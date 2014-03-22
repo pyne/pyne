@@ -105,20 +105,20 @@ cdef extern from "data.h" namespace "pyne":
     vector[double] alpha_energy(int parent) except +
     vector[double] alpha_intensity(int parent) except +
     vector[int] alpha_parent(double energy, double error) except +
-    vector[int] alpha_daughter(double energy, double error) except +
-    vector[int] alpha_daughter(int parent) except +
+    vector[int] alpha_child(double energy, double error) except +
+    vector[int] alpha_child(int parent) except +
 
     vector[double] beta_endpoint_energy(int parent) except +
     vector[double] beta_average_energy(int parent) except +
     vector[double] beta_intensity(int parent) except +
     vector[int] beta_parent(double energy, double error) except +
-    vector[int] beta_daughter(double energy, double error) except +
-    vector[int] beta_daughter(int parent) except +
+    vector[int] beta_child(double energy, double error) except +
+    vector[int] beta_child(int parent) except +
 
     vector[double] ecbp_endpoint_energy(int parent) except +
     vector[double] ecbp_average_energy(int parent) except +
     vector[double] ec_intensity(int parent) except +
     vector[double] bp_intensity(int parent) except +
     vector[int] ecbp_parent(double energy, double error) except +
-    vector[int] ecbp_daughter(double energy, double error) except +
-    vector[int] ecbp_daughter(int parent) except +
+    vector[int] ecbp_child(double energy, double error) except +
+    vector[int] ecbp_child(int parent) except +

@@ -833,9 +833,9 @@ def alpha_parent(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.alpha_parent(<double> en, <double> enerror)
 
-def alpha_daughter(en, enerror=None):
+def alpha_child(en, enerror=None):
     """
-    Returns a list of alpha daughters from ENSDF decay dataset 
+    Returns a list of alpha children from ENSDF decay dataset 
     based on alpha energy.
 
     Parameters
@@ -849,15 +849,15 @@ def alpha_daughter(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of alpha daughters in nuc_id form
+        An array of alpha children in nuc_id form
     """
     if enerror == None:
         enerror = en * 0.01
-    return cpp_data.alpha_daughter(<double> en, <double> enerror)
+    return cpp_data.alpha_child(<double> en, <double> enerror)
     
-def alpha_daughter(parent):
+def alpha_child(parent):
     """
-    Returns a list of alpha daughters from ENSDF decay dataset 
+    Returns a list of alpha children from ENSDF decay dataset 
     based on alpha parent.
 
     Parameters
@@ -868,9 +868,9 @@ def alpha_daughter(parent):
     Returns
     -------
     ratios : array of ints
-        An array of alpha daughters in nuc_id form
+        An array of alpha children in nuc_id form
     """
-    return cpp_data.alpha_daughter(<int> parent)
+    return cpp_data.alpha_child(<int> parent)
 
 def beta_endpoint_energy(parent):
     """
@@ -945,9 +945,9 @@ def beta_parent(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.beta_parent(<double> en, <double> enerror)
 
-def beta_daughter(en, enerror=None):
+def beta_child(en, enerror=None):
     """
-    Returns a list of beta minus daughters from ENSDF decay dataset 
+    Returns a list of beta minus children from ENSDF decay dataset 
     based on beta energy.
 
     Parameters
@@ -961,15 +961,15 @@ def beta_daughter(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of beta minus daughters in nuc_id form
+        An array of beta minus children in nuc_id form
     """
     if enerror == None:
         enerror = en * 0.01
-    return cpp_data.beta_daughter(<double> en, <double> enerror)
+    return cpp_data.beta_child(<double> en, <double> enerror)
     
-def beta_daughter(parent):
+def beta_child(parent):
     """
-    Returns a list of beta minus daughters from ENSDF decay dataset 
+    Returns a list of beta minus children from ENSDF decay dataset 
     based on parent.
 
     Parameters
@@ -980,9 +980,9 @@ def beta_daughter(parent):
     Returns
     -------
     ratios : array of ints
-        An array of beta- daughters in nuc_id form
+        An array of beta- children in nuc_id form
     """
-    return cpp_data.beta_daughter(<int> parent)
+    return cpp_data.beta_child(<int> parent)
 
 def ecbp_endpoint_energy(parent):
     """
@@ -1068,13 +1068,13 @@ def ecbp_parent(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of beta plus/electron capture daughters in nuc_id form
+        An array of beta plus/electron capture children in nuc_id form
     """
     if enerror == None:
         enerror = en * 0.01
     return cpp_data.ecbp_parent(<double> en, <double> enerror)
 
-def ecbp_daughter(en, enerror=None):
+def ecbp_child(en, enerror=None):
     """
     Returns a list of beta plus/electron capture parents from ENSDF decay 
     dataset based on beta energy.
@@ -1090,15 +1090,15 @@ def ecbp_daughter(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of beta plus/electron capture daughters in nuc_id form
+        An array of beta plus/electron capture children in nuc_id form
     """
     if enerror == None:
         enerror = en * 0.01
-    return cpp_data.ecbp_daughter(<double> en, <double> enerror)
+    return cpp_data.ecbp_child(<double> en, <double> enerror)
     
-def ecbp_daughter(parent):
+def ecbp_child(parent):
     """
-    Returns a list of beta plus daughters from ENSDF decay dataset 
+    Returns a list of beta plus children from ENSDF decay dataset 
     based on parent.
 
     Parameters
@@ -1109,6 +1109,6 @@ def ecbp_daughter(parent):
     Returns
     -------
     ratios : array of ints
-        An array of beta+ daughters in nuc_id form
+        An array of beta+ children in nuc_id form
     """
-    return cpp_data.ecbp_daughter(<int> parent)
+    return cpp_data.ecbp_child(<int> parent)

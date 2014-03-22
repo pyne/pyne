@@ -91,6 +91,26 @@ def test_constants():
     for exp, obs in cases:
         yield assert_equal, exp, obs
 
+
+def test_metastable_id():
+    assert_equal(data.metastable_id(430990000, 1), 430990002)
+
+
+def test_decay_half_life():
+    assert_equal(data.decay_half_life(551370000, 561370000), [(949252608.0, 2840184.0)])
+
+
+def test_decay_half_life_byparent():
+    assert_equal(data.decay_half_life_byparent(551370000), [(949252608.0, 2840184.0)])
+
+
+def test_decay_branch_ratio_byparent():
+    assert_equal(data.decay_branch_ratio_byparent(551370000), [1.0])
+
+
+def test_decay_photon_branch_ratio():
+    assert_equal(data.decay_photon_branch_ratio_byparent(551370000), [(1.0, 0.0)])
+
 if __name__ == "__main__":
     nose.runmodule()
 

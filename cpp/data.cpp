@@ -921,7 +921,7 @@ void pyne::_load_level_data()
   status = H5Tinsert(desc, "half_life", HOFFSET(level_struct, half_life),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "metastable", HOFFSET(level_struct, metastable),
-                      H5T_NATIVE_DOUBLE);
+                      H5T_NATIVE_INT);
 
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1071,7 +1071,7 @@ template<> void pyne::_load_data<pyne::decay_struct>()
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(decay_struct));
   status = H5Tinsert(desc, "parent", HOFFSET(decay_struct, parent),
                       H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "daughter", HOFFSET(decay_struct, daughter),
+  status = H5Tinsert(desc, "child", HOFFSET(decay_struct, child),
                       H5T_NATIVE_INT);
   status = H5Tinsert(desc, "decay", HOFFSET(decay_struct, decay), H5T_STRING);
   status = H5Tinsert(desc, "half_life", HOFFSET(decay_struct, half_life), H5T_NATIVE_DOUBLE);
@@ -1098,7 +1098,7 @@ template<> void pyne::_load_data<pyne::decay_struct>()
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < decay_length; ++i) {
-    decay_data[std::make_pair(decay_array[i].parent, decay_array[i].daughter)] = decay_array[i];
+    decay_data[std::make_pair(decay_array[i].parent, decay_array[i].child)] = decay_array[i];
   }
 
 }
@@ -1169,7 +1169,7 @@ double pyne::decay_branch_ratio(std::pair<int, int> from_to){
 };
 
 std::vector<double> pyne::decay_branch_ratios(int parent){
-  return data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life), decay_data);
+  return data_access<double, decay_struct>(parent, offsetof(decay_struct, branch_ratio), decay_data);
 }
 
 std::pair<double, double> pyne::decay_photon_branch_ratio(std::pair<int,int> from_to){
@@ -1420,10 +1420,10 @@ std::vector<int> pyne::alpha_parent(double energy, double error){
   return data_access<int, alpha_struct>(energy+error, energy-error, offsetof(alpha_struct, from_nuc), alpha_data);
 };
 
-std::vector<int> pyne::alpha_daughter(double energy, double error){
+std::vector<int> pyne::alpha_child(double energy, double error){
   return data_access<int, alpha_struct>(energy+error, energy-error, offsetof(alpha_struct, to_nuc), alpha_data);
 };
-std::vector<int> pyne::alpha_daughter(int parent){
+std::vector<int> pyne::alpha_child(int parent){
   return data_access<int, alpha_struct>(parent, offsetof(alpha_struct, to_nuc), alpha_data);
 };
 
@@ -1492,11 +1492,11 @@ std::vector<int> pyne::beta_parent(double energy, double error){
   return data_access<int, beta_struct>(energy+error, energy-error, offsetof(beta_struct, from_nuc), beta_data);
 };
 
-std::vector<int> pyne::beta_daughter(double energy, double error){
+std::vector<int> pyne::beta_child(double energy, double error){
   return data_access<int, beta_struct>(energy+error, energy-error, offsetof(beta_struct, to_nuc), beta_data);
 };
 
-std::vector<int> pyne::beta_daughter(int parent){
+std::vector<int> pyne::beta_child(int parent){
   return data_access<int, beta_struct>(parent, offsetof(beta_struct, to_nuc), beta_data);
 };
 
@@ -1575,10 +1575,10 @@ std::vector<int> pyne::ecbp_parent(double energy, double error){
   return data_access<int, ecbp_struct>(energy+error, energy-error, offsetof(ecbp_struct, from_nuc), ecbp_data);
 };
 
-std::vector<int> pyne::ecbp_daughter(double energy, double error){
+std::vector<int> pyne::ecbp_child(double energy, double error){
   return data_access<int, ecbp_struct>(energy+error, energy-error, offsetof(ecbp_struct, to_nuc), ecbp_data);
 };
 
-std::vector<int> pyne::ecbp_daughter(int parent){
+std::vector<int> pyne::ecbp_child(int parent){
   return data_access<int, ecbp_struct>(parent, offsetof(ecbp_struct, to_nuc), ecbp_data);
 };

@@ -228,8 +228,8 @@ namespace pyne
   /// a struct matching the '/decay/half_life_decay' table in nuc_data.h5.
   typedef struct half_life_decay_struct {
     int from_nuc; ///< parent species in id form
-    double level; ///< decay level [MeV]
     int to_nuc;   ///< child species in id form
+    double level; ///< decay level [MeV]
     double half_life;     ///< species half life [s]
     double decay_const;   ///< decay constant [1/s]
     double branch_ratio;  ///< decay branch ratio [fraction]
@@ -323,7 +323,7 @@ namespace pyne
   /// a struct matching the '/decay/decays' table in nuc_data.h5.
   typedef struct decay_struct{
     int parent;
-    int daughter;
+    int child;
     char decay[5];
     double half_life;
     double half_life_error;
@@ -356,6 +356,9 @@ namespace pyne
 
   /// a struct matching the '/decay/gammas' table in nuc_data.h5.
   typedef struct gamma_struct{
+    int from_nuc;
+    int to_nuc;
+    int parent_nuc;
     double energy;
     double energy_err;
     double photon_intensity;
@@ -364,9 +367,6 @@ namespace pyne
     double conv_intensity_err;
     double total_intensity;
     double total_intensity_err;
-    int from_nuc;
-    int to_nuc;
-    int parent_nuc;
     double k_conv_e;
     double l_conv_e;
     double m_conv_e;
@@ -398,10 +398,10 @@ namespace pyne
 
   /// a struct matching the '/decay/alphas' table in nuc_data.h5.
   typedef struct alpha_struct{
-    double energy;
-    double intensity;
     int from_nuc;
     int to_nuc;
+    double energy;
+    double intensity;
   } alpha_struct;
 
   /// Loads the alpha decay data from the nuc_data.h5 file into memory.
@@ -416,18 +416,18 @@ namespace pyne
   std::vector<double> alpha_intensity(int parent);
   //returns a list of alpha decay parents from input decay energy range
   std::vector<int> alpha_parent(double energy, double error);
-  //returns a list of alpha decay daughters from input decay energy range
-  std::vector<int> alpha_daughter(double energy, double error);
-  //returns a list of alpha decay daughters from input parent nuclide
-  std::vector<int> alpha_daughter(int parent);
+  //returns a list of alpha decay children from input decay energy range
+  std::vector<int> alpha_child(double energy, double error);
+  //returns a list of alpha decay children from input parent nuclide
+  std::vector<int> alpha_child(int parent);
 
   /// a struct matching the '/decay/betas' table in nuc_data.h5.
   typedef struct beta_struct{
+    int from_nuc;
+    int to_nuc;
     double endpoint_energy;
     double avg_energy;
     double intensity;
-    int from_nuc;
-    int to_nuc;
   } beta_struct;
 
   /// Loads the beta decay data from the nuc_data.h5 file into memory.
@@ -443,19 +443,19 @@ namespace pyne
   std::vector<double> beta_intensity(int parent);
   //returns a list of beta decay parents from input decay energy range
   std::vector<int> beta_parent(double energy, double error);
-  //returns a list of beta decay daughters from input decay energy range
-  std::vector<int> beta_daughter(double energy, double error);
-  //returns a list of beta decay daughters from input parent nuclide
-  std::vector<int> beta_daughter(int parent);
+  //returns a list of beta decay children from input decay energy range
+  std::vector<int> beta_child(double energy, double error);
+  //returns a list of beta decay children from input parent nuclide
+  std::vector<int> beta_child(int parent);
 
   /// A struct matching the '/decay/ecbp' table in nuc_data.h5.
   typedef struct ecbp_struct{
+    int from_nuc;
+    int to_nuc;
     double endpoint_energy;
     double avg_energy;
     double beta_plus_intensity;
     double ec_intensity;
-    int from_nuc;
-    int to_nuc;
     double k_conv_e;
     double l_conv_e;
     double m_conv_e;
@@ -477,10 +477,10 @@ namespace pyne
   std::vector<double> bp_intensity(int parent);
   //returns a list of electron capture /beta plus decay parents from input decay energy range
   std::vector<int> ecbp_parent(double energy, double error);
-  //returns a list of electron capture /beta plus decay daughters from input decay energy range
-  std::vector<int> ecbp_daughter(double energy, double error);
-  //returns a list of electron capture /beta plus decay daughters from input parent nuclide
-  std::vector<int> ecbp_daughter(int parent);
+  //returns a list of electron capture /beta plus decay children from input decay energy range
+  std::vector<int> ecbp_child(double energy, double error);
+  //returns a list of electron capture /beta plus decay children from input parent nuclide
+  std::vector<int> ecbp_child(int parent);
   /// \}
 }
 
