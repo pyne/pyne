@@ -108,8 +108,59 @@ def test_decay_branch_ratio_byparent():
     assert_equal(data.decay_branch_ratio_byparent(551370000), [1.0])
 
 
-def test_decay_photon_branch_ratio():
+def test_decay_photon_branch_ratio_byparent():
     assert_equal(data.decay_photon_branch_ratio_byparent(551370000), [(1.0, 0.0)])
+
+
+def test_decay_beta_branch_ratio_byparent():
+    assert_equal(data.decay_beta_branch_ratio_byparent(551370000), [(1.0, 0.0)])
+
+
+def test_gamma_energy():
+    assert_equal(data.gamma_energy(551370000), [(283.5, 0.1), (661.657, 0.003)])
+
+
+def test_gamma_photon_intensity():
+    assert_equal(data.gamma_photon_intensity(551370000), [(0.00058, 8e-05), (85.1, 0.2)])
+
+
+def test_gamma_conversion_intensity():
+    assert_equal(data.gamma_conversion_intensity(551370000), [(np.nan, np.nan), (0.1124, np.nan)])
+
+def test_gamma_total_intensity():
+    assert_equal(data.gamma_total_intensity(561370000), [(100.0, np.nan)]) 
+
+def test_gamma_from_to_byparent():
+    assert_equal(data.gamma_from_to_byparent(551370000), [(561370001, 561370000), (561370002, 561370000)])
+
+def test_gamma_from_to_byen():
+    assert_equal(data.gamma_from_to_byen(661.65, 0.1),
+                 [(390990016, 390990005),
+                 (822040062, 822040024),
+                 (902290055, 902290000),
+                 (400880011, 400880004),
+                 (551310023, 551310009),
+                 (0, 0),
+                 (431070028, 431070020),
+                 (972490039, 972490003),
+                 (0, 0),
+                 (380930068, 380930050),
+                 (561370002, 561370000),
+                 (561370002, 561370000),
+                 (621520071, 621520020),
+                 (621540026, 621540006),
+                 (781810026, 781810000),
+                 (791930069, 791930033),
+                 (541390033, 541390028)])
+
+
+def test_gamma_parent():
+    assert_equal(data.gamma_parent(661.65, 0.1),
+                 [611510000, 651500000, 380990000, 832040000, 892290000,
+                  410880000, 561310000, 771830000, 962480000, 992530000,
+                  661550000, 370930000, 551370000, 561370000, 611520000,
+                  611540000, 791810000, 801930000, 982520000])
+
 
 if __name__ == "__main__":
     nose.runmodule()

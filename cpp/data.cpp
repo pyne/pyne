@@ -1135,7 +1135,7 @@ template<typename T, typename U> std::vector<T> pyne::data_access(int parent, si
   T *ret;
   // First check if we already have the nuc in the map
   for (it = nuc_iter; it!= nuc_end; ++it){
-    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
+    ret = (T *)((char *)&(it->second) + valoffset);
     result.push_back(*ret);
   }
   // Next, fill up the map with values from the
@@ -1220,6 +1220,9 @@ template<> void pyne::_load_data<pyne::gamma_struct>()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(gamma_struct));
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(gamma_struct, from_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(gamma_struct, to_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "parent_nuc", HOFFSET(gamma_struct, parent_nuc), H5T_NATIVE_INT);
   status = H5Tinsert(desc, "energy", HOFFSET(gamma_struct, energy),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "energy_err", HOFFSET(gamma_struct, energy_err),
@@ -1230,9 +1233,6 @@ template<> void pyne::_load_data<pyne::gamma_struct>()
   status = H5Tinsert(desc, "conv_intensity_err", HOFFSET(gamma_struct, conv_intensity_err), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "total_intensity", HOFFSET(gamma_struct, total_intensity), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "total_intensity_err", HOFFSET(gamma_struct, total_intensity_err), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(gamma_struct, from_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(gamma_struct, to_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "parent_nuc", HOFFSET(gamma_struct, parent_nuc), H5T_NATIVE_INT);
   status = H5Tinsert(desc, "k_conv_e", HOFFSET(gamma_struct, k_conv_e), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "l_conv_e", HOFFSET(gamma_struct, l_conv_e), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "m_conv_e", HOFFSET(gamma_struct, m_conv_e), H5T_NATIVE_DOUBLE);
@@ -1260,15 +1260,25 @@ template<> void pyne::_load_data<pyne::gamma_struct>()
 
 }
 
+bool pyne::swapmapcompare::operator()(const std::pair<int, double>& lhs, const std::pair<int, double>& rhs) const {
+    return lhs.second<rhs.second || (!(rhs.second<lhs.second) && lhs.first<rhs.first); 
+};
+
 template<typename T, typename U> std::vector<T> pyne::data_access(double energy_min, double energy_max, size_t valoffset, std::map<std::pair<int, double>, U>  &data){
-  typename std::map<std::pair<int, double>, U>::iterator nuc_iter, nuc_end, it;
+  typename std::map<std::pair<int, double>, U, swapmapcompare>::iterator nuc_iter, nuc_end, it;
+  std::map<std::pair<int, double>, U, swapmapcompare> dc(data.begin(), data.end());
   std::vector<T> result;
-  nuc_iter = data.lower_bound(std::make_pair(energy_min,0));
-  nuc_end = data.upper_bound(std::make_pair(energy_max,9999999999));
+  if (energy_max < energy_min){
+    double temp = energy_max;
+    energy_max = energy_min;
+    energy_min = temp;
+  } 
+  nuc_iter = dc.lower_bound(std::make_pair(0, energy_min));
+  nuc_end = dc.upper_bound(std::make_pair(9999999999, energy_max));
   T *ret;
   // First check if we already have the nuc in the map
   for (it = nuc_iter; it!= nuc_end; ++it){
-    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
+    ret = (T *)((char *)&(it->second) + valoffset);
     result.push_back(*ret);
   }
   // Next, fill up the map with values from the
@@ -1284,12 +1294,12 @@ template<typename T, typename U> std::vector<T> pyne::data_access(double energy_
 template<typename T, typename U> std::vector<T> pyne::data_access(int parent, size_t valoffset, std::map<std::pair<int, double>, U>  &data){
   typename std::map<std::pair<int, double>, U>::iterator nuc_iter, nuc_end, it;
   std::vector<T> result;
-  nuc_iter = data.lower_bound(std::make_pair(0,parent));
-  nuc_end = data.upper_bound(std::make_pair(DBL_MAX,parent));
+  nuc_iter = data.lower_bound(std::make_pair(parent,0.0));
+  nuc_end = data.upper_bound(std::make_pair(parent,DBL_MAX));
   T *ret;
   // First check if we already have the nuc in the map
   for (it = nuc_iter; it!= nuc_end; ++it){
-    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
+    ret = (T *)((char *)&(it->second) + valoffset);
     result.push_back(*ret);
   }
   // Next, fill up the map with values from the
@@ -1380,11 +1390,11 @@ template<> void pyne::_load_data<pyne::alpha_struct>()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(alpha_struct));
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(alpha_struct, from_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(alpha_struct, to_nuc), H5T_NATIVE_INT);
   status = H5Tinsert(desc, "energy", HOFFSET(alpha_struct, energy),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "intensity", HOFFSET(alpha_struct, intensity), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(alpha_struct, from_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(alpha_struct, to_nuc), H5T_NATIVE_INT);
 
 
   // Open the HDF5 file

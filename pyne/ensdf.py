@@ -777,16 +777,16 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                     e = 0
                 bparent = _to_id_from_level(parent2, e, levellist, lmap)
                 bdaughter = _to_id_from_level(daughter, level, levellist, lmap)
-                betas.append([dat[0], 0.0, dat[2], bparent, bdaughter])
+                betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
             continue
         bc_rec = _betac.match(line)
         if bc_rec is not None:
             bcdat = _parse_beta_continuation_record(bc_rec)
             if bcdat[0] is not None:
                 if bc_rec.group(2) == 'B':
-                    betas[-1][1] = bcdat[0]
+                    betas[-1][3] = bcdat[0]
                 else:
-                    ecbp[-1][1] = bcdat[0]
+                    ecbp[-1][3] = bcdat[0]
                     bggc = _gc.match(line)
                     conv = _parse_gamma_continuation_record(bggc, dat[2], dat[8])
                     if 'K' in conv:
@@ -805,7 +805,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                     e = 0
                 aparent = _to_id_from_level(parent2, e, levellist, lmap)
                 adaughter = _to_id_from_level(daughter, level, levellist, lmap)
-                alphas.append((dat[0], dat[2], aparent, adaughter))
+                alphas.append((aparent, adaughter, dat[0], dat[2]))
             continue
         ec_rec = _ec.match(line)
         if ec_rec is not None:
@@ -816,7 +816,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
             if levellist is not None:
                 ecparent = _to_id_from_level(parent2, e, levellist, lmap)
                 ecdaughter = _to_id_from_level(daughter, level, levellist, lmap)
-                ecbp.append([dat[0], 0.0, dat[2], dat[4], ecparent, ecdaughter,
+                ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
                              0, 0, 0])
             continue
         g_rec = _g.match(line)
@@ -830,14 +830,14 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                         gparent = _to_id_from_level(daughter, level, levellist, lmap)
                         dlevel = level - dat[0]
                         gdaughter = _to_id_from_level(daughter, dlevel, levellist, lmap)
-                dat.append(gparent)
-                dat.append(gdaughter)
                 if parent2 is None:
                     gp2 = pfinal
                     e = 0
                 else:
                     gp2 = _to_id(parent2)
-                dat.append(gp2)
+                dat.insert(0, gp2)
+                dat.insert(0, gdaughter)
+                dat.insert(0, gparent)
                 for i in range(3):
                     dat.append(0)
                 gammarays.append(dat)

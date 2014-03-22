@@ -57,8 +57,8 @@ def grab_ensdf_decay(build_dir=""):
 
 half_life_dtype = np.dtype([
     ('from_nuc', int),
-    ('level', float),
     ('to_nuc', int),
+    ('level', float),
     ('half_life', float),
     ('decay_const', float),
     ('branch_ratio', float),
@@ -85,6 +85,9 @@ decay_dtype = np.dtype([
     ])
 
 gammas_dtype = np.dtype([
+    ('from_nuc', int),
+    ('to_nuc', int),
+    ('parent_nuc', int),
     ('energy', float),
     ('energy_err', float),
     ('photon_intensity', float),
@@ -93,36 +96,33 @@ gammas_dtype = np.dtype([
     ('conv_intensity_err', float),
     ('total_intensity', float),
     ('total_intensity_err', float),
-    ('from_nuc', int),
-    ('to_nuc', int),
-    ('parent_nuc', int),
     ('k_conv_e', float),
     ('l_conv_e', float),
     ('m_conv_e', float),
     ])
 
 alphas_dtype = np.dtype([
-    ('energy', float),
-    ('intensity', float),
     ('from_nuc', int),
     ('to_nuc', int),
+    ('energy', float),
+    ('intensity', float),
     ])
 
 betas_dtype = np.dtype([
+    ('from_nuc', int),
+    ('to_nuc', int),
     ('endpoint_energy', float),
     ('avg_energy', float),
     ('intensity', float),
-    ('from_nuc', int),
-    ('to_nuc', int),
     ])
 
 ecbp_dtype = np.dtype([
+    ('from_nuc', int),
+    ('to_nuc', int),
     ('endpoint_energy', float),
     ('avg_energy', float),
     ('beta_plus_intensity', float),
     ('ec_intensity', float),
-    ('from_nuc', int),
-    ('to_nuc', int),
     ('k_conv_e', float),
     ('l_conv_e', float),
     ('m_conv_e', float),
@@ -184,13 +184,17 @@ def parse_decay(build_dir=""):
     for item in decay_data:
         all_decays.append(item[:10])
         if len(item[10]) > 0:
-            all_gammas.append(tuple(item[10][0]))
+            for subitem in item[10]:
+                all_gammas.append(tuple(subitem))
         if len(item[11]) > 0:
-            all_alphas.append(tuple(item[11][0]))
+            for subitem in item[11]:
+                all_alphas.append(tuple(subitem))
         if len(item[12]) > 0:
-            all_betas.append(tuple(item[12][0]))
+            for subitem in item[12]:
+                all_betas.append(tuple(subitem))
         if len(item[13]) > 0:
-            all_ecbp.append(tuple(item[13][0]))
+            for subitem in item[13]:
+                all_ecbp.append(tuple(subitem))
 
     all_decay_array = np.array(all_decays, dtype=decay_dtype)
     all_gammas_array = np.array(all_gammas, dtype=gammas_dtype)

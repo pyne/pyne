@@ -375,6 +375,10 @@ namespace pyne
   /// Loads the gamma ray data from the nuc_data.h5 file into memory.
   template<> void _load_data<gamma_struct>();
 
+  class swapmapcompare{
+    public:
+        bool operator()(const std::pair<int, double>& lhs,const std::pair<int, double>& rhs) const;
+  };
   /// A vector of structs containing gamma ray data for access in memory
   //extern std::vector<gamma_struct> gamma_data;
   template<typename T, typename U> std::vector<T> data_access(double emin, double emax, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
