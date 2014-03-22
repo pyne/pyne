@@ -592,25 +592,31 @@ def get_material_set(**kw):
     return mat_ids
 
 #### start util
-
-def discretize_geom(mesh, num_rays, grid=False):
-    """This function reads in a Cartesian, structured, axis-aligned, PyNE mesh
-    object, then uses Monte Carlo ray tracing to determine the volume 
-    fractions of each geometry cell within each mesh volume element of the 
-    mesh. Note that a DAGMC geometry must already be loaded into memory.
+def discretize_geom(mesh, **kwargs):
+    """discretize_geom(mesh, **kwargs)
+    This function discretizes a geometry (by geometry cell) onto a superimposed
+    mesh. If the mesh is structured, ray_discretize() is called and Monte Carlo
+    ray tracing is used to determine the volume fractions of each geometry cell 
+    within each mesh volume element of the mesh. If the mesh is not structured, 
+    cell_at_ve_centers is called and mesh volume elements are assigned a 
+    geometry cell based off of what geometry cell occupies the center of the
+    mesh volume element. The output of cell_at_ve_centers is then put in the
+    same structured array format used by ray_discretize(). Note that a DAGMC
+    geometry must already be loaded into memory.
  
     Parameters
     ----------
     mesh : PyNE Mesh
         A Cartesian, structured, axis-aligned Mesh that superimposed the
         geometry.
-    num_rays : int
-        The number of rays to fire in each mesh row for each direction.
-    grid : boolean
-        If false, rays starting points are chosen randomly (on the boundary) 
-        for each mesh row. If true, a linearly spaced grid of starting points is 
-        used, with dimension sqrt(num_rays) x sqrt(num_rays). In this case, 
-        "num_rays" must be a perfect square.
+    num_rays : int, optional, default = 10
+        Structured mesh only. The number of rays to fire in each mesh row for 
+        each direction.
+    grid : boolean, optional, default = False
+        Structured mesh only. If false, rays starting points are chosen randomly
+        (on the boundary) for each mesh row. If true, a linearly spaced grid of
+        starting points is used, with dimension sqrt(num_rays) x sqrt(num_rays). 
+        In this case, "num_rays" must be a perfect square.
 
     Returns
     -------
@@ -628,6 +634,92 @@ def discretize_geom(mesh, num_rays, grid=False):
         This array is returned in sorted order with respect to idx and cell, with
         cell changing fastest.
     """
+    if mesh.structured:
+       num_rays = kwargs['num_rays'] if 'num_rays' in kwargs else 10
+       grid = kwargs['grid'] if 'grid' in kwargs else False
+       results = ray_discretize(mesh, num_rays, grid)
+    else:
+       if kwargs:
+           raise ValueError("No valid key word arguments for unstructed mesh.")
+       cells = cells_at_ve_centers(mesh)
+       results = np.zeros(len(mesh), dtype=[('idx', np.int64),
+                                            ('cell', np.int64),
+                                            ('vol_frac', np.float64), 
+                                            ('rel_error', np.float64)])
+       for i, cell in enumerate(cells):
+           results[i] = (i, cells[i], 1.0, 1.0)
+
+    return results
+
+def cells_at_ve_centers(mesh):
+    """cells_at_ve_centers(mesh)
+    This function reads in any PyNE Mesh object and finds the geometry cell
+    at the point in the center of each mesh volume element. A DAGMC geometry 
+    must be loaded prior to using this function.
+
+    Parameters
+    ----------
+    mesh : PyNE Mesh
+        Any Mesh that is superimposed over the geometry.
+
+    Returns
+    -------
+    cells : list
+        The cell numbers of the geometry cells that occupy the center of the
+        mesh volume element, in the order of the mesh idx.
+    """
+    cells = []
+    for i, mat, ve in mesh:
+        center = mesh.ve_center(ve)
+        cell = find_volume(center)
+        cells.append(cell)
+
+    return cells
+
+def ray_discretize(mesh, num_rays=10, grid=False):
+    """ray_discretize(mesh, num_rays=10, grid=False)
+    This function discretizes a geometry (by geometry cell) onto a 
+    superimposed, structured, axis-aligned mesh using the method described in
+    [1]. Ray tracing is used to sample track lengths in geometry cells in mesh
+    volume elements, and volume fractions are determined statiscally. Rays are
+    fired down entire mesh rows, in three directions: x, y, and z. Rays starting
+    points can be chosen randomly, or on a uniform grid. Note that a DAGMC
+    geometry must already be loaded into memory.
+
+    [1] Moule, D. and Wilson, P., Mesh Generation methods for Deterministic
+    Radiation Transport Codes, Transacztions of the American Nuclear Society,
+    104, 407--408, (2009).
+ 
+    Parameters
+    ----------
+    mesh : PyNE Mesh
+        A Cartesian, structured, axis-aligned Mesh that superimposed the
+        geometry.
+    num_rays : int, optional, default = 10
+        The number of rays to fire in each mesh row for each direction.
+    grid : boolean, optional, default = False
+        If false, rays starting points are chosen randomly (on the boundary)
+        for each mesh row. If true, a linearly spaced grid of starting points is
+        used, with dimension sqrt(num_rays) x sqrt(num_rays). In this case,
+        "num_rays" must be a perfect square.
+
+    Returns
+    -------
+    results : structured array
+        Stores in a one dimensional array, each entry containing the following
+        fields:
+        :idx: int 
+            The mesh volume element index.
+        :cell: int
+            The geometry cell number.
+        :vol_frac: float
+            The volume fraction of the cell withing the mesh volume element.
+        :rel_error: float
+            The relative error associated with the volume fraction.
+        This array is returned in sorted order with respect to idx and cell, with
+        cell changing fastest.
+    """
+    mesh._structured_check()
     divs = [mesh.structured_get_divisions(x) for x in 'xyz']
     num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)
     #  Stores a running tally of sums of x and sums of x^2 for each ve

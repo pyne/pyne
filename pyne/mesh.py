@@ -942,6 +942,24 @@ class Mesh(object):
         else:
             return None
 
+    def ve_center(self, ve):
+       """Finds the point at the center of any tetrahedral or hexahedral mesh
+       volume element.
+
+       Parameters
+       ----------
+       ve : iMesh entity handle
+           Any mesh volume element.
+
+       Returns
+       -------
+       center : tuple
+           The (x, y, z) coordinates of the center of the mesh volume element.
+       """
+       coords = self.mesh.getVtxCoords(
+                self.mesh.getEntAdj(ve, iBase.Type.vertex))
+       center = tuple([np.mean(coords[:,x]) for x in range(3)])
+       return center
 
     #Structured methods:
     def structured_get_vertex(self, i, j, k):

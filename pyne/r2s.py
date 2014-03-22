@@ -70,7 +70,7 @@ def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, geom=None,
         load(geom)
 
     m = meshtal.tally[tally_num]
-    vol_fracs = discretize_geom(m, num_rays, grid=grid)
+    vol_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
     m.cell_fracs_to_mats(vol_fracs, cell_mats)
 
     mesh_to_fluxin(m, flux_tag, fluxin, reverse)
