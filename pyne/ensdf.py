@@ -68,8 +68,8 @@ def _read_variablepoint(line, dstart, dlen):
 
 
 def _to_id_from_level(nuc_id, level, levellist, lmap):
-    gparent = 0
     nid = _to_id(nuc_id)
+    gparent = nid
     if nid in lmap:
         for i in range(lmap[nid], len(levellist)):
             if level is not None and level + 1.0 > levellist[i][2] > level - 1.0:
@@ -803,6 +803,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                 if parent2 is None:
                     parent2 = parent
                     e = 0
+                #FIXME complete levellist beforehand so this actually works
                 aparent = _to_id_from_level(parent2, e, levellist, lmap)
                 adaughter = _to_id_from_level(daughter, level, levellist, lmap)
                 alphas.append((aparent, adaughter, dat[0], dat[2]))

@@ -167,9 +167,9 @@ def parse_decay(build_dir=""):
         level_list, decay_data, lmap, lcount = ensdf.decays(f, level_list, decay_data, lmap, lcount)
 
     ln2 = np.log(2.0)
-    half_life_data = [(fn, lvl, tn, hl, ln2 / hl, br) for fn, lvl, tn, hl, br in half_life_data]
+    half_life_data = [(fn, tn, lvl, hl, ln2 / hl, br) for fn, lvl, tn, hl, br in half_life_data]
     half_life_data = set(half_life_data)
-    half_life_data = sorted(half_life_data, key=lambda x: (x[0], x[2]))
+    half_life_data = sorted(half_life_data, key=lambda x: (x[0], x[1]))
 
     half_life_data_array = np.array(half_life_data, dtype=half_life_dtype)
     #da, mask = np.unique(decay_array, return_index=True)

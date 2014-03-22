@@ -833,7 +833,7 @@ def alpha_parent(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.alpha_parent(<double> en, <double> enerror)
 
-def alpha_child(en, enerror=None):
+def alpha_child_byen(en, enerror=None):
     """
     Returns a list of alpha children from ENSDF decay dataset 
     based on alpha energy.
@@ -855,7 +855,7 @@ def alpha_child(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.alpha_child(<double> en, <double> enerror)
     
-def alpha_child(parent):
+def alpha_child_byparent(parent):
     """
     Returns a list of alpha children from ENSDF decay dataset 
     based on alpha parent.
@@ -945,7 +945,7 @@ def beta_parent(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.beta_parent(<double> en, <double> enerror)
 
-def beta_child(en, enerror=None):
+def beta_child_byen(en, enerror=None):
     """
     Returns a list of beta minus children from ENSDF decay dataset 
     based on beta energy.
@@ -967,7 +967,7 @@ def beta_child(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.beta_child(<double> en, <double> enerror)
     
-def beta_child(parent):
+def beta_child_byparent(parent):
     """
     Returns a list of beta minus children from ENSDF decay dataset 
     based on parent.
@@ -1074,7 +1074,7 @@ def ecbp_parent(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.ecbp_parent(<double> en, <double> enerror)
 
-def ecbp_child(en, enerror=None):
+def ecbp_child_byen(en, enerror=None):
     """
     Returns a list of beta plus/electron capture parents from ENSDF decay 
     dataset based on beta energy.
@@ -1096,7 +1096,7 @@ def ecbp_child(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.ecbp_child(<double> en, <double> enerror)
     
-def ecbp_child(parent):
+def ecbp_child_byparent(parent):
     """
     Returns a list of beta plus children from ENSDF decay dataset 
     based on parent.

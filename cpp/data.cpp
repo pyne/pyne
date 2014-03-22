@@ -698,8 +698,8 @@ void pyne::_load_half_life_decay()
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(half_life_decay_struct));
   status = H5Tinsert(desc, "from_nuc", HOFFSET(half_life_decay_struct, from_nuc),
                       H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "level", HOFFSET(half_life_decay_struct, level), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "to_nuc", HOFFSET(half_life_decay_struct, to_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "level", HOFFSET(half_life_decay_struct, level), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "half_life", HOFFSET(half_life_decay_struct, half_life),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "decay_const", HOFFSET(half_life_decay_struct, decay_const),
@@ -752,6 +752,53 @@ void pyne::_load_half_life_decay()
 
   delete[] atom_dec_array;
 };
+
+
+//
+// Half-life data
+//
+
+double pyne::half_life(int nuc)
+{
+  // Find the nuclide's half life in s
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = half_life_map.find(nuc);
+  nuc_end = half_life_map.end();
+
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (half_life_map.empty())
+  {
+    _load_half_life_decay();
+    return half_life(nuc);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double hl = 1.0 / 0.0;
+  half_life_map[nuc] = hl;
+  return hl;
+};
+
+
+double pyne::half_life(char * nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return half_life(nuc_zz);
+};
+
+
+double pyne::half_life(std::string nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return half_life(nuc_zz);
+};
+
 
 
 //
@@ -851,6 +898,50 @@ double pyne::branch_ratio(std::string from_nuc, std::string to_nuc)
   return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
                                           nucname::id(to_nuc)));
 };
+
+//
+// Excitation state energy data
+//
+
+double pyne::state_energy(int nuc)
+{
+  // Find the nuclide's state energy in MeV
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = state_energy_map.find(nuc);
+  nuc_end = state_energy_map.end();
+
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the 
+  // nuc_data.h5, if the map is empty.
+  if (state_energy_map.empty())
+  {
+    _load_half_life_decay();
+    return state_energy(nuc);
+  };
+
+  // Finally, if none of these work, 
+  // assume the value is stable
+  double se = 0.0;
+  state_energy_map[nuc] = se;
+  return se;
+};
+
+
+double pyne::state_energy(char * nuc)
+{
+  return state_energy(nucname::id(nuc));
+};
+
+
+double pyne::state_energy(std::string nuc)
+{
+  return state_energy(nucname::id(nuc));
+};
+
 
 //
 // Decay children data
@@ -968,87 +1059,6 @@ int pyne::metastable_id(int nuc) {
   return metastable_id(nuc, 1);
 }
 
-//
-// Excitation state energy data
-//
-
-double pyne::state_energy(int nuc)
-{
-  // Find the nuclide's state energy in MeV
-  double energy = 0.0;
-
-    // Find the nuclide's state energy in MeV
-  std::map<int, pyne::level_struct>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = level_data.find(nuc);
-  nuc_end = level_data.end();
-
-  // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end)
-     return nuc_iter->second.level;
-
-  // Next, fill up the map with values from the
-  // nuc_data.h5, if the map is empty.
-  if (level_data.empty())
-  {
-    _load_level_data();
-    state_energy(nuc);
-  };
-  return 0.0;
-};
-
-
-double pyne::state_energy(char * nuc)
-{
-  return state_energy(nucname::id(nuc));
-};
-
-
-double pyne::state_energy(std::string nuc)
-{
-  return state_energy(nucname::id(nuc));
-};
-
-//
-// Half-life data
-//
-
-double pyne::half_life(int nuc)
-{
-
-    // Find the nuclide's state energy in MeV
-  std::map<int, pyne::level_struct>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = level_data.find(nuc);
-  nuc_end = level_data.end();
-
-  // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end)
-     return nuc_iter->second.half_life;
-
-  // Next, fill up the map with values from the
-  // nuc_data.h5, if the map is empty.
-  if (level_data.empty())
-  {
-    _load_level_data();
-    return half_life(nuc);
-  };
-  return 0.0;
-};
-
-
-double pyne::half_life(char * nuc)
-{
-  int nuc_zz = nucname::id(nuc);
-  return half_life(nuc_zz);
-};
-
-
-double pyne::half_life(std::string nuc)
-{
-  int nuc_zz = nucname::id(nuc);
-  return half_life(nuc_zz);
-};
 
 std::map<std::pair<int, int>, pyne::decay_struct> pyne::decay_data = \
   std::map<std::pair<int, int>, pyne::decay_struct>();
@@ -1481,7 +1491,7 @@ template<> void pyne::_load_data<pyne::beta_struct>()
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < beta_length; ++i) {
-    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].endpoint_energy)] = beta_array[i];
+    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)] = beta_array[i];
   }
 
 }
@@ -1529,17 +1539,17 @@ template<> void pyne::_load_data<pyne::ecbp_struct>()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(ecbp_struct));
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(ecbp_struct, from_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(ecbp_struct, to_nuc), H5T_NATIVE_INT);
   status = H5Tinsert(desc, "endpoint_energy", HOFFSET(ecbp_struct, endpoint_energy),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "avg_energy", HOFFSET(ecbp_struct, avg_energy),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "beta_plus_intensity", HOFFSET(ecbp_struct, beta_plus_intensity), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "ec_intensity", HOFFSET(ecbp_struct, ec_intensity), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(ecbp_struct, from_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(ecbp_struct, to_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "k_conv_e", HOFFSET(gamma_struct, k_conv_e), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "l_conv_e", HOFFSET(gamma_struct, l_conv_e), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "m_conv_e", HOFFSET(gamma_struct, m_conv_e), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_conv_e", HOFFSET(ecbp_struct, k_conv_e), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_conv_e", HOFFSET(ecbp_struct, l_conv_e), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "m_conv_e", HOFFSET(ecbp_struct, m_conv_e), H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1558,7 +1568,7 @@ template<> void pyne::_load_data<pyne::ecbp_struct>()
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < ecbp_length; ++i) {
-    ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].endpoint_energy)] = ecbp_array[i];
+    ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)] = ecbp_array[i];
   }
 
 }
