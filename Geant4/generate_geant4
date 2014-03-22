@@ -7,7 +7,7 @@ from pyne.material import Material,MaterialLibrary
 
 from pyne.nucname import name, znum, anum, id, alara
 from pyne.data import atomic_mass
-from pyne.dagmc import *
+#from pyne.dagmc import *
 
 import re
 
@@ -27,14 +27,15 @@ def main():
     # build the generic header files
     header_files = _setup_headers()
     # create dag geom specific headers
-    dag_header_files = _setup_dagspecific_headers(dag_volume_names)
+    dag_header_files = _setup_dagspecific_headers(dag_volume_names,options.tally)
     header_files.update(dag_header_files)
     _write_files(options.directory+"/include",header_files)
     # setup the soruce
     source_files = _setup_source()
     # dag specific source
     dag_source_files = _setup_dagspecific_source(dag_volume_names,options.dag_file,
-                                                 g4_isotopes, g4_elements, g4_materials)
+                                                 g4_isotopes, g4_elements, g4_materials, options.tally, 
+                                                 options.history_printing)
     source_files.update(dag_source_files)
     _write_files(options.directory+"/src",source_files)
 
@@ -51,8 +52,11 @@ def parse_arguments():
                       help=" filename the name of the DAG h5m file")
     parser.add_option("-v", "--verbose", action="store_true", default=False, \
                           help="print limited amount of text to screen", dest="verbose")
-    parser.add_option("-t", "--tallies", action="store_false", default=True, \
+    parser.add_option("-t", "--tallies", action="store_true", default=False, \
                           help="produce tallies for each volume", dest="tally")
+    parser.add_option("--hist", action="store_true", default=False, \
+                          help="print tallies every history", dest="history_printing")
+
 
     (options, args) = parser.parse_args()
 
@@ -514,7 +518,7 @@ dag_volume_names : list or dictionary of volume names
 
 """
 
-def _setup_dagspecific_headers(dag_volume_names):
+def _setup_dagspecific_headers(dag_volume_names, tallies_needed):
 
     if not dag_volume_names:
         print "dag volume names not assigned", sys.exc_info()[0]
@@ -616,20 +620,23 @@ def _setup_dagspecific_headers(dag_volume_names):
     file_contents.append('  G4THitsMap<G4double>* GetHitsCollection(G4int hcID,\n')
     file_contents.append('                                          const G4Event* event) const;\n')
     file_contents.append('  G4double GetSum(G4THitsMap<G4double>* hitsMap) const;\n')
-    
-    if len(dag_volume_names) == 1:
-        file_contents.append('  void PrintEventStatistics(G4double '+str(dag_volume_names[0])+'_tracklength) const;\n')
-    else:
-        file_contents.append('  void PrintEventStatistics(G4double '+str(dag_volume_names[0])+'_tracklength, \n')
-        for i in range(1,len(dag_volume_names)-1):
-            file_contents.append('			          G4double '+str(dag_volume_names[i])+'_tracklength,\n')
-    file_contents.append('                            G4double '+str(dag_volume_names[-1])+'_tracklength) const;\n')
+
+    if tallies_needed:
+        if len(dag_volume_names) == 1:
+            file_contents.append('  void PrintEventStatistics(G4double '+str(dag_volume_names[0])+'_tracklength) const;\n')
+        else:
+            file_contents.append('  void PrintEventStatistics(G4double '+str(dag_volume_names[0])+'_tracklength, \n')
+            for i in range(1,len(dag_volume_names)-1):
+                file_contents.append('			          G4double '+str(dag_volume_names[i])+'_tracklength,\n')
+            file_contents.append('                            G4double '+str(dag_volume_names[-1])+'_tracklength) const;\n')
 
     file_contents.append('  \n')
     file_contents.append('  // data members                   \n')
     # data objecs to index detectors
-    for vol in dag_volume_names:
-        file_contents.append('  G4int  '+str(vol)+'_tl_HCID;\n')
+    if tallies_needed:
+        for vol in dag_volume_names:
+            file_contents.append('  G4int  '+str(vol)+'_tl_HCID;\n')
+
     file_contents.append('};\n')
     file_contents.append('                     \n')
     file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
@@ -823,7 +830,8 @@ def _setup_source():
     return source_files
 
 def _setup_dagspecific_source(dag_volume_names, dag_h5m,
-                              g4_isotopes,g4_elements,g4_materials):
+                              g4_isotopes,g4_elements,g4_materials, tallies_needed,
+                              every_history):
 
     source_files = {}
     ###
@@ -940,17 +948,17 @@ def _setup_dagspecific_source(dag_volume_names, dag_h5m,
     file_contents.append('  G4SDManager::GetSDMpointer()->SetVerboseLevel(1);\n')
 
     # options if tracklength 
+    if tallies_needed:
+        file_contents.append(' // TrackLength Scorer\n')
+        for volume in dag_volume_names:
+            file_contents.append('  G4MultiFunctionalDetector* '+volume+'_det = new G4MultiFunctionalDetector("'+volume+'_flux");\n')
+            if dag_volume_names.index(volume) == 0:
+                file_contents.append('  G4VPrimitiveScorer* primitive;\n')
 
-    file_contents.append(' // TrackLength Scorer\n')
-    for volume in dag_volume_names:
-        file_contents.append('  G4MultiFunctionalDetector* '+volume+'_det = new G4MultiFunctionalDetector("'+volume+'_flux");\n')
-        if dag_volume_names.index(volume) == 0:
-            file_contents.append('  G4VPrimitiveScorer* primitive;\n')
-
-        file_contents.append('  primitive = new G4PSTrackLength("TrackLength");\n')
-        file_contents.append('  '+volume+'_det->RegisterPrimitive(primitive);  \n')
-        file_contents.append('  SetSensitiveDetector("'+volume+'_log",'+volume+'_det);\n')
-        file_contents.append('\n')
+            file_contents.append('  primitive = new G4PSTrackLength("TrackLength");\n')
+            file_contents.append('  '+volume+'_det->RegisterPrimitive(primitive);  \n')
+            file_contents.append('  SetSensitiveDetector("'+volume+'_log",'+volume+'_det);\n')
+            file_contents.append('\n')
 
     file_contents.append('\n')
     file_contents.append('}\n')
@@ -982,14 +990,19 @@ def _setup_dagspecific_source(dag_volume_names, dag_h5m,
     file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
     file_contents.append('\n')
     file_contents.append('ExN01EventAction::ExN01EventAction()\n')
-    file_contents.append(' : G4UserEventAction(),\n')
+    
+    if tallies_needed:
+        file_contents.append(' : G4UserEventAction(),\n')
     
     # for each volume if scoring
-    for idx in range(0,len(dag_volume_names)-1):
-        volume = dag_volume_names[idx]
-        file_contents.append('   '+volume+'_tl_HCID(-1),\n')
-    volume = dag_volume_names[-1]
-    file_contents.append('   '+volume+'_tl_HCID(-1)\n')
+        for idx in range(0,len(dag_volume_names)-1):
+            volume = dag_volume_names[idx]
+            file_contents.append('   '+volume+'_tl_HCID(-1),\n')
+        volume = dag_volume_names[-1]
+        file_contents.append('   '+volume+'_tl_HCID(-1)\n')
+    else:
+        file_contents.append(' : G4UserEventAction() \n')
+
     file_contents.append('{}\n')
     file_contents.append('\n')
     file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
@@ -1031,28 +1044,32 @@ def _setup_dagspecific_source(dag_volume_names, dag_h5m,
     file_contents.append('\n')
     file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
     file_contents.append('\n')
-    file_contents.append('void ExN01EventAction::PrintEventStatistics(\n')
-    
-    # for each volume if scoring
-    for idx in range(0,len(dag_volume_names)-1):
-        volume = dag_volume_names[idx]
-        file_contents.append('                            G4double '+volume+'_tracklength, \n')
-    volume = dag_volume_names[-1]
-    file_contents.append('                            G4double '+volume+'_tracklength) const \n')
 
-    file_contents.append('{\n')
-    file_contents.append('  // Print event statistics\n')
-    file_contents.append('  //\n')
+    if tallies_needed and every_history:
+        file_contents.append('void ExN01EventAction::PrintEventStatistics(\n')
 
-    # for each volume print scores
-    for volume in dag_volume_names:
-        file_contents.append('  G4cout\n')
-        file_contents.append('     << "   '+volume+': total tracklength: " \n')
-        file_contents.append('     << std::setw(7) << G4BestUnit('+volume+'_tracklength, "Length")\n')
-        file_contents.append('     << "       total track length: " << G4endl;\n')
-        file_contents.append('  G4cout << "----------------------------------------------" << G4endl; \n')
+        # for each volume if scoring
+        for idx in range(0,len(dag_volume_names)-1):
+            volume = dag_volume_names[idx]
+            file_contents.append('                            G4double '+volume+'_tracklength, \n')
+        volume = dag_volume_names[-1]
+        file_contents.append('                            G4double '+volume+'_tracklength) const \n')
 
-    file_contents.append('}\n')
+        file_contents.append('{\n')
+        file_contents.append('  // Print event statistics\n')
+        file_contents.append('  //\n')
+
+        # for each volume print scores
+        for volume in dag_volume_names:
+            file_contents.append('  G4cout\n')
+            file_contents.append('     << "   '+volume+': total tracklength: " \n')
+            file_contents.append('     << std::setw(7) << G4BestUnit('+volume+'_tracklength, "Length")\n')
+            file_contents.append('     << "       total track length: " << G4endl;\n')
+            file_contents.append('  G4cout << "----------------------------------------------" << G4endl; \n')
+
+
+        file_contents.append('}\n')
+
     file_contents.append('\n')
     file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
     file_contents.append('\n')
@@ -1063,65 +1080,71 @@ def _setup_dagspecific_source(dag_volume_names, dag_h5m,
     file_contents.append('\n')
     file_contents.append('void ExN01EventAction::EndOfEventAction(const G4Event* event)\n')
     file_contents.append('{  \n')
-    file_contents.append('   // Get hist collections IDs\n')
-    # if initialisation
-    volume = dag_volume_names[0] 
-    file_contents.append('  if ( '+volume+'_tl_HCID == -1 ) {\n')
-    file_contents.append('      // name has to match that in detector construction?!\n')
-    # for each volume print scores
-    for volume in dag_volume_names:
-        file_contents.append('    '+volume+'_tl_HCID\n')
-        file_contents.append('      = G4SDManager::GetSDMpointer()->GetCollectionID("'+volume+'_flux/TrackLength");\n')
 
-    file_contents.append('  }\n')
-    file_contents.append('  \n')
-    file_contents.append('  // Get sum values from hits collections\n')
-    file_contents.append('  //\n')
+    if tallies_needed:
+        file_contents.append('   // Get hist collections IDs\n')
+        # if initialisation
+        volume = dag_volume_names[0] 
+        file_contents.append('  if ( '+volume+'_tl_HCID == -1 ) {\n')
+        file_contents.append('      // name has to match that in detector construction?!\n')
+        # for each volume print scores
+        for volume in dag_volume_names:
+            file_contents.append('    '+volume+'_tl_HCID\n')
+            file_contents.append('      = G4SDManager::GetSDMpointer()->GetCollectionID("'+volume+'_flux/TrackLength");\n')
 
-    # for each volume print scores
-    for volume in dag_volume_names:
-        file_contents.append('  G4double '+volume+'_tracklength = GetSum(GetHitsCollection('+volume+'_tl_HCID, event));\n')
-    file_contents.append('\n')
-    file_contents.append('  // get analysis manager\n')
-    file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
-    file_contents.append('\n')
-    file_contents.append('  // fill histograms\n')
-    file_contents.append('  //  \n')
+        file_contents.append('  }\n')
+        file_contents.append('  \n')
+        file_contents.append('  // Get sum values from hits collections\n')
+        file_contents.append('  //\n')
 
-    # for each volume print scores
-    for idx in range(0,len(dag_volume_names)-1):
-        volume = dag_volume_names[idx]
-        file_contents.append('  analysisManager->FillH1('+str(idx+1)+', '+volume+'_tracklength);\n')
+        # for each volume print scores
+        for volume in dag_volume_names:
+            file_contents.append('  G4double '+volume+'_tracklength = GetSum(GetHitsCollection('+volume+'_tl_HCID, event));\n')
+        file_contents.append('\n')
+        file_contents.append('  // get analysis manager\n')
+        file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
+        file_contents.append('\n')
+        file_contents.append('  // fill histograms\n')
+        file_contents.append('  //  \n')
 
-    file_contents.append('  \n')
-    file_contents.append('  // fill ntuple\n')
-    file_contents.append('  //\n')
+        # for each volume print scores
+        for idx in range(0,len(dag_volume_names)-1):
+            volume = dag_volume_names[idx]
+            file_contents.append('  analysisManager->FillH1('+str(idx+1)+', '+volume+'_tracklength);\n')
 
-    # for each volume print scores
-    for idx in range(0,len(dag_volume_names)-1):
-        volume = dag_volume_names[idx]
-        file_contents.append('  analysisManager->FillNtupleDColumn('+str(idx)+', '+volume+'_tracklength);\n')
+            file_contents.append('  \n')
+            file_contents.append('  // fill ntuple\n')
+            file_contents.append('  //\n')
 
-    file_contents.append('  analysisManager->AddNtupleRow();  \n')
-    file_contents.append('  \n')
-    file_contents.append('  //print per event (modulo n)\n')
-    file_contents.append('  //\n')
-    file_contents.append('  G4int eventID = event->GetEventID();\n')
-    file_contents.append('  G4int printModulo = G4RunManager::GetRunManager()->GetPrintProgress();\n')
-    file_contents.append('  if ( ( printModulo > 0 ) && ( eventID % printModulo == 0 ) ) {\n')
-    file_contents.append('    G4cout << "---> End of event: " << eventID << G4endl;     \n')
+        # for each volume print scores
+        for idx in range(0,len(dag_volume_names)-1):
+            volume = dag_volume_names[idx]
+            file_contents.append('  analysisManager->FillNtupleDColumn('+str(idx)+', '+volume+'_tracklength);\n')
 
-    file_contents.append('    PrintEventStatistics( \n')
-    # for each volume print scores
-    for volume in dag_volume_names:
-        idx = dag_volume_names.index(volume)
-        if idx != len(dag_volume_names)-1:
-            file_contents.append('                         '+volume+'_tracklength, \n')
-        else:
-            file_contents.append('                         '+volume+'_tracklength \n')
+        file_contents.append('  analysisManager->AddNtupleRow();  \n')
+        file_contents.append('  \n')
+        
+        if every_history:
+            file_contents.append('  //print per event (modulo n)\n')
+            file_contents.append('  //\n')
+            file_contents.append('  G4int eventID = event->GetEventID();\n')
+            file_contents.append('  G4int printModulo = G4RunManager::GetRunManager()->GetPrintProgress();\n')
+            file_contents.append('  if ( ( printModulo > 0 ) && ( eventID % printModulo == 0 ) ) {\n')
+            file_contents.append('    G4cout << "---> End of event: " << eventID << G4endl;     \n')
 
-    file_contents.append('                                       );\n')   
-    file_contents.append('  }\n')
+
+            file_contents.append('    PrintEventStatistics( \n')
+            # for each volume print scores
+            for volume in dag_volume_names:
+                idx = dag_volume_names.index(volume)
+                if idx != len(dag_volume_names)-1:
+                    file_contents.append('                         '+volume+'_tracklength, \n')
+                else:
+                    file_contents.append('                         '+volume+'_tracklength \n')
+
+            file_contents.append('                                       );\n')   
+            file_contents.append('  }\n')
+
     file_contents.append('}  \n')
     file_contents.append('\n')
 
@@ -1151,93 +1174,104 @@ def _setup_dagspecific_source(dag_volume_names, dag_h5m,
     file_contents.append('  G4RunManager::GetRunManager()->SetPrintProgress(1);     \n')
     file_contents.append('\n')
     file_contents.append('  // Create analysis manager\n')
-    file_contents.append('  // The choice of analysis technology is done via selectin of a namespace\n')
-    file_contents.append('  // in ExNO1Analysis.hh\n')
-    file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
-    file_contents.append('  G4cout << "Using " << analysisManager->GetType() << G4endl;\n')
-    file_contents.append('\n')
-    file_contents.append('  // Create directories \n')
-    file_contents.append('  //analysisManager->SetHistoDirectoryName("histograms");\n')
-    file_contents.append('  //analysisManager->SetNtupleDirectoryName("ntuple");\n')
-    file_contents.append('  analysisManager->SetVerboseLevel(1);\n')
-    file_contents.append('  analysisManager->SetFirstHistoId(1);\n')
-    file_contents.append('\n')
-    file_contents.append('  // Book histograms, ntuple\n')
-    file_contents.append('  //\n')
-    file_contents.append('  \n')
-    file_contents.append('  // Creating histograms\n')
+    if tallies_needed:
+        file_contents.append('  // The choice of analysis technology is done via selectin of a namespace\n')
+        file_contents.append('  // in ExNO1Analysis.hh\n')
+        file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
+        file_contents.append('  G4cout << "Using " << analysisManager->GetType() << G4endl;\n')
+        file_contents.append('\n')
+        file_contents.append('  // Create directories \n')
+        file_contents.append('  //analysisManager->SetHistoDirectoryName("histograms");\n')
+        file_contents.append('  //analysisManager->SetNtupleDirectoryName("ntuple");\n')
+        file_contents.append('  analysisManager->SetVerboseLevel(1);\n')
+        file_contents.append('  analysisManager->SetFirstHistoId(1);\n')
+        file_contents.append('\n')
+        file_contents.append('  // Book histograms, ntuple\n')
+        file_contents.append('  //\n')
+        file_contents.append('  \n')
+        file_contents.append('  // Creating histograms\n')
     
-    # for each volume in tally
-    for volume in dag_volume_names:
-        idx = dag_volume_names.index(volume)
-        file_contents.append('  analysisManager->CreateH1("'+str(idx)+'","trackL in '+volume+'", 100, 0., 1.*m);\n')
 
-    file_contents.append('\n')
-    file_contents.append('\n')
-    file_contents.append('  // Creating ntuple\n')
-    file_contents.append('  analysisManager->CreateNtuple("N01", "TrackL");\n')
-    
-    for volume in dag_volume_names:
-        file_contents.append('  analysisManager->CreateNtupleDColumn("'+volume+'");\n')
+        # for each volume in tally
+        for volume in dag_volume_names:
+            idx = dag_volume_names.index(volume)
+            file_contents.append('  analysisManager->CreateH1("'+str(idx+1)+'","trackL in '+volume+'", 100, 0., 1.*m);\n')
 
-    file_contents.append('  analysisManager->FinishNtuple();\n')
+#            file_contents.append('\n')
+        file_contents.append('\n')
+        file_contents.append('  // Creating ntuple\n')
+        file_contents.append('  analysisManager->CreateNtuple("N01", "TrackL");\n')
+            
+        for volume in dag_volume_names:
+            file_contents.append('  analysisManager->CreateNtupleDColumn("'+volume+'");\n')
+
+        file_contents.append('  analysisManager->FinishNtuple();\n')
+
     file_contents.append('}\n')
     file_contents.append('\n')
     file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
     file_contents.append('\n')
     file_contents.append('ExN01RunAction::~ExN01RunAction()\n')
     file_contents.append('{\n')
-    file_contents.append('  delete G4AnalysisManager::Instance();  \n')
+
+    if tallies_needed:
+        file_contents.append('  delete G4AnalysisManager::Instance();  \n')
+
     file_contents.append('}\n')
     file_contents.append('\n')
     file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
     file_contents.append('\n')
+
     file_contents.append('void ExN01RunAction::BeginOfRunAction(const G4Run* /*run*/)\n')
     file_contents.append('{ \n')
     file_contents.append('  //inform the runManager to save random number seed\n')
     file_contents.append('  //G4RunManager::GetRunManager()->SetRandomNumberStore(true);\n')
     file_contents.append('  \n')
-    file_contents.append('  // Get analysis manager\n')
-    file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
-    file_contents.append('\n')
-    file_contents.append('  // Open an output file\n')
-    file_contents.append('  //\n')
-    file_contents.append('  G4String fileName = "ExN01";\n')
-    file_contents.append('  analysisManager->OpenFile(fileName);\n')
+    if tallies_needed:
+        file_contents.append('  // Get analysis manager\n')
+        file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
+        file_contents.append('\n')
+        file_contents.append('  // Open an output file\n')
+        file_contents.append('  //\n')
+        file_contents.append('  G4String fileName = "ExN01";\n')
+        file_contents.append('  analysisManager->OpenFile(fileName);\n')
+
     file_contents.append('}\n')
     file_contents.append('\n')
     file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
     file_contents.append('\n')
     file_contents.append('void ExN01RunAction::EndOfRunAction(const G4Run* /*run*/)\n')
     file_contents.append('{\n')
-    file_contents.append('  // print histogram statistics\n')
-    file_contents.append('  //\n')
-    file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
-    file_contents.append('  if ( analysisManager->GetH1(1) ) {\n')
-    file_contents.append('    G4cout << "\\n ----> print histograms statistic ";\n')
-    file_contents.append('    if(isMaster) {\n')
-    file_contents.append('      G4cout << "for the entire run \\n" << G4endl; \n')
-    file_contents.append('    }\n')
-    file_contents.append('    else {\n')
-    file_contents.append('      G4cout << "for the local thread \\n" << G4endl; \n')
-    file_contents.append('    }\n')
-    file_contents.append('    \n')
+    if tallies_needed:
+        file_contents.append('  // print histogram statistics\n')
+        file_contents.append('  //\n')
+        file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
+        file_contents.append('  if ( analysisManager->GetH1(1) ) {\n')
+        file_contents.append('    G4cout << "\\n ----> print histograms statistic ";\n')
+        file_contents.append('    if(isMaster) {\n')
+        file_contents.append('      G4cout << "for the entire run \\n" << G4endl; \n')
+        file_contents.append('    }\n')
+        file_contents.append('    else {\n')
+        file_contents.append('      G4cout << "for the local thread \\n" << G4endl; \n')
+        file_contents.append('    }\n')
+        file_contents.append('    \n')
 
-    for volume in dag_volume_names:
-        idx = dag_volume_names.index(volume)
-        file_contents.append('    G4cout << " '+volume+' : mean = " \n')
-        file_contents.append('       << G4BestUnit(analysisManager->GetH1('+str(idx)+')->mean(), "Length") \n')
-        file_contents.append('       << " rms = " \n')
-        file_contents.append('       << G4BestUnit(analysisManager->GetH1('+str(idx)+')->rms(),  "Length") << G4endl;\n')
-    file_contents.append('    \n')
-    file_contents.append('    \n')
-    file_contents.append('  }\n')
-    file_contents.append('\n')
-    file_contents.append('  // save histograms & ntuple\n')
-    file_contents.append('  //\n')
-    file_contents.append('  analysisManager->Write();\n')
-    file_contents.append('  analysisManager->CloseFile();\n')
-    file_contents.append('\n')
+        for volume in dag_volume_names:
+            idx = dag_volume_names.index(volume)
+            file_contents.append('    G4cout << " '+volume+' : mean = " \n')
+            file_contents.append('       << G4BestUnit(analysisManager->GetH1('+str(idx+1)+')->mean(), "Length") \n')
+            file_contents.append('       << " rms = " \n')
+            file_contents.append('       << G4BestUnit(analysisManager->GetH1('+str(idx+1)+')->rms(),  "Length") << G4endl;\n')
+            file_contents.append('    \n')
+        
+        file_contents.append('  }\n')
+
+        file_contents.append('\n')
+        file_contents.append('  // save histograms & ntuple\n')
+        file_contents.append('  //\n')
+        file_contents.append('  analysisManager->Write();\n')
+        file_contents.append('  analysisManager->CloseFile();\n')
+        file_contents.append('\n')
     file_contents.append('}\n')
 
     source_files['ExN01RunAction.cc'] = file_contents
