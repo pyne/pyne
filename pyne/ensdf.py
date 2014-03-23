@@ -2,6 +2,7 @@ import re
 import urllib
 import os
 import warnings
+import copy
 
 import numpy as np
 
@@ -749,7 +750,6 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
     parents = parent.split(',')
     if len(parents) > 1:
         pfinal = _to_id(parents[0])
-        warnings.warn('Multiple parents {0}'.format(parent))
     else:
         pfinal = _to_id(parents[0][:5])
     tfinal = None
@@ -893,7 +893,10 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
         #FIXME: Handle uneven errors
         if tfinalerr is not None and not isinstance(tfinalerr, float):
             tfinalerr = tfinalerr[0]
-
+        if len(parents) > 1:
+            pfinal = []
+            for item in parents:
+                pfinal.append(_to_id(item))
         return pfinal, daughter_id, decay_s.strip(), tfinal, tfinalerr, \
                br, nrbr, nrbr_err, nbbr, nbbr_err, gammarays, alphas, \
                betas, ecbp
@@ -942,7 +945,21 @@ def decays(filename, levellist=None, decaylist=None, lmap=None, lcount = 0):
             decay_s = ident.group(2).split()[1]
             decay = _parse_decay_dataset(lines, decay_s, levellist, lmap)
             if decay is not None:
-                decaylist.append(decay)
+                if isinstance(decay[0], list):
+                    for parent in decay[0]:
+                        dc = copy.deepcopy(list(decay))
+                        dc[0] = parent
+                        for gamma in dc[10]:
+                            gamma[2] = parent
+                        for alpha in dc[11]:
+                            alpha[0] = parent
+                        for beta in dc[12]:
+                            beta[0] = parent
+                        for ecbp in dc[13]:
+                            ecbp[0] = parent
+                        decaylist.append(tuple(dc))
+                else:
+                    decaylist.append(decay)
     return levellist, decaylist, lmap, lcount
 
 
