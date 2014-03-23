@@ -13,6 +13,7 @@
 #include <exception>
 #include <stdlib.h>
 #include <stdio.h>
+#include <float.h>
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
@@ -277,18 +278,18 @@ namespace pyne
   /// Mapping from nuclides in id form to its decay children, if any.
   extern std::map<int, std::set<int> > decay_children_map;
 
-  /// a struct matching the '/atomic_decay' table in nuc_data.h5.
-  typedef struct atomic_decay_struct {
+  /// a struct matching the '/decay/half_life_decay' table in nuc_data.h5.
+  typedef struct half_life_decay_struct {
     int from_nuc; ///< parent species in id form
-    double level; ///< decay level [MeV]
     int to_nuc;   ///< child species in id form
+    double level; ///< decay level [MeV]
     double half_life;     ///< species half life [s]
     double decay_const;   ///< decay constant [1/s]
     double branch_ratio;  ///< decay branch ratio [fraction]
-  } atomic_decay_struct;
+  } half_life_decay_struct;
 
-  /// Loads the decay data from the nuc_data.h5 file into memory.
-  void _load_atomic_decay();
+  /// Loads the half life data from the nuc_data.h5 file into memory.
+  void _load_half_life_decay();
 
   /// \brief Returns the half life for a nuclide \a nuc.
   ///
@@ -347,6 +348,207 @@ namespace pyne
   /// Returns the decay constant for a nuclide \a nuc.
   std::set<int> decay_children(std::string nuc);
 
+  /// Loads the level data from the nuc_data.h5 file into memory.
+  void _load_level_data();
+
+  /// \brief Returns the nuc_id of a metastable state
+  ///
+  /// This function looks through the level map for a given input nuc_id to find the
+  /// nuc_id corresponding to the level
+  int metastable_id(int nuc, int m);
+  /// Assumes the first metastable state is the desired one
+  int metastable_id(int nuc);
+
+  /// a struct matching the '/decay/level_list' table in nuc_data.h5.
+  typedef struct level_struct{
+    int nuc_id;
+    double level;
+    double half_life;
+    int metastable;
+  } level_struct;
+
+  /// Mapping from nuclides in id form to a struct containing data associated
+  /// with that level.
+  extern std::map<int, level_struct> level_data;
+
+  template<typename T> void _load_data();
+
+  /// a struct matching the '/decay/decays' table in nuc_data.h5.
+  typedef struct decay_struct{
+    int parent;
+    int child;
+    char decay[5];
+    double half_life;
+    double half_life_error;
+    double branch_ratio;
+    double photon_branch_ratio;
+    double photon_branch_ratio_error;
+    double beta_branch_ratio;
+    double beta_branch_ratio_error;
+  } decay_struct;
+
+  /// Loads the decay data from the nuc_data.h5 file into memory.
+  template<> void _load_data<decay_struct>();
+  /// Mapping from a pair of nuclides in id form to a struct containing data
+  /// associated with the decay from the first to the second
+  extern std::map<std::pair<int, int>, decay_struct> decay_data;
+
+  template<typename T, typename U> T data_access(std::pair<int, int> from_to, 
+    size_t valoffset, std::map<std::pair<int, int>, U> &data);
+  template<typename T, typename U> std::vector<T> data_access(int parent, 
+    size_t valoffset, std::map<std::pair<int, int>, U> &data);
+  //
+  //void decay_data(std::pair<int, int> from_to, decay_struct *data);
+  std::pair<double, double> decay_half_life(std::pair<int,int>);
+  std::vector<std::pair<double, double> > decay_half_lifes(int);
+  double decay_branch_ratio(std::pair<int,int>);
+  std::vector<double> decay_branch_ratios(int parent);
+  std::pair<double, double> decay_photon_branch_ratio(std::pair<int,int>);
+  std::vector<std::pair<double, double> >decay_photon_branch_ratios(int parent);
+  std::pair<double, double> decay_beta_branch_ratio(std::pair<int,int>);
+  std::vector<std::pair<double, double> >decay_beta_branch_ratios(int parent);
+
+
+  /// a struct matching the '/decay/gammas' table in nuc_data.h5.
+  typedef struct gamma_struct{
+    int from_nuc;
+    int to_nuc;
+    int parent_nuc;
+    double energy;
+    double energy_err;
+    double photon_intensity;
+    double photon_intensity_err;
+    double conv_intensity;
+    double conv_intensity_err;
+    double total_intensity;
+    double total_intensity_err;
+    double k_conv_e;
+    double l_conv_e;
+    double m_conv_e;
+  } gamma_struct;
+
+  /// Loads the gamma ray data from the nuc_data.h5 file into memory.
+  template<> void _load_data<gamma_struct>();
+
+  class swapmapcompare{
+    public:
+        bool operator()(const std::pair<int, double>& lhs,
+                        const std::pair<int, double>& rhs) const;
+  };
+  /// A vector of structs containing gamma ray data for access in memory
+  //extern std::vector<gamma_struct> gamma_data;
+  template<typename T, typename U> std::vector<T> data_access(double emin,
+    double emax, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
+  template<typename T, typename U> std::vector<T> data_access(int parent,
+    size_t valoffset, std::map<std::pair<int, double>, U>  &data);
+  extern std::map<std::pair<int, double>, gamma_struct> gamma_data;
+
+  //returns a list of gamma decay energies from input parent nuclide
+  std::vector<std::pair<double, double> > gamma_energy(int parent);
+  //returns a list of gamma photon intensities from input parent nuclide
+  std::vector<std::pair<double, double> > gamma_photon_intensity(int parent);
+  //returns a list of gamma conversion intensities from input parent nuclide
+  std::vector<std::pair<double, double> > gamma_conversion_intensity(int parent);
+  //returns a list of gamma total intensities from input parent nuclide
+  std::vector<std::pair<double, double> > gamma_total_intensity(int parent);
+  //returns a list of pairs of excited state transitions from an input parent nuclide
+  std::vector<std::pair<int, int> > gamma_from_to(int parxent);
+  //returns a list of pairs of excited state transitions from an decay energy
+  std::vector<std::pair<int, int> > gamma_from_to(double energy, double error);
+  //returns a list of parent nuclides associated with an input decay energy
+  std::vector<int> gamma_parent(double energy, double error);
+
+  /// a struct matching the '/decay/alphas' table in nuc_data.h5.
+  typedef struct alpha_struct{
+    int from_nuc;
+    int to_nuc;
+    double energy;
+    double intensity;
+  } alpha_struct;
+
+  /// Loads the alpha decay data from the nuc_data.h5 file into memory.
+  template<> void _load_data<alpha_struct>();
+
+  /// A vector of structs containing alpha data for access in memory
+  extern std::map<std::pair<int, double>, alpha_struct> alpha_data;
+  
+  //returns a list of alpha decay energies from input parent nuclide
+  std::vector<double > alpha_energy(int parent);
+  //returns a list of alpha decay intensities from input parent nuclide
+  std::vector<double> alpha_intensity(int parent);
+  //returns a list of alpha decay parents from input decay energy range
+  std::vector<int> alpha_parent(double energy, double error);
+  //returns a list of alpha decay children from input decay energy range
+  std::vector<int> alpha_child(double energy, double error);
+  //returns a list of alpha decay children from input parent nuclide
+  std::vector<int> alpha_child(int parent);
+
+  /// a struct matching the '/decay/betas' table in nuc_data.h5.
+  typedef struct beta_struct{
+    int from_nuc;
+    int to_nuc;
+    double endpoint_energy;
+    double avg_energy;
+    double intensity;
+  } beta_struct;
+
+  /// Loads the beta decay data from the nuc_data.h5 file into memory.
+  template<> void _load_data<beta_struct>();
+
+  /// A vector of structs containing beta data for access in memory
+  extern std::map<std::pair<int, double>, beta_struct> beta_data;
+  //returns a list of beta decay endpoint energies from input parent nuclide
+  std::vector<double > beta_endpoint_energy(int parent);
+  //returns a list of beta decay average energies from input parent nuclide
+  std::vector<double > beta_average_energy(int parent);
+  //returns a list of beta decay intensities from input parent nuclide
+  std::vector<double> beta_intensity(int parent);
+  //returns a list of beta decay parents from input decay energy range
+  std::vector<int> beta_parent(double energy, double error);
+  //returns a list of beta decay children from input decay energy range
+  std::vector<int> beta_child(double energy, double error);
+  //returns a list of beta decay children from input parent nuclide
+  std::vector<int> beta_child(int parent);
+
+  /// A struct matching the '/decay/ecbp' table in nuc_data.h5.
+  typedef struct ecbp_struct{
+    int from_nuc;
+    int to_nuc;
+    double endpoint_energy;
+    double avg_energy;
+    double beta_plus_intensity;
+    double ec_intensity;
+    double k_conv_e;
+    double l_conv_e;
+    double m_conv_e;
+  } ecbp_struct;
+
+  /// A vector of structs containing ecbp data for access in memory
+  extern std::map<std::pair<int, double>, ecbp_struct> ecbp_data;
+
+  /// Loads the electron capture and beta plus decay data from the
+  /// nuc_data.h5 file into memory.
+  template<> void _load_data<ecbp_struct>();
+  ///returns a list of electron capture/ beta plus decay endpoint energies from
+  ///input parent nuclide
+  std::vector<double > ecbp_endpoint_energy(int parent);
+  //returns a list of electron capture/ beta plus decay average energies from 
+  //input parent nuclide
+  std::vector<double > ecbp_average_energy(int parent);
+  //returns a list of electron capture decay intensities from input parent 
+  //nuclide
+  std::vector<double> ec_intensity(int parent);
+  //returns a list of beta plus decay intensities from input parent nuclide
+  std::vector<double> bp_intensity(int parent);
+  //returns a list of electron capture /beta plus decay parents from input 
+  //decay energy range
+  std::vector<int> ecbp_parent(double energy, double error);
+  //returns a list of electron capture /beta plus decay children from input
+  //decay energy range
+  std::vector<int> ecbp_child(double energy, double error);
+  //returns a list of electron capture /beta plus decay children from input 
+  //parent nuclide
+  std::vector<int> ecbp_child(int parent);
   /// \}
 }
 
