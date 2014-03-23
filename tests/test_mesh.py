@@ -20,7 +20,7 @@ from pyne.material import Material, MaterialLibrary
 def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
 
-def gen_mesh(mats=None):
+def gen_mesh(mats=()):
     mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
                   structured_ordering='zyx', mats=mats)
     volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
@@ -43,7 +43,7 @@ def test_unstructured_mesh_from_instance():
                             "files_mesh_test/unstr.h5m")
     mesh = iMesh.Mesh()
     mesh.load(filename)
-    sm = Mesh(mesh = mesh)
+    sm = Mesh(mesh=mesh)
 
 def test_elem_volume():
     """Test the get_elem_volume method"""
@@ -845,3 +845,7 @@ def test_cell_fracs_to_mats():
     for i, mat, _ in m:
         assert_equal(mat.comp, exp_comps[i])
         assert_equal(mat.density, 1.0)
+
+def test_no_mats():
+    mesh = gen_mesh(mats=None)
+    assert_true(mesh.mats is None)
