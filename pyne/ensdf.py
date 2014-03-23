@@ -72,7 +72,8 @@ def _to_id_from_level(nuc_id, level, levellist, lmap):
     gparent = nid
     if nid in lmap:
         for i in range(lmap[nid], len(levellist)):
-            if level is not None and level + 1.0 > levellist[i][2] > level - 1.0:
+            if level is not None and level + 1.0 > levellist[i][2] >\
+                            level - 1.0:
                 gparent = levellist[i][0]
                 break
             if int(nid/10000) != int(levellist[i][0]/10000):
@@ -204,7 +205,8 @@ def half_life(ensdf):
         for line in lines:
             level_l = _level_regex.match(line)
             if level_l is not None:
-                level, half_lifev, from_nuc, state = _parse_level_record(level_l)
+                level, half_lifev, from_nuc, state = \
+                    _parse_level_record(level_l)
                 if half_lifev == np.inf and from_nuc is not None:
                     data.append((from_nuc, 0.0, from_nuc, half_lifev, 1.0))
                 if level is None:
@@ -790,14 +792,14 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                 else:
                     ecbp[-1][3] = bcdat[0]
                     bggc = _gc.match(line)
-                    conv = _parse_gamma_continuation_record(bggc, dat[2], dat[8])
+                    conv = _parse_gamma_continuation_record(bggc, dat[2],
+                                                            dat[8])
                     if 'K' in conv:
                         ecbp[-1][-3] = conv['K'][0]
                     if 'L' in conv:
                         ecbp[-1][-2] = conv['L'][0]
                     if 'M' in conv:
                         ecbp[-1][-1] = conv['M'][0]
-                    #ecbp[-1][-8:] = _update_xrays(econv, ecbp[-1][-8:], _to_id(daughter))
         a_rec = _alpha.match(line)
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
@@ -835,9 +837,11 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                 gdaughter = 0
                 if levellist is not None:
                     if level is not None:
-                        gparent = _to_id_from_level(daughter, level, levellist, lmap)
+                        gparent = _to_id_from_level(daughter, level, levellist,
+                                                    lmap)
                         dlevel = level - dat[0]
-                        gdaughter = _to_id_from_level(daughter, dlevel, levellist, lmap)
+                        gdaughter = _to_id_from_level(daughter, dlevel,
+                                                      levellist, lmap)
                 if parent2 is None:
                     gp2 = pfinal
                     e = 0
@@ -855,14 +859,14 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
             continue
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
-            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][2], gammarays[-1][6])
+            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][2],
+                                                    gammarays[-1][6])
             if 'K' in conv:
                 gammarays[-1][-3] = conv['K'][0]
             if 'L' in conv:
                 gammarays[-1][-2] = conv['L'][0]
             if 'M' in conv:
                 gammarays[-1][-1] = conv['M'][0]
-            #gammarays[-1][-8:] = _update_xrays(conv, gammarays[-1][-8:], _to_id(daughter))
             continue
         n_rec = _norm.match(line)
         if n_rec is not None:
@@ -920,7 +924,8 @@ def decays(filename, levellist=None, decaylist=None, lmap=None, lcount = 0):
             for line in lines:
                 level_l = _level_regex.match(line)
                 if level_l is not None:
-                    level, half_lifev, from_nuc, state = _parse_level_record(level_l)
+                    level, half_lifev, from_nuc, state = \
+                        _parse_level_record(level_l)
                     if from_nuc is not None:
                         nuc_id = from_nuc + leveln
                         if leveln == 0:
@@ -1003,7 +1008,8 @@ def origen_data(filename):
                     continue
                 p_rec = _p.match(line)
                 if p_rec is not None:
-                    parent2, tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+                    parent2, tfinal, tfinalerr, e, e_err = \
+                        _parse_parent_record(p_rec)
                     continue
                 level_l = _level_regex.match(line)
                 if level_l is not None:
@@ -1015,7 +1021,8 @@ def origen_data(filename):
                             ie = 0.0
                         decaylist.append((_to_id(parent), tfinal, e,
                                           half_lifev, level, dtype, (ib + ie)))
-                    level, half_lifev, from_nuc, state = _parse_level_record(level_l)
+                    level, half_lifev, from_nuc, state = \
+                        _parse_level_record(level_l)
                     newlevel = True
                     continue
             if newlevel and (ib is not None or ie is not None):
@@ -1039,7 +1046,8 @@ def origen_data(filename):
                         if len(brs) > 0:
                             branchlist.append((pid, level, half_lifev, brs))
                         brs = {}
-                    level, half_lifev, from_nuc, state = _parse_level_record(level_l)
+                    level, half_lifev, from_nuc, state = \
+                        _parse_level_record(level_l)
                     continue
                 levelc = _level_cont_regex.match(line)
                 if levelc is not None:

@@ -1020,8 +1020,8 @@ def ecbp_average_energy(parent):
 
 def ec_intensity(parent):
     """
-    Returns a list of electron capture intensisities from ENSDF decay dataset from
-    a given parent.
+    Returns a list of electron capture intensisities from ENSDF decay dataset
+    from a given parent.
 
     Parameters
     ----------

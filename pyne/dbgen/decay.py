@@ -164,10 +164,12 @@ def parse_decay(build_dir=""):
     for f in files:
         print("    parsing decay data from {0}".format(f))
         half_life_data += ensdf.half_life(f)
-        level_list, decay_data, lmap, lcount = ensdf.decays(f, level_list, decay_data, lmap, lcount)
+        level_list, decay_data, lmap, lcount = \
+            ensdf.decays(f, level_list, decay_data, lmap, lcount)
 
     ln2 = np.log(2.0)
-    half_life_data = [(fn, tn, lvl, hl, ln2 / hl, br) for fn, lvl, tn, hl, br in half_life_data]
+    half_life_data = [(fn, tn, lvl, hl, ln2 / hl, br)
+                      for fn, lvl, tn, hl, br in half_life_data]
     half_life_data = set(half_life_data)
     half_life_data = sorted(half_life_data, key=lambda x: (x[0], x[1]))
 

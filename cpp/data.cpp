@@ -70,7 +70,7 @@ void pyne::_load_atomic_mass_map()
   atomic_mass_struct * atomic_mass_array = new atomic_mass_struct[atomic_mass_length];
   H5Dread(atomic_mass_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atomic_mass_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   H5Dclose(atomic_mass_set);
   H5Fclose(nuc_data_h5);
 
@@ -258,7 +258,7 @@ void pyne::_load_scattering_lengths()
   scattering_lengths_struct * scat_len_array = new scattering_lengths_struct[scat_len_length];
   status = H5Dread(scat_len_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, scat_len_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(scat_len_set);
   status = H5Fclose(nuc_data_h5);
 
@@ -513,7 +513,7 @@ void pyne::_load_wimsdfpy() {
   wimsdfpy_struct * wimsdfpy_array = new wimsdfpy_struct[wimsdfpy_length];
   status = H5Dread(wimsdfpy_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, wimsdfpy_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(wimsdfpy_set);
   status = H5Fclose(nuc_data_h5);
 
@@ -574,7 +574,7 @@ void pyne::_load_ndsfpy() {
   ndsfpy_struct * ndsfpy_array = new ndsfpy_struct[ndsfpy_length];
   status = H5Dread(ndsfpy_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, ndsfpy_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(ndsfpy_set);
   status = H5Fclose(nuc_data_h5);
 
@@ -662,7 +662,8 @@ double pyne::fpyield(char * from_nuc, char * to_nuc, int source, bool get_error)
                                      nucname::id(to_nuc)), source, get_error);
 };
 
-double pyne::fpyield(std::string from_nuc, std::string to_nuc, int source, bool get_error) {
+double pyne::fpyield(std::string from_nuc, std::string to_nuc, int source, 
+                     bool get_error) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc), 
                                      nucname::id(to_nuc)), source, get_error);
 };
@@ -675,10 +676,10 @@ double pyne::fpyield(std::string from_nuc, std::string to_nuc, int source, bool 
 std::map<int, double> pyne::half_life_map = std::map<int, double>();
 std::map<int, double> pyne::decay_const_map = std::map<int, double>();
 std::map<std::pair<int, int>, double> pyne::branch_ratio_map = \
-                                              std::map<std::pair<int, int>, double>();
+                              std::map<std::pair<int, int>, double>();
 std::map<int, double> pyne::state_energy_map = std::map<int, double>();
 std::map<int, std::set<int> > pyne::decay_children_map = \
-                                                      std::map<int, std::set<int> >();
+                              std::map<int, std::set<int> >();
 
 
 void pyne::_load_half_life_decay()
@@ -696,19 +697,22 @@ void pyne::_load_half_life_decay()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(half_life_decay_struct));
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(half_life_decay_struct, from_nuc),
-                      H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(half_life_decay_struct, to_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "level", HOFFSET(half_life_decay_struct, level), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "half_life", HOFFSET(half_life_decay_struct, half_life),
-                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "decay_const", HOFFSET(half_life_decay_struct, decay_const),
-                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "branch_ratio", HOFFSET(half_life_decay_struct, branch_ratio),
-                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(half_life_decay_struct, 
+                     from_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(half_life_decay_struct, to_nuc),
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "level", HOFFSET(half_life_decay_struct, level), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "half_life", HOFFSET(half_life_decay_struct, 
+                      half_life), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "decay_const", HOFFSET(half_life_decay_struct, 
+                      decay_const), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "branch_ratio", HOFFSET(half_life_decay_struct, 
+                      branch_ratio), H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
-  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
+                              H5P_DEFAULT);
 
   // Open the data set
   hid_t atom_dec_set = H5Dopen2(nuc_data_h5, "/decay/half_life", H5P_DEFAULT);
@@ -716,10 +720,13 @@ void pyne::_load_half_life_decay()
   int atom_dec_length = H5Sget_simple_extent_npoints(atom_dec_space);
 
   // Read in the data
-  half_life_decay_struct * atom_dec_array = new half_life_decay_struct[atom_dec_length];
-  status = H5Dread(atom_dec_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, atom_dec_array);
+  half_life_decay_struct * atom_dec_array = \
+    new half_life_decay_struct[atom_dec_length];
+    
+  status = H5Dread(atom_dec_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+                   atom_dec_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(atom_dec_set);
   status = H5Fclose(nuc_data_h5);
 
@@ -1008,15 +1015,16 @@ void pyne::_load_level_data()
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(level_struct));
   status = H5Tinsert(desc, "nuc_id", HOFFSET(level_struct, nuc_id),
                       H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "level", HOFFSET(level_struct, level), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "level", HOFFSET(level_struct, level), 
+                     H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "half_life", HOFFSET(level_struct, half_life),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "metastable", HOFFSET(level_struct, metastable),
                       H5T_NATIVE_INT);
 
   // Open the HDF5 file
-  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
+                              H5P_DEFAULT);
   // Open the data set
   hid_t level_set = H5Dopen2(nuc_data_h5, "/decay/level_list", H5P_DEFAULT);
   hid_t level_space = H5Dget_space(level_set);
@@ -1024,9 +1032,10 @@ void pyne::_load_level_data()
 
   // Read in the data
   level_struct * level_array = new level_struct[level_length];
-  status = H5Dread(level_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, level_array);
+  status = H5Dread(level_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+                   level_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(level_set);
   status = H5Fclose(nuc_data_h5);
 
@@ -1047,7 +1056,8 @@ int pyne::metastable_id(int nuc, int m) {
 
   nuc_lower = level_data.lower_bound(nostate);
   nuc_upper = level_data.upper_bound(nostate+9999);
-  for (std::map<int, pyne::level_struct>::iterator it=nuc_lower; it!=nuc_upper; ++it) {
+  for (std::map<int, pyne::level_struct>::iterator it=nuc_lower; it!=nuc_upper;
+       ++it) {
     if (it->second.metastable == m)
         return it->second.nuc_id;
   }
@@ -1080,19 +1090,28 @@ template<> void pyne::_load_data<pyne::decay_struct>()
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(decay_struct));
   status = H5Tinsert(desc, "parent", HOFFSET(decay_struct, parent),
-                      H5T_NATIVE_INT);
+                     H5T_NATIVE_INT);
   status = H5Tinsert(desc, "child", HOFFSET(decay_struct, child),
-                      H5T_NATIVE_INT);
+                     H5T_NATIVE_INT);
   status = H5Tinsert(desc, "decay", HOFFSET(decay_struct, decay), H5T_STRING);
-  status = H5Tinsert(desc, "half_life", HOFFSET(decay_struct, half_life), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "half_life_error", HOFFSET(decay_struct, half_life_error), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "branch_ratio", HOFFSET(decay_struct, branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "photon_branch_ratio", HOFFSET(decay_struct, photon_branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "photon_branch_ratio_error", HOFFSET(decay_struct, photon_branch_ratio_error), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "beta_branch_ratio", HOFFSET(decay_struct, beta_branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "beta_branch_ratio_error", HOFFSET(decay_struct, beta_branch_ratio_error), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "half_life", HOFFSET(decay_struct, half_life), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "half_life_error", HOFFSET(decay_struct, 
+                     half_life_error), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "branch_ratio", HOFFSET(decay_struct, branch_ratio),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "photon_branch_ratio", HOFFSET(decay_struct, 
+                     photon_branch_ratio), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "photon_branch_ratio_error", HOFFSET(decay_struct,
+                     photon_branch_ratio_error), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "beta_branch_ratio", HOFFSET(decay_struct, 
+                     beta_branch_ratio), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "beta_branch_ratio_error", HOFFSET(decay_struct,
+                     beta_branch_ratio_error), H5T_NATIVE_DOUBLE);
+  
   // Open the HDF5 file
-  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
+                              H5P_DEFAULT);
 
   // Open the data set
   hid_t decay_set = H5Dopen2(nuc_data_h5, "/decay/decays", H5P_DEFAULT);
@@ -1101,21 +1120,24 @@ template<> void pyne::_load_data<pyne::decay_struct>()
 
   // Read in the data
   decay_struct * decay_array = new decay_struct[decay_length];
-  status = H5Dread(decay_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, decay_array);
+  status = H5Dread(decay_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+                   decay_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(decay_set);
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < decay_length; ++i) {
-    decay_data[std::make_pair(decay_array[i].parent, decay_array[i].child)] = decay_array[i];
+    decay_data[std::make_pair(decay_array[i].parent, decay_array[i].child)] = \
+      decay_array[i];
   }
 
 }
 
 
 
-template<typename T, typename U> T pyne::data_access(std::pair<int, int> from_to, size_t valoffset, std::map<std::pair<int, int>, U> &data) {
+template<typename T, typename U> T pyne::data_access(std::pair<int, int> 
+from_to, size_t valoffset, std::map<std::pair<int, int>, U> &data) {
   typename std::map<std::pair<int, int>, U>::iterator nuc_iter, nuc_end;
 
   nuc_iter = data.find(from_to);
@@ -1137,7 +1159,8 @@ template<typename T, typename U> T pyne::data_access(std::pair<int, int> from_to
   return 0;
 }
 
-template<typename T, typename U> std::vector<T> pyne::data_access(int parent, size_t valoffset, std::map<std::pair<int, int>, U> &data){
+template<typename T, typename U> std::vector<T> pyne::data_access(int parent, 
+size_t valoffset, std::map<std::pair<int, int>, U> &data){
   typename std::map<std::pair<int, int>, U>::iterator nuc_iter, nuc_end, it;
   std::vector<T> result;
   nuc_iter = data.lower_bound(std::make_pair(parent,0));
@@ -1160,14 +1183,17 @@ template<typename T, typename U> std::vector<T> pyne::data_access(int parent, si
 
 
 std::pair<double, double> pyne::decay_half_life(std::pair<int, int> from_to){
-  return std::make_pair(data_access<double, decay_struct>(from_to, offsetof(decay_struct, half_life), decay_data),
-   data_access<double, decay_struct>(from_to, offsetof(decay_struct, half_life_error), decay_data));
+  return std::make_pair(data_access<double, decay_struct>(from_to, offsetof(
+   decay_struct, half_life), decay_data), data_access<double, decay_struct>(
+   from_to, offsetof(decay_struct, half_life_error), decay_data));
 };
 
 std::vector<std::pair<double, double> >pyne::decay_half_lifes(int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life), decay_data);
-  std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, half_life_error), decay_data);
+  std::vector<double> part1 = data_access<double, decay_struct>(parent, 
+    offsetof(decay_struct, half_life), decay_data);
+  std::vector<double> part2 = data_access<double, decay_struct>(parent,
+    offsetof(decay_struct, half_life_error), decay_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1175,37 +1201,51 @@ std::vector<std::pair<double, double> >pyne::decay_half_lifes(int parent){
 }
 
 double pyne::decay_branch_ratio(std::pair<int, int> from_to){
-  return data_access<double, decay_struct>(from_to, offsetof(decay_struct, branch_ratio), decay_data);
+  return data_access<double, decay_struct>(from_to, offsetof(decay_struct,
+    branch_ratio), decay_data);
 };
 
 std::vector<double> pyne::decay_branch_ratios(int parent){
-  return data_access<double, decay_struct>(parent, offsetof(decay_struct, branch_ratio), decay_data);
+  return data_access<double, decay_struct>(parent, offsetof(decay_struct, 
+    branch_ratio), decay_data);
 }
 
-std::pair<double, double> pyne::decay_photon_branch_ratio(std::pair<int,int> from_to){
-  return std::make_pair(data_access<double, decay_struct>(from_to, offsetof(decay_struct, photon_branch_ratio), decay_data),
-   data_access<double, decay_struct>(from_to, offsetof(decay_struct, photon_branch_ratio_error), decay_data));
+std::pair<double, double> pyne::decay_photon_branch_ratio(std::pair<int,int> 
+from_to){
+  return std::make_pair(data_access<double, decay_struct>(from_to, 
+    offsetof(decay_struct, photon_branch_ratio), decay_data),
+    data_access<double, decay_struct>(from_to, offsetof(decay_struct, 
+    photon_branch_ratio_error), decay_data));
 };
 
-std::vector<std::pair<double, double> >pyne::decay_photon_branch_ratios(int parent){
+std::vector<std::pair<double, double> >pyne::decay_photon_branch_ratios(
+int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, photon_branch_ratio), decay_data);
-  std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, photon_branch_ratio_error), decay_data);
+  std::vector<double> part1 = data_access<double, decay_struct>(parent, 
+    offsetof(decay_struct, photon_branch_ratio), decay_data);
+  std::vector<double> part2 = data_access<double, decay_struct>(parent, 
+    offsetof(decay_struct, photon_branch_ratio_error), decay_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
 }
 
-std::pair<double, double> pyne::decay_beta_branch_ratio(std::pair<int,int> from_to){
-  return std::make_pair(data_access<double, decay_struct>(from_to, offsetof(decay_struct, beta_branch_ratio), decay_data),
-   data_access<double, decay_struct>(from_to, offsetof(decay_struct, beta_branch_ratio_error), decay_data));
+std::pair<double, double> pyne::decay_beta_branch_ratio(std::pair<int,int> 
+from_to){
+  return std::make_pair(data_access<double, decay_struct>(from_to, 
+    offsetof(decay_struct, beta_branch_ratio), decay_data),
+    data_access<double, decay_struct>(from_to, offsetof(decay_struct, 
+    beta_branch_ratio_error), decay_data));
 };
 
-std::vector<std::pair<double, double> >pyne::decay_beta_branch_ratios(int parent){
+std::vector<std::pair<double, double> >pyne::decay_beta_branch_ratios(
+int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, decay_struct>(parent, offsetof(decay_struct, beta_branch_ratio), decay_data);
-  std::vector<double> part2 = data_access<double, decay_struct>(parent, offsetof(decay_struct, beta_branch_ratio_error), decay_data);
+  std::vector<double> part1 = data_access<double, decay_struct>(parent, 
+    offsetof(decay_struct, beta_branch_ratio), decay_data);
+  std::vector<double> part2 = data_access<double, decay_struct>(parent, 
+    offsetof(decay_struct, beta_branch_ratio_error), decay_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1230,26 +1270,39 @@ template<> void pyne::_load_data<pyne::gamma_struct>()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(gamma_struct));
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(gamma_struct, from_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(gamma_struct, to_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "parent_nuc", HOFFSET(gamma_struct, parent_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(gamma_struct, from_nuc), 
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(gamma_struct, to_nuc), 
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "parent_nuc", HOFFSET(gamma_struct, parent_nuc),
+                     H5T_NATIVE_INT);
   status = H5Tinsert(desc, "energy", HOFFSET(gamma_struct, energy),
-                      H5T_NATIVE_DOUBLE);
+                     H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "energy_err", HOFFSET(gamma_struct, energy_err),
-                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "photon_intensity", HOFFSET(gamma_struct, photon_intensity), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "photon_intensity_err", HOFFSET(gamma_struct, photon_intensity_err), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "conv_intensity", HOFFSET(gamma_struct, conv_intensity), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "conv_intensity_err", HOFFSET(gamma_struct, conv_intensity_err), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "total_intensity", HOFFSET(gamma_struct, total_intensity), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "total_intensity_err", HOFFSET(gamma_struct, total_intensity_err), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "k_conv_e", HOFFSET(gamma_struct, k_conv_e), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "l_conv_e", HOFFSET(gamma_struct, l_conv_e), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "m_conv_e", HOFFSET(gamma_struct, m_conv_e), H5T_NATIVE_DOUBLE);
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "photon_intensity", HOFFSET(gamma_struct, 
+                     photon_intensity), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "photon_intensity_err", HOFFSET(gamma_struct, 
+                     photon_intensity_err), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "conv_intensity", HOFFSET(gamma_struct, 
+                     conv_intensity), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "conv_intensity_err", HOFFSET(gamma_struct, 
+                     conv_intensity_err), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "total_intensity", HOFFSET(gamma_struct, 
+                     total_intensity), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "total_intensity_err", HOFFSET(gamma_struct, 
+                     total_intensity_err), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_conv_e", HOFFSET(gamma_struct, k_conv_e), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_conv_e", HOFFSET(gamma_struct, l_conv_e), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "m_conv_e", HOFFSET(gamma_struct, m_conv_e), 
+                     H5T_NATIVE_DOUBLE);
 
 
   // Open the HDF5 file
-  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
+                              H5P_DEFAULT);
 
   // Open the data set
   hid_t gamma_set = H5Dopen2(nuc_data_h5, "/decay/gammas", H5P_DEFAULT);
@@ -1258,25 +1311,33 @@ template<> void pyne::_load_data<pyne::gamma_struct>()
 
   // Read in the data
   gamma_struct * gamma_array = new gamma_struct[gamma_length];
-  status = H5Dread(gamma_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, gamma_array);
+  status = H5Dread(gamma_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+                   gamma_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(gamma_set);
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < gamma_length; ++i) {
-    gamma_data[std::make_pair(gamma_array[i].parent_nuc, gamma_array[i].energy)] = gamma_array[i];
+    gamma_data[std::make_pair(gamma_array[i].parent_nuc, 
+      gamma_array[i].energy)] = gamma_array[i];
   }
 
 }
 
-bool pyne::swapmapcompare::operator()(const std::pair<int, double>& lhs, const std::pair<int, double>& rhs) const {
-    return lhs.second<rhs.second || (!(rhs.second<lhs.second) && lhs.first<rhs.first); 
+bool pyne::swapmapcompare::operator()(const std::pair<int, double>& lhs, 
+const std::pair<int, double>& rhs) const {
+    return lhs.second<rhs.second || (!(rhs.second<lhs.second) && 
+      lhs.first<rhs.first); 
 };
 
-template<typename T, typename U> std::vector<T> pyne::data_access(double energy_min, double energy_max, size_t valoffset, std::map<std::pair<int, double>, U>  &data){
-  typename std::map<std::pair<int, double>, U, swapmapcompare>::iterator nuc_iter, nuc_end, it;
-  std::map<std::pair<int, double>, U, swapmapcompare> dc(data.begin(), data.end());
+template<typename T, typename U> std::vector<T> pyne::data_access(
+double energy_min, double energy_max, size_t valoffset, std::map<std::pair<int,
+double>, U>  &data) {
+  typename std::map<std::pair<int, double>, U, swapmapcompare>::iterator 
+    nuc_iter, nuc_end, it;
+  std::map<std::pair<int, double>, U, swapmapcompare> dc(data.begin(), 
+    data.end());
   std::vector<T> result;
   if (energy_max < energy_min){
     double temp = energy_max;
@@ -1301,7 +1362,8 @@ template<typename T, typename U> std::vector<T> pyne::data_access(double energy_
   return result;
 };
 
-template<typename T, typename U> std::vector<T> pyne::data_access(int parent, size_t valoffset, std::map<std::pair<int, double>, U>  &data){
+template<typename T, typename U> std::vector<T> pyne::data_access(int parent, 
+size_t valoffset, std::map<std::pair<int, double>, U>  &data){
   typename std::map<std::pair<int, double>, U>::iterator nuc_iter, nuc_end, it;
   std::vector<T> result;
   nuc_iter = data.lower_bound(std::make_pair(parent,0.0));
@@ -1325,35 +1387,46 @@ template<typename T, typename U> std::vector<T> pyne::data_access(int parent, si
 
 std::vector<std::pair<double, double> > pyne::gamma_energy(int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, energy), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, energy_err), gamma_data);
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 
+    offsetof(gamma_struct, energy), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 
+    offsetof(gamma_struct, energy_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
 };
-std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(int parent){
+std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(
+int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, photon_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, photon_intensity_err), gamma_data);
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 
+    offsetof(gamma_struct, photon_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 
+    offsetof(gamma_struct, photon_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
 };
-std::vector<std::pair<double, double> > pyne::gamma_conversion_intensity(int parent){
+std::vector<std::pair<double, double> > pyne::gamma_conversion_intensity(
+int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, conv_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, conv_intensity_err), gamma_data);
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 
+    offsetof(gamma_struct, conv_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 
+    offsetof(gamma_struct, conv_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
 };
-std::vector<std::pair<double, double> > pyne::gamma_total_intensity(int parent){
+std::vector<std::pair<double, double> > pyne::gamma_total_intensity(
+int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, total_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, offsetof(gamma_struct, total_intensity_err), gamma_data);
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent,
+    offsetof(gamma_struct, total_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent,
+    offsetof(gamma_struct, total_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1361,17 +1434,22 @@ std::vector<std::pair<double, double> > pyne::gamma_total_intensity(int parent){
 };
 std::vector<std::pair<int, int> > pyne::gamma_from_to(int parent){
   std::vector<std::pair<int, int> > result;
-  std::vector<int> part1 = data_access<int, gamma_struct>(parent, offsetof(gamma_struct, from_nuc), gamma_data);
-  std::vector<int> part2 = data_access<int, gamma_struct>(parent, offsetof(gamma_struct, to_nuc), gamma_data);
+  std::vector<int> part1 = data_access<int, gamma_struct>(parent, 
+    offsetof(gamma_struct, from_nuc), gamma_data);
+  std::vector<int> part2 = data_access<int, gamma_struct>(parent,
+    offsetof(gamma_struct, to_nuc), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
 };
-std::vector<std::pair<int, int> > pyne::gamma_from_to(double energy, double error){
+std::vector<std::pair<int, int> > pyne::gamma_from_to(double energy, 
+double error){
   std::vector<std::pair<int, int> > result;
-  std::vector<int> part1 = data_access<int, gamma_struct>(energy+error, energy-error, offsetof(gamma_struct, from_nuc), gamma_data);
-  std::vector<int> part2 = data_access<int, gamma_struct>(energy+error, energy-error, offsetof(gamma_struct, to_nuc), gamma_data);
+  std::vector<int> part1 = data_access<int, gamma_struct>(energy+error,
+    energy-error, offsetof(gamma_struct, from_nuc), gamma_data);
+  std::vector<int> part2 = data_access<int, gamma_struct>(energy+error,
+    energy-error, offsetof(gamma_struct, to_nuc), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1379,7 +1457,8 @@ std::vector<std::pair<int, int> > pyne::gamma_from_to(double energy, double erro
 
 };
 std::vector<int> pyne::gamma_parent(double energy, double error){
-  return data_access<int, gamma_struct>(energy+error, energy-error, offsetof(gamma_struct, parent_nuc), gamma_data);
+  return data_access<int, gamma_struct>(energy+error, energy-error,
+    offsetof(gamma_struct, parent_nuc), gamma_data);
 };
 
 std::map<std::pair<int, double>, pyne::alpha_struct> pyne::alpha_data;
@@ -1400,15 +1479,19 @@ template<> void pyne::_load_data<pyne::alpha_struct>()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(alpha_struct));
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(alpha_struct, from_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(alpha_struct, to_nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(alpha_struct, from_nuc),
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(alpha_struct, to_nuc),
+                     H5T_NATIVE_INT);
   status = H5Tinsert(desc, "energy", HOFFSET(alpha_struct, energy),
-                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "intensity", HOFFSET(alpha_struct, intensity), H5T_NATIVE_DOUBLE);
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "intensity", HOFFSET(alpha_struct, intensity),
+                     H5T_NATIVE_DOUBLE);
 
 
   // Open the HDF5 file
-  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY,
+                              H5P_DEFAULT);
 
   // Open the data set
   hid_t alpha_set = H5Dopen2(nuc_data_h5, "/decay/alphas", H5P_DEFAULT);
@@ -1417,34 +1500,41 @@ template<> void pyne::_load_data<pyne::alpha_struct>()
 
   // Read in the data
   alpha_struct * alpha_array = new alpha_struct[alpha_length];
-  status = H5Dread(alpha_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, alpha_array);
+  status = H5Dread(alpha_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                   alpha_array);
 
   // close the nuc_data library, before doing anything stupid
   status = H5Dclose(alpha_set);
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < alpha_length; ++i) {
-    alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)] = alpha_array[i];
+    alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
+    = alpha_array[i];
   }
 
 }
 
 std::vector<double > pyne::alpha_energy(int parent){
-  return data_access<double, alpha_struct>(parent, offsetof(alpha_struct, energy), alpha_data);
+  return data_access<double, alpha_struct>(parent, offsetof(alpha_struct,
+                                           energy), alpha_data);
 };
 std::vector<double> pyne::alpha_intensity(int parent){
-  return data_access<double, alpha_struct>(parent, offsetof(alpha_struct, intensity), alpha_data);
+  return data_access<double, alpha_struct>(parent, offsetof(alpha_struct,
+                                           intensity), alpha_data);
 };
 
 std::vector<int> pyne::alpha_parent(double energy, double error){
-  return data_access<int, alpha_struct>(energy+error, energy-error, offsetof(alpha_struct, from_nuc), alpha_data);
+  return data_access<int, alpha_struct>(energy+error, energy-error, 
+                     offsetof(alpha_struct, from_nuc), alpha_data);
 };
 
 std::vector<int> pyne::alpha_child(double energy, double error){
-  return data_access<int, alpha_struct>(energy+error, energy-error, offsetof(alpha_struct, to_nuc), alpha_data);
+  return data_access<int, alpha_struct>(energy+error, energy-error, 
+                     offsetof(alpha_struct, to_nuc), alpha_data);
 };
 std::vector<int> pyne::alpha_child(int parent){
-  return data_access<int, alpha_struct>(parent, offsetof(alpha_struct, to_nuc), alpha_data);
+  return data_access<int, alpha_struct>(parent, offsetof(alpha_struct, to_nuc),
+                                        alpha_data);
 };
 
 std::map<std::pair<int, double>, pyne::beta_struct> pyne::beta_data;
@@ -1465,17 +1555,21 @@ template<> void pyne::_load_data<pyne::beta_struct>()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(beta_struct));
-  status = H5Tinsert(desc, "endpoint_energy", HOFFSET(beta_struct, endpoint_energy),
-                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "endpoint_energy", HOFFSET(beta_struct, 
+                     endpoint_energy), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "avg_energy", HOFFSET(beta_struct, avg_energy),
-                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "intensity", HOFFSET(beta_struct, intensity), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(beta_struct, from_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(beta_struct, to_nuc), H5T_NATIVE_INT);
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "intensity", HOFFSET(beta_struct, intensity),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(beta_struct, from_nuc),
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(beta_struct, to_nuc), 
+                     H5T_NATIVE_INT);
 
 
   // Open the HDF5 file
-  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY,
+                              H5P_DEFAULT);
 
   // Open the data set
   hid_t beta_set = H5Dopen2(nuc_data_h5, "/decay/betas", H5P_DEFAULT);
@@ -1486,38 +1580,45 @@ template<> void pyne::_load_data<pyne::beta_struct>()
   beta_struct * beta_array = new beta_struct[beta_length];
   status = H5Dread(beta_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, beta_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(beta_set);
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < beta_length; ++i) {
-    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)] = beta_array[i];
+    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
+    = beta_array[i];
   }
 
 }
 
 std::vector<double > pyne::beta_endpoint_energy(int parent){
-  return data_access<double, beta_struct>(parent, offsetof(beta_struct, endpoint_energy), beta_data);
+  return data_access<double, beta_struct>(parent, offsetof(beta_struct, 
+                                          endpoint_energy), beta_data);
 };
 
 std::vector<double > pyne::beta_average_energy(int parent){
-  return data_access<double, beta_struct>(parent, offsetof(beta_struct, avg_energy), beta_data);
+  return data_access<double, beta_struct>(parent, offsetof(beta_struct, 
+                                          avg_energy), beta_data);
 };
 
 std::vector<double> pyne::beta_intensity(int parent){
-  return data_access<double, beta_struct>(parent, offsetof(beta_struct, intensity), beta_data);
+  return data_access<double, beta_struct>(parent, offsetof(beta_struct, 
+                                          intensity), beta_data);
 };
 
 std::vector<int> pyne::beta_parent(double energy, double error){
-  return data_access<int, beta_struct>(energy+error, energy-error, offsetof(beta_struct, from_nuc), beta_data);
+  return data_access<int, beta_struct>(energy+error, energy-error, 
+                     offsetof(beta_struct, from_nuc), beta_data);
 };
 
 std::vector<int> pyne::beta_child(double energy, double error){
-  return data_access<int, beta_struct>(energy+error, energy-error, offsetof(beta_struct, to_nuc), beta_data);
+  return data_access<int, beta_struct>(energy+error, energy-error, 
+                     offsetof(beta_struct, to_nuc), beta_data);
 };
 
 std::vector<int> pyne::beta_child(int parent){
-  return data_access<int, beta_struct>(parent, offsetof(beta_struct, to_nuc), beta_data);
+  return data_access<int, beta_struct>(parent, offsetof(beta_struct, to_nuc), 
+                                       beta_data);
 };
 
 
@@ -1539,20 +1640,28 @@ template<> void pyne::_load_data<pyne::ecbp_struct>()
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(ecbp_struct));
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(ecbp_struct, from_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(ecbp_struct, to_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "endpoint_energy", HOFFSET(ecbp_struct, endpoint_energy),
-                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "from_nuc", HOFFSET(ecbp_struct, from_nuc),
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "to_nuc", HOFFSET(ecbp_struct, to_nuc),
+                     H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "endpoint_energy", HOFFSET(ecbp_struct,
+                     endpoint_energy),H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "avg_energy", HOFFSET(ecbp_struct, avg_energy),
-                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "beta_plus_intensity", HOFFSET(ecbp_struct, beta_plus_intensity), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "ec_intensity", HOFFSET(ecbp_struct, ec_intensity), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "k_conv_e", HOFFSET(ecbp_struct, k_conv_e), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "l_conv_e", HOFFSET(ecbp_struct, l_conv_e), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "m_conv_e", HOFFSET(ecbp_struct, m_conv_e), H5T_NATIVE_DOUBLE);
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "beta_plus_intensity", HOFFSET(ecbp_struct, 
+                     beta_plus_intensity), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ec_intensity", HOFFSET(ecbp_struct, ec_intensity),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_conv_e", HOFFSET(ecbp_struct, k_conv_e),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_conv_e", HOFFSET(ecbp_struct, l_conv_e),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "m_conv_e", HOFFSET(ecbp_struct, m_conv_e),
+                     H5T_NATIVE_DOUBLE);
 
   // Open the HDF5 file
-  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY,
+                              H5P_DEFAULT);
 
   // Open the data set
   hid_t ecbp_set = H5Dopen2(nuc_data_h5, "/decay/ecbp", H5P_DEFAULT);
@@ -1563,12 +1672,13 @@ template<> void pyne::_load_data<pyne::ecbp_struct>()
   ecbp_struct * ecbp_array = new ecbp_struct[ecbp_length];
   status = H5Dread(ecbp_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, ecbp_array);
 
-  // close the nuc_data library, before doing anythng stupid
+  // close the nuc_data library, before doing anything stupid
   status = H5Dclose(ecbp_set);
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < ecbp_length; ++i) {
-    ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)] = ecbp_array[i];
+    ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
+    = ecbp_array[i];
   }
 
 }
@@ -1576,29 +1686,36 @@ template<> void pyne::_load_data<pyne::ecbp_struct>()
 
 
 std::vector<double > pyne::ecbp_endpoint_energy(int parent){
-  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, endpoint_energy), ecbp_data);
+  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, 
+                                          endpoint_energy), ecbp_data);
 };
 
 std::vector<double > pyne::ecbp_average_energy(int parent){
-  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, avg_energy), ecbp_data);
+  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, 
+                                          avg_energy), ecbp_data);
 };
 
 std::vector<double> pyne::ec_intensity(int parent){
-  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, ec_intensity), ecbp_data);
+  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct,
+                                          ec_intensity), ecbp_data);
 };
 
 std::vector<double> pyne::bp_intensity(int parent){
-  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, beta_plus_intensity), ecbp_data);
+  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, 
+                                          beta_plus_intensity), ecbp_data);
 };
 
 std::vector<int> pyne::ecbp_parent(double energy, double error){
-  return data_access<int, ecbp_struct>(energy+error, energy-error, offsetof(ecbp_struct, from_nuc), ecbp_data);
+  return data_access<int, ecbp_struct>(energy+error, energy-error,
+                     offsetof(ecbp_struct, from_nuc), ecbp_data);
 };
 
 std::vector<int> pyne::ecbp_child(double energy, double error){
-  return data_access<int, ecbp_struct>(energy+error, energy-error, offsetof(ecbp_struct, to_nuc), ecbp_data);
+  return data_access<int, ecbp_struct>(energy+error, energy-error, 
+                     offsetof(ecbp_struct, to_nuc), ecbp_data);
 };
 
 std::vector<int> pyne::ecbp_child(int parent){
-  return data_access<int, ecbp_struct>(parent, offsetof(ecbp_struct, to_nuc), ecbp_data);
+  return data_access<int, ecbp_struct>(parent, offsetof(ecbp_struct, to_nuc),
+                                       ecbp_data);
 };

@@ -340,8 +340,10 @@ namespace pyne
   /// associated with the decay from the first to the second
   extern std::map<std::pair<int, int>, decay_struct> decay_data;
 
-  template<typename T, typename U> T data_access(std::pair<int, int> from_to, size_t valoffset, std::map<std::pair<int, int>, U> &data);
-  template<typename T, typename U> std::vector<T> data_access(int parent, size_t valoffset, std::map<std::pair<int, int>, U> &data);
+  template<typename T, typename U> T data_access(std::pair<int, int> from_to, 
+    size_t valoffset, std::map<std::pair<int, int>, U> &data);
+  template<typename T, typename U> std::vector<T> data_access(int parent, 
+    size_t valoffset, std::map<std::pair<int, int>, U> &data);
   //
   //void decay_data(std::pair<int, int> from_to, decay_struct *data);
   std::pair<double, double> decay_half_life(std::pair<int,int>);
@@ -377,12 +379,15 @@ namespace pyne
 
   class swapmapcompare{
     public:
-        bool operator()(const std::pair<int, double>& lhs,const std::pair<int, double>& rhs) const;
+        bool operator()(const std::pair<int, double>& lhs,
+                        const std::pair<int, double>& rhs) const;
   };
   /// A vector of structs containing gamma ray data for access in memory
   //extern std::vector<gamma_struct> gamma_data;
-  template<typename T, typename U> std::vector<T> data_access(double emin, double emax, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
-  template<typename T, typename U> std::vector<T> data_access(int parent, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
+  template<typename T, typename U> std::vector<T> data_access(double emin,
+    double emax, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
+  template<typename T, typename U> std::vector<T> data_access(int parent,
+    size_t valoffset, std::map<std::pair<int, double>, U>  &data);
   extern std::map<std::pair<int, double>, gamma_struct> gamma_data;
 
   //returns a list of gamma decay energies from input parent nuclide
@@ -471,19 +476,25 @@ namespace pyne
   /// Loads the electron capture and beta plus decay data from the
   /// nuc_data.h5 file into memory.
   template<> void _load_data<ecbp_struct>();
-  //returns a list of electron capture/ beta plus decay endpoint energies from input parent nuclide
+  ///returns a list of electron capture/ beta plus decay endpoint energies from
+  ///input parent nuclide
   std::vector<double > ecbp_endpoint_energy(int parent);
-  //returns a list of electron capture/ beta plus decay average energies from input parent nuclide
+  //returns a list of electron capture/ beta plus decay average energies from 
+  //input parent nuclide
   std::vector<double > ecbp_average_energy(int parent);
-  //returns a list of electron capture decay intensities from input parent nuclide
+  //returns a list of electron capture decay intensities from input parent 
+  //nuclide
   std::vector<double> ec_intensity(int parent);
   //returns a list of beta plus decay intensities from input parent nuclide
   std::vector<double> bp_intensity(int parent);
-  //returns a list of electron capture /beta plus decay parents from input decay energy range
+  //returns a list of electron capture /beta plus decay parents from input 
+  //decay energy range
   std::vector<int> ecbp_parent(double energy, double error);
-  //returns a list of electron capture /beta plus decay children from input decay energy range
+  //returns a list of electron capture /beta plus decay children from input
+  //decay energy range
   std::vector<int> ecbp_child(double energy, double error);
-  //returns a list of electron capture /beta plus decay children from input parent nuclide
+  //returns a list of electron capture /beta plus decay children from input 
+  //parent nuclide
   std::vector<int> ecbp_child(int parent);
   /// \}
 }

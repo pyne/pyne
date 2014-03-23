@@ -106,11 +106,13 @@ def test_metastable_id():
 
 
 def test_decay_half_life():
-    assert_equal(data.decay_half_life(551370000, 561370000), (949252608.0, 2840184.0))
+    assert_equal(data.decay_half_life(551370000, 561370000), (949252608.0,
+                                                              2840184.0))
 
 
 def test_decay_half_life_byparent():
-    assert_equal(data.decay_half_life_byparent(551370000), [(949252608.0, 2840184.0)])
+    assert_equal(data.decay_half_life_byparent(551370000), [(949252608.0,
+                                                             2840184.0)])
 
 
 def test_decay_branch_ratio():
@@ -118,7 +120,8 @@ def test_decay_branch_ratio():
 
 
 def test_decay_photon_branch_ratio():
-    assert_equal(data.decay_photon_branch_ratio(551370000, 561370000), (1.0, 0.0))
+    assert_equal(data.decay_photon_branch_ratio(551370000, 561370000), (1.0,
+                                                                        0.0))
 
 
 def test_decay_beta_branch_ratio():
@@ -130,7 +133,8 @@ def test_decay_branch_ratio_byparent():
 
 
 def test_decay_photon_branch_ratio_byparent():
-    assert_equal(data.decay_photon_branch_ratio_byparent(551370000), [(1.0, 0.0)])
+    assert_equal(data.decay_photon_branch_ratio_byparent(551370000), [(1.0,
+                                                                       0.0)])
 
 
 def test_decay_beta_branch_ratio_byparent():
@@ -142,19 +146,23 @@ def test_gamma_energy():
 
 
 def test_gamma_photon_intensity():
-    assert_equal(data.gamma_photon_intensity(551370000), [(0.00058, 8e-05), (85.1, 0.2)])
+    assert_equal(data.gamma_photon_intensity(551370000), [(0.00058, 8e-05),
+                                                          (85.1, 0.2)])
 
 
 def test_gamma_conversion_intensity():
-    npt.assert_array_almost_equal(data.gamma_conversion_intensity(551370000), [(np.nan, np.nan), (0.1124, np.nan)])
+    npt.assert_array_almost_equal(data.gamma_conversion_intensity(551370000),
+                                  [(np.nan, np.nan), (0.1124, np.nan)])
 
 
 def test_gamma_total_intensity():
-    npt.assert_array_almost_equal(data.gamma_total_intensity(561370000), [(100.0, np.nan)])
+    npt.assert_array_almost_equal(data.gamma_total_intensity(561370000),
+                                  [(100.0, np.nan)])
 
 
 def test_gamma_from_to_byparent():
-    assert_equal(data.gamma_from_to_byparent(551370000), [(561370001, 561370000), (561370002, 561370000)])
+    assert_equal(data.gamma_from_to_byparent(551370000),
+                 [(561370001, 561370000), (561370002, 561370000)])
 
 
 def test_gamma_from_to_byen():
@@ -199,10 +207,14 @@ def test_alpha_energy():
 
 def test_alpha_intensity():
     npt.assert_array_almost_equal(data.alpha_intensity(952410000),
-                                  [1e-05, 8.6e-05, 0.0007, np.nan, np.nan, np.nan, np.nan,
-                                   0.0001, np.nan, 0.00014, 0.0004, 0.0004, np.nan, 0.0004,
-                                   0.00032, 0.0007, 0.0003, 0.0009, 0.0006, 1e-05, 0.0013,
-                                   np.nan, 0.0024, 0.0005, 0.015, 1.66, 0.01, 13.1, 0.04, 84.8,
+                                  [1e-05, 8.6e-05, 0.0007, np.nan, np.nan,
+                                   np.nan, np.nan,
+                                   0.0001, np.nan, 0.00014, 0.0004, 0.0004,
+                                   np.nan, 0.0004,
+                                   0.00032, 0.0007, 0.0003, 0.0009, 0.0006,
+                                   1e-05, 0.0013,
+                                   np.nan, 0.0024, 0.0005, 0.015, 1.66, 0.01,
+                                   13.1, 0.04, 84.8,
                                    0.225, 0.37])
 
 
@@ -226,7 +238,8 @@ def test_alpha_child_byparent():
 
 
 def test_beta_endpoint_energy():
-    npt.assert_array_almost_equal(data.beta_endpoint_energy(551370000), [514.03, np.nan, 1176.])
+    npt.assert_array_almost_equal(data.beta_endpoint_energy(551370000),
+                                  [514.03, np.nan, 1176.])
 
 
 def test_beta_average_energy():
@@ -242,11 +255,13 @@ def test_beta_parent():
 
 
 def test_beta_child_byen():
-    assert_equal(data.beta_child_byen(1000, 0.1), [320760084, 420990050, 451070007])
+    assert_equal(data.beta_child_byen(1000, 0.1),
+                 [320760084, 420990050, 451070007])
 
 
 def test_beta_child_byparent():
-    assert_equal(data.beta_child_byparent(551370000), [561370002, 561370001, 561370000])
+    assert_equal(data.beta_child_byparent(551370000),
+                 [561370002, 561370001, 561370000])
 
 
 def test_ecbp_endpoint_energy():
@@ -266,11 +281,13 @@ def test_beta_plus_intensity():
 
 
 def test_ecbp_parent():
-    assert_equal(data.ecbp_parent(215.54, 0.5), [110220000, 541230000, 571330000])
+    assert_equal(data.ecbp_parent(215.54, 0.5),
+                 [110220000, 541230000, 571330000])
 
 
 def test_ecbp_child_byen():
-    assert_equal(data.ecbp_child_byen(215.54, 0.5), [100220001, 531230020, 561330006])
+    assert_equal(data.ecbp_child_byen(215.54, 0.5),
+                 [100220001, 531230020, 561330006])
 
 
 def test_ecbp_child_byparent():
