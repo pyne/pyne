@@ -1,4 +1,4 @@
-mcnp   version 5     ld=09282010  probid =  06/19/13 11:00:46 
+mcnp   version 5.mpi ld=09282010  probid =  06/19/13 11:00:46 
  Input file to general test meshtal file                                         
  Number of histories used for normalizing tallies =        100000.00
 
