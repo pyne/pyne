@@ -211,12 +211,166 @@ double pyne::natural_abund(std::string nuc)
 
 
 
+/*****************************/
+/*** Q_value Functions ***/
+/*****************************/
+std::map<int, double> pyne::q_val_map = std::map<int, double>();
+
+void pyne::_load_q_val_map()
+{
+  // Loads the important parts of q_value table into q_value_map
+
+  //Check to see if the file is in HDF5 format.
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
+    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
+    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+
+  // Get the HDF5 compound type (table) description
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(q_val_struct));
+  H5Tinsert(desc, "nuc", HOFFSET(q_val_struct, nuc),  H5T_NATIVE_INT);
+  H5Tinsert(desc, "q_val", HOFFSET(q_val_struct, q_val), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "gamma_frac", HOFFSET(q_val_struct, gamma_frac), H5T_NATIVE_DOUBLE);
+
+  // Open the HDF5 file
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+
+  // Open the data set
+  hid_t q_val_set = H5Dopen2(nuc_data_h5, "/neutron/q_values", H5P_DEFAULT);
+  hid_t q_val_space = H5Dget_space(q_val_set);
+  int q_val_length = H5Sget_simple_extent_npoints(q_val_space);
+
+  // Read in the data
+  q_val_struct * q_val_array = new q_val_struct[q_val_length];
+  H5Dread(q_val_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, q_val_array);
+
+  // close the nuc_data library, before doing anything stupid
+  H5Dclose(q_val_set);
+  H5Fclose(nuc_data_h5);
+
+  // Ok now that we have the array of structs, put it in the map
+  for(int n = 0; n < q_val_length; n++){
+    q_val_map[q_val_array[n].nuc] = q_val_array[n].q_val;
+    gamma_frac_map[q_val_array[n].nuc] = q_val_array[n].gamma_frac;
+  }
+
+  delete[] q_val_array;
+};
+
+
+double pyne::q_val(int nuc)
+{
+  // Find the nuclide's q_val in MeV/fission
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = q_val_map.find(nuc);
+  nuc_end = q_val_map.end();
+
+  // First check if we already have the nuc q_val in the map
+  if (nuc_iter != nuc_end) 
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
+  if (q_val_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_q_val_map();
+      return q_val(nuc);
+    }
+    catch(...){};
+  };
+  
+  double qv;
+  int nucid = nucname::id(nuc);
+  if (nucid != nuc)
+    return q_val(nucid);
+
+  // If nuclide is not found, return 0
+  qv = 0.0;
+  q_val_map[nuc] = qv;
+  return qv;
+};
+
+
+double pyne::q_val(char * nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return q_val(nuc_zz);
+};
+
+
+double pyne::q_val(std::string nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return q_val(nuc_zz);
+};
+
+
+/*******************************/
+/*** gamma_frac functions ***/
+/*******************************/
+
+std::map<int, double> pyne::gamma_frac_map = std::map<int, double>();
+
+double pyne::gamma_frac(int nuc)
+{
+  // Find the nuclide's fraction of Q that comes from gammas
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = gamma_frac_map.find(nuc);
+  nuc_end = gamma_frac_map.end();
+
+  // First check if we already have the gamma_frac in the map
+  if (nuc_iter != nuc_end)
+    return (*nuc_iter).second;
+
+  // Next, fill up the map with values from nuc_data.h5 if the map is empty.
+  if (gamma_frac_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_q_val_map();
+      return gamma_frac(nuc);
+    }
+    catch(...){};
+  };
+
+  double gf;
+  int nucid = nucname::id(nuc);
+  if (nucid != nuc)
+    return gamma_frac(nucid);
+
+  // If nuclide is not found, return 0
+  gf = 0.0;
+  gamma_frac_map[nucid] = gf;
+  return gf;
+};
+
+
+double pyne::gamma_frac(char * nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return gamma_frac(nuc_zz);
+};
+
+
+double pyne::gamma_frac(std::string nuc)
+{
+  int nuc_zz = nucname::id(nuc);
+  return gamma_frac(nuc_zz);
+};
+
 
 /***********************************/
 /*** scattering length functions ***/
 /***********************************/
-std::map<int, extra_types::complex_t> pyne::b_coherent_map = std::map<int, extra_types::complex_t>();
-std::map<int, extra_types::complex_t> pyne::b_incoherent_map = std::map<int, extra_types::complex_t>();
+std::map<int, xd_complex_t> pyne::b_coherent_map = std::map<int, xd_complex_t>();
+std::map<int, xd_complex_t> pyne::b_incoherent_map = std::map<int, xd_complex_t>();
 std::map<int, double> pyne::b_map = std::map<int, double>();
 
 
@@ -279,10 +433,10 @@ void pyne::_load_scattering_lengths()
 //
 
 
-extra_types::complex_t pyne::b_coherent(int nuc)
+xd_complex_t pyne::b_coherent(int nuc)
 {
   // Find the nuclide's bound scattering length in cm
-  std::map<int, extra_types::complex_t>::iterator nuc_iter, nuc_end;
+  std::map<int, xd_complex_t>::iterator nuc_iter, nuc_end;
 
   nuc_iter = b_coherent_map.find(nuc);
   nuc_end = b_coherent_map.end();
@@ -299,7 +453,7 @@ extra_types::complex_t pyne::b_coherent(int nuc)
     return b_coherent(nuc);
   };
 
-  extra_types::complex_t bc;
+  xd_complex_t bc;
   int nucid = nucname::id(nuc);
   int znum = nucname::znum(nucid);
   int anum = nucname::anum(nucid);
@@ -339,14 +493,14 @@ extra_types::complex_t pyne::b_coherent(int nuc)
 };
 
 
-extra_types::complex_t pyne::b_coherent(char * nuc)
+xd_complex_t pyne::b_coherent(char * nuc)
 {
   int nuc_zz = nucname::id(nuc);
   return b_coherent(nuc_zz);
 };
 
 
-extra_types::complex_t pyne::b_coherent(std::string nuc)
+xd_complex_t pyne::b_coherent(std::string nuc)
 {
   int nuc_zz = nucname::id(nuc);
   return b_coherent(nuc_zz);
@@ -359,10 +513,10 @@ extra_types::complex_t pyne::b_coherent(std::string nuc)
 //
 
 
-extra_types::complex_t pyne::b_incoherent(int nuc)
+xd_complex_t pyne::b_incoherent(int nuc)
 {
   // Find the nuclide's bound inchoherent scattering length in cm
-  std::map<int, extra_types::complex_t>::iterator nuc_iter, nuc_end;
+  std::map<int, xd_complex_t>::iterator nuc_iter, nuc_end;
 
   nuc_iter = b_incoherent_map.find(nuc);
   nuc_end = b_incoherent_map.end();
@@ -379,7 +533,7 @@ extra_types::complex_t pyne::b_incoherent(int nuc)
     return b_incoherent(nuc);
   };
 
-  extra_types::complex_t bi;
+  xd_complex_t bi;
   int nucid = nucname::id(nuc);
   int znum = nucname::znum(nucid);
   int anum = nucname::anum(nucid);
@@ -419,13 +573,13 @@ extra_types::complex_t pyne::b_incoherent(int nuc)
 };
 
 
-extra_types::complex_t pyne::b_incoherent(char * nuc)
+xd_complex_t pyne::b_incoherent(char * nuc)
 {
   return b_incoherent(nucname::id(nuc));
 };
 
 
-extra_types::complex_t pyne::b_incoherent(std::string nuc)
+xd_complex_t pyne::b_incoherent(std::string nuc)
 {
   return b_incoherent(nucname::id(nuc));
 };
@@ -449,8 +603,8 @@ double pyne::b(int nuc)
     return (*nuc_iter).second;
 
   // Next, calculate the value from coherent and incoherent lengths
-  extra_types::complex_t bc = b_coherent(nuc);
-  extra_types::complex_t bi = b_incoherent(nuc);
+  xd_complex_t bc = b_coherent(nuc);
+  xd_complex_t bi = b_incoherent(nuc);
 
   double b_val = sqrt(bc.re*bc.re + bc.im*bc.im + bi.re*bi.re + bi.im*bi.im);
 

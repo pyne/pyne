@@ -1,6 +1,5 @@
 package = 'pyne'
 packagedir = 'pyne'
-sourcedir = 'cpp'
 
 extra_types = 'extra_types'  # non-default value
 

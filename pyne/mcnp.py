@@ -41,7 +41,7 @@ except ImportError:
                   ImportWarning)
     HAVE_PYTAPS = False
 
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 
 class Mctal(object):
@@ -704,8 +704,36 @@ class Runtpe(_BinaryReader):
 
 
 class Xsdir(object):
+    """This class stores the information contained in a single MCNP xsdir file.
+
+    Attributes
+    ----------
+    f : file handle
+        The xsdir file.
+    filename : str
+        Path to the xsdir file.
+    directory : str
+        Path to the directory containing the xsdir file.
+    datapath : str
+        The data path specified in the first line of the xsdir file, if it
+        exists.
+    awr : dict
+        Maps material ids to their atomic weight ratios.
+    tables : list
+        Entries are XsdirTable objects, that appear in the same order as the
+        xsdir table lines.
+
+    Notes
+    -----
+    See MCNP5 User's Guide Volume 3 Appendix K for more information.
+    """
 
     def __init__(self, filename):
+        """Parameters
+        ----------
+        filename : str
+            Path to xsdir file.
+        """
         self.f = open(filename, 'r')
         self.filename = os.path.abspath(filename)
         self.directory = os.path.dirname(filename)
@@ -715,6 +743,8 @@ class Xsdir(object):
         self.read()
 
     def read(self):
+        """Populate the Xsdir object by reading the file.
+        """
         # Go to beginning of file
         self.f.seek(0)
 
@@ -783,6 +813,18 @@ class Xsdir(object):
                 table.ptable = (words[10] == 'ptable')
 
     def find_table(self, name):
+        """Find all tables for a given ZIAD.
+        
+        Parameters
+        ----------
+        name : str
+            The ZIAD name.
+ 
+        Returns
+        -------
+        tables : list
+            All XsdirTable objects for a given ZIAD.
+        """
         tables = []
         for table in self:
             if name in table.name:
@@ -790,6 +832,14 @@ class Xsdir(object):
         return tables
 
     def to_xsdata(self, filename):
+        """Writes a Serpent xsdata file for all continuous energy xs tables.
+
+        Parameters
+        ----------
+        filename : str
+            The output filename.
+
+        """
         xsdata = open(filename, 'w')
         for table in self.tables:
             if table.serpent_type == 1:
@@ -809,13 +859,47 @@ class Xsdir(object):
         valid_nucs : set
             The valid nuclide ids.
         """
-         
-        valid_nucs = set(nucname.id(nuc) for nuc in self.awr.keys() 
-                   if nucname.isnuclide(nuc))
+        valid_nucs = set(nucname.id(table.name.split('.')[0]) for table in self.tables if
+                         nucname.isnuclide(table.name.split('.')[0]))
         return valid_nucs
 
 
 class XsdirTable(object):
+    """Stores all information that describes a xsdir table entry, which appears
+    as a single line in xsdir file. Attribute names are based off of those found in
+    the MCNP5 User's Guide Volume 3, appendix K.
+
+    Attributes
+    ----------
+    name : str
+        The ZAID and library identifier, delimited by a '.'.
+    awr : float
+        The atomic mass ratio of the nuclide.
+    filename : str
+        The relative path of the file containing the xs table.
+    access : str
+       Additional string to specify an access route, such as UNIX directory.
+       This entry is typically 0.
+    filetype : int
+        Describes whether the file contains formated (1) or unformated (2)
+        file.
+    address : int
+        If filetype is 1, address is the line number of the xsdir table. If
+        filetype is 2, address is the record number.
+    tablelength : int
+        Length of the second block of a data table.
+    recordlength : int
+        Unused for filetype = 1. For filetype = 2, recordlength is the number
+        of entires per record times the size (in bytes) of each entry.
+    entries : int
+        Unused for filetype = 1. For filetype = 2, it is the number of entries
+        per record
+    temperature : float
+        Temperature in MeV for neutron data only.
+    ptable : bool
+        True if xs table describes continuous energy neutron data with
+        unresolved resonance range probability tables.
+    """
 
     def __init__(self):
         self.name = None
@@ -832,10 +916,17 @@ class XsdirTable(object):
 
     @property
     def alias(self):
+        """Returns the name of the table entry <ZIAD>.<library id>.
+        """
         return self.name
 
     @property
     def serpent_type(self):
+        """Converts cross section table type to Serpent format:
+            :1: continuous energy (c).
+            :2: dosimetry table (y).
+            :3: termal (t).
+        """
         if self.name.endswith('c'):
             return 1
         elif self.name.endswith('y'):
@@ -847,6 +938,9 @@ class XsdirTable(object):
 
     @property
     def metastable(self):
+        """Returns 1 is xsdir table nuclide is metastable. Returns zero
+        otherwise.
+        """
         # Only valid for neutron cross-sections
         if not self.name.endswith('c'):
             return
@@ -858,7 +952,7 @@ class XsdirTable(object):
             return 0
 
         # All other cases
-        A = int(self.zaid) % 1000
+        A = int(self.name.split('.')[0]) % 1000
         if A > 600:
             return 1
         else:
@@ -866,9 +960,18 @@ class XsdirTable(object):
 
     @property
     def zaid(self):
+        """Returns the ZIAD of the nuclide.
+        """
         return self.name[:self.name.find('.')]
 
     def to_serpent(self, directory=''):
+        """Converts table to serpent format.
+
+        Parameters
+        ----------
+        directory : str
+            The directory where Serpent data is to be stored.
+        """
         # Adjust directory
         if directory:
             if not directory.endswith('/'):
@@ -1358,7 +1461,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
             for density in converted_densities:
                 mat2 = Material()
                 mat2.comp = mat.comp
-                mat2.atoms_per_mol = mat.atoms_per_mol
+                mat2.atoms_per_molecule = mat.atoms_per_molecule
                 mat2.mass = mat.mass
                 mat2.attrs = mat.attrs
                 mat2.density = density
@@ -1781,10 +1884,25 @@ class Meshtal(object):
         A dictionary with MCNP fmesh4 tally numbers
         (e.g. 4, 14, 24) as keys and
         MeshTally objects as values.
+    tags : dict
+        Maps integer tally numbers to iterables containing four strs: the
+        results tag name, the relative error tag name, the total results
+        tag name, and the total relative error tag name. If tags is None
+        the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
+        'x_rel_error_total' where x is n or p for neutrons or photons.
     """
 
-    def __init__(self, filename):
-        """Instantiate a Meshtal object from a meshtal file.
+    def __init__(self, filename, tags=None):
+        """Parameters
+        ----------
+        filename : str
+            MCNP meshtal file.
+        tags : dict, optional
+            Maps integer tally numbers to iterables containing four strs: the
+            results tag name, the relative error tag name, the total results
+            tag name, and the total relative error tag name. If tags is None
+            the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
+            'x_rel_error_total' where x is n or p for neutrons or photons.
         """
 
         if not HAVE_PYTAPS:
@@ -1792,6 +1910,7 @@ class Meshtal(object):
                                "unable to create Meshtal.")
 
         self.tally = {}
+        self.tags = tags
 
         with open(filename, 'r') as f:
             self._read_meshtal_head(f)
@@ -1822,8 +1941,12 @@ class Meshtal(object):
 
         while line != "":
             if line.split()[0:3] == ['Mesh', 'Tally', 'Number']:
-                tally_number = int(line.split()[3])
-                self.tally[tally_number] = MeshTally(f, tally_number)
+                tally_num = int(line.split()[3])
+                if self.tags is not None and tally_num in self.tags.keys():
+                    self.tally[tally_num] = MeshTally(f, tally_num,
+                                                      self.tags[tally_num])
+                else:
+                    self.tally[tally_num] = MeshTally(f, tally_num)
 
             line = f.readline()
 
@@ -1840,7 +1963,8 @@ class MeshTally(StatMesh):
     tally_number : int
         The MCNP tally number. Must end in 4 (e.g. 4, 14, 214).
     particle : string
-        Either "n" for a neutron mesh tally or "p" for a photon mesh tally.
+        Either "neutron" for a neutron mesh tally or "photon" for a photon mesh
+        tally.
     dose_response : bool
         True is the tally is modified by a dose response function.
     x_bounds : list of floats
@@ -1854,20 +1978,32 @@ class MeshTally(StatMesh):
     mesh :
         An iMesh instance tagged with all results and
         relative errors
+    tag_names : iterable
+        Four strs that specify the tag names for the results, relative errors,
+        total results, and relative errors of the total results.
 
     Notes
     -----
-    All Mesh attributes are also present via a super() call to
-    Mesh.__init__().
+    All Mesh/StatMesh attributes are also present via a super() call to
+    StatMesh.__init__().
 
     """
 
-    def __init__(self, f, tally_number):
-        """Create MeshTally object from a filestream (f) open to the second
-        line of a mesh tally header (the neutron/photon line). The
-        "tally_number" is the MCNP fmesh4 tally number (e.g. 4, 14, 24).
-        MeshTally objects should be instantiated only through the
-        Meshtal class.
+    def __init__(self, f, tally_number, tag_names=None):
+        """Create MeshTally object from a filestream open to the second
+        line of a mesh tally header (the neutron/photon line). MeshTally objects
+        should be instantiated only through the Meshtal class.
+
+        Parameters
+        ----------
+        f : filestream
+            Open to the neutron/photon line.
+        tally number : int
+            The MCNP fmesh4 tally number (e.g. 4, 14, 24).
+        tag_names : iterable, optional
+            Four strs that specify the tag names for the results, relative 
+            errors, total results and relative errors of the total results.
+            This should come from the Meshtal.tags attribute dict.
         """
 
         if not HAVE_PYTAPS:
@@ -1877,6 +2013,15 @@ class MeshTally(StatMesh):
         self.tally_number = tally_number
         self._read_meshtally_head(f)
         self._read_column_order(f)
+        
+        if tag_names is None:
+            self.tag_names = ("{0}_result".format(self.particle), 
+                              "{0}_rel_error".format(self.particle),
+                              "{0}_result_total".format(self.particle),
+                              "{0}_rel_error_total".format(self.particle))
+        else:
+            self.tag_names = tag_names
+
         self._create_mesh(f)
 
     def _read_meshtally_head(self, f):
@@ -1885,9 +2030,9 @@ class MeshTally(StatMesh):
         """
         line = f.readline()
         if ('neutron' in line):
-            self.particle = 'n'
+            self.particle = 'neutron'
         elif ('photon' in line):
-            self.particle = 'p'
+            self.particle = 'photon'
 
         #determine if meshtally flux-to-dose conversion factors are being used.
         line = f.readline()
@@ -1952,18 +2097,15 @@ class MeshTally(StatMesh):
             rel_error[i] = rel_error_row
 
         #Tag results and error vector to mesh
-        tag_result = self.mesh.createTag(
-            "{0}_result".format(self.particle), num_e_groups, float)
-        tag_rel_error = self.mesh.createTag(
-            "{0}_rel_error".format(self.particle), num_e_groups, float)
-        res_vol_elements = list(self.structured_iterate_hex("xyz"))
-        err_vol_elements = list(self.structured_iterate_hex("xyz"))
-        for res_ve, err_ve, i in itertools.izip(res_vol_elements,
-                                                err_vol_elements,
-                                                range(0, num_vol_elements)):
-            tag_result[res_ve] = result[:, i]
-            tag_rel_error[err_ve] = rel_error[:, i]
-
+        res_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[0])
+        rel_err_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[1])
+        if num_e_groups == 1:
+            res_tag[:] = result[0]
+            rel_err_tag[:] = rel_error[0]
+        else:
+            res_tag[:] = result.transpose()
+            rel_err_tag[:] = rel_error.transpose()
+        
         #If "total" data exists (i.e. if there is more than
         #1 energy group) get it and tag it onto the mesh.
         if num_e_groups > 1:
@@ -1975,16 +2117,11 @@ class MeshTally(StatMesh):
                 rel_error.append(
                     float(line[self._column_idx["Rel_Error"]]))
 
-            tag_result = self.mesh.createTag(
-                "{0}_total_result".format(self.particle), 1, float)
-            tag_rel_error = self.mesh.createTag(
-                "{0}_total_rel_error".format(self.particle), 1, float)
+            res_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[2])
+            rel_err_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[3])
+            res_tot_tag[:] = result
+            rel_err_tot_tag[:] = rel_error
 
-            res_vol_elements = list(self.structured_iterate_hex("xyz"))
-            err_vol_elements = list(self.structured_iterate_hex("xyz"))
-
-            tag_result[res_vol_elements] = result
-            tag_rel_error[err_vol_elements] = rel_error
 
 def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     """This function reads a structured Mesh object and returns the geometry

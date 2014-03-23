@@ -31,6 +31,18 @@ cdef extern from "data.h" namespace "pyne":
     double natural_abund(char *) except +
     double natural_abund(std_string) except +
 
+    # q_val functions
+    map[int, double] q_val_map
+    double q_val(int) except +
+    double q_val(char *) except +
+    double q_val(std_string) except +
+
+    # gamma_frac functions
+    map[int, double] gamma_frac_map
+    double gamma_frac(int) except +
+    double gamma_frac(char *) except +
+    double gamma_frac(std_string) except +
+
     # Scattering length functions
     map[int, extra_types.complex_t] b_coherent_map
     extra_types.complex_t b_coherent(int) except +

@@ -75,6 +75,7 @@ namespace pyne
   double atomic_mass(std::string nuc); 
   /// \}
 
+
   /// \name Natural Abundance Data
   /// \{
 
@@ -93,21 +94,73 @@ namespace pyne
   double natural_abund(std::string nuc); 
   /// \}
 
+
+
+  /// \name Q_value Data
+  /// \{
+
+  /// Mapping from nuclides in id form to their q_values.
+  extern std::map<int, double> q_val_map;
+
+  /// a struct matching the q_value table in nuc_data.h5.
+  typedef struct q_val_struct {
+    int nuc;          ///< nuclide in id form
+    double q_val;      ///< nuclide q_value [MeV/fission]
+    double gamma_frac; ///< fraction of q that comes from gammas
+  } q_val_struct; 
+
+  /// Loads the q_value data from the nuc_data.h5 file into memory.
+  void _load_q_val_map(); 
+
+  /// \brief Returns the q_value of a nuclide \a nuc.  
+  /// 
+  /// This function will first try to find the q_value data in the q_val_map.
+  /// If this map is empty, it will load the data from disk. If the nuclide simply 
+  /// cannot be found, the default value returned is 0.0.
+  double q_val(int nuc);
+  /// Returns the q_value of a nuclide \a nuc.
+  double q_val(char * nuc); 
+  /// Returns the q_value of a nuclide \a nuc.
+  double q_val(std::string nuc); 
+  /// \}
+
+
+
+  /// \name Gamma Fraction of Q Values Data
+  /// \{
+
+  /// Mapping from nuclides in id form to the fraction of Q that comes from gammas.
+  extern std::map<int, double> gamma_frac_map;
+
+  /// \brief Returns the natural abundance of a nuclide \a nuc.  
+  /// 
+  /// This follows the same the basic rules for finding or computing the fraction
+  /// of Q that comes from gammas as the q_val() functions do.
+  /// If the nuclide cannot be found, the default value returned is 0.0.
+  double gamma_frac(int nuc);
+  /// Returns the gamma_frac of a nuclide \a nuc. 
+  double gamma_frac(char * nuc); 
+  /// Returns the gamma_frac of a nuclide \a nuc. 
+  double gamma_frac(std::string nuc); 
+  /// \}
+
+
+
   /// \name Scattering Length Data
   /// \{
 
   /// Mapping from nuclides in id form to their coherent scattering length.
-  extern std::map<int, extra_types::complex_t> b_coherent_map;
+  extern std::map<int, xd_complex_t> b_coherent_map;
   /// Mapping from nuclides in id form to their incoherent scattering length.
-  extern std::map<int, extra_types::complex_t> b_incoherent_map;
+  extern std::map<int, xd_complex_t> b_incoherent_map;
   /// Mapping from nuclides in id form to their scattering length.
   extern std::map<int, double> b_map;
 
   /// a struct matching the '/neutron/scattering_lengths' table in nuc_data.h5.
   typedef struct scattering_lengths_struct {
     int nuc;  ///< nuclide in id form
-    extra_types::complex_t b_coherent;  ///< coherent scattering length [cm]
-    extra_types::complex_t b_incoherent;  ///< incoherent scattering length [cm]
+    xd_complex_t b_coherent;  ///< coherent scattering length [cm]
+    xd_complex_t b_incoherent;  ///< incoherent scattering length [cm]
     double xs_coherent;   ///< coherent scattering cross section
     double xs_incoherent; ///< incoherent scattering cross section
     double xs;            ///< scattering cross section
@@ -123,20 +176,20 @@ namespace pyne
   /// nuclide with the same A number is returned instead.  If none of these exist,
   /// then the value of a nuclide with the same Z number is used.  If none of these
   /// work then 0.0 is returned.
-  extra_types::complex_t b_coherent(int nuc);
+  xd_complex_t b_coherent(int nuc);
   /// Finds the coherent scattering length [cm] for a nuclide \a nuc.
-  extra_types::complex_t b_coherent(char * nuc);
+  xd_complex_t b_coherent(char * nuc);
   /// Finds the coherent scattering length [cm] for a nuclide \a nuc.
-  extra_types::complex_t b_coherent(std::string nuc);
+  xd_complex_t b_coherent(std::string nuc);
 
   /// \brief Finds the incoherent scattering length [cm] for a nuclide \a nuc.
   ///
   /// This function works in the same way that b_coherent() does.
-  extra_types::complex_t b_incoherent(int nuc);
+  xd_complex_t b_incoherent(int nuc);
   /// Finds the incoherent scattering length [cm] for a nuclide \a nuc.
-  extra_types::complex_t b_incoherent(char * nuc);
+  xd_complex_t b_incoherent(char * nuc);
   /// Finds the incoherent scattering length [cm] for a nuclide \a nuc.
-  extra_types::complex_t b_incoherent(std::string nuc);
+  xd_complex_t b_incoherent(std::string nuc);
 
   /// Computes the scattering length [cm] from the coherent and incoherent components.
   double b(int nuc);

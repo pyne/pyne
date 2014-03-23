@@ -135,6 +135,78 @@ def natural_abund(nuc):
     return abund
 
 
+#
+# q_val functions
+#
+cdef conv._MapIntDouble q_val_map_proxy = conv.MapIntDouble(False)
+q_val_map_proxy.map_ptr = &cpp_data.q_val_map
+q_val_map = q_val_map_proxy
+
+def q_val(nuc):
+    """Finds the Q value of a nuclide in [MeV/fission].
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    q_val : double
+        Q value of this nuclide [MeV/fission].
+
+    Notes
+    -----
+    If the nuclide is not found, 0 is returned.
+    """
+    if isinstance(nuc, int):
+        q_val = cpp_data.q_val(<int> nuc)
+    elif isinstance(nuc, basestring):
+        q_val = cpp_data.q_val(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return q_val
+
+
+
+#
+# gamma_frac functions
+#
+cdef conv._MapIntDouble gamma_frac_map_proxy = conv.MapIntDouble(False)
+gamma_frac_map_proxy.map_ptr = &cpp_data.gamma_frac_map
+gamma_frac_map = gamma_frac_map_proxy
+
+# initialize gamma_frac_map
+cpp_data.gamma_frac(<int> 10000000)
+
+
+def gamma_frac(nuc):
+    """Finds the fraction of Q that comes from gammas of a nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    gamma_frac : double
+        Fraction of Q that comes from gammas of this nuclide.
+
+    Notes
+    -----
+    If the nuclide is not found, gamma_frac is 0.
+    """
+    if isinstance(nuc, int):
+        gamma_frac = cpp_data.gamma_frac(<int> nuc)
+    elif isinstance(nuc, basestring):
+        gamma_frac = cpp_data.gamma_frac(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return gamma_frac
+
 
 #
 # scattering length functions
