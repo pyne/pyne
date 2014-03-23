@@ -931,7 +931,7 @@ def test_single_meshtally_meshtal():
     meshtal_object = mcnp.Meshtal(meshtal_file, tags)
 
     # test Meshtal attributes
-    assert_equal(meshtal_object.version, 5)
+    assert_equal(meshtal_object.version, '5.mpi')
 
     assert_equal(meshtal_object.ld, "09282010")
 
