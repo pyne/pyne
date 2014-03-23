@@ -74,6 +74,7 @@ namespace pyne
   double atomic_mass(std::string nuc); 
   /// \}
 
+
   /// \name Natural Abundance Data
   /// \{
 
@@ -91,6 +92,58 @@ namespace pyne
   /// Returns the natural abundance of a nuclide \a nuc. 
   double natural_abund(std::string nuc); 
   /// \}
+
+
+
+  /// \name Q_value Data
+  /// \{
+
+  /// Mapping from nuclides in id form to their q_values.
+  extern std::map<int, double> q_val_map;
+
+  /// a struct matching the q_value table in nuc_data.h5.
+  typedef struct q_val_struct {
+    int nuc;          ///< nuclide in id form
+    double q_val;      ///< nuclide q_value [MeV/fission]
+    double gamma_frac; ///< fraction of q that comes from gammas
+  } q_val_struct; 
+
+  /// Loads the q_value data from the nuc_data.h5 file into memory.
+  void _load_q_val_map(); 
+
+  /// \brief Returns the q_value of a nuclide \a nuc.  
+  /// 
+  /// This function will first try to find the q_value data in the q_val_map.
+  /// If this map is empty, it will load the data from disk. If the nuclide simply 
+  /// cannot be found, the default value returned is 0.0.
+  double q_val(int nuc);
+  /// Returns the q_value of a nuclide \a nuc.
+  double q_val(char * nuc); 
+  /// Returns the q_value of a nuclide \a nuc.
+  double q_val(std::string nuc); 
+  /// \}
+
+
+
+  /// \name Gamma Fraction of Q Values Data
+  /// \{
+
+  /// Mapping from nuclides in id form to the fraction of Q that comes from gammas.
+  extern std::map<int, double> gamma_frac_map;
+
+  /// \brief Returns the natural abundance of a nuclide \a nuc.  
+  /// 
+  /// This follows the same the basic rules for finding or computing the fraction
+  /// of Q that comes from gammas as the q_val() functions do.
+  /// If the nuclide cannot be found, the default value returned is 0.0.
+  double gamma_frac(int nuc);
+  /// Returns the gamma_frac of a nuclide \a nuc. 
+  double gamma_frac(char * nuc); 
+  /// Returns the gamma_frac of a nuclide \a nuc. 
+  double gamma_frac(std::string nuc); 
+  /// \}
+
+
 
   /// \name Scattering Length Data
   /// \{

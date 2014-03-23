@@ -24,6 +24,16 @@ def test_atomic_mass():
     assert_in(data.atomic_mass(952421), am242m)
 
 
+def test_q_val():
+    assert_equal(data.q_val(110240001), 0.473)
+    assert_equal(data.q_val('H1'), 0.0)
+    assert_equal(data.q_val(92235), 4.674)
+
+def test_gamma_frac():
+    assert_equal(data.gamma_frac('H1'), 0.0)
+    assert_equal(data.gamma_frac(92235), 0.036)
+    assert_equal(data.gamma_frac(110240001), 0.998)
+
 def test_b_coherent():
     assert_equal(data.b_coherent('H1'), -3.7406E-13 + 0j)
     assert_equal(data.b_coherent(491150), 4.01E-13 - 5.62E-15j)
