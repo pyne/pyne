@@ -4,6 +4,7 @@ from libcpp.map cimport map
 from libcpp.set cimport set
 from libcpp.utility cimport pair
 from libcpp cimport bool
+from libcpp.vector cimport vector
 
 cimport extra_types
 
@@ -92,3 +93,44 @@ cdef extern from "data.h" namespace "pyne":
     set[int] decay_children(char *) except +
     set[int] decay_children(std_string) except +
 
+    int metastable_id(int, int) except +
+    int metastable_id(int) except +
+
+    #ENSDF data functions
+    pair[double,double] decay_half_life(pair[int, int]) except +
+    vector[pair[double, double]] decay_half_lifes(int) except +
+    double decay_branch_ratio(pair[int, int] from_to) except +
+    vector[double] decay_branch_ratios(int) except +
+    pair[double,double] decay_photon_branch_ratio(pair[int, int] from_to) except +
+    vector[pair[double, double]] decay_photon_branch_ratios(int) except +
+    pair[double,double] decay_beta_branch_ratio(pair[int, int] from_to) except +
+    vector[pair[double, double]] decay_beta_branch_ratios(int) except +
+
+    vector[pair[double, double]] gamma_energy(int parent) except +
+    vector[pair[double, double]] gamma_photon_intensity(int parent) except +
+    vector[pair[double, double]] gamma_conversion_intensity(int parent) except +
+    vector[pair[double, double]] gamma_total_intensity(int parent) except +
+    vector[pair[int, int]] gamma_from_to(int parent) except +
+    vector[pair[int, int]] gamma_from_to(double energy, double error) except +
+    vector[int] gamma_parent(double energy, double error) except +
+    
+    vector[double] alpha_energy(int parent) except +
+    vector[double] alpha_intensity(int parent) except +
+    vector[int] alpha_parent(double energy, double error) except +
+    vector[int] alpha_child(double energy, double error) except +
+    vector[int] alpha_child(int parent) except +
+
+    vector[double] beta_endpoint_energy(int parent) except +
+    vector[double] beta_average_energy(int parent) except +
+    vector[double] beta_intensity(int parent) except +
+    vector[int] beta_parent(double energy, double error) except +
+    vector[int] beta_child(double energy, double error) except +
+    vector[int] beta_child(int parent) except +
+
+    vector[double] ecbp_endpoint_energy(int parent) except +
+    vector[double] ecbp_average_energy(int parent) except +
+    vector[double] ec_intensity(int parent) except +
+    vector[double] bp_intensity(int parent) except +
+    vector[int] ecbp_parent(double energy, double error) except +
+    vector[int] ecbp_child(double energy, double error) except +
+    vector[int] ecbp_child(int parent) except +
