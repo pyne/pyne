@@ -362,8 +362,8 @@ namespace pyne
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.
   typedef struct level_struct{
     int nuc_id;
-    double level;
     double half_life;
+    double level;
     int metastable;
   } level_struct;
 

@@ -5,7 +5,7 @@ import warnings
 
 import numpy as np
 
-from pyne import nucname
+from pyne import nucname, rxname
 from pyne.utils import to_sec
 
 
@@ -155,18 +155,6 @@ def _to_time(tstr, errstr):
     return tfinal, tfinalerr
 
 
-_decay_to = {
-    '%EC': lambda x: (x - 10000000) / 10000 * 10000,
-    '%B+': lambda x: (x - 10000000) / 10000 * 10000,
-    '%EC+%B+': lambda x: (x - 10000000) / 10000 * 10000,
-    '%B-': lambda x: (x + 10000000) / 10000 * 10000,
-    '%IT': lambda x: x / 10000 * 10000,
-    '%A': lambda x: (x - 20040000) / 10000 * 10000,
-    '%P': lambda x: (x - 10010000) / 10000 * 10000,
-    '%N': lambda x: (x - 10000) / 10000 * 10000,
-}
-
-
 def half_life(ensdf):
     """Grabs the half-lives from an ENSDF file.
 
@@ -219,11 +207,24 @@ def half_life(ensdf):
             if levelc is None or half_lifev is None or from_nuc is None:
                 continue
             dat = _parse_level_continuation_record(levelc)
-            dat = dict([(_decay_to[key](from_nuc),
-                         float(val) * 0.01)
-                        for key, val in dat.items() if key in _decay_to])
+            to_list = []
+            for key, val in dat.items():
+                goodkey = True
+                keystrip = key.replace("%", "").lower()
+                badlist = ["sf", "ecsf", "34si", "|b{+-}fission", "{+24}ne",
+                           "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
+                           "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
+                           "{+28}mg", "sf(+ec+b+)"]
+                for item in badlist:
+                    if keystrip == item:
+                        goodkey = False
+                        print("reaction not supported {0}".format(keystrip))
+                if goodkey is True and from_nuc != 0:
+                    kid = (rxname.child(from_nuc, keystrip,
+                                        "decay")/10000)*10000
+                    to_list.append([kid, float(val.split("(")[0]) * 0.01])
             data += [(from_nuc, level * 1.0E-3, to_nuc, half_lifev, br)
-                     for to_nuc, br in dat.items() if 0.0 < br]
+                     for to_nuc, br in to_list if 0.0 < br]
     return data
 
 
@@ -721,7 +722,7 @@ def _update_xrays(conv, xrays, nuc_id):
     return xrays
 
 
-def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
+def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
     """
     This parses a gamma ray dataset. It returns a tuple of the parsed data.
 
@@ -749,7 +750,7 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
     parents = parent.split(',')
     if len(parents) > 1:
         pfinal = _to_id(parents[0])
-        warnings.warn('Multiple parents {0}'.format(parent))
+        #warnings.warn('Multiple parents {0}'.format(parent))
     else:
         pfinal = _to_id(parents[0][:5])
     tfinal = None
@@ -807,7 +808,6 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
                 if parent2 is None:
                     parent2 = parent
                     e = 0
-                #FIXME complete levellist beforehand so this actually works
                 aparent = _to_id_from_level(parent2, e, levellist, lmap)
                 adaughter = _to_id_from_level(daughter, level, levellist, lmap)
                 alphas.append((aparent, adaughter, dat[0], dat[2]))
@@ -900,11 +900,9 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap = None):
     return None
 
 
-def decays(filename, levellist=None, decaylist=None, lmap=None, lcount = 0):
+def levels(filename, levellist=None, lmap=None, lcount=0):
     if levellist is None:
         levellist = []
-    if decaylist is None:
-        decaylist = []
     if lmap is None:
         lmap = dict()
     if isinstance(filename, str):
@@ -914,7 +912,6 @@ def decays(filename, levellist=None, decaylist=None, lmap=None, lcount = 0):
         dat = filename.read()
     datasets = dat.split(80 * " " + "\n")[0:-1]
     for dataset in datasets:
-        levels = []
         lines = dataset.splitlines()
         ident = re.match(_ident, lines[0])
         if ident is None:
@@ -933,6 +930,22 @@ def decays(filename, levellist=None, decaylist=None, lmap=None, lcount = 0):
                         leveln += 1
                         lcount += 1
                         levellist.append((nuc_id, half_lifev, level, state))
+    return levellist, lmap, lcount
+
+
+def decays(filename, levellist=None, decaylist=None, lmap=None, lcount=0):
+    if levellist is None:
+        levellist = []
+    if decaylist is None:
+        decaylist = []
+    if lmap is None:
+        lmap = dict()
+    if isinstance(filename, str):
+        with open(filename, 'r') as f:
+            dat = f.read()
+    else:
+        dat = filename.read()
+    datasets = dat.split(80 * " " + "\n")[0:-1]
     for dataset in datasets:
         lines = dataset.splitlines()
         ident = re.match(_ident, lines[0])
@@ -1092,6 +1105,45 @@ def _dlist_gen(f):
                     decaylist.append(fin)
 
     return decaylist
+
+
+def _level_dlist_gen(f, keys):
+    """
+    This compiles a list of decay types in an ensdf file
+
+    Parameters
+    ----------
+    f : str
+        Name of ENSDF formatted file
+
+    Returns
+    -------
+    decaylist : list
+        list of decay types in the ENSDF file eg. ['B+','B-','A']
+    """
+    if isinstance(f, str):
+        with open(f, 'r') as f:
+            dat = f.read()
+    else:
+        dat = f.read()
+    decaylist = []
+    datasets = dat.split(80 * " " + "\n")[0:-1]
+    for dataset in datasets:
+        lines = dataset.splitlines()
+        ident = re.match(_ident, lines[0])
+        if ident is not None:
+            if 'ADOPTED LEVELS' in ident.group(2):
+                #print ident.group(2)
+                for line in lines:
+                    levelc = _level_cont_regex.match(line)
+                    if levelc is None:
+                        continue
+                    ddict = _parse_level_continuation_record(levelc)
+                    for item in ddict.keys():
+                        if item in keys:
+                            continue
+                        keys.append(item)
+    return keys
 
 
 def gamma_rays(f):

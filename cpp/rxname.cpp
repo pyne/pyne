@@ -552,6 +552,25 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "a_continuum",
   "lumped_covar",
   "excited",
+  "b-",
+  "b+",
+  "ec",
+  "b-n",
+  "b-a",
+  "it",
+  "b+a",
+  "ec+b+",
+  "b+p",
+  "b-2n",
+  "b-3n",
+  "b-4n",
+  "ecp",
+  "eca",
+  "b+2p",
+  "ec2p",
+  "2b-",
+  "b-p",
+  "14c"
   };
 std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
                                           pyne::rxname::_names+NUM_RX_NAMES);
@@ -1122,6 +1141,25 @@ void * pyne::rxname::_fill_maps()
     849,
     851,
     0,
+    852,
+    853,
+    854,
+    855,
+    856,
+    857,
+    858,
+    859,
+    860,
+    861,
+    862,
+    863,
+    864,
+    865,
+    866,
+    867,
+    868,
+    869,
+    870,
   };
   std::string _labels[NUM_RX_NAMES] = {
     "(z,total)",
@@ -1673,6 +1711,25 @@ void * pyne::rxname::_fill_maps()
     "(z,ac)",
     "Lumped Covariances",
     "Any Excited State",
+    "(z,b-)",
+    "(z,b+)",
+    "(z,ec)",
+    "(z,b-n)",
+    "(z,b-a)",
+    "(z,it)",
+    "(z,b+a)",
+    "(z,ec+b+)",
+    "(z,b+p)",
+    "(z,b-2n)",
+    "(z,b-3n)",
+    "(z,b-4n)",
+    "(z,ecp)",
+    "(z,eca)",
+    "(z,b+2p)",
+    "(z,ec2p)",
+    "(z,2b-)",
+    "(z,b-p)",
+    "(z,14c)"
   };
   std::string _docs[NUM_RX_NAMES] = {
     "(n,total) Neutron total",
@@ -2224,6 +2281,25 @@ void * pyne::rxname::_fill_maps()
     "(n,ac)",
     "Lumped-Reaction Covariances",
     "production of any excited state nucleus",
+    "(z,b-)",
+    "(z,b+)",
+    "(z,ec)",
+    "(z,b-n)",
+    "(z,b-a)",
+    "(z,it)",
+    "(z,b+a)",
+    "(z,ec+b+)",
+    "(z,b+p)",
+    "(z,b-2n)",
+    "(z,b-3n)",
+    "(z,b-4n)",
+    "(z,ecp)",
+    "(z,eca)",
+    "(z,b+2p)",
+    "(z,ec2p)",
+    "(z,2b-)",
+    "(z,b-p)",
+    "(z,14c)"
   };
 
   // fill the maps
@@ -2270,6 +2346,11 @@ void * pyne::rxname::_fill_maps()
   altnames["he-3"] = name_id["He3"];
   altnames["HE-3"] = name_id["He3"];
   altnames["*"] = name_id["excited"];
+  altnames["2n"] = name_id["z_2n"];
+  altnames["2p"] = name_id["z_2p"];
+  altnames["3h"] = name_id["t"];
+  altnames["g"] = name_id["it"];
+  
 
   // set the nuclide difference mappings, offset_id
   // offset_id[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
@@ -2399,6 +2480,19 @@ void * pyne::rxname::_fill_maps()
   offset_id[make_pair("decay", offset(-1, -3))] = name_id["t"];
   offset_id[make_pair("decay", offset(-2, -3))] = name_id["He3"];
   offset_id[make_pair("decay", offset(-2, -4))] = name_id["a"];
+  offset_id[make_pair("decay", offset(1, 0))] = name_id["b-"];
+  offset_id[make_pair("decay", offset(-1, 0))] = name_id["b+"];
+  offset_id[make_pair("decay", offset(1, -1))] = name_id["b-n"];
+  offset_id[make_pair("decay", offset(-1, -4))] = name_id["b-a"];
+  offset_id[make_pair("decay", offset(0, 0))] = name_id["it"];
+  offset_id[make_pair("decay", offset(-3, -4))] = name_id["b+a"];
+  offset_id[make_pair("decay", offset(-2, -1))] = name_id["b+p"];
+  offset_id[make_pair("decay", offset(1, -2))] = name_id["b-2n"];
+  offset_id[make_pair("decay", offset(1, -3))] = name_id["b-3n"];
+  offset_id[make_pair("decay", offset(1, -4))] = name_id["b-4n"];
+  offset_id[make_pair("decay", offset(-3, -2))] = name_id["b+2p"];
+  offset_id[make_pair("decay", offset(2, 0))] = name_id["2b-"];
+  offset_id[make_pair("decay", offset(-6, -14))] = name_id["14c"];
 
   // pre-loaded child offsets
   std::map<std::pair<std::string, int>, unsigned int>::iterator ioffid;
@@ -2418,6 +2512,13 @@ void * pyne::rxname::_fill_maps()
   id_offset[make_pair("n", name_id["np_2"])] = offset(-1, -1, 2);
   id_offset[make_pair("n", name_id["n"])] = offset(0, 0);
   id_offset[make_pair("n", name_id["gamma"])] = offset(0, 1);
+  // decay:
+  id_offset[make_pair("decay", name_id["b-p"])] = offset(0, -1);
+  id_offset[make_pair("decay", name_id["ec2p"])] = offset(-3, -2);
+  id_offset[make_pair("decay", name_id["ec"])] = offset(-1, 0);
+  id_offset[make_pair("decay", name_id["ec+b+"])] = offset(-1, 0);
+  id_offset[make_pair("decay", name_id["ecp"])] = offset(-2, -1);
+  id_offset[make_pair("decay", name_id["eca"])] = offset(-3, -4);
   return NULL;
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();

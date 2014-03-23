@@ -1169,10 +1169,10 @@ void pyne::_load_level_data()
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(level_struct));
   status = H5Tinsert(desc, "nuc_id", HOFFSET(level_struct, nuc_id),
                       H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "level", HOFFSET(level_struct, level), 
-                     H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "half_life", HOFFSET(level_struct, half_life),
                       H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "level", HOFFSET(level_struct, level), 
+                     H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "metastable", HOFFSET(level_struct, metastable),
                       H5T_NATIVE_INT);
 

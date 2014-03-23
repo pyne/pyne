@@ -66,8 +66,8 @@ half_life_dtype = np.dtype([
 
 level_dtype = np.dtype([
     ('nuc_id', int),
-    ('level', float),
     ('half_life', float),
+    ('level', float),
     ('metastable', int),
     ])
 
@@ -162,8 +162,12 @@ def parse_decay(build_dir=""):
     lcount = 0
     files = sorted([f for f in glob.glob(os.path.join(build_dir, 'ensdf.*'))])
     for f in files:
-        print("    parsing decay data from {0}".format(f))
+        print("    building level data from {0}".format(f))
         half_life_data += ensdf.half_life(f)
+        level_list, lmap, lcount = \
+            ensdf.levels(f, level_list, lmap, lcount)
+    for f in files:
+        print("    parsing decay data from {0}".format(f))
         level_list, decay_data, lmap, lcount = \
             ensdf.decays(f, level_list, decay_data, lmap, lcount)
 
