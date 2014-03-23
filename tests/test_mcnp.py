@@ -1018,6 +1018,7 @@ def test_multiple_meshtally_meshtal():
             34:["p_result", "p_rel_error",
                 "p_total_result", "p_total_rel_error"]}
     meshtal_object = mcnp.Meshtal(meshtal_file, tags)
+    assert_equal(meshtal_object.version, '5')
 
     # test meshtally 4
     for v_e, expected_v_e in zip(
