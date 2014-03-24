@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <float.h>
+#include <math.h>
 
 #include "hdf5.h"
 #include "hdf5_hl.h"
@@ -23,6 +24,7 @@
 #include "extra_types.h"
 #include "pyne.h"
 #include "nucname.h"
+#include "rxname.h"
 #endif
 
 namespace pyne
@@ -362,8 +364,10 @@ namespace pyne
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.
   typedef struct level_struct{
     int nuc_id;
+    int rx_id;
     double half_life;
     double level;
+    double branch_ratio;
     int metastable;
   } level_struct;
 

@@ -73,13 +73,13 @@ def _to_id_from_level(nuc_id, level, levellist, lmap):
     gparent = nid
     if nid in lmap and level > 0.0:
         for i in range(lmap[nid], len(levellist)):
-            if level + 1.0 > levellist[i][2] >\
+            if level + 1.0 > levellist[i][3] > \
                             level - 1.0:
                 gparent = levellist[i][0]
                 break
-            if level + 1.0 < levellist[i][2]:
+            if level + 1.0 < levellist[i][3]:
                 break
-            if int(nid/10000) != int(levellist[i][0]/10000):
+            if int(nid / 10000) != int(levellist[i][0] / 10000):
                 break
     return gparent
 
@@ -224,7 +224,7 @@ def half_life(ensdf):
                         print("reaction not supported {0}".format(keystrip))
                 if goodkey is True and from_nuc != 0:
                     kid = (rxname.child(from_nuc, keystrip,
-                                        "decay")/10000)*10000
+                                        "decay") / 10000) * 10000
                     to_list.append([kid, float(val.split("(")[0]) * 0.01])
             data += [(from_nuc, level * 1.0E-3, to_nuc, half_lifev, br)
                      for to_nuc, br in to_list if 0.0 < br]
@@ -924,9 +924,28 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
             continue
         if 'ADOPTED LEVELS' in ident.group(2):
             leveln = 0
+            brs = {}
+            level_found = False
             for line in lines:
                 level_l = _level_regex.match(line)
                 if level_l is not None:
+                    if len(brs) > 0:
+                        for key, val in brs.items():
+                            goodkey = True
+                            keystrip = key.replace("%", "").lower()
+                            badlist = ["sf", "ecsf", "34si", "|b{+-}fission", "{+24}ne",
+                                       "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
+                                       "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
+                                       "{+28}mg", "sf(+ec+b+)"]
+                            for item in badlist:
+                                if keystrip == item:
+                                    goodkey = False
+                            if goodkey is True:
+                                rx = rxname.id(keystrip)
+                                levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state))
+                    if level_found is True:
+                        levellist.append((nuc_id, 0, half_lifev, level, 0.0, state))
+                    brs = {}
                     level, half_lifev, from_nuc, state = \
                         _parse_level_record(level_l)
                     if from_nuc is not None:
@@ -935,7 +954,30 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                             lmap.update({nuc_id: lcount})
                         leveln += 1
                         lcount += 1
-                        levellist.append((nuc_id, half_lifev, level, state))
+                        level_found = True
+                    else:
+                        level_found = False
+                    continue
+                levelc = _level_cont_regex.match(line)
+                if levelc is not None:
+                    brs.update(_parse_level_continuation_record(levelc))
+                    continue
+            if len(brs) > 0:
+                for key, val in brs.items():
+                    goodkey = True
+                    keystrip = key.replace("%", "").lower()
+                    badlist = ["ecsf", "34si", "|b{+-}fission", "{+24}ne",
+                               "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
+                               "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
+                               "{+28}mg", "sf(+ec+b+)"]
+                    for item in badlist:
+                        if keystrip == item:
+                            goodkey = False
+                    if goodkey is True:
+                        rx = rxname.id(keystrip)
+                        levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state))
+            if level_found is True:
+                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state))
     return levellist, lmap, lcount
 
 

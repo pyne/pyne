@@ -66,8 +66,10 @@ half_life_dtype = np.dtype([
 
 level_dtype = np.dtype([
     ('nuc_id', int),
+    ('rx_id', int),
     ('half_life', float),
     ('level', float),
+    ('branch_ratio', float),
     ('metastable', int),
     ])
 
