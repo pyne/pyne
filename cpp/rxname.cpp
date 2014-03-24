@@ -102,7 +102,7 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "n_39",
   "n_40",
   "n_continuum",
-  "disappeareance",
+  "disappearance",
   "gamma",
   "gamma_0",
   "gamma_1",
@@ -220,7 +220,7 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "erel_n_39",
   "erel_n_40",
   "erel_n_continuum",
-  "erel_disappeareance",
+  "erel_disappearance",
   "erel_gamma",
   "erel_p",
   "erel_d",
@@ -570,7 +570,11 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "ec2p",
   "2b-",
   "b-p",
-  "14c"
+  "14c",
+  "b+3p",
+  "sf",
+  "2b+",
+  "2ec",
   };
 std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
                                           pyne::rxname::_names+NUM_RX_NAMES);
@@ -1141,25 +1145,29 @@ void * pyne::rxname::_fill_maps()
     849,
     851,
     0,
-    852,
-    853,
-    854,
-    855,
-    856,
-    857,
-    858,
-    859,
-    860,
-    861,
-    862,
-    863,
-    864,
-    865,
-    866,
-    867,
-    868,
-    869,
-    870,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
   };
   std::string _labels[NUM_RX_NAMES] = {
     "(z,total)",
@@ -1261,7 +1269,7 @@ void * pyne::rxname::_fill_maps()
     "(z,n39)",
     "(z,n40)",
     "(z,nc)",
-    "(z,disap) Neutron disappeareance",
+    "(z,disap) Neutron disappearance",
     "(z,gamma)",
     "(z,gamma0)",
     "(z,gamma1)",
@@ -1379,7 +1387,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,n39)",
     "Energy Release from (z,n40)",
     "Energy Release from (z,nc)",
-    "Energy Release from (z,disap) Neutron disappeareance",
+    "Energy Release from (z,disap) Neutron disappearance",
     "Energy Release from (z,gamma)",
     "Energy Release from (z,p)",
     "Energy Release from (z,d)",
@@ -1396,7 +1404,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,pt)",
     "Energy Release from (z,da)",
     "(damage)",
-    "Desciptive Data",
+    "Descriptive Data",
     "Total Neutrons per Fission",
     "Independent fission product yield",
     "Delayed Neutron Data",
@@ -1729,7 +1737,11 @@ void * pyne::rxname::_fill_maps()
     "(z,ec2p)",
     "(z,2b-)",
     "(z,b-p)",
-    "(z,14c)"
+    "(z,14c)",
+    "(z,b+3p)",
+    "(z,sf)",
+    "(z,2b+)",
+    "(z,2ec)",
   };
   std::string _docs[NUM_RX_NAMES] = {
     "(n,total) Neutron total",
@@ -1831,7 +1843,7 @@ void * pyne::rxname::_fill_maps()
     "(z,n39) Production of n, 39th excited state",
     "(z,n40) Production of n, 40th excited state",
     "(z,nc) Production of n in continuum",
-    "(n,disap) Neutron disappeareance",
+    "(n,disap) Neutron disappearance",
     "(z,gamma) Radiative capture",
     "(z,gamma0) Radiative capture, ground state",
     "(z,gamma1) Radiative capture, 1st excited state",
@@ -1949,7 +1961,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,n39) Production of n, 39th excited state",
     "Energy Release from (z,n40) Production of n, 40th excited state",
     "Energy Release from (z,nc) Production of n in continuum",
-    "Energy Release from (n,disap) Neutron disappeareance",
+    "Energy Release from (n,disap) Neutron disappearance",
     "Energy Release from (z,gamma) Radiative capture",
     "Energy Release from (z,p) Production of p",
     "Energy Release from (z,d) Production of d",
@@ -1966,7 +1978,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,pt) Production of p and t",
     "Energy Release from (z,da) Production of d and a",
     "(damage)",
-    "Desciptive Data",
+    "Descriptive Data",
     "Total Neutrons per Fission",
     "Independent fission product yield",
     "Delayed Neutron Data",
@@ -2299,7 +2311,11 @@ void * pyne::rxname::_fill_maps()
     "(z,ec2p)",
     "(z,2b-)",
     "(z,b-p)",
-    "(z,14c)"
+    "(z,14c)",
+    "(z,b+3p)",
+    "(z,sf)",
+    "(z,2b+)",
+    "(z,2ec)",
   };
 
   // fill the maps
@@ -2491,7 +2507,9 @@ void * pyne::rxname::_fill_maps()
   offset_id[make_pair("decay", offset(1, -3))] = name_id["b-3n"];
   offset_id[make_pair("decay", offset(1, -4))] = name_id["b-4n"];
   offset_id[make_pair("decay", offset(-3, -2))] = name_id["b+2p"];
+  offset_id[make_pair("decay", offset(-4, -3))] = name_id["b+3p"];
   offset_id[make_pair("decay", offset(2, 0))] = name_id["2b-"];
+  offset_id[make_pair("decay", offset(-2, 0))] = name_id["2b+"];
   offset_id[make_pair("decay", offset(-6, -14))] = name_id["14c"];
 
   // pre-loaded child offsets
@@ -2519,6 +2537,7 @@ void * pyne::rxname::_fill_maps()
   id_offset[make_pair("decay", name_id["ec+b+"])] = offset(-1, 0);
   id_offset[make_pair("decay", name_id["ecp"])] = offset(-2, -1);
   id_offset[make_pair("decay", name_id["eca"])] = offset(-3, -4);
+  id_offset[make_pair("decay", name_id["2ec"])] = offset(-2, 0);
   return NULL;
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();

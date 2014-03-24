@@ -74,7 +74,7 @@ level_dtype = np.dtype([
 decay_dtype = np.dtype([
     ('parent', int),
     ('child', int),
-    ('decay', 'S5'),
+    ('decay', int),
     ('half_life', float),
     ('half_life_error', float),
     ('branch_ratio', float),

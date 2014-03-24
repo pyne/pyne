@@ -377,7 +377,7 @@ namespace pyne
   typedef struct decay_struct{
     int parent;
     int child;
-    char decay[5];
+    int decay;
     double half_life;
     double half_life_error;
     double branch_ratio;

@@ -71,11 +71,13 @@ def _read_variablepoint(line, dstart, dlen):
 def _to_id_from_level(nuc_id, level, levellist, lmap):
     nid = _to_id(nuc_id)
     gparent = nid
-    if nid in lmap:
+    if nid in lmap and level > 0.0:
         for i in range(lmap[nid], len(levellist)):
-            if level is not None and level + 1.0 > levellist[i][2] >\
+            if level + 1.0 > levellist[i][2] >\
                             level - 1.0:
                 gparent = levellist[i][0]
+                break
+            if level + 1.0 < levellist[i][2]:
                 break
             if int(nid/10000) != int(levellist[i][0]/10000):
                 break
@@ -897,7 +899,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
             pfinal = []
             for item in parents:
                 pfinal.append(_to_id(item))
-        return pfinal, daughter_id, decay_s.strip(), tfinal, tfinalerr, \
+        return pfinal, daughter_id, rxname.id(decay_s.strip().lower()), \
+               tfinal, tfinalerr, \
                br, nrbr, nrbr_err, nbbr, nbbr_err, gammarays, alphas, \
                betas, ecbp
     return None

@@ -1247,7 +1247,7 @@ template<> void pyne::_load_data<pyne::decay_struct>()
                      H5T_NATIVE_INT);
   status = H5Tinsert(desc, "child", HOFFSET(decay_struct, child),
                      H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "decay", HOFFSET(decay_struct, decay), H5T_STRING);
+  status = H5Tinsert(desc, "decay", HOFFSET(decay_struct, decay), H5T_NATIVE_INT);
   status = H5Tinsert(desc, "half_life", HOFFSET(decay_struct, half_life), 
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "half_life_error", HOFFSET(decay_struct, 
