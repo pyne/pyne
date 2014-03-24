@@ -749,8 +749,12 @@ class Mesh(object):
         index i, the material mat, and the volume element itself ve.
         """
         mats = self.mats
-        for i, ve in enumerate(self.iter_ve()):
-            yield i, mats[i], ve
+        if mats is None:
+            for i, ve in enumerate(self.iter_ve()):
+                yield i, None, ve
+        else:
+            for i, ve in enumerate(self.iter_ve()):
+                yield i, mats[i], ve
 
     def iter_ve(self):
         """Returns an iterator that yields on the volume elements.

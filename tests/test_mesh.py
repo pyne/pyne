@@ -849,3 +849,5 @@ def test_cell_fracs_to_mats():
 def test_no_mats():
     mesh = gen_mesh(mats=None)
     assert_true(mesh.mats is None)
+    i, mat, ve = next(iter(mesh))
+    assert_true(mat is None)
