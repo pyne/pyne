@@ -189,6 +189,46 @@ def test_zzaaam_to_id():
             continue
         yield check_cases, nucname.zzaaam_to_id, val, id
 
+def test_zzzaaa(): 
+
+    assert_equal(nucname.zzzaaa(20040),2004)
+    assert_equal(nucname.zzzaaa("he4"),    2004)
+    assert_equal(nucname.zzzaaa("Cm-244"), 96244)
+    assert_equal(nucname.zzzaaa("PU239"),  94239)
+    assert_equal(nucname.zzzaaa("AM242M"), 95242)
+#americium 242 - ZZZAAA : 095 242 - Excited state dropped..
+
+    assert_equal(nucname.zzzaaa(2004),  2004)
+    assert_equal(nucname.zzzaaa(95642), 95242)
+    assert_equal(nucname.zzzaaa(95242), 95242)
+    assert_equal(nucname.zzzaaa(92636), 92236)
+    assert_equal(nucname.zzzaaa(95942), 95242)
+
+    assert_equal(nucname.zzzaaa("Am-242m"), 95242)
+
+    assert_equal(nucname.zzzaaa("he"), 2000)
+    assert_equal(nucname.zzzaaa("U"), 92000)
+    assert_equal(nucname.zzzaaa("Np"), 93000)
+
+    assert_equal(nucname.zzzaaa("4he"),   2004)
+    assert_equal(nucname.zzzaaa("244CM"), 96244)
+    assert_equal(nucname.zzzaaa("239Pu"), 94239)
+    assert_equal(nucname.zzzaaa("242AM"), 95242)
+
+    assert_equal(nucname.zzzaaa(40020),   2004)
+    assert_equal(nucname.zzzaaa(2440961), 96244)
+    assert_equal(nucname.zzzaaa(2390940), 94239)
+    assert_equal(nucname.zzzaaa(2420950), 95242)
+
+def test_zzzaaa_to_id():
+    vals = [2004, 2004, 96244, 94239, 95242, 2004, 95242, 95242, 92236, 
+            95242, 95242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 
+            2004, 96244, 94239, 95242, 92000]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.zzzaaa_to_id, val, id
+
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
     assert_equal(nucname.mcnp(952421), 95242)
