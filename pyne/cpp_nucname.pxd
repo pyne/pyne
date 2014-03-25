@@ -60,15 +60,6 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int zzaaam_to_id(char *) except +
     int zzaaam_to_id(std_string) except +
 
-
-
-
-
-
-
-
-
-
     # zzzaaa Functions
     int zzzaaa(int) except +
     int zzzaaa(char *) except +
@@ -76,19 +67,6 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int zzzaaa_to_id(int) except +
     int zzzaaa_to_id(char *) except +
     int zzzaaa_to_id(std_string) except +
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     # MCNP Functions 
     int mcnp(int) except + 
