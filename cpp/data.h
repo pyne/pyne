@@ -267,32 +267,71 @@ namespace pyne
 
   /// \name Decay Data
   /// \{
+  
+  /// Data access functions
+  
+  /// simple class to swap the order in which a pair is compared
+  class swapmapcompare{
+    public:
+        bool operator()(const std::pair<int, double>& lhs,
+                        const std::pair<int, double>& rhs) const;
+  };
+  
+  /// Access data in a std::map<std::pair<int, double> for a range of 
+  /// values of the second member of the pair. Returns a vector of all 
+  /// values at valoffset of class U of type T f
+  template<typename T, typename U> std::vector<T> data_access(double emin,
+    double emax, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
+  /// Access data in a std::map<std::pair<int, double> for a given 
+  /// value of the first member of the pair. Returns a vector of all 
+  /// values at valoffset of class U of type T
+  template<typename T, typename U> std::vector<T> data_access(int parent,
+    double min, double max, size_t valoffset, 
+    std::map<std::pair<int, double>, U>  &data);
+  /// Access data in a std::map<std::pair<int, int> for a given 
+  /// matching pair. Returns the value at valoffset of
+  /// class U of type T
+  template<typename T, typename U> T data_access(std::pair<int, int> from_to, 
+    size_t valoffset, std::map<std::pair<int, int>, U> &data);
+  /// Access data in a std::map<std::pair<int, int> for a given 
+  /// value of the first member of the pair. Returns an array of the values
+  /// at valoffset of class U of type T 
+  template<typename T, typename U> std::vector<T> data_access(int parent, 
+    size_t valoffset, std::map<std::pair<int, int>, U> &data);    
 
-  /// Mapping from nuclides in id form to their half lives [s].
-  extern std::map<int, double> half_life_map;
-  /// Mapping from nuclides in id form to their decay constants [1/s].
-  extern std::map<int, double> decay_const_map;
-  /// Mapping from parent/child nuclide pairs in id form to their 
-  /// branch ratio [fraction].
-  extern std::map<std::pair<int, int>, double> branch_ratio_map;
-  /// Mapping from nuclides in id form to their excitation energy [MeV].
-  extern std::map<int, double> state_energy_map;
-  /// Mapping from nuclides in id form to its decay children, if any.
-  extern std::map<int, std::set<int> > decay_children_map;
 
-  /// a struct matching the '/decay/half_life_decay' table in nuc_data.h5.
-  typedef struct half_life_decay_struct {
-    int from_nuc; ///< parent species in id form
-    int to_nuc;   ///< child species in id form
-    double level; ///< decay level [MeV]
-    double half_life;     ///< species half life [s]
-    double decay_const;   ///< decay constant [1/s]
-    double branch_ratio;  ///< decay branch ratio [fraction]
-  } half_life_decay_struct;
+  /// a struct matching the '/decay/level_list' table in nuc_data.h5.
+  typedef struct level_struct{
+    int nuc_id;
+    int rx_id;
+    double half_life;
+    double level;
+    double branch_ratio;
+    int metastable;
+  } level_struct;
 
-  /// Loads the half life data from the nuc_data.h5 file into memory.
-  void _load_half_life_decay();
-
+  /// Mapping from nuclides in id form to a struct containing data associated
+  /// with that level.
+  extern std::map<std::pair<int,double>, level_struct> level_data_lvl_map;
+  extern std::map<std::pair<int,int>, level_struct> level_data_rx_map;
+  
+  template<typename T> void _load_data();
+  template<> void _load_data<level_struct>();
+  
+  /// \brief Returns the nuc_id of an energy level
+  ///
+  /// This function looks for the level that best matches the input level
+  /// within 1 keV of the input nuclide
+  int id_from_level(int nuc, double level);
+  
+  /// \brief Returns the nuc_id of a metastable state
+  ///
+  /// This function looks through the level map for a given input nuc_id to find the
+  /// nuc_id corresponding to the level
+  int metastable_id(int nuc, int m);
+  /// Assumes the first metastable state is the desired one
+  int metastable_id(int nuc);
+  
   /// \brief Returns the half life for a nuclide \a nuc.
   ///
   /// This function works by first checking the half_life_map.  If this is empty it
@@ -350,33 +389,6 @@ namespace pyne
   /// Returns the decay constant for a nuclide \a nuc.
   std::set<int> decay_children(std::string nuc);
 
-  /// Loads the level data from the nuc_data.h5 file into memory.
-  void _load_level_data();
-
-  /// \brief Returns the nuc_id of a metastable state
-  ///
-  /// This function looks through the level map for a given input nuc_id to find the
-  /// nuc_id corresponding to the level
-  int metastable_id(int nuc, int m);
-  /// Assumes the first metastable state is the desired one
-  int metastable_id(int nuc);
-
-  /// a struct matching the '/decay/level_list' table in nuc_data.h5.
-  typedef struct level_struct{
-    int nuc_id;
-    int rx_id;
-    double half_life;
-    double level;
-    double branch_ratio;
-    int metastable;
-  } level_struct;
-
-  /// Mapping from nuclides in id form to a struct containing data associated
-  /// with that level.
-  extern std::map<int, level_struct> level_data;
-
-  template<typename T> void _load_data();
-
   /// a struct matching the '/decay/decays' table in nuc_data.h5.
   typedef struct decay_struct{
     int parent;
@@ -397,10 +409,6 @@ namespace pyne
   /// associated with the decay from the first to the second
   extern std::map<std::pair<int, int>, decay_struct> decay_data;
 
-  template<typename T, typename U> T data_access(std::pair<int, int> from_to, 
-    size_t valoffset, std::map<std::pair<int, int>, U> &data);
-  template<typename T, typename U> std::vector<T> data_access(int parent, 
-    size_t valoffset, std::map<std::pair<int, int>, U> &data);
   //
   //void decay_data(std::pair<int, int> from_to, decay_struct *data);
   std::pair<double, double> decay_half_life(std::pair<int,int>);
@@ -434,17 +442,6 @@ namespace pyne
   /// Loads the gamma ray data from the nuc_data.h5 file into memory.
   template<> void _load_data<gamma_struct>();
 
-  class swapmapcompare{
-    public:
-        bool operator()(const std::pair<int, double>& lhs,
-                        const std::pair<int, double>& rhs) const;
-  };
-  /// A vector of structs containing gamma ray data for access in memory
-  //extern std::vector<gamma_struct> gamma_data;
-  template<typename T, typename U> std::vector<T> data_access(double emin,
-    double emax, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
-  template<typename T, typename U> std::vector<T> data_access(int parent,
-    size_t valoffset, std::map<std::pair<int, double>, U>  &data);
   extern std::map<std::pair<int, double>, gamma_struct> gamma_data;
 
   //returns a list of gamma decay energies from input parent nuclide

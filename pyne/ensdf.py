@@ -6,7 +6,7 @@ import copy
 
 import numpy as np
 
-from pyne import nucname, rxname
+from pyne import nucname, rxname, data
 from pyne.utils import to_sec
 
 
@@ -780,8 +780,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
                 if parent2 is None:
                     parent2 = parent
                     e = 0
-                bparent = _to_id_from_level(parent2, e, levellist, lmap)
-                bdaughter = _to_id_from_level(daughter, level, levellist, lmap)
+                bparent = data.id_from_level(_to_id(parent2), e)
+                bdaughter = data.id_from_level(_to_id(daughter), level)
                 betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
             else:
                 betas.append([pfinal, daughter_id, dat[0], 0.0, dat[2]])
@@ -810,8 +810,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
                 if parent2 is None:
                     parent2 = parent
                     e = 0
-                aparent = _to_id_from_level(parent2, e, levellist, lmap)
-                adaughter = _to_id_from_level(daughter, level, levellist, lmap)
+                aparent = data.id_from_level(_to_id(parent2), e)
+                adaughter = data.id_from_level(_to_id(daughter), level)
                 alphas.append((aparent, adaughter, dat[0], dat[2]))
             else:
                 alphas.append((pfinal, daughter_id, dat[0], dat[2]))
@@ -823,8 +823,8 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
                 parent2 = parent
                 e = 0
             if levellist is not None:
-                ecparent = _to_id_from_level(parent2, e, levellist, lmap)
-                ecdaughter = _to_id_from_level(daughter, level, levellist, lmap)
+                ecparent = data.id_from_level(_to_id(parent2), e)
+                ecdaughter = data.id_from_level(_to_id(daughter), level)
                 ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
                              0, 0, 0])
             else:
@@ -839,11 +839,9 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
                 gdaughter = 0
                 if levellist is not None:
                     if level is not None:
-                        gparent = _to_id_from_level(daughter, level, levellist,
-                                                    lmap)
+                        gparent = data.id_from_level(_to_id(daughter), level)
                         dlevel = level - dat[0]
-                        gdaughter = _to_id_from_level(daughter, dlevel,
-                                                      levellist, lmap)
+                        gdaughter = data.id_from_level(_to_id(daughter), dlevel)
                 if parent2 is None:
                     gp2 = pfinal
                     e = 0
@@ -978,7 +976,7 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                         levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state))
             if level_found is True:
                 levellist.append((nuc_id, 0, half_lifev, level, 0.0, state))
-    return levellist, lmap, lcount
+    return levellist
 
 
 def decays(filename, levellist=None, decaylist=None, lmap=None, lcount=0):
@@ -1018,7 +1016,7 @@ def decays(filename, levellist=None, decaylist=None, lmap=None, lcount=0):
                         decaylist.append(tuple(dc))
                 else:
                     decaylist.append(decay)
-    return levellist, decaylist, lmap, lcount
+    return decaylist
 
 
 def origen_data(filename):

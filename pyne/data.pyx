@@ -11,7 +11,6 @@ from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair as cpp_pair
-from libc.stdlib cimport free
 #from cython cimport pointer
 
 import numpy as np
@@ -388,9 +387,9 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
 #
 # decay data functions
 #
-cdef conv._MapIntDouble half_life_map_proxy = conv.MapIntDouble(False)
-half_life_map_proxy.map_ptr = &cpp_data.half_life_map
-half_life_map = half_life_map_proxy
+#cdef conv._MapIntDouble half_life_map_proxy = conv.MapIntDouble(False)
+#half_life_map_proxy.map_ptr = &cpp_data.half_life_map
+#half_life_map = half_life_map_proxy
 
 
 def half_life(nuc):
@@ -420,9 +419,9 @@ def half_life(nuc):
     return hl
 
 
-cdef conv._MapIntDouble decay_const_map_proxy = conv.MapIntDouble(False)
-decay_const_map_proxy.map_ptr = &cpp_data.decay_const_map
-decay_const_map = decay_const_map_proxy
+#cdef conv._MapIntDouble decay_const_map_proxy = conv.MapIntDouble(False)
+#decay_const_map_proxy.map_ptr = &cpp_data.decay_const_map
+#decay_const_map = decay_const_map_proxy
 
 
 def decay_const(nuc):
@@ -490,9 +489,9 @@ def branch_ratio(from_nuc, to_nuc):
     return br
 
 
-cdef conv._MapIntDouble state_energy_map_proxy = conv.MapIntDouble(False)
-state_energy_map_proxy.map_ptr = &cpp_data.state_energy_map
-state_energy_map = state_energy_map_proxy
+#cdef conv._MapIntDouble state_energy_map_proxy = conv.MapIntDouble(False)
+#state_energy_map_proxy.map_ptr = &cpp_data.state_energy_map
+#state_energy_map = state_energy_map_proxy
 
 
 def state_energy(nuc):
@@ -550,6 +549,27 @@ def decay_children(nuc):
 
     return dc
 
+def id_from_level(nuc, level):
+    """
+    return the nuc_id for input energy level
+
+    Parameters
+    ----------
+    nuc : int
+        Input nuclide
+    level : double
+        energy level of state
+
+    Returns
+    -------
+    nuc : int
+        nuc_id of state
+    """
+    if level > 0.0:
+        return cpp_data.id_from_level(<int> nuc, <double> level)
+    else:
+        return nuc
+    
 def metastable_id(nuc, level=1):
     """
     return the nuc_id of a metastable state
