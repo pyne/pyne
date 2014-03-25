@@ -196,7 +196,6 @@ def test_zzzaaa():
     assert_equal(nucname.zzzaaa("Cm-244"), 96244)
     assert_equal(nucname.zzzaaa("PU239"),  94239)
     assert_equal(nucname.zzzaaa("AM242M"), 95242)
-#americium 242 - ZZZAAA : 095 242 - Excited state dropped..
 
     assert_equal(nucname.zzzaaa(2004),  2004)
     assert_equal(nucname.zzzaaa(95642), 95242)
