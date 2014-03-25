@@ -654,20 +654,6 @@ cdef cpp_set[int] zzaaam_set(object nuc_sequence):
         nuc_set.insert(nuc_zz)
     return nuc_set
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 cdef cpp_set[int] zzzaaa_set(object nuc_sequence):
     cdef int nuc_zz
     cdef cpp_set[int] nuc_set = cpp_set[int]()
