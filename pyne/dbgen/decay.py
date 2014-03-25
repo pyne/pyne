@@ -170,11 +170,10 @@ def parse_decay_data(build_dir=""):
     build_dir = os.path.join(build_dir, 'ENSDF')
 
     decay_data = []
-    level_list = []
     files = sorted([f for f in glob.glob(os.path.join(build_dir, 'ensdf.*'))])
     for f in files:
         print("    parsing decay data from {0}".format(f))
-        decay_data = ensdf.decays(f, level_list, decay_data)
+        decay_data = ensdf.decays(f, decay_data)
 
     all_decays = []
     all_gammas = []

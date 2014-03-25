@@ -1005,13 +1005,13 @@ template<> void pyne::_load_data<pyne::level_struct>()
 //
 int pyne::id_from_level(int nuc, double level) {
   int nostate = (nuc / 10000) * 10000;
-  if (level_data_rx_map.empty()) {
+  if (level_data_lvl_map.empty()) {
     _load_data<level_struct>();
   }
 
   std::map<std::pair<int, double>, level_struct>::iterator nuc_lower, nuc_upper;
 
-  nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0));
+  nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0.0));
   nuc_upper = level_data_lvl_map.upper_bound(std::make_pair(nostate+9999, DBL_MAX));
   double min = DBL_MAX;
   //by default return input nuc_id with level stripped
@@ -1041,7 +1041,7 @@ int pyne::metastable_id(int nuc, int m) {
 
   std::map<std::pair<int, double>, level_struct>::iterator nuc_lower, nuc_upper;
 
-  nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0));
+  nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0.0));
   nuc_upper = level_data_lvl_map.upper_bound(std::make_pair(nostate+9999, DBL_MAX));
   for (std::map<std::pair<int, double>, level_struct>::iterator it=nuc_lower; it!=nuc_upper;
        ++it) {
@@ -1111,50 +1111,6 @@ double pyne::state_energy(std::string nuc)
 
 
 //
-// Branch ratio data
-//
-
-
-double pyne::branch_ratio(std::pair<int, int> from_to) {
-  std::vector<int> part1 = data_access<int, level_struct>(from_to.first, 
-    offsetof(level_struct, rx_id), level_data_rx_map);
-  std::vector<double> part2 = data_access<double, level_struct>(from_to.first, 
-    offsetof(level_struct, branch_ratio), level_data_rx_map);
-  double result = 0;
-  for (std::vector<int>::size_type i=0; i < part1.size(); ++i) {
-    if ((part1[i] != 0) && ((rxname::child(from_to.first,part1[i],"decay")/10000)*10000 == from_to.second))
-      result = result + part2[i]*0.01;
-    if ((part1[i] == 36125) && (((from_to.first/10000)*10000) == ((from_to.second/10000)*10000))) {
-      result = 1.0;
-      break;
-    }
-  }
-  if (from_to.first == from_to.second) {
-    result = 1.0;
-  }
-  return result;
-}
-
-double pyne::branch_ratio(int from_nuc, int to_nuc)
-{
-  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
-                                          nucname::id(to_nuc)));
-};
-
-double pyne::branch_ratio(char * from_nuc, char * to_nuc)
-{
-  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
-                                          nucname::id(to_nuc)));
-};
-
-double pyne::branch_ratio(std::string from_nuc, std::string to_nuc)
-{
-  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
-                                          nucname::id(to_nuc)));
-};
-
-
-//
 // Decay constant data
 //
 
@@ -1209,6 +1165,50 @@ double pyne::half_life(std::string nuc)
 {
   int nuc_zz = nucname::id(nuc);
   return half_life(nuc_zz);
+};
+
+
+//
+// Branch ratio data
+//
+
+
+double pyne::branch_ratio(std::pair<int, int> from_to) {
+  std::vector<int> part1 = data_access<int, level_struct>(from_to.first, 
+    offsetof(level_struct, rx_id), level_data_rx_map);
+  std::vector<double> part2 = data_access<double, level_struct>(from_to.first, 
+    offsetof(level_struct, branch_ratio), level_data_rx_map);
+  double result = 0;
+  if ((from_to.first == from_to.second) && (half_life(from_to.first) == std::numeric_limits<double>::infinity()))
+    return 1.0;
+  for (std::vector<int>::size_type i=0; i < part1.size(); ++i) {
+    if ((part1[i] != 0) && ((rxname::child(from_to.first,part1[i],"decay")/10000)*10000 == from_to.second))
+      result = result + part2[i]*0.01;
+    if ((part1[i] == 36125) && (((from_to.first/10000)*10000) == ((from_to.second/10000)*10000))
+        && (from_to.second % 10000 == 0)) { 
+      return 1.0;
+    }
+  }
+  
+  return result;
+}
+
+double pyne::branch_ratio(int from_nuc, int to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
+};
+
+double pyne::branch_ratio(char * from_nuc, char * to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
+};
+
+double pyne::branch_ratio(std::string from_nuc, std::string to_nuc)
+{
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
 };
 
 

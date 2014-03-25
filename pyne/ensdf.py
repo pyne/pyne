@@ -158,79 +158,6 @@ def _to_time(tstr, errstr):
     return tfinal, tfinalerr
 
 
-def half_life(ensdf):
-    """Grabs the half-lives from an ENSDF file.
-
-    Parameters
-    ----------
-    ensdf : str or file-like object
-        ENSDF file to inspect for half-life data
-
-    Returns
-    -------
-    data : list of 5-tuples
-        List of tuples where the indices match
-
-        1. from_nuclide, int (id)
-        2. level, float (MeV) - from_nuc's energy level
-        3. to_nuclide, int (id)
-        4. half_life, float (seconds)
-        5. branch_ratio, float (frac)
-
-    """
-    if isinstance(ensdf, basestring):
-        with open(ensdf, 'r') as f:
-            lines = f.read()
-    else:
-        lines = ensdf.read()
-    data = []
-    datasets = lines.split(80 * " " + "\n")[0:-1]
-    for dataset in datasets:
-        lines = dataset.splitlines()
-        ident = re.match(_ident, lines[0])
-        leveln = 0
-        if ident is None:
-            continue
-        if not 'ADOPTED LEVELS' in ident.group(2):
-            continue
-        for line in lines:
-            level_l = _level_regex.match(line)
-            if level_l is not None:
-                level, half_lifev, from_nuc, state = \
-                    _parse_level_record(level_l)
-                if half_lifev == np.inf and from_nuc is not None:
-                    data.append((from_nuc, 0.0, from_nuc, half_lifev, 1.0))
-                if level is None:
-                    level = 0.0
-                if from_nuc is not None:
-                    from_nuc += leveln
-                    leveln += 1
-                continue
-            levelc = _level_cont_regex.match(line)
-            if levelc is None or half_lifev is None or from_nuc is None:
-                continue
-            dat = _parse_level_continuation_record(levelc)
-            to_list = []
-            for key, val in dat.items():
-                goodkey = True
-                keystrip = key.replace("%", "").lower()
-                badlist = ["sf", "ecsf", "34si", "|b{+-}fission", "{+24}ne",
-                           "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
-                           "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
-                           "{+28}mg", "sf(+ec+b+)"]
-                for item in badlist:
-                    if keystrip == item:
-                        goodkey = False
-                        print("reaction not supported {0}".format(keystrip))
-                if goodkey is True and from_nuc != 0:
-                    kid = (rxname.child(from_nuc, keystrip,
-                                        "decay") / 10000) * 10000
-                    to_list.append([kid, float(val.split("(")[0]) * 0.01])
-            data += [(from_nuc, level * 1.0E-3, to_nuc, half_lifev, br)
-                     for to_nuc, br in to_list if 0.0 < br]
-    return data
-
-
 def _get_val_err(valstr, errstr):
     pm = _errpm.match(errstr)
     err = _err.match(errstr)
@@ -725,7 +652,7 @@ def _update_xrays(conv, xrays, nuc_id):
     return xrays
 
 
-def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
+def _parse_decay_dataset(lines, decay_s):
     """
     This parses a gamma ray dataset. It returns a tuple of the parsed data.
 
@@ -776,16 +703,12 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
         b_rec = _beta.match(line)
         if b_rec is not None:
             dat = _parse_beta_record(b_rec)
-            if levellist is not None:
-                if parent2 is None:
-                    parent2 = parent
-                    e = 0
-                bparent = data.id_from_level(_to_id(parent2), e)
-                bdaughter = data.id_from_level(_to_id(daughter), level)
-                betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
-            else:
-                betas.append([pfinal, daughter_id, dat[0], 0.0, dat[2]])
-            continue
+            if parent2 is None:
+                parent2 = parent
+                e = 0
+            bparent = data.id_from_level(_to_id(parent2), e)
+            bdaughter = data.id_from_level(_to_id(daughter), level)
+            betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
         bc_rec = _betac.match(line)
         if bc_rec is not None:
             bcdat = _parse_beta_continuation_record(bc_rec)
@@ -806,30 +729,22 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
         a_rec = _alpha.match(line)
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
-            if levellist is not None:
-                if parent2 is None:
-                    parent2 = parent
-                    e = 0
-                aparent = data.id_from_level(_to_id(parent2), e)
-                adaughter = data.id_from_level(_to_id(daughter), level)
-                alphas.append((aparent, adaughter, dat[0], dat[2]))
-            else:
-                alphas.append((pfinal, daughter_id, dat[0], dat[2]))
-            continue
+            if parent2 is None:
+                parent2 = parent
+                e = 0
+            aparent = data.id_from_level(_to_id(parent2), e)
+            adaughter = data.id_from_level(_to_id(daughter), level)
+            alphas.append((aparent, adaughter, dat[0], dat[2]))
         ec_rec = _ec.match(line)
         if ec_rec is not None:
             dat = _parse_ec_record(ec_rec)
             if parent2 is None:
                 parent2 = parent
                 e = 0
-            if levellist is not None:
-                ecparent = data.id_from_level(_to_id(parent2), e)
-                ecdaughter = data.id_from_level(_to_id(daughter), level)
-                ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
-                             0, 0, 0])
-            else:
-                ecbp.append([pfinal, daughter_id, dat[0], 0.0, dat[2], dat[4],
-                             0, 0, 0])
+            ecparent = data.id_from_level(_to_id(parent2), e)
+            ecdaughter = data.id_from_level(_to_id(daughter), level)
+            ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
+                         0, 0, 0])
             continue
         g_rec = _g.match(line)
         if g_rec is not None:
@@ -837,11 +752,10 @@ def _parse_decay_dataset(lines, decay_s, levellist=None, lmap=None):
             if dat[0] is not None:
                 gparent = 0
                 gdaughter = 0
-                if levellist is not None:
-                    if level is not None:
-                        gparent = data.id_from_level(_to_id(daughter), level)
-                        dlevel = level - dat[0]
-                        gdaughter = data.id_from_level(_to_id(daughter), dlevel)
+                if level is not None:
+                    gparent = data.id_from_level(_to_id(daughter), level)
+                    dlevel = level - dat[0]
+                    gdaughter = data.id_from_level(_to_id(daughter), dlevel)
                 if parent2 is None:
                     gp2 = pfinal
                     e = 0
@@ -979,13 +893,9 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
     return levellist
 
 
-def decays(filename, levellist=None, decaylist=None, lmap=None, lcount=0):
-    if levellist is None:
-        levellist = []
+def decays(filename, decaylist=None):
     if decaylist is None:
         decaylist = []
-    if lmap is None:
-        lmap = dict()
     if isinstance(filename, str):
         with open(filename, 'r') as f:
             dat = f.read()
@@ -999,7 +909,7 @@ def decays(filename, levellist=None, decaylist=None, lmap=None, lcount=0):
             continue
         if 'DECAY' in ident.group(2):
             decay_s = ident.group(2).split()[1]
-            decay = _parse_decay_dataset(lines, decay_s, levellist, lmap)
+            decay = _parse_decay_dataset(lines, decay_s)
             if decay is not None:
                 if isinstance(decay[0], list):
                     for parent in decay[0]:
@@ -1186,7 +1096,6 @@ def _level_dlist_gen(f, keys):
             dat = f.read()
     else:
         dat = f.read()
-    decaylist = []
     datasets = dat.split(80 * " " + "\n")[0:-1]
     for dataset in datasets:
         lines = dataset.splitlines()
