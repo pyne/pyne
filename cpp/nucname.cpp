@@ -603,7 +603,7 @@ int pyne::nucname::zzzaaa(std::string nuc)
 
 int pyne::nucname::zzzaaa_to_id(int nuc)
 {
-  return (nuc)*10;
+  return (nuc)*10000;
 };
 
 
