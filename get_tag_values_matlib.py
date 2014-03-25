@@ -246,7 +246,8 @@ def write_mats_h5m(materials_list, filename):
     new_matlib = MaterialLibrary()
 
     for material in materials_list:
-        new_matlib[material.attrs['name']] = material
+        # using fluka name as index since this is unique
+        new_matlib[material.attrs['fluka_name']] = material
     new_matlib.write_hdf5(filename)
 
 """
@@ -298,7 +299,6 @@ main
 def main():
     # parse the script
     references = parsing()
-    print 'refs =', references.code
     # get list of tag values
     tag_values = get_tag_values(references.datafile)
     # now load material library
