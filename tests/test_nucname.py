@@ -220,13 +220,13 @@ def test_zzzaaa():
     assert_equal(nucname.zzzaaa(2420950), 95242)
 
 def test_zzzaaa_to_id():
-    vals = [2004, 2004, 96244, 94239, 95242, 2004, 95242, 95242, 92236, 
-            95242, 95242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 
-            2004, 96244, 94239, 95242, 92000]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
-        yield check_cases, nucname.zzzaaa_to_id, val, id
+
+    assert_equal(nucname.zzzaaa_to_id(2004),nucname.id(20040))
+    assert_equal(nucname.zzzaaa_to_id(96244),nucname.id("Cm-244"))
+    assert_equal(nucname.zzzaaa_to_id(94239),nucname.id("PU239"))
+
+    assert_equal(nucname.zzzaaa_to_id(95242),nucname.id(95642))
+    assert_equal(nucname.zzzaaa_to_id(95242),nucname.id(95642))
 
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
