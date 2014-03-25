@@ -618,6 +618,8 @@ int pyne::nucname::zzzaaa_to_id(std::string nuc)
   return zzzaaa_to_id(pyne::to_int(nuc));
 };
 
+
+
 /**********************/
 /*** mcnp functions ***/
 /**********************/

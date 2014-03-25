@@ -18,9 +18,7 @@ Currently the following naming conventions are supported:
     example, 'H-1' and 'Am242M' are both valid.  Note that nucname will always
     return name form with the dash removed and all letters uppercase.
  #. **zzaaam**: This type places the charge of the nucleus out front, then has three
-    digits for the atomic mass number, and ends with a metastable flag (0 = ground,
-    1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would
-    be expressed as '922350'.
+    digits for the atomic mass.  It contains no information about the excited state.
  #. **SZA**: This type places three state digits out front, the charge of the nucleus in 
     the middle, and then has three digits for the atomic mass number. Uranium-235M here 
     would be expressed as '1092235'.  
@@ -50,7 +48,7 @@ All functionality may be found in the ``nucname`` package::
 
  from pyne import nucname
 
-This contains several zzaaam, name, MCNP and Serpent converter function as
+This contains several zzaaam, zzzaaa, name, MCNP and Serpent converter function as
 well as other helpful module attributes.
 
 .. _name_cast:
@@ -68,6 +66,10 @@ Naming Convention Casting Functions
 -----
 
 .. autofunction:: zzaaam(nuc)
+
+-----
+
+.. autofunction:: zzzaaa(nuc)
 
 -----
 
@@ -97,6 +99,10 @@ Id Conversion Functions
 .. autofunction:: zzaaam_to_id(nuc)
 
 -----
+
+.. autofunction:: zzzaaa_to_id(nuc)
+
+---
 
 .. autofunction:: mcnp_to_id(nuc)
 
