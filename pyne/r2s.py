@@ -79,7 +79,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
             flux_mesh = Meshtal(flux_mesh, {tally_num: (flux_tag, 
                                                         flux_tag + "_err", 
                                                         flux_tag + "_total", 
-                                                        flux_tag + "_err_total")})
+                                                        flux_tag + "_err_total")},
+                                                        mesh_mats=True)
             m = flux_mesh.tally[tally_num]
         #  flux_mesh is Meshtal object
         elif instance(flux_mesh, Meshtal):
