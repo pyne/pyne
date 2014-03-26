@@ -221,21 +221,21 @@ def test_zzzaaa():
 
 def test_zzzaaa_to_id():
 
-    assert_equal(nucname.zzzaaa_to_id(2004),nucname.id(20040))
-    assert_equal(nucname.zzzaaa_to_id(96244),nucname.id("Cm-244"))
-    assert_equal(nucname.zzzaaa_to_id(94239),nucname.id("PU239"))
+    assert_equal(nucname.zzzaaa_to_id(2004), nucname.id(20040))
+    assert_equal(nucname.zzzaaa_to_id(96244), nucname.id("Cm-244"))
+    assert_equal(nucname.zzzaaa_to_id(94239), nucname.id("PU239"))
 
-    assert_equal(nucname.zzzaaa_to_id(95242),nucname.id(95642))
-    #Added /10*10 to remove the state information from id (ZZZAAA carries no state
+    assert_equal(nucname.zzzaaa_to_id(95242), nucname.id(95642))
+    # Added /10*10 to remove the state information from id (ZZZAAA carries no state
     # information, defaults to zero when converting ZZZAAA back to ID)
-    assert_equal(nucname.zzzaaa_to_id(95242),nucname.id(95942)/10*10)
-    assert_equal(nucname.zzzaaa_to_id(95242),nucname.id("AM-242m")/10*10)
+    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id(95942)/10)*10)
+    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id("AM-242m")/10)*10)
 
-    assert_equal(nucname.zzzaaa_to_id(2000),nucname.id("he"))
-    assert_equal(nucname.zzzaaa_to_id(92000),nucname.id("U"))
-    assert_equal(nucname.zzzaaa_to_id(93000),nucname.id("Np"))
+    assert_equal(nucname.zzzaaa_to_id(2000), nucname.id("he"))
+    assert_equal(nucname.zzzaaa_to_id(92000), nucname.id("U"))
+    assert_equal(nucname.zzzaaa_to_id(93000), nucname.id("Np"))
 
-    assert_equal(nucname.zzzaaa_to_id(2004),nucname.id(40020))
+    assert_equal(nucname.zzzaaa_to_id(2004), nucname.id(40020))
 
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
