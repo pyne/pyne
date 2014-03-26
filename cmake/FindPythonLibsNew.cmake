@@ -142,6 +142,10 @@ else()
               "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}m"
               "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}mu"
               "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}dm"
+              "libpython${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
+              "libpython${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}m"
+              "libpython${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}mu"
+              "libpython${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}dm"
         PATHS ${_PYTHON_LIBS_SEARCH}
         NO_SYSTEM_ENVIRONMENT_PATH)
 endif()
