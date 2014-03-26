@@ -576,6 +576,49 @@ int pyne::nucname::zzaaam_to_id(std::string nuc)
   return zzaaam_to_id(pyne::to_int(nuc));
 };
 
+/************************/
+/*** zzzaaa functions ***/
+/************************/
+int pyne::nucname::zzzaaa(int nuc)
+{
+  int nucid = id(nuc);
+  int zzzaaa = nucid/10000;
+
+  return zzzaaa;
+};
+
+
+int pyne::nucname::zzzaaa(char * nuc)
+{
+  std::string newnuc (nuc);
+  return zzzaaa(newnuc);
+};
+
+
+int pyne::nucname::zzzaaa(std::string nuc)
+{
+  return zzzaaa(id(nuc));
+};
+
+
+int pyne::nucname::zzzaaa_to_id(int nuc)
+{
+  return (nuc)*10000;
+};
+
+
+int pyne::nucname::zzzaaa_to_id(char * nuc)
+{
+  return zzzaaa_to_id(std::string(nuc));
+};
+
+
+int pyne::nucname::zzzaaa_to_id(std::string nuc)
+{
+  return zzzaaa_to_id(pyne::to_int(nuc));
+};
+
+
 
 /**********************/
 /*** mcnp functions ***/
