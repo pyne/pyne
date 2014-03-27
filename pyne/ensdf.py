@@ -1,5 +1,8 @@
 import re
-import urllib
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 import os
 import warnings
 import copy
