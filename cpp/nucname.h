@@ -335,6 +335,33 @@ namespace nucname
   int zzzaaa_to_id(std::string nuc);
   /// \}
 
+
+  /// \name AALLZZZM Form Functions
+  /// \{
+  /// The AALLZZZM nuclide naming convention is a form in which the nuclides 
+  /// AA number is followed by the redundant two LL characters, followed by 
+  /// the nuclides ZZZ number.  Can also be followed with a metastable flag.
+  /// Uranium-235 here would be expressed as ‘92-U-235’.
+  /// \param nuc a nuclide
+  /// \return an integer nuclide identifier.
+  std::string aallzzzm(int nuc);
+  std::string aallzzzm(char * nuc);
+  std::string aallzzzm(std::string nuc);
+  /// \}
+
+
+  /// \name AALLZZZM Form to Identifier Form Functions
+  /// \{
+  /// This converts from the AALLZZZM nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in AALLZZZM form.
+  /// \return an integer id nuclide identifier.
+  //int aallzzzm_to_id(int nuc);
+  int aallzzzm_to_id(char * nuc);
+  int aallzzzm_to_id(std::string nuc);
+  /// \}
+
+
   /// \name MCNP Form Functions
   /// \{
   /// This is the naming convention used by the MCNP suite of codes.
