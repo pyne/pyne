@@ -51,15 +51,10 @@ class USRBIN(Mesh):
                                         self.y_bounds, self.z_bounds],
                                         structured=True,structured_ordering='zyx')
 
-        print self.x_bounds,self.y_bounds,self.z_bounds
-
 	print "done creating mesh"
 	self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self, name="part_data_{0}".format(self.particle))
 	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, name="error_data_{0}".format(self.particle))
 
-        print len(self.part_data)
-        print len(self.error_data)
-	
 	self.part_data_tag[:] = self.part_data
 	self.error_data_tag[:] = self.error_data
 
@@ -158,18 +153,16 @@ class USRBIN(Mesh):
 
 
     def read_usrbin(self, file_handle): # combines all above functions to place data in a list
-#        fh = open(filename)
-        fh = file_handle
-        self.mesh_tally = 0
-        cart_tf = False
-        track_length_tf = False
-        track_error_tf = False
-        EOF_tf = False
-        self.part_data = []
-        self.error_data = []
+        fh = file_handle # valid file handle
+        self.mesh_tally = 0 
+
         line = True
+   
 	line = fh.readline()
         while line:
+            self.part_data = []
+            self.error_data = []
+
 	    self.mesh_tally = self.mesh_tally + 1
 	    print self.mesh_tally
 
@@ -191,37 +184,24 @@ class USRBIN(Mesh):
 	    for count in range (0,2):
 		line = fh.readline()
 
-
 	    if "accurate deposition" in line:
-		print "!!!!!!!!!"
-		print line
-		print "!!!!!!!!!"
 		line = fh.readline()
 
-#	    print "!!!!!"
-#	    print line
-#	    print "!!!!!"
-#            if "track-length binning" not in line:
-#		print "not a track length binning?"
-#		line = False
 	    if "track-length binning" in line:
-		print "!!!!!!!!!"
-		print line
-		print "!!!!!!!!!"
-		fh.readline()
-#		print line
+		line = fh.readline()
 
+
+            print line
 	    # now reading track length data
             #int(math.ceil(x_info[0]*y_info[0]*z_info[0]/float(columns)))
             num_volume_element = x_info[0]*y_info[0]*z_info[0]
             while ( len(self.part_data) < num_volume_element ):
 		self.part_data += [float(x) for x in line.split()]
                 line = fh.readline()
-	    line = fh.readline()
-#	    print line
-            for count in range (0,2):
+	    print "last track +1", line
+            for count in range (0,3):
 		line = fh.readline()
-#		print line
+            print "first line error ", line
             while ( len(self.error_data) < num_volume_element ):
 		self.error_data += [float(x) for x in line.split()]
                 line = fh.readline()
@@ -251,5 +231,5 @@ class USRBIN(Mesh):
 
 #test1=USR("fng_dose_usrbin_22.lis")
 # test2=read_tally_sets()
-my_file = USRBIN("/data/prod/nasa/atic/big_run/fludag/atic_usrbin_76.lis")
+my_file = USRBIN("/data/prod/nasa/atic/big_run/fluka/atic_usrbin_76.lis")
 #my_file.read_usrbin("fng_dose_usrbin_22.lis")
