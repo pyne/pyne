@@ -333,35 +333,6 @@ def zzzaaa_to_id(nuc):
     return newnuc
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def mcnp(nuc):
     """Converts a nuclide to its MCNP form (92636). 
 
@@ -441,7 +412,7 @@ def aallzzzm(nuc):
 
 
 def aallzzzm_to_id(nuc):
-    """Converts a nuclide directly from AALLZZZM form (95242) to
+    """Converts a nuclide directly from AALLZZZM form (95-Am-241m) to
     the canonical identifier form. 
 
     Parameters
