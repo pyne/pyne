@@ -31,15 +31,17 @@
 //
 // MODULE:              DagSolid.hh
 //
-// Date:                20/12/2010
-// Author:              M. C. Han, C. H. Kim, J. H. Jeong, Y. S. Yeom, S. Kim, Paul. P. H. Wilson, J. Apostolakis
-// Organisation:        Hanyang Univ., KR
+// Date:                27/03/2014
+// Author:              A. Davis M. C. Han, C. H. Kim, J. H. Jeong, Y. S. Yeom, S.
+//                      Kim, Paul. P. H. Wilson, J. Apostolakis
+// Organisation:        The University of Wisconsin-Madison, USA & Hanyang Univ., KR
 //
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
 // CHANGE HISTORY
 // --------------
 //
+// 27 March 2014, A Davis, UW - Updated description text
 // 31 October 2010, J. H. Jeong, Hanyang Univ., KR
 //  - Created.
 //
