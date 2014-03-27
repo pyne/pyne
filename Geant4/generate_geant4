@@ -17,11 +17,12 @@ main driver
 def main():
     options = parse_arguments()
 
+    # get the materials present in the intput file
+    (g4_isotopes,g4_elements,g4_materials, material_dict) = _get_material_info(options.dag_file)
+
     # get the volumes present in the input file
     (dag_volume_names,dag_materials) = _get_dag_info(options.dag_file)
 
-    # get the materials present in the intput file
-    (g4_isotopes,g4_elements,g4_materials) = _get_material_info(options.dag_file)
     # create the dir structure for g4 file
     _create_directory_structure(options.directory)
     # build the generic header files
@@ -33,7 +34,7 @@ def main():
     # setup the soruce
     source_files = _setup_source()
     # dag specific source
-    dag_source_files = _setup_dagspecific_source(dag_volume_names,options.dag_file,
+    dag_source_files = _setup_dagspecific_source(dag_volume_names,dag_materials, material_dict, options.dag_file,
                                                  g4_isotopes, g4_elements, g4_materials, options.tally, 
                                                  options.history_printing)
     source_files.update(dag_source_files)
@@ -133,22 +134,20 @@ def _get_dag_info(dag_filename):
     # for the 3d entities
     for entity in geom_list:
         if vol_tag[entity] == 3:
-             dag_vol_names.append('vol_'+str(name_tag[entity]))          
+             dag_vol_names.append(str(name_tag[entity]))          
 
-    # could use dag to get metadata
-    # need to update pydagmc to support new syntax
-    # also need to update 
-    # load the file into dag
-    """
-    load(dag_filename)
 
-    vol_list = get_volume_list()
+    # loop over all the volumes
+    for entity in geom_list:
+        # loop over the material sets
+        for meshset in mat_list:
+            # if volume in set
+            if meshset.contains(entity):
+                mat_name = mat_tag[meshset]
+                volume_name = name_tag[entity]
+                dag_materials[volume_name]="".join( chr( val ) for val in mat_name )
 
-    for vol in vol_list:
-        print volume_metadata(vol)
-    
-    print get_material_set()
-    """
+
     return dag_vol_names,dag_materials
 
 """
@@ -166,7 +165,7 @@ material_dict : dictionary of materials
 
 """
 def _get_material_info(dag_file):
-    dag_file = "output.h5m"
+
     # material object
     mat_lib = MaterialLibrary()
     mat = Material()
@@ -196,9 +195,9 @@ def _get_material_info(dag_file):
 
     # now need to create g4 materials using the elements we created previously
 
-    g4_materials = _materials_to_g4materials(materials,mat_lib)
+    (g4_materials,material_dictionary) = _materials_to_g4materials(materials,mat_lib)
 
-    return g4_isotopes, g4_elements, g4_materials
+    return g4_isotopes, g4_elements, g4_materials, material_dictionary
 
 """ 
 Function to translate nuclide in zzzaaammmm form
@@ -295,12 +294,17 @@ g4_elements : list of G4Elements ready to write to disk
 def _materials_to_g4materials(materials, material_lib):
     g4materials = []
 
+    material_index_dict = {}
+
     # for each material
     for material_name in materials:
         # 1 to N+1 index
         mat_idx = materials.index(material_name)+1
         # material object
         material = material_lib[material_name]
+        # set correspondnce between name and index
+        material_index_dict[material_name]=mat_idx
+
 #        print material.comp
         # get the element names
         
@@ -312,13 +316,13 @@ def _materials_to_g4materials(materials, material_lib):
                 elem_dict[znum(nuclide)] += material.comp[nuclide]
                 
         # setup material
-        g4materials.append('  density = {0}*g/cm3; \n'.format(-1.*material.density))
+        g4materials.append('  density = {0}*g/cm3; \n'.format(material.density))
         g4materials.append('  G4Material* mat_{0} = new G4Material(name= "{1}", density, ncomponents = {2}); \n'.format(mat_idx,material_name,len(elem_dict)))
         for elem in elem_dict.keys():
             nucname = name(elem*10000000)
             g4materials.append("  mat_{0}->AddElement( el_{0}_{1} , fractionmass = {2}*perCent); \n".format(mat_idx,nucname,elem_dict[elem]*100.))
         
-    return g4materials
+    return g4materials,material_index_dict
 
 """ 
 Function to create headers for Geant4 problem
@@ -559,7 +563,8 @@ def _setup_dagspecific_headers(dag_volume_names, tallies_needed):
     # eg file_contents.append('    G4LogicalVolume* slab1_log;\n')
 
     file_contents.append('    // DAG Logical volumes\n')
-    for volume in dag_volume_names:
+    for volume_name in dag_volume_names:
+        volume = 'vol_'+volume_name
         file_contents.append('    G4LogicalVolume* '+volume+'_log;\n')
 
     file_contents.append('\n')
@@ -571,7 +576,8 @@ def _setup_dagspecific_headers(dag_volume_names, tallies_needed):
     # eg file_contents.append('    G4VPhysicalVolume* slab1_phys;\n')
 
     file_contents.append('    // DAG Physical volumes\n')
-    for volume in dag_volume_names:
+    for volume_name in dag_volume_names:
+        volume = 'vol_'+volume_name
         file_contents.append('    G4VPhysicalVolume* '+volume+'_phys;\n')
 
     # may want to store the name in list for later
@@ -829,7 +835,7 @@ def _setup_source():
 
     return source_files
 
-def _setup_dagspecific_source(dag_volume_names, dag_h5m,
+def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, dag_h5m,
                               g4_isotopes,g4_elements,g4_materials, tallies_needed,
                               every_history):
 
@@ -899,9 +905,6 @@ def _setup_dagspecific_source(dag_volume_names, dag_h5m,
     file_contents.append('  G4Material* Vacuum = \n')
     file_contents.append('  new G4Material("Vacuum",z=1., a=1.0*g/mole, density=1.0e-20*mg/cm3);\n')
     file_contents.append('\n')
-    file_contents.append('  G4Material* Vacuum1 = \n')
-    file_contents.append('  new G4Material("Vacuum1",z=20., a=3000.0*g/mole, density=1.0*g/cm3);\n')
-    file_contents.append('\n')
 
     # will pull world size from max min in problem, maybe even take graveyard instead
 
@@ -931,10 +934,32 @@ def _setup_dagspecific_source(dag_volume_names, dag_h5m,
     file_contents.append('  G4cout << "There are " << Num_of_objects << " dag volumes" << G4endl;\n')
     file_contents.append('\n')
 
-    for volume in dag_volume_names:
-        idx = dag_volume_names.index(volume)
+    for volume_name in dag_volume_names:
+        idx = dag_volume_names.index(volume_name)
+        # material 
+
+#        for keys in dag_materials.keys():
+ #           print volume_name,keys,dag_materials[keys]
+  #          print dag_materials[1]
+   #         exit()
+
+        if int(volume_name) not in dag_materials.keys():
+            material = "Vacuum"
+        else:
+            tmp_name = dag_materials[int(volume_name)].split(":")[1].strip()
+            material = tmp_name.replace('\x00', '')
+ #           print material
+            if 'Graveyard' in material:
+                material = "Vacuum"
+            else:
+                material = "mat_"+str(material_dict[material])
+  
+        # should exit if material not in list
+
+#        print material, volume_name
+        volume='vol_'+volume_name
         file_contents.append('  DagSolid* '+volume+' = new DagSolid("'+volume+'",dagmc,'+str(idx+1)+');\n')
-        file_contents.append('  G4LogicalVolume* '+volume+'_log = new G4LogicalVolume('+volume+',Vacuum1,"'+volume+'_log",0,0,0);\n')
+        file_contents.append('  G4LogicalVolume* '+volume+'_log = new G4LogicalVolume('+volume+','+material+',"'+volume+'_log",0,0,0);\n')
         file_contents.append('  G4PVPlacement* '+volume+'_phys = new G4PVPlacement(0,G4ThreeVector(0*cm,0*cm,0*cm),'+volume+'_log,"'+volume+'_phys",world_volume_log,false,0);\n')
         file_contents.append('\n')
 
@@ -950,7 +975,8 @@ def _setup_dagspecific_source(dag_volume_names, dag_h5m,
     # options if tracklength 
     if tallies_needed:
         file_contents.append(' // TrackLength Scorer\n')
-        for volume in dag_volume_names:
+        for volume_name in dag_volume_names:
+            volume = "vol_"+volume_name
             file_contents.append('  G4MultiFunctionalDetector* '+volume+'_det = new G4MultiFunctionalDetector("'+volume+'_flux");\n')
             if dag_volume_names.index(volume) == 0:
                 file_contents.append('  G4VPrimitiveScorer* primitive;\n')
@@ -1650,6 +1676,10 @@ def _create_directory_structure(directory):
     _mkdir_p(directory+'/include')
     _mkdir_p(directory+'/src')
     return
+
+def _dagmc_volume_material(dagmc_h5m, index):
+
+    return material_name
 
 """
 Function from http://stackoverflow.com/questions
