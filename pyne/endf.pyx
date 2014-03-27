@@ -2125,7 +2125,7 @@ class ENDFContRecord(ENDFRecord):
 #    def read(self, line):
 #        super(ENDFSendRecord, self).read(self.line)
 #        if items[2] == 99999:
-#            print 'SEND'
+#            print('SEND')
 #        else:
 #            raise NotFound('SEND')
 #
@@ -2140,7 +2140,7 @@ class ENDFContRecord(ENDFRecord):
 #    def read(self, line):
 #        super(ENDFFendRecord, self).read(self.line)
 #        if (items[1] == 0) and (items[2] == 0):
-#            print 'FEND'
+#            print('FEND')
 #        else:
 #            raise NotFound('FEND')
 #
@@ -2155,7 +2155,7 @@ class ENDFContRecord(ENDFRecord):
 #    def read(self, line):
 #        super(ENDFMendRecord, self).read(self.line)
 #        if (items[0] == 0) and (items[1] == 0) and (items[2] == 0):
-#            print 'MEND'
+#            print('MEND')
 #        else:
 #            raise NotFound('MEND')
 #
@@ -2170,7 +2170,7 @@ class ENDFContRecord(ENDFRecord):
 #    def read(self, line):
 #        super(ENDFTendRecord, self).read(self.line)
 #        if (items[0] == -1) and (items[1] == 0) and (items[2] == 0):
-#            print 'TEND'
+#            print('TEND')
 #        else:
 #            raise NotFound('TEND')
 #
