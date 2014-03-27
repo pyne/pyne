@@ -20,7 +20,10 @@ subsequent fee for these data.
 from __future__ import print_function, division
 import os
 import shutil
-import urllib2
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 
 import numpy as np
 import numpy.lib.recfunctions

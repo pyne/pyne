@@ -23,7 +23,10 @@ import os
 import re
 import sys
 import shutil
-import urllib2
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 if sys.version_info[0] >= 3:
     from html.parser import HTMLParser
 else:
