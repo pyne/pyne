@@ -32,7 +32,8 @@
 // MODULE:              DagSolid.hh
 //
 // Date:                20/12/2010
-// Author:              M. C. Han, C. H. Kim, J. H. Jeong, Y. S. Yeom, S. Kim, Paul. P. H. Wilson, J. Apostolakis
+// Author:              M. C. Han, C. H. Kim, J. H. Jeong, Y. S. Yeom, S. Kim, 
+//                      Paul. P. H. Wilson, J. Apostolakis
 // Organisation:        Hanyang Univ., KR
 //
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
