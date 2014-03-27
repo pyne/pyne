@@ -1892,7 +1892,7 @@ class Meshtal(object):
         'x_rel_error_total' where x is n or p for neutrons or photons.
     mesh_mats : bool
          If false, Meshtally objects will be created without PyNE material
-         material objects. 
+         objects. 
     """
 
     def __init__(self, filename, tags=None, mesh_mats=False):
@@ -2015,7 +2015,7 @@ class MeshTally(StatMesh):
             This should come from the Meshtal.tags attribute dict.
         mesh_mats : bool
              If false, Meshtally objects will be created without PyNE material
-             material objects. 
+             objects. 
         """
 
         if not HAVE_PYTAPS:
