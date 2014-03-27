@@ -20,7 +20,7 @@ from pyne.material import Material, MaterialLibrary
 def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
 
-def gen_mesh(mats=None):
+def gen_mesh(mats=()):
     mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
                   structured_ordering='zyx', mats=mats)
     volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
@@ -43,7 +43,7 @@ def test_unstructured_mesh_from_instance():
                             "files_mesh_test/unstr.h5m")
     mesh = iMesh.Mesh()
     mesh.load(filename)
-    sm = Mesh(mesh = mesh)
+    sm = Mesh(mesh=mesh)
 
 def test_elem_volume():
     """Test the get_elem_volume method"""
@@ -67,6 +67,12 @@ def test_elem_volume():
     for __, __, ve in mesh:
         vols.append(mesh.elem_volume(ve))
     assert_almost_equal(np.mean(vols), 51.3333, places=4)
+
+def test_ve_center():
+    m = Mesh(structured=True, structured_coords=[[-1, 3, 5], [-1, 1], [-1, 1]])
+    exp_centers = [(1, 0, 0), (4, 0, 0)]
+    for i, mat, ve in m:
+        assert_equal(m.ve_center(ve), exp_centers[i])
 
 
 #############################################
@@ -545,10 +551,10 @@ def test_large_iterator():
 @with_setup(None, try_rm_file('test_matlib2.h5m'))
 def test_matlib():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}), 
-        1: Material({'H1': 0.1, 'O16': 1.0}), 
-        2: Material({'He4': 42.0}), 
-        3: Material({'Tm171': 171.0}), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=2.2), 
+        2: Material({'He4': 42.0}, density=3.3), 
+        3: Material({'Tm171': 171.0}, density=4.4), 
         }
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all)):
@@ -558,7 +564,17 @@ def test_matlib():
     m.write_hdf5('test_matlib.h5m')
     shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
     m2 = Mesh(mesh_file='test_matlib2.h5m')  # MOAB fails to flush
+    for i, mat, ve in m2:
+        assert_equal(len(mat.comp), len(mats[i].comp))
+        for key in mats[i].iterkeys():
+            assert_equal(mat.comp[key], mats[i].comp[key])
+        assert_equal(mat.density, mats[i].density)
+        assert_equal(m2.idx[i], i)
 
+@with_setup(None, try_rm_file('test_no_matlib.h5m'))
+def test_no_matlib():
+    m = gen_mesh(mats=None)
+    m.write_hdf5('test_no_matlib.h5m')
     
 def test_matproptag():
     mats = {
@@ -833,3 +849,9 @@ def test_cell_fracs_to_mats():
     for i, mat, _ in m:
         assert_equal(mat.comp, exp_comps[i])
         assert_equal(mat.density, 1.0)
+
+def test_no_mats():
+    mesh = gen_mesh(mats=None)
+    assert_true(mesh.mats is None)
+    i, mat, ve = next(iter(mesh))
+    assert_true(mat is None)

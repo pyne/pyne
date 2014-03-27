@@ -1922,7 +1922,7 @@ class Meshtal(object):
 
         line_1 = f.readline()
         #set mcnp version
-        self.version = float(line_1.split()[2])
+        self.version = line_1.split()[2]
         #get version date ("ld" in MCNP User's Manual)
         self.ld = line_1.split()[3][3:]
 
