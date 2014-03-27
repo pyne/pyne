@@ -1,5 +1,10 @@
-import numpy as np
 import re
+try:
+    basestring
+except NameError:
+    basestring = str
+
+import numpy as np
 
 _if_idx_str = ("""if (exist("idx", "var"));\n"""
               """  idx = idx + 1;\n"""

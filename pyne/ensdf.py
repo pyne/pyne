@@ -12,6 +12,10 @@ import numpy as np
 from pyne import nucname
 from pyne.utils import to_sec
 
+try:
+    basestring
+except NameError:
+    basestring = str
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')

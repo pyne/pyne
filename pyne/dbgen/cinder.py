@@ -4,6 +4,10 @@ import os
 import re
 import shutil
 from glob import glob
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 import tables as tb

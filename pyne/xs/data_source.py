@@ -2,6 +2,10 @@
 """
 import os
 import StringIO
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 import tables as tb

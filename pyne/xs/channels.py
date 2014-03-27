@@ -5,6 +5,10 @@ such as computing cross sections for materials, fission energy spectra, metastab
 ratios, etc.
 """
 import collections
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 np.seterr(all='ignore')

@@ -16,6 +16,7 @@ import warnings
 cimport numpy as np
 import numpy as np
 
+
 # local imports
 from pyne cimport cpp_material
 cimport pyne.stlcontainers as conv

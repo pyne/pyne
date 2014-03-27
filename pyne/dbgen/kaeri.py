@@ -7,6 +7,10 @@ try:
 except ImportError:
     import urllib2
     from urllib2 import URLError
+try:
+    basestring
+except NameError:
+    basestring = str
 
 from pyne import nucname
 
