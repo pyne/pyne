@@ -6,7 +6,7 @@ from pyne.mesh import Mesh, StatMesh, IMeshTag
 import math
 #from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
-class USRBIN(StatMesh):
+class USRBIN(Mesh):
     """This class stores all the information from Fluka USRBIN output
     file with a single **or multiple** track length binnings and their 
     associated error binnings. Currently this class only supports a 
@@ -49,14 +49,25 @@ class USRBIN(StatMesh):
         print "creating mesh"
 	super(USRBIN, self).__init__(structured_coords=[self.x_bounds,
                                         self.y_bounds, self.z_bounds],
-                                        structured=True)
+                                        structured=True,structured_ordering='zyx')
+
+        print self.x_bounds,self.y_bounds,self.z_bounds
+
 	print "done creating mesh"
 	self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self, name="part_data_{0}".format(self.particle))
 	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, name="error_data_{0}".format(self.particle))
 
+        print len(self.part_data)
+        print len(self.error_data)
 	
 	self.part_data_tag[:] = self.part_data
-	self.error_data_tag[:] = self.error_data	
+	self.error_data_tag[:] = self.error_data
+
+
+ #       self.write_hdf5(self.name.strip()+".h5m")
+#        from itaps import iMesh
+        self.mesh.save(self.name.strip()+".h5m")
+	
 
     def get_name_and_system(self, line): # retrieves user defined binning name, coordinate system, and particle type used
         # readlines until finds "cartesian" -- then parse as have already
@@ -65,7 +76,6 @@ class USRBIN(StatMesh):
         line_split = line.split()
         particle_type = line_split[len(line_split)-1]
         return name, coord_sys, particle_type
-
     def get_coordinate_system(self, line): # retrieves specific dimensions and binning information for each x, y, and z dimensions
         # automatically call after get_name_...
 #        print line 
@@ -202,25 +212,21 @@ class USRBIN(StatMesh):
 #		print line
 
 	    # now reading track length data
-	    for item in range (0,int(math.ceil(x_info[0]*y_info[0]*z_info[0]/float(columns)))):
-		line = fh.readline()
-		data = self.read_data(line)
-#		self.part_data.append(data)
-		self.part_data += data
+            #int(math.ceil(x_info[0]*y_info[0]*z_info[0]/float(columns)))
+            num_volume_element = x_info[0]*y_info[0]*z_info[0]
+            while ( len(self.part_data) < num_volume_element ):
+		self.part_data += [float(x) for x in line.split()]
+                line = fh.readline()
 	    line = fh.readline()
 #	    print line
             for count in range (0,2):
 		line = fh.readline()
 #		print line
-	    for item in range (0,int(math.ceil(x_info[0]*y_info[0]*z_info[0]/float(columns)))):
-		line = fh.readline()
-		data = self.read_data(line)
-#		self.error_data = self.error_data + data
-		self.error_data += data
+            while ( len(self.error_data) < num_volume_element ):
+		self.error_data += [float(x) for x in line.split()]
+                line = fh.readline()
+                                
 
-#	    line = fh.readline()
-#	    print line
-	    # now all data assigne for nth tally
 	    # create mesh object
 
             self.x_bounds = self.generate_bounds(x_info[1],x_info[2],x_info[3],x_info[0])
@@ -245,5 +251,5 @@ class USRBIN(StatMesh):
 
 #test1=USR("fng_dose_usrbin_22.lis")
 # test2=read_tally_sets()
-my_file = USRBIN("atic_usrbin_76.lis")
+my_file = USRBIN("/data/prod/nasa/atic/big_run/fludag/atic_usrbin_76.lis")
 #my_file.read_usrbin("fng_dose_usrbin_22.lis")
