@@ -40,32 +40,37 @@ KDEKernel* KDEKernel::createKernel(const std::string& type, unsigned int order)
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
-// TODO replace this method with boundary_correction
-double KDEKernel::evaluate(double u,
-                           double bandwidth,
-                           double distance,
-                           unsigned int side) const
+// TODO implement this method for 2D, and 3D cases
+double KDEKernel::boundary_correction(const double* u,
+                                      const double* p,
+                                      const unsigned int* side,
+                                      unsigned int num_corrections) const
 {
-    assert(side <= 1);
+    assert(num_corrections <= 3);
 
-    // compute the scaled distance from the boundary
-    double p = distance / bandwidth;
+    // use 1D boundary kernel factor if correction is only needed in 1D
+    double correction_factor = 0.0;
 
-    // compute partial moments ai(p)
-    std::vector<double> ai;
-    compute_moments(u, p, side, ai);
-
-    // evaluate boundary kernel only if all three moments were computed
-    double value = 0.0;
-
-    if (ai.size() == 3)
+    if (num_corrections == 1)
     {
-        value = (ai[2] - ai[1] * u) * this->evaluate(u);
-        value /= ai[0] * ai[2] - ai[1] * ai[1];
-    }
-    // else outside boundary kernel domain
+        // compute partial moments ai(p)
+        std::vector<double> ai;
+        compute_moments(u[0], p[0], side[0], ai);
 
-    return value;
+        // compute boundary correction only if all three moments were computed
+        if (ai.size() == 3)
+        {
+            correction_factor = (ai[2] - ai[1] * u[0]);
+            correction_factor /= ai[0] * ai[2] - ai[1] * ai[1];
+        }
+        // else outside boundary kernel domain
+    }
+    else
+    {
+        std::cout << "Not implemented yet" << std::endl;
+    }
+
+    return correction_factor;
 }
 //---------------------------------------------------------------------------//
 // PROTECTED METHODS

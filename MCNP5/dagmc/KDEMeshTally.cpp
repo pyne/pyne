@@ -503,16 +503,18 @@ double KDEMeshTally::evaluate_kernel(const CalculationPoint& X,
     {
         double u = (X.coords[i] - observation[i]) / bandwidth[i];
 
+        // always compute standard kernel value for this dimension
+        kernel_value *= kernel->evaluate(u) / bandwidth[i];
+
+        // compute and apply boundary correction if requested
         if (use_boundary_correction && X.boundary_data[i] != -1)
         {
-            // use boundary kernel for this direction
-            kernel_value *= kernel->evaluate(u, bandwidth[i],
-                                             X.distance_data[i],
-                                             X.boundary_data[i]) / bandwidth[i];
-        }
-        else // use standard kernel for this direction
-        {
-            kernel_value *= kernel->evaluate(u) / bandwidth[i];
+            // compute ratio of distance to boundary divided by bandwidth
+            double p = X.distance_data[i] / bandwidth[i];
+
+            // apply boundary correction factor for this dimension
+            unsigned int side = X.boundary_data[i];
+            kernel_value *= kernel->boundary_correction(&u, &p, &side, 1);
         }
     }
 

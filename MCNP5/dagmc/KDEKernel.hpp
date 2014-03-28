@@ -126,29 +126,19 @@ class KDEKernel
     virtual double integrate_moment(double a, double b, unsigned int i) const = 0;
 
     /**
-     * \brief Evaluate this kernel using a boundary correction method K_b
-     * \param[in] u the value at which K_b will be evaluated
-     * \param[in] bandwidth the maximum distance for which correction is needed
-     * \param[in] distance the distance from the calculation point to the boundary
-     * \param[in] side the location of the boundary (0 = LOWER, 1 = UPPER)
-     * \return K_b(u)
+     * \brief Evaluate the boundary correction factor for this kernel function K
+     * \param[in] u value(s) at which the kernel is to be evaluated
+     * \param[in] p ratio(s) of distance from the boundary divided by bandwidth
+     * \param[in] side the location(s) of the boundary (0 = LOWER, 1 = UPPER)
+     * \param[in] num_corrections number of dimensions requiring correction
+     * \return the boundary correction factor for K(u)
      *
-     * The default boundary correction method uses a boundary kernel to evaluate
-     * calculation points that are within one bandwidth of an external boundary.
-     * This boundary kernel is defined by
-     *
-     *     K_b(u) = {a_2(p) - a_1(p) * u} * K(u)
-     *              ----------------------------
-     *               a_0(p) * a_2(p) - a_1(p)^2
-     *
-     * where K(u) is the standard kernel function evaluation, a_i(p) is the
-     * integral of the ith moment function, and p is the ratio of the distance
-     * divided by the bandwidth.
+     * TODO describe how this method works
      */
-    virtual double evaluate(double u,
-                            double bandwidth,
-                            double distance,
-                            unsigned int side) const;
+    virtual double boundary_correction(const double* u,
+                                       const double* p,
+                                       const unsigned int* side,
+                                       unsigned int num_corrections) const;
 
   protected:
     /**
