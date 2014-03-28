@@ -14,31 +14,25 @@ For more information on the Evaluation class, contact Paul Romano
 John Xia <john.danger.xia@gmail.com>.
 """
 
+from __future__ import print_function
 import re
 import os
 from libc.stdlib cimport malloc, free
 
 cimport numpy as np
 import numpy as np
+from scipy.interpolate import interp1d
 
 np.import_array()
 
 from pyne cimport cpp_nucname
-
-from math import e
-
 from pyne import nucname
 import pyne.rxdata as rx
 from pyne.rxname import label
 from pyne.utils import fromendf_tok, endftod
 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libc.stdlib cimport atof, atoi
-    from libc.string cimport strtok, strcpy, strncpy
-ELSE:
-    from pyne._includes.libc.stdlib cimport atof, atoi
-    from pyne._includes.libc.string cimport strtok, strcpy, strncpy
+from libc.stdlib cimport atof, atoi
+from libc.string cimport strtok, strcpy, strncpy
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
@@ -51,7 +45,7 @@ NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
 SPACE66_R = re.compile(' {66}')
 
 class Library(rx.RxLib):
-    "A class for a file which contains multiple ENDF evaluations."
+    """A class for a file which contains multiple ENDF evaluations."""
     def __init__(self, fh):
         self.mts = {}
         self.structure = {}
@@ -71,7 +65,8 @@ class Library(rx.RxLib):
 
 
     def load(self):
-        """Read the ENDF file into a NumPy array.
+        """load()
+        Read the ENDF file into a NumPy array.
 
         Returns
         --------
@@ -312,71 +307,159 @@ class Library(rx.RxLib):
         total_lines = 1 + meta_len + data_len
         return head, intdata, total_lines
 
-    def _histogram(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        return np.nansum((Eint[1:]-Eint[:-1]) * xs[:-1]/dEint)
+    def _histogram(self, e_int, xs, low, high):
+        if low in e_int:
+            # truncate at lower bound
+            xs = xs[e_int >= low]
+            e_int = e_int[e_int >= low]
+        elif low is not None and low > e_int[0]:
+            # truncate at lower bound and prepend interpolated endpoint
+            low_xs = xs[e_int < low][-1]
+            xs = np.insert(xs[e_int > low], 0, low_xs)
+            e_int = np.insert(e_int[e_int > low], 0, low)
+        if high in e_int:
+            # truncate at higher bound
+            xs = xs[e_int <= high]
+            e_int = e_int[e_int <= high]
+        elif high is not None:
+            # truncate at higher bound and prepend interpolated endpoint
+            high_xs = xs[e_int < high][-1]
+            xs = np.append(xs[e_int < high], high_xs)
+            e_int = np.append(e_int[e_int < high], high)
+        de_int = float(e_int[-1]-e_int[0])
+        return np.nansum((e_int[1:]-e_int[:-1]) * xs[:-1]/de_int)
 
-    def _linlin(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        return np.nansum((Eint[1:]-Eint[:-1])* (xs[1:]+xs[:-1])/2./dEint)
+    def _linlin(self, e_int, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(e_int, xs)
+            if low in e_int:
+                xs = xs[e_int >= low]
+                e_int = e_int[e_int >= low]
+            elif low is not None and low > e_int[0]:
+                low_xs = interp(low)
+                xs = np.insert(xs[e_int > low], 0, low_xs)
+                e_int = np.insert(e_int[e_int > low], 0, low)
+            if high in e_int:
+                xs = xs[e_int <= high]
+                e_int = e_int[e_int <= high]
+            elif high is not None:
+                high_xs = interp(high)
+                xs = np.append(xs[e_int < high], high_xs)
+                e_int = np.append(e_int[e_int < high], high)
+        de_int = float(e_int[-1]-e_int[0])
+        return np.nansum((e_int[1:]-e_int[:-1])* (xs[1:]+xs[:-1])/2./de_int)
 
-    def _linlog(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        x1 = Eint[:-1]
-        x2 = Eint[1:]
+    def _linlog(self, e_int, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(np.log(e_int), xs)
+            if low in e_int:
+                xs = xs[e_int >= low]
+                e_int = e_int[e_int >= low]
+            elif low is not None and low > e_int[0]:
+                low_xs = interp(np.log(low))
+                xs = np.insert(xs[e_int > low], 0, low_xs)
+                e_int = np.insert(e_int[e_int > low], 0, low)
+            if high in e_int:
+                xs = xs[e_int <= high]
+                e_int = e_int[e_int <= high]
+            elif high is not None:
+                high_xs = interp(np.log(high))
+                xs = np.append(xs[e_int < high], high_xs)
+                e_int = np.append(e_int[e_int < high], high)
+
+        de_int = float(e_int[-1]-e_int[0])
+        x1 = e_int[:-1]
+        x2 = e_int[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         A = (y1-y2)/(np.log(x1/x2))
         B = y1-A*np.log(x1)
-        return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))/dEint
+        return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))/de_int
 
-    def _loglin(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        x1 = Eint[:-1]
-        x2 = Eint[1:]
+    def _loglin(self, e_int, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(e_int, np.log(xs))
+            if low in e_int:
+                xs = xs[e_int >= low]
+                e_int = e_int[e_int >= low]
+            elif low is not None and low > e_int[0]:
+                low_xs = np.e ** interp(low)
+                xs = np.insert(xs[e_int > low], 0, low_xs)
+                e_int = np.insert(e_int[e_int > low], 0, low)
+            if high in e_int:
+                xs = xs[e_int <= high]
+                e_int = e_int[e_int <= high]
+            elif high is not None:
+                high_xs = np.e ** interp(high)
+                xs = np.append(xs[e_int < high], high_xs)
+                e_int = np.append(e_int[e_int < high], high)
+
+        de_int = float(e_int[-1]-e_int[0])
+        x1 = e_int[:-1]
+        x2 = e_int[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         A = (np.log(y1)-np.log(y2))/(x1-x2)
         B = np.log(y1) - A*x1
-        return np.nansum((y2-y1)/A)/dEint
+        return np.nansum((y2-y1)/A)/de_int
 
-    def _loglog(self, Eint, xs):
-        dEint = float(Eint[-1]-Eint[0])
-        x1 = Eint[:-1]
-        x2 = Eint[1:]
+    def _loglog(self, e_int, xs, low, high):
+        if low is not None or high is not None:
+            interp = interp1d(np.log(e_int), np.log(xs))
+            if low in e_int:
+                xs = xs[e_int >= low]
+                e_int = e_int[e_int >= low]
+            elif low is not None and low > e_int[0]:
+                low_xs = np.e ** interp(np.log(low))
+                xs = np.insert(xs[e_int > low], 0, low_xs)
+                e_int = np.insert(e_int[e_int > low], 0, low)
+            if high in e_int:
+                xs = xs[e_int <= high]
+                e_int = e_int[e_int <= high]
+            elif high is not None:
+                high_xs = np.e ** interp(np.log(high))
+                xs = np.append(xs[e_int < high], high_xs)
+                e_int = np.append(e_int[e_int < high], high)
+
+        de_int = float(e_int[-1]-e_int[0])
+        x1 = e_int[:-1]
+        x2 = e_int[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         A = - np.log(y2/y1)/np.log(x1/x2)
         B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
-        return np.nansum(e**B / (A+1) * (x2**(A+1) - x1**(A+1))/dEint)
+        return np.nansum(np.e**B / (A+1) * (x2**(A+1) - x1**(A+1))/de_int)
 
-    def _chargedparticles(self, Eint, xs, flags=None):
+    def _chargedparticles(self, e_int, xs, flags=None):
         q = flags['Q']
         if q > 0:
             T = 0
         else:
             T = q
-        dEint = float(Eint[-1]-Eint[0])
-        x1 = Eint[:-1]
-        x2 = Eint[1:]
+        de_int = float(e_int[-1]-e_int[0])
+        x1 = e_int[:-1]
+        x2 = e_int[1:]
         y1 = xs[:-1]
         y2 = xs[1:]
         B = np.log(y2*x2/(x1*y1)) / (1/(x1-T)**0.5 - 1/(x2-T)**0.5)
-        A = e**(B/(x1-T)**0.5)*y1*x1
+        A = np.e**(B/(x1-T)**0.5)*y1*x1
         # FIXME
         raise NotImplementedError("see docs for more details.")
 
-    def integrate_tab_range(self, intscheme, Eint, xs):
-        """Integrates across one tabulation range.
+    def integrate_tab_range(self, intscheme, e_int, xs, low=None, high=None):
+        """integrate_tab_range(intscheme, e_int, xs, low=None, high=None)
+        Integrates across one tabulation range.
 
         Parameters
         ----------
         intscheme : int or float
             The interpolation scheme used in this range.
-        Eint : array
+        e_int : array
             The energies at which we have xs data.
         xs : array
-            The xs data corresponding to Eint.
+            The xs data corresponding to e_int.
+        low, high : float
+            Lower and upper bounds within the tabulation range to start/stop at.
 
         Returns
         -------
@@ -384,7 +467,9 @@ class Library(rx.RxLib):
             The group xs.
         """
         with np.errstate(divide="ignore", invalid="ignore"):
-           return self.intdict[intscheme](Eint, xs)
+            # each of these functions returns a normalized integration
+            # over the range
+            return self.intdict[intscheme](e_int, xs, low, high)
 
     def _cont_and_update(self, flags, keys, data, total_lines):
         flags.update(self._get_cont(keys, data[total_lines]))
@@ -414,7 +499,8 @@ class Library(rx.RxLib):
         return total_lines
 
     def _read_res(self, mat_id):
-        """Read the resonance data from one material in the library and updates
+        """_read_res(mat_id)
+        Read the resonance data from one material in the library and updates
         self.structure.
 
         Parameters
@@ -442,7 +528,8 @@ class Library(rx.RxLib):
             isotope['unresolved'].sort()
 
     def _read_nis(self, isotope_data, lrp, mat_id):
-        """Read resonance data for a specific isotope.
+        """_read_nis(isotope_data, lrp, mat_id)
+        Read resonance data for a specific isotope.
 
         Parameters
         -----------
@@ -550,12 +637,12 @@ class Library(rx.RxLib):
                 elif lbk == 1:
                     total_lines += 2
                     rbr, rbr_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('Eint','RBR'),
+                        (0,0,0,0,'NR','NP'), ('e_int','RBR'),
                         subsection[total_lines:])[1:3]
                     total_lines += rbr_size
                     ch_data['RBR'] = rbr
                     rbi, rbi_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('Eint','RBI'),
+                        (0,0,0,0,'NR','NP'), ('e_int','RBI'),
                         (subsection[total_lines:]))[1:3]
                     total_lines += rbi_size
                     ch_data['RBI'] = rbi
@@ -576,12 +663,12 @@ class Library(rx.RxLib):
                 total_lines += 2
                 if lps == 1:
                     psr, psr_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('Eint','PSR'),
+                        (0,0,0,0,'NR','NP'), ('e_int','PSR'),
                         subsection[total_lines:])[1:3]
                     total_lines += psr_size
                     ch_data['PSR'] = psr
                     psi, psi_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('Eint','PSI'),
+                        (0,0,0,0,'NR','NP'), ('e_int','PSI'),
                         (subsection[total_lines:]))[1:3]
                     total_lines += psi_size
                     ch_data['PSI'] = psi
@@ -790,7 +877,7 @@ class Library(rx.RxLib):
         total_lines += 1
         int_flags, int_data, int_size = self._get_tab1(
             ('QM','QI',0,'LM','NR','NP'),
-            ('Eint','xs'),
+            ('e_int','xs'),
             xsdata[total_lines:])
         int_flags.update(head_flags)
         isotope_dict = self.structure[nuc]['data'][nuc_i]
@@ -798,7 +885,8 @@ class Library(rx.RxLib):
         total_lines += int_size
 
     def get_xs(self, nuc, mt, nuc_i=None):
-        """Grab cross-section data.
+        """get_xs(nuc, mt, nuc_i=None)
+        Grab cross-section data.
 
         Parameters
         -----------
@@ -827,7 +915,8 @@ class Library(rx.RxLib):
         return self.structure[nuc]['data'][nuc_i]['xs'][mt]
 
     def get_rx(self, nuc, mf, mt, lines=0):
-        """Grab the data from one reaction type.
+        """get_rx(nuc, mf, mt, lines=0)
+        Grab the data from one reaction type.
 
         Parameters
         -----------
@@ -875,7 +964,12 @@ class Library(rx.RxLib):
             opened_here = True
         else:
             fh = self.fh
-        start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+        try:
+            start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+        except KeyError as e:
+            msg = "MT {1} not found in File {0}.".format(mf, mt)
+            e.args = (msg,)
+            raise e
         fh.readline()
         fh.seek(start)
         if lines == 0:
@@ -905,7 +999,7 @@ class Evaluation(object):
     def read(self, reactions=None):
         if not reactions:
             if self.verbose:
-                print 'No reaction given. Read all'
+                print("No reaction given. Read all")
             reactions = []
             for r in self.reactionList[1:]:
                 reactions.append(r[0:2])
@@ -993,7 +1087,7 @@ class Evaluation(object):
 
             if not found:
                 if self.verbose:
-                    print 'Reaction not found'
+                    print("Reaction not found")
                 raise NotFound('Reaction')
 
     def _read_header(self):
@@ -1216,7 +1310,7 @@ class Evaluation(object):
         # Find reaction
         self.seek_mfmt(3, MT)
 
-        # Read HEAD record with ZA and atomic weight ratio
+        # Read HEAD record with ZA and atomic mass ratio
         items = self._get_head_record()
         xs.ZA = items[0]
         xs.AWR = items[1]
@@ -1407,7 +1501,7 @@ class Evaluation(object):
         elast.LTHR = items[2] # coherent/incoherent flag
         if elast.LTHR == 1:
             if self.verbose:
-                print 'Coherent elastic'
+                print("Coherent elastic")
                 temp = []
                 eint = []
                 set = []
@@ -1420,7 +1514,7 @@ class Evaluation(object):
                 set.append(temp0.y)
                 elast.LT = temp0.params[2]
                 if self.veryverbose:
-                    print 'Number of temperatures:', elast.LT+1
+                    print("Number of temperatures: {0}".format(elast.LT+1))
                 for t in range(elast.LT):
                     heads, s = self._get_list_record()
                     # Save S(E,T)
@@ -1432,7 +1526,7 @@ class Evaluation(object):
                 elast.eint = np.array(eint)
         elif elast.LTHR == 2:
             if self.verbose:
-                print 'Incoherent elastic'
+                print("Incoherent elastic")
                 temp = []
                 eint = []
                 set = []
@@ -1444,7 +1538,7 @@ class Evaluation(object):
                 # Save W(T)
                 elast.w = np.array(record.y)
         else:
-            print 'Invalid value of LHTR'
+            print("Invalid value of LHTR")
         file7.reactions.append(elast)
 
     def _read_thermal_inelastic(self):
@@ -1470,7 +1564,7 @@ class Evaluation(object):
         inel.B = B
         if B[0] == 0.0:
             if self.verbose:
-                print 'No principal atom'
+                print("No principal atom")
         else:
             nbeta = self._get_tab2_record()
             sabt = []
@@ -1490,7 +1584,7 @@ class Evaluation(object):
                 temp.append(temp0.params[0])
                 inel.LT = temp0.params[2]
                 if self.veryverbose:
-                    print 'Number of temperatures:', inel.LT+1
+                    print("Number of temperatures: {0}".format(inel.LT+1))
                 for t in range(inel.LT):
                     #Read records for all the other temperatures
                     headsab, sa = self._get_list_record()
@@ -1684,7 +1778,7 @@ class Evaluation(object):
         # Get head record
         items = self._get_head_record()
         mp.ZA = items[0]
-        mp.AWR = items[1] # Atomic weight ratio
+        mp.AWR = items[1] # Atomic mass ratio
         mp.LIS = items[2] # Level number of the target
         mp.NS = items[4] # Number of final states
 
@@ -1715,7 +1809,7 @@ class Evaluation(object):
         # Get head record
         items = self._get_head_record()
         rxn.ZA = items[0]
-        rxn.AWR = items[1] # Atomic weight ratio
+        rxn.AWR = items[1] # Atomic mass ratio
         rxn.LIS = items[2] # Level number of the target
         rxn.NS = items[4] # Number of final states
 
@@ -1734,7 +1828,7 @@ class Evaluation(object):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
-            print 'Get TEXT record'
+            print("Get TEXT record")
         HL = line[0:66]
         MAT = int(line[66:70])
         MF = int(line[70:72])
@@ -1744,7 +1838,7 @@ class Evaluation(object):
 
     def _get_cont_record(self, line=None, skipC=False):
         if self.veryverbose:
-            print 'Get CONT record'
+            print("Get CONT record")
         if not line:
             line = self.fh.readline()
         if skipC:
@@ -1767,7 +1861,7 @@ class Evaluation(object):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
-            print 'Get HEAD record'
+            print("Get HEAD record")
         ZA = int(endftod(line[:11]))
         AWR = endftod(line[11:22])
         L1 = int(line[22:33])
@@ -1783,7 +1877,7 @@ class Evaluation(object):
     def _get_list_record(self, onlyList=False):
         # determine how many items are in list
         if self.veryverbose:
-            print 'Get LIST record'
+            print("Get LIST record")
         items = self._get_cont_record()
         NPL = items[4]
 
@@ -1805,14 +1899,14 @@ class Evaluation(object):
 
     def _get_tab1_record(self):
         if self.veryverbose:
-            print 'Get TAB1 record'
+            print("Get TAB1 record")
         r = ENDFTab1Record()
         r.read(self.fh)
         return r
 
     def _get_tab2_record(self):
         if self.veryverbose:
-            print 'Get TAB2 record'
+            print("Get TAB2 record")
         r = ENDFTab2Record()
         r.read(self.fh)
         return r
@@ -1866,7 +1960,7 @@ class Evaluation(object):
             if line == '':
                 # Reached EOF
                 if self.verbose:
-                    print('Could not find MF={0}, MT={1}'.format(MF, MT))
+                    print("Could not find MF={0}, MT={1}".format(MF, MT))
                 raise NotFound('Reaction')
             if line[70:75] == searchString:
                 self.fh.seek(position)
@@ -2031,7 +2125,7 @@ class ENDFContRecord(ENDFRecord):
 #    def read(self, line):
 #        super(ENDFSendRecord, self).read(self.line)
 #        if items[2] == 99999:
-#            print 'SEND'
+#            print('SEND')
 #        else:
 #            raise NotFound('SEND')
 #
@@ -2046,7 +2140,7 @@ class ENDFContRecord(ENDFRecord):
 #    def read(self, line):
 #        super(ENDFFendRecord, self).read(self.line)
 #        if (items[1] == 0) and (items[2] == 0):
-#            print 'FEND'
+#            print('FEND')
 #        else:
 #            raise NotFound('FEND')
 #
@@ -2061,7 +2155,7 @@ class ENDFContRecord(ENDFRecord):
 #    def read(self, line):
 #        super(ENDFMendRecord, self).read(self.line)
 #        if (items[0] == 0) and (items[1] == 0) and (items[2] == 0):
-#            print 'MEND'
+#            print('MEND')
 #        else:
 #            raise NotFound('MEND')
 #
@@ -2076,7 +2170,7 @@ class ENDFContRecord(ENDFRecord):
 #    def read(self, line):
 #        super(ENDFTendRecord, self).read(self.line)
 #        if (items[0] == -1) and (items[1] == 0) and (items[2] == 0):
-#            print 'TEND'
+#            print('TEND')
 #        else:
 #            raise NotFound('TEND')
 #

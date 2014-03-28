@@ -1,19 +1,24 @@
-"""C++ wrapper for nucname library."""
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-    from libcpp.map cimport map
-    from libcpp.set cimport set
-    from libcpp.utility cimport pair
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.map cimport map
-    from pyne._includes.libcpp.set cimport set
-    from pyne._includes.libcpp.utility cimport pair
+"""C++ wrapper for data library."""
+from libcpp.string cimport string as std_string
+from libcpp.map cimport map
+from libcpp.set cimport set
+from libcpp.utility cimport pair
+from libcpp cimport bool
+from libcpp.vector cimport vector
 
 cimport extra_types
 
 cdef extern from "data.h" namespace "pyne":
+    # Mathematical constants
+    double pi
+    double N_A
+    double barns_per_cm2
+    double cm2_per_barn
+    double sec_per_day
+
+    # hash map and initialization function
+    map[std_string, std_string] data_checksums
+    
     # atomic_mass functions
     map[int, double] atomic_mass_map
     double atomic_mass(int) except +
@@ -25,6 +30,18 @@ cdef extern from "data.h" namespace "pyne":
     double natural_abund(int) except +
     double natural_abund(char *) except +
     double natural_abund(std_string) except +
+
+    # q_val functions
+    map[int, double] q_val_map
+    double q_val(int) except +
+    double q_val(char *) except +
+    double q_val(std_string) except +
+
+    # gamma_frac functions
+    map[int, double] gamma_frac_map
+    double gamma_frac(int) except +
+    double gamma_frac(char *) except +
+    double gamma_frac(std_string) except +
 
     # Scattering length functions
     map[int, extra_types.complex_t] b_coherent_map
@@ -42,6 +59,12 @@ cdef extern from "data.h" namespace "pyne":
     double b(char *) except +
     double b(std_string) except +
 
+    # fission product data
+    map[pair[int, int], double] wimsdfpy_data
+    double fpyield(pair[int, int], int, bool) except +
+    double fpyield(int, int, int, bool) except +
+    double fpyield(char *, char *, int, bool) except +
+    double fpyield(std_string, std_string, int, bool) except +
 
     # decay data functions
     map[int, double] half_life_map
@@ -70,3 +93,44 @@ cdef extern from "data.h" namespace "pyne":
     set[int] decay_children(char *) except +
     set[int] decay_children(std_string) except +
 
+    int metastable_id(int, int) except +
+    int metastable_id(int) except +
+
+    #ENSDF data functions
+    pair[double,double] decay_half_life(pair[int, int]) except +
+    vector[pair[double, double]] decay_half_lifes(int) except +
+    double decay_branch_ratio(pair[int, int] from_to) except +
+    vector[double] decay_branch_ratios(int) except +
+    pair[double,double] decay_photon_branch_ratio(pair[int, int] from_to) except +
+    vector[pair[double, double]] decay_photon_branch_ratios(int) except +
+    pair[double,double] decay_beta_branch_ratio(pair[int, int] from_to) except +
+    vector[pair[double, double]] decay_beta_branch_ratios(int) except +
+
+    vector[pair[double, double]] gamma_energy(int parent) except +
+    vector[pair[double, double]] gamma_photon_intensity(int parent) except +
+    vector[pair[double, double]] gamma_conversion_intensity(int parent) except +
+    vector[pair[double, double]] gamma_total_intensity(int parent) except +
+    vector[pair[int, int]] gamma_from_to(int parent) except +
+    vector[pair[int, int]] gamma_from_to(double energy, double error) except +
+    vector[int] gamma_parent(double energy, double error) except +
+    
+    vector[double] alpha_energy(int parent) except +
+    vector[double] alpha_intensity(int parent) except +
+    vector[int] alpha_parent(double energy, double error) except +
+    vector[int] alpha_child(double energy, double error) except +
+    vector[int] alpha_child(int parent) except +
+
+    vector[double] beta_endpoint_energy(int parent) except +
+    vector[double] beta_average_energy(int parent) except +
+    vector[double] beta_intensity(int parent) except +
+    vector[int] beta_parent(double energy, double error) except +
+    vector[int] beta_child(double energy, double error) except +
+    vector[int] beta_child(int parent) except +
+
+    vector[double] ecbp_endpoint_energy(int parent) except +
+    vector[double] ecbp_average_energy(int parent) except +
+    vector[double] ec_intensity(int parent) except +
+    vector[double] bp_intensity(int parent) except +
+    vector[int] ecbp_parent(double energy, double error) except +
+    vector[int] ecbp_child(double energy, double error) except +
+    vector[int] ecbp_child(int parent) except +

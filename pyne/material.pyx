@@ -6,6 +6,9 @@ from libcpp.set cimport set as cpp_set
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
+from libcpp.string cimport string as std_string
+from libcpp.map cimport map as cpp_map
+from libcpp.vector cimport vector as cpp_vector
 
 # Python imports
 import collections
@@ -14,16 +17,7 @@ cimport numpy as np
 import numpy as np
 
 # local imports
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-    from libcpp.map cimport map as cpp_map
-    from libcpp.vector cimport vector as cpp_vector
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.map cimport map as cpp_map
-    from pyne._includes.libcpp.vector cimport vector as cpp_vector
-cimport cpp_material
+from pyne cimport cpp_material
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
@@ -58,7 +52,7 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 cdef class _Material:
 
     def __cinit__(self, nucvec=None, double mass=-1.0, double density=-1.0,
-                  double atoms_per_mol=-1.0, attrs=None, bint free_mat=True,
+                  double atoms_per_molecule=-1.0, attrs=None, bint free_mat=True,
                   *args, **kwargs):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
@@ -71,17 +65,17 @@ cdef class _Material:
             # Material from dict
             comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(
-                    comp, mass, density, atoms_per_mol, deref(cattrs._inst))
+                    comp, mass, density, atoms_per_molecule, deref(cattrs._inst))
         elif isinstance(nucvec, basestring):
             # Material from file
             self.mat_pointer = new cpp_material.Material(
-                    <char *> nucvec, mass, density, atoms_per_mol, 
+                    <char *> nucvec, mass, density, atoms_per_molecule, 
                     deref(cattrs._inst))
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
                 self.mat_pointer = new cpp_material.Material(comp, mass, density,
-                                        atoms_per_mol, deref(cattrs._inst))
+                                        atoms_per_molecule, deref(cattrs._inst))
             else:
                 self.mat_pointer = NULL
         else:
@@ -151,12 +145,12 @@ cdef class _Material:
         def __set__(self, double value):
             self.mat_pointer.density = value
 
-    property atoms_per_mol:
+    property atoms_per_molecule:
         def __get__(self):
-            return self.mat_pointer.atoms_per_mol
+            return self.mat_pointer.atoms_per_molecule
 
         def __set__(self, double value):
-            self.mat_pointer.atoms_per_mol = value
+            self.mat_pointer.atoms_per_molecule = value
 
     property attrs:
         def __get__(self):
@@ -237,7 +231,7 @@ cdef class _Material:
                 |-- material (table)
                     |-- mass (double col)
                     |-- density (double col)
-                    |-- atoms_per_mol (double col)
+                    |-- atoms_per_molecule (double col)
                     |-- comp (double array col, len of nuc_zz)
                 |-- nuc_zz (int array)
                 |-- material_attr (variable length char array)
@@ -457,24 +451,24 @@ cdef class _Material:
         return nucvec_proxy
 
 
-    def molecular_weight(self, atoms_per_mol=-1.0):
-        """molecular_weight(atoms_per_mol=-1.0)
-        This method returns the molecular weight of the comp of this
+    def molecular_mass(self, atoms_per_molecule=-1.0):
+        """molecular_mass(atoms_per_molecule=-1.0)
+        This method returns the molecular mass of the comp of this
         material.
 
         Parameters
         ----------
-        atoms_per_mol : double, optional
+        atoms_per_molecule : double, optional
             Number of atoms to per molecule of material.  Needed to obtain
             proper scaling.  For example, this value for water is 3.0.
 
         Returns
         -------
-        mol_weight : float
-            Molecular weight in [amu].
+        mol_mass : float
+            Molecular mass in [amu].
 
         """
-        return self.mat_pointer.molecular_weight(atoms_per_mol)
+        return self.mat_pointer.molecular_mass(atoms_per_molecule)
 
     def expand_elements(self):
         """expand_elements(self)
@@ -491,8 +485,8 @@ cdef class _Material:
         newmat.mat_pointer[0] = self.mat_pointer.expand_elements()
         return newmat
 
-    def mass_density(self, double num_dens=-1.0, double atoms_per_mol=-1.0):
-        """mass_density(self, num_dens=-1.0, atoms_per_mol=-1.0)
+    def mass_density(self, double num_dens=-1.0, double atoms_per_molecule=-1.0):
+        """mass_density(self, num_dens=-1.0, atoms_per_molecule=-1.0)
         Computes, sets, and returns the mass density when num_dens is greater
         than or equal zero.  If num_dens is negative, this simply returns the
         current value of the density attribute.  
@@ -502,7 +496,7 @@ cdef class _Material:
         num_dens : float, optional
             The number density from which to compute the mass density in units
             of [1/cc].
-        atoms_per_mol : float, optional
+        atoms_per_molecule : float, optional
             Number of atoms to per molecule of material. For example, this value 
             for water is 3.0.
 
@@ -512,10 +506,10 @@ cdef class _Material:
             The density attr [g/cc].
 
         """
-        return self.mat_pointer.mass_density(num_dens, atoms_per_mol)
+        return self.mat_pointer.mass_density(num_dens, atoms_per_molecule)
 
-    def number_density(self, double mass_dens=-1.0, double atoms_per_mol=-1.0):
-        """number_density(self, mass_dens=-1.0, atoms_per_mol=-1.0)
+    def number_density(self, double mass_dens=-1.0, double atoms_per_molecule=-1.0):
+        """number_density(self, mass_dens=-1.0, atoms_per_molecule=-1.0)
         Computes and returns the number density from the mass_dens argument if this 
         is greater than or equal zero.  If mass_dens is negative, then the number 
         density is computed using the current value of the density attribute.  
@@ -525,7 +519,7 @@ cdef class _Material:
         mass_dens : float, optional
             The mass density from which to compute the number density in units
             of [g/cc].
-        atoms_per_mol : float, optional
+        atoms_per_molecule : float, optional
             Number of atoms to per molecule of material. For example, this value 
             for water is 3.0.
 
@@ -535,7 +529,7 @@ cdef class _Material:
             The number density [1/cc] of the material.
 
         """
-        return self.mat_pointer.number_density(mass_dens, atoms_per_mol)
+        return self.mat_pointer.number_density(mass_dens, atoms_per_molecule)
 
 
 
@@ -560,7 +554,7 @@ cdef class _Material:
         submaterial : Material
             A new mass stream object that only
             has the members given in nuc_sequence.  The mass of the submaterial
-            is calculated based on the weight fraction composition and mass
+            is calculated based on the mass fraction composition and mass
             of the original mass stream.
 
         Notes
@@ -598,7 +592,7 @@ cdef class _Material:
         submaterial : Material
             A new material object whose members in nuc_sequence have the
             cooresponding mass value.  The mass of the submaterial is
-            calculated based on the weight fraction composition and mass of the
+            calculated based on the mass fraction composition and mass of the
             original material.
 
         """
@@ -626,7 +620,7 @@ cdef class _Material:
         submaterial : Material
             A new material object that only has the members not given in
             nuc_sequence.  The mass of the submaterial is calculated based on
-            the weight fraction composition and mass of the original material.
+            the mass fraction composition and mass of the original material.
 
         Notes
         -----
@@ -1207,7 +1201,6 @@ cdef class _Material:
         return id(self)
 
 
-
 class Material(_Material, collections.MutableMapping):
     """Material composed of nuclides.
 
@@ -1217,9 +1210,9 @@ class Material(_Material, collections.MutableMapping):
         This is the input nuclide component dictionary.  This dictionary need
         not be normalized; Material initialization will automatically
         renormalize the stream.  Thus the comp simply is a dictionary of
-        relative weights.  The keys of comp must be integers representing
+        relative mass.  The keys of comp must be integers representing
         nuclides in id-form.  The values are floats for each nuclide's
-        weight fraction. If a string is provided instead of a dictionary, then
+        mass fraction. If a string is provided instead of a dictionary, then
         Material will read in the comp vector from a file at the string's
         location.  This either plaintext or hdf5 files. If no comp is provided,
         an empty Material object is constructed.
@@ -1230,9 +1223,9 @@ class Material(_Material, collections.MutableMapping):
         positive or zero, then this mass overrides the calculated one.
     density : float, optional
         This is the density of the material.
-    atoms_per_mol : float, optional
+    atoms_per_molecule : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1247,8 +1240,8 @@ class Material(_Material, collections.MutableMapping):
     def __str__(self):
         header = ["Material:"]
         header += ["mass = {0}".format(self.mass)]
-        header += ["density= {0}".format(self.density)]
-        header += ["atoms per molecule = {0}".format(self.atoms_per_mol)]
+        header += ["density = {0}".format(self.density)]
+        header += ["atoms per molecule = {0}".format(self.atoms_per_molecule)]
         if self.attrs.isobject():
             for key, value in self.attrs.items():
                 header += ["{0} = {1}".format(key, value)]
@@ -1261,15 +1254,38 @@ class Material(_Material, collections.MutableMapping):
 
     def __repr__(self):
         return "pyne.material.Material({0}, {1}, {2}, {3}, {4})".format(
-                repr(self.comp), self.mass, self.density, self.atoms_per_mol, repr(self.attrs))
+                repr(self.comp), self.mass, self.density, self.atoms_per_molecule, repr(self.attrs))
 
+    def __deepcopy__(self, memo):
+        cdef _Material other = Material(free_mat=False)
+        cdef cpp_material.Material * self_ptr = (<_Material> self).mat_pointer
+        cdef cpp_material.Material * other_ptr = new cpp_material.Material()
+        other_ptr.comp = self_ptr.comp
+        other_ptr.mass = self_ptr.mass
+        other_ptr.density = self_ptr.density
+        other_ptr.atoms_per_molecule = self_ptr.atoms_per_molecule
+        other_ptr.attrs = self_ptr.attrs
+        other.mat_pointer = other_ptr
+        other._free_mat = True
+        return other
 
-    def write_mcnp(self, filename, frac_type='mass'):
-        """write_mcnp(self, filename, frac_type='mass')
-        The method appends an mcnp mass fraction definition, with
-        attributes to the file with the supplied filename."""
+    def mcnp(self, frac_type='mass'):
+        """mcnp(self, frac_type='mass')
+        This method returns an MCNP material card in string form. Relevant
+        attributes are added as MCNP valid comments.
 
-        s = ''  # string to output
+        Parameters
+        ----------
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition.
+
+        Returns
+        -------
+        s : str
+            The MCNP material card.
+        """
+        s = ''
 
         if 'name' in self.attrs:
             s += 'C name: {0}\n'.format(self.attrs['name'])
@@ -1304,16 +1320,35 @@ class Material(_Material, collections.MutableMapping):
                 s += '     {0} '.format(nucmcnp)
             s += '{0}{1:.4E}\n'.format(frac_sign, frac)
 
-        # write s to output file
+        return s
+
+
+    def write_mcnp(self, filename, frac_type='mass'):
+        """write_mcnp(self, filename, frac_type='mass')
+        The method appends an MCNP mass fraction definition, with
+        attributes to the file with the supplied filename.
+
+        Parameters
+        ----------
+        filename : str
+            The file to append the material definition to.
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition.
+        """
         with open(filename, 'a') as f:
-            f.write(s)
+            f.write(self.mcnp(frac_type))
 
+    def alara(self):
+        """alara(self)
+        This method returns an ALARA material in string form, with relevant
+        attributes as ALARA valid comments.
 
-    def write_alara(self, filename):
-        """write_alara(self, filename)
-        The method appends an ALARA definition, with
-        attributes to the file with the supplied filename."""
-
+        Returns
+        -------
+        s : str
+            The MCNP material card.
+        """
         s = ''
 
         if 'mat_number' in self.attrs:
@@ -1351,16 +1386,28 @@ class Material(_Material, collections.MutableMapping):
             s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
                                                  frac, str(nucname.znum(iso)))
 
+        return s
+
+    def write_alara(self, filename):
+        """write_alara(self, filename)
+        The method appends an ALARA material d$efinition, with attributes
+        to the file with the supplied filename.
+
+        Parameters
+        ----------
+        filename : str
+            The file to append the material definition to.
+        """
         with open(filename, 'a') as f:
-            f.write(s)
+            f.write(self.alara())
 
 #####################################
 ### Material generation functions ###
 #####################################
 
 def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
-                   double atoms_per_mol=-1.0, attrs=None):
-    """from_atom_frac(atom_fracs, double mass=-1.0, double atoms_per_mol=-1.0)
+                   double atoms_per_molecule=-1.0, attrs=None):
+    """from_atom_frac(atom_fracs, double mass=-1.0, double atoms_per_molecule=-1.0)
     Create a Material from a mapping of atom fractions.
 
     Parameters
@@ -1376,9 +1423,9 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
         positive or zero, then this mass overrides the calculated one.
     density : float, optional
         This is the density of the material.
-    atoms_per_mol : float, optional
+    atoms_per_molecule : float, optional
         Number of atoms per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1423,8 +1470,8 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
     if 0.0 <= density:
         mat.density = density
 
-    if 0.0 <= atoms_per_mol:
-        mat.atoms_per_mol = atoms_per_mol
+    if 0.0 <= atoms_per_molecule:
+        mat.atoms_per_molecule = atoms_per_molecule
 
     return mat
 
@@ -1471,8 +1518,8 @@ def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
 
 
 
-def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attrs=None):
-    """from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0)
+def from_text(char * filename, double mass=-1.0, double atoms_per_molecule=-1.0, attrs=None):
+    """from_text(char * filename, double mass=-1.0, double atoms_per_molecule=-1.0)
     Create a Material object from a simple text file.
 
     Parameters
@@ -1484,9 +1531,9 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attr
         (default -1.0) then the mass of the new stream is calculated from the
         sum of compdict's components before normalization.  If the mass here is
         positive or zero, then this mass overrides the calculated one.
-    atoms_per_mol : float, optional
+    atoms_per_molecule : float, optional
         Number of atoms to per molecule of material.  Needed to obtain proper
-        scaling of molecular weights.  For example, this value for water is
+        scaling of molecular mass.  For example, this value for water is
         3.0.
     attrs : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
@@ -1514,8 +1561,8 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_mol=-1.0, attr
     if 0.0 <= mass:
         mat.mass = mass
 
-    if 0.0 <= atoms_per_mol:
-        mat.atoms_per_mol = atoms_per_mol
+    if 0.0 <= atoms_per_molecule:
+        mat.atoms_per_molecule = atoms_per_molecule
 
     mat.from_text(filename)
     return mat
@@ -1752,20 +1799,29 @@ class MultiMaterial(collections.MutableMapping):
         """This function reads in a python dict of materials and mass fractions
         then mixes the material by mass fractions and returns a material of mass=1.
         """
+        total = 0
+        total_mass_frac = 0
         mix = Material()
         for mat, mat_frac in self._mats.items():
-            mix = mix + mat * mat_frac
+            mix = mix + mat*mat_frac
+            total_mass_frac += mat_frac
+            total += (mat_frac/mat.density)
         mix.mass = 1
+        mix.density = total_mass_frac/total
+
         return mix
 
     def mix_by_volume(self):
         """This function reads in a python dict of materials and volume fractions
         then mixes the material by volume fractions and returns a material of mass=1.
         """
+        total = 0
         mix = Material()
         for mat, mat_frac in self._mats.items():
-            mix=mix + mat * mat_frac * mat.density
+            mix = mix + mat*mat_frac*mat.density
+            total += (mat.density*mat_frac)
         mix.mass = 1
+        mix.density = total
         return mix
 
 
@@ -1827,7 +1883,8 @@ cdef class _MaterialLibrary(object):
             self._lib = _lib
             if lib.endswith('.json') or lib.endswith('.js'):
                 self.from_json(lib)
-            if lib.endswith('.h5') or lib.endswith('.hdf5'):
+            if lib.endswith('.h5') or lib.endswith('.hdf5') \
+                                   or lib.endswith('.h5m'):
                 self.from_hdf5(lib, datapath=datapath, nucpath=nucpath)
         elif isinstance(lib, collections.Sequence):
             for key, mat in lib:
@@ -1941,7 +1998,7 @@ cdef class _MaterialLibrary(object):
             row = matstable[i]
             comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
             mat = Material(comp, mass=row[0], density=row[1], 
-                                    atoms_per_mol=row[2])
+                                    atoms_per_molecule=row[2])
             strattrs = "".join(map(chr, matsattrs[i]))
             s = std_string(<char *> strattrs)
             attribs = cpp_jsoncpp.Value()

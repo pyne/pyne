@@ -7,20 +7,17 @@ from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
+from libcpp.map cimport map as cpp_map
+from libcpp.set cimport set as cpp_set
+from libcpp.string cimport string as std_string
+from libcpp.utility cimport pair as cpp_pair
+from libc.stdlib cimport free
 #from cython cimport pointer
 
+import numpy as np
+cimport numpy as np
+
 # local imports 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.map cimport map as cpp_map
-    from libcpp.set cimport set as cpp_set
-    from libcpp.string cimport string as std_string
-    from libcpp.utility cimport pair as cpp_pair
-ELSE:
-    from pyne._includes.libcpp.map cimport map as cpp_map
-    from pyne._includes.libcpp.set cimport set as cpp_set
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.utility cimport pair as cpp_pair
 cimport extra_types
 
 cimport pyne.cpp_pyne
@@ -34,6 +31,30 @@ import pyne.nucname
 cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+# Mathematical constants
+pi = cpp_data.pi
+"""Mathematical constant pi."""
+
+N_A = cpp_data.N_A
+"""Avogadro constant."""
+
+barns_per_cm2 = cpp_data.barns_per_cm2
+"""Barns per centimeter squared."""
+
+cm2_per_barn = cpp_data.cm2_per_barn
+"""Centimeter squared per barn."""
+
+sec_per_day = cpp_data.sec_per_day
+"""The number of seconds in a canonical day."""
+
+
+#
+# hash map and initialization
+#
+cdef conv._MapStrStr data_checksums_proxy = conv.MapStrStr(False)
+data_checksums_proxy.map_ptr = &cpp_data.data_checksums
+data_checksums = data_checksums_proxy
 
 
 #
@@ -79,7 +100,7 @@ natural_abund_map_proxy.map_ptr = &cpp_data.natural_abund_map
 natural_abund_map = natural_abund_map_proxy
 
 # initialize natural_abund_map
-cpp_data.natural_abund(<int>10000000)
+cpp_data.natural_abund(<int> 10000000)
 
 abundance_by_z = dict([(i, []) for i in range(1,119)])
 for zas, abundance in natural_abund_map.items():
@@ -113,6 +134,78 @@ def natural_abund(nuc):
 
     return abund
 
+
+#
+# q_val functions
+#
+cdef conv._MapIntDouble q_val_map_proxy = conv.MapIntDouble(False)
+q_val_map_proxy.map_ptr = &cpp_data.q_val_map
+q_val_map = q_val_map_proxy
+
+def q_val(nuc):
+    """Finds the Q value of a nuclide in [MeV/fission].
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    q_val : double
+        Q value of this nuclide [MeV/fission].
+
+    Notes
+    -----
+    If the nuclide is not found, 0 is returned.
+    """
+    if isinstance(nuc, int):
+        q_val = cpp_data.q_val(<int> nuc)
+    elif isinstance(nuc, basestring):
+        q_val = cpp_data.q_val(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return q_val
+
+
+
+#
+# gamma_frac functions
+#
+cdef conv._MapIntDouble gamma_frac_map_proxy = conv.MapIntDouble(False)
+gamma_frac_map_proxy.map_ptr = &cpp_data.gamma_frac_map
+gamma_frac_map = gamma_frac_map_proxy
+
+# initialize gamma_frac_map
+cpp_data.gamma_frac(<int> 10000000)
+
+
+def gamma_frac(nuc):
+    """Finds the fraction of Q that comes from gammas of a nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    gamma_frac : double
+        Fraction of Q that comes from gammas of this nuclide.
+
+    Notes
+    -----
+    If the nuclide is not found, gamma_frac is 0.
+    """
+    if isinstance(nuc, int):
+        gamma_frac = cpp_data.gamma_frac(<int> nuc)
+    elif isinstance(nuc, basestring):
+        gamma_frac = cpp_data.gamma_frac(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return gamma_frac
 
 
 #
@@ -234,8 +327,62 @@ def b(nuc):
 
     return float(value)
 
+#
+# Fission product yield data
+#
 
 
+def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
+    """Finds the fission product yield for a (parent, child) nuclide pair [fraction].
+
+    Parameters
+    ----------
+    from_nuc : int or str 
+        Parent nuclide.
+    to_nuc : int or str 
+        Child nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'WIMSD': 0, 'NDS_THERMAL' : 1, 'NDS_FAST' : 2, 'NDS_14MEV' : 3
+    get_errors : boolean
+        return the error in the value if possible or 0
+
+    Returns
+    -------
+    fpy : float
+        Fractional yield of this nuclide pair [unitless].
+
+    Notes
+    -----
+    If this pair is not found, it is assumed to be impossible, and the yield
+    is set to zero.
+    """
+    srcmap = {'WIMSD': 0, 'NDS_THERMAL': 1, 'NDS_FAST': 2, 'NDS_14MEV': 3}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 3:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints or strings are accepted')
+    if isinstance(from_nuc, int):
+        fn = pyne.cpp_nucname.id(<int> from_nuc)
+    elif isinstance(from_nuc, basestring):
+        fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc))
+    else:
+        raise pyne.nucname.NucTypeError(from_nuc)
+
+    if isinstance(to_nuc, int):
+        tn = pyne.cpp_nucname.id(<int> to_nuc)
+    elif isinstance(to_nuc, basestring):
+        tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc))
+    else:
+        raise pyne.nucname.NucTypeError(to_nuc)
+    fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn), <int> source, get_errors)
+    return fpy
 
 
 #
@@ -244,6 +391,7 @@ def b(nuc):
 cdef conv._MapIntDouble half_life_map_proxy = conv.MapIntDouble(False)
 half_life_map_proxy.map_ptr = &cpp_data.half_life_map
 half_life_map = half_life_map_proxy
+
 
 def half_life(nuc):
     """Finds the half-life of a nuclide in [seconds].
@@ -272,10 +420,10 @@ def half_life(nuc):
     return hl
 
 
-
 cdef conv._MapIntDouble decay_const_map_proxy = conv.MapIntDouble(False)
 decay_const_map_proxy.map_ptr = &cpp_data.decay_const_map
 decay_const_map = decay_const_map_proxy
+
 
 def decay_const(nuc):
     """Finds the decay constant of a nuclide in [1/seconds].
@@ -302,7 +450,6 @@ def decay_const(nuc):
         raise pyne.nucname.NucTypeError(nuc)
 
     return dc
-
 
 
 def branch_ratio(from_nuc, to_nuc):
@@ -346,6 +493,7 @@ def branch_ratio(from_nuc, to_nuc):
 cdef conv._MapIntDouble state_energy_map_proxy = conv.MapIntDouble(False)
 state_energy_map_proxy.map_ptr = &cpp_data.state_energy_map
 state_energy_map = state_energy_map_proxy
+
 
 def state_energy(nuc):
     """Finds the excitation energy [MeV] of a nuclide in a given state.
@@ -401,3 +549,638 @@ def decay_children(nuc):
         raise pyne.nucname.NucTypeError(nuc)
 
     return dc
+
+def metastable_id(nuc, level=1):
+    """
+    return the nuc_id of a metastable state
+
+    Parameters
+    ----------
+    nuc : int
+        Input nuclide
+    level : int
+        integer metastable state
+
+    Returns
+    -------
+    nuc : int
+        nuc_id of metastable state
+    """
+    return cpp_data.metastable_id(<int> nuc, <int> level)
+
+def decay_half_life(from_nuc, to_nuc):
+    """
+    Returns the half life from ENSDF decay dataset parent data
+
+    Parameters
+    ----------
+    from_nuc : int
+        parent nuclide
+    to_nuc : int
+        child nuclide
+
+    Returns
+    -------
+    half_life : double
+        half life in seconds
+    error : double
+        Error in seconds
+    """
+    half_life, error = cpp_data.decay_half_life(cpp_pair[int,int](from_nuc, to_nuc)) 
+    return half_life, error
+
+def decay_half_life_byparent(parent):
+    """
+    Returns a list half lives from ENSDF decay dataset parent data
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    half_lives : array of pairs
+        An array of half lives and their errors for a given parent nuclide
+    """
+    half_lives = cpp_data.decay_half_lifes(<int> parent)
+    return half_lives
+
+def decay_branch_ratio(from_nuc, to_nuc):
+    """
+    Returns the branch ratio from ENSDF decay dataset data
+
+    Parameters
+    ----------
+    from_nuc : int
+        parent nuclide
+    to_nuc : int
+        child nuclide
+
+    Returns
+    -------
+    ratio : double
+        branching ratio
+    """
+    ratio = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc)) 
+    return ratio
+
+def decay_branch_ratio_byparent(parent):
+    """
+    Returns a list branching ratios from ENSDF decay dataset data for a given
+    parent.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of doubles
+        An array of half lives and their errors for a given parent nuclide
+    """
+    ratios = cpp_data.decay_branch_ratios(<int> parent)
+    return ratios
+
+def decay_photon_branch_ratio(from_nuc, to_nuc):
+    """
+    Returns the photon branch ratio from ENSDF decay dataset data
+
+    Parameters
+    ----------
+    from_nuc : int
+        parent nuclide
+    to_nuc : int
+        child nuclide
+
+    Returns
+    -------
+    ratio : double
+        photon branching ratio
+    """
+    ratio, error = \
+    cpp_data.decay_photon_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc)) 
+    return ratio, error
+
+def decay_photon_branch_ratio_byparent(parent):
+    """
+    Returns a list of photon branch ratios from ENSDF decay dataset parent data
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    half_lives : array of pairs
+        An array of photon branching ratios and their errors for a given parent
+        nuclide
+    """
+    arr = cpp_data.decay_photon_branch_ratios(<int> parent)
+    return arr
+
+def decay_beta_branch_ratio(from_nuc, to_nuc):
+    """
+    Returns the  branch ratio from ENSDF decay dataset data
+
+    Parameters
+    ----------
+    from_nuc : int
+        parent nuclide
+    to_nuc : int
+        child nuclide
+
+    Returns
+    -------
+    ratio : double
+         branching ratio
+    """
+    ratio, error = \
+    cpp_data.decay_beta_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc)) 
+    return ratio, error
+
+def decay_beta_branch_ratio_byparent(parent):
+    """
+    Returns a list of beta branch ratios from ENSDF decay dataset parent data
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of beta branching ratios and their errors for a given parent
+        nuclide
+    """
+    ratios = cpp_data.decay_beta_branch_ratios(<int> parent)
+    return ratios
+
+def gamma_energy(parent):
+    """
+    Returns a list of gamma ray energies from ENSDF decay dataset from a given 
+    parent
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray energies and errors
+    """
+    return cpp_data.gamma_energy(<int> parent)
+
+def gamma_photon_intensity(parent):
+    """
+    Returns a list of gamma ray photon intensities from ENSDF decay dataset 
+    from a given parent
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray photon intensities and errors
+    """
+    return cpp_data.gamma_photon_intensity(<int> parent)
+    
+def gamma_conversion_intensity(parent):
+    """
+    Returns a list of gamma ray conversion intensities from ENSDF decay dataset
+    from a given parent
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray conversion intensities and errors
+    """
+    return cpp_data.gamma_conversion_intensity(<int> parent)
+    
+def gamma_total_intensity(parent):
+    """
+    Returns a list of gamma ray total intensities from ENSDF decay dataset from
+    a given parent
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray total intensities and errors
+    """
+    return cpp_data.gamma_total_intensity(<int> parent)
+
+def gamma_from_to_byparent(parent):
+    """
+    Returns a list of gamma ray level pairs from ENSDF decay dataset from a
+    given parent. This makes it possible to calculate coincidence rates.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray level pairs in nuc_id form
+    """
+    return cpp_data.gamma_from_to(<int> parent)
+    
+def gamma_from_to_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray level pairs from ENSDF decay dataset 
+    based on gamma-ray energy. 
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray level pairs in nuc_id form
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.gamma_from_to(<double> en,<double> enerror)   
+
+def gamma_parent(en, enerror=None):
+    """
+    Returns a list of gamma ray parents from ENSDF decay dataset 
+    based on gamma-ray energy. 
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of gamma ray parents in nuc_id form
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.gamma_parent(<double> en, <double> enerror)
+
+
+def alpha_energy(parent):
+    """
+    Returns a list of alpha energies from ENSDF decay dataset from a given 
+    parent
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of alpha energies and errors
+    """
+    return cpp_data.alpha_energy(<int> parent)
+
+def alpha_intensity(parent):
+    """
+    Returns a list of alpha intensities from ENSDF decay dataset from a given 
+    parent
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of alpha intensities and errors
+    """
+    return cpp_data.alpha_intensity(<int> parent) 
+
+def alpha_parent(en, enerror=None):
+    """
+    Returns a list of alpha parents from ENSDF decay dataset 
+    based on alpha energy. 
+
+    Parameters
+    ----------
+    en : double
+        alpha energy in keV
+    enerror : double
+        alpha energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of alpha parents in nuc_id form
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.alpha_parent(<double> en, <double> enerror)
+
+def alpha_child_byen(en, enerror=None):
+    """
+    Returns a list of alpha children from ENSDF decay dataset 
+    based on alpha energy.
+
+    Parameters
+    ----------
+    en : double
+        alpha energy in keV
+    enerror : double
+        alpha energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of alpha children in nuc_id form
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.alpha_child(<double> en, <double> enerror)
+    
+def alpha_child_byparent(parent):
+    """
+    Returns a list of alpha children from ENSDF decay dataset 
+    based on alpha parent.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in nuc_id form
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of alpha children in nuc_id form
+    """
+    return cpp_data.alpha_child(<int> parent)
+
+def beta_endpoint_energy(parent):
+    """
+    Returns a list of beta endpoint energies from ENSDF decay dataset 
+    based on parent nuclide.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in nuc_id form
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta endpoint energies and errors
+    """
+    return cpp_data.beta_endpoint_energy(<int> parent)
+
+def beta_average_energy(parent):
+    """
+    Returns a list of beta average energies from ENSDF decay dataset 
+    based on parent nuclide.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in nuc_id form
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta average energies and errors
+    """
+    return cpp_data.beta_average_energy(<int> parent)
+
+def beta_intensity(parent):
+    """
+    Returns a list of beta intensities from ENSDF decay dataset 
+    based on parent nuclide.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in nuc_id form
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta intensities and errors
+    """
+    return cpp_data.beta_intensity(<int> parent) 
+
+def beta_parent(en, enerror=None):
+    """
+    Returns a list of beta minus parents from ENSDF decay dataset 
+    based on beta energy.
+
+    Parameters
+    ----------
+    en : double
+        beta- energy in keV
+    enerror : double
+        beta- energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta minus parents in nuc_id form
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.beta_parent(<double> en, <double> enerror)
+
+def beta_child_byen(en, enerror=None):
+    """
+    Returns a list of beta minus children from ENSDF decay dataset 
+    based on beta energy.
+
+    Parameters
+    ----------
+    en : double
+        beta- energy in keV
+    enerror : double
+        beta- energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta minus children in nuc_id form
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.beta_child(<double> en, <double> enerror)
+    
+def beta_child_byparent(parent):
+    """
+    Returns a list of beta minus children from ENSDF decay dataset 
+    based on parent.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in nuc_id form
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta- children in nuc_id form
+    """
+    return cpp_data.beta_child(<int> parent)
+
+def ecbp_endpoint_energy(parent):
+    """
+    Returns a list of beta plus endpoint energies from ENSDF decay dataset from
+    a given parent.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of beta plus endpoint energies and errors
+    """
+    return cpp_data.ecbp_endpoint_energy(<int> parent)
+
+def ecbp_average_energy(parent):
+    """
+    Returns a list of beta plus average energies from ENSDF decay dataset from
+    a given parent.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of beta plus average energies and errors
+    """
+    return cpp_data.ecbp_average_energy(<int> parent)
+
+def ec_intensity(parent):
+    """
+    Returns a list of electron capture intensisities from ENSDF decay dataset
+    from a given parent.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of electron capture intensisities and errors
+    """
+    return cpp_data.ec_intensity(<int> parent)
+
+def beta_plus_intensity(parent):
+    """
+    Returns a list of beta plus intensities from ENSDF decay dataset from
+    a given parent.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of beta plus intensities and errors
+    """
+    return cpp_data.bp_intensity(<int> parent) 
+
+def ecbp_parent(en, enerror=None):
+    """
+    Returns a list of beta plus/electron capture parents from ENSDF decay 
+    dataset based on beta energy.
+
+    Parameters
+    ----------
+    en : double
+        beta- energy in keV
+    enerror : double
+        beta- energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta plus/electron capture children in nuc_id form
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.ecbp_parent(<double> en, <double> enerror)
+
+def ecbp_child_byen(en, enerror=None):
+    """
+    Returns a list of beta plus/electron capture parents from ENSDF decay 
+    dataset based on beta energy.
+
+    Parameters
+    ----------
+    en : double
+        beta- energy in keV
+    enerror : double
+        beta- energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta plus/electron capture children in nuc_id form
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.ecbp_child(<double> en, <double> enerror)
+    
+def ecbp_child_byparent(parent):
+    """
+    Returns a list of beta plus children from ENSDF decay dataset 
+    based on parent.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in nuc_id form
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of beta+ children in nuc_id form
+    """
+    return cpp_data.ecbp_child(<int> parent)

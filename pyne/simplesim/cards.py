@@ -1,6 +1,6 @@
 """The :py:mod:`cards` module can be imported as such::
 
-    from pyne.simplesim import cards
+    from .simplesim import cards
 
 The user creates cards, typically only working with the constructors, and then
 adds the cards to a :py:class:`pyne.simplesim.definition.IDefinition`. The user
@@ -291,9 +291,9 @@ import warnings
 
 import numpy as np
 
-from pyne import nucname
-from pyne import material
-import pyne.simplesim.nestedgeom as ng
+from .. import nucname
+from .. import material
+from . import nestedgeom as ng
 
 def _validate_name(value, isunique=False):
     if value.find(' ') != -1:
@@ -3552,7 +3552,7 @@ class ICellSurfTally(ITally):
         Alternatively, the cards can be specified by something like the
         following (see :py:mod:`pyne.simplesim.nestedgeom`)::
 
-            import pyne.simplesim.nestedgeom as ng
+            import .simplesim.nestedgeom as ng
             unit = ng.Surf('sA') < ng.FCell('cA')
             tally = SurfaceFlux('fuel', 'neutron', unit)
 

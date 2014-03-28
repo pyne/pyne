@@ -90,14 +90,14 @@ def parse_res(resfile, write_py=False):
     header = "import numpy as np\n\n"
 
     # Find all variables and shape
-    vars_shape = np.unique( re.findall(_lhs_variable_pattern, f) )
+    vars_shape = np.array(list(set(re.findall(_lhs_variable_pattern, f))))
     vars_dtype = dict( re.findall(_rhs_variable_pattern, f) )
     # Initialize variables to zero
     header = header + "# Initialize variables\n"
     for vs in vars_shape:
         # Determine shape
-        s = re.search(r'\[.*:(.*?)\]', vs[1])
-        if s == None:
+        s = re.search(r'\[.*?:(.*?)\]', vs[1])
+        if s is None:
             vs_shape = ""
         else:
             vs_shape = s.group(1)
@@ -125,7 +125,7 @@ def parse_res(resfile, write_py=False):
     f = header + f
 
     # Replace variable overrides
-    vars = np.unique( re.findall("(" + _lhs_variable_pattern + ")", f) )
+    vars = np.array(list(set(re.findall("(" + _lhs_variable_pattern + ")", f))))
     for v in vars:
         f = f.replace(v[0], "{0}[idx] ".format(v[1]))
 

@@ -2,7 +2,7 @@
 
 """The ``definition`` module can be imported as such::
 
-    from pyne.simplesim import definition
+    from .simplesim import definition
 
 ********
 Overview
@@ -50,6 +50,7 @@ Reference
 """
 # TODO check overwriting warning.
 # TODO test the exceptions for getting *_num() not in list/dict.
+from __future__ import print_function
 import abc
 import collections
 import pickle
@@ -62,8 +63,8 @@ except ImportError:
 
 import numpy as np
 
-from pyne import material
-from pyne.simplesim import cards
+from .. import material
+from . import cards
 
 class IDefinition(object):
     """This class is not used by the user. Abstract base class for
@@ -87,11 +88,11 @@ class IDefinition(object):
         self.verbose = verbose
         if fname is not None:
             if self.verbose:
-                print "Opening definition stored in {0!r}.".format(fname)
+                print("Opening definition stored in {0!r}.".format(fname))
             self._open(fname)
         else:
             if self.verbose:
-                print "Creating a new definition."
+                print("Creating a new definition.")
             self._create_new()
 
     @abc.abstractmethod
@@ -228,7 +229,7 @@ class SystemDefinition(IDefinition):
                 self._cells[cell.name] = cell
                 return
             if self.verbose:
-                print "Adding cell %s." % cell.name
+                print("Adding cell %s." % cell.name)
             # Add all surfaces that aren't already added. Do this by walking the
             # region tree and calling _add_unique_surfaces() at the leaves.
             cell.region.walk(self._add_unique_surfaces)
@@ -283,14 +284,14 @@ class SystemDefinition(IDefinition):
         # Used by add_cell().
         name = regionleaf.surface.name
         if self.verbose:
-            print "Trying to add surface {0!r}...".format(name)
+            print("Trying to add surface {0!r}...".format(name))
         if name not in self.surfaces:
             self.add_surface(regionleaf.surface)
             if self.verbose:
-                print "  Surface {0!r} added successfully.".format(name)
+                print("  Surface {0!r} added successfully.".format(name))
         else:
             if self.verbose:
-                print ("  Surface {0!r} already exists in the "
+                print("  Surface {0!r} already exists in the "
                         "definition.".format(name))
 
     def add_material(self, *args):
@@ -1055,8 +1056,8 @@ class DefinitionEncoder(json.JSONEncoder):
             #    return ''
             return json.JSONEncoder.default(self, obj)
         except:
-            print "exception: "
-            print type(obj)
-            print obj
+            print("exception: ")
+            print(type(obj))
+            print(obj)
             raise
 

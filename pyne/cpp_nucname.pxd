@@ -1,12 +1,7 @@
 """C++ wrapper for nucname library."""
 from libcpp.map cimport map
 from libcpp.set cimport set
-
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
+from libcpp.string cimport string as std_string
 
 cdef extern from "nucname.h" namespace "pyne::nucname":
     # Conversion dictionaries
@@ -64,6 +59,14 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int zzaaam_to_id(int) except +
     int zzaaam_to_id(char *) except +
     int zzaaam_to_id(std_string) except +
+
+    # zzzaaa Functions
+    int zzzaaa(int) except +
+    int zzzaaa(char *) except +
+    int zzzaaa(std_string) except +
+    int zzzaaa_to_id(int) except +
+    int zzzaaa_to_id(char *) except +
+    int zzzaaa_to_id(std_string) except +
 
     # MCNP Functions 
     int mcnp(int) except + 

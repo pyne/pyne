@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import re
 import urllib2
@@ -28,7 +29,7 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     else:
         filename = os.path.join(build_dir, '{nuc}_{n}.html'.format(nuc=nuc, n=n))
         kaeri_url = 'http://atom.kaeri.re.kr/cgi-bin/nuclide?nuc={0}&n={n}'.format(nuc, n=n)
-    print "    getting {0} and placing in {1}".format(nuc, filename)
+    print("    getting {0} and placing in {1}".format(nuc, filename))
 
     # Get the url 
     req = urllib2.Request(kaeri_url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -44,7 +45,7 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
         except urllib2.URLError:
             hdl.close()
             i += 1
-            print "    getting {0} and placing in {1}, attempt {2}".format(nuc, filename, i)
+            print("    getting {0} and placing in {1}, attempt {2}".format(nuc, filename, i))
             hdl = urllib2.urlopen(req, timeout=30.0)
 
     # Write out to the file    

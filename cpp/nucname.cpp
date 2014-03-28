@@ -3,7 +3,9 @@
 // name is for letters  as well (U-235).
 // MCNP is for numerals without the meta-stable flag (92235), as used in MCNP.
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "nucname.h"
+#endif
 
 /*** Constructs the LL to zz Dictionary ***/
 pyne::nucname::name_zz_t pyne::nucname::get_name_zz()
@@ -574,6 +576,49 @@ int pyne::nucname::zzaaam_to_id(std::string nuc)
   return zzaaam_to_id(pyne::to_int(nuc));
 };
 
+/************************/
+/*** zzzaaa functions ***/
+/************************/
+int pyne::nucname::zzzaaa(int nuc)
+{
+  int nucid = id(nuc);
+  int zzzaaa = nucid/10000;
+
+  return zzzaaa;
+};
+
+
+int pyne::nucname::zzzaaa(char * nuc)
+{
+  std::string newnuc (nuc);
+  return zzzaaa(newnuc);
+};
+
+
+int pyne::nucname::zzzaaa(std::string nuc)
+{
+  return zzzaaa(id(nuc));
+};
+
+
+int pyne::nucname::zzzaaa_to_id(int nuc)
+{
+  return (nuc)*10000;
+};
+
+
+int pyne::nucname::zzzaaa_to_id(char * nuc)
+{
+  return zzzaaa_to_id(std::string(nuc));
+};
+
+
+int pyne::nucname::zzzaaa_to_id(std::string nuc)
+{
+  return zzzaaa_to_id(pyne::to_int(nuc));
+};
+
+
 
 /**********************/
 /*** mcnp functions ***/
@@ -640,6 +685,7 @@ int pyne::nucname::mcnp_to_id(int nuc)
   else if (aaa == 0)
     // MCNP form natural nuclide
     return zzz * 10000000;
+  throw IndeterminateNuclideForm(nuc, "");
 };
 
 

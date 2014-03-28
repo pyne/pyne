@@ -15,6 +15,8 @@ The Python for Nuclear Engineering Team includes:
 * `Eric Relson`_
 * `Elliott Biondo`_
 * `Matthew Gidden`_
+* Cameron Bates
+* `Kevin Manalo`_
 
 .. _Anthony Scopatz: http://www.scopatz.com/
 
@@ -29,6 +31,8 @@ The Python for Nuclear Engineering Team includes:
 .. _Elliott Biondo: mailto:biondo@wisc.edu
 
 .. _Matthew Gidden: http://github.com/gidden
+
+.. _Kevin Manalo: mailto:kmanalo@gmail.com
 
 Contact us via pyne-dev@googlegroups.com
 

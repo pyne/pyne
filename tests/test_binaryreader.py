@@ -4,60 +4,62 @@ import struct
 import filecmp
 import os
 
-from pyne.binaryreader import (_FortranRecord, FortranRecordError,
-                               _BinaryReader, BinaryReaderError)
+from pyne.binaryreader import (_FortranRecord, _BinaryReader)
+
 
 # test the ability to make a new empty FortranRecord
 def test_make_empty_FR():
-    testRecord = _FortranRecord('',0)
 
-    if testRecord.data != '':
-        raise FortranRecordError("Failed to make an new empty _FortranRecord.  "
-                                 "Record has data.")
-    if testRecord.numBytes != 0:
-        raise FortranRecordError("Failed to make an new empty _FortranRecord.  "
-                                 "Record has numBytes>0.")
-    if testRecord.pos != 0:
-        raise FortranRecordError("Failed to make an new empty _FortranRecord.  "
-                                 "Position is not at 0.")
+    test_record = _FortranRecord('', 0)
+
+    if test_record.data != '':
+        raise ValueError("Failed to make an new empty _FortranRecord. "
+                         " Record has data.")
+    if test_record.num_bytes != 0:
+        raise ValueError("Failed to make an new empty _FortranRecord. "
+                         " Record has num_bytes>0.")
+    if test_record.pos != 0:
+        raise ValueError("Failed to make an new empty _FortranRecord. "
+                         " Position is not at 0.")
 
     return 1
+
 
 # test the ability to reset the pos pointer in a FortranRecord
 def test_reset_FR():
 
-    tempPos = 4
+    temp_pos = 4
 
-    testRecord = _FortranRecord('',0)  # already tested
+    test_record = _FortranRecord('', 0)  # already tested
 
-    testRecord.pos = tempPos
+    test_record.pos = temp_pos
 
-    if testRecord.pos != tempPos:
-        raise FortranRecordError("Internal error: unable to update "
-                                 "testRecord.pos")
+    if test_record.pos != temp_pos:
+        raise ValueError("Internal error: unable to update test_record.pos")
 
-    testRecord.reset()
-    if testRecord.pos != 0:
-        raise FortranRecordError("reset() method did not reset pos")
-        
+    test_record.reset()
+    if test_record.pos != 0:
+        raise ValueError("reset() method did not reset pos")
+
     return 1
-    
+
 
 # useful for checking all the changes expected from writing to a FortranRecord
 def check_write_record_data(record, pos, num, data, typeString):
 
     if record.pos != pos:
-        raise FortranRecordError("Writing " + typeString + 
-                                 " to record did not update pos properly: "
-                                 + str(record.pos))
-    if record.numBytes != num:
-        raise FortranRecordError("Writing " + typeString +
-                                 " to record did not update numBytes properly")
+        raise ValueError("Writing " + typeString +
+                         " to record did not update pos properly: "
+                         + str(record.pos))
+    if record.num_bytes != num:
+        raise ValueError("Writing  " + typeString +
+                         "to record did not update num_bytes properly")
     if record.data != data:
-        raise FortranRecordError("Writing " + typeString +
-                                 " to record did not set data member correctly")
-    
+        raise ValueError("Writing  " + typeString +
+                         "to record did not set data member correctly")
+
     return 1
+
 
 ###################
 #
@@ -67,162 +69,173 @@ def check_write_record_data(record, pos, num, data, typeString):
 ###################
 def test_write_FR_single_int():
 
-    setInt = 8
-    setNumBytes = 4
-    setData = '\x08\x00\x00\x00'
-    
-    # create new record
-    testRecord = _FortranRecord('',0)  # already tested
-    
-    # write integer
-    testRecord.put_int(setInt)
+    set_int = 8
+    set_num_bytes = 4
+    set_data = '\x08\x00\x00\x00'
 
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"4-byte integer")
+    # create new record
+    test_record = _FortranRecord('', 0)  # already tested
+
+    # write integer
+    test_record.put_int(set_int)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "4-byte integer")
+
 
 def test_write_FR_int_list():
 
-    setIntList = [8,16]
-    setNumBytes = 8
-    setData = '\x08\x00\x00\x00\x10\x00\x00\x00'
+    set_intList = [8, 16]
+    set_num_bytes = 8
+    set_data = '\x08\x00\x00\x00\x10\x00\x00\x00'
 
-    testRecord = _FortranRecord('',0)
+    test_record = _FortranRecord('', 0)
 
     # write integer list
-    testRecord.put_int(setIntList)
-    
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData, "list of 4-byte integers")
+    test_record.put_int(set_intList)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "list of 4-byte integers")
+
 
 def test_write_FR_single_long():
 
-    setLong = 8
-    setNumBytes = 8
-    setData = '\x08\x00\x00\x00\x00\x00\x00\x00'
-    
-    # create new record
-    testRecord = _FortranRecord('',0)  # already tested
-    
-    # write long
-    testRecord.put_long(setLong)
+    set_long = 8
+    set_num_bytes = 8
+    set_data = '\x08\x00\x00\x00\x00\x00\x00\x00'
 
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"8-byte integer")
+    # create new record
+    test_record = _FortranRecord('', 0)  # already tested
+
+    # write long
+    test_record.put_long(set_long)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "8-byte integer")
+
 
 def test_write_FR_long_list():
 
-    setLongList = [8,16]
-    setNumBytes  = 16
-    setData = '\x08\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00'
+    set_long_list = [8, 16]
+    set_num_bytes = 16
+    set_data = \
+        '\x08\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00'
 
-    testRecord = _FortranRecord('',0)
-    testRecord.put_long(setLongList)
-    
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"list of 8-byte integers")
+    test_record = _FortranRecord('', 0)
+    test_record.put_long(set_long_list)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "list of 8-byte integers")
+
 
 def test_write_FR_single_float():
 
-    setFloat = 3.14
-    setNumBytes = 4
-    setData = '\xc3\xf5H@'
-    
-    # create new record
-    testRecord = _FortranRecord('',0)  # already tested
-    
-    # write float
-    testRecord.put_float(setFloat)
+    set_float = 3.14
+    set_num_bytes = 4
+    set_data = '\xc3\xf5H@'
 
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"float")
+    # create new record
+    test_record = _FortranRecord('', 0)  # already tested
+
+    # write float
+    test_record.put_float(set_float)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "float")
+
 
 def test_write_FR_float_list():
 
-    setFloatList = [3.14,0.3333]
-    setNumBytes  = 8
-    setData = '\xc3\xf5H@L\xa6\xaa>'
+    set_floatList = [3.14, 0.3333]
+    set_num_bytes = 8
+    set_data = '\xc3\xf5H@L\xa6\xaa>'
 
-    testRecord = _FortranRecord('',0)
-    testRecord.put_float(setFloatList)
-    
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"list of floats")
+    test_record = _FortranRecord('', 0)
+    test_record.put_float(set_floatList)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "list of floats")
+
 
 def test_write_FR_single_double():
 
-    setDouble = 3.14
-    setNumBytes = 8
-    setData = '\x1f\x85\xebQ\xb8\x1e\t@'
-    
-    # create new record
-    testRecord = _FortranRecord('',0)  # already tested
-    
-    # write double
-    testRecord.put_double(setDouble)
+    set_double = 3.14
+    set_num_bytes = 8
+    set_data = '\x1f\x85\xebQ\xb8\x1e\t@'
 
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"double")
+    # create new record
+    test_record = _FortranRecord('',  0)  # already tested
+
+    # write double
+    test_record.put_double(set_double)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "double")
+
 
 def test_write_FR_double_list():
 
-    setDoubleList = [3.14,0.3333]
-    setNumBytes  = 16
-    setData = '\x1f\x85\xebQ\xb8\x1e\t@io\xf0\x85\xc9T\xd5?'
+    set_double_list = [3.14, 0.3333]
+    set_num_bytes = 16
+    set_data = '\x1f\x85\xebQ\xb8\x1e\t@io\xf0\x85\xc9T\xd5?'
 
-    testRecord = _FortranRecord('',0)
-    testRecord.put_double(setDoubleList)
-    
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"list of doubles")
+    test_record = _FortranRecord('', 0)
+    test_record.put_double(set_double_list)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "list of doubles")
+
 
 def test_write_FR_single_string():
 
-    setString = "Hello World!"
-    setLength = len(setString)
-    setNumBytes = 12
-    setData = 'Hello World!'
-    
+    set_string = "Hello World!"
+    set_length = len(set_string)
+    set_num_bytes = 12
+    set_data = 'Hello World!'
+
     # create new record
-    testRecord = _FortranRecord('',0)  # already tested
-    
+    test_record = _FortranRecord('', 0)  # already tested
+
     # write string
-    testRecord.put_string([setString],12,1)
-    
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"string")
+    test_record.put_string([set_string], 12, 1)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "string")
+
 
 def test_write_FR_string_list():
 
-    setStringList = ["Hello ", "World!"]
-    setLength = len(setStringList[0])
-    setNumBytes  = 12
-    setData = 'Hello World!'
+    set_string_list = ["Hello ", "World!"]
+    set_length = len(set_string_list[0])
+    set_num_bytes = 12
+    set_data = 'Hello World!'
 
-    testRecord = _FortranRecord('',0)
-    testRecord.put_string(setStringList,setLength)
-    
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"list of strings")
+    test_record = _FortranRecord('', 0)
+    test_record.put_string(set_string_list, set_length)
+
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "list of strings")
+
 
 def test_write_FR_mixed_record():
 
-    setInt = 8
-    setFloat = 3.14
-    setDoubleList = [1.6e-19,6.02e23]
-    setString = "Hello World!"
-    
-    setNumBytes = 4+4+(2*8)+12
-    setData = '\x08\x00\x00\x00Hello World!#B\x92\x0c\xa1\x9c\x07<a\xd3' + \
+    set_int = 8
+    set_float = 3.14
+    set_double_list = [1.6e-19, 6.02e23]
+    set_string = "Hello World!"
+
+    set_num_bytes = 4+4+(2*8)+12
+    set_data = '\x08\x00\x00\x00Hello World!#B\x92\x0c\xa1\x9c\x07<a\xd3' + \
         '\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
 
-    testRecord = _FortranRecord('',0)
-    testRecord.put_int(setInt)
-    testRecord.put_string([setString],len(setString))
-    testRecord.put_double(setDoubleList)
-    testRecord.put_float([setFloat])
+    test_record = _FortranRecord('', 0)
+    test_record.put_int(set_int)
+    test_record.put_string([set_string], len(set_string))
+    test_record.put_double(set_double_list)
+    test_record.put_float([set_float])
 
-    return check_write_record_data(testRecord, setNumBytes, setNumBytes,
-                                   setData,"list of doubles")
+    return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
+                                   set_data, "list of doubles")
 
 ###################
 #
@@ -231,234 +244,245 @@ def test_write_FR_mixed_record():
 #
 ###################
 
+
 def test_read_FR_single_int():
 
-    setInt = 8
+    set_int = 8
 
-    testRecord = _FortranRecord('',0)  # already tested
-    testRecord.put_int([setInt])       # already tested
+    test_record = _FortranRecord('', 0)  # already tested
+    test_record.put_int([set_int])       # already tested
 
-    testRecord.reset()                 # already tested
+    test_record.reset()                 # already tested
 
-    testInt = testRecord.get_int()[0]
+    test_int = test_record.get_int()[0]
 
-    if testInt != setInt:
-        raise FortranRecordError("Value from get_int doesn't match value "
-                                 "from put_int.")
-        
+    if test_int != set_int:
+        raise ValueError("Value from get_int doesn't match value "
+                         "from put_int.")
+
     return 1
+
 
 def test_read_FR_int_list():
 
-    setIntList = [8,16]
-    numInts = 2
+    set_intList = [8, 16]
+    num_ints = 2
 
-    testRecord = _FortranRecord('',0)  # already tested
-    testRecord.put_int(setIntList)       # already tested
+    test_record = _FortranRecord('', 0)  # already tested
+    test_record.put_int(set_intList)       # already tested
 
-    testRecord.reset()                 # already tested
+    test_record.reset()                 # already tested
 
-    testInt = testRecord.get_int(numInts)
+    test_int = test_record.get_int(num_ints)
 
-    if testInt != setIntList:
-        raise FortranRecordError("Value from get_int doesn't match value "
-                                 "from put_int.")
-        
+    if test_int != set_intList:
+        raise ValueError("Value from get_int doesn't match value "
+                         "from put_int.")
+
     return 1
+
 
 def test_read_FR_single_long():
 
-    setLong = 8
+    set_long = 8
 
-    testRecord = _FortranRecord('',0)  # already tested
-    testRecord.put_long([setLong])       # already tested
+    test_record = _FortranRecord('', 0)  # already tested
+    test_record.put_long([set_long])       # already tested
 
-    testRecord.reset()                 # already tested
+    test_record.reset()                 # already tested
 
-    testLong = testRecord.get_long()[0]
+    testLong = test_record.get_long()[0]
 
-    if testLong != setLong:
-        raise FortranRecordError("Value from get_long doesn't match value "
-                                 "from put_long.")
-        
+    if testLong != set_long:
+        raise ValueError("Value from get_long doesn't match value "
+                         "from put_long.")
+
     return 1
+
 
 def test_read_FR_long_list():
 
-    setLongList = [8,16]
+    set_long_list = [8, 16]
     numLongs = 2
 
-    testRecord = _FortranRecord('',0)  # already tested
-    testRecord.put_long(setLongList)       # already tested
+    test_record = _FortranRecord('', 0)  # already tested
+    test_record.put_long(set_long_list)       # already tested
 
-    testRecord.reset()                 # already tested
+    test_record.reset()                 # already tested
 
-    testLong = testRecord.get_long(numLongs)
+    testLong = test_record.get_long(numLongs)
 
-    if testLong != setLongList:
-        raise FortranRecordError("Value from get_long doesn't match value "
-                                 "from put_long.")
-        
+    if testLong != set_long_list:
+        raise ValueError("Value from get_long doesn't match value "
+                         "from put_long.")
+
     return 1
+
 
 def test_read_FR_single_float():
 
-    setFloat =  6.1
+    set_float = 6.1
 
-    testRecord = _FortranRecord('',0)
-    testRecord.put_float([setFloat])
+    test_record = _FortranRecord('', 0)
+    test_record.put_float([set_float])
 
-    testRecord.reset()
-    
-    testFloat = testRecord.get_float()[0]
+    test_record.reset()
+
+    test_float = test_record.get_float()[0]
 
     # NOTE: since Python doesn't do native 32-bit floats, both values should be
     #       passed through a string formatting to truncate to 6 digits
-    setFloat  = '%10.6f' % setFloat
-    testFloat = '%10.6f' % testFloat
+    set_float = '%10.6f' % set_float
+    test_float = '%10.6f' % test_float
 
-    if testFloat != setFloat:
-        print str(setFloat) + " != " + str(testFloat)
-        raise FortranRecordError("Value from get_float doesn't match value "
-                                 "from put_float.")
-        
+    if test_float != set_float:
+        print str(set_float) + " != " + str(test_float)
+        raise ValueError("Value from get_float doesn't match value "
+                         "from put_float.")
+
     return 1
+
 
 def test_read_FR_float_list():
 
-    floatList = [2.34,8.65]
-    
-    testRecord = _FortranRecord('',0)
-    testRecord.put_float(floatList)
-    
-    testRecord.reset()
+    floatList = [2.34, 8.65]
 
-    testList = testRecord.get_float(2)
+    test_record = _FortranRecord('', 0)
+    test_record.put_float(floatList)
+
+    test_record.reset()
+
+    testList = test_record.get_float(2)
 
     # NOTE: since Python doesn't do native 32-bit floats, both values should be
     #       passed through a string formatting to truncate to 6 digits
-    floatList  = ['%10.6f' % floatList[0], '%10.6f' % floatList[1]]
+    floatList = ['%10.6f' % floatList[0], '%10.6f' % floatList[1]]
     testList = ['%10.6f' % testList[0], '%10.6f' % testList[1]]
 
     if testList != floatList:
         print floatList
         print testList
-        raise FortranRecordError("List from get_float doesn't match value "
-                                 "from put_float.")
+        raise ValueError("List from get_float doesn't match value "
+                         "from put_float.")
 
     return 1
+
 
 def test_read_FR_single_double():
 
-    setDouble = 1.43
+    set_double = 1.43
 
-    testRecord = _FortranRecord('',0)
-    testRecord.put_double([setDouble])
+    test_record = _FortranRecord('', 0)
+    test_record.put_double([set_double])
 
-    testRecord.reset()
-    
-    testDouble = testRecord.get_double()[0]
+    test_record.reset()
 
-    if testDouble != setDouble:
-        raise FortranRecordError("Value from get_double doesn't match value "
-                                 "from put_double.")
-        
+    testDouble = test_record.get_double()[0]
+
+    if testDouble != set_double:
+        raise ValueError("Value from get_double doesn't match value "
+                         "from put_double.")
+
     return 1
+
 
 def test_read_FR_double_list():
 
-    doubleList = [2.34,8.65]
-    
-    testRecord = _FortranRecord('',0)
-    testRecord.put_double(doubleList)
-    
-    testRecord.reset()
+    double_list = [2.34, 8.65]
 
-    testList = testRecord.get_double(2)
+    test_record = _FortranRecord('', 0)
+    test_record.put_double(double_list)
 
-    if testList != doubleList:
-        raise FortranRecordError("List from get_double doesn't match value "
-                                 "from put_double.")
+    test_record.reset()
+
+    testList = test_record.get_double(2)
+
+    if testList != double_list:
+        raise ValueError("List from get_double doesn't match value "
+                         "from put_double.")
 
     return 1
+
 
 def test_read_FR_single_string():
 
-    setString = "Hello World!"
-    setLength = len(setString)
-    
+    set_string = "Hello World!"
+    set_length = len(set_string)
+
     # create new record
-    testRecord = _FortranRecord('',0)  # already tested
-    testRecord.put_string([setString],12,1)
+    test_record = _FortranRecord('', 0)  # already tested
+    test_record.put_string([set_string], 12, 1)
 
-    testRecord.reset()
+    test_record.reset()
 
-    testString = testRecord.get_string(setLength)[0]
+    test_string = test_record.get_string(set_length)[0]
 
-    if testString != setString:
-        raise FortranRecordError("List from get_string doesn't match value "
-                                 "from put_string.")
-        
+    if test_string != set_string:
+        raise ValueError("List from get_string doesn't match value "
+                         "from put_string.")
+
     return 1
+
 
 def test_read_FR_string_list():
 
-    setStringList = ["Hello ", "World!"]
-    setLength = len(setStringList[0])
+    set_string_list = ["Hello ", "World!"]
+    set_length = len(set_string_list[0])
 
-    testRecord = _FortranRecord('',0)
-    testRecord.put_string(setStringList,setLength)
-    testRecord.reset()
+    test_record = _FortranRecord('', 0)
+    test_record.put_string(set_string_list, set_length)
+    test_record.reset()
 
-    testStringList = testRecord.get_string(setLength,2)
+    test_string_list = test_record.get_string(set_length, 2)
 
-    if testStringList != setStringList:
-        raise FortranRecordError("List from get_string doesn't match value "
-                                 "from put_string.")
-        
+    if test_string_list != set_string_list:
+        raise ValueError("List from get_string doesn't match value "
+                         "from put_string.")
+
     return 1
+
 
 def test_read_FR_mixed_record():
 
-    setInt = 8
-    setFloat = 3.14
-    setDoubleList = [1.6e-19,6.02e23]
-    setString = "Hello World!"
-    
-    testRecord = _FortranRecord('',0)
-    testRecord.put_int([setInt])
-    testRecord.put_string([setString],len(setString))
-    testRecord.put_double(setDoubleList)
-    testRecord.put_float([setFloat])
+    set_int = 8
+    set_float = 3.14
+    set_double_list = [1.6e-19, 6.02e23]
+    set_string = "Hello World!"
 
-    testRecord.reset()
+    test_record = _FortranRecord('', 0)
+    test_record.put_int([set_int])
+    test_record.put_string([set_string], len(set_string))
+    test_record.put_double(set_double_list)
+    test_record.put_float([set_float])
 
-    testInt = testRecord.get_int()[0]
-    if testInt != setInt:
-        raise FortranRecordError("Value from get_int doesn't match value "
-                                 "from put_int.")
+    test_record.reset()
 
-    testString = testRecord.get_string(12)[0]
-    if testString != setString:
-        raise FortranRecordError("List from get_string doesn't match value "
-                                 "from put_string.")
+    test_int = test_record.get_int()[0]
+    if test_int != set_int:
+        raise ValueError("Value from get_int doesn't match value "
+                         "from put_int.")
 
-    testDoubleList = testRecord.get_double(2)
-    if testDoubleList != setDoubleList:
-        raise FortranRecordError("List from get_double doesn't match value "
-                                 "from put_double.")
+    test_string = test_record.get_string(12)[0]
+    if test_string != set_string:
+        raise ValueError("List from get_string doesn't match value "
+                         "from put_string.")
 
-    testFloat = testRecord.get_float()[0]
+    test_double_list = test_record.get_double(2)
+    if test_double_list != set_double_list:
+        raise ValueError("List from get_double doesn't match value "
+                         "from put_double.")
+
+    test_float = test_record.get_float()[0]
     # NOTE: since Python doesn't do native 32-bit floats, both values should be
     #       passed through a string formatting to truncate to 6 digits
-    setFloat  = '%10.6f' % setFloat
-    testFloat = '%10.6f' % testFloat
+    set_float = '%10.6f' % set_float
+    test_float = '%10.6f' % test_float
 
-    if testFloat != setFloat:
-        print str(setFloat) + " != " + str(testFloat)
-        raise FortranRecordError("Value from get_float doesn't match value "
-                                 "from put_float.")
-    
+    if test_float != set_float:
+        print str(set_float) + " != " + str(test_float)
+        raise ValueError("Value from get_float doesn't match value "
+                         "from put_float.")
+
     return 1
 
 
@@ -469,82 +493,84 @@ def test_read_FR_mixed_record():
 ####################
 
 def test_open_writable_BR():
-    
-    binaryFile = _BinaryReader('test.file','wb')
-    if not binaryFile.f:
-        raise BinaryReaderError("Failed to open new file for writing.")
-    
-    binaryFile.close()
-    
+
+    binary_file = _BinaryReader('test.file', 'wb')
+    if not binary_file.f:
+        raise ValueError("Failed to open new file for writing.")
+
+    binary_file.close()
+
     return 1
+
 
 def test_write_BR():
 
-    binaryFile = _BinaryReader('test.file','wb')
-    if not binaryFile.f:
-        raise BinaryReaderError("Failed to open new file for writing.")
+    binary_file = _BinaryReader('test.file', 'wb')
+    if not binary_file.f:
+        raise ValueError("Failed to open new file for writing.")
 
-    setInt = 8
-    setFloat = 3.14
-    setDoubleList = [1.6e-19,6.02e23]
-    setString = "Hello World!"
-    
-    testRecord = _FortranRecord('',0)
-    testRecord.put_int([setInt])
-    testRecord.put_string([setString],len(setString))
-    testRecord.put_double(setDoubleList)
-    testRecord.put_float([setFloat])
+    set_int = 8
+    set_float = 3.14
+    set_double_list = [1.6e-19, 6.02e23]
+    set_string = "Hello World!"
 
-    testRecord.reset()
+    test_record = _FortranRecord('', 0)
+    test_record.put_int([set_int])
+    test_record.put_string([set_string], len(set_string))
+    test_record.put_double(set_double_list)
+    test_record.put_float([set_float])
 
-    binaryFile.put_fortran_record(testRecord)
+    test_record.reset()
 
-    binaryFile.close()
+    binary_file.put_fortran_record(test_record)
 
-    if not filecmp.cmp('test.file','test_readBR.ref'):
-        raise BinaryReaderError('Created file does not match reference.')
+    binary_file.close()
+
+    if not filecmp.cmp('test.file', 'test_readBR.ref'):
+        raise ValueError('Created file does not match reference.')
 
     return 1
+
 
 def test_read_BR():
 
-    setInt = 8
-    setFloat = 3.14
-    setDoubleList = [1.6e-19,6.02e23]
-    setString = "Hello World!"
-    
-    binaryFile = _BinaryReader('test_readBR.ref')
-    
-    testRecord = binaryFile.get_fortran_record()
+    set_int = 8
+    set_float = 3.14
+    set_double_list = [1.6e-19, 6.02e23]
+    set_string = "Hello World!"
 
-    testInt = testRecord.get_int()[0]
-    if testInt != setInt:
-        raise BinaryReaderError("Integer value was not as expected.")
+    binary_file = _BinaryReader('test_readBR.ref')
 
-    testString = testRecord.get_string(12)[0]
-    if testString != setString:
-        raise BinaryReaderError("String was not as expected.")
+    test_record = binary_file.get_fortran_record()
 
-    testDoubleList = testRecord.get_double(2)
-    if testDoubleList != setDoubleList:
-        raise BinaryReaderError("List of doubles was not as expected.")
+    test_int = test_record.get_int()[0]
+    if test_int != set_int:
+        raise ValueError("Integer value was not as expected.")
 
-    testFloat = testRecord.get_float()[0]
+    test_string = test_record.get_string(12)[0]
+    if test_string != set_string:
+        raise ValueError("String was not as expected.")
+
+    test_double_list = test_record.get_double(2)
+    if test_double_list != set_double_list:
+        raise ValueError("List of doubles was not as expected.")
+
+    test_float = test_record.get_float()[0]
     # NOTE: since Python doesn't do native 32-bit floats, both values should be
     #       passed through a string formatting to truncate to 6 digits
-    setFloat  = '%10.6f' % setFloat
-    testFloat = '%10.6f' % testFloat
+    set_float = '%10.6f' % set_float
+    test_float = '%10.6f' % test_float
 
-    if testFloat != setFloat:
-        print str(setFloat) + " != " + str(testFloat)
-        raise BinaryReaderError("Float value was not as expected.")
-    
+    if test_float != set_float:
+        print str(set_float) + " != " + str(test_float)
+        raise ValueError("Float value was not as expected.")
+
     return 1
-    
+
 
 # start all tests here
 
-tests = [0,0]
+tests = [0, 0]
 
 if os.name == 'posix':
     passed = '\x1b[31G\x1b[32mPASSED\x1b[0m'
@@ -768,8 +794,6 @@ try:
 except Exception as inst:
     print failed + ": " + str(inst)
     tests[1] += 1
-
-
 
 print "Ran    " + str(tests[0]+tests[1]) + " tests."
 print "PASSED " + str(tests[0]) + " tests."

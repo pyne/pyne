@@ -1,6 +1,7 @@
 // Enrichment Cascade
-
+#ifndef PYNE_IS_AMALGAMATED
 #include "enrichment_cascade.h"
+#endif
 
 namespace pyne_enr = pyne::enrichment;
 

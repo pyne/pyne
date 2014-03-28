@@ -8,13 +8,9 @@ from libcpp.set cimport set as cpp_set
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 #from cython cimport pointer
+from libcpp.string cimport string as std_string
 
 # local imports 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
@@ -289,6 +285,52 @@ def zzaaam_to_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
+
+def zzzaaa(nuc):
+    """Converts a nuclide to its zzzaaa form (95242). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in zzzaaa form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzzaaa(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzzaaa(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+def zzzaaa_to_id(nuc):
+    """Converts a nuclide directly from ZZZAAA form (95242) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in ZZZAAA form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzzaaa_to_id(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzzaaa_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
 
 def mcnp(nuc):
     """Converts a nuclide to its MCNP form (92636). 
@@ -609,5 +651,13 @@ cdef cpp_set[int] zzaaam_set(object nuc_sequence):
     cdef cpp_set[int] nuc_set = cpp_set[int]()
     for nuc in nuc_sequence:
         nuc_zz = zzaaam(nuc)
+        nuc_set.insert(nuc_zz)
+    return nuc_set
+
+cdef cpp_set[int] zzzaaa_set(object nuc_sequence):
+    cdef int nuc_zz
+    cdef cpp_set[int] nuc_set = cpp_set[int]()
+    for nuc in nuc_sequence:
+        nuc_zz = zzzaaa(nuc)
         nuc_set.insert(nuc_zz)
     return nuc_set
