@@ -639,11 +639,12 @@ std::string pyne::nucname::zzllaaam(int nuc)
   newnuc += pyne::to_str(zzz);
   newnuc += "-";
   // Add LL
-  std::string llupper = pyne::to_upper(zz_name[zzz]);
-  std::string lllower = pyne::to_lower(zz_name[zzz]);
-  newnuc += llupper[0];
-  for (int l = 1; l < lllower.size(); l++)
-    newnuc += lllower[l];  
+newnuc += zz_name[zzz];
+  //std::string llupper = pyne::to_upper(zz_name[zzz]);
+  //std::string lllower = pyne::to_lower(zz_name[zzz]);
+  //newnuc += llupper[0];
+  //for (int l = 1; l < lllower.size(); l++)
+  //  newnuc += lllower[l];  
 
   // Add required dash
   newnuc += "-";
@@ -651,8 +652,8 @@ std::string pyne::nucname::zzllaaam(int nuc)
   // Add ZZZ
   if (0 < aaassss)
     newnuc += pyne::to_str(aaa);
-  else if (0 == aaassss)
-    newnuc += "nat";
+//  else if (0 == aaassss)
+//    newnuc += "nat";
 
   // Add meta-stable flag
   if (0 < ssss)
