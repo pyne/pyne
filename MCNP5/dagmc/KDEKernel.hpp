@@ -4,11 +4,12 @@
 #define DAGMC_KDE_KERNEL_HPP
 
 #include <string>
+#include <vector>
 
 #include "Quadrature.hpp"
 
 //===========================================================================//
-/**
+/** TODO will need to update this description with new implementation details
  * \class KDEKernel
  * \brief Defines a general 1D kernel function interface
  *
@@ -143,10 +144,6 @@ class KDEKernel
      * where K(u) is the standard kernel function evaluation, a_i(p) is the
      * integral of the ith moment function, and p is the ratio of the distance
      * divided by the bandwidth.
-     *
-     * Note that the integrals of a_i(p) depend on whether a LOWER or UPPER
-     * boundary is used.  If LOWER, then the integration is performed on
-     * [-1, p].  If UPPER, then the integration is performed on [-p, 1].
      */
     virtual double evaluate(double u,
                             double bandwidth,
@@ -154,6 +151,27 @@ class KDEKernel
                             unsigned int side) const;
 
   protected:
+    /**
+     * \brief Computes partial moments ai(p) for this kernel up to i = 2
+     * \param[in] u the value at which the kernel is to be evaluated
+     * \param[in] p ratio of the distance from the boundary divided by bandwidth
+     * \param[in] side the location of the boundary (0 = LOWER, 1 = UPPER)
+     * \param[out] moments an empty vector that will store the new ai(p) values
+     *
+     * The partial moments ai(p) are integrals of the ith moment function of a
+     * kernel K(u).  They are used to determine the correction factor for the
+     * boundary kernel method.  Currently, this method only supports second-
+     * order kernel functions.
+     *
+     * Note that the integration limits of a_i(p) depend on whether a LOWER or
+     * UPPER boundary is used.  If LOWER, then the integration is performed on
+     * [-1, p].  If UPPER, then the integration is performed on [-p, 1].
+     */
+    void compute_moments(double u,
+                         double p,
+                         unsigned int side,
+                         std::vector<double>& moments) const;
+
     /**
      * \class MomentFunction
      * \brief Defines the ith moment function for a general kernel object

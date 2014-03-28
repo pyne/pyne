@@ -40,6 +40,7 @@ KDEKernel* KDEKernel::createKernel(const std::string& type, unsigned int order)
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
+// TODO replace this method with boundary_correction
 double KDEKernel::evaluate(double u,
                            double bandwidth,
                            double distance,
@@ -50,41 +51,60 @@ double KDEKernel::evaluate(double u,
     // compute the scaled distance from the boundary
     double p = distance / bandwidth;
 
-    // test if outside domain p = [0, 1]
-    if (p < 0.0 || p > 1.0) return 0.0;
+    // compute partial moments ai(p)
+    std::vector<double> ai;
+    compute_moments(u, p, side, ai);
 
-    // determine the integration limits
-    double lower_limit = -1.0;
-    double upper_limit = 1.0;
+    // evaluate boundary kernel only if all three moments were computed
+    double value = 0.0;
 
-    if (p < 1.0)
+    if (ai.size() == 3)
     {
-        if (side == 0) // side == LOWER
-        {
-            upper_limit = p;
-        }
-        else // side == UPPER
-        {
-            lower_limit = -1.0 * p;
-        }
+        value = (ai[2] - ai[1] * u) * this->evaluate(u);
+        value /= ai[0] * ai[2] - ai[1] * ai[1];
     }
-
-    // test if outside domain u = [lower_limit, upper_limit]
-    if (u < lower_limit || u > upper_limit) return 0.0;
-
-    // evaluate the moment functions ai(p)
-    double a0 = this->integrate_moment(lower_limit, upper_limit, 0);
-    double a1 = this->integrate_moment(lower_limit, upper_limit, 1);
-    double a2 = this->integrate_moment(lower_limit, upper_limit, 2);
-
-    // compute the value of the boundary kernel
-    double value = (a2 - a1 * u) * this->evaluate(u);
-    value /= a0 * a2 - a1 * a1;
+    // else outside boundary kernel domain
 
     return value;
 }
 //---------------------------------------------------------------------------//
 // PROTECTED METHODS
+//---------------------------------------------------------------------------//
+void KDEKernel::compute_moments(double u,
+                                double p,
+                                unsigned int side,
+                                std::vector<double>& moments) const
+{
+    assert(side <= 1);
+    assert(moments.empty());
+
+    // test if outside domain p = [0, 1]
+    if (p < 0.0 || p > 1.0) return;
+
+    // determine the integration limits
+    double u_min = -1.0;
+    double u_max = 1.0;
+
+    if (p < 1.0)
+    {
+        if (side == 0) // side == LOWER
+        {
+            u_max = p;
+        }
+        else // side == UPPER
+        {
+            u_min = -1.0 * p;
+        }
+    }
+
+    // test if outside domain u = [u_min, u_max]
+    if (u < u_min || u > u_max) return;
+
+    // evaluate the partial moment functions ai(p) and add to moments vector
+    moments.push_back(this->integrate_moment(u_min, u_max, 0));
+    moments.push_back(this->integrate_moment(u_min, u_max, 1));
+    moments.push_back(this->integrate_moment(u_min, u_max, 2));
+}
 //---------------------------------------------------------------------------//
 double KDEKernel::MomentFunction::evaluate(double x) const
 {
