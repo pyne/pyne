@@ -387,9 +387,6 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
 #
 # decay data functions
 #
-#cdef conv._MapIntDouble half_life_map_proxy = conv.MapIntDouble(False)
-#half_life_map_proxy.map_ptr = &cpp_data.half_life_map
-#half_life_map = half_life_map_proxy
 
 
 def half_life(nuc):
@@ -419,9 +416,6 @@ def half_life(nuc):
     return hl
 
 
-#cdef conv._MapIntDouble decay_const_map_proxy = conv.MapIntDouble(False)
-#decay_const_map_proxy.map_ptr = &cpp_data.decay_const_map
-#decay_const_map = decay_const_map_proxy
 
 
 def decay_const(nuc):
@@ -487,11 +481,6 @@ def branch_ratio(from_nuc, to_nuc):
 
     br = cpp_data.branch_ratio(cpp_pair[int, int](fn, tn))
     return br
-
-
-#cdef conv._MapIntDouble state_energy_map_proxy = conv.MapIntDouble(False)
-#state_energy_map_proxy.map_ptr = &cpp_data.state_energy_map
-#state_energy_map = state_energy_map_proxy
 
 
 def state_energy(nuc):
