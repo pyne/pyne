@@ -389,13 +389,16 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
 #
 
 
-def half_life(nuc):
+def half_life(nuc, use_metastable=True):
     """Finds the half-life of a nuclide in [seconds].
 
     Parameters
     ----------
     nuc : int or str 
         Input nuclide.
+    use_metastable : bool
+        Assume state of input nuc_id refers to metastable state. Defaults to
+        True.
 
     Returns
     -------
@@ -406,6 +409,11 @@ def half_life(nuc):
     -----
     If the nuclide is not found, the nuclide is assumed to be stable.
     """
+    if use_metastable is True:
+        nuc = pyne.nucname.id(nuc)
+        ms = nuc % 10000
+        nuc = (nuc // 10000) * 10000
+        nuc = metastable_id(nuc, ms)
     if isinstance(nuc, int):
         hl = cpp_data.half_life(<int> nuc)
     elif isinstance(nuc, basestring):
@@ -418,13 +426,16 @@ def half_life(nuc):
 
 
 
-def decay_const(nuc):
+def decay_const(nuc, use_metastable=True):
     """Finds the decay constant of a nuclide in [1/seconds].
 
     Parameters
     ----------
     nuc : int or str 
         Input nuclide.
+    use_metastable : bool
+        Assume state of input nuc_id refers to metastable state. Defaults to
+        True.
 
     Returns
     -------
@@ -435,6 +446,11 @@ def decay_const(nuc):
     -----
     If the nuclide is not found, the nuclide is assumed to be stable.
     """
+    if use_metastable is True:
+        nuc = pyne.nucname.id(nuc)
+        ms = nuc % 10000
+        nuc = (nuc // 10000) * 10000
+        nuc = metastable_id(nuc, ms)
     if isinstance(nuc, int):
         dc = cpp_data.decay_const(<int> nuc)
     elif isinstance(nuc, basestring):
@@ -445,7 +461,7 @@ def decay_const(nuc):
     return dc
 
 
-def branch_ratio(from_nuc, to_nuc):
+def branch_ratio(from_nuc, to_nuc, use_metastable=True):
     """Finds a branch ratio for a from -> to nuclide pair [fraction].
 
     Parameters
@@ -454,6 +470,9 @@ def branch_ratio(from_nuc, to_nuc):
         Parent nuclide.
     to_nuc : int or str 
         Child nuclide.
+    use_metastable : bool
+        Assume state of input nuc_id refers to metastable state. Defaults to
+        True.
 
     Returns
     -------
@@ -465,6 +484,15 @@ def branch_ratio(from_nuc, to_nuc):
     If this pair is not found, it is assumed to be impossible, and the branch ratio
     is set to zero.
     """
+    if use_metastable is True:
+        from_nuc = pyne.nucname.id(from_nuc)
+        to_nuc = pyne.nucname.id(to_nuc)
+        ms = from_nuc % 10000
+        from_nuc = (from_nuc // 10000) * 10000
+        from_nuc = metastable_id(from_nuc, ms)
+        ms = to_nuc % 10000
+        to_nuc = (to_nuc // 10000) * 10000
+        to_nuc = metastable_id(to_nuc, ms)
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
     elif isinstance(from_nuc, basestring):
@@ -483,13 +511,16 @@ def branch_ratio(from_nuc, to_nuc):
     return br
 
 
-def state_energy(nuc):
+def state_energy(nuc, use_metastable=True):
     """Finds the excitation energy [MeV] of a nuclide in a given state.
 
     Parameters
     ----------
     nuc : int or str 
         Input nuclide.
+    use_metastable : bool
+        Assume state of input nuc_id refers to metastable state. Defaults to
+        True
 
     Returns
     -------
@@ -500,6 +531,11 @@ def state_energy(nuc):
     -----
     If the nuclide is not found, the nuclide is assumed to be stable.
     """
+    if use_metastable is True:
+        nuc = pyne.nucname.id(nuc)
+        ms = nuc % 10000
+        nuc = (nuc // 10000) * 10000
+        nuc = metastable_id(nuc, ms)
     if isinstance(nuc, int):
         se = cpp_data.state_energy(<int> nuc)
     elif isinstance(nuc, basestring):
@@ -510,13 +546,16 @@ def state_energy(nuc):
     return se
 
 
-def decay_children(nuc):
+def decay_children(nuc, use_metastable=True):
     """Finds the decay children of a nuclide.
 
     Parameters
     ----------
     nuc : int or str 
         Input nuclide.
+    use_metastable : bool
+        Assume state of input nuc_id refers to metastable state. Defaults to
+        True
 
     Returns
     -------
@@ -527,6 +566,11 @@ def decay_children(nuc):
     -----
     If the nuclide is not found or is stable, the empty set is returned.
     """
+    if use_metastable is True:
+        nuc = pyne.nucname.id(nuc)
+        ms = nuc % 10000
+        nuc = (nuc // 10000) * 10000
+        nuc = metastable_id(nuc, ms)
     cdef conv._SetInt dc = conv.SetInt()
 
     if isinstance(nuc, int):

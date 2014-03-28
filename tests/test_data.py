@@ -92,7 +92,7 @@ def test_decay_children():
     assert_equal(data.decay_children(922350001), set([922350000]))
     assert_equal(data.decay_children(611460000), set([601460000, 621460000]))
     assert_equal(data.decay_children('O16'), set())
-    assert_equal(data.decay_children('80166'), set([60120000, 80160000]))
+    assert_equal(data.decay_children('80166', False), set([60120000, 80160000]))
 
 
 def test_abundance_by_z_for_soundness():

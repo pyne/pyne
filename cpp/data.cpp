@@ -1054,9 +1054,9 @@ int pyne::id_from_level(int nuc, double level) {
 //
 
 int pyne::metastable_id(int nuc, int m) {
-  if (m==0) return 0;
   int nostate = (nuc / 10000) * 10000;
-  if (level_data_rx_map.empty()) {
+  if (m==0) return nostate;
+  if (level_data_lvl_map.empty()) {
     _load_data<level_struct>();
   }
 
@@ -1070,7 +1070,7 @@ int pyne::metastable_id(int nuc, int m) {
         return it->second.nuc_id;
   }
 
-  return 0;
+  return nuc;
 }
 
 int pyne::metastable_id(int nuc) {
