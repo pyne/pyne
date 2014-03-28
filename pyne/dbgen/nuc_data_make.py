@@ -14,6 +14,7 @@ from pyne.dbgen.materials_library import make_materials_library
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
 from pyne.dbgen.q_val import make_q_value
+from pyne.dbgen.dosefactors import make_dose_factors
 from pyne.dbgen.cinder import make_cinder
 from pyne.dbgen.eaf import make_eaf
 from pyne.dbgen import wimsdfpy
@@ -78,6 +79,7 @@ def main():
                   ('cinder', make_cinder),
                   ('materials', make_materials_library),
                   ('q_values', make_q_value),
+                  ('dose_factors', make_dose_factors),
                   ('eaf', make_eaf),
                   ('wimsd_fpy', wimsdfpy.make_fpy),
                   ('nds_fpy', ndsfpy.make_fpy)
