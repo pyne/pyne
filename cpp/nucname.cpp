@@ -635,25 +635,18 @@ std::string pyne::nucname::zzllaaam(int nuc)
   if (0 == zz_name.count(zzz))
     throw NotANuclide(nuc, nucid);
 
-  //Adding AA
+  //Adding ZZ
   newnuc += pyne::to_str(zzz);
   newnuc += "-";
   // Add LL
-newnuc += zz_name[zzz];
-  //std::string llupper = pyne::to_upper(zz_name[zzz]);
-  //std::string lllower = pyne::to_lower(zz_name[zzz]);
-  //newnuc += llupper[0];
-  //for (int l = 1; l < lllower.size(); l++)
-  //  newnuc += lllower[l];  
+  newnuc += zz_name[zzz];
 
   // Add required dash
   newnuc += "-";
 
-  // Add ZZZ
+  // Add AAA
   if (0 < aaassss)
     newnuc += pyne::to_str(aaa);
-//  else if (0 == aaassss)
-//    newnuc += "nat";
 
   // Add meta-stable flag
   if (0 < ssss)
