@@ -552,29 +552,29 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "a_continuum",
   "lumped_covar",
   "excited",
-  "b-",
-  "b+",
+  "bminus",
+  "bplus",
   "ec",
-  "b-n",
-  "b-a",
+  "bminus_n",
+  "bminus_a",
   "it",
-  "b+a",
-  "ec+b+",
-  "b+p",
-  "b-2n",
-  "b-3n",
-  "b-4n",
+  "bplus_a",
+  "ec_bplus",
+  "bplus_p",
+  "bminus_2n",
+  "bminus_3n",
+  "bminus_4n",
   "ecp",
   "eca",
-  "b+2p",
-  "ec2p",
-  "2b-",
-  "b-p",
-  "14c",
-  "b+3p",
+  "bplus_2p",
+  "ec_2p",
+  "decay_2bminus",
+  "bminus_p",
+  "decay_14c",
+  "bplus_3p",
   "sf",
-  "2b+",
-  "2ec",
+  "decay_2bplus",
+  "decay_2ec",
   };
 std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
                                           pyne::rxname::_names+NUM_RX_NAMES);
@@ -2366,6 +2366,24 @@ void * pyne::rxname::_fill_maps()
   altnames["2p"] = name_id["z_2p"];
   altnames["3h"] = name_id["t"];
   altnames["g"] = name_id["it"];
+  altnames["b-"] = name_id["bminus"];
+  altnames["b+"] = name_id["bplus"];
+  altnames["b-n"] = name_id["bminus_n"];
+  altnames["b-a"] = name_id["bminus_a"];
+  altnames["b+a"] = name_id["bplus_a"];
+  altnames["ec+b+"] = name_id["ec_bplus"];
+  altnames["b+p"] = name_id["bplus_p"];
+  altnames["b-2n"] = name_id["bminus_2n"];
+  altnames["b-3n"] = name_id["bminus_3n"];
+  altnames["b-4n"] = name_id["bminus_4n"];
+  altnames["b+2p"] = name_id["bplus_2p"];
+  altnames["ec2p"] = name_id["ec_2p"];
+  altnames["2b-"] = name_id["decay_2bminus"];
+  altnames["b-p"] = name_id["bminus_p"];
+  altnames["14c"] = name_id["decay_14c"];
+  altnames["b+3p"] = name_id["bplus_3p"];
+  altnames["2b+"] = name_id["decay_2bplus"];
+  altnames["2ec"] = name_id["decay_2ec"];
   
 
   // set the nuclide difference mappings, offset_id
@@ -2496,22 +2514,22 @@ void * pyne::rxname::_fill_maps()
   offset_id[make_pair("decay", offset(-1, -3))] = name_id["t"];
   offset_id[make_pair("decay", offset(-2, -3))] = name_id["He3"];
   offset_id[make_pair("decay", offset(-2, -4))] = name_id["a"];
-  offset_id[make_pair("decay", offset(1, 0))] = name_id["b-"];
-  offset_id[make_pair("decay", offset(-1, 0))] = name_id["b+"];
-  offset_id[make_pair("decay", offset(1, -1))] = name_id["b-n"];
-  offset_id[make_pair("decay", offset(-1, -4))] = name_id["b-a"];
+  offset_id[make_pair("decay", offset(1, 0))] = name_id["bminus"];
+  offset_id[make_pair("decay", offset(-1, 0))] = name_id["bplus"];
+  offset_id[make_pair("decay", offset(1, -1))] = name_id["bminus_n"];
+  offset_id[make_pair("decay", offset(-1, -4))] = name_id["bminus_a"];
   offset_id[make_pair("decay", offset(0, 0))] = name_id["it"];
-  offset_id[make_pair("decay", offset(-3, -4))] = name_id["b+a"];
-  offset_id[make_pair("decay", offset(-2, -1))] = name_id["b+p"];
-  offset_id[make_pair("decay", offset(1, -2))] = name_id["b-2n"];
-  offset_id[make_pair("decay", offset(1, -3))] = name_id["b-3n"];
-  offset_id[make_pair("decay", offset(1, -4))] = name_id["b-4n"];
-  offset_id[make_pair("decay", offset(-3, -2))] = name_id["b+2p"];
-  offset_id[make_pair("decay", offset(-4, -3))] = name_id["b+3p"];
-  offset_id[make_pair("decay", offset(2, 0))] = name_id["2b-"];
-  offset_id[make_pair("decay", offset(-2, 0))] = name_id["2b+"];
-  offset_id[make_pair("decay", offset(-6, -14))] = name_id["14c"];
-
+  offset_id[make_pair("decay", offset(-3, -4))] = name_id["bplus_a"];
+  offset_id[make_pair("decay", offset(-2, -1))] = name_id["bplus_p"];
+  offset_id[make_pair("decay", offset(1, -2))] = name_id["bminus_2n"];
+  offset_id[make_pair("decay", offset(1, -3))] = name_id["bminus_3n"];
+  offset_id[make_pair("decay", offset(1, -4))] = name_id["bminus_4n"];
+  offset_id[make_pair("decay", offset(-3, -2))] = name_id["bplus_2p"];
+  offset_id[make_pair("decay", offset(-4, -3))] = name_id["bplus_3p"];
+  offset_id[make_pair("decay", offset(2, 0))] = name_id["decay_2bminus"];
+  offset_id[make_pair("decay", offset(-2, 0))] = name_id["decay_2bplus"];
+  offset_id[make_pair("decay", offset(-6, -14))] = name_id["decay_14c"];
+  
   // pre-loaded child offsets
   std::map<std::pair<std::string, int>, unsigned int>::iterator ioffid;
   for (ioffid = offset_id.begin(); ioffid != offset_id.end(); ioffid++) {
@@ -2531,13 +2549,13 @@ void * pyne::rxname::_fill_maps()
   id_offset[make_pair("n", name_id["n"])] = offset(0, 0);
   id_offset[make_pair("n", name_id["gamma"])] = offset(0, 1);
   // decay:
-  id_offset[make_pair("decay", name_id["b-p"])] = offset(0, -1);
-  id_offset[make_pair("decay", name_id["ec2p"])] = offset(-3, -2);
+  id_offset[make_pair("decay", name_id["bminus_p"])] = offset(0, -1);
+  id_offset[make_pair("decay", name_id["ec_2p"])] = offset(-3, -2);
   id_offset[make_pair("decay", name_id["ec"])] = offset(-1, 0);
-  id_offset[make_pair("decay", name_id["ec+b+"])] = offset(-1, 0);
+  id_offset[make_pair("decay", name_id["ec_bplus"])] = offset(-1, 0);
   id_offset[make_pair("decay", name_id["ecp"])] = offset(-2, -1);
   id_offset[make_pair("decay", name_id["eca"])] = offset(-3, -4);
-  id_offset[make_pair("decay", name_id["2ec"])] = offset(-2, 0);
+  id_offset[make_pair("decay", name_id["decay_2ec"])] = offset(-2, 0);
   return NULL;
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();

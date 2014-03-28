@@ -22,7 +22,6 @@ std::map<std::string, std::string> pyne::get_data_checksums()
 {
     std::map<std::string, std::string> temp_map;
     // Initialization of dataset hashes
-    temp_map["/decay/half_life"]="09bf73252629077785e20b3532fde8b3";
     temp_map["/atomic_mass"]="10edfdc662e35bdfab91beb89285efff";
     temp_map["/material_library"]="8b10864378fbd88538434679acf908cc";
     temp_map["/neutron/eaf_xs"]="29622c636c4a3a46802207b934f9516c";

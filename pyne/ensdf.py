@@ -819,6 +819,10 @@ def _parse_decay_dataset(lines, decay_s):
 
 
 def levels(filename, levellist=None, lmap=None, lcount=0):
+    badlist = ["ecsf", "34si", "|b{+-}fission", "{+24}ne",
+           "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
+           "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
+           "{+28}mg", "sf(+ec+b+)"]
     if levellist is None:
         levellist = []
     if lmap is None:
@@ -845,10 +849,6 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                         for key, val in brs.items():
                             goodkey = True
                             keystrip = key.replace("%", "").lower()
-                            badlist = ["sf", "ecsf", "34si", "|b{+-}fission", "{+24}ne",
-                                       "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
-                                       "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
-                                       "{+28}mg", "sf(+ec+b+)"]
                             for item in badlist:
                                 if keystrip == item:
                                     goodkey = False
@@ -878,10 +878,6 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                 for key, val in brs.items():
                     goodkey = True
                     keystrip = key.replace("%", "").lower()
-                    badlist = ["ecsf", "34si", "|b{+-}fission", "{+24}ne",
-                               "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
-                               "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
-                               "{+28}mg", "sf(+ec+b+)"]
                     for item in badlist:
                         if keystrip == item:
                             goodkey = False
