@@ -388,8 +388,8 @@ def mcnp_to_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
-def aallzzzm(nuc):
-    """Converts a nuclide to its aallzzzm form (95-Am-241m). 
+def zzllaaam(nuc):
+    """Converts a nuclide to its zzllaaam form (95-Am-241m). 
 
     Parameters
     ----------
@@ -399,26 +399,26 @@ def aallzzzm(nuc):
     Returns
     -------
     newnuc : int 
-        Output nuclide in aallzzzm form.
+        Output nuclide in zzllaaam form.
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.aallzzzm(<char *> nuc)
+        newnuc = cpp_nucname.zzllaaam(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
-        newnuc = cpp_nucname.aallzzzm(<int> nuc)
+        newnuc = cpp_nucname.zzllaaam(<int> nuc)
     else:
         raise NucTypeError(nuc)
     return newnuc
 
 
-def aallzzzm_to_id(nuc):
-    """Converts a nuclide directly from AALLZZZM form (95-Am-241m) to
+def zzllaaam_to_id(nuc):
+    """Converts a nuclide directly from ZZLLAAAM form (95-Am-241m) to
     the canonical identifier form. 
 
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide in AALLZZZM form.
+        Input nuclide in ZZLLAAAM form.
 
     Returns
     -------
@@ -427,7 +427,7 @@ def aallzzzm_to_id(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.aallzzzm_to_id(<char *> nuc)
+        newnuc = cpp_nucname.zzllaaam_to_id(<char *> nuc)
     else:
         raise NucTypeError(nuc)
     return newnuc

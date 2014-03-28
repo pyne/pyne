@@ -19,7 +19,7 @@ Currently the following naming conventions are supported:
     return name form with the dash removed and all letters uppercase.
  #. **zzzaaa**: This type places the charge of the nucleus out front, then has three
     digits for the atomic mass.  It contains no information about the excited state.
- #. **aallzzzm**: This type places the two digit atomic mass followed by the redundant
+ #. **zzllaaam**: This type places the two digit atomic mass followed by the redundant
     two character elemental abreviation, followed by the elements ZZZ and exited state.
  #. **SZA**: This type places three state digits out front, the charge of the nucleus in 
     the middle, and then has three digits for the atomic mass number. Uranium-235M here 
@@ -50,7 +50,7 @@ All functionality may be found in the ``nucname`` package::
 
  from pyne import nucname
 
-This contains several zzaaam, zzzaaa, aallzzzm, name, MCNP and Serpent converter function as
+This contains several zzaaam, zzzaaa, zzllaaam, name, MCNP and Serpent converter function as
 well as other helpful module attributes.
 
 .. _name_cast:
@@ -75,7 +75,7 @@ Naming Convention Casting Functions
 
 -----
 
-.. autofunction:: aallzzzm(nuc)
+.. autofunction:: zzllaaam(nuc)
 
 -----
 
@@ -110,7 +110,7 @@ Id Conversion Functions
 
 ---
 
-.. autofunction:: aallzzzm_to_id(nuc)
+.. autofunction:: zzllaaam_to_id(nuc)
 
 ---
 

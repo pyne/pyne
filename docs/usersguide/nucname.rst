@@ -20,7 +20,7 @@ supported by PyNE.  Functions to convert between forms may be seen in :ref:`name
     digits for the atomic mass number, and ends with a metastable flag (0 = ground,
     1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would
     be expressed as '922350'.
- #. **aallzzzm**: The AALLZZZM naming convention is similar to name form.  However, it is preceded by
+ #. **zzllaaam**: The ZZLLAAAM naming convention is similar to name form.  However, it is preceded by
     the nuclides two AA numbers, followed by the two LL characters.  Of the two LL characters, only 
     the first letter in the chemical symbol is uppercase, the dash is always present, and the the
     meta-stable flag is lowercase.  For instance, '95-Am-242m' is the valid serpent notation for 
@@ -99,7 +99,7 @@ Examples of Use
     In [3]: nucname.zzaaam(10010)
     Out[3]: 10010
 
-    In [4]: nucname.aallzzzm(942390)
+    In [4]: nucname.zzllaaam(942390)
     Out[4]: '95-Am-242m'
 
     In [5]: nucname.name(10010)

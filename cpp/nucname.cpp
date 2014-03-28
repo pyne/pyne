@@ -619,9 +619,9 @@ int pyne::nucname::zzzaaa_to_id(std::string nuc)
 };
 
 /*************************/
-/*** aallzzzm functions ***/
+/*** zzllaaam functions ***/
 /*************************/
-std::string pyne::nucname::aallzzzm(int nuc)
+std::string pyne::nucname::zzllaaam(int nuc)
 {
   int nucid = id(nuc);
   std::string newnuc = "";
@@ -663,26 +663,26 @@ std::string pyne::nucname::aallzzzm(int nuc)
 };
 
 
-std::string pyne::nucname::aallzzzm(char * nuc)
+std::string pyne::nucname::zzllaaam(char * nuc)
 {
   std::string newnuc (nuc);
-  return aallzzzm(newnuc);
+  return zzllaaam(newnuc);
 };
 
 
-std::string pyne::nucname::aallzzzm(std::string nuc)
+std::string pyne::nucname::zzllaaam(std::string nuc)
 {
-  return aallzzzm(id(nuc));
+  return zzllaaam(id(nuc));
 };
 
 
-int pyne::nucname::aallzzzm_to_id(char * nuc)
+int pyne::nucname::zzllaaam_to_id(char * nuc)
 {
-  return aallzzzm_to_id(std::string(nuc));
+  return zzllaaam_to_id(std::string(nuc));
 };
 
 
-int pyne::nucname::aallzzzm_to_id(std::string nuc)
+int pyne::nucname::zzllaaam_to_id(std::string nuc)
 {
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
