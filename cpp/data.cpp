@@ -935,12 +935,34 @@ size_t valoffset, std::map<std::pair<int, int>, U> &data){
   return result;
 };
 
+template<typename T, typename U> std::vector<T> pyne::data_access(int parent, 
+size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data){
+  typename std::map<std::pair<int, unsigned int>, U>::iterator nuc_iter, nuc_end, it;
+  std::vector<T> result;
+  nuc_iter = data.lower_bound(std::make_pair(parent,0));
+  nuc_end = data.upper_bound(std::make_pair(parent,UINT_MAX));
+  T *ret;
+  // First check if we already have the nuc in the map
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    ret = (T *)((char *)&(it->second) + valoffset);
+    result.push_back(*ret);
+  }
+  // Next, fill up the map with values from the
+  // nuc_data.h5, if the map is empty.
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(parent, valoffset, data);
+  };
+  return result;
+};
+
 //
 // Load level data
 //
 
 std::map<std::pair<int,double>, pyne::level_struct> pyne::level_data_lvl_map;
-std::map<std::pair<int,int>, pyne::level_struct> pyne::level_data_rx_map;
+std::map<std::pair<int,unsigned int>, pyne::level_struct> pyne::level_data_rx_map;
 
 
 template<> void pyne::_load_data<pyne::level_struct>()
@@ -962,7 +984,7 @@ template<> void pyne::_load_data<pyne::level_struct>()
   status = H5Tinsert(desc, "nuc_id", HOFFSET(level_struct, nuc_id),
                       H5T_NATIVE_INT);
   status = H5Tinsert(desc, "rx_id", HOFFSET(level_struct, rx_id),
-                     H5T_NATIVE_INT);
+                     H5T_NATIVE_UINT);
   status = H5Tinsert(desc, "half_life", HOFFSET(level_struct, half_life),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "level", HOFFSET(level_struct, level), 
@@ -1061,10 +1083,10 @@ int pyne::metastable_id(int nuc) {
 
 
 std::set<int> pyne::decay_children(int nuc) {
-  std::vector<int> part = data_access<int, level_struct>(nuc, 
+  std::vector<unsigned int> part = data_access<unsigned int, level_struct>(nuc, 
     offsetof(level_struct, rx_id), level_data_rx_map);
   std::set<int> result;
-  for (std::vector<int>::iterator it=part.begin(); it!=part.end(); ++it) {
+  for (std::vector<unsigned int>::iterator it=part.begin(); it!=part.end(); ++it) {
     if (*it == 36125)  
       result.insert((nuc /10000) * 10000);
     else 
@@ -1173,14 +1195,14 @@ double pyne::half_life(std::string nuc)
 
 
 double pyne::branch_ratio(std::pair<int, int> from_to) {
-  std::vector<int> part1 = data_access<int, level_struct>(from_to.first, 
+  std::vector<unsigned int> part1 = data_access<unsigned int, level_struct>(from_to.first, 
     offsetof(level_struct, rx_id), level_data_rx_map);
   std::vector<double> part2 = data_access<double, level_struct>(from_to.first, 
     offsetof(level_struct, branch_ratio), level_data_rx_map);
   double result = 0;
   if ((from_to.first == from_to.second) && (half_life(from_to.first) == std::numeric_limits<double>::infinity()))
     return 1.0;
-  for (std::vector<int>::size_type i=0; i < part1.size(); ++i) {
+  for (std::vector<unsigned int>::size_type i=0; i < part1.size(); ++i) {
     if ((part1[i] != 0) && ((rxname::child(from_to.first,part1[i],"decay")/10000)*10000 == from_to.second))
       result = result + part2[i]*0.01;
     if ((part1[i] == 36125) && (((from_to.first/10000)*10000) == ((from_to.second/10000)*10000))

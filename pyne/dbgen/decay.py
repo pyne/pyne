@@ -57,7 +57,7 @@ def grab_ensdf_decay(build_dir=""):
 
 level_dtype = np.dtype([
     ('nuc_id', int),
-    ('rx_id', int),
+    ('rx_id', np.uint32),
     ('half_life', float),
     ('level', float),
     ('branch_ratio', float),
@@ -67,7 +67,7 @@ level_dtype = np.dtype([
 decay_dtype = np.dtype([
     ('parent', int),
     ('child', int),
-    ('decay', int),
+    ('decay', np.uint32),
     ('half_life', float),
     ('half_life_error', float),
     ('branch_ratio', float),

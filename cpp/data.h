@@ -298,12 +298,13 @@ namespace pyne
   /// at valoffset of class U of type T 
   template<typename T, typename U> std::vector<T> data_access(int parent, 
     size_t valoffset, std::map<std::pair<int, int>, U> &data);    
-
+  template<typename T, typename U> std::vector<T> data_access(int parent, 
+    size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data); 
 
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.
   typedef struct level_struct{
     int nuc_id;
-    int rx_id;
+    unsigned int rx_id;
     double half_life;
     double level;
     double branch_ratio;
@@ -313,7 +314,7 @@ namespace pyne
   /// Mapping from nuclides in id form to a struct containing data associated
   /// with that level.
   extern std::map<std::pair<int,double>, level_struct> level_data_lvl_map;
-  extern std::map<std::pair<int,int>, level_struct> level_data_rx_map;
+  extern std::map<std::pair<int,unsigned int>, level_struct> level_data_rx_map;
   
   template<typename T> void _load_data();
   template<> void _load_data<level_struct>();
@@ -393,7 +394,7 @@ namespace pyne
   typedef struct decay_struct{
     int parent;
     int child;
-    int decay;
+    unsigned int decay;
     double half_life;
     double half_life_error;
     double branch_ratio;
