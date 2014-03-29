@@ -90,7 +90,7 @@ def calc_hash(node, nuc_data):
                             mhash.update(tiny_item.data)
                     else:
                         for tiny_item in item:
-                            mhash.update(str(tiny_item))
+                            mhash.update(str(tiny_item).encode())
             ret = mhash.hexdigest()
         else:
             ret = hashlib.md5(node[:].data).hexdigest()

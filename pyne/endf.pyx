@@ -103,7 +103,7 @@ class Library(rx.RxLib):
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
         # originally in a float version of ZZAAA.M, ie 94242.1
-        nuc = cpp_nucname.id(<int> (endftod(line[:11])*10))
+        nuc = cpp_nucname.id(<int> (endftod(line[:11].encode())*10))
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
@@ -978,6 +978,7 @@ class Library(rx.RxLib):
             s = fh.read(lines*81)
         if opened_here:
             fh.close
+        s = s.encode()
         return fromendf_tok(s)
 
 class Evaluation(object):

@@ -28,7 +28,7 @@ Report LA-5324-MS_.
 """
 
 
-from binaryreader import _BinaryReader, _FortranRecord
+from pyne.binaryreader import _BinaryReader, _FortranRecord
 
 class Isotxs(_BinaryReader):
     """An Isotxs object represents a binary ISOTXS file written according to the
@@ -327,8 +327,8 @@ class Isotxs(_BinaryReader):
 
         # This is basically how many scattering cross sections there are for
         # this scatter type for this nuclide
-        jl = (m - 1)*((ng - 1)/nsblok + 1) + 1
-        jup = m*((ng - 1)/nsblok + 1)
+        jl = (m - 1)*((ng - 1)//nsblok + 1) + 1
+        jup = m*((ng - 1)//nsblok + 1)
         ju = min(ng, jup)
 
         # Figure out kmax for this sub-block. 
@@ -353,8 +353,7 @@ class Isotxs(_BinaryReader):
                 jup   = nuc.libParams['jj'][g,block] - 1
                 jdown = nuc.libParams['jband'][g,block] - nuc.libParams['jj'][g,block]
                 fromGroups = range(j-jdown,j+jup+1)
-                fromGroups.reverse()
-                for k in fromGroups:
+                for k in reversed(fromGroups):
                     fromG = k-1
                     nuc.micros['scat',block,g,fromG,order] = r.get_float()[0]
 

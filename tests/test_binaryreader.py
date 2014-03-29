@@ -540,7 +540,7 @@ def test_read_BR():
     set_int = 8
     set_float = 3.14
     set_double_list = [1.6e-19, 6.02e23]
-    set_string = "Hello World!"
+    set_string = b"Hello World!"
 
     binary_file = _BinaryReader('test_readBR.ref')
 
