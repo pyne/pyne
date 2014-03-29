@@ -1,5 +1,5 @@
 """This module provides a way to grab and store raw data for radioactive decay."""
-from __future__ import print_function
+from __future__ import print_function, division
 import os
 import glob
 try:

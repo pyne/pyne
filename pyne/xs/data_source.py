@@ -1,5 +1,6 @@
 """Cross section library data source interfaces.
 """
+from __future__ import division
 import os
 import StringIO
 try:

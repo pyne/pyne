@@ -1,4 +1,6 @@
 """Python wrapper for material library."""
+from __future__ import division
+
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
 from libcpp.set cimport set as cpp_set
@@ -1017,7 +1019,7 @@ cdef class _Material:
 
     def __div_float__(self, double y):
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer[0] / y
+        pymat.mat_pointer[0] = self.mat_pointer[0] * (1 / y)
         return pymat
 
 

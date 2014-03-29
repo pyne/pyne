@@ -1,3 +1,4 @@
+from __future__ import division
 import re
 try:
     import urllib.request as urllib
@@ -84,7 +85,7 @@ def _to_id_from_level(nuc_id, level, levellist, lmap):
                             level - 1.0:
                 gparent = levellist[i][0]
                 break
-            if int(nid/10000) != int(levellist[i][0]/10000):
+            if int(nid//10000) != int(levellist[i][0]//10000):
                 break
     return gparent
 
@@ -164,14 +165,14 @@ def _to_time(tstr, errstr):
 
 
 _decay_to = {
-    '%EC': lambda x: (x - 10000000) / 10000 * 10000,
-    '%B+': lambda x: (x - 10000000) / 10000 * 10000,
-    '%EC+%B+': lambda x: (x - 10000000) / 10000 * 10000,
-    '%B-': lambda x: (x + 10000000) / 10000 * 10000,
-    '%IT': lambda x: x / 10000 * 10000,
-    '%A': lambda x: (x - 20040000) / 10000 * 10000,
-    '%P': lambda x: (x - 10010000) / 10000 * 10000,
-    '%N': lambda x: (x - 10000) / 10000 * 10000,
+    '%EC': lambda x: (x - 10000000) // 10000 * 10000,
+    '%B+': lambda x: (x - 10000000) // 10000 * 10000,
+    '%EC+%B+': lambda x: (x - 10000000) // 10000 * 10000,
+    '%B-': lambda x: (x + 10000000) // 10000 * 10000,
+    '%IT': lambda x: x // 10000 * 10000,
+    '%A': lambda x: (x - 20040000) // 10000 * 10000,
+    '%P': lambda x: (x - 10010000) // 10000 * 10000,
+    '%N': lambda x: (x - 10000) // 10000 * 10000,
 }
 
 

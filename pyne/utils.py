@@ -1,3 +1,4 @@
+from __future__ import division
 import os
 from distutils.dir_util import remove_tree
 

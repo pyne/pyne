@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, division
 
 #from pyne cimport cpp_dagmc_bridge
 from pyne cimport cpp_dagmc_bridge

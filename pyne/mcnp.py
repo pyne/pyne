@@ -12,7 +12,7 @@ available to use.
 
 """
 
-from __future__ import print_function
+from __future__ import print_function, division
 import collections
 import string
 import struct
@@ -1109,7 +1109,7 @@ class PtracReader(object):
                 raise EOFError
 
             length = struct.unpack(self.endianness + 'i', b)[0]
-            number = length / format_length
+            number = length // format_length
 
             b = self.f.read(length + 4)
             tmp = struct.unpack(self.endianness + format*number + 'i', b)

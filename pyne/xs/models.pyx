@@ -1,4 +1,5 @@
 """This module provides physical cross-section models and helper functions."""
+from __future__ import division
 
 cimport numpy as np
 import numpy as np

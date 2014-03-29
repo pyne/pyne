@@ -4,7 +4,7 @@ from being used with infinities.  For a work around see [1].
 
 1. https://groups.google.com/forum/#!msg/sympy/YL1R_hR6OKQ/axKrCsCSMQsJ
 """
-from __future__ import print_function
+from __future__ import print_function, division
 import os
 import time
 import multiprocessing
