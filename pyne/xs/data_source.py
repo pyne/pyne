@@ -1,6 +1,6 @@
 """Cross section library data source interfaces.
 """
-from __future__ import division
+from __future__ import division, unicode_literals
 import os
 try:
     from StringIO import StringIO
@@ -604,16 +604,16 @@ class EAFDataSource(DataSource):
         absrx = rxname.id('absorption')
 
         if rx in self._rx_avail:
-            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, self._rx_avail[rx])
+            cond = "(nuc_zz == {0}) & (rxnum == b'{1}')".format(nuc, self._rx_avail[rx])
         elif rx == absrx:
-            cond = "(nuc_zz == {0})".format(nuc)
+            cond = "(nuc_zz == {0})".format(nuc).encode()
         else:
             return None
 
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = node.readWhere(cond)
+            rows = node.read_where(cond)
             #rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:

@@ -277,7 +277,7 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
         return _atom_mass_channel(sigma_a_reaction, nuc, rx=rx, temp=temp, 
                                     xs_cache=xs_cache)
     nuc = nucname.id(nuc)
-    key= (nuc, rx, temp)
+    key = (nuc, rx, temp)
     return xs_cache[key]
 
 

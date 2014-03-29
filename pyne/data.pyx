@@ -85,6 +85,7 @@ def atomic_mass(nuc):
     if isinstance(nuc, int):
         mass = cpp_data.atomic_mass(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc = nuc.encode()
         mass = cpp_data.atomic_mass(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)

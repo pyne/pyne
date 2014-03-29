@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
+import codecs
 import struct
 import filecmp
 import os
@@ -54,10 +55,11 @@ def check_write_record_data(record, pos, num, data, typeString):
                          + str(record.pos))
     if record.num_bytes != num:
         raise ValueError("Writing  " + typeString +
-                         "to record did not update num_bytes properly")
-    if record.data != data:
+                         " to record did not update num_bytes properly")
+    if codecs.decode(record.data, 'unicode_escape') != data:
+        print((codecs.decode(record.data, 'unicode_escape'), data))
         raise ValueError("Writing  " + typeString +
-                         "to record did not set data member correctly")
+                         " to record did not set data member correctly")
 
     return 1
 
@@ -75,7 +77,7 @@ def test_write_FR_single_int():
     set_data = '\x08\x00\x00\x00'
 
     # create new record
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
 
     # write integer
     test_record.put_int(set_int)
@@ -90,7 +92,7 @@ def test_write_FR_int_list():
     set_num_bytes = 8
     set_data = '\x08\x00\x00\x00\x10\x00\x00\x00'
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
 
     # write integer list
     test_record.put_int(set_intList)
@@ -106,7 +108,7 @@ def test_write_FR_single_long():
     set_data = '\x08\x00\x00\x00\x00\x00\x00\x00'
 
     # create new record
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
 
     # write long
     test_record.put_long(set_long)
@@ -122,7 +124,7 @@ def test_write_FR_long_list():
     set_data = \
         '\x08\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00'
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_long(set_long_list)
 
     return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
@@ -136,7 +138,7 @@ def test_write_FR_single_float():
     set_data = '\xc3\xf5H@'
 
     # create new record
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
 
     # write float
     test_record.put_float(set_float)
@@ -151,7 +153,7 @@ def test_write_FR_float_list():
     set_num_bytes = 8
     set_data = '\xc3\xf5H@L\xa6\xaa>'
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_float(set_floatList)
 
     return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
@@ -165,7 +167,7 @@ def test_write_FR_single_double():
     set_data = '\x1f\x85\xebQ\xb8\x1e\t@'
 
     # create new record
-    test_record = _FortranRecord('',  0)  # already tested
+    test_record = _FortranRecord(b'',  0)  # already tested
 
     # write double
     test_record.put_double(set_double)
@@ -180,7 +182,7 @@ def test_write_FR_double_list():
     set_num_bytes = 16
     set_data = '\x1f\x85\xebQ\xb8\x1e\t@io\xf0\x85\xc9T\xd5?'
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_double(set_double_list)
 
     return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
@@ -189,13 +191,13 @@ def test_write_FR_double_list():
 
 def test_write_FR_single_string():
 
-    set_string = "Hello World!"
+    set_string = b"Hello World!"
     set_length = len(set_string)
     set_num_bytes = 12
     set_data = 'Hello World!'
 
     # create new record
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
 
     # write string
     test_record.put_string([set_string], 12, 1)
@@ -206,12 +208,12 @@ def test_write_FR_single_string():
 
 def test_write_FR_string_list():
 
-    set_string_list = ["Hello ", "World!"]
+    set_string_list = [b"Hello ", b"World!"]
     set_length = len(set_string_list[0])
     set_num_bytes = 12
     set_data = 'Hello World!'
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_string(set_string_list, set_length)
 
     return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
@@ -223,13 +225,13 @@ def test_write_FR_mixed_record():
     set_int = 8
     set_float = 3.14
     set_double_list = [1.6e-19, 6.02e23]
-    set_string = "Hello World!"
+    set_string = b"Hello World!"
 
     set_num_bytes = 4+4+(2*8)+12
     set_data = '\x08\x00\x00\x00Hello World!#B\x92\x0c\xa1\x9c\x07<a\xd3' + \
         '\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_int(set_int)
     test_record.put_string([set_string], len(set_string))
     test_record.put_double(set_double_list)
@@ -250,7 +252,7 @@ def test_read_FR_single_int():
 
     set_int = 8
 
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
     test_record.put_int([set_int])       # already tested
 
     test_record.reset()                 # already tested
@@ -269,7 +271,7 @@ def test_read_FR_int_list():
     set_intList = [8, 16]
     num_ints = 2
 
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
     test_record.put_int(set_intList)       # already tested
 
     test_record.reset()                 # already tested
@@ -287,7 +289,7 @@ def test_read_FR_single_long():
 
     set_long = 8
 
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
     test_record.put_long([set_long])       # already tested
 
     test_record.reset()                 # already tested
@@ -306,7 +308,7 @@ def test_read_FR_long_list():
     set_long_list = [8, 16]
     numLongs = 2
 
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
     test_record.put_long(set_long_list)       # already tested
 
     test_record.reset()                 # already tested
@@ -324,7 +326,7 @@ def test_read_FR_single_float():
 
     set_float = 6.1
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_float([set_float])
 
     test_record.reset()
@@ -348,7 +350,7 @@ def test_read_FR_float_list():
 
     floatList = [2.34, 8.65]
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_float(floatList)
 
     test_record.reset()
@@ -373,7 +375,7 @@ def test_read_FR_single_double():
 
     set_double = 1.43
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_double([set_double])
 
     test_record.reset()
@@ -391,7 +393,7 @@ def test_read_FR_double_list():
 
     double_list = [2.34, 8.65]
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_double(double_list)
 
     test_record.reset()
@@ -407,11 +409,11 @@ def test_read_FR_double_list():
 
 def test_read_FR_single_string():
 
-    set_string = "Hello World!"
+    set_string = b"Hello World!"
     set_length = len(set_string)
 
     # create new record
-    test_record = _FortranRecord('', 0)  # already tested
+    test_record = _FortranRecord(b'', 0)  # already tested
     test_record.put_string([set_string], 12, 1)
 
     test_record.reset()
@@ -427,10 +429,10 @@ def test_read_FR_single_string():
 
 def test_read_FR_string_list():
 
-    set_string_list = ["Hello ", "World!"]
+    set_string_list = [b"Hello ", b"World!"]
     set_length = len(set_string_list[0])
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_string(set_string_list, set_length)
     test_record.reset()
 
@@ -448,9 +450,9 @@ def test_read_FR_mixed_record():
     set_int = 8
     set_float = 3.14
     set_double_list = [1.6e-19, 6.02e23]
-    set_string = "Hello World!"
+    set_string = b"Hello World!"
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_int([set_int])
     test_record.put_string([set_string], len(set_string))
     test_record.put_double(set_double_list)
@@ -513,9 +515,9 @@ def test_write_BR():
     set_int = 8
     set_float = 3.14
     set_double_list = [1.6e-19, 6.02e23]
-    set_string = "Hello World!"
+    set_string = b"Hello World!"
 
-    test_record = _FortranRecord('', 0)
+    test_record = _FortranRecord(b'', 0)
     test_record.put_int([set_int])
     test_record.put_string([set_string], len(set_string))
     test_record.put_double(set_double_list)
