@@ -1,6 +1,7 @@
 """Python wrapper for nucname library."""
 # Python imports 
 #from collections import Iterable
+from __future__ import division
 
 # Cython imports
 from libcpp.map cimport map
@@ -105,7 +106,7 @@ cpp_data.natural_abund(<int> 10000000)
 abundance_by_z = dict([(i, []) for i in range(1,119)])
 for zas, abundance in natural_abund_map.items():
     if 0.0 < abundance < 1.0:
-        abundance_by_z[zas/10000000].append((zas, abundance))
+        abundance_by_z[zas//10000000].append((zas, abundance))
 
 
 def natural_abund(nuc):
