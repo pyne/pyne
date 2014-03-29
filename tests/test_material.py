@@ -79,7 +79,7 @@ def test_mat4():
     mat = Material({922350000: 0.05, 922380000: 0.95}, 15, attrs={'units': 'kg'})
     assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
     assert_equal(mat.mass, 15.0)
-    assert_equal(mat.attrs['units'], 'kg')
+    assert_equal(mat.attrs['units'], b'kg')
 
 def test_from_text():
     mat = Material(attrs={'units': 'kg'})
@@ -947,10 +947,10 @@ def test_attrs():
     assert_equal(len(mat.attrs), 0)
     mat.attrs['units'] = 'kg'
     assert_equal(len(mat.attrs), 1)
-    assert_equal(mat.attrs['units'], 'kg')
+    assert_equal(mat.attrs['units'], b'kg')
     
     mat.attrs = {'comment': 'rawr', 'amount': 42.0}
-    assert_equal(mat.attrs.keys(), ['amount', 'comment'])
+    assert_equal(mat.attrs.keys(), [b'amount', b'comment'])
     assert_true(isinstance(mat.attrs, jsoncpp.Value))
 
     aview = mat.attrs

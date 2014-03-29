@@ -12,7 +12,7 @@ available to use.
 
 """
 
-from __future__ import print_function, division
+from __future__ import print_function, division, unicode_literals
 import collections
 import string
 import struct
@@ -332,12 +332,12 @@ class SurfSrc(_BinaryReader):
         # interpret header
         self.kod = header.get_string(8)[0]  # code identifier
 
-        if 'SF_00001' not in self.kod:
+        if b'SF_00001' not in self.kod:
             self.ver = header.get_string(5)[0]  # code version identifier
 
-            if '2.6.0' in self.ver:
+            if b'2.6.0' in self.ver:
                 self.loddat = header.get_string(28)[0]  # code version date
-            elif '5    ' in self.ver:
+            elif b'5    ' in self.ver:
                 self.loddat = header.get_string(8)[0]  # code version date
             else:
                 raise NotImplementedError("MCNP5/X Version:" +
@@ -352,7 +352,7 @@ class SurfSrc(_BinaryReader):
             tablelengths = self.get_fortran_record()
 
             # interpret table lengths
-            if '2.6.0' in self.ver:
+            if b'2.6.0' in self.ver:
                 self.np1 = tablelengths.get_int()[0]    # hist used to gen. src
                 self.nrss = tablelengths.get_int()[0]   # #tracks to surf src
             else:
@@ -368,7 +368,7 @@ class SurfSrc(_BinaryReader):
             while tablelengths.num_bytes > tablelengths.pos:
                 self.table1extra += tablelengths.get_int()
 
-        elif 'SF_00001' in self.kod:
+        elif b'SF_00001' in self.kod:
             header = self.get_fortran_record()
             self.ver = header.get_string(12)[0]     # code version identifier
             self.loddat = header.get_string(9)[0]   # code version date
@@ -475,24 +475,24 @@ class SurfSrc(_BinaryReader):
         """Write the header part of the header to the surface source file"""
         if 'SF_00001' in self.kod:
             rec = [self.kod]
-            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            newrecord = _FortranRecord(b"".join(rec), len("".join(rec)))
             self.put_fortran_record(newrecord)
 
             rec = [self.ver, self.loddat, self.idtm, self.probid, self.aid]
-            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            newrecord = _FortranRecord(b"".join(rec), len("".join(rec)))
             newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
         else:
             rec = [self.kod, self.ver, self.loddat,
                    self.idtm, self.probid, self.aid]
-            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            newrecord = _FortranRecord(b"".join(rec), len("".join(rec)))
             newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
         return
 
     def put_table_1(self):
         """Write the table1 part of the header to the surface source file"""
-        newrecord = _FortranRecord("", 0)
+        newrecord = _FortranRecord(b"", 0)
 
         if '2.6.0' in self.ver:
             newrecord.put_int([self.np1])
@@ -510,7 +510,7 @@ class SurfSrc(_BinaryReader):
 
     def put_table_2(self):
         """Write the table2 part of the header to the surface source file"""
-        newrecord = _FortranRecord("", 0)
+        newrecord = _FortranRecord(b"", 0)
         newrecord.put_int([self.niwr])
         newrecord.put_int([self.mipts])
         newrecord.put_int([self.kjaq])
@@ -522,7 +522,7 @@ class SurfSrc(_BinaryReader):
         """Write the record for each surface to the surface source file"""
 
         for cnt, s in enumerate(self.surflist):
-            newrecord = _FortranRecord("", 0)
+            newrecord = _FortranRecord(b"", 0)
             newrecord.put_int(s.id)
             if self.kjaq == 1:
                 newrecord.put_int(s.facet_id)  # don't add a 'dummy facet ID'
@@ -537,7 +537,7 @@ class SurfSrc(_BinaryReader):
 
     def put_summary(self):
         """Write the summary part of the header to the surface source file"""
-        newrecord = _FortranRecord("", 0)
+        newrecord = _FortranRecord(b"", 0)
         newrecord.put_int(list(self.summary_table))
         newrecord.put_int(list(self.summary_extra))
         self.put_fortran_record(newrecord)
@@ -559,7 +559,7 @@ class SurfSrc(_BinaryReader):
         """
 
         for j in range(self.nrss):  # nrss is the size of tracklist
-            newrecord = _FortranRecord("", 0)
+            newrecord = _FortranRecord(b"", 0)
             # 11 records comprising particle information
             newrecord.put_double(self.tracklist[j].nps)
             newrecord.put_double(self.tracklist[j].bitarray)
@@ -1066,11 +1066,11 @@ class PtracReader(object):
 
         # read and unpack first 4 bytes
         b = self.f.read(4)
-        should_be_4 = struct.unpack('<i', b)[0]
+        should_be_4 = struct.unpack(b'<i', b)[0]
         if should_be_4 == 4:
-            self.endianness = '<'
+            self.endianness = b'<'
         else:
-            self.endianness = '>'
+            self.endianness = b'>'
 
         # discard the next 8 bytes (the value -1 und another 4)
         self.f.read(8)
@@ -1105,20 +1105,20 @@ class PtracReader(object):
         if auto and not raw_format:
             b = self.f.read(4)
 
-            if b == '':
+            if b == b'':
                 raise EOFError
 
-            length = struct.unpack(self.endianness + 'i', b)[0]
+            length = struct.unpack(self.endianness + b'i', b)[0]
             number = length // format_length
 
             b = self.f.read(length + 4)
-            tmp = struct.unpack(self.endianness + format*number + 'i', b)
+            tmp = struct.unpack((self.endianness + format*number + b'i').encode(), b)
             length2 = tmp[-1]
             tmp = tmp[:-1]
         else:
             bytes_to_read = number * format_length + 8
             b = self.f.read(bytes_to_read)
-            if b == '':
+            if b == b'':
                 raise EOFError
 
             fmt_string = self.endianness + "i"
@@ -1127,7 +1127,7 @@ class PtracReader(object):
             else:
                 fmt_string += format * number + "i"
 
-            tmp = struct.unpack(fmt_string, b)
+            tmp = struct.unpack(fmt_string.encode(), b)
             length = tmp[0]
             length2 = tmp[-1]
             tmp = tmp[1:-1]
@@ -1136,7 +1136,7 @@ class PtracReader(object):
 
         if format == 's':
             # return just one string
-            return ''.join(str(c) for c in tmp)
+            return b''.join(str(c) for c in tmp)
         elif number == 1:
             # just return the number and not a tuple containing just the number
             return tmp[0]
@@ -1163,8 +1163,8 @@ class PtracReader(object):
         # following float) with 8 bytes length.
         if len(line) != 10:
             self.eightbytes = True
-            tmp = struct.pack(self.endianness + "f"*20, *line)
-            line = list(struct.unpack(self.endianness + "d"*10, tmp))
+            tmp = struct.pack((self.endianness + "f"*20).encode(), *line)
+            line = list(struct.unpack((self.endianness + "d"*10).encode(), tmp))
 
         # the first item is always 13. afterwards, there is 13 times the
         # following scheme:

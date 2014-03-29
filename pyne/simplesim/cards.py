@@ -297,7 +297,9 @@ from .. import material
 from . import nestedgeom as ng
 
 def _validate_name(value, isunique=False):
-    if value.find(' ') != -1:
+    if isinstance(value, bytes):
+        value = value.decode()
+    if str(value).find(' ') != -1:
         raise ValueError("The property ``name`` cannot contain spaces. "
                          "User provided {0}.".format(value))
     if isunique:

@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, unicode_literals
 import os
 from distutils.dir_util import remove_tree
 

@@ -110,6 +110,7 @@ cdef class Value(object):
 
         # convert key and get value
         if isinstance(pykey, basestring):
+            pykey = pykey.encode()
             cvalue = &self._inst[0][<const_char *> pykey]
         elif isinstance(pykey, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             pykey = toposindex(pykey, self._inst[0].size())
@@ -199,6 +200,7 @@ cdef class Value(object):
     def __contains__(self, item):
         cdef int i, curr_size
         if isinstance(item, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
+            item = item.encode()
             return self._inst.isMember(<const_char *> item)
         elif (self._inst.type() == cpp_jsoncpp.arrayValue):
             i = 0

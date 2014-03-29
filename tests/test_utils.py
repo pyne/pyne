@@ -1,4 +1,5 @@
 """PyNE utility tests"""
+from __future__ import unicode_literals
 import os
 
 import nose 
@@ -66,58 +67,58 @@ def test_remove():
 
 def test_fromstring_split1():
     s = "1 2.3 4"
-    obs = utils.fromstring_split(s)
+    obs = utils.fromstring_split(s.encode())
     exp = np.fromstring(s, sep=" ")
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_split2():
     s = "1-2.3-4"
-    obs = utils.fromstring_split(s, sep='-')
+    obs = utils.fromstring_split(s.encode(), sep='-'.encode())
     exp = np.fromstring(s, sep="-")
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_split3():
     s = "1,2.3,4"
-    obs = utils.fromstring_split(s, sep=',')
+    obs = utils.fromstring_split(s.encode(), sep=','.encode())
     exp = np.fromstring(s, sep=",")
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_split4():
     s = "1\n 23 \t 4"
-    obs = utils.fromstring_split(s, dtype=int)
+    obs = utils.fromstring_split(s.encode(), dtype=int)
     exp = np.array([1, 23, 4])
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_token1():
     s = "1 2.3 4"
-    obs = utils.fromstring_token(s)
+    obs = utils.fromstring_token(s.encode())
     exp = np.fromstring(s, sep=" ")
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_token2():
     s = "1-2.3-4"
-    obs = utils.fromstring_token(s, sep='-')
+    obs = utils.fromstring_token(s.encode(), sep='-'.encode())
     exp = np.fromstring(s, sep="-")
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_token3():
     s = "1,  2.3, 4"
-    obs = utils.fromstring_token(s, sep=' ,')
+    obs = utils.fromstring_token(s.encode(), sep=' ,'.encode())
     exp = np.fromstring(s, sep=", ")
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_token4():
     s = "1, 2.3 ,4"
-    obs = utils.fromstring_token(s, sep=' ,', inplace=True)
+    obs = utils.fromstring_token(s.encode(), sep=' ,'.encode(), inplace=True)
     exp = np.array([1.0, 2.3, 4.0])
-    assert_equal(s, "1\x00 2.3\x00,4")
+    assert_equal(s, "1, 2.3 ,4")
     assert_array_equal(obs, exp)
 
 
