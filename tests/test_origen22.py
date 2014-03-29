@@ -1,6 +1,9 @@
 from __future__ import print_function
 import os
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import numpy as np
 from nose.tools import assert_equal, assert_true

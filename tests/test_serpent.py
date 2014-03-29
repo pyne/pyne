@@ -1,5 +1,5 @@
 import os
-from StringIO import StringIO
+
 
 import numpy as np
 from nose.tools import assert_equal, assert_true
