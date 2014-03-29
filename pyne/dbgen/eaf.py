@@ -61,7 +61,7 @@ def grab_eaf_data(build_dir=""):
         ofile = os.path.join(build_dir, 'fendlg-2.0_175')
         with open(ofile, 'w') as fw:
             for line in gf:
-                fw.write(line)
+                fw.write(line.decode("us-ascii"))
     finally:
         gf.close()
         

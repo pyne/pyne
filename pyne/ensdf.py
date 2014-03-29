@@ -81,8 +81,8 @@ def _to_id_from_level(nuc_id, level, levellist, lmap):
     gparent = nid
     if nid in lmap:
         for i in range(lmap[nid], len(levellist)):
-            if level is not None and level + 1.0 > levellist[i][2] >\
-                            level - 1.0:
+            if level is not None and levellist[i][2] is not None\
+                    and level + 1.0 > levellist[i][2] > level - 1.0:
                 gparent = levellist[i][0]
                 break
             if int(nid//10000) != int(levellist[i][0]//10000):

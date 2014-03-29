@@ -134,8 +134,8 @@ def make_fpy_table(nuc_data, build_dir=""):
         Path to nuclide data file.
     """
     build_filename = os.path.join(build_dir, 'nds-fpyield.html')
-    with open(build_filename, 'r') as f:
-        raw_data = f.read()
+    with open(build_filename, 'rb') as f:
+        raw_data = f.read().decode('iso-8859-1')
     spdat = raw_data.split('<table>')
     alldata = []
     for i in range(1, 31, 5):
@@ -161,7 +161,7 @@ def grab_fpy(build_dir='', file_out='nds-fpyield.html'):
         return
 
     nist = urllib2.urlopen('https://www-nds.iaea.org/sgnucdat/c2.htm')
-    with open(build_filename, 'w') as f:
+    with open(build_filename, 'wb') as f:
         f.write(nist.read())
 
 
