@@ -649,7 +649,7 @@ class EAFDataSource(DataSource):
             node = f.root.neutron.eaf_xs.eaf_xs
             for row in node:
                 nuc = row['nuc_zz']
-                rx = avail_rx[row['rxnum']]
+                rx = avail_rx[row['rxnum'].decode('utf-8')]
                 xs = row['xs']
                 rxcache[nuc, rx] = xs
                 abskey = (nuc, absrx)

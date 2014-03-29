@@ -271,6 +271,7 @@ def id(x, y=None, char * z="n"):
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
+            x = x.encode()
             rxid = cpp_rxname.id(std_string(<char *> x))
         elif isinstance(x, int):
             rxid = cpp_rxname.id(<extra_types.uint32> long(x))

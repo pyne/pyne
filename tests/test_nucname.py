@@ -222,18 +222,18 @@ def test_mcnp_to_id():
         yield check_cases, nucname.mcnp_to_id, val, id
 
 def test_serpent():
-    assert_equal(nucname.serpent(942390), "Pu-239")
-    assert_equal(nucname.serpent(952421), "Am-242m")
+    assert_equal(nucname.serpent(942390), b"Pu-239")
+    assert_equal(nucname.serpent(952421), b"Am-242m")
 
-    assert_equal(nucname.serpent("Pu-239"), "Pu-239")
+    assert_equal(nucname.serpent("Pu-239"), b"Pu-239")
 
-    assert_equal(nucname.serpent(94239), "Pu-239")
-    assert_equal(nucname.serpent(95642), "Am-242")
-    assert_equal(nucname.serpent(95242), "Am-242m")
-    assert_equal(nucname.serpent(92636), "U-236m")
+    assert_equal(nucname.serpent(94239), b"Pu-239")
+    assert_equal(nucname.serpent(95642), b"Am-242")
+    assert_equal(nucname.serpent(95242), b"Am-242m")
+    assert_equal(nucname.serpent(92636), b"U-236m")
 
-    assert_equal(nucname.serpent(2390940), "Pu-239")
-    assert_equal(nucname.serpent(2420951), "Am-242m")
+    assert_equal(nucname.serpent(2390940), b"Pu-239")
+    assert_equal(nucname.serpent(2420951), b"Am-242m")
 
 def test_serpent_to_id():
     # use None for impossible forms
@@ -247,20 +247,20 @@ def test_serpent_to_id():
         yield check_cases, nucname.serpent_to_id, val, id
 
 def test_nist():
-    assert_equal(nucname.nist(942390), "239Pu")
-    assert_equal(nucname.nist(952421), "242Am")
+    assert_equal(nucname.nist(942390), b"239Pu")
+    assert_equal(nucname.nist(952421), b"242Am")
 
-    assert_equal(nucname.nist("Pu-239"), "239Pu")
+    assert_equal(nucname.nist("Pu-239"), b"239Pu")
 
-    assert_equal(nucname.nist(94239), "239Pu")
-    assert_equal(nucname.nist(95642), "242Am")
+    assert_equal(nucname.nist(94239), b"239Pu")
+    assert_equal(nucname.nist(95642), b"242Am")
 
-    assert_equal(nucname.nist("10000"), "H")
-    assert_equal(nucname.nist("920000"), "U")
-    assert_equal(nucname.nist("940000"), "Pu")
+    assert_equal(nucname.nist("10000"), b"H")
+    assert_equal(nucname.nist("920000"), b"U")
+    assert_equal(nucname.nist("940000"), b"Pu")
 
-    assert_equal(nucname.nist(2390940), "239Pu")
-    assert_equal(nucname.nist(2420951), "242Am")
+    assert_equal(nucname.nist(2390940), b"239Pu")
+    assert_equal(nucname.nist(2420951), b"242Am")
 
 def test_nist_to_id():
     # use None for impossible forms

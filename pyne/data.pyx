@@ -322,6 +322,7 @@ def b(nuc):
     if isinstance(nuc, int):
         value = cpp_data.b(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc = nuc.encode()
         value = cpp_data.b(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
@@ -446,6 +447,7 @@ def decay_const(nuc):
     if isinstance(nuc, int):
         dc = cpp_data.decay_const(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc = nuc.encode()
         dc = cpp_data.decay_const(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)

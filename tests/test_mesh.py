@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import time
 import shutil
@@ -155,7 +156,7 @@ def test_structured_get_vertex():
     for i,x in enumerate(x_range):
         for j,y in enumerate(y_range):
             for k,z in enumerate(z_range):
-                print i, j, k
+                print("{0} {1} {2}".format(i, j, k))
                 vtx = sm.structured_get_vertex(i,j,k)
                 vcoord = sm.mesh.getVtxCoords(vtx)
                 assert_true(all(vcoord == [x,y,z]))
