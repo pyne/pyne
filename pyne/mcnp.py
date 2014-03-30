@@ -1112,7 +1112,7 @@ class PtracReader(object):
             number = length // format_length
 
             b = self.f.read(length + 4)
-            tmp = struct.unpack((self.endianness + format*number + b'i').encode(), b)
+            tmp = struct.unpack(b"".join([self.endianness, (format*number).encode(), b'i']), b)
             length2 = tmp[-1]
             tmp = tmp[:-1]
         else:

@@ -85,12 +85,12 @@ def check_read_header_block(ssrname):
             ssr.read_header()
 
             # header record values
-            assert_equal(ssr.kod, "SF_00001")
-            assert_equal(ssr.ver, "mcnp    6   ")
-            assert_equal(ssr.loddat, " 05/08/13")
-            assert_equal(ssr.idtm, " 11/18/13 17:50:49 ")
-            assert_equal(ssr.probid, " 11/18/13 17:50:43 ")
-            assert_equal(ssr.aid, "Simple MCNP Example that uses SSW"
+            assert_equal(ssr.kod, b"SF_00001")
+            assert_equal(ssr.ver, b"mcnp    6   ")
+            assert_equal(ssr.loddat, b" 05/08/13")
+            assert_equal(ssr.idtm, b" 11/18/13 17:50:49 ")
+            assert_equal(ssr.probid, b" 11/18/13 17:50:43 ")
+            assert_equal(ssr.aid, b"Simple MCNP Example that uses SSW"
                          "                       "
                          "                        ")
             assert_equal(ssr.knod, 2)
@@ -111,12 +111,12 @@ def check_read_header_block(ssrname):
             ssr.read_header()
 
             # header record values
-            assert_equal(ssr.kod, "mcnpx   ")
-            assert_equal(ssr.ver, "2.6.0")
-            assert_equal(ssr.loddat, "Wed Apr 09 08:00:00 MST 2008")
-            assert_equal(ssr.idtm, "  10/28/13 02:16:22")
-            assert_equal(ssr.probid, "  10/28/13 02:16:16")
-            assert_equal(ssr.aid, "Simple MCNP Example that uses SSW"
+            assert_equal(ssr.kod, b"mcnpx   ")
+            assert_equal(ssr.ver, b"2.6.0")
+            assert_equal(ssr.loddat, b"Wed Apr 09 08:00:00 MST 2008")
+            assert_equal(ssr.idtm, b"  10/28/13 02:16:22")
+            assert_equal(ssr.probid, b"  10/28/13 02:16:16")
+            assert_equal(ssr.aid, b"Simple MCNP Example that uses SSW"
                          "                                               ")
             assert_equal(ssr.knod, 2)
             # table 1 record values

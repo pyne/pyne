@@ -1,6 +1,6 @@
 """rxname tests"""
 import nose 
-
+import sys
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_in, assert_greater_equal
 
@@ -120,8 +120,9 @@ def test_mt_mts():
     assert_equal(rxname.mt(107), 107)
     assert_equal(rxname.mt(1), 1)
 
-    assert_equal(rxname.mt(107L), 107)
-    assert_equal(rxname.mt(1L), 1)
+    if sys.version_info[0] == 2:
+        assert_equal(rxname.mt(107L), 107)
+        assert_equal(rxname.mt(1L), 1)
 
     assert_equal(rxname.mt("107"), 107)
     assert_equal(rxname.mt("1"), 1)
