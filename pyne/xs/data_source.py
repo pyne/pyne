@@ -1,7 +1,15 @@
 """Cross section library data source interfaces.
 """
+from __future__ import division, unicode_literals
 import os
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 import tables as tb
@@ -596,16 +604,16 @@ class EAFDataSource(DataSource):
         absrx = rxname.id('absorption')
 
         if rx in self._rx_avail:
-            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, self._rx_avail[rx])
+            cond = "(nuc_zz == {0}) & (rxnum == b'{1}')".format(nuc, self._rx_avail[rx])
         elif rx == absrx:
-            cond = "(nuc_zz == {0})".format(nuc)
+            cond = "(nuc_zz == {0})".format(nuc).encode()
         else:
             return None
 
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = node.readWhere(cond)
+            rows = node.read_where(cond)
             #rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
@@ -641,7 +649,7 @@ class EAFDataSource(DataSource):
             node = f.root.neutron.eaf_xs.eaf_xs
             for row in node:
                 nuc = row['nuc_zz']
-                rx = avail_rx[row['rxnum']]
+                rx = avail_rx[row['rxnum'].decode('utf-8')]
                 xs = row['xs']
                 rxcache[nuc, rx] = xs
                 abskey = (nuc, absrx)
@@ -681,7 +689,7 @@ class ENDFDataSource(DataSource):
                 self._exists = os.path.isfile(self.fh)
             else:
                 self._exists = (isinstance(self.fh, file) or \
-                                isinstance(self.fh, StringIO.StringIO))
+                                isinstance(self.fh, StringIO))
         return self._exists
 
     def _load_group_structure(self, nuc, rx, nuc_i=None):

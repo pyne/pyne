@@ -5,6 +5,7 @@ Fortran formatted records.
 
 """
 
+from __future__ import unicode_literals
 import struct
 
 
@@ -45,7 +46,7 @@ class _FortranRecord(object):
                 "All data read from record, pos=" + str(self.pos) +
                 " >= num_bytes=" + str(self.num_bytes))
 
-        values = struct.unpack('{0}{1}'.format(n, typeCode),
+        values = struct.unpack('{0}{1}'.format(n, typeCode).encode(),
                                self.data[self.pos:self.pos+item_size*n])
         self.pos += item_size * n
         return list(values)
@@ -54,7 +55,7 @@ class _FortranRecord(object):
         """
         Returns one or more 4-byte integers.
         """
-        return self.get_data(n, 'i', self.int_size)
+        return self.get_data(n, "i", self.int_size)
 
     def get_long(self, n=1):
         """
@@ -86,7 +87,7 @@ class _FortranRecord(object):
                 " >= num_bytes=" + str(self.num_bytes))
 
         relevantData = self.data[self.pos:self.pos+length*n]
-        (s,) = struct.unpack('{0}s'.format(length*n), relevantData)
+        (s,) = struct.unpack('{0}s'.format(length*n).encode(), relevantData)
         self.pos += length*n
         return [s[i*length:(i+1)*length] for i in range(n)]
 
@@ -101,7 +102,7 @@ class _FortranRecord(object):
             newdata = [newdata]
 
         for i in range(len(newdata)):
-            self.data += struct.pack(format, newdata[i])
+            self.data = b''.join([self.data, struct.pack(format, newdata[i])])
             self.pos += item_size
             self.num_bytes += item_size
 
@@ -109,32 +110,32 @@ class _FortranRecord(object):
         """
         Pack a list of 4-byte integers.
         """
-        self.put_data(data, '1i', self.int_size)
+        self.put_data(data, b'1i', self.int_size)
 
     def put_long(self, data):
         """
         Pack a list of 8-byte integers.
         """
-        self.put_data(data, '1q', self.long_size)
+        self.put_data(data, b'1q', self.long_size)
 
     def put_float(self, data):
         """
         Pack a list of floats
         """
-        self.put_data(data, '1f', self.float_size)
+        self.put_data(data, b'1f', self.float_size)
 
     def put_double(self, data):
         """
         Pack a list of doubles
         """
-        self.put_data(data, '1d', self.double_size)
+        self.put_data(data, b'1d', self.double_size)
 
     def put_string(self, data, length, n=1):
         """
         Packs a list of one or more double at the current
         position within the data list.
         """
-        self.put_data(data, '{0}s'.format(length), length)
+        self.put_data(data, '{0}s'.format(length).encode(), length)
 
     def reset(self):
         self.pos = 0

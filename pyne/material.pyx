@@ -1,4 +1,6 @@
 """Python wrapper for material library."""
+from __future__ import division, unicode_literals
+
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
 from libcpp.set cimport set as cpp_set
@@ -15,6 +17,7 @@ import collections
 import warnings
 cimport numpy as np
 import numpy as np
+
 
 # local imports
 from pyne cimport cpp_material
@@ -1016,7 +1019,7 @@ cdef class _Material:
 
     def __div_float__(self, double y):
         cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer[0] / y
+        pymat.mat_pointer[0] = self.mat_pointer[0] * (1 / y)
         return pymat
 
 
@@ -2000,6 +2003,7 @@ cdef class _MaterialLibrary(object):
             mat = Material(comp, mass=row[0], density=row[1], 
                                     atoms_per_molecule=row[2])
             strattrs = "".join(map(chr, matsattrs[i]))
+            strattrs = strattrs.encode()
             s = std_string(<char *> strattrs)
             attribs = cpp_jsoncpp.Value()
             reader.parse(s, attribs)

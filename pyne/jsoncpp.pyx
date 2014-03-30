@@ -38,9 +38,11 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
         for k, v in doc.items():
             if not isinstance(k, basestring):
                 raise KeyError('object keys must be strings, got {0}'.format(k))
+            k = k.encode()
             cval[0][<const_char *> k].swap(deref(tocppval(v)))
     elif isinstance(doc, basestring):
         # string must come before other sequences
+        doc = doc.encode()
         cval = new cpp_jsoncpp.Value(<char *> doc)
     elif isinstance(doc, collections.Sequence) or isinstance(doc, collections.Set):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.arrayValue)
@@ -108,6 +110,7 @@ cdef class Value(object):
 
         # convert key and get value
         if isinstance(pykey, basestring):
+            pykey = pykey.encode()
             cvalue = &self._inst[0][<const_char *> pykey]
         elif isinstance(pykey, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             pykey = toposindex(pykey, self._inst[0].size())
@@ -149,6 +152,7 @@ cdef class Value(object):
     def __setitem__(self, key, value):
         cdef cpp_jsoncpp.Value * ckey = NULL
         if isinstance(key, basestring):
+            key = key.encode()
             ckey = &self._inst[0][<const_char *> key]
             ckey.swap(deref(tocppval(value)))
         elif isinstance(key, int):
@@ -196,6 +200,7 @@ cdef class Value(object):
     def __contains__(self, item):
         cdef int i, curr_size
         if isinstance(item, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
+            item = item.encode()
             return self._inst.isMember(<const_char *> item)
         elif (self._inst.type() == cpp_jsoncpp.arrayValue):
             i = 0

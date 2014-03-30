@@ -1,4 +1,5 @@
 """Cython-based utils to be imported into utils."""
+from __future__ import division
 from libc.stdlib cimport malloc, free
 from libc.stdlib cimport atof
 from libc.string cimport strtok, strcpy, strncpy
@@ -85,7 +86,7 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
         strcpy(cs, s)
 
     if maxsize < 0:
-        maxsize = (I / 2) + 1
+        maxsize = (I // 2) + 1
 
     data = np.empty(maxsize, dtype=np.float64)
     cdata = data
@@ -138,10 +139,10 @@ def fromendf_tok(char * s):
     cdef long pos = 0
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     i = 0
-    num_entries = len(s)/81 * 6
+    num_entries = len(s)//81 * 6
     cdata = np.empty(num_entries, dtype=np.float64)
     while i < num_entries:
-        pos = i*11 + i/6 * 15
+        pos = i*11 + i//6 * 15
         strncpy(entry, s+pos, 11)
         cdata[i] = pyne.cpp_pyne.endftod(entry)
         i += 1

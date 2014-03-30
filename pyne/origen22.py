@@ -1,10 +1,16 @@
-from __future__ import print_function
+from __future__ import print_function, division
+from future_builtins import map
+
 import os
 import re
 import sys
 from collections import Mapping
 from copy import deepcopy
-from itertools import chain, imap, izip
+from itertools import chain, izip
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 
@@ -911,7 +917,7 @@ def _parse_tape9_decay(deck):
 
     # Parse the cards into a structured arrau
     cards = [m.groups()[1:] + n.groups()[1:] for m, n in 
-             izip(imap(decay_card1_re.match, deck[1::2]), imap(decay_card2_re.match, deck[2::2]))]
+             izip(map(decay_card1_re.match, deck[1::2]), map(decay_card2_re.match, deck[2::2]))]
     cards = [tuple(d.replace(' ', '') for d in card) for card in cards]
     cards = np.array(cards, dtype='i4,i4' + ',f8'*12)
     pdeck['_cards'] = cards

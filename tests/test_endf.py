@@ -1,6 +1,9 @@
 import os
 import warnings
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 from math import e
 
 import numpy as np
@@ -16,7 +19,7 @@ from pyne import nucname
 import nose
 from nose.tools import assert_equal
 
-str_library = StringIO.StringIO(
+str_library = StringIO(
 """ $Rev:: 532      $  $Date:: 2011-12-05#$                             1 0  0
  1.002000+3 1.996800+0          1          0          0          0 128 1451    1
  0.000000+0 0.000000+0          0          0          0          6 128 1451    2
@@ -418,7 +421,7 @@ def test_unresolved_resonances_a():
     obs = library.structure[nuc10031]['data'][nuc10031]['unresolved']
     obs_LIST = obs[1][2][2,2]
 
-    exp = array_from_ENDF(StringIO.StringIO(
+    exp = array_from_ENDF(StringIO(
         """ 1.801000+3          0 1.100000+0 3.078520-1 1.000000-2 0.000000+0
  2.101000+3          1 2.100000+0 7.088000-1 2.000000-2 0.000000+0
  3.101000+3          2 3.100000+0 2.120000-1 3.000000-2 0.000000+0"""))
@@ -432,7 +435,7 @@ def test_unresolved_resonances_b():
     obs = library.structure[nuc40000]['data'][nuc40040]['unresolved']
     # For the spin=4.5, L=3, J=4 section in the first isotope
     obs_1 = obs[0][2][4.5,3,4]
-    exp_1_a = array_from_ENDF(StringIO.StringIO(
+    exp_1_a = array_from_ENDF(StringIO(
         """ 0.000000+0 0.000000+0 3.000000+0          3         12          0
  2.804009-5 4.000000+0 3.181707+3 3.885315-9-3.382438+3 0.000000+0
  2.376630+2 7.198625-2-5.887887-8-4.380016-5 1.747888-6-4.104291-9"""))
@@ -445,7 +448,7 @@ def test_unresolved_resonances_b():
         assert_array_equal(obs_1[key], exp_1[key])
     # For the spin=3.5, L=4, J=5 section in the second isotope
     obs_2 = obs[1][2][3.5,4,5]
-    exp_2_a = array_from_ENDF(StringIO.StringIO(
+    exp_2_a = array_from_ENDF(StringIO(
         """ 0.000000+0 0.000000+0 4.000000+0          4         13          0
 -9.824193-5 5.000000+0 4.676826-4-4.336597+0-9.045122+2 0.000000+0
  3.699655-9-3.919000+5 8.467144-3-3.737007+9-5.750577+7-9.588021+8
@@ -460,7 +463,7 @@ def test_unresolved_resonances_b():
 
     # Check the energy values.
     obs_ES = obs[1][2]['ES']
-    exp_ES_a = array_from_ENDF(StringIO.StringIO(
+    exp_ES_a = array_from_ENDF(StringIO(
         """-2.723837-2-8.755303-2 2.245337-2-9.034520+2 2.252098+5 2.666587+2
  3.747872-3                                                       """))
     exp_ES = exp_ES_a.flat[:num_e]
@@ -471,7 +474,7 @@ def test_unresolved_resonances_c():
     # Case C (ENDF Manual p. 70)
     obs = library.structure[nuc40000]['data'][nuc40040]['unresolved'][2][2][0.5,6,9]
 
-    exp_a = array_from_ENDF(StringIO.StringIO(
+    exp_a = array_from_ENDF(StringIO(
         """ 9.000000+0 0.000000+0          2          0         18          2
  0.000000+0 0.000000+0-4.253833-1-2.269388+0 0.000000+0 4.732644-4
 -5.873521-3-4.808214+9 5.089619+5 4.836683+0 2.772702-3-4.865151-8
@@ -577,7 +580,7 @@ def test_resolved_adleradler():
     for key in exp_LIST:
         assert_allclose(exp_LIST[key],obs_LIST[key], rtol = 1e-8)
 
-    exp_bg_string = StringIO.StringIO(
+    exp_bg_string = StringIO(
         """ 9.143204-3 1.601509+1-3.312654-7-3.460776+8-3.947879-5-1.646877-5
  1.009363-5-1.861342-7-1.613360+7-7.549728+5-3.064120+9-2.961641+0
 -4.390193-5 2.303605+0-4.630212+5-3.237353+1-4.037885+4-3.231304+0""")
@@ -592,7 +595,7 @@ def test_resolved_r_matrix_kbk_kps():
     obs_3 = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2][3.0]
     obs_4 = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2][-4.0]
 
-    exp_3 = array_from_ENDF(StringIO.StringIO(
+    exp_3 = array_from_ENDF(StringIO(
         """ 1.960831+3-1.053619+4          0          0          3          1
  3.941056-6-0.524089+0-2.023965-8 0.000000+0 0.000000+0 0.000000+0
  0.000000+0 0.000000+0          0          0          0          1
@@ -649,7 +652,7 @@ def test_resolved_r_matrix_kbk_kps():
 
     lbk1_obs = obs_4['ch0']
     lbk2_obs = obs_4['ch1']
-    lbk_exp = array_from_ENDF(StringIO.StringIO(
+    lbk_exp = array_from_ENDF(StringIO(
         """ 0.000000+0 0.000000+0          0          0          1          1
  0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0
  0.000000+0 0.000000+0          0          0          4          5
@@ -688,7 +691,7 @@ def test_resolved_r_matrix_kbk_kps():
 
 
 def test_resolved_r_matrix():
-    pp_exp_a = array_from_ENDF(StringIO.StringIO(
+    pp_exp_a = array_from_ENDF(StringIO(
         """1.685738+5 1.659888-5          1          7          0          0
  0.000000+0 0.000000+0          1          3          2          1
  0.000000+0 0.000000+0          2          0         24          4
@@ -704,7 +707,7 @@ def test_resolved_r_matrix():
                            pp_exp_a[1])))
     del pp_exp[0]
 
-    ch_exp_a = array_from_ENDF(StringIO.StringIO(
+    ch_exp_a = array_from_ENDF(StringIO(
         """-4.000000+0          0 1.914541-3-4.683290+5         12          2
  1.981937+3 9.740279-7-2.450194+5-1.304844+4 1.856158-9-1.218463-9
 -4.097837+1-2.765873-9-0.913351+1 1.591290+5-2.379063+0 2.066455-6
@@ -718,7 +721,7 @@ def test_resolved_r_matrix():
                           ch_exp_a[1:3].transpose()))
     ch_obs = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2]
 
-    gam_4_a = array_from_ENDF(StringIO.StringIO(
+    gam_4_a = array_from_ENDF(StringIO(
         """ 2.949030-1 1.156625+7 7.255199-6          0          0          0
  4.453964+1 5.062864-5-1.110875-3          0          0          0
  2.208407-7 9.942677-6-3.134503-8          0          0          0"""))
@@ -727,7 +730,7 @@ def test_resolved_r_matrix():
                  'GAM': gam_4_a[1:3].transpose()}
     ch_exp[-4.0].update(gam_4_exp)
 
-    gam_3_a = array_from_ENDF(StringIO.StringIO(
+    gam_3_a = array_from_ENDF(StringIO(
         """ 5.088175-6-2.282938+0-4.236786-6          0          0          0
  8.930267-9-3.115607+8-2.521300-4          0          0          0
  3.978418+5 4.821547-6 3.110373-3          0          0          0"""))
@@ -754,7 +757,7 @@ def test_xs():
 
     # Manually find where the data should be reading from and check if it is
     # consistent with what the program is doing.
-    exp_2_str = StringIO.StringIO(
+    exp_2_str = StringIO(
         """ 4.284918+3 6.292347+0          0          0          0          0
  4.047593+5-4.245658-8          0-4.651348+3          7         20
           6          4          9          2         12          1
@@ -765,7 +768,7 @@ def test_xs():
                      (exp_2_a[2:].flat[:14:2], exp_2_a[2:].flat[1:14:2])))
     obs_2 = library.structure[nuc40000]['data'][nuc_i]['xs'][2][0]
 
-    exp_600_a = array_from_ENDF(StringIO.StringIO(
+    exp_600_a = array_from_ENDF(StringIO(
         """ 4.193742+3 6.287192+0          0          0          0          0
  3.863437-5-7.373532-7          0 8.675483-1          5         20
           4          1          8          2         12          3
@@ -792,7 +795,10 @@ def test_u235():
     try:
         assert(os.path.isfile('U235.txt'))
     except AssertionError:
-        from urllib import urlretrieve
+        try:
+            from urllib import urlretrieve
+        except ImportError:
+            from urllib.request import urlretrieve
         urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
                     "U235.txt")
     from hashlib import md5
@@ -808,7 +814,7 @@ def test_u235():
     nuc = 922350000
     u235._read_res(nuc)
     u235._read_xs(nuc, 37)
-    exp_a = array_from_ENDF(StringIO.StringIO
+    exp_a = array_from_ENDF(StringIO
          (""" 9.223500+4 2.330248+2          0          0          0          0
 -1.788560+7-1.788560+7          0          0          1          6
           6          2                                            

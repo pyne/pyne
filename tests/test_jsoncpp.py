@@ -1,10 +1,14 @@
 """JsonCpp tests"""
+from __future__ import unicode_literals
 import os
 try:
     import simplejson as json
 except ImportError:
     import json
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import nose 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
@@ -93,7 +97,7 @@ def test_setvalue():
     assert_equal(v.type_name(), 'array')
 
 def test_mapvalue():
-    m = {'name': 'Terry Jones', 'age': 42.0}
+    m = {'name': b'Terry Jones', 'age': 42.0}
     v = Value(m)
     assert_equal(len(v), len(m))
     assert_equal(dict([(k, v[k]) for k in m]), m)
@@ -116,14 +120,14 @@ def test_nestedvalue():
     assert_equal(v[-1]['a']['b'], lofl[-1]['a']['b'])
 
 def test_arrsetitem():
-    l = ['Terry Jones', 1, None, 42.0]
+    l = [b'Terry Jones', 1, None, 42.0]
     v = Value([None] * len(l))
     for i, value in enumerate(l):
         v[i] = value
     assert_equal([v[i] for i in range(len(l))], l)
 
 def test_mapsetitem():
-    m = {'name': 'Terry Jones', 'age': 42.0}
+    m = {'name': b'Terry Jones', 'age': 42.0}
     v = Value({})
     for key, value in m.items():
         v[key] = value
@@ -160,7 +164,7 @@ def test_setslice():
     v = Value(a)
     v[::-1] = 'abcd'
     obs = [v[i] for i in range(4)]
-    exp = ['d', 'c', 'b', 'a']
+    exp = [b'd', b'c', b'b', b'a']
     assert_equal(obs, exp)
 
     v = Value(a)
@@ -174,7 +178,7 @@ def test_setvalue():
     b = Value(65.0)
     a['counter'] = b
     assert_equal(a['i'], 10)
-    assert_equal(a['j'], "rawr")
+    assert_equal(a['j'], b"rawr")
     assert_equal(float(b), 65.0)
     assert_equal(a['counter'], 65.0)
 
@@ -233,7 +237,7 @@ def test_delitem_contains():
 
 def test_keys():
     a = Value({'i': 10, 'j': "rawr"})
-    assert_equal(a.keys(), ['i', 'j'])
+    assert_equal(a.keys(), [b'i', b'j'])
 
 def test_vals():
     a = Value({'i': 10, 'j': "rawr"})
@@ -344,9 +348,9 @@ def test_mutableseq():
 
 def test_str_repr():
     assert_equal(repr(Value({'hello': 1})), '{"hello":1}')
-    assert_equal(str(Value({'hello': 1})), '{\n   "hello" : 1\n}')
-    assert_equal(repr(Value('hello')), "hello")
-    assert_equal(str(Value('hello')), 'hello')
+    assert_equal(str(Value({'hello': 1})), b'{\n   "hello" : 1\n}')
+    assert_equal(repr(Value('hello')), b"hello")
+    assert_equal(str(Value('hello')), b'hello')
 
 def test_reader():
     r = Reader()
@@ -361,13 +365,13 @@ def test_reader():
 
 def test_fastwriter():
     fw = FastWriter()
-    assert_equal(fw.write(Value({'hello': 1})), '{"hello":1}\n')
-    assert_equal(fw.write(Value('hello')), '"hello"\n')
+    assert_equal(fw.write(Value({'hello': 1})), b'{"hello":1}\n')
+    assert_equal(fw.write(Value('hello')), b'"hello"\n')
 
 def test_styledwriter():
     sw = StyledWriter()
-    assert_equal(sw.write(Value({'hello': 1})), '{\n   "hello" : 1\n}\n')
-    assert_equal(sw.write(Value('hello')), '"hello"\n')
+    assert_equal(sw.write(Value({'hello': 1})), b'{\n   "hello" : 1\n}\n')
+    assert_equal(sw.write(Value('hello')), b'"hello"\n')
 
 
 if __name__ == "__main__":

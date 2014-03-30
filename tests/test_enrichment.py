@@ -139,7 +139,7 @@ def check_sample_feed(solver):
             922380000: 0.9863899989,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11, max_iter=100)
+    casc = enr.multicomponent(orig_casc, solver=solver.encode(), tolerance=1E-11, max_iter=100)
 
     #print "casc.mat_prod = " + repr(casc.mat_prod)
     #print "casc.mat_prod = " + repr(casc.mat_tail)
@@ -173,7 +173,7 @@ def check_NU(solver):
             922380000: 0.992745,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11)
+    casc = enr.multicomponent(orig_casc, solver=solver.encode(), tolerance=1E-11)
 
     #print "casc.mat_prod = " + repr(casc.mat_prod)
     assert_almost_equal(casc.mat_prod.comp[922350000], 0.05,   5) 
@@ -207,7 +207,7 @@ def check_vision(solver):
             922380000: 0.985523854246919,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-11)
+    casc = enr.multicomponent(orig_casc, solver=solver.encode(), tolerance=1E-11)
 
     assert_almost_equal(casc.mat_prod.comp[922350000], 0.055,  5) 
     assert_almost_equal(casc.mat_tail.comp[922350000], 0.0025, 5)
@@ -252,7 +252,7 @@ def check_tungsten(solver):
             741860000: 0.28417,
             })
     orig_casc.mat_feed = feed
-    casc = enr.multicomponent(orig_casc, solver=solver, tolerance=1E-7)
+    casc = enr.multicomponent(orig_casc, solver=solver.encode(), tolerance=1E-7)
 
     assert_almost_equal(casc.mat_prod.comp[741800000], 0.5109,  5) 
     assert_almost_equal(casc.mat_tail.comp[741800000], 0.00014, 5)

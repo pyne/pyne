@@ -1,5 +1,9 @@
+from __future__ import division
 import re
-import urllib
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 import os
 import warnings
 import copy
@@ -9,6 +13,10 @@ import numpy as np
 from pyne import nucname
 from pyne.utils import to_sec
 
+try:
+    basestring
+except NameError:
+    basestring = str
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')
@@ -73,11 +81,11 @@ def _to_id_from_level(nuc_id, level, levellist, lmap):
     gparent = nid
     if nid in lmap:
         for i in range(lmap[nid], len(levellist)):
-            if level is not None and level + 1.0 > levellist[i][2] >\
-                            level - 1.0:
+            if level is not None and levellist[i][2] is not None\
+                    and level + 1.0 > levellist[i][2] > level - 1.0:
                 gparent = levellist[i][0]
                 break
-            if int(nid/10000) != int(levellist[i][0]/10000):
+            if int(nid//10000) != int(levellist[i][0]//10000):
                 break
     return gparent
 
@@ -157,14 +165,14 @@ def _to_time(tstr, errstr):
 
 
 _decay_to = {
-    '%EC': lambda x: (x - 10000000) / 10000 * 10000,
-    '%B+': lambda x: (x - 10000000) / 10000 * 10000,
-    '%EC+%B+': lambda x: (x - 10000000) / 10000 * 10000,
-    '%B-': lambda x: (x + 10000000) / 10000 * 10000,
-    '%IT': lambda x: x / 10000 * 10000,
-    '%A': lambda x: (x - 20040000) / 10000 * 10000,
-    '%P': lambda x: (x - 10010000) / 10000 * 10000,
-    '%N': lambda x: (x - 10000) / 10000 * 10000,
+    '%EC': lambda x: (x - 10000000) // 10000 * 10000,
+    '%B+': lambda x: (x - 10000000) // 10000 * 10000,
+    '%EC+%B+': lambda x: (x - 10000000) // 10000 * 10000,
+    '%B-': lambda x: (x + 10000000) // 10000 * 10000,
+    '%IT': lambda x: x // 10000 * 10000,
+    '%A': lambda x: (x - 20040000) // 10000 * 10000,
+    '%P': lambda x: (x - 10010000) // 10000 * 10000,
+    '%N': lambda x: (x - 10000) // 10000 * 10000,
 }
 
 

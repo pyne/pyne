@@ -1,7 +1,10 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
 from __future__ import print_function
 import os
-import urllib
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 from zipfile import ZipFile
 
 import numpy as np

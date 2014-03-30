@@ -116,22 +116,22 @@ def test_id():
 
 
 def test_name():
-    assert_equal(nucname.name(942390), "Pu239")
-    assert_equal(nucname.name(952421), "Am242M")
+    assert_equal(nucname.name(942390), b"Pu239")
+    assert_equal(nucname.name(952421), b"Am242M")
 
-    assert_equal(nucname.name("PU239"), "Pu239")
+    assert_equal(nucname.name("PU239"), b"Pu239")
 
-    assert_equal(nucname.name(94239), "Pu239")
-    assert_equal(nucname.name(95242), "Am242M")
-    assert_equal(nucname.name(95642), "Am242")
-    assert_equal(nucname.name(92636), "U236M")
+    assert_equal(nucname.name(94239), b"Pu239")
+    assert_equal(nucname.name(95242), b"Am242M")
+    assert_equal(nucname.name(95642), b"Am242")
+    assert_equal(nucname.name(92636), b"U236M")
 
-    assert_equal(nucname.name("Am-242m"), "Am242M")
+    assert_equal(nucname.name("Am-242m"), b"Am242M")
 
-    assert_equal(nucname.name(40020),   "He4")
-    assert_equal(nucname.name(2440961), "Cm244M")
-    assert_equal(nucname.name(2390940), "Pu239")
-    assert_equal(nucname.name(2420950), "Am242")
+    assert_equal(nucname.name(40020),   b"He4")
+    assert_equal(nucname.name(2440961), b"Cm244M")
+    assert_equal(nucname.name(2390940), b"Pu239")
+    assert_equal(nucname.name(2420950), b"Am242")
 
 def test_znum():
     exps = [2, 2, 96, 94, 95, 2, 95, 95, 92, 95, 95, 2, 92, 93, 2, 96, 94, 95, 2,
@@ -270,18 +270,18 @@ def test_mcnp_to_id():
         yield check_cases, nucname.mcnp_to_id, val, id
 
 def test_serpent():
-    assert_equal(nucname.serpent(942390), "Pu-239")
-    assert_equal(nucname.serpent(952421), "Am-242m")
+    assert_equal(nucname.serpent(942390), b"Pu-239")
+    assert_equal(nucname.serpent(952421), b"Am-242m")
 
-    assert_equal(nucname.serpent("Pu-239"), "Pu-239")
+    assert_equal(nucname.serpent("Pu-239"), b"Pu-239")
 
-    assert_equal(nucname.serpent(94239), "Pu-239")
-    assert_equal(nucname.serpent(95642), "Am-242")
-    assert_equal(nucname.serpent(95242), "Am-242m")
-    assert_equal(nucname.serpent(92636), "U-236m")
+    assert_equal(nucname.serpent(94239), b"Pu-239")
+    assert_equal(nucname.serpent(95642), b"Am-242")
+    assert_equal(nucname.serpent(95242), b"Am-242m")
+    assert_equal(nucname.serpent(92636), b"U-236m")
 
-    assert_equal(nucname.serpent(2390940), "Pu-239")
-    assert_equal(nucname.serpent(2420951), "Am-242m")
+    assert_equal(nucname.serpent(2390940), b"Pu-239")
+    assert_equal(nucname.serpent(2420951), b"Am-242m")
 
 def test_serpent_to_id():
     # use None for impossible forms
@@ -295,20 +295,20 @@ def test_serpent_to_id():
         yield check_cases, nucname.serpent_to_id, val, id
 
 def test_nist():
-    assert_equal(nucname.nist(942390), "239Pu")
-    assert_equal(nucname.nist(952421), "242Am")
+    assert_equal(nucname.nist(942390), b"239Pu")
+    assert_equal(nucname.nist(952421), b"242Am")
 
-    assert_equal(nucname.nist("Pu-239"), "239Pu")
+    assert_equal(nucname.nist("Pu-239"), b"239Pu")
 
-    assert_equal(nucname.nist(94239), "239Pu")
-    assert_equal(nucname.nist(95642), "242Am")
+    assert_equal(nucname.nist(94239), b"239Pu")
+    assert_equal(nucname.nist(95642), b"242Am")
 
-    assert_equal(nucname.nist("10000"), "H")
-    assert_equal(nucname.nist("920000"), "U")
-    assert_equal(nucname.nist("940000"), "Pu")
+    assert_equal(nucname.nist("10000"), b"H")
+    assert_equal(nucname.nist("920000"), b"U")
+    assert_equal(nucname.nist("940000"), b"Pu")
 
-    assert_equal(nucname.nist(2390940), "239Pu")
-    assert_equal(nucname.nist(2420951), "242Am")
+    assert_equal(nucname.nist(2390940), b"239Pu")
+    assert_equal(nucname.nist(2420951), b"242Am")
 
 def test_nist_to_id():
     # use None for impossible forms
@@ -347,24 +347,24 @@ def test_cinder_to_id():
         yield check_cases, nucname.cinder_to_id, val, id
 
 def test_alara():
-    assert_equal(nucname.alara(942390), "pu:239")
-    assert_equal(nucname.alara(952421), "am:242")
+    assert_equal(nucname.alara(942390), b"pu:239")
+    assert_equal(nucname.alara(952421), b"am:242")
 
-    assert_equal(nucname.alara("PU239"), "pu:239")
+    assert_equal(nucname.alara("PU239"), b"pu:239")
 
-    assert_equal(nucname.alara(94239), "pu:239")
-    assert_equal(nucname.alara(95242), "am:242")
-    assert_equal(nucname.alara(95642), "am:242")
-    assert_equal(nucname.alara(92636), "u:236")
-    assert_equal(nucname.alara(2000),  "he")
+    assert_equal(nucname.alara(94239), b"pu:239")
+    assert_equal(nucname.alara(95242), b"am:242")
+    assert_equal(nucname.alara(95642), b"am:242")
+    assert_equal(nucname.alara(92636), b"u:236")
+    assert_equal(nucname.alara(2000),  b"he")
 
-    assert_equal(nucname.alara("Am-242m"), "am:242")
+    assert_equal(nucname.alara("Am-242m"), b"am:242")
 
-    assert_equal(nucname.alara(40020),   "he:4")
-    assert_equal(nucname.alara(20000),   "he")
-    assert_equal(nucname.alara(2440961), "cm:244")
-    assert_equal(nucname.alara(2390940), "pu:239")
-    assert_equal(nucname.alara(2420950), "am:242")
+    assert_equal(nucname.alara(40020),   b"he:4")
+    assert_equal(nucname.alara(20000),   b"he")
+    assert_equal(nucname.alara(2440961), b"cm:244")
+    assert_equal(nucname.alara(2390940), b"pu:239")
+    assert_equal(nucname.alara(2420950), b"am:242")
 
 def test_alara_to_id():
     # use None for impossible forms

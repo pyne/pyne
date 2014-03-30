@@ -141,6 +141,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
+
 # local imports 
 cimport extra_types
 cimport pyne.cpp_pyne
@@ -270,6 +271,7 @@ def id(x, y=None, char * z="n"):
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
+            x = x.encode()
             rxid = cpp_rxname.id(std_string(<char *> x))
         elif isinstance(x, int):
             rxid = cpp_rxname.id(<extra_types.uint32> long(x))

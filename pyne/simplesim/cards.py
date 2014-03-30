@@ -284,6 +284,7 @@ the related simplesim card.
 # name referencing everywhere, not object passing. however using json() would
 # create something more human-readable.
 
+from __future__ import division
 import abc
 import collections
 import copy
@@ -296,7 +297,9 @@ from .. import material
 from . import nestedgeom as ng
 
 def _validate_name(value, isunique=False):
-    if value.find(' ') != -1:
+    if isinstance(value, bytes):
+        value = value.decode()
+    if str(value).find(' ') != -1:
         raise ValueError("The property ``name`` cannot contain spaces. "
                          "User provided {0}.".format(value))
     if isunique:
@@ -4178,7 +4181,7 @@ class IDetector(ITally):
         self.detectors = []
         self.sep_direct = kwargs.get('sep_direct', True)
         self._args_per_set = args_per_set
-        for i_set in range(len(args) / self._args_per_set):
+        for i_set in range(len(args) // self._args_per_set):
             i_start = self._args_per_set * i_set
             self.add(*args[i_start:i_start+self._args_per_set])
 
@@ -4683,7 +4686,7 @@ class ICellMod(IMisc):
                     "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
 
     def _process_varargs(self, args):
-        for i_cell in range(len(args) / self._n_args_per_cell):
+        for i_cell in range(len(args) // self._n_args_per_cell):
             i_start = self._n_args_per_cell * i_cell
             self.set(*args[i_start:i_start+self._n_args_per_cell])
 
@@ -5676,7 +5679,7 @@ class ICellModParticle(IUniqueParticle):
                     "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
 
     def _process_varargs(self, args):
-        for i_cell in range(len(args) / self._n_args_per_cell):
+        for i_cell in range(len(args) // self._n_args_per_cell):
             i_start = self._n_args_per_cell * i_cell
             self.set(*args[i_start:i_start+self._n_args_per_cell])
 
@@ -6655,7 +6658,7 @@ class DXTRANSpheres(IUniqueParticle):
         self.spheres = collections.OrderedDict()
         self._n_args_per_set = 4
         # TODO copied from ICellMod, ICellModParticle.
-        for i_set in range(len(args) / self._n_args_per_set):
+        for i_set in range(len(args) // self._n_args_per_set):
             i_start = self._n_args_per_set * i_set
             self.set(*args[i_start:i_start+self._n_args_per_set])
 
