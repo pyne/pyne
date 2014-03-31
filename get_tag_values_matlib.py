@@ -124,7 +124,7 @@ and creates a list of material with attrs set
 """
 
 
-def check_and_create_materials(material_list, mat_lib, references):
+def check_and_create_materials(material_list, mat_lib, arguments):
     flukamaterials_list = []
     material_object_list = []
     d = 0
@@ -140,7 +140,7 @@ def check_and_create_materials(material_list, mat_lib, references):
                 flukamaterials_list.append(material)
                 copy_attrs(new_mat, mat_lib.get(key))
                 # set the mcnp material number or fluka material name
-                set_attrs(new_mat, d, references.code, flukamaterials_list)
+                set_attrs(new_mat, d, arguments.code, flukamaterials_list)
                 if material_list[g][1] != ' ':
                     new_mat.density = float(material_list[g][1])
 
@@ -157,6 +157,7 @@ def check_and_create_materials(material_list, mat_lib, references):
         raise Exception("There are insuficient materials")
 
     # return the list of material objects to write to file
+    print material_object_list
     return material_object_list
 
 """
@@ -175,18 +176,6 @@ def copy_attrs(material, material_from_lib):
     return
 
 
-""" 
-function to print near matches to material name
-"""
-
-
-def print_near_match(material, material_library):
-    for item in material_library.iterkeys():
-        if (material.lower() in item.lower()) or (material.upper() in item.upper()):
-            print "near matches to ", material, " are "
-            print item
-    return
-
 """
 function to set the attributes of the materials:
 """
@@ -198,6 +187,7 @@ def set_attrs(mat, number, code, flukamat_list):
     if code == 'fluka' or 'both':
         fluka_material_naming(mat, flukamat_list)
     return
+
 
 """
 Function to prepare fluka material names:
@@ -219,7 +209,7 @@ def fluka_material_naming(matl, flukamat_list):
                 matf = matf.rstrip(matf[-1])
                 matf = matf + str(a)
             else:
-                for i in range(range(len(a))):
+                for i in range(len(a)):
                     matf = matf.rstrip(matf[-1])
                 matf = matf + str(a)
             if matf.upper() in flukamat_list:
@@ -232,6 +222,18 @@ def fluka_material_naming(matl, flukamat_list):
         flukamat_list.append(matf.upper())
     matl.attrs['fluka_name'] = matf.upper()
     return matl
+
+""" 
+function to print near matches to material name
+"""
+
+
+def print_near_match(material, material_library):
+    for item in material_library.iterkeys():
+        if (material.lower() in item.lower()) or (material.upper() in item.upper()):
+            print "near matches to ", material, " are "
+            print item
+    return
 
 """
 Function write_mats, writes material objects to hdf5 file
@@ -265,31 +267,19 @@ def parsing():
     parser.add_argument('-d', action='store', dest='nuc_data',
                         help='the path to the PyNE materials library   nuc_data.h5')
     parser.add_argument('-c', action='store', dest='code',
-                        help='the format of the output h5m file; mcnp or fluka')
+                        help='the format of the output h5m file; mcnp or fluka or both')
     parser.add_argument(
-        '-o', action='store', dest='output', help='the name of the output file')
+        '-o', action='store', dest='output', help='the name of the output file ***.h5m')
     args = parser.parse_args()
-
-    class references():
-        if args.datafile:
-            datafile = args.datafile
-        else:
-            raise Exception('h5m file not found!!. [-f] is not set')
-        if args.nuc_data:
-            nuc_data = args.nuc_data
-        else:
-            raise Exception('nuc_data file not found!!. [-d] is not set')
-        if args.code:
-            code = args.code
-        else:
-            raise Exception(
-                'output file format is not specified!!. [-c] is not set')
-        if args.output:
-            output = args.output
-        else:
-            output = 'output.h5m'
-
-    return references
+    if not args.datafile:
+        raise Exception('h5m file path not entered!!. [-f] is not set')
+    if not args.nuc_data:
+        raise Exception('nuc_data file path not entered!!. [-d] is not set')
+    if not args.code:
+        atgs.code = 'both'
+    if not args.output:
+        args.output= 'output.h5m'
+    return args
 
 """
 main
@@ -298,20 +288,19 @@ main
 
 def main():
     # parse the script
-    references = parsing()
+    args = parsing()
     # get list of tag values
-    tag_values = get_tag_values(references.datafile)
+    tag_values = get_tag_values(args.datafile)
     # now load material library
-    mat_lib = load_mat_lib(references.nuc_data)
+    mat_lib = load_mat_lib(args.nuc_data)
     # check that material tags exist in library # material_list is list of
     # pyne objects in problem
     mat_dens_list = check_matname(tag_values)
     # create material objects from library
     material_object_list = check_and_create_materials(
-        mat_dens_list, mat_lib, references)
-    print material_object_list
+        mat_dens_list, mat_lib, args)
     # write materials to file
-    write_mats_h5m(material_object_list, references.output)
+    write_mats_h5m(material_object_list, args.output)
 
 if __name__ == "__main__":
     main()
