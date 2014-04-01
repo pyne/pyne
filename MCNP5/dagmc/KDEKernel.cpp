@@ -112,7 +112,7 @@ double KDEKernel::boundary_correction(const double* u,
 
         for (unsigned int i = 1; i <= num_corrections; ++i)
         {
-            correction_factor += u[i] * coefficients[i];
+            correction_factor += u[i-1] * coefficients[i];
         }
 
         return correction_factor;
@@ -208,7 +208,7 @@ bool KDEKernel::solve_symmetric_matrix(std::vector<double>& A,
 
     dspsv_(&uplo, &n, &nrhs, &A[0], &ipiv[0], &b[0], &ldb, &info);
 
-    if (info == 1)
+    if (info == 0)
     {
         return true;
     }
