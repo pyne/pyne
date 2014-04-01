@@ -147,6 +147,7 @@ class KDEKernel
      * \param[in] p ratio of the distance from the boundary divided by bandwidth
      * \param[in] side the location of the boundary (0 = LOWER, 1 = UPPER)
      * \param[out] moments an empty vector that will store the new ai(p) values
+     * \return true if moments are defined for boundary kernel; false otherwise
      *
      * The partial moments ai(p) are integrals of the ith moment function of a
      * kernel K(u).  They are used to determine the correction factor for the
@@ -157,7 +158,7 @@ class KDEKernel
      * UPPER boundary is used.  If LOWER, then the integration is performed on
      * [-1, p].  If UPPER, then the integration is performed on [-p, 1].
      */
-    void compute_moments(double u,
+    bool compute_moments(double u,
                          double p,
                          unsigned int side,
                          std::vector<double>& moments) const;

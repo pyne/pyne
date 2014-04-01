@@ -40,42 +40,76 @@ KDEKernel* KDEKernel::createKernel(const std::string& type, unsigned int order)
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
-// TODO implement this method for 2D, and 3D cases
 double KDEKernel::boundary_correction(const double* u,
                                       const double* p,
                                       const unsigned int* side,
                                       unsigned int num_corrections) const
 {
     assert(num_corrections <= 3);
+    assert(num_corrections > 0);
 
-    // use 1D boundary kernel factor if correction is only needed in 1D
-    double correction_factor = 0.0;
+    // compute partial moments ai(p) for first dimension
+    std::vector <double> ai_u;
+    bool valid_moments = compute_moments(u[0], p[0], side[0], ai_u);
 
+    // check within boundary kernel domain
+    if (!valid_moments) return 0.0;
+
+    // solve for the boundary correction factor
     if (num_corrections == 1)
     {
-        // compute partial moments ai(p)
-        std::vector<double> ai;
-        compute_moments(u[0], p[0], side[0], ai);
-
-        // compute boundary correction only if all three moments were computed
-        if (ai.size() == 3)
-        {
-            correction_factor = (ai[2] - ai[1] * u[0]);
-            correction_factor /= ai[0] * ai[2] - ai[1] * ai[1];
-        }
-        // else outside boundary kernel domain
+        double correction_factor = (ai_u[2] - ai_u[1] * u[0]);
+        correction_factor /= ai_u[0] * ai_u[2] - ai_u[1] * ai_u[1];
+        return correction_factor;
     }
-    else
+    else  // correction needed in more than one dimension
     {
-        std::cout << "Not implemented yet" << std::endl;
-    }
+        // compute partial moments ai(p) for second dimension
+        std::vector<double> ai_v;
+        valid_moments = compute_moments(u[1], p[1], side[1], ai_v);
 
-    return correction_factor;
+        // check still within boundary kernel domain
+        if (!valid_moments) return 0.0;
+
+        // solve for the coefficients of the boundary correction factor
+        std::vector<double> coefficients;
+        coefficients.push_back(1.0);
+        coefficients.push_back(0.0);
+        coefficients.push_back(0.0);
+
+        if (num_corrections == 2)
+        {
+            // TODO solve 2D matrix system for coefficients
+        }
+        else  // correction needed in all three dimensions
+        {
+            coefficients.push_back(0.0);
+
+            // compute partial moments ai(p) for third dimension
+            std::vector<double> ai_w;
+            valid_moments = compute_moments(u[2], p[2], side[2], ai_w); 
+
+            // check still within boundary kernel domain
+            if (!valid_moments) return 0.0;
+
+            // TODO solve 3D matrix system for coefficients
+        }
+
+        // compute the boundary correction factor from coefficients
+        double correction_factor = coefficients[0];
+
+        for (unsigned int i = 1; i <= num_corrections; ++i)
+        {
+            correction_factor += u[i] * coefficients[i];
+        }
+
+        return correction_factor;
+    }
 }
 //---------------------------------------------------------------------------//
 // PROTECTED METHODS
 //---------------------------------------------------------------------------//
-void KDEKernel::compute_moments(double u,
+bool KDEKernel::compute_moments(double u,
                                 double p,
                                 unsigned int side,
                                 std::vector<double>& moments) const
@@ -84,7 +118,7 @@ void KDEKernel::compute_moments(double u,
     assert(moments.empty());
 
     // test if outside domain p = [0, 1]
-    if (p < 0.0 || p > 1.0) return;
+    if (p < 0.0 || p > 1.0) return false;
 
     // determine the integration limits
     double u_min = -1.0;
@@ -103,12 +137,14 @@ void KDEKernel::compute_moments(double u,
     }
 
     // test if outside domain u = [u_min, u_max]
-    if (u < u_min || u > u_max) return;
+    if (u < u_min || u > u_max) return false;
 
     // evaluate the partial moment functions ai(p) and add to moments vector
     moments.push_back(this->integrate_moment(u_min, u_max, 0));
     moments.push_back(this->integrate_moment(u_min, u_max, 1));
     moments.push_back(this->integrate_moment(u_min, u_max, 2));
+
+    return true;
 }
 //---------------------------------------------------------------------------//
 double KDEKernel::MomentFunction::evaluate(double x) const
