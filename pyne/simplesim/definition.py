@@ -50,7 +50,7 @@ Reference
 """
 # TODO check overwriting warning.
 # TODO test the exceptions for getting *_num() not in list/dict.
-from __future__ import print_function
+from __future__ import print_function, division
 import abc
 import collections
 import pickle
@@ -367,7 +367,7 @@ class SystemDefinition(IDefinition):
         if isinstance(self.surfaces[name], cards.Facet):
             # This does not work, as self.surfaces is the macrobody with the
             # same name, not the facet.
-            return num + self.surfaces[name].number / 10
+            return num + self.surfaces[name].number // 10
         return num
 
     def material_num(self, name):

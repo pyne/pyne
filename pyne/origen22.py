@@ -1,10 +1,14 @@
-from __future__ import print_function
+from __future__ import print_function, division
 import os
 import re
 import sys
 from collections import Mapping
 from copy import deepcopy
 from itertools import chain, imap, izip
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 

@@ -1,7 +1,15 @@
 """Cross section library data source interfaces.
 """
+from __future__ import division
 import os
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 import tables as tb
@@ -681,7 +689,7 @@ class ENDFDataSource(DataSource):
                 self._exists = os.path.isfile(self.fh)
             else:
                 self._exists = (isinstance(self.fh, file) or \
-                                isinstance(self.fh, StringIO.StringIO))
+                                isinstance(self.fh, StringIO))
         return self._exists
 
     def _load_group_structure(self, nuc, rx, nuc_i=None):

@@ -14,7 +14,7 @@ For more information on the Evaluation class, contact Paul Romano
 John Xia <john.danger.xia@gmail.com>.
 """
 
-from __future__ import print_function
+from __future__ import print_function, division, unicode_literals
 import re
 import os
 from libc.stdlib cimport malloc, free
@@ -113,7 +113,7 @@ class Library(rx.RxLib):
                                           'mfs':{}}})
         # Parse header (all lines with 1451)
         mf = 1
-        stop = (self.chars_til_now+self.offset)/81
+        stop = (self.chars_til_now+self.offset)//81
         while FILE1_R.search(line):
             # parse contents section
             if CONTENTS_R.match(line):
@@ -146,7 +146,7 @@ class Library(rx.RxLib):
         self.more_files = (nextline != '' and nextline[68:70] != "-1")
         # Update materials dict
         if mat_id != -1:
-            self.mat_dict[nuc]['end_line'] = (self.chars_til_now+self.offset)/81
+            self.mat_dict[nuc]['end_line'] = (self.chars_til_now+self.offset)//81
             setattr(self, "mat{0}".format(nuc), self.structure[nuc])
         self._read_mat_flags(nuc)
         fh.seek(0)
@@ -248,13 +248,13 @@ class Library(rx.RxLib):
         if 0 in head:
             del head[0]
         npl = int(lines[0][4])
-        headlines = (len(headkeys)-1)/6 + 1
-        arraylines = (npl-1)/6 + 1
+        headlines = (len(headkeys)-1)//6 + 1
+        arraylines = (npl-1)//6 + 1
         if len(itemkeys) == 1:
             array_len = npl - (headlines-1) * 6
             items={itemkeys[0]: lines[headlines:].flat[:array_len]}
         else:
-            array_width = ((len(itemkeys)-1)/6 + 1)*6
+            array_width = ((len(itemkeys)-1)//6 + 1)*6
             items_transposed = np.transpose(
                 lines[headlines:headlines+arraylines].reshape(-1,
                                                               array_width))
@@ -295,8 +295,8 @@ class Library(rx.RxLib):
         if 0 in head:
             del head[0]
         nr, np_ = int(lines[0][4]), int(lines[0][5])
-        meta_len = (nr*2-1)/6 + 1
-        data_len = (np_*2-1)/6 + 1
+        meta_len = (nr*2-1)//6 + 1
+        data_len = (np_*2-1)//6 + 1
         intmeta = dict(zip(('intpoints','intschemes'),
                            (lines[1:1+meta_len].flat[:nr*2:2],
                             lines[1:1+meta_len].flat[1:nr*2:2])))
@@ -745,7 +745,7 @@ class Library(rx.RxLib):
                     (0,0,0,'NRS','6*NX','NX'), ('ER',), subsection[total_lines:])
                 total_lines += er_size
                 nch = int(aj_flags['NCH'])
-                er_array_width = (nch/6+1)*6
+                er_array_width = (nch//6+1)*6
                 er_data = er_data['ER'].reshape(-1,er_array_width).transpose()
                 aj_data = {'ER': er_data[0], 'GAM': er_data[1:1+nch].transpose()}
                 aj_data.update(ch_items)
@@ -1715,7 +1715,7 @@ class Evaluation(object):
             # Half-life and decay energies
             items, itemList = self._get_list_record()
             decay.half_life = (items[0], items[1])
-            decay.NC = items[4]/2
+            decay.NC = items[4]//2
             decay.energies = zip(itemList[0::2], itemList[1::2])
 
             # Decay mode information
@@ -1884,7 +1884,7 @@ class Evaluation(object):
         # read items
         itemsList = []
         m = 0
-        for i in range((NPL-1)/6 + 1):
+        for i in range((NPL-1)//6 + 1):
             line = self.fh.readline()
             toRead = min(6,NPL-m)
             for j in range(toRead):
@@ -2003,7 +2003,7 @@ class ENDFTab1Record(object):
 
         # Read the interpolation region data, namely NBT and INT
         m = 0
-        for i in range((NR-1)/3 + 1):
+        for i in range((NR-1)//3 + 1):
             line = fh.readline()
             toRead = min(3,NR-m)
             for j in range(toRead):
@@ -2016,7 +2016,7 @@ class ENDFTab1Record(object):
 
         # Read tabulated pairs x(n) and y(n)
         m = 0
-        for i in range((NP-1)/3 + 1):
+        for i in range((NP-1)//3 + 1):
             line = fh.readline()
             toRead = min(3,NP-m)
             for j in range(toRead):
@@ -2045,7 +2045,7 @@ class ENDFTab2Record(object):
 
         # Read the interpolation region data, namely NBT and INT
         m = 0
-        for i in range((NR-1)/3 + 1):
+        for i in range((NR-1)//3 + 1):
             line = fh.readline()
             toRead = min(3,NR-m)
             for j in range(toRead):

@@ -1,7 +1,10 @@
 from __future__ import print_function
 import os
 import argparse
-import urllib2
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 import shutil
 from distutils.dir_util import mkpath, remove_tree
 

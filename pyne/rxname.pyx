@@ -132,6 +132,7 @@ Repeat this procedure as necessary.
 --------------------------
 
 """
+from __future__ import unicode_literals
 
 # Cython imports
 from libcpp.map cimport map
@@ -140,6 +141,7 @@ from libc.string cimport const_char
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
+
 
 # local imports 
 cimport extra_types

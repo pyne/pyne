@@ -2,6 +2,10 @@
 cross-sections from provided nuclear data sets."""
 from itertools import product
 from collections import MutableMapping
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 import tables as tb

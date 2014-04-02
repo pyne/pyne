@@ -1,6 +1,7 @@
 """Python wrapper for nucname library."""
 # Python imports 
 #from collections import Iterable
+from __future__ import unicode_literals
 
 # Cython imports
 from libcpp.map cimport map
@@ -138,6 +139,7 @@ def id(nuc):
 
     """
     if isinstance(nuc, basestring):
+        nuc = nuc.encode()
         newnuc = cpp_nucname.id(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.id(<int> nuc)
