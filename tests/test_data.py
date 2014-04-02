@@ -32,10 +32,12 @@ def test_q_val():
     assert_equal(data.q_val('H1'), 0.0)
     assert_equal(data.q_val(92235), 4.674)
 
+
 def test_gamma_frac():
     assert_equal(data.gamma_frac('H1'), 0.0)
     assert_equal(data.gamma_frac(92235), 0.036)
     assert_equal(data.gamma_frac(110240001), 0.998)
+
 
 def test_b_coherent():
     assert_equal(data.b_coherent('H1'), -3.7406E-13 + 0j)
@@ -90,7 +92,7 @@ def test_decay_children():
     assert_equal(data.decay_children(922350001), set([922350000]))
     assert_equal(data.decay_children(611460000), set([601460000, 621460000]))
     assert_equal(data.decay_children('O16'), set())
-    assert_equal(data.decay_children('80166'), set([60120000, 80160000]))
+    assert_equal(data.decay_children('80166', False), set([60120000, 80160000]))
 
 
 def test_abundance_by_z_for_soundness():
@@ -178,14 +180,14 @@ def test_gamma_from_to_byparent():
 def test_gamma_from_to_byen():
     assert_equal(data.gamma_from_to_byen(661.65, 0.1),
                  [(621510087, 621510015),
-                  (641500021, 641500006),
+                  (641500138, 641500138),
                   (390990016, 390990005),
                   (822040062, 822040024),
                   (902290055, 902290000),
                   (400880011, 400880004),
                   (551310023, 551310009),
                   (0, 0),
-                  (431070028, 431070020),
+                  (431070001, 431070001),
                   (972490039, 972490003),
                   (0, 0),
                   (380930068, 380930050),
