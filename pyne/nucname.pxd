@@ -30,4 +30,5 @@ import pyne.stlcontainers as conv
 
 cdef cpp_set[int] id_set(object nuc_sequence)
 cdef cpp_set[int] zzaaam_set(object nuc_sequence)
+cdef cpp_set[int] zzzaaa_set(object nuc_sequence)
 

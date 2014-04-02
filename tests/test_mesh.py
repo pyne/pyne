@@ -571,6 +571,10 @@ def test_matlib():
         assert_equal(mat.density, mats[i].density)
         assert_equal(m2.idx[i], i)
 
+@with_setup(None, try_rm_file('test_no_matlib.h5m'))
+def test_no_matlib():
+    m = gen_mesh(mats=None)
+    m.write_hdf5('test_no_matlib.h5m')
     
 def test_matproptag():
     mats = {

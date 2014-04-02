@@ -1150,7 +1150,8 @@ class Mesh(object):
     def write_hdf5(self, filename):
         """Writes the mesh to an hdf5 file."""
         self.mesh.save(filename)
-        self.mats.write_hdf5(filename)
+        if self.mats is not None:
+            self.mats.write_hdf5(filename)
 
     def cell_fracs_to_mats(self, cell_fracs, cell_mats):
         """This function uses the output from dagmc.discretize_geom() and 

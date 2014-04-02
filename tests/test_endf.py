@@ -798,6 +798,15 @@ def test_u235():
         from urllib import urlretrieve
         urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
                     "U235.txt")
+    from hashlib import md5
+    with open("U235.txt", "r") as f:
+        obs_hash = md5(f.read()).hexdigest()
+    exp_hash = "1b71da3769d8b1e675c3c579ba5cb2d3"
+    try:
+        assert_equal(obs_hash, exp_hash)
+    except AssertionError:
+        raise AssertionError("U235.txt hash check failed; please try redownloading the U235 data file.")
+
     u235 = Library('U235.txt')
     nuc = 922350000
     u235._read_res(nuc)
