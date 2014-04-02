@@ -7,6 +7,7 @@ from an initial cascade.  Other helper function compute relative flow rates
 and nuclide-specific separation factors.
 """
 # Cython imports
+from __future__ import unicode_literals
 from cython cimport pointer
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc

@@ -14,7 +14,7 @@ For more information on the Evaluation class, contact Paul Romano
 John Xia <john.danger.xia@gmail.com>.
 """
 
-from __future__ import print_function, division
+from __future__ import print_function, division, unicode_literals
 import re
 import os
 from libc.stdlib cimport malloc, free

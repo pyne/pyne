@@ -16,7 +16,7 @@ generates ACE-format cross sections.
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
 
-from __future__ import division
+from __future__ import division, unicode_literals
 import struct
 from warnings import warn
 from collections import OrderedDict

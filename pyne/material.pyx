@@ -1,5 +1,5 @@
 """Python wrapper for material library."""
-from __future__ import division
+from __future__ import division, unicode_literals
 
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
@@ -2003,6 +2003,7 @@ cdef class _MaterialLibrary(object):
             mat = Material(comp, mass=row[0], density=row[1], 
                                     atoms_per_molecule=row[2])
             strattrs = "".join(map(chr, matsattrs[i]))
+            strattrs = strattrs.encode()
             s = std_string(<char *> strattrs)
             attribs = cpp_jsoncpp.Value()
             reader.parse(s, attribs)

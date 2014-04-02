@@ -132,6 +132,7 @@ Repeat this procedure as necessary.
 --------------------------
 
 """
+from __future__ import unicode_literals
 
 # Cython imports
 from libcpp.map cimport map

@@ -1,6 +1,7 @@
 """Python wrapper for nucname library."""
 # Python imports 
 #from collections import Iterable
+from __future__ import unicode_literals
 
 # Cython imports
 from libcpp.map cimport map

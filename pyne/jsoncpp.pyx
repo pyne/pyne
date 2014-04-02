@@ -1,4 +1,5 @@
 """Python wrapper for jsoncpp."""
+from __future__ import division, unicode_literals
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
@@ -25,7 +26,7 @@ cdef cpp_jsoncpp.Value * toboolval(bint b):
             new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.booleanValue)
     cdef cpp_jsoncpp.Reader reader= cpp_jsoncpp.Reader()
     if b:
-        reader.parse('true', deref(cval), 0)
+        reader.parse(b'true', deref(cval), 0)
     return cval
 
 
@@ -425,7 +426,7 @@ cdef class Value(object):
         """Reverses the array in place."""
         cdef int curr_size, i
         curr_size = self._inst[0].size()
-        for i in range(curr_size/2):
+        for i in range(curr_size//2):
             self._inst[0][i].swap(self._inst[0][curr_size-i-1])
 
     def extend(self, itr):
