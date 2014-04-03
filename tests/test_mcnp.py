@@ -5,7 +5,7 @@ import nose
 
 import nose.tools
 from nose.tools import assert_almost_equal, assert_equal, assert_true, \
-                       assert_false, assert_raises
+                       assert_false, assert_raises, assert_not_equal
 import tables
 
 try:
@@ -928,7 +928,9 @@ def test_single_meshtally_meshtal():
 
     tags = {4: ["n_result", "n_rel_error", 
                 "n_total_result", "n_total_rel_error"]}
-    meshtal_object = mcnp.Meshtal(meshtal_file, tags)
+
+    meshtal_object = mcnp.Meshtal(meshtal_file, tags, mesh_mats=True)
+    assert_not_equal(meshtal_object.tally[4].mats, None)
 
     # test Meshtal attributes
     assert_equal(meshtal_object.version, '5.mpi')
@@ -1019,6 +1021,7 @@ def test_multiple_meshtally_meshtal():
                 "p_total_result", "p_total_rel_error"]}
     meshtal_object = mcnp.Meshtal(meshtal_file, tags)
     assert_equal(meshtal_object.version, '5')
+    assert_equal(meshtal_object.tally[4].mats, None)
 
     # test meshtally 4
     for v_e, expected_v_e in zip(
