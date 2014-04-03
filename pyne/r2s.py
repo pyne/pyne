@@ -89,18 +89,18 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                              " object, MCNP meshtal file or meshtal.h5m file.")
        
     if m.structured:
-        vol_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+        cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
     else:
-        vol_fracs = discretize_geom(m)
+        cell_fracs = discretize_geom(m)
 
-    m.cell_fracs_to_mats(vol_fracs, cell_mats)
+    #m.cell_fracs_to_mats(vol_fracs, cell_mats)
 
     mesh_to_fluxin(m, flux_tag, fluxin, reverse)
-    mesh_to_geom(m, alara_inp, alara_matlib)
+    mesh_to_geom(m, cell_fracs, alara_inp, alara_matlib)
 
     if isfile(alara_params):
         with open(alara_params, 'r') as f:
-            alara_params = f.read(alara_params)
+            alara_params = f.read()
 
     with open(alara_inp, 'a') as f:
         f.write("\n" + alara_params)

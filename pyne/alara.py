@@ -203,6 +203,50 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
             else:
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
+def record_to_geom(mesh, vol_fracs, cell_mats, geom_file, matlib_file):
+    """
+    Parameters
+    ----------
+    mesh : PyNE Mesh object
+        The Mesh object containing the materials to be printed.
+    record :a
+       ve_idx 
+
+     cell : mats
+    geom_file : str
+        The name of the file to print the geometry and material blocks.
+    matlib_file : str
+        The name of the file to print the matlib.
+    """
+    # Create geometry information header. Note that the shape of the geometry
+    # (rectangular) is actually inconsequential to the ALARA calculation so
+    # unstructured meshes are not adversely affected. 
+    geometry = "geometry rectangular\n\n"
+
+    # Create three strings in order to create all ALARA input blocks in a
+    # single mesh iteration.
+    volume = "volume\n" # volume input block
+    mat_loading = "mat_loading\n" # material loading input block
+    mixture = "" # mixture blocks
+    matlib = "" # ALARA material library string
+
+    for i, mat, ve in mesh:
+        volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
+        mat_loading += "    zone_{0}    mix_{0}\n".format(i)
+        mixture += "mixture mix_{0}\n"
+        for
+            mixture += "    material mat_{0} 1 {1}\n".format()
+        mixture += "end\n\n"
+
+    volume += "end\n\n"
+    mat_loading += "end\n\n"
+
+    with open(geom_file, 'w') as f:
+        f.write(geometry + volume + mat_loading + mixture)
+    
+    with open(matlib_file, 'w') as f:
+        f.write(matlib)
+
 
 def mesh_to_geom(mesh, geom_file, matlib_file):
     """This function reads the materials of a PyNE mesh object and prints the
