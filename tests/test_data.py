@@ -132,12 +132,13 @@ def test_decay_branch_ratio():
 
 
 def test_decay_photon_branch_ratio():
-    assert_equal(data.decay_photon_branch_ratio(551370000, 561370000), (1.0,
-                                                                        0.0))
+    npt.assert_array_almost_equal(
+        data.decay_photon_branch_ratio(551370000, 561370000), (1.0, np.nan))
 
 
 def test_decay_beta_branch_ratio():
-    assert_equal(data.decay_beta_branch_ratio(551370000, 561370000), (1.0, 0.0))
+    npt.assert_array_almost_equal(
+        data.decay_beta_branch_ratio(551370000, 561370000), (1.0, np.nan))
 
 
 def test_decay_branch_ratio_byparent():
@@ -145,12 +146,13 @@ def test_decay_branch_ratio_byparent():
 
 
 def test_decay_photon_branch_ratio_byparent():
-    assert_equal(data.decay_photon_branch_ratio_byparent(551370000), [(1.0,
-                                                                       0.0)])
+    npt.assert_array_almost_equal(
+        data.decay_photon_branch_ratio_byparent(551370000), [(1.0, np.nan)])
 
 
 def test_decay_beta_branch_ratio_byparent():
-    assert_equal(data.decay_beta_branch_ratio_byparent(551370000), [(1.0, 0.0)])
+    npt.assert_array_almost_equal(
+        data.decay_beta_branch_ratio_byparent(551370000), [(1.0, np.nan)])
 
 
 def test_gamma_energy():

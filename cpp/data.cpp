@@ -1278,11 +1278,11 @@ template<> void pyne::_load_data<pyne::decay_struct>()
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio", HOFFSET(decay_struct, 
                      photon_branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "photon_branch_ratio_error", HOFFSET(decay_struct,
+  status = H5Tinsert(desc, "photon_branch_ratio_err", HOFFSET(decay_struct,
                      photon_branch_ratio_error), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "beta_branch_ratio", HOFFSET(decay_struct, 
                      beta_branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "beta_branch_ratio_error", HOFFSET(decay_struct,
+  status = H5Tinsert(desc, "beta_branch_ratio_err", HOFFSET(decay_struct,
                      beta_branch_ratio_error), H5T_NATIVE_DOUBLE);
   
   // Open the HDF5 file
