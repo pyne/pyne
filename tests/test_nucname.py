@@ -189,6 +189,54 @@ def test_zzaaam_to_id():
             continue
         yield check_cases, nucname.zzaaam_to_id, val, id
 
+def test_zzzaaa(): 
+
+    assert_equal(nucname.zzzaaa(20040),2004)
+    assert_equal(nucname.zzzaaa("he4"),    2004)
+    assert_equal(nucname.zzzaaa("Cm-244"), 96244)
+    assert_equal(nucname.zzzaaa("PU239"),  94239)
+    assert_equal(nucname.zzzaaa("AM242M"), 95242)
+
+    assert_equal(nucname.zzzaaa(2004),  2004)
+    assert_equal(nucname.zzzaaa(95642), 95242)
+    assert_equal(nucname.zzzaaa(95242), 95242)
+    assert_equal(nucname.zzzaaa(92636), 92236)
+    assert_equal(nucname.zzzaaa(95942), 95242)
+
+    assert_equal(nucname.zzzaaa("Am-242m"), 95242)
+
+    assert_equal(nucname.zzzaaa("he"), 2000)
+    assert_equal(nucname.zzzaaa("U"), 92000)
+    assert_equal(nucname.zzzaaa("Np"), 93000)
+
+    assert_equal(nucname.zzzaaa("4he"),   2004)
+    assert_equal(nucname.zzzaaa("244CM"), 96244)
+    assert_equal(nucname.zzzaaa("239Pu"), 94239)
+    assert_equal(nucname.zzzaaa("242AM"), 95242)
+
+    assert_equal(nucname.zzzaaa(40020),   2004)
+    assert_equal(nucname.zzzaaa(2440961), 96244)
+    assert_equal(nucname.zzzaaa(2390940), 94239)
+    assert_equal(nucname.zzzaaa(2420950), 95242)
+
+def test_zzzaaa_to_id():
+
+    assert_equal(nucname.zzzaaa_to_id(2004), nucname.id(20040))
+    assert_equal(nucname.zzzaaa_to_id(96244), nucname.id("Cm-244"))
+    assert_equal(nucname.zzzaaa_to_id(94239), nucname.id("PU239"))
+
+    assert_equal(nucname.zzzaaa_to_id(95242), nucname.id(95642))
+    # Added /10*10 to remove the state information from id (ZZZAAA carries no state
+    # information, defaults to zero when converting ZZZAAA back to ID)
+    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id(95942)/10)*10)
+    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id("AM-242m")/10)*10)
+
+    assert_equal(nucname.zzzaaa_to_id(2000), nucname.id("he"))
+    assert_equal(nucname.zzzaaa_to_id(92000), nucname.id("U"))
+    assert_equal(nucname.zzzaaa_to_id(93000), nucname.id("Np"))
+
+    assert_equal(nucname.zzzaaa_to_id(2004), nucname.id(40020))
+
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
     assert_equal(nucname.mcnp(952421), 95242)

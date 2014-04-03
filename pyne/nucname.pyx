@@ -286,6 +286,52 @@ def zzaaam_to_id(nuc):
     return newnuc
 
 
+def zzzaaa(nuc):
+    """Converts a nuclide to its zzzaaa form (95242). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in zzzaaa form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzzaaa(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzzaaa(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+def zzzaaa_to_id(nuc):
+    """Converts a nuclide directly from ZZZAAA form (95242) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in ZZZAAA form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzzaaa_to_id(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzzaaa_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
 def mcnp(nuc):
     """Converts a nuclide to its MCNP form (92636). 
 
@@ -605,5 +651,13 @@ cdef cpp_set[int] zzaaam_set(object nuc_sequence):
     cdef cpp_set[int] nuc_set = cpp_set[int]()
     for nuc in nuc_sequence:
         nuc_zz = zzaaam(nuc)
+        nuc_set.insert(nuc_zz)
+    return nuc_set
+
+cdef cpp_set[int] zzzaaa_set(object nuc_sequence):
+    cdef int nuc_zz
+    cdef cpp_set[int] nuc_set = cpp_set[int]()
+    for nuc in nuc_sequence:
+        nuc_zz = zzzaaa(nuc)
         nuc_set.insert(nuc_zz)
     return nuc_set
