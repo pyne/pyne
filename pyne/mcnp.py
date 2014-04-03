@@ -1295,7 +1295,7 @@ def read_mcnp_inp(inp):
     mat_lines = []  # line of lines that begin material cards
     densities = {}  # dictionary to be popul. with material nos. and densities
     mat_nums = []  # list of material numbers to be printed to stdout
-    material_list = []  # to be populated with material objectes and returned
+    material_list = {}  # to be populated with material objectes and returned
 
     line_count = 1
     line = linecache.getline(inp, line_count)
@@ -1340,10 +1340,9 @@ def read_mcnp_inp(inp):
     for i in range(0, len(mat_nums)):
         print(mat_nums[i])
         if mat_nums[i] in densities.keys():
-            material_list.append(
-                mat_from_mcnp(inp, mat_lines[i], densities[mat_nums[i]]))
+            material_list[int(mat_num[i])] =  mat_from_mcnp(inp, mat_lines[i], densities[mat_nums[i]])
         else:
-            material_list.append(mat_from_mcnp(inp, mat_lines[i]))
+            material_list[int(mat_nums[i])] = mat_from_mcnp(inp, mat_lines[i])
 
     return material_list
 
