@@ -5,5 +5,5 @@ Enrichement -- ``libpyne_enrichment``
     enrichment.h
     enrichment_symbolic.h
     enrichment_cascade.h
-    :source: pyne
+    :source: pyne_enrichment
 
