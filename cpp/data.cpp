@@ -1269,7 +1269,7 @@ template<> void pyne::_load_data<pyne::decay_struct>()
   status = H5Tinsert(desc, "child", HOFFSET(decay_struct, child),
                      H5T_NATIVE_INT);
   status = H5Tinsert(desc, "decay", HOFFSET(decay_struct, decay),
-                     H5T_NATIVE_INT);
+                     H5T_NATIVE_UINT);
   status = H5Tinsert(desc, "half_life", HOFFSET(decay_struct, half_life), 
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "half_life_error", HOFFSET(decay_struct, 
@@ -1278,11 +1278,11 @@ template<> void pyne::_load_data<pyne::decay_struct>()
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio", HOFFSET(decay_struct, 
                      photon_branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "photon_branch_ratio_error", HOFFSET(decay_struct,
+  status = H5Tinsert(desc, "photon_branch_ratio_err", HOFFSET(decay_struct,
                      photon_branch_ratio_error), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "beta_branch_ratio", HOFFSET(decay_struct, 
                      beta_branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "beta_branch_ratio_error", HOFFSET(decay_struct,
+  status = H5Tinsert(desc, "beta_branch_ratio_err", HOFFSET(decay_struct,
                      beta_branch_ratio_error), H5T_NATIVE_DOUBLE);
   
   // Open the HDF5 file
