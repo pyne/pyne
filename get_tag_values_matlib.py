@@ -276,7 +276,7 @@ def parsing():
     if not args.nuc_data:
         raise Exception('nuc_data file path not entered!!. [-d] is not set')
     if not args.code:
-        atgs.code = 'both'
+        args.code = 'both'
     if not args.output:
         args.output= 'output.h5m'
     return args
