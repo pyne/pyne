@@ -168,11 +168,7 @@ def q_val(nuc):
 
     return q_val
 
-
-
-#
-# gamma_frac functions
-#
+# gamma_frac
 cdef conv._MapIntDouble gamma_frac_map_proxy = conv.MapIntDouble(False)
 gamma_frac_map_proxy.map_ptr = &cpp_data.gamma_frac_map
 gamma_frac_map = gamma_frac_map_proxy
@@ -206,6 +202,62 @@ def gamma_frac(nuc):
         raise pyne.nucname.NucTypeError(nuc)
 
     return gamma_frac
+
+
+#
+# Decay Factor data
+#
+cdef conv._MapIntDouble ext_air_df_map_proxy = conv.MapIntDouble(False)
+ext_air_df_map_proxy.map_ptr = &cpp_data.ext_air_df_map
+ext_air_df_map = ext_air_df_map_proxy
+
+def ext_air_df(nuc, source=0, get_errors=False):
+    """Finds the external air dose factor for a tracked nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Parent nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'EPA': 0, 'DOE' : 1, 'GENII' : 2
+    get_errors : boolean
+        return the error in the value if possible or 0
+
+    Returns
+    -------
+    ext_air : float
+        Dose factor from external air exposure [mrem/hr per Ci/m^3]
+    ratio : float
+        Fraction of dose from external air to dose from inhalation.
+
+    Notes
+    -----
+    If the nuclide is not found, and the dose factor is set to zero.
+    """
+    srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 2:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints or strings are accepted')
+
+    if isinstance(nuc, int):
+        air = cpp_data.ext_air_df(<int> nuc, <int> source, get_errors)
+        ratio = cpp_data.ratio(<int> nuc, <int> source, get_errors)
+    elif isinstance(nuc, basestring):
+        air = cpp_data.ext_air_df(<char *> nuc, <int> source, get_errors)
+        ratio = cpp_data.ratio(<char *> nuc, <int> source, get_errors)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return air, ratio
+
 
 
 #
