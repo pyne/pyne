@@ -9,7 +9,7 @@ cimport pyne.cpp_pyne
 from cython.operator cimport dereference as deref
 import numpy as np
 
-def fromstring_split(char * s, sep=None, dtype=float):
+def fromstring_split(s, sep=None, dtype=float):
     """A replacement for numpy.fromstring() using the Python str.split() 
     and np.array().
 
@@ -39,7 +39,7 @@ def fromstring_split(char * s, sep=None, dtype=float):
     return np.array(rawdata, dtype=dtype)
 
 
-def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-1):
+def fromstring_token(s, sep=" ", bint inplace=False, int maxsize=-1):
     """A replacement for numpy.fromstring() using the C standard
     library atof() and strtok() functions.
 
@@ -75,15 +75,17 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
     cdef char* csep
     cdef int i, I
     cdef np.ndarray[np.float64_t, ndim=1] cdata
-
-    I = len(s)
-    csep = sep
+    
+    s_bytes = s.encode('UTF-8')
+    I = len(s_bytes)
+    sep_bytes = sep.encode('UTF-8')
+    csep = sep_bytes
 
     if inplace:
-        cs = s
+        cs = s_bytes
     else:
         cs = <char *> malloc(I * sizeof(char))
-        strcpy(cs, s)
+        strcpy(cs, s_bytes)
 
     if maxsize < 0:
         maxsize = (I // 2) + 1
