@@ -39,10 +39,12 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
         for k, v in doc.items():
             if not isinstance(k, basestring):
                 raise KeyError('object keys must be strings, got {0}'.format(k))
-            cval[0][<const_char *> k].swap(deref(tocppval(v)))
+            k_bytes = k.encode()
+            cval[0][<const_char *> k_bytes].swap(deref(tocppval(v)))
     elif isinstance(doc, basestring):
         # string must come before other sequences
-        cval = new cpp_jsoncpp.Value(<char *> doc)
+        doc_bytes = doc.encode()
+        cval = new cpp_jsoncpp.Value(<char *> doc_bytes)
     elif isinstance(doc, collections.Sequence) or isinstance(doc, collections.Set):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.arrayValue)
         cval.resize(<int> len(doc))
@@ -109,7 +111,8 @@ cdef class Value(object):
 
         # convert key and get value
         if isinstance(pykey, basestring):
-            cvalue = &self._inst[0][<const_char *> pykey]
+            pykey_bytes = pykey.encode()
+            cvalue = &self._inst[0][<const_char *> pykey_bytes]
         elif isinstance(pykey, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             pykey = toposindex(pykey, self._inst[0].size())
             cvalue = &self._inst[0][<int> pykey]
@@ -135,7 +138,7 @@ cdef class Value(object):
             pyvalue._inst = cvalue
             return pyvalue
         elif cvalue.isString():
-            return <char *> cvalue.asCString()
+            return bytes(<char *> cvalue.asCString()).decode()
         elif cvalue.isDouble():
             return cvalue.asDouble()
         elif cvalue.isBool():
@@ -150,7 +153,8 @@ cdef class Value(object):
     def __setitem__(self, key, value):
         cdef cpp_jsoncpp.Value * ckey = NULL
         if isinstance(key, basestring):
-            ckey = &self._inst[0][<const_char *> key]
+            key_bytes = key.encode()
+            ckey = &self._inst[0][<const_char *> key_bytes]
             ckey.swap(deref(tocppval(value)))
         elif isinstance(key, int):
             curr_size = self._inst[0].size()
@@ -171,7 +175,8 @@ cdef class Value(object):
         cdef int i, ikey, curr_size, end_size
         cdef cpp_jsoncpp.Value ctemp
         if isinstance(key, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
-            self._inst.removeMember(<const_char *> key)
+            key_bytes = key.encode()
+            self._inst.removeMember(<const_char *> key_bytes)
         elif isinstance(key, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             curr_size = self._inst[0].size()
             ikey = key
@@ -181,7 +186,7 @@ cdef class Value(object):
             self._inst.resize(curr_size-1)
         elif isinstance(key, slice) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             curr_size = self._inst[0].size()
-            r = range(curr_size)
+            r = list(range(curr_size))
             del r[key]
             end_size = len(r)
             ctemp = cpp_jsoncpp.Value(cpp_jsoncpp.arrayValue)
@@ -197,7 +202,8 @@ cdef class Value(object):
     def __contains__(self, item):
         cdef int i, curr_size
         if isinstance(item, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
-            return self._inst.isMember(<const_char *> item)
+            item_bytes = item.encode()
+            return self._inst.isMember(<const_char *> item_bytes)
         elif (self._inst.type() == cpp_jsoncpp.arrayValue):
             i = 0
             curr_size = self._inst[0].size()
@@ -231,7 +237,7 @@ cdef class Value(object):
         cdef StyledWriter sw = StyledWriter()
         cdef std_string s 
         s = sw.write(self)
-        pys = str(s)
+        pys = bytes(s).decode()
         if (self._inst.type() == cpp_jsoncpp.stringValue):
             pys = pys[1:-2]
         else:
@@ -242,7 +248,7 @@ cdef class Value(object):
         cdef FastWriter fw = FastWriter()
         cdef std_string s 
         s = fw.write(self)
-        pys = str(s)
+        pys = bytes(s).decode()
         if (self._inst.type() == cpp_jsoncpp.stringValue):
             pys = pys[1:-2]
         else:
@@ -305,11 +311,16 @@ cdef class Value(object):
 
     def keys(self):
         """Returns a list of keys in JSON object."""
+        cdef int i
         cdef std_vector[std_string] ckeys
         if (self._inst.type() != cpp_jsoncpp.objectValue):
             raise TypeError("no keys, not JSON object.")
         ckeys = self._inst.getMemberNames()
-        return ckeys
+        pykeys = []
+        for i in range(len(ckeys)):
+            k = bytes(ckeys[i]).decode()
+            pykeys.append(k)
+        return pykeys
 
     def values(self):
         """Returns a list of values in JSON object."""
@@ -330,11 +341,12 @@ cdef class Value(object):
         its = [(k, self[k]) for k in ckeys]
         return its
 
-    def get(self, char * key, default=None):
+    def get(self, key, default=None):
         """Returns key if present, or default otherwise."""
         if (self._inst.type() != cpp_jsoncpp.objectValue):
             raise TypeError("no keys, not JSON object.")
-        if self._inst.isMember(<const_char *> key):
+        key_bytes = key.encode()
+        if self._inst.isMember(<const_char *> key_bytes):
             return self[key]
         else:
             return default
@@ -372,8 +384,9 @@ cdef class Value(object):
         del self[k]
         return (k, v)
 
-    def setdefault(self, char * k, d=None):
-        if not self._inst.isMember(<const_char *> k):
+    def setdefault(self, k, d=None):
+        k_bytes = k.encode()
+        if not self._inst.isMember(<const_char *> k_bytes):
             self[k] = d
         v = self[k]
         return v
@@ -479,9 +492,10 @@ cdef class Reader(object):
         cdef char * cdocval
         cdef std_string cdoc
         if isinstance(document, basestring):
-            cdocval = document
+            document_bytes = document.encode()
+            cdocval = document_bytes
         else:
-            pydocval = document.read()
+            pydocval = document.read().endcode()
             cdocval = pydocval
         cdoc = std_string(cdocval)
         self._inst.parse(cdoc, root._inst[0], collect_comments)
@@ -516,7 +530,7 @@ cdef class FastWriter(object):
 
         """
         cdef std_string s = self._inst.write(deref(tocppval(value)))
-        return s
+        return bytes(s).decode()
 
 
 cdef class StyledWriter(object):
@@ -543,4 +557,4 @@ cdef class StyledWriter(object):
 
         """
         cdef std_string s = self._inst.write(deref(tocppval(value)))
-        return s
+        return bytes(s).decode()
