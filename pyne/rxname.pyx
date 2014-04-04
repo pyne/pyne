@@ -272,18 +272,21 @@ def id(x, y=None, char * z="n"):
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
-            rxid = cpp_rxname.id(std_string(<char *> x))
+            x_bytes = x.encode()
+            rxid = cpp_rxname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             rxid = cpp_rxname.id(<extra_types.uint32> long(x))
         elif isinstance(x, long):
             rxid = cpp_rxname.id(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.id(std_string(<char *> x))
+            x_bytes = x.encode()
+            from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.id(std_string(<char *> y))
+            y_bytes = y.encode()
+            to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
             to_nuc = cpp_nucname.id(<int> y)
         rxid = cpp_rxname.id(from_nuc, to_nuc, std_string(z))

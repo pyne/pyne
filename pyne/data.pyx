@@ -583,7 +583,7 @@ def decay_children(nuc, use_metastable=True):
 
     return dc
 
-def id_from_level(nuc, level):
+def id_from_level(int nuc, double level):
     """
     return the nuc_id for input energy level
 
@@ -600,7 +600,7 @@ def id_from_level(nuc, level):
         nuc_id of state
     """
     if level > 0.0:
-        return cpp_data.id_from_level(<int> nuc, <double> level)
+        return cpp_data.id_from_level(nuc, level)
     else:
         return nuc
     

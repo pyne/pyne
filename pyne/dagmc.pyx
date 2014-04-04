@@ -1,6 +1,5 @@
 from __future__ import print_function, division, unicode_literals
 
-#from pyne cimport cpp_dagmc_bridge
 from pyne cimport cpp_dagmc_bridge
 
 cimport numpy as np

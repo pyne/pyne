@@ -713,6 +713,8 @@ def _parse_decay_dataset(lines, decay_s):
             if parent2 is None:
                 parent2 = parent
                 e = 0
+            e = 0.0 if e is None else e
+            level = 0.0 if level is None else level
             bparent = data.id_from_level(_to_id(parent2), e)
             bdaughter = data.id_from_level(_to_id(daughter), level)
             betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
@@ -739,6 +741,8 @@ def _parse_decay_dataset(lines, decay_s):
             if parent2 is None:
                 parent2 = parent
                 e = 0
+            e = 0.0 if e is None else e
+            level = 0.0 if level is None else level
             aparent = data.id_from_level(_to_id(parent2), e)
             adaughter = data.id_from_level(_to_id(daughter), level)
             alphas.append((aparent, adaughter, dat[0], dat[2]))
@@ -748,6 +752,8 @@ def _parse_decay_dataset(lines, decay_s):
             if parent2 is None:
                 parent2 = parent
                 e = 0
+            e = 0.0 if e is None else e
+            level = 0.0 if level is None else level
             ecparent = data.id_from_level(_to_id(parent2), e)
             ecdaughter = data.id_from_level(_to_id(daughter), level)
             ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
