@@ -28,7 +28,7 @@ Report LA-5324-MS_.
 """
 
 
-from binaryreader import _BinaryReader, _FortranRecord
+from pyne.binaryreader import _BinaryReader, _FortranRecord
 
 class Isotxs(_BinaryReader):
     """An Isotxs object represents a binary ISOTXS file written according to the
