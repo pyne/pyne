@@ -369,26 +369,12 @@ double pyne::gamma_frac(std::string nuc)
 /*****************************/
 /*** Dose Factor Functions ***/
 /*****************************/
-/*
-/// Ext Air DF Map
-std::map<int, double> pyne::ext_air_df_map = std::map<int, double>();
-/// Ext Soil DF Maps
-std::map<int, double> pyne::ext_soil_genii_df_map = std::map<int, double>();
-std::map<int, double> pyne::ext_soil_epa_df_map = std::map<int, double>();
-std::map<int, double> pyne::ext_soil_doe_df_map = std::map<int, double>();
-/// Ingestion DF Maps
-std::map<int, double> pyne::ingest_genii_df_map = std::map<int, double>();
-std::map<int, double> pyne::ingest_epa_df_map = std::map<int, double>();
-std::map<int, double> pyne::ingest_doe_df_map = std::map<int, double>();
-/// Inhalation DF Maps
-std::map<int, double> pyne::inhale_genii_df_map = std::map<int, double>();
-std::map<int, double> pyne::inhale_epa_df_map = std::map<int, double>();
-std::map<int, double> pyne::inhale_doe_df_map = std::map<int, double>();
-*/
-/*
-void pyne::_load_ext_air_df_map()
+std::map<int, double> pyne::df_map = std::map<int, double>();
+
+void pyne::_load_df_map(source_location)
 {
-  // Loads the parts of a dose factor table into *_df_map
+  // Loads the dose factor table into df_map
+  herr_t status;
 
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH))
@@ -399,57 +385,88 @@ void pyne::_load_ext_air_df_map()
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
 
   // Get the HDF5 compound type (table) description
-  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(ext_air_struct));
-  H5Tinsert(desc, "nuc", HOFFSET(ext_air_struct, nuc),  H5T_NATIVE_INT);
-  H5Tinsert(desc, "air_df", HOFFSET(ext_air_struct, air_df), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "ratio", HOFFSET(ext_air_struct, ratio), H5T_NATIVE_DOUBLE);
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(df_struct));
+  H5Tinsert(desc, "nuc", HOFFSET(df_struct, nuc),  H5T_NATIVE_INT);
+  H5Tinsert(desc, "ext_air_df", HOFFSET(df_struct, ext_air_df), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "ratio", HOFFSET(df_struct, ratio), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "ext_soil_df", HOFFSET(df_struct, ext_soil_df), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "ingest_df", HOFFSET(df_struct, ingest_df), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "fluid_frac", HOFFSET(df_struct, fluid_frac), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "inhale_df", HOFFSET(df_struct, inhale_df), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "lung_mod", HOFFSET(df_struct, lung_mod), H5T_NATIVE_CHAR);
 
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t ext_air_df_set = H5Dopen2(nuc_data_h5, "/neutron/dose_factors/external_air", H5P_DEFAULT);
-  hid_t ext_air_df_space = H5Dget_space(ext_air_df_set);
-  int ext_air_df_length = H5Sget_simple_extent_npoints(ext_air_df_space);
+  hid_t df_set = H5Dopen2(nuc_data_h5, source_location, H5P_DEFAULT);
+  hid_t df_space = H5Dget_space(df_set);
+  int df_length = H5Sget_simple_extent_npoints(df_space);
 
   // Read in the data
-  ext_air_struct * ext_air_df_array = new ext_air_struct[ext_air_df_length];
-  H5Dread(ext_air_df_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, ext_air_df_array);
+  df_struct * df_array = new df_struct[df_length];
+  H5Dread(df_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, df_array);
 
-  // close the nuc_data library
-  H5Dclose(ext_air_df_set);
+  // close the nuc_data library, before doing anything stupid
+  H5Dclose(df_set);
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of structs, put it in the map
-  for(int n = 0; n < ext_air_df_length; n++){
-    ext_air_df_map[ext_air_df_array[n].nuc] = ext_air_df_array[n].air_df;
-    //ratio_map[ext_air_df_array[n].nuc] = ext_air_df_array[n].ratio;
+  for(int n = 0; n < df_length; n++){
+    ext_air_df_map[df_array[n].nuc] = df_array[n].ext_air_df;
+    ratio_map[df_array[n].nuc] = df_array[n].ratio;
+    ext_soil_df_map[df_array[n].nuc] = df_array[n].ext_soil_df;
+    ingest_df_map[df_array[n].nuc] = df_array[n].ingest_df;
+    fluid_frac_map[df_array[n].nuc] = df_array[n].fluid_frac;
+    inhale_df_map[df_array[n].nuc] = df_array[n].inhale_df;
+    lung_mod_map[df_array[n].nuc] = df_array[n].lung_mod;
   }
 
-  delete[] ext_air_df_array;
+  delete[] df_array;
 };
 
 
-double pyne::air_df(int nuc)
+double pyne::ext_air_df(int nuc, int source, bool get_error)
 {
-  // Find the nuclide's ext_air dose factor in mrem/h per Ci/m^3
+  // Find the nuclide's external air dose factor in [mrem/hr per Ci/m^3]
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
   nuc_iter = ext_air_df_map.find(nuc);
   nuc_end = ext_air_df_map.end();
 
-  // First check if we already have the nuc dose factor in the map
+  // First check if we already have the nuc ext_air_df in the map
   if (nuc_iter != nuc_end) 
     return (*nuc_iter).second;
 
   // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
-  if (ext_air_df_map.empty())
+  if ((source == 0) && (df_map.empty()))
   {
     // Don't fail if we can't load the library
     try
     {
-      _load_ext_air_df_map();
-      return air_df(nuc);
+      source_location = "/dose_factors/epa"
+      _load_df_map(source_location);
+      return ext_air_df(nuc);
+    }
+    catch(...){};
+  }
+  else if (source == 1)
+  {
+    try
+    {
+      source_location = "/dose_factors/doe"
+      _load_df_map(source_location);
+      return ext_air_df(nuc);
+    }
+    catch(...){};
+  }
+  else if (source == 2)
+  {
+    try
+    {
+      source_location = "/dose_factors/genii"
+      _load_df_map(source_location);
+      return ext_air_df(nuc);
     }
     catch(...){};
   };
@@ -457,7 +474,7 @@ double pyne::air_df(int nuc)
   double df;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return air_df(nucid);
+    return ext_air_df(nucid);
 
   // If nuclide is not found, return 0
   df = 0.0;
@@ -466,75 +483,20 @@ double pyne::air_df(int nuc)
 };
 
 
-double pyne::air_df(char * nuc)
+double pyne::ext_air_df(char * nuc)
 {
   int nuc_zz = nucname::id(nuc);
-  return air_df(nuc_zz);
+  return ext_air_df(nuc_zz);
 };
 
 
-double pyne::air_df(std::string nuc)
+double pyne::ext_air_df(std::string nuc)
 {
   int nuc_zz = nucname::id(nuc);
-  return air_df(nuc_zz);
-};
-*/
-
-/********************************************/
-/*** Dose Factor Additonal Info functions ***/
-/********************************************/
-/*
-std::map<int, double> pyne::gamma_frac_map = std::map<int, double>();
-
-double pyne::gamma_frac(int nuc)
-{
-  // Find the nuclide's fraction of Q that comes from gammas
-  std::map<int, double>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = gamma_frac_map.find(nuc);
-  nuc_end = gamma_frac_map.end();
-
-  // First check if we already have the gamma_frac in the map
-  if (nuc_iter != nuc_end)
-    return (*nuc_iter).second;
-
-  // Next, fill up the map with values from nuc_data.h5 if the map is empty.
-  if (gamma_frac_map.empty())
-  {
-    // Don't fail if we can't load the library
-    try
-    {
-      _load_q_val_map();
-      return gamma_frac(nuc);
-    }
-    catch(...){};
-  };
-
-  double gf;
-  int nucid = nucname::id(nuc);
-  if (nucid != nuc)
-    return gamma_frac(nucid);
-
-  // If nuclide is not found, return 0
-  gf = 0.0;
-  gamma_frac_map[nucid] = gf;
-  return gf;
+  return ext_air_df(nuc_zz);
 };
 
 
-double pyne::gamma_frac(char * nuc)
-{
-  int nuc_zz = nucname::id(nuc);
-  return gamma_frac(nuc_zz);
-};
-
-
-double pyne::gamma_frac(std::string nuc)
-{
-  int nuc_zz = nucname::id(nuc);
-  return gamma_frac(nuc_zz);
-};
-*/
 
 /***********************************/
 /*** scattering length functions ***/

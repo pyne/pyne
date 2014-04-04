@@ -144,108 +144,63 @@ namespace pyne
   double gamma_frac(std::string nuc); 
   /// \}
 
-/*
+
+
   /// \name Dose Factor Data
   /// \{
 
-  /// Mapping from nuclides in id form to their dose factors (4 types, 4 tables).
-  /// All but external air have three sources of dose factor data: GENII, EPA, & DOE.
+  /// Mapping from nuclides in id form to their dose factors (4 types).
   ///
-  /// Ext Air DF Map
-  extern std::map<int, double> ext_air_df_map;
-  /// Ext Soil DF Maps
-  extern std::map<int, double> ext_soil_genii_df_map;
-  extern std::map<int, double> ext_soil_epa_df_map;
-  extern std::map<int, double> ext_soil_doe_df_map;
-  /// Ingestion DF Maps
-  extern std::map<int, double> ingest_genii_df_map;
-  extern std::map<int, double> ingest_epa_df_map;
-  extern std::map<int, double> ingest_doe_df_map;
-  /// Inhalation DF Maps
-  extern std::map<int, double> inhale_genii_df_map;
-  extern std::map<int, double> inhale_epa_df_map;
-  extern std::map<int, double> inhale_doe_df_map;
+  /// DF Map
+  extern std::map<int, double> df_map;
 
-  /// a struct matching the external air dose factor table in nuc_data.h5.
-  typedef struct ext_air_struct {
-    int nuc;        ///< nuclide in id form
-    double air_df;  ///< nuclide dose factor [mrem/h per Ci/m^3]
-    double ratio;   ///< ratio of external air df to df due to inhalation
-  } ext_air_struct; 
-  /// a struct matching the external soil dose factor table in nuc_data.h5.
-  typedef struct ext_soil_struct {
-    int nuc;       ///< nuclide in id form
-    double genii;  ///< nuclide dose factor from GENII [mrem/h per Ci/m^2]
-    double epa;    ///< nuclide dose factor from EPA
-    double doe;    ///< nuclide dose factor from DOE
-  } ext_soil_struct;
-  /// a struct matching the ingestion dose factor table in nuc_data.h5.
-  typedef struct ingest_struct {
-    int nuc;           ///< nuclide in id form
-    double fluid_frac; ///< fraction of activity abosorbed in body fluids
-    double genii;      ///< nuclide dose factor from GENII [mrem/pCi]
-    double epa;        ///< nuclide dose factor from EPA
-    double doe;        ///< nuclide dose factor from DOE
-  } ingest_struct;
-  /// a struct matching the inhalation dose factor table in nuc_data.h5.
-  typedef struct inhale_struct {
-    int nuc;       ///< nuclide in id form
-    char lung_mod; ///< model of lung used (time of biological half life -- D, W, or Y)
-    double genii;  ///< nuclide dose factor from GENII [mrem/pCi]
-    double epa;    ///< nuclide dose factor from EPA
-    double doe;    ///< nuclide dose factor from DOE
-  } inhale_struct;
+  /// a struct matching the dose factor table in nuc_data.h5.
+  typedef struct df_struct {
+    int nuc;            ///< nuclide in id form
+    double ext_air_df;  ///< nuclide ext_air dose factor [mrem/h per Ci/m^3]
+    double ratio;       ///< ratio of external air df to df due to inhalation
+    double ext_soil_df; ///< nuclide ext_soil dose factor [mrem/h per Ci/m^2]
+    double ingest_df;   ///< nuclide dose factor due to ingestion [mrem/pCi]
+    double fluid_frac;  ///< fraction of activity abosorbed in body fluids
+    double inhale_df;   ///< model of lung used (time of biological half life -- D, W, or Y)
+    char lung_mod;      ///< nuclide dose factor [mrem/h per Ci/m^3]
+  } df_struct; 
 
   /// Loads the dose factor data from the nuc_data.h5 file into memory.
   ///
   /// Ext Air DF Map
-  void _load_ext_air_df_map();
-  /// Ext Soil DF Maps
-  void _load_ext_soil_genii_df_map();
-  void _load_ext_soil_epa_df_map();
-  void _load_ext_soil_doe_df_map();
-  /// Ingestion DF Maps
-  void _load_ingest_genii_df_map();
-  void _load_ingest_epa_df_map();
-  void _load_ingest_doe_df_map();
-  /// Inhalation DF Maps
-  void _load_inhale_genii_df_map();
-  void _load_inhale_epa_df_map();
-  void _load_inhale_doe_df_map();
+  void _load_df_map();
+  
+  /// Mapping from nuclides in id form to requested form of dose factor and the 
+  /// additional information, if applicable.
+  extern std::map<int, double> ext_air_df_map;
+  extern std::map<int, double> ext_soil_df_map;
+  extern std::map<int, double> ingest_df_map;
+  extern std::map<int, double> inhale_df_map;
+  extern std::map<int, double> ratio_map;
+  extern std::map<int, double> fluid_frac_map;
+  extern std::map<int, char> lung_mod_map;
 
   /// \brief Returns the dose factors of a nuclide \a nuc.  
   /// 
   /// These functions will first try to find the dose factor data in the df_maps.
   /// If the maps are empty, it will load the data from disk. If the nuclide simply 
   /// cannot be found, the default value returned is 0.0.
-  double air_df(int nuc);
-  double genii(int nuc);
-  double epa(int nuc);
-  double doe(int nuc);
+  double ext_air_df(int nuc);
+  double ext_soil_df(int nuc);
+  double ingest_df(int nuc);
+  double inhale_df(int nuc);
   /// Returns the dose factor of a nuclide \a nuc.
-  double air_df(char * nuc); 
-  double genii(char * nuc); 
-  double epa(char * nuc); 
-  double doe(char * nuc);
+  double ext_air_df(char * nuc); 
+  double ext_soil_df(char * nuc); 
+  double ingest_df(char * nuc); 
+  double inhale_df(char * nuc);
   /// Returns the dose factor of a nuclide \a nuc.
-  double air_df(std::string nuc);
-  double genii(std::string nuc);
-  double epa(std::string nuc);
-  double doe(std::string nuc);
-  /// \}
-
-
-
-  /// \name Dose Factor Additional  Data
-  /// \{
-
-  /// Mapping from nuclides in id form to additional information, including the
-  /// ratio of the external air dose rate factor to that of inhalation, the
-  /// fraction of .
-  extern std::map<int, double> ratio_map;
-  extern std::map<int, double> fluid_frac_map;
-  extern std::map<int, char> lung_mod_map;
-
+  double ext_air_df(std::string nuc);
+  double ext_soil_df(std::string nuc);
+  double ingest_df(std::string nuc);
+  double inhale_df(std::string nuc);
+  
   /// \brief Returns the additional info of a nuclide \a nuc.  
   /// 
   /// This follows the same the basic rules for finding or computing the dose factor
@@ -263,9 +218,9 @@ namespace pyne
   double fluid_frac(std::string nuc);
   char lung_mod(std::string nuc);
   /// \}
-*/
 
 
+  
   /// \name Scattering Length Data
   /// \{
 
