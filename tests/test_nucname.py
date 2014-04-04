@@ -1,4 +1,5 @@
 """nucname tests"""
+from __future__ import unicode_literals, division
 from unittest import TestCase
 import nose 
 
@@ -228,8 +229,8 @@ def test_zzzaaa_to_id():
     assert_equal(nucname.zzzaaa_to_id(95242), nucname.id(95642))
     # Added /10*10 to remove the state information from id (ZZZAAA carries no state
     # information, defaults to zero when converting ZZZAAA back to ID)
-    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id(95942)/10)*10)
-    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id("AM-242m")/10)*10)
+    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id(95942)//10)*10)
+    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id("AM-242m")//10)*10)
 
     assert_equal(nucname.zzzaaa_to_id(2000), nucname.id("he"))
     assert_equal(nucname.zzzaaa_to_id(92000), nucname.id("U"))
