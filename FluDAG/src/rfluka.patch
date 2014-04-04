@@ -1,5 +1,5 @@
-117c117,118
-<              cp ${DAGMCFILE} dagmc.h5m
----
+106a107,110
+> 	  d)
+> 	     DAGMCFILE=${OPTARG}
 > 	     ln -s ${DAGMCFILE} dagmc.h5m
->              #cp ${DAGMCFILE} dagmc.h5m
+> 	     ;;
