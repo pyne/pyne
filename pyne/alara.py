@@ -203,16 +203,33 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
             else:
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
-def record_to_geom(mesh, vol_fracs, cell_mats, geom_file, matlib_file):
-    """
+def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
+    """record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file)
+    Function preforms the same funcion as alara.mesh_to_geom, except the
+    geometry is on the basis of the stuctured array output of
+    dagmc.discretize_geom rather than a PyNE material object with materials.
+    This allows for more efficient ALARA runs by minimizing the number of
+    materials in the ALARA matlib.
+
     Parameters
     ----------
     mesh : PyNE Mesh object
-        The Mesh object containing the materials to be printed.
-    record :a
-       ve_idx 
+        The Mesh object for which the geometry is discretized.
+     cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A sorted, one dimensional
+            array, each entry containing the following fields:
 
-     cell : mats
+                :idx: int 
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+     cell_mats : dict
+        Maps geometry cell numbers to PyNE Material objects. Each PyNE material
+        object must have the 'mat_number' in Material.attrs.
     geom_file : str
         The name of the file to print the geometry and material blocks.
     matlib_file : str
@@ -228,14 +245,14 @@ def record_to_geom(mesh, vol_fracs, cell_mats, geom_file, matlib_file):
     volume = "volume\n" # volume input block
     mat_loading = "mat_loading\n" # material loading input block
     mixture = "" # mixture blocks
-    matlib = "" # ALARA material library string
 
     for i, mat, ve in mesh:
         volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
         mat_loading += "    zone_{0}    mix_{0}\n".format(i)
-        mixture += "mixture mix_{0}\n"
-        for
-            mixture += "    material mat_{0} 1 {1}\n".format()
+        mixture += "mixture mix_{0}\n".format(i)
+        for row in cell_fracs[cell_fracs['idx'] == i]:
+            mixture += "    material mat_{0} 1 {1}\n".format(
+                       cell_mats[row['cell']].attrs['mat_number'], row['vol_frac'])
         mixture += "end\n\n"
 
     volume += "end\n\n"
@@ -244,6 +261,17 @@ def record_to_geom(mesh, vol_fracs, cell_mats, geom_file, matlib_file):
     with open(geom_file, 'w') as f:
         f.write(geometry + volume + mat_loading + mixture)
     
+    matlib = "" # ALARA material library string
+
+    for mat in cell_mats.values():
+        matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(mat.attrs['mat_number'], 
+                                                         mat.density, 
+                                                         len(mat.comp))
+        for nuc, comp in mat.comp.iteritems():
+            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0, 
+                                                        znum(nuc))
+        matlib += "\n"
+
     with open(matlib_file, 'w') as f:
         f.write(matlib)
 

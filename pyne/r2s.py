@@ -2,7 +2,7 @@ from os.path import isfile, join, dirname
 
 from pyne.mesh import Mesh
 from pyne.mcnp import Meshtal
-from pyne.alara import mesh_to_fluxin, mesh_to_geom, photon_source_to_hdf5, \
+from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
                        photon_source_hdf5_to_mesh
 from pyne.dagmc import load, discretize_geom
 
@@ -97,7 +97,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     #m.cell_fracs_to_mats(vol_fracs, cell_mats)
 
     mesh_to_fluxin(m, flux_tag, fluxin, reverse)
-    mesh_to_geom(m, cell_fracs, alara_inp, alara_matlib)
+    record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib)
 
     if isfile(alara_params):
         with open(alara_params, 'r') as f:
