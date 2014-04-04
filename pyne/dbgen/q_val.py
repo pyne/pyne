@@ -45,7 +45,7 @@ def read_row(row):
     
     Parameters
     ----------
-    row : list
+    row : tuple
         One entry in a q_val file.
     """
 
@@ -97,7 +97,7 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
 
     Parameters
     ----------
-    all_q_values: list of lists
+    all_q_values: list of tuples
         Array of q_values for all nuclides.
     nuc_data : str
         Path to nuclide data file.
