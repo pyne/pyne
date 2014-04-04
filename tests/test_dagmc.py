@@ -1,4 +1,5 @@
 from __future__ import print_function
+import sys
 import unittest
 import os.path
 from nose.tools import assert_equal, assert_almost_equal, assert_raises
@@ -11,6 +12,10 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
+if sys.version_info[0] < 3:
+    STRING_TYPES = (basestring, str, unicode)
+else:
+    STRING_TYPES = (str,)
 
 class TestDagmcWithUnitbox(unittest.TestCase):
 
@@ -37,7 +42,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
     def test_versions(self):
         returned = dagmc.versions()
         self.assertEqual(len(returned), 2)
-        self.assertTrue(isinstance(returned[0], str))
+        self.assertTrue(isinstance(returned[0], STRING_TYPES))
         self.assertTrue(isinstance(returned[1], int))
 
     def test_list_functions(self):
