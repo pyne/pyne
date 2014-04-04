@@ -352,7 +352,7 @@ class SystemDefinition(IDefinition):
         if name not in self.cells:
             raise StandardError("Cell {0!r} is not in the system.".format(
                     name))
-        return self.cells.keys().index(name) + 1
+        return list(self.cells.keys()).index(name) + 1
 
     def surface_num(self, name):
         """Returns the surface number for the surface name provided. If a
@@ -363,7 +363,7 @@ class SystemDefinition(IDefinition):
         if name not in self.surfaces:
             raise StandardError("Surface {0!r} is not in the system.".format(
                     name))
-        num = self.surfaces.keys().index(name) + 1
+        num = list(self.surfaces.keys()).index(name) + 1
         if isinstance(self.surfaces[name], cards.Facet):
             # This does not work, as self.surfaces is the macrobody with the
             # same name, not the facet.
@@ -379,7 +379,7 @@ class SystemDefinition(IDefinition):
         if name not in self.materials:
             raise StandardError("Material {0!r} is not in the system.".format(
                     name))
-        return self.materials.keys().index(name) + 1
+        return list(self.materials.keys()).index(name) + 1
 
     def universe_num(self, name):
         """Returns the universe number for the universe name provided. If a
@@ -674,7 +674,7 @@ class SimulationDefinition(IDefinition):
         if name not in self.dists:
             raise StandardError("Distribution {0!r} is not in "
                     "the simulation.".format(name))
-        return self.dists.keys().index(name) + 1
+        return list(self.dists.keys()).index(name) + 1
 
     def remove_source(self, name):
         """Removes a source card from the system. No dependency check is
@@ -875,38 +875,38 @@ class MCNPSimulation(SimulationDefinition):
         card = self.tally[name]
         # Must add one because indices start at 0 but card numbers at 1.
         if isinstance(card, cards.SurfaceCurrent):
-            return self._tally_surfacecurrent.keys().index(name) + 1
+            return list(self._tally_surfacecurrent.keys()).index(name) + 1
         elif isinstance(card, cards.SurfaceFlux):
-            return self._tally_surfaceflux.keys().index(name) + 1
+            return list(self._tally_surfaceflux.keys()).index(name) + 1
         elif isinstance(card, cards.CellFlux):
-            return self._tally_cellflux.keys().index(name) + 1
+            return list(self._tally_cellflux.keys()).index(name) + 1
         elif isinstance(card, cards.CellEnergyDeposition):
-            return self._tally_cellenergydep.keys().index(name) + 1
+            return list(self._tally_cellenergydep.keys()).index(name) + 1
         elif isinstance(card, cards.CellFissionEnergyDeposition):
-            return self._tally_cellfissiondep.keys().index(name) + 1
+            return list(self._tally_cellfissiondep.keys()).index(name) + 1
         elif isinstance(card, (cards.CellPulseHeight,
                 cards.CellChargeDeposition)):
-            return self._tally_pulseheight.keys().index(name) + 1
+            return list(self._tally_pulseheight.keys()).index(name) + 1
         elif isinstance(card, cards.IDetector):
-            return self._tally_detector.keys().index(name) + 1
+            return list(self._tally_detector.keys()).index(name) + 1
         elif isinstance(card, cards.Custom):
             # See if class attribute is not None.
             if card.tallyclass:
                 if issubclass(card.tallyclass, cards.SurfaceCurrent):
-                    return self._tally_surfacecurrent.keys().index(name) + 1
+                    return list(self._tally_surfacecurrent.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.SurfaceFlux):
-                    return self._tally_surfaceflux.keys().index(name) + 1
+                    return list(self._tally_surfaceflux.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.CellFlux):
-                    return self._tally_cellflux.keys().index(name) + 1
+                    return list(self._tally_cellflux.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.CellEnergyDeposition):
-                    return self._tally_cellenergydep.keys().index(name) + 1
+                    return list(self._tally_cellenergydep.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.CellFissionEnergyDeposition):
-                    return self._tally_cellfissiondep.keys().index(name) + 1
+                    return list(self._tally_cellfissiondep.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, (cards.CellPulseHeight,
                         cards.CellChargeDeposition)):
-                    return self._tally_pulseheight.keys().index(name) + 1
+                    return list(self._tally_pulseheight.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.IDetector):
-                    return self._tally_detector.keys().index(name) + 1
+                    return list(self._tally_detector.keys()).index(name) + 1
                 else:
                     raise Exception("Unrecognized tally card {0}.".format(card))
         else:
@@ -997,7 +997,7 @@ class MCNPSimulation(SimulationDefinition):
         if name not in self.transformations:
             raise StandardError("Transformation {0!r} is not in "
                     "the simulation.".format(name))
-        return self.transformations.keys().index(name) + 1
+        return list(self.transformations.keys()).index(name) + 1
 
     def remove_transformation(self, name):
         """Removes a transformation card from the system. No dependency check is

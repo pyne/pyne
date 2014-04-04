@@ -107,7 +107,7 @@ def fromstring_token(s, sep=" ", bint inplace=False, int maxsize=-1):
     return data
 
 
-def endftod(char * s):
+def endftod(s):
     """Converts a string from ENDF number format to float64.
 
     Parameters
@@ -119,10 +119,13 @@ def endftod(char * s):
     -------
     float64
     """
-    return pyne.cpp_pyne.endftod(<char *> s)
+    cdef char * cs
+    s_bytes = s.encode('UTF-8')
+    cs = s_bytes
+    return pyne.cpp_pyne.endftod(<char *> cs)
 
 
-def fromendf_tok(char * s):
+def fromendf_tok(s):
     """A replacement for numpy.fromstring().
 
     Parameters:
@@ -136,16 +139,19 @@ def fromendf_tok(char * s):
         Will always return a 1d float64 array.  You must reshape to the
         appropriate shape.
     """
+    cdef char * cs
+    s_bytes = s.encode('UTF-8')
+    cs = s_bytes
     cdef int i, num_entries
     cdef char entry[12]
     cdef long pos = 0
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     i = 0
-    num_entries = len(s)//81 * 6
+    num_entries = len(cs)//81 * 6
     cdata = np.empty(num_entries, dtype=np.float64)
     while i < num_entries:
         pos = i*11 + i//6 * 15
-        strncpy(entry, s+pos, 11)
+        strncpy(entry, cs+pos, 11)
         cdata[i] = pyne.cpp_pyne.endftod(entry)
         i += 1
     return cdata

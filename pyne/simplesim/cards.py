@@ -2225,13 +2225,13 @@ class IRegion(ICard):
 
         """
         if isinstance(self, RegionLeaf):
-            leaf_func.im_func(leaf_func.im_self, self)
+            leaf_func.__func__(leaf_func.__self__, self)
         else:
             self.left_child.walk(leaf_func)
             if and_func and isinstance(self, and_func):
-                and_func.im_func(and_func.im_self, self)
+                and_func.__func__(and_func.__self__, self)
             if or_func and isinstance(self, or_func):
-                or_func.im_func(or_func.im_func, self)
+                or_func.__func__(or_func.__func__, self)
             self.right_child.walk(leaf_func)
 
 
@@ -3222,7 +3222,7 @@ class Distribution(ICard):
 
     @key_setting.setter
     def key_setting(self, value):
-        acceptable = self.mcnp_keys.keys() + ['analytic']
+        acceptable = list(self.mcnp_keys.keys()) + ['analytic']
         if value and value not in acceptable:
             raise ValueError("The ``key_setting`` {0!r} is "
                 "unacceptable.".format(value))
@@ -3233,7 +3233,7 @@ class Distribution(ICard):
 
     @val_setting.setter
     def val_setting(self, value):
-        acceptable = self.mcnp_vals.keys() + self.analytic.keys()
+        acceptable = list(self.mcnp_vals.keys()) + list(self.analytic.keys())
         if value and value not in acceptable:
             raise ValueError("The ``val_setting`` {0!r} is "
                 "unacceptable.".format(value))
@@ -4727,7 +4727,7 @@ class ICellMod(IMisc):
             else:
                 empty_count += 1
                 # Account for running out of cells with empty baggage.
-                if key is sim.sys.cells.keys()[-1]:
+                if key is list(sim.sys.cells.keys())[-1]:
                     string += " {0}J".format(empty_count)
         return string
 
@@ -6736,7 +6736,7 @@ class DXTRANSpheres(IUniqueParticle):
         return formatstr % (tuple(sph.center) + (sph.inrad, sph.outrad))
 
     def index(self, sph_name):
-        return self.spheres.keys().index(sph_name) + 1
+        return list(self.spheres.keys()).index(sph_name) + 1
 
     @property
     def upper_cutoff(self): return self._upper_cutoff
@@ -6815,7 +6815,7 @@ class Vector(IMisc):
     def comment(self):
         string = "Vector {0!r}:".format(self.name)
         counter = 0
-        for key, val in self.vectors.iteritems():
+        for key, val in self.vectors.items():
             counter += 1
             string += " {0}: ({1[0]:g}, {1[1]:g}, {1[2]:g}) cm".format(
                     key, val)
@@ -6827,7 +6827,7 @@ class Vector(IMisc):
             raise StandardError("No vectors added.")
         string = "VECT"
         counter = 0
-        for key, val in self.vectors.iteritems():
+        for key, val in self.vectors.items():
             counter += 1
             index = self.index(key)
             formatstr = " V{0} {1} {1} {1}".format(index, float_format)
@@ -6836,7 +6836,7 @@ class Vector(IMisc):
         
     def index(self, vecname):
         # MCNP is okay with index 0.
-        return self.vectors.keys().index(vecname)
+        return list(self.vectors.keys()).index(vecname)
 
 
 class Burnup(IMisc):
