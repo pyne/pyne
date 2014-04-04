@@ -189,7 +189,7 @@ class Transmuter(object):
         xscache = self.xscache
         sig_a = sigma_a(nuc, xs_cache=xscache)
         d = utils.from_barns(sig_a[0], 'cm2') * xscache['phi_g'][0]
-        if decay:
+        if decay and not np.isnan(data.decay_const(nuc)):
             d += data.decay_const(nuc) 
         return d
 

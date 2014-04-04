@@ -34,7 +34,7 @@ def grab_ensdf_decay(build_dir=""):
     # Grab ENSDF files and unzip them.
     iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2013-October/'
     cf_base_url = 'http://data.pyne.io/'
-    ensdf_zip = ['ensdf_131009_099.zip', 'ensdf_131009_199.zip', 'ensdf_131009_294.zip',]
+    ensdf_zip = ['ensdf_131009_099.zip', 'ensdf_131009_199.zip', 'ensdf_131009_294.zip', ]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
@@ -42,7 +42,7 @@ def grab_ensdf_decay(build_dir=""):
             print("  grabbing {0} and placing it in {1}".format(f, fpath))
             urllib.urlretrieve(iaea_base_url + f, fpath)
 
-            if os.path.getsize(fpath) < 1048576: 
+            if os.path.getsize(fpath) < 1048576:
                 print("  could not get {0} from IAEA; trying mirror".format(f))
                 os.remove(fpath)
                 urllib.urlretrieve(cf_base_url + f, fpath)
@@ -58,26 +58,19 @@ def grab_ensdf_decay(build_dir=""):
             zf.close()
 
 
-half_life_dtype = np.dtype([
-    ('from_nuc', int),
-    ('to_nuc', int),
-    ('level', float),
-    ('half_life', float),
-    ('decay_const', float),
-    ('branch_ratio', float),
-    ])
-
 level_dtype = np.dtype([
     ('nuc_id', int),
-    ('level', float),
+    ('rx_id', np.uint32),
     ('half_life', float),
+    ('level', float),
+    ('branch_ratio', float),
     ('metastable', int),
-    ])
+])
 
 decay_dtype = np.dtype([
     ('parent', int),
     ('child', int),
-    ('decay', 'S5'),
+    ('decay', np.uint32),
     ('half_life', float),
     ('half_life_error', float),
     ('branch_ratio', float),
@@ -85,7 +78,7 @@ decay_dtype = np.dtype([
     ('photon_branch_ratio_err', float),
     ('beta_branch_ratio', float),
     ('beta_branch_ratio_err', float),
-    ])
+])
 
 gammas_dtype = np.dtype([
     ('from_nuc', int),
@@ -102,14 +95,14 @@ gammas_dtype = np.dtype([
     ('k_conv_e', float),
     ('l_conv_e', float),
     ('m_conv_e', float),
-    ])
+])
 
 alphas_dtype = np.dtype([
     ('from_nuc', int),
     ('to_nuc', int),
     ('energy', float),
     ('intensity', float),
-    ])
+])
 
 betas_dtype = np.dtype([
     ('from_nuc', int),
@@ -117,7 +110,7 @@ betas_dtype = np.dtype([
     ('endpoint_energy', float),
     ('avg_energy', float),
     ('intensity', float),
-    ])
+])
 
 ecbp_dtype = np.dtype([
     ('from_nuc', int),
@@ -129,10 +122,10 @@ ecbp_dtype = np.dtype([
     ('k_conv_e', float),
     ('l_conv_e', float),
     ('m_conv_e', float),
-    ])
+])
 
 
-def parse_decay(build_dir=""):
+def parse_level_data(build_dir=""):
     """Builds and returns a list of nuclide decay data.
     Parameters
     ----------
@@ -141,10 +134,31 @@ def parse_decay(build_dir=""):
 
     Returns
     -------
-    half_life_data_array : np.ndarray
-        array of half life data
     level_list_array : np.ndarray
         array of level data
+    """
+    build_dir = os.path.join(build_dir, 'ENSDF')
+
+    level_list = []
+    files = sorted([f for f in glob.glob(os.path.join(build_dir, 'ensdf.*'))])
+    for f in files:
+        print("    building level data from {0}".format(f))
+        level_list = ensdf.levels(f, level_list)
+
+    level_list_array = np.array(level_list, dtype=level_dtype)
+
+    return level_list_array
+
+
+def parse_decay_data(build_dir=""):
+    """Builds and returns a list of nuclide decay data.
+    Parameters
+    ----------
+    build_dir : str
+        build_nuc_data directory containing ENSDF folder
+
+    Returns
+    -------
     all_decay_array : np.ndarray
         array of decay data
     all_gammas_array : np.ndarray
@@ -158,29 +172,12 @@ def parse_decay(build_dir=""):
     """
     build_dir = os.path.join(build_dir, 'ENSDF')
 
-    half_life_data = []
     decay_data = []
-    level_list = []
-    lmap = dict()
-    lcount = 0
     files = sorted([f for f in glob.glob(os.path.join(build_dir, 'ensdf.*'))])
     for f in files:
         print("    parsing decay data from {0}".format(f))
-        half_life_data += ensdf.half_life(f)
-        level_list, decay_data, lmap, lcount = \
-            ensdf.decays(f, level_list, decay_data, lmap, lcount)
+        decay_data = ensdf.decays(f, decay_data)
 
-    ln2 = np.log(2.0)
-    half_life_data = [(fn, tn, lvl, hl, ln2 / hl, br)
-                      for fn, lvl, tn, hl, br in half_life_data]
-    half_life_data = set(half_life_data)
-    half_life_data = sorted(half_life_data, key=lambda x: (x[0], x[1]))
-
-    half_life_data_array = np.array(half_life_data, dtype=half_life_dtype)
-    #da, mask = np.unique(decay_array, return_index=True)
-    #mask.sort()
-    #decay_array = decay_array[mask]
-    level_list_array = np.array(level_list, dtype=level_dtype)
     all_decays = []
     all_gammas = []
     all_alphas = []
@@ -207,8 +204,8 @@ def parse_decay(build_dir=""):
     all_betas_array = np.array(all_betas, dtype=betas_dtype)
     all_ecbp_array = np.array(all_ecbp, dtype=ecbp_dtype)
 
-    return half_life_data_array, level_list_array, all_decay_array, \
-           all_gammas_array, all_alphas_array, all_betas_array, all_ecbp_array
+    return all_decay_array, all_gammas_array, all_alphas_array, \
+           all_betas_array, all_ecbp_array
 
 
 def make_decay_half_life_table(nuc_data, build_dir=""):
@@ -221,9 +218,8 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     build_dir : str
         Directory to place ensdf files in.
     """
-    # Grab raw data
-    half_life, level_list, decay, \
-    gammas, alphas, betas, ecbp = parse_decay(build_dir)
+    # Grab raw level data
+    level_list = parse_level_data(build_dir)
 
     # Open the HDF5 File
     db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
@@ -232,20 +228,13 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     if not hasattr(db.root, 'decay'):
         db.createGroup('/', 'decay', 'ENSDF Decay data')
 
-    decaytable = db.createTable('/decay/', 'half_life',
-                                np.empty(0, dtype=half_life_dtype),
-                                'Decay Energy level [MeV], half_life [s],'
-                                'decay_const [1/s], branch_ratio [frac]',
-                                expectedrows=len(half_life))
-    decaytable.append(half_life)
-
-    # Ensure that data was written to table
-    decaytable.flush()
-
     ll_table = db.createTable('/decay/', 'level_list', level_list,
                               'nuclide [nuc_id], level [keV], half life [s],'
                               'metastable [int]', expectedrows=len(level_list))
     ll_table.flush()
+
+    #now that the level data is in nuc_data we can build the decay data fast
+    decay, gammas, alphas, betas, ecbp = parse_decay_data(build_dir)
 
     decay_table = db.createTable('/decay/', 'decays', decay,
                                  'parent nuclide [nuc_id], daughter nuclide '
@@ -259,6 +248,8 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     decay_table.flush()
 
     gamma_table = db.createTable('/decay/', 'gammas', gammas,
+                                 'from_nuc [int], to_nuc [int], primary parent'
+                                 'nuc_id [int],'
                                  'Energy [keV], Energy error [keV], '
                                  'photon intensity [ratio], '
                                  'photon intensity error [ratio],'
@@ -266,8 +257,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                                  'conversion e intensity error [ratio],'
                                  'total intensity [ratio],'
                                  'total intensity error [ratio], '
-                                 'from_nuc [int], to_nuc [int], primary parent'
-                                 'nuc_id [int], K conversion electron'
+                                 'K conversion electron'
                                  'intensity [ratio], L conversion electron'
                                  'intensity [ratio], M conversion electron'
                                  'intensity [ratio]',
@@ -276,23 +266,25 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     gamma_table.flush()
 
     alphas_table = db.createTable('/decay/', 'alphas', alphas,
-                                  'Energy [keV], Intensity [ratio],'
-                                  'from_nuc [int], to_nuc [int]',
+                                  'from_nuc [int], to_nuc [int]'
+                                  'Energy [keV], Intensity [ratio],',
                                   expectedrows=len(alphas))
     alphas_table.flush()
 
     betas_table = db.createTable('/decay/', 'betas', betas,
+                                 'from_nuc [int], to_nuc [int],'
                                  'Endpoint Energy [keV], Average Energy [keV],'
-                                 'Intensity [ratio], from_nuc [int],'
-                                 'to_nuc [int]', expectedrows=len(betas))
+                                 'Intensity [ratio]'
+                                 , expectedrows=len(betas))
 
     betas_table.flush()
 
     ecbp_table = db.createTable('/decay/', 'ecbp', ecbp,
+                                'from_nuc [int], to_nuc [int],'
                                 'Endpoint Energy [keV], Average Energy [keV],'
                                 'B+ Intensity [ratio], '
                                 'Electron Capture Intensity [ratio],'
-                                'from_nuc [int], to_nuc [int], K conversion'
+                                'K conversion'
                                 'electron intensity [ratio], L conversion'
                                 'electron intensity [ratio], M conversion'
                                 'electron intensity [ratio]',
