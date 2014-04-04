@@ -15,7 +15,7 @@ extern "C" {
 }
 
 //===========================================================================//
-/** TODO will need to update this description with new implementation details
+/**
  * \class KDEKernel
  * \brief Defines a general 1D kernel function interface
  *
@@ -28,17 +28,13 @@ extern "C" {
  * the object, so it will need to be deleted once it is no longer needed to
  * prevent memory leaks.
  *
- * Once a kernel has been created, it can then be evaluated using one of two
- * different methods
+ * Once a kernel K(u) has been created, it can then be evaluated using the
+ * evaluate(double u) method.
  *
- *     1) evaluate(double u)
- *     2) evaluate(double u, double bandwidth, double distance, int side)
- *
- * The first method evaluates the standard kernel function K(u), whereas the
- * second evaluates K_b(u) based on a boundary correction method.  This boundary
- * correction method should only be called when a calculation point lies within
- * one bandwidth of an external boundary.  Note that the current implementation
- * of this method is only valid for 2nd-order kernels.
+ * If a calculation point lies within one bandwidth of an external boundary,
+ * then K(u) should be multiplied by the boundary correction factor computed
+ * by the boundary_correction method.  This fixes the boundary bias issue that
+ * would otherwise occur, but is currently only valid for 2nd-order kernels.
  *
  * =======================
  * Derived Class Interface
@@ -137,9 +133,27 @@ class KDEKernel
      * \param[in] p ratio(s) of distance from the boundary divided by bandwidth
      * \param[in] side the location(s) of the boundary (0 = LOWER, 1 = UPPER)
      * \param[in] num_corrections number of dimensions requiring correction
-     * \return the boundary correction factor for K(u)
+     * \return the boundary correction factor for K(u,v,w)
      *
-     * TODO describe how this method works
+     * Corrects for the boundary bias using the boundary kernel method.  Note
+     * that this method works for 1D, 2D, and 3D boundary corrections, as long
+     * as the 1D kernel function K is assumed to be the same in all dimenions.
+     *
+     * The size of u, p, and side are assumed to be equal to num_corrections.
+     * Values should only be added for the dimensions that need correcting.
+     * For example, if only u and w need correction for K(u,v,w)
+     *
+     *                   u = (u, w)
+     *                   p = (p(u), p(w))
+     *                side = (side(u), side(w))
+     *     num_corrections = 2
+     *
+     * The form of the boundary correction factor is a0 + a1*u + a2*v + a3*w.
+     * It will still need to be multiplied by K(u,v,w) to form a valid kernel
+     * contribution.
+     *
+     * If a correction factor of 0.0 is returned, then it means that either u
+     * and/or p are outside their valid domains.
      */
     virtual double boundary_correction(const double* u,
                                        const double* p,
@@ -170,14 +184,21 @@ class KDEKernel
                          std::vector<double>& moments) const;
 
     /**
-     * TODO define this method
+     * \brief Sets up the 3x3 matrix needed to solve for the 2D boundary kernel
+     * \param[in] ai_u the set of moments for the u-dimension
+     * \param[in] ai_v the set of moments for the v-dimension
+     * \param[out] matrix the 3x3 correction matrix
      */
     void get_correction_matrix2D(const std::vector<double>& ai_u,
                                  const std::vector<double>& ai_v,
                                  std::vector<double>& matrix) const;
 
     /**
-     * TODO define this method
+     * \brief Sets up the 4x4 matrix needed to solve for the 3D boundary kernel
+     * \param[in] ai_u the set of moments for the u-dimension
+     * \param[in] ai_v the set of moments for the v-dimension
+     * \param[in] ai_w the set of moments for the w-dimension
+     * \param[out] matrix the 4x4 correction matrix
      */
     void get_correction_matrix3D(const std::vector<double>& ai_u,
                                  const std::vector<double>& ai_v,

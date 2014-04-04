@@ -214,6 +214,8 @@ bool KDEKernel::solve_symmetric_matrix(std::vector<double>& A,
     }
     else  // matrix system could not be solved
     {
+        std::cerr << "Warning: LAPACK could not solve symmetric matrix system"
+                  << std::endl;
         return false;
     }
 }
