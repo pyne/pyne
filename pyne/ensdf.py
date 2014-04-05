@@ -211,13 +211,18 @@ def _parse_level_record(l_rec):
         Half life in seconds
     from_nuc : int
         nuc id of nuclide
+    state : int
+        metastable state of level
+    special : str
+        A-Z character denoting a group of known levels with no reference
+        to the ground state
     """
     lm = re.match("([A-Z])", l_rec.group(2))
     spv = _specialval.match(l_rec.group(2))
-    special = ''
+    special = ' '
     if lm is not None:
         special = lm.group(1)
-        e = np.nan
+        e = 0.0
         de = np.nan
     elif spv is not None:
         e, de = _get_val_err(spv.group(1), l_rec.group(3))
@@ -705,6 +710,7 @@ def _parse_decay_dataset(lines, decay_s):
     nb = None
     br = None
     level = None
+    special = " "
     goodgray = False
     parent2 = None
     for line in lines:
@@ -765,9 +771,9 @@ def _parse_decay_dataset(lines, decay_s):
                 gparent = 0
                 gdaughter = 0
                 if level is not None:
-                    gparent = data.id_from_level(_to_id(daughter), level)
+                    gparent = data.id_from_level(_to_id(daughter), level, special)
                     dlevel = level - dat[0]
-                    gdaughter = data.id_from_level(_to_id(daughter), dlevel)
+                    gdaughter = data.id_from_level(_to_id(daughter), dlevel, special)
                 if parent2 is None:
                     gp2 = pfinal
                     e = 0

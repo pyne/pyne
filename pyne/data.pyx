@@ -582,7 +582,7 @@ def decay_children(nuc, use_metastable=True):
 
     return dc
 
-def id_from_level(nuc, level):
+def id_from_level(nuc, level, special=""):
     """
     return the nuc_id for input energy level
 
@@ -592,17 +592,25 @@ def id_from_level(nuc, level):
         Input nuclide
     level : double
         energy level of state
-
+    special : str
+        special level denotation. This is a single A-Z character corresponding
+        to a group of levels and associated gammas with no reference to the GS
     Returns
     -------
     nuc : int
         nuc_id of state
     """
+    cdef std_string spc
+    if len(special) == 1:
+        spc = special[0]
     if level > 0.0:
-        return cpp_data.id_from_level(<int> nuc, <double> level)
+        if len(special) == 1:
+            return cpp_data.id_from_level(<int> nuc, <double> level, <std_string> spc)
+        else:
+            return cpp_data.id_from_level(<int> nuc, <double> level)
     else:
         return nuc
-    
+
 def metastable_id(nuc, level=1):
     """
     return the nuc_id of a metastable state
