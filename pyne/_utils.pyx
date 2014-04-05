@@ -76,9 +76,9 @@ def fromstring_token(s, sep=" ", bint inplace=False, int maxsize=-1):
     cdef int i, I
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     
-    s_bytes = s.encode('UTF-8')
+    s_bytes = s.encode()
     I = len(s_bytes)
-    sep_bytes = sep.encode('UTF-8')
+    sep_bytes = sep.encode()
     csep = sep_bytes
 
     if inplace:
@@ -120,7 +120,7 @@ def endftod(s):
     float64
     """
     cdef char * cs
-    s_bytes = s.encode('UTF-8')
+    s_bytes = s.encode()
     cs = s_bytes
     return pyne.cpp_pyne.endftod(<char *> cs)
 
@@ -140,7 +140,7 @@ def fromendf_tok(s):
         appropriate shape.
     """
     cdef char * cs
-    s_bytes = s.encode('UTF-8')
+    s_bytes = s.encode()
     cs = s_bytes
     cdef int i, num_entries
     cdef char entry[12]

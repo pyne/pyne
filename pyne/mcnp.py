@@ -1112,7 +1112,8 @@ class PtracReader(object):
             number = length // format_length
 
             b = self.f.read(length + 4)
-            tmp = struct.unpack(b"".join([self.endianness.encode(), (format*number).encode(), b'i']), b)
+            tmp = struct.unpack(b"".join([self.endianness.encode(), 
+                                (format*number).encode(), b'i']), b)
             length2 = tmp[-1]
             tmp = tmp[:-1]
         else:
@@ -1136,7 +1137,7 @@ class PtracReader(object):
 
         if format == 's':
             # return just one string
-            return ''.join(str(c) for c in tmp)
+            return ''.join(tmp)
         elif number == 1:
             # just return the number and not a tuple containing just the number
             return tmp[0]

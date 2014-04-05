@@ -84,10 +84,12 @@ def atomic_mass(nuc):
     if isinstance(nuc, int):
         mass = cpp_data.atomic_mass(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        mass = cpp_data.atomic_mass(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         mass = cpp_data.atomic_mass(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
-
     return mass
 
 
@@ -128,10 +130,12 @@ def natural_abund(nuc):
     if isinstance(nuc, int):
         abund = cpp_data.natural_abund(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        abund = cpp_data.natural_abund(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         abund = cpp_data.natural_abund(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
-
     return abund
 
 
@@ -162,10 +166,12 @@ def q_val(nuc):
     if isinstance(nuc, int):
         q_val = cpp_data.q_val(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        q_val = cpp_data.q_val(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         q_val = cpp_data.q_val(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
-
     return q_val
 
 
@@ -201,6 +207,9 @@ def gamma_frac(nuc):
     if isinstance(nuc, int):
         gamma_frac = cpp_data.gamma_frac(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        gamma_frac = cpp_data.gamma_frac(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         gamma_frac = cpp_data.gamma_frac(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
@@ -241,6 +250,9 @@ def b_coherent(nuc):
     if isinstance(nuc, int):
         value = cpp_data.b_coherent(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        value = cpp_data.b_coherent(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         value = cpp_data.b_coherent(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
@@ -278,6 +290,9 @@ def b_incoherent(nuc):
     if isinstance(nuc, int):
         value = cpp_data.b_incoherent(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        value = cpp_data.b_incoherent(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         value = cpp_data.b_incoherent(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
@@ -321,10 +336,12 @@ def b(nuc):
     if isinstance(nuc, int):
         value = cpp_data.b(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        value = cpp_data.b(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         value = cpp_data.b(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
-
     return float(value)
 
 #
@@ -371,6 +388,9 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
     elif isinstance(from_nuc, basestring):
+        from_nuc_bytes = from_nuc.encode()
+        fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc_bytes))
+    elif isinstance(from_nuc, bytes):
         fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc))
     else:
         raise pyne.nucname.NucTypeError(from_nuc)
@@ -378,6 +398,9 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
     if isinstance(to_nuc, int):
         tn = pyne.cpp_nucname.id(<int> to_nuc)
     elif isinstance(to_nuc, basestring):
+        to_nuc_bytes = to_nuc.encode()
+        tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc_bytes))
+    elif isinstance(to_nuc, bytes):
         tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc))
     else:
         raise pyne.nucname.NucTypeError(to_nuc)
@@ -577,6 +600,9 @@ def decay_children(nuc, use_metastable=True):
     if isinstance(nuc, int):
         dc.set_ptr[0] = cpp_data.decay_children(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        dc.set_ptr[0] = cpp_data.decay_children(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         dc.set_ptr[0] = cpp_data.decay_children(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
