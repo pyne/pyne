@@ -262,7 +262,6 @@ class SurfSrc(_BinaryReader):
     def __cmp__(self, other):
         """ Comparison is not completely robust. Tracklists are not compared!!!
         """
-        print("Yoohoo!")
 
         if other.kod != self.kod:
             # kod does not match
