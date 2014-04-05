@@ -45,6 +45,9 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
         # string must come before other sequences
         doc_bytes = doc.encode()
         cval = new cpp_jsoncpp.Value(<char *> doc_bytes)
+    elif isinstance(doc, bytes):
+        # bytes must come before other sequences
+        cval = new cpp_jsoncpp.Value(<char *> doc)
     elif isinstance(doc, collections.Sequence) or isinstance(doc, collections.Set):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.arrayValue)
         cval.resize(<int> len(doc))
@@ -113,6 +116,8 @@ cdef class Value(object):
         if isinstance(pykey, basestring):
             pykey_bytes = pykey.encode()
             cvalue = &self._inst[0][<const_char *> pykey_bytes]
+        elif isinstance(pykey, bytes):
+            cvalue = &self._inst[0][<const_char *> pykey]
         elif isinstance(pykey, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             pykey = toposindex(pykey, self._inst[0].size())
             cvalue = &self._inst[0][<int> pykey]
@@ -156,6 +161,9 @@ cdef class Value(object):
             key_bytes = key.encode()
             ckey = &self._inst[0][<const_char *> key_bytes]
             ckey.swap(deref(tocppval(value)))
+        elif isinstance(key, bytes):
+            ckey = &self._inst[0][<const_char *> key]
+            ckey.swap(deref(tocppval(value)))
         elif isinstance(key, int):
             curr_size = self._inst[0].size()
             key = toposindex(key, curr_size)
@@ -174,9 +182,12 @@ cdef class Value(object):
     def __delitem__(self, key):
         cdef int i, ikey, curr_size, end_size
         cdef cpp_jsoncpp.Value ctemp
-        if isinstance(key, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
+        if isinstance(key, basestring) and \
+           (self._inst.type() == cpp_jsoncpp.objectValue):
             key_bytes = key.encode()
             self._inst.removeMember(<const_char *> key_bytes)
+        elif isinstance(key, bytes) and (self._inst.type() == cpp_jsoncpp.objectValue):
+            self._inst.removeMember(<const_char *> key)
         elif isinstance(key, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
             curr_size = self._inst[0].size()
             ikey = key
@@ -235,9 +246,7 @@ cdef class Value(object):
 
     def __str__(self):
         cdef StyledWriter sw = StyledWriter()
-        cdef std_string s 
-        s = sw.write(self)
-        pys = bytes(s).decode()
+        pys = sw.write(self)
         if (self._inst.type() == cpp_jsoncpp.stringValue):
             pys = pys[1:-2]
         else:
@@ -246,9 +255,7 @@ cdef class Value(object):
 
     def __repr__(self):
         cdef FastWriter fw = FastWriter()
-        cdef std_string s 
-        s = fw.write(self)
-        pys = bytes(s).decode()
+        pys = fw.write(self)
         if (self._inst.type() == cpp_jsoncpp.stringValue):
             pys = pys[1:-2]
         else:
@@ -334,11 +341,15 @@ cdef class Value(object):
 
     def items(self):
         """Returns a list of items in JSON object."""
+        cdef int i
         cdef std_vector[std_string] ckeys
         if (self._inst.type() != cpp_jsoncpp.objectValue):
             raise TypeError("no values, not JSON object.")
         ckeys = self._inst.getMemberNames()
-        its = [(k, self[k]) for k in ckeys]
+        its = []
+        for i in range(len(ckeys)):
+            k = bytes(ckeys[i]).decode()
+            its.append((k, self[ckeys[i]]))
         return its
 
     def get(self, key, default=None):
