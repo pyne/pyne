@@ -301,7 +301,7 @@ def _validate_name(value, isunique=False):
         raise ValueError("The property ``name`` cannot contain spaces. "
                          "User provided {0}.".format(value))
     if isunique:
-        raise StandardError("This is a unique card, meaning only one card"
+        raise Exception("This is a unique card, meaning only one card"
                             " of this type can be found in a ``definition``. "
                             "Accordingly, the name is read-only.")
     if value == '':
@@ -546,7 +546,7 @@ class Cell(ICard):
     def mcnp(self, float_format, sim):
         # Card number.
         if self.name not in sim.sys.cells:
-            raise StandardError("Cell {0!r} not in simulation.".format(
+            raise Exception("Cell {0!r} not in simulation.".format(
                 self.name))
         formatstr = "{{: <{0}d}}".format(
                 int(np.log10(len(sim.sys.cells))) + 1)
@@ -1439,7 +1439,7 @@ class ISurface(ICard):
     @abc.abstractmethod
     def mcnp(self, float_format, sim, keystring):
         if self.name not in sim.sys.surfaces:
-            raise StandardError("Surface {0!r} not in simulation.".format(
+            raise Exception("Surface {0!r} not in simulation.".format(
                 self.name))
         formatstr = "{0}{1}{{: <{2}d}} {3:<4}".format(
                 "*" if self.reflecting else "",
@@ -4680,7 +4680,7 @@ class ICellMod(IMisc):
         self.cells = []
         self._n_args_per_cell = n_args_per_cell
         if len(args) % n_args_per_cell != 0:
-            raise StandardError("The length of ``*args`` must be a multiple "
+            raise Exception("The length of ``*args`` must be a multiple "
                     "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
 
     def _process_varargs(self, args):
@@ -5673,7 +5673,7 @@ class ICellModParticle(IUniqueParticle):
         self.cells = []
         self._n_args_per_cell = n_args_per_cell
         if len(args) % n_args_per_cell != 0:
-            raise StandardError("The length of ``*args`` must be a multiple "
+            raise Exception("The length of ``*args`` must be a multiple "
                     "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
 
     def _process_varargs(self, args):
@@ -6570,7 +6570,7 @@ class DXTRANContribution(ICellMod):
             # Get sphere index.
             dxt_name = 'dxtranspheres-{0}'.format(self.particle)
             if dxt_name not in sim.misc:
-                raise StandardError("To specify DXTRAN contributions for "
+                raise Exception("To specify DXTRAN contributions for "
                         "{0}s, a {1} misc card must be in the "
                         "simulation.".format(self.particle, dxt_name))
             index = sim.misc[dxt_name].index(self.sph_name)
@@ -6824,7 +6824,7 @@ class Vector(IMisc):
 
     def mcnp(self, float_format, sim):
         if len(self.vectors) == 0:
-            raise StandardError("No vectors added.")
+            raise Exception("No vectors added.")
         string = "VECT"
         counter = 0
         for key, val in self.vectors.items():

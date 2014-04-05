@@ -675,7 +675,7 @@ class TestSystemDefinition(unittest.TestCase):
             cyl = cards.AxisCylinder('mycyl', 'z', 0.4, reflecting=True,
                     white=True)
         except ValueError as e:
-            self.assertEquals(e.message, "The user set the surface to be "
+            self.assertEquals(e.args[0], "The user set the surface to be "
                     "reflecting AND white, but can only be neither or "
                     "one of the two.")
 
@@ -731,7 +731,7 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             cyl.shift([3, 3, 0])
         except ValueError as e:
-            self.assertEquals(e.message, "A cylinder aligned with the x axis "
+            self.assertEquals(e.args[0], "A cylinder aligned with the x axis "
                     "cannot be shifted in the y or z directions.")
 
         ## stretch()
@@ -773,7 +773,7 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             cyl.stretch([1, 3, 2])
         except ValueError as e:
-            self.assertEquals(e.message, "Stretches perpendicular to the "
+            self.assertEquals(e.args[0], "Stretches perpendicular to the "
                     "axis must be uniform in the two perpendicular "
                     "directions. User provided y stretch 3 and z "
                     "stretch 2 for a x-aligned cylinder.")
@@ -1520,7 +1520,7 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             wwn.mcnp('%g', self.sim)
         except Exception as e:
-            self.assertEquals(e.message, "No WWGT:N or WWT:N card found in "
+            self.assertEquals(e.args[0], "No WWGT:N or WWT:N card found in "
                     "the simulation.")
         ## Importance
         impn = cards.Importance('neutron', 'fuel', 1, 'coolant', 2)
@@ -1816,11 +1816,11 @@ class TestSystemDefinition(unittest.TestCase):
         critsrc = cards.Criticality()
         self.assertEquals(critsrc.name, 'criticality')
         # Test trying to change the name.
-        self.assertRaises(StandardError, setattr, critsrc, 'name', 'testname')
+        self.assertRaises(Exception, setattr, critsrc, 'name', 'testname')
         try:
             critsrc.name = 'testname'
-        except StandardError as e:
-            self.assertEquals(e.message, "This is a unique card, meaning "
+        except Exception as e:
+            self.assertEquals(e.args[0], "This is a unique card, meaning "
                     "only one card of this type can be found in a "
                     "``definition``. Accordingly, the name is read-only.")
         self.assertEquals(critsrc.n_histories, 1000)
@@ -1852,37 +1852,37 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             critsrc.n_histories = 0.5
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_histories`` "
+            self.assertEquals(e.args[0], "The property ``n_histories`` "
                     "must be an integer. User provided 0.5.")
         try:
             critsrc.n_histories = -1
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_histories`` "
+            self.assertEquals(e.args[0], "The property ``n_histories`` "
                     "must be positive. User provided -1.")
         try:
             critsrc.keff_guess = -1
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``keff_guess`` "
+            self.assertEquals(e.args[0], "The property ``keff_guess`` "
                     "must be non-negative. User provided -1.")
         try:
             critsrc.n_skip_cycles = 0.5
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
+            self.assertEquals(e.args[0], "The property ``n_skip_cycles`` "
                     "must be an integer. User provided 0.5.")
         try:
             critsrc.n_skip_cycles = -1
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
+            self.assertEquals(e.args[0], "The property ``n_skip_cycles`` "
                     "must be positive. User provided -1.")
         try:
             critsrc.n_cycles = 0.5
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_cycles`` "
+            self.assertEquals(e.args[0], "The property ``n_cycles`` "
                     "must be an integer. User provided 0.5.")
         try:
             critsrc.n_cycles = -1
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_cycles`` "
+            self.assertEquals(e.args[0], "The property ``n_cycles`` "
                     "must be equal to or greater than ``n_skip_cycles``. "
                     "User provided -1.")
 
@@ -1918,7 +1918,7 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             critpts.points = [[0, 0, 0], [1]]
         except ValueError as e:
-            self.assertEquals(e.message, "Length of all point lists/arrays "
+            self.assertEquals(e.args[0], "Length of all point lists/arrays "
                     "must be 3. User provided a point [1].")
 
         ## mcnp()

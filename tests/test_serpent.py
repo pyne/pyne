@@ -1,6 +1,5 @@
 import os
 
-
 import numpy as np
 from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal
@@ -24,7 +23,7 @@ def test_parse_res1():
 
 
 def test_parse_dep1():
-    dep = serpent.parse_dep('sample_dep.m')
+    dep = serpent.parse_dep('sample_dep.m', True)
     nuc_set = set([nucname.id(int(nuc)) for nuc in dep['ZAI'][:-2]])
     shape = (len(dep['ZAI']), len(dep['DAYS'])) 
     for key in dep:
@@ -54,5 +53,6 @@ def test_parse_det1():
             assert_true(det[key].shape[1] in [3, 13])
 
     # Check values
-    assert_array_equal(det['DETphi'][6], [7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 2.92709E-02, 0.00857, 16768])
+    assert_array_equal(det['DETphi'][6], 
+                       [7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 2.92709E-02, 0.00857, 16768])
     assert_array_equal(det['DETphiE'][-3], [1.49182E+01, 1.69046E+01, 1.49182E+01])

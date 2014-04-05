@@ -350,7 +350,7 @@ class SystemDefinition(IDefinition):
         # TODO removing cards.
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.cells:
-            raise StandardError("Cell {0!r} is not in the system.".format(
+            raise Exception("Cell {0!r} is not in the system.".format(
                     name))
         return list(self.cells.keys()).index(name) + 1
 
@@ -361,7 +361,7 @@ class SystemDefinition(IDefinition):
         """
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.surfaces:
-            raise StandardError("Surface {0!r} is not in the system.".format(
+            raise Exception("Surface {0!r} is not in the system.".format(
                     name))
         num = list(self.surfaces.keys()).index(name) + 1
         if isinstance(self.surfaces[name], cards.Facet):
@@ -377,7 +377,7 @@ class SystemDefinition(IDefinition):
         """
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.materials:
-            raise StandardError("Material {0!r} is not in the system.".format(
+            raise Exception("Material {0!r} is not in the system.".format(
                     name))
         return list(self.materials.keys()).index(name) + 1
 
@@ -387,7 +387,7 @@ class SystemDefinition(IDefinition):
 
         """
         if name not in self.universes:
-            raise StandardError("Universe {0!r} is not in the system.".format(
+            raise Exception("Universe {0!r} is not in the system.".format(
                     name))
         return self.universes.index(name) + 1
 
@@ -672,7 +672,7 @@ class SimulationDefinition(IDefinition):
 
         """
         if name not in self.dists:
-            raise StandardError("Distribution {0!r} is not in "
+            raise Exception("Distribution {0!r} is not in "
                     "the simulation.".format(name))
         return list(self.dists.keys()).index(name) + 1
 
@@ -995,7 +995,7 @@ class MCNPSimulation(SimulationDefinition):
 
         """
         if name not in self.transformations:
-            raise StandardError("Transformation {0!r} is not in "
+            raise Exception("Transformation {0!r} is not in "
                     "the simulation.".format(name))
         return list(self.transformations.keys()).index(name) + 1
 
