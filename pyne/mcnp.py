@@ -13,6 +13,7 @@ available to use.
 """
 
 from __future__ import print_function, division
+import sys
 import collections
 import string
 import struct
@@ -43,6 +44,9 @@ except ImportError:
 
 from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
+if sys.version_info[0] > 2:
+    def cmp(a, b):
+        return (a > b) - (a < b)
 
 class Mctal(object):
     def __init__(self):
@@ -251,14 +255,14 @@ class SurfSrc(_BinaryReader):
 
         return track_data
 
-#    def __eq__(self, other):
-#        """ Compare two surface sources
-#        """
-#        return self.__dict__ == other.__dict__
+    def __eq__(self, other):
+        rtn = self.__cmp__(other)
+        return rtn == 0
 
     def __cmp__(self, other):
         """ Comparison is not completely robust. Tracklists are not compared!!!
         """
+        print("Yoohoo!")
 
         if other.kod != self.kod:
             # kod does not match
@@ -332,12 +336,12 @@ class SurfSrc(_BinaryReader):
         # interpret header
         self.kod = header.get_string(8)[0]  # code identifier
 
-        if b'SF_00001' not in self.kod:
+        if 'SF_00001' not in self.kod:
             self.ver = header.get_string(5)[0]  # code version identifier
 
-            if b'2.6.0' in self.ver:
+            if '2.6.0' in self.ver:
                 self.loddat = header.get_string(28)[0]  # code version date
-            elif b'5    ' in self.ver:
+            elif '5    ' in self.ver:
                 self.loddat = header.get_string(8)[0]  # code version date
             else:
                 raise NotImplementedError("MCNP5/X Version:" +
@@ -352,7 +356,7 @@ class SurfSrc(_BinaryReader):
             tablelengths = self.get_fortran_record()
 
             # interpret table lengths
-            if b'2.6.0' in self.ver:
+            if '2.6.0' in self.ver:
                 self.np1 = tablelengths.get_int()[0]    # hist used to gen. src
                 self.nrss = tablelengths.get_int()[0]   # #tracks to surf src
             else:
@@ -368,7 +372,7 @@ class SurfSrc(_BinaryReader):
             while tablelengths.num_bytes > tablelengths.pos:
                 self.table1extra += tablelengths.get_int()
 
-        elif b'SF_00001' in self.kod:
+        elif 'SF_00001' in self.kod:
             header = self.get_fortran_record()
             self.ver = header.get_string(12)[0]     # code version identifier
             self.loddat = header.get_string(9)[0]   # code version date
@@ -435,7 +439,8 @@ class SurfSrc(_BinaryReader):
         # no known case of their actual utility is known currently
         for j in range(self.njsw, self.njsw+self.niwr):
             self.get_fortran_record()
-            print("Extra info in header not handled: {0}".format(j))
+            warnings.warn("Extra info in header not handled: {0}".format(j),
+                          RuntimeWarning)
 
         # read summary table record
         summary_info = self.get_fortran_record()
@@ -473,28 +478,31 @@ class SurfSrc(_BinaryReader):
 
     def put_header(self):
         """Write the header part of the header to the surface source file"""
-        if b'SF_00001' in self.kod:
+        if 'SF_00001' in self.kod:
             rec = [self.kod]
-            newrecord = _FortranRecord(b"".join(rec), len(b"".join(rec)))
+            joinrec = "".join(rec)
+            newrecord = _FortranRecord(joinrec, len(joinrec))
             self.put_fortran_record(newrecord)
 
             rec = [self.ver, self.loddat, self.idtm, self.probid, self.aid]
-            newrecord = _FortranRecord(b"".join(rec), len(b"".join(rec)))
+            joinrec = "".join(rec)
+            newrecord = _FortranRecord(joinrec, len(joinrec))
             newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
         else:
             rec = [self.kod, self.ver, self.loddat,
                    self.idtm, self.probid, self.aid]
-            newrecord = _FortranRecord(b"".join(rec), len(b"".join(rec)))
+            joinrec = "".join(rec)
+            newrecord = _FortranRecord(joinrec, len(joinrec))
             newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
         return
 
     def put_table_1(self):
         """Write the table1 part of the header to the surface source file"""
-        newrecord = _FortranRecord(b"", 0)
+        newrecord = _FortranRecord("", 0)
 
-        if b'2.6.0' in self.ver:
+        if '2.6.0' in self.ver:
             newrecord.put_int([self.np1])
             newrecord.put_int([self.nrss])
         else:
@@ -510,7 +518,7 @@ class SurfSrc(_BinaryReader):
 
     def put_table_2(self):
         """Write the table2 part of the header to the surface source file"""
-        newrecord = _FortranRecord(b"", 0)
+        newrecord = _FortranRecord("", 0)
         newrecord.put_int([self.niwr])
         newrecord.put_int([self.mipts])
         newrecord.put_int([self.kjaq])
@@ -522,7 +530,7 @@ class SurfSrc(_BinaryReader):
         """Write the record for each surface to the surface source file"""
 
         for cnt, s in enumerate(self.surflist):
-            newrecord = _FortranRecord(b"", 0)
+            newrecord = _FortranRecord("", 0)
             newrecord.put_int(s.id)
             if self.kjaq == 1:
                 newrecord.put_int(s.facet_id)  # don't add a 'dummy facet ID'
@@ -537,7 +545,7 @@ class SurfSrc(_BinaryReader):
 
     def put_summary(self):
         """Write the summary part of the header to the surface source file"""
-        newrecord = _FortranRecord(b"", 0)
+        newrecord = _FortranRecord("", 0)
         newrecord.put_int(list(self.summary_table))
         newrecord.put_int(list(self.summary_extra))
         self.put_fortran_record(newrecord)
@@ -559,7 +567,7 @@ class SurfSrc(_BinaryReader):
         """
 
         for j in range(self.nrss):  # nrss is the size of tracklist
-            newrecord = _FortranRecord(b"", 0)
+            newrecord = _FortranRecord("", 0)
             # 11 records comprising particle information
             newrecord.put_double(self.tracklist[j].nps)
             newrecord.put_double(self.tracklist[j].bitarray)
@@ -977,7 +985,7 @@ class XsdirTable(object):
             if not directory.endswith('/'):
                 directory = directory.strip() + '/'
 
-        return "{0} {0} {1} {2} {3} {4} {5} {6} {7}".format(
+        return "{0} {0} {1} {2} {3} {4} {5:.11e} {6} {7}".format(
             self.name,
             self.serpent_type, self.zaid, 1 if self.metastable else 0,
             self.awr, self.temperature/8.6173423e-11, self.filetype - 1,
@@ -1137,7 +1145,7 @@ class PtracReader(object):
 
         if format == 's':
             # return just one string
-            return ''.join(tmp)
+            return b''.join(tmp).decode()
         elif number == 1:
             # just return the number and not a tuple containing just the number
             return tmp[0]
@@ -1381,7 +1389,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     # Check to see it material is definted my mass or atom fracs.
     # Do this by comparing the first non-zero fraction to the rest
     # If atom fracs, convert.
-    nucvecvals = nucvec.values()
+    nucvecvals = list(nucvec.values())
     n = 0
     isatom = 0 < nucvecvals[n]
     while 0 == nucvecvals[n]:
