@@ -23,7 +23,7 @@ def test_parse_res1():
 
 
 def test_parse_dep1():
-    dep = serpent.parse_dep('sample_dep.m', True)
+    dep = serpent.parse_dep('sample_dep.m')
     nuc_set = set([nucname.id(int(nuc)) for nuc in dep['ZAI'][:-2]])
     shape = (len(dep['ZAI']), len(dep['DAYS'])) 
     for key in dep:

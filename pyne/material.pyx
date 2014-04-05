@@ -1054,12 +1054,10 @@ cdef class _Material:
 
 
     # Division
-
     def __div_float__(self, double y):
         cdef _Material pymat = Material()
         pymat.mat_pointer[0] = self.mat_pointer[0] * (1 / y)
         return pymat
-
 
     def __div__(self, y):
         if isinstance(y, float):
@@ -1069,14 +1067,16 @@ cdef class _Material:
         else:
             return NotImplemented
 
-
     def __rdiv__(self, y):
         return self.__div__(y)
 
-
     def __truediv__(self, y):
-        return self.__div__(y)
-
+        if isinstance(y, float):
+            return self.__div_float__(y)
+        elif isinstance(y, int):
+            return self.__div_float__(float(y))
+        else:
+            return NotImplemented
 
     #
     # Mapping interface
@@ -1989,6 +1989,8 @@ cdef class _MaterialLibrary(object):
             file = open(file, 'r')
             opened_here = True
         fstr = file.read()
+        if isinstance(fstr, str):
+            fstr = fstr.encode()
         s = std_string(<char *> fstr)
         if opened_here:
             file.close()
@@ -1998,7 +2000,7 @@ cdef class _MaterialLibrary(object):
             mat = Material()
             key = keys[i]
             (<_Material> mat).mat_pointer.load_json(jsonlib[key])
-            _lib[key.c_str()] = mat
+            _lib[bytes(key.c_str()).decode()] = mat
 
     def write_json(self, file):
         """Writes this material library to a JSON file.
@@ -2022,8 +2024,7 @@ cdef class _MaterialLibrary(object):
         if isinstance(file, basestring):
             file = open(file, 'w')
             opened_here = True
-        s = s.decode('UTF-8')
-        file.write(s)
+        file.write(bytes(s).decode())
         if opened_here:
             file.close()
 
