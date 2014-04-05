@@ -835,6 +835,7 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
            "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
            "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
            "{+28}mg", "sf(+ec+b+)"]
+    special = ""
     if levellist is None:
         levellist = []
     if lmap is None:
@@ -866,9 +867,9 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                                     goodkey = False
                             if goodkey is True:
                                 rx = rxname.id(keystrip)
-                                levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state))
+                                levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state, special))
                     if level_found is True:
-                        levellist.append((nuc_id, 0, half_lifev, level, 0.0, state))
+                        levellist.append((nuc_id, 0, half_lifev, level, 0.0, state, special))
                     brs = {}
                     level, half_lifev, from_nuc, state, special = \
                         _parse_level_record(level_l)
@@ -895,9 +896,9 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                             goodkey = False
                     if goodkey is True:
                         rx = rxname.id(keystrip)
-                        levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state))
+                        levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state, special))
             if level_found is True:
-                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state))
+                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state, special))
     return levellist
 
 
