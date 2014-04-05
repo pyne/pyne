@@ -71,6 +71,7 @@ cdef class _Material:
                     comp, mass, density, atoms_per_molecule, deref(cattrs._inst))
         elif isinstance(nucvec, basestring):
             # Material from file
+            nucvec = nucvec.encode()
             self.mat_pointer = new cpp_material.Material(
                     <char *> nucvec, mass, density, atoms_per_molecule, 
                     deref(cattrs._inst))
@@ -178,7 +179,7 @@ cdef class _Material:
         self.mat_pointer.norm_comp()
 
 
-    def from_hdf5(self, char * filename, char * datapath, int row=-1,
+    def from_hdf5(self, filename, datapath, int row=-1,
                   int protocol=1):
         """from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1)
         Initialize a Material object from an HDF5 file.
@@ -253,7 +254,19 @@ cdef class _Material:
             mat.from_hdf5("afile.h5", "/foo/bar/mat", -3)
 
         """
-        self.mat_pointer.from_hdf5(filename, datapath, row, protocol)
+        cdef char * c_filename
+        if isinstance(filename, unicode):
+            filename_bytes = filename.encode('UTF-8')
+        else:
+            filename_bytes = filename
+        c_filename = filename_bytes
+        cdef char * c_datapath
+        if isinstance(datapath, unicode):
+            datapath_bytes = datapath.encode('UTF-8')
+        else:
+            datapath_bytes = datapath
+        c_datapath = datapath_bytes
+        self.mat_pointer.from_hdf5(c_filename, c_datapath, row, protocol)
 
 
     def write_hdf5(self, filename, datapath="/material", nucpath="/nucid",
@@ -303,10 +316,19 @@ cdef class _Material:
                 leu.write_hdf5('proto1.h5')
 
         """
-        self.mat_pointer.write_hdf5(filename, datapath, nucpath, row, chunksize)
+        cdef char * c_filename
+        filename_bytes = filename.encode('UTF-8')
+        c_filename = filename_bytes
+        cdef char * c_datapath
+        datapath_bytes = datapath.encode('UTF-8')
+        c_datapath = datapath_bytes
+        cdef char * c_nucpath
+        nucpath_bytes = nucpath.encode('UTF-8')
+        c_nucpath = nucpath_bytes
+        self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
 
-    def from_text(self, char * filename):
+    def from_text(self, filename):
         """from_text(char * filename)
         Initialize a Material object from a simple text file.
 
@@ -347,7 +369,13 @@ cdef class _Material:
         This method is most often called implicitly by the Material constructor.
 
         """
-        self.mat_pointer.from_text(filename)
+        cdef char * c_filename
+        if isinstance(filename, unicode):
+            filename_bytes = filename.encode('UTF-8')
+        else:
+            filename_bytes = filename
+        c_filename = filename_bytes
+        self.mat_pointer.from_text(c_filename)
 
 
     def write_text(self, filename):
@@ -368,7 +396,13 @@ cdef class _Material:
             leu.write_text('leu.txt')
 
         """
-        self.mat_pointer.write_text(filename)
+        cdef char * c_filename
+        if isinstance(filename, unicode):
+            filename_bytes = filename.encode('UTF-8')
+        else:
+            filename_bytes = filename
+        c_filename = filename_bytes
+        self.mat_pointer.write_text(c_filename)
 
     def load_json(self, json):
         """load_json(json)
@@ -396,7 +430,7 @@ cdef class _Material:
         val._inst[0] = self.mat_pointer.dump_json()
         return val
 
-    def from_json(self, char * filename):
+    def from_json(self, filename):
         """from_json(char * filename)
         Initialize a Material object from a JSON file.
 
@@ -406,7 +440,10 @@ cdef class _Material:
             Path to text file that contains the data to read in.
 
         """
-        self.mat_pointer.from_json(filename)
+        cdef char * c_filename
+        filename_bytes = filename.encode('UTF-8')
+        c_filename = filename_bytes
+        self.mat_pointer.from_json(c_filename)
 
     def write_json(self, filename):
         """write_json(filename)
@@ -426,6 +463,7 @@ cdef class _Material:
             leu.write_json('leu.json')
 
         """
+        filename = filename.encode()
         self.mat_pointer.write_json(filename)
 
     def normalize(self):
@@ -1480,7 +1518,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
 
 
 
-def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
+def from_hdf5(filename, datapath, int row=-1, int protocol=1):
     """from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1)
     Create a Material object from an HDF5 file.
 
@@ -1515,13 +1553,19 @@ def from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1):
     Material.from_hdf5 : Underlying method class method.
 
     """
+    cdef char * c_filename
+    filename_bytes = filename.encode('UTF-8')
+    c_filename = filename_bytes
+    cdef char * c_datapath
+    datapath_bytes = datapath.encode('UTF-8')
+    c_datapath = datapath_bytes
     mat = Material()
-    mat.from_hdf5(filename, datapath, row, protocol)
+    mat.from_hdf5(c_filename, c_datapath, row, protocol)
     return mat
 
 
 
-def from_text(char * filename, double mass=-1.0, double atoms_per_molecule=-1.0, attrs=None):
+def from_text(filename, double mass=-1.0, double atoms_per_molecule=-1.0, attrs=None):
     """from_text(char * filename, double mass=-1.0, double atoms_per_molecule=-1.0)
     Create a Material object from a simple text file.
 
@@ -1559,6 +1603,9 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_molecule=-1.0,
     Material.from_text : Underlying method class method.
 
     """
+    cdef char * c_filename
+    filename_bytes = filename.encode('UTF-8')
+    c_filename = filename_bytes
     mat = Material(attrs=attrs)
 
     if 0.0 <= mass:
@@ -1567,7 +1614,7 @@ def from_text(char * filename, double mass=-1.0, double atoms_per_molecule=-1.0,
     if 0.0 <= atoms_per_molecule:
         mat.atoms_per_molecule = atoms_per_molecule
 
-    mat.from_text(filename)
+    mat.from_text(c_filename)
     return mat
 
 
@@ -1705,6 +1752,7 @@ cdef class _MapStrMaterial:
         cdef _Material pymat
 
         if isinstance(key, basestring):
+            key = key.encode()
             s = std_string(<char *> key)
         else:
             raise TypeError("Only string keys are valid.")
@@ -1718,14 +1766,18 @@ cdef class _MapStrMaterial:
         else:
             raise KeyError(repr(key) + " not in map.")
 
-    def __setitem__(self, char * key, value):
-        cdef std_string s = std_string(key)
+    def __setitem__(self, key, value):
+        
+        cdef char * c_key
+        key_bytes = key.encode('UTF-8')
+        c_key = key_bytes
+        cdef std_string s = std_string(c_key)
         if not isinstance(value, _Material):
             raise TypeError("may only set materials into this mapping.")
         cdef cpp_pair[std_string, matp] item = cpp_pair[std_string, matp](s,
                 (<_Material> value).mat_pointer)
         self.map_ptr.insert(item)
-        self._cache[key] = value
+        self._cache[c_key] = value
 
     def __delitem__(self, char * key):
         cdef std_string s
@@ -1963,12 +2015,14 @@ cdef class _MaterialLibrary(object):
         cdef cpp_jsoncpp.Value jsonlib = cpp_jsoncpp.Value(cpp_jsoncpp.objectValue)
         cdef cpp_jsoncpp.StyledWriter writer = cpp_jsoncpp.StyledWriter()
         for key, mat in self._lib.items():
+            key = key.encode()
             skey = std_string(<char *> key)
             jsonlib[skey] = (<_Material> mat).mat_pointer.dump_json()
         s = writer.write(jsonlib)
         if isinstance(file, basestring):
             file = open(file, 'w')
             opened_here = True
+        s = s.decode('UTF-8')
         file.write(s)
         if opened_here:
             file.close()

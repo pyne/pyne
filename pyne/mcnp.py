@@ -1253,7 +1253,7 @@ class PtracReader(object):
 
         self.next_event = evt_line[0]
 
-        for i in xrange(1, len(self.variable_ids[e])):
+        for i in range(1, len(self.variable_ids[e])):
             if self.variable_ids[e][i] in self.variable_mappings:
                 ptrac_event[self.variable_mappings[
                     self.variable_ids[e][i]]] = \
