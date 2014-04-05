@@ -13,7 +13,7 @@ def test_make_empty_FR():
 
     test_record = _FortranRecord('', 0)
 
-    if test_record.data != '':
+    if len(test_record.data) != 0:
         raise ValueError("Failed to make an new empty _FortranRecord. "
                          " Record has data.")
     if test_record.num_bytes != 0:
@@ -46,17 +46,17 @@ def test_reset_FR():
 
 
 # useful for checking all the changes expected from writing to a FortranRecord
-def check_write_record_data(record, pos, num, data, typeString):
+def check_write_record_data(record, pos, num, data, typestring):
 
     if record.pos != pos:
-        raise ValueError("Writing " + typeString +
+        raise ValueError("Writing " + typestring +
                          " to record did not update pos properly: "
                          + str(record.pos))
     if record.num_bytes != num:
-        raise ValueError("Writing  " + typeString +
+        raise ValueError("Writing  " + typestring +
                          "to record did not update num_bytes properly")
     if record.data != data:
-        raise ValueError("Writing  " + typeString +
+        raise ValueError("Writing  " + typestring +
                          "to record did not set data member correctly")
 
     return 1
@@ -72,7 +72,7 @@ def test_write_FR_single_int():
 
     set_int = 8
     set_num_bytes = 4
-    set_data = '\x08\x00\x00\x00'
+    set_data = b'\x08\x00\x00\x00'
 
     # create new record
     test_record = _FortranRecord('', 0)  # already tested
@@ -88,7 +88,7 @@ def test_write_FR_int_list():
 
     set_intList = [8, 16]
     set_num_bytes = 8
-    set_data = '\x08\x00\x00\x00\x10\x00\x00\x00'
+    set_data = b'\x08\x00\x00\x00\x10\x00\x00\x00'
 
     test_record = _FortranRecord('', 0)
 
@@ -103,7 +103,7 @@ def test_write_FR_single_long():
 
     set_long = 8
     set_num_bytes = 8
-    set_data = '\x08\x00\x00\x00\x00\x00\x00\x00'
+    set_data = b'\x08\x00\x00\x00\x00\x00\x00\x00'
 
     # create new record
     test_record = _FortranRecord('', 0)  # already tested
@@ -120,7 +120,7 @@ def test_write_FR_long_list():
     set_long_list = [8, 16]
     set_num_bytes = 16
     set_data = \
-        '\x08\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00'
+        b'\x08\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00'
 
     test_record = _FortranRecord('', 0)
     test_record.put_long(set_long_list)
@@ -133,7 +133,7 @@ def test_write_FR_single_float():
 
     set_float = 3.14
     set_num_bytes = 4
-    set_data = '\xc3\xf5H@'
+    set_data = b'\xc3\xf5H@'
 
     # create new record
     test_record = _FortranRecord('', 0)  # already tested
@@ -149,7 +149,7 @@ def test_write_FR_float_list():
 
     set_floatList = [3.14, 0.3333]
     set_num_bytes = 8
-    set_data = '\xc3\xf5H@L\xa6\xaa>'
+    set_data = b'\xc3\xf5H@L\xa6\xaa>'
 
     test_record = _FortranRecord('', 0)
     test_record.put_float(set_floatList)
@@ -162,7 +162,7 @@ def test_write_FR_single_double():
 
     set_double = 3.14
     set_num_bytes = 8
-    set_data = '\x1f\x85\xebQ\xb8\x1e\t@'
+    set_data = b'\x1f\x85\xebQ\xb8\x1e\t@'
 
     # create new record
     test_record = _FortranRecord('',  0)  # already tested
@@ -178,7 +178,7 @@ def test_write_FR_double_list():
 
     set_double_list = [3.14, 0.3333]
     set_num_bytes = 16
-    set_data = '\x1f\x85\xebQ\xb8\x1e\t@io\xf0\x85\xc9T\xd5?'
+    set_data = b'\x1f\x85\xebQ\xb8\x1e\t@io\xf0\x85\xc9T\xd5?'
 
     test_record = _FortranRecord('', 0)
     test_record.put_double(set_double_list)
@@ -192,7 +192,7 @@ def test_write_FR_single_string():
     set_string = "Hello World!"
     set_length = len(set_string)
     set_num_bytes = 12
-    set_data = 'Hello World!'
+    set_data = b'Hello World!'
 
     # create new record
     test_record = _FortranRecord('', 0)  # already tested
@@ -209,7 +209,7 @@ def test_write_FR_string_list():
     set_string_list = ["Hello ", "World!"]
     set_length = len(set_string_list[0])
     set_num_bytes = 12
-    set_data = 'Hello World!'
+    set_data = b'Hello World!'
 
     test_record = _FortranRecord('', 0)
     test_record.put_string(set_string_list, set_length)
@@ -226,8 +226,8 @@ def test_write_FR_mixed_record():
     set_string = "Hello World!"
 
     set_num_bytes = 4+4+(2*8)+12
-    set_data = '\x08\x00\x00\x00Hello World!#B\x92\x0c\xa1\x9c\x07<a\xd3' + \
-        '\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
+    set_data = b'\x08\x00\x00\x00Hello World!#B\x92\x0c\xa1\x9c\x07<a\xd3' + \
+        b'\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
 
     test_record = _FortranRecord('', 0)
     test_record.put_int(set_int)

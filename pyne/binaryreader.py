@@ -4,9 +4,8 @@
 Fortran formatted records.
 
 """
-
 import struct
-
+from collections import Iterable
 
 class _FortranRecord(object):
     """A single Fortran formatted record.
@@ -93,13 +92,14 @@ class _FortranRecord(object):
         Packs a list of data objects at the current position with a
         specified format and data size.
         """
-        try:
-            iter(newdata)
-        except TypeError:
+        if not isinstance(newdata, Iterable):
             newdata = [newdata]
 
         for i in range(len(newdata)):
-            self.data += struct.pack(format, newdata[i])
+            nd = newdata[i]
+            if isinstance(nd, str):
+                nd = nd.encode()
+            self.data += struct.pack(format, nd)
             self.pos += item_size
             self.num_bytes += item_size
 
