@@ -120,9 +120,10 @@ def endftod(s):
     float64
     """
     cdef char * cs
-    s_bytes = s.encode()
-    cs = s_bytes
-    return pyne.cpp_pyne.endftod(<char *> cs)
+    if isinstance(s, str):
+        s = s.encode()
+    cs = s
+    return pyne.cpp_pyne.endftod(cs)
 
 
 def fromendf_tok(s):
@@ -140,8 +141,9 @@ def fromendf_tok(s):
         appropriate shape.
     """
     cdef char * cs
-    s_bytes = s.encode()
-    cs = s_bytes
+    if isinstance(s, str):
+        s = s.encode()
+    cs = s
     cdef int i, num_entries
     cdef char entry[12]
     cdef long pos = 0

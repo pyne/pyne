@@ -2,6 +2,7 @@
 """
 from __future__ import division
 import os
+import io
 try:
     from StringIO import StringIO
 except ImportError:
@@ -688,8 +689,7 @@ class ENDFDataSource(DataSource):
             if isinstance(self.fh, basestring):
                 self._exists = os.path.isfile(self.fh)
             else:
-                self._exists = (isinstance(self.fh, file) or \
-                                isinstance(self.fh, StringIO))
+                self._exists = isinstance(self.fh, io.IOBase)
         return self._exists
 
     def _load_group_structure(self, nuc, rx, nuc_i=None):
