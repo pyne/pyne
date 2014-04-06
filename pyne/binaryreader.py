@@ -61,9 +61,7 @@ class _FortranRecord(object):
         return self.get_data(n, 'q', self.long_size)
 
     def get_float(self, n=1):
-        """
-        Returns one or more floats.
-        """
+        """Returns one or more floats."""
         return self.get_data(n, 'f', self.float_size)
 
     def get_double(self, n=1):
@@ -179,6 +177,8 @@ class _BinaryReader(object):
 
         # Read num_bytes from the record
         data = self.f.read(num_bytes)
+        if isinstance(data, str):
+            data = bytearray(data)
 
         # now read end of record
         num_bytes2 = self.get_int()

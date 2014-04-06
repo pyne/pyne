@@ -521,7 +521,7 @@ class Cell(ICard):
         string = "Cell {0!r}: region {1}, ".format(
                 self.name, self.region.comment())
         if self.material and self.density and self.density_units:
-            string += "material {0!r} density {1:g} {2}".format(
+            string += "material {0} density {1:g} {2}".format(
                     self.material.name, self.density, self.density_units)
         else:
             string += "void"
@@ -1315,7 +1315,7 @@ class Material(ICard):
     def comment(self): 
         if self.name == '':
             raise ValueError("The ``name`` property of the material cannot be empty.")
-        s = "Material {0!r}".format(self.name)
+        s = "Material {0}".format(self.name)
         if self.description:
             s += ": {0}".format(self.description)
         else:
@@ -1432,7 +1432,7 @@ class ISurface(ICard):
 
     @abc.abstractmethod
     def comment(self, title):
-        return "{0} {1!r}:{2}{3} ".format(title, self.name, 
+        return "{0} {1}:{2}{3} ".format(title, self.name, 
                 " reflecting." if self.reflecting else "",
                 " white." if self.white else "")
 
@@ -1935,7 +1935,7 @@ class Facet(ISurface):
         self.number = number
 
     def comment(self):
-        return "{0}. facet {0!r}.".format(
+        return "{0}. facet {0}.".format(
                 self.macrobody.comment(), self.descriptor)
 
     def mcnp(self):
@@ -2410,7 +2410,7 @@ class ScatteringLaw(IMisc):
         self.libraries = libraries
 
     def comment(self):
-        string = "Scattering law {0!r}:".format(self.name)
+        string = "Scattering law {0}:".format(self.name)
         for nuc, lib in self.libraries.items():
             string += " {0}: {1},".format(nucname.name(nuc), lib)
         return string[:-1] + "."
@@ -3146,7 +3146,7 @@ class Distribution(ICard):
 
     def comment(self):
         vecformat = " {0} {0} {0}"
-        string = "Source distribution {0!r}:".format(self.name)
+        string = "Source distribution {0}:".format(self.name)
         string += " key setting {0},".format(
                 self.key_setting if self.key_setting else "default")
         string += " val setting {0},".format(
@@ -3291,7 +3291,7 @@ class Criticality(ISource):
         self.n_cycles = n_cycles
 
     def comment(self):
-        return ("Criticality source {0!r}: n_histories: {1}, keff_guess: {2:g}"
+        return ("Criticality source {0}: n_histories: {1}, keff_guess: {2:g}"
                 ", n_skip_cycles: {3}, n_cycles: {4}.".format(self.name,
                     self.n_histories, self.keff_guess, self.n_skip_cycles,
                     self.n_cycles))
@@ -3384,7 +3384,7 @@ class CriticalityPoints(ISource):
         self.points = points
 
     def comment(self):
-        string = "Criticality points {0!r}:".format(self.name)
+        string = "Criticality points {0}:".format(self.name)
         counter = 0
         for point in self.points:
             counter += 1

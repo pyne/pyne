@@ -3,15 +3,15 @@ Infinite lattice.
   C ==========
   C Cell Cards
   C ==========
-  C Cell 'fuel': region -pin, material 'UO2' density 11 g/cm^3 VOL= 1 cm^3
-  c     IMP:N= 1.
+  C Cell 'fuel': region -pin, material UO2 density 11 g/cm^3 VOL= 1 cm^3 IMP:N=
+  c     1.
 1 2 -11 -2 VOL= 1 IMP:N=1
   C
   C cellhey
 2 cellhey
   C
-  C Cell 'coolant': region (+pin | -bound), material 'H2O' density 1 g/cm^3 VOL=
-  c     1 cm^3 IMP:N= 1.
+  C Cell 'coolant': region (+pin | -bound), material H2O density 1 g/cm^3 VOL= 1
+  c     cm^3 IMP:N= 1.
 3 3 -1 (2 -3) VOL= 1 IMP:N=1
   C
   C Cell 'graveyard': region +bound, void IMP:N= 0.
@@ -24,11 +24,11 @@ Infinite lattice.
   C surfhey
 1 surfhey
   C
-  C Axis cylinder 'pin': aligned and centered on x axis, with radius 0.4 cm
+  C Axis cylinder pin: aligned and centered on x axis, with radius 0.4 cm
   c     (diameter 0.8 cm).
 2  CX   0.4
   C
-  C Parallelepiped 'bound': reflecting. [-0.6, 0.6] x [-0.6, 0.6] x [0, 0] cm.
+  C Parallelepiped bound: reflecting. [-0.6, 0.6] x [-0.6, 0.6] x [0, 0] cm.
 *3 RPP -0.6  0.6  -0.6  0.6   0  0
   C
 
@@ -42,13 +42,13 @@ Infinite lattice.
   C mathey
 M1 mathey
   C
-  C Material 'UO2'.
+  C Material UO2.
 M2
        8016    2 $ O16
       92235    0.05 $ U235
       92238    0.95 $ U238
   C
-  C Material 'H2O'.
+  C Material H2O.
 M3
        1001    2 $ H1
        8016    1 $ O16
@@ -57,11 +57,11 @@ M3
   C ************
   C Source Cards
   C ************
-  C Criticality source 'criticality': n_histories: 1000, keff_guess: 1,
+  C Criticality source criticality: n_histories: 1000, keff_guess: 1,
   c     n_skip_cycles: 30, n_cycles: 130.
 KCODE 1000  1 30 130
   C
-  C Criticality points 'criticalitypoints': (0, 0, 0) cm.
+  C Criticality points criticalitypoints: (0, 0, 0) cm.
 KSRC  0  0  0
   C
   C sourcehey
@@ -102,7 +102,7 @@ TR1 transhey
   C *******************
   C Miscellaneous Cards
   C *******************
-  C Scattering law 'scatlaw-H2O': H1: lwtr.
+  C Scattering law scatlaw-H2O: H1: lwtr.
 MT3 lwtr
   C
   C Energy grid 'egrid0' for all tallies: 110 groups.
