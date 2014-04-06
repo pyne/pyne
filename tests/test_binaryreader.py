@@ -5,6 +5,8 @@ import struct
 import filecmp
 import os
 
+from nose.tools import assert_equal
+
 from pyne.binaryreader import (_FortranRecord, _BinaryReader)
 
 
@@ -102,6 +104,7 @@ def test_write_FR_int_list():
 def test_write_FR_single_long():
 
     set_long = 8
+
     set_num_bytes = 8
     set_data = b'\x08\x00\x00\x00\x00\x00\x00\x00'
 
@@ -545,12 +548,10 @@ def test_read_BR():
     test_record = binary_file.get_fortran_record()
 
     test_int = test_record.get_int()[0]
-    if test_int != set_int:
-        raise ValueError("Integer value was not as expected.")
+    assert_equal(set_int, test_int)
 
     test_string = test_record.get_string(12)[0]
-    if test_string != set_string:
-        raise ValueError("String was not as expected.")
+    assert_equal(set_string.decode(), test_string)
 
     test_double_list = test_record.get_double(2)
     if test_double_list != set_double_list:
