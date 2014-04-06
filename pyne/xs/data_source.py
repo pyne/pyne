@@ -469,7 +469,10 @@ class CinderDataSource(DataSource):
 
         # Set query condition
         if rx in self._rx_avail:
-            cond = "(from_nuc == {0}) & (reaction_type == {1})"
+            if py3k:
+                cond = "(from_nuc == {0}) & (reaction_type == {1})"
+            else:
+                cond = "(from_nuc == {0}) & (reaction_type == '{1}')"
             cond = cond.format(nuc, self._rx_avail[rx].encode())
         elif rx == fissrx:
             cond = 'nuc == {0}'.format(nuc)
