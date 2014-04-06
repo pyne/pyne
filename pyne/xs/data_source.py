@@ -3,14 +3,11 @@
 from __future__ import division
 import os
 import io
+import sys
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-try:
-    basestring
-except NameError:
-    basestring = str
 
 import numpy as np
 import tables as tb
@@ -20,6 +17,12 @@ from .. import nucname
 from .. import rxname
 from ..endf import Library
 from .models import partial_energy_matrix, group_collapse
+
+IO_TYPES = (io.IOBase, StringIO)
+
+if sys.version_info[0] > 2:
+    basestring = str
+
 
 class DataSource(object):
     """Base cross section data source.
@@ -690,7 +693,8 @@ class ENDFDataSource(DataSource):
             if isinstance(self.fh, basestring):
                 self._exists = os.path.isfile(self.fh)
             else:
-                self._exists = isinstance(self.fh, io.IOBase)
+                self._exists = isinstance(self.fh, IO_TYPES)
+        print(self.fh)
         return self._exists
 
     def _load_group_structure(self, nuc, rx, nuc_i=None):
