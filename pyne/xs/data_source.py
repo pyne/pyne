@@ -465,12 +465,12 @@ class CinderDataSource(DataSource):
 
         # Set query condition
         if rx in self._rx_avail:
-            cond = "(from_nuc == {0}) & (reaction_type == '{1}')"
-            cond = cond.format(nuc, self._rx_avail[rx])
+            cond = "(from_nuc == {0}) & (reaction_type == {1})"
+            cond = cond.format(nuc, self._rx_avail[rx].encode())
         elif rx == fissrx:
             cond = 'nuc == {0}'.format(nuc)
         elif rx == absrx:
-            cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
+            cond = "(from_nuc == {0}) & (reaction_type != b'c')".format(nuc)
         else:
             return None
 
@@ -605,7 +605,8 @@ class EAFDataSource(DataSource):
         absrx = rxname.id('absorption')
 
         if rx in self._rx_avail:
-            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, self._rx_avail[rx])
+            cond = "(nuc_zz == {0}) & (rxnum == {1})"
+            cond = cond.format(nuc, self._rx_avail[rx].encode())
         elif rx == absrx:
             cond = "(nuc_zz == {0})".format(nuc)
         else:
@@ -831,9 +832,9 @@ class ENDFDataSource(DataSource):
         ----------
         scheme : int
             ENDF-coded interpolation scheme to be used between the data points.
-        e_int : NDArray
+        e_int : ndarray
             Array of energy values to integrate over.
-        xs : NDArray
+        xs : ndarray
             Array of cross-sections corresponding to e_int.
         low, high : float
             Lower and upper bounds of integration.
@@ -841,7 +842,9 @@ class ENDFDataSource(DataSource):
         Returns
         -------
         sigma * dE : float
-            Non-normalized integral. """
+            Non-normalized integral. 
+
+        """
         dE = high - low
         sigma = self.library.integrate_tab_range(scheme,e_int, xs, low, high)
         return sigma * dE

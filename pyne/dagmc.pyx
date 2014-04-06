@@ -29,10 +29,10 @@ def get_entity_handle_type():
     else:
         raise TypeError("Unrecognized entity handle size in dagmc library: "
                          + str(eh_size))
-    return type(b"EntityHandle", (eh_t,), {})
+    return type("EntityHandle", (eh_t,), {})
 
 EntityHandle = get_entity_handle_type()
-_ErrorCode = type(b"ErrorCode", (np.int,), {})
+_ErrorCode = type("ErrorCode", (np.int,), {})
 
 class DagmcError(Exception):
     pass

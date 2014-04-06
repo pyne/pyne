@@ -3,13 +3,19 @@ import sys
 import unittest
 import os.path
 from nose.tools import assert_equal, assert_almost_equal, assert_raises
+from nose.plugins.skip import SkipTest
 from numpy.testing import assert_array_equal
+
+try:
+    from itaps import iMesh
+    HAVE_IMESH = True
+except ImportError:
+    HAVE_IMESH = False
 
 try:
     from pyne import dagmc
     from pyne.mesh import Mesh
 except ImportError:
-    from nose.plugins.skip import SkipTest
     raise SkipTest
 
 if sys.version_info[0] < 3:
@@ -171,6 +177,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """The 14th (index 13) mesh volume element fully contains volume 2. Use 
         random sampling.
         """
+        if not HAVE_IMESH:
+            raise SkipTest
         coords = [-4, -1, 1, 4]
         mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
         results = dagmc.discretize_geom(mesh, num_rays=50)
@@ -189,6 +197,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """The 14th (index 13) mesh volume element fully contains volume 2. Use 
         grid sampling.
         """
+        if not HAVE_IMESH:
+            raise SkipTest
         coords = [-4, -1, 1, 4]
         mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
         results = dagmc.discretize_geom(mesh, num_rays=49, grid=True)
@@ -207,6 +217,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """Single mesh volume element that is a 50:50 split of geometry volumes
         2 and 3.
         """
+        if not HAVE_IMESH:
+            raise SkipTest
         coords = [0, 1]
         coords2 = [0, 2]
         mesh = Mesh(structured=True, 
@@ -230,6 +242,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """Test to make sure requesting a grid with a num_rays that is not a
         perfect square raises ValueError.
         """
+        if not HAVE_IMESH:
+            raise SkipTest
         coords = [0, 1]
         mesh = Mesh(structured=True, 
                     structured_coords=[coords, coords, coords])
@@ -238,6 +252,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
     def test_discretize_geom_centers(self):
         """Test that unstructured mesh is sampled by mesh ve centers.
         """
+        if not HAVE_IMESH:
+            raise SkipTest
         coords = [0, 1]
         coords2 = [0, 2, 4]
         mesh = Mesh(structured=True, 
@@ -258,6 +274,8 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """Test that a mesh with one ve in cell 2 and one ve in cell 3 produces
         correct results.
         """
+        if not HAVE_IMESH:
+            raise SkipTest
         coords = [0, 1]
         coords2 = [0, 2, 4]
         mesh = Mesh(structured=True, 
