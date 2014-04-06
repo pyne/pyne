@@ -20,9 +20,10 @@ from .models import partial_energy_matrix, group_collapse
 
 IO_TYPES = (io.IOBase, StringIO)
 
+py3k = False
 if sys.version_info[0] > 2:
     basestring = str
-
+    py3k = True
 
 class DataSource(object):
     """Base cross section data source.
@@ -608,7 +609,10 @@ class EAFDataSource(DataSource):
         absrx = rxname.id('absorption')
 
         if rx in self._rx_avail:
-            cond = "(nuc_zz == {0}) & (rxnum == {1})"
+            if py3k is True:
+                cond = "(nuc_zz == {0}) & (rxnum == {1})"
+            else:
+                cond = "(nuc_zz == {0}) & (rxnum == '{1}')"
             cond = cond.format(nuc, self._rx_avail[rx])
         elif rx == absrx:
             cond = "(nuc_zz == {0})".format(nuc)
@@ -618,7 +622,7 @@ class EAFDataSource(DataSource):
         # Grab data
         with tb.openFile(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = node.readWhere(cond)
+            rows = node.read_where(cond)
             #rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
