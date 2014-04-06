@@ -812,8 +812,8 @@ class ENDFDataSource(DataSource):
         internal_src_bounds = [bd for bd in src_bounds if dst_low < bd < dst_high]
         integration_bounds = [dst_low, dst_high]
         integration_bounds[1:1] = internal_src_bounds
-        integration_bounds = zip(integration_bounds[:-1],
-                                 integration_bounds[1:])
+        integration_bounds = list(zip(integration_bounds[:-1],
+                                      integration_bounds[1:]))
 
         schemes = [src_dict[src_bounds[src_bounds >= high][0]] for low,
                    high in integration_bounds]
