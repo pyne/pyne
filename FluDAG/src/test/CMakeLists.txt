@@ -6,16 +6,18 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 # Where to look for includes
 INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${GTEST_HOME}/gtest-1.7.0/include")
 
+SET(fludag_source "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
 # make fludag source files into a library
 ADD_LIBRARY(fludag SHARED
-	    ${FLUDAG_SOURCE}/fluka_funcs.cpp
-	    ${FLUDAG_SOURCE}/dagmc_utils.cpp
-	    ${FLUDAG_SOURCE}/Input.cpp
-	    ${FLUDAG_SOURCE}/WrapMag.cc
-	    ${FLUDAG_SOURCE}/WrapLookFX.cc
-	    ${FLUDAG_SOURCE}/WrapReg.cc
-	    ${FLUDAG_SOURCE}/WrapFlgfwr.cc
-	    ${FLUDAG_SOURCE}/UnitNumberManager.cpp
+	    ${fludag_source}/fluka_funcs.cpp
+	    ${fludag_source}/dagmc_utils.cpp
+	    ${fludag_source}/Input.cpp
+	    ${fludag_source}/WrapMag.cc
+	    ${fludag_source}/WrapLookFX.cc
+	    ${fludag_source}/WrapReg.cc
+	    ${fludag_source}/WrapFlgfwr.cc
+	    ${fludag_source}/UnitNumberManager.cpp
  )
 
 
