@@ -114,6 +114,10 @@ def test_id():
     assert_equal(nucname.id(2420950), 952420000)
     assert_equal(nucname.id(92), 920000000)
 
+    assert_equal(nucname.id("94-Pu-239"), nucname.id("Pu-239"))
+    assert_equal(nucname.id("95-Am-242m"), nucname.id("Am-242m"))
+    assert_equal(nucname.id("94-Pu-239"), nucname.id("Pu-239"))
+    assert_equal(nucname.id("95-Am-242"), nucname.id("Am-242"))
 
 def test_name():
     assert_equal(nucname.name(942390), "Pu239")
@@ -236,6 +240,28 @@ def test_zzzaaa_to_id():
     assert_equal(nucname.zzzaaa_to_id(93000), nucname.id("Np"))
 
     assert_equal(nucname.zzzaaa_to_id(2004), nucname.id(40020))
+
+def test_zzllaaam():
+    assert_equal(nucname.zzllaaam(942390), "94-Pu-239")
+    assert_equal(nucname.zzllaaam(952421), "95-Am-242m")
+
+    assert_equal(nucname.zzllaaam("Pu-239"), "94-Pu-239")
+
+    assert_equal(nucname.zzllaaam(94239), "94-Pu-239")
+    assert_equal(nucname.zzllaaam(95642), "95-Am-242")
+    assert_equal(nucname.zzllaaam(95242), "95-Am-242m")
+    assert_equal(nucname.zzllaaam(92636), "92-U-236m")
+
+    assert_equal(nucname.zzllaaam(2390940), "94-Pu-239")
+    assert_equal(nucname.zzllaaam(2420951), "95-Am-242m")
+
+def test_zzllaaam_to_id():
+    assert_equal(nucname.zzllaaam_to_id("94-Pu-239"), nucname.id("Pu-239"))
+    assert_equal(nucname.zzllaaam_to_id("95-Am-242m"), nucname.id("Am-242m"))
+
+    assert_equal(nucname.zzllaaam_to_id("94-Pu-239"), nucname.id("Pu-239"))
+    assert_equal(nucname.zzllaaam_to_id("95-Am-242"), nucname.id("Am-242"))
+    assert_equal(nucname.zzllaaam_to_id("95-Am-242m"), nucname.id("Am-242m"))
 
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
