@@ -3,31 +3,26 @@
 PROJECT(FluDAGUnitTests)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 
-SET (gtest_home "${CMAKE_CURRENT_SOURCE_DIR}/../../../gtest")
-SET (gtest_dir "${gtest_home}/gtest-1.7.0")
-SET (fludag_source "${CMAKE_CURRENT_SOURCE_DIR}/..")
-
 # Where to look for includes
-INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${gtest_dir}/include")
-
+INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${GTEST_HOME}/gtest-1.7.0/include")
 
 # make fludag source files into a library
 ADD_LIBRARY(fludag SHARED
-	    ${fludag_source}/fluka_funcs.cpp
-	    ${fludag_source}/dagmc_utils.cpp
-	    ${fludag_source}/Input.cpp
-	    ${fludag_source}/WrapMag.cc
-	    ${fludag_source}/WrapLookFX.cc
-	    ${fludag_source}/WrapReg.cc
-	    ${fludag_source}/WrapFlgfwr.cc
-	    ${fludag_source}/UnitNumberManager.cpp
+	    ${FLUDAG_SOURCE}/fluka_funcs.cpp
+	    ${FLUDAG_SOURCE}/dagmc_utils.cpp
+	    ${FLUDAG_SOURCE}/Input.cpp
+	    ${FLUDAG_SOURCE}/WrapMag.cc
+	    ${FLUDAG_SOURCE}/WrapLookFX.cc
+	    ${FLUDAG_SOURCE}/WrapReg.cc
+	    ${FLUDAG_SOURCE}/WrapFlgfwr.cc
+	    ${FLUDAG_SOURCE}/UnitNumberManager.cpp
  )
 
 
 # set libraries needed to link to test cases
 SET(LIBRARIES
-    ${gtest_home}/lib/libgtest.a
-    ${gtest_home}/lib/libgtest_main.a
+    ${GTEST_HOME}/lib/libgtest.a
+    ${GTEST_HOME}/lib/libgtest_main.a
     pthread
     fludag
     ${MOAB_HOME}/lib/libMOAB.so
