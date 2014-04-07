@@ -12,9 +12,6 @@ def load_mat_lib(filename):
     mat_lib = material.MaterialLibrary()
     mat_lib.from_hdf5(
         filename, datapath="/material_library/materials", nucpath="/material_library/nucid")
-    for item in mat_lib.iterkeys():
-        print item
-    exit()
     return mat_lib
     
 
@@ -40,8 +37,8 @@ def compare(material_library, material):
         for item in material_library.items():
             counter=counter+1
             if material[0] == item[0] :
-                print 'material :' , material
-                print 'item :' ,item
+                #print 'material :' , material
+                #print 'item :' ,item
                 if material[1].density == item[1].density:
                     print "complete match found for : ", material[0]
                 elif material[1].density != item[1].density :
