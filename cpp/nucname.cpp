@@ -366,6 +366,11 @@ int pyne::nucname::id(std::string nuc)
   int newnuc;
   std::string elem_name;
 
+  //Checking if the string has two dashes.  If so, then it is most likely in ZZLLAAAM form.
+  size_t numDash = std::count(nuc.begin(), nuc.end(), '_');
+  if(numDash>1){//Nuc has two dashes, theirfore it must be in ZZLLAAAM form.
+     return zzllaaam_to_id(nuc);
+  }
   // Get the string into a regular form
   std::string nucstr = pyne::to_upper(nuc);
   nucstr = pyne::remove_substring(nucstr, "-");
