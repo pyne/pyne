@@ -23,11 +23,11 @@ def get_tag_values(filename):
     # tag_values = []  # list of tag values
     tag_values = []
     found_all_tags = 0
-    for i in mesh_sets:
+    for s in mesh_sets:
         if found_all_tags == 1:
             break
         # get all the tags
-        tags = mesh.getAllTags(i)
+        tags = mesh.getAllTags(s)
         # loop over the tags checking for name
         for t in tags:
             # look for NAME tag
@@ -35,7 +35,7 @@ def get_tag_values(filename):
                 # the handle is the tag name
                 t_handle = mesh.getTagHandle(t.name)
                 # get the data for the tag, with taghandle in element i
-                tag = t_handle[i]
+                tag = t_handle[s]
                 tag_to_script(tag, tag_values)
                 # last tag we are done
                 if any('impl_complement' in s for s in tag_values):
@@ -61,7 +61,7 @@ def tag_to_script(tag, tag_list):
             test = ''.join(a)
             # the the string we are testing for is not in the list of found
             # tag values, add to the list of tag_values
-    # if not already in list append to lilst
+    # if not already in list append to list
     if not any(test in s for s in tag_list):
         tag_list.append(test)
     return tag_list
@@ -109,17 +109,19 @@ def check_matname(tag_values):
                 mat_list_density.append(' ')
             else:
                 raise Exception(
-                    "Could not find group name in appropriate format %s" % tag)
+                    "Couldn\'t find group name in appropriate format %s" % tag)
+            if len(matname) > 2:
+                raise Exception("Wrong format for group names! %s. correct: mat:NAME/rho:VALUE" %tag)        
             mat_list_matname.append(matname[1])
     mat_dens_list = zip(mat_list_matname, mat_list_density)
     # error conditions, no tags found
     if len(mat_dens_list) == 0:
-        raise Exception("no group names found")
+        raise Exception("No group names found")
     return mat_dens_list
 
 """
-function to check the existence of material names on the PyNE library 
-and creates a list of material with attrs set
+function that checks the existence of material names on the PyNE library 
+and creates a list of material with attributes set
 -------------------------------------------------------------
 """
 
@@ -148,10 +150,10 @@ def check_and_create_materials(material_list, mat_lib, arguments):
                 break
             if mat_lib.keys().index(key) == len(mat_lib.keys()) - 1:
                 print(
-                    'material {%s} doesn''t exist in pyne material lib' % material)
+                    'Material {%s} doesn\'t exist in pyne material lib' % material)
                 print_near_match(material, mat_lib)
                 raise Exception(
-                    'Couldn''t find exact match in material library')
+                    'Couldn\'t find exact match in material library for : %s' %material)
     # check that there are as many materials as there are groups
     if d != len(material_list):
         raise Exception("There are insuficient materials")
@@ -172,7 +174,7 @@ def copy_attrs(material, material_from_lib):
 
     material.density = material_from_lib.density
     material.mass = material_from_lib.mass
-#    material.atoms_per_mol = material_from_lib.atoms_per_mol
+    material.atoms_per_mol = material_from_lib.atoms_per_mol
     return
 
 
@@ -194,14 +196,14 @@ Function to prepare fluka material names:
 """
 
 
-def fluka_material_naming(matl, flukamat_list):
-    matf = matl.attrs['name']
+def fluka_material_naming(material, flukamat_list):
+    matf = material.attrs['name']
     matf = ''.join(c for c in matf if c.isalnum())
     if len(matf) > 8:
         matf = matf[0:8]
     else:
         pass
-    # if name in list change name by appending number
+    # if name is in list, change name by appending number
     if matf.upper() in flukamat_list:
         for a in range(len(flukamat_list)):
             a = a + 1
@@ -220,8 +222,8 @@ def fluka_material_naming(matl, flukamat_list):
     # otherwise uppercase
     else:
         flukamat_list.append(matf.upper())
-    matl.attrs['fluka_name'] = matf.upper()
-    return matl
+    material.attrs['fluka_name'] = matf.upper()
+    return material
 
 """ 
 function to print near matches to material name
@@ -231,12 +233,12 @@ function to print near matches to material name
 def print_near_match(material, material_library):
     for item in material_library.iterkeys():
         if (material.lower() in item.lower()) or (material.upper() in item.upper()):
-            print "near matches to ", material, " are "
+            print("Near matches to %s are :" %material)
             print item
     return
 
 """
-Function write_mats, writes material objects to hdf5 file
+Function that writes material objects to hdf5 file
 -------
 material_list: list of PyNE Material Objects
 filename: filename to write the objects to
@@ -257,26 +259,28 @@ function to parse the script, adding options:
 defining 
 -f  : the .h5m file path
 -d  : nuc_data path
+-c  : code mcnp or fluka or both
+-o  : name of the output h5m file
 """
 
 
 def parsing():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-f', action='store', dest='datafile', help='the path to the .h5m file')
+        '-f', action='store', dest='datafile', help='The path to the .h5m file')
     parser.add_argument('-d', action='store', dest='nuc_data',
-                        help='the path to the PyNE materials library   nuc_data.h5')
+                        help='The path to the PyNE materials library nuc_data.h5')
     parser.add_argument('-c', action='store', dest='code',
-                        help='the format of the output h5m file; mcnp or fluka or both')
+                        help='The format of the output h5m file; mcnp or fluka or both')
     parser.add_argument(
-        '-o', action='store', dest='output', help='the name of the output file ***.h5m')
+        '-o', action='store', dest='output', help='The name of the output file ***.h5m')
     args = parser.parse_args()
     if not args.datafile:
         raise Exception('h5m file path not entered!!. [-f] is not set')
     if not args.nuc_data:
         raise Exception('nuc_data file path not entered!!. [-d] is not set')
     if not args.code:
-        atgs.code = 'both'
+        args.code = 'both'
     if not args.output:
         args.output= 'output.h5m'
     return args
