@@ -214,7 +214,6 @@ double pyne::natural_abund(std::string nuc)
 /*************************/
 /*** Q_value Functions ***/
 /*************************/
-std::map<int, double> pyne::q_val_map = std::map<int, double>();
 
 void pyne::_load_q_val_map()
 {
@@ -259,6 +258,7 @@ void pyne::_load_q_val_map()
   delete[] q_val_array;
 };
 
+std::map<int, double> pyne::q_val_map = std::map<int, double>();
 
 double pyne::q_val(int nuc)
 {
@@ -369,9 +369,9 @@ double pyne::gamma_frac(std::string nuc)
 /*****************************/
 /*** Dose Factor Functions ***/
 /*****************************/
-std::map<int, double> pyne::df_map = std::map<int, double>();
+//std::map<int, pyne::df_struct> pyne::df_map = std::map<int, pyne::df_struct>();
 
-void pyne::_load_df_map(const char source_location)
+void pyne::_load_df_map(const char * source_location)
 {
   // Loads the dose factor table into df_map
   herr_t status;
@@ -412,7 +412,8 @@ void pyne::_load_df_map(const char source_location)
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of structs, put it in the map
-  for(int n = 0; n < df_length; n++){
+  for (int n = 0; n < df_length; n++)
+  {
     ext_air_df_map[df_array[n].nuc] = df_array[n].ext_air_df;
     ratio_map[df_array[n].nuc] = df_array[n].ratio;
     ext_soil_df_map[df_array[n].nuc] = df_array[n].ext_soil_df;
@@ -420,11 +421,17 @@ void pyne::_load_df_map(const char source_location)
     fluid_frac_map[df_array[n].nuc] = df_array[n].fluid_frac;
     inhale_df_map[df_array[n].nuc] = df_array[n].inhale_df;
     lung_mod_map[df_array[n].nuc] = df_array[n].lung_mod;
-  }
+  };
 
   delete[] df_array;
 };
 
+///
+/// Functions for External Air and 
+/// Ratio of External Air to Inhalation Dose Factors
+///
+
+std::map<int, double> pyne::ext_air_df_map = std::map<int, double>();
 
 double pyne::ext_air_df(int nuc, int source, bool get_error)
 {
@@ -435,47 +442,41 @@ double pyne::ext_air_df(int nuc, int source, bool get_error)
   nuc_end = ext_air_df_map.end();
 
   // First check if we already have the nuc ext_air_df in the map
-  const char source_location = ""
   if (nuc_iter != nuc_end) 
     return (*nuc_iter).second;
 
+  // Choose correct table from nuc_data.h5 based on user input. 
+  const char * source_location;
+  if (source == 0)
+  {
+    source_location = "/dose_factors/epa";
+  }
+  else if (source == 1)
+  {
+    source_location = "/dose_factors/doe";
+  }
+  else if (source == 2)
+  {
+    source_location = "/dose_factors/genii";
+  }
+
   // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
-  if ((source == 0) && (df_map.empty()))
+  if (ext_air_df_map.empty())
   {
     // Don't fail if we can't load the library
     try
     {
-      source_location = "/dose_factors/epa"
       _load_df_map(source_location);
-      return ext_air_df(nuc);
-    }
-    catch(...){};
-  }
-  else if (source == 1)
-  {
-    try
-    {
-      source_location = "/dose_factors/doe"
-      _load_df_map(source_location);
-      return ext_air_df(nuc);
-    }
-    catch(...){};
-  }
-  else if (source == 2)
-  {
-    try
-    {
-      source_location = "/dose_factors/genii"
-      _load_df_map(source_location);
-      return ext_air_df(nuc);
+      return ext_air_df(nuc, source, get_error);
     }
     catch(...){};
   };
   
+  
   double df;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return ext_air_df(nucid);
+    return ext_air_df(nucid, source, get_error);
 
   // If nuclide is not found, return 0
   df = 0.0;
@@ -484,17 +485,17 @@ double pyne::ext_air_df(int nuc, int source, bool get_error)
 };
 
 
-double pyne::ext_air_df(char * nuc)
+double pyne::ext_air_df(char * nuc, int source, bool get_error)
 {
   int nuc_zz = nucname::id(nuc);
-  return ext_air_df(nuc_zz);
+  return ext_air_df(nuc_zz, source, get_error);
 };
 
 
-double pyne::ext_air_df(std::string nuc)
+double pyne::ext_air_df(std::string nuc, int source, bool get_error)
 {
   int nuc_zz = nucname::id(nuc);
-  return ext_air_df(nuc_zz);
+  return ext_air_df(nuc_zz, source, get_error);
 };
 
 

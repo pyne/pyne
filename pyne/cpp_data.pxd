@@ -44,27 +44,10 @@ cdef extern from "data.h" namespace "pyne":
 
     # ext_air_df functions
     map[int, double] ext_air_df_map
-    pair[double, double] ext_air_df(int) except +
-    pair[double, double] ext_air_df(char *) except +
-    pair[double, double] ext_air_df(std_string) except +
-
-    # ext_soil_df functions
-    map[int, double] ext_soil_df_map
-    double ext_soil_df(int) except +
-    double ext_soil_df(char *) except +
-    double ext_soil_df(std_string) except +
-
-    # ingest_df functions
-    map[int, double] ingest_df_map
-    pair[double, double] ingest_df(int) except +
-    pair[double, double] ingest_df(char *) except +
-    pair[double, double] ingest_df(std_string) except +
-
-    # inhale_df functions
-    map[int, double] inhale_df_map
-    pair[double, string] inhale_df(int) except +
-    pair[double, string] inhale_df(char *) except +
-    pair[double, string] inhale_df(std_string) except +
+#    map[int, double] ratio_map
+    double ext_air_df(int, int, bool) except +
+    double ext_air_df(char *, int, bool) except +
+    double ext_air_df(std_string, int, bool) except +
 
     # Scattering length functions
     map[int, extra_types.complex_t] b_coherent_map

@@ -151,9 +151,6 @@ namespace pyne
 
   /// Mapping from nuclides in id form to their dose factors (4 types).
   ///
-  /// DF Map
-  extern std::map<int, double> df_map;
-
   /// a struct matching the dose factor table in nuc_data.h5.
   typedef struct df_struct {
     int nuc;            ///< nuclide in id form
@@ -164,12 +161,13 @@ namespace pyne
     double fluid_frac;  ///< fraction of activity abosorbed in body fluids
     double inhale_df;   ///< model of lung used (time of biological half life -- D, W, or Y)
     char lung_mod;      ///< nuclide dose factor [mrem/h per Ci/m^3]
-  } df_struct; 
+  } df_struct;
 
   /// Loads the dose factor data from the nuc_data.h5 file into memory.
   ///
-  /// Ext Air DF Map
-  void _load_df_map();
+  /// DF Map
+//  extern std::map<int, df_struct> df_map;
+  void _load_df_map(const char * source_location);
   
   /// Mapping from nuclides in id form to requested form of dose factor and the 
   /// additional information, if applicable.
@@ -179,44 +177,44 @@ namespace pyne
   extern std::map<int, double> inhale_df_map;
   extern std::map<int, double> ratio_map;
   extern std::map<int, double> fluid_frac_map;
-  extern std::map<int, char> lung_mod_map;
+  extern std::map<int, char> lung_mod_map; 
 
   /// \brief Returns the dose factors of a nuclide \a nuc.  
   /// 
   /// These functions will first try to find the dose factor data in the df_maps.
   /// If the maps are empty, it will load the data from disk. If the nuclide simply 
   /// cannot be found, the default value returned is 0.0.
-  double ext_air_df(int nuc);
-  double ext_soil_df(int nuc);
-  double ingest_df(int nuc);
-  double inhale_df(int nuc);
+  double ext_air_df(int nuc, int source, bool get_error);
+  double ext_soil_df(int nuc, int source, bool get_error);
+  double ingest_df(int nuc, int source, bool get_error);
+  double inhale_df(int nuc, int source, bool get_error);
   /// Returns the dose factor of a nuclide \a nuc.
-  double ext_air_df(char * nuc); 
-  double ext_soil_df(char * nuc); 
-  double ingest_df(char * nuc); 
-  double inhale_df(char * nuc);
+  double ext_air_df(char * nuc, int source, bool get_error); 
+  double ext_soil_df(char * nuc, int source, bool get_error); 
+  double ingest_df(char * nuc, int source, bool get_error); 
+  double inhale_df(char * nuc, int source, bool get_error);
   /// Returns the dose factor of a nuclide \a nuc.
-  double ext_air_df(std::string nuc);
-  double ext_soil_df(std::string nuc);
-  double ingest_df(std::string nuc);
-  double inhale_df(std::string nuc);
+  double ext_air_df(std::string nuc, int source, bool get_error);
+  double ext_soil_df(std::string nuc, int source, bool get_error);
+  double ingest_df(std::string nuc, int source, bool get_error);
+  double inhale_df(std::string nuc, int source, bool get_error);
   
   /// \brief Returns the additional info of a nuclide \a nuc.  
   /// 
   /// This follows the same the basic rules for finding or computing the dose factor
   /// as the df() functions do.
   /// If the nuclide cannot be found, the default value returned is 0.0.
-  double ratio(int nuc);
-  double fluid_frac(int nuc);
-  char lung_mod(int nuc);
+  double ratio(int nuc, int source, bool get_error);
+  double fluid_frac(int nuc, int source, bool get_error);
+  char lung_mod(int nuc, int source, bool get_error);
   /// Returns the requested info of a nuclide \a nuc. 
-  double ratio(char * nuc);
-  double fluid_frac(char * nuc);
-  char lung_mod(char * nuc); 
+  double ratio(char * nuc, int source, bool get_error);
+  double fluid_frac(char * nuc, int source, bool get_error);
+  char lung_mod(char * nuc, int source, bool get_error); 
   /// Returns the requested info of a nuclide \a nuc. 
-  double ratio(std::string nuc);
-  double fluid_frac(std::string nuc);
-  char lung_mod(std::string nuc);
+  double ratio(std::string nuc, int source, bool get_error);
+  double fluid_frac(std::string nuc, int source, bool get_error);
+  char lung_mod(std::string nuc, int source, bool get_error);
   /// \}
 
 
