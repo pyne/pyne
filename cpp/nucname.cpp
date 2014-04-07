@@ -366,12 +366,12 @@ int pyne::nucname::id(std::string nuc)
   int newnuc;
   std::string elem_name;
   
-
   if((pyne::contains_substring(nuc.substr(1,3),"-")) && (pyne::contains_substring(nuc.substr(4,5),"-")) ){
      //Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
      return zzllaaam_to_id(nuc);
   }
 
+  // Get the string into a regular form
   std::string nucstr = pyne::to_upper(nuc);
   nucstr = pyne::remove_substring(nucstr, "-");
   int nuclen = nucstr.length();
