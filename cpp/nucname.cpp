@@ -366,20 +366,22 @@ int pyne::nucname::id(std::string nuc)
   int newnuc;
   std::string elem_name;
   
-  if((pyne::contains_substring(nuc.substr(1,3),"-")) && (pyne::contains_substring(nuc.substr(4,5),"-")) ){
-     //Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
-     int dashIndex = nuc.find("-"); 
-     std::string ZZ = nuc.substr(0,dashIndex);
-     std::string LLAAAM = nuc.substr(dashIndex+1);
-     int dash2Index = LLAAAM.find("-");
-     std::string LL = LLAAAM.substr(0,dash2Index);
-     int ZZInt;
-     std::stringstream s_str(ZZ);
-     s_str >> ZZInt;
-     if(znum(LL)==ZZInt ) { //Verifying that the LL and ZZ point to the same element as secondary
-				//verification that nuc is in ZZLLAAAM form.
-       return zzllaaam_to_id(nuc);
-     }
+  if(nuc.length()>=5) { //nuc must be at least 4 characters or greater if it is in ZZLLAAAM form.
+    if((pyne::contains_substring(nuc.substr(1, 3), "-")) && (pyne::contains_substring(nuc.substr(4, 5), "-")) ){
+       // Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
+       int dashIndex = nuc.find("-"); 
+       std::string zz = nuc.substr(0, dashIndex);
+       std::string ll_aaa_m = nuc.substr(dashIndex+1);
+       int dash2Index = ll_aaa_m.find("-");
+       std::string ll = ll_aaa_m.substr(0, dash2Index);
+       int zz_int;
+       std::stringstream s_str(zz);
+       s_str >> zz_int;
+       if(znum(ll)==zz_int ) {    // Verifying that the LL and ZZ point to the same element as secondary
+	  			  // verification that nuc is in ZZLLAAAM form.
+         return zzllaaam_to_id(nuc);
+       }
+    }
   }
 
   // Get the string into a regular form
