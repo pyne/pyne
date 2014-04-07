@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-from  pyne import material #, MaterialLibrary
+import argparse
+from  pyne import material
 from pyne.material import Material
-
 
 """
 function to load the material library
@@ -34,26 +34,38 @@ library
 """
 def compare(material_library, material): 
         counter=0
-        for key in material_library.items():
+        for item in material_library.items():
             counter=counter+1
-            if material == key :
-                print "OK", material
-                print("+++++++++++++++++")
-                print key
-                break
-            elif material[0] == key[0] and material[1].attrs["density"] != key[1].attrs["density"] :
-                print "difference in density", material
-                #raise Exception('error found') 
-                print "///////////////"   
-            elif counter == len(material_library.items())-1 :
-                print "no match found for %s" %material[0]
-                print material
+            if material[0] == item[0] :
+                #print 'material :' , material
+                #print 'item :' ,item
+                if material[1].density == item[1].density:
+                    print "complete match found for : ", material[0]
+                elif material[1].density != item[1].density :
+                    print "match found with a difference in density for : ", material[0]   
+                elif counter == len(material_library.items())-1 :
+                    print "no match found for %s" %material[0]
 
+"""
+Parsing
+"""
+def parse():
+    parser=argparse.ArgumentParser()
+    parser.add_argument('-m',action='store',dest='model',help='the output file .h5m path')
+    args=parser.parse_args()
+    if not args.model:
+        raise Exception('h5m path needed')
+    return args
+    
+"""
+main
+"""    
 def main():
+    args=parse()
     # now load material library
     mat_lib = load_mat_lib("/home/moataz/.local/lib/python2.7/site-packages/pyne/nuc_data.h5")
     #load the output h5m file
-    output_lib=load_output("output.h5m", mat_lib)
+    output_lib=load_output(args.model, mat_lib)
     
     
 
