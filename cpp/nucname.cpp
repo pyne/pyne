@@ -365,13 +365,13 @@ int pyne::nucname::id(std::string nuc)
     throw NotANuclide(nuc, "<empty>");
   int newnuc;
   std::string elem_name;
+  
 
-  //Checking if the string has two dashes.  If so, then it is most likely in ZZLLAAAM form.
-  size_t numDash = std::count(nuc.begin(), nuc.end(), '_');
-  if(numDash>1){//Nuc has two dashes, theirfore it must be in ZZLLAAAM form.
+  if((pyne::contains_substring(nuc.substr(1,3),"-")) && (pyne::contains_substring(nuc.substr(4,5),"-")) ){
+     //Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
      return zzllaaam_to_id(nuc);
   }
-  // Get the string into a regular form
+
   std::string nucstr = pyne::to_upper(nuc);
   nucstr = pyne::remove_substring(nucstr, "-");
   int nuclen = nucstr.length();
