@@ -368,7 +368,20 @@ int pyne::nucname::id(std::string nuc)
   
   if((pyne::contains_substring(nuc.substr(1,3),"-")) && (pyne::contains_substring(nuc.substr(4,5),"-")) ){
      //Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
-     return zzllaaam_to_id(nuc);
+     int dashIndex = nuc.find("-"); 
+     std::string ZZ = nuc.substr(0,dashIndex);
+     std::string LLAAAM = nuc.substr(dashIndex+1);
+     int dash2Index = LLAAAM.find("-");
+     std::string LL = LLAAAM.substr(0,dash2Index);
+     int ZZInt;
+     std::stringstream s_str(ZZ);
+     s_str >> ZZInt;
+     if(znum(LL)==ZZInt ) { //Verifying that the LL and ZZ point to the same element as secondary
+				//verification that nuc is in ZZLLAAAM form.
+       return zzllaaam_to_id(nuc);
+     } else {
+      //Do nothing
+     }
   }
 
   // Get the string into a regular form
