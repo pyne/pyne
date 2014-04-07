@@ -379,8 +379,6 @@ int pyne::nucname::id(std::string nuc)
      if(znum(LL)==ZZInt ) { //Verifying that the LL and ZZ point to the same element as secondary
 				//verification that nuc is in ZZLLAAAM form.
        return zzllaaam_to_id(nuc);
-     } else {
-      //Do nothing
      }
   }
 
