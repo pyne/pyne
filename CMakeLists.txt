@@ -60,7 +60,8 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
     # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
-    set(CMAKE_INSTALL_RPATH "@rpath/lib")
+    set(CMAKE_MACOSX_RPATH 1)
+    set(CMAKE_INSTALL_RPATH "@loader_path/lib")
 elseif(WIN32)
     if(MSVC)
         # ??? Who knows what to do here?! --Anthony
