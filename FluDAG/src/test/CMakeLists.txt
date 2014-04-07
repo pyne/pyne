@@ -3,10 +3,13 @@
 PROJECT(FluDAGUnitTests)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 
-# Where to look for includes
-INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${GTEST_HOME}/gtest-1.7.0/include")
+SET (gtest_home "${CMAKE_CURRENT_SOURCE_DIR}/../../../gtest")
+SET (gtest_dir "${gtest_home}/gtest-1.7.0")
+SET (fludag_source "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
-SET(fludag_source "${CMAKE_CURRENT_SOURCE_DIR}/..")
+# Where to look for includes
+INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${gtest_dir}/include")
+
 
 # make fludag source files into a library
 ADD_LIBRARY(fludag SHARED
@@ -23,8 +26,8 @@ ADD_LIBRARY(fludag SHARED
 
 # set libraries needed to link to test cases
 SET(LIBRARIES
-    ${GTEST_HOME}/lib/libgtest.a
-    ${GTEST_HOME}/lib/libgtest_main.a
+    ${gtest_home}/lib/libgtest.a
+    ${gtest_home}/lib/libgtest_main.a
     pthread
     fludag
     ${MOAB_HOME}/lib/libMOAB.so
