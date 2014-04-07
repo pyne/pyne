@@ -371,7 +371,7 @@ double pyne::gamma_frac(std::string nuc)
 /*****************************/
 std::map<int, double> pyne::df_map = std::map<int, double>();
 
-void pyne::_load_df_map(source_location)
+void pyne::_load_df_map(const char source_location)
 {
   // Loads the dose factor table into df_map
   herr_t status;
@@ -435,6 +435,7 @@ double pyne::ext_air_df(int nuc, int source, bool get_error)
   nuc_end = ext_air_df_map.end();
 
   // First check if we already have the nuc ext_air_df in the map
+  const char source_location = ""
   if (nuc_iter != nuc_end) 
     return (*nuc_iter).second;
 
