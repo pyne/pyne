@@ -20,6 +20,11 @@ supported by PyNE.  Functions to convert between forms may be seen in :ref:`name
     digits for the atomic mass number, and ends with a metastable flag (0 = ground,
     1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would
     be expressed as '922350'.
+ #. **zzllaaam**: The ZZLLAAAM naming convention is similar to name form.  However, it is preceded by
+    the nuclides two AA numbers, followed by the two LL characters.  Of the two LL characters, only 
+    the first letter in the chemical symbol is uppercase, the dash is always present, and the the
+    meta-stable flag is lowercase.  For instance, '95-Am-242m' is the valid serpent notation for 
+    this nuclide.
  #. **name**: This is the more common, human readable notation.  The chemical symbol
     (one or two characters long) is first, followed by the atomic weight.  Lastly if
     the nuclide is metastable, the letter *M* is concatenated to the end.  For example,
@@ -94,20 +99,23 @@ Examples of Use
     In [3]: nucname.zzaaam(10010)
     Out[3]: 10010
 
-    In [4]: nucname.name(10010)
-    Out[4]: 'H1'
+    In [4]: nucname.zzllaaam(942390)
+    Out[4]: '95-Am-242m'
 
-    In [5]: nucname.serpent('AM242M')
-    Out[5]: 'Am-242m'
+    In [5]: nucname.name(10010)
+    Out[5]: 'H1'
 
-    In [6]: nucname.name_zz['SR']
-    Out[6]: 38
+    In [6]: nucname.serpent('AM242M')
+    Out[6]: 'Am-242m'
 
-    In [7]: nucname.zz_name[57]
-    Out[7]: 'LA'
+    In [7]: nucname.name_zz['SR']
+    Out[7]: 38
 
-    In [8]: nucname.alara('FE56')
-    Out[8]: 'fe:56'
+    In [8]: nucname.zz_name[57]
+    Out[8]: 'LA'
+
+    In [9]: nucname.alara('FE56')
+    Out[9]: 'fe:56'
 
 
 

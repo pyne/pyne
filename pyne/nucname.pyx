@@ -332,6 +332,7 @@ def zzzaaa_to_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
+
 def mcnp(nuc):
     """Converts a nuclide to its MCNP form (92636). 
 
@@ -386,6 +387,51 @@ def mcnp_to_id(nuc):
     else:
         raise NucTypeError(nuc)
     return newnuc
+
+def zzllaaam(nuc):
+    """Converts a nuclide to its zzllaaam form (95-Am-241m). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in zzllaaam form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzllaaam(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzllaaam(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+def zzllaaam_to_id(nuc):
+    """Converts a nuclide directly from ZZLLAAAM form (95-Am-241m) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in ZZLLAAAM form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzllaaam_to_id(<char *> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
 
 
 def serpent(nuc):

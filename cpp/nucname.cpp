@@ -365,6 +365,22 @@ int pyne::nucname::id(std::string nuc)
     throw NotANuclide(nuc, "<empty>");
   int newnuc;
   std::string elem_name;
+  
+  if((pyne::contains_substring(nuc.substr(1,3),"-")) && (pyne::contains_substring(nuc.substr(4,5),"-")) ){
+     //Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
+     int dashIndex = nuc.find("-"); 
+     std::string ZZ = nuc.substr(0,dashIndex);
+     std::string LLAAAM = nuc.substr(dashIndex+1);
+     int dash2Index = LLAAAM.find("-");
+     std::string LL = LLAAAM.substr(0,dash2Index);
+     int ZZInt;
+     std::stringstream s_str(ZZ);
+     s_str >> ZZInt;
+     if(znum(LL)==ZZInt ) { //Verifying that the LL and ZZ point to the same element as secondary
+				//verification that nuc is in ZZLLAAAM form.
+       return zzllaaam_to_id(nuc);
+     }
+  }
 
   // Get the string into a regular form
   std::string nucstr = pyne::to_upper(nuc);
@@ -618,7 +634,105 @@ int pyne::nucname::zzzaaa_to_id(std::string nuc)
   return zzzaaa_to_id(pyne::to_int(nuc));
 };
 
+/*************************/
+/*** zzllaaam functions ***/
+/*************************/
+std::string pyne::nucname::zzllaaam(int nuc)
+{
+  int nucid = id(nuc);
+  std::string newnuc = "";
 
+  int ssss = nucid % 10000;
+  int aaassss = nucid % 10000000;
+  int zzz = nucid / 10000000;
+  int aaa = aaassss / 10000;
+
+  // Make sure the LL value is correct
+  if (0 == zz_name.count(zzz))
+    throw NotANuclide(nuc, nucid);
+  //Adding ZZ
+  newnuc += pyne::to_str(zzz);
+  newnuc += "-";
+  // Add LL
+  newnuc += zz_name[zzz];
+  // Add required dash
+  newnuc += "-";
+  // Add AAA
+  if (0 < aaassss)
+    newnuc += pyne::to_str(aaa);
+  // Add meta-stable flag
+  if (0 < ssss)
+    newnuc += "m";
+  return newnuc;
+};
+
+
+std::string pyne::nucname::zzllaaam(char * nuc)
+{
+  std::string newnuc (nuc);
+  return zzllaaam(newnuc);
+};
+
+
+std::string pyne::nucname::zzllaaam(std::string nuc)
+{
+  return zzllaaam(id(nuc));
+};
+
+
+int pyne::nucname::zzllaaam_to_id(char * nuc)
+{
+  return zzllaaam_to_id(std::string(nuc));
+};
+
+
+int pyne::nucname::zzllaaam_to_id(std::string nuc)
+{
+  if (nuc.empty())
+    throw NotANuclide(nuc, "<empty>");
+  int nucid;
+  std::string elem_name;
+
+  // Get the string into a regular form
+  std::string nucstr = pyne::to_upper(nuc);
+  // Removing first two characters (redundant), for 1 digit nuclides, such
+  // as 2-He-4, the first slash will be removed, and the second attempt to
+  // remove the second slash will do nothing.  
+  nucstr.erase(0,2);
+  nucstr = pyne::remove_substring(nucstr, "-");
+  // Does nothing if nuclide is short, otherwise removes the second "-" instance
+  nucstr = pyne::remove_substring(nucstr, "-");
+  int nuclen = nucstr.length();
+
+  // Nuclide is probably in name form, or some variation therein
+  std::string anum_str = pyne::remove_characters(nucstr, pyne::alphabet);
+
+  // natural element form, a la 'U' -> 920000000
+  if (anum_str.empty() || pyne::contains_substring(nucstr, "NAT")) {
+    elem_name = pyne::capitalize(pyne::remove_substring(nucstr, "NAT")); 
+    if (0 < name_zz.count(elem_name))
+      return 10000000 * name_zz[elem_name]; 
+  }
+  int anum = pyne::to_int(anum_str);
+
+  // Figure out if we are meta-stable or not
+  std::string end_char = pyne::last_char(nucstr);
+  if (end_char == "M")
+    nucid = (10000 * anum) + 1;
+  else if (pyne::contains_substring(pyne::digits, end_char))
+    nucid = (10000 * anum);
+  else
+    throw NotANuclide(nucstr, nucid);
+
+  // Add the Z-number
+  elem_name = pyne::remove_characters(nucstr.substr(0, nuclen-1), pyne::digits);
+  elem_name = pyne::capitalize(elem_name);
+  if (0 < name_zz.count(elem_name))
+    nucid = (10000000 * name_zz[elem_name]) + nucid;
+  else
+    throw NotANuclide(nucstr, nucid);
+  return nucid;
+};
 
 /**********************/
 /*** mcnp functions ***/
