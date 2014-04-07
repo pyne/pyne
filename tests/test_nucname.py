@@ -84,6 +84,8 @@ caseids = [20040000, 20040000, 962440000, 942390000, 952420001, 20040000, 952420
 
 def test_id():
     assert_equal(nucname.id(20040), 20040000)
+ 
+    assert_equal(nucname.id("1NN"), 10010000)
 
     assert_equal(nucname.id("he4"),    20040000)
     assert_equal(nucname.id("Cm-244"), 962440000)

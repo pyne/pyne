@@ -240,8 +240,10 @@ bool pyne::nucname::isnuclide(int nuc)
   catch(IndeterminateNuclideForm) {
     return false;
   };
-  if (n <= 10000000)
-    return false;
+  if (n <= 10000000) {
+    if(n!=1001000) // is neutron
+      return false;
+  }
   int zzz = n / 10000000;
   int aaa = (n % 10000000) / 10000;
   if (aaa == 0)
@@ -383,6 +385,11 @@ int pyne::nucname::id(std::string nuc)
        }
     }
   }
+
+  // Check if nuc is a neutron
+  if(!nuc.compare("1NN")) {
+    return 10010000;
+  } 
 
   // Get the string into a regular form
   std::string nucstr = pyne::to_upper(nuc);
