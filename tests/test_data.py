@@ -308,6 +308,10 @@ def test_ecbp_child_byparent():
     assert_equal(data.ecbp_child_byparent(110220000), [100220001, 100220000])
 
 
+def test_id_from_level():
+    assert_equal(data.id_from_level(811920000, 445, 'X'), 811920010)
+    assert_equal(data.id_from_level(561370000, 662), 561370002)
+
 if __name__ == "__main__":
     nose.runmodule()
 
