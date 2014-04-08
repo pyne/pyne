@@ -241,7 +241,7 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
                     "    material mat_{0} 1 1\nend\n\n".format(i))
 
         for nuc, comp in mesh.comp[i].iteritems():
-            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp, 
+            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0, 
                                                          znum(nuc))
         matlib += "\n"
 

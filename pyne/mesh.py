@@ -101,6 +101,8 @@ class MaterialPropertyTag(Tag):
     def __getitem__(self, key):
         name = self.name
         mats = self.mesh.mats
+        if mats is None:
+            RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
             return getattr(mats[key], name)
@@ -119,6 +121,8 @@ class MaterialPropertyTag(Tag):
     def __setitem__(self, key, value):
         name = self.name
         mats = self.mesh.mats
+        if mats is None:
+            RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
             setattr(mats[key], name, value)
@@ -170,6 +174,8 @@ class MaterialMethodTag(Tag):
     def __getitem__(self, key):
         name = self.name
         mats = self.mesh.mats
+        if mats is None:
+            RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
             return getattr(mats[key], name)()
@@ -210,6 +216,8 @@ class MetadataTag(Tag):
     def __getitem__(self, key):
         name = self.name
         mats = self.mesh.mats
+        if mats is None:
+            RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
             return mats[key].attrs[name]
@@ -228,6 +236,8 @@ class MetadataTag(Tag):
     def __setitem__(self, key, value):
         name = self.name
         mats = self.mesh.mats
+        if mats is None:
+            RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
             mats[key].attrs[name] = value
@@ -263,6 +273,8 @@ class MetadataTag(Tag):
     def __delitem__(self, key):
         name = self.name
         mats = self.mesh.mats
+        if mats is None:
+            RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
             del mats[key].attrs[name]
@@ -528,7 +540,7 @@ class Mesh(object):
 
     def __init__(self, mesh=None, mesh_file=None, structured=False, \
                  structured_coords=None, structured_set=None, 
-                 structured_ordering='xyz', mats=None):
+                 structured_ordering='xyz', mats=()):
         """Parameters
         ----------
         mesh : iMesh instance, optional
@@ -546,7 +558,8 @@ class Mesh(object):
             A three character string denoting the iteration order of the mesh (e.g.
             'xyz', meaning z changest fastest, then y, then x.)
         mats : MaterialLibrary or dict or Materials or None, optional
-            This is a mapping of volume element handles to Material objects.
+            This is a mapping of volume element handles to Material objects.  If 
+            mats is None, then no empty materials are created for the mesh.
     
             Unstructured mesh instantiation:
                  - From iMesh instance by specifying: <mesh>
@@ -659,14 +672,16 @@ class Mesh(object):
                                + [x + 1 for x in self.dims[3:6]]
         # sets mats
         mats_in_mesh_file = False
-        if mesh_file and mats is None:
+        if mesh_file and mats is not None and len(mats) == 0:
             with tb.openFile(mesh_file) as h5f:
                 if '/materials' in h5f:
                     mats_in_mesh_file = True
             if mats_in_mesh_file:
                 mats = MaterialLibrary(mesh_file)
 
-        if mats is None and not mats_in_mesh_file:
+        if mats is None:
+            pass
+        elif len(mats) == 0 and not mats_in_mesh_file:
             mats = MaterialLibrary()
         elif not isinstance(mats, MaterialLibrary):
             mats = MaterialLibrary(mats)
@@ -683,43 +698,47 @@ class Mesh(object):
             tag_idx = self.mesh.createTag('idx', 1, int)
         for i, ve in enumerate(ves):
             tag_idx[ve] = i
-            if i not in mats:
+            if mats is not None and i not in mats:
                 mats[i] = Material()
         self._len = i + 1
 
         # Default tags
         self.tags = {}
-        # metadata tags, these should come first so they don't accidentally 
-        # overwite hard coded tag names.
-        metatagnames = set()
-        for mat in mats.values():
-            metatagnames.update(mat.attrs.keys())
-        for name in metatagnames:
-            setattr(self, name, MetadataTag(mesh=self, name=name))
+        if mats is not None:
+            # metadata tags, these should come first so they don't accidentally 
+            # overwite hard coded tag names.
+            metatagnames = set()
+            for mat in mats.values():
+                metatagnames.update(mat.attrs.keys())
+            for name in metatagnames:
+                setattr(self, name, MetadataTag(mesh=self, name=name))
         # iMesh.Mesh() tags
         tagnames = set()
         for ve in ves:
             tagnames.update(t.name for t in self.mesh.getAllTags(ve))
         for name in tagnames:
             setattr(self, name, IMeshTag(mesh=self, name=name)) 
-        # Material property tags
-        self.atoms_per_molecule = MaterialPropertyTag(mesh=self, name='atoms_per_molecule', 
-                                                 doc='Number of atoms per molecule')
-        self.attrs = MaterialPropertyTag(mesh=self, name='attrs', 
-                        doc='metadata attributes, stored on the material')
-        self.comp = MaterialPropertyTag(mesh=self, name='comp', 
-                doc="normalized composition mapping from nuclides to mass fractions")
-        self.mass = MaterialPropertyTag(mesh=self, name='mass', 
-                                        doc='the mass of the material')
-        self.density = MaterialPropertyTag(mesh=self, name='density', 
-                                           doc='the density [g/cc]')
-        # Material method tags
-        methtagnames = ('expand_elements', 'mass_density', 'molecular_mass', 
-                        'mult_by_mass', 'number_density', 'sub_act', 'sub_fp', 
-                        'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
-        for name in methtagnames:
-            doc = "see Material.{0}() for more information".format(name)
-            setattr(self, name, MaterialMethodTag(mesh=self, name=name, doc=doc))
+        if mats is not None:
+            # Material property tags
+            self.atoms_per_molecule = MaterialPropertyTag(mesh=self, 
+                                        name='atoms_per_molecule', 
+                                        doc='Number of atoms per molecule')
+            self.attrs = MaterialPropertyTag(mesh=self, name='attrs', 
+                            doc='metadata attributes, stored on the material')
+            self.comp = MaterialPropertyTag(mesh=self, name='comp', 
+                            doc='normalized composition mapping from nuclides to '
+                                'mass fractions')
+            self.mass = MaterialPropertyTag(mesh=self, name='mass', 
+                                            doc='the mass of the material')
+            self.density = MaterialPropertyTag(mesh=self, name='density', 
+                                               doc='the density [g/cc]')
+            # Material method tags
+            methtagnames = ('expand_elements', 'mass_density', 'molecular_mass', 
+                            'mult_by_mass', 'number_density', 'sub_act', 'sub_fp', 
+                            'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
+            for name in methtagnames:
+                doc = "see Material.{0}() for more information".format(name)
+                setattr(self, name, MaterialMethodTag(mesh=self, name=name, doc=doc))
         
         
     def __len__(self):
@@ -730,8 +749,12 @@ class Mesh(object):
         index i, the material mat, and the volume element itself ve.
         """
         mats = self.mats
-        for i, ve in enumerate(self.iter_ve()):
-            yield i, mats[i], ve
+        if mats is None:
+            for i, ve in enumerate(self.iter_ve()):
+                yield i, None, ve
+        else:
+            for i, ve in enumerate(self.iter_ve()):
+                yield i, mats[i], ve
 
     def iter_ve(self):
         """Returns an iterator that yields on the volume elements.
@@ -1127,7 +1150,8 @@ class Mesh(object):
     def write_hdf5(self, filename):
         """Writes the mesh to an hdf5 file."""
         self.mesh.save(filename)
-        self.mats.write_hdf5(filename)
+        if self.mats is not None:
+            self.mats.write_hdf5(filename)
 
     def cell_fracs_to_mats(self, cell_fracs, cell_mats):
         """This function uses the output from dagmc.discretize_geom() and 

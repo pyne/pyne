@@ -21,7 +21,6 @@ const double pyne::sec_per_day = 24.0 * 3600.0;
 std::map<std::string, std::string> pyne::get_data_checksums() {
     std::map<std::string, std::string> temp_map;
     // Initialization of dataset hashes
-    temp_map["/decay/half_life"]="09bf73252629077785e20b3532fde8b3";
     temp_map["/atomic_mass"]="10edfdc662e35bdfab91beb89285efff";
     temp_map["/material_library"]="8b10864378fbd88538434679acf908cc";
     temp_map["/neutron/eaf_xs"]="29622c636c4a3a46802207b934f9516c";
@@ -31,7 +30,8 @@ std::map<std::string, std::string> pyne::get_data_checksums() {
     return temp_map;
 };
 
-std::map<std::string, std::string> pyne::data_checksums = pyne::get_data_checksums();
+std::map<std::string, std::string> pyne::data_checksums = 
+  pyne::get_data_checksums();
 
 /*****************************/
 /*** atomic_mass Functions ***/
@@ -777,312 +777,153 @@ double pyne::fpyield(std::string from_nuc, std::string to_nuc, int source,
 };
 
 
-
 /***********************/
 /*** decay functions ***/
 /***********************/
-std::map<int, double> pyne::half_life_map = std::map<int, double>();
-std::map<int, double> pyne::decay_const_map = std::map<int, double>();
-std::map<std::pair<int, int>, double> pyne::branch_ratio_map = \
-                              std::map<std::pair<int, int>, double>();
-std::map<int, double> pyne::state_energy_map = std::map<int, double>();
-std::map<int, std::set<int> > pyne::decay_children_map = \
-                              std::map<int, std::set<int> >();
 
+//
+// Data access tools
+// 
 
-void pyne::_load_half_life_decay() {
-  // Loads the important parts of half_life_decay table into memory
-  herr_t status;
-
-  //Check to see if the file is in HDF5 format.
-  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
-    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
-
-  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
-  if (!ish5)
-    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
-
-  // Get the HDF5 compound type (table) description
-  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(half_life_decay_struct));
-  status = H5Tinsert(desc, "from_nuc", HOFFSET(half_life_decay_struct, 
-                     from_nuc), H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "to_nuc", HOFFSET(half_life_decay_struct, to_nuc),
-                     H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "level", HOFFSET(half_life_decay_struct, level), 
-                     H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "half_life", HOFFSET(half_life_decay_struct, 
-                      half_life), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "decay_const", HOFFSET(half_life_decay_struct, 
-                      decay_const), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "branch_ratio", HOFFSET(half_life_decay_struct, 
-                      branch_ratio), H5T_NATIVE_DOUBLE);
-
-  // Open the HDF5 file
-  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
-                              H5P_DEFAULT);
-
-  // Open the data set
-  hid_t atom_dec_set = H5Dopen2(nuc_data_h5, "/decay/half_life", H5P_DEFAULT);
-  hid_t atom_dec_space = H5Dget_space(atom_dec_set);
-  int atom_dec_length = H5Sget_simple_extent_npoints(atom_dec_space);
-
-  // Read in the data
-  half_life_decay_struct * atom_dec_array = \
-    new half_life_decay_struct[atom_dec_length];
-    
-  status = H5Dread(atom_dec_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
-                   atom_dec_array);
-
-  // close the nuc_data library, before doing anything stupid
-  status = H5Dclose(atom_dec_set);
-  status = H5Fclose(nuc_data_h5);
-
-  // Ok now that we have the array of stucts, put it in the maps
-  // giving precednece to ground state values or those seen first.
-  int from_nuc, to_nuc;
-  double level;
-  std::pair<int, int> from_to;
-  for(int n = 0; n < atom_dec_length; n++) {
-    from_nuc = atom_dec_array[n].from_nuc;
-    level = atom_dec_array[n].level;
-    to_nuc = atom_dec_array[n].to_nuc;
-    from_to = std::pair<int, int>(from_nuc, to_nuc);
-
-    if (0 == half_life_map.count(from_nuc) || 0.0 == level)
-      half_life_map[from_nuc] = atom_dec_array[n].half_life;
-
-    if (0 == decay_const_map.count(from_nuc) || 0.0 == level)
-      decay_const_map[from_nuc] = atom_dec_array[n].decay_const;
-
-    if (0 == branch_ratio_map.count(from_to) || 0.0 == level)
-      branch_ratio_map[from_to] = atom_dec_array[n].branch_ratio;
-
-    state_energy_map[from_nuc] = level;
-
-    if (0.0 != atom_dec_array[n].decay_const)
-      decay_children_map[from_nuc].insert(to_nuc);
-  };
-
-  delete[] atom_dec_array;
+bool pyne::swapmapcompare::operator()(const std::pair<int, double>& lhs, 
+const std::pair<int, double>& rhs) const {
+    return lhs.second<rhs.second || (!(rhs.second<lhs.second) && 
+      lhs.first<rhs.first); 
 };
 
-
-//
-// Half-life data
-//
-
-double pyne::half_life(int nuc) {
-  // Find the nuclide's half life in s
-  std::map<int, double>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = half_life_map.find(nuc);
-  nuc_end = half_life_map.end();
-
+template<typename T, typename U> std::vector<T> pyne::data_access(
+double energy_min, double energy_max, size_t valoffset, std::map<std::pair<int,
+double>, U>  &data) {
+  typename std::map<std::pair<int, double>, U, swapmapcompare>::iterator 
+    nuc_iter, nuc_end, it;
+  std::map<std::pair<int, double>, U, swapmapcompare> dc(data.begin(), 
+    data.end());
+  std::vector<T> result;
+  if (energy_max < energy_min){
+    double temp = energy_max;
+    energy_max = energy_min;
+    energy_min = temp;
+  } 
+  nuc_iter = dc.lower_bound(std::make_pair(0, energy_min));
+  nuc_end = dc.upper_bound(std::make_pair(9999999999, energy_max));
+  T *ret;
   // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end)
-    return (*nuc_iter).second;
-
-  // Next, fill up the map with values from the 
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    ret = (T *)((char *)&(it->second) + valoffset);
+    result.push_back(*ret);
+  }
+  // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
-  if (half_life_map.empty()) {
-    _load_half_life_decay();
-    return half_life(nuc);
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(energy_min, energy_max, valoffset, data);
   };
-
-  // Finally, if none of these work, 
-  // assume the value is stable
-  double hl = 1.0 / 0.0;
-  half_life_map[nuc] = hl;
-  return hl;
+  return result;
 };
 
-
-double pyne::half_life(char * nuc) {
-  int nuc_zz = nucname::id(nuc);
-  return half_life(nuc_zz);
-};
-
-
-double pyne::half_life(std::string nuc) {
-  int nuc_zz = nucname::id(nuc);
-  return half_life(nuc_zz);
-};
-
-
-
-//
-// Decay constant data
-//
-
-double pyne::decay_const(int nuc) {
-  // Find the nuclide's decay constant in 1/s
-  std::map<int, double>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = decay_const_map.find(nuc);
-  nuc_end = decay_const_map.end();
-
+template<typename T, typename U> std::vector<T> pyne::data_access(int parent, 
+double min, double max, size_t valoffset, 
+std::map<std::pair<int, double>, U>  &data) {
+  typename std::map<std::pair<int, double>, U>::iterator nuc_iter, nuc_end, it;
+  std::vector<T> result;
+  nuc_iter = data.lower_bound(std::make_pair(parent,min));
+  nuc_end = data.upper_bound(std::make_pair(parent,max));
+  T *ret;
   // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end)
-    return (*nuc_iter).second;
-
-  // Next, fill up the map with values from the 
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    ret = (T *)((char *)&(it->second) + valoffset);
+    result.push_back(*ret);
+  }
+  // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
-  if (decay_const_map.empty()) {
-    _load_half_life_decay();
-    return decay_const(nuc);
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(parent, min, max, valoffset, data);
   };
-
-  // Finally, if none of these work, 
-  // assume the value is stable
-  double dc = 0.0;
-  decay_const_map[nuc] = dc;
-  return dc;
+  return result;
 };
 
+template<typename T, typename U> T pyne::data_access(std::pair<int, int> 
+from_to, size_t valoffset, std::map<std::pair<int, int>, U> &data) {
+  typename std::map<std::pair<int, int>, U>::iterator nuc_iter, nuc_end;
 
-double pyne::decay_const(char * nuc) {
-  int nuc_zz = nucname::id(nuc);
-  return decay_const(nuc_zz);
-};
-
-
-double pyne::decay_const(std::string nuc) {
-  int nuc_zz = nucname::id(nuc);
-  return decay_const(nuc_zz);
-};
-
-
-
-
-//
-// Branch ratio data
-//
-
-double pyne::branch_ratio(std::pair<int, int> from_to) {
-  // Find the parent/child pair branch ratio as a fraction
-  std::map<std::pair<int, int>, double>::iterator br_iter, br_end;
-
-  br_iter = branch_ratio_map.find(from_to);
-  br_end = branch_ratio_map.end();
-
-  // First check if we already have the pair in the map
-  if (br_iter != br_end)
-    return (*br_iter).second;
-
-  // Next, fill up the map with values from the 
-  // nuc_data.h5, if the map is empty.
-  if (branch_ratio_map.empty()) {
-    _load_half_life_decay();
-    return branch_ratio(from_to);
-  };
-
-  // Finally, if none of these work, 
-  // assume the value is stable
-  double br = 0.0;
-  branch_ratio_map[from_to] = br;
-  return br;
-};
-
-
-double pyne::branch_ratio(int from_nuc, int to_nuc) {
-  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
-                                          nucname::id(to_nuc)));
-};
-
-double pyne::branch_ratio(char * from_nuc, char * to_nuc) {
-  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
-                                          nucname::id(to_nuc)));
-};
-
-double pyne::branch_ratio(std::string from_nuc, std::string to_nuc) {
-  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
-                                          nucname::id(to_nuc)));
-};
-
-//
-// Excitation state energy data
-//
-
-double pyne::state_energy(int nuc) {
-  // Find the nuclide's state energy in MeV
-  std::map<int, double>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = state_energy_map.find(nuc);
-  nuc_end = state_energy_map.end();
-
+  nuc_iter = data.find(from_to);
+  nuc_end = data.end();
+  T *ret;
   // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end)
-    return (*nuc_iter).second;
-
-  // Next, fill up the map with values from the 
+  if (nuc_iter != nuc_end){
+    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
+    return *ret;
+  }
+  // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
-  if (state_energy_map.empty()) {
-    _load_half_life_decay();
-    return state_energy(nuc);
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(from_to, valoffset, data);
   };
+  // This is okay for now because we only return ints and doubles
+  return 0;
+}
 
-  // Finally, if none of these work, 
-  // assume the value is stable
-  double se = 0.0;
-  state_energy_map[nuc] = se;
-  return se;
-};
-
-
-double pyne::state_energy(char * nuc) {
-  return state_energy(nucname::id(nuc));
-};
-
-
-double pyne::state_energy(std::string nuc) {
-  return state_energy(nucname::id(nuc));
-};
-
-
-//
-// Decay children data
-//
-
-std::set<int> pyne::decay_children(int nuc) {
-  // Find the nuclide's decay constant in 1/s
-  std::map<int, std::set<int> >::iterator nuc_iter, nuc_end;
-
-  nuc_iter = decay_children_map.find(nuc);
-  nuc_end = decay_children_map.end();
-
+template<typename T, typename U> std::vector<T> pyne::data_access(int parent, 
+size_t valoffset, std::map<std::pair<int, int>, U> &data){
+  typename std::map<std::pair<int, int>, U>::iterator nuc_iter, nuc_end, it;
+  std::vector<T> result;
+  nuc_iter = data.lower_bound(std::make_pair(parent,0));
+  nuc_end = data.upper_bound(std::make_pair(parent,9999999999));
+  T *ret;
   // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end) {
-    return (*nuc_iter).second;
-  };
-
-  // Next, fill up the map with values from the 
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    ret = (T *)((char *)&(it->second) + valoffset);
+    result.push_back(*ret);
+  }
+  // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
-  if (decay_children_map.empty()) {
-    _load_half_life_decay();
-    return decay_children(nuc);
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(parent, valoffset, data);
   };
-
-  // Finally, if none of these work, 
-  // assume the value is stable
-  std::set<int> dc = std::set<int>();
-  decay_children_map[nuc] = dc;
-  return dc;
+  return result;
 };
 
-
-std::set<int> pyne::decay_children(char * nuc) {
-  return decay_children(nucname::id(nuc));
+template<typename T, typename U> std::vector<T> pyne::data_access(int parent, 
+size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data){
+  typename std::map<std::pair<int, unsigned int>, U>::iterator nuc_iter,
+   nuc_end, it;
+  std::vector<T> result;
+  nuc_iter = data.lower_bound(std::make_pair(parent,0));
+  nuc_end = data.upper_bound(std::make_pair(parent,UINT_MAX));
+  T *ret;
+  // First check if we already have the nuc in the map
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    ret = (T *)((char *)&(it->second) + valoffset);
+    result.push_back(*ret);
+  }
+  // Next, fill up the map with values from the
+  // nuc_data.h5, if the map is empty.
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<T, U>(parent, valoffset, data);
+  };
+  return result;
 };
 
+//
+// Load level data
+//
 
-std::set<int> pyne::decay_children(std::string nuc) {
-  return decay_children(nucname::id(nuc));
-};
+std::map<std::pair<int,double>, pyne::level_struct> pyne::level_data_lvl_map;
+std::map<std::pair<int,unsigned int>, 
+  pyne::level_struct> pyne::level_data_rx_map;
 
-std::map<int, pyne::level_struct> pyne::level_data = \
-  std::map<int, pyne::level_struct>();
 
-void pyne::_load_level_data() {
+template<> void pyne::_load_data<pyne::level_struct>()
+{
 
   // Loads the level table into memory
   herr_t status;
@@ -1099,10 +940,14 @@ void pyne::_load_level_data() {
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(level_struct));
   status = H5Tinsert(desc, "nuc_id", HOFFSET(level_struct, nuc_id),
                       H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "level", HOFFSET(level_struct, level), 
-                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "rx_id", HOFFSET(level_struct, rx_id),
+                     H5T_NATIVE_UINT);
   status = H5Tinsert(desc, "half_life", HOFFSET(level_struct, half_life),
                       H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "level", HOFFSET(level_struct, level), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "branch_ratio", HOFFSET(level_struct, branch_ratio),
+                     H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "metastable", HOFFSET(level_struct, metastable),
                       H5T_NATIVE_INT);
 
@@ -1124,35 +969,224 @@ void pyne::_load_level_data() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < level_length; ++i) {
-    level_data[level_array[i].nuc_id] = level_array[i];
+    if (level_array[i].rx_id == 0)
+      level_data_lvl_map[std::make_pair(level_array[i].nuc_id,
+                                        level_array[i].level)] = level_array[i];
+    else
+      level_data_rx_map[std::make_pair(level_array[i].nuc_id,
+                                       level_array[i].rx_id)] = level_array[i];
   }
-
+  
+  delete[] level_array;
 }
 
-int pyne::metastable_id(int nuc, int m) {
-  if (m==0) return 0;
-  int nostate = (nuc / 1000) * 1000;
-  if (level_data.empty()) {
-    _load_level_data();
+//
+// level id
+//
+int pyne::id_from_level(int nuc, double level) {
+  int nostate = (nuc / 10000) * 10000;
+  if (level_data_lvl_map.empty()) {
+    _load_data<level_struct>();
   }
 
-  std::map<int, pyne::level_struct>::iterator nuc_lower, nuc_upper;
+  std::map<std::pair<int, double>, level_struct>::iterator nuc_lower, nuc_upper;
 
-  nuc_lower = level_data.lower_bound(nostate);
-  nuc_upper = level_data.upper_bound(nostate+9999);
-  for (std::map<int, pyne::level_struct>::iterator it=nuc_lower; it!=nuc_upper;
+  nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0.0));
+  nuc_upper = level_data_lvl_map.upper_bound(std::make_pair(nostate+9999,
+                                             DBL_MAX));
+  double min = DBL_MAX;
+  //by default return input nuc_id with level stripped
+  int ret_id = nuc;
+  for (std::map<std::pair<int, double>, level_struct>::iterator it=nuc_lower; 
+  it!=nuc_upper;
        ++it) {
+    if (abs(level - it->second.level) < min) {
+      min = abs(level - it->second.level);
+      ret_id = it->second.nuc_id;
+    }
+  }
+  if (min > 1.0)
+    ret_id = nuc;
+  return ret_id;
+}
+
+//
+// Metastable id data
+//
+
+int pyne::metastable_id(int nuc, int m) {
+  int nostate = (nuc / 10000) * 10000;
+  if (m==0) return nostate;
+  if (level_data_lvl_map.empty()) {
+    _load_data<level_struct>();
+  }
+
+  std::map<std::pair<int, double>, level_struct>::iterator nuc_lower, nuc_upper;
+
+  nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0.0));
+  nuc_upper = level_data_lvl_map.upper_bound(std::make_pair(nostate+9999, 
+  DBL_MAX));
+  for (std::map<std::pair<int, double>, level_struct>::iterator it=nuc_lower; 
+  it!=nuc_upper; ++it) {
     if (it->second.metastable == m)
         return it->second.nuc_id;
   }
 
-  return 0;
+  return nuc;
 }
 
 int pyne::metastable_id(int nuc) {
   return metastable_id(nuc, 1);
 }
 
+//
+// Decay children data
+//
+
+
+std::set<int> pyne::decay_children(int nuc) {
+  std::vector<unsigned int> part = data_access<unsigned int, level_struct>(nuc,
+    offsetof(level_struct, rx_id), level_data_rx_map);
+  std::set<int> result;
+  for (std::vector<unsigned int>::iterator it=part.begin(); it!=part.end(); 
+  ++it) {
+    if (*it == 36125)  
+      result.insert((nuc /10000) * 10000);
+    else 
+      result.insert((rxname::child(nuc,*it,"decay") /10000) * 10000);
+  }
+  return result;
+}
+
+std::set<int> pyne::decay_children(char * nuc)
+{
+  return decay_children(nucname::id(nuc));
+};
+
+std::set<int> pyne::decay_children(std::string nuc)
+{
+  return decay_children(nucname::id(nuc));
+};
+
+//
+// Excitation state energy data
+//
+
+double pyne::state_energy(int nuc)
+{
+  std::vector<double> result = data_access<double, level_struct>(nuc, 0.0, 
+  DBL_MAX, offsetof(level_struct, level), level_data_lvl_map);
+  if (result.size() == 1)
+    return result[0]/1000.0;
+  return 0.0;
+}
+
+double pyne::state_energy(char * nuc)
+{
+  return state_energy(nucname::id(nuc));
+};
+
+
+double pyne::state_energy(std::string nuc)
+{
+  return state_energy(nucname::id(nuc));
+};
+
+
+//
+// Decay constant data
+//
+
+double pyne::decay_const(int nuc)
+{  
+    std::vector<double> result = data_access<double, level_struct>(nuc, 0.0,
+      DBL_MAX, offsetof(level_struct, half_life), level_data_lvl_map);
+    if (result.size() == 1) {
+        return log(2.0)/result[0];
+    }
+    return 0.0;
+}
+
+
+double pyne::decay_const(char * nuc) {
+  int nuc_zz = nucname::id(nuc);
+  return decay_const(nuc_zz);
+};
+
+
+double pyne::decay_const(std::string nuc) {
+  int nuc_zz = nucname::id(nuc);
+  return decay_const(nuc_zz);
+};
+
+
+//
+// Half-life data
+//
+
+
+double pyne::half_life(int nuc) {
+    std::vector<double> result = data_access<double, level_struct>(nuc, 0.0,  
+    DBL_MAX, offsetof(level_struct, half_life), level_data_lvl_map);
+    if (result.size() == 1) {
+        return result[0];
+    }
+    return 1.0/0.0;
+};
+
+
+double pyne::half_life(char * nuc) {
+  int nuc_zz = nucname::id(nuc);
+  return half_life(nuc_zz);
+};
+
+double pyne::half_life(std::string nuc) {
+  int nuc_zz = nucname::id(nuc);
+  return half_life(nuc_zz);
+};
+
+//
+// Branch ratio data
+//
+
+
+double pyne::branch_ratio(std::pair<int, int> from_to) {
+  std::vector<unsigned int> part1 = data_access<unsigned int, level_struct>(
+    from_to.first, offsetof(level_struct, rx_id), level_data_rx_map);
+  std::vector<double> part2 = data_access<double, level_struct>(from_to.first,
+    offsetof(level_struct, branch_ratio), level_data_rx_map);
+  double result = 0;
+  if ((from_to.first == from_to.second) && 
+      (half_life(from_to.first) == std::numeric_limits<double>::infinity()))
+    return 1.0;
+  for (std::vector<unsigned int>::size_type i=0; i < part1.size(); ++i) {
+    if ((part1[i] != 0) && ((rxname::child(from_to.first,part1[i],"decay")
+      / 10000) * 10000 == from_to.second))
+      result = result + part2[i]*0.01;
+    if ((part1[i] == 36125) && 
+        (((from_to.first/10000)*10000) == ((from_to.second/10000)*10000)) && 
+        (from_to.second % 10000 == 0)) { 
+      return 1.0;
+    }
+  }
+  
+  return result;
+}
+
+double pyne::branch_ratio(int from_nuc, int to_nuc) {
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
+};
+
+double pyne::branch_ratio(char * from_nuc, char * to_nuc) {
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
+};
+
+double pyne::branch_ratio(std::string from_nuc, std::string to_nuc) {
+  return branch_ratio(std::pair<int, int>(nucname::id(from_nuc), 
+                                          nucname::id(to_nuc)));
+};
 
 std::map<std::pair<int, int>, pyne::decay_struct> pyne::decay_data = \
   std::map<std::pair<int, int>, pyne::decay_struct>();
@@ -1176,7 +1210,8 @@ template<> void pyne::_load_data<pyne::decay_struct>() {
                      H5T_NATIVE_INT);
   status = H5Tinsert(desc, "child", HOFFSET(decay_struct, child),
                      H5T_NATIVE_INT);
-  status = H5Tinsert(desc, "decay", HOFFSET(decay_struct, decay), H5T_STRING);
+  status = H5Tinsert(desc, "decay", HOFFSET(decay_struct, decay),
+                     H5T_NATIVE_UINT);
   status = H5Tinsert(desc, "half_life", HOFFSET(decay_struct, half_life), 
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "half_life_error", HOFFSET(decay_struct, 
@@ -1185,11 +1220,11 @@ template<> void pyne::_load_data<pyne::decay_struct>() {
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio", HOFFSET(decay_struct, 
                      photon_branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "photon_branch_ratio_error", HOFFSET(decay_struct,
+  status = H5Tinsert(desc, "photon_branch_ratio_err", HOFFSET(decay_struct,
                      photon_branch_ratio_error), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "beta_branch_ratio", HOFFSET(decay_struct, 
                      beta_branch_ratio), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "beta_branch_ratio_error", HOFFSET(decay_struct,
+  status = H5Tinsert(desc, "beta_branch_ratio_err", HOFFSET(decay_struct,
                      beta_branch_ratio_error), H5T_NATIVE_DOUBLE);
   
   // Open the HDF5 file
@@ -1214,56 +1249,10 @@ template<> void pyne::_load_data<pyne::decay_struct>() {
     decay_data[std::make_pair(decay_array[i].parent, decay_array[i].child)] = \
       decay_array[i];
   }
-
+  delete[] decay_array;
 }
 
-
-
-template<typename T, typename U> T pyne::data_access(std::pair<int, int> 
-from_to, size_t valoffset, std::map<std::pair<int, int>, U> &data) {
-  typename std::map<std::pair<int, int>, U>::iterator nuc_iter, nuc_end;
-
-  nuc_iter = data.find(from_to);
-  nuc_end = data.end();
-  T *ret;
-  // First check if we already have the nuc in the map
-  if (nuc_iter != nuc_end){
-    ret = (T *)((char *)&(nuc_iter->second) + valoffset);
-    return *ret;
-  }
-  // Next, fill up the map with values from the
-  // nuc_data.h5, if the map is empty.
-  if (data.empty()) {
-    _load_data<U>();
-    return data_access<T, U>(from_to, valoffset, data);
-  };
-  // This is okay for now because we only return ints and doubles
-  return 0;
-}
-
-template<typename T, typename U> std::vector<T> pyne::data_access(int parent, 
-size_t valoffset, std::map<std::pair<int, int>, U> &data) {
-  typename std::map<std::pair<int, int>, U>::iterator nuc_iter, nuc_end, it;
-  std::vector<T> result;
-  nuc_iter = data.lower_bound(std::make_pair(parent,0));
-  nuc_end = data.upper_bound(std::make_pair(parent,9999999999));
-  T *ret;
-  // First check if we already have the nuc in the map
-  for (it = nuc_iter; it!= nuc_end; ++it){
-    ret = (T *)((char *)&(it->second) + valoffset);
-    result.push_back(*ret);
-  }
-  // Next, fill up the map with values from the
-  // nuc_data.h5, if the map is empty.
-  if (data.empty()) {
-    _load_data<U>();
-    return data_access<T, U>(parent, valoffset, data);
-  };
-  return result;
-};
-
-
-std::pair<double, double> pyne::decay_half_life(std::pair<int, int> from_to) {
+std::pair<double, double> pyne::decay_half_life(std::pair<int, int> from_to){
   return std::make_pair(data_access<double, decay_struct>(from_to, offsetof(
    decay_struct, half_life), decay_data), data_access<double, decay_struct>(
    from_to, offsetof(decay_struct, half_life_error), decay_data));
@@ -1335,8 +1324,7 @@ int parent) {
 
 std::map<std::pair<int, double>, pyne::gamma_struct> pyne::gamma_data;
 
-template<> void pyne::_load_data<pyne::gamma_struct>()
-{
+template<> void pyne::_load_data<pyne::gamma_struct>() {
 
   // Loads the gamma table into memory
   herr_t status;
@@ -1403,73 +1391,16 @@ template<> void pyne::_load_data<pyne::gamma_struct>()
     gamma_data[std::make_pair(gamma_array[i].parent_nuc, 
       gamma_array[i].energy)] = gamma_array[i];
   }
-
+  delete[] gamma_array;
 }
 
-bool pyne::swapmapcompare::operator()(const std::pair<int, double>& lhs, 
-const std::pair<int, double>& rhs) const {
-    return lhs.second<rhs.second || (!(rhs.second<lhs.second) && 
-      lhs.first<rhs.first); 
-};
-
-template<typename T, typename U> std::vector<T> pyne::data_access(
-double energy_min, double energy_max, size_t valoffset, std::map<std::pair<int,
-double>, U>  &data) {
-  typename std::map<std::pair<int, double>, U, swapmapcompare>::iterator 
-    nuc_iter, nuc_end, it;
-  std::map<std::pair<int, double>, U, swapmapcompare> dc(data.begin(), 
-    data.end());
-  std::vector<T> result;
-  if (energy_max < energy_min){
-    double temp = energy_max;
-    energy_max = energy_min;
-    energy_min = temp;
-  } 
-  nuc_iter = dc.lower_bound(std::make_pair(0, energy_min));
-  nuc_end = dc.upper_bound(std::make_pair(9999999999, energy_max));
-  T *ret;
-  // First check if we already have the nuc in the map
-  for (it = nuc_iter; it!= nuc_end; ++it) {
-    ret = (T *)((char *)&(it->second) + valoffset);
-    result.push_back(*ret);
-  }
-  // Next, fill up the map with values from the
-  // nuc_data.h5, if the map is empty.
-  if (data.empty()) {
-    _load_data<U>();
-    return data_access<T, U>(energy_min, energy_max, valoffset, data);
-  };
-  return result;
-};
-
-template<typename T, typename U> std::vector<T> pyne::data_access(int parent, 
-size_t valoffset, std::map<std::pair<int, double>, U>  &data){
-  typename std::map<std::pair<int, double>, U>::iterator nuc_iter, nuc_end, it;
-  std::vector<T> result;
-  nuc_iter = data.lower_bound(std::make_pair(parent,0.0));
-  nuc_end = data.upper_bound(std::make_pair(parent,DBL_MAX));
-  T *ret;
-  // First check if we already have the nuc in the map
-  for (it = nuc_iter; it!= nuc_end; ++it) {
-    ret = (T *)((char *)&(it->second) + valoffset);
-    result.push_back(*ret);
-  }
-  // Next, fill up the map with values from the
-  // nuc_data.h5, if the map is empty.
-  if (data.empty()) {
-    _load_data<U>();
-    return data_access<T, U>(parent, valoffset, data);
-  };
-  return result;
-};
-
-std::vector<std::pair<double, double> > pyne::gamma_energy(int parent) {
+std::vector<std::pair<double, double> > pyne::gamma_energy(int parent){
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 
-    offsetof(gamma_struct, energy), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 
-    offsetof(gamma_struct, energy_err), gamma_data);
-  for(int i = 0; i < part1.size(); ++i) {
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, energy), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, energy_err), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
@@ -1478,10 +1409,10 @@ std::vector<std::pair<double, double> > pyne::gamma_energy(int parent) {
 std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(
 int parent) {
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 
-    offsetof(gamma_struct, photon_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 
-    offsetof(gamma_struct, photon_intensity_err), gamma_data);
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, photon_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, photon_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1491,10 +1422,10 @@ int parent) {
 std::vector<std::pair<double, double> > pyne::gamma_conversion_intensity(
 int parent) {
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 
-    offsetof(gamma_struct, conv_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 
-    offsetof(gamma_struct, conv_intensity_err), gamma_data);
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, conv_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, conv_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1504,10 +1435,10 @@ int parent) {
 std::vector<std::pair<double, double> > pyne::gamma_total_intensity(
 int parent) {
   std::vector<std::pair<double, double> > result;
-  std::vector<double> part1 = data_access<double, gamma_struct>(parent,
-    offsetof(gamma_struct, total_intensity), gamma_data);
-  std::vector<double> part2 = data_access<double, gamma_struct>(parent,
-    offsetof(gamma_struct, total_intensity_err), gamma_data);
+  std::vector<double> part1 = data_access<double, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, total_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, total_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1516,9 +1447,9 @@ int parent) {
 
 std::vector<std::pair<int, int> > pyne::gamma_from_to(int parent) {
   std::vector<std::pair<int, int> > result;
-  std::vector<int> part1 = data_access<int, gamma_struct>(parent, 
+  std::vector<int> part1 = data_access<int, gamma_struct>(parent, 0.0, DBL_MAX,
     offsetof(gamma_struct, from_nuc), gamma_data);
-  std::vector<int> part2 = data_access<int, gamma_struct>(parent,
+  std::vector<int> part2 = data_access<int, gamma_struct>(parent, 0.0, DBL_MAX,
     offsetof(gamma_struct, to_nuc), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
@@ -1593,17 +1524,16 @@ template<> void pyne::_load_data<pyne::alpha_struct>() {
     alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
     = alpha_array[i];
   }
-
+  delete[] alpha_array;
 }
 
-std::vector<double > pyne::alpha_energy(int parent) {
-  return data_access<double, alpha_struct>(parent, offsetof(alpha_struct,
-                                           energy), alpha_data);
+std::vector<double > pyne::alpha_energy(int parent){
+  return data_access<double, alpha_struct>(parent, 0.0, DBL_MAX, 
+                     offsetof(alpha_struct,energy), alpha_data);
 };
-
-std::vector<double> pyne::alpha_intensity(int parent) {
-  return data_access<double, alpha_struct>(parent, offsetof(alpha_struct,
-                                           intensity), alpha_data);
+std::vector<double> pyne::alpha_intensity(int parent){
+  return data_access<double, alpha_struct>(parent, 0.0, DBL_MAX, 
+                     offsetof(alpha_struct,intensity), alpha_data);
 };
 
 std::vector<int> pyne::alpha_parent(double energy, double error) {
@@ -1615,9 +1545,10 @@ std::vector<int> pyne::alpha_child(double energy, double error) {
   return data_access<int, alpha_struct>(energy+error, energy-error, 
                      offsetof(alpha_struct, to_nuc), alpha_data);
 };
-std::vector<int> pyne::alpha_child(int parent) {
-  return data_access<int, alpha_struct>(parent, offsetof(alpha_struct, to_nuc),
-                                        alpha_data);
+
+std::vector<int> pyne::alpha_child(int parent){
+  return data_access<int, alpha_struct>(parent, 0.0, DBL_MAX,
+                     offsetof(alpha_struct, to_nuc), alpha_data);
 };
 
 std::map<std::pair<int, double>, pyne::beta_struct> pyne::beta_data;
@@ -1670,22 +1601,22 @@ template<> void pyne::_load_data<pyne::beta_struct>() {
     beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
     = beta_array[i];
   }
-
+  delete[] beta_array;
 }
 
-std::vector<double > pyne::beta_endpoint_energy(int parent) {
-  return data_access<double, beta_struct>(parent, offsetof(beta_struct, 
-                                          endpoint_energy), beta_data);
+std::vector<double > pyne::beta_endpoint_energy(int parent){
+  return data_access<double, beta_struct>(parent, 0.0, DBL_MAX,  
+                     offsetof(beta_struct, endpoint_energy), beta_data);
 };
 
-std::vector<double > pyne::beta_average_energy(int parent) {
-  return data_access<double, beta_struct>(parent, offsetof(beta_struct, 
-                                          avg_energy), beta_data);
+std::vector<double > pyne::beta_average_energy(int parent){
+  return data_access<double, beta_struct>(parent, 0.0, DBL_MAX,  
+                     offsetof(beta_struct, avg_energy), beta_data);
 };
 
-std::vector<double> pyne::beta_intensity(int parent) {
-  return data_access<double, beta_struct>(parent, offsetof(beta_struct, 
-                                          intensity), beta_data);
+std::vector<double> pyne::beta_intensity(int parent){
+  return data_access<double, beta_struct>(parent, 0.0, DBL_MAX, 
+                     offsetof(beta_struct, intensity), beta_data);
 };
 
 std::vector<int> pyne::beta_parent(double energy, double error) {
@@ -1698,9 +1629,9 @@ std::vector<int> pyne::beta_child(double energy, double error) {
                      offsetof(beta_struct, to_nuc), beta_data);
 };
 
-std::vector<int> pyne::beta_child(int parent) {
-  return data_access<int, beta_struct>(parent, offsetof(beta_struct, to_nuc), 
-                                       beta_data);
+std::vector<int> pyne::beta_child(int parent){
+  return data_access<int, beta_struct>(parent, 0.0, DBL_MAX,  
+                     offsetof(beta_struct, to_nuc),beta_data);
 };
 
 
@@ -1761,29 +1692,27 @@ template<> void pyne::_load_data<pyne::ecbp_struct>() {
     ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
     = ecbp_array[i];
   }
-
+  delete[] ecbp_array;
 }
 
-
-
-std::vector<double > pyne::ecbp_endpoint_energy(int parent) {
-  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, 
-                                          endpoint_energy), ecbp_data);
+std::vector<double > pyne::ecbp_endpoint_energy(int parent){
+  return data_access<double, ecbp_struct>(parent, 0.0, DBL_MAX,  
+                     offsetof(ecbp_struct,endpoint_energy), ecbp_data);
 };
 
-std::vector<double > pyne::ecbp_average_energy(int parent) {
-  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, 
-                                          avg_energy), ecbp_data);
+std::vector<double > pyne::ecbp_average_energy(int parent){
+  return data_access<double, ecbp_struct>(parent, 0.0, DBL_MAX, 
+                     offsetof(ecbp_struct, avg_energy), ecbp_data);
 };
 
-std::vector<double> pyne::ec_intensity(int parent) {
-  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct,
-                                          ec_intensity), ecbp_data);
+std::vector<double> pyne::ec_intensity(int parent){
+  return data_access<double, ecbp_struct>(parent, 0.0, DBL_MAX, 
+                     offsetof(ecbp_struct, ec_intensity), ecbp_data);
 };
 
-std::vector<double> pyne::bp_intensity(int parent) {
-  return data_access<double, ecbp_struct>(parent, offsetof(ecbp_struct, 
-                                          beta_plus_intensity), ecbp_data);
+std::vector<double> pyne::bp_intensity(int parent){
+  return data_access<double, ecbp_struct>(parent, 0.0, DBL_MAX,  
+                     offsetof(ecbp_struct, beta_plus_intensity), ecbp_data);
 };
 
 std::vector<int> pyne::ecbp_parent(double energy, double error) {
@@ -1796,7 +1725,7 @@ std::vector<int> pyne::ecbp_child(double energy, double error) {
                      offsetof(ecbp_struct, to_nuc), ecbp_data);
 };
 
-std::vector<int> pyne::ecbp_child(int parent) {
-  return data_access<int, ecbp_struct>(parent, offsetof(ecbp_struct, to_nuc),
-                                       ecbp_data);
+std::vector<int> pyne::ecbp_child(int parent){
+  return data_access<int, ecbp_struct>(parent, 0.0, DBL_MAX, 
+                     offsetof(ecbp_struct, to_nuc), ecbp_data);
 };
