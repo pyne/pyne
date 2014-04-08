@@ -15,23 +15,13 @@
 Tally::Tally(const TallyInput& input) 
     : input_data(input), data(NULL)
 {
+    assert(input_data.energy_bin_bounds.size() > 1);
+
+    // This is a placeholder for a future option to set t.e.b. false via the
+    // TallyInput 
     bool total_energy_bin = true;
-    unsigned int num_energy_bins = 0;
 
-    int num_boundaries = input_data.energy_bin_bounds.size();
-
-    // turn off total energy bin if only one bin exists
-    if (num_boundaries == 2)
-    {
-        total_energy_bin = false;
-        num_energy_bins = 1;
-    }
-    else
-    {
-        // determine total number of energy bins requested
-        assert(num_energy_bins > 2);
-        num_energy_bins = num_boundaries;
-    }
+    unsigned int num_energy_bins = input_data.energy_bin_bounds.size() - 1;
 
     data = new TallyData(num_energy_bins, total_energy_bin); 
 }
