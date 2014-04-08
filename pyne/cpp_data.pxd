@@ -44,11 +44,40 @@ cdef extern from "data.h" namespace "pyne":
 
     # ext_air_df functions
     map[int, double] ext_air_df_map
-#    map[int, double] ratio_map
-    double ext_air_df(int, int, bool) except +
-    double ext_air_df(char *, int, bool) except +
-    double ext_air_df(std_string, int, bool) except +
+    map[int, double] ratio_map
+    double ext_air_df(int, int, bint) except +
+    double ext_air_df(char *, int, bint) except +
+    double ext_air_df(std_string, int, bint) except +
+    double ratio(int, int, bint) except +
+    double ratio(char *, int, bint) except +
+    double ratio(std_string, int, bint) except +
+    
+    # ext_soil_df functions
+    map[int, double] ext_soil_df_map
+    double ext_soil_df(int, int, bint) except +
+    double ext_soil_df(char *, int, bint) except +
+    double ext_soil_df(std_string, int, bint) except +
 
+    # ingest_df functions
+    map[int, double] ingest_df_map
+    map[int, double] fluid_frac_map
+    double ingest_df(int, int, bint) except +
+    double ingest_df(char *, int, bint) except +
+    double ingest_df(std_string, int, bint) except +
+    double fluid_frac(int, int, bint) except +
+    double fluid_frac(char *, int, bint) except +
+    double fluid_frac(std_string, int, bint) except +
+
+    # inhale_df functions
+    map[int, double] inhale_df_map
+    map[int, std_string] lung_mod_map
+    double inhale_df(int, int, bint) except +
+    double inhale_df(char *, int, bint) except +
+    double inhale_df(std_string, int, bint) except +
+    std_string lung_mod(int, int, bint) except +
+    std_string lung_mod(char *, int, bint) except +
+    std_string lung_mod(std_string, int, bint) except +
+    
     # Scattering length functions
     map[int, extra_types.complex_t] b_coherent_map
     extra_types.complex_t b_coherent(int) except +

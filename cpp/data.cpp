@@ -369,7 +369,6 @@ double pyne::gamma_frac(std::string nuc)
 /*****************************/
 /*** Dose Factor Functions ***/
 /*****************************/
-//std::map<int, pyne::df_struct> pyne::df_map = std::map<int, pyne::df_struct>();
 
 void pyne::_load_df_map(const char * source_location)
 {
