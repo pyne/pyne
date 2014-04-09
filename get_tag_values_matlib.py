@@ -175,6 +175,7 @@ def copy_attrs(material, material_from_lib):
     material.density = material_from_lib.density
     material.mass = material_from_lib.mass
     material.atoms_per_mol = material_from_lib.atoms_per_mol
+    material.comp = material_from_lib.comp
     return
 
 
