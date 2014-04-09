@@ -65,17 +65,58 @@ TEST(TallyDataInputTest, TotalEnergyBinLogic)
    EXPECT_EQ(8, tallyData4.get_num_energy_bins());
    EXPECT_FALSE(tallyData4.has_total_energy_bin());
 }
-
 //---------------------------------------------------------------------------//
 TEST(TallyDataDeathTest, ZeroEnergyBins)
 {
-   EXPECT_EXIT(TallyData(0, true),  ::testing::ExitedWithCode(EXIT_FAILURE), "");
-   EXPECT_EXIT(TallyData(0, false), ::testing::ExitedWithCode(EXIT_FAILURE), "");
+   ::testing::FLAGS_gtest_death_test_style="threadsafe";
+   EXPECT_DEATH(TallyData(0, true),  "");
+   EXPECT_DEATH(TallyData(0, false),  "");
 }
+//---------------------------------------------------------------------------//
+TEST(ZeroDataTest, ZeroTallyData)
+{
+   // Set it up
+   TallyData tallyData(2, false);
+   tallyData.resize_data_arrays(3);
+ 
+   ///////////////////////////////////////////////////////////////
+   // Fill it with random data
+   int length;
+   double fill_tally[] = {1.2, -3.4, 5.6, 0.0, 8.9, 7.8};
+   double fill_error[] = {0.2, -0.4, 0.06, 0.0, .089, .078};
+   double fill_scratch[] = {10.2, -30.4, 50.6, 0.0, 80.9, 70.8};
 
+   double* tally_ary = tallyData.get_tally_data(length);
+   EXPECT_EQ(6, length);
+
+   double* error_ary   = tallyData.get_error_data(length);
+   EXPECT_EQ(6, length);
+
+   double* scratch_ary = tallyData.get_scratch_data(length);
+   EXPECT_EQ(6, length);
+
+   for (int i=0; i<length; i++)
+   { 
+       tally_ary[i] = fill_tally[i];
+       error_ary[i] = fill_error[i];
+       scratch_ary[i] = fill_scratch[i];
+   } 
+   ///////////////////////////////////////////////////////////////
+  
+   // Clear the data
+   tallyData.zero_tally_data();
+   
+
+   // Check the zeroing worked
+   for (int i=0; i<length; i++)
+   { 
+       EXPECT_DOUBLE_EQ(0.0, tally_ary[i]); 
+       EXPECT_DOUBLE_EQ(0.0, error_ary[i]); 
+       EXPECT_DOUBLE_EQ(0.0, scratch_ary[i]); 
+   } 
+}
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: TallyDataTest
-//---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 void ResizeDataArraysHelper(TallyData* tallyData, 
                           unsigned int num_tally_points, 
@@ -103,7 +144,6 @@ void ResizeDataArraysHelper(TallyData* tallyData,
         EXPECT_DOUBLE_EQ(0.0, tallyArray3[i]);
      }
 }
-
 //---------------------------------------------------------------------------//
 TEST_F(TallyDataTest, ResizeDataArrays)
 {
@@ -119,7 +159,5 @@ TEST_F(TallyDataTest, ResizeDataArrays)
      ResizeDataArraysHelper(tallyData3, 1, 9);
      ResizeDataArraysHelper(tallyData3, 3, 27);
 }
-
 //---------------------------------------------------------------------------//
-
 // end of MCNP5/dagmc/test/test_TallyData.cpp
