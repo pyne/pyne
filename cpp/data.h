@@ -172,7 +172,7 @@ namespace pyne
 
   /// Loads the dose factor data from the nuc_data.h5 file into memory.
   ///
-  void _load_df_map(const char * source_location);
+  void _load_df_map(const char * source_path);
 
   /// \brief Returns the dose factors of a nuclide \a nuc.  
   /// 

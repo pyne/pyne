@@ -370,7 +370,7 @@ double pyne::gamma_frac(std::string nuc)
 /*** Dose Factor Functions ***/
 /*****************************/
 
-void pyne::_load_df_map(const char * source_location)
+void pyne::_load_df_map(const char * source_path)
 {
   // Loads the dose factor table into df_map
   herr_t status;
@@ -398,7 +398,7 @@ void pyne::_load_df_map(const char * source_location)
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t df_set = H5Dopen2(nuc_data_h5, source_location, H5P_DEFAULT);
+  hid_t df_set = H5Dopen2(nuc_data_h5, source_path, H5P_DEFAULT);
   hid_t df_space = H5Dget_space(df_set);
   int df_length = H5Sget_simple_extent_npoints(df_space);
 
@@ -426,10 +426,33 @@ void pyne::_load_df_map(const char * source_location)
 };
 
 ///
+/// Function for Source
+///
+
+const char * source_string(int source)
+{
+  const char * source_location;
+  if (source == 0)
+  {
+    source_location = "/dose_factors/epa";
+  }
+  else if (source == 1)
+  {
+    source_location = "/dose_factors/doe";
+  }
+  else if (source == 2)
+  {
+    source_location = "/dose_factors/genii";
+  }
+  return source_location;
+};
+  
+///
 /// Functions for External Air and 
 /// Ratio of External Air to Inhalation Dose Factors
 ///
 
+/// External Air
 std::map<int, double> pyne::ext_air_df_map = std::map<int, double>();
 
 double pyne::ext_air_df(int nuc, int source, bool get_error)
@@ -445,19 +468,8 @@ double pyne::ext_air_df(int nuc, int source, bool get_error)
     return (*nuc_iter).second;
 
   // Choose correct table from nuc_data.h5 based on user input. 
-  const char * source_location;
-  if (source == 0)
-  {
-    source_location = "/dose_factors/epa";
-  }
-  else if (source == 1)
-  {
-    source_location = "/dose_factors/doe";
-  }
-  else if (source == 2)
-  {
-    source_location = "/dose_factors/genii";
-  }
+  const char * source_path;
+  source_path = source_string(source);
 
   // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
   if (ext_air_df_map.empty())
@@ -465,7 +477,7 @@ double pyne::ext_air_df(int nuc, int source, bool get_error)
     // Don't fail if we can't load the library
     try
     {
-      _load_df_map(source_location);
+      _load_df_map(source_path);
       return ext_air_df(nuc, source, get_error);
     }
     catch(...){};
@@ -495,6 +507,362 @@ double pyne::ext_air_df(std::string nuc, int source, bool get_error)
 {
   int nuc_zz = nucname::id(nuc);
   return ext_air_df(nuc_zz, source, get_error);
+};
+
+/// Ratio
+std::map<int, double> pyne::ratio_map = std::map<int, double>();
+
+double pyne::ratio(int nuc, int source, bool get_error)
+{
+  // Find the nuclide's external air dose factor in [mrem/hr per Ci/m^3]
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = ratio_map.find(nuc);
+  nuc_end = ratio_map.end();
+
+  // First check if we already have the nuc ratio in the map
+  if (nuc_iter != nuc_end) 
+    return (*nuc_iter).second;
+
+  // Choose correct table from nuc_data.h5 based on user input. 
+  const char * source_path;
+  source_path = source_string(source);
+
+  // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
+  if (ratio_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_df_map(source_path);
+      return ratio(nuc, source, get_error);
+    }
+    catch(...){};
+  };
+  
+  
+  double r;
+  int nucid = nucname::id(nuc);
+  if (nucid != nuc)
+    return ratio(nucid, source, get_error);
+
+  // If nuclide is not found, return 0
+  r = 0.0;
+  ratio_map[nuc] = r;
+  return r;
+};
+
+
+double pyne::ratio(char * nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return ratio(nuc_zz, source, get_error);
+};
+
+
+double pyne::ratio(std::string nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return ratio(nuc_zz, source, get_error);
+};
+
+///
+/// Functions for External Soil Dose Factors
+///
+
+std::map<int, double> pyne::ext_soil_df_map = std::map<int, double>();
+
+double pyne::ext_soil_df(int nuc, int source, bool get_error)
+{
+  // Find the nuclide's external soil dose factor in [mrem/hr per Ci/m^2]
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = ext_soil_df_map.find(nuc);
+  nuc_end = ext_soil_df_map.end();
+
+  // First check if we already have the nuc ext_soil_df in the map
+  if (nuc_iter != nuc_end) 
+    return (*nuc_iter).second;
+
+  // Choose correct table from nuc_data.h5 based on user input. 
+  const char * source_path;
+  source_path = source_string(source);
+
+  // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
+  if (ext_soil_df_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_df_map(source_path);
+      return ext_soil_df(nuc, source, get_error);
+    }
+    catch(...){};
+  };
+  
+  
+  double df;
+  int nucid = nucname::id(nuc);
+  if (nucid != nuc)
+    return ext_soil_df(nucid, source, get_error);
+
+  // If nuclide is not found, return 0
+  df = 0.0;
+  ext_soil_df_map[nuc] = df;
+  return df;
+};
+
+
+double pyne::ext_soil_df(char * nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return ext_soil_df(nuc_zz, source, get_error);
+};
+
+
+double pyne::ext_soil_df(std::string nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return ext_soil_df(nuc_zz, source, get_error);
+};
+
+///
+/// Functions for Ingestion Dose Factors and
+/// Fraction of activity that is absorbed by body fluids
+///
+
+/// Ingestion
+std::map<int, double> pyne::ingest_df_map = std::map<int, double>();
+
+double pyne::ingest_df(int nuc, int source, bool get_error)
+{
+  // Find the nuclide's ingestion dose factor in [mrem/pCi]
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = ingest_df_map.find(nuc);
+  nuc_end = ingest_df_map.end();
+
+  // First check if we already have the nuc ingest_df in the map
+  if (nuc_iter != nuc_end) 
+    return (*nuc_iter).second;
+
+  // Choose correct table from nuc_data.h5 based on user input. 
+  const char * source_path;
+  source_path = source_string(source);
+
+  // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
+  if (ingest_df_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_df_map(source_path);
+      return ingest_df(nuc, source, get_error);
+    }
+    catch(...){};
+  };
+  
+  
+  double df;
+  int nucid = nucname::id(nuc);
+  if (nucid != nuc)
+    return ingest_df(nucid, source, get_error);
+
+  // If nuclide is not found, return 0
+  df = 0.0;
+  ingest_df_map[nuc] = df;
+  return df;
+};
+
+
+double pyne::ingest_df(char * nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return ingest_df(nuc_zz, source, get_error);
+};
+
+
+double pyne::ingest_df(std::string nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return ingest_df(nuc_zz, source, get_error);
+};
+
+/// Fluid Fraction
+std::map<int, double> pyne::fluid_frac_map = std::map<int, double>();
+
+double pyne::fluid_frac(int nuc, int source, bool get_error)
+{
+  // Find the nuclide's fluid fraction for ingestion
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = fluid_frac_map.find(nuc);
+  nuc_end = fluid_frac_map.end();
+
+  // First check if we already have the nuc fluid_frac in the map
+  if (nuc_iter != nuc_end) 
+    return (*nuc_iter).second;
+
+  // Choose correct table from nuc_data.h5 based on user input. 
+  const char * source_path;
+  source_path = source_string(source);
+
+  // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
+  if (fluid_frac_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_df_map(source_path);
+      return fluid_frac(nuc, source, get_error);
+    }
+    catch(...){};
+  };
+  
+  
+  double ff;
+  int nucid = nucname::id(nuc);
+  if (nucid != nuc)
+    return fluid_frac(nucid, source, get_error);
+
+  // If nuclide is not found, return 0
+  ff = 0.0;
+  fluid_frac_map[nuc] = ff;
+  return ff;
+};
+
+
+double pyne::fluid_frac(char * nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return fluid_frac(nuc_zz, source, get_error);
+};
+
+
+double pyne::fluid_frac(std::string nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return fluid_frac(nuc_zz, source, get_error);
+};
+
+
+///
+/// Functions for Inhalation Dose Factors and
+/// Lung Model used to obtain dose factors
+///
+
+/// Inhalation
+std::map<int, double> pyne::inhale_df_map = std::map<int, double>();
+
+double pyne::inhale_df(int nuc, int source, bool get_error)
+{
+  // Find the nuclide's inhalation dose factor in [mrem/pCi]
+  std::map<int, double>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = inhale_df_map.find(nuc);
+  nuc_end = inhale_df_map.end();
+
+  // First check if we already have the nuc inhale_df in the map
+  if (nuc_iter != nuc_end) 
+    return (*nuc_iter).second;
+
+  // Choose correct table from nuc_data.h5 based on user input. 
+  const char * source_path;
+  source_path = source_string(source);
+
+  // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
+  if (inhale_df_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_df_map(source_path);
+      return inhale_df(nuc, source, get_error);
+    }
+    catch(...){};
+  };
+  
+  
+  double df;
+  int nucid = nucname::id(nuc);
+  if (nucid != nuc)
+    return inhale_df(nucid, source, get_error);
+
+  // If nuclide is not found, return 0
+  df = 0.0;
+  inhale_df_map[nuc] = df;
+  return df;
+};
+
+
+double pyne::inhale_df(char * nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return inhale_df(nuc_zz, source, get_error);
+};
+
+
+double pyne::inhale_df(std::string nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return inhale_df(nuc_zz, source, get_error);
+};
+
+/// Lung Model
+std::map<int, std::string> pyne::lung_mod_map = std::map<int, std::string>();
+
+std::string pyne::lung_mod(int nuc, int source, bool get_error)
+{
+  // Find the nuclide's lung model for inhlation
+  std::map<int, std::string>::iterator nuc_iter, nuc_end;
+
+  nuc_iter = lung_mod_map.find(nuc);
+  nuc_end = lung_mod_map.end();
+
+  // First check if we already have the nuc lung_mod in the map
+  if (nuc_iter != nuc_end) 
+    return (*nuc_iter).second;
+
+  // Choose correct table from nuc_data.h5 based on user input. 
+  const char * source_path;
+  source_path = source_string(source);
+
+  // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
+  if (lung_mod_map.empty())
+  {
+    // Don't fail if we can't load the library
+    try
+    {
+      _load_df_map(source_path);
+      return lung_mod(nuc, source, get_error);
+    }
+    catch(...){};
+  };
+  
+  
+  std::string lm;
+  int nucid = nucname::id(nuc);
+  if (nucid != nuc)
+    return lung_mod(nucid, source, get_error);
+
+  // If nuclide is not found, return string
+  lm = "nuclide not found";
+  lung_mod_map[nuc] = lm;
+  return lm;
+};
+
+
+std::string pyne::lung_mod(char * nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return lung_mod(nuc_zz, source, get_error);
+};
+
+
+std::string pyne::lung_mod(std::string nuc, int source, bool get_error)
+{
+  int nuc_zz = nucname::id(nuc);
+  return lung_mod(nuc_zz, source, get_error);
 };
 
 
