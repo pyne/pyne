@@ -1,8 +1,12 @@
 #!/usr/bin/python
 
 import argparse
-from  pyne import material
+import nose
+from unittest import TestCase
+from nose.tools import assert_equal, assert_in, assert_true, assert_almost_equal
+from pyne import material
 from pyne.material import Material
+
 
 """
 function to load the material library
@@ -24,27 +28,34 @@ def load_output(filename, material_library):
     mat=material.Material()   
     for m in output_lib.items() :
         mat=m
-        compare(material_library, mat)
+        test_existence(material_library, mat)
+        test_density(material_library, mat)
+        test_composition(material_library, mat)
     return output_lib
 
 
 """
-function to compare items from the output library with that in the material 
+test to check the exsitence of materials from the output library in the PyNE material 
 library
 """
-def compare(material_library, material): 
-        counter=0
-        for item in material_library.items():
-            counter=counter+1
-            if material[0] == item[0] :
-                #print 'material :' , material
-                #print 'item :' ,item
-                if material[1].density == item[1].density:
-                    print "complete match found for : ", material[0]
-                elif material[1].density != item[1].density :
-                    print "match found with a difference in density for : ", material[0]   
-                elif counter == len(material_library.items())-1 :
-                    print "no match found for %s" %material[0]
+def test_existence(material_library, material): 
+    assert_in(material[0],material_library.iterkeys())
+    
+"""
+test to check that the density of materials exsits and is in a proper format
+"""    
+               
+def test_density(material_library, material):
+    assert_true(material[1].density,float)
+    
+"""
+test to check the composition
+"""
+def test_composition(material_library,material):
+    for item in material_library.iteritems():
+        if material[0] == item[0]:
+            for c in material[1].comp.keys():
+                assert_almost_equal(material[1].comp[c], item[1].comp[c], places=4)                 
 
 """
 Parsing
