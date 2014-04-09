@@ -151,27 +151,7 @@ def make_df_tables(genii, epa, doe, nuc_data, build_dir=""):
     """
     
     # Define data types for all three cases
-    genii_dtype = np.dtype([
-        ('nuc', int),
-        ('ext_air_df', float),
-        ('ratio', float),
-        ('ext_soil_df', float),
-        ('ingest_df', float),
-        ('fluid_frac', float),
-        ('inhale_df', float),
-        ('lung_mod', 'S10'),
-        ])
-    epa_dtype = np.dtype([
-        ('nuc', int),
-        ('ext_air_df', float),
-        ('ratio', float),
-        ('ext_soil_df', float),
-        ('ingest_df', float),
-        ('fluid_frac', float),
-        ('inhale_df', float),
-        ('lung_mod', 'S10'),
-        ])
-    doe_dtype = np.dtype([
+    df_dtype = np.dtype([
         ('nuc', int),
         ('ext_air_df', float),
         ('ratio', float),
@@ -183,9 +163,9 @@ def make_df_tables(genii, epa, doe, nuc_data, build_dir=""):
         ])
 
     # Convert to numpy arrays
-    genii_array = np.array(genii, dtype=genii_dtype)
-    epa_array = np.array(epa, dtype=epa_dtype)
-    doe_array = np.array(doe, dtype=doe_dtype)
+    genii_array = np.array(genii, dtype=df_dtype)
+    epa_array = np.array(epa, dtype=df_dtype)
+    doe_array = np.array(doe, dtype=df_dtype)
 
     # Open the hdf5 file
     nuc_file = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
