@@ -10,10 +10,6 @@ SET (FLUDAG_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/..")
 # Where to look for includes
 INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${gtest_dir}" "${gtest_dir}/include")
 
-# This makes libgtest.a in the binary directory for an out-of-source gtest
-# SET ( GTest "${gtest_dir}/src/gtest-all.cc")
-# ADD_LIBRARY (gtest ${GTest})
-
 # make fludag source files into a library
 ADD_LIBRARY(fludag SHARED
 	    ${FLUDAG_SOURCE}/fluka_funcs.cpp
@@ -37,14 +33,6 @@ SET(LIBRARIES
     ${MOAB_HOME}/lib/libdagmc.so
     ${MOAB_HOME}/lib/libMOAB.so
 )
-
-# To add a new file, add it to this lis.  
-# SET (FLUDAG_TEST_SOURCE
-#	"${CMAKE_CURRENT_SOURCE_DIR}/test_FlukaFuncs.cpp"
-#	"${CMAKE_CURRENT_SOURCE_DIR}/test_UnitNubmer.cpp"
-#	)
-
-# ADD_EXECUTABLE (fludag_unit_tests fludag_unit_test_driver.cc ${FLUDAG_TEST_SOURCE})
 
 # set up test cases
 ADD_EXECUTABLE(test_UnitNumber test_UnitNumber.cpp)
