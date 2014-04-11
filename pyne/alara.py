@@ -246,31 +246,48 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
     mat_loading = "mat_loading\n" # material loading input block
     mixture = "" # mixture blocks
 
+    unique_mixtures = []
     for i, mat, ve in mesh:
         volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
-        mat_loading += "    zone_{0}    mix_{0}\n".format(i)
-        mixture += "mixture mix_{0}\n".format(i)
+
+        ve_mixture = {}
         for row in cell_fracs[cell_fracs['idx'] == i]:
-            mixture += "    material mat_{0} 1 {1}\n".format(
-                       cell_mats[row['cell']].attrs['mat_number'], row['vol_frac'])
-        mixture += "end\n\n"
+            if cell_mats[row['cell']].attrs['mat_number'] not in ve_mixture.keys():
+                ve_mixture[cell_mats[row['cell']].attrs['mat_number']] = round(row['vol_frac'], 6)
+            else:
+                ve_mixture[cell_mats[row['cell']].attrs['mat_number']] += round(row['vol_frac'], 6)
+
+        if ve_mixture not in unique_mixtures:
+            unique_mixtures.append(ve_mixture)
+            mixture += "mixture mix_{0}\n".format(unique_mixtures.index(ve_mixture))
+            for key, value in ve_mixture.items():
+                mixture += "    material mat_{0} 1 {1}\n".format(key, value)
+
+            mixture += "end\n\n"
+
+        mat_loading += "    zone_{0}    mix_{1}\n".format(i, unique_mixtures.index(ve_mixture))
 
     volume += "end\n\n"
     mat_loading += "end\n\n"
+    print(unique_mixtures)
 
     with open(geom_file, 'w') as f:
         f.write(geometry + volume + mat_loading + mixture)
     
     matlib = "" # ALARA material library string
 
+    printed_mats = []
     for mat in cell_mats.values():
-        matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(mat.attrs['mat_number'], 
-                                                         mat.density, 
-                                                         len(mat.comp))
-        for nuc, comp in mat.comp.iteritems():
-            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0, 
-                                                        znum(nuc))
-        matlib += "\n"
+        mat_num = mat.attrs['mat_number']
+        if mat_num not in printed_mats:
+            printed_mats.append(mat_num)
+            matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(mat.attrs['mat_number'], 
+                                                             mat.density, 
+                                                             len(mat.comp))
+            for nuc, comp in mat.comp.iteritems():
+                matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0, 
+                                                            znum(nuc))
+            matlib += "\n"
 
     with open(matlib_file, 'w') as f:
         f.write(matlib)
