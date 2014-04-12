@@ -1,5 +1,9 @@
+from __future__ import division
 import re
-import urllib
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 import os
 import warnings
 import copy
@@ -9,6 +13,10 @@ import numpy as np
 from pyne import nucname, rxname, data
 from pyne.utils import to_sec
 
+try:
+    basestring
+except NameError:
+    basestring = str
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')
@@ -73,13 +81,12 @@ def _to_id_from_level(nuc_id, level, levellist, lmap):
     gparent = nid
     if nid in lmap and level > 0.0:
         for i in range(lmap[nid], len(levellist)):
-            if level + 1.0 > levellist[i][3] > \
-                            level - 1.0:
+            if level + 1.0 > levellist[i][3] > level - 1.0:
                 gparent = levellist[i][0]
                 break
             if level + 1.0 < levellist[i][3]:
                 break
-            if int(nid / 10000) != int(levellist[i][0] / 10000):
+            if int(nid // 10000) != int(levellist[i][0] // 10000):
                 break
     return gparent
 
@@ -706,6 +713,8 @@ def _parse_decay_dataset(lines, decay_s):
             if parent2 is None:
                 parent2 = parent
                 e = 0
+            e = 0.0 if e is None else e
+            level = 0.0 if level is None else level
             bparent = data.id_from_level(_to_id(parent2), e)
             bdaughter = data.id_from_level(_to_id(daughter), level)
             betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
@@ -732,6 +741,8 @@ def _parse_decay_dataset(lines, decay_s):
             if parent2 is None:
                 parent2 = parent
                 e = 0
+            e = 0.0 if e is None else e
+            level = 0.0 if level is None else level
             aparent = data.id_from_level(_to_id(parent2), e)
             adaughter = data.id_from_level(_to_id(daughter), level)
             alphas.append((aparent, adaughter, dat[0], dat[2]))
@@ -741,6 +752,8 @@ def _parse_decay_dataset(lines, decay_s):
             if parent2 is None:
                 parent2 = parent
                 e = 0
+            e = 0.0 if e is None else e
+            level = 0.0 if level is None else level
             ecparent = data.id_from_level(_to_id(parent2), e)
             ecdaughter = data.id_from_level(_to_id(daughter), level)
             ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],

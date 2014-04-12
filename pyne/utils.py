@@ -1,7 +1,8 @@
+from __future__ import division
 import os
 from distutils.dir_util import remove_tree
 
-from _utils import fromstring_split, fromstring_token, endftod, fromendf_tok
+from pyne._utils import fromstring_split, fromstring_token, endftod, fromendf_tok
 
 time_conv_dict = {
           'as': 1e-18, 

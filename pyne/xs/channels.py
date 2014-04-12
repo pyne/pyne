@@ -4,7 +4,12 @@ structure.  Additionally, it provides interfaces for some higher level functiona
 such as computing cross sections for materials, fission energy spectra, metastable
 ratios, etc.
 """
+from __future__ import division
 import collections
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import numpy as np
 np.seterr(all='ignore')

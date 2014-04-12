@@ -7,6 +7,7 @@ from an initial cascade.  Other helper function compute relative flow rates
 and nuclide-specific separation factors.
 """
 # Cython imports
+from __future__ import unicode_literals
 from cython cimport pointer
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
@@ -433,7 +434,7 @@ def solve_numeric(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
     return casc
 
 
-def multicomponent(Cascade orig_casc, char * solver="symbolic", 
+def multicomponent(Cascade orig_casc, solver="symbolic", 
                    double tolerance=1.0E-7, int max_iter=100):
     """multicomponent(orig_casc, solver="symbolic", tolerance=1.0E-7, max_iter=100)
     Calculates the optimal value of Mstar by minimzing the seperative power.
@@ -463,8 +464,11 @@ def multicomponent(Cascade orig_casc, char * solver="symbolic",
         are also computed on this instance.
 
     """
+    cdef char * csolver
+    s_bytes = solver.encode('UTF-8')
+    csolver = s_bytes
     cdef Cascade casc = Cascade()
-    cdef std_string strsolver = std_string(solver)
+    cdef std_string strsolver = std_string(csolver)
     cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(\
                                     orig_casc._inst[0], strsolver, tolerance, max_iter)
     casc._inst[0] = ccasc

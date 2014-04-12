@@ -499,35 +499,35 @@ def test_read_mcnp():
     read_materials = read_mcnp_inp('mcnp_inp.txt')
     assert_equal(expected_material, read_materials[0])
     assert_equal(
-        expected_multimaterial._mats.keys()[0].comp,
-        read_materials[1]._mats.keys()[0].comp)
+        list(expected_multimaterial._mats.keys())[0].comp,
+        list(read_materials[1]._mats.keys())[0].comp)
     assert_equal(
-        expected_multimaterial._mats.keys()[0].mass,
-        read_materials[1]._mats.keys()[0].mass)
+        list(expected_multimaterial._mats.keys())[0].mass,
+        list(read_materials[1]._mats.keys())[0].mass)
     assert_equal(
-        expected_multimaterial._mats.keys()[0].density,
-        read_materials[1]._mats.keys()[0].density)
+        list(expected_multimaterial._mats.keys())[0].density,
+        list(read_materials[1]._mats.keys())[0].density)
     assert_equal(
-        expected_multimaterial._mats.keys()[0].atoms_per_molecule,
-        read_materials[1]._mats.keys()[0].atoms_per_molecule)
+        list(expected_multimaterial._mats.keys())[0].atoms_per_molecule,
+        list(read_materials[1]._mats.keys())[0].atoms_per_molecule)
     assert_equal(
-        expected_multimaterial._mats.keys()[0].attrs,
-        read_materials[1]._mats.keys()[0].attrs)
+        list(expected_multimaterial._mats.keys())[0].attrs,
+        list(read_materials[1]._mats.keys())[0].attrs)
     assert_equal(
-        expected_multimaterial._mats.keys()[1].comp,
-        read_materials[1]._mats.keys()[1].comp)
+        list(expected_multimaterial._mats.keys())[1].comp,
+        list(read_materials[1]._mats.keys())[1].comp)
     assert_equal(
-        expected_multimaterial._mats.keys()[1].mass,
-        read_materials[1]._mats.keys()[1].mass)
+        list(expected_multimaterial._mats.keys())[1].mass,
+        list(read_materials[1]._mats.keys())[1].mass)
     assert_equal(
-        expected_multimaterial._mats.keys()[1].density,
-        read_materials[1]._mats.keys()[1].density)
+        list(expected_multimaterial._mats.keys())[1].density,
+        list(read_materials[1]._mats.keys())[1].density)
     assert_equal(
-        expected_multimaterial._mats.keys()[1].atoms_per_molecule,
-        read_materials[1]._mats.keys()[1].atoms_per_molecule)
+        list(expected_multimaterial._mats.keys())[1].atoms_per_molecule,
+        list(read_materials[1]._mats.keys())[1].atoms_per_molecule)
     assert_equal(
-        expected_multimaterial._mats.keys()[1].attrs,
-        read_materials[1]._mats.keys()[1].attrs)
+        list(expected_multimaterial._mats.keys())[1].attrs,
+        list(read_materials[1]._mats.keys())[1].attrs)
 
 
 # Test PtracReader class

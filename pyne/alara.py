@@ -6,6 +6,10 @@ import collections
 import numpy as np
 import tables as tb
 import warnings
+try:
+    basestring
+except NameError:
+    basestring = str
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions

@@ -7,7 +7,10 @@ from __future__ import print_function
 import os
 import re
 import shutil
-import urllib2
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 
 import numpy as np
 import tables as tb

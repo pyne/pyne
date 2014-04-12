@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import struct
 import filecmp
 import os
+
+from nose.tools import assert_equal
 
 from pyne.binaryreader import (_FortranRecord, _BinaryReader)
 
@@ -12,7 +15,7 @@ def test_make_empty_FR():
 
     test_record = _FortranRecord('', 0)
 
-    if test_record.data != '':
+    if len(test_record.data) != 0:
         raise ValueError("Failed to make an new empty _FortranRecord. "
                          " Record has data.")
     if test_record.num_bytes != 0:
@@ -45,17 +48,17 @@ def test_reset_FR():
 
 
 # useful for checking all the changes expected from writing to a FortranRecord
-def check_write_record_data(record, pos, num, data, typeString):
+def check_write_record_data(record, pos, num, data, typestring):
 
     if record.pos != pos:
-        raise ValueError("Writing " + typeString +
+        raise ValueError("Writing " + typestring +
                          " to record did not update pos properly: "
                          + str(record.pos))
     if record.num_bytes != num:
-        raise ValueError("Writing  " + typeString +
+        raise ValueError("Writing  " + typestring +
                          "to record did not update num_bytes properly")
     if record.data != data:
-        raise ValueError("Writing  " + typeString +
+        raise ValueError("Writing  " + typestring +
                          "to record did not set data member correctly")
 
     return 1
@@ -71,7 +74,7 @@ def test_write_FR_single_int():
 
     set_int = 8
     set_num_bytes = 4
-    set_data = '\x08\x00\x00\x00'
+    set_data = b'\x08\x00\x00\x00'
 
     # create new record
     test_record = _FortranRecord('', 0)  # already tested
@@ -87,7 +90,7 @@ def test_write_FR_int_list():
 
     set_intList = [8, 16]
     set_num_bytes = 8
-    set_data = '\x08\x00\x00\x00\x10\x00\x00\x00'
+    set_data = b'\x08\x00\x00\x00\x10\x00\x00\x00'
 
     test_record = _FortranRecord('', 0)
 
@@ -101,8 +104,9 @@ def test_write_FR_int_list():
 def test_write_FR_single_long():
 
     set_long = 8
+
     set_num_bytes = 8
-    set_data = '\x08\x00\x00\x00\x00\x00\x00\x00'
+    set_data = b'\x08\x00\x00\x00\x00\x00\x00\x00'
 
     # create new record
     test_record = _FortranRecord('', 0)  # already tested
@@ -119,7 +123,7 @@ def test_write_FR_long_list():
     set_long_list = [8, 16]
     set_num_bytes = 16
     set_data = \
-        '\x08\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00'
+        b'\x08\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00'
 
     test_record = _FortranRecord('', 0)
     test_record.put_long(set_long_list)
@@ -132,7 +136,7 @@ def test_write_FR_single_float():
 
     set_float = 3.14
     set_num_bytes = 4
-    set_data = '\xc3\xf5H@'
+    set_data = b'\xc3\xf5H@'
 
     # create new record
     test_record = _FortranRecord('', 0)  # already tested
@@ -148,7 +152,7 @@ def test_write_FR_float_list():
 
     set_floatList = [3.14, 0.3333]
     set_num_bytes = 8
-    set_data = '\xc3\xf5H@L\xa6\xaa>'
+    set_data = b'\xc3\xf5H@L\xa6\xaa>'
 
     test_record = _FortranRecord('', 0)
     test_record.put_float(set_floatList)
@@ -161,7 +165,7 @@ def test_write_FR_single_double():
 
     set_double = 3.14
     set_num_bytes = 8
-    set_data = '\x1f\x85\xebQ\xb8\x1e\t@'
+    set_data = b'\x1f\x85\xebQ\xb8\x1e\t@'
 
     # create new record
     test_record = _FortranRecord('',  0)  # already tested
@@ -177,7 +181,7 @@ def test_write_FR_double_list():
 
     set_double_list = [3.14, 0.3333]
     set_num_bytes = 16
-    set_data = '\x1f\x85\xebQ\xb8\x1e\t@io\xf0\x85\xc9T\xd5?'
+    set_data = b'\x1f\x85\xebQ\xb8\x1e\t@io\xf0\x85\xc9T\xd5?'
 
     test_record = _FortranRecord('', 0)
     test_record.put_double(set_double_list)
@@ -191,7 +195,7 @@ def test_write_FR_single_string():
     set_string = "Hello World!"
     set_length = len(set_string)
     set_num_bytes = 12
-    set_data = 'Hello World!'
+    set_data = b'Hello World!'
 
     # create new record
     test_record = _FortranRecord('', 0)  # already tested
@@ -208,7 +212,7 @@ def test_write_FR_string_list():
     set_string_list = ["Hello ", "World!"]
     set_length = len(set_string_list[0])
     set_num_bytes = 12
-    set_data = 'Hello World!'
+    set_data = b'Hello World!'
 
     test_record = _FortranRecord('', 0)
     test_record.put_string(set_string_list, set_length)
@@ -225,8 +229,8 @@ def test_write_FR_mixed_record():
     set_string = "Hello World!"
 
     set_num_bytes = 4+4+(2*8)+12
-    set_data = '\x08\x00\x00\x00Hello World!#B\x92\x0c\xa1\x9c\x07<a\xd3' + \
-        '\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
+    set_data = b'\x08\x00\x00\x00Hello World!#B\x92\x0c\xa1\x9c\x07<a\xd3' + \
+        b'\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
 
     test_record = _FortranRecord('', 0)
     test_record.put_int(set_int)
@@ -336,7 +340,7 @@ def test_read_FR_single_float():
     test_float = '%10.6f' % test_float
 
     if test_float != set_float:
-        print str(set_float) + " != " + str(test_float)
+        print("{0} != {1}".format(set_float, test_float))
         raise ValueError("Value from get_float doesn't match value "
                          "from put_float.")
 
@@ -360,8 +364,8 @@ def test_read_FR_float_list():
     testList = ['%10.6f' % testList[0], '%10.6f' % testList[1]]
 
     if testList != floatList:
-        print floatList
-        print testList
+        print(floatList)
+        print(testList)
         raise ValueError("List from get_float doesn't match value "
                          "from put_float.")
 
@@ -479,7 +483,7 @@ def test_read_FR_mixed_record():
     test_float = '%10.6f' % test_float
 
     if test_float != set_float:
-        print str(set_float) + " != " + str(test_float)
+        print("{0} != {1}".format(set_float, test_float))
         raise ValueError("Value from get_float doesn't match value "
                          "from put_float.")
 
@@ -537,19 +541,17 @@ def test_read_BR():
     set_int = 8
     set_float = 3.14
     set_double_list = [1.6e-19, 6.02e23]
-    set_string = "Hello World!"
+    set_string = b"Hello World!"
 
     binary_file = _BinaryReader('test_readBR.ref')
 
     test_record = binary_file.get_fortran_record()
 
     test_int = test_record.get_int()[0]
-    if test_int != set_int:
-        raise ValueError("Integer value was not as expected.")
+    assert_equal(set_int, test_int)
 
     test_string = test_record.get_string(12)[0]
-    if test_string != set_string:
-        raise ValueError("String was not as expected.")
+    assert_equal(set_string.decode(), test_string)
 
     test_double_list = test_record.get_double(2)
     if test_double_list != set_double_list:
@@ -562,7 +564,7 @@ def test_read_BR():
     test_float = '%10.6f' % test_float
 
     if test_float != set_float:
-        print str(set_float) + " != " + str(test_float)
+        print("{0} != {1}".format(set_float, test_float))
         raise ValueError("Float value was not as expected.")
 
     return 1
@@ -579,222 +581,223 @@ else:
     passed = 'PASSED'
     failed = 'FAILED'
 
-print "test_make_empty_FR: ",
+print("test_make_empty_FR: ")
 try:
     tests[0] += test_make_empty_FR()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_reset_FR: ",
+print("test_reset_FR: ")
 try:
     tests[0] += test_reset_FR()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_single_int: ",
+print("test_write_FR_single_int: ")
 try:
     tests[0] += test_write_FR_single_int()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_int_list: ",
+print("test_write_FR_int_list: ")
 try:
     tests[0] += test_write_FR_int_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_single_long: ",
+print("test_write_FR_single_long: ")
 try:
     tests[0] += test_write_FR_single_long()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_long_list: ",
+print("test_write_FR_long_list: ")
 try:
     tests[0] += test_write_FR_long_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_single_float: ",
+print("test_write_FR_single_float: ")
 try:
     tests[0] += test_write_FR_single_float()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_float_list: ",
+print("test_write_FR_float_list: ")
 try:
     tests[0] += test_write_FR_float_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_single_double: ",
+print("test_write_FR_single_double: ")
 try:
     tests[0] += test_write_FR_single_double()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_double_list: ",
+print("test_write_FR_double_list: ")
 try:
     tests[0] += test_write_FR_double_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_single_string: ",
+print("test_write_FR_single_string: ")
 try:
     tests[0] += test_write_FR_single_string()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_string_list: ",
+print("test_write_FR_string_list: ")
 try:
     tests[0] += test_write_FR_string_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_FR_mixed_record: ",
+print("test_write_FR_mixed_record: ")
 try:
     tests[0] += test_write_FR_mixed_record()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_single_int: ",
+print("test_read_FR_single_int: ")
 try:
     tests[0] += test_read_FR_single_int()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_int_list: ",
+print("test_read_FR_int_list: ")
 try:
     tests[0] += test_read_FR_int_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_single_long: ",
+print("test_read_FR_single_long: ")
 try:
     tests[0] += test_read_FR_single_long()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_long_list: ",
+print("test_read_FR_long_list: ")
 try:
     tests[0] += test_read_FR_long_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_single_float: ",
+print("test_read_FR_single_float: ")
 try:
     tests[0] += test_read_FR_single_float()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_float_list: ",
+print("test_read_FR_float_list: ")
 try:
     tests[0] += test_read_FR_float_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_single_double: ",
+print("test_read_FR_single_double: ")
 try:
     tests[0] += test_read_FR_single_double()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_double_list: ",
+print("test_read_FR_double_list: ")
 try:
     tests[0] += test_read_FR_double_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_single_string: ",
+print("test_read_FR_single_string: ")
 try:
     tests[0] += test_read_FR_single_string()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_string_list: ",
+print("test_read_FR_string_list: ")
 try:
     tests[0] += test_read_FR_string_list()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_FR_mixed_record: ",
+print("test_read_FR_mixed_record: ")
 try:
     tests[0] += test_read_FR_mixed_record()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_open_writable_BR: ",
+print("test_open_writable_BR: ")
 try:
     tests[0] += test_open_writable_BR()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_write_BR: ",
+print("test_write_BR: ")
 try:
     tests[0] += test_write_BR()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "test_read_BR: ",
+print("test_read_BR: ")
 try:
     tests[0] += test_read_BR()
-    print passed
+    print(passed)
 except Exception as inst:
-    print failed + ": " + str(inst)
+    print(failed + ": " + str(inst))
     tests[1] += 1
 
-print "Ran    " + str(tests[0]+tests[1]) + " tests."
-print "PASSED " + str(tests[0]) + " tests."
-print "FAILED " + str(tests[1]) + " tests."
+print("Ran    " + str(tests[0]+tests[1]) + " tests.")
+print("PASSED " + str(tests[0]) + " tests.")
+print("FAILED " + str(tests[1]) + " tests.")
+
