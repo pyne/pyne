@@ -433,6 +433,43 @@ def test_sza():
     assert_equal(nucname.sza(2390940), 94239)
     assert_equal(nucname.sza(2420950), 95242)
 
+
+def test_stateless():
+
+    assert_equal(nucname.stateless("he4"), 20040000)
+    assert_equal(nucname.stateless("Cm-244"), 962440000)
+    assert_equal(nucname.stateless("PU239"),  942390000)
+    assert_equal(nucname.stateless("AM242M"), 952420000)
+
+    assert_equal(nucname.stateless(2004),  20040000)
+    assert_equal(nucname.stateless(95642), 952420000)
+    assert_equal(nucname.stateless(95242), 952420000)
+    assert_equal(nucname.stateless(92636), 922360000)
+    assert_equal(nucname.stateless(95942), 952420000)
+
+    assert_equal(nucname.stateless("Am-242m"), 952420000)
+
+    assert_equal(nucname.stateless("he"), 20000000)
+    assert_equal(nucname.stateless("U"), 920000000)
+    assert_equal(nucname.stateless("Np"), 930000000)
+    assert_equal(nucname.stateless("Cl"), 170000000)
+
+    assert_equal(nucname.stateless("4he"),   20040000)
+    assert_equal(nucname.stateless("244CM"), 962440000)
+    assert_equal(nucname.stateless("239Pu"), 942390000)
+    assert_equal(nucname.stateless("242AM"), 952420000)
+
+    assert_equal(nucname.stateless(40020),   20040000)
+    assert_equal(nucname.stateless(2440961), 962440001)
+    assert_equal(nucname.stateless(2390940), 942390000)
+    assert_equal(nucname.stateless(2420950), 952420000)
+    assert_equal(nucname.stateless(92), 920000000)
+
+    assert_equal(nucname.stateless("94-Pu-239"), (nucname.id("Pu-239")/10000)*10000)
+    assert_equal(nucname.stateless("95-Am-242m"), (nucname.id("Am-242m")/10000)*10000)
+    assert_equal(nucname.stateless("94-Pu-239"), (nucname.id("Pu-239")/10000)*10000)
+    assert_equal(nucname.stateless("95-Am-242"), (nucname.id("Am-242")/10000)*10000)
+
 def test_sza_to_id():
     vals = [2004, 2004, 96244, 94239, 1095242, 2004, 95242, 1095242, 1092236, 
             4095242, 1095242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 
