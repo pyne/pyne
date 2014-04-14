@@ -1,3 +1,5 @@
+#ifndef TALLY_H
+#define TALLY_H
 /// \file tally.h
 /// \author Andrew Davis (davisa\@engr.wisc.edu)
 ///
@@ -40,8 +42,7 @@ namespace pyne
     std::string entity_name; // the name of the entity (optional)
     std::string particle_name; // particle name string
     std::string tally_type; // type of tally flux or current
-    int entity_id; // id number of the entity being tallied upon
-    
+    int entity_id; // id number of the entity being tallied upon    
   };
 
   /// Converts a Tally to a string stream representation.
@@ -57,3 +58,5 @@ namespace pyne
   
 // End pyne namespace
 };
+
+#endif
