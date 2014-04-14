@@ -698,6 +698,32 @@ def sza_to_id(nuc):
     return newnuc
 
 
+
+def stateless(nuc):
+    """Converts a nuclide to its Stateless form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in Stateless form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.stateless(<char *> nuc_bytes)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.stateless(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+
+
 #
 # C++ Helper Functions
 #
