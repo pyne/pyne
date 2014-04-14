@@ -46,7 +46,7 @@ class FluDAGTest : public ::testing::Test
     {
        // Default h5m file for testing
        // std::string infile = directory + "input/test2/fludag/slabs.h5m";
-       std::string infile = "../slabs.h5m";
+       std::string infile = "slabs.h5m";
 
        rloadval = DAG->load_file(infile.c_str(), 0.0 ); 
        assert(rloadval == MB_SUCCESS);
