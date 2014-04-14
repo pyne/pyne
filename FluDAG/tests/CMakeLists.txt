@@ -46,9 +46,9 @@ TARGET_LINK_LIBRARIES(gtest_main gtest)
 SET (tgt "gtest")
 ADD_CUSTOM_COMMAND (TARGET ${tgt}
 	COMMAND cp 
-		"${CMAKE_SOURCE_DIR}/slabs.h5m" 
-		"${CMAKE_BINARY_DIR}"
-	COMMENT "...copying test file from test source ${CMAKE_SOURCE_DIR} TO ${CMAKE_BINARY_DIR}"
+		"${CMAKE_CURRENT_SOURCE_DIR}/slabs.h5m" 
+		"${CMAKE_CURRENT_BINARY_DIR}"
+		COMMENT "...copying test file from test source ${CMAKE_CURRENT_SOURCE_DIR} TO ${CMAKE_CURRENT_BINARY_DIR}"
 	DEPENDS
 	VERBATIM
  	)
