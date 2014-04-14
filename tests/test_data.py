@@ -37,6 +37,27 @@ def test_gamma_frac():
     assert_equal(data.gamma_frac(92235), 0.036)
     assert_equal(data.gamma_frac(110240001), 0.998)
 
+def test_ext_air_df():
+    assert_equal(data.ext_air_df(40100000), 1.49E-10)
+    assert_equal(data.ext_air_df('H3', 0), 4.41E-12)
+#   need to insert function that checks a null value from another source
+#    assert_equal(data.ext_air_df(25054, 1), )
+
+def test_ext_soil_df():
+    assert_equal(data.ext_soil_df(40100000, 0), 0.537)
+    assert_equal(data.ext_soil_df('H3', 2), 3.49E-8)
+    assert_equal(data.ext_soil_df(25054, 1), 9590.0)
+    
+def test_ingest_df():
+    assert_equal(data.ingest_df(40100000), 4.66E-6)
+    assert_equal(data.ingest_df('H3', 2), 6.12E-8)
+    assert_equal(data.ingest_df(25054, 1), 2.7E-6)
+    
+def test_inhale_df():
+    assert_equal(data.inhale_df(40100000), 0.000354)
+    assert_equal(data.inhale_df('H3', 2), 9.02E-8)
+    assert_equal(data.inhale_df(25054, 1), 6.4E-6)
+
 def test_b_coherent():
     assert_equal(data.b_coherent('H1'), -3.7406E-13 + 0j)
     assert_equal(data.b_coherent(491150), 4.01E-13 - 5.62E-15j)
