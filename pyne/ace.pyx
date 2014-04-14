@@ -34,6 +34,72 @@ from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
 
+def ascii_to_binary(ascii_file, binary_file):
+    """Convert an ACE file in ASCII format (type 1) to binary format (type 2).
+
+    Parameters
+    ----------
+    ascii_file : str
+        Filename of ASCII ACE file
+    binary_file : str
+        Filename of binary ACE file to be written
+
+    """
+
+    # Open ASCII file
+    ascii = open(ascii_file, 'r')
+
+    # Set default record length
+    record_length = 4096
+
+    # Read data from ASCII file
+    lines = ascii.readlines()
+    ascii.close()
+
+    # Open binary file
+    binary = open(binary_file, 'wb')
+
+    idx = 0
+    while idx < len(lines):
+        # Read/write header block
+        hz = lines[idx][:10].encode('UTF-8')
+        aw0 = float(lines[idx][10:22])
+        tz = float(lines[idx][22:34])
+        hd = lines[idx][35:45].encode('UTF-8')
+        hk = lines[idx + 1][:70].encode('UTF-8')
+        hm = lines[idx + 1][70:80].encode('UTF-8')
+        binary.write(struct.pack('=10sdd10s70s10s', hz, aw0, tz, hd, hk, hm))
+
+        # Read/write IZ/AW pairs
+        data = ' '.join(lines[idx + 2:idx + 6]).split()
+        iz = list(map(int, data[::2]))
+        aw = list(map(float, data[1::2]))
+        izaw = [item for sublist in zip(iz, aw) for item in sublist]
+        binary.write(struct.pack('=' + 16*'id', *izaw))
+
+        # Read/write NXS and JXS arrays. Null bytes are added at the end so
+        # that XSS will start at the second record
+        nxs = list(map(int, ' '.join(lines[idx + 6:idx + 8]).split()))
+        jxs = list(map(int, ' '.join(lines[idx + 8:idx + 12]).split()))
+        binary.write(struct.pack('=16i32i{0}x'.format(record_length - 500),
+                                 *(nxs + jxs)))
+
+        # Read/write XSS array. Null bytes are added to form a complete record
+        # at the end of the file
+        n_lines = (nxs[0] + 3)//4
+        xss = list(map(float, ' '.join(lines[
+            idx + 12:idx + 12 + n_lines]).split()))
+        extra_bytes = record_length - ((len(xss)*8 - 1) % record_length + 1)
+        binary.write(struct.pack('={0}d{1}x'.format(nxs[0], extra_bytes),
+                                 *xss))
+
+        # Advance to next table in file
+        idx += 12 + n_lines
+
+    # Close binary file
+    binary.close()
+
+
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain
     multiple tables with data.
@@ -87,7 +153,7 @@ class Library(object):
         Parameters
         ----------
         table_names : None, str, or iterable, optional
-            Tables from the file to read in.  If None, reads in all of the 
+            Tables from the file to read in.  If None, reads in all of the
             tables. If str, reads in only the single table of a matching name.
         """
         if isinstance(table_names, basestring):
@@ -284,8 +350,8 @@ class AceTable(object):
 
     def _read_all(self):
         raise NotImplementedError
-        
-        
+
+
 class NeutronTable(AceTable):
     """A NeutronTable object contains continuous-energy neutron interaction data
     read from an ACE-formatted Type I table. These objects are not normally
@@ -301,7 +367,7 @@ class NeutronTable(AceTable):
         Atomic mass ratio of the target nuclide.
     temp : float
         Temperature of the target nuclide in eV.
-    
+
     :Attributes:
       **awr** : float
         Atomic mass ratio of the target nuclide.
@@ -466,7 +532,7 @@ class NeutronTable(AceTable):
                 self.nu_t_type = "polynomial"
                 NC = int(self.xss[KNU+1])
                 coeffs = self.xss[KNU+2 : KNU+2+NC]
-                
+
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_t_type = "tabular"
