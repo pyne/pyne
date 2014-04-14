@@ -447,8 +447,6 @@ def test_stateless():
     assert_equal(nucname.stateless(92636), 922360000)
     assert_equal(nucname.stateless(95942), 952420000)
 
-    assert_equal(nucname.stateless("Am-242m"), 952420000)
-
     assert_equal(nucname.stateless("he"), 20000000)
     assert_equal(nucname.stateless("U"), 920000000)
     assert_equal(nucname.stateless("Np"), 930000000)

@@ -698,7 +698,6 @@ def sza_to_id(nuc):
     return newnuc
 
 
-
 def stateless(nuc):
     """Converts a nuclide to its Stateless form. 
 
@@ -720,7 +719,6 @@ def stateless(nuc):
     else:
         raise NucTypeError(nuc)
     return newnuc
-
 
 
 
