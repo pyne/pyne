@@ -1148,10 +1148,10 @@ int pyne::nucname::stateless(int nuc) {
 
 int pyne::nucname::stateless(char * nuc) {
   std::string newnuc (nuc);
-  return sza(newnuc);
+  return stateless(newnuc);
 }
 
 
 int pyne::nucname::stateless(std::string nuc) {
-  return sza(id(nuc));
+  return stateless(id(nuc));
 }
