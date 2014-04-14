@@ -213,7 +213,7 @@ cdef conv._MapIntDouble ext_air_df_map_proxy = conv.MapIntDouble(False)
 ext_air_df_map_proxy.map_ptr = &cpp_data.ext_air_df_map
 ext_air_df_map = ext_air_df_map_proxy
 
-def ext_air_df(nuc, source=0, get_errors=False):
+def ext_air_df(nuc, source=0):
     """Finds the external air dose factor for a tracked nuclide.
 
     Parameters
@@ -224,8 +224,6 @@ def ext_air_df(nuc, source=0, get_errors=False):
         The int or corresponding dictionary key for the source dataset.
         Allowed values are:
         'EPA': 0, 'DOE' : 1, 'GENII' : 2
-    get_errors : boolean
-        return the error in the value if possible or 0
 
     Returns
     -------
@@ -248,9 +246,9 @@ def ext_air_df(nuc, source=0, get_errors=False):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        ext_air_df = cpp_data.ext_air_df(<int> nuc, <int> source, <bint> get_errors)
+        ext_air_df = cpp_data.ext_air_df(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ext_air_df = cpp_data.ext_air_df(<char *> nuc, <int> source, <bint> get_errors)
+        ext_air_df = cpp_data.ext_air_df(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -261,7 +259,7 @@ cdef conv._MapIntDouble ratio_map_proxy = conv.MapIntDouble(False)
 ratio_map_proxy.map_ptr = &cpp_data.ratio_map
 ratio_map = ratio_map_proxy
 
-def ratio(nuc, source=0, get_errors=False):
+def ratio(nuc, source=0):
     """Finds ratio of dose from external air to dose from inhalation for a tracked nuclide.
 
     Parameters
@@ -272,8 +270,6 @@ def ratio(nuc, source=0, get_errors=False):
         The int or corresponding dictionary key for the source dataset.
         Allowed values are:
         'EPA': 0, 'DOE' : 1, 'GENII' : 2
-    get_errors : boolean
-        return the error in the value if possible or 0
 
     Returns
     -------
@@ -296,9 +292,9 @@ def ratio(nuc, source=0, get_errors=False):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        ratio = cpp_data.ratio(<int> nuc, <int> source, <bint> get_errors)
+        ratio = cpp_data.ratio(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ratio = cpp_data.ratio(<char *> nuc, <int> source, <bint> get_errors)
+        ratio = cpp_data.ratio(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -309,7 +305,7 @@ cdef conv._MapIntDouble ext_soil_df_map_proxy = conv.MapIntDouble(False)
 ext_soil_df_map_proxy.map_ptr = &cpp_data.ext_soil_df_map
 ext_soil_df_map = ext_soil_df_map_proxy
 
-def ext_soil_df(nuc, source=0, get_errors=False):
+def ext_soil_df(nuc, source=0):
     """Finds the external soil dose factor for a tracked nuclide.
 
     Parameters
@@ -320,8 +316,6 @@ def ext_soil_df(nuc, source=0, get_errors=False):
         The int or corresponding dictionary key for the source dataset.
         Allowed values are:
         'EPA': 0, 'DOE' : 1, 'GENII' : 2
-    get_errors : boolean
-        return the error in the value if possible or 0
 
     Returns
     -------
@@ -344,9 +338,9 @@ def ext_soil_df(nuc, source=0, get_errors=False):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        ext_soil_df = cpp_data.ext_soil_df(<int> nuc, <int> source, <bint> get_errors)
+        ext_soil_df = cpp_data.ext_soil_df(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ext_soil_df = cpp_data.ext_soil_df(<char *> nuc, <int> source, <bint> get_errors)
+        ext_soil_df = cpp_data.ext_soil_df(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -357,7 +351,7 @@ cdef conv._MapIntDouble ingest_df_map_proxy = conv.MapIntDouble(False)
 ingest_df_map_proxy.map_ptr = &cpp_data.ingest_df_map
 ingest_df_map = ingest_df_map_proxy
 
-def ingest_df(nuc, source=0, get_errors=False):
+def ingest_df(nuc, source=0):
     """Finds the dose factor due to ingestion for a tracked nuclide.
 
     Parameters
@@ -368,8 +362,6 @@ def ingest_df(nuc, source=0, get_errors=False):
         The int or corresponding dictionary key for the source dataset.
         Allowed values are:
         'EPA': 0, 'DOE' : 1, 'GENII' : 2
-    get_errors : boolean
-        return the error in the value if possible or 0
 
     Returns
     -------
@@ -392,9 +384,9 @@ def ingest_df(nuc, source=0, get_errors=False):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        ingest_df = cpp_data.ingest_df(<int> nuc, <int> source, <bint> get_errors)
+        ingest_df = cpp_data.ingest_df(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ingest_df = cpp_data.ingest_df(<char *> nuc, <int> source, <bint> get_errors)
+        ingest_df = cpp_data.ingest_df(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -405,7 +397,7 @@ cdef conv._MapIntDouble fluid_frac_map_proxy = conv.MapIntDouble(False)
 fluid_frac_map_proxy.map_ptr = &cpp_data.fluid_frac_map
 fluid_frac_map = fluid_frac_map_proxy
 
-def fluid_frac(nuc, source=0, get_errors=False):
+def fluid_frac(nuc, source=0):
     """Finds fraction of activity that is absorbed by body fluids for a tracked nuclide.
 
     Parameters
@@ -416,8 +408,6 @@ def fluid_frac(nuc, source=0, get_errors=False):
         The int or corresponding dictionary key for the source dataset.
         Allowed values are:
         'EPA': 0, 'DOE' : 1, 'GENII' : 2
-    get_errors : boolean
-        return the error in the value if possible or 0
 
     Returns
     -------
@@ -440,9 +430,9 @@ def fluid_frac(nuc, source=0, get_errors=False):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        fluid_frac = cpp_data.fluid_frac(<int> nuc, <int> source, <bint> get_errors)
+        fluid_frac = cpp_data.fluid_frac(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        fluid_frac = cpp_data.fluid_frac(<char *> nuc, <int> source, <bint> get_errors)
+        fluid_frac = cpp_data.fluid_frac(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -453,7 +443,7 @@ cdef conv._MapIntDouble inhale_df_map_proxy = conv.MapIntDouble(False)
 inhale_df_map_proxy.map_ptr = &cpp_data.inhale_df_map
 inhale_df_map = inhale_df_map_proxy
 
-def inhale_df(nuc, source=0, get_errors=False):
+def inhale_df(nuc, source=0):
     """Finds the dose factor due to inhalation for a tracked nuclide.
 
     Parameters
@@ -464,8 +454,6 @@ def inhale_df(nuc, source=0, get_errors=False):
         The int or corresponding dictionary key for the source dataset.
         Allowed values are:
         'EPA': 0, 'DOE' : 1, 'GENII' : 2
-    get_errors : boolean
-        return the error in the value if possible or 0
 
     Returns
     -------
@@ -488,9 +476,9 @@ def inhale_df(nuc, source=0, get_errors=False):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        inhale_df = cpp_data.inhale_df(<int> nuc, <int> source, <bint> get_errors)
+        inhale_df = cpp_data.inhale_df(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        inhale_df = cpp_data.inhale_df(<char *> nuc, <int> source, <bint> get_errors)
+        inhale_df = cpp_data.inhale_df(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -501,7 +489,7 @@ cdef conv._MapIntStr lung_mod_map_proxy = conv.MapIntStr(False)
 lung_mod_map_proxy.map_ptr = &cpp_data.lung_mod_map
 lung_mod_map = lung_mod_map_proxy
 
-def lung_mod(nuc, source=0, get_errors=False):
+def lung_mod(nuc, source=0):
     """Finds the lung model for the inhalation df for a tracked nuclide.
 
     Parameters
@@ -512,8 +500,6 @@ def lung_mod(nuc, source=0, get_errors=False):
         The int or corresponding dictionary key for the source dataset.
         Allowed values are:
         'EPA': 0, 'DOE' : 1, 'GENII' : 2
-    get_errors : boolean
-        return the error in the value if possible or 0
 
     Returns
     -------
@@ -536,9 +522,9 @@ def lung_mod(nuc, source=0, get_errors=False):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        lung_mod = cpp_data.lung_mod(<int> nuc, <int> source, <bint> get_errors)
+        lung_mod = cpp_data.lung_mod(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        lung_mod = cpp_data.lung_mod(<char *> nuc, <int> source, <bint> get_errors)
+        lung_mod = cpp_data.lung_mod(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 

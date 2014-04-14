@@ -179,37 +179,37 @@ namespace pyne
   /// These functions will first try to find the dose factor data in the df_maps.
   /// If the maps are empty, it will load the data from disk. If the nuclide simply 
   /// cannot be found, the default value returned is 0.0.
-  double ext_air_df(int nuc, int source, bool get_error);
-  double ext_soil_df(int nuc, int source, bool get_error);
-  double ingest_df(int nuc, int source, bool get_error);
-  double inhale_df(int nuc, int source, bool get_error);
+  double ext_air_df(int nuc, int source);
+  double ext_soil_df(int nuc, int source);
+  double ingest_df(int nuc, int source);
+  double inhale_df(int nuc, int source);
   /// Returns the dose factor of a nuclide \a nuc.
-  double ext_air_df(char * nuc, int source, bool get_error); 
-  double ext_soil_df(char * nuc, int source, bool get_error); 
-  double ingest_df(char * nuc, int source, bool get_error); 
-  double inhale_df(char * nuc, int source, bool get_error);
+  double ext_air_df(char * nuc, int source); 
+  double ext_soil_df(char * nuc, int source); 
+  double ingest_df(char * nuc, int source); 
+  double inhale_df(char * nuc, int source);
   /// Returns the dose factor of a nuclide \a nuc.
-  double ext_air_df(std::string nuc, int source, bool get_error);
-  double ext_soil_df(std::string nuc, int source, bool get_error);
-  double ingest_df(std::string nuc, int source, bool get_error);
-  double inhale_df(std::string nuc, int source, bool get_error);
+  double ext_air_df(std::string nuc, int source);
+  double ext_soil_df(std::string nuc, int source);
+  double ingest_df(std::string nuc, int source);
+  double inhale_df(std::string nuc, int source);
   
   /// \brief Returns the additional info of a nuclide \a nuc.  
   /// 
   /// This follows the same the basic rules for finding or computing the dose factor
   /// as the df() functions do.
   /// If the nuclide cannot be found, the default value returned is 0.0.
-  double ratio(int nuc, int source, bool get_error);
-  double fluid_frac(int nuc, int source, bool get_error);
-  std::string lung_mod(int nuc, int source, bool get_error);
+  double ratio(int nuc, int source);
+  double fluid_frac(int nuc, int source);
+  std::string lung_mod(int nuc, int source);
   /// Returns the requested info of a nuclide \a nuc. 
-  double ratio(char * nuc, int source, bool get_error);
-  double fluid_frac(char * nuc, int source, bool get_error);
-  std::string lung_mod(char * nuc, int source, bool get_error); 
+  double ratio(char * nuc, int source);
+  double fluid_frac(char * nuc, int source);
+  std::string lung_mod(char * nuc, int source); 
   /// Returns the requested info of a nuclide \a nuc. 
-  double ratio(std::string nuc, int source, bool get_error);
-  double fluid_frac(std::string nuc, int source, bool get_error);
-  std::string lung_mod(std::string nuc, int source, bool get_error);
+  double ratio(std::string nuc, int source);
+  double fluid_frac(std::string nuc, int source);
+  std::string lung_mod(std::string nuc, int source);
   /// \}
 
 

@@ -455,7 +455,7 @@ const char * source_string(int source)
 /// External Air
 std::map<int, double> pyne::ext_air_df_map = std::map<int, double>();
 
-double pyne::ext_air_df(int nuc, int source, bool get_error)
+double pyne::ext_air_df(int nuc, int source)
 {
   // Find the nuclide's external air dose factor in [mrem/hr per Ci/m^3]
   std::map<int, double>::iterator nuc_iter, nuc_end;
@@ -478,7 +478,7 @@ double pyne::ext_air_df(int nuc, int source, bool get_error)
     try
     {
       _load_df_map(source_path);
-      return ext_air_df(nuc, source, get_error);
+      return ext_air_df(nuc, source);
     }
     catch(...){};
   };
@@ -487,7 +487,7 @@ double pyne::ext_air_df(int nuc, int source, bool get_error)
   double df;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return ext_air_df(nucid, source, get_error);
+    return ext_air_df(nucid, source);
 
   // If nuclide is not found, return 0
   df = 0.0;
@@ -496,23 +496,23 @@ double pyne::ext_air_df(int nuc, int source, bool get_error)
 };
 
 
-double pyne::ext_air_df(char * nuc, int source, bool get_error)
+double pyne::ext_air_df(char * nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return ext_air_df(nuc_zz, source, get_error);
+  return ext_air_df(nuc_zz, source);
 };
 
 
-double pyne::ext_air_df(std::string nuc, int source, bool get_error)
+double pyne::ext_air_df(std::string nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return ext_air_df(nuc_zz, source, get_error);
+  return ext_air_df(nuc_zz, source);
 };
 
 /// Ratio
 std::map<int, double> pyne::ratio_map = std::map<int, double>();
 
-double pyne::ratio(int nuc, int source, bool get_error)
+double pyne::ratio(int nuc, int source)
 {
   // Find the nuclide's external air dose factor in [mrem/hr per Ci/m^3]
   std::map<int, double>::iterator nuc_iter, nuc_end;
@@ -535,7 +535,7 @@ double pyne::ratio(int nuc, int source, bool get_error)
     try
     {
       _load_df_map(source_path);
-      return ratio(nuc, source, get_error);
+      return ratio(nuc, source);
     }
     catch(...){};
   };
@@ -544,7 +544,7 @@ double pyne::ratio(int nuc, int source, bool get_error)
   double r;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return ratio(nucid, source, get_error);
+    return ratio(nucid, source);
 
   // If nuclide is not found, return 0
   r = 0.0;
@@ -553,17 +553,17 @@ double pyne::ratio(int nuc, int source, bool get_error)
 };
 
 
-double pyne::ratio(char * nuc, int source, bool get_error)
+double pyne::ratio(char * nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return ratio(nuc_zz, source, get_error);
+  return ratio(nuc_zz, source);
 };
 
 
-double pyne::ratio(std::string nuc, int source, bool get_error)
+double pyne::ratio(std::string nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return ratio(nuc_zz, source, get_error);
+  return ratio(nuc_zz, source);
 };
 
 ///
@@ -572,7 +572,7 @@ double pyne::ratio(std::string nuc, int source, bool get_error)
 
 std::map<int, double> pyne::ext_soil_df_map = std::map<int, double>();
 
-double pyne::ext_soil_df(int nuc, int source, bool get_error)
+double pyne::ext_soil_df(int nuc, int source)
 {
   // Find the nuclide's external soil dose factor in [mrem/hr per Ci/m^2]
   std::map<int, double>::iterator nuc_iter, nuc_end;
@@ -595,7 +595,7 @@ double pyne::ext_soil_df(int nuc, int source, bool get_error)
     try
     {
       _load_df_map(source_path);
-      return ext_soil_df(nuc, source, get_error);
+      return ext_soil_df(nuc, source);
     }
     catch(...){};
   };
@@ -604,7 +604,7 @@ double pyne::ext_soil_df(int nuc, int source, bool get_error)
   double df;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return ext_soil_df(nucid, source, get_error);
+    return ext_soil_df(nucid, source);
 
   // If nuclide is not found, return 0
   df = 0.0;
@@ -613,17 +613,17 @@ double pyne::ext_soil_df(int nuc, int source, bool get_error)
 };
 
 
-double pyne::ext_soil_df(char * nuc, int source, bool get_error)
+double pyne::ext_soil_df(char * nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return ext_soil_df(nuc_zz, source, get_error);
+  return ext_soil_df(nuc_zz, source);
 };
 
 
-double pyne::ext_soil_df(std::string nuc, int source, bool get_error)
+double pyne::ext_soil_df(std::string nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return ext_soil_df(nuc_zz, source, get_error);
+  return ext_soil_df(nuc_zz, source);
 };
 
 ///
@@ -634,7 +634,7 @@ double pyne::ext_soil_df(std::string nuc, int source, bool get_error)
 /// Ingestion
 std::map<int, double> pyne::ingest_df_map = std::map<int, double>();
 
-double pyne::ingest_df(int nuc, int source, bool get_error)
+double pyne::ingest_df(int nuc, int source)
 {
   // Find the nuclide's ingestion dose factor in [mrem/pCi]
   std::map<int, double>::iterator nuc_iter, nuc_end;
@@ -657,7 +657,7 @@ double pyne::ingest_df(int nuc, int source, bool get_error)
     try
     {
       _load_df_map(source_path);
-      return ingest_df(nuc, source, get_error);
+      return ingest_df(nuc, source);
     }
     catch(...){};
   };
@@ -666,7 +666,7 @@ double pyne::ingest_df(int nuc, int source, bool get_error)
   double df;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return ingest_df(nucid, source, get_error);
+    return ingest_df(nucid, source);
 
   // If nuclide is not found, return 0
   df = 0.0;
@@ -675,23 +675,23 @@ double pyne::ingest_df(int nuc, int source, bool get_error)
 };
 
 
-double pyne::ingest_df(char * nuc, int source, bool get_error)
+double pyne::ingest_df(char * nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return ingest_df(nuc_zz, source, get_error);
+  return ingest_df(nuc_zz, source);
 };
 
 
-double pyne::ingest_df(std::string nuc, int source, bool get_error)
+double pyne::ingest_df(std::string nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return ingest_df(nuc_zz, source, get_error);
+  return ingest_df(nuc_zz, source);
 };
 
 /// Fluid Fraction
 std::map<int, double> pyne::fluid_frac_map = std::map<int, double>();
 
-double pyne::fluid_frac(int nuc, int source, bool get_error)
+double pyne::fluid_frac(int nuc, int source)
 {
   // Find the nuclide's fluid fraction for ingestion
   std::map<int, double>::iterator nuc_iter, nuc_end;
@@ -714,7 +714,7 @@ double pyne::fluid_frac(int nuc, int source, bool get_error)
     try
     {
       _load_df_map(source_path);
-      return fluid_frac(nuc, source, get_error);
+      return fluid_frac(nuc, source);
     }
     catch(...){};
   };
@@ -723,7 +723,7 @@ double pyne::fluid_frac(int nuc, int source, bool get_error)
   double ff;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return fluid_frac(nucid, source, get_error);
+    return fluid_frac(nucid, source);
 
   // If nuclide is not found, return 0
   ff = 0.0;
@@ -732,17 +732,17 @@ double pyne::fluid_frac(int nuc, int source, bool get_error)
 };
 
 
-double pyne::fluid_frac(char * nuc, int source, bool get_error)
+double pyne::fluid_frac(char * nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return fluid_frac(nuc_zz, source, get_error);
+  return fluid_frac(nuc_zz, source);
 };
 
 
-double pyne::fluid_frac(std::string nuc, int source, bool get_error)
+double pyne::fluid_frac(std::string nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return fluid_frac(nuc_zz, source, get_error);
+  return fluid_frac(nuc_zz, source);
 };
 
 
@@ -754,7 +754,7 @@ double pyne::fluid_frac(std::string nuc, int source, bool get_error)
 /// Inhalation
 std::map<int, double> pyne::inhale_df_map = std::map<int, double>();
 
-double pyne::inhale_df(int nuc, int source, bool get_error)
+double pyne::inhale_df(int nuc, int source)
 {
   // Find the nuclide's inhalation dose factor in [mrem/pCi]
   std::map<int, double>::iterator nuc_iter, nuc_end;
@@ -777,7 +777,7 @@ double pyne::inhale_df(int nuc, int source, bool get_error)
     try
     {
       _load_df_map(source_path);
-      return inhale_df(nuc, source, get_error);
+      return inhale_df(nuc, source);
     }
     catch(...){};
   };
@@ -786,7 +786,7 @@ double pyne::inhale_df(int nuc, int source, bool get_error)
   double df;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return inhale_df(nucid, source, get_error);
+    return inhale_df(nucid, source);
 
   // If nuclide is not found, return 0
   df = 0.0;
@@ -795,23 +795,23 @@ double pyne::inhale_df(int nuc, int source, bool get_error)
 };
 
 
-double pyne::inhale_df(char * nuc, int source, bool get_error)
+double pyne::inhale_df(char * nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return inhale_df(nuc_zz, source, get_error);
+  return inhale_df(nuc_zz, source);
 };
 
 
-double pyne::inhale_df(std::string nuc, int source, bool get_error)
+double pyne::inhale_df(std::string nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return inhale_df(nuc_zz, source, get_error);
+  return inhale_df(nuc_zz, source);
 };
 
 /// Lung Model
 std::map<int, std::string> pyne::lung_mod_map = std::map<int, std::string>();
 
-std::string pyne::lung_mod(int nuc, int source, bool get_error)
+std::string pyne::lung_mod(int nuc, int source)
 {
   // Find the nuclide's lung model for inhlation
   std::map<int, std::string>::iterator nuc_iter, nuc_end;
@@ -834,7 +834,7 @@ std::string pyne::lung_mod(int nuc, int source, bool get_error)
     try
     {
       _load_df_map(source_path);
-      return lung_mod(nuc, source, get_error);
+      return lung_mod(nuc, source);
     }
     catch(...){};
   };
@@ -843,7 +843,7 @@ std::string pyne::lung_mod(int nuc, int source, bool get_error)
   std::string lm;
   int nucid = nucname::id(nuc);
   if (nucid != nuc)
-    return lung_mod(nucid, source, get_error);
+    return lung_mod(nucid, source);
 
   // If nuclide is not found, return string
   lm = "nuclide not found";
@@ -852,17 +852,17 @@ std::string pyne::lung_mod(int nuc, int source, bool get_error)
 };
 
 
-std::string pyne::lung_mod(char * nuc, int source, bool get_error)
+std::string pyne::lung_mod(char * nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return lung_mod(nuc_zz, source, get_error);
+  return lung_mod(nuc_zz, source);
 };
 
 
-std::string pyne::lung_mod(std::string nuc, int source, bool get_error)
+std::string pyne::lung_mod(std::string nuc, int source)
 {
   int nuc_zz = nucname::id(nuc);
-  return lung_mod(nuc_zz, source, get_error);
+  return lung_mod(nuc_zz, source);
 };
 
 
