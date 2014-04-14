@@ -460,15 +460,15 @@ def test_stateless():
     assert_equal(nucname.stateless("242AM"), 952420000)
 
     assert_equal(nucname.stateless(40020),   20040000)
-    assert_equal(nucname.stateless(2440961), 962440001)
+    assert_equal(nucname.stateless(2440961), 962440000)
     assert_equal(nucname.stateless(2390940), 942390000)
     assert_equal(nucname.stateless(2420950), 952420000)
     assert_equal(nucname.stateless(92), 920000000)
 
-    assert_equal(nucname.stateless("94-Pu-239"), (nucname.id("Pu-239")/10000)*10000)
-    assert_equal(nucname.stateless("95-Am-242m"), (nucname.id("Am-242m")/10000)*10000)
-    assert_equal(nucname.stateless("94-Pu-239"), (nucname.id("Pu-239")/10000)*10000)
-    assert_equal(nucname.stateless("95-Am-242"), (nucname.id("Am-242")/10000)*10000)
+    assert_equal(nucname.stateless("94-Pu-239"), 942390000)
+    assert_equal(nucname.stateless("95-Am-242m"), 952420000)
+    assert_equal(nucname.stateless("94-Pu-239"), 942390000)
+    assert_equal(nucname.stateless("95-Am-242"), 952420000)
 
 def test_sza_to_id():
     vals = [2004, 2004, 96244, 94239, 1095242, 2004, 95242, 1095242, 1092236, 
