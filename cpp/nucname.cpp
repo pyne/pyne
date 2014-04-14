@@ -1140,8 +1140,9 @@ int pyne::nucname::sza_to_id(std::string nuc) {
 /***  Stateless functions  ***/
 /*****************************/
 int pyne::nucname::stateless(int nuc) {
-  int nucid = id(nuc)
-  return nucid / 10000 * 10000;
+  int nucid = id(nuc);
+  int nostate = (nucid / 10000 ) * 10000;
+  return nostate;
 }
 
 

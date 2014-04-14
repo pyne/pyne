@@ -714,7 +714,7 @@ def stateless(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.stateless(<char *> nuc_bytes)
+        newnuc = cpp_nucname.stateless(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.stateless(<int> nuc)
     else:

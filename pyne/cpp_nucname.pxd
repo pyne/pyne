@@ -125,5 +125,5 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
 
     # Stateless Functions
     int stateless(int) except + 
-    int stateless(char *) exxcept + 
+    int stateless(char *) except + 
     int stateless(std_string) except +
