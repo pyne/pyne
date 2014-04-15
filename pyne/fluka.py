@@ -231,5 +231,5 @@ class USRBIN(Mesh):
 
 #test1=USR("fng_dose_usrbin_22.lis")
 # test2=read_tally_sets()
-my_file = USRBIN("/data/prod/nasa/atic/big_run/fluka/atic_usrbin_76.lis")
+my_file = USRBIN("/home/kalin/Documents/CNERG/testfiles/atic_usrbin_76.lis")
 #my_file.read_usrbin("fng_dose_usrbin_22.lis")
