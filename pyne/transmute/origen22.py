@@ -1,6 +1,6 @@
 """This module implements an ORIGEN v2.2 transmutation solver.
 """
-from __future__ import print_function
+from __future__ import print_function, division
 import os
 import tempfile
 import subprocess

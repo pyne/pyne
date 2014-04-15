@@ -12,7 +12,8 @@ available to use.
 
 """
 
-from __future__ import print_function
+from __future__ import print_function, division
+import sys
 import collections
 import string
 import struct
@@ -43,6 +44,9 @@ except ImportError:
 
 from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
+if sys.version_info[0] > 2:
+    def cmp(a, b):
+        return (a > b) - (a < b)
 
 class Mctal(object):
     def __init__(self):
@@ -251,10 +255,9 @@ class SurfSrc(_BinaryReader):
 
         return track_data
 
-#    def __eq__(self, other):
-#        """ Compare two surface sources
-#        """
-#        return self.__dict__ == other.__dict__
+    def __eq__(self, other):
+        rtn = self.__cmp__(other)
+        return rtn == 0
 
     def __cmp__(self, other):
         """ Comparison is not completely robust. Tracklists are not compared!!!
@@ -435,7 +438,8 @@ class SurfSrc(_BinaryReader):
         # no known case of their actual utility is known currently
         for j in range(self.njsw, self.njsw+self.niwr):
             self.get_fortran_record()
-            print("Extra info in header not handled: {0}".format(j))
+            warnings.warn("Extra info in header not handled: {0}".format(j),
+                          RuntimeWarning)
 
         # read summary table record
         summary_info = self.get_fortran_record()
@@ -475,17 +479,20 @@ class SurfSrc(_BinaryReader):
         """Write the header part of the header to the surface source file"""
         if 'SF_00001' in self.kod:
             rec = [self.kod]
-            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            joinrec = "".join(rec)
+            newrecord = _FortranRecord(joinrec, len(joinrec))
             self.put_fortran_record(newrecord)
 
             rec = [self.ver, self.loddat, self.idtm, self.probid, self.aid]
-            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            joinrec = "".join(rec)
+            newrecord = _FortranRecord(joinrec, len(joinrec))
             newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
         else:
             rec = [self.kod, self.ver, self.loddat,
                    self.idtm, self.probid, self.aid]
-            newrecord = _FortranRecord("".join(rec), len("".join(rec)))
+            joinrec = "".join(rec)
+            newrecord = _FortranRecord(joinrec, len(joinrec))
             newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
         return
@@ -977,7 +984,7 @@ class XsdirTable(object):
             if not directory.endswith('/'):
                 directory = directory.strip() + '/'
 
-        return "{0} {0} {1} {2} {3} {4} {5} {6} {7}".format(
+        return "{0} {0} {1} {2} {3} {4} {5:.11e} {6} {7}".format(
             self.name,
             self.serpent_type, self.zaid, 1 if self.metastable else 0,
             self.awr, self.temperature/8.6173423e-11, self.filetype - 1,
@@ -1105,20 +1112,21 @@ class PtracReader(object):
         if auto and not raw_format:
             b = self.f.read(4)
 
-            if b == '':
+            if b == b'':
                 raise EOFError
 
-            length = struct.unpack(self.endianness + 'i', b)[0]
-            number = length / format_length
+            length = struct.unpack(self.endianness.encode() + b'i', b)[0]
+            number = length // format_length
 
             b = self.f.read(length + 4)
-            tmp = struct.unpack(self.endianness + format*number + 'i', b)
+            tmp = struct.unpack(b"".join([self.endianness.encode(), 
+                                (format*number).encode(), b'i']), b)
             length2 = tmp[-1]
             tmp = tmp[:-1]
         else:
             bytes_to_read = number * format_length + 8
             b = self.f.read(bytes_to_read)
-            if b == '':
+            if b == b'':
                 raise EOFError
 
             fmt_string = self.endianness + "i"
@@ -1127,7 +1135,7 @@ class PtracReader(object):
             else:
                 fmt_string += format * number + "i"
 
-            tmp = struct.unpack(fmt_string, b)
+            tmp = struct.unpack(fmt_string.encode(), b)
             length = tmp[0]
             length2 = tmp[-1]
             tmp = tmp[1:-1]
@@ -1136,7 +1144,7 @@ class PtracReader(object):
 
         if format == 's':
             # return just one string
-            return ''.join(str(c) for c in tmp)
+            return b''.join(tmp).decode()
         elif number == 1:
             # just return the number and not a tuple containing just the number
             return tmp[0]
@@ -1253,7 +1261,7 @@ class PtracReader(object):
 
         self.next_event = evt_line[0]
 
-        for i in xrange(1, len(self.variable_ids[e])):
+        for i in range(1, len(self.variable_ids[e])):
             if self.variable_ids[e][i] in self.variable_mappings:
                 ptrac_event[self.variable_mappings[
                     self.variable_ids[e][i]]] = \
@@ -1380,7 +1388,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
     # Check to see it material is definted my mass or atom fracs.
     # Do this by comparing the first non-zero fraction to the rest
     # If atom fracs, convert.
-    nucvecvals = nucvec.values()
+    nucvecvals = list(nucvec.values())
     n = 0
     isatom = 0 < nucvecvals[n]
     while 0 == nucvecvals[n]:

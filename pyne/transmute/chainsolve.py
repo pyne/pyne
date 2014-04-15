@@ -1,6 +1,7 @@
 """This module implements an ALARA-like chain-based transmutation solver.
 """
 
+from __future__ import division
 import numpy as np
 from scipy import linalg
 #from scipy import sparse  # <-- SPARSE
