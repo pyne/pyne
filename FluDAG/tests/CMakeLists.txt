@@ -45,10 +45,10 @@ cxx_static_library(gtest_main ${cxx_strict} "${gtest_dir}/src/gtest_main.cc")
 TARGET_LINK_LIBRARIES(gtest_main gtest)
 SET (tgt "gtest")
 ADD_CUSTOM_COMMAND (TARGET ${tgt}
-	COMMAND cp 
+	COMMAND ln "-s"
 		"${CMAKE_CURRENT_SOURCE_DIR}/slabs.h5m" 
-		"${CMAKE_CURRENT_BINARY_DIR}"
-		COMMENT "...copying test file from test source ${CMAKE_CURRENT_SOURCE_DIR} TO ${CMAKE_CURRENT_BINARY_DIR}"
+		"${CMAKE_CURRENT_BINARY_DIR}/slabs.h5m"
+		COMMENT "...linking test file in ${CMAKE_CURRENT_SOURCE_DIR} to ${CMAKE_CURRENT_BINARY_DIR}/slabs.h5m"
 	DEPENDS
 	VERBATIM
  	)
