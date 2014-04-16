@@ -102,9 +102,20 @@ int main(int argc, char* argv[])
   seconds = difftime(time_after,time_before);
   std::cout << "Time to initialise the geometry" << seconds << std::endl;
 
-  // flugg mode is flag = 1
-  const int flag = 1;
-  flukam(flag);
+  // if fluka preprocess run then create mat file to paste into input deck
+  if (!flukarun)
+    {
+      std::string lcad = "mat.inp";
+      fludagwrite_assignma(lcad);
+      std::cout << "Producing material snippets" << std::endl;
+      std::cout << "please paste these into your input deck" << std::endl;
+    }
+  else // call fluka run
+    {
+      // flugg mode is flag = 1
+      const int flag = 1;
+      flukam(flag);
+    }
 
   return 0;
 }
