@@ -36,6 +36,14 @@ extern "C" {
    * which is set by a call to rayfire
   */
   int getSense(int region);
+  /*
+   * Prepare a descriptive string that creates the properties of the volume whose index is index
+   */
+  std::string mat_property_string (int index, std::vector<std::string> &properties);
+  /*
+   * Write the material assignment for each volume to a file named matfile
+   */
+  void fludagwrite_assignma(std::string matfile);
   void dagmc_version_(double* dagmcVersion);
 #ifdef __cplusplus
 } // extern "C"
