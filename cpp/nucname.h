@@ -509,6 +509,19 @@ namespace nucname
   int sza_to_id(std::string nuc);
   /// \}
 
+  /// \Ground State Form Functions
+  /// \{
+  /// This form stores the nuclide in id form, but removes
+  /// the state information about the nuclide.  I is in the same
+  /// form as ID, but the four last digits are all zeros.
+  /// \param nuc a nuclide
+  /// \return a integer groundstate id
+  int groundstate(int nuc);
+  int groundstate(char * nuc);
+  int groundstate(std::string nuc);
+  /// \}
+
+
 };
 };
 

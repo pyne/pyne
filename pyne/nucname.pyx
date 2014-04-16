@@ -698,6 +698,30 @@ def sza_to_id(nuc):
     return newnuc
 
 
+def groundstate(nuc):
+    """Converts a nuclide to its Groundstate form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in Groundstate form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.groundstate(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.groundstate(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+
 #
 # C++ Helper Functions
 #
