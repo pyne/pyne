@@ -25,6 +25,13 @@ cdef extern from "data.h" namespace "pyne":
     double atomic_mass(char *) except +
     double atomic_mass(std_string) except +
 
+    # simple_xs functions
+    map[std_string, map[int, map[int, double]]] simple_xs_map
+    double simple_xs(int nuc, int rx_id, std_string energy) except +
+    double simple_xs(int nuc, std_string rx_id, std_string energy) except +
+    double simple_xs(std_string nuc, int rx_id, std_string energy) except +
+    double simple_xs(std_string nuc, std_string rx_id, std_string energy) except +
+
     # natural_abund functions
     map[int, double] natural_abund_map
     double natural_abund(int) except +
