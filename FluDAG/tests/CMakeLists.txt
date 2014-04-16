@@ -41,8 +41,6 @@ FUNCTION(cxx_static_library name cxx_flags)
 ENDFUNCTION()
 
 cxx_static_library(gtest      ${cxx_strict} "${gtest_dir}/src/gtest-all.cc")
-# cxx_static_library(gtest_main ${cxx_strict} "${gtest_dir}/src/gtest_main.cc")
-# TARGET_LINK_LIBRARIES(gtest_main gtest)
 
 SET (tgt "gtest")
 ADD_CUSTOM_COMMAND (TARGET ${tgt}
@@ -87,20 +85,9 @@ ADD_EXECUTABLE (fludag_unit_tests
 
 TARGET_LINK_LIBRARIES (fludag_unit_tests ${LIBS} gtest)
 	
- 	
-# set up test cases
-# ADD_EXECUTABLE(test_UnitNumber test_UnitNumber.cpp)
-# TARGET_LINK_LIBRARIES(test_UnitNumber ${LIBRARIES})
-
-# ADD_EXECUTABLE(test_FlukaFuncs test_FlukaFuncs.cpp)
-# TARGET_LINK_LIBRARIES(test_FlukaFuncs ${LIBRARIES})
-
-# This adds dashboard testing and also calls enable_testing()
-# include( CTest )
-
 # enable test cases
 enable_testing()
 
-# list test cases
+# list test cases for compatibility with BaTLab
 add_test(test_UnitNumber test_UnitNumber)
 add_test(test_FlukaFuncs test_FlukaFuncs)
