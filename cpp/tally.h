@@ -47,6 +47,10 @@ namespace pyne
   /// Converts a Tally to a string stream representation.
   std::ostream& operator<< (std::ostream& os, Tally tally);
 
+
+  /// A stuct for reprensenting fundemental data in a tally
+  /// Maybe Useful for HDF5 representations.
+  /// following scoptaz's lead here
   typedef struct tally_struct {
     std::string tally_type;
     std::string particle_name;
