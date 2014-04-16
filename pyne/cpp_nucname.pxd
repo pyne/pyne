@@ -123,7 +123,7 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int sza_to_id(char *) except +
     int sza_to_id(std_string) except +
 
-    # Stateless Functions
-    int stateless(int) except +
-    int stateless(char *) except +
-    int stateless(std_string) except +
+    # Groundstate Functions
+    int groundstate(int) except +
+    int groundstate(char *) except +
+    int groundstate(std_string) except +

@@ -698,8 +698,8 @@ def sza_to_id(nuc):
     return newnuc
 
 
-def stateless(nuc):
-    """Converts a nuclide to its Stateless form. 
+def groundstate(nuc):
+    """Converts a nuclide to its Groundstate form. 
 
     Parameters
     ----------
@@ -709,13 +709,13 @@ def stateless(nuc):
     Returns
     -------
     newnuc : int
-        Output nuclide in Stateless form.
+        Output nuclide in Groundstate form.
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.stateless(<char *> nuc)
+        newnuc = cpp_nucname.groundstate(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
-        newnuc = cpp_nucname.stateless(<int> nuc)
+        newnuc = cpp_nucname.groundstate(<int> nuc)
     else:
         raise NucTypeError(nuc)
     return newnuc
