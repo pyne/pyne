@@ -1,5 +1,5 @@
-#ifndef TALLY_H
-#define TALLY_H
+#ifndef PYNE_IQ4M73STINHJDPRV6KWUZZXOYE
+#define PYNE_IQ4M73STINHJDPRV6KWUZZXOYE
 /// \file tally.h
 /// \author Andrew Davis (davisa\@engr.wisc.edu)
 ///
@@ -15,7 +15,6 @@
 #include <set>
 #include <stdio.h>
 #include <stdlib.h>
-
 
 namespace pyne
 {
