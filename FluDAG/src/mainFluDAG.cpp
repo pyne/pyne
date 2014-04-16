@@ -35,16 +35,18 @@ extern "C"
 // Getting the geometry out of the file is done by dagmc_define
 int main(int argc, char* argv[]) 
 {
+  bool flukarun = false; 
   MBErrorCode error;
   time_t time_before,time_after;
 
   // Default h5m filename is for fluka runs
   std::string infile = "dagmc.h5m"; 
  
-  if ( argc >= 1 ) // then its a fluka run
+  if ( argc == 1 ) // then its a fluka run
     {
       // fluka creates a run dir one lvl higher 
       infile = "../"+infile; 
+      flukarun = true;
     }
   else if ( argc > 2 )
     {
@@ -53,10 +55,10 @@ int main(int argc, char* argv[])
       std::cout << "too many arguments provided" << std::endl;
       exit(1);
     }
-//  else // its a pre process run
-//    {
-//      infile = argv[1]; // must be the 2nd argument
-//    }
+  else // its a pre process run
+    {
+      infile = argv[1]; // must be the 2nd argument
+    }
 
 
   std::ifstream h5mfile (infile.c_str()); // filestream for mesh geom
