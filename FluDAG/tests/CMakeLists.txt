@@ -41,8 +41,7 @@ FUNCTION(cxx_static_library name cxx_flags)
 ENDFUNCTION()
 
 cxx_static_library(gtest      ${cxx_strict} "${gtest_dir}/src/gtest-all.cc")
-cxx_static_library(gtest_main ${cxx_strict} "${gtest_dir}/src/gtest_main.cc")
-TARGET_LINK_LIBRARIES(gtest_main gtest)
+
 SET (tgt "gtest")
 ADD_CUSTOM_COMMAND (TARGET ${tgt}
 	COMMAND ln "-s"
@@ -54,7 +53,7 @@ ADD_CUSTOM_COMMAND (TARGET ${tgt}
  	)
 
 # make fludag source files into a library
-ADD_LIBRARY(fludag SHARED
+SET(fludag_source_files 
 	    ${fludag_source}/fluka_funcs.cpp
 	    ${fludag_source}/dagmc_utils.cpp
 	    ${fludag_source}/Input.cpp
@@ -65,31 +64,29 @@ ADD_LIBRARY(fludag SHARED
 	    ${fludag_source}/UnitNumberManager.cpp
  )
 
+SET (fludag_test_source ${fludag_source_files}
+	${CMAKE_CURRENT_SOURCE_DIR}/test_UnitNumber.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/test_FlukaFuncs.cpp
+	)
 
 # set libraries needed to link to test cases
-SET(LIBRARIES
-    ${CMAKE_BINARY_DIR}/tests/libgtest.a
-    ${CMAKE_BINARY_DIR}/tests/libgtest_main.a
+SET(LIBS
     pthread
-    fludag
     ${MOAB_HOME}/lib/libMOAB.so
     ${MOAB_HOME}/lib/libdagmc.so
     ${MOAB_HOME}/lib/libMOAB.so
 )
 
-# set up test cases
-ADD_EXECUTABLE(test_UnitNumber test_UnitNumber.cpp)
-TARGET_LINK_LIBRARIES(test_UnitNumber ${LIBRARIES})
+ADD_EXECUTABLE (fludag_unit_tests 
+	fludag_unit_test_driver.cc
+	${fludag_test_source}
+	)
 
-ADD_EXECUTABLE(test_FlukaFuncs test_FlukaFuncs.cpp)
-TARGET_LINK_LIBRARIES(test_FlukaFuncs ${LIBRARIES})
-
-# This adds dashboard testing and also calls enable_testing()
-# include( CTest )
-
+TARGET_LINK_LIBRARIES (fludag_unit_tests ${LIBS} gtest)
+	
 # enable test cases
 enable_testing()
 
-# list test cases
+# list test cases for compatibility with BaTLab
 add_test(test_UnitNumber test_UnitNumber)
 add_test(test_FlukaFuncs test_FlukaFuncs)
