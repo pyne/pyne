@@ -582,11 +582,9 @@ int f_idnr(const int & nreg, const int & mlat)
 }
 
 ///////////////////////////////////////////////////////////////////
-//
-// WrapReg2Name.cc -  Paola Sala
+// from WrapReg2Name.cc 
 //
 // Wrapper for getting region name corresponding to given region number
-//
 ///////////////////////////////////////////////////////////////////
 void rg2nwr(const int& mreg, const char* Vname)
 {
@@ -600,8 +598,7 @@ void rg2nwr(const int& mreg, const char* Vname)
 }
 
 ///////////////////////////////////////////////////////////////////
-//
-// WrapReg.hh - Sara Vanini 
+// from WrapReg.hh 
 //
 // Wrapper for scoring hits: previous step end-point is taken from 
 // history (and compared with fluka region index, flukaReg),
@@ -609,8 +606,6 @@ void rg2nwr(const int& mreg, const char* Vname)
 // volume tree, i.e. returns indMother[] array with all the 
 // mother volumes index and repMother[] array with all the 
 // mother volumes repetition number.   
-//
-//
 ///////////////////////////////////////////////////////////////////
 void rgrpwr(const int& flukaReg, const int& ptrLttc, int& g4Reg,
             int* indMother, int* repMother, int& depthFluka)
@@ -620,15 +615,11 @@ void rgrpwr(const int& flukaReg, const int& ptrLttc, int& g4Reg,
   return;
 }
 
-
 ///////////////////////////////////////////////////////////////////
-//
-// WrapMag.hh - Sara Vanini
+// from WrapMag.hh
 //
 // Wrapper for geometry tracking in magnetic field: returns magnetic 
 // field values in a given position.
-//
-//
 /////////////////////////////////////////////////////////////////
 void fldwr(const double& pX, const double& pY, const double& pZ,
             double& cosBx, double& cosBy, double& cosBz, 
@@ -639,21 +630,32 @@ void fldwr(const double& pX, const double& pY, const double& pZ,
   return;
 }
 
-
 ///////////////////////////////////////////////////////////////////
-//
-// WrapFlgfwr.cc - Paola Sala
+// from WrapFlgfwr.cc
 //
 // Wrapper for setting of fluka geometry flag
-//
-// created  12/Nov/09
-//
 //////////////////////////////////////////////////////////////////
 void flgfwr ( int& flkflg )
 {
   std::cerr << "=======FLGFWR =======" << std::endl;
   return;
 }
+
+///////////////////////////////////////////////////////////////////
+// from WrapLookFX.hh
+//
+// Wrapper for localisation of particle to fix particular conditions.
+// At the moment is the same as WrapLookZ.hh. 
+//////////////////////////////////////////////////////////////////
+void lkfxwr(double& pSx, double& pSy, double& pSz,
+            double* pV, const int& oldReg, const int& oldLttc,
+	    int& newReg, int& flagErr, int& newLttc)
+{
+  std::cerr << "======= LKFXWR =======" << std::endl;
+
+  return;
+}
+
 /**************************************************************************************************/
 /******                                End of FLUKA stubs                                  ********/
 /**************************************************************************************************/
