@@ -950,7 +950,8 @@ template<> void pyne::_load_data<pyne::level_struct>()
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "metastable", HOFFSET(level_struct, metastable),
                       H5T_NATIVE_INT);
-
+  status = H5Tinsert(desc, "special", HOFFSET(level_struct, special),
+                      H5T_C_S1);
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
                               H5P_DEFAULT);
@@ -983,7 +984,7 @@ template<> void pyne::_load_data<pyne::level_struct>()
 //
 // level id
 //
-int pyne::id_from_level(int nuc, double level) {
+int pyne::id_from_level(int nuc, double level, std::string special) {
   int nostate = (nuc / 10000) * 10000;
   if (level_data_lvl_map.empty()) {
     _load_data<level_struct>();
@@ -1000,7 +1001,9 @@ int pyne::id_from_level(int nuc, double level) {
   for (std::map<std::pair<int, double>, level_struct>::iterator it=nuc_lower; 
   it!=nuc_upper;
        ++it) {
-    if (abs(level - it->second.level) < min) {
+    if ((abs(level - it->second.level) < min) && 
+    ((char)it->second.special == special.c_str()[0]) &&
+    !isnan(it->second.level)) {
       min = abs(level - it->second.level);
       ret_id = it->second.nuc_id;
     }
@@ -1010,6 +1013,9 @@ int pyne::id_from_level(int nuc, double level) {
   return ret_id;
 }
 
+int pyne::id_from_level(int nuc, double level){
+    return id_from_level(nuc, level, " ");
+}
 //
 // Metastable id data
 //

@@ -74,28 +74,23 @@ cdef extern from "data.h" namespace "pyne":
     double fpyield(std_string, std_string, int, bool) except +
 
     # decay data functions
-    #map[int, double] half_life_map
     double half_life(int) except +
     double half_life(char *) except +
     double half_life(std_string) except +
 
-    #map[int, double] decay_const_map
     double decay_const(int) except +
     double decay_const(char *) except +
     double decay_const(std_string) except +
 
-    #map[pair[int, int], double] branch_ratio_map
     double branch_ratio(pair[int, int]) except +
     double branch_ratio(int, int) except +
     double branch_ratio(char *, char *) except +
     double branch_ratio(std_string, std_string) except +
 
-    #map[int, double] state_energy_map
     double state_energy(int) except +
     double state_energy(char *) except +
     double state_energy(std_string) except +
 
-    #map[int, set[int]] decay_children_map
     set[int] decay_children(int) except +
     set[int] decay_children(char *) except +
     set[int] decay_children(std_string) except +
@@ -104,6 +99,7 @@ cdef extern from "data.h" namespace "pyne":
     int metastable_id(int) except +
     
     int id_from_level(int, double) except +
+    int id_from_level(int, double, std_string) except +
 
     #ENSDF data functions
     pair[double,double] decay_half_life(pair[int, int]) except +

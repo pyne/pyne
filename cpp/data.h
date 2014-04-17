@@ -310,6 +310,7 @@ namespace pyne
     double level;
     double branch_ratio;
     int metastable;
+    char special;
   } level_struct;
 
   /// Mapping from nuclides in id form to a struct containing data associated
@@ -325,7 +326,7 @@ namespace pyne
   /// This function looks for the level that best matches the input level
   /// within 1 keV of the input nuclide
   int id_from_level(int nuc, double level);
-  
+  int id_from_level(int nuc, double level, std::string special);
   /// \brief Returns the nuc_id of a metastable state
   ///
   /// This function looks through the level map for a given input nuc_id to find the

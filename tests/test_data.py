@@ -193,14 +193,14 @@ def test_gamma_from_to_byparent():
 def test_gamma_from_to_byen():
     assert_equal(data.gamma_from_to_byen(661.65, 0.1),
                  [(621510087, 621510015),
-                  (641500138, 641500138),
+                  (641500021, 641500006),
                   (390990016, 390990005),
                   (822040062, 822040024),
                   (902290055, 902290000),
                   (400880011, 400880004),
                   (551310023, 551310009),
                   (0, 0),
-                  (431070001, 431070001),
+                  (431070028, 431070020),
                   (972490039, 972490003),
                   (0, 0),
                   (380930068, 380930050),
@@ -318,6 +318,10 @@ def test_ecbp_child_byen():
 def test_ecbp_child_byparent():
     assert_equal(data.ecbp_child_byparent(110220000), [100220001, 100220000])
 
+
+def test_id_from_level():
+    assert_equal(data.id_from_level(811920000, 445, 'X'), 811920010)
+    assert_equal(data.id_from_level(561370000, 662), 561370002)
 
 if __name__ == "__main__":
     nose.runmodule()

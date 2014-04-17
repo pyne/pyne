@@ -20,6 +20,7 @@ except NameError:
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')
+_specialval = re.compile("([0-9.]*)[+]([A-Z])")
 _errpm = re.compile('[+](\d*)[-](\d*)')
 _err = re.compile('[ ]*(\d*)')
 _base = '([ \d]{3}[ A-Za-z]{2})'
@@ -217,8 +218,24 @@ def _parse_level_record(l_rec):
         Half life in seconds
     from_nuc : int
         nuc id of nuclide
+    state : int
+        metastable state of level
+    special : str
+        A-Z character denoting a group of known levels with no reference
+        to the ground state
     """
-    e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
+    lm = re.match("([A-Z])", l_rec.group(2))
+    spv = _specialval.match(l_rec.group(2))
+    special = ' '
+    if lm is not None:
+        special = lm.group(1)
+        e = 0.0
+        de = np.nan
+    elif spv is not None:
+        e, de = _get_val_err(spv.group(1), l_rec.group(3))
+        special = spv.group(2)
+    else:
+        e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
     from_nuc = _to_id(l_rec.group(1))
     m = l_rec.group(11)
@@ -230,7 +247,7 @@ def _parse_level_record(l_rec):
             state = int(state)
         else:
             state = 1
-    return e, tfinal, from_nuc, state
+    return e, tfinal, from_nuc, state, special
 
 
 def _parse_level_continuation_record(lc_rec):
@@ -700,12 +717,13 @@ def _parse_decay_dataset(lines, decay_s):
     nb = None
     br = None
     level = None
+    special = " "
     goodgray = False
     parent2 = None
     for line in lines:
         level_l = _level_regex.match(line)
         if level_l is not None:
-            level, half_lifev, from_nuc, state = _parse_level_record(level_l)
+            level, half_lifev, from_nuc, state, special = _parse_level_record(level_l)
             continue
         b_rec = _beta.match(line)
         if b_rec is not None:
@@ -766,9 +784,9 @@ def _parse_decay_dataset(lines, decay_s):
                 gparent = 0
                 gdaughter = 0
                 if level is not None:
-                    gparent = data.id_from_level(_to_id(daughter), level)
+                    gparent = data.id_from_level(_to_id(daughter), level, special)
                     dlevel = level - dat[0]
-                    gdaughter = data.id_from_level(_to_id(daughter), dlevel)
+                    gdaughter = data.id_from_level(_to_id(daughter), dlevel, special)
                 if parent2 is None:
                     gp2 = pfinal
                     e = 0
@@ -836,6 +854,7 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
            "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
            "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
            "{+28}mg", "sf(+ec+b+)"]
+    special = ""
     if levellist is None:
         levellist = []
     if lmap is None:
@@ -867,11 +886,11 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                                     goodkey = False
                             if goodkey is True:
                                 rx = rxname.id(keystrip)
-                                levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state))
+                                levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state, special))
                     if level_found is True:
-                        levellist.append((nuc_id, 0, half_lifev, level, 0.0, state))
+                        levellist.append((nuc_id, 0, half_lifev, level, 0.0, state, special))
                     brs = {}
-                    level, half_lifev, from_nuc, state = \
+                    level, half_lifev, from_nuc, state, special = \
                         _parse_level_record(level_l)
                     if from_nuc is not None:
                         nuc_id = from_nuc + leveln
@@ -896,9 +915,9 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                             goodkey = False
                     if goodkey is True:
                         rx = rxname.id(keystrip)
-                        levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state))
+                        levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state, special))
             if level_found is True:
-                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state))
+                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state, special))
     return levellist
 
 
@@ -1013,7 +1032,7 @@ def origen_data(filename):
                             ie = 0.0
                         decaylist.append((_to_id(parent), tfinal, e,
                                           half_lifev, level, dtype, (ib + ie)))
-                    level, half_lifev, from_nuc, state = \
+                    level, half_lifev, from_nuc, state, special = \
                         _parse_level_record(level_l)
                     newlevel = True
                     continue
@@ -1038,7 +1057,7 @@ def origen_data(filename):
                         if len(brs) > 0:
                             branchlist.append((pid, level, half_lifev, brs))
                         brs = {}
-                    level, half_lifev, from_nuc, state = \
+                    level, half_lifev, from_nuc, state, special = \
                         _parse_level_record(level_l)
                     continue
                 levelc = _level_cont_regex.match(line)
