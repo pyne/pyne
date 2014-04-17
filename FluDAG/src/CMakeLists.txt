@@ -28,9 +28,9 @@ SET (fluka_libdir ${FLUPRO})
 #ADD_CUSTOM_TARGET (mgdraw
 #	        DEPENDS mgdraw.o)
 
-SET (commonfiles fluka_funcs.cpp dagmc_utils.cpp Input.cpp)
-SET (wrapperfiles WrapReg2Name.cc WrapMag.cc 
-		  WrapReg.cc WrapFlgfwr.cc)
+# SET (commonfiles fluka_funcs.cpp dagmc_utils.cpp Input.cpp)
+SET (commonfiles fluka_funcs.cpp dagmc_utils.cpp )
+SET (wrapperfiles WrapReg2Name.cc WrapMag.cc WrapReg.cc WrapFlgfwr.cc)
 
 # Create the executable that can call flukam_
 ADD_EXECUTABLE(mainfludag mainFluDAG.cpp ${commonfiles} ${wrapperfiles})

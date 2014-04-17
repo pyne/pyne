@@ -56,7 +56,7 @@ ADD_CUSTOM_COMMAND (TARGET ${tgt}
 SET(fludag_source_files 
 	    ${fludag_source}/fluka_funcs.cpp
 	    ${fludag_source}/dagmc_utils.cpp
-	    ${fludag_source}/Input.cpp
+	    # ${fludag_source}/Input.cpp
 	    ${fludag_source}/WrapMag.cc
 	    ${fludag_source}/WrapLookFX.cc
 	    ${fludag_source}/WrapReg.cc
