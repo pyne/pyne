@@ -65,6 +65,7 @@ level_dtype = np.dtype([
     ('level', float),
     ('branch_ratio', float),
     ('metastable', int),
+    ('special', 'S1'),
 ])
 
 decay_dtype = np.dtype([
