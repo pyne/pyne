@@ -553,6 +553,36 @@ namespace pyne
   //parent nuclide
   std::vector<int> ecbp_child(int parent);
   /// \}
-}
+
+  /// map<energy, map<nuclide, map<rx, xs> > >
+  extern std::map<std::string, std::map<int, std::map<int, double> > > 
+      simple_xs_map;
+
+  /// returns the microscopic cross section in barns for the specified
+  /// nuclide, reaction, and energy group.  energy must be one of: "thermal",
+  /// "thermal_maxwell_ave", "resonance_integral", "fourteen_MeV",
+  /// "fission_spectrum_ave".
+  double simple_xs(int nuc, int rx, std::string energy);
+  double simple_xs(int nuc, std::string rx, std::string energy);
+  double simple_xs(std::string nuc, int rx, std::string energy);
+  double simple_xs(std::string nuc, std::string rx, std::string energy);
+
+  /// Custom exception for declaring a simple_xs request invalid
+  class InvalidSimpleXS : public std::exception {
+   public:
+    InvalidSimpleXS () {};
+    ~InvalidSimpleXS () throw () {};
+
+    InvalidSimpleXS(std::string msg) : msg_(msg) {};
+
+    virtual const char* what() const throw() {
+      return msg_.c_str();
+    };
+
+   private:
+    std::string msg_;
+  };
+
+} // namespace pyne
 
 #endif

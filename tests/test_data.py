@@ -32,6 +32,17 @@ def test_q_val():
     assert_equal(data.q_val('H1'), 0.0)
     assert_equal(data.q_val(92235), 4.674)
 
+def test_simple_xs():
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal'), 698.2)
+    assert_equal(data.simple_xs('u235', 'elastic', 'thermal'), 15.04)
+    assert_equal(data.simple_xs(922350000, b'gamma', 'thermal'), 98.81)
+    assert_equal(data.simple_xs(922350000, 'fission', 'thermal'), 584.4)
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal'), 698.2)
+
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal_maxwell_ave'), 608.4)
+    assert_equal(data.simple_xs(922350000, 'absorption', 'resonance_integral'), 411.1)
+    assert_equal(data.simple_xs(922350000, 'tot', 'fourteen_MeV'), 5.865)
+    assert_equal(data.simple_xs(922350000, 'tot', 'fission_spectrum_ave'), 7.705)
 
 def test_gamma_frac():
     assert_equal(data.gamma_frac('H1'), 0.0)
