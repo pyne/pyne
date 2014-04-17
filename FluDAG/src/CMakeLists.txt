@@ -11,7 +11,7 @@ ENDIF (NOT DEFINED FLUPRO)
 
 SET(MOAB_INCLUDE ${MOAB_HOME}/include)
 SET(MOAB_LIB_DIR ${MOAB_HOME}/lib)
-set (moablibs ${MOAB_LIB_DIR}/libdagmc.so ${MOAB_LIB_DIR}/libMOAB.so)
+SET(moablibs ${MOAB_LIB_DIR}/libdagmc.so ${MOAB_LIB_DIR}/libMOAB.so)
 
 # Where to look for includes
 INCLUDE_DIRECTORIES(${MOAB_INCLUDE})
@@ -28,8 +28,6 @@ SET (fluka_libdir ${FLUPRO})
 #ADD_CUSTOM_TARGET (mgdraw
 #	        DEPENDS mgdraw.o)
 
-SET (commonfiles fluka_funcs.cpp dagmc_utils.cpp )
-
 # Create the executable that can call flukam_
-ADD_EXECUTABLE(mainfludag mainFluDAG.cpp ${commonfiles} )
+ADD_EXECUTABLE(mainfludag mainFluDAG.cpp fluka_funcs.cpp chkerr.cpp)
 TARGET_LINK_LIBRARIES(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a gfortran)

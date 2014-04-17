@@ -7,18 +7,11 @@
  * \note   Unittested
  */
 //---------------------------------------------------------------------------//
-// #include "fludag_utils.h"
 #include "fluka_funcs.h"
-
+#include "chkerr.hpp"
 #include "DagMC.hpp"
-#include "MBInterface.hpp"
-#include "MBCartVect.hpp"
-#include "MBTypes.h"
 
-#include <iostream>
-#include <stdlib.h>
 #include <cstring>
-#include <string.h>
 #include <fstream>
 #include <time.h>       // for timing the routine
 

@@ -57,7 +57,7 @@ ADD_CUSTOM_COMMAND (TARGET ${tgt}
 # make fludag source files into a library
 SET(fludag_source_files 
 	    ${fludag_source}/fluka_funcs.cpp
-	    ${fludag_source}/dagmc_utils.cpp
+	    ${fludag_source}/chkerr.cpp
 	    ${fludag_source}/UnitNumberManager.cpp
  )
 

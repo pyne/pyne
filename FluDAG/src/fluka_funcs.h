@@ -1,20 +1,19 @@
 #ifndef FLUDAG_SRC_FLUKA_FUNCS_H
 #define FLUDAG_SRC_FLUKA_FUNCS_H
 
-#include <string>
+#include <iostream>
+#include <stdlib.h>
+#include <string>      // string, cout
 #include <vector>
 
 #include "moab/Types.hpp"
-
 #include "MBInterface.hpp"
 #include "MBCartVect.hpp"
-
 #include "DagMC.hpp"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /* 
  * This signature is intended to be called from a c++ function.  
@@ -50,16 +49,15 @@ extern "C" {
 #endif
 
 
-
 ///////////////////////////////////////////////////////////////////
 //
 // Interface for Dag Wrappers
 //
 ///////////////////////////////////////////////////////////////////
 
-#include "MBInterface.hpp"
-#include "MBCartVect.hpp"
-#include "moab/Types.hpp"
+// #include "MBInterface.hpp"
+// #include "MBCartVect.hpp"
+// #include "moab/Types.hpp"
 
 #define f_idnr idnrwr_
 #define g_step g1wr_

@@ -1,5 +1,7 @@
 #include "chkerr.hpp"
 
+#include "DagMC.hpp"
+
 using namespace moab;
 
 void chkerr( Interface* mbi, ErrorCode code, int line, const char* file )
@@ -25,3 +27,7 @@ void chkerr( Interface& mbi, ErrorCode code, int line, const char* file )
   chkerr( &mbi, code, line, file );
 }
  
+void chkerr( DagMC& dag, ErrorCode code, int line, const char* file )
+{
+  chkerr( dag.moab_instance(), code, line, file );
+}

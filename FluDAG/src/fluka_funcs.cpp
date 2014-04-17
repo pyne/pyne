@@ -11,17 +11,16 @@
 //---------------------------------------------------------------------------//
 
 #include "fluka_funcs.h"
-
-#include "dagmc_utils.hpp"
+#include "chkerr.hpp"
 
 #include "MBInterface.hpp"
 #include "MBCartVect.hpp"
 
 #include "DagMC.hpp"
 #include "moab/Types.hpp"
+
 using moab::DagMC;
 
-#include <string>      // string, cout
 #include <iomanip>
 #include <fstream>     // ofstream
 #include <sstream>
@@ -1069,4 +1068,5 @@ void dagmc_version_(double* dagmcVersion)
 {
   *dagmcVersion = DAG->version();
 }
+
 

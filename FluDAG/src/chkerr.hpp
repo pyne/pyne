@@ -5,9 +5,13 @@
 #include <moab/Interface.hpp>
 
 using namespace moab;
-
+namespace moab
+{
+    class DagMC;
+}
 void chkerr( Interface* mbi, ErrorCode code, int line, const char* file );
 void chkerr( Interface& mbi, ErrorCode code, int line, const char* file );
+void chkerr( DagMC& dag, ErrorCode code, int line, const char* file );
 
 #define CHECKERR(M,C) chkerr(M,C,__LINE__,__FILE__)
 
