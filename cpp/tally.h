@@ -26,7 +26,7 @@ namespace pyne
 
     /// Constructor from passed in vars
     /// \param type the type of tally (flux or current)
-    /// \param particle the name of the particle type
+    /// \param particle_name the name of the particle type
     /// \param entity the entity id of the tally (eg. surface index, 
     ///          volume number)
     /// \param entity_type (volume or surface)
