@@ -11,7 +11,6 @@
 //---------------------------------------------------------------------------//
 
 #include "fluka_funcs.h"
-#include "fludag_utils.h"
 
 #include "DagWrappers.hh"
 #include "dagmc_utils.hpp"
@@ -23,7 +22,9 @@
 #include "moab/Types.hpp"
 using moab::DagMC;
 
+#include <string>      // string, cout
 #include <iomanip>
+#include <fstream>     // ofstream
 #include <sstream>
 #include <set>
 #include <cstring>

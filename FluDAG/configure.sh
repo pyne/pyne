@@ -5,6 +5,7 @@
 EXTRA_ARGS=$@
 
 rm -rf CMakeCache.txt
+rm tests/slabs.h5m
 
 cmake \
 -D MOAB_HOME=$HOME/dagmc_bld/MOAB \
