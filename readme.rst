@@ -68,10 +68,36 @@ prevents the developers from distributing it with PyNE.  However, the
 do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.  
 
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Conda Install Instructions
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+On mac and linux PyNE can be installed via the package manager conda. 
+After installing anaconda or miniconda from http://continuum.io/downloads
+add::
+
+    export PATH=~/anaconda/bin:$PATH
+
+to ~/.bash_profile, then::
+
+    source ~/.bash_profile
+    conda install conda-build jinja2 nose setuptools pytables hdf5 scipy
+
+on linux you may also need to run::
+
+    conda install patchelf
+
+Then dowload the latest conda-recipes:
+ https://github.com/conda/conda-recipes/archive/master.zip
+cd to the conda-recipes directory and run::
+
+    conda build pyne
+    conda install $(conda build --output pyne)
+    nuc_data_make
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Mac OSX Specific Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The instructions are based on using the homebrew http://brew.sh/ package manager
+These instructions are based on using the homebrew http://brew.sh/ package manager
 Install command line tools from https://developer.apple.com/downloads/
 you will need to create an account in order to download::
 
@@ -100,18 +126,9 @@ to ~/.bash_profile, then::
 
 download pyne-staging cd to that directory::
 
-
     cd Downloads/pyne-staging
     python setup.py install
 
-It may be necessary to add the pyne library path to the
-``DYLD_FALLBACK_LIBRARY_PATH`` environment variable *before* running 
-``nuc_data_make``. To do this, add the following lines to your 
-``~/.bashrc`` file where ``/path/to/pyne/lib`` is the absolute path to the 
-directory containing libpyne.dylib::
-
-    DYLD_FALLBACK_LIBRARY_PATH="${DYLD_FALLBACK_LIBRARY_PATH}:/path/to/pyne/lib"
-    export DYLD_FALLBACK_LIBRARY_PATH
 
 Once those lines have been added, run the following command before running 
 ``nuc_data_make``::
