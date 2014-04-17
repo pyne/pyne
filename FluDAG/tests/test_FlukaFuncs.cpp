@@ -4,7 +4,7 @@
 
 #include "DagMC.hpp"
 #include "MBInterface.hpp"
-#include "DagWrappers.hh"
+#include "fluka_funcs.h"
 
 
 #include <cmath>
@@ -13,7 +13,6 @@
 
 #define DAG moab::DagMC::instance()
 
-const std::string directory = "/filespace/people/z/zachman/repos/fludag_testing/";
 int num_slab_vols = 12;
 
 //---------------------------------------------------------------------------//
@@ -45,7 +44,6 @@ class FluDAGTest : public ::testing::Test
     virtual void SetUp()
     {
        // Default h5m file for testing
-       // std::string infile = directory + "input/test2/fludag/slabs.h5m";
        std::string infile = "slabs.h5m";
 
        rloadval = DAG->load_file(infile.c_str(), 0.0 ); 
