@@ -1,9 +1,10 @@
 PROJECT(FluDAGUnitTests)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 
-SET (gtest_home    "${CMAKE_CURRENT_SOURCE_DIR}/../../gtest")
+# Note that CMAKE_SOURCE_DIR (without 'CURRNET') is the top-level dir containing CMakeLists.txt
+SET (gtest_home    "${CMAKE_SOURCE_DIR}/../gtest")
 SET (gtest_dir     "${gtest_home}/gtest-1.7.0")
-SET (fludag_source "${CMAKE_CURRENT_SOURCE_DIR}/../src")
+SET (fludag_source "${CMAKE_SOURCE_DIR}/src")
 
 # Where to look for includes
 INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${gtest_dir}" "${gtest_dir}/include" ${fludag_source})
@@ -11,7 +12,8 @@ INCLUDE_DIRECTORIES("${MOAB_HOME}/include" "${gtest_dir}" "${gtest_dir}/include"
 # Setup for gtest libraries
 SET(cxx_base_flags "-Wall -Wshadow")
 SET(cxx_exception_flags "-fexceptions")
-SET(cxx_strict_flags "-Wextra")
+# Ref: https://groups.google.com/forum/#!topic/googletestframework/8S3QSezcoRA
+SET(cxx_strict_flags "-Wextra -Wno-missing-field-initializers")
 
 IF (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
     SET(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
@@ -40,7 +42,7 @@ FUNCTION(cxx_static_library name cxx_flags)
 	cxx_library_with_type(${name} STATIC "${cxx_flags}" ${ARGN})
 ENDFUNCTION()
 
-cxx_static_library(gtest      ${cxx_strict} "${gtest_dir}/src/gtest-all.cc")
+cxx_static_library(gtest ${cxx_strict} "${gtest_dir}/src/gtest-all.cc")
 
 SET (tgt "gtest")
 ADD_CUSTOM_COMMAND (TARGET ${tgt}
@@ -55,12 +57,7 @@ ADD_CUSTOM_COMMAND (TARGET ${tgt}
 # make fludag source files into a library
 SET(fludag_source_files 
 	    ${fludag_source}/fluka_funcs.cpp
-	    ${fludag_source}/dagmc_utils.cpp
-	    ${fludag_source}/Input.cpp
-	    ${fludag_source}/WrapMag.cc
-	    ${fludag_source}/WrapLookFX.cc
-	    ${fludag_source}/WrapReg.cc
-	    ${fludag_source}/WrapFlgfwr.cc
+	    ${fludag_source}/chkerr.cpp
 	    ${fludag_source}/UnitNumberManager.cpp
  )
 
