@@ -73,13 +73,12 @@ Conda Install Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 On mac and linux PyNE can be installed via the package manager conda. 
 After installing anaconda or miniconda from http://continuum.io/downloads
-add::
+add conda's binary directory to your bash profile by adding::
 
-    export PATH=~/anaconda/bin:$PATH
+    export PATH=/path/to/anaconda/bin:$PATH
 
-to ~/.bash_profile, then::
+to your .bashrc or .bash_profile. Then in a new shell::
 
-    source ~/.bash_profile
     conda install conda-build jinja2 nose setuptools pytables hdf5 scipy
 
 on linux you may also need to run::
