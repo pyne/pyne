@@ -38,6 +38,7 @@ Additionally, building the documentation requires the following:
    #. `Sphinx <http://sphinx-doc.org/>`_
    #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
    #. `breathe <http://michaeljones.github.io/breathe/>`_ 
+   #. `PrettyTable <https://code.google.com/p/prettytable/>`_
 
 ------
 Binary

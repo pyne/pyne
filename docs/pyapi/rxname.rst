@@ -7,3 +7,7 @@ Reaction Names -- :mod:`pyne.rxname`
     :members:
 
 
+Reaction Listing
+--------------------
+
+.. include:: ../rxname_listing
