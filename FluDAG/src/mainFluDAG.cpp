@@ -8,7 +8,6 @@
  */
 //---------------------------------------------------------------------------//
 #include "fluka_funcs.h"
-#include "chkerr.hpp"
 #include "DagMC.hpp"
 
 #include <cstring>

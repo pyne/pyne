@@ -912,9 +912,9 @@ void fludagwrite_assignma(std::string lfname)  // file with cell/surface cards
 // This function helps with debugging, but is not germane to writing cards.
 std::string mat_property_string (int index, std::vector<std::string> &properties)
 {
-  ErrorCode ret;
+  MBErrorCode ret;
   std::string propstring;
-  EntityHandle entity = DAG->entity_by_index(3,index);
+  MBEntityHandle entity = DAG->entity_by_index(3,index);
   int id = DAG->id_by_index(3, index);
   for (std::vector<std::string>::iterator p = properties.begin(); p != properties.end(); ++p)
   {
@@ -961,9 +961,9 @@ std::string mat_property_string (int index, std::vector<std::string> &properties
 // For a given volume, find all properties associated with it, and any and all 
 //     values associated with each property
 // Copied and modified from obb_analysis.cpp
-static std::string make_property_string (EntityHandle eh, std::vector<std::string> &properties)
+static std::string make_property_string (MBEntityHandle eh, std::vector<std::string> &properties)
 {
-  ErrorCode ret;
+  MBErrorCode ret;
   std::string propstring;
   for (std::vector<std::string>::iterator p = properties.begin(); p != properties.end(); ++p)
   {
