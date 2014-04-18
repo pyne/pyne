@@ -370,8 +370,7 @@ double pyne::gamma_frac(std::string nuc)
 /*** Dose Factor Functions ***/
 /*****************************/
 
-void pyne::_load_df_map(const char * source_path)
-{
+void pyne::_load_df_map(const char * source_path) {
   // Loads the dose factor table into df_map
   herr_t status;
 
@@ -407,8 +406,7 @@ void pyne::_load_df_map(const char * source_path)
   H5Dread(df_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, df_array);
 
   // Ok now that we have the array of structs, put it in the map
-  for (int n = 0; n < df_length; n++)
-  {
+  for (int n = 0; n < df_length; n++) {
     ext_air_df_map[df_array[n].nuc] = df_array[n].ext_air_df;
     ratio_map[df_array[n].nuc] = df_array[n].ratio;
     ext_soil_df_map[df_array[n].nuc] = df_array[n].ext_soil_df;
