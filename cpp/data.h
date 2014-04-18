@@ -167,7 +167,7 @@ namespace pyne
     double ingest_df;   ///< nuclide dose factor due to ingestion [mrem/pCi]
     double fluid_frac;  ///< fraction of activity abosorbed in body fluids
     double inhale_df;   ///< model of lung used (time of biological half life -- D, W, or Y)
-    char * lung_mod;      ///< nuclide dose factor [mrem/h per Ci/m^3]
+    char lung_mod[7];      ///< nuclide dose factor [mrem/h per Ci/m^3]
   } df_struct;
 
   /// Loads the dose factor data from the nuc_data.h5 file into memory.
