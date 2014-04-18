@@ -385,15 +385,15 @@ void pyne::_load_df_map(const char * source_path)
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(df_struct));
-  H5Tinsert(desc, "nuc", HOFFSET(df_struct, nuc),  H5T_NATIVE_INT);
-  H5Tinsert(desc, "ext_air_df", HOFFSET(df_struct, ext_air_df), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "ratio", HOFFSET(df_struct, ratio), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "ext_soil_df", HOFFSET(df_struct, ext_soil_df), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "ingest_df", HOFFSET(df_struct, ingest_df), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "fluid_frac", HOFFSET(df_struct, fluid_frac), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "inhale_df", HOFFSET(df_struct, inhale_df), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "lung_mod", HOFFSET(df_struct, lung_mod), H5T_NATIVE_CHAR);
-
+  status = H5Tinsert(desc, "nuc", HOFFSET(df_struct, nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "ext_air_df", HOFFSET(df_struct, ext_air_df), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ratio", HOFFSET(df_struct, ratio), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ext_soil_df", HOFFSET(df_struct, ext_soil_df), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ingest_df", HOFFSET(df_struct, ingest_df), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "fluid_frac", HOFFSET(df_struct, fluid_frac), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "inhale_df", HOFFSET(df_struct, inhale_df), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "lung_mod", HOFFSET(df_struct, lung_mod), H5T_C_S1);
+  
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
@@ -405,10 +405,6 @@ void pyne::_load_df_map(const char * source_path)
   // Read in the data
   df_struct * df_array = new df_struct[df_length];
   H5Dread(df_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, df_array);
-
-  // close the nuc_data library, before doing anything stupid
-  H5Dclose(df_set);
-  H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of structs, put it in the map
   for (int n = 0; n < df_length; n++)
@@ -422,6 +418,10 @@ void pyne::_load_df_map(const char * source_path)
     lung_mod_map[df_array[n].nuc] = df_array[n].lung_mod;
   };
 
+  // close the nuc_data library, before doing anything stupid
+  H5Dclose(df_set);
+  H5Fclose(nuc_data_h5);
+  
   delete[] df_array;
 };
 
@@ -434,15 +434,15 @@ const char * source_string(int source)
   const char * source_location;
   if (source == 0)
   {
-    source_location = "/dose_factors/epa";
+    source_location = "/dose_factors/EPA";
   }
   else if (source == 1)
   {
-    source_location = "/dose_factors/doe";
+    source_location = "/dose_factors/DOE";
   }
   else if (source == 2)
   {
-    source_location = "/dose_factors/genii";
+    source_location = "/dose_factors/GENII";
   }
   return source_location;
 };
@@ -573,7 +573,7 @@ double pyne::ratio(std::string nuc, int source)
 std::map<int, double> pyne::ext_soil_df_map = std::map<int, double>();
 
 double pyne::ext_soil_df(int nuc, int source)
-{
+{  
   // Find the nuclide's external soil dose factor in [mrem/hr per Ci/m^2]
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
@@ -591,13 +591,8 @@ double pyne::ext_soil_df(int nuc, int source)
   // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
   if (ext_soil_df_map.empty())
   {
-    // Don't fail if we can't load the library
-    try
-    {
       _load_df_map(source_path);
       return ext_soil_df(nuc, source);
-    }
-    catch(...){};
   };
   
   
