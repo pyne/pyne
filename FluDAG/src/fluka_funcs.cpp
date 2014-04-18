@@ -11,7 +11,7 @@
 //---------------------------------------------------------------------------//
 
 #include "fluka_funcs.h"
-#include "chkerr.hpp"
+// #include "chkerr.hpp"
 
 #include "MBInterface.hpp"
 #include "MBCartVect.hpp"
@@ -922,7 +922,11 @@ std::string mat_property_string (int index, std::vector<std::string> &properties
      {
         std::vector<std::string> vals;
         ret = DAG->prop_values(entity, *p, vals);
-        CHECKERR(*DAG, ret);
+        if( ret != MB_SUCCESS )
+        {
+            std::cerr << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
+            std::exit( EXIT_FAILURE );
+        }
         propstring += *p;
         if (vals.size() == 1)
         {
@@ -967,7 +971,11 @@ static std::string make_property_string (EntityHandle eh, std::vector<std::strin
      {
         std::vector<std::string> vals;
         ret = DAG->prop_values(eh, *p, vals);
-        CHECKERR(*DAG, ret);
+        if( ret != MB_SUCCESS )
+        {
+            std::cerr << __FILE__ << ", " << __func__ << ":" << __LINE__ << "_______________" << std::endl;
+            std::exit( EXIT_FAILURE );
+        }
         propstring += *p;
         if (vals.size() == 1)
         {
