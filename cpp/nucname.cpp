@@ -407,6 +407,8 @@ int pyne::nucname::id(std::string nuc) {
     std::string end_char = pyne::last_char(nucstr);
     if (end_char == "M")
       newnuc = (10000 * anum) + 1;
+    else if (end_char == "N")
+      newnuc = (10000 * anum) + 2;
     else if (pyne::contains_substring(pyne::digits, end_char))
       newnuc = (10000 * anum);
     else
@@ -452,7 +454,9 @@ std::string pyne::nucname::name(int nuc) {
     newnuc += pyne::to_str(aaa);
 
   // Add meta-stable flag
-  if (0 < ssss)
+  if (ssss == 2)
+    newnuc += "N";
+  else if (0 < ssss)
     newnuc += "M";
 
   return newnuc;
@@ -616,7 +620,9 @@ std::string pyne::nucname::zzllaaam(int nuc) {
   if (0 < aaassss)
     newnuc += pyne::to_str(aaa);
   // Add meta-stable flag
-  if (0 < ssss)
+  if (ssss == 2)
+    newnuc += "n";
+  else if (0 < ssss)
     newnuc += "m";
   return newnuc;
 };
@@ -670,6 +676,8 @@ int pyne::nucname::zzllaaam_to_id(std::string nuc) {
   std::string end_char = pyne::last_char(nucstr);
   if (end_char == "M")
     nucid = (10000 * anum) + 1;
+  else if (end_char == "N")
+    nucid = (10000 * anum) + 2;
   else if (pyne::contains_substring(pyne::digits, end_char))
     nucid = (10000 * anum);
   else
@@ -788,7 +796,9 @@ std::string pyne::nucname::serpent(int nuc) {
     newnuc += "nat";
 
   // Add meta-stable flag
-  if (0 < ssss)
+  if (ssss == 2)
+    newnuc += "n";
+  else if (0 < ssss)
     newnuc += "m";
 
   return newnuc;
@@ -845,6 +855,8 @@ int pyne::nucname::serpent_to_id(std::string nuc) {
   std::string end_char = pyne::last_char(nucstr);
   if (end_char == "M")
     nucid = (10000 * anum) + 1;
+  else if (end_char == "N")
+    nucid = (10000 * anum) + 2;
   else if (pyne::contains_substring(pyne::digits, end_char))
     nucid = (10000 * anum);
   else
