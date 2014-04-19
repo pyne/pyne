@@ -148,7 +148,7 @@ find_library(PYTHON_LIBRARY
           "Python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}dm"
     HINTS ${_PYTHON_LIBS_SEARCH}
     NO_SYSTEM_ENVIRONMENT_PATH)
-#endif()
+endif()
 
 # For backward compatibility, set PYTHON_INCLUDE_PATH, but make it internal.
 SET(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}" CACHE INTERNAL
