@@ -1,8 +1,13 @@
 """Cython-based utils to be imported into utils."""
+
 from __future__ import division, unicode_literals
 from libc.stdlib cimport malloc, free
 from libc.stdlib cimport atof
 from libc.string cimport strtok, strcpy, strncpy
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 cimport numpy as np
 cimport pyne.cpp_pyne

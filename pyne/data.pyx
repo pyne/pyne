@@ -1,7 +1,12 @@
 """Python wrapper for nucname library."""
+
 # Python imports 
 #from collections import Iterable
 from __future__ import division, unicode_literals
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Cython imports
 from libcpp.map cimport map
@@ -13,6 +18,10 @@ from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 import numpy as np
 cimport numpy as np

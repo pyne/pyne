@@ -1,3 +1,7 @@
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 from __future__ import print_function, division
 import copy
 import itertools

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 """Read a MCNP Ptrac file and save it in HDF5 format."""
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 import tables
 from . import mcnp

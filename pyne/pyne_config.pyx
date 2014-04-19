@@ -1,6 +1,11 @@
 """Python wrapper for isoname library."""
 # Cython imports
+
 from __future__ import unicode_literals
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set

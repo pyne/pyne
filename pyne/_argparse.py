@@ -81,6 +81,9 @@ __all__ = [
     'ZERO_OR_MORE',
 ]
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 import copy as _copy
 import os as _os

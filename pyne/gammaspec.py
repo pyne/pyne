@@ -2,6 +2,9 @@
 GammaSpectrum class, reads a .spe file Will in the future have functions 
 for activity calculations.
 """
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 import numpy as np
 

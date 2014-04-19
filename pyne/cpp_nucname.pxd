@@ -1,4 +1,8 @@
 """C++ wrapper for nucname library."""
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 from libcpp.map cimport map
 from libcpp.set cimport set
 from libcpp.string cimport string as std_string

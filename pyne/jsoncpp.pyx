@@ -8,6 +8,10 @@ from libc.string cimport const_char, memcpy
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as std_vector
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 # Python imports
 import collections
 

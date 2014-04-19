@@ -19,6 +19,10 @@ import re
 import os
 from libc.stdlib cimport malloc, free
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 cimport numpy as np
 import numpy as np
 from scipy.interpolate import interp1d

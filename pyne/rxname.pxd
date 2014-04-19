@@ -1,5 +1,9 @@
 """Python wrapper for rxname library."""
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 # Cython imports
 from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set

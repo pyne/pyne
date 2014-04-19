@@ -4,6 +4,11 @@
 Fortran formatted records.
 
 """
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import struct
 from collections import Iterable
 

@@ -1,5 +1,10 @@
 """Python wrapper for material library."""
+
 from __future__ import division, unicode_literals
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair

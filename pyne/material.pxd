@@ -1,3 +1,7 @@
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
 from cython import pointer

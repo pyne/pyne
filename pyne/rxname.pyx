@@ -132,7 +132,12 @@ Repeat this procedure as necessary.
 --------------------------
 
 """
+
 from __future__ import unicode_literals
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Cython imports
 from libcpp.map cimport map
