@@ -53,7 +53,8 @@ install_lib(pyne_enrichment)
 # pyne_tally
 add_library(pyne_tally tally.cpp)
 set_target_properties(pyne_tally PROPERTIES 
-                      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
+                      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib"
+                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
 install_lib(pyne_tally)
 
 
