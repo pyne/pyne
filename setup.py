@@ -97,7 +97,7 @@ def main_body():
                 pass
             elif 'sh.exe' in files_on_path:
                 cmake_cmd += ['-G "MSYS Makefiles"']
-            elif 'gcc.exe' in files_on_path:
+            elif 'gcc.exe' in files_on_path or 'gcc.bat' in files_on_path:
                 cmake_cmd += ['-G "MinGW Makefiles"']
             cmake_cmd = ' '.join(cmake_cmd)
         rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=(os.name=='nt'))
