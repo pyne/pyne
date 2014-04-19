@@ -141,7 +141,7 @@ def test_name():
     assert_equal(nucname.name(2390940), "Pu239")
     assert_equal(nucname.name(2420950), "Am242")
 
-    assert_equal(nucname.name(491202), nucname.id("In-120n"))
+    assert_equal(nucname.name(491202), "In120N")
 
 def test_znum():
     exps = [2, 2, 96, 94, 95, 2, 95, 95, 92, 95, 95, 2, 92, 93, 2, 96, 94, 95, 2,
