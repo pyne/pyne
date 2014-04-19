@@ -1,6 +1,7 @@
 """Python wrapper for nucname library."""
 # Python imports 
 #from collections import Iterable
+from __future__ import unicode_literals, division
 
 # Cython imports
 from libcpp.map cimport map
@@ -8,13 +9,9 @@ from libcpp.set cimport set as cpp_set
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 #from cython cimport pointer
+from libcpp.string cimport string as std_string
 
 # local imports 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
@@ -117,7 +114,8 @@ def isnuclide(nuc):
 
     """
     if isinstance(nuc, basestring):
-        flag = cpp_nucname.isnuclide(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        flag = cpp_nucname.isnuclide(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         flag = cpp_nucname.isnuclide(<int> nuc)
     else:
@@ -142,6 +140,7 @@ def id(nuc):
 
     """
     if isinstance(nuc, basestring):
+        nuc = nuc.encode()
         newnuc = cpp_nucname.id(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.id(<int> nuc)
@@ -166,12 +165,13 @@ def name(nuc):
     """
     cdef std_string newnuc
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.name(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.name(<char *> nuc_bytes)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.name(<int> nuc)
     else:
         raise NucTypeError(nuc)
-    return <char *> newnuc.c_str()
+    return bytes(<char *> newnuc.c_str()).decode()
 
 
 def znum(nuc):
@@ -189,7 +189,8 @@ def znum(nuc):
 
     """
     if isinstance(nuc, basestring):
-        z = cpp_nucname.znum(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        z = cpp_nucname.znum(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         z = cpp_nucname.znum(<int> nuc)
     else:
@@ -212,7 +213,8 @@ def anum(nuc):
 
     """
     if isinstance(nuc, basestring):
-        a = cpp_nucname.anum(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        a = cpp_nucname.anum(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         a = cpp_nucname.anum(<int> nuc)
     else:
@@ -235,7 +237,8 @@ def snum(nuc):
 
     """
     if isinstance(nuc, basestring):
-        s = cpp_nucname.snum(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        s = cpp_nucname.snum(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         s = cpp_nucname.snum(<int> nuc)
     else:
@@ -258,7 +261,8 @@ def zzaaam(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.zzaaam(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.zzaaam(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.zzaaam(<int> nuc)
     else:
@@ -282,9 +286,58 @@ def zzaaam_to_id(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.zzaaam_to_id(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.zzaaam_to_id(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.zzaaam_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+def zzzaaa(nuc):
+    """Converts a nuclide to its zzzaaa form (95242). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in zzzaaa form.
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.zzzaaa(<char *> nuc_bytes)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzzaaa(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+def zzzaaa_to_id(nuc):
+    """Converts a nuclide directly from ZZZAAA form (95242) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in ZZZAAA form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.zzzaaa_to_id(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzzaaa_to_id(<int> nuc)
     else:
         raise NucTypeError(nuc)
     return newnuc
@@ -313,12 +366,12 @@ def mcnp(nuc):
     """
 
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.mcnp(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.mcnp(<char *> nuc_bytes)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.mcnp(<int> nuc)
     else:
         raise NucTypeError(nuc)
-
     return newnuc
 
 
@@ -338,12 +391,60 @@ def mcnp_to_id(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.mcnp_to_id(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.mcnp_to_id(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.mcnp_to_id(<int> nuc)
     else:
         raise NucTypeError(nuc)
     return newnuc
+
+def zzllaaam(nuc):
+    """Converts a nuclide to its zzllaaam form (95-Am-241m). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : str 
+        Output nuclide in zzllaaam form.
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.zzllaaam(<char *> nuc_bytes)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.zzllaaam(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return bytes(newnuc).decode()
+
+
+def zzllaaam_to_id(nuc):
+    """Converts a nuclide directly from ZZLLAAAM form (95-Am-241m) to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in ZZLLAAAM form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.zzllaaam_to_id(<char *> nuc_bytes)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
 
 
 def serpent(nuc):
@@ -363,13 +464,14 @@ def serpent(nuc):
     cdef std_string newnuc
 
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.serpent(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.serpent(<char *> nuc_bytes)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.serpent(<int> nuc)
     else:
         raise NucTypeError(nuc)
 
-    return <char *> newnuc.c_str()
+    return bytes(<char *> newnuc.c_str()).decode()
 
 
 def serpent_to_id(nuc):
@@ -388,7 +490,8 @@ def serpent_to_id(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.serpent_to_id(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.serpent_to_id(<char *> nuc_bytes)
     #elif isinstance(nuc, int) or isinstance(nuc, long):
     #    newnuc = cpp_nucname.serpent_to_id(<int> nuc)
     else:
@@ -413,13 +516,14 @@ def nist(nuc):
     cdef std_string newnuc
 
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.nist(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.nist(<char *> nuc_bytes)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.nist(<int> nuc)
     else:
         raise NucTypeError(nuc)
 
-    return <char *> newnuc.c_str()
+    return bytes(<char *> newnuc.c_str()).decode()
 
 
 def nist_to_id(nuc):
@@ -438,7 +542,8 @@ def nist_to_id(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.nist_to_id(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.nist_to_id(<char *> nuc_bytes)
     #elif isinstance(nuc, int) or isinstance(nuc, long):
     #    newnuc = cpp_nucname.nist_to_id(<int> nuc)
     else:
@@ -460,14 +565,13 @@ def cinder(nuc):
         Output nuclide in CINDER (aaazzzm) form.
 
     """
-
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.cinder(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.cinder(<char *> nuc_bytes)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.cinder(<int> nuc)
     else:
         raise NucTypeError(nuc)
-
     return newnuc
 
 
@@ -512,13 +616,14 @@ def alara(nuc):
     cdef std_string newnuc
 
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.alara(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.alara(<char *> nuc_bytes)
     elif isinstance(nuc, int):
         newnuc = cpp_nucname.alara(<int> nuc)
     else:
         raise NucTypeError(nuc)
 
-    return <char *> newnuc.c_str()
+    return bytes(<char *> newnuc.c_str()).decode()
 
 
 def alara_to_id(nuc):
@@ -537,7 +642,8 @@ def alara_to_id(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.alara_to_id(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.alara_to_id(<char *> nuc_bytes)
     #elif isinstance(nuc, int) or isinstance(nuc, long):
     #    newnuc = cpp_nucname.alara_to_id(<int> nuc)
     else:
@@ -560,7 +666,8 @@ def sza(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.sza(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.sza(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.sza(<int> nuc)
     else:
@@ -584,12 +691,37 @@ def sza_to_id(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.sza_to_id(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.sza_to_id(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.sza_to_id(<int> nuc)
     else:
         raise NucTypeError(nuc)
     return newnuc
+
+
+def groundstate(nuc):
+    """Converts a nuclide to its Groundstate form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in Groundstate form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.groundstate(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.groundstate(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
 
 
 #
@@ -609,5 +741,13 @@ cdef cpp_set[int] zzaaam_set(object nuc_sequence):
     cdef cpp_set[int] nuc_set = cpp_set[int]()
     for nuc in nuc_sequence:
         nuc_zz = zzaaam(nuc)
+        nuc_set.insert(nuc_zz)
+    return nuc_set
+
+cdef cpp_set[int] zzzaaa_set(object nuc_sequence):
+    cdef int nuc_zz
+    cdef cpp_set[int] nuc_set = cpp_set[int]()
+    for nuc in nuc_sequence:
+        nuc_zz = zzzaaa(nuc)
         nuc_set.insert(nuc_zz)
     return nuc_set

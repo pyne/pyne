@@ -1,15 +1,19 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
+from __future__ import print_function
 import os
-import re
-import urllib2
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
+from zipfile import ZipFile
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.utils import to_barns
-from pyne.dbgen.api import BASIC_FILTERS
-from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
+from .. import nucname
+from ..utils import to_barns
+from .api import BASIC_FILTERS
+from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 
 
 def grab_kaeri_simple_xs(build_dir=""):
@@ -21,6 +25,20 @@ def grab_kaeri_simple_xs(build_dir=""):
     build_dir : str
         Major directory to place html files in. 'KAERI/' will be appended.
     """
+    zip_path = os.path.join(build_dir, 'kaeri.zip')
+    zip_url = 'http://data.pyne.io/kaeri.zip'
+    if not os.path.exists(zip_path):
+        print("  grabbing {0} and placing it in {1}".format(zip_url, zip_path))
+        urllib.urlretrieve(zip_url, zip_path)
+        try:
+            zf = ZipFile(zip_path)
+            for name in zf.namelist():
+                if not os.path.exists(os.path.join(build_dir, name)):
+                    print("    extracting {0} from {1}".format(name, zip_path))
+                    zf.extract(name, build_dir)
+        finally:
+            zf.close()
+
     # Add kaeri to build_dir
     build_dir = os.path.join(build_dir, 'KAERI')
     try:
@@ -234,14 +252,14 @@ def make_simple_xs(args):
 
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
-            print "skipping simple XS data table creation; already exists."
+            print("skipping simple XS data table creation; already exists.")
             return 
 
     # First grab the atomic abundance data
-    print "Grabbing neutron summary files from KAERI"
+    print("Grabbing neutron summary files from KAERI")
     grab_kaeri_simple_xs(build_dir)
 
     # Make simple table once we have the array
-    print "Making simple cross section data tables"
+    print("Making simple cross section data tables")
     make_simple_xs_tables(nuc_data, build_dir)
 

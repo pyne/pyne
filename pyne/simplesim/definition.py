@@ -2,7 +2,7 @@
 
 """The ``definition`` module can be imported as such::
 
-    from pyne.simplesim import definition
+    from .simplesim import definition
 
 ********
 Overview
@@ -50,6 +50,7 @@ Reference
 """
 # TODO check overwriting warning.
 # TODO test the exceptions for getting *_num() not in list/dict.
+from __future__ import print_function, division
 import abc
 import collections
 import pickle
@@ -62,8 +63,8 @@ except ImportError:
 
 import numpy as np
 
-from pyne import material
-from pyne.simplesim import cards
+from .. import material
+from . import cards
 
 class IDefinition(object):
     """This class is not used by the user. Abstract base class for
@@ -87,11 +88,11 @@ class IDefinition(object):
         self.verbose = verbose
         if fname is not None:
             if self.verbose:
-                print "Opening definition stored in {0!r}.".format(fname)
+                print("Opening definition stored in {0!r}.".format(fname))
             self._open(fname)
         else:
             if self.verbose:
-                print "Creating a new definition."
+                print("Creating a new definition.")
             self._create_new()
 
     @abc.abstractmethod
@@ -228,7 +229,7 @@ class SystemDefinition(IDefinition):
                 self._cells[cell.name] = cell
                 return
             if self.verbose:
-                print "Adding cell %s." % cell.name
+                print("Adding cell %s." % cell.name)
             # Add all surfaces that aren't already added. Do this by walking the
             # region tree and calling _add_unique_surfaces() at the leaves.
             cell.region.walk(self._add_unique_surfaces)
@@ -283,14 +284,14 @@ class SystemDefinition(IDefinition):
         # Used by add_cell().
         name = regionleaf.surface.name
         if self.verbose:
-            print "Trying to add surface {0!r}...".format(name)
+            print("Trying to add surface {0!r}...".format(name))
         if name not in self.surfaces:
             self.add_surface(regionleaf.surface)
             if self.verbose:
-                print "  Surface {0!r} added successfully.".format(name)
+                print("  Surface {0!r} added successfully.".format(name))
         else:
             if self.verbose:
-                print ("  Surface {0!r} already exists in the "
+                print("  Surface {0!r} already exists in the "
                         "definition.".format(name))
 
     def add_material(self, *args):
@@ -349,9 +350,9 @@ class SystemDefinition(IDefinition):
         # TODO removing cards.
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.cells:
-            raise StandardError("Cell {0!r} is not in the system.".format(
+            raise Exception("Cell {0!r} is not in the system.".format(
                     name))
-        return self.cells.keys().index(name) + 1
+        return list(self.cells.keys()).index(name) + 1
 
     def surface_num(self, name):
         """Returns the surface number for the surface name provided. If a
@@ -360,13 +361,13 @@ class SystemDefinition(IDefinition):
         """
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.surfaces:
-            raise StandardError("Surface {0!r} is not in the system.".format(
+            raise Exception("Surface {0!r} is not in the system.".format(
                     name))
-        num = self.surfaces.keys().index(name) + 1
+        num = list(self.surfaces.keys()).index(name) + 1
         if isinstance(self.surfaces[name], cards.Facet):
             # This does not work, as self.surfaces is the macrobody with the
             # same name, not the facet.
-            return num + self.surfaces[name].number / 10
+            return num + self.surfaces[name].number // 10
         return num
 
     def material_num(self, name):
@@ -376,9 +377,9 @@ class SystemDefinition(IDefinition):
         """
         # Must add one because indices start at 0 but card numbers at 1.
         if name not in self.materials:
-            raise StandardError("Material {0!r} is not in the system.".format(
+            raise Exception("Material {0!r} is not in the system.".format(
                     name))
-        return self.materials.keys().index(name) + 1
+        return list(self.materials.keys()).index(name) + 1
 
     def universe_num(self, name):
         """Returns the universe number for the universe name provided. If a
@@ -386,7 +387,7 @@ class SystemDefinition(IDefinition):
 
         """
         if name not in self.universes:
-            raise StandardError("Universe {0!r} is not in the system.".format(
+            raise Exception("Universe {0!r} is not in the system.".format(
                     name))
         return self.universes.index(name) + 1
 
@@ -671,9 +672,9 @@ class SimulationDefinition(IDefinition):
 
         """
         if name not in self.dists:
-            raise StandardError("Distribution {0!r} is not in "
+            raise Exception("Distribution {0!r} is not in "
                     "the simulation.".format(name))
-        return self.dists.keys().index(name) + 1
+        return list(self.dists.keys()).index(name) + 1
 
     def remove_source(self, name):
         """Removes a source card from the system. No dependency check is
@@ -874,38 +875,38 @@ class MCNPSimulation(SimulationDefinition):
         card = self.tally[name]
         # Must add one because indices start at 0 but card numbers at 1.
         if isinstance(card, cards.SurfaceCurrent):
-            return self._tally_surfacecurrent.keys().index(name) + 1
+            return list(self._tally_surfacecurrent.keys()).index(name) + 1
         elif isinstance(card, cards.SurfaceFlux):
-            return self._tally_surfaceflux.keys().index(name) + 1
+            return list(self._tally_surfaceflux.keys()).index(name) + 1
         elif isinstance(card, cards.CellFlux):
-            return self._tally_cellflux.keys().index(name) + 1
+            return list(self._tally_cellflux.keys()).index(name) + 1
         elif isinstance(card, cards.CellEnergyDeposition):
-            return self._tally_cellenergydep.keys().index(name) + 1
+            return list(self._tally_cellenergydep.keys()).index(name) + 1
         elif isinstance(card, cards.CellFissionEnergyDeposition):
-            return self._tally_cellfissiondep.keys().index(name) + 1
+            return list(self._tally_cellfissiondep.keys()).index(name) + 1
         elif isinstance(card, (cards.CellPulseHeight,
                 cards.CellChargeDeposition)):
-            return self._tally_pulseheight.keys().index(name) + 1
+            return list(self._tally_pulseheight.keys()).index(name) + 1
         elif isinstance(card, cards.IDetector):
-            return self._tally_detector.keys().index(name) + 1
+            return list(self._tally_detector.keys()).index(name) + 1
         elif isinstance(card, cards.Custom):
             # See if class attribute is not None.
             if card.tallyclass:
                 if issubclass(card.tallyclass, cards.SurfaceCurrent):
-                    return self._tally_surfacecurrent.keys().index(name) + 1
+                    return list(self._tally_surfacecurrent.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.SurfaceFlux):
-                    return self._tally_surfaceflux.keys().index(name) + 1
+                    return list(self._tally_surfaceflux.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.CellFlux):
-                    return self._tally_cellflux.keys().index(name) + 1
+                    return list(self._tally_cellflux.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.CellEnergyDeposition):
-                    return self._tally_cellenergydep.keys().index(name) + 1
+                    return list(self._tally_cellenergydep.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.CellFissionEnergyDeposition):
-                    return self._tally_cellfissiondep.keys().index(name) + 1
+                    return list(self._tally_cellfissiondep.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, (cards.CellPulseHeight,
                         cards.CellChargeDeposition)):
-                    return self._tally_pulseheight.keys().index(name) + 1
+                    return list(self._tally_pulseheight.keys()).index(name) + 1
                 elif issubclass(card.tallyclass, cards.IDetector):
-                    return self._tally_detector.keys().index(name) + 1
+                    return list(self._tally_detector.keys()).index(name) + 1
                 else:
                     raise Exception("Unrecognized tally card {0}.".format(card))
         else:
@@ -994,9 +995,9 @@ class MCNPSimulation(SimulationDefinition):
 
         """
         if name not in self.transformations:
-            raise StandardError("Transformation {0!r} is not in "
+            raise Exception("Transformation {0!r} is not in "
                     "the simulation.".format(name))
-        return self.transformations.keys().index(name) + 1
+        return list(self.transformations.keys()).index(name) + 1
 
     def remove_transformation(self, name):
         """Removes a transformation card from the system. No dependency check is
@@ -1055,8 +1056,8 @@ class DefinitionEncoder(json.JSONEncoder):
             #    return ''
             return json.JSONEncoder.default(self, obj)
         except:
-            print "exception: "
-            print type(obj)
-            print obj
+            print("exception: ")
+            print(type(obj))
+            print(obj)
             raise
 

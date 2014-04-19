@@ -1,19 +1,26 @@
 import os
+import io
 import warnings
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+from math import e
 
 import numpy as np
-from numpy.testing import assert_array_equal, assert_allclose
+from numpy.testing import assert_array_equal, assert_allclose, \
+    assert_array_almost_equal
 
 from pyne.endf import Library
 from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict
 from pyne.xs.data_source import ENDFDataSource
+from pyne import nucname
 
 import nose
 from nose.tools import assert_equal
 
-str_library = StringIO.StringIO(
+str_library = StringIO(
 """ $Rev:: 532      $  $Date:: 2011-12-05#$                             1 0  0
  1.002000+3 1.996800+0          1          0          0          0 128 1451    1
  0.000000+0 0.000000+0          0          0          0          6 128 1451    2
@@ -356,10 +363,11 @@ convallis tristique sem.                                           419 1451   14
 
 
 library = Library(str_library)
-library._read_res(10020000)
-library._read_res(10030001)
-library._read_res(40000000)
-
+nuc1002, nuc10031, nuc40000 = nucname.id(1002), nucname.id(10031), nucname.id(40000)
+library._read_res(nuc1002)
+library._read_res(nuc10031)
+library._read_res(nuc40000)
+nuc40040 = nucname.id(40040)
 
 def array_from_ENDF(fh):
     "Convert a chunk of ENDF, stripped of metadata, into a numpy array."
@@ -398,7 +406,7 @@ def test_endftod():
 
 
 def test_get():
-    obs = library.get_rx(40000000, 4, 2)
+    obs = library.get_rx(nuc40000, 4, 2)
     exp = [4.898421e+3,6.768123e+0,0,1,0,0,2.123124e+6,8.123142e-6,2.123212e+6,
            8.231231e-6,-2.231211e+6,8.123421e-6]
     try:
@@ -411,11 +419,11 @@ def test_get():
 
 def test_unresolved_resonances_a():
     # Case A (ENDF Manual p.70)
-    obs = library.mat10030001['data'][10031]['unresolved']
+    obs = library.structure[nuc10031]['data'][nuc10031]['unresolved']
     obs_LIST = obs[1][2][2,2]
 
-    exp = array_from_ENDF(StringIO.StringIO(
-        """ 1.801000+3          0 1.100000+0 3.078520-1 1.000000-2 0.000000+0
+    exp = array_from_ENDF(io.BytesIO(
+        b""" 1.801000+3          0 1.100000+0 3.078520-1 1.000000-2 0.000000+0
  2.101000+3          1 2.100000+0 7.088000-1 2.000000-2 0.000000+0
  3.101000+3          2 3.100000+0 2.120000-1 3.000000-2 0.000000+0"""))
     exp_LIST = dict(zip(('D','AJ','AMUN','GN0','GG'), exp.transpose()))
@@ -425,11 +433,11 @@ def test_unresolved_resonances_a():
 
 def test_unresolved_resonances_b():
     # Case B (ENDF Manual p. 70)
-    obs = library.mat40000000['data'][40040]['unresolved']
+    obs = library.structure[nuc40000]['data'][nuc40040]['unresolved']
     # For the spin=4.5, L=3, J=4 section in the first isotope
     obs_1 = obs[0][2][4.5,3,4]
-    exp_1_a = array_from_ENDF(StringIO.StringIO(
-        """ 0.000000+0 0.000000+0 3.000000+0          3         12          0
+    exp_1_a = array_from_ENDF(io.BytesIO(
+        b""" 0.000000+0 0.000000+0 3.000000+0          3         12          0
  2.804009-5 4.000000+0 3.181707+3 3.885315-9-3.382438+3 0.000000+0
  2.376630+2 7.198625-2-5.887887-8-4.380016-5 1.747888-6-4.104291-9"""))
     exp_1 = dict(zip((0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG'),
@@ -441,8 +449,8 @@ def test_unresolved_resonances_b():
         assert_array_equal(obs_1[key], exp_1[key])
     # For the spin=3.5, L=4, J=5 section in the second isotope
     obs_2 = obs[1][2][3.5,4,5]
-    exp_2_a = array_from_ENDF(StringIO.StringIO(
-        """ 0.000000+0 0.000000+0 4.000000+0          4         13          0
+    exp_2_a = array_from_ENDF(io.BytesIO(
+        b""" 0.000000+0 0.000000+0 4.000000+0          4         13          0
 -9.824193-5 5.000000+0 4.676826-4-4.336597+0-9.045122+2 0.000000+0
  3.699655-9-3.919000+5 8.467144-3-3.737007+9-5.750577+7-9.588021+8
 -3.280571+7                                                       """))
@@ -456,8 +464,8 @@ def test_unresolved_resonances_b():
 
     # Check the energy values.
     obs_ES = obs[1][2]['ES']
-    exp_ES_a = array_from_ENDF(StringIO.StringIO(
-        """-2.723837-2-8.755303-2 2.245337-2-9.034520+2 2.252098+5 2.666587+2
+    exp_ES_a = array_from_ENDF(io.BytesIO(
+        b"""-2.723837-2-8.755303-2 2.245337-2-9.034520+2 2.252098+5 2.666587+2
  3.747872-3                                                       """))
     exp_ES = exp_ES_a.flat[:num_e]
     assert_array_equal(obs_ES, exp_ES)
@@ -465,10 +473,10 @@ def test_unresolved_resonances_b():
 
 def test_unresolved_resonances_c():
     # Case C (ENDF Manual p. 70)
-    obs = library.mat40000000['data'][40040]['unresolved'][2][2][0.5,6,9]
+    obs = library.structure[nuc40000]['data'][nuc40040]['unresolved'][2][2][0.5,6,9]
 
-    exp_a = array_from_ENDF(StringIO.StringIO(
-        """ 9.000000+0 0.000000+0          2          0         18          2
+    exp_a = array_from_ENDF(io.BytesIO(
+        b""" 9.000000+0 0.000000+0          2          0         18          2
  0.000000+0 0.000000+0-4.253833-1-2.269388+0 0.000000+0 4.732644-4
 -5.873521-3-4.808214+9 5.089619+5 4.836683+0 2.772702-3-4.865151-8
 -2.659480-9 1.044275+8-1.393749+2-4.189996-6-9.596467-4 3.942829+9"""))
@@ -504,7 +512,7 @@ def test_resolved_breitwigner():
          ER         AJ         GT         GN         GG         GF 419 2151    8
 """
 
-    data = library.mat10020000['data'][10020]['resolved']
+    data = library.structure[nuc1002]['data'][nuc1002]['resolved']
     # Check to see if NRO is reading from the right place.
     # NRO = 0 case
     range_nro_0 = data[2]
@@ -531,7 +539,7 @@ def test_resolved_reichmoore():
         ER         AJ         GN         GG        GFA        GFB 419 2151    7
 """
 
-    subsection = library.mat10020000['data'][10020]['resolved'][1]
+    subsection = library.structure[nuc1002]['data'][nuc1002]['resolved'][1]
     assert_array_equal(subsection[2]['int']['intpoints'], [3,7])
     assert_array_equal(subsection[2]['int']['intschemes'], [4,1])
 
@@ -558,7 +566,7 @@ def test_resolved_adleradler():
              ------------------------------------
              ------------------------, GICN LJ ] LIST
 """
-    subsection = library.mat10020000['data'][10020]['resolved'][0]
+    subsection = library.structure[nuc1002]['data'][nuc1002]['resolved'][0]
 
     obs_LIST = subsection[2][3.5,5,3]
     obs_bg = subsection[2]['bg']
@@ -573,8 +581,8 @@ def test_resolved_adleradler():
     for key in exp_LIST:
         assert_allclose(exp_LIST[key],obs_LIST[key], rtol = 1e-8)
 
-    exp_bg_string = StringIO.StringIO(
-        """ 9.143204-3 1.601509+1-3.312654-7-3.460776+8-3.947879-5-1.646877-5
+    exp_bg_string = io.BytesIO(
+        b""" 9.143204-3 1.601509+1-3.312654-7-3.460776+8-3.947879-5-1.646877-5
  1.009363-5-1.861342-7-1.613360+7-7.549728+5-3.064120+9-2.961641+0
 -4.390193-5 2.303605+0-4.630212+5-3.237353+1-4.037885+4-3.231304+0""")
     exp_bg = dict(zip(('A1','A2','A3','A4','B1','B2'),
@@ -585,11 +593,11 @@ def test_resolved_adleradler():
 
 def test_resolved_r_matrix_kbk_kps():
 
-    obs_3 = library.mat10020000['data'][10020]['resolved'][-1][2][3.0]
-    obs_4 = library.mat10020000['data'][10020]['resolved'][-1][2][-4.0]
+    obs_3 = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2][3.0]
+    obs_4 = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2][-4.0]
 
-    exp_3 = array_from_ENDF(StringIO.StringIO(
-        """ 1.960831+3-1.053619+4          0          0          3          1
+    exp_3 = array_from_ENDF(io.BytesIO(
+        b""" 1.960831+3-1.053619+4          0          0          3          1
  3.941056-6-0.524089+0-2.023965-8 0.000000+0 0.000000+0 0.000000+0
  0.000000+0 0.000000+0          0          0          0          1
  0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0
@@ -627,11 +635,11 @@ def test_resolved_r_matrix_kbk_kps():
 
     ch1_exp = {'PSI':{'intpoints': [3.,6.,10.],
                       'intschemes': [1.,2.,3.],
-                      'Eint': exp_3[13:17].flat[:-4:2],
+                      'e_int': exp_3[13:17].flat[:-4:2],
                       'PSI': exp_3[13:17].flat[1:-4:2]},
                'PSR':{'intpoints': 3.,
                       'intschemes': 2.,
-                      'Eint': exp_3[10].flat[::2],
+                      'e_int': exp_3[10].flat[::2],
                       'PSR': exp_3[10].flat[1::2]},
                'LBK': 0.,
                'LPS': 1.}
@@ -645,8 +653,8 @@ def test_resolved_r_matrix_kbk_kps():
 
     lbk1_obs = obs_4['ch0']
     lbk2_obs = obs_4['ch1']
-    lbk_exp = array_from_ENDF(StringIO.StringIO(
-        """ 0.000000+0 0.000000+0          0          0          1          1
+    lbk_exp = array_from_ENDF(io.BytesIO(
+        b""" 0.000000+0 0.000000+0          0          0          1          1
  0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0
  0.000000+0 0.000000+0          0          0          4          5
           1          2          2          1          3          3
@@ -683,17 +691,16 @@ def test_resolved_r_matrix_kbk_kps():
     assert_equal(lbk2_exp, lbk2_obs)
 
 
-
 def test_resolved_r_matrix():
-    pp_exp_a = array_from_ENDF(StringIO.StringIO(
-        """1.685738+5 1.659888-5          1          7          0          0
+    pp_exp_a = array_from_ENDF(io.BytesIO(
+        b"""1.685738+5 1.659888-5          1          7          0          0
  0.000000+0 0.000000+0          1          3          2          1
  0.000000+0 0.000000+0          2          0         24          4
  7.916271+6-3.532347-6 4.469905+7-2.134022+4-3.500000+0-3.500000+0
  5.307428-7          0          1          7          1         -1
  2.807643-8-4.478596+0 3.274758+3-2.760395+9 1.356440+3 3.447654+4
  4.790839-8          1         -1        800          1         -1"""))
-    pp_obs = library.mat10020000['data'][10020]['resolved'][-1][3]
+    pp_obs = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][3]
     pp_exp = dict(zip(('MA','MB','ZA','ZB','IA','IB','Q','PNT','SHF','MT',
                        'PA','PB'),
                        pp_exp_a[3:7].reshape(2,12).transpose()))
@@ -701,8 +708,8 @@ def test_resolved_r_matrix():
                            pp_exp_a[1])))
     del pp_exp[0]
 
-    ch_exp_a = array_from_ENDF(StringIO.StringIO(
-        """-4.000000+0          0 1.914541-3-4.683290+5         12          2
+    ch_exp_a = array_from_ENDF(io.BytesIO(
+        b"""-4.000000+0          0 1.914541-3-4.683290+5         12          2
  1.981937+3 9.740279-7-2.450194+5-1.304844+4 1.856158-9-1.218463-9
 -4.097837+1-2.765873-9-0.913351+1 1.591290+5-2.379063+0 2.066455-6
  3.000000+0          0-2.924403-5-4.840218-1         12          2
@@ -713,10 +720,10 @@ def test_resolved_r_matrix():
                          ch_exp_a[4:6].transpose()))
     ch_exp[-4.0] = dict(zip(('IPP','L','SCH','BND','APE','APT'),
                           ch_exp_a[1:3].transpose()))
-    ch_obs = library.mat10020000['data'][10020]['resolved'][-1][2]
+    ch_obs = library.structure[nuc1002]['data'][nuc1002]['resolved'][-1][2]
 
-    gam_4_a = array_from_ENDF(StringIO.StringIO(
-        """ 2.949030-1 1.156625+7 7.255199-6          0          0          0
+    gam_4_a = array_from_ENDF(io.BytesIO(
+        b""" 2.949030-1 1.156625+7 7.255199-6          0          0          0
  4.453964+1 5.062864-5-1.110875-3          0          0          0
  2.208407-7 9.942677-6-3.134503-8          0          0          0"""))
     gam_4_a = gam_4_a.transpose()
@@ -724,8 +731,8 @@ def test_resolved_r_matrix():
                  'GAM': gam_4_a[1:3].transpose()}
     ch_exp[-4.0].update(gam_4_exp)
 
-    gam_3_a = array_from_ENDF(StringIO.StringIO(
-        """ 5.088175-6-2.282938+0-4.236786-6          0          0          0
+    gam_3_a = array_from_ENDF(io.BytesIO(
+        b""" 5.088175-6-2.282938+0-4.236786-6          0          0          0
  8.930267-9-3.115607+8-2.521300-4          0          0          0
  3.978418+5 4.821547-6 3.110373-3          0          0          0"""))
     gam_3_a = gam_3_a
@@ -745,13 +752,14 @@ def test_resolved_r_matrix():
 
 def test_xs():
     # Read in the data
-    library._read_xs(40000000, 2, 40192)
-    library._read_xs(40000000, 600, 40040)
+    nuc_i = nucname.id(40192)
+    library._read_xs(nuc40000, 2, nuc_i)
+    library._read_xs(nuc40000, 600, nuc40040)
 
     # Manually find where the data should be reading from and check if it is
     # consistent with what the program is doing.
-    exp_2_str = StringIO.StringIO(
-        """ 4.284918+3 6.292347+0          0          0          0          0
+    exp_2_str = io.BytesIO(
+        b""" 4.284918+3 6.292347+0          0          0          0          0
  4.047593+5-4.245658-8          0-4.651348+3          7         20
           6          4          9          2         12          1
          13          5         15          3         17          4
@@ -759,24 +767,24 @@ def test_xs():
     exp_2_a = array_from_ENDF(exp_2_str)
     exp_2 = dict(zip(('intpoints', 'intschemes'),
                      (exp_2_a[2:].flat[:14:2], exp_2_a[2:].flat[1:14:2])))
-    obs_2 = library.mat40000000['data'][40192]['xs'][2][0]
+    obs_2 = library.structure[nuc40000]['data'][nuc_i]['xs'][2][0]
 
-    exp_600_a = array_from_ENDF(StringIO.StringIO(
-        """ 4.193742+3 6.287192+0          0          0          0          0
+    exp_600_a = array_from_ENDF(io.BytesIO(
+        b""" 4.193742+3 6.287192+0          0          0          0          0
  3.863437-5-7.373532-7          0 8.675483-1          5         20
           4          1          8          2         12          3
          16          4         20          5                     """))
 
     exp_600 = dict(zip(('intpoints', 'intschemes'),
                        (exp_600_a[2:].flat[:-2:2], exp_600_a[2:].flat[1:-1:2])))
-    obs_600 = library.mat40000000['data'][40040]['xs'][600][0]
+    obs_600 = library.structure[nuc40000]['data'][nuc40040]['xs'][600][0]
 
     for key in exp_2:
         assert_array_equal(obs_2[key], exp_2[key])
         assert_array_equal(obs_600[key], exp_600[key])
 
     # Heck, why not check the flags too?
-    obs_600_flags = library.mat40000000['data'][40040]['xs'][600][1]
+    obs_600_flags = library.structure[nuc40000]['data'][nuc40040]['xs'][600][1]
     exp_600_flags = dict(zip(('QM','QI',0,'LM','NR','NP'),
         exp_600_a[1]))#
     exp_600_flags.update({'ZA': 4.004e+3, 'AWR': 6.287192})
@@ -785,25 +793,38 @@ def test_xs():
 
 
 def test_u235():
-    """This test file can be found here:
-    http://t2.lanl.gov/data/data/ENDFB-VII.1-neutron/U/235
-    It is very big (51 MB), so it is not included.
-    """
-    if not os.path.isfile('U235.txt'):
-        return
+    try:
+        assert(os.path.isfile('U235.txt'))
+    except AssertionError:
+        try:
+            import urllib.request as urllib
+        except ImportError:
+            import urllib
+        urllib.urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
+                    "U235.txt")
+    from hashlib import md5
+    with open("U235.txt", "rb") as f:
+        obs_hash = md5(f.read()).hexdigest()
+    exp_hash = "1b71da3769d8b1e675c3c579ba5cb2d3"
+    try:
+        assert_equal(obs_hash, exp_hash)
+    except AssertionError:
+        raise AssertionError("U235.txt hash check failed; please try redownloading the U235 data file.")
+
     u235 = Library('U235.txt')
-    u235._read_res(922350)
-    u235._read_xs(922350, 37)
-    exp_a = array_from_ENDF(StringIO.StringIO
-         (""" 9.223500+4 2.330248+2          0          0          0          0
+    nuc = 922350000
+    u235._read_res(nuc)
+    u235._read_xs(nuc, 37)
+    exp_a = array_from_ENDF(io.BytesIO
+         (b""" 9.223500+4 2.330248+2          0          0          0          0
 -1.788560+7-1.788560+7          0          0          1          6
           6          2                                            
  1.796240+7 5.05980-10 1.800000+7 3.810030-7 1.850000+7 8.441785-5
  1.900000+7 2.387410-4 1.950000+7 1.348763-3 2.000000+7 4.785594-3
 """))
-    obs =  u235.mat922350['data'][922350]['xs'][37][0]
+    obs =  u235.structure[nuc]['data'][nuc]['xs'][37][0]
     exp = {'intpoints': 6, 'intschemes': 2,
-           'Eint': exp_a[3:5].flat[::2],
+           'e_int': exp_a[3:5].flat[::2],
            'xs': exp_a[3:5].flat[1::2]}
 
     for key in obs:
@@ -811,19 +832,6 @@ def test_u235():
 
 
 # Test ENDF Data Source
-ds = ENDFDataSource(str_library)
-
-def test_group_struct():
-    from math import e
-    ds._load_reaction(40000000, 600, 40040)
-    obs = ds.rxcache[40000000, 600, 40040]['src_group_struct']
-    exp = [np.array([1., 4., 10., 20.]),
-           np.array([1., 4., 10., 20.]),
-           np.array([1, round(e, 6), round(e,6), round(e**2, 6)]),
-           np.array([1., 2., 2., 3.]),
-           np.array([1., 2., 2., 3.])]
-    for i in range(len(exp)):
-        assert_allclose(obs[i], exp[i])
 
 def test_int_hist():
     exp_Eint = np.array([1,4,10, 20])
@@ -831,7 +839,22 @@ def test_int_hist():
     obs = library.integrate_tab_range(1, exp_Eint, exp_xs)
     exp = (3*15 + 6*12+10*-7)/19.
     assert_allclose(exp, obs, rtol = 1e-12)
-    return exp
+
+def test_int_hist_interpolation():
+    exp_Eint = np.array([1,4,10, 20])
+    exp_xs = np.array([15, 12, -7, 10])
+    obs = library.integrate_tab_range(1, exp_Eint, exp_xs, low = 2, high = 15)
+    exp = (2*15 + 6*12 + 5*-7)/13.
+    assert_allclose(exp, obs, rtol = 1e-12)
+
+def test_int_hist_only_interpolate_one_endpoint():
+    endfds = ENDFDataSource(str_library)
+    obs = endfds.integrate_dst_group((1, 5), np.array([2, 5, 8]),
+                                     {2: 1, 5: 1, 8:1},
+                                     np.array([0., 2, 4, 6, 8]),
+                                     np.array([0., 1, 0, 0, 0]))
+    exp = 0.5
+    assert_equal(exp, obs)
 
 def test_int_linlin():
     exp_Eint = np.array([1,4,10, 20])
@@ -841,41 +864,125 @@ def test_int_linlin():
     assert_allclose(exp, obs, rtol = 1e-12)
     return exp
 
+def test_int_linlin_interpolation():
+    exp_Eint = np.array([1, 4, 10, 20.])
+    exp_xs = np.array([15, 12, -7, 10.])
+    obs = library.integrate_tab_range(2, exp_Eint, exp_xs, low = 2, high = 15)
+    exp = (2*13 + 6*2.5 + 5*(-7+1.5)/2)/13.
+    assert_allclose(exp, obs, rtol = 1e-12)
+
+def test_int_linlin_interpolation_2():
+    endfds = ENDFDataSource(str_library)
+    obs = endfds.integrate_dst_group((1, 5), np.array([3, 5, 8]),
+                                     {3: 2, 5: 2, 8:1},
+                                     np.array([0., 2, 4, 6, 8]),
+                                     np.array([0., 1, 0, 0, 0]))
+    exp = (0.75 + 1) / 4
+    assert_equal(exp, obs)
+
+def test_int_linlin_only_interpolate_one_endpoint():
+    exp_Eint = np.array([1, 4, 10, 20.])
+    exp_xs = np.array([15, 12, -7, 10.])
+    obs = library.integrate_tab_range(2, exp_Eint, exp_xs, low = 1, high = 15)
+    exp = (3*13.5 + 6*2.5 + 5*(-7+1.5)/2)/14.
+    assert_allclose(exp, obs, rtol = 1e-12)
+
 def test_int_linlog():
-    from math import e
     exp_Eint = np.array([1, e, e, e**2])
     exp_xs = np.array([1, 3, 3, 0])
     obs = library.integrate_tab_range(3, exp_Eint, exp_xs)
     exp = (e+1+3*e**2-6*e)/(e**2-1)
     assert_allclose(exp, obs, rtol=1e-12)
-    return exp
+
+def test_int_linlog_interpolation():
+    exp_Eint = np.array([1, e**2, e**4, e**6])
+    exp_xs = np.array([0, 2, 4, 6.])
+    obs = library.integrate_tab_range(3, exp_Eint, exp_xs, low=e, high=e**5)
+    exp = 4*e**5/(e**5-e)
+    assert_allclose(exp, obs, rtol=1e-12)
+
+def test_int_linlog_only_interpolate_one_endpoint():
+    exp_Eint = np.array([1, e**2, e**4, e**6])
+    exp_xs = np.array([0, 2, 4, 6.])
+    obs = library.integrate_tab_range(3, exp_Eint, exp_xs, low=1, high=e**5)
+    exp = (1+4*e**5)/(e**5-1)
+    assert_allclose(exp, obs, rtol=1e-12)
 
 def test_int_loglin():
-    from math import e
     exp_Eint = np.array([1., 2., 2., 3.])
     exp_xs = np.array([1, e, e**2, e])
     obs = library.integrate_tab_range(4, exp_Eint, exp_xs)
     exp = (e**2-1)/2
     assert_allclose(exp, obs, rtol=1e-12)
-    return exp
+
+def test_int_loglin_interpolation():
+    exp_Eint = np.array([0, 2, 4, 6])
+    exp_xs = np.array([1, e**2, e**4, e**6])
+    obs = library.integrate_tab_range(4, exp_Eint, exp_xs, low=1, high=5)
+    exp = (e**5 - e)/(5-1)
+    assert_allclose(exp, obs, rtol=1e-12)
+
+def test_int_loglin_only_interpolate_one_endpoint():
+    exp_Eint = np.array([0, 2, 4, 6], dtype="float64")
+    exp_xs = np.array([1, e**2, e**4, e**6])
+    obs = library.integrate_tab_range(4, exp_Eint, exp_xs, low=2, high=5)
+    exp = (e**5 - e**2)/(5-2)
+    assert_allclose(exp, obs, rtol=1e-12)
 
 def test_int_loglog():
-    from math import e
     exp_Eint = np.array([1., 2., 2., 3.])
     exp_xs = np.array([1/e, 4/e, (e**2)/4, (e**2)/9])
     obs = library.integrate_tab_range(5, exp_Eint, exp_xs)
     exp = (7/(3*e) + (e**2)/6)/2.
     assert_allclose(exp, obs, rtol=1e-12)
-    return exp
+
+def test_int_loglog_interpolation():
+    # ln y = 2 ln x + 1
+    # y = e * x ** 2
+    # integral of y = e/3 * x**3
+    exp_Eint = np.array([1, 3, 5, 7], dtype="float64")
+    exp_xs = np.array([e, 9*e, 25*e, 49*e])
+    obs = library.integrate_tab_range(5, exp_Eint, exp_xs, low = 2, high = 6)
+    exp = e/3 * (6**3 - 2 **3) / (6-2)
+    assert_allclose(exp, obs, rtol=1e-12)
+
+def test_int_loglog_only_interpolate_one_endpoint():
+    # ln y = 2 ln x + 1
+    # y = e * x ** 2
+    # integral of y = e/3 * x**3
+    exp_Eint = np.array([1, 3, 5, 7], dtype="float64")
+    exp_xs = np.array([e, 9*e, 25*e, 49*e])
+    obs = library.integrate_tab_range(5, exp_Eint, exp_xs, low = 2, high = 5)
+    exp = e/3 * (5**3 - 2 **3) / (5-2)
+    assert_allclose(exp, obs, rtol=1e-12)
 
 def test_discretize():
-    obs = ds.discretize(40000000, 600, 40040)
-    exp = [test_int_loglog(),
-           test_int_loglin(),
-           test_int_linlog(),
-           test_int_linlin(),
-           test_int_hist()]
-    assert_allclose(np.asarray(exp), obs, rtol=1e-6)
+    from os.path import isfile
+    try:
+        import urllib.request as urllib
+    except ImportError:
+        import urllib
+    
+    if not isfile("Ni59.txt"):
+        urllib.urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ni/59",
+                    "Ni59.txt")
+
+    endfds = ENDFDataSource("Ni59.txt")
+    nonelastic_rx = endfds.reaction("Ni59", "nonelastic")
+    nonelastic_rx['dst_group_struct'] = np.logspace(7, -5, 33)
+    nonelastic_c = endfds.discretize("Ni59", "nonelastic")
+    exp = [0.54334609294912528, 0.21206255570566626,
+           0.079089998725708668, 0.039061531003500925, 0.056193960028285306,
+           0.062581135526972767, 0.086088778452663009, 0.1519375415918513,
+           0.015156525895127398, 0.18503957567677801, 0.0039443417078627837,
+           0.082573739674287688, 17.523219940338304, 0.97176481236488554,
+           0.60307330340022303, 0.71684581122716162, 0.99386518962022252,
+           1.4726882603418707, 2.2391970686479672, 3.405589441800994,
+           5.2453926977834398, 8.0731410528834182, 12.384026334168054,
+           19.175694435799141, 29.334824378652982, 45.254982026071197,
+           74.217617672501689, 162.26091389706099, 218.90153743636509,
+           312.62178192130619, 590.40136068709603, 724.64216445611373]
+    assert_array_almost_equal(nonelastic_c, exp)
 
 if __name__ == "__main__":
     nose.runmodule()

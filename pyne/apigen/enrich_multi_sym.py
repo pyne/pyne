@@ -4,6 +4,7 @@ from being used with infinities.  For a work around see [1].
 
 1. https://groups.google.com/forum/#!msg/sympy/YL1R_hR6OKQ/axKrCsCSMQsJ
 """
+from __future__ import print_function, division
 import os
 import time
 import multiprocessing
@@ -20,7 +21,7 @@ NPROCS = 10
 
 def _aggstatus(stat, msg, aggstat):
     if not aggstat:
-        print msg
+        print(msg)
     stat += msg + '\n'
     return stat
 
@@ -169,7 +170,7 @@ def cgen_ncomp(ncomp=3, nporder=2, aggstat=False, debug=False):
     msg = "  completed in {0:.3G} s".format(time.time() - start_time)
     stat = _aggstatus(stat, msg, aggstat)
     if aggstat:
-        print stat
+        print(stat)
     return ccode, repnames, stat
 
 
@@ -306,11 +307,14 @@ _header_file_template = r"""
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
 
-#if !defined(_PYNE_ENRICHMENT_SYMBOLIC_)
-#define _PYNE_ENRICHMENT_SYMBOLIC_
+#ifndef PYNE_OU4PO4TJDBDM5PY4VKAVL7JCSM
+#define PYNE_OU4PO4TJDBDM5PY4VKAVL7JCSM
 
 #include <math.h>
+
+#ifndef PYNE_IS_AMALGAMATED
 #include "enrichment_cascade.h"
+#endif
 
 namespace pyne {{
 namespace enrichment {{
@@ -336,7 +340,9 @@ _source_file_header_template = """
 /*** WARNING: This file is auto-generated.             ***/
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
+#ifndef PYNE_IS_AMALGAMATED
 #include "{hfname}"
+#endif
 
 """
 

@@ -3,10 +3,12 @@
 ///
 /// \brief Top-level enrichment functionality.
 
-#if !defined(_PYNE_ENRICHMENT_)
-#define _PYNE_ENRICHMENT_
+#ifndef PYNE_B3ANNCKDQ5HEJLI33RPZPDNX6A
+#define PYNE_B3ANNCKDQ5HEJLI33RPZPDNX6A
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "enrichment_symbolic.h"
+#endif
 
 /************************************************/
 /*** Enrichment Component Class and Functions ***/

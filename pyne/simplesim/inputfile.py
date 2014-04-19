@@ -2,7 +2,7 @@
 
 """The ``inputfile`` module can be imported as such::
 
-    from pyne.simplesim import inputfile
+    from .simplesim import inputfile
 
 
 ********
@@ -40,8 +40,8 @@ import warnings
 
 import numpy as np
 
-from pyne.simplesim import definition
-from pyne.simplesim import cards
+from . import definition
+from . import cards
 
 class IInputFile(object):
     """This class is not used directly by the user. Abstract base class for
@@ -325,7 +325,7 @@ class MCNPInput(IInputFile):
         self._write_user_literal("data", self.user_data_literal)
 
     def _write_dictionary(self, dictionary):
-        for key, card in dictionary.iteritems():
+        for key, card in dictionary.items():
             if self.comments:
                 self._write_comment(card.comment())
             self._write_card(card)

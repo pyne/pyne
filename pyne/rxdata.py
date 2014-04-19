@@ -1,7 +1,5 @@
-import re
-import numpy as np
 import collections
-# import pyne.endf as endf
+# import .endf as endf
 
 class RxLib(object):
     """RxLib is a parent type which implements an abstract representation of

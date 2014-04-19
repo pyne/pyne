@@ -1,13 +1,7 @@
 """C++ wrapper for material class."""
 from libcpp.set cimport set
-
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-    from libcpp.map cimport map
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.map cimport map
+from libcpp.string cimport string as std_string
+from libcpp.map cimport map
 
 cimport cpp_jsoncpp 
 
@@ -34,7 +28,7 @@ cdef extern from "material.h" namespace "pyne":
         map[int, double] comp
         double mass
         double density
-        double atoms_per_mol
+        double atoms_per_molecule
         cpp_jsoncpp.Value attrs
 
         # Methods
@@ -58,8 +52,8 @@ cdef extern from "material.h" namespace "pyne":
 
         void normalize() except +
         map[int, double] mult_by_mass() except +
-        double molecular_weight() except +
-        double molecular_weight(double) except +
+        double molecular_mass() except +
+        double molecular_mass(double) except +
         Material expand_elements() except +
         double mass_density() except +
         double mass_density(double) except +

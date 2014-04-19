@@ -10,10 +10,10 @@
 namespace extra_types
 {
   /// complex type struct, matching PyTables definition
-  typedef struct {
-    double re;  ///< real part
-    double im;  ///< imaginary part
-  } complex_t;
+//  typedef struct {
+//    double re;  ///< real part
+//    double im;  ///< imaginary part
+//  } complex_t;
 
   /// Chivalrously handles C++ memory issues that Cython does
   /// not yet have a syntax for.  This is a template class,
@@ -47,13 +47,16 @@ namespace extra_types
 
 #elif defined(__STDC__)
 
+// de nada
+
+#endif
+
+
 /// complex type struct, matching PyTables definition
 typedef struct {
   double re;  ///< real part
   double im;  ///< imaginary part
-} complex_t;
-
-#endif
+} xd_complex_t;
 
 #endif
 

@@ -1,12 +1,7 @@
 """C++ wrapper for nucname library."""
 from libcpp.map cimport map
 from libcpp.set cimport set
-
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
+from libcpp.string cimport string as std_string
 
 cdef extern from "nucname.h" namespace "pyne::nucname":
     # Conversion dictionaries
@@ -65,6 +60,21 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int zzaaam_to_id(char *) except +
     int zzaaam_to_id(std_string) except +
 
+    # zzzaaa Functions
+    int zzzaaa(int) except +
+    int zzzaaa(char *) except +
+    int zzzaaa(std_string) except +
+    int zzzaaa_to_id(int) except +
+    int zzzaaa_to_id(char *) except +
+    int zzzaaa_to_id(std_string) except +
+
+    # zzllaaam Functions
+    std_string zzllaaam(int) except +
+    std_string zzllaaam(char *) except +
+    std_string zzllaaam(std_string) except +
+    int zzllaaam_to_id(char *) except +
+    int zzllaaam_to_id(std_string) except +
+
     # MCNP Functions 
     int mcnp(int) except + 
     int mcnp(char *) except + 
@@ -112,3 +122,8 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int sza_to_id(int) except +
     int sza_to_id(char *) except +
     int sza_to_id(std_string) except +
+
+    # Groundstate Functions
+    int groundstate(int) except +
+    int groundstate(char *) except +
+    int groundstate(std_string) except +

@@ -1,6 +1,7 @@
 """This module implements an ALARA-like chain-based transmutation solver.
 """
 
+from __future__ import division
 import numpy as np
 from scipy import linalg
 #from scipy import sparse  # <-- SPARSE
@@ -18,7 +19,8 @@ from pyne.xs.channels import sigma_a
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
-    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None, log=None):
+    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None, log=None, 
+                 *args, **kwargs):
         """Parameters
         ----------
         t : float
@@ -37,13 +39,17 @@ class Transmuter(object):
         log : file-like or None
             The log file object should be written. A None imples the log is 
             not desired.
+        args : tuple, optional
+            Other arguments ignored for compatibility with other Transmuters.
+        kwargs : dict, optional
+            Other keyword arguments ignored for compatibility with other Transmuters.
         """
         eafds = EAFDataSource()
         eafds.load(temp=temp)
         gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
         eafds.dst_group_struct = gs
-        self.xs_cache = XSCache(group_struct=gs, data_source_classes=(NullDataSource,))
-        self.xs_cache.data_sources.insert(0, eafds)
+        self.xscache = XSCache(group_struct=gs, data_source_classes=(NullDataSource,))
+        self.xscache.data_sources.insert(0, eafds)
 
         self.t = t
         self._phi = None
@@ -81,17 +87,17 @@ class Transmuter(object):
             raise ValueError("The flux vector must be 0- or 1-dimensional.")
         if not np.all(flux >= 0.0):
             raise ValueError("Flux entries must be non-negative.")
-        for ds in self.xs_cache.data_sources:
+        for ds in self.xscache.data_sources:
             ds.src_phi_g = flux
-        self.xs_cache['phi_g'] = np.array([flux.sum()])
+        self.xscache['phi_g'] = np.array([flux.sum()])
         self._phi = flux
 
-    def transmute(self, x, t=None, phi=None, tol=None, log=None):
+    def transmute(self, x, t=None, phi=None, tol=None, log=None, *args, **kwargs):
         """Transmutes a material into its daughters.
 
         Parameters
         ----------
-        x : Marterial or similar
+        x : Material or similar
             Input material for transmutation.
         t : float
             Transmutations time [sec].
@@ -129,8 +135,8 @@ class Transmuter(object):
             partial = self._transmute_partial(nuc)
             for part_nuc, part_adens in partial.items():
                 y_atoms[part_nuc] = part_adens * adens + y_atoms.get(part_nuc, 0.0)
-        mw_x = x.molecular_weight()
-        y = from_atom_frac(y_atoms, atoms_per_mol=x.atoms_per_mol)
+        mw_x = x.molecular_mass()
+        y = from_atom_frac(y_atoms, atoms_per_molecule=x.atoms_per_molecule)
         # even though it doesn't look likt it, the following line is actually
         #   mass_y = MW_y * mass_x / MW_x
         y.mass *= x.mass / mw_x 
@@ -180,10 +186,10 @@ class Transmuter(object):
             Destruction rate of the nuclide.
 
         """
-        xs_cache = self.xs_cache
-        sig_a = sigma_a(nuc, xs_cache=xs_cache)
-        d = utils.from_barns(sig_a[0], 'cm2') * xs_cache['phi_g'][0]
-        if decay:
+        xscache = self.xscache
+        sig_a = sigma_a(nuc, xs_cache=xscache)
+        d = utils.from_barns(sig_a[0], 'cm2') * xscache['phi_g'][0]
+        if decay and not np.isnan(data.decay_const(nuc)):
             d += data.decay_const(nuc) 
         return d
 
@@ -245,9 +251,9 @@ class Transmuter(object):
         """
         t = self.t
         tol = self.tol
-        phi = self.xs_cache['phi_g'][0]
+        phi = self.xscache['phi_g'][0]
         temp = self.temp
-        xs_cache = self.xs_cache
+        xscache = self.xscache
         if self.log is not None:
             self._log_tree(depth, nuc, 1.0)
         prod = {}
@@ -262,7 +268,7 @@ class Transmuter(object):
                 child = rxname.child(nuc, rx)
             except RuntimeError:
                 continue
-            child_xs = xs_cache[nuc, rx, temp][0]
+            child_xs = xscache[nuc, rx, temp][0]
             rr = utils.from_barns(child_xs, 'cm2') * phi  # reaction rate
             prod[child] = rr + prod.get(child, 0.0)
         # Cycle production dictionary

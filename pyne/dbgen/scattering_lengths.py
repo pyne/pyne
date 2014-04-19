@@ -3,16 +3,20 @@ lengths.  This data comes from Neutron News, Vol. 3, No. 3, 1992, pp. 29-37 via
 a NIST webpage (http://www.ncnr.nist.gov/resources/n-lengths/list.html).  Please
 contact Alan Munter, <alan.munter@nist.gov> for more information."""
 
+from __future__ import print_function
 import os
 import re
 import shutil
-import urllib2
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from .api import BASIC_FILTERS
 
 
 def grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html'):
@@ -142,14 +146,14 @@ def make_scattering_lengths(args):
     # Check that the table exists
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'scattering_lengths'):
-            print "skipping scattering lengths data table creation; already exists."
+            print("skipping scattering lengths data table creation; already exists.")
             return
 
     # Grab the raw data
-    print "Grabbing the scattering length data."
+    print("Grabbing the scattering length data.")
     grab_scattering_lengths(build_dir)
 
     # Make scatering table once we have the data
-    print "Making neutron scattering length table."
+    print("Making neutron scattering length table.")
     make_scattering_lengths_table(nuc_data, build_dir)
 

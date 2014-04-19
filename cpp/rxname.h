@@ -3,8 +3,8 @@
 ///
 /// \brief Converts between naming conventions for reaction channels.
 
-#ifndef _PYNE_RXNAME_
-#define _PYNE_RXNAME_
+#ifndef PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY
+#define PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY
 #include <utility>
 #include <iostream>
 #include <string>
@@ -14,11 +14,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "pyne.h"
 #include "nucname.h"
+#endif
 
 /// Number of reactions supported by default.
-#define NUM_RX_NAMES 549
+#define NUM_RX_NAMES 572
 
 namespace pyne
 {
@@ -99,7 +101,7 @@ namespace rxname
   ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   unsigned int id(int x);
   unsigned int id(unsigned int x);
-  unsigned int id(char * x);
+  unsigned int id(const char * x);
   unsigned int id(std::string x);
   unsigned int id(int from_nuc, int to_nuc, std::string z="n");
   unsigned int id(int from_nuc, std::string to_nuc, std::string z="n");
@@ -354,4 +356,4 @@ namespace rxname
 };
 };
 
-#endif
+#endif  // PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY

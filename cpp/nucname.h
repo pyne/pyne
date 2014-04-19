@@ -3,8 +3,8 @@
 ///
 /// \brief Converts between naming conventions for nuclides.
 
-#ifndef _PYNE_NUCNAME_
-#define _PYNE_NUCNAME_
+#ifndef PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA
+#define PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA
 #include <iostream>
 #include <string>
 #include <map>
@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "pyne.h"
+#endif
 
 namespace pyne
 {
@@ -307,6 +309,59 @@ namespace nucname
   int zzaaam_to_id(std::string nuc);
   /// \}
 
+
+  /// \name ZZZAAA Form Functions
+  /// \{
+  /// The ZZZAAA nuclide naming convention is a form in which the nuclides three 
+  ///digit ZZZ number is followed by the 3 digit AAA number.  If the ZZZ number 
+  ///is 2 digits, the preceding zeros are not included.
+  /// Uranium-235 here would be expressed as ‘92235’.
+  /// \param nuc a nuclide
+  /// \return an integer nuclide identifier.
+  int zzzaaa(int nuc);
+  int zzzaaa(char * nuc);
+  int zzzaaa(std::string nuc);
+  /// \}
+
+
+  /// \name ZZZAAA Form to Identifier Form Functions
+  /// \{
+  /// This converts from the ZZZAAA nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in ZZZAAA form.
+  /// \return an integer id nuclide identifier.
+  int zzzaaa_to_id(int nuc);
+  int zzzaaa_to_id(char * nuc);
+  int zzzaaa_to_id(std::string nuc);
+  /// \}
+
+
+  /// \name ZZLLAAAM Form Functions
+  /// \{
+  /// The ZZLLAAAM nuclide naming convention is a form in which the nuclides 
+  /// AA number is followed by the redundant two LL characters, followed by 
+  /// the nuclides ZZZ number.  Can also be followed with a metastable flag.
+  /// Uranium-235 here would be expressed as ‘92-U-235’.
+  /// \param nuc a nuclide
+  /// \return an integer nuclide identifier.
+  std::string zzllaaam(int nuc);
+  std::string zzllaaam(char * nuc);
+  std::string zzllaaam(std::string nuc);
+  /// \}
+
+
+  /// \name ZZLLAAAM Form to Identifier Form Functions
+  /// \{
+  /// This converts from the ZZLLAAAM nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in ZZLLAAAM form.
+  /// \return an integer id nuclide identifier.
+  //int zzllaaam_to_id(int nuc);
+  int zzllaaam_to_id(char * nuc);
+  int zzllaaam_to_id(std::string nuc);
+  /// \}
+
+
   /// \name MCNP Form Functions
   /// \{
   /// This is the naming convention used by the MCNP suite of codes.
@@ -454,7 +509,20 @@ namespace nucname
   int sza_to_id(std::string nuc);
   /// \}
 
+  /// \Ground State Form Functions
+  /// \{
+  /// This form stores the nuclide in id form, but removes
+  /// the state information about the nuclide.  I is in the same
+  /// form as ID, but the four last digits are all zeros.
+  /// \param nuc a nuclide
+  /// \return a integer groundstate id
+  int groundstate(int nuc);
+  int groundstate(char * nuc);
+  int groundstate(std::string nuc);
+  /// \}
+
+
 };
 };
 
-#endif
+#endif  // PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA

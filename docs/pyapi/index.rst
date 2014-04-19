@@ -18,6 +18,7 @@ The following modules and sub-packages are discussed:
     njoy
     cccc
     ace
+    endf
     ensdf
     xs/index
     transmute/index
@@ -26,8 +27,12 @@ The following modules and sub-packages are discussed:
     enrichment
     utils
     stlcontainers
+    cli/index
     dbgen/index
+    variancereduction
     mcnp
+    alara
+    r2s
     ptrac_to_hdf5
     binaryreader
     rxdata

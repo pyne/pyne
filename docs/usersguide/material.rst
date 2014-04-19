@@ -189,20 +189,20 @@ Other methods also exist for obtaining commonly used sub-materials, such as gath
 Plutonium vector.  
 
 
-Molecular Weights & Atom Fractions
+Molecular Mass & Atom Fractions
 ----------------------------------
-You may also calculate the molecular weight of a material via the :meth:`Material.molecular_weight` method.
+You may also calculate the molecular mass of a material via the :meth:`Material.molecular_mass` method.
 This uses the :func:`pyne.data.atomic_mass` function to look up the atomic mass values of
 the constituent nuclides.
 
 .. code-block:: ipython
 
-    In [29]: leu.molecular_weight()
+    In [29]: leu.molecular_mass()
     Out[29]: 237.9290388038301
 
 Note that by default, materials are assumed to have one atom per molecule.  This is a poor
 assumption for more complex materials.  For example, take water.  Without specifying the 
-number of atoms per molecule, the molecular weight calculation will be off by a factor of 3.
+number of atoms per molecule, the molecular mass calculation will be off by a factor of 3.
 This can be remedied by passing the correct number to the method.  If there is no other valid
 number of molecules stored on the material, this will set the appropriate attribute on the 
 class.
@@ -211,13 +211,13 @@ class.
 
     In [30]: h2o = Material({10010: 0.11191487328808077, 80160: 0.8880851267119192})
 
-    In [31]: h2o.molecular_weight()
+    In [31]: h2o.molecular_mass()
     Out[31]: 6.003521561343334
 
-    In [32]: h2o.molecular_weight(3.0)
+    In [32]: h2o.molecular_mass(3.0)
     Out[32]: 18.01056468403
 
-    In [33]: h2o.atoms_per_mol
+    In [33]: h2o.atoms_per_molecule
     Out[33]: 3.0
 
 It is often also useful to be able to convert the current mass-weighted material to 
@@ -232,7 +232,7 @@ fractional number of atoms is returned.
     In [34]: h2o.to_atom_frac()
     Out[34]: {10010: 2.0, 80160: 1.0}
 
-    In [35]: h2o.atoms_per_mol = -1.0
+    In [35]: h2o.atoms_per_molecule = -1.0
 
     In [36]: h2o.to_atom_frac()
     Out[36]: {10010: 0.666666666667, 80160: 0.333333333333}
@@ -243,7 +243,7 @@ which will clear out the current contents of the material's composition and repl
 it with the mass-weighted values.  Note that 
 when you initialize a material from atom fractions, the sum of all of the atom fractions
 will be stored as the atoms per molecule on this class.  Additionally, if a mass is not 
-already set on the material, the molecular weight will be used.
+already set on the material, the molecular mass will be used.
 
 .. code-block:: ipython
 
@@ -256,13 +256,13 @@ already set on the material, the molecular weight will be used.
     In [40]: h2o.comp
     Out[40]: {10010: 0.111914873288, 80160: 0.888085126712}
 
-    In [41]: h2o.atoms_per_mol
+    In [41]: h2o.atoms_per_molecule
     Out[41]: 3.0
 
     In [42]: h2o.mass
     Out[42]: 18.01056468403
 
-    In [43]: h2o.molecular_weight()
+    In [43]: h2o.molecular_mass()
     Out[43]: 18.01056468403
 
 

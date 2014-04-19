@@ -1,4 +1,6 @@
 """Material tests"""
+import os
+from copy import deepcopy
 
 from unittest import TestCase
 import nose 
@@ -6,7 +8,6 @@ import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
-import os
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
     MapStrMaterial, MultiMaterial, MaterialLibrary
@@ -33,10 +34,10 @@ leu = {922380000: 0.96, 922350000: 0.04}
 def assert_mat_almost_equal(first, second, places=7):
     assert_almost_equal(first.mass, second.mass, places=places)
     assert_almost_equal(first.density, second.density, places=places)
-    assert_almost_equal(first.atoms_per_mol, second.atoms_per_mol, places=places)
+    assert_almost_equal(first.atoms_per_molecule, second.atoms_per_molecule, places=places)
     assert_equal(first.attrs, second.attrs)
-    nucs = set(second.comp.keys())
-    assert_equal(set(first.comp.keys()), nucs)
+    nucs = set(second.comp)
+    assert_equal(set(first.comp), nucs)
     for nuc in nucs:
         assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
 
@@ -105,7 +106,7 @@ def test_write_text():
 
     read_leu = from_text('leu.txt')
     assert_equal(leu.mass, read_leu.mass)
-    assert_equal(leu.atoms_per_mol, read_leu.atoms_per_mol)
+    assert_equal(leu.atoms_per_molecule, read_leu.atoms_per_molecule)
     assert_equal(leu.comp, read_leu.comp)
 
     os.remove('leu.txt')
@@ -161,14 +162,14 @@ def test_hdf5_protocol_1():
     m = Material()
     m.from_hdf5('proto1.h5', '/material', -3, 1)
     assert_equal(m.density, 2.72)
-    assert_equal(m.atoms_per_mol, 8.0)
+    assert_equal(m.atoms_per_molecule, 8.0)
     assert_equal(m.mass, 33.6)
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.attrs['comment'], 'fire in the disco - 8')
 
     m = from_hdf5('proto1.h5', '/material', 3, 1)
     assert_equal(m.density, 2.72)
-    assert_equal(m.atoms_per_mol, 4.0)
+    assert_equal(m.atoms_per_molecule, 4.0)
     assert_equal(m.mass, 16.8)
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.attrs['comment'], 'fire in the disco - 4')
@@ -191,19 +192,19 @@ class TestMaterialMethods(TestCase):
         assert_equal(nucvec, {922350000: 0.75, 922380000: 14.25})
 
 
-    def test_molecular_weight(self):
+    def test_molecular_mass(self):
         mat_empty = Material({})
-        assert_equal(mat_empty.molecular_weight(), 0.0)
+        assert_equal(mat_empty.molecular_mass(), 0.0)
 
         mat_u238 = Material({922380000: 1.0})
-        mw_u238 = mat_u238.molecular_weight()
+        mw_u238 = mat_u238.molecular_mass()
         try:
             assert_almost_equal(mw_u238, 238.050788423)
         except AssertionError:
             assert_almost_equal(mw_u238, 238.0)            
 
         mat_mixed = Material({922350000: 0.5, 922380000: 0.5})
-        mw_mixed = mat_mixed.molecular_weight()
+        mw_mixed = mat_mixed.molecular_mass()
         try:
             assert_almost_equal(mw_mixed/236.547360417, 1.0, 4)            
         except AssertionError:
@@ -467,43 +468,43 @@ class TestMaterialOperatorOverloading(TestCase):
 #
 def test_to_atom_frac():
     h2o = {10010000: 0.11191487328808077, 80160000: 0.8880851267119192}
-    mat = Material(h2o, atoms_per_mol=3.0)
+    mat = Material(h2o, atoms_per_molecule=3.0)
     af = mat.to_atom_frac()
-    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(af[10010000], 2.0)
     assert_equal(af[80160000], 1.0)
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
 
 def test_from_atom_frac_meth():
     h2o = {10010000: 2.0, 80160000: 1.0}
     mat = Material()
     mat.from_atom_frac(h2o)
-    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.mass, 18.01056468403)    
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
-    h2 = Material({10010000: 1.0}, atoms_per_mol=2.0)
+    h2 = Material({10010000: 1.0}, atoms_per_molecule=2.0)
     h2o = {'O16': 1.0, h2: 1.0}
     mat = Material()
     mat.from_atom_frac(h2o)
-    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
     ihm = Material()
     ihm.from_atom_frac({922350000: 0.5, 922380000: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
     mat = Material()
     mat.from_atom_frac(uox)
-    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.atoms_per_molecule, 3.0)
     assert_almost_equal(mat.comp[80160000], 0.11912625367051276, 16)
     assert_almost_equal(mat.comp[922350000], 0.43763757904405304, 15)
     assert_almost_equal(mat.comp[922380000], 0.44323616728543414, 15)
-    assert_almost_equal(mat.molecular_weight()/268.53718851614, 1.0, 15)
+    assert_almost_equal(mat.molecular_mass()/268.53718851614, 1.0, 15)
 
 
 #
@@ -585,11 +586,11 @@ def test_getitem_sequence():
     mat = Material(nucvec)
     mat1 = mat[922380000, 922350000] 
     assert_equal(mat1.mass, 2.0)
-    assert_equal(set(mat1.keys()), set([922380000, 922350000]))
+    assert_equal(set(mat1), set([922380000, 922350000]))
 
     mat1 = mat[922380, 'H2', 'h1']
     assert_equal(mat1.mass, 2.0)
-    assert_equal(set(mat1.keys()), set([922380000, 10010000]))
+    assert_equal(set(mat1), set([922380000, 10010000]))
 
 
 def test_setitem_int():
@@ -832,7 +833,7 @@ def test_iter():
     values = set([0.04, 0.96])
     items = set([(922350000, 0.04), (922380000, 0.96)])
 
-    assert_equal(set(mat.keys()), keys)
+    assert_equal(set(mat), keys)
     assert_equal(set(mat.values()), values)
     assert_equal(set(mat.items()), items)
 
@@ -845,28 +846,28 @@ def test_iter():
 def test_from_atom_frac_func():
     h2o = {10010000: 2.0, 80160000: 1.0}
     mat = from_atom_frac(h2o)
-    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.mass, 18.01056468403)    
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
-    h2 = Material({10010000: 1.0}, atoms_per_mol=2.0)
+    h2 = Material({10010000: 1.0}, atoms_per_molecule=2.0)
     h2o = {'O16': 1.0, h2: 1.0}
     mat = from_atom_frac(h2o)
-    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
-    assert_equal(mat.molecular_weight(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)    
 
     ihm = from_atom_frac({922350000: 0.5, 922380000: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
     mat = from_atom_frac(uox)
-    assert_equal(mat.atoms_per_mol, 3.0)
+    assert_equal(mat.atoms_per_molecule, 3.0)
     assert_almost_equal(mat.comp[80160000], 0.11912625367051276, 16)
     assert_almost_equal(mat.comp[922350000], 0.43763757904405304, 15)
     assert_almost_equal(mat.comp[922380000], 0.44323616728543414, 15)
-    assert_almost_equal(mat.molecular_weight()/268.53718851614, 1.0, 15)
+    assert_almost_equal(mat.molecular_mass()/268.53718851614, 1.0, 15)
 
 
 
@@ -959,26 +960,125 @@ def test_attrs():
 #
 # Test MultiMaterial
 #
-def test_multimaterial():
+def test_multimaterial_mix_composition():
     mat1 = Material(nucvec={120240000:0.3, 300000000:0.2, 10010000:0.1}, density=2.71)
     mat2 = Material(nucvec={60120000:0.2, 280640000:0.5, 10010000:0.12}, density=8.0)
     mix = MultiMaterial({mat1:0.5, mat2:0.21})
     mat3 = mix.mix_by_mass()
     mat4 = mix.mix_by_volume()
 
-    assert_equal(mat3.density, -1.0)
     assert_equal(mat3.comp[10010000], 0.16065498683155846)
     assert_equal(mat3.comp[60120000], 0.0721401580212985)
     assert_equal(mat3.comp[120240000], 0.352112676056338)
     assert_equal(mat3.comp[280640000], 0.18035039505324627)
     assert_equal(mat3.comp[300000000], 0.2347417840375587)
 
-    assert_equal(mat4.density, -1.0)
     assert_equal(mat4.comp[10010000], 0.15541581280722197)
     assert_equal(mat4.comp[60120000], 0.13501024631333625)
     assert_equal(mat4.comp[120240000], 0.2232289950576606)
     assert_equal(mat4.comp[280640000], 0.33752561578334067)
     assert_equal(mat4.comp[300000000], 0.14881933003844042)
+
+
+def test_multimaterial_mix_density():
+    mat1 = Material(nucvec={120240000:0.3, 300000000:0.2, 10010000:0.1}, density=1.0)
+    mat2 = Material(nucvec={60120000:0.2, 280640000:0.5, 10010000:0.12}, density=2.0)
+    # mixing by hand to get density 1.5 when 50:50 by volume of density 1 & 2
+    mix = MultiMaterial({mat1:0.5, mat2:0.5})
+    mat3 = mix.mix_by_volume()
+    # calculated mass fracs by hand, same problem as above stated in mass fraction terms
+    # rather than volume fraction terms.
+    mix = MultiMaterial({mat1:1/3., mat2:2/3.})
+    mat4 = mix.mix_by_mass()
+
+    assert_equal(mat3.density, 1.5)
+    assert_equal(mat4.density, 1.5)
+
+    assert_equal(mat3.density, mat4.density)
+
+def test_deepcopy():
+    x = Material({'H1': 1.0}, mass=2.0, density=3.0, atoms_per_molecule=4.0, 
+                 attrs={'name': 'loki'})
+    y = deepcopy(x)
+    assert_equal(x, y)
+    y.comp[10010000] = 42.0
+    y[80160000] = 21.0
+    y.density = 65.0
+    y.atoms_per_molecule = 28.0
+    y.attrs['wakka'] = 'jawaka'
+    y.mass = 48.0
+    y.attrs['name'] = 'odin'
+    assert_not_equal(x, y)
+    assert_equal(x, Material({'H1': 1.0}, mass=2.0, density=3.0, atoms_per_molecule=4.0, 
+                             attrs={'name': 'loki'}))
+
+def test_mcnp():
+
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
+                   attrs={'mat_number': 2, 
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'mat_name':'LEU', 
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'}, 
+                   density=19.1)
+
+    mass = leu.mcnp()
+    mass_exp = ('C name: leu\n'
+                'C density = 19.1\n'
+                'C source: Some URL\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'm2\n'
+                '     92235.15c -4.0000E-02\n'
+                '     92238.25c -9.6000E-01\n')
+    assert_equal(mass, mass_exp)
+
+    atom = leu.mcnp(frac_type='atom')
+    atom_exp = ('C name: leu\n'
+                'C density = 19.1\n'
+                'C source: Some URL\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'm2\n'
+                '     92235.15c 4.0491E-02\n'
+                '     92238.25c 9.5951E-01\n')
+    assert_equal(atom, atom_exp)
+
+
+def test_alara():
+
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2, 'table_ids':{'922350':'15c', '922380':'25c'},\
+          'name':'LEU', 'source':'Some URL', \
+          'comments': \
+'this is a long comment that will definitly go over the 80 character limit, for science', \
+            }, density=19.1)
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96}, attrs={\
+          'mat_number':2,}, density=19.1)
+    leu3 = Material(nucvec={'U235': 0.04, 'U238': 0.96})
+
+
+    written = leu.alara()
+    written += leu2.alara()
+    written += leu3.alara()
+
+    expected = ('# mat number: 2\n'
+                '# source: Some URL\n'
+                '# comments: this is a long comment that will definitly go over the 80 character\n'
+                '#  limit, for science\n'
+                'LEU 19.1 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n'
+                '# mat number: 2\n'
+                'mat2_rho-19.1 19.1 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n'
+                'mat<mat_num>_rho-<rho> <rho> 2\n'
+                '     u:235 4.0000E-02 92\n'
+                '     u:238 9.6000E-01 92\n')
+    assert_equal(written, expected)
 
 def test_write_mcnp():
     if 'mcnp_mass_fracs.txt' in os.listdir('.'):
@@ -1060,7 +1160,7 @@ def test_natural_elements():
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     expected_comp = {10000000: 0.11189838783149784, 80000000: 0.8881016121685023}
-    for key in expected_comp.keys():
+    for key in expected_comp:
         assert_almost_equal(water.comp[key], expected_comp[key])
 
 
@@ -1069,14 +1169,14 @@ def test_load_json():
     exp = Material(leu)
     obs = Material()
     json = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "attrs": {}, 
-                         "atoms_per_mol": -1.0})
+                         "atoms_per_molecule": -1.0})
     obs.load_json(json)
     assert_equal(exp, obs)
 
 def test_dump_json():
     leu = {"U238": 0.96, "U235": 0.04}
     exp = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "attrs": {}, 
-                         "atoms_per_mol": -1.0})
+                         "atoms_per_molecule": -1.0})
     obs = Material(leu).dump_json()
     assert_equal(exp, obs)
 
@@ -1106,8 +1206,8 @@ def test_matlib_json():
     wmatlib.write_json(filename)
     rmatlib = MaterialLibrary()
     rmatlib.from_json(filename)
-    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
-    for key in rmatlib.keys():
+    assert_equal(set(wmatlib), set(rmatlib))
+    for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
@@ -1118,6 +1218,8 @@ def test_matlib_hdf5_nuc_data():
 
 def test_matlib_hdf5():
     filename = "matlib.h5"
+    if filename in os.listdir('.'):
+        os.remove(filename)
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     water.attrs["name"] = "Aqua sera."
@@ -1130,8 +1232,8 @@ def test_matlib_hdf5():
     # Round trip!
     rmatlib.write_hdf5(filename)
     wmatlib = MaterialLibrary(filename)
-    assert_equal(set(wmatlib.keys()), set(rmatlib.keys()))
-    for key in rmatlib.keys():
+    assert_equal(set(wmatlib), set(rmatlib))
+    for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
