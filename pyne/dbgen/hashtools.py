@@ -7,6 +7,10 @@ import hashlib
 import numpy
 import tables
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 from .. import data
 
 #list of nodes from distinct data sets

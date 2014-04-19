@@ -10,6 +10,10 @@ from __future__ import print_function
 import csv
 import os
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import numpy as np
 import tables as tb
 

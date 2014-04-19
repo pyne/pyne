@@ -12,6 +12,10 @@ import tables as tb
 import numpy as np
 import os
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 from .. import nucname
 from ..data import natural_abund, natural_abund_map
 from ..material import Material

@@ -6,6 +6,10 @@ import sys
 import argparse
 from glob import glob
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import numpy as np
 
 from pyne import data

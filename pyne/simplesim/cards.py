@@ -290,6 +290,10 @@ import collections
 import copy
 import warnings
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import numpy as np
 
 from .. import nucname

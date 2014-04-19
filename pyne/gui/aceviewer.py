@@ -6,6 +6,10 @@ module.
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>
 """
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import sys
 from bisect import bisect_right
 

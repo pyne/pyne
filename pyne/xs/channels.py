@@ -6,6 +6,11 @@ ratios, etc.
 """
 from __future__ import division
 import collections
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 try:
     basestring
 except NameError:

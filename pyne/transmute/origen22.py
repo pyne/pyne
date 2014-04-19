@@ -6,6 +6,10 @@ import tempfile
 import subprocess
 from collections import Mapping
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import numpy as np
 
 from pyne import utils

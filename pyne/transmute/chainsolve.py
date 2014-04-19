@@ -6,6 +6,10 @@ import numpy as np
 from scipy import linalg
 #from scipy import sparse  # <-- SPARSE
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 from pyne import utils
 from pyne import data
 from pyne import rxname

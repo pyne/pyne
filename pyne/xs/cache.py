@@ -1,5 +1,10 @@
 """This module provides a cross section cache which automatically extracts 
 cross-sections from provided nuclear data sets."""
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 from itertools import product
 from collections import MutableMapping
 try:

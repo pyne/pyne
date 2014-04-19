@@ -38,6 +38,10 @@ import re
 import textwrap
 import warnings
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import numpy as np
 
 from . import definition

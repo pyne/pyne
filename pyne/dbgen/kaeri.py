@@ -1,6 +1,11 @@
 from __future__ import print_function
 import os
 import re
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 try:
     import urllib.request as urllib2
     from urllib.error import URLError

@@ -4,6 +4,11 @@ import os
 import io
 import re
 import shutil
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 from glob import glob
 try:
     basestring

@@ -1,5 +1,9 @@
 """Plotting routines for spectrometry modules"""
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import matplotlib.pyplot as plt
 
 

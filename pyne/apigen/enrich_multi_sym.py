@@ -10,6 +10,10 @@ import time
 import multiprocessing
 import logging
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \
     log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand, Abs
 from sympy.solvers import solve

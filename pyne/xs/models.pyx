@@ -1,6 +1,10 @@
 """This module provides physical cross-section models and helper functions."""
 from __future__ import division
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 cimport numpy as np
 import numpy as np
 

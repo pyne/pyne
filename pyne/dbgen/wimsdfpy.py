@@ -23,6 +23,11 @@ import os
 import re
 import sys
 import shutil
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 try:
     import urllib.request as urllib2
 except ImportError:

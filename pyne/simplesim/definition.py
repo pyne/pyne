@@ -56,6 +56,10 @@ import collections
 import pickle
 import warnings
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 try:
     import simplejson as json
 except ImportError:

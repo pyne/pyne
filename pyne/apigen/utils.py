@@ -1,5 +1,9 @@
 """Utility functions for pyne.apigen"""
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 import re
 
 from sympy.utilities.codegen import codegen
