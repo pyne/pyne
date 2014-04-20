@@ -49,6 +49,7 @@ A binary distribution of PyNE is currently available for windows only on
     conda install -c https://conda.binstar.org/batesca pyne_win32py27
 
 Conda binaries are coming soon for other platforms.
+
 .. _install_source:
 
 ------
