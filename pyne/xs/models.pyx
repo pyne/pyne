@@ -3,8 +3,6 @@ from __future__ import division
 
 from warnings import warn
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 cimport numpy as np
 import numpy as np
 
@@ -17,6 +15,8 @@ from scipy.special import erf
 # Integration imports
 #from scipy import integrate
 #import metasci.mathematics.integrate as msmintegrate
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Bolzmann's constant in MeV/K
 k = constants.physical_constants['Boltzmann constant in eV/K'][0] * (1.0E-6)

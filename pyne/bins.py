@@ -1,11 +1,10 @@
 """Module for tools to generate and handle various binning structures."""
 
+import numpy as np
+from numpy import logspace
 from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-import numpy as np
-
-from numpy import logspace
 
 def ninespace(start, stop, num=50, endpoint=True):
     """Splits the range into one-minus-log-uniform bins defined by num points.

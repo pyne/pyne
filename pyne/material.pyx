@@ -2,10 +2,6 @@
 
 from __future__ import division, unicode_literals
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
 from libcpp.set cimport set as cpp_set
@@ -22,7 +18,7 @@ import collections
 import warnings
 cimport numpy as np
 import numpy as np
-
+from warnings import warn
 
 # local imports
 from pyne cimport cpp_material
@@ -41,6 +37,8 @@ cimport pyne.data as data
 import pyne.data as data
 
 import tables as tb
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647

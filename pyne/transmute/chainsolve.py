@@ -5,10 +5,7 @@ from __future__ import division
 import numpy as np
 from scipy import linalg
 #from scipy import sparse  # <-- SPARSE
-
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 from pyne import utils
 from pyne import data
@@ -19,6 +16,8 @@ from pyne.material import Material, from_atom_frac
 from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""

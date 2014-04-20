@@ -6,12 +6,9 @@ module.
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>
 """
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 import sys
 from bisect import bisect_right
+from warnings import warn
 
 import numpy as np
 import matplotlib
@@ -26,6 +23,8 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from pyne import ace
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class AceViewer(QMainWindow):
 

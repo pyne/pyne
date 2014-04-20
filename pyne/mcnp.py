@@ -11,9 +11,9 @@ If PyTAPS is not installed, then Wwinp, Meshtal, and Meshtally will not be
 available to use.
 
 """
-from warnings import warn
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
+
 
 from __future__ import print_function, division
 import sys
@@ -26,6 +26,7 @@ import linecache
 import tables
 import datetime
 import warnings
+from warnings import warn
 import itertools
 
 import numpy as np
@@ -34,6 +35,8 @@ from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Mesh specific imports
 try:

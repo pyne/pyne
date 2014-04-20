@@ -6,12 +6,11 @@ import hashlib
 
 import numpy
 import tables
-
 from warnings import warn
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 from .. import data
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 #list of nodes from distinct data sets
 nodelist = ['/atomic_mass', '/material_library',

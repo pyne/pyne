@@ -21,10 +21,6 @@ import struct
 from warnings import warn
 from collections import OrderedDict
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 cimport numpy as np
 import numpy as np
 from bisect import bisect_right
@@ -36,6 +32,8 @@ from pyne.rxname import label
 # fromstring func should depend on numpy verison
 from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain

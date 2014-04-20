@@ -1,7 +1,3 @@
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 from __future__ import print_function, division
 try:
     from future_builtins import map, zip
@@ -13,6 +9,10 @@ import sys
 from collections import Mapping
 from copy import deepcopy
 from itertools import chain
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 try:
     basestring
 except NameError:

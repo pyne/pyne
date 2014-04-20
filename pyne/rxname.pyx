@@ -135,10 +135,6 @@ Repeat this procedure as necessary.
 
 from __future__ import unicode_literals
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 # Cython imports
 from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set
@@ -158,6 +154,10 @@ cimport cpp_nucname
 cimport cpp_rxname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # names
 cdef conv._SetStr names_proxy = conv.SetStr(False)

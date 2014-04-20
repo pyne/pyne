@@ -22,18 +22,16 @@ Original Copyright:
 .. moduleauthor:: A. Hebert, R. Karthikeyan
 
 """
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 from __future__ import print_function
 import os
 import time
 import warnings
+from warnings import warn
 
 warnings.warn("the NJOY module is untested and considered experimental", 
               RuntimeWarning)
-
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class PyNjoyError(Exception):
     """Exception indicating an error in PyNjoy."""

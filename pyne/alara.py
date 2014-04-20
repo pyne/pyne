@@ -1,16 +1,11 @@
 """This module contains functions relevant to the ALARA activation code.
 """
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 from __future__ import print_function
 import os
 import collections
 import numpy as np
 import tables as tb
 import warnings
-
 from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)

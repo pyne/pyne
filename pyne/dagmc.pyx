@@ -1,7 +1,3 @@
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 from __future__ import print_function, division, unicode_literals
 
 from pyne cimport cpp_dagmc_bridge
@@ -18,6 +14,10 @@ from numpy.linalg import norm
 np.import_array()
 
 from pyne.mesh import Mesh
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Globals
 VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid

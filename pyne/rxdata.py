@@ -1,9 +1,8 @@
+import collections
+# import .endf as endf
 from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
-import collections
-# import .endf as endf
 
 class RxLib(object):
     """RxLib is a parent type which implements an abstract representation of

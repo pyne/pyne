@@ -3,10 +3,6 @@
 
 from __future__ import unicode_literals
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
 from cython cimport pointer
@@ -21,6 +17,9 @@ cimport cpp_pyne
 import os
 import json
 import pyne.__init__
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 prefix = os.path.split(pyne.__init__.__file__)[0]
 

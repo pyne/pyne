@@ -1,10 +1,7 @@
 from __future__ import print_function
 import os
 import re
-
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 try:
     import urllib.request as urllib2
@@ -19,6 +16,7 @@ except NameError:
 
 from pyne import nucname
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     """Grabs a nuclide file from KAERI from the web and places 

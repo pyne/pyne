@@ -2,10 +2,7 @@
 from __future__ import print_function, division
 import os
 import glob
-
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 try:
     import urllib.request as urllib
@@ -19,6 +16,7 @@ import tables as tb
 from pyne import ensdf
 from pyne.dbgen.api import BASIC_FILTERS
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def grab_ensdf_decay(build_dir=""):
     """Grabs the ENSDF decay data files

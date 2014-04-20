@@ -19,10 +19,6 @@ import re
 import os
 from libc.stdlib cimport malloc, free
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 cimport numpy as np
 import numpy as np
 from scipy.interpolate import interp1d
@@ -37,6 +33,10 @@ from pyne.utils import fromendf_tok, endftod
 
 from libc.stdlib cimport atof, atoi
 from libc.string cimport strtok, strcpy, strncpy
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",

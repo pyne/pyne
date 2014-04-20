@@ -81,17 +81,16 @@ __all__ = [
     'ZERO_OR_MORE',
 ]
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 import copy as _copy
 import os as _os
 import re as _re
 import sys as _sys
 import textwrap as _textwrap
+from warnings import warn
 
 from gettext import gettext as _
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 try:
     set

@@ -4,10 +4,7 @@ import os
 import io
 import re
 import shutil
-
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 from glob import glob
 try:
@@ -21,6 +18,8 @@ import tables as tb
 from .. import nucname
 from ..utils import failure
 from .api import BASIC_FILTERS
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""

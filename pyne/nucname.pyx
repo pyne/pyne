@@ -3,10 +3,7 @@
 # Python imports 
 #from collections import Iterable
 from __future__ import unicode_literals, division
-
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Cython imports
 from libcpp.map cimport map
@@ -24,6 +21,8 @@ import pyne.pyne_config
 from pyne cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 #
 # Conversion dictionaries

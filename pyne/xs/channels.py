@@ -6,10 +6,7 @@ ratios, etc.
 """
 from __future__ import division
 import collections
-
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 try:
     basestring
@@ -30,6 +27,8 @@ from ..material import Material
 from . import models
 from . import cache
 from .models import group_collapse
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 
 def _prep_cache(xs_cache, E_g=None, phi_g=None):

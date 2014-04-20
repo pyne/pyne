@@ -7,10 +7,7 @@ from __future__ import print_function
 import os
 import re
 import shutil
-
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 try:
     import urllib.request as urllib2
@@ -23,6 +20,7 @@ import tables as tb
 from .. import nucname
 from .api import BASIC_FILTERS
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html'):
     """Grabs the scattering cross-section lengths for neutrons from the NIST website

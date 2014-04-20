@@ -2,9 +2,9 @@
 
 from warnings import warn
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 import matplotlib.pyplot as plt
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 
 def plot_spectrum(spect):

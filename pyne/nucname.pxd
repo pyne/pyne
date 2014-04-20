@@ -1,10 +1,8 @@
 """Python wrapper for nucname library."""
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Python imports 
 #from collections import Iterable
+from warnings import warn
 
 # Cython imports
 from libcpp.map cimport map
@@ -22,6 +20,8 @@ import pyne.pyne_config
 cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 #
 # Conversion dictionaries

@@ -15,10 +15,6 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 from pyne cimport nucname
 from pyne import nucname
 
@@ -30,6 +26,9 @@ import pyne.material
 
 from pyne cimport cpp_enrichment
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 
 #####################

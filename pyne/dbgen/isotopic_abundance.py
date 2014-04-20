@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 import pkgutil
-
 from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)

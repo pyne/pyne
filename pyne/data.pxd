@@ -1,7 +1,4 @@
 """Python wrapper for nucname library."""
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Python imports
 #from collections import Iterable
@@ -23,3 +20,7 @@ import pyne.pyne_config
 cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)

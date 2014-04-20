@@ -289,16 +289,15 @@ import abc
 import collections
 import copy
 import warnings
-
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 import numpy as np
 
 from .. import nucname
 from .. import material
 from . import nestedgeom as ng
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def _validate_name(value, isunique=False):
     if value.find(' ') != -1:

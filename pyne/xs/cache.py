@@ -3,8 +3,6 @@ cross-sections from provided nuclear data sets."""
 
 from warnings import warn
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 from itertools import product
 from collections import MutableMapping
 try:
@@ -19,6 +17,8 @@ from .. import nucname
 from ..pyne_config import pyne_conf
 from .models import partial_energy_matrix, phi_g
 from . import data_source
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 
 def _same_arr_or_none(a, b): 

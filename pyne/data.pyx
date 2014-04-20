@@ -4,10 +4,6 @@
 #from collections import Iterable
 from __future__ import division, unicode_literals
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 # Cython imports
 from libcpp.map cimport map
 from libcpp.set cimport set as cpp_set
@@ -40,6 +36,10 @@ import pyne.nucname
 cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Mathematical constants
 pi = cpp_data.pi

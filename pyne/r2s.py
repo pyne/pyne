@@ -1,14 +1,13 @@
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 from os.path import isfile, join, dirname
+from warnings import warn
 
 from pyne.mesh import Mesh
 from pyne.mcnp import Meshtal
 from pyne.alara import mesh_to_fluxin, mesh_to_geom, photon_source_to_hdf5, \
                        photon_source_hdf5_to_mesh
 from pyne.dagmc import load, discretize_geom
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       geom=None, num_rays=10, grid=False, flux_tag="n_flux",
