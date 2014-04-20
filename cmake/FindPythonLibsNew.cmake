@@ -125,7 +125,7 @@ endif()
 
 if(CMAKE_HOST_WIN32)
     set(PYTHON_LIBRARY
-        "${PYTHON_PREFIX}/libs/Python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}.lib")
+        "${PYTHON_PREFIX}/libs/libpython${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}.a")
 #elseif(APPLE)
 #    set(PYTHON_LIBRARY
 ##        "${PYTHON_PREFIX}/lib/libpython${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.dylib")
