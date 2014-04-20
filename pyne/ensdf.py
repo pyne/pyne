@@ -853,7 +853,7 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
     badlist = ["ecsf", "34si", "|b{+-}fission", "{+24}ne",
            "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
            "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
-           "{+28}mg", "sf(+ec+b+)"]
+           "{+28}mg", "sf(+ec+b+)", "22ne"]
     special = ""
     if levellist is None:
         levellist = []
