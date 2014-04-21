@@ -5,6 +5,7 @@ from collections import Iterable, Sequence
 
 import numpy as np
 import tables as tb
+from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
