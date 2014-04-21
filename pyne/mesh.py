@@ -2,10 +2,10 @@ from __future__ import print_function, division
 import copy
 import itertools
 from collections import Iterable, Sequence
+from warnings import warn
 
 import numpy as np
 import tables as tb
-from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

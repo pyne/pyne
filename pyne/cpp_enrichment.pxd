@@ -1,9 +1,10 @@
 """Cython header for enrichment library."""
 
+from warnings import warn
+
 from libcpp.string cimport string as std_string
 
 from pyne cimport cpp_material
-from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

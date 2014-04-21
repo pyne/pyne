@@ -4,6 +4,7 @@ This module contains functions for mesh-based Monte Carlo variance reduction.
 
 from itertools import izip
 import numpy as np
+
 from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)

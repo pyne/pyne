@@ -1,8 +1,9 @@
 """Module for tools to generate and handle various binning structures."""
 
+from warnings import warn
+
 import numpy as np
 from numpy import logspace
-from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

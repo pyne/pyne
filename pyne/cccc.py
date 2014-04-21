@@ -29,8 +29,9 @@ Report LA-5324-MS_.
 
 from __future__ import division
 
-from pyne.binaryreader import _BinaryReader, _FortranRecord
 from warnings import warn
+
+from pyne.binaryreader import _BinaryReader, _FortranRecord
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

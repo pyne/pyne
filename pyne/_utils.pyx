@@ -5,11 +5,12 @@ from libc.stdlib cimport malloc, free
 from libc.stdlib cimport atof
 from libc.string cimport strtok, strcpy, strncpy
 
+from warnings import warn
+
 cimport numpy as np
 cimport pyne.cpp_pyne
 from cython.operator cimport dereference as deref
 import numpy as np
-from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

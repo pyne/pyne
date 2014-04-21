@@ -2,10 +2,11 @@
 """
 
 from __future__ import division
+from warnings import warn
+
 import numpy as np
 from scipy import linalg
 #from scipy import sparse  # <-- SPARSE
-from warnings import warn
 
 from pyne import utils
 from pyne import data
