@@ -15,10 +15,6 @@ from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 import numpy as np
 cimport numpy as np
 
