@@ -25,7 +25,6 @@ import os
 import linecache
 import tables
 import datetime
-import warnings
 from warnings import warn
 import itertools
 
@@ -43,7 +42,7 @@ try:
     from itaps import iMesh
     HAVE_PYTAPS = True
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the mcnp module may be incomplete.",
                   ImportWarning)
     HAVE_PYTAPS = False
@@ -444,7 +443,7 @@ class SurfSrc(_BinaryReader):
         # no known case of their actual utility is known currently
         for j in range(self.njsw, self.njsw+self.niwr):
             self.get_fortran_record()
-            warnings.warn("Extra info in header not handled: {0}".format(j),
+            warn("Extra info in header not handled: {0}".format(j),
                           RuntimeWarning)
 
         # read summary table record
@@ -1404,7 +1403,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         if isatom != (0 <= value):
             msg = 'Mixed atom and mass fractions not supported.'
             ' See material defined on line {0}'.format(mat_line)
-            warnings.warn(msg)
+            warn(msg)
 
     # apply all data to material object
     if isatom:

@@ -1,7 +1,6 @@
 import copy
 import itertools
 from collections import Iterable, Sequence
-import warnings
 from __future__ import print_function, division
 
 import numpy as np
@@ -12,7 +11,7 @@ warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
 from pyne.material import Material, MaterialLibrary, MultiMaterial

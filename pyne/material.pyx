@@ -15,7 +15,6 @@ from libcpp.vector cimport vector as cpp_vector
 
 # Python imports
 import collections
-import warnings
 cimport numpy as np
 import numpy as np
 from warnings import warn

@@ -36,7 +36,6 @@ import abc
 import datetime
 import re
 import textwrap
-import warnings
 from warnings import warn
 
 import numpy as np

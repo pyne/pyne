@@ -54,7 +54,6 @@ from __future__ import print_function, division
 import abc
 import collections
 import pickle
-import warnings
 from warnings import warn
 
 try:
@@ -160,7 +159,7 @@ class IDefinition(object):
                     "'cell', 'surface', 'material', 'source', "
                     "'tally', or 'misc'.")
         if card.name in dict_to_check and self.verbose:
-            warnings.warn("Card {0!r}, type {1!r} is already part of the "
+            warn("Card {0!r}, type {1!r} is already part of the "
                     "definition; overwriting.".format(card.name, card_type))
             #raise UserWarning("Card {0!r}, type {0!r} is already part of the "
             #        "definition; overwriting.".format(card.name, card_type))

@@ -5,7 +5,6 @@ import os
 import collections
 import numpy as np
 import tables as tb
-import warnings
 from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
@@ -18,7 +17,7 @@ except NameError:
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the alara module may be incomplete.",
                   ImportWarning)
 
