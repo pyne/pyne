@@ -86,7 +86,7 @@ def main():
                   ]
     make_map = dict(make_funcs)
     make_open = set(['atomic_mass', 'scattering_lengths', 'simple_xs', 'materials',
-                     'wimsd_fpy', 'nds_fpy', 'q_values'])
+                     'wimsd_fpy', 'nds_fpy', 'q_values', 'dose_factors'])
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')
