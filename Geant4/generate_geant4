@@ -3,10 +3,14 @@
 from optparse import OptionParser
 import os,errno
 from itaps import iMesh,iBase
+# for material handling
 from pyne.material import Material,MaterialLibrary
-
 from pyne.nucname import name, znum, anum, id, alara
 from pyne.data import atomic_mass
+
+# for coloring the volumes
+import colorsys
+
 #from pyne.dagmc import *
 
 import re
@@ -861,7 +865,7 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
     file_contents.append('#include "G4PVPlacement.hh"\n')
     file_contents.append('#include "globals.hh"\n')
     file_contents.append('#include "G4SystemOfUnits.hh"\n')
-    file_contents.append('\n')
+    file_contents.append('#include "G4VisAttributes.hh"\n')
     file_contents.append('#include "G4SDManager.hh"\n')
     file_contents.append('#include "G4SDChargedFilter.hh"\n')
     file_contents.append('#include "G4MultiFunctionalDetector.hh"\n')
@@ -904,6 +908,8 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
     file_contents.append('\n')
     file_contents.append('  G4Material* Vacuum = \n')
     file_contents.append('  new G4Material("Vacuum",z=1., a=1.0*g/mole, density=1.0e-20*mg/cm3);\n')
+    file_contents.append('  // set the visibility based on the material   \n')
+    file_contents.append('  G4VisAttributes * invis = new G4VisAttributes(G4VisAttributes::Invisible);\n')
     file_contents.append('\n')
 
     # will pull world size from max min in problem, maybe even take graveyard instead
@@ -918,6 +924,7 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
     file_contents.append('  \n')
     file_contents.append('  G4Box* world_volume = new G4Box("world_volume_box",world_width,world_height,world_depth);\n')
     file_contents.append('  world_volume_log = new G4LogicalVolume(world_volume,Vacuum,"world_vol_log",0,0,0);\n')
+    file_contents.append('  world_volume_log->SetVisAttributes(invis);\n')
     file_contents.append('  G4PVPlacement* world_volume_phys = new G4PVPlacement(0,G4ThreeVector(),world_volume_log,\n')
     file_contents.append('						      "world_vol",0,false,0); \n')
     file_contents.append('  \n')
@@ -933,6 +940,12 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
     file_contents.append('\n')
     file_contents.append('  G4cout << "There are " << Num_of_objects << " dag volumes" << G4endl;\n')
     file_contents.append('\n')
+
+    # generate colors
+    num_col = len(material_dict) 
+    HSV_tuples = [(x*1.0/num_col, 0.5, 0.5) for x in range(num_col)] 
+    RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
+
 
     for volume_name in dag_volume_names:
         idx = dag_volume_names.index(volume_name)
@@ -960,6 +973,14 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
         volume='vol_'+volume_name
         file_contents.append('  DagSolid* '+volume+' = new DagSolid("'+volume+'",dagmc,'+str(idx+1)+');\n')
         file_contents.append('  G4LogicalVolume* '+volume+'_log = new G4LogicalVolume('+volume+','+material+',"'+volume+'_log",0,0,0);\n')
+        # set the visualisation
+        if "Vacuum" in material:
+            file_contents.append('  '+volume+'_log->SetVisAttributes(invis);')
+        else:
+            mat_num = int(material.split('_')[1])
+            colors = RGB_tuples[mat_num-1]
+            file_contents.append('  '+volume+'_log->SetVisAttributes(G4Color('+str(colors[0])+','+str(colors[1])+ \
+                                     ','+str(colors[2])+'));\n')
         file_contents.append('  G4PVPlacement* '+volume+'_phys = new G4PVPlacement(0,G4ThreeVector(0*cm,0*cm,0*cm),'+volume+'_log,"'+volume+'_phys",world_volume_log,false,0);\n')
         file_contents.append('\n')
 
