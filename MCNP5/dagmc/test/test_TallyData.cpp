@@ -22,10 +22,10 @@ class TallyDataTest : public ::testing::Test
         tallyData1 = new TallyData(1,false);
         
         // For looking at total_energy_bin
-        num_energy_bins = 5;
-        tallyData2 = new TallyData(num_energy_bins, true);
+        tallyData2 = new TallyData(5, true);
     
         tallyData3 = new TallyData(9, false); 
+
     }
 
     // deallocate memory resources
@@ -37,13 +37,30 @@ class TallyDataTest : public ::testing::Test
     }
 
   protected:
-    // Clarifying global 
-    unsigned int num_energy_bins;
 
    TallyData* tallyData1;
    TallyData* tallyData2;
    TallyData* tallyData3;
 };
+
+//---------------------------------------------------------------------------//
+void fillTally(TallyData& tallyData)
+{
+        double fill_tally[]   = {1.2, -3.4, 5.6, 0.0, 8.9, 7.8};
+        double fill_error[]   = {0.2, -0.4, 0.06, 0.0, .089, .078};
+        double fill_scratch[] = {10.2, -30.4, 50.6, 0.0, 80.9, 70.8};
+        // Set it up
+        int length;
+        double* tally_data = tallyData.get_tally_data(length); 
+        double* error_data = tallyData.get_error_data(length);
+        double* scratch_data = tallyData.get_scratch_data(length);
+        for (int i=0; i<6; i++)
+        { 
+            tally_data[i] = fill_tally[i];
+            error_data[i] = fill_error[i];
+            scratch_data[i] = fill_scratch[i];
+        } 
+}
 //---------------------------------------------------------------------------//
 // SIMPLE TESTS
 //---------------------------------------------------------------------------//
@@ -73,19 +90,16 @@ TEST(TallyDataDeathTest, ZeroEnergyBins)
    EXPECT_DEATH(TallyData(0, false),  "");
 }
 //---------------------------------------------------------------------------//
-TEST(ZeroDataTest, ZeroTallyData)
+TEST(FilledTallyTest, ZeroTallyData)
 {
    // Set it up
    TallyData tallyData(2, false);
    tallyData.resize_data_arrays(3);
- 
    ///////////////////////////////////////////////////////////////
-   // Fill it with random data
+   // Fill it with some random data
+   fillTally(tallyData);
+ 
    int length;
-   double fill_tally[] = {1.2, -3.4, 5.6, 0.0, 8.9, 7.8};
-   double fill_error[] = {0.2, -0.4, 0.06, 0.0, .089, .078};
-   double fill_scratch[] = {10.2, -30.4, 50.6, 0.0, 80.9, 70.8};
-
    double* tally_ary = tallyData.get_tally_data(length);
    EXPECT_EQ(6, length);
 
@@ -94,19 +108,11 @@ TEST(ZeroDataTest, ZeroTallyData)
 
    double* scratch_ary = tallyData.get_scratch_data(length);
    EXPECT_EQ(6, length);
-
-   for (int i=0; i<length; i++)
-   { 
-       tally_ary[i] = fill_tally[i];
-       error_ary[i] = fill_error[i];
-       scratch_ary[i] = fill_scratch[i];
-   } 
    ///////////////////////////////////////////////////////////////
   
    // Clear the data
    tallyData.zero_tally_data();
    
-
    // Check the zeroing worked
    for (int i=0; i<length; i++)
    { 
@@ -115,6 +121,7 @@ TEST(ZeroDataTest, ZeroTallyData)
        EXPECT_DOUBLE_EQ(0.0, scratch_ary[i]); 
    } 
 }
+
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: TallyDataTest
 //---------------------------------------------------------------------------//
@@ -125,7 +132,6 @@ void ResizeDataArraysHelper(TallyData* tallyData,
      int length;
 
      double *tallyArray1, *tallyArray2, *tallyArray3;
-
      tallyData->resize_data_arrays(num_tally_points);
 
      tallyArray1 = tallyData->get_tally_data(length);
@@ -160,4 +166,38 @@ TEST_F(TallyDataTest, ResizeDataArrays)
      ResizeDataArraysHelper(tallyData3, 3, 27);
 }
 //---------------------------------------------------------------------------//
+TEST(FilledTallyTest, GetDataTest)
+{
+   TallyData tallyData(2, true);
+   tallyData.resize_data_arrays(2);
+   fillTally(tallyData);
+
+   std::pair<double, double> returnPair;
+   // Tally Point 0: two energy bins and energy total
+   returnPair = tallyData.get_data(0,0);
+   EXPECT_DOUBLE_EQ(1.2,returnPair.first);
+   EXPECT_DOUBLE_EQ(0.2,returnPair.second);
+
+   returnPair = tallyData.get_data(0,1);
+   EXPECT_DOUBLE_EQ(-3.4,returnPair.first);
+   EXPECT_DOUBLE_EQ(-0.4,returnPair.second);
+
+   returnPair = tallyData.get_data(0,2);
+   EXPECT_DOUBLE_EQ(5.6,returnPair.first);
+   EXPECT_DOUBLE_EQ(0.06,returnPair.second);
+   
+   // Tally Point 1: two energy bins and energy total
+   returnPair = tallyData.get_data(1,0);
+   EXPECT_DOUBLE_EQ(0.0,returnPair.first);
+   EXPECT_DOUBLE_EQ(0.0,returnPair.second);
+
+   returnPair = tallyData.get_data(1,1);
+   EXPECT_DOUBLE_EQ(8.9,returnPair.first);
+   EXPECT_DOUBLE_EQ(.089,returnPair.second);
+
+   returnPair = tallyData.get_data(1,2);
+   EXPECT_DOUBLE_EQ(7.8,returnPair.first);
+   EXPECT_DOUBLE_EQ(0.078,returnPair.second);
+
+}
 // end of MCNP5/dagmc/test/test_TallyData.cpp
