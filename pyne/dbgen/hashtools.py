@@ -3,10 +3,10 @@ Tools to generate, set and check the hashes of datasets in pyne.
 """
 
 import hashlib
+from warnings import warn
 
 import numpy
 import tables
-from warnings import warn
 
 from .. import data
 

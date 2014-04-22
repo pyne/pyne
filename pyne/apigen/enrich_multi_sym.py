@@ -6,9 +6,9 @@ from being used with infinities.  For a work around see [1].
 """
 from __future__ import print_function, division
 import os
-import time
-import multiprocessing
 import logging
+import multiprocessing
+import time
 from warnings import warn
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \

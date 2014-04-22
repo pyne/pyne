@@ -8,10 +8,11 @@ This currently consists to natural element materials and those coming from PNNL'
 from __future__ import print_function
 import csv
 import re
-import tables as tb
-import numpy as np
 import os
 from warnings import warn
+
+import tables as tb
+import numpy as np
 
 from .. import nucname
 from ..data import natural_abund, natural_abund_map

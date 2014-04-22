@@ -5,6 +5,7 @@ such as computing cross sections for materials, fission energy spectra, metastab
 ratios, etc.
 """
 from __future__ import division
+
 import collections
 from warnings import warn
 
@@ -14,8 +15,6 @@ except NameError:
     basestring = str
 
 import numpy as np
-np.seterr(all='ignore')
-
 import scipy.integrate
 import tables as tb
 
@@ -30,6 +29,7 @@ from .models import group_collapse
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
+np.seterr(all='ignore')
 
 def _prep_cache(xs_cache, E_g=None, phi_g=None):
     """Ensures that certain values are in the cache safely."""
