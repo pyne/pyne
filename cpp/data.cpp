@@ -3,6 +3,7 @@
 #include "data.h"
 #endif
 
+#define STR_SIZE 7
 
 //
 // Math Helpers
@@ -215,8 +216,7 @@ double pyne::natural_abund(std::string nuc)
 /*** Q_value Functions ***/
 /*************************/
 
-void pyne::_load_q_val_map()
-{
+void pyne::_load_q_val_map() {
   // Loads the important parts of q_value table into q_value_map
 
   //Check to see if the file is in HDF5 format.
@@ -250,7 +250,7 @@ void pyne::_load_q_val_map()
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of structs, put it in the map
-  for(int n = 0; n < q_val_length; n++){
+  for(int n = 0; n < q_val_length; n++) {
     q_val_map[q_val_array[n].nuc] = q_val_array[n].q_val;
     gamma_frac_map[q_val_array[n].nuc] = q_val_array[n].gamma_frac;
   }
@@ -260,8 +260,7 @@ void pyne::_load_q_val_map()
 
 std::map<int, double> pyne::q_val_map = std::map<int, double>();
 
-double pyne::q_val(int nuc)
-{
+double pyne::q_val(int nuc) {
   // Find the nuclide's q_val in MeV/fission
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
@@ -273,15 +272,9 @@ double pyne::q_val(int nuc)
     return (*nuc_iter).second;
 
   // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
-  if (q_val_map.empty())
-  {
-    // Don't fail if we can't load the library
-    try
-    {
+  if (q_val_map.empty()) {
       _load_q_val_map();
       return q_val(nuc);
-    }
-    catch(...){};
   };
   
   double qv;
@@ -296,15 +289,13 @@ double pyne::q_val(int nuc)
 };
 
 
-double pyne::q_val(char * nuc)
-{
+double pyne::q_val(char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return q_val(nuc_zz);
 };
 
 
-double pyne::q_val(std::string nuc)
-{
+double pyne::q_val(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return q_val(nuc_zz);
 };
@@ -316,8 +307,7 @@ double pyne::q_val(std::string nuc)
 
 std::map<int, double> pyne::gamma_frac_map = std::map<int, double>();
 
-double pyne::gamma_frac(int nuc)
-{
+double pyne::gamma_frac(int nuc) {
   // Find the nuclide's fraction of Q that comes from gammas
   std::map<int, double>::iterator nuc_iter, nuc_end;
 
@@ -329,15 +319,9 @@ double pyne::gamma_frac(int nuc)
     return (*nuc_iter).second;
 
   // Next, fill up the map with values from nuc_data.h5 if the map is empty.
-  if (gamma_frac_map.empty())
-  {
-    // Don't fail if we can't load the library
-    try
-    {
+  if (gamma_frac_map.empty()) {
       _load_q_val_map();
       return gamma_frac(nuc);
-    }
-    catch(...){};
   };
 
   double gf;
@@ -352,15 +336,13 @@ double pyne::gamma_frac(int nuc)
 };
 
 
-double pyne::gamma_frac(char * nuc)
-{
+double pyne::gamma_frac(char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return gamma_frac(nuc_zz);
 };
 
 
-double pyne::gamma_frac(std::string nuc)
-{
+double pyne::gamma_frac(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return gamma_frac(nuc_zz);
 };
@@ -381,6 +363,12 @@ void pyne::_load_df_map(std::string source_path) {
   bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
   if (!ish5)
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+  
+  // Defining string type for lung model data
+  hid_t string_type_;
+  string_type_ = H5Tcopy(H5T_C_S1);
+  H5Tset_size(string_type_, STR_SIZE);
+  H5Tset_strpad(string_type_, H5T_STR_NULLPAD);
 
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(df_struct));
@@ -391,7 +379,7 @@ void pyne::_load_df_map(std::string source_path) {
   status = H5Tinsert(desc, "ingest_df", HOFFSET(df_struct, ingest_df), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "fluid_frac", HOFFSET(df_struct, fluid_frac), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "inhale_df", HOFFSET(df_struct, inhale_df), H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "lung_mod", HOFFSET(df_struct, lung_mod), H5T_C_S1);
+  status = H5Tinsert(desc, "lung_mod", HOFFSET(df_struct, lung_mod), string_type_);
   
   // Open the HDF5 file
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -421,6 +409,7 @@ void pyne::_load_df_map(std::string source_path) {
 
   // close the nuc_data library, before doing anything stupid
   H5Dclose(df_set);
+  H5Tclose(string_type_);
   H5Fclose(nuc_data_h5);
   
   delete[] df_array;
@@ -430,8 +419,7 @@ void pyne::_load_df_map(std::string source_path) {
 /// Function for Source
 ///
 
-std::string source_string(int source)
-{
+std::string source_string(int source) {
   std::string source_location;
   if (source == 0) {
     source_location = "/dose_factors/EPA";
