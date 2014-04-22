@@ -99,6 +99,9 @@ def check_matname(tag_values):
         # name
             if "/" in tag:
                 mat_name = tag.split("/")
+                if mat_name[1] == '':
+                    raise Exception(
+                        "Couldn\'t find group name in appropriate format; extra \'/\' in %s" % tag)
                 # list of material name only
                 matname = mat_name[0].split(":")
                 matdensity = mat_name[1].split(":")
@@ -106,12 +109,16 @@ def check_matname(tag_values):
                 # otherwise we have only "mat:"
             elif ":" in tag:
                 matname = tag.split(":")
+                if matname[1] == '':
+                    raise Exception(
+                        "Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
                 mat_list_density.append(' ')
             else:
                 raise Exception(
                     "Couldn\'t find group name in appropriate format %s" % tag)
             if len(matname) > 2:
-                raise Exception("Wrong format for group names! %s. correct: mat:NAME/rho:VALUE" %tag)        
+                raise Exception(
+                    "Wrong format for group names! %s. correct: mat:NAME/rho:VALUE" % tag)
             mat_list_matname.append(matname[1])
     mat_dens_list = zip(mat_list_matname, mat_list_density)
     # error conditions, no tags found
@@ -153,7 +160,7 @@ def check_and_create_materials(material_list, mat_lib, arguments):
                     'Material {%s} doesn\'t exist in pyne material lib' % material)
                 print_near_match(material, mat_lib)
                 raise Exception(
-                    'Couldn\'t find exact match in material library for : %s' %material)
+                    'Couldn\'t find exact match in material library for : %s' % material)
     # check that there are as many materials as there are groups
     if d != len(material_list):
         raise Exception("There are insuficient materials")
@@ -234,7 +241,7 @@ function to print near matches to material name
 def print_near_match(material, material_library):
     for item in material_library.iterkeys():
         if (material.lower() in item.lower()) or (material.upper() in item.upper()):
-            print("Near matches to %s are :" %material)
+            print("Near matches to %s are :" % material)
             print item
     return
 
@@ -283,7 +290,7 @@ def parsing():
     if not args.code:
         args.code = 'both'
     if not args.output:
-        args.output= 'output.h5m'
+        args.output = 'output.h5m'
     return args
 
 """
