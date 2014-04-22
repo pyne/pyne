@@ -913,6 +913,126 @@ size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data){
   return result;
 };
 
+template<typename U> double pyne::data_access(int Z, 
+size_t valoffset, std::map<int, U> &data){
+  typename std::map<int, U>::iterator nuc_iter,
+   nuc_end, it;
+  nuc_iter = data.find(Z);
+  nuc_end = data.end();
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end){
+    return (double)((char *)&(it->second) + valoffset);
+  }
+  // Next, fill up the map with values from the
+  // nuc_data.h5, if the map is empty.
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<U>(Z, valoffset, data);
+  };
+  throw pyne::nucname::NotANuclide(Z, "");
+};
+
+
+//
+// Load atomic data
+//
+std::map<int, pyne::atomic_struct> pyne::atomic_data_map;
+
+template<> void pyne::_load_data<pyne::atomic_struct>()
+{
+// Loads the atomic table into memory
+  herr_t status;
+
+  //Check to see if the file is in HDF5 format.
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
+    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
+    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+
+  // Get the HDF5 compound type (table) description
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_struct));
+  status = H5Tinsert(desc, "Z", HOFFSET(atomic_struct, Z),
+                      H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "k_shell_fluor", HOFFSET(atomic_struct, k_shell_fluor),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_shell_fluor_error", HOFFSET(atomic_struct, k_shell_fluor_error),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_shell_fluor", HOFFSET(atomic_struct, k_shell_fluor),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_shell_fluor_error", HOFFSET(atomic_struct, k_shell_fluor_error),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "prob", HOFFSET(atomic_struct, prob), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_shell_be", HOFFSET(atomic_struct, k_shell_be),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_shell_be_err", HOFFSET(atomic_struct, k_shell_be_err),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "li_shell_be", HOFFSET(atomic_struct, li_shell_be),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "li_shell_be_err", HOFFSET(atomic_struct, li_shell_be_err),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "mi_shell_be", HOFFSET(atomic_struct, mi_shell_be),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "mi_shell_be_err", HOFFSET(atomic_struct, mi_shell_be_err),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ni_shell_be", HOFFSET(atomic_struct, ni_shell_be),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ni_shell_be_err", HOFFSET(atomic_struct, ni_shell_be_err),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Kb_to_Ka", HOFFSET(atomic_struct, Kb_to_Ka),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Kb_to_Ka_err", HOFFSET(atomic_struct, Kb_to_Ka_err),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Ka2_to_Ka1", HOFFSET(atomic_struct, Ka2_to_Ka1),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Ka2_to_Ka1_err", HOFFSET(atomic_struct, Ka2_to_Ka1_err),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "L_auger", HOFFSET(atomic_struct, L_auger), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "K_auger", HOFFSET(atomic_struct, K_auger),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Ka1_X_ray_en", HOFFSET(atomic_struct, Ka1_X_ray_en),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Ka1_X_ray_en_err", HOFFSET(atomic_struct, Ka1_X_ray_en_err),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Ka2_X_ray_en", HOFFSET(atomic_struct, Ka1_X_ray_en),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Ka2_X_ray_en_err", HOFFSET(atomic_struct, Ka1_X_ray_en_err),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "Kb_X_ray_en", HOFFSET(atomic_struct, Kb_X_ray_en),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "L_X_ray_en", HOFFSET(atomic_struct, L_X_ray_en),
+                      H5T_NATIVE_DOUBLE);
+                      
+  // Open the HDF5 file
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
+                              H5P_DEFAULT);
+  // Open the data set
+  hid_t atomic_set = H5Dopen2(nuc_data_h5, "/decay/atomic", H5P_DEFAULT);
+  hid_t atomic_space = H5Dget_space(atomic_set);
+  int atomic_length = H5Sget_simple_extent_npoints(atomic_space);
+
+  // Read in the data
+  atomic_struct * atomic_array = new atomic_struct[atomic_length];
+  status = H5Dread(atomic_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+                   atomic_array);
+
+  // close the nuc_data library, before doing anything stupid
+  status = H5Dclose(atomic_set);
+  status = H5Fclose(nuc_data_h5);
+
+  for (int i = 0; i < atomic_length; ++i) {
+      atomic_data_map[atomic_array[i].Z] = atomic_array[i];
+  }
+  
+  delete[] atomic_array;
+
+}
+
+
 //
 // Load level data
 //
