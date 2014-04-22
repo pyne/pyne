@@ -1,14 +1,14 @@
 import re
 from warnings import warn
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+import numpy as np
 
 try:
     basestring
 except NameError:
     basestring = str
 
-import numpy as np
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 _if_idx_str = ("""if (exist("idx", "var"));\n"""
               """  idx = idx + 1;\n"""

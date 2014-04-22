@@ -23,12 +23,12 @@ import struct
 import math
 import os
 import linecache
-import tables
 import datetime
 from warnings import warn
 import itertools
 
 import numpy as np
+import tables
 
 from pyne.material import Material
 from pyne.material import MultiMaterial

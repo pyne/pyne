@@ -3,8 +3,9 @@ GammaSpectrum class, reads a .spe file Will in the future have functions
 for activity calculations.
 """
 
-import numpy as np
 from warnings import warn
+
+import numpy as np
 
 from pyne import spectanalysis
 
