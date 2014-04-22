@@ -148,8 +148,8 @@ def check_and_create_materials(material_list, mat_lib, arguments):
                 new_mat = mat_lib.get(key)[:]
                 flukamaterials_list.append(material)
                 copy_attrs(new_mat, mat_lib.get(key))
-                # set the mcnp material number or fluka material name
-                set_attrs(new_mat, d, arguments.code, flukamaterials_list)
+                # set the mcnp material number and fluka material name
+                set_attrs(new_mat, d, flukamaterials_list)
                 if material_list[g][1] != ' ':
                     new_mat.density = float(material_list[g][1])
 
@@ -191,11 +191,9 @@ function to set the attributes of the materials:
 """
 
 
-def set_attrs(mat, number, code, flukamat_list):
-    if code is 'mcnp' or 'both':
-        mat.attrs['mat_number'] = str(number)
-    if code == 'fluka' or 'both':
-        fluka_material_naming(mat, flukamat_list)
+def set_attrs(mat, number, flukamat_list):
+    mat.attrs['mat_number'] = str(number)
+    fluka_material_naming(mat, flukamat_list)
     return
 
 
@@ -230,7 +228,8 @@ def fluka_material_naming(material, flukamat_list):
     # otherwise uppercase
     else:
         flukamat_list.append(matf.upper())
-    material.attrs['fluka_name'] = matf.upper()
+    material.attrs['original_name']=material.attrs['name']    
+    material.attrs['name'] = matf.upper()
     return material
 
 """ 
@@ -254,12 +253,10 @@ filename: filename to write the objects to
 
 
 def write_mats_h5m(materials_list, filename):
-
     new_matlib = MaterialLibrary()
-
     for material in materials_list:
         # using fluka name as index since this is unique
-        new_matlib[material.attrs['fluka_name']] = material
+        new_matlib[material.attrs['name']] = material
     new_matlib.write_hdf5(filename)
 
 """
@@ -267,7 +264,6 @@ function to parse the script, adding options:
 defining 
 -f  : the .h5m file path
 -d  : nuc_data path
--c  : code mcnp or fluka or both
 -o  : name of the output h5m file
 """
 
@@ -278,8 +274,6 @@ def parsing():
         '-f', action='store', dest='datafile', help='The path to the .h5m file')
     parser.add_argument('-d', action='store', dest='nuc_data',
                         help='The path to the PyNE materials library nuc_data.h5')
-    parser.add_argument('-c', action='store', dest='code',
-                        help='The format of the output h5m file; mcnp or fluka or both')
     parser.add_argument(
         '-o', action='store', dest='output', help='The name of the output file ***.h5m')
     args = parser.parse_args()
@@ -287,8 +281,6 @@ def parsing():
         raise Exception('h5m file path not entered!!. [-f] is not set')
     if not args.nuc_data:
         raise Exception('nuc_data file path not entered!!. [-d] is not set')
-    if not args.code:
-        args.code = 'both'
     if not args.output:
         args.output = 'output.h5m'
     return args
