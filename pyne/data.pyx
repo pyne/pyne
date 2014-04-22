@@ -173,10 +173,6 @@ cdef conv._MapIntDouble gamma_frac_map_proxy = conv.MapIntDouble(False)
 gamma_frac_map_proxy.map_ptr = &cpp_data.gamma_frac_map
 gamma_frac_map = gamma_frac_map_proxy
 
-# initialize gamma_frac_map
-cpp_data.gamma_frac(<int> 10000000)
-
-
 def gamma_frac(nuc):
     """Finds the fraction of Q that comes from gammas of a nuclide.
 

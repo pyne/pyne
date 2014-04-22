@@ -19,7 +19,7 @@ of HNF-5636
 
 *Lung Model:
   "V" for tritium stands for vapor (50% larger absorption)
-  "Organic" for C-14 means that the carbon is assumed to have an organic chemical form. 
+  "O" for C-14 means that the carbon is assumed to have an Organic chemical form. 
   "D" material clears the lungs in days
   "W" material clears the lungs in weeks
   "Y" material clears the lungs in years

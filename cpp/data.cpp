@@ -3,8 +3,6 @@
 #include "data.h"
 #endif
 
-#define STR_SIZE 7
-
 //
 // Math Helpers
 //
@@ -237,7 +235,7 @@ void pyne::_load_q_val_map() {
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t q_val_set = H5Dopen2(nuc_data_h5, "/neutron/q_values", H5P_DEFAULT);
+  hid_t q_val_set = H5Dopen2(nuc_data_h5, "/decay/q_values", H5P_DEFAULT);
   hid_t q_val_space = H5Dget_space(q_val_set);
   int q_val_length = H5Sget_simple_extent_npoints(q_val_space);
 
@@ -363,13 +361,13 @@ void pyne::_load_dose_map(std::string source_path) {
   bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
   if (!ish5)
     throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
-  
+ 
   // Defining string type for lung model data
   hid_t string_type_;
   string_type_ = H5Tcopy(H5T_C_S1);
-  H5Tset_size(string_type_, STR_SIZE);
+  H5Tset_size(string_type_, 1);
   H5Tset_strpad(string_type_, H5T_STR_NULLPAD);
-
+  
   // Get the HDF5 compound type (table) description
   hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(dose_struct));
   status = H5Tinsert(desc, "nuc", HOFFSET(dose_struct, nuc), H5T_NATIVE_INT);

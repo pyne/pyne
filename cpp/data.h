@@ -160,14 +160,14 @@ namespace pyne
   
   /// A struct matching the dose factor table in nuc_data.h5.
   typedef struct dose_struct {
-    int nuc;            ///< nuclide in id form
+    int nuc;              ///< nuclide in id form
     double ext_air_dose;  ///< nuclide ext_air dose factor [mrem/h per Ci/m^3]
-    double ratio;       ///< ratio of external air dose factor to dose factor due to inhalation
+    double ratio;         ///< ratio of external air dose factor to dose factor due to inhalation
     double ext_soil_dose; ///< nuclide ext_soil dose factor [mrem/h per Ci/m^2]
     double ingest_dose;   ///< nuclide dose factor due to ingestion [mrem/pCi]
-    double fluid_frac;  ///< fraction of activity abosorbed in body fluids
+    double fluid_frac;    ///< fraction of activity abosorbed in body fluids
     double inhale_dose;   ///< model of lung used (time of biological half life -- D, W, or Y)
-    char lung_mod[7];   ///< nuclide dose factor [mrem/h per Ci/m^3]
+    char lung_mod;        ///< nuclide dose factor [mrem/h per Ci/m^3]
   } dose_struct;
 
   /// Loads the dose factor data from the nuc_data.h5 file into memory.
