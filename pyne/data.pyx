@@ -462,7 +462,32 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
     fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn), <int> source, get_errors)
     return fpy
 
+#
+# atomic data functions
+#
 
+def calculate_xray_data(nuc, k_conv, l_conv):
+    """Calculates X-ray intensities for a given atom with
+    k and l conversion intensities
+    
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+    k_conv : float
+        k electron converion coefficient arbitrary units
+    l_conv : float
+        l electron converion coefficient arbitrary units
+
+    Returns
+    -------
+    arr : vector of pairs
+        Vector of pairs containing the four primary X-rays and their 
+        intensities: Ka1, Ka2, Kb, L
+    """
+    z = pyne.nucname.znum(nuc)
+    return cpp_data.calculate_xray_data(<int> z, <double> k_conv, 
+                                        <double> l_conv)
 #
 # decay data functions
 #

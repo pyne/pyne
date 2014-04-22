@@ -343,6 +343,11 @@ namespace pyne
   template<typename T> void _load_data();
   template<> void _load_data<atomic_struct>();
   
+  // compute X-ray data
+  std::vector<std::pair<double, double> >
+  calculate_xray_data(int Z, double k_conv, double l_conv);
+  
+  
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.
   typedef struct level_struct{
     int nuc_id;

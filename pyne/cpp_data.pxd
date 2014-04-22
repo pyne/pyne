@@ -73,6 +73,10 @@ cdef extern from "data.h" namespace "pyne":
     double fpyield(char *, char *, int, bool) except +
     double fpyield(std_string, std_string, int, bool) except +
 
+    # atomic data functions
+    vector[pair[double, double]] calculate_xray_data(int, double,
+                                                     double) except +
+
     # decay data functions
     double half_life(int) except +
     double half_life(char *) except +

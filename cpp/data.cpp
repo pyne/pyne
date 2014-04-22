@@ -921,7 +921,7 @@ size_t valoffset, std::map<int, U> &data){
   nuc_end = data.end();
   // First check if we already have the nuc in the map
   if (nuc_iter != nuc_end){
-    return (double)((char *)&(it->second) + valoffset);
+    return *(double *)((char *)&(it->second) + valoffset);
   }
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
@@ -939,8 +939,7 @@ size_t valoffset, std::map<int, U> &data){
 //
 std::map<int, pyne::atomic_struct> pyne::atomic_data_map;
 
-template<> void pyne::_load_data<pyne::atomic_struct>()
-{
+template<> void pyne::_load_data<pyne::atomic_struct>() {
 // Loads the atomic table into memory
   herr_t status;
 
@@ -960,9 +959,9 @@ template<> void pyne::_load_data<pyne::atomic_struct>()
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "k_shell_fluor_error", HOFFSET(atomic_struct, k_shell_fluor_error),
                       H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "l_shell_fluor", HOFFSET(atomic_struct, k_shell_fluor),
+  status = H5Tinsert(desc, "l_shell_fluor", HOFFSET(atomic_struct, l_shell_fluor),
                      H5T_NATIVE_DOUBLE);
-  status = H5Tinsert(desc, "l_shell_fluor_error", HOFFSET(atomic_struct, k_shell_fluor_error),
+  status = H5Tinsert(desc, "l_shell_fluor_error", HOFFSET(atomic_struct, l_shell_fluor_error),
                       H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "prob", HOFFSET(atomic_struct, prob), 
                      H5T_NATIVE_DOUBLE);
@@ -1030,6 +1029,45 @@ template<> void pyne::_load_data<pyne::atomic_struct>()
   
   delete[] atomic_array;
 
+}
+
+std::vector<std::pair<double, double> >
+  pyne::calculate_xray_data(int Z, double k_conv, double l_conv) {
+  double xk = 0;
+  double xka = 0;
+  double xka1 = 0;
+  double xka2 = 0;
+  double xkb = 0;
+  double xl = 0;
+  if (!isnan(k_conv)) {
+    xk = data_access<atomic_struct> (Z, offsetof(atomic_struct, k_shell_fluor),
+     atomic_data_map)*k_conv;
+    xka = xk / (1.0 + data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     Kb_to_Ka), atomic_data_map));
+    xka1 = xka / (1.0 + data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     Ka2_to_Ka1), atomic_data_map));
+    xka2 = xka - xka1;
+    xkb = xk - xka;
+    if (!isnan(l_conv)) {
+        xl = (l_conv + k_conv*data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     prob), atomic_data_map))*data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     l_shell_fluor), atomic_data_map);
+    }
+  } else if (!isnan(l_conv)) {
+    xl = l_conv*data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     l_shell_fluor), atomic_data_map);
+  }
+  std::vector<std::pair<double, double> > result;
+  result.push_back(std::make_pair(data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     Ka1_X_ray_en), atomic_data_map),xka1));
+  result.push_back(std::make_pair(data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     Ka2_X_ray_en), atomic_data_map),xka2));
+  result.push_back(std::make_pair(data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     Kb_X_ray_en), atomic_data_map),xkb));
+  result.push_back(std::make_pair(data_access<atomic_struct> (Z, offsetof(atomic_struct, 
+     L_X_ray_en), atomic_data_map),xl));
+
+  return result;
 }
 
 
