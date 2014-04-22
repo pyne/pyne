@@ -75,7 +75,7 @@ def load_mat_lib(filename):
     mat_lib = material.Material()
     mat_lib = material.MaterialLibrary()
     mat_lib.from_hdf5(
-        filename, datapath="/material_library/materials", nucpath="/material_library/nucid")
+        filename, datapath='/material_library/materials', nucpath='/material_library/nucid')
     return mat_lib
 
 """
@@ -89,26 +89,30 @@ mat_lib - pyne material library instance
 
 def check_matname(tag_values):
     # loop over tags
+    g = 0
     mat_list_matname = []  # list of material names
     mat_list_density = []  # list of density if provided in the group names
     # loop over the tags in the file
     for tag in tag_values:
     # look for mat, this id's material in group name
-        if tag[0:3] == "mat":
+        if tag[0:3] == 'mat':
         # split on the basis of "/" being delimiter and split colons from
         # name
-            if "/" in tag:
-                mat_name = tag.split("/")
+            if 'Graveyard' or 'graveyard' in tag:
+                g = 1
+                continue
+            if '/' in tag:
+                mat_name = tag.split('/')
                 if mat_name[1] == '':
                     raise Exception(
                         "Couldn\'t find group name in appropriate format; extra \'/\' in %s" % tag)
                 # list of material name only
-                matname = mat_name[0].split(":")
-                matdensity = mat_name[1].split(":")
+                matname = mat_name[0].split(':')
+                matdensity = mat_name[1].split(':')
                 mat_list_density.append(matdensity[1])
                 # otherwise we have only "mat:"
-            elif ":" in tag:
-                matname = tag.split(":")
+            elif ':' in tag:
+                matname = tag.split(':')
                 if matname[1] == '':
                     raise Exception(
                         "Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
@@ -120,6 +124,8 @@ def check_matname(tag_values):
                 raise Exception(
                     "Wrong format for group names! %s. correct: mat:NAME/rho:VALUE" % tag)
             mat_list_matname.append(matname[1])
+    if g == 0:
+        raise Exception("Graveyard group is missing!")
     mat_dens_list = zip(mat_list_matname, mat_list_density)
     # error conditions, no tags found
     if len(mat_dens_list) == 0:
@@ -228,7 +234,7 @@ def fluka_material_naming(material, flukamat_list):
     # otherwise uppercase
     else:
         flukamat_list.append(matf.upper())
-    material.attrs['original_name']=material.attrs['name']    
+    material.attrs['original_name'] = material.attrs['name']
     material.attrs['name'] = matf.upper()
     return material
 
