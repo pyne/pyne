@@ -42,38 +42,38 @@ cdef extern from "data.h" namespace "pyne":
     double gamma_frac(char *) except +
     double gamma_frac(std_string) except +
 
-    # ext_air_df functions
-    map[int, double] ext_air_df_map
+    # ext_air_dose functions
+    map[int, double] ext_air_dose_map
     map[int, double] ratio_map
-    double ext_air_df(int, int) except +
-    double ext_air_df(char *, int) except +
-    double ext_air_df(std_string, int) except +
+    double ext_air_dose(int, int) except +
+    double ext_air_dose(char *, int) except +
+    double ext_air_dose(std_string, int) except +
     double ratio(int, int) except +
     double ratio(char *, int) except +
     double ratio(std_string, int) except +
     
-    # ext_soil_df functions
-    map[int, double] ext_soil_df_map
-    double ext_soil_df(int, int) except +
-    double ext_soil_df(char *, int) except +
-    double ext_soil_df(std_string, int) except +
+    # ext_soil_dose functions
+    map[int, double] ext_soil_dose_map
+    double ext_soil_dose(int, int) except +
+    double ext_soil_dose(char *, int) except +
+    double ext_soil_dose(std_string, int) except +
 
-    # ingest_df functions
-    map[int, double] ingest_df_map
+    # ingest_dose functions
+    map[int, double] ingest_dose_map
     map[int, double] fluid_frac_map
-    double ingest_df(int, int) except +
-    double ingest_df(char *, int) except +
-    double ingest_df(std_string, int) except +
+    double ingest_dose(int, int) except +
+    double ingest_dose(char *, int) except +
+    double ingest_dose(std_string, int) except +
     double fluid_frac(int, int) except +
     double fluid_frac(char *, int) except +
     double fluid_frac(std_string, int) except +
 
-    # inhale_df functions
-    map[int, double] inhale_df_map
+    # inhale_dose functions
+    map[int, double] inhale_dose_map
     map[int, std_string] lung_mod_map
-    double inhale_df(int, int) except +
-    double inhale_df(char *, int) except +
-    double inhale_df(std_string, int) except +
+    double inhale_dose(int, int) except +
+    double inhale_dose(char *, int) except +
+    double inhale_dose(std_string, int) except +
     std_string lung_mod(int, int) except +
     std_string lung_mod(char *, int) except +
     std_string lung_mod(std_string, int) except +

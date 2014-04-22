@@ -208,12 +208,12 @@ def gamma_frac(nuc):
 # Decay Factor data
 #
 
-# external air df
-cdef conv._MapIntDouble ext_air_df_map_proxy = conv.MapIntDouble(False)
-ext_air_df_map_proxy.map_ptr = &cpp_data.ext_air_df_map
-ext_air_df_map = ext_air_df_map_proxy
+# external air dose
+cdef conv._MapIntDouble ext_air_dose_map_proxy = conv.MapIntDouble(False)
+ext_air_dose_map_proxy.map_ptr = &cpp_data.ext_air_dose_map
+ext_air_dose_map = ext_air_dose_map_proxy
 
-def ext_air_df(nuc, source=0):
+def ext_air_dose(nuc, source=0):
     """Finds the external air dose factor for a tracked nuclide.
 
     Parameters
@@ -227,7 +227,7 @@ def ext_air_df(nuc, source=0):
 
     Returns
     -------
-    ext_air_df : float
+    ext_air_dose : float
         Dose factor from external air exposure [mrem/hr per Ci/m^3]
 
     Notes
@@ -246,13 +246,13 @@ def ext_air_df(nuc, source=0):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        ext_air_df = cpp_data.ext_air_df(<int> nuc, <int> source)
+        ext_air_dose = cpp_data.ext_air_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ext_air_df = cpp_data.ext_air_df(<char *> nuc, <int> source)
+        ext_air_dose = cpp_data.ext_air_dose(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    return ext_air_df
+    return ext_air_dose
 
 # ratio
 cdef conv._MapIntDouble ratio_map_proxy = conv.MapIntDouble(False)
@@ -300,12 +300,12 @@ def ratio(nuc, source=0):
 
     return ratio
 
-# external soil df
-cdef conv._MapIntDouble ext_soil_df_map_proxy = conv.MapIntDouble(False)
-ext_soil_df_map_proxy.map_ptr = &cpp_data.ext_soil_df_map
-ext_soil_df_map = ext_soil_df_map_proxy
+# external soil dose
+cdef conv._MapIntDouble ext_soil_dose_map_proxy = conv.MapIntDouble(False)
+ext_soil_dose_map_proxy.map_ptr = &cpp_data.ext_soil_dose_map
+ext_soil_dose_map = ext_soil_dose_map_proxy
 
-def ext_soil_df(nuc, source=0):
+def ext_soil_dose(nuc, source=0):
     """Finds the external soil dose factor for a tracked nuclide.
 
     Parameters
@@ -319,7 +319,7 @@ def ext_soil_df(nuc, source=0):
 
     Returns
     -------
-    ext_soil_df : float
+    ext_soil_dose : float
         Dose factor from 15 cm of external soil exposure [mrem/hr per Ci/m^2]
 
     Notes
@@ -338,20 +338,20 @@ def ext_soil_df(nuc, source=0):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        ext_soil_df = cpp_data.ext_soil_df(<int> nuc, <int> source)
+        ext_soil_dose = cpp_data.ext_soil_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ext_soil_df = cpp_data.ext_soil_df(<char *> nuc, <int> source)
+        ext_soil_dose = cpp_data.ext_soil_dose(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    return ext_soil_df
+    return ext_soil_dose
     
-# ingestion df
-cdef conv._MapIntDouble ingest_df_map_proxy = conv.MapIntDouble(False)
-ingest_df_map_proxy.map_ptr = &cpp_data.ingest_df_map
-ingest_df_map = ingest_df_map_proxy
+# ingestion dose
+cdef conv._MapIntDouble ingest_dose_map_proxy = conv.MapIntDouble(False)
+ingest_dose_map_proxy.map_ptr = &cpp_data.ingest_dose_map
+ingest_dose_map = ingest_dose_map_proxy
 
-def ingest_df(nuc, source=0):
+def ingest_dose(nuc, source=0):
     """Finds the dose factor due to ingestion for a tracked nuclide.
 
     Parameters
@@ -384,13 +384,13 @@ def ingest_df(nuc, source=0):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        ingest_df = cpp_data.ingest_df(<int> nuc, <int> source)
+        ingest_dose = cpp_data.ingest_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ingest_df = cpp_data.ingest_df(<char *> nuc, <int> source)
+        ingest_dose = cpp_data.ingest_dose(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    return ingest_df
+    return ingest_dose
     
 # fluid_frac
 cdef conv._MapIntDouble fluid_frac_map_proxy = conv.MapIntDouble(False)
@@ -438,12 +438,12 @@ def fluid_frac(nuc, source=0):
 
     return fluid_frac
 
-# inhalation df
-cdef conv._MapIntDouble inhale_df_map_proxy = conv.MapIntDouble(False)
-inhale_df_map_proxy.map_ptr = &cpp_data.inhale_df_map
-inhale_df_map = inhale_df_map_proxy
+# inhalation dose
+cdef conv._MapIntDouble inhale_dose_map_proxy = conv.MapIntDouble(False)
+inhale_dose_map_proxy.map_ptr = &cpp_data.inhale_dose_map
+inhale_dose_map = inhale_dose_map_proxy
 
-def inhale_df(nuc, source=0):
+def inhale_dose(nuc, source=0):
     """Finds the dose factor due to inhalation for a tracked nuclide.
 
     Parameters
@@ -457,7 +457,7 @@ def inhale_df(nuc, source=0):
 
     Returns
     -------
-    inhale_df : float
+    inhale_dose : float
         Dose factor from exposure due to inhalation [mrem/pCi]
 
     Notes
@@ -476,13 +476,13 @@ def inhale_df(nuc, source=0):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        inhale_df = cpp_data.inhale_df(<int> nuc, <int> source)
+        inhale_dose = cpp_data.inhale_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        inhale_df = cpp_data.inhale_df(<char *> nuc, <int> source)
+        inhale_dose = cpp_data.inhale_dose(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    return inhale_df
+    return inhale_dose
 
 # lung model
 cdef conv._MapIntStr lung_mod_map_proxy = conv.MapIntStr(False)
@@ -490,7 +490,7 @@ lung_mod_map_proxy.map_ptr = &cpp_data.lung_mod_map
 lung_mod_map = lung_mod_map_proxy
 
 def lung_mod(nuc, source=0):
-    """Finds the lung model for the inhalation df for a tracked nuclide.
+    """Finds the lung model for the inhalation dose factor for a tracked nuclide.
 
     Parameters
     ----------
