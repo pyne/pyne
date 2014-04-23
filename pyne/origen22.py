@@ -11,13 +11,6 @@ from copy import deepcopy
 from itertools import chain
 from warnings import warn
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
-try:
-    basestring
-except NameError:
-    basestring = str
-
 import numpy as np
 
 from pyne import data
@@ -25,6 +18,13 @@ from pyne import rxname
 from pyne import nucname
 from pyne.xs import cache
 from pyne.material import Material, from_atom_frac
+
+try:
+    basestring
+except NameError:
+    basestring = str
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 BASE_TAPE9 = os.path.join(os.path.dirname(__file__), 'base_tape9.inp')
 

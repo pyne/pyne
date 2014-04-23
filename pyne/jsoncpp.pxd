@@ -1,6 +1,8 @@
+from warnings import warn
+
 # Local imports
 cimport cpp_jsoncpp
-from warnings import warn
+
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

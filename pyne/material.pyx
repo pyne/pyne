@@ -18,6 +18,9 @@ import collections
 cimport numpy as np
 import numpy as np
 from warnings import warn
+import os
+
+import tables as tb
 
 # local imports
 from pyne cimport cpp_material
@@ -30,12 +33,10 @@ import jsoncpp
 
 cimport pyne.nucname as nucname
 import pyne.nucname as nucname
-import os
 
 cimport pyne.data as data
 import pyne.data as data
 
-import tables as tb
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

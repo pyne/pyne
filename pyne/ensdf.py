@@ -1,15 +1,11 @@
 from __future__ import division
 import re
 from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 try:
     import urllib.request as urllib
 except ImportError:
     import urllib
 import os
-import warnings
 import copy
 
 import numpy as np
@@ -21,6 +17,9 @@ try:
     basestring
 except NameError:
     basestring = str
+
+    
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')
@@ -141,7 +140,7 @@ def _to_id(nuc):
     if not 'NN' in nuc:
         nucid = nucname.id(nuc.strip())
     else:
-        warnings.warn('Neutron data not supported!')
+        warn('Neutron data not supported!')
         return 0
     return nucid
 

@@ -1,14 +1,14 @@
 
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
+from libcpp.string cimport string as std_string
+from libcpp.map cimport map as cpp_map
 from cython import pointer
 
 import collections
 from warnings import warn
 
 # Local imports
-from libcpp.string cimport string as std_string
-from libcpp.map cimport map as cpp_map
 cimport cpp_material
 cimport pyne.stlcontainers as conv
 

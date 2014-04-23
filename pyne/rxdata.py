@@ -1,5 +1,4 @@
 import collections
-# import .endf as endf
 from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)

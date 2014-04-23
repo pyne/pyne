@@ -13,17 +13,19 @@ For more information on the Evaluation class, contact Paul Romano
 <paul.k.romano@gmail.com>. For more information on the Library class, contact
 John Xia <john.danger.xia@gmail.com>.
 """
-
 from __future__ import print_function, division, unicode_literals
+
+from libc.stdlib cimport malloc, free
+from libc.stdlib cimport atof, atoi
+from libc.string cimport strtok, strcpy, strncpy
+
 import re
 import os
-from libc.stdlib cimport malloc, free
+from warnings import warn
 
 cimport numpy as np
 import numpy as np
 from scipy.interpolate import interp1d
-
-np.import_array()
 
 from pyne cimport cpp_nucname
 from pyne import nucname
@@ -31,10 +33,7 @@ import pyne.rxdata as rx
 from pyne.rxname import label
 from pyne.utils import fromendf_tok, endftod
 
-from libc.stdlib cimport atof, atoi
-from libc.string cimport strtok, strcpy, strncpy
-
-from warnings import warn
+np.import_array()
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

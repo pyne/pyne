@@ -1,5 +1,6 @@
 """Python wrapper for jsoncpp."""
 from __future__ import division, unicode_literals
+
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
@@ -12,15 +13,15 @@ from libcpp.vector cimport vector as std_vector
 import collections
 from warnings import warn
 
-# local imports
-cimport cpp_jsoncpp
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 try:
     import simplejson as json
 except ImportError:
     import json
+
+# local imports
+cimport cpp_jsoncpp
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 cdef cpp_jsoncpp.Value * toboolval(bint b):
     # NOTE: This is a little hack-y but has to be done since
