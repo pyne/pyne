@@ -54,6 +54,7 @@
 #include "G4TriangularFacet.hh"
 #include "G4VFacet.hh"
 #include "G4TessellatedSolid.hh"
+#include "G4SystemOfUnits.hh"
 
 #include <iostream>
 
@@ -124,12 +125,13 @@ DagSolid::DagSolid (const G4String &name, DagMC* dagmc, int volID)
   Interface* moab = dagmc->moab_instance();
   moab->get_child_meshsets(fvolEntity, surfs, 1 );
 
+  G4cout<<"please wait for visualization... "<<G4endl;
   for(unsigned i=0 ; i<surfs.size() ; i++)
     {
       My_sulf_hit=surfs[i]; 
       moab->get_number_entities_by_type( surfs[i], MBTRI, num_entities);
-      G4cout<<"Number of triangles = "<<num_entities<<" in surface index: "<<fdagmc->index_by_handle(surfs[i])<<G4endl;
-      G4cout<<"please wait for visualization... "<<G4endl;
+      //G4cout<<"Number of triangles = "<<num_entities<<" in surface index: "<<fdagmc->index_by_handle(surfs[i])<<G4endl;
+      //G4cout<<"please wait for visualization... "<<G4endl;
     
       moab->get_entities_by_type( surfs[i], MBTRI, tris);
 
@@ -140,11 +142,12 @@ DagSolid::DagSolid (const G4String &name, DagMC* dagmc, int volID)
 
 	  //	  G4cout<<"add facet for vis = "<<coords[0]<<" "<<coords[1]<<" "<<coords[2]<<G4endl;
 
-	  vertex[0] = G4ThreeVector( coords[0][0], coords[0][1], coords[0][2] );
-	  vertex[1] = G4ThreeVector( coords[1][0], coords[1][1], coords[1][2] );
-	  vertex[2] = G4ThreeVector( coords[2][0], coords[2][1], coords[2][2] );
+	  vertex[0] = G4ThreeVector( coords[0][0]*cm, coords[0][1]*cm, coords[0][2]*cm );
+	  vertex[1] = G4ThreeVector( coords[1][0]*cm, coords[1][1]*cm, coords[1][2]*cm );
+	  vertex[2] = G4ThreeVector( coords[2][0]*cm, coords[2][1]*cm, coords[2][2]*cm );
       
 	  G4TriangularFacet *facet = new G4TriangularFacet (vertex[0], vertex[1], vertex[2], ABSOLUTE);
+	  //  G4cout << vertex[0] << " " << vertex[1] << " " << vertex[2] << G4endl;
 	  AddFacet((G4VFacet*)facet);
 
 	  for (G4int k=0 ; k < 3 ; k++) 
@@ -204,7 +207,7 @@ DagSolid::~DagSolid ()
 //
 EInside DagSolid::Inside (const G4ThreeVector &p) const
 {
-  G4double point[3]={p.x(), p.y(), p.z()};
+  G4double point[3]={p.x()/cm, p.y()/cm, p.z()/cm}; //convert to cm
   double u = rand();
   double v = rand();
   double w = rand();
@@ -234,6 +237,8 @@ EInside DagSolid::Inside (const G4ThreeVector &p) const
     // point may still be within +kCarTolerance*0.5 of boundary
     {
       double minDist;
+      // need to convert point back to mm for this call
+      point[0]=point[0]*cm; point[1]=point[1]*cm; point[2]=point[2]*cm;
       ec = fdagmc->closest_to_location(fvolEntity, point, minDist);
       if( ec != MB_SUCCESS)
 	{
@@ -318,21 +323,14 @@ G4ThreeVector DagSolid::SurfaceNormal (const G4ThreeVector &p) const
 {
 
   G4double ang[3]={0,0,1};
-  G4double position[3]={p.x(),p.y(),p.z()};
+  G4double position[3]={p.x()/cm,p.y()/cm,p.z()/cm}; //convert to cm
 
   fdagmc->get_angle(My_sulf_hit, position, ang);
 
   G4ThreeVector normal = G4ThreeVector(ang[0],ang[1],ang[2]);
 
-  //G4cout<<"SurfaceNormal = "<<normal<<G4endl;
-
   return normal;
 }
-
-
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -343,7 +341,7 @@ G4double DagSolid::DistanceToIn (const G4ThreeVector &p,
 {
 
   G4double minDist = kInfinity;
-  G4double position[3] = {p.x(),p.y(),p.z()};
+  G4double position[3] = {p.x()/cm,p.y()/cm,p.z()/cm}; //convert to cm
   G4double dir[3] = {v.x(),v.y(),v.z()};
   EntityHandle next_surf;
   G4double distance;
@@ -353,6 +351,7 @@ G4double DagSolid::DistanceToIn (const G4ThreeVector &p,
   // perform the ray fire with modified dag call
   fdagmc->ray_fire(fvolEntity,position,dir,next_surf,distance,&history,0,-1);
   history.reset();
+  distance *= cm; // convert back to mm
   
   if ( next_surf == 0 ) // no intersection
     return kInfinity;
@@ -376,11 +375,11 @@ G4double DagSolid::DistanceToIn (const G4ThreeVector &p) const
 {
 
   G4double minDist = kInfinity;
-  G4double point[3]={p.x(), p.y(), p.z()};
+  G4double point[3]={p.x()/cm, p.y()/cm, p.z()/cm}; // convert position to cm
 
   
   fdagmc->closest_to_location(fvolEntity, point, minDist);
-  
+  minDist /= cm; // convert back to mm
   if ( minDist <= kCarTolerance*0.5 )
     return kInfinity;
   else
@@ -413,7 +412,7 @@ G4double DagSolid::DistanceToOut (const G4ThreeVector &p,
                           G4bool *validNorm, G4ThreeVector *n) const
 {
   G4double minDist = kInfinity;
-  double position[3]={p.x(),p.y(),p.z()};
+  double position[3]={p.x()/cm,p.y()/cm,p.z()/cm}; //convert position to cm
   double dir[3]={v.x(),v.y(),v.z()};
 
   EntityHandle next_surf;
@@ -422,6 +421,7 @@ G4double DagSolid::DistanceToOut (const G4ThreeVector &p,
 
   fdagmc->ray_fire(fvolEntity,position,dir,next_surf,next_dist,&history,0,1);
   history.reset();
+  next_dist *= cm; // convert back to mm
 
   if(next_surf == 0 )
     return kInfinity;
@@ -458,9 +458,10 @@ G4double DagSolid::DistanceToOut (const G4ThreeVector &p,
 G4double DagSolid::DistanceToOut (const G4ThreeVector &p) const
 {
   G4double minDist = kInfinity;
-  G4double point[3]={p.x(), p.y(), p.z()};
+  G4double point[3]={p.x()/cm, p.y()/cm, p.z()/cm}; // convert to cm
 
   fdagmc->closest_to_location(fvolEntity, point, minDist);
+  minDist *= cm; // convert back to mm
   if ( minDist < kCarTolerance/2.0 )
     return kInfinity;
   else
@@ -571,32 +572,32 @@ DagSolid::CalculateExtent(const EAxis pAxis,
 }
 
 G4double DagSolid::GetMinXExtent () const
-  {return xMinExtent;}
+  {return xMinExtent/cm;}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 G4double DagSolid::GetMaxXExtent () const
-  {return xMaxExtent;}
+  {return xMaxExtent/cm;}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 G4double DagSolid::GetMinYExtent () const
-  {return yMinExtent;}
+  {return yMinExtent/cm;}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 G4double DagSolid::GetMaxYExtent () const
-  {return yMaxExtent;}
+  {return yMaxExtent/cm;}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 G4double DagSolid::GetMinZExtent () const
-  {return zMinExtent;}
+  {return zMinExtent/cm;}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 G4double DagSolid::GetMaxZExtent () const
-  {return zMaxExtent;}
+  {return zMaxExtent/cm;}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -604,7 +605,7 @@ G4double DagSolid::GetCubicVolume()
 {
   G4double result;
   fdagmc->measure_volume(fvolEntity, result);
-  return result;
+  return result*cm*cm*cm;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -613,6 +614,6 @@ G4double DagSolid::GetSurfaceArea()
 {
   G4double result;
   fdagmc->measure_area(fvolEntity, result);
-  return result;
+  return result*cm*cm;
 }
 
