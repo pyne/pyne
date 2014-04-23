@@ -506,6 +506,9 @@ namespace pyne
   std::vector<std::pair<int, int> > gamma_from_to(double energy, double error);
   //returns a list of parent nuclides associated with an input decay energy
   std::vector<int> gamma_parent(double energy, double error);
+  //returns an array of arrays of X-ray energies and intesities for a 
+  //given parent
+  std::vector<std::vector<std::pair<double, double> > > gamma_xrays(int parent);
 
   /// a struct matching the '/decay/alphas' table in nuc_data.h5.
   typedef struct alpha_struct{
@@ -598,6 +601,9 @@ namespace pyne
   //returns a list of electron capture /beta plus decay children from input 
   //parent nuclide
   std::vector<int> ecbp_child(int parent);
+  //returns an array of arrays of X-ray energies and intesities for a 
+  //given parent
+  std::vector<std::vector<std::pair<double, double> > > ecbp_xrays(int parent);
   /// \}
 
   /// map<energy, map<nuclide, map<rx, xs> > >

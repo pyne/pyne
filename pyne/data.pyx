@@ -1016,7 +1016,25 @@ def gamma_parent(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.gamma_parent(<double> en, <double> enerror)
 
+def gamma_xrays(parent):
+    """
+    Returns an array of arrays of xrays associated with the gamma 
+    rays from an input parent nuclide
+    
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
 
+    Returns
+    -------
+    ratios : array of arrays
+        This returns an array of length 4 arrays containing pairs of energies
+        and intensities of the following X-rays: Ka1, Ka2, Kb, L
+    
+    """
+    return cpp_data.gamma_xrays(<int> parent)
+    
 def alpha_energy(parent):
     """
     Returns a list of alpha energies from ENSDF decay dataset from a given 
@@ -1352,3 +1370,22 @@ def ecbp_child_byparent(parent):
         An array of beta+ children in nuc_id form
     """
     return cpp_data.ecbp_child(<int> parent)
+
+def ecbp_xrays(parent):
+    """
+    Returns an array of arrays of xrays associated with the electron capture 
+    and beta plus decays from an input parent nuclide
+    
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of arrays
+        This returns an array of length 4 arrays containing pairs of energies
+        and intensities of the following X-rays: Ka1, Ka2, Kb, L
+    
+    """
+    return cpp_data.ecbp_xrays(<int> parent)
