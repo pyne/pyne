@@ -4,13 +4,12 @@ import os
 import io
 import re
 import shutil
+from glob import glob
 from warnings import warn
 
-from glob import glob
-try:
-    basestring
-except NameError:
-    basestring = str
+import sys
+if sys.version_info[0] > 2
+  basestring = str
 
 import numpy as np
 import tables as tb
