@@ -173,10 +173,15 @@ def _get_material_info(dag_file):
     # material object
     mat_lib = MaterialLibrary()
     mat = Material()
-    # load material library
-    mat_lib.from_hdf5(dag_file)
 
-    materials =  mat_lib.keys()
+    # load material library
+    try:
+        mat_lib.from_hdf5(dag_file)
+        materials =  mat_lib.keys()
+    except:
+        print "!! There are no materials in the h5m file !!"
+        print " Assuming all volumes contain vacuum "
+        materials = {}
     
     nuclides = set()
 
@@ -975,7 +980,7 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
         file_contents.append('  G4LogicalVolume* '+volume+'_log = new G4LogicalVolume('+volume+','+material+',"'+volume+'_log",0,0,0);\n')
         # set the visualisation
         if "Vacuum" in material:
-            file_contents.append('  '+volume+'_log->SetVisAttributes(invis);')
+            file_contents.append('  '+volume+'_log->SetVisAttributes(invis); \n')
         else:
             mat_num = int(material.split('_')[1])
             colors = RGB_tuples[mat_num-1]
@@ -999,7 +1004,7 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
         for volume_name in dag_volume_names:
             volume = "vol_"+volume_name
             file_contents.append('  G4MultiFunctionalDetector* '+volume+'_det = new G4MultiFunctionalDetector("'+volume+'_flux");\n')
-            if dag_volume_names.index(volume) == 0:
+            if dag_volume_names.index(volume_name) == 0:
                 file_contents.append('  G4VPrimitiveScorer* primitive;\n')
 
             file_contents.append('  primitive = new G4PSTrackLength("TrackLength");\n')
