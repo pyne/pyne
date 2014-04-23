@@ -3,13 +3,10 @@ from __future__ import print_function
 import os
 import io
 import re
+import sys
 import shutil
 from glob import glob
 from warnings import warn
-
-import sys
-if sys.version_info[0] > 2
-  basestring = str
 
 import numpy as np
 import tables as tb
@@ -17,6 +14,9 @@ import tables as tb
 from .. import nucname
 from ..utils import failure
 from .api import BASIC_FILTERS
+
+if sys.version_info[0] > 2
+  basestring = str
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
