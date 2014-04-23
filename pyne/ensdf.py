@@ -575,44 +575,6 @@ def _parse_delayed_particle_record(dp_rec):
     return ptype, e, de, ip, dip, ei, t, dt
 
 
-def _update_xrays(conv, xrays, nuc_id):
-    """
-    Update X-ray data for a given decay
-    """
-    z = nucname.znum(nuc_id)
-    xka1 = 0
-    xka2 = 0
-    xkb = 0
-    xl = 0
-    if 'K' in conv and conv['K'][0] is not None:
-        if not np.isnan(conv['K'][0]):
-            xk = _xraydat[z - 1, 1] * conv['K'][0]
-            xka = xk / (1.0 + _xraydat[z - 1, 14])
-            xka1 = xka / (1.0 + _xraydat[z - 1, 16])
-            xka2 = xka - xka1
-            xkb = xk - xka
-            if 'L' in conv and conv['L'][0] is not None:
-                if not np.isnan(conv['L'][0]):
-                    xl = _xraydat[z - 1, 3] * \
-                         (conv['L'][0] + conv['K'][0] * _xraydat[z - 1, 5])
-                else:
-                    xl = 0
-            else:
-                xl = 0
-        elif 'L' in conv and conv['L'][0] is not None:
-            if not np.isnan(conv['L'][0]):
-                xl = _xraydat[z - 1, 3] * (conv['L'][0])
-    elif 'L' in conv and conv['L'][0] is not None:
-        if not np.isnan(conv['L'][0]):
-            xl = _xraydat[z - 1, 3] * (conv['L'][0])
-
-    xrays = np.array([_xraydat[z - 1, 20], xka1 + xrays[1],
-                      _xraydat[z - 1, 22], xka2 + xrays[3],
-                      _xraydat[z - 1, 24], xkb + xrays[5],
-                      _xraydat[z - 1, 25], xl + xrays[7]])
-    return xrays
-
-
 def _parse_decay_dataset(lines, decay_s):
     """
     This parses a gamma ray dataset. It returns a tuple of the parsed data.
