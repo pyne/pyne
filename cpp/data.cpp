@@ -913,6 +913,165 @@ size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data){
   return result;
 };
 
+template<typename U> double pyne::data_access(int nuc, 
+size_t valoffset, std::map<int, U> &data){
+  typename std::map<int, U>::iterator nuc_iter,
+   nuc_end;
+  nuc_iter = data.find(nuc);
+  nuc_end = data.end();
+  // First check if we already have the nuc in the map
+  if (nuc_iter != nuc_end){
+    return *(double *)((char *)&(nuc_iter->second) + valoffset);
+  }
+  // Next, fill up the map with values from the
+  // nuc_data.h5, if the map is empty.
+  if (data.empty())
+  {
+    _load_data<U>();
+    return data_access<U>(nuc, valoffset, data);
+  };
+  throw pyne::nucname::NotANuclide(nuc, "");
+};
+
+
+//
+// Load atomic data
+//
+
+std::map<int, pyne::atomic_struct> pyne::atomic_data_map;
+
+template<> void pyne::_load_data<pyne::atomic_struct>() {
+  // Loads the atomic table into memory
+  herr_t status;
+
+  //Check to see if the file is in HDF5 format.
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
+    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
+    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+
+  // Get the HDF5 compound type (table) description
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(atomic_struct));
+  status = H5Tinsert(desc, "z", HOFFSET(atomic_struct, z),
+                      H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "k_shell_fluor", HOFFSET(atomic_struct, k_shell_fluor),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_shell_fluor_error", HOFFSET(atomic_struct, k_shell_fluor_error),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_shell_fluor", HOFFSET(atomic_struct, l_shell_fluor),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_shell_fluor_error", HOFFSET(atomic_struct, l_shell_fluor_error),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "prob", HOFFSET(atomic_struct, prob), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_shell_be", HOFFSET(atomic_struct, k_shell_be),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_shell_be_err", HOFFSET(atomic_struct, k_shell_be_err),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "li_shell_be", HOFFSET(atomic_struct, li_shell_be),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "li_shell_be_err", HOFFSET(atomic_struct, li_shell_be_err),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "mi_shell_be", HOFFSET(atomic_struct, mi_shell_be),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "mi_shell_be_err", HOFFSET(atomic_struct, mi_shell_be_err),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ni_shell_be", HOFFSET(atomic_struct, ni_shell_be),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ni_shell_be_err", HOFFSET(atomic_struct, ni_shell_be_err),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "kb_to_ka", HOFFSET(atomic_struct, kb_to_ka),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "kb_to_ka_err", HOFFSET(atomic_struct, kb_to_ka_err),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ka2_to_ka1", HOFFSET(atomic_struct, ka2_to_ka1),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ka2_to_ka1_err", HOFFSET(atomic_struct, ka2_to_ka1_err),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_auger", HOFFSET(atomic_struct, l_auger), 
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "k_auger", HOFFSET(atomic_struct, k_auger),
+                     H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ka1_x_ray_en", HOFFSET(atomic_struct, ka1_x_ray_en),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ka1_x_ray_en_err", HOFFSET(atomic_struct, ka1_x_ray_en_err),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ka2_x_ray_en", HOFFSET(atomic_struct, ka2_x_ray_en),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ka2_x_ray_en_err", HOFFSET(atomic_struct, ka2_x_ray_en_err),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "kb_x_ray_en", HOFFSET(atomic_struct, kb_x_ray_en),
+                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "l_x_ray_en", HOFFSET(atomic_struct, l_x_ray_en),
+                      H5T_NATIVE_DOUBLE);
+                      
+  // Open the HDF5 file
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, 
+                              H5P_DEFAULT);
+  // Open the data set
+  hid_t atomic_set = H5Dopen2(nuc_data_h5, "/decay/atomic", H5P_DEFAULT);
+  hid_t atomic_space = H5Dget_space(atomic_set);
+  int atomic_length = H5Sget_simple_extent_npoints(atomic_space);
+
+  // Read in the data
+  atomic_struct * atomic_array = new atomic_struct[atomic_length];
+  status = H5Dread(atomic_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+                   atomic_array);
+
+  // close the nuc_data library, before doing anything stupid
+  status = H5Dclose(atomic_set);
+  status = H5Fclose(nuc_data_h5);
+
+  for (int i = 0; i < atomic_length; ++i) {
+      atomic_data_map[atomic_array[i].z] = atomic_array[i];
+  }
+  
+  delete[] atomic_array;
+
+}
+
+std::vector<std::pair<double, double> >
+  pyne::calculate_xray_data(int z, double k_conv, double l_conv) {
+  double xk = 0;
+  double xka = 0;
+  double xka1 = 0;
+  double xka2 = 0;
+  double xkb = 0;
+  double xl = 0;
+  if (!isnan(k_conv)) {
+    xk = data_access<atomic_struct> (z, offsetof(atomic_struct, k_shell_fluor),
+     atomic_data_map)*k_conv;
+    xka = xk / (1.0 + data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     kb_to_ka), atomic_data_map));
+    xka1 = xka / (1.0 + data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     ka2_to_ka1), atomic_data_map));
+    xka2 = xka - xka1;
+    xkb = xk - xka;
+    if (!isnan(l_conv)) {
+        xl = (l_conv + k_conv*data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     prob), atomic_data_map))*data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     l_shell_fluor), atomic_data_map);
+    }
+  } else if (!isnan(l_conv)) {
+    xl = l_conv*data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     l_shell_fluor), atomic_data_map);
+  }
+  std::vector<std::pair<double, double> > result;
+  result.push_back(std::make_pair(data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     ka1_x_ray_en), atomic_data_map),xka1));
+  result.push_back(std::make_pair(data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     ka2_x_ray_en), atomic_data_map),xka2));
+  result.push_back(std::make_pair(data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     kb_x_ray_en), atomic_data_map),xkb));
+  result.push_back(std::make_pair(data_access<atomic_struct> (z, offsetof(atomic_struct, 
+     l_x_ray_en), atomic_data_map),xl));
+
+  return result;
+}
+
+
 //
 // Load level data
 //
@@ -1481,6 +1640,24 @@ std::vector<int> pyne::gamma_parent(double energy, double error) {
     offsetof(gamma_struct, parent_nuc), gamma_data);
 };
 
+
+std::vector<std::vector<std::pair<double, double> > > 
+  pyne::gamma_xrays(int parent) {
+  std::vector<std::vector<std::pair<double, double> > > result;
+  std::vector<double> k_list = data_access<double, gamma_struct>(parent, 0.0, DBL_MAX,
+    offsetof(gamma_struct, k_conv_e), gamma_data);
+  std::vector<double> l_list = data_access<double, gamma_struct>(parent, 0.0, DBL_MAX,
+    offsetof(gamma_struct, l_conv_e), gamma_data);
+  std::vector<int> nuc_list = data_access<int, gamma_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(gamma_struct, from_nuc), gamma_data);
+  for(int i = 0; i < k_list.size(); ++i){
+    result.push_back(calculate_xray_data(nucname::znum(nuc_list[i]), k_list[i], 
+                                         l_list[i]));
+  }
+  return result;
+};
+
+
 std::map<std::pair<int, double>, pyne::alpha_struct> pyne::alpha_data;
 
 template<> void pyne::_load_data<pyne::alpha_struct>() {
@@ -1736,6 +1913,21 @@ std::vector<int> pyne::ecbp_child(int parent){
                      offsetof(ecbp_struct, to_nuc), ecbp_data);
 };
 
+std::vector<std::vector<std::pair<double, double> > > 
+  pyne::ecbp_xrays(int parent) {
+  std::vector<std::vector<std::pair<double, double> > > result;
+  std::vector<double> k_list = data_access<double, ecbp_struct>(parent, 0.0, DBL_MAX,
+    offsetof(ecbp_struct, k_conv_e), ecbp_data);
+  std::vector<double> l_list = data_access<double, ecbp_struct>(parent, 0.0, DBL_MAX,
+    offsetof(ecbp_struct, l_conv_e), ecbp_data);
+  std::vector<int> nuc_list = data_access<int, ecbp_struct>(parent, 0.0, 
+    DBL_MAX, offsetof(ecbp_struct, from_nuc), ecbp_data);
+  for(int i = 0; i < k_list.size(); ++i){
+    result.push_back(calculate_xray_data(nucname::znum(nuc_list[i]), k_list[i], 
+                                         l_list[i]));
+  }
+  return result;
+};
 
 //////////////////////////////////////////
 //////////// simple xs data //////////////

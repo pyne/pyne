@@ -1,10 +1,5 @@
 from __future__ import division
 import re
-try:
-    import urllib.request as urllib
-except ImportError:
-    import urllib
-import os
 import warnings
 import copy
 
@@ -61,22 +56,6 @@ def _getvalue(obj, fn=float, rn=None):
         return rn
 
 
-def _readpoint(line, dstart, dlen):
-    data = _getvalue(line[dstart:dstart + dlen])
-    error = _getvalue(line[dstart + dlen:dstart + dlen + 2])
-    return data, error
-
-
-def _read_variablepoint(line, dstart, dlen):
-    sub = line[dstart:dstart + dlen + 2].split()
-    data = None
-    error = None
-    if len(sub) == 2:
-        data = _getvalue(sub[0])
-        error = _getvalue(sub[1])
-    return data, error
-
-
 def _to_id_from_level(nuc_id, level, levellist, lmap):
     nid = _to_id(nuc_id)
     gparent = nid
@@ -90,48 +69,6 @@ def _to_id_from_level(nuc_id, level, levellist, lmap):
             if int(nid // 10000) != int(levellist[i][0] // 10000):
                 break
     return gparent
-
-
-def _build_xray_table():
-    i = 0
-    j = 0
-    dat = np.zeros((105, 26))
-    medfile = os.path.join(os.path.dirname(__file__), 'mednew.dat')
-    if not os.path.isfile(medfile):
-        urllib.urlretrieve('http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/'
-                           + 'analysis/radlst/mednew.dat', medfile)
-    with open(medfile, 'r') as f:
-        lines = f.readlines()
-    for line in lines:
-        if (-1) ** i == 1:
-            Z = int(line[0:3])
-            k_shell_fluor, k_shell_fluor_error = _readpoint(line, 9, 6)
-            l_shell_fluor, l_shell_fluor_error = _readpoint(line, 18, 6)
-            #Probability of creating L-shell vacancy by filling K-shell vacancy
-            prob, prob_error = _readpoint(line, 27, 6)
-            k_shell_be, k_shell_be_err = _readpoint(line, 36, 8)
-            li_shell_be, li_shell_be_err = _readpoint(line, 47, 8)
-            mi_shell_be, mi_shell_be_err = _readpoint(line, 58, 8)
-            ni_shell_be, ni_shell_be_err = _readpoint(line, 69, 8)
-        else:
-            Kb_to_Ka, Kb_to_Ka_err = _read_variablepoint(line, 9, 7)
-            Ka2_to_Ka1, Ka2_to_Ka1_err = _read_variablepoint(line, 19, 7)
-            L_auger = _getvalue(line[29:36])
-            K_auger = _getvalue(line[36:42])
-            Ka1_X_ray_en, Ka1_X_ray_en_err = _readpoint(line, 43, 8)
-            Ka2_X_ray_en, Ka2_X_ray_en_err = _readpoint(line, 54, 7)
-            Kb_X_ray_en = _getvalue(line[65:69])
-            L_X_ray_en = _getvalue(line[70:76])
-            dat[j] = Z, k_shell_fluor, k_shell_fluor_error, l_shell_fluor, \
-                     l_shell_fluor_error, prob, k_shell_be, k_shell_be_err, \
-                     li_shell_be, li_shell_be_err, mi_shell_be, \
-                     mi_shell_be_err, ni_shell_be, ni_shell_be_err, \
-                     Kb_to_Ka, Kb_to_Ka_err, Ka2_to_Ka1, Ka2_to_Ka1_err, \
-                     L_auger, K_auger, Ka1_X_ray_en, Ka1_X_ray_en_err, \
-                     Ka2_X_ray_en, Ka2_X_ray_en_err, Kb_X_ray_en, L_X_ray_en
-            j += 1
-        i += 1
-    return dat
 
 
 def _to_id(nuc):
@@ -636,44 +573,6 @@ def _parse_delayed_particle_record(dp_rec):
     ei = _getvalue(dp_rec.group(7))
     t, dt = _to_time(dp_rec.group(8), dp_rec.group(9))
     return ptype, e, de, ip, dip, ei, t, dt
-
-
-def _update_xrays(conv, xrays, nuc_id):
-    """
-    Update X-ray data for a given decay
-    """
-    z = nucname.znum(nuc_id)
-    xka1 = 0
-    xka2 = 0
-    xkb = 0
-    xl = 0
-    if 'K' in conv and conv['K'][0] is not None:
-        if not np.isnan(conv['K'][0]):
-            xk = _xraydat[z - 1, 1] * conv['K'][0]
-            xka = xk / (1.0 + _xraydat[z - 1, 14])
-            xka1 = xka / (1.0 + _xraydat[z - 1, 16])
-            xka2 = xka - xka1
-            xkb = xk - xka
-            if 'L' in conv and conv['L'][0] is not None:
-                if not np.isnan(conv['L'][0]):
-                    xl = _xraydat[z - 1, 3] * \
-                         (conv['L'][0] + conv['K'][0] * _xraydat[z - 1, 5])
-                else:
-                    xl = 0
-            else:
-                xl = 0
-        elif 'L' in conv and conv['L'][0] is not None:
-            if not np.isnan(conv['L'][0]):
-                xl = _xraydat[z - 1, 3] * (conv['L'][0])
-    elif 'L' in conv and conv['L'][0] is not None:
-        if not np.isnan(conv['L'][0]):
-            xl = _xraydat[z - 1, 3] * (conv['L'][0])
-
-    xrays = np.array([_xraydat[z - 1, 20], xka1 + xrays[1],
-                      _xraydat[z - 1, 22], xka2 + xrays[3],
-                      _xraydat[z - 1, 24], xkb + xrays[5],
-                      _xraydat[z - 1, 25], xl + xrays[7]])
-    return xrays
 
 
 def _parse_decay_dataset(lines, decay_s):
@@ -1217,5 +1116,3 @@ def gamma_rays(f):
                             decaylist.append(decay)
     return decaylist
 
-
-_xraydat = _build_xray_table()
