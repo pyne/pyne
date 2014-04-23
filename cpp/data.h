@@ -309,7 +309,7 @@ namespace pyne
   
   /// Structure for atomic data
   typedef struct atomic_struct{
-    int Z;
+    int z;
     double k_shell_fluor;
     double k_shell_fluor_error;
     double l_shell_fluor;
@@ -323,18 +323,18 @@ namespace pyne
     double mi_shell_be_err;
     double ni_shell_be;
     double ni_shell_be_err;
-    double Kb_to_Ka;
-    double Kb_to_Ka_err;
-    double Ka2_to_Ka1;
-    double Ka2_to_Ka1_err;
-    double L_auger;
-    double K_auger;
-    double Ka1_X_ray_en;
-    double Ka1_X_ray_en_err;
-    double Ka2_X_ray_en;
-    double Ka2_X_ray_en_err;
-    double Kb_X_ray_en;
-    double L_X_ray_en;
+    double kb_to_ka;
+    double kb_to_ka_err;
+    double ka2_to_ka1;
+    double ka2_to_ka1_err;
+    double l_auger;
+    double k_auger;
+    double ka1_x_ray_en;
+    double ka1_x_ray_en_err;
+    double ka2_x_ray_en;
+    double ka2_x_ray_en_err;
+    double kb_x_ray_en;
+    double l_x_ray_en;
   } atomic_struct;
   
   // map of Z to atomic data
@@ -345,7 +345,7 @@ namespace pyne
   
   // compute X-ray data
   std::vector<std::pair<double, double> >
-  calculate_xray_data(int Z, double k_conv, double l_conv);
+  calculate_xray_data(int z, double k_conv, double l_conv);
   
   
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.

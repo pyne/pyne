@@ -190,7 +190,7 @@ ecbp_dtype = np.dtype([
 
 
 atomic_dtype = np.dtype([
-    ('Z', int),
+    ('z', int),
     ('k_shell_fluor', float),
     ('k_shell_fluor_error', float),
     ('l_shell_fluor', float),
@@ -204,18 +204,18 @@ atomic_dtype = np.dtype([
     ('mi_shell_be_err', float),
     ('ni_shell_be', float),
     ('ni_shell_be_err', float),
-    ('Kb_to_Ka', float),
-    ('Kb_to_Ka_err', float),
-    ('Ka2_to_Ka1', float),
-    ('Ka2_to_Ka1_err', float),
-    ('L_auger', float),
-    ('K_auger', float),
-    ('Ka1_X_ray_en', float),
-    ('Ka1_X_ray_en_err', float),
-    ('Ka2_X_ray_en', float),
-    ('Ka2_X_ray_en_err', float),
-    ('Kb_X_ray_en', float),
-    ('L_X_ray_en', float),
+    ('kb_to_ka', float),
+    ('kb_to_ka_err', float),
+    ('ka2_to_ka1', float),
+    ('ka2_to_ka1_err', float),
+    ('l_auger', float),
+    ('k_auger', float),
+    ('ka1_x_ray_en', float),
+    ('ka1_x_ray_en_err', float),
+    ('ka2_x_ray_en', float),
+    ('ka2_x_ray_en_err', float),
+    ('kb_x_ray_en', float),
+    ('l_x_ray_en', float),
 ])
 
 
@@ -321,7 +321,7 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
         db.createGroup('/', 'decay', 'ENSDF Decay data')
 
     atomic_table = db.createTable('/decay/', 'atomic', xrd,
-                              'Z'
+                              'z'
                               'k_shell_fluor'
                               'k_shell_fluor_error'
                               'l_shell_fluor'
@@ -335,18 +335,18 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
                               'mi_shell_be_err'
                               'ni_shell_be'
                               'ni_shell_be_err'
-                              'Kb_to_Ka'
-                              'Kb_to_Ka_err'
-                              'Ka2_to_Ka1'
-                              'Ka2_to_Ka1_err'
-                              'L_auger'
-                              'K_auger'
-                              'Ka1_X_ray_en'
-                              'Ka1_X_ray_en_err'
-                              'Ka2_X_ray_en'
-                              'Ka2_X_ray_en_err'
-                              'Kb_X_ray_en'
-                              'L_X_ray_en',
+                              'kb_to_ka'
+                              'kb_to_ka_err'
+                              'ka2_to_ka1'
+                              'ka2_to_ka1_err'
+                              'k_auger'
+                              'k_auger'
+                              'ka1_x_ray_en'
+                              'ka1_x_ray_en_err'
+                              'ka2_x_ray_en'
+                              'ka2_x_ray_en_err'
+                              'kb_x_ray_en'
+                              'l_x_ray_en',
                               expectedrows=103)
     atomic_table.flush()
     db.close()
