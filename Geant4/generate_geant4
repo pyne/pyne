@@ -638,19 +638,19 @@ def _setup_dagspecific_headers(dag_volume_names, tallies_needed):
 
     if tallies_needed:
         if len(dag_volume_names) == 1:
-            file_contents.append('  void PrintEventStatistics(G4double '+str(dag_volume_names[0])+'_tracklength) const;\n')
+            file_contents.append('  void PrintEventStatistics(G4double vol_'+str(dag_volume_names[0])+'_tracklength) const;\n')
         else:
-            file_contents.append('  void PrintEventStatistics(G4double '+str(dag_volume_names[0])+'_tracklength, \n')
+            file_contents.append('  void PrintEventStatistics(G4double vol_'+str(dag_volume_names[0])+'_tracklength, \n')
             for i in range(1,len(dag_volume_names)-1):
-                file_contents.append('			          G4double '+str(dag_volume_names[i])+'_tracklength,\n')
-            file_contents.append('                            G4double '+str(dag_volume_names[-1])+'_tracklength) const;\n')
+                file_contents.append('			          G4double vol_'+str(dag_volume_names[i])+'_tracklength,\n')
+            file_contents.append('                            G4double vol_'+str(dag_volume_names[-1])+'_tracklength) const;\n')
 
     file_contents.append('  \n')
     file_contents.append('  // data members                   \n')
     # data objecs to index detectors
     if tallies_needed:
         for vol in dag_volume_names:
-            file_contents.append('  G4int  '+str(vol)+'_tl_HCID;\n')
+            file_contents.append('  G4int  vol_'+str(vol)+'_tl_HCID;\n')
 
     file_contents.append('};\n')
     file_contents.append('                     \n')
@@ -1049,9 +1049,9 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
     # for each volume if scoring
         for idx in range(0,len(dag_volume_names)-1):
             volume = dag_volume_names[idx]
-            file_contents.append('   '+volume+'_tl_HCID(-1),\n')
+            file_contents.append('   vol_'+volume+'_tl_HCID(-1),\n')
         volume = dag_volume_names[-1]
-        file_contents.append('   '+volume+'_tl_HCID(-1)\n')
+        file_contents.append('   vol_'+volume+'_tl_HCID(-1)\n')
     else:
         file_contents.append(' : G4UserEventAction() \n')
 
@@ -1102,9 +1102,9 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
 
         # for each volume if scoring
         for idx in range(0,len(dag_volume_names)-1):
-            volume = dag_volume_names[idx]
+            volume = 'vol_'+dag_volume_names[idx]
             file_contents.append('                            G4double '+volume+'_tracklength, \n')
-        volume = dag_volume_names[-1]
+        volume = "vol_"+dag_volume_names[-1]
         file_contents.append('                            G4double '+volume+'_tracklength) const \n')
 
         file_contents.append('{\n')
@@ -1113,6 +1113,7 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
 
         # for each volume print scores
         for volume in dag_volume_names:
+            volume = "vol_"+volume
             file_contents.append('  G4cout\n')
             file_contents.append('     << "   '+volume+': total tracklength: " \n')
             file_contents.append('     << std::setw(7) << G4BestUnit('+volume+'_tracklength, "Length")\n')
@@ -1136,13 +1137,13 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
     if tallies_needed:
         file_contents.append('   // Get hist collections IDs\n')
         # if initialisation
-        volume = dag_volume_names[0] 
+        volume = "vol_"+dag_volume_names[0] 
         file_contents.append('  if ( '+volume+'_tl_HCID == -1 ) {\n')
         file_contents.append('      // name has to match that in detector construction?!\n')
         # for each volume print scores
         for volume in dag_volume_names:
-            file_contents.append('    '+volume+'_tl_HCID\n')
-            file_contents.append('      = G4SDManager::GetSDMpointer()->GetCollectionID("'+volume+'_flux/TrackLength");\n')
+            file_contents.append('    vol_'+volume+'_tl_HCID\n')
+            file_contents.append('      = G4SDManager::GetSDMpointer()->GetCollectionID("vol_'+volume+'_flux/TrackLength");\n')
 
         file_contents.append('  }\n')
         file_contents.append('  \n')
@@ -1151,6 +1152,7 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
 
         # for each volume print scores
         for volume in dag_volume_names:
+            volume = "vol_"+volume
             file_contents.append('  G4double '+volume+'_tracklength = GetSum(GetHitsCollection('+volume+'_tl_HCID, event));\n')
         file_contents.append('\n')
         file_contents.append('  // get analysis manager\n')
@@ -1160,8 +1162,8 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
         file_contents.append('  //  \n')
 
         # for each volume print scores
-        for idx in range(0,len(dag_volume_names)-1):
-            volume = dag_volume_names[idx]
+        for idx in range(0,len(dag_volume_names)):
+            volume = "vol_"+dag_volume_names[idx]
             file_contents.append('  analysisManager->FillH1('+str(idx+1)+', '+volume+'_tracklength);\n')
 
             file_contents.append('  \n')
@@ -1169,8 +1171,8 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
             file_contents.append('  //\n')
 
         # for each volume print scores
-        for idx in range(0,len(dag_volume_names)-1):
-            volume = dag_volume_names[idx]
+        for idx in range(0,len(dag_volume_names)):
+            volume = "vol_"+dag_volume_names[idx]
             file_contents.append('  analysisManager->FillNtupleDColumn('+str(idx)+', '+volume+'_tracklength);\n')
 
         file_contents.append('  analysisManager->AddNtupleRow();  \n')
@@ -1189,6 +1191,7 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
             # for each volume print scores
             for volume in dag_volume_names:
                 idx = dag_volume_names.index(volume)
+                volume = "vol_"+volume
                 if idx != len(dag_volume_names)-1:
                     file_contents.append('                         '+volume+'_tracklength, \n')
                 else:
@@ -1310,6 +1313,7 @@ def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, da
 
         for volume in dag_volume_names:
             idx = dag_volume_names.index(volume)
+            volume = "vol_"+volume
             file_contents.append('    G4cout << " '+volume+' : mean = " \n')
             file_contents.append('       << G4BestUnit(analysisManager->GetH1('+str(idx+1)+')->mean(), "Length") \n')
             file_contents.append('       << " rms = " \n')
