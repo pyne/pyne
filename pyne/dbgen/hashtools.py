@@ -1,7 +1,6 @@
 """
 Tools to generate, set and check the hashes of datasets in pyne.
 """
-
 import hashlib
 from warnings import warn
 

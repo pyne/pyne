@@ -1,5 +1,4 @@
 """This module provides a way to grab and store raw data for atomic mass."""
-
 from __future__ import print_function
 import os
 import re

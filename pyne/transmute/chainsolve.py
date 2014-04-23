@@ -1,6 +1,5 @@
 """This module implements an ALARA-like chain-based transmutation solver.
 """
-
 from __future__ import division
 from warnings import warn
 

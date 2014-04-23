@@ -1,6 +1,5 @@
 """This module provides a cross section cache which automatically extracts 
 cross-sections from provided nuclear data sets."""
-
 from warnings import warn
 
 from itertools import product

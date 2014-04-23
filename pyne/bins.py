@@ -1,5 +1,4 @@
 """Module for tools to generate and handle various binning structures."""
-
 from warnings import warn
 
 import numpy as np

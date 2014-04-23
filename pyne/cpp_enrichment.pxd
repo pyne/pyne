@@ -1,8 +1,7 @@
 """Cython header for enrichment library."""
+from libcpp.string cimport string as std_string
 
 from warnings import warn
-
-from libcpp.string cimport string as std_string
 
 from pyne cimport cpp_material
 

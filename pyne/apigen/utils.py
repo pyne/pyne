@@ -1,5 +1,4 @@
 """Utility functions for pyne.apigen"""
-
 import re
 from warnings import warn
 

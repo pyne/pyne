@@ -1,21 +1,17 @@
 from __future__ import print_function, division, unicode_literals
 
-from pyne cimport cpp_dagmc_bridge
+# Python imports
+import sys
+from contextlib import contextmanager
+from warnings import warn
 
 cimport numpy as np
 import numpy as np
 
-# Python imports
-import sys
-from contextlib import contextmanager
-
-from numpy.linalg import norm
-
-np.import_array()
-
+from pyne cimport cpp_dagmc_bridge
 from pyne.mesh import Mesh
-
-from warnings import warn
+from numpy.linalg import norm
+np.import_array()
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

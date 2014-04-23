@@ -1,5 +1,4 @@
 """This module provides a way to locate, parse, and store CINDER cross sections."""
-
 from __future__ import print_function
 import os
 import io

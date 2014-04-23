@@ -4,7 +4,6 @@
 Fortran formatted records.
 
 """
-
 import struct
 from collections import Iterable
 from warnings import warn

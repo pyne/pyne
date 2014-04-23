@@ -1,5 +1,4 @@
 """Plotting routines for spectrometry modules"""
-
 from warnings import warn
 
 import matplotlib.pyplot as plt

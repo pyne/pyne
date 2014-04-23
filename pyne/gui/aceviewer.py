@@ -5,7 +5,6 @@ module.
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>
 """
-
 import sys
 from bisect import bisect_right
 from warnings import warn

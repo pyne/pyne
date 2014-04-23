@@ -5,7 +5,6 @@ q_value, and the percent of q coming from gammas. This data is from
 'ORIGEN-S DECAY DATA LIBRARY AND HALF-LIFE UNCERTAINTIES' 
 (http://web.ornl.gov/~webworks/cppr/y2001/rpt/97914.pdf)
 """
-
 from __future__ import print_function
 import csv
 import os

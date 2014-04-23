@@ -17,7 +17,6 @@ an appropriate acknowledgement to the source of data. One may not charge any
 subsequent fee for these data.
 
 """
-
 from __future__ import print_function
 import os
 import re

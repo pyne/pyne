@@ -2,7 +2,6 @@
 lengths.  This data comes from Neutron News, Vol. 3, No. 3, 1992, pp. 29-37 via 
 a NIST webpage (http://www.ncnr.nist.gov/resources/n-lengths/list.html).  Please
 contact Alan Munter, <alan.munter@nist.gov> for more information."""
-
 from __future__ import print_function
 import os
 import re

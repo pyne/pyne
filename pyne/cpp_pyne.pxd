@@ -1,10 +1,9 @@
 """C++ wrapper for pyne library header."""
-
 from libcpp.map cimport map
 from libcpp.set cimport set
-
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector
+
 from warnings import warn
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
