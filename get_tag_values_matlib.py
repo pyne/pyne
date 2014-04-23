@@ -98,7 +98,7 @@ def check_matname(tag_values):
         if tag[0:3] == 'mat':
         # split on the basis of "/" being delimiter and split colons from
         # name
-            if 'Graveyard' or 'graveyard' in tag:
+            if 'Graveyard'in tag or 'graveyard' in tag:
                 g = 1
                 continue
             if '/' in tag:
