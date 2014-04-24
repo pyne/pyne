@@ -468,6 +468,7 @@ def test_groundstate():
     assert_equal(nucname.groundstate("94-Pu-239"), 942390000)
     assert_equal(nucname.groundstate("95-Am-242"), 952420000)
 
+
 def test_sza_to_id():
     vals = [2004, 2004, 96244, 94239, 1095242, 2004, 95242, 1095242, 1092236, 
             4095242, 1095242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 
