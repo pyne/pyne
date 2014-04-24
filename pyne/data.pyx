@@ -502,7 +502,7 @@ def half_life(nuc, use_metastable=True):
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide.
+        Input nuclide, if metastable is false this uses state_id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True.
@@ -539,7 +539,7 @@ def decay_const(nuc, use_metastable=True):
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide.
+        Input nuclide, if metastable is false this uses state_id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True.
@@ -574,9 +574,9 @@ def branch_ratio(from_nuc, to_nuc, use_metastable=True):
     Parameters
     ----------
     from_nuc : int or str 
-        Parent nuclide.
+        Parent nuclide, if metastable is false this uses state id
     to_nuc : int or str 
-        Child nuclide.
+        Child nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True.
@@ -624,7 +624,7 @@ def state_energy(nuc, use_metastable=True):
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide.
+        Input nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True
@@ -659,7 +659,7 @@ def decay_children(nuc, use_metastable=True):
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide.
+        Input nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True
@@ -694,7 +694,7 @@ def decay_children(nuc, use_metastable=True):
 
 def id_from_level(nuc, level, special=""):
     """
-    return the nuc_id for input energy level
+    return the state_id for input energy level
 
     Parameters
     ----------
@@ -708,7 +708,7 @@ def id_from_level(nuc, level, special=""):
     Returns
     -------
     nuc : int
-        nuc_id of state
+        state_id of state
     """
     cdef std_string spc
     if len(special) == 1:
@@ -735,7 +735,7 @@ def metastable_id(nuc, level=1):
     Returns
     -------
     nuc : int
-        nuc_id of metastable state
+        state_id of metastable state
     """
     return cpp_data.metastable_id(<int> nuc, <int> level)
 
@@ -746,9 +746,9 @@ def decay_half_life(from_nuc, to_nuc):
     Parameters
     ----------
     from_nuc : int
-        parent nuclide
+        parent nuclide in state_id form
     to_nuc : int
-        child nuclide
+        child nuclide in state_id form
 
     Returns
     -------
@@ -767,7 +767,7 @@ def decay_half_life_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -784,9 +784,9 @@ def decay_branch_ratio(from_nuc, to_nuc):
     Parameters
     ----------
     from_nuc : int
-        parent nuclide
+        parent nuclide in state_id form
     to_nuc : int
-        child nuclide
+        child nuclide in state_id form
 
     Returns
     -------
@@ -804,7 +804,7 @@ def decay_branch_ratio_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -821,9 +821,9 @@ def decay_photon_branch_ratio(from_nuc, to_nuc):
     Parameters
     ----------
     from_nuc : int
-        parent nuclide
+        parent nuclide in state_id form
     to_nuc : int
-        child nuclide
+        child nuclide in state_id form
 
     Returns
     -------
@@ -841,7 +841,7 @@ def decay_photon_branch_ratio_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -859,9 +859,9 @@ def decay_beta_branch_ratio(from_nuc, to_nuc):
     Parameters
     ----------
     from_nuc : int
-        parent nuclide
+        parent nuclide in state_id form
     to_nuc : int
-        child nuclide
+        child nuclide in state_id form
 
     Returns
     -------
@@ -879,7 +879,7 @@ def decay_beta_branch_ratio_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -898,7 +898,7 @@ def gamma_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -915,7 +915,7 @@ def gamma_photon_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -932,7 +932,7 @@ def gamma_conversion_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -949,7 +949,7 @@ def gamma_total_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -966,12 +966,12 @@ def gamma_from_to_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
     ratios : array of pairs
-        An array of gamma ray level pairs in nuc_id form
+        An array of gamma ray level pairs in state_id form
     """
     return cpp_data.gamma_from_to(<int> parent)
     
@@ -991,7 +991,7 @@ def gamma_from_to_byen(en, enerror=None):
     Returns
     -------
     ratios : array of pairs
-        An array of gamma ray level pairs in nuc_id form
+        An array of gamma ray level pairs in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -1013,7 +1013,7 @@ def gamma_parent(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of gamma ray parents in nuc_id form
+        An array of gamma ray parents in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -1027,7 +1027,7 @@ def gamma_xrays(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1046,7 +1046,7 @@ def alpha_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1063,7 +1063,7 @@ def alpha_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1088,7 +1088,7 @@ def alpha_parent(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of alpha parents in nuc_id form
+        An array of alpha parents in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -1110,7 +1110,7 @@ def alpha_child_byen(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of alpha children in nuc_id form
+        An array of alpha children in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -1124,12 +1124,12 @@ def alpha_child_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
     ratios : array of ints
-        An array of alpha children in nuc_id form
+        An array of alpha children in state_id form
     """
     return cpp_data.alpha_child(<int> parent)
 
@@ -1141,7 +1141,7 @@ def beta_endpoint_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1158,7 +1158,7 @@ def beta_average_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1175,7 +1175,7 @@ def beta_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1236,12 +1236,12 @@ def beta_child_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
     ratios : array of ints
-        An array of beta- children in nuc_id form
+        An array of beta- children in state_id form
     """
     return cpp_data.beta_child(<int> parent)
 
@@ -1253,7 +1253,7 @@ def ecbp_endpoint_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1270,7 +1270,7 @@ def ecbp_average_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1287,7 +1287,7 @@ def ec_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1304,7 +1304,7 @@ def beta_plus_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1351,7 +1351,7 @@ def ecbp_child_byen(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of beta plus/electron capture children in nuc_id form
+        An array of beta plus/electron capture children in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -1365,12 +1365,12 @@ def ecbp_child_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in nuc_id form in state_id form
 
     Returns
     -------
     ratios : array of ints
-        An array of beta+ children in nuc_id form
+        An array of beta+ children in state_id form
     """
     return cpp_data.ecbp_child(<int> parent)
 

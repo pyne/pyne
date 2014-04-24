@@ -7,6 +7,8 @@
 #include "nucname.h"
 #endif
 
+#include "state_map.h"
+
 /*** Constructs the LL to zz Dictionary ***/
 pyne::nucname::name_zz_t pyne::nucname::get_name_zz() {
   pyne::nucname::name_zz_t lzd;
@@ -1154,4 +1156,53 @@ int pyne::nucname::groundstate(char * nuc) {
 
 int pyne::nucname::groundstate(std::string nuc) {
   return groundstate(id(nuc));
+}
+
+
+void pyne::nucname::_load_state_map(){
+    for (int i = 0; i < TOTAL_STATE_MAPS; ++i) {
+       state_id_map[map_nuc_ids[i]] = map_metastable[i];
+    }
+}
+
+int pyne::nucname::state_id_to_id(int state) {
+    int zzzaaa = (state / 10000) * 10000;
+    
+    std::map<int, int>::iterator nuc_iter, nuc_end;
+
+    nuc_iter = state_id_map.find(state);
+    nuc_end = state_id_map.end();
+    if (nuc_iter != nuc_end){ 
+     int m = (*nuc_iter).second;
+     return zzzaaa + m;
+    }        
+
+    if (state_id_map.empty())  {
+      _load_state_map();
+      return state_id_to_id(state);
+    }
+    throw IndeterminateNuclideForm(state, "no matching metastable state");
+}
+
+
+int pyne::nucname::id_to_state_id(int nuc_id) {
+    int zzzaaa = (nuc_id / 10000) * 10000;
+    int state = nuc_id % 10000;
+    
+    std::map<int, int>::iterator nuc_iter, nuc_end, it;
+    
+    nuc_iter = state_id_map.lower_bound(nuc_id);
+    nuc_end = state_id_map.upper_bound(nuc_id + 10000);
+    for (it = nuc_iter; it!= nuc_end; ++it){
+        if (state == it->second) {
+          return it->first;
+        }
+    }
+    int m = (*nuc_iter).second;
+    
+    if (state_id_map.empty())  {
+      _load_state_map();
+      return id_to_state_id(nuc_id);
+    }
+    throw IndeterminateNuclideForm(state, "no matching state id");
 }
