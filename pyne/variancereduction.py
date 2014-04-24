@@ -1,8 +1,13 @@
 """
 This module contains functions for mesh-based Monte Carlo variance reduction.
 """
+
 from itertools import izip
+from warnings import warn
+
 import numpy as np
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions

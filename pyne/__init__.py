@@ -1,4 +1,7 @@
 import os
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 if os.name == 'nt':
     p = os.environ['PATH'].split(';')

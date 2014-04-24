@@ -8,10 +8,10 @@ import numpy as np
 from pyne import nucname, rxname, data
 from pyne.utils import to_sec
 
-try:
-    basestring
-except NameError:
-    basestring = str
+if sys.version_info[0] > 2:
+  basestring = str
+    
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')
@@ -75,7 +75,7 @@ def _to_id(nuc):
     if not 'NN' in nuc:
         nucid = nucname.id(nuc.strip())
     else:
-        warnings.warn('Neutron data not supported!')
+        warn('Neutron data not supported!')
         return 0
     return nucid
 

@@ -6,25 +6,27 @@ functions in this module compute the total flow rate and separation factors
 from an initial cascade.  Other helper functions compute relative flow rates 
 and nuclide-specific separation factors.
 """
-# Cython imports
 from __future__ import unicode_literals
+
+# Cython imports
 from cython cimport pointer
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
+from warnings import warn
+
 from pyne cimport nucname
 from pyne import nucname
-
 from pyne cimport stlcontainers as conv
-
 cimport pyne.cpp_material
 cimport pyne.material
 import pyne.material
-
 from pyne cimport cpp_enrichment
 
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 
 #####################

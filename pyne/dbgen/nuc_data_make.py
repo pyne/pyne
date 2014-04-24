@@ -1,6 +1,8 @@
 from __future__ import print_function
 import os
 import argparse
+from warnings import warn
+
 try:
     import urllib.request as urllib2
 except ImportError:
@@ -22,6 +24,8 @@ from pyne.dbgen.eaf import make_eaf
 from pyne.dbgen import wimsdfpy
 from pyne.dbgen import ndsfpy
 from pyne.dbgen.hashtools import check_hashes
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)

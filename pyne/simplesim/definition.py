@@ -54,7 +54,7 @@ from __future__ import print_function, division
 import abc
 import collections
 import pickle
-import warnings
+from warnings import warn
 
 try:
     import simplejson as json
@@ -65,6 +65,8 @@ import numpy as np
 
 from .. import material
 from . import cards
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class IDefinition(object):
     """This class is not used by the user. Abstract base class for
@@ -157,7 +159,7 @@ class IDefinition(object):
                     "'cell', 'surface', 'material', 'source', "
                     "'tally', or 'misc'.")
         if card.name in dict_to_check and self.verbose:
-            warnings.warn("Card {0!r}, type {1!r} is already part of the "
+            warn("Card {0!r}, type {1!r} is already part of the "
                     "definition; overwriting.".format(card.name, card_type))
             #raise UserWarning("Card {0!r}, type {0!r} is already part of the "
             #        "definition; overwriting.".format(card.name, card_type))

@@ -6,6 +6,9 @@ Fortran formatted records.
 """
 import struct
 from collections import Iterable
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class _FortranRecord(object):
     """A single Fortran formatted record.
