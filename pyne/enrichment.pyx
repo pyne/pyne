@@ -1,6 +1,6 @@
 """The enrichment module contains tools for defining and manipulating 
 enrichment cascades.  The Cascade class is a simple container for storing 
-parameters which define and enrichment setup.  These include feed, product, 
+parameters that define and enrichment setup.  These include feed, product, 
 and tail materials, target enrichments, and separation factors.  The main 
 functions in this modules computes the total flow rate and separation factors
 from an initial cascade.  Other helper function compute relative flow rates 
