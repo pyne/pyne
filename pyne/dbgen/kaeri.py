@@ -15,7 +15,7 @@ from pyne import nucname
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
-if sys.version_info[0] > 2
+if sys.version_info[0] > 2:
   basestring = str
 
 def grab_kaeri_nuclide(nuc, build_dir="", n=None):

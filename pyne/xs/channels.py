@@ -24,7 +24,7 @@ from .models import group_collapse
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
-if sys.version_info[0] > 2
+if sys.version_info[0] > 2:
   basestring = str
 
 np.seterr(all='ignore')

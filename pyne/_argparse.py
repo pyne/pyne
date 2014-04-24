@@ -98,7 +98,7 @@ except NameError:
     # for python < 2.4 compatibility (sets module is there since 2.3):
     from sets import Set as set
 
-if _sys.version_info[0] > 2
+if _sys.version_info[0] > 2:
   basestring = str
 
 try:

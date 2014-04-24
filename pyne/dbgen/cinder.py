@@ -15,7 +15,7 @@ from .. import nucname
 from ..utils import failure
 from .api import BASIC_FILTERS
 
-if sys.version_info[0] > 2
+if sys.version_info[0] > 2:
   basestring = str
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
