@@ -1,7 +1,8 @@
 from __future__ import division
 import re
-import warnings
+import sys
 import copy
+from warnings import warn
 
 import numpy as np
 
