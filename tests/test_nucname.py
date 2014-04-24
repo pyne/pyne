@@ -488,12 +488,12 @@ def test_isnuclide():
         yield assert_false, nucname.isnuclide(nuc)
 
 
-def test_state_id_to_nuc_id():
-    assert_equal(nucname.state_id_to_nuc_id(190380015), 190380002)
+def test_state_id_to_id():
+    assert_equal(nucname.state_id_to_id(190380015), 190380002)
 
 
-def test_nuc_id_to_state_id():
-    assert_equal(nucname.nuc_id_to_state_id(190380002), 190380015)
+def test_id_to_state_id():
+    assert_equal(nucname.id_to_state_id(190380002), 190380015)
 
 
 if __name__ == "__main__":

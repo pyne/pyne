@@ -723,7 +723,7 @@ def groundstate(nuc):
     return newnuc
 
 
-def state_id_to_nuc_id(state):
+def state_id_to_id(state):
     """
     Converts a ENSDF state id to a PyNE nuc_id
     
@@ -739,13 +739,13 @@ def state_id_to_nuc_id(state):
 
     """
     if isinstance(state, int) or isinstance(state, long):
-        newnuc = cpp_nucname.state_id_to_nuc_id(<int> state)
+        newnuc = cpp_nucname.state_id_to_id(<int> state)
     else:
         raise NucTypeError(state)
     return newnuc
 
 
-def nuc_id_to_state_id(nuc):
+def id_to_state_id(nuc):
     """
     Converts a ENSDF state id to a PyNE nuc_id
     
@@ -761,7 +761,7 @@ def nuc_id_to_state_id(nuc):
 
     """
     if isinstance(nuc, int) or isinstance(nuc, long):
-        newnuc = cpp_nucname.nuc_id_to_state_id(<int> nuc)
+        newnuc = cpp_nucname.id_to_state_id(<int> nuc)
     else:
         raise NucTypeError(nuc)
     return newnuc

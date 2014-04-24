@@ -130,5 +130,5 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int groundstate(std_string) except +
     
     # State id Functions
-    int state_id_to_nuc_id(int state) except +
-    int nuc_id_to_state_id(int nuc_id) except +
+    int state_id_to_id(int state) except +
+    int id_to_state_id(int nuc_id) except +

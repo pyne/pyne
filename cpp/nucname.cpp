@@ -1165,7 +1165,7 @@ void pyne::nucname::_load_state_map(){
     }
 }
 
-int pyne::nucname::state_id_to_nuc_id(int state) {
+int pyne::nucname::state_id_to_id(int state) {
     int zzzaaa = (state / 10000) * 10000;
     
     std::map<int, int>::iterator nuc_iter, nuc_end;
@@ -1179,13 +1179,13 @@ int pyne::nucname::state_id_to_nuc_id(int state) {
 
     if (state_id_map.empty())  {
       _load_state_map();
-      return state_id_to_nuc_id(state);
+      return state_id_to_id(state);
     }
     throw IndeterminateNuclideForm(state, "no matching metastable state");
 }
 
 
-int pyne::nucname::nuc_id_to_state_id(int nuc_id) {
+int pyne::nucname::id_to_state_id(int nuc_id) {
     int zzzaaa = (nuc_id / 10000) * 10000;
     int state = nuc_id % 10000;
     
@@ -1202,7 +1202,7 @@ int pyne::nucname::nuc_id_to_state_id(int nuc_id) {
     
     if (state_id_map.empty())  {
       _load_state_map();
-      return nuc_id_to_state_id(nuc_id);
+      return id_to_state_id(nuc_id);
     }
     throw IndeterminateNuclideForm(state, "no matching state id");
 }

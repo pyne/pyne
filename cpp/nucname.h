@@ -526,8 +526,8 @@ namespace nucname
   /// These convert from/to decay state ids (used in decay data)
   /// to metastable ids (the PyNE default)
   void _load_state_map();
-  int state_id_to_nuc_id(int state);
-  int nuc_id_to_state_id(int nuc_id);
+  int state_id_to_id(int state);
+  int id_to_state_id(int nuc_id);
   extern std::map<int, int> state_id_map;
 
 
