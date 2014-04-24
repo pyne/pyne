@@ -2657,7 +2657,7 @@ unsigned int pyne::rxname::id(unsigned int x) {
   return name_id[pyne::rxname::name(x)];
 };
   
-unsigned int pyne::rxname::id(char * x) {
+unsigned int pyne::rxname::id(const char * x) {
   return name_id[pyne::rxname::name(x)];
 };
   

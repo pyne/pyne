@@ -178,7 +178,62 @@ def q_val(nuc):
         raise pyne.nucname.NucTypeError(nuc)
     return q_val
 
+#
+# simple_xs functions
+#
 
+def simple_xs(nuc, rx, energy):
+    """Finds the cross section for the given nuclide and reaction in [barns].
+    Uses the simple_xs dataset.
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    rx : int or str
+        Input reaction.
+
+    energy : str
+        Energy group for reaction.  Must be one of: "thermal",
+        "thermal_maxwell_ave", "resonance_integral", "fourteen_MeV",
+        "fission_spectrum_ave".
+
+    Returns
+    -------
+    xs : double
+        cross section value for this nuclide and reaction [barns].
+
+    Notes
+    -----
+    If the nuclide is not found, 0 is returned.
+    """
+    if not isinstance(energy, basestring):
+        raise ValueError('energy must be string')
+    elif not isinstance(nuc, int) and not isinstance(nuc, basestring):
+        raise ValueError('nuc must be int or string')
+    elif not isinstance(rx, int) and not isinstance(rx, basestring):
+        raise ValueError('rx must be int or string')
+
+    nucin, rxin = nuc, rx
+    if isinstance(nucin, bytes):
+        nucin = nuc.decode("utf-8")
+    if isinstance(rxin, bytes):
+        rxin = rx.decode("utf-8")
+
+    if isinstance(nucin, int) and isinstance(rxin, int):
+        xs = cpp_data.simple_xs(<int> nucin, <int> rxin, <std_string> energy)
+    elif isinstance(nucin, int) and isinstance(rxin, basestring):
+        xs = cpp_data.simple_xs(<int> nucin, <std_string> rxin, 
+                                <std_string> energy)
+    elif isinstance(nucin, basestring) and isinstance(rxin, int):
+        xs = cpp_data.simple_xs(<std_string> nucin, 
+                                <int> rxin, <std_string> energy)
+    elif isinstance(nucin, basestring) and isinstance(rxin, basestring):
+        xs = cpp_data.simple_xs(<std_string> nucin, <std_string> rxin, 
+                                <std_string> energy)
+
+    return xs
 
 #
 # gamma_frac functions
@@ -411,7 +466,32 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
     fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn), <int> source, get_errors)
     return fpy
 
+#
+# atomic data functions
+#
 
+def calculate_xray_data(nuc, k_conv, l_conv):
+    """Calculates X-ray intensities for a given atom with
+    k and l conversion intensities
+    
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+    k_conv : float
+        k electron converion coefficient arbitrary units
+    l_conv : float
+        l electron converion coefficient arbitrary units
+
+    Returns
+    -------
+    arr : vector of pairs
+        Vector of pairs containing the four primary X-rays and their 
+        intensities: Ka1, Ka2, Kb, L
+    """
+    z = pyne.nucname.znum(nuc)
+    return cpp_data.calculate_xray_data(<int> z, <double> k_conv, 
+                                        <double> l_conv)
 #
 # decay data functions
 #
@@ -613,7 +693,7 @@ def decay_children(nuc, use_metastable=True):
 
     return dc
 
-def id_from_level(int nuc, double level):
+def id_from_level(nuc, level, special=""):
     """
     return the nuc_id for input energy level
 
@@ -623,17 +703,25 @@ def id_from_level(int nuc, double level):
         Input nuclide
     level : double
         energy level of state
-
+    special : str
+        special level denotation. This is a single A-Z character corresponding
+        to a group of levels and associated gammas with no reference to the GS
     Returns
     -------
     nuc : int
         nuc_id of state
     """
+    cdef std_string spc
+    if len(special) == 1:
+        spc = special[0].encode('UTF-8')
     if level > 0.0:
-        return cpp_data.id_from_level(nuc, level)
+        if len(special) == 1:
+            return cpp_data.id_from_level(<int> nuc, <double> level, <std_string> spc)
+        else:
+            return cpp_data.id_from_level(<int> nuc, <double> level)
     else:
         return nuc
-    
+
 def metastable_id(nuc, level=1):
     """
     return the nuc_id of a metastable state
@@ -932,7 +1020,25 @@ def gamma_parent(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.gamma_parent(<double> en, <double> enerror)
 
+def gamma_xrays(parent):
+    """
+    Returns an array of arrays of xrays associated with the gamma 
+    rays from an input parent nuclide
+    
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
 
+    Returns
+    -------
+    ratios : array of arrays
+        This returns an array of length 4 arrays containing pairs of energies
+        and intensities of the following X-rays: Ka1, Ka2, Kb, L
+    
+    """
+    return cpp_data.gamma_xrays(<int> parent)
+    
 def alpha_energy(parent):
     """
     Returns a list of alpha energies from ENSDF decay dataset from a given 
@@ -1268,3 +1374,22 @@ def ecbp_child_byparent(parent):
         An array of beta+ children in nuc_id form
     """
     return cpp_data.ecbp_child(<int> parent)
+
+def ecbp_xrays(parent):
+    """
+    Returns an array of arrays of xrays associated with the electron capture 
+    and beta plus decays from an input parent nuclide
+    
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of arrays
+        This returns an array of length 4 arrays containing pairs of energies
+        and intensities of the following X-rays: Ka1, Ka2, Kb, L
+    
+    """
+    return cpp_data.ecbp_xrays(<int> parent)

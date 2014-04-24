@@ -44,6 +44,13 @@ set_target_properties(pyne_enrichment PROPERTIES
 target_link_libraries(pyne_enrichment pyne_material)
 install_lib(pyne_enrichment)
 
+# pyne_tally
+add_library(pyne_tally tally.cpp)
+set_target_properties(pyne_tally PROPERTIES 
+                      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
+install_lib(pyne_tally)
+
+
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")

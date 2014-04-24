@@ -302,6 +302,52 @@ namespace pyne
   template<typename T, typename U> std::vector<T> data_access(int parent, 
     size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data); 
 
+  /// Access data in a std::map<int, data> format for a given first member
+  /// of the pair. Returns the value at valoffset of the matching datapoint.
+  template<typename U> double data_access(int parent, 
+  size_t valoffset, std::map<int, U> &data); 
+  
+  /// Structure for atomic data
+  typedef struct atomic_struct{
+    int z;
+    double k_shell_fluor;
+    double k_shell_fluor_error;
+    double l_shell_fluor;
+    double l_shell_fluor_error;
+    double prob;
+    double k_shell_be;
+    double k_shell_be_err;
+    double li_shell_be;
+    double li_shell_be_err;
+    double mi_shell_be;
+    double mi_shell_be_err;
+    double ni_shell_be;
+    double ni_shell_be_err;
+    double kb_to_ka;
+    double kb_to_ka_err;
+    double ka2_to_ka1;
+    double ka2_to_ka1_err;
+    double l_auger;
+    double k_auger;
+    double ka1_x_ray_en;
+    double ka1_x_ray_en_err;
+    double ka2_x_ray_en;
+    double ka2_x_ray_en_err;
+    double kb_x_ray_en;
+    double l_x_ray_en;
+  } atomic_struct;
+  
+  // map of Z to atomic data
+  extern std::map<int, atomic_struct> atomic_data_map;
+  
+  template<typename T> void _load_data();
+  template<> void _load_data<atomic_struct>();
+  
+  // compute X-ray data
+  std::vector<std::pair<double, double> >
+  calculate_xray_data(int z, double k_conv, double l_conv);
+  
+  
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.
   typedef struct level_struct{
     int nuc_id;
@@ -310,6 +356,7 @@ namespace pyne
     double level;
     double branch_ratio;
     int metastable;
+    char special;
   } level_struct;
 
   /// Mapping from nuclides in id form to a struct containing data associated
@@ -317,7 +364,6 @@ namespace pyne
   extern std::map<std::pair<int,double>, level_struct> level_data_lvl_map;
   extern std::map<std::pair<int,unsigned int>, level_struct> level_data_rx_map;
   
-  template<typename T> void _load_data();
   template<> void _load_data<level_struct>();
   
   /// \brief Returns the nuc_id of an energy level
@@ -325,7 +371,7 @@ namespace pyne
   /// This function looks for the level that best matches the input level
   /// within 1 keV of the input nuclide
   int id_from_level(int nuc, double level);
-  
+  int id_from_level(int nuc, double level, std::string special);
   /// \brief Returns the nuc_id of a metastable state
   ///
   /// This function looks through the level map for a given input nuc_id to find the
@@ -460,6 +506,9 @@ namespace pyne
   std::vector<std::pair<int, int> > gamma_from_to(double energy, double error);
   //returns a list of parent nuclides associated with an input decay energy
   std::vector<int> gamma_parent(double energy, double error);
+  //returns an array of arrays of X-ray energies and intesities for a 
+  //given parent
+  std::vector<std::vector<std::pair<double, double> > > gamma_xrays(int parent);
 
   /// a struct matching the '/decay/alphas' table in nuc_data.h5.
   typedef struct alpha_struct{
@@ -552,7 +601,40 @@ namespace pyne
   //returns a list of electron capture /beta plus decay children from input 
   //parent nuclide
   std::vector<int> ecbp_child(int parent);
+  //returns an array of arrays of X-ray energies and intesities for a 
+  //given parent
+  std::vector<std::vector<std::pair<double, double> > > ecbp_xrays(int parent);
   /// \}
-}
+
+  /// map<energy, map<nuclide, map<rx, xs> > >
+  extern std::map<std::string, std::map<int, std::map<int, double> > > 
+      simple_xs_map;
+
+  /// returns the microscopic cross section in barns for the specified
+  /// nuclide, reaction, and energy group.  energy must be one of: "thermal",
+  /// "thermal_maxwell_ave", "resonance_integral", "fourteen_MeV",
+  /// "fission_spectrum_ave".
+  double simple_xs(int nuc, int rx, std::string energy);
+  double simple_xs(int nuc, std::string rx, std::string energy);
+  double simple_xs(std::string nuc, int rx, std::string energy);
+  double simple_xs(std::string nuc, std::string rx, std::string energy);
+
+  /// Custom exception for declaring a simple_xs request invalid
+  class InvalidSimpleXS : public std::exception {
+   public:
+    InvalidSimpleXS () {};
+    ~InvalidSimpleXS () throw () {};
+
+    InvalidSimpleXS(std::string msg) : msg_(msg) {};
+
+    virtual const char* what() const throw() {
+      return msg_.c_str();
+    };
+
+   private:
+    std::string msg_;
+  };
+
+} // namespace pyne
 
 #endif

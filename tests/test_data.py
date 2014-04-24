@@ -33,6 +33,19 @@ def test_q_val():
     assert_equal(data.q_val(92235), 4.674)
 
 
+def test_simple_xs():
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal'), 698.2)
+    assert_equal(data.simple_xs('u235', 'elastic', 'thermal'), 15.04)
+    assert_equal(data.simple_xs(922350000, b'gamma', 'thermal'), 98.81)
+    assert_equal(data.simple_xs(922350000, 'fission', 'thermal'), 584.4)
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal'), 698.2)
+
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal_maxwell_ave'), 608.4)
+    assert_equal(data.simple_xs(922350000, 'absorption', 'resonance_integral'), 411.1)
+    assert_equal(data.simple_xs(922350000, 'tot', 'fourteen_MeV'), 5.865)
+    assert_equal(data.simple_xs(922350000, 'tot', 'fission_spectrum_ave'), 7.705)
+
+
 def test_gamma_frac():
     assert_equal(data.gamma_frac('H1'), 0.0)
     assert_equal(data.gamma_frac(92235), 0.036)
@@ -182,14 +195,14 @@ def test_gamma_from_to_byparent():
 def test_gamma_from_to_byen():
     assert_equal(data.gamma_from_to_byen(661.65, 0.1),
                  [(621510087, 621510015),
-                  (641500138, 641500138),
+                  (641500021, 641500006),
                   (390990016, 390990005),
                   (822040062, 822040024),
                   (902290055, 902290000),
                   (400880011, 400880004),
                   (551310023, 551310009),
                   (0, 0),
-                  (431070001, 431070001),
+                  (431070028, 431070020),
                   (972490039, 972490003),
                   (0, 0),
                   (380930068, 380930050),
@@ -306,6 +319,41 @@ def test_ecbp_child_byen():
 
 def test_ecbp_child_byparent():
     assert_equal(data.ecbp_child_byparent(110220000), [100220001, 100220000])
+
+
+def test_id_from_level():
+    assert_equal(data.id_from_level(811920000, 445, 'X'), 811920010)
+    assert_equal(data.id_from_level(561370000, 662), 561370002)
+
+
+def test_xray_data():
+    npt.assert_almost_equal(data.calculate_xray_data(551370000, 0.1, 0.1),
+                            [(30.9728, 0.04693557573523976),
+                             (30.6251, 0.025406227145485287),
+                             (35.0, 0.017058197119274962),
+                             (4.29, 0.019708)])
+
+
+def test_gamma_xray():
+    npt.assert_almost_equal(data.gamma_xrays(551370000),
+                            [[(32.1936, 0.0), (31.8171, 0.0),
+                              (36.4, 0.0), (4.47, 0.0)],
+                             [(32.1936, 23759153.763765693),
+                              (31.8171, 12896468.662972018),
+                              (36.4, 8749697.07326229),
+                              (4.47, 5927514.212400001)]])
+
+
+def test_ecbp_xray():
+    npt.assert_almost_equal(data.ecbp_xrays(110220000),
+                            [[(1.041, 0.11273075771609505),
+                              (1.041, 0.05669229805542418),
+                              (1.07, 0.0014231536684807533),
+                              (np.nan, 0.0)],
+                             [(1.041, 1.273768717251104e-05),
+                              (1.041, 6.4057828790558e-06),
+                              (1.07, 1.6080514843315978e-07),
+                              (np.nan, 0.0)]])
 
 
 if __name__ == "__main__":

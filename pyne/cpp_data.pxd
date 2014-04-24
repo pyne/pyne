@@ -29,6 +29,13 @@ cdef extern from "data.h" namespace "pyne":
     double atomic_mass(char *) except +
     double atomic_mass(std_string) except +
 
+    # simple_xs functions
+    map[std_string, map[int, map[int, double]]] simple_xs_map
+    double simple_xs(int nuc, int rx_id, std_string energy) except +
+    double simple_xs(int nuc, std_string rx_id, std_string energy) except +
+    double simple_xs(std_string nuc, int rx_id, std_string energy) except +
+    double simple_xs(std_string nuc, std_string rx_id, std_string energy) except +
+
     # natural_abund functions
     map[int, double] natural_abund_map
     double natural_abund(int) except +
@@ -70,29 +77,28 @@ cdef extern from "data.h" namespace "pyne":
     double fpyield(char *, char *, int, bool) except +
     double fpyield(std_string, std_string, int, bool) except +
 
+    # atomic data functions
+    vector[pair[double, double]] calculate_xray_data(int, double,
+                                                     double) except +
+
     # decay data functions
-    #map[int, double] half_life_map
     double half_life(int) except +
     double half_life(char *) except +
     double half_life(std_string) except +
 
-    #map[int, double] decay_const_map
     double decay_const(int) except +
     double decay_const(char *) except +
     double decay_const(std_string) except +
 
-    #map[pair[int, int], double] branch_ratio_map
     double branch_ratio(pair[int, int]) except +
     double branch_ratio(int, int) except +
     double branch_ratio(char *, char *) except +
     double branch_ratio(std_string, std_string) except +
 
-    #map[int, double] state_energy_map
     double state_energy(int) except +
     double state_energy(char *) except +
     double state_energy(std_string) except +
 
-    #map[int, set[int]] decay_children_map
     set[int] decay_children(int) except +
     set[int] decay_children(char *) except +
     set[int] decay_children(std_string) except +
@@ -101,6 +107,7 @@ cdef extern from "data.h" namespace "pyne":
     int metastable_id(int) except +
     
     int id_from_level(int, double) except +
+    int id_from_level(int, double, std_string) except +
 
     #ENSDF data functions
     pair[double,double] decay_half_life(pair[int, int]) except +
@@ -119,6 +126,7 @@ cdef extern from "data.h" namespace "pyne":
     vector[pair[int, int]] gamma_from_to(int parent) except +
     vector[pair[int, int]] gamma_from_to(double energy, double error) except +
     vector[int] gamma_parent(double energy, double error) except +
+    vector[vector[pair[double, double]]] gamma_xrays(int parent) except +
     
     vector[double] alpha_energy(int parent) except +
     vector[double] alpha_intensity(int parent) except +
@@ -140,3 +148,4 @@ cdef extern from "data.h" namespace "pyne":
     vector[int] ecbp_parent(double energy, double error) except +
     vector[int] ecbp_child(double energy, double error) except +
     vector[int] ecbp_child(int parent) except +
+    vector[vector[pair[double, double]]] ecbp_xrays(int parent) except +

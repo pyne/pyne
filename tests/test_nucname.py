@@ -433,6 +433,41 @@ def test_sza():
     assert_equal(nucname.sza(2390940), 94239)
     assert_equal(nucname.sza(2420950), 95242)
 
+
+def test_groundstate():
+
+    assert_equal(nucname.groundstate("he4"), 20040000)
+    assert_equal(nucname.groundstate("Cm-244"), 962440000)
+    assert_equal(nucname.groundstate("PU239"),  942390000)
+    assert_equal(nucname.groundstate("AM242M"), 952420000)
+
+    assert_equal(nucname.groundstate(2004),  20040000)
+    assert_equal(nucname.groundstate(95642), 952420000)
+    assert_equal(nucname.groundstate(95242), 952420000)
+    assert_equal(nucname.groundstate(92636), 922360000)
+    assert_equal(nucname.groundstate(95942), 952420000)
+
+    assert_equal(nucname.groundstate("he"), 20000000)
+    assert_equal(nucname.groundstate("U"), 920000000)
+    assert_equal(nucname.groundstate("Np"), 930000000)
+    assert_equal(nucname.groundstate("Cl"), 170000000)
+
+    assert_equal(nucname.groundstate("4he"),   20040000)
+    assert_equal(nucname.groundstate("244CM"), 962440000)
+    assert_equal(nucname.groundstate("239Pu"), 942390000)
+    assert_equal(nucname.groundstate("242AM"), 952420000)
+
+    assert_equal(nucname.groundstate(40020),   20040000)
+    assert_equal(nucname.groundstate(2440961), 962440000)
+    assert_equal(nucname.groundstate(2390940), 942390000)
+    assert_equal(nucname.groundstate(2420950), 952420000)
+    assert_equal(nucname.groundstate(92), 920000000)
+
+    assert_equal(nucname.groundstate("94-Pu-239"), 942390000)
+    assert_equal(nucname.groundstate("95-Am-242m"), 952420000)
+    assert_equal(nucname.groundstate("94-Pu-239"), 942390000)
+    assert_equal(nucname.groundstate("95-Am-242"), 952420000)
+
 def test_sza_to_id():
     vals = [2004, 2004, 96244, 94239, 1095242, 2004, 95242, 1095242, 1092236, 
             4095242, 1095242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 

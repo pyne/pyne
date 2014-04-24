@@ -413,17 +413,18 @@ def zzllaaam(nuc):
 
     Returns
     -------
-    newnuc : int 
+    newnuc : str 
         Output nuclide in zzllaaam form.
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.zzllaaam(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.zzllaaam(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.zzllaaam(<int> nuc)
     else:
         raise NucTypeError(nuc)
-    return newnuc
+    return bytes(newnuc).decode()
 
 
 def zzllaaam_to_id(nuc):
@@ -442,7 +443,8 @@ def zzllaaam_to_id(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.zzllaaam_to_id(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.zzllaaam_to_id(<char *> nuc_bytes)
     else:
         raise NucTypeError(nuc)
     return newnuc
@@ -700,6 +702,30 @@ def sza_to_id(nuc):
     else:
         raise NucTypeError(nuc)
     return newnuc
+
+
+def groundstate(nuc):
+    """Converts a nuclide to its Groundstate form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in Groundstate form.
+
+    """
+    if isinstance(nuc, basestring):
+        newnuc = cpp_nucname.groundstate(<char *> nuc)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.groundstate(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
 
 
 #
