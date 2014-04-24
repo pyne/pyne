@@ -104,7 +104,7 @@ def make_materials_compendium(nuc_data):
         if 0 == len(elemental_mats[zz]):
             continue
         element = Material(elemental_mats[zz], mass=1.0, 
-                           attrs={'name': nucname.name(zz)})
+                           metadata={'name': nucname.name(zz)})
         element.write_hdf5(nuc_data, datapath="/material_library/materials", 
                            nucpath="/material_library/nucid", chunksize=70)
 
@@ -112,7 +112,7 @@ def make_materials_compendium(nuc_data):
     for i in range(len(mats)):
         mats[i].mass = 1.0
         mats[i].density = float(densities[i])
-        mats[i].attrs = {'name': names[i]}
+        mats[i].metadata = {'name': names[i]}
         mats[i].write_hdf5(nuc_data, datapath="/material_library/materials", 
                            nucpath="/material_library/nucid", chunksize=70)
     

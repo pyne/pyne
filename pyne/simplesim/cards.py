@@ -1266,15 +1266,15 @@ class Material(ICard):
         mat : pyne.material.Material
             Material to base this card on.
         name : str, optional
-            Must either be present in mat.attrs or supplied here.
+            Must either be present in mat.metadata or supplied here.
         description : str, optional
             A description of this material that perhaps explains where the
             material came from (whether it's recycled, any references, etc.).
-            If not supplied here, may be present in mat.attrs.
+            If not supplied here, may be present in mat.metadata.
         tables : dict of (nucname, str) pairs
             Sometimes it is necessary to specify a library/table identifier for
             a given nuclide. These can be provided in this dictionary. Leave
-            out the period. If not supplied here, may be present in mat.attrs.  
+            out the period. If not supplied here, may be present in mat.metadata.  
             See examples.
 
         Examples
@@ -1301,7 +1301,7 @@ class Material(ICard):
                            name='water', tables={'H1': '71c'})
 
         """
-        name = name if name is not None else  mat.attrs['name']
+        name = name if name is not None else  mat.metadata['name']
         self._mat = mat
         super(Material, self).__init__(name=name, description=description,
                                        tables=tables, *args, **kwargs)
@@ -1348,41 +1348,41 @@ class Material(ICard):
 
     @mat.setter
     def mat(self, value):
-        _validate_name(self.mat.attrs['name'], self.unique)
+        _validate_name(self.mat.metadata['name'], self.unique)
         self._mat = value
-        if 'tables' in value.attrs:
-            self._max_table_len = max([len(v) for v in value.attrs['tables'].values()])
+        if 'tables' in value.metadata:
+            self._max_table_len = max([len(v) for v in value.metadata['tables'].values()])
         else:
             self._max_table_len = 0
 
     @property
     def name(self):
-        return self._mat.attrs['name']
+        return self._mat.metadata['name']
 
     @name.setter
     def name(self, value):
         _validate_name(value, self.unique)
-        self._mat.attrs['name'] = value
+        self._mat.metadata['name'] = value
 
     @property
     def description(self):
-        if 'description' not in self._mat.attrs:
-            self._mat.attrs['description'] = None
-        return self._mat.attrs['description']
+        if 'description' not in self._mat.metadata:
+            self._mat.metadata['description'] = None
+        return self._mat.metadata['description']
 
     @description.setter
     def description(self, value):
-        self._mat.attrs['description'] = value
+        self._mat.metadata['description'] = value
 
     @property
     def tables(self):
-        if 'tables' not in self._mat.attrs:
-            self._mat.attrs['tables'] = {}
-        return self._mat.attrs['tables']
+        if 'tables' not in self._mat.metadata:
+            self._mat.metadata['tables'] = {}
+        return self._mat.metadata['tables']
 
     @tables.setter
     def tables(self, value):
-        self._mat.attrs['tables'] = value
+        self._mat.metadata['tables'] = value
         self._max_table_len = max([len(val) for val in value.values()])
 
 
@@ -6951,7 +6951,7 @@ class MaterialCustom(Custom, Material):
 
     """
     def __init__(self, mat, name=None, *args, **kwargs):
-        name = name if name is not None else  mat.attrs['name']
+        name = name if name is not None else  mat.metadata['name']
         self._mat = mat
         super(MaterialCustom, self).__init__(name=name, *args, **kwargs)
 
