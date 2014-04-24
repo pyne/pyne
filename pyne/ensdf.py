@@ -6,6 +6,7 @@ try:
 except ImportError:
     import urllib
 import os
+import sys
 import copy
 
 import numpy as np
@@ -13,11 +14,8 @@ import numpy as np
 from pyne import nucname, rxname, data
 from pyne.utils import to_sec
 
-try:
-    basestring
-except NameError:
-    basestring = str
-
+if sys.version_info[0] > 2
+  basestring = str
     
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

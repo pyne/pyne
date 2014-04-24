@@ -5,14 +5,9 @@ such as computing cross sections for materials, fission energy spectra, metastab
 ratios, etc.
 """
 from __future__ import division
-
+import sys
 import collections
 from warnings import warn
-
-try:
-    basestring
-except NameError:
-    basestring = str
 
 import numpy as np
 import scipy.integrate
@@ -28,6 +23,9 @@ from . import cache
 from .models import group_collapse
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
+if sys.version_info[0] > 2
+  basestring = str
 
 np.seterr(all='ignore')
 

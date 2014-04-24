@@ -1,11 +1,8 @@
 """Python header for enrichment library."""
-
 from warnings import warn
 
 cimport cpp_enrichment
 cimport pyne.material
-
-
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 

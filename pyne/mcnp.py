@@ -11,10 +11,6 @@ If PyTAPS is not installed, then Wwinp, Meshtal, and Meshtally will not be
 available to use.
 
 """
-
-
-
-
 from __future__ import print_function, division
 import sys
 import collections

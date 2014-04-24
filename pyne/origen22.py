@@ -19,10 +19,8 @@ from pyne import nucname
 from pyne.xs import cache
 from pyne.material import Material, from_atom_frac
 
-try:
-    basestring
-except NameError:
-    basestring = str
+if sys.version_info[0] > 2
+  basestring = str
 
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
