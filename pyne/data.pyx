@@ -12,8 +12,7 @@ from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
-#Standard lib imports
-#from collections import Iterable
+#Standard lib import
 from warnings import warn
 
 cimport numpy as np
