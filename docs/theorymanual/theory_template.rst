@@ -15,7 +15,18 @@ appropriate use of this physics.
 Descriptive Heading of Method
 *****************************
 
-Mathematical Details.
+Mathematical Details, some example math syntax:
+
+You can use LaTeX format in rst. To do inline expressions (what $expression$ would
+do in LaTeX) :math:`A\vec{x} = \vec{b}`.
+
+To have blocks of mathematical content, do this
+
+.. math::
+    
+    A\vec{x} = \vec{b}
+
+Support is limited to a subset of LaTeX math by the conversion required for many output formats.
 
 ***********
 Assumptions
