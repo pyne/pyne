@@ -33,8 +33,8 @@ from pyne cimport cpp_enrichment
 
 
 cdef class Cascade:
-    """This class is a container for enrichment cascade parameters which 
-    defines the perfomance of a separations plant. Instances of this class 
+    """This class is a container for enrichment cascade parameters that 
+    define the perfomance of a separations plant. Instances of this class 
     are passed into and out of many enrichment functions.  
     """
 
