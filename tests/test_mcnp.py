@@ -501,7 +501,7 @@ def test_read_mcnp():
     expected_material = Material(nucvec={922350000: 0.04, 922380000: 0.96},
                                  mass=-1.0,
                                  density=19.1,
-                                 attrs={"comments": (
+                                 metadata={"comments": (
                                      " first line of comments second line of "
                                      "comments third line of comments forth "
                                      "line of comments"),
@@ -549,8 +549,8 @@ def test_read_mcnp():
         list(expected_multimaterial._mats.keys())[0].atoms_per_molecule,
         list(read_materials[1]._mats.keys())[0].atoms_per_molecule)
     assert_equal(
-        list(expected_multimaterial._mats.keys())[0].attrs,
-        list(read_materials[1]._mats.keys())[0].attrs)
+        list(expected_multimaterial._mats.keys())[0].metadata,
+        list(read_materials[1]._mats.keys())[0].metadata)
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].comp,
         list(read_materials[1]._mats.keys())[1].comp)
@@ -564,8 +564,8 @@ def test_read_mcnp():
         list(expected_multimaterial._mats.keys())[1].atoms_per_molecule,
         list(read_materials[1]._mats.keys())[1].atoms_per_molecule)
     assert_equal(
-        list(expected_multimaterial._mats.keys())[1].attrs,
-        list(read_materials[1]._mats.keys())[1].attrs)
+        list(expected_multimaterial._mats.keys())[1].metadata,
+        list(read_materials[1]._mats.keys())[1].metadata)
 
 
 # Test PtracReader class

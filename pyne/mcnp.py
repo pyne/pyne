@@ -1409,29 +1409,28 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         # set nucvec attribute to the nucvec dict from above
         mat = Material(nucvec=nucvec)
 
-    mat.attrs['table_ids'] = table_ids
-    mat.attrs['mat_number'] = data_string.split()[0][1:]
+    mat.metadata['table_ids'] = table_ids
+    mat.metadata['mat_number'] = data_string.split()[0][1:]
 
     # collect metadata, if present
-    attrs = ['source', 'comments', 'name']
+    mds = ['source', 'comments', 'name']
     line_index = 1
-    attrs_line = linecache.getline(filename, mat_line - line_index)
+    mds_line = linecache.getline(filename, mat_line - line_index)
     # while reading non-empty comment lines
-    while attrs_line.strip() not in set('cC') \
-            and attrs_line.split()[0] in ['c', 'C']:
-        if attrs_line.split()[0] in ['c', 'C'] \
-                and len(attrs_line.split()) > 1:
-            possible_attr = attrs_line.split()[1].split(':')[0].lower()
-            if possible_attr in attrs:
-                if possible_attr.lower() == 'comments':
+    while mds_line.strip() not in set('cC') \
+            and mds_line.split()[0] in ['c', 'C']:
+        if mds_line.split()[0] in ['c', 'C'] \
+                and len(mds_line.split()) > 1:
+            possible_md = mds_line.split()[1].split(':')[0].lower()
+            if possible_md in mds:
+                if possible_md.lower() == 'comments':
                     comments_string = str(
-                        ''.join(attrs_line.split(':')[1:]).split('\n')[0])
+                        ''.join(mds_line.split(':')[1:]).split('\n')[0])
                     comment_index = 1
                     comment_line = linecache.getline(
                         filename, mat_line - line_index + comment_index)
                     while comment_line.split()[0] in ['c', 'C']:
-                        if comment_line.split()[1].split(':')[0].lower() in \
-                                attrs:
+                        if comment_line.split()[1].split(':')[0].lower() in mds:
                             break
                         comments_string += ' ' + ' '.join(
                             comment_line.split()[1:])
@@ -1440,13 +1439,13 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
                             linecache.getline(filename,
                                               mat_line - line_index +
                                               comment_index)
-                    mat.attrs[possible_attr] = comments_string
+                    mat.metadata[possible_md] = comments_string
                 else:
-                    mat.attrs[possible_attr] = ''.join(
-                        attrs_line.split(':')[1:]).split('\n')[0]
+                    mat.metadata[possible_md] = ''.join(
+                        mds_line.split(':')[1:]).split('\n')[0]
                     # set metadata
         line_index += 1
-        attrs_line = linecache.getline(filename, mat_line - line_index)
+        mds_line = linecache.getline(filename, mat_line - line_index)
 
     # Check all the densities. If they are atom densities, convert them to mass
     # densities. If they are mass densities they willl be negative, so make
@@ -1472,7 +1471,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
                 mat2.comp = mat.comp
                 mat2.atoms_per_molecule = mat.atoms_per_molecule
                 mat2.mass = mat.mass
-                mat2.attrs = mat.attrs
+                mat2.metadata = mat.metadata
                 mat2.density = density
                 mat_dict[mat2] = 1
             finished_mat = MultiMaterial(mat_dict)
@@ -2215,7 +2214,7 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
     mat_cards = ""
     idx = mesh.iter_structured_idx('xyz')
     for i in idx:
-        mesh.mats[i].attrs['mat_number'] = i + 1
+        mesh.mats[i].metadata['mat_number'] = i + 1
         mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
   
     return mat_cards
