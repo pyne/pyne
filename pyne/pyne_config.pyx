@@ -1,7 +1,7 @@
 """Python wrapper for isoname library."""
-# Cython imports
 from __future__ import unicode_literals
 
+# Cython imports
 from libcpp.map cimport map as cpp_map
 from libcpp.set cimport set as cpp_set
 from cython cimport pointer
@@ -10,12 +10,15 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
-# local imports 
-cimport cpp_pyne
-
 import os
 import json
+from warnings import warn
+
+# local imports 
+cimport cpp_pyne
 import pyne.__init__
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 prefix = os.path.split(pyne.__init__.__file__)[0]
 

@@ -2,6 +2,9 @@
 from libcpp.map cimport map
 from libcpp.set cimport set
 from libcpp.string cimport string as std_string
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 cdef extern from "nucname.h" namespace "pyne::nucname":
     # Conversion dictionaries

@@ -20,6 +20,8 @@ subsequent fee for these data.
 from __future__ import print_function, division
 import os
 import shutil
+from warnings import warn
+
 try:
     import urllib.request as urllib2
 except ImportError:
@@ -32,6 +34,7 @@ import tables as tb
 from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def readtable(i, spdat):
     """

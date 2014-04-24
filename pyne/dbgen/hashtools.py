@@ -1,13 +1,15 @@
 """
 Tools to generate, set and check the hashes of datasets in pyne.
 """
-
 import hashlib
+from warnings import warn
 
 import numpy
 import tables
 
 from .. import data
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 #list of nodes from distinct data sets
 nodelist = ['/atomic_mass', '/material_library',

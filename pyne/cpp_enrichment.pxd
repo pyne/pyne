@@ -1,7 +1,11 @@
 """Cython header for enrichment library."""
 from libcpp.string cimport string as std_string
 
+from warnings import warn
+
 from pyne cimport cpp_material
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 cdef extern from "enrichment_cascade.h" namespace "pyne::enrichment":
 

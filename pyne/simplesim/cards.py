@@ -288,13 +288,15 @@ from __future__ import division
 import abc
 import collections
 import copy
-import warnings
+from warnings import warn
 
 import numpy as np
 
 from .. import nucname
 from .. import material
 from . import nestedgeom as ng
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def _validate_name(value, isunique=False):
     if value.find(' ') != -1:
@@ -5558,11 +5560,11 @@ class Temperature(ICellMod):
         """
         super(Temperature, self).set(cell)
         if temp < 200:
-            warnings.warn("Temperature set as less than 200 K. "
+            warn("Temperature set as less than 200 K. "
                     "Are you trying to specify temperature in degrees "
                     "Celcius, etc.? User provided {0:g}.".format(temp))
         if temp < 1:
-            warnings.warn("Temperature set as less than 1 K. "
+            warn("Temperature set as less than 1 K. "
                     "Are you trying to specify temperature as 'kT'? "
                     "User provided {0:g}.".format(temp))
         self.temps[cell] = temp

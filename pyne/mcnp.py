@@ -11,7 +11,6 @@ If PyTAPS is not installed, then Wwinp, Meshtal, and Meshtally will not be
 available to use.
 
 """
-
 from __future__ import print_function, division
 import sys
 import collections
@@ -20,24 +19,26 @@ import struct
 import math
 import os
 import linecache
-import tables
 import datetime
-import warnings
+from warnings import warn
 import itertools
 
 import numpy as np
+import tables
 
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 # Mesh specific imports
 try:
     from itaps import iMesh
     HAVE_PYTAPS = True
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the mcnp module may be incomplete.",
                   ImportWarning)
     HAVE_PYTAPS = False
@@ -438,7 +439,7 @@ class SurfSrc(_BinaryReader):
         # no known case of their actual utility is known currently
         for j in range(self.njsw, self.njsw+self.niwr):
             self.get_fortran_record()
-            warnings.warn("Extra info in header not handled: {0}".format(j),
+            warn("Extra info in header not handled: {0}".format(j),
                           RuntimeWarning)
 
         # read summary table record
@@ -1398,7 +1399,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         if isatom != (0 <= value):
             msg = 'Mixed atom and mass fractions not supported.'
             ' See material defined on line {0}'.format(mat_line)
-            warnings.warn(msg)
+            warn(msg)
 
     # apply all data to material object
     if isatom:

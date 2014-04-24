@@ -1,19 +1,22 @@
 from __future__ import print_function
 import os
 import re
+import sys
+from warnings import warn
+
 try:
     import urllib.request as urllib2
     from urllib.error import URLError
 except ImportError:
     import urllib2
     from urllib2 import URLError
-try:
-    basestring
-except NameError:
-    basestring = str
 
 from pyne import nucname
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
+if sys.version_info[0] > 2:
+  basestring = str
 
 def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     """Grabs a nuclide file from KAERI from the web and places 

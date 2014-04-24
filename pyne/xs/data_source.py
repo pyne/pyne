@@ -1,9 +1,12 @@
 """Cross section library data source interfaces.
 """
 from __future__ import division
+
 import os
 import io
 import sys
+from warnings import warn
+
 try:
     from StringIO import StringIO
 except ImportError:
@@ -17,6 +20,8 @@ from .. import nucname
 from .. import rxname
 from ..endf import Library
 from .models import partial_energy_matrix, group_collapse
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 IO_TYPES = (io.IOBase, StringIO)
 

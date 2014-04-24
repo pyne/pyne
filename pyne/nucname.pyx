@@ -1,6 +1,4 @@
 """Python wrapper for nucname library."""
-# Python imports 
-#from collections import Iterable
 from __future__ import unicode_literals, division
 
 # Cython imports
@@ -11,6 +9,10 @@ from cython.operator cimport preincrement as inc
 #from cython cimport pointer
 from libcpp.string cimport string as std_string
 
+# Python imports 
+#from collections import Iterable
+from warnings import warn
+
 # local imports 
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
@@ -19,6 +21,8 @@ import pyne.pyne_config
 from pyne cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 #
 # Conversion dictionaries

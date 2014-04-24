@@ -8,13 +8,17 @@ This currently consists to natural element materials and those coming from PNNL'
 from __future__ import print_function
 import csv
 import re
+import os
+from warnings import warn
+
 import tables as tb
 import numpy as np
-import os
 
 from .. import nucname
 from ..data import natural_abund, natural_abund_map
 from ..material import Material
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 elemental_mats = {}
 names = []

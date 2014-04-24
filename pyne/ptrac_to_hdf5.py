@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 """Read a MCNP Ptrac file and save it in HDF5 format."""
+from warnings import warn
 
 import tables
+
 from . import mcnp
+
 try:
     import argparse
 except ImportError:
     from . import _argparse as argparse
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def main():
     argparser = argparse.ArgumentParser(description="write the contents of a MCNP PTRAC file to a HDF5 table")
