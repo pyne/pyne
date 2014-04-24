@@ -3,7 +3,7 @@ include_directories(${PYNE_INCLUDE_DIRS})
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 # extra_types
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/extra_types.pyx"
