@@ -14,7 +14,7 @@ import numpy as np
 from pyne import nucname, rxname, data
 from pyne.utils import to_sec
 
-if sys.version_info[0] > 2
+if sys.version_info[0] > 2:
   basestring = str
     
 warn(__name__ + " is not yet V&V compliant.", ImportWarning)
