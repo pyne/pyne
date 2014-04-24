@@ -2,4 +2,4 @@ Materials -- ``libpyne_material``
 =================================
 
 .. autodoxygenindex:: material.h
-    :source: pyne
+    :source: pyne_material
