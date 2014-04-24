@@ -250,6 +250,11 @@ breathe_default_project = 'pyne'
 breathe_domain_by_extension = {"h": "cpp",}
 breathe_projects_source = {"pyne": '../cpp',}
 
+for p in os.listdir(breathe_projects_source['pyne']):
+    p, _ = os.path.splitext(p)
+    breathe_projects['pyne_' + p] = breathe_projects['pyne']
+    breathe_projects_source['pyne_' + p] = breathe_projects_source['pyne']
+
 # Prevent numpy from making silly tables 
 numpydoc_show_class_members = False
 
