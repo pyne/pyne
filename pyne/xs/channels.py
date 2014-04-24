@@ -7,7 +7,7 @@ ratios, etc.
 from __future__ import division
 import sys
 import collections
-from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import scipy.integrate
@@ -22,7 +22,7 @@ from . import models
 from . import cache
 from .models import group_collapse
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 if sys.version_info[0] > 2:
   basestring = str

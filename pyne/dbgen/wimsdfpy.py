@@ -22,7 +22,7 @@ import os
 import re
 import sys
 import shutil
-from warnings import warn
+from pyne.utils import VnVWarning
 
 try:
     import urllib.request as urllib2
@@ -39,7 +39,7 @@ import tables as tb
 from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_fpy(build_dir="", file_out='wimsd-fpyield.html'):
     """Grabs the WIMS fission product yields from the IAEA website

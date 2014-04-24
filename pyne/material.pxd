@@ -6,13 +6,10 @@ from libcpp.map cimport map as cpp_map
 from cython import pointer
 
 import collections
-from warnings import warn
 
 # Local imports
 cimport cpp_material
 cimport pyne.stlcontainers as conv
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 cdef cpp_map[int, double] dict_to_comp(dict)
 

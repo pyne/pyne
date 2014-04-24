@@ -5,7 +5,7 @@ from __future__ import division
 import os
 import io
 import sys
-from warnings import warn
+from pyne.utils import VnVWarning
 
 try:
     from StringIO import StringIO
@@ -21,7 +21,7 @@ from .. import rxname
 from ..endf import Library
 from .models import partial_energy_matrix, group_collapse
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 IO_TYPES = (io.IOBase, StringIO)
 

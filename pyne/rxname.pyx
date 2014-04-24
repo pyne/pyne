@@ -142,7 +142,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
-from warnings import warn
+from pyne.utils import VnVWarning
 
 # local imports 
 cimport extra_types
@@ -156,7 +156,7 @@ import pyne.stlcontainers as conv
 
 
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 # names
 cdef conv._SetStr names_proxy = conv.SetStr(False)

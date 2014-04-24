@@ -288,7 +288,7 @@ from __future__ import division
 import abc
 import collections
 import copy
-from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 
@@ -296,7 +296,7 @@ from .. import nucname
 from .. import material
 from . import nestedgeom as ng
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def _validate_name(value, isunique=False):
     if value.find(' ') != -1:

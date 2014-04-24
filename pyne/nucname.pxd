@@ -9,8 +9,6 @@ from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
 # Python imports 
-#from collections import Iterable
-from warnings import warn
 
 # local imports 
 cimport pyne.cpp_pyne
@@ -20,8 +18,6 @@ import pyne.pyne_config
 cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 #
 # Conversion dictionaries

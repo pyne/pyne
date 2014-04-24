@@ -6,9 +6,9 @@ Fortran formatted records.
 """
 import struct
 from collections import Iterable
-from warnings import warn
+from pyne.utils import VnVWarning
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class _FortranRecord(object):
     """A single Fortran formatted record.

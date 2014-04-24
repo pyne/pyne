@@ -6,7 +6,7 @@ import re
 import sys
 import shutil
 from glob import glob
-from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import tables as tb
@@ -18,7 +18,7 @@ from .api import BASIC_FILTERS
 if sys.version_info[0] > 2:
   basestring = str
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""

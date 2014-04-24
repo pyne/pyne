@@ -2,18 +2,18 @@ from __future__ import print_function, division
 import copy
 import itertools
 from collections import Iterable, Sequence
-from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import tables as tb
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", ImportWarning)
+         "Some aspects of the mesh module may be incomplete.", VnVWarning)
 
 from pyne.material import Material, MaterialLibrary, MultiMaterial
 

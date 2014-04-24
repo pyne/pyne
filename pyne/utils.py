@@ -1,12 +1,12 @@
 from __future__ import division
 import os
-from warnings import warn
 
 from distutils.dir_util import remove_tree
 
 from pyne._utils import fromstring_split, fromstring_token, endftod, fromendf_tok
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+class VnVWarning(UserWarning):
+    pass
 
 time_conv_dict = {
           'as': 1e-18, 

@@ -6,7 +6,7 @@ import os
 import subprocess
 import tempfile
 from collections import Mapping
-from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 
@@ -20,7 +20,7 @@ from pyne.material import Material, from_atom_frac
 from pyne.xs.data_source import NullDataSource, SimpleDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class Transmuter(object):
     """A class for transmuting materials using ORIGEN v2.2."""
