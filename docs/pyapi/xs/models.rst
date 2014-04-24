@@ -4,7 +4,7 @@
 Cross Section Models -- :mod:`pyne.xs.models`
 =============================================
 This module provides functions to compute cross sections, and related quantities, from 
-fundamental physical models.  From an empirical perspective, physical models are not a 
+fundamental physical models.  From an empirical perspective, physical models are not as 
 valuable as experimental data.  However, these functions exist to be called upon when
 experimental data is not available.
 
