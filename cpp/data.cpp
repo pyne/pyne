@@ -287,7 +287,7 @@ double pyne::q_val(int nuc) {
 };
 
 
-double pyne::q_val(char * nuc) {
+double pyne::q_val(const char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return q_val(nuc_zz);
 };
@@ -334,7 +334,7 @@ double pyne::gamma_frac(int nuc) {
 };
 
 
-double pyne::gamma_frac(char * nuc) {
+double pyne::gamma_frac(const char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return gamma_frac(nuc_zz);
 };
@@ -473,7 +473,7 @@ double pyne::ext_air_dose(int nuc, int source) {
 };
 
 
-double pyne::ext_air_dose(char * nuc, int source) {
+double pyne::ext_air_dose(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ext_air_dose(nuc_zz, source);
 };
@@ -521,7 +521,7 @@ double pyne::ratio(int nuc, int source) {
 };
 
 
-double pyne::ratio(char * nuc, int source) {
+double pyne::ratio(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ratio(nuc_zz, source);
 };
@@ -572,7 +572,7 @@ double pyne::ext_soil_dose(int nuc, int source) {
 };
 
 
-double pyne::ext_soil_dose(char * nuc, int source) {
+double pyne::ext_soil_dose(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ext_soil_dose(nuc_zz, source);
 };
@@ -625,7 +625,7 @@ double pyne::ingest_dose(int nuc, int source) {
 };
 
 
-double pyne::ingest_dose(char * nuc, int source) {
+double pyne::ingest_dose(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ingest_dose(nuc_zz, source);
 };
@@ -673,7 +673,7 @@ double pyne::fluid_frac(int nuc, int source) {
 };
 
 
-double pyne::fluid_frac(char * nuc, int source) {
+double pyne::fluid_frac(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return fluid_frac(nuc_zz, source);
 };
@@ -727,7 +727,7 @@ double pyne::inhale_dose(int nuc, int source) {
 };
 
 
-double pyne::inhale_dose(char * nuc, int source) {
+double pyne::inhale_dose(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return inhale_dose(nuc_zz, source);
 };
@@ -775,7 +775,7 @@ std::string pyne::lung_mod(int nuc, int source) {
 };
 
 
-std::string pyne::lung_mod(char * nuc, int source) {
+std::string pyne::lung_mod(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return lung_mod(nuc_zz, source);
 };

@@ -119,7 +119,7 @@ namespace pyne
   /// cannot be found, the default value returned is 0.0.
   double q_val(int nuc);
   /// Returns the q_value of a nuclide \a nuc.
-  double q_val(char * nuc); 
+  double q_val(const char * nuc); 
   /// Returns the q_value of a nuclide \a nuc.
   double q_val(std::string nuc); 
   /// \}
@@ -139,7 +139,7 @@ namespace pyne
   /// If the nuclide cannot be found, the default value returned is 0.0.
   double gamma_frac(int nuc);
   /// Returns the gamma_frac of a nuclide \a nuc. 
-  double gamma_frac(char * nuc); 
+  double gamma_frac(const char * nuc); 
   /// Returns the gamma_frac of a nuclide \a nuc. 
   double gamma_frac(std::string nuc); 
   /// \}
@@ -184,10 +184,10 @@ namespace pyne
   double ingest_dose(int nuc, int source);
   double inhale_dose(int nuc, int source);
   /// Returns the dose factor of a nuclide \a nuc.
-  double ext_air_dose(char * nuc, int source); 
-  double ext_soil_dose(char * nuc, int source); 
-  double ingest_dose(char * nuc, int source); 
-  double inhale_dose(char * nuc, int source);
+  double ext_air_dose(const char * nuc, int source); 
+  double ext_soil_dose(const char * nuc, int source); 
+  double ingest_dose(const char * nuc, int source); 
+  double inhale_dose(const char * nuc, int source);
   /// Returns the dose factor of a nuclide \a nuc.
   double ext_air_dose(std::string nuc, int source);
   double ext_soil_dose(std::string nuc, int source);
@@ -203,9 +203,9 @@ namespace pyne
   double fluid_frac(int nuc, int source);
   std::string lung_mod(int nuc, int source);
   /// Returns the requested info of a nuclide \a nuc. 
-  double ratio(char * nuc, int source);
-  double fluid_frac(char * nuc, int source);
-  std::string lung_mod(char * nuc, int source); 
+  double ratio(const char * nuc, int source);
+  double fluid_frac(const char * nuc, int source);
+  std::string lung_mod(const char * nuc, int source); 
   /// Returns the requested info of a nuclide \a nuc. 
   double ratio(std::string nuc, int source);
   double fluid_frac(std::string nuc, int source);
