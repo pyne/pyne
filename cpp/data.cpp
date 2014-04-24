@@ -97,11 +97,8 @@ double pyne::atomic_mass(int nuc) {
   // nuc_data.h5, if the map is empty.
   if (atomic_mass_map.empty()) {
     // Don't fail if we can't load the library
-    try {
       _load_atomic_mass_map();
       return atomic_mass(nuc);
-    }
-    catch(...){};
   };
 
   double aw;
@@ -157,11 +154,8 @@ double pyne::natural_abund(int nuc) {
   // nuc_data.h5, if the map is empty.
   if (natural_abund_map.empty()) {
     // Don't fail if we can't load the library
-    try {
       _load_atomic_mass_map();
       return natural_abund(nuc);
-    }
-    catch(...){};
   };
 
   double na;
@@ -259,11 +253,8 @@ double pyne::q_val(int nuc) {
   // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
   if (q_val_map.empty()) {
     // Don't fail if we can't load the library
-    try {
       _load_q_val_map();
       return q_val(nuc);
-    }
-    catch(...){};
   };
   
   double qv;
@@ -310,11 +301,8 @@ double pyne::gamma_frac(int nuc) {
   // Next, fill up the map with values from nuc_data.h5 if the map is empty.
   if (gamma_frac_map.empty()) {
     // Don't fail if we can't load the library
-    try {
       _load_q_val_map();
       return gamma_frac(nuc);
-    }
-    catch(...){};
   };
 
   double gf;
