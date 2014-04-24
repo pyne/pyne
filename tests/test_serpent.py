@@ -1,5 +1,4 @@
 import os
-from StringIO import StringIO
 
 import numpy as np
 from nose.tools import assert_equal, assert_true
@@ -54,5 +53,6 @@ def test_parse_det1():
             assert_true(det[key].shape[1] in [3, 13])
 
     # Check values
-    assert_array_equal(det['DETphi'][6], [7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 2.92709E-02, 0.00857, 16768])
+    assert_array_equal(det['DETphi'][6], 
+                       [7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 2.92709E-02, 0.00857, 16768])
     assert_array_equal(det['DETphiE'][-3], [1.49182E+01, 1.69046E+01, 1.49182E+01])

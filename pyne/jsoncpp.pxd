@@ -1,6 +1,10 @@
+from warnings import warn
+
 # Local imports
 cimport cpp_jsoncpp
 
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 #
 # Json containers

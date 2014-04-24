@@ -88,7 +88,9 @@ tally.
 
 
 """
+from warnings import warn
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class IUnit(object):
     """Abstract base class for tally units. The user does not use this class

@@ -90,3 +90,9 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/enrichment.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(enrichment enrichment.pyx)
 target_link_libraries(enrichment pyne_enrichment pyne_material)
+
+# tally
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/tally.pyx"
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(tally tally.pyx)
+target_link_libraries(tally pyne pyne_tally)

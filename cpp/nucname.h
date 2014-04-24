@@ -335,6 +335,33 @@ namespace nucname
   int zzzaaa_to_id(std::string nuc);
   /// \}
 
+
+  /// \name ZZLLAAAM Form Functions
+  /// \{
+  /// The ZZLLAAAM nuclide naming convention is a form in which the nuclides 
+  /// AA number is followed by the redundant two LL characters, followed by 
+  /// the nuclides ZZZ number.  Can also be followed with a metastable flag.
+  /// Uranium-235 here would be expressed as ‘92-U-235’.
+  /// \param nuc a nuclide
+  /// \return an integer nuclide identifier.
+  std::string zzllaaam(int nuc);
+  std::string zzllaaam(char * nuc);
+  std::string zzllaaam(std::string nuc);
+  /// \}
+
+
+  /// \name ZZLLAAAM Form to Identifier Form Functions
+  /// \{
+  /// This converts from the ZZLLAAAM nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in ZZLLAAAM form.
+  /// \return an integer id nuclide identifier.
+  //int zzllaaam_to_id(int nuc);
+  int zzllaaam_to_id(char * nuc);
+  int zzllaaam_to_id(std::string nuc);
+  /// \}
+
+
   /// \name MCNP Form Functions
   /// \{
   /// This is the naming convention used by the MCNP suite of codes.
@@ -481,6 +508,28 @@ namespace nucname
   int sza_to_id(char * nuc);
   int sza_to_id(std::string nuc);
   /// \}
+
+  /// \Ground State Form Functions
+  /// \{
+  /// This form stores the nuclide in id form, but removes
+  /// the state information about the nuclide.  I is in the same
+  /// form as ID, but the four last digits are all zeros.
+  /// \param nuc a nuclide
+  /// \return a integer groundstate id
+  int groundstate(int nuc);
+  int groundstate(char * nuc);
+  int groundstate(std::string nuc);
+  /// \}
+  
+  /// \State Map functions
+  /// \{
+  /// These convert from/to decay state ids (used in decay data)
+  /// to metastable ids (the PyNE default)
+  void _load_state_map();
+  int state_id_to_id(int state);
+  int id_to_state_id(int nuc_id);
+  extern std::map<int, int> state_id_map;
+
 
 };
 };

@@ -32,10 +32,25 @@ def test_q_val():
     assert_equal(data.q_val('H1'), 0.0)
     assert_equal(data.q_val(92235), 4.674)
 
+
+def test_simple_xs():
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal'), 698.2)
+    assert_equal(data.simple_xs('u235', 'elastic', 'thermal'), 15.04)
+    assert_equal(data.simple_xs(922350000, b'gamma', 'thermal'), 98.81)
+    assert_equal(data.simple_xs(922350000, 'fission', 'thermal'), 584.4)
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal'), 698.2)
+
+    assert_equal(data.simple_xs(922350000, 'tot', 'thermal_maxwell_ave'), 608.4)
+    assert_equal(data.simple_xs(922350000, 'absorption', 'resonance_integral'), 411.1)
+    assert_equal(data.simple_xs(922350000, 'tot', 'fourteen_MeV'), 5.865)
+    assert_equal(data.simple_xs(922350000, 'tot', 'fission_spectrum_ave'), 7.705)
+
+
 def test_gamma_frac():
     assert_equal(data.gamma_frac('H1'), 0.0)
     assert_equal(data.gamma_frac(92235), 0.036)
     assert_equal(data.gamma_frac(110240001), 0.998)
+
 
 #def test_ext_air_dose():
 #    assert_equal(data.ext_air_dose(40100000), 1.49E-10)
@@ -43,20 +58,24 @@ def test_gamma_frac():
 #   need to insert function that checks a null value from another source
 #    assert_equal(data.ext_air_dose(25054, 1), )
 
+
 def test_ext_soil_dose():
     assert_equal(data.ext_soil_dose(40100000, 0), 0.537)
 #    assert_equal(data.ext_soil_dose('H3', 2), 3.49E-8)
 #    assert_equal(data.ext_soil_dose(25054, 1), 9590.0)
+
     
 #def test_ingest_dose():
 #    assert_equal(data.ingest_dose(40100000), 4.66E-6)
 #    assert_equal(data.ingest_dose('H3', 2), 6.12E-8)
 #    assert_equal(data.ingest_dose(25054, 1), 2.7E-6)
+
     
 #def test_inhale_dose():
 #    assert_equal(data.inhale_dose(40100000), 0.000354)
 #    assert_equal(data.inhale_dose('H3', 2), 9.02E-8)
 #    assert_equal(data.inhale_dose(25054, 1), 6.4E-6)
+
 
 def test_b_coherent():
     assert_equal(data.b_coherent('H1'), -3.7406E-13 + 0j)
@@ -111,7 +130,7 @@ def test_decay_children():
     assert_equal(data.decay_children(922350001), set([922350000]))
     assert_equal(data.decay_children(611460000), set([601460000, 621460000]))
     assert_equal(data.decay_children('O16'), set())
-    assert_equal(data.decay_children('80166'), set([60120000, 80160000]))
+    assert_equal(data.decay_children('80166', False), set([60120000, 80160000]))
 
 
 def test_abundance_by_z_for_soundness():
@@ -151,12 +170,13 @@ def test_decay_branch_ratio():
 
 
 def test_decay_photon_branch_ratio():
-    assert_equal(data.decay_photon_branch_ratio(551370000, 561370000), (1.0,
-                                                                        0.0))
+    npt.assert_array_almost_equal(
+        data.decay_photon_branch_ratio(551370000, 561370000), (1.0, np.nan))
 
 
 def test_decay_beta_branch_ratio():
-    assert_equal(data.decay_beta_branch_ratio(551370000, 561370000), (1.0, 0.0))
+    npt.assert_array_almost_equal(
+        data.decay_beta_branch_ratio(551370000, 561370000), (1.0, np.nan))
 
 
 def test_decay_branch_ratio_byparent():
@@ -164,12 +184,13 @@ def test_decay_branch_ratio_byparent():
 
 
 def test_decay_photon_branch_ratio_byparent():
-    assert_equal(data.decay_photon_branch_ratio_byparent(551370000), [(1.0,
-                                                                       0.0)])
+    npt.assert_array_almost_equal(
+        data.decay_photon_branch_ratio_byparent(551370000), [(1.0, np.nan)])
 
 
 def test_decay_beta_branch_ratio_byparent():
-    assert_equal(data.decay_beta_branch_ratio_byparent(551370000), [(1.0, 0.0)])
+    npt.assert_array_almost_equal(
+        data.decay_beta_branch_ratio_byparent(551370000), [(1.0, np.nan)])
 
 
 def test_gamma_energy():
@@ -323,6 +344,41 @@ def test_ecbp_child_byen():
 
 def test_ecbp_child_byparent():
     assert_equal(data.ecbp_child_byparent(110220000), [100220001, 100220000])
+
+
+def test_id_from_level():
+    assert_equal(data.id_from_level(811920000, 445, 'X'), 811920010)
+    assert_equal(data.id_from_level(561370000, 662), 561370002)
+
+
+def test_xray_data():
+    npt.assert_almost_equal(data.calculate_xray_data(551370000, 0.1, 0.1),
+                            [(30.9728, 0.04693557573523976),
+                             (30.6251, 0.025406227145485287),
+                             (35.0, 0.017058197119274962),
+                             (4.29, 0.019708)])
+
+
+def test_gamma_xray():
+    npt.assert_almost_equal(data.gamma_xrays(551370000),
+                            [[(32.1936, 0.0), (31.8171, 0.0),
+                              (36.4, 0.0), (4.47, 0.0)],
+                             [(32.1936, 23759153.763765693),
+                              (31.8171, 12896468.662972018),
+                              (36.4, 8749697.07326229),
+                              (4.47, 5927514.212400001)]])
+
+
+def test_ecbp_xray():
+    npt.assert_almost_equal(data.ecbp_xrays(110220000),
+                            [[(1.041, 0.11273075771609505),
+                              (1.041, 0.05669229805542418),
+                              (1.07, 0.0014231536684807533),
+                              (np.nan, 0.0)],
+                             [(1.041, 1.273768717251104e-05),
+                              (1.041, 6.4057828790558e-06),
+                              (1.07, 1.6080514843315978e-07),
+                              (np.nan, 0.0)]])
 
 
 if __name__ == "__main__":

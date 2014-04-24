@@ -3,6 +3,7 @@ from __future__ import print_function
 import os
 import re
 import pkgutil
+from warnings import warn
 
 import numpy as np
 import tables as tb
@@ -10,6 +11,8 @@ import tables as tb
 from .. import nucname
 from .api import BASIC_FILTERS
 from .isotopic_abundance import get_isotopic_abundances
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Note that since ground state and meta-stable isotopes are of the same atomic mass, 
 # the meta-stables have been discluded from the following data sets.

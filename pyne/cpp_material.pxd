@@ -3,6 +3,10 @@ from libcpp.set cimport set
 from libcpp.string cimport string as std_string
 from libcpp.map cimport map
 
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 cimport cpp_jsoncpp 
 
 cdef extern from "material.h" namespace "pyne":
@@ -29,7 +33,7 @@ cdef extern from "material.h" namespace "pyne":
         double mass
         double density
         double atoms_per_molecule
-        cpp_jsoncpp.Value attrs
+        cpp_jsoncpp.Value metadata
 
         # Methods
         void norm_comp() except +

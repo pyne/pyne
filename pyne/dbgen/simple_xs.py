@@ -1,7 +1,12 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
 from __future__ import print_function
 import os
-import urllib
+from warnings import warn
+
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 from zipfile import ZipFile
 
 import numpy as np
@@ -12,6 +17,7 @@ from ..utils import to_barns
 from .api import BASIC_FILTERS
 from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 def grab_kaeri_simple_xs(build_dir=""):
     """Grabs the KAERI files needed for the simple cross sections table, 

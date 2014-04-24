@@ -1,5 +1,7 @@
 """This module implements an ALARA-like chain-based transmutation solver.
 """
+from __future__ import division
+from warnings import warn
 
 import numpy as np
 from scipy import linalg
@@ -14,6 +16,8 @@ from pyne.material import Material, from_atom_frac
 from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
@@ -188,7 +192,7 @@ class Transmuter(object):
         xscache = self.xscache
         sig_a = sigma_a(nuc, xs_cache=xscache)
         d = utils.from_barns(sig_a[0], 'cm2') * xscache['phi_g'][0]
-        if decay:
+        if decay and not np.isnan(data.decay_const(nuc)):
             d += data.decay_const(nuc) 
         return d
 

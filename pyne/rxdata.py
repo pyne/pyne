@@ -1,8 +1,10 @@
 import collections
-# import .endf as endf
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class RxLib(object):
-    """RxLib is a parent type which implements an abstract representation of
+    """RxLib is a parent type that implements an abstract representation of
     nuclear data. Eventually it will be able to represent ENDF, ACE, and other
     filetypes.
     """

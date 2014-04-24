@@ -284,10 +284,11 @@ the related simplesim card.
 # name referencing everywhere, not object passing. however using json() would
 # create something more human-readable.
 
+from __future__ import division
 import abc
 import collections
 import copy
-import warnings
+from warnings import warn
 
 import numpy as np
 
@@ -295,12 +296,14 @@ from .. import nucname
 from .. import material
 from . import nestedgeom as ng
 
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+
 def _validate_name(value, isunique=False):
     if value.find(' ') != -1:
         raise ValueError("The property ``name`` cannot contain spaces. "
                          "User provided {0}.".format(value))
     if isunique:
-        raise StandardError("This is a unique card, meaning only one card"
+        raise Exception("This is a unique card, meaning only one card"
                             " of this type can be found in a ``definition``. "
                             "Accordingly, the name is read-only.")
     if value == '':
@@ -520,7 +523,7 @@ class Cell(ICard):
         string = "Cell {0!r}: region {1}, ".format(
                 self.name, self.region.comment())
         if self.material and self.density and self.density_units:
-            string += "material {0!r} density {1:g} {2}".format(
+            string += "material {0} density {1:g} {2}".format(
                     self.material.name, self.density, self.density_units)
         else:
             string += "void"
@@ -545,7 +548,7 @@ class Cell(ICard):
     def mcnp(self, float_format, sim):
         # Card number.
         if self.name not in sim.sys.cells:
-            raise StandardError("Cell {0!r} not in simulation.".format(
+            raise Exception("Cell {0!r} not in simulation.".format(
                 self.name))
         formatstr = "{{: <{0}d}}".format(
                 int(np.log10(len(sim.sys.cells))) + 1)
@@ -1265,15 +1268,15 @@ class Material(ICard):
         mat : pyne.material.Material
             Material to base this card on.
         name : str, optional
-            Must either be present in mat.attrs or supplied here.
+            Must either be present in mat.metadata or supplied here.
         description : str, optional
             A description of this material that perhaps explains where the
             material came from (whether it's recycled, any references, etc.).
-            If not supplied here, may be present in mat.attrs.
+            If not supplied here, may be present in mat.metadata.
         tables : dict of (nucname, str) pairs
             Sometimes it is necessary to specify a library/table identifier for
             a given nuclide. These can be provided in this dictionary. Leave
-            out the period. If not supplied here, may be present in mat.attrs.  
+            out the period. If not supplied here, may be present in mat.metadata.  
             See examples.
 
         Examples
@@ -1300,7 +1303,7 @@ class Material(ICard):
                            name='water', tables={'H1': '71c'})
 
         """
-        name = name if name is not None else  mat.attrs['name']
+        name = name if name is not None else  mat.metadata['name']
         self._mat = mat
         super(Material, self).__init__(name=name, description=description,
                                        tables=tables, *args, **kwargs)
@@ -1314,7 +1317,7 @@ class Material(ICard):
     def comment(self): 
         if self.name == '':
             raise ValueError("The ``name`` property of the material cannot be empty.")
-        s = "Material {0!r}".format(self.name)
+        s = "Material {0}".format(self.name)
         if self.description:
             s += ": {0}".format(self.description)
         else:
@@ -1347,41 +1350,41 @@ class Material(ICard):
 
     @mat.setter
     def mat(self, value):
-        _validate_name(self.mat.attrs['name'], self.unique)
+        _validate_name(self.mat.metadata['name'], self.unique)
         self._mat = value
-        if 'tables' in value.attrs:
-            self._max_table_len = max([len(v) for v in value.attrs['tables'].values()])
+        if 'tables' in value.metadata:
+            self._max_table_len = max([len(v) for v in value.metadata['tables'].values()])
         else:
             self._max_table_len = 0
 
     @property
     def name(self):
-        return self._mat.attrs['name']
+        return self._mat.metadata['name']
 
     @name.setter
     def name(self, value):
         _validate_name(value, self.unique)
-        self._mat.attrs['name'] = value
+        self._mat.metadata['name'] = value
 
     @property
     def description(self):
-        if 'description' not in self._mat.attrs:
-            self._mat.attrs['description'] = None
-        return self._mat.attrs['description']
+        if 'description' not in self._mat.metadata:
+            self._mat.metadata['description'] = None
+        return self._mat.metadata['description']
 
     @description.setter
     def description(self, value):
-        self._mat.attrs['description'] = value
+        self._mat.metadata['description'] = value
 
     @property
     def tables(self):
-        if 'tables' not in self._mat.attrs:
-            self._mat.attrs['tables'] = {}
-        return self._mat.attrs['tables']
+        if 'tables' not in self._mat.metadata:
+            self._mat.metadata['tables'] = {}
+        return self._mat.metadata['tables']
 
     @tables.setter
     def tables(self, value):
-        self._mat.attrs['tables'] = value
+        self._mat.metadata['tables'] = value
         self._max_table_len = max([len(val) for val in value.values()])
 
 
@@ -1431,14 +1434,14 @@ class ISurface(ICard):
 
     @abc.abstractmethod
     def comment(self, title):
-        return "{0} {1!r}:{2}{3} ".format(title, self.name, 
+        return "{0} {1}:{2}{3} ".format(title, self.name, 
                 " reflecting." if self.reflecting else "",
                 " white." if self.white else "")
 
     @abc.abstractmethod
     def mcnp(self, float_format, sim, keystring):
         if self.name not in sim.sys.surfaces:
-            raise StandardError("Surface {0!r} not in simulation.".format(
+            raise Exception("Surface {0!r} not in simulation.".format(
                 self.name))
         formatstr = "{0}{1}{{: <{2}d}} {3:<4}".format(
                 "*" if self.reflecting else "",
@@ -1934,7 +1937,7 @@ class Facet(ISurface):
         self.number = number
 
     def comment(self):
-        return "{0}. facet {0!r}.".format(
+        return "{0}. facet {0}.".format(
                 self.macrobody.comment(), self.descriptor)
 
     def mcnp(self):
@@ -2224,13 +2227,13 @@ class IRegion(ICard):
 
         """
         if isinstance(self, RegionLeaf):
-            leaf_func.im_func(leaf_func.im_self, self)
+            leaf_func.__func__(leaf_func.__self__, self)
         else:
             self.left_child.walk(leaf_func)
             if and_func and isinstance(self, and_func):
-                and_func.im_func(and_func.im_self, self)
+                and_func.__func__(and_func.__self__, self)
             if or_func and isinstance(self, or_func):
-                or_func.im_func(or_func.im_func, self)
+                or_func.__func__(or_func.__func__, self)
             self.right_child.walk(leaf_func)
 
 
@@ -2409,7 +2412,7 @@ class ScatteringLaw(IMisc):
         self.libraries = libraries
 
     def comment(self):
-        string = "Scattering law {0!r}:".format(self.name)
+        string = "Scattering law {0}:".format(self.name)
         for nuc, lib in self.libraries.items():
             string += " {0}: {1},".format(nucname.name(nuc), lib)
         return string[:-1] + "."
@@ -3145,7 +3148,7 @@ class Distribution(ICard):
 
     def comment(self):
         vecformat = " {0} {0} {0}"
-        string = "Source distribution {0!r}:".format(self.name)
+        string = "Source distribution {0}:".format(self.name)
         string += " key setting {0},".format(
                 self.key_setting if self.key_setting else "default")
         string += " val setting {0},".format(
@@ -3221,7 +3224,7 @@ class Distribution(ICard):
 
     @key_setting.setter
     def key_setting(self, value):
-        acceptable = self.mcnp_keys.keys() + ['analytic']
+        acceptable = list(self.mcnp_keys.keys()) + ['analytic']
         if value and value not in acceptable:
             raise ValueError("The ``key_setting`` {0!r} is "
                 "unacceptable.".format(value))
@@ -3232,7 +3235,7 @@ class Distribution(ICard):
 
     @val_setting.setter
     def val_setting(self, value):
-        acceptable = self.mcnp_vals.keys() + self.analytic.keys()
+        acceptable = list(self.mcnp_vals.keys()) + list(self.analytic.keys())
         if value and value not in acceptable:
             raise ValueError("The ``val_setting`` {0!r} is "
                 "unacceptable.".format(value))
@@ -3290,7 +3293,7 @@ class Criticality(ISource):
         self.n_cycles = n_cycles
 
     def comment(self):
-        return ("Criticality source {0!r}: n_histories: {1}, keff_guess: {2:g}"
+        return ("Criticality source {0}: n_histories: {1}, keff_guess: {2:g}"
                 ", n_skip_cycles: {3}, n_cycles: {4}.".format(self.name,
                     self.n_histories, self.keff_guess, self.n_skip_cycles,
                     self.n_cycles))
@@ -3383,7 +3386,7 @@ class CriticalityPoints(ISource):
         self.points = points
 
     def comment(self):
-        string = "Criticality points {0!r}:".format(self.name)
+        string = "Criticality points {0}:".format(self.name)
         counter = 0
         for point in self.points:
             counter += 1
@@ -4178,7 +4181,7 @@ class IDetector(ITally):
         self.detectors = []
         self.sep_direct = kwargs.get('sep_direct', True)
         self._args_per_set = args_per_set
-        for i_set in range(len(args) / self._args_per_set):
+        for i_set in range(len(args) // self._args_per_set):
             i_start = self._args_per_set * i_set
             self.add(*args[i_start:i_start+self._args_per_set])
 
@@ -4679,11 +4682,11 @@ class ICellMod(IMisc):
         self.cells = []
         self._n_args_per_cell = n_args_per_cell
         if len(args) % n_args_per_cell != 0:
-            raise StandardError("The length of ``*args`` must be a multiple "
+            raise Exception("The length of ``*args`` must be a multiple "
                     "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
 
     def _process_varargs(self, args):
-        for i_cell in range(len(args) / self._n_args_per_cell):
+        for i_cell in range(len(args) // self._n_args_per_cell):
             i_start = self._n_args_per_cell * i_cell
             self.set(*args[i_start:i_start+self._n_args_per_cell])
 
@@ -4726,7 +4729,7 @@ class ICellMod(IMisc):
             else:
                 empty_count += 1
                 # Account for running out of cells with empty baggage.
-                if key is sim.sys.cells.keys()[-1]:
+                if key is list(sim.sys.cells.keys())[-1]:
                     string += " {0}J".format(empty_count)
         return string
 
@@ -5557,11 +5560,11 @@ class Temperature(ICellMod):
         """
         super(Temperature, self).set(cell)
         if temp < 200:
-            warnings.warn("Temperature set as less than 200 K. "
+            warn("Temperature set as less than 200 K. "
                     "Are you trying to specify temperature in degrees "
                     "Celcius, etc.? User provided {0:g}.".format(temp))
         if temp < 1:
-            warnings.warn("Temperature set as less than 1 K. "
+            warn("Temperature set as less than 1 K. "
                     "Are you trying to specify temperature as 'kT'? "
                     "User provided {0:g}.".format(temp))
         self.temps[cell] = temp
@@ -5672,11 +5675,11 @@ class ICellModParticle(IUniqueParticle):
         self.cells = []
         self._n_args_per_cell = n_args_per_cell
         if len(args) % n_args_per_cell != 0:
-            raise StandardError("The length of ``*args`` must be a multiple "
+            raise Exception("The length of ``*args`` must be a multiple "
                     "of {0}. Length is {1}.".format(n_args_per_cell, len(args)))
 
     def _process_varargs(self, args):
-        for i_cell in range(len(args) / self._n_args_per_cell):
+        for i_cell in range(len(args) // self._n_args_per_cell):
             i_start = self._n_args_per_cell * i_cell
             self.set(*args[i_start:i_start+self._n_args_per_cell])
 
@@ -6569,7 +6572,7 @@ class DXTRANContribution(ICellMod):
             # Get sphere index.
             dxt_name = 'dxtranspheres-{0}'.format(self.particle)
             if dxt_name not in sim.misc:
-                raise StandardError("To specify DXTRAN contributions for "
+                raise Exception("To specify DXTRAN contributions for "
                         "{0}s, a {1} misc card must be in the "
                         "simulation.".format(self.particle, dxt_name))
             index = sim.misc[dxt_name].index(self.sph_name)
@@ -6655,7 +6658,7 @@ class DXTRANSpheres(IUniqueParticle):
         self.spheres = collections.OrderedDict()
         self._n_args_per_set = 4
         # TODO copied from ICellMod, ICellModParticle.
-        for i_set in range(len(args) / self._n_args_per_set):
+        for i_set in range(len(args) // self._n_args_per_set):
             i_start = self._n_args_per_set * i_set
             self.set(*args[i_start:i_start+self._n_args_per_set])
 
@@ -6735,7 +6738,7 @@ class DXTRANSpheres(IUniqueParticle):
         return formatstr % (tuple(sph.center) + (sph.inrad, sph.outrad))
 
     def index(self, sph_name):
-        return self.spheres.keys().index(sph_name) + 1
+        return list(self.spheres.keys()).index(sph_name) + 1
 
     @property
     def upper_cutoff(self): return self._upper_cutoff
@@ -6814,7 +6817,7 @@ class Vector(IMisc):
     def comment(self):
         string = "Vector {0!r}:".format(self.name)
         counter = 0
-        for key, val in self.vectors.iteritems():
+        for key, val in self.vectors.items():
             counter += 1
             string += " {0}: ({1[0]:g}, {1[1]:g}, {1[2]:g}) cm".format(
                     key, val)
@@ -6823,10 +6826,10 @@ class Vector(IMisc):
 
     def mcnp(self, float_format, sim):
         if len(self.vectors) == 0:
-            raise StandardError("No vectors added.")
+            raise Exception("No vectors added.")
         string = "VECT"
         counter = 0
-        for key, val in self.vectors.iteritems():
+        for key, val in self.vectors.items():
             counter += 1
             index = self.index(key)
             formatstr = " V{0} {1} {1} {1}".format(index, float_format)
@@ -6835,7 +6838,7 @@ class Vector(IMisc):
         
     def index(self, vecname):
         # MCNP is okay with index 0.
-        return self.vectors.keys().index(vecname)
+        return list(self.vectors.keys()).index(vecname)
 
 
 class Burnup(IMisc):
@@ -6950,7 +6953,7 @@ class MaterialCustom(Custom, Material):
 
     """
     def __init__(self, mat, name=None, *args, **kwargs):
-        name = name if name is not None else  mat.attrs['name']
+        name = name if name is not None else  mat.metadata['name']
         self._mat = mat
         super(MaterialCustom, self).__init__(name=name, *args, **kwargs)
 

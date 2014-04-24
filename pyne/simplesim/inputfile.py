@@ -36,12 +36,14 @@ import abc
 import datetime
 import re
 import textwrap
-import warnings
+from warnings import warn
 
 import numpy as np
 
 from . import definition
 from . import cards
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 class IInputFile(object):
     """This class is not used directly by the user. Abstract base class for
@@ -325,7 +327,7 @@ class MCNPInput(IInputFile):
         self._write_user_literal("data", self.user_data_literal)
 
     def _write_dictionary(self, dictionary):
-        for key, card in dictionary.iteritems():
+        for key, card in dictionary.items():
             if self.comments:
                 self._write_comment(card.comment())
             self._write_card(card)

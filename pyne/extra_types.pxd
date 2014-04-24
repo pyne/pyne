@@ -1,5 +1,9 @@
 """C++ wrapper for extra types header."""
+
 from libc.stdio cimport FILE
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 # Dirty ifdef, else, else preprocessor hack
 # see http://comments.gmane.org/gmane.comp.python.cython.user/4080

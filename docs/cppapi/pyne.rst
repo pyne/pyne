@@ -2,4 +2,4 @@ PyNE Globals -- ``libpyne``
 =====================================
 
 .. autodoxygenindex:: pyne.h
-    :source: pyne
+    :source: pyne_pyne

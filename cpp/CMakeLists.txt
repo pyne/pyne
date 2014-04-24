@@ -26,7 +26,7 @@ install_lib(pyne_rxname)
 add_library(pyne_data data.cpp)
 set_target_properties(pyne_data PROPERTIES 
                       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
-target_link_libraries(pyne_data pyne_nucname pyne hdf5)
+target_link_libraries(pyne_data pyne_nucname pyne_rxname pyne hdf5)
 install_lib(pyne_data)
 
 # pyne_material
@@ -43,6 +43,13 @@ set_target_properties(pyne_enrichment PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
 target_link_libraries(pyne_enrichment pyne_material)
 install_lib(pyne_enrichment)
+
+# pyne_tally
+add_library(pyne_tally tally.cpp)
+set_target_properties(pyne_tally PROPERTIES 
+                      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
+install_lib(pyne_tally)
+
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

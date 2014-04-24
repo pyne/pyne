@@ -57,6 +57,7 @@ Development:
     pubs
     dev_team
     gsoc/index
+    theorymanual/index
 
 ------------
 Search Links

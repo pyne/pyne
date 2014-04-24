@@ -1,8 +1,12 @@
 """C++ wrapper for dagmc_bridge."""
-from libcpp.string cimport string as std_string
+from libcpp.utility cimport pair
 from libcpp.map cimport map
 from libcpp.set cimport set
-from libcpp.utility cimport pair
+from libcpp.string cimport string as std_string
+
+from warnings import warn
+
+warn(__name__ + " is not yet V&V compliant.", ImportWarning)
 
 cimport extra_types
 
