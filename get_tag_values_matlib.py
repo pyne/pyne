@@ -72,7 +72,6 @@ function which loads pyne material library
 
 
 def load_mat_lib(filename):
-    mat_lib = material.Material()
     mat_lib = material.MaterialLibrary()
     mat_lib.from_hdf5(
         filename, datapath='/material_library/materials', nucpath='/material_library/nucid')
