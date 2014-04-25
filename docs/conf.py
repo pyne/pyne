@@ -12,7 +12,11 @@
 # serve to show the default.
 import os
 import sys
+import warnings
 
+from pyne.utils import VnVWarning
+
+warnings.simplefilter("ignore", VnVWarning)
 # -- General configuration -----------------------------------------------------
 
 sys.path.insert(0, os.path.dirname(__file__))

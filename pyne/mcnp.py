@@ -1894,10 +1894,10 @@ class Meshtal(object):
         (e.g. 4, 14, 24) as keys and
         MeshTally objects as values.
     tags : dict
-        Maps integer tally numbers to iterables containing four strs: the
+        Maps integer tally numbers to iterables containing four strs, the
         results tag name, the relative error tag name, the total results
         tag name, and the total relative error tag name. If tags is None
-        the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
+        the tags are named 'x_result', 'x_rel_error', 'x_result_total',
         'x_rel_error_total' where x is n or p for neutrons or photons.
     """
 

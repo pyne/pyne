@@ -13,12 +13,13 @@ warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyTAPS optional dependency could not be imported. "
         "Some aspects of the variance reduction module may be incomplete.", 
         VnVWarning)
 
 from mesh import Mesh
 from mesh import MeshError
+
 
 def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag, 
           ww_mesh, ww_tag, q_bias_mesh, q_bias_tag, beta=5):
