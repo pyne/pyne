@@ -7,8 +7,7 @@ Nuclear Reaction Channels
 .. currentmodule:: pyne.nuclear_reaction_channels
 
 This page presents a detailed explanation of how :py:mod:`Nuclear Reaction Channels`
- works, including
-underlying theory, any assocaited assumptions, and information about correct and
+works, including underlying theory, any associated assumptions, and information about correct and
 appropriate use of this physics. 
 
 

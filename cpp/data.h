@@ -221,24 +221,24 @@ namespace pyne
 
   /// a struct matching the '/neutron/nds_fission_product' table in nuc_data.h5
   typedef struct ndsfpy_struct {
-    int from_nuc;
-    int to_nuc;
-    double yield_thermal;
-    double yield_thermal_err;
-    double yield_fast;
-    double yield_fast_err;
-    double yield_14MeV;
-    double yield_14MeV_err;
+    int from_nuc; ///< id of fissioning nuclide
+    int to_nuc; ///< id of fission product
+    double yield_thermal; ///< thermal yield [fraction]
+    double yield_thermal_err; ///< thermal yield error [fraction]
+    double yield_fast; ///< fast yield [fraction]
+    double yield_fast_err; ///< fast yield error [fraction]
+    double yield_14MeV; ///< 14 MeV yield [fraction]
+    double yield_14MeV_err; ///< 14 MeV yield error [fraction]
   } ndsfpy_struct;
 
   /// a struct for the nds data for fpyield
   typedef struct ndsfpysub_struct {
-    double yield_thermal;
-    double yield_thermal_err;
-    double yield_fast;
-    double yield_fast_err;
-    double yield_14MeV;
-    double yield_14MeV_err;
+    double yield_thermal; ///< thermal yield [fraction]
+    double yield_thermal_err; ///< thermal yield error [fraction]
+    double yield_fast; ///< fast yield [fraction]
+    double yield_fast_err; ///< fast yield error [fraction]
+    double yield_14MeV; ///< 14 MeV yield [fraction]
+    double yield_14MeV_err; ///< 14 MeV yield error [fraction]
   } ndsfpysub_struct;
 
 
@@ -309,32 +309,32 @@ namespace pyne
   
   /// Structure for atomic data
   typedef struct atomic_struct{
-    int z;
-    double k_shell_fluor;
-    double k_shell_fluor_error;
-    double l_shell_fluor;
-    double l_shell_fluor_error;
-    double prob;
-    double k_shell_be;
-    double k_shell_be_err;
-    double li_shell_be;
-    double li_shell_be_err;
-    double mi_shell_be;
-    double mi_shell_be_err;
-    double ni_shell_be;
-    double ni_shell_be_err;
-    double kb_to_ka;
-    double kb_to_ka_err;
-    double ka2_to_ka1;
-    double ka2_to_ka1_err;
-    double l_auger;
-    double k_auger;
-    double ka1_x_ray_en;
-    double ka1_x_ray_en_err;
-    double ka2_x_ray_en;
-    double ka2_x_ray_en_err;
-    double kb_x_ray_en;
-    double l_x_ray_en;
+    int z; ///< number of protons [int]
+    double k_shell_fluor; ///< K-shell fluorescence [fraction]
+    double k_shell_fluor_error; ///< K-shell fluorescence error [fraction]
+    double l_shell_fluor; ///< L-shell fluorescence [fraction]
+    double l_shell_fluor_error; ///< L-shell fluorescence error [fraction]
+    double prob; ///< probability K shell hole is filled by L shell [fraction]
+    double k_shell_be; ///< K-shell binding energy  [fraction]
+    double k_shell_be_err; ///< K-shell binding energy error [fraction]
+    double li_shell_be; ///< L-shell binding energy  [fraction]
+    double li_shell_be_err; ///< L-shell binding energy error [fraction]
+    double mi_shell_be; ///< M-shell binding energy  [fraction]
+    double mi_shell_be_err; ///< M-shell binding energy error [fraction]
+    double ni_shell_be; ///< N-shell binding energy  [fraction]
+    double ni_shell_be_err; ///< N-shell binding energy error [fraction]
+    double kb_to_ka; ///< ratio of Kb to Ka fluorescence [fraction]
+    double kb_to_ka_err; ///< error in ratio of Kb to Ka fluorescence [fraction]
+    double ka2_to_ka1; ///< Ka2 to Ka1 fluorescence ratio [fraction]
+    double ka2_to_ka1_err; ///< Ka2 to Ka1 fluorescence error [fraction]
+    double k_auger; ///< Auger electrons from k shell holes [fraction]
+    double l_auger; ///< Auger electrons from l shell holes [fraction]
+    double ka1_x_ray_en; ///< Ka1 X-ray energy [keV]
+    double ka1_x_ray_en_err; ///< Ka1 X-ray energy error [keV]
+    double ka2_x_ray_en; ///< Ka2 X-ray energy [keV]
+    double ka2_x_ray_en_err; ///< Ka2 X-ray energy error [keV]
+    double kb_x_ray_en; ///< Kb X-ray energy [keV]
+    double l_x_ray_en; ///< L X-ray energy [keV]
   } atomic_struct;
   
   // map of Z to atomic data
@@ -350,13 +350,13 @@ namespace pyne
   
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.
   typedef struct level_struct{
-    int nuc_id;
-    unsigned int rx_id;
-    double half_life;
-    double level;
-    double branch_ratio;
-    int metastable;
-    char special;
+    int nuc_id; ///< state id of nuclide
+    unsigned int rx_id; ///< rx id of reaction, 0 for basic level data
+    double half_life; ///< half life [seconds]
+    double level; ///< level energy [keV]
+    double branch_ratio; ///< branch ratio [fraction]
+    int metastable; ///< metastable level [int]
+    char special; ///< special high-spin state [character]
   } level_struct;
 
   /// Mapping from nuclides in id form to a struct containing data associated
@@ -439,15 +439,19 @@ namespace pyne
 
   /// a struct matching the '/decay/decays' table in nuc_data.h5.
   typedef struct decay_struct{
-    int parent;
-    int child;
-    unsigned int decay;
-    double half_life;
-    double half_life_error;
-    double branch_ratio;
+    int parent; ///< state id of decay parent
+    int child; ///< state id of decay child
+    unsigned int decay; ///< rx id of decay
+    double half_life; ///< half life of the decay [s]
+    double half_life_error; ///< half life error of the decay [s]
+    double branch_ratio; ///< branching ratio of this decay [fraction]
+    /// photon branching ratio of this decay [fraction]
     double photon_branch_ratio;
+    /// photon branching ratio error of this decay [fraction]
     double photon_branch_ratio_error;
+    /// beta branching ratio of this decay [fraction]
     double beta_branch_ratio;
+    /// beta branching ratio error of this decay [fraction]
     double beta_branch_ratio_error;
   } decay_struct;
 
@@ -471,20 +475,20 @@ namespace pyne
 
   /// a struct matching the '/decay/gammas' table in nuc_data.h5.
   typedef struct gamma_struct{
-    int from_nuc;
-    int to_nuc;
-    int parent_nuc;
-    double energy;
-    double energy_err;
-    double photon_intensity;
-    double photon_intensity_err;
-    double conv_intensity;
-    double conv_intensity_err;
-    double total_intensity;
-    double total_intensity_err;
-    double k_conv_e;
-    double l_conv_e;
-    double m_conv_e;
+    int from_nuc; ///< state id of starting level
+    int to_nuc; ///< state id of final level
+    int parent_nuc; ///< state id of the primary decaying nucleus
+    double energy; ///< energy of the photon [keV]
+    double energy_err; ///< energy error of the photon [keV]
+    double photon_intensity; ///< photon intensity
+    double photon_intensity_err; ///< photon intensity error
+    double conv_intensity; ///< conversion intensity
+    double conv_intensity_err; ///< conversion intensity error
+    double total_intensity; ///< total decay intensity
+    double total_intensity_err; ///< total decay intensity error
+    double k_conv_e; ///< k conversion electron fraction
+    double l_conv_e; ///< l conversion electron fraction
+    double m_conv_e; ///< m conversion electron fraction
   } gamma_struct;
 
   /// Loads the gamma ray data from the nuc_data.h5 file into memory.
@@ -512,10 +516,10 @@ namespace pyne
 
   /// a struct matching the '/decay/alphas' table in nuc_data.h5.
   typedef struct alpha_struct{
-    int from_nuc;
-    int to_nuc;
-    double energy;
-    double intensity;
+    int from_nuc; ///< state id of parent nuclide
+    int to_nuc; ///< state id of child nuclide
+    double energy; ///< energy of alpha
+    double intensity; ///< intensity of alpha decay
   } alpha_struct;
 
   /// Loads the alpha decay data from the nuc_data.h5 file into memory.
@@ -537,11 +541,11 @@ namespace pyne
 
   /// a struct matching the '/decay/betas' table in nuc_data.h5.
   typedef struct beta_struct{
-    int from_nuc;
-    int to_nuc;
-    double endpoint_energy;
-    double avg_energy;
-    double intensity;
+    int from_nuc; ///< state id of parent nuclide
+    int to_nuc; ///< state id of child nuclide
+    double endpoint_energy; ///< beta decay endpoint energy
+    double avg_energy; ///< beta decay average energy
+    double intensity; ///< beta intensity
   } beta_struct;
 
   /// Loads the beta decay data from the nuc_data.h5 file into memory.
@@ -564,15 +568,15 @@ namespace pyne
 
   /// A struct matching the '/decay/ecbp' table in nuc_data.h5.
   typedef struct ecbp_struct{
-    int from_nuc;
-    int to_nuc;
-    double endpoint_energy;
-    double avg_energy;
-    double beta_plus_intensity;
-    double ec_intensity;
-    double k_conv_e;
-    double l_conv_e;
-    double m_conv_e;
+    int from_nuc;  ///< state id of parent nuclide
+    int to_nuc; ///< state id of child nuclide
+    double endpoint_energy; ///< beta decay endpoint energy
+    double avg_energy; ///< beta decay average energy
+    double beta_plus_intensity; ///< intensity of beta plus decay
+    double ec_intensity; ///< intensity of electron capture
+    double k_conv_e; ///< k conversion electron fraction
+    double l_conv_e; ///< l conversion electron fraction
+    double m_conv_e; ///< m conversion electron fraction
   } ecbp_struct;
 
   /// A vector of structs containing ecbp data for access in memory
