@@ -27,10 +27,11 @@ from __future__ import print_function
 import os
 import time
 from warnings import warn
+from pyne.utils import VnVWarning
 
 warn("the NJOY module is untested and considered experimental", 
               RuntimeWarning)
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class PyNjoyError(Exception):
     """Exception indicating an error in PyNjoy."""

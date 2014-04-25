@@ -22,6 +22,7 @@ from libc.string cimport strtok, strcpy, strncpy
 import re
 import os
 from warnings import warn
+from pyne.utils import VnVWarning
 
 cimport numpy as np
 import numpy as np
@@ -35,7 +36,7 @@ from pyne.utils import fromendf_tok, endftod
 
 np.import_array()
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",

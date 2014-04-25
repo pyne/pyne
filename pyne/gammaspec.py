@@ -4,12 +4,13 @@ for activity calculations.
 """
 
 from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 
 from pyne import spectanalysis
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class GammaSpectrum(spectanalysis.PhSpectrum):
     """GammaSpec class includes gamma specific variables"""

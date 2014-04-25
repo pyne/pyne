@@ -5,8 +5,9 @@
 
 """
 from warnings import warn
+from pyne.utils import VnVWarning
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class PhSpectrum(object):
     """Pulse height spectrum class"""

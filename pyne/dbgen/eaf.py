@@ -6,6 +6,7 @@ from __future__ import print_function
 import re
 import os
 from warnings import warn
+from pyne.utils import VnVWarning
 
 try:
     import urllib.request as urllib
@@ -19,7 +20,7 @@ import tables as tb
 from .. import nucname
 from .api import BASIC_FILTERS
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_eaf_data(build_dir=""):
     """Grabs the EAF activation data files

@@ -7,9 +7,12 @@
 import os
 import pickle
 import unittest
+import warnings
 
 import numpy as np
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import material
 from pyne.simplesim import definition, cards, inputfile
 import pyne.simplesim.nestedgeom as ng

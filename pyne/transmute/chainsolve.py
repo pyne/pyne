@@ -2,6 +2,7 @@
 """
 from __future__ import division
 from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 from scipy import linalg
@@ -17,7 +18,7 @@ from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""

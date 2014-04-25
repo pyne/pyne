@@ -5,10 +5,6 @@ from libc.string cimport const_char
 from libcpp.string cimport string as std_string
 cimport extra_types
 
-from warnings import warn
-
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
-
 cdef extern from "rxname.h" namespace "pyne::rxname":
     # names sets
     set[std_string] names

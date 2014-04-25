@@ -14,6 +14,7 @@ from libcpp.utility cimport pair as cpp_pair
 
 #Standard lib import
 from warnings import warn
+from pyne.utils import VnVWarning
 
 cimport numpy as np
 import numpy as np
@@ -33,7 +34,7 @@ cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 # Mathematical constants
 pi = cpp_data.pi
@@ -103,9 +104,6 @@ def atomic_mass(nuc):
 cdef conv._MapIntDouble natural_abund_map_proxy = conv.MapIntDouble(False)
 natural_abund_map_proxy.map_ptr = &cpp_data.natural_abund_map
 natural_abund_map = natural_abund_map_proxy
-
-# initialize natural_abund_map
-cpp_data.natural_abund(<int> 10000000)
 
 abundance_by_z = dict([(i, []) for i in range(1,119)])
 for zas, abundance in natural_abund_map.items():
@@ -284,7 +282,7 @@ ext_air_dose_map = ext_air_dose_map_proxy
 
 def ext_air_dose(nuc, source=0):
     """Finds the external air dose factor for a tracked nuclide.
-
+    
     Parameters
     ----------
     nuc : int or str 

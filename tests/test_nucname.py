@@ -2,10 +2,13 @@
 from __future__ import unicode_literals, division
 from unittest import TestCase
 import nose 
+import warnings
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
     assert_true, assert_false
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import nucname
 
 def test_name_zz():

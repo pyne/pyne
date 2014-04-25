@@ -3,7 +3,7 @@ import os
 import unittest
 import nose
 import struct
-
+import warnings
 
 import nose.tools
 from nose.tools import assert_almost_equal, assert_equal, assert_true, \
@@ -12,6 +12,8 @@ from nose.plugins.skip import SkipTest
 
 import tables
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 try:
     from pyne import mcnp
     from pyne.mcnp import read_mcnp_inp

@@ -53,7 +53,7 @@ install_lib(pyne_tally)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 #file(COPY "${CMAKE_CURRENT_SOURCE_DIR}" DESTINATION 
 #    "${CMAKE_BINARY_DIR}/pyne/includes/" FILES_MATCHING PATTERN "*.h")

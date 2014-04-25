@@ -1,4 +1,5 @@
 import os
+import warnings
 from nose.tools import assert_equal, assert_almost_equal
 from numpy.testing import assert_array_equal
 
@@ -8,6 +9,8 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne.r2s import irradiation_setup, photon_sampling_setup
 from pyne.material import Material
 from pyne.mesh import Mesh, IMeshTag
