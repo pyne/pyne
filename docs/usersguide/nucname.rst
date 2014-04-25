@@ -49,6 +49,8 @@ supported by PyNE.  Functions to convert between forms may be seen in :ref:`name
     canonical zzzaaammmm form in that ssss refers to a list of states by ordered by energy. This is
     derived from the levels listed in the ENSDF files for a given nuclide. Using this form is
     dangerous as it may change with new releases of ENSDF data.
+ #. **Groundstate**:  In Groundstate format, the nuclide is stored in a form similar to the standard
+    id form, but the last four digits are zero to eliminate the information about the nuclides state.  
 
 If there are more conventions that you would like to see supported, please contact the :ref:`dev_team`.
 

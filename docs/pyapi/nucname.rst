@@ -43,8 +43,8 @@ Currently the following naming conventions are supported:
  #. **ALARA**: In ALARA format, elements are denoted by the lower case atomic symbol. Isotopes are
     specified by appending a semicolon and A-number. For example, "fe" and "fe:56" represent
     elemental iron and iron-56 respectively. No metastable flag exists.
- #. **Groundstate**:  In Groundstate format, the nuclide is stored in a form similar to the standard id
-    form, but the last four digits are zero to eliminate the information about the nuclides state.  
+ #. **Groundstate**:  In Groundstate format, the nuclide is stored in a form similar to the standard
+    id form, but the last four digits are zero to eliminate the information about the nuclides state.  
 
 .. currentmodule:: pyne.nucname
 
