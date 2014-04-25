@@ -29,5 +29,5 @@ SET (fluka_libdir ${FLUPRO})
 #	        DEPENDS mgdraw.o)
 
 # Create the executable that can call flukam_
-ADD_EXECUTABLE(mainfludag mainFluDAG.cpp fluka_funcs.cpp chkerr.cpp)
+ADD_EXECUTABLE(mainfludag mainFluDAG.cpp fluka_funcs.cpp)
 TARGET_LINK_LIBRARIES(mainfludag ${moablibs} ${FLUPRO}/libflukahp.a gfortran)
