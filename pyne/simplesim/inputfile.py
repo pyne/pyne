@@ -37,13 +37,14 @@ import datetime
 import re
 import textwrap
 from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 
 from . import definition
 from . import cards
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class IInputFile(object):
     """This class is not used directly by the user. Abstract base class for

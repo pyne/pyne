@@ -1,7 +1,8 @@
 import collections
 from warnings import warn
+from pyne.utils import VnVWarning
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class RxLib(object):
     """RxLib is a parent type that implements an abstract representation of

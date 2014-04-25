@@ -14,6 +14,7 @@ from libcpp.utility cimport pair as cpp_pair
 
 #Standard lib import
 from warnings import warn
+from pyne.utils import VnVWarning
 
 cimport numpy as np
 import numpy as np
@@ -33,7 +34,7 @@ cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 # Mathematical constants
 pi = cpp_data.pi

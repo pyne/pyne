@@ -4,17 +4,18 @@ This module contains functions for mesh-based Monte Carlo variance reduction.
 
 from itertools import izip
 from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
     warnings.warn("the PyTAPS optional dependency could not be imported. "
         "Some aspects of the variance reduction module may be incomplete.", 
-        ImportWarning)
+        VnVWarning)
 
 from mesh import Mesh
 from mesh import MeshError

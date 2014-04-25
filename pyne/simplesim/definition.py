@@ -55,6 +55,7 @@ import abc
 import collections
 import pickle
 from warnings import warn
+from pyne.utils import VnVWarning
 
 try:
     import simplejson as json
@@ -66,7 +67,7 @@ import numpy as np
 from .. import material
 from . import cards
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class IDefinition(object):
     """This class is not used by the user. Abstract base class for

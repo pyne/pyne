@@ -19,6 +19,7 @@ generates ACE-format cross sections.
 from __future__ import division, unicode_literals
 import struct
 from warnings import warn
+from pyne.utils import VnVWarning
 from collections import OrderedDict
 
 cimport numpy as np
@@ -33,7 +34,7 @@ from pyne.rxname import label
 from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
-warn(__name__ + " is not yet V&V compliant.", ImportWarning)
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class Library(object):
     """A Library objects represents an ACE-formatted file which may contain

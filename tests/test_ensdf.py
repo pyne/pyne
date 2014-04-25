@@ -1,4 +1,5 @@
 """ensdf tests"""
+import warnings
 try:
     from StringIO import StringIO
 except ImportError:
@@ -8,6 +9,8 @@ import nose
 
 from nose.tools import assert_equal, assert_almost_equal
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import ensdf
 
 ensdf_sample = """\
