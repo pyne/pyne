@@ -102,12 +102,15 @@ def check_matname(tag_values):
                 continue
             if '/' in tag:
                 mat_name = tag.split('/')
-                if mat_name[1] == '':
-                    raise Exception(
-                        "Couldn\'t find group name in appropriate format; extra \'/\' in %s" % tag)
                 # list of material name only
                 matname = mat_name[0].split(':')
+                if matname[1] == '':
+                    raise Exception(
+                        "Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
                 matdensity = mat_name[1].split(':')
+                if matdensity[1] == '':
+                    raise Exception(
+                        "Couldn\'t find group name in appropriate format; extra \'/\' in %s" % tag)
                 mat_list_density.append(matdensity[1])
                 # otherwise we have only "mat:"
             elif ':' in tag:
