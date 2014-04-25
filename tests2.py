@@ -14,13 +14,13 @@ Existence/Absence of a graveyard group
 def test_garveyard():
     # 'mat:graveyard' group exists
     tag_1=['mat:graveyard','mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p', 'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
-    assert_equal(gtag.check_matname(tag_1),[('graveyard', ' '), ('Nitrogen', '-0.001205'), ('Steel, Stainless 321', '-2'), ('Lead', '-11.35'), ('Mercury', '-7.874')])
+    assert_equal(gtag.check_matname(tag_1),[('Nitrogen', '-0.001205'), ('Steel, Stainless 321', '-2'), ('Lead', '-11.35'), ('Mercury', '-7.874')])
     # 'mat:Graveyard' group exists
     tag_2=['mat:Graveyard','mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p', 'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
-    assert_equal(gtag.check_matname(tag_2),[('Graveyard', ' '), ('Nitrogen', '-0.001205'), ('Steel, Stainless 321', '-2'), ('Lead', '-11.35'), ('Mercury', '-7.874')])
+    assert_equal(gtag.check_matname(tag_2),[('Nitrogen', '-0.001205'), ('Steel, Stainless 321', '-2'), ('Lead', '-11.35'), ('Mercury', '-7.874')])
     # graveyard group is absent
     tag_3=['mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p', 'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
-    #assert_raises(Exception, gtag.check_matname, tag_3)
+    assert_raises(Exception, gtag.check_matname, tag_3)
     #graveyard exists as 'graveyard'
     tag_4=['graveyard','mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p', 'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
     assert_equal(gtag.check_matname(tag_4),[('Nitrogen', '-0.001205'), ('Steel, Stainless 321', '-2'), ('Lead', '-11.35'), ('Mercury', '-7.874')])
