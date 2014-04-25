@@ -1,4 +1,5 @@
 from os.path import isfile, join, dirname
+from warnings import warn
 from pyne.utils import VnVWarning
 
 from pyne.mesh import Mesh

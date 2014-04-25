@@ -9,6 +9,7 @@ import os
 import logging
 import multiprocessing
 import time
+from warnings import warn
 from pyne.utils import VnVWarning
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \

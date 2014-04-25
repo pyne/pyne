@@ -1,4 +1,5 @@
 """Plotting routines for spectrometry modules"""
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import matplotlib.pyplot as plt

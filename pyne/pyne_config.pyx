@@ -12,13 +12,10 @@ from libcpp.string cimport string as std_string
 
 import os
 import json
-from pyne.utils import VnVWarning
 
 # local imports 
 cimport cpp_pyne
 import pyne.__init__
-
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 prefix = os.path.split(pyne.__init__.__file__)[0]
 

@@ -5,6 +5,7 @@ from __future__ import division
 import os
 import io
 import sys
+from warnings import warn
 from pyne.utils import VnVWarning
 
 try:

@@ -1,6 +1,7 @@
 """This module provides physical cross-section models and helper functions."""
 from __future__ import division
 
+from warnings import warn
 from pyne.utils import VnVWarning
 
 cimport numpy as np

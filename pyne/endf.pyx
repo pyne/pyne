@@ -21,6 +21,7 @@ from libc.string cimport strtok, strcpy, strncpy
 
 import re
 import os
+from warnings import warn
 from pyne.utils import VnVWarning
 
 cimport numpy as np

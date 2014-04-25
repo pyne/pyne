@@ -5,14 +5,10 @@ from libc.stdlib cimport malloc, free
 from libc.stdlib cimport atof
 from libc.string cimport strtok, strcpy, strncpy
 
-from pyne.utils import VnVWarning
-
 cimport numpy as np
 cimport pyne.cpp_pyne
 from cython.operator cimport dereference as deref
 import numpy as np
-
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def fromstring_split(s, sep=None, dtype=float):
     """A replacement for numpy.fromstring() using the Python str.split() 

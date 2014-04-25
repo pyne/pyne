@@ -86,6 +86,7 @@ import os as _os
 import re as _re
 import sys as _sys
 import textwrap as _textwrap
+from warnings import warn
 from pyne.utils import VnVWarning
 
 from gettext import gettext as _

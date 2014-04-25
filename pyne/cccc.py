@@ -28,6 +28,7 @@ Report LA-5324-MS_.
 """
 
 from __future__ import division
+from warnings import warn
 from pyne.utils import VnVWarning
 
 from pyne.binaryreader import _BinaryReader, _FortranRecord

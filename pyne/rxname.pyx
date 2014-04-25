@@ -142,6 +142,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
+from warnings import warn
 from pyne.utils import VnVWarning
 
 # local imports 

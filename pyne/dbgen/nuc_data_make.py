@@ -1,6 +1,7 @@
 from __future__ import print_function
 import os
 import argparse
+from warnings import warn
 from pyne.utils import VnVWarning
 
 try:

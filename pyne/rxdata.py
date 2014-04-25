@@ -1,4 +1,5 @@
 import collections
+from warnings import warn
 from pyne.utils import VnVWarning
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)

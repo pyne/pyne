@@ -7,6 +7,7 @@ module.
 """
 import sys
 from bisect import bisect_right
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

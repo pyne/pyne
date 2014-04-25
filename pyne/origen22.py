@@ -9,6 +9,7 @@ import sys
 from collections import Mapping
 from copy import deepcopy
 from itertools import chain
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

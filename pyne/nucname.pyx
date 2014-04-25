@@ -11,6 +11,7 @@ from libcpp.string cimport string as std_string
 
 # Python imports 
 #from collections import Iterable
+from warnings import warn
 from pyne.utils import VnVWarning
 
 # local imports 

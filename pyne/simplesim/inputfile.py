@@ -36,6 +36,7 @@ import abc
 import datetime
 import re
 import textwrap
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

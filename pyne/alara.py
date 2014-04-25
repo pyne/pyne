@@ -3,6 +3,7 @@
 from __future__ import print_function
 import os
 import collections
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

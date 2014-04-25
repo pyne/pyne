@@ -1,11 +1,15 @@
 """PyNE nuclear data tests"""
 import os
 import math
+import warnings
 
 import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
 import numpy as np
 import numpy.testing as npt
+
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 
 import pyne
 from pyne import data

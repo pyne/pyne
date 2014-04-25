@@ -7,6 +7,7 @@ ratios, etc.
 from __future__ import division
 import sys
 import collections
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

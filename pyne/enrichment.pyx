@@ -15,6 +15,7 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
+from warnings import warn
 from pyne.utils import VnVWarning
 
 from pyne cimport nucname

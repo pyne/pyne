@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Read a MCNP Ptrac file and save it in HDF5 format."""
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import tables

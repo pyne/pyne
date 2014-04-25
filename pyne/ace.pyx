@@ -18,6 +18,7 @@ generates ACE-format cross sections.
 
 from __future__ import division, unicode_literals
 import struct
+from warnings import warn
 from pyne.utils import VnVWarning
 from collections import OrderedDict
 

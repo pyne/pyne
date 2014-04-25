@@ -20,6 +20,7 @@ subsequent fee for these data.
 from __future__ import print_function, division
 import os
 import shutil
+from warnings import warn
 from pyne.utils import VnVWarning
 
 try:

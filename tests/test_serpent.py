@@ -1,9 +1,12 @@
 import os
+import warnings
 
 import numpy as np
 from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import serpent
 from pyne import nucname
 from pyne.material import Material

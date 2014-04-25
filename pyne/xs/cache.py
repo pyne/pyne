@@ -1,5 +1,6 @@
 """This module provides a cross section cache which automatically extracts 
 cross-sections from provided nuclear data sets."""
+from warnings import warn
 from pyne.utils import VnVWarning
 import sys
 from itertools import product

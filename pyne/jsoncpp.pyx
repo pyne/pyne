@@ -11,7 +11,6 @@ from libcpp.vector cimport vector as std_vector
 
 # Python imports
 import collections
-from pyne.utils import VnVWarning
 
 try:
     import simplejson as json
@@ -20,8 +19,6 @@ except ImportError:
 
 # local imports
 cimport cpp_jsoncpp
-
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 cdef cpp_jsoncpp.Value * toboolval(bint b):
     # NOTE: This is a little hack-y but has to be done since

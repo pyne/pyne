@@ -2,6 +2,7 @@
 from __future__ import print_function, division
 import os
 import glob
+from warnings import warn
 from pyne.utils import VnVWarning
 
 try:

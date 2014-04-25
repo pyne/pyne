@@ -1,4 +1,5 @@
 """Module for tools to generate and handle various binning structures."""
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

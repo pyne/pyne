@@ -2,6 +2,7 @@ from __future__ import division
 import re
 import sys
 import copy
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

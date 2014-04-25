@@ -2,6 +2,7 @@ from __future__ import print_function
 import sys
 import unittest
 import os.path
+import warnings
 from nose.tools import assert_equal, assert_almost_equal, assert_raises
 from nose.plugins.skip import SkipTest
 from numpy.testing import assert_array_equal
@@ -11,6 +12,9 @@ try:
     HAVE_IMESH = True
 except ImportError:
     HAVE_IMESH = False
+
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 
 try:
     from pyne import dagmc

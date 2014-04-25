@@ -8,6 +8,7 @@ q_value, and the percent of q coming from gammas. This data is from
 from __future__ import print_function
 import csv
 import os
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

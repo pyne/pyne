@@ -3,6 +3,7 @@ GammaSpectrum class, reads a .spe file Will in the future have functions
 for activity calculations.
 """
 
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

@@ -1,7 +1,5 @@
 import os
-from pyne.utils import VnVWarning
-
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+from warnings import warn
 
 if os.name == 'nt':
     p = os.environ['PATH'].split(';')

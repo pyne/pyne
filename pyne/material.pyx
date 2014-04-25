@@ -17,6 +17,7 @@ from libcpp.vector cimport vector as cpp_vector
 import collections
 cimport numpy as np
 import numpy as np
+from warnings import warn
 from pyne.utils import VnVWarning
 import os
 

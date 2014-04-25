@@ -3,6 +3,7 @@ This module contains functions for mesh-based Monte Carlo variance reduction.
 """
 
 from itertools import izip
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

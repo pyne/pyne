@@ -13,6 +13,7 @@ from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
 #Standard lib import
+from warnings import warn
 from pyne.utils import VnVWarning
 
 cimport numpy as np

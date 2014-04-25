@@ -1,6 +1,7 @@
 """Material tests"""
 import os
 from copy import deepcopy
+import warnings
 
 from unittest import TestCase
 import nose 
@@ -8,6 +9,8 @@ import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
     MapStrMaterial, MultiMaterial, MaterialLibrary

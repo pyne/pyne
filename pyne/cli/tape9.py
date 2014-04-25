@@ -5,6 +5,7 @@ import os
 import sys
 import argparse
 from glob import glob
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

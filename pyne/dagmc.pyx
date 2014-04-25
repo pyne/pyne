@@ -3,6 +3,7 @@ from __future__ import print_function, division, unicode_literals
 # Python imports
 import sys
 from contextlib import contextmanager
+from warnings import warn
 from pyne.utils import VnVWarning
 
 cimport numpy as np

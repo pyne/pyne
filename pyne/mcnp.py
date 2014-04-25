@@ -20,6 +20,7 @@ import math
 import os
 import linecache
 import datetime
+from warnings import warn
 from pyne.utils import VnVWarning
 import itertools
 

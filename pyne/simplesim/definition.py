@@ -54,6 +54,7 @@ from __future__ import print_function, division
 import abc
 import collections
 import pickle
+from warnings import warn
 from pyne.utils import VnVWarning
 
 try:

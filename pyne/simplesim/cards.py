@@ -288,6 +288,7 @@ from __future__ import division
 import abc
 import collections
 import copy
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

@@ -22,6 +22,7 @@ import os
 import re
 import sys
 import shutil
+from warnings import warn
 from pyne.utils import VnVWarning
 
 try:

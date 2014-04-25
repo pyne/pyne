@@ -1,5 +1,6 @@
 """Utility functions for pyne.apigen"""
 import re
+from warnings import warn
 from pyne.utils import VnVWarning
 
 from sympy.utilities.codegen import codegen

@@ -9,6 +9,7 @@ from __future__ import print_function
 import csv
 import re
 import os
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import tables as tb

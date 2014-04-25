@@ -6,6 +6,7 @@ import os
 import subprocess
 import tempfile
 from collections import Mapping
+from warnings import warn
 from pyne.utils import VnVWarning
 
 import numpy as np

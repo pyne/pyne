@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
 from unittest import TestCase
+import warnings
 
 from nose.tools import assert_equal, assert_raises
+
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 
 from pyne.cccc import Isotxs
 
