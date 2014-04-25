@@ -104,9 +104,6 @@ cdef conv._MapIntDouble natural_abund_map_proxy = conv.MapIntDouble(False)
 natural_abund_map_proxy.map_ptr = &cpp_data.natural_abund_map
 natural_abund_map = natural_abund_map_proxy
 
-# initialize natural_abund_map
-cpp_data.natural_abund(<int> 10000000)
-
 abundance_by_z = dict([(i, []) for i in range(1,119)])
 for zas, abundance in natural_abund_map.items():
     if 0.0 < abundance < 1.0:
@@ -240,9 +237,6 @@ def simple_xs(nuc, rx, energy):
 cdef conv._MapIntDouble gamma_frac_map_proxy = conv.MapIntDouble(False)
 gamma_frac_map_proxy.map_ptr = &cpp_data.gamma_frac_map
 gamma_frac_map = gamma_frac_map_proxy
-
-# initialize gamma_frac_map
-cpp_data.gamma_frac(<int> 10000000)
 
 
 def gamma_frac(nuc):
