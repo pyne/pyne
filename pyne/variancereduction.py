@@ -38,7 +38,7 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
         Vol. 42, No. 1, pp. 25-53, 2003.
 
     Parameters
-    -----------
+    ----------
     adj_flux_mesh : PyNE Mesh object
         The mesh containing the adjoint fluxes.
     adj_flux_tag : string
