@@ -106,6 +106,16 @@ cdef extern from "data.h" namespace "pyne":
     int id_from_level(int, double, std_string) except +
 
     #ENSDF data functions
+    cdef struct level_struct:
+        int nuc_id
+        unsigned int rx_id
+        double half_life
+        double level
+        double branch_ratio
+        int metastable 
+        char special
+    
+    map[pair[int,double], level_struct] level_data_lvl_map
     pair[double,double] decay_half_life(pair[int, int]) except +
     vector[pair[double, double]] decay_half_lifes(int) except +
     double decay_branch_ratio(pair[int, int] from_to) except +
@@ -117,6 +127,8 @@ cdef extern from "data.h" namespace "pyne":
 
     vector[pair[double, double]] gamma_energy(int parent) except +
     vector[pair[double, double]] gamma_photon_intensity(int parent) except +
+    vector[pair[double, double]] gamma_photon_intensity(double energy,
+                                                        double error) except +
     vector[pair[double, double]] gamma_conversion_intensity(int parent) except +
     vector[pair[double, double]] gamma_total_intensity(int parent) except +
     vector[pair[int, int]] gamma_from_to(int parent) except +
