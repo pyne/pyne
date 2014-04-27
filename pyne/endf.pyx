@@ -73,7 +73,7 @@ class Library(rx.RxLib):
         Read the ENDF file into a NumPy array.
 
         Returns
-        --------
+        -------
         data : np.array, 1d, float64
             Returns a 1d float64 NumPy array.
         """
@@ -893,7 +893,7 @@ class Library(rx.RxLib):
         Grab cross-section data.
 
         Parameters
-        -----------
+        ----------
         nuc: int
             id of nuclide to read.
         mt: int
@@ -902,7 +902,7 @@ class Library(rx.RxLib):
             id of isotope to read. Defaults to nuc.
 
         Returns
-        --------
+        -------
         tuple
             Returns a tuple with xs data in tuple[0] and flags in tuple[1].
         """
@@ -923,20 +923,20 @@ class Library(rx.RxLib):
         Grab the data from one reaction type.
 
         Parameters
-        -----------
-        nuc: int
+        ----------
+        nuc : int
             id form of material to read from.
-        mf: int
+        mf : int
             ENDF file number (MF).
-        mt: int
+        mt : int
             ENDF reaction number (MT).
-        lines: int
+        lines : int
             Number of lines to read from this reaction, starting from the top.
             Default value is 0, which reads in the entire reaction.
 
         Returns
-        --------
-        data: NumPy array
+        -------
+        data : NumPy array
             Contains the reaction data in an Nx6 array.
         """
         nuc = nucname.id(nuc)
@@ -949,7 +949,7 @@ class Library(rx.RxLib):
         """Load in the data from one reaction into self.structure.
 
         Parameters
-        -----------
+        ----------
         nuc : int
             id of nuclide.
         mf : int
@@ -958,7 +958,7 @@ class Library(rx.RxLib):
             ENDF reaction number (MT).
 
         Returns
-        --------
+        -------
         array, 1d, float64
             1d, float64 NumPy array containing the reaction data.
         """

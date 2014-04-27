@@ -82,7 +82,8 @@ def parse_atomic_data(build_dir=""):
 
 
 def grab_ensdf_decay(build_dir=""):
-    """Grabs the ENSDF decay data files
+    """
+    Grabs the ENSDF decay data files
     if not already present.
 
     Parameters
@@ -223,7 +224,9 @@ atomic_dtype = np.dtype([
 
 
 def parse_level_data(build_dir=""):
-    """Builds and returns a list of nuclide decay data.
+    """
+    Builds and returns a list of nuclide decay data.
+
     Parameters
     ----------
     build_dir : str
@@ -248,7 +251,9 @@ def parse_level_data(build_dir=""):
 
 
 def parse_decay_data(build_dir=""):
-    """Builds and returns a list of nuclide decay data.
+    """
+    Builds and returns a list of nuclide decay data.
+
     Parameters
     ----------
     build_dir : str
