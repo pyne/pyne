@@ -15,13 +15,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       fluxin="alara_fluxin", reverse=False, 
                       alara_inp="alara_geom", alara_matlib="alara_matlib",  
                       output_mesh="r2s_step1.h5m"):
-    """def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, 
-                          geom=None, num_rays=10, grid=False, flux_tag="n_flux",
-                          fluxin="alara_fluxin", reverse=False, 
-                          alara_inp="alara_geom", alara_matlib="alara_matlib",  
-                          output_mesh="r2s_step1.h5m")
-
-    This function is used to setup the irradiation inputs after the first
+    """This function is used to setup the irradiation inputs after the first
     R2S transport step.
 
     Parameters

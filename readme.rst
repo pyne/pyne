@@ -20,6 +20,7 @@ http://pyne.io/, the official PyNE projectsite.
 ============
 Installation
 ============
+
 -------------
 Dependencies
 -------------
@@ -76,7 +77,8 @@ or from public sources on the internet.
 Conda Install Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 On mac and linux PyNE can be installed via the package manager conda. 
-After installing anaconda or miniconda from `here <http://continuum.io/downloads>`_ 
+After installing anaconda or miniconda from 
+`the Continuum downloads page <http://continuum.io/downloads>`_ 
 add conda's binary directory to your bash profile by adding::
 
     export PATH=/path/to/anaconda/bin:$PATH
