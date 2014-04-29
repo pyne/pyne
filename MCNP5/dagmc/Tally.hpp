@@ -46,6 +46,10 @@ struct TallyInput
     /// Support a single multiplier for each tally; this id refers to an
     /// index in the TallyEvent::multipliers vector
     int multiplier_id;
+
+    enum ParticleType {NEUTRON=1, PHOTON=2, ELECTRON=3};
+
+    ParticleType particle;
 };
 
 //===========================================================================//

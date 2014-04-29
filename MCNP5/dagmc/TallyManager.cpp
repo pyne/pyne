@@ -18,10 +18,11 @@ TallyManager::TallyManager()
 //---------------------------------------------------------------------------//
 void TallyManager::addNewTally(unsigned int tally_id,
                                std::string tally_type,
+                               unsigned int particle,
                                const std::vector<double>& energy_bin_bounds,
                                const std::multimap<std::string, std::string>& options)
 {
-    Tally *newTally = createTally(tally_id, tally_type, energy_bin_bounds, options);
+    Tally *newTally = createTally(tally_id, tally_type, particle, energy_bin_bounds, options);
 
     if (newTally != NULL)
     {
@@ -69,7 +70,7 @@ void TallyManager::updateMultiplier(unsigned int multiplier_id, double value)
     }
 }
 //---------------------------------------------------------------------------//
-unsigned int TallyManager::num_tallies()
+unsigned int TallyManager::numTallies()
 {
     return observers.size();
 }
@@ -92,7 +93,8 @@ void TallyManager::removeTally(unsigned int tally_id)
     }
 }
 //---------------------------------------------------------------------------//
-bool TallyManager::setCollisionEvent(double x, double y, double z,
+bool TallyManager::setCollisionEvent(unsigned int particle, 
+                                     double x, double y, double z,
                                      double particle_energy, double particle_weight,
                                      double total_cross_section, int cell_id)
 { 
@@ -103,14 +105,15 @@ bool TallyManager::setCollisionEvent(double x, double y, double z,
         return false;;
     }
 
-    return setEvent(TallyEvent::COLLISION, 
+    return setEvent(TallyEvent::COLLISION, particle,
                      x, y, z, 0.0, 0.0, 0.0,
                      particle_energy, particle_weight, 
                      0.0, total_cross_section, 
                      cell_id);
 } 
 //---------------------------------------------------------------------------//
-bool TallyManager::setTrackEvent(double x, double y, double z,
+bool TallyManager::setTrackEvent(unsigned int particle,
+                                 double x, double y, double z,
                                  double u, double v, double w,                           
                                  double particle_energy, double particle_weight,
                                  double track_length, int cell_id)
@@ -122,7 +125,7 @@ bool TallyManager::setTrackEvent(double x, double y, double z,
         return false;
     }
 
-    return setEvent(TallyEvent::TRACK, 
+    return setEvent(TallyEvent::TRACK, particle,
                      x, y, z, u, v, w,
                      particle_energy, particle_weight,
                      track_length, 0.0,
@@ -132,6 +135,7 @@ bool TallyManager::setTrackEvent(double x, double y, double z,
 void TallyManager::clearLastEvent()
 {
     event.type = TallyEvent::NONE;
+    event.particle  = 0;
     event.position  = moab::CartVect(0.0, 0.0, 0.0);
     event.direction = moab::CartVect(0.0, 0.0, 0.0);
     event.particle_energy     = 0.0;
@@ -148,7 +152,11 @@ void TallyManager::updateTallies()
     for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
     {
         Tally *tally = map_it->second;
-        tally->compute_score(event);
+        // skip events involving particles not expected by the tally
+        if (tally->input_data.particle == event.particle)
+        { 
+           tally->compute_score(event);
+        }
     }
     clearLastEvent();
 }
@@ -247,6 +255,7 @@ void TallyManager::zeroAllTallyData()
 //---------------------------------------------------------------------------//
 Tally *TallyManager::createTally(unsigned int tally_id,
                                  std::string  tally_type,
+                                 unsigned int particle,
                                  const std::vector<double>& energy_bin_bounds,
                                  const std::multimap<std::string, std::string>& options)
 {
@@ -259,7 +268,24 @@ Tally *TallyManager::createTally(unsigned int tally_id,
                   << " are invalid." << std::endl;
         return NULL;
     }
+    switch (particle)
+    {
+      case 1:
+        input.particle = TallyInput::NEUTRON;
+        break;
  
+      case 2:
+        input.particle = TallyInput::PHOTON;
+        break;
+
+      case 3:
+        input.particle = TallyInput::ELECTRON;
+        break;
+
+      default:
+        input.particle = TallyInput::NEUTRON;
+    }
+
     // Set up the input structure from the passed parameters
     input.tally_id          = tally_id;
     input.tally_type        = tally_type;
@@ -270,7 +296,7 @@ Tally *TallyManager::createTally(unsigned int tally_id,
     return Tally::create_tally(input);
 }
 //---------------------------------------------------------------------------//
-bool TallyManager::setEvent(TallyEvent::EventType type,  
+bool TallyManager::setEvent(TallyEvent::EventType type, unsigned int particle,
                            double x, double y, double z, 
                            double u, double v, double w,                           
                            double particle_energy, double particle_weight, 
@@ -279,6 +305,8 @@ bool TallyManager::setEvent(TallyEvent::EventType type,
 {
     // Test whether an error condition has occurred for this event
     bool errflag = false;
+
+    event.particle = particle;
 
     // Set the particle state object
     event.position  = moab::CartVect(x, y, z);

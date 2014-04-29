@@ -37,6 +37,9 @@ struct TallyEvent
     enum EventType {NONE = 0, COLLISION = 1, TRACK = 2};
 
     EventType type;
+ 
+    /// Type of particle being tallied
+    unsigned int particle;
     
     /// Geometric cell in which the event occurred
     int current_cell;

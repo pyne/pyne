@@ -95,6 +95,7 @@ class TallyManager
      * \brief Create a new DAGMC Tally and add it to the Observer list
      * \param[in] tally_id the unique ID for this Tally
      * \param[in] tally_type the type of Tally to create
+     * \param[in] particle the enumerated type of particle 
      * \param[in] energy_bin_bounds the boundaries of the energy bins
      * \param[in] options the set of options requested for this Tally
      *
@@ -104,6 +105,7 @@ class TallyManager
      */
     void addNewTally(unsigned int tally_id,
                      std::string tally_type,
+                     unsigned int particle,
                      const std::vector<double>& energy_bin_bounds,
                      const std::multimap<std::string, std::string>& options);
 
@@ -136,10 +138,10 @@ class TallyManager
     void updateMultiplier(unsigned int multiplier_id, double value);
 
     /**
-     * \brief num_tallies()
+     * \brief numTallies()
      * \return number of active Tally Observers
      */
-    unsigned int num_tallies();
+    unsigned int numTallies();
 
     /**
      * \brief Remove a DAGMC Tally from the Observer list
@@ -149,6 +151,7 @@ class TallyManager
 
     /**
      * \brief Set a collision event
+     * \param[in] particle the enumerated type of particle 
      * \param[in] x, y, z coordinates of the collision point
      * \param[in] particle_energy the energy of the particle prior to collision
      * \param[in] particle_weight the weight of the particle prior to collision
@@ -156,12 +159,14 @@ class TallyManager
      * \param[in] cell_id the unique ID for the current cell
      * \return true if a collision event was set; false otherwise
      */
-    bool setCollisionEvent(double x, double y, double z,
+    bool setCollisionEvent(unsigned int particle,
+                           double x, double y, double z,
                            double particle_energy, double particle_weight,
                            double total_cross_section, int cell_id); 
 
     /**
      * \brief Set a track event
+     * \param[in] particle the enumerated type of particle 
      * \param[in] x, y, z coordinates of the start of the track
      * \param[in] u, v, w current direction of the particle
      * \param[in] particle_energy the energy of the particle prior to event
@@ -169,7 +174,8 @@ class TallyManager
      * \param[in] track_length the length of the track
      * \return true if a track event was set; false otherwise
      */
-    bool setTrackEvent(double x, double y, double z,
+    bool setTrackEvent(unsigned int particle,
+                       double x, double y, double z,
                        double u, double v, double w,                           
                        double particle_energy, double particle_weight,
                        double track_length, int cell_id); 
@@ -234,6 +240,7 @@ class TallyManager
      * \brief Create a new DAGMC Tally
      * \param[in] tally_id the unique ID for this Tally
      * \param[in] tally_type the type of Tally to create
+     * \param[in] particle the enumerated type of particle 
      * \param[in] energy_bin_bounds the boundaries of the energy bins
      * \param[in] options the set of options requested for this Tally
      *
@@ -241,11 +248,13 @@ class TallyManager
      */
     Tally *createTally(unsigned int tally_id,
                        std::string  tally_type,
+                       unsigned int particle,
                        const std::vector<double>& energy_bin_bounds,
                        const std::multimap<std::string, std::string>& options);
 
     /**
      * \brief Sets up TallyEvent
+     * \param[in] particle the enumerated type of particle 
      * \param[in] x, y, z the position of the particle
      * \param[in] u, v, w current direction of the particle
      * \param[in] particle_energy the energy of the particle prior to event
@@ -255,7 +264,7 @@ class TallyManager
      * \param[in] cell_id the unique ID for the current geometric cell
      * \return true if an event was set; false otherwise
      */
-    bool setEvent(TallyEvent::EventType type,
+    bool setEvent(TallyEvent::EventType type, unsigned int particle,
                    double x, double y, double z,
                    double u, double v, double w,                           
                    double particle_energy, double particle_weight,
