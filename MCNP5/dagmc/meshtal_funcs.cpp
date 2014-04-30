@@ -113,7 +113,7 @@ std::string copyComments(char* fort_comment, int* n_comment_lines)
 //---------------------------------------------------------------------------//
 /**
  * \brief Sets up a DAGMC mesh tally in Fortran
- * \param[in] ipt the type of particle; currently unused
+ * \param[in] fm_ipt the type of particle tallied by this fmesh tally
  * \param[in] id the unique ID for the tally defined by FMESH
  * \param[in] energy_mesh the energy bin boundaries
  * \param[in] n_energy_mesh the number of energy bin boundaries
@@ -324,7 +324,7 @@ void dagmc_fmesh_end_history_()
 //---------------------------------------------------------------------------//
 /**
  * \brief Called from fortran to score a track event
- * \param[in] ipt, the event particle
+ * \param[in] ipt the type of particle to be tallied
  * \param[in] x, y, z the position of the particle
  * \param[in] u, v, w the direction of the particle
  * \param[in] erg the energy of the particle
@@ -341,9 +341,13 @@ void dagmc_fmesh_score_(int* ipt,
                         double *d, int *icl)
 {
 #ifdef MESHTAL_DEBUG
+    std::cout << "particle type: " << *ipt << std::endl;
     std::cout << "particle loc: " << *x << ", " << *y << ", " << *z << std::endl;
     std::cout << "particle dir: " << *u << ", " << *v << ", " << *w << std::endl;
+    std::cout << "particle energy: " << *erg << std::endl;
+    std::cout << "particle weight: " << *wgt << std::endl;
     std::cout << "track length: " << *d << std::endl;
+    std::cout << "current cell: " << *icl << std::endl;
 #endif
 
     tallyManager.setTrackEvent(*ipt, *x, *y, *z, *u, *v, *w, *erg, *wgt, *d, *icl);
@@ -361,7 +365,7 @@ void dagmc_fmesh_print_(double* sp_norm)
 //---------------------------------------------------------------------------//
 /**
  * \brief Called from hstory.F90 to score a collision event
- * \param[in] ipt, the event particle
+ * \param[in] ipt the type of particle to be tallied
  * \param[in] x, y, z the position of the particle
  * \param[in] erg the energy of the particle
  * \param[in] wgt the weight of the particle

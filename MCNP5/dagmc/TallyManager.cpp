@@ -22,7 +22,8 @@ void TallyManager::addNewTally(unsigned int tally_id,
                                const std::vector<double>& energy_bin_bounds,
                                const std::multimap<std::string, std::string>& options)
 {
-    Tally *newTally = createTally(tally_id, tally_type, particle, energy_bin_bounds, options);
+    Tally *newTally = createTally(tally_id, tally_type, particle,
+                                  energy_bin_bounds, options);
 
     if (newTally != NULL)
     {
@@ -152,6 +153,7 @@ void TallyManager::updateTallies()
     for (map_it = observers.begin(); map_it != observers.end(); ++map_it)
     {
         Tally *tally = map_it->second;
+
         // skip events involving particles not expected by the tally
         if (tally->input_data.particle == event.particle)
         { 
@@ -268,6 +270,7 @@ Tally *TallyManager::createTally(unsigned int tally_id,
                   << " are invalid." << std::endl;
         return NULL;
     }
+
     switch (particle)
     {
       case 1:
@@ -306,9 +309,8 @@ bool TallyManager::setEvent(TallyEvent::EventType type, unsigned int particle,
     // Test whether an error condition has occurred for this event
     bool errflag = false;
 
-    event.particle = particle;
-
     // Set the particle state object
+    event.particle = particle;
     event.position  = moab::CartVect(x, y, z);
     event.direction = moab::CartVect(u, v, w);
     // This should already be normalized

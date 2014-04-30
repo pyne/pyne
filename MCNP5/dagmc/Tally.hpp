@@ -19,11 +19,11 @@ struct TallyEvent;
  *
  * Data stored in this struct is set by TallyManager and read by the different
  * Tally implementations.  Required variables for all tallies are tally_id,
- * tally_type and energy_bin_bounds.  The TallyOptions multimap is optional
- * and can be used to store all key-value pairs that define options that are
- * specific to each Tally implementation.  The multiplier_id is also optional
- * and is used to indicate what energy-dependent multiplier is to be used
- * with the Tally.
+ * tally_type, particle and energy_bin_bounds.  The TallyOptions multimap is
+ * optional and can be used to store all key-value pairs that define options
+ * that are specific to each Tally implementation.  The multiplier_id is also
+ * optional and is used to indicate what energy-dependent multiplier is to be
+ * used with the Tally.
  */
 //===========================================================================//
 struct TallyInput
@@ -33,6 +33,10 @@ struct TallyInput
 
     /// Type of Tally to create as a concrete class
     std::string tally_type;
+
+    /// Defines type of particle that is tallied by this Tally
+    enum ParticleType {NEUTRON = 1, PHOTON = 2, ELECTRON = 3};
+    ParticleType particle;
 
     /// Energy bin boundaries defined for all tally points
     std::vector<double> energy_bin_bounds;
@@ -46,10 +50,6 @@ struct TallyInput
     /// Support a single multiplier for each tally; this id refers to an
     /// index in the TallyEvent::multipliers vector
     int multiplier_id;
-
-    enum ParticleType {NEUTRON=1, PHOTON=2, ELECTRON=3};
-
-    ParticleType particle;
 };
 
 //===========================================================================//

@@ -50,7 +50,7 @@ extern void FMESH_FUNC(dagmc_make_fortran_pointer)(void* fort_ref, double* array
  * mostly from fmesh_mod.F90.  They should probably not be called from C++ code.
  * Per-function documentation is found in meshtal_funcs.cpp
  */
-void dagmc_fmesh_setup_mesh_(int* ipt, int* id, int* fmesh_idx,
+void dagmc_fmesh_setup_mesh_(int* fm_ipt, int* id, int* fmesh_idx,
                              double* energy_mesh, int* n_energy_mesh, int* tot_energy_bin, 
                              char* comment, int* n_comment_lines, int* is_collision_tally);
 

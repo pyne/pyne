@@ -95,13 +95,16 @@ class TallyManager
      * \brief Create a new DAGMC Tally and add it to the Observer list
      * \param[in] tally_id the unique ID for this Tally
      * \param[in] tally_type the type of Tally to create
-     * \param[in] particle the enumerated type of particle 
+     * \param[in] particle the type of particle tallied by this Tally
      * \param[in] energy_bin_bounds the boundaries of the energy bins
      * \param[in] options the set of options requested for this Tally
      *
      * If an invalid tally_type is requested, then it will be ignored.
      * Note that energy_bin_bounds must have at least two entries, so
      * to define a single energy bin use [0.0, max_energy].
+     *
+     * Valid particle types include NEUTRON = 1, PHOTON = 2, ELECTRON = 3.  If
+     * an invalid type is requested, then the default is NEUTRON.
      */
     void addNewTally(unsigned int tally_id,
                      std::string tally_type,
@@ -151,7 +154,7 @@ class TallyManager
 
     /**
      * \brief Set a collision event
-     * \param[in] particle the enumerated type of particle 
+     * \param[in] particle the type of particle to be tallied
      * \param[in] x, y, z coordinates of the collision point
      * \param[in] particle_energy the energy of the particle prior to collision
      * \param[in] particle_weight the weight of the particle prior to collision
@@ -166,7 +169,7 @@ class TallyManager
 
     /**
      * \brief Set a track event
-     * \param[in] particle the enumerated type of particle 
+     * \param[in] particle the type of particle to be tallied
      * \param[in] x, y, z coordinates of the start of the track
      * \param[in] u, v, w current direction of the particle
      * \param[in] particle_energy the energy of the particle prior to event
@@ -240,7 +243,7 @@ class TallyManager
      * \brief Create a new DAGMC Tally
      * \param[in] tally_id the unique ID for this Tally
      * \param[in] tally_type the type of Tally to create
-     * \param[in] particle the enumerated type of particle 
+     * \param[in] particle the type of particle tallied by this Tally
      * \param[in] energy_bin_bounds the boundaries of the energy bins
      * \param[in] options the set of options requested for this Tally
      *
@@ -254,7 +257,8 @@ class TallyManager
 
     /**
      * \brief Sets up TallyEvent
-     * \param[in] particle the enumerated type of particle 
+     * \param[in] type the type of event to be tallied
+     * \param[in] particle the type of particle to be tallied
      * \param[in] x, y, z the position of the particle
      * \param[in] u, v, w current direction of the particle
      * \param[in] particle_energy the energy of the particle prior to event
