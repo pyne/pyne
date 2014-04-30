@@ -194,7 +194,7 @@ class Library(object):
             datastr = '0 ' + ' '.join(lines[6:8])
             nxs = fromstring_split(datastr, dtype=int)
 
-            n_lines = (nxs[1] + 3)/4
+            n_lines = (nxs[1] + 3)//4
             n_bytes = len(lines[-1]) * (n_lines - 2) + 1
 
             # Ensure that we have more tables to read in
