@@ -7,6 +7,8 @@ from nose.tools import assert_equal, assert_almost_equal
 from pyne import material
 from pyne.material import Material
 
+'''run as python script'''
+
 """
 materials composition to be used in this test
 """    
@@ -55,6 +57,18 @@ test Steel, Stainless 321
 def test_material4(Steel, output_Material_library):
     for material in output_Material_library.iteritems():
         if material[1].attrs['original_name'] == 'Steel, Stainless 321' :
-            assert_almost_equal(material[1].comp, Steel.comp, places=4)              
+            assert_almost_equal(material[1].comp, Steel.comp, places=4)  
+                        
+def main():
+    #load the output h5m file
+    output_lib=load_output('output_5.h5m')
+    #test materials
+    test_material1(Lead,output_lib)
+    test_material2(Nitrogen,output_lib)
+    test_material3(Mercury,output_lib)
+    test_material4(Steel,output_lib)
+    
 
+if __name__ == '__main__':
+    main()    
 
