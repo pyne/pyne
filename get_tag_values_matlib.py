@@ -250,11 +250,13 @@ function to print near matches to material name
 
 
 def print_near_match(material, material_library):
+    list_of_matches=[]
     for item in material_library.iterkeys():
         if (material.lower() in item.lower()) or (material.upper() in item.upper()):
             print("Near matches to %s are :" % material)
             print item
-    return
+        list_of_matches.append(item)    
+    return list_of_matches
 
 """
 Function that writes material objects to hdf5 file
