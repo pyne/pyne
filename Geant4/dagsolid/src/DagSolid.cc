@@ -379,7 +379,7 @@ G4double DagSolid::DistanceToIn (const G4ThreeVector &p) const
 
   
   fdagmc->closest_to_location(fvolEntity, point, minDist);
-  minDist /= cm; // convert back to mm
+  minDist *= cm; // convert back to mm
   if ( minDist <= kCarTolerance*0.5 )
     return kInfinity;
   else
