@@ -113,7 +113,7 @@ std::string copyComments(char* fort_comment, int* n_comment_lines)
 //---------------------------------------------------------------------------//
 /**
  * \brief Sets up a DAGMC mesh tally in Fortran
- * \param[in] ipt the type of particle; currently unused
+ * \param[in] fm_ipt the type of particle tallied by this fmesh tally
  * \param[in] id the unique ID for the tally defined by FMESH
  * \param[in] energy_mesh the energy bin boundaries
  * \param[in] n_energy_mesh the number of energy bin boundaries
@@ -122,7 +122,7 @@ std::string copyComments(char* fort_comment, int* n_comment_lines)
  * \param[in] n_comment_lines the number of comment lines
  * \param[out] is_collision_tally indicates that tally uses collision estimator
  */
-void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id, int* fmesh_idx,
+void dagmc_fmesh_setup_mesh_(int* fm_ipt, int* id, int* fmesh_idx,
                              double* energy_mesh, int* n_energy_mesh,
                              int* tot_energy_bin, 
                              char* fort_comment, int* n_comment_lines,
@@ -185,7 +185,7 @@ void dagmc_fmesh_setup_mesh_(int* /*ipt*/, int* id, int* fmesh_idx,
         *is_collision_tally = false;
     } 
 
-    tallyManager.addNewTally(*id, type, energy_boundaries, fc_settings);
+    tallyManager.addNewTally(*id, type, *fm_ipt, energy_boundaries, fc_settings);
 
     // Add tally multiplier, if it exists  
     if (*fmesh_idx != -1)
@@ -324,6 +324,7 @@ void dagmc_fmesh_end_history_()
 //---------------------------------------------------------------------------//
 /**
  * \brief Called from fortran to score a track event
+ * \param[in] ipt the type of particle to be tallied
  * \param[in] x, y, z the position of the particle
  * \param[in] u, v, w the direction of the particle
  * \param[in] erg the energy of the particle
@@ -333,18 +334,23 @@ void dagmc_fmesh_end_history_()
  * 
  * This function is called once per track event.
  */
-void dagmc_fmesh_score_(double *x, double *y, double *z,
+void dagmc_fmesh_score_(int* ipt,
+                        double *x, double *y, double *z,
                         double *u, double *v, double *w, 
                         double *erg,double *wgt, 
                         double *d, int *icl)
 {
 #ifdef MESHTAL_DEBUG
+    std::cout << "particle type: " << *ipt << std::endl;
     std::cout << "particle loc: " << *x << ", " << *y << ", " << *z << std::endl;
     std::cout << "particle dir: " << *u << ", " << *v << ", " << *w << std::endl;
+    std::cout << "particle energy: " << *erg << std::endl;
+    std::cout << "particle weight: " << *wgt << std::endl;
     std::cout << "track length: " << *d << std::endl;
+    std::cout << "current cell: " << *icl << std::endl;
 #endif
 
-    tallyManager.setTrackEvent(*x, *y, *z, *u, *v, *w, *erg, *wgt, *d, *icl);
+    tallyManager.setTrackEvent(*ipt, *x, *y, *z, *u, *v, *w, *erg, *wgt, *d, *icl);
     tallyManager.updateTallies();
 }
 //---------------------------------------------------------------------------//
@@ -359,6 +365,7 @@ void dagmc_fmesh_print_(double* sp_norm)
 //---------------------------------------------------------------------------//
 /**
  * \brief Called from hstory.F90 to score a collision event
+ * \param[in] ipt the type of particle to be tallied
  * \param[in] x, y, z the position of the particle
  * \param[in] erg the energy of the particle
  * \param[in] wgt the weight of the particle
@@ -367,11 +374,12 @@ void dagmc_fmesh_print_(double* sp_norm)
  * 
  * This function is called once per collision event.
  */
-void dagmc_collision_score_(double* x,   double* y, double* z, 
+void dagmc_collision_score_(int* ipt,
+                            double* x,   double* y, double* z, 
                             double* erg, double* wgt,
                             double* ple, int* icl)
 {
-    tallyManager.setCollisionEvent(*x, *y, *z, *erg, *wgt, *ple, *icl);
+    tallyManager.setCollisionEvent(*ipt, *x, *y, *z, *erg, *wgt, *ple, *icl);
     tallyManager.updateTallies();
 }
 //---------------------------------------------------------------------------//

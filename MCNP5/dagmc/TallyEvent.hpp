@@ -13,10 +13,10 @@
  *
  * Data stored in this struct is set by TallyManager and read by the different
  * Tally implementations.  The variables that will be used by each Tally depend
- * on the type of event that is defined.  All events set type, particle_energy
- * and particle_weight. Collision events add the current_cell, position
- * (i.e. collision point) and total_cross_section.  Track events add the
- * current_cell, position (i.e. start of track), direction and track_length.
+ * on the type of event that is defined.  All events set type, particle,
+ * particle_energy and particle_weight. Collision events add the current_cell,
+ * position (i.e. collision point) and total_cross_section.  Track events add
+ * the current_cell, position (i.e. start of track), direction and track_length.
  *
  * An optional tally multipliers vector is also stored in TallyEvent.  Each
  * Tally can set a multiplier_id in TallyInput through the TallyManager that
@@ -37,6 +37,9 @@ struct TallyEvent
     enum EventType {NONE = 0, COLLISION = 1, TRACK = 2};
 
     EventType type;
+ 
+    /// Type of particle being tallied: NEUTRON = 1, PHOTON = 2, ELECTRON = 3.
+    unsigned int particle;
     
     /// Geometric cell in which the event occurred
     int current_cell;
