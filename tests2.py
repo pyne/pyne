@@ -12,7 +12,7 @@ Existence/Absence of a graveyard group
 """
 
 
-def test_garveyard_1():
+def test_graveyard_1():
     # 'mat:graveyard' group exists
     tag_1 = ['mat:graveyard', 'mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p',
              'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
@@ -143,33 +143,9 @@ test
 def test_match_1():
     air_1=material.Material({60120000: 0.24732500000000002, 60130000: 0.0026750000000000003, 70140000: 0.24909, 70150000: 0.00091, 80160000: 0.24939250000000002, 80170000: 9.5e-05, 80180000: 0.0005124999999999999, 180360000: 0.000834, 180380000: 0.00015725, 180400000: 0.24900875}, 1.0, 0.001205, -1.0, {"name":"Air (dry, near sea level)"})
     air_2=material.Material({10010000: 0.19997700000000002, 10020000: 2.3e-05, 60120000: 0.19786, 60130000: 0.0021400000000000004, 80160000: 0.19951400000000002, 80170000: 7.6e-05, 80180000: 0.00040999999999999994, 90190000: 0.2, 140280000: 0.184446, 140290000: 0.00937, 140300000: 0.006184}, 1.0, 1.76, -1.0, {"name":"C-552 Air-Equivalent Plastic"})
+    list_of_matches=['C-552 Air-Equivalent Plastic', 'Air (dry, near sea level)']
     material_library=MaterialLibrary()
     material_library[air_1.attrs['name']]=air_1
     material_library[air_2.attrs['name']]=air_2
-    gtag.print_near_match('air',material_library)
+    assert_equal(gtag.print_near_match('air',material_library),list_of_matches)
 
-"""
-main
-"""
-
-
-def main():
-    test_garveyard_1()
-    test_garveyard_2()
-    test_garveyard_3()
-    test_group_1()
-    test_group_2()
-    test_group_3()
-    test_group_4()
-    test_group_5()
-    test_group_6()
-    test_group_7()
-    test_group_8()
-    test_group_9()   
-    test_fluka_1()
-    test_fluka_2()
-    test_fluka_3()
-    test_match_1()
-
-if __name__ == '__main__':
-    main()
