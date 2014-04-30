@@ -41,7 +41,7 @@ namespace pyne
 
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
 
-  // Mapping from nodes in nuc_data.h5 to hashes of nodes
+  /// Mapping from nodes in nuc_data.h5 to hashes of nodes
   extern std::map<std::string, std::string> data_checksums; 
   
   /// \name Atomic Mass Data
@@ -342,6 +342,7 @@ namespace pyne
   /// simple class to swap the order in which a pair is compared
   class swapmapcompare{
     public:
+        /// This operator compares the second item in a pair first
         bool operator()(const std::pair<int, double>& lhs,
                         const std::pair<int, double>& rhs) const;
   };
@@ -687,8 +688,20 @@ namespace pyne
   /// "thermal_maxwell_ave", "resonance_integral", "fourteen_MeV",
   /// "fission_spectrum_ave".
   double simple_xs(int nuc, int rx, std::string energy);
+  /// returns the microscopic cross section in barns for the specified
+  /// nuclide, reaction, and energy group.  energy must be one of: "thermal",
+  /// "thermal_maxwell_ave", "resonance_integral", "fourteen_MeV",
+  /// "fission_spectrum_ave".
   double simple_xs(int nuc, std::string rx, std::string energy);
+  /// returns the microscopic cross section in barns for the specified
+  /// nuclide, reaction, and energy group.  energy must be one of: "thermal",
+  /// "thermal_maxwell_ave", "resonance_integral", "fourteen_MeV",
+  /// "fission_spectrum_ave".
   double simple_xs(std::string nuc, int rx, std::string energy);
+  /// returns the microscopic cross section in barns for the specified
+  /// nuclide, reaction, and energy group.  energy must be one of: "thermal",
+  /// "thermal_maxwell_ave", "resonance_integral", "fourteen_MeV",
+  /// "fission_spectrum_ave".
   double simple_xs(std::string nuc, std::string rx, std::string energy);
 
   /// Custom exception for declaring a simple_xs request invalid
@@ -696,9 +709,9 @@ namespace pyne
    public:
     InvalidSimpleXS () {};
     ~InvalidSimpleXS () throw () {};
-
+    /// Exception thrown if energy group or rxname are invalid
     InvalidSimpleXS(std::string msg) : msg_(msg) {};
-
+    /// Exception returns the string passed when thrown.
     virtual const char* what() const throw() {
       return msg_.c_str();
     };
