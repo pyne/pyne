@@ -501,6 +501,8 @@ namespace pyne
   std::vector<std::pair<double, double> > gamma_energy(int parent);
   //returns a list of gamma photon intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_photon_intensity(int parent);
+  std::vector<std::pair<double, double> > gamma_photon_intensity(double energy,
+   double error);
   //returns a list of gamma conversion intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_conversion_intensity(int parent);
   //returns a list of gamma total intensities from input parent nuclide

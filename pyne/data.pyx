@@ -918,6 +918,29 @@ def gamma_photon_intensity(parent):
         An array of gamma ray photon intensities and errors
     """
     return cpp_data.gamma_photon_intensity(<int> parent)
+
+
+def gamma_photon_intensity_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray photon intensities from ENSDF decay dataset 
+    from a given gamma ray energy
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray photon intensities and errors
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.gamma_photon_intensity(<double> en,<double> enerror)
     
 def gamma_conversion_intensity(parent):
     """
