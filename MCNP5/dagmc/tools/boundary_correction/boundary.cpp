@@ -315,8 +315,8 @@ int main(int argc, char* argv[])
 {
     if (argc != 6)
     {
-        std::cerr << "usage: " << argv[0] << " <input mesh> <input geometry> "
-                  << "<hx hy hz>" << std::endl;
+        std::cerr << "usage: " << argv[0] << " <input_mesh.h5m> "
+                  << "<input_geometry.h5m> <hx hy hz>" << std::endl;
         exit( EXIT_FAILURE );
     }
 
@@ -412,7 +412,7 @@ int main(int argc, char* argv[])
     // write mesh to output file with new tag data
     moab::Tag output_tags[2] = {boundary_tag, distance_tag};
 
-    mb_error = mbi->write_file("output_mesh.vtk",
+    mb_error = mbi->write_file("output_mesh.h5m",
                                NULL, NULL, NULL, 0,
                                output_tags, 2);
 
