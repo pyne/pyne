@@ -89,14 +89,18 @@ double KDEKernel::evaluate(double u,
 //---------------------------------------------------------------------------//
 double KDEKernel::MomentFunction::evaluate(double x) const
 {
-    if (moment_index == 0)
+    double value = kernel.evaluate(x);
+
+    if (moment_index > 0)
     {
-        return kernel.evaluate(x);
+        for (unsigned int i = 0; i < moment_index; ++i)
+        {
+            value *= x;
+        } 
+
     }
-    else
-    { 
-        return pow(x, moment_index) * kernel.evaluate(x);
-    }
+
+    return value;
 }
 //---------------------------------------------------------------------------//
 
