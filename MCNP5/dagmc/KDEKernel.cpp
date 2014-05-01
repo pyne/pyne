@@ -1,7 +1,6 @@
 // MCNP5/dagmc/KDEKernel.cpp
 
 #include <cassert>
-#include <cmath>
 
 #include "KDEKernel.hpp"
 #include "PolynomialKernel.hpp"

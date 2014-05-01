@@ -1,7 +1,6 @@
 // MCNP5/dagmc/PolynomialKernel.cpp
 
 #include <cassert>
-#include <cmath>
 #include <sstream>
 
 #include "PolynomialKernel.hpp"
