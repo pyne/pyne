@@ -1572,6 +1572,19 @@ int parent) {
   return result;
 };
 
+std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(
+double energy, double error) {
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma_struct>(energy+error,
+    energy-error, offsetof(gamma_struct, photon_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(energy+error,
+    energy-error, offsetof(gamma_struct, photon_intensity_err), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+
 std::vector<std::pair<double, double> > pyne::gamma_conversion_intensity(
 int parent) {
   std::vector<std::pair<double, double> > result;
