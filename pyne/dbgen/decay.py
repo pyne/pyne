@@ -2,6 +2,9 @@
 from __future__ import print_function, division
 import os
 import glob
+from warnings import warn
+from pyne.utils import VnVWarning
+
 try:
     import urllib.request as urllib
 except ImportError:
@@ -14,9 +17,73 @@ import tables as tb
 from pyne import ensdf
 from pyne.dbgen.api import BASIC_FILTERS
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+def _readpoint(line, dstart, dlen):
+    data = ensdf._getvalue(line[dstart:dstart + dlen])
+    error = ensdf._getvalue(line[dstart + dlen:dstart + dlen + 2])
+    return data, error
+
+
+def _read_variablepoint(line, dstart, dlen):
+    sub = line[dstart:dstart + dlen + 2].split()
+    data = None
+    error = None
+    if len(sub) == 2:
+        data = ensdf._getvalue(sub[0])
+        error = ensdf._getvalue(sub[1])
+    return data, error
+
+
+def grab_atomic_data(build_dir=""):
+    medfile = os.path.join(build_dir, 'mednew.dat')
+    if not os.path.isfile(medfile):
+        urllib.urlretrieve('http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/'
+                           + 'analysis/radlst/mednew.dat', medfile)
+
+
+def parse_atomic_data(build_dir=""):
+    i = 0
+    j = 0
+    medfile = os.path.join(build_dir, 'mednew.dat')
+    dat = np.zeros((103,), atomic_dtype)
+    with open(medfile, 'r') as f:
+        lines = f.readlines()
+    for line in lines:
+        if (-1) ** i == 1:
+            Z = int(line[0:3])
+            k_shell_fluor, k_shell_fluor_error = _readpoint(line, 9, 6)
+            l_shell_fluor, l_shell_fluor_error = _readpoint(line, 18, 6)
+            #Probability of creating L-shell vacancy by filling K-shell vacancy
+            prob, prob_error = _readpoint(line, 27, 6)
+            k_shell_be, k_shell_be_err = _readpoint(line, 36, 8)
+            li_shell_be, li_shell_be_err = _readpoint(line, 47, 8)
+            mi_shell_be, mi_shell_be_err = _readpoint(line, 58, 8)
+            ni_shell_be, ni_shell_be_err = _readpoint(line, 69, 8)
+        else:
+            Kb_to_Ka, Kb_to_Ka_err = _read_variablepoint(line, 9, 7)
+            Ka2_to_Ka1, Ka2_to_Ka1_err = _read_variablepoint(line, 19, 7)
+            L_auger = ensdf._getvalue(line[29:36])
+            K_auger = ensdf._getvalue(line[36:42])
+            Ka1_X_ray_en, Ka1_X_ray_en_err = _readpoint(line, 43, 8)
+            Ka2_X_ray_en, Ka2_X_ray_en_err = _readpoint(line, 54, 7)
+            Kb_X_ray_en = ensdf._getvalue(line[65:69])
+            L_X_ray_en = ensdf._getvalue(line[70:76])
+            dat[j] = Z, k_shell_fluor, k_shell_fluor_error, l_shell_fluor, \
+                     l_shell_fluor_error, prob, k_shell_be, k_shell_be_err, \
+                     li_shell_be, li_shell_be_err, mi_shell_be, \
+                     mi_shell_be_err, ni_shell_be, ni_shell_be_err, \
+                     Kb_to_Ka, Kb_to_Ka_err, Ka2_to_Ka1, Ka2_to_Ka1_err, \
+                     L_auger, K_auger, Ka1_X_ray_en, Ka1_X_ray_en_err, \
+                     Ka2_X_ray_en, Ka2_X_ray_en_err, Kb_X_ray_en, L_X_ray_en
+            j += 1
+        i += 1
+    return dat
+
 
 def grab_ensdf_decay(build_dir=""):
-    """Grabs the ENSDF decay data files
+    """
+    Grabs the ENSDF decay data files
     if not already present.
 
     Parameters
@@ -65,6 +132,7 @@ level_dtype = np.dtype([
     ('level', float),
     ('branch_ratio', float),
     ('metastable', int),
+    ('special', 'S1'),
 ])
 
 decay_dtype = np.dtype([
@@ -125,8 +193,40 @@ ecbp_dtype = np.dtype([
 ])
 
 
+atomic_dtype = np.dtype([
+    ('z', int),
+    ('k_shell_fluor', float),
+    ('k_shell_fluor_error', float),
+    ('l_shell_fluor', float),
+    ('l_shell_fluor_error', float),
+    ('prob', float),
+    ('k_shell_be', float),
+    ('k_shell_be_err', float),
+    ('li_shell_be', float),
+    ('li_shell_be_err', float),
+    ('mi_shell_be', float),
+    ('mi_shell_be_err', float),
+    ('ni_shell_be', float),
+    ('ni_shell_be_err', float),
+    ('kb_to_ka', float),
+    ('kb_to_ka_err', float),
+    ('ka2_to_ka1', float),
+    ('ka2_to_ka1_err', float),
+    ('l_auger', float),
+    ('k_auger', float),
+    ('ka1_x_ray_en', float),
+    ('ka1_x_ray_en_err', float),
+    ('ka2_x_ray_en', float),
+    ('ka2_x_ray_en_err', float),
+    ('kb_x_ray_en', float),
+    ('l_x_ray_en', float),
+])
+
+
 def parse_level_data(build_dir=""):
-    """Builds and returns a list of nuclide decay data.
+    """
+    Builds and returns a list of nuclide decay data.
+
     Parameters
     ----------
     build_dir : str
@@ -151,7 +251,9 @@ def parse_level_data(build_dir=""):
 
 
 def parse_decay_data(build_dir=""):
-    """Builds and returns a list of nuclide decay data.
+    """
+    Builds and returns a list of nuclide decay data.
+
     Parameters
     ----------
     build_dir : str
@@ -206,6 +308,56 @@ def parse_decay_data(build_dir=""):
 
     return all_decay_array, all_gammas_array, all_alphas_array, \
            all_betas_array, all_ecbp_array
+
+
+def make_atomic_decay_table(nuc_data, build_dir=""):
+    """Makes atomic decay table in the nuc_data library.
+
+    Parameters
+    ----------
+    nuc_data : str
+        Path to nuclide data file.
+    build_dir : str
+        Directory to place xray data file in.
+    """
+    xrd = parse_atomic_data(build_dir)
+
+    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+
+    # Make a new the table
+    if not hasattr(db.root, 'decay'):
+        db.createGroup('/', 'decay', 'ENSDF Decay data')
+
+    atomic_table = db.createTable('/decay/', 'atomic', xrd,
+                              'z'
+                              'k_shell_fluor'
+                              'k_shell_fluor_error'
+                              'l_shell_fluor'
+                              'l_shell_fluor_error'
+                              'prob'
+                              'k_shell_be'
+                              'k_shell_be_err'
+                              'li_shell_be'
+                              'li_shell_be_err'
+                              'mi_shell_be'
+                              'mi_shell_be_err'
+                              'ni_shell_be'
+                              'ni_shell_be_err'
+                              'kb_to_ka'
+                              'kb_to_ka_err'
+                              'ka2_to_ka1'
+                              'ka2_to_ka1_err'
+                              'k_auger'
+                              'k_auger'
+                              'ka1_x_ray_en'
+                              'ka1_x_ray_en_err'
+                              'ka2_x_ray_en'
+                              'ka2_x_ray_en_err'
+                              'kb_x_ray_en'
+                              'l_x_ray_en',
+                              expectedrows=103)
+    atomic_table.flush()
+    db.close()
 
 
 def make_decay_half_life_table(nuc_data, build_dir=""):
@@ -311,4 +463,10 @@ def make_decay(args):
     # Make atomic mass table once we have the array
     print("Making decay data table.")
     make_decay_half_life_table(nuc_data, build_dir)
+
+    print("Grabbing Atomic data from NNDC")
+    grab_atomic_data(build_dir)
+
+    print("Making atomic decay data table")
+    make_atomic_decay_table(nuc_data, build_dir)
 

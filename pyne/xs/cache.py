@@ -1,11 +1,10 @@
 """This module provides a cross section cache which automatically extracts 
 cross-sections from provided nuclear data sets."""
+from warnings import warn
+from pyne.utils import VnVWarning
+import sys
 from itertools import product
 from collections import MutableMapping
-try:
-    basestring
-except NameError:
-    basestring = str
 
 import numpy as np
 import tables as tb
@@ -15,6 +14,10 @@ from ..pyne_config import pyne_conf
 from .models import partial_energy_matrix, phi_g
 from . import data_source
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+if sys.version_info[0] > 2:
+  basestring = str
 
 def _same_arr_or_none(a, b): 
     if a is None or b is None:

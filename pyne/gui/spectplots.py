@@ -1,6 +1,10 @@
 """Plotting routines for spectrometry modules"""
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import matplotlib.pyplot as plt
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 
 def plot_spectrum(spect):

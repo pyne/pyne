@@ -43,6 +43,8 @@ Currently the following naming conventions are supported:
  #. **ALARA**: In ALARA format, elements are denoted by the lower case atomic symbol. Isotopes are
     specified by appending a semicolon and A-number. For example, "fe" and "fe:56" represent
     elemental iron and iron-56 respectively. No metastable flag exists.
+ #. **Groundstate**:  In Groundstate format, the nuclide is stored in a form similar to the standard
+    id form, but the last four digits are zero to eliminate the information about the nuclides state.  
 
 .. currentmodule:: pyne.nucname
 
@@ -50,7 +52,7 @@ All functionality may be found in the ``nucname`` package::
 
  from pyne import nucname
 
-This contains several zzaaam, zzzaaa, zzllaaam, name, MCNP and Serpent converter function as
+This contains several zzaaam, zzzaaa, zzllaaam, name, MCNP, Groundstate and Serpent converter function as
 well as other helpful module attributes.
 
 .. _name_cast:
@@ -96,6 +98,10 @@ Naming Convention Casting Functions
 -----
 
 .. autofunction:: alara(nuc)
+
+-----
+
+.. autofunction:: groundstate(nuc)
 
 
 -----------------------------------

@@ -3,12 +3,11 @@ from __future__ import print_function
 import os
 import io
 import re
+import sys
 import shutil
 from glob import glob
-try:
-    basestring
-except NameError:
-    basestring = str
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import tables as tb
@@ -16,6 +15,11 @@ import tables as tb
 from .. import nucname
 from ..utils import failure
 from .api import BASIC_FILTERS
+
+if sys.version_info[0] > 2:
+  basestring = str
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""

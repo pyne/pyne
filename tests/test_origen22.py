@@ -1,5 +1,6 @@
 from __future__ import print_function
 import os
+import warnings 
 try:
     from StringIO import StringIO
 except ImportError:
@@ -9,6 +10,8 @@ import numpy as np
 from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import origen22
 from pyne.xs.cache import XSCache
 from pyne.xs.data_source import NullDataSource

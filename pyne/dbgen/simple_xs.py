@@ -1,6 +1,9 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
 from __future__ import print_function
 import os
+from warnings import warn
+from pyne.utils import VnVWarning
+
 try:
     import urllib.request as urllib
 except ImportError:
@@ -15,6 +18,7 @@ from ..utils import to_barns
 from .api import BASIC_FILTERS
 from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_kaeri_simple_xs(build_dir=""):
     """Grabs the KAERI files needed for the simple cross sections table, 

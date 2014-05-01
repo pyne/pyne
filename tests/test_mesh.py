@@ -2,6 +2,7 @@ from __future__ import print_function
 import os
 import time
 import shutil
+import warnings
 import itertools
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
@@ -14,6 +15,9 @@ try:
 except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
+
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag, \
     ComputedTag
 from pyne.material import Material, MaterialLibrary

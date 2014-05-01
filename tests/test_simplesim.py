@@ -7,9 +7,12 @@
 import os
 import pickle
 import unittest
+import warnings
 
 import numpy as np
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import material
 from pyne.simplesim import definition, cards, inputfile
 import pyne.simplesim.nestedgeom as ng
@@ -55,7 +58,7 @@ class TestSystemDefinition(unittest.TestCase):
     def setUp(self):
         uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
         self.uo2 = cards.Material(uo2, name='UO2')
-        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, metadata={'name': 'H2O'})
         self.h2o = cards.Material(h2o)
         
         # Surfaces.
@@ -2309,7 +2312,7 @@ class TestMCNPInput(unittest.TestCase):
         # Materials.
         uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
         uo2 = cards.Material(uo2, name='UO2')
-        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, metadata={'name': 'H2O'})
         h2o = cards.Material(h2o)
         mc = cards.MaterialCustom(mat=material.Material(), name='matc', 
                                   comment="mathey", mcnp="mathey")
@@ -2401,7 +2404,7 @@ class TestMCNPInput(unittest.TestCase):
         # Materials.
         uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
         uo2 = cards.Material(uo2, name='UO2')
-        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, metadata={'name': 'H2O'})
         h2o = cards.Material(h2o)
 
         # Surfaces.

@@ -1,5 +1,6 @@
 """Python wrapper for jsoncpp."""
 from __future__ import division, unicode_literals
+
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport malloc, free
@@ -11,13 +12,13 @@ from libcpp.vector cimport vector as std_vector
 # Python imports
 import collections
 
-# local imports
-cimport cpp_jsoncpp
-
 try:
     import simplejson as json
 except ImportError:
     import json
+
+# local imports
+cimport cpp_jsoncpp
 
 cdef cpp_jsoncpp.Value * toboolval(bint b):
     # NOTE: This is a little hack-y but has to be done since

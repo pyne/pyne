@@ -176,7 +176,7 @@ namespace pyne
     double density; ///< density (in arbitrary units) of the Material.
     double atoms_per_molecule; ///< The number of atoms per molecule.
     /// container for arbitrary metadata, following the JSON rules.
-    Json::Value attrs;  
+    Json::Value metadata;  
 
     // Material function definitions
     void normalize ();  ///< Normalizes the mass.

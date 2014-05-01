@@ -3,7 +3,7 @@
 ==========================================
 Command Line Interfaces -- :mod:`pyne.cli`
 ==========================================
-PyNE provides a number of command line interfaces into it's libraries.  This 
+PyNE provides a number of command line interfaces into its libraries.  This 
 sub-package is where those CLIs are primarily implemented.
 
 .. toctree::

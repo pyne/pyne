@@ -19,6 +19,9 @@ except ImportError:
     HAVE_PYTAPS = False
     pass
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
+
 from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.material import Material
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \

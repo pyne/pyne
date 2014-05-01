@@ -88,7 +88,10 @@ tally.
 
 
 """
+from warnings import warn
+from pyne.utils import VnVWarning
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class IUnit(object):
     """Abstract base class for tally units. The user does not use this class

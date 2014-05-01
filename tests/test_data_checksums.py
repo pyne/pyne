@@ -1,8 +1,11 @@
 """ test data_checksums and hashing functions"""
 import os
+import warnings
 
 from nose.tools import assert_equal, assert_true
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 import pyne
 
 # These tests require nuc_data
