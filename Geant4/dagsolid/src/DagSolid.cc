@@ -423,25 +423,29 @@ G4double DagSolid::DistanceToOut (const G4ThreeVector &p,
   history.reset();
   next_dist *= cm; // convert back to mm
 
+  // no more surfaces
   if(next_surf == 0 )
     return kInfinity;
   
   if (calcNorm)
     {
       *n         = SurfaceNormal(p+minDist*v);
+      *validNorm = false;
     }
 
   if (next_dist < minDist )
     minDist = next_dist;
  
-          
+  // particle considered to be on surface
   if (minDist > 0.0 && minDist <= 0.5*kCarTolerance ) 
     {
       return kInfinity;
     }
   else if ( minDist < kInfinity)
     {
-      return minDist;
+      if(calcNorm) // if calc norm true,s should set validNorm true
+	  *validNorm = true;
+      return minDist;  
     }
   else
     {
