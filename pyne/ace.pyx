@@ -68,20 +68,20 @@ def ascii_to_binary(ascii_file, binary_file):
         hd = lines[idx][35:45].encode('UTF-8')
         hk = lines[idx + 1][:70].encode('UTF-8')
         hm = lines[idx + 1][70:80].encode('UTF-8')
-        binary.write(struct.pack('=10sdd10s70s10s', hz, aw0, tz, hd, hk, hm))
+        binary.write(struct.pack(str('=10sdd10s70s10s'), hz, aw0, tz, hd, hk, hm))
 
         # Read/write IZ/AW pairs
         data = ' '.join(lines[idx + 2:idx + 6]).split()
         iz = list(map(int, data[::2]))
         aw = list(map(float, data[1::2]))
         izaw = [item for sublist in zip(iz, aw) for item in sublist]
-        binary.write(struct.pack('=' + 16*'id', *izaw))
+        binary.write(struct.pack(str('=' + 16*'id'), *izaw))
 
         # Read/write NXS and JXS arrays. Null bytes are added at the end so
         # that XSS will start at the second record
         nxs = list(map(int, ' '.join(lines[idx + 6:idx + 8]).split()))
         jxs = list(map(int, ' '.join(lines[idx + 8:idx + 12]).split()))
-        binary.write(struct.pack('=16i32i{0}x'.format(record_length - 500),
+        binary.write(struct.pack(str('=16i32i{0}x'.format(record_length - 500)),
                                  *(nxs + jxs)))
 
         # Read/write XSS array. Null bytes are added to form a complete record
@@ -90,7 +90,7 @@ def ascii_to_binary(ascii_file, binary_file):
         xss = list(map(float, ' '.join(lines[
             idx + 12:idx + 12 + n_lines]).split()))
         extra_bytes = record_length - ((len(xss)*8 - 1) % record_length + 1)
-        binary.write(struct.pack('={0}d{1}x'.format(nxs[0], extra_bytes),
+        binary.write(struct.pack(str('={0}d{1}x'.format(nxs[0], extra_bytes)),
                                  *xss))
 
         # Advance to next table in file
@@ -179,14 +179,14 @@ class Library(object):
             # Read name, atomic mass ratio, temperature, date, comment, and
             # material
             name, awr, temp, date, comment, mat = \
-                struct.unpack('=10sdd10s70s10s', self.f.read(116))
+                struct.unpack(str('=10sdd10s70s10s'), self.f.read(116))
             name = name.strip()
 
             # Read ZAID/awr combinations
-            data = struct.unpack('=' + 16*'id', self.f.read(192))
+            data = struct.unpack(str('=' + 16*'id'), self.f.read(192))
 
             # Read NXS
-            nxs = list(struct.unpack('=16i', self.f.read(64)))
+            nxs = list(struct.unpack(str('=16i'), self.f.read(64)))
 
             # Determine length of XSS and number of records
             length = nxs[0]
@@ -213,11 +213,11 @@ class Library(object):
             self.tables[name] = table
 
             # Read JXS
-            table.jxs = list(struct.unpack('=32i', self.f.read(128)))
+            table.jxs = list(struct.unpack(str('=32i'), self.f.read(128)))
 
             # Read XSS
             self.f.seek(start_position + recl_length)
-            table.xss = list(struct.unpack('={0}d'.format(length),
+            table.xss = list(struct.unpack(str('={0}d'.format(length)),
                                            self.f.read(length*8)))
 
             # Insert empty object at beginning of NXS, JXS, and XSS
