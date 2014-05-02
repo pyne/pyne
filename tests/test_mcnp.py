@@ -7,7 +7,7 @@ import warnings
 
 import nose.tools
 from nose.tools import assert_almost_equal, assert_equal, assert_true, \
-                       assert_false, assert_raises
+                       assert_not_equal, assert_false, assert_raises
 from nose.plugins.skip import SkipTest
 
 import tables
