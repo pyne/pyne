@@ -21,4 +21,5 @@ set(moab_libs ${MOAB_DIR}/lib/libdagmc.so ${MOAB_DIR}/lib/libMOAB.so)
 
 # targets
 set (CMAKE_INSTALL_PREFIX .)
-install(TARGETS dagsolid DESTINATION ../lib)
+install(TARGETS dagsolid DESTINATION ${DAGSOLID_DIR}/lib)
+
