@@ -218,6 +218,8 @@ EInside DagSolid::Inside (const G4ThreeVector &p) const
 
   G4double direction[3]={u,v,w};
 
+  G4double minDist;
+
   int result;
   ErrorCode ec;
   ec = fdagmc->point_in_volume(fvolEntity, point, result,
@@ -229,17 +231,15 @@ EInside DagSolid::Inside (const G4ThreeVector &p) const
       exit(1);
     }
 
+  ec = fdagmc->closest_to_location(fvolEntity, point, minDist);
+  if( ec != MB_SUCCESS)
+    {
+      G4cout << "failed to determine closed to location" << G4endl;
+      exit(1);
+    }
+
   if ( result == 1 ) // point is contained within fvolEntity
     {
-      double minDist;
-      // need to convert point back to mm for this call
-      //      point[0]=point[0]*cm; point[1]=point[1]*cm; point[2]=point[2]*cm;
-      ec = fdagmc->closest_to_location(fvolEntity, point, minDist);
-      if( ec != MB_SUCCESS)
-	{
-	  G4cout << "failed to determine closed to location" << G4endl;
-	  exit(1);
-	}
       if (minDist <= 0.5*kCarTolerance) 
 	return kSurface;
       else
@@ -247,7 +247,10 @@ EInside DagSolid::Inside (const G4ThreeVector &p) const
     }
   else if ( result == 0 )
     {
-      return kOutside;
+      if (minDist <= 0.5*kCarTolerance) 
+	return kSurface;
+      else
+	return kOutside;
     }
 
 
