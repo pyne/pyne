@@ -1,7 +1,6 @@
 // MCNP5/dagmc/PolynomialKernel.cpp
 
 #include <cassert>
-#include <cmath>
 #include <sstream>
 
 #include "PolynomialKernel.hpp"
@@ -19,8 +18,14 @@ PolynomialKernel::PolynomialKernel(unsigned int s, unsigned int r)
     {
         for (unsigned int k = 0; k < r; ++k)
         {
-            double value = pow(-1, k) * pochhammer(0.5 + s + r, k);
+            double value = pochhammer(0.5 + s + r, k);
             value /= factorial(k) * factorial(r - 1 - k) * pochhammer(1.5, k);
+
+            if (k%2 == 1)
+            {
+                value *= -1.0;
+            }
+
             coefficients.push_back(value);
         }
 
@@ -54,17 +59,24 @@ double PolynomialKernel::evaluate(double u) const
     }
     else if (s > 1)
     {
-        value *= pow(1 - u * u, s);
+        double temp = 1 - u * u;
+
+        for (unsigned int i = 0; i < s; ++i)
+        {
+            value *= temp;
+        }
     }
 
     // multiply value by second polynomial for kernels of higher order
     if (r > 1)
     {
-        double sum = 0.0;
+        double sum = coefficients[0];
+        double temp = 1.0;
 
-        for (unsigned int k = 0; k < r; ++k)
+        for (unsigned int k = 1; k < r; ++k)
         {
-            sum += coefficients[k] * pow(u, 2 * k);
+            temp *= u * u;
+            sum += coefficients[k] * temp;
         }
 
         value *= sum;
