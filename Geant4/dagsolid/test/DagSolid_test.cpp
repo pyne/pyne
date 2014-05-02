@@ -15,7 +15,7 @@ class DagSolidTest : public ::testing::Test
 /*
  * Point in volume test
  */
-TEST_F(DagSolidTest,test_1) {
+TEST_F(DagSolidTest,point_in_volume) {
   DagMC* dagmc = DagMC::instance(); // create dag instance
 
   // dag_volumes
@@ -29,8 +29,59 @@ TEST_F(DagSolidTest,test_1) {
   G4ThreeVector position = G4ThreeVector(0.,0.,0.);
   // point in volume test
   EInside inside = vol_1->Inside(position);
+ 
+  EXPECT_EQ(kInside,inside);
+ 
   return;
 }
+
+/*
+ * Point on surface
+ */
+TEST_F(DagSolidTest,point_on_surface) {
+  DagMC* dagmc = DagMC::instance(); // create dag instance
+
+  // dag_volumes
+  const char* h5mfilename = "/data/opt/DAGMC/Geant4/test/geometry/test_geom.h5m";
+  dagmc->load_file(h5mfilename,0);
+  dagmc->init_OBBTree();
+
+  // new volume
+  DagSolid* vol_1 = new DagSolid("vol_1",dagmc,1);
+  // sample position
+  G4ThreeVector position = G4ThreeVector(50.,0.,0.);
+  // point in volume test
+  EInside inside = vol_1->Inside(position);
+
+  EXPECT_EQ(kSurface,inside);
+
+  return;
+}
+
+/*
+ * Point on out of volume
+ */
+TEST_F(DagSolidTest,point_outside_volume) {
+  DagMC* dagmc = DagMC::instance(); // create dag instance
+
+  // dag_volumes
+  const char* h5mfilename = "/data/opt/DAGMC/Geant4/test/geometry/test_geom.h5m";
+  dagmc->load_file(h5mfilename,0);
+  dagmc->init_OBBTree();
+
+  // new volume
+  DagSolid* vol_1 = new DagSolid("vol_1",dagmc,1);
+  // sample position
+  G4ThreeVector position = G4ThreeVector(51.,0.,0.);
+  // point in volume test
+  EInside inside = vol_1->Inside(position);
+
+  EXPECT_EQ(kOutside,inside);
+
+  return;
+}
+
+
 
 /*
  * ray fire test, distance to in
