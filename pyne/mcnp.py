@@ -1899,9 +1899,6 @@ class Meshtal(object):
         tag name, and the total relative error tag name. If tags is None
         the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
         'x_rel_error_total' where x is n or p for neutrons or photons.
-    meshes_have_mats : bool
-         If false, Meshtally objects will be created without PyNE material
-         objects. 
     """
 
     def __init__(self, filename, tags=None, meshes_have_mats=False):
@@ -1915,7 +1912,7 @@ class Meshtal(object):
             tag name, and the total relative error tag name. If tags is None
             the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
             'x_rel_error_total' where x is n or p for neutrons or photons.
-        mats : bool
+        meshes_have_mats : bool
              If false, Meshtally objects will be created without PyNE material
              material objects. 
         """
@@ -1926,7 +1923,7 @@ class Meshtal(object):
 
         self.tally = {}
         self.tags = tags
-        self.meshes_have_mats = meshes_have_mats
+        self._meshes_have_mats = meshes_have_mats
 
         with open(filename, 'r') as f:
             self._read_meshtal_head(f)
@@ -1961,10 +1958,10 @@ class Meshtal(object):
                 if self.tags is not None and tally_num in self.tags.keys():
                     self.tally[tally_num] = MeshTally(f, tally_num,
                                             self.tags[tally_num],
-                                            mesh_has_mats=self.meshes_have_mats)
+                                            mesh_has_mats=self._meshes_have_mats)
                 else:
                     self.tally[tally_num] = MeshTally(f, tally_num,
-                                            mesh_has_mats=self.meshes_have_mats)
+                                            mesh_has_mats=self._meshes_have_mats)
 
             line = f.readline()
 
