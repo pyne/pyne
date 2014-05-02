@@ -48,13 +48,24 @@ ENDFUNCTION()
 cxx_static_library(gtest ${cxx_strict} "${gtest_dir}/src/gtest-all.cc")
 ## do not change above here
 
+SET (tgt "gtest")
+ADD_CUSTOM_COMMAND (TARGET ${tgt}
+	COMMAND ln "-s"
+		"${CMAKE_CURRENT_SOURCE_DIR}/test_geom.h5m" 
+		"${CMAKE_CURRENT_BINARY_DIR}/test_geom.h5m"
+		COMMENT "...linking test file in ${CMAKE_CURRENT_SOURCE_DIR} to ${CMAKE_CURRENT_BINARY_DIR}/slabs.h5m"
+	DEPENDS
+	VERBATIM
+ 	)
+
 # dagsolid tests
 set (dagsolid_test_source
      ${CMAKE_CURRENT_SOURCE_DIR}/DagSolid_test.cpp
      )
 
 # geant libs needed for test cases
-set(geant_libs ${GEANT_DIR}/lib/libG4geometry.so ${GEANT_DIR}/lib/libG4global.so 
+set(geant_libs ${GEANT_DIR}/lib/libG4geometry.so 
+               ${GEANT_DIR}/lib/libG4global.so 
                ${GEANT_DIR}/lib/libG4clhep.so )
 
 # set libraries needed to link to test cases
@@ -63,7 +74,8 @@ set(LIBS
     ${MOAB_DIR}/lib/libMOAB.so
     ${MOAB_DIR}/lib/libdagmc.so
     ${MOAB_DIR}/lib/libMOAB.so
-    ${DAGSOLID_DIR}/lib/libdagsolid.so
+    # at compile time (before make install) libdagsolid in bld dir
+    ${DAGSOLID_DIR}/bld/src/libdagsolid.so
     ${geant_libs} )
 
 # custom driver which calls tests
