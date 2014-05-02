@@ -378,14 +378,24 @@ TEST_F(BoundaryKernel1DTest, EvaluatePointOutsideMaxDistance)
 {
     p_ratio = 1.5;
 
-    // test correction factor is always zero if p ratio is outside domain
-    double u2[] = {-2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0};
+    // test correction factor is always one over the domain u = [-1, 1]
+    double u1[] = {-1.0, -0.8, -0.6, -0.4, -0.2,
+                    0.0,  0.2,  0.4,  0.6,  0.8, 1.0};
 
-    for (int i = 0; i < 7; ++i)
+    for (int i = 0; i < 11; ++i)
     {
-        double value2 = kernel->boundary_correction(&u2[i], &p_ratio, &side, 1);
-        EXPECT_DOUBLE_EQ(0.0, value2);
+        double value1 = kernel->boundary_correction(&u1[i], &p_ratio, &side, 1);
+        EXPECT_DOUBLE_EQ(1.0, value1);
     }
+
+    // test correction factor is zero outside the domain u = [-1, 1]
+    double u2[] = {-2.0, 2.0};
+
+    double value2 = kernel->boundary_correction(&u2[0], &p_ratio, &side, 1);
+    EXPECT_DOUBLE_EQ(0.0, value2);
+
+    value2 = kernel->boundary_correction(&u2[1], &p_ratio, &side, 1);
+    EXPECT_DOUBLE_EQ(0.0, value2);
 }
 //---------------------------------------------------------------------------//
 // Tests point that is at a negative distance from a boundary
@@ -420,6 +430,43 @@ TEST_F(BoundaryKernel3DTest, AllValidKernelMoments)
     EXPECT_NEAR(-0.183359, value, 1e-6);
 }
 //---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, ReduceCorrectionMatrixTo2D)
+{
+    // change 3D correction to include one point outside max distance
+    p[2] = 2.3;
+
+    // 1D correction
+    double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 2D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 2);
+    EXPECT_NEAR(1.275992, value, 1e-6);
+
+    // 3D correction reduces to the 2D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 3);
+    EXPECT_NEAR(1.275992, value, 1e-6);
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, ReduceCorrectionMatrixTo1D)
+{
+    // change 2D and 3D corrections to include points outside max distance
+    p[1] = 1.1;
+    p[2] = 7.9;
+
+    // 1D correction
+    double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 2D correction reduces to the 1D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 2);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 3D correction reduces to the 1D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 3);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+}
+//---------------------------------------------------------------------------//
 TEST_F(BoundaryKernel3DTest, AllInvalidKernelMoments)
 {
     // change u so that all moments will be invalid
@@ -438,7 +485,7 @@ TEST_F(BoundaryKernel3DTest, AllInvalidKernelMoments)
 TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForU)
 {
     // change p so that only the first set of moments will be invalid
-    p[0] = 1.5;
+    p[0] = -1.5;
 
     // test correction factor is always zero
     for (int i = 1; i <= 3; ++i)
@@ -468,7 +515,7 @@ TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForV)
 TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForW)
 {
     // change p so that only the third set of moments will be invalid
-    p[2] = 5;
+    p[2] = -5;
 
     // 1D correction should still work
     double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
@@ -514,7 +561,7 @@ TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForUW)
 TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForVW)
 {
     // change u/p so that the second and third set of moments will be invalid
-    p[1] = 1.2;
+    p[1] = -1.2;
     u[2] = 10.5;
 
     // 1D correction should still work

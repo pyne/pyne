@@ -129,8 +129,8 @@ bool KDEKernel::compute_moments(double u,
     assert(side <= 1);
     assert(moments.empty());
 
-    // test if outside domain p = [0, 1]
-    if (p < 0.0 || p > 1.0) return false;
+    // make sure p is not negative
+    if (p < 0.0) return false;
 
     // determine the integration limits
     double u_min = -1.0;

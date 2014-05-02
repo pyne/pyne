@@ -140,8 +140,10 @@ class KDEKernel
      * as the 1D kernel function K is assumed to be the same in all dimenions.
      *
      * The size of u, p, and side are assumed to be equal to num_corrections.
-     * Values should only be added for the dimensions that need correcting.
-     * For example, if only u and w need correction for K(u,v,w)
+     * Though the 3D case will work for all boundary and interior calculation
+     * points, for efficiency purposes values should only be added for the
+     * dimensions that actually need correcting.  For example, if only u and
+     * w need correcting for K(u, v, w), then
      *
      *                   u = (u, w)
      *                   p = (p(u), p(w))
@@ -152,8 +154,9 @@ class KDEKernel
      * It will still need to be multiplied by K(u,v,w) to form a valid kernel
      * contribution.
      *
-     * If a correction factor of 0.0 is returned, then it means that either u
-     * and/or p are outside their valid domains.
+     * If a correction factor of 0.0 is returned, this means that u lies
+     * outside the valid domain for the boundary kernel and there is no valid
+     * kernel contribution.
      */
     virtual double boundary_correction(const double* u,
                                        const double* p,
@@ -176,7 +179,8 @@ class KDEKernel
      *
      * Note that the integration limits of a_i(p) depend on whether a LOWER or
      * UPPER boundary is used.  If LOWER, then the integration is performed on
-     * [-1, p].  If UPPER, then the integration is performed on [-p, 1].
+     * [-1, p].  If UPPER, then the integration is performed on [-p, 1]. If
+     * p >= 1 moments will be always be defined on the domain [-1, 1].
      */
     bool compute_moments(double u,
                          double p,
