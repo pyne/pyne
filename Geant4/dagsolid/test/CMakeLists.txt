@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 add_definitions(-DGTEST_HAS_PTHREAD=0)
 
 # Note that CMAKE_SOURCE_DIR (without 'CURRNET') is the top-level dir containing CMakeLists.txt
-SET (gtest_home    "${CMAKE_SOURCE_DIR}/../../../gtest")
+SET (gtest_home    "${CMAKE_SOURCE_DIR}/../../gtest")
 SET (gtest_dir     "${gtest_home}/gtest-1.7.0")
 
 # Where to look for includes
@@ -18,9 +18,9 @@ SET(cxx_exception_flags "-fexceptions")
 # Ref: https://groups.google.com/forum/#!topic/googletestframework/8S3QSezcoRA
 SET(cxx_strict_flags "-Wextra -Wno-missing-field-initializers")
 
-#IF (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
-#    SET(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
-#ENDIF()
+IF (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
+    SET(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
+ENDIF()
 
 # Make the gtest libraries
 SET(cxx_exception "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exception_flags}")
@@ -36,9 +36,9 @@ FUNCTION(cxx_library_with_type name type cxx_flags)
       SET_TARGET_PROPERTIES(${name}
 	    PROPERTIES
             COMPILE_FLAGS "${cxx_flags}")
-#    IF (CMAKE_USE_PTHREADS_INIT)
-#         TARGET_LINK_LIBRARIES(${name} ${CMAKE_THREAD_LIBS_INIT})
-#    ENDIF()
+    IF (CMAKE_USE_PTHREADS_INIT)
+         TARGET_LINK_LIBRARIES(${name} ${CMAKE_THREAD_LIBS_INIT})
+    ENDIF()
 ENDFUNCTION()
 
 FUNCTION(cxx_static_library name cxx_flags)
