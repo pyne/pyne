@@ -47,7 +47,11 @@ TEST_F(DagSolidTest,test_2) {
 
   G4ThreeVector position = G4ThreeVector(-100.,0.,0.);
   double distance = vol_1->DistanceToIn(position);
-  std::cout << distance << std::endl;
+
+  // DistanceToIn point external to volume should give distance
+  // to entry, distance should be set to 50.0 mm 
+  EXPECT_EQ(50.0,distance);
+
   return;
 }
 
@@ -67,6 +71,15 @@ TEST_F(DagSolidTest,test_3) {
   G4ThreeVector direction = G4ThreeVector(1.,0.,0.);
   double distance = vol_1->DistanceToOut(position,direction);
   std::cout << distance << std::endl;
+
+  // DistanceToOut normally only called from inside the volume
+  // but in this case, we expect the ray to skip over the volume 
+  // and give the distance to when we leave the volume instead
+
+  // distance should be set to 50.0 mm since the point
+  // is in the center of the box
+  EXPECT_EQ(150.0,distance);
+
   return;
 }
 
@@ -85,7 +98,11 @@ TEST_F(DagSolidTest,test_4) {
 
   G4ThreeVector position = G4ThreeVector(0.,0.,0.);
   double distance = vol_1->DistanceToOut(position);
-  std::cout << distance << std::endl;
+
+  // distance should be set to 50.0 mm since the point
+  // is in the center of the box
+  EXPECT_EQ(50.0,distance);
+
   return;
 }
 
@@ -105,7 +122,11 @@ TEST_F(DagSolidTest,test_5) {
   G4ThreeVector position = G4ThreeVector(0.,0.,0.);
   G4ThreeVector direction = G4ThreeVector(1.,0.,0.);
   double distance = vol_1->DistanceToIn(position,direction);
-  std::cout << distance << std::endl;
+
+  // distance should be set to infinity since there are no other volumes
+  // to enter
+  EXPECT_EQ(kInfinity,distance);
+
   return;
 }
 
@@ -129,9 +150,12 @@ TEST_F(DagSolidTest,test_6) {
   G4ThreeVector normal;
   bool v_norm = false;
   double distance = vol_1->DistanceToOut(position,direction,true,&v_norm,&normal);
-  std::cout << v_norm << std::endl;
-  std::cout << normal << std::endl;
-  std::cout << distance << std::endl;
+
+  // when the point is inside or on the surface of the volume, v_norm should be true
+  EXPECT_TRUE(v_norm);
+  // distance should be set to 0.0 in this case
+  EXPECT_EQ(50.0,distance);
+  
   return;
 }
 
@@ -156,7 +180,10 @@ TEST_F(DagSolidTest,test_7) {
   bool v_norm = false;
   double distance = vol_1->DistanceToOut(position,direction,true,&v_norm,&normal);
 
-
+  // when the point is inside or on the surface of the volume, v_norm should be true
+  EXPECT_TRUE(v_norm);
+  // distance should be set to 0.0 in this case
+  EXPECT_EQ(0.0,distance);
   return;
 }
 
@@ -180,6 +207,10 @@ TEST_F(DagSolidTest, test_8 ) {
   G4ThreeVector normal;
   bool v_norm = false;
   double distance = vol_1->DistanceToOut(position,direction,true,&v_norm,&normal);
-
+ 
+  // when the point is outside the volume, v_norm should be false
+  EXPECT_FALSE(v_norm);
+  // distance should be set to infinity
+  EXPECT_EQ(kInfinity,distance);
   return;
 }
