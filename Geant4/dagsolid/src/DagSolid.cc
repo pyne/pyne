@@ -231,14 +231,9 @@ EInside DagSolid::Inside (const G4ThreeVector &p) const
 
   if ( result == 1 ) // point is contained within fvolEntity
     {
-      return kInside;
-    }
-  else
-    // point may still be within +kCarTolerance*0.5 of boundary
-    {
       double minDist;
       // need to convert point back to mm for this call
-      point[0]=point[0]*cm; point[1]=point[1]*cm; point[2]=point[2]*cm;
+      //      point[0]=point[0]*cm; point[1]=point[1]*cm; point[2]=point[2]*cm;
       ec = fdagmc->closest_to_location(fvolEntity, point, minDist);
       if( ec != MB_SUCCESS)
 	{
@@ -248,7 +243,11 @@ EInside DagSolid::Inside (const G4ThreeVector &p) const
       if (minDist <= 0.5*kCarTolerance) 
 	return kSurface;
       else
-	return kOutside;
+	return kInside;
+    }
+  else if ( result == 0 )
+    {
+      return kOutside;
     }
 
 
