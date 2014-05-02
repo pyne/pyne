@@ -969,7 +969,7 @@ def test_single_meshtally_meshtal():
     tags = {4: ["n_result", "n_rel_error", 
                 "n_total_result", "n_total_rel_error"]}
 
-    meshtal_object = mcnp.Meshtal(meshtal_file, tags, mesh_mats=True)
+    meshtal_object = mcnp.Meshtal(meshtal_file, tags, meshes_have_mats=True)
     assert_not_equal(meshtal_object.tally[4].mats, None)
 
     # test Meshtal attributes

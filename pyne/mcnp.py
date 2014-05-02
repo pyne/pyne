@@ -1899,12 +1899,12 @@ class Meshtal(object):
         tag name, and the total relative error tag name. If tags is None
         the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
         'x_rel_error_total' where x is n or p for neutrons or photons.
-    mesh_mats : bool
+    meshes_have_mats : bool
          If false, Meshtally objects will be created without PyNE material
          objects. 
     """
 
-    def __init__(self, filename, tags=None, mesh_mats=False):
+    def __init__(self, filename, tags=None, meshes_have_mats=False):
         """Parameters
         ----------
         filename : str
@@ -1926,7 +1926,7 @@ class Meshtal(object):
 
         self.tally = {}
         self.tags = tags
-        self.mesh_mats = mesh_mats
+        self.meshes_have_mats = meshes_have_mats
 
         with open(filename, 'r') as f:
             self._read_meshtal_head(f)
@@ -1960,11 +1960,11 @@ class Meshtal(object):
                 tally_num = int(line.split()[3])
                 if self.tags is not None and tally_num in self.tags.keys():
                     self.tally[tally_num] = MeshTally(f, tally_num,
-                                                      self.tags[tally_num],
-                                                      mesh_mats=self.mesh_mats)
+                                            self.tags[tally_num],
+                                            mesh_has_mats=self.meshes_have_mats)
                 else:
                     self.tally[tally_num] = MeshTally(f, tally_num,
-                                                      mesh_mats=self.mesh_mats)
+                                            mesh_has_mats=self.meshes_have_mats)
 
             line = f.readline()
 
@@ -2007,7 +2007,7 @@ class MeshTally(StatMesh):
 
     """
 
-    def __init__(self, f, tally_number, tag_names=None, mesh_mats=False):
+    def __init__(self, f, tally_number, tag_names=None, mesh_has_mats=False):
         """Create MeshTally object from a filestream open to the second
         line of a mesh tally header (the neutron/photon line). MeshTally objects
         should be instantiated only through the Meshtal class.
@@ -2022,7 +2022,7 @@ class MeshTally(StatMesh):
             Four strs that specify the tag names for the results, relative 
             errors, total results and relative errors of the total results.
             This should come from the Meshtal.tags attribute dict.
-        mesh_mats : bool
+        mesh_has_mats : bool
              If false, Meshtally objects will be created without PyNE material
              objects. 
         """
@@ -2043,7 +2043,7 @@ class MeshTally(StatMesh):
         else:
             self.tag_names = tag_names
 
-        self._create_mesh(f, mesh_mats)
+        self._create_mesh(f, mesh_has_mats)
 
     def _read_meshtally_head(self, f):
         """Get the particle type, spacial and energy bounds, and whether or
@@ -2089,12 +2089,12 @@ class MeshTally(StatMesh):
             'Rslt * ', 'Rslt_*_').strip().split()
         self._column_idx = dict(zip(column_names, range(0, len(column_names))))
 
-    def _create_mesh(self, f, mesh_mats):
+    def _create_mesh(self, f, mesh_has_mats):
         """Instantiate a Mesh object and tag the iMesh instance
            with results and relative errors.
         """
 
-        mats = () if mesh_mats is True else None
+        mats = () if mesh_has_mats is True else None
         super(MeshTally, self).__init__(structured_coords=[self.x_bounds,
                                         self.y_bounds, self.z_bounds],
                                         structured=True, mats=mats)
