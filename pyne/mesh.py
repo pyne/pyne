@@ -1,17 +1,20 @@
-from __future__ import print_function
+from __future__ import print_function, division
 import copy
 import itertools
 from collections import Iterable, Sequence
-import warnings
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import tables as tb
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", ImportWarning)
+    warn("the PyTAPS optional dependency could not be imported. "
+         "Some aspects of the mesh module may be incomplete.", VnVWarning)
 
 from pyne.material import Material, MaterialLibrary, MultiMaterial
 
@@ -207,7 +210,7 @@ class MetadataTag(Tag):
     This makes the following expressions equivalent for a given material property
     name::
 
-        mesh.name[i] == mesh.mats[i].attrs['name']
+        mesh.name[i] == mesh.mats[i].metadata['name']
 
     It also adds slicing, fancy indexing, boolean masking, and broadcasting
     features to this process.  
@@ -220,15 +223,15 @@ class MetadataTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            return mats[key].attrs[name]
+            return mats[key].metadata[name]
         elif isinstance(key, slice):
-            return [mats[i].attrs[name] for i in range(*key.indices(size))]
+            return [mats[i].metadata[name] for i in range(*key.indices(size))]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
-            return [mats[i].attrs[name] for i, b in enumerate(key) if b]
+            return [mats[i].metadata[name] for i, b in enumerate(key) if b]
         elif isinstance(key, Iterable):
-            return [mats[i].attrs[name] for i in key]
+            return [mats[i].metadata[name] for i in key]
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
@@ -240,32 +243,32 @@ class MetadataTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            mats[key].attrs[name] = value
+            mats[key].metadata[name] = value
         elif isinstance(key, slice):
             idx = range(*key.indices(size))
             if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(idx):
                 for i, v in zip(idx, value):
-                    mats[i].attrs[name] = v
+                    mats[i].metadata[name] = v
             else:
                 for i in idx:
-                    mats[i].attrs[name] = value
+                    mats[i].metadata[name] = value
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             idx = np.where(key)[0]
             if isinstance(value, _SEQUENCE_TYPES) and len(value) == key.sum():
                 for i, v in zip(idx, value):
-                    mats[i].attrs[name] = v
+                    mats[i].metadata[name] = v
             else:
                 for i in idx:
-                    mats[i].attrs[name] = value
+                    mats[i].metadata[name] = value
         elif isinstance(key, Iterable):
             if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(key):
                 for i, v in zip(key, value):
-                    mats[i].attrs[name] = v
+                    mats[i].metadata[name] = v
             else:
                 for i in key:
-                    mats[i].attrs[name] = value
+                    mats[i].metadata[name] = value
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
@@ -277,19 +280,19 @@ class MetadataTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            del mats[key].attrs[name]
+            del mats[key].metadata[name]
         elif isinstance(key, slice):
             for i in range(*key.indices(size)):
-                del mats[i].attrs[name]
+                del mats[i].metadata[name]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             for i, b in enumerate(key): 
                 if b:
-                    del mats[i].attrs[name] 
+                    del mats[i].metadata[name] 
         elif isinstance(key, Iterable):
             for i in key:
-                del mats[i].attrs[name]
+                del mats[i].metadata[name]
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
@@ -709,7 +712,7 @@ class Mesh(object):
             # overwite hard coded tag names.
             metatagnames = set()
             for mat in mats.values():
-                metatagnames.update(mat.attrs.keys())
+                metatagnames.update(mat.metadata.keys())
             for name in metatagnames:
                 setattr(self, name, MetadataTag(mesh=self, name=name))
         # iMesh.Mesh() tags
@@ -723,7 +726,7 @@ class Mesh(object):
             self.atoms_per_molecule = MaterialPropertyTag(mesh=self, 
                                         name='atoms_per_molecule', 
                                         doc='Number of atoms per molecule')
-            self.attrs = MaterialPropertyTag(mesh=self, name='attrs', 
+            self.metadata = MaterialPropertyTag(mesh=self, name='metadata', 
                             doc='metadata attributes, stored on the material')
             self.comp = MaterialPropertyTag(mesh=self, name='comp', 
                             doc='normalized composition mapping from nuclides to '

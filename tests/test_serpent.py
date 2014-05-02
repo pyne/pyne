@@ -1,10 +1,12 @@
 import os
-from StringIO import StringIO
+import warnings
 
 import numpy as np
 from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import serpent
 from pyne import nucname
 from pyne.material import Material
@@ -54,5 +56,6 @@ def test_parse_det1():
             assert_true(det[key].shape[1] in [3, 13])
 
     # Check values
-    assert_array_equal(det['DETphi'][6], [7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 2.92709E-02, 0.00857, 16768])
+    assert_array_equal(det['DETphi'][6], 
+                       [7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 2.92709E-02, 0.00857, 16768])
     assert_array_equal(det['DETphiE'][-3], [1.49182E+01, 1.69046E+01, 1.49182E+01])

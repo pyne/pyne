@@ -1,9 +1,13 @@
 """This module provides a way to locate, parse, and store CINDER cross sections."""
 from __future__ import print_function
 import os
+import io
 import re
+import sys
 import shutil
 from glob import glob
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import tables as tb
@@ -11,6 +15,11 @@ import tables as tb
 from .. import nucname
 from ..utils import failure
 from .api import BASIC_FILTERS
+
+if sys.version_info[0] > 2:
+  basestring = str
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""
@@ -106,7 +115,16 @@ def get_group_sizes(raw_data):
 
     return nuclides, G_n, G_p, G_g
 
-
+def safe_decode(b, encs=(None, 'utf-8', 'latin-1')):
+    """Tries to decode a bytes array in a few different ways."""
+    enc, encs = encs[0], encs[1:]
+    try:
+        s = b.decode() if enc is None else b.decode(enc)
+    except UnicodeDecodeError:
+        if len(encs) == 0:
+            raise
+        s = safe_decode(b, encs)
+    return s
 
 def make_mg_group_structure(nuc_data, build_dir=""):
     """Add the energy group bounds arrays to the hdf5 library.
@@ -126,8 +144,9 @@ def make_mg_group_structure(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
@@ -179,8 +198,9 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
@@ -267,8 +287,9 @@ def make_mg_fission(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
@@ -354,8 +375,9 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
@@ -529,8 +551,9 @@ def make_neutron_fp_info(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # get the info table
     info_table = parse_neutron_fp_info(raw_data)
@@ -618,8 +641,9 @@ def make_photon_fp_info(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Grab photon info table
     info_table = grab_photon_fp_info(raw_data)
@@ -665,8 +689,9 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     N_n, N_g = get_fp_sizes(raw_data)
@@ -734,8 +759,9 @@ def make_photon_fp_yields(nuc_data, build_dir):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     N_n, N_g = get_fp_sizes(raw_data)

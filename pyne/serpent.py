@@ -1,5 +1,14 @@
-import numpy as np
 import re
+import sys
+from warnings import warn
+from pyne.utils import VnVWarning
+
+import numpy as np
+
+if sys.version_info[0] > 2:
+  basestring = str
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 _if_idx_str = ("""if (exist("idx", "var"));\n"""
               """  idx = idx + 1;\n"""
@@ -143,8 +152,9 @@ def parse_res(resfile, write_py=False):
 
     # Execute the adjusted file
     res = {}
-    exec(f, {}, res)
-
+    exec(f, res, res)
+    if '__builtins__' in res:
+        del res['__builtins__']
     return res
 
 
@@ -223,7 +233,9 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     footer = ""
     if make_mats:
         mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
-        footer += "\n\n# Construct materials\nzai = map(int, ZAI)\ncols = range(len(DAYS))\n"
+        footer += ('\n\n# Construct materials\n'
+                   'zai = list(map(int, ZAI))\n'
+                   'cols = list(range(len(DAYS)))\n')
         base_names = re.findall('(MAT_\w*_)MDENS = ', f)
         for base_name in base_names:
             footer += mat_gen_line.format(name=base_name)
@@ -244,8 +256,9 @@ def parse_dep(depfile, write_py=False, make_mats=True):
 
     # Execute the adjusted file
     dep = {}
-    exec(f, {}, dep)
-
+    exec(f, dep, dep)
+    if '__builtins__' in dep:
+        del dep['__builtins__']
     return dep
 
 

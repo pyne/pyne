@@ -1,17 +1,25 @@
 #!/usr/bin/env python
 
 from unittest import TestCase
+import warnings
 
 from nose.tools import assert_equal, assert_raises
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
+
 from pyne.cccc import Isotxs
+
+from nose.plugins.skip import SkipTest
 
 class TestIsotxs(TestCase):
 
     def setUp(self):
         self.iso = Isotxs('ISOTXS')
-        self.iso.read()
-
+        try:
+	    self.iso.read()
+	except:
+	    raise SkipTest
     def test_isotxs_data(self):
         assert self.iso.emax[0] == 10000000.0
         assert self.iso.emax[4] == 0.625

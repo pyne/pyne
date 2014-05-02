@@ -7,9 +7,12 @@
 import os
 import pickle
 import unittest
+import warnings
 
 import numpy as np
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import material
 from pyne.simplesim import definition, cards, inputfile
 import pyne.simplesim.nestedgeom as ng
@@ -55,7 +58,7 @@ class TestSystemDefinition(unittest.TestCase):
     def setUp(self):
         uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
         self.uo2 = cards.Material(uo2, name='UO2')
-        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, metadata={'name': 'H2O'})
         self.h2o = cards.Material(h2o)
         
         # Surfaces.
@@ -477,14 +480,14 @@ class TestSystemDefinition(unittest.TestCase):
 
         sd = cards.Distribution('distA', [-2, 2], [0, 1])
         self.sim.add_dist(sd)
-        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+        self.assertEquals(sd.comment(), "Source distribution distA: "
                 "key setting default, val setting default, "
                 "KEYS: -2, 2, VALS: 0, 1.")
         self.assertEquals(sd.mcnp('%.5g', self.sim), 
                 "SI1 -2 2\nSP1 0 1")
         sd = cards.Distribution('distA', [-2, 2], [0, 1], 'histogram', 'prob')
         self.sim.add_dist(sd)
-        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+        self.assertEquals(sd.comment(), "Source distribution distA: "
                 "key setting histogram, val setting prob, "
                 "KEYS: -2, 2, VALS: 0, 1.")
         self.assertEquals(sd.mcnp('%.5g', self.sim), 
@@ -496,7 +499,7 @@ class TestSystemDefinition(unittest.TestCase):
                 key_setting='discrete',
                 val_setting='partint')
         self.sim.add_dist(sd)
-        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+        self.assertEquals(sd.comment(), "Source distribution distA: "
                 "key setting discrete, val setting partint, "
                 "KEYS: neutron, photon, spont-fiss-by-hist, 92238, "
                 "VALS: 1, 1, fuel, 2.")
@@ -511,7 +514,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.sim.add_dist(sd)
         self.sim.add_dist(sdB)
         self.sim.add_dist(sdC)
-        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+        self.assertEquals(sd.comment(), "Source distribution distA: "
                 "key setting dist, val setting default, "
                 "KEYS: distB, distC, "
                 "VALS: 0.3, 0.7.")
@@ -520,7 +523,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         sd = cards.Distribution('distA', [], [], 'analytic', 'maxwell')
         self.sim.add_dist(sd)
-        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+        self.assertEquals(sd.comment(), "Source distribution distA: "
                 "key setting analytic, val setting maxwell, "
                 "KEYS: default, VALS: default.")
         self.assertEquals(sd.mcnp('%.5g', self.sim), "SP1 -2")
@@ -528,7 +531,7 @@ class TestSystemDefinition(unittest.TestCase):
         sd = cards.Distribution('distA', [], [], key_setting='analytic',
                                                  val_setting='maxwell')
         self.sim.add_dist(sd)
-        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+        self.assertEquals(sd.comment(), "Source distribution distA: "
                 "key setting analytic, val setting maxwell, "
                 "KEYS: default, VALS: default.")
         self.assertEquals(sd.mcnp('%.5g', self.sim),
@@ -536,7 +539,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         sd = cards.Distribution('distA', [0, 10], [1, 3], 'analytic', 'watt')
         self.sim.add_dist(sd)
-        self.assertEquals(sd.comment(), "Source distribution 'distA': "
+        self.assertEquals(sd.comment(), "Source distribution distA: "
                 "key setting analytic, val setting watt, "
                 "KEYS: 0, 10, VALS: 1, 3.")
         self.assertEquals(sd.mcnp('%.5g', self.sim),
@@ -613,7 +616,7 @@ class TestSystemDefinition(unittest.TestCase):
                              name='water', description=originstory)
         h2o.tables = {'10010': '71c'}
         self.sim.sys.add_material(h2o)
-        self.assertEquals(h2o.comment(), "Material 'water': "
+        self.assertEquals(h2o.comment(), "Material water: "
                 "I found this water in a well a few years ago.")
         self.assertEquals(h2o.mcnp('%g', self.sim), "M3\n"
         "       1001.71c  1 $ H1\n"
@@ -633,7 +636,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## ScatteringLaw
         sl = cards.ScatteringLaw('water', {'H1': 'lwtr.16t', 80160: 'madeup'})
-        self.assertEquals(sl.comment(), "Scattering law 'scatlaw-water': "
+        self.assertEquals(sl.comment(), "Scattering law scatlaw-water: "
                 "O16: madeup, H1: lwtr.16t.")
         self.assertEquals(sl.mcnp('%g', self.sim), "MT3 madeup lwtr.16t")
 
@@ -659,7 +662,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertTrue(cyl.white)
         ## comment()
         self.assertEquals(cyl.comment(),
-                "Axis cylinder 'mycyl': white. "
+                "Axis cylinder mycyl: white. "
                 "aligned and centered on z axis, "
                 "with radius 0.4 cm (diameter 0.8 cm).")
 
@@ -675,7 +678,7 @@ class TestSystemDefinition(unittest.TestCase):
             cyl = cards.AxisCylinder('mycyl', 'z', 0.4, reflecting=True,
                     white=True)
         except ValueError as e:
-            self.assertEquals(e.message, "The user set the surface to be "
+            self.assertEquals(e.args[0], "The user set the surface to be "
                     "reflecting AND white, but can only be neither or "
                     "one of the two.")
 
@@ -689,7 +692,7 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## comment()
         self.assertEquals(cyl.comment(),
-                "Axis cylinder 'mycyl': aligned and centered on x axis, "
+                "Axis cylinder mycyl: aligned and centered on x axis, "
                 "with radius 0.4 cm (diameter 0.8 cm).")
 
         ## mcnp()
@@ -731,7 +734,7 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             cyl.shift([3, 3, 0])
         except ValueError as e:
-            self.assertEquals(e.message, "A cylinder aligned with the x axis "
+            self.assertEquals(e.args[0], "A cylinder aligned with the x axis "
                     "cannot be shifted in the y or z directions.")
 
         ## stretch()
@@ -773,7 +776,7 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             cyl.stretch([1, 3, 2])
         except ValueError as e:
-            self.assertEquals(e.message, "Stretches perpendicular to the "
+            self.assertEquals(e.args[0], "Stretches perpendicular to the "
                     "axis must be uniform in the two perpendicular "
                     "directions. User provided y stretch 3 and z "
                     "stretch 2 for a x-aligned cylinder.")
@@ -793,7 +796,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertFalse(plane.white)
 
         ## comment()
-        self.assertEquals(plane.comment(), "Axis plane 'myplane': "
+        self.assertEquals(plane.comment(), "Axis plane myplane: "
                 "reflecting. x = 3 cm.")
 
         ## mcnp()
@@ -850,7 +853,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.assertEquals(pp.white, False)
 
         ## comment()
-        self.assertEquals(pp.comment(), "Parallelepiped 'mypp': "
+        self.assertEquals(pp.comment(), "Parallelepiped mypp: "
                 "reflecting. "
                 "[-2, 3] x [-4, 5] x "
                 "[-6, 7] cm.")
@@ -892,7 +895,7 @@ class TestSystemDefinition(unittest.TestCase):
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellB)
         self.assertEquals(cellB.comment(), "Cell 'B': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 "
+                "(-fuelpin & +bound), material UO2 density 10 "
                 "g/cm^3.")
         self.assertEquals(cellB.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1:2)")
@@ -923,7 +926,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellC)
         self.assertEquals(cellC.comment(), "Cell 'C': region "
                 "(-fuelpin & +bound), "
-                "material 'UO2' density 1 g/cm^3 "
+                "material UO2 density 1 g/cm^3 "
                 "univ unitcell (truncated).")
         self.assertEquals(cellC.mcnp('%.5g', self.sim), "6 1 -1 (-1:2) U=1")
 
@@ -933,7 +936,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellD)
         self.assertEquals(cellD.comment(), "Cell 'D': region "
                 "-fuelpin, "
-                "material 'UO2' density 2 g/cm^3 "
+                "material UO2 density 2 g/cm^3 "
                 "univ unitcell (not truncated).")
         self.assertEquals(cellD.mcnp('%.5g', self.sim), "7 1 -2 -1 U=-1")
 
@@ -1003,7 +1006,7 @@ class TestSystemDefinition(unittest.TestCase):
                 10.0, 'g/cm^3')
         self.rxr.add_cell(cellD)
         self.assertEquals(cellD.comment(), "Cell 'D': region "
-                "(-fuelpin | +bound), material 'UO2' density 10 "
+                "(-fuelpin | +bound), material UO2 density 10 "
                 "g/cm^3.")
         self.assertEquals(cellD.mcnp("%.5e", self.sim), "5 1 -1.00000e+01 "
                 "(-1 2)")
@@ -1016,7 +1019,7 @@ class TestSystemDefinition(unittest.TestCase):
                 importance=('neutron', 1))
         self.rxr.add_cell(cellE)
         self.assertEquals(cellE.comment(), "Cell 'E': region "
-                "(-fuelpin | +bound), material 'UO2' density 10 "
+                "(-fuelpin | +bound), material UO2 density 10 "
                 "g/cm^3 TMP= 600 K VOL= 1 cm^3 IMP:N= 1.")
         self.assertEquals(cellE.mcnp('%g', self.sim), "6 1 -10 "
                 "(-1 2) TMP=5.17041e-08 VOL=1 IMP:N=1")
@@ -1025,7 +1028,7 @@ class TestSystemDefinition(unittest.TestCase):
                 importance=[('neutron', 1), ('photon', 0)])
         self.rxr.add_cell(cellF)
         self.assertEquals(cellF.comment(), "Cell 'F': region "
-                "(-fuelpin | +bound), material 'UO2' density 10 "
+                "(-fuelpin | +bound), material UO2 density 10 "
                 "g/cm^3 IMP:N= 1 IMP:P= 0.")
         self.assertEquals(cellF.mcnp('%g', self.sim), "7 1 -10 "
                 "(-1 2) IMP:N=1 IMP:P=0")
@@ -1037,7 +1040,7 @@ class TestSystemDefinition(unittest.TestCase):
                 ('photon', 0.5, 'x', 'away')])
         self.rxr.add_cell(cellG)
         self.assertEquals(cellG.comment(), "Cell 'G': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "EXT:N= stretch by capture-to-total toward currdir "
                 "EXT:P= stretch by 0.5 away from x.")
         self.assertEquals(cellG.mcnp('%g', self.sim), "8 1 -10 "
@@ -1050,7 +1053,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellH)
         self.sim.add_misc(vec)
         self.assertEquals(cellH.comment(), "Cell 'H': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "EXT:N= stretch by 0.5 away from vec1.")
         self.assertEquals(cellH.mcnp('%g', self.sim), "9 1 -10 "
                 "(-1:2) EXT:N=-0.5V0")
@@ -1060,7 +1063,7 @@ class TestSystemDefinition(unittest.TestCase):
                 forced_coll=('neutron', 0.5, False))
         self.rxr.add_cell(cellI)
         self.assertEquals(cellI.comment(), "Cell 'I': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "FCL:N= prob 0.5 for entering and weight games.")
         self.assertEquals(cellI.mcnp('%g', self.sim), "10 1 -10 "
                 "(-1:2) FCL:N=0.5")
@@ -1073,7 +1076,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellJ)
         self.sim.add_misc(wwe)
         self.assertEquals(cellJ.comment(), "Cell 'J': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "WWN(3,1):N= killall.")
         self.assertEquals(cellJ.mcnp('%g', self.sim), "11 1 -10 "
                 "(-1:2) WWN3:N=-1")
@@ -1085,7 +1088,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellK)
         self.sim.add_misc(dsph)
         self.assertEquals(cellK.comment(), "Cell 'K': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "DXC'sph1':N= 0.5.")
         self.assertEquals(cellK.mcnp('%g', self.sim), "12 1 -10 "
                 "(-1:2) DXC1:N=0.5")
@@ -1095,7 +1098,7 @@ class TestSystemDefinition(unittest.TestCase):
                 photon_weight=('one',))
         self.rxr.add_cell(cellL)
         self.assertEquals(cellL.comment(), "Cell 'L': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "PWT= one.")
         self.assertEquals(cellL.mcnp('%g', self.sim), "13 1 -10 (-1:2) "
                 "PWT=0")
@@ -1109,7 +1112,7 @@ class TestSystemDefinition(unittest.TestCase):
                 photon_weight=(0.5,))
         self.rxr.add_cell(cellL2)
         self.assertEquals(cellL2.comment(), "Cell 'L2': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "PWT= 0.5.")
         self.assertEquals(cellL2.mcnp('%g', self.sim), "14 1 -10 (-1:2) "
                 "PWT=0.5")
@@ -1118,7 +1121,7 @@ class TestSystemDefinition(unittest.TestCase):
                 photon_weight=(0.5, True))
         self.rxr.add_cell(cellM)
         self.assertEquals(cellM.comment(), "Cell 'M': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "PWT= 0.5 (pre-weighted).")
         self.assertEquals(cellM.mcnp('%g', self.sim), "15 1 -10 "
                 "(-1:2) PWT=-0.5")
@@ -1128,7 +1131,7 @@ class TestSystemDefinition(unittest.TestCase):
                 fission_turnoff='capture-nogamma')
         self.rxr.add_cell(cellN)
         self.assertEquals(cellN.comment(), "Cell 'N': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "NONU= capture-nogamma.")
         self.assertEquals(cellN.mcnp('%g', self.sim), "16 1 -10 "
                 "(-1:2) NONU=2")
@@ -1140,7 +1143,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellO)
         self.sim.add_tally(det1)
         self.assertEquals(cellO.comment(), "Cell 'O': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "PD for tally 'det1'= 0.5.")
         self.assertEquals(cellO.mcnp('%g', self.sim), "17 1 -10 "
                 "(-1:2) PD15=0.5")
@@ -1153,7 +1156,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellP)
         self.sim.add_transformation(trans)
         self.assertEquals(cellP.comment(), "Cell 'P': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "TRCL 'transA'.")
         self.assertEquals(cellP.mcnp('%g', self.sim), "18 1 -10 "
                 "(-1:2) TRCL=1")
@@ -1162,7 +1165,7 @@ class TestSystemDefinition(unittest.TestCase):
                 transformation=([1, 0, 0], np.eye(3)))
         self.rxr.add_cell(cellP)
         self.assertEquals(cellP.comment(), "Cell 'P': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "TRCL aux origin in main (1, 0, 0) cm, x' <1, 0, 0>, "
                 "y' <0, 1, 0>, z' <0, 0, 1>.")
         self.assertEquals(cellP.mcnp('%g', self.sim), "18 1 -10 "
@@ -1172,7 +1175,7 @@ class TestSystemDefinition(unittest.TestCase):
                 transformation=([1, 0, 0], np.eye(3), True, True))
         self.rxr.add_cell(cellP)
         self.assertEquals(cellP.comment(), "Cell 'P': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "TRCL aux origin in main (1, 0, 0) cm, "
                 "x' <1, 0, 0> deg, y' <0, 1, 0> deg, "
                 "z' <0, 0, 1> deg.")
@@ -1183,7 +1186,7 @@ class TestSystemDefinition(unittest.TestCase):
                 user_custom='EXT:N 0.7V2')
         self.rxr.add_cell(cellP)
         self.assertEquals(cellP.comment(), "Cell 'P': region "
-                "(-fuelpin & +bound), material 'UO2' density 10 g/cm^3 "
+                "(-fuelpin & +bound), material UO2 density 10 g/cm^3 "
                 "and user's custom input.")
         self.assertEquals(cellP.mcnp('%g', self.sim), "18 1 -10 "
                 "(-1:2) EXT:N 0.7V2")
@@ -1202,7 +1205,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellC)
         self.assertEquals(cellC.comment(), "Cell 'C': region "
                 "(-fuelpin & +bound), "
-                "material 'UO2' density 1 g/cm^3 "
+                "material UO2 density 1 g/cm^3 "
                 "univ unitcell (truncated) VOL= 1 cm^3.")
         self.assertEquals(cellC.mcnp('%.5g', self.sim), "4  1 -1 (-1:2) "
                 "U=1 VOL=1")
@@ -1214,7 +1217,7 @@ class TestSystemDefinition(unittest.TestCase):
         self.rxr.add_cell(cellD)
         self.assertEquals(cellD.comment(), "Cell 'D': region "
                 "-fuelpin, "
-                "material 'UO2' density 2 g/cm^3 "
+                "material UO2 density 2 g/cm^3 "
                 "univ unitcell (not truncated) VOL= 1 cm^3.")
         self.assertEquals(cellD.mcnp('%.5g', self.sim), "5  1 -2 -1 U=-1 VOL=1")
 
@@ -1520,7 +1523,7 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             wwn.mcnp('%g', self.sim)
         except Exception as e:
-            self.assertEquals(e.message, "No WWGT:N or WWT:N card found in "
+            self.assertEquals(e.args[0], "No WWGT:N or WWT:N card found in "
                     "the simulation.")
         ## Importance
         impn = cards.Importance('neutron', 'fuel', 1, 'coolant', 2)
@@ -1816,11 +1819,11 @@ class TestSystemDefinition(unittest.TestCase):
         critsrc = cards.Criticality()
         self.assertEquals(critsrc.name, 'criticality')
         # Test trying to change the name.
-        self.assertRaises(StandardError, setattr, critsrc, 'name', 'testname')
+        self.assertRaises(Exception, setattr, critsrc, 'name', 'testname')
         try:
             critsrc.name = 'testname'
-        except StandardError as e:
-            self.assertEquals(e.message, "This is a unique card, meaning "
+        except Exception as e:
+            self.assertEquals(e.args[0], "This is a unique card, meaning "
                     "only one card of this type can be found in a "
                     "``definition``. Accordingly, the name is read-only.")
         self.assertEquals(critsrc.n_histories, 1000)
@@ -1852,44 +1855,44 @@ class TestSystemDefinition(unittest.TestCase):
         try:
             critsrc.n_histories = 0.5
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_histories`` "
+            self.assertEquals(e.args[0], "The property ``n_histories`` "
                     "must be an integer. User provided 0.5.")
         try:
             critsrc.n_histories = -1
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_histories`` "
+            self.assertEquals(e.args[0], "The property ``n_histories`` "
                     "must be positive. User provided -1.")
         try:
             critsrc.keff_guess = -1
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``keff_guess`` "
+            self.assertEquals(e.args[0], "The property ``keff_guess`` "
                     "must be non-negative. User provided -1.")
         try:
             critsrc.n_skip_cycles = 0.5
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
+            self.assertEquals(e.args[0], "The property ``n_skip_cycles`` "
                     "must be an integer. User provided 0.5.")
         try:
             critsrc.n_skip_cycles = -1
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_skip_cycles`` "
+            self.assertEquals(e.args[0], "The property ``n_skip_cycles`` "
                     "must be positive. User provided -1.")
         try:
             critsrc.n_cycles = 0.5
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_cycles`` "
+            self.assertEquals(e.args[0], "The property ``n_cycles`` "
                     "must be an integer. User provided 0.5.")
         try:
             critsrc.n_cycles = -1
         except ValueError as e:
-            self.assertEquals(e.message, "The property ``n_cycles`` "
+            self.assertEquals(e.args[0], "The property ``n_cycles`` "
                     "must be equal to or greater than ``n_skip_cycles``. "
                     "User provided -1.")
 
         ## comment()
         critsrc = cards.Criticality()
         self.assertEquals(critsrc.comment(), "Criticality source "
-                "'criticality': n_histories: 1000, keff_guess: 1"
+                "criticality: n_histories: 1000, keff_guess: 1"
                 ", n_skip_cycles: 30, n_cycles: 130.")
 
         ## mcnp()
@@ -1911,14 +1914,14 @@ class TestSystemDefinition(unittest.TestCase):
 
         ## comment()
         self.assertEquals(critpts.comment(), "Criticality points "
-                "'criticalitypoints': (1, 2, 3) cm, "
+                "criticalitypoints: (1, 2, 3) cm, "
                 "(3.1416, 2.7183, 0) cm.")
         self.assertRaises(ValueError, setattr, critpts, 'points', 
                 [[0, 0, 0], [1]])
         try:
             critpts.points = [[0, 0, 0], [1]]
         except ValueError as e:
-            self.assertEquals(e.message, "Length of all point lists/arrays "
+            self.assertEquals(e.args[0], "Length of all point lists/arrays "
                     "must be 3. User provided a point [1].")
 
         ## mcnp()
@@ -2309,7 +2312,7 @@ class TestMCNPInput(unittest.TestCase):
         # Materials.
         uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
         uo2 = cards.Material(uo2, name='UO2')
-        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, metadata={'name': 'H2O'})
         h2o = cards.Material(h2o)
         mc = cards.MaterialCustom(mat=material.Material(), name='matc', 
                                   comment="mathey", mcnp="mathey")
@@ -2401,7 +2404,7 @@ class TestMCNPInput(unittest.TestCase):
         # Materials.
         uo2 = material.from_atom_frac({'U235': 0.05, 'U238': 0.95, 'O16' : 2.00})
         uo2 = cards.Material(uo2, name='UO2')
-        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, attrs={'name': 'H2O'})
+        h2o = material.from_atom_frac({'H1' : 2.0, 'O16': 1.0}, metadata={'name': 'H2O'})
         h2o = cards.Material(h2o)
 
         # Surfaces.

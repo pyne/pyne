@@ -1,7 +1,6 @@
 """C++ wrapper for pyne library header."""
 from libcpp.map cimport map
 from libcpp.set cimport set
-
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector
 

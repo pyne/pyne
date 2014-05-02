@@ -1,10 +1,23 @@
 from __future__ import print_function
 import os
 import re
-import urllib2
+import sys
+from warnings import warn
+from pyne.utils import VnVWarning
+
+try:
+    import urllib.request as urllib2
+    from urllib.error import URLError
+except ImportError:
+    import urllib2
+    from urllib2 import URLError
 
 from pyne import nucname
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+if sys.version_info[0] > 2:
+  basestring = str
 
 def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     """Grabs a nuclide file from KAERI from the web and places 
@@ -42,7 +55,7 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
         try:
             kaeri_html = hdl.read()
             read_in = True
-        except urllib2.URLError:
+        except URLError:
             hdl.close()
             i += 1
             print("    getting {0} and placing in {1}, attempt {2}".format(nuc, filename, i))

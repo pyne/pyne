@@ -102,7 +102,7 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "n_39",
   "n_40",
   "n_continuum",
-  "disappeareance",
+  "disappearance",
   "gamma",
   "gamma_0",
   "gamma_1",
@@ -220,7 +220,7 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "erel_n_39",
   "erel_n_40",
   "erel_n_continuum",
-  "erel_disappeareance",
+  "erel_disappearance",
   "erel_gamma",
   "erel_p",
   "erel_d",
@@ -552,6 +552,29 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "a_continuum",
   "lumped_covar",
   "excited",
+  "bminus",
+  "bplus",
+  "ec",
+  "bminus_n",
+  "bminus_a",
+  "it",
+  "bplus_a",
+  "ec_bplus",
+  "bplus_p",
+  "bminus_2n",
+  "bminus_3n",
+  "bminus_4n",
+  "ecp",
+  "eca",
+  "bplus_2p",
+  "ec_2p",
+  "decay_2bminus",
+  "bminus_p",
+  "decay_14c",
+  "bplus_3p",
+  "sf",
+  "decay_2bplus",
+  "decay_2ec",
   };
 std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
                                           pyne::rxname::_names+NUM_RX_NAMES);
@@ -567,8 +590,7 @@ std::map<unsigned int, std::string> pyne::rxname::docs;
 std::map<std::pair<std::string, int>, unsigned int> pyne::rxname::offset_id;
 std::map<std::pair<std::string, unsigned int>, int> pyne::rxname::id_offset;
 
-void * pyne::rxname::_fill_maps()
-{
+void * pyne::rxname::_fill_maps() {
   using std::make_pair;
   std::string rx;
   unsigned int rxid;
@@ -1122,6 +1144,29 @@ void * pyne::rxname::_fill_maps()
     849,
     851,
     0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
   };
   std::string _labels[NUM_RX_NAMES] = {
     "(z,total)",
@@ -1223,7 +1268,7 @@ void * pyne::rxname::_fill_maps()
     "(z,n39)",
     "(z,n40)",
     "(z,nc)",
-    "(z,disap) Neutron disappeareance",
+    "(z,disap) Neutron disappearance",
     "(z,gamma)",
     "(z,gamma0)",
     "(z,gamma1)",
@@ -1341,7 +1386,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,n39)",
     "Energy Release from (z,n40)",
     "Energy Release from (z,nc)",
-    "Energy Release from (z,disap) Neutron disappeareance",
+    "Energy Release from (z,disap) Neutron disappearance",
     "Energy Release from (z,gamma)",
     "Energy Release from (z,p)",
     "Energy Release from (z,d)",
@@ -1358,7 +1403,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,pt)",
     "Energy Release from (z,da)",
     "(damage)",
-    "Desciptive Data",
+    "Descriptive Data",
     "Total Neutrons per Fission",
     "Independent fission product yield",
     "Delayed Neutron Data",
@@ -1673,6 +1718,29 @@ void * pyne::rxname::_fill_maps()
     "(z,ac)",
     "Lumped Covariances",
     "Any Excited State",
+    "(z,b-)",
+    "(z,b+)",
+    "(z,ec)",
+    "(z,b-n)",
+    "(z,b-a)",
+    "(z,it)",
+    "(z,b+a)",
+    "(z,ec+b+)",
+    "(z,b+p)",
+    "(z,b-2n)",
+    "(z,b-3n)",
+    "(z,b-4n)",
+    "(z,ecp)",
+    "(z,eca)",
+    "(z,b+2p)",
+    "(z,ec2p)",
+    "(z,2b-)",
+    "(z,b-p)",
+    "(z,14c)",
+    "(z,b+3p)",
+    "(z,sf)",
+    "(z,2b+)",
+    "(z,2ec)",
   };
   std::string _docs[NUM_RX_NAMES] = {
     "(n,total) Neutron total",
@@ -1774,7 +1842,7 @@ void * pyne::rxname::_fill_maps()
     "(z,n39) Production of n, 39th excited state",
     "(z,n40) Production of n, 40th excited state",
     "(z,nc) Production of n in continuum",
-    "(n,disap) Neutron disappeareance",
+    "(n,disap) Neutron disappearance",
     "(z,gamma) Radiative capture",
     "(z,gamma0) Radiative capture, ground state",
     "(z,gamma1) Radiative capture, 1st excited state",
@@ -1892,7 +1960,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,n39) Production of n, 39th excited state",
     "Energy Release from (z,n40) Production of n, 40th excited state",
     "Energy Release from (z,nc) Production of n in continuum",
-    "Energy Release from (n,disap) Neutron disappeareance",
+    "Energy Release from (n,disap) Neutron disappearance",
     "Energy Release from (z,gamma) Radiative capture",
     "Energy Release from (z,p) Production of p",
     "Energy Release from (z,d) Production of d",
@@ -1909,7 +1977,7 @@ void * pyne::rxname::_fill_maps()
     "Energy Release from (z,pt) Production of p and t",
     "Energy Release from (z,da) Production of d and a",
     "(damage)",
-    "Desciptive Data",
+    "Descriptive Data",
     "Total Neutrons per Fission",
     "Independent fission product yield",
     "Delayed Neutron Data",
@@ -2224,11 +2292,33 @@ void * pyne::rxname::_fill_maps()
     "(n,ac)",
     "Lumped-Reaction Covariances",
     "production of any excited state nucleus",
+    "(z,b-)",
+    "(z,b+)",
+    "(z,ec)",
+    "(z,b-n)",
+    "(z,b-a)",
+    "(z,it)",
+    "(z,b+a)",
+    "(z,ec+b+)",
+    "(z,b+p)",
+    "(z,b-2n)",
+    "(z,b-3n)",
+    "(z,b-4n)",
+    "(z,ecp)",
+    "(z,eca)",
+    "(z,b+2p)",
+    "(z,ec2p)",
+    "(z,2b-)",
+    "(z,b-p)",
+    "(z,14c)",
+    "(z,b+3p)",
+    "(z,sf)",
+    "(z,2b+)",
+    "(z,2ec)",
   };
 
   // fill the maps
-  for (int i = 0; i < NUM_RX_NAMES; i++)
-  {
+  for (int i = 0; i < NUM_RX_NAMES; i++) {
     rx = _names[i];
     rxid = pyne::rxname::hash(rx);
     id_name[rxid] = rx;
@@ -2270,6 +2360,29 @@ void * pyne::rxname::_fill_maps()
   altnames["he-3"] = name_id["He3"];
   altnames["HE-3"] = name_id["He3"];
   altnames["*"] = name_id["excited"];
+  altnames["2n"] = name_id["z_2n"];
+  altnames["2p"] = name_id["z_2p"];
+  altnames["3h"] = name_id["t"];
+  altnames["g"] = name_id["it"];
+  altnames["b-"] = name_id["bminus"];
+  altnames["b+"] = name_id["bplus"];
+  altnames["b-n"] = name_id["bminus_n"];
+  altnames["b-a"] = name_id["bminus_a"];
+  altnames["b+a"] = name_id["bplus_a"];
+  altnames["ec+b+"] = name_id["ec_bplus"];
+  altnames["b+p"] = name_id["bplus_p"];
+  altnames["b-2n"] = name_id["bminus_2n"];
+  altnames["b-3n"] = name_id["bminus_3n"];
+  altnames["b-4n"] = name_id["bminus_4n"];
+  altnames["b+2p"] = name_id["bplus_2p"];
+  altnames["ec2p"] = name_id["ec_2p"];
+  altnames["2b-"] = name_id["decay_2bminus"];
+  altnames["b-p"] = name_id["bminus_p"];
+  altnames["14c"] = name_id["decay_14c"];
+  altnames["b+3p"] = name_id["bplus_3p"];
+  altnames["2b+"] = name_id["decay_2bplus"];
+  altnames["2ec"] = name_id["decay_2ec"];
+  
 
   // set the nuclide difference mappings, offset_id
   // offset_id[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
@@ -2399,7 +2512,22 @@ void * pyne::rxname::_fill_maps()
   offset_id[make_pair("decay", offset(-1, -3))] = name_id["t"];
   offset_id[make_pair("decay", offset(-2, -3))] = name_id["He3"];
   offset_id[make_pair("decay", offset(-2, -4))] = name_id["a"];
-
+  offset_id[make_pair("decay", offset(1, 0))] = name_id["bminus"];
+  offset_id[make_pair("decay", offset(-1, 0))] = name_id["bplus"];
+  offset_id[make_pair("decay", offset(1, -1))] = name_id["bminus_n"];
+  offset_id[make_pair("decay", offset(-1, -4))] = name_id["bminus_a"];
+  offset_id[make_pair("decay", offset(0, 0))] = name_id["it"];
+  offset_id[make_pair("decay", offset(-3, -4))] = name_id["bplus_a"];
+  offset_id[make_pair("decay", offset(-2, -1))] = name_id["bplus_p"];
+  offset_id[make_pair("decay", offset(1, -2))] = name_id["bminus_2n"];
+  offset_id[make_pair("decay", offset(1, -3))] = name_id["bminus_3n"];
+  offset_id[make_pair("decay", offset(1, -4))] = name_id["bminus_4n"];
+  offset_id[make_pair("decay", offset(-3, -2))] = name_id["bplus_2p"];
+  offset_id[make_pair("decay", offset(-4, -3))] = name_id["bplus_3p"];
+  offset_id[make_pair("decay", offset(2, 0))] = name_id["decay_2bminus"];
+  offset_id[make_pair("decay", offset(-2, 0))] = name_id["decay_2bplus"];
+  offset_id[make_pair("decay", offset(-6, -14))] = name_id["decay_14c"];
+  
   // pre-loaded child offsets
   std::map<std::pair<std::string, int>, unsigned int>::iterator ioffid;
   for (ioffid = offset_id.begin(); ioffid != offset_id.end(); ioffid++) {
@@ -2418,21 +2546,29 @@ void * pyne::rxname::_fill_maps()
   id_offset[make_pair("n", name_id["np_2"])] = offset(-1, -1, 2);
   id_offset[make_pair("n", name_id["n"])] = offset(0, 0);
   id_offset[make_pair("n", name_id["gamma"])] = offset(0, 1);
+  // decay:
+  id_offset[make_pair("decay", name_id["bminus_p"])] = offset(0, -1);
+  id_offset[make_pair("decay", name_id["ec_2p"])] = offset(-3, -2);
+  id_offset[make_pair("decay", name_id["ec"])] = offset(-1, 0);
+  id_offset[make_pair("decay", name_id["ec_bplus"])] = offset(-1, 0);
+  id_offset[make_pair("decay", name_id["ecp"])] = offset(-2, -1);
+  id_offset[make_pair("decay", name_id["eca"])] = offset(-3, -4);
+  id_offset[make_pair("decay", name_id["decay_2ec"])] = offset(-2, 0);
   return NULL;
 };
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
 
 
+unsigned int pyne::rxname::hash(std::string s) {
+  return pyne::rxname::hash(s.c_str());
+  };
 
-unsigned int pyne::rxname::hash(std::string s){return pyne::rxname::hash(s.c_str());};
-unsigned int pyne::rxname::hash(const char * s)
-{
+unsigned int pyne::rxname::hash(const char * s) {
   // Modified from http://cboard.cprogramming.com/tech-board/114650-string-hashing-algorithm.html#post853145
   // starting from h = 32*2^5 > 1000, rather than 0, to reserve space for MT numbers
   int c;
   unsigned int h = 32; 
-  while((c = *s++))
-  {
+  while((c = *s++)) {
     h = ((h << 5) + h) ^ c;
   }
   return h;
@@ -2443,9 +2579,11 @@ unsigned int pyne::rxname::hash(const char * s)
 // *** name functions *****
 // ************************
 
-std::string pyne::rxname::name(char * s){return pyne::rxname::name(std::string(s));};
-std::string pyne::rxname::name(std::string s)
-{
+std::string pyne::rxname::name(char * s) {
+  return pyne::rxname::name(std::string(s));
+  };
+
+std::string pyne::rxname::name(std::string s) {
   if (0 < names.count(s))
     return s;
   if (0 < altnames.count(s))
@@ -2454,8 +2592,7 @@ std::string pyne::rxname::name(std::string s)
   int i = 0;
   int I = s.length();
   int found = 0;
-  while(0 <= found && i < I)
-  {
+  while(0 <= found && i < I) {
     found = pyne::digits.find(s[i]);
     i++;
   }
@@ -2466,9 +2603,11 @@ std::string pyne::rxname::name(std::string s)
 };
 
 
-std::string pyne::rxname::name(int n){return pyne::rxname::name((unsigned int) n);};
-std::string pyne::rxname::name(unsigned int n)
-{
+std::string pyne::rxname::name(int n) {
+  return pyne::rxname::name((unsigned int) n);
+};
+
+std::string pyne::rxname::name(unsigned int n) {
   if (0 < id_name.count(n))
     return id_name[n];
   if (0 < mt_id.count(n))
@@ -2477,8 +2616,7 @@ std::string pyne::rxname::name(unsigned int n)
 };
 
 
-std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z)
-{
+std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z) {
   // This assumes nuclides are in id form
   std::pair<std::string, int> key = std::make_pair(z, to_nuc - from_nuc);
   if (0 == offset_id.count(key))
@@ -2487,20 +2625,17 @@ std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z)
   return id_name[offset_id[key]];
 };
 
-std::string pyne::rxname::name(std::string from_nuc, int to_nuc, std::string z)
-{
+std::string pyne::rxname::name(std::string from_nuc, int to_nuc, std::string z) {
   return pyne::rxname::name(pyne::nucname::id(from_nuc), 
                             pyne::nucname::id(to_nuc), z);
 };
 
-std::string pyne::rxname::name(int from_nuc, std::string to_nuc, std::string z)
-{
+std::string pyne::rxname::name(int from_nuc, std::string to_nuc, std::string z) {
   return pyne::rxname::name(pyne::nucname::id(from_nuc), 
                             pyne::nucname::id(to_nuc), z);
 };
 
-std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::string z)
-{
+std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::string z) {
   return pyne::rxname::name(pyne::nucname::id(from_nuc), 
                             pyne::nucname::id(to_nuc), z);
 };
@@ -2510,13 +2645,11 @@ std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::st
 // **********************
 // *** id functions *****
 // **********************
-unsigned int pyne::rxname::id(int x)
-{
+unsigned int pyne::rxname::id(int x) {
   return name_id[pyne::rxname::name(x)];
 };
   
-unsigned int pyne::rxname::id(unsigned int x)
-{
+unsigned int pyne::rxname::id(unsigned int x) {
   if (0 < id_name.count(x))
     return x;
   if (0 < mt_id.count(x))
@@ -2524,13 +2657,11 @@ unsigned int pyne::rxname::id(unsigned int x)
   return name_id[pyne::rxname::name(x)];
 };
   
-unsigned int pyne::rxname::id(char * x)
-{
+unsigned int pyne::rxname::id(const char * x) {
   return name_id[pyne::rxname::name(x)];
 };
   
-unsigned int pyne::rxname::id(std::string x)
-{
+unsigned int pyne::rxname::id(std::string x) {
   if (0 < names.count(x))
     return name_id[x];
   if (0 < altnames.count(x))
@@ -2538,8 +2669,7 @@ unsigned int pyne::rxname::id(std::string x)
   return name_id[pyne::rxname::name(x)];  
 };
   
-unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z)
-{
+unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z) {
   // This assumes nuclides are in id form
   std::pair<std::string, int> key = std::make_pair(z, to_nuc - from_nuc);
   if (0 == offset_id.count(key))
@@ -2548,20 +2678,17 @@ unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z)
   return offset_id[key];
 };
   
-unsigned int pyne::rxname::id(int from_nuc, std::string to_nuc, std::string z)
-{
+unsigned int pyne::rxname::id(int from_nuc, std::string to_nuc, std::string z) {
   return pyne::rxname::id(pyne::nucname::id(from_nuc), 
                           pyne::nucname::id(to_nuc), z);
 };
   
-unsigned int pyne::rxname::id(std::string from_nuc, int to_nuc, std::string z)
-{
+unsigned int pyne::rxname::id(std::string from_nuc, int to_nuc, std::string z) {
   return pyne::rxname::id(pyne::nucname::id(from_nuc), 
                           pyne::nucname::id(to_nuc), z);
 };
   
-unsigned int pyne::rxname::id(std::string from_nuc, std::string to_nuc, std::string z)
-{
+unsigned int pyne::rxname::id(std::string from_nuc, std::string to_nuc, std::string z) {
   return pyne::rxname::id(pyne::nucname::id(from_nuc), 
                           pyne::nucname::id(to_nuc), z);
 };
@@ -2570,64 +2697,56 @@ unsigned int pyne::rxname::id(std::string from_nuc, std::string to_nuc, std::str
 // **********************
 // *** MT functions *****
 // **********************
-unsigned int pyne::rxname::mt(int x)
-{
+unsigned int pyne::rxname::mt(int x) {
   unsigned int rxid = pyne::rxname::id(x);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
 };
   
-unsigned int pyne::rxname::mt(unsigned int x)
-{
+unsigned int pyne::rxname::mt(unsigned int x) {
   unsigned int rxid = pyne::rxname::id(x);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
 };
   
-unsigned int pyne::rxname::mt(char * x)
-{
+unsigned int pyne::rxname::mt(char * x) {
   unsigned int rxid = pyne::rxname::id(x);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
 };
   
-unsigned int pyne::rxname::mt(std::string x)
-{
+unsigned int pyne::rxname::mt(std::string x) {
   unsigned int rxid = pyne::rxname::id(x);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
 };
   
-unsigned int pyne::rxname::mt(int from_nuc, int to_nuc, std::string z)
-{
+unsigned int pyne::rxname::mt(int from_nuc, int to_nuc, std::string z) {
   unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
 };
   
-unsigned int pyne::rxname::mt(int from_nuc, std::string to_nuc, std::string z)
-{
+unsigned int pyne::rxname::mt(int from_nuc, std::string to_nuc, std::string z) {
   unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
 };
   
-unsigned int pyne::rxname::mt(std::string from_nuc, int to_nuc, std::string z)
-{
+unsigned int pyne::rxname::mt(std::string from_nuc, int to_nuc, std::string z) {
   unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
 };
   
-unsigned int pyne::rxname::mt(std::string from_nuc, std::string to_nuc, std::string z)
-{
+unsigned int pyne::rxname::mt(std::string from_nuc, std::string to_nuc, std::string z) {
   unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
@@ -2638,43 +2757,35 @@ unsigned int pyne::rxname::mt(std::string from_nuc, std::string to_nuc, std::str
 // ***********************
 // *** label functions ***
 // ***********************
-std::string pyne::rxname::label(int x)
-{
+std::string pyne::rxname::label(int x) {
   return labels[pyne::rxname::id(x)];
 };
   
-std::string pyne::rxname::label(unsigned int x)
-{
+std::string pyne::rxname::label(unsigned int x) {
   return labels[pyne::rxname::id(x)];
 };
   
-std::string pyne::rxname::label(char * x)
-{
+std::string pyne::rxname::label(char * x) {
   return labels[pyne::rxname::id(x)];
 };
   
-std::string pyne::rxname::label(std::string x)
-{
+std::string pyne::rxname::label(std::string x) {
   return labels[pyne::rxname::id(x)];
 };
   
-std::string pyne::rxname::label(int from_nuc, int to_nuc, std::string z)
-{
+std::string pyne::rxname::label(int from_nuc, int to_nuc, std::string z) {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
   
-std::string pyne::rxname::label(int from_nuc, std::string to_nuc, std::string z)
-{
+std::string pyne::rxname::label(int from_nuc, std::string to_nuc, std::string z) {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
   
-std::string pyne::rxname::label(std::string from_nuc, int to_nuc, std::string z)
-{
+std::string pyne::rxname::label(std::string from_nuc, int to_nuc, std::string z) {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
   
-std::string pyne::rxname::label(std::string from_nuc, std::string to_nuc, std::string z)
-{
+std::string pyne::rxname::label(std::string from_nuc, std::string to_nuc, std::string z) {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
 
@@ -2682,43 +2793,35 @@ std::string pyne::rxname::label(std::string from_nuc, std::string to_nuc, std::s
 // *********************
 // *** doc functions ***
 // *********************
-std::string pyne::rxname::doc(int x)
-{
+std::string pyne::rxname::doc(int x) {
   return docs[pyne::rxname::id(x)];
 };
   
-std::string pyne::rxname::doc(unsigned int x)
-{
+std::string pyne::rxname::doc(unsigned int x) {
   return docs[pyne::rxname::id(x)];
 };
   
-std::string pyne::rxname::doc(char * x)
-{
+std::string pyne::rxname::doc(char * x) {
   return docs[pyne::rxname::id(x)];
 };
   
-std::string pyne::rxname::doc(std::string x)
-{
+std::string pyne::rxname::doc(std::string x) {
   return docs[pyne::rxname::id(x)];
 };
   
-std::string pyne::rxname::doc(int from_nuc, int to_nuc, std::string z)
-{
+std::string pyne::rxname::doc(int from_nuc, int to_nuc, std::string z) {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
   
-std::string pyne::rxname::doc(int from_nuc, std::string to_nuc, std::string z)
-{
+std::string pyne::rxname::doc(int from_nuc, std::string to_nuc, std::string z) {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
   
-std::string pyne::rxname::doc(std::string from_nuc, int to_nuc, std::string z)
-{
+std::string pyne::rxname::doc(std::string from_nuc, int to_nuc, std::string z) {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
   
-std::string pyne::rxname::doc(std::string from_nuc, std::string to_nuc, std::string z)
-{
+std::string pyne::rxname::doc(std::string from_nuc, std::string to_nuc, std::string z) {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
 };
 

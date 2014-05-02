@@ -8,8 +8,7 @@
 #include "enrichment_symbolic.h"
 #endif
 
-pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cascade & orig_casc)
-{
+pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cascade & orig_casc) {
   pyne::enrichment::Cascade casc = orig_casc;
   int j = casc.j;
   int k = casc.k;
@@ -637,8 +636,7 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
   MW[1] = pyne::atomic_mass(k);
   xF[0] = casc.mat_feed.comp[j];
   xF[1] = casc.mat_feed.comp[k];
-  for(pyne::comp_iter ci = casc.mat_feed.comp.begin(); ci != casc.mat_feed.comp.end(); ci++)
-  {
+  for(pyne::comp_iter ci = casc.mat_feed.comp.begin(); ci != casc.mat_feed.comp.end(); ci++) {
     nuc = (*ci).first;
     if (nuc == j || nuc == k)
         continue;
@@ -647,8 +645,7 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
     i++;
   };
 
-  switch (ncomp)
-  {
+  switch (ncomp) {
     case 3:
       n0 = -2.00000000000000;
       n1 = MW[0] - Mstar;

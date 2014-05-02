@@ -132,6 +132,7 @@ Repeat this procedure as necessary.
 --------------------------
 
 """
+from __future__ import unicode_literals
 
 # Cython imports
 from libcpp.map cimport map
@@ -141,16 +142,22 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
+from warnings import warn
+from pyne.utils import VnVWarning
+
 # local imports 
 cimport extra_types
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
 import pyne.pyne_config
-
 cimport cpp_nucname
 cimport cpp_rxname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 # names
 cdef conv._SetStr names_proxy = conv.SetStr(False)
@@ -194,16 +201,17 @@ docs = docs_proxy
 
 
 
-def hash(char * s):
+def hash(s):
     """hash(s)
 
     Hashes a string to be used as a reaction id.  This hash specifically reserves
     the h < 1000 for MT numbers.
     """
-    return int(cpp_rxname.hash(<const_char *> s))
+    s_bytes = s.encode()
+    return int(cpp_rxname.hash(<const_char *> s_bytes))
 
 
-def name(x, y=None, char * z="n"):
+def name(x, y=None, z="n"):
     """name(x, y=None, z="n")
 
     Gives the unique reaction name.  Note that this name follows the 'natural naming' 
@@ -227,26 +235,30 @@ def name(x, y=None, char * z="n"):
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
-            cn = cpp_rxname.name(std_string(<char *> x))
+            x_bytes = x.encode()
+            cn = cpp_rxname.name(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             cn = cpp_rxname.name(<extra_types.uint32> long(x))
         elif isinstance(x, long):
             cn = cpp_rxname.name(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.id(std_string(<char *> x))
+            x_bytes = x.encode()
+            from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.id(std_string(<char *> y))
+            y_bytes = y.encode()
+            to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
             to_nuc = cpp_nucname.id(<int> y)
-        cn = cpp_rxname.name(from_nuc, to_nuc, std_string(z))
-    n = <char *> cn.c_str()
+        z_bytes = z.encode()
+        cn = cpp_rxname.name(from_nuc, to_nuc, std_string(<char *> z_bytes))
+    n = bytes(<char *> cn.c_str()).decode()
     return n
 
 
-def id(x, y=None, char * z="n"):
+def id(x, y=None, z="n"):
     """id(x, y=None, z="n")
 
     Gives the unique reaction id.  This is originally calculated as the hash of the
@@ -270,25 +282,29 @@ def id(x, y=None, char * z="n"):
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
-            rxid = cpp_rxname.id(std_string(<char *> x))
+            x_bytes = x.encode()
+            rxid = cpp_rxname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             rxid = cpp_rxname.id(<extra_types.uint32> long(x))
         elif isinstance(x, long):
             rxid = cpp_rxname.id(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.id(std_string(<char *> x))
+            x_bytes = x.encode()
+            from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.id(std_string(<char *> y))
+            y_bytes = y.encode()
+            to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
             to_nuc = cpp_nucname.id(<int> y)
-        rxid = cpp_rxname.id(from_nuc, to_nuc, std_string(z))
+        z_bytes = z.encode()
+        rxid = cpp_rxname.id(from_nuc, to_nuc, std_string(<char *> z_bytes))
     return int(rxid)
 
 
-def mt(x, y=None, char * z="n"):
+def mt(x, y=None, z="n"):
     """mt(x, y=None, z="n")
 
     Gives the reaction MT number. This may not be greater than 1000. 
@@ -310,25 +326,29 @@ def mt(x, y=None, char * z="n"):
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
-            mtnum = cpp_rxname.mt(std_string(<char *> x))
+            x_bytes = x.encode()
+            mtnum = cpp_rxname.mt(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             mtnum = cpp_rxname.mt(<extra_types.uint32> long(x))
         elif isinstance(x, long):
             mtnum = cpp_rxname.mt(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.id(std_string(<char *> x))
+            x_bytes = x.encode()
+            from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.id(std_string(<char *> y))
+            y_bytes = y.encode()
+            to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
             to_nuc = cpp_nucname.id(<int> y)
-        mtnum = cpp_rxname.mt(from_nuc, to_nuc, std_string(z))
+        z_bytes = z.encode()
+        mtnum = cpp_rxname.mt(from_nuc, to_nuc, std_string(<char *> z_bytes))
     return int(mtnum)
 
 
-def label(x, y=None, char * z="n"):
+def label(x, y=None, z="n"):
     """label(x, y=None, z="n")
 
     Gives a short reaction label, useful for user interfaces.
@@ -351,26 +371,30 @@ def label(x, y=None, char * z="n"):
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
-            clab = cpp_rxname.label(std_string(<char *> x))
+            x_bytes = x.encode()
+            clab = cpp_rxname.label(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             clab = cpp_rxname.label(<extra_types.uint32> long(x))
         elif isinstance(x, long):
             clab = cpp_rxname.label(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.id(std_string(<char *> x))
+            x_bytes = x.encode()
+            from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.id(std_string(<char *> y))
+            y_bytes = y.encode()
+            to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
             to_nuc = cpp_nucname.id(<int> y)
-        clab = cpp_rxname.label(from_nuc, to_nuc, std_string(z))
-    lab = <char *> clab.c_str()
+        z_bytes = z.encode()
+        clab = cpp_rxname.label(from_nuc, to_nuc, std_string(<char *> z_bytes))
+    lab = bytes(<char *> clab.c_str()).decode()
     return lab
 
 
-def doc(x, y=None, char * z="n"):
+def doc(x, y=None, z="n"):
     """doc(x, y=None, z="n")
 
     Gives documentation string for the reaction.
@@ -393,22 +417,26 @@ def doc(x, y=None, char * z="n"):
     cdef int from_nuc, to_nuc
     if y is None:
         if isinstance(x, basestring):
-            cd = cpp_rxname.doc(std_string(<char *> x))
+            x_bytes = x.encode()
+            cd = cpp_rxname.doc(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             cd = cpp_rxname.doc(<extra_types.uint32> long(x))
         elif isinstance(x, long):
             cd = cpp_rxname.doc(<extra_types.uint32> x)
     else:
         if isinstance(x, basestring):
-            from_nuc = cpp_nucname.id(std_string(<char *> x))
+            x_bytes = x.encode()
+            from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
         if isinstance(y, basestring):
-            to_nuc = cpp_nucname.id(std_string(<char *> y))
+            y_bytes = y.encode()
+            to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
             to_nuc = cpp_nucname.id(<int> y)
-        cd = cpp_rxname.doc(from_nuc, to_nuc, std_string(z))
-    d = <char *> cd.c_str()
+        z_bytes = z.encode()
+        cd = cpp_rxname.doc(from_nuc, to_nuc, std_string(<char *> z_bytes))
+    d = bytes(<char *> cd.c_str()).decode()
     return d
 
 
@@ -437,12 +465,16 @@ def child(nuc, rx, char * z="n"):
     cdef bint rx_is_str = isinstance(rx, basestring)
     ptype = std_string(<char *> z);
     if nuc_is_str and rx_is_str:
-        to_nuc = cpp_rxname.child(std_string(<char *> nuc), 
-                                  std_string(<char *> rx), ptype)
+        nuc_bytes = nuc.encode()
+        rx_bytes = rx.encode()
+        to_nuc = cpp_rxname.child(std_string(<char *> nuc_bytes), 
+                                  std_string(<char *> rx_bytes), ptype)
     elif not nuc_is_str and rx_is_str:
-        to_nuc = cpp_rxname.child(<int> nuc, std_string(<char *> rx), ptype)
+        rx_bytes = rx.encode()
+        to_nuc = cpp_rxname.child(<int> nuc, std_string(<char *> rx_bytes), ptype)
     elif nuc_is_str and not rx_is_str:
-        to_nuc = cpp_rxname.child(std_string(<char *> nuc), 
+        nuc_bytes = nuc.encode()
+        to_nuc = cpp_rxname.child(std_string(<char *> nuc_bytes), 
                                   <extra_types.uint32> long(rx), ptype)
     elif not nuc_is_str and not rx_is_str:
         to_nuc = cpp_rxname.child(<int> nuc, <extra_types.uint32> long(rx), ptype)
@@ -474,12 +506,16 @@ def parent(nuc, rx, char * z="n"):
     cdef bint rx_is_str = isinstance(rx, basestring)
     ptype = std_string(<char *> z);
     if nuc_is_str and rx_is_str:
-        from_nuc = cpp_rxname.parent(std_string(<char *> nuc), 
-                                    std_string(<char *> rx), ptype)
+        nuc_bytes = nuc.encode()
+        rx_bytes = rx.encode()
+        from_nuc = cpp_rxname.parent(std_string(<char *> nuc_bytes), 
+                                    std_string(<char *> rx_bytes), ptype)
     elif not nuc_is_str and rx_is_str:
-        from_nuc = cpp_rxname.parent(<int> nuc, std_string(<char *> rx), ptype)
+        rx_bytes = rx.encode()
+        from_nuc = cpp_rxname.parent(<int> nuc, std_string(<char *> rx_bytes), ptype)
     elif nuc_is_str and not rx_is_str:
-        from_nuc = cpp_rxname.parent(std_string(<char *> nuc), 
+        nuc_bytes = nuc.encode()
+        from_nuc = cpp_rxname.parent(std_string(<char *> nuc_bytes), 
                                     <extra_types.uint32> long(rx), ptype)
     elif not nuc_is_str and not rx_is_str:
         from_nuc = cpp_rxname.parent(<int> nuc, <extra_types.uint32> long(rx), ptype)

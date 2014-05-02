@@ -1,6 +1,8 @@
+from __future__ import print_function
 import os
 import time
 import shutil
+import warnings
 import itertools
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
@@ -13,6 +15,9 @@ try:
 except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
+
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag, \
     ComputedTag
 from pyne.material import Material, MaterialLibrary
@@ -155,7 +160,7 @@ def test_structured_get_vertex():
     for i,x in enumerate(x_range):
         for j,y in enumerate(y_range):
             for k,z in enumerate(z_range):
-                print i, j, k
+                print("{0} {1} {2}".format(i, j, k))
                 vtx = sm.structured_get_vertex(i,j,k)
                 vcoord = sm.mesh.getVtxCoords(vtx)
                 assert_true(all(vcoord == [x,y,z]))
