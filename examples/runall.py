@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 """A simple script to run all of the IPython notebooks in this directory.
 """
+import io
 import os
 import sys
 import traceback
