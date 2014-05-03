@@ -41,7 +41,7 @@ def gen_mesh(mats=()):
 def test_unstructured_mesh_from_file():
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/unstr.h5m")
-    sm = Mesh(mesh_file=filename)
+    sm = Mesh(mesh=filename)
 
 def test_unstructured_mesh_from_instance():
     filename = os.path.join(os.path.dirname(__file__), 
@@ -55,7 +55,7 @@ def test_elem_volume():
     # Test tet elements recognition and calculation
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/unstr.h5m")
-    tetmesh = Mesh(mesh_file=filename)
+    tetmesh = Mesh(mesh=filename)
     vols = list()
     for __, __, ve in tetmesh:
         vols.append(tetmesh.elem_volume(ve))
@@ -67,7 +67,7 @@ def test_elem_volume():
     # Test hex elements recognition and calculation
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/grid543.h5m")
-    mesh = Mesh(mesh_file=filename)
+    mesh = Mesh(mesh=filename)
     vols = list()
     for __, __, ve in mesh:
         vols.append(mesh.elem_volume(ve))
@@ -99,7 +99,7 @@ def test_create_by_set():
 def test_create_by_file():
     filename = os.path.join(os.path.dirname(__file__), 
                             "files_mesh_test/grid543.h5m")
-    sm = Mesh(mesh_file = filename, structured=True)
+    sm = Mesh(mesh=filename, structured=True)
     assert_true(all(sm.dims == [1, 11, -5, 5, 14, -3]))
 
     # This mesh is interesting because the i/j/k space is not numbered from
@@ -113,7 +113,7 @@ def test_create_by_file():
     # error
     filename2 = os.path.join(os.path.dirname(__file__), 
                              "files_mesh_test/no_str_mesh.h5m")
-    assert_raises(iBase.TagNotFoundError, Mesh, mesh_file = filename2, 
+    assert_raises(iBase.TagNotFoundError, Mesh, mesh=filename2, 
                        structured=True)
 
 def test_structured_get_hex():
@@ -568,7 +568,7 @@ def test_matlib():
 
     m.write_hdf5('test_matlib.h5m')
     shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
-    m2 = Mesh(mesh_file='test_matlib2.h5m')  # MOAB fails to flush
+    m2 = Mesh(mesh='test_matlib2.h5m')  # MOAB fails to flush
     for i, mat, ve in m2:
         assert_equal(len(mat.comp), len(mats[i].comp))
         for key in mats[i].iterkeys():

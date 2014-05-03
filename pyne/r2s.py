@@ -69,7 +69,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     #  flux_mesh is unstructured mesh file
     elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
                                   and flux_mesh.endswith(".h5m"):
-            m = Mesh(structured=False, mesh_file=flux_mesh)
+            m = Mesh(structured=False, mesh=flux_mesh)
     #  flux_mesh is Meshtal or meshtal file
     else:
         #  flux_mesh is meshtal file
