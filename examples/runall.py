@@ -7,6 +7,11 @@ import traceback
 from tempfile import NamedTemporaryFile
 import subprocess
 
+class get_ipython():
+    """Mocks some ipython funnyness, such as magic commands."""
+    def magic(self, *args, **kwargs):
+        pass
+
 def execpy(filename, glb=None, loc=None):
     """A function equivalent to the Python 2.x execfile statement."""
     with io.open(filename, 'r') as f:
@@ -16,6 +21,9 @@ def execpy(filename, glb=None, loc=None):
 def execipynb(filename, glb=None, loc=None):
     """A function equivalent to the Python 2.x execfile statement but for IPython 
     notebooks."""
+    if glb is None:
+        glb = {}
+    glb['get_ipython'] = get_ipython
     out = NamedTemporaryFile()
     err = NamedTemporaryFile()
     rtn = subprocess.check_call(['ipython', 'nbconvert', '--to=python', '--stdout', 
@@ -27,7 +35,7 @@ def execipynb(filename, glb=None, loc=None):
     exec(compile(src, filename, "exec"), glb, loc)
 
 def main():
-    files = os.listdir('.')
+    files = sorted(os.listdir('.'))
     thisfile = os.path.split(__file__)[1]
     count = 0
     nsucc = 0
@@ -36,12 +44,13 @@ def main():
     for f in files:
         base, ext = os.path.splitext(f)
         if f == thisfile:
-            print("thisfile")
             continue
         elif ext == '.py':
             execer = execpy
+            cat = 'cat ' + f
         elif ext == '.ipynb':
             execer = execipynb
+            cat = 'ipython nbconvert --to=python --stdout ' + f
         else:
             continue
         count += 1
@@ -56,7 +65,7 @@ def main():
             nfail += 1
             sys.stderr.write('F')
             sys.stderr.flush()
-            summary += "\nFAILURE: " + f + ":\n----------\n"
+            summary += "\nFAILURE: " + f + ":\nCAT: " + cat + "\n----------\n"
             summary += traceback.format_exc()
     if count > 0:
         summary += "\n------\nTOTAL: {0} - ".format(count)
@@ -65,6 +74,8 @@ def main():
     if nfail > 0:
         summary += " {0} failures".format(nfail)
     print(summary)
+    if nfail > 0:
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
