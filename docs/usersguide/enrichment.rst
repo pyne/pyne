@@ -51,7 +51,7 @@ may be seen as a function of the mass separation :math:`M^*` below.
 
     **Figure 1:** *The normalized total flow rate as a function of the mass separation 
     factor between the jth and kth key components for a sample uranium cascade.*
-    :download:`[ipython notebook] <mstar_vs_flowrate.ipynb>`
+    :download:`[ipython notebook] <../../examples/mstar_vs_flowrate.ipynb>`
 
 It is easy to see how the flow rate is minimized near the center of this bucket-shape in 
 Figure 1.  Finding this minimum point is what the :func:`multicomponent`
