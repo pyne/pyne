@@ -9,12 +9,13 @@ from tempfile import NamedTemporaryFile
 import subprocess
 
 class get_ipython():
-    """Mocks some ipython funnyness, such as magic commands."""
+    """Mocks some ipython funniness, such as magic commands."""
     def magic(self, *args, **kwargs):
         pass
 
 def execpy(filename, glb=None, loc=None):
     """A function equivalent to the Python 2.x execfile statement."""
+    glb = {} if glb is None else glb
     with io.open(filename, 'r') as f:
         src = f.read()
     exec(compile(src, filename, "exec"), glb, loc)
@@ -22,8 +23,7 @@ def execpy(filename, glb=None, loc=None):
 def execipynb(filename, glb=None, loc=None):
     """A function equivalent to the Python 2.x execfile statement but for IPython 
     notebooks."""
-    if glb is None:
-        glb = {}
+    glb = {} if glb is None else glb
     glb['get_ipython'] = get_ipython
     out = NamedTemporaryFile()
     err = NamedTemporaryFile()
