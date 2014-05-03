@@ -36,7 +36,10 @@ def execipynb(filename, glb=None, loc=None):
     exec(compile(src, filename, "exec"), glb, loc)
 
 def main():
-    files = sorted(os.listdir('.'))
+    cwd = os.getcwd()
+    execerdir = os.path.dirname(os.path.abspath(__file__))
+    sys.path = [cwd if d == execerdir else d for d in sys.path]
+    files = sorted(os.listdir(cwd))
     thisfile = os.path.split(__file__)[1]
     count = 0
     nsucc = 0
