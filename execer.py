@@ -27,8 +27,11 @@ def execipynb(filename, glb=None, loc=None):
     glb['get_ipython'] = get_ipython
     out = NamedTemporaryFile()
     err = NamedTemporaryFile()
+    env = os.environ.copy()
+    env['TERM'] = 'dumb'
+    env['PYTHONIOENCODING'] = 'utf-8'
     rtn = subprocess.check_call(['ipython', 'nbconvert', '--to=python', '--stdout', 
-                                 filename], stdout=out, stderr=err)
+                                 filename], stdout=out, stderr=err, env=env)
     out.seek(0)
     src = out.read()
     out.close()
