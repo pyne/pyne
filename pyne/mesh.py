@@ -601,7 +601,7 @@ class Mesh(object):
 
         if self.structured:
             self.structured_ordering = structured_ordering
-            if not structured_coords and not structured_set:
+            if (mesh is not None) and not structured_coords and not structured_set:
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")
                 except iBase.TagNotFoundError as e:
@@ -626,13 +626,13 @@ class Mesh(object):
                                     " Instantiate individually using"
                                     " from_ent_set()".format(count))
             # from coordinates                       
-            elif structured_coords and not structured_set:
+            elif (mesh is None) and structured_coords and not structured_set:
                 extents = [0, 0, 0] + [len(x) - 1 for x in structured_coords]
                 self.structured_set = self.mesh.createStructuredMesh(
                      extents, i=structured_coords[0], j=structured_coords[1], 
                      k=structured_coords[2], create_set=True)
 
-            #From mesh and structured_set:
+            # From mesh and structured_set:
             elif not structured_coords and structured_set:
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")[structured_set]

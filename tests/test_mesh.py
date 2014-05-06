@@ -93,7 +93,7 @@ def test_create_by_set():
     mesh = iMesh.Mesh()
     a = mesh.createStructuredMesh([0,0,0,1,1,1], i=[1,2], j=[1,2], k=[1,2], 
                                  create_set=True)
-    sm = Mesh(mesh = mesh, structured_set=a, structured=True)
+    sm = Mesh(mesh=mesh, structured_set=a, structured=True)
     assert_true(all(sm.dims == [0, 0, 0, 1, 1, 1]))
 
 def test_create_by_file():
