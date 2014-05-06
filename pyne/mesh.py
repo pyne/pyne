@@ -846,55 +846,29 @@ class Mesh(object):
             t[:] = value
         setattr(self, name, t)
 
-
-#    def __add__(self, other):
-#        """Adds the common tags of other and returns a new mesh object.
-#        """
-#        tags = self.common_ve_tags(other)
-#        return self._do_op(other, tags, "+", in_place=False)
-#
-#    def __sub__(self, other):
-#        """Subtracts the common tags of other and returns a new mesh object.
-#        """
-#        tags = self.common_ve_tags(other)
-#        return self._do_op(other, tags, "-", in_place=False)
-#
-#    def __mul__(self, other):
-#        """Multiplies the common tags of other and returns a new mesh object.
-#        """
-#        tags = self.common_ve_tags(other)
-#        return  self._do_op(other, tags, "*", in_place=False)
-#
-#    def __div__(self, other):
-#        """Adds the common tags of other and returns a new mesh object.
-#        """
-#        tags = self.common_ve_tags(other)
-#        return self._do_op(other, tags, "/", in_place=False)
-
-
-    def add(self, other):
+    def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
         """
         tags = self.common_ve_tags(other)
-        self._do_op(other, tags, "+")
+        return self._do_op(other, tags, "+")
 
-    def sub(self, other):
+    def __isub__(self, other):
         """Substracts the common tags of other to the mesh object.
         """
         tags = self.common_ve_tags(other)
-        self._do_op(other, tags, "-")
+        return self._do_op(other, tags, "-")
 
-    def mul(self, other):
+    def __imul__(self, other):
         """Multiplies the common tags of other to the mesh object.
         """
         tags = self.common_ve_tags(other)
-        self._do_op(other, tags, "*")
+        return self._do_op(other, tags, "*")
 
-    def div(self, other):
+    def __idiv__(self, other):
         """Divides the common tags of other to the mesh object.
         """
         tags = self.common_ve_tags(other)
-        self._do_op(other, tags, "/")
+        return self._do_op(other, tags, "/")
 
     def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /.
