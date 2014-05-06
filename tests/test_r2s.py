@@ -68,7 +68,7 @@ def test_irradiation_setup_structured():
     tot_fluxes = [1.74147E-06, 1.61484E-06, 1.50290E-06, 1.56677E-06] 
     tot_errs = [6.01522E-02, 6.13336E-02, 6.19920E-02, 5.98742E-02]
 
-    m = Mesh(structured=True, mesh_file=output_mesh, mats=output_mesh)
+    m = Mesh(structured=True, mesh=output_mesh, mats=output_mesh)
     for i, mat, _ in m:
         assert_almost_equal(mat.density, 1.962963E+00)
         assert_equal(len(mat.comp), 3)
@@ -163,7 +163,7 @@ def test_irradiation_setup_unstructured():
     tot_fluxes = [1.74147E-06, 1.61484E-06, 1.50290E-06, 1.56677E-06] 
     tot_errs = [6.01522E-02, 6.13336E-02, 6.19920E-02, 5.98742E-02]
 
-    m = Mesh(structured=True, mesh_file=output_mesh, mats=output_mesh)
+    m = Mesh(structured=True, mesh=output_mesh, mats=output_mesh)
     for i, mat, _ in m:
         assert_almost_equal(mat.density, 2.0)
         assert_equal(len(mat.comp), 2)

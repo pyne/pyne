@@ -653,7 +653,7 @@ def test_wwinp_n():
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_n.txt')
     expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_n.h5m')
-    expected_sm = Mesh(mesh_file=expected_h5m, structured=True)
+    expected_sm = Mesh(mesh=expected_h5m, structured=True)
     output = os.path.join(os.getcwd(), 'test_wwinp')
 
     # Read in the wwinp file to an object and check resulting attributes.
@@ -758,7 +758,7 @@ def test_wwinp_p():
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_p.txt')
     expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_p.h5m')
-    expected_sm = Mesh(mesh_file=expected_h5m, structured=True)
+    expected_sm = Mesh(mesh=expected_h5m, structured=True)
     output = os.path.join(os.getcwd(), 'test_wwinp')
 
     # Read in the wwinp file to an object and check resulting attributes.
@@ -852,7 +852,7 @@ def test_wwinp_np():
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_np.txt')
     expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_np.h5m')
-    expected_sm = Mesh(mesh_file=expected_h5m, structured=True)
+    expected_sm = Mesh(mesh=expected_h5m, structured=True)
     output = os.path.join(os.getcwd(), 'test_wwinp')
 
     # Read in the wwinp file to an object and check resulting attributes.
@@ -964,7 +964,7 @@ def test_single_meshtally_meshtal():
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_single_meshtal.txt")
     expected_h5m = os.path.join(thisdir, "mcnp_meshtal_single_mesh.h5m")
-    expected_sm = Mesh(mesh_file=expected_h5m, structured=True)
+    expected_sm = Mesh(mesh=expected_h5m, structured=True)
 
     tags = {4: ["n_result", "n_rel_error", 
                 "n_total_result", "n_total_rel_error"]}
@@ -1040,16 +1040,16 @@ def test_multiple_meshtally_meshtal():
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_multiple_meshtal.txt")
 
     expected_h5m_4 = os.path.join(thisdir, "mcnp_meshtal_tally_4.h5m")
-    expected_sm_4 = Mesh(mesh_file=expected_h5m_4, structured=True)
+    expected_sm_4 = Mesh(mesh=expected_h5m_4, structured=True)
 
     expected_h5m_14 = os.path.join(thisdir, "mcnp_meshtal_tally_14.h5m")
-    expected_sm_14 = Mesh(mesh_file=expected_h5m_14, structured=True)
+    expected_sm_14 = Mesh(mesh=expected_h5m_14, structured=True)
 
     expected_h5m_24 = os.path.join(thisdir, "mcnp_meshtal_tally_24.h5m")
-    expected_sm_24 = Mesh(mesh_file=expected_h5m_24, structured=True)
+    expected_sm_24 = Mesh(mesh=expected_h5m_24, structured=True)
 
     expected_h5m_34 = os.path.join(thisdir, "mcnp_meshtal_tally_34.h5m")
-    expected_sm_34 = Mesh(mesh_file=expected_h5m_34, structured=True)
+    expected_sm_34 = Mesh(mesh=expected_h5m_34, structured=True)
 
     tags = {4: ["n_result", "n_rel_error",
                  "n_total_result", "n_total_rel_error"],
