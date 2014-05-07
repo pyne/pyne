@@ -20,7 +20,7 @@
 #endif
 
 /// Number of reactions supported by default.
-#define NUM_RX_NAMES 549
+#define NUM_RX_NAMES 572
 
 namespace pyne
 {
@@ -101,7 +101,7 @@ namespace rxname
   ///          Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   unsigned int id(int x);
   unsigned int id(unsigned int x);
-  unsigned int id(char * x);
+  unsigned int id(const char * x);
   unsigned int id(std::string x);
   unsigned int id(int from_nuc, int to_nuc, std::string z="n");
   unsigned int id(int from_nuc, std::string to_nuc, std::string z="n");

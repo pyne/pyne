@@ -29,7 +29,7 @@ cdef extern from "material.h" namespace "pyne":
         double mass
         double density
         double atoms_per_molecule
-        cpp_jsoncpp.Value attrs
+        cpp_jsoncpp.Value metadata
 
         # Methods
         void norm_comp() except +

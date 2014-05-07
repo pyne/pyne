@@ -1,10 +1,18 @@
 """rxname tests"""
-import nose 
+from __future__ import unicode_literals, division
+import sys
+import warnings
 
+import nose 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_in, assert_greater_equal
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import rxname
+
+if sys.version_info[0] > 2:
+    long = int
 
 def _hash(s):
     MVAL = 2**32  # integer size
@@ -46,8 +54,8 @@ def test_name_mts():
     assert_equal(rxname.name(107), "a")
     assert_equal(rxname.name(1), "total")
 
-    assert_equal(rxname.name(107L), "a")
-    assert_equal(rxname.name(1L), "total")
+    assert_equal(rxname.name(long(107)), "a")
+    assert_equal(rxname.name(long(1)), "total")
 
     assert_equal(rxname.name("107"), "a")
     assert_equal(rxname.name("1"), "total")
@@ -83,8 +91,8 @@ def test_id_mts():
     assert_equal(rxname.id(107), _hash("a"))
     assert_equal(rxname.id(1), _hash("total"))
 
-    assert_equal(rxname.id(107L), _hash("a"))
-    assert_equal(rxname.id(1L), _hash("total"))
+    assert_equal(rxname.id(long(107)), _hash("a"))
+    assert_equal(rxname.id(long(1)), _hash("total"))
 
     assert_equal(rxname.id("107"), _hash("a"))
     assert_equal(rxname.id("1"), _hash("total"))
@@ -120,8 +128,8 @@ def test_mt_mts():
     assert_equal(rxname.mt(107), 107)
     assert_equal(rxname.mt(1), 1)
 
-    assert_equal(rxname.mt(107L), 107)
-    assert_equal(rxname.mt(1L), 1)
+    assert_equal(rxname.mt(long(107)), 107)
+    assert_equal(rxname.mt(long(1)), 1)
 
     assert_equal(rxname.mt("107"), 107)
     assert_equal(rxname.mt("1"), 1)
@@ -172,8 +180,8 @@ def test_label_mts():
     assert_equal(rxname.label(107), alabel)
     assert_equal(rxname.label(1), totlabel)
 
-    assert_equal(rxname.label(107L), alabel)
-    assert_equal(rxname.label(1L), totlabel)
+    assert_equal(rxname.label(long(107)), alabel)
+    assert_equal(rxname.label(long(1)), totlabel)
 
     assert_equal(rxname.label("107"), alabel)
     assert_equal(rxname.label("1"), totlabel)
@@ -215,8 +223,8 @@ def test_doc_mts():
     assert_equal(rxname.doc(107), adoc)
     assert_equal(rxname.doc(1), totdoc)
 
-    assert_equal(rxname.doc(107L), adoc)
-    assert_equal(rxname.doc(1L), totdoc)
+    assert_equal(rxname.doc(long(107)), adoc)
+    assert_equal(rxname.doc(long(1)), totdoc)
 
     assert_equal(rxname.doc("107"), adoc)
     assert_equal(rxname.doc("1"), totdoc)

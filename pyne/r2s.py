@@ -1,4 +1,6 @@
 from os.path import isfile, join, dirname
+from warnings import warn
+from pyne.utils import VnVWarning
 
 from pyne.mesh import Mesh
 from pyne.mcnp import Meshtal
@@ -6,18 +8,14 @@ from pyne.alara import mesh_to_fluxin, mesh_to_geom, photon_source_to_hdf5, \
                        photon_source_hdf5_to_mesh
 from pyne.dagmc import load, discretize_geom
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
 def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       geom=None, num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False, 
                       alara_inp="alara_geom", alara_matlib="alara_matlib",  
                       output_mesh="r2s_step1.h5m"):
-    """def irradiation_setup(meshtal, tally_num, cell_mats, alara_params, 
-                          geom=None, num_rays=10, grid=False, flux_tag="n_flux",
-                          fluxin="alara_fluxin", reverse=False, 
-                          alara_inp="alara_geom", alara_matlib="alara_matlib",  
-                          output_mesh="r2s_step1.h5m")
-
-    This function is used to setup the irradiation inputs after the first
+    """This function is used to setup the irradiation inputs after the first
     R2S transport step.
 
     Parameters
@@ -71,7 +69,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     #  flux_mesh is unstructured mesh file
     elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
                                   and flux_mesh.endswith(".h5m"):
-            m = Mesh(structured=False, mesh_file=flux_mesh)
+            m = Mesh(structured=False, mesh=flux_mesh)
     #  flux_mesh is Meshtal or meshtal file
     else:
         #  flux_mesh is meshtal file
@@ -79,7 +77,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
             flux_mesh = Meshtal(flux_mesh, {tally_num: (flux_tag, 
                                                         flux_tag + "_err", 
                                                         flux_tag + "_total", 
-                                                        flux_tag + "_err_total")})
+                                                        flux_tag + "_err_total")},
+                                                        meshes_have_mats=True)
             m = flux_mesh.tally[tally_num]
         #  flux_mesh is Meshtal object
         elif instance(flux_mesh, Meshtal):

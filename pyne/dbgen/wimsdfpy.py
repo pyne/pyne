@@ -17,13 +17,18 @@ an appropriate acknowledgement to the source of data. One may not charge any
 subsequent fee for these data.
 
 """
-
 from __future__ import print_function
 import os
 import re
 import sys
 import shutil
-import urllib2
+from warnings import warn
+from pyne.utils import VnVWarning
+
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 if sys.version_info[0] >= 3:
     from html.parser import HTMLParser
 else:
@@ -35,6 +40,7 @@ import tables as tb
 from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_fpy(build_dir="", file_out='wimsd-fpyield.html'):
     """Grabs the WIMS fission product yields from the IAEA website

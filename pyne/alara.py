@@ -3,16 +3,25 @@
 from __future__ import print_function
 import os
 import collections
+from warnings import warn
+from pyne.utils import VnVWarning
+
 import numpy as np
 import tables as tb
-import warnings
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the alara module may be incomplete.",
-                  ImportWarning)
+                  VnVWarning)
 
 from pyne.mesh import Mesh, MeshError
 from pyne.material import Material, from_atom_frac
@@ -241,7 +250,7 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
                     "    material mat_{0} 1 1\nend\n\n".format(i))
 
         for nuc, comp in mesh.comp[i].iteritems():
-            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp, 
+            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0, 
                                                          znum(nuc))
         matlib += "\n"
 
