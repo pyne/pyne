@@ -21,9 +21,9 @@ http://pyne.io/, the official PyNE projectsite.
 Installation
 ============
 
--------------
+------------
 Dependencies
--------------
+------------
 PyNE has the following dependencies:
 
    #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
@@ -142,8 +142,8 @@ Once those lines have been added, run the following command before running
     source ~/.bashrc
 
 
-.. _zip: https://github.com/pyne/pyne/zipball/0.3
-.. _tar: https://github.com/pyne/pyne/tarball/0.3
+.. _zip: https://github.com/pyne/pyne/zipball/0.4
+.. _tar: https://github.com/pyne/pyne/tarball/0.4
 
 .. install-end
 
