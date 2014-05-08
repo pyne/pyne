@@ -2,15 +2,25 @@
 import nose 
 from nose.tools import assert_equal, assert_true
 import warnings
+import numpy as np
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne import gammaspec
 
-gspec1 = gammaspec.read_spe_file("test.spe")
+gspec1 = gammaspec.read_spe_file('test.spe')
 eff_coeff = [-2.818615042612040000, -0.727352820018942000, -0.039579888648190400,
              -0.059230525466409600, 0.023772637347443000, 0.032530647507267100]
 
+gspec2=gammaspec.GammaSpectrum()
+gspec2.spec_name='test spec 2'
+gspec2.counts=np.arange(20)
+
+gspec3=gammaspec.GammaSpectrum()
+gspec3.spec_name='test spec 3'
+gspec3.counts=np.arange(20)
+
+gs4=gspec3+gspec2
 
 def test_read_spe():
     assert_equal(gspec1.real_time, 300.0)

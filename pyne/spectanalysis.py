@@ -9,6 +9,8 @@ from pyne.utils import QAWarning
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+import copy
+
 
 class PhSpectrum(object):
     """Pulse height spectrum class"""
@@ -38,16 +40,18 @@ def rect_smooth(spectrum, m):
     smooth_spect: a spectrum object
 
     """
+   
     if(m < 3):
         raise ValueError('Error:Smoothing width less than 3')
     if(m % 2 == 0):
         raise ValueError('Error:Smoothing width not odd')
-
-    smooth_spec = spectrum
+    """ something breaks in this part, the original spectrum is reset as well as the new"""
+    smooth_spec = copy.deepcopy(spectrum)
     smooth_spec.counts = [] #reset counts
-    ext = (m - 1) / 2
-    i = 0
+
+    ext = (m - 1.0) / 2.0
     
+    i = 0
     # 3 stages of loops a small one at start and end to deal 
     # with end cases and a main one for bulk of spectrum
     while i < ext:
