@@ -268,8 +268,11 @@ namespace pyne
     Material operator/ (double);
   };
 
-  /// Converts a Material to a string stream representation.
+  /// Converts a Material to a string stream representation for cononical writing.
   std::ostream& operator<< (std::ostream& os, Material mat);
+
+  /// Converts a Material to an output string stream for mcnp_write.
+  std::ostringstringstream& operator<< (std::ostream& os, Material mat);
 
   /// A stuct for reprensenting fundemental data in a material.
   /// Useful for HDF5 representations.

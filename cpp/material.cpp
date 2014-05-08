@@ -483,6 +483,10 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 };
 
+std::string pyne::Material::write_mcnp()
+{
+};
+
 void pyne::Material::from_text(char * filename) {
   std::string fname (filename);
   from_text(fname);
@@ -729,6 +733,10 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
   return os;
 };
 
+ 
+std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) {
+  return os;
+};
 
 void pyne::Material::normalize () {
   // normalizes the mass
