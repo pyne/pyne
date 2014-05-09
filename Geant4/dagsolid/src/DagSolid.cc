@@ -125,7 +125,7 @@ DagSolid::DagSolid (const G4String &name, DagMC* dagmc, int volID)
   Interface* moab = dagmc->moab_instance();
   moab->get_child_meshsets(fvolEntity, surfs, 1 );
 
-  G4cout<<"please wait for visualization... "<<G4endl;
+  //  G4cout<<"please wait for visualization... "<<G4endl;
   for(unsigned i=0 ; i<surfs.size() ; i++)
     {
       My_sulf_hit=surfs[i]; 
@@ -238,80 +238,13 @@ EInside DagSolid::Inside (const G4ThreeVector &p) const
       exit(1);
     }
 
-  if ( result == 1 ) // point is contained within fvolEntity
-    {
-      if (minDist <= 0.5*kCarTolerance) 
-	return kSurface;
-      else
-	return kInside;
-    }
-  else if ( result == 0 )
-    {
-      if (minDist <= 0.5*kCarTolerance) 
-	return kSurface;
-      else
-	return kOutside;
-    }
-
-
-  // fast check to rule out points that are clearly beyond the volume
-  /*
-  if ( p.x() < xMinExtent - kCarTolerance || p.x() > xMaxExtent + kCarTolerance ||
-       p.y() < yMinExtent - kCarTolerance || p.y() > yMaxExtent + kCarTolerance ||
-       p.z() < zMinExtent - kCarTolerance || p.z() > zMaxExtent + kCarTolerance )
-  {
-    return kOutside;
-  }  
- 
-
-  //  G4double minDist = kInfinity;
-  G4double point[3]={p.x(), p.y(), p.z()};
-
-  ErrorCode ec = fdagmc->closest_to_location(fvolEntity, point, minDist);
-  if( ec != MB_SUCCESS)
-    {
-      exit(1);
-    }
-
   if (minDist <= 0.5*kCarTolerance) 
     return kSurface;
-
-  double u = rand();
-  double v = rand();
-  double w = rand();
-  const double magnitude = sqrt( u*u + v*v + w*w );
-  u /= magnitude;
-  v /= magnitude;
-  w /= magnitude;
-
-  G4double direction[3]={u,v,w};
-
-  int result;
-  ec = fdagmc->point_in_volume(fvolEntity, point, result,
-			       direction);  // if uvw is not given, this function generate uvw randomly
-  G4cout << "inside: result =  " << result << std::endl;
-  if (ec != MB_SUCCESS)
-    {
-      G4cout << "failed to get point in volume" << std::endl;
-      exit(1);
-    }
-
-  if ( result == 0 )
-    {
-      G4cout << "point_in_cell not in vol " << fvolEntity << " " << p << G4endl;
-      return kOutside;
-    }
-  else if (result == 1)
-    {
-      G4cout << "point_in_cell in vol " << fvolEntity << " " << p << G4endl;
-      return kInside;
-    }
+  else if ( result == 0 )
+    return kOutside;
   else
-    {
-      G4cout << "pint is nowhere" << G4endl;
-      exit(1);
-    }
-  */
+    return kInside;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -383,11 +316,9 @@ G4double DagSolid::DistanceToIn (const G4ThreeVector &p) const
   fdagmc->closest_to_location(fvolEntity, point, minDist);
   minDist *= cm; // convert back to mm
   if ( minDist <= kCarTolerance*0.5 )
-    return kInfinity;
+    return 0.0;
   else
-    {
-      return minDist;
-    }
+    return minDist;
 }
 
 
@@ -441,7 +372,7 @@ G4double DagSolid::DistanceToOut (const G4ThreeVector &p,
   // particle considered to be on surface
   if (minDist > 0.0 && minDist <= 0.5*kCarTolerance ) 
     {
-      return kInfinity;
+      return 0.0;
     }
   else if ( minDist < kInfinity)
     {
@@ -451,7 +382,7 @@ G4double DagSolid::DistanceToOut (const G4ThreeVector &p,
     }
   else
     {
-      return kInfinity;
+      return 0.0; //was kinfinity
     }
 }
 
@@ -469,11 +400,9 @@ G4double DagSolid::DistanceToOut (const G4ThreeVector &p) const
   fdagmc->closest_to_location(fvolEntity, point, minDist);
   minDist *= cm; // convert back to mm
   if ( minDist < kCarTolerance/2.0 )
-    return kInfinity;
+    return 0.0;
   else
-    {
-      return minDist;
-    }
+    return minDist;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
