@@ -485,6 +485,22 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
 std::string pyne::Material::write_mcnp()
 {
+  // This write method does not write to a file
+  std::ostringstream oss;
+
+  Json::Reader reader;
+  std::vector<std::string> obj = metadata.getMemberNames();
+
+  if (0 <= mass)
+    oss << "Mass    " << mass << "\n";
+
+  if (0 <= density)
+    oss << "Density "  << density << "\n";
+  
+  if (0 <= atoms_per_molecule)
+    oss << "APerM   " << atoms_per_molecule << "\n";
+ 
+  return oss.str();
 };
 
 void pyne::Material::from_text(char * filename) {
