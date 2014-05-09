@@ -18,6 +18,7 @@
 #include <set>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sstream>	// std::ostringstream
 
 #if !defined(JSON_IS_AMALGAMATION)
   #define JSON_IS_AMALGAMATION
@@ -146,6 +147,8 @@ namespace pyne
     void write_hdf5(std::string filename, std::string datapath="/material", 
                     std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
+    /// Return an mcnp input deck record as a string
+    std::string write_mcnp();
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
     /// Reads data from a plaintext file at \a filename into this Material instance.
@@ -272,7 +275,7 @@ namespace pyne
   std::ostream& operator<< (std::ostream& os, Material mat);
 
   /// Converts a Material to an output string stream for mcnp_write.
-  std::ostringstringstream& operator<< (std::ostream& os, Material mat);
+  std::ostringstream& operator<< (std::ostringstream& os, Material mat);
 
   /// A stuct for reprensenting fundemental data in a material.
   /// Useful for HDF5 representations.
