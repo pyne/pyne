@@ -44,7 +44,12 @@ Additionally, building the documentation requires the following:
 ------
 Binary
 ------
-A binary distribution of PyNE is currently available for windows only on 
+Binary distributions of the latest release (0.4) for mac and linux (64-bit) 
+using the conda package manager can be installed by running the command::
+
+    conda install -c https://conda.binstar.org/batesca pyne
+
+A binary distribution of PyNE is also available for windows on 
 32-bit python using conda. In order to install use the following command::
 
     conda install -c https://conda.binstar.org/batesca pyne_win32py27
