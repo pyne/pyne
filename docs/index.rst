@@ -36,7 +36,7 @@ For a quick install from source, please  clone from the official repo::
 Contents
 --------
 
-Usage:
+**Usage:**
 
 .. toctree::
     :maxdepth: 1
@@ -48,16 +48,22 @@ Usage:
     cppapi/index
     previous/index
 
-Development:
+**Theory:**
+
+.. toctree::
+    :maxdepth: 1
+
+    theorymanual/index
+
+**Development:**
 
 .. toctree::
     :maxdepth: 1
 
     devsguide/index
-    pubs
     dev_team
+    pubs
     gsoc/index
-    theorymanual/index
 
 ------------
 Search Links
