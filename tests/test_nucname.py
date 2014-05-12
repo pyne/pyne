@@ -123,6 +123,9 @@ def test_id():
     assert_equal(nucname.id("94-Pu-239"), nucname.id("Pu-239"))
     assert_equal(nucname.id("95-Am-242"), nucname.id("Am-242"))
 
+    assert_equal(nucname.id("In-120n"), 491200002)
+
+
 def test_name():
     assert_equal(nucname.name(942390), "Pu239")
     assert_equal(nucname.name(952421), "Am242M")
@@ -140,6 +143,8 @@ def test_name():
     assert_equal(nucname.name(2440961), "Cm244M")
     assert_equal(nucname.name(2390940), "Pu239")
     assert_equal(nucname.name(2420950), "Am242")
+
+    assert_equal(nucname.name(491202), "In120N")
 
 def test_znum():
     exps = [2, 2, 96, 94, 95, 2, 95, 95, 92, 95, 95, 2, 92, 93, 2, 96, 94, 95, 2,
@@ -188,6 +193,9 @@ def test_zzaaam():
     assert_equal(nucname.zzaaam(2390940), 942390)
     assert_equal(nucname.zzaaam(2420950), 952420)
 
+    assert_equal(nucname.zzaaam("In-120n"), 491202)
+
+
 def test_zzaaam_to_id():
     vals = [20040, 20040, 962440, 942390, 952421, 20040, 952420, 952421, 922361, 
             952424, 952421, 20000, 920000, 930000, 20040, 962440, 942390, 952420, 
@@ -196,6 +204,8 @@ def test_zzaaam_to_id():
         if val is None:
             continue
         yield check_cases, nucname.zzaaam_to_id, val, id
+
+        assert_equal(491200002, nucname.zzaaam_to_id(491202))
 
 def test_zzzaaa(): 
 
