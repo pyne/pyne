@@ -1,10 +1,14 @@
 """nucname tests"""
+from __future__ import unicode_literals, division
 from unittest import TestCase
 import nose 
+import warnings
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
     assert_true, assert_false
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import nucname
 
 def test_name_zz():
@@ -114,6 +118,10 @@ def test_id():
     assert_equal(nucname.id(2420950), 952420000)
     assert_equal(nucname.id(92), 920000000)
 
+    assert_equal(nucname.id("94-Pu-239"), nucname.id("Pu-239"))
+    assert_equal(nucname.id("95-Am-242m"), nucname.id("Am-242m"))
+    assert_equal(nucname.id("94-Pu-239"), nucname.id("Pu-239"))
+    assert_equal(nucname.id("95-Am-242"), nucname.id("Am-242"))
 
 def test_name():
     assert_equal(nucname.name(942390), "Pu239")
@@ -228,14 +236,36 @@ def test_zzzaaa_to_id():
     assert_equal(nucname.zzzaaa_to_id(95242), nucname.id(95642))
     # Added /10*10 to remove the state information from id (ZZZAAA carries no state
     # information, defaults to zero when converting ZZZAAA back to ID)
-    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id(95942)/10)*10)
-    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id("AM-242m")/10)*10)
+    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id(95942)//10)*10)
+    assert_equal(nucname.zzzaaa_to_id(95242), (nucname.id("AM-242m")//10)*10)
 
     assert_equal(nucname.zzzaaa_to_id(2000), nucname.id("he"))
     assert_equal(nucname.zzzaaa_to_id(92000), nucname.id("U"))
     assert_equal(nucname.zzzaaa_to_id(93000), nucname.id("Np"))
 
     assert_equal(nucname.zzzaaa_to_id(2004), nucname.id(40020))
+
+def test_zzllaaam():
+    assert_equal(nucname.zzllaaam(942390), "94-Pu-239")
+    assert_equal(nucname.zzllaaam(952421), "95-Am-242m")
+
+    assert_equal(nucname.zzllaaam("Pu-239"), "94-Pu-239")
+
+    assert_equal(nucname.zzllaaam(94239), "94-Pu-239")
+    assert_equal(nucname.zzllaaam(95642), "95-Am-242")
+    assert_equal(nucname.zzllaaam(95242), "95-Am-242m")
+    assert_equal(nucname.zzllaaam(92636), "92-U-236m")
+
+    assert_equal(nucname.zzllaaam(2390940), "94-Pu-239")
+    assert_equal(nucname.zzllaaam(2420951), "95-Am-242m")
+
+def test_zzllaaam_to_id():
+    assert_equal(nucname.zzllaaam_to_id("94-Pu-239"), nucname.id("Pu-239"))
+    assert_equal(nucname.zzllaaam_to_id("95-Am-242m"), nucname.id("Am-242m"))
+
+    assert_equal(nucname.zzllaaam_to_id("94-Pu-239"), nucname.id("Pu-239"))
+    assert_equal(nucname.zzllaaam_to_id("95-Am-242"), nucname.id("Am-242"))
+    assert_equal(nucname.zzllaaam_to_id("95-Am-242m"), nucname.id("Am-242m"))
 
 def test_mcnp():
     assert_equal(nucname.mcnp(10010),  1001)
@@ -406,6 +436,42 @@ def test_sza():
     assert_equal(nucname.sza(2390940), 94239)
     assert_equal(nucname.sza(2420950), 95242)
 
+
+def test_groundstate():
+
+    assert_equal(nucname.groundstate("he4"), 20040000)
+    assert_equal(nucname.groundstate("Cm-244"), 962440000)
+    assert_equal(nucname.groundstate("PU239"),  942390000)
+    assert_equal(nucname.groundstate("AM242M"), 952420000)
+
+    assert_equal(nucname.groundstate(2004),  20040000)
+    assert_equal(nucname.groundstate(95642), 952420000)
+    assert_equal(nucname.groundstate(95242), 952420000)
+    assert_equal(nucname.groundstate(92636), 922360000)
+    assert_equal(nucname.groundstate(95942), 952420000)
+
+    assert_equal(nucname.groundstate("he"), 20000000)
+    assert_equal(nucname.groundstate("U"), 920000000)
+    assert_equal(nucname.groundstate("Np"), 930000000)
+    assert_equal(nucname.groundstate("Cl"), 170000000)
+
+    assert_equal(nucname.groundstate("4he"),   20040000)
+    assert_equal(nucname.groundstate("244CM"), 962440000)
+    assert_equal(nucname.groundstate("239Pu"), 942390000)
+    assert_equal(nucname.groundstate("242AM"), 952420000)
+
+    assert_equal(nucname.groundstate(40020),   20040000)
+    assert_equal(nucname.groundstate(2440961), 962440000)
+    assert_equal(nucname.groundstate(2390940), 942390000)
+    assert_equal(nucname.groundstate(2420950), 952420000)
+    assert_equal(nucname.groundstate(92), 920000000)
+
+    assert_equal(nucname.groundstate("94-Pu-239"), 942390000)
+    assert_equal(nucname.groundstate("95-Am-242m"), 952420000)
+    assert_equal(nucname.groundstate("94-Pu-239"), 942390000)
+    assert_equal(nucname.groundstate("95-Am-242"), 952420000)
+
+
 def test_sza_to_id():
     vals = [2004, 2004, 96244, 94239, 1095242, 2004, 95242, 1095242, 1092236, 
             4095242, 1095242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 
@@ -423,6 +489,14 @@ def test_isnuclide():
         yield assert_true, nucname.isnuclide(nuc)
     for nuc in arent:
         yield assert_false, nucname.isnuclide(nuc)
+
+
+def test_state_id_to_id():
+    assert_equal(nucname.state_id_to_id(190380015), 190380002)
+
+
+def test_id_to_state_id():
+    assert_equal(nucname.id_to_state_id(190380002), 190380015)
 
 
 if __name__ == "__main__":

@@ -9,4 +9,3 @@ from libcpp.string cimport string as std_string
 
 # local imports 
 cimport cpp_pyne
-

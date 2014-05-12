@@ -8,13 +8,18 @@ This currently consists to natural element materials and those coming from PNNL'
 from __future__ import print_function
 import csv
 import re
+import os
+from warnings import warn
+from pyne.utils import VnVWarning
+
 import tables as tb
 import numpy as np
-import os
 
 from .. import nucname
 from ..data import natural_abund, natural_abund_map
 from ..material import Material
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 elemental_mats = {}
 names = []
@@ -104,7 +109,7 @@ def make_materials_compendium(nuc_data):
         if 0 == len(elemental_mats[zz]):
             continue
         element = Material(elemental_mats[zz], mass=1.0, 
-                           attrs={'name': nucname.name(zz)})
+                           metadata={'name': nucname.name(zz)})
         element.write_hdf5(nuc_data, datapath="/material_library/materials", 
                            nucpath="/material_library/nucid", chunksize=70)
 
@@ -112,7 +117,7 @@ def make_materials_compendium(nuc_data):
     for i in range(len(mats)):
         mats[i].mass = 1.0
         mats[i].density = float(densities[i])
-        mats[i].attrs = {'name': names[i]}
+        mats[i].metadata = {'name': names[i]}
         mats[i].write_hdf5(nuc_data, datapath="/material_library/materials", 
                            nucpath="/material_library/nucid", chunksize=70)
     

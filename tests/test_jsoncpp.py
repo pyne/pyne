@@ -4,7 +4,10 @@ try:
     import simplejson as json
 except ImportError:
     import json
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import nose 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \

@@ -36,7 +36,7 @@ For a quick install from source, please  clone from the official repo::
 Contents
 --------
 
-Usage:
+**Usage:**
 
 .. toctree::
     :maxdepth: 1
@@ -48,14 +48,21 @@ Usage:
     cppapi/index
     previous/index
 
-Development:
+**Theory:**
+
+.. toctree::
+    :maxdepth: 1
+
+    theorymanual/index
+
+**Development:**
 
 .. toctree::
     :maxdepth: 1
 
     devsguide/index
-    pubs
     dev_team
+    pubs
     gsoc/index
 
 ------------
@@ -71,6 +78,6 @@ Search Links
 
 .. _github: https://github.com/pyne/pyne
 
-.. _zip: https://github.com/pyne/pyne/zipball/0.3
-.. _tar: https://github.com/pyne/pyne/tarball/0.3
+.. _zip: https://github.com/pyne/pyne/zipball/0.4
+.. _tar: https://github.com/pyne/pyne/tarball/0.4
 

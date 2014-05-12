@@ -8,8 +8,7 @@ namespace pyne_enr = pyne::enrichment;
 /*********************************/
 /*** Enrichment Helper Classes ***/
 /*********************************/
-pyne_enr::Cascade::Cascade()
-{
+pyne_enr::Cascade::Cascade() {
   alpha = 0.0;
   Mstar = 0.0;
 
@@ -33,13 +32,11 @@ pyne_enr::Cascade::Cascade()
 };
 
 
-pyne_enr::Cascade::~Cascade()
-{
+pyne_enr::Cascade::~Cascade() {
 };
 
 
-void pyne_enr::Cascade::_reset_xjs()
-{
+void pyne_enr::Cascade::_reset_xjs() {
   // resets the key enriment member variables
   x_feed_j = mat_feed.comp[j];
   x_prod_j = mat_prod.comp[j];

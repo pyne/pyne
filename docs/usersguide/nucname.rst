@@ -11,7 +11,7 @@ three pieces of information that *should* be included in a radionuclide's name
 
 1. **Z Number**: The number of protons.
 2. **A Number**: The number of nucleons (neutrons + protons).
-3. **Excitation Level**: The internal energy state of the nucleus.
+3. **Metastable Level**: The metastable state of the nucleus as defined by ENSDF.
 
 Some common naming conventions exist.  The following are the ones currently 
 supported by PyNE.  Functions to convert between forms may be seen in :ref:`name_cast`.
@@ -20,6 +20,11 @@ supported by PyNE.  Functions to convert between forms may be seen in :ref:`name
     digits for the atomic mass number, and ends with a metastable flag (0 = ground,
     1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would
     be expressed as '922350'.
+ #. **zzllaaam**: The ZZLLAAAM naming convention is similar to name form.  However, it is preceded by
+    the nuclides two AA numbers, followed by the two LL characters.  Of the two LL characters, only 
+    the first letter in the chemical symbol is uppercase, the dash is always present, and the the
+    meta-stable flag is lowercase.  For instance, '95-Am-242m' is the valid serpent notation for 
+    this nuclide.
  #. **name**: This is the more common, human readable notation.  The chemical symbol
     (one or two characters long) is first, followed by the atomic weight.  Lastly if
     the nuclide is metastable, the letter *M* is concatenated to the end.  For example,
@@ -40,6 +45,12 @@ supported by PyNE.  Functions to convert between forms may be seen in :ref:`name
  #. **ALARA**: In ALARA format, elements are denoted by the lower case atomic symbol. Isotopes are
     specified by appending a semicolon and A-number. For example, "fe" and "fe:56" represent
     elemental iron and iron-56 respectively. No metastable flag exists.
+ #. **state_id**: The state id naming convention uses the form zzzaaassss. It is different from the
+    canonical zzzaaammmm form in that ssss refers to a list of states by ordered by energy. This is
+    derived from the levels listed in the ENSDF files for a given nuclide. Using this form is
+    dangerous as it may change with new releases of ENSDF data.
+ #. **Groundstate**:  In Groundstate format, the nuclide is stored in a form similar to the standard
+    id form, but the last four digits are zero to eliminate the information about the nuclides state.  
 
 If there are more conventions that you would like to see supported, please contact the :ref:`dev_team`.
 
@@ -47,14 +58,14 @@ If there are more conventions that you would like to see supported, please conta
 --------------
 Canonical Form
 --------------
-The ``zzaaam`` integer form of nuclide names is the fundamental form of nuclide naming because
+The ``zzzaaammmm`` integer form of nuclide names is the fundamental form of nuclide naming because
 it accurately captures all of the needed information in the smallest amount of space.  Given that the 
 Z-number may be up to three digits, A-numbers are always three digits, and the excitation level is
-one digit, all possible nuclides are represented on the range ``0 <= zzaaam < 10000000``.  This 
+one digit, all possible nuclides are represented on the range ``0 <= zzzaaammmm < 10000000000``.  This 
 falls well within 32 bit integers (but sadly outside of the smaller 16 bit ints).
 
 On the other hand, ``name`` string representations may be anywhere from two characters (16 bits)
-up to six characters (48 bits).  So in general, ``zzaaam`` is smaller by 50%.  Other forms do 
+up to six characters (48 bits).  So in general, ``zzzaaammmm`` is smaller by 50%.  Other forms do 
 not necessarily contain all of the required information (``MCNP``) or require additional storage 
 space (``Serpent``).  It may seem pedantic to quibble over the number of bits per nuclide name, 
 but these identifiers are used everywhere throughout nuclear code, so it behooves us to be as small
@@ -64,7 +75,7 @@ The other distinct advantage that integer forms have is that you can natively pe
 on them.  For example::
 
     # Am-242m
-    nuc = 942421
+    nuc = 942420001
 
     # Z-number
     zz = nuc/10000
@@ -75,9 +86,9 @@ on them.  For example::
     # Meta-stable state
     m = nuc%10
 
-Code internal to PyNE use ``zzaaam``, and except for human readability, you should too!  
+Code internal to PyNE use ``zzzaaammmm``, and except for human readability, you should too!  
 Natural elements are specified in this form by having zero A-number and excitation flags
-(``zzaaam('U') == 920000``).
+(``zzzaaammmm('U') == 920000``).
 
 
 ---------------
@@ -94,20 +105,23 @@ Examples of Use
     In [3]: nucname.zzaaam(10010)
     Out[3]: 10010
 
-    In [4]: nucname.name(10010)
-    Out[4]: 'H1'
+    In [4]: nucname.zzllaaam(942390)
+    Out[4]: '95-Am-242m'
 
-    In [5]: nucname.serpent('AM242M')
-    Out[5]: 'Am-242m'
+    In [5]: nucname.name(10010)
+    Out[5]: 'H1'
 
-    In [6]: nucname.name_zz['SR']
-    Out[6]: 38
+    In [6]: nucname.serpent('AM242M')
+    Out[6]: 'Am-242m'
 
-    In [7]: nucname.zz_name[57]
-    Out[7]: 'LA'
+    In [7]: nucname.name_zz['SR']
+    Out[7]: 38
 
-    In [8]: nucname.alara('FE56')
-    Out[8]: 'fe:56'
+    In [8]: nucname.zz_name[57]
+    Out[8]: 'LA'
+
+    In [9]: nucname.alara('FE56')
+    Out[9]: 'fe:56'
 
 
 

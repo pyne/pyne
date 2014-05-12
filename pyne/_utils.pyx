@@ -1,4 +1,6 @@
 """Cython-based utils to be imported into utils."""
+
+from __future__ import division, unicode_literals
 from libc.stdlib cimport malloc, free
 from libc.stdlib cimport atof
 from libc.string cimport strtok, strcpy, strncpy
@@ -8,7 +10,7 @@ cimport pyne.cpp_pyne
 from cython.operator cimport dereference as deref
 import numpy as np
 
-def fromstring_split(char * s, sep=None, dtype=float):
+def fromstring_split(s, sep=None, dtype=float):
     """A replacement for numpy.fromstring() using the Python str.split() 
     and np.array().
 
@@ -38,7 +40,7 @@ def fromstring_split(char * s, sep=None, dtype=float):
     return np.array(rawdata, dtype=dtype)
 
 
-def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-1):
+def fromstring_token(s, sep=" ", bint inplace=False, int maxsize=-1):
     """A replacement for numpy.fromstring() using the C standard
     library atof() and strtok() functions.
 
@@ -74,18 +76,20 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
     cdef char* csep
     cdef int i, I
     cdef np.ndarray[np.float64_t, ndim=1] cdata
-
-    I = len(s)
-    csep = sep
+    
+    s_bytes = s.encode()
+    I = len(s_bytes)
+    sep_bytes = sep.encode()
+    csep = sep_bytes
 
     if inplace:
-        cs = s
+        cs = s_bytes
     else:
         cs = <char *> malloc(I * sizeof(char))
-        strcpy(cs, s)
+        strcpy(cs, s_bytes)
 
     if maxsize < 0:
-        maxsize = (I / 2) + 1
+        maxsize = (I // 2) + 1
 
     data = np.empty(maxsize, dtype=np.float64)
     cdata = data
@@ -104,7 +108,7 @@ def fromstring_token(char * s, char * sep=" ", bint inplace=False, int maxsize=-
     return data
 
 
-def endftod(char * s):
+def endftod(s):
     """Converts a string from ENDF number format to float64.
 
     Parameters
@@ -116,10 +120,14 @@ def endftod(char * s):
     -------
     float64
     """
-    return pyne.cpp_pyne.endftod(<char *> s)
+    cdef char * cs
+    if isinstance(s, str):
+        s = s.encode()
+    cs = s
+    return pyne.cpp_pyne.endftod(cs)
 
 
-def fromendf_tok(char * s):
+def fromendf_tok(s):
     """A replacement for numpy.fromstring().
 
     Parameters:
@@ -133,16 +141,20 @@ def fromendf_tok(char * s):
         Will always return a 1d float64 array.  You must reshape to the
         appropriate shape.
     """
+    cdef char * cs
+    if isinstance(s, str):
+        s = s.encode()
+    cs = s
     cdef int i, num_entries
     cdef char entry[12]
     cdef long pos = 0
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     i = 0
-    num_entries = len(s)/81 * 6
+    num_entries = len(cs)//81 * 6
     cdata = np.empty(num_entries, dtype=np.float64)
     while i < num_entries:
-        pos = i*11 + i/6 * 15
-        strncpy(entry, s+pos, 11)
+        pos = i*11 + i//6 * 15
+        strncpy(entry, cs+pos, 11)
         cdata[i] = pyne.cpp_pyne.endftod(entry)
         i += 1
     return cdata

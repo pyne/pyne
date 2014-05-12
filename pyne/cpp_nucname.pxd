@@ -7,6 +7,7 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     # Conversion dictionaries
     map[std_string, int] name_zz
     map[int, std_string] zz_name
+    map[int, int] state_id_map
 
     # Elemental string sets
     set[std_string] LAN
@@ -68,6 +69,13 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int zzzaaa_to_id(char *) except +
     int zzzaaa_to_id(std_string) except +
 
+    # zzllaaam Functions
+    std_string zzllaaam(int) except +
+    std_string zzllaaam(char *) except +
+    std_string zzllaaam(std_string) except +
+    int zzllaaam_to_id(char *) except +
+    int zzllaaam_to_id(std_string) except +
+
     # MCNP Functions 
     int mcnp(int) except + 
     int mcnp(char *) except + 
@@ -115,3 +123,12 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int sza_to_id(int) except +
     int sza_to_id(char *) except +
     int sza_to_id(std_string) except +
+
+    # Groundstate Functions
+    int groundstate(int) except +
+    int groundstate(char *) except +
+    int groundstate(std_string) except +
+    
+    # State id Functions
+    int state_id_to_id(int state) except +
+    int id_to_state_id(int nuc_id) except +

@@ -33,6 +33,9 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 # Check for MOAB library
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
+if(${MOAB_FOUND})
+    include_directories(${MOAB_INCLUDE_DIR})
+endif(${MOAB_FOUND})
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
@@ -60,7 +63,8 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
     # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
-    set(CMAKE_INSTALL_RPATH "@rpath/lib")
+    set(CMAKE_MACOSX_RPATH 1)
+    set(CMAKE_INSTALL_RPATH "@loader_path/lib")
 elseif(WIN32)
     if(MSVC)
         # ??? Who knows what to do here?! --Anthony
@@ -97,7 +101,7 @@ add_subdirectory(pyne/xs)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 message("-- Copying C/C++ header files.")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/cpp/" DESTINATION
