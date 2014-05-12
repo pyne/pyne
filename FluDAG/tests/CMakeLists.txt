@@ -57,11 +57,9 @@ ADD_CUSTOM_COMMAND (TARGET ${tgt}
 # make fludag source files into a library
 SET(fludag_source_files 
 	    ${fludag_source}/fluka_funcs.cpp
-	    ${fludag_source}/UnitNumberManager.cpp
  )
 
 SET (fludag_test_source ${fludag_source_files}
-	${CMAKE_CURRENT_SOURCE_DIR}/test_UnitNumber.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/test_FlukaFuncs.cpp
 	)
 
@@ -84,5 +82,4 @@ TARGET_LINK_LIBRARIES (fludag_unit_tests ${LIBS} gtest)
 enable_testing()
 
 # list test cases for compatibility with BaTLab
-add_test(test_UnitNumber test_UnitNumber)
 add_test(test_FlukaFuncs test_FlukaFuncs)
