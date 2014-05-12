@@ -42,6 +42,7 @@ Contents
     :maxdepth: 1
 
     install
+    tutorial/index
     gallery/index
     usersguide/index
     pyapi/index
