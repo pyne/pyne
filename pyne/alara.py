@@ -238,7 +238,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
                     The relative error associated with the volume fraction.
      cell_mats : dict
         Maps geometry cell numbers to PyNE Material objects. Each PyNE material
-        object must have the 'mat_number' in Material.attrs.
+        object must have the 'mat_number' in Material.metadata.
     geom_file : str
         The name of the file to print the geometry and material blocks.
     matlib_file : str
@@ -261,10 +261,10 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
 
         ve_mixture = {}
         for row in cell_fracs[cell_fracs['idx'] == i]:
-            if cell_mats[row['cell']].attrs['mat_number'] not in ve_mixture.keys():
-                ve_mixture[cell_mats[row['cell']].attrs['mat_number']] = round(row['vol_frac'], 6)
+            if cell_mats[row['cell']].metadata['mat_number'] not in ve_mixture.keys():
+                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] = round(row['vol_frac'], 6)
             else:
-                ve_mixture[cell_mats[row['cell']].attrs['mat_number']] += round(row['vol_frac'], 6)
+                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] += round(row['vol_frac'], 6)
 
         if ve_mixture not in unique_mixtures:
             unique_mixtures.append(ve_mixture)
@@ -287,10 +287,10 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
 
     printed_mats = []
     for mat in cell_mats.values():
-        mat_num = mat.attrs['mat_number']
+        mat_num = mat.metadata['mat_number']
         if mat_num not in printed_mats:
             printed_mats.append(mat_num)
-            matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(mat.attrs['mat_number'], 
+            matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(mat.metadata['mat_number'], 
                                                              mat.density, 
                                                              len(mat.comp))
             for nuc, comp in mat.comp.iteritems():

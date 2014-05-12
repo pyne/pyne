@@ -14,7 +14,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       geom=None, num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False, 
                       alara_inp="alara_geom", alara_matlib="alara_matlib",  
-                      output_mesh="r2s_step1.h5m"):
+                      output_mesh="r2s_step1.h5m", output_material=False):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
 
@@ -59,6 +59,9 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     output_mesh : str, optional
         A mesh containing all the fluxes and materials used for irradiation
         setup.
+    output_material : bool, optional
+        If true, output mesh will have materials as determined by 
+        dagmc.discretize_geom()
     """
     if geom is not None and isfile(geom):
         load(geom)
@@ -74,11 +77,11 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     else:
         #  flux_mesh is meshtal file
         if isinstance(flux_mesh, str) and isfile(flux_mesh):
-            flux_mesh = Meshtal(flux_mesh, {tally_num: (flux_tag, 
-                                                        flux_tag + "_err", 
-                                                        flux_tag + "_total", 
-                                                        flux_tag + "_err_total")},
-                                                        meshes_have_mats=True)
+            flux_mesh = Meshtal(flux_mesh, 
+                                {tally_num: (flux_tag, flux_tag + "_err", 
+                                             flux_tag + "_total", 
+                                             flux_tag + "_err_total")},
+                                             meshes_have_mats=output_material)
             m = flux_mesh.tally[tally_num]
         #  flux_mesh is Meshtal object
         elif instance(flux_mesh, Meshtal):
@@ -92,7 +95,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     else:
         cell_fracs = discretize_geom(m)
 
-    #m.cell_fracs_to_mats(vol_fracs, cell_mats)
+    if output_material:
+        m.cell_fracs_to_mats(cell_fracs, cell_mats)
 
     mesh_to_fluxin(m, flux_tag, fluxin, reverse)
     record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib)

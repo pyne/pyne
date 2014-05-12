@@ -22,8 +22,8 @@ def test_irradiation_setup_structured():
 
     meshtal = os.path.join(thisdir, "files_test_r2s", "meshtal_2x2x1")
     tally_num = 4
-    cell_mats = {2: Material({2004: 1.0}, density=1.0, attrs={'mat_number': 11}),
-                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, attrs={'mat_number':12})}
+    cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'mat_number': 11}),
+                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'mat_number':12})}
     alara_params = "Bogus line for testing\n" 
     geom = os.path.join(thisdir, "unitbox.h5m")
     num_rays = 9
@@ -32,12 +32,13 @@ def test_irradiation_setup_structured():
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
     reverse = True
     alara_inp = os.path.join(os.getcwd(), "alara_inp")
-    alara_matlib= os.path.join(os.getcwd(), "alara_matlib")
-    output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
+    alara_matlib = os.path.join(os.getcwd(), "alara_matlib")
+    output_mesh = os.path.join(os.getcwd(), "r2s_step1.h5m")
+    output_material = True
  
     irradiation_setup(meshtal, cell_mats, alara_params, tally_num, geom,
                       num_rays, grid, flux_tag, fluxin, reverse, alara_inp,
-                      alara_matlib, output_mesh)
+                      alara_matlib, output_mesh, output_material)
 
     #  expected output files
     exp_alara_inp = os.path.join(thisdir, "files_test_r2s", "exp_alara_inp")
@@ -70,12 +71,12 @@ def test_irradiation_setup_structured():
 
     m = Mesh(structured=True, mesh=output_mesh, mats=output_mesh)
     for i, mat, _ in m:
-        #assert_almost_equal(mat.density, 1.962963E+00)
-        #assert_equal(len(mat.comp), 3)
-        #assert_almost_equal(mat.comp[20040000], 1.886792E-02)
-        #assert_almost_equal(mat.comp[30060000], 5.886792E-01)
-        #assert_almost_equal(mat.comp[30070000], 3.924528E-01)
-        #assert_array_equal(m.n_flux[i], fluxes[i])
+        assert_almost_equal(mat.density, 1.962963E+00)
+        assert_equal(len(mat.comp), 3)
+        assert_almost_equal(mat.comp[20040000], 1.886792E-02)
+        assert_almost_equal(mat.comp[30060000], 5.886792E-01)
+        assert_almost_equal(mat.comp[30070000], 3.924528E-01)
+        assert_array_equal(m.n_flux[i], fluxes[i])
         assert_array_equal(m.n_flux_err[i], errs[i])
         assert_almost_equal(m.n_flux_total[i], tot_fluxes[i])
         assert_almost_equal(m.n_flux_err_total[i], tot_errs[i])
@@ -118,8 +119,8 @@ def test_irradiation_setup_unstructured():
     meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
     meshtal.mesh.save(meshtal_mesh_file)
 
-    cell_mats = {2: Material({2004: 1.0}, density=1.0, attrs={'mat_number':11}),
-                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, attrs={'mat_number':21})}
+    cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'mat_number':11}),
+                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'mat_number':12})}
     alara_params = "Bogus line for testing\n" 
     geom = os.path.join(thisdir, "unitbox.h5m")
     flux_tag = "n_flux"
@@ -128,14 +129,16 @@ def test_irradiation_setup_unstructured():
     alara_inp = os.path.join(os.getcwd(), "alara_inp")
     alara_matlib= os.path.join(os.getcwd(), "alara_matlib")
     output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
+    output_material = True
  
     irradiation_setup(flux_mesh=meshtal_mesh_file, cell_mats=cell_mats, 
                       alara_params=alara_params, geom=geom, flux_tag=flux_tag, 
                       fluxin=fluxin, reverse=reverse, alara_inp=alara_inp,
-                      alara_matlib=alara_matlib, output_mesh=output_mesh)
+                      alara_matlib=alara_matlib, output_mesh=output_mesh,
+                      output_material=output_material)
 
     #  expected output files
-    exp_alara_inp = os.path.join(thisdir, "files_test_r2s", "exp_alara_inp")
+    exp_alara_inp = os.path.join(thisdir, "files_test_r2s", "exp_alara_inp_un")
     exp_alara_matlib = os.path.join(thisdir, "files_test_r2s", 
                                              "exp_alara_matlib_un")
     exp_fluxin = os.path.join(thisdir, "files_test_r2s", "exp_fluxin_un")
@@ -146,12 +149,12 @@ def test_irradiation_setup_unstructured():
             assert_equal(a, b)
 
     #  test alara matlibe file
-    with open(alara_matlib, 'r') as f1, open(exp_alara_matlib) as f2:
+    with open(alara_matlib, 'r') as f1, open(exp_alara_matlib, 'r') as f2:
         for a, b in zip(f1.readlines(), f2.readlines()):
             assert_equal(a, b)
 
     #  test alara fluxin file
-    with open(fluxin, 'r') as f1, open(exp_fluxin) as f2:
+    with open(fluxin, 'r') as f1, open(exp_fluxin, 'r') as f2:
         for a, b in zip(f1.readlines(), f2.readlines()):
             assert_equal(a, b)
 
