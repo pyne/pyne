@@ -483,7 +483,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 };
 
-std::string pyne::Material::write_mcnp()
+std::string pyne::Material::mcnp()
 {
   // This write method does not write to a file
   std::ostringstream oss;
@@ -508,18 +508,23 @@ std::string pyne::Material::write_mcnp()
   std::string nuc_name;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++) 
   {
-    nuc_name = pyne::nucname::name( i->first ) + "  ";
+    std::cout << i->first << ", " << i->second << "\n";
+    int n=i->first;
+     
+    nuc_name = pyne::nucname::name( n ) + "  ";
+    nuc_name = pyne::nucname::name( "H1" ) + "  ";
+    nuc_name = pyne::nucname::name( (int)922350000 ) + "  ";
+/*
     while (nuc_name.length() < 8)
     {
       nuc_name += " ";
     }
+*/
     oss << nuc_name << i->second << "\n";
   }
-//  s = ''
 
-  if 'name' in metadata:
-       // s += 'C name: {0}\n'.format(self.metadata['name'])
-       oss << 'C name: {0}\n'.format(self.metadata['name'])
+//  if ('name' in metadata:
+//       oss << 'C name: {0}\n'.format(self.metadata['name'])
 
   return oss.str();
 }
