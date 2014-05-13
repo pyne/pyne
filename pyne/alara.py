@@ -212,9 +212,9 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
             else:
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
-def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file, sig_figs=6):
-    """record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file, digits)
-    This function preforms the same task as alara.mesh_to_geom, except the
+def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file, 
+                   sig_figs=6):
+    """This function preforms the same task as alara.mesh_to_geom, except the
     geometry is on the basis of the stuctured array output of
     dagmc.discretize_geom rather than a PyNE material object with materials.
     This allows for more efficient ALARA runs by minimizing the number of
@@ -245,8 +245,8 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file, sig_figs
     matlib_file : str
         The name of the file to print the matlib.
     sig_figs : int
-        The number of significant figures that two mixtures must have in common to
-        be treated as the same mixture within ALARA.
+        The number of significant figures that two mixtures must have in common
+        to be treated as the same mixture within ALARA.
     """
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
@@ -265,22 +265,25 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file, sig_figs
 
         ve_mixture = {}
         for row in cell_fracs[cell_fracs['idx'] == i]:
-            if cell_mats[row['cell']].metadata['mat_number'] not in ve_mixture.keys():
-                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] \
-                    = round(row['vol_frac'], sig_figs)
+            if cell_mats[row['cell']].metadata['mat_number'] \
+                not in ve_mixture.keys():
+                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] = \
+                    round(row['vol_frac'], sig_figs)
             else:
-                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] \
-                    += round(row['vol_frac'], sig_figs)
+                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] += \
+                    round(row['vol_frac'], sig_figs)
 
         if ve_mixture not in unique_mixtures:
             unique_mixtures.append(ve_mixture)
-            mixture += "mixture mix_{0}\n".format(unique_mixtures.index(ve_mixture))
+            mixture += "mixture mix_{0}\n".format(
+                                           unique_mixtures.index(ve_mixture))
             for key, value in ve_mixture.items():
                 mixture += "    material mat_{0} 1 {1}\n".format(key, value)
 
             mixture += "end\n\n"
 
-        mat_loading += "    zone_{0}    mix_{1}\n".format(i, unique_mixtures.index(ve_mixture))
+        mat_loading += "    zone_{0}    mix_{1}\n".format(i, 
+                        unique_mixtures.index(ve_mixture))
 
     volume += "end\n\n"
     mat_loading += "end\n\n"
@@ -295,12 +298,11 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file, sig_figs
         mat_num = mat.metadata['mat_number']
         if mat_num not in printed_mats:
             printed_mats.append(mat_num)
-            matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(mat.metadata['mat_number'], 
-                                                             mat.density, 
-                                                             len(mat.comp))
+            matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(
+                       mat.metadata['mat_number'], mat.density, len(mat.comp))
             for nuc, comp in mat.comp.iteritems():
-                matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0, 
-                                                             znum(nuc))
+                matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), 
+                                                      comp*100.0, znum(nuc))
             matlib += "\n"
 
     with open(matlib_file, 'w') as f:
