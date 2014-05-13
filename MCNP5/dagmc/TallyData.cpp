@@ -9,8 +9,29 @@
 //---------------------------------------------------------------------------//
 TallyData::TallyData(unsigned int num_energy_bins, bool total_energy_bin) 
 {
-    this->num_energy_bins = num_energy_bins;
-    this->total_energy_bin = total_energy_bin;
+    assert(num_energy_bins >= 1);
+    if (num_energy_bins == 1)
+    {
+       // Any time there is only one energy bin, total_energy_bin is moot
+       this->total_energy_bin = false;
+    }
+    else
+    {
+       // Otherwise, pass through the value
+       this->total_energy_bin = total_energy_bin;
+    }
+
+    //////////////////////////////////////////////////
+    if (this->total_energy_bin)
+    {
+       // Add an extra bin for the total, if required
+       this->num_energy_bins = num_energy_bins + 1;
+    }
+    else
+    {
+       this->num_energy_bins = num_energy_bins;
+    }
+    
     this->num_tally_points = 0;
 }
 //---------------------------------------------------------------------------//

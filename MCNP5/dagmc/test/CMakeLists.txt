@@ -56,6 +56,9 @@ TARGET_LINK_LIBRARIES(test_CellTally ${LIBRARIES})
 ADD_EXECUTABLE(test_TallyEvent test_TallyEvent.cpp)
 TARGET_LINK_LIBRARIES(test_TallyEvent ${LIBRARIES})
 
+ADD_EXECUTABLE(test_TallyData test_TallyData.cpp)
+TARGET_LINK_LIBRARIES(test_TallyData ${LIBRARIES})
+
 # enable DAGMC Tally test cases
 ENABLE_TESTING()
 
@@ -67,3 +70,4 @@ ADD_TEST(test_PolynomialKernel test_PolynomialKernel)
 ADD_TEST(test_Quadrature test_Quadrature)
 ADD_TEST(test_CellTally test_CellTally)
 ADD_TEST(test_TallyEvent test_TallyEvent)
+ADD_TEST(test_TallyData test_TallyData)
