@@ -1354,6 +1354,7 @@ def read_mcnp_inp(inp):
                 mat_from_mcnp(inp, mat_lines[i], densities[mat_nums[i]]))
         else:
             material_list.append(mat_from_mcnp(inp, mat_lines[i]))
+
     return material_list
 
 

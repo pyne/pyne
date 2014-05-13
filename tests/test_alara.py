@@ -180,25 +180,30 @@ def test_record_to_geom():
     if not HAVE_PYTAPS:
         raise SkipTest
 
-    expected_geom = os.path.join(thisdir, "files_test_alara", "alara_record_geom.txt")
-    expected_matlib = os.path.join(thisdir, "files_test_alara", "alara_record_matlib.txt")
+    expected_geom = os.path.join(thisdir, "files_test_alara", 
+                                 "alara_record_geom.txt")
+    expected_matlib = os.path.join(thisdir, "files_test_alara", 
+                                   "alara_record_matlib.txt")
     geom = os.path.join(os.getcwd(), "alara_record_geom")
     matlib = os.path.join(os.getcwd(), "alara_record_matlib")
-    cell_fracs = np.zeros(7, dtype=[('idx', np.int64),
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
                                         ('cell', np.int64),
                                         ('vol_frac', np.float64),
                                         ('rel_error', np.float64)])
 
-    cell_mats = {11: Material({'H1': 1.0, 'K39': 1.0}, density=1.1, metadata={'mat_number': 21}),
-                 12: Material({'H1': 0.1, 'O16': 1.0}, density=1.2, metadata={'mat_number': 22}),
-                 13: Material({'He4': 42.0}, density=1.3, metadata={'mat_number': 23})}
+    cell_mats = {11: Material({'H1': 1.0, 'K39': 1.0}, density=1.1, 
+                              metadata={'mat_number': 21}),
+                 12: Material({'H1': 0.1, 'O16': 1.0}, density=1.2, 
+                              metadata={'mat_number': 22}),
+                 13: Material({'He4': 42.0}, density=1.3, 
+                              metadata={'mat_number': 23})}
 
     cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0), 
                      (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 1.0, 0.0), 
-                     (3, 12, 1.0, 0.0)]
+                     (3, 11, 0.55, 0.0), (3, 12, 0.45, 0.0)]
 
-    m = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True,
-             mats=None)
+    m = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]], 
+             structured=True, mats=None)
 
     record_to_geom(m, cell_fracs, cell_mats, geom, matlib)
 
@@ -230,7 +235,8 @@ def test_mesh_to_geom():
         raise SkipTest
 
     expected_geom = os.path.join(thisdir, "files_test_alara", "alara_geom.txt")
-    expected_matlib = os.path.join(thisdir, "files_test_alara", "alara_matlib.txt")
+    expected_matlib = os.path.join(thisdir, "files_test_alara", 
+                                   "alara_matlib.txt")
     geom = os.path.join(os.getcwd(), "alara_geom")
     matlib = os.path.join(os.getcwd(), "alara_matlib")
 

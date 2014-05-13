@@ -168,10 +168,10 @@ def test_irradiation_setup_unstructured():
 
     m = Mesh(structured=True, mesh=output_mesh, mats=output_mesh)
     for i, mat, _ in m:
-        #assert_almost_equal(mat.density, 2.0)
-        #assert_equal(len(mat.comp), 2)
-        #assert_almost_equal(mat.comp[30060000], 0.6)
-        #assert_almost_equal(mat.comp[30070000], 0.4)
+        assert_almost_equal(mat.density, 2.0)
+        assert_equal(len(mat.comp), 2)
+        assert_almost_equal(mat.comp[30060000], 0.6)
+        assert_almost_equal(mat.comp[30070000], 0.4)
         assert_array_equal(m.n_flux[i], fluxes[i])
         assert_array_equal(m.n_flux_err[i], errs[i])
         assert_almost_equal(m.n_flux_total[i], tot_fluxes[i])

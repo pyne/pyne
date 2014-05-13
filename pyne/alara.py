@@ -212,30 +212,31 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
             else:
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
-def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
-    """record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file)
-    Function preforms the same funcion as alara.mesh_to_geom, except the
+def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file, sig_figs=6):
+    """record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file, digits)
+    This function preforms the same task as alara.mesh_to_geom, except the
     geometry is on the basis of the stuctured array output of
     dagmc.discretize_geom rather than a PyNE material object with materials.
     This allows for more efficient ALARA runs by minimizing the number of
-    materials in the ALARA matlib.
+    materials in the ALARA matlib. This is done by treating mixtures that are
+    equal up to <sig_figs> digits to be the same mixture within ALARA.
 
     Parameters
     ----------
     mesh : PyNE Mesh object
         The Mesh object for which the geometry is discretized.
      cell_fracs : structured array
-            The output from dagmc.discretize_geom(). A sorted, one dimensional
-            array, each entry containing the following fields:
+        The output from dagmc.discretize_geom(). A sorted, one dimensional
+        array, each entry containing the following fields:
 
-                :idx: int 
-                    The volume element index.
-                :cell: int
-                    The geometry cell number.
-                :vol_frac: float
-                    The volume fraction of the cell withing the mesh ve.
-                :rel_error: float
-                    The relative error associated with the volume fraction.
+            :idx: int 
+                The volume element index.
+            :cell: int
+                The geometry cell number.
+            :vol_frac: float
+                The volume fraction of the cell withing the mesh ve.
+            :rel_error: float
+                The relative error associated with the volume fraction.
      cell_mats : dict
         Maps geometry cell numbers to PyNE Material objects. Each PyNE material
         object must have the 'mat_number' in Material.metadata.
@@ -243,6 +244,9 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
         The name of the file to print the geometry and material blocks.
     matlib_file : str
         The name of the file to print the matlib.
+    sig_figs : int
+        The number of significant figures that two mixtures must have in common to
+        be treated as the same mixture within ALARA.
     """
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
@@ -262,9 +266,11 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
         ve_mixture = {}
         for row in cell_fracs[cell_fracs['idx'] == i]:
             if cell_mats[row['cell']].metadata['mat_number'] not in ve_mixture.keys():
-                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] = round(row['vol_frac'], 6)
+                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] \
+                    = round(row['vol_frac'], sig_figs)
             else:
-                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] += round(row['vol_frac'], 6)
+                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] \
+                    += round(row['vol_frac'], sig_figs)
 
         if ve_mixture not in unique_mixtures:
             unique_mixtures.append(ve_mixture)
@@ -278,7 +284,6 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
 
     volume += "end\n\n"
     mat_loading += "end\n\n"
-    print(unique_mixtures)
 
     with open(geom_file, 'w') as f:
         f.write(geometry + volume + mat_loading + mixture)
@@ -295,7 +300,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file):
                                                              len(mat.comp))
             for nuc, comp in mat.comp.iteritems():
                 matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0, 
-                                                            znum(nuc))
+                                                             znum(nuc))
             matlib += "\n"
 
     with open(matlib_file, 'w') as f:
