@@ -488,6 +488,7 @@ std::string pyne::Material::write_mcnp()
   // This write method does not write to a file
   std::ostringstream oss;
 
+  // Below is a copy of write_text() with 'f' replaced by 'oss'
   Json::Reader reader;
   std::vector<std::string> obj = metadata.getMemberNames();
 
@@ -500,8 +501,28 @@ std::string pyne::Material::write_mcnp()
   if (0 <= atoms_per_molecule)
     oss << "APerM   " << atoms_per_molecule << "\n";
  
+  for (int i=0; i < metadata.size(); i=i+2){
+    oss << metadata.get(obj.at(i), "") << metadata.get(obj.at(i+1), "");
+  }
+
+  std::string nuc_name;
+  for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++) 
+  {
+    nuc_name = pyne::nucname::name( i->first ) + "  ";
+    while (nuc_name.length() < 8)
+    {
+      nuc_name += " ";
+    }
+    oss << nuc_name << i->second << "\n";
+  }
+//  s = ''
+
+  if 'name' in metadata:
+       // s += 'C name: {0}\n'.format(self.metadata['name'])
+       oss << 'C name: {0}\n'.format(self.metadata['name'])
+
   return oss.str();
-};
+}
 
 void pyne::Material::from_text(char * filename) {
   std::string fname (filename);
