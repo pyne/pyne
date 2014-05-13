@@ -14,19 +14,19 @@ SET(base_pyne_libs
 	${hdf5_lib_dir}/libhdf5.so
 	${pyne_lib_dir}/libpyne.so
 	${pyne_lib_dir}/libpyne_material.so
+	${pyne_lib_dir}/libpyne_nucname.so
 )
 
 SET(libs
 	${base_pyne_libs}
 	${pyne_lib_dir}/libpyne_data.so
-	${pyne_lib_dir}/libpyne_nucname.so
 )
 
 # Where to look for includes
 INCLUDE_DIRECTORIES(${hdf5_include} ${pyne_include})
 
 ADD_EXECUTABLE(test_material test_createMaterial.cpp)
-TARGET_LINK_LIBRARIES(test_material ${base_pyne_libs})
+TARGET_LINK_LIBRARIES(test_material ${libs})
 
 # Create the executable that can call flukam_
 ADD_EXECUTABLE(pyne_mat pyne_mat.cpp)

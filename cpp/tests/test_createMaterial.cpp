@@ -1,4 +1,5 @@
 #include "material.h"
+#include "nucname.h"
 
 int main (int argc, char* argv[])
 {
@@ -21,7 +22,7 @@ int main (int argc, char* argv[])
    // Create a basic filled Material object
    test_mat = Material(nucvec);
 
-   // Test if can call into the pyne library
+   // Test if can call into the existing pyne library
    comp_map::iterator it;
    for (it=test_mat.comp.begin(); it != test_mat.comp.end(); ++it)
    {
@@ -32,6 +33,6 @@ int main (int argc, char* argv[])
    std::cout << "atoms_per_molecule = " << test_mat.atoms_per_molecule << std::endl;
 
    // Test if can call added functionality in pyne library
-   std::string write_mcnp_ret = test_mat.write_mcnp();
-   std::cout << write_mcnp_ret << "\nTaDA!" << std::endl;
+   std::string mcnp_ret = test_mat.mcnp();
+   std::cout << mcnp_ret;
 }
