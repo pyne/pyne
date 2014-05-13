@@ -54,7 +54,7 @@ A binary distribution of PyNE is also available for windows on
 
     conda install -c https://conda.binstar.org/batesca pyne_win32py27
 
-Conda binaries are coming soon for other platforms.
+Conda binaries do not have moab/pytaps/mesh support (yet).
 
 .. _install_source:
 
