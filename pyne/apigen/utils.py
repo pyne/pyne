@@ -1,8 +1,11 @@
 """Utility functions for pyne.apigen"""
-
 import re
+from warnings import warn
+from pyne.utils import VnVWarning
 
 from sympy.utilities.codegen import codegen
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
     """Converts the return value sympy.cse() to a single C code snippet.

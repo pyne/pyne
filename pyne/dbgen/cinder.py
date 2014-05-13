@@ -1,15 +1,25 @@
 """This module provides a way to locate, parse, and store CINDER cross sections."""
+from __future__ import print_function
 import os
+import io
 import re
+import sys
 import shutil
 from glob import glob
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.utils import to_barns, failure
-from pyne.dbgen.api import BASIC_FILTERS
+from .. import nucname
+from ..utils import failure
+from .api import BASIC_FILTERS
+
+if sys.version_info[0] > 2:
+  basestring = str
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already present."""
@@ -22,17 +32,17 @@ def grab_cinder_dat(build_dir="", datapath=''):
     elif 'DATAPATH' in os.environ:
         datapath = os.environ['DATAPATH']
     else:
-        print failure("DATAPATH not defined in environment; cinder.dat not found - skipping.")
+        print(failure("DATAPATH not defined in environment; cinder.dat not found - skipping."))
         return False
 
     local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr].[Dd][Aa][Tt]")
     local_filename = glob(local_filename)
     if 0 < len(local_filename):
-        print "Grabbing cinder.dat from " + datapath
+        print("Grabbing cinder.dat from " + datapath)
         shutil.copy(local_filename[0], build_filename)
         rtn = True
     else:
-        print failure("cinder.dat file not found in DATAPATH dir - skipping.")
+        print(failure("cinder.dat file not found in DATAPATH dir - skipping."))
         rtn = False
     return rtn
 
@@ -105,7 +115,16 @@ def get_group_sizes(raw_data):
 
     return nuclides, G_n, G_p, G_g
 
-
+def safe_decode(b, encs=(None, 'utf-8', 'latin-1')):
+    """Tries to decode a bytes array in a few different ways."""
+    enc, encs = encs[0], encs[1:]
+    try:
+        s = b.decode() if enc is None else b.decode(enc)
+    except UnicodeDecodeError:
+        if len(encs) == 0:
+            raise
+        s = safe_decode(b, encs)
+    return s
 
 def make_mg_group_structure(nuc_data, build_dir=""):
     """Add the energy group bounds arrays to the hdf5 library.
@@ -125,8 +144,9 @@ def make_mg_group_structure(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
@@ -178,8 +198,9 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
@@ -196,7 +217,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.id(m_from.group(1))
 
         # Check matestable state
         if 1 < from_nuc%10:
@@ -208,7 +229,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
         # Iterate over all to_nucs
         for m_to in re.finditer(to_nuc_pattern, from_nuc_part):
-            to_nuc = nucname.zzaaam(m_to.group(1))
+            to_nuc = nucname.id(m_to.group(1))
 
             # Check matestable state
             if 1 < to_nuc%10:
@@ -266,8 +287,9 @@ def make_mg_fission(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
@@ -284,7 +306,7 @@ def make_mg_fission(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.id(m_from.group(1))
 
         # Check matestable state
         if 1 < from_nuc%10:
@@ -353,8 +375,9 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
@@ -371,7 +394,7 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
-        from_nuc = nucname.zzaaam(m_from.group(1))
+        from_nuc = nucname.id(m_from.group(1))
 
         # Check matestable state
         if 1 < from_nuc%10:
@@ -494,7 +517,7 @@ def parse_neutron_fp_info(raw_data):
         iit = iits[m]
         index = int(iit[0])
 
-        nuc = nucname.zzaaam(iit[1])
+        nuc = nucname.id(iit[1])
         # Correct for metastable flag
         if 0 != nuc%10:
             nuc = nuc + 2000
@@ -528,8 +551,9 @@ def make_neutron_fp_info(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # get the info table
     info_table = parse_neutron_fp_info(raw_data)
@@ -584,7 +608,7 @@ def grab_photon_fp_info(raw_data):
         iit = iits[m]
         index = int(iit[0])
 
-        nuc = nucname.zzaaam(iit[1])
+        nuc = nucname.id(iit[1])
         # Correct for metastable flag
         if 0 != nuc%10:
             nuc = nuc + 2000
@@ -617,8 +641,9 @@ def make_photon_fp_info(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Grab photon info table
     info_table = grab_photon_fp_info(raw_data)
@@ -664,8 +689,9 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     N_n, N_g = get_fp_sizes(raw_data)
@@ -686,7 +712,7 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
     # Iterate over all to-nucs
     fp_to_nuc_pattern = fp_to_nuc_base + N_n*fp_to_nuc_insert + ")"
     for m_to in re.finditer(fp_to_nuc_pattern, nfp_yields_raw):
-        to_nuc = nucname.zzaaam(m_to.group(2).strip())
+        to_nuc = nucname.id(m_to.group(2).strip())
 
         # Check matestable state
         if 1 < to_nuc%10:
@@ -733,8 +759,9 @@ def make_photon_fp_yields(nuc_data, build_dir):
 
     # Read in cinder data file
     cinder_dat = os.path.join(build_dir, 'cinder.dat')
-    with open(cinder_dat, 'r') as f:
+    with io.open(cinder_dat, 'rb') as f:
         raw_data = f.read()
+    raw_data = safe_decode(raw_data)
 
     # Get group sizes
     N_n, N_g = get_fp_sizes(raw_data)
@@ -755,7 +782,7 @@ def make_photon_fp_yields(nuc_data, build_dir):
     # Iterate over all to-nucs
     fp_to_nuc_pattern = fp_to_nuc_base + N_g*fp_to_nuc_insert + ")"
     for m_to in re.finditer(fp_to_nuc_pattern, gfp_yields_raw):
-        to_nuc = nucname.zzaaam(m_to.group(2).strip())
+        to_nuc = nucname.id(m_to.group(2).strip())
 
         # Check matestable state
         if 1 < to_nuc%10:
@@ -788,7 +815,7 @@ def make_cinder(args):
 
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'cinder_xs') and hasattr(f.root.neutron, 'cinder_fission_products'):
-            print "skipping Cinder XS data table creation; already exists."
+            print("skipping Cinder XS data table creation; already exists.")
             return
 
     # First grab the atomic abundance data
@@ -797,36 +824,36 @@ def make_cinder(args):
         return
 
     # Add energy groups to file
-    print "Adding cinder data..."
-    print "  energy group boundaries."
+    print("Adding cinder data...")
+    print("  energy group boundaries.")
     make_mg_group_structure(nuc_data, build_dir)
 
     # Add neutron absorption to file
-    print "  neutron absorption cross sections."
+    print("  neutron absorption cross sections.")
     make_mg_absorption(nuc_data, build_dir)
 
     # Add fission to file
-    print "  neutron fission cross sections."
+    print("  neutron fission cross sections.")
     make_mg_fission(nuc_data, build_dir)
 
     # Add gamma decay spectrum to file
-    print "  gamma decay spectra."
+    print("  gamma decay spectra.")
     make_mg_gamma_decay(nuc_data, build_dir)
 
     # Add neutron info table
-    print "  neutron fission product info."
+    print("  neutron fission product info.")
     make_neutron_fp_info(nuc_data, build_dir)
 
     # Add neutron yield table
-    print "  neutron fission product yields."
+    print("  neutron fission product yields.")
     make_neutron_fp_yields(nuc_data, build_dir)
 
     # Add photon info table
-    print "  photofission product info."
+    print("  photofission product info.")
     make_photon_fp_info(nuc_data, build_dir)
 
     # Add neutron yield table
-    print "  photofission product yields."
+    print("  photofission product yields.")
     make_photon_fp_yields(nuc_data, build_dir)
 
-    print "...finished with cinder."
+    print("...finished with cinder.")

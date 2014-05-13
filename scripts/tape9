@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+"""Manipulate ORIGEN v2.2 TAPE9.INP files."""
+
+from pyne.cli.tape9 import main
+
+main()
+
