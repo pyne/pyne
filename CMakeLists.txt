@@ -50,15 +50,6 @@ include_directories(${SCIMAKE_DIR}/include)
 set(DAGMC_VERSION "${VERSION}-${PROJECT_REV}")
 install(CODE "message(STATUS \"Installing into \${CMAKE_INSTALL_PREFIX}.\")")
 
-# JRC: I am removing this, as a project should make this decision, not
-# scimake.  It goes into SciInit in any case.
-if (FALSE)
-if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.4")
-# Only works on gcc > 4.4
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
-endif()
-endif()
-
 ######################################################################
 #
 # Always use rpath to greatest extent.
@@ -135,7 +126,7 @@ endif ()
 ###################################################
 
 # Enable tests
-include(CTestConfig.cmake)
+# include(CTestConfig.cmake)
 include(CTest)
 enable_testing()
 
