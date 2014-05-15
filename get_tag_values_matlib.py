@@ -98,8 +98,7 @@ def check_matname(tag_values):
             continue
     # look for mat, this id's material in group name
         if tag[0:3] == 'mat':
-        # split on the basis of "/" being delimiter and split colons from
-        # name
+            # split on the basis of "/" being delimiter and split colons from name
             if '/' in tag:
                 mat_name = tag.split('/')
                 if ':' not in mat_name[0]:
@@ -114,9 +113,13 @@ def check_matname(tag_values):
                         "Couldn\'t find group name in appropriate format; extra \'/\' in %s" % tag)
                 if ':' not in mat_name[1]:
                     raise Exception("Couldn\'t find group name in appropriate format; ':' is absent after the '/' in %s" % tag)                
-                matdensity = mat_name[1].split(':')        
+                matdensity = mat_name[1].split(':')
+                try:
+                    matdensity=float(matdensity[1])
+                except:
+                    raise Exception("Couldn\'t find density in appropriate format!; density is not a float in %s" %tag)            
                 mat_list_density.append(matdensity[1])
-                # otherwise we have only "mat:"
+            # otherwise we have only "mat:"
             elif ':' in tag:
                 matname = tag.split(':')
                 if matname[1] == '':
@@ -140,7 +143,7 @@ def check_matname(tag_values):
 
 """
 function that checks the existence of material names on the PyNE library 
-and creates a list of material with attributes set
+and creates a list of materials with attributes set
 -------------------------------------------------------------
 """
 
@@ -195,7 +198,7 @@ def copy_attrs(material, material_from_lib):
     material.mass = material_from_lib.mass
     material.atoms_per_mol = material_from_lib.atoms_per_mol
     material.comp = material_from_lib.comp
-    return
+    return material
 
 
 """
@@ -206,7 +209,7 @@ function to set the attributes of the materials:
 def set_attrs(mat, number, flukamat_list):
     mat.attrs['mat_number'] = str(number)
     fluka_material_naming(mat, flukamat_list)
-    return
+    return mat
 
 
 """
@@ -278,7 +281,7 @@ function to parse the script, adding options:
 defining 
 -f  : the .h5m file path
 -d  : nuc_data path
--o  : name of the output h5m file
+-o  : name of the output h5m file "NAME.h5m"
 """
 
 
@@ -292,9 +295,9 @@ def parsing():
         '-o', action='store', dest='output', help='The name of the output file ***.h5m')
     args = parser.parse_args()
     if not args.datafile:
-        raise Exception('h5m file path not entered!!. [-f] is not set')
+        raise Exception('h5m file path not specified!!. [-f] is not set')
     if not args.nuc_data:
-        raise Exception('nuc_data file path not entered!!. [-d] is not set')
+        raise Exception('nuc_data file path not specified!!. [-d] is not set')
     if not args.output:
         args.output = 'output.h5m'
     return args
