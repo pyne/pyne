@@ -27,7 +27,7 @@ function that loads the output h5m file created using get_tag_values script
 
 def load_output(filename):
     output_lib = material.MaterialLibrary()
-    output_lib.from_hdf5(filename, datapath='/materials')
+    output_lib.from_hdf5(filename,'/materials')
     return output_lib
 
 
@@ -38,7 +38,7 @@ test Lead
 
 def test_material1(Lead, output_Material_library):
     for material in output_Material_library.iteritems():
-        if material[1].attrs['original_name'] == 'Lead':
+        if material[1].metadata['original_name'] == 'Lead':
             assert_almost_equal(material[1].comp, Lead.comp, places=4)
 
 """
@@ -48,7 +48,7 @@ test Nitrogen
 
 def test_material2(Nitrogen, output_Material_library):
     for material in output_Material_library.iteritems():
-        if material[1].attrs['original_name'] == 'Nitrogen':
+        if material[1].metadata['original_name'] == 'Nitrogen':
             assert_almost_equal(material[1].comp, Nitrogen.comp, places=4)
 
 """
@@ -58,7 +58,7 @@ test Mercury
 
 def test_material3(Mercury, output_Material_library):
     for material in output_Material_library.iteritems():
-        if material[1].attrs['original_name'] == 'Mercury':
+        if material[1].metadata['original_name'] == 'Mercury':
             assert_almost_equal(material[1].comp, Mercury.comp, places=4)
 
 """
@@ -68,7 +68,7 @@ test Steel, Stainless 321
 
 def test_material4(Steel, output_Material_library):
     for material in output_Material_library.iteritems():
-        if material[1].attrs['original_name'] == 'Steel, Stainless 321':
+        if material[1].metadata['original_name'] == 'Steel, Stainless 321':
             assert_almost_equal(material[1].comp, Steel.comp, places=4)
 
 
