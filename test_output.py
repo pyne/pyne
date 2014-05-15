@@ -2,7 +2,6 @@
 
 
 import nose
-from unittest import TestCase
 from nose.tools import assert_equal, assert_almost_equal
 from pyne import material
 from pyne.material import Material
