@@ -33,3 +33,7 @@ cdef extern from "endf.h" namespace "pyne::endf":
     endf_library_struct library
     
     void read_endf(string) except +
+    
+    vector[vector[int] ] get_library_contents() except +
+    
+    void load_dataset_to_API(int, int, int) except +
