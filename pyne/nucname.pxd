@@ -1,6 +1,4 @@
 """Python wrapper for nucname library."""
-# Python imports 
-#from collections import Iterable
 
 # Cython imports
 from libcpp.map cimport map
@@ -9,6 +7,8 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 #from cython cimport pointer
 from libcpp.string cimport string as std_string
+
+# Python imports 
 
 # local imports 
 cimport pyne.cpp_pyne

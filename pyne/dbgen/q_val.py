@@ -5,10 +5,11 @@ q_value, and the percent of q coming from gammas. This data is from
 'ORIGEN-S DECAY DATA LIBRARY AND HALF-LIFE UNCERTAINTIES' 
 (http://web.ornl.gov/~webworks/cppr/y2001/rpt/97914.pdf)
 """
-
 from __future__ import print_function
 import csv
 import os
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import tables as tb
@@ -16,6 +17,8 @@ import tables as tb
 from pyne import nucname
 from pyne.api import nuc_data
 from pyne.dbgen.api import BASIC_FILTERS
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 # Parses data from .csv
 def grab_q_values(fname):

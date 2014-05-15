@@ -151,34 +151,34 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   H5Tclose(str_attr);
 
   //
-  // Get attrs from associated dataset, if available
+  // Get metadata from associated dataset, if available
   //
-  std::string attrpath = datapath + "_attrs";
+  std::string attrpath = datapath + "_metadata";
   bool attrpath_exists = h5wrap::path_exists(db, attrpath);
   if (!attrpath_exists)
     return;
 
-  hid_t attrspace, attrtype, attrset, attrslab, attrmemspace;
+  hid_t metadatapace, attrtype, metadataet, metadatalab, attrmemspace;
   int attrrank; 
   hvl_t attrdata [1];
 
   attrtype = H5Tvlen_create(H5T_NATIVE_CHAR);
 
-  // Get the attrs from the file
-  attrset = H5Dopen2(db, attrpath.c_str(), H5P_DEFAULT);
-  attrslab = H5Dget_space(attrset);
-  H5Sselect_hyperslab(attrslab, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
+  // Get the metadata from the file
+  metadataet = H5Dopen2(db, attrpath.c_str(), H5P_DEFAULT);
+  metadatalab = H5Dget_space(metadataet);
+  H5Sselect_hyperslab(metadatalab, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
   attrmemspace = H5Screate_simple(1, data_count, NULL);
-  H5Dread(attrset, attrtype, attrmemspace, attrslab, H5P_DEFAULT, attrdata);
+  H5Dread(metadataet, attrtype, attrmemspace, metadatalab, H5P_DEFAULT, attrdata);
 
   // convert to in-memory JSON
   Json::Reader reader;
-  reader.parse((char *) attrdata[0].p, (char *) attrdata[0].p+attrdata[0].len, attrs, false);
+  reader.parse((char *) attrdata[0].p, (char *) attrdata[0].p+attrdata[0].len, metadata, false);
   
   // close attr data objects
   H5Fflush(db, H5F_SCOPE_GLOBAL);
-  H5Dclose(attrset);
-  H5Sclose(attrspace);
+  H5Dclose(metadataet);
+  H5Sclose(metadatapace);
   H5Tclose(attrtype);
 
   // Close out the HDF5 file
@@ -412,10 +412,10 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   H5Tclose(desc);
 
   //
-  // Write out the attrs to the file
+  // Write out the metadata to the file
   //
-  std::string attrpath = datapath + "_attrs";
-  hid_t attrspace, attrtype, attrset, attrslab, attrmemspace;
+  std::string attrpath = datapath + "_metadata";
+  hid_t metadatapace, attrtype, metadataet, metadatalab, attrmemspace;
   int attrrank; 
 
   attrtype = H5Tvlen_create(H5T_NATIVE_CHAR);
@@ -423,57 +423,57 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   // get / make the data set
   bool attrpath_exists = h5wrap::path_exists(db, attrpath);
   if (attrpath_exists) {
-    attrset = H5Dopen2(db, attrpath.c_str(), H5P_DEFAULT);
-    attrspace = H5Dget_space(attrset);
-    attrrank = H5Sget_simple_extent_dims(attrspace, data_dims, data_max_dims);
+    metadataet = H5Dopen2(db, attrpath.c_str(), H5P_DEFAULT);
+    metadatapace = H5Dget_space(metadataet);
+    attrrank = H5Sget_simple_extent_dims(metadatapace, data_dims, data_max_dims);
 
     if (data_dims[0] <= row_num) {
       // row == -0, extend to data set so that we can append, or
       // row_num is larger than current dimension, resize to accomodate.
       data_dims[0] = row_num + 1;
-      H5Dset_extent(attrset, data_dims);
+      H5Dset_extent(metadataet, data_dims);
     }
 
     data_offset[0] = row_num;
   } else {
-    hid_t attrsetparams;
+    hid_t metadataetparams;
     hsize_t attrchunkdims [1];
 
     // Make data set properties to enable chunking
-    attrsetparams = H5Pcreate(H5P_DATASET_CREATE);
+    metadataetparams = H5Pcreate(H5P_DATASET_CREATE);
     attrchunkdims[0] = chunksize; 
-    H5Pset_chunk(attrsetparams, 1, attrchunkdims);
-    H5Pset_deflate(attrsetparams, 1);
+    H5Pset_chunk(metadataetparams, 1, attrchunkdims);
+    H5Pset_deflate(metadataetparams, 1);
 
     hvl_t attrfillvalue [1];
     attrfillvalue[0].len = 3;
     attrfillvalue[0].p = (char *) "{}\n";
-    H5Pset_fill_value(attrsetparams, attrtype, &attrfillvalue);
+    H5Pset_fill_value(metadataetparams, attrtype, &attrfillvalue);
 
     // make dataset
-    attrspace = H5Screate_simple(1, data_dims, data_max_dims);
-    attrset = H5Dcreate2(db, attrpath.c_str(), attrtype, attrspace, 
-                         H5P_DEFAULT, attrsetparams, H5P_DEFAULT);
-    H5Dset_extent(attrset, data_dims);
+    metadatapace = H5Screate_simple(1, data_dims, data_max_dims);
+    metadataet = H5Dcreate2(db, attrpath.c_str(), attrtype, metadatapace, 
+                         H5P_DEFAULT, metadataetparams, H5P_DEFAULT);
+    H5Dset_extent(metadataet, data_dims);
   };
 
   // set the attr string
   hvl_t attrdata [1];
   Json::FastWriter writer;
-  std::string attrstr = writer.write(attrs);
-  attrdata[0].p = (char *) attrstr.c_str();
-  attrdata[0].len = attrstr.length();
+  std::string metadatatr = writer.write(metadata);
+  attrdata[0].p = (char *) metadatatr.c_str();
+  attrdata[0].len = metadatatr.length();
 
   // write the attr
-  attrslab = H5Dget_space(attrset);
-  H5Sselect_hyperslab(attrslab, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
+  metadatalab = H5Dget_space(metadataet);
+  H5Sselect_hyperslab(metadatalab, H5S_SELECT_SET, data_offset, NULL, data_count, NULL);
   attrmemspace = H5Screate_simple(1, data_count, data_max_dims);
-  H5Dwrite(attrset, attrtype, attrmemspace, attrslab, H5P_DEFAULT, attrdata);
+  H5Dwrite(metadataet, attrtype, attrmemspace, metadatalab, H5P_DEFAULT, attrdata);
 
   // close attr data objects
   H5Fflush(db, H5F_SCOPE_GLOBAL);
-  H5Dclose(attrset);
-  H5Sclose(attrspace);
+  H5Dclose(metadataet);
+  H5Sclose(metadatapace);
   H5Tclose(attrtype);
 
   // Close out the HDF5 file
@@ -523,7 +523,7 @@ void pyne::Material::from_text(std::string filename) {
     } else {
       getline(f, valstr);
       valstr= valstr.substr(0, valstr.length()-1);
-      attrs[keystr]= valstr;
+      metadata[keystr]= valstr;
       continue;
    }
    };
@@ -545,7 +545,7 @@ void pyne::Material::write_text(std::string filename) {
   f.open(filename.c_str(), std::ios_base::trunc);
 
   Json::Reader reader;
-  std::vector<std::string> obj = attrs.getMemberNames();
+  std::vector<std::string> obj = metadata.getMemberNames();
 
   if (0 <= mass)
     f << "Mass    " << mass << "\n";
@@ -556,8 +556,8 @@ void pyne::Material::write_text(std::string filename) {
   if (0 <= atoms_per_molecule)
     f << "APerM   " << atoms_per_molecule << "\n";
 
-  for (int i=0; i < attrs.size(); i=i+2){
-    f <<attrs.get(obj.at(i), "") << attrs.get(obj.at(i+1), "");
+  for (int i=0; i < metadata.size(); i=i+2){
+    f <<metadata.get(obj.at(i), "") << metadata.get(obj.at(i+1), "");
   }
 
   std::string nuc_name;
@@ -583,7 +583,7 @@ void pyne::Material::load_json(Json::Value json) {
   mass = json["mass"].asDouble();
   density = json["density"].asDouble();
   atoms_per_molecule = json["atoms_per_molecule"].asDouble();
-  attrs = json["attrs"];
+  metadata = json["metadata"];
 };
 
 
@@ -593,7 +593,7 @@ Json::Value pyne::Material::dump_json() {
   json["mass"] = mass;
   json["density"] = density;
   json["atoms_per_molecule"] = atoms_per_molecule;
-  json["attrs"] = attrs;
+  json["metadata"] = metadata;
   for(comp_iter i = comp.begin(); i != comp.end(); i++)
     jcomp[nucname::name(i->first)] = (i->second);
   json["comp"] = jcomp;
@@ -650,7 +650,7 @@ pyne::Material::Material() {
   mass = -1.0;
   density = -1.0;
   atoms_per_molecule = -1.0;
-  attrs = Json::Value(Json::objectValue);
+  metadata = Json::Value(Json::objectValue);
 }
 
 
@@ -661,7 +661,7 @@ pyne::Material::Material(pyne::comp_map cm, double m, double d, double apm,
   mass = m;
   density=d;
   atoms_per_molecule = apm;
-  attrs = attributes;
+  metadata = attributes;
   if (!comp.empty()) 
     norm_comp();
 };
@@ -673,7 +673,7 @@ pyne::Material::Material(char * filename, double m, double d, double apm,
   mass = m;
   density=d;
   atoms_per_molecule = apm;
-  attrs = attributes;
+  metadata = attributes;
 
   // Check that the file is there
   std::string fname (filename);
@@ -695,7 +695,7 @@ pyne::Material::Material(std::string filename, double m, double d, double apm,
   mass = m;
   density=d;
   atoms_per_molecule = apm;
-  attrs = attributes;
+  metadata = attributes;
 
   // Check that the file is there
   if (!pyne::file_exists(filename))
@@ -811,7 +811,7 @@ pyne::Material pyne::Material::expand_elements() {
     } else
       newcomp.insert(*nuc);
   };
-  return Material(newcomp, mass, density, atoms_per_molecule, attrs);
+  return Material(newcomp, mass, density, atoms_per_molecule, metadata);
 };
 
 

@@ -1,6 +1,5 @@
 """Python wrapper for nucname library."""
-# Python imports 
-#from collections import Iterable
+from __future__ import division, unicode_literals
 
 # Cython imports
 from libcpp.map cimport map
@@ -13,8 +12,12 @@ from libcpp.string cimport string as std_string
 from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
-import numpy as np
+#Standard lib import
+from warnings import warn
+from pyne.utils import VnVWarning
+
 cimport numpy as np
+import numpy as np
 
 # local imports 
 cimport extra_types
@@ -30,6 +33,8 @@ import pyne.nucname
 cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 # Mathematical constants
 pi = cpp_data.pi
@@ -83,10 +88,12 @@ def atomic_mass(nuc):
     if isinstance(nuc, int):
         mass = cpp_data.atomic_mass(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        mass = cpp_data.atomic_mass(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         mass = cpp_data.atomic_mass(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
-
     return mass
 
 
@@ -98,13 +105,10 @@ cdef conv._MapIntDouble natural_abund_map_proxy = conv.MapIntDouble(False)
 natural_abund_map_proxy.map_ptr = &cpp_data.natural_abund_map
 natural_abund_map = natural_abund_map_proxy
 
-# initialize natural_abund_map
-cpp_data.natural_abund(<int> 10000000)
-
 abundance_by_z = dict([(i, []) for i in range(1,119)])
 for zas, abundance in natural_abund_map.items():
     if 0.0 < abundance < 1.0:
-        abundance_by_z[zas/10000000].append((zas, abundance))
+        abundance_by_z[zas//10000000].append((zas, abundance))
 
 
 def natural_abund(nuc):
@@ -127,10 +131,12 @@ def natural_abund(nuc):
     if isinstance(nuc, int):
         abund = cpp_data.natural_abund(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        abund = cpp_data.natural_abund(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         abund = cpp_data.natural_abund(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
-
     return abund
 
 
@@ -161,13 +167,77 @@ def q_val(nuc):
     if isinstance(nuc, int):
         q_val = cpp_data.q_val(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        q_val = cpp_data.q_val(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         q_val = cpp_data.q_val(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
-
     return q_val
 
+#
+# simple_xs functions
+#
 
+def simple_xs(nuc, rx, energy):
+    """Finds the cross section for the given nuclide and reaction in [barns].
+    Uses the simple_xs dataset.
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    rx : int or str
+        Input reaction.
+
+    energy : str
+        Energy group for reaction.  Must be one of: "thermal",
+        "thermal_maxwell_ave", "resonance_integral", "fourteen_MeV",
+        "fission_spectrum_ave".
+
+    Returns
+    -------
+    xs : double
+        cross section value for this nuclide and reaction [barns].
+
+    Notes
+    -----
+    If the nuclide is not found, 0 is returned.
+    """
+    #make sure we start with unicode strings
+    if isinstance(nuc, bytes):
+        nuc = nuc.decode("utf-8")
+    if isinstance(rx, bytes):
+        rx = rx.decode("utf-8")
+
+    if not isinstance(energy, basestring):
+        raise ValueError('energy must be string')
+    elif not isinstance(nuc, int) and not isinstance(nuc, basestring):
+        raise ValueError('nuc must be int or string')
+    elif not isinstance(rx, int) and not isinstance(rx, basestring):
+        raise ValueError('rx must be int or string')
+    
+    energy_bytes = energy.encode()
+    if isinstance(nuc, int) and isinstance(rx, int):
+        xs = cpp_data.simple_xs(<int> nuc, <int> rx, 
+                                std_string(<char *> energy_bytes))
+    elif isinstance(nuc, int) and isinstance(rx, basestring):
+        rxin_bytes = rx.encode()
+        xs = cpp_data.simple_xs(<int> nuc, std_string(<char *> rxin_bytes), 
+                                std_string(<char *> energy_bytes))
+    elif isinstance(nuc, basestring) and isinstance(rx, int):
+        nucin_bytes = nuc.encode()
+        xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes), 
+                                <int> rx, std_string(<char *> energy_bytes))
+    elif isinstance(nuc, basestring) and isinstance(rx, basestring):
+        rxin_bytes = rx.encode()
+        nucin_bytes = nuc.encode()
+        xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes),
+                                std_string(<char *> rxin_bytes), 
+                                std_string(<char *> energy_bytes))
+
+    return xs
 
 #
 # gamma_frac functions
@@ -175,9 +245,6 @@ def q_val(nuc):
 cdef conv._MapIntDouble gamma_frac_map_proxy = conv.MapIntDouble(False)
 gamma_frac_map_proxy.map_ptr = &cpp_data.gamma_frac_map
 gamma_frac_map = gamma_frac_map_proxy
-
-# initialize gamma_frac_map
-cpp_data.gamma_frac(<int> 10000000)
 
 
 def gamma_frac(nuc):
@@ -200,6 +267,9 @@ def gamma_frac(nuc):
     if isinstance(nuc, int):
         gamma_frac = cpp_data.gamma_frac(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        gamma_frac = cpp_data.gamma_frac(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         gamma_frac = cpp_data.gamma_frac(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
@@ -240,6 +310,9 @@ def b_coherent(nuc):
     if isinstance(nuc, int):
         value = cpp_data.b_coherent(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        value = cpp_data.b_coherent(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         value = cpp_data.b_coherent(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
@@ -277,6 +350,9 @@ def b_incoherent(nuc):
     if isinstance(nuc, int):
         value = cpp_data.b_incoherent(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        value = cpp_data.b_incoherent(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         value = cpp_data.b_incoherent(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
@@ -320,10 +396,12 @@ def b(nuc):
     if isinstance(nuc, int):
         value = cpp_data.b(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        value = cpp_data.b(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         value = cpp_data.b(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
-
     return float(value)
 
 #
@@ -370,6 +448,9 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
     elif isinstance(from_nuc, basestring):
+        from_nuc_bytes = from_nuc.encode()
+        fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc_bytes))
+    elif isinstance(from_nuc, bytes):
         fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc))
     else:
         raise pyne.nucname.NucTypeError(from_nuc)
@@ -377,13 +458,41 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
     if isinstance(to_nuc, int):
         tn = pyne.cpp_nucname.id(<int> to_nuc)
     elif isinstance(to_nuc, basestring):
+        to_nuc_bytes = to_nuc.encode()
+        tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc_bytes))
+    elif isinstance(to_nuc, bytes):
         tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc))
     else:
         raise pyne.nucname.NucTypeError(to_nuc)
     fpy = cpp_data.fpyield(cpp_pair[int, int](fn, tn), <int> source, get_errors)
     return fpy
 
+#
+# atomic data functions
+#
 
+def calculate_xray_data(nuc, k_conv, l_conv):
+    """Calculates X-ray intensities for a given atom with
+    k and l conversion intensities
+    
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+    k_conv : float
+        k electron converion coefficient arbitrary units
+    l_conv : float
+        l electron converion coefficient arbitrary units
+
+    Returns
+    -------
+    arr : vector of pairs
+        Vector of pairs containing the four primary X-rays and their 
+        intensities: Ka1, Ka2, Kb, L
+    """
+    z = pyne.nucname.znum(nuc)
+    return cpp_data.calculate_xray_data(<int> z, <double> k_conv, 
+                                        <double> l_conv)
 #
 # decay data functions
 #
@@ -395,7 +504,7 @@ def half_life(nuc, use_metastable=True):
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide.
+        Input nuclide, if metastable is false this uses state_id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True.
@@ -432,7 +541,7 @@ def decay_const(nuc, use_metastable=True):
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide.
+        Input nuclide, if metastable is false this uses state_id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True.
@@ -467,9 +576,9 @@ def branch_ratio(from_nuc, to_nuc, use_metastable=True):
     Parameters
     ----------
     from_nuc : int or str 
-        Parent nuclide.
+        Parent nuclide, if metastable is false this uses state id
     to_nuc : int or str 
-        Child nuclide.
+        Child nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True.
@@ -517,7 +626,7 @@ def state_energy(nuc, use_metastable=True):
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide.
+        Input nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True
@@ -552,7 +661,7 @@ def decay_children(nuc, use_metastable=True):
     Parameters
     ----------
     nuc : int or str 
-        Input nuclide.
+        Input nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
         True
@@ -576,15 +685,18 @@ def decay_children(nuc, use_metastable=True):
     if isinstance(nuc, int):
         dc.set_ptr[0] = cpp_data.decay_children(<int> nuc)
     elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        dc.set_ptr[0] = cpp_data.decay_children(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
         dc.set_ptr[0] = cpp_data.decay_children(<char *> nuc)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
     return dc
 
-def id_from_level(nuc, level):
+def id_from_level(nuc, level, special=""):
     """
-    return the nuc_id for input energy level
+    return the state_id for input energy level
 
     Parameters
     ----------
@@ -592,17 +704,25 @@ def id_from_level(nuc, level):
         Input nuclide
     level : double
         energy level of state
-
+    special : str
+        special level denotation. This is a single A-Z character corresponding
+        to a group of levels and associated gammas with no reference to the GS
     Returns
     -------
     nuc : int
-        nuc_id of state
+        state_id of state
     """
+    cdef std_string spc
+    if len(special) == 1:
+        spc = special[0].encode('UTF-8')
     if level > 0.0:
-        return cpp_data.id_from_level(<int> nuc, <double> level)
+        if len(special) == 1:
+            return cpp_data.id_from_level(<int> nuc, <double> level, <std_string> spc)
+        else:
+            return cpp_data.id_from_level(<int> nuc, <double> level)
     else:
         return nuc
-    
+
 def metastable_id(nuc, level=1):
     """
     return the nuc_id of a metastable state
@@ -617,7 +737,7 @@ def metastable_id(nuc, level=1):
     Returns
     -------
     nuc : int
-        nuc_id of metastable state
+        state_id of metastable state
     """
     return cpp_data.metastable_id(<int> nuc, <int> level)
 
@@ -628,9 +748,9 @@ def decay_half_life(from_nuc, to_nuc):
     Parameters
     ----------
     from_nuc : int
-        parent nuclide
+        parent nuclide in state_id form
     to_nuc : int
-        child nuclide
+        child nuclide in state_id form
 
     Returns
     -------
@@ -649,7 +769,7 @@ def decay_half_life_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -666,9 +786,9 @@ def decay_branch_ratio(from_nuc, to_nuc):
     Parameters
     ----------
     from_nuc : int
-        parent nuclide
+        parent nuclide in state_id form
     to_nuc : int
-        child nuclide
+        child nuclide in state_id form
 
     Returns
     -------
@@ -686,7 +806,7 @@ def decay_branch_ratio_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -703,9 +823,9 @@ def decay_photon_branch_ratio(from_nuc, to_nuc):
     Parameters
     ----------
     from_nuc : int
-        parent nuclide
+        parent nuclide in state_id form
     to_nuc : int
-        child nuclide
+        child nuclide in state_id form
 
     Returns
     -------
@@ -723,7 +843,7 @@ def decay_photon_branch_ratio_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -741,9 +861,9 @@ def decay_beta_branch_ratio(from_nuc, to_nuc):
     Parameters
     ----------
     from_nuc : int
-        parent nuclide
+        parent nuclide in state_id form
     to_nuc : int
-        child nuclide
+        child nuclide in state_id form
 
     Returns
     -------
@@ -761,7 +881,7 @@ def decay_beta_branch_ratio_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -780,7 +900,7 @@ def gamma_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -797,7 +917,7 @@ def gamma_photon_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -805,6 +925,29 @@ def gamma_photon_intensity(parent):
         An array of gamma ray photon intensities and errors
     """
     return cpp_data.gamma_photon_intensity(<int> parent)
+
+
+def gamma_photon_intensity_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray photon intensities from ENSDF decay dataset 
+    from a given gamma ray energy
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray photon intensities and errors
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.gamma_photon_intensity(<double> en,<double> enerror)
     
 def gamma_conversion_intensity(parent):
     """
@@ -814,7 +957,7 @@ def gamma_conversion_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -831,7 +974,7 @@ def gamma_total_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -848,12 +991,12 @@ def gamma_from_to_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
     ratios : array of pairs
-        An array of gamma ray level pairs in nuc_id form
+        An array of gamma ray level pairs in state_id form
     """
     return cpp_data.gamma_from_to(<int> parent)
     
@@ -873,7 +1016,7 @@ def gamma_from_to_byen(en, enerror=None):
     Returns
     -------
     ratios : array of pairs
-        An array of gamma ray level pairs in nuc_id form
+        An array of gamma ray level pairs in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -895,13 +1038,31 @@ def gamma_parent(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of gamma ray parents in nuc_id form
+        An array of gamma ray parents in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
     return cpp_data.gamma_parent(<double> en, <double> enerror)
 
+def gamma_xrays(parent):
+    """
+    Returns an array of arrays of xrays associated with the gamma 
+    rays from an input parent nuclide
+    
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in state_id form
 
+    Returns
+    -------
+    ratios : array of arrays
+        This returns an array of length 4 arrays containing pairs of energies
+        and intensities of the following X-rays: Ka1, Ka2, Kb, L
+    
+    """
+    return cpp_data.gamma_xrays(<int> parent)
+    
 def alpha_energy(parent):
     """
     Returns a list of alpha energies from ENSDF decay dataset from a given 
@@ -910,7 +1071,7 @@ def alpha_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -927,7 +1088,7 @@ def alpha_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -952,7 +1113,7 @@ def alpha_parent(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of alpha parents in nuc_id form
+        An array of alpha parents in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -974,7 +1135,7 @@ def alpha_child_byen(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of alpha children in nuc_id form
+        An array of alpha children in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -988,12 +1149,12 @@ def alpha_child_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
     ratios : array of ints
-        An array of alpha children in nuc_id form
+        An array of alpha children in state_id form
     """
     return cpp_data.alpha_child(<int> parent)
 
@@ -1005,7 +1166,7 @@ def beta_endpoint_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1022,7 +1183,7 @@ def beta_average_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1039,7 +1200,7 @@ def beta_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1100,12 +1261,12 @@ def beta_child_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in state_id form
 
     Returns
     -------
     ratios : array of ints
-        An array of beta- children in nuc_id form
+        An array of beta- children in state_id form
     """
     return cpp_data.beta_child(<int> parent)
 
@@ -1117,7 +1278,7 @@ def ecbp_endpoint_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1134,7 +1295,7 @@ def ecbp_average_energy(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1151,7 +1312,7 @@ def ec_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1168,7 +1329,7 @@ def beta_plus_intensity(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide
+        parent nuclide in state_id form
 
     Returns
     -------
@@ -1215,7 +1376,7 @@ def ecbp_child_byen(en, enerror=None):
     Returns
     -------
     ratios : array of ints
-        An array of beta plus/electron capture children in nuc_id form
+        An array of beta plus/electron capture children in state_id form
     """
     if enerror == None:
         enerror = en * 0.01
@@ -1229,11 +1390,30 @@ def ecbp_child_byparent(parent):
     Parameters
     ----------
     parent : int
-        parent nuclide in nuc_id form
+        parent nuclide in nuc_id form in state_id form
 
     Returns
     -------
     ratios : array of ints
-        An array of beta+ children in nuc_id form
+        An array of beta+ children in state_id form
     """
     return cpp_data.ecbp_child(<int> parent)
+
+def ecbp_xrays(parent):
+    """
+    Returns an array of arrays of xrays associated with the electron capture 
+    and beta plus decays from an input parent nuclide
+    
+    Parameters
+    ----------
+    parent : int
+        parent nuclide
+
+    Returns
+    -------
+    ratios : array of arrays
+        This returns an array of length 4 arrays containing pairs of energies
+        and intensities of the following X-rays: Ka1, Ka2, Kb, L
+    
+    """
+    return cpp_data.ecbp_xrays(<int> parent)

@@ -4,6 +4,8 @@ import os
 import sys
 import subprocess
 
+import numpy as np
+
 import configure
 
 # Thanks to http://patorjk.com/software/taag/  
@@ -37,6 +39,16 @@ pyne_logo = """\
                                      `  
 """
 
+def assert_np_version():
+    low = (1, 8, 0)
+    v = np.version.short_version
+    cur = tuple(map(int, v.split('.')))
+    if cur < low:
+        raise ValueError("numpy version too low! {0} (have) < 1.8.0 (min)".format(v))
+
+def assert_dep_versions():
+    assert_np_version()
+
 def parse_args():
     distutils_args = []
     cmake = []
@@ -64,6 +76,7 @@ def parse_args():
 
 
 def main_body():
+    assert_dep_versions()
     if not os.path.exists('build'):
         os.mkdir('build')
     sys.argv, cmake_args, make_args = parse_args()

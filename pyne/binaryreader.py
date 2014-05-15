@@ -4,9 +4,12 @@
 Fortran formatted records.
 
 """
-
 import struct
+from collections import Iterable
+from warnings import warn
+from pyne.utils import VnVWarning
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class _FortranRecord(object):
     """A single Fortran formatted record.
@@ -21,10 +24,9 @@ class _FortranRecord(object):
     """
 
     def __init__(self, data, num_bytes):
-        """
-        Initialize instance of Record object.
-        """
-
+        """Initialize instance of Record object."""
+        if isinstance(data, str):
+            data = data.encode()
         self.data = data
         self.num_bytes = num_bytes
 
@@ -63,9 +65,7 @@ class _FortranRecord(object):
         return self.get_data(n, 'q', self.long_size)
 
     def get_float(self, n=1):
-        """
-        Returns one or more floats.
-        """
+        """Returns one or more floats."""
         return self.get_data(n, 'f', self.float_size)
 
     def get_double(self, n=1):
@@ -75,8 +75,7 @@ class _FortranRecord(object):
         return self.get_data(n, 'd', self.double_size)
 
     def get_string(self, length, n=1):
-        """
-        Returns a string of a specified length starting at the current
+        """Returns a string of a specified length starting at the current
         position in the data list.
         """
 
@@ -88,20 +87,21 @@ class _FortranRecord(object):
         relevantData = self.data[self.pos:self.pos+length*n]
         (s,) = struct.unpack('{0}s'.format(length*n), relevantData)
         self.pos += length*n
-        return [s[i*length:(i+1)*length] for i in range(n)]
+        return [s[i*length:(i+1)*length].decode() for i in range(n)]
 
     def put_data(self, newdata, format, item_size):
         """
         Packs a list of data objects at the current position with a
         specified format and data size.
         """
-        try:
-            iter(newdata)
-        except TypeError:
+        if not isinstance(newdata, Iterable):
             newdata = [newdata]
 
         for i in range(len(newdata)):
-            self.data += struct.pack(format, newdata[i])
+            nd = newdata[i]
+            if isinstance(nd, str):
+                nd = nd.encode()
+            self.data += struct.pack(format, nd)
             self.pos += item_size
             self.num_bytes += item_size
 
@@ -118,20 +118,16 @@ class _FortranRecord(object):
         self.put_data(data, '1q', self.long_size)
 
     def put_float(self, data):
-        """
-        Pack a list of floats
+        """Pack a list of floats
         """
         self.put_data(data, '1f', self.float_size)
 
     def put_double(self, data):
-        """
-        Pack a list of doubles
-        """
+        """Pack a list of doubles."""
         self.put_data(data, '1d', self.double_size)
 
     def put_string(self, data, length, n=1):
-        """
-        Packs a list of one or more double at the current
+        """Packs a list of one or more double at the current
         position within the data list.
         """
         self.put_data(data, '{0}s'.format(length), length)
@@ -173,7 +169,6 @@ class _BinaryReader(object):
         self.put_int(record.num_bytes)
         self.f.write(record.data)
         self.put_int(record.num_bytes)
-
         return 1
 
     def get_fortran_record(self):
@@ -186,6 +181,8 @@ class _BinaryReader(object):
 
         # Read num_bytes from the record
         data = self.f.read(num_bytes)
+        if isinstance(data, str):
+            data = bytearray(data)
 
         # now read end of record
         num_bytes2 = self.get_int()

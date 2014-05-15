@@ -33,6 +33,9 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 # Check for MOAB library
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
+if(${MOAB_FOUND})
+    include_directories(${MOAB_INCLUDE_DIR})
+endif(${MOAB_FOUND})
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
@@ -98,7 +101,7 @@ add_subdirectory(pyne/xs)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 message("-- Copying C/C++ header files.")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/cpp/" DESTINATION

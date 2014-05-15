@@ -27,9 +27,11 @@ examples/*.txt
 examples/*.eps
 examples/*.svg
 examples/*.png
+examples/*.h5m
 tests/test.file
 tests/test.txt
 tests/U235.txt
 tests/Ni59.txt
-
+tutorial/Ni59.txt
+docs/rxname_listing
 .ipynb_checkpoints
