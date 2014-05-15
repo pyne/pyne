@@ -4,7 +4,7 @@ from pyne import material
 from pyne.material import Material, MaterialLibrary
 import nose
 from nose.tools import assert_equal, assert_raises
-import get_tag_values_matlib as gtag
+import dagmc_get_materials as gtag
 
 
 """
