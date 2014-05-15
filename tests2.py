@@ -44,58 +44,64 @@ test groups naming
 
 
 def test_group_1():
-    # ':' is missing
+    # ':' is missing in 'matLead/rho:-11.35'
     tag_5 = ['mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p',
              'mat:Steel, Stainless 321/rho:-2', 'matLead/rho:-11.35', 'mat:Mercury/rho:-7.874']
     assert_raises(Exception, gtag.check_matname, tag_5)
     
-def test_group_2():    
-    # material name is absent
-    tag_6 = ['mat:graveyard', 'mat:/rho:-0.001205', 'tally_4.cell.flux.p',
+def test_group_2():
+    # density is in wrong format in 'mat:Mercury/rho:mercury'
+    tag_6 = ['graveyard', 'mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p',
+             'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:mercury']
+    assert_raises(Exception, gtag.check_matname, tag_6)             
+    
+def test_group_3():    
+    # material name is absent in 'mat:/rho:-0.001205'
+    tag_7 = ['mat:graveyard', 'mat:/rho:-0.001205', 'tally_4.cell.flux.p',
              'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
     assert_raises(Exception, gtag.check_matname, tag_6)
     
-def test_group_3():    
-    # an error in the group name "/" without a density
-    tag_7 = ['mat:graveyard', 'mat:Nitrogen/', 'tally_4.cell.flux.p',
+def test_group_4():    
+    # an error in the group name; "/" without a density in 'mat:Nitrogen/'
+    tag_8 = ['mat:graveyard', 'mat:Nitrogen/', 'tally_4.cell.flux.p',
              'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
     assert_raises(Exception, gtag.check_matname, tag_7)
     
-def test_group_4():    
-    # ':' is absent in the density part
-    tag_8 = ['mat:graveyard', 'mat:Nitrogen/rho-0.001205', 'tally_4.cell.flux.p',
+def test_group_5():    
+    # ':' is absent in the density part in 'mat:Nitrogen/rho-0.001205'
+    tag_9 = ['mat:graveyard', 'mat:Nitrogen/rho-0.001205', 'tally_4.cell.flux.p',
              'mat:Steel, Stainless 321/rho:-2', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
     assert_raises(Exception, gtag.check_matname, tag_8)
     
-def test_group_5():    
+def test_group_6():    
     # no desnity provided
-    tag_9 = ['mat:graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p',
+    tag_10 = ['mat:graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p',
              'mat:Steel, Stainless 321', 'mat:Lead', 'mat:Mercury']
     assert_equal(gtag.check_matname(tag_9), [('Nitrogen', ' '), (
         'Steel, Stainless 321', ' '), ('Lead', ' '), ('Mercury', ' ')])
         
-def test_group_6():        
+def test_group_7():        
     # some densities are provided
-    tag_10 = ['mat:graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p',
+    tag_11 = ['mat:graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p',
               'mat:Steel, Stainless 321', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
     assert_equal(gtag.check_matname(tag_10), [('Nitrogen', ' '), (
         'Steel, Stainless 321', ' '), ('Lead', '-11.35'), ('Mercury', '-7.874')])
         
-def test_group_7():        
+def test_group_8():        
     # no density provided and material name is absent
-    tag_11 = ['mat:graveyard', 'mat:', 'tally_4.cell.flux.p',
+    tag_12 = ['mat:graveyard', 'mat:', 'tally_4.cell.flux.p',
               'mat:Steel, Stainless 321', 'mat:Lead', 'mat:Mercury']
     assert_raises(Exception, gtag.check_matname, tag_11)
     
-def test_group_8():    
-    # no density is provided and ':' is absent
-    tag_12 = ['mat:graveyard', 'matNitrogen', 'tally_4.cell.flux.p',
+def test_group_9():    
+    # no density is provided and ':' is absent in 'matNitrogen'
+    tag_13 = ['mat:graveyard', 'matNitrogen', 'tally_4.cell.flux.p',
               'mat:Steel, Stainless 321', 'mat:Lead', 'mat:Mercury']
     assert_raises(Exception, gtag.check_matname, tag_12)
 
-def test_group_9():    
+def test_group_10():    
     # 'mat' is absent from the group names
-    tag_13 = ['graveyard', 'Nitrogen', 'tally_4.cell.flux.p',
+    tag_14 = ['graveyard', 'Nitrogen', 'tally_4.cell.flux.p',
               'Steel, Stainless 321', 'Lead', 'Mercury']
     assert_raises(Exception, gtag.check_matname, tag_13)
     
