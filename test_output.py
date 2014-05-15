@@ -74,7 +74,7 @@ def test_material4(Steel, output_Material_library):
 
 def main():
     # load the output h5m file
-    output_lib = load_output('output_5.h5m')
+    output_lib = load_output('sample_output.h5m')
     # test materials
     test_material1(Lead, output_lib)
     test_material2(Nitrogen, output_lib)
