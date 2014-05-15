@@ -166,9 +166,9 @@ def check_and_create_materials(material_list, mat_lib):
                 # get the material
                 new_mat = mat_lib.get(key)[:]
                 flukamaterials_list.append(material)
-                copy_attrs(new_mat, mat_lib.get(key))
+                copy_metadata(new_mat, mat_lib.get(key))
                 # set the mcnp material number and fluka material name
-                set_attrs(new_mat, d, flukamaterials_list)
+                set_metadata(new_mat, d, flukamaterials_list)
                 if material_list[g][1] != ' ':
                     new_mat.density = float(material_list[g][1])
 
@@ -189,18 +189,18 @@ def check_and_create_materials(material_list, mat_lib):
     return material_object_list
 
 """
-function to copy the attrs of materials from the PyNE material library
+function to copy the metadata of materials from the PyNE material library
 """
 
 
-def copy_attrs(material, material_from_lib):
-    # copy attrs from lib to material
-    for key in list(material_from_lib.attrs.keys()):
-        material.attrs[key] = material_from_lib.attrs[key]
+def copy_metadata(material, material_from_lib):
+    # copy metadata from lib to material
+    for key in list(material_from_lib.metadata.keys()):
+        material.metadata[key] = material_from_lib.metadata[key]
 
     material.density = material_from_lib.density
     material.mass = material_from_lib.mass
-    material.atoms_per_mol = material_from_lib.atoms_per_mol
+    material.atoms_per_molecule = material_from_lib.atoms_per_molecule
     material.comp = material_from_lib.comp
     return material
 
@@ -210,8 +210,8 @@ function to set the attributes of the materials:
 """
 
 
-def set_attrs(mat, number, flukamat_list):
-    mat.attrs['mat_number'] = str(number)
+def set_metadata(mat, number, flukamat_list):
+    mat.metadata['mat_number'] = str(number)
     fluka_material_naming(mat, flukamat_list)
     return mat
 
@@ -222,7 +222,7 @@ Function to prepare fluka material names:
 
 
 def fluka_material_naming(material, flukamat_list):
-    matf = material.attrs['name']
+    matf = material.metadata['name']
     matf = ''.join(c for c in matf if c.isalnum())
     if len(matf) > 8:
         matf = matf[0:8]
@@ -247,8 +247,8 @@ def fluka_material_naming(material, flukamat_list):
     # otherwise uppercase
     else:
         flukamat_list.append(matf.upper())
-    material.attrs['original_name'] = material.attrs['name']
-    material.attrs['name'] = matf.upper()
+    material.metadata['original_name'] = material.metadata['name']
+    material.metadata['name'] = matf.upper()
     return material
 
 """ 
@@ -277,7 +277,7 @@ def write_mats_h5m(materials_list, filename):
     new_matlib = MaterialLibrary()
     for material in materials_list:
         # using fluka name as index since this is unique
-        new_matlib[material.attrs['name']] = material
+        new_matlib[material.metadata['name']] = material
     new_matlib.write_hdf5(filename)
 
 """
