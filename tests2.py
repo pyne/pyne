@@ -129,8 +129,8 @@ def test_fluka_1():
                               240500000: 0.004827777777777778, 240520000: 0.09309888888888891, 240530000: 0.010556666666666667, 240540000: 0.002627777777777779, 250550000: 0.11111111111111112, 260540000: 0.006494444444444446, 260560000: 0.10194888888888891, 260570000: 0.0023544444444444455, 260580000: 0.0003133333333333333, 280580000: 0.07564111111111112, 280600000: 0.029136666666666672, 280610000: 0.0012665555555555557, 280620000: 0.004038444444444445, 280640000: 0.0010283333333333336}, 1.0, -7.0, -1.0, {"mat_number": "4", "name": "Steel, Stainless 321"})
     flukamat_list = ['NITROGEN', 'LEAD']
     mat = gtag.fluka_material_naming(steel, flukamat_list)
-    original_name = mat.attrs['original_name']
-    name = mat.attrs['name']
+    original_name = mat.metadata['original_name']
+    name = mat.metadata['name']
     assert_equal(name, 'STEELSTA')
     assert_equal(original_name, 'Steel, Stainless 321')
 
@@ -141,8 +141,8 @@ def test_fluka_2():
         {70140000: 0.99636, 70150000: 0.00364}, 1.0, 0.001165, -1.0, {"mat_number": "1", "name": "Nitrogen"})
     flukamat_list = ['NITROGEN', 'LEAD']
     mat = gtag.fluka_material_naming(nitrogen, flukamat_list)
-    original_name = mat.attrs['original_name']
-    name = mat.attrs['name']
+    original_name = mat.metadata['original_name']
+    name = mat.metadata['name']
     assert_equal(name, 'NITROGE1')
     assert_equal(original_name, 'Nitrogen')
 
@@ -153,8 +153,8 @@ def test_fluka_3():
         {70140000: 0.99636, 70150000: 0.00364}, 1.0, 0.001165, -1.0, {"mat_number": "1", "name": "Nitrogen"})
     flukamat_list = ['NITROGEN', 'LEAD', 'NITROGE1']
     mat = gtag.fluka_material_naming(nitrogen, flukamat_list)
-    original_name = mat.attrs['original_name']
-    name = mat.attrs['name']
+    original_name = mat.metadata['original_name']
+    name = mat.metadata['name']
     assert_equal(name, 'NITROGE2')
     assert_equal(original_name, 'Nitrogen')
 
@@ -173,7 +173,7 @@ def test_match_1():
     list_of_matches = [
         'C-552 Air-Equivalent Plastic', 'Air (dry, near sea level)']
     material_library = MaterialLibrary()
-    material_library[air_1.attrs['name']] = air_1
-    material_library[air_2.attrs['name']] = air_2
+    material_library[air_1.metadata['name']] = air_1
+    material_library[air_2.metadata['name']] = air_2
     assert_equal(
         gtag.print_near_match('air', material_library), list_of_matches)
