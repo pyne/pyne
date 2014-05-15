@@ -98,11 +98,13 @@ def check_matname(tag_values):
             continue
     # look for mat, this id's material in group name
         if tag[0:3] == 'mat':
-            # split on the basis of "/" being delimiter and split colons from name
+            # split on the basis of "/" being delimiter and split colons from
+            # name
             if '/' in tag:
                 mat_name = tag.split('/')
                 if ':' not in mat_name[0]:
-                    raise Exception("Couldn\'t find group name in appropriate format; ':' is absent in %s" % tag)
+                    raise Exception(
+                        "Couldn\'t find group name in appropriate format; ':' is absent in %s" % tag)
                 # list of material name only
                 matname = mat_name[0].split(':')
                 if matname[1] == '':
@@ -112,12 +114,14 @@ def check_matname(tag_values):
                     raise Exception(
                         "Couldn\'t find group name in appropriate format; extra \'/\' in %s" % tag)
                 if ':' not in mat_name[1]:
-                    raise Exception("Couldn\'t find group name in appropriate format; ':' is absent after the '/' in %s" % tag)                
+                    raise Exception(
+                        "Couldn\'t find group name in appropriate format; ':' is absent after the '/' in %s" % tag)
                 matdensity = mat_name[1].split(':')
                 try:
-                    matdensity=float(matdensity[1])
+                    matdensity_test = float(matdensity[1])
                 except:
-                    raise Exception("Couldn\'t find density in appropriate format!; density is not a float in %s" %tag)            
+                    raise Exception(
+                        "Couldn\'t find density in appropriate format!; density is not a float in %s" % tag)
                 mat_list_density.append(matdensity[1])
             # otherwise we have only "mat:"
             elif ':' in tag:
@@ -132,7 +136,7 @@ def check_matname(tag_values):
             if len(matname) > 2:
                 raise Exception(
                     "Wrong format for group names! %s. correct: mat:NAME/rho:VALUE or mat:NAME" % tag)
-            mat_list_matname.append(matname[1])    
+            mat_list_matname.append(matname[1])
     if g == 0:
         raise Exception("Graveyard group is missing!")
     mat_dens_list = zip(mat_list_matname, mat_list_density)
@@ -253,12 +257,12 @@ function to print near matches to material name
 
 
 def print_near_match(material, material_library):
-    list_of_matches=[]
+    list_of_matches = []
     for item in material_library.iterkeys():
         if (material.lower() in item.lower()) or (material.upper() in item.upper()):
             print("Near matches to %s are :" % material)
             print item
-        list_of_matches.append(item)    
+        list_of_matches.append(item)
     return list_of_matches
 
 """
