@@ -1,15 +1,10 @@
-PROJECT(DagSolidUnitTests)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 
-add_definitions(-DGTEST_HAS_PTHREAD=0)
-
-# Note that CMAKE_SOURCE_DIR (without 'CURRNET') is the top-level dir containing CMakeLists.txt
+# CMAKE_SOURCE_DIR (without 'CURRENT') is the top-level dir containing CMakeLists.txt
 SET (gtest_home    "${CMAKE_SOURCE_DIR}/../../gtest")
 SET (gtest_dir     "${gtest_home}/gtest-1.7.0")
 
 # Where to look for includes
-INCLUDE_DIRECTORIES(${MOAB_DIR}/include ${gtest_dir} ${gtest_dir}/include
-                    ${DAGSOLID_DIR}/include ${GEANT_DIR}/include/Geant4)
+INCLUDE_DIRECTORIES(${gtest_dir} ${gtest_dir}/include)
 
 ## from here
 # Setup for gtest libraries
@@ -21,10 +16,10 @@ SET(cxx_strict_flags "-Wextra -Wno-missing-field-initializers")
 IF (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available.
     SET(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
 ENDIF()
-
 # Make the gtest libraries
 SET(cxx_exception "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exception_flags}")
 SET(cxx_strict "${cxx_exception} ${cxx_strict_flags}")
+
 ########################################################################
 #
 # Defines the gtest & gtest_main libraries.  User tests should link
@@ -50,8 +45,8 @@ cxx_static_library(gtest ${cxx_strict} "${gtest_dir}/src/gtest-all.cc")
 
 SET (tgt "gtest")
 ADD_CUSTOM_COMMAND (TARGET ${tgt}
-	COMMAND ln "-s"
-		"${CMAKE_CURRENT_SOURCE_DIR}/test_geom.h5m" 
+	COMMAND ln "-sf"
+		"${CMAKE_CURRENT_SOURCE_DIR}/test_geom.h5m"
 		"${CMAKE_CURRENT_BINARY_DIR}/test_geom.h5m"
 		COMMENT "...linking test file in ${CMAKE_CURRENT_SOURCE_DIR} to ${CMAKE_CURRENT_BINARY_DIR}/slabs.h5m"
 	DEPENDS
@@ -59,29 +54,31 @@ ADD_CUSTOM_COMMAND (TARGET ${tgt}
  	)
 
 # dagsolid tests
-set (dagsolid_test_source
-     ${CMAKE_CURRENT_SOURCE_DIR}/DagSolid_test.cpp
-     )
+set(dagsolid_test_source
+  ${CMAKE_CURRENT_SOURCE_DIR}/DagSolid_test.cpp
+)
 
 # geant libs needed for test cases
-set(geant_libs ${GEANT_DIR}/lib/libG4geometry.so 
-               ${GEANT_DIR}/lib/libG4global.so 
-               ${GEANT_DIR}/lib/libG4clhep.so )
+set(geant_libs
+  ${Geant4_G4geometry_LIBRARY}
+  ${Geant4_G4clhep_LIBRARY}
+  ${Geant4_G4global_LIBRARY}
+)
 
 # set libraries needed to link to test cases
 set(LIBS
-    pthread
-    ${MOAB_DIR}/lib/libMOAB.so
-    ${MOAB_DIR}/lib/libdagmc.so
-    ${MOAB_DIR}/lib/libMOAB.so
-    # at compile time (before make install) libdagsolid in bld dir
-    ${DAGSOLID_DIR}/bld/src/libdagsolid.so
-    ${geant_libs} )
+  dagsolid
+  ${Moab_MOAB_LIBRARY}
+  ${Moab_dagmc_LIBRARY}
+  ${Moab_MOAB_LIBRARY}  # Is there a circular dependency in MOAB?
+  ${geant_libs}
+  pthread
+)
 
 # custom driver which calls tests
 ADD_EXECUTABLE (dagsolid_unit_tests
 	dagsolid_unit_test_driver.cpp
-	${dagsolid_test_source} )
+	${dagsolid_test_source})
 
 TARGET_LINK_LIBRARIES (dagsolid_unit_tests ${LIBS} gtest)
 
