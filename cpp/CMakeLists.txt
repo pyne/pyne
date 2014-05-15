@@ -50,6 +50,12 @@ set_target_properties(pyne_tally PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
 install_lib(pyne_tally)
 
+# pyne_endf
+add_library(pyne_endf endf.cpp)
+set_target_properties(pyne_endf PROPERTIES 
+                      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
+target_link_libraries(pyne_endf pyne)
+install_lib(pyne_endf)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
