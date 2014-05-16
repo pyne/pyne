@@ -23,18 +23,7 @@ int main (int argc, char* argv[])
    // Create a basic filled Material object
    test_mat = Material(nucvec);
 
-   // Test if can call into the existing pyne library
-   comp_map::iterator it;
-   for (it=test_mat.comp.begin(); it != test_mat.comp.end(); ++it)
-   {
-       std::cout << it->first << ", " << it->second << std::endl;
-   }
-   std::cout << "density = " << test_mat.density << std::endl;
-   std::cout << "mass = " << test_mat.mass << std::endl;
-   std::cout << "atoms_per_molecule = " << test_mat.atoms_per_molecule << std::endl;
-
    // Test if can call added functionality in pyne library
-   // std::string mcnp_ret = test_mat.mcnp("mass");
    std::string mcnp_ret = test_mat.mcnp();
    std::cout << mcnp_ret << std::endl;
 }
