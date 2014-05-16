@@ -1,5 +1,6 @@
-#include "material.h"
+#include "material.h" 
 #include "nucname.h"
+#include "data.h"
 
 int main (int argc, char* argv[])
 {
@@ -33,6 +34,7 @@ int main (int argc, char* argv[])
    std::cout << "atoms_per_molecule = " << test_mat.atoms_per_molecule << std::endl;
 
    // Test if can call added functionality in pyne library
+   // std::string mcnp_ret = test_mat.mcnp("mass");
    std::string mcnp_ret = test_mat.mcnp();
-   std::cout << mcnp_ret;
+   std::cout << mcnp_ret << std::endl;
 }

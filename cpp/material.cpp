@@ -483,46 +483,84 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 };
 
-std::string pyne::Material::mcnp()
+std::string pyne::Material::mcnp(std::string frac_type)
 {
-  // This write method does not write to a file
+  // This method does not write to a file
   std::ostringstream oss;
+  std::string record;
 
-  // Below is a copy of write_text() with 'f' replaced by 'oss'
-  Json::Reader reader;
+  // Print out some stuff  Json::Reader reader;
   std::vector<std::string> obj = metadata.getMemberNames();
 
   if (0 <= mass)
-    oss << "Mass    " << mass << "\n";
+    std::cout << "Mass    " << mass << "\n";
 
   if (0 <= density)
-    oss << "Density "  << density << "\n";
+    std::cout  << "Density "  << density << "\n";
   
   if (0 <= atoms_per_molecule)
-    oss << "APerM   " << atoms_per_molecule << "\n";
+    std::cout << "APerM   " << atoms_per_molecule << "\n";
  
   for (int i=0; i < metadata.size(); i=i+2){
-    oss << metadata.get(obj.at(i), "") << metadata.get(obj.at(i+1), "");
+    std::cout << metadata.get(obj.at(i), "") << metadata.get(obj.at(i+1), "");
   }
 
-  std::string nuc_name;
+  int mcnp_id;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++) 
   {
-    std::cout << i->first << ", " << i->second << "\n";
-    int n=i->first;
+    std::cout << i->first << ", " << i->second << std::endl;
      
-    nuc_name = pyne::nucname::name( n ) + "  ";
-    nuc_name = pyne::nucname::name( "H1" ) + "  ";
-    nuc_name = pyne::nucname::name( (int)922350000 ) + "  ";
-/*
-    while (nuc_name.length() < 8)
-    {
-      nuc_name += " ";
-    }
-*/
-    oss << nuc_name << i->second << "\n";
+    mcnp_id = pyne::nucname::mcnp( i->first );
+    std::cout << mcnp_id << i->second << std::endl;
+    std::cout << pyne::nucname::name( i->first ) << std::endl;
   }
+  std::string mat_num;
+  // test
+  // std::cout << "metadata['mat_num'] = " << metadata["mat_num"] << std::endl; 
+  record += "m";
+  if (metadata.isMember("mat_num"))
+  {
+     mat_num = metadata["mat_num"].asString(); 
+     if ( !mat_num.empty() )
+     {
+        record += mat_num;
+     }
+     else
+     {
+        record += "?";
+     }
+  }
+  else
+  {
+     record += "?"; 
+  }
+  // record += 'm{0}\n'.format(mat_num)
+  std::cout << "record is " << record;
 
+  std::map<int, double> fracs;
+  std::string frac_sign; 
+  
+  if ("atom" == frac_type)
+  { 
+    fracs = to_atom_frac();
+    frac_sign = "";
+  }
+  else
+  { 
+    fracs = comp;
+    frac_sign = "-";
+  }
+/*
+        for nuc, frac in fracs.items():
+            nucmcnp = str(nucname.mcnp(nuc))
+            if 'table_ids' in self.metadata:
+                s += ' {0}.{1} '.format(nucmcnp,
+                                            self.metadata['table_ids'][nucmcnp])
+            else:
+                s += ' {0} '.format(nucmcnp)
+            s += '{0}{1:.4E}\n'.format(frac_sign, frac)
+*/
+//        return s
 //  if ('name' in metadata:
 //       oss << 'C name: {0}\n'.format(self.metadata['name'])
 
@@ -803,6 +841,7 @@ pyne::comp_map pyne::Material::mult_by_mass() {
 double pyne::Material::molecular_mass(double apm) {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
+
   for (pyne::comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++)
     inverseA += (nuc->second) / pyne::atomic_mass(nuc->first);
 
@@ -1095,10 +1134,10 @@ pyne::Material pyne::Material::sub_fp() {
 
 std::map<int, double> pyne::Material::to_atom_frac() {
   // Returns an atom fraction map from this material's composition
-
+std::cout << "In to_atom_frac()" << std::endl;
   // the material's molecular mass
-  double mat_mw = molecular_mass();
-
+  double mat_mw = molecular_mass(-1);
+std::cout << "In to_atom_frac() after molecular_mass()" << std::endl;
   std::map<int, double> atom_fracs = std::map<int, double>();
 
   for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
