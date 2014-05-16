@@ -96,3 +96,10 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/tally.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(tally tally.pyx)
 target_link_libraries(tally pyne pyne_tally)
+
+
+# source_sampling
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/source_sampling.pyx"
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(source_sampling source_sampling.pyx)
+target_link_libraries(source_sampling pyne pyne_source_sampling)

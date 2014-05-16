@@ -50,6 +50,12 @@ set_target_properties(pyne_tally PROPERTIES
                       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
 install_lib(pyne_tally)
 
+#pyne_source_sampling
+add_library(pyne_source_sampling source_sampling.cpp measure.cpp)
+set_target_properties(pyne_source_sampling PROPERTIES 
+                      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/pyne/lib")
+target_link_libraries(pyne_source_sampling ${MOAB_LIBRARIES})
+install_lib(pyne_source_sampling)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

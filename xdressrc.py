@@ -40,4 +40,4 @@ stlcontainers = [
 
 classes = [apiname('Tally','cpp/tally.*',incfiles='tally.h')]
 
-functions = []
+functions = [apiname('mcnp_sampling_setup_','cpp/source_sampling.cpp', incfiles='source_sampling.h')]

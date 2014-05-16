@@ -1,4 +1,4 @@
-#include "sampling.hpp"
+#include "source_sampling.h"
 //#define MBI moab_instance()
 //#define SI Sampling::instance()
 
@@ -8,8 +8,8 @@ Sampling *Sampling::instance_ = NULL;
  ( FORTRAN API
 */
 
-void mcnp_sampling_setup_(bool* analog){
-  SI->sampling_setup((char*)&"tagged_unstr.h5m", (char*)&"phtn_src2", (char*)&"e_bounds_file", *analog);
+void mcnp_sampling_setup_(){
+  SI->sampling_setup((char*)&"tagged_unstr.h5m", (char*)&"phtn_src2", (char*)&"e_bounds_file", true);
 }
 
 void fsampling_setup_(char* file_name, char* src_tag_name, char* e_bounds_tag_name, bool* analog){

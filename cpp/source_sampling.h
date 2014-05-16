@@ -24,7 +24,7 @@ extern "C" {
 //void Fsampling_setup_(char* file_name, char* src_tag_name, char* e_bounds_file_name, bool analog, char* bias_tag_name);
 //void Fparticle_birth_(double* rands, double &x, double &y, double &z, double &e, double &w);
 
-void mcnp_sampling_setup_(bool* analog);
+void mcnp_sampling_setup_();
 void fsampling_setup_(char*, char*, char*, bool*);
 void fsampling_setup2_(char*, char*, char*, bool*, char*);
 void fparticle_birth_(double*, double*, double *, double *, double *, double *);
