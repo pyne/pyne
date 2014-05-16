@@ -485,25 +485,12 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
 std::string pyne::Material::mcnp(std::string frac_type)
 {
-  // This method does not write to a file
-  std::ostringstream oss;
-  std::string record;
 
   // Print out some stuff  Json::Reader reader;
-  std::vector<std::string> obj = metadata.getMemberNames();
-
-  if (0 <= mass)
-    std::cout << "Mass    " << mass << "\n";
-
-  if (0 <= density)
-    std::cout  << "Density "  << density << "\n";
-  
-  if (0 <= atoms_per_molecule)
-    std::cout << "APerM   " << atoms_per_molecule << "\n";
- 
-  for (int i=0; i < metadata.size(); i=i+2){
-    std::cout << metadata.get(obj.at(i), "") << metadata.get(obj.at(i+1), "");
-  }
+  // std::vector<std::string> obj = metadata.getMemberNames();
+  // for (int i=0; i < metadata.size(); i=i+2){
+  //   std::cout << metadata.get(obj.at(i), "") << metadata.get(obj.at(i+1), "");
+  // }
 
   int mcnp_id;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++) 
@@ -511,12 +498,50 @@ std::string pyne::Material::mcnp(std::string frac_type)
     std::cout << i->first << ", " << i->second << std::endl;
      
     mcnp_id = pyne::nucname::mcnp( i->first );
-    std::cout << mcnp_id << i->second << std::endl;
-    std::cout << pyne::nucname::name( i->first ) << std::endl;
+    std::cout << "nucname mcnp id:  " << mcnp_id << ", second is: " << i->second << std::endl;
+    std::cout << "nucname name: " << pyne::nucname::name( i->first ) << std::endl;
   }
+  //////////////////// Begin record creation ///////////////////////
+  std::cout << "Begin record creation" << std::endl;
+  std::string record;
+  std::ostringstream oss;
+  if (metadata.isMember("name"))
+  {
+     // s += 'C name: {0}\n'.format(self.metadata['name'])
+     record += "C name: " + metadata["name"].asString() + "\n";
+     oss << "C name: " << metadata["name"].asString() << "\n";
+  }
+  // if self.density != -1.0:
+  //          s += 'C density = {0}\n'.format(self.density)
+  if (density != -1.0)
+  {
+     oss << "C density = " << density << "\n";
+  }
+  if (metadata.isMember("source"))
+  {
+     record += "C source: " + metadata["source"].asString() + "\n";
+     oss << "C source: " << metadata["source"].asString() << "\n";
+  }
+/*
+if 'comments' in self.metadata:
+            comment_string= 'comments: ' + self.metadata['comments']
+            # split up lines so comments are less than 80 characters
+            for n in range(0, int(np.ceil(float(len(comment_string))/77))):
+                s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
+*/
+  if (metadata.isMember("comments"))
+  {
+      std::string comment_string = "comments: " + metadata["comments"].asString();
+      // split up lines so comments are less than 80 characters
+      //      for n in range(0, int(np.ceil(float(len(comment_string))/77))):
+      if (comment_string.length() < 80)
+      {
+         // s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
+         oss << "C " << comment_string << "\n";
+      }
+  }
+
   std::string mat_num;
-  // test
-  // std::cout << "metadata['mat_num'] = " << metadata["mat_num"] << std::endl; 
   record += "m";
   if (metadata.isMember("mat_num"))
   {
@@ -550,7 +575,38 @@ std::string pyne::Material::mcnp(std::string frac_type)
     fracs = comp;
     frac_sign = "-";
   }
-/*
+  
+  std::string nucmcnp;
+  std::string table_item;
+  for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); i++) 
+  {
+     std::stringstream ss;
+     mcnp_id = pyne::nucname::mcnp( i->first );
+     ss << mcnp_id;
+     nucmcnp = ss.str();
+     if (metadata.isMember("table_ids"))
+     {
+        table_item = metadata["table_ids"][nucmcnp].asString();
+        if ( !table_item.empty() )
+        {
+            record += " " + nucmcnp + "." + table_item + " ";
+        }
+        else
+        {
+            record += " " + nucmcnp + ".";
+        }
+        // s+= frac_sign
+
+        std::stringstream fs;
+        // s += '{0}{1:.4E}\n'.format(frac_sign, frac)
+        fs.precision(4);   
+        fs << frac_sign << std::scientific << i->second << "\n";
+        record += fs.str(); 
+     }
+  } 
+  std::cout << record;
+  std::cout << "\noss is " << oss.str();
+/*  fragment from python version
         for nuc, frac in fracs.items():
             nucmcnp = str(nucname.mcnp(nuc))
             if 'table_ids' in self.metadata:
@@ -564,7 +620,7 @@ std::string pyne::Material::mcnp(std::string frac_type)
 //  if ('name' in metadata:
 //       oss << 'C name: {0}\n'.format(self.metadata['name'])
 
-  return oss.str();
+  return record;
 }
 
 void pyne::Material::from_text(char * filename) {
