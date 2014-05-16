@@ -7,14 +7,15 @@
 ######################################################################
 
 add_library(dagsolid SHARED DagSolid.cc)
-if (BUILD_SHARED_LIBS)
-  if (VERSION_MAJOR)
-    set_target_properties(dagsolid PROPERTIES
-      SOVERSION ${VERSION_MAJOR}.${VERSION_MINOR}
-      VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
-      COMPILE_DEFINITIONS dagsolid_EXPORTS
-    )
-  endif ()
+if (VERSION_MAJOR)
+  set_target_properties(dagsolid PROPERTIES
+    SOVERSION ${VERSION_MAJOR}.${VERSION_MINOR}
+    VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+    COMPILE_DEFINITIONS dagsolid_EXPORTS
+  )
+endif ()
+# Mac needs to link shared libs to shared libs
+if (APPLE)
   target_link_libraries(dagsolid
     ${Moab_MOAB_LIBRARY}
     ${Moab_dagmc_LIBRARY}
