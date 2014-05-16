@@ -10,17 +10,14 @@ SET(pyne_include ${PYNE_HOME}/include)
 
 SET(hdf5_lib_dir ${HDF5_HOME}/lib)
 SET(pyne_lib_dir ${PYNE_HOME}/lib)
-SET(base_pyne_libs 
+SET(libs
 	${hdf5_lib_dir}/libhdf5.so
 	${pyne_lib_dir}/libpyne.so
 	${pyne_lib_dir}/libpyne_material.so
 	${pyne_lib_dir}/libpyne_nucname.so
-)
-
-SET(libs
-	${base_pyne_libs}
 	${pyne_lib_dir}/libpyne_data.so
 )
+
 
 # Where to look for includes
 INCLUDE_DIRECTORIES(${hdf5_include} ${pyne_include})
