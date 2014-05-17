@@ -22,10 +22,10 @@
 #if !defined(JSON_IS_AMALGAMATION)
   #define JSON_IS_AMALGAMATION
 #endif
-#include <json/json-forwards.h>
-#include <json/json.h>
 
 #ifndef PYNE_IS_AMALGAMATED
+#include <json/json-forwards.h>
+#include <json/json.h>
 #include "h5wrap.h"
 #include "pyne.h"
 #include "nucname.h"
