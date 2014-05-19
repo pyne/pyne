@@ -8,12 +8,20 @@
 ################################################
 
 
-
+from libcpp.vector cimport vector as cpp_vector
 
 # function signatures
 cdef extern from "source_sampling.h" :
 
     void mcnp_sampling_setup_() except +
+
+
+
+# function signatures
+cdef extern from "source_sampling.h" :
+
+    cpp_vector[double] pyparticle_birth_() except +
+    cpp_vector[double] pyparticle_birth_(cpp_vector[double]) except +
 
 
 

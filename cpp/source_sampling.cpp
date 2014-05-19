@@ -24,6 +24,18 @@ void fparticle_birth_(double* rands, double* x, double* y, double* z, double* e,
   SI->particle_birth(rands, x, y, z, e, w);
 }
 
+std::vector<double> pyparticle_birth_(std::vector<double> rands){
+  double x, y, z, e, w;
+  SI->particle_birth(&rands[0], &x, &y, &z, &e, &w);
+  std::vector<double> result(5);
+  result[0] = x;
+  result[1] = y;
+  result[2] = z;
+  result[3] = e;
+  result[4] = w;
+  return result;
+}
+
 /*
  * IPA NARTROF
  */

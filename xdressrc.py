@@ -40,4 +40,5 @@ stlcontainers = [
 
 classes = [apiname('Tally','cpp/tally.*',incfiles='tally.h')]
 
-functions = [apiname('mcnp_sampling_setup_','cpp/source_sampling.cpp', incfiles='source_sampling.h')]
+functions = [apiname('mcnp_sampling_setup_','cpp/source_sampling.cpp', incfiles='source_sampling.h'), 
+             apiname('pyparticle_birth_','cpp/source_sampling.cpp', incfiles='source_sampling.h'),]
