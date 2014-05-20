@@ -47,7 +47,7 @@ class OrientedBoxTreeTool;
  * "inp" key is REQUIRED for TrackLengthMeshTally objects, whereas the "out"
  * key is optional.  See MeshTally.hpp for more information.
  *
- * 2) "convex"="t/f", "convex"="true/fale"
+ * 2) "convex"="t/f", "convex"="true/false"
  * ----------------------------------------------
  * If the convex option is set to true, the user is asserting that the input
  * mesh has convex geometry.  Single particle tracks that leave a convex mesh

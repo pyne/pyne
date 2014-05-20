@@ -96,7 +96,12 @@ void Tally::end_history()
 
 const TallyData& Tally::getTallyData()
 {
-      return *data;
+    return *data;
+}
+
+std::string Tally::get_tally_type()
+{
+    return input_data.tally_type;    
 }
 //---------------------------------------------------------------------------//
 // PROTECTED INTERFACE
