@@ -509,7 +509,7 @@ namespace nucname
   int sza_to_id(std::string nuc);
   /// \}
 
-  /// \Ground State Form Functions
+  /// \name Ground State Form Functions
   /// \{
   /// This form stores the nuclide in id form, but removes
   /// the state information about the nuclide.  I is in the same
@@ -520,6 +520,15 @@ namespace nucname
   int groundstate(char * nuc);
   int groundstate(std::string nuc);
   /// \}
+  
+  /// \name State Map functions
+  /// \{
+  /// These convert from/to decay state ids (used in decay data)
+  /// to metastable ids (the PyNE default)
+  void _load_state_map();
+  int state_id_to_id(int state);
+  int id_to_state_id(int nuc_id);
+  extern std::map<int, int> state_id_map;
 
 
 };

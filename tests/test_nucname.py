@@ -2,10 +2,13 @@
 from __future__ import unicode_literals, division
 from unittest import TestCase
 import nose 
+import warnings
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
     assert_true, assert_false
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import nucname
 
 def test_name_zz():
@@ -468,6 +471,7 @@ def test_groundstate():
     assert_equal(nucname.groundstate("94-Pu-239"), 942390000)
     assert_equal(nucname.groundstate("95-Am-242"), 952420000)
 
+
 def test_sza_to_id():
     vals = [2004, 2004, 96244, 94239, 1095242, 2004, 95242, 1095242, 1092236, 
             4095242, 1095242, 2000, 92000, 93000, 2004, 96244, 94239, 95242, 
@@ -485,6 +489,14 @@ def test_isnuclide():
         yield assert_true, nucname.isnuclide(nuc)
     for nuc in arent:
         yield assert_false, nucname.isnuclide(nuc)
+
+
+def test_state_id_to_id():
+    assert_equal(nucname.state_id_to_id(190380015), 190380002)
+
+
+def test_id_to_state_id():
+    assert_equal(nucname.id_to_state_id(190380002), 190380015)
 
 
 if __name__ == "__main__":

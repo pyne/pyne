@@ -13,17 +13,20 @@ For more information on the Evaluation class, contact Paul Romano
 <paul.k.romano@gmail.com>. For more information on the Library class, contact
 John Xia <john.danger.xia@gmail.com>.
 """
-
 from __future__ import print_function, division, unicode_literals
+
+from libc.stdlib cimport malloc, free
+from libc.stdlib cimport atof, atoi
+from libc.string cimport strtok, strcpy, strncpy
+
 import re
 import os
-from libc.stdlib cimport malloc, free
+from warnings import warn
+from pyne.utils import VnVWarning
 
 cimport numpy as np
 import numpy as np
 from scipy.interpolate import interp1d
-
-np.import_array()
 
 from pyne cimport cpp_nucname
 from pyne import nucname
@@ -31,8 +34,9 @@ import pyne.rxdata as rx
 from pyne.rxname import label
 from pyne.utils import fromendf_tok, endftod
 
-from libc.stdlib cimport atof, atoi
-from libc.string cimport strtok, strcpy, strncpy
+np.import_array()
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
@@ -69,7 +73,7 @@ class Library(rx.RxLib):
         Read the ENDF file into a NumPy array.
 
         Returns
-        --------
+        -------
         data : np.array, 1d, float64
             Returns a 1d float64 NumPy array.
         """
@@ -889,7 +893,7 @@ class Library(rx.RxLib):
         Grab cross-section data.
 
         Parameters
-        -----------
+        ----------
         nuc: int
             id of nuclide to read.
         mt: int
@@ -898,7 +902,7 @@ class Library(rx.RxLib):
             id of isotope to read. Defaults to nuc.
 
         Returns
-        --------
+        -------
         tuple
             Returns a tuple with xs data in tuple[0] and flags in tuple[1].
         """
@@ -919,20 +923,20 @@ class Library(rx.RxLib):
         Grab the data from one reaction type.
 
         Parameters
-        -----------
-        nuc: int
+        ----------
+        nuc : int
             id form of material to read from.
-        mf: int
+        mf : int
             ENDF file number (MF).
-        mt: int
+        mt : int
             ENDF reaction number (MT).
-        lines: int
+        lines : int
             Number of lines to read from this reaction, starting from the top.
             Default value is 0, which reads in the entire reaction.
 
         Returns
-        --------
-        data: NumPy array
+        -------
+        data : NumPy array
             Contains the reaction data in an Nx6 array.
         """
         nuc = nucname.id(nuc)
@@ -945,7 +949,7 @@ class Library(rx.RxLib):
         """Load in the data from one reaction into self.structure.
 
         Parameters
-        -----------
+        ----------
         nuc : int
             id of nuclide.
         mf : int
@@ -954,7 +958,7 @@ class Library(rx.RxLib):
             ENDF reaction number (MT).
 
         Returns
-        --------
+        -------
         array, 1d, float64
             1d, float64 NumPy array containing the reaction data.
         """

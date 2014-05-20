@@ -1,4 +1,5 @@
 """C++ wrapper for extra types header."""
+
 from libc.stdio cimport FILE
 
 # Dirty ifdef, else, else preprocessor hack

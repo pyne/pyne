@@ -1,0 +1,8 @@
+.. _tutorial-08:
+
+Diffusion
+============
+
+Download the :download:`full notebook <../../tutorial/08-diffusion.ipynb>`.
+
+.. notebook:: ../../tutorial/08-diffusion.ipynb

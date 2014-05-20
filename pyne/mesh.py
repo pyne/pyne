@@ -1,20 +1,26 @@
 from __future__ import print_function, division
+import sys
 import copy
 import itertools
 from collections import Iterable, Sequence
-import warnings
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import tables as tb
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", ImportWarning)
+    warn("the PyTAPS optional dependency could not be imported. "
+         "Some aspects of the mesh module may be incomplete.", VnVWarning)
 
 from pyne.material import Material, MaterialLibrary, MultiMaterial
 
+if sys.version_info[0] > 2:
+    basestring = str
 
 # dictionary of lamba functions for mesh arithmetic
 _ops = {"+": lambda val_1, val_2: (val_1 + val_2), 
@@ -207,7 +213,7 @@ class MetadataTag(Tag):
     This makes the following expressions equivalent for a given material property
     name::
 
-        mesh.name[i] == mesh.mats[i].attrs['name']
+        mesh.name[i] == mesh.mats[i].metadata['name']
 
     It also adds slicing, fancy indexing, boolean masking, and broadcasting
     features to this process.  
@@ -220,15 +226,15 @@ class MetadataTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            return mats[key].attrs[name]
+            return mats[key].metadata[name]
         elif isinstance(key, slice):
-            return [mats[i].attrs[name] for i in range(*key.indices(size))]
+            return [mats[i].metadata[name] for i in range(*key.indices(size))]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
-            return [mats[i].attrs[name] for i, b in enumerate(key) if b]
+            return [mats[i].metadata[name] for i, b in enumerate(key) if b]
         elif isinstance(key, Iterable):
-            return [mats[i].attrs[name] for i in key]
+            return [mats[i].metadata[name] for i in key]
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
@@ -240,32 +246,32 @@ class MetadataTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            mats[key].attrs[name] = value
+            mats[key].metadata[name] = value
         elif isinstance(key, slice):
             idx = range(*key.indices(size))
             if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(idx):
                 for i, v in zip(idx, value):
-                    mats[i].attrs[name] = v
+                    mats[i].metadata[name] = v
             else:
                 for i in idx:
-                    mats[i].attrs[name] = value
+                    mats[i].metadata[name] = value
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             idx = np.where(key)[0]
             if isinstance(value, _SEQUENCE_TYPES) and len(value) == key.sum():
                 for i, v in zip(idx, value):
-                    mats[i].attrs[name] = v
+                    mats[i].metadata[name] = v
             else:
                 for i in idx:
-                    mats[i].attrs[name] = value
+                    mats[i].metadata[name] = value
         elif isinstance(key, Iterable):
             if isinstance(value, _SEQUENCE_TYPES) and len(value) == len(key):
                 for i, v in zip(key, value):
-                    mats[i].attrs[name] = v
+                    mats[i].metadata[name] = v
             else:
                 for i in key:
-                    mats[i].attrs[name] = value
+                    mats[i].metadata[name] = value
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
@@ -277,19 +283,19 @@ class MetadataTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            del mats[key].attrs[name]
+            del mats[key].metadata[name]
         elif isinstance(key, slice):
             for i in range(*key.indices(size)):
-                del mats[i].attrs[name]
+                del mats[i].metadata[name]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             for i, b in enumerate(key): 
                 if b:
-                    del mats[i].attrs[name] 
+                    del mats[i].metadata[name] 
         elif isinstance(key, Iterable):
             for i in key:
-                del mats[i].attrs[name]
+                del mats[i].metadata[name]
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
@@ -538,14 +544,14 @@ class Mesh(object):
     """
 
 
-    def __init__(self, mesh=None, mesh_file=None, structured=False, \
+    def __init__(self, mesh=None, structured=False, 
                  structured_coords=None, structured_set=None, 
                  structured_ordering='xyz', mats=()):
         """Parameters
         ----------
-        mesh : iMesh instance, optional
-        mesh_file : str, optional
-            File name of file containing iMesh instance.
+        mesh : iMesh instance or str, optional
+            Either an iMesh instance or a file name of file containing an 
+            iMesh instance.
         structured : bool, optional
             True for structured mesh.
         structured_coords : list of lists, optional
@@ -583,41 +589,19 @@ class Mesh(object):
             in self.dims.
     
         """
-
-
-        if mesh:
-            self.mesh = mesh
-        else: 
+        if mesh is None:
             self.mesh = iMesh.Mesh()
+        elif isinstance(mesh, basestring):
+            self.mesh = iMesh.Mesh()
+            self.mesh.load(mesh)
+        else: 
+            self.mesh = mesh
 
         self.structured = structured
 
-        #Unstructured mesh cases
-        if not self.structured:
-            #Error if structured arguments are passed
-            if structured_coords or structured_set:
-                MeshError("Structured mesh arguments should not be present for\
-                            unstructured Mesh instantiation.")
-
-            #From imesh instance
-            if mesh and not mesh_file:
-                pass
-            #From file
-            elif mesh_file and not mesh:
-                self.mesh.load(mesh_file)
-            else:
-                raise MeshError("To instantiate unstructured mesh object, "
-                                 "must supply exactly 1 of the following: "
-                                 "<mesh>, <mesh_file>.")
-
-        #structured mesh cases
-        elif self.structured:
+        if self.structured:
             self.structured_ordering = structured_ordering
-            #From mesh or mesh_file
-            if (mesh or mesh_file) and not structured_coords \
-                                   and not structured_set:
-                if mesh_file:
-                    self.mesh.load(mesh_file)
+            if (mesh is not None) and not structured_coords and not structured_set:
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")
                 except iBase.TagNotFoundError as e:
@@ -636,22 +620,20 @@ class Mesh(object):
 
                 if count == 0:
                     raise MeshError("Found no structured meshes in "
-                                    "file {0}".format(mesh_file))
+                                    "file {0}".format(mesh))
                 elif count > 1:
                     raise MeshError("Found {0} structured meshes."
                                     " Instantiate individually using"
                                     " from_ent_set()".format(count))
             # from coordinates                       
-            elif not mesh and not mesh_file and structured_coords \
-                                            and not structured_set:
+            elif (mesh is None) and structured_coords and not structured_set:
                 extents = [0, 0, 0] + [len(x) - 1 for x in structured_coords]
                 self.structured_set = self.mesh.createStructuredMesh(
                      extents, i=structured_coords[0], j=structured_coords[1], 
                      k=structured_coords[2], create_set=True)
 
-            #From mesh and structured_set:
-            elif mesh and not mesh_file and not structured_coords \
-                                        and structured_set:
+            # From mesh and structured_set:
+            elif not structured_coords and structured_set:
                 try:
                     self.mesh.getTagHandle("BOX_DIMS")[structured_set]
                 except iBase.TagNotFoundError as e:
@@ -670,14 +652,21 @@ class Mesh(object):
             self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
+        else:
+            # Unstructured mesh cases
+            # Error if structured arguments are passed
+            if structured_coords or structured_set:
+                MeshError("Structured mesh arguments should not be present for\
+                            unstructured Mesh instantiation.")
+
         # sets mats
         mats_in_mesh_file = False
-        if mesh_file and mats is not None and len(mats) == 0:
-            with tb.openFile(mesh_file) as h5f:
+        if isinstance(mesh, basestring) and len(mats) == 0:
+            with tb.openFile(mesh) as h5f:
                 if '/materials' in h5f:
                     mats_in_mesh_file = True
             if mats_in_mesh_file:
-                mats = MaterialLibrary(mesh_file)
+                mats = MaterialLibrary(mesh)
 
         if mats is None:
             pass
@@ -709,7 +698,7 @@ class Mesh(object):
             # overwite hard coded tag names.
             metatagnames = set()
             for mat in mats.values():
-                metatagnames.update(mat.attrs.keys())
+                metatagnames.update(mat.metadata.keys())
             for name in metatagnames:
                 setattr(self, name, MetadataTag(mesh=self, name=name))
         # iMesh.Mesh() tags
@@ -723,7 +712,7 @@ class Mesh(object):
             self.atoms_per_molecule = MaterialPropertyTag(mesh=self, 
                                         name='atoms_per_molecule', 
                                         doc='Number of atoms per molecule')
-            self.attrs = MaterialPropertyTag(mesh=self, name='attrs', 
+            self.metadata = MaterialPropertyTag(mesh=self, name='metadata', 
                             doc='metadata attributes, stored on the material')
             self.comp = MaterialPropertyTag(mesh=self, name='comp', 
                             doc='normalized composition mapping from nuclides to '
@@ -843,55 +832,29 @@ class Mesh(object):
             t[:] = value
         setattr(self, name, t)
 
-
-#    def __add__(self, other):
-#        """Adds the common tags of other and returns a new mesh object.
-#        """
-#        tags = self.common_ve_tags(other)
-#        return self._do_op(other, tags, "+", in_place=False)
-#
-#    def __sub__(self, other):
-#        """Subtracts the common tags of other and returns a new mesh object.
-#        """
-#        tags = self.common_ve_tags(other)
-#        return self._do_op(other, tags, "-", in_place=False)
-#
-#    def __mul__(self, other):
-#        """Multiplies the common tags of other and returns a new mesh object.
-#        """
-#        tags = self.common_ve_tags(other)
-#        return  self._do_op(other, tags, "*", in_place=False)
-#
-#    def __div__(self, other):
-#        """Adds the common tags of other and returns a new mesh object.
-#        """
-#        tags = self.common_ve_tags(other)
-#        return self._do_op(other, tags, "/", in_place=False)
-
-
-    def add(self, other):
+    def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
         """
         tags = self.common_ve_tags(other)
-        self._do_op(other, tags, "+")
+        return self._do_op(other, tags, "+")
 
-    def sub(self, other):
+    def __isub__(self, other):
         """Substracts the common tags of other to the mesh object.
         """
         tags = self.common_ve_tags(other)
-        self._do_op(other, tags, "-")
+        return self._do_op(other, tags, "-")
 
-    def mul(self, other):
+    def __imul__(self, other):
         """Multiplies the common tags of other to the mesh object.
         """
         tags = self.common_ve_tags(other)
-        self._do_op(other, tags, "*")
+        return self._do_op(other, tags, "*")
 
-    def div(self, other):
+    def __idiv__(self, other):
         """Divides the common tags of other to the mesh object.
         """
         tags = self.common_ve_tags(other)
-        self._do_op(other, tags, "/")
+        return self._do_op(other, tags, "/")
 
     def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /.
@@ -1280,12 +1243,12 @@ def _structured_iter(indices, ordmap, dims, it):
 
 
 class StatMesh(Mesh):
-    def __init__(self, mesh=None, mesh_file=None, structured=False,
-                 structured_coords=None, structured_set=None):
+    def __init__(self, mesh=None, structured=False,
+                 structured_coords=None, structured_set=None, mats=()):
 
-        super(StatMesh, self).__init__(mesh=mesh, mesh_file=mesh_file, 
+        super(StatMesh, self).__init__(mesh=mesh,
               structured=structured, structured_coords=structured_coords, 
-              structured_set=structured_set)
+              structured_set=structured_set, mats=mats)
 
     def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /. Called by operater

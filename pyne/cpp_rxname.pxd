@@ -3,7 +3,6 @@ from libcpp.map cimport map
 from libcpp.set cimport set
 from libc.string cimport const_char
 from libcpp.string cimport string as std_string
-
 cimport extra_types
 
 cdef extern from "rxname.h" namespace "pyne::rxname":

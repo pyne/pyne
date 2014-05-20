@@ -11,6 +11,9 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose, \
     assert_array_almost_equal
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
+
 from pyne.endf import Library
 from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict

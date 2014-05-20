@@ -5,15 +5,12 @@ such as computing cross sections for materials, fission energy spectra, metastab
 ratios, etc.
 """
 from __future__ import division
+import sys
 import collections
-try:
-    basestring
-except NameError:
-    basestring = str
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
-np.seterr(all='ignore')
-
 import scipy.integrate
 import tables as tb
 
@@ -26,6 +23,12 @@ from . import models
 from . import cache
 from .models import group_collapse
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+if sys.version_info[0] > 2:
+  basestring = str
+
+np.seterr(all='ignore')
 
 def _prep_cache(xs_cache, E_g=None, phi_g=None):
     """Ensures that certain values are in the cache safely."""

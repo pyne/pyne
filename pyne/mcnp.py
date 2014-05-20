@@ -11,7 +11,6 @@ If PyTAPS is not installed, then Wwinp, Meshtal, and Meshtally will not be
 available to use.
 
 """
-
 from __future__ import print_function, division
 import sys
 import collections
@@ -20,26 +19,29 @@ import struct
 import math
 import os
 import linecache
-import tables
 import datetime
-import warnings
+from warnings import warn
+from pyne.utils import VnVWarning
 import itertools
 
 import numpy as np
+import tables
 
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
 # Mesh specific imports
 try:
     from itaps import iMesh
     HAVE_PYTAPS = True
 except ImportError:
-    warnings.warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the mcnp module may be incomplete.",
-                  ImportWarning)
+                  VnVWarning)
     HAVE_PYTAPS = False
 
 from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
@@ -438,7 +440,7 @@ class SurfSrc(_BinaryReader):
         # no known case of their actual utility is known currently
         for j in range(self.njsw, self.njsw+self.niwr):
             self.get_fortran_record()
-            warnings.warn("Extra info in header not handled: {0}".format(j),
+            warn("Extra info in header not handled: {0}".format(j),
                           RuntimeWarning)
 
         # read summary table record
@@ -1398,7 +1400,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         if isatom != (0 <= value):
             msg = 'Mixed atom and mass fractions not supported.'
             ' See material defined on line {0}'.format(mat_line)
-            warnings.warn(msg)
+            warn(msg)
 
     # apply all data to material object
     if isatom:
@@ -1408,29 +1410,28 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
         # set nucvec attribute to the nucvec dict from above
         mat = Material(nucvec=nucvec)
 
-    mat.attrs['table_ids'] = table_ids
-    mat.attrs['mat_number'] = data_string.split()[0][1:]
+    mat.metadata['table_ids'] = table_ids
+    mat.metadata['mat_number'] = data_string.split()[0][1:]
 
     # collect metadata, if present
-    attrs = ['source', 'comments', 'name']
+    mds = ['source', 'comments', 'name']
     line_index = 1
-    attrs_line = linecache.getline(filename, mat_line - line_index)
+    mds_line = linecache.getline(filename, mat_line - line_index)
     # while reading non-empty comment lines
-    while attrs_line.strip() not in set('cC') \
-            and attrs_line.split()[0] in ['c', 'C']:
-        if attrs_line.split()[0] in ['c', 'C'] \
-                and len(attrs_line.split()) > 1:
-            possible_attr = attrs_line.split()[1].split(':')[0].lower()
-            if possible_attr in attrs:
-                if possible_attr.lower() == 'comments':
+    while mds_line.strip() not in set('cC') \
+            and mds_line.split()[0] in ['c', 'C']:
+        if mds_line.split()[0] in ['c', 'C'] \
+                and len(mds_line.split()) > 1:
+            possible_md = mds_line.split()[1].split(':')[0].lower()
+            if possible_md in mds:
+                if possible_md.lower() == 'comments':
                     comments_string = str(
-                        ''.join(attrs_line.split(':')[1:]).split('\n')[0])
+                        ''.join(mds_line.split(':')[1:]).split('\n')[0])
                     comment_index = 1
                     comment_line = linecache.getline(
                         filename, mat_line - line_index + comment_index)
                     while comment_line.split()[0] in ['c', 'C']:
-                        if comment_line.split()[1].split(':')[0].lower() in \
-                                attrs:
+                        if comment_line.split()[1].split(':')[0].lower() in mds:
                             break
                         comments_string += ' ' + ' '.join(
                             comment_line.split()[1:])
@@ -1439,13 +1440,13 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
                             linecache.getline(filename,
                                               mat_line - line_index +
                                               comment_index)
-                    mat.attrs[possible_attr] = comments_string
+                    mat.metadata[possible_md] = comments_string
                 else:
-                    mat.attrs[possible_attr] = ''.join(
-                        attrs_line.split(':')[1:]).split('\n')[0]
+                    mat.metadata[possible_md] = ''.join(
+                        mds_line.split(':')[1:]).split('\n')[0]
                     # set metadata
         line_index += 1
-        attrs_line = linecache.getline(filename, mat_line - line_index)
+        mds_line = linecache.getline(filename, mat_line - line_index)
 
     # Check all the densities. If they are atom densities, convert them to mass
     # densities. If they are mass densities they willl be negative, so make
@@ -1471,7 +1472,7 @@ def mat_from_mcnp(filename, mat_line, densities='None'):
                 mat2.comp = mat.comp
                 mat2.atoms_per_molecule = mat.atoms_per_molecule
                 mat2.mass = mat.mass
-                mat2.attrs = mat.attrs
+                mat2.metadata = mat.metadata
                 mat2.density = density
                 mat_dict[mat2] = 1
             finished_mat = MultiMaterial(mat_dict)
@@ -1893,14 +1894,15 @@ class Meshtal(object):
         (e.g. 4, 14, 24) as keys and
         MeshTally objects as values.
     tags : dict
-        Maps integer tally numbers to iterables containing four strs: the
+        Maps integer tally numbers to iterables containing four strs, the
         results tag name, the relative error tag name, the total results
         tag name, and the total relative error tag name. If tags is None
         the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
         'x_rel_error_total' where x is n or p for neutrons or photons.
+
     """
 
-    def __init__(self, filename, tags=None):
+    def __init__(self, filename, tags=None, meshes_have_mats=False):
         """Parameters
         ----------
         filename : str
@@ -1911,6 +1913,9 @@ class Meshtal(object):
             tag name, and the total relative error tag name. If tags is None
             the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
             'x_rel_error_total' where x is n or p for neutrons or photons.
+        meshes_have_mats : bool
+             If false, Meshtally objects will be created without PyNE material
+             material objects. 
         """
 
         if not HAVE_PYTAPS:
@@ -1919,6 +1924,7 @@ class Meshtal(object):
 
         self.tally = {}
         self.tags = tags
+        self._meshes_have_mats = meshes_have_mats
 
         with open(filename, 'r') as f:
             self._read_meshtal_head(f)
@@ -1952,9 +1958,11 @@ class Meshtal(object):
                 tally_num = int(line.split()[3])
                 if self.tags is not None and tally_num in self.tags.keys():
                     self.tally[tally_num] = MeshTally(f, tally_num,
-                                                      self.tags[tally_num])
+                                            self.tags[tally_num],
+                                            mesh_has_mats=self._meshes_have_mats)
                 else:
-                    self.tally[tally_num] = MeshTally(f, tally_num)
+                    self.tally[tally_num] = MeshTally(f, tally_num,
+                                            mesh_has_mats=self._meshes_have_mats)
 
             line = f.readline()
 
@@ -1997,7 +2005,7 @@ class MeshTally(StatMesh):
 
     """
 
-    def __init__(self, f, tally_number, tag_names=None):
+    def __init__(self, f, tally_number, tag_names=None, mesh_has_mats=False):
         """Create MeshTally object from a filestream open to the second
         line of a mesh tally header (the neutron/photon line). MeshTally objects
         should be instantiated only through the Meshtal class.
@@ -2012,6 +2020,9 @@ class MeshTally(StatMesh):
             Four strs that specify the tag names for the results, relative 
             errors, total results and relative errors of the total results.
             This should come from the Meshtal.tags attribute dict.
+        mesh_has_mats : bool
+             If false, Meshtally objects will be created without PyNE material
+             objects. 
         """
 
         if not HAVE_PYTAPS:
@@ -2030,7 +2041,7 @@ class MeshTally(StatMesh):
         else:
             self.tag_names = tag_names
 
-        self._create_mesh(f)
+        self._create_mesh(f, mesh_has_mats)
 
     def _read_meshtally_head(self, f):
         """Get the particle type, spacial and energy bounds, and whether or
@@ -2076,14 +2087,15 @@ class MeshTally(StatMesh):
             'Rslt * ', 'Rslt_*_').strip().split()
         self._column_idx = dict(zip(column_names, range(0, len(column_names))))
 
-    def _create_mesh(self, f):
+    def _create_mesh(self, f, mesh_has_mats):
         """Instantiate a Mesh object and tag the iMesh instance
            with results and relative errors.
         """
 
+        mats = () if mesh_has_mats is True else None
         super(MeshTally, self).__init__(structured_coords=[self.x_bounds,
                                         self.y_bounds, self.z_bounds],
-                                        structured=True)
+                                        structured=True, mats=mats)
 
         num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
             * (len(self.z_bounds)-1)
@@ -2214,7 +2226,7 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
     mat_cards = ""
     idx = mesh.iter_structured_idx('xyz')
     for i in idx:
-        mesh.mats[i].attrs['mat_number'] = i + 1
+        mesh.mats[i].metadata['mat_number'] = i + 1
         mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
   
     return mat_cards

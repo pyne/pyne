@@ -1,4 +1,5 @@
 """Python wrapper for material library."""
+
 from __future__ import division, unicode_literals
 
 # Cython imports
@@ -14,10 +15,13 @@ from libcpp.vector cimport vector as cpp_vector
 
 # Python imports
 import collections
-import warnings
 cimport numpy as np
 import numpy as np
+from warnings import warn
+from pyne.utils import VnVWarning
+import os
 
+import tables as tb
 
 # local imports
 from pyne cimport cpp_material
@@ -30,12 +34,12 @@ import jsoncpp
 
 cimport pyne.nucname as nucname
 import pyne.nucname as nucname
-import os
 
 cimport pyne.data as data
 import pyne.data as data
 
-import tables as tb
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647
@@ -55,11 +59,11 @@ cdef cpp_map[int, double] dict_to_comp(dict nucvec):
 cdef class _Material:
 
     def __cinit__(self, nucvec=None, double mass=-1.0, double density=-1.0,
-                  double atoms_per_molecule=-1.0, attrs=None, bint free_mat=True,
+                  double atoms_per_molecule=-1.0, metadata=None, bint free_mat=True,
                   *args, **kwargs):
         """Material C++ constuctor."""
         cdef cpp_map[int, double] comp
-        cdef jsoncpp.Value cattrs = jsoncpp.Value({} if attrs is None else attrs)
+        cdef jsoncpp.Value cmetadata = jsoncpp.Value({} if metadata is None else metadata)
 
         if isinstance(nucvec, _Material):
             # Material from Material
@@ -68,18 +72,18 @@ cdef class _Material:
             # Material from dict
             comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(
-                    comp, mass, density, atoms_per_molecule, deref(cattrs._inst))
+                    comp, mass, density, atoms_per_molecule, deref(cmetadata._inst))
         elif isinstance(nucvec, basestring):
             # Material from file
             nucvec = nucvec.encode()
             self.mat_pointer = new cpp_material.Material(
                     <char *> nucvec, mass, density, atoms_per_molecule, 
-                    deref(cattrs._inst))
+                    deref(cmetadata._inst))
         elif (nucvec is None):
             if free_mat:
                 # Make empty mass stream
                 self.mat_pointer = new cpp_material.Material(comp, mass, density,
-                                        atoms_per_molecule, deref(cattrs._inst))
+                                        atoms_per_molecule, deref(cmetadata._inst))
             else:
                 self.mat_pointer = NULL
         else:
@@ -156,16 +160,16 @@ cdef class _Material:
         def __set__(self, double value):
             self.mat_pointer.atoms_per_molecule = value
 
-    property attrs:
+    property metadata:
         def __get__(self):
             cdef jsoncpp.Value val = jsoncpp.Value(view=True)
-            val._inst = &self.mat_pointer.attrs
+            val._inst = &self.mat_pointer.metadata
             return val
 
         def __set__(self, value):
             cdef jsoncpp.Value val = jsoncpp.Value(value)
             val._view = True
-            self.mat_pointer.attrs = deref(val._inst)
+            self.mat_pointer.metadata = deref(val._inst)
 
     #
     # Class Methods
@@ -1268,7 +1272,7 @@ class Material(_Material, collections.MutableMapping):
         Number of atoms to per molecule of material.  Needed to obtain proper
         scaling of molecular mass.  For example, this value for water is
         3.0.
-    attrs : JSON-convertable Python object, optional
+    metadata : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
         usually a dictionary with string keys.  This container is used to store
         arbitrary metadata about the material.
@@ -1283,8 +1287,8 @@ class Material(_Material, collections.MutableMapping):
         header += ["mass = {0}".format(self.mass)]
         header += ["density = {0}".format(self.density)]
         header += ["atoms per molecule = {0}".format(self.atoms_per_molecule)]
-        if self.attrs.isobject():
-            for key, value in self.attrs.items():
+        if self.metadata.isobject():
+            for key, value in self.metadata.items():
                 header += ["{0} = {1}".format(key, value)]
         header += ['-' * max([len(h) for h in header])]
         header = "\n".join(header) + "\n"
@@ -1295,7 +1299,7 @@ class Material(_Material, collections.MutableMapping):
 
     def __repr__(self):
         return "pyne.material.Material({0}, {1}, {2}, {3}, {4})".format(
-                repr(self.comp), self.mass, self.density, self.atoms_per_molecule, repr(self.attrs))
+                repr(self.comp), self.mass, self.density, self.atoms_per_molecule, repr(self.metadata))
 
     def __deepcopy__(self, memo):
         cdef _Material other = Material(free_mat=False)
@@ -1305,7 +1309,7 @@ class Material(_Material, collections.MutableMapping):
         other_ptr.mass = self_ptr.mass
         other_ptr.density = self_ptr.density
         other_ptr.atoms_per_molecule = self_ptr.atoms_per_molecule
-        other_ptr.attrs = self_ptr.attrs
+        other_ptr.metadata = self_ptr.metadata
         other.mat_pointer = other_ptr
         other._free_mat = True
         return other
@@ -1328,23 +1332,23 @@ class Material(_Material, collections.MutableMapping):
         """
         s = ''
 
-        if 'name' in self.attrs:
-            s += 'C name: {0}\n'.format(self.attrs['name'])
+        if 'name' in self.metadata:
+            s += 'C name: {0}\n'.format(self.metadata['name'])
 
         if self.density != -1.0:
             s += 'C density = {0}\n'.format(self.density)
 
-        if 'source' in self.attrs:
-            s += 'C source: {0}\n'.format(self.attrs['source'])
+        if 'source' in self.metadata:
+            s += 'C source: {0}\n'.format(self.metadata['source'])
 
-        if 'comments' in self.attrs:
-            comment_string= 'comments: ' + self.attrs['comments']
+        if 'comments' in self.metadata:
+            comment_string= 'comments: ' + self.metadata['comments']
             # split up lines so comments are less than 80 characters
             for n in range(0, int(np.ceil(float(len(comment_string))/77))):
                 s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
 
-        if 'mat_number' in self.attrs:
-            mat_num = self.attrs['mat_number']
+        if 'mat_number' in self.metadata:
+            mat_num = self.metadata['mat_number']
         else:
             mat_num = '?'
 
@@ -1354,9 +1358,9 @@ class Material(_Material, collections.MutableMapping):
         frac_sign = "" if  frac_type == 'atom' else '-'
         for nuc, frac in fracs.items():
             nucmcnp = str(nucname.mcnp(nuc))
-            if 'table_ids' in self.attrs:
+            if 'table_ids' in self.metadata:
                 s += '     {0}.{1} '.format(nucmcnp,
-                                            self.attrs['table_ids'][nucmcnp])
+                                            self.metadata['table_ids'][nucmcnp])
             else:
                 s += '     {0} '.format(nucmcnp)
             s += '{0}{1:.4E}\n'.format(frac_sign, frac)
@@ -1392,17 +1396,17 @@ class Material(_Material, collections.MutableMapping):
         """
         s = ''
 
-        if 'mat_number' in self.attrs:
-            s += '# mat number: {0}\n'.format(self.attrs['mat_number'])
-            mat_num = self.attrs['mat_number']  # for use in mat_name
+        if 'mat_number' in self.metadata:
+            s += '# mat number: {0}\n'.format(self.metadata['mat_number'])
+            mat_num = self.metadata['mat_number']  # for use in mat_name
         else:
             mat_num = '<mat_num>'
 
-        if 'source' in self.attrs:
-            s += '# source: {0}\n'.format(self.attrs['source'])
+        if 'source' in self.metadata:
+            s += '# source: {0}\n'.format(self.metadata['source'])
 
-        if 'comments' in self.attrs:
-            comment_string= 'comments: ' + self.attrs['comments']
+        if 'comments' in self.metadata:
+            comment_string= 'comments: ' + self.metadata['comments']
             # split up lines so comments are less than 80 characters
             for n in range(0, int(np.ceil(float(len(comment_string))/77))):
                 s += '# {0}\n'.format(comment_string[n*77:(n + 1)*77])
@@ -1415,8 +1419,8 @@ class Material(_Material, collections.MutableMapping):
 
         # if a name is present, use it. Otherwise the name is is:
         # mat<mat_number>_rho<rho>
-        if 'name' in self.attrs:
-            mat_name = self.attrs['name']
+        if 'name' in self.metadata:
+            mat_name = self.metadata['name']
         else:
             mat_name = 'mat{0}_rho-{1}'.format(mat_num, density)
 
@@ -1447,7 +1451,7 @@ class Material(_Material, collections.MutableMapping):
 #####################################
 
 def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
-                   double atoms_per_molecule=-1.0, attrs=None):
+                   double atoms_per_molecule=-1.0, metadata=None):
     """from_atom_frac(atom_fracs, double mass=-1.0, double atoms_per_molecule=-1.0)
     Create a Material from a mapping of atom fractions.
 
@@ -1468,7 +1472,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
         Number of atoms per molecule of material.  Needed to obtain proper
         scaling of molecular mass.  For example, this value for water is
         3.0.
-    attrs : JSON-convertable Python object, optional
+    metadata : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
         usually a dictionary with string keys.  This container is used to store
         arbitrary metadata about the material.
@@ -1502,7 +1506,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
     Material.from_atom_frac : Underlying method class method.
 
     """
-    mat = Material(attrs=attrs)
+    mat = Material(metadata=metadata)
     mat.from_atom_frac(atom_fracs)
 
     if 0.0 <= mass:
@@ -1565,7 +1569,7 @@ def from_hdf5(filename, datapath, int row=-1, int protocol=1):
 
 
 
-def from_text(filename, double mass=-1.0, double atoms_per_molecule=-1.0, attrs=None):
+def from_text(filename, double mass=-1.0, double atoms_per_molecule=-1.0, metadata=None):
     """from_text(char * filename, double mass=-1.0, double atoms_per_molecule=-1.0)
     Create a Material object from a simple text file.
 
@@ -1582,7 +1586,7 @@ def from_text(filename, double mass=-1.0, double atoms_per_molecule=-1.0, attrs=
         Number of atoms to per molecule of material.  Needed to obtain proper
         scaling of molecular mass.  For example, this value for water is
         3.0.
-    attrs : JSON-convertable Python object, optional
+    metadata : JSON-convertable Python object, optional
         Initial attributes to build the material with.  At the top-level this is
         usually a dictionary with string keys.  This container is used to store
         arbitrary metadata about the material.
@@ -1606,7 +1610,7 @@ def from_text(filename, double mass=-1.0, double atoms_per_molecule=-1.0, attrs=
     cdef char * c_filename
     filename_bytes = filename.encode('UTF-8')
     c_filename = filename_bytes
-    mat = Material(attrs=attrs)
+    mat = Material(metadata=metadata)
 
     if 0.0 <= mass:
         mat.mass = mass
@@ -1892,7 +1896,7 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
     colnames = ["Nuclide"]
     for i, mat in enumerate(mats):
         nucs |= set(mat.comp.keys())
-        name = mat.attrs['name'] if 'name' in mat.attrs else "mat{0}".format(i)
+        name = mat.metadata['name'] if 'name' in mat.metadata else "mat{0}".format(i)
         colnames.append(name)
     nucs = sorted(nucs)
     colnames = labels + colnames[len(labels):]
@@ -2051,20 +2055,20 @@ cdef class _MaterialLibrary(object):
         with tb.openFile(file, 'r') as f:
             matstable = f.getNode(datapath)[:]
             nucs = f.getNode(nucpath)[:]
-            matsattrs = f.getNode(datapath + '_attrs').read()
+            matsmetadata = f.getNode(datapath + '_metadata').read()
         for i in range(len(matstable)):
             row = matstable[i]
             comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
             mat = Material(comp, mass=row[0], density=row[1], 
                                     atoms_per_molecule=row[2])
-            strattrs = "".join(map(chr, matsattrs[i]))
-            strattrs = strattrs.encode()
-            s = std_string(<char *> strattrs)
+            strmetadata = "".join(map(chr, matsmetadata[i]))
+            strmetadata = strmetadata.encode()
+            s = std_string(<char *> strmetadata)
             attribs = cpp_jsoncpp.Value()
             reader.parse(s, attribs)
-            (<_Material> mat).mat_pointer.attrs = attribs
-            if "name" in mat.attrs:
-                name = mat.attrs["name"]
+            (<_Material> mat).mat_pointer.metadata = attribs
+            if "name" in mat.metadata:
+                name = mat.metadata["name"]
             else:
                 name = "_" + str(i)
             _lib[name] = mat
@@ -2092,8 +2096,8 @@ cdef class _MaterialLibrary(object):
             f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)), 
                           createparents=True)
         for key, mat in _lib.items():
-            if "name" not in mat.attrs:
-                mat.attrs["name"] = key
+            if "name" not in mat.metadata:
+                mat.metadata["name"] = key
             mat.write_hdf5(file, datapath=datapath, nucpath=nucpath)
 
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):

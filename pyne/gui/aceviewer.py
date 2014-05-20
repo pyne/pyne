@@ -5,13 +5,13 @@ module.
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>
 """
-
 import sys
 from bisect import bisect_right
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 import matplotlib
-matplotlib.use('Qt4Agg')
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
@@ -22,6 +22,10 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from pyne import ace
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+matplotlib.use('Qt4Agg')
 
 class AceViewer(QMainWindow):
 

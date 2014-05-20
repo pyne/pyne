@@ -1,30 +1,33 @@
 """The enrichment module contains tools for defining and manipulating 
 enrichment cascades.  The Cascade class is a simple container for storing 
-parameters which define and enrichment setup.  These include feed, product, 
+parameters that define an enrichment setup.  These include feed, product, 
 and tail materials, target enrichments, and separation factors.  The main 
-functions in this modules computes the total flow rate and separation factors
-from an initial cascade.  Other helper function compute relative flow rates 
+functions in this module compute the total flow rate and separation factors
+from an initial cascade.  Other helper functions compute relative flow rates 
 and nuclide-specific separation factors.
 """
-# Cython imports
 from __future__ import unicode_literals
+
+# Cython imports
 from cython cimport pointer
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
+from warnings import warn
+from pyne.utils import VnVWarning
+
 from pyne cimport nucname
 from pyne import nucname
-
 from pyne cimport stlcontainers as conv
-
 cimport pyne.cpp_material
 cimport pyne.material
 import pyne.material
-
 from pyne cimport cpp_enrichment
 
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 
 #####################
@@ -33,8 +36,8 @@ from pyne cimport cpp_enrichment
 
 
 cdef class Cascade:
-    """This class is a container for enrichment cascade parameters which 
-    defines the perfomance of a separations plant. Instances of this class 
+    """This class is a container for enrichment cascade parameters that 
+    define the perfomance of a separations plant. Instances of this class 
     are passed into and out of many enrichment functions.  
     """
 

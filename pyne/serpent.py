@@ -1,10 +1,14 @@
 import re
-try:
-    basestring
-except NameError:
-    basestring = str
+import sys
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
+
+if sys.version_info[0] > 2:
+  basestring = str
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 _if_idx_str = ("""if (exist("idx", "var"));\n"""
               """  idx = idx + 1;\n"""

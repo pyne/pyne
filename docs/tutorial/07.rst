@@ -1,0 +1,8 @@
+.. _tutorial-07:
+
+Mesh Basics
+=============
+
+Download the :download:`full notebook <../../tutorial/07-mesh-basics.ipynb>`.
+
+.. notebook:: ../../tutorial/07-mesh-basics.ipynb

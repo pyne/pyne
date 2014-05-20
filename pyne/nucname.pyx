@@ -1,6 +1,4 @@
 """Python wrapper for nucname library."""
-# Python imports 
-#from collections import Iterable
 from __future__ import unicode_literals, division
 
 # Cython imports
@@ -11,6 +9,11 @@ from cython.operator cimport preincrement as inc
 #from cython cimport pointer
 from libcpp.string cimport string as std_string
 
+# Python imports 
+#from collections import Iterable
+from warnings import warn
+from pyne.utils import VnVWarning
+
 # local imports 
 cimport pyne.cpp_pyne
 cimport pyne.pyne_config
@@ -19,6 +22,8 @@ import pyne.pyne_config
 from pyne cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 #
 # Conversion dictionaries
@@ -715,13 +720,57 @@ def groundstate(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.groundstate(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.groundstate(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.groundstate(<int> nuc)
     else:
         raise NucTypeError(nuc)
     return newnuc
 
+
+def state_id_to_id(state):
+    """
+    Converts a ENSDF state id to a PyNE nuc_id
+    
+    Parameters
+    ----------
+    nuc : int
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in nuc_id form.
+
+    """
+    if isinstance(state, int) or isinstance(state, long):
+        newnuc = cpp_nucname.state_id_to_id(<int> state)
+    else:
+        raise NucTypeError(state)
+    return newnuc
+
+
+def id_to_state_id(nuc):
+    """
+    Converts a ENSDF state id to a PyNE nuc_id
+    
+    Parameters
+    ----------
+    nuc : int
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in nuc_id form.
+
+    """
+    if isinstance(nuc, int) or isinstance(nuc, long):
+        newnuc = cpp_nucname.id_to_state_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
 
 
 #

@@ -9,10 +9,8 @@ import sys
 from collections import Mapping
 from copy import deepcopy
 from itertools import chain
-try:
-    basestring
-except NameError:
-    basestring = str
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 
@@ -21,6 +19,11 @@ from pyne import rxname
 from pyne import nucname
 from pyne.xs import cache
 from pyne.material import Material, from_atom_frac
+
+if sys.version_info[0] > 2:
+  basestring = str
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 BASE_TAPE9 = os.path.join(os.path.dirname(__file__), 'base_tape9.inp')
 

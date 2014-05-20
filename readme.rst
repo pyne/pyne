@@ -20,9 +20,10 @@ http://pyne.io/, the official PyNE projectsite.
 ============
 Installation
 ============
--------------
+
+------------
 Dependencies
--------------
+------------
 PyNE has the following dependencies:
 
    #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
@@ -43,9 +44,17 @@ Additionally, building the documentation requires the following:
 ------
 Binary
 ------
-A binary distribution of PyNE is hopefully coming soon.  Until then, please
-install from source.
+Binary distributions of the latest release (0.4) for mac and linux (64-bit) 
+using the conda package manager can be installed by running the command::
 
+    conda install -c https://conda.binstar.org/batesca pyne
+
+A binary distribution of PyNE is also available for windows on 
+32-bit python using conda. In order to install use the following command::
+
+    conda install -c https://conda.binstar.org/batesca pyne_win32py27
+
+Conda binaries do not have moab/pytaps/mesh support (yet).
 
 .. _install_source:
 
@@ -73,7 +82,8 @@ or from public sources on the internet.
 Conda Install Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 On mac and linux PyNE can be installed via the package manager conda. 
-After installing anaconda or miniconda from http://continuum.io/downloads
+After installing anaconda or miniconda from 
+`the Continuum downloads page <http://continuum.io/downloads>`_ 
 add conda's binary directory to your bash profile by adding::
 
     export PATH=/path/to/anaconda/bin:$PATH
@@ -86,8 +96,9 @@ on linux you may also need to run::
 
     conda install patchelf
 
-Then dowload the latest conda-recipes:
- https://github.com/conda/conda-recipes/archive/master.zip
+Then dowload the latest conda-recipes `here 
+<https://github.com/conda/conda-recipes/archive/master.zip>`_
+
 cd to the conda-recipes directory and run::
 
     conda build pyne
@@ -136,8 +147,8 @@ Once those lines have been added, run the following command before running
     source ~/.bashrc
 
 
-.. _zip: https://github.com/pyne/pyne/zipball/0.3
-.. _tar: https://github.com/pyne/pyne/tarball/0.3
+.. _zip: https://github.com/pyne/pyne/zipball/0.4
+.. _tar: https://github.com/pyne/pyne/tarball/0.4
 
 .. install-end
 
@@ -150,5 +161,3 @@ it is as easy as forking the repository on GitHub, making your changes, and
 issuing a pull request. If you have any questions about this process don't 
 hesitate to ask the mailing list (https://groups.google.com/forum/#!forum/pyne-dev, 
 pyne-dev@googlegroups.com).
-
-

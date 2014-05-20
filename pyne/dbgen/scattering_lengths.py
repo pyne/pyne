@@ -2,11 +2,13 @@
 lengths.  This data comes from Neutron News, Vol. 3, No. 3, 1992, pp. 29-37 via 
 a NIST webpage (http://www.ncnr.nist.gov/resources/n-lengths/list.html).  Please
 contact Alan Munter, <alan.munter@nist.gov> for more information."""
-
 from __future__ import print_function
 import os
 import re
 import shutil
+from warnings import warn
+from pyne.utils import VnVWarning
+
 try:
     import urllib.request as urllib2
 except ImportError:
@@ -18,6 +20,7 @@ import tables as tb
 from .. import nucname
 from .api import BASIC_FILTERS
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html'):
     """Grabs the scattering cross-section lengths for neutrons from the NIST website

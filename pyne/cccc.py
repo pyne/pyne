@@ -26,9 +26,14 @@ Report LA-5324-MS_.
 .. _LA-5324-MS: http://www.osti.gov/bridge/servlets/purl/5369298-uIcX6p/
 
 """
+
 from __future__ import division
+from warnings import warn
+from pyne.utils import VnVWarning
 
 from pyne.binaryreader import _BinaryReader, _FortranRecord
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class Isotxs(_BinaryReader):
     """An Isotxs object represents a binary ISOTXS file written according to the

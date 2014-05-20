@@ -1,0 +1,8 @@
+.. _tutorial-06:
+
+Transmutation
+=============
+
+Download the :download:`full notebook <../../tutorial/06-transmutation.ipynb>`.
+
+.. notebook:: ../../tutorial/06-transmutation.ipynb
