@@ -49,10 +49,8 @@ using the conda package manager can be installed by running the command::
 
     conda install -c https://conda.binstar.org/batesca pyne
 
-A binary distribution of PyNE is also available for windows on 
-32-bit python using conda. In order to install use the following command::
-
-    conda install -c https://conda.binstar.org/batesca pyne_win32py27
+A windows 32-bit binary is also available on conda via the same command but
+it is highly experimental and likely broken.
 
 Conda binaries do not have moab/pytaps/mesh support (yet).
 
