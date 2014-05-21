@@ -1038,7 +1038,7 @@ def test_mcnp():
                 '     92238.25c -9.6000E-01\n')
     assert_equal(mass, mass_exp)
 
-    atom = leu.mcnp(frac_type='atom')
+    atom = leu.mcnp(frac_id=1)
     atom_exp = ('C name: leu\n'
                 'C density = 19.1\n'
                 'C source: Some URL\n'
@@ -1098,7 +1098,7 @@ def test_write_mcnp():
                    density=19.1)
 
     leu.write_mcnp('mcnp_mass_fracs.txt')
-    leu.write_mcnp('mcnp_mass_fracs.txt', frac_type='atom')
+    leu.write_mcnp('mcnp_mass_fracs.txt', frac_id=1)
 
     with open('mcnp_mass_fracs.txt') as f:
         written = f.read()
@@ -1114,7 +1114,6 @@ def test_write_mcnp():
                 'C density = 19.1\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
-                'C  limit, for science\n'
                 'm2\n'
                 '     92235.15c 4.0491E-02\n'
                 '     92238.25c 9.5951E-01\n')

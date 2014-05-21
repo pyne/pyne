@@ -331,6 +331,17 @@ cdef class _Material:
         c_nucpath = nucpath_bytes
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
+    def mcnp(self, frac_id):
+        """mcnp(int)
+        Return an mcnp card
+        Parameters
+        ----------
+ 	   int 0 means use "mass" as the frac_type
+        """
+        cdef std_string card
+        card = self.mat_pointer.mcnp(frac_id)
+        return card
+
 
     def from_text(self, filename):
         """from_text(char * filename)
@@ -1314,61 +1325,8 @@ class Material(_Material, collections.MutableMapping):
         other._free_mat = True
         return other
 
-    def mcnp(self, frac_type='mass'):
-        """mcnp(self, frac_type='mass')
-        This method returns an MCNP material card in string form. Relevant
-        attributes are added as MCNP valid comments.
 
-        Parameters
-        ----------
-        frac_type : str, optional
-            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
-            are used to describe material composition.
-
-        Returns
-        -------
-        s : str
-            The MCNP material card.
-        """
-        s = ''
-
-        if 'name' in self.metadata:
-            s += 'C name: {0}\n'.format(self.metadata['name'])
-
-        if self.density != -1.0:
-            s += 'C density = {0}\n'.format(self.density)
-
-        if 'source' in self.metadata:
-            s += 'C source: {0}\n'.format(self.metadata['source'])
-
-        if 'comments' in self.metadata:
-            comment_string= 'comments: ' + self.metadata['comments']
-            # split up lines so comments are less than 80 characters
-            for n in range(0, int(np.ceil(float(len(comment_string))/77))):
-                s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
-
-        if 'mat_number' in self.metadata:
-            mat_num = self.metadata['mat_number']
-        else:
-            mat_num = '?'
-
-        s += 'm{0}\n'.format(mat_num)
-
-        fracs = self.to_atom_frac() if frac_type == 'atom' else self.comp
-        frac_sign = "" if  frac_type == 'atom' else '-'
-        for nuc, frac in fracs.items():
-            nucmcnp = str(nucname.mcnp(nuc))
-            if 'table_ids' in self.metadata:
-                s += '     {0}.{1} '.format(nucmcnp,
-                                            self.metadata['table_ids'][nucmcnp])
-            else:
-                s += '     {0} '.format(nucmcnp)
-            s += '{0}{1:.4E}\n'.format(frac_sign, frac)
-
-        return s
-
-
-    def write_mcnp(self, filename, frac_type='mass'):
+    def write_mcnp(self, filename, frac_id=0):
         """write_mcnp(self, filename, frac_type='mass')
         The method appends an MCNP mass fraction definition, with
         attributes to the file with the supplied filename.
@@ -1377,12 +1335,12 @@ class Material(_Material, collections.MutableMapping):
         ----------
         filename : str
             The file to append the material definition to.
-        frac_type : str, optional
-            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+        frac_type : int, optional
+            Represent either 'mass'(0, default) or 'atom'(1). Speficies whether mass or atom fractions
             are used to describe material composition.
         """
         with open(filename, 'a') as f:
-            f.write(self.mcnp(frac_type))
+            f.write(self.mcnp(frac_id))
 
     def alara(self):
         """alara(self)
