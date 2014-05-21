@@ -148,7 +148,8 @@ namespace pyne
                     std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
     /// Return an mcnp input deck record as a string
-    std::string mcnp(std::string frac_type = "mass");
+    // std::string mcnp(std::string frac_type = "mass");
+    std::string mcnp(int frac_id = 0);
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
     /// Reads data from a plaintext file at \a filename into this Material instance.

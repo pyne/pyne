@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <iomanip>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
@@ -483,7 +484,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 };
 
-std::string pyne::Material::mcnp(std::string frac_type)
+std::string pyne::Material::mcnp(int frac_id)
 {
 
   // Print out some stuff  Json::Reader reader;
@@ -491,7 +492,15 @@ std::string pyne::Material::mcnp(std::string frac_type)
   // for (int i=0; i < metadata.size(); i=i+2){
   //   std::cout << metadata.get(obj.at(i), "") << metadata.get(obj.at(i+1), "");
   // }
-
+  std::string frac_type;
+  if (0 == frac_id)
+  {
+     frac_type = "mass";
+  }
+  else
+  {
+     frac_type = "atom";
+  }
   int mcnp_id;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++) 
   {
@@ -519,7 +528,7 @@ std::string pyne::Material::mcnp(std::string frac_type)
   }
   if (metadata.isMember("source"))
   {
-     record += "C source: " + metadata["source"].asString() + "\n";
+ //     record += "C source: " + metadata["source"].asString() + "\n";
      oss << "C source: " << metadata["source"].asString() << "\n";
   }
 /*
@@ -538,6 +547,12 @@ if 'comments' in self.metadata:
       {
          // s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
          oss << "C " << comment_string << "\n";
+      }
+      else
+      {
+         char comment_trunc[78];
+         strncpy(comment_trunc,comment_string.c_str(),77);
+         oss << "C " << comment_trunc << "\n";
       }
   }
 
@@ -620,7 +635,8 @@ if 'comments' in self.metadata:
 //  if ('name' in metadata:
 //       oss << 'C name: {0}\n'.format(self.metadata['name'])
 
-  return record;
+  // return record;
+  return oss.str();
 }
 
 void pyne::Material::from_text(char * filename) {
