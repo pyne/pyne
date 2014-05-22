@@ -331,15 +331,14 @@ cdef class _Material:
         c_nucpath = nucpath_bytes
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
-    def mcnp(self, frac_id):
-        """mcnp(int)
+    def mcnp(self, frac_type):
+        """mcnp(frac_type)
         Return an mcnp card
         Parameters
         ----------
  	   int 0 means use "mass" as the frac_type
         """
-        cdef std_string card
-        card = self.mat_pointer.mcnp(frac_id)
+        card = self.mat_pointer.mcnp(frac_type)
         return card
 
 
@@ -1340,7 +1339,7 @@ class Material(_Material, collections.MutableMapping):
             are used to describe material composition.
         """
         with open(filename, 'a') as f:
-            f.write(self.mcnp(frac_id))
+            f.write(self.mcnp(frac_type))
 
     def alara(self):
         """alara(self)
