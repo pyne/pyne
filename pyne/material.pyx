@@ -331,13 +331,14 @@ cdef class _Material:
         c_nucpath = nucpath_bytes
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
-    def mcnp(self, frac_type):
+    def mcnp(self, frac_type='mass'):
         """mcnp(frac_type)
         Return an mcnp card
         Parameters
         ----------
  	   int 0 means use "mass" as the frac_type
         """
+        cdef std_string card
         card = self.mat_pointer.mcnp(frac_type)
         return card
 
