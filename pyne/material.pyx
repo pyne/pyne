@@ -1326,7 +1326,7 @@ class Material(_Material, collections.MutableMapping):
         return other
 
 
-    def write_mcnp(self, filename, frac_id=0):
+    def write_mcnp(self, filename, frac_type='mass'):
         """write_mcnp(self, filename, frac_type='mass')
         The method appends an MCNP mass fraction definition, with
         attributes to the file with the supplied filename.
@@ -1335,8 +1335,8 @@ class Material(_Material, collections.MutableMapping):
         ----------
         filename : str
             The file to append the material definition to.
-        frac_type : int, optional
-            Represent either 'mass'(0, default) or 'atom'(1). Speficies whether mass or atom fractions
+        frac_type : string, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
             are used to describe material composition.
         """
         with open(filename, 'a') as f:
