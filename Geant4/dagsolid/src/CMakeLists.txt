@@ -1,25 +1,29 @@
-cmake_minimum_required(VERSION 2.6.4)
+######################################################################
+#
+# CMakeLists.txt for dagmc/Geant4/dagsolid/src
+#
+# $Id: CMakeLists.txt 6346 2014-01-27 03:33:21Z cary $
+#
+######################################################################
 
-# project name
-project (dagsolid)
+add_library(dagsolid SHARED DagSolid.cc)
+if (VERSION_MAJOR)
+  set_target_properties(dagsolid PROPERTIES
+    SOVERSION ${VERSION_MAJOR}.${VERSION_MINOR}
+    VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+    COMPILE_DEFINITIONS dagsolid_EXPORTS
+  )
+endif ()
+# Mac needs to link shared libs to shared libs
+if (APPLE)
+  target_link_libraries(dagsolid
+    ${Moab_MOAB_LIBRARY}
+    ${Moab_dagmc_LIBRARY}
+    ${Geant4_G4geometry_LIBRARY}
+    ${Geant4_G4clhep_LIBRARY}
+    ${Geant4_G4global_LIBRARY}
+  )
+endif ()
 
-# make the dagsolid lib
-add_library (dagsolid SHARED ../src/DagSolid.cc)
-
-# set moab paths
-set(MOAB_INCLUDE ${MOAB_DIR}/include)
-set(MOAB_LIBS ${MOAB_DIR}/lib)
-
-# set geant paths
-set(GEANT_INCLUDE ${GEANT_DIR}/include/Geant4/ )
-
-# include files
-include_directories(../include ${GEANT_INCLUDE} ${MOAB_INCLUDE} ${HDF5_INCLUDE})
-
-# set libs
-set(moab_libs ${MOAB_DIR}/lib/libdagmc.so ${MOAB_DIR}/lib/libMOAB.so)
-
-# targets
-set (CMAKE_INSTALL_PREFIX .)
-install(TARGETS dagsolid DESTINATION ${DAGSOLID_DIR}/lib)
+install(TARGETS dagsolid DESTINATION Geant4/dagsolid/lib)
 
