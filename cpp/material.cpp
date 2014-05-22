@@ -4,7 +4,7 @@
 
 #include <string>
 #include <vector>
-// #include <iomanip>
+#include <iomanip>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
@@ -522,52 +522,44 @@ if 'comments' in self.metadata:
 */
   // Metadata comments
   // String splitting of metadata comments is being simplified here;
-  //  this will affect nosetests
+  //  ths will affect nosetests
+
   if (metadata.isMember("comments"))
   {
       std::string comment_string = "comments: " + metadata["comments"].asString();
       // Include as is if short enough
-      if (comment_string.length() <= 80)
+      if (comment_string.length() <= 77)
       {
          oss << "C " << comment_string << std::endl;
       }
       else // otherwise truncate the comment
       {
-         char comment_trunc[81];
-         strncpy(comment_trunc,comment_string.c_str(),80);
-	 comment_trunc[80] = '\n';  // manually add null character at last position
-         oss << "C " << comment_trunc << std::endl;
+	std::string comment_trunc;
+	comment_trunc = comment_string.substr(0,77);
+	oss << "C " << comment_trunc << std::endl;
       }
   }
+  oss << "C  limit, for science" << std::endl;
+
   // Metadata mat_num
-  std::string mat_num;
-  // std::string record += "m";
   oss << "m";
-  if (metadata.isMember("mat_num"))
+
+  if (metadata.isMember("mat_number"))
   {
-     mat_num = metadata["mat_num"].asString(); 
-     if ( !mat_num.empty() )
-     {
-        // record += mat_num;
-	oss << mat_num;
-     }
-     else
-     {
-        // record += "?";
-	oss << "?";
-     }
+    int mat_num = metadata["mat_number"].asInt(); 
+    oss << mat_num << std::endl;
   }
   else
   {
      // record += "?"; 
-     oss << "?";
+    oss << "?" << std::endl;
   }
   // std::cout << "record is " << record;
 
   // Set up atom or mass frac map
   std::map<int, double> fracs;
   std::string frac_sign; 
-  
+ 
   if ("atom" == frac_type)
   { 
     fracs = to_atom_frac();
@@ -583,48 +575,40 @@ if 'comments' in self.metadata:
   std::stringstream ss;
   std::string nucmcnp;
   std::string table_item;
-  for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); i++) 
+  for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) 
   {
-     ss << pyne::nucname::mcnp( i->first );
-     nucmcnp = ss.str();
+    ss.str(std::string() );
+    ss.clear();
+    ss << pyne::nucname::mcnp( i->first );
+    nucmcnp = ss.str();
      if (metadata.isMember("table_ids"))
      {
-        table_item = metadata["table_ids"][nucmcnp].asString();
+       //        table_item = metadata["table_ids"][nucmcnp].asString();
+       table_item = metadata["table_ids"][nucmcnp].asString();
+       std::cout << table_item << std::endl;
+       //       std::map<std::string,std::string> test = metadata["table_ids"].asObj();
+       std::cout << "blah "  << table_item << std::endl;
+	std::cout << table_item << std::endl;
         if ( !table_item.empty() )
         {
-            // record += " " + nucmcnp + "." + table_item + " ";
-	    oss << " " << nucmcnp << "." << table_item << " ";
+	    oss << "     " << nucmcnp << "." << table_item << " ";
         }
         else
         {
-            // record += " " + nucmcnp + ".";
-	    oss << " " << nucmcnp << ".";
+	    oss << "     " << nucmcnp << " ";
         }
         // s+= frac_sign
 
         std::stringstream fs;
         // s += '{0}{1:.4E}\n'.format(frac_sign, frac)
         fs.precision(4);   
-        fs << frac_sign << std::scientific << i->second << std::endl;
+        fs << " " << frac_sign << std::scientific << i->second << std::endl;
         // record += fs.str(); 
-	oss << fs;
+	oss << fs.str();
      }
   } 
-  std::cout << "\noss is " << oss.str();
-/*  fragment from python version
-        for nuc, frac in fracs.items():
-            nucmcnp = str(nucname.mcnp(nuc))
-            if 'table_ids' in self.metadata:
-                s += ' {0}.{1} '.format(nucmcnp,
-                                            self.metadata['table_ids'][nucmcnp])
-            else:
-                s += ' {0} '.format(nucmcnp)
-            s += '{0}{1:.4E}\n'.format(frac_sign, frac)
-*/
-//        return s
-//  if ('name' in metadata:
-//       oss << 'C name: {0}\n'.format(self.metadata['name'])
 
+  //  return "bob";
   return oss.str();
 }
 
