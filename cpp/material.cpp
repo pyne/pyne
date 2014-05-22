@@ -489,11 +489,8 @@ std::string pyne::Material::mcnp(std::string frac_type)
   int mcnp_id;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++) 
   {
-    std::cout << i->first << ", " << i->second << std::endl;
      
     mcnp_id = pyne::nucname::mcnp( i->first );
-    std::cout << "nucname mcnp id:  " << mcnp_id << ", second is: " << i->second << std::endl;
-    std::cout << "nucname name: " << pyne::nucname::name( i->first ) << std::endl;
   }
   //////////////////// Begin card creation ///////////////////////
   std::cout << "Begin card creation" << std::endl;
@@ -513,17 +510,7 @@ std::string pyne::Material::mcnp(std::string frac_type)
   {
      oss << "C source: " << metadata["source"].asString() << std::endl;
   }
-/*
-if 'comments' in self.metadata:
-            comment_string= 'comments: ' + self.metadata['comments']
-            # split up lines so comments are less than 80 characters
-            for n in range(0, int(np.ceil(float(len(comment_string))/77))):
-                s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
-*/
   // Metadata comments
-  // String splitting of metadata comments is being simplified here;
-  //  ths will affect nosetests
-
   if (metadata.isMember("comments"))
   {
       std::string comment_string = "comments: " + metadata["comments"].asString();
@@ -532,18 +519,24 @@ if 'comments' in self.metadata:
       {
          oss << "C " << comment_string << std::endl;
       }
-      else // otherwise truncate the comment
+      else // otherwise create a remainder string and iterate/update it
       {
-	std::string comment_trunc;
-	comment_trunc = comment_string.substr(0,77);
-	oss << "C " << comment_trunc << std::endl;
+	 oss << "C " << comment_string.substr(0,77) << std::endl;
+	 std::string remainder_string = comment_string.substr(77);
+         while (remainder_string.length() > 77)
+	 {
+	   oss << "C " << remainder_string.substr(0,77) << std::endl;
+           remainder_string.erase(0,77);
+	 }
+	 if (remainder_string.length() > 0)
+	 {
+	    oss << "C " << remainder_string << std::endl;
+	 }
       }
   }
-  oss << "C  limit, for science" << std::endl;
 
   // Metadata mat_num
   oss << "m";
-
   if (metadata.isMember("mat_number"))
   {
     int mat_num = metadata["mat_number"].asInt(); 
@@ -551,10 +544,8 @@ if 'comments' in self.metadata:
   }
   else
   {
-     // record += "?"; 
     oss << "?" << std::endl;
   }
-  // std::cout << "record is " << record;
 
   // Set up atom or mass frac map
   std::map<int, double> fracs;
@@ -577,18 +568,15 @@ if 'comments' in self.metadata:
   std::string table_item;
   for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) 
   {
-    ss.str(std::string() );
-    ss.clear();
-    ss << pyne::nucname::mcnp( i->first );
-    nucmcnp = ss.str();
+     // Clear first
+     ss.str(std::string() );
+     ss.clear();
+     ss << pyne::nucname::mcnp( i->first );
+     nucmcnp = ss.str();
+     // Spaces are important for tests
      if (metadata.isMember("table_ids"))
      {
-       //        table_item = metadata["table_ids"][nucmcnp].asString();
-       table_item = metadata["table_ids"][nucmcnp].asString();
-       std::cout << table_item << std::endl;
-       //       std::map<std::string,std::string> test = metadata["table_ids"].asObj();
-       std::cout << "blah "  << table_item << std::endl;
-	std::cout << table_item << std::endl;
+        table_item = metadata["table_ids"][nucmcnp].asString();
         if ( !table_item.empty() )
         {
 	    oss << "     " << nucmcnp << "." << table_item << " ";
@@ -597,18 +585,14 @@ if 'comments' in self.metadata:
         {
 	    oss << "     " << nucmcnp << " ";
         }
-        // s+= frac_sign
 
         std::stringstream fs;
-        // s += '{0}{1:.4E}\n'.format(frac_sign, frac)
         fs.precision(4);   
-        fs << " " << frac_sign << std::scientific << i->second << std::endl;
-        // record += fs.str(); 
+        fs << frac_sign << std::scientific << i->second << std::endl;
 	oss << fs.str();
      }
   } 
 
-  //  return "bob";
   return oss.str();
 }
 
@@ -1179,10 +1163,8 @@ pyne::Material pyne::Material::sub_fp() {
 
 std::map<int, double> pyne::Material::to_atom_frac() {
   // Returns an atom fraction map from this material's composition
-std::cout << "In to_atom_frac()" << std::endl;
   // the material's molecular mass
   double mat_mw = molecular_mass(-1);
-std::cout << "In to_atom_frac() after molecular_mass()" << std::endl;
   std::map<int, double> atom_fracs = std::map<int, double>();
 
   for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
