@@ -4,7 +4,7 @@
 
 #include <string>
 #include <vector>
-#include <iomanip>
+// #include <iomanip>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
@@ -484,23 +484,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 };
 
-std::string pyne::Material::mcnp(int frac_id)
+std::string pyne::Material::mcnp(std::string frac_type)
 {
-
-  // Print out some stuff  Json::Reader reader;
-  // std::vector<std::string> obj = metadata.getMemberNames();
-  // for (int i=0; i < metadata.size(); i=i+2){
-  //   std::cout << metadata.get(obj.at(i), "") << metadata.get(obj.at(i+1), "");
-  // }
-  std::string frac_type;
-  if (0 == frac_id)
-  {
-     frac_type = "mass";
-  }
-  else
-  {
-     frac_type = "atom";
-  }
   int mcnp_id;
   for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++) 
   {
@@ -510,26 +495,23 @@ std::string pyne::Material::mcnp(int frac_id)
     std::cout << "nucname mcnp id:  " << mcnp_id << ", second is: " << i->second << std::endl;
     std::cout << "nucname name: " << pyne::nucname::name( i->first ) << std::endl;
   }
-  //////////////////// Begin record creation ///////////////////////
-  std::cout << "Begin record creation" << std::endl;
-  std::string record;
+  //////////////////// Begin card creation ///////////////////////
+  std::cout << "Begin card creation" << std::endl;
   std::ostringstream oss;
+  // 'name'
   if (metadata.isMember("name"))
   {
-     // s += 'C name: {0}\n'.format(self.metadata['name'])
-     record += "C name: " + metadata["name"].asString() + "\n";
      oss << "C name: " << metadata["name"].asString() << "\n";
   }
-  // if self.density != -1.0:
-  //          s += 'C density = {0}\n'.format(self.density)
+  // 'density'
   if (density != -1.0)
   {
      oss << "C density = " << density << "\n";
   }
+  // 'source'
   if (metadata.isMember("source"))
   {
- //     record += "C source: " + metadata["source"].asString() + "\n";
-     oss << "C source: " << metadata["source"].asString() << "\n";
+     oss << "C source: " << metadata["source"].asString() << std::endl;
   }
 /*
 if 'comments' in self.metadata:
@@ -538,45 +520,51 @@ if 'comments' in self.metadata:
             for n in range(0, int(np.ceil(float(len(comment_string))/77))):
                 s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
 */
+  // Metadata comments
+  // String splitting of metadata comments is being simplified here;
+  //  this will affect nosetests
   if (metadata.isMember("comments"))
   {
       std::string comment_string = "comments: " + metadata["comments"].asString();
-      // split up lines so comments are less than 80 characters
-      //      for n in range(0, int(np.ceil(float(len(comment_string))/77))):
-      if (comment_string.length() < 80)
+      // Include as is if short enough
+      if (comment_string.length() <= 80)
       {
-         // s += 'C {0}\n'.format(comment_string[n*77:(n + 1)*77])
-         oss << "C " << comment_string << "\n";
+         oss << "C " << comment_string << std::endl;
       }
-      else
+      else // otherwise truncate the comment
       {
-         char comment_trunc[78];
-         strncpy(comment_trunc,comment_string.c_str(),77);
-         oss << "C " << comment_trunc << "\n";
+         char comment_trunc[81];
+         strncpy(comment_trunc,comment_string.c_str(),80);
+	 comment_trunc[80] = '\n';  // manually add null character at last position
+         oss << "C " << comment_trunc << std::endl;
       }
   }
-
+  // Metadata mat_num
   std::string mat_num;
-  record += "m";
+  // std::string record += "m";
+  oss << "m";
   if (metadata.isMember("mat_num"))
   {
      mat_num = metadata["mat_num"].asString(); 
      if ( !mat_num.empty() )
      {
-        record += mat_num;
+        // record += mat_num;
+	oss << mat_num;
      }
      else
      {
-        record += "?";
+        // record += "?";
+	oss << "?";
      }
   }
   else
   {
-     record += "?"; 
+     // record += "?"; 
+     oss << "?";
   }
-  // record += 'm{0}\n'.format(mat_num)
-  std::cout << "record is " << record;
+  // std::cout << "record is " << record;
 
+  // Set up atom or mass frac map
   std::map<int, double> fracs;
   std::string frac_sign; 
   
@@ -591,35 +579,37 @@ if 'comments' in self.metadata:
     frac_sign = "-";
   }
   
+  // iterate through frac map
+  std::stringstream ss;
   std::string nucmcnp;
   std::string table_item;
   for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); i++) 
   {
-     std::stringstream ss;
-     mcnp_id = pyne::nucname::mcnp( i->first );
-     ss << mcnp_id;
+     ss << pyne::nucname::mcnp( i->first );
      nucmcnp = ss.str();
      if (metadata.isMember("table_ids"))
      {
         table_item = metadata["table_ids"][nucmcnp].asString();
         if ( !table_item.empty() )
         {
-            record += " " + nucmcnp + "." + table_item + " ";
+            // record += " " + nucmcnp + "." + table_item + " ";
+	    oss << " " << nucmcnp << "." << table_item << " ";
         }
         else
         {
-            record += " " + nucmcnp + ".";
+            // record += " " + nucmcnp + ".";
+	    oss << " " << nucmcnp << ".";
         }
         // s+= frac_sign
 
         std::stringstream fs;
         // s += '{0}{1:.4E}\n'.format(frac_sign, frac)
         fs.precision(4);   
-        fs << frac_sign << std::scientific << i->second << "\n";
-        record += fs.str(); 
+        fs << frac_sign << std::scientific << i->second << std::endl;
+        // record += fs.str(); 
+	oss << fs;
      }
   } 
-  std::cout << record;
   std::cout << "\noss is " << oss.str();
 /*  fragment from python version
         for nuc, frac in fracs.items():
@@ -635,7 +625,6 @@ if 'comments' in self.metadata:
 //  if ('name' in metadata:
 //       oss << 'C name: {0}\n'.format(self.metadata['name'])
 
-  // return record;
   return oss.str();
 }
 
