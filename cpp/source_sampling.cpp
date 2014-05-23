@@ -14,7 +14,7 @@ void fsampling_setup_(char* file_name, char* src_tag_name, char* e_bounds_tag_na
   SI->sampling_setup(file_name, src_tag_name, e_bounds_tag_name, analog);
 }
 
-void fsampling_setup2_(char* file_name, char* src_tag_name, char* e_bounds_file_name, bool* analog, char* bias_tag_name){
+void fsampling_setup2_(char* file_name, char* src_tag_name, char* e_bounds_file_name, bool* analog, std::string bias_tag_name){
   SI->sampling_setup(file_name, src_tag_name, e_bounds_file_name, analog, bias_tag_name);
 }
 
@@ -25,8 +25,8 @@ void fparticle_birth_(double* rands, double* x, double* y, double* z, double* e,
 // C++ and Python API
 
 
-void sampling_setup(std::string file_name, std::string src_tag_name, std::string e_bounds_file_name, bool analog){
-  SI->sampling_setup((char*)&"sampling_mesh.h5m", (char*)&"src", (char*)&"e_bounds_file", analog);
+void sampling_setup(std::string filename, std::string src_tag_name, std::string e_bounds_filename, bool analog){
+  SI->sampling_setup(filename, src_tag_name, e_bounds_filename, analog);
 }
 
 std::vector<double> particle_birth(std::vector<double> rands){
@@ -53,20 +53,21 @@ Sampling::Sampling(MBInterface *mb_impl)
    : mbImpl(mb_impl), uniform(false){}
 
 
-void Sampling::sampling_setup(char* file_name, char* src_tag_name, char* e_bounds_file, bool _analog){
+void Sampling::sampling_setup(std::string filename, std::string src_tag_name, std::string e_bounds_file, bool _analog){
 
   analog = _analog;
   if(analog == false)
     uniform = true;
 
-  char* bias_tag_name = NULL;
-  sampling_setup(file_name, src_tag_name, e_bounds_file, analog, bias_tag_name);
+  //char* bias_tag_name = NULL;
+  std::string bias_tag_name;
+  sampling_setup(filename, src_tag_name, e_bounds_file, analog, bias_tag_name);
 }
 
 
-void Sampling::sampling_setup(char* file_name, char* _src_tag_name, char* e_bounds_file, bool analog, char* _bias_tag_name){
+void Sampling::sampling_setup(std::string filename, std::string _src_tag_name, std::string  e_bounds_file, bool analog, std::string _bias_tag_name){
 
-  if(analog == true && _bias_tag_name != NULL){
+  if(analog == true && _bias_tag_name.length() != 0){
     throw std::invalid_argument("bias_tag_name should not be specified for analog sampling");
   }
 
@@ -79,7 +80,7 @@ void Sampling::sampling_setup(char* file_name, char* _src_tag_name, char* e_boun
   MBEntityHandle loaded_file_set;
   rval = MBI->create_meshset(MESHSET_SET, loaded_file_set );
   //assert( rval == MB_SUCCESS );
-  rval = MBI->load_file( file_name, &loaded_file_set );
+  rval = MBI->load_file(&filename[0], &loaded_file_set );
   //assert( rval == MB_SUCCESS );
   MBRange ves;
   rval = MBI->get_entities_by_dimension(loaded_file_set, 3, ves);
@@ -134,7 +135,7 @@ void Sampling::get_mesh_geom_data(MBRange ves, std::vector<double> &volumes){
 void Sampling::get_mesh_tag_data(MBRange ves, std::vector<double>volumes){
   MBErrorCode rval;
   MBTag src_tag;
-  rval = MBI->tag_get_handle(src_tag_name, moab::MB_TAG_VARLEN, MB_TYPE_DOUBLE, src_tag);
+  rval = MBI->tag_get_handle(&src_tag_name[0], moab::MB_TAG_VARLEN, MB_TYPE_DOUBLE, src_tag);
   // THIS ASSERT FAILS because we do not know number of energy groups a priori.
   //assert( rval == MB_SUCCESS );
   int src_tag_size;
@@ -170,7 +171,7 @@ void Sampling::get_mesh_tag_data(MBRange ves, std::vector<double>volumes){
       }
     }else if(uniform == false){
       MBTag bias_tag;
-      rval = MBI->tag_get_handle(bias_tag_name, moab::MB_TAG_VARLEN, MB_TYPE_DOUBLE, bias_tag);
+      rval = MBI->tag_get_handle(&bias_tag_name[0], moab::MB_TAG_VARLEN, MB_TYPE_DOUBLE, bias_tag);
       int bias_tag_size;
       rval = MBI->tag_get_bytes(bias_tag, *(&bias_tag_size));
       int num_bias_groups = bias_tag_size/sizeof(double);
@@ -211,7 +212,7 @@ void Sampling::get_mesh_tag_data(MBRange ves, std::vector<double>volumes){
 
 }
 
-void Sampling::get_e_bounds_data(char* e_bounds_file){
+void Sampling::get_e_bounds_data(std::string e_bounds_file){
 /* E_TAG STUFF
   MBTag e_tag;
   std::cout << e_bounds_file_name << std::endl;
@@ -242,7 +243,7 @@ void Sampling::get_e_bounds_data(char* e_bounds_file){
  // std::cout << e_bounds[0] << std::endl;
   //std::cout << e_bounds[0] << e_bounds[1] << e_bounds[2] << std::endl;
   */
-  std::ifstream inputFile(e_bounds_file);
+  std::ifstream inputFile(&e_bounds_file[0]);
   // test file open   
   if (inputFile) {        
     double value;

@@ -52,20 +52,20 @@ def particle_birth(rands):
 
 
 
-def sampling_setup(file_name, src_tag_name, e_bounds_file_name, analog):
-    """sampling_setup(file_name, src_tag_name, e_bounds_file_name, analog)
+def sampling_setup(filename, src_tag_name, e_bounds_file_name, analog):
+    """sampling_setup(filename, src_tag_name, e_bounds_file_name, analog)
      This function was overloaded in the C-based source. To overcome
     this we ill put the relevant docstring for each version below. Each
     version will begin with a line of # characters.
     
     """
-    cdef char * file_name_proxy
+    cdef char * filename_proxy
     cdef char * src_tag_name_proxy
     cdef char * e_bounds_file_name_proxy
-    file_name_bytes = file_name.encode()
+    filename_bytes = filename.encode()
     src_tag_name_bytes = src_tag_name.encode()
     e_bounds_file_name_bytes = e_bounds_file_name.encode()
-    cpp_source_sampling.sampling_setup(std_string(<char *> file_name_bytes), std_string(<char *> src_tag_name_bytes), std_string(<char *> e_bounds_file_name_bytes), <bint> analog)
+    cpp_source_sampling.sampling_setup(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), std_string(<char *> e_bounds_file_name_bytes), <bint> analog)
 
 
 
