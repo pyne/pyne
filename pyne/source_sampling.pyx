@@ -11,14 +11,16 @@
 cimport cpp_source_sampling
 cimport dtypes
 cimport numpy as np
+from libcpp cimport bool as cpp_bool
+from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
 
 import numpy as np
 
 np.import_array()
 
-def pyparticle_birth_(rands):
-    """pyparticle_birth_(rands)
+def particle_birth(rands):
+    """particle_birth(rands)
      This function was overloaded in the C-based source. To overcome
     this we ill put the relevant docstring for each version below. Each
     version will begin with a line of # characters.
@@ -42,7 +44,7 @@ def pyparticle_birth_(rands):
         rands_proxy = cpp_vector[double](<size_t> rands_size)
         for irands in range(rands_size):
             rands_proxy[irands] = <double> rands[irands]
-    rtnval = cpp_source_sampling.pyparticle_birth_(rands_proxy)
+    rtnval = cpp_source_sampling.particle_birth(rands_proxy)
     rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
     rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
     rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
@@ -50,14 +52,20 @@ def pyparticle_birth_(rands):
 
 
 
-def mcnp_sampling_setup_():
-    """mcnp_sampling_setup_()
+def sampling_setup(file_name, src_tag_name, e_bounds_file_name, analog):
+    """sampling_setup(file_name, src_tag_name, e_bounds_file_name, analog)
      This function was overloaded in the C-based source. To overcome
     this we ill put the relevant docstring for each version below. Each
     version will begin with a line of # characters.
     
     """
-    cpp_source_sampling.mcnp_sampling_setup_()
+    cdef char * file_name_proxy
+    cdef char * src_tag_name_proxy
+    cdef char * e_bounds_file_name_proxy
+    file_name_bytes = file_name.encode()
+    src_tag_name_bytes = src_tag_name.encode()
+    e_bounds_file_name_bytes = e_bounds_file_name.encode()
+    cpp_source_sampling.sampling_setup(std_string(<char *> file_name_bytes), std_string(<char *> src_tag_name_bytes), std_string(<char *> e_bounds_file_name_bytes), <bint> analog)
 
 
 

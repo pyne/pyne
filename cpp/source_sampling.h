@@ -28,7 +28,8 @@ void mcnp_sampling_setup_();
 void fsampling_setup_(char*, char*, char*, bool*);
 void fsampling_setup2_(char*, char*, char*, bool*, char*);
 void fparticle_birth_(double*, double*, double *, double *, double *, double *);
-std::vector<double> pyparticle_birth_(std::vector<double>);
+void sampling_setup(std::string, std::string, std::string, bool);
+std::vector<double> particle_birth(std::vector<double>);
 
 class Sampling
 {

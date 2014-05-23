@@ -8,20 +8,26 @@
 ################################################
 
 
+from libcpp cimport bool as cpp_bool
+from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
 
 # function signatures
 cdef extern from "source_sampling.h" :
 
-    void mcnp_sampling_setup_() except +
+    cpp_vector[double] particle_birth() except +
+    cpp_vector[double] particle_birth(cpp_vector[double]) except +
 
 
 
 # function signatures
 cdef extern from "source_sampling.h" :
 
-    cpp_vector[double] pyparticle_birth_() except +
-    cpp_vector[double] pyparticle_birth_(cpp_vector[double]) except +
+    void sampling_setup() except +
+    void sampling_setup(std_string) except +
+    void sampling_setup(std_string, std_string) except +
+    void sampling_setup(std_string, std_string, std_string) except +
+    void sampling_setup(std_string, std_string, std_string, cpp_bool) except +
 
 
 

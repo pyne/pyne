@@ -4,9 +4,7 @@
 
 Sampling *Sampling::instance_ = NULL;
 
-/*
- ( FORTRAN API
-*/
+//FORTRAN API
 
 void mcnp_sampling_setup_(){
   SI->sampling_setup((char*)&"tagged_unstr.h5m", (char*)&"phtn_src2", (char*)&"e_bounds_file", true);
@@ -24,21 +22,26 @@ void fparticle_birth_(double* rands, double* x, double* y, double* z, double* e,
   SI->particle_birth(rands, x, y, z, e, w);
 }
 
-std::vector<double> pyparticle_birth_(std::vector<double> rands){
+// C++ and Python API
+
+
+void sampling_setup(std::string file_name, std::string src_tag_name, std::string e_bounds_file_name, bool analog){
+  SI->sampling_setup((char*)&"sampling_mesh.h5m", (char*)&"src", (char*)&"e_bounds_file", analog);
+}
+
+std::vector<double> particle_birth(std::vector<double> rands){
   double x, y, z, e, w;
   SI->particle_birth(&rands[0], &x, &y, &z, &e, &w);
-  std::vector<double> result(5);
-  result[0] = x;
-  result[1] = y;
-  result[2] = z;
-  result[3] = e;
-  result[4] = w;
+  //std::vector<double> result {x, y, z, e, w};
+  std::vector<double> result;
+  result.push_back(x);
+  result.push_back(y);
+  result.push_back(z);
+  result.push_back(e);
+  result.push_back(w);
   return result;
 }
 
-/*
- * IPA NARTROF
- */
 
 void Sampling::create_instance(MBInterface *mb_impl)
 {
