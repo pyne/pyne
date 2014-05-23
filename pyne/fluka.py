@@ -20,6 +20,7 @@ class USRS(object):
         usrbins = USRBIN()
         usrbins.read_usrbin(fh)
 
+
 class USRBIN(Mesh):
     """This class stores all the information from Fluka usrbin 
     file with a single **or multiple** track length binnings and their 
@@ -31,36 +32,49 @@ class USRBIN(Mesh):
         pass
 
     def _create_mesh(self, file_handle):
-        print "creating mesh"
-	super(USRBIN, self).__init__(structured_coords=[self.x_bounds,
-                                        self.y_bounds, self.z_bounds],
-                                        structured=True,structured_ordering='zyx')
+        """This will create the .h5m files with the name of the provided
+        usrbin data. One file contains the part_data and the error_data.
+        """
 
-	print "done creating mesh"
-	self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self, name="part_data_{0}".format(self.particle))
-	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, name="error_data_{0}".format(self.particle))
+	super(USRBIN, self).__init__(structured_coords=[self.x_bounds,
+                                     self.y_bounds, self.z_bounds],
+                                     structured=True,
+                                     structured_ordering='zyx')
+
+	self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 
+                                  name="part_data_{0}".format(self.particle))
+	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 
+                                  name="error_data_{0}".format(self.particle))
 
 	self.part_data_tag[:] = self.part_data
 	self.error_data_tag[:] = self.error_data
 
-
         self.mesh.save(self.name.strip()+".h5m")
 	
-
-    def get_name_and_system(self, line): # retrieves user defined binning name, coordinate system, and particle type used
-        # readlines until finds "cartesian" -- then parse as have already
+    def get_name_and_system(self, line): 
+        """This will retrieve the coordinate system that was used, the name of
+        the track data provided by the user, and the particle type. It is 
+        expected that the coordinate system is "Cartesian" as that is all that
+        is supported.
+        """
         name = line.split('"')[1]
         coord_sys = line.split()[0]
         line_split = line.split()
         particle_type = line_split[len(line_split)-1]
         return name, coord_sys, particle_type
-    def get_coordinate_system(self, line): # retrieves specific dimensions and binning information for each x, y, and z dimensions
-        # automatically call after get_name_...
+
+    def get_coordinate_system(self, line): 
+        """This retrieves the specific dimensions and binning information for 
+        the x, y, and z dimensions. Information retrieved is the minimum and 
+        maximum value for each dimension, the number of bins in each direction,
+        and the width of each evenly spaced bin.
+        """
         number_of_bins = line.split()[7]
         coord_min = line.split()[3]
         coord_max = line.split()[5]
         bin_width = line.split()[10]
-        return int(number_of_bins), float(coord_min), float(coord_max), float(bin_width)
+        return int(number_of_bins), float(coord_min), float(coord_max), \
+               float(bin_width)
 
     def matrix_organization(self, line): # retrieves information about how the matrix of information is organized for each binning
         matrix_organization = line.split()[5]
@@ -125,7 +139,7 @@ class USRBIN(Mesh):
             print "Coordinate sytem is not Cartesian"
         line = fh.readline()
         # collect how data is arranged (number of columns in matrix)
-        columns = self.matrix_organization(line)[3]
+        columns = 10 #self.matrix_organization(line)[3]
         return x_info, y_info, z_info, columns
 
 
