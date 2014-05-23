@@ -10,18 +10,18 @@ nuclear engineering tools.  PyNE is meant to be both fast and useful.
 
 Release highlights:
 
-  - Nuclear data updates, includeing full ENSDF support 
+  - Nuclear data updates, including full ENSDF support 
   - Python 3 support
   - R2S activation workflow
   - Tally class for Monte Carlo tallies
-  - CADIS variance redution implementation
+  - CADIS variance reduction implementation
   - Pydagmc integration 
   - Verification and validation workflow implemented
   - Style guide adoption
   - New tutorial
   - Removal of simplesim
 
-This release represnts over 976 commits, 325 files changed, 62846 insertions(+), 
+This release represents over 976 commits, 325 files changed, 62846 insertions(+), 
 22162 deletions(-) since the version v0.3 release.  Additionally, over 125 issues were 
 closed on behalf of this release.
 

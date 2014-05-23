@@ -720,7 +720,8 @@ def groundstate(nuc):
 
     """
     if isinstance(nuc, basestring):
-        newnuc = cpp_nucname.groundstate(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.groundstate(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.groundstate(<int> nuc)
     else:

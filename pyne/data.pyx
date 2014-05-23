@@ -205,30 +205,37 @@ def simple_xs(nuc, rx, energy):
     -----
     If the nuclide is not found, 0 is returned.
     """
+    #make sure we start with unicode strings
+    if isinstance(nuc, bytes):
+        nuc = nuc.decode("utf-8")
+    if isinstance(rx, bytes):
+        rx = rx.decode("utf-8")
+
     if not isinstance(energy, basestring):
         raise ValueError('energy must be string')
     elif not isinstance(nuc, int) and not isinstance(nuc, basestring):
         raise ValueError('nuc must be int or string')
     elif not isinstance(rx, int) and not isinstance(rx, basestring):
         raise ValueError('rx must be int or string')
-
-    nucin, rxin = nuc, rx
-    if isinstance(nucin, bytes):
-        nucin = nuc.decode("utf-8")
-    if isinstance(rxin, bytes):
-        rxin = rx.decode("utf-8")
-
-    if isinstance(nucin, int) and isinstance(rxin, int):
-        xs = cpp_data.simple_xs(<int> nucin, <int> rxin, <std_string> energy)
-    elif isinstance(nucin, int) and isinstance(rxin, basestring):
-        xs = cpp_data.simple_xs(<int> nucin, <std_string> rxin, 
-                                <std_string> energy)
-    elif isinstance(nucin, basestring) and isinstance(rxin, int):
-        xs = cpp_data.simple_xs(<std_string> nucin, 
-                                <int> rxin, <std_string> energy)
-    elif isinstance(nucin, basestring) and isinstance(rxin, basestring):
-        xs = cpp_data.simple_xs(<std_string> nucin, <std_string> rxin, 
-                                <std_string> energy)
+    
+    energy_bytes = energy.encode()
+    if isinstance(nuc, int) and isinstance(rx, int):
+        xs = cpp_data.simple_xs(<int> nuc, <int> rx, 
+                                std_string(<char *> energy_bytes))
+    elif isinstance(nuc, int) and isinstance(rx, basestring):
+        rxin_bytes = rx.encode()
+        xs = cpp_data.simple_xs(<int> nuc, std_string(<char *> rxin_bytes), 
+                                std_string(<char *> energy_bytes))
+    elif isinstance(nuc, basestring) and isinstance(rx, int):
+        nucin_bytes = nuc.encode()
+        xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes), 
+                                <int> rx, std_string(<char *> energy_bytes))
+    elif isinstance(nuc, basestring) and isinstance(rx, basestring):
+        rxin_bytes = rx.encode()
+        nucin_bytes = nuc.encode()
+        xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes),
+                                std_string(<char *> rxin_bytes), 
+                                std_string(<char *> energy_bytes))
 
     return xs
 
