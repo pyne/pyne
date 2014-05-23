@@ -47,7 +47,7 @@ Binary
 Binary distributions of the latest release (0.4) for mac and linux (64-bit) 
 using the conda package manager can be installed by running the command::
 
-    conda install -c https://conda.binstar.org/batesca pyne
+    conda install -c https://conda.binstar.org/pyne pyne
 
 A windows 32-bit binary is also available on conda via the same command but
 it is highly experimental and likely broken.
