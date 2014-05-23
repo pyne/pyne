@@ -2,48 +2,33 @@
 
 from itaps import iMesh
 from pyne.mesh import Mesh, StatMesh, IMeshTag
-
 import math
-#from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
+
+class USRS(object):
+    """This class is the wrapper class for USRBINS. For a particular Fluka 
+    usrbin file, it will call read_usrbin to read all of the track length 
+    binning data in the file.
+
+    Attributes:
+    -----------
+    filename : string
+        Path to Fluka usrbin file
+    """
+
+    def __init__(self, filename):
+        fh = open(filename)
+        usrbins = USRBIN()
+        usrbins.read_usrbin(fh)
 
 class USRBIN(Mesh):
-    """This class stores all the information from Fluka USRBIN output
+    """This class stores all the information from Fluka usrbin 
     file with a single **or multiple** track length binnings and their 
     associated error binnings. Currently this class only supports a 
     cartesian coordinate system.
-
-    Attributes
-    ----------
-    assigned_name : str
-        the name given by user to the particular binning
-    coord_max : float
-        maximum value of one dimension
-    coord_min : float
-        minimum value of one dimension
-    coordinate_system : str
-        type of coordinate system being used
-    data : list of lists
-        list of track length data for a particular binning
-    error_data : list of lists
-        list of error data for each binning
-    mesh_tally : int
-        tallies the number of track length binnings in file
-    number_of_bins : int
-        the number of evenly spaced bins corresponding to one dimension
-        (x, y, or z)
-    particle : 
-        particle type given by its corresponding numerical identifier
-    total_bins :
-        total number of bins in the three dimensional system
-    Notes
-    -----
-    Attribute names are identical to names speficied in a USRBIN file
-    description in the Fluka Manual, section 7.77 USRBIN input commands.
-
     """
-    def __init__(self, filename):
-        fh = open(filename)
-	self.read_usrbin(fh)
+
+    def __init__(self):
+        pass
 
     def _create_mesh(self, file_handle):
         print "creating mesh"
@@ -59,8 +44,6 @@ class USRBIN(Mesh):
 	self.error_data_tag[:] = self.error_data
 
 
- #       self.write_hdf5(self.name.strip()+".h5m")
-#        from itaps import iMesh
         self.mesh.save(self.name.strip()+".h5m")
 	
 
@@ -73,12 +56,10 @@ class USRBIN(Mesh):
         return name, coord_sys, particle_type
     def get_coordinate_system(self, line): # retrieves specific dimensions and binning information for each x, y, and z dimensions
         # automatically call after get_name_...
-#        print line 
         number_of_bins = line.split()[7]
         coord_min = line.split()[3]
         coord_max = line.split()[5]
         bin_width = line.split()[10]
-#        print number_of_bins
         return int(number_of_bins), float(coord_min), float(coord_max), float(bin_width)
 
     def matrix_organization(self, line): # retrieves information about how the matrix of information is organized for each binning
@@ -99,8 +80,6 @@ class USRBIN(Mesh):
         data_line = line.split()
         for i, ve in enumerate(data_line):
 	    data_line[i] = float(ve)
-#        for item in data_line:
-#	    item = float(item)
         return data_line
 
     def generate_bounds(self,dir_min,dir_max,bin_width,bounds): 
@@ -119,7 +98,6 @@ class USRBIN(Mesh):
         particle = self.get_name_and_system(line)[2]
         if coord_sys == "Cartesian":
             line = fh.readline()
- #           print line
             # assume next line is X coord info
             x_bins = self.get_coordinate_system(line)[0]
             x_min = self.get_coordinate_system(line)[1]
@@ -148,7 +126,6 @@ class USRBIN(Mesh):
         line = fh.readline()
         # collect how data is arranged (number of columns in matrix)
         columns = self.matrix_organization(line)[3]
-#        print x_info, y_info, z_info, columns
         return x_info, y_info, z_info, columns
 
 
@@ -166,21 +143,17 @@ class USRBIN(Mesh):
 	    self.mesh_tally = self.mesh_tally + 1
 	    print self.mesh_tally
 
-#	    line = fh.readline()
 	    print line
             if "1" not in line:
 		print "error not a usrbin file"
                 line = False
             line = fh.readline()    
-#	    print line
 
 	    self.name = self.get_name_and_system(line)[0]
 	    self.particle = self.get_name_and_system(line)[2]
 
-#	    print self.name
-
 	    [x_info, y_info, z_info, columns] = self.read_header(fh, line)
-#	    print line
+
 	    for count in range (0,2):
 		line = fh.readline()
 
@@ -191,9 +164,7 @@ class USRBIN(Mesh):
 		line = fh.readline()
 
 
-            print line
 	    # now reading track length data
-            #int(math.ceil(x_info[0]*y_info[0]*z_info[0]/float(columns)))
             num_volume_element = x_info[0]*y_info[0]*z_info[0]
             while ( len(self.part_data) < num_volume_element ):
 		self.part_data += [float(x) for x in line.split()]
@@ -216,20 +187,8 @@ class USRBIN(Mesh):
 	    print "mesh #", self.mesh_tally
 	    self._create_mesh(fh)
 
-	    print "****"
-	    print line
-	    print "****"
-#	    if "1" in line:
-#		line = False
-#                self.mesh_tally = self.mesh_tally + 1
-#	    print line
-#	    print self.mesh_tally
-#	print self.part_data
-   
 
 
 
-#test1=USR("fng_dose_usrbin_22.lis")
-# test2=read_tally_sets()
-my_file = USRBIN("/home/kalin/Documents/CNERG/testfiles/atic_usrbin_76.lis")
-#my_file.read_usrbin("fng_dose_usrbin_22.lis")
+my_file = "/home/kalin/Documents/CNERG/testfiles/atic_usrbin_76.lis"
+USRS(my_file)
