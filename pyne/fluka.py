@@ -35,20 +35,16 @@ class USRBIN(Mesh):
         """This will create the .h5m files with the name of the provided
         usrbin data. One file contains the part_data and the error_data.
         """
-
 	super(USRBIN, self).__init__(structured_coords=[self.x_bounds,
                                      self.y_bounds, self.z_bounds],
                                      structured=True,
                                      structured_ordering='zyx')
-
 	self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 
                                   name="part_data_{0}".format(self.particle))
 	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 
                                   name="error_data_{0}".format(self.particle))
-
 	self.part_data_tag[:] = self.part_data
 	self.error_data_tag[:] = self.error_data
-
         self.mesh.save(self.name.strip()+".h5m")
 	
     def get_name_and_system(self, line): 
@@ -73,23 +69,12 @@ class USRBIN(Mesh):
         coord_min = line.split()[3]
         coord_max = line.split()[5]
         bin_width = line.split()[10]
-        return int(number_of_bins), float(coord_min), float(coord_max), \
-               float(bin_width)
+        return float(coord_min), float(coord_max), float(bin_width), \
+               int(number_of_bins)
 
-    def matrix_organization(self, line): # retrieves information about how the matrix of information is organized for each binning
-        matrix_organization = line.split()[5]
-        # for a cartesian coordinate system:
-        i = matrix_organization[3] # changes last
-        j = matrix_organization[6] # changes second
-        k = matrix_organization[9] # changes first
-        column_format = line.split()[7]
-        column_number = column_format.split(',')[2].split('(')[0] # number of columns in table
-        print column_format, column_number
-        return i, j, k, int(column_number)
-
-    def read_data(self, line): # reads data
-        """
-        reads data from string, splits into space delimited chunks and returns a list of items
+    def read_data(self, line): 
+        """Reads track-length binning data from a single line in file, splits 
+        into space delimited chunks, and returns a list of floats.
         """
         data_line = line.split()
         for i, ve in enumerate(data_line):
@@ -97,11 +82,12 @@ class USRBIN(Mesh):
         return data_line
 
     def generate_bounds(self,dir_min,dir_max,bin_width,bounds): 
-        """ takes arguments of the the minimum and max values in a given direction and the number
-        of splits, returns list of boundaries
+        """Takes arguments of the the minimum value, maximum value, and the
+        number of bins for a given direction and returns list of boundary 
+        values for that direction.
         """
         bound_data=[]
-        bound_data.append(dir_min) #append the first boundary
+        bound_data.append(dir_min)
         for i in range(1,bounds+1):
             bound_data.append(dir_min+(i*bin_width))
         return bound_data
@@ -113,28 +99,28 @@ class USRBIN(Mesh):
         if coord_sys == "Cartesian":
             line = fh.readline()
             # assume next line is X coord info
-            x_bins = self.get_coordinate_system(line)[0]
-            x_min = self.get_coordinate_system(line)[1]
-            x_max = self.get_coordinate_system(line)[2]
-            x_width = self.get_coordinate_system(line)[3]
-            print x_bins, x_min, x_max, x_width
+            x_bins = self.get_coordinate_system(line)[3]
+            x_min = self.get_coordinate_system(line)[0]
+            x_max = self.get_coordinate_system(line)[1]
+            x_width = self.get_coordinate_system(line)[2]
+            print x_min, x_max, x_width
             x_info = [x_bins, x_min, x_max, x_width]
             line = fh.readline()
             # assume next line is y coord info
-            y_bins = self.get_coordinate_system(line)[0]
-            y_min = self.get_coordinate_system(line)[1]
-            y_max = self.get_coordinate_system(line)[2]
-            y_width = self.get_coordinate_system(line)[3]
+            y_bins = self.get_coordinate_system(line)[3]
+            y_min = self.get_coordinate_system(line)[0]
+            y_max = self.get_coordinate_system(line)[1]
+            y_width = self.get_coordinate_system(line)[2]
             y_info = [y_bins, y_min, y_max, y_width]
             line = fh.readline()
-            print y_bins, y_min, y_max, y_width
+            print y_min, y_max, y_width
             # assume next line is z coord info
-            z_bins = self.get_coordinate_system(line)[0]
-            z_min = self.get_coordinate_system(line)[1]
-            z_max = self.get_coordinate_system(line)[2]
-            z_width = self.get_coordinate_system(line)[3]
+            z_bins = self.get_coordinate_system(line)[3]
+            z_min = self.get_coordinate_system(line)[0]
+            z_max = self.get_coordinate_system(line)[1]
+            z_width = self.get_coordinate_system(line)[2]
             z_info = [z_bins, z_min, z_max, z_width]
-            print z_bins, z_min, z_max, z_width
+            print z_min, z_max, z_width
         else:
             print "Coordinate sytem is not Cartesian"
         line = fh.readline()
