@@ -190,5 +190,5 @@ class USRBIN(Mesh):
 
 
 
-my_file = "/home/kalin/Documents/CNERG/testfiles/atic_usrbin_76.lis"
+my_file ="/home/kalin/Documents/CNERG/pyne/tests/fluka_usrbin_multiple.lis"
 USRS(my_file)
