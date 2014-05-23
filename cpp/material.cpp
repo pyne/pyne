@@ -4,7 +4,7 @@
 
 #include <string>
 #include <vector>
-#include <iomanip>
+#include <iomanip>  // std::setprecision
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
@@ -486,24 +486,19 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
 std::string pyne::Material::mcnp(std::string frac_type)
 {
-  int mcnp_id;
-  for(pyne::comp_iter i = comp.begin(); i != comp.end(); i++) 
-  {
-     
-    mcnp_id = pyne::nucname::mcnp( i->first );
-  }
   //////////////////// Begin card creation ///////////////////////
-  std::cout << "Begin card creation" << std::endl;
   std::ostringstream oss;
   // 'name'
   if (metadata.isMember("name"))
   {
-     oss << "C name: " << metadata["name"].asString() << "\n";
+     oss << "C name: " << metadata["name"].asString() << std::endl;
   }
   // 'density'
   if (density != -1.0)
   {
-     oss << "C density = " << density << "\n";
+     std::stringstream ds;
+     ds << std::setprecision(1) << std::fixed << "C density = " << density << std::endl;
+     oss << ds.str();
   }
   // 'source'
   if (metadata.isMember("source"))
@@ -563,6 +558,7 @@ std::string pyne::Material::mcnp(std::string frac_type)
   }
   
   // iterate through frac map
+  // This is an awkward pre-C++11 way to put an int to a string
   std::stringstream ss;
   std::string nucmcnp;
   std::string table_item;
@@ -573,24 +569,26 @@ std::string pyne::Material::mcnp(std::string frac_type)
      ss.clear();
      ss << pyne::nucname::mcnp( i->first );
      nucmcnp = ss.str();
+
+     int mcnp_id;
+     mcnp_id = pyne::nucname::mcnp( i->first );
      // Spaces are important for tests
-     if (metadata.isMember("table_ids"))
-     {
+     //if (metadata.isMember("table_ids"))
+     //{
         table_item = metadata["table_ids"][nucmcnp].asString();
         if ( !table_item.empty() )
         {
-	    oss << "     " << nucmcnp << "." << table_item << " ";
+	    oss << "     " << mcnp_id << "." << table_item << " ";
         }
         else
         {
-	    oss << "     " << nucmcnp << " ";
+	    oss << "     " << mcnp_id << " ";
         }
 
         std::stringstream fs;
-        fs.precision(4);   
-        fs << frac_sign << std::scientific << i->second << std::endl;
+        fs << std::setprecision(4) << std::scientific << frac_sign << i->second << std::endl;
 	oss << fs.str();
-     }
+     //}
   } 
 
   return oss.str();
