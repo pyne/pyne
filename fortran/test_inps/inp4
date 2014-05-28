@@ -1,0 +1,23 @@
+Test problem 3d
+1 0          Order & Method: 0/1 => AHOT-N-SI/AHOT-N-ITM
+4 1          Order & Qudrature Type: 0/1/2 => TWOTRAN/EQN/Read-in
+4 4 4       Number of Nodes in x- y- & z-Directions
+1 1          Number of Groups & Number of Materials
+4*0.25                     x-size of cells
+4*0.25                      y-size of cells
+4*0.25                z-size of cells
+2  2         x-start and -end BCs
+2  2         y-start and -end BCs
+2  2         z-start and -end BCs
+mat4       
+            
+xs           
+src_4.dat      
+bc_4.dat
+phi_4.ahot
+1.e-12 6000 0 1.e-10     Conv.Crit., Max.Its., Moments Converged, Tolerence
+0 1.e-14     Frequency of Checking Solution, and Tolerence
+0 0 0        Max [mom]ent to [p]rint=0-Lambda, flag for [mom]ent [sum]=0/1, flag for [mom]ent at a [p]oin[t]=0/1
+0            Flag for computing, presenting quadrant fluxes
+0            Flag for printing matrix file: 1=yes, /1=no
+0            ITM solution flag, Direct/Conjugate Gradient = 0/1

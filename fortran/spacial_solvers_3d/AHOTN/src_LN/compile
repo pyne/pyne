@@ -1,0 +1,23 @@
+#! /bin/bash
+#
+ifort -c -r8 -O3 invar.f90
+ifort -c -r8 -O3 solvar.f90
+ifort -c -r8 -O3 lin_nodal_module.f90
+ifort -c -r8 -O3 timevar.f90
+ifort -c -r8 -O3 main.f90
+ifort -c -r8 -O3 version.f90
+ifort -c -r8 -O3 input.f90
+ifort -c -r8 -O3 angle.f90
+ifort -c -r8 -O3 readmt.f90
+ifort -c -r8 -O3 readxs.f90
+ifort -c -r8 -O3 readsrc.f90
+ifort -c -r8 -O3 read_inflow.f90
+ifort -c -r8 -O3 check.f90
+ifort -c -r8 -O3 echo.f90
+ifort -c -r8 -O3 solve.f90
+ifort -c -r8 -O3 inner.f90
+ifort -c -r8 -O3 sweep.f90
+ifort -c -r8 -O3 output.f90
+ifort -c -r8 -O3 output_phi.f90
+ifort -r8 -O3 -o ../LN.exe *.o lapack.a
+rm *.o *.mod

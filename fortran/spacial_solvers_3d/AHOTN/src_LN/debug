@@ -1,0 +1,23 @@
+#! /bin/bash
+#
+ifort -c -g -traceback -check all -fpe0 invar.f90
+ifort -c -g -traceback -check all -fpe0 solvar.f90
+ifort -c -g -traceback -check all -fpe0 lin_nodal_module.f90
+ifort -c -g -traceback -check all -fpe0 timevar.f90
+ifort -c -g -traceback -check all -fpe0 main.f90
+ifort -c -g -traceback -check all -fpe0 version.f90
+ifort -c -g -traceback -check all -fpe0 input.f90
+ifort -c -g -traceback -check all -fpe0 angle.f90
+ifort -c -g -traceback -check all -fpe0 readmt.f90
+ifort -c -g -traceback -check all -fpe0 readxs.f90
+ifort -c -g -traceback -check all -fpe0 readsrc.f90
+ifort -c -g -traceback -check all -fpe0 read_inflow.f90
+ifort -c -g -traceback -check all -fpe0 check.f90
+ifort -c -g -traceback -check all -fpe0 echo.f90
+ifort -c -g -traceback -check all -fpe0 solve.f90
+ifort -c -g -traceback -check all -fpe0 inner.f90
+ifort -c -g -traceback -check all -fpe0 sweep.f90
+ifort -c -g -traceback -check all -fpe0 output.f90
+ifort -c -g -traceback -check all -fpe0 output_phi.f90
+ifort -lblas -llapack -o ../ahotn1_nefd *.o
+rm *.o *.mod

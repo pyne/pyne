@@ -1,0 +1,26 @@
+#! /bin/bash
+#
+ifort -c -r8  -check all -g -fpe0 dgfem_lagrange.f90 
+ifort -c -r8 -check all -g -fpe0 invar.f90
+ifort -c -r8 -check all -g -fpe0 solvar.f90
+ifort -c -r8  -check all -g -fpe0 timevar.f90
+ifort -c -r8  -check all -g -fpe0 main.f90
+ifort -c -r8  -check all -g -fpe0 version.f90
+ifort -c -r8  -check all -g -fpe0 input.f90
+ifort -c -r8  -check all -g -fpe0 angle.f90
+ifort -c  -r8 -check all -g -fpe0 readmt.f90
+ifort -c -r8  -check all -g -fpe0 readxs.f90
+ifort -c -r8  -check all -g -fpe0 readsrc.f90
+ifort -c -r8  -check all -g -fpe0 read_inflow.f90
+ifort -c -r8  -check all -g -fpe0 check.f90
+ifort -c -r8  -check all -g -fpe0 echo.f90
+ifort -c -r8  -check all -g -fpe0 solve.f90
+ifort -c -r8  -check all -g -fpe0 inner.f90
+ifort -c -r8  -check all -g -fpe0 sweep.f90
+ifort -c -r8  -check all -g -fpe0 output.f90
+ifort -c -r8  -check all -g -fpe0 output_phi.f90
+ifort -lblas -llapack -o ../DGLA.exe *.o
+rm *.o *.mod
+#ifort  -check all -g -fpe0 fluxsum.f90
+#ifort  -check all -g -fpe0 qdrntflux.f90
+#ifort  -check all -g -fpe0 p.f90

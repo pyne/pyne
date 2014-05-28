@@ -1,0 +1,23 @@
+#! /bin/bash
+#
+ifort -c -r8 -O3 -heap-arrays invar.f90
+ifort -c -r8 -O3 -heap-arrays solvar.f90
+ifort -c -r8 -O3 -heap-arrays ahotn_kernel_module.f90
+ifort -c -r8 -O3 -heap-arrays timevar.f90
+ifort -c -r8 -O3 -heap-arrays main.f90
+ifort -c -r8 -O3 -heap-arrays version.f90
+ifort -c -r8 -O3 -heap-arrays input.f90
+ifort -c -r8 -O3 -heap-arrays angle.f90
+ifort -c -r8 -O3 -heap-arrays readmt.f90
+ifort -c -r8 -O3 -heap-arrays readxs.f90
+ifort -c -r8 -O3 -heap-arrays readsrc.f90
+ifort -c -r8 -O3 -heap-arrays read_inflow.f90
+ifort -c -r8 -O3 -heap-arrays check.f90
+ifort -c -r8 -O3 -heap-arrays echo.f90
+ifort -c -r8 -O3 -heap-arrays solve.f90
+ifort -c -r8 -O3 -heap-arrays inner.f90
+ifort -c -r8 -O3 -heap-arrays sweep.f90
+ifort -c -r8 -O3 -heap-arrays output.f90
+ifort -c -r8 -O3 -heap-arrays output_phi.f90
+ifort -r8 -O3 -heap-arrays -o ../ahotn_nefd.exe *.o lapack.a
+rm *.o *.mod

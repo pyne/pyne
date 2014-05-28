@@ -1,0 +1,26 @@
+#! /bin/bash
+#
+ifort -c -r8 -O0   ld.f90 
+ifort -c -r8 -O0   invar.f90
+ifort -c -r8 -O0   solvar.f90
+ifort -c -r8 -O0   timevar.f90
+ifort -c -r8 -O0   main.f90
+ifort -c -r8 -O0   version.f90
+ifort -c -r8 -O0   input.f90
+ifort -c -r8 -O0   angle.f90
+ifort -c -r8 -O0   readmt.f90
+ifort -c -r8 -O0   readxs.f90
+ifort -c -r8 -O0   readsrc.f90
+ifort -c -r8 -O0   read_inflow.f90
+ifort -c -r8 -O0   check.f90
+ifort -c -r8 -O0   echo.f90
+ifort -c -r8 -O0   solve.f90
+ifort -c -r8 -O0   inner.f90
+ifort -c -r8 -O0   sweep.f90
+ifort -c -r8 -O0   output.f90
+ifort -c -r8 -O0   output_phi.f90
+ifort -r8 -O0   -o ../LD.exe *.o 
+rm *.o *.mod
+#ifort -c -r8   fluxsum.f90
+#ifort -c -r8   qdrntflux.f90
+#ifort -c -r8   p.f90
