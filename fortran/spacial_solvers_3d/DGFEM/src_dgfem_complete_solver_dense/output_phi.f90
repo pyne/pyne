@@ -15,7 +15,7 @@ LOGICAL :: existence
 INTEGER :: ix,iy,iz,jx,jy,jz,g,l
 
 INQUIRE (FILE = phi_file, EXIST = existence)
-IF (existence == .TRUE.) THEN
+IF (existence) THEN
     OPEN (UNIT = 31, FILE = phi_file, STATUS = "OLD", ACTION = &
           "WRITE",FORM='UNFORMATTED')
 ELSE
