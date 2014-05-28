@@ -89,7 +89,7 @@ READ(7,104) phi_file
 INQUIRE(FILE = mtfile, EXIST = ex4)
 INQUIRE(FILE = xsfile, EXIST = ex1)
 INQUIRE(FILE = srcfile, EXIST = ex2)
-IF (ex1 == .FALSE. .OR. ex2 == .FALSE. .OR. ex4 == .FALSE.) THEN
+IF ( .not. ex1 .OR. .not. ex2  .OR. .not. ex4 ) THEN
    WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
    STOP
 END IF
@@ -127,7 +127,7 @@ CALL readmt(mtfile)
 ALLOCATE(ang(apo,3), w(apo))
 IF (qdtyp == 2) THEN
    INQUIRE(FILE=qdfile, EXIST=ex3)
-   IF (qdfile == '        ' .OR. ex3 == .FALSE.) THEN
+   IF (qdfile == '        ' .OR. .not. ex3 ) THEN
       WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
       STOP
    END IF

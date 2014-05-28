@@ -21,23 +21,19 @@ USE timevar
 IMPLICIT NONE
 CHARACTER(30) :: infile, outfile, qdfile, xsfile, srcfile, mtfile,inflow_file,&
                 phi_file    
-INTEGER :: statin, statout
+!INTEGER :: statin, statout
 LOGICAL :: existence
 
 ! Get information about the input and output files and check
-CALL GETARG (1, infile, statin)
-CALL GETARG (2, outfile, statout)
-IF (statin == -1 .OR. statout == -1) THEN
-    PRINT *, "Failed reading input and output file names."
-    STOP
-END IF
+CALL GETARG (1, infile)
+CALL GETARG (2, outfile)
 
 ! Open the input supplied by the user
 OPEN (UNIT = 7, FILE = infile, STATUS = "OLD", ACTION = "READ")
 
 ! Check if the output file exists or not, then open appropriately
 INQUIRE (FILE = outfile, EXIST = existence)
-IF (existence == .TRUE.) THEN
+IF (existence) THEN
     OPEN (UNIT = 8, FILE = outfile, STATUS = "OLD", ACTION = "WRITE")
 ELSE
     OPEN (UNIT = 8, FILE = outfile, STATUS = "NEW", ACTION = "WRITE")
