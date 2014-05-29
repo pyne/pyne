@@ -1335,7 +1335,7 @@ class Material(_Material, collections.MutableMapping):
         ----------
         filename : str
             The file to append the material definition to.
-        frac_type : string, optional
+        frac_type : str, optional
             Either 'mass' or 'atom'. Speficies whether mass or atom fractions
             are used to describe material composition.
         """
