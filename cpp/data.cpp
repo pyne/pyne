@@ -106,6 +106,7 @@ double pyne::atomic_mass(int nuc) {
       catch (FileNotFound)
       {      
          std::cout << "Cannot load atomic_mass_map from disk.\n";
+	 exit(EXIT_FAILURE);
       }
   }
 
