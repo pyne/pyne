@@ -1,12 +1,12 @@
 #! /bin/bash
 #
-gfortran -c precision_module.f90
-gfortran -c geompack.f90
-gfortran -c trackstruct.f90
-gfortran -c igeompack.f90
-gfortran -c trackroutines.f90
-gfortran -c sct_module.f90
-gfortran -c invar.f90
+gfortran -c -fdefault-real-8 precision_module.f90
+gfortran -c -fdefault-real-8 geompack.f90
+gfortran -c -fdefault-real-8 trackstruct.f90
+gfortran -c -fdefault-real-8 igeompack.f90
+gfortran -c -fdefault-real-8 trackroutines.f90
+gfortran -c -fdefault-real-8 sct_module.f90
+gfortran -c -fdefault-real-8 invar.f90
 gfortran -c solvar.f90
 gfortran -c kernel_module.f90
 gfortran -c timevar.f90
