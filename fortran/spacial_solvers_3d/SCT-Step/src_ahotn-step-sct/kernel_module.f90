@@ -90,9 +90,9 @@ subroutine ahotn0_kernel(x,y,z,mu,eta,xi,sig,inflow_x,inflow_y,inflow_z,psia)
    ex = 2.0d0*mu /(x*sig)
    ey = 2.0d0*eta/(y*sig)
    ez = 2.0d0*xi /(z*sig)
-   alpha = spwt(1.0/ex)
-   beta  = spwt(1.0/ey)
-   gamma = spwt(1.0/ez)
+   alpha = spwt(1.0d0/ex)
+   beta  = spwt(1.0d0/ey)
+   gamma = spwt(1.0d0/ez)
  
    ! Compute psia
 
