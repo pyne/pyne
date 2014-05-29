@@ -271,7 +271,7 @@ namespace pyne
     Material operator/ (double);
   };
 
-  /// Converts a Material to a string stream representation for cononical writing.
+  /// Converts a Material to a string stream representation for canonical writing.
   /// This operator is also defined on inheritors of std::ostream
   std::ostream& operator<< (std::ostream& os, Material mat);
 
