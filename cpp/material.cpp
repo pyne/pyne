@@ -837,10 +837,11 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
   return os;
 };
 
- 
-std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) {
+// Note this refines << for an inheritor of std::ostream.  
+std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) 
+{
   return os;
-};
+}
 
 void pyne::Material::normalize () {
   // normalizes the mass
@@ -1159,7 +1160,8 @@ pyne::Material pyne::Material::sub_fp() {
 std::map<int, double> pyne::Material::to_atom_frac() {
   // Returns an atom fraction map from this material's composition
   // the material's molecular mass
-  double mat_mw = molecular_mass(-1);
+  double mat_mw = molecular_mass();
+
   std::map<int, double> atom_fracs = std::map<int, double>();
 
   for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
