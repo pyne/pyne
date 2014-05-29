@@ -13,7 +13,7 @@ mat4
             
 xs           
 src_4.dat      
-bc_4.dat
+bc_4_sct.dat
 phi_4.ahot
 1.e-12 6000 0 1.e-10     Conv.Crit., Max.Its., Moments Converged, Tolerence
 0 1.e-14     Frequency of Checking Solution, and Tolerence
