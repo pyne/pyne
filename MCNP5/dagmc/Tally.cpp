@@ -108,46 +108,33 @@ std::string Tally::get_tally_type()
 //---------------------------------------------------------------------------//
 bool Tally::get_energy_bin(double energy, unsigned int& ebin)
 {
-    bool bin_found = false;
+    bool bin_exists = false;
 
     if (energy_in_bounds(energy))
     {
+        bin_exists = true;
         if (data->get_num_energy_bins() == 1)
         {
             ebin = 0;
-            bin_found = true;
         }
         else  // in bounds and more than one energy bin
         {
-            // Case where we are close to the highest energy
-            double tol = 1e-6;
             unsigned int max_ebound = input_data.energy_bin_bounds.size() - 1;
-
-            if (fabs(energy - input_data.energy_bin_bounds.at(max_ebound)) < tol)
-            {
-                ebin =  max_ebound - 1;
-                bin_found = true;
-            }
-
-            unsigned int i = 0;
-
-            while (!bin_found)
+            // Pre-load ebin with maximum bin
+            ebin =  max_ebound - 1;
+	    for (unsigned int i=0; i < max_ebound; ++i)
             {
                 if (input_data.energy_bin_bounds.at(i) <= energy &&
                     energy < input_data.energy_bin_bounds.at(i+1))
                 {
                     ebin = i;
-                    bin_found = true;
+		    break;
                 }
-                else
-                {
-                    ++i;
-                }
-            }  // end while
+            }  // end for
         }  // end else in bounds and >1 energy bin
     }  // end if in bounds
-
-    return bin_found;
+    
+    return bin_exists;
 }
 //---------------------------------------------------------------------------//
 bool Tally::energy_in_bounds(double energy)
