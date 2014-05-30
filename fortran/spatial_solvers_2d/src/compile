@@ -1,0 +1,67 @@
+#! /bin/bash
+#
+ifort -c -r8 invar.f90
+ifort -c -r8 solvar.f90
+ifort -c -r8 timevar.f90
+ifort -c -r8 main.f90
+ifort -c -r8 version.f90
+ifort -c -r8 input.f90
+ifort -c -r8 angle.f90
+ifort -c -r8 readmt.f90
+ifort -c -r8 readxs.f90
+ifort -c -r8 readsrc.f90
+ifort -c -r8 check.f90
+ifort -c -r8 echo.f90
+ifort -c -r8 solve.f90
+ifort -c -r8 inner.f90
+ifort -c -r8 sweep.f90
+ifort -c -r8 scell.f90
+ifort -c -r8 jima.f90
+ifort -c -r8 weitn.f90
+ifort -c -r8 odev.f90
+ifort -c -r8 weitc.f90
+ifort -c -r8 conab.f90
+ifort -c -r8 cong.f90
+ifort -c -r8 gammas.f90
+ifort -c -r8 cgsolve.f90
+ifort -c -r8 output.f90
+ifort -c -r8 fluxsum.f90
+ifort -c -r8 qdrntflux.f90
+ifort -c -r8 p.f90
+ifort -c -r8 printPsi.f90
+ifort -c -r8 printPhi.f90
+ifort -lblas -llapack -o ../ahot2d *.o
+rm *.o
+#
+#ifort -c -r8 -g -traceback -check all -fpe0  invar.f90
+#ifort -c -r8 -g -traceback -check all -fpe0  solvar.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 timevar.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 main.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 version.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 input.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 angle.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 readmt.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 readxs.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 readsrc.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 check.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 echo.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 solve.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 inner.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 sweep.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 scell.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 jima.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 weitn.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 odev.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 weitc.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 conab.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 cong.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 gammas.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 cgsolve.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 output.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 fluxsum.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 qdrntflux.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 p.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 printPsi.f90
+#ifort -c -r8 -g -traceback -check all -fpe0 printPhi.f90
+#ifort -lblas -llapack -o ../ahot2d *.o
+#
