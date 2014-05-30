@@ -291,4 +291,5 @@ TEST_F(TallyEnergyBinTest, NonZeroEnergyBounds)
   EXPECT_DOUBLE_EQ(27.0, result.first);
   EXPECT_DOUBLE_EQ(243.0, result.second);
 }
+//---------------------------------------------------------------------------//
 // end of MCNP5/dagmc/test/test_Tally.cpp
