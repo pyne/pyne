@@ -16,12 +16,12 @@ class TallyFactoryTest : public ::testing::Test
     // initialize variables for each test
     virtual void SetUp()
     {
-        tally = NULL;
 	// Minimum required member settings
         input.energy_bin_bounds.push_back(0.0);
         input.energy_bin_bounds.push_back(10.0);
 	input.tally_id = 1;
-	input.options.insert(std::make_pair("inp", "../unstructured_mesh.h5m"));
+        tally = NULL;
+        tally = Tally::create_tally(input); 
     }
 
     // deallocate memory resources
@@ -37,13 +37,47 @@ class TallyFactoryTest : public ::testing::Test
 };
 
 //---------------------------------------------------------------------------//
-// SIMPLE TESTS
-//---------------------------------------------------------------------------//
+
+class TallyEnergyBinTest : public ::testing::Test
+{
+  protected:
+    // initialize variables for each test
+    virtual void SetUp()
+    {
+        tally = NULL;
+        input.tally_id = 1;
+        input.tally_type = "cell_track";
+	// Set a default energy bin case
+        input.energy_bin_bounds.push_back(0.0);
+        input.energy_bin_bounds.push_back(10.0);
+        input.energy_bin_bounds.push_back(20.3);
+        input.energy_bin_bounds.push_back(34.5);
+        input.energy_bin_bounds.push_back(67.9);
+
+	event.type = TallyEvent::TRACK;
+	event.current_cell = 1;
+	event.track_length = 9.0;
+	event.particle_weight = 1.0;
+    }
+
+    // deallocate memory resources
+    virtual void TearDown()
+    {
+        delete tally;
+    }
+
+  protected:
+    // data needed for each test
+    Tally* tally;
+    TallyInput input;
+    TallyEvent event;
+};
 
 //---------------------------------------------------------------------------//
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: TallyTest
 //---------------------------------------------------------------------------//
+
 // Tests for the factory method
 TEST_F(TallyFactoryTest, TallyConstructor1)
 {
@@ -67,6 +101,7 @@ TEST_F(TallyFactoryTest, TallyConstructor2)
 TEST_F(TallyFactoryTest, CreateTrackLengthMeshTally)
 {
   input.tally_type = "unstr_track";
+  input.options.insert(std::make_pair("inp", "../unstructured_mesh.h5m"));
   tally = Tally::create_tally(input);
   EXPECT_TRUE(tally != NULL);
   EXPECT_EQ("unstr_track", tally->get_tally_type());
@@ -76,6 +111,7 @@ TEST_F(TallyFactoryTest, CreateTrackLengthMeshTally)
 TEST_F(TallyFactoryTest, CreateKDETrackMeshTally)
 {
   input.tally_type = "kde_track";
+  input.options.insert(std::make_pair("inp", "../unstructured_mesh.h5m"));
   tally = Tally::create_tally(input);
   EXPECT_TRUE(tally != NULL);
   EXPECT_EQ("kde_track", tally->get_tally_type());
@@ -84,6 +120,7 @@ TEST_F(TallyFactoryTest, CreateKDETrackMeshTally)
 TEST_F(TallyFactoryTest, CreateKDESubtrackMeshTally)
 {
   input.tally_type = "kde_subtrack";
+  input.options.insert(std::make_pair("inp", "../unstructured_mesh.h5m"));
   tally = Tally::create_tally(input);
   EXPECT_TRUE(tally != NULL);
   EXPECT_EQ("kde_subtrack", tally->get_tally_type());
@@ -92,6 +129,7 @@ TEST_F(TallyFactoryTest, CreateKDESubtrackMeshTally)
 TEST_F(TallyFactoryTest, CreateKDECollisionMeshTally)
 {
   input.tally_type = "kde_coll";
+  input.options.insert(std::make_pair("inp", "../unstructured_mesh.h5m"));
   tally = Tally::create_tally(input);
   EXPECT_TRUE(tally != NULL);
   EXPECT_EQ("kde_coll", tally->get_tally_type());
@@ -123,6 +161,134 @@ TEST_F(TallyFactoryTest, TallyTypeNotSet)
   EXPECT_TRUE(tally == NULL);
 }
 //---------------------------------------------------------------------------//
-
+// TallyEnergyBinTest
 //---------------------------------------------------------------------------//
+TEST_F(TallyEnergyBinTest, EnergyNotInBounds)
+{
+  tally = Tally::create_tally(input);
+  event.particle_energy = -10.0; 
+  tally->compute_score(event);
+  tally->end_history();
+
+  const TallyData& data = tally->getTallyData();
+  for (int i=0; i<4; ++i)
+  {
+     std::pair<double, double> result = data.get_data(0,i);
+     EXPECT_DOUBLE_EQ(0.0, result.first);
+     EXPECT_DOUBLE_EQ(0.0, result.second);
+  }
+
+  event.particle_energy = 69.9;
+  tally->compute_score(event);
+  tally->end_history();
+  for (int i=0; i<4; ++i)
+  {
+     std::pair<double, double> result = data.get_data(0,i);
+     EXPECT_DOUBLE_EQ(0.0, result.first);
+     EXPECT_DOUBLE_EQ(0.0, result.second);
+  }
+}
+//---------------------------------------------------------------------------//
+//  Bin boundaries for 4 bins: 	
+//	0.0 10.0  20.3  34.5  67.9
+//	bin 0 includes 0
+//	bin 1 includes 10.0
+//	bin 2 includes 20.3
+//	bin 3 includes 34.5 AND 67.9
+//---------------------------------------------------------------------------//
+TEST_F(TallyEnergyBinTest, EnergyInBounds)
+{
+  tally = Tally::create_tally(input);
+  event.particle_energy = 0.0; 
+  tally->compute_score(event);
+  tally->end_history();
+
+  const TallyData& data = tally->getTallyData();
+  std::pair<double, double> result = data.get_data(0,0);
+  EXPECT_DOUBLE_EQ(9.0, result.first);
+  EXPECT_DOUBLE_EQ(81.0, result.second);
+
+  event.particle_energy = 10.0; 
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,1);
+  EXPECT_DOUBLE_EQ(9.0, result.first);
+  EXPECT_DOUBLE_EQ(81.0, result.second);
+
+  event.particle_energy = 20.3; 
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,2);
+  EXPECT_DOUBLE_EQ(9.0, result.first);
+  EXPECT_DOUBLE_EQ(81.0, result.second);
+
+  event.particle_energy = 25.87;
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,2);
+  EXPECT_DOUBLE_EQ(18.0, result.first);
+  EXPECT_DOUBLE_EQ(162.0, result.second);
+
+  event.particle_energy = 34.5; 
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,3);
+  EXPECT_DOUBLE_EQ(9.0, result.first);
+  EXPECT_DOUBLE_EQ(81.0, result.second);
+
+  event.particle_energy = 67.9;
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,3);
+  EXPECT_DOUBLE_EQ(18.0, result.first);
+  EXPECT_DOUBLE_EQ(162.0, result.second);
+}
+//---------------------------------------------------------------------------//
+TEST_F(TallyEnergyBinTest, NonZeroEnergyBounds)
+{
+  input.energy_bin_bounds.clear();  
+  input.energy_bin_bounds.push_back(5.0);
+  input.energy_bin_bounds.push_back(17.0);
+
+  tally = Tally::create_tally(input);
+
+  event.particle_energy = 3.3;
+  tally->compute_score(event);
+  tally->end_history();
+  const TallyData& data = tally->getTallyData();
+  std::pair<double, double> result = data.get_data(0,0);
+  EXPECT_DOUBLE_EQ(0.0, result.first);
+  EXPECT_DOUBLE_EQ(0.0, result.second);
+
+
+  event.particle_energy = 5.0; 
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,0);
+  EXPECT_DOUBLE_EQ(9.0, result.first);
+  EXPECT_DOUBLE_EQ(81.0, result.second);
+
+  event.particle_energy = 8.2;
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,0);
+  EXPECT_DOUBLE_EQ(18.0, result.first);
+  EXPECT_DOUBLE_EQ(162.0, result.second);
+
+
+  event.particle_energy = 17.0;
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,0);
+  EXPECT_DOUBLE_EQ(27.0, result.first);
+  EXPECT_DOUBLE_EQ(243.0, result.second);
+
+
+  event.particle_energy = 18.0;
+  tally->compute_score(event);
+  tally->end_history();
+  result = data.get_data(0,0);
+  EXPECT_DOUBLE_EQ(27.0, result.first);
+  EXPECT_DOUBLE_EQ(243.0, result.second);
+}
 // end of MCNP5/dagmc/test/test_Tally.cpp

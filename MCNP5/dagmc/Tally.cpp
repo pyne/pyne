@@ -121,11 +121,11 @@ bool Tally::get_energy_bin(double energy, unsigned int& ebin)
         {
             // Case where we are close to the highest energy
             double tol = 1e-6;
-            unsigned int maxbin = input_data.energy_bin_bounds.size() - 1;
+            unsigned int max_ebound = input_data.energy_bin_bounds.size() - 1;
 
-            if (fabs(energy - input_data.energy_bin_bounds.at(maxbin)) < tol)
+            if (fabs(energy - input_data.energy_bin_bounds.at(max_ebound)) < tol)
             {
-                ebin =  maxbin;
+                ebin =  max_ebound - 1;
                 bin_found = true;
             }
 
@@ -152,10 +152,10 @@ bool Tally::get_energy_bin(double energy, unsigned int& ebin)
 //---------------------------------------------------------------------------//
 bool Tally::energy_in_bounds(double energy)
 {
-    unsigned int maxbin = input_data.energy_bin_bounds.size() - 1;
+    unsigned int max_ebound = input_data.energy_bin_bounds.size() - 1;
 
     return !(energy < input_data.energy_bin_bounds.at(0) ||
-             energy > input_data.energy_bin_bounds.at(maxbin));
+             energy > input_data.energy_bin_bounds.at(max_ebound));
 }
 //---------------------------------------------------------------------------//
 
