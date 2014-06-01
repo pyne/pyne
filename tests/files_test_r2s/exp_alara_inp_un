@@ -15,8 +15,7 @@ mat_loading
 end
 
 mixture mix_0
-    material mat_11 1 0.037037
-    material mat_12 1 0.962963
+    material mat_12 1 1.0
 end
 
 
