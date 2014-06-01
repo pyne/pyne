@@ -53,9 +53,9 @@ The strategy is similar on windows but you need to:
 3. Add just mingw32-make to your path (Do not install gcc with mingw-get!)
 4. Use the pynewin branch
 5. Download and install the hdf5 1.8.11 shared library version (VS9 or VS10
-32-bit)
+   32-bit)
 6. Add the hdf5 dll's to your path
 7. Write a bld.bat script to build pyne and copy the necessary hdf5 libraries
 8. Edit the pyne meta.yaml file to include libpython and mingw and remove hdf5
-from both the build and run steps.
+   from both the build and run steps.
 9. build, test, and upload pyne
