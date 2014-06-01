@@ -5,14 +5,14 @@ The basic strategy for building conda binaries is to use the recipe at
 https://github.com/conda/conda-recipes to build pyne and change the yaml
 file to the desired branch/tag.
 
-1. Get the latest conda-recipes
+Get the latest conda-recipes
 
 .. code-block:: bash
 
   $ git clone https://github.com/conda/conda-recipes.git
   $ cd conda-recipes
 
-2. Now edit the "url:" line and the version line to match the desired tag and
+Now edit the "url:" line and the version line to match the desired tag and
 version. After this build pyne, install pyne, run nuc_data_make and run the
 tests. In order to use the steps shown below you need jinja2, conda-build,
 binstar and nose installed.
