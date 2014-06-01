@@ -51,7 +51,7 @@ The strategy is similar on windows but you need to:
 1. Install your own copy of cmake
 2. Use mingw-get to get mingw32-make
 3. Add just mingw32-make to your path (Do not install gcc with mingw-get!)
-4. Use the pynewin branch
+4. Use the pynewin branch from @crbates https://github.com/crbates/pyne/tree/pynewin
 5. Download and install the hdf5 1.8.11 shared library version (VS9 or VS10
    32-bit)
 6. Add the hdf5 dll's to your path
