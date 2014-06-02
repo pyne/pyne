@@ -95,19 +95,10 @@ double pyne::atomic_mass(int nuc) {
 
   // Next, fill up the map with values from the 
   // nuc_data.h5, if the map is empty.
-  if (atomic_mass_map.empty()) 
-  {
+  if (atomic_mass_map.empty()) {
     // Don't fail if we can't load the library
-      try
-      {
-         _load_atomic_mass_map();
-         return atomic_mass(nuc);
-      }
-      catch (FileNotFound)
-      {      
-         std::cout << "Cannot load atomic_mass_map from disk.\n";
-	 exit(EXIT_FAILURE);
-      }
+    _load_atomic_mass_map();
+    return atomic_mass(nuc);
   }
 
   double aw;
