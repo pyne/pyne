@@ -1121,6 +1121,28 @@ def test_write_mcnp():
     assert_equal(written, expected)
     os.remove('mcnp_mass_fracs.txt')
 
+def test_write_fluka_material():
+
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
+                   metadata={'mat_number': 2, 
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'name':'LEU', 
+			  'original_name':'leu',
+                          'source':'Some URL',
+                          'comments': ('Fluka Material Attributes'),
+                          }, 
+                   density=19.1)
+
+    # leu.write_mcnp('mcnp_mass_fracs.txt')
+    # leu.write_mcnp('mcnp_mass_fracs.txt', frac_type='atom')
+    mat_id = 26;
+    written = leu.write_fluka_material(mat_id);
+
+    expected = ('* Fluka Material Attributes\n'
+                'MATERIAL                  19.1                  26                    LEU       \n')
+    
+    assert_equal(written, expected)
+
 
 def test_write_alara():
     if 'alara.txt' in os.listdir('.'):

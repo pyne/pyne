@@ -582,7 +582,7 @@ std::string pyne::Material::mcnp(std::string frac_type)
      {
          oss << "     " << mcnp_id << " ";
      }
-
+     // The int needs a little formatting
      std::stringstream fs;
      fs << std::setprecision(4) << std::scientific << frac_sign << i->second << std::endl;
      oss << fs.str();
@@ -590,6 +590,37 @@ std::string pyne::Material::mcnp(std::string frac_type)
 
   return oss.str();
 }
+
+
+std::string pyne::Material::write_fluka_material(int mat_id) {
+  std::stringstream rs;
+  std::string name;
+  std::string comment;
+  // 'original_name' -- so far only fluka material objects
+  if (metadata.isMember("original_name"))
+  {
+    if (metadata.isMember("name") )
+    {
+       name = metadata["name"].asString();
+    }
+    if (metadata.isMember("comments") )
+    {
+       comment = metadata["comments"].asString();
+       rs << "* " << comment << std::endl;
+    }
+
+    rs << std::setw(10) << std::left << "MATERIAL";
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << density;
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << mat_id;
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::left << name << std::endl;
+  }
+  return rs.str();
+}
+
 
 void pyne::Material::from_text(char * filename) {
   std::string fname (filename);

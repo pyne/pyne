@@ -342,6 +342,17 @@ cdef class _Material:
         card = self.mat_pointer.mcnp(frac_type)
         return card
 
+    def write_fluka_material(self, mat_id):
+        """write_fluka_material(int)
+        Return a fluka material card
+        Parameters
+        ----------
+ 	   The sequential material id starting from 26 unless predefined
+        """
+        cdef std_string card
+        card = self.mat_pointer.write_fluka_material(mat_id)
+        return card
+
 
     def from_text(self, filename):
         """from_text(char * filename)
