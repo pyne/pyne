@@ -191,7 +191,7 @@ class Library(object):
 
             # Determine length of XSS and number of records
             length = nxs[0]
-            n_records = (length + entries - 1)/entries
+            n_records = (length + entries - 1)//entries
 
             # verify that we are suppossed to read this table in
             if (table_names is not None) and (name not in table_names):
