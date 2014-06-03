@@ -484,47 +484,38 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 };
 
-std::string pyne::Material::mcnp(std::string frac_type)
-{
+std::string pyne::Material::mcnp(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
   // 'name'
-  if (metadata.isMember("name"))
-  {
+  if (metadata.isMember("name")) {
      oss << "C name: " << metadata["name"].asString() << std::endl;
   }
   // 'density'
-  if (density != -1.0)
-  {
+  if (density != -1.0) {
      std::stringstream ds;
      ds << std::setprecision(1) << std::fixed << "C density = " << density << std::endl;
      oss << ds.str();
   }
   // 'source'
-  if (metadata.isMember("source"))
-  {
+  if (metadata.isMember("source")) {
      oss << "C source: " << metadata["source"].asString() << std::endl;
   }
   // Metadata comments
-  if (metadata.isMember("comments"))
-  {
+  if (metadata.isMember("comments")) {
       std::string comment_string = "comments: " + metadata["comments"].asString();
       // Include as is if short enough
-      if (comment_string.length() <= 77)
-      {
+      if (comment_string.length() <= 77) {
          oss << "C " << comment_string << std::endl;
       }
-      else // otherwise create a remainder string and iterate/update it
-      {
+      else // otherwise create a remainder string and iterate/update it {
 	 oss << "C " << comment_string.substr(0,77) << std::endl;
 	 std::string remainder_string = comment_string.substr(77);
-         while (remainder_string.length() > 77)
-	 {
+         while (remainder_string.length() > 77) {
 	   oss << "C " << remainder_string.substr(0,77) << std::endl;
            remainder_string.erase(0,77);
 	 }
-	 if (remainder_string.length() > 0)
-	 {
+	 if (remainder_string.length() > 0) {
 	    oss << "C " << remainder_string << std::endl;
 	 }
       }
@@ -532,13 +523,10 @@ std::string pyne::Material::mcnp(std::string frac_type)
 
   // Metadata mat_num
   oss << "m";
-  if (metadata.isMember("mat_number"))
-  {
+  if (metadata.isMember("mat_number")) {
     int mat_num = metadata["mat_number"].asInt(); 
     oss << mat_num << std::endl;
-  }
-  else
-  {
+  } else {
     oss << "?" << std::endl;
   }
 
@@ -546,13 +534,10 @@ std::string pyne::Material::mcnp(std::string frac_type)
   std::map<int, double> fracs;
   std::string frac_sign; 
  
-  if ("atom" == frac_type)
-  { 
+  if ("atom" == frac_type) { 
     fracs = to_atom_frac();
     frac_sign = "";
-  }
-  else
-  { 
+  } else { 
     fracs = comp;
     frac_sign = "-";
   }
@@ -562,8 +547,7 @@ std::string pyne::Material::mcnp(std::string frac_type)
   std::stringstream ss;
   std::string nucmcnp;
   std::string table_item;
-  for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) 
-  {
+  for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
      // Clear first
      ss.str(std::string() );
      ss.clear();
@@ -574,12 +558,9 @@ std::string pyne::Material::mcnp(std::string frac_type)
      mcnp_id = pyne::nucname::mcnp( i->first );
      // Spaces are important for tests
      table_item = metadata["table_ids"][nucmcnp].asString();
-     if ( !table_item.empty() )
-     {
+     if ( !table_item.empty() ) {
          oss << "     " << mcnp_id << "." << table_item << " ";
-     }
-     else
-     {
+     } else {
          oss << "     " << mcnp_id << " ";
      }
      // The int needs a little formatting
@@ -592,7 +573,7 @@ std::string pyne::Material::mcnp(std::string frac_type)
 }
 // Per the FLUKA manual, this is 25 if no material is define, 
 //  and is incremented for every defined material.
-int pyne::Material::mat_id = 25;
+int pyne::Material::fluka_mat_id = 25;
 
 std::string pyne::Material::write_fluka_material() {
   std::stringstream rs;
@@ -611,8 +592,8 @@ std::string pyne::Material::write_fluka_material() {
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << density;
-    rs << std::setw(9) << std::right << ++mat_id;
-    // mat_id is an int, but FLUKA likes ints like '26.'
+    rs << std::setw(9) << std::right << ++fluka_mat_id;
+    // fluka_mat_id is an int, but FLUKA likes ints like '26.'
     rs << '.';
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << "";
