@@ -97,9 +97,9 @@ double pyne::atomic_mass(int nuc) {
   // nuc_data.h5, if the map is empty.
   if (atomic_mass_map.empty()) {
     // Don't fail if we can't load the library
-      _load_atomic_mass_map();
-      return atomic_mass(nuc);
-  };
+    _load_atomic_mass_map();
+    return atomic_mass(nuc);
+  }
 
   double aw;
   int nucid = nucname::id(nuc);
