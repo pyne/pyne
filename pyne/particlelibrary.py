@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+from warnings import warn
+from pyne.utils import VnVWarning
+
 """Module for the IO of particle type related data, the idea being that there
 are several functions to query the particle library
 
@@ -46,8 +50,8 @@ class ParticleLibrary(object):
         particle_dict["anti-electron-neutrino"]="anti-nu_e"
         particle_dict["muon-neutrino"] = "nu_mu"
         particle_dict["anti-muon-neutrino"]="anti-nu_mu"        
-        particle_dict["tauon-neutrino"] = "tau_mu-"
-        particle_dict["anti-tauon-neutrino"]="anti-tau_m+"
+        particle_dict["tauon-neutrino"] = "tau_mu"
+        particle_dict["anti-tauon-neutrino"]="anti-tau_mu"
 
         # gauge bosons
         particle_dict["gamma"] = "photon"
