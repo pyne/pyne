@@ -1,0 +1,8 @@
+.. _tutorial-03:
+
+Nuclear Data
+============
+
+Download the :download:`full notebook <../../tutorial/03-nuclear-data.ipynb>`.
+
+.. notebook:: ../../tutorial/03-nuclear-data.ipynb

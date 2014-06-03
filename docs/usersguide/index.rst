@@ -17,6 +17,5 @@ essential aspects of using PyNE to do nuclear engineering.
     ace
     origen22
     enrichment
-    simplesim
     stlcontainers
     jsoncpp
