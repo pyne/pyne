@@ -30,8 +30,8 @@ def test_new_lib():
 
 def test_pseudo_particles():
     lib = ParticleLibrary()
-    pseudo_particle = particle_dict["pseduo"]
-    assert_equal(pseudo_particle,"pseudo_particle")
+    pseudo_particle = lib["pseduo"]
+    assert_equal(pseudo_particle,"pseudo")
 
 def test_reactor_particles():
     lib = ParticleLibrary()
