@@ -2,57 +2,67 @@
 
 import os
 
-from nose.tools import assert_equal, assert_in
+from nose.tools import assert_equal, assert_in, assert_almost_equal
 
 import pyne.ace
 
-def test_convert_h1():
-    pyne.ace.ascii_to_binary('H_001_293.6K.ace', 'H1-binary.ace')
+def setup():
+    try:
+        import urllib.request as urllib
+    except ImportError:
+        import urllib
 
-def test_read_h1_ascii():
-    h1 = pyne.ace.Library('H_001_293.6K.ace')
-    h1.read()
+    if not os.path.isfile('C012-n.ace'):
+        urllib.urlretrieve('ftp://ftp.nrg.eu/pub/www/talys/tendl2013/neutron_file/C/012/lib/endf/C012-n.ace',
+                           'C012-n.ace')
 
-    assert_in('1001.71c', h1.tables)
-    table = h1.tables['1001.71c']
+def test_convert_c12():
+    pyne.ace.ascii_to_binary('C012-n.ace', 'C12-binary.ace')
 
-    assert_equal(table.nxs[1], 8177)
-    assert_equal(table.nxs[2], 1001)
-    assert_equal(table.nxs[3], 590)
+def test_read_c12_ascii():
+    c12 = pyne.ace.Library('C012-n.ace')
+    c12.read()
+
+    assert_in('6000.00c', c12.tables)
+    table = c12.tables['6000.00c']
+
+    assert_equal(table.nxs[1], 38937)
+    assert_equal(table.nxs[2], 6000)
+    assert_equal(table.nxs[3], 1513)
     assert_equal(table.jxs[1], 1)
 
     assert_in(2, table.reactions)
-    assert_in(102, table.reactions)
+    assert_in(107, table.reactions)
     assert_in(204, table.reactions)
     assert_in(444, table.reactions)
 
-    assert_equal(table.energy[0], 1.0e-11)
+    assert_almost_equal(table.energy[0], 1.0e-11)
 
-    assert_equal(table.reactions[2].sigma[0], 1160.546)
-    assert_equal(table.reactions[2].sigma[-1], 0.4827462)
+    assert_equal(table.reactions[2].sigma[0], 78.04874)
+    assert_equal(table.reactions[2].sigma[-1], 1.00772)
 
-def test_read_h1_binary():
-    h1 = pyne.ace.Library('H1-binary.ace')
-    h1.read()
+def test_read_c12_binary():
+    c12 = pyne.ace.Library('C12-binary.ace')
+    c12.read()
 
-    assert_in('1001.71c', h1.tables)
-    table = h1.tables['1001.71c']
+    assert_in('6000.00c', c12.tables)
+    table = c12.tables['6000.00c']
 
-    assert_equal(table.nxs[1], 8177)
-    assert_equal(table.nxs[2], 1001)
-    assert_equal(table.nxs[3], 590)
+    assert_equal(table.nxs[1], 38937)
+    assert_equal(table.nxs[2], 6000)
+    assert_equal(table.nxs[3], 1513)
     assert_equal(table.jxs[1], 1)
 
     assert_in(2, table.reactions)
-    assert_in(102, table.reactions)
+    assert_in(107, table.reactions)
     assert_in(204, table.reactions)
     assert_in(444, table.reactions)
 
-    assert_equal(table.energy[0], 1.0e-11)
+    assert_almost_equal(table.energy[0], 1.0e-11)
 
-    assert_equal(table.reactions[2].sigma[0], 1160.546)
-    assert_equal(table.reactions[2].sigma[-1], 0.4827462)
+    assert_equal(table.reactions[2].sigma[0], 78.04874)
+    assert_equal(table.reactions[2].sigma[-1], 1.00772)
 
 def teardown():
-    if os.path.exists('H1-binary.ace'):
-        os.remove('H1-binary.ace')
+    if os.path.exists('C12-binary.ace'):
+        os.remove('C12-binary.ace')
