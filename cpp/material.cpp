@@ -590,30 +590,30 @@ std::string pyne::Material::mcnp(std::string frac_type)
 
   return oss.str();
 }
+// Per the FLUKA manual, this is 25 if no material is define, 
+//  and is incremented for every defined material.
+int pyne::Material::mat_id = 25;
 
-
-std::string pyne::Material::write_fluka_material(int mat_id) {
+std::string pyne::Material::write_fluka_material() {
   std::stringstream rs;
   std::string name;
   std::string comment;
-  // 'original_name' -- so far only fluka material objects
-  if (metadata.isMember("original_name"))
-  {
-    if (metadata.isMember("name") )
-    {
+  if (metadata.isMember("fluka_name")) {
+    if (metadata.isMember("name") ) {
        name = metadata["name"].asString();
     }
-    if (metadata.isMember("comments") )
-    {
+    if (metadata.isMember("comments") ) {
        comment = metadata["comments"].asString();
        rs << "* " << comment << std::endl;
     }
 
     rs << std::setw(10) << std::left << "MATERIAL";
     rs << std::setw(10) << std::right << "";
-    rs << std::setw(10) << std::right << density;
     rs << std::setw(10) << std::right << "";
-    rs << std::setw(10) << std::right << mat_id;
+    rs << std::setw(10) << std::right << density;
+    rs << std::setw(9) << std::right << ++mat_id;
+    // mat_id is an int, but FLUKA likes ints like '26.'
+    rs << '.';
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::left << name << std::endl;
@@ -621,6 +621,20 @@ std::string pyne::Material::write_fluka_material(int mat_id) {
   return rs.str();
 }
 
+
+std::string pyne::Material::write_fluka_assignma(std::string vol_id_name) {
+  std::string name;
+  std::stringstream rs;
+  if (metadata.isMember("fluka_name")) {
+    if (metadata.isMember("name") ) {
+       name = metadata["name"].asString();
+    }
+    rs << std::setw(10) << std::left << "ASSIGNMAt";
+    rs << std::setw(10) << std::right << name;
+    rs << std::setw(10) << std::right << vol_id_name << std::endl;
+  }
+  return rs.str();
+}
 
 void pyne::Material::from_text(char * filename) {
   std::string fname (filename);

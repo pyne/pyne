@@ -26,6 +26,7 @@ cdef extern from "material.h" namespace "pyne":
 
         # Attributes
         map[int, double] comp
+    
         double mass
         double density
         double atoms_per_molecule
@@ -34,7 +35,8 @@ cdef extern from "material.h" namespace "pyne":
         # Methods
         void norm_comp() except +
         std_string mcnp(std_string ) except +
-        std_string write_fluka_material(int) except +
+        std_string write_fluka_material() except +
+        std_string write_fluka_assignma(std_string) except +
         void from_hdf5(char *, char *) except +
         void from_hdf5(char *, char *, int) except +
         void from_hdf5(char *, char *, int, int) except +

@@ -1127,21 +1127,37 @@ def test_write_fluka_material():
                    metadata={'mat_number': 2, 
                           'table_ids': {'92235':'15c', '92238':'25c'},
                           'name':'LEU', 
-			  'original_name':'leu',
+                          'fluka_name':'leu',
                           'source':'Some URL',
                           'comments': ('Fluka Material Attributes'),
                           }, 
                    density=19.1)
 
-    # leu.write_mcnp('mcnp_mass_fracs.txt')
-    # leu.write_mcnp('mcnp_mass_fracs.txt', frac_type='atom')
-    mat_id = 26;
-    written = leu.write_fluka_material(mat_id);
-
+    written = leu.write_fluka_material();
     expected = ('* Fluka Material Attributes\n'
-                'MATERIAL                  19.1                  26                    LEU       \n')
-    
+                'MATERIAL                            19.1       26.                    LEU       \n')
     assert_equal(written, expected)
+
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
+                   metadata={'mat_number': 2, 
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'name':'LEU2', 
+                          'fluka_name':'leu2',
+                          'source':'Some URL',
+                          'comments': ('Fluka Material Attributes, again'),
+                          }, 
+                   density=19.15)
+
+    written2 = leu2.write_fluka_material();
+    expected2 = ('* Fluka Material Attributes, again\n'
+                'MATERIAL                           19.15       27.                    LEU2      \n')
+    assert_equal(written2, expected2)
+
+    leu.metadata["comments"] = "FLUKA ASSIGNMA"
+   
+    written3 = leu.write_fluka_assignma('2')
+    expected3 = ('ASSIGNMAt        LEU         2\n')
+    assert_equal(written3, expected3)
 
 
 def test_write_alara():
