@@ -1153,12 +1153,6 @@ def test_write_fluka_material():
                 'MATERIAL                           19.15       27.                    LEU2      \n')
     assert_equal(written2, expected2)
 
-    leu.metadata["comments"] = "FLUKA ASSIGNMA"
-   
-    written3 = leu.write_fluka_assignma('2')
-    expected3 = ('ASSIGNMAt        LEU         2\n')
-    assert_equal(written3, expected3)
-
 
 def test_write_alara():
     if 'alara.txt' in os.listdir('.'):

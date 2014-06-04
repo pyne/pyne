@@ -354,17 +354,6 @@ cdef class _Material:
         return card
 
 
-    def write_fluka_assignma(self, vol_id_name):
-        """write_fluka_assignma(vol_id_name)
-	Return a fluka ASSIGNMAt card
-        Parameters none
-        ----------
-	"""
-        cdef std_string card
-        card = self.mat_pointer.write_fluka_assignma(vol_id_name)
-        return card
-
-
     def from_text(self, filename):
         """from_text(char * filename)
         Initialize a Material object from a simple text file.

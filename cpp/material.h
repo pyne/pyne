@@ -153,8 +153,6 @@ namespace pyne
     static int fluka_mat_id;
     /// Return a fluka input deck MATERIAL card as a string
     std::string write_fluka_material();
-    /// Return a fluka input deck ASSIGNMAt card as a string
-    std::string write_fluka_assignma(std::string vol_id_name);
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
     /// Reads data from a plaintext file at \a filename into this Material instance.

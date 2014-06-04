@@ -508,7 +508,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
       if (comment_string.length() <= 77) {
          oss << "C " << comment_string << std::endl;
       }
-      else // otherwise create a remainder string and iterate/update it {
+      else { // otherwise create a remainder string and iterate/update it 
 	 oss << "C " << comment_string.substr(0,77) << std::endl;
 	 std::string remainder_string = comment_string.substr(77);
          while (remainder_string.length() > 77) {
@@ -602,20 +602,6 @@ std::string pyne::Material::write_fluka_material() {
   return rs.str();
 }
 
-
-std::string pyne::Material::write_fluka_assignma(std::string vol_id_name) {
-  std::string name;
-  std::stringstream rs;
-  if (metadata.isMember("fluka_name")) {
-    if (metadata.isMember("name") ) {
-       name = metadata["name"].asString();
-    }
-    rs << std::setw(10) << std::left << "ASSIGNMAt";
-    rs << std::setw(10) << std::right << name;
-    rs << std::setw(10) << std::right << vol_id_name << std::endl;
-  }
-  return rs.str();
-}
 
 void pyne::Material::from_text(char * filename) {
   std::string fname (filename);
