@@ -101,10 +101,10 @@ def check_matname(tag_values):
             # split on the basis of "/" being delimiter and split colons from
             # name
             if '/' in tag:
-                mat_dens_split(tag)
+                splitted_group_name = mat_dens_split(tag)
             # otherwise we have only "mat:"
             elif ':' in tag:
-                mat_split(tag)
+                splitted_group_name = mat_split(tag)
             else:
                 raise Exception(
                     "Couldn\'t find group name in appropriate format; ': is absent' in  %s" % tag)
@@ -151,23 +151,27 @@ def mat_dens_split(tag):
     except:
         raise Exception(
             "Couldn\'t find density in appropriate format!; density is not a float in %s" % tag)
-    splitted_group_name['density']=matdensity[1]
+    splitted_group_name['density'] = matdensity[1]
     return splitted_group_name
-   
+
 """
 splitting group names containing only materials
 """
+
+
 def mat_split(tag):
-    splitted_group_name={}
+    splitted_group_name = {}
     matname = tag.split(':')
     if len(matname) > 2:
-        raise Exception("Wrong format for group names! %s. correct: mat:NAME/rho:VALUE or mat:NAME" % tag)
+        raise Exception(
+            "Wrong format for group names! %s. correct: mat:NAME/rho:VALUE or mat:NAME" % tag)
     if matname[1] == '':
-        raise Exception("Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
-    splitted_group_name['material']=matname[1]
-    splitted_group_name['density']=''
-    return splitted_group_name        
-                       
+        raise Exception(
+            "Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
+    splitted_group_name['material'] = matname[1]
+    splitted_group_name['density'] = ''
+    return splitted_group_name
+
 """
 function that checks the existence of material names on the PyNE library 
 and creates a list of materials with attributes set
