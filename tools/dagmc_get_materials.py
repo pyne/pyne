@@ -78,7 +78,7 @@ def load_mat_lib(filename):
     return mat_lib
 
 """
-function to check that material group names exist and creates 
+function to check that material group names exist and creates
 a list of names and densities if provided
 -------------------------------------------------
 tag_values - list of tags from dagmc file
@@ -101,42 +101,15 @@ def check_matname(tag_values):
             # split on the basis of "/" being delimiter and split colons from
             # name
             if '/' in tag:
-                mat_name = tag.split('/')
-                if ':' not in mat_name[0]:
-                    raise Exception(
-                        "Couldn\'t find group name in appropriate format; ':' is absent in %s" % tag)
-                # list of material name only
-                matname = mat_name[0].split(':')
-                if matname[1] == '':
-                    raise Exception(
-                        "Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
-                if mat_name[1] == '':
-                    raise Exception(
-                        "Couldn\'t find group name in appropriate format; extra \'/\' in %s" % tag)
-                if ':' not in mat_name[1]:
-                    raise Exception(
-                        "Couldn\'t find group name in appropriate format; ':' is absent after the '/' in %s" % tag)
-                matdensity = mat_name[1].split(':')
-                try:
-                    matdensity_test = float(matdensity[1])
-                except:
-                    raise Exception(
-                        "Couldn\'t find density in appropriate format!; density is not a float in %s" % tag)
-                mat_list_density.append(matdensity[1])
+                mat_dens_split(tag)
             # otherwise we have only "mat:"
             elif ':' in tag:
-                matname = tag.split(':')
-                if matname[1] == '':
-                    raise Exception(
-                        "Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
-                mat_list_density.append(' ')
+                mat_split(tag)
             else:
                 raise Exception(
                     "Couldn\'t find group name in appropriate format; ': is absent' in  %s" % tag)
-            if len(matname) > 2:
-                raise Exception(
-                    "Wrong format for group names! %s. correct: mat:NAME/rho:VALUE or mat:NAME" % tag)
-            mat_list_matname.append(matname[1])
+            mat_list_matname.append(splitted_group_name['material'])
+            mat_list_density.append(splitted_group_name['density'])
     if g == 0:
         raise Exception("Graveyard group is missing!")
     mat_dens_list = zip(mat_list_matname, mat_list_density)
@@ -145,6 +118,56 @@ def check_matname(tag_values):
         raise Exception("No group names found")
     return mat_dens_list
 
+
+"""
+splitting group names containing both materials and densities
+"""
+
+
+def mat_dens_split(tag):
+    splitted_group_name = {}
+    mat_name = tag.split('/')
+    if ':' not in mat_name[0]:
+        raise Exception(
+            "Couldn\'t find group name in appropriate format; ':' is absent in %s" % tag)
+    # list of material name only
+    matname = mat_name[0].split(':')
+    if len(matname) > 2:
+        raise Exception(
+            "Wrong format for group names! %s. correct: mat:NAME/rho:VALUE or mat:NAME" % tag)
+    if matname[1] == '':
+        raise Exception(
+            "Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
+    splitted_group_name['material'] = matname[1]
+    if mat_name[1] == '':
+        raise Exception(
+            "Couldn\'t find group name in appropriate format; extra \'/\' in %s" % tag)
+    if ':' not in mat_name[1]:
+        raise Exception(
+            "Couldn\'t find group name in appropriate format; ':' is absent after the '/' in %s" % tag)
+    matdensity = mat_name[1].split(':')
+    try:
+        matdensity_test = float(matdensity[1])
+    except:
+        raise Exception(
+            "Couldn\'t find density in appropriate format!; density is not a float in %s" % tag)
+    splitted_group_name['density']=matdensity[1]
+    return splitted_group_name
+   
+"""
+splitting group names containing only materials
+"""
+def mat_split(tag):
+    splitted_group_name={}
+    matname = tag.split(':')
+    if len(matname) > 2:
+        raise Exception("Wrong format for group names! %s. correct: mat:NAME/rho:VALUE or mat:NAME" % tag)
+    if matname[1] == '':
+        raise Exception("Couldn\'t find group name in appropriate format; wrong material name in %s" % tag)
+    splitted_group_name['material']=matname[1]
+    splitted_group_name['density']=''
+    return splitted_group_name        
+                       
 """
 function that checks the existence of material names on the PyNE library 
 and creates a list of materials with attributes set
