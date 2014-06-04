@@ -1121,7 +1121,7 @@ def test_write_mcnp():
     assert_equal(written, expected)
     os.remove('mcnp_mass_fracs.txt')
 
-def test_write_fluka_material():
+def test_fluka():
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
                    metadata={'mat_number': 2, 
                           'table_ids': {'92235':'15c', '92238':'25c'},
@@ -1133,7 +1133,7 @@ def test_write_fluka_material():
                           }, 
                    density=19.1)
 
-    written = leu.write_fluka_material();
+    written = leu.fluka();
     expected = ('* Fluka Material Attributes\n'
                 'MATERIAL                            19.1       26.                    LEU       \n')
     assert_equal(written, expected)
@@ -1149,7 +1149,7 @@ def test_write_fluka_material():
                           }, 
                    density=19.15)
 
-    written2 = leu2.write_fluka_material();
+    written2 = leu2.fluka();
     expected2 = ('* Fluka Material Attributes, again\n'
                 'MATERIAL                           19.15       27.                    LEU2      \n')
     assert_equal(written2, expected2)

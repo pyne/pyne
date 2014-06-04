@@ -573,7 +573,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   return oss.str();
 }
 
-std::string pyne::Material::write_fluka_material() {
+std::string pyne::Material::fluka() {
   // Per the FLUKA manual, the first index is 26
   //  and is incremented for every defined material.
   const int mat_idx_start = 26;
