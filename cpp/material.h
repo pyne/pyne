@@ -149,8 +149,6 @@ namespace pyne
 
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
-    /// This is for write_fluka_material: fluka_mat_id will be init'd to 25
-    static int fluka_mat_id;
     /// Return a fluka input deck MATERIAL card as a string
     std::string write_fluka_material();
     /// Reads data from a plaintext file at \a filename into this Material instance.

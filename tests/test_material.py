@@ -1122,12 +1122,12 @@ def test_write_mcnp():
     os.remove('mcnp_mass_fracs.txt')
 
 def test_write_fluka_material():
-
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
                    metadata={'mat_number': 2, 
                           'table_ids': {'92235':'15c', '92238':'25c'},
                           'name':'LEU', 
                           'fluka_name':'leu',
+			  'fluka_mat_idx':0,
                           'source':'Some URL',
                           'comments': ('Fluka Material Attributes'),
                           }, 
@@ -1143,6 +1143,7 @@ def test_write_fluka_material():
                           'table_ids': {'92235':'15c', '92238':'25c'},
                           'name':'LEU2', 
                           'fluka_name':'leu2',
+			  'fluka_mat_idx': 1,
                           'source':'Some URL',
                           'comments': ('Fluka Material Attributes, again'),
                           }, 

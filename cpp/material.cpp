@@ -565,24 +565,36 @@ std::string pyne::Material::mcnp(std::string frac_type) {
      }
      // The int needs a little formatting
      std::stringstream fs;
-     fs << std::setprecision(4) << std::scientific << frac_sign << i->second << std::endl;
+     fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
+        << std::endl;
      oss << fs.str();
   } 
 
   return oss.str();
 }
-// Per the FLUKA manual, this is 25 if no material is define, 
-//  and is incremented for every defined material.
-int pyne::Material::fluka_mat_id = 25;
 
 std::string pyne::Material::write_fluka_material() {
+  // Per the FLUKA manual, the first index is 26
+  //  and is incremented for every defined material.
+  const int mat_idx_start = 26;
+
   std::stringstream rs;
+  std::stringstream mat_idx_stream;
   std::string name;
   std::string comment;
   if (metadata.isMember("fluka_name")) {
     if (metadata.isMember("name") ) {
        name = metadata["name"].asString();
     }
+    if (metadata.isMember("fluka_mat_idx") ) {
+       int fluka_mat_idx = metadata["fluka_mat_idx"].asInt();
+       // fluka_mat_id is an int, but FLUKA likes ints like '26.'
+       mat_idx_stream << fluka_mat_idx + mat_idx_start << '.'; 
+    } else {
+      // There isn't a mat_index
+      mat_idx_stream << "?";
+    }
+       
     if (metadata.isMember("comments") ) {
        comment = metadata["comments"].asString();
        rs << "* " << comment << std::endl;
@@ -592,9 +604,7 @@ std::string pyne::Material::write_fluka_material() {
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << density;
-    rs << std::setw(9) << std::right << ++fluka_mat_id;
-    // fluka_mat_id is an int, but FLUKA likes ints like '26.'
-    rs << '.';
+    rs << std::setw(10) << std::right << mat_idx_stream.str();
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::left << name << std::endl;
