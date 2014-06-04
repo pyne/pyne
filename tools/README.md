@@ -18,8 +18,8 @@ About the dagmc_get_materials and tests scripts
 -  An output obtained by running the script with an arbitrary input h5m file ('sample_output.h5m')
   
 
-# Tests #1:
+# Tests:
 - test #1: ('test_functions.py') is a test of the different functions of the 'dagmc_get_materials.py' script. it can be run as ```nosetests test_functions.py```
 
-# Test #2:
+- test #2:
 ('test_output.py') tests the output h5m file created by running the script ans is run as a python script or using nosetests  
