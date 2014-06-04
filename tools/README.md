@@ -15,8 +15,7 @@ About the dagmc_get_materials and tests scripts
 - nose tools (https://nose.readthedocs.org/en/latest/), for testing
 
 # Sample output:
--  A sample CAD model ('sample_output.h5m') created using CUBIT with arbitrary material groups.
-
+-  An output obtained by running the script with an arbitrary input h5m file ('sample_output.h5m')
 # Tests:
 - test #1: ('test_functions.py') is a test of the different functions of the 'dagmc_get_materials.py' script. it can be run as ```nosetests test_functions.py```
 
