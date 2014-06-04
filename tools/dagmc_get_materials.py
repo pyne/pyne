@@ -196,7 +196,7 @@ def check_and_create_materials(material_list, mat_lib):
                 copy_metadata(new_mat, mat_lib.get(key))
                 # set the mcnp material number and fluka material name
                 set_metadata(new_mat, d, flukamaterials_list)
-                if material_list[g][1] != ' ':
+                if material_list[g][1] != '':
                     new_mat.density = float(material_list[g][1])
 
                 material_object_list.append(new_mat)
