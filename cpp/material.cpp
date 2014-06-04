@@ -586,8 +586,8 @@ std::string pyne::Material::write_fluka_material() {
     if (metadata.isMember("name") ) {
        name = metadata["name"].asString();
     }
-    if (metadata.isMember("fluka_mat_idx") ) {
-       int fluka_mat_idx = metadata["fluka_mat_idx"].asInt();
+    if (metadata.isMember("fluka_material_index") ) {
+       int fluka_mat_idx = metadata["fluka_material_index"].asInt();
        // fluka_mat_id is an int, but FLUKA likes ints like '26.'
        mat_idx_stream << fluka_mat_idx + mat_idx_start << '.'; 
     } else {
