@@ -489,7 +489,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   std::ostringstream oss;
   // 'name'
   if (metadata.isMember("name")) {
-     oss << "C name: " << metadata["name"].asString() << std::endl;
+    oss << "C name: " << metadata["name"].asString() << std::endl;
   }
   // 'density'
   if (density != -1.0) {
@@ -503,22 +503,22 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   }
   // Metadata comments
   if (metadata.isMember("comments")) {
-      std::string comment_string = "comments: " + metadata["comments"].asString();
-      // Include as is if short enough
-      if (comment_string.length() <= 77) {
-         oss << "C " << comment_string << std::endl;
+    std::string comment_string = "comments: " + metadata["comments"].asString();
+    // Include as is if short enough
+    if (comment_string.length() <= 77) {
+      oss << "C " << comment_string << std::endl;
+    }
+    else { // otherwise create a remainder string and iterate/update it 
+      oss << "C " << comment_string.substr(0,77) << std::endl;
+      std::string remainder_string = comment_string.substr(77);
+      while (remainder_string.length() > 77) {
+        oss << "C " << remainder_string.substr(0,77) << std::endl;
+        remainder_string.erase(0,77);
       }
-      else { // otherwise create a remainder string and iterate/update it 
-	 oss << "C " << comment_string.substr(0,77) << std::endl;
-	 std::string remainder_string = comment_string.substr(77);
-         while (remainder_string.length() > 77) {
-	   oss << "C " << remainder_string.substr(0,77) << std::endl;
-           remainder_string.erase(0,77);
-	 }
-	 if (remainder_string.length() > 0) {
-	    oss << "C " << remainder_string << std::endl;
-	 }
+      if (remainder_string.length() > 0) {
+        oss << "C " << remainder_string << std::endl;
       }
+    }
   }
 
   // Metadata mat_num
@@ -548,26 +548,26 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   std::string nucmcnp;
   std::string table_item;
   for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
-     // Clear first
-     ss.str(std::string() );
-     ss.clear();
-     ss << pyne::nucname::mcnp( i->first );
-     nucmcnp = ss.str();
+    // Clear first
+    ss.str(std::string() );
+    ss.clear();
+    ss << pyne::nucname::mcnp(i->first );
+    nucmcnp = ss.str();
 
-     int mcnp_id;
-     mcnp_id = pyne::nucname::mcnp( i->first );
-     // Spaces are important for tests
-     table_item = metadata["table_ids"][nucmcnp].asString();
-     if ( !table_item.empty() ) {
-         oss << "     " << mcnp_id << "." << table_item << " ";
-     } else {
-         oss << "     " << mcnp_id << " ";
-     }
-     // The int needs a little formatting
-     std::stringstream fs;
-     fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
-        << std::endl;
-     oss << fs.str();
+    int mcnp_id;
+    mcnp_id = pyne::nucname::mcnp(i->first );
+    // Spaces are important for tests
+    table_item = metadata["table_ids"][nucmcnp].asString();
+    if ( !table_item.empty() ) {
+      oss << "     " << mcnp_id << "." << table_item << " ";
+    } else {
+      oss << "     " << mcnp_id << " ";
+    }
+    // The int needs a little formatting
+    std::stringstream fs;
+    fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
+       << std::endl;
+    oss << fs.str();
   } 
 
   return oss.str();
@@ -860,8 +860,7 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
 };
 
 // Note this refines << for an inheritor of std::ostream.  
-std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) 
-{
+std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) {
   return os;
 }
 
@@ -1236,7 +1235,7 @@ pyne::Material pyne::Material::operator+ (Material y) {
     
   for (pyne::comp_iter i = ywgt.begin(); i != ywgt.end(); i++) {
     if ( 0 == cm.count(i->first) )
-      cm[i->first] = ywgt[i->first];			
+      cm[i->first] = ywgt[i->first]	
   };
 
   return pyne::Material(cm, -1, -1);
