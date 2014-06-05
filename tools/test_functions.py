@@ -10,8 +10,6 @@ import dagmc_get_materials as gtag
 """
 Existence/Absence of a graveyard group
 """
-
-
 def test_graveyard_1():
     # 'mat:graveyard' group exists
     tag_1 = ['mat:graveyard', 'mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p',
@@ -43,8 +41,6 @@ def test_graveyard_3():
 """
 test groups naming
 """
-
-
 def test_group_1():
     # ':' is missing in 'matLead/rho:-11.35'
     tag_5 = ['mat:Nitrogen/rho:-0.001205', 'tally_4.cell.flux.p',
@@ -129,8 +125,8 @@ def test_fluka_1():
                               240500000: 0.004827777777777778, 240520000: 0.09309888888888891, 240530000: 0.010556666666666667, 240540000: 0.002627777777777779, 250550000: 0.11111111111111112, 260540000: 0.006494444444444446, 260560000: 0.10194888888888891, 260570000: 0.0023544444444444455, 260580000: 0.0003133333333333333, 280580000: 0.07564111111111112, 280600000: 0.029136666666666672, 280610000: 0.0012665555555555557, 280620000: 0.004038444444444445, 280640000: 0.0010283333333333336}, 1.0, -7.0, -1.0, {"mat_number": "4", "name": "Steel, Stainless 321"})
     flukamat_list = ['NITROGEN', 'LEAD']
     mat = gtag.fluka_material_naming(steel, flukamat_list)
-    original_name = mat.metadata['original_name']
-    name = mat.metadata['name']
+    original_name = mat.metadata['name']
+    name = mat.metadata['fluka_name']
     assert_equal(name, 'STEELSTA')
     assert_equal(original_name, 'Steel, Stainless 321')
 
@@ -141,8 +137,8 @@ def test_fluka_2():
         {70140000: 0.99636, 70150000: 0.00364}, 1.0, 0.001165, -1.0, {"mat_number": "1", "name": "Nitrogen"})
     flukamat_list = ['NITROGEN', 'LEAD']
     mat = gtag.fluka_material_naming(nitrogen, flukamat_list)
-    original_name = mat.metadata['original_name']
-    name = mat.metadata['name']
+    original_name = mat.metadata['name']
+    name = mat.metadata['fluka_name']
     assert_equal(name, 'NITROGE1')
     assert_equal(original_name, 'Nitrogen')
 
@@ -153,8 +149,8 @@ def test_fluka_3():
         {70140000: 0.99636, 70150000: 0.00364}, 1.0, 0.001165, -1.0, {"mat_number": "1", "name": "Nitrogen"})
     flukamat_list = ['NITROGEN', 'LEAD', 'NITROGE1']
     mat = gtag.fluka_material_naming(nitrogen, flukamat_list)
-    original_name = mat.metadata['original_name']
-    name = mat.metadata['name']
+    original_name = mat.metadata['name']
+    name = mat.metadata['fluka_name']
     assert_equal(name, 'NITROGE2')
     assert_equal(original_name, 'Nitrogen')
 
