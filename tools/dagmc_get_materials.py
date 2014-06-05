@@ -1,10 +1,16 @@
 #!/usr/bin/python
 
-from itaps import iMesh, iBase
-from pyne import material
-from pyne.material import Material, MaterialLibrary
 import string
 import argparse
+try:
+    from itaps import iMesh, iBase
+except:
+    raise ImportError("The PyTAPS dependency could not be imported")
+try:
+    from pyne import material
+    from pyne.material import Material, MaterialLibrary
+except:
+    raise ImportError("The PyNE dependency could not be imported")
 
 """
 function that gets all tags on dagmc geometry
@@ -12,6 +18,8 @@ function that gets all tags on dagmc geometry
 filename : the dagmc filename
 return vector of tag_values
 """
+
+
 def get_tag_values(filename):
     mesh = iMesh.Mesh()
     mesh.load(filename)
@@ -40,6 +48,7 @@ def get_tag_values(filename):
                 if any('impl_complement' in s for s in tag_values):
                     found_all_tags = 1
     print('The groups found in the h5m file are: ')
+    print tag_values
     return tag_values
 
 """
@@ -48,6 +57,8 @@ tag : string of the tag to add to tag_list
 tag_list : vector of tags in the problem
 returns tag_list
 """
+
+
 def tag_to_script(tag, tag_list):
     a = []
     # since we have a byte type tag loop over the 32 elements
@@ -73,6 +84,8 @@ function which loads pyne material library
 filename : string of the name of the material library
 returns PyNE MaterialLibrary instance
 """
+
+
 def load_mat_lib(filename):
     mat_lib = material.MaterialLibrary()
     mat_lib.from_hdf5(
@@ -87,6 +100,8 @@ tag_values - list of tags from dagmc file
 mat_lib - pyne material library instance
 returns mat_dens_list, a zipped pair of density and material name
 """
+
+
 def check_matname(tag_values):
     # loop over tags
     g = 0
@@ -103,23 +118,7 @@ def check_matname(tag_values):
             # split on the basis of "/" being delimiter and split colons from
             # name
             if '/' in tag:
-                mat_name = tag.split('/')
-                if ':' not in mat_name[0]:
-                    raise Exception("Could not find group name in appropriate format; ':' is absent in %s" % tag)
-                # list of material name only
-                matname = mat_name[0].split(':')
-                if matname[1] == '':
-                    raise Exception("Could not find group name in appropriate format; material name in blank  %s" % tag)
-                if mat_name[1] == '':
-                    raise Exception("Could not find group name in appropriate format; extra \'/\' in %s" % tag)
-                if ':' not in mat_name[1]:
-                    raise Exception("Could not find group name in appropriate format; ':' is absent after the '/' in %s" % tag)
-                matdensity = mat_name[1].split(':')
-                try:
-                    matdensity_test = float(matdensity[1])
-                except:
-                    raise Exception("Could not find density in appropriate format!; density is not a float in %s" % tag)
-                mat_list_density.append(matdensity[1])
+                splitted_group_name = mat_dens_split(tag)
             # otherwise we have only "mat:"
             elif ':' in tag:
                 splitted_group_name = mat_split(tag)
@@ -129,17 +128,20 @@ def check_matname(tag_values):
             mat_list_matname.append(splitted_group_name['material'])
             mat_list_density.append(splitted_group_name['density'])
     if g == 0:
-        raise Exception("Graveyard group is missing! You must have a graveyard")
+        raise Exception(
+            "Graveyard group is missing! You must have a graveyard")
     mat_dens_list = zip(mat_list_matname, mat_list_density)
     # error conditions, no tags found
     if len(mat_dens_list) == 0:
-        raise Exception("No material group names found, you must have materials")
+        raise Exception(
+            "No material group names found, you must have materials")
 
     return mat_dens_list
 
 
 """
-splitting group names containing both materials and densities
+function that splits group name on the basis of '/'
+group name containing both material name and density
 """
 
 
@@ -174,7 +176,8 @@ def mat_dens_split(tag):
     return splitted_group_name
 
 """
-splitting group names containing only materials
+function that splits group name on the basis of ':'
+group name containing only material name
 """
 
 
@@ -198,6 +201,8 @@ and creates a list of materials with attributes set
 material_list : vector of material_name & density pairs
 mat_lib : PyNE Material library object
 """
+
+
 def check_and_create_materials(material_list, mat_lib):
     flukamaterials_list = []
     material_object_list = []
@@ -217,9 +222,9 @@ def check_and_create_materials(material_list, mat_lib):
                 set_metadata(new_mat, d, flukamaterials_list)
 
                 # rename the material to match the group
-                group_name = "mat:"+material_list[g][0]
+                group_name = "mat:" + material_list[g][0]
                 if material_list[g][1] is not ' ':
-                    group_name += "/rho:"+material_list[g][1]
+                    group_name += "/rho:" + material_list[g][1]
                 print "grp2", group_name
                 new_mat.metadata['name'] = group_name
 
@@ -229,9 +234,11 @@ def check_and_create_materials(material_list, mat_lib):
                 material_object_list.append(new_mat)
                 break
             if mat_lib.keys().index(key) == len(mat_lib.keys()) - 1:
-                print('Material {%s} doesn\'t exist in pyne material lib' % material)
+                print(
+                    'Material {%s} doesn\'t exist in pyne material lib' % material)
                 print_near_match(material, mat_lib)
-                raise Exception('Couldn\'t find exact match in material library for : %s' % material)
+                raise Exception(
+                    'Couldn\'t find exact match in material library for : %s' % material)
 
     # check that there are as many materials as there are groups
     if d != len(material_list):
@@ -247,6 +254,8 @@ function to copy the metadata of materials from the PyNE material library
 material : PyNE material object to copy data into 
 material_from_lib : PyNE material objec to copy data from
 """
+
+
 def copy_metadata(material, material_from_lib):
     # copy metadata from lib to material
     for key in list(material_from_lib.metadata.keys()):
@@ -267,9 +276,11 @@ number : mcnp material number
 flukamat_list : 
 returns : PyNE Material Object
 """
+
+
 def set_metadata(mat, number, flukamat_list):
     mat.metadata['mat_number'] = str(number)
-    mat.metadata['fluka_material_index'] = str(number+25)
+    mat.metadata['fluka_material_index'] = str(number + 25)
     fluka_material_naming(mat, flukamat_list)
     return mat
 
@@ -277,6 +288,8 @@ def set_metadata(mat, number, flukamat_list):
 """
 Function to prepare fluka material names:
 """
+
+
 def fluka_material_naming(material, flukamat_list):
     matf = material.metadata['name']
     matf = ''.join(c for c in matf if c.isalnum())
@@ -309,6 +322,8 @@ def fluka_material_naming(material, flukamat_list):
 """ 
 function to print near matches to material name
 """
+
+
 def print_near_match(material, material_library):
     list_of_matches = []
     for item in material_library.iterkeys():
@@ -324,6 +339,8 @@ Function that writes material objects to hdf5 file
 material_list: list of PyNE Material Objects
 filename: filename to write the objects to
 """
+
+
 def write_mats_h5m(materials_list, filename):
     new_matlib = MaterialLibrary()
     for material in materials_list:
@@ -338,6 +355,8 @@ defining
 -d  : nuc_data path
 -o  : name of the output h5m file "NAME.h5m"
 """
+
+
 def parsing():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -358,6 +377,8 @@ def parsing():
 """
 main
 """
+
+
 def main():
     # parse the script
     args = parsing()
