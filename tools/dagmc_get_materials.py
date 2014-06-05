@@ -109,8 +109,7 @@ def check_matname(tag_values):
     mat_list_density = []  # list of density if provided in the group names
     # loop over the tags in the file
     for tag in tag_values:
-        print tag
-        if 'Graveyard' in tag or 'graveyard' in tag:
+        if ('Graveyard' in tag) or ('graveyard' in tag):
             g = 1
             continue
     # look for mat, this id's material in group name
@@ -223,12 +222,12 @@ def check_and_create_materials(material_list, mat_lib):
 
                 # rename the material to match the group
                 group_name = "mat:" + material_list[g][0]
-                if material_list[g][1] is not ' ':
+                if material_list[g][1] is not '':
                     group_name += "/rho:" + material_list[g][1]
                 print "grp2", group_name
                 new_mat.metadata['name'] = group_name
 
-                if material_list[g][1] != ' ':
+                if material_list[g][1] != '':
                     new_mat.density = float(material_list[g][1])
 
                 material_object_list.append(new_mat)
