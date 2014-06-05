@@ -80,16 +80,16 @@ def test_group_6():
     # no desnity provided
     tag_10 = ['mat:graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p',
               'mat:Steel, Stainless 321', 'mat:Lead', 'mat:Mercury']
-    assert_equal(gtag.check_matname(tag_10), [('Nitrogen', ' '), (
-        'Steel, Stainless 321', ' '), ('Lead', ' '), ('Mercury', ' ')])
+    assert_equal(gtag.check_matname(tag_10), [('Nitrogen', ''), (
+        'Steel, Stainless 321', ''), ('Lead', ''), ('Mercury', '')])
 
 
 def test_group_7():
     # some densities are provided
     tag_11 = ['mat:graveyard', 'mat:Nitrogen', 'tally_4.cell.flux.p',
               'mat:Steel, Stainless 321', 'mat:Lead/rho:-11.35', 'mat:Mercury/rho:-7.874']
-    assert_equal(gtag.check_matname(tag_11), [('Nitrogen', ' '), (
-        'Steel, Stainless 321', ' '), ('Lead', '-11.35'), ('Mercury', '-7.874')])
+    assert_equal(gtag.check_matname(tag_11), [('Nitrogen', ''), (
+        'Steel, Stainless 321', ''), ('Lead', '-11.35'), ('Mercury', '-7.874')])
 
 
 def test_group_8():
