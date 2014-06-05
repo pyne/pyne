@@ -1235,7 +1235,7 @@ pyne::Material pyne::Material::operator+ (Material y) {
     
   for (pyne::comp_iter i = ywgt.begin(); i != ywgt.end(); i++) {
     if ( 0 == cm.count(i->first) )
-      cm[i->first] = ywgt[i->first]	
+      cm[i->first] = ywgt[i->first];
   };
 
   return pyne::Material(cm, -1, -1);
