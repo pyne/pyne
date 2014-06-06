@@ -33,7 +33,7 @@ if( PYTHONINTERP_FOUND )
     )
 else()
   find_program( CYTHON_EXECUTABLE
-    NAMES cython cython.bat
+    NAMES cython cython.bat cython-2.7 cython-3.3 cython-3.4
     )
 endif()
 
