@@ -43,7 +43,7 @@ IF (prtfl == 1) THEN
    !  psi - file
    ! 
    INQUIRE (FILE = "scratch8", EXIST = existance)
-   IF (existance == .TRUE.) THEN
+   IF (existance .eqv. .TRUE.) THEN
        OPEN (UNIT = 31, FILE = "scratch8", STATUS = "OLD", ACTION = "WRITE" ,ACCESS = "APPEND")
    ELSE
        OPEN (UNIT = 31, FILE = "scratch8", STATUS = "NEW", ACTION = "WRITE")
@@ -52,7 +52,7 @@ IF (prtfl == 1) THEN
    ! Edge Moments LR
    ! 
    INQUIRE (FILE = "scratch9", EXIST = existance)
-   IF (existance == .TRUE.) THEN
+   IF (existance .eqv. .TRUE.) THEN
        OPEN (UNIT = 32, FILE = "scratch9", STATUS = "OLD", ACTION = "WRITE", ACCESS = "APPEND")
    ELSE
        OPEN (UNIT = 32, FILE = "scratch9", STATUS = "NEW", ACTION = "WRITE")
@@ -61,7 +61,7 @@ IF (prtfl == 1) THEN
    ! Edge Moments BT
    !
    INQUIRE (FILE = "scratch10", EXIST = existance)
-   IF (existance == .TRUE.) THEN
+   IF (existance .eqv. .TRUE.) THEN
        OPEN (UNIT = 33, FILE = "scratch10", STATUS = "OLD", ACTION = "WRITE", ACCESS = "APPEND")
    ELSE
        OPEN (UNIT = 33, FILE = "scratch10", STATUS = "NEW", ACTION = "WRITE")
