@@ -1,41 +1,205 @@
 #!/usr/bin/python
+"""Module for parsing FLUKA output data. FLUKA is a fully integrated particle
+physics MonteCarlo simulation package. It has many applications in high 
+energy experimental physics and engineering, shielding, detector and telescope
+design, cosmic ray studies, dosimetry, medical physics and radio-biology.
+Further information on FLUKA can be obtained from 
+http://www.fluka.org/fluka.php
 
-from itaps import iMesh
-from pyne.mesh import Mesh, StatMesh, IMeshTag
-import math
+Currently, only USRBIN output files can be read.
 
-class USRS(object):
-    """This class is the wrapper class for USRBINS. For a particular Fluka 
-    usrbin file, it will call read_usrbin to read all of the track length 
-    binning data in the file.
+If PyTAPS is not installed, then UsrbinFile and UsrbinTally will not be 
+available to use.
+
+"""
+
+# Mesh specific imports
+try:
+    from itaps import iMesh
+    HAVE_PYTAPS = True
+except ImportError:
+    warn("the PyTAPS optional dependency could not be imported. "
+                  "Some aspects of the mcnp module may be incomplete.",
+                  VnVWarning)
+    HAVE_PYTAPS = False
+
+from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
+
+
+class UsrbinFile(object):
+    """This class is the wrapper class for UsrbinTally. This class stores will
+    store all information for a single file that contains one or more usrbin
+    tallies. The "tally" attribute provides key/value access to individual 
+    UsrbinTally objects.
 
     Attributes:
     -----------
     filename : string
-        Path to Fluka usrbin file
+        Path to Fluka usrbin file 
+    tally : dict
+        A dictionary with user-specified tally names as keys and UsrbinTally 
+        objects as values.
     """
 
     def __init__(self, filename):
-        fh = open(filename)
-        usrbins = USRBIN()
-        usrbins.read_usrbin(fh)
+        """Parameters
+        ----------
+        filename : string
+            FLUKA USRBIN file
+        """
+
+        if not HAVE_PYTAPS:
+            raise RuntimeError("PyTAPS is not available, "
+                               "unable to create Meshtal.")
+
+        self.tally = {}
+
+        with open(filename, 'r') as fh:
+            self._read_tallies(fh)
 
 
-class USRBIN(Mesh):
-    """This class stores all the information from Fluka usrbin 
-    file with a single **or multiple** track length binnings and their 
-    associated error binnings. Currently this class only supports a 
-    cartesian coordinate system.
+    def _read_tallies(self, fh):
+        """Read in all of the USRBIN tallies from the USRBIN file.
+        """
+        line = fh.readline()
+
+        while (line != "" and line[0] == '1'):
+            new_tally = UsrbinTally(fh)
+            self.tally[new_tally.name] = new_tally
+            line = fh.readline()
+
+
+class UsrbinTally(Mesh):
+    """This class reads a single FLUKA USRBIN tally from a USRBIN file. 
+
+    Attributes
+    ----------
+    coord_sys : string
+        The coordinate system used. Either "Cartesian", "R-Z", "R-Phi-Z", or
+        user-defined. Only "Cartesian" is supported.
+    name : string
+        The user-defined name for the tally
+    particle : integer
+        The integer code corresponding to the particle tracked in tally.
+        For complete list visit http://www.fluka.org/fluka.php?id=man_onl&sub=7
+    x_bounds : list of floats
+        The locations of mesh vertices in the x direction
+    y_bounds : list of floats
+        The locations of mesh vertices in the y direction
+    z_bounds : list of floats
+        The locations of mesh vertices in the z direction
+    part_data_tag ***
+    error_data_tag ***
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, fh):
+        """Creates a UsrbinTally object by reading through the file
 
-    def _create_mesh(self, file_handle):
-        """This will create the .h5m files with the name of the provided
-        usrbin data. One file contains the part_data and the error_data.
+        Paramters
+        ---------
+        fh : filehandle
+            An open USRBIN file
         """
-	super(USRBIN, self).__init__(structured_coords=[self.x_bounds,
+
+        if not HAVE_PYTAPS:
+            raise RuntimeError("PyTAPS is not available, "
+                               "unable to create Meshtal.")
+
+        part_data = []
+        error_data = []
+
+        line = fh.readline()    
+
+        # Read the header for the tally. 
+        # Information obtained: coordinate system used, user-defined tally 
+        # name, particle, and x, y, and z dimension information.
+        [self.coord_sys, self.name, self.particle] = line.split('"')
+        self.name = self.name.strip()
+        self.coord_sys = self.coord_sys.split()[0]
+        self.particle = self.particle.split()[-1]
+
+        if self.coord_sys != 'Cartesian':
+            print "Error: only cartesian coordinate system currently supported"
+            return
+
+        [x_info, y_info, z_info] = self._read_usrbin_head(fh)
+
+        # Advance to start of tally data skipping blank and/or text lines.
+        line = fh.readline()
+        line = fh.readline()
+        if "accurate deposition" in line:
+            line = fh.readline()
+        if "track-length binning" in line:
+            line = fh.readline()
+
+        # Read the track-length binning data (part_data) and percentage error
+        # data (error_data).
+        num_volume_element = x_info[2]*y_info[2]*z_info[2]
+        part_data += [float(x) for x in line.split()]
+        while ( len(part_data) < num_volume_element ):
+            line = fh.readline()
+            part_data += [float(x) for x in line.split()]
+        for count in range (0,3):
+            line = fh.readline()
+        while ( len(error_data) < num_volume_element ):
+            line = fh.readline()
+            error_data += [float(x) for x in line.split()]
+                            
+        # create mesh object
+        self.x_bounds = self._generate_bounds(x_info)
+        self.y_bounds = self._generate_bounds(y_info)
+        self.z_bounds = self._generate_bounds(z_info)
+        self._create_mesh(part_data, error_data)
+
+
+    def _read_usrbin_head(self, fh):
+        """Get the minimum bound, maximum bound, number of bins, and bin width
+        for each of the x, y, and z dimensions contained within the header.
+        """
+        line = fh.readline()
+        # assume next line is x coord info
+        x_info = self._parse_dimensions(line)
+        line = fh.readline()
+        # assume next line is y coord info
+        y_info = self._parse_dimensions(line)
+        line = fh.readline()
+        # assume next line is z coord info
+        z_info = self._parse_dimensions(line)
+           
+        line = fh.readline()
+
+        # return lists of info for each dimension: [min, max, number of bins, width]
+        return x_info, y_info, z_info
+
+	
+    def _parse_dimensions(self, line): 
+        """This retrieves the specific dimensions and binning information for 
+        the x, y, and z dimensions. Information retrieved is the minimum and 
+        maximum value for each dimension, the number of bins in each direction,
+        and the width of each evenly spaced bin.
+        """
+        tokens = line.split()
+        return float(tokens[3]), float(tokens[5]), int(tokens[7]), \
+               float(tokens[10])
+
+
+    def _generate_bounds(self, dim_info): 
+        """This takes in the dimension information (min, max, bins, and width)
+        and returns a list of bound values for that given dimension.
+        """
+        [dim_min, dim_max, bins, width] = dim_info
+        bound_data=[]
+        for i in range(0,bins+1):
+            bound_data.append(dim_min+(i*width))
+        return bound_data
+
+
+    def _create_mesh(self, part_data, error_data):
+        """This will create the mesh object with the name of the tally 
+        specified by the user. One mesh object contains both the part_data and
+        the error_data.
+        """
+	super(UsrbinTally, self).__init__(structured_coords=[self.x_bounds,
                                      self.y_bounds, self.z_bounds],
                                      structured=True,
                                      structured_ordering='zyx')
@@ -43,152 +207,5 @@ class USRBIN(Mesh):
                                   name="part_data_{0}".format(self.particle))
 	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 
                                   name="error_data_{0}".format(self.particle))
-	self.part_data_tag[:] = self.part_data
-	self.error_data_tag[:] = self.error_data
-        self.mesh.save(self.name.strip()+".h5m")
-	
-    def get_name_and_system(self, line): 
-        """This will retrieve the coordinate system that was used, the name of
-        the track data provided by the user, and the particle type. It is 
-        expected that the coordinate system is "Cartesian" as that is all that
-        is supported.
-        """
-        name = line.split('"')[1]
-        coord_sys = line.split()[0]
-        line_split = line.split()
-        particle_type = line_split[len(line_split)-1]
-        return name, coord_sys, particle_type
-
-    def get_coordinate_system(self, line): 
-        """This retrieves the specific dimensions and binning information for 
-        the x, y, and z dimensions. Information retrieved is the minimum and 
-        maximum value for each dimension, the number of bins in each direction,
-        and the width of each evenly spaced bin.
-        """
-        number_of_bins = line.split()[7]
-        coord_min = line.split()[3]
-        coord_max = line.split()[5]
-        bin_width = line.split()[10]
-        return float(coord_min), float(coord_max), float(bin_width), \
-               int(number_of_bins)
-
-    def read_data(self, line): 
-        """Reads track-length binning data from a single line in file, splits 
-        into space delimited chunks, and returns a list of floats.
-        """
-        data_line = line.split()
-        for i, ve in enumerate(data_line):
-	    data_line[i] = float(ve)
-        return data_line
-
-    def generate_bounds(self,dir_min,dir_max,bin_width,bounds): 
-        """Takes arguments of the the minimum value, maximum value, and the
-        number of bins for a given direction and returns list of boundary 
-        values for that direction.
-        """
-        bound_data=[]
-        bound_data.append(dir_min)
-        for i in range(1,bounds+1):
-            bound_data.append(dir_min+(i*bin_width))
-        return bound_data
-
-    def read_header(self, fh, line):
-        name = self.get_name_and_system(line)[0]
-        coord_sys = self.get_name_and_system(line)[1]
-        particle = self.get_name_and_system(line)[2]
-        if coord_sys == "Cartesian":
-            line = fh.readline()
-            # assume next line is X coord info
-            x_bins = self.get_coordinate_system(line)[3]
-            x_min = self.get_coordinate_system(line)[0]
-            x_max = self.get_coordinate_system(line)[1]
-            x_width = self.get_coordinate_system(line)[2]
-            print x_min, x_max, x_width
-            x_info = [x_bins, x_min, x_max, x_width]
-            line = fh.readline()
-            # assume next line is y coord info
-            y_bins = self.get_coordinate_system(line)[3]
-            y_min = self.get_coordinate_system(line)[0]
-            y_max = self.get_coordinate_system(line)[1]
-            y_width = self.get_coordinate_system(line)[2]
-            y_info = [y_bins, y_min, y_max, y_width]
-            line = fh.readline()
-            print y_min, y_max, y_width
-            # assume next line is z coord info
-            z_bins = self.get_coordinate_system(line)[3]
-            z_min = self.get_coordinate_system(line)[0]
-            z_max = self.get_coordinate_system(line)[1]
-            z_width = self.get_coordinate_system(line)[2]
-            z_info = [z_bins, z_min, z_max, z_width]
-            print z_min, z_max, z_width
-        else:
-            print "Coordinate sytem is not Cartesian"
-        line = fh.readline()
-        # collect how data is arranged (number of columns in matrix)
-        columns = 10 #self.matrix_organization(line)[3]
-        return x_info, y_info, z_info, columns
-
-
-    def read_usrbin(self, file_handle): # combines all above functions to place data in a list
-        fh = file_handle # valid file handle
-        self.mesh_tally = 0 
-
-        line = True
-   
-	line = fh.readline()
-        while line:
-            self.part_data = []
-            self.error_data = []
-
-	    self.mesh_tally = self.mesh_tally + 1
-	    print self.mesh_tally
-
-	    print line
-            if "1" not in line:
-		print "error not a usrbin file"
-                line = False
-            line = fh.readline()    
-
-	    self.name = self.get_name_and_system(line)[0]
-	    self.particle = self.get_name_and_system(line)[2]
-
-	    [x_info, y_info, z_info, columns] = self.read_header(fh, line)
-
-	    for count in range (0,2):
-		line = fh.readline()
-
-	    if "accurate deposition" in line:
-		line = fh.readline()
-
-	    if "track-length binning" in line:
-		line = fh.readline()
-
-
-	    # now reading track length data
-            num_volume_element = x_info[0]*y_info[0]*z_info[0]
-            while ( len(self.part_data) < num_volume_element ):
-		self.part_data += [float(x) for x in line.split()]
-                line = fh.readline()
-	    print "last track +1", line
-            for count in range (0,3):
-		line = fh.readline()
-            print "first line error ", line
-            while ( len(self.error_data) < num_volume_element ):
-		self.error_data += [float(x) for x in line.split()]
-                line = fh.readline()
-                                
-
-	    # create mesh object
-
-            self.x_bounds = self.generate_bounds(x_info[1],x_info[2],x_info[3],x_info[0])
-            self.y_bounds = self.generate_bounds(y_info[1],y_info[2],y_info[3],y_info[0])
-            self.z_bounds = self.generate_bounds(z_info[1],z_info[2],z_info[3],z_info[0])
-
-	    print "mesh #", self.mesh_tally
-	    self._create_mesh(fh)
-
-
-
-
-my_file ="/home/kalin/Documents/CNERG/pyne/tests/fluka_usrbin_multiple.lis"
-USRS(my_file)
+	self.part_data_tag[:] = part_data
+	self.error_data_tag[:] = error_data
