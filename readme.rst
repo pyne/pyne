@@ -1,14 +1,17 @@
-PyNE: Python for Nuclear Engineering
-====================================
-The pyne project aims to provide a common set of tools for nuclear 
+PyNE: The Nuclear Engineering Toolkit
+=====================================
+The PyNE project aims to provide a common set of tools for nuclear 
 science and engineering needs.
 
 If you are interested in the package itself, or would like to help
 and contribute, please let us know either on the mailing list 
-(pyne-dev@googlegroups.com) or `github`_.
+(https://groups.google.com/forum/#!forum/pyne-dev, 
+pyne-dev@googlegroups.com) or `github`_.
+
+Examples, documentation, and more can be found at 
+http://pyne.io/, the official PyNE projectsite.
 
 .. _github: https://github.com/pyne/pyne
-
 
 .. install-start
 
@@ -17,23 +20,38 @@ and contribute, please let us know either on the mailing list
 ============
 Installation
 ============
--------------
+
+------------
 Dependencies
--------------
+------------
 PyNE has the following dependencies:
 
-   #. `NumPy <http://numpy.scipy.org/>`_
+   #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
+   #. `NumPy <http://www.numpy.org/>`_ (>= 1.8.0)
    #. `SciPy <http://www.scipy.org/>`_
-   #. `Cython <http://cython.org/>`_
+   #. `Cython <http://cython.org/>`_ (>= 0.19.1)
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
+   #. `Python 2.7 <http://www.python.org/>`_
+
+Additionally, building the documentation requires the following:
+
+   #. `Sphinx <http://sphinx-doc.org/>`_
+   #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
+   #. `breathe <http://michaeljones.github.io/breathe/>`_ 
+   #. `PrettyTable <https://code.google.com/p/prettytable/>`_
 
 ------
 Binary
 ------
-A binary distribution of PyNE is hopefully coming soon.  Until then, please
-install from source.
+Binary distributions of the latest release (0.4) for mac and linux (64-bit) 
+using the conda package manager can be installed by running the command::
 
+    conda install -c https://conda.binstar.org/pyne pyne
+
+A windows 32-bit binary is also available on conda via the same command but
+it is highly experimental and likely broken.
+Conda binaries do not have moab/pytaps/mesh support (yet).
 
 .. _install_source:
 
@@ -46,7 +64,7 @@ the unzipped directory::
 
     cd pyne/
     python setup.py install --user
-    nuc_data_make
+    scripts/nuc_data_make
 
 The ``setup.py`` command compiles and installs the PyNE source code.
 The ``nuc_data_make`` builds and installs a database of nuclear data.
@@ -57,64 +75,86 @@ prevents the developers from distributing it with PyNE.  However, the
 do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.  
 
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Conda Install Instructions
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+On mac and linux PyNE can be installed via the package manager conda. 
+After installing anaconda or miniconda from 
+`the Continuum downloads page <http://continuum.io/downloads>`_ 
+add conda's binary directory to your bash profile by adding::
 
-.. _win_install:
+    export PATH=/path/to/anaconda/bin:$PATH
 
-********************
-Windows Installation
-********************
-Depending on the current state of your system, installing on Windows may 
-be more or less involved.  We recommend the following procedure.  This 
-ensures that all dependencies are installed correctly and PyNE has been 
-built and tested using this setup.
+to your .bashrc or .bash_profile. Then in a new shell::
 
-#. Install the Enthought Python Distribution (`EPD`_).
-#. Determine your HDF5 version by running the following command::
+    conda install conda-build jinja2 nose setuptools pytables hdf5 scipy
 
-    python -c "import tables; print tables.getHDF5Version()"
+on linux you may also need to run::
 
-#. Download the `HDF5 Windows binaries`_ for your version.
-   Navigate to something like ``http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-{h5ver}/bin/windows/``
-   and select the appropriate 32- or 64-bit file.  Do not download the source-only files.
-#. Unzip HDF5 to the C-drive (``C:\\hdf5-{h5ver}``).
-#. Download and unzip the source (`zip`_). 
-#. Move into the source directory and run the PyNE setup command with the ``--hdf5`` option::
+    conda install patchelf
 
-    cd pyne\
-    python setup.py install --user --hdf5=C:\\hdf5-{h5ver}
-           
-And voila, everything will have installed correctly.  Should this still fail, 
-please report your problem to pyne-dev@googlegroups.com.
+Then dowload the latest conda-recipes `here 
+<https://github.com/conda/conda-recipes/archive/master.zip>`_
 
-********************
-Linux + EPD
-********************
-Assuming you are on some flavor of Linux and you primarily use Python 
-through the Enthought Python Distribution (`EPD`_), you can install PyNE
-to be based off of the EPD packages.
+cd to the conda-recipes directory and run::
 
-First, you'll need to know where on your system EPD is installed.
-Call this variable ``EPD_DIR``; for example if you have installed it 
-to your home directory then ``EPD_DIR=$HOME/epd``.  You'll then need
-to add the following lines to your ``~/.bashrc`` file *after* 
-installing EPD but *prior to* installing PyNE::
+    conda build pyne
+    conda install $(conda build --output pyne)
+    nuc_data_make
 
-    export PATH=$EPD_DIR/bin:$HOME/.local/bin:$PATH
-    export CPATH=$EPD_DIR/include:$CPATH
-    export LD_LIBRARY_PATH=$EPD_DIR/lib:$LD_LIBRARY_PATH
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Mac OSX Specific Instructions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+These instructions are based on using the homebrew http://brew.sh/ package manager
+Install command line tools from https://developer.apple.com/downloads/
+you will need to create an account in order to download::
 
-Or as in the example::
+    ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
+    brew doctor
+    brew tap homebrew/science
+    brew install hdf5
+    brew install cmake
+    brew install python
 
-    export PATH=$HOME/epd/bin:$HOME/.local/bin:$PATH
-    export CPATH=$HOME/epd/include:$CPATH
-    export LD_LIBRARY_PATH=$HOME/epd/lib:$LD_LIBRARY_PATH
+Add::
 
-You may now proceed with the PyNE install as above.
+    export PATH=/usr/local/bin:$PATH
+    export PATH=/usr/local/share/python:$PATH
 
-.. _zip: https://github.com/pyne/pyne/zipball/0.1-rc
-.. _tar: https://github.com/pyne/pyne/tarball/0.1-rc
+to ~/.bash_profile, then::
 
-.. _EPD: http://www.enthought.com/products/epd.php
-.. _HDF5 Windows binaries: http://www.hdfgroup.org/ftp/HDF5/releases/
+    source ~/.bash_profile
+    sudo pip install numpy
+    sudo chown -R $(whoami) /usr/local
+    brew install gfortran
+    pip install scipy
+    pip install cython
+    pip install numexpr
+    pip install tables
+
+download pyne-staging cd to that directory::
+
+    cd Downloads/pyne-staging
+    python setup.py install
+
+
+Once those lines have been added, run the following command before running 
+``nuc_data_make``::
+
+    source ~/.bashrc
+
+
+.. _zip: https://github.com/pyne/pyne/zipball/0.4
+.. _tar: https://github.com/pyne/pyne/tarball/0.4
 
 .. install-end
+
+
+============
+Contributing
+============
+We highly encourage contributions to PyNE! If you would like to contribute, 
+it is as easy as forking the repository on GitHub, making your changes, and 
+issuing a pull request. If you have any questions about this process don't 
+hesitate to ask the mailing list (https://groups.google.com/forum/#!forum/pyne-dev, 
+pyne-dev@googlegroups.com).

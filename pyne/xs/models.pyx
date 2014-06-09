@@ -1,4 +1,8 @@
 """This module provides physical cross-section models and helper functions."""
+from __future__ import division
+
+from warnings import warn
+from pyne.utils import VnVWarning
 
 cimport numpy as np
 import numpy as np
@@ -13,6 +17,8 @@ from scipy.special import erf
 #from scipy import integrate
 #import metasci.mathematics.integrate as msmintegrate
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
 # Bolzmann's constant in MeV/K
 k = constants.physical_constants['Boltzmann constant in eV/K'][0] * (1.0E-6)
 
@@ -25,7 +31,7 @@ m_n = constants.physical_constants['neutron mass in u'][0]
 ##############################
 
 def partial_energy_matrix_mono(np.ndarray[np.float64_t, ndim=1] E_g, np.ndarray[np.float64_t, ndim=1] E_n, int slope=-1):
-    """Gerenates a matrix of fractional values that may be used to converts a high-resolution 
+    """Generates a matrix of fractional values that may be used to converts a high-resolution 
     flux array with group structure E_n to a low-resolution flux array with group-structure E_g.
     Here, both of the energy arrays must be monotonic. This is useful for performing group collapses.
 
@@ -112,12 +118,12 @@ def partial_energy_matrix(E_g, E_n):
     E_g = np.asarray(E_g, dtype=float)
     E_n = np.asarray(E_n, dtype=float)
 
-    if (E_g[:-1] > E_g[1:]).all() and (E_n[:-1] > E_n[1:]).all():
+    if (E_g[:-1] >= E_g[1:]).all() and (E_n[:-1] >= E_n[1:]).all():
         # Both energy arrays are monotonically decreasing
         assert E_g[0] <= E_n[0]
         assert E_n[-1] <= E_g[-1]
         pem = partial_energy_matrix_mono(E_g, E_n, -1)
-    elif (E_g[:-1] < E_g[1:]).all() and (E_n[:-1] < E_n[1:]).all():
+    elif (E_g[:-1] <= E_g[1:]).all() and (E_n[:-1] <= E_n[1:]).all():
         # Both energy arrays are monotonically increasing
         assert E_n[0] <= E_g[0]
         assert E_g[-1] <= E_n[-1]
@@ -205,6 +211,7 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
 
     # Calulate partial group collapse
     sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    sigma_g[np.isnan(sigma_g)] = 0.0  # handle zero flux that causes NaNs later.
     return sigma_g
 
 

@@ -22,10 +22,23 @@
 # limitations under the License.
 #=============================================================================
 
-find_program( CYTHON_EXECUTABLE NAMES cython )
+# Use the Cython executable that lives next to the Python executable
+# if it is a local installation.
+find_package( PythonInterp )
+if( PYTHONINTERP_FOUND )
+  get_filename_component( _python_path ${PYTHON_EXECUTABLE} PATH )
+  find_program( CYTHON_EXECUTABLE
+    NAMES cython cython.bat cython-2.7 cython-3.3 cython-3.4
+    HINTS ENV PATH ${_python_path}
+    )
+else()
+  find_program( CYTHON_EXECUTABLE
+    NAMES cython cython.bat cython-2.7 cython-3.3 cython-3.4
+    )
+endif()
+
 
 include( FindPackageHandleStandardArgs )
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( Cython REQUIRED_VARS CYTHON_EXECUTABLE )
 
 mark_as_advanced( CYTHON_EXECUTABLE )
-

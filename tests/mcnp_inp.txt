@@ -1,0 +1,29 @@
+TEST MCNP INPUT FILE -- This is NOT valid MCNP input
+C  cells 
+  1  1  -19.1  -2323   $ These are just random surface numbers
+  2  2  -0.9  -1222 1002 -4002                  
+  3  2   1.005e+23 $ atom density of water (not molecule density)                           
+C 4  2  -2.7 $ Testing comment out capability
+C  materials 
+C
+C name: leu
+C source: Some http://URL.com
+C comments: first line of comments
+C second comments
+c third line of comments
+c forth line of comments
+m1
+     92235.15c -4.0000E-02 $ herere
+     92238     -9.6000E-01
+C    92233.45C -0.01 $ Testing comment out capability
+C      
+c    
+c    
+C name: water
+C source: internet
+C comments: Here are comments:
+C the comments continue
+C here are more
+c even more
+m2 1000.05c 2 8000 1 $ Testing single line capability 
+

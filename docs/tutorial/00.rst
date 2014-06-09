@@ -1,0 +1,8 @@
+.. _tutorial-00:
+
+Introduction
+============
+
+Download the :download:`full notebook <../../tutorial/00-intro.ipynb>`.
+
+.. notebook:: ../../tutorial/00-intro.ipynb

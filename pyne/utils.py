@@ -1,7 +1,12 @@
+from __future__ import division
 import os
+
 from distutils.dir_util import remove_tree
 
-from _utils import fromstring_split, fromstring_token
+from pyne._utils import fromstring_split, fromstring_token, endftod, fromendf_tok
+
+class VnVWarning(UserWarning):
+    pass
 
 time_conv_dict = {
           'as': 1e-18, 
@@ -81,27 +86,45 @@ barn_conv_dict = {
     'barns': 1.0,
     'kb': 1E+3,
     'kilobarn': 1E+3,
+    'cm2': 1E+24,
+    'cm^2': 1E+24,
     }
-    
 
 def to_barns(xs, units):
     """Converts a cross section with units to barns.
 
     Parameters
     ----------
-    xs : number
+    xs : 
         Cross section value in [units].
     units : str
         Units flag, eg 'b', 'microbarn'.
 
     Returns
     -------
-    barn_xs : float
+    barn_xs : 
         Cross section value in [barns].
 
     """
-    barn_xs = xs * barn_conv_dict[units.lower()]
-    return barn_xs
+    return xs * barn_conv_dict[units.lower()]
+
+def from_barns(xs, units):
+    """Converts a cross section from barns to units.
+
+    Parameters
+    ----------
+    xs : 
+        Cross section value in [barns].
+    units : str
+        Units flag, eg 'b', 'microbarn'.
+
+    Returns
+    -------
+    unit_xs : 
+        Cross section value in [units].
+
+    """
+    return xs / barn_conv_dict[units.lower()]
 
 
 #########################

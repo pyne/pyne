@@ -1,12 +1,7 @@
 """C++ wrapper for material class."""
-from libcpp.map cimport map
 from libcpp.set cimport set
-
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
+from libcpp.string cimport string as std_string
+from libcpp.map cimport map
 
 cimport cpp_jsoncpp 
 
@@ -33,8 +28,8 @@ cdef extern from "material.h" namespace "pyne":
         map[int, double] comp
         double mass
         double density
-        double atoms_per_mol
-        cpp_jsoncpp.Value attrs
+        double atoms_per_molecule
+        cpp_jsoncpp.Value metadata
 
         # Methods
         void norm_comp() except +
@@ -50,9 +45,22 @@ cdef extern from "material.h" namespace "pyne":
 
         void write_text(char *) except +
 
+        void load_json(cpp_jsoncpp.Value) except +
+        cpp_jsoncpp.Value dump_json() except +
+        void from_json(char *) except +
+        void write_json(char *) except +
+
         void normalize() except +
         map[int, double] mult_by_mass() except +
-        double molecular_weight(double) except +
+        double molecular_mass() except +
+        double molecular_mass(double) except +
+        Material expand_elements() except +
+        double mass_density() except +
+        double mass_density(double) except +
+        double mass_density(double, double) except +
+        double number_density() except +
+        double number_density(double) except +
+        double number_density(double, double) except +
 
         # Substream Methods
         Material sub_mat(set[int]) except +
@@ -63,8 +71,7 @@ cdef extern from "material.h" namespace "pyne":
         Material set_range(int, int, double) except +
         Material del_range(int, int) except +
 
-        Material sub_u() except +
-        Material sub_pu() except +
+        Material sub_elem(int) except +
         Material sub_lan() except +
         Material sub_act() except +
         Material sub_tru() except +
