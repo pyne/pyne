@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <iomanip>  // std::setprecision
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
@@ -484,6 +485,135 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 };
 
+std::string pyne::Material::mcnp(std::string frac_type) {
+  //////////////////// Begin card creation ///////////////////////
+  std::ostringstream oss;
+  // 'name'
+  if (metadata.isMember("name")) {
+    oss << "C name: " << metadata["name"].asString() << std::endl;
+  }
+  // 'density'
+  if (density != -1.0) {
+     std::stringstream ds;
+     ds << std::setprecision(1) << std::fixed << "C density = " << density << std::endl;
+     oss << ds.str();
+  }
+  // 'source'
+  if (metadata.isMember("source")) {
+     oss << "C source: " << metadata["source"].asString() << std::endl;
+  }
+  // Metadata comments
+  if (metadata.isMember("comments")) {
+    std::string comment_string = "comments: " + metadata["comments"].asString();
+    // Include as is if short enough
+    if (comment_string.length() <= 77) {
+      oss << "C " << comment_string << std::endl;
+    }
+    else { // otherwise create a remainder string and iterate/update it 
+      oss << "C " << comment_string.substr(0,77) << std::endl;
+      std::string remainder_string = comment_string.substr(77);
+      while (remainder_string.length() > 77) {
+        oss << "C " << remainder_string.substr(0,77) << std::endl;
+        remainder_string.erase(0,77);
+      }
+      if (remainder_string.length() > 0) {
+        oss << "C " << remainder_string << std::endl;
+      }
+    }
+  }
+
+  // Metadata mat_num
+  oss << "m";
+  if (metadata.isMember("mat_number")) {
+    int mat_num = metadata["mat_number"].asInt(); 
+    oss << mat_num << std::endl;
+  } else {
+    oss << "?" << std::endl;
+  }
+
+  // Set up atom or mass frac map
+  std::map<int, double> fracs;
+  std::string frac_sign; 
+ 
+  if ("atom" == frac_type) { 
+    fracs = to_atom_frac();
+    frac_sign = "";
+  } else { 
+    fracs = comp;
+    frac_sign = "-";
+  }
+  
+  // iterate through frac map
+  // This is an awkward pre-C++11 way to put an int to a string
+  std::stringstream ss;
+  std::string nucmcnp;
+  std::string table_item;
+  for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
+    // Clear first
+    ss.str(std::string() );
+    ss.clear();
+    ss << pyne::nucname::mcnp(i->first );
+    nucmcnp = ss.str();
+
+    int mcnp_id;
+    mcnp_id = pyne::nucname::mcnp(i->first );
+    // Spaces are important for tests
+    table_item = metadata["table_ids"][nucmcnp].asString();
+    if ( !table_item.empty() ) {
+      oss << "     " << mcnp_id << "." << table_item << " ";
+    } else {
+      oss << "     " << mcnp_id << " ";
+    }
+    // The int needs a little formatting
+    std::stringstream fs;
+    fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
+       << std::endl;
+    oss << fs.str();
+  } 
+
+  return oss.str();
+}
+
+std::string pyne::Material::fluka() {
+  // Per the FLUKA manual, the first index is 26
+  //  and is incremented for every defined material.
+  const int mat_idx_start = 26;
+
+  std::stringstream rs;
+  std::stringstream mat_idx_stream;
+  std::string name;
+  std::string comment;
+  if (metadata.isMember("fluka_name")) {
+    if (metadata.isMember("name") ) {
+       name = metadata["name"].asString();
+    }
+    if (metadata.isMember("fluka_material_index") ) {
+       int fluka_mat_idx = metadata["fluka_material_index"].asInt();
+       // fluka_mat_id is an int, but FLUKA likes ints like '26.'
+       mat_idx_stream << fluka_mat_idx + mat_idx_start << '.'; 
+    } else {
+      // There isn't a mat_index
+      mat_idx_stream << "?";
+    }
+       
+    if (metadata.isMember("comments") ) {
+       comment = metadata["comments"].asString();
+       rs << "* " << comment << std::endl;
+    }
+
+    rs << std::setw(10) << std::left << "MATERIAL";
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << density;
+    rs << std::setw(10) << std::right << mat_idx_stream.str();
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::left << name << std::endl;
+  }
+  return rs.str();
+}
+
+
 void pyne::Material::from_text(char * filename) {
   std::string fname (filename);
   from_text(fname);
@@ -730,6 +860,10 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
   return os;
 };
 
+// Note this refines << for an inheritor of std::ostream.  
+std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) {
+  return os;
+}
 
 void pyne::Material::normalize () {
   // normalizes the mass
@@ -754,6 +888,7 @@ pyne::comp_map pyne::Material::mult_by_mass() {
 double pyne::Material::molecular_mass(double apm) {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
+
   for (pyne::comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++)
     inverseA += (nuc->second) / pyne::atomic_mass(nuc->first);
 
@@ -1046,7 +1181,6 @@ pyne::Material pyne::Material::sub_fp() {
 
 std::map<int, double> pyne::Material::to_atom_frac() {
   // Returns an atom fraction map from this material's composition
-
   // the material's molecular mass
   double mat_mw = molecular_mass();
 

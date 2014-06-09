@@ -1034,8 +1034,8 @@ def test_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c -4.0000E-02\n'
-                '     92238.25c -9.6000E-01\n')
+                '     92235.15c -4.0000e-02\n'
+                '     92238.25c -9.6000e-01\n')
     assert_equal(mass, mass_exp)
 
     atom = leu.mcnp(frac_type='atom')
@@ -1045,8 +1045,8 @@ def test_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c 4.0491E-02\n'
-                '     92238.25c 9.5951E-01\n')
+                '     92235.15c 4.0491e-02\n'
+                '     92238.25c 9.5951e-01\n')
     assert_equal(atom, atom_exp)
 
 
@@ -1108,18 +1108,51 @@ def test_write_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c -4.0000E-02\n'
-                '     92238.25c -9.6000E-01\n'
+                '     92235.15c -4.0000e-02\n'
+                '     92238.25c -9.6000e-01\n'
                 'C name: leu\n'
                 'C density = 19.1\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c 4.0491E-02\n'
-                '     92238.25c 9.5951E-01\n')
+                '     92235.15c 4.0491e-02\n'
+                '     92238.25c 9.5951e-01\n')
     assert_equal(written, expected)
     os.remove('mcnp_mass_fracs.txt')
+
+def test_fluka():
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
+                   metadata={'mat_number': 2, 
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'name':'LEU', 
+                          'fluka_name':'leu',
+			  'fluka_material_index': 0,
+                          'source':'Some URL',
+                          'comments': ('Fluka Material Attributes'),
+                          }, 
+                   density=19.1)
+
+    written = leu.fluka();
+    expected = ('* Fluka Material Attributes\n'
+                'MATERIAL                            19.1       26.                    LEU       \n')
+    assert_equal(written, expected)
+
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
+                   metadata={'mat_number': 2, 
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'name':'LEU2', 
+                          'fluka_name':'leu2',
+			  'fluka_material_index': 1,
+                          'source':'Some URL',
+                          'comments': ('Fluka Material Attributes, again'),
+                          }, 
+                   density=19.15)
+
+    written2 = leu2.fluka();
+    expected2 = ('* Fluka Material Attributes, again\n'
+                'MATERIAL                           19.15       27.                    LEU2      \n')
+    assert_equal(written2, expected2)
 
 
 def test_write_alara():
