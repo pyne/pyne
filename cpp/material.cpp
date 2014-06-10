@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <iomanip>  // std::setprecision
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
@@ -54,16 +55,16 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
   std::string nuckey;
 
   // get the number of members in the material group
-  H5G_info_t group_info; 
+  H5G_info_t group_info;
   H5Gget_info(matgroup, &group_info);
   hsize_t matG = group_info.nlinks;
 
   // Iterate over datasets in the group.
   for (int matg = 0; matg < matG; matg++) {
-    nuckeylen = 1 + H5Lget_name_by_idx(matgroup, ".", H5_INDEX_NAME, H5_ITER_INC, matg, 
+    nuckeylen = 1 + H5Lget_name_by_idx(matgroup, ".", H5_INDEX_NAME, H5_ITER_INC, matg,
                                         NULL, 0, H5P_DEFAULT);
     char * nkey = new char[nuckeylen];
-    nuckeylen = H5Lget_name_by_idx(matgroup, ".", H5_INDEX_NAME, H5_ITER_INC, matg, 
+    nuckeylen = H5Lget_name_by_idx(matgroup, ".", H5_INDEX_NAME, H5_ITER_INC, matg,
                                     nkey, nuckeylen, H5P_DEFAULT);
     nuckey = nkey;
     nucset = H5Dopen2(matgroup, nkey, H5P_DEFAULT);
@@ -129,9 +130,9 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
 
   // make the data table type
   H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density), 
+  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol), 
+  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol),
             H5T_NATIVE_DOUBLE);
   H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
 
@@ -159,7 +160,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
     return;
 
   hid_t metadatapace, attrtype, metadataet, metadatalab, attrmemspace;
-  int attrrank; 
+  int attrrank;
   hvl_t attrdata [1];
 
   attrtype = H5Tvlen_create(H5T_NATIVE_CHAR);
@@ -174,7 +175,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   // convert to in-memory JSON
   Json::Reader reader;
   reader.parse((char *) attrdata[0].p, (char *) attrdata[0].p+attrdata[0].len, metadata, false);
-  
+
   // close attr data objects
   H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Dclose(metadataet);
@@ -192,7 +193,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
 void pyne::Material::from_hdf5(char * filename, char * datapath, int row, int protocol) {
   std::string fname (filename);
   std::string dpath (datapath);
-  from_hdf5(fname, dpath, row, protocol);  
+  from_hdf5(fname, dpath, row, protocol);
 };
 
 
@@ -248,12 +249,12 @@ void pyne::Material::write_hdf5(char * filename, char * datapath, char * nucpath
   std::string fname (filename);
   std::string groupname (datapath);
   std::string nuclist (nucpath);
-  write_hdf5(fname, groupname, nuclist, row, chunksize);  
+  write_hdf5(fname, groupname, nuclist, row, chunksize);
 };
 
 
 
-void pyne::Material::write_hdf5(std::string filename, std::string datapath, 
+void pyne::Material::write_hdf5(std::string filename, std::string datapath,
                                 std::string nucpath, float row, int chunksize) {
   int row_num = (int) row;
 
@@ -299,7 +300,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       nuc_data[n] = nuclides[n];
     nuc_dims[0] = nuc_size;
     hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
-    hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space, 
+    hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space,
                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
     H5Fflush(db, H5F_SCOPE_GLOBAL);
@@ -321,11 +322,11 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
   // make the data table type
   H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density), 
+  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol), 
+  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), 
+  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp),
             comp_values_array_type);
 
   material_struct * mat_data  = new material_struct[material_struct_size];
@@ -364,7 +365,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
     // Make data set properties to enable chunking
     hid_t data_set_params = H5Pcreate(H5P_DATASET_CREATE);
-    hsize_t chunk_dims[1] ={chunksize}; 
+    hsize_t chunk_dims[1] ={chunksize};
     H5Pset_chunk(data_set_params, 1, chunk_dims);
     H5Pset_deflate(data_set_params, 1);
 
@@ -377,7 +378,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     H5Pset_fill_value(data_set_params, desc, &data_fill_value);
 
     // Create the data set
-    data_set = H5Dcreate2(db, datapath.c_str(), desc, data_space, H5P_DEFAULT, 
+    data_set = H5Dcreate2(db, datapath.c_str(), desc, data_space, H5P_DEFAULT,
                             data_set_params, H5P_DEFAULT);
     H5Dset_extent(data_set, data_dims);
 
@@ -385,7 +386,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     hid_t nuc_attr_type = H5Tcopy(H5T_C_S1);
     H5Tset_size(nuc_attr_type, nucpath.length());
     hid_t nuc_attr_space = H5Screate(H5S_SCALAR);
-    hid_t nuc_attr = H5Acreate2(data_set, "nucpath", nuc_attr_type, nuc_attr_space, 
+    hid_t nuc_attr = H5Acreate2(data_set, "nucpath", nuc_attr_type, nuc_attr_space,
                                 H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
     H5Fflush(db, H5F_SCOPE_GLOBAL);
@@ -416,7 +417,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   //
   std::string attrpath = datapath + "_metadata";
   hid_t metadatapace, attrtype, metadataet, metadatalab, attrmemspace;
-  int attrrank; 
+  int attrrank;
 
   attrtype = H5Tvlen_create(H5T_NATIVE_CHAR);
 
@@ -441,7 +442,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
     // Make data set properties to enable chunking
     metadataetparams = H5Pcreate(H5P_DATASET_CREATE);
-    attrchunkdims[0] = chunksize; 
+    attrchunkdims[0] = chunksize;
     H5Pset_chunk(metadataetparams, 1, attrchunkdims);
     H5Pset_deflate(metadataetparams, 1);
 
@@ -452,9 +453,10 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
     // make dataset
     metadatapace = H5Screate_simple(1, data_dims, data_max_dims);
-    metadataet = H5Dcreate2(db, attrpath.c_str(), attrtype, metadatapace, 
+    metadataet = H5Dcreate2(db, attrpath.c_str(), attrtype, metadatapace,
                          H5P_DEFAULT, metadataetparams, H5P_DEFAULT);
     H5Dset_extent(metadataet, data_dims);
+    H5Pclose(metadataetparams);
   };
 
   // set the attr string
@@ -478,10 +480,139 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
   // Close out the HDF5 file
   H5Fclose(db);
-  // Remember the milk!  
+  // Remember the milk!
   // ...by which I mean to deallocate
   delete[] mat_data;
 };
+
+std::string pyne::Material::mcnp(std::string frac_type) {
+  //////////////////// Begin card creation ///////////////////////
+  std::ostringstream oss;
+  // 'name'
+  if (metadata.isMember("name")) {
+    oss << "C name: " << metadata["name"].asString() << std::endl;
+  }
+  // 'density'
+  if (density != -1.0) {
+     std::stringstream ds;
+     ds << std::setprecision(1) << std::fixed << "C density = " << density << std::endl;
+     oss << ds.str();
+  }
+  // 'source'
+  if (metadata.isMember("source")) {
+     oss << "C source: " << metadata["source"].asString() << std::endl;
+  }
+  // Metadata comments
+  if (metadata.isMember("comments")) {
+    std::string comment_string = "comments: " + metadata["comments"].asString();
+    // Include as is if short enough
+    if (comment_string.length() <= 77) {
+      oss << "C " << comment_string << std::endl;
+    }
+    else { // otherwise create a remainder string and iterate/update it 
+      oss << "C " << comment_string.substr(0,77) << std::endl;
+      std::string remainder_string = comment_string.substr(77);
+      while (remainder_string.length() > 77) {
+        oss << "C " << remainder_string.substr(0,77) << std::endl;
+        remainder_string.erase(0,77);
+      }
+      if (remainder_string.length() > 0) {
+        oss << "C " << remainder_string << std::endl;
+      }
+    }
+  }
+
+  // Metadata mat_num
+  oss << "m";
+  if (metadata.isMember("mat_number")) {
+    int mat_num = metadata["mat_number"].asInt(); 
+    oss << mat_num << std::endl;
+  } else {
+    oss << "?" << std::endl;
+  }
+
+  // Set up atom or mass frac map
+  std::map<int, double> fracs;
+  std::string frac_sign; 
+ 
+  if ("atom" == frac_type) { 
+    fracs = to_atom_frac();
+    frac_sign = "";
+  } else { 
+    fracs = comp;
+    frac_sign = "-";
+  }
+  
+  // iterate through frac map
+  // This is an awkward pre-C++11 way to put an int to a string
+  std::stringstream ss;
+  std::string nucmcnp;
+  std::string table_item;
+  for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
+    // Clear first
+    ss.str(std::string() );
+    ss.clear();
+    ss << pyne::nucname::mcnp(i->first );
+    nucmcnp = ss.str();
+
+    int mcnp_id;
+    mcnp_id = pyne::nucname::mcnp(i->first );
+    // Spaces are important for tests
+    table_item = metadata["table_ids"][nucmcnp].asString();
+    if ( !table_item.empty() ) {
+      oss << "     " << mcnp_id << "." << table_item << " ";
+    } else {
+      oss << "     " << mcnp_id << " ";
+    }
+    // The int needs a little formatting
+    std::stringstream fs;
+    fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
+       << std::endl;
+    oss << fs.str();
+  } 
+
+  return oss.str();
+}
+
+std::string pyne::Material::fluka() {
+  // Per the FLUKA manual, the first index is 26
+  //  and is incremented for every defined material.
+  const int mat_idx_start = 26;
+
+  std::stringstream rs;
+  std::stringstream mat_idx_stream;
+  std::string name;
+  std::string comment;
+  if (metadata.isMember("fluka_name")) {
+    if (metadata.isMember("name") ) {
+       name = metadata["name"].asString();
+    }
+    if (metadata.isMember("fluka_material_index") ) {
+       int fluka_mat_idx = metadata["fluka_material_index"].asInt();
+       // fluka_mat_id is an int, but FLUKA likes ints like '26.'
+       mat_idx_stream << fluka_mat_idx + mat_idx_start << '.'; 
+    } else {
+      // There isn't a mat_index
+      mat_idx_stream << "?";
+    }
+       
+    if (metadata.isMember("comments") ) {
+       comment = metadata["comments"].asString();
+       rs << "* " << comment << std::endl;
+    }
+
+    rs << std::setw(10) << std::left << "MATERIAL";
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << density;
+    rs << std::setw(10) << std::right << mat_idx_stream.str();
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::right << "";
+    rs << std::setw(10) << std::left << name << std::endl;
+  }
+  return rs.str();
+}
+
 
 void pyne::Material::from_text(char * filename) {
   std::string fname (filename);
@@ -512,7 +643,7 @@ void pyne::Material::from_text(std::string filename) {
       f >> valstr;
       mass = pyne::to_dbl(valstr);
     } else if (keystr == "Density") {
-      f >> valstr; 
+      f >> valstr;
       density = pyne::to_dbl(valstr);
     } else if (keystr == "APerM") {
       f >> valstr;
@@ -527,7 +658,7 @@ void pyne::Material::from_text(std::string filename) {
       continue;
    }
    };
- 
+
    f.close();
    norm_comp();
 };
@@ -552,7 +683,7 @@ void pyne::Material::write_text(std::string filename) {
 
   if (0 <= density)
     f << "Density "  << density << "\n";
-  
+
   if (0 <= atoms_per_molecule)
     f << "APerM   " << atoms_per_molecule << "\n";
 
@@ -579,7 +710,7 @@ void pyne::Material::load_json(Json::Value json) {
   comp.clear();
   for (; ikey != ikey_end; ++ikey)
     comp[nucname::id(*ikey)] = json["comp"][*ikey].asDouble();
-  norm_comp(); 
+  norm_comp();
   mass = json["mass"].asDouble();
   density = json["density"].asDouble();
   atoms_per_molecule = json["atoms_per_molecule"].asDouble();
@@ -608,7 +739,7 @@ void pyne::Material::from_json(char * filename) {
 
 void pyne::Material::from_json(std::string filename) {
   if (!pyne::file_exists(filename))
-    throw pyne::FileNotFound(filename);  
+    throw pyne::FileNotFound(filename);
   std::string s;
   std::ifstream f (filename.c_str(), std::ios::in | std::ios::binary);
   f.seekg(0, std::ios::end);
@@ -662,7 +793,7 @@ pyne::Material::Material(pyne::comp_map cm, double m, double d, double apm,
   density=d;
   atoms_per_molecule = apm;
   metadata = attributes;
-  if (!comp.empty()) 
+  if (!comp.empty())
     norm_comp();
 };
 
@@ -729,6 +860,10 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
   return os;
 };
 
+// Note this refines << for an inheritor of std::ostream.  
+std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) {
+  return os;
+}
 
 void pyne::Material::normalize () {
   // normalizes the mass
@@ -740,7 +875,7 @@ pyne::comp_map pyne::Material::mult_by_mass() {
   // bypass calculation if already normalized.
   if (mass == 1.0)
     return comp;
-    
+
   pyne::comp_map cm;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++) {
     cm[i->first] = (i->second) * mass;
@@ -753,6 +888,7 @@ pyne::comp_map pyne::Material::mult_by_mass() {
 double pyne::Material::molecular_mass(double apm) {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
+
   for (pyne::comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++)
     inverseA += (nuc->second) / pyne::atomic_mass(nuc->first);
 
@@ -869,7 +1005,7 @@ pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value) {
   // n is the name of the new material.
 
   pyne::comp_map cm;
-  
+
   // Add non-set components
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++) {
     if ( 0 == nucset.count(i->first) )
@@ -879,7 +1015,7 @@ pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value) {
   // Add set component
   for (std::set<int>::iterator nuc = nucset.begin(); nuc != nucset.end(); nuc++)
     cm[*nuc] = value;
-  
+
   return pyne::Material(cm, -1, -1);
 };
 
@@ -1045,7 +1181,6 @@ pyne::Material pyne::Material::sub_fp() {
 
 std::map<int, double> pyne::Material::to_atom_frac() {
   // Returns an atom fraction map from this material's composition
-
   // the material's molecular mass
   double mat_mw = molecular_mass();
 
@@ -1098,10 +1233,10 @@ pyne::Material pyne::Material::operator+ (Material y) {
     else
       cm[i->first] = xwgt[i->first];
   };
-    
+
   for (pyne::comp_iter i = ywgt.begin(); i != ywgt.end(); i++) {
     if ( 0 == cm.count(i->first) )
-      cm[i->first] = ywgt[i->first];			
+      cm[i->first] = ywgt[i->first];
   };
 
   return pyne::Material(cm, -1, -1);
@@ -1120,4 +1255,3 @@ pyne::Material pyne::Material::operator/ (double y) {
   // Overloads x / y
   return pyne::Material(comp, mass / y, density );
 }
-

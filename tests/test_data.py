@@ -9,6 +9,7 @@ import numpy as np
 import numpy.testing as npt
 
 from pyne.utils import VnVWarning
+
 warnings.simplefilter("ignore", VnVWarning)
 
 import pyne
@@ -382,6 +383,19 @@ def test_ecbp_xray():
                               (1.041, 6.4057828790558e-06),
                               (1.07, 1.6080514843315978e-07),
                               (np.nan, 0.0)]])
+
+
+def test_gamma_photon_intensity_byen():
+    npt.assert_almost_equal(data.gamma_photon_intensity_byen(661.657, 0.05),
+                            [(0.08, 0.017),
+                             (16.0, 3.0),
+                             (85.1, 0.2),
+                             (89.9, 0.14),
+                             (1.5, 0.1),
+                             (0.14, np.nan),
+                             (160.0, 24.0),
+                             (0.32, 0.1),
+                             (5.0, np.nan)])
 
 
 if __name__ == "__main__":

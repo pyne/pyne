@@ -15,7 +15,7 @@ work builds upon past work well.
     :maxdepth: 1
 
     style_guide
-    unittest
+    testing
     release
-    simplesim
     endf
+    binaries

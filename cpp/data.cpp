@@ -96,9 +96,9 @@ double pyne::atomic_mass(int nuc) {
   // nuc_data.h5, if the map is empty.
   if (atomic_mass_map.empty()) {
     // Don't fail if we can't load the library
-      _load_atomic_mass_map();
-      return atomic_mass(nuc);
-  };
+    _load_atomic_mass_map();
+    return atomic_mass(nuc);
+  }
 
   double aw;
   int nucid = nucname::id(nuc);
@@ -2005,6 +2005,19 @@ int parent) {
     DBL_MAX, offsetof(gamma_struct, photon_intensity), gamma_data);
   std::vector<double> part2 = data_access<double, gamma_struct>(parent, 0.0, 
     DBL_MAX, offsetof(gamma_struct, photon_intensity_err), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+
+std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(
+double energy, double error) {
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma_struct>(energy+error,
+    energy-error, offsetof(gamma_struct, photon_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(energy+error,
+    energy-error, offsetof(gamma_struct, photon_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }

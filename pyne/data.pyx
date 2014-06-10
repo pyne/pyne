@@ -243,30 +243,37 @@ def simple_xs(nuc, rx, energy):
     -----
     If the nuclide is not found, 0 is returned.
     """
+    #make sure we start with unicode strings
+    if isinstance(nuc, bytes):
+        nuc = nuc.decode("utf-8")
+    if isinstance(rx, bytes):
+        rx = rx.decode("utf-8")
+
     if not isinstance(energy, basestring):
         raise ValueError('energy must be string')
     elif not isinstance(nuc, int) and not isinstance(nuc, basestring):
         raise ValueError('nuc must be int or string')
     elif not isinstance(rx, int) and not isinstance(rx, basestring):
         raise ValueError('rx must be int or string')
-
-    nucin, rxin = nuc, rx
-    if isinstance(nucin, bytes):
-        nucin = nuc.decode("utf-8")
-    if isinstance(rxin, bytes):
-        rxin = rx.decode("utf-8")
-
-    if isinstance(nucin, int) and isinstance(rxin, int):
-        xs = cpp_data.simple_xs(<int> nucin, <int> rxin, <std_string> energy)
-    elif isinstance(nucin, int) and isinstance(rxin, basestring):
-        xs = cpp_data.simple_xs(<int> nucin, <std_string> rxin, 
-                                <std_string> energy)
-    elif isinstance(nucin, basestring) and isinstance(rxin, int):
-        xs = cpp_data.simple_xs(<std_string> nucin, 
-                                <int> rxin, <std_string> energy)
-    elif isinstance(nucin, basestring) and isinstance(rxin, basestring):
-        xs = cpp_data.simple_xs(<std_string> nucin, <std_string> rxin, 
-                                <std_string> energy)
+    
+    energy_bytes = energy.encode()
+    if isinstance(nuc, int) and isinstance(rx, int):
+        xs = cpp_data.simple_xs(<int> nuc, <int> rx, 
+                                std_string(<char *> energy_bytes))
+    elif isinstance(nuc, int) and isinstance(rx, basestring):
+        rxin_bytes = rx.encode()
+        xs = cpp_data.simple_xs(<int> nuc, std_string(<char *> rxin_bytes), 
+                                std_string(<char *> energy_bytes))
+    elif isinstance(nuc, basestring) and isinstance(rx, int):
+        nucin_bytes = nuc.encode()
+        xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes), 
+                                <int> rx, std_string(<char *> energy_bytes))
+    elif isinstance(nuc, basestring) and isinstance(rx, basestring):
+        rxin_bytes = rx.encode()
+        nucin_bytes = nuc.encode()
+        xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes),
+                                std_string(<char *> rxin_bytes), 
+                                std_string(<char *> energy_bytes))
 
     return xs
 
@@ -1246,6 +1253,29 @@ def gamma_photon_intensity(parent):
         An array of gamma ray photon intensities and errors
     """
     return cpp_data.gamma_photon_intensity(<int> parent)
+
+
+def gamma_photon_intensity_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray photon intensities from ENSDF decay dataset 
+    from a given gamma ray energy
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray photon intensities and errors
+    """
+    if enerror == None:
+        enerror = en * 0.01
+    return cpp_data.gamma_photon_intensity(<double> en,<double> enerror)
     
 def gamma_conversion_intensity(parent):
     """
