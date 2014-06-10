@@ -79,8 +79,8 @@ class UsrbinTally(Mesh):
         user-defined. Only "Cartesian" is supported.
     name : string
         The user-defined name for the tally
-    particle : integer
-        The integer code corresponding to the particle tracked in tally.
+    particle : string
+        The number code corresponding to the particle tracked in tally.
         For complete list visit http://www.fluka.org/fluka.php?id=man_onl&sub=7
     x_bounds : list of floats
         The locations of mesh vertices in the x direction
