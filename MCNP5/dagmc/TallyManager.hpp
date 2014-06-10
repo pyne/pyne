@@ -101,7 +101,9 @@ class TallyManager
      *
      * If an invalid tally_type is requested, then it will be ignored.
      * Note that energy_bin_bounds must have at least two entries, so
-     * to define a single energy bin use [0.0, max_energy].
+     * to define a single energy bin use [min_energy, max_energy]. The
+     * energy bin boundaries are always assumed to be sorted from
+     * min_energy to max_energy.
      *
      * Valid particle types include NEUTRON = 1, PHOTON = 2, ELECTRON = 3.  If
      * an invalid type is requested, then the default is NEUTRON.

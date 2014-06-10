@@ -38,6 +38,7 @@ class CellTallyTest : public ::testing::Test
         options.insert(std::make_pair("cell", "45"));
         options.insert(std::make_pair("volume", "2.36"));
         input.options = options;
+	input.multiplier_id = 2;  // Use a multiplier for this tally
         cell_tally3 = new CellTally(input, TallyEvent::TRACK); 
     }
 
@@ -55,7 +56,6 @@ class CellTallyTest : public ::testing::Test
     CellTally* cell_tally1;
     CellTally* cell_tally2;
     CellTally* cell_tally3;
-
 };
 //---------------------------------------------------------------------------//
 // SIMPLE TESTS
@@ -312,6 +312,33 @@ TEST_F(CellTallyTest,TrackEventScore)
     EXPECT_DOUBLE_EQ(2.8,  result.first);
     EXPECT_DOUBLE_EQ(7.84, result.second);
 } 
+//---------------------------------------------------------------------------//
+// Tests tally multiplier works
+TEST_F(CellTallyTest, TallyMultiplier)
+{
+    TallyEvent event;
+    event.type             = TallyEvent::TRACK;
+    event.particle_weight  = 1.1;
+    event.particle_energy  = 5.3;
+    event.position  = moab::CartVect(0.0, 0.0, 0.0);
+    event.direction = moab::CartVect(0.0, 1.0, 0.0);
+    event.track_length     = 2.8;
+    event.current_cell = 45;
+
+    // add some tally multipliers
+    event.multipliers.push_back(2.4);
+    event.multipliers.push_back(10.0);
+    event.multipliers.push_back(12.9);
+
+    // Using cell_tally3, which has tally multiplier id = 2
+    EXPECT_NO_THROW(cell_tally3->compute_score(event));
+    EXPECT_NO_THROW(cell_tally3->end_history());
+
+    const TallyData& data3 = cell_tally3->getTallyData();
+    std::pair<double, double> result = data3.get_data(0,0);
+    EXPECT_DOUBLE_EQ(39.732, result.first);
+    EXPECT_DOUBLE_EQ(1578.631824, result.second);
+}
 //---------------------------------------------------------------------------//
 
 // end of MCNP5/dagmc/test/test_CellTally.cpp

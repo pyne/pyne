@@ -131,6 +131,11 @@ class Tally
      */
     const TallyData& getTallyData();
 
+    /**
+     * \brief Returns the Tally type.
+     */
+    virtual std::string get_tally_type();
+
   protected:
     /// Input data defined by user for this tally
     TallyInput input_data;
