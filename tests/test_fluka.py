@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os
-import fluka
+from pyne import fluka
 
 import nose.tools
 from nose.tools import assert_equal 
