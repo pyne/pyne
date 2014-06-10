@@ -71,8 +71,10 @@ class KDENeighborhood
     /**
      * \brief Gets the calculation points for this neighborhood region
      * \return set of calculation points currently in the neighborhood region
+     *
+     * Provides read-only access to the current set of calculation points.
      */
-    std::set<moab::EntityHandle> get_points() const;
+    const std::set<moab::EntityHandle>& get_points() const;
 
     /**
      * \brief Updates the neighborhood region based on the given tally event

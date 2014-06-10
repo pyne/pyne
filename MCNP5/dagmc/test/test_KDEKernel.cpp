@@ -46,6 +46,7 @@ class MockEpanechnikovKernel : public KDEKernel
 //---------------------------------------------------------------------------//
 // TEST FIXTURES
 //---------------------------------------------------------------------------//
+// Tests KDEKernel factory method
 class KDEKernelTest : public ::testing::Test
 {
   protected:
@@ -66,7 +67,8 @@ class KDEKernelTest : public ::testing::Test
     KDEKernel* kernel;
 };
 //---------------------------------------------------------------------------//
-class BoundaryKernelTest : public ::testing::Test
+// Tests 1D boundary kernel implementation
+class BoundaryKernel1DTest : public KDEKernelTest
 {
   protected:
     // initialize variables for each test
@@ -74,22 +76,43 @@ class BoundaryKernelTest : public ::testing::Test
     {
         kernel = new MockEpanechnikovKernel();
         side = 0;
-        distance = 0.5;
-        max_distance = 0.5;
-    }
-
-    // deallocate memory resources
-    virtual void TearDown()
-    {
-        delete kernel;
+        p_ratio = 1;
     }
 
   protected:
     // data needed for each test
-    KDEKernel* kernel;
     unsigned int side;
-    double distance;
-    double max_distance;
+    double p_ratio;
+};
+//---------------------------------------------------------------------------//
+// Tests both 2D and 3D boundary kernel implementation.
+class BoundaryKernel3DTest : public KDEKernelTest
+{
+  protected:
+    // initialize variables for each test
+    virtual void SetUp()
+    {
+        kernel = new MockEpanechnikovKernel();
+
+        // set up parameters that will produce valid moments
+        u.push_back(0.1);
+        u.push_back(-0.5);
+        u.push_back(1.0);
+
+        p.push_back(0.3);
+        p.push_back(0.0);
+        p.push_back(0.6);
+
+        sides.push_back(1);
+        sides.push_back(0);
+        sides.push_back(1);
+    }
+
+  protected:
+    // data needed for each test
+    std::vector<double> u;
+    std::vector<double> p;
+    std::vector<unsigned int> sides;
 };
 //---------------------------------------------------------------------------//
 // FIXTURE-BASED TESTS: KDEKernelTest
@@ -178,325 +201,378 @@ TEST_F(KDEKernelTest, CreateHigherOrderKernel)
     EXPECT_EQ(5, kernel->get_min_quadrature(3));
 }
 //---------------------------------------------------------------------------//
-// FIXTURE-BASED TESTS: BoundaryKernelTest
+// FIXTURE-BASED TESTS: BoundaryKernel1DTest
 //---------------------------------------------------------------------------//
 // Tests point located at the max distance from the LOWER boundary
-// i.e. distance = max_distance, side = 0 (LOWER)
-TEST_F(BoundaryKernelTest, EvaluatePointAtLowerMax)
+// i.e. distance = bandwidth, side = 0 (LOWER)
+TEST_F(BoundaryKernel1DTest, EvaluatePointAtLowerMax)
 {
-    // test evaluation over the domain u = [-1, 1]
-    double value = kernel->evaluate(-1.0, max_distance, distance, side);
-    EXPECT_NEAR(0.0, value, 1e-6);
+    // test correction factor is one over the domain u = [-1, 1]
+    double u1[] = {-1.0, -0.8, -0.6, -0.4, -0.2,
+                    0.0,  0.2,  0.4,  0.6,  0.8, 1.0};
 
-    value = kernel->evaluate(-0.8, max_distance, distance, side);
-    EXPECT_NEAR(0.27, value, 1e-6);
+    for (int i = 0; i < 11; ++i)
+    {
+        double value1 = kernel->boundary_correction(&u1[i], &p_ratio, &side, 1);
+        EXPECT_NEAR(1.0, value1, 1e-6);
+    }
 
-    value = kernel->evaluate(-0.6, max_distance, distance, side);
-    EXPECT_NEAR(0.48, value, 1e-6);
+    // test correction factor is zero outside the domain u = [-1, 1]
+    double u2[] = {-2.0, 2.0};
 
-    value = kernel->evaluate(-0.4, max_distance, distance, side);
-    EXPECT_NEAR(0.63, value, 1e-6);
+    double value2 = kernel->boundary_correction(&u2[0], &p_ratio, &side, 1);
+    EXPECT_DOUBLE_EQ(0.0, value2);
 
-    value = kernel->evaluate(-0.2, max_distance, distance, side);
-    EXPECT_NEAR(0.72, value, 1e-6);
-
-    value = kernel->evaluate(0.0, max_distance, distance, side);
-    EXPECT_NEAR(0.75, value, 1e-6);
-
-    value = kernel->evaluate(0.2, max_distance, distance, side);
-    EXPECT_NEAR(0.72, value, 1e-6);
-
-    value = kernel->evaluate(0.4, max_distance, distance, side);
-    EXPECT_NEAR(0.63, value, 1e-6);
-
-    value = kernel->evaluate(0.6, max_distance, distance, side);
-    EXPECT_NEAR(0.48, value, 1e-6);
-
-    value = kernel->evaluate(0.8, max_distance, distance, side);
-    EXPECT_NEAR(0.27, value, 1e-6);
-
-    value = kernel->evaluate(1.0, max_distance, distance, side);
-    EXPECT_NEAR(0.0, value, 1e-6);
-
-    // test evaluation outside the domain u = [-1, 1]
-    value = kernel->evaluate(-2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    value2 = kernel->boundary_correction(&u2[1], &p_ratio, &side, 1);
+    EXPECT_DOUBLE_EQ(0.0, value2);
 }
 //---------------------------------------------------------------------------//
 // Tests point located at the max distance from the UPPER boundary
-// i.e. distance = max_distance, side = 1 (UPPER)
-TEST_F(BoundaryKernelTest, EvaluatePointAtUpperMax)
+// i.e. distance = bandwidth, side = 1 (UPPER)
+TEST_F(BoundaryKernel1DTest, EvaluatePointAtUpperMax)
 {
     side = 1;
 
-    // test evaluation over the domain u = [-1, 1]
-    double value = kernel->evaluate(-1.0, max_distance, distance, side);
-    EXPECT_NEAR(0.0, value, 1e-6);
+    // test correction factor is one over the domain u = [-1, 1]
+    double u1[] = {-1.0, -0.8, -0.6, -0.4, -0.2,
+                    0.0,  0.2,  0.4,  0.6,  0.8, 1.0};
 
-    value = kernel->evaluate(-0.8, max_distance, distance, side);
-    EXPECT_NEAR(0.27, value, 1e-6);
+    for (int i = 0; i < 11; ++i)
+    {
+        double value1 = kernel->boundary_correction(&u1[i], &p_ratio, &side, 1);
+        EXPECT_NEAR(1.0, value1, 1e-6);
+    }
 
-    value = kernel->evaluate(-0.6, max_distance, distance, side);
-    EXPECT_NEAR(0.48, value, 1e-6);
+    // test correction factor is zero outside the domain u = [-1, 1]
+    double u2[] = {-2.0, 2.0};
 
-    value = kernel->evaluate(-0.4, max_distance, distance, side);
-    EXPECT_NEAR(0.63, value, 1e-6);
+    double value2 = kernel->boundary_correction(&u2[0], &p_ratio, &side, 1);
+    EXPECT_DOUBLE_EQ(0.0, value2);
 
-    value = kernel->evaluate(-0.2, max_distance, distance, side);
-    EXPECT_NEAR(0.72, value, 1e-6);
-
-    value = kernel->evaluate(0.0, max_distance, distance, side);
-    EXPECT_NEAR(0.75, value, 1e-6);
-
-    value = kernel->evaluate(0.2, max_distance, distance, side);
-    EXPECT_NEAR(0.72, value, 1e-6);
-
-    value = kernel->evaluate(0.4, max_distance, distance, side);
-    EXPECT_NEAR(0.63, value, 1e-6);
-
-    value = kernel->evaluate(0.6, max_distance, distance, side);
-    EXPECT_NEAR(0.48, value, 1e-6);
-
-    value = kernel->evaluate(0.8, max_distance, distance, side);
-    EXPECT_NEAR(0.27, value, 1e-6);
-
-    value = kernel->evaluate(1.0, max_distance, distance, side);
-    EXPECT_NEAR(0.0, value, 1e-6);
-
-    // test evaluation outside the domain u = [-1, 1]
-    value = kernel->evaluate(-2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    value2 = kernel->boundary_correction(&u2[1], &p_ratio, &side, 1);
+    EXPECT_DOUBLE_EQ(0.0, value2);
 }
 //---------------------------------------------------------------------------//
 // Tests point located at half the max distance from the LOWER boundary
-// i.e. distance = 0.5 * max_distance, side = 0 (LOWER)
-TEST_F(BoundaryKernelTest, EvaluatePointAtHalfLowerMax)
+// i.e. distance = 0.5 * bandwidth, side = 0 (LOWER)
+TEST_F(BoundaryKernel1DTest, EvaluatePointAtHalfLowerMax)
 {
-    distance = 0.25;
+    p_ratio = 0.5;
 
-    // test evaluation over the domain u = [-1, 0.5]
-    double value = kernel->evaluate(-1.0, max_distance, distance, side);
-    EXPECT_NEAR(0.0, value, 1e-6);
+    // define valid u and reference values
+    double u1[] = {-1.0, -0.8, -0.6, -0.4,
+                   -0.2,  0.0,  0.2,  0.5};
 
-    value = kernel->evaluate(-0.8, max_distance, distance, side);
-    EXPECT_NEAR(0.119070, value, 1e-6);
+    double ref[] = {0.220500, 0.440999, 0.661499, 0.881998,
+                    1.102498, 1.322997, 1.543497, 1.874246};
 
-    value = kernel->evaluate(-0.6, max_distance, distance, side);
-    EXPECT_NEAR(0.317519, value, 1e-6);
+    // test correction factor over the domain u = [-1, 0.5]
+    for (int i = 0; i < 8; ++i)
+    {
+        double value1 = kernel->boundary_correction(&u1[i], &p_ratio, &side, 1);
+        EXPECT_NEAR(ref[i], value1, 1e-6);
+    }
 
-    value = kernel->evaluate(-0.4, max_distance, distance, side);
-    EXPECT_NEAR(0.555659, value, 1e-6);
+    // test correction factor is zero outside the domain u = [-1, 0.5]
+    double u2[] = {-2.0, 0.8, 1.0, 2.0};
 
-    value = kernel->evaluate(-0.2, max_distance, distance, side);
-    EXPECT_NEAR(0.793798, value, 1e-6);
-
-    value = kernel->evaluate(0.0, max_distance, distance, side);
-    EXPECT_NEAR(0.992248, value, 1e-6);
-
-    value = kernel->evaluate(0.2, max_distance, distance, side);
-    EXPECT_NEAR(1.111318, value, 1e-6);
-
-    value = kernel->evaluate(0.5, max_distance, distance, side);
-    EXPECT_NEAR(1.054264, value, 1e-6);
-
-    // test evaluation outside the domain u = [-1, 0.5]
-    value = kernel->evaluate(-2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(0.8, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(1.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    for (int i = 0; i < 4; ++i)
+    {
+        double value2 = kernel->boundary_correction(&u2[i], &p_ratio, &side, 1);
+        EXPECT_DOUBLE_EQ(0.0, value2);
+    }
 }
 //---------------------------------------------------------------------------//
 // Tests point located at half the max distance from the UPPER boundary
-// i.e. distance = 0.5 * max_distance, side = 1 (UPPER)
-TEST_F(BoundaryKernelTest, EvaluatePointAtHalfUpperMax)
+// i.e. distance = 0.5 * bandwidth, side = 1 (UPPER)
+TEST_F(BoundaryKernel1DTest, EvaluatePointAtHalfUpperMax)
 {
-    distance = 0.25;
+    p_ratio = 0.5;
     side = 1;
 
-    // test evaluation over the domain u = [-0.5, 1]
-    double value = kernel->evaluate(-0.5, max_distance, distance, side);
-    EXPECT_NEAR(1.054264, value, 1e-6);
+    // define valid u and reference values
+    double u1[] = {-0.5, -0.2, 0.0, 0.2,
+                    0.4,  0.6, 0.8, 1.0};
 
-    value = kernel->evaluate(-0.2, max_distance, distance, side);
-    EXPECT_NEAR(1.111318, value, 1e-6);
+    double ref[] = {1.874246, 1.543497, 1.322997, 1.102498,
+                    0.881998, 0.661499, 0.440999, 0.220500};
 
-    value = kernel->evaluate(0.0, max_distance, distance, side);
-    EXPECT_NEAR(0.992248, value, 1e-6);
+    // test correction factor over the domain u = [-0.5, 1]
+    for (int i = 0; i < 8; ++i)
+    {
+        double value1 = kernel->boundary_correction(&u1[i], &p_ratio, &side, 1);
+        EXPECT_NEAR(ref[i], value1, 1e-6);
+    }
 
-    value = kernel->evaluate(0.2, max_distance, distance, side);
-    EXPECT_NEAR(0.793798, value, 1e-6);
+    // test correction factor is zero outside the domain u = [-0.5, 1]
+    double u2[] = {-2.0, -1.0, -0.8, 2.0};
 
-    value = kernel->evaluate(0.4, max_distance, distance, side);
-    EXPECT_NEAR(0.555659, value, 1e-6);
-
-    value = kernel->evaluate(0.6, max_distance, distance, side);
-    EXPECT_NEAR(0.317519, value, 1e-6);
-
-    value = kernel->evaluate(0.8, max_distance, distance, side);
-    EXPECT_NEAR(0.119070, value, 1e-6);
-
-    value = kernel->evaluate(1.0, max_distance, distance, side);
-    EXPECT_NEAR(0.0, value, 1e-6);
-
-    // test evaluation outside the domain u = [-0.5, 1]
-    value = kernel->evaluate(-2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(-1.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(-0.8, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    for (int i = 0; i < 4; ++i)
+    {
+        double value2 = kernel->boundary_correction(&u2[i], &p_ratio, &side, 1);
+        EXPECT_DOUBLE_EQ(0.0, value2);
+    }
 }
 //---------------------------------------------------------------------------//
 // Tests point located on the LOWER boundary
 // i.e. distance = 0, side = 0 (LOWER)
-TEST_F(BoundaryKernelTest, EvaluatePointOnLowerBoundary)
+TEST_F(BoundaryKernel1DTest, EvaluatePointOnLowerBoundary)
 {
-    distance = 0.0;
+    p_ratio = 0.0;
 
-    // test evaluation over the domain u = [-1, 0]
-    double value = kernel->evaluate(-1.0, max_distance, distance, side);
-    EXPECT_NEAR(0.0, value, 1e-6);
+    // define valid u and reference values
+    double u1[] = {-1.0, -0.8, -0.6, -0.4, -0.2, 0.0};
 
-    value = kernel->evaluate(-0.8, max_distance, distance, side);
-    EXPECT_NEAR(-0.909474, value, 1e-6);
+    double ref[] = {-5.894737, -3.368421, -0.842105,
+                     1.684211,  4.210526,  6.736842};
 
-    value = kernel->evaluate(-0.6, max_distance, distance, side);
-    EXPECT_NEAR(-0.404211, value, 1e-6);
+    // test correction factor over the domain u = [-1, 0]
+    for (int i = 0; i < 6; ++i)
+    {
+        double value1 = kernel->boundary_correction(&u1[i], &p_ratio, &side, 1);
+        EXPECT_NEAR(ref[i], value1, 1e-6);
+    }
 
-    value = kernel->evaluate(-0.4, max_distance, distance, side);
-    EXPECT_NEAR(1.061053, value, 1e-6);
+    // test correction factor is zero outside the domain u = [-1, 0]
+    double u2[] = {-2.0, 0.5, 1.0, 2.0};
 
-    value = kernel->evaluate(-0.2, max_distance, distance, side);
-    EXPECT_NEAR(3.031579, value, 1e-6);
-
-    value = kernel->evaluate(0.0, max_distance, distance, side);
-    EXPECT_NEAR(5.052632, value, 1e-6);
-
-    // test evaluation outside the domain u = [-1, 0]
-    value = kernel->evaluate(-2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(0.5, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(1.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    for (int i = 0; i < 4; ++i)
+    {
+        double value2 = kernel->boundary_correction(&u2[i], &p_ratio, &side, 1);
+        EXPECT_DOUBLE_EQ(0.0, value2);
+    }
 }
 //---------------------------------------------------------------------------//
 // Tests point located on the UPPER boundary
 // i.e. distance = 0, side = 1 (UPPER)
-TEST_F(BoundaryKernelTest, EvaluatePointOnUpperBoundary)
+TEST_F(BoundaryKernel1DTest, EvaluatePointOnUpperBoundary)
 {
-    distance = 0.0;
+    p_ratio = 0.0;
     side = 1;
 
-    // test evaluation over the domain u = [0, 1]
-    double value = kernel->evaluate(0.0, max_distance, distance, side);
-    EXPECT_NEAR(5.052632, value, 1e-6);
+    // define valid u and reference values
+    double u1[] = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
 
-    value = kernel->evaluate(0.2, max_distance, distance, side);
-    EXPECT_NEAR(3.031579, value, 1e-6);
+    double ref[] = { 6.736842,  4.210526,  1.684211,
+                    -0.842105, -3.368421, -5.894737};
 
-    value = kernel->evaluate(0.4, max_distance, distance, side);
-    EXPECT_NEAR(1.061053, value, 1e-6);
+    // test correction factor over the domain u = [0, 1]
+    for (int i = 0; i < 6; ++i)
+    {
+        double value1 = kernel->boundary_correction(&u1[i], &p_ratio, &side, 1);
+        EXPECT_NEAR(ref[i], value1, 1e-6);
+    }
 
-    value = kernel->evaluate(0.6, max_distance, distance, side);
-    EXPECT_NEAR(-0.404211, value, 1e-6);
+    // test correction factor is zero outside the domain u = [0, 1]
+    double u2[] = {-2.0, -0.5, -1.0, 2.0};
 
-    value = kernel->evaluate(0.8, max_distance, distance, side);
-    EXPECT_NEAR(-0.909474, value, 1e-6);
-
-    value = kernel->evaluate(1.0, max_distance, distance, side);
-    EXPECT_NEAR(0.0, value, 1e-6);
-
-    // test evaluation outside the domain u = [0, 1]
-    value = kernel->evaluate(-2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(-0.5, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(-1.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    for (int i = 0; i < 4; ++i)
+    {
+        double value2 = kernel->boundary_correction(&u2[i], &p_ratio, &side, 1);
+        EXPECT_DOUBLE_EQ(0.0, value2);
+    }
 }
 //---------------------------------------------------------------------------//
 // Tests point that is outside the max distance from a boundary
-TEST_F(BoundaryKernelTest, EvaluatePointOutsideMaxDistance)
+TEST_F(BoundaryKernel1DTest, EvaluatePointOutsideMaxDistance)
 {
-    distance = 1.5;
+    p_ratio = 1.5;
 
-    // test evaluation over various values to verify always outside domain
-    double value = kernel->evaluate(-2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    // test correction factor is always one over the domain u = [-1, 1]
+    double u1[] = {-1.0, -0.8, -0.6, -0.4, -0.2,
+                    0.0,  0.2,  0.4,  0.6,  0.8, 1.0};
 
-    value = kernel->evaluate(-1.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    for (int i = 0; i < 11; ++i)
+    {
+        double value1 = kernel->boundary_correction(&u1[i], &p_ratio, &side, 1);
+        EXPECT_DOUBLE_EQ(1.0, value1);
+    }
 
-    value = kernel->evaluate(-0.5, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    // test correction factor is zero outside the domain u = [-1, 1]
+    double u2[] = {-2.0, 2.0};
 
-    value = kernel->evaluate(0.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    double value2 = kernel->boundary_correction(&u2[0], &p_ratio, &side, 1);
+    EXPECT_DOUBLE_EQ(0.0, value2);
 
-    value = kernel->evaluate(0.5, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(1.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(2.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
+    value2 = kernel->boundary_correction(&u2[1], &p_ratio, &side, 1);
+    EXPECT_DOUBLE_EQ(0.0, value2);
 }
 //---------------------------------------------------------------------------//
 // Tests point that is at a negative distance from a boundary
-TEST_F(BoundaryKernelTest, EvaluateNegativeDistanceRatio)
+TEST_F(BoundaryKernel1DTest, EvaluateNegativeDistanceRatio)
 {
-    distance = -1.5;
+    p_ratio = -1.5;
 
-    // test evaluation over various values to verify always outside domain
-    double value = kernel->evaluate(-2.0, max_distance, distance, side);
+    // test correction factor is always zero if p ratio is negative
+    double u2[] = {-2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0};
+
+    for (int i = 0; i < 7; ++i)
+    {
+        double value2 = kernel->boundary_correction(&u2[i], &p_ratio, &side, 1);
+        EXPECT_DOUBLE_EQ(0.0, value2);
+    }
+}
+//---------------------------------------------------------------------------//
+// FIXTURE-BASED TESTS: BoundaryKernel3DTest
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, AllValidKernelMoments)
+{
+    // 1D correction
+    double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 2D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 2);
+    EXPECT_NEAR(1.275992, value, 1e-6);
+
+    // 3D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 3);
+    EXPECT_NEAR(-0.183359, value, 1e-6);
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, ReduceCorrectionMatrixTo2D)
+{
+    // change 3D correction to include one point outside max distance
+    p[2] = 2.3;
+
+    // 1D correction
+    double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 2D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 2);
+    EXPECT_NEAR(1.275992, value, 1e-6);
+
+    // 3D correction reduces to the 2D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 3);
+    EXPECT_NEAR(1.275992, value, 1e-6);
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, ReduceCorrectionMatrixTo1D)
+{
+    // change 2D and 3D corrections to include points outside max distance
+    p[1] = 1.1;
+    p[2] = 7.9;
+
+    // 1D correction
+    double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 2D correction reduces to the 1D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 2);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 3D correction reduces to the 1D correction
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 3);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, AllInvalidKernelMoments)
+{
+    // change u so that all moments will be invalid
+    u[0] = -0.6;
+    u[1] = 0.5;
+    u[2] = -1.0;
+
+    // test correction factor is always zero
+    for (int i = 1; i <= 3; ++i)
+    {
+        double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], i);
+        EXPECT_DOUBLE_EQ(0.0, value);
+    }
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForU)
+{
+    // change p so that only the first set of moments will be invalid
+    p[0] = -1.5;
+
+    // test correction factor is always zero
+    for (int i = 1; i <= 3; ++i)
+    {
+        double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], i);
+        EXPECT_DOUBLE_EQ(0.0, value);
+    }
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForV)
+{
+    // change u so that only the second set of moments will be invalid
+    u[1] = 0.5;
+
+    // 1D correction should still work
+    double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 2D and 3D correction factors should be zero
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 2);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-1.0, max_distance, distance, side);
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 3);
+    EXPECT_DOUBLE_EQ(0.0, value);
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForW)
+{
+    // change p so that only the third set of moments will be invalid
+    p[2] = -5;
+
+    // 1D correction should still work
+    double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 2D correction should still work
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 2);
+    EXPECT_NEAR(1.275992, value, 1e-6);
+
+    // 3D correction factor should be zero
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 3);
+    EXPECT_DOUBLE_EQ(0.0, value);
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForUV)
+{
+    // change p so that the first and second set of moments will be invalid
+    p[0] = -1.0;
+    p[1] = 2.0;
+
+    // test correction factor is always zero
+    for (int i = 1; i <= 3; ++i)
+    {
+        double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], i);
+        EXPECT_DOUBLE_EQ(0.0, value);
+    }
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForUW)
+{
+    // change u so that the first and third set of moments will be invalid
+    u[0] = 1.2;
+    u[2] = -0.7;
+
+    // test correction factor is always zero
+    for (int i = 1; i <= 3; ++i)
+    {
+        double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], i);
+        EXPECT_DOUBLE_EQ(0.0, value);
+    }
+}
+//---------------------------------------------------------------------------//
+TEST_F(BoundaryKernel3DTest, InvalidKernelMomentsForVW)
+{
+    // change u/p so that the second and third set of moments will be invalid
+    p[1] = -1.2;
+    u[2] = 10.5;
+
+    // 1D correction should still work
+    double value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 1);
+    EXPECT_NEAR(1.737159, value, 1e-6);
+
+    // 2D and 3D correction factors should be zero
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 2);
     EXPECT_DOUBLE_EQ(0.0, value);
 
-    value = kernel->evaluate(-0.5, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(0.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(0.5, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(1.0, max_distance, distance, side);
-    EXPECT_DOUBLE_EQ(0.0, value);
-
-    value = kernel->evaluate(2.0, max_distance, distance, side);
+    value = kernel->boundary_correction(&u[0], &p[0], &sides[0], 3);
     EXPECT_DOUBLE_EQ(0.0, value);
 }
 //---------------------------------------------------------------------------//

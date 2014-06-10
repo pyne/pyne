@@ -4,8 +4,15 @@
 #define DAGMC_KDE_KERNEL_HPP
 
 #include <string>
+#include <vector>
 
 #include "Quadrature.hpp"
+
+// LAPACK routine for solving Ax = b using symmetric matrix with packed storage
+extern "C" {
+    void dspsv_(char* UPLO, int* N, int* NRHS, double* AP, int* IPIV, double* B,
+                int* LDB, int* INFO); 
+}
 
 //===========================================================================//
 /**
@@ -21,17 +28,13 @@
  * the object, so it will need to be deleted once it is no longer needed to
  * prevent memory leaks.
  *
- * Once a kernel has been created, it can then be evaluated using one of two
- * different methods
+ * Once a kernel K(u) has been created, it can then be evaluated using the
+ * evaluate(double u) method.
  *
- *     1) evaluate(double u)
- *     2) evaluate(double u, double bandwidth, double distance, int side)
- *
- * The first method evaluates the standard kernel function K(u), whereas the
- * second evaluates K_b(u) based on a boundary correction method.  This boundary
- * correction method should only be called when a calculation point lies within
- * one bandwidth of an external boundary.  Note that the current implementation
- * of this method is only valid for 2nd-order kernels.
+ * If a calculation point lies within one bandwidth of an external boundary,
+ * then K(u) should be multiplied by the boundary correction factor computed
+ * by the boundary_correction method.  This fixes the boundary bias issue that
+ * would otherwise occur, but is currently only valid for 2nd-order kernels.
  *
  * =======================
  * Derived Class Interface
@@ -125,35 +128,102 @@ class KDEKernel
     virtual double integrate_moment(double a, double b, unsigned int i) const = 0;
 
     /**
-     * \brief Evaluate this kernel using a boundary correction method K_b
-     * \param[in] u the value at which K_b will be evaluated
-     * \param[in] bandwidth the maximum distance for which correction is needed
-     * \param[in] distance the distance from the calculation point to the boundary
-     * \param[in] side the location of the boundary (0 = LOWER, 1 = UPPER)
-     * \return K_b(u)
+     * \brief Evaluate the boundary correction factor for this kernel function K
+     * \param[in] u value(s) at which the kernel is to be evaluated
+     * \param[in] p ratio(s) of distance from the boundary divided by bandwidth
+     * \param[in] side the location(s) of the boundary (0 = LOWER, 1 = UPPER)
+     * \param[in] num_corrections number of dimensions requiring correction
+     * \return the boundary correction factor for K(u,v,w)
      *
-     * The default boundary correction method uses a boundary kernel to evaluate
-     * calculation points that are within one bandwidth of an external boundary.
-     * This boundary kernel is defined by
+     * Corrects for the boundary bias using the boundary kernel method.  Note
+     * that this method works for 1D, 2D, and 3D boundary corrections, as long
+     * as the 1D kernel function K is assumed to be the same in all dimenions.
      *
-     *     K_b(u) = {a_2(p) - a_1(p) * u} * K(u)
-     *              ----------------------------
-     *               a_0(p) * a_2(p) - a_1(p)^2
+     * The size of u, p, and side are assumed to be equal to num_corrections.
+     * Though the 3D case will work for all boundary and interior calculation
+     * points, for efficiency purposes values should only be added for the
+     * dimensions that actually need correcting.  For example, if only u and
+     * w need correcting for K(u, v, w), then
      *
-     * where K(u) is the standard kernel function evaluation, a_i(p) is the
-     * integral of the ith moment function, and p is the ratio of the distance
-     * divided by the bandwidth.
+     *                   u = (u, w)
+     *                   p = (p(u), p(w))
+     *                side = (side(u), side(w))
+     *     num_corrections = 2
      *
-     * Note that the integrals of a_i(p) depend on whether a LOWER or UPPER
-     * boundary is used.  If LOWER, then the integration is performed on
-     * [-1, p].  If UPPER, then the integration is performed on [-p, 1].
+     * The form of the boundary correction factor is a0 + a1*u + a2*v + a3*w.
+     * It will still need to be multiplied by K(u,v,w) to form a valid kernel
+     * contribution.
+     *
+     * If a correction factor of 0.0 is returned, this means that u lies
+     * outside the valid domain for the boundary kernel and there is no valid
+     * kernel contribution.
      */
-    virtual double evaluate(double u,
-                            double bandwidth,
-                            double distance,
-                            unsigned int side) const;
+    virtual double boundary_correction(const double* u,
+                                       const double* p,
+                                       const unsigned int* side,
+                                       unsigned int num_corrections) const;
 
   protected:
+    /**
+     * \brief Computes partial moments ai(p) for this kernel up to i = 2
+     * \param[in] u the value at which the kernel is to be evaluated
+     * \param[in] p ratio of the distance from the boundary divided by bandwidth
+     * \param[in] side the location of the boundary (0 = LOWER, 1 = UPPER)
+     * \param[out] moments an empty vector that will store the new ai(p) values
+     * \return true if moments are defined for boundary kernel; false otherwise
+     *
+     * The partial moments ai(p) are integrals of the ith moment function of a
+     * kernel K(u).  They are used to determine the correction factor for the
+     * boundary kernel method.  Currently, this method only supports second-
+     * order kernel functions.
+     *
+     * Note that the integration limits of a_i(p) depend on whether a LOWER or
+     * UPPER boundary is used.  If LOWER, then the integration is performed on
+     * [-1, p].  If UPPER, then the integration is performed on [-p, 1]. If
+     * p >= 1 moments will be always be defined on the domain [-1, 1].
+     */
+    bool compute_moments(double u,
+                         double p,
+                         unsigned int side,
+                         std::vector<double>& moments) const;
+
+    /**
+     * \brief Sets up the 3x3 matrix needed to solve for the 2D boundary kernel
+     * \param[in] ai_u the set of moments for the u-dimension
+     * \param[in] ai_v the set of moments for the v-dimension
+     * \param[out] matrix the 3x3 correction matrix
+     */
+    void get_correction_matrix2D(const std::vector<double>& ai_u,
+                                 const std::vector<double>& ai_v,
+                                 std::vector<double>& matrix) const;
+
+    /**
+     * \brief Sets up the 4x4 matrix needed to solve for the 3D boundary kernel
+     * \param[in] ai_u the set of moments for the u-dimension
+     * \param[in] ai_v the set of moments for the v-dimension
+     * \param[in] ai_w the set of moments for the w-dimension
+     * \param[out] matrix the 4x4 correction matrix
+     */
+    void get_correction_matrix3D(const std::vector<double>& ai_u,
+                                 const std::vector<double>& ai_v,
+                                 const std::vector<double>& ai_w,
+                                 std::vector<double>& matrix) const;
+
+    /**
+     * \brief Solve a symmetric matrix system Ax = b
+     * \param[in/out] A an NxN symmetric matrix
+     * \param[in/out] b the right-hand side vector
+     * \return true if matrix system was solved; false otherwise
+     *
+     * The matrix A should be in lower triangular format, stored by columns.
+     *
+     * On exit, A will be overwritten by the diagonal matrix obtained through
+     * the factorization method that was used to solve the matrix system.  The
+     * vector b will also be overwritten with the solution x.
+     */
+    bool solve_symmetric_matrix(std::vector<double>& A,
+                                std::vector<double>& b) const; 
+
     /**
      * \class MomentFunction
      * \brief Defines the ith moment function for a general kernel object

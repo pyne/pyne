@@ -142,7 +142,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
 
     // update the neighborhood region and find all of the calculations points
     region->update_neighborhood(event, bandwidth);
-    std::set<moab::EntityHandle> calculation_points = region->get_points();
+    const std::set<moab::EntityHandle>& calculation_points = region->get_points();
 
     // iterate through calculation points and compute their final scores
     std::set<moab::EntityHandle>::iterator i;
@@ -153,11 +153,7 @@ void KDEMeshTally::compute_score(const TallyEvent& event)
         // get coordinates of this point
         moab::EntityHandle point = *i;
         moab::ErrorCode rval = mbi->get_coords(&point, 1, X.coords);
-	if(rval != moab::MB_SUCCESS)
-	  {
-	    std::cout << "Failed to get coordinates" << std::endl;
-	    exit(1);
-	  }
+
         assert(rval == moab::MB_SUCCESS);
 
         // get tag data for this point if user requested boundary correction
@@ -496,24 +492,36 @@ double KDEMeshTally::PathKernel::evaluate(double s) const
 double KDEMeshTally::evaluate_kernel(const CalculationPoint& X,
                                      const moab::CartVect& observation) const
 {
+    // define variables needed for boundary correction
+    bool is_boundary_point = false;
+    std::vector<double> ui;
+    std::vector<double> pi;
+    std::vector<unsigned int> si;
+
     // evaluate the 3D kernel function
     double kernel_value = 1.0;
 
     for (int i = 0; i < 3; ++i)
     {
+        // always compute standard kernel value for this dimension
         double u = (X.coords[i] - observation[i]) / bandwidth[i];
+        kernel_value *= kernel->evaluate(u) / bandwidth[i];
 
+        // update boundary correction data if needed for this dimension
         if (use_boundary_correction && X.boundary_data[i] != -1)
         {
-            // use boundary kernel for this direction
-            kernel_value *= kernel->evaluate(u, bandwidth[i],
-                                             X.distance_data[i],
-                                             X.boundary_data[i]) / bandwidth[i];
+            is_boundary_point = true;
+            ui.push_back(u);
+            pi.push_back(X.distance_data[i] / bandwidth[i]);
+            si.push_back(X.boundary_data[i]);
         }
-        else // use standard kernel for this direction
-        {
-            kernel_value *= kernel->evaluate(u) / bandwidth[i];
-        }
+    }
+
+    // multiply by boundary correction factor only if X is a boundary point
+    if (is_boundary_point)
+    {
+        unsigned int n = ui.size();
+        kernel_value *= kernel->boundary_correction(&ui[0], &pi[0], &si[0], n);
     }
 
     return kernel_value;

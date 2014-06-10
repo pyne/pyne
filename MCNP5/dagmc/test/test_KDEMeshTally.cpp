@@ -566,7 +566,7 @@ TEST_F(KDECollisionTest, EvaluateBoundaryPointOnXYZ)
                                          boundary_data,
                                          distance_data);
 
-    EXPECT_NEAR(8.372093, score2, 1e-6);
+    EXPECT_NEAR(-72.732558, score2, 1e-6);
 }
 //---------------------------------------------------------------------------//
 

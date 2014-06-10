@@ -25,6 +25,8 @@ ADD_LIBRARY(dagtally SHARED
     ${DAGMC_TALLY_SOURCE}/Quadrature.cpp
 )
 
+TARGET_LINK_LIBRARIES(dagtally lapack)
+
 # set libraries
 SET(LIBRARIES
     ${GTEST_HOME}/lib/libgtest.a

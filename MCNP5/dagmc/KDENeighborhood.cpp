@@ -59,7 +59,7 @@ KDENeighborhood::~KDENeighborhood()
 //---------------------------------------------------------------------------//
 // PUBLIC INTERFACE
 //---------------------------------------------------------------------------//
-std::set<moab::EntityHandle> KDENeighborhood::get_points() const
+const std::set<moab::EntityHandle>& KDENeighborhood::get_points() const
 {
     return points;
 }
@@ -233,12 +233,11 @@ void KDENeighborhood::points_in_box()
     std::vector<moab::EntityHandle>::iterator i; 
     moab::Interface* mb = kd_tree->moab();
     moab::CartVect coords(0.0, 0.0, 0.0);
-    moab::Range leaf_points;
     moab::Range::iterator j;
 
     for (i = leaves.begin(); i != leaves.end(); ++i)
     {
-        leaf_points.clear();
+        moab::Range leaf_points;
         rval = mb->get_entities_by_type(*i, moab::MBVERTEX, leaf_points);
         assert(rval == moab::MB_SUCCESS);
   

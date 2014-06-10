@@ -1,7 +1,7 @@
 # CMAKE build script for KDE boundary correction tool
 
 PROJECT(KDEBoundaryCorrection)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # Add MOAB_DIR to list of include directories
 INCLUDE_DIRECTORIES("${MOAB_DIR}/include")
