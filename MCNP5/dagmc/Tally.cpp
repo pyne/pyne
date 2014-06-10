@@ -93,15 +93,15 @@ void Tally::end_history()
 {
     data->end_history();
 }
-
+//---------------------------------------------------------------------------//
 const TallyData& Tally::getTallyData()
 {
     return *data;
 }
-
+//---------------------------------------------------------------------------//
 std::string Tally::get_tally_type()
 {
-    return input_data.tally_type;    
+    return input_data.tally_type;
 }
 //---------------------------------------------------------------------------//
 // PROTECTED INTERFACE
@@ -112,7 +112,9 @@ bool Tally::get_energy_bin(double energy, unsigned int& ebin)
 
     if (energy_in_bounds(energy))
     {
+        // in bounds, energy bin index must exist
         bin_exists = true;
+
         if (data->get_num_energy_bins() == 1)
         {
             ebin = 0;
@@ -120,8 +122,11 @@ bool Tally::get_energy_bin(double energy, unsigned int& ebin)
         else  // in bounds and more than one energy bin
         {
             unsigned int max_ebound = input_data.energy_bin_bounds.size() - 1;
-            // Pre-load ebin with maximum bin
+
+            // Pre-load ebin with maximum bin as default
             ebin =  max_ebound - 1;
+
+            // find ebin if not maximum bin
 	    for (unsigned int i=0; i < max_ebound; ++i)
             {
                 if (input_data.energy_bin_bounds.at(i) <= energy &&
@@ -133,7 +138,7 @@ bool Tally::get_energy_bin(double energy, unsigned int& ebin)
             }  // end for
         }  // end else in bounds and >1 energy bin
     }  // end if in bounds
-    
+
     return bin_exists;
 }
 //---------------------------------------------------------------------------//
