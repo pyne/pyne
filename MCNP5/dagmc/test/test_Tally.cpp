@@ -20,7 +20,6 @@ class TallyFactoryTest : public ::testing::Test
         input.energy_bin_bounds.push_back(0.0);
         input.energy_bin_bounds.push_back(10.0);
 	input.tally_id = 1;
-        tally = Tally::create_tally(input);
     }
 
     // deallocate memory resources
@@ -138,7 +137,6 @@ TEST_F(TallyFactoryTest, CreateKDECollisionMeshTally)
 TEST_F(TallyFactoryTest, CreateCellTrackTally)
 {
   input.tally_type = "cell_track";
-  input.options.clear();
   tally = Tally::create_tally(input);
   EXPECT_TRUE(tally != NULL);
   EXPECT_EQ("cell_track", tally->get_tally_type());
@@ -147,7 +145,6 @@ TEST_F(TallyFactoryTest, CreateCellTrackTally)
 TEST_F(TallyFactoryTest, CreateCellCollisionTally)
 {
   input.tally_type = "cell_coll";
-  input.options.clear();
   tally = Tally::create_tally(input);
   EXPECT_TRUE(tally != NULL);
   EXPECT_EQ("cell_coll", tally->get_tally_type());
@@ -155,7 +152,6 @@ TEST_F(TallyFactoryTest, CreateCellCollisionTally)
 //---------------------------------------------------------------------------//
 TEST_F(TallyFactoryTest, TallyTypeNotSet)
 {
-  input.options.clear();
   tally = Tally::create_tally(input);
   EXPECT_TRUE(tally == NULL);
 }
