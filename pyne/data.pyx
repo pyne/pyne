@@ -283,9 +283,6 @@ def simple_xs(nuc, rx, energy):
 #
 
 # external air dose
-cdef conv._MapIntDouble ext_air_dose_map_proxy = conv.MapIntDouble(False)
-ext_air_dose_map_proxy.map_ptr = &cpp_data.ext_air_dose_map
-ext_air_dose_map = ext_air_dose_map_proxy
 
 def ext_air_dose(nuc, source=0):
     """Finds the external air dose factor for a tracked nuclide.
@@ -326,14 +323,14 @@ def ext_air_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    if ext_air_dose < 0:
+        return None
+
     return ext_air_dose
 
 # ratio
-cdef conv._MapIntDouble ratio_map_proxy = conv.MapIntDouble(False)
-ratio_map_proxy.map_ptr = &cpp_data.ratio_map
-ratio_map = ratio_map_proxy
 
-def ratio(nuc, source=0):
+def dose_ratio(nuc, source=0):
     """Finds ratio of dose from external air to dose from inhalation for a tracked nuclide.
 
     Parameters
@@ -366,18 +363,18 @@ def ratio(nuc, source=0):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        ratio = cpp_data.ratio(<int> nuc, <int> source)
+        ratio = cpp_data.dose_ratio(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ratio = cpp_data.ratio(<char *> nuc, <int> source)
+        ratio = cpp_data.dose_ratio(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
+
+    if ratio < 0:
+        return None
 
     return ratio
 
 # external soil dose
-cdef conv._MapIntDouble ext_soil_dose_map_proxy = conv.MapIntDouble(False)
-ext_soil_dose_map_proxy.map_ptr = &cpp_data.ext_soil_dose_map
-ext_soil_dose_map = ext_soil_dose_map_proxy
 
 def ext_soil_dose(nuc, source=0):
     """Finds the external soil dose factor for a tracked nuclide.
@@ -418,12 +415,12 @@ def ext_soil_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    if ext_soil_dose < 0:
+        return None
+
     return ext_soil_dose
     
 # ingestion dose
-cdef conv._MapIntDouble ingest_dose_map_proxy = conv.MapIntDouble(False)
-ingest_dose_map_proxy.map_ptr = &cpp_data.ingest_dose_map
-ingest_dose_map = ingest_dose_map_proxy
 
 def ingest_dose(nuc, source=0):
     """Finds the dose factor due to ingestion for a tracked nuclide.
@@ -464,14 +461,14 @@ def ingest_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    if ingest_dose < 0:
+        return None
+    
     return ingest_dose
     
 # fluid_frac
-cdef conv._MapIntDouble fluid_frac_map_proxy = conv.MapIntDouble(False)
-fluid_frac_map_proxy.map_ptr = &cpp_data.fluid_frac_map
-fluid_frac_map = fluid_frac_map_proxy
 
-def fluid_frac(nuc, source=0):
+def dose_fluid_frac(nuc, source=0):
     """Finds fraction of activity that is absorbed by body fluids for a tracked nuclide.
 
     Parameters
@@ -504,18 +501,18 @@ def fluid_frac(nuc, source=0):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        fluid_frac = cpp_data.fluid_frac(<int> nuc, <int> source)
+        fluid_frac = cpp_data.dose_fluid_frac(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        fluid_frac = cpp_data.fluid_frac(<char *> nuc, <int> source)
+        fluid_frac = cpp_data.dose_fluid_frac(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
+
+    if dose_fluid_frac < 0:
+        return None
 
     return fluid_frac
 
 # inhalation dose
-cdef conv._MapIntDouble inhale_dose_map_proxy = conv.MapIntDouble(False)
-inhale_dose_map_proxy.map_ptr = &cpp_data.inhale_dose_map
-inhale_dose_map = inhale_dose_map_proxy
 
 def inhale_dose(nuc, source=0):
     """Finds the dose factor due to inhalation for a tracked nuclide.
@@ -556,14 +553,14 @@ def inhale_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    if inhale_dose < 0:
+        return None
+
     return inhale_dose
 
 # lung model
-cdef conv._MapIntStr lung_mod_map_proxy = conv.MapIntStr(False)
-lung_mod_map_proxy.map_ptr = &cpp_data.lung_mod_map
-lung_mod_map = lung_mod_map_proxy
 
-def lung_mod(nuc, source=0):
+def dose_lung_model(nuc, source=0):
     """Finds the lung model for the inhalation dose factor for a tracked nuclide.
 
     Parameters
@@ -596,9 +593,9 @@ def lung_mod(nuc, source=0):
         raise ValueError('Only ints or strings are accepted')
 
     if isinstance(nuc, int):
-        lung_mod = cpp_data.lung_mod(<int> nuc, <int> source)
+        lung_mod = cpp_data.dose_lung_model(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        lung_mod = cpp_data.lung_mod(<char *> nuc, <int> source)
+        lung_mod = cpp_data.dose_lung_model(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 

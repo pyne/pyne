@@ -123,11 +123,14 @@ def grab_dose_factors():
     epa = []
     doe = []
     for nuclide in dose_factors:
-        genii_row = (nuclide[0], None, None, nuclide[3], nuclide[6], nuclide[9], nuclide[10], nuclide[13])
+        for i, val in enumerate(nuclide):
+            if val is None:
+                nuclide[i] = -1
+        genii_row = (nuclide[0], -1, -1, nuclide[3], nuclide[6], nuclide[9], nuclide[10], nuclide[13])
         genii.append(genii_row)
         epa_row = ((nuclide[0], nuclide[1], nuclide[2], nuclide[4], nuclide[7], nuclide[9], nuclide[11], nuclide[13]))
         epa.append(epa_row)
-        doe_row = ((nuclide[0], None, None, nuclide[5], nuclide[8], nuclide[9], nuclide[12], nuclide[13]))
+        doe_row = ((nuclide[0], -1, -1, nuclide[5], nuclide[8], nuclide[9], nuclide[12], nuclide[13]))
         doe.append(doe_row)
     
     return genii, epa, doe

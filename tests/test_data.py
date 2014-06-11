@@ -65,20 +65,20 @@ def test_ext_air_dose():
 
 def test_ext_soil_dose():
     assert_equal(data.ext_soil_dose(40100000, 0), 0.537)
-#    assert_equal(data.ext_soil_dose('H3', 2), 3.49E-8)
-#    assert_equal(data.ext_soil_dose(25054, 1), 9590.0)
+    assert_equal(data.ext_soil_dose('H3', 2), 3.49E-8)
+    assert_equal(data.ext_soil_dose(25054, 1), 9590.0)
 
     
 def test_ingest_dose():
     assert_equal(data.ingest_dose(40100000), 4.66E-6)
-#    assert_equal(data.ingest_dose('H3', 2), 6.12E-8)
-#    assert_equal(data.ingest_dose(25054, 1), 2.7E-6)
+    assert_equal(data.ingest_dose('H3', 2), 6.12E-8)
+    assert_equal(data.ingest_dose(25054, 1), 2.7E-6)
 
     
 def test_inhale_dose():
     assert_equal(data.inhale_dose(40100000), 0.000354)
-#    assert_equal(data.inhale_dose('H3', 2), 9.02E-8)
-#    assert_equal(data.inhale_dose(25054, 1), 6.4E-6)
+    assert_equal(data.inhale_dose('H3', 2), 9.02E-8)
+    assert_equal(data.inhale_dose(25054, 1), 6.4E-6)
 
 
 def test_b_coherent():

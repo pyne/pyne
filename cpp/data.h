@@ -152,15 +152,6 @@ namespace pyne
   /// \name Dose Factor Data
   /// \{
 
-  /// Mapping from nuclides in id form to their dose factors (4 types).
-  extern std::map<int, double> ext_air_dose_map;
-  extern std::map<int, double> ext_soil_dose_map;
-  extern std::map<int, double> ingest_dose_map;
-  extern std::map<int, double> inhale_dose_map;
-  extern std::map<int, double> ratio_map;
-  extern std::map<int, double> fluid_frac_map;
-  extern std::map<int, std::string> lung_mod_map;
-  
   /// A struct matching the dose factor table in nuc_data.h5.
   typedef struct dose_struct {
     int nuc;              ///< nuclide in id form
@@ -173,9 +164,15 @@ namespace pyne
     char lung_mod;        ///< nuclide dose factor [mrem/h per Ci/m^3]
   } dose_struct;
 
+  /// Mapping from int to dose_struct for 3 sources
+  extern std::map<int, dose_struct> epa_dose_map;
+  extern std::map<int, dose_struct> doe_dose_map;
+  extern std::map<int, dose_struct> genii_dose_map;
+
   /// Loads the dose factor data from the nuc_data.h5 file into memory.
   ///
-  void _load_dose_map(std::string source_path);
+  void _load_dose_map(std::map<int, dose_struct>& dm, std::string
+source_path);
 
   /// \brief Returns the dose factors of a nuclide \a nuc.  
   /// 
@@ -202,17 +199,17 @@ namespace pyne
   /// This follows the same the basic rules for finding or computing the dose factor
   /// as the dose() functions do.
   /// If the nuclide cannot be found, the default value returned is 0.0.
-  double ratio(int nuc, int source);
-  double fluid_frac(int nuc, int source);
-  std::string lung_mod(int nuc, int source);
+  double dose_ratio(int nuc, int source);
+  double dose_fluid_frac(int nuc, int source);
+  std::string dose_lung_model(int nuc, int source);
   /// Returns the requested info of a nuclide \a nuc. 
-  double ratio(const char * nuc, int source);
-  double fluid_frac(const char * nuc, int source);
-  std::string lung_mod(const char * nuc, int source); 
+  double dose_ratio(const char * nuc, int source);
+  double dose_fluid_frac(const char * nuc, int source);
+  std::string dose_lung_model(const char * nuc, int source); 
   /// Returns the requested info of a nuclide \a nuc. 
-  double ratio(std::string nuc, int source);
-  double fluid_frac(std::string nuc, int source);
-  std::string lung_mod(std::string nuc, int source);
+  double dose_ratio(std::string nuc, int source);
+  double dose_fluid_frac(std::string nuc, int source);
+  std::string dose_lung_model(std::string nuc, int source);
   /// \}
 
 

@@ -50,40 +50,33 @@ cdef extern from "data.h" namespace "pyne":
     double gamma_frac(std_string) except +
 
     # ext_air_dose functions
-    map[int, double] ext_air_dose_map
-    map[int, double] ratio_map
     double ext_air_dose(int, int) except +
     double ext_air_dose(char *, int) except +
     double ext_air_dose(std_string, int) except +
-    double ratio(int, int) except +
-    double ratio(char *, int) except +
-    double ratio(std_string, int) except +
+    double dose_ratio(int, int) except +
+    double dose_ratio(char *, int) except +
+    double dose_ratio(std_string, int) except +
     
     # ext_soil_dose functions
-    map[int, double] ext_soil_dose_map
     double ext_soil_dose(int, int) except +
     double ext_soil_dose(char *, int) except +
     double ext_soil_dose(std_string, int) except +
 
     # ingest_dose functions
-    map[int, double] ingest_dose_map
-    map[int, double] fluid_frac_map
     double ingest_dose(int, int) except +
     double ingest_dose(char *, int) except +
     double ingest_dose(std_string, int) except +
-    double fluid_frac(int, int) except +
-    double fluid_frac(char *, int) except +
-    double fluid_frac(std_string, int) except +
+    double dose_fluid_frac(int, int) except +
+    double dose_fluid_frac(char *, int) except +
+    double dose_fluid_frac(std_string, int) except +
 
     # inhale_dose functions
-    map[int, double] inhale_dose_map
-    map[int, std_string] lung_mod_map
     double inhale_dose(int, int) except +
     double inhale_dose(char *, int) except +
     double inhale_dose(std_string, int) except +
-    std_string lung_mod(int, int) except +
-    std_string lung_mod(char *, int) except +
-    std_string lung_mod(std_string, int) except +
+    std_string dose_lung_model(int, int) except +
+    std_string dose_lung_model(char *, int) except +
+    std_string dose_lung_model(std_string, int) except +
     
     # Scattering length functions
     map[int, extra_types.complex_t] b_coherent_map
