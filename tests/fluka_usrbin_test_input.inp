@@ -1,3 +1,5 @@
+TITLE
+This is the input file for Fluka that creates all the necessary usrbin files for fluka.py testing
 BEAM           -0.01             10000.0                              NEUTRON
 BEAMPOS         -2.5       0.0       -1.
 ASSIGNMA        LEAD        c1
