@@ -303,7 +303,8 @@ def ext_air_dose(nuc, source=0):
 
     Notes
     -----
-    If the nuclide is not found, and the dose factor is set to zero.
+    The only source that provides this data is EPA; all other 
+    sources will give a value of -1.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
     if isinstance(source, str):
@@ -349,7 +350,8 @@ def dose_ratio(nuc, source=0):
 
     Notes
     -----
-    If the nuclide is not found, and the ratio is set to zero.
+    The only source that provides this data is EPA; all other 
+    sources will give a value of -1.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
     if isinstance(source, str):
@@ -395,7 +397,7 @@ def ext_soil_dose(nuc, source=0):
 
     Notes
     -----
-    If the nuclide is not found, and the dose factor is set to zero.
+    If the nuclide is not found, a value of -1 is returned.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
     if isinstance(source, str):
@@ -441,7 +443,7 @@ def ingest_dose(nuc, source=0):
 
     Notes
     -----
-    If the nuclide is not found, and the dose factor is set to zero.
+    If the nuclide is not found, a value of -1 is returned.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
     if isinstance(source, str):
@@ -487,7 +489,7 @@ def dose_fluid_frac(nuc, source=0):
 
     Notes
     -----
-    If the nuclide is not found, and the fluid fraction is set to zero.
+    If the nuclide is not found, a value of -1 is returned.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
     if isinstance(source, str):
@@ -533,7 +535,7 @@ def inhale_dose(nuc, source=0):
 
     Notes
     -----
-    If the nuclide is not found, and the dose factor is set to zero.
+    If the nuclide is not found, a value of -1 is returned.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
     if isinstance(source, str):
@@ -579,7 +581,7 @@ def dose_lung_model(nuc, source=0):
 
     Notes
     -----
-    If the nuclide is not found, and the lung model is set to zero.
+    If the nuclide is not found, a string of 'Nada' is returned.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
     if isinstance(source, str):

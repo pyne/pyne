@@ -331,7 +331,6 @@ double pyne::gamma_frac(std::string nuc) {
 /*****************************/
 
 void pyne::_load_dose_map(std::map<int, dose_struct>& dm, std::string source_path) {
-  // Loads the dose factor table into dose_map
   herr_t status;
 
   //Check to see if the file is in HDF5 format.
@@ -374,12 +373,12 @@ void pyne::_load_dose_map(std::map<int, dose_struct>& dm, std::string source_pat
   dose_struct * dose_array = new dose_struct[dose_length];
   H5Dread(dose_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, dose_array);
 
-  // Ok now that we have the array of structs, put it in the map
+  // Put array of structs in the map
   for (int n = 0; n < dose_length; n++) {
     dm[dose_array[n].nuc] = dose_array[n];
   };
 
-  // close the nuc_data library, before doing anything stupid
+  // Close the nuc_data library
   H5Dclose(dose_set);
   H5Tclose(string_type_);
   H5Fclose(nuc_data_h5);
@@ -405,7 +404,7 @@ std::string source_string(int source) {
   }
   return source_location;
 };
-  
+
 std::map<int, pyne::dose_struct>& dose_source_map(int source) {
   std::map<int, pyne::dose_struct>* dm;
   if (source == 1) {
