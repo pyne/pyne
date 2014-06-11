@@ -37,10 +37,10 @@ DEFAULT_FILES = [
     'cpp/json/json.h',
     'cpp/material.h',
     'cpp/material.cpp',
-    'cpp/enrichment.h',
-    'cpp/enrichment.cpp',
     'cpp/enrichment_cascade.h',
     'cpp/enrichment_cascade.cpp',
+    'cpp/enrichment.h',
+    'cpp/enrichment.cpp',
     'cpp/enrichment_symbolic.h',
     'cpp/enrichment_symbolic20.cpp',
     ]
