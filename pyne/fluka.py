@@ -6,9 +6,9 @@ design, cosmic ray studies, dosimetry, medical physics and radio-biology.
 Further information on FLUKA can be obtained from 
 http://www.fluka.org/fluka.php
 
-Currently, only USRBIN output files can be read.
+Currently, only usrbin output files can be read.
 
-If PyTAPS is not installed, then UsrbinFile and UsrbinTally will not be 
+If PyTAPS is not installed, then Usrbin and UsrbinTally will not be 
 available to use.
 
 """
@@ -26,9 +26,9 @@ except ImportError:
 from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 
-class UsrbinFile(object):
-    """This class is the wrapper class for UsrbinTally. This class stores will
-    store all information for a single file that contains one or more usrbin
+class Usrbin(object):
+    """This class is the wrapper class for UsrbinTally. This class stores 
+    all information for a single file that contains one or more usrbin
     tallies. The "tally" attribute provides key/value access to individual 
     UsrbinTally objects.
 
@@ -88,8 +88,12 @@ class UsrbinTally(Mesh):
         The locations of mesh vertices in the y direction
     z_bounds : list of floats
         The locations of mesh vertices in the z direction
-    part_data_tag ***
-    error_data_tag ***
+    part_data_tag : string
+    	The name of the tag for the track-length tally data.
+    	Follows form "part_data_X" where X is the number of the particle
+    error_data_tag : string
+    	The name of the tag for the error data.
+    	Follows form "error_data_X" where X is the number of the particle
     """
 
     def __init__(self, fh):
@@ -98,7 +102,7 @@ class UsrbinTally(Mesh):
         Paramters
         ---------
         fh : filehandle
-            An open USRBIN file
+            An open usrbin file
         """
 
         if not HAVE_PYTAPS:
@@ -119,8 +123,7 @@ class UsrbinTally(Mesh):
         self.particle = self.particle.split()[-1]
 
         if self.coord_sys != 'Cartesian':
-            print "Error: only cartesian coordinate system currently supported"
-            return
+            raise ValueError("Only cartesian coordinate system currently supported"
 
         [x_info, y_info, z_info] = self._read_usrbin_head(fh)
 
@@ -136,12 +139,12 @@ class UsrbinTally(Mesh):
         # data (error_data).
         num_volume_element = x_info[2]*y_info[2]*z_info[2]
         part_data += [float(x) for x in line.split()]
-        while ( len(part_data) < num_volume_element ):
+        while (len(part_data) < num_volume_element):
             line = fh.readline()
             part_data += [float(x) for x in line.split()]
-        for count in range (0,3):
+        for count in range (0, 3):
             line = fh.readline()
-        while ( len(error_data) < num_volume_element ):
+        while (len(error_data) < num_volume_element):
             line = fh.readline()
             error_data += [float(x) for x in line.split()]
                             
@@ -189,7 +192,7 @@ class UsrbinTally(Mesh):
         """
         [dim_min, dim_max, bins, width] = dim_info
         bound_data=[]
-        for i in range(0,bins+1):
+        for i in range(0, bins + 1):
             bound_data.append(dim_min+(i*width))
         return bound_data
 
