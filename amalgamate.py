@@ -23,7 +23,7 @@ DEFAULT_FILES = [
     'cpp/pyne.cpp',
     'cpp/extra_types.h',
     'cpp/h5wrap.h',
-    'state_map.cpp',
+    'cpp/state_map.cpp',
     'cpp/nucname.h',
     'cpp/nucname.cpp',
     'cpp/rxname.h',
