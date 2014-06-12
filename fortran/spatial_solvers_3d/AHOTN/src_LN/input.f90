@@ -1,4 +1,10 @@
-SUBROUTINE input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin, matin, qdfilein, xsfilein, srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momptin, qdflxin )
+
+
+SUBROUTINE input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein, &
+ lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin, dxin, dyin, & 
+dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin, matin, qdfilein, xsfilein, & 
+srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momptin, &
+ qdflxin)
 !-------------------------------------------------------------
 !
 !    Read the input from the input file
@@ -23,30 +29,30 @@ INTEGER :: i, j, k, n
 ! File Names
 CHARACTER(30), INTENT(OUT) :: qdfile, xsfile, srcfile, mtfile,inflow_file,&
                              phi_file
-LOGICAL :: ex1, ex2, ex3, ex4
+LOGICAL :: ex1, ex2, ex3
 REAL*8 :: wtsum
 
-CHARACTER(80) :: titlein
-INTEGER :: lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin
-REAL*8, DIMENSION(:), ALLOCATABLE :: dxin, dyin, dzin
-INTEGER :: xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin 
+CHARACTER(80), INTENT(IN) :: titlein
+INTEGER, INTENT(IN) :: lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin
+REAL*8, INTENT(IN), DIMENSION(:) :: dxin, dyin, dzin
+INTEGER, INTENT(IN) :: xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin 
 
 ! Cell materials
-INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: matin
-ALLOCATE(mat(nxin,nyin,nzin))
+INTEGER, INTENT(IN), DIMENSION(:,:,:) :: matin
+!ALLOCATE(mat(nxin,nyin,nzin))
 
-CHARACTER(30) :: qdfilein, xsfilein, srcfilein
+CHARACTER(30), INTENT(IN) :: qdfilein, xsfilein, srcfilein
 
 ! Iteration Controls
-REAL*8 :: errin, tolrin
-INTEGER :: itmxin, iallin
+REAL*8, INTENT(IN) :: errin, tolrin
+INTEGER, INTENT(IN) :: itmxin, iallin
 
 ! Solution check frequency
-REAL*8 :: tchkin
-INTEGER :: ichkin
+REAL*8, INTENT(IN) :: tchkin
+INTEGER, INTENT(IN) :: ichkin
 
 ! Editing data
-INTEGER :: mompin, momsumin, momptin, qdflxin
+INTEGER, INTENT(IN) :: mompin, momsumin, momptin, qdflxin
 
 title = titlein
 lambda = lambdain
@@ -75,7 +81,7 @@ inflow_file = "bc_4.dat"
 phi_file = "phi_4.ahot"
 
 err = errin
-tolr = tolerin
+tolr = tolrin
 itmx = itmxin
 iall = iallin
 
@@ -88,7 +94,7 @@ mompt = momptin
 qdflx = qdflxin
 
 ! Read the title of the case
-103 FORMAT(A80)
+!103 FORMAT(A80)
 
 ! Read Problem Size Specification:
 !   lambda => LAMDBA, the AHOT spatial order
@@ -148,7 +154,7 @@ END IF
 !write(6,*) mtfile
 !write(6,*) xsfile
 !write(6,*) srcfile
-104 FORMAT(A)
+!104 FORMAT(A)
 ! Perform quick checks on the files
 !INQUIRE(FILE = mtfilein, EXIST = ex4)
 INQUIRE(FILE = xsfilein, EXIST = ex1)
