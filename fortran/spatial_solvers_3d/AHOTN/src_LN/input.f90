@@ -1,5 +1,4 @@
-SUBROUTINE input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file)
-
+SUBROUTINE input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin, matin )
 !-------------------------------------------------------------
 !
 !    Read the input from the input file
@@ -27,8 +26,39 @@ CHARACTER(30), INTENT(OUT) :: qdfile, xsfile, srcfile, mtfile,inflow_file,&
 LOGICAL :: ex1, ex2, ex3, ex4
 REAL*8 :: wtsum
 
+CHARACTER(80) :: titlein
+INTEGER :: lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin
+REAL*8, DIMENSION(:), ALLOCATABLE :: dxin, dyin, dzin
+INTEGER :: xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin 
+
+! Cell materials
+INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: matin
+ALLOCATE(mat(nxin,nyin,nzin))
+
+title = titlein
+lambda = lambdain
+meth = methin
+qdord = qdordin
+qdtyp = qdtypin
+nx = nxin
+ny = nyin
+nz = nzin
+ng = ngin
+nm = nmin
+dx = dxin
+dy = dyin
+dz = dzin
+
+xsbc = xsbcin
+xebc = xebcin
+ysbc = ysbcin
+yebc = yebcin
+zsbc = zsbcin
+zebc = zebcin
+ 
+mat = matin
+
 ! Read the title of the case
-READ(7,103) title
 103 FORMAT(A80)
 
 ! Read Problem Size Specification:
@@ -42,8 +72,8 @@ READ(7,103) title
 !   ng    => Number of groups
 !   nm    => Number of materials
 
-READ(7,*) lambda, meth
-READ(7,*) qdord, qdtyp
+!READ(7,*) lambda, meth
+!READ(7,*) qdord, qdtyp
 
 IF (lambda .ne. 1) then
    WRITE(8,*) "ERROR: Lambda must be equal to one." 
@@ -60,28 +90,28 @@ ELSE IF (MOD(qdord,2) /= 0) THEN
 END IF
 
 ! Finish reading problem size
-READ(7,*) nx, ny, nz
-READ(7,*) ng, nm
+!READ(7,*) nx, ny, nz
+!READ(7,*) ng, nm
 
 ! Set sizes for spatial mesh, read mesh sizes
 !   dx  => cell x-dimension
 !   dy  => cell y-dimension
 !   dz  => cell z-dimension
-ALLOCATE(dx(nx), dy(ny), dz(nz))
+!ALLOCATE(dx(nx), dy(ny), dz(nz))
 
-READ(7,*) (dx(i), i = 1, nx)
-READ(7,*) (dy(j), j = 1, ny)
-READ(7,*) (dz(k), k = 1, nz)
+!READ(7,*) (dx(i), i = 1, nx)
+!READ(7,*) (dy(j), j = 1, ny)
+!READ(7,*) (dz(k), k = 1, nz)
 
 ! Read the boundary conditions
 !   *bc = 0/1/2 = Vacuum/Reflective/fixed inflow
-READ(7,*) xsbc, xebc
-READ(7,*) ysbc, yebc
-READ(7,*) zsbc, zebc
+!READ(7,*) xsbc, xebc
+!READ(7,*) ysbc, yebc
+!READ(7,*) zsbc, zebc
 
 ! Read the names of files with cross sections and source distribution
-READ(7,104) mtfile
-READ(7,104) qdfile
+!READ(7,104) mtfile
+!READ(7,104) qdfile
 READ(7,104) xsfile
 READ(7,104) srcfile
 READ(7,104) inflow_file
@@ -91,10 +121,10 @@ READ(7,104) phi_file
 !write(6,*) srcfile
 104 FORMAT(A)
 ! Perform quick checks on the files
-INQUIRE(FILE = mtfile, EXIST = ex4)
+!INQUIRE(FILE = mtfilein, EXIST = ex4)
 INQUIRE(FILE = xsfile, EXIST = ex1)
 INQUIRE(FILE = srcfile, EXIST = ex2)
-IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE. .OR. ex4 .eqv. .FALSE.) THEN
+IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
    WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
    STOP
 END IF
@@ -126,7 +156,7 @@ ordsq = order**2
 ordcb = order**3
 
 ! Material map
-CALL readmt(mtfile)
+!CALL readmt(mtfilein)
  
 ! Angular quadrature
 ALLOCATE(ang(apo,3), w(apo))

@@ -20,4 +20,5 @@ gfortran -c -fdefault-real-8 sweep.f90
 gfortran -c -fdefault-real-8 output.f90
 gfortran -c -fdefault-real-8 output_phi.f90
 gfortran -o ../LN.exe *.o lapack.a
-rm *.o *.mod
+#rm *.o *.mod
+rm *.o

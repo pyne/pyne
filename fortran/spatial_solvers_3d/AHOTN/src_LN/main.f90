@@ -44,7 +44,7 @@ CALL version
 
 ! Read input data:
 ! Input will call dependency algorithms, namely the input check
-CALL input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file)
+CALL input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, "AAA")
 
 ! Echo the input data:
 CALL echo(infile, outfile, qdfile, xsfile, srcfile, mtfile)
