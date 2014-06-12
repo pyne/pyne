@@ -1,4 +1,4 @@
-SUBROUTINE input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin, matin )
+SUBROUTINE input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin, matin, qdfilein, xsfilein, srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momptin, qdflxin )
 !-------------------------------------------------------------
 !
 !    Read the input from the input file
@@ -35,6 +35,19 @@ INTEGER :: xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin
 INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: matin
 ALLOCATE(mat(nxin,nyin,nzin))
 
+CHARACTER(30) :: qdfilein, xsfilein, srcfilein
+
+! Iteration Controls
+REAL*8 :: errin, tolrin
+INTEGER :: itmxin, iallin
+
+! Solution check frequency
+REAL*8 :: tchkin
+INTEGER :: ichkin
+
+! Editing data
+INTEGER :: mompin, momsumin, momptin, qdflxin
+
 title = titlein
 lambda = lambdain
 meth = methin
@@ -57,6 +70,22 @@ zsbc = zsbcin
 zebc = zebcin
  
 mat = matin
+
+inflow_file = "bc_4.dat"
+phi_file = "phi_4.ahot"
+
+err = errin
+tolr = tolerin
+itmx = itmxin
+iall = iallin
+
+tchk = tchkin
+ichk = ichkin
+
+momp = mompin
+momsum = momsumin
+mompt = momptin
+qdflx = qdflxin
 
 ! Read the title of the case
 103 FORMAT(A80)
@@ -112,18 +141,18 @@ END IF
 ! Read the names of files with cross sections and source distribution
 !READ(7,104) mtfile
 !READ(7,104) qdfile
-READ(7,104) xsfile
-READ(7,104) srcfile
-READ(7,104) inflow_file
-READ(7,104) phi_file
+!READ(7,104) xsfile
+!READ(7,104) srcfile
+!READ(7,104) inflow_file
+!READ(7,104) phi_file
 !write(6,*) mtfile
 !write(6,*) xsfile
 !write(6,*) srcfile
 104 FORMAT(A)
 ! Perform quick checks on the files
 !INQUIRE(FILE = mtfilein, EXIST = ex4)
-INQUIRE(FILE = xsfile, EXIST = ex1)
-INQUIRE(FILE = srcfile, EXIST = ex2)
+INQUIRE(FILE = xsfilein, EXIST = ex1)
+INQUIRE(FILE = srcfilein, EXIST = ex2)
 IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
    WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
    STOP
@@ -134,20 +163,20 @@ END IF
 !   itmx   => Maximum number of iterations
 !   iall   => Scalar Flux Spatial Moments Converged [0->LAMBDA]
 !   tolr   => Tolerence for Convergence Check: determine whether abs or rel difference
-READ(7,*) err, itmx, iall, tolr
+!READ(7,*) err, itmx, iall, tolr
 
 ! Read the Solution Check Control:
 !   ichk    => Frequency of check, 0 implies skip check
 !   tchk    => Tolerence of solution check
-READ(7,*) ichk, tchk
+!READ(7,*) ichk, tchk
 
 ! Read the optional editing parameters
 !   momp   => highest moment to be printed, [0->LAMBDA]
 !   momsum => flag to say whether the moments should be summed and printed for cell-center, 0 or 1
 !   mompt  => flag to initiate an interactive mode that allows the user to retrieve pt data, non-center, 0 or 1
 !   qdflx  => flag to indicate if the volume average scalar flux for the four quadrants should be given
-READ(7,*) momp, momsum, mompt
-READ(7,*) qdflx
+!READ(7,*) momp, momsum, mompt
+!READ(7,*) qdflx
 
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
@@ -161,12 +190,12 @@ ordcb = order**3
 ! Angular quadrature
 ALLOCATE(ang(apo,3), w(apo))
 IF (qdtyp == 2) THEN
-   INQUIRE(FILE=qdfile, EXIST=ex3)
+   INQUIRE(FILE=qdfilein, EXIST=ex3)
    IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
       WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
       STOP
    END IF
-   OPEN(UNIT=10, FILE=qdfile)
+   OPEN(UNIT=10, FILE=qdfilein)
    READ(10,*)
    READ(10,*) (ang(n,1),ang(n,2),w(n),n=1,apo)
    ! Renormalize all the weights
@@ -183,8 +212,8 @@ IF (qdtyp == 2) CLOSE(UNIT=10)
    ! Call for the input check
 CALL check
    ! Call to read the cross sections and source; do their own input check
-CALL readxs(xsfile)
-CALL readsrc(srcfile)
+CALL readxs(xsfilein)
+CALL readsrc(srcfilein)
 IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
 RETURN
 END SUBROUTINE input
