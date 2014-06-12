@@ -60,7 +60,7 @@ def test_gamma_frac():
 def test_ext_air_dose():
     assert_equal(data.ext_air_dose(40100000), 1.49E-10)
     assert_equal(data.ext_air_dose('H3', 0), 4.41E-12)
-    assert_equal(data.ext_air_dose(25054, 1), None)
+    assert_equal(data.ext_air_dose(25054, 1), float('NaN'))
 
 
 def test_ext_soil_dose():

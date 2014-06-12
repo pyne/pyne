@@ -324,8 +324,9 @@ def ext_air_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    cdef double n = float('NaN')
     if ext_air_dose < 0:
-        return None
+        return n
 
     return ext_air_dose
 
@@ -371,8 +372,9 @@ def dose_ratio(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    cdef double n = float('NaN')
     if ratio < 0:
-        return None
+        return n
 
     return ratio
 
@@ -417,8 +419,9 @@ def ext_soil_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    cdef double n = float('NaN')
     if ext_soil_dose < 0:
-        return None
+        return n
 
     return ext_soil_dose
     
@@ -463,8 +466,9 @@ def ingest_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    cdef double n = float('NaN')
     if ingest_dose < 0:
-        return None
+        return n
     
     return ingest_dose
     
@@ -509,8 +513,9 @@ def dose_fluid_frac(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    cdef double n = float('NaN')
     if dose_fluid_frac < 0:
-        return None
+        return n
 
     return fluid_frac
 
@@ -555,8 +560,9 @@ def inhale_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
+    cdef double n = float('NaN')
     if inhale_dose < 0:
-        return None
+        return n
 
     return inhale_dose
 

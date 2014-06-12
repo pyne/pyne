@@ -329,6 +329,16 @@ double pyne::gamma_frac(std::string nuc) {
 /*****************************/
 /*** Dose Factor Functions ***/
 /*****************************/
+/***************************************************************************
+This data is from: [Exposure Scenarios and Unit Dose Factors for the Hanford
+Immobilized Low-Activity Tank Waste Performance Assessment, ref.
+HNF-SD-WM-TI-707 Rev. 1 December 1999] Appendix O of HNF-5636 [DATA PACKAGES
+FOR THE HANFORD IMMOBILIZED LOW-ACTIVITY TANK WASTE PERFORMANCE ASSESSMENT:
+2001 VERSION]
+
+Liability Disclaimer: The PyNE Development Team shall not be liable for any
+loss or injury resulting from decisions made with this data. 
+**************************************************************************/
 
 void pyne::_load_dose_map(std::map<int, dose_struct>& dm, std::string source_path) {
   herr_t status;

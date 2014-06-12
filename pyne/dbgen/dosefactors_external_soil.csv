@@ -1,3 +1,4 @@
+#see python docstring for reference information
 Nuclide,GENII,EPA,DOE,GENII/EPA,DOE/EPA
 H-3,3.49E-008,0,0,EPA=0,
 Be-10,4.33E-001,5.37E-001,0,0.806,DOE=0

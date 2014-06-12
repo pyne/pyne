@@ -1,21 +1,24 @@
 """
-Module allows the grabbing of dose rate factors for the calculation of radiotoxicity. There are four dose rates provided: 
- (1) external from air (mrem/h per Ci/m^3)
+Module allows the grabbing of dose rate factors for the calculation of radiotoxicity. There are four dose rates provided:
+ 1. external from air (mrem/h per Ci/m^3)
      Table includes: nuclide, air dose rate factor, ratio to inhalation dose (All EPA values)
- (2) external from 15 cm of soil (mrem/h per Ci/m^2)
+ 2. external from 15 cm of soil (mrem/h per Ci/m^2)
      Table includes: nuclide, GENII, EPA, DOE, GENII/EPA, DOE/EPA
- (3) ingestion (mrem/pCi)
+ 3. ingestion (mrem/pCi)
      Table includes: nuclide, f1 (fraction of the activity ingested that enters body fluids.), GENII, EPA, DOE, GENII/EPA, DOE/EPA
- (4) inhalation (mrem/pCi)
+ 4. inhalation (mrem/pCi)
      Table includes: nuclide, lung model*, GENII, EPA, DOE, GENII/EPA, DOE/EPA 
 
-This data is from:
+This data is from: 
+[Exposure Scenarios and Unit Dose Factors for the Hanford
+Immobilized Low-Activity Tank Waste Performance Assessment, ref.
+HNF-SD-WM-TI-707 Rev. 1 December 1999] Appendix O of HNF-5636 [DATA PACKAGES
+FOR THE HANFORD IMMOBILIZED LOW-ACTIVITY TANK WASTE PERFORMANCE ASSESSMENT:
+2001 VERSION]
 
-Appendix O 
-[Exposure Scenarios and Unit Dose Factors for the Hanford Immobilized Low-Activity Tank Waste Performance Assessment, ref. HNF-SD-WM-TI-707 Rev. 1 December 1999]
-
-of HNF-5636 
-[DATA PACKAGES FOR THE HANFORDIMMOBILIZED LOW-ACTIVITY TANK WASTE PERFORMANCE ASSESSMENT: 2001 VERSION]
+Liability Disclaimer:
+The PyNE Development Team shall not be liable for any loss or injury resulting
+from decisions made with this data. 
 
 *Lung Model:
   "V" for tritium stands for vapor (50% larger absorption)
@@ -36,13 +39,12 @@ from pyne import nucname
 from pyne.api import nuc_data
 from pyne.dbgen.api import BASIC_FILTERS
 
-# Grabs data row by row
 def read_row(row):
     """Returns a list for each nuclide. Form varies based on type of dose rate factor:
-    (1) External DF in Air: [int, float, float]
-    (2) External DF in Soil: [int, float, float, float]
-    (3) Ingestion DF: [int, float, float, float, float]
-    (4) Inhalation DF: [int, string, float, float, float]
+    1. External DF in Air: [int, float, float]
+    2. External DF in Soil: [int, float, float, float]
+    3. Ingestion DF: [int, float, float, float, float]
+    4. Inhalation DF: [int, string, float, float, float]
     
     Parameters
     ----------
@@ -54,7 +56,6 @@ def read_row(row):
     entry = []
     
     # Evaluate each component of the given row
-
     if row[0].endswith('+D'):
         row[0] = row[0][:-2]
     nuclide = nucname.id(row[0])
@@ -87,10 +88,8 @@ def read_row(row):
         epa = float(row[3])
         doe = float(row[4])
         entry = [nuclide, genii, epa, doe, f1]
-    
     return entry
 
-# Parses data from .csv
 def grab_dose_factors():
     """Parses data from dose factor csv files.
     """
@@ -98,11 +97,12 @@ def grab_dose_factors():
     # Populates Dose Factor list with initial set of nuclides: opens first .csv file and parses it
     dose_factors = []
     with open(os.path.join(os.path.dirname(__file__), 'dosefactors_external_air.csv'), 'r') as f:
-            reader = csv.reader(f)
-            next(f)
-            for row in reader:
-                entry = read_row(row)
-                dose_factors.append(entry)
+        reader = csv.reader(f)
+        next(f)
+        next(f)
+        for row in reader:
+            entry = read_row(row)
+            dose_factors.append(entry)
 
     # Loops through remaining three files to add other dose factors to each nuclide
     dose_files = ['dosefactors_external_soil.csv', 'dosefactors_ingest.csv', 'dosefactors_inhale.csv']
@@ -110,6 +110,7 @@ def grab_dose_factors():
         # Opens remaining .csv files and parses them
         with open(os.path.join(os.path.dirname(__file__), fname), 'r') as f:
             reader = csv.reader(f)
+            next(f)
             next(f)
             for row in reader:
                 entry = read_row(row)
@@ -132,10 +133,8 @@ def grab_dose_factors():
         epa.append(epa_row)
         doe_row = ((nuclide[0], -1, -1, nuclide[5], nuclide[8], nuclide[9], nuclide[12], nuclide[13]))
         doe.append(doe_row)
-    
     return genii, epa, doe
 
-# Write dose factor tables to file
 def make_dose_tables(genii, epa, doe, nuc_data, build_dir=""):
     """Adds three dose factor tables to the nuc_data.h5 library.
 
@@ -191,6 +190,7 @@ def make_dose_tables(genii, epa, doe, nuc_data, build_dir=""):
 
 def make_dose_factors(args):
     """Controller function for adding dose factors"""
+
     nuc_data, build_dir = args.nuc_data, args.build_dir
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:

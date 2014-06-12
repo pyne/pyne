@@ -1,3 +1,4 @@
+#see python docstring for reference information
 Nuclide,Lung Model,GENII,EPA,DOE,GENII/EPA,DOE/EPA
 H-3,V,9.02E-008,9.60E-008,9.45E-008,0.94,
 Be-10,Y,3.54E-004,3.54E-004,3.50E-004,,

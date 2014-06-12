@@ -180,27 +180,25 @@ source_path);
   /// If the maps are empty, it will load the data from disk. If the nuclide simply 
   /// cannot be found, the default value returned is -1.
   double ext_air_dose(int nuc, int source);
-  double ext_soil_dose(int nuc, int source);
-  double ingest_dose(int nuc, int source);
-  double inhale_dose(int nuc, int source);
-  double dose_ratio(int nuc, int source);
-  double dose_fluid_frac(int nuc, int source);
-  std::string dose_lung_model(int nuc, int source);
-  /// Returns the dose factor/additonal info of a char-input nuclide.
   double ext_air_dose(const char * nuc, int source); 
-  double ext_soil_dose(const char * nuc, int source); 
-  double ingest_dose(const char * nuc, int source); 
-  double inhale_dose(const char * nuc, int source);
-  double dose_ratio(const char * nuc, int source);
-  double dose_fluid_frac(const char * nuc, int source);
-  std::string dose_lung_model(const char * nuc, int source); 
-  /// Returns the dose factor/additonal info of a string-input nuclide.
   double ext_air_dose(std::string nuc, int source);
+  double ext_soil_dose(int nuc, int source);
+  double ext_soil_dose(const char * nuc, int source); 
   double ext_soil_dose(std::string nuc, int source);
+  double ingest_dose(int nuc, int source);
+  double ingest_dose(const char * nuc, int source); 
   double ingest_dose(std::string nuc, int source);
+  double inhale_dose(int nuc, int source);
+  double inhale_dose(const char * nuc, int source);
   double inhale_dose(std::string nuc, int source);
+  double dose_ratio(int nuc, int source);
+  double dose_ratio(const char * nuc, int source);
   double dose_ratio(std::string nuc, int source);
+  double dose_fluid_frac(int nuc, int source);
+  double dose_fluid_frac(const char * nuc, int source);
   double dose_fluid_frac(std::string nuc, int source);
+  std::string dose_lung_model(int nuc, int source);
+  std::string dose_lung_model(const char * nuc, int source); 
   std::string dose_lung_model(std::string nuc, int source);
   /// \}
 
