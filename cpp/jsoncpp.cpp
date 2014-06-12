@@ -72,8 +72,13 @@ license you like.
 
 
 
-
-#include <json/json.h>
+#ifdef PYNE_IS_AMALGAMATED
+  #if !defined(JSON_IS_AMALGAMATION)
+    #define JSON_IS_AMALGAMATION
+  #endif
+#else
+  #include <json/json.h>
+#endif
 
 
 // //////////////////////////////////////////////////////////////////////
