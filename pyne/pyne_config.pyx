@@ -14,7 +14,7 @@ import os
 import json
 
 # local imports 
-cimport cpp_pyne
+cimport cpp_utils
 import pyne.__init__
 
 prefix = os.path.split(pyne.__init__.__file__)[0]
@@ -52,7 +52,7 @@ def pyne_start():
     #    os.environ[ldpath] += sepcha + os.path.join(md['HDF5_DIR'], libdll)
     
     # Call the C-version of pyne_start
-    cpp_pyne.pyne_start()
+    cpp_utils.pyne_start()
 
 
 # Run the appropriate start-up routines
@@ -67,20 +67,20 @@ cdef class PyneConf:
 
     property PYNE_DATA:
         def __get__(self):
-            cdef std_string value = cpp_pyne.PYNE_DATA
+            cdef std_string value = cpp_utils.PYNE_DATA
             return <char *> value.c_str()
 
         def __set__(self, char * value):
-            cpp_pyne.PYNE_DATA = std_string(value)
+            cpp_utils.PYNE_DATA = std_string(value)
 
 
     property NUC_DATA_PATH:
         def __get__(self):
-            cdef std_string value = cpp_pyne.NUC_DATA_PATH
+            cdef std_string value = cpp_utils.NUC_DATA_PATH
             return <char *> value.c_str()
 
         def __set__(self, char * value):
-            cpp_pyne.NUC_DATA_PATH = std_string(value)
+            cpp_utils.NUC_DATA_PATH = std_string(value)
 
 
         

@@ -1,6 +1,3 @@
-/// \file material.h
-/// \author Anthony Scopatz (scopatz\@gmail.com)
-///
 /// \brief The ever-important material class and related helpers.
 /// 
 /// The material class is effectively a normalized nuclide linked list with 
@@ -28,7 +25,7 @@
 #include <json/json-forwards.h>
 #include <json/json.h>
 #include "h5wrap.h"
-#include "pyne.h"
+#include "utils.h"
 #include "nucname.h"
 #include "data.h"
 #endif

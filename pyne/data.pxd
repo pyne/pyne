@@ -11,7 +11,7 @@ from libcpp.string cimport string as std_string
 
 # local imports
 cimport extra_types
-cimport pyne.cpp_pyne
+cimport pyne.cpp_utils
 cimport pyne.pyne_config
 import pyne.pyne_config
 
