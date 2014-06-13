@@ -1,7 +1,7 @@
 def populate():
 		solver_dict = {
 		'spatial_order':1,
-		'spatial_method':1,
+		'spatial_method':0,
 		'quadrature_order':4,
 		'quadrature_type':1,
 		'nodes_xyz':[4,4,4],

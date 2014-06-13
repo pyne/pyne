@@ -1,10 +1,9 @@
-from AHOTN.src_LN.input import input
-from AHOTN.src_LN.solve import solve
+from AHOTN.src_LN.input import input as ahot_ln_input
+#from AHOTN.src_LN.solve import solve as ahot_ln_solve
+#from AHOTN.src_LN.output import output as ahot_ln_output
 
 def ahotn(inputdict):
-	print "in ahotan"
-	print inputdict['material_id']
-	input("test title in",
+	ahot_ln_input("test title in",
 	inputdict['spatial_order'],
 	inputdict['spatial_method'],
 	inputdict['quadrature_order'],
@@ -37,6 +36,5 @@ def ahotn(inputdict):
 	inputdict['momsum'],
 	inputdict['mompt'],
 	inputdict['qdflx'])
-	print "INPUT WORKED!"
-	print inputdict['qdflx']
-	solve()
+	#ahot_ln_solve()
+  #ahot_ln_output()

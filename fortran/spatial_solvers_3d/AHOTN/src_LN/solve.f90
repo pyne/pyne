@@ -54,7 +54,7 @@ DO g = 1, ng
    END IF
 
    ! Get the time to reach this point
-   !CALL CPU_TIME(ttosolve)
+   CALL CPU_TIME(ttosolve)
    
    ! Check which solution scheme will be employed
    IF (meth == 0) THEN
@@ -67,7 +67,7 @@ DO g = 1, ng
    END IF
 
    ! Get the time out of the solution
-   !CALL CPU_TIME(tsolve)
+   CALL CPU_TIME(tsolve)
    
 END DO
    

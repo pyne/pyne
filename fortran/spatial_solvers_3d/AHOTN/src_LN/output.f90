@@ -18,6 +18,7 @@ IF (momsum == 1) THEN
 END IF
 
 ! Start the echo of the output for each group
+WRITE (8,'(//,1X,I2,A,/)') ng, " ng value"
 DO g = 1, ng   
    ! Check if the flux converged
    IF (cnvf(g) == 1) THEN

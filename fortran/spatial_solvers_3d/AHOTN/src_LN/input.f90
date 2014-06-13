@@ -221,5 +221,7 @@ CALL check
 CALL readxs(xsfilein)
 CALL readsrc(srcfilein)
 IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
+CALL solve
+CALL output
 RETURN
 END SUBROUTINE input
