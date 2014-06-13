@@ -302,7 +302,7 @@ def ext_air_dose(nuc, source=0):
         Dose factor from external air exposure [mrem/hr per Ci/m^3]
 
     Notes
-    -----
+    ----
     The only source that provides this data is EPA; all other 
     sources will give a value of -1.
     """
@@ -324,9 +324,8 @@ def ext_air_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    cdef double n = float('NaN')
     if ext_air_dose < 0:
-        return n
+        return float('nan')
 
     return ext_air_dose
 
@@ -372,9 +371,8 @@ def dose_ratio(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    cdef double n = float('NaN')
     if ratio < 0:
-        return n
+        return float('nan')
 
     return ratio
 
@@ -419,9 +417,8 @@ def ext_soil_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    cdef double n = float('NaN')
     if ext_soil_dose < 0:
-        return n
+        return float('nan')
 
     return ext_soil_dose
     
@@ -466,9 +463,8 @@ def ingest_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    cdef double n = float('NaN')
     if ingest_dose < 0:
-        return n
+        return float('nan')
     
     return ingest_dose
     
@@ -513,9 +509,8 @@ def dose_fluid_frac(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    cdef double n = float('NaN')
     if dose_fluid_frac < 0:
-        return n
+        return float('nan')
 
     return fluid_frac
 
@@ -560,9 +555,8 @@ def inhale_dose(nuc, source=0):
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    cdef double n = float('NaN')
     if inhale_dose < 0:
-        return n
+        return float('nan')
 
     return inhale_dose
 
