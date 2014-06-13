@@ -1,0 +1,34 @@
+TITLE
+This is the input file for Fluka that creates all the necessary usrbin files for fluka.py testing
+BEAM           -0.01             10000.0                              NEUTRON
+BEAMPOS         -2.5       0.0       -1.
+ASSIGNMA        LEAD        c1
+ASSIGNMA      VACUUM        c2
+ASSIGNMA    BLCKHOLE        c3
+EMF
+START          1000.                                           100000.
+USRBIN           10.   NEUTRON      -21.        6.        3.        0.single_n
+USRBIN           -3.       -3.       -3.        3.        3.        3. &
+USRBIN           10.    PHOTON      -22.        6.        3.        0.multi_p
+USRBIN           -3.       -3.       -3.        3.        3.        3. &
+USRBIN           10.   NEUTRON      -22.        6.        3.        0.multi_n
+USRBIN           -3.       -3.       -3.        3.        3.        3. &
+USRBIN           10.   NEUTRON      -23.        6.        3.        0.degen1
+USRBIN           -3.       -3.       -3.        3.        2.        1. &
+USRBIN           10.   NEUTRON      -23.        6.        3.        0.degen2
+USRBIN           -3.       -3.       -3.        2.        1.        3. &
+USRBIN           10.   NEUTRON      -23.        6.        3.        0.degen3
+USRBIN           -3.       -3.       -3.        1.        3.        2. &
+RANDOMIZ
+GEOBEGIN                                                              COMBNAME
+    3    0          
+RPP S1         -2. 5. -2. 2. -2. -1.
+RPP S2         -3. 6. -3. 3. -3. 0.
+END
+c1           5 +S1
+c2           5 -S1 +S2
+c3           5 -S2
+END
+        1.        1.        1.
+GEOEND
+STOP
