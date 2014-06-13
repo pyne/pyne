@@ -405,11 +405,9 @@ std::string source_string(int source) {
   std::string source_location;
   if (source == 1) {
     source_location = "/dose_factors/DOE";
-  }
-  else if (source == 2) {
+  } else if (source == 2) {
     source_location = "/dose_factors/GENII";
-  }
-  else {
+  } else {
     source_location = "/dose_factors/EPA";
   }
   return source_location;
@@ -463,7 +461,7 @@ double pyne::ext_air_dose(std::string nuc, int source) {
   return ext_air_dose(nuc_zz, source);
 };
 
-/// Ratio
+/// Dose Ratio
 double pyne::dose_ratio(int nuc, int source) {
   std::map<int, pyne::dose_struct>& dm = dose_source_map(source);
   int nucid = nucname::id(nuc);
@@ -487,7 +485,7 @@ double pyne::dose_ratio(std::string nuc, int source) {
 };
 
 ///
-/// Functions for External Soil Dose Factors
+/// Function for External Soil Dose Factors
 ///
 
 double pyne::ext_soil_dose(int nuc, int source) {  

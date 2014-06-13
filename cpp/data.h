@@ -102,8 +102,10 @@ namespace pyne
   /// \name Q_value Data
   /// \{
 
-  /// Mapping from nuclides in id form to their q_values.
+  /// Mapping from nuclides in id form to their q_values and 
+  /// the fraction of Q that comes from gammas.
   extern std::map<int, double> q_val_map;
+  extern std::map<int, double> gamma_frac_map;
 
   /// a struct matching the q_value table in nuc_data.h5.
   typedef struct q_val_struct {
@@ -121,32 +123,12 @@ namespace pyne
   /// If this map is empty, it will load the data from disk. If the nuclide simply 
   /// cannot be found, the default value returned is 0.0.
   double q_val(int nuc);
-  /// Returns the q_value of a nuclide \a nuc.
   double q_val(const char * nuc); 
-  /// Returns the q_value of a nuclide \a nuc.
   double q_val(std::string nuc); 
-  /// \}
-
-
-
-  /// \name Gamma Fraction of Q Values Data
-  /// \{
-
-  /// Mapping from nuclides in id form to the fraction of Q that comes from gammas.
-  extern std::map<int, double> gamma_frac_map;
-
-  /// \brief Returns the fraction of Q that comes from gammas of a nuclide \a nuc.  
-  /// 
-  /// This follows the same the basic rules for finding or computing the fraction
-  /// of Q that comes from gammas as the q_val() functions do.
-  /// If the nuclide cannot be found, the default value returned is 0.0.
   double gamma_frac(int nuc);
-  /// Returns the gamma_frac of a nuclide \a nuc. 
   double gamma_frac(const char * nuc); 
-  /// Returns the gamma_frac of a nuclide \a nuc. 
   double gamma_frac(std::string nuc); 
   /// \}
-
 
 
   /// \name Dose Factor Data
@@ -160,8 +142,8 @@ namespace pyne
     double ext_soil_dose; ///< nuclide ext_soil dose factor [mrem/h per Ci/m^2]
     double ingest_dose;   ///< nuclide dose factor due to ingestion [mrem/pCi]
     double fluid_frac;    ///< fraction of activity abosorbed in body fluids
-    double inhale_dose;   ///< model of lung used (time of biological half life -- D, W, or Y)
-    char lung_mod;        ///< nuclide dose factor [mrem/h per Ci/m^3]
+    double inhale_dose;   ///< nuclide dose factor due to inhalation [mrem/pCi]
+    char lung_mod;        ///< model of lung used (time of biological half life-- D, W, or Y)
   } dose_struct;
 
   /// Mapping from int to dose_struct for 3 sources
@@ -171,8 +153,7 @@ namespace pyne
 
   /// Loads the dose factor data from the nuc_data.h5 file into memory
   /// according to the user-input source.
-  void _load_dose_map(std::map<int, dose_struct>& dm, std::string
-source_path);
+  void _load_dose_map(std::map<int, dose_struct>& dm, std::string source_path);
 
   /// \brief Returns the dose factors of a nuclide.  
   /// 

@@ -315,7 +315,7 @@ def ext_air_dose(nuc, source=0):
         else:
             raise ValueError
     else:
-        raise ValueError('Only ints or strings are accepted')
+        raise ValueError('Only ints are accepted')
 
     if isinstance(nuc, int):
         ext_air_dose = cpp_data.ext_air_dose(<int> nuc, <int> source)
@@ -362,7 +362,7 @@ def dose_ratio(nuc, source=0):
         else:
             raise ValueError
     else:
-        raise ValueError('Only ints or strings are accepted')
+        raise ValueError('Only ints are accepted')
 
     if isinstance(nuc, int):
         ratio = cpp_data.dose_ratio(<int> nuc, <int> source)
@@ -408,7 +408,7 @@ def ext_soil_dose(nuc, source=0):
         else:
             raise ValueError
     else:
-        raise ValueError('Only ints or strings are accepted')
+        raise ValueError('Only ints are accepted')
 
     if isinstance(nuc, int):
         ext_soil_dose = cpp_data.ext_soil_dose(<int> nuc, <int> source)
@@ -454,7 +454,7 @@ def ingest_dose(nuc, source=0):
         else:
             raise ValueError
     else:
-        raise ValueError('Only ints or strings are accepted')
+        raise ValueError('Only ints are accepted')
 
     if isinstance(nuc, int):
         ingest_dose = cpp_data.ingest_dose(<int> nuc, <int> source)
@@ -500,7 +500,7 @@ def dose_fluid_frac(nuc, source=0):
         else:
             raise ValueError
     else:
-        raise ValueError('Only ints or strings are accepted')
+        raise ValueError('Only ints are accepted')
 
     if isinstance(nuc, int):
         fluid_frac = cpp_data.dose_fluid_frac(<int> nuc, <int> source)
@@ -546,7 +546,7 @@ def inhale_dose(nuc, source=0):
         else:
             raise ValueError
     else:
-        raise ValueError('Only ints or strings are accepted')
+        raise ValueError('Only ints are accepted')
 
     if isinstance(nuc, int):
         inhale_dose = cpp_data.inhale_dose(<int> nuc, <int> source)
@@ -592,7 +592,7 @@ def dose_lung_model(nuc, source=0):
         else:
             raise ValueError
     else:
-        raise ValueError('Only ints or strings are accepted')
+        raise ValueError('Only ints are accepted')
 
     if isinstance(nuc, int):
         lung_mod = cpp_data.dose_lung_model(<int> nuc, <int> source)
