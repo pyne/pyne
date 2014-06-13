@@ -14,7 +14,7 @@ To build this example, you must already have MOAB installed, presumably in
 some location `MOAB_INSTALL_PREFIX`.
 
 
-     MOAB_DIR=$MOAB_INSTALL_PREFIX
+     make MOAB_DIR=$MOAB_INSTALL_PREFIX
 
 
 Running
