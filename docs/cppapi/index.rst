@@ -34,40 +34,42 @@ whereas PyNE's wrappers take heavy advantage of Python's duck typing.  For most 
 cases, the :ref:`usersguide`, the :ref:`pyapi`, and the header files should be 
 sufficient to describe the C++ API.
 
-All PyNE shared objects are installed into the :file:`pyne/lib/` directory.  The 
-headers for both C/C++ and Cython are always installed into the 
-:file:`pyne/includes/` directory. Unfortunately, where :file:`pyne/` is located 
-often changes from one system to another. However, these locations may be found from 
-the ``pyne_config`` module.
+PyNE creates a single shared object called ``libpyne.so`` (or equivalent) and is 
+installed into Python's ``<prefix>/lib`` directory.  The 
+headers for C/C++ are installed into the :file:`<prefix>/include/pyne` directory. 
+Unfortunately, where :file:`<prefix>` is located changes based on the Python 
+interpreter and arguments passed to ``setup.py`` at install time.
+These often change from one system to another. However, these locations may be 
+found from either the ``pyne`` or the ``pyne_config`` module.
 
 .. code-block:: ipython 
 
-    In [1]: from pyne import pyne_config
+    In [1]: from pyne import lib, includes
 
-    In [2]: pyne_config.lib
-    Out[2]: '/usr/lib64/python2.7/site-packages/site-packages/pyne/lib'
+    In [2]: lib
+    Out[2]: '/usr/lib64'
 
-    In [3]: pyne_config.includes
-    Out[3]: '/usr/lib64/python2.7/site-packages/site-packages/pyne/include'
+    In [3]: includes
+    Out[3]: '/usr/include'
 
+Therefore to link against pyne, add the following options to your linker:
 
-The following table displays the C++ shared objects that are currently built (in Linux)
-and which names to use when dynamically linking to them.  For an example of how to 
-link please refer to PyNE's own `setup.py`_ file.  Additionally, feel free to contact 
-the authors if you require additional assistance.
+.. code-block:: bash
 
-.. table:: Pure C++ Shared Object Libraries
+    -lpyne -L$(python -c 'import pyne; print(pyne.lib)')
 
-    ========== ===================== =================
-    Module     Filename              Link With
-    ========== ===================== =================
-    pyne       libpyne.so            'pyne'
-    nucname    libpyne_nucname.so    'pyne_nucname'
-    data       libpyne_data.so       'pyne_data'
-    rxname     libpyne_rxname.so     'pyne_rxname'
-    material   libpyne_material.so   'pyne_material'
-    enrichment libpyne_enrichment.so 'pyne_enrichment'
-    ========== ===================== =================
+To include pyne from other C/C++ code, use the top-level pyne header:
+
+.. code-block:: c++
+
+    #include "pyne/pyne.h"
+
+And be sure that the include directory is on your ``C_INLCUDE_PATH`` and 
+``CPLUS_INLCUDE_PATH``.  You can do so from your compiler with:
+
+.. code-block:: bash
+
+    -I$(python -c 'import pyne; print(pyne.includes)')
 
 .. _setup.py: https://github.com/pyne/pyne/blob/staging/setup.py
 
@@ -110,6 +112,4 @@ For example, to take only up through the rxname, amalgamate with:
 
 `Cyclus <http://fuelcycle.org>`_ is an example of a project which uses an amalgamated
 version of pyne.
-
-
 
