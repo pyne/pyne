@@ -123,7 +123,7 @@ class UsrbinTally(Mesh):
         self.particle = self.particle.split()[-1]
 
         if self.coord_sys != 'Cartesian':
-            raise ValueError("Only cartesian coordinate system currently supported"
+            raise ValueError("Only cartesian coordinate system currently supported")
 
         [x_info, y_info, z_info] = self._read_usrbin_head(fh)
 
