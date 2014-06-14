@@ -60,10 +60,18 @@ def parse_args():
             i += 1
         else:
             argsets[i].append(arg)
+    # handle HDF5
     hdf5opt = [o.split('=')[1] for o in distutils_args if o.startswith('--hdf5=')]
     if 0 < len(hdf5opt):
         os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
         distutils_args = [o for o in distutils_args if not o.startswith('--hdf5=')]
+
+    # handle build type
+    btopt = [o.split('=')[1] for o in distutils_args if o.startswith('--build-type=')]
+    if 0 < len(btopt):
+        cmake.append('-DCMAKE_BUILD_TYPE=' + btopt[0])
+        distutils_args = [o for o in distutils_args if not o.startswith('--build-type=')]
+    
     # Change egg-base entry to absolute path so it behaves as expected
     import argparse
     parser = argparse.ArgumentParser()

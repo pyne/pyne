@@ -2,8 +2,8 @@ set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS} PARENT_
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_library(pyne 
-    "dagmc_bridge.cpp"
+# setup source files
+set(PYNE_SRCS
     "data.cpp"
     "enrichment.cpp"
     "enrichment_cascade.cpp"
@@ -15,7 +15,16 @@ add_library(pyne
     "tally.cpp"
     "utils.cpp"
     )
+if (MOAB_FOUND)
+    set(PYNE_SRCS "${PYNE_SRCS}" "dagmc_bridge.cpp")    
+endif (MOAB_FOUND)
+
+# compile and link library
+add_library(pyne ${PYNE_SRCS})
 target_link_libraries(pyne hdf5)
+if (MOAB_FOUND)
+    target_link_libraries(pyne dagmc MOAB)
+endif (MOAB_FOUND)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

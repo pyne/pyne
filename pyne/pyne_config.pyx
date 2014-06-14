@@ -54,10 +54,8 @@ def pyne_start():
     # Call the C-version of pyne_start
     cpp_utils.pyne_start()
 
-
 # Run the appropriate start-up routines
 pyne_start()
-
 
 ################################
 ### PyNE Configuration Class ###
@@ -83,7 +81,6 @@ cdef class PyneConf:
             cpp_utils.NUC_DATA_PATH = std_string(value)
 
 
-        
 # Make a singleton of the pyne config object
 pyne_conf = PyneConf()
 
@@ -92,5 +89,3 @@ if pyne_conf.PYNE_DATA == "<NOT_FOUND>":
     pyne_conf.PYNE_DATA = os.environ['PYNE_DATA']
 if pyne_conf.NUC_DATA_PATH == "<NOT_FOUND>":
     pyne_conf.NUC_DATA_PATH = os.environ['NUC_DATA_PATH']
-
-
