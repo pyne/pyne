@@ -17,10 +17,10 @@ import json
 cimport cpp_utils
 import pyne.__init__
 
-prefix = os.path.split(pyne.__init__.__file__)[0]
+prefix = os.path.dirname(pyne.__init__.__file__)
 
-lib = os.path.join(prefix, 'lib')
-includes = os.path.join(prefix, 'include')
+lib = os.path.abspath(os.path.join(prefix, '..', '..', '..', '..', 'lib'))
+includes = os.path.abspath(os.path.join(prefix, '..', '..', '..', '..', 'include'))
 nuc_data = os.path.join(prefix, 'nuc_data.h5')
 
 
