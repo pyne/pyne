@@ -6,7 +6,7 @@ import sys
 import json
 from glob import glob
 
-INFO = {'version': '0.4-dev'}
+INFO = {'version': '0.5-dev'}
 
 def main():
     "Run functions specified on the command line"

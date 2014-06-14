@@ -24,10 +24,6 @@
 #include <vector>
 #include <algorithm>
 
-/*** Macros ***/
-/// Determines the length of an array using sizeof().
-#define length_array(a) ( sizeof ( a ) / sizeof ( *a ) )
-
 #if defined __APPLE__ || defined __WIN_GNUC__
 #if (__GNUC__ >= 4)
   #include <cmath>
