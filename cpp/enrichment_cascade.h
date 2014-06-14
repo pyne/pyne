@@ -1,13 +1,10 @@
-/// \file enrichment_cascade.h
-/// \author Anthony Scopatz (scopatz\@gmail.com)
-///
 /// \brief A container representing enrichment cascades.
 
 #ifndef PYNE_3QGDWZMLZBHDHI424JL52SQHN4
 #define PYNE_3QGDWZMLZBHDHI424JL52SQHN4
 
 #ifndef PYNE_IS_AMALGAMATED
-#include "pyne.h"
+#include "utils.h"
 #include "nucname.h"
 #include "data.h"
 #include "material.h"

@@ -19,8 +19,8 @@ HEADER_EXTS |= {e.upper() for e in HEADER_EXTS}
 
 DEFAULT_FILES = [
     'license.txt',
-    'cpp/pyne.h',
-    'cpp/pyne.cpp',
+    'cpp/utils.h',
+    'cpp/utils.cpp',
     'cpp/extra_types.h',
     'cpp/h5wrap.h',
     'cpp/state_map.cpp',

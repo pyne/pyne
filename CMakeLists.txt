@@ -8,8 +8,17 @@ project( pyne )
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-#Default to release build type
-set(CMAKE_BUILD_TYPE Release)
+# Default to release build type
+set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type")
+
+# quiets fortify_source warnings when not compiling with optimizations
+# in linux distros where compilers were compiled with fortify_source enabled by
+# default (e.g. Arch linux).
+MESSAGE("-- Build type: ${CMAKE_BUILD_TYPE}")
+STRING(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+IF(NOT ${BUILD_TYPE} STREQUAL "release")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
+ENDIF()
 
 # Include the HDF5 library and c++ headers
 find_package( HDF5 COMPONENTS C )
@@ -76,7 +85,6 @@ else(APPLE)
     set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
 endif(APPLE)
 message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
-
 
 # find numpy and include the numpy headers
 find_package(Numpy REQUIRED)

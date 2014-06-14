@@ -21,16 +21,6 @@ macro( add_lib_to_pyne _name _source )
   set(PYNE_LIBRARIES ${PYNE_LIBRARIES} ${_name})
 endmacro()
 
-macro( install_lib _name )
-  # install it
-  set(lib_type LIBRARY)
-  if(WIN32)
-    set(lib_type RUNTIME)
-  endif(WIN32)
-  install(TARGETS ${_name} ${lib_type} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-endmacro()
-
-
 macro( print_logo )
   set(cat_prog cat)
   if(WIN32)
