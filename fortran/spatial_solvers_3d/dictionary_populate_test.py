@@ -16,7 +16,7 @@ def populate():
 		'material_id': [[[1]*4]*4]*4,
 		'quadrature_file':'quad_file',
 		'xs_file':'xs',
-		'srcfile':'src_4.dat',
+		'src_file':'src_4.dat',
 		'converge_critical':1.e-12,
 		'max_iterations':6000,
 		'moments_converged':0,
@@ -27,5 +27,21 @@ def populate():
 		'momsum':0,
 		'mompt':0,
 		'qdflx':0
+		};
+		return solver_dict
+
+def populate_with_warnings():
+		solver_dict = {
+		'nodes_xyz':[4,4,4],
+		'x_cells_widths':[0.25, 0.25, 0.25, 0.25],
+	 	'y_cells_widths':[0.25, 0.25, 0.25, 0.25],
+		'z_cells_widths':[0.25, 0.25, 0.25, 0.25],
+		'x_boundry_conditions':[2,2],
+		'y_boundry_conditions':[2,2],
+		'z_boundry_conditions':[2,2],
+		'material_id': [[[1]*4]*4]*4,
+		'quadrature_file':'quad_file',
+		'xs_file':'xs',
+		'src_file':'src_4.dat'
 		};
 		return solver_dict

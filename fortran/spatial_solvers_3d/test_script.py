@@ -1,7 +1,8 @@
 import spatial_solver
 
-from dictionary_populate_test import populate
+from dictionary_populate_test import populate, populate_with_warnings
 
 
-a = populate()
+#a = populate()
+a = populate_with_warnings()
 spatial_solver.ahotn(a)

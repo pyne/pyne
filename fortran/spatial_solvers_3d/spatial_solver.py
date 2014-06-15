@@ -2,7 +2,10 @@ from AHOTN.src_LN.input import input as ahot_ln_input
 #from AHOTN.src_LN.solve import solve as ahot_ln_solve
 #from AHOTN.src_LN.output import output as ahot_ln_output
 
-def ahotn(inputdict):
+from dict_util import dict_complete
+
+def ahotn(inputdict_unchecked):
+	inputdict = dict_complete(inputdict_unchecked)
 	ahot_ln_input("test title in",
 	inputdict['spatial_order'],
 	inputdict['spatial_method'],
@@ -25,7 +28,7 @@ def ahotn(inputdict):
 	inputdict['material_id'],
 	inputdict['quadrature_file'],
 	inputdict['xs_file'],
-	inputdict['srcfile'],
+	inputdict['src_file'],
 	inputdict['converge_critical'],
 	inputdict['max_iterations'],
 	inputdict['moments_converged'],
