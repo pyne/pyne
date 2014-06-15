@@ -24,6 +24,7 @@ srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momp
 !-------------------------------------------------------------
 
 USE invar
+USE solvar
 IMPLICIT NONE
 INTEGER :: i, j, k, n
 ! File Names
@@ -107,9 +108,6 @@ qdflx = qdflxin
 !   ng    => Number of groups
 !   nm    => Number of materials
 
-!READ(7,*) lambda, meth
-!READ(7,*) qdord, qdtyp
-
 IF (lambda .ne. 1) then
    WRITE(8,*) "ERROR: Lambda must be equal to one." 
    STOP
@@ -124,39 +122,6 @@ ELSE IF (MOD(qdord,2) /= 0) THEN
    STOP
 END IF
 
-! Finish reading problem size
-!READ(7,*) nx, ny, nz
-!READ(7,*) ng, nm
-
-! Set sizes for spatial mesh, read mesh sizes
-!   dx  => cell x-dimension
-!   dy  => cell y-dimension
-!   dz  => cell z-dimension
-!ALLOCATE(dx(nx), dy(ny), dz(nz))
-
-!READ(7,*) (dx(i), i = 1, nx)
-!READ(7,*) (dy(j), j = 1, ny)
-!READ(7,*) (dz(k), k = 1, nz)
-
-! Read the boundary conditions
-!   *bc = 0/1/2 = Vacuum/Reflective/fixed inflow
-!READ(7,*) xsbc, xebc
-!READ(7,*) ysbc, yebc
-!READ(7,*) zsbc, zebc
-
-! Read the names of files with cross sections and source distribution
-!READ(7,104) mtfile
-!READ(7,104) qdfile
-!READ(7,104) xsfile
-!READ(7,104) srcfile
-!READ(7,104) inflow_file
-!READ(7,104) phi_file
-!write(6,*) mtfile
-!write(6,*) xsfile
-!write(6,*) srcfile
-!104 FORMAT(A)
-! Perform quick checks on the files
-!INQUIRE(FILE = mtfilein, EXIST = ex4)
 INQUIRE(FILE = xsfilein, EXIST = ex1)
 INQUIRE(FILE = srcfilein, EXIST = ex2)
 IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
@@ -164,35 +129,12 @@ IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
    STOP
 END IF
 
-! Read the iteration parameters
-!   err    => Pointwise relative convergence criterion
-!   itmx   => Maximum number of iterations
-!   iall   => Scalar Flux Spatial Moments Converged [0->LAMBDA]
-!   tolr   => Tolerence for Convergence Check: determine whether abs or rel difference
-!READ(7,*) err, itmx, iall, tolr
-
-! Read the Solution Check Control:
-!   ichk    => Frequency of check, 0 implies skip check
-!   tchk    => Tolerence of solution check
-!READ(7,*) ichk, tchk
-
-! Read the optional editing parameters
-!   momp   => highest moment to be printed, [0->LAMBDA]
-!   momsum => flag to say whether the moments should be summed and printed for cell-center, 0 or 1
-!   mompt  => flag to initiate an interactive mode that allows the user to retrieve pt data, non-center, 0 or 1
-!   qdflx  => flag to indicate if the volume average scalar flux for the four quadrants should be given
-!READ(7,*) momp, momsum, mompt
-!READ(7,*) qdflx
-
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
 order = lambda+1
 ordsq = order**2
 ordcb = order**3
 
-! Material map
-!CALL readmt(mtfilein)
- 
 ! Angular quadrature
 ALLOCATE(ang(apo,3), w(apo))
 IF (qdtyp == 2) THEN
@@ -223,5 +165,5 @@ CALL readsrc(srcfilein)
 IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
 CALL solve
 CALL output
-RETURN
+RETURN 
 END SUBROUTINE input
