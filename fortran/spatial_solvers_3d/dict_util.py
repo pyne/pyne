@@ -14,8 +14,8 @@ def dict_complete(inputdict):
 		try:
 			formatted_dict['spatial_method'] = inputdict['spatial_method']
 		except:
-			formatted_dict['spatial_method'] = 1
-			warn(warning_msg + " spatial_method value of 1")
+			formatted_dict['spatial_method'] = 0
+			warn(warning_msg + " spatial_method value of 0")
 		try:
 			formatted_dict['quadrature_order'] = inputdict['quadrature_order']
 		except:
