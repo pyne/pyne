@@ -1,3 +1,5 @@
+"""This file creates a sample dictionary to test the spatial_solver code's."""
+
 def populate():
 		solver_dict = {
 		'spatial_order':1,

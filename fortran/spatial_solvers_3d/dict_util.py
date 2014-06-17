@@ -1,3 +1,5 @@
+"""This file provides utility functions for the dictionary that is passed into various solvers on in spatial_solver.  It checks that all required key-pair values are present, then fills in any optional key-pair values that are not present.  Warns the user for each overriden key-pair value."""
+
 # Python imports 
 from warnings import warn
 
