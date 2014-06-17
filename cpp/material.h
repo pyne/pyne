@@ -22,8 +22,8 @@
 #endif
 
 #ifndef PYNE_IS_AMALGAMATED
-#include <json/json-forwards.h>
-#include <json/json.h>
+#include "json-forwards.h"
+#include "json.h"
 #include "h5wrap.h"
 #include "utils.h"
 #include "nucname.h"

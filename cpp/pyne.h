@@ -1,6 +1,6 @@
 #ifndef PYNE_IS_AMALGAMATED
-#include <json/json-forwards.h>
-#include <json/json.h>
+#include "json-forwards.h"
+#include "json.h"
 //#include "dagmc_bridge.h"  // figure this out later...
 #include "data.h"
 #include "enrichment_cascade.h"
