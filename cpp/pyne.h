@@ -1,3 +1,7 @@
+#ifndef JSON_IS_AMALGAMATION
+  #define JSON_IS_AMALGAMATION
+#endif
+
 #ifndef PYNE_IS_AMALGAMATED
 #include "json-forwards.h"
 #include "json.h"
