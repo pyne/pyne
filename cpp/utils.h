@@ -38,6 +38,10 @@
     #define isnan(x) ((x) != (x))
 #endif
 
+#ifndef JSON_IS_AMALGAMATION
+  #define JSON_IS_AMALGAMATION
+#endif
+
 /// The 'pyne' namespace all PyNE functionality is included in.
 namespace pyne {
 
