@@ -5,7 +5,6 @@ import os
 import sys
 import imp
 import subprocess
-from pprint import pprint
 
 import numpy as np
 
