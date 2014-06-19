@@ -1,7 +1,9 @@
 #!/usr/bin/env python
- 
+from __future__ import print_function
+
 import os
 import sys
+import imp
 import subprocess
 
 import numpy as np
@@ -129,6 +131,27 @@ def main():
         success = True
     finally:
         configure.final_message(success)
+    # trick to get install path
+    abspath = os.path.abspath
+    joinpath = os.path.join
+    cwd = abspath(os.getcwd())
+    pypath = [p for p in sys.path if len(p) > 0 and cwd != abspath(p)]
+    try:
+        _, pynepath, _ = imp.find_module('pyne', pypath)
+    except ImportError:
+        pynepath = "${HOME}/.local/python2.7/site-packages"
+    libpath = abspath(joinpath(pynepath, '..', '..', '..'))
+    binpath = abspath(joinpath(libpath, '..', 'bin'))
+    msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
+           "LD_LIBRARY_PATH (or DYLD_FALLBACK_LIBRARY_PATH on Mac OSX) has been "
+           "appropriately set to the install prefix of pyne. For this install of "
+           "pyne you may add the following lines to your '~/.bashrc' file or "
+           "equivalent:\n\n"
+           "# PyNE Environment Settings\n"
+           'export PATH="{binpath}:${{PATH}}"\n'
+           'export LD_LIBRARY_PATH="{libpath}:${{LD_LIBRARY_PATH}}"'
+           ).format(binpath=binpath, libpath=libpath)
+    print(msg, file=sys.stderr)
 
 if __name__ == "__main__":
     main()
