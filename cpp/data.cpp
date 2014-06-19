@@ -3,7 +3,6 @@
 #include "data.h"
 #endif
 
-
 //
 // Math Helpers
 //
@@ -97,9 +96,9 @@ double pyne::atomic_mass(int nuc) {
   // nuc_data.h5, if the map is empty.
   if (atomic_mass_map.empty()) {
     // Don't fail if we can't load the library
-      _load_atomic_mass_map();
-      return atomic_mass(nuc);
-  };
+    _load_atomic_mass_map();
+    return atomic_mass(nuc);
+  }
 
   double aw;
   int nucid = nucname::id(nuc);
@@ -191,10 +190,9 @@ double pyne::natural_abund(std::string nuc) {
 
 
 
-/*****************************/
+/*************************/
 /*** Q_value Functions ***/
-/*****************************/
-std::map<int, double> pyne::q_val_map = std::map<int, double>();
+/*************************/
 
 void pyne::_load_q_val_map() {
   // Loads the important parts of q_value table into q_value_map
@@ -217,7 +215,7 @@ void pyne::_load_q_val_map() {
   hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   // Open the data set
-  hid_t q_val_set = H5Dopen2(nuc_data_h5, "/neutron/q_values", H5P_DEFAULT);
+  hid_t q_val_set = H5Dopen2(nuc_data_h5, "/decay/q_values", H5P_DEFAULT);
   hid_t q_val_space = H5Dget_space(q_val_set);
   int q_val_length = H5Sget_simple_extent_npoints(q_val_space);
 
@@ -230,7 +228,7 @@ void pyne::_load_q_val_map() {
   H5Fclose(nuc_data_h5);
 
   // Ok now that we have the array of structs, put it in the map
-  for(int n = 0; n < q_val_length; n++){
+  for(int n = 0; n < q_val_length; n++) {
     q_val_map[q_val_array[n].nuc] = q_val_array[n].q_val;
     gamma_frac_map[q_val_array[n].nuc] = q_val_array[n].gamma_frac;
   }
@@ -238,6 +236,7 @@ void pyne::_load_q_val_map() {
   delete[] q_val_array;
 };
 
+std::map<int, double> pyne::q_val_map = std::map<int, double>();
 
 double pyne::q_val(int nuc) {
   // Find the nuclide's q_val in MeV/fission
@@ -252,7 +251,6 @@ double pyne::q_val(int nuc) {
 
   // Next, fill up the map with values from the nuc_data.h5 if the map is empty.
   if (q_val_map.empty()) {
-    // Don't fail if we can't load the library
       _load_q_val_map();
       return q_val(nuc);
   };
@@ -269,7 +267,7 @@ double pyne::q_val(int nuc) {
 };
 
 
-double pyne::q_val(char * nuc) {
+double pyne::q_val(const char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return q_val(nuc_zz);
 };
@@ -281,9 +279,9 @@ double pyne::q_val(std::string nuc) {
 };
 
 
-/*******************************/
+/****************************/
 /*** gamma_frac functions ***/
-/*******************************/
+/****************************/
 
 std::map<int, double> pyne::gamma_frac_map = std::map<int, double>();
 
@@ -300,7 +298,6 @@ double pyne::gamma_frac(int nuc) {
 
   // Next, fill up the map with values from nuc_data.h5 if the map is empty.
   if (gamma_frac_map.empty()) {
-    // Don't fail if we can't load the library
       _load_q_val_map();
       return gamma_frac(nuc);
   };
@@ -317,7 +314,7 @@ double pyne::gamma_frac(int nuc) {
 };
 
 
-double pyne::gamma_frac(char * nuc) {
+double pyne::gamma_frac(const char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return gamma_frac(nuc_zz);
 };
@@ -326,6 +323,293 @@ double pyne::gamma_frac(char * nuc) {
 double pyne::gamma_frac(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return gamma_frac(nuc_zz);
+};
+
+
+/*****************************/
+/*** Dose Factor Functions ***/
+/*****************************/
+/***************************************************************************
+This data is from: [Exposure Scenarios and Unit Dose Factors for the Hanford
+Immobilized Low-Activity Tank Waste Performance Assessment, ref.
+HNF-SD-WM-TI-707 Rev. 1 December 1999] Appendix O of HNF-5636 [DATA PACKAGES
+FOR THE HANFORD IMMOBILIZED LOW-ACTIVITY TANK WASTE PERFORMANCE ASSESSMENT:
+2001 VERSION]
+
+Liability Disclaimer: The PyNE Development Team shall not be liable for any
+loss or injury resulting from decisions made with this data. 
+**************************************************************************/
+
+void pyne::_load_dose_map(std::map<int, dose_struct>& dm, std::string source_path) {
+  herr_t status;
+
+  //Check to see if the file is in HDF5 format.
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
+    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+
+  bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
+  if (!ish5)
+    throw h5wrap::FileNotHDF5(pyne::NUC_DATA_PATH);
+ 
+  // Defining string type for lung model data
+  hid_t string_type_;
+  string_type_ = H5Tcopy(H5T_C_S1);
+  H5Tset_size(string_type_, 1);
+  H5Tset_strpad(string_type_, H5T_STR_NULLPAD);
+  
+  // Get the HDF5 compound type (table) description
+  hid_t desc = H5Tcreate(H5T_COMPOUND, sizeof(dose_struct));
+  status = H5Tinsert(desc, "nuc", HOFFSET(dose_struct, nuc), H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "ext_air_dose", HOFFSET(dose_struct, ext_air_dose), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ratio", HOFFSET(dose_struct, ratio), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ext_soil_dose", HOFFSET(dose_struct, ext_soil_dose), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "ingest_dose", HOFFSET(dose_struct, ingest_dose), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "fluid_frac", HOFFSET(dose_struct, fluid_frac), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "inhale_dose", HOFFSET(dose_struct, inhale_dose), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "lung_mod", HOFFSET(dose_struct, lung_mod), string_type_);
+  
+  // Open the HDF5 file
+  hid_t nuc_data_h5 = H5Fopen(pyne::NUC_DATA_PATH.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+
+  // Convert source_path to proper format for HD5open
+  const char * c = source_path.c_str();
+
+  // Open the data set
+  hid_t dose_set = H5Dopen2(nuc_data_h5, c, H5P_DEFAULT);
+  hid_t dose_space = H5Dget_space(dose_set);
+  int dose_length = H5Sget_simple_extent_npoints(dose_space);
+
+  // Read in the data
+  dose_struct * dose_array = new dose_struct[dose_length];
+  H5Dread(dose_set, desc, H5S_ALL, H5S_ALL, H5P_DEFAULT, dose_array);
+
+  // Put array of structs in the map
+  for (int n = 0; n < dose_length; n++) {
+    dm[dose_array[n].nuc] = dose_array[n];
+  };
+
+  // Close the nuc_data library
+  H5Dclose(dose_set);
+  H5Tclose(string_type_);
+  H5Fclose(nuc_data_h5);
+  
+  delete[] dose_array;
+};
+
+///
+/// Functions for Source Location in nuc_data.h5 
+/// and related Map Pointers
+///
+
+std::string source_string(int source) {
+  std::string source_location;
+  if (source == 1) {
+    source_location = "/dose_factors/DOE";
+  } else if (source == 2) {
+    source_location = "/dose_factors/GENII";
+  } else {
+    source_location = "/dose_factors/EPA";
+  }
+  return source_location;
+};
+
+std::map<int, pyne::dose_struct>& dose_source_map(int source) {
+  std::map<int, pyne::dose_struct>* dm;
+  if (source == 1) {
+    dm = &pyne::doe_dose_map;
+  } else if (source == 2) {
+    dm = &pyne::genii_dose_map;
+  } else {
+    dm = &pyne::epa_dose_map;
+  }
+  if (dm->empty()) {
+      std::string source_path = source_string(source);
+      _load_dose_map(*dm, source_path);
+  }
+  return *dm;
+};
+
+std::map<int, pyne::dose_struct> pyne::epa_dose_map;
+std::map<int, pyne::dose_struct> pyne::doe_dose_map;
+std::map<int, pyne::dose_struct> pyne::genii_dose_map;
+
+///
+/// Functions for External Air and 
+/// Ratio of External Air to Inhalation Dose Factors
+///
+
+/// External Air
+double pyne::ext_air_dose(int nuc, int source) {
+  std::map<int, pyne::dose_struct>& dm = dose_source_map(source);
+  int nucid = nucname::id(nuc);
+
+  if (dm.count(nucid)==1) { 
+    return dm[nucid].ext_air_dose;
+  } else {
+    return -1;
+  }
+};
+
+double pyne::ext_air_dose(const char * nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return ext_air_dose(nuc_zz, source);
+};
+
+
+double pyne::ext_air_dose(std::string nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return ext_air_dose(nuc_zz, source);
+};
+
+/// Dose Ratio
+double pyne::dose_ratio(int nuc, int source) {
+  std::map<int, pyne::dose_struct>& dm = dose_source_map(source);
+  int nucid = nucname::id(nuc);
+
+  if (dm.count(nucid)==1) { 
+    return dm[nucid].ratio;
+  } else {
+    return -1;
+  }
+};
+
+double pyne::dose_ratio(const char * nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return dose_ratio(nuc_zz, source);
+};
+
+
+double pyne::dose_ratio(std::string nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return dose_ratio(nuc_zz, source);
+};
+
+///
+/// Function for External Soil Dose Factors
+///
+
+double pyne::ext_soil_dose(int nuc, int source) {  
+  std::map<int, pyne::dose_struct>& dm = dose_source_map(source);
+  int nucid = nucname::id(nuc);
+
+  if (dm.count(nucid)==1) { 
+    return dm[nucid].ext_soil_dose;
+  } else {
+    return -1;
+  }
+};
+
+double pyne::ext_soil_dose(const char * nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return ext_soil_dose(nuc_zz, source);
+};
+
+
+double pyne::ext_soil_dose(std::string nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return ext_soil_dose(nuc_zz, source);
+};
+
+///
+/// Functions for Ingestion Dose Factors and
+/// Fraction of activity that is absorbed by body fluids
+///
+
+/// Ingestion
+double pyne::ingest_dose(int nuc, int source) {
+  std::map<int, pyne::dose_struct>& dm = dose_source_map(source);
+  int nucid = nucname::id(nuc);
+
+  if (dm.count(nucid)==1) { 
+    return dm[nucid].ingest_dose;
+  } else {
+    return -1;
+  }
+};
+
+double pyne::ingest_dose(const char * nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return ingest_dose(nuc_zz, source);
+};
+
+
+double pyne::ingest_dose(std::string nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return ingest_dose(nuc_zz, source);
+};
+
+/// Fluid Fraction
+double pyne::dose_fluid_frac(int nuc, int source) {
+  std::map<int, pyne::dose_struct>& dm = dose_source_map(source);
+  int nucid = nucname::id(nuc);
+
+  if (dm.count(nucid)==1) { 
+    return dm[nucid].fluid_frac;
+  } else {
+    return -1;
+  }
+};
+
+double pyne::dose_fluid_frac(const char * nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return dose_fluid_frac(nuc_zz, source);
+};
+
+
+double pyne::dose_fluid_frac(std::string nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return dose_fluid_frac(nuc_zz, source);
+};
+
+///
+/// Functions for Inhalation Dose Factors and
+/// Lung Model used to obtain dose factors
+///
+
+/// Inhalation
+double pyne::inhale_dose(int nuc, int source) {
+  std::map<int, pyne::dose_struct>& dm = dose_source_map(source);
+  int nucid = nucname::id(nuc);
+
+  if (dm.count(nucid)==1) { 
+    return dm[nucid].inhale_dose;
+  } else {
+    return -1;
+  }
+};
+
+double pyne::inhale_dose(const char * nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return inhale_dose(nuc_zz, source);
+};
+
+
+double pyne::inhale_dose(std::string nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return inhale_dose(nuc_zz, source);
+};
+
+/// Lung Model
+std::string pyne::dose_lung_model(int nuc, int source) {
+  std::map<int, pyne::dose_struct>& dm = dose_source_map(source);
+  int nucid = nucname::id(nuc);
+
+  if (dm.count(nucid)==1) { 
+    return std::string(1, dm[nucid].lung_mod);
+  } else {
+    return "Nada";
+  }
+};
+
+std::string pyne::dose_lung_model(const char * nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return dose_lung_model(nuc_zz, source);
+};
+
+
+std::string pyne::dose_lung_model(std::string nuc, int source) {
+  int nuc_zz = nucname::id(nuc);
+  return dose_lung_model(nuc_zz, source);
 };
 
 
@@ -1566,6 +1850,19 @@ int parent) {
     DBL_MAX, offsetof(gamma_struct, photon_intensity), gamma_data);
   std::vector<double> part2 = data_access<double, gamma_struct>(parent, 0.0, 
     DBL_MAX, offsetof(gamma_struct, photon_intensity_err), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+
+std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(
+double energy, double error) {
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma_struct>(energy+error,
+    energy-error, offsetof(gamma_struct, photon_intensity), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma_struct>(energy+error,
+    energy-error, offsetof(gamma_struct, photon_intensity_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }

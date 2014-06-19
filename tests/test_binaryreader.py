@@ -10,6 +10,7 @@ from nose.tools import assert_equal
 from nose.plugins.skip import SkipTest
 
 from pyne.utils import VnVWarning
+
 warnings.simplefilter("ignore", VnVWarning)
 
 from pyne.binaryreader import (_FortranRecord, _BinaryReader)
@@ -17,7 +18,6 @@ from pyne.binaryreader import (_FortranRecord, _BinaryReader)
 
 # test the ability to make a new empty FortranRecord
 def test_make_empty_FR():
-
     test_record = _FortranRecord('', 0)
 
     if len(test_record.data) != 0:
@@ -35,7 +35,6 @@ def test_make_empty_FR():
 
 # test the ability to reset the pos pointer in a FortranRecord
 def test_reset_FR():
-
     temp_pos = 4
 
     test_record = _FortranRecord('', 0)  # already tested
@@ -54,7 +53,6 @@ def test_reset_FR():
 
 # useful for checking all the changes expected from writing to a FortranRecord
 def check_write_record_data(record, pos, num, data, typestring):
-
     if record.pos != pos:
         raise ValueError("Writing " + typestring +
                          " to record did not update pos properly: "
@@ -76,7 +74,6 @@ def check_write_record_data(record, pos, num, data, typestring):
 #
 ###################
 def test_write_FR_single_int():
-
     set_int = 8
     set_num_bytes = 4
     set_data = b'\x08\x00\x00\x00'
@@ -92,7 +89,6 @@ def test_write_FR_single_int():
 
 
 def test_write_FR_int_list():
-
     set_intList = [8, 16]
     set_num_bytes = 8
     set_data = b'\x08\x00\x00\x00\x10\x00\x00\x00'
@@ -107,7 +103,6 @@ def test_write_FR_int_list():
 
 
 def test_write_FR_single_long():
-
     set_long = 8
 
     set_num_bytes = 8
@@ -124,7 +119,6 @@ def test_write_FR_single_long():
 
 
 def test_write_FR_long_list():
-
     set_long_list = [8, 16]
     set_num_bytes = 16
     set_data = \
@@ -138,7 +132,6 @@ def test_write_FR_long_list():
 
 
 def test_write_FR_single_float():
-
     set_float = 3.14
     set_num_bytes = 4
     set_data = b'\xc3\xf5H@'
@@ -154,7 +147,6 @@ def test_write_FR_single_float():
 
 
 def test_write_FR_float_list():
-
     set_floatList = [3.14, 0.3333]
     set_num_bytes = 8
     set_data = b'\xc3\xf5H@L\xa6\xaa>'
@@ -167,13 +159,12 @@ def test_write_FR_float_list():
 
 
 def test_write_FR_single_double():
-
     set_double = 3.14
     set_num_bytes = 8
     set_data = b'\x1f\x85\xebQ\xb8\x1e\t@'
 
     # create new record
-    test_record = _FortranRecord('',  0)  # already tested
+    test_record = _FortranRecord('', 0)  # already tested
 
     # write double
     test_record.put_double(set_double)
@@ -183,7 +174,6 @@ def test_write_FR_single_double():
 
 
 def test_write_FR_double_list():
-
     set_double_list = [3.14, 0.3333]
     set_num_bytes = 16
     set_data = b'\x1f\x85\xebQ\xb8\x1e\t@io\xf0\x85\xc9T\xd5?'
@@ -196,7 +186,6 @@ def test_write_FR_double_list():
 
 
 def test_write_FR_single_string():
-
     set_string = "Hello World!"
     set_length = len(set_string)
     set_num_bytes = 12
@@ -213,7 +202,6 @@ def test_write_FR_single_string():
 
 
 def test_write_FR_string_list():
-
     set_string_list = ["Hello ", "World!"]
     set_length = len(set_string_list[0])
     set_num_bytes = 12
@@ -227,15 +215,14 @@ def test_write_FR_string_list():
 
 
 def test_write_FR_mixed_record():
-
     set_int = 8
     set_float = 3.14
     set_double_list = [1.6e-19, 6.02e23]
     set_string = "Hello World!"
 
-    set_num_bytes = 4+4+(2*8)+12
+    set_num_bytes = 4 + 4 + (2 * 8) + 12
     set_data = b'\x08\x00\x00\x00Hello World!#B\x92\x0c\xa1\x9c\x07<a\xd3' + \
-        b'\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
+               b'\xa8\x10\x9f\xde\xdfD\xc3\xf5H@'
 
     test_record = _FortranRecord('', 0)
     test_record.put_int(set_int)
@@ -246,6 +233,7 @@ def test_write_FR_mixed_record():
     return check_write_record_data(test_record, set_num_bytes, set_num_bytes,
                                    set_data, "list of doubles")
 
+
 ###################
 #
 # Test reading from all the different combinations of data type and single
@@ -255,16 +243,15 @@ def test_write_FR_mixed_record():
 
 
 def test_read_FR_single_int():
-
     set_int = 8
 
     test_record = _FortranRecord('', 0)  # already tested
-    test_record.put_int([set_int])       # already tested
+    test_record.put_int([set_int])  # already tested
 
-    test_record.reset()                 # already tested
+    test_record.reset()  # already tested
 
     test_int = test_record.get_int()[0]
-    
+
     if test_int != set_int:
         raise ValueError("Value from get_int doesn't match value "
                          "from put_int.")
@@ -273,14 +260,13 @@ def test_read_FR_single_int():
 
 
 def test_read_FR_int_list():
-
     set_intList = [8, 16]
     num_ints = 2
 
     test_record = _FortranRecord('', 0)  # already tested
-    test_record.put_int(set_intList)       # already tested
+    test_record.put_int(set_intList)  # already tested
 
-    test_record.reset()                 # already tested
+    test_record.reset()  # already tested
 
     test_int = test_record.get_int(num_ints)
 
@@ -292,13 +278,12 @@ def test_read_FR_int_list():
 
 
 def test_read_FR_single_long():
-
     set_long = 8
 
     test_record = _FortranRecord('', 0)  # already tested
-    test_record.put_long([set_long])       # already tested
+    test_record.put_long([set_long])  # already tested
 
-    test_record.reset()                 # already tested
+    test_record.reset()  # already tested
 
     testLong = test_record.get_long()[0]
 
@@ -310,14 +295,13 @@ def test_read_FR_single_long():
 
 
 def test_read_FR_long_list():
-
     set_long_list = [8, 16]
     numLongs = 2
 
     test_record = _FortranRecord('', 0)  # already tested
-    test_record.put_long(set_long_list)       # already tested
+    test_record.put_long(set_long_list)  # already tested
 
-    test_record.reset()                 # already tested
+    test_record.reset()  # already tested
 
     testLong = test_record.get_long(numLongs)
 
@@ -329,7 +313,6 @@ def test_read_FR_long_list():
 
 
 def test_read_FR_single_float():
-
     set_float = 6.1
 
     test_record = _FortranRecord('', 0)
@@ -353,7 +336,6 @@ def test_read_FR_single_float():
 
 
 def test_read_FR_float_list():
-
     floatList = [2.34, 8.65]
 
     test_record = _FortranRecord('', 0)
@@ -378,7 +360,6 @@ def test_read_FR_float_list():
 
 
 def test_read_FR_single_double():
-
     set_double = 1.43
 
     test_record = _FortranRecord('', 0)
@@ -396,7 +377,6 @@ def test_read_FR_single_double():
 
 
 def test_read_FR_double_list():
-
     double_list = [2.34, 8.65]
 
     test_record = _FortranRecord('', 0)
@@ -414,7 +394,6 @@ def test_read_FR_double_list():
 
 
 def test_read_FR_single_string():
-
     set_string = "Hello World!"
     set_length = len(set_string)
 
@@ -434,7 +413,6 @@ def test_read_FR_single_string():
 
 
 def test_read_FR_string_list():
-
     set_string_list = ["Hello ", "World!"]
     set_length = len(set_string_list[0])
 
@@ -452,7 +430,6 @@ def test_read_FR_string_list():
 
 
 def test_read_FR_mixed_record():
-
     set_int = 8
     set_float = 3.14
     set_double_list = [1.6e-19, 6.02e23]
@@ -502,7 +479,6 @@ def test_read_FR_mixed_record():
 ####################
 
 def test_open_writable_BR():
-
     binary_file = _BinaryReader('test.file', 'wb')
     if not binary_file.f:
         raise ValueError("Failed to open new file for writing.")
@@ -513,7 +489,6 @@ def test_open_writable_BR():
 
 
 def test_write_BR():
-
     binary_file = _BinaryReader('test.file', 'wb')
     if not binary_file.f:
         raise ValueError("Failed to open new file for writing.")
@@ -542,7 +517,6 @@ def test_write_BR():
 
 
 def test_read_BR():
-
     set_int = 8
     set_float = 3.14
     set_double_list = [1.6e-19, 6.02e23]
@@ -553,9 +527,9 @@ def test_read_BR():
     test_record = binary_file.get_fortran_record()
 
     try:
-    	test_int = test_record.get_int()[0]
+        test_int = test_record.get_int()[0]
     except:
-	raise SkipTest
+        raise SkipTest
     assert_equal(set_int, test_int)
 
     test_string = test_record.get_string(12)[0]
@@ -805,7 +779,7 @@ except Exception as inst:
     print(failed + ": " + str(inst))
     tests[1] += 1
 
-print("Ran    " + str(tests[0]+tests[1]) + " tests.")
+print("Ran    " + str(tests[0] + tests[1]) + " tests.")
 print("PASSED " + str(tests[0]) + " tests.")
 print("FAILED " + str(tests[1]) + " tests.")
 

@@ -14,13 +14,13 @@ import os
 import json
 
 # local imports 
-cimport cpp_pyne
+cimport cpp_utils
 import pyne.__init__
 
-prefix = os.path.split(pyne.__init__.__file__)[0]
+prefix = os.path.dirname(pyne.__init__.__file__)
 
-lib = os.path.join(prefix, 'lib')
-includes = os.path.join(prefix, 'include')
+lib = os.path.abspath(os.path.join(prefix, '..', '..', '..', '..', 'lib'))
+includes = os.path.abspath(os.path.join(prefix, '..', '..', '..', '..', 'include'))
 nuc_data = os.path.join(prefix, 'nuc_data.h5')
 
 
@@ -52,12 +52,10 @@ def pyne_start():
     #    os.environ[ldpath] += sepcha + os.path.join(md['HDF5_DIR'], libdll)
     
     # Call the C-version of pyne_start
-    cpp_pyne.pyne_start()
-
+    cpp_utils.pyne_start()
 
 # Run the appropriate start-up routines
 pyne_start()
-
 
 ################################
 ### PyNE Configuration Class ###
@@ -67,23 +65,22 @@ cdef class PyneConf:
 
     property PYNE_DATA:
         def __get__(self):
-            cdef std_string value = cpp_pyne.PYNE_DATA
+            cdef std_string value = cpp_utils.PYNE_DATA
             return <char *> value.c_str()
 
         def __set__(self, char * value):
-            cpp_pyne.PYNE_DATA = std_string(value)
+            cpp_utils.PYNE_DATA = std_string(value)
 
 
     property NUC_DATA_PATH:
         def __get__(self):
-            cdef std_string value = cpp_pyne.NUC_DATA_PATH
+            cdef std_string value = cpp_utils.NUC_DATA_PATH
             return <char *> value.c_str()
 
         def __set__(self, char * value):
-            cpp_pyne.NUC_DATA_PATH = std_string(value)
+            cpp_utils.NUC_DATA_PATH = std_string(value)
 
 
-        
 # Make a singleton of the pyne config object
 pyne_conf = PyneConf()
 
@@ -92,5 +89,3 @@ if pyne_conf.PYNE_DATA == "<NOT_FOUND>":
     pyne_conf.PYNE_DATA = os.environ['PYNE_DATA']
 if pyne_conf.NUC_DATA_PATH == "<NOT_FOUND>":
     pyne_conf.NUC_DATA_PATH = os.environ['NUC_DATA_PATH']
-
-

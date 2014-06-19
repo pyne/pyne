@@ -1,5 +1,5 @@
 /// Json-cpp amalgated source (http://jsoncpp.sourceforge.net/).
-/// It is intented to be used with #include <json/json.h>
+/// It is intented to be used with #include <json.h>
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -72,8 +72,13 @@ license you like.
 
 
 
-
-#include <json/json.h>
+#ifdef PYNE_IS_AMALGAMATED
+  #if !defined(JSON_IS_AMALGAMATION)
+    #define JSON_IS_AMALGAMATION
+  #endif
+#else
+  #include "json.h"
+#endif
 
 
 // //////////////////////////////////////////////////////////////////////

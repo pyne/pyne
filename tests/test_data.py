@@ -4,11 +4,12 @@ import math
 import warnings
 
 import nose
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, assert_true
 import numpy as np
 import numpy.testing as npt
 
 from pyne.utils import VnVWarning
+
 warnings.simplefilter("ignore", VnVWarning)
 
 import pyne
@@ -54,6 +55,30 @@ def test_gamma_frac():
     assert_equal(data.gamma_frac('H1'), 0.0)
     assert_equal(data.gamma_frac(92235), 0.036)
     assert_equal(data.gamma_frac(110240001), 0.998)
+
+
+def test_ext_air_dose():
+    assert_equal(data.ext_air_dose(40100000), 1.49E-10)
+    assert_equal(data.ext_air_dose('H3', 0), 4.41E-12)
+    assert_true(math.isnan(data.ext_air_dose(25054, 1)))
+
+
+def test_ext_soil_dose():
+    assert_equal(data.ext_soil_dose(40100000, 0), 0.537)
+    assert_equal(data.ext_soil_dose('H3', 2), 3.49E-8)
+    assert_equal(data.ext_soil_dose(25054, 1), 9590.0)
+
+    
+def test_ingest_dose():
+    assert_equal(data.ingest_dose(40100000), 4.66E-6)
+    assert_equal(data.ingest_dose('H3', 2), 6.12E-8)
+    assert_equal(data.ingest_dose(25054, 1), 2.7E-6)
+
+    
+def test_inhale_dose():
+    assert_equal(data.inhale_dose(40100000), 0.000354)
+    assert_equal(data.inhale_dose('H3', 2), 9.02E-8)
+    assert_equal(data.inhale_dose(25054, 1), 6.4E-6)
 
 
 def test_b_coherent():
@@ -358,6 +383,19 @@ def test_ecbp_xray():
                               (1.041, 6.4057828790558e-06),
                               (1.07, 1.6080514843315978e-07),
                               (np.nan, 0.0)]])
+
+
+def test_gamma_photon_intensity_byen():
+    npt.assert_almost_equal(data.gamma_photon_intensity_byen(661.657, 0.05),
+                            [(0.08, 0.017),
+                             (16.0, 3.0),
+                             (85.1, 0.2),
+                             (89.9, 0.14),
+                             (1.5, 0.1),
+                             (0.14, np.nan),
+                             (160.0, 24.0),
+                             (0.32, 0.1),
+                             (5.0, np.nan)])
 
 
 if __name__ == "__main__":

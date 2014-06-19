@@ -23,7 +23,7 @@
 #ifndef PYNE_IS_AMALGAMATED
 #include "h5wrap.h"
 #include "extra_types.h"
-#include "pyne.h"
+#include "utils.h"
 #include "nucname.h"
 #include "rxname.h"
 #endif
@@ -102,8 +102,10 @@ namespace pyne
   /// \name Q_value Data
   /// \{
 
-  /// Mapping from nuclides in id form to their q_values.
+  /// Mapping from nuclides in id form to their q_values and 
+  /// the fraction of Q that comes from gammas.
   extern std::map<int, double> q_val_map;
+  extern std::map<int, double> gamma_frac_map;
 
   /// a struct matching the q_value table in nuc_data.h5.
   typedef struct q_val_struct {
@@ -121,34 +123,68 @@ namespace pyne
   /// If this map is empty, it will load the data from disk. If the nuclide simply 
   /// cannot be found, the default value returned is 0.0.
   double q_val(int nuc);
-  /// Returns the q_value of a nuclide \a nuc.
-  double q_val(char * nuc); 
-  /// Returns the q_value of a nuclide \a nuc.
+  double q_val(const char * nuc); 
   double q_val(std::string nuc); 
-  /// \}
-
-
-
-  /// \name Gamma Fraction of Q Values Data
-  /// \{
-
-  /// Mapping from nuclides in id form to the fraction of Q that comes from gammas.
-  extern std::map<int, double> gamma_frac_map;
-
-  /// \brief Returns the natural abundance of a nuclide \a nuc.  
-  /// 
-  /// This follows the same the basic rules for finding or computing the fraction
-  /// of Q that comes from gammas as the q_val() functions do.
-  /// If the nuclide cannot be found, the default value returned is 0.0.
   double gamma_frac(int nuc);
-  /// Returns the gamma_frac of a nuclide \a nuc. 
-  double gamma_frac(char * nuc); 
-  /// Returns the gamma_frac of a nuclide \a nuc. 
+  double gamma_frac(const char * nuc); 
   double gamma_frac(std::string nuc); 
   /// \}
 
 
+  /// \name Dose Factor Data
+  /// \{
 
+  /// A struct matching the dose factor table in nuc_data.h5.
+  typedef struct dose_struct {
+    int nuc;              ///< nuclide in id form
+    double ext_air_dose;  ///< nuclide ext_air dose factor [mrem/h per Ci/m^3]
+    double ratio;         ///< ratio of external air dose factor to dose factor due to inhalation
+    double ext_soil_dose; ///< nuclide ext_soil dose factor [mrem/h per Ci/m^2]
+    double ingest_dose;   ///< nuclide dose factor due to ingestion [mrem/pCi]
+    double fluid_frac;    ///< fraction of activity abosorbed in body fluids
+    double inhale_dose;   ///< nuclide dose factor due to inhalation [mrem/pCi]
+    char lung_mod;        ///< model of lung used (time of biological half life-- D, W, or Y)
+  } dose_struct;
+
+  /// Mapping from int to dose_struct for 3 sources
+  extern std::map<int, dose_struct> epa_dose_map;
+  extern std::map<int, dose_struct> doe_dose_map;
+  extern std::map<int, dose_struct> genii_dose_map;
+
+  /// Loads the dose factor data from the nuc_data.h5 file into memory
+  /// according to the user-input source.
+  void _load_dose_map(std::map<int, dose_struct>& dm, std::string source_path);
+
+  /// \brief Returns the dose factors of a nuclide.  
+  /// 
+  /// These functions will first try to find the dose factor data in the dose_maps.
+  /// If the maps are empty, it will load the data from disk. If the nuclide simply 
+  /// cannot be found, the default value returned is -1.
+  double ext_air_dose(int nuc, int source);
+  double ext_air_dose(const char * nuc, int source); 
+  double ext_air_dose(std::string nuc, int source);
+  double ext_soil_dose(int nuc, int source);
+  double ext_soil_dose(const char * nuc, int source); 
+  double ext_soil_dose(std::string nuc, int source);
+  double ingest_dose(int nuc, int source);
+  double ingest_dose(const char * nuc, int source); 
+  double ingest_dose(std::string nuc, int source);
+  double inhale_dose(int nuc, int source);
+  double inhale_dose(const char * nuc, int source);
+  double inhale_dose(std::string nuc, int source);
+  double dose_ratio(int nuc, int source);
+  double dose_ratio(const char * nuc, int source);
+  double dose_ratio(std::string nuc, int source);
+  double dose_fluid_frac(int nuc, int source);
+  double dose_fluid_frac(const char * nuc, int source);
+  double dose_fluid_frac(std::string nuc, int source);
+  std::string dose_lung_model(int nuc, int source);
+  std::string dose_lung_model(const char * nuc, int source); 
+  std::string dose_lung_model(std::string nuc, int source);
+  /// \}
+
+
+  
   /// \name Scattering Length Data
   /// \{
 
@@ -501,6 +537,8 @@ namespace pyne
   std::vector<std::pair<double, double> > gamma_energy(int parent);
   //returns a list of gamma photon intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_photon_intensity(int parent);
+  std::vector<std::pair<double, double> > gamma_photon_intensity(double energy,
+   double error);
   //returns a list of gamma conversion intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_conversion_intensity(int parent);
   //returns a list of gamma total intensities from input parent nuclide

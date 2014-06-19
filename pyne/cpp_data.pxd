@@ -44,12 +44,40 @@ cdef extern from "data.h" namespace "pyne":
     double q_val(char *) except +
     double q_val(std_string) except +
 
-    # gamma_frac functions
     map[int, double] gamma_frac_map
     double gamma_frac(int) except +
     double gamma_frac(char *) except +
     double gamma_frac(std_string) except +
 
+    # ext_air_dose functions
+    double ext_air_dose(int, int) except +
+    double ext_air_dose(char *, int) except +
+    double ext_air_dose(std_string, int) except +
+    double dose_ratio(int, int) except +
+    double dose_ratio(char *, int) except +
+    double dose_ratio(std_string, int) except +
+    
+    # ext_soil_dose functions
+    double ext_soil_dose(int, int) except +
+    double ext_soil_dose(char *, int) except +
+    double ext_soil_dose(std_string, int) except +
+
+    # ingest_dose functions
+    double ingest_dose(int, int) except +
+    double ingest_dose(char *, int) except +
+    double ingest_dose(std_string, int) except +
+    double dose_fluid_frac(int, int) except +
+    double dose_fluid_frac(char *, int) except +
+    double dose_fluid_frac(std_string, int) except +
+
+    # inhale_dose functions
+    double inhale_dose(int, int) except +
+    double inhale_dose(char *, int) except +
+    double inhale_dose(std_string, int) except +
+    std_string dose_lung_model(int, int) except +
+    std_string dose_lung_model(char *, int) except +
+    std_string dose_lung_model(std_string, int) except +
+    
     # Scattering length functions
     map[int, extra_types.complex_t] b_coherent_map
     extra_types.complex_t b_coherent(int) except +
@@ -117,6 +145,8 @@ cdef extern from "data.h" namespace "pyne":
 
     vector[pair[double, double]] gamma_energy(int parent) except +
     vector[pair[double, double]] gamma_photon_intensity(int parent) except +
+    vector[pair[double, double]] gamma_photon_intensity(double energy,
+                                                        double error) except +
     vector[pair[double, double]] gamma_conversion_intensity(int parent) except +
     vector[pair[double, double]] gamma_total_intensity(int parent) except +
     vector[pair[int, int]] gamma_from_to(int parent) except +

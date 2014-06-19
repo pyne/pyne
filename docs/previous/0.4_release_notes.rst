@@ -1,0 +1,64 @@
+======================
+PyNE 0.4 Release Notes
+======================
+
+PyNE 0.4 is the latest, greatest release of PyNE: The Nuclear Engineering Toolkit 
+project after an additional six months of effort.  PyNE is a free and open source 
+(BSD licensed) project whose goal is to become a necessary package in the computational 
+nuclear engineer's toolkit.  It is meant to play nicely with existing, industry standard
+nuclear engineering tools.  PyNE is meant to be both fast and useful.  
+
+Release highlights:
+
+  - Nuclear data updates, including full ENSDF support 
+  - Python 3 support
+  - R2S activation workflow
+  - Tally class for Monte Carlo tallies
+  - CADIS variance reduction implementation
+  - Pydagmc integration 
+  - Verification and validation workflow implemented
+  - Style guide adoption
+  - New tutorial
+  - Removal of simplesim
+
+This release represents over 976 commits, 325 files changed, 62846 insertions(+), 
+22162 deletions(-) since the version v0.3 release.  Additionally, over 125 issues were 
+closed on behalf of this release.
+
+Please visit our website for more information: http://pyne.io/
+Please contact us via our users mailing list 
+(https://groups.google.com/forum/#!forum/pyne-users or pyne-users@googlegroups.com) 
+if you have any questions on how to use or install pyne.
+
+Authors
+=======
+This release contains code written by the following people (in alphabetical 
+order). An (*) indicates a first-time contributor to pyne.
+
+* Cameron Bates*
+* Elliott Biondo
+* Carsten Brachem
+* Robert Carlsen*
+* Andrew Davis*
+* Christopher Dembia
+* Markus Elfring*
+* Robert Flanagan
+* Matthew Gidden
+* Tim Haines*
+* Joshua Howland*
+* Blake Huff*
+* Katy Huff
+* Steve Jackson*
+* Matthew Klebenow
+* Kevin Manalo*
+* Matt McCormick
+* Arrielle Christine Opotowsky*
+* Mohamad Rabbani
+* Eric Relson
+* Paul Romano
+* Anthony Scopatz
+* Patrick Shriwise*
+* Rachel Slaybaugh*
+* py1sl*
+* Paul Wilson
+* John Xia
