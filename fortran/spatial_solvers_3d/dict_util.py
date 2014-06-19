@@ -9,6 +9,22 @@ def dict_complete(inputdict):
 
 		formatted_dict = {}
 		try:
+			if((inputdict['solver'] == "AHOTN") or (inputdict['solver']=="DGFEM")):
+				formatted_dict['solver'] = inputdict['solver']
+			else:
+				raise InputDictError("solver does not exist")
+		except:
+			raise InputDictError("solver")
+		try:
+			formatted_dict['solver_type'] = inputdict['solver_type']
+		except:
+			#raise InputDictError("solver_type")
+			if(inputdict['solver'] == "AHOTN"):
+				formatted_dict['solver_type'] = "LN"
+			elif(inputdict['solver'] == "DGFEM"):
+				formatted_dict['solver_type'] = "NEED_DEFAULT..."
+		
+		try:
 			formatted_dict['spatial_order'] = inputdict['spatial_order']
 		except:
 			formatted_dict['spatial_order'] = 1
