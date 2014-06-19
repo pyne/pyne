@@ -19,15 +19,15 @@ def dict_complete(inputdict):
 			formatted_dict['spatial_method'] = 0
 			warn(warning_msg + " spatial_method value of 0")
 		try:
-			formatted_dict['quadrature_order'] = inputdict['quadrature_order']
+			formatted_dict['angular_quadrature_order'] = inputdict['angular_quadrature_order']
 		except:
-			formatted_dict['quadrature_order'] = 4
-			warn(warning_msg + " quadrature_order value of 4")
+			formatted_dict['angular_quadrature_order'] = 4
+			warn(warning_msg + " angular_quadrature_order value of 4")
 		try:
-			formatted_dict['quadrature_type'] = inputdict['quadrature_type']
+			formatted_dict['angular_quadrature_type'] = inputdict['angular_quadrature_type']
 		except:
-			formatted_dict['quadrature_type'] = 1
-			warn(warning_msg + " quadrature_type value of 1")
+			formatted_dict['qangular_uadrature_type'] = 1
+			warn(warning_msg + " angular_quadrature_type value of 1")
 		try:
 			formatted_dict['nodes_xyz'] = inputdict['nodes_xyz']
 		except:

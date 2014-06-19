@@ -4,8 +4,8 @@ def populate():
 		solver_dict = {
 		'spatial_order':1,
 		'spatial_method':0,
-		'quadrature_order':4,
-		'quadrature_type':1,
+		'angular_quadrature_order':4,
+		'angular_quadrature_type':1,
 		'nodes_xyz':[4,4,4],
 		'num_groups':1,
 		'num_materials':1,
@@ -36,8 +36,8 @@ def populate_with_warnings():
 		solver_dict = {
 		#'spatial_order':1,
 		#'spatial_method':0,
-		#'quadrature_order':4,
-		#'quadrature_type':1,
+		#'angular_quadrature_order':4,
+		#'angular_quadrature_type':1,
 		'nodes_xyz':[4,4,4],
 		#'num_groups':1,
 		#'num_materials':1,
