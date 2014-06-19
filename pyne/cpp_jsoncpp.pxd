@@ -3,7 +3,7 @@ from libc.string cimport const_char
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as std_vector
 
-cdef extern from "json/json.h" namespace "Json":
+cdef extern from "json.h" namespace "Json":
 
     cdef enum ValueType:
         nullValue,

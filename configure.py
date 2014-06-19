@@ -114,7 +114,6 @@ def setup():
     data_files = [
         ('lib', libpynes),
         ('include/pyne', glob('../cpp/*.h')),
-        ('include/pyne/json', glob('../cpp/json/*.h')),
         ]
     setup_kwargs = {
         "name": "pyne",

@@ -14,6 +14,9 @@ set(PYNE_SRCS
     "rxname.cpp"
     "tally.cpp"
     "utils.cpp"
+    "endf_base.cpp"
+    "endf_mt.cpp"
+    "endf.cpp"
     )
 if (MOAB_FOUND)
     set(PYNE_SRCS "${PYNE_SRCS}" "dagmc_bridge.cpp")    
