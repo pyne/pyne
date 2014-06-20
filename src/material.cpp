@@ -954,18 +954,28 @@ pyne::Material pyne::Material::expand_elements() {
 // sum up atom_fracs (don't forget to check form and change if nec first)
 pyne::Material pyne::Material::collapse_elements(std::vector<int> nucids) {
  
-  // 1. From the argument list of nucids, extract unique elements via z-number
+  // 1. From the argument list of nucids, extract elements
+  //    whose z-numbers are unique 
   std::set<int> znum_set;
-  std::vector<int>::iterator it;  
-  for (it = nucids.begin(); it != nucids.end();  ++it)
-  {
-    znum_set.insert(nucname::znum(*it));
+  std::set<int>::iterator zs_it;
+
+  std::vector<int>::iterator it;
+  for (it = nucids.begin(); it != nucids.end(); ++it) {
+    std::cout << "nucid: " << *it;
+    int znum = nucname::znum(*it);
+    std::cout << "znum: " << znum << std::endl;
+    znum_set.insert(znum);
   }
+  std::cout << std::endl;
+  for (zs_it = znum_set.begin(); zs_it != znum_set.end(); ++zs_it) {
+    std::cout << "zs element: " << *zs_it << std::endl;
+  }
+  // Temporory empty material
+  return Material();
   // for (comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++) {
 }
 
 // Wrapped version for calling from python
-/* TBD:  currently compiler doesn't recognize call to collaps_elements(..)
 pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
     std::vector<int> nucvec;
     // Set first pointer to first int pointed to by arg
@@ -975,9 +985,8 @@ pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
       nucvec.push_back(*int_ptr);
       int_ptr++;
     }
-    return pyne::Material::collapse_element(nucvec);
+    return collapse_elements(nucvec);
 }
-*/
 
 double pyne::Material::mass_density(double num_dens, double apm) {
   if (0.0 <= num_dens) {

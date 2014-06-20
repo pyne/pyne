@@ -232,6 +232,29 @@ def test_expand_elements2():
     assert_almost_equal(data.natural_abund(60120000), afrac[60120000])
     assert_almost_equal(data.natural_abund(60130000), afrac[60130000])
 
+def test_collapse_elements1():
+    nucvec = {10010000:  1.0,   
+          80160000:  1.0,   
+          691690000: 1.0,
+          922350000: 1.0,
+          922380000: 1.0,
+          942390000: 1.0,
+          942410000: 1.0,
+          952420000: 1.0,
+          962440000: 1.0,
+          }
+    nucids = {10010000,
+          80160000,  
+          691690000,
+          922350000,
+          922380000,
+          942390000,
+          942410000,
+          952420000,
+          962440000 }
+
+    degmat = Material(nucvec)
+    cmat   = degmat.collapse_elements(nucids)
 
 def test_mass_density():
     ethanol = from_atom_frac({'C':2, 'H':6, 'O':1})
