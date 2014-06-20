@@ -151,7 +151,7 @@ namespace pyne
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
     /// Reads data from a plaintext file at \a filename into this Material instance.
-    void from_text(std::string filname);
+    void from_text(std::string filename);
 
     /// Writes the Material out to a simple plaintext file readable by from_text().
     void write_text(char * filename);
@@ -194,6 +194,10 @@ namespace pyne
     /// Returns a copy of the current material where all natural elements in the
     /// composition are expanded to their natural isotopic abundances.
     Material expand_elements();
+    // Returns a copy of the current material where all the isotopes of the elements
+    // passed in as a nuclide list are added up, atomic-fraction-wise.
+    Material collapse_elements(std::vector<int>);
+    Material collapse_elements(int **);
     /// Computes, sets, and returns the mass density when \a num_dens is greater
     /// than or equal zero.  If \a num_dens is negative, this simply returns the
     /// current value of the density member variable.  You may also use / set the

@@ -950,6 +950,34 @@ pyne::Material pyne::Material::expand_elements() {
   return Material(newcomp, mass, density, atoms_per_molecule, metadata);
 };
 
+// This version will be called from c++, typically
+// sum up atom_fracs (don't forget to check form and change if nec first)
+pyne::Material pyne::Material::collapse_elements(std::vector<int> nucids) {
+ 
+  // 1. From the argument list of nucids, extract unique elements via z-number
+  std::set<int> znum_set;
+  std::vector<int>::iterator it;  
+  for (it = nucids.begin(); it != nucids.end();  ++it)
+  {
+    znum_set.insert(nucname::znum(*it));
+  }
+  // for (comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++) {
+}
+
+// Wrapped version for calling from python
+/* TBD:  currently compiler doesn't recognize call to collaps_elements(..)
+pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
+    std::vector<int> nucvec;
+    // Set first pointer to first int pointed to by arg
+    int *int_ptr = *int_ptr_arry;
+    while (int_ptr != NULL)
+    {
+      nucvec.push_back(*int_ptr);
+      int_ptr++;
+    }
+    return pyne::Material::collapse_element(nucvec);
+}
+*/
 
 double pyne::Material::mass_density(double num_dens, double apm) {
   if (0.0 <= num_dens) {
