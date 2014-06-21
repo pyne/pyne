@@ -1,6 +1,6 @@
 """This module provides a way to access neutron spatial solver codes.  It primarily consists of wrapped fortran code's being called with python via f2py"""
 
-from source.input import input as input
+from source.main import main as main
 #from AHOTN.src_LN.solve import solve as ahot_ln_solve
 #from AHOTN.src_LN.output import output as ahot_ln_output
 
@@ -8,7 +8,9 @@ from dict_util import dict_complete
 
 def ahotn(inputdict_unchecked):
 	inputdict = dict_complete(inputdict_unchecked)
-	input("test title in",
+	main("test title in",
+	inputdict['solver'],
+	inputdict['solver_type'],
 	inputdict['spatial_order'],
 	inputdict['spatial_method'],
 	inputdict['angular_quadrature_order'],
