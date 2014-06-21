@@ -11,7 +11,7 @@ SUBROUTINE sweep(g)
 
 USE invar
 USE solvar
-use ln_kernel_module
+use kernel_module
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: g
 INTEGER :: xs, xe, ys, ye, zs, ze, incx, incy, incz, ord, nfy, nfz
@@ -248,8 +248,11 @@ DO n = 1, apo
             b(4)=c*e(4,i,j,k) + s(1,0,0,i,j,k,g)/sig
 
             ! call AHOTN kernel
-            call  ln_kernel(x,y,z,mu,eta,xi,incx,incy,incz,sig,c,fx,fy(:,i,nfy),fz(:,i,j,nfy,nfz),b)
-
+						IF (solvertype == "LN" ) THEN
+	            call  ln_kernel(x,y,z,mu,eta,xi,incx,incy,incz,sig,c,fx,fy(:,i,nfy),fz(:,i,j,nfy,nfz),b)
+						ELSE IF (solvertype == "LL" ) THEN
+							call  ll_kernel(x,y,z,mu,eta,xi,incx,incy,incz,sig,c,fx,fy(:,i,nfy),fz(:,i,j,nfy,nfz),b)
+						END IF
             ! Update the scalar flux solution
             f(1,i,j,k,g) = f(1,i,j,k,g) + w(n)*b(1)
             f(2,i,j,k,g) = f(2,i,j,k,g) + w(n)*b(2)

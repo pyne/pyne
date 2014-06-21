@@ -10,7 +10,7 @@ SUBROUTINE solve
 USE invar
 USE solvar
 USE timevar
-USE ln_kernel_module
+USE kernel_module
 IMPLICIT NONE
 INTEGER :: i, j, k, t, u, v, m, g, gp
 REAL*8 :: xsct
@@ -60,7 +60,7 @@ DO g = 1, ng
    IF (meth == 0) THEN
       WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
       ! Call for the inner iteration (or ITM solver later)
-      CALL inner(g)
+      CALL inner_ahotn_l(g)
    ELSE IF (meth == 1) THEN
       STOP
       WRITE(8,*) 'Option meth=1 was removed'
