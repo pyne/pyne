@@ -6,7 +6,7 @@ def populate():
 		'solver_type':'LL',
 		'spatial_order':1,
 		'spatial_method':0,
-		'angular_quadrature_order':4,
+		'angular_quadrature_order':4,  #WORKS
 		'angular_quadrature_type':1,
 		'nodes_xyz':[4,4,4],
 		'num_groups':1,

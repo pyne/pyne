@@ -1,96 +1,174 @@
-PROGRAM ahot3d
 
-!-------------------------------  AHOT3D.1  -----------------------------------
-!  Updated f90 version of AHOT-N, originally composed by YYAzmy, ORNL, 4-1-92
-!  Update by RJZerr, May 2008
-!  Includes full three-dimensionality in the SI and ITM solution schemes
-!  Features:  1. Double Precision
-!             2. Module file for input variables
-!             3. General Order Nodal
-!             4. Multigroup with Isotropic Downscattering
-!             5. Printing and Solution Editing Options
-!             6. Multi-file Input/Output
+
+SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein, solverin, solvertypein, &
+ lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin, dxin, dyin, & 
+dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin, matin, qdfilein, xsfilein, & 
+srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momptin, &
+ qdflxin)
+!-------------------------------------------------------------
 !
-!  Use makefile in same directory to compile and link.
+!    Read the input from the input file
 !
-!----------------------------------------------------------------------------
+!    Comments below demonstrate order of the reading
+!
+!    Dependency: 
+!           angle   = gets the angular quadrature data
+!           readmt  = reads the material map from file
+!           readxs  = reads the cross sections
+!           readsrc = reads the source distribution
+!           check   = input check on all the values
+!
+!    Allows for dynamic allocation. Uses module to hold all 
+!      input variables: invar
+!
+!-------------------------------------------------------------
 
 USE invar
 USE solvar
-USE timevar
 IMPLICIT NONE
-CHARACTER(30) :: infile, outfile, qdfile, xsfile, srcfile, mtfile,inflow_file,&
-                phi_file    
-LOGICAL :: existence
+INTEGER :: i, j, k, n
+! File Names
+CHARACTER(30), INTENT(OUT) :: qdfile, xsfile, srcfile, mtfile,inflow_file,&
+                             phi_file
+LOGICAL :: ex1, ex2, ex3
+REAL*8 :: wtsum
 
-! Get information about the input and output files and check
-CALL GETARG (1, infile)
-CALL GETARG (2, outfile)
+CHARACTER(80), INTENT(IN) :: titlein
+CHARACTER(30), INTENT(IN) :: solverin, solvertypein
+INTEGER, INTENT(IN) :: lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin
+REAL*8, INTENT(IN), DIMENSION(:) :: dxin, dyin, dzin
+INTEGER, INTENT(IN) :: xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin 
 
-! Open the input supplied by the user
-OPEN (UNIT = 7, FILE = infile, STATUS = "OLD", ACTION = "READ")
+! Cell materials
+INTEGER, INTENT(IN), DIMENSION(:,:,:) :: matin
+!ALLOCATE(mat(nxin,nyin,nzin))
 
-! Check if the output file exists or not, then open appropriately
-INQUIRE (FILE = outfile, EXIST = existence)
-IF (existence .eqv. .TRUE.) THEN
-    OPEN (UNIT = 8, FILE = outfile, STATUS = "OLD", ACTION = "WRITE")
+CHARACTER(30), INTENT(IN) :: qdfilein, xsfilein, srcfilein
+
+! Iteration Controls
+REAL*8, INTENT(IN) :: errin, tolrin
+INTEGER, INTENT(IN) :: itmxin, iallin
+
+! Solution check frequency
+REAL*8, INTENT(IN) :: tchkin
+INTEGER, INTENT(IN) :: ichkin
+
+! Editing data
+INTEGER, INTENT(IN) :: mompin, momsumin, momptin, qdflxin
+
+title = titlein
+solver = solverin
+solvertype = solvertypein
+
+lambda = lambdain
+meth = methin
+qdord = qdordin
+qdtyp = qdtypin
+nx = nxin
+ny = nyin
+nz = nzin
+ng = ngin
+nm = nmin
+dx = dxin
+dy = dyin
+dz = dzin
+
+xsbc = xsbcin
+xebc = xebcin
+ysbc = ysbcin
+yebc = yebcin
+zsbc = zsbcin
+zebc = zebcin
+ 
+mat = matin
+
+inflow_file = "bc_4.dat"
+phi_file = "phi_4.ahot"
+
+err = errin
+tolr = tolrin
+itmx = itmxin
+iall = iallin
+
+tchk = tchkin
+ichk = ichkin
+
+momp = mompin
+momsum = momsumin
+mompt = momptin
+qdflx = qdflxin
+
+! Read the title of the case
+!103 FORMAT(A80)
+
+! Read Problem Size Specification:
+!   lambda => LAMDBA, the AHOT spatial order
+!   meth  => = 0/1 = AHOT-N/AHOT-N-ITM
+!   qdord => Angular quadrature order
+!   qdtyp => Angular quadrature type = 0/1/2 = TWOTRAN/EQN/Read-in
+!   nx    => Number of 'x' cells
+!   ny    => Number of 'y' cells
+!   nz    => Number of 'z' cells
+!   ng    => Number of groups
+!   nm    => Number of materials
+
+IF (lambda .ne. 1) then
+   WRITE(8,*) "ERROR: Lambda must be equal to one." 
+   STOP
+END IF
+
+! Check that the order given greater than zero and is even
+IF (qdord <= 0) THEN
+   WRITE(8,'(/,3x,A)') "ERROR: Illegal value for qdord. Must be greater than zero."
+   STOP
+ELSE IF (MOD(qdord,2) /= 0) THEN
+   WRITE(8,'(/,3x,A)') "ERROR: Illegal value for the quadrature order. Even #s only."
+   STOP
+END IF
+
+INQUIRE(FILE = xsfilein, EXIST = ex1)
+INQUIRE(FILE = srcfilein, EXIST = ex2)
+IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
+   WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
+   STOP
+END IF
+
+! Set up the extra needed info from the read input
+apo = (qdord*(qdord+2))/8
+order = lambda+1
+ordsq = order**2
+ordcb = order**3
+
+! Angular quadrature
+ALLOCATE(ang(apo,3), w(apo))
+IF (qdtyp == 2) THEN
+   INQUIRE(FILE=qdfilein, EXIST=ex3)
+   IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
+      WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
+      STOP
+   END IF
+   OPEN(UNIT=10, FILE=qdfilein)
+   READ(10,*)
+   READ(10,*) (ang(n,1),ang(n,2),w(n),n=1,apo)
+   ! Renormalize all the weights
+   wtsum = SUM(w)
+   DO n = 1, apo
+      w(n) = w(n) * 0.125/wtsum
+   END DO
 ELSE
-    OPEN (UNIT = 8, FILE = outfile, STATUS = "NEW", ACTION = "WRITE")
+   CALL angle
 END IF
 
-! Set up the introductory info
-CALL version
+IF (qdtyp == 2) CLOSE(UNIT=10)
 
-! Read input data:
-! Input will call dependency algorithms, namely the input check
-CALL input(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file)
-
-! Echo the input data:
-CALL echo(infile, outfile, qdfile, xsfile, srcfile, mtfile)
-
-! Solve the transport problem:
-! Solve will call dependency algorithms: inner, weight, sweep
+   ! Call for the input check
+CALL check
+   ! Call to read the cross sections and source; do their own input check
+CALL readxs(xsfilein)
+CALL readsrc(srcfilein)
+IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
+CALL echo(qdfile, xsfile, srcfile, mtfile)
 CALL solve
-
-! Print the output
 CALL output
-
-! Print scalar fluxes
-CALL output_phi(phi_file)
-
-! Time the end of the job
-CALL CPU_TIME(tend)
-
-! Print the relevant times of the execution
-WRITE(8,'(/,2X,A,/)') "Fortran95 Timing Estimates with CPU_TIME..."
-WRITE(8,100)
-WRITE(8,101) "InputWrk", ttosolve, ttosolve
-IF (meth == 1) THEN
-   WRITE(8,101) "MakeJMAT", tjmat, tjmat-ttosolve
-   WRITE(8,101) "SolveITM", tsolve, tsolve-tjmat
-END IF
-WRITE(8,101) "SolveTot", tsolve, tsolve-ttosolve
-WRITE(8,101) "PrintOut", tend, tend-tsolve
-WRITE(8,102)
-100 FORMAT(5X,'WorkDone',3X,'Absolute(s)',6X,'Difference(s)')
-101 FORMAT(5X,A8,3X,F9.3,5X,F9.3)
-102 FORMAT(//,'*********************   END PROGRAM  ************************')
-
-! Deallocate the allocated arrays
-DEALLOCATE(dx,dy,mat,ssum,ang,w,sigt,sigs,s) !,f,e)
-IF ( ALLOCATED(frbc) ) THEN
-   DEALLOCATE(frbc,babc,lebc,ribc,bobc,tobc)
-END IF
-IF (meth == 1) THEN
-   DEALLOCATE(amat,bmat,gmat,jmat,gaa,gaxy,gaxz,gayz)
-   DEALLOCATE(gxya,gxyxy,gxyxz,gxyyz,gxza,gxzxy,gxzxz,gxzyz)
-   DEALLOCATE(gyza,gyzxy,gyzxz,gyzyz,xmat,ymat,zmat)
-END IF
-IF (momsum == 1) THEN
-   DEALLOCATE(phisum)
-END IF
-
-! End the AHOT program
-
-STOP
-END PROGRAM ahot3d
+RETURN 
+END SUBROUTINE main

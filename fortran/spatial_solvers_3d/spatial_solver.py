@@ -1,6 +1,7 @@
 """This module provides a way to access neutron spatial solver codes.  It primarily consists of wrapped fortran code's being called with python via f2py"""
 
-from source.main import main as main
+#from source.main import main as main
+from AHOTN.src_LL.main import main as main
 #from AHOTN.src_LN.solve import solve as ahot_ln_solve
 #from AHOTN.src_LN.output import output as ahot_ln_output
 

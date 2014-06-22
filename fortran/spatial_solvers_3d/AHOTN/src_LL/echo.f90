@@ -1,4 +1,4 @@
-SUBROUTINE echo(infile, outfile, qdfile, xsfile, srcfile, mtfile)
+SUBROUTINE echo(qdfile, xsfile, srcfile, mtfile)
 
 !-------------------------------------------------------------
 !
@@ -11,7 +11,7 @@ IMPLICIT NONE
 INTEGER :: i,j,k,t,u,v,g,m,n
 INTEGER :: ix,iy,iz,jx,jy,jz
 ! File Names
-CHARACTER(30), INTENT(IN) :: infile, outfile, qdfile, xsfile, srcfile, mtfile
+CHARACTER(30), INTENT(IN) :: qdfile, xsfile, srcfile, mtfile
 
 
 ! Start the echo
@@ -39,12 +39,10 @@ WRITE (8,105) "Highest moment converged = ", iall
 107 FORMAT(1X,A,ES10.3)
 
 ! Write the names of the files used
-WRITE (8,'(/,1X,A,A8)') "Data read from input file: ", infile
 WRITE (8,'(/,1X,A,A8)') "Material map read from file: ", mtfile
 IF (qdtyp == 2) WRITE (8,'(A,A8)') "Quadrature data from file: ", qdfile
 WRITE (8,'(1X,A,A8)') "Cross sections from file: ", xsfile
 WRITE (8,'(1X,A,A8)') "Source data from file: ", srcfile
-WRITE (8,'(1X,A,A8,/)') "Output written to file: ", outfile
 
 ! Write the angular quadrature information        
 IF (qdtyp == 0) THEN
