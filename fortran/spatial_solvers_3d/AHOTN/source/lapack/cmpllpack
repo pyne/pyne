@@ -1,0 +1,45 @@
+#!/bin/bash
+cd lapack_routine
+gfortran -c -O3  dlamch.f  
+gfortran -c -O3  ieeeck.f  
+gfortran -c -O3  ilaenv.f  
+gfortran -c -O3  iparmq.f
+gfortran -c -O3  lsame.f
+gfortran -c -O3  xerbla.f
+mv *o ../
+cd ../double
+gfortran -c -O3  dtrsm.f
+gfortran -c -O3  dgesv.f
+gfortran -c -O3  dgetf2.f
+gfortran -c -O3  dgetrf.f
+gfortran -c -O3  dgetrs.f
+gfortran -c -O3  dlaswp.f
+gfortran -c -O3  idamax.f
+gfortran -c -O3  dswap.f
+gfortran -c -O3  dscal.f
+gfortran -c -O3  dger.f
+gfortran -c -O3  dgemm.f
+gfortran -c -O3  dgemv.f
+gfortran -c -O3  dsysv.f
+gfortran -c -O3  dposv.f
+gfortran -c -O3  dpotrs.f
+gfortran -c -O3  dpotrf.f
+gfortran -c -O3  dsytrf.f
+gfortran -c -O3  dsytrs.f
+gfortran -c -O3  dsytrs2.f
+gfortran -c -O3  dsyrk.f
+gfortran -c -O3  dpotf2.f
+gfortran -c -O3  dlasyf.f
+gfortran -c -O3  dsytf2.f
+gfortran -c -O3  dsytrs2.f
+gfortran -c -O3  dsyconv.f
+gfortran -c -O3  dcopy.f
+gfortran -c -O3  ddot.f
+gfortran -c -O3  disnan.f
+gfortran -c -O3  dsyr.f
+gfortran -c -O3  dlaisnan.f
+mv *o ../
+cd ../
+ar rc lapack.a *.o
+rm *o
+
