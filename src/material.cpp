@@ -953,11 +953,12 @@ pyne::Material pyne::Material::expand_elements() {
 // This version will be called from c++, typically
 // sum up atom_fracs (don't forget to check form and change if nec first)
 pyne::Material pyne::Material::collapse_elements(std::vector<int> nucids) {
- 
+  // This can be simplified 
+
   // 1. From the argument list of nucids, extract elements
-  //    whose z-numbers are unique 
+  //    whose z-numbers are unique => znum_set
   std::set<int> znum_set;
-  std::set<int>::iterator zs_it;
+  std::set<int>::const_iterator zs_it;
 
   std::vector<int>::iterator it;
   for (it = nucids.begin(); it != nucids.end(); ++it) {
@@ -966,14 +967,46 @@ pyne::Material pyne::Material::collapse_elements(std::vector<int> nucids) {
     std::cout << "znum: " << znum << std::endl;
     znum_set.insert(znum);
   }
+//  collapse_elements(znum_set);
+// }
+
+// pyne::Material pyne::Material::collapse_elements(std::set<int> znum_set) {
+  // 2.  Foreach unique z-number get the one-or-more matching nucids
+  std::map<int,std::vector<int> > unique_map;
   std::cout << std::endl;
   for (zs_it = znum_set.begin(); zs_it != znum_set.end(); ++zs_it) {
-    std::cout << "zs element: " << *zs_it << std::endl;
+    int u_znum = *zs_it;
+    std::cout << "unique z_num: " << u_znum << std::endl;
+    // Set up a container element for the map
+    std::pair<int, std::vector<int> > umap_el = std::make_pair(*zs_it, std::vector<int>());
+    unique_map.insert(umap_el);
+
+    // Get all the input nucids with this z_num
+    for (it = nucids.begin(); it != nucids.end(); ++it) {
+      int nznum = nucname::znum(*it);
+      // The current input nucid matches the current unique id
+      if (u_znum == nznum) {
+        unique_map.at(u_znum).push_back(*it);
+      }
+    }
   }
+  // Check by printing out the unique_map just created
+  std::cout << std::endl;
+
+  std::map<int,std::vector<int> >::iterator map_ptr;
+  for (map_ptr = unique_map.begin(); map_ptr != unique_map.end(); ++map_ptr) {
+    std::cout << map_ptr->first << ": ";
+    for (std::vector<int>::iterator vptr = map_ptr->second.begin(); 
+      vptr != map_ptr->second.end(); ++vptr) {
+      std::cout << "( " << *vptr << ", " << comp[*vptr] << " ), ";
+      }
+    std::cout << std::endl;
+  }
+
   // Temporory empty material
   return Material();
-  // for (comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++) {
 }
+
 
 // Wrapped version for calling from python
 pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {

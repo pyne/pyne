@@ -234,7 +234,7 @@ def test_expand_elements2():
 
 def test_collapse_elements1():
     nucvec = {10010000:  1.0,   
-          80160000:  1.0,   
+           80160000: 1.0,   
           691690000: 1.0,
           922350000: 1.0,
           922380000: 1.0,
@@ -253,8 +253,16 @@ def test_collapse_elements1():
           952420000,
           962440000 }
 
-    degmat = Material(nucvec)
-    cmat   = degmat.collapse_elements(nucids)
+    mat  = Material(nucvec)
+    cmat = mat.collapse_elements(nucids)
+    # Expected results
+     
+    nucids_92 = { 922350000, 922380000 }
+    nucids_94 = { 942390000, 942410000 }
+    dict_92 = {92: nucids_92}
+    dict_94 = {94: nucids_94}
+
+
 
 def test_mass_density():
     ethanol = from_atom_frac({'C':2, 'H':6, 'O':1})
