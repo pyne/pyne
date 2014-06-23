@@ -3,7 +3,7 @@
 def populate():
 		solver_dict = {
 		'solver':'AHOTN',
-		'solver_type':'LN',
+		'solver_type':'LL',
 		'spatial_order':1,
 		'spatial_method':0,
 		'angular_quadrature_order':4,  #WORKS

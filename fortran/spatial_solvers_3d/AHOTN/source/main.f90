@@ -112,9 +112,11 @@ qdflx = qdflxin
 !   ng    => Number of groups
 !   nm    => Number of materials
 
-IF (lambda .ne. 1) then
-   WRITE(8,*) "ERROR: Lambda must be equal to one." 
-   STOP
+IF (solvertype == "LN" .or. solvertype == "LL") THEN
+	IF (lambda .ne. 1) then
+ 	  WRITE(8,*) "ERROR: Lambda must be equal to one." 
+ 	  STOP
+	END IF
 END IF
 
 ! Check that the order given greater than zero and is even
