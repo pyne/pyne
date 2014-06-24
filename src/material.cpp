@@ -953,8 +953,7 @@ pyne::Material pyne::Material::expand_elements() {
 // This version will be called from c++, typically
 // sum up atom_fracs (don't forget to check form and change if nec first)
 pyne::Material pyne::Material::collapse_elements(std::set<int> ids_to_collapse) {
-
-  // print_material(*this);
+  //////////////////////////////////////////////////////////////
   // From the argument list of nucids, extract z_nums
   //    and make a unique set => znum_set
   //    and a map from znum to nucid
@@ -966,21 +965,18 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> ids_to_collapse) 
     collapsed_id[nucname::znum(*it)] = *it;
   }
 
-  // New algorithm
-  // 0. Setup
-  //    o Make a new comp_map cm
-  //    o Make a map<int, int> collapsed_id such that 
-  //      collapsed_id[z_num] = collapsed_nucid
-  // 1. for each component in this material
-  //    a. Its z-num is not in the list of nucids to collapse
+  // Algorithm
+  // 0. Setup comp map and map connecting znum to specific nucid
+  // 1. for each component in this material, look at its znum:
+  //    if z-num is not in the list of nucids to collapse
   //       => Put the map element into the new comp map
-  //    b. -or-  Its z_num *is* in the list of nucids to collapse
-  //        i) the nucid is in the passed-in-list 
+  //    else if z_num *is* in the list of nucids to collapse
+  //        if the nucid is in the passed-in-list 
   //           => put the element in to the new comp map
-  //       ii) the nucid is NOT in the passed in list
-  //           => ADD the component to the one of the same id that's in the passed-in-list
-  //           Note: to facilitate this, map z_num to nucid of passed in list: 
-  //           mymap[z_num] = mycollapsednucid
+  //        else if the nucid is NOT in the passed in list
+  //           => ADD the component frac to the frac of the desired id 
+  // 2. create a material of the new comp_map and return it
+  //
   // Questions: 
   //	what about multiplying by mass???
   //    does  pyne::Material(cm, -1, -1); preserve settings?
@@ -994,42 +990,18 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> ids_to_collapse) 
         cm[ptr->first] = (ptr->second) * mass;
       }
   }
-  // go through the components again and look for 
-  // a) znum IN the set AND
-  // b) nucid NOT on the list 
-  // The principle nucid is already in the cm
+  // Now go through the components again and look for 
+  // znum IN the set AND nucid NOT on the list 
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
     int comp_znum = nucname::znum(ptr->first);
     if ( 0 <  znum_set.count(comp_znum) &&
          0 == ids_to_collapse.count(ptr->first) ) {
-        // Get the correct nucid to collapse this to,
-	// to its fraction add the fraction of the current nucid
-        cm[collapsed_id[comp_znum]] += (ptr->second) * mass;
-      } 
+      // to the fraction of the correct nucid add the current fraction
+      cm[collapsed_id[comp_znum]] += (ptr->second) * mass;
+    } 
   }
-  // print_material(pyne::Material(cm, -1, -1));
   return pyne::Material(cm, -1, -1);
 }
-
-// Convenience function
-/*
-void print_material( pyne::Material test_mat)
-{
-  pyne::comp_iter it;
-
-  std::cout << "density = " << test_mat.density << std::endl;
-  std::cout << "mass = " << test_mat.mass << std::endl;
-  std::cout << "atoms_per_mol = " << test_mat.atoms_per_molecule << std::endl;
-
-  for ( it = test_mat.comp.begin() ; it != test_mat.comp.end() ; ++it ) {
-    if(it->second <= 0.0)
-      continue;
-    else
-      std::cout << it->first << " " << it->second << std::endl;
-  }
-  std::cout << test_mat.metadata << std::endl;
-}
-*/
 
 // Wrapped version for calling from python
 pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {

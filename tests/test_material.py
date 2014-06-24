@@ -232,7 +232,8 @@ def test_expand_elements2():
     assert_almost_equal(data.natural_abund(60120000), afrac[60120000])
     assert_almost_equal(data.natural_abund(60130000), afrac[60130000])
 
-def test_collapse_elements1():
+def test_collapse_elements():
+    """ Very simple test to combine nucids"""
     nucvec = {10010000:  1.0,   
            80160000: 1.0,   
           691690000: 1.0,
@@ -249,9 +250,6 @@ def test_collapse_elements1():
           962440000 }
 
     mat  = Material(nucvec)
-    for i in mat.comp:
-    	print i
-
     cmat = mat.collapse_elements(nucids)
 
     assert_equal(cmat.comp[80160000],  mat.comp[80160000])
