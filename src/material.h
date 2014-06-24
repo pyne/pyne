@@ -196,9 +196,10 @@ namespace pyne
     Material expand_elements();
     // Returns a copy of the current material where all the isotopes of the elements
     // passed in as a nuclide list are added up, atomic-fraction-wise.
-    Material collapse_elements(std::vector<int> nucvec);
+    Material collapse_elements(std::set<int> nucvec);
     // Wrapped version to facilitate calling from python
     Material collapse_elements(int **int_ptr_arry);
+    void print_material( pyne::Material test_mat);
     /// Computes, sets, and returns the mass density when \a num_dens is greater
     /// than or equal zero.  If \a num_dens is negative, this simply returns the
     /// current value of the density member variable.  You may also use / set the

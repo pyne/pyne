@@ -1,7 +1,7 @@
 """C++ wrapper for material class."""
 from libcpp.set cimport set
 from libcpp.string cimport string as std_string
-from libcpp.vector cimport vector as std_vector
+from libcpp.set cimport set as std_set
 from libcpp.map cimport map
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -62,7 +62,7 @@ cdef extern from "material.h" namespace "pyne":
         double molecular_mass() except +
         double molecular_mass(double) except +
         Material expand_elements() except +
-        Material collapse_elements(std_vector[int]) except +
+        Material collapse_elements(std_set[int]) except +
         double mass_density() except +
         double mass_density(double) except +
         double mass_density(double, double) except +

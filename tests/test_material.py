@@ -244,24 +244,16 @@ def test_collapse_elements1():
           962440000: 1.0,
           }
     nucids = {10010000,
-          80160000,  
-          691690000,
-          922350000,
-          922380000,
           942390000,
-          942410000,
           952420000,
           962440000 }
 
     mat  = Material(nucvec)
     cmat = mat.collapse_elements(nucids)
-    # Expected results
-     
-    nucids_92 = { 922350000, 922380000 }
-    nucids_94 = { 942390000, 942410000 }
-    dict_92 = {92: nucids_92}
-    dict_94 = {94: nucids_94}
 
+    assert_equal(cmat.comp[80160000],  mat.comp[80160000])
+    assert_equal(cmat.comp[922350000], mat.comp[922350000])
+    assert_equal(cmat.comp[942390000], mat.comp[942390000] + mat.comp[942410000])
 
 
 def test_mass_density():
