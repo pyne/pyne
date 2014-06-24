@@ -195,8 +195,8 @@ namespace pyne
     /// composition are expanded to their natural isotopic abundances.
     Material expand_elements();
     // Returns a copy of the current material where all the isotopes of the elements
-    // passed in as a nuclide list are added up, atomic-fraction-wise.
-    Material collapse_elements(std::set<int> nucvec);
+    // are added up, atomic-fraction-wise, unless they are in the exception set
+    Material collapse_elements(std::set<int> exception_znum);
     // Wrapped version to facilitate calling from python
     Material collapse_elements(int **int_ptr_arry);
     // void print_material( pyne::Material test_mat);
