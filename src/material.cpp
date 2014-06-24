@@ -953,13 +953,11 @@ pyne::Material pyne::Material::expand_elements() {
 // This version will be called from c++, typically
 // sum up atom_fracs (don't forget to check form and change if nec first)
 pyne::Material pyne::Material::collapse_elements(std::set<int> ids_to_collapse) {
-  // This can be simplified 
-  // For the moment, assume the nucids to collapse are of unique z-number
-  //  The reason for this is to know the nucid to collapse to.
 
-  // print_material();
-  // 1. From the argument list of nucids, extract z_nums
+  // print_material(*this);
+  // From the argument list of nucids, extract z_nums
   //    and make a unique set => znum_set
+  //    and a map from znum to nucid
   std::map<int, int> collapsed_id;
   std::set<int> znum_set;
   std::set<int>::iterator it;
@@ -985,143 +983,36 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> ids_to_collapse) 
   //           mymap[z_num] = mycollapsednucid
   // Questions: 
   //	what about multiplying by mass???
-  //	does the call below preserve settings in the 
-  // return pyne::Material(cm, -1, -1);
+  //    does  pyne::Material(cm, -1, -1); preserve settings?
   // 
-/* from sub_mat
-  pyne::comp_map cm;
-  for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++) {
-    if ( 0 < ids_to_collapse.count(i->first) )
-      cm[i->first] = (i->second) * mass;
-  };
-
-  return pyne::Material(cm, -1, -1);
-  */
-   
-  pyne::comp_map cm;
+  ///////////////////////////////////////////////////////// 
   // preload cm with nucids on the list and any nucid with znum NOT on the list
+  pyne::comp_map cm;
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
       if ( 0 < ids_to_collapse.count(ptr->first) ||
            0 == znum_set.count(nucname::znum(ptr->first)) ) {
         cm[ptr->first] = (ptr->second) * mass;
       }
   }
-  // Now go through the components again and look for 
+  // go through the components again and look for 
   // a) znum IN the set AND
   // b) nucid NOT on the list 
+  // The principle nucid is already in the cm
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
     int comp_znum = nucname::znum(ptr->first);
-    // The z-number of current component is on the list
-    // and the principle nucid is already in the cm
     if ( 0 <  znum_set.count(comp_znum) &&
          0 == ids_to_collapse.count(ptr->first) ) {
         // Get the correct nucid to collapse this to,
-	// add to its fraction the fraction of the current nucid
+	// to its fraction add the fraction of the current nucid
         cm[collapsed_id[comp_znum]] += (ptr->second) * mass;
       } 
   }
+  // print_material(pyne::Material(cm, -1, -1));
   return pyne::Material(cm, -1, -1);
-
-  /*
-  // 2.  For each unique z-number get the one-or-more matching nucids
-  std::map<int,std::vector<int> > unique_map;
-  std::cout << std::endl;
-  std::set<int>::const_iterator zs_it;
-  for (zs_it = znum_set.begin(); zs_it != znum_set.end(); ++zs_it) {
-    int u_znum = *zs_it;
-    std::cout << "unique z_num: " << u_znum << std::endl;
-    // Set up a container element for the map
-    std::pair<int, std::vector<int> > umap_el = std::make_pair(*zs_it, std::vector<int>());
-    unique_map.insert(umap_el);
-
-    // Get all the input nucids with this z_num
-    for (std::vector<int>::iterator ptr  = ids_to_collapse.begin(); 
-                                    ptr != ids_to_collapse.end(); ++ptr) {
-      if (nucname::znum(*ptr) == u_znum ) {
-        // The current input id matches the current unique id
-        unique_map[u_znum].push_back(*ptr);
-        if (unique_map[u_znum].size() > 1) {
-	   // It is not the first one for this z-number to match
-	   // i.e. require collapsing => add its component value to that
-	   // of the first instance, then delete it
-	   comp[unique_map[u_znum] += comp[*ptr];
-	   comp.erase(*ptr);
-	   print_material();
-	}
-      }
-    }
-  }
-
-  // print_map(unique_map);
-  // Check by printing out the unique_map just created
-  std::cout << std::endl;
-
-  std::map<int,std::vector<int> >::iterator map_ptr;
-  for (map_ptr = unique_map.begin(); map_ptr != unique_map.end(); ++map_ptr) {
-    std::cout << map_ptr->first << ": ";
-    for (std::vector<int>::iterator vptr = map_ptr->second.begin(); 
-      vptr != map_ptr->second.end(); ++vptr) {
-      std::cout << "( " << *vptr << ", " << comp[*vptr] << " ), ";
-      }
-    std::cout << std::endl;
-  }
-  // When nosetest is run, result looks like
-  1: ( 10010000, 0.111111 ), 
-  8: ( 80160000, 0.111111 ), 
-  69: ( 691690000, 0.111111 ), 
-  92: ( 922350000, 0.111111 ), ( 922380000, 0.111111 ), 
-  94: ( 942410000, 0.111111 ), ( 942390000, 0.111111 ), 
-  95: ( 952420000, 0.111111 ), 
-  96: ( 962440000, 0.111111 ), 
-  
-  // 3. Make a material of, e.g., element 92, nucid 922350000   
-  // 4. Add the comp amounts and set them, i.e. collapse a single nucid
-  //    a) for now, use first nucid in list to be the new material nucid
-  //    b) This could use reflection and a clause at the beginning could
-  //       check if the size of the unique set of z-number is 1
-  //    c) Save the list of sub_mats
-  // 5. call del_mat on duplicate z_number components
-   
-  // Go through the map and get items for which the size of the 
-  // vector (the second element) is > 1
-  std::set<int> nucids_to_remove;
-  std::map<int,std::vector<int> >::iterator map_el;
-  for (map_el = unique_map.begin(); map_el != unique_map.end(); ++map_el) {
-    std::vector<int> collapsee = map_el->second;
-    if (collapsee.size() > 1) {
-      // There are components to collapse
-      std::cout << "It works up to here!" << std::endl;
-      std::vector<int>::iterator base_ptr = collapsee.begin(); 
-      // std::cout << "Adding to " << comp[*base_ptr] << " of nucid " << *base_ptr << ": ";
-
-      // delete
-      std::cout << "Adding to " << " of nucid " << *base_ptr << ": ";
-      std::vector<int>::iterator vptr = ++base_ptr;
-      // Add the frac of a subsequent isotope to the base nucid amount
-      // and mark the added nucid for removal
-      for ( ; vptr != collapsee.end(); ++vptr) {
-        comp[*base_ptr] += comp[*vptr];
-	nucids_to_remove.insert(*vptr);
-	std::cout << comp[*vptr] << " from nucid " << *vptr << ", "; 
-      }
-      // delete end
-
-    } // end if collapsee.size() > 1
-  }   // end unique_map for loop
-
-  // Print out the list of removal candidates
-  std::cout << std::endl;
-  for (std::set<int>::iterator ptr = nucids_to_remove.begin(); ptr != nucids_to_remove.end(); ++ptr) {
-    std::cout << *ptr << ", ";
-  }
-  std::cout << std::endl;
-  Material cmat;
-  cmat = del_mat(nucids_to_remove);
-  return cmat;
-  */
 }
 
 // Convenience function
+/*
 void print_material( pyne::Material test_mat)
 {
   pyne::comp_iter it;
@@ -1138,6 +1029,7 @@ void print_material( pyne::Material test_mat)
   }
   std::cout << test_mat.metadata << std::endl;
 }
+*/
 
 // Wrapped version for calling from python
 pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {

@@ -249,6 +249,9 @@ def test_collapse_elements1():
           962440000 }
 
     mat  = Material(nucvec)
+    for i in mat.comp:
+    	print i
+
     cmat = mat.collapse_elements(nucids)
 
     assert_equal(cmat.comp[80160000],  mat.comp[80160000])

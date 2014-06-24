@@ -538,7 +538,7 @@ cdef class _Material:
         """
         return self.mat_pointer.molecular_mass(atoms_per_molecule)
 
-    def expand_elements(self, ):
+    def expand_elements(self):
         """expand_elements(self)
         Exapnds the elements ('U', 'C', etc) in the material by replacing them
         with their natural isotopic distributions.  This function returns a copy.
