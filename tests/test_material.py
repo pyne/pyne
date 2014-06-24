@@ -248,13 +248,17 @@ def test_collapse_elements():
           942390000,
           952420000,
           962440000 }
+    
+    exception_znums = {1,8,69,92}
 
     mat  = Material(nucvec)
-    cmat = mat.collapse_elements(nucids)
+    # cmat = mat.collapse_elements(nucids)
+    cmat = mat.collapse_elements(exception_znums)
 
     assert_equal(cmat.comp[80160000],  mat.comp[80160000])
     assert_equal(cmat.comp[922350000], mat.comp[922350000])
-    assert_equal(cmat.comp[942390000], mat.comp[942390000] + mat.comp[942410000])
+    assert_equal(cmat.comp[94], mat.comp[942390000] + mat.comp[942410000])
+    assert_equal(cmat.comp[95], mat.comp[952420000])
 
 
 def test_mass_density():

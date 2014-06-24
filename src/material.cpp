@@ -952,54 +952,31 @@ pyne::Material pyne::Material::expand_elements() {
 
 // This version will be called from c++, typically
 // sum up atom_fracs (don't forget to check form and change if nec first)
-pyne::Material pyne::Material::collapse_elements(std::set<int> ids_to_collapse) {
-  //////////////////////////////////////////////////////////////
-  // From the argument list of nucids, extract z_nums
-  //    and make a unique set => znum_set
-  //    and a map from znum to nucid
-  std::map<int, int> collapsed_id;
-  std::set<int> znum_set;
-  std::set<int>::iterator it;
-  for (it = ids_to_collapse.begin(); it != ids_to_collapse.end(); ++it) {
-    znum_set.insert(nucname::znum(*it));
-    collapsed_id[nucname::znum(*it)] = *it;
-  }
-
+pyne::Material pyne::Material::collapse_elements(std::set<int> exception_znums) {
+  /////////////////////////////////////////////////////////////
+  // Assumptions
+  //    - list passed in is of atomic numbers NOT to collapse
   // Algorithm
-  // 0. Setup comp map and map connecting znum to specific nucid
-  // 1. for each component in this material, look at its znum:
-  //    if z-num is not in the list of nucids to collapse
-  //       => Put the map element into the new comp map
-  //    else if z_num *is* in the list of nucids to collapse
-  //        if the nucid is in the passed-in-list 
-  //           => put the element in to the new comp map
-  //        else if the nucid is NOT in the passed in list
-  //           => ADD the component frac to the frac of the desired id 
-  // 2. create a material of the new comp_map and return it
-  //
+  // for each component in this material, look at its znum:
+  //    if it's on the exception list, copy the component
+  //    else it is to be collapsed
+  //       => add it's frac to the component of the znum
   // Questions: 
-  //	what about multiplying by mass???
-  //    does  pyne::Material(cm, -1, -1); preserve settings?
+  //	to_atom_frac()?	
   // 
-  ///////////////////////////////////////////////////////// 
-  // preload cm with nucids on the list and any nucid with znum NOT on the list
+  ///////////////////////////////////////////////////////////// 
   pyne::comp_map cm;
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
-      if ( 0 < ids_to_collapse.count(ptr->first) ||
-           0 == znum_set.count(nucname::znum(ptr->first)) ) {
+      int cur_znum = nucname::znum(ptr->first);
+      if ( 0 < exception_znums.count(cur_znum) ) {
+        // On exception list, => do not collapse
         cm[ptr->first] = (ptr->second) * mass;
+      } else {
+        // Not on exception list, add frac to znum-component
+	cm[cur_znum] += (ptr->second) * mass;
       }
   }
-  // Now go through the components again and look for 
-  // znum IN the set AND nucid NOT on the list 
-  for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
-    int comp_znum = nucname::znum(ptr->first);
-    if ( 0 <  znum_set.count(comp_znum) &&
-         0 == ids_to_collapse.count(ptr->first) ) {
-      // to the fraction of the correct nucid add the current fraction
-      cm[collapsed_id[comp_znum]] += (ptr->second) * mass;
-    } 
-  }
+
   return pyne::Material(cm, -1, -1);
 }
 
