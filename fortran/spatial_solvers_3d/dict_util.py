@@ -51,13 +51,11 @@ def dict_complete(inputdict):
 		try:
 			formatted_dict['num_groups'] = inputdict['num_groups']
 		except:
-			formatted_dict['num_groups'] = 1
-			warn(warning_msg + " num_groups value of 1")
+			raise InputDictError("num_groups")
 		try:
 			formatted_dict['num_materials'] = inputdict['num_materials']
 		except:
-			formatted_dict['num_materials'] = 1
-			warn(warning_msg + " num_materials value of 1")
+			raise InputDictError('num_materials')
 		try:
 			formatted_dict['x_cells_widths'] = inputdict['x_cells_widths']
 		except:
@@ -95,14 +93,22 @@ def dict_complete(inputdict):
 		except:
 			raise InputDictError("xs_file")
 		try:
-			formatted_dict['src_file'] = inputdict['src_file']
+			formatted_dict['source_input_file'] = inputdict['source_input_file']
 		except:
-			raise InputDictError("src_file")
+			raise InputDictError("source_input_file")
 		try:
-			formatted_dict['converge_critical'] = inputdict['converge_critical']
+			formatted_dict['bc_input_file'] = inputdict['bc_input_file']
 		except:
-			formatted_dict['converge_critical'] = 1e-12
-			warn(warning_msg + " converge_critical value of 1e-12")
+			raise InputDictError("bc_input_file")
+		try:
+			formatted_dict['flux_output_file'] = inputdict['flux_output_file']
+		except:
+			raise InputDictError("flux_output_file")
+		try:
+			formatted_dict['convergence_criterion'] = inputdict['convergence_criterion']
+		except:
+			formatted_dict['convergence_criterion'] = 1e-12
+			warn(warning_msg + " convergence_criterion value of 1e-12")
 		try:
 			formatted_dict['max_iterations'] = inputdict['max_iterations']
 		except:
@@ -128,27 +134,12 @@ def dict_complete(inputdict):
 		except:
 			formatted_dict['ichk_tolerence'] = 1e-14
 			warn(warning_msg + " ichk_tolerence value of 1e-14")
-		try:
-			formatted_dict['momsum'] = inputdict['momsum']
-		except:
-			formatted_dict['momsum'] = 0
-			warn(warning_msg + " momsum value of 0")
-		try:
-			formatted_dict['momp'] = inputdict['momp']
-		except:
-			formatted_dict['momp'] = 0
-			warn(warning_msg + " momp value of 0")
-		try:
-			formatted_dict['mompt'] = inputdict['mompt']
-		except:
-			formatted_dict['mompt'] = 0
-			warn(warning_msg + " mompt value of 0")
-		try:
-			formatted_dict['qdflx'] = inputdict['qdflx']
-		except:
-			formatted_dict['qdflx'] = 0
-			warn(warning_msg + " qdflx value of 0")
 			
+		formatted_dict['max_mom_printed'] = 0
+		formatted_dict['moment_sum_flag'] = 0
+		formatted_dict['mom_at_a_pt_flag'] = 0
+		formatted_dict['quad_flux_print_flag'] = 0
+
 		return formatted_dict
 
 

@@ -1,6 +1,6 @@
 """This module provides a way to access neutron spatial solver codes.  It primarily consists of wrapped fortran code's being called with python via f2py"""
 
-from AHOTN.source.main import main as main
+from source.main import main as main
 #from AHOTN.src_LL.main import main as main
 #from AHOTN.src_LN.solve import solve as ahot_ln_solve
 #from AHOTN.src_LN.output import output as ahot_ln_output
@@ -33,16 +33,16 @@ def ahotn(inputdict_unchecked):
 	inputdict['material_id'],
 	inputdict['quadrature_file'],
 	inputdict['xs_file'],
-	inputdict['src_file'],
-	inputdict['converge_critical'],
+	inputdict['source_input_file'],
+	inputdict['convergence_criterion'],
 	inputdict['max_iterations'],
 	inputdict['moments_converged'],
 	inputdict['converge_tolerence'],
 	inputdict['ichk'],
 	inputdict['ichk_tolerence'],
-	inputdict['momp'],
-	inputdict['momsum'],
-	inputdict['mompt'],
-	inputdict['qdflx'])
+	inputdict['max_mom_printed'],
+	inputdict['moment_sum_flag'],
+	inputdict['mom_at_a_pt_flag'],
+	inputdict['quad_flux_print_flag'])
 	#ahot_ln_solve()
   #ahot_ln_output()
