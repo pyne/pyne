@@ -257,8 +257,8 @@ def test_collapse_elements():
 
     assert_equal(cmat.comp[80160000],  mat.comp[80160000])
     assert_equal(cmat.comp[922350000], mat.comp[922350000])
-    assert_equal(cmat.comp[94], mat.comp[942390000] + mat.comp[942410000])
-    assert_equal(cmat.comp[95], mat.comp[952420000])
+    assert_equal(cmat.comp[940000000], mat.comp[942390000] + mat.comp[942410000])
+    assert_equal(cmat.comp[950000000], mat.comp[952420000])
 
 
 def test_mass_density():

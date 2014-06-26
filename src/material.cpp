@@ -973,7 +973,7 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_znums) 
         cm[ptr->first] = (ptr->second) * mass;
       } else {
         // Not on exception list, add frac to znum-component
-	cm[cur_znum] += (ptr->second) * mass;
+	cm[nucname::id(cur_znum)] += (ptr->second) * mass;
       }
   }
 
