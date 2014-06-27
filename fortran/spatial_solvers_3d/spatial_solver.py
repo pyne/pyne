@@ -7,7 +7,7 @@ from source.main import main as main
 
 from dict_util import dict_complete
 
-def ahotn(inputdict_unchecked):
+def solve(inputdict_unchecked):
 	inputdict = dict_complete(inputdict_unchecked)
 	main("test title in",
 	inputdict['solver'],
