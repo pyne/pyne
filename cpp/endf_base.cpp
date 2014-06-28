@@ -3,8 +3,8 @@
   #include "utils.h"
 #endif
 
-pyne::endf::control_struct pyne::endf::read_cont(std::ifstream &infile) {
-    control_struct cts;
+pyne::endf::control pyne::endf::read_cont(std::ifstream &infile) {
+    control cts;
     std::string line;
     getline(infile, line);
     cts.c1 = pyne::endftod(line.substr(0, 11).c_str());
@@ -19,8 +19,8 @@ pyne::endf::control_struct pyne::endf::read_cont(std::ifstream &infile) {
     return cts;
 }
 
-pyne::endf::list_struct pyne::endf::read_list(std::ifstream &infile) {
-    list_struct lst;
+pyne::endf::list pyne::endf::read_list(std::ifstream &infile) {
+    list lst;
     std::string line;
     getline(infile, line);
     lst.c1 = pyne::endftod(line.substr(0, 11).c_str());
@@ -48,8 +48,8 @@ pyne::endf::list_struct pyne::endf::read_list(std::ifstream &infile) {
     return lst;
 }
 
-pyne::endf::tab1_struct pyne::endf::read_tab1(std::ifstream &infile){
-  tab1_struct tab1;
+pyne::endf::tab1 pyne::endf::read_tab1(std::ifstream &infile){
+  tab1 tab1;
   std::string line;
   getline(infile, line);
   tab1.c1 = pyne::endftod(line.substr(0, 11).c_str());
@@ -94,8 +94,8 @@ pyne::endf::tab1_struct pyne::endf::read_tab1(std::ifstream &infile){
   return tab1;
 }
 
-pyne::endf::tab2_struct pyne::endf::read_tab2(std::ifstream &infile){
-  tab2_struct tab2;
+pyne::endf::tab2 pyne::endf::read_tab2(std::ifstream &infile){
+  tab2 tab2;
   std::string line;
   getline(infile, line);
   tab2.c1 = pyne::endftod(line.substr(0, 11).c_str());

@@ -3,10 +3,10 @@
   #include "endf_mt.h"
 #endif
 
-pyne::endf::mt_451_struct pyne::endf::read_451(std::ifstream &infile) {
-    mt_451_struct mt_451;
+pyne::endf::mt_451 pyne::endf::read_451(std::ifstream &infile) {
+    mt_451 mt_451;
 
-    control_struct cs = read_cont(infile);
+    control cs = read_cont(infile);
     mt_451.nuc_id = cs.c1;
     mt_451.awr = cs.c2;
     mt_451.mat = cs.mat;
@@ -59,10 +59,10 @@ pyne::endf::mt_451_struct pyne::endf::read_451(std::ifstream &infile) {
     return mt_451;
 }
 
-pyne::endf::mt_fpy_8_struct pyne::endf::read_fpy_8(std::ifstream &infile) {
-    mt_fpy_8_struct mt_fpy;
+pyne::endf::mt_fpy_8 pyne::endf::read_fpy_8(std::ifstream &infile) {
+    mt_fpy_8 mt_fpy;
 
-    control_struct cs = read_cont(infile);
+    control cs = read_cont(infile);
     mt_fpy.nuc_id = cs.c1;
     mt_fpy.awr = cs.c2;
     mt_fpy.mat = cs.mat;
@@ -72,7 +72,7 @@ pyne::endf::mt_fpy_8_struct pyne::endf::read_fpy_8(std::ifstream &infile) {
     mt_fpy.le = cs.l1;
     std::vector<std::vector<double> > tmp;
     for (int i = 0; i < mt_fpy.le; ++i) {
-        list_struct lst = read_list(infile);
+        list lst = read_list(infile);
         mt_fpy.e.push_back(lst.c1);
         mt_fpy.i.push_back(lst.l1);
 
@@ -89,10 +89,10 @@ pyne::endf::mt_fpy_8_struct pyne::endf::read_fpy_8(std::ifstream &infile) {
     return mt_fpy;
 }
 
-pyne::endf::mt_452_1_struct pyne::endf::read_452_1(std::ifstream &infile) {
-  mt_452_1_struct mt_452;
+pyne::endf::mt_452_1 pyne::endf::read_452_1(std::ifstream &infile) {
+  mt_452_1 mt_452;
 
-  control_struct cs = read_cont(infile);
+  control cs = read_cont(infile);
   mt_452.nuc_id = cs.c1;
   mt_452.awr = cs.c2;
   mt_452.mat = cs.mat;
@@ -102,10 +102,10 @@ pyne::endf::mt_452_1_struct pyne::endf::read_452_1(std::ifstream &infile) {
   mt_452.lnu = cs.l2;
 
   if (mt_452.lnu == 1) {
-    list_struct lst = read_list(infile);
+    list lst = read_list(infile);
     mt_452.poly = lst.data;
   }else if (mt_452.lnu == 2) {
-    tab1_struct tab = read_tab1(infile);
+    tab1 tab = read_tab1(infile);
     mt_452.nbt = tab.nbt;
     mt_452.intn = tab.intn;
     mt_452.eint = tab.x;
@@ -116,10 +116,10 @@ pyne::endf::mt_452_1_struct pyne::endf::read_452_1(std::ifstream &infile) {
   return mt_452;
 }
 
-pyne::endf::mt_455_1_struct pyne::endf::read_455_1(std::ifstream &infile) {
-  mt_455_1_struct mt_455;
+pyne::endf::mt_455_1 pyne::endf::read_455_1(std::ifstream &infile) {
+  mt_455_1 mt_455;
 
-  control_struct cs = read_cont(infile);
+  control cs = read_cont(infile);
   mt_455.nuc_id = cs.c1;
   mt_455.awr = cs.c2;
   mt_455.mat = cs.mat;
@@ -130,8 +130,8 @@ pyne::endf::mt_455_1_struct pyne::endf::read_455_1(std::ifstream &infile) {
   mt_455.lnu = cs.l2;
 
   if ((mt_455.lnu == 2) && (mt_455.ldg == 0)) {
-    list_struct lst = read_list(infile);
-    tab1_struct tab = read_tab1(infile);
+    list lst = read_list(infile);
+    tab1 tab = read_tab1(infile);
     mt_455.lambdas = lst.data;
     mt_455.nbt = tab.nbt;
     mt_455.intn = tab.intn;
@@ -140,10 +140,10 @@ pyne::endf::mt_455_1_struct pyne::endf::read_455_1(std::ifstream &infile) {
 
   }
   if ((mt_455.lnu == 2) && (mt_455.ldg == 1)) {
-    tab2_struct tab = read_tab2(infile);
+    tab2 tab = read_tab2(infile);
     int nv;
     for (int i = 0; i < tab.l2; ++i) {
-      list_struct lst = read_list(infile);
+      list lst = read_list(infile);
       nv = lst.npl/2;
       std::vector<double> lambdas(nv, 0.0);
       std::vector<double> alphas(nv, 0.0);
@@ -154,27 +154,27 @@ pyne::endf::mt_455_1_struct pyne::endf::read_455_1(std::ifstream &infile) {
       mt_455.lambda_arr.push_back(lambdas);
       mt_455.alpha_arr.push_back(alphas);
     }
-    tab1_struct tab1 = read_tab1(infile);
+    tab1 tab1 = read_tab1(infile);
     mt_455.nbt = tab1.nbt;
     mt_455.intn = tab1.intn;
     mt_455.eint = tab1.x;
     mt_455.nu_d = tab1.y;
   }
   if ((mt_455.lnu == 1) && (mt_455.ldg == 0)) {
-    list_struct lst = read_list(infile);
+    list lst = read_list(infile);
     mt_455.lambda_arr.push_back(lst.data);
-    tab1_struct tab = read_tab1(infile);
+    tab1 tab = read_tab1(infile);
     mt_455.nbt = tab.nbt;
     mt_455.intn = tab.intn;
     mt_455.nu_d = tab.y;
   }
   if ((mt_455.lnu == 1) && (mt_455.ldg == 1)) {
-    tab2_struct tab = read_tab2(infile);
+    tab2 tab = read_tab2(infile);
     mt_455.ne = tab.nbt;
     mt_455.einti = tab.intn;
     int nv;
     for (int i = 0; i < tab.l2; ++i) {
-      list_struct lst = read_list(infile);
+      list lst = read_list(infile);
       nv = lst.npl/2;
       std::vector<double> lambdas(nv, 0.0);
       std::vector<double> alphas(nv, 0.0);
@@ -185,7 +185,7 @@ pyne::endf::mt_455_1_struct pyne::endf::read_455_1(std::ifstream &infile) {
       mt_455.lambda_arr.push_back(lambdas);
       mt_455.alpha_arr.push_back(alphas);
     }
-    tab1_struct tab1 = read_tab1(infile);
+    tab1 tab1 = read_tab1(infile);
     mt_455.nbt = tab1.nbt;
     mt_455.intn = tab1.intn;
     mt_455.eint = tab1.x;
@@ -196,9 +196,9 @@ pyne::endf::mt_455_1_struct pyne::endf::read_455_1(std::ifstream &infile) {
   return mt_455;
 }
 
-pyne::endf::mt_456_1_struct pyne::endf::read_456_1(std::ifstream &infile) {
-  mt_456_1_struct mt_456;
-  control_struct cs = read_cont(infile);
+pyne::endf::mt_456_1 pyne::endf::read_456_1(std::ifstream &infile) {
+  mt_456_1 mt_456;
+  control cs = read_cont(infile);
   mt_456.nuc_id = cs.c1;
   mt_456.awr = cs.c2;
   mt_456.mat = cs.mat;
@@ -208,10 +208,10 @@ pyne::endf::mt_456_1_struct pyne::endf::read_456_1(std::ifstream &infile) {
   mt_456.lnu = cs.l2;
 
   if (mt_456.lnu == 1) {
-    list_struct lst = read_list(infile);
+    list lst = read_list(infile);
     mt_456.nu = lst.data;
   }else if (mt_456.lnu == 2) {
-    tab1_struct tab = read_tab1(infile);
+    tab1 tab = read_tab1(infile);
     mt_456.nbt = tab.nbt;
     mt_456.intn = tab.intn;
     mt_456.eint = tab.x;
@@ -223,16 +223,16 @@ pyne::endf::mt_456_1_struct pyne::endf::read_456_1(std::ifstream &infile) {
   return mt_456;
 }
 
-pyne::endf::mt_458_1_struct pyne::endf::read_458_1(std::ifstream &infile) {
-  mt_458_1_struct mt_458;
-  control_struct cs = read_cont(infile);
+pyne::endf::mt_458_1 pyne::endf::read_458_1(std::ifstream &infile) {
+  mt_458_1 mt_458;
+  control cs = read_cont(infile);
   mt_458.nuc_id = cs.c1;
   mt_458.awr = cs.c2;
   mt_458.mat = cs.mat;
   mt_458.mf = cs.mf;
   mt_458.mt = cs.mt;
 
-  list_struct lst = read_list(infile);
+  list lst = read_list(infile);
 
   mt_458.efr = std::vector<double> (lst.l2 + 1, 0);
   mt_458.defr = std::vector<double> (lst.l2 + 1, 0);
@@ -279,9 +279,9 @@ pyne::endf::mt_458_1_struct pyne::endf::read_458_1(std::ifstream &infile) {
   return mt_458;
 }
 
-pyne::endf::mt_460_1_struct pyne::endf::read_460_1(std::ifstream &infile) {
-  mt_460_1_struct mt_460;
-  control_struct cs = read_cont(infile);
+pyne::endf::mt_460_1 pyne::endf::read_460_1(std::ifstream &infile) {
+  mt_460_1 mt_460;
+  control cs = read_cont(infile);
 
   mt_460.nuc_id = cs.c1;
   mt_460.awr = cs.c2;
@@ -295,7 +295,7 @@ pyne::endf::mt_460_1_struct pyne::endf::read_460_1(std::ifstream &infile) {
 
   if (mt_460.lo == 1) {
     for (int i = 0; i < mt_460.ng; ++i) {
-      tab1_struct tab = read_tab1(infile);
+      tab1 tab = read_tab1(infile);
       mt_460.elist[i] = tab.c1;
       mt_460.nbt.push_back(tab.nbt);
       mt_460.intn.push_back(tab.intn);
@@ -303,7 +303,7 @@ pyne::endf::mt_460_1_struct pyne::endf::read_460_1(std::ifstream &infile) {
       mt_460.t.push_back(tab.y);
     }
   }else if(mt_460.lo == 2) {
-    list_struct lst = read_list(infile);
+    list lst = read_list(infile);
     mt_460.lambdas = lst.data;
   }
 

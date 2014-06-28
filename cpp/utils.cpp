@@ -76,7 +76,7 @@ double pyne::to_dbl (std::string s) {
   return strtod( s.c_str(), NULL );
 }
 
-double pyne::endftod (char * s) {
+double pyne::endftod (const char * s) {
   // Converts string from ENDF to float64.
   int pos, mant, exp;
   double v, dbl_exp;
@@ -294,27 +294,27 @@ double pyne::coth(double x) {
 bool pyne::file_exists(std::string strfilename) {
   // Thank you intarwebz for this function!
   // Sepcifically: http://www.techbytes.ca/techbyte103.html
-  struct stat stFileInfo; 
-  bool blnReturn; 
-  int intStat; 
+  struct stat stFileInfo;
+  bool blnReturn;
+  int intStat;
 
-  // Attempt to get the file attributes 
-  intStat = stat(strfilename.c_str(), &stFileInfo); 
+  // Attempt to get the file attributes
+  intStat = stat(strfilename.c_str(), &stFileInfo);
 
-  if(intStat == 0) { 
-    // We were able to get the file attributes 
-    // so the file obviously exists. 
-    blnReturn = true; 
-  } 
-  else { 
-    // We were not able to get the file attributes. 
-    // This may mean that we don't have permission to 
-    // access the folder which contains this file. If you 
-    // need to do that level of checking, lookup the 
-    // return values of stat which will give you 
-    // more details on why stat failed. 
-    blnReturn = false; 
-  } 
-   
-  return(blnReturn); 
+  if(intStat == 0) {
+    // We were able to get the file attributes
+    // so the file obviously exists.
+    blnReturn = true;
+  }
+  else {
+    // We were not able to get the file attributes.
+    // This may mean that we don't have permission to
+    // access the folder which contains this file. If you
+    // need to do that level of checking, lookup the
+    // return values of stat which will give you
+    // more details on why stat failed.
+    blnReturn = false;
+  }
+
+  return(blnReturn);
 };

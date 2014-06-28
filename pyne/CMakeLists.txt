@@ -21,7 +21,8 @@ cython_add_module(dtypes dtypes.pyx)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/stlcontainers.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(stlcontainers stlcontainers.pyx)
-                            
+
+
 # jsoncpp
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/jsoncpp.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
@@ -98,7 +99,7 @@ cython_add_module(tally tally.pyx)
 target_link_libraries(tally pyne)
 
 # endfcpp
-set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/endfcpp.pyx"
+ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/endf2.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(endfcpp endfcpp.pyx)
-target_link_libraries(endfcpp pyne)
+ cython_add_module(endf2 endf2.pyx)
+ target_link_libraries(endf2 pyne)

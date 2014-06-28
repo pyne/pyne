@@ -16,27 +16,7 @@ from libcpp.string cimport string as std_string
 
 
 cdef class Tally:
-    """there are no protected functions currently fool.
-    
-    Attributes
-    ----------
-    entity_type (std::string) :
-    entity_name (std::string) :
-    particle_name (std::string) :
-    tally_type (std::string) :
-    entity_id (int) :
-    
-    
-    Methods
-    -------
-    Tally
-    ~Tally
-    
-    Notes
-    -----
-    This class was defined in tally.h
-    
-    The class is found in the "pyne" namespace"""
+    """no docstring for {'sidecars': (), 'tarbase': 'tally', 'tarname': 'Tally', 'language': 'c++', 'srcname': 'Tally', 'incfiles': ('tally.h',), 'srcfiles': ('cpp/tally.cpp', 'cpp/tally.h')}, please file a bug report!"""
 
 
 
@@ -50,134 +30,29 @@ cdef class Tally:
 
     def _tally_tally_0(self, ):
         """Tally(self, )
-         This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
-        Each version will begin with a line of # characters.
-        
-        empty constructor   there are no protected functions currently
-        fool.
-        
-        Parameters
-        ----------
-        None
-        
-        Returns
-        -------
-        None
-        
-        ################################################################
-        
-        Constructor from passed in vars
-        
-        Parameters
-        ----------
-        particle_name : std::string
-        
-        entity_type : std::string
-        
-        type : std::string
-        
-        entity_name : std::string
-        
-        entity : int
-        
-        Returns
-        -------
-        None
-        
         """
         self._inst = new cpp_tally.Tally()
     
     
-    def _tally_tally_1(self, type, particle_name, entity, entity_type, entity_name):
-        """Tally(self, type, particle_name, entity, entity_type, entity_name)
-         This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
-        Each version will begin with a line of # characters.
-        
-        empty constructor   there are no protected functions currently
-        fool.
-        
-        Parameters
-        ----------
-        None
-        
-        Returns
-        -------
-        None
-        
-        ################################################################
-        
-        Constructor from passed in vars
-        
-        Parameters
-        ----------
-        particle_name : std::string
-        
-        entity_type : std::string
-        
-        type : std::string
-        
-        entity_name : std::string
-        
-        entity : int
-        
-        Returns
-        -------
-        None
-        
+    def _tally_tally_1(self, type, part_name, ent, ent_type, ent_name):
+        """Tally(self, type, part_name, ent, ent_type, ent_name)
         """
         cdef char * type_proxy
-        cdef char * particle_name_proxy
-        cdef char * entity_type_proxy
-        cdef char * entity_name_proxy
+        cdef char * part_name_proxy
+        cdef char * ent_type_proxy
+        cdef char * ent_name_proxy
         type_bytes = type.encode()
-        particle_name_bytes = particle_name.encode()
-        entity_type_bytes = entity_type.encode()
-        entity_name_bytes = entity_name.encode()
-        self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> particle_name_bytes), <int> entity, std_string(<char *> entity_type_bytes), std_string(<char *> entity_name_bytes))
+        part_name_bytes = part_name.encode()
+        ent_type_bytes = ent_type.encode()
+        ent_name_bytes = ent_name.encode()
+        self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes))
     
     
     _tally_tally_0_argtypes = frozenset()
-    _tally_tally_1_argtypes = frozenset(((0, str), (1, str), (2, int), (3, str), (4, str), ("type", str), ("particle_name", str), ("entity", int), ("entity_type", str), ("entity_name", str)))
+    _tally_tally_1_argtypes = frozenset(((0, str), (1, str), (2, int), (3, str), (4, str), ("type", str), ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str)))
     
     def __init__(self, *args, **kwargs):
-        """Tally(self, type, particle_name, entity, entity_type, entity_name)
-         This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
-        Each version will begin with a line of # characters.
-        
-        empty constructor   there are no protected functions currently
-        fool.
-        
-        Parameters
-        ----------
-        None
-        
-        Returns
-        -------
-        None
-        
-        ################################################################
-        
-        Constructor from passed in vars
-        
-        Parameters
-        ----------
-        particle_name : std::string
-        
-        entity_type : std::string
-        
-        type : std::string
-        
-        entity_name : std::string
-        
-        entity : int
-        
-        Returns
-        -------
-        None
-        
+        """Tally(self, type, part_name, ent, ent_type, ent_name)
         """
         types = set([(i, type(a)) for i, a in enumerate(args)])
         types.update([(k, type(v)) for k, v in kwargs.items()])

@@ -22,26 +22,28 @@ namespace pyne
 namespace endf
 {
   /// struct used for indexing endf library
-  typedef struct endf_id_struct {
+  typedef struct endf_id {
     int mat;
     int mf;
     int mt;
-    friend bool operator <(const endf_id_struct &lhs, const endf_id_struct &rhs);
-    friend bool operator ==(const endf_id_struct &lhs, const endf_id_struct &rhs);
-  } endf_id_struct;
+    friend bool operator <(const endf_id &lhs, const endf_id &rhs);
+    friend bool operator ==(const endf_id &lhs, const endf_id &rhs);
+  } endf_id;
 
-  /// utility function to convert an mt_base_struct into an id
-  endf_id_struct make_endf_id(mt_base_struct input);
+  bool operator <(const endf_id &lhs, const endf_id &rhs);
+  bool operator ==(const endf_id &lhs, const endf_id &rhs);
+  /// utility function to convert an mt_base into an id
+  endf_id make_endf_id(mt_base input);
 
   /// Class for storing raw endf data
   class library {
-    public:
+  public:
       ~library();
 
-      std::map<endf_id_struct , mt_base_struct*> contents;///< library data
+      std::map<endf_id , mt_base*> contents;///< library data
 
       /// Access to library data by id struct
-      template<typename T> T get (endf_id_struct comp);
+      template<typename T> T get (endf_id comp);
       /// Access to library data by mat number, mf, and mt number
       template<typename T> T get (int mat, int mf, int mt);
       /// Access to library data by mf and mt number returns a vector of

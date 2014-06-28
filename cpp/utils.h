@@ -72,7 +72,7 @@ namespace pyne {
 
   double to_dbl(std::string s);  ///< Converts a valid string to a float using atof().
 
-  double endftod(char * s); ///< Converts a string from ENDF format to a float.
+  double endftod(const char * s); ///< Converts a string from ENDF format to a float.
 
   /// Returns an all upper case copy of the string.
   std::string to_upper(std::string s);
@@ -112,14 +112,14 @@ namespace pyne {
   /// Returns true if \a substr is in \a s.
   bool contains_substring(std::string s, std::string substr);
 
-  /// Calculates a version of the string \a name that is also a valid variable name. 
+  /// Calculates a version of the string \a name that is also a valid variable name.
   /// That is to say that the return value uses only word characters.
   std::string natural_naming(std::string name);
 
   /// Finds the slope of a line from the points (\a x1, \a y1) and (\a x2, \a y2).
   double slope (double x2, double y2, double x1, double y1);
 
-  /// Solves the equation for the line y = mx + b, given \a x and the points that 
+  /// Solves the equation for the line y = mx + b, given \a x and the points that
   /// form the line: (\a x1, \a y1) and (\a x2, \a y2).
   double solve_line (double x, double x2, double y2, double x1, double y1);
 
