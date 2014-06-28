@@ -22,8 +22,6 @@ e_ahotn_nefd = 0.0
 ! Initialize the old time point
 told = ttosolve
 ! Start the iterations
-itmx = 100
-   WRITE(8,'(/,3X,A,//)') "made it to beginning."
 DO it = 1, itmx
    ! Call for the mesh sweep
    CALL sweep_ahotn_nefd(g)

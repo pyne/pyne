@@ -24,7 +24,7 @@ told = ttosolve
 ! Start the iterations
 DO it = 1, itmx
    ! Call for the mesh sweep
-   CALL sweep(g)
+   CALL sweep_ahotn_l(g)
    
    ! Compare new and old flux iterates for user chosen range of moments, iall
    dfmx = -1.0
