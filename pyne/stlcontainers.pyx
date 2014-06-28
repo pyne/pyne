@@ -2020,7 +2020,7 @@ cdef class _MapStrVectorDouble:
                 key_bytes = key.encode()
                 # value is a ('vector', 'float64', 0)
                 value_size = len(value)
-                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == dtypes.xd_vector_double.num:
                     value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
                     value_proxy = cpp_vector[double](<size_t> value_size)
                     for ivalue in range(value_size):
@@ -2037,7 +2037,7 @@ cdef class _MapStrVectorDouble:
                 key_bytes = key.encode()
                 # value is a ('vector', 'float64', 0)
                 value_size = len(value)
-                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == dtypes.xd_vector_double.num:
                     value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
                     value_proxy = cpp_vector[double](<size_t> value_size)
                     for ivalue in range(value_size):
@@ -2108,7 +2108,7 @@ cdef class _MapStrVectorDouble:
         key_bytes = key.encode()
         # value is a ('vector', 'float64', 0)
         value_size = len(value)
-        if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+        if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == dtypes.xd_vector_double.num:
             value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
             value_proxy = cpp_vector[double](<size_t> value_size)
             for ivalue in range(value_size):
@@ -2209,7 +2209,7 @@ cdef class _MapIntVectorDouble:
 
                 # value is a ('vector', 'float64', 0)
                 value_size = len(value)
-                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == dtypes.xd_vector_double.num:
                     value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
                     value_proxy = cpp_vector[double](<size_t> value_size)
                     for ivalue in range(value_size):
@@ -2226,7 +2226,7 @@ cdef class _MapIntVectorDouble:
 
                 # value is a ('vector', 'float64', 0)
                 value_size = len(value)
-                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == dtypes.xd_vector_double.num:
                     value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
                     value_proxy = cpp_vector[double](<size_t> value_size)
                     for ivalue in range(value_size):
@@ -2297,7 +2297,7 @@ cdef class _MapIntVectorDouble:
 
         # value is a ('vector', 'float64', 0)
         value_size = len(value)
-        if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+        if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == dtypes.xd_vector_double.num:
             value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
             value_proxy = cpp_vector[double](<size_t> value_size)
             for ivalue in range(value_size):
@@ -2340,5 +2340,14 @@ class MapIntVectorDouble(_MapIntVectorDouble, collections.MutableMapping):
     def __repr__(self):
         return "{" + ", ".join(["{0}: {1}".format(repr(key), repr(value)) for key, value in self.items()]) + "}"
 
+
+
+# cpp_vector[int] vector
+
+
+# cpp_vector[double] vector
+
+
+# cpp_vector[cpp_vector[double]] vector
 
 

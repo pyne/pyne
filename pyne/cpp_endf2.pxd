@@ -8,11 +8,9 @@
 ################################################
 
 
-from libcpp.map cimport map as cpp_map
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
 from pyne cimport cpp_endf2
-from pyne cimport cpp_endf_mt
 
 cdef extern from "endf.h" namespace "pyne::endf":
 
@@ -31,19 +29,73 @@ cdef extern from "endf.h" namespace "pyne::endf":
 
 
 
-cdef extern from "endf.h" namespace "endf":
+cdef extern from "endf_mt.h" namespace "pyne::endf":
+
+    cdef cppclass mt_base:
+        # constructors
+        mt_base() except +
+
+        # attributes
+        double awr
+        int mat
+        int mf
+        int mt
+        int nuc_id
+
+        # methods
+
+        pass
+
+
+
+cdef extern from "endf_mt.h" namespace "pyne::endf":
+
+    cdef cppclass mt_451(mt_base):
+        # constructors
+        mt_451() except +
+
+        # attributes
+        double awi
+        double elis
+        double emax
+        int ldrv
+        int lfi
+        int lis
+        int liso
+        int lrel
+        int lrp
+        cpp_vector[cpp_vector[int]] mt_list
+        int nfor
+        int nlib
+        int nmod
+        int nsub
+        int nver
+        int nwd
+        int nxc
+        int sta
+        double temp
+
+        # methods
+
+        pass
+
+
+
+cdef extern from "endf.h" namespace "pyne::endf":
 
     cdef cppclass library:
         # constructors
         library() except +
 
         # attributes
-        cpp_map[endf_id, cpp_endf_mt.mt_base *] contents
+
 
         # methods
         cpp_vector[cpp_vector[int]] get_content_list() except +
         void read_endf() except +
         void read_endf(std_string) except +
+        mt_451 get_mt_451 "get< pyne::endf::mt_451 >" (endf_id) except +
+        mt_451 get_mt_451 "get< pyne::endf::mt_451 >" (int, int, int) except +
         pass
 
 

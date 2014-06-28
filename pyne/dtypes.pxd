@@ -20,7 +20,7 @@ cimport numpy as np
 cimport extra_types
 
 # Cython imports for types
-
+from libcpp.vector cimport vector as cpp_vector
 
 cdef extern from "Python.h":
     ctypedef Py_ssize_t Py_ssize_t
@@ -139,4 +139,43 @@ cdef extern from "extra_types.h" namespace "extra_types":
         T * defnew() nogil except +
         T * renew(void *) nogil except +
         void deall(T *) nogil except +
+
+# cpp_vector[int] dtype
+ctypedef struct PyXDVectorInt_Type:
+    Py_ssize_t ob_refcnt
+    PyTypeObject *ob_typ
+    cpp_vector[int] obval
+
+cdef object pyxd_vector_int_getitem(void * data, void * arr)
+cdef int pyxd_vector_int_setitem(object value, void * data, void * arr)
+cdef void pyxd_vector_int_copyswapn(void * dest, np.npy_intp dstride, void * src, np.npy_intp sstride, np.npy_intp n, int swap, void * arr)
+cdef void pyxd_vector_int_copyswap(void * dest, void * src, int swap, void * arr)
+cdef np.npy_bool pyxd_vector_int_nonzero(void * data, void * arr)
+
+
+# cpp_vector[double] dtype
+ctypedef struct PyXDVectorDouble_Type:
+    Py_ssize_t ob_refcnt
+    PyTypeObject *ob_typ
+    cpp_vector[double] obval
+
+cdef object pyxd_vector_double_getitem(void * data, void * arr)
+cdef int pyxd_vector_double_setitem(object value, void * data, void * arr)
+cdef void pyxd_vector_double_copyswapn(void * dest, np.npy_intp dstride, void * src, np.npy_intp sstride, np.npy_intp n, int swap, void * arr)
+cdef void pyxd_vector_double_copyswap(void * dest, void * src, int swap, void * arr)
+cdef np.npy_bool pyxd_vector_double_nonzero(void * data, void * arr)
+
+
+# cpp_vector[cpp_vector[double]] dtype
+ctypedef struct PyXDVectorVectorDouble_Type:
+    Py_ssize_t ob_refcnt
+    PyTypeObject *ob_typ
+    cpp_vector[cpp_vector[double]] obval
+
+cdef object pyxd_vector_vector_double_getitem(void * data, void * arr)
+cdef int pyxd_vector_vector_double_setitem(object value, void * data, void * arr)
+cdef void pyxd_vector_vector_double_copyswapn(void * dest, np.npy_intp dstride, void * src, np.npy_intp sstride, np.npy_intp n, int swap, void * arr)
+cdef void pyxd_vector_vector_double_copyswap(void * dest, void * src, int swap, void * arr)
+cdef np.npy_bool pyxd_vector_vector_double_nonzero(void * data, void * arr)
+
 

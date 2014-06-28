@@ -9,11 +9,9 @@
 
 
 cimport dtypes
-cimport endf_mt
-cimport stlcontainers
-from libcpp.map cimport map as cpp_map
+cimport numpy as np
+from libcpp.vector cimport vector as cpp_vector
 from pyne cimport cpp_endf2
-from pyne cimport cpp_endf_mt
 
 
 
@@ -29,7 +27,23 @@ cdef class endf_id:
 cdef class library:
     cdef void * _inst
     cdef public bint _free_inst
-    cdef public stlcontainers._Mapendf_idmt_base _contents
+    pass
+
+
+
+
+
+cdef class mt_base:
+    cdef void * _inst
+    cdef public bint _free_inst
+    pass
+
+
+
+
+
+cdef class mt_451(mt_base):
+    cdef public np.ndarray _mt_list
     pass
 
 

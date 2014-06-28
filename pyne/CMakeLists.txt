@@ -14,6 +14,7 @@ cython_add_module(extra_types extra_types.pyx)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dtypes.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(dtypes dtypes.pyx)
+target_link_libraries(dtypes hdf5)
 
 # STL containers
 # If the pyx file is a C++ file, we should specify that here.
@@ -21,7 +22,6 @@ cython_add_module(dtypes dtypes.pyx)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/stlcontainers.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(stlcontainers stlcontainers.pyx)
-
 
 # jsoncpp
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/jsoncpp.pyx"
@@ -98,8 +98,9 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/tally.pyx"
 cython_add_module(tally tally.pyx)
 target_link_libraries(tally pyne)
 
-# endfcpp
- set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/endf2.pyx"
+
+# endf
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/endf2.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
- cython_add_module(endf2 endf2.pyx)
- target_link_libraries(endf2 pyne)
+cython_add_module(endf2 endf2.pyx)
+target_link_libraries(endf2 pyne)

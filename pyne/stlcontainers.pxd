@@ -225,3 +225,12 @@ cdef class _MapIntVectorDouble:
 
 
 
+# cpp_vector[int] vector
+
+
+# cpp_vector[double] vector
+
+
+# cpp_vector[cpp_vector[double]] vector
+
+

@@ -5,7 +5,7 @@ package = 'pyne'
 packagedir = 'pyne'
 
 plugins = ('xdress.stlwrap', 'xdress.autoall', 'xdress.autodescribe',
-           'xdress.cythongen')#'xdress.doxygen',
+           'xdress.descfilter', 'xdress.cythongen')#'xdress.doxygen',
 
 doxygen_config = {'PROJECT_NAME': 'PYNE',
                   'EXTRACT_ALL': False,  # Note usage of python False
@@ -34,20 +34,25 @@ stlcontainers = [
     ('map', 'uint32', 'float64'),
     ('map', 'str', ('vector', 'float64')),
     ('map', 'int32', ('vector', 'float64')),
+    ('vector',('vector','int')),
+    ('vector',('vector','double')),
+    ('vector',('vector',('vector','double'))),
     ]
 
 #stlcontainers_module = 'stlcontainers'
 
 classes = [apiname('Tally','cpp/tally.*',incfiles='tally.h'),
-           apiname('mt_base','cpp/endf_mt.*',incfiles=['endf_mt.h']),
-           apiname('mt_451','cpp/endf_mt.*',incfiles=['endf_mt.h']),
-           apiname('mt_452_1','cpp/endf_mt.*',incfiles=['endf_mt.h']),
-           apiname('mt_455_1','cpp/endf_mt.*',incfiles=['endf_mt.h']),
-           apiname('mt_456_1','cpp/endf_mt.*',incfiles=['endf_mt.h']),
-           apiname('mt_458_1','cpp/endf_mt.*',incfiles=['endf_mt.h']),
-           apiname('mt_460_1','cpp/endf_mt.*',incfiles=['endf_mt.h']),
-           apiname('mt_fpy_8','cpp/endf_mt.*',incfiles=['endf_mt.h']),
-           apiname('endf_id','cpp/endf.*',tarbase='endf2', incfiles=['endf.h']),
-           apiname('library','cpp/endf.*',tarbase='endf2', incfiles=['endf.h'])]
+           apiname('mt_base','cpp/endf_mt.*',tarbase='endf2', incfiles=['endf_mt.h']),
+           apiname('mt_451','cpp/endf_mt.*',tarbase='endf2', incfiles=['endf_mt.h']),
+           #apiname('mt_452_1','cpp/endf_mt.*',tarbase='endf2', incfiles=['endf_mt.h']),
+           #apiname('mt_455_1','cpp/endf_mt.*',tarbase='endf2', incfiles=['endf_mt.h']),
+           #apiname('mt_456_1','cpp/endf_mt.*',tarbase='endf2', incfiles=['endf_mt.h']),
+           #apiname('mt_458_1','cpp/endf_mt.*',tarbase='endf2', incfiles=['endf_mt.h']),
+           #apiname('mt_460_1','cpp/endf_mt.*',tarbase='endf2', incfiles=['endf_mt.h']),
+           #apiname('mt_fpy_8','cpp/endf_mt.*',tarbase='endf2', incfiles=['endf_mt.h']),
+           apiname('endf_id','cpp/endf.[hc]*',tarbase='endf2', incfiles=['endf.h']),
+           apiname('library','cpp/endf.[hc]*',tarbase='endf2', incfiles=['endf.h'])]
 
 functions = []
+
+skipattrs = {'library':['contents',]}

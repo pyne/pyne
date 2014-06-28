@@ -10,29 +10,22 @@
 """
 cimport dtypes
 cimport endf2
-cimport endf_mt
 cimport numpy as np
-cimport stlcontainers
 from libc.stdlib cimport free
 from libc.stdlib cimport malloc
-from libcpp.map cimport map as cpp_map
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
 from pyne cimport cpp_endf2
-from pyne cimport cpp_endf_mt
 
-import collections
 import dtypes
-import endf_mt
 import numpy as np
-import stlcontainers
 
 np.import_array()
 
 
 
-cdef class library:
-    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'library', 'language': 'c++', 'srcname': 'library', 'incfiles': ('endf.h',), 'srcfiles': ('cpp/endf.cpp', 'cpp/endf.h')}, please file a bug report!"""
+cdef class mt_base:
+    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'mt_base', 'language': 'c++', 'srcname': 'mt_base', 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
 
 
 
@@ -42,59 +35,381 @@ cdef class library:
         self._free_inst = True
 
         # cached property defaults
-        self._contents = None
+
 
     def __init__(self, ):
-        """library(self, )
+        """mt_base(self, )
         """
-        self._inst = new cpp_endf2.library()
-    
-    
+        self._inst = malloc(sizeof(cpp_endf2.mt_base))
+        (<cpp_endf2.mt_base *> self._inst)[0] = cpp_endf2.mt_base()
+
+
     def __dealloc__(self):
         if self._free_inst and self._inst is not NULL:
             free(self._inst)
 
     # attributes
-    property contents:
-        """no docstring for contents, please file a bug report!"""
+    property awr:
+        """no docstring for awr, please file a bug report!"""
         def __get__(self):
-            cdef stlcontainers._Mapendf_idmt_base contents_proxy
-            if self._contents is None:
-                contents_proxy = stlcontainers.Mapendf_idmt_base(False, False)
-                contents_proxy.map_ptr = &(<cpp_endf2.library *> self._inst).contents
-                self._contents = contents_proxy
-            return self._contents
-    
+            return float((<cpp_endf2.mt_base *> self._inst).awr)
+
         def __set__(self, value):
-            cdef stlcontainers._Mapendf_idmt_base value_proxy
-            value_proxy = stlcontainers.Mapendf_idmt_base(value, not isinstance(value, stlcontainers._Mapendf_idmt_base))
-            (<cpp_endf2.library *> self._inst).contents = value_proxy.map_ptr[0]
-            self._contents = None
-    
-    
+            (<cpp_endf2.mt_base *> self._inst).awr = <double> value
+
+
+    property mat:
+        """no docstring for mat, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_base *> self._inst).mat)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_base *> self._inst).mat = <int> value
+
+
+    property mf:
+        """no docstring for mf, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_base *> self._inst).mf)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_base *> self._inst).mf = <int> value
+
+
+    property mt:
+        """no docstring for mt, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_base *> self._inst).mt)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_base *> self._inst).mt = <int> value
+
+
+    property nuc_id:
+        """no docstring for nuc_id, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_base *> self._inst).nuc_id)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_base *> self._inst).nuc_id = <int> value
+
+
+    # methods
+
+
+    pass
+
+
+
+
+
+cdef class mt_451(mt_base):
+    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'mt_451', 'language': 'c++', 'srcname': 'mt_451', 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+
+
+
+    # constuctors
+    def __cinit__(self, *args, **kwargs):
+        self._inst = NULL
+        self._free_inst = True
+
+        # cached property defaults
+        self._mt_list = None
+
+    def __init__(self, ):
+        """mt_451(self, )
+        """
+        self._inst = malloc(sizeof(cpp_endf2.mt_451))
+        (<cpp_endf2.mt_451 *> self._inst)[0] = cpp_endf2.mt_451()
+
+
+
+    # attributes
+    property awi:
+        """no docstring for awi, please file a bug report!"""
+        def __get__(self):
+            return float((<cpp_endf2.mt_451 *> self._inst).awi)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).awi = <double> value
+
+
+    property elis:
+        """no docstring for elis, please file a bug report!"""
+        def __get__(self):
+            return float((<cpp_endf2.mt_451 *> self._inst).elis)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).elis = <double> value
+
+
+    property emax:
+        """no docstring for emax, please file a bug report!"""
+        def __get__(self):
+            return float((<cpp_endf2.mt_451 *> self._inst).emax)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).emax = <double> value
+
+
+    property ldrv:
+        """no docstring for ldrv, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).ldrv)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).ldrv = <int> value
+
+
+    property lfi:
+        """no docstring for lfi, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).lfi)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).lfi = <int> value
+
+
+    property lis:
+        """no docstring for lis, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).lis)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).lis = <int> value
+
+
+    property liso:
+        """no docstring for liso, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).liso)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).liso = <int> value
+
+
+    property lrel:
+        """no docstring for lrel, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).lrel)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).lrel = <int> value
+
+
+    property lrp:
+        """no docstring for lrp, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).lrp)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).lrp = <int> value
+
+
+    property mt_list:
+        """no docstring for mt_list, please file a bug report!"""
+        def __get__(self):
+            cdef np.ndarray mt_list_proxy
+            cdef np.npy_intp mt_list_proxy_shape[1]
+            if self._mt_list is None:
+                mt_list_proxy_shape[0] = <np.npy_intp> (<cpp_endf2.mt_451 *> self._inst).mt_list.size()
+                mt_list_proxy = np.PyArray_SimpleNewFromData(1, mt_list_proxy_shape, dtypes.xd_vector_int.num, &(<cpp_endf2.mt_451 *> self._inst).mt_list[0])
+                self._mt_list = mt_list_proxy
+            return self._mt_list
+
+        def __set__(self, value):
+            cdef cpp_vector[cpp_vector[int]] value_proxy
+            cdef int ivalue
+            cdef int value_size
+            cdef cpp_vector[int] * value_data
+            # value is a ('vector', ('vector', 'int32', 0), 0)
+            value_size = len(value)
+            if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == dtypes.xd_vector_int.num:
+                value_data = <cpp_vector[int] *> np.PyArray_DATA(<np.ndarray> value)
+                value_proxy = cpp_vector[cpp_vector[int]](<size_t> value_size)
+                for ivalue in range(value_size):
+                    value_proxy[ivalue] = value_data[ivalue]
+            else:
+                value_proxy = cpp_vector[cpp_vector[int]](<size_t> value_size)
+                for ivalue in range(value_size):
+                    value_proxy[ivalue] = <cpp_vector[int]> value[ivalue]
+            (<cpp_endf2.mt_451 *> self._inst).mt_list = value_proxy
+            self._mt_list = None
+
+
+    property nfor:
+        """no docstring for nfor, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).nfor)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).nfor = <int> value
+
+
+    property nlib:
+        """no docstring for nlib, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).nlib)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).nlib = <int> value
+
+
+    property nmod:
+        """no docstring for nmod, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).nmod)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).nmod = <int> value
+
+
+    property nsub:
+        """no docstring for nsub, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).nsub)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).nsub = <int> value
+
+
+    property nver:
+        """no docstring for nver, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).nver)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).nver = <int> value
+
+
+    property nwd:
+        """no docstring for nwd, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).nwd)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).nwd = <int> value
+
+
+    property nxc:
+        """no docstring for nxc, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).nxc)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).nxc = <int> value
+
+
+    property sta:
+        """no docstring for sta, please file a bug report!"""
+        def __get__(self):
+            return int((<cpp_endf2.mt_451 *> self._inst).sta)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).sta = <int> value
+
+
+    property temp:
+        """no docstring for temp, please file a bug report!"""
+        def __get__(self):
+            return float((<cpp_endf2.mt_451 *> self._inst).temp)
+
+        def __set__(self, value):
+            (<cpp_endf2.mt_451 *> self._inst).temp = <double> value
+
+
+    # methods
+
+
+    pass
+
+
+
+
+
+cdef class library:
+    """no docstring for {'tarbase': 'endf2', 'tarname': 'library', 'language': 'c++', 'srcname': 'library', 'sidecars': ('cpp/endf.py',), 'incfiles': ('endf.h',), 'srcfiles': ('cpp/endf.cpp', 'cpp/endf.h')}, please file a bug report!"""
+
+
+
+    # constuctors
+    def __cinit__(self, *args, **kwargs):
+        self._inst = NULL
+        self._free_inst = True
+
+        # cached property defaults
+
+
+    def __init__(self, ):
+        """library(self, )
+        """
+        self._inst = new cpp_endf2.library()
+
+
+    def __dealloc__(self):
+        if self._free_inst and self._inst is not NULL:
+            free(self._inst)
+
+    # attributes
+
     # methods
     def get_content_list(self, ):
         """get_content_list(self, )
         no docstring for get_content_list, please file a bug report!"""
         cdef cpp_vector[cpp_vector[int]] rtnval
-        
-        cdef np.npy_intp rtnval_proxy_shape[1]
         rtnval = (<cpp_endf2.library *> self._inst).get_content_list()
-        rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
-        rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_INT32, &rtnval[0])
-        rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
-        return rtnval_proxy
-    
-    
+        return rtnval
+
+
     def read_endf(self, filenm):
         """read_endf(self, filenm)
         no docstring for read_endf, please file a bug report!"""
         cdef char * filenm_proxy
         filenm_bytes = filenm.encode()
         (<cpp_endf2.library *> self._inst).read_endf(std_string(<char *> filenm_bytes))
-    
-    
-    
+
+
+    def _library_get_mt_451_0(self, comp):
+        """get_mt_451(self, comp)
+        no docstring for ('get', 'mt_451'), please file a bug report!"""
+        cdef endf_id comp_proxy
+        cdef cpp_endf2.mt_451 rtnval
+        comp_proxy = <endf_id> comp
+        rtnval = (<cpp_endf2.library *> self._inst).get_mt_451((<cpp_endf2.endf_id *> comp_proxy._inst)[0])
+        rtnval_proxy = mt_451()
+        (<cpp_endf2.mt_451 *> rtnval_proxy._inst)[0] = rtnval
+        return rtnval_proxy
+
+
+    def _library_get_mt_451_1(self, mat, mf, mt):
+        """get_mt_451(self, mat, mf, mt)
+        no docstring for ('get', 'mt_451'), please file a bug report!"""
+        cdef cpp_endf2.mt_451 rtnval
+        rtnval = (<cpp_endf2.library *> self._inst).get_mt_451(<int> mat, <int> mf, <int> mt)
+        rtnval_proxy = mt_451()
+        (<cpp_endf2.mt_451 *> rtnval_proxy._inst)[0] = rtnval
+        return rtnval_proxy
+
+
+
+    def get_mt_451(self, *args, **kwargs):
+        """get_mt_451(self, mat, mf, mt)
+        no docstring for ('get', 'mt_451'), please file a bug report!"""
+        types = set([(i, type(a)) for i, a in enumerate(args)])
+        types.update([(k, type(v)) for k, v in kwargs.items()])
+        # vtable-like dispatch for exactly matching types
+        # duck-typed dispatch based on whatever works!
+        raise RuntimeError('method get_mt_451() could not be dispatched')
+
+
+    #
+    # Function Dispatchers
+    #
+
+    # get dispatcher
+    get = {}
+    get['mt_451'] = get_mt_451
+    get[mt_451] = get_mt_451
 
     pass
 
@@ -103,7 +418,7 @@ cdef class library:
 
 
 cdef class endf_id:
-    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'endf_id', 'language': 'c++', 'srcname': 'endf_id', 'incfiles': ('endf.h',), 'srcfiles': ('cpp/endf.cpp', 'cpp/endf.h')}, please file a bug report!"""
+    """no docstring for {'tarbase': 'endf2', 'tarname': 'endf_id', 'language': 'c++', 'srcname': 'endf_id', 'sidecars': ('cpp/endf.py',), 'incfiles': ('endf.h',), 'srcfiles': ('cpp/endf.cpp', 'cpp/endf.h')}, please file a bug report!"""
 
 
 
@@ -120,8 +435,8 @@ cdef class endf_id:
         """
         self._inst = malloc(sizeof(cpp_endf2.endf_id))
         (<cpp_endf2.endf_id *> self._inst)[0] = cpp_endf2.endf_id()
-    
-    
+
+
     def __dealloc__(self):
         if self._free_inst and self._inst is not NULL:
             free(self._inst)
@@ -131,31 +446,31 @@ cdef class endf_id:
         """no docstring for mat, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.endf_id *> self._inst).mat)
-    
+
         def __set__(self, value):
             (<cpp_endf2.endf_id *> self._inst).mat = <int> value
-    
-    
+
+
     property mf:
         """no docstring for mf, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.endf_id *> self._inst).mf)
-    
+
         def __set__(self, value):
             (<cpp_endf2.endf_id *> self._inst).mf = <int> value
-    
-    
+
+
     property mt:
         """no docstring for mt, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.endf_id *> self._inst).mt)
-    
+
         def __set__(self, value):
             (<cpp_endf2.endf_id *> self._inst).mt = <int> value
-    
-    
+
+
     # methods
-    
+
 
     pass
 
