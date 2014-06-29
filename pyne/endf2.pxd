@@ -43,6 +43,8 @@ cdef class mt_base:
 
 
 cdef class mt_451(mt_base):
+    cdef cpp_endf2.mt_451 * _subinst
+    cdef cpp_endf2.mt_451 _ob
     cdef public np.ndarray _mt_list
     pass
 

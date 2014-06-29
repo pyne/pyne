@@ -110,7 +110,7 @@ cdef class mt_451(mt_base):
 
     # constuctors
     def __cinit__(self, *args, **kwargs):
-        self._inst = NULL
+        self._subinst = NULL
         self._free_inst = True
 
         # cached property defaults
@@ -119,8 +119,8 @@ cdef class mt_451(mt_base):
     def __init__(self, ):
         """mt_451(self, )
         """
-        self._inst = malloc(sizeof(cpp_endf2.mt_451))
-        (<cpp_endf2.mt_451 *> self._inst)[0] = cpp_endf2.mt_451()
+        #self._subinst = malloc(sizeof(cpp_endf2.mt_451))
+        self._subinst = &self._ob
 
 
 
@@ -128,82 +128,82 @@ cdef class mt_451(mt_base):
     property awi:
         """no docstring for awi, please file a bug report!"""
         def __get__(self):
-            return float((<cpp_endf2.mt_451 *> self._inst).awi)
+            return float(self._subinst.awi)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).awi = <double> value
+            self._subinst.awi = <double> value
 
 
     property elis:
         """no docstring for elis, please file a bug report!"""
         def __get__(self):
-            return float((<cpp_endf2.mt_451 *> self._inst).elis)
+            return float(self._subinst.elis)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).elis = <double> value
+            self._subinst.elis = <double> value
 
 
     property emax:
         """no docstring for emax, please file a bug report!"""
         def __get__(self):
-            return float((<cpp_endf2.mt_451 *> self._inst).emax)
+            return float(self._subinst.emax)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).emax = <double> value
+            self._subinst.emax = <double> value
 
 
     property ldrv:
         """no docstring for ldrv, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).ldrv)
+            return int(self._subinst.ldrv)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).ldrv = <int> value
+            self._subinst.ldrv = <int> value
 
 
     property lfi:
         """no docstring for lfi, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).lfi)
+            return int(self._subinst.lfi)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).lfi = <int> value
+            self._subinst.lfi = <int> value
 
 
     property lis:
         """no docstring for lis, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).lis)
+            return int(self._subinst.lis)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).lis = <int> value
+            self._subinst.lis = <int> value
 
 
     property liso:
         """no docstring for liso, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).liso)
+            return int(self._subinst.liso)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).liso = <int> value
+            self._subinst.liso = <int> value
 
 
     property lrel:
         """no docstring for lrel, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).lrel)
+            return int(self._subinst.lrel)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).lrel = <int> value
+            self._subinst.lrel = <int> value
 
 
     property lrp:
         """no docstring for lrp, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).lrp)
+            return int(self._subinst.lrp)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).lrp = <int> value
+            self._subinst.lrp = <int> value
 
 
     property mt_list:
@@ -212,8 +212,8 @@ cdef class mt_451(mt_base):
             cdef np.ndarray mt_list_proxy
             cdef np.npy_intp mt_list_proxy_shape[1]
             if self._mt_list is None:
-                mt_list_proxy_shape[0] = <np.npy_intp> (<cpp_endf2.mt_451 *> self._inst).mt_list.size()
-                mt_list_proxy = np.PyArray_SimpleNewFromData(1, mt_list_proxy_shape, dtypes.xd_vector_int.num, &(<cpp_endf2.mt_451 *> self._inst).mt_list[0])
+                mt_list_proxy_shape[0] = <np.npy_intp> self._subinst.mt_list.size()
+                mt_list_proxy = np.PyArray_SimpleNewFromData(1, mt_list_proxy_shape, dtypes.xd_vector_int.num, &self._subinst.mt_list[0])
                 self._mt_list = mt_list_proxy
             return self._mt_list
 
@@ -233,89 +233,89 @@ cdef class mt_451(mt_base):
                 value_proxy = cpp_vector[cpp_vector[int]](<size_t> value_size)
                 for ivalue in range(value_size):
                     value_proxy[ivalue] = <cpp_vector[int]> value[ivalue]
-            (<cpp_endf2.mt_451 *> self._inst).mt_list = value_proxy
+            self._subinst.mt_list = value_proxy
             self._mt_list = None
 
 
     property nfor:
         """no docstring for nfor, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).nfor)
+            return int(self._subinst.nfor)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).nfor = <int> value
+            self._subinst.nfor = <int> value
 
 
     property nlib:
         """no docstring for nlib, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).nlib)
+            return int(self._subinst.nlib)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).nlib = <int> value
+            self._subinst.nlib = <int> value
 
 
     property nmod:
         """no docstring for nmod, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).nmod)
+            return int(self._subinst.nmod)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).nmod = <int> value
+            self._subinst.nmod = <int> value
 
 
     property nsub:
         """no docstring for nsub, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).nsub)
+            return int(self._subinst.nsub)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).nsub = <int> value
+            self._subinst.nsub = <int> value
 
 
     property nver:
         """no docstring for nver, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).nver)
+            return int(self._subinst.nver)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).nver = <int> value
+            self._subinst.nver = <int> value
 
 
     property nwd:
         """no docstring for nwd, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).nwd)
+            return int(self._subinst.nwd)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).nwd = <int> value
+            self._subinst.nwd = <int> value
 
 
     property nxc:
         """no docstring for nxc, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).nxc)
+            return int(self._subinst.nxc)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).nxc = <int> value
+            self._subinst.nxc = <int> value
 
 
     property sta:
         """no docstring for sta, please file a bug report!"""
         def __get__(self):
-            return int((<cpp_endf2.mt_451 *> self._inst).sta)
+            return int(self._subinst.sta)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).sta = <int> value
+            self._subinst.sta = <int> value
 
 
     property temp:
         """no docstring for temp, please file a bug report!"""
         def __get__(self):
-            return float((<cpp_endf2.mt_451 *> self._inst).temp)
+            return float(self._subinst.temp)
 
         def __set__(self, value):
-            (<cpp_endf2.mt_451 *> self._inst).temp = <double> value
+            self._subinst.temp = <double> value
 
 
     # methods
@@ -387,7 +387,7 @@ cdef class library:
         cdef cpp_endf2.mt_451 rtnval
         rtnval = (<cpp_endf2.library *> self._inst).get_mt_451(<int> mat, <int> mf, <int> mt)
         rtnval_proxy = mt_451()
-        (<cpp_endf2.mt_451 *> rtnval_proxy._inst)[0] = rtnval
+        rtnval_proxy._ob = rtnval
         return rtnval_proxy
 
 
