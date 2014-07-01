@@ -47,14 +47,11 @@ Binary
 Binary distributions of the latest release (0.4) for mac and linux (64-bit) 
 using the conda package manager can be installed by running the command::
 
-    conda install -c https://conda.binstar.org/batesca pyne
+    conda install -c https://conda.binstar.org/pyne pyne
 
-A binary distribution of PyNE is also available for windows on 
-32-bit python using conda. In order to install use the following command::
-
-    conda install -c https://conda.binstar.org/batesca pyne_win32py27
-
-Conda binaries do not have moab/pytaps/mesh support (yet).
+A windows 32-bit binary is also available on conda via the same command but
+it is highly experimental and likely broken. Conda binaries do not have 
+moab/pytaps/mesh support (yet).
 
 .. _install_source:
 
@@ -77,6 +74,27 @@ prevents the developers from distributing it with PyNE.  However, the
 ``nuc_data_make`` program (which is installed by ``setup.py``) will
 do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.  
+
+^^^^^^^^^^^^^^^^^^^
+Supported Platforms
+^^^^^^^^^^^^^^^^^^^
+PyNE is currently built and tested daily on the following platforms
+on Python 2.7
+
+ * Ubuntu 12.04 - x86_64
+ * OSX 10.8 - x86_64
+
+PyNE has pre-built binaries for the lastest release (0.4) on windows
+mac and linux 
+
+ * Mac (Python 2.7 and Python 3.3) - x86_64
+ * Linux (Python 2.7 and Python 3.3) - x86_64
+ * Windows (Python 2.7) - x86
+
+PyNE has known issues on the following platforms
+
+ * Windows (64-bit build currently not feasible)
+ * 32-bit platforms (all variants) have known problems - see #315
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Conda Install Instructions

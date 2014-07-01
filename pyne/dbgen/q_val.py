@@ -48,7 +48,7 @@ def read_row(row):
     
     Parameters
     ----------
-    row : list
+    row : tuple
         One entry in a q_val file.
     """
 
@@ -100,7 +100,7 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
 
     Parameters
     ----------
-    all_q_values: list of lists
+    all_q_values: list of tuples
         Array of q_values for all nuclides.
     nuc_data : str
         Path to nuclide data file.
@@ -125,7 +125,7 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
     nuc_file = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new table
-    q_value_table = nuc_file.createTable('/neutron', 'q_values', q_value_array, 'Nuclide, Q_value [MeV per disintegration], Fraction of Q that comes from gammas')
+    q_value_table = nuc_file.createTable('/decay', 'q_values', q_value_array, 'Nuclide, Q_value [MeV per disintegration], Fraction of Q that comes from gammas')
 
     # Ensure that data was written to table
     q_value_table.flush()
@@ -138,7 +138,7 @@ def make_q_value(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
     if os.path.exists(nuc_data):
         with tb.openFile(nuc_data, 'r') as f:
-            if '/neutron/q_values' in f:
+            if '/decay/q_values' in f:
                 print("skipping q_value table creation; already exists.")
                 return
     

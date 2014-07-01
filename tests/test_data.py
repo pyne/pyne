@@ -4,7 +4,7 @@ import math
 import warnings
 
 import nose
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, assert_true
 import numpy as np
 import numpy.testing as npt
 
@@ -55,6 +55,30 @@ def test_gamma_frac():
     assert_equal(data.gamma_frac('H1'), 0.0)
     assert_equal(data.gamma_frac(92235), 0.036)
     assert_equal(data.gamma_frac(110240001), 0.998)
+
+
+def test_ext_air_dose():
+    assert_equal(data.ext_air_dose(40100000), 1.49E-10)
+    assert_equal(data.ext_air_dose('H3', 0), 4.41E-12)
+    assert_true(math.isnan(data.ext_air_dose(25054, 1)))
+
+
+def test_ext_soil_dose():
+    assert_equal(data.ext_soil_dose(40100000, 0), 0.537)
+    assert_equal(data.ext_soil_dose('H3', 2), 3.49E-8)
+    assert_equal(data.ext_soil_dose(25054, 1), 9590.0)
+
+
+def test_ingest_dose():
+    assert_equal(data.ingest_dose(40100000), 4.66E-6)
+    assert_equal(data.ingest_dose('H3', 2), 6.12E-8)
+    assert_equal(data.ingest_dose(25054, 1), 2.7E-6)
+
+
+def test_inhale_dose():
+    assert_equal(data.inhale_dose(40100000), 0.000354)
+    assert_equal(data.inhale_dose('H3', 2), 9.02E-8)
+    assert_equal(data.inhale_dose(25054, 1), 6.4E-6)
 
 
 def test_b_coherent():
@@ -200,24 +224,24 @@ def test_gamma_from_to_byparent():
 def test_gamma_from_to_byen():
     assert_equal(data.gamma_from_to_byen(661.65, 0.1),
                  [(621510087, 621510015),
-                  (641500021, 641500006),
-                  (390990016, 390990005),
-                  (822040062, 822040024),
-                  (902290055, 902290000),
-                  (400880011, 400880004),
-                  (551310023, 551310009),
-                  (0, 0),
-                  (431070028, 431070020),
-                  (972490039, 972490003),
-                  (0, 0),
-                  (380930068, 380930050),
-                  (561370002, 561370000),
-                  (561370002, 561370000),
-                  (621520071, 621520020),
-                  (621540026, 621540006),
-                  (781810026, 781810000),
-                  (791930069, 791930033),
-                  (541390033, 541390028)])
+                 (641500021, 641500006),
+                 (390990016, 390990005),
+                 (822040062, 822040024),
+                 (902290055, 902290000),
+                 (400880011, 400880004),
+                 (551310023, 551310009),
+                 (0, 0),
+                 (431070028, 431070020),
+                 (972490039, 972490003),
+                 (0, 0),
+                 (380930068, 380930050),
+                 (561370002, 561370000),
+                 (561370002, 561370000),
+                 (621520096, 621520019),
+                 (621540026, 621540006),
+                 (781810026, 781810000),
+                 (791930069, 791930033),
+                 (541390033, 541390028)])
 
 
 def test_gamma_parent():
@@ -314,12 +338,12 @@ def test_beta_plus_intensity():
 
 def test_ecbp_parent():
     assert_equal(data.ecbp_parent(215.54, 0.5),
-                 [110220000, 541230000, 571330000])
+                 [110220000, 340690000, 541230000, 571330000])
 
 
 def test_ecbp_child_byen():
     assert_equal(data.ecbp_child_byen(215.54, 0.5),
-                 [100220001, 531230020, 561330006])
+                 [100220001, 330690000, 531230020, 561330006])
 
 
 def test_ecbp_child_byparent():
@@ -376,4 +400,3 @@ def test_gamma_photon_intensity_byen():
 
 if __name__ == "__main__":
     nose.runmodule()
-

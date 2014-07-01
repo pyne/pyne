@@ -22,7 +22,7 @@ import numpy as np
 # local imports 
 cimport extra_types
 
-cimport pyne.cpp_pyne
+cimport pyne.cpp_utils
 cimport pyne.pyne_config
 import pyne.pyne_config
 
@@ -175,6 +175,44 @@ def q_val(nuc):
         raise pyne.nucname.NucTypeError(nuc)
     return q_val
 
+
+#
+# gamma_frac functions
+#
+cdef conv._MapIntDouble gamma_frac_map_proxy = conv.MapIntDouble(False)
+gamma_frac_map_proxy.map_ptr = &cpp_data.gamma_frac_map
+gamma_frac_map = gamma_frac_map_proxy
+
+def gamma_frac(nuc):
+    """Finds the fraction of Q that comes from gammas of a nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    gamma_frac : double
+        Fraction of Q that comes from gammas of this nuclide.
+
+    Notes
+    -----
+    If the nuclide is not found, gamma_frac is 0.
+    """
+    if isinstance(nuc, int):
+        gamma_frac = cpp_data.gamma_frac(<int> nuc)
+    elif isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        gamma_frac = cpp_data.gamma_frac(<char *> nuc_bytes)
+    elif isinstance(nuc, bytes):
+        gamma_frac = cpp_data.gamma_frac(<char *> nuc)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return gamma_frac
+
+
 #
 # simple_xs functions
 #
@@ -239,42 +277,331 @@ def simple_xs(nuc, rx, energy):
 
     return xs
 
+
 #
-# gamma_frac functions
+# Decay Factor data
 #
-cdef conv._MapIntDouble gamma_frac_map_proxy = conv.MapIntDouble(False)
-gamma_frac_map_proxy.map_ptr = &cpp_data.gamma_frac_map
-gamma_frac_map = gamma_frac_map_proxy
 
+# external air dose
 
-def gamma_frac(nuc):
-    """Finds the fraction of Q that comes from gammas of a nuclide.
-
+def ext_air_dose(nuc, source=0):
+    """Finds the external air dose factor for a tracked nuclide.
+    
     Parameters
     ----------
-    nuc : int or str
-        Input nuclide.
+    nuc : int or str 
+        Parent nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'EPA': 0, 'DOE' : 1, 'GENII' : 2
 
     Returns
     -------
-    gamma_frac : double
-        Fraction of Q that comes from gammas of this nuclide.
+    ext_air_dose : float
+        Dose factor from external air exposure [mrem/hr per Ci/m^3]
 
     Notes
-    -----
-    If the nuclide is not found, gamma_frac is 0.
+    ----
+    The only source that provides this data is EPA; all other 
+    sources will give a value of -1.
     """
+    srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 2:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints are accepted')
+
     if isinstance(nuc, int):
-        gamma_frac = cpp_data.gamma_frac(<int> nuc)
+        ext_air_dose = cpp_data.ext_air_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        nuc_bytes = nuc.encode()
-        gamma_frac = cpp_data.gamma_frac(<char *> nuc_bytes)
-    elif isinstance(nuc, bytes):
-        gamma_frac = cpp_data.gamma_frac(<char *> nuc)
+        ext_air_dose = cpp_data.ext_air_dose(<char *> nuc, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
-    return gamma_frac
+    if ext_air_dose < 0:
+        return float('nan')
+
+    return ext_air_dose
+
+# ratio
+
+def dose_ratio(nuc, source=0):
+    """Finds ratio of dose from external air to dose from inhalation for a tracked nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Parent nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'EPA': 0, 'DOE' : 1, 'GENII' : 2
+
+    Returns
+    -------
+    ratio : float
+        Fraction of dose from external air to dose from inhalation.
+
+    Notes
+    -----
+    The only source that provides this data is EPA; all other 
+    sources will give a value of -1.
+    """
+    srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 2:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints are accepted')
+
+    if isinstance(nuc, int):
+        ratio = cpp_data.dose_ratio(<int> nuc, <int> source)
+    elif isinstance(nuc, basestring):
+        ratio = cpp_data.dose_ratio(<char *> nuc, <int> source)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    if ratio < 0:
+        return float('nan')
+
+    return ratio
+
+# external soil dose
+
+def ext_soil_dose(nuc, source=0):
+    """Finds the external soil dose factor for a tracked nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Parent nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'EPA': 0, 'DOE' : 1, 'GENII' : 2
+
+    Returns
+    -------
+    ext_soil_dose : float
+        Dose factor from 15 cm of external soil exposure [mrem/hr per Ci/m^2]
+
+    Notes
+    -----
+    If the nuclide is not found, a value of -1 is returned.
+    """
+    srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 2:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints are accepted')
+
+    if isinstance(nuc, int):
+        ext_soil_dose = cpp_data.ext_soil_dose(<int> nuc, <int> source)
+    elif isinstance(nuc, basestring):
+        ext_soil_dose = cpp_data.ext_soil_dose(<char *> nuc, <int> source)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    if ext_soil_dose < 0:
+        return float('nan')
+
+    return ext_soil_dose
+    
+# ingestion dose
+
+def ingest_dose(nuc, source=0):
+    """Finds the dose factor due to ingestion for a tracked nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Parent nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'EPA': 0, 'DOE' : 1, 'GENII' : 2
+
+    Returns
+    -------
+    ingest : float
+        Dose factor from exposure due to ingestion [mrem/pCi]
+
+    Notes
+    -----
+    If the nuclide is not found, a value of -1 is returned.
+    """
+    srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 2:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints are accepted')
+
+    if isinstance(nuc, int):
+        ingest_dose = cpp_data.ingest_dose(<int> nuc, <int> source)
+    elif isinstance(nuc, basestring):
+        ingest_dose = cpp_data.ingest_dose(<char *> nuc, <int> source)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    if ingest_dose < 0:
+        return float('nan')
+    
+    return ingest_dose
+    
+# fluid_frac
+
+def dose_fluid_frac(nuc, source=0):
+    """Finds fraction of activity that is absorbed by body fluids for a tracked nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Parent nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'EPA': 0, 'DOE' : 1, 'GENII' : 2
+
+    Returns
+    -------
+    fluid_frac : float
+        Fraction of activity that is absorbed by body fluids.
+
+    Notes
+    -----
+    If the nuclide is not found, a value of -1 is returned.
+    """
+    srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 2:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints are accepted')
+
+    if isinstance(nuc, int):
+        fluid_frac = cpp_data.dose_fluid_frac(<int> nuc, <int> source)
+    elif isinstance(nuc, basestring):
+        fluid_frac = cpp_data.dose_fluid_frac(<char *> nuc, <int> source)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    if dose_fluid_frac < 0:
+        return float('nan')
+
+    return fluid_frac
+
+# inhalation dose
+
+def inhale_dose(nuc, source=0):
+    """Finds the dose factor due to inhalation for a tracked nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Parent nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'EPA': 0, 'DOE' : 1, 'GENII' : 2
+
+    Returns
+    -------
+    inhale_dose : float
+        Dose factor from exposure due to inhalation [mrem/pCi]
+
+    Notes
+    -----
+    If the nuclide is not found, a value of -1 is returned.
+    """
+    srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 2:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints are accepted')
+
+    if isinstance(nuc, int):
+        inhale_dose = cpp_data.inhale_dose(<int> nuc, <int> source)
+    elif isinstance(nuc, basestring):
+        inhale_dose = cpp_data.inhale_dose(<char *> nuc, <int> source)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    if inhale_dose < 0:
+        return float('nan')
+
+    return inhale_dose
+
+# lung model
+
+def dose_lung_model(nuc, source=0):
+    """Finds the lung model for the inhalation dose factor for a tracked nuclide.
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Parent nuclide.
+    source : int or str
+        The int or corresponding dictionary key for the source dataset.
+        Allowed values are:
+        'EPA': 0, 'DOE' : 1, 'GENII' : 2
+
+    Returns
+    -------
+    lung_mod : string
+        Model of lung used for calculation (D (days), W (weeks), or Y (years)).
+
+    Notes
+    -----
+    If the nuclide is not found, a string of 'Nada' is returned.
+    """
+    srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
+    if isinstance(source, str):
+        sourceint = srcmap[source]
+    elif isinstance(source, int):
+        if 0 <= source <= 2:
+            sourceint = source
+        else:
+            raise ValueError
+    else:
+        raise ValueError('Only ints are accepted')
+
+    if isinstance(nuc, int):
+        lung_mod = cpp_data.dose_lung_model(<int> nuc, <int> source)
+    elif isinstance(nuc, basestring):
+        lung_mod = cpp_data.dose_lung_model(<char *> nuc, <int> source)
+    else:
+        raise pyne.nucname.NucTypeError(nuc)
+
+    return lung_mod
 
 
 #

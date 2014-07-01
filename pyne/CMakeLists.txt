@@ -53,49 +53,49 @@ endif (MOAB_FOUND)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/endf.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(endf endf.pyx)
-target_link_libraries(endf pyne_nucname)
+target_link_libraries(endf pyne)
 
 # nucname
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/nucname.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(nucname nucname.pyx)
-target_link_libraries(nucname pyne pyne_nucname)
+target_link_libraries(nucname pyne)
 
 # rxname
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/rxname.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(rxname rxname.pyx)
-target_link_libraries(rxname pyne pyne_rxname)
+target_link_libraries(rxname pyne)
 
 # data
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/data.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(data data.pyx)
-target_link_libraries(data pyne pyne_nucname pyne_data hdf5)
+target_link_libraries(data pyne)
 
 # material
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/material.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(material  material.pyx)
-target_link_libraries(material pyne pyne_nucname pyne_data pyne_material hdf5)
+cython_add_module(material material.pyx)
+target_link_libraries(material pyne hdf5)
 
 # ace
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/ace.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(ace ace.pyx)
-target_link_libraries(ace pyne pyne_nucname)
+target_link_libraries(ace pyne)
 
 # enrichment
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/enrichment.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(enrichment enrichment.pyx)
-target_link_libraries(enrichment pyne_enrichment pyne_material)
+target_link_libraries(enrichment pyne)
 
 # tally
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/tally.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(tally tally.pyx)
-target_link_libraries(tally pyne pyne_tally)
+target_link_libraries(tally pyne)
 
 
 # source_sampling

@@ -4,11 +4,9 @@ from __future__ import print_function
 import os
 import sys
 import json
+from glob import glob
 
-INFO = {
-    'version': '0.4-dev',
-    }
-
+INFO = {'version': '0.5-dev'}
 
 def main():
     "Run functions specified on the command line"
@@ -89,12 +87,11 @@ def setup():
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat')) or 
                                      (os.name != 'nt' and not s.endswith('.bat'))]
-    packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 
+    packages = ['pyne', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 
                 'pyne.transmute', 'pyne.gui', 'pyne.cli']
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
-        'pyne.lib': 'pyne/lib',
         'pyne.gui': 'pyne/gui',
         'pyne.cli': 'pyne/cli',
         'pyne.dbgen': 'pyne/dbgen',
@@ -103,14 +100,21 @@ def setup():
         }
     extpttn = ['*.dll', '*.so', '*.dylib', '*.pyd', '*.pyo']
     pack_data = {
+        'lib': extpttn,
         'pyne': ['*.pxd', 'include/*.h', 'include/*.pxi', 'include/*/*.h', '*.inp',
                  'include/*/*/*.h', 'include/*/*/*/*.h', '*.json', '_includes/*.txt',
                  '_includes/*.pxd', '_includes/*/*', '_includes/*/*/*'] + extpttn,
         'pyne.xs': ['*.pxd'] + extpttn,
-        'pyne.lib': extpttn,
         'pyne.gui': ['*.pyw'],
         'pyne.dbgen': ['*.html', '*.csv', 'abundances.txt', 'mass.mas12'],
         }
+    libpynes = set()
+    for ext in extpttn:
+        libpynes |= set(glob('cpp/' + ext))
+    data_files = [
+        ('lib', libpynes),
+        ('include/pyne', glob('../cpp/*.h')),
+        ]
     setup_kwargs = {
         "name": "pyne",
         "version": INFO['version'],
@@ -121,8 +125,9 @@ def setup():
         "packages": packages,
         "package_dir": pack_dir,
         "package_data": pack_data,
+        "data_files": data_files,
         "scripts": scripts,
-        }
+        }    
     rtn = core.setup(**setup_kwargs)
 
 
