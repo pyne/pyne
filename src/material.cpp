@@ -577,18 +577,17 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 std::string pyne::Material::fluka() {
   // Per the FLUKA manual, the first index is 26
   //  and is incremented for every defined material.
-  const int mat_idx_start = 26;
+  const int mat_idx_start = 0;
 
   std::stringstream rs;
   std::stringstream mat_idx_stream;
   std::string name;
   std::string comment;
   if (metadata.isMember("fluka_name")) {
-    if (metadata.isMember("name") ) {
-       name = metadata["name"].asString();
-    }
+    name = metadata["fluka_name"].asString();
     if (metadata.isMember("fluka_material_index") ) {
-       int fluka_mat_idx = metadata["fluka_material_index"].asInt();
+      std::string fluka_mat_idx_str = metadata["fluka_material_index"].asString();
+      int fluka_mat_idx = atoi(fluka_mat_idx_str.c_str());
        // fluka_mat_id is an int, but FLUKA likes ints like '26.'
        mat_idx_stream << fluka_mat_idx + mat_idx_start << '.';
     } else {
@@ -966,6 +965,18 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_znums) 
   // 
   ///////////////////////////////////////////////////////////// 
   pyne::comp_map cm;
+  // Set up atom or mass frac map
+  std::map<int, double> fracs;
+  
+  /*
+  if (-1 == atoms_per_molecule) {
+    // it's already in atom_frac format
+    fracs = comp;
+  } else { 
+    fracs = to_atom_frac();
+  }
+  */
+  
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
       int cur_znum = nucname::znum(ptr->first);
       if ( 0 < exception_znums.count(cur_znum) ) {

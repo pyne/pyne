@@ -232,7 +232,7 @@ def test_expand_elements2():
     assert_almost_equal(data.natural_abund(60120000), afrac[60120000])
     assert_almost_equal(data.natural_abund(60130000), afrac[60130000])
 
-def test_collapse_elements():
+def test_collapse_elements1():
     """ Very simple test to combine nucids"""
     nucvec = {10010000:  1.0,   
            80160000: 1.0,   
@@ -242,24 +242,28 @@ def test_collapse_elements():
           942390000: 1.0,
           942410000: 1.0,
           952420000: 1.0,
-          962440000: 1.0,
-          }
-    nucids = {10010000,
-          942390000,
-          952420000,
-          962440000 }
-    
+          962440000: 1.0 }
+
     exception_znums = {1,8,69,92}
 
     mat  = Material(nucvec)
-    # cmat = mat.collapse_elements(nucids)
+    print mat
+    
     cmat = mat.collapse_elements(exception_znums)
+    print cmat
 
     assert_equal(cmat.comp[80160000],  mat.comp[80160000])
     assert_equal(cmat.comp[922350000], mat.comp[922350000])
     assert_equal(cmat.comp[940000000], mat.comp[942390000] + mat.comp[942410000])
     assert_equal(cmat.comp[950000000], mat.comp[952420000])
 
+def test_collapse_elements2()
+    # Test if mass frac collapses properly, and whether or not collapsing 
+    # occurs, if the atom fraction is properly returned
+    h2o = {10010: 1, 10020: 2, 'O16': 1}
+    mat = Material()
+    mat.from_atom_frac(h2o) 
+    cmat.collapse_elements({})
 
 def test_mass_density():
     ethanol = from_atom_frac({'C':2, 'H':6, 'O':1})
