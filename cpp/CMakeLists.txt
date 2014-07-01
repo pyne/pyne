@@ -1,3 +1,7 @@
+set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS} PARENT_SCOPE)
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+
 # setup source files
 set(PYNE_SRCS
     "data.cpp"
