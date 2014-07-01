@@ -509,7 +509,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
     if (comment_string.length() <= 77) {
       oss << "C " << comment_string << std::endl;
     }
-    else { // otherwise create a remainder string and iterate/update it 
+    else { // otherwise create a remainder string and iterate/update it
       oss << "C " << comment_string.substr(0,77) << std::endl;
       std::string remainder_string = comment_string.substr(77);
       while (remainder_string.length() > 77) {
@@ -525,7 +525,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // Metadata mat_num
   oss << "m";
   if (metadata.isMember("mat_number")) {
-    int mat_num = metadata["mat_number"].asInt(); 
+    int mat_num = metadata["mat_number"].asInt();
     oss << mat_num << std::endl;
   } else {
     oss << "?" << std::endl;
@@ -533,16 +533,16 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 
   // Set up atom or mass frac map
   std::map<int, double> fracs;
-  std::string frac_sign; 
- 
-  if ("atom" == frac_type) { 
+  std::string frac_sign;
+
+  if ("atom" == frac_type) {
     fracs = to_atom_frac();
     frac_sign = "";
-  } else { 
+  } else {
     fracs = comp;
     frac_sign = "-";
   }
-  
+
   // iterate through frac map
   // This is an awkward pre-C++11 way to put an int to a string
   std::stringstream ss;
@@ -569,7 +569,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
     fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
        << std::endl;
     oss << fs.str();
-  } 
+  }
 
   return oss.str();
 }
@@ -590,12 +590,12 @@ std::string pyne::Material::fluka() {
     if (metadata.isMember("fluka_material_index") ) {
        int fluka_mat_idx = metadata["fluka_material_index"].asInt();
        // fluka_mat_id is an int, but FLUKA likes ints like '26.'
-       mat_idx_stream << fluka_mat_idx + mat_idx_start << '.'; 
+       mat_idx_stream << fluka_mat_idx + mat_idx_start << '.';
     } else {
       // There isn't a mat_index
       mat_idx_stream << "?";
     }
-       
+
     if (metadata.isMember("comments") ) {
        comment = metadata["comments"].asString();
        rs << "* " << comment << std::endl;
@@ -860,7 +860,7 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
   return os;
 };
 
-// Note this refines << for an inheritor of std::ostream.  
+// Note this refines << for an inheritor of std::ostream.
 std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) {
   return os;
 }
@@ -1212,6 +1212,70 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs) {
 
 
 
+std::vector<std::pair<double, double> > pyne::Material::gamma_rays() {
+  std::vector<std::pair<double, double> > result;
+  std::map<int, double> atom_fracs = this->to_atom_frac();
+  int state_id;
+  for (comp_iter ci = comp.begin(); ci != comp.end(); ci++) {
+    if (ci->first % 10000 > 0)
+        state_id = nucname::id_to_state_id(ci->first);
+    else
+        state_id = ci->first;
+
+    std::vector<std::pair<double, double> > raw_gammas = pyne::gamma_rays(state_id);
+    for (int i = 0; i < raw_gammas.size(); ++i) {
+      result.push_back(std::make_pair(raw_gammas[i].first,
+        atom_fracs[ci->first]*raw_gammas[i].second));
+    }
+  }
+  return result;
+}
+
+std::vector<std::pair<double, double> > pyne::Material::x_rays() {
+  std::vector<std::pair<double, double> > result;
+  std::map<int, double> atom_fracs = this->to_atom_frac();
+  int state_id;
+  for (comp_iter ci = comp.begin(); ci != comp.end(); ci++) {
+    if (ci->first % 10000 > 0)
+        state_id = nucname::id_to_state_id(ci->first);
+    else
+        state_id = ci->first;
+
+    std::vector<std::pair<double, double> > raw_xrays = pyne::xrays(state_id);
+    for (int i = 0; i < raw_xrays.size(); ++i) {
+      result.push_back(std::make_pair(raw_xrays[i].first,
+        atom_fracs[ci->first]*raw_xrays[i].second));
+    }
+  }
+  return result;
+}
+
+std::vector<std::pair<double, double> > pyne::Material::photons(bool norm) {
+  std::vector<std::pair<double, double> >  xrays = x_rays();
+  std::vector<std::pair<double, double> >  gammas = gamma_rays();
+  for (int i = 0; i < xrays.size(); ++i)
+    gammas.push_back(xrays[i]);
+  if (norm)
+    gammas = normalize_radioactivity(gammas);
+  return gammas;
+}
+
+std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
+std::vector<std::pair<double, double> > unnormed) {
+  std::vector<std::pair<double, double> > normed;
+  double sum = 0.0;
+  for (int i = 0; i < unnormed.size(); ++i) {
+    if (!isnan(unnormed[i].second))
+      sum = sum + unnormed[i].second;
+  }
+  for (int i = 0; i < unnormed.size(); ++i) {
+    if (!isnan(unnormed[i].second)) {
+      normed.push_back(std::make_pair(unnormed[i].first,
+        (unnormed[i].second)/sum));
+    }
+  }
+  return normed;
+}
 
 
 pyne::Material pyne::Material::operator+ (double y) {

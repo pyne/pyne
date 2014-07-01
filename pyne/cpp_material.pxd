@@ -2,11 +2,14 @@
 from libcpp.set cimport set
 from libcpp.string cimport string as std_string
 from libcpp.map cimport map
+from libcpp.vector cimport vector
+from libcpp.utility cimport pair
+from libcpp cimport bool
 
-cimport cpp_jsoncpp 
+cimport cpp_jsoncpp
 
 cdef extern from "material.h" namespace "pyne":
-    # Cython does not allow for typdef'ing tamplated types :( 
+    # Cython does not allow for typdef'ing tamplated types :(
     #ctypedef map[int, double] comp_map
     #ctypedef map[int, double].iterator comp_iter
 
@@ -26,7 +29,7 @@ cdef extern from "material.h" namespace "pyne":
 
         # Attributes
         map[int, double] comp
-    
+
         double mass
         double density
         double atoms_per_molecule
@@ -84,6 +87,11 @@ cdef extern from "material.h" namespace "pyne":
         # Atom frac member functions
         map[int, double] to_atom_frac() except +
         void from_atom_frac(map[int, double]) except +
+
+
+        vector[pair[double, double]] gamma_rays() except +
+        vector[pair[double, double]] x_rays() except +
+        vector[pair[double, double]] photons(bool) except +
 
         # Operator Overloads
         Material operator+(double) except +

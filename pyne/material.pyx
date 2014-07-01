@@ -12,6 +12,7 @@ from libc.stdlib cimport malloc, free
 from libcpp.string cimport string as std_string
 from libcpp.map cimport map as cpp_map
 from libcpp.vector cimport vector as cpp_vector
+from libcpp cimport bool as cpp_bool
 
 # Python imports
 import collections
@@ -77,7 +78,7 @@ cdef class _Material:
             # Material from file
             nucvec = nucvec.encode()
             self.mat_pointer = new cpp_material.Material(
-                    <char *> nucvec, mass, density, atoms_per_molecule, 
+                    <char *> nucvec, mass, density, atoms_per_molecule,
                     deref(cmetadata._inst))
         elif (nucvec is None):
             if free_mat:
@@ -556,7 +557,7 @@ cdef class _Material:
         """mass_density(self, num_dens=-1.0, atoms_per_molecule=-1.0)
         Computes, sets, and returns the mass density when num_dens is greater
         than or equal zero.  If num_dens is negative, this simply returns the
-        current value of the density attribute.  
+        current value of the density attribute.
 
         Parameters
         ----------
@@ -564,7 +565,7 @@ cdef class _Material:
             The number density from which to compute the mass density in units
             of [1/cc].
         atoms_per_molecule : float, optional
-            Number of atoms to per molecule of material. For example, this value 
+            Number of atoms to per molecule of material. For example, this value
             for water is 3.0.
 
         Returns
@@ -577,9 +578,9 @@ cdef class _Material:
 
     def number_density(self, double mass_dens=-1.0, double atoms_per_molecule=-1.0):
         """number_density(self, mass_dens=-1.0, atoms_per_molecule=-1.0)
-        Computes and returns the number density from the mass_dens argument if this 
-        is greater than or equal zero.  If mass_dens is negative, then the number 
-        density is computed using the current value of the density attribute.  
+        Computes and returns the number density from the mass_dens argument if this
+        is greater than or equal zero.  If mass_dens is negative, then the number
+        density is computed using the current value of the density attribute.
 
         Parameters
         ----------
@@ -587,7 +588,7 @@ cdef class _Material:
             The mass density from which to compute the number density in units
             of [g/cc].
         atoms_per_molecule : float, optional
-            Number of atoms to per molecule of material. For example, this value 
+            Number of atoms to per molecule of material. For example, this value
             for water is 3.0.
 
         Returns
@@ -815,7 +816,7 @@ cdef class _Material:
 
     def sub_elem(self, element):
         """sub_elem(element)
-        Grabs a subset of the material and returns a new material comprised of 
+        Grabs a subset of the material and returns a new material comprised of
         only the nuclides of the specified element.
 
         Returns
@@ -1024,7 +1025,43 @@ cdef class _Material:
 
         self.mat_pointer.from_atom_frac(af)
 
+    #
+    # Radioactive Properties
+    #
+    def gamma_rays(self, norm=False):
+        """
+        Returns a list of gamma rays and intensities in decays/s/atom material
 
+        Returns
+        -------
+        gammas : a vector of pairs of gamma-rays and intensities. The
+            intensities are in decays/s/atom material
+        """
+        return self.mat_pointer.gamma_rays()
+
+    def x_rays(self, norm=False):
+        """
+        Returns a list of X rays and intensities in decays/s/atom material.
+        Includes only X rays that are by-products of gammas and electron capture
+
+        Returns
+        -------
+        x-rays : a vector of pairs of X-rays and intensities. The
+            intensities are in decays/s/atom material
+        """
+        return self.mat_pointer.x_rays()
+
+    def photons(self, norm=False):
+        """
+        Returns a list of X rays and intensities in decays/s/atom material.
+        Includes only X rays that are by-products of gammas and electron capture
+
+        Returns
+        -------
+        x-rays : a vector of pairs of X-rays and intensities. The
+            intensities are in decays/s/atom material
+        """
+        return self.mat_pointer.photons(<cpp_bool> norm)
     #
     # Operator Overloads
     #
@@ -1740,7 +1777,7 @@ cdef class _MapStrMaterial:
             raise KeyError(repr(key) + " not in map.")
 
     def __setitem__(self, key, value):
-        
+
         cdef char * c_key
         key_bytes = key.encode('UTF-8')
         c_key = key_bytes
@@ -1892,7 +1929,7 @@ cdef class _MaterialLibrary(object):
         """Parameters
         ----------
         lib : dict-like, str, or None, optional
-            The data to intialize the material library with.  If this is a 
+            The data to intialize the material library with.  If this is a
             string, it is interpreted as a path to a file.
         datapath : str, optional
             The path in the heirarchy to the data table in an HDF5 file.
@@ -1951,7 +1988,7 @@ cdef class _MaterialLibrary(object):
         """
         cdef std_string s
         cdef bint opened_here = False
-        cdef cpp_jsoncpp.Value jsonlib 
+        cdef cpp_jsoncpp.Value jsonlib
         cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
         cdef int i
         cdef std_string key
@@ -2028,7 +2065,7 @@ cdef class _MaterialLibrary(object):
         for i in range(len(matstable)):
             row = matstable[i]
             comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
-            mat = Material(comp, mass=row[0], density=row[1], 
+            mat = Material(comp, mass=row[0], density=row[1],
                                     atoms_per_molecule=row[2])
             strmetadata = "".join(map(chr, matsmetadata[i]))
             strmetadata = strmetadata.encode()
@@ -2062,7 +2099,7 @@ cdef class _MaterialLibrary(object):
             nucids.update(mat.comp.keys())
         with tb.openFile(file, 'a') as f:
             nucgrp, nucdsname = os.path.split(nucpath)
-            f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)), 
+            f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)),
                           createparents=True)
         for key, mat in _lib.items():
             if "name" not in mat.metadata:
@@ -2070,7 +2107,7 @@ cdef class _MaterialLibrary(object):
             mat.write_hdf5(file, datapath=datapath, nucpath=nucpath)
 
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
-    """The material library is a collection of unique keys mapped to 
+    """The material library is a collection of unique keys mapped to
     Material objects.  This is useful for organization and declaring
     prefernces between several sources (multiple libraries).
     """
