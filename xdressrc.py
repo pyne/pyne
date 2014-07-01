@@ -40,5 +40,7 @@ stlcontainers = [
 
 classes = [apiname('Tally','cpp/tally.*',incfiles='tally.h')]
 
-functions = [apiname('sampling_setup','cpp/source_sampling.cpp', incfiles='source_sampling.h'), 
-             apiname('particle_birth','cpp/source_sampling.cpp', incfiles='source_sampling.h'),]
+functions = [apiname('Sampler','cpp/source_sampling.cpp', incfiles='source_sampling.h'), 
+             apiname('AliasTable','cpp/source_sampling.cpp', incfiles='source_sampling.h'),
+             apiname('Sample','cpp/source_sampling.cpp', incfiles='source_sampling.h'),
+             apiname('sample_vects','cpp/source_sampling.cpp', incfiles='source_sampling.h'),]
