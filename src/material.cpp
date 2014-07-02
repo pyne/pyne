@@ -950,41 +950,33 @@ pyne::Material pyne::Material::expand_elements() {
 };
 
 // This version will be called from c++, typically
-// sum up atom_fracs (don't forget to check form and change if nec first)
-pyne::Material pyne::Material::collapse_elements(std::set<int> exception_znums) {
+// The input can be znums or ids:  Either is transformed to znum
+pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   /////////////////////////////////////////////////////////////
   // Assumptions
-  //    - list passed in is of atomic numbers NOT to collapse
+  //    - list passed in is of nucids of elements, eg 80000000, 690000000
   // Algorithm
-  // for each component in this material, look at its znum:
+  // for each component in this material, look at its 'stripped' nucid, 
+  //    that is the last seven places replaced with 0's
   //    if it's on the exception list, copy the component
   //    else it is to be collapsed
   //       => add it's frac to the component of the znum
-  // Questions: 
-  //	to_atom_frac()?	
   // 
   ///////////////////////////////////////////////////////////// 
   pyne::comp_map cm;
-  // Set up atom or mass frac map
-  std::map<int, double> fracs;
-  
-  /*
-  if (-1 == atoms_per_molecule) {
-    // it's already in atom_frac format
-    fracs = comp;
-  } else { 
-    fracs = to_atom_frac();
-  }
-  */
   
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
-      int cur_znum = nucname::znum(ptr->first);
-      if ( 0 < exception_znums.count(cur_znum) ) {
+      // look at the stripped nucid
+      int cur_stripped_id = nucname::id(nucname::znum(ptr->first));
+      std::cout << "cur_stripped_id is " << cur_stripped_id;
+      if ( 0 < exception_ids.count(cur_stripped_id) ) {
         // On exception list, => do not collapse
+	std::cout << " On the exception list, don't collapse " << std::endl;
         cm[ptr->first] = (ptr->second) * mass;
       } else {
-        // Not on exception list, add frac to znum-component
-	cm[nucname::id(cur_znum)] += (ptr->second) * mass;
+        // Not on exception list, add frac to id-component
+	std::cout << " Not on the exception list, collapsing " << std::endl;
+	cm[nucname::id(cur_stripped_id)] += (ptr->second) * mass;
       }
   }
 
