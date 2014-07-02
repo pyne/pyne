@@ -8,6 +8,36 @@
 ################################################
 
 
+cimport dtypes
+cimport numpy as np
+from libcpp.vector cimport vector as cpp_vector
+from pyne cimport cpp_source_sampling
+
+
+
+cdef class Sampler:
+    cdef void * _inst
+    cdef public bint _free_inst
+    pass
+
+
+
+
+
+cdef class Sample:
+    cdef void * _inst
+    cdef public bint _free_inst
+    cdef public np.ndarray _xyz
+    pass
+
+
+
+
+
+cdef class AliasTable:
+    cdef void * _inst
+    cdef public bint _free_inst
+    pass
 
 
 

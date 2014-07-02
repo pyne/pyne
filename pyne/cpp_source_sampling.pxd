@@ -12,22 +12,59 @@ from libcpp cimport bool as cpp_bool
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
 
-# function signatures
 cdef extern from "source_sampling.h" :
 
-    cpp_vector[double] particle_birth() except +
-    cpp_vector[double] particle_birth(cpp_vector[double]) except +
+    cdef cppclass AliasTable:
+        # constructors
+        AliasTable() except +
+        AliasTable(cpp_vector[double]) except +
+
+        # attributes
+
+
+        # methods
+        int sample_pdf() except +
+        int sample_pdf(double) except +
+        int sample_pdf(double, double) except +
+        pass
 
 
 
-# function signatures
 cdef extern from "source_sampling.h" :
 
-    void sampling_setup() except +
-    void sampling_setup(std_string) except +
-    void sampling_setup(std_string, std_string) except +
-    void sampling_setup(std_string, std_string, std_string) except +
-    void sampling_setup(std_string, std_string, std_string, cpp_bool) except +
+    cdef cppclass Sampler:
+        # constructors
+        Sampler() except +
+        Sampler(std_string) except +
+        Sampler(std_string, std_string) except +
+        Sampler(std_string, std_string, cpp_vector[double]) except +
+        Sampler(std_string, std_string, cpp_vector[double], std_string) except +
+        Sampler(std_string, std_string, cpp_vector[double], cpp_bool) except +
+
+        # attributes
+
+
+        # methods
+        cpp_vector[double] particle_birth() except +
+        cpp_vector[double] particle_birth(cpp_vector[double]) except +
+        pass
+
+
+
+cdef extern from "source_sampling.h" :
+
+    cdef cppclass Sample:
+        # constructors
+        Sample() except +
+
+        # attributes
+        double e
+        double w
+        cpp_vector[double] xyz
+
+        # methods
+
+        pass
 
 
 

@@ -172,24 +172,24 @@ void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
   }
 }
 
-Sample Sampler::particle_birth(vect_d rands){
+vect_d Sampler::particle_birth(vect_d rands){
   // get indices
   int pdf_idx = at->sample_pdf(rands[0], rands[1]);
   int ve_idx = pdf_idx/num_e_groups;
   int e_idx = pdf_idx % num_e_groups;
 
-  Sample samp;
+  vect_d samp;
   vect_d xyz_rands;
   xyz_rands.push_back(rands[2]);
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
   MBCartVect pos = get_xyz(ve_idx, xyz_rands);
 
-  samp.xyz.push_back(pos[0]); 
-  samp.xyz.push_back(pos[1]); 
-  samp.xyz.push_back(pos[2]); 
-  samp.w = get_w(pdf_idx);
-  samp.e = get_e(e_idx, rands[5]);
+  samp.push_back(pos[0]); 
+  samp.push_back(pos[1]); 
+  samp.push_back(pos[2]); 
+  samp.push_back(get_w(pdf_idx));
+  samp.push_back(get_e(e_idx, rands[5]));
   return samp;
 }
 

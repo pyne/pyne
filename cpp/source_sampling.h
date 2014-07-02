@@ -45,9 +45,6 @@ struct sample_vects{
    MBCartVect z_vec;
 };
 
-
-
-
 class AliasTable
 {
 private:
@@ -71,15 +68,15 @@ public:
   // \param filename the filename of the mesh file
   Sampler(str filename, str src_tag_name, vect_d e_bounds, bool uniform);
   Sampler(str filename, str src_tag_name, vect_d e_bounds, str bias_tag_name);
-  void setup();
   ~Sampler(){
      delete mesh;
      delete at;
      };
-  Sample particle_birth(vect_d rands);
+  vect_d particle_birth(vect_d rands);
 
 
 private:
+  void setup();
   vect_d e_bounds;
   Mode mode;
   MBInterface *mesh;

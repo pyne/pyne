@@ -8,9 +8,10 @@
 ################################################
 """
 """
-cimport cpp_source_sampling
 cimport dtypes
 cimport numpy as np
+from libc.stdlib cimport free
+from libc.stdlib cimport malloc
 from libcpp cimport bool as cpp_bool
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
@@ -19,53 +20,479 @@ import numpy as np
 
 np.import_array()
 
-def particle_birth(rands):
-    """particle_birth(rands)
-     This function was overloaded in the C-based source. To overcome
-    this we ill put the relevant docstring for each version below. Each
-    version will begin with a line of # characters.
-    
+
+
+cdef class AliasTable:
     """
-    cdef cpp_vector[double] rands_proxy
-    cdef int irands
-    cdef int rands_size
-    cdef double * rands_data
-    cdef cpp_vector[double] rtnval
     
-    cdef np.npy_intp rtnval_proxy_shape[1]
-    # rands is a ('vector', 'float64', 0)
-    rands_size = len(rands)
-    if isinstance(rands, np.ndarray) and (<np.ndarray> rands).descr.type_num == np.NPY_FLOAT64:
-        rands_data = <double *> np.PyArray_DATA(<np.ndarray> rands)
-        rands_proxy = cpp_vector[double](<size_t> rands_size)
-        for irands in range(rands_size):
-            rands_proxy[irands] = rands_data[irands]
-    else:
-        rands_proxy = cpp_vector[double](<size_t> rands_size)
-        for irands in range(rands_size):
-            rands_proxy[irands] = <double> rands[irands]
-    rtnval = cpp_source_sampling.particle_birth(rands_proxy)
-    rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
-    rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
-    rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
-    return rtnval_proxy
-
-
-
-def sampling_setup(filename, src_tag_name, e_bounds_file_name, analog):
-    """sampling_setup(filename, src_tag_name, e_bounds_file_name, analog)
-     This function was overloaded in the C-based source. To overcome
-    this we ill put the relevant docstring for each version below. Each
-    version will begin with a line of # characters.
+    Attributes
+    ----------
+    prob (std::vector< double >) :
+    alias (std::vector< int >) :
+    n (int) :
     
+    
+    Methods
+    -------
+    AliasTable
+    ~AliasTable
+    sample_pdf
+    
+    Notes
+    -----
+    This class was defined in source_sampling.h
+    
+    The class is found in the "" namespace"""
+
+
+
+    # constuctors
+    def __cinit__(self, *args, **kwargs):
+        self._inst = NULL
+        self._free_inst = True
+
+        # cached property defaults
+
+
+    def __init__(self, p):
+        """AliasTable(self, p)
+        
+        
+        Parameters
+        ----------
+        p : vect_d
+        
+        Returns
+        -------
+        None
+        
+        """
+        cdef cpp_vector[double] p_proxy
+        cdef int ip
+        cdef int p_size
+        cdef double * p_data
+        # p is a ('vector', 'float64', 0)
+        p_size = len(p)
+        if isinstance(p, np.ndarray) and (<np.ndarray> p).descr.type_num == np.NPY_FLOAT64:
+            p_data = <double *> np.PyArray_DATA(<np.ndarray> p)
+            p_proxy = cpp_vector[double](<size_t> p_size)
+            for ip in range(p_size):
+                p_proxy[ip] = p_data[ip]
+        else:
+            p_proxy = cpp_vector[double](<size_t> p_size)
+            for ip in range(p_size):
+                p_proxy[ip] = <double> p[ip]
+        self._inst = new cpp_source_sampling.AliasTable(p_proxy)
+    
+    
+    def __dealloc__(self):
+        if self._free_inst and self._inst is not NULL:
+            free(self._inst)
+
+    # attributes
+
+    # methods
+    def sample_pdf(self, rand1, rand2):
+        """sample_pdf(self, rand1, rand2)
+        
+        
+        Parameters
+        ----------
+        ran1 : double
+        
+        ran2 : double
+        
+        Returns
+        -------
+        res1 : int
+        
+        """
+        cdef int rtnval
+        rtnval = (<cpp_source_sampling.AliasTable *> self._inst).sample_pdf(<double> rand1, <double> rand2)
+        return int(rtnval)
+    
+    
+    
+
+    pass
+
+
+
+
+
+cdef class Sample:
+    """no docstring for {'tarbase': 'source_sampling', 'tarname': 'Sample', 'language': 'c++', 'srcname': 'Sample', 'sidecars': (), 'incfiles': ('source_sampling.h',), 'srcfiles': ('cpp/source_sampling.cpp', 'cpp/source_sampling.h')}, please file a bug report!"""
+
+
+
+    # constuctors
+    def __cinit__(self, *args, **kwargs):
+        self._inst = NULL
+        self._free_inst = True
+
+        # cached property defaults
+        self._xyz = None
+
+    def __init__(self, ):
+        """Sample(self, )
+        """
+        self._inst = malloc(sizeof(cpp_source_sampling.Sample))
+        (<cpp_source_sampling.Sample *> self._inst)[0] = cpp_source_sampling.Sample()
+    
+    
+    def __dealloc__(self):
+        if self._free_inst and self._inst is not NULL:
+            free(self._inst)
+
+    # attributes
+    property e:
+        """no docstring for e, please file a bug report!"""
+        def __get__(self):
+            return float((<cpp_source_sampling.Sample *> self._inst).e)
+    
+        def __set__(self, value):
+            (<cpp_source_sampling.Sample *> self._inst).e = <double> value
+    
+    
+    property w:
+        """no docstring for w, please file a bug report!"""
+        def __get__(self):
+            return float((<cpp_source_sampling.Sample *> self._inst).w)
+    
+        def __set__(self, value):
+            (<cpp_source_sampling.Sample *> self._inst).w = <double> value
+    
+    
+    property xyz:
+        """no docstring for xyz, please file a bug report!"""
+        def __get__(self):
+            cdef np.ndarray xyz_proxy
+            cdef np.npy_intp xyz_proxy_shape[1]
+            if self._xyz is None:
+                xyz_proxy_shape[0] = <np.npy_intp> (<cpp_source_sampling.Sample *> self._inst).xyz.size()
+                xyz_proxy = np.PyArray_SimpleNewFromData(1, xyz_proxy_shape, np.NPY_FLOAT64, &(<cpp_source_sampling.Sample *> self._inst).xyz[0])
+                self._xyz = xyz_proxy
+            return self._xyz
+    
+        def __set__(self, value):
+            cdef cpp_vector[double] value_proxy
+            cdef int ivalue
+            cdef int value_size
+            cdef double * value_data
+            # value is a ('vector', 'float64', 0)
+            value_size = len(value)
+            if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+                value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
+                value_proxy = cpp_vector[double](<size_t> value_size)
+                for ivalue in range(value_size):
+                    value_proxy[ivalue] = value_data[ivalue]
+            else:
+                value_proxy = cpp_vector[double](<size_t> value_size)
+                for ivalue in range(value_size):
+                    value_proxy[ivalue] = <double> value[ivalue]
+            (<cpp_source_sampling.Sample *> self._inst).xyz = value_proxy
+            self._xyz = None
+    
+    
+    # methods
+    
+
+    pass
+
+
+
+
+
+cdef class Sampler:
     """
-    cdef char * filename_proxy
-    cdef char * src_tag_name_proxy
-    cdef char * e_bounds_file_name_proxy
-    filename_bytes = filename.encode()
-    src_tag_name_bytes = src_tag_name.encode()
-    e_bounds_file_name_bytes = e_bounds_file_name.encode()
-    cpp_source_sampling.sampling_setup(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), std_string(<char *> e_bounds_file_name_bytes), <bint> analog)
+    
+    Attributes
+    ----------
+    e_bounds (vect_d) :
+    mode (Mode) :
+    mesh (MBInterface *) :
+    filename (str) :
+    src_tag_name (str) :
+    bias_tag_name (str) :
+    num_e_groups (int) :
+    ve_type (MBEntityType) :
+    vects (None) :
+    verts_per_ve (int) :
+    cart_sampler (std::vector< ) :
+    at (None) :
+    biased_weights (std::vector< double >) :
+    
+    
+    Methods
+    -------
+    Sampler
+    ~Sampler
+    get_e
+    get_mesh_geom_data
+    get_mesh_tag_data
+    get_w
+    get_xyz
+    particle_birth
+    setup
+    
+    Notes
+    -----
+    This class was defined in source_sampling.h
+    
+    The class is found in the "" namespace"""
+
+
+
+    # constuctors
+    def __cinit__(self, *args, **kwargs):
+        self._inst = NULL
+        self._free_inst = True
+
+        # cached property defaults
+
+
+    def _sampler_sampler_0(self, _filename, _src_tag_name, _e_bounds, _bias_tag_name):
+        """Sampler(self, _filename, _src_tag_name, _e_bounds, _bias_tag_name)
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+        
+        
+        
+        Parameters
+        ----------
+        e_bounds : vect_d
+        
+        src_tag_name : str
+        
+        bias_tag_name : str
+        
+        filename : str
+        
+        Returns
+        -------
+        None
+        
+        ################################################################
+        
+        
+        
+        Parameters
+        ----------
+        e_bounds : vect_d
+        
+        src_tag_name : str
+        
+        uniform : bool
+        
+        filename : str
+        
+        Returns
+        -------
+        None
+        
+        """
+        cdef char * _filename_proxy
+        cdef char * _src_tag_name_proxy
+        cdef cpp_vector[double] _e_bounds_proxy
+        cdef int i_e_bounds
+        cdef int _e_bounds_size
+        cdef double * _e_bounds_data
+        cdef char * _bias_tag_name_proxy
+        _filename_bytes = _filename.encode()
+        _src_tag_name_bytes = _src_tag_name.encode()
+        # _e_bounds is a ('vector', 'float64', 0)
+        _e_bounds_size = len(_e_bounds)
+        if isinstance(_e_bounds, np.ndarray) and (<np.ndarray> _e_bounds).descr.type_num == np.NPY_FLOAT64:
+            _e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> _e_bounds)
+            _e_bounds_proxy = cpp_vector[double](<size_t> _e_bounds_size)
+            for i_e_bounds in range(_e_bounds_size):
+                _e_bounds_proxy[i_e_bounds] = _e_bounds_data[i_e_bounds]
+        else:
+            _e_bounds_proxy = cpp_vector[double](<size_t> _e_bounds_size)
+            for i_e_bounds in range(_e_bounds_size):
+                _e_bounds_proxy[i_e_bounds] = <double> _e_bounds[i_e_bounds]
+        _bias_tag_name_bytes = _bias_tag_name.encode()
+        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> _filename_bytes), std_string(<char *> _src_tag_name_bytes), _e_bounds_proxy, std_string(<char *> _bias_tag_name_bytes))
+    
+    
+    def _sampler_sampler_1(self, _filename, _src_tag_name, _e_bounds, _uniform):
+        """Sampler(self, _filename, _src_tag_name, _e_bounds, _uniform)
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+        
+        
+        
+        Parameters
+        ----------
+        e_bounds : vect_d
+        
+        src_tag_name : str
+        
+        bias_tag_name : str
+        
+        filename : str
+        
+        Returns
+        -------
+        None
+        
+        ################################################################
+        
+        
+        
+        Parameters
+        ----------
+        e_bounds : vect_d
+        
+        src_tag_name : str
+        
+        uniform : bool
+        
+        filename : str
+        
+        Returns
+        -------
+        None
+        
+        """
+        cdef char * _filename_proxy
+        cdef char * _src_tag_name_proxy
+        cdef cpp_vector[double] _e_bounds_proxy
+        cdef int i_e_bounds
+        cdef int _e_bounds_size
+        cdef double * _e_bounds_data
+        _filename_bytes = _filename.encode()
+        _src_tag_name_bytes = _src_tag_name.encode()
+        # _e_bounds is a ('vector', 'float64', 0)
+        _e_bounds_size = len(_e_bounds)
+        if isinstance(_e_bounds, np.ndarray) and (<np.ndarray> _e_bounds).descr.type_num == np.NPY_FLOAT64:
+            _e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> _e_bounds)
+            _e_bounds_proxy = cpp_vector[double](<size_t> _e_bounds_size)
+            for i_e_bounds in range(_e_bounds_size):
+                _e_bounds_proxy[i_e_bounds] = _e_bounds_data[i_e_bounds]
+        else:
+            _e_bounds_proxy = cpp_vector[double](<size_t> _e_bounds_size)
+            for i_e_bounds in range(_e_bounds_size):
+                _e_bounds_proxy[i_e_bounds] = <double> _e_bounds[i_e_bounds]
+        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> _filename_bytes), std_string(<char *> _src_tag_name_bytes), _e_bounds_proxy, <bint> _uniform)
+    
+    
+    _sampler_sampler_0_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, str), ("_filename", str), ("_src_tag_name", str), ("_e_bounds", np.ndarray), ("_bias_tag_name", str)))
+    _sampler_sampler_1_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, bool), ("_filename", str), ("_src_tag_name", str), ("_e_bounds", np.ndarray), ("_uniform", bool)))
+    
+    def __init__(self, *args, **kwargs):
+        """Sampler(self, _filename, _src_tag_name, _e_bounds, _uniform)
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+        
+        
+        
+        Parameters
+        ----------
+        e_bounds : vect_d
+        
+        src_tag_name : str
+        
+        bias_tag_name : str
+        
+        filename : str
+        
+        Returns
+        -------
+        None
+        
+        ################################################################
+        
+        
+        
+        Parameters
+        ----------
+        e_bounds : vect_d
+        
+        src_tag_name : str
+        
+        uniform : bool
+        
+        filename : str
+        
+        Returns
+        -------
+        None
+        
+        """
+        types = set([(i, type(a)) for i, a in enumerate(args)])
+        types.update([(k, type(v)) for k, v in kwargs.items()])
+        # vtable-like dispatch for exactly matching types
+        if types <= self._sampler_sampler_0_argtypes:
+            self._sampler_sampler_0(*args, **kwargs)
+            return
+        if types <= self._sampler_sampler_1_argtypes:
+            self._sampler_sampler_1(*args, **kwargs)
+            return
+        # duck-typed dispatch based on whatever works!
+        try:
+            self._sampler_sampler_0(*args, **kwargs)
+            return
+        except (RuntimeError, TypeError, NameError):
+            pass
+        try:
+            self._sampler_sampler_1(*args, **kwargs)
+            return
+        except (RuntimeError, TypeError, NameError):
+            pass
+        raise RuntimeError('method __init__() could not be dispatched')
+    
+    def __dealloc__(self):
+        if self._free_inst and self._inst is not NULL:
+            free(self._inst)
+
+    # attributes
+
+    # methods
+    def particle_birth(self, rands):
+        """particle_birth(self, rands)
+        
+        
+        Parameters
+        ----------
+        rands : vect_d
+        
+        Returns
+        -------
+        res1 : vect_d
+        
+        """
+        cdef cpp_vector[double] rands_proxy
+        cdef int irands
+        cdef int rands_size
+        cdef double * rands_data
+        cdef cpp_vector[double] rtnval
+        
+        cdef np.npy_intp rtnval_proxy_shape[1]
+        # rands is a ('vector', 'float64', 0)
+        rands_size = len(rands)
+        if isinstance(rands, np.ndarray) and (<np.ndarray> rands).descr.type_num == np.NPY_FLOAT64:
+            rands_data = <double *> np.PyArray_DATA(<np.ndarray> rands)
+            rands_proxy = cpp_vector[double](<size_t> rands_size)
+            for irands in range(rands_size):
+                rands_proxy[irands] = rands_data[irands]
+        else:
+            rands_proxy = cpp_vector[double](<size_t> rands_size)
+            for irands in range(rands_size):
+                rands_proxy[irands] = <double> rands[irands]
+        rtnval = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
+        rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
+        rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
+        rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
+        return rtnval_proxy
+    
+    
+    
+
+    pass
 
 
 
