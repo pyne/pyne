@@ -1,4 +1,7 @@
+#ifndef PYNE_IS_AMALGAMATED
 #include "source_sampling.h"
+#endif
+
 
 //    throw std::invalid_argument("bias_tag_name should not be specified for analog sampling");
 
@@ -15,9 +18,9 @@ void get_e_bounds_data(str e_bounds_file){
 
 Sampler::Sampler(str filename, str src_tag_name, vect_d e_bounds, bool _uniform){
   if(_uniform){
-   *mode = UNIFORM;
+   mode = UNIFORM;
   } else {
-   *mode = ANALOG;
+   mode = ANALOG;
   }
   str bias_tag_name;
   Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
@@ -26,7 +29,7 @@ Sampler::Sampler(str filename, str src_tag_name, vect_d e_bounds, bool _uniform)
 Sampler::Sampler(str filename, str _src_tag_name, 
                   vect_d _e_bounds, str _bias_tag_name)
   : src_tag_name(_src_tag_name), e_bounds(_e_bounds), bias_tag_name(_bias_tag_name) {
-  if(mode == NULL) *mode = USER;
+  if(mode != ANALOG && mode != UNIFORM) mode = USER;
 
   MBErrorCode rval;
   MBEntityHandle loaded_file_set;
@@ -112,14 +115,14 @@ void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
     pdf[i] /= sum;
   }
 
-  if(*mode != ANALOG){
+  if(mode != ANALOG){
     vect_d bias_pdf(ves.size()*num_e_groups); 
-    if(*mode == UNIFORM){
+    if(mode == UNIFORM){
       for(i=0; i<ves.size(); ++i){
         for(j=0; j<num_e_groups; ++j)
            bias_pdf[i*num_e_groups + j] =  volumes[i];
       }
-    }else if(*mode == USER){
+    }else if(mode == USER){
       MBTag bias_tag;
       rval = mesh->tag_get_handle(bias_tag_name.c_str(), 
                                   moab::MB_TAG_VARLEN, 
@@ -160,7 +163,7 @@ void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
       for(i=0; i<ves.size()*num_e_groups; ++i){
         biased_weights[i] = pdf[i]/bias_pdf[i];
       }
-  }else if(*mode == ANALOG){
+  }else if(mode == ANALOG){
     at = new AliasTable(pdf);
   }
 }
@@ -221,7 +224,7 @@ double Sampler::get_e(int e_idx, double rand){
 }
 
 double Sampler::get_w(int pdf_idx){
-  if(*mode == ANALOG){
+  if(mode == ANALOG){
     return 1.0;
   }else{
     return biased_weights[pdf_idx];

@@ -1,3 +1,13 @@
+#ifndef PYNE_AIQ4M73S
+#define PYNE_AIQ4M73S
+/// \file source_sampling.h
+/// \author Elliott Biondo (biondo\@wisc.edu)
+///
+/// \brief The tally class and helper functions
+/// 
+/// The tally class is in essesence a structure containing attributes
+/// related to tallies
+
 #include <assert.h>
 #include <iostream>
 #include <fstream>
@@ -13,18 +23,13 @@
 #include "measure.hpp"
 #include "MBCartVect.hpp"
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void get_e_bounds_data(std::string e_bounds_file);
-typedef std::vector<double> vect_d;
-typedef std::string str;
 
 struct Sample {
-    vect_d xyz;
+    vect_d xyz; /// \param type
     double e;
     double w;
 };
@@ -36,6 +41,12 @@ struct sample_vects{
    MBCartVect z_vec;
 };
 
+
+void get_e_bounds_data(std::string e_bounds_file);
+typedef std::vector<double> vect_d;
+typedef std::string str;
+
+
 class AliasTable
 {
 private:
@@ -45,13 +56,18 @@ private:
 public:
   int sample_pdf(double ran1, double ran2);
   AliasTable(vect_d p);
+  ~AliasTable(){};
 };
 
+
+enum Mode {ANALOG, UNIFORM, USER};
 
 
 class Sampler
 {
 public:
+  // Sampler constructors
+  // \param filename the filename of the mesh file
   Sampler(str filename, str src_tag_name, vect_d e_bounds, bool uniform);
   Sampler(str filename, str src_tag_name, vect_d e_bounds, str bias_tag_name);
   ~Sampler(){
@@ -60,10 +76,10 @@ public:
      };
   Sample particle_birth(vect_d rands);
 
+
 private:
-  enum Mode {ANALOG, UNIFORM, USER};
-  Mode* mode = NULL;
   vect_d e_bounds;
+  Mode mode;
   MBInterface *mesh;
   str src_tag_name;
   str bias_tag_name;
@@ -88,3 +104,4 @@ private:
 } //  extern "C"
 #endif
 
+#endif
