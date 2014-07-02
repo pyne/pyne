@@ -1951,7 +1951,7 @@ std::vector<std::pair<double, double> > pyne::gamma_xrays(int parent) {
         temp = calculate_xray_data(nucname::znum(children[i]),
           k_list[i]*decay_br[j].first, l_list[i]*decay_br[j].first);
         for (int k = 0; k < temp.size(); ++k) {
-          if (!isnan(temp[k].second)) {
+          if (!isnan(temp[k].second) && !isnan(temp[k].first)) {
             int found = 0;
             for (int l = 0; l < result.size(); ++l) {
               if (temp[k].first == result[l].first) {
@@ -2235,7 +2235,7 @@ std::vector<std::pair<double, double> > pyne::ecbp_xrays(int parent) {
   std::vector<double> l_list = data_access<double, ecbp_struct>(parent, 0.0, DBL_MAX,
     offsetof(ecbp_struct, l_conv_e), ecbp_data);
   std::vector<int> children = data_access<int, ecbp_struct>(parent, 0.0, DBL_MAX,
-                     offsetof(ecbp_struct, to_nuc), ecbp_data);
+    offsetof(ecbp_struct, to_nuc), ecbp_data);
   std::vector<int> decay_children = decay_data_children(parent);
   std::vector<std::pair<double, double> > decay_br =
     decay_beta_branch_ratios(parent);
@@ -2245,7 +2245,7 @@ std::vector<std::pair<double, double> > pyne::ecbp_xrays(int parent) {
         temp = calculate_xray_data(nucname::znum(children[i]),
           k_list[i]*decay_br[j].first, l_list[i]*decay_br[j].first);
         for (int k = 0; k < temp.size(); ++k) {
-          if (!isnan(temp[k].second)) {
+          if (!isnan(temp[k].second) && !isnan(temp[k].first)) {
             int found = 0;
             for (int l = 0; l < result.size(); ++l) {
               if (temp[k].first == result[l].first) {
@@ -2350,7 +2350,7 @@ std::vector<std::pair<double, double> > pyne::xrays(int parent) {
         temp = calculate_xray_data(nucname::znum(children[i]),
           k_list[i]*decay_br[j].first, l_list[i]*decay_br[j].first);
         for (int k = 0; k < temp.size(); ++k) {
-          if (!isnan(temp[k].second)) {
+          if (!isnan(temp[k].second) && !isnan(temp[k].first)) {
             int found = 0;
             for (int l = 0; l < result.size(); ++l) {
               if (temp[k].first == result[l].first) {
@@ -2382,7 +2382,7 @@ std::vector<std::pair<double, double> > pyne::xrays(int parent) {
         temp = calculate_xray_data(nucname::znum(gchildren[i]),
           gk_list[i]*decay_nrbr[j].first, gl_list[i]*decay_nrbr[j].first);
         for (int k = 0; k < temp.size(); ++k) {
-          if (!isnan(temp[k].second)) {
+          if (!isnan(temp[k].second) && !isnan(temp[k].first)) {
             int found = 0;
             for (int l = 0; l < result.size(); ++l) {
               if (temp[k].first == result[l].first) {

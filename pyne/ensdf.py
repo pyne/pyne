@@ -12,7 +12,7 @@ from pyne.utils import to_sec
 
 if sys.version_info[0] > 2:
   basestring = str
-    
+
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
@@ -415,7 +415,7 @@ def _parse_normalization_record(n_rec):
     else:
         nrbr = None
     if nr_err is not None and br_err is not None:
-        nrbr_err = np.sqrt((nr_err ** 2) + (br_err ** 2))
+        nrbr_err = nrbr*np.sqrt((br_err/br) ** 2 * (nr_err/nr) ** 2)
     else:
         nrbr_err = None
     return nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err
@@ -630,11 +630,9 @@ def _parse_decay_dataset(lines, decay_s):
         if b_rec is not None:
             dat = _parse_beta_record(b_rec)
             if parent2 is None:
-                parent2 = parent
-                e = 0
-            e = 0.0 if e is None else e
+                parent2 = pfinal
             level = 0.0 if level is None else level
-            bparent = data.id_from_level(_to_id(parent2), e)
+            bparent = parent2
             bdaughter = data.id_from_level(_to_id(daughter), level)
             betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
         bc_rec = _betac.match(line)
@@ -658,22 +656,18 @@ def _parse_decay_dataset(lines, decay_s):
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
             if parent2 is None:
-                parent2 = parent
-                e = 0
-            e = 0.0 if e is None else e
+                parent2 = pfinal
             level = 0.0 if level is None else level
-            aparent = data.id_from_level(_to_id(parent2), e)
+            aparent = parent2
             adaughter = data.id_from_level(_to_id(daughter), level)
             alphas.append((aparent, adaughter, dat[0], dat[2]))
         ec_rec = _ec.match(line)
         if ec_rec is not None:
             dat = _parse_ec_record(ec_rec)
             if parent2 is None:
-                parent2 = parent
-                e = 0
-            e = 0.0 if e is None else e
+                parent2 = pfinal
             level = 0.0 if level is None else level
-            ecparent = data.id_from_level(_to_id(parent2), e)
+            ecparent = parent2
             ecdaughter = data.id_from_level(_to_id(daughter), level)
             ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
                          0, 0, 0])
@@ -690,9 +684,8 @@ def _parse_decay_dataset(lines, decay_s):
                     gdaughter = data.id_from_level(_to_id(daughter), dlevel, special)
                 if parent2 is None:
                     gp2 = pfinal
-                    e = 0
                 else:
-                    gp2 = _to_id(parent2)
+                    gp2 = parent2
                 dat.insert(0, gp2)
                 dat.insert(0, gdaughter)
                 dat.insert(0, gparent)
@@ -705,8 +698,8 @@ def _parse_decay_dataset(lines, decay_s):
             continue
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
-            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][2],
-                                                    gammarays[-1][6])
+            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][5],
+                                                    gammarays[-1][9])
             if 'K' in conv:
                 gammarays[-1][-3] = conv['K'][0]
             if 'L' in conv:
@@ -718,22 +711,26 @@ def _parse_decay_dataset(lines, decay_s):
         if n_rec is not None:
             nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
                 _parse_normalization_record(n_rec)
+            if nb is not None and br is not None:
+                nbbr = nb * br
+            if nb_err is not None and br_err is not None and nb_err != 0:
+                nbbr_err = nbbr*((br_err/br) ** 2 * (nb_err/nb) ** 2) ** 0.5
             continue
         np_rec = _normp.match(line)
         if np_rec is not None:
-            nrbr2, nrbr_err2, ntbr, ntbr_err, nbbr, nbbr_err = \
+            nrbr2, nrbr_err2, ntbr, ntbr_err, nbbr2, nbbr_err2 = \
                 _parse_production_normalization_record(np_rec)
-            if nrbr2 is not None:
+            if nrbr2 is not None and nrbr is None:
                 nrbr = nrbr2
                 nrbr_err = nrbr_err2
-            if nbbr is None and nb is not None and br is not None:
-                nbbr = nb * br
-            if nbbr_err is None and nb_err is not None and br_err is not None:
-                nbbr_err = (br_err ** 2 + nb_err ** 2) ** 0.5
+            if nbbr2 is not None and nbbr is None:
+                nbbr = nbbr2
+                nbbr_err = nbbr_err2
             continue
         p_rec = _p.match(line)
         if p_rec is not None:
             parent2, tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+            parent2 = data.id_from_level(_to_id(parent2), e, " ")
             continue
     if len(gammarays) > 0 or len(alphas) > 0 or len(betas) > 0 or len(ecbp) > 0:
         #FIXME: Handle uneven errors
@@ -1117,4 +1114,3 @@ def gamma_rays(f):
                         if decay is not None:
                             decaylist.append(decay)
     return decaylist
-
