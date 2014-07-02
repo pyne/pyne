@@ -16,21 +16,24 @@ void get_e_bounds_data(str e_bounds_file){
   }
 }
 
-Sampler::Sampler(str filename, str src_tag_name, vect_d e_bounds, bool _uniform){
+Sampler::Sampler(str _filename, str _src_tag_name, vect_d _e_bounds, bool _uniform)
+  : filename(_filename), src_tag_name(_src_tag_name), e_bounds(_e_bounds) {
   if(_uniform){
    mode = UNIFORM;
   } else {
    mode = ANALOG;
   }
-  str bias_tag_name;
-  Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
+  setup();
 }
 
-Sampler::Sampler(str filename, str _src_tag_name, 
+Sampler::Sampler(str _filename, str _src_tag_name, 
                   vect_d _e_bounds, str _bias_tag_name)
-  : src_tag_name(_src_tag_name), e_bounds(_e_bounds), bias_tag_name(_bias_tag_name) {
-  if(mode != ANALOG && mode != UNIFORM) mode = USER;
+  : filename(_filename), src_tag_name(_src_tag_name), e_bounds(_e_bounds), bias_tag_name(_bias_tag_name) {
+  mode = USER;
+  setup();
+}
 
+void Sampler::setup(){
   MBErrorCode rval;
   MBEntityHandle loaded_file_set;
   mesh = new MBCore();
@@ -87,8 +90,9 @@ void Sampler::get_mesh_geom_data(MBRange ves, vect_d &volumes){
 void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
   MBErrorCode rval;
   MBTag src_tag;
-  rval = mesh->tag_get_handle(src_tag_name.c_str(), 
-                              moab::MB_TAG_VARLEN, 
+  rval = mesh->tag_get_handle(src_tag_name.c_str(),
+                              1,
+                              // moab::MB_TAG_VARLEN, 
                               MB_TYPE_DOUBLE, 
                               src_tag);
   // THIS ASSERT FAILS because we do not know number of energy groups a priori.
@@ -146,8 +150,8 @@ void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
         }
       }
       else
-        throw std::length_error("Length of bias tag must equal \
-                                 length of the source tag, or 1.");
+        std::cout<<num_bias_groups<<" "<<num_e_groups<<std::endl;
+        throw std::length_error("Length of bias tag must equal length of the source tag, or 1.");
 
       sum = 0;
       for(i=0; i<ves.size()*num_e_groups; ++i){
@@ -180,9 +184,10 @@ Sample Sampler::particle_birth(vect_d rands){
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
   MBCartVect pos = get_xyz(ve_idx, xyz_rands);
-  samp.xyz[0] = pos[0]; //JUST GUESSING
-  samp.xyz[1] = pos[1];
-  samp.xyz[2] = pos[2];
+
+  samp.xyz.push_back(pos[0]); 
+  samp.xyz.push_back(pos[1]); 
+  samp.xyz.push_back(pos[2]); 
   samp.w = get_w(pdf_idx);
   samp.e = get_e(e_idx, rands[5]);
   return samp;

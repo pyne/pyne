@@ -27,6 +27,10 @@
 extern "C" {
 #endif
 
+void get_e_bounds_data(std::string e_bounds_file);
+typedef std::vector<double> vect_d;
+typedef std::string str;
+
 
 struct Sample {
     vect_d xyz; /// \param type
@@ -42,9 +46,6 @@ struct sample_vects{
 };
 
 
-void get_e_bounds_data(std::string e_bounds_file);
-typedef std::vector<double> vect_d;
-typedef std::string str;
 
 
 class AliasTable
@@ -60,7 +61,7 @@ public:
 };
 
 
-enum Mode {ANALOG, UNIFORM, USER};
+enum Mode {USER, ANALOG, UNIFORM};
 
 
 class Sampler
@@ -70,6 +71,7 @@ public:
   // \param filename the filename of the mesh file
   Sampler(str filename, str src_tag_name, vect_d e_bounds, bool uniform);
   Sampler(str filename, str src_tag_name, vect_d e_bounds, str bias_tag_name);
+  void setup();
   ~Sampler(){
      delete mesh;
      delete at;
@@ -81,6 +83,7 @@ private:
   vect_d e_bounds;
   Mode mode;
   MBInterface *mesh;
+  str filename;
   str src_tag_name;
   str bias_tag_name;
   int num_e_groups;
