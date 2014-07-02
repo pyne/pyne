@@ -967,15 +967,15 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
       // look at the stripped nucid
+      std::cout << "cur_id is " << nucname::id(ptr->first);
       int cur_stripped_id = nucname::id(nucname::znum(ptr->first));
-      std::cout << "cur_stripped_id is " << cur_stripped_id;
       if ( 0 < exception_ids.count(cur_stripped_id) ) {
         // On exception list, => do not collapse
-	std::cout << " On the exception list, don't collapse " << std::endl;
+	std::cout << ":  On the exception list, don't collapse " << std::endl;
         cm[ptr->first] = (ptr->second) * mass;
       } else {
         // Not on exception list, add frac to id-component
-	std::cout << " Not on the exception list, collapsing " << std::endl;
+	std::cout << ":  Not on the exception list, collapsing " << std::endl;
 	cm[nucname::id(cur_stripped_id)] += (ptr->second) * mass;
       }
   }
