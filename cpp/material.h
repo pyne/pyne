@@ -263,21 +263,14 @@ namespace pyne
     /// Returns a list of gamma-rays energies in keV and intensities in
     /// decays/s/atom material unnormalized
     std::vector<std::pair<double, double> > gamma_rays();
-    /// Returns a list of alpha energies in keV and intensities in
-    /// decays/s material unnormalized
-    //std::vector<std::pair<double, double> > alphas();
-    /// Returns a list of beta minus average energies in keV and intensities in
-    /// decays/s material unnormalized
-    //std::vector<std::pair<double, double> > beta_minus();
-    /// Returns a list of beta plus average energies in keV and intensities in
-    /// decays/s material unnormalized
-    //std::vector<std::pair<double, double> > beta_plus_ec();
     /// Returns a list of x-rays average energies in keV and intensities in
     /// decays/s material unnormalized
     std::vector<std::pair<double, double> > x_rays();
-
+    /// Returns a list of photon energies in keV and intensities in
+    /// decays/s/atom material unnormalized
     std::vector<std::pair<double, double> > photons(bool norm);
-
+    /// Takes a list of photon energies and intensities and normalizes them
+    /// so the sum of the intensities is one
     std::vector<std::pair<double, double> > normalize_radioactivity(
       std::vector<std::pair<double, double> > unnormed);
 
