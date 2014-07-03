@@ -38,7 +38,7 @@ struct Sample {
     double w;
 };
 
-struct sample_vects{
+struct edge_vects{
    MBCartVect o_point;
    MBCartVect x_vec;
    MBCartVect y_vec;
@@ -86,20 +86,20 @@ private:
   int num_bias_groups;
   int num_ves;
   MBEntityType ve_type;
-  sample_vects vects;
+  edge_vects vects;
   int verts_per_ve;
-  std::vector<sample_vects> cart_sampler;
+  std::vector<edge_vects> all_edge_vects;
   AliasTable* at;
   std::vector<double> biased_weights;
 
 private:
   // functions and classes
   void get_mesh_geom_data(MBRange ves, vect_d &volumes);
-  void get_mesh_tag_data(MBRange ves, vect_d volumes);
+  void get_mesh_tag_data(MBRange ves, const vect_d volumes);
   MBCartVect get_xyz(int ve_idx, vect_d rands);
   double get_e(int e_idx, double rand);
   double get_w(int pdf_idx);
-  void normalize_pdf(vect_d & pdf, int size);
+  void normalize_pdf(vect_d & pdf);
   int get_num_groups(MBTag tag);
   vect_d get_bias_pdf(MBRange ves, vect_d volumes);
 };

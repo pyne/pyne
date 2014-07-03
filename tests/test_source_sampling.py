@@ -30,39 +30,39 @@ def test_analog_single_hex():
     m.bias = IMeshTag(1, float)
     m.bias[0] = 1.0
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), "bias")
+    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), False)
 
-    num_samples = 100000
+    num_samples = 1000
+    score = 1.0/num_samples
     num_divs = 2
-    samples = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
         assert_equal(s[4], 1.0)
-        samples[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
-                int(s[3]*num_divs)] += 1.0/num_samples
-    
-    for s in samples.flat:
-        assert(abs(s*(num_divs)**4 - 1) < 0.3)
+        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), int(s[3]*num_divs)] += score
+    for i in range(0, 4):
+        for j in range(0, 2):
+            assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
 
 def test_analog_multiple_hex():
-    m = Mesh(structured=True, structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 1]], mats = None)
+    m = Mesh(structured=True, structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]], mats = None)
     m.src = IMeshTag(2, float)
-    m.src[:] = np.array([[1,1],[1,1],[1,1],[1,1]])
-    m.mesh.save("sampling_mesh2.h5m")
-    sampler = Sampler("sampling_mesh2.h5m", "src", np.array([0,0.5,1]), False)
+    m.src[:] = np.ones(shape=(8,2))
+    m.mesh.save("sampling_mesh.h5m")
+    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0,0.5,1]), False)
 
-    num_samples = 10000
+    num_samples = 1000
+    score = 1.0/num_samples
     num_divs = 2
-    samples = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         assert_equal(s[4], 1.0)
-        samples[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
-                int(s[3]*num_divs)] += 1.0/num_samples
+        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), int(s[3]*num_divs)] += score
     
-    for s in samples.flat:
-        assert(abs(s*(num_divs)**4 - 1) < 0.1)
-
+    for i in range(0, 4):
+        for j in range(0, 2):
+            assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
 
 def test_analog_single_tet():
     mesh = iMesh.Mesh()
@@ -84,19 +84,28 @@ def test_analog_single_tet():
                [center, v2, v3, v4]]
 
     sampler = Sampler("tet.h5m", "src", np.array([0, 1]), False)
-    num_samples = 10000
-    samples = np.zeros(shape=(4))
+    num_samples = 1000
+    score = 1.0/num_samples
+    tally = np.zeros(shape=(4))
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         assert_equal(s[4], 1.0)
         for i, tet in enumerate(subtets):
             if point_in_tet(tet, [s[0], s[1], s[2]]):
-                samples[i] += 1.0/num_samples
+                tally[i] += score
+                break
     
-    for s in samples:
-        for a in samples:
-            print(a)
-        assert(abs(s*4 - 1) < 0.1)
+    for t in tally:
+        assert(abs(t - 0.25) < 0.05)
+
+def test_uniform():
+    pass
+
+def test_bias():
+    pass
+
+def test_bias_spacial():
+    pass
 
 def point_in_tet(t, p):
 

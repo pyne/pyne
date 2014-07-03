@@ -2,35 +2,36 @@
 #include "source_sampling.h"
 #endif
 
-
-//    throw std::invalid_argument("bias_tag_name should not be specified for analog sampling");
-
-void get_e_bounds_data(str e_bounds_file){
-  std::ifstream inputFile(&e_bounds_file[0]);
-  // test file open   
-  vect_d e_bounds;
-  if (inputFile) {        
-    double value;
-    while (inputFile >> value)
-      e_bounds.push_back(value);
-  }
-}
-
 Sampler::Sampler(str _filename, str _src_tag_name, vect_d _e_bounds, bool _uniform)
   : filename(_filename), src_tag_name(_src_tag_name), e_bounds(_e_bounds) {
-  if(_uniform){
-   mode = UNIFORM;
-  } else {
-   mode = ANALOG;
-  }
+  mode = (_uniform) ? UNIFORM : ANALOG;
   setup();
 }
 
-Sampler::Sampler(str _filename, str _src_tag_name, 
-                  vect_d _e_bounds, str _bias_tag_name)
-  : filename(_filename), src_tag_name(_src_tag_name), e_bounds(_e_bounds), bias_tag_name(_bias_tag_name) {
+Sampler::Sampler(str _filename, str _src_tag_name, vect_d _e_bounds, str _bias_tag_name)
+  : filename(_filename), src_tag_name(_src_tag_name), e_bounds(_e_bounds), bias_tag_name(_bias_tag_name){
   mode = USER;
   setup();
+}
+
+vect_d Sampler::particle_birth(vect_d rands){
+  int pdf_idx = at->sample_pdf(rands[0], rands[1]);
+  int ve_idx = pdf_idx/num_e_groups;
+  int e_idx = pdf_idx % num_e_groups;
+
+  vect_d samp;
+  vect_d xyz_rands;
+  xyz_rands.push_back(rands[2]);
+  xyz_rands.push_back(rands[3]);
+  xyz_rands.push_back(rands[4]);
+  MBCartVect pos = get_xyz(ve_idx, xyz_rands);
+
+  samp.push_back(pos[0]); 
+  samp.push_back(pos[1]); 
+  samp.push_back(pos[2]); 
+  samp.push_back(get_e(e_idx, rands[5]));
+  samp.push_back(get_w(pdf_idx));
+  return samp;
 }
 
 void Sampler::setup(){
@@ -75,20 +76,20 @@ void Sampler::get_mesh_geom_data(MBRange ves, vect_d &volumes){
       MBCartVect x(coords[3], coords[4], coords[5]);
       MBCartVect y(coords[9], coords[10], coords[11]);
       MBCartVect z(coords[12], coords[13], coords[14]);
-      sample_vects vp = {o, x-o, y-o, z-o};
-      cart_sampler.push_back(vp);
+      edge_vects ev = {o, x-o, y-o, z-o};
+      all_edge_vects.push_back(ev);
    }else if (ve_type == MBTET){
       MBCartVect o(coords[0], coords[1], coords[2]);
       MBCartVect x(coords[3], coords[4], coords[5]);
       MBCartVect y(coords[6], coords[7], coords[8]);
       MBCartVect z(coords[9], coords[10], coords[11]);
-      sample_vects vp = {o, x-o, y-o, z-o};
-      cart_sampler.push_back(vp);
+      edge_vects ev = {o, x-o, y-o, z-o};
+      all_edge_vects.push_back(ev);
     }
   }
 }
 
-void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
+void Sampler::get_mesh_tag_data(MBRange ves, const vect_d volumes){
   MBErrorCode rval;
   MBTag src_tag;
   rval = mesh->tag_get_handle(src_tag_name.c_str(),
@@ -102,26 +103,26 @@ void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
   vect_d pdf(num_ves*num_e_groups); 
   rval = mesh->tag_get_data(src_tag, ves, &pdf[0]);
 
+  // Multiply the source densities by the VE volumes
   int i, j;
   for(i=0; i<num_ves; ++i){
     for(j=0; j<num_e_groups; ++j){
        pdf[i*num_e_groups + j] *=  volumes[i];
     }
   }
-  
-  normalize_pdf(pdf, num_ves*num_e_groups);
+  normalize_pdf(pdf);
 
-  if(mode != ANALOG){
+  if(mode == ANALOG){
+    at = new AliasTable(pdf);
+  }else{
     vect_d bias_pdf = get_bias_pdf(ves, volumes);
-    normalize_pdf(bias_pdf, num_ves*num_e_groups);
+    normalize_pdf(bias_pdf);
     //  Create alias table based off biased pdf and calculate birth weights.
-    at = new AliasTable(bias_pdf);
     biased_weights.resize(num_ves*num_e_groups);
       for(i=0; i<num_ves*num_e_groups; ++i){
         biased_weights[i] = pdf[i]/bias_pdf[i];
       }
-  }else{
-    at = new AliasTable(pdf);
+    at = new AliasTable(bias_pdf);
   }
 }
 
@@ -130,22 +131,19 @@ vect_d Sampler::get_bias_pdf(MBRange ves, vect_d volumes){
     int i, j;
     MBErrorCode rval;
     if(mode == UNIFORM){
-
       for(i=0; i<num_ves; ++i){
         for(j=0; j<num_e_groups; ++j)
            bias_pdf[i*num_e_groups + j] =  volumes[i];
       }
-
     }else if(mode == USER){
       MBTag bias_tag;
       rval = mesh->tag_get_handle(bias_tag_name.c_str(), 
                                   moab::MB_TAG_VARLEN, 
                                   MB_TYPE_DOUBLE, 
                                   bias_tag);
-
       num_bias_groups = get_num_groups(bias_tag);
 
-      if (num_bias_groups == num_e_groups){
+      if(num_bias_groups == num_e_groups){
         rval = mesh->tag_get_data(bias_tag, ves, &bias_pdf[0]);
         for(i=0; i<num_ves; ++i){
           for(j=0; j<num_e_groups; ++j)
@@ -155,9 +153,9 @@ vect_d Sampler::get_bias_pdf(MBRange ves, vect_d volumes){
         vect_d spacial_pdf(num_ves); 
         rval = mesh->tag_get_data(bias_tag, ves, &spacial_pdf[0]);
         for(i=0; i<num_ves; ++i){
-          bias_pdf[i*num_e_groups + j] *=  spacial_pdf[i]*volumes[i];
+          for(j=0; j<num_e_groups; ++j)
+            bias_pdf[i*num_e_groups + j] =  spacial_pdf[i]*volumes[i];
         }
-
       }else{
         throw std::length_error("Length of bias tag must equal length of the"
                                 "  source tag, or 1.");
@@ -166,12 +164,12 @@ vect_d Sampler::get_bias_pdf(MBRange ves, vect_d volumes){
 return bias_pdf;
 }
 
-void Sampler::normalize_pdf(vect_d & pdf, int size){
+void Sampler::normalize_pdf(vect_d & pdf){
   double sum = 0;
   int i;
-  for(i=0; i<size; ++i)
+  for(i=0; i<num_ves*num_e_groups; ++i)
     sum += pdf[i];
-  for(i=0; i<size; ++i)
+  for(i=0; i<num_ves*num_e_groups; ++i)
     pdf[i] /= sum;
 }
 
@@ -182,26 +180,6 @@ int Sampler::get_num_groups(MBTag tag){
   return tag_size/sizeof(double);
 }
 
-vect_d Sampler::particle_birth(vect_d rands){
-  // get indices
-  int pdf_idx = at->sample_pdf(rands[0], rands[1]);
-  int ve_idx = pdf_idx/num_e_groups;
-  int e_idx = pdf_idx % num_e_groups;
-
-  vect_d samp;
-  vect_d xyz_rands;
-  xyz_rands.push_back(rands[2]);
-  xyz_rands.push_back(rands[3]);
-  xyz_rands.push_back(rands[4]);
-  MBCartVect pos = get_xyz(ve_idx, xyz_rands);
-
-  samp.push_back(pos[0]); 
-  samp.push_back(pos[1]); 
-  samp.push_back(pos[2]); 
-  samp.push_back(get_e(e_idx, rands[5]));
-  samp.push_back(get_w(pdf_idx));
-  return samp;
-}
 
 MBCartVect Sampler::get_xyz(int ve_idx, vect_d rands){
   double s = rands[0];
@@ -226,10 +204,10 @@ MBCartVect Sampler::get_xyz(int ve_idx, vect_d rands){
     }
   }
 
- return s*cart_sampler[ve_idx].x_vec + \
-        t*cart_sampler[ve_idx].y_vec + \
-        u*cart_sampler[ve_idx].z_vec + \
-          cart_sampler[ve_idx].o_point;
+ return s*all_edge_vects[ve_idx].x_vec + \
+        t*all_edge_vects[ve_idx].y_vec + \
+        u*all_edge_vects[ve_idx].z_vec + \
+          all_edge_vects[ve_idx].o_point;
 }
 
 double Sampler::get_e(int e_idx, double rand){
@@ -239,11 +217,7 @@ double Sampler::get_e(int e_idx, double rand){
 }
 
 double Sampler::get_w(int pdf_idx){
-  if(mode == ANALOG){
-    return 1.0;
-  }else{
-    return biased_weights[pdf_idx];
-  }
+  return (mode == ANALOG) ? 1.0 : biased_weights[pdf_idx];
 }
 
 
