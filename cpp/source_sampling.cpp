@@ -221,16 +221,12 @@ double Sampler::get_w(int pdf_idx){
 }
 
 
-////////////////////
-// ALIAS TABLE STUFF
-////////////////////
-
+// Random-number sampling using the Walker-Vose alias method,
+// Copyright: Joachim Wuttke, Forschungszentrum Juelich GmbH (2013)
+// M. D. Vose, IEEE T. Software Eng. 17, 972 (1991)
+// A. J. Walker, Electronics Letters 10, 127 (1974); ACM TOMS 3, 253 (1977)
 
 AliasTable::AliasTable(vect_d p){
-  // Random-number sampling using the Walker-Vose alias method,
-  // Copyright: Joachim Wuttke, Forschungszentrum Juelich GmbH (2013)
-  // M. D. Vose, IEEE T. Software Eng. 17, 972 (1991)
-  // A. J. Walker, Electronics Letters 10, 127 (1974); ACM TOMS 3, 253 (1977)
   n = p.size();
   prob.resize(n);
   alias.resize(n);

@@ -4,8 +4,7 @@ import warnings
 import itertools
 
 from operator import itemgetter
-from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
-    assert_is, assert_is_instance, assert_in, assert_not_in, assert_almost_equal
+from nose.tools import assert_true, assert_equal, assert_raises, with_setup, assert_almost_equal
 from random import uniform
 
 import numpy as np
@@ -27,8 +26,6 @@ def test_analog_single_hex():
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]], mats = None)
     m.src = IMeshTag(1, float)
     m.src[0] = 1.0
-    m.bias = IMeshTag(1, float)
-    m.bias[0] = 1.0
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), False)
 
@@ -49,7 +46,7 @@ def test_analog_multiple_hex():
     m.src = IMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0,0.5,1]), False)
+    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 0.5, 1]), False)
 
     num_samples = 1000
     score = 1.0/num_samples
@@ -99,10 +96,72 @@ def test_analog_single_tet():
         assert(abs(t - 0.25) < 0.05)
 
 def test_uniform():
-    pass
+    m = Mesh(structured=True, structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
+    e_bounds = np.array([0, 0.5, 1.0])
+    m.mesh.save("sampling_mesh.h5m")
+    sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, True)
+
+    num_samples = 1000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        if s[0] < 2.5:
+            if s[3] < 0.5:
+              assert_almost_equal(s[4], 0.8) # hand calcs
+            else:
+              assert_almost_equal(s[4], 1.2) # hand calcs
+        else:
+            if s[3] < 0.5:
+              assert_almost_equal(s[4], 0.4) # hand calcs
+            else:
+              assert_almost_equal(s[4], 1.6) # hand calcs
+
+        tally[int(s[0]*num_divs)/10, int(s[1]*num_divs)/10, int(s[2]*num_divs)/10]  += score
+
+    print(tally)
+    for i in range(0, 3):
+        for j in range(0, 2):
+            assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:]) - 0.5) < 0.05)
+
 
 def test_bias():
-    pass
+    m = Mesh(structured=True, structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
+    e_bounds = np.array([0, 0.5, 1.0])
+    m.bias = IMeshTag(2, float)
+    m.bias[:] = [[8.0, 3.0], [5.0, 8.0]]
+    m.mesh.save("sampling_mesh.h5m")
+    sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, "bias")
+
+    num_samples = 1000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = np.zeros(shape=(4))
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        if s[0] < 2.5:
+            if s[3] < 0.5:
+              assert_almost_equal(s[4], 0.625) # hand calcs
+              tally[0] += score
+            else:
+              assert_almost_equal(s[4], 2.5) # hand calcs
+              tally[1] += score
+        else:
+            if s[3] < 0.5:
+              assert_almost_equal(s[4], 0.5) # hand calcs
+              tally[2] += score
+            else:
+              assert_almost_equal(s[4], 1.25) # hand calcs
+              tally[3] += score
+
+    expected_tally = [0.16, 0.06, 0.3, 0.48]
+    for a, b in zip(tally, expected_tally):
+       assert(abs(a-b)/b < 0.2)
 
 def test_bias_spacial():
     pass
