@@ -188,8 +188,8 @@ vect_d Sampler::particle_birth(vect_d rands){
   samp.push_back(pos[0]); 
   samp.push_back(pos[1]); 
   samp.push_back(pos[2]); 
-  samp.push_back(get_w(pdf_idx));
   samp.push_back(get_e(e_idx, rands[5]));
+  samp.push_back(get_w(pdf_idx));
   return samp;
 }
 
