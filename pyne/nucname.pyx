@@ -11,8 +11,6 @@ from libcpp.string cimport string as std_string
 
 # Python imports 
 #from collections import Iterable
-from warnings import warn
-from pyne.utils import VnVWarning
 
 # local imports 
 cimport pyne.cpp_utils
@@ -22,8 +20,6 @@ import pyne.pyne_config
 from pyne cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
-
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 #
 # Conversion dictionaries
