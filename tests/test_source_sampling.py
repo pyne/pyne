@@ -59,7 +59,8 @@ def test_analog_multiple_hex():
     
     for i in range(0, 4):
         for j in range(0, 2):
-            assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
+            halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:,:])
+            assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
 
 def test_analog_single_tet():
     mesh = iMesh.Mesh()
@@ -93,7 +94,7 @@ def test_analog_single_tet():
                 break
     
     for t in tally:
-        assert(abs(t - 0.25) < 0.05)
+        assert(abs(t - 0.25)/0.25 < 0.2)
 
 def test_uniform():
     m = Mesh(structured=True, structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], mats = None)
@@ -122,10 +123,10 @@ def test_uniform():
 
         tally[int(s[0]*num_divs)/10, int(s[1]*num_divs)/10, int(s[2]*num_divs)/10]  += score
 
-    print(tally)
     for i in range(0, 3):
         for j in range(0, 2):
-            assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:]) - 0.5) < 0.05)
+            halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:])
+            assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
 
 
 def test_bias():
@@ -161,10 +162,41 @@ def test_bias():
 
     expected_tally = [0.16, 0.06, 0.3, 0.48]
     for a, b in zip(tally, expected_tally):
-       assert(abs(a-b)/b < 0.2)
+       assert(abs(a-b)/b < 0.25)
 
 def test_bias_spacial():
-    pass
+    m = Mesh(structured=True, structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
+    m.bias = IMeshTag(2, float)
+    m.bias[:] = [1, 1]
+    e_bounds = np.array([0, 0.5, 1.0])
+    m.mesh.save("sampling_mesh.h5m")
+    sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, "bias")
+
+    num_samples = 1000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        if s[0] < 2.5:
+            if s[3] < 0.5:
+              assert_almost_equal(s[4], 0.8) # hand calcs
+            else:
+              assert_almost_equal(s[4], 1.2) # hand calcs
+        else:
+            if s[3] < 0.5:
+              assert_almost_equal(s[4], 0.4) # hand calcs
+            else:
+              assert_almost_equal(s[4], 1.6) # hand calcs
+
+        tally[int(s[0]*num_divs)/10, int(s[1]*num_divs)/10, int(s[2]*num_divs)/10]  += score
+
+    for i in range(0, 3):
+        for j in range(0, 2):
+            halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:])
+            assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
 
 def point_in_tet(t, p):
 
@@ -191,5 +223,4 @@ def point_in_tet(t, p):
               [p[0], p[1], p[2], 1]])]
 
     determinates =[np.linalg.det(x) for x in matricies]
-    print(determinates[0] - np.sum(determinates[1:]))
     return all(x >= 0 for x in determinates) or all(x < 0 for x in determinates)
