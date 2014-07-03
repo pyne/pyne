@@ -74,7 +74,6 @@ public:
      };
   vect_d particle_birth(vect_d rands);
 
-
 private:
   void setup();
   vect_d e_bounds;
@@ -84,6 +83,8 @@ private:
   str src_tag_name;
   str bias_tag_name;
   int num_e_groups;
+  int num_bias_groups;
+  int num_ves;
   MBEntityType ve_type;
   sample_vects vects;
   int verts_per_ve;
@@ -98,6 +99,9 @@ private:
   MBCartVect get_xyz(int ve_idx, vect_d rands);
   double get_e(int e_idx, double rand);
   double get_w(int pdf_idx);
+  void normalize_pdf(vect_d & pdf, int size);
+  int get_num_groups(MBTag tag);
+  vect_d get_bias_pdf(MBRange ves, vect_d volumes);
 };
 
 #ifdef __cplusplus

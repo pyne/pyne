@@ -30,7 +30,7 @@ def test_analog_single_hex():
     m.bias = IMeshTag(1, float)
     m.bias[0] = 1.0
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), False)
+    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), "bias")
 
     num_samples = 100000
     num_divs = 2
