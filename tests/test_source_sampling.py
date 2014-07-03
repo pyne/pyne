@@ -61,10 +61,10 @@ def test_analog_multiple_hex():
                 int(s[3]*num_divs)] += 1.0/num_samples
     
     for s in samples.flat:
-        assert(abs(s*(num_divs)**4 - 1) < 0.2)
+        assert(abs(s*(num_divs)**4 - 1) < 0.1)
 
 
-def htest_analog_single_tet():
+def test_analog_single_tet():
     mesh = iMesh.Mesh()
     v1 = [0, 0, 0]
     v2 = [1, 0, 0]
@@ -83,33 +83,45 @@ def htest_analog_single_tet():
                [center, v1, v3, v4], 
                [center, v2, v3, v4]]
 
-    with open("e_bounds_file", 'w') as f:
-        f.write("0 1")
-    sampling_setup("tet.h5m", "src", "e_bounds_file", True)
+    sampler = Sampler("tet.h5m", "src", np.array([0, 1]), False)
+    num_samples = 10000
+    samples = np.zeros(shape=(4))
+    for i in range(num_samples):
+        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        assert_equal(s[4], 1.0)
+        for i, tet in enumerate(subtets):
+            if point_in_tet(tet, [s[0], s[1], s[2]]):
+                samples[i] += 1.0/num_samples
+    
+    for s in samples:
+        for a in samples:
+            print(a)
+        assert(abs(s*4 - 1) < 0.1)
 
 def point_in_tet(t, p):
 
     matricies = [
-    np.array([[t[0][0], t[1][0], t[2][0], 1],
-              [t[0][1], t[1][1], t[2][1], 1],
-              [t[0][2], t[1][2], t[2][2], 1],
-              [t[0][3], t[1][3], t[2][3], 1]]),
-    np.array([[p[0], p[1], p[2], 1],
-              [t[0][1], t[1][1], t[2][1], 1],
-              [t[0][2], t[1][2], t[2][2], 1],
-              [t[0][3], t[1][3], t[2][3], 1]]),
-    np.array([[t[0][0], t[1][0], t[2][0], 1],
-             [p[0], p[1], p[2], 1],
-             [t[0][2], t[1][2], t[2][2], 1],
-             [t[0][3], t[1][3], t[2][3], 1]]),
-    np.array([[t[0][0], t[1][0], t[2][0], 1],
-              [t[0][1], t[1][1], t[2][1], 1],
+    np.array( [[t[0][0], t[0][1], t[0][2], 1],
+              [t[1][0], t[1][1], t[1][2], 1],
+              [t[2][0], t[2][1], t[2][2], 1],
+              [t[3][0], t[3][1], t[3][2], 1]]),
+    np.array( [[p[0], p[1], p[2], 1],
+              [t[1][0], t[1][1], t[1][2], 1],
+              [t[2][0], t[2][1], t[2][2], 1],
+              [t[3][0], t[3][1], t[3][2], 1]]),
+    np.array( [[t[0][0], t[0][1], t[0][2], 1],
               [p[0], p[1], p[2], 1],
-              [t[0][3], t[1][3], t[2][3], 1]]),
-    np.array([[t[0][0], t[1][0], t[2][0], 1],
-              [t[0][1], t[1][1], t[2][1], 1],
-              [t[0][2], t[1][2], t[2][2], 1],
+              [t[2][0], t[2][1], t[2][2], 1],
+              [t[3][0], t[3][1], t[3][2], 1]]),
+    np.array( [[t[0][0], t[0][1], t[0][2], 1],
+              [t[1][0], t[1][1], t[1][2], 1],
+              [p[0], p[1], p[2], 1],
+              [t[3][0], t[3][1], t[3][2], 1]]),
+    np.array( [[t[0][0], t[0][1], t[0][2], 1],
+              [t[1][0], t[1][1], t[1][2], 1],
+              [t[2][0], t[2][1], t[2][2], 1],
               [p[0], p[1], p[2], 1]])]
 
-    determinates =[lp.linalg.det(x) for x in matricies]
+    determinates =[np.linalg.det(x) for x in matricies]
+    print(determinates[0] - np.sum(determinates[1:]))
     return all(x >= 0 for x in determinates) or all(x < 0 for x in determinates)
