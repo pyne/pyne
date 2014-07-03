@@ -91,8 +91,7 @@ void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
   MBErrorCode rval;
   MBTag src_tag;
   rval = mesh->tag_get_handle(src_tag_name.c_str(),
-                              1,
-                              // moab::MB_TAG_VARLEN, 
+                              moab::MB_TAG_VARLEN, 
                               MB_TYPE_DOUBLE, 
                               src_tag);
   // THIS ASSERT FAILS because we do not know number of energy groups a priori.
@@ -150,8 +149,8 @@ void Sampler::get_mesh_tag_data(MBRange ves, vect_d volumes){
         }
       }
       else
-        std::cout<<num_bias_groups<<" "<<num_e_groups<<std::endl;
-        throw std::length_error("Length of bias tag must equal length of the source tag, or 1.");
+        throw std::length_error("Length of bias tag must equal length of the"
+                                "  source tag, or 1.");
 
       sum = 0;
       for(i=0; i<ves.size()*num_e_groups; ++i){
