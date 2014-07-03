@@ -13,7 +13,7 @@ from numpy.testing import assert_array_equal, assert_allclose, \
 from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
 
-from pyne.endfcpp import endf
+from pyne.endf2 import library
 
 import nose
 from nose.tools import assert_equal
@@ -39,15 +39,16 @@ def test_endcpp_basics():
         raise AssertionError("U235.txt hash check failed; please try redownloading the U235 data file.")
 
 
-    library = endf()
-    library.read_endf('U235.txt')
-    assert_equal(library.get_content_list(), [[9228, 1, 451],
-                                             [9228, 1, 452],
-                                             [9228, 1, 455],
-                                             [9228, 1, 456],
-                                             [9228, 1, 458],
-                                             [9228, 1, 460]] )
-    assert_equal(library.get(9228,1,451).mt_list,[[1, 451, 934, 7],
+    test_library = library()
+    test_library.read_endf('U235.txt')
+    assert_equal(test_library.content_list, array([
+                 array([9228,    1,  451], dtype=int32),
+                 array([9228,    1,  452], dtype=int32),
+                 array([9228,    1,  455], dtype=int32),
+                 array([9228,    1,  456], dtype=int32),
+                 array([9228,    1,  458], dtype=int32),
+                 array([9228,    1,  460], dtype=int32)]))
+    assert_equal(test_library.get(9228,1,451).mt_list,[[1, 451, 934, 7],
                                                  [1, 452, 30, 6],
                                                  [1, 455, 7, 7],
                                                  [1, 456, 30, 7],
@@ -179,7 +180,7 @@ def test_endcpp_basics():
                                                  [33, 18, 81910, 7],
                                                  [33, 102, 23060, 7],
                                                  [35, 18, 6606, 7]])
-    assert_equal(library.get_mt(1, 458)[0].egp, [6600000.0, 0.0777, 0.0])
+    assert_equal(test_library.get_mt(1, 458)[0].egp, [6600000.0, 0.0777, 0.0])
 
 if __name__ == "__main__":
     nose.runmodule()

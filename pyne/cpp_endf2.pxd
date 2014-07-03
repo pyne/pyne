@@ -12,7 +12,7 @@ from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
 from pyne cimport cpp_endf2
 
-cdef extern from "endf.h" namespace "pyne::endf":
+cdef extern from "endf.h" namespace "pyne":
 
     cdef cppclass endf_id:
         # constructors
@@ -29,7 +29,7 @@ cdef extern from "endf.h" namespace "pyne::endf":
 
 
 
-cdef extern from "endf_mt.h" namespace "pyne::endf":
+cdef extern from "endf_mt.h" namespace "pyne":
 
     cdef cppclass mt_base:
         # constructors
@@ -48,7 +48,144 @@ cdef extern from "endf_mt.h" namespace "pyne::endf":
 
 
 
-cdef extern from "endf_mt.h" namespace "pyne::endf":
+cdef extern from "endf_mt.h" namespace "pyne":
+
+    cdef cppclass mt_fpy_8(mt_base):
+        # constructors
+        mt_fpy_8() except +
+
+        # attributes
+        cpp_vector[double] e
+        cpp_vector[int] i
+        int le
+        cpp_vector[cpp_vector[cpp_vector[double]]] yields
+
+        # methods
+
+        pass
+
+
+
+cdef extern from "endf_mt.h" namespace "pyne":
+
+    cdef cppclass mt_460_1(mt_base):
+        # constructors
+        mt_460_1() except +
+
+        # attributes
+        cpp_vector[double] elist
+        cpp_vector[cpp_vector[int]] intn
+        cpp_vector[double] lambdas
+        int lo
+        cpp_vector[cpp_vector[int]] nbt
+        int ng
+        cpp_vector[cpp_vector[double]] t
+        cpp_vector[cpp_vector[double]] tint
+
+        # methods
+
+        pass
+
+
+
+cdef extern from "endf_mt.h" namespace "pyne":
+
+    cdef cppclass mt_458_1(mt_base):
+        # constructors
+        mt_458_1() except +
+
+        # attributes
+        cpp_vector[double] deb
+        cpp_vector[double] defr
+        cpp_vector[double] degd
+        cpp_vector[double] degp
+        cpp_vector[double] dend
+        cpp_vector[double] denp
+        cpp_vector[double] denu
+        cpp_vector[double] der
+        cpp_vector[double] det
+        cpp_vector[double] eb
+        cpp_vector[double] efr
+        cpp_vector[double] egd
+        cpp_vector[double] egp
+        cpp_vector[double] end
+        cpp_vector[double] enp
+        cpp_vector[double] enu
+        cpp_vector[double] er
+        cpp_vector[double] et
+
+        # methods
+
+        pass
+
+
+
+cdef extern from "endf_mt.h" namespace "pyne":
+
+    cdef cppclass mt_456_1(mt_base):
+        # constructors
+        mt_456_1() except +
+
+        # attributes
+        cpp_vector[double] eint
+        cpp_vector[int] intn
+        int lnu
+        cpp_vector[int] nbt
+        cpp_vector[double] nu
+        cpp_vector[double] nu_e
+
+        # methods
+
+        pass
+
+
+
+cdef extern from "endf_mt.h" namespace "pyne":
+
+    cdef cppclass mt_455_1(mt_base):
+        # constructors
+        mt_455_1() except +
+
+        # attributes
+        cpp_vector[cpp_vector[double]] alpha_arr
+        cpp_vector[double] eint
+        cpp_vector[int] einti
+        cpp_vector[int] intn
+        cpp_vector[cpp_vector[double]] lambda_arr
+        cpp_vector[double] lambdas
+        int ldg
+        int lnu
+        cpp_vector[int] nbt
+        cpp_vector[int] ne
+        cpp_vector[double] nu_d
+
+        # methods
+
+        pass
+
+
+
+cdef extern from "endf_mt.h" namespace "pyne":
+
+    cdef cppclass mt_452_1(mt_base):
+        # constructors
+        mt_452_1() except +
+
+        # attributes
+        cpp_vector[double] eint
+        cpp_vector[int] intn
+        int lnu
+        cpp_vector[int] nbt
+        cpp_vector[double] nu_e
+        cpp_vector[double] poly
+
+        # methods
+
+        pass
+
+
+
+cdef extern from "endf_mt.h" namespace "pyne":
 
     cdef cppclass mt_451(mt_base):
         # constructors
@@ -81,21 +218,47 @@ cdef extern from "endf_mt.h" namespace "pyne::endf":
 
 
 
-cdef extern from "endf.h" namespace "pyne::endf":
+cdef extern from "endf.h" namespace "pyne":
 
     cdef cppclass library:
         # constructors
         library() except +
 
         # attributes
-
+        cpp_vector[cpp_vector[int]] content_list
 
         # methods
         cpp_vector[cpp_vector[int]] get_content_list() except +
         void read_endf() except +
         void read_endf(std_string) except +
-        mt_451 get_mt_451 "get< pyne::endf::mt_451 >" (endf_id) except +
-        mt_451 get_mt_451 "get< pyne::endf::mt_451 >" (int, int, int) except +
+        mt_451 get_mt_451 "get< pyne::mt_451 >" () except +
+        mt_451 get_mt_451 "get< pyne::mt_451 >" (int) except +
+        mt_451 get_mt_451 "get< pyne::mt_451 >" (int, int) except +
+        mt_451 get_mt_451 "get< pyne::mt_451 >" (int, int, int) except +
+        mt_452_1 get_mt_452_1 "get< pyne::mt_452_1 >" () except +
+        mt_452_1 get_mt_452_1 "get< pyne::mt_452_1 >" (int) except +
+        mt_452_1 get_mt_452_1 "get< pyne::mt_452_1 >" (int, int) except +
+        mt_452_1 get_mt_452_1 "get< pyne::mt_452_1 >" (int, int, int) except +
+        mt_455_1 get_mt_455_1 "get< pyne::mt_455_1 >" () except +
+        mt_455_1 get_mt_455_1 "get< pyne::mt_455_1 >" (int) except +
+        mt_455_1 get_mt_455_1 "get< pyne::mt_455_1 >" (int, int) except +
+        mt_455_1 get_mt_455_1 "get< pyne::mt_455_1 >" (int, int, int) except +
+        mt_456_1 get_mt_456_1 "get< pyne::mt_456_1 >" () except +
+        mt_456_1 get_mt_456_1 "get< pyne::mt_456_1 >" (int) except +
+        mt_456_1 get_mt_456_1 "get< pyne::mt_456_1 >" (int, int) except +
+        mt_456_1 get_mt_456_1 "get< pyne::mt_456_1 >" (int, int, int) except +
+        mt_458_1 get_mt_458_1 "get< pyne::mt_458_1 >" () except +
+        mt_458_1 get_mt_458_1 "get< pyne::mt_458_1 >" (int) except +
+        mt_458_1 get_mt_458_1 "get< pyne::mt_458_1 >" (int, int) except +
+        mt_458_1 get_mt_458_1 "get< pyne::mt_458_1 >" (int, int, int) except +
+        mt_460_1 get_mt_460_1 "get< pyne::mt_460_1 >" () except +
+        mt_460_1 get_mt_460_1 "get< pyne::mt_460_1 >" (int) except +
+        mt_460_1 get_mt_460_1 "get< pyne::mt_460_1 >" (int, int) except +
+        mt_460_1 get_mt_460_1 "get< pyne::mt_460_1 >" (int, int, int) except +
+        mt_fpy_8 get_mt_fpy_8 "get< pyne::mt_fpy_8 >" () except +
+        mt_fpy_8 get_mt_fpy_8 "get< pyne::mt_fpy_8 >" (int) except +
+        mt_fpy_8 get_mt_fpy_8 "get< pyne::mt_fpy_8 >" (int, int) except +
+        mt_fpy_8 get_mt_fpy_8 "get< pyne::mt_fpy_8 >" (int, int, int) except +
         pass
 
 

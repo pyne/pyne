@@ -3,7 +3,7 @@
   #include "endf_mt.h"
 #endif
 
-pyne::endf::mt_451 pyne::endf::read_451(std::ifstream &infile) {
+pyne::mt_451 pyne::read_451(std::ifstream &infile) {
     mt_451 mt_451;
 
     control cs = read_cont(infile);
@@ -59,7 +59,7 @@ pyne::endf::mt_451 pyne::endf::read_451(std::ifstream &infile) {
     return mt_451;
 }
 
-pyne::endf::mt_fpy_8 pyne::endf::read_fpy_8(std::ifstream &infile) {
+pyne::mt_fpy_8 pyne::read_fpy_8(std::ifstream &infile) {
     mt_fpy_8 mt_fpy;
 
     control cs = read_cont(infile);
@@ -89,7 +89,7 @@ pyne::endf::mt_fpy_8 pyne::endf::read_fpy_8(std::ifstream &infile) {
     return mt_fpy;
 }
 
-pyne::endf::mt_452_1 pyne::endf::read_452_1(std::ifstream &infile) {
+pyne::mt_452_1 pyne::read_452_1(std::ifstream &infile) {
   mt_452_1 mt_452;
 
   control cs = read_cont(infile);
@@ -116,7 +116,7 @@ pyne::endf::mt_452_1 pyne::endf::read_452_1(std::ifstream &infile) {
   return mt_452;
 }
 
-pyne::endf::mt_455_1 pyne::endf::read_455_1(std::ifstream &infile) {
+pyne::mt_455_1 pyne::read_455_1(std::ifstream &infile) {
   mt_455_1 mt_455;
 
   control cs = read_cont(infile);
@@ -196,7 +196,7 @@ pyne::endf::mt_455_1 pyne::endf::read_455_1(std::ifstream &infile) {
   return mt_455;
 }
 
-pyne::endf::mt_456_1 pyne::endf::read_456_1(std::ifstream &infile) {
+pyne::mt_456_1 pyne::read_456_1(std::ifstream &infile) {
   mt_456_1 mt_456;
   control cs = read_cont(infile);
   mt_456.nuc_id = cs.c1;
@@ -223,7 +223,7 @@ pyne::endf::mt_456_1 pyne::endf::read_456_1(std::ifstream &infile) {
   return mt_456;
 }
 
-pyne::endf::mt_458_1 pyne::endf::read_458_1(std::ifstream &infile) {
+pyne::mt_458_1 pyne::read_458_1(std::ifstream &infile) {
   mt_458_1 mt_458;
   control cs = read_cont(infile);
   mt_458.nuc_id = cs.c1;
@@ -279,7 +279,7 @@ pyne::endf::mt_458_1 pyne::endf::read_458_1(std::ifstream &infile) {
   return mt_458;
 }
 
-pyne::endf::mt_460_1 pyne::endf::read_460_1(std::ifstream &infile) {
+pyne::mt_460_1 pyne::read_460_1(std::ifstream &infile) {
   mt_460_1 mt_460;
   control cs = read_cont(infile);
 

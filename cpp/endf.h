@@ -19,8 +19,6 @@
 
 namespace pyne
 {
-namespace endf
-{
   /// struct used for indexing endf library
   typedef struct endf_id {
     int mat;
@@ -32,6 +30,7 @@ namespace endf
 
   bool operator <(const endf_id &lhs, const endf_id &rhs);
   bool operator ==(const endf_id &lhs, const endf_id &rhs);
+
   /// utility function to convert an mt_base into an id
   endf_id make_endf_id(mt_base input);
 
@@ -41,7 +40,7 @@ namespace endf
       ~library();
 
       std::map<endf_id , mt_base*> contents;///< library data
-
+      std::vector<std::vector<int> > content_list;
       /// Access to library data by id struct
       template<typename T> T get (endf_id comp);
       /// Access to library data by mat number, mf, and mt number
@@ -55,7 +54,7 @@ namespace endf
       void read_endf(std::string filenm);
   };
 
-}
+
 }
 
 #endif

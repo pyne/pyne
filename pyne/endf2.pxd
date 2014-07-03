@@ -27,6 +27,7 @@ cdef class endf_id:
 cdef class library:
     cdef void * _inst
     cdef public bint _free_inst
+    cdef public np.ndarray _content_list
     pass
 
 
@@ -42,10 +43,96 @@ cdef class mt_base:
 
 
 
+cdef class mt_455_1(mt_base):
+    cdef public np.ndarray _alpha_arr
+    cdef public np.ndarray _eint
+    cdef public np.ndarray _einti
+    cdef public np.ndarray _intn
+    cdef public np.ndarray _lambda_arr
+    cdef public np.ndarray _lambdas
+    cdef public np.ndarray _nbt
+    cdef public np.ndarray _ne
+    cdef public np.ndarray _nu_d
+    pass
+
+
+
+
+
+cdef class mt_fpy_8(mt_base):
+    cdef public np.ndarray _e
+    cdef public np.ndarray _i
+    cdef public np.ndarray _yields
+    pass
+
+
+
+
+
+cdef class mt_452_1(mt_base):
+    cdef public np.ndarray _eint
+    cdef public np.ndarray _intn
+    cdef public np.ndarray _nbt
+    cdef public np.ndarray _nu_e
+    cdef public np.ndarray _poly
+    pass
+
+
+
+
+
 cdef class mt_451(mt_base):
-    cdef cpp_endf2.mt_451 * _subinst
-    cdef cpp_endf2.mt_451 _ob
     cdef public np.ndarray _mt_list
+    pass
+
+
+
+
+
+cdef class mt_458_1(mt_base):
+    cdef public np.ndarray _deb
+    cdef public np.ndarray _defr
+    cdef public np.ndarray _degd
+    cdef public np.ndarray _degp
+    cdef public np.ndarray _dend
+    cdef public np.ndarray _denp
+    cdef public np.ndarray _denu
+    cdef public np.ndarray _der
+    cdef public np.ndarray _det
+    cdef public np.ndarray _eb
+    cdef public np.ndarray _efr
+    cdef public np.ndarray _egd
+    cdef public np.ndarray _egp
+    cdef public np.ndarray _end
+    cdef public np.ndarray _enp
+    cdef public np.ndarray _enu
+    cdef public np.ndarray _er
+    cdef public np.ndarray _et
+    pass
+
+
+
+
+
+cdef class mt_460_1(mt_base):
+    cdef public np.ndarray _elist
+    cdef public np.ndarray _intn
+    cdef public np.ndarray _lambdas
+    cdef public np.ndarray _nbt
+    cdef public np.ndarray _t
+    cdef public np.ndarray _tint
+    pass
+
+
+
+
+
+cdef class mt_456_1(mt_base):
+    cdef public np.ndarray _eint
+    cdef public np.ndarray _intn
+    cdef public np.ndarray _nbt
+    cdef public np.ndarray _nu
+    cdef public np.ndarray _nu_e
     pass
 
 

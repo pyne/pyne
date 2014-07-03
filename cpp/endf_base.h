@@ -7,8 +7,6 @@
 
 namespace pyne
 {
-namespace endf
-{
 
   /*****************************************************************************/
   /******************* Structs for basic ENDF datatypes ************************/
@@ -84,7 +82,6 @@ namespace endf
   tab1 read_tab1(std::ifstream &infile);
   tab2 read_tab2(std::ifstream &infile);
 
-}
 }
 
 #endif

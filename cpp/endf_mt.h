@@ -11,15 +11,14 @@
 
 namespace pyne
 {
-namespace endf
-{
+
 
   /*****************************************************************************/
   /************************* Structs for MT data *******************************/
   /*****************************************************************************/
 
   /// basic structure for an mt section
-  typedef struct mt_base {
+  class mt_base {
     public:
       int nuc_id; ///< ENDF style nuc id ZZZAAA
       double awr; ///< mass relative to neutron [double]
@@ -28,10 +27,11 @@ namespace endf
       int mt; ///< ENDF reaction designation
       /// force struct to be polymorphic
       virtual ~mt_base() {};
-  }mt_base;
+  };
 
   /// mt section for descriptive informaiton
-  typedef struct mt_451 : mt_base {
+  class mt_451 : public mt_base {
+  public:
     int lrp; ///< resonance parameters given
     int lfi; ///< does material fission
     int nlib; ///< library identifier
@@ -51,23 +51,25 @@ namespace endf
     int nwd; ///< number of descriptove records
     int nxc; ///< number of mt record in this file
     std::vector<std::vector<int> > mt_list; ///< list of [mf,mt,lines,mod]
-  } mt_451;
+  };
 
   /// readers for different dataset types
   mt_451 read_451(std::ifstream &infile);
 
   /// A struct for fission profuct yield data MT 454, 459
-  typedef struct mt_fpy_8 : mt_base {
+  class mt_fpy_8 : public mt_base {
+  public:
     int le; ///< number of energy  dependent yields given
     std::vector<int> i; ///< interpolation to be used between E[i-1] and E[i]
     std::vector<double> e; ///< list of energies
     std::vector<std::vector<std::vector<double> > > yields; ///< yield data [zafp,fps,yi,dyi]
-  } mt_fpy_8;
+  };
 
   mt_fpy_8 read_fpy_8(std::ifstream &infile);
 
   /// A struct for neutrons per fission
-  typedef struct mt_452_1 : mt_base {
+  class mt_452_1 : public mt_base {
+  public:
     int lnu; ///< type of data in section
     /// if LNU = 1 this will be an nth order polynomial describing nu
     std::vector<double> poly;///< polynomial describing neutrons per fission(E)
@@ -76,11 +78,12 @@ namespace endf
     std::vector<int> intn; ///< list of interpolations to be used
     std::vector<double> eint; ///< Energy of the incident neutron
     std::vector<double> nu_e; ///< Neutrons per fission at the given energy
-  } mt_452_1;
+  };
 
   mt_452_1 read_452_1(std::ifstream &infile);
 
-  typedef struct mt_455_1 : mt_base {
+  class mt_455_1 : public mt_base {
+  public:
 
     int ldg; ///< energy dependence of decay constants
     int lnu; ///< data representation type
@@ -99,13 +102,14 @@ namespace endf
     /// fraction of ith precursor with neutron energy E
     std::vector<std::vector<double> > alpha_arr;
 
-  } mt_455_1;
+  };
 
   mt_455_1 read_455_1(std::ifstream &infile);
 
   /// structure containing data about prompt neutrons per fission as a function
   /// of energy
-  typedef struct mt_456_1 : mt_base {
+  class mt_456_1 : public mt_base {
+  public:
     int lnu;
 
     /// If lnu = 1 nu contains an nth order polynomial describing neutrons as a
@@ -117,13 +121,14 @@ namespace endf
     std::vector<double> eint; ///< ith energy
     std::vector<double> nu_e; ///< average neutrons per prompt fission event
 
-  } mt_456_1;
+  };
 
 
   mt_456_1 read_456_1(std::ifstream &infile);
 
   /// Data structure for fission energy release
-  typedef struct mt_458_1 : mt_base {
+  class mt_458_1 : public mt_base {
+  public:
 
     std::vector<double> efr; ///< kinetic energy from fission products
     std::vector<double> defr; ///< error in efr
@@ -144,14 +149,15 @@ namespace endf
     std::vector<double> et; ///< total energy release per fission
     std::vector<double> det; ///< error in et
 
-  } mt_458_1;
+  };
 
   /// reads ENDF fission energy release data from an ifstream and returns
   /// structure containing associated data
   mt_458_1 read_458_1(std::ifstream &infile);
 
   /// data structure for delayed photon data
-  typedef struct mt_460_1 : mt_base {
+  class mt_460_1 : public mt_base {
+  public:
 
     int lo; ///< representation type: 1 if discrete, 2 if continuous
     /// lo = 1
@@ -164,11 +170,11 @@ namespace endf
     /// lo = 2
     std::vector<double> lambdas; ///< decay constant for the ith precursor
 
-  } mt_460_1;
+  };
 
   mt_460_1 read_460_1(std::ifstream &infile);
 
-}
+
 }
 
 #endif
