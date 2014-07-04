@@ -1,5 +1,5 @@
-#ifndef PYNE_AIQ4M73S
-#define PYNE_AIQ4M73S
+#ifndef PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
+#define PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
 /// \file source_sampling.h
 /// \author Elliott Biondo (biondo\@wisc.edu)
 ///
@@ -31,18 +31,17 @@ void get_e_bounds_data(std::string e_bounds_file);
 typedef std::vector<double> vect_d;
 typedef std::string str;
 
-
 struct Sample {
-    vect_d xyz; /// \param type
-    double e;
-    double w;
+  vect_d xyz; /// \param type
+  double e;
+  double w;
 };
 
-struct edge_vects{
-   MBCartVect o_point;
-   MBCartVect x_vec;
-   MBCartVect y_vec;
-   MBCartVect z_vec;
+struct edge_vects {
+  MBCartVect o_point;
+  MBCartVect x_vec;
+  MBCartVect y_vec;
+  MBCartVect z_vec;
 };
 
 class AliasTable
@@ -57,9 +56,7 @@ public:
   ~AliasTable(){};
 };
 
-
 enum Mode {USER, ANALOG, UNIFORM};
-
 
 class Sampler
 {
@@ -68,32 +65,32 @@ public:
   // \param filename the filename of the mesh file
   Sampler(str filename, str src_tag_name, vect_d e_bounds, bool uniform);
   Sampler(str filename, str src_tag_name, vect_d e_bounds, str bias_tag_name);
-  ~Sampler(){
-     delete mesh;
-     delete at;
+  ~Sampler() {
+     delete _mesh;
+     delete _at;
      };
   vect_d particle_birth(vect_d rands);
 
 private:
-  void setup();
-  vect_d e_bounds;
-  Mode mode;
-  MBInterface *mesh;
-  str filename;
-  str src_tag_name;
-  str bias_tag_name;
-  int num_e_groups;
-  int num_bias_groups;
-  int num_ves;
-  MBEntityType ve_type;
-  edge_vects vects;
-  int verts_per_ve;
-  std::vector<edge_vects> all_edge_vects;
-  AliasTable* at;
-  std::vector<double> biased_weights;
+  // member variables
+  vect_d _e_bounds;
+  Mode _mode;
+  MBInterface *_mesh;
+  str _filename;
+  str _src_tag_name;
+  str _bias_tag_name;
+  int _num_e_groups;
+  int _num_bias_groups;
+  int _num_ves;
+  MBEntityType _ve_type;
+  int _verts_per_ve;
+  std::vector<edge_vects> _all_edge_vects;
+  AliasTable* _at;
+  std::vector<double> _biased_weights;
 
 private:
   // functions and classes
+  void setup();
   void get_mesh_geom_data(MBRange ves, vect_d &volumes);
   void get_mesh_tag_data(MBRange ves, const vect_d volumes);
   MBCartVect get_xyz(int ve_idx, vect_d rands);
