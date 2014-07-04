@@ -21,17 +21,19 @@ Sampler::Sampler(str filename,
 }
 
 vect_d Sampler::particle_birth(vect_d rands) {
+  // select mesh volume and energy group
   int pdf_idx = _at->sample_pdf(rands[0], rands[1]);
   int ve_idx = pdf_idx/_num_e_groups;
   int e_idx = pdf_idx % _num_e_groups;
 
+  // Sample uniformly within the selected mesh volume elemenet and energy
+  // group.
   vect_d samp;
   vect_d xyz_rands;
   xyz_rands.push_back(rands[2]);
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
   MBCartVect pos = get_xyz(ve_idx, xyz_rands);
-
   samp.push_back(pos[0]); 
   samp.push_back(pos[1]); 
   samp.push_back(pos[2]); 
@@ -43,18 +45,19 @@ vect_d Sampler::particle_birth(vect_d rands) {
 void Sampler::setup() {
   MBErrorCode rval;
   MBEntityHandle loaded_file_set;
+  // Create MOAB instance
   _mesh = new MBCore();
   rval = _mesh->create_meshset(MESHSET_SET, loaded_file_set);
   rval = _mesh->load_file(_filename.c_str(), &loaded_file_set);
   if (rval != moab::MB_SUCCESS)
     throw std::invalid_argument("Could not load mesh file.");
 
+  // Get mesh volume elemebts 
   MBRange ves;
   rval = _mesh->get_entities_by_dimension(loaded_file_set, 3, ves);
   if (rval != moab::MB_SUCCESS)
     throw std::runtime_error("Problem entities of dimension 3");
   _num_ves = ves.size();
-
   int num_hex, num_tet;
   rval = _mesh->get_number_entities_by_type(loaded_file_set, MBHEX, num_hex);
   rval = _mesh->get_number_entities_by_type(loaded_file_set, MBTET, num_tet);
@@ -67,17 +70,23 @@ void Sampler::setup() {
   }
   else throw std::invalid_argument("Mesh file must contain only tets or hexes.");
 
+  // Process all the spacial and tag data and create an alias table.
   vect_d volumes(_num_ves);
   get_mesh_geom_data(ves, volumes);
   get_mesh_tag_data(ves, volumes);
 }
 
 void Sampler::get_mesh_geom_data(MBRange ves, vect_d &volumes) {
+  // Get connectivity.
   MBErrorCode rval;
   std::vector<MBEntityHandle> connect;
   rval = _mesh->get_connectivity_by_type(_ve_type, connect);
   if (rval != moab::MB_SUCCESS)
     throw std::runtime_error("Problem getting mesh connectivity.");
+
+  // Grab the coordinates that define 4 connected points within a mesh volume
+  // element and setup a data structure to allow uniform sampling with each 
+  // mesh volume element.
   double coords[_verts_per_ve*3];
   int i;
   for (i=0; i<_num_ves; ++i) {
@@ -85,7 +94,6 @@ void Sampler::get_mesh_geom_data(MBRange ves, vect_d &volumes) {
     if (rval != moab::MB_SUCCESS)
       throw std::runtime_error("Problem vertex coordinates.");
     volumes[i] = measure(_ve_type, _verts_per_ve, &coords[0]);
-
     if (_ve_type == MBHEX) {
       MBCartVect o(coords[0], coords[1], coords[2]);
       MBCartVect x(coords[3], coords[4], coords[5]);
@@ -128,6 +136,7 @@ void Sampler::get_mesh_tag_data(MBRange ves, const vect_d volumes) {
   }
   normalize_pdf(pdf);
 
+  // Setup alias table based off PDF or biased PDF
   if (_mode == ANALOG) {
     _at = new AliasTable(pdf);
   } else {
@@ -147,11 +156,14 @@ vect_d Sampler::get_bias_pdf(MBRange ves, vect_d volumes) {
     int i, j;
     MBErrorCode rval;
     if (_mode == UNIFORM) {
+      // In unform sampling, the biased PDF is just the volume of the mesh
+      // volume element
       for (i=0; i<_num_ves; ++i) {
         for (j=0; j<_num_e_groups; ++j)
            bias_pdf[i*_num_e_groups + j] =  volumes[i];
       }
     } else if (_mode == USER) {
+      // Get the biased PDF from the mesh
       MBTag bias_tag;
       rval = _mesh->tag_get_handle(_bias_tag_name.c_str(), 
                                   moab::MB_TAG_VARLEN, 
@@ -168,6 +180,8 @@ vect_d Sampler::get_bias_pdf(MBRange ves, vect_d volumes) {
              bias_pdf[i*_num_e_groups + j] *=  volumes[i];
         }
       } else if (_num_bias_groups == 1) {
+        // Spacial biasing only: the supplied bias PDF values are supplied
+        // to all energy groups within a mesh volume element
         vect_d spacial_pdf(_num_ves); 
         rval = _mesh->tag_get_data(bias_tag, ves, &spacial_pdf[0]);
         if (rval != moab::MB_SUCCESS)
@@ -184,30 +198,12 @@ vect_d Sampler::get_bias_pdf(MBRange ves, vect_d volumes) {
 return bias_pdf;
 }
 
-void Sampler::normalize_pdf(vect_d & pdf) {
-  double sum = 0;
-  int i;
-  for (i=0; i<_num_ves*_num_e_groups; ++i)
-    sum += pdf[i];
-  for (i=0; i<_num_ves*_num_e_groups; ++i)
-    pdf[i] /= sum;
-}
-
-int Sampler::get_num_groups(MBTag tag) {
-  MBErrorCode rval;
-  int tag_size;
-  rval = _mesh->tag_get_bytes(tag, *(&tag_size));
-  if (rval != moab::MB_SUCCESS)
-      throw std::runtime_error("Problem getting tag size.");
-  return tag_size/sizeof(double);
-}
-
-
 MBCartVect Sampler::get_xyz(int ve_idx, vect_d rands) {
   double s = rands[0];
   double t = rands[1];
   double u = rands[2];
 
+  // Transform s, t, u to uniformly sample a tetrahedron
   if (_ve_type == MBTET) {
     if (s + t > 1) {
       s = 1.0 - s;
@@ -240,6 +236,24 @@ double Sampler::get_e(int e_idx, double rand) {
 
 double Sampler::get_w(int pdf_idx) {
   return (_mode == ANALOG) ? 1.0 : _biased_weights[pdf_idx];
+}
+
+void Sampler::normalize_pdf(vect_d & pdf) {
+  double sum = 0;
+  int i;
+  for (i=0; i<_num_ves*_num_e_groups; ++i)
+    sum += pdf[i];
+  for (i=0; i<_num_ves*_num_e_groups; ++i)
+    pdf[i] /= sum;
+}
+
+int Sampler::get_num_groups(MBTag tag) {
+  MBErrorCode rval;
+  int tag_size;
+  rval = _mesh->tag_get_bytes(tag, *(&tag_size));
+  if (rval != moab::MB_SUCCESS)
+      throw std::runtime_error("Problem getting tag size.");
+  return tag_size/sizeof(double);
 }
 
 
