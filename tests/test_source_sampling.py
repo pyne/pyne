@@ -1,10 +1,11 @@
 from __future__ import print_function
 
+import os
 import warnings
 import itertools
 
 from operator import itemgetter
-from nose.tools import assert_true, assert_equal, assert_raises, with_setup, assert_almost_equal
+from nose.tools import assert_equal, with_setup, assert_almost_equal
 from random import uniform
 
 import numpy as np
@@ -21,9 +22,14 @@ warnings.simplefilter("ignore", VnVWarning)
 from pyne.mesh import Mesh, IMeshTag
 from pyne.source_sampling import Sampler
 
+def try_rm_file(filename):
+    return lambda: os.remove(filename) if os.path.exists(filename) else None
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex():
 
-    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]], mats = None)
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]], 
+             mats = None)
     m.src = IMeshTag(1, float)
     m.src[0] = 1.0
     m.mesh.save("sampling_mesh.h5m")
@@ -36,13 +42,17 @@ def test_analog_single_hex():
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
         assert_equal(s[4], 1.0)
-        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), int(s[3]*num_divs)] += score
+        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
+              int(s[3]*num_divs)] += score
     for i in range(0, 4):
         for j in range(0, 2):
             assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
 
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_multiple_hex():
-    m = Mesh(structured=True, structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]], mats = None)
+    m = Mesh(structured=True, 
+             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]], 
+             mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
     m.mesh.save("sampling_mesh.h5m")
@@ -55,13 +65,15 @@ def test_analog_multiple_hex():
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         assert_equal(s[4], 1.0)
-        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), int(s[3]*num_divs)] += score
+        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
+              int(s[3]*num_divs)] += score
     
     for i in range(0, 4):
         for j in range(0, 2):
             halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:,:])
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
 
+@with_setup(None, try_rm_file('tet.h5m'))
 def test_analog_single_tet():
     mesh = iMesh.Mesh()
     v1 = [0, 0, 0]
@@ -96,8 +108,11 @@ def test_analog_single_tet():
     for t in tally:
         assert(abs(t - 0.25)/0.25 < 0.2)
 
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_uniform():
-    m = Mesh(structured=True, structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], mats = None)
+    m = Mesh(structured=True, 
+             structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]],
+             mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
     e_bounds = np.array([0, 0.5, 1.0])
@@ -121,7 +136,9 @@ def test_uniform():
             else:
               assert_almost_equal(s[4], 1.6) # hand calcs
 
-        tally[int(s[0]*num_divs)/10, int(s[1]*num_divs)/10, int(s[2]*num_divs)/10]  += score
+        tally[int(s[0]*num_divs)/10, 
+              int(s[1]*num_divs)/10, 
+              int(s[2]*num_divs)/10]  += score
 
     for i in range(0, 3):
         for j in range(0, 2):
@@ -129,8 +146,11 @@ def test_uniform():
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
 
 
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_bias():
-    m = Mesh(structured=True, structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], mats = None)
+    m = Mesh(structured=True, 
+             structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], 
+             mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
     e_bounds = np.array([0, 0.5, 1.0])
@@ -164,8 +184,11 @@ def test_bias():
     for a, b in zip(tally, expected_tally):
        assert(abs(a-b)/b < 0.25)
 
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_bias_spacial():
-    m = Mesh(structured=True, structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], mats = None)
+    m = Mesh(structured=True, 
+             structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]],
+             mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
     m.bias = IMeshTag(2, float)
@@ -191,7 +214,9 @@ def test_bias_spacial():
             else:
               assert_almost_equal(s[4], 1.6) # hand calcs
 
-        tally[int(s[0]*num_divs)/10, int(s[1]*num_divs)/10, int(s[2]*num_divs)/10]  += score
+        tally[int(s[0]*num_divs)/10, 
+              int(s[1]*num_divs)/10, 
+              int(s[2]*num_divs)/10]  += score
 
     for i in range(0, 3):
         for j in range(0, 2):
@@ -199,7 +224,6 @@ def test_bias_spacial():
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
 
 def point_in_tet(t, p):
-
     matricies = [
     np.array( [[t[0][0], t[0][1], t[0][2], 1],
               [t[1][0], t[1][1], t[1][2], 1],

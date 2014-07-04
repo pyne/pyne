@@ -91,15 +91,15 @@ void Sampler::get_mesh_geom_data(MBRange ves, vect_d &volumes) {
       MBCartVect x(coords[3], coords[4], coords[5]);
       MBCartVect y(coords[9], coords[10], coords[11]);
       MBCartVect z(coords[12], coords[13], coords[14]);
-      edge_vects ev = {o, x-o, y-o, z-o};
-      _all_edge_vects.push_back(ev);
+      edge_points ep = {o, x-o, y-o, z-o};
+      _all_edge_points.push_back(ep);
     } else if (_ve_type == MBTET) {
       MBCartVect o(coords[0], coords[1], coords[2]);
       MBCartVect x(coords[3], coords[4], coords[5]);
       MBCartVect y(coords[6], coords[7], coords[8]);
       MBCartVect z(coords[9], coords[10], coords[11]);
-      edge_vects ev = {o, x-o, y-o, z-o};
-      _all_edge_vects.push_back(ev);
+      edge_points ep = {o, x-o, y-o, z-o};
+      _all_edge_points.push_back(ep);
     }
   }
 }
@@ -112,7 +112,7 @@ void Sampler::get_mesh_tag_data(MBRange ves, const vect_d volumes) {
                               MB_TYPE_DOUBLE, 
                               src_tag);
   // THIS rval FAILS because we do not know number of energy groups a priori.
-
+  // That's okay. That's what the next line is all about:
   _num_e_groups = get_num_groups(src_tag);
   vect_d pdf(_num_ves*_num_e_groups); 
   rval = _mesh->tag_get_data(src_tag, ves, &pdf[0]);
@@ -226,10 +226,10 @@ MBCartVect Sampler::get_xyz(int ve_idx, vect_d rands) {
     }
   }
 
- return s*_all_edge_vects[ve_idx].x_vec + \
-        t*_all_edge_vects[ve_idx].y_vec + \
-        u*_all_edge_vects[ve_idx].z_vec + \
-          _all_edge_vects[ve_idx].o_point;
+ return s*_all_edge_points[ve_idx].x_vec + \
+        t*_all_edge_points[ve_idx].y_vec + \
+        u*_all_edge_points[ve_idx].z_vec + \
+          _all_edge_points[ve_idx].o_point;
 }
 
 double Sampler::get_e(int e_idx, double rand) {

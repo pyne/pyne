@@ -25,7 +25,7 @@
 
 #include <math.h>
 
-#include "measure.hpp"
+#include "measure.h"
 
 class CartVect {
   private:
