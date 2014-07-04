@@ -370,7 +370,11 @@ function BibtexDisplay() {
 
 function bibtex_js_draw() {
   $(".bibtex_template").hide();
-  (new BibtexDisplay()).displayBibtex($("#bibtex_input").val(), $("#bibtex_display"));
+  
+  // only display Bibtex entries if there is a source to read from and a target to write to
+  if ($("#bibtex_input").length && $("#bibtex_display").length) {
+    (new BibtexDisplay()).displayBibtex($("#bibtex_input").val(), $("#bibtex_display"));
+  }
 }
 
 // check whether or not jquery is present
