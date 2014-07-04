@@ -96,7 +96,7 @@ mompt = momptin
 qdflx = qdflxin
 
 ! Read the title of the case
-READ(7,103) title
+!READ(7,103) title
 103 FORMAT(A80)
 
 ! Read Problem Size Specification:
@@ -110,9 +110,12 @@ READ(7,103) title
 !   ng    => Number of groups
 !   nm    => Number of materials
 
-READ(7,*) lambda, meth
-lambda=1
-READ(7,*) qdord, qdtyp
+!LAMBDA = 1 IF LD SOLVER.  NOT SURE IF THIS SHOULD HAPPEN FOR OTHER SOLVERS.
+IF (solver == "DGFEM") THEN
+	IF (solvertype == "LD") THEN
+		lambda=1
+	END IF
+END IF
 
 ! Check that the order given greater than zero and is even
 IF (qdord <= 0) THEN
@@ -124,8 +127,8 @@ ELSE IF (MOD(qdord,2) /= 0) THEN
 END IF
 
 ! Finish reading problem size
-READ(7,*) nx, ny, nz
-READ(7,*) ng, nm
+!READ(7,*) nx, ny, nz
+!READ(7,*) ng, nm
 
 ! Set sizes for spatial mesh, read mesh sizes
 !   dx  => cell x-dimension
@@ -215,8 +218,8 @@ IF (qdtyp == 2) CLOSE(UNIT=10)
    ! Call for the input check
 CALL check
    ! Call to read the cross sections and source; do their own input check
-CALL readxs(xsfile)
-CALL readsrc(srcfile)
+CALL readxs(xsfilein)
+CALL readsrc(srcfilein)
 IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
 CALL solve
 CALL output

@@ -1,6 +1,11 @@
 """This module provides a way to access neutron spatial solver codes.  It primarily consists of wrapped fortran code's being called with python via f2py"""
 
-from source.main import main as main
+#Usual imports
+#from source.main import main as main
+#from dict_util import dict_complete
+
+#imports being used for testing
+from DGFEM_source.main import main as main
 from dict_util import dict_complete
 
 def solve(inputdict_unchecked):
