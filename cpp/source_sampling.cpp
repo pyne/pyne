@@ -46,8 +46,13 @@ void Sampler::setup() {
   _mesh = new MBCore();
   rval = _mesh->create_meshset(MESHSET_SET, loaded_file_set);
   rval = _mesh->load_file(_filename.c_str(), &loaded_file_set);
+  if (rval != moab::MB_SUCCESS)
+    throw std::invalid_argument("Could not load mesh file.");
+
   MBRange ves;
   rval = _mesh->get_entities_by_dimension(loaded_file_set, 3, ves);
+  if (rval != moab::MB_SUCCESS)
+    throw std::runtime_error("Problem entities of dimension 3");
   _num_ves = ves.size();
 
   int num_hex, num_tet;
@@ -60,7 +65,7 @@ void Sampler::setup() {
     _ve_type = MBTET;
     _verts_per_ve = 4;
   }
-  else throw std::invalid_argument("Mesh file must contain only tets or hexes");
+  else throw std::invalid_argument("Mesh file must contain only tets or hexes.");
 
   vect_d volumes(_num_ves);
   get_mesh_geom_data(ves, volumes);
@@ -71,10 +76,14 @@ void Sampler::get_mesh_geom_data(MBRange ves, vect_d &volumes) {
   MBErrorCode rval;
   std::vector<MBEntityHandle> connect;
   rval = _mesh->get_connectivity_by_type(_ve_type, connect);
+  if (rval != moab::MB_SUCCESS)
+    throw std::runtime_error("Problem getting mesh connectivity.");
   double coords[_verts_per_ve*3];
   int i;
   for (i=0; i<_num_ves; ++i) {
     rval=_mesh->get_coords(&connect[_verts_per_ve*i], _verts_per_ve, &coords[0]);
+    if (rval != moab::MB_SUCCESS)
+      throw std::runtime_error("Problem vertex coordinates.");
     volumes[i] = measure(_ve_type, _verts_per_ve, &coords[0]);
 
     if (_ve_type == MBHEX) {
@@ -102,12 +111,13 @@ void Sampler::get_mesh_tag_data(MBRange ves, const vect_d volumes) {
                               moab::MB_TAG_VARLEN, 
                               MB_TYPE_DOUBLE, 
                               src_tag);
-  // THIS ASSERT FAILS because we do not know number of energy groups a priori.
-  //assert( rval == MB_SUCCESS );
+  // THIS rval FAILS because we do not know number of energy groups a priori.
 
   _num_e_groups = get_num_groups(src_tag);
   vect_d pdf(_num_ves*_num_e_groups); 
   rval = _mesh->tag_get_data(src_tag, ves, &pdf[0]);
+  if (rval != moab::MB_SUCCESS)
+    throw std::runtime_error("Problem getting source tag data.");
 
   // Multiply the source densities by the VE volumes
   int i, j;
@@ -151,6 +161,8 @@ vect_d Sampler::get_bias_pdf(MBRange ves, vect_d volumes) {
 
       if (_num_bias_groups == _num_e_groups) {
         rval = _mesh->tag_get_data(bias_tag, ves, &bias_pdf[0]);
+        if (rval != moab::MB_SUCCESS)
+          throw std::runtime_error("Problem getting bias tag data.");
         for (i=0; i<_num_ves; ++i) {
           for (j=0; j<_num_e_groups; ++j)
              bias_pdf[i*_num_e_groups + j] *=  volumes[i];
@@ -158,6 +170,8 @@ vect_d Sampler::get_bias_pdf(MBRange ves, vect_d volumes) {
       } else if (_num_bias_groups == 1) {
         vect_d spacial_pdf(_num_ves); 
         rval = _mesh->tag_get_data(bias_tag, ves, &spacial_pdf[0]);
+        if (rval != moab::MB_SUCCESS)
+          throw std::runtime_error("Problem getting bias tag data.");
         for (i=0; i<_num_ves; ++i) {
           for (j=0; j<_num_e_groups; ++j)
             bias_pdf[i*_num_e_groups + j] =  spacial_pdf[i]*volumes[i];
@@ -183,6 +197,8 @@ int Sampler::get_num_groups(MBTag tag) {
   MBErrorCode rval;
   int tag_size;
   rval = _mesh->tag_get_bytes(tag, *(&tag_size));
+  if (rval != moab::MB_SUCCESS)
+      throw std::runtime_error("Problem getting tag size.");
   return tag_size/sizeof(double);
 }
 
