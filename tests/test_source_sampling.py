@@ -27,7 +27,12 @@ def try_rm_file(filename):
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex():
-
+    """This test tests that particles of sampled evenly within the phase-space 
+    of a single mesh volume element with one energy group in an analog sampling
+    scheme. This done by dividing each dimension (x, y, z, E) in half, then 
+    sampling particles and tallying on the basis of which of the 2^4 = 8 regions
+    of phase space the particle is born into. 
+    """
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]], 
              mats = None)
     m.src = IMeshTag(1, float)
@@ -39,17 +44,25 @@ def test_analog_single_hex():
     score = 1.0/num_samples
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
+
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        assert_equal(s[4], 1.0)
+        assert_equal(s[4], 1.0) # analog: all weights must be one
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
               int(s[3]*num_divs)] += score
+
+    # Test that each half-space of phase space (e.g. x > 0.5) is sampled about
+    # half the time.
     for i in range(0, 4):
         for j in range(0, 2):
             assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_multiple_hex():
+    """This test tests that particle are sampled uniformly from a uniform source
+    defined on eight mesh volume elements in two energy groups. This is done
+    using the exact same method ass test_analog_multiple_hex.
+    """
     m = Mesh(structured=True, 
              structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]], 
              mats = None)
@@ -75,6 +88,10 @@ def test_analog_multiple_hex():
 
 @with_setup(None, try_rm_file('tet.h5m'))
 def test_analog_single_tet():
+    """This test tests uniform sampling within a single tetrahedron. This is
+    done by dividing the tetrahedron in 4 smaller tetrahedrons and ensuring
+    that each sub-tet is sampled equally.
+    """
     mesh = iMesh.Mesh()
     v1 = [0, 0, 0]
     v2 = [1, 0, 0]
@@ -110,6 +127,12 @@ def test_analog_single_tet():
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_uniform():
+    """This test tests that the uniform biasing scheme:
+    1. Samples space uniformly. This is checked using the same method
+       described in test_analog_single_hex().
+    2. Adjusts weights accordingly. Sample calculations are provided in Case 1
+       in the Theory Manual.
+    """
     m = Mesh(structured=True, 
              structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]],
              mats = None)
@@ -148,6 +171,11 @@ def test_uniform():
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_bias():
+    """This test tests that a user-specified biasing scheme:
+    1. Samples space uniformly according to the scheme.
+    2. Adjusts weights accordingly. Sample calculations are provided in Case 2
+       in the Theory Manual.
+    """
     m = Mesh(structured=True, 
              structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], 
              mats = None)
@@ -186,6 +214,13 @@ def test_bias():
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_bias_spacial():
+    """This test tests a user-specified biasing scheme for which the only 1
+    bias group is supplied for a source distribution containing two energy 
+    groups. This bias group is applied to both energy groups. In this test,
+    the user-supplied bias distribution that was choosen, correspondes to 
+    uniform sampling, so that results can be checked against Case 1 in the
+    theory manual.
+    """
     m = Mesh(structured=True, 
              structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]],
              mats = None)
@@ -224,6 +259,10 @@ def test_bias_spacial():
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
 
 def point_in_tet(t, p):
+    """ This function determines if some point <p> lies within some tetrahedron
+    <t> using the method described here:
+    http://steve.hollasch.net/cgindex/geometry/ptintet.html
+    """
     matricies = [
     np.array( [[t[0][0], t[0][1], t[0][2], 1],
               [t[1][0], t[1][1], t[1][2], 1],
