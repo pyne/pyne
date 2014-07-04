@@ -6,6 +6,7 @@ IMPLICIT NONE
 
 ! Title
 CHARACTER(80) :: title
+CHARACTER(30) :: solver, solvertype
 
 ! Problem Size Specifications
 INTEGER :: lambda, meth, qdord, qdtyp, nx, ny, nz, ng, nm
