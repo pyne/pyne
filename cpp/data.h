@@ -51,12 +51,12 @@ namespace pyne
   extern std::map<int, double> atomic_mass_map;
 
   /// a struct matching the atomic_mass table in nuc_data.h5.
-  typedef struct atomic_mass_struct {
+  typedef struct atomic_mass_data {
     int nuc;      ///< nuclide in id form
     double mass;  ///< nuclide atomic mass [amu]
     double error; ///< error in atomic mass [amu]
     double abund; ///< natural abundance of nuclide [atom fraction]
-  } atomic_mass_struct;
+  } atomic_mass_data;
 
   // Loads preset dataset hashes into memory.
   std::map<std::string, std::string> get_data_checksums();
@@ -108,11 +108,11 @@ namespace pyne
   extern std::map<int, double> gamma_frac_map;
 
   /// a struct matching the q_value table in nuc_data.h5.
-  typedef struct q_val_struct {
+  typedef struct q_val_data {
     int nuc;          ///< nuclide in id form
     double q_val;      ///< nuclide q_value [MeV/fission]
     double gamma_frac; ///< fraction of q that comes from gammas
-  } q_val_struct;
+  } q_val_data;
 
   /// Loads the q_value data from the nuc_data.h5 file into memory.
   void _load_q_val_map();
@@ -135,7 +135,7 @@ namespace pyne
   /// \{
 
   /// A struct matching the dose factor table in nuc_data.h5.
-  typedef struct dose_struct {
+  typedef struct dose {
     int nuc;              ///< nuclide in id form
     double ext_air_dose;  ///< nuclide ext_air dose factor [mrem/h per Ci/m^3]
     double ratio;         ///< ratio of external air dose factor to dose factor due to inhalation
@@ -144,16 +144,16 @@ namespace pyne
     double fluid_frac;    ///< fraction of activity abosorbed in body fluids
     double inhale_dose;   ///< nuclide dose factor due to inhalation [mrem/pCi]
     char lung_mod;        ///< model of lung used (time of biological half life-- D, W, or Y)
-  } dose_struct;
+  } dose;
 
-  /// Mapping from int to dose_struct for 3 sources
-  extern std::map<int, dose_struct> epa_dose_map;
-  extern std::map<int, dose_struct> doe_dose_map;
-  extern std::map<int, dose_struct> genii_dose_map;
+  /// Mapping from int to dose for 3 sources
+  extern std::map<int, dose> epa_dose_map;
+  extern std::map<int, dose> doe_dose_map;
+  extern std::map<int, dose> genii_dose_map;
 
   /// Loads the dose factor data from the nuc_data.h5 file into memory
   /// according to the user-input source.
-  void _load_dose_map(std::map<int, dose_struct>& dm, std::string source_path);
+  void _load_dose_map(std::map<int, dose>& dm, std::string source_path);
 
   /// \brief Returns the dose factors of a nuclide.
   ///
@@ -196,14 +196,14 @@ namespace pyne
   extern std::map<int, double> b_map;
 
   /// a struct matching the '/neutron/scattering_lengths' table in nuc_data.h5.
-  typedef struct scattering_lengths_struct {
+  typedef struct scattering_lengths {
     int nuc;  ///< nuclide in id form
     xd_complex_t b_coherent;  ///< coherent scattering length [cm]
     xd_complex_t b_incoherent;  ///< incoherent scattering length [cm]
     double xs_coherent;   ///< coherent scattering cross section
     double xs_incoherent; ///< incoherent scattering cross section
     double xs;            ///< scattering cross section
-  } scattering_lengths_struct;
+  } scattering_lengths;
 
   /// Loads the scattering length data from the nuc_data.h5 file into memory.
   void _load_scattering_lengths();
@@ -246,17 +246,17 @@ namespace pyne
   extern std::map<std::pair<int, int>, double> wimsdfpy_data;
 
   /// a struct matching the '/neutron/wimsd_fission_product' table in nuc_data.h5.
-  typedef struct wimsdfpy_struct {
+  typedef struct wimsdfpy {
     int from_nuc;  ///< from nuclide in id form
     int to_nuc;  ///< from nuclide in id form
     double yields; ///< fission product yield, fraction [unitless]
-  } wimsdfpy_struct;
+  } wimsdfpy;
 
   /// Loads the WIMSD fission product yield data from the nuc_data.h5 file into memory.
   void _load_wimsdfpy();
 
   /// a struct matching the '/neutron/nds_fission_product' table in nuc_data.h5
-  typedef struct ndsfpy_struct {
+  typedef struct ndsfpy {
     int from_nuc; ///< id of fissioning nuclide
     int to_nuc; ///< id of fission product
     double yield_thermal; ///< thermal yield [fraction]
@@ -265,20 +265,20 @@ namespace pyne
     double yield_fast_err; ///< fast yield error [fraction]
     double yield_14MeV; ///< 14 MeV yield [fraction]
     double yield_14MeV_err; ///< 14 MeV yield error [fraction]
-  } ndsfpy_struct;
+  } ndsfpy;
 
   /// a struct for the nds data for fpyield
-  typedef struct ndsfpysub_struct {
+  typedef struct ndsfpysub {
     double yield_thermal; ///< thermal yield [fraction]
     double yield_thermal_err; ///< thermal yield error [fraction]
     double yield_fast; ///< fast yield [fraction]
     double yield_fast_err; ///< fast yield error [fraction]
     double yield_14MeV; ///< 14 MeV yield [fraction]
     double yield_14MeV_err; ///< 14 MeV yield error [fraction]
-  } ndsfpysub_struct;
+  } ndsfpysub;
 
 
-  extern std::map<std::pair<int, int>, ndsfpysub_struct> ndsfpy_data;
+  extern std::map<std::pair<int, int>, ndsfpysub> ndsfpy_data;
 
   /// Loads the NDS fission product yield data from the nuc_data.h5 file into memory.
   void _load_ndsfpy();
@@ -345,7 +345,7 @@ namespace pyne
   size_t valoffset, std::map<int, U> &data);
 
   /// Structure for atomic data
-  typedef struct atomic_struct{
+  typedef struct atomic{
     int z; ///< number of protons [int]
     double k_shell_fluor; ///< K-shell fluorescence [fraction]
     double k_shell_fluor_error; ///< K-shell fluorescence error [fraction]
@@ -372,13 +372,13 @@ namespace pyne
     double ka2_x_ray_en_err; ///< Ka2 X-ray energy error [keV]
     double kb_x_ray_en; ///< Kb X-ray energy [keV]
     double l_x_ray_en; ///< L X-ray energy [keV]
-  } atomic_struct;
+  } atomic;
 
   // map of Z to atomic data
-  extern std::map<int, atomic_struct> atomic_data_map;
+  extern std::map<int, atomic> atomic_data_map;
 
   template<typename T> void _load_data();
-  template<> void _load_data<atomic_struct>();
+  template<> void _load_data<atomic>();
 
   // compute X-ray data
   std::vector<std::pair<double, double> >
@@ -386,7 +386,7 @@ namespace pyne
 
 
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.
-  typedef struct level_struct{
+  typedef struct level_data{
     int nuc_id; ///< state id of nuclide
     unsigned int rx_id; ///< rx id of reaction, 0 for basic level data
     double half_life; ///< half life [seconds]
@@ -394,14 +394,14 @@ namespace pyne
     double branch_ratio; ///< branch ratio [fraction]
     int metastable; ///< metastable level [int]
     char special; ///< special high-spin state [character]
-  } level_struct;
+  } level_data;
 
   /// Mapping from nuclides in id form to a struct containing data associated
   /// with that level.
-  extern std::map<std::pair<int,double>, level_struct> level_data_lvl_map;
-  extern std::map<std::pair<int,unsigned int>, level_struct> level_data_rx_map;
+  extern std::map<std::pair<int,double>, level_data> level_data_lvl_map;
+  extern std::map<std::pair<int,unsigned int>, level_data> level_data_rx_map;
 
-  template<> void _load_data<level_struct>();
+  template<> void _load_data<level_data>();
 
   /// \brief Returns the nuc_id of an energy level
   ///
@@ -475,7 +475,7 @@ namespace pyne
   std::set<int> decay_children(std::string nuc);
 
   /// a struct matching the '/decay/decays' table in nuc_data.h5.
-  typedef struct decay_struct{
+  typedef struct decay{
     int parent; ///< state id of decay parent
     int child; ///< state id of decay child
     unsigned int decay; ///< rx id of decay
@@ -490,13 +490,13 @@ namespace pyne
     double beta_branch_ratio;
     /// beta branching ratio error of this decay [fraction]
     double beta_branch_ratio_error;
-  } decay_struct;
+  } decay;
 
   /// Loads the decay data from the nuc_data.h5 file into memory.
-  template<> void _load_data<decay_struct>();
+  template<> void _load_data<decay>();
   /// Mapping from a pair of nuclides in id form to a struct containing data
   /// associated with the decay from the first to the second
-  extern std::map<std::pair<int, int>, decay_struct> decay_data;
+  extern std::map<std::pair<int, int>, decay> decay_data;
 
   //
   //
@@ -512,7 +512,7 @@ namespace pyne
 
 
   /// a struct matching the '/decay/gammas' table in nuc_data.h5.
-  typedef struct gamma_struct{
+  typedef struct gamma{
     int from_nuc; ///< state id of starting level
     int to_nuc; ///< state id of final level
     int parent_nuc; ///< state id of the primary decaying nucleus
@@ -527,12 +527,12 @@ namespace pyne
     double k_conv_e; ///< k conversion electron fraction
     double l_conv_e; ///< l conversion electron fraction
     double m_conv_e; ///< m conversion electron fraction
-  } gamma_struct;
+  } gamma;
 
   /// Loads the gamma ray data from the nuc_data.h5 file into memory.
-  template<> void _load_data<gamma_struct>();
+  template<> void _load_data<gamma>();
 
-  extern std::map<std::pair<int, double>, gamma_struct> gamma_data;
+  extern std::map<std::pair<int, double>, gamma> gamma_data;
 
   //returns a list of gamma decay energies from input parent nuclide
   std::vector<std::pair<double, double> > gamma_energy(int parent);
@@ -561,18 +561,18 @@ namespace pyne
   std::vector<std::pair<double, double> > xrays(int parent);
 
   /// a struct matching the '/decay/alphas' table in nuc_data.h5.
-  typedef struct alpha_struct{
+  typedef struct alpha{
     int from_nuc; ///< state id of parent nuclide
     int to_nuc; ///< state id of child nuclide
     double energy; ///< energy of alpha
     double intensity; ///< intensity of alpha decay
-  } alpha_struct;
+  } alpha;
 
   /// Loads the alpha decay data from the nuc_data.h5 file into memory.
-  template<> void _load_data<alpha_struct>();
+  template<> void _load_data<alpha>();
 
   /// A vector of structs containing alpha data for access in memory
-  extern std::map<std::pair<int, double>, alpha_struct> alpha_data;
+  extern std::map<std::pair<int, double>, alpha> alpha_data;
 
   //returns a list of alpha decay energies from input parent nuclide
   std::vector<double > alpha_energy(int parent);
@@ -586,19 +586,19 @@ namespace pyne
   std::vector<int> alpha_child(int parent);
 
   /// a struct matching the '/decay/betas' table in nuc_data.h5.
-  typedef struct beta_struct{
+  typedef struct beta{
     int from_nuc; ///< state id of parent nuclide
     int to_nuc; ///< state id of child nuclide
     double endpoint_energy; ///< beta decay endpoint energy
     double avg_energy; ///< beta decay average energy
     double intensity; ///< beta intensity
-  } beta_struct;
+  } beta;
 
   /// Loads the beta decay data from the nuc_data.h5 file into memory.
-  template<> void _load_data<beta_struct>();
+  template<> void _load_data<beta>();
 
   /// A vector of structs containing beta data for access in memory
-  extern std::map<std::pair<int, double>, beta_struct> beta_data;
+  extern std::map<std::pair<int, double>, beta> beta_data;
   //returns a list of beta decay endpoint energies from input parent nuclide
   std::vector<double > beta_endpoint_energy(int parent);
   //returns a list of beta decay average energies from input parent nuclide
@@ -613,7 +613,7 @@ namespace pyne
   std::vector<int> beta_child(int parent);
 
   /// A struct matching the '/decay/ecbp' table in nuc_data.h5.
-  typedef struct ecbp_struct{
+  typedef struct ecbp{
     int from_nuc;  ///< state id of parent nuclide
     int to_nuc; ///< state id of child nuclide
     double endpoint_energy; ///< beta decay endpoint energy
@@ -623,14 +623,14 @@ namespace pyne
     double k_conv_e; ///< k conversion electron fraction
     double l_conv_e; ///< l conversion electron fraction
     double m_conv_e; ///< m conversion electron fraction
-  } ecbp_struct;
+  } ecbp;
 
   /// A vector of structs containing ecbp data for access in memory
-  extern std::map<std::pair<int, double>, ecbp_struct> ecbp_data;
+  extern std::map<std::pair<int, double>, ecbp> ecbp_data;
 
   /// Loads the electron capture and beta plus decay data from the
   /// nuc_data.h5 file into memory.
-  template<> void _load_data<ecbp_struct>();
+  template<> void _load_data<ecbp>();
   ///returns a list of electron capture/ beta plus decay endpoint energies from
   ///input parent nuclide
   std::vector<double > ecbp_endpoint_energy(int parent);

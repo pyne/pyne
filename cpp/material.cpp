@@ -124,20 +124,20 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   hid_t mem_space = H5Screate_simple(1, data_count, NULL);
 
   // Get material type
-  size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
-  hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
+  size_t material_data_size = sizeof(pyne::material_data) + sizeof(double)*nuc_size;
+  hid_t desc = H5Tcreate(H5T_COMPOUND, material_data_size);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density),
+  H5Tinsert(desc, "mass", HOFFSET(pyne::material_data, mass), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "density", HOFFSET(pyne::material_data, density),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol),
+  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_data, atoms_per_mol),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
+  H5Tinsert(desc, "comp", HOFFSET(pyne::material_data, comp), comp_values_array_type);
 
   // make the data array, have to over-allocate
-  material_struct * mat_data = new material_struct [material_struct_size];
+  material_data * mat_data = new material_data [material_data_size];
 
   // Finally, get data and put in on this instance
   H5Dread(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
@@ -316,20 +316,20 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   hsize_t data_max_dims[1] = {H5S_UNLIMITED};
   hsize_t data_offset[1] = {0};
 
-  size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
-  hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
+  size_t material_data_size = sizeof(pyne::material_data) + sizeof(double)*nuc_size;
+  hid_t desc = H5Tcreate(H5T_COMPOUND, material_data_size);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density),
+  H5Tinsert(desc, "mass", HOFFSET(pyne::material_data, mass), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "density", HOFFSET(pyne::material_data, density),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol),
+  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_data, atoms_per_mol),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp),
+  H5Tinsert(desc, "comp", HOFFSET(pyne::material_data, comp),
             comp_values_array_type);
 
-  material_struct * mat_data  = new material_struct[material_struct_size];
+  material_data * mat_data  = new material_data[material_data_size];
   (*mat_data).mass = mass;
   (*mat_data).density = density;
   (*mat_data).atoms_per_mol = atoms_per_molecule;
@@ -369,7 +369,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     H5Pset_chunk(data_set_params, 1, chunk_dims);
     H5Pset_deflate(data_set_params, 1);
 
-    material_struct * data_fill_value  = new material_struct[material_struct_size];
+    material_data * data_fill_value  = new material_data[material_data_size];
     (*data_fill_value).mass = -1.0;
     (*data_fill_value).density= -1.0;
     (*data_fill_value).atoms_per_mol = -1.0;

@@ -292,12 +292,12 @@ namespace pyne
 
   /// A stuct for reprensenting fundemental data in a material.
   /// Useful for HDF5 representations.
-  typedef struct material_struct {
+  typedef struct material_data {
     double mass;  ///< material mass
     double density; ///< material density
     double atoms_per_mol; ///< material atoms per mole
     double comp []; ///< array of material composition mass weights.
-  } material_struct;
+  } material_data;
 
   /// Custom exception for invalid HDF5 protocol numbers
   class MaterialProtocolError: public std::exception
