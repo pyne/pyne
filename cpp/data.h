@@ -555,7 +555,7 @@ namespace pyne
   std::vector<std::pair<double, double> > gamma_xrays(int parent);
 
   /// Returns a list of energies and intensities normalized to branching ratios
-  std::vector<std::pair<double, double> > gamma_rays(int parent_state_id);
+  std::vector<std::pair<double, double> > gammas(int parent_state_id);
   std::vector<std::pair<double, double> > alphas(int parent_state_id);
   std::vector<std::pair<double, double> > betas(int parent_state_id);
   std::vector<std::pair<double, double> > xrays(int parent);

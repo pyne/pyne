@@ -2270,7 +2270,7 @@ std::vector<std::pair<double, double> > pyne::ecbp_xrays(int parent) {
 /// Combined decay data ///
 ///////////////////////////
 
-std::vector<std::pair<double, double> > pyne::gamma_rays(int parent_state_id) {
+std::vector<std::pair<double, double> > pyne::gammas(int parent_state_id) {
   std::vector<std::pair<double, double> > result;
   double decay_c = decay_const(parent_state_id);
   std::vector<std::pair<double, double> > energies = gamma_energy(parent_state_id);

@@ -262,10 +262,10 @@ namespace pyne
     // Radioactive Material functions
     /// Returns a list of gamma-rays energies in keV and intensities in
     /// decays/s/atom material unnormalized
-    std::vector<std::pair<double, double> > gamma_rays();
+    std::vector<std::pair<double, double> > gammas();
     /// Returns a list of x-rays average energies in keV and intensities in
     /// decays/s material unnormalized
-    std::vector<std::pair<double, double> > x_rays();
+    std::vector<std::pair<double, double> > xrays();
     /// Returns a list of photon energies in keV and intensities in
     /// decays/s/atom material unnormalized
     std::vector<std::pair<double, double> > photons(bool norm);

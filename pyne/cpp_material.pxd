@@ -89,8 +89,8 @@ cdef extern from "material.h" namespace "pyne":
         void from_atom_frac(map[int, double]) except +
 
 
-        vector[pair[double, double]] gamma_rays() except +
-        vector[pair[double, double]] x_rays() except +
+        vector[pair[double, double]] gammas() except +
+        vector[pair[double, double]] xrays() except +
         vector[pair[double, double]] photons(bool) except +
 
         # Operator Overloads

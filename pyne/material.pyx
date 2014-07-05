@@ -1028,21 +1028,21 @@ cdef class _Material:
     #
     # Radioactive Properties
     #
-    
-    def gamma_rays(self, norm=False):
+
+    def gammas(self, norm=False):
         """
-        Returns a list of gamma rays and intensities in decays/s/atom material
+        Returns a vector of gamma rays and intensities in decays/s/atom material
 
         Returns
         -------
         gammas : a vector of pairs of gamma-rays and intensities. The
             intensities are in decays/s/atom material
         """
-        return self.mat_pointer.gamma_rays()
+        return self.mat_pointer.gammas()
 
-    def x_rays(self, norm=False):
+    def xrays(self, norm=False):
         """
-        Returns a list of X rays and intensities in decays/s/atom material.
+        Returns a vector of X rays and intensities in decays/s/atom material.
         Includes only X rays from internal conversion and electron capture
 
         Returns
@@ -1050,12 +1050,12 @@ cdef class _Material:
         x-rays : a vector of pairs of X-rays and intensities. The
             intensities are in decays/s/atom material
         """
-        return self.mat_pointer.x_rays()
+        return self.mat_pointer.xrays()
 
     def photons(self, norm=False):
         """
-        Returns a list of photons and intensities in decays/s/atom material.
-        This list is the combination of X-rays and gamma-rays produced in the
+        Returns a vector of photons and intensities in decays/s/atom material.
+        This vector is the combination of X-rays and gamma-rays produced in the
         decay of the material.
 
 

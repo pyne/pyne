@@ -1212,7 +1212,7 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs) {
 
 
 
-std::vector<std::pair<double, double> > pyne::Material::gamma_rays() {
+std::vector<std::pair<double, double> > pyne::Material::gammas() {
   std::vector<std::pair<double, double> > result;
   std::map<int, double> atom_fracs = this->to_atom_frac();
   int state_id;
@@ -1222,7 +1222,7 @@ std::vector<std::pair<double, double> > pyne::Material::gamma_rays() {
     else
         state_id = ci->first;
 
-    std::vector<std::pair<double, double> > raw_gammas = pyne::gamma_rays(state_id);
+    std::vector<std::pair<double, double> > raw_gammas = pyne::gammas(state_id);
     for (int i = 0; i < raw_gammas.size(); ++i) {
       result.push_back(std::make_pair(raw_gammas[i].first,
         atom_fracs[ci->first]*raw_gammas[i].second));
@@ -1231,7 +1231,7 @@ std::vector<std::pair<double, double> > pyne::Material::gamma_rays() {
   return result;
 }
 
-std::vector<std::pair<double, double> > pyne::Material::x_rays() {
+std::vector<std::pair<double, double> > pyne::Material::xrays() {
   std::vector<std::pair<double, double> > result;
   std::map<int, double> atom_fracs = this->to_atom_frac();
   int state_id;
@@ -1251,13 +1251,13 @@ std::vector<std::pair<double, double> > pyne::Material::x_rays() {
 }
 
 std::vector<std::pair<double, double> > pyne::Material::photons(bool norm) {
-  std::vector<std::pair<double, double> >  xrays = x_rays();
-  std::vector<std::pair<double, double> >  gammas = gamma_rays();
-  for (int i = 0; i < xrays.size(); ++i)
-    gammas.push_back(xrays[i]);
+  std::vector<std::pair<double, double> >  txray = this->xrays();
+  std::vector<std::pair<double, double> >  tgammas = this->gammas();
+  for (int i = 0; i < txray.size(); ++i)
+    tgammas.push_back(txray[i]);
   if (norm)
-    gammas = normalize_radioactivity(gammas);
-  return gammas;
+    tgammas = normalize_radioactivity(tgammas);
+  return tgammas;
 }
 
 std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
