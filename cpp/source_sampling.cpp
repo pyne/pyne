@@ -203,7 +203,9 @@ MBCartVect Sampler::get_xyz(int ve_idx, vect_d rands) {
   double t = rands[1];
   double u = rands[2];
 
-  // Transform s, t, u to uniformly sample a tetrahedron
+  // Transform s, t, u to uniformly sample a tetrahedron. See:
+  // C. Rocchini and P. Cignoni, “Generating Random Points in a Tetrahedron,” 
+  //  Journal of Graphics Tools, 5, 200–202 (2001).
   if (_ve_type == MBTET) {
     if (s + t > 1) {
       s = 1.0 - s;
