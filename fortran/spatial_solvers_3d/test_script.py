@@ -5,5 +5,14 @@ import spatial_solver
 from dictionary_populate_test import populate, populate_with_warnings
 
 a = populate("DGFEM","DENSE")
-#a = populate_with_warnings()
 spatial_solver.solve(a)
+
+#ALL supported configurations without warnings
+#a = populate("AHOTN","LN")
+#a = populate("AHOTN","LL")
+#a = populate("AHOTN","NEFD")
+#a = populate("DGFEM","LD")
+#a = populate("DGFEM","DENES")
+#Supported configurations with ALL POSSIBLE warnings
+#a = populate_with_warnings("AHOTN")
+#a = populate_with_warnings("DGFEM")

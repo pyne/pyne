@@ -22,7 +22,7 @@ def dict_complete(inputdict):
 			if(inputdict['solver'] == "AHOTN"):
 				formatted_dict['solver_type'] = "LN"
 			elif(inputdict['solver'] == "DGFEM"):
-				formatted_dict['solver_type'] = "NEED_DEFAULT..."
+				formatted_dict['solver_type'] = "LD"
 		
 		try:
 			formatted_dict['spatial_order'] = inputdict['spatial_order']
