@@ -1,9 +1,9 @@
 """This file creates a sample dictionary to test the spatial_solver code's."""
 
-def populate():
+def populate(solverin, solvertypein):
 		solver_dict = {
-		'solver':'DGFEM',
-		'solver_type':'DENSE',
+		'solver':solverin,
+		'solver_type':solvertypein,
 		'spatial_order':1,
 		'spatial_method':0,
 		'angular_quadrature_order':4,  #WORKS
