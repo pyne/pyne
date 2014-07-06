@@ -1,5 +1,5 @@
 SUBROUTINE solve
-use ld_module
+USE dgfem_kernel_module
 !-------------------------------------------------------------
 !
 !  Directs the solution by either calling for a mesh
@@ -25,6 +25,11 @@ warn = 0
 WRITE (8,*)
 WRITE (8,*) "-------------------------- THE SOLUTION ----------------------------------"
 WRITE (8,*)
+
+IF (solvertype == "DENSE") THEN
+	! Construct matrix templates
+	call build_tmats_complete(lambda)
+END IF
 
 ! Start the loop over all energy groups
 DO g = 1, ng
@@ -58,6 +63,11 @@ DO g = 1, ng
 
    ! Get the time out of the solution
    CALL CPU_TIME(tsolve)
+
+IF (solvertype == "DENSE") THEN
+   ! Clean up
+   CALL clean_complete_kernel
+END IF
 
 END DO
    

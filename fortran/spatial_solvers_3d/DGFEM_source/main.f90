@@ -19,6 +19,8 @@ srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momp
 !    Allows for dynamic allocation. Uses module to hold all 
 !      input variables: invar
 !
+!  	Solver types =  "LD" "DENSE" and "LAGRANGE"
+!
 !-------------------------------------------------------------
 
 USE invar
@@ -188,8 +190,13 @@ END IF
 
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
-dofpc = 4
-
+IF (solvertype == "LD") THEN
+	dofpc = 4
+ELSE IF (solvertype == "DENSE") THEN
+	dofpc = (lambda+3)*(lambda+2)*(lambda+1)/6
+ELSE IF (solvertype == "LAGRANGE") THEN
+	!NOT IMPLEMENTED YET!
+END IF
 ! Material map
 !CALL readmt(mtfile)
 ! 

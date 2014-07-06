@@ -1,5 +1,5 @@
 SUBROUTINE sweep(g)
-use ld_module
+USE dgfem_kernel_module
 !-------------------------------------------------------------
 !
 !  Sweeps across the 3-D matrix
@@ -194,22 +194,59 @@ DO n = 1, apo
 
             ! Prepare the vector psi => on input to solver it's the total source
        
-            psi(1) =              (sigsc*e(1,i,j,k) + s(1,i,j,k,g))
-            psi(2) = real(incz,8)*(sigsc*e(2,i,j,k) + s(2,i,j,k,g))
-            psi(3) = real(incy,8)*(sigsc*e(3,i,j,k) + s(3,i,j,k,g))
-            psi(4) = real(incx,8)*(sigsc*e(4,i,j,k) + s(4,i,j,k,g))
+						IF (solvertype == "LD") THEN
+		          psi(1) =              (sigsc*e(1,i,j,k) + s(1,i,j,k,g))
+		          psi(2) = real(incz,8)*(sigsc*e(2,i,j,k) + s(2,i,j,k,g))
+		          psi(3) = real(incy,8)*(sigsc*e(3,i,j,k) + s(3,i,j,k,g))
+		          psi(4) = real(incx,8)*(sigsc*e(4,i,j,k) + s(4,i,j,k,g))
 
-            ! Call cell solver    
-              
-            call ld_kernel(del,sig,omeg,face,psi)
+		          ! Call cell solver    
+		            
+		          call ld_kernel(del,sig,omeg,face,psi)
 
-            ! Update scalar flux, update formula interfaces psi test/trial and 
-            ! phi test/trial functions
+		          ! Update scalar flux, update formula interfaces psi test/trial and 
+		          ! phi test/trial functions
 
-            f(1,i,j,k,g) = f(1,i,j,k,g) +                w(n) * psi(1)
-            f(2,i,j,k,g) = f(2,i,j,k,g) + real(incz,8) * w(n) * psi(2)
-            f(3,i,j,k,g) = f(3,i,j,k,g) + real(incy,8) * w(n) * psi(3)
-            f(4,i,j,k,g) = f(4,i,j,k,g) + real(incx,8) * w(n) * psi(4)
+		          f(1,i,j,k,g) = f(1,i,j,k,g) +                w(n) * psi(1)
+		          f(2,i,j,k,g) = f(2,i,j,k,g) + real(incz,8) * w(n) * psi(2)
+		          f(3,i,j,k,g) = f(3,i,j,k,g) + real(incy,8) * w(n) * psi(3)
+		          f(4,i,j,k,g) = f(4,i,j,k,g) + real(incx,8) * w(n) * psi(4)
+						ELSE IF (solvertype == "DENSE") THEN
+	!           indx=0
+		          DO t = 0, lambda
+		             mltx = incx**t
+		             DO u = 0, lambda-t
+		                mlty = incy**u
+		                DO v = 0, lambda-t-u
+		                   mltz = incz**v
+		                   indx = v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6
+	!                    indx=indx+1
+		                   psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k) + s(indx,i,j,k,g))
+		                END DO
+		             END DO
+		          END DO
+
+		          ! Call cell solver    
+		            
+		          call complete_kernel_dense(dofpc,del,sig,omeg,face,psi) 
+
+		          ! Update scalar flux, update formula interfaces psi test/trial and 
+		          ! phi test/trial functions
+	 
+	!           indx=0
+		          DO t = 0, lambda
+		             mltx = incx**t
+		             DO u = 0, lambda-t
+		                mlty = incy**u
+		                DO v = 0, lambda-t-u
+		                   mltz = incz**v
+		                   indx = v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6 
+	!                    indx=indx+1        
+		                   f(indx,i,j,k,g) = f(indx,i,j,k,g) + real(mltx*mlty*mltz,8)*w(n)*psi(indx)
+		                END DO
+		             END DO
+		          END DO
+						END IF
       
  
            ! Save the face fluxes in fx,fy,fz
