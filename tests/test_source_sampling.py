@@ -20,7 +20,7 @@ from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
 
 from pyne.mesh import Mesh, IMeshTag
-from pyne.source_sampling import Sampler
+from pyne.source_sampling import Sampler, AliasTable
 
 def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
@@ -257,6 +257,24 @@ def test_bias_spacial():
         for j in range(0, 2):
             halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:])
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
+
+def test_alias_table():
+    """This tests that the AliasTable class produces samples in the ratios
+    consistant with the supplied PDF.
+    """
+    pdf = np.array([0.1, 0.2, 0.7])
+    at = AliasTable(pdf)
+    num_samples = 10000
+    score = 1.0/num_samples
+    tally = np.zeros(shape=(3))
+
+    for i in range(num_samples):
+        s = at.sample_pdf(uniform(0, 1), uniform(0,1))
+        tally[s] += score
+
+    for i in range(0, 3):
+       print(tally[i])
+       assert(abs(tally[i] - pdf[i])/pdf[i] < 0.05)
 
 def point_in_tet(t, p):
     """ This function determines if some point <p> lies within some tetrahedron
