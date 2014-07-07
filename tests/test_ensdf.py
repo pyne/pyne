@@ -365,10 +365,10 @@ ensdf_sample = """\
 """
 
 
-def test_gamma_rays():
+def test_decays():
     f = StringIO(ensdf_sample)
     f.seek(0)
-    gr = ensdf.gamma_rays(f)
+    gr = ensdf.decays(f)
     f.close()
 
     assert_almost_equal(gr[0][0:10], (631520000, 641520000, 4130566254,
