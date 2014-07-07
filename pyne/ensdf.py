@@ -11,7 +11,7 @@ from pyne import nucname, rxname, data
 from pyne.utils import to_sec
 
 if sys.version_info[0] > 2:
-  basestring = str
+    basestring = str
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
@@ -853,120 +853,6 @@ def decays(filename, decaylist=None):
                 else:
                     decaylist.append(decay)
     return decaylist
-
-
-def origen_data(filename):
-    """This function parses assorted data from an ensdf file in order to collect
-    the necessary information to generate data for origen input decks.
-
-    Parameters
-    ----------
-    filename : str
-        Name of ENSDF formatted file
-
-    Returns
-    -------
-    decaylist : list
-        This is a list of tuples containing:
-            * parent nuc_id
-            * half life of parent
-            * parent energy level
-            * half life of daughter
-            * energy level of daughter
-            * decay type of parent
-            * percent of beta + percent of electron capture decays to daughter
-    branchlist : list
-        This is a list of tuples containing:
-            * parent nuc_id
-            * energy level of parent
-            * half life of parent
-            * dictionary of branching ratios
-    """
-    if isinstance(filename, str):
-        with open(filename, 'r') as f:
-            dat = f.read()
-    else:
-        dat = filename.read()
-    datasets = dat.split(80 * " " + "\n")[0:-1]
-    decaylist = []
-    branchlist = []
-    for dataset in datasets:
-        lines = dataset.splitlines()
-        ident = re.match(_ident, lines[0])
-        if ident is None:
-            continue
-        if 'DECAY' in ident.group(2):
-            daughter = ident.group(1)
-            parent = ident.group(2).split()[0]
-            dtype = ident.group(2).split()[1]
-            tfinal = 0
-            e = 0.0
-            ie = None
-            ib = None
-            newlevel = False
-            for line in lines:
-                b_rec = _beta.match(line)
-                if b_rec is not None:
-                    en, en_err, ib, dib, logft, \
-                    dft = _parse_beta_record(b_rec)
-                    continue
-                e_rec = _ec.match(line)
-                if e_rec is not None:
-                    en, en_err, ib, dib, ie, die, logft, \
-                    dft, tti, dtti = _parse_ec_record(e_rec)
-                    continue
-                p_rec = _p.match(line)
-                if p_rec is not None:
-                    parent2, tfinal, tfinalerr, e, e_err = \
-                        _parse_parent_record(p_rec)
-                    continue
-                level_l = _level_regex.match(line)
-                if level_l is not None:
-                    if newlevel and (ib is not None or ie is not None):
-                        #save old level data
-                        if ib is None:
-                            ib = 0.0
-                        if ie is None:
-                            ie = 0.0
-                        decaylist.append((_to_id(parent), tfinal, e,
-                                          half_lifev, level, dtype, (ib + ie)))
-                    level, half_lifev, from_nuc, state, special = \
-                        _parse_level_record(level_l)
-                    newlevel = True
-                    continue
-            if newlevel and (ib is not None or ie is not None):
-                #save old level data
-                if ib is None:
-                    ib = 0.0
-                if ie is None:
-                    ie = 0.0
-                decaylist.append((_to_id(parent), tfinal, e, half_lifev, level,
-                                  dtype, (ib + ie)))
-        if 'ADOPTED LEVELS' in ident.group(2):
-            parent = ident.group(1)
-            pid = _to_id(parent)
-            brs = {}
-            levelc_found = False
-            for line in lines:
-                level_l = _level_regex.match(line)
-                if level_l is not None:
-                    if levelc_found and half_lifev is not None:
-                        levelc_found = False
-                        if len(brs) > 0:
-                            branchlist.append((pid, level, half_lifev, brs))
-                        brs = {}
-                    level, half_lifev, from_nuc, state, special = \
-                        _parse_level_record(level_l)
-                    continue
-                levelc = _level_cont_regex.match(line)
-                if levelc is not None:
-                    brs.update(_parse_level_continuation_record(levelc))
-                    levelc_found = True
-                    continue
-            if levelc_found and half_lifev is not None and pid is not None:
-                if len(brs) > 0:
-                    branchlist.append((pid, level, half_lifev, brs))
-    return decaylist, branchlist
 
 
 def _dlist_gen(f):

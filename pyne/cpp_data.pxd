@@ -142,6 +142,7 @@ cdef extern from "data.h" namespace "pyne":
     vector[pair[double, double]] decay_photon_branch_ratios(int) except +
     pair[double,double] decay_beta_branch_ratio(pair[int, int] from_to) except +
     vector[pair[double, double]] decay_beta_branch_ratios(int) except +
+    vector[int] decay_data_children(int) except +
 
     vector[pair[double, double]] gamma_energy(int parent) except +
     vector[pair[double, double]] gamma_photon_intensity(int parent) except +
