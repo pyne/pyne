@@ -10,6 +10,8 @@ USE invar
 USE solvar
 IMPLICIT NONE
 INTEGER :: i, j, k, t, u, v, g,l
+!Printing iteration counters.  Vary based on solver type
+Integer :: iter1, iter2
 
 ! First check if sum is going to be printed
 IF (momsum == 1) THEN
@@ -36,9 +38,21 @@ DO g = 1, ng
       ! Print the optional flux moments as determined by momp
       IF (momp > 0) THEN
          DO v = 0, momp
-            DO u = 0, momp-v
-               DO t = 0, momp-v-u
-                  l =v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6
+						iter1 = momp
+						iter2 = momp
+						IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
+							iter1 = iter1-v
+							iter2 = iter1-v-u
+						ELSE IF (solvertype == "LAGRANGE") THEN
+							!Leave iter values alone
+						END IF
+            DO u = 0, iter1
+               DO t = 0, iter2
+									IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
+                  	l =v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6
+									ELSE IF (solvertype == "LAGRANGE") THEN
+							      l = v+1+(lambda+1)*u+(lambda+1)**2*t
+									END IF
                   IF (t == 0 .AND. u == 0 .AND. v == 0) CYCLE
                   IF (t > iall .OR. u > iall .OR. v > iall) THEN
                      warn = warn + 1

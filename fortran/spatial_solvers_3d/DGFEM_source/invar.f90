@@ -27,7 +27,7 @@ REAL*8 :: tchk
 INTEGER :: ichk
 
 ! Extra variables derived from input
-INTEGER :: apo, dofpc
+INTEGER :: apo, dofpc, order, ordsq, ordcb, orpc
 REAL*8, DIMENSION(:,:), ALLOCATABLE :: ssum
 
 ! Angular quadrature input

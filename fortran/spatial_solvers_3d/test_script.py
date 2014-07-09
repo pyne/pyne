@@ -4,7 +4,8 @@ simply run this file in python. '''
 import spatial_solver
 from dictionary_populate_test import populate, populate_with_warnings
 
-a = populate("DGFEM","DENSE")
+#a = populate("DGFEM","DENSE")
+a = populate("DGFEM","LAGRANGE")
 spatial_solver.solve(a)
 
 #ALL supported configurations without warnings
@@ -12,7 +13,8 @@ spatial_solver.solve(a)
 #a = populate("AHOTN","LL")
 #a = populate("AHOTN","NEFD")
 #a = populate("DGFEM","LD")
-#a = populate("DGFEM","DENES")
+#a = populate("DGFEM","DENSE")
+#a = populate("DGFEM","LAGRANGE")
 #Supported configurations with ALL POSSIBLE warnings
 #a = populate_with_warnings("AHOTN")
 #a = populate_with_warnings("DGFEM")

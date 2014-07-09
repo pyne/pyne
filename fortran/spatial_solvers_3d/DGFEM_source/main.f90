@@ -195,8 +195,11 @@ IF (solvertype == "LD") THEN
 ELSE IF (solvertype == "DENSE") THEN
 	dofpc = (lambda+3)*(lambda+2)*(lambda+1)/6
 ELSE IF (solvertype == "LAGRANGE") THEN
-	!NOT IMPLEMENTED YET!
+	order = lambda+1
+	ordsq = order**2
+	ordcb = order**3
 END IF
+
 ! Material map
 !CALL readmt(mtfile)
 ! 
@@ -225,7 +228,14 @@ IF (qdtyp == 2) CLOSE(UNIT=10)
    ! Call for the input check
 CALL check
    ! Call to read the cross sections and source; do their own input check
+!Setting orpc value for sweep.
+IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
+	orpc = dofpc
+ELSE IF (solvertype == "LAGRANGE") THEN
+	orpc = ordcb
+END IF
 CALL readxs(xsfilein)
+! python call fails at call readsrc..
 CALL readsrc(srcfilein)
 IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
 CALL solve

@@ -17,12 +17,12 @@ INTEGER :: xs, xe, ys, ye, zs, ze, incx, incy, incz, ord, nfy, nfz
 INTEGER :: i, j, k, t, u, v, m, n, sgm, sge, sgx, ydir, xdir, zdir, mltx, mlty, mltz
 INTEGER :: ieq, tt, col, indx, jndx, kndx, info, tmp1, tmp2
 INTEGER :: ix,iy,iz,jx,jy,jz
-REAL*8, DIMENSION(dofpc) :: psi
-REAL*8, DIMENSION(dofpc) :: fx
-REAL*8, DIMENSION(dofpc,nx, 2) :: fy
-REAL*8, DIMENSION(dofpc,nx, ny, 2, 2) :: fz
+REAL*8, DIMENSION(orpc) :: psi
+REAL*8, DIMENSION(orpc) :: fx
+REAL*8, DIMENSION(orpc,nx, 2) :: fy
+REAL*8, DIMENSION(orpc,nx, ny, 2, 2) :: fz
 REAL*8 :: sig, mu, eta, xi, x, y, z, sigsc, sgn, factor
-REAL*8 :: del(3),omeg(3),face(dofpc,3)
+REAL*8 :: del(3),omeg(3),face(orpc,3)
 
 ! Initialize the flux solution to zero
 f = 0.0
@@ -246,6 +246,42 @@ DO n = 1, apo
 		                END DO
 		             END DO
 		          END DO
+
+						ELSE IF (solvertype == "LAGRANGE") THEN
+
+            ! Prepare the vector psi => on input to solver it's the total source
+       
+            DO t = 0, lambda
+               mltx = incx**t
+               DO u = 0, lambda
+                  mlty = incy**u
+                  DO v = 0, lambda
+                     mltz = incz**v
+                     indx = ordsq*t + order*u + v + 1
+                     psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k) + s(indx,i,j,k,g))
+                  END DO
+               END DO
+            END DO
+
+            ! Call cell solver    
+              
+            call lagrange_kernel_dense(ordcb,del,sig,omeg,face,psi) 
+
+            ! Update scalar flux, update formula interfaces psi test/trial and 
+            ! phi test/trial functions
+ 
+            DO t = 0, lambda
+               mltx = incx**t
+               DO u = 0, lambda
+                  mlty = incy**u
+                  DO v = 0, lambda
+                     mltz = incz**v
+                     indx = ordsq*t + order*u + v + 1
+                     f(indx,i,j,k,g) = f(indx,i,j,k,g) + real(mltx*mlty*mltz,8)*w(n)*psi(indx)
+                  END DO
+               END DO
+            END DO
+
 						END IF
       
  

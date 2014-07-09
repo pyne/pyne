@@ -14,7 +14,11 @@ IMPLICIT NONE
 INTEGER :: i, j, k, t, u, v, m, g, gp
 REAL*8 :: xsct
 
-ALLOCATE(f(dofpc,nx,ny,nz,ng), e(dofpc,nx,ny,nz))
+IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
+	ALLOCATE(f(dofpc,nx,ny,nz,ng), e(dofpc,nx,ny,nz))
+ELSE IF (solvertype == "LAGRANGE") THEN
+	ALLOCATE(f(ordcb,nx,ny,nz,ng), e(ordcb,nx,ny,nz))
+END IF
 
 ALLOCATE(cnvf(ng))
 
@@ -26,9 +30,11 @@ WRITE (8,*)
 WRITE (8,*) "-------------------------- THE SOLUTION ----------------------------------"
 WRITE (8,*)
 
+! Construct matrix templates
 IF (solvertype == "DENSE") THEN
-	! Construct matrix templates
 	call build_tmats_complete(lambda)
+ELSE IF (solvertype == "LAGRANGE") THEN
+	call build_tmats_lagrange(lambda)
 END IF
 
 ! Start the loop over all energy groups
@@ -67,6 +73,8 @@ DO g = 1, ng
 IF (solvertype == "DENSE") THEN
    ! Clean up
    CALL clean_complete_kernel
+ELSE IF (solvertype == "LAGRANGE") THEN
+   CALL clean_lagrange_kernel
 END IF
 
 END DO
