@@ -39,7 +39,8 @@ REAL*8, DIMENSION(:,:), ALLOCATABLE :: sigt
 REAL*8, DIMENSION(:,:,:), ALLOCATABLE :: sigs
 
 ! Source data
-REAL*8, DIMENSION(:,:,:,:,:), ALLOCATABLE :: s
+!REAL*8, DIMENSION(:,:,:,:,:), ALLOCATABLE :: s
+REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: s
 
 ! Fixed boundary conditions
 ! 
@@ -63,12 +64,13 @@ REAL*8, DIMENSION(:,:,:,:,:), ALLOCATABLE :: s
 !
 ! correspondingly for the other inflow BC
 !
-REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: frbc
-REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: babc
-REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: lebc
-REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: ribc
-REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: bobc
-REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: tobc
+
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: frbc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: babc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: lebc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ribc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: bobc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tobc
 
 !
 ! temporary bc arrays

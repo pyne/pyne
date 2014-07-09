@@ -47,10 +47,10 @@ DO n = 1, apo
             !
             DO ix=1,nx
                DO iy=1,ny
-                 fz(:,ix,iy,2,2)=tobc(:,ix,iy,n,1)  ! mu>0,eta>0
-                 fz(:,ix,iy,2,1)=tobc(:,ix,iy,n,2)  ! mu>0,eta<0
-                 fz(:,ix,iy,1,2)=tobc(:,ix,iy,n,3)  ! mu<0,eta>0 
-                 fz(:,ix,iy,1,1)=tobc(:,ix,iy,n,4)  ! mu<0,eta<0
+                 fz(:,ix,iy,2,2)=tobc(:,ix,iy,n,1,1)  ! mu>0,eta>0
+                 fz(:,ix,iy,2,1)=tobc(:,ix,iy,n,2,1)  ! mu>0,eta<0
+                 fz(:,ix,iy,1,2)=tobc(:,ix,iy,n,3,1)  ! mu<0,eta>0 
+                 fz(:,ix,iy,1,1)=tobc(:,ix,iy,n,4,1)  ! mu<0,eta<0
                END DO
             END DO
             !
@@ -68,10 +68,10 @@ DO n = 1, apo
             !
             DO ix=1,nx
                DO iy=1,ny
-                  fz(:,ix,iy,2,2)=bobc(:,ix,iy,n,1)  ! mu>0,eta>0
-                  fz(:,ix,iy,2,1)=bobc(:,ix,iy,n,2)  ! mu>0,eta<0
-                  fz(:,ix,iy,1,2)=bobc(:,ix,iy,n,3)  ! mu<0,eta>0 
-                  fz(:,ix,iy,1,1)=bobc(:,ix,iy,n,4)  ! mu<0,eta<0
+                  fz(:,ix,iy,2,2)=bobc(:,ix,iy,n,1,1)  ! mu>0,eta>0
+                  fz(:,ix,iy,2,1)=bobc(:,ix,iy,n,2,1)  ! mu>0,eta<0
+                  fz(:,ix,iy,1,2)=bobc(:,ix,iy,n,3,1)  ! mu<0,eta>0 
+                  fz(:,ix,iy,1,1)=bobc(:,ix,iy,n,4,1)  ! mu<0,eta<0
                END DO
             END DO
             !
@@ -96,15 +96,15 @@ DO n = 1, apo
             ELSE IF (yebc==2 .and. incz>0 ) THEN
               !
               DO ix=1,nx
-                 fy(:,ix,1)=babc(:,k,ix,n,2) ! xi>0, mu<0
-                 fy(:,ix,2)=babc(:,k,ix,n,1) ! xi>0, mu>0
+                 fy(:,ix,1)=babc(:,k,ix,n,2,1) ! xi>0, mu<0
+                 fy(:,ix,2)=babc(:,k,ix,n,1,1) ! xi>0, mu>0
               END DO
               !
             ELSE IF (yebc==2 .and. incz<0 ) THEN
               !
               DO ix=1,nx
-                 fy(:,ix,1)=babc(:,k,ix,n,4) ! xi<0, mu<0
-                 fy(:,ix,2)=babc(:,k,ix,n,3) ! xi<0, mu>0
+                 fy(:,ix,1)=babc(:,k,ix,n,4,1) ! xi<0, mu<0
+                 fy(:,ix,2)=babc(:,k,ix,n,3,1) ! xi<0, mu>0
               END DO
               !
             END IF 
@@ -122,15 +122,15 @@ DO n = 1, apo
             ELSE IF (ysbc==2 .and. incz>0 ) THEN
               !
               DO ix=1,nx
-                 fy(:,ix,1)=frbc(:,k,ix,n,2) ! xi>0, mu<0
-                 fy(:,ix,2)=frbc(:,k,ix,n,1) ! xi>0, mu>0
+                 fy(:,ix,1)=frbc(:,k,ix,n,2,1) ! xi>0, mu<0
+                 fy(:,ix,2)=frbc(:,k,ix,n,1,1) ! xi>0, mu>0
               END DO
               !
             ELSE IF (ysbc==2 .and. incz<0 ) THEN
               !
               DO ix=1,nx
-                 fy(:,ix,1)=frbc(:,k,ix,n,4) ! xi<0, mu<0
-                 fy(:,ix,2)=frbc(:,k,ix,n,3) ! xi<0, mu>0
+                 fy(:,ix,1)=frbc(:,k,ix,n,4,1) ! xi<0, mu<0
+                 fy(:,ix,2)=frbc(:,k,ix,n,3,1) ! xi<0, mu>0
               END DO
               !
             END IF
@@ -150,13 +150,13 @@ DO n = 1, apo
                IF(xebc==0) THEN
                   fx=0.0
                ELSE IF(xebc==2 .and. incy>0 .and. incz>0) THEN
-                  fx=ribc(:,j,k,n,1)
+                  fx=ribc(:,j,k,n,1,1)
                ELSE IF(xebc==2 .and. incy>0 .and. incz<0) THEN
-                  fx=ribc(:,j,k,n,2)
+                  fx=ribc(:,j,k,n,2,1)
                ELSE IF(xebc==2 .and. incy<0 .and. incz>0) THEN
-                  fx=ribc(:,j,k,n,3)
+                  fx=ribc(:,j,k,n,3,1)
                ELSE IF(xebc==2 .and. incy<0 .and. incz<0) THEN
-                  fx=ribc(:,j,k,n,4)
+                  fx=ribc(:,j,k,n,4,1)
                END IF
             ELSE IF (xdir == 2) THEN
                xs = 1
@@ -169,13 +169,13 @@ DO n = 1, apo
                ELSE IF(xsbc==1) THEN
                   fx=fx
                ELSE IF(xsbc==2 .and. incy>0 .and. incz>0) THEN
-                  fx=lebc(:,j,k,n,1)
+                  fx=lebc(:,j,k,n,1,1)
                ELSE IF(xsbc==2 .and. incy>0 .and. incz<0) THEN
-                  fx=lebc(:,j,k,n,2)
+                  fx=lebc(:,j,k,n,2,1)
                ELSE IF(xsbc==2 .and. incy<0 .and. incz>0) THEN
-                  fx=lebc(:,j,k,n,3)
+                  fx=lebc(:,j,k,n,3,1)
                ELSE IF(xsbc==2 .and. incy<0 .and. incz<0) THEN
-                  fx=lebc(:,j,k,n,4)
+                  fx=lebc(:,j,k,n,4,1)
                END IF
             END IF
          
@@ -195,10 +195,10 @@ DO n = 1, apo
             ! Prepare the vector psi => on input to solver it's the total source
        
 						IF (solvertype == "LD") THEN
-		          psi(1) =              (sigsc*e(1,i,j,k) + s(1,i,j,k,g))
-		          psi(2) = real(incz,8)*(sigsc*e(2,i,j,k) + s(2,i,j,k,g))
-		          psi(3) = real(incy,8)*(sigsc*e(3,i,j,k) + s(3,i,j,k,g))
-		          psi(4) = real(incx,8)*(sigsc*e(4,i,j,k) + s(4,i,j,k,g))
+		          psi(1) =              (sigsc*e(1,i,j,k) + s(1,i,j,k,g,1,1))
+		          psi(2) = real(incz,8)*(sigsc*e(2,i,j,k) + s(2,i,j,k,g,1,1))
+		          psi(3) = real(incy,8)*(sigsc*e(3,i,j,k) + s(3,i,j,k,g,1,1))
+		          psi(4) = real(incx,8)*(sigsc*e(4,i,j,k) + s(4,i,j,k,g,1,1))
 
 		          ! Call cell solver    
 		            
@@ -221,7 +221,7 @@ DO n = 1, apo
 		                   mltz = incz**v
 		                   indx = v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6
 	!                    indx=indx+1
-		                   psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k) + s(indx,i,j,k,g))
+		                   psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k) + s(indx,i,j,k,g,1,1))
 		                END DO
 		             END DO
 		          END DO
@@ -258,7 +258,7 @@ DO n = 1, apo
                   DO v = 0, lambda
                      mltz = incz**v
                      indx = ordsq*t + order*u + v + 1
-                     psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k) + s(indx,i,j,k,g))
+                     psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k) + s(indx,i,j,k,g,1,1))
                   END DO
                END DO
             END DO

@@ -111,7 +111,7 @@ DO g = 1, ng
                   WRITE (8,*)
                   WRITE (8,110) "Source for Group: ", g, " Moment ", t, u, v, "z-plane(k): ", k, " Row(j): ", j
                   l=v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6 
-                  WRITE (8,108) (s(l,i,j,k,g), i = 1, nx)
+                  WRITE (8,108) (s(l,i,j,k,g,1,1), i = 1, nx)
                END DO
             END DO
          END DO

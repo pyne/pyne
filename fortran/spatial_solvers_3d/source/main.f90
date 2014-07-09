@@ -1,5 +1,3 @@
-
-
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein, solverin, solvertypein, &
  lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin, dxin, dyin, & 
 dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin, matin, qdfilein, xsfilein, & 
@@ -21,6 +19,11 @@ srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momp
 !    Allows for dynamic allocation. Uses module to hold all 
 !      input variables: invar
 !
+!
+!  	Solver types =  "AHOTN" "DGFEM" and "SCTSTEP"
+!			AHOTN solvers: "LL" "LN" and "NEFD"
+!   	DGFEM solvers: "LD" "DENSE" and "LAGRANGE"
+!			SCTSTEP solvers:
 !-------------------------------------------------------------
 
 USE invar
@@ -30,7 +33,7 @@ INTEGER :: i, j, k, n
 ! File Names
 CHARACTER(30), INTENT(OUT) :: qdfile, xsfile, srcfile, mtfile,inflow_file,&
                              phi_file
-LOGICAL :: ex1, ex2, ex3
+LOGICAL :: ex1, ex2, ex3, ex4
 REAL*8 :: wtsum
 
 CHARACTER(80), INTENT(IN) :: titlein
@@ -98,9 +101,6 @@ momsum = momsumin
 mompt = momptin
 qdflx = qdflxin
 
-! Read the title of the case
-!103 FORMAT(A80)
-
 ! Read Problem Size Specification:
 !   lambda => LAMDBA, the AHOT spatial order
 !   meth  => = 0/1 = AHOT-N/AHOT-N-ITM
@@ -112,10 +112,17 @@ qdflx = qdflxin
 !   ng    => Number of groups
 !   nm    => Number of materials
 
-IF (solvertype == "LN" .or. solvertype == "LL") THEN
-	IF (lambda .ne. 1) then
- 	  WRITE(8,*) "ERROR: Lambda must be equal to one." 
- 	  STOP
+
+IF (solver == "DGFEM") THEN
+	IF (solvertype == "LD") THEN
+		lambda=1
+	END IF
+ELSE IF (solver == "AHOTN") THEN
+	IF (solvertype == "LN" .or. solvertype == "LL") THEN
+		IF (lambda .ne. 1) then
+	 	  WRITE(8,*) "ERROR: Lambda must be equal to one." 
+	 	  STOP
+		END IF
 	END IF
 END IF
 

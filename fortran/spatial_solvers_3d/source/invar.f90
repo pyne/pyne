@@ -63,12 +63,23 @@ REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: s
 !
 ! correspondingly for the other inflow BC
 !
+
 REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: frbc
 REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: babc
 REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: lebc
 REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ribc
 REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: bobc
 REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tobc
+
+!
+! temporary bc arrays
+!
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tfrbc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tbabc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tlebc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tribc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tbobc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ttobc
 
 ! Editing data
 INTEGER :: momp, momsum, mompt, qdflx

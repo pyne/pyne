@@ -27,12 +27,12 @@ USE invar
 IMPLICIT NONE
 INTEGER :: i, j, k, n
 ! File Names
-CHARACTER(80), INTENT(IN) :: titlein
 CHARACTER(30), INTENT(OUT) :: qdfile, xsfile, srcfile, mtfile,inflow_file,&
                              phi_file
 LOGICAL :: ex1, ex2, ex3, ex4
 REAL*8 :: wtsum
 
+CHARACTER(80), INTENT(IN) :: titlein
 CHARACTER(30), INTENT(IN) :: solverin, solvertypein
 INTEGER, INTENT(IN) :: lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin, ngin, nmin
 REAL*8, INTENT(IN), DIMENSION(:) :: dxin, dyin, dzin
@@ -97,10 +97,6 @@ momsum = momsumin
 mompt = momptin
 qdflx = qdflxin
 
-! Read the title of the case
-!READ(7,103) title
-103 FORMAT(A80)
-
 ! Read Problem Size Specification:
 !   lambda => LAMDBA, the AHOT spatial order
 !   meth  => = 0/1 = AHOT-N/AHOT-N-ITM
@@ -127,66 +123,6 @@ ELSE IF (MOD(qdord,2) /= 0) THEN
    WRITE(8,'(/,3x,A)') "ERROR: Illegal value for the quadrature order. Even #s only."
    STOP
 END IF
-
-! Finish reading problem size
-!READ(7,*) nx, ny, nz
-!READ(7,*) ng, nm
-
-! Set sizes for spatial mesh, read mesh sizes
-!   dx  => cell x-dimension
-!   dy  => cell y-dimension
-!   dz  => cell z-dimension
-!ALLOCATE(dx(nx), dy(ny), dz(nz))
-
-!READ(7,*) (dx(i), i = 1, nx)
-!READ(7,*) (dy(j), j = 1, ny)
-!READ(7,*) (dz(k), k = 1, nz)
-
-! Read the boundary conditions
-!   *bc = 0/1/2 = Vacuum/Reflective/fixed inflow
-!READ(7,*) xsbc, xebc
-!READ(7,*) ysbc, yebc
-!READ(7,*) zsbc, zebc
-
-! Read the names of files with cross sections and source distribution
-!READ(7,104) mtfile
-!READ(7,104) qdfile
-!READ(7,104) xsfile
-!READ(7,104) srcfile
-!READ(7,104) inflow_file
-!READ(7,104) phi_file
-!write(6,*) mtfile
-!write(6,*) xsfile
-!write(6,*) srcfile
-104 FORMAT(A)
-! Perform quick checks on the files
-!INQUIRE(FILE = mtfile, EXIST = ex4)
-!INQUIRE(FILE = xsfile, EXIST = ex1)
-!INQUIRE(FILE = srcfile, EXIST = ex2)
-!IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE. .OR. ex4 .eqv. .FALSE.) THEN
-!   WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
-!   STOP
-!END IF
-
-! Read the iteration parameters
-!   err    => Pointwise relative convergence criterion
-!   itmx   => Maximum number of iterations
-!   iall   => Scalar Flux Spatial Moments Converged [0->LAMBDA]
-!   tolr   => Tolerence for Convergence Check: determine whether abs or rel difference
-!READ(7,*) err, itmx, iall, tolr
-
-! Read the Solution Check Control:
-!   ichk    => Frequency of check, 0 implies skip check
-!   tchk    => Tolerence of solution check
-!READ(7,*) ichk, tchk
-
-! Read the optional editing parameters
-!   momp   => highest moment to be printed, [0->LAMBDA]
-!   momsum => flag to say whether the moments should be summed and printed for cell-center, 0 or 1
-!   mompt  => flag to initiate an interactive mode that allows the user to retrieve pt data, non-center, 0 or 1
-!   qdflx  => flag to indicate if the volume average scalar flux for the four quadrants should be given
-!READ(7,*) momp, momsum, mompt
-!READ(7,*) qdflx
 
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
@@ -235,7 +171,6 @@ ELSE IF (solvertype == "LAGRANGE") THEN
 	orpc = ordcb
 END IF
 CALL readxs(xsfilein)
-! python call fails at call readsrc..
 CALL readsrc(srcfilein)
 IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
 CALL solve

@@ -22,19 +22,19 @@ ALLOCATE(  tfrbc(nz,nx,0:lambda,0:lambda,apo,4),&
            ttobc(nx,ny,0:lambda,0:lambda,apo,4) )
 
 IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
-	ALLOCATE( frbc(dofpc,nz,nx,apo,4) )
-	ALLOCATE( babc(dofpc,nz,nx,apo,4) )
-	ALLOCATE( lebc(dofpc,ny,nz,apo,4) )
-	ALLOCATE( ribc(dofpc,ny,nz,apo,4) )
-	ALLOCATE( bobc(dofpc,nx,ny,apo,4) )
-	ALLOCATE( tobc(dofpc,nx,ny,apo,4) )
+	ALLOCATE( frbc(dofpc,nz,nx,apo,4,1) )
+	ALLOCATE( babc(dofpc,nz,nx,apo,4,1) )
+	ALLOCATE( lebc(dofpc,ny,nz,apo,4,1) )
+	ALLOCATE( ribc(dofpc,ny,nz,apo,4,1) )
+	ALLOCATE( bobc(dofpc,nx,ny,apo,4,1) )
+	ALLOCATE( tobc(dofpc,nx,ny,apo,4,1) )
 ELSE IF (solvertype == "LAGRANGE") THEN
-	ALLOCATE( frbc(ordcb,nz,nx,apo,4) )
-	ALLOCATE( babc(ordcb,nz,nx,apo,4) )
-	ALLOCATE( lebc(ordcb,ny,nz,apo,4) )
-	ALLOCATE( ribc(ordcb,ny,nz,apo,4) )
-	ALLOCATE( bobc(ordcb,nx,ny,apo,4) )
-	ALLOCATE( tobc(ordcb,nx,ny,apo,4) )
+	ALLOCATE( frbc(ordcb,nz,nx,apo,4,1) )
+	ALLOCATE( babc(ordcb,nz,nx,apo,4,1) )
+	ALLOCATE( lebc(ordcb,ny,nz,apo,4,1) )
+	ALLOCATE( ribc(ordcb,ny,nz,apo,4,1) )
+	ALLOCATE( bobc(ordcb,nx,ny,apo,4,1) )
+	ALLOCATE( tobc(ordcb,nx,ny,apo,4,1) )
 END IF
 
 OPEN(UNIT=12, FILE=inflow_file,STATUS = "OLD", ACTION = "READ",FORM='UNFORMATTED')
@@ -175,13 +175,13 @@ CLOSE(UNIT=12)
 												IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
                          IF(jx+jy+jz .le. lambda) THEN
                            l=jz+1-jy*(-3+2*jx+jy-2*lambda)/2+jx*(11+jx**2-3*jx*(2+lambda)+3*lambda*(4+lambda))/6
-                           frbc(l,iz,ix,n,dir)=-ang(n,2)*(-1.0d0)**jy*dx(ix)*dz(iz)*sgz**jz*sgx**jx*tfrbc(iz,ix,jz,jx,n,dir) 
-                           babc(l,iz,ix,n,dir)=-ang(n,2)*(-1.0d0)**jy*dx(ix)*dz(iz)*sgz**jz*sgx**jx*tbabc(iz,ix,jz,jx,n,dir) 
+                           frbc(l,iz,ix,n,dir,1)=-ang(n,2)*(-1.0d0)**jy*dx(ix)*dz(iz)*sgz**jz*sgx**jx*tfrbc(iz,ix,jz,jx,n,dir) 
+                           babc(l,iz,ix,n,dir,1)=-ang(n,2)*(-1.0d0)**jy*dx(ix)*dz(iz)*sgz**jz*sgx**jx*tbabc(iz,ix,jz,jx,n,dir) 
                          END IF 
 												ELSE IF (solvertype == "LAGRANGE") THEN
                          l=jz+1+(lambda+1)*jy+(lambda+1)**2*jx
-                         frbc(l,iz,ix,n,dir)=-ang(n,2)*(-1.0d0)**jy*dx(ix)*dz(iz)*sgz**jz*sgx**jx*tfrbc(iz,ix,jz,jx,n,dir) 
-                         babc(l,iz,ix,n,dir)=-ang(n,2)*(-1.0d0)**jy*dx(ix)*dz(iz)*sgz**jz*sgx**jx*tbabc(iz,ix,jz,jx,n,dir) 
+                         frbc(l,iz,ix,n,dir,1)=-ang(n,2)*(-1.0d0)**jy*dx(ix)*dz(iz)*sgz**jz*sgx**jx*tfrbc(iz,ix,jz,jx,n,dir) 
+                         babc(l,iz,ix,n,dir,1)=-ang(n,2)*(-1.0d0)**jy*dx(ix)*dz(iz)*sgz**jz*sgx**jx*tbabc(iz,ix,jz,jx,n,dir) 
 												END IF
                       end do
                     end do
@@ -215,13 +215,13 @@ CLOSE(UNIT=12)
 												IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
                          IF(jx+jy+jz .le. lambda) THEN
                            l=jz+1-jy*(-3+2*jx+jy-2*lambda)/2+jx*(11+jx**2-3*jx*(2+lambda)+3*lambda*(4+lambda))/6
-                           lebc(l,iy,iz,n,dir)=-ang(n,1)*(-1.0d0)**jx*dy(iy)*dz(iz)*sgy**jy*sgz**jz*tlebc(iy,iz,jy,jz,n,dir)
-                           ribc(l,iy,iz,n,dir)=-ang(n,1)*(-1.0d0)**jx*dy(iy)*dz(iz)*sgy**jy*sgz**jz*tribc(iy,iz,jy,jz,n,dir)
+                           lebc(l,iy,iz,n,dir,1)=-ang(n,1)*(-1.0d0)**jx*dy(iy)*dz(iz)*sgy**jy*sgz**jz*tlebc(iy,iz,jy,jz,n,dir)
+                           ribc(l,iy,iz,n,dir,1)=-ang(n,1)*(-1.0d0)**jx*dy(iy)*dz(iz)*sgy**jy*sgz**jz*tribc(iy,iz,jy,jz,n,dir)
                          END IF 
 												ELSE IF (solvertype == "LAGRANGE") THEN
                          l=jz+1+(lambda+1)*jy+(lambda+1)**2*jx
-                         lebc(l,iy,iz,n,dir)=-ang(n,1)*(-1.0d0)**jx*dy(iy)*dz(iz)*sgy**jy*sgz**jz*tlebc(iy,iz,jy,jz,n,dir)
-                         ribc(l,iy,iz,n,dir)=-ang(n,1)*(-1.0d0)**jx*dy(iy)*dz(iz)*sgy**jy*sgz**jz*tribc(iy,iz,jy,jz,n,dir)
+                         lebc(l,iy,iz,n,dir,1)=-ang(n,1)*(-1.0d0)**jx*dy(iy)*dz(iz)*sgy**jy*sgz**jz*tlebc(iy,iz,jy,jz,n,dir)
+                         ribc(l,iy,iz,n,dir,1)=-ang(n,1)*(-1.0d0)**jx*dy(iy)*dz(iz)*sgy**jy*sgz**jz*tribc(iy,iz,jy,jz,n,dir)
 												END IF
                       end do
                     end do
@@ -255,13 +255,13 @@ CLOSE(UNIT=12)
 												IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
                          IF(jx+jy+jz .le. lambda) THEN
                            l=jz+1-jy*(-3+2*jx+jy-2*lambda)/2+jx*(11+jx**2-3*jx*(2+lambda)+3*lambda*(4+lambda))/6
-                           tobc(l,ix,iy,n,dir)=-ang(n,3)*(-1.0d0)**jz*dx(ix)*dy(iy)*sgx**jx*sgy**jy*ttobc(ix,iy,jx,jy,n,dir)
-                           bobc(l,ix,iy,n,dir)=-ang(n,3)*(-1.0d0)**jz*dx(ix)*dy(iy)*sgx**jx*sgy**jy*tbobc(ix,iy,jx,jy,n,dir)
+                           tobc(l,ix,iy,n,dir,1)=-ang(n,3)*(-1.0d0)**jz*dx(ix)*dy(iy)*sgx**jx*sgy**jy*ttobc(ix,iy,jx,jy,n,dir)
+                           bobc(l,ix,iy,n,dir,1)=-ang(n,3)*(-1.0d0)**jz*dx(ix)*dy(iy)*sgx**jx*sgy**jy*tbobc(ix,iy,jx,jy,n,dir)
                          END IF
 												ELSE IF (solvertype == "LAGRANGE") THEN
                          l=jz+1+(lambda+1)*jy+(lambda+1)**2*jx
-                         tobc(l,ix,iy,n,dir)=-ang(n,3)*(-1.0d0)**jz*dx(ix)*dy(iy)*sgx**jx*sgy**jy*ttobc(ix,iy,jx,jy,n,dir)
-                         bobc(l,ix,iy,n,dir)=-ang(n,3)*(-1.0d0)**jz*dx(ix)*dy(iy)*sgx**jx*sgy**jy*tbobc(ix,iy,jx,jy,n,dir)
+                         tobc(l,ix,iy,n,dir,1)=-ang(n,3)*(-1.0d0)**jz*dx(ix)*dy(iy)*sgx**jx*sgy**jy*ttobc(ix,iy,jx,jy,n,dir)
+                         bobc(l,ix,iy,n,dir,1)=-ang(n,3)*(-1.0d0)**jz*dx(ix)*dy(iy)*sgx**jx*sgy**jy*tbobc(ix,iy,jx,jy,n,dir)
 												END IF
                       end do
                     end do
