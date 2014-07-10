@@ -8,12 +8,14 @@ IMPLICIT NONE
 !! REAL*8 :: alpha, beta, gamma, ex, ey, ez
 
 ! Scalar flux moments
-REAL*8, DIMENSION(:,:,:,:,:), ALLOCATABLE :: f_ahotn_l
-REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: f_ahotn_nefd
+REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: f
+!REAL*8, DIMENSION(:,:,:,:,:), ALLOCATABLE :: f_ahotn_l
+!REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: f_ahotn_nefd
 
 ! Previous iterate to scalar flux
-REAL*8, DIMENSION(:,:,:,:), ALLOCATABLE :: e_ahotn_l
-REAL*8, DIMENSION(:,:,:,:,:,:), ALLOCATABLE :: e_ahotn_nefd
+REAL*8, DIMENSION(:,:,:,:,:,:), ALLOCATABLE :: e
+!REAL*8, DIMENSION(:,:,:,:), ALLOCATABLE :: e_ahotn_l
+!REAL*8, DIMENSION(:,:,:,:,:,:), ALLOCATABLE :: e_ahotn_nefd
 
 ! Convergence flag
 INTEGER, DIMENSION(:), ALLOCATABLE :: cnvf

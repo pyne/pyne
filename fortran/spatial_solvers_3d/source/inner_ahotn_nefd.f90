@@ -18,7 +18,7 @@ INTEGER :: id, jd, kd, td, ud, vd, gd
 REAL*8 :: df, dfmx
 
 ! Initialize the previous flux iterate
-e_ahotn_nefd = 0.0
+e = 0.0
 ! Initialize the old time point
 told = ttosolve
 ! Start the iterations
@@ -36,11 +36,11 @@ DO it = 1, itmx
                   DO t = 0, iall
 
                      ! Compute the difference depending on 'e' value
-                     IF (e_ahotn_nefd(t,u,v,i,j,k) >= tolr) THEN
-                        df = ABS((f_ahotn_nefd(t,u,v,i,j,k,g) - e_ahotn_nefd(t,u,v,i,j,k))/&
-													e_ahotn_nefd(t,u,v,i,j,k))
+                     IF (e(t,u,v,i,j,k) >= tolr) THEN
+                        df = ABS((f(t,u,v,i,j,k,g) - e(t,u,v,i,j,k))/&
+													e(t,u,v,i,j,k))
                      ELSE
-                        df = ABS((f_ahotn_nefd(t,u,v,i,j,k,g) - e_ahotn_nefd(t,u,v,i,j,k)))
+                        df = ABS((f(t,u,v,i,j,k,g) - e(t,u,v,i,j,k)))
                      END IF
                      ! Find the largest value
                      IF (df > dfmx) THEN
@@ -66,14 +66,14 @@ DO it = 1, itmx
    ! Print whether or not convergence was reached
    IF (dfmx > err .AND. it < itmx) THEN
       ! Set previous iterate of flux equal to current iterate
-      WRITE(8,111) g, it, id, jd, kd, td, ud, vd, dfmx, f_ahotn_nefd(td,ud,vd,id,jd,kd,gd), titer-told
+      WRITE(8,111) g, it, id, jd, kd, td, ud, vd, dfmx, f(td,ud,vd,id,jd,kd,gd), titer-told
       DO k = 1, nz
          DO j = 1, ny
             DO i = 1, nx
                DO v = 0, lambda
                   DO u = 0, lambda
                      DO t = 0, lambda
-                        e_ahotn_nefd(t,u,v,i,j,k) = f_ahotn_nefd(t,u,v,i,j,k,g)
+                        e(t,u,v,i,j,k) = f(t,u,v,i,j,k,g)
                      END DO
                   END DO
                END DO
@@ -94,7 +94,7 @@ DO it = 1, itmx
       WRITE (8,*)
       WRITE (8,*) "  Group ", g, " did not converge in maximum number of iterations ", itmx
       WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ", &
-				f_ahotn_nefd(td,ud,vd,id,jd,kd,gd)
+				f(td,ud,vd,id,jd,kd,gd)
       WRITE (8,*) "Pos ", id, jd, kd, " Moment ", td, ud, vd
       cnvf(g) = 0
       EXIT

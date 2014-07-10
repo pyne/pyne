@@ -25,7 +25,7 @@ REAL*8, DIMENSION(ordcb) :: b
 REAL*8 :: sig, mu, eta, xi, x, y, z, c, sgn
 
 ! Initialize the flux solution to zero
-f_ahotn_nefd=0.0d0
+f=0.0d0
 
 ! Start with loop over all angles
 DO n = 1, apo
@@ -221,7 +221,7 @@ DO n = 1, apo
                   DO t = 0, lambda
 !                     cell_source(t,u,v)=c*e(t,u,v,i,j,k) + s(t,u,v,i,j,k,g)/sig
                       indx = ordsq*t + order*u + v + 1
-                      b(indx)=c*e_ahotn_nefd(t,u,v,i,j,k) + s(t,u,v,i,j,k,g)/sig
+                      b(indx)=c*e(t,u,v,i,j,k) + s(t,u,v,i,j,k,g)/sig
                   END DO
                END DO
             END DO
@@ -234,7 +234,7 @@ DO n = 1, apo
                DO u = 0, lambda
                   DO t = 0, lambda
                      indx = ordsq*t + order*u + v + 1
-                     f_ahotn_nefd(t,u,v,i,j,k,g) = f_ahotn_nefd(t,u,v,i,j,k,g) + w(n)*b(indx)
+                     f(t,u,v,i,j,k,g) = f(t,u,v,i,j,k,g) + w(n)*b(indx)
                   END DO
                END DO
             END DO

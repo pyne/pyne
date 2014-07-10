@@ -5,7 +5,8 @@ import spatial_solver
 from dictionary_populate_test import populate, populate_with_warnings
 
 #a = populate("DGFEM","DENSE")
-a = populate("DGFEM","LAGRANGE")
+#a = populate("DGFEM","LAGRANGE")
+a = populate("AHOTN","LN")
 spatial_solver.solve(a)
 
 #ALL supported configurations without warnings

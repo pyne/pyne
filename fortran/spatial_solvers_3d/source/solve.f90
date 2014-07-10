@@ -25,7 +25,7 @@ WRITE (8,*) "-------------------------- THE SOLUTION ---------------------------
 WRITE (8,*)
 
 IF (solvertype == "LN" .or. solvertype == "LL") THEN
-	ALLOCATE(f_ahotn_l(4,nx,ny,nz,ng), e_ahotn_l(4,nx,ny,nz))
+	ALLOCATE(f(4,nx,ny,nz,ng,1,1), e(4,nx,ny,nz,1,1))
 	call read_sp_wts_ahotn_l
 	
 	! Read spatial weights
@@ -41,10 +41,10 @@ IF (solvertype == "LN" .or. solvertype == "LL") THEN
 		             DO i = 1, nx
 		                m = mat(i,j,k)
 		                xsct = sigs(m,g,gp)
-		                s(0,0,0,i,j,k,g) = s(0,0,0,i,j,k,g) + xsct*f_ahotn_l(1,i,j,k,gp)
-		                s(0,0,1,i,j,k,g) = s(0,0,1,i,j,k,g) + xsct*f_ahotn_l(2,i,j,k,gp)
-		                s(0,1,0,i,j,k,g) = s(0,1,0,i,j,k,g) + xsct*f_ahotn_l(3,i,j,k,gp)
-		                s(1,0,0,i,j,k,g) = s(1,0,0,i,j,k,g) + xsct*f_ahotn_l(4,i,j,k,gp)
+		                s(0,0,0,i,j,k,g) = s(0,0,0,i,j,k,g) + xsct*f(1,i,j,k,gp,1,1)
+		                s(0,0,1,i,j,k,g) = s(0,0,1,i,j,k,g) + xsct*f(2,i,j,k,gp,1,1)
+		                s(0,1,0,i,j,k,g) = s(0,1,0,i,j,k,g) + xsct*f(3,i,j,k,gp,1,1)
+		                s(1,0,0,i,j,k,g) = s(1,0,0,i,j,k,g) + xsct*f(4,i,j,k,gp,1,1)
 		             END DO
 		          END DO
 		       END DO
@@ -70,7 +70,7 @@ IF (solvertype == "LN" .or. solvertype == "LL") THEN
 	END DO
 
 ELSE IF (solvertype == "NEFD") THEN
-	ALLOCATE(f_ahotn_nefd(0:lambda,0:lambda,0:lambda,nx,ny,nz,ng), e_ahotn_nefd(0:lambda,0:lambda,0:lambda,nx,ny,nz))
+	ALLOCATE(f(0:lambda,0:lambda,0:lambda,nx,ny,nz,ng), e(0:lambda,0:lambda,0:lambda,nx,ny,nz))
 	call read_sp_wts_ahotn_nefd(lambda)
 
 
@@ -92,7 +92,7 @@ ELSE IF (solvertype == "NEFD") THEN
 		                DO v = 0, lambda
 		                   DO u = 0, lambda
 		                      DO t = 0, lambda
-		                         s(t,u,v,i,j,k,g) = s(t,u,v,i,j,k,g) + xsct*f_ahotn_nefd(t,u,v,i,j,k,gp)
+		                         s(t,u,v,i,j,k,g) = s(t,u,v,i,j,k,g) + xsct*f(t,u,v,i,j,k,gp)
 		                      END DO
 		                   END DO
 		                END DO

@@ -18,7 +18,7 @@ INTEGER :: id, jd, kd, vd, gd
 REAL*8 :: df, dfmx
 
 ! Initialize the previous flux iterate
-e_ahotn_l = 0.0
+e = 0.0
 ! Initialize the old time point
 told = ttosolve
 ! Start the iterations
@@ -34,10 +34,10 @@ DO it = 1, itmx
             DO v = 1, iall+1
 
                ! Compute the difference depending on 'e' value
-               IF (e_ahotn_l(v,i,j,k) >= tolr) THEN
-                  df = ABS((f_ahotn_l(v,i,j,k,g) - e_ahotn_l(v,i,j,k))/e_ahotn_l(v,i,j,k))
+               IF (e(v,i,j,k,1,1) >= tolr) THEN
+                  df = ABS((f(v,i,j,k,g,1,1) - e(v,i,j,k,1,1))/e(v,i,j,k,1,1))
                ELSE
-                  df = ABS((f_ahotn_l(v,i,j,k,g) - e_ahotn_l(v,i,j,k)))
+                  df = ABS((f(v,i,j,k,g,1,1) - e(v,i,j,k,1,1)))
                END IF
                ! Find the largest value
                IF (df > dfmx) THEN
@@ -59,11 +59,11 @@ DO it = 1, itmx
    ! Print whether or not convergence was reached
    IF (dfmx > err .AND. it < itmx) THEN
       ! Set previous iterate of flux equal to current iterate
-      WRITE(8,111) g, it, id, jd, kd, vd, dfmx, f_ahotn_l(vd,id,jd,kd,gd), titer-told
+      WRITE(8,111) g, it, id, jd, kd, vd, dfmx, f(vd,id,jd,kd,gd,1,1), titer-told
       DO k = 1, nz
          DO j = 1, ny
             DO i = 1, nx
-               e_ahotn_l(:,i,j,k) = f_ahotn_l(:,i,j,k,g)
+               e(:,i,j,k,1,1) = f(:,i,j,k,g,1,1)
             END DO
          END DO
       END DO
@@ -81,7 +81,7 @@ DO it = 1, itmx
       WRITE (8,*)
       WRITE (8,*) "  Group ", g, " did not converge in maximum number of iterations ", itmx
       WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ",&
-				f_ahotn_l(vd,id,jd,kd,gd)
+				f(vd,id,jd,kd,gd,1,1)
       WRITE (8,*) "Pos ", id, jd, kd, " Moment ", vd
       cnvf(g) = 0
       EXIT

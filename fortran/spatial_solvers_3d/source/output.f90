@@ -30,7 +30,7 @@ IF (solvertype == "LL" .or. solvertype == "LN") THEN
 		    DO k = 1, nz
 		       DO j = 1, ny
 		          WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
-		          WRITE (8,113) (f_ahotn_l(1,i,j,k,g), i = 1, nx)
+		          WRITE (8,113) (f(1,i,j,k,g,1,1), i = 1, nx)
 		       END DO
 		    END DO
 		    ! Call for the sum of the scalar flux moments if requested by momsum = 1
@@ -58,7 +58,7 @@ ELSE IF(solvertype == "NEFD") THEN
 		    DO k = 1, nz
 		       DO j = 1, ny
 		          WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
-		          WRITE (8,113) (f_ahotn_nefd(t,u,v,i,j,k,g), i = 1, nx)
+		          WRITE (8,113) (f(t,u,v,i,j,k,g), i = 1, nx)
 		       END DO
 		    END DO
 		    ! Print the optional flux moments as determined by momp
@@ -76,7 +76,7 @@ ELSE IF(solvertype == "NEFD") THEN
 		                DO k = 1, nz
 		                   DO j = 1, ny
 		                      WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
-		                      WRITE (8,113) (f_ahotn_nefd(t,u,v,i,j,k,g), i = 1, nx)
+		                      WRITE (8,113) (f(t,u,v,i,j,k,g), i = 1, nx)
 		                   END DO
 		                END DO
 		             END DO

@@ -31,13 +31,13 @@ DO g=1,ng
               DO jy=0,1
                 DO jz=0,1
                   IF      (jx.eq.0 .and. jy.eq.0 .and. jz.eq.0) then
-                    WRITE(31) REAL(f_ahotn_l(1,ix,iy,iz,g),8)
+                    WRITE(31) REAL(f(1,ix,iy,iz,g,1,1),8)
                   ELSE IF (jx.eq.0 .and. jy.eq.0 .and. jz.eq.1) then 
-                    WRITE(31) REAL(f_ahotn_l(2,ix,iy,iz,g),8)
+                    WRITE(31) REAL(f(2,ix,iy,iz,g,1,1),8)
                   ELSE IF (jx.eq.0 .and. jy.eq.1 .and. jz.eq.0) then 
-                    WRITE(31) REAL(f_ahotn_l(3,ix,iy,iz,g),8)
+                    WRITE(31) REAL(f(3,ix,iy,iz,g,1,1),8)
                   ELSE IF (jx.eq.1 .and. jy.eq.0 .and. jz.eq.0) then 
-                    WRITE(31) REAL(f_ahotn_l(4,ix,iy,iz,g),8)
+                    WRITE(31) REAL(f(4,ix,iy,iz,g,1,1),8)
                   ELSE
                     WRITE(31) 0.0d0
                   END IF
