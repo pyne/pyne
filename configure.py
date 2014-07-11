@@ -79,7 +79,7 @@ def final_message(success=True):
            "[1] http://www.enthought.com/products/epd.php\n"
            "[2] http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-{h5ver}/bin/windows/\n"
            ).format(h5ver=h5ver)
-    print(msg)
+    print(msg)a
 
 
 def setup():

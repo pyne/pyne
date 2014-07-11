@@ -1,20 +1,12 @@
 """This module accesses the AHOTN, DGFEM and SCT-STEP flavored nuetron transport solvers.
 """
 from __future__ import division
-from warnings import warn
-from pyne.utils import VnVWarning
 
 import sys
 import os
 
-#from pyne import utils
-#from pyne import data
-#from pyne import rxname
-#from pyne import nucname
-#from pyne import nuc_data
-#warn(__name__ + " is not yet V&V compliant.", VnVWarning)
-
 #Solver imports
+sys.path.append("../fortran/spatial_solvers_3d/source")
 sys.path.append("../../fortran/spatial_solvers_3d/source")
 
 #goal_dir = os.path.join(os.getcwd(), "../../fortran/spatial_solvers_3d/source")
