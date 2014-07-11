@@ -1,21 +1,18 @@
 """This module provides a way to access neutron spatial solver codes.  It primarily consists of wrapped fortran code's being called with python via f2py"""
 
 #Usual imports
-from source.main import main as main_AHOTN
-#supposed to be:
-#	from source.main import main as main
+from source.main import main as main
 
 #imports being used for testing
-from DGFEM_source.main import main as main_DGFEM
 from dict_util import dict_complete
 
 def solve(inputdict_unchecked):
 	inputdict = dict_complete(inputdict_unchecked)
 	if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
-		main_AHOTN("test title in",
+		main("test title in",
 		inputdict['solver'],
 		inputdict['solver_type'],
-		inputdict['spatial_order'],
+		inputdict['spatial_order'], 
 		inputdict['spatial_method'],
 		inputdict['angular_quadrature_order'],
 		inputdict['angular_quadrature_type'],
@@ -47,7 +44,6 @@ def solve(inputdict_unchecked):
 		inputdict['moment_sum_flag'],
 		inputdict['mom_at_a_pt_flag'],
 		inputdict['quad_flux_print_flag'])
-
 	elif(inputdict['solver'] == "SCT-STEP"):
 		print("SCT-STEP NOT IMPLEMENTED YET...")
 	else:
