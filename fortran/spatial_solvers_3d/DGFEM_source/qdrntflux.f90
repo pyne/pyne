@@ -29,7 +29,7 @@ DO g = 1, ng
    DO j = 1, hy
       DO i = 1, hx
          area = area + dx(i)*dy(j)
-         arflx = arflx + f(i,j,0,0,g)*dx(i)*dy(j)
+         arflx = arflx + f(i,j,0,0,g,1,1)*dx(i)*dy(j)
       END DO
    END DO
    ! Get the value for this loop
@@ -42,7 +42,7 @@ DO g = 1, ng
    DO j = 1, hy
       DO i = hx+1, nx
          area = area + dx(i)*dy(j)
-         arflx = arflx + f(i,j,0,0,g)*dx(i)*dy(j)
+         arflx = arflx + f(i,j,0,0,g,1,1)*dx(i)*dy(j)
       END DO
    END DO
    ! Get the value for this loop
@@ -55,7 +55,7 @@ DO g = 1, ng
    DO j = hy+1, ny
       DO i = 1, hx
          area = area + dx(i)*dy(j)
-         arflx = arflx + f(i,j,0,0,g)*dx(i)*dy(j)
+         arflx = arflx + f(i,j,0,0,g,1,1)*dx(i)*dy(j)
       END DO
    END DO
    ! Get the value for this loop
@@ -68,7 +68,7 @@ DO g = 1, ng
    DO j = hy+1, ny
       DO i = hx+1, nx
          area = area + dx(i)*dy(j)
-         arflx = arflx + f(i,j,0,0,g)*dx(i)*dy(j)
+         arflx = arflx + f(i,j,0,0,g,1,1)*dx(i)*dy(j)
       END DO
    END DO
    ! Get the value for this loop

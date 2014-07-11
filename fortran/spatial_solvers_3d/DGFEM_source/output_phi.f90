@@ -33,13 +33,13 @@ DO g=1,ng
 									IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
 		                IF(jx+jy+jz .le. lambda) THEN
 		                	l = jz+1-jy*(-3+2*jx+jy-2*lambda)/2+jx*(11+jx**2-3*jx*(2+lambda)+3*lambda*(4+lambda))/6
-		                 	WRITE(31) REAL(f(l,ix,iy,iz,g),8)/REAL(2*jx+1,8)/REAL(2*jy+1,8)/REAL(2*jz+1,8)
+		                 	WRITE(31) REAL(f(l,ix,iy,iz,g,1,1),8)/REAL(2*jx+1,8)/REAL(2*jy+1,8)/REAL(2*jz+1,8)
 		                ELSE
 		                   WRITE(31) 0.0d0
 		                END IF
 									ELSE IF (solvertype == "LAGRANGE") THEN
                   	l = jz+1+(lambda+1)*jy+(lambda+1)**2*jx
-                  	WRITE(31) REAL(f(l,ix,iy,iz,g),8)/REAL(2*jx+1,8)/REAL(2*jy+1,8)/REAL(2*jz+1,8)
+                  	WRITE(31) REAL(f(l,ix,iy,iz,g,1,1),8)/REAL(2*jx+1,8)/REAL(2*jy+1,8)/REAL(2*jz+1,8)
 									END IF
                 END DO
               END DO

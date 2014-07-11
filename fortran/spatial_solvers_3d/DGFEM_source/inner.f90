@@ -37,10 +37,10 @@ DO it = 1, itmx
                   DO i = 1, nx
                      l = v+1+(lambda+1)*u+(lambda+1)**2*t
                      ! Compute the difference depending on 'e' value
-                     IF (e(l,i,j,k) >= tolr) THEN
-                        df = ABS((f(l,i,j,k,g) - e(l,i,j,k))/e(l,i,j,k))
+                     IF (e(l,i,j,k,1,1) >= tolr) THEN
+                        df = ABS((f(l,i,j,k,g,1,1) - e(l,i,j,k,1,1))/e(l,i,j,k,1,1))
                      ELSE
-                        df = ABS(f(l,i,j,k,g) - e(l,i,j,k))
+                        df = ABS(f(l,i,j,k,g,1,1) - e(l,i,j,k,1,1))
                      END IF
                      ! Find the largest value
                      IF (df > dfmx) THEN
@@ -67,11 +67,11 @@ DO it = 1, itmx
    l = vd+1+(lambda+1)*ud+(lambda+1)**2*td
    IF (dfmx > err .AND. it < itmx) THEN
       ! Set previous iterate of flux equal to current iterate
-      WRITE(8,111) g, it, id, jd, kd, td, ud, vd, dfmx, f(l,id,jd,kd,gd), titer-told
+      WRITE(8,111) g, it, id, jd, kd, td, ud, vd, dfmx, f(l,id,jd,kd,gd,1,1), titer-told
       DO k = 1, nz
          DO j = 1, ny
             DO i = 1, nx
-               e(:,i,j,k) = f(:,i,j,k,g)
+               e(:,i,j,k,1,1) = f(:,i,j,k,g,1,1)
             END DO
          END DO
       END DO
@@ -88,7 +88,7 @@ DO it = 1, itmx
    ELSE IF (it == itmx) THEN
       WRITE (8,*)
       WRITE (8,*) "  Group ", g, " did not converge in maximum number of iterations ", itmx
-      WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ", f(l,id,jd,kd,gd)
+      WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ", f(l,id,jd,kd,gd,1,1)
       WRITE (8,*) "Pos ", id, jd, kd, " Moment ", td, ud, vd
       cnvf(g) = 0
       EXIT

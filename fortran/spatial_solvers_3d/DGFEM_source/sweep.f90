@@ -195,10 +195,10 @@ DO n = 1, apo
             ! Prepare the vector psi => on input to solver it's the total source
        
 						IF (solvertype == "LD") THEN
-		          psi(1) =              (sigsc*e(1,i,j,k) + s(1,i,j,k,g,1,1))
-		          psi(2) = real(incz,8)*(sigsc*e(2,i,j,k) + s(2,i,j,k,g,1,1))
-		          psi(3) = real(incy,8)*(sigsc*e(3,i,j,k) + s(3,i,j,k,g,1,1))
-		          psi(4) = real(incx,8)*(sigsc*e(4,i,j,k) + s(4,i,j,k,g,1,1))
+		          psi(1) =              (sigsc*e(1,i,j,k,1,1) + s(1,i,j,k,g,1,1))
+		          psi(2) = real(incz,8)*(sigsc*e(2,i,j,k,1,1) + s(2,i,j,k,g,1,1))
+		          psi(3) = real(incy,8)*(sigsc*e(3,i,j,k,1,1) + s(3,i,j,k,g,1,1))
+		          psi(4) = real(incx,8)*(sigsc*e(4,i,j,k,1,1) + s(4,i,j,k,g,1,1))
 
 		          ! Call cell solver    
 		            
@@ -207,10 +207,10 @@ DO n = 1, apo
 		          ! Update scalar flux, update formula interfaces psi test/trial and 
 		          ! phi test/trial functions
 
-		          f(1,i,j,k,g) = f(1,i,j,k,g) +                w(n) * psi(1)
-		          f(2,i,j,k,g) = f(2,i,j,k,g) + real(incz,8) * w(n) * psi(2)
-		          f(3,i,j,k,g) = f(3,i,j,k,g) + real(incy,8) * w(n) * psi(3)
-		          f(4,i,j,k,g) = f(4,i,j,k,g) + real(incx,8) * w(n) * psi(4)
+		          f(1,i,j,k,g,1,1) = f(1,i,j,k,g,1,1) +                w(n) * psi(1)
+		          f(2,i,j,k,g,1,1) = f(2,i,j,k,g,1,1) + real(incz,8) * w(n) * psi(2)
+		          f(3,i,j,k,g,1,1) = f(3,i,j,k,g,1,1) + real(incy,8) * w(n) * psi(3)
+		          f(4,i,j,k,g,1,1) = f(4,i,j,k,g,1,1) + real(incx,8) * w(n) * psi(4)
 						ELSE IF (solvertype == "DENSE") THEN
 	!           indx=0
 		          DO t = 0, lambda
@@ -221,7 +221,7 @@ DO n = 1, apo
 		                   mltz = incz**v
 		                   indx = v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6
 	!                    indx=indx+1
-		                   psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k) + s(indx,i,j,k,g,1,1))
+		                   psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k,1,1) + s(indx,i,j,k,g,1,1))
 		                END DO
 		             END DO
 		          END DO
@@ -242,7 +242,7 @@ DO n = 1, apo
 		                   mltz = incz**v
 		                   indx = v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6 
 	!                    indx=indx+1        
-		                   f(indx,i,j,k,g) = f(indx,i,j,k,g) + real(mltx*mlty*mltz,8)*w(n)*psi(indx)
+		                   f(indx,i,j,k,g,1,1) = f(indx,i,j,k,g,1,1) + real(mltx*mlty*mltz,8)*w(n)*psi(indx)
 		                END DO
 		             END DO
 		          END DO
@@ -258,7 +258,7 @@ DO n = 1, apo
                   DO v = 0, lambda
                      mltz = incz**v
                      indx = ordsq*t + order*u + v + 1
-                     psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k) + s(indx,i,j,k,g,1,1))
+                     psi(indx) = real(mltx*mlty*mltz,8) * (sigsc*e(indx,i,j,k,1,1) + s(indx,i,j,k,g,1,1))
                   END DO
                END DO
             END DO
@@ -277,7 +277,7 @@ DO n = 1, apo
                   DO v = 0, lambda
                      mltz = incz**v
                      indx = ordsq*t + order*u + v + 1
-                     f(indx,i,j,k,g) = f(indx,i,j,k,g) + real(mltx*mlty*mltz,8)*w(n)*psi(indx)
+                     f(indx,i,j,k,g,1,1) = f(indx,i,j,k,g,1,1) + real(mltx*mlty*mltz,8)*w(n)*psi(indx)
                   END DO
                END DO
             END DO

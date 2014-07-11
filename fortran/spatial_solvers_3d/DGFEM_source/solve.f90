@@ -15,9 +15,9 @@ INTEGER :: i, j, k, t, u, v, m, g, gp
 REAL*8 :: xsct
 
 IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
-	ALLOCATE(f(dofpc,nx,ny,nz,ng), e(dofpc,nx,ny,nz))
+	ALLOCATE(f(dofpc,nx,ny,nz,ng,1,1), e(dofpc,nx,ny,nz,1,1))
 ELSE IF (solvertype == "LAGRANGE") THEN
-	ALLOCATE(f(ordcb,nx,ny,nz,ng), e(ordcb,nx,ny,nz))
+	ALLOCATE(f(ordcb,nx,ny,nz,ng,1,1), e(ordcb,nx,ny,nz,1,1))
 END IF
 
 ALLOCATE(cnvf(ng))
@@ -47,7 +47,7 @@ DO g = 1, ng
                DO i = 1, nx
                   m = mat(i,j,k)
                   xsct = sigs(m,g,gp)
-                  s(:,i,j,k,g,1,1) = s(:,i,j,k,g,1,1) + xsct*f(:,i,j,k,gp)
+                  s(:,i,j,k,g,1,1) = s(:,i,j,k,g,1,1) + xsct*f(:,i,j,k,gp,1,1)
                END DO
             END DO
          END DO
