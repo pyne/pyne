@@ -58,7 +58,8 @@ IF (solvertype == "LN" .or. solvertype == "LL") THEN
 		 IF (meth == 0) THEN
 		    WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
 		    ! Call for the inner iteration (or ITM solver later)
-		    CALL inner_ahotn_l(g)
+		    !CALL inner_ahotn_l(g)
+				CALL inner(g)
 		 ELSE IF (meth == 1) THEN
 		    STOP
 		    WRITE(8,*) 'Option meth=1 was removed'
@@ -109,7 +110,8 @@ ELSE IF (solvertype == "NEFD") THEN
 		 IF (meth == 0) THEN
 		    WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
 		    ! Call for the inner iteration (or ITM solver later)
-		    CALL inner_ahotn_nefd(g)
+		    !CALL inner_ahotn_nefd(g)
+				CALL inner(g)
 		 ELSE IF (meth == 1) THEN
 		    STOP
 		    WRITE(8,*) 'Option meth=1 was removed'
