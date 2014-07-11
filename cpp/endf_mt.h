@@ -30,7 +30,7 @@ namespace pyne
   };
 
   /// mt section for descriptive informaiton
-  class mt_451 : public mt_base {
+  class mt451 : public mt_base {
   public:
     int lrp; ///< resonance parameters given
     int lfi; ///< does material fission
@@ -53,11 +53,12 @@ namespace pyne
     std::vector<std::vector<int> > mt_list; ///< list of [mf,mt,lines,mod]
   };
 
-  /// readers for different dataset types
-  mt_451 read_451(std::ifstream &infile);
+  /// read an mt 451 information from a filestream
+  /// \param infile An ENDF filestream
+  mt451 read_mt451(std::ifstream &infile);
 
   /// A struct for fission profuct yield data MT 454, 459
-  class mt_fpy_8 : public mt_base {
+  class mtfpy_mf8 : public mt_base {
   public:
     int le; ///< number of energy  dependent yields given
     std::vector<int> i; ///< interpolation to be used between E[i-1] and E[i]
@@ -65,10 +66,12 @@ namespace pyne
     std::vector<std::vector<std::vector<double> > > yields; ///< yield data [zafp,fps,yi,dyi]
   };
 
-  mt_fpy_8 read_fpy_8(std::ifstream &infile);
+  /// read an mt fission product yield information from a filestream
+  /// \param infile An ENDF filestream
+  mtfpy_mf8 read_mtfpy_mf8(std::ifstream &infile);
 
   /// A struct for neutrons per fission
-  class mt_452_1 : public mt_base {
+  class mt452_mf1 : public mt_base {
   public:
     int lnu; ///< type of data in section
     /// if LNU = 1 this will be an nth order polynomial describing nu
@@ -80,9 +83,11 @@ namespace pyne
     std::vector<double> nu_e; ///< Neutrons per fission at the given energy
   };
 
-  mt_452_1 read_452_1(std::ifstream &infile);
+  /// read neutrons per fission information from a filestream
+  /// \param infile An ENDF filestream
+  mt452_mf1 read_mt452_mf1(std::ifstream &infile);
 
-  class mt_455_1 : public mt_base {
+  class mt455_mf1 : public mt_base {
   public:
 
     int ldg; ///< energy dependence of decay constants
@@ -104,11 +109,13 @@ namespace pyne
 
   };
 
-  mt_455_1 read_455_1(std::ifstream &infile);
+  /// read precursor information from a filestream
+  /// \param infile An ENDF filestream
+  mt455_mf1 read_mt455_mf1(std::ifstream &infile);
 
   /// structure containing data about prompt neutrons per fission as a function
   /// of energy
-  class mt_456_1 : public mt_base {
+  class mt456_mf1 : public mt_base {
   public:
     int lnu;
 
@@ -123,11 +130,12 @@ namespace pyne
 
   };
 
-
-  mt_456_1 read_456_1(std::ifstream &infile);
+  /// read neutrons per fission data from a filestream
+  /// \param infile An ENDF filestream
+  mt456_mf1 read_mt456_mf1(std::ifstream &infile);
 
   /// Data structure for fission energy release
-  class mt_458_1 : public mt_base {
+  class mt458_mf1 : public mt_base {
   public:
 
     std::vector<double> efr; ///< kinetic energy from fission products
@@ -153,10 +161,11 @@ namespace pyne
 
   /// reads ENDF fission energy release data from an ifstream and returns
   /// structure containing associated data
-  mt_458_1 read_458_1(std::ifstream &infile);
+  /// \param infile An ENDF filestream
+  mt458_mf1 read_mt458_mf1(std::ifstream &infile);
 
   /// data structure for delayed photon data
-  class mt_460_1 : public mt_base {
+  class mt460_mf1 : public mt_base {
   public:
 
     int lo; ///< representation type: 1 if discrete, 2 if continuous
@@ -172,7 +181,9 @@ namespace pyne
 
   };
 
-  mt_460_1 read_460_1(std::ifstream &infile);
+  /// read delayed photon data from a filestream
+  /// \param infile An ENDF filestream
+  mt460_mf1 read_mt460_mf1(std::ifstream &infile);
 
 
 }

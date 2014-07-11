@@ -16,7 +16,7 @@ from libcpp.string cimport string as std_string
 
 
 cdef class Tally:
-    """no docstring for {'tarbase': 'tally', 'tarname': 'Tally', 'language': 'c++', 'srcname': 'Tally', 'sidecars': (), 'incfiles': ('tally.h',), 'srcfiles': ('cpp/tally.cpp', 'cpp/tally.h')}, please file a bug report!"""
+    """no docstring for {'sidecars': (), 'tarbase': 'tally', 'tarname': 'Tally', 'language': 'c++', 'srcname': 'Tally', 'incfiles': ('tally.h',), 'srcfiles': ('cpp/tally.cpp', 'cpp/tally.h')}, please file a bug report!"""
 
 
 

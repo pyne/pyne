@@ -3,64 +3,64 @@
   #include "endf_mt.h"
 #endif
 
-pyne::mt_451 pyne::read_451(std::ifstream &infile) {
-    mt_451 mt_451;
+pyne::mt451 pyne::read_mt451(std::ifstream &infile) {
+    mt451 mt451;
 
     control cs = read_cont(infile);
-    mt_451.nuc_id = cs.c1;
-    mt_451.awr = cs.c2;
-    mt_451.mat = cs.mat;
-    mt_451.mf = cs.mf;
-    mt_451.mt = cs.mt;
+    mt451.nuc_id = cs.c1;
+    mt451.awr = cs.c2;
+    mt451.mat = cs.mat;
+    mt451.mf = cs.mf;
+    mt451.mt = cs.mt;
 
-    mt_451.lrp = cs.l1;
-    mt_451.lfi = cs.l2;
-    mt_451.nlib = cs.n1;
-    mt_451.nmod = cs.n2;
-
-
-    cs = read_cont(infile);
-    mt_451.elis = cs.c1;
-    mt_451.sta = cs.c2;
-    mt_451.lis = cs.l1;
-    mt_451.liso = cs.l2;
-    //mt_451.elis = cs.n1;
-    mt_451.nfor = cs.n2;
+    mt451.lrp = cs.l1;
+    mt451.lfi = cs.l2;
+    mt451.nlib = cs.n1;
+    mt451.nmod = cs.n2;
 
 
     cs = read_cont(infile);
-    mt_451.awi = cs.c1;
-    mt_451.emax = cs.c2;
-    mt_451.lrel = cs.l1;
-    //mt_451.liso = cs.l2;
-    mt_451.nsub = cs.n1;
-    mt_451.nver = cs.n2;
+    mt451.elis = cs.c1;
+    mt451.sta = cs.c2;
+    mt451.lis = cs.l1;
+    mt451.liso = cs.l2;
+    //mt451.elis = cs.n1;
+    mt451.nfor = cs.n2;
 
 
     cs = read_cont(infile);
-    mt_451.temp = cs.c1;
-    //mt_451.emax = cs3.c2;
-    mt_451.ldrv = cs.l1;
-    //mt_451.liso = cs.l2;
-    mt_451.nwd = cs.n1;
-    mt_451.nxc = cs.n2;
+    mt451.awi = cs.c1;
+    mt451.emax = cs.c2;
+    mt451.lrel = cs.l1;
+    //mt451.liso = cs.l2;
+    mt451.nsub = cs.n1;
+    mt451.nver = cs.n2;
+
+
+    cs = read_cont(infile);
+    mt451.temp = cs.c1;
+    //mt451.emax = cs3.c2;
+    mt451.ldrv = cs.l1;
+    //mt451.liso = cs.l2;
+    mt451.nwd = cs.n1;
+    mt451.nxc = cs.n2;
     std::string line;
-    for (int i = 0; i < mt_451.nwd; ++i) {
+    for (int i = 0; i < mt451.nwd; ++i) {
         getline(infile, line);
     }
 
-    for (int i = 0; i < mt_451.nxc; ++i) {
+    for (int i = 0; i < mt451.nxc; ++i) {
         cs = read_cont(infile);
         int tmp_arr[] = {cs.l1, cs.l2, cs.n1, cs.n2};
         std::vector<int> tmp (tmp_arr, tmp_arr + sizeof(tmp_arr) / sizeof(int) );
-        mt_451.mt_list.push_back(tmp);
+        mt451.mt_list.push_back(tmp);
     }
     getline(infile, line); // get send line
-    return mt_451;
+    return mt451;
 }
 
-pyne::mt_fpy_8 pyne::read_fpy_8(std::ifstream &infile) {
-    mt_fpy_8 mt_fpy;
+pyne::mtfpy_mf8 pyne::read_mtfpy_mf8(std::ifstream &infile) {
+    mtfpy_mf8 mt_fpy;
 
     control cs = read_cont(infile);
     mt_fpy.nuc_id = cs.c1;
@@ -89,57 +89,57 @@ pyne::mt_fpy_8 pyne::read_fpy_8(std::ifstream &infile) {
     return mt_fpy;
 }
 
-pyne::mt_452_1 pyne::read_452_1(std::ifstream &infile) {
-  mt_452_1 mt_452;
+pyne::mt452_mf1 pyne::read_mt452_mf1(std::ifstream &infile) {
+  mt452_mf1 mt452;
 
   control cs = read_cont(infile);
-  mt_452.nuc_id = cs.c1;
-  mt_452.awr = cs.c2;
-  mt_452.mat = cs.mat;
-  mt_452.mf = cs.mf;
-  mt_452.mt = cs.mt;
+  mt452.nuc_id = cs.c1;
+  mt452.awr = cs.c2;
+  mt452.mat = cs.mat;
+  mt452.mf = cs.mf;
+  mt452.mt = cs.mt;
 
-  mt_452.lnu = cs.l2;
+  mt452.lnu = cs.l2;
 
-  if (mt_452.lnu == 1) {
+  if (mt452.lnu == 1) {
     list lst = read_list(infile);
-    mt_452.poly = lst.data;
-  }else if (mt_452.lnu == 2) {
+    mt452.poly = lst.data;
+  }else if (mt452.lnu == 2) {
     tab1 tab = read_tab1(infile);
-    mt_452.nbt = tab.nbt;
-    mt_452.intn = tab.intn;
-    mt_452.eint = tab.x;
-    mt_452.nu_e = tab.y;
+    mt452.nbt = tab.nbt;
+    mt452.intn = tab.intn;
+    mt452.eint = tab.x;
+    mt452.nu_e = tab.y;
   }
   std::string line;
   getline(infile, line);
-  return mt_452;
+  return mt452;
 }
 
-pyne::mt_455_1 pyne::read_455_1(std::ifstream &infile) {
-  mt_455_1 mt_455;
+pyne::mt455_mf1 pyne::read_mt455_mf1(std::ifstream &infile) {
+  mt455_mf1 mt455;
 
   control cs = read_cont(infile);
-  mt_455.nuc_id = cs.c1;
-  mt_455.awr = cs.c2;
-  mt_455.mat = cs.mat;
-  mt_455.mf = cs.mf;
-  mt_455.mt = cs.mt;
+  mt455.nuc_id = cs.c1;
+  mt455.awr = cs.c2;
+  mt455.mat = cs.mat;
+  mt455.mf = cs.mf;
+  mt455.mt = cs.mt;
 
-  mt_455.ldg = cs.l1;
-  mt_455.lnu = cs.l2;
+  mt455.ldg = cs.l1;
+  mt455.lnu = cs.l2;
 
-  if ((mt_455.lnu == 2) && (mt_455.ldg == 0)) {
+  if ((mt455.lnu == 2) && (mt455.ldg == 0)) {
     list lst = read_list(infile);
     tab1 tab = read_tab1(infile);
-    mt_455.lambdas = lst.data;
-    mt_455.nbt = tab.nbt;
-    mt_455.intn = tab.intn;
-    mt_455.eint = tab.x;
-    mt_455.nu_d = tab.y;
+    mt455.lambdas = lst.data;
+    mt455.nbt = tab.nbt;
+    mt455.intn = tab.intn;
+    mt455.eint = tab.x;
+    mt455.nu_d = tab.y;
 
   }
-  if ((mt_455.lnu == 2) && (mt_455.ldg == 1)) {
+  if ((mt455.lnu == 2) && (mt455.ldg == 1)) {
     tab2 tab = read_tab2(infile);
     int nv;
     for (int i = 0; i < tab.l2; ++i) {
@@ -151,27 +151,27 @@ pyne::mt_455_1 pyne::read_455_1(std::ifstream &infile) {
         lambdas[j] = lst.data[j*2];
         alphas[j] = lst.data[j*2 + 1];
       }
-      mt_455.lambda_arr.push_back(lambdas);
-      mt_455.alpha_arr.push_back(alphas);
+      mt455.lambda_arr.push_back(lambdas);
+      mt455.alpha_arr.push_back(alphas);
     }
     tab1 tab1 = read_tab1(infile);
-    mt_455.nbt = tab1.nbt;
-    mt_455.intn = tab1.intn;
-    mt_455.eint = tab1.x;
-    mt_455.nu_d = tab1.y;
+    mt455.nbt = tab1.nbt;
+    mt455.intn = tab1.intn;
+    mt455.eint = tab1.x;
+    mt455.nu_d = tab1.y;
   }
-  if ((mt_455.lnu == 1) && (mt_455.ldg == 0)) {
+  if ((mt455.lnu == 1) && (mt455.ldg == 0)) {
     list lst = read_list(infile);
-    mt_455.lambda_arr.push_back(lst.data);
+    mt455.lambda_arr.push_back(lst.data);
     tab1 tab = read_tab1(infile);
-    mt_455.nbt = tab.nbt;
-    mt_455.intn = tab.intn;
-    mt_455.nu_d = tab.y;
+    mt455.nbt = tab.nbt;
+    mt455.intn = tab.intn;
+    mt455.nu_d = tab.y;
   }
-  if ((mt_455.lnu == 1) && (mt_455.ldg == 1)) {
+  if ((mt455.lnu == 1) && (mt455.ldg == 1)) {
     tab2 tab = read_tab2(infile);
-    mt_455.ne = tab.nbt;
-    mt_455.einti = tab.intn;
+    mt455.ne = tab.nbt;
+    mt455.einti = tab.intn;
     int nv;
     for (int i = 0; i < tab.l2; ++i) {
       list lst = read_list(infile);
@@ -182,132 +182,132 @@ pyne::mt_455_1 pyne::read_455_1(std::ifstream &infile) {
         lambdas[j] = lst.data[j*2];
         alphas[j] = lst.data[j*2 + 1];
       }
-      mt_455.lambda_arr.push_back(lambdas);
-      mt_455.alpha_arr.push_back(alphas);
+      mt455.lambda_arr.push_back(lambdas);
+      mt455.alpha_arr.push_back(alphas);
     }
     tab1 tab1 = read_tab1(infile);
-    mt_455.nbt = tab1.nbt;
-    mt_455.intn = tab1.intn;
-    mt_455.eint = tab1.x;
-    mt_455.nu_d = tab1.y;
+    mt455.nbt = tab1.nbt;
+    mt455.intn = tab1.intn;
+    mt455.eint = tab1.x;
+    mt455.nu_d = tab1.y;
   }
   std::string line;
   getline(infile, line);
-  return mt_455;
+  return mt455;
 }
 
-pyne::mt_456_1 pyne::read_456_1(std::ifstream &infile) {
-  mt_456_1 mt_456;
+pyne::mt456_mf1 pyne::read_mt456_mf1(std::ifstream &infile) {
+  mt456_mf1 mt456;
   control cs = read_cont(infile);
-  mt_456.nuc_id = cs.c1;
-  mt_456.awr = cs.c2;
-  mt_456.mat = cs.mat;
-  mt_456.mf = cs.mf;
-  mt_456.mt = cs.mt;
+  mt456.nuc_id = cs.c1;
+  mt456.awr = cs.c2;
+  mt456.mat = cs.mat;
+  mt456.mf = cs.mf;
+  mt456.mt = cs.mt;
 
-  mt_456.lnu = cs.l2;
+  mt456.lnu = cs.l2;
 
-  if (mt_456.lnu == 1) {
+  if (mt456.lnu == 1) {
     list lst = read_list(infile);
-    mt_456.nu = lst.data;
-  }else if (mt_456.lnu == 2) {
+    mt456.nu = lst.data;
+  }else if (mt456.lnu == 2) {
     tab1 tab = read_tab1(infile);
-    mt_456.nbt = tab.nbt;
-    mt_456.intn = tab.intn;
-    mt_456.eint = tab.x;
-    mt_456.nu_e = tab.y;
+    mt456.nbt = tab.nbt;
+    mt456.intn = tab.intn;
+    mt456.eint = tab.x;
+    mt456.nu_e = tab.y;
   }
 
   std::string line;
   getline(infile, line);
-  return mt_456;
+  return mt456;
 }
 
-pyne::mt_458_1 pyne::read_458_1(std::ifstream &infile) {
-  mt_458_1 mt_458;
+pyne::mt458_mf1 pyne::read_mt458_mf1(std::ifstream &infile) {
+  mt458_mf1 mt458;
   control cs = read_cont(infile);
-  mt_458.nuc_id = cs.c1;
-  mt_458.awr = cs.c2;
-  mt_458.mat = cs.mat;
-  mt_458.mf = cs.mf;
-  mt_458.mt = cs.mt;
+  mt458.nuc_id = cs.c1;
+  mt458.awr = cs.c2;
+  mt458.mat = cs.mat;
+  mt458.mf = cs.mf;
+  mt458.mt = cs.mt;
 
   list lst = read_list(infile);
 
-  mt_458.efr = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.defr = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.enp = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.denp = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.end = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.dend = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.egp = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.degp = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.egd = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.degd = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.eb = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.deb = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.enu = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.denu = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.er = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.der = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.et = std::vector<double> (lst.l2 + 1, 0);
-  mt_458.det = std::vector<double> (lst.l2 + 1, 0);
+  mt458.efr = std::vector<double> (lst.l2 + 1, 0);
+  mt458.defr = std::vector<double> (lst.l2 + 1, 0);
+  mt458.enp = std::vector<double> (lst.l2 + 1, 0);
+  mt458.denp = std::vector<double> (lst.l2 + 1, 0);
+  mt458.end = std::vector<double> (lst.l2 + 1, 0);
+  mt458.dend = std::vector<double> (lst.l2 + 1, 0);
+  mt458.egp = std::vector<double> (lst.l2 + 1, 0);
+  mt458.degp = std::vector<double> (lst.l2 + 1, 0);
+  mt458.egd = std::vector<double> (lst.l2 + 1, 0);
+  mt458.degd = std::vector<double> (lst.l2 + 1, 0);
+  mt458.eb = std::vector<double> (lst.l2 + 1, 0);
+  mt458.deb = std::vector<double> (lst.l2 + 1, 0);
+  mt458.enu = std::vector<double> (lst.l2 + 1, 0);
+  mt458.denu = std::vector<double> (lst.l2 + 1, 0);
+  mt458.er = std::vector<double> (lst.l2 + 1, 0);
+  mt458.der = std::vector<double> (lst.l2 + 1, 0);
+  mt458.et = std::vector<double> (lst.l2 + 1, 0);
+  mt458.det = std::vector<double> (lst.l2 + 1, 0);
 
   for (int i = 0; i < lst.l2 + 1; ++i) {
-    mt_458.efr[i] = lst.data[i*18];
-    mt_458.defr[i] = lst.data[i*18+1];
-    mt_458.enp[i] = lst.data[i*18+2];
-    mt_458.denp[i] = lst.data[i*18+3];
-    mt_458.end[i] = lst.data[i*18+4];
-    mt_458.dend[i] = lst.data[i*18+5];
-    mt_458.egp[i] = lst.data[i*18+6];
-    mt_458.degp[i] = lst.data[i*18+7];
-    mt_458.egd[i] = lst.data[i*18+8];
-    mt_458.degd[i] = lst.data[i*18+9];
-    mt_458.eb[i] = lst.data[i*18+10];
-    mt_458.deb[i] = lst.data[i*18+11];
-    mt_458.enu[i] = lst.data[i*18+12];
-    mt_458.denu[i] = lst.data[i*18+13];
-    mt_458.er[i] = lst.data[i*18+14];
-    mt_458.der[i] = lst.data[i*18+15];
-    mt_458.et[i] = lst.data[i*18+16];
-    mt_458.det[i] = lst.data[i*18+17];
+    mt458.efr[i] = lst.data[i*18];
+    mt458.defr[i] = lst.data[i*18+1];
+    mt458.enp[i] = lst.data[i*18+2];
+    mt458.denp[i] = lst.data[i*18+3];
+    mt458.end[i] = lst.data[i*18+4];
+    mt458.dend[i] = lst.data[i*18+5];
+    mt458.egp[i] = lst.data[i*18+6];
+    mt458.degp[i] = lst.data[i*18+7];
+    mt458.egd[i] = lst.data[i*18+8];
+    mt458.degd[i] = lst.data[i*18+9];
+    mt458.eb[i] = lst.data[i*18+10];
+    mt458.deb[i] = lst.data[i*18+11];
+    mt458.enu[i] = lst.data[i*18+12];
+    mt458.denu[i] = lst.data[i*18+13];
+    mt458.er[i] = lst.data[i*18+14];
+    mt458.der[i] = lst.data[i*18+15];
+    mt458.et[i] = lst.data[i*18+16];
+    mt458.det[i] = lst.data[i*18+17];
   }
 
   std::string line;
   getline(infile, line);
-  return mt_458;
+  return mt458;
 }
 
-pyne::mt_460_1 pyne::read_460_1(std::ifstream &infile) {
-  mt_460_1 mt_460;
+pyne::mt460_mf1 pyne::read_mt460_mf1(std::ifstream &infile) {
+  mt460_mf1 mt460;
   control cs = read_cont(infile);
 
-  mt_460.nuc_id = cs.c1;
-  mt_460.awr = cs.c2;
-  mt_460.mat = cs.mat;
-  mt_460.mf = cs.mf;
-  mt_460.mt = cs.mt;
+  mt460.nuc_id = cs.c1;
+  mt460.awr = cs.c2;
+  mt460.mat = cs.mat;
+  mt460.mf = cs.mf;
+  mt460.mt = cs.mt;
 
-  mt_460.lo = cs.l1;
-  mt_460.ng = cs.n1;
-  mt_460.elist = std::vector<double>(mt_460.ng, 0.0);
+  mt460.lo = cs.l1;
+  mt460.ng = cs.n1;
+  mt460.elist = std::vector<double>(mt460.ng, 0.0);
 
-  if (mt_460.lo == 1) {
-    for (int i = 0; i < mt_460.ng; ++i) {
+  if (mt460.lo == 1) {
+    for (int i = 0; i < mt460.ng; ++i) {
       tab1 tab = read_tab1(infile);
-      mt_460.elist[i] = tab.c1;
-      mt_460.nbt.push_back(tab.nbt);
-      mt_460.intn.push_back(tab.intn);
-      mt_460.tint.push_back(tab.x);
-      mt_460.t.push_back(tab.y);
+      mt460.elist[i] = tab.c1;
+      mt460.nbt.push_back(tab.nbt);
+      mt460.intn.push_back(tab.intn);
+      mt460.tint.push_back(tab.x);
+      mt460.t.push_back(tab.y);
     }
-  }else if(mt_460.lo == 2) {
+  }else if(mt460.lo == 2) {
     list lst = read_list(infile);
-    mt_460.lambdas = lst.data;
+    mt460.lambdas = lst.data;
   }
 
   std::string line;
   getline(infile, line);
-  return mt_460;
+  return mt460;
 }

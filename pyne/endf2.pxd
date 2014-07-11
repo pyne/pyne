@@ -43,53 +43,7 @@ cdef class mt_base:
 
 
 
-cdef class mt_455_1(mt_base):
-    cdef public np.ndarray _alpha_arr
-    cdef public np.ndarray _eint
-    cdef public np.ndarray _einti
-    cdef public np.ndarray _intn
-    cdef public np.ndarray _lambda_arr
-    cdef public np.ndarray _lambdas
-    cdef public np.ndarray _nbt
-    cdef public np.ndarray _ne
-    cdef public np.ndarray _nu_d
-    pass
-
-
-
-
-
-cdef class mt_fpy_8(mt_base):
-    cdef public np.ndarray _e
-    cdef public np.ndarray _i
-    cdef public np.ndarray _yields
-    pass
-
-
-
-
-
-cdef class mt_452_1(mt_base):
-    cdef public np.ndarray _eint
-    cdef public np.ndarray _intn
-    cdef public np.ndarray _nbt
-    cdef public np.ndarray _nu_e
-    cdef public np.ndarray _poly
-    pass
-
-
-
-
-
-cdef class mt_451(mt_base):
-    cdef public np.ndarray _mt_list
-    pass
-
-
-
-
-
-cdef class mt_458_1(mt_base):
+cdef class mt458_mf1(mt_base):
     cdef public np.ndarray _deb
     cdef public np.ndarray _defr
     cdef public np.ndarray _degd
@@ -114,7 +68,25 @@ cdef class mt_458_1(mt_base):
 
 
 
-cdef class mt_460_1(mt_base):
+cdef class mt451(mt_base):
+    cdef public np.ndarray _mt_list
+    pass
+
+
+
+
+
+cdef class mtfpy_mf8(mt_base):
+    cdef public np.ndarray _e
+    cdef public np.ndarray _i
+    cdef public np.ndarray _yields
+    pass
+
+
+
+
+
+cdef class mt460_mf1(mt_base):
     cdef public np.ndarray _elist
     cdef public np.ndarray _intn
     cdef public np.ndarray _lambdas
@@ -127,7 +99,35 @@ cdef class mt_460_1(mt_base):
 
 
 
-cdef class mt_456_1(mt_base):
+cdef class mt452_mf1(mt_base):
+    cdef public np.ndarray _eint
+    cdef public np.ndarray _intn
+    cdef public np.ndarray _nbt
+    cdef public np.ndarray _nu_e
+    cdef public np.ndarray _poly
+    pass
+
+
+
+
+
+cdef class mt455_mf1(mt_base):
+    cdef public np.ndarray _alpha_arr
+    cdef public np.ndarray _eint
+    cdef public np.ndarray _einti
+    cdef public np.ndarray _intn
+    cdef public np.ndarray _lambda_arr
+    cdef public np.ndarray _lambdas
+    cdef public np.ndarray _nbt
+    cdef public np.ndarray _ne
+    cdef public np.ndarray _nu_d
+    pass
+
+
+
+
+
+cdef class mt456_mf1(mt_base):
     cdef public np.ndarray _eint
     cdef public np.ndarray _intn
     cdef public np.ndarray _nbt

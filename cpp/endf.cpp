@@ -68,19 +68,19 @@ void pyne::library::read_endf(std::string filenm) {
   getline(infile, line);
   infile.seekg(place);
   mt = atoi(line.substr(72, 3).c_str());
-  mt_451 *mt451;
+  mt451 *mt451_current;
   if (mt == 451){
-    mt451 = new mt_451;
-    *mt451 = read_451(infile);
-    endf_id id = make_endf_id((mt_base) *mt451);
-    contents[(endf_id) id] = mt451;
+    mt451_current = new mt451;
+    *mt451_current = read_mt451(infile);
+    endf_id id = make_endf_id((mt_base) *mt451_current);
+    contents[(endf_id) id] = mt451_current;
   }else
     return;
 
   std::vector<int> plist;
   plist.push_back(81);
   infile.seekg(place);
-  for (int i = 0; i < mt451->nxc; ++i) {
+  for (int i = 0; i < mt451_current->nxc; ++i) {
     place = infile.tellg();
     getline(infile, line);
     infile.seekg(place);
@@ -97,45 +97,45 @@ void pyne::library::read_endf(std::string filenm) {
     plist.back() = plist.back() + count*81;
     infile.seekg(place);
     int last = plist.back();
-    plist.push_back(last + mt451->mt_list[i][2]*81 + 81);
+    plist.push_back(last + mt451_current->mt_list[i][2]*81 + 81);
     infile.seekg(plist.back());
   }
   for (int i = 1; i < plist.size() - 1; ++i){
     infile.clear();// reset any flags if a parser went nuts
     infile.seekg(plist[i]);
-    mf = mt451->mt_list[i][0];
-    mt = mt451->mt_list[i][1];
+    mf = mt451_current->mt_list[i][0];
+    mt = mt451_current->mt_list[i][1];
     if (mf == 1) {
       if (mt == 452) {
-        mt_452_1 *temp = new mt_452_1;
-        *temp = read_452_1(infile);
+        mt452_mf1 *temp = new mt452_mf1;
+        *temp = read_mt452_mf1(infile);
         endf_id id = make_endf_id((mt_base) *temp);
         contents[(endf_id) id] = temp;
       }else if (mt == 455) {
-        mt_455_1 *temp = new mt_455_1;
-        *temp = read_455_1(infile);
+        mt455_mf1 *temp = new mt455_mf1;
+        *temp = read_mt455_mf1(infile);
         endf_id id = make_endf_id((mt_base) *temp);
         contents[(endf_id) id] = temp;
       }else if (mt == 456) {
-        mt_456_1 *temp = new mt_456_1;
-        *temp = read_456_1(infile);
+        mt456_mf1 *temp = new mt456_mf1;
+        *temp = read_mt456_mf1(infile);
         endf_id id = make_endf_id((mt_base) *temp);
         contents[(endf_id) id] = temp;
       }else if (mt == 458) {
-        mt_458_1 *temp = new mt_458_1;
-        *temp = read_458_1(infile);
+        mt458_mf1 *temp = new mt458_mf1;
+        *temp = read_mt458_mf1(infile);
         endf_id id = make_endf_id((mt_base) *temp);
         contents[(endf_id) id] = temp;
       }else if (mt == 460) {
-        mt_460_1 *temp = new mt_460_1;
-        *temp = read_460_1(infile);
+        mt460_mf1 *temp = new mt460_mf1;
+        *temp = read_mt460_mf1(infile);
         endf_id id = make_endf_id((mt_base) *temp);
         contents[(endf_id) id] = temp;
       }
     }else if (mf == 8) {
       if ((mt == 454) || (mt == 459)) {
-        mt_fpy_8 *temp = new mt_fpy_8;
-        *temp = read_fpy_8(infile);
+        mtfpy_mf8 *temp = new mtfpy_mf8;
+        *temp = read_mtfpy_mf8(infile);
         endf_id id = make_endf_id((mt_base) *temp);
         contents[(endf_id) id] = temp;
       }
@@ -155,13 +155,13 @@ template<typename T> T pyne::library::get (endf_id comp){
   return ret;
 };
 
-template pyne::mt_451 pyne::library::get(pyne::endf_id comp);
-template pyne::mt_452_1 pyne::library::get(pyne::endf_id comp);
-template pyne::mt_455_1 pyne::library::get(pyne::endf_id comp);
-template pyne::mt_456_1 pyne::library::get(pyne::endf_id comp);
-template pyne::mt_458_1 pyne::library::get(pyne::endf_id comp);
-template pyne::mt_460_1 pyne::library::get(pyne::endf_id comp);
-template pyne::mt_fpy_8 pyne::library::get(pyne::endf_id comp);
+template pyne::mt451 pyne::library::get(pyne::endf_id comp);
+template pyne::mt452_mf1 pyne::library::get(pyne::endf_id comp);
+template pyne::mt455_mf1 pyne::library::get(pyne::endf_id comp);
+template pyne::mt456_mf1 pyne::library::get(pyne::endf_id comp);
+template pyne::mt458_mf1 pyne::library::get(pyne::endf_id comp);
+template pyne::mt460_mf1 pyne::library::get(pyne::endf_id comp);
+template pyne::mtfpy_mf8 pyne::library::get(pyne::endf_id comp);
 
 template<typename T> T pyne::library::get (int mat, int mf, int mt){
   endf_id tmp;
@@ -171,13 +171,13 @@ template<typename T> T pyne::library::get (int mat, int mf, int mt){
   return get<T>(tmp);
 };
 
-template pyne::mt_451 pyne::library::get(int mat, int mf, int mt);
-template pyne::mt_452_1 pyne::library::get(int mat, int mf, int mt);
-template pyne::mt_455_1 pyne::library::get(int mat, int mf, int mt);
-template pyne::mt_456_1 pyne::library::get(int mat, int mf, int mt);
-template pyne::mt_458_1 pyne::library::get(int mat, int mf, int mt);
-template pyne::mt_460_1 pyne::library::get(int mat, int mf, int mt);
-template pyne::mt_fpy_8 pyne::library::get(int mat, int mf, int mt);
+template pyne::mt451 pyne::library::get(int mat, int mf, int mt);
+template pyne::mt452_mf1 pyne::library::get(int mat, int mf, int mt);
+template pyne::mt455_mf1 pyne::library::get(int mat, int mf, int mt);
+template pyne::mt456_mf1 pyne::library::get(int mat, int mf, int mt);
+template pyne::mt458_mf1 pyne::library::get(int mat, int mf, int mt);
+template pyne::mt460_mf1 pyne::library::get(int mat, int mf, int mt);
+template pyne::mtfpy_mf8 pyne::library::get(int mat, int mf, int mt);
 
 template<typename T> std::vector<T> pyne::library::getl (int mf, int mt){
   std::map<endf_id, mt_base*>::iterator endf_lower, endf_upper, it;
@@ -200,10 +200,10 @@ template<typename T> std::vector<T> pyne::library::getl (int mf, int mt){
 };
 
 
-template std::vector<pyne::mt_451> pyne::library::getl(int mf, int mt);
-template std::vector<pyne::mt_452_1> pyne::library::getl(int mf, int mt);
-template std::vector<pyne::mt_455_1> pyne::library::getl(int mf, int mt);
-template std::vector<pyne::mt_456_1> pyne::library::getl(int mf, int mt);
-template std::vector<pyne::mt_458_1> pyne::library::getl(int mf, int mt);
-template std::vector<pyne::mt_460_1> pyne::library::getl(int mf, int mt);
-template std::vector<pyne::mt_fpy_8> pyne::library::getl(int mf, int mt);
+template std::vector<pyne::mt451> pyne::library::getl(int mf, int mt);
+template std::vector<pyne::mt452_mf1> pyne::library::getl(int mf, int mt);
+template std::vector<pyne::mt455_mf1> pyne::library::getl(int mf, int mt);
+template std::vector<pyne::mt456_mf1> pyne::library::getl(int mf, int mt);
+template std::vector<pyne::mt458_mf1> pyne::library::getl(int mf, int mt);
+template std::vector<pyne::mt460_mf1> pyne::library::getl(int mf, int mt);
+template std::vector<pyne::mtfpy_mf8> pyne::library::getl(int mf, int mt);

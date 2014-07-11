@@ -50,9 +50,9 @@ cdef extern from "endf_mt.h" namespace "pyne":
 
 cdef extern from "endf_mt.h" namespace "pyne":
 
-    cdef cppclass mt_fpy_8(mt_base):
+    cdef cppclass mtfpy_mf8(mt_base):
         # constructors
-        mt_fpy_8() except +
+        mtfpy_mf8() except +
 
         # attributes
         cpp_vector[double] e
@@ -68,9 +68,9 @@ cdef extern from "endf_mt.h" namespace "pyne":
 
 cdef extern from "endf_mt.h" namespace "pyne":
 
-    cdef cppclass mt_460_1(mt_base):
+    cdef cppclass mt460_mf1(mt_base):
         # constructors
-        mt_460_1() except +
+        mt460_mf1() except +
 
         # attributes
         cpp_vector[double] elist
@@ -90,9 +90,9 @@ cdef extern from "endf_mt.h" namespace "pyne":
 
 cdef extern from "endf_mt.h" namespace "pyne":
 
-    cdef cppclass mt_458_1(mt_base):
+    cdef cppclass mt458_mf1(mt_base):
         # constructors
-        mt_458_1() except +
+        mt458_mf1() except +
 
         # attributes
         cpp_vector[double] deb
@@ -122,9 +122,9 @@ cdef extern from "endf_mt.h" namespace "pyne":
 
 cdef extern from "endf_mt.h" namespace "pyne":
 
-    cdef cppclass mt_456_1(mt_base):
+    cdef cppclass mt456_mf1(mt_base):
         # constructors
-        mt_456_1() except +
+        mt456_mf1() except +
 
         # attributes
         cpp_vector[double] eint
@@ -142,9 +142,9 @@ cdef extern from "endf_mt.h" namespace "pyne":
 
 cdef extern from "endf_mt.h" namespace "pyne":
 
-    cdef cppclass mt_455_1(mt_base):
+    cdef cppclass mt455_mf1(mt_base):
         # constructors
-        mt_455_1() except +
+        mt455_mf1() except +
 
         # attributes
         cpp_vector[cpp_vector[double]] alpha_arr
@@ -167,9 +167,9 @@ cdef extern from "endf_mt.h" namespace "pyne":
 
 cdef extern from "endf_mt.h" namespace "pyne":
 
-    cdef cppclass mt_452_1(mt_base):
+    cdef cppclass mt452_mf1(mt_base):
         # constructors
-        mt_452_1() except +
+        mt452_mf1() except +
 
         # attributes
         cpp_vector[double] eint
@@ -187,9 +187,9 @@ cdef extern from "endf_mt.h" namespace "pyne":
 
 cdef extern from "endf_mt.h" namespace "pyne":
 
-    cdef cppclass mt_451(mt_base):
+    cdef cppclass mt451(mt_base):
         # constructors
-        mt_451() except +
+        mt451() except +
 
         # attributes
         double awi
@@ -231,34 +231,34 @@ cdef extern from "endf.h" namespace "pyne":
         cpp_vector[cpp_vector[int]] get_content_list() except +
         void read_endf() except +
         void read_endf(std_string) except +
-        mt_451 get_mt_451 "get< pyne::mt_451 >" () except +
-        mt_451 get_mt_451 "get< pyne::mt_451 >" (int) except +
-        mt_451 get_mt_451 "get< pyne::mt_451 >" (int, int) except +
-        mt_451 get_mt_451 "get< pyne::mt_451 >" (int, int, int) except +
-        mt_452_1 get_mt_452_1 "get< pyne::mt_452_1 >" () except +
-        mt_452_1 get_mt_452_1 "get< pyne::mt_452_1 >" (int) except +
-        mt_452_1 get_mt_452_1 "get< pyne::mt_452_1 >" (int, int) except +
-        mt_452_1 get_mt_452_1 "get< pyne::mt_452_1 >" (int, int, int) except +
-        mt_455_1 get_mt_455_1 "get< pyne::mt_455_1 >" () except +
-        mt_455_1 get_mt_455_1 "get< pyne::mt_455_1 >" (int) except +
-        mt_455_1 get_mt_455_1 "get< pyne::mt_455_1 >" (int, int) except +
-        mt_455_1 get_mt_455_1 "get< pyne::mt_455_1 >" (int, int, int) except +
-        mt_456_1 get_mt_456_1 "get< pyne::mt_456_1 >" () except +
-        mt_456_1 get_mt_456_1 "get< pyne::mt_456_1 >" (int) except +
-        mt_456_1 get_mt_456_1 "get< pyne::mt_456_1 >" (int, int) except +
-        mt_456_1 get_mt_456_1 "get< pyne::mt_456_1 >" (int, int, int) except +
-        mt_458_1 get_mt_458_1 "get< pyne::mt_458_1 >" () except +
-        mt_458_1 get_mt_458_1 "get< pyne::mt_458_1 >" (int) except +
-        mt_458_1 get_mt_458_1 "get< pyne::mt_458_1 >" (int, int) except +
-        mt_458_1 get_mt_458_1 "get< pyne::mt_458_1 >" (int, int, int) except +
-        mt_460_1 get_mt_460_1 "get< pyne::mt_460_1 >" () except +
-        mt_460_1 get_mt_460_1 "get< pyne::mt_460_1 >" (int) except +
-        mt_460_1 get_mt_460_1 "get< pyne::mt_460_1 >" (int, int) except +
-        mt_460_1 get_mt_460_1 "get< pyne::mt_460_1 >" (int, int, int) except +
-        mt_fpy_8 get_mt_fpy_8 "get< pyne::mt_fpy_8 >" () except +
-        mt_fpy_8 get_mt_fpy_8 "get< pyne::mt_fpy_8 >" (int) except +
-        mt_fpy_8 get_mt_fpy_8 "get< pyne::mt_fpy_8 >" (int, int) except +
-        mt_fpy_8 get_mt_fpy_8 "get< pyne::mt_fpy_8 >" (int, int, int) except +
+        mt451 get_mt451 "get< pyne::mt451 >" () except +
+        mt451 get_mt451 "get< pyne::mt451 >" (int) except +
+        mt451 get_mt451 "get< pyne::mt451 >" (int, int) except +
+        mt451 get_mt451 "get< pyne::mt451 >" (int, int, int) except +
+        mt452_mf1 get_mt452_mf1 "get< pyne::mt452_mf1 >" () except +
+        mt452_mf1 get_mt452_mf1 "get< pyne::mt452_mf1 >" (int) except +
+        mt452_mf1 get_mt452_mf1 "get< pyne::mt452_mf1 >" (int, int) except +
+        mt452_mf1 get_mt452_mf1 "get< pyne::mt452_mf1 >" (int, int, int) except +
+        mt455_mf1 get_mt455_mf1 "get< pyne::mt455_mf1 >" () except +
+        mt455_mf1 get_mt455_mf1 "get< pyne::mt455_mf1 >" (int) except +
+        mt455_mf1 get_mt455_mf1 "get< pyne::mt455_mf1 >" (int, int) except +
+        mt455_mf1 get_mt455_mf1 "get< pyne::mt455_mf1 >" (int, int, int) except +
+        mt456_mf1 get_mt456_mf1 "get< pyne::mt456_mf1 >" () except +
+        mt456_mf1 get_mt456_mf1 "get< pyne::mt456_mf1 >" (int) except +
+        mt456_mf1 get_mt456_mf1 "get< pyne::mt456_mf1 >" (int, int) except +
+        mt456_mf1 get_mt456_mf1 "get< pyne::mt456_mf1 >" (int, int, int) except +
+        mt458_mf1 get_mt458_mf1 "get< pyne::mt458_mf1 >" () except +
+        mt458_mf1 get_mt458_mf1 "get< pyne::mt458_mf1 >" (int) except +
+        mt458_mf1 get_mt458_mf1 "get< pyne::mt458_mf1 >" (int, int) except +
+        mt458_mf1 get_mt458_mf1 "get< pyne::mt458_mf1 >" (int, int, int) except +
+        mt460_mf1 get_mt460_mf1 "get< pyne::mt460_mf1 >" () except +
+        mt460_mf1 get_mt460_mf1 "get< pyne::mt460_mf1 >" (int) except +
+        mt460_mf1 get_mt460_mf1 "get< pyne::mt460_mf1 >" (int, int) except +
+        mt460_mf1 get_mt460_mf1 "get< pyne::mt460_mf1 >" (int, int, int) except +
+        mtfpy_mf8 get_mtfpy_mf8 "get< pyne::mtfpy_mf8 >" () except +
+        mtfpy_mf8 get_mtfpy_mf8 "get< pyne::mtfpy_mf8 >" (int) except +
+        mtfpy_mf8 get_mtfpy_mf8 "get< pyne::mtfpy_mf8 >" (int, int) except +
+        mtfpy_mf8 get_mtfpy_mf8 "get< pyne::mtfpy_mf8 >" (int, int, int) except +
         pass
 
 

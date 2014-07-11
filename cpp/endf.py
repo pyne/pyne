@@ -4,26 +4,26 @@ mod = {
     'docstring': "Python wrapper for endf library.",
     'library': {
         'methods': {
-            (('get', 'mt_451'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
-                'return': 'mt_451',
+            (('get', 'mt451'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
+                'return': 'mt451',
                 'defaults': ((Arg.NONE, None),(Arg.NONE, None),(Arg.NONE, None))},
-            (('get', 'mt_452_1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
-                'return': 'mt_452_1',
+            (('get', 'mt452_mf1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
+                'return': 'mt452_mf1',
                 'defaults': ((Arg.NONE, None),(Arg.NONE, None),(Arg.NONE, None))},
-            (('get', 'mt_455_1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
-                'return': 'mt_455_1',
+            (('get', 'mt455_mf1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
+                'return': 'mt455_mf1',
                 'defaults': ((Arg.NONE, None),(Arg.NONE, None),(Arg.NONE, None))},
-            (('get', 'mt_456_1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
-                'return': 'mt_456_1',
+            (('get', 'mt456_mf1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
+                'return': 'mt456_mf1',
                 'defaults': ((Arg.NONE, None),(Arg.NONE, None),(Arg.NONE, None))},
-            (('get', 'mt_458_1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
-                'return': 'mt_458_1',
+            (('get', 'mt458_mf1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
+                'return': 'mt458_mf1',
                 'defaults': ((Arg.NONE, None),(Arg.NONE, None),(Arg.NONE, None))},
-            (('get', 'mt_460_1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
-                'return': 'mt_460_1',
+            (('get', 'mt460_mf1'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
+                'return': 'mt460_mf1',
                 'defaults': ((Arg.NONE, None),(Arg.NONE, None),(Arg.NONE, None))},
-            (('get', 'mt_fpy_8'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
-                'return': 'mt_fpy_8',
+            (('get', 'mtfpy_mf8'), ('mat','int'), ('mf', 'int'), ('mt', 'int')): {
+                'return': 'mtfpy_mf8',
                 'defaults': ((Arg.NONE, None),(Arg.NONE, None),(Arg.NONE, None))},
             }
         },
