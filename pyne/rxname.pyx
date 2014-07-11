@@ -147,7 +147,7 @@ from pyne.utils import VnVWarning
 
 # local imports 
 cimport extra_types
-cimport pyne.cpp_pyne
+cimport pyne.cpp_utils
 cimport pyne.pyne_config
 import pyne.pyne_config
 cimport cpp_nucname

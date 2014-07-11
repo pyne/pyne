@@ -1,6 +1,3 @@
-/// \file material.h
-/// \author Anthony Scopatz (scopatz\@gmail.com)
-///
 /// \brief The ever-important material class and related helpers.
 /// 
 /// The material class is effectively a normalized nuclide linked list with 
@@ -18,16 +15,17 @@
 #include <set>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sstream>	// std::ostringstream
 
 #if !defined(JSON_IS_AMALGAMATION)
   #define JSON_IS_AMALGAMATION
 #endif
-#include <json/json-forwards.h>
-#include <json/json.h>
 
 #ifndef PYNE_IS_AMALGAMATED
+#include <json/json-forwards.h>
+#include <json/json.h>
 #include "h5wrap.h"
-#include "pyne.h"
+#include "utils.h"
 #include "nucname.h"
 #include "data.h"
 #endif
@@ -146,6 +144,10 @@ namespace pyne
     void write_hdf5(std::string filename, std::string datapath="/material", 
                     std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
+    /// Return an mcnp input deck record as a string
+    std::string mcnp(std::string frac_type = "mass");
+    /// Return a fluka input deck MATERIAL card as a string
+    std::string fluka();
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
     /// Reads data from a plaintext file at \a filename into this Material instance.
@@ -268,7 +270,8 @@ namespace pyne
     Material operator/ (double);
   };
 
-  /// Converts a Material to a string stream representation.
+  /// Converts a Material to a string stream representation for canonical writing.
+  /// This operator is also defined on inheritors of std::ostream
   std::ostream& operator<< (std::ostream& os, Material mat);
 
   /// A stuct for reprensenting fundemental data in a material.
