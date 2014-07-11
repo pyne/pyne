@@ -21,9 +21,10 @@ REAL*8 :: df, dfmx
 e = 0.0
 ! Initialize the old time point
 told = ttosolve
+
+
 ! Start the iterations
 DO it = 1, itmx
-
 ! Call for the mesh sweep
    CALL sweep(g)
    

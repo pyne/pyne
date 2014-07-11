@@ -9,7 +9,7 @@ SUBROUTINE output
 USE invar
 USE solvar
 IMPLICIT NONE
-INTEGER :: i, j, k, t, u, v, g,l
+INTEGER :: i, j, k, t, u, v, g, l
 !Printing iteration counters.  Vary based on solver type
 Integer :: iter1, iter2
 
