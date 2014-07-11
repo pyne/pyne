@@ -1,6 +1,3 @@
-/// \file rxname.h
-/// \author Anthony Scopatz (scopatz\@gmail.com)
-///
 /// \brief Converts between naming conventions for reaction channels.
 
 #ifndef PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY
@@ -15,7 +12,7 @@
 #include <stdio.h>
 
 #ifndef PYNE_IS_AMALGAMATED
-#include "pyne.h"
+#include "utils.h"
 #include "nucname.h"
 #endif
 

@@ -1521,7 +1521,7 @@ class Wwinp(Mesh):
         of spacial bounds in the i, j, k dimensions.
     mesh : Mesh object
         with a structured mesh containing all the neutron and/or
-        photon mass window lower bounds. These tags have the form
+        photon weight window lower bounds. These tags have the form
         "ww_X" where X is n or p The mesh has rootSet tags in the form
         X_e_upper_bounds.
 

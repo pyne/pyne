@@ -5,9 +5,9 @@
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "nucname.h"
+#include "state_map.cpp"
 #endif
 
-#include "state_map.h"
 
 /*** Constructs the LL to zz Dictionary ***/
 pyne::nucname::name_zz_t pyne::nucname::get_name_zz() {

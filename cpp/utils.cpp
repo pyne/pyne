@@ -1,7 +1,7 @@
 // General Library
 
 #ifndef PYNE_IS_AMALGAMATED
-#include "pyne.h"
+#include "utils.h"
 #endif
 
 
