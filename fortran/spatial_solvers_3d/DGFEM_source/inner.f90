@@ -13,7 +13,7 @@ USE solvar
 USE timevar
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: g
-INTEGER :: i, j, k, t, u, v, it,l
+INTEGER :: i, j, k, t, u, v, it, l
 INTEGER :: id, jd, kd, td, ud, vd, gd
 REAL*8 :: df, dfmx
 
@@ -26,7 +26,7 @@ told = ttosolve
 ! Start the iterations
 DO it = 1, itmx
 ! Call for the mesh sweep
-   CALL sweep(g)
+   CALL sweep_dgfem(g)
    
    ! Compare new and old flux iterates for user chosen range of moments, iall
    dfmx = -1.0

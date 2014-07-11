@@ -19,11 +19,15 @@ srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momp
 !    Allows for dynamic allocation. Uses module to hold all 
 !      input variables: invar
 !
-!  	Solver types =  "LD" "DENSE" and "LAGRANGE"
 !
+!  	Solver types =  "AHOTN" "DGFEM" and "SCTSTEP"
+!			AHOTN solvers: "LL" "LN" and "NEFD"
+!   	DGFEM solvers: "LD" "DENSE" and "LAGRANGE"
+!			SCTSTEP solvers:
 !-------------------------------------------------------------
 
 USE invar
+USE solvar
 IMPLICIT NONE
 INTEGER :: i, j, k, n
 ! File Names
@@ -108,10 +112,16 @@ qdflx = qdflxin
 !   ng    => Number of groups
 !   nm    => Number of materials
 
-!LAMBDA = 1 IF LD SOLVER.  NOT SURE IF THIS SHOULD HAPPEN FOR OTHER SOLVERS.
 IF (solver == "DGFEM") THEN
 	IF (solvertype == "LD") THEN
 		lambda=1
+	END IF
+ELSE IF (solver == "AHOTN") THEN
+	IF (solvertype == "LN" .or. solvertype == "LL") THEN
+		IF (lambda .ne. 1) then
+	 	  WRITE(8,*) "ERROR: Lambda must be equal to one." 
+	 	  STOP
+		END IF
 	END IF
 END IF
 
@@ -124,30 +134,40 @@ ELSE IF (MOD(qdord,2) /= 0) THEN
    STOP
 END IF
 
+INQUIRE(FILE = xsfilein, EXIST = ex1)
+INQUIRE(FILE = srcfilein, EXIST = ex2)
+IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
+   WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
+   STOP
+END IF
+
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
-IF (solvertype == "LD") THEN
-	dofpc = 4
-ELSE IF (solvertype == "DENSE") THEN
-	dofpc = (lambda+3)*(lambda+2)*(lambda+1)/6
-ELSE IF (solvertype == "LAGRANGE") THEN
+IF (solver == "AHOTN") THEN
 	order = lambda+1
 	ordsq = order**2
 	ordcb = order**3
+ELSE IF (solver == "DGFEM") THEN
+	IF (solvertype == "LD") THEN
+		dofpc = 4
+	ELSE IF (solvertype == "DENSE") THEN
+		dofpc = (lambda+3)*(lambda+2)*(lambda+1)/6
+	ELSE IF (solvertype == "LAGRANGE") THEN
+		order = lambda+1
+		ordsq = order**2
+		ordcb = order**3
+	END IF
 END IF
 
-! Material map
-!CALL readmt(mtfile)
-! 
 ! Angular quadrature
 ALLOCATE(ang(apo,3), w(apo))
 IF (qdtyp == 2) THEN
-   INQUIRE(FILE=qdfile, EXIST=ex3)
+   INQUIRE(FILE=qdfilein, EXIST=ex3)
    IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
       WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
       STOP
    END IF
-   OPEN(UNIT=10, FILE=qdfile)
+   OPEN(UNIT=10, FILE=qdfilein)
    READ(10,*)
    READ(10,*) (ang(n,1),ang(n,2),w(n),n=1,apo)
    ! Renormalize all the weights
@@ -165,14 +185,24 @@ IF (qdtyp == 2) CLOSE(UNIT=10)
 CALL check
    ! Call to read the cross sections and source; do their own input check
 !Setting orpc value for sweep.
-IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
-	orpc = dofpc
-ELSE IF (solvertype == "LAGRANGE") THEN
-	orpc = ordcb
+IF (solver == "DGFEM") THEN
+	IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
+		orpc = dofpc
+	ELSE IF (solvertype == "LAGRANGE") THEN
+		orpc = ordcb
+	END IF
 END IF
 CALL readxs(xsfilein)
 CALL readsrc(srcfilein)
-IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
+IF (xsbc .eq. 2) THEN
+	IF (solver == "AHOTN") THEN
+		!CALL read_inflow_ahotn(inflow_file)
+
+	ELSE IF (solver == "DGFEM") THEN
+		CALL read_inflow_dgfem(inflow_file)
+
+	END IF
+END IF
 CALL solve
 CALL output
 RETURN

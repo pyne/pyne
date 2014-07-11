@@ -112,7 +112,6 @@ qdflx = qdflxin
 !   ng    => Number of groups
 !   nm    => Number of materials
 
-
 IF (solver == "DGFEM") THEN
 	IF (solvertype == "LD") THEN
 		lambda=1
@@ -144,9 +143,21 @@ END IF
 
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
-order = lambda+1
-ordsq = order**2
-ordcb = order**3
+IF (solver == "AHOTN") THEN
+	order = lambda+1
+	ordsq = order**2
+	ordcb = order**3
+ELSE IF (solver == "DGFEM") THEN
+	IF (solvertype == "LD") THEN
+		dofpc = 4
+	ELSE IF (solvertype == "DENSE") THEN
+		dofpc = (lambda+3)*(lambda+2)*(lambda+1)/6
+	ELSE IF (solvertype == "LAGRANGE") THEN
+		order = lambda+1
+		ordsq = order**2
+		ordcb = order**3
+	END IF
+END IF
 
 ! Angular quadrature
 ALLOCATE(ang(apo,3), w(apo))
@@ -173,9 +184,25 @@ IF (qdtyp == 2) CLOSE(UNIT=10)
    ! Call for the input check
 CALL check
    ! Call to read the cross sections and source; do their own input check
+!Setting orpc value for sweep.
+IF (solver == "DGFEM") THEN
+	IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
+		orpc = dofpc
+	ELSE IF (solvertype == "LAGRANGE") THEN
+		orpc = ordcb
+	END IF
+END IF
 CALL readxs(xsfilein)
 CALL readsrc(srcfilein)
-IF (xsbc .eq. 2) CALL read_inflow(inflow_file)
+IF (xsbc .eq. 2) THEN
+	IF (solver == "AHOTN") THEN
+		CALL read_inflow_ahotn(inflow_file)
+
+	ELSE IF (solver == "DGFEM") THEN
+		CALL read_inflow_dgfem(inflow_file)
+
+	END IF
+END IF
 CALL solve
 CALL output
 RETURN 

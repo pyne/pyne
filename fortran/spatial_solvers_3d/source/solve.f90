@@ -129,21 +129,21 @@ IF (solver == "AHOTN") THEN
 	ENDIF
 ELSE IF (solver == "DGFEM") THEN
 
+
+
+
+
+
+
 	IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
 		ALLOCATE(f(dofpc,nx,ny,nz,ng,1,1), e(dofpc,nx,ny,nz,1,1))
 	ELSE IF (solvertype == "LAGRANGE") THEN
 		ALLOCATE(f(ordcb,nx,ny,nz,ng,1,1), e(ordcb,nx,ny,nz,1,1))
 	END IF
 
-	ALLOCATE(cnvf(ng))
 
 	! Intitialize warn to indicate where warnings may occur
 	warn = 0
-
-	! Mark the beginning of the solution phase
-	WRITE (8,*)
-	WRITE (8,*) "-------------------------- THE SOLUTION ----------------------------------"
-	WRITE (8,*)
 
 	! Construct matrix templates
 	IF (solvertype == "DENSE") THEN
@@ -193,6 +193,10 @@ ELSE IF (solver == "DGFEM") THEN
 	END IF
 
 	END DO
+
+
+
+
 
 ELSE IF (solver == "SCTS") THEN
 	!Not implemented yet!
