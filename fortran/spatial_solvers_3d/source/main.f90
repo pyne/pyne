@@ -3,9 +3,10 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein, s
 dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin, matin, qdfilein, xsfilein, & 
 srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momptin, &
  qdflxin)
+
 !-------------------------------------------------------------
 !
-!    Read the input from the input file
+!    Read the input parameters from input files
 !
 !    Comments below demonstrate order of the reading
 !
@@ -16,14 +17,14 @@ srcfilein, errin, itmxin, iallin, tolrin, tchkin, ichkin, mompin, momsumin, momp
 !           readsrc = reads the source distribution
 !           check   = input check on all the values
 !
-!    Allows for dynamic allocation. Uses module to hold all 
-!      input variables: invar
+!    This code can by dynamically allocated. It uses a module to hold all 
+!    input variables: invar
 !
 !
-!  	Solver types =  "AHOTN" "DGFEM" and "SCTSTEP"
-!			AHOTN solvers: "LL" "LN" and "NEFD"
-!   	DGFEM solvers: "LD" "DENSE" and "LAGRANGE"
-!			SCTSTEP solvers:
+!    Solver types =  "AHOTN", "DGFEM", and "SCTSTEP"
+!                    - AHOTN solvers: "LL" "LN" and "NEFD"
+!                    - DGFEM solvers: "LD" "DENSE" and "LAGRANGE"
+!		     - SCTSTEP solvers:
 !-------------------------------------------------------------
 
 USE invar
@@ -32,7 +33,7 @@ IMPLICIT NONE
 INTEGER :: i, j, k, n
 ! File Names
 CHARACTER(30), INTENT(OUT) :: qdfile, xsfile, srcfile, mtfile,inflow_file,&
-                             phi_file
+                              phi_file
 LOGICAL :: ex1, ex2, ex3, ex4
 REAL*8 :: wtsum
 
@@ -144,19 +145,19 @@ END IF
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
 IF (solver == "AHOTN") THEN
-	order = lambda+1
-	ordsq = order**2
-	ordcb = order**3
+        order = lambda+1
+        ordsq = order**2
+        ordcb = order**3
 ELSE IF (solver == "DGFEM") THEN
-	IF (solvertype == "LD") THEN
-		dofpc = 4
-	ELSE IF (solvertype == "DENSE") THEN
-		dofpc = (lambda+3)*(lambda+2)*(lambda+1)/6
-	ELSE IF (solvertype == "LAGRANGE") THEN
-		order = lambda+1
-		ordsq = order**2
-		ordcb = order**3
-	END IF
+        IF (solvertype == "LD") THEN
+                dofpc = 4
+        ELSE IF (solvertype == "DENSE") THEN
+                dofpc = (lambda+3)*(lambda+2)*(lambda+1)/6
+        ELSE IF (solvertype == "LAGRANGE") THEN
+                order = lambda+1
+                ordsq = order**2
+                ordcb = order**3
+        END IF
 END IF
 
 ! Angular quadrature
@@ -181,29 +182,33 @@ END IF
 
 IF (qdtyp == 2) CLOSE(UNIT=10)
 
-   ! Call for the input check
+! Call for the input check
 CALL check
-   ! Call to read the cross sections and source; do their own input check
-!Setting orpc value for sweep.
+
+! Setting orpc value for sweep.
 IF (solver == "DGFEM") THEN
-	IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
-		orpc = dofpc
-	ELSE IF (solvertype == "LAGRANGE") THEN
-		orpc = ordcb
-	END IF
+        IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
+                orpc = dofpc
+        ELSE IF (solvertype == "LAGRANGE") THEN
+                orpc = ordcb
+        END IF
 END IF
+
+! Call to read the cross sections and source; do their own input check
 CALL readxs(xsfilein)
 CALL readsrc(srcfilein)
+
 IF (xsbc .eq. 2) THEN
-	IF (solver == "AHOTN") THEN
-		CALL read_inflow_ahotn(inflow_file)
-
-	ELSE IF (solver == "DGFEM") THEN
-		CALL read_inflow_dgfem(inflow_file)
-
-	END IF
+        IF (solver == "AHOTN") THEN
+                CALL read_inflow_ahotn(inflow_file)
+        ELSE IF (solver == "DGFEM") THEN
+                CALL read_inflow_dgfem(inflow_file)
+        END IF
 END IF
+
 CALL solve
 CALL output
+
 RETURN 
+
 END SUBROUTINE main
