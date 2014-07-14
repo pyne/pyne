@@ -1,6 +1,3 @@
-/// \file nucname.h
-/// \author Anthony Scopatz (scopatz\@gmail.com)
-///
 /// \brief Converts between naming conventions for nuclides.
 
 #ifndef PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA
@@ -14,7 +11,7 @@
 #include <stdio.h>
 
 #ifndef PYNE_IS_AMALGAMATED
-#include "pyne.h"
+#include "utils.h"
 #endif
 
 namespace pyne

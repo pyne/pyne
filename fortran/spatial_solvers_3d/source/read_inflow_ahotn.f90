@@ -1,4 +1,4 @@
-SUBROUTINE read_inflow(inflow_file)
+SUBROUTINE read_inflow_ahotn(inflow_file)
 
 !-------------------------------------------------------------
 !
@@ -128,4 +128,4 @@ END DO
 CLOSE(UNIT=12)
 
 
-END SUBROUTINE read_inflow
+END SUBROUTINE read_inflow_ahotn

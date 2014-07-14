@@ -116,9 +116,15 @@ READ(7,*) qdflx
 
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
-order = lambda+1
-ordsq = order**2
-ordcb = order**3
+IF ( solvertype == "LD") THEN
+	dofpc = 4
+ELSE IF ( solvertype == "DENSE" ) THEN
+	dofpc = (lambda+3)*(lambda+2)*(lambda+1)/6
+ELSE IF ( solvertype == "LAGRANGE" ) THEN
+	order = lambda+1
+	ordsq = order**2
+	ordcb = order**3
+END IF
 
 ! Material map
 CALL readmt(mtfile)

@@ -1,12 +1,12 @@
 """This file creates a sample dictionary to test the spatial_solver code's."""
 
-def populate():
+def populate(solverin, solvertypein):
 		solver_dict = {
-		'solver':'AHOTN',
-		'solver_type':'NEFD',
+		'solver':solverin,
+		'solver_type':solvertypein,
 		'spatial_order':1,
 		'spatial_method':0,
-		'angular_quadrature_order':4,  #WORKS
+		'angular_quadrature_order':4,
 		'angular_quadrature_type':1,
 		'nodes_xyz':[4,4,4],
 		'num_groups':1,
@@ -32,10 +32,10 @@ def populate():
 		};
 		return solver_dict
 
-def populate_with_warnings():
+def populate_with_warnings(solverin):
 		solver_dict = {
-		'solver':'AHOTN',
-		#'solver_type':'LN',
+		'solver':solverin,
+		#'solver_type':solvertypein,
 		#'spatial_order':1,
 		#'spatial_method':0,
 		#'angular_quadrature_order':4,

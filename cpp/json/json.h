@@ -68,7 +68,11 @@ license you like.
 // End of content of file: LICENSE
 // //////////////////////////////////////////////////////////////////////
 
-
+#ifdef PYNE_IS_AMALGAMATED
+  #if !defined(JSON_IS_AMALGAMATION)
+    #define JSON_IS_AMALGAMATION
+  #endif
+#endif
 
 
 

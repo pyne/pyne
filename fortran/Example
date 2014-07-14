@@ -13,7 +13,7 @@ Requirements:
 
 There are two options for running this example:
 
-(1) Cd into the spatial_solvers_3d.  Run the test_script.py python file.  It generates a dictionary
+(1) Cd into the directory pyne/pyne/spatialsolver.  Run the test_script.py python file.  It generates a dictionary
 	with all needed key-pair entries, then runs the NEFD solver.  To change dictionary entries, alter
 	the dictionary_populate_test.py file.   
 		To change the solver, change the "solver" entry.  Note that so far, only AHOTN is supported

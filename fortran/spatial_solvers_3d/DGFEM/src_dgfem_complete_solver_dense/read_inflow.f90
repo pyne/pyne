@@ -21,7 +21,6 @@ ALLOCATE(  tfrbc(nz,nx,0:lambda,0:lambda,apo,4),&
            tbobc(nx,ny,0:lambda,0:lambda,apo,4),&
            ttobc(nx,ny,0:lambda,0:lambda,apo,4) )
 
-
 ALLOCATE( frbc(dofpc,nz,nx,apo,4) )
 ALLOCATE( babc(dofpc,nz,nx,apo,4) )
 ALLOCATE( lebc(dofpc,ny,nz,apo,4) )
@@ -30,7 +29,6 @@ ALLOCATE( bobc(dofpc,nx,ny,apo,4) )
 ALLOCATE( tobc(dofpc,nx,ny,apo,4) )
 
 OPEN(UNIT=12, FILE=inflow_file,STATUS = "OLD", ACTION = "READ",FORM='UNFORMATTED')
-
 DO octant=1,8
    DO n=1,apo
       READ(12) sgn_mu,sgn_eta,sgn_xi 

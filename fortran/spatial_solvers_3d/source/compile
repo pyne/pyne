@@ -3,7 +3,7 @@
 gfortran -fPIC -c invar.f90 solvar.f90 timevar.f90
 gfortran -fPIC -c *.f90
 rm main.o
-f2py -m main -c *.o main.f90 -lblas -llapack
+f2py -m main -c *.o main.f90 -lblas -llapack --debug-capi
 rm *.o
 rm *.mod
 #-L./blas/ =L./lapack/double/ -L./lapack/util -lmini_blas_s -lmini_lapack_util_s -lmini_lapack_D_s

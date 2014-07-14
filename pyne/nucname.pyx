@@ -15,7 +15,7 @@ from warnings import warn
 from pyne.utils import VnVWarning
 
 # local imports 
-cimport pyne.cpp_pyne
+cimport pyne.cpp_utils
 cimport pyne.pyne_config
 import pyne.pyne_config
 

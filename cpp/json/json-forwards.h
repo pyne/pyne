@@ -70,7 +70,11 @@ license you like.
 // //////////////////////////////////////////////////////////////////////
 
 
-
+#ifdef PYNE_IS_AMALGAMATED
+  #if !defined(JSON_IS_AMALGAMATION)
+    #define JSON_IS_AMALGAMATION
+  #endif
+#endif
 
 
 #ifndef JSON_FORWARD_AMALGATED_H_INCLUDED
