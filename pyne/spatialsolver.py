@@ -1,34 +1,21 @@
 """This module accesses the AHOTN, DGFEM and SCT-STEP flavored nuetron transport solvers.
 """
-import re
-import os
-import sys
-from warnings import warn
-from pyne.utils import VnVWarning
-
 from __future__ import division
 
+import sys
+import os
 
 #Solver imports
 sys.path.append("../fortran/spatial_solvers_3d/source")
-sys.path.append("../../fortran/spatial_solvers_3d/source")
+sys.path.append("../pyne_transport/pyne/fortran/spatial_solvers_3d/source")
+#sys.path.append("../../fortran/spatial_solvers_3d/source")
 
+#goal_dir = os.path.join(os.getcwd(), "../../fortran/spatial_solvers_3d/source")
 from main import main as main
+#from ... fortran.spatial_solvers_3d.source.main import main as main
 
-if sys.version_info[0] > 2:
-  basestring = str
-
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
-
-#from spatialsolver.solver import solver as internalsolver
-#import spatial.solver
-
-
-#def solve(inputdict_unchecked): 
-#				spatial.solver.solve(inputdict_unchecked)
-        #spatialsolver.solver.solve(inputdict_unchecked)
-
-
+#imports being used for testing
+#from dict_util import dict_complete
 
 def solve(inputdict_unchecked):
 	inputdict = dict_complete(inputdict_unchecked)
@@ -73,6 +60,10 @@ def solve(inputdict_unchecked):
 	else:
 		#Throw error
 		print("Not a supported solver")
+
+
+
+
 
 def dict_complete(inputdict):
 
