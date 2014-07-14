@@ -6,7 +6,7 @@ import sys
 import os
 
 #Solver imports
-sys.path.append("../fortran/spatial_solvers_3d/source")
+#sys.path.append("../fortran/spatial_solvers_3d/source")
 sys.path.append("../pyne_transport/pyne/fortran/spatial_solvers_3d/source")
 #sys.path.append("../../fortran/spatial_solvers_3d/source")
 
