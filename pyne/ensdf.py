@@ -11,8 +11,8 @@ from pyne import nucname, rxname, data
 from pyne.utils import to_sec
 
 if sys.version_info[0] > 2:
-  basestring = str
-    
+    basestring = str
+
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
@@ -58,23 +58,8 @@ def _getvalue(obj, fn=float, rn=None):
         return rn
 
 
-def _to_id_from_level(nuc_id, level, levellist, lmap):
-    nid = _to_id(nuc_id)
-    gparent = nid
-    if nid in lmap and level > 0.0:
-        for i in range(lmap[nid], len(levellist)):
-            if level + 1.0 > levellist[i][3] > level - 1.0:
-                gparent = levellist[i][0]
-                break
-            if level + 1.0 < levellist[i][3]:
-                break
-            if int(nid // 10000) != int(levellist[i][0] // 10000):
-                break
-    return gparent
-
-
 def _to_id(nuc):
-    if not 'NN' in nuc:
+    if 'NN' not in nuc:
         nucid = nucname.id(nuc.strip())
     else:
         warn('Neutron data not supported!')
@@ -415,7 +400,7 @@ def _parse_normalization_record(n_rec):
     else:
         nrbr = None
     if nr_err is not None and br_err is not None:
-        nrbr_err = np.sqrt((nr_err ** 2) + (br_err ** 2))
+        nrbr_err = nrbr*np.sqrt((br_err/br) ** 2 * (nr_err/nr) ** 2)
     else:
         nrbr_err = None
     return nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err
@@ -624,17 +609,16 @@ def _parse_decay_dataset(lines, decay_s):
     for line in lines:
         level_l = _level_regex.match(line)
         if level_l is not None:
-            level, half_lifev, from_nuc, state, special = _parse_level_record(level_l)
+            level, half_lifev, from_nuc, \
+            state, special = _parse_level_record(level_l)
             continue
         b_rec = _beta.match(line)
         if b_rec is not None:
             dat = _parse_beta_record(b_rec)
             if parent2 is None:
-                parent2 = parent
-                e = 0
-            e = 0.0 if e is None else e
+                parent2 = pfinal
             level = 0.0 if level is None else level
-            bparent = data.id_from_level(_to_id(parent2), e)
+            bparent = parent2
             bdaughter = data.id_from_level(_to_id(daughter), level)
             betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
         bc_rec = _betac.match(line)
@@ -658,22 +642,18 @@ def _parse_decay_dataset(lines, decay_s):
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
             if parent2 is None:
-                parent2 = parent
-                e = 0
-            e = 0.0 if e is None else e
+                parent2 = pfinal
             level = 0.0 if level is None else level
-            aparent = data.id_from_level(_to_id(parent2), e)
+            aparent = parent2
             adaughter = data.id_from_level(_to_id(daughter), level)
             alphas.append((aparent, adaughter, dat[0], dat[2]))
         ec_rec = _ec.match(line)
         if ec_rec is not None:
             dat = _parse_ec_record(ec_rec)
             if parent2 is None:
-                parent2 = parent
-                e = 0
-            e = 0.0 if e is None else e
+                parent2 = pfinal
             level = 0.0 if level is None else level
-            ecparent = data.id_from_level(_to_id(parent2), e)
+            ecparent = parent2
             ecdaughter = data.id_from_level(_to_id(daughter), level)
             ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
                          0, 0, 0])
@@ -685,14 +665,15 @@ def _parse_decay_dataset(lines, decay_s):
                 gparent = 0
                 gdaughter = 0
                 if level is not None:
-                    gparent = data.id_from_level(_to_id(daughter), level, special)
+                    gparent = data.id_from_level(_to_id(daughter), level,
+                                                 special)
                     dlevel = level - dat[0]
-                    gdaughter = data.id_from_level(_to_id(daughter), dlevel, special)
+                    gdaughter = data.id_from_level(_to_id(daughter), dlevel,
+                                                   special)
                 if parent2 is None:
                     gp2 = pfinal
-                    e = 0
                 else:
-                    gp2 = _to_id(parent2)
+                    gp2 = parent2
                 dat.insert(0, gp2)
                 dat.insert(0, gdaughter)
                 dat.insert(0, gparent)
@@ -705,8 +686,8 @@ def _parse_decay_dataset(lines, decay_s):
             continue
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
-            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][2],
-                                                    gammarays[-1][6])
+            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][5],
+                                                    gammarays[-1][9])
             if 'K' in conv:
                 gammarays[-1][-3] = conv['K'][0]
             if 'L' in conv:
@@ -718,25 +699,29 @@ def _parse_decay_dataset(lines, decay_s):
         if n_rec is not None:
             nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
                 _parse_normalization_record(n_rec)
+            if nb is not None and br is not None:
+                nbbr = nb * br
+            if nb_err is not None and br_err is not None and nb_err != 0:
+                nbbr_err = nbbr*((br_err/br) ** 2 * (nb_err/nb) ** 2) ** 0.5
             continue
         np_rec = _normp.match(line)
         if np_rec is not None:
-            nrbr2, nrbr_err2, ntbr, ntbr_err, nbbr, nbbr_err = \
+            nrbr2, nrbr_err2, ntbr, ntbr_err, nbbr2, nbbr_err2 = \
                 _parse_production_normalization_record(np_rec)
-            if nrbr2 is not None:
+            if nrbr2 is not None and nrbr is None:
                 nrbr = nrbr2
                 nrbr_err = nrbr_err2
-            if nbbr is None and nb is not None and br is not None:
-                nbbr = nb * br
-            if nbbr_err is None and nb_err is not None and br_err is not None:
-                nbbr_err = (br_err ** 2 + nb_err ** 2) ** 0.5
+            if nbbr2 is not None and nbbr is None:
+                nbbr = nbbr2
+                nbbr_err = nbbr_err2
             continue
         p_rec = _p.match(line)
         if p_rec is not None:
             parent2, tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
+            parent2 = data.id_from_level(_to_id(parent2), e, " ")
             continue
     if len(gammarays) > 0 or len(alphas) > 0 or len(betas) > 0 or len(ecbp) > 0:
-        #FIXME: Handle uneven errors
+        # FIXME: Handle uneven errors
         if tfinalerr is not None and not isinstance(tfinalerr, float):
             tfinalerr = tfinalerr[0]
         if len(parents) > 1:
@@ -750,16 +735,50 @@ def _parse_decay_dataset(lines, decay_s):
     return None
 
 
-def levels(filename, levellist=None, lmap=None, lcount=0):
+def levels(filename, levellist=None):
+    """
+    This takes an ENSDF filename or file object and parses the ADOPTED LEVELS
+    records to assign level numbers by energy. It also parses the different
+    reported decay types and branching ratios.
+
+    Parameters
+    ----------
+    filename : str or file
+        Name of ENSDF formatted file or a file-like object containing ENSDF
+        formatted data
+    levellist : list of tuples
+        This is a list object which all newly processed levels will be added
+        to. If it's None a new one will be created.
+
+    Returns
+    -------
+    levellist : list of tuples
+        This is a list of all the level data. Each level has base entry with a
+        reaction id of 0 and additional entries for any listed decays. The
+        format of each row is:
+        nuc_id : int
+            The state_id of the level
+        rx_id : int
+            The id of the decay "reaction" in PyNE reaction id form.
+        half_life : float
+            Half life of the state in s
+        level : float
+            energy of the level in keV
+        branch_ratio : float
+            if rx_id != 0 this is the percent of decays in that channel
+        metastable : int
+            metastable id number of the level (if given)
+        special : string
+            single character denoting levels with unknown relation to ground
+            state
+    """
     badlist = ["ecsf", "34si", "|b{+-}fission", "{+24}ne",
-           "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
-           "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
-           "{+28}mg", "sf(+ec+b+)"]
+               "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
+               "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
+               "{+28}mg", "sf(+ec+b+)"]
     special = ""
     if levellist is None:
         levellist = []
-    if lmap is None:
-        lmap = dict()
     if isinstance(filename, str):
         with open(filename, 'r') as f:
             dat = f.read()
@@ -787,18 +806,18 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                                     goodkey = False
                             if goodkey is True:
                                 rx = rxname.id(keystrip)
-                                levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state, special))
+                                levellist.append((nuc_id, rx, half_lifev,
+                                                  level, val.split("(")[0],
+                                                  state, special))
                     if level_found is True:
-                        levellist.append((nuc_id, 0, half_lifev, level, 0.0, state, special))
+                        levellist.append((nuc_id, 0, half_lifev, level, 0.0,
+                                          state, special))
                     brs = {}
                     level, half_lifev, from_nuc, state, special = \
                         _parse_level_record(level_l)
                     if from_nuc is not None:
                         nuc_id = from_nuc + leveln
-                        if leveln == 0:
-                            lmap.update({nuc_id: lcount})
                         leveln += 1
-                        lcount += 1
                         level_found = True
                     else:
                         level_found = False
@@ -816,13 +835,102 @@ def levels(filename, levellist=None, lmap=None, lcount=0):
                             goodkey = False
                     if goodkey is True:
                         rx = rxname.id(keystrip)
-                        levellist.append((nuc_id, rx, half_lifev, level, val.split("(")[0], state, special))
+                        levellist.append((nuc_id, rx, half_lifev, level,
+                                          val.split("(")[0], state, special))
             if level_found is True:
-                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state, special))
+                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state,
+                                  special))
     return levellist
 
 
 def decays(filename, decaylist=None):
+    """
+    This splits an ENSDF file into datasets. It then passes the dataset to the
+    appropriate parser. Currently only a subset of decay datasets are
+    supported. The output is a list of objects containing information
+    pertaining to a particular decay.
+
+    Parameters
+    ----------
+    filename : str or file
+        Name of ENSDF formatted file or a file-like object containing ENSDF
+        formatted data
+    decaylist : list of tuples
+        This is a list object which all newly processed decays will be added
+        to. If it's None a new one will be created.
+
+    Returns
+    -------
+    decaylist : list of tuples
+        list of objects containing information pertaining to a particular
+        decay. This information is in the following format:
+
+    int
+        nuc_id of the parent
+    int
+        nuc_id of the daughter
+    int
+        PyNE reaction id
+    float
+        half-life in seconds
+    float
+        half-life error in seconds
+    float
+        branching ratio (percent)
+    float
+        Conversion factor for gamma intensity to photons per 100 decays of the
+        parent
+    float
+        Error in conversion factor for gamma intensity
+    float
+        Conversion factor for electron capture/beta intensity to electron
+        captures/betas per 100 decays of the parent
+    float
+        Error in conversion factor for electron capture/beta intensity
+    list
+        a list containing information about each gamma ray:
+            * starting level of gamma transition in stats_id form
+            * final level of gamma transition in state_id form
+            * original parent
+            * energy in keV
+            * uncertainty in energy
+            * intensity (multiply by conversion factor for percentage)
+            * uncertainty in intensity
+            * electron conversion intensity
+            * uncertainty in electron conversion intensity
+            * total transition intensity
+            * total transition intensity error
+            * k electron conversion intensity
+            * l electron conversion intensity
+            * m electron conversion intensity
+    list
+        a list containing information about each alpha:
+            * parent nuclide id in state_id form
+            * child nuclide id in state_id form
+            * alpha energy
+            * alpha intensity in percent of total alphas
+    list
+        a list containing information about each beta minus from the parent
+        decay:
+            * parent nuclide id in state_id form
+            * child nuclide id in state_id form
+            * beta endpoint energy
+            * beta average energy
+            * beta intensity (multiply by conversion factor for percentage)
+    list
+        a list containing information about each beta plus and electron capture
+        from the parent decay:
+            * parent nuclide id in state_id form
+            * child nuclide id in state_id form
+            * beta plus endpoint energy
+            * beta plus average energy
+            * beta intensity (multiply by conversion factor for percentage)
+            * electron capture intensity (multiply by conversion factor for
+              percentage)
+            * k electron conversion intensity
+            * l electron conversion intensity
+            * m electron conversion intensity
+    """
     if decaylist is None:
         decaylist = []
     if isinstance(filename, str):
@@ -858,120 +966,6 @@ def decays(filename, decaylist=None):
     return decaylist
 
 
-def origen_data(filename):
-    """This function parses assorted data from an ensdf file in order to collect
-    the necessary information to generate data for origen input decks.
-
-    Parameters
-    ----------
-    filename : str
-        Name of ENSDF formatted file
-
-    Returns
-    -------
-    decaylist : list
-        This is a list of tuples containing:
-            * parent nuc_id
-            * half life of parent
-            * parent energy level
-            * half life of daughter
-            * energy level of daughter
-            * decay type of parent
-            * percent of beta + percent of electron capture decays to daughter
-    branchlist : list
-        This is a list of tuples containing:
-            * parent nuc_id
-            * energy level of parent
-            * half life of parent
-            * dictionary of branching ratios
-    """
-    if isinstance(filename, str):
-        with open(filename, 'r') as f:
-            dat = f.read()
-    else:
-        dat = filename.read()
-    datasets = dat.split(80 * " " + "\n")[0:-1]
-    decaylist = []
-    branchlist = []
-    for dataset in datasets:
-        lines = dataset.splitlines()
-        ident = re.match(_ident, lines[0])
-        if ident is None:
-            continue
-        if 'DECAY' in ident.group(2):
-            daughter = ident.group(1)
-            parent = ident.group(2).split()[0]
-            dtype = ident.group(2).split()[1]
-            tfinal = 0
-            e = 0.0
-            ie = None
-            ib = None
-            newlevel = False
-            for line in lines:
-                b_rec = _beta.match(line)
-                if b_rec is not None:
-                    en, en_err, ib, dib, logft, \
-                    dft = _parse_beta_record(b_rec)
-                    continue
-                e_rec = _ec.match(line)
-                if e_rec is not None:
-                    en, en_err, ib, dib, ie, die, logft, \
-                    dft, tti, dtti = _parse_ec_record(e_rec)
-                    continue
-                p_rec = _p.match(line)
-                if p_rec is not None:
-                    parent2, tfinal, tfinalerr, e, e_err = \
-                        _parse_parent_record(p_rec)
-                    continue
-                level_l = _level_regex.match(line)
-                if level_l is not None:
-                    if newlevel and (ib is not None or ie is not None):
-                        #save old level data
-                        if ib is None:
-                            ib = 0.0
-                        if ie is None:
-                            ie = 0.0
-                        decaylist.append((_to_id(parent), tfinal, e,
-                                          half_lifev, level, dtype, (ib + ie)))
-                    level, half_lifev, from_nuc, state, special = \
-                        _parse_level_record(level_l)
-                    newlevel = True
-                    continue
-            if newlevel and (ib is not None or ie is not None):
-                #save old level data
-                if ib is None:
-                    ib = 0.0
-                if ie is None:
-                    ie = 0.0
-                decaylist.append((_to_id(parent), tfinal, e, half_lifev, level,
-                                  dtype, (ib + ie)))
-        if 'ADOPTED LEVELS' in ident.group(2):
-            parent = ident.group(1)
-            pid = _to_id(parent)
-            brs = {}
-            levelc_found = False
-            for line in lines:
-                level_l = _level_regex.match(line)
-                if level_l is not None:
-                    if levelc_found and half_lifev is not None:
-                        levelc_found = False
-                        if len(brs) > 0:
-                            branchlist.append((pid, level, half_lifev, brs))
-                        brs = {}
-                    level, half_lifev, from_nuc, state, special = \
-                        _parse_level_record(level_l)
-                    continue
-                levelc = _level_cont_regex.match(line)
-                if levelc is not None:
-                    brs.update(_parse_level_continuation_record(levelc))
-                    levelc_found = True
-                    continue
-            if levelc_found and half_lifev is not None and pid is not None:
-                if len(brs) > 0:
-                    branchlist.append((pid, level, half_lifev, brs))
-    return decaylist, branchlist
-
-
 def _dlist_gen(f):
     """
     This compiles a list of decay types in an ensdf file
@@ -1000,7 +994,7 @@ def _dlist_gen(f):
             if 'DECAY' in ident.group(2):
                 #print ident.group(2)
                 fin = ident.group(2).split()[1]
-                if not fin in decaylist:
+                if fin not in decaylist:
                     decaylist.append(fin)
 
     return decaylist
@@ -1042,79 +1036,3 @@ def _level_dlist_gen(f, keys):
                             continue
                         keys.append(item)
     return keys
-
-
-def gamma_rays(f):
-    """
-    This splits an ENSDF file into datasets. It then passes the dataset to the
-    appropriate parser. Currently only a subset of decay datasets are
-    supported. The output is a list of objects containing information
-    pertaining to a particular decay. This object is described in detail in the
-    _parse_decay_dataset function.
-
-    Parameters
-    ----------
-    filename : str
-        Name of ENSDF formatted file
-
-    Returns
-    -------
-    decaylist : list of tuples
-        list of objects containing information pertaining to a particular
-        decay. This information is in the following format:
-    int
-        nuc_id of the parent
-    int
-        nuc_id of the daughter
-    str
-        decay type
-    float
-        half-life in seconds
-    float
-        half-life error in seconds
-    float
-        Conversion factor for gamma intensity to photons per 100 decays of the
-        parent
-    float
-        Error in conversion factor for gamma intensity
-    numpy.ndarray
-        X-ray energies and intensities in the following format:
-            * K_alpha1 energy
-            * K_alpha1 intensity (multiply by conversion factor for percentage)
-            * K_alpha2 energy
-            * K_alpha2 intensity (multiply by conversion factor for percentage)
-            * K_beta energy
-            * K_beta intensity (multiply by conversion factor for percentage)
-            * L energy
-            * L intensity (multiply by conversion factor for percentage)
-    numpy.ndarray
-        a numpy array containing information about each gamma ray:
-            * energy in keV
-            * uncertainty in energy
-            * intensity (multiply by conversion factor for percentage)
-            * uncertainty in intensity
-            * electron conversion intensity
-            * uncertainty in electron conversion intensity
-            * total transition intensity
-            * total transition intensity error
-
-    """
-    if isinstance(f, str):
-        with open(f, 'r') as f:
-            dat = f.read()
-    else:
-        dat = f.read()
-    decaylist = []
-    datasets = dat.split(80 * " " + "\n")[0:-1]
-    for dataset in datasets:
-        lines = dataset.splitlines()
-        ident = re.match(_ident, lines[0])
-        if ident is not None:
-            for decay_s in _decays:
-                if 'DECAY' in ident.group(2):
-                    if decay_s == ident.group(2).split()[1]:
-                        decay = _parse_decay_dataset(lines, decay_s)
-                        if decay is not None:
-                            decaylist.append(decay)
-    return decaylist
-

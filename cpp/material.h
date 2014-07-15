@@ -1,8 +1,8 @@
 /// \brief The ever-important material class and related helpers.
-/// 
-/// The material class is effectively a normalized nuclide linked list with 
-/// associated mass, density, atoms per mol, and metadata.  However, this 
-/// implementation also contains other functions for mixing materials and generating 
+///
+/// The material class is effectively a normalized nuclide linked list with
+/// associated mass, density, atoms per mol, and metadata.  However, this
+/// implementation also contains other functions for mixing materials and generating
 /// related materials.
 
 #ifndef PYNE_MR34UE5INRGMZK2QYRDWICFHVM
@@ -50,7 +50,7 @@ namespace pyne
     Material ();  ///< empty constructor
     /// Constructor from composition map
     /// \param cm composition map
-    /// \param m mass value, the mass is set to the sum of the values in the 
+    /// \param m mass value, the mass is set to the sum of the values in the
     ///          composition if \a m is negative.
     /// \param d density value
     /// \param apm atoms per mole
@@ -60,8 +60,8 @@ namespace pyne
     /// Constructor from file
     /// \param filename path to file on disk, this file may be either in plaintext
     ///                 or HDF5 format.
-    /// \param m mass value, the mass is set to the sum of the values in the 
-    ///          composition if \a m is negative, 
+    /// \param m mass value, the mass is set to the sum of the values in the
+    ///          composition if \a m is negative,
     ///          may be overridden by the value from disk.
     /// \param d density value,
     ///          may be overridden by the value from disk.
@@ -74,8 +74,8 @@ namespace pyne
     /// Constructor from file
     /// \param filename path to file on disk, this file may be either in plaintext
     ///                 or HDF5 format.
-    /// \param m mass value, the mass is set to the sum of the values in the 
-    ///          composition if \a m is negative, 
+    /// \param m mass value, the mass is set to the sum of the values in the
+    ///          composition if \a m is negative,
     ///          may be overridden by the value from disk.
     /// \param d density value,
     ///          may be overridden by the value from disk.
@@ -92,14 +92,14 @@ namespace pyne
 
     // Persistence functions.
 
-    /// Loads the matrial composition from an HDF5 file according to the layout 
+    /// Loads the matrial composition from an HDF5 file according to the layout
     /// defined by protocol 0.  This protocol is depratacted.
     /// \param db HDF5 id for the open HDF5 file.
     /// \param datapath Path to the base node for the material in \a db.
     /// \param row The index to read out, may be negative.
     void _load_comp_protocol0(hid_t db, std::string datapath, int row);
 
-    /// Loads the matrial composition from an HDF5 file according to the layout 
+    /// Loads the matrial composition from an HDF5 file according to the layout
     /// defined by protocol 1.  This protocol should be used in favor of protocol 0.
     /// \param db HDF5 id for the open HDF5 file.
     /// \param datapath Path to the base node for the material in \a db.
@@ -118,30 +118,30 @@ namespace pyne
     /// \param datapath Path to the the material in the file.
     /// \param row The index to read out, may be negative.
     /// \param protocol Flag for layout of material on disk.
-    void from_hdf5(std::string filename, std::string datapath="/material", 
+    void from_hdf5(std::string filename, std::string datapath="/material",
                                                           int row=-1, int protocol=1);
 
-    /// Writes this material out to an HDF5 file.  
+    /// Writes this material out to an HDF5 file.
     /// This happens according to protocol 1.
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
     /// \param nucpath Path to the nuclides set in the file.
     /// \param row The index to read out, may be negative. Also note that this is a
-    ///            float.  A value of -0.0 indicates that the material should be 
+    ///            float.  A value of -0.0 indicates that the material should be
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
-    void write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0, 
+    void write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0,
                                                                     int chunksize=100);
-    /// Writes this material out to an HDF5 file.  
+    /// Writes this material out to an HDF5 file.
     /// This happens according to protocol 1.
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
     /// \param nucpath Path to the nuclides set in the file.
     /// \param row The index to read out, may be negative. Also note that this is a
-    ///            float.  A value of -0.0 indicates that the material should be 
+    ///            float.  A value of -0.0 indicates that the material should be
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
-    void write_hdf5(std::string filename, std::string datapath="/material", 
+    void write_hdf5(std::string filename, std::string datapath="/material",
                     std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
     /// Return an mcnp input deck record as a string
@@ -173,16 +173,16 @@ namespace pyne
 
     // Fundemental mass stream data
     /// composition, maps nuclides in id form to normalized mass weights.
-    comp_map comp;  
+    comp_map comp;
     double mass;  ///< mass (in arbitrary units) of the Material.
     double density; ///< density (in arbitrary units) of the Material.
     double atoms_per_molecule; ///< The number of atoms per molecule.
     /// container for arbitrary metadata, following the JSON rules.
-    Json::Value metadata;  
+    Json::Value metadata;
 
     // Material function definitions
     void normalize ();  ///< Normalizes the mass.
-    /// Returns a composition map that has been unnormalized by multiplying each 
+    /// Returns a composition map that has been unnormalized by multiplying each
     /// mass weight by the actual mass of the material.
     comp_map mult_by_mass();
     /// Calculates the atomic weight of this material based on the composition
@@ -191,7 +191,7 @@ namespace pyne
     /// If \a apm and atoms_per_molecule on this instance are both negative, then the best
     /// guess value calculated from the normailized composition is used here.
     double molecular_mass(double apm=-1.0);
-    /// Returns a copy of the current material where all natural elements in the 
+    /// Returns a copy of the current material where all natural elements in the
     /// composition are expanded to their natural isotopic abundances.
     Material expand_elements();
     /// Computes, sets, and returns the mass density when \a num_dens is greater
@@ -199,10 +199,10 @@ namespace pyne
     /// current value of the density member variable.  You may also use / set the
     /// atoms per molecule (atoms_per_molecule) in this function using \a apm.
     double mass_density(double num_dens=-1.0, double apm=-1.0);
-    /// Computes and returns the number density of the material using the 
-    /// mass density if \a mass_dens is greater than or equal to zero.  If 
-    /// \a mass_dens is negative, the denisty member variable is used instead.  
-    /// You may also use / set the atoms per molecule (atoms_per_molecule) in this 
+    /// Computes and returns the number density of the material using the
+    /// mass density if \a mass_dens is greater than or equal to zero.  If
+    /// \a mass_dens is negative, the denisty member variable is used instead.
+    /// You may also use / set the atoms per molecule (atoms_per_molecule) in this
     /// function using \a apm.
     double number_density(double mass_dens=-1.0, double apm=-1.0);
 
@@ -214,11 +214,11 @@ namespace pyne
     /// Elements of this set may be in any form.
     Material sub_mat(std::set<std::string> nucset);
 
-    /// Creates a new Material with the mass weights for all nuclides in \a nucset 
+    /// Creates a new Material with the mass weights for all nuclides in \a nucset
     /// set to \a value.
     /// Elements of \a nucset may be either in id form or simple Z numbers.
     Material set_mat(std::set<int> nucset, double value);
-    /// Creates a new Material with the mass weights for all nuclides in \a nucset 
+    /// Creates a new Material with the mass weights for all nuclides in \a nucset
     /// set to \a value.  Elements of \a nucset may be in any form.
     Material set_mat(std::set<std::string> nucset, double value);
 
@@ -255,9 +255,25 @@ namespace pyne
     /// Returns a mapping of the nuclides in this material to their atom fractions.
     /// This calculation is based off of the materials molecular weight.
     std::map<int, double> to_atom_frac();
-    /// Sets the composition, mass, and atoms_per_molecule of this material to those 
+    /// Sets the composition, mass, and atoms_per_molecule of this material to those
     /// calculated from \a atom_fracs, a mapping of nuclides to atom fractions values.
     void from_atom_frac(std::map<int, double> atom_fracs);
+
+    // Radioactive Material functions
+    /// Returns a list of gamma-rays energies in keV and intensities in
+    /// decays/s/atom material unnormalized
+    std::vector<std::pair<double, double> > gammas();
+    /// Returns a list of x-rays average energies in keV and intensities in
+    /// decays/s material unnormalized
+    std::vector<std::pair<double, double> > xrays();
+    /// Returns a list of photon energies in keV and intensities in
+    /// decays/s/atom material unnormalized
+    std::vector<std::pair<double, double> > photons(bool norm);
+    /// Takes a list of photon energies and intensities and normalizes them
+    /// so the sum of the intensities is one
+    std::vector<std::pair<double, double> > normalize_radioactivity(
+      std::vector<std::pair<double, double> > unnormed);
+
 
     // Overloaded Operators
     /// Adds mass to a material instance.
@@ -276,12 +292,12 @@ namespace pyne
 
   /// A stuct for reprensenting fundemental data in a material.
   /// Useful for HDF5 representations.
-  typedef struct material_struct {
+  typedef struct material_data {
     double mass;  ///< material mass
     double density; ///< material density
     double atoms_per_mol; ///< material atoms per mole
     double comp []; ///< array of material composition mass weights.
-  } material_struct;
+  } material_data;
 
   /// Custom exception for invalid HDF5 protocol numbers
   class MaterialProtocolError: public std::exception
