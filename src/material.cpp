@@ -949,34 +949,42 @@ pyne::Material pyne::Material::expand_elements() {
   return Material(newcomp, mass, density, atoms_per_molecule, metadata);
 };
 
-// This version will be called from c++, typically
-// The input can be znums or ids:  Either is transformed to znum
 pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
-  /////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////
   // Assumptions
   //    - list passed in is of nucids of elements, eg 80000000, 690000000
   // Algorithm
-  // for each component in this material, look at its 'stripped' nucid, 
+  // for each component listed in this material, look at its 'stripped' nucid, 
   //    that is the last seven places replaced with 0's
   //    if it's on the exception list, copy the component
-  //    else it is to be collapsed
+  //    else it is to be collapsed if it is present* in a nonzero amount
   //       => add it's frac to the component of the znum
-  // 
-  ///////////////////////////////////////////////////////////// 
+  //  
+  // * When from_hdf5 reads from a file the comp iterator will produce a 
+  //   hit for EVERY nucid in EVERY material in the file.  Only the nucids
+  //   belonging to the CURRENT material have a nonzero fraction/mass amount
+  ///////////////////////////////////////////////////////////////////////// 
   pyne::comp_map cm;
   
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
-      // look at the stripped nucid
-      std::cout << "cur_id is " << nucname::id(ptr->first);
-      int cur_stripped_id = nucname::id(nucname::znum(ptr->first));
-      if ( 0 < exception_ids.count(cur_stripped_id) ) {
-        // On exception list, => do not collapse
-	std::cout << ":  On the exception list, don't collapse " << std::endl;
-        cm[ptr->first] = (ptr->second) * mass;
-      } else {
-        // Not on exception list, add frac to id-component
-	std::cout << ":  Not on the exception list, collapsing " << std::endl;
-	cm[nucname::id(cur_stripped_id)] += (ptr->second) * mass;
+      if (0 < ptr->second) {
+        // There is a nonzero amount of this nucid in the current material, 
+        // look at the stripped nucid
+	// check if znum and anum are in the exception list, leave out snum
+        // int cur_stripped_id = nucname::id(nucname::znum(ptr->first));
+        int cur_stripped_id = nucname::znum(ptr->first)*10000000 
+	                    + nucname::anum(ptr->first)*10000;
+        if (0 < exception_ids.count(cur_stripped_id)) {
+          // On exception list, => copy, don't collapse
+          // std::cout << "cur_id is " << nucname::id(ptr->first) << std::endl;
+          cm[ptr->first] = (ptr->second) * mass;
+        } else {
+          // Not on exception list => add frac to id-component
+          std::cout << "cur_id is " << nucname::id(ptr->first);
+	  std::cout << ":  Collapsing amount " << ptr->second << std::endl;
+          int znum_id = nucname::id(nucname::znum(ptr->first));
+	  cm[znum_id] += (ptr->second) * mass;
+        }
       }
   }
 
