@@ -124,20 +124,20 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   hid_t mem_space = H5Screate_simple(1, data_count, NULL);
 
   // Get material type
-  size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
-  hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
+  size_t material_data_size = sizeof(pyne::material_data) + sizeof(double)*nuc_size;
+  hid_t desc = H5Tcreate(H5T_COMPOUND, material_data_size);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density),
+  H5Tinsert(desc, "mass", HOFFSET(pyne::material_data, mass), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "density", HOFFSET(pyne::material_data, density),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol),
+  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_data, atoms_per_mol),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp), comp_values_array_type);
+  H5Tinsert(desc, "comp", HOFFSET(pyne::material_data, comp), comp_values_array_type);
 
   // make the data array, have to over-allocate
-  material_struct * mat_data = new material_struct [material_struct_size];
+  material_data * mat_data = new material_data [material_data_size];
 
   // Finally, get data and put in on this instance
   H5Dread(data_set, desc, mem_space, data_hyperslab, H5P_DEFAULT, mat_data);
@@ -316,20 +316,20 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   hsize_t data_max_dims[1] = {H5S_UNLIMITED};
   hsize_t data_offset[1] = {0};
 
-  size_t material_struct_size = sizeof(pyne::material_struct) + sizeof(double)*nuc_size;
-  hid_t desc = H5Tcreate(H5T_COMPOUND, material_struct_size);
+  size_t material_data_size = sizeof(pyne::material_data) + sizeof(double)*nuc_size;
+  hid_t desc = H5Tcreate(H5T_COMPOUND, material_data_size);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
   // make the data table type
-  H5Tinsert(desc, "mass", HOFFSET(pyne::material_struct, mass), H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "density", HOFFSET(pyne::material_struct, density),
+  H5Tinsert(desc, "mass", HOFFSET(pyne::material_data, mass), H5T_NATIVE_DOUBLE);
+  H5Tinsert(desc, "density", HOFFSET(pyne::material_data, density),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_struct, atoms_per_mol),
+  H5Tinsert(desc, "atoms_per_molecule", HOFFSET(pyne::material_data, atoms_per_mol),
             H5T_NATIVE_DOUBLE);
-  H5Tinsert(desc, "comp", HOFFSET(pyne::material_struct, comp),
+  H5Tinsert(desc, "comp", HOFFSET(pyne::material_data, comp),
             comp_values_array_type);
 
-  material_struct * mat_data  = new material_struct[material_struct_size];
+  material_data * mat_data  = new material_data[material_data_size];
   (*mat_data).mass = mass;
   (*mat_data).density = density;
   (*mat_data).atoms_per_mol = atoms_per_molecule;
@@ -369,7 +369,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     H5Pset_chunk(data_set_params, 1, chunk_dims);
     H5Pset_deflate(data_set_params, 1);
 
-    material_struct * data_fill_value  = new material_struct[material_struct_size];
+    material_data * data_fill_value  = new material_data[material_data_size];
     (*data_fill_value).mass = -1.0;
     (*data_fill_value).density= -1.0;
     (*data_fill_value).atoms_per_mol = -1.0;
@@ -509,7 +509,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
     if (comment_string.length() <= 77) {
       oss << "C " << comment_string << std::endl;
     }
-    else { // otherwise create a remainder string and iterate/update it 
+    else { // otherwise create a remainder string and iterate/update it
       oss << "C " << comment_string.substr(0,77) << std::endl;
       std::string remainder_string = comment_string.substr(77);
       while (remainder_string.length() > 77) {
@@ -525,7 +525,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // Metadata mat_num
   oss << "m";
   if (metadata.isMember("mat_number")) {
-    int mat_num = metadata["mat_number"].asInt(); 
+    int mat_num = metadata["mat_number"].asInt();
     oss << mat_num << std::endl;
   } else {
     oss << "?" << std::endl;
@@ -533,16 +533,16 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 
   // Set up atom or mass frac map
   std::map<int, double> fracs;
-  std::string frac_sign; 
- 
-  if ("atom" == frac_type) { 
+  std::string frac_sign;
+
+  if ("atom" == frac_type) {
     fracs = to_atom_frac();
     frac_sign = "";
-  } else { 
+  } else {
     fracs = comp;
     frac_sign = "-";
   }
-  
+
   // iterate through frac map
   // This is an awkward pre-C++11 way to put an int to a string
   std::stringstream ss;
@@ -569,7 +569,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
     fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
        << std::endl;
     oss << fs.str();
-  } 
+  }
 
   return oss.str();
 }
@@ -590,12 +590,12 @@ std::string pyne::Material::fluka() {
     if (metadata.isMember("fluka_material_index") ) {
        int fluka_mat_idx = metadata["fluka_material_index"].asInt();
        // fluka_mat_id is an int, but FLUKA likes ints like '26.'
-       mat_idx_stream << fluka_mat_idx + mat_idx_start << '.'; 
+       mat_idx_stream << fluka_mat_idx + mat_idx_start << '.';
     } else {
       // There isn't a mat_index
       mat_idx_stream << "?";
     }
-       
+
     if (metadata.isMember("comments") ) {
        comment = metadata["comments"].asString();
        rs << "* " << comment << std::endl;
@@ -860,7 +860,7 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
   return os;
 };
 
-// Note this refines << for an inheritor of std::ostream.  
+// Note this refines << for an inheritor of std::ostream.
 std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) {
   return os;
 }
@@ -1212,6 +1212,70 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs) {
 
 
 
+std::vector<std::pair<double, double> > pyne::Material::gammas() {
+  std::vector<std::pair<double, double> > result;
+  std::map<int, double> atom_fracs = this->to_atom_frac();
+  int state_id;
+  for (comp_iter ci = comp.begin(); ci != comp.end(); ci++) {
+    if (ci->first % 10000 > 0)
+        state_id = nucname::id_to_state_id(ci->first);
+    else
+        state_id = ci->first;
+
+    std::vector<std::pair<double, double> > raw_gammas = pyne::gammas(state_id);
+    for (int i = 0; i < raw_gammas.size(); ++i) {
+      result.push_back(std::make_pair(raw_gammas[i].first,
+        atom_fracs[ci->first]*raw_gammas[i].second));
+    }
+  }
+  return result;
+}
+
+std::vector<std::pair<double, double> > pyne::Material::xrays() {
+  std::vector<std::pair<double, double> > result;
+  std::map<int, double> atom_fracs = this->to_atom_frac();
+  int state_id;
+  for (comp_iter ci = comp.begin(); ci != comp.end(); ci++) {
+    if (ci->first % 10000 > 0)
+        state_id = nucname::id_to_state_id(ci->first);
+    else
+        state_id = ci->first;
+
+    std::vector<std::pair<double, double> > raw_xrays = pyne::xrays(state_id);
+    for (int i = 0; i < raw_xrays.size(); ++i) {
+      result.push_back(std::make_pair(raw_xrays[i].first,
+        atom_fracs[ci->first]*raw_xrays[i].second));
+    }
+  }
+  return result;
+}
+
+std::vector<std::pair<double, double> > pyne::Material::photons(bool norm) {
+  std::vector<std::pair<double, double> >  txray = this->xrays();
+  std::vector<std::pair<double, double> >  tgammas = this->gammas();
+  for (int i = 0; i < txray.size(); ++i)
+    tgammas.push_back(txray[i]);
+  if (norm)
+    tgammas = normalize_radioactivity(tgammas);
+  return tgammas;
+}
+
+std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
+std::vector<std::pair<double, double> > unnormed) {
+  std::vector<std::pair<double, double> > normed;
+  double sum = 0.0;
+  for (int i = 0; i < unnormed.size(); ++i) {
+    if (!isnan(unnormed[i].second))
+      sum = sum + unnormed[i].second;
+  }
+  for (int i = 0; i < unnormed.size(); ++i) {
+    if (!isnan(unnormed[i].second)) {
+      normed.push_back(std::make_pair(unnormed[i].first,
+        (unnormed[i].second)/sum));
+    }
+  }
+  return normed;
+}
 
 
 pyne::Material pyne::Material::operator+ (double y) {
