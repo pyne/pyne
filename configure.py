@@ -111,6 +111,7 @@ def setup():
     libpynes = set()
     for ext in extpttn:
         libpynes |= set(glob('cpp/' + ext))
+        libpynes |= set(glob('fortran/' + ext))
     data_files = [
         ('lib', libpynes),
         ('include/pyne', glob('../cpp/*.h')),
