@@ -580,19 +580,19 @@ std::string pyne::Material::fluka() {
   const int mat_idx_start = 0;
 
   std::stringstream rs;
-  std::stringstream mat_idx_stream;
   std::string name;
   std::string comment;
   if (metadata.isMember("fluka_name")) {
+
     name = metadata["fluka_name"].asString();
+
+    int fluka_mat_idx;
+    bool is_mat_idx = true;
     if (metadata.isMember("fluka_material_index") ) {
       std::string fluka_mat_idx_str = metadata["fluka_material_index"].asString();
-      int fluka_mat_idx = atoi(fluka_mat_idx_str.c_str());
-       // fluka_mat_id is an int, but FLUKA likes ints like '26.'
-       mat_idx_stream << fluka_mat_idx + mat_idx_start << '.';
-    } else {
-      // There isn't a mat_index
-      mat_idx_stream << "?";
+      fluka_mat_idx = atoi(fluka_mat_idx_str.c_str());
+    } else { // There isn't a mat_index
+      is_mat_idx = false;
     }
 
     if (metadata.isMember("comments") ) {
@@ -600,11 +600,25 @@ std::string pyne::Material::fluka() {
        rs << "* " << comment << std::endl;
     }
 
+    std::cout.precision(0);
+    double intpart;
+    modf (density, &intpart);
     rs << std::setw(10) << std::left << "MATERIAL";
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << "";
-    rs << std::setw(10) << std::right << density;
-    rs << std::setw(10) << std::right << mat_idx_stream.str();
+    // Density is an int, ensure there is a '.' after it
+    if (density == intpart) {
+      rs << std::setprecision(0) << std::fixed << std::showpoint << 
+            std::setw(10) << std::right << density;
+    } else {
+      rs << std::setw(10) << std::right << density;
+    }
+    if (is_mat_idx) { 
+      rs << std::setprecision(0) << std::fixed << std::showpoint <<
+      std::setw(10) << std::right << (float)(fluka_mat_idx + mat_idx_start); 
+    } else {
+      rs << std::setw(10) << std::right << "?";
+    }
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::right << "";
     rs << std::setw(10) << std::left << name << std::endl;
@@ -952,12 +966,15 @@ pyne::Material pyne::Material::expand_elements() {
 pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   ////////////////////////////////////////////////////////////////////////
   // Assumptions
-  //    - list passed in is of nucids of elements, eg 80000000, 690000000
+  //    - list passed in is formed of znum-anum of Fluka-named isotopes,
+  //      since we want to preserve the full nucid of any such material in
+  //      the problem
   // Algorithm
-  // for each component listed in this material, look at its 'stripped' nucid, 
-  //    that is the last seven places replaced with 0's
+  // for each component listed in this material that has a nonzero frac or 
+  //    weight amount, look at its 'stripped' nucid, that is, the last four 
+  //    places replaced by zeros.
   //    if it's on the exception list, copy the component
-  //    else it is to be collapsed if it is present* in a nonzero amount
+  //    else it is to be collapsed 
   //       => add it's frac to the component of the znum
   //  
   // * When from_hdf5 reads from a file the comp iterator will produce a 
@@ -969,25 +986,23 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
       if (0 < ptr->second) {
         // There is a nonzero amount of this nucid in the current material, 
-        // look at the stripped nucid
-	// check if znum and anum are in the exception list, leave out snum
-        // int cur_stripped_id = nucname::id(nucname::znum(ptr->first));
+	// check if znum and anum are in the exception list, 
         int cur_stripped_id = nucname::znum(ptr->first)*10000000 
 	                    + nucname::anum(ptr->first)*10000;
         if (0 < exception_ids.count(cur_stripped_id)) {
-          // On exception list, => copy, don't collapse
-          // std::cout << "cur_id is " << nucname::id(ptr->first) << std::endl;
+          // The znum/anum combination identify the current material as a 
+	  // fluka-named exception list => copy, don't collapse
           cm[ptr->first] = (ptr->second) * mass;
         } else {
           // Not on exception list => add frac to id-component
-          std::cout << "cur_id is " << nucname::id(ptr->first);
-	  std::cout << ":  Collapsing amount " << ptr->second << std::endl;
           int znum_id = nucname::id(nucname::znum(ptr->first));
+          std::cout << "cur_id is " << nucname::id(ptr->first);
+	  std::cout << ":  Collapsing amount " << ptr->second << 
+	               " to nucid " << znum_id << std::endl;
 	  cm[znum_id] += (ptr->second) * mass;
         }
       }
   }
-
   return pyne::Material(cm, -1, -1);
 }
 
