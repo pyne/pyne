@@ -4,6 +4,9 @@ cmake_minimum_required( VERSION 2.8.5 )
 # Set the project name
 project( pyne )
 
+# languages
+enable_language(Fortran)
+
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -104,6 +107,7 @@ add_custom_target(ReplicatePythonSourceTree ALL "${CMAKE_COMMAND}" -P
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_subdirectory(cpp)
+add_subdirectory(fortran)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
 
