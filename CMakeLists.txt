@@ -106,8 +106,7 @@ add_custom_target(ReplicatePythonSourceTree ALL "${CMAKE_COMMAND}" -P
   "${CMAKE_CURRENT_BINARY_DIR}"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_subdirectory(cpp)
-add_subdirectory(fortran)
+add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
 

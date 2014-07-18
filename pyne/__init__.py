@@ -9,7 +9,7 @@ if os.name == 'nt':
 try:
     from .pyne_config import *
 except ImportError:
-    msg = """Error importing PyNE: you should not try to import PyNE from
-             its source directory; please exit the PyNE source tree, and relaunch
-             your python interpreter from there."""
+    msg = ("Error importing PyNE: you should not try to import PyNE from "
+           "its source directory; please exit the PyNE source tree, and relaunch "
+           "your python interpreter from there.")
     raise ImportError(msg)
