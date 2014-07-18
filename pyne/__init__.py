@@ -12,4 +12,5 @@ except ImportError:
     msg = ("Error importing PyNE: you should not try to import PyNE from "
            "its source directory; please exit the PyNE source tree, and relaunch "
            "your python interpreter from there.")
-    raise ImportError(msg)
+    warn(msg, Warning)
+    raise
