@@ -76,7 +76,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
     # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
     set(CMAKE_MACOSX_RPATH 1)
-    set(CMAKE_INSTALL_RPATH "@loader_path/lib")
+    set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
 elseif(WIN32)
     if(MSVC)
         # ??? Who knows what to do here?! --Anthony
@@ -106,8 +106,7 @@ add_custom_target(ReplicatePythonSourceTree ALL "${CMAKE_COMMAND}" -P
   "${CMAKE_CURRENT_BINARY_DIR}"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_subdirectory(cpp)
-add_subdirectory(fortran)
+add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
 

@@ -42,8 +42,8 @@ namespace pyne
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
 
   /// Mapping from nodes in nuc_data.h5 to hashes of nodes
-  extern std::map<std::string, std::string> data_checksums; 
-  
+  extern std::map<std::string, std::string> data_checksums;
+
   /// \name Atomic Mass Data
   /// \{
 
@@ -51,31 +51,31 @@ namespace pyne
   extern std::map<int, double> atomic_mass_map;
 
   /// a struct matching the atomic_mass table in nuc_data.h5.
-  typedef struct atomic_mass_struct {
+  typedef struct atomic_mass_data {
     int nuc;      ///< nuclide in id form
     double mass;  ///< nuclide atomic mass [amu]
     double error; ///< error in atomic mass [amu]
     double abund; ///< natural abundance of nuclide [atom fraction]
-  } atomic_mass_struct; 
+  } atomic_mass_data;
 
   // Loads preset dataset hashes into memory.
   std::map<std::string, std::string> get_data_checksums();
-  
+
   /// Loads the atomic mass and natural abundance data from the nuc_data.h5 file
   /// into memory.
-  void _load_atomic_mass_map(); 
+  void _load_atomic_mass_map();
 
-  /// \brief Returns the atomic mass of a nuclide \a nuc.  
-  /// 
+  /// \brief Returns the atomic mass of a nuclide \a nuc.
+  ///
   /// This function will first try to find the atomic mass data in the atomic_mass_map.
   /// If this map is empty, it will load the data from disk.  If the nuclide is in an
   /// excited state and not found in the map, it will give the value for the ground
   /// state nuclide.  If the nuclide simply cannot be found, the A number is returned.
   double atomic_mass(int nuc);
   /// Returns the atomic mass of a nuclide \a nuc.
-  double atomic_mass(char * nuc); 
+  double atomic_mass(char * nuc);
   /// Returns the atomic mass of a nuclide \a nuc.
-  double atomic_mass(std::string nuc); 
+  double atomic_mass(std::string nuc);
   /// \}
 
 
@@ -85,16 +85,16 @@ namespace pyne
   /// Mapping from nuclides in id form to their natural abundances.
   extern std::map<int, double> natural_abund_map;
 
-  /// \brief Returns the natural abundance of a nuclide \a nuc.  
-  /// 
+  /// \brief Returns the natural abundance of a nuclide \a nuc.
+  ///
   /// This follows the same the basic rules for finding or computing the natural
   /// abundances as the atomic_mass() functions do.  However, if the nuclide cannot
   /// be found, the default value returned is 0.0.
   double natural_abund(int nuc);
-  /// Returns the natural abundance of a nuclide \a nuc. 
-  double natural_abund(char * nuc); 
-  /// Returns the natural abundance of a nuclide \a nuc. 
-  double natural_abund(std::string nuc); 
+  /// Returns the natural abundance of a nuclide \a nuc.
+  double natural_abund(char * nuc);
+  /// Returns the natural abundance of a nuclide \a nuc.
+  double natural_abund(std::string nuc);
   /// \}
 
 
@@ -102,32 +102,32 @@ namespace pyne
   /// \name Q_value Data
   /// \{
 
-  /// Mapping from nuclides in id form to their q_values and 
+  /// Mapping from nuclides in id form to their q_values and
   /// the fraction of Q that comes from gammas.
   extern std::map<int, double> q_val_map;
   extern std::map<int, double> gamma_frac_map;
 
   /// a struct matching the q_value table in nuc_data.h5.
-  typedef struct q_val_struct {
+  typedef struct q_val_data {
     int nuc;          ///< nuclide in id form
     double q_val;      ///< nuclide q_value [MeV/fission]
     double gamma_frac; ///< fraction of q that comes from gammas
-  } q_val_struct; 
+  } q_val_data;
 
   /// Loads the q_value data from the nuc_data.h5 file into memory.
-  void _load_q_val_map(); 
+  void _load_q_val_map();
 
-  /// \brief Returns the q_value of a nuclide \a nuc.  
-  /// 
+  /// \brief Returns the q_value of a nuclide \a nuc.
+  ///
   /// This function will first try to find the q_value data in the q_val_map.
-  /// If this map is empty, it will load the data from disk. If the nuclide simply 
+  /// If this map is empty, it will load the data from disk. If the nuclide simply
   /// cannot be found, the default value returned is 0.0.
   double q_val(int nuc);
-  double q_val(const char * nuc); 
-  double q_val(std::string nuc); 
+  double q_val(const char * nuc);
+  double q_val(std::string nuc);
   double gamma_frac(int nuc);
-  double gamma_frac(const char * nuc); 
-  double gamma_frac(std::string nuc); 
+  double gamma_frac(const char * nuc);
+  double gamma_frac(std::string nuc);
   /// \}
 
 
@@ -135,7 +135,7 @@ namespace pyne
   /// \{
 
   /// A struct matching the dose factor table in nuc_data.h5.
-  typedef struct dose_struct {
+  typedef struct dose {
     int nuc;              ///< nuclide in id form
     double ext_air_dose;  ///< nuclide ext_air dose factor [mrem/h per Ci/m^3]
     double ratio;         ///< ratio of external air dose factor to dose factor due to inhalation
@@ -144,30 +144,30 @@ namespace pyne
     double fluid_frac;    ///< fraction of activity abosorbed in body fluids
     double inhale_dose;   ///< nuclide dose factor due to inhalation [mrem/pCi]
     char lung_mod;        ///< model of lung used (time of biological half life-- D, W, or Y)
-  } dose_struct;
+  } dose;
 
-  /// Mapping from int to dose_struct for 3 sources
-  extern std::map<int, dose_struct> epa_dose_map;
-  extern std::map<int, dose_struct> doe_dose_map;
-  extern std::map<int, dose_struct> genii_dose_map;
+  /// Mapping from int to dose for 3 sources
+  extern std::map<int, dose> epa_dose_map;
+  extern std::map<int, dose> doe_dose_map;
+  extern std::map<int, dose> genii_dose_map;
 
   /// Loads the dose factor data from the nuc_data.h5 file into memory
   /// according to the user-input source.
-  void _load_dose_map(std::map<int, dose_struct>& dm, std::string source_path);
+  void _load_dose_map(std::map<int, dose>& dm, std::string source_path);
 
-  /// \brief Returns the dose factors of a nuclide.  
-  /// 
+  /// \brief Returns the dose factors of a nuclide.
+  ///
   /// These functions will first try to find the dose factor data in the dose_maps.
-  /// If the maps are empty, it will load the data from disk. If the nuclide simply 
+  /// If the maps are empty, it will load the data from disk. If the nuclide simply
   /// cannot be found, the default value returned is -1.
   double ext_air_dose(int nuc, int source);
-  double ext_air_dose(const char * nuc, int source); 
+  double ext_air_dose(const char * nuc, int source);
   double ext_air_dose(std::string nuc, int source);
   double ext_soil_dose(int nuc, int source);
-  double ext_soil_dose(const char * nuc, int source); 
+  double ext_soil_dose(const char * nuc, int source);
   double ext_soil_dose(std::string nuc, int source);
   double ingest_dose(int nuc, int source);
-  double ingest_dose(const char * nuc, int source); 
+  double ingest_dose(const char * nuc, int source);
   double ingest_dose(std::string nuc, int source);
   double inhale_dose(int nuc, int source);
   double inhale_dose(const char * nuc, int source);
@@ -179,12 +179,12 @@ namespace pyne
   double dose_fluid_frac(const char * nuc, int source);
   double dose_fluid_frac(std::string nuc, int source);
   std::string dose_lung_model(int nuc, int source);
-  std::string dose_lung_model(const char * nuc, int source); 
+  std::string dose_lung_model(const char * nuc, int source);
   std::string dose_lung_model(std::string nuc, int source);
   /// \}
 
 
-  
+
   /// \name Scattering Length Data
   /// \{
 
@@ -196,14 +196,14 @@ namespace pyne
   extern std::map<int, double> b_map;
 
   /// a struct matching the '/neutron/scattering_lengths' table in nuc_data.h5.
-  typedef struct scattering_lengths_struct {
+  typedef struct scattering_lengths {
     int nuc;  ///< nuclide in id form
     xd_complex_t b_coherent;  ///< coherent scattering length [cm]
     xd_complex_t b_incoherent;  ///< incoherent scattering length [cm]
     double xs_coherent;   ///< coherent scattering cross section
     double xs_incoherent; ///< incoherent scattering cross section
     double xs;            ///< scattering cross section
-  } scattering_lengths_struct; 
+  } scattering_lengths;
 
   /// Loads the scattering length data from the nuc_data.h5 file into memory.
   void _load_scattering_lengths();
@@ -246,17 +246,17 @@ namespace pyne
   extern std::map<std::pair<int, int>, double> wimsdfpy_data;
 
   /// a struct matching the '/neutron/wimsd_fission_product' table in nuc_data.h5.
-  typedef struct wimsdfpy_struct {
+  typedef struct wimsdfpy {
     int from_nuc;  ///< from nuclide in id form
     int to_nuc;  ///< from nuclide in id form
     double yields; ///< fission product yield, fraction [unitless]
-  } wimsdfpy_struct; 
+  } wimsdfpy;
 
   /// Loads the WIMSD fission product yield data from the nuc_data.h5 file into memory.
   void _load_wimsdfpy();
 
   /// a struct matching the '/neutron/nds_fission_product' table in nuc_data.h5
-  typedef struct ndsfpy_struct {
+  typedef struct ndsfpy {
     int from_nuc; ///< id of fissioning nuclide
     int to_nuc; ///< id of fission product
     double yield_thermal; ///< thermal yield [fraction]
@@ -265,20 +265,20 @@ namespace pyne
     double yield_fast_err; ///< fast yield error [fraction]
     double yield_14MeV; ///< 14 MeV yield [fraction]
     double yield_14MeV_err; ///< 14 MeV yield error [fraction]
-  } ndsfpy_struct;
+  } ndsfpy;
 
   /// a struct for the nds data for fpyield
-  typedef struct ndsfpysub_struct {
+  typedef struct ndsfpysub {
     double yield_thermal; ///< thermal yield [fraction]
     double yield_thermal_err; ///< thermal yield error [fraction]
     double yield_fast; ///< fast yield [fraction]
     double yield_fast_err; ///< fast yield error [fraction]
     double yield_14MeV; ///< 14 MeV yield [fraction]
     double yield_14MeV_err; ///< 14 MeV yield error [fraction]
-  } ndsfpysub_struct;
+  } ndsfpysub;
 
 
-  extern std::map<std::pair<int, int>, ndsfpysub_struct> ndsfpy_data;
+  extern std::map<std::pair<int, int>, ndsfpysub> ndsfpy_data;
 
   /// Loads the NDS fission product yield data from the nuc_data.h5 file into memory.
   void _load_ndsfpy();
@@ -304,9 +304,9 @@ namespace pyne
 
   /// \name Decay Data
   /// \{
-  
+
   /// Data access functions
-  
+
   /// simple class to swap the order in which a pair is compared
   class swapmapcompare{
     public:
@@ -314,38 +314,38 @@ namespace pyne
         bool operator()(const std::pair<int, double>& lhs,
                         const std::pair<int, double>& rhs) const;
   };
-  
-  /// Access data in a std::map<std::pair<int, double> for a range of 
-  /// values of the second member of the pair. Returns a vector of all 
+
+  /// Access data in a std::map<std::pair<int, double> for a range of
+  /// values of the second member of the pair. Returns a vector of all
   /// values at valoffset of class U of type T f
   template<typename T, typename U> std::vector<T> data_access(double emin,
     double emax, size_t valoffset, std::map<std::pair<int, double>, U>  &data);
-  /// Access data in a std::map<std::pair<int, double> for a given 
-  /// value of the first member of the pair. Returns a vector of all 
+  /// Access data in a std::map<std::pair<int, double> for a given
+  /// value of the first member of the pair. Returns a vector of all
   /// values at valoffset of class U of type T
   template<typename T, typename U> std::vector<T> data_access(int parent,
-    double min, double max, size_t valoffset, 
+    double min, double max, size_t valoffset,
     std::map<std::pair<int, double>, U>  &data);
-  /// Access data in a std::map<std::pair<int, int> for a given 
+  /// Access data in a std::map<std::pair<int, int> for a given
   /// matching pair. Returns the value at valoffset of
   /// class U of type T
-  template<typename T, typename U> T data_access(std::pair<int, int> from_to, 
+  template<typename T, typename U> T data_access(std::pair<int, int> from_to,
     size_t valoffset, std::map<std::pair<int, int>, U> &data);
-  /// Access data in a std::map<std::pair<int, int> for a given 
+  /// Access data in a std::map<std::pair<int, int> for a given
   /// value of the first member of the pair. Returns an array of the values
-  /// at valoffset of class U of type T 
-  template<typename T, typename U> std::vector<T> data_access(int parent, 
-    size_t valoffset, std::map<std::pair<int, int>, U> &data);    
-  template<typename T, typename U> std::vector<T> data_access(int parent, 
-    size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data); 
+  /// at valoffset of class U of type T
+  template<typename T, typename U> std::vector<T> data_access(int parent,
+    size_t valoffset, std::map<std::pair<int, int>, U> &data);
+  template<typename T, typename U> std::vector<T> data_access(int parent,
+    size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data);
 
   /// Access data in a std::map<int, data> format for a given first member
   /// of the pair. Returns the value at valoffset of the matching datapoint.
-  template<typename U> double data_access(int parent, 
-  size_t valoffset, std::map<int, U> &data); 
-  
+  template<typename U> double data_access(int parent,
+  size_t valoffset, std::map<int, U> &data);
+
   /// Structure for atomic data
-  typedef struct atomic_struct{
+  typedef struct atomic{
     int z; ///< number of protons [int]
     double k_shell_fluor; ///< K-shell fluorescence [fraction]
     double k_shell_fluor_error; ///< K-shell fluorescence error [fraction]
@@ -372,21 +372,21 @@ namespace pyne
     double ka2_x_ray_en_err; ///< Ka2 X-ray energy error [keV]
     double kb_x_ray_en; ///< Kb X-ray energy [keV]
     double l_x_ray_en; ///< L X-ray energy [keV]
-  } atomic_struct;
-  
+  } atomic;
+
   // map of Z to atomic data
-  extern std::map<int, atomic_struct> atomic_data_map;
-  
+  extern std::map<int, atomic> atomic_data_map;
+
   template<typename T> void _load_data();
-  template<> void _load_data<atomic_struct>();
-  
+  template<> void _load_data<atomic>();
+
   // compute X-ray data
   std::vector<std::pair<double, double> >
   calculate_xray_data(int z, double k_conv, double l_conv);
-  
-  
+
+
   /// a struct matching the '/decay/level_list' table in nuc_data.h5.
-  typedef struct level_struct{
+  typedef struct level_data{
     int nuc_id; ///< state id of nuclide
     unsigned int rx_id; ///< rx id of reaction, 0 for basic level data
     double half_life; ///< half life [seconds]
@@ -394,15 +394,15 @@ namespace pyne
     double branch_ratio; ///< branch ratio [fraction]
     int metastable; ///< metastable level [int]
     char special; ///< special high-spin state [character]
-  } level_struct;
+  } level_data;
 
   /// Mapping from nuclides in id form to a struct containing data associated
   /// with that level.
-  extern std::map<std::pair<int,double>, level_struct> level_data_lvl_map;
-  extern std::map<std::pair<int,unsigned int>, level_struct> level_data_rx_map;
-  
-  template<> void _load_data<level_struct>();
-  
+  extern std::map<std::pair<int,double>, level_data> level_data_lvl_map;
+  extern std::map<std::pair<int,unsigned int>, level_data> level_data_rx_map;
+
+  template<> void _load_data<level_data>();
+
   /// \brief Returns the nuc_id of an energy level
   ///
   /// This function looks for the level that best matches the input level
@@ -416,7 +416,7 @@ namespace pyne
   int metastable_id(int nuc, int m);
   /// Assumes the first metastable state is the desired one
   int metastable_id(int nuc);
-  
+
   /// \brief Returns the half life for a nuclide \a nuc.
   ///
   /// This function works by first checking the half_life_map.  If this is empty it
@@ -442,7 +442,7 @@ namespace pyne
   /// \brief Returns the branch ratio for a parent/child nuclide pair.
   ///
   /// This function works by first checking the branch_ratio_map.  If this is empty it
-  /// loads the data from disk.  If the parent/child nuclide pair is still not found, 
+  /// loads the data from disk.  If the parent/child nuclide pair is still not found,
   /// then the decay is assumed to be impossible and 0.0 is returned.
   double branch_ratio(std::pair<int, int> from_to);
   /// Returns the branch ratio for a parent/child nuclide pair.
@@ -475,7 +475,7 @@ namespace pyne
   std::set<int> decay_children(std::string nuc);
 
   /// a struct matching the '/decay/decays' table in nuc_data.h5.
-  typedef struct decay_struct{
+  typedef struct decay{
     int parent; ///< state id of decay parent
     int child; ///< state id of decay child
     unsigned int decay; ///< rx id of decay
@@ -490,16 +490,17 @@ namespace pyne
     double beta_branch_ratio;
     /// beta branching ratio error of this decay [fraction]
     double beta_branch_ratio_error;
-  } decay_struct;
+  } decay;
 
   /// Loads the decay data from the nuc_data.h5 file into memory.
-  template<> void _load_data<decay_struct>();
+  template<> void _load_data<decay>();
   /// Mapping from a pair of nuclides in id form to a struct containing data
   /// associated with the decay from the first to the second
-  extern std::map<std::pair<int, int>, decay_struct> decay_data;
+  extern std::map<std::pair<int, int>, decay> decay_data;
 
   //
-  //void decay_data(std::pair<int, int> from_to, decay_struct *data);
+  //
+  std::vector<int> decay_data_children(int parent);
   std::pair<double, double> decay_half_life(std::pair<int,int>);
   std::vector<std::pair<double, double> > decay_half_lifes(int);
   double decay_branch_ratio(std::pair<int,int>);
@@ -511,7 +512,7 @@ namespace pyne
 
 
   /// a struct matching the '/decay/gammas' table in nuc_data.h5.
-  typedef struct gamma_struct{
+  typedef struct gamma{
     int from_nuc; ///< state id of starting level
     int to_nuc; ///< state id of final level
     int parent_nuc; ///< state id of the primary decaying nucleus
@@ -526,12 +527,12 @@ namespace pyne
     double k_conv_e; ///< k conversion electron fraction
     double l_conv_e; ///< l conversion electron fraction
     double m_conv_e; ///< m conversion electron fraction
-  } gamma_struct;
+  } gamma;
 
   /// Loads the gamma ray data from the nuc_data.h5 file into memory.
-  template<> void _load_data<gamma_struct>();
+  template<> void _load_data<gamma>();
 
-  extern std::map<std::pair<int, double>, gamma_struct> gamma_data;
+  extern std::map<std::pair<int, double>, gamma> gamma_data;
 
   //returns a list of gamma decay energies from input parent nuclide
   std::vector<std::pair<double, double> > gamma_energy(int parent);
@@ -544,29 +545,35 @@ namespace pyne
   //returns a list of gamma total intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_total_intensity(int parent);
   //returns a list of pairs of excited state transitions from an input parent nuclide
-  std::vector<std::pair<int, int> > gamma_from_to(int parxent);
+  std::vector<std::pair<int, int> > gamma_from_to(int parent);
   //returns a list of pairs of excited state transitions from an decay energy
   std::vector<std::pair<int, int> > gamma_from_to(double energy, double error);
   //returns a list of parent nuclides associated with an input decay energy
   std::vector<int> gamma_parent(double energy, double error);
-  //returns an array of arrays of X-ray energies and intesities for a 
+  //returns an array of arrays of X-ray energies and intesities for a
   //given parent
-  std::vector<std::vector<std::pair<double, double> > > gamma_xrays(int parent);
+  std::vector<std::pair<double, double> > gamma_xrays(int parent);
+
+  /// Returns a list of energies and intensities normalized to branching ratios
+  std::vector<std::pair<double, double> > gammas(int parent_state_id);
+  std::vector<std::pair<double, double> > alphas(int parent_state_id);
+  std::vector<std::pair<double, double> > betas(int parent_state_id);
+  std::vector<std::pair<double, double> > xrays(int parent);
 
   /// a struct matching the '/decay/alphas' table in nuc_data.h5.
-  typedef struct alpha_struct{
+  typedef struct alpha{
     int from_nuc; ///< state id of parent nuclide
     int to_nuc; ///< state id of child nuclide
     double energy; ///< energy of alpha
     double intensity; ///< intensity of alpha decay
-  } alpha_struct;
+  } alpha;
 
   /// Loads the alpha decay data from the nuc_data.h5 file into memory.
-  template<> void _load_data<alpha_struct>();
+  template<> void _load_data<alpha>();
 
   /// A vector of structs containing alpha data for access in memory
-  extern std::map<std::pair<int, double>, alpha_struct> alpha_data;
-  
+  extern std::map<std::pair<int, double>, alpha> alpha_data;
+
   //returns a list of alpha decay energies from input parent nuclide
   std::vector<double > alpha_energy(int parent);
   //returns a list of alpha decay intensities from input parent nuclide
@@ -579,19 +586,19 @@ namespace pyne
   std::vector<int> alpha_child(int parent);
 
   /// a struct matching the '/decay/betas' table in nuc_data.h5.
-  typedef struct beta_struct{
+  typedef struct beta{
     int from_nuc; ///< state id of parent nuclide
     int to_nuc; ///< state id of child nuclide
     double endpoint_energy; ///< beta decay endpoint energy
     double avg_energy; ///< beta decay average energy
     double intensity; ///< beta intensity
-  } beta_struct;
+  } beta;
 
   /// Loads the beta decay data from the nuc_data.h5 file into memory.
-  template<> void _load_data<beta_struct>();
+  template<> void _load_data<beta>();
 
   /// A vector of structs containing beta data for access in memory
-  extern std::map<std::pair<int, double>, beta_struct> beta_data;
+  extern std::map<std::pair<int, double>, beta> beta_data;
   //returns a list of beta decay endpoint energies from input parent nuclide
   std::vector<double > beta_endpoint_energy(int parent);
   //returns a list of beta decay average energies from input parent nuclide
@@ -606,7 +613,7 @@ namespace pyne
   std::vector<int> beta_child(int parent);
 
   /// A struct matching the '/decay/ecbp' table in nuc_data.h5.
-  typedef struct ecbp_struct{
+  typedef struct ecbp{
     int from_nuc;  ///< state id of parent nuclide
     int to_nuc; ///< state id of child nuclide
     double endpoint_energy; ///< beta decay endpoint energy
@@ -616,41 +623,41 @@ namespace pyne
     double k_conv_e; ///< k conversion electron fraction
     double l_conv_e; ///< l conversion electron fraction
     double m_conv_e; ///< m conversion electron fraction
-  } ecbp_struct;
+  } ecbp;
 
   /// A vector of structs containing ecbp data for access in memory
-  extern std::map<std::pair<int, double>, ecbp_struct> ecbp_data;
+  extern std::map<std::pair<int, double>, ecbp> ecbp_data;
 
   /// Loads the electron capture and beta plus decay data from the
   /// nuc_data.h5 file into memory.
-  template<> void _load_data<ecbp_struct>();
+  template<> void _load_data<ecbp>();
   ///returns a list of electron capture/ beta plus decay endpoint energies from
   ///input parent nuclide
   std::vector<double > ecbp_endpoint_energy(int parent);
-  //returns a list of electron capture/ beta plus decay average energies from 
+  //returns a list of electron capture/ beta plus decay average energies from
   //input parent nuclide
   std::vector<double > ecbp_average_energy(int parent);
-  //returns a list of electron capture decay intensities from input parent 
+  //returns a list of electron capture decay intensities from input parent
   //nuclide
   std::vector<double> ec_intensity(int parent);
   //returns a list of beta plus decay intensities from input parent nuclide
   std::vector<double> bp_intensity(int parent);
-  //returns a list of electron capture /beta plus decay parents from input 
+  //returns a list of electron capture /beta plus decay parents from input
   //decay energy range
   std::vector<int> ecbp_parent(double energy, double error);
   //returns a list of electron capture /beta plus decay children from input
   //decay energy range
   std::vector<int> ecbp_child(double energy, double error);
-  //returns a list of electron capture /beta plus decay children from input 
+  //returns a list of electron capture /beta plus decay children from input
   //parent nuclide
   std::vector<int> ecbp_child(int parent);
-  //returns an array of arrays of X-ray energies and intesities for a 
+  //returns an array of arrays of X-ray energies and intesities for a
   //given parent
-  std::vector<std::vector<std::pair<double, double> > > ecbp_xrays(int parent);
+  std::vector<std::pair<double, double> > ecbp_xrays(int parent);
   /// \}
 
   /// map<energy, map<nuclide, map<rx, xs> > >
-  extern std::map<std::string, std::map<int, std::map<int, double> > > 
+  extern std::map<std::string, std::map<int, std::map<int, double> > >
       simple_xs_map;
 
   /// returns the microscopic cross section in barns for the specified

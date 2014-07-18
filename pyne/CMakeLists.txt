@@ -44,7 +44,7 @@ target_link_libraries(_utils pyne)
 if (MOAB_FOUND)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/cpp/dagmc_bridge.cpp")
+cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
 target_link_libraries(_dagmc dagmc MOAB pyne)
 set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
 endif (MOAB_FOUND)
