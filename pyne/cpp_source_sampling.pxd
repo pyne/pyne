@@ -12,7 +12,7 @@ from libcpp cimport bool as cpp_bool
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
 
-cdef extern from "source_sampling.h" :
+cdef extern from "source_sampling.h" namespace "pyne":
 
     cdef cppclass AliasTable:
         # constructors
@@ -20,7 +20,9 @@ cdef extern from "source_sampling.h" :
         AliasTable(cpp_vector[double]) except +
 
         # attributes
-
+        cpp_vector[int] alias
+        int n
+        cpp_vector[double] prob
 
         # methods
         int sample_pdf() except +
@@ -30,7 +32,7 @@ cdef extern from "source_sampling.h" :
 
 
 
-cdef extern from "source_sampling.h" :
+cdef extern from "source_sampling.h" namespace "pyne":
 
     cdef cppclass Sampler:
         # constructors

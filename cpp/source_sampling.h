@@ -42,104 +42,111 @@
 extern "C" {
 #endif
 
+namespace pyne {
 
-/// Stores 4 connected points in a mesh volume element
-struct edge_points {
-  MBCartVect o_point;
-  MBCartVect x_vec;
-  MBCartVect y_vec;
-  MBCartVect z_vec;
-};
-
-/// A data structure for O(1) source sampling
-class AliasTable {
-public:
-  /// Constructor
-  /// \param p A normalized probability distribution function
-  AliasTable(std::vector<double> p);
-  /// Samples the alias table
-  /// \param rand1 A random number in range [0, 1].
-  /// \param rand2 A random number in range [0, 1].
-  int sample_pdf(double rand1, double rand2);
-  ~AliasTable(){};
-  int n; /// Number of bins in the PDF.
-private:
-  std::vector<double> prob;
-  std::vector<int> alias;
-};
-
-/// Problem modes
-enum Mode {USER, ANALOG, UNIFORM};
-
-/// Mesh based Monte Carlo source sampling.
-class Sampler {
-public:
-  /// Constuctor for analog and uniform sampling
-  /// \param filename The path to the MOAB mesh (.h5m) file
-  /// \param src_tag_name The name of the tag that describes the unbiased 
-  ///                     source density distribution.
-  /// \param e_bounds The energy boundaries, note there are N + 1 energy
-  ///                 bounds for N energy groups
-  /// \param uniform If false, analog sampling is used. If true, uniform
-  ///                sampling is used.
-  Sampler(std::string filename, std::string src_tag_name, std::vector<double> e_bounds, bool uniform);
-  /// Constuctor for analog and uniform sampling
-  /// \param filename The path to the MOAB mesh (.h5m) file
-  /// \param src_tag_name The name of the tag with the unbiased source density
-  ///                     distribution.
-  /// \param e_bounds The energy boundaries, note there are N + 1 energy
-  ///                 bounds for N energy groups
-  /// \param bias_tag_name The name of the tag describing the biased source
-  ///                       density distribution. The tag must have the same
-  ///                       number of energy groups as <src_tag_name> or 1.
-  ///                       If 1 (i.e. spacial biasing only), all energy groups
-  ///                       within a mesh volume element are sampled equally.
-  Sampler(std::string filename, std::string src_tag_name, std::vector<double> e_bounds, std::string bias_tag_name);
-  /// Samples particle birth parameters
-  /// \param rands Six pseudo-random numbers in range [0, 1].
-  /// \return A vector containing the x position, y, position, z, point, energy
-  ///         and weight of a particle (in that order).
-  std::vector<double> particle_birth(std::vector<double> rands);
-  ~Sampler() {
-    delete mesh;
-    delete at;
+  /// Stores 4 connected points in a mesh volume element
+  struct edge_points {
+    MBCartVect o_point;
+    MBCartVect x_vec;
+    MBCartVect y_vec;
+    MBCartVect z_vec;
   };
-
-// member variables
-private:
-  // problem parameters
-  std::string filename; ///< MOAB mesh file path
-  std::string src_tag_name; ///< Unbiased source density distribution
-  std::string bias_tag_name; ///< Biased source density distribution
-  std::vector<double> e_bounds;  ///< Energy boundaries
-  int num_e_groups; ///< Number of groups in tag \a _src_tag_name
-  int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
-  Mode mode; ///< Problem mode: analog, uniform, user
-  // mesh
-  MBInterface* mesh; ///< MOAB mesh
-  int num_ves; ///< Number of mesh volume elements on \a mesh.
-  MBEntityType ve_type; ///< Type of mesh volume: MBTET or MBHEX
-  int verts_per_ve; ///< Number of verticles per mesh volume element
-  // sampling
-  std::vector<edge_points> all_edge_points; ///< Four connected points on a VE.
-  std::vector<double> biased_weights; ///< Birth weights for biased sampling.
-  AliasTable* at; ///< Alias table used for sampling.
-
-// member functions
-private:
-  // instantiation
-  void setup();
-  void mesh_geom_data(MBRange ves, std::vector<double> &volumes);
-  void mesh_tag_data(MBRange ves, const std::vector<double> volumes);
-  // select birth parameters
-  MBCartVect sample_xyz(int ve_idx, std::vector<double> rands);
-  double sample_e(int e_idx, double rand);
-  double sample_w(int pdf_idx);
-  // helper functions
-  void normalize_pdf(std::vector<double> & pdf);
-  int num_groups(MBTag tag);
-  std::vector<double> get_bias_pdf(MBRange ves, std::vector<double> volumes);
-};
+  
+  /// A data structure for O(1) source sampling
+  class AliasTable {
+  public:
+    /// Constructor
+    /// \param p A normalized probability distribution function
+    AliasTable(std::vector<double> p);
+    /// Samples the alias table
+    /// \param rand1 A random number in range [0, 1].
+    /// \param rand2 A random number in range [0, 1].
+    int sample_pdf(double rand1, double rand2);
+    ~AliasTable(){};
+    int n; /// Number of bins in the PDF.
+    std::vector<double> prob; /// Probabilities.
+    std::vector<int> alias; /// Alias probabilities.
+  };
+  
+  /// Problem modes
+  enum Mode {USER, ANALOG, UNIFORM};
+  
+  /// Mesh based Monte Carlo source sampling.
+  class Sampler {
+  public:
+    /// Constuctor for analog and uniform sampling
+    /// \param filename The path to the MOAB mesh (.h5m) file
+    /// \param src_tag_name The name of the tag that describes the unbiased 
+    ///                     source density distribution.
+    /// \param e_bounds The energy boundaries, note there are N + 1 energy
+    ///                 bounds for N energy groups
+    /// \param uniform If false, analog sampling is used. If true, uniform
+    ///                sampling is used.
+    Sampler(std::string filename, 
+            std::string src_tag_name, 
+            std::vector<double> e_bounds, 
+            bool uniform);
+    /// Constuctor for analog and uniform sampling
+    /// \param filename The path to the MOAB mesh (.h5m) file
+    /// \param src_tag_name The name of the tag with the unbiased source density
+    ///                     distribution.
+    /// \param e_bounds The energy boundaries, note there are N + 1 energy
+    ///                 bounds for N energy groups
+    /// \param bias_tag_name The name of the tag describing the biased source
+    ///                       density distribution. The tag must have the same
+    ///                       number of energy groups as <src_tag_name> or 1.
+    ///                       If 1 (i.e. spacial biasing only), all energy groups
+    ///                       within a mesh volume element are sampled equally.
+    Sampler(std::string filename, 
+            std::string src_tag_name, 
+            std::vector<double> e_bounds, 
+            std::string bias_tag_name);
+    /// Samples particle birth parameters
+    /// \param rands Six pseudo-random numbers in range [0, 1].
+    /// \return A vector containing the x position, y, position, z, point, energy
+    ///         and weight of a particle (in that order).
+    std::vector<double> particle_birth(std::vector<double> rands);
+    ~Sampler() {
+      delete mesh;
+      delete at;
+    };
+  
+  // member variables
+  private:
+    // problem parameters
+    std::string filename; ///< MOAB mesh file path
+    std::string src_tag_name; ///< Unbiased source density distribution
+    std::string bias_tag_name; ///< Biased source density distribution
+    std::vector<double> e_bounds;  ///< Energy boundaries
+    int num_e_groups; ///< Number of groups in tag \a _src_tag_name
+    int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
+    Mode mode; ///< Problem mode: analog, uniform, user
+    // mesh
+    MBInterface* mesh; ///< MOAB mesh
+    int num_ves; ///< Number of mesh volume elements on \a mesh.
+    MBEntityType ve_type; ///< Type of mesh volume: MBTET or MBHEX
+    int verts_per_ve; ///< Number of verticles per mesh volume element
+    // sampling
+    std::vector<edge_points> all_edge_points; ///< Four connected points on a VE.
+    std::vector<double> biased_weights; ///< Birth weights for biased sampling.
+    AliasTable* at; ///< Alias table used for sampling.
+  
+  // member functions
+  private:
+    // instantiation
+    void setup();
+    void mesh_geom_data(MBRange ves, std::vector<double> &volumes);
+    void mesh_tag_data(MBRange ves, const std::vector<double> volumes);
+    // select birth parameters
+    MBCartVect sample_xyz(int ve_idx, std::vector<double> rands);
+    double sample_e(int e_idx, double rand);
+    double sample_w(int pdf_idx);
+    // helper functions
+    void normalize_pdf(std::vector<double> & pdf);
+    int num_groups(MBTag tag);
+    std::vector<double> read_bias_pdf(MBRange ves, std::vector<double> volumes);
+  };
+}; //end namespace pyne
 
 #ifdef __cplusplus
 } // extern "C"

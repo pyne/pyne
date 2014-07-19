@@ -2,13 +2,16 @@
 #include "source_sampling.h"
 #endif
 
-Sampler::Sampler(std::string filename, std::string src_tag_name, std::vector<double> e_bounds, bool uniform)
+pyne::Sampler::Sampler(std::string filename, 
+                 std::string src_tag_name, 
+                 std::vector<double> e_bounds, 
+                 bool uniform)
   : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds) {
   mode = (uniform) ? UNIFORM : ANALOG;
   setup();
 }
 
-Sampler::Sampler(std::string filename,  
+pyne::Sampler::Sampler(std::string filename,  
                  std::string src_tag_name, 
                  std::vector<double> e_bounds, 
                  std::string bias_tag_name)
@@ -20,7 +23,7 @@ Sampler::Sampler(std::string filename,
   setup();
 }
 
-std::vector<double> Sampler::particle_birth(std::vector<double> rands) {
+std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   int pdf_idx =at->sample_pdf(rands[0], rands[1]);
   int ve_idx = pdf_idx/num_e_groups;
@@ -42,7 +45,7 @@ std::vector<double> Sampler::particle_birth(std::vector<double> rands) {
   return samp;
 }
 
-void Sampler::setup() {
+void pyne::Sampler::setup() {
   MBErrorCode rval;
   MBEntityHandle loaded_file_set;
   // Create MOAB instance
@@ -76,7 +79,7 @@ void Sampler::setup() {
   mesh_tag_data(ves, volumes);
 }
 
-void Sampler::mesh_geom_data(MBRange ves, std::vector<double> &volumes) {
+void pyne::Sampler::mesh_geom_data(MBRange ves, std::vector<double> &volumes) {
   // Get connectivity.
   MBErrorCode rval;
   std::vector<MBEntityHandle> connect;
@@ -112,7 +115,8 @@ void Sampler::mesh_geom_data(MBRange ves, std::vector<double> &volumes) {
   }
 }
 
-void Sampler::mesh_tag_data(MBRange ves, const std::vector<double> volumes) {
+void pyne::Sampler::mesh_tag_data(MBRange ves, 
+                                  const std::vector<double> volumes) {
   MBErrorCode rval;
   MBTag src_tag;
   rval = mesh->tag_get_handle(src_tag_name.c_str(),
@@ -140,7 +144,7 @@ void Sampler::mesh_tag_data(MBRange ves, const std::vector<double> volumes) {
   if (mode == ANALOG) {
     at = new AliasTable(pdf);
   } else {
-    std::vector<double> bias_pdf = get_bias_pdf(ves, volumes);
+    std::vector<double> bias_pdf = read_bias_pdf(ves, volumes);
     normalize_pdf(bias_pdf);
     //  Create alias table based off biased pdf and calculate birth weights.
     biased_weights.resize(num_ves*num_e_groups);
@@ -151,7 +155,8 @@ void Sampler::mesh_tag_data(MBRange ves, const std::vector<double> volumes) {
   }
 }
 
-std::vector<double> Sampler::get_bias_pdf(MBRange ves, std::vector<double> volumes) {
+std::vector<double> pyne::Sampler::read_bias_pdf(MBRange ves, 
+                                                 std::vector<double> volumes) {
     std::vector<double> bias_pdf(num_ves*num_e_groups);
     int i, j;
     MBErrorCode rval;
@@ -198,7 +203,7 @@ std::vector<double> Sampler::get_bias_pdf(MBRange ves, std::vector<double> volum
 return bias_pdf;
 }
 
-MBCartVect Sampler::sample_xyz(int ve_idx, std::vector<double> rands) {
+MBCartVect pyne::Sampler::sample_xyz(int ve_idx, std::vector<double> rands) {
   double s = rands[0];
   double t = rands[1];
   double u = rands[2];
@@ -230,17 +235,17 @@ MBCartVect Sampler::sample_xyz(int ve_idx, std::vector<double> rands) {
           all_edge_points[ve_idx].o_point;
 }
 
-double Sampler::sample_e(int e_idx, double rand) {
+double pyne::Sampler::sample_e(int e_idx, double rand) {
    double e_min = e_bounds[e_idx];
    double e_max = e_bounds[e_idx + 1];
    return rand * (e_max - e_min) + e_min;
 }
 
-double Sampler::sample_w(int pdf_idx) {
+double pyne::Sampler::sample_w(int pdf_idx) {
   return (mode == ANALOG) ? 1.0 : biased_weights[pdf_idx];
 }
 
-void Sampler::normalize_pdf(std::vector<double> & pdf) {
+void pyne::Sampler::normalize_pdf(std::vector<double> & pdf) {
   double sum = 0;
   int i;
   for (i=0; i<num_ves*num_e_groups; ++i)
@@ -249,7 +254,7 @@ void Sampler::normalize_pdf(std::vector<double> & pdf) {
     pdf[i] /= sum;
 }
 
-int Sampler::num_groups(MBTag tag) {
+int pyne::Sampler::num_groups(MBTag tag) {
   MBErrorCode rval;
   int tag_size;
   rval = mesh->tag_get_bytes(tag, *(&tag_size));
@@ -264,7 +269,7 @@ int Sampler::num_groups(MBTag tag) {
 // M. D. Vose, IEEE T. Software Eng. 17, 972 (1991)
 // A. J. Walker, Electronics Letters 10, 127 (1974); ACM TOMS 3, 253 (1977)
 
-AliasTable::AliasTable(std::vector<double> p) {
+pyne::AliasTable::AliasTable(std::vector<double> p) {
   n = p.size();
   prob.resize(n);
   alias.resize(n);
@@ -307,7 +312,7 @@ AliasTable::AliasTable(std::vector<double> p) {
     prob[small[--n_s] ] = 1;
 }
 
-int AliasTable::sample_pdf(double rand1, double rand2) {
+int pyne::AliasTable::sample_pdf(double rand1, double rand2) {
   int i = (int) n * rand1;
   return rand2 < prob[i] ? i : alias[i];
 }
