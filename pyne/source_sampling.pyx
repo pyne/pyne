@@ -22,13 +22,13 @@ np.import_array()
 
 
 cdef class AliasTable:
-    """
+    """Constructor
     
     Attributes
     ----------
-    prob (std::vector< double >) :
-    alias (std::vector< int >) :
     n (int) :
+    prob (std::vector< double >) : Number of bins in the PDF.
+    alias (std::vector< int >) :
     
     
     Methods
@@ -55,11 +55,11 @@ cdef class AliasTable:
 
     def __init__(self, p):
         """AliasTable(self, p)
-        
+        Constructor
         
         Parameters
         ----------
-        p : vect_d
+        p : std::vector< double >
         
         Returns
         -------
@@ -93,13 +93,13 @@ cdef class AliasTable:
     # methods
     def sample_pdf(self, rand1, rand2):
         """sample_pdf(self, rand1, rand2)
-        
+        Samples the alias table
         
         Parameters
         ----------
-        ran1 : double
+        rand2 : double
         
-        ran2 : double
+        rand1 : double
         
         Returns
         -------
@@ -120,24 +120,28 @@ cdef class AliasTable:
 
 
 cdef class Sampler:
-    """
+    """Constuctor for analog and uniform sampling
     
     Attributes
     ----------
-    _e_bounds (vect_d) :
-    _mode (Mode) :
-    _mesh (MBInterface *) :
-    _filename (str) :
-    _src_tag_name (str) :
-    _bias_tag_name (str) :
-    _num_e_groups (int) :
-    _num_bias_groups (int) :
-    _num_ves (int) :
-    _ve_type (MBEntityType) :
-    _verts_per_ve (int) :
-    _all_edge_points (std::vector< ) :
-    _at (None) :
-    _biased_weights (std::vector< double >) :
+    filename (std::string) : MOAB mesh file path.
+    src_tag_name (std::string) : Unbiased source density
+        distribution.
+    bias_tag_name (std::string) : Biased source density
+        distribution.
+    e_bounds (std::vector< double >) : Energy boundaries.
+    num_e_groups (int) : Number of groups in tag
+    num_bias_groups (int) : Number of groups tag
+    mode (None) : Problem mode: analog, uniform, user.
+    mesh (MBInterface *) : MOAB mesh.
+    num_ves (int) : Number of mesh volume elements on
+    ve_type (MBEntityType) : Type of mesh volume: MBTET or MBHEX.
+    verts_per_ve (int) : Number of verticles per mesh volume
+        element.
+    all_edge_points (std::vector< ) : Four connected points on a VE.
+    biased_weights (std::vector< double >) : Birth weights for
+        biased sampling.
+    at (None) : Alias table used for sampling.
     
     
     Methods
@@ -145,14 +149,14 @@ cdef class Sampler:
     Sampler
     ~Sampler
     get_bias_pdf
-    get_e
-    get_mesh_geom_data
-    get_mesh_tag_data
-    get_num_groups
-    get_w
-    get_xyz
+    mesh_geom_data
+    mesh_tag_data
     normalize_pdf
+    num_groups
     particle_birth
+    sample_e
+    sample_w
+    sample_xyz
     setup
     
     Notes
@@ -177,17 +181,17 @@ cdef class Sampler:
         this we ill put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
-        
+        Constuctor for analog and uniform sampling
         
         Parameters
         ----------
-        e_bounds : vect_d
+        e_bounds : std::vector< double >
         
-        src_tag_name : str
+        src_tag_name : std::string
         
-        bias_tag_name : str
+        bias_tag_name : std::string
         
-        filename : str
+        filename : std::string
         
         Returns
         -------
@@ -195,17 +199,17 @@ cdef class Sampler:
         
         ################################################################
         
-        
+        Constuctor for analog and uniform sampling
         
         Parameters
         ----------
-        e_bounds : vect_d
+        e_bounds : std::vector< double >
         
-        src_tag_name : str
+        src_tag_name : std::string
         
         uniform : bool
         
-        filename : str
+        filename : std::string
         
         Returns
         -------
@@ -242,17 +246,17 @@ cdef class Sampler:
         this we ill put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
-        
+        Constuctor for analog and uniform sampling
         
         Parameters
         ----------
-        e_bounds : vect_d
+        e_bounds : std::vector< double >
         
-        src_tag_name : str
+        src_tag_name : std::string
         
-        bias_tag_name : str
+        bias_tag_name : std::string
         
-        filename : str
+        filename : std::string
         
         Returns
         -------
@@ -260,17 +264,17 @@ cdef class Sampler:
         
         ################################################################
         
-        
+        Constuctor for analog and uniform sampling
         
         Parameters
         ----------
-        e_bounds : vect_d
+        e_bounds : std::vector< double >
         
-        src_tag_name : str
+        src_tag_name : std::string
         
         uniform : bool
         
-        filename : str
+        filename : std::string
         
         Returns
         -------
@@ -308,17 +312,17 @@ cdef class Sampler:
         this we ill put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
-        
+        Constuctor for analog and uniform sampling
         
         Parameters
         ----------
-        e_bounds : vect_d
+        e_bounds : std::vector< double >
         
-        src_tag_name : str
+        src_tag_name : std::string
         
-        bias_tag_name : str
+        bias_tag_name : std::string
         
-        filename : str
+        filename : std::string
         
         Returns
         -------
@@ -326,17 +330,17 @@ cdef class Sampler:
         
         ################################################################
         
-        
+        Constuctor for analog and uniform sampling
         
         Parameters
         ----------
-        e_bounds : vect_d
+        e_bounds : std::vector< double >
         
-        src_tag_name : str
+        src_tag_name : std::string
         
         uniform : bool
         
-        filename : str
+        filename : std::string
         
         Returns
         -------
@@ -374,15 +378,15 @@ cdef class Sampler:
     # methods
     def particle_birth(self, rands):
         """particle_birth(self, rands)
-        
+        Samples particle birth parameters
         
         Parameters
         ----------
-        rands : vect_d
+        rands : std::vector< double >
         
         Returns
         -------
-        res1 : vect_d
+        res1 : std::vector< double >
         
         """
         cdef cpp_vector[double] rands_proxy
