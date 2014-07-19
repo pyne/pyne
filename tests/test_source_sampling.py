@@ -264,7 +264,7 @@ def test_alias_table():
     """
     pdf = np.array([0.1, 0.2, 0.7])
     at = AliasTable(pdf)
-    num_samples = 10000
+    num_samples = 100000
     score = 1.0/num_samples
     tally = np.zeros(shape=(3))
 
