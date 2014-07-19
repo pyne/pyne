@@ -40,7 +40,7 @@ def test_analog_single_hex():
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), False)
 
-    num_samples = 1000
+    num_samples = 5000
     score = 1.0/num_samples
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
@@ -71,7 +71,7 @@ def test_analog_multiple_hex():
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 0.5, 1]), False)
 
-    num_samples = 1000
+    num_samples = 5000
     score = 1.0/num_samples
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
@@ -111,7 +111,7 @@ def test_analog_single_tet():
                [center, v2, v3, v4]]
 
     sampler = Sampler("tet.h5m", "src", np.array([0, 1]), False)
-    num_samples = 1000
+    num_samples = 5000
     score = 1.0/num_samples
     tally = np.zeros(shape=(4))
     for i in range(num_samples):
@@ -142,7 +142,7 @@ def test_uniform():
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, True)
 
-    num_samples = 1000
+    num_samples = 5000
     score = 1.0/num_samples
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs))
@@ -187,7 +187,7 @@ def test_bias():
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, "bias")
 
-    num_samples = 1000
+    num_samples = 5000
     score = 1.0/num_samples
     num_divs = 2
     tally = np.zeros(shape=(4))
@@ -232,7 +232,7 @@ def test_bias_spacial():
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, "bias")
 
-    num_samples = 1000
+    num_samples = 5000
     score = 1.0/num_samples
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs))
@@ -264,7 +264,7 @@ def test_alias_table():
     """
     pdf = np.array([0.1, 0.2, 0.7])
     at = AliasTable(pdf)
-    num_samples = 100000
+    num_samples = 50000
     score = 1.0/num_samples
     tally = np.zeros(shape=(3))
 
