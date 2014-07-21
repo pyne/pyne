@@ -1,10 +1,11 @@
 EXAMPLE README:
 AHOT usage example:
 (In a python session, run the following commands:
-			**Note: you must copy the contents of this folder in the directory that you wish to run the
-              ahot solvers from.  This is because the AHOT solvers rely on source data you provide
-              with certain files that are contained in this folder.  You could, of course, generate 
-              those file's yourself, but we have not added an interface to allow you to do so yet.
+      **Note: you must copy the contents of this folder in the directory that you wish to run the
+        ahot solvers from.  This is because the AHOT solvers rely on source data you provide
+        with certain files that are contained in this folder.  You could, of course, generate 
+        those file's yourself, but we have not added an interface to allow you to do so yet.
+
     # Imports
     $ import pyne.spatial_solver
     $ from dictionary_populate_test import populate, populate_with_warnings
