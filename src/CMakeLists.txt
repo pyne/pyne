@@ -45,7 +45,11 @@ set(PYNE_SRCS
     )
 
 if (MOAB_FOUND)
-    set(PYNE_SRCS "${PYNE_SRCS}" "dagmc_bridge.cpp")    
+    set(PYNE_SRCS "${PYNE_SRCS}" 
+        "dagmc_bridge.cpp"
+        "measure.cpp"
+        "source_sampling.cpp"
+        )
 endif (MOAB_FOUND)
 
 # compile and link library
