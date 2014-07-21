@@ -6,13 +6,8 @@ import sys
 import os
 
 #Solver imports
-#sys.path.append("../fortran/spatial_solvers_3d/source")
-sys.path.append("../pyne_transport/pyne/fortran/spatial_solvers_3d/source")
-#sys.path.append("../../fortran/spatial_solvers_3d/source")
-
-#goal_dir = os.path.join(os.getcwd(), "../../fortran/spatial_solvers_3d/source")
-from main import main as main
-#from ... fortran.spatial_solvers_3d.source.main import main as main
+#sys.path.append("../pyne_transport/pyne/fortran/spatial_solvers_3d/source")
+import pyne.ahot as ahot
 
 #imports being used for testing
 #from dict_util import dict_complete
@@ -20,7 +15,7 @@ from main import main as main
 def solve(inputdict_unchecked):
 	inputdict = dict_complete(inputdict_unchecked)
 	if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
-		main("test title in",
+		ahot.main("test title in",
 		inputdict['solver'],
 		inputdict['solver_type'],
 		inputdict['spatial_order'], 
