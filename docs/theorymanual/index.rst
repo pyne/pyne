@@ -15,6 +15,7 @@ The following describe methods implemented natively in PyNE:
     cross_section_models.rst
     enrichment.rst
     materials.rst
+    source_sampling.rst
     mesh_based_variance_reduction.rst
     nuclear_reaction_channels.rst
     r2s.rst
