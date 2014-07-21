@@ -38,6 +38,6 @@ stlcontainers = [
 
 #stlcontainers_module = 'stlcontainers'
 
-classes = [apiname('Tally','cpp/tally.*',incfiles='tally.h')]
-
-functions = []
+classes = [apiname('Tally','cpp/tally.*',incfiles='tally.h'),
+           apiname('Sampler','cpp/source_sampling.*',incfiles='source_sampling.h'),
+           apiname('AliasTable','cpp/source_sampling.*',incfiles='source_sampling.h')]
