@@ -105,6 +105,9 @@ cython_add_module(source_sampling source_sampling.pyx)
 target_link_libraries(source_sampling pyne)
 
 # AHOT wrapper
+# I don't know which method is better...
+#add_custom_target(ahot ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/ahot${CMAKE_SHARED_LIBRARY_SUFFIX}) 
+#add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/ahot${CMAKE_SHARED_LIBRARY_SUFFIX} 
 add_custom_target(ahot ALL DEPENDS ahot${CMAKE_SHARED_LIBRARY_SUFFIX}) 
 add_custom_command(OUTPUT ahot${CMAKE_SHARED_LIBRARY_SUFFIX} 
     COMMAND f2py -m ahot -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src 
