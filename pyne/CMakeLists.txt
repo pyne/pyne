@@ -107,7 +107,9 @@ target_link_libraries(source_sampling pyne)
 # AHOT wrapper
 add_custom_target(ahot ALL DEPENDS ahot${CMAKE_SHARED_LIBRARY_SUFFIX}) 
 add_custom_command(OUTPUT ahot${CMAKE_SHARED_LIBRARY_SUFFIX} 
-    COMMAND f2py -m ahot -I${PROJECT_BINARY_DIR}/src -c ${PROJECT_SOURCE_DIR}/src/ahot/spatial_solvers_3d/source/main.f90 --debug-capi
+    COMMAND f2py -m ahot -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src 
+                -c ${PROJECT_SOURCE_DIR}/src/ahot/spatial_solvers_3d/source/main.f90 
+                -lpyne --debug-capi
     DEPENDS pyne
     )
 target_link_libraries(ahot pyne)
