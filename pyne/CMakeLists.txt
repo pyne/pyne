@@ -42,11 +42,11 @@ target_link_libraries(_utils pyne)
 
 # dagmc
 if (MOAB_FOUND)
-set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
-                            PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
-target_link_libraries(_dagmc dagmc MOAB pyne)
-set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
+    set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
+                                PROPERTIES CYTHON_IS_CXX TRUE)
+    cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
+    target_link_libraries(_dagmc dagmc MOAB pyne)
+    set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
 endif (MOAB_FOUND)
 
 # endf
@@ -99,7 +99,9 @@ target_link_libraries(tally pyne)
 
 
 # source_sampling
-set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/source_sampling.pyx"
-                            PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(source_sampling source_sampling.pyx)
-target_link_libraries(source_sampling pyne)
+if (MOAB_FOUND)
+    set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/source_sampling.pyx"
+                                PROPERTIES CYTHON_IS_CXX TRUE)
+    cython_add_module(source_sampling source_sampling.pyx)
+    target_link_libraries(source_sampling pyne)
+endif (MOAB_FOUND)
