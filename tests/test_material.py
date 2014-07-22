@@ -237,26 +237,35 @@ def test_collapse_elements1():
     """ Very simple test to combine nucids"""
     nucvec = {10010000:  1.0,   
       80160000: 1.0,   
+      80160001: 1.0,   
       691690000: 1.0, 
       922350000: 1.0, 
       922380000: 1.0, 
       942390000: 1.0, 
-      942410000: 1.0, 
       952420000: 1.0, 
       962440000: 1.0 }
 
-    exception_ids = {nucname.id(1), nucname.id(8), nucname.id(69), nucname.id(92)}
+    exception_ids = {nucname.id(1001), 
+                     nucname.id("U-235"), 
+		     nucname.id("U-238"), 
+		     nucname.id("Pu-239"),
+		     nucname.id("Pu-241"),
+		     }
 
     mat  = Material(nucvec)
+
+    print "Original"
     print mat
     
     cmat = mat.collapse_elements(exception_ids)
+    print "Collapsed"
     print cmat
 
-    assert_equal(cmat.comp[80160000],  mat.comp[80160000])
+    assert_equal(cmat.comp[80000000],  mat.comp[80160000] + mat.comp[80160001])
     assert_equal(cmat.comp[922350000], mat.comp[922350000])
-    assert_equal(cmat.comp[940000000], mat.comp[942390000] + mat.comp[942410000])
+    assert_equal(cmat.comp[942390000], mat.comp[942390000])
     assert_equal(cmat.comp[950000000], mat.comp[952420000])
+    assert_equal(cmat.comp[960000000], mat.comp[952420000])
 
 
 def test_mass_density():
