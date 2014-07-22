@@ -95,7 +95,7 @@ DO n = 1, apo
           END IF
           DO iy=1,ny
              DO ix=1,nx
-                fz(3,ix,iy)=tobc(ix,iy,n,l)  ! mu>0,eta>0
+                fz(3,ix,iy)=tobc(ix,iy,n,l,1,1)  ! mu>0,eta>0
              END DO
           END DO
           !
@@ -119,7 +119,7 @@ DO n = 1, apo
           END IF
           DO iy=1,ny
              DO ix=1,nx
-                fz(3,ix,iy)=bobc(ix,iy,n, l )  ! mu>0,eta>0
+                fz(3,ix,iy)=bobc(ix,iy,n,l,1,1)  ! mu>0,eta>0
              END DO
           END DO
           !
@@ -155,7 +155,7 @@ DO n = 1, apo
               l=4 
             END IF
             DO ix=1,nx
-               fy(2,ix)=babc(ix,k,n, l ) ! xi>0, mu<0
+               fy(2,ix)=babc(ix,k,n,l,1,1) ! xi>0, mu<0
             END DO
             !
           END IF 
@@ -179,7 +179,7 @@ DO n = 1, apo
               l=4 
             END IF
             DO ix=1,nx
-               fy(2,ix)=frbc(ix,k,n, l ) ! xi>0, mu<0
+               fy(2,ix)=frbc(ix,k,n,l,1,1) ! xi>0, mu<0
             END DO
             !
           END IF
@@ -201,13 +201,13 @@ DO n = 1, apo
              ELSE IF(xebc==1) THEN
                 fx(1)=refl_right(j,k,oct,n,g) 
              ELSE IF(xebc==2 .and. incy>0 .and. incz>0) THEN
-                fx(1)=ribc(j,k,n,1)
+                fx(1)=ribc(j,k,n,1,1,1)
              ELSE IF(xebc==2 .and. incy>0 .and. incz<0) THEN
-                fx(1)=ribc(j,k,n,2)
+                fx(1)=ribc(j,k,n,2,1,1)
              ELSE IF(xebc==2 .and. incy<0 .and. incz>0) THEN
-                fx(1)=ribc(j,k,n,3)
+                fx(1)=ribc(j,k,n,3,1,1)
              ELSE IF(xebc==2 .and. incy<0 .and. incz<0) THEN
-                fx(1)=ribc(j,k,n,4)
+                fx(1)=ribc(j,k,n,4,1,1)
              END IF
           ELSE IF (incx == 1) THEN
              nfy = 2
@@ -217,13 +217,13 @@ DO n = 1, apo
              ELSE IF(xsbc==1) THEN
                 fx(1)=refl_left(j,k,oct,n,g) 
              ELSE IF(xsbc==2 .and. incy>0 .and. incz>0) THEN
-                fx(1)=lebc(j,k,n,1)
+                fx(1)=lebc(j,k,n,1,1,1)
              ELSE IF(xsbc==2 .and. incy>0 .and. incz<0) THEN
-                fx(1)=lebc(j,k,n,2)
+                fx(1)=lebc(j,k,n,2,1,1)
              ELSE IF(xsbc==2 .and. incy<0 .and. incz>0) THEN
-                fx(1)=lebc(j,k,n,3)
+                fx(1)=lebc(j,k,n,3,1,1)
              ELSE IF(xsbc==2 .and. incy<0 .and. incz<0) THEN
-                fx(1)=lebc(j,k,n,4)
+                fx(1)=lebc(j,k,n,4,1,1)
              END IF
           END IF
          
@@ -240,7 +240,7 @@ DO n = 1, apo
              c = sigs(m,g,g)/sig     ! Scattering ratio  
 
              ! Prepare source
-             b=c*e(i,j,k) + s(i,j,k,g)/sig
+             b=c*e(i,j,k,1,1,1) + s(i,j,k,g,1,1,1)/sig
         
              ! Call kernel depending on cell_tpe
              if      (cell_tpe(i,j,k) == 1 ) then ! SC intersected cell      
@@ -336,7 +336,7 @@ DO n = 1, apo
              end if
  
              ! Update the scalar flux solution
-             f(i,j,k,g) = f(i,j,k,g) + w(n)*b
+             f(i,j,k,g,1,1,1) = f(i,j,k,g,1,1,1) + w(n)*b
 !! if(n.eq.1 .and. oct.eq.1) f(i,j,k,g) = b
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

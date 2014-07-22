@@ -36,5 +36,19 @@ REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: zmat
 ! Solution editing
 REAL*8, DIMENSION(:,:,:,:), ALLOCATABLE :: phisum
 
+! Signs of direction cosines in octants+mu/eta/xi-mates
+
+INTEGER :: octant_signs(3,8)
+INTEGER :: mu_mate(8)  = (/3,4,1,2,7,8,5,6/)
+INTEGER :: eta_mate(8) = (/2,1,4,3,6,5,8,7/)
+INTEGER :: xi_mate(8)  = (/5,6,7,8,1,2,3,4/)
+
+! Reflective boundary conditions arrays
+REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: refl_left
+REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: refl_right
+REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: refl_front
+REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: refl_back
+REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: refl_top
+REAL*8, DIMENSION(:,:,:,:,:),ALLOCATABLE :: refl_bottom
 
 END MODULE

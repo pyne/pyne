@@ -6,6 +6,7 @@ IMPLICIT NONE
 
 ! Title
 CHARACTER(80) :: title
+CHARACTER(30) :: solver, solvertype
 
 ! Problem Size Specifications
 INTEGER :: lambda, meth, qdord, qdtyp, nx, ny, nz, ng, nm
@@ -26,7 +27,7 @@ REAL*8 :: tchk
 INTEGER :: ichk
 
 ! Extra variables derived from input
-INTEGER :: apo, order, ordsq, ordcb
+INTEGER :: apo, dofpc, order, ordsq, ordcb, orpc
 REAL*8, DIMENSION(:,:), ALLOCATABLE :: ssum
 
 ! Angular quadrature input
@@ -38,7 +39,7 @@ REAL*8, DIMENSION(:,:), ALLOCATABLE :: sigt
 REAL*8, DIMENSION(:,:,:), ALLOCATABLE :: sigs
 
 ! Source data
-REAL*8, DIMENSION(:,:,:,:), ALLOCATABLE :: s
+REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: s
 
 ! Fixed boundary conditions
 ! 
@@ -62,12 +63,23 @@ REAL*8, DIMENSION(:,:,:,:), ALLOCATABLE :: s
 !
 ! correspondingly for the other inflow BC
 !
-REAL*8, DIMENSION(:,:,:,:),ALLOCATABLE :: frbc
-REAL*8, DIMENSION(:,:,:,:),ALLOCATABLE :: babc
-REAL*8, DIMENSION(:,:,:,:),ALLOCATABLE :: lebc
-REAL*8, DIMENSION(:,:,:,:),ALLOCATABLE :: ribc
-REAL*8, DIMENSION(:,:,:,:),ALLOCATABLE :: bobc
-REAL*8, DIMENSION(:,:,:,:),ALLOCATABLE :: tobc
+
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: frbc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: babc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: lebc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ribc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: bobc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tobc
+
+!
+! temporary bc arrays
+!
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tfrbc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tbabc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tlebc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tribc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tbobc
+REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ttobc
 
 ! Editing data
 INTEGER :: momp, momsum, mompt, qdflx

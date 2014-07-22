@@ -1,5 +1,4 @@
-'''This is a sample test script to quickly verify the integrity of the solve as work is being done.  To run, 
-simply run this file in python. '''
+'''AHOT Spatial Solver tests'''
 
 import pyne.spatialsolver
 from dictionary_populate_test import populate, populate_with_warnings

@@ -4,14 +4,14 @@ MODULE solvar
 
 IMPLICIT NONE
 
-!! ! Variables for subroutine 'weight'
-!! REAL*8 :: alpha, beta, gamma, ex, ey, ez
+! Variables for subroutine 'weight'
+REAL*8 :: alpha, beta, gamma, ex, ey, ez
 
 ! Scalar flux moments
-REAL*8, DIMENSION(:,:,:,:), ALLOCATABLE :: f
+REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: f
 
 ! Previous iterate to scalar flux
-REAL*8, DIMENSION(:,:,:), ALLOCATABLE :: e
+REAL*8, DIMENSION(:,:,:,:,:,:), ALLOCATABLE :: e
 
 ! Convergence flag
 INTEGER, DIMENSION(:), ALLOCATABLE :: cnvf

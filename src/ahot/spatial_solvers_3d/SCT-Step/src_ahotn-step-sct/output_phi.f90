@@ -27,7 +27,7 @@ DO g=1,ng
    DO ix=1,nx
       DO iy=1,ny
          DO iz=1,nz
-            WRITE(31) REAL(f(ix,iy,iz,g),8)
+            WRITE(31) REAL(f(ix,iy,iz,g,1,1,1),8)
          END DO
       END DO
    END DO

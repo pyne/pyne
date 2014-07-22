@@ -16,7 +16,7 @@ IMPLICIT NONE
 INTEGER :: i, j, k, t, u, v, m, g, gp
 REAL*8 :: xsct
 
-ALLOCATE(f(nx,ny,nz,ng), e(nx,ny,nz))
+ALLOCATE(f(nx,ny,nz,ng,1,1,1), e(nx,ny,nz,1,1,1))
 ALLOCATE(cnvf(ng))
 
 ! Set values in tracking module
@@ -74,7 +74,7 @@ DO g = 1, ng
                DO i = 1, nx
                   m = mat(i,j,k)
                   xsct = sigs(m,g,gp)
-                  s(i,j,k,g) = s(i,j,k,g) + xsct*f(i,j,k,gp)
+                  s(i,j,k,g,1,1,1) = s(i,j,k,g,1,1,1) + xsct*f(i,j,k,gp,1,1,1)
                END DO
             END DO
          END DO

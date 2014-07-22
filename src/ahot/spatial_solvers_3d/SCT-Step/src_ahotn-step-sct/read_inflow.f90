@@ -13,12 +13,12 @@ INTEGER :: octant,n
 INTEGER :: ix,iy,iz,jx,jy,jz,dir
 INTEGER :: sgn_mu,sgn_eta,sgn_xi
 
-ALLOCATE( frbc(nx,nz,apo,4) )
-ALLOCATE( babc(nx,nz,apo,4) )
-ALLOCATE( lebc(ny,nz,apo,4) )
-ALLOCATE( ribc(ny,nz,apo,4) )
-ALLOCATE( bobc(nx,ny,apo,4) )
-ALLOCATE( tobc(nx,ny,apo,4) )
+ALLOCATE( frbc(nx,nz,apo,4,1,1) )
+ALLOCATE( babc(nx,nz,apo,4,1,1) )
+ALLOCATE( lebc(ny,nz,apo,4,1,1) )
+ALLOCATE( ribc(ny,nz,apo,4,1,1) )
+ALLOCATE( bobc(nx,ny,apo,4,1,1) )
+ALLOCATE( tobc(nx,ny,apo,4,1,1) )
 
 OPEN(UNIT=12, FILE=inflow_file,STATUS = "OLD", ACTION = "READ",FORM='UNFORMATTED')
 
@@ -39,13 +39,13 @@ DO octant=1,8
       IF (sgn_eta>0) THEN
          DO iz=1,nz
             DO ix=1,nx
-               READ(12) frbc(ix,iz,n,dir)
+               READ(12) frbc(ix,iz,n,dir,1,1)
             END DO
          END DO  
       ELSE
          DO iz=1,nz
             DO ix=1,nx
-               READ(12) babc(ix,iz,n,dir)
+               READ(12) babc(ix,iz,n,dir,1,1)
             END DO
          END DO
       END IF 
@@ -63,13 +63,13 @@ DO octant=1,8
       IF (sgn_mu>0) THEN
         DO iy=1,ny
           DO iz=1,nz
-            READ(12) lebc(iy,iz,n,dir)
+            READ(12) lebc(iy,iz,n,dir,1,1)
           END DO
         END DO
       ELSE
         DO iy=1,ny
           DO iz=1,nz
-             READ(12) ribc(iy,iz,n,dir)
+             READ(12) ribc(iy,iz,n,dir,1,1)
           END DO
         END DO 
       END IF
@@ -87,13 +87,13 @@ DO octant=1,8
       IF (sgn_xi>0) THEN
         DO ix=1,nx
           DO iy=1,ny
-            READ(12) bobc(ix,iy,n,dir)
+            READ(12) bobc(ix,iy,n,dir,1,1)
           END DO
         END DO
       ELSE
         DO ix=1,nx
           DO iy=1,ny
-            READ(12) tobc(ix,iy,n,dir)
+            READ(12) tobc(ix,iy,n,dir,1,1)
           END DO
         END DO
       END IF

@@ -12,7 +12,7 @@ CHARACTER(30), INTENT(IN) :: srcfile
 INTEGER :: g,ix,iy,iz,jx,jy,jz
 
 ! Set up the size of the arrays for the cross sections
-ALLOCATE(s(nx,ny,nz,ng))
+ALLOCATE(s(nx,ny,nz,ng,1,1,1))
 
 ! Initialize all elements of the source matrix to zero
 s = 0.
@@ -24,7 +24,7 @@ DO g=1,ng
    DO ix=1,nx
       DO iy=1,ny
          DO iz=1,nz
-             READ(12) s(ix,iy,iz,g)
+             READ(12) s(ix,iy,iz,g,1,1,1)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Needs to be removed
 ! s=0.0d0
