@@ -1,0 +1,7 @@
+! Source data input file
+0              ! Flag to indicate non-full specification
+1              ! # source instructions
+1 0 0          ! group, x-moment, y-moment
+1 1            ! starting x and y cells
+4 4            ! ending x and y cells
+1.0            ! magnitude of source

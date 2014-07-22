@@ -25,6 +25,7 @@ The following modules and sub-packages are discussed:
 
     transmute/index
     enrichment
+    spatialsolver
     r2s
     bins
     variancereduction
