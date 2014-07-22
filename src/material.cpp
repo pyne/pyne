@@ -975,7 +975,7 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   //    places replaced by zeros.
   //    if it's on the exception list, copy the component
   //    else it is to be collapsed 
-  //       => add it's frac to the component of the znum
+  //       => add its frac to the component of the znum
   //  
   // * When from_hdf5 reads from a file the comp iterator will produce a 
   //   hit for EVERY nucid in EVERY material in the file.  Only the nucids
