@@ -2,7 +2,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  solverin, solvertypein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin,&
  ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin,&
  matin, qdfilein, xsfilein, srcfilein, errin, itmxin, iallin, tolrin, tchkin,&
- ichkin, mompin, momsumin, momptin, qdflxin)
+ ichkin, mompin, momsumin, momptin, qdflxin,fluxout)
 
 !-------------------------------------------------------------
 !
@@ -43,6 +43,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
 USE invar
 USE solvar
 IMPLICIT NONE
+  
 INTEGER :: i, j, k, n
 ! File Names
 CHARACTER(30), INTENT(OUT) :: qdfile, xsfile, srcfile, mtfile,inflow_file,&
@@ -73,6 +74,14 @@ INTEGER, INTENT(IN) :: ichkin
 
 ! Editing data
 INTEGER, INTENT(IN) :: mompin, momsumin, momptin, qdflxin
+
+!INTEGER, INTENT(IN), DIMENSION(:) :: out_dims 
+
+!REAL*8, INTENT(OUT) :: fluxout
+!REAL*8, INTENT(OUT), DIMENSION(:,:,:,:,:,:,:) :: fluxout
+REAL*8, INTENT(OUT), DIMENSION(4,1,nyin,nzin,ngin,1,1) :: fluxout
+
+!fluxout = 101.01;REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: f
 
 ! Set all of the input values
 title = titlein
@@ -204,7 +213,75 @@ IF (xsbc .eq. 2) THEN
 END IF
 
 CALL solve
+
+
+fluxout = f
+
 CALL output
+
+
+IF( allocated(ang)) deallocate(ang)
+IF( allocated(w)) deallocate(w)
+IF( allocated(sigt)) deallocate(sigt)
+IF( allocated(sigs)) deallocate(sigs)
+IF( allocated(s)) deallocate(s)
+IF( allocated(frbc)) deallocate(frbc)
+IF( allocated(babc)) deallocate(babc)
+IF( allocated(lebc)) deallocate(lebc)
+IF( allocated(ribc)) deallocate(ribc)
+IF( allocated(bobc)) deallocate(bobc)
+IF( allocated(tobc)) deallocate(tobc)
+IF( allocated(tfrbc)) deallocate(tfrbc)
+IF( allocated(tbabc)) deallocate(tbabc)
+IF( allocated(tlebc)) deallocate(tlebc)
+IF( allocated(tribc)) deallocate(tribc)
+IF( allocated(tbobc)) deallocate(tbobc)
+IF( allocated(ttobc)) deallocate(ttobc)
+
+IF( allocated(ssum)) deallocate(ssum)
+IF( allocated(dx)) deallocate(dx)
+IF( allocated(dy)) deallocate(dy)
+IF( allocated(dz)) deallocate(dz)
+IF( allocated(mat)) deallocate(mat)
+IF( allocated(f)) deallocate(f)
+IF( allocated(e)) deallocate(e)
+IF( allocated(cnvf)) deallocate(cnvf)
+IF( allocated(amat)) deallocate(amat)
+IF( allocated(bmat)) deallocate(bmat)
+IF( allocated(gmat)) deallocate(gmat)
+IF( allocated(jmat)) deallocate(jmat)
+IF( allocated(gaa)) deallocate(gaa)
+IF( allocated(gaxy)) deallocate(gaxy)
+IF( allocated(gaxz)) deallocate(gaxz)
+IF( allocated(gayz)) deallocate(gayz)
+IF( allocated(gxya)) deallocate(gxya)
+IF( allocated(gxyxy)) deallocate(gxyxy)
+IF( allocated(gxyxz)) deallocate(gxyxz)
+IF( allocated(gxyyz)) deallocate(gxyyz)
+IF( allocated(gxza)) deallocate(gxza)
+IF( allocated(gxzxy)) deallocate(gxzxy)
+IF( allocated(gxzxz)) deallocate(gxzxz)
+IF( allocated(gxzyz)) deallocate(gxzyz)
+IF( allocated(gyza)) deallocate(gyza)
+IF( allocated(gyzxy)) deallocate(gyzxy)
+IF( allocated(gyzxz)) deallocate(gyzxz)
+IF( allocated(gyzyz)) deallocate(gyzyz)
+IF( allocated(xmat)) deallocate(xmat)
+IF( allocated(ymat)) deallocate(ymat)
+IF( allocated(zmat)) deallocate(zmat)
+IF( allocated(phisum)) deallocate(phisum)
+IF( allocated(refl_left)) deallocate(refl_left)
+IF( allocated(refl_right)) deallocate(refl_right)
+IF( allocated(refl_front)) deallocate(refl_front)
+IF( allocated(refl_back)) deallocate(refl_back)
+IF( allocated(refl_top)) deallocate(refl_top)
+IF( allocated(refl_bottom)) deallocate(refl_bottom)
+!IF( allocated()) deallocate()
+!IF( allocated()) deallocate()
+
+
+
+
 
 RETURN 
 

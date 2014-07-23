@@ -4,6 +4,7 @@ from __future__ import division
 
 import sys
 import os
+import time
 
 #Solver imports
 #sys.path.append("../pyne_transport/pyne/fortran/spatial_solvers_3d/source")
@@ -13,52 +14,58 @@ import pyne.ahot as ahot
 #from dict_util import dict_complete
 
 def solve(inputdict_unchecked):
-	inputdict = dict_complete(inputdict_unchecked)
-	if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
-		ahot.main("test title in",
-		inputdict['solver'],
-		inputdict['solver_type'],
-		inputdict['spatial_order'], 
-		inputdict['spatial_method'],
-		inputdict['angular_quadrature_order'],
-		inputdict['angular_quadrature_type'],
-		inputdict['nodes_xyz'][0],
-		inputdict['nodes_xyz'][1],
-		inputdict['nodes_xyz'][2],
-		inputdict['num_groups'],
-		inputdict['num_materials'],
-		inputdict['x_cells_widths'],
-		inputdict['y_cells_widths'],
-		inputdict['z_cells_widths'],
-		inputdict['x_boundry_conditions'][0],
-		inputdict['x_boundry_conditions'][1],
-		inputdict['y_boundry_conditions'][0],
-		inputdict['y_boundry_conditions'][1],
-		inputdict['z_boundry_conditions'][0],
-		inputdict['z_boundry_conditions'][1],
-		inputdict['material_id'],
-		inputdict['quadrature_file'],
-		inputdict['xs_file'],
-		inputdict['source_input_file'],
-		inputdict['convergence_criterion'],
-		inputdict['max_iterations'],
-		inputdict['moments_converged'],
-		inputdict['converge_tolerence'],
-		inputdict['ichk'],
-		inputdict['ichk_tolerence'],
-		inputdict['max_mom_printed'],
-		inputdict['moment_sum_flag'],
-		inputdict['mom_at_a_pt_flag'],
-		inputdict['quad_flux_print_flag'])
-	elif(inputdict['solver'] == "SCT-STEP"):
-		print("SCT-STEP NOT IMPLEMENTED YET...")
-	else:
-		#Throw error
-		print("Not a supported solver")
-
-
-
-
+  inputdict = dict_complete(inputdict_unchecked)
+  flux_output = []
+  solver_output = {
+     };
+  if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
+    fortran_returns = ahot.main("test title in",
+    inputdict['solver'],
+    inputdict['solver_type'],
+    inputdict['spatial_order'], 
+    inputdict['spatial_method'],
+    inputdict['angular_quadrature_order'],
+    inputdict['angular_quadrature_type'],
+    inputdict['nodes_xyz'][0],
+    inputdict['nodes_xyz'][1],
+    inputdict['nodes_xyz'][2],
+    inputdict['num_groups'],
+    inputdict['num_materials'],
+    inputdict['x_cells_widths'],
+    inputdict['y_cells_widths'],
+    inputdict['z_cells_widths'],
+    inputdict['x_boundry_conditions'][0],
+    inputdict['x_boundry_conditions'][1],
+    inputdict['y_boundry_conditions'][0],
+    inputdict['y_boundry_conditions'][1],
+    inputdict['z_boundry_conditions'][0],
+    inputdict['z_boundry_conditions'][1],
+    inputdict['material_id'],
+    inputdict['quadrature_file'],
+    inputdict['xs_file'],
+    inputdict['source_input_file'],
+    inputdict['convergence_criterion'],
+    inputdict['max_iterations'],
+    inputdict['moments_converged'],
+    inputdict['converge_tolerence'],
+    inputdict['ichk'],
+    inputdict['ichk_tolerence'],
+    inputdict['max_mom_printed'],
+    inputdict['moment_sum_flag'],
+    inputdict['mom_at_a_pt_flag'],
+    inputdict['quad_flux_print_flag']#,
+#    inputdict['out_dims']
+    )
+    #time.sleep(.5)
+    solver_output['flux'] = fortran_returns[6].tolist()
+    solver_output['success'] = 1
+    return solver_output
+  elif(inputdict['solver'] == "SCT-STEP"):
+    print("SCT-STEP NOT IMPLEMENTED YET...")
+    return null
+  else:
+    #Throw error
+    print("Not a supported solver")
 
 def dict_complete(inputdict):
 
@@ -196,6 +203,8 @@ def dict_complete(inputdict):
 		formatted_dict['moment_sum_flag'] = 0
 		formatted_dict['mom_at_a_pt_flag'] = 0
 		formatted_dict['quad_flux_print_flag'] = 0
+#!if solver == ahotn if solvertype == ln
+#    formatted_dict['out_dims'] = [4,formatted_dict['nodes_xyz'][0],formatted_dict['nodes_xyz'][1],formatted_dict##['nodes_xyz'][2],formatted_dict['num_groups'],1,1];
 
 		return formatted_dict
 
