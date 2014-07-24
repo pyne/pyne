@@ -17,21 +17,21 @@ def test_ahotn_ll():
   dict_results = pyne.spatialsolver.solve(a)
   print(dict_results)
 
-#def test_ahotn_nefd():
-#  a = populate("AHOTN","NEFD")
-#  dict_results = pyne.spatialsolver.solve(a)
+def test_ahotn_nefd():
+  a = populate("AHOTN","NEFD")
+  dict_results = pyne.spatialsolver.solve(a)
 
-#def test_dgfem_ld():
-#  a = populate("DGFEM","LD")
-#  dict_results = pyne.spatialsolver.solve(a)
+def test_dgfem_ld():
+  a = populate("DGFEM","LD")
+  dict_results = pyne.spatialsolver.solve(a)
 
-#def test_dgfem_dense():
-#  a = populate("DGFEM","DENSE")
-#  dict_results = pyne.spatialsolver.solve(a)
+def test_dgfem_dense():
+  a = populate("DGFEM","DENSE")
+  dict_results = pyne.spatialsolver.solve(a)
 
-#def test_dgfem_lagrange():
-#  a = populate("DGFEM","LAGRANGE")
-#  dict_results = pyne.spatialsolver.solve(a)
+def test_dgfem_lagrange():
+  a = populate("DGFEM","LAGRANGE")
+  dict_results = pyne.spatialsolver.solve(a)
 
 #TODO:
 #Add tests with supported warning configurations?

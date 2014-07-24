@@ -1,7 +1,7 @@
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  solverin, solvertypein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin,&
  ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin,&
- matin, qdfilein, xsfilein, srcfilein, errin, itmxin, iallin, tolrin, tchkin,&
+ matin, qdfilein, xsfilein, xsdatain, srcfilein, errin, itmxin, iallin, tolrin, tchkin,&
  ichkin, mompin, momsumin, momptin, qdflxin,fluxout)
 
 !-------------------------------------------------------------
@@ -63,6 +63,8 @@ INTEGER, INTENT(IN), DIMENSION(:,:,:) :: matin
 !ALLOCATE(mat(nxin,nyin,nzin))
 
 CHARACTER(30), INTENT(IN) :: qdfilein, xsfilein, srcfilein
+
+REAL*8, INTENT(IN), DIMENSION(:,:,:) :: xsdatain
 
 ! Iteration Controls
 REAL*8, INTENT(IN) :: errin, tolrin
@@ -141,12 +143,12 @@ ELSE IF (MOD(qdord,2) /= 0) THEN
     STOP
 END IF
 
-INQUIRE(FILE = xsfilein, EXIST = ex1)
-INQUIRE(FILE = srcfilein, EXIST = ex2)
-IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
-   STOP
-END IF
+!INQUIRE(FILE = xsfilein, EXIST = ex1)
+!INQUIRE(FILE = srcfilein, EXIST = ex2)
+!IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
+!   WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
+!   STOP
+!END IF
 
 ! Set up the extra needed info from the read input
 apo = (qdord*(qdord+2))/8
@@ -200,8 +202,7 @@ IF (solver == "DGFEM") THEN
     END IF
 END IF
 
-! Call to read the cross sections and source; do their own input check
-CALL readxs(xsfilein)
+CALL readxs(xsfilein,xsdatain)
 CALL readsrc(srcfilein)
 
 IF (xsbc .eq. 2) THEN
@@ -213,12 +214,8 @@ IF (xsbc .eq. 2) THEN
 END IF
 
 CALL solve
-
-
-fluxout = f
-
 CALL output
-
+fluxout = f
 
 IF( allocated(ang)) deallocate(ang)
 IF( allocated(w)) deallocate(w)

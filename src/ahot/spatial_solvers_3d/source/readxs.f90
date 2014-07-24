@@ -1,4 +1,4 @@
-SUBROUTINE readxs(xsfile)
+SUBROUTINE readxs(xsfile,xsdata)
 
 !-------------------------------------------------------------
 !
@@ -17,27 +17,48 @@ USE invar
 IMPLICIT NONE
 INTEGER :: m, g, gp
 CHARACTER(30), INTENT(IN) :: xsfile
+REAL*8, INTENT(IN), DIMENSION(:,:,:) :: xsdata
 
 ! Set up the size of the arrays for the cross sections
 ALLOCATE(sigt(nm,ng), sigs(nm,ng,ng), ssum(nm,ng))
 
-! Open the cross-section file for reading
-OPEN (UNIT = 11, FILE=xsfile)
 
-READ (11, *)
-! Loop over material overall
-DO m = 1, nm
-   READ (11,*)
-   ! Next loop is the INTO group
-   DO g = 1, ng
-      READ(11,*)
-      READ(11,*) sigt(m,g)
-      ! Implied DO loop for OUT OF groups
-      ! Input then 'looks' like the actual matrix and is read that way
-      READ(11,*) (sigs(m,g,gp), gp = 1, ng)
-   END DO
+! Call to read the cross sections and source; do their own input check
+IF(xsfile .ne. "empty") THEN
+	! Open the cross-section file for reading
+	OPEN (UNIT = 11, FILE=xsfile)
+	READ (11, *)
+	! Loop over material overall
+	DO m = 1, nm
+		 READ (11,*)
+		 ! Next loop is the INTO group
+		 DO g = 1, ng
+		    READ(11,*)
+		    READ(11,*) sigt(m,g)
+		    ! Implied DO loop for OUT OF groups
+		    ! Input then 'looks' like the actual matrix and is read that way
+		    READ(11,*) (sigs(m,g,gp), gp = 1, ng)
+		 END DO
+	END DO
+  CLOSE(UNIT=11)
 
-END DO
+ELSE
+   !WRITE(8,'(/,3x,A)') "READING XS DATA BROKEN..CAUSES SEGMENTATION FALUT..."
+  ! STOP
+	DO m = 1, nm
+		 DO g = 1, ng
+       WRITE(8,'(/,3x,A)') "CAUSING SEGMENTATION FAULT WHEN xsdata is accessed for some reason.."
+       STOP
+       sigt(m,g) = xsdata(nm,ng,1)
+       !NOT SURE IF FOLLOWING IS CORRECT
+       sigs(m,g,gp) = xsdata(nm,ng,2)
+       !WAS DERIVED FROM FOLLOWING LINE:
+			    ! Input then 'looks' like the actual matrix and is read that way
+       	  !READ(11,*) (sigs(m,g,gp), gp = 1, ng)
+		 END DO
+	END DO
+END IF
+
 
 ! Perform checks on the cross section data
 IF (MINVAL(sigt) < 0.) THEN

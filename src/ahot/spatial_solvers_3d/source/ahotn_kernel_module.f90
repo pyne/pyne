@@ -34,6 +34,7 @@ subroutine read_sp_wts_ahotn_l
      read(10,*) sp_wt1(1,i),sp_wt1(2,i),sp_wt1(3,i),sp_wt1(4,i) 
   end do
   close(unit=9)
+  close(unit=10)
 end subroutine
 
 function spwt0(e)

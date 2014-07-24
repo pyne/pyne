@@ -20,6 +20,7 @@ def populate(solverin, solvertypein):
 		'material_id': [[[1]*4]*4]*4,
 		'quadrature_file':'quad_file',
 		'xs_file':'xs',
+  #  'xs_data':[[[1.1,0.2]]],
 		'source_input_file':'src_4.dat',
 		'bc_input_file':'bc_4.dat',
 		'flux_output_file':'phi_4.ahot',
