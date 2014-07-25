@@ -135,7 +135,7 @@ ELSE IF (qdflx /= 0 .AND. qdflx /= 1) THEN
 
 ! Or there is nothing wrong, report that and continue
 ELSE
-   WRITE(8,'(/,3X,A,//)') "No input errors have been detectasdfadsfed."
+   WRITE(8,'(/,3X,A,//)') "No input errors have been detected."
 
 END IF
    

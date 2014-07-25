@@ -28,7 +28,7 @@ IF(xsfile .ne. "empty") THEN
 	! Open the cross-section file for reading
 	OPEN (UNIT = 11, FILE=xsfile)
 	READ (11, *)
-	! Loop over material overall
+	! Loop over material overall 
 	DO m = 1, nm
 		 READ (11,*)
 		 ! Next loop is the INTO group
