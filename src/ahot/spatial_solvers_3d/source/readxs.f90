@@ -17,7 +17,7 @@ USE invar
 IMPLICIT NONE
 INTEGER :: m, g, gp
 CHARACTER(30), INTENT(IN) :: xsfile
-REAL*8, INTENT(IN), DIMENSION(:,:,:) :: xsdata
+REAL*8, INTENT(IN), DIMENSION(ng,nm,2) :: xsdata
 
 ! Set up the size of the arrays for the cross sections
 ALLOCATE(sigt(nm,ng), sigs(nm,ng,ng), ssum(nm,ng))
@@ -47,18 +47,19 @@ ELSE
   ! STOP
 	DO m = 1, nm
 		 DO g = 1, ng
-       WRITE(8,'(/,3x,A)') "CAUSING SEGMENTATION FAULT WHEN xsdata is accessed for some reason.."
-       STOP
-       sigt(m,g) = xsdata(nm,ng,1)
-       !NOT SURE IF FOLLOWING IS CORRECT
-       sigs(m,g,gp) = xsdata(nm,ng,2)
+       WRITE(8,'(/,3x,A)') "INTEGRITY OF XS DATA MATRIX NEEDS VERIFICATION!"
+       sigt(m,g) = xsdata(m,g,1)
+       sigs(m,g,1) = xsdata(1,1,2)
+       !FOLLOWING LINE PROBABLY WRONG
+       sigs(m,g,1) = xsdata(m,g,2)
        !WAS DERIVED FROM FOLLOWING LINE:
 			    ! Input then 'looks' like the actual matrix and is read that way
        	  !READ(11,*) (sigs(m,g,gp), gp = 1, ng)
+       !NEEDS TO INSTEAD ITERATE OVER ALL GROUPS XS FOR EACH MATERIAL TO 
+       !STORE IN sigs?
 		 END DO
 	END DO
 END IF
-
 
 ! Perform checks on the cross section data
 IF (MINVAL(sigt) < 0.) THEN
@@ -80,6 +81,8 @@ DO m = 1, nm
       END IF
    END DO
 END DO
+
+105 FORMAT(1X,A,I5)
 
 RETURN
 END SUBROUTINE readxs

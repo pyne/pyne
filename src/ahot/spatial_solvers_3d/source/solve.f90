@@ -26,7 +26,6 @@ WRITE (8,*) "-------------------------- THE SOLUTION ---------------------------
 WRITE (8,*)
 
 
-
 IF (solver == "AHOTN") THEN
 	IF (solvertype == "LN" .or. solvertype == "LL") THEN
 		ALLOCATE(f(4,nx,ny,nz,ng,1,1), e(4,nx,ny,nz,1,1))
@@ -78,12 +77,6 @@ IF (solver == "AHOTN") THEN
 		ALLOCATE(f(0:lambda,0:lambda,0:lambda,nx,ny,nz,ng), e(0:lambda,0:lambda,0:lambda,nx,ny,nz))
 		call read_sp_wts_ahotn_nefd(lambda)
 
-
-
-
-
-
-
 		! Start the loop over all energy groups
 		DO g = 1, ng
 			 ! Reset the source as external + scattering
@@ -129,18 +122,11 @@ IF (solver == "AHOTN") THEN
 	ENDIF
 ELSE IF (solver == "DGFEM") THEN
 
-
-
-
-
-
-
 	IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
 		ALLOCATE(f(dofpc,nx,ny,nz,ng,1,1), e(dofpc,nx,ny,nz,1,1))
 	ELSE IF (solvertype == "LAGRANGE") THEN
 		ALLOCATE(f(ordcb,nx,ny,nz,ng,1,1), e(ordcb,nx,ny,nz,1,1))
 	END IF
-
 
 	! Intitialize warn to indicate where warnings may occur
 	warn = 0
@@ -193,10 +179,6 @@ ELSE IF (solver == "DGFEM") THEN
 	END IF
 
 	END DO
-
-
-
-
 
 ELSE IF (solver == "SCTS") THEN
 	!Not implemented yet!

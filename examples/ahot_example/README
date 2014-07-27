@@ -7,14 +7,14 @@ AHOT usage example:
         those file's yourself, but we have not added an interface to allow you to do so yet.
 
     # Imports
-    $ import pyne.spatial_solver
+    $ import pyne.spatialsolver
     $ from dictionary_populate_test import populate, populate_with_warnings
 
     # Creating a dictionary, a, then populating it with the test script
     $ solver_dict = populate("AHOTN","LN")
 
     # Call the solver
-    $ pyne.spatialsolver.solve(a)
+    $ pyne.spatialsolver.solve(solver_dict)
 
     #ALL supported configurations without warnings
     #a = populate("AHOTN","LN")

@@ -79,11 +79,8 @@ INTEGER, INTENT(IN) :: mompin, momsumin, momptin, qdflxin
 
 !INTEGER, INTENT(IN), DIMENSION(:) :: out_dims 
 
-!REAL*8, INTENT(OUT) :: fluxout
-!REAL*8, INTENT(OUT), DIMENSION(:,:,:,:,:,:,:) :: fluxout
 REAL*8, INTENT(OUT), DIMENSION(4,1,nyin,nzin,ngin,1,1) :: fluxout
-
-!fluxout = 101.01;REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: f
+!Works for AHOTN/LL, AHOTN/LN, DGFEM/LD only so far
 
 ! Set all of the input values
 title = titlein
@@ -120,6 +117,8 @@ momp = mompin
 momsum = momsumin
 mompt = momptin
 qdflx = qdflxin
+
+!ALLOCATE(fluxout(4,nx,ny,nz,ng,1,1))
 
 IF (solver == "DGFEM") THEN
     IF (solvertype == "LD") THEN
@@ -213,6 +212,7 @@ IF (xsbc .eq. 2) THEN
     END IF
 END IF
 
+!CALL echo
 CALL solve
 CALL output
 fluxout = f
