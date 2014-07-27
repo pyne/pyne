@@ -132,9 +132,35 @@ ELSE IF (solver == "DGFEM") THEN
 		       END DO
 		    END IF
 		 END IF
-	END DO
+  END DO
 ELSE IF (solver == "SCTS") THEN
-	!Not implemented yet
+  ! Start the echo of the output for each group
+  DO g = 1, ng   
+     ! Check if the flux converged
+     IF (cnvf(g) == 1) THEN
+        WRITE (8,*)
+        WRITE (8,112) "========== Group ", g, " Converged Scalar Flux Zero Moment =========="
+        t = 0
+        u = 0
+        v = 0
+        DO k = 1, nz
+           DO j = 1, ny
+              WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
+              WRITE (8,113) (f(i,j,k,g,1,1,1), i = 1, nx)
+           END DO
+        END DO
+        ! Call for the sum of the scalar flux moments if requested by momsum = 1
+     !    IF (momsum == 1) THEN
+     !      CALL fluxsum(g)
+     !       WRITE (8,*)
+     !       WRITE (8,115) "---------- Group ", g, " Cell-Center Scalar Flux Moments Sum ----------"
+     !       DO j = 1, ny
+     !          WRITE (8,*) " Row(j) : ", j
+     !          WRITE (8,113) (phisum(i,j,g), i = 1, nx)
+     !       END DO
+     !    END IF
+     END IF
+  END DO
 END IF
 
 112 FORMAT(1X, A, I4, A)

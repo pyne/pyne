@@ -131,6 +131,8 @@ ELSE IF (solver == "AHOTN") THEN
             STOP
         END IF
     END IF
+ELSE IF (solver == "SCTSTEP") THEN
+    lambda = 0
 END IF
 
 ! Check that the order given is greater than zero and is even
@@ -215,6 +217,7 @@ END IF
 !CALL echo
 CALL solve
 CALL output
+!CALL output_phi("phifile")
 fluxout = f
 
 IF( allocated(ang)) deallocate(ang)
@@ -273,12 +276,6 @@ IF( allocated(refl_front)) deallocate(refl_front)
 IF( allocated(refl_back)) deallocate(refl_back)
 IF( allocated(refl_top)) deallocate(refl_top)
 IF( allocated(refl_bottom)) deallocate(refl_bottom)
-!IF( allocated()) deallocate()
-!IF( allocated()) deallocate()
-
-
-
-
 
 RETURN 
 
