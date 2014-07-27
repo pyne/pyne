@@ -43,6 +43,11 @@ IF(xsfile .ne. "empty") THEN
   CLOSE(UNIT=11)
 
 ELSE
+! What are you trying to do here? I am not clear about you're trying to accomplish.
+! I looked at the original working issues wiki entry, and I am still not sure.
+! I can see that if xsfile isn't empty that you execute the original code. Is that
+! still working? 
+! also, it looks like there are still space/tab issues? This spacing is hard to read...
    !WRITE(8,'(/,3x,A)') "READING XS DATA BROKEN..CAUSES SEGMENTATION FALUT..."
   ! STOP
 	DO m = 1, nm
