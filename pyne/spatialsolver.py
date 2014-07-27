@@ -18,57 +18,57 @@ def solve(inputdict_unchecked):
   flux_output = []
   solver_output = {
      };
-  if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
-    fortran_returns = ahot.main("test title in",
-    inputdict['solver'],
-    inputdict['solver_type'],
-    inputdict['spatial_order'], 
-    inputdict['spatial_method'],
-    inputdict['angular_quadrature_order'],
-    inputdict['angular_quadrature_type'],
-    inputdict['nodes_xyz'][0],
-    inputdict['nodes_xyz'][1],
-    inputdict['nodes_xyz'][2],
-    inputdict['num_groups'],
-    inputdict['num_materials'],
-    inputdict['x_cells_widths'],
-    inputdict['y_cells_widths'],
-    inputdict['z_cells_widths'],
-    inputdict['x_boundry_conditions'][0],
-    inputdict['x_boundry_conditions'][1],
-    inputdict['y_boundry_conditions'][0],
-    inputdict['y_boundry_conditions'][1],
-    inputdict['z_boundry_conditions'][0],
-    inputdict['z_boundry_conditions'][1],
-    inputdict['material_id'],
-    inputdict['quadrature_file'],
-    inputdict['xs_file'],
-    inputdict['xs_data'],
-    inputdict['source_input_file'],
-    inputdict['bc_input_file'],
-    inputdict['flux_output_file'],
-    inputdict['convergence_criterion'],
-    inputdict['max_iterations'],
-    inputdict['moments_converged'],
-    inputdict['converge_tolerence'],
-    inputdict['ichk'],
-    inputdict['ichk_tolerence'],
-    inputdict['max_mom_printed'],
-    inputdict['moment_sum_flag'],
-    inputdict['mom_at_a_pt_flag'],
-    inputdict['quad_flux_print_flag']#,
+  #if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
+  fortran_returns = ahot.main("test title in",
+  inputdict['solver'],
+  inputdict['solver_type'],
+  inputdict['spatial_order'], 
+  inputdict['spatial_method'],
+  inputdict['angular_quadrature_order'],
+  inputdict['angular_quadrature_type'],
+  inputdict['nodes_xyz'][0],
+  inputdict['nodes_xyz'][1],
+  inputdict['nodes_xyz'][2],
+  inputdict['num_groups'],
+  inputdict['num_materials'],
+  inputdict['x_cells_widths'],
+  inputdict['y_cells_widths'],
+  inputdict['z_cells_widths'],
+  inputdict['x_boundry_conditions'][0],
+  inputdict['x_boundry_conditions'][1],
+  inputdict['y_boundry_conditions'][0],
+  inputdict['y_boundry_conditions'][1],
+  inputdict['z_boundry_conditions'][0],
+  inputdict['z_boundry_conditions'][1],
+  inputdict['material_id'],
+  inputdict['quadrature_file'],
+  inputdict['xs_file'],
+  inputdict['xs_data'],
+  inputdict['source_input_file'],
+  inputdict['bc_input_file'],
+  inputdict['flux_output_file'],
+  inputdict['convergence_criterion'],
+  inputdict['max_iterations'],
+  inputdict['moments_converged'],
+  inputdict['converge_tolerence'],
+  inputdict['ichk'],
+  inputdict['ichk_tolerence'],
+  inputdict['max_mom_printed'],
+  inputdict['moment_sum_flag'],
+  inputdict['mom_at_a_pt_flag'],
+  inputdict['quad_flux_print_flag']#,
 #    inputdict['out_dims']
     )
     #time.sleep(.5)
-    solver_output['flux'] = fortran_returns[6].tolist()
-    solver_output['success'] = 1
-    return solver_output
-  elif(inputdict['solver'] == "SCT-STEP"):
-    print("SCT-STEP NOT IMPLEMENTED YET...")
-    return null
-  else:
+  solver_output['flux'] = fortran_returns[6].tolist()
+  solver_output['success'] = 1
+  return solver_output
+  #elif(inputdict['solver'] == "SCTSTEP"):
+  #  print("SCT-STEP NOT IMPLEMENTED YET...")
+  #  return null
+  #else:
     #Throw error
-    print("Not a supported solver")
+  #  print("Not a supported solver")
 
 def dict_complete(inputdict):
 
