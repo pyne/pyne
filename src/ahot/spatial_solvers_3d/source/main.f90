@@ -1,7 +1,7 @@
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  solverin, solvertypein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin,&
  ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin,&
- matin, qdfilein, xsfilein, xsdatain, srcfilein, errin, itmxin, iallin, tolrin, tchkin,&
+ matin, qdfilein, xsfilein, xsdatain, srcfilein, bc_input_filein, flux_output_filein, errin, itmxin, iallin, tolrin, tchkin,&
  ichkin, mompin, momsumin, momptin, qdflxin,fluxout)
 
 !-------------------------------------------------------------
@@ -62,7 +62,7 @@ INTEGER, INTENT(IN) :: xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin
 INTEGER, INTENT(IN), DIMENSION(:,:,:) :: matin
 !ALLOCATE(mat(nxin,nyin,nzin))
 
-CHARACTER(30), INTENT(IN) :: qdfilein, xsfilein, srcfilein
+CHARACTER(30), INTENT(IN) :: qdfilein, xsfilein, srcfilein, bc_input_filein, flux_output_filein
 
 REAL*8, INTENT(IN), DIMENSION(:,:,:) :: xsdatain
 
@@ -105,8 +105,10 @@ yebc = yebcin
 zsbc = zsbcin
 zebc = zebcin
 mat = matin
-inflow_file = "bc_4.dat"
-phi_file = "phi_4.ahot"
+inflow_file = bc_input_filein
+phi_file = flux_output_filein
+!inflow_file = "bc_4.dat"
+!phi_file = "phi_4.ahot"
 err = errin
 tolr = tolrin
 itmx = itmxin

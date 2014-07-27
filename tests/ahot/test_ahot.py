@@ -33,6 +33,10 @@ def test_dgfem_lagrange():
   a = populate("DGFEM","LAGRANGE")
   dict_results = pyne.spatialsolver.solve(a)
 
+def test_sct_step():
+  a = populate("SCTSTEP","a")
+  dict_results = pyne.spatialsolver.solve(a)
+
 #TODO:
 #Add tests with supported warning configurations?
   #a = populate_with_warnings("AHOTN")

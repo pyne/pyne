@@ -45,6 +45,8 @@ def solve(inputdict_unchecked):
     inputdict['xs_file'],
     inputdict['xs_data'],
     inputdict['source_input_file'],
+    inputdict['bc_input_file'],
+    inputdict['flux_output_file'],
     inputdict['convergence_criterion'],
     inputdict['max_iterations'],
     inputdict['moments_converged'],
@@ -74,7 +76,7 @@ def dict_complete(inputdict):
 
     formatted_dict = {}
     try:
-      if((inputdict['solver'] == "AHOTN") or (inputdict['solver']=="DGFEM")):
+      if((inputdict['solver'] == "AHOTN") or (inputdict['solver']=="DGFEM") or (inputdict['solver']=="SCTSTEP")):
         formatted_dict['solver'] = inputdict['solver']
       else:
         raise InputDictError("solver does not exist")
