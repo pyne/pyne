@@ -1,16 +1,17 @@
 EXAMPLE README:
 AHOT usage example:
 (In a python session, run the following commands:
-      **Note: you must copy the contents of this folder in the directory that you wish to run the
-        ahot solvers from.  This is because the AHOT solvers rely on source data you provide
-        with certain files that are contained in this folder.  You could, of course, generate 
-        those file's yourself, but we have not added an interface to allow you to do so yet.
+      **Note: you must copy the contents of this folder to the directory that 
+        you wish to run the ahot solvers from. This is because the AHOT solvers
+        rely on source data provided through certain files contained in this 
+        folder. You could, in theory, generate those files yourself, but there
+        is not yet an interface to do this.
 
     # Imports
     $ import pyne.spatialsolver
     $ from dictionary_populate_test import populate, populate_with_warnings
 
-    # Creating a dictionary, a, then populating it with the test script
+    # Create a dictionary, a, then populate it with the test script
     $ solver_dict = populate("AHOTN","LN")
 
     # Call the solver
@@ -24,14 +25,15 @@ AHOT usage example:
     #a = populate("DGFEM","DENSE")
     #a = populate("DGFEM","LAGRANGE")
 
-    # Alternately, you could use the test dictionary generate script to generate a dictionary with only the
-    # required key-pair values.  The rest will be overriden by the solver; according warnings will be printed.
+    # Alternately, you could use the test dictionary generate script to generate
+    # a dictionary with only the required key-value pairs. The remaining entries
+    # will be filled in with defaults by the solver. Any warnings will be printed.
     #Supported configurations with ALL POSSIBLE warnings
     #a = populate_with_warnings("AHOTN")
     #a = populate_with_warnings("DGFEM")
 
-    # You can also create your own dictionary (more realistic, although the test dictionary script used above
-    # does just that).  Below is a commented out example:
+    # You can also create your own dictionary (more realistic, although the test
+    # dictionary script used above does just that). Here is a commented example:
 
     # solver_dict = {
     #'solver':'AHOTN',
