@@ -18,6 +18,8 @@ IF (solver == "AHOTN") THEN
 	ALLOCATE(s(0:lambda,0:lambda,0:lambda,nx,ny,nz,ng))
 ELSE IF (solver == "DGFEM") THEN
 	ALLOCATE(s(orpc,nx,ny,nz,ng,1,1))
+ELSE IF (solver == "SCTSTEP") THEN
+  ALLOCATE(s(nx,ny,nz,ng,1,1,1))
 END IF
 ! Initialize all elements of the source matrix to zero
 s = 0.
@@ -67,6 +69,21 @@ ELSE IF (solver == "DGFEM") THEN
 		    END DO
 		 END DO
 	END DO
+ELSE IF (solver == "SCTSTEP") THEN
+  DO g=1,ng
+     DO ix=1,nx
+        DO iy=1,ny
+           DO iz=1,nz
+               READ(12) s(ix,iy,iz,g,1,1,1)
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Needs to be removed
+  ! s=0.0d0
+  ! Needs to be removed
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!
+           END DO
+        END DO
+     END DO
+  END DO
 END IF
 CLOSE(UNIT=12)
 RETURN

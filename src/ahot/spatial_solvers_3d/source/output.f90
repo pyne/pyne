@@ -133,7 +133,7 @@ ELSE IF (solver == "DGFEM") THEN
 		    END IF
 		 END IF
   END DO
-ELSE IF (solver == "SCTS") THEN
+ELSE IF (solver == "SCTSTEP") THEN
   ! Start the echo of the output for each group
   DO g = 1, ng   
      ! Check if the flux converged

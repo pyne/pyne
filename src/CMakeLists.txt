@@ -1,7 +1,7 @@
 set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS} PARENT_SCOPE)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
-
+ 
 # setup source files
 set(AHOT_SRCS
     "ahot/spatial_solvers_3d/source/ahotn_kernel_module.f90"
@@ -19,6 +19,7 @@ set(AHOT_SRCS
     "ahot/spatial_solvers_3d/source/precision_module.f90"
     "ahot/spatial_solvers_3d/source/read_inflow_ahotn.f90"
     "ahot/spatial_solvers_3d/source/read_inflow_dgfem.f90"
+    "ahot/spatial_solvers_3d/source/read_inflow_sct_step.f90"
     "ahot/spatial_solvers_3d/source/readmt.f90"
     "ahot/spatial_solvers_3d/source/readsrc.f90"
     "ahot/spatial_solvers_3d/source/readxs.f90"

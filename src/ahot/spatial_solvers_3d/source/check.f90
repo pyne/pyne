@@ -72,20 +72,39 @@ ELSE IF (ysbc /= 0 .AND. ysbc /= 1 .AND. ysbc /= 2 ) THEN
 ELSE IF (zsbc /= 0 .AND. zsbc /= 1 .AND. zsbc /= 2 ) THEN
    WRITE(8,'(/,3x,A)') "ERROR: Illegal lower z BC. Must be 0-Vac, 1-Refl or 2-Fixed."
    STOP
-   
-! the upper BCs that are vacuum only
-ELSE IF (xebc /= 0 .AND. xebc /= 2 ) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed."
-   STOP
-ELSE IF (yebc /= 0 .AND. yebc /= 2 ) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed."
-   STOP
-ELSE IF (zebc /= 0 .AND. zebc /= 2 ) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed."
-   STOP
+END IF
 
+IF (solver == "SCTSTEP") THEN
+  ! the upper BCs that are vacuum only
+  IF (xebc /= 0 .AND. xebc /=1 .AND. xebc /= 2 ) THEN
+     WRITE(8,'(/,3x,A)') "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed."
+     STOP
+  ELSE IF (yebc /= 0 .AND. yebc /=1 .AND. yebc /= 2 ) THEN
+     WRITE(8,'(/,3x,A)') "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed."
+     STOP
+  ELSE IF (zebc /= 0 .AND. zebc /=1 .AND. zebc /= 2 ) THEN
+     WRITE(8,'(/,3x,A)') "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed."
+     STOP
+  END IF
+ELSE
+  ! the upper BCs that are vacuum only
+  IF (xebc /= 0 .AND. xebc /= 2 ) THEN
+     WRITE(8,'(/,3x,A)') "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed."
+     STOP
+  ELSE IF (yebc /= 0 .AND. yebc /= 2 ) THEN
+     WRITE(8,'(/,3x,A)') "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed."
+     STOP
+  ELSE IF (zebc /= 0 .AND. zebc /= 2 ) THEN
+     WRITE(8,'(/,3x,A)') "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed."
+     STOP
+  END IF
+END IF
+
+
+!Added a break in if statements to allow for solver specific checking above^
+! (they were all else if before.."
 ! Iteration control parameters
-ELSE IF (err <= 0.) THEN
+IF (err <= 0.) THEN
    WRITE(8,'(/,3x,A)') "ERROR: Illegal convergence criterion. Must be positive."
    STOP
 ELSE IF (itmx <= 0) THEN

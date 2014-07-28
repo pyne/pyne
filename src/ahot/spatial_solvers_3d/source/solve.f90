@@ -182,9 +182,9 @@ ELSE IF (solver == "DGFEM") THEN
 
 	END DO
 
-ELSE IF (solver == "SCTS") THEN
+ELSE IF (solver == "SCTSTEP") THEN
   ALLOCATE(f(nx,ny,nz,ng,1,1,1), e(nx,ny,nz,1,1,1))
-  ALLOCATE(cnvf(ng))
+  !ALLOCATE(cnvf(ng))
 
   ! Set values in tracking module
   tnx=nx;tny=ny;tnz=nz
@@ -216,7 +216,7 @@ ELSE IF (solver == "SCTS") THEN
   warn = 0
 
   ! Read spatial weights
-  call read_sp_wts(lambda)
+  call read_sp_wts_sct_step(lambda)
 
   ! Allcoate and initialize reflective boundary condition arrays
   IF(xsbc.eq.1) ALLOCATE( refl_left  (ny,nz,8,apo,ng) )
@@ -240,7 +240,7 @@ ELSE IF (solver == "SCTS") THEN
               DO j = 1, ny
                  DO i = 1, nx
                     m = mat(i,j,k)
-                    xsct = sigs(m,g,gp)
+                    xsct = sigs(m,g,gp) 
                     s(i,j,k,g,1,1,1) = s(i,j,k,g,1,1,1) + xsct*f(i,j,k,gp,1,1,1)
                  END DO
               END DO

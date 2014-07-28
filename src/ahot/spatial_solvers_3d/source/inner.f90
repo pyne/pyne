@@ -256,12 +256,12 @@ ELSE IF (solver == "DGFEM") THEN
 
 
 
-ELSE IF (solver == "SCTS") THEN
+ELSE IF (solver == "SCTSTEP") THEN
 
   ! Start the iterations
   DO it = 1, itmx
      ! Call for the mesh sweep
-     CALL sweep_ahotn_nefd(g)
+     CALL sweep_sct_step(g)
      
      ! Compare new and old flux iterates for user chosen range of moments, iall
      dfmx = -1.0

@@ -169,26 +169,31 @@ ELSE IF (solver == "DGFEM") THEN
         ordsq = order**2
         ordcb = order**3
     END IF
+ELSE IF (solver=="SCTSTEP") THEN
+  !apo = (qdord*(qdord+2))/8
+  order = lambda+1
+  ordsq = order**2
+  ordcb = order**3
 END IF
 
 ! Angular quadrature
 ALLOCATE(ang(apo,3), w(apo))
 IF (qdtyp == 2) THEN
-    INQUIRE(FILE=qdfilein, EXIST=ex3)
-    IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
-        WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
-        STOP
-    END IF
-    OPEN(UNIT=10, FILE=qdfilein)
-    READ(10,*)
-    READ(10,*) (ang(n,1),ang(n,2),w(n),n=1,apo)
-    ! Renormalize all the weights
-    wtsum = SUM(w)
-    DO n = 1, apo
-        w(n) = w(n) * 0.125/wtsum
-    END DO
+  INQUIRE(FILE=qdfilein, EXIST=ex3)
+  IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
+    WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
+    STOP
+   END IF
+   OPEN(UNIT=10, FILE=qdfilein)
+   READ(10,*)
+   READ(10,*) (ang(n,1),ang(n,2),w(n),n=1,apo)
+   ! Renormalize all the weights
+   wtsum = SUM(w)
+   DO n = 1, apo
+     w(n) = w(n) * 0.125/wtsum
+   END DO
 ELSE
-    CALL angle
+  CALL angle
 END IF
 
 IF (qdtyp == 2) CLOSE(UNIT=10)
@@ -213,6 +218,8 @@ IF (xsbc .eq. 2) THEN
         CALL read_inflow_ahotn(inflow_file)
     ELSE IF (solver == "DGFEM") THEN
         CALL read_inflow_dgfem(inflow_file)
+    ELSE IF (solver == "SCTSTEP") THEN
+        CALL read_inflow_sct_step(inflow_file)
     END IF
 END IF
 

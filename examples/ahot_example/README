@@ -5,7 +5,8 @@ AHOT usage example:
         you wish to run the ahot solvers from. This is because the AHOT solvers
         rely on source data provided through certain files contained in this 
         folder. You could, in theory, generate those files yourself, but there
-        is not yet an interface to do this.
+        is not yet an interface to do this.  Dictionary API documentation in
+        progress.
 
     # Imports
     $ import pyne.spatialsolver
@@ -27,7 +28,8 @@ AHOT usage example:
 
     # Alternately, you could use the test dictionary generate script to generate
     # a dictionary with only the required key-value pairs. The remaining entries
-    # will be filled in with defaults by the solver. Any warnings will be printed.
+    # will be filled in with defaults by the solver. Warnings for each not required
+    # dictionary key-value pair will be printed.
     #Supported configurations with ALL POSSIBLE warnings
     #a = populate_with_warnings("AHOTN")
     #a = populate_with_warnings("DGFEM")

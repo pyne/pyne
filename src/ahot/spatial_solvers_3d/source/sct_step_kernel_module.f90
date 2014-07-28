@@ -24,7 +24,7 @@ real(kind=8) :: sp_wts(4,0:1000)
 
 contains
 
-subroutine read_sp_wts(order)
+subroutine read_sp_wts_sct_step(order)
 !*********************************************************
 !
 ! This subroutine reads Pade coefficients from files

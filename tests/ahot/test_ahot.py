@@ -4,7 +4,7 @@ import pyne.spatialsolver
 from dictionary_populate_test import populate, populate_with_warnings
 
 def test_ahotn_ln():
-  a = populate("AHOTN","LN")
+  a = populate("AHOTN","LN") 
   dict_results = pyne.spatialsolver.solve(a)
   print(dict_results)
 
