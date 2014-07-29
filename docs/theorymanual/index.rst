@@ -1,4 +1,4 @@
-.. _theorymanual:
+.. _ahot_solvers:
 
 =============
 Theory Manual
@@ -11,6 +11,7 @@ The following describe methods implemented natively in PyNE:
 .. toctree::
     :maxdepth: 1
 
+    ahot.rst
     chain_solve.rst
     cross_section_models.rst
     enrichment.rst

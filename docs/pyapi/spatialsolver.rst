@@ -5,13 +5,13 @@ Spatialsolver Support -- :mod:`pyne.spatialsolver`
 **************************************
 Spatialsolver description here
 
-.. currentmodule:: pyne.serpent
+.. currentmodule:: pyne.spatialsolver
 
 All functionality may be found in the ``spatialsolver`` package::
 
  from pyne import spatialsolver
 
-Serpent API
+Spatialsolver API
 -----------
 
 .. automodule:: pyne.spatialsolver
