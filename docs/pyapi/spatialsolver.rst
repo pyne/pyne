@@ -30,34 +30,34 @@ As these are complicated solvers, they require a large amount of input data supp
 format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overriden by default values if not present/not specified. 
 
 **Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**::
- key: "spatial_order"
- type: Integer
- ex: 0
- default: 1
+    key: "spatial_order"
+    type: Integer
+    ex: 0
+    default: 1
 
 **Entry: Method (meth): 0/1 => AHOT-N-SI/AHOT-N-ITM**
- key: "spatial_method"   
- type: Integer
- ex: 0
- default: 0
+    key: "spatial_method"   
+    type: Integer
+    ex: 0
+    default: 0
 
 **Entry: Quadrature order (can only be an even number)**
- key: "quadrature_order"
- type: Integer
- ex: 4
- default: 4
+    key: "quadrature_order"
+    type: Integer
+    ex: 4
+    default: 4
 
 **Entry: Qudrature type:**
- key: "quadrature_type"
- type: Integer
- ex: 1
- default: 1
+    key: "quadrature_type"
+    type: Integer
+    ex: 1
+    default: 1
 
 **Entry: Number of Nodes in x, y, and z directions (nx/ny/nz)**
- key: "nodes_xyz"
- type: Integer array
- ex: [4, 4, 4]
- default: No default
+    key: "nodes_xyz"
+    type: Integer array
+    ex: [4, 4, 4]
+    default: No default
 	
 **Entry: Number of groupds (ng)**
  key: "num_groups"
