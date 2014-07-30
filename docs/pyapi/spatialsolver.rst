@@ -23,16 +23,13 @@ space per dimension, i.e. in x, y and z direction.
  #. **SCTSTEP**: SCT Step algorithm similar to Duo's SCT algorithm implemented in three dimensional Cartesian
     geometry.
 
+-----------------------------------
+Dictionary Entries
+-----------------------------------
 As these are complicated solvers, they require a large amount of input data supplied by the user.  The
 format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overriden by default values if not present/not specified. 
 
-.. _dictionary_entries:
-### Entries in Dictionary:
-**(resolved here)**
-
-**1 0**       Order (lambda; ahot spatial order; I think can only be 0, 1, or 2?) & Method (meth): 0/1 => AHOT-N-SI/AHOT-N-ITM (I need to check which methods need 0 vs. 1, or if both are ok with all)
-
-**Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**
+**Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**::
  key: "spatial_order"
  type: Integer
  ex: 0
