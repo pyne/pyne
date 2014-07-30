@@ -43,7 +43,6 @@ def solve(inputdict_unchecked):
   inputdict['material_id'],
   inputdict['quadrature_file'],
   inputdict['xs_file'],
-  inputdict['xs_data'],
   inputdict['source_input_file'],
   inputdict['bc_input_file'],
   inputdict['flux_output_file'],
@@ -155,15 +154,10 @@ def dict_complete(inputdict):
       formatted_dict['quadrature_file'] = inputdict['quadrature_file']
     except:
       raise InputDictError("quadrature_file")
-    try: 
-      formatted_dict['xs_data'] = inputdict['xs_data']
-      formatted_dict['xs_file'] = "empty"
+    try:
+		  formatted_dict['xs_file'] = inputdict['xs_file']
     except:
-      formatted_dict['xs_data'] = [[-1 -1]]
-      try:
-			  formatted_dict['xs_file'] = inputdict['xs_file']
-      except:
-        raise InputDictError("xs_file/xs_data")
+      raise InputDictError("xs_file")
     try:
       formatted_dict['source_input_file'] = inputdict['source_input_file']
     except:

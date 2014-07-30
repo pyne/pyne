@@ -1,7 +1,7 @@
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  solverin, solvertypein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin,&
  ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin,&
- matin, qdfilein, xsfilein, xsdatain, srcfilein, bc_input_filein, flux_output_filein, errin, itmxin, iallin, tolrin, tchkin,&
+ matin, qdfilein, xsfilein, srcfilein, bc_input_filein, flux_output_filein, errin, itmxin, iallin, tolrin, tchkin,&
  ichkin, mompin, momsumin, momptin, qdflxin,fluxout)
 
 !-------------------------------------------------------------
@@ -25,6 +25,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
 !                    - AHOTN solvers: "LL" "LN" and "NEFD"
 !                    - DGFEM solvers: "LD" "DENSE" and "LAGRANGE"
 !		     - SCTSTEP solvers:
+!                    - SCTSTEP (only one)
 !
 ! Some problem size specifications that are passed in:
 !   lambda => LAMDBA, the AHOT spatial order
@@ -63,8 +64,6 @@ INTEGER, INTENT(IN), DIMENSION(:,:,:) :: matin
 !ALLOCATE(mat(nxin,nyin,nzin))
 
 CHARACTER(30), INTENT(IN) :: qdfilein, xsfilein, srcfilein, bc_input_filein, flux_output_filein
-
-REAL*8, INTENT(IN), DIMENSION(:,:,:) :: xsdatain
 
 ! Iteration Controls
 REAL*8, INTENT(IN) :: errin, tolrin
@@ -210,7 +209,7 @@ IF (solver == "DGFEM") THEN
     END IF
 END IF
 
-CALL readxs(xsfilein,xsdatain)
+CALL readxs(xsfilein)
 CALL readsrc(srcfilein)
 
 IF (xsbc .eq. 2) THEN
