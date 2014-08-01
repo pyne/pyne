@@ -35,31 +35,31 @@ format we choose to take all this information in by is with a python dictionary.
 
 **Entry: Method (meth): 0/1 => AHOT-N-SI/AHOT-N-ITM**::
 
-    key: "spatial_method"   
-    type: Integer
-    ex: 0
-    default: 0
+  key: "spatial_method"   
+  type: Integer
+  ex: 0
+  default: 0
 
 **Entry: Quadrature order (can only be an even number)**::
 
-    key: "quadrature_order"
-    type: Integer
-    ex: 4
-    default: 4
+  key: "quadrature_order"
+  type: Integer
+  ex: 4
+  default: 4
 
 **Entry: Qudrature type:**::
 
-    key: "quadrature_type"
-    type: Integer
-    ex: 1
-    default: 1
+  key: "quadrature_type"
+  type: Integer
+  ex: 1
+  default: 1
 
 **Entry: Number of Nodes in x, y, and z directions (nx/ny/nz)**::
 
-    key: "nodes_xyz"
-    type: Integer array
-    ex: [4, 4, 4]
-    default: No default
+  key: "nodes_xyz"
+  type: Integer array
+  ex: [4, 4, 4]
+  default: No default
 	
 **Entry: Number of groupds (ng)**::
 

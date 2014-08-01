@@ -222,7 +222,7 @@ IF (xsbc .eq. 2) THEN
     END IF
 END IF
 
-!CALL echo
+CALL echo
 CALL solve
 CALL output
 !CALL output_phi("phifile")
