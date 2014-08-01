@@ -72,6 +72,7 @@ namespace pyne
     std::string particle_name; // particle name string
     std::string tally_type; // type of tally flux or current
     int entity_id; // id number of the entity being tallied upon    
+    double entity_size; // the physical size of the entity 
   };
 
   /// Converts a Tally to a string stream representation.
@@ -82,11 +83,13 @@ namespace pyne
   /// Maybe Useful for HDF5 representations.
   /// following scoptaz's lead here
   typedef struct tally_struct {
-    std::string tally_type;
-    std::string particle_name;
     int entity_id;
-    std::string entity_type;
-    std::string entity_name;
+    int entity_type;
+    int tally_type;
+    char * particle_name;
+    char * entity_name;
+    char * tally_name;
+    double entity_size;
   } tally_struct;
   
 // End pyne namespace

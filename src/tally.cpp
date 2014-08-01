@@ -89,28 +89,28 @@ void pyne::Tally::write_hdf5( char * filename, char * datapath) {
 // otherwise creates new file
 void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 
-  tally_t tally_data;
+  tally_struct tally_data[1];
 
   // setup the data to write
-  tally_data.entity_id = entity_id;
+  tally_data[0].entity_id = entity_id;
   // entity type
   if (tally_type.find("Volume") != std::string::npos)
-    tally_data.entity_type = VOLUME;
+    tally_data[0].entity_type = VOLUME;
   else if (tally_type.find("Surface") != std::string::npos)
-    tally_data.entity_type = SURFACE;
+    tally_data[0].entity_type = SURFACE;
 
   // tally kind
   if (tally_type.find("Flux") != std::string::npos)
-    tally_data.entity_type = FLUX;
+    tally_data[0].entity_type = FLUX;
   else if (tally_type.find("Current") != std::string::npos)
-    tally_data.entity_type = CURRENT;
+    tally_data[0].entity_type = CURRENT;
 
   // entity id
-  tally_data.entity_id = entity_id;
+  tally_data[0].entity_id = entity_id;
   // entity_name
-  tally_data.entity_name = entity_name.c_str();
+  tally_data[0].entity_name = entity_name.c_str();
   // particle name
-  tally_data.particle_name = particle_name.c_str();
+  tally_data[0].particle_name = particle_name.c_str();
 
   
   // check for file existence
@@ -129,22 +129,22 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     hid_t prop = H5Pcreate(H5P_DATASET_CREATE);
     // set chunk size
     hsize_t chunk_dimensions[1]={2};
-    herr_t status = H5Pset_chunk(prop,1,chunk_dims);
+    herr_t status = H5Pset_chunk(prop,1,chunk_dimensions);
     
     // allow varaible length strings
     hid_t strtype = H5Tcopy (H5T_C_S1);
     status = H5Tset_size (strtype, H5T_VARIABLE);
 
     // Create the compound datatype for memory.
-    hid_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (tally_t));
+    hid_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (tally_struct));
     status = H5Tinsert (memtype, "Entity ID",
-		HOFFSET (tally_t, entity_id), H5T_NATIVE_INT);
+		HOFFSET (tally_struct, entity_id), H5T_NATIVE_INT);
     status = H5Tinsert (memtype, "Entity Type",
-                HOFFSET (tally_t, entity_type), H5T_NATIVE_INT);
-    status = H5Tinsert (memtype, "Tally Name", HOFFSET (tally_t, tally_name),
+                HOFFSET (tally_struct, entity_type), H5T_NATIVE_INT);
+    status = H5Tinsert (memtype, "Tally Name", HOFFSET (tally_struct, tally_name),
                 strtype);
     status = H5Tinsert (memtype, "Entity Size",
-		HOFFSET (tally_t, entity_size), H5T_NATIVE_DOUBLE);
+		HOFFSET (tally_struct, entity_size), H5T_NATIVE_DOUBLE);
 
     // Create the compound datatype for the file.
     hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + sizeof (hvl_t) + 8);
@@ -180,6 +180,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 
     // Get dataspace and allocate memory for read buffer.
     hid_t space = H5Dget_space (dset);
+    int rank  = H5Sget_simple_extent_ndims(space);
     hsize_t dims[1]; // for length of dataset 
 
     // get the length of the dataset
@@ -187,26 +188,29 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 
     // determine if chunked
     hid_t prop = H5Dget_create_plist(dset);
+
+    hsize_t chunk_dimsr[1];
+    int rank_chunk;
     if(H5D_CHUNKED == H5Pget_layout(prop))
       rank_chunk = H5Pget_chunk(prop,rank,chunk_dimsr);
 
     // allocate memory for data from file
-    read_data = new tally_t[dims[0]];
+    tally_struct* read_data = new tally_struct[dims[0]];
 
     // Create variable-length string datatype.
-    strtype = H5Tcopy (H5T_C_S1);
-    status  = H5Tset_size (strtype, H5T_VARIABLE);
+    hid_t strtype = H5Tcopy (H5T_C_S1);
+    int status  = H5Tset_size (strtype, H5T_VARIABLE);
 
     // Create the compound datatype for memory.
-    memtype = H5Tcreate (H5T_COMPOUND, sizeof (tally_t));
+    hid_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (tally_struct));
     status = H5Tinsert (memtype, "Entity ID",
-                HOFFSET (tally_t, entity_id), H5T_NATIVE_INT);
+                HOFFSET (tally_struct, entity_id), H5T_NATIVE_INT);
     status = H5Tinsert (memtype, "Entity Type",
-                HOFFSET (tally_t, entity_type), H5T_NATIVE_INT);
-    status = H5Tinsert (memtype, "Tally Name", HOFFSET (tally_t, tally_name),
+                HOFFSET (tally_struct, entity_type), H5T_NATIVE_INT);
+    status = H5Tinsert (memtype, "Tally Name", HOFFSET (tally_struct, tally_name),
                 strtype);
     status = H5Tinsert (memtype, "Entity Size",
-		HOFFSET (tally_t, entity_size), H5T_NATIVE_DOUBLE);
+		HOFFSET (tally_struct, entity_size), H5T_NATIVE_DOUBLE);
 
     /*
      * Create the compound datatype for the file.  Because the standard
@@ -214,7 +218,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
      * the corresponding native types, we must manually calculate the
      * offset of each member.
      */
-    filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + sizeof (hvl_t) + 8);
+    hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + sizeof (hvl_t) + 8);
     status = H5Tinsert (filetype, "Entity ID", 0, H5T_STD_I64BE);
     status = H5Tinsert (filetype, "Entity Type", 8, H5T_STD_I64BE);
     status = H5Tinsert (filetype, "Tally Name", 8+8, strtype);
