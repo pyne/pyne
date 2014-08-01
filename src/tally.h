@@ -16,6 +16,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef PYNE_IS_AMALGAMATED
+  #include "h5wrap.h"
+  #include "utils.h"
+#endif
+
+
 namespace pyne
 {
   class Tally
@@ -35,6 +41,30 @@ namespace pyne
   	std::string entity_type, std::string entity_name);
    
     ~Tally (); ///< default destructor
+
+    // Dummy read method wrapper around c style strings
+    /// \param filename the filename of the file to read from
+    /// \param datapath _name the name of the region where tallies 
+    ///          are stored
+    void from_hdf5(char * filename, char *datapath, int row = -1);
+
+    // Main read tally method
+    /// \param filename the filename of the file to read from
+    /// \param datapath _name the name of the region where tallies 
+    ///          are stored
+    void from_hdf5(std::string filename, std::string datapath, int row = -1);
+
+    // Dummy write method wrapper around c style strings
+    /// \param filename the filename of the file to write to
+    /// \param datapath _name the name of the region where tallies 
+    ///          are to be stored
+    void write_hdf5( char * filename, char * datapath);
+
+    // Main write tally method
+    /// \param filename the filename of the file to write to
+    /// \param datapath _name the name of the region where tallies 
+    ///          are to be stored
+    void write_hdf5(std::string filename, std::string datapath);
 
     // fundamental tally variables
     std::string entity_type; // the type of entity (volume,surface)
