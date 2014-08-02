@@ -17,5 +17,4 @@ work builds upon past work well.
     style_guide
     testing
     release
-    simplesim
     endf

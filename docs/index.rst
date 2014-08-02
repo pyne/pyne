@@ -4,11 +4,10 @@ PyNE: The Nuclear Engineering Toolkit
 
 .. container:: frontpage-images
 
-    .. image:: gallery/half_life_thumb.png
     .. image:: gallery/data_sources_thumb.png
-    .. image:: gallery/mesh_tags_thumb.png
-    .. image:: gallery/enrichment_mstar_vs_flowrate_thumb.png
-    .. image:: gallery/origen22_h1_xs_thumb.png
+    .. image:: gallery/fng_model_thumb.png
+    .. image:: gallery/discretized_teapot_thumb.png
+    .. image:: gallery/ace_thumb.png
 
 
 PyNE, or Python for Nuclear Engineering, is a suite of tools to aid in 
@@ -36,28 +35,35 @@ For a quick install from source, please  clone from the official repo::
 Contents
 --------
 
-Usage:
+**Usage:**
 
 .. toctree::
     :maxdepth: 1
 
     install
+    tutorial/index
     gallery/index
     usersguide/index
     pyapi/index
     cppapi/index
     previous/index
 
-Development:
+**Theory:**
+
+.. toctree::
+    :maxdepth: 1
+
+    theorymanual/index
+
+**Development:**
 
 .. toctree::
     :maxdepth: 1
 
     devsguide/index
-    pubs
     dev_team
+    pubs
     gsoc/index
-    theorymanual/index
 
 ------------
 Search Links

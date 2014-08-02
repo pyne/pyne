@@ -1,0 +1,8 @@
+.. _tutorial-04:
+
+Reaction Names
+===============
+
+Download the :download:`full notebook <../../tutorial/04-reaction_names.ipynb>`.
+
+.. notebook:: ../../tutorial/04-reaction_names.ipynb
