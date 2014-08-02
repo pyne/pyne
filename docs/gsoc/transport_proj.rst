@@ -1,6 +1,6 @@
-===================
+===================================
 Transport Solver Components
-===================
+===================================
 The Transport Solver Components project will create the structure and first pieces to allow PyNE to have plug-and-play deterministic transport solver functionality. 
 
 Brief explanation:
@@ -32,5 +32,5 @@ Professor Rachel Slaybaugh and Postdoctoral Scholar Kathryn Huff, University of 
 More Resources:
 ---------------
 *  Source code : github.com/pyne/pyne
-*  Example gallery : http://pynesim.org/gallery/index.html
+*  Example gallery : http://pyne.io/gallery/index.html
 

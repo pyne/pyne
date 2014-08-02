@@ -1,0 +1,26 @@
+mcnp   version 5     ld=09282010  probid =  03/14/14 13:04:32 
+ Input file to general test meshtal file                                         
+ Number of histories used for normalizing tallies =       7661196.00
+
+ Mesh Tally Number         4
+ This is a neutron mesh tally.
+
+ Tally bin boundaries:
+    X direction:     -3.00      0.00      3.00
+    Y direction:     -3.00      3.00
+    Z direction:     -3.00      0.00      3.00
+    Energy bin boundaries: 0.00E+00 1.00E-01 2.00E-01
+
+   Energy         X         Y         Z     Result     Rel Error
+  1.000E-01    -1.500     0.000    -1.500 6.93088E-07 9.67452E-02
+  1.000E-01    -1.500     0.000     1.500 6.36368E-07 9.88806E-02
+  1.000E-01     1.500     0.000    -1.500 5.16309E-07 1.04090E-01
+  1.000E-01     1.500     0.000     1.500 6.36887E-07 9.75826E-02
+  2.000E-01    -1.500     0.000    -1.500 1.04838E-06 7.55950E-02
+  2.000E-01    -1.500     0.000     1.500 9.78475E-07 7.61482E-02
+  2.000E-01     1.500     0.000    -1.500 9.86586E-07 7.69284E-02
+  2.000E-01     1.500     0.000     1.500 9.29879E-07 7.54181E-02
+   Total       -1.500     0.000    -1.500 1.74147E-06 6.01522E-02
+   Total       -1.500     0.000     1.500 1.61484E-06 6.13336E-02
+   Total        1.500     0.000    -1.500 1.50290E-06 6.19920E-02
+   Total        1.500     0.000     1.500 1.56677E-06 5.98742E-02

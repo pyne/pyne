@@ -33,5 +33,5 @@ More Resources:
 ---------------
 *  The associated PyNE ticket: https://github.com/PyNE/PyNE/issues/219
 *  Source code : github.com/pyne/pyne
-*  Example gallery : http://pynesim.org/gallery/index.html
+*  Example gallery : http://pyne.io/gallery/index.html
 

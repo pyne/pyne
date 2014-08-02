@@ -174,9 +174,9 @@ namespace pyne
     comp_map comp;  
     double mass;  ///< mass (in arbitrary units) of the Material.
     double density; ///< density (in arbitrary units) of the Material.
-    double atoms_per_mol; ///< The number of atoms per molecule.
+    double atoms_per_molecule; ///< The number of atoms per molecule.
     /// container for arbitrary metadata, following the JSON rules.
-    Json::Value attrs;  
+    Json::Value metadata;  
 
     // Material function definitions
     void normalize ();  ///< Normalizes the mass.
@@ -185,8 +185,8 @@ namespace pyne
     comp_map mult_by_mass();
     /// Calculates the atomic weight of this material based on the composition
     /// and the number of atoms per mol.  If \a apm is non-negative then it is
-    /// used (and stored on the instance) as the atoms_per_mol for this calculation.
-    /// If \a apm and atoms_per_mol on this instance are both negative, then the best
+    /// used (and stored on the instance) as the atoms_per_molecule for this calculation.
+    /// If \a apm and atoms_per_molecule on this instance are both negative, then the best
     /// guess value calculated from the normailized composition is used here.
     double molecular_mass(double apm=-1.0);
     /// Returns a copy of the current material where all natural elements in the 
@@ -195,12 +195,12 @@ namespace pyne
     /// Computes, sets, and returns the mass density when \a num_dens is greater
     /// than or equal zero.  If \a num_dens is negative, this simply returns the
     /// current value of the density member variable.  You may also use / set the
-    /// atoms per molecule (atoms_per_mol) in this function using \a apm.
+    /// atoms per molecule (atoms_per_molecule) in this function using \a apm.
     double mass_density(double num_dens=-1.0, double apm=-1.0);
     /// Computes and returns the number density of the material using the 
     /// mass density if \a mass_dens is greater than or equal to zero.  If 
     /// \a mass_dens is negative, the denisty member variable is used instead.  
-    /// You may also use / set the atoms per molecule (atoms_per_mol) in this 
+    /// You may also use / set the atoms per molecule (atoms_per_molecule) in this 
     /// function using \a apm.
     double number_density(double mass_dens=-1.0, double apm=-1.0);
 
@@ -253,7 +253,7 @@ namespace pyne
     /// Returns a mapping of the nuclides in this material to their atom fractions.
     /// This calculation is based off of the materials molecular weight.
     std::map<int, double> to_atom_frac();
-    /// Sets the composition, mass, and atoms_per_mol of this material to those 
+    /// Sets the composition, mass, and atoms_per_molecule of this material to those 
     /// calculated from \a atom_fracs, a mapping of nuclides to atom fractions values.
     void from_atom_frac(std::map<int, double> atom_fracs);
 

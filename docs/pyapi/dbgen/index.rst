@@ -28,7 +28,6 @@ divided conceptually into three parts, run in series:
     nuc_data_make
     kaeri
     atomic_mass
-    atomic_weight
     decay
     scattering_lengths
     simple_xs

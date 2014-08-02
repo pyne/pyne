@@ -1,5 +1,6 @@
 """Enrichment Tests"""
 import nose 
+import warnings
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, with_setup
@@ -7,6 +8,9 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 import os
 import warnings
 import numpy as np
+
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 
 import pyne
 from pyne.material import Material

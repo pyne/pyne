@@ -1,6 +1,20 @@
+from xdress.utils import apiname
+from xdress.doxygen import default_doxygen_config
+
 package = 'pyne'
 packagedir = 'pyne'
-sourcedir = 'cpp'
+
+plugins = ('xdress.stlwrap', 'xdress.autoall', 'xdress.autodescribe',
+           'xdress.doxygen', 'xdress.cythongen')
+
+doxygen_config = {'PROJECT_NAME': 'PYNE',
+                  'EXTRACT_ALL': False,  # Note usage of python False
+                  'GENERATE_DOCBOOK': False,
+                  'GENERATE_LATEX': True  # Could be 'YES' or True
+                  }
+
+doxyfile_name = './build/tally_doxyfile'
+
 
 extra_types = 'extra_types'  # non-default value
 
@@ -24,6 +38,6 @@ stlcontainers = [
 
 #stlcontainers_module = 'stlcontainers'
 
-classes = []
+classes = [apiname('Tally','cpp/tally.*',incfiles='tally.h')]
 
 functions = []

@@ -1,6 +1,8 @@
+from __future__ import print_function
 import os
 import time
 import shutil
+import warnings
 import itertools
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
@@ -13,6 +15,9 @@ try:
 except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
+
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag, \
     ComputedTag
 from pyne.material import Material, MaterialLibrary
@@ -20,7 +25,7 @@ from pyne.material import Material, MaterialLibrary
 def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
 
-def gen_mesh(mats=None):
+def gen_mesh(mats=()):
     mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
                   structured_ordering='zyx', mats=mats)
     volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
@@ -29,7 +34,6 @@ def gen_mesh(mats=None):
     flux_tag[volumes1] = flux_data
     return mesh_1
 
-
 #############################################
 #Test unstructured mesh functionality
 #############################################
@@ -37,21 +41,21 @@ def gen_mesh(mats=None):
 def test_unstructured_mesh_from_file():
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/unstr.h5m")
-    sm = Mesh(mesh_file=filename)
+    sm = Mesh(mesh=filename)
 
 def test_unstructured_mesh_from_instance():
     filename = os.path.join(os.path.dirname(__file__), 
                             "files_mesh_test/unstr.h5m")
     mesh = iMesh.Mesh()
     mesh.load(filename)
-    sm = Mesh(mesh = mesh)
+    sm = Mesh(mesh=mesh)
 
 def test_elem_volume():
     """Test the get_elem_volume method"""
     # Test tet elements recognition and calculation
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/unstr.h5m")
-    tetmesh = Mesh(mesh_file=filename)
+    tetmesh = Mesh(mesh=filename)
     vols = list()
     for __, __, ve in tetmesh:
         vols.append(tetmesh.elem_volume(ve))
@@ -63,11 +67,17 @@ def test_elem_volume():
     # Test hex elements recognition and calculation
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/grid543.h5m")
-    mesh = Mesh(mesh_file=filename)
+    mesh = Mesh(mesh=filename)
     vols = list()
     for __, __, ve in mesh:
         vols.append(mesh.elem_volume(ve))
     assert_almost_equal(np.mean(vols), 51.3333, places=4)
+
+def test_ve_center():
+    m = Mesh(structured=True, structured_coords=[[-1, 3, 5], [-1, 1], [-1, 1]])
+    exp_centers = [(1, 0, 0), (4, 0, 0)]
+    for i, mat, ve in m:
+        assert_equal(m.ve_center(ve), exp_centers[i])
 
 
 #############################################
@@ -83,13 +93,13 @@ def test_create_by_set():
     mesh = iMesh.Mesh()
     a = mesh.createStructuredMesh([0,0,0,1,1,1], i=[1,2], j=[1,2], k=[1,2], 
                                  create_set=True)
-    sm = Mesh(mesh = mesh, structured_set=a, structured=True)
+    sm = Mesh(mesh=mesh, structured_set=a, structured=True)
     assert_true(all(sm.dims == [0, 0, 0, 1, 1, 1]))
 
 def test_create_by_file():
     filename = os.path.join(os.path.dirname(__file__), 
                             "files_mesh_test/grid543.h5m")
-    sm = Mesh(mesh_file = filename, structured=True)
+    sm = Mesh(mesh=filename, structured=True)
     assert_true(all(sm.dims == [1, 11, -5, 5, 14, -3]))
 
     # This mesh is interesting because the i/j/k space is not numbered from
@@ -103,7 +113,7 @@ def test_create_by_file():
     # error
     filename2 = os.path.join(os.path.dirname(__file__), 
                              "files_mesh_test/no_str_mesh.h5m")
-    assert_raises(iBase.TagNotFoundError, Mesh, mesh_file = filename2, 
+    assert_raises(iBase.TagNotFoundError, Mesh, mesh=filename2, 
                        structured=True)
 
 def test_structured_get_hex():
@@ -150,7 +160,7 @@ def test_structured_get_vertex():
     for i,x in enumerate(x_range):
         for j,y in enumerate(y_range):
             for k,z in enumerate(z_range):
-                print i, j, k
+                print("{0} {1} {2}".format(i, j, k))
                 vtx = sm.structured_get_vertex(i,j,k)
                 vcoord = sm.mesh.getVtxCoords(vtx)
                 assert_true(all(vcoord == [x,y,z]))
@@ -217,85 +227,39 @@ class TestArithmetic():
     
     def test_add_mesh(self):
         self.arithmetic_mesh_setup()
-        self.mesh_1.add(self.mesh_2)
+        self.mesh_1 += self.mesh_2
         exp_res = [2.1, 4.2, 6.3, 8.4]
         obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
 
-    
-#    def test_op_add_mesh(self):
-#        self.arithmetic_mesh_setup()
-#        mesh_3 = self.mesh_1 + self.mesh_2
-#        exp_res = [2.1, 4.2, 6.3, 8.4]
-#        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
-#                   for vol in mesh_3.structured_iterate_hex("xyz")]
-#        assert_array_almost_equal(exp_res, obs_res)
-#
-#        #test to make sure not modification is being done in place
-#        obs_orig_1 = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
-#                   for vol in self.mesh_1.structured_iterate_hex("xyz")]
-#        exp_orig_1 = [1.0, 2.0, 3.0, 4.0]
-#        assert_array_almost_equal(exp_orig_1, obs_orig_1)
-#
-#        obs_orig_2 = [self.mesh_2.mesh.getTagHandle("flux")[vol] 
-#                   for vol in self.mesh_2.structured_iterate_hex("xyz")]
-#        exp_orig_1 = [1.1, 2.2, 3.3, 4.4]
-#        assert_array_almost_equal(exp_res, obs_res)
-#        assert_array_almost_equal(exp_orig_2, obs_orig_2)
-
-    
     def test_subtract_mesh(self):
         self.arithmetic_mesh_setup()
-        self.mesh_1.sub(self.mesh_2)
+        self.mesh_1 -= self.mesh_2
         exp_res = [-0.1, -0.2, -0.3, -0.4]
         obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
     
-#    def test_op_subtract_mesh(self):
-#        self.arithmetic_mesh_setup()
-#        mesh_3 = self.mesh_1 - self.mesh_2
-#        exp_res = [-0.1, -0.2, -0.3, -0.4]
-#        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
-#                   for vol in mesh_3.structured_iterate_hex("xyz")]
-#        assert_array_almost_equal(exp_res, obs_res)
-    
     def test_multiply_mesh(self):
         self.arithmetic_mesh_setup()
-        self.mesh_1.mul(self.mesh_2)
+        self.mesh_1 *= self.mesh_2
         exp_res = [1.1, 4.4, 9.9, 17.6]
         obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
     
-#    def test_op_multiply_mesh(self):
-#        self.arithmetic_mesh_setup()
-#        mesh_3 = self.mesh_1 * self.mesh_2
-#        exp_res = [1.1, 4.4, 9.9, 17.6]
-#        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
-#                   for vol in mesh_3.structured_iterate_hex("xyz")]
-#        assert_array_almost_equal(exp_res, obs_res)
-    
     def test_divide_mesh(self):
         self.arithmetic_mesh_setup()
-        self.mesh_1.div(self.mesh_2)
+        self.mesh_1 /= self.mesh_2
         exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
         obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
     
-#    def test_op_divide_mesh(self):
-#        self.arithmetic_mesh_setup()
-#        mesh_3 = self.mesh_1/self.mesh_2
-#        exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
-#        obs_res = [mesh_3.mesh.getTagHandle("flux")[vol] 
-#                   for vol in mesh_3.structured_iterate_hex("xyz")]
-#        assert_array_almost_equal(exp_res, obs_res)
-    
     def test_add_statmesh(self):
         self.arithmetic_statmesh_setup()
-        self.statmesh_1.add(self.statmesh_2)
+        self.statmesh_1 += self.statmesh_2
         exp_res = [2.1, 4.2, 6.3, 8.4]
         exp_err = [0.070790803558659549, 0.1415816071173191, 
                    0.21237241067597862, 0.28316321423463819]
@@ -306,23 +270,9 @@ class TestArithmetic():
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
     
-#    def test_op_add_statmesh(self):
-#        self.arithmetic_statmesh_setup()
-#        statmesh_3 = self.statmesh_1 + self.statmesh_2
-#        exp_res = [2.1, 4.2, 6.3, 8.4]
-#        exp_err = [0.070790803558659549, 0.1415816071173191, 
-#                   0.21237241067597862, 0.28316321423463819]
-#        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
-#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-#        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
-#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-#        assert_array_almost_equal(exp_res, obs_res)
-#        assert_array_almost_equal(exp_err, obs_err)
-
-  
     def test_subtract_statmesh(self):
         self.arithmetic_statmesh_setup()
-        self.statmesh_1.sub(self.statmesh_2)
+        self.statmesh_1 -= self.statmesh_2
         exp_res = [-0.1, -0.2, -0.3, -0.4]
         exp_err = [-1.4866068747, -2.9732137495, -4.4598206242, -5.9464274989]
         obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
@@ -332,21 +282,9 @@ class TestArithmetic():
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
     
-#    def test_op_subtract_statmesh(self):
-#        self.arithmetic_statmesh_setup()
-#        statmesh_3 = self.statmesh_1 - self.statmesh_2
-#        exp_res = [-0.1, -0.2, -0.3, -0.4]
-#        exp_err = [-1.4866068747, -2.9732137495, -4.4598206242, -5.9464274989]
-#        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
-#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-#        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
-#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-#        assert_array_almost_equal(exp_res, obs_res)
-#        assert_array_almost_equal(exp_err, obs_err)
-    
     def test_multiply_statmesh(self):
         self.arithmetic_statmesh_setup()
-        self.statmesh_1.mul(self.statmesh_2)
+        self.statmesh_1 *= self.statmesh_2
         exp_res = [1.1, 4.4, 9.9, 17.6]
         exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249,]
         obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
@@ -356,21 +294,9 @@ class TestArithmetic():
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
     
-#    def test_op_multiply_statmesh(self):
-#        self.arithmetic_statmesh_setup()
-#        statmesh_3 = self.statmesh_1 * self.statmesh_2
-#        exp_res = [1.1, 4.4, 9.9, 17.6]
-#        exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249,]
-#        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
-#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-#        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
-#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-#        assert_array_almost_equal(exp_res, obs_res)
-#        assert_array_almost_equal(exp_err, obs_err)
-    
     def test_divide_statmesh(self):
         self.arithmetic_statmesh_setup()
-        self.statmesh_1.div(self.statmesh_2)
+        self.statmesh_1 /= self.statmesh_2
         exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
         exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249]
         obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
@@ -379,18 +305,6 @@ class TestArithmetic():
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
-    
-#    def test_op_divide_statmesh(self):
-#        self.arithmetic_statmesh_setup()
-#        statmesh_3 = self.statmesh_1/self.statmesh_2
-#        exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
-#        exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249]
-#        obs_res = [statmesh_3.mesh.getTagHandle("flux")[vol] 
-#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-#        obs_err = [statmesh_3.mesh.getTagHandle("flux_error")[vol] 
-#                   for vol in statmesh_3.structured_iterate_hex("xyz")]
-#        assert_array_almost_equal(exp_res, obs_res)
-#        assert_array_almost_equal(exp_err, obs_err)
     
 #############################################
 #Test Structured mesh iteration functionality
@@ -546,10 +460,10 @@ def test_large_iterator():
 @with_setup(None, try_rm_file('test_matlib2.h5m'))
 def test_matlib():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}), 
-        1: Material({'H1': 0.1, 'O16': 1.0}), 
-        2: Material({'He4': 42.0}), 
-        3: Material({'Tm171': 171.0}), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=2.2), 
+        2: Material({'He4': 42.0}, density=3.3), 
+        3: Material({'Tm171': 171.0}, density=4.4), 
         }
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all)):
@@ -558,8 +472,18 @@ def test_matlib():
 
     m.write_hdf5('test_matlib.h5m')
     shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
-    m2 = Mesh(mesh_file='test_matlib2.h5m')  # MOAB fails to flush
+    m2 = Mesh(mesh='test_matlib2.h5m')  # MOAB fails to flush
+    for i, mat, ve in m2:
+        assert_equal(len(mat.comp), len(mats[i].comp))
+        for key in mats[i].iterkeys():
+            assert_equal(mat.comp[key], mats[i].comp[key])
+        assert_equal(mat.density, mats[i].density)
+        assert_equal(m2.idx[i], i)
 
+@with_setup(None, try_rm_file('test_no_matlib.h5m'))
+def test_no_matlib():
+    m = gen_mesh(mats=None)
+    m.write_hdf5('test_no_matlib.h5m')
     
 def test_matproptag():
     mats = {
@@ -661,9 +585,7 @@ def test_imeshtag():
         }
     m = gen_mesh(mats=mats)
     m.f = IMeshTag(mesh=m, name='f')
-    ftag = m.mesh.getTagHandle('f')
-    ftag[list(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all))] = \
-                                                                [1.0, 2.0, 3.0, 4.0]
+    m.f[:] = [1.0, 2.0, 3.0, 4.0]                                                                
 
     # Getting tags
     assert_equal(m.f[0], 1.0)
@@ -692,6 +614,41 @@ def test_imeshtag():
 
     # deleting tag
     del m.f[:]
+
+def test_imeshtag_fancy_indexing():
+    m = gen_mesh()
+    
+    #  tags of length 1
+    m.horse = IMeshTag(1, float)
+    #  test fancy indexing
+    m.horse[[2, 0]] = [3.0, 1.0]
+    assert_array_equal(m.horse[:], [1.0, 0.0, 3.0, 0.0])
+    m.horse[[2]] = [7.0]
+    assert_array_equal(m.horse[:], [1.0, 0.0, 7.0, 0.0])
+
+    #  tags of length > 1
+    m.grape = IMeshTag(2, float)
+    #  test fancy indexing
+    m.grape[[2, 0]] = [[3.0, 4.0], [5.0, 6.0]]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [0.0, 0.0], [3.0, 4.0], [0.0, 0.0]])
+    m.grape[[2]] = [[13.0, 14.0]]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [0.0, 0.0], [13.0, 14.0], [0.0, 0.0]])
+    m.grape[1] = [23.0, 24.0]
+    assert_array_equal(m.grape[:], [[5.0, 6.0], [23.0, 24.0], [13.0, 14.0], [0.0, 0.0]])
+
+
+def test_imeshtag_broadcasting():
+    m = gen_mesh()
+    #  tags of length 1
+    m.horse = IMeshTag(1, float)
+    m.horse[:] = 2.0
+    assert_array_equal(m.horse[:], [2.0]*4)
+
+    #  tags of length > 1
+    m.grape = IMeshTag(2, float)
+    #  test broadcasing
+    m.grape[[2, 0]] = [7.0, 8.0]
+    assert_array_equal(m.grape[:], [[7.0, 8.0], [0.0, 0.0], [7.0, 8.0], [0.0, 0.0]])
 
 
 def test_comptag():
@@ -729,7 +686,19 @@ def test_addtag():
 def test_lazytaginit():
     m = gen_mesh()
     m.cactus = IMeshTag(3, 'i')
+    m.cactus[:] = np.array([42, 43, 44])
     assert_in('cactus', m.tags)
+    assert_array_equal(m.cactus[0], [42, 43, 44])
+
+    x = np.arange(len(m))[:,np.newaxis] * np.array([42, 43, 44])
+    m.cactus[:] = x
+    assert_array_equal(m.cactus[2], x[2])
+
+def test_issue360():
+    a = Mesh(structured=True, structured_coords=[[0,1,2],[0,1],[0,1]])
+    a.cat = IMeshTag(3, float)
+    a.cat[:] = [[0.11, 0.22, 0.33],[0.44, 0.55, 0.66]]
+    a.cat[:] = np.array([[0.11, 0.22, 0.33],[0.44, 0.55, 0.66]])
 
 def test_iter():
     mats = {
@@ -746,9 +715,52 @@ def test_iter():
         assert_is(mats[i], mat)
         assert_equal(j, idx_tag[ve])
         j += 1
+
+def test_iter_ve():
+    mats = {
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
+        2: Material({'He4': 42.0}, density=44.0), 
+        3: Material({'Tm171': 171.0}, density=45.0), 
+        }
+    m = gen_mesh(mats=mats)
+    ves1 = set(ve for _, _, ve in m)
+    ves2 = set(m.iter_ve())
         
 
 def test_contains():
     m = gen_mesh()
     assert_in(1, m)
     assert_not_in(42, m)
+
+def test_cell_fracs_to_mats():
+    m = gen_mesh()
+    cell_fracs = np.zeros(7, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_mats = {11: Material({'H': 1.0}, density = 1.0),
+                 12: Material({'He': 1.0}, density = 1.0),
+                 13: Material({'Li': 1.0}, density = 1.0),
+                 14: Material({'Be': 1.0}, density = 1.0)}
+
+    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0), 
+                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 1.0, 0.0), 
+                     (3, 12, 1.0, 0.0)]
+
+    m.cell_fracs_to_mats(cell_fracs, cell_mats)
+
+    #  Expected compositions:
+    exp_comps = [{10000000: 0.55, 20000000: 0.45},
+                 {10000000: 0.2, 20000000: 0.3, 30000000: 0.5},
+                 {10000000: 1.0}, {20000000: 1.0}]
+
+    for i, mat, _ in m:
+        assert_equal(mat.comp, exp_comps[i])
+        assert_equal(mat.density, 1.0)
+
+def test_no_mats():
+    mesh = gen_mesh(mats=None)
+    assert_true(mesh.mats is None)
+    i, mat, ve = next(iter(mesh))
+    assert_true(mat is None)

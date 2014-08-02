@@ -18,23 +18,23 @@ using moab::EntityHandle;
 
 namespace pyne {
 
-float dag_version(void){
+float dag_version(void) {
     return DagMC::version();
 }
 
-unsigned dag_rev_version(void){
+unsigned dag_rev_version(void) {
     return DagMC::interface_revision();
 }
 
-int dag_ent_handle_size(void){
+int dag_ent_handle_size(void) {
     return sizeof(EntityHandle);
 }
 
 static std::vector<int> surfList;
 static std::vector<int> volList;
 
-const int* geom_id_list(int dimension, int* number_of_items){
-    switch(dimension){
+const int* geom_id_list(int dimension, int* number_of_items) {
+    switch(dimension) {
     case 2:
         *number_of_items = surfList.size();
         return &(surfList.front());
@@ -47,11 +47,11 @@ const int* geom_id_list(int dimension, int* number_of_items){
     }
 }
 
-EntityHandle handle_from_id(int dimension, int id){
+EntityHandle handle_from_id(int dimension, int id) {
     return DagMC::instance()->entity_by_id(dimension, id);
 }
 
-int id_from_handle(EntityHandle eh){
+int id_from_handle(EntityHandle eh) {
     return DagMC::instance()->get_entity_id(eh);
 }
 
@@ -80,13 +80,13 @@ ErrorCode dag_load(const char* filename){
 
     int num_surfs = dag->num_entities(2);
     surfList.reserve(num_surfs);
-    for(int i = 1; i <= num_surfs; ++i){
+    for(int i = 1; i <= num_surfs; ++i) {
         surfList.push_back(dag->id_by_index(2, i));
     }
 
     int num_vols = dag->num_entities(3);
     volList.reserve(num_vols);
-    for(int i = 1; i <= num_vols; ++i){
+    for(int i = 1; i <= num_vols; ++i) {
         volList.push_back(dag->id_by_index(3, i));
     }
 
@@ -94,17 +94,17 @@ ErrorCode dag_load(const char* filename){
 }
 
 
-void* dag_alloc_ray_history(void){
+void* dag_alloc_ray_history(void) {
     return new DagMC::RayHistory();
 }
 
-void dag_dealloc_ray_history(void* r){
+void dag_dealloc_ray_history(void* r) {
     delete (static_cast<DagMC::RayHistory*>(r));
 }
 
 ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir, 
                         EntityHandle* next_surf_ent, double* next_surf_dist,
-                        void* history, double distance_limit){
+                        void* history, double distance_limit) {
     ErrorCode err;
 
     DagMC*  dag = DagMC::instance();
@@ -116,7 +116,7 @@ ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir,
     return err;
 }
 
-class ray_buffers{
+class ray_buffers {
 
     public:
     DagMC::RayHistory history;
@@ -144,12 +144,12 @@ ErrorCode dag_ray_follow(EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
     CartVect uvw(ray_dir);
 
     // iterate over the ray until no more intersections are available
-    while(vol){
+    while(vol) {
         err = dag->ray_fire(vol, ray_point.array(), ray_dir, 
                              next_surf, next_surf_dist, &(buf->history), dlimit);
         CHECKERR(err);
 
-        if(next_surf){
+        if(next_surf) {
             ray_point += uvw * next_surf_dist;
             buf->surfs.push_back(next_surf);
             buf->dists.push_back(next_surf_dist);
@@ -173,12 +173,12 @@ ErrorCode dag_ray_follow(EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
     return err;
 }
 
-void dag_dealloc_ray_buffer(void* data_buffers){
+void dag_dealloc_ray_buffer(void* data_buffers) {
     ray_buffers* b = static_cast<ray_buffers*>(data_buffers);
     delete b;
 }
 
-ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, const void* history){
+ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, const void* history) {
     
     ErrorCode err;
 
@@ -189,7 +189,7 @@ ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, const 
     return err;
 }
 
-ErrorCode dag_next_vol(EntityHandle surface, EntityHandle volume, EntityHandle* next_vol){
+ErrorCode dag_next_vol(EntityHandle surface, EntityHandle volume, EntityHandle* next_vol) {
 
     ErrorCode err;
     DagMC* dag = DagMC::instance();
@@ -199,7 +199,7 @@ ErrorCode dag_next_vol(EntityHandle surface, EntityHandle volume, EntityHandle* 
     return err;
 }
 
-int vol_is_graveyard(EntityHandle vol){
+int vol_is_graveyard(EntityHandle vol) {
     return DagMC::instance()->has_prop(vol, "graveyard");
 }
 
@@ -210,7 +210,7 @@ int vol_is_implicit_complement(EntityHandle vol){
     return DagMC::instance()->is_implicit_complement(vol);
 }
 
-ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, double* importance){
+ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, double* importance) {
     ErrorCode err;
     DagMC* dag = DagMC::instance();
 
@@ -220,28 +220,28 @@ ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, 
 
     std::string str;
     err = dag->prop_value(vol, "mat", str);
-    if(err == moab::MB_SUCCESS){
+    if(err == moab::MB_SUCCESS) {
         mat_id = strtol(str.c_str(), NULL, 10);
     }
-    else if(err != moab::MB_TAG_NOT_FOUND){
+    else if(err != moab::MB_TAG_NOT_FOUND) {
         // TAG_NOT_FOUND should not be returned as an error; it just means
         // the default value of mat_id needs to be used.
         CHECKERR(err);
     }
     
     err = dag->prop_value(vol, "rho", str);
-    if(err == moab::MB_SUCCESS){
+    if(err == moab::MB_SUCCESS) {
         rho = strtod(str.c_str(), NULL);
     }
-    else if(err != moab::MB_TAG_NOT_FOUND){
+    else if(err != moab::MB_TAG_NOT_FOUND) {
         CHECKERR(err);
     }
 
     err = dag->prop_value(vol, "imp", str);
-    if(err == moab::MB_SUCCESS){
+    if(err == moab::MB_SUCCESS) {
         imp = strtod(str.c_str(), NULL);
     }
-    else if(err != moab::MB_TAG_NOT_FOUND){
+    else if(err != moab::MB_TAG_NOT_FOUND) {
         CHECKERR(err);
     }
 
@@ -252,7 +252,7 @@ ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, 
     return moab::MB_SUCCESS;
 }
 
-ErrorCode get_volume_boundary(EntityHandle vol, vec3 minPt, vec3 maxPt){
+ErrorCode get_volume_boundary(EntityHandle vol, vec3 minPt, vec3 maxPt) {
     return DagMC::instance()->getobb(vol, minPt, maxPt);
 }
 

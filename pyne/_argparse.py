@@ -81,14 +81,17 @@ __all__ = [
     'ZERO_OR_MORE',
 ]
 
-
 import copy as _copy
 import os as _os
 import re as _re
 import sys as _sys
 import textwrap as _textwrap
+from warnings import warn
+from pyne.utils import VnVWarning
 
 from gettext import gettext as _
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 try:
     set
@@ -96,10 +99,8 @@ except NameError:
     # for python < 2.4 compatibility (sets module is there since 2.3):
     from sets import Set as set
 
-try:
-    basestring
-except NameError:
-    basestring = str
+if _sys.version_info[0] > 2:
+  basestring = str
 
 try:
     sorted

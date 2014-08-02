@@ -1,6 +1,14 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
 from __future__ import print_function
 import os
+from warnings import warn
+from pyne.utils import VnVWarning
+
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
+from zipfile import ZipFile
 
 import numpy as np
 import tables as tb
@@ -10,6 +18,7 @@ from ..utils import to_barns
 from .api import BASIC_FILTERS
 from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_kaeri_simple_xs(build_dir=""):
     """Grabs the KAERI files needed for the simple cross sections table, 
@@ -20,6 +29,20 @@ def grab_kaeri_simple_xs(build_dir=""):
     build_dir : str
         Major directory to place html files in. 'KAERI/' will be appended.
     """
+    zip_path = os.path.join(build_dir, 'kaeri.zip')
+    zip_url = 'http://data.pyne.io/kaeri.zip'
+    if not os.path.exists(zip_path):
+        print("  grabbing {0} and placing it in {1}".format(zip_url, zip_path))
+        urllib.urlretrieve(zip_url, zip_path)
+        try:
+            zf = ZipFile(zip_path)
+            for name in zf.namelist():
+                if not os.path.exists(os.path.join(build_dir, name)):
+                    print("    extracting {0} from {1}".format(name, zip_path))
+                    zf.extract(name, build_dir)
+        finally:
+            zf.close()
+
     # Add kaeri to build_dir
     build_dir = os.path.join(build_dir, 'KAERI')
     try:

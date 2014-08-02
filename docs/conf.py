@@ -12,7 +12,11 @@
 # serve to show the default.
 import os
 import sys
+import warnings
 
+from pyne.utils import VnVWarning
+
+warnings.simplefilter("ignore", VnVWarning)
 # -- General configuration -----------------------------------------------------
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -250,5 +254,57 @@ breathe_default_project = 'pyne'
 breathe_domain_by_extension = {"h": "cpp",}
 breathe_projects_source = {"pyne": '../cpp',}
 
+for p in os.listdir(breathe_projects_source['pyne']):
+    p, _ = os.path.splitext(p)
+    breathe_projects['pyne_' + p] = breathe_projects['pyne']
+    breathe_projects_source['pyne_' + p] = breathe_projects_source['pyne']
+
 # Prevent numpy from making silly tables 
 numpydoc_show_class_members = False
+
+
+###############################################
+
+# rxnames
+from textwrap import TextWrapper
+from prettytable import PrettyTable, FRAME
+from pyne import rxname
+
+tw = TextWrapper(initial_indent="    ", subsequent_indent="    ", 
+                 break_long_words=False)
+style = {"style": "margin-left:auto;margin-right:auto;"}
+rxtab = PrettyTable(['reaction', 'id', 'description'])
+rxtab.align['reaction'] = 'l'
+rxtab.align['id'] = 'r'
+rxtab.align['description'] = 'l'
+for name in sorted(rxname.names):
+    rxtab.add_row(["'" + name + "'", rxname.id(name), rxname.doc(name)])
+rxtab = "\n".join(tw.wrap(rxtab.get_html_string(attributes=style)))
+
+aliastab = PrettyTable(['alias', 'reaction'])
+aliastab.align['alias'] = 'l'
+aliastab.align['reaction'] = 'l'
+for alias, rxid in sorted(rxname.altnames.items()):
+    aliastab.add_row(["'" + alias + "'", "'" + rxname.name(rxid) + "'"])
+aliastab = "\n".join(tw.wrap(aliastab.get_html_string(attributes=style)))
+
+_rxname_rst = """**Reactions:**
+
+.. raw:: html
+
+    <div>
+{0}
+    </div>
+
+**Reaction Aliases:**
+
+.. raw:: html
+
+    <div>
+{1}
+    </div>
+
+""".format(rxtab, aliastab)
+
+with open('rxname_listing', 'w') as f:
+    f.write(_rxname_rst)

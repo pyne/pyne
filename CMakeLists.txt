@@ -11,9 +11,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 #Default to release build type
 set(CMAKE_BUILD_TYPE Release)
 
-# give an option for whether this should be built as a CI project
-option(IS_CI "Is this project being built under continuous integration?" FALSE)
-
 # Include the HDF5 library and c++ headers
 find_package( HDF5 COMPONENTS C )
 include_directories(${HDF5_INCLUDE_DIRS})
@@ -36,6 +33,9 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 # Check for MOAB library
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
+if(${MOAB_FOUND})
+    include_directories(${MOAB_INCLUDE_DIR})
+endif(${MOAB_FOUND})
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
@@ -63,7 +63,8 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
     # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
-    set(CMAKE_INSTALL_RPATH "@rpath/lib")
+    set(CMAKE_MACOSX_RPATH 1)
+    set(CMAKE_INSTALL_RPATH "@loader_path/lib")
 elseif(WIN32)
     if(MSVC)
         # ??? Who knows what to do here?! --Anthony
@@ -84,12 +85,6 @@ include_directories("${NUMPY_INCLUDE_DIR}")
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
 
-# Add some CI-dependent stuff
-message("-- Is CI: ${IS_CI}")
-if(${IS_CI})
-    include_directories("/home/slave/anaconda/include/python2.7")
-endif(${IS_CI})
-
 # With CMake, a clean separation can be made between the source tree and the
 # build tree.  When all source is compiled, as with pure C/C++, the source is
 # no-longer needed in the build tree.  However, with pure *.py source, the
@@ -106,7 +101,7 @@ add_subdirectory(pyne/xs)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 message("-- Copying C/C++ header files.")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/cpp/" DESTINATION

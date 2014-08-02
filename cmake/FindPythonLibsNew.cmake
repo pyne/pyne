@@ -123,28 +123,32 @@ if(PYTHON_IS_DEBUG)
     set(PYTHON_MODULE_EXTENSION "_d${PYTHON_MODULE_EXTENSION}")
 endif()
 
-if(CMAKE_HOST_WIN32)
-    set(PYTHON_LIBRARY
-        "${PYTHON_PREFIX}/libs/Python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}.lib")
-elseif(APPLE)
-    set(PYTHON_LIBRARY
-        "${PYTHON_PREFIX}/lib/libpython${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.dylib")
+#if(CMAKE_HOST_WIN32)
+#    set(PYTHON_LIBRARY
+#        "${PYTHON_PREFIX}/libs/Python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}.lib")
+#elseif(APPLE)
+#    set(PYTHON_LIBRARY
+##        "${PYTHON_PREFIX}/lib/libpython${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.dylib")
+#else()
+if(${PYTHON_SIZEOF_VOID_P} MATCHES 8)
+    set(_PYTHON_LIBS_SEARCH "${PYTHON_PREFIX}/lib64" "${PYTHON_PREFIX}/lib")
 else()
-    if(${PYTHON_SIZEOF_VOID_P} MATCHES 8)
-        set(_PYTHON_LIBS_SEARCH "${PYTHON_PREFIX}/lib64" "${PYTHON_PREFIX}/lib")
-    else()
-        set(_PYTHON_LIBS_SEARCH "${PYTHON_PREFIX}/lib")
-    endif()
-    # Probably this needs to be more involved. It would be nice if the config
-    # information the python interpreter itself gave us were more complete.
-    find_library(PYTHON_LIBRARY
-        NAMES "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
-              "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}m"
-              "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}mu"
-              "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}dm"
-        PATHS ${_PYTHON_LIBS_SEARCH}
-        NO_SYSTEM_ENVIRONMENT_PATH)
+    set(_PYTHON_LIBS_SEARCH "${PYTHON_PREFIX}/lib")
 endif()
+# Probably this needs to be more involved. It would be nice if the config
+# information the python interpreter itself gave us were more complete.
+find_library(PYTHON_LIBRARY
+    NAMES "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
+          "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}m"
+          "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}mu"
+          "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}dm"
+          "Python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}"
+          "Python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}m"
+          "Python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}mu"
+          "Python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}dm"
+    HINTS ${_PYTHON_LIBS_SEARCH}
+    NO_SYSTEM_ENVIRONMENT_PATH)
+#endif()
 
 # For backward compatibility, set PYTHON_INCLUDE_PATH, but make it internal.
 SET(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}" CACHE INTERNAL

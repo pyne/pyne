@@ -16,8 +16,10 @@ generates ACE-format cross sections.
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
 
+from __future__ import division, unicode_literals
 import struct
 from warnings import warn
+from pyne.utils import VnVWarning
 from collections import OrderedDict
 
 cimport numpy as np
@@ -32,9 +34,11 @@ from pyne.rxname import label
 from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class Library(object):
-    """A Library objects represents an ACE-formatted file which may contain
+    """
+    A Library objects represents an ACE-formatted file which may contain
     multiple tables with data.
 
     Parameters
@@ -42,18 +46,16 @@ class Library(object):
     filename : str
         Path of the ACE library file to load.
 
-    :attributes:
-      **binary** : bool
+    Attributes
+    ----------
+    binary : bool
         Identifies Whether the library is in binary format or not
-
-      **tables** : dict
-        Dictionary whose keys are the names of the ACE tables and whose values
-        are the instances of subclasses of AceTable (e.g. NeutronTable)
-
-      **verbose** : bool
+    tables : dict
+        Dictionary whose keys are the names of the ACE tables and whose 
+        values are the instances of subclasses of AceTable (e.g. NeutronTable)
+    verbose : bool
         Determines whether output is printed to the stdout when reading a
         Library
-
     """
 
     def __init__(self, filename):
@@ -192,7 +194,7 @@ class Library(object):
             datastr = '0 ' + ' '.join(lines[6:8])
             nxs = fromstring_split(datastr, dtype=int)
 
-            n_lines = (nxs[1] + 3)/4
+            n_lines = (nxs[1] + 3)//4
             n_bytes = len(lines[-1]) * (n_lines - 2) + 1
 
             # Ensure that we have more tables to read in
@@ -301,55 +303,56 @@ class NeutronTable(AceTable):
     temp : float
         Temperature of the target nuclide in eV.
     
-    :Attributes:
-      **awr** : float
+    Attributes
+    ----------
+    awr : float
         Atomic mass ratio of the target nuclide.
 
-      **energy** : list of floats
+    energy : list of floats
         The energy values (MeV) at which reaction cross-sections are tabulated.
 
-      **name** : str
+    name : str
         ZAID identifier of the table, e.g. 92235.70c.
 
-      **nu_p_energy** : list of floats
+    nu_p_energy : list of floats
         Energies in MeV at which the number of prompt neutrons emitted per
         fission is tabulated.
 
-      **nu_p_type** : str
+    nu_p_type : str
         Indicates how number of prompt neutrons emitted per fission is
         stored. Can be either "polynomial" or "tabular".
 
-      **nu_p_value** : list of floats
+    nu_p_value : list of floats
         The number of prompt neutrons emitted per fission, if data is stored in
         "tabular" form, or the polynomial coefficients for the "polynomial"
         form.
 
-      **nu_t_energy** : list of floats
+    nu_t_energy : list of floats
         Energies in MeV at which the total number of neutrons emitted per
         fission is tabulated.
 
-      **nu_t_type** : str
+    nu_t_type : str
         Indicates how total number of neutrons emitted per fission is
         stored. Can be either "polynomial" or "tabular".
 
-      **nu_t_value** : list of floats
+    nu_t_value : list of floats
         The total number of neutrons emitted per fission, if data is stored in
         "tabular" form, or the polynomial coefficients for the "polynomial"
         form.
 
-      **reactions** : list of Reactions
+    reactions : list of Reactions
         A list of Reaction instances containing the cross sections, secondary
         angle and energy distributions, and other associated data for each
         reaction for this nuclide.
 
-      **sigma_a** : list of floats
+    sigma_a : list of floats
         The microscopic absorption cross section for each value on the energy
         grid.
 
-      **sigma_t** : list of floats
+    sigma_t : list of floats
         The microscopic total cross section for each value on the energy grid.
 
-      **temp** : float
+    temp : float
         Temperature of the target nuclide in eV.
 
     """
@@ -1278,34 +1281,35 @@ class SabTable(AceTable):
     temp : float
         Temperature of the target nuclide in eV.
 
-    :Attributes:
-      **awr** : float
+    Attributes
+    ----------
+    awr : float
         Atomic mass ratio of the target nuclide.
 
-      **elastic_e_in** : list of floats
+    elastic_e_in : list of floats
         Incoming energies in MeV for which the elastic cross section is
         tabulated.
 
-      **elastic_P** : list of floats
+    elastic_P : list of floats
         Elastic scattering cross section for data derived in the incoherent
         approximation, or Bragg edge parameters for data derived in the coherent
         approximation.
 
-      **elastic_type** : str
+    elastic_type : str
         Describes the behavior of the elastic cross section, i.e. whether it was
         derived in the incoherent or coherent approximation.
 
-      **inelastic_e_in** : list of floats
+    inelastic_e_in : list of floats
         Incoming energies in MeV for which the inelastic cross section is
         tabulated.
 
-      **inelastic_sigma** : list of floats
+    inelastic_sigma : list of floats
         Inelastic scattering cross section in barns at each energy.
 
-      **name** : str
+    name : str
         ZAID identifier of the table, e.g. 92235.70c.
 
-      **temp** : float
+    temp : float
         Temperature of the target nuclide in eV.
 
     """
@@ -1399,42 +1403,43 @@ class Reaction(object):
         the parent nuclide is needed (for instance, the energy grid at which
         cross sections are tabulated)
 
-    :Attributes:
-      **ang_energy_in** : list of floats
+    Attributes
+    ----------
+    ang_energy_in : list of floats
         Incoming energies in MeV at which angular distributions are tabulated.
 
-      **ang_energy_cos** : list of floats
+    ang_energy_cos : list of floats
         Scattering cosines corresponding to each point of the angular distribution
         functions.
 
-      **ang_energy_pdf** : list of floats
+    ang_energy_pdf : list of floats
         Probability distribution function for angular distribution.
 
-      **ang_energy_cdf** : list of floats
+    ang_energy_cdf : list of floats
         Cumulative distribution function for angular distribution.
 
-      **e_dist_energy** : list of floats
+    e_dist_energy : list of floats
         Incoming energies in MeV at which energy distributions are tabulated.
 
-      **e_dist_law** : int
+    e_dist_law : int
         ACE law used for secondary energy distribution.
 
-      **IE** : int
+    IE : int
         The index on the energy grid corresponding to the threshold of this
         reaction.
 
-      **MT** : int
+    MT : int
         The ENDF MT number for this reaction. On occasion, MCNP uses MT numbers
         that don't correspond exactly to the ENDF specification.
 
-      **Q** : float
+    Q : float
         The Q-value of this reaction in MeV.
 
-      **sigma** : list of floats
+    sigma : list of floats
         Microscopic cross section for this reaction at each point on the energy
         grid above the threshold value.
 
-      **TY** : int
+    TY : int
         An integer whose absolute value is the number of neutrons emitted in
         this reaction. If negative, it indicates that scattering should be
         performed in the center-of-mass system. If positive, scattering should

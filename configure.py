@@ -90,7 +90,7 @@ def setup():
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat')) or 
                                      (os.name != 'nt' and not s.endswith('.bat'))]
     packages = ['pyne', 'pyne.lib', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs', 
-                'pyne.simplesim', 'pyne.transmute', 'pyne.gui', 'pyne.cli']
+                'pyne.transmute', 'pyne.gui', 'pyne.cli']
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
@@ -99,7 +99,6 @@ def setup():
         'pyne.cli': 'pyne/cli',
         'pyne.dbgen': 'pyne/dbgen',
         'pyne.apigen': 'pyne/apigen',
-        'pyne.simplesim': 'pyne/simplesim',
         'pyne.transmute': 'pyne/transmute',
         }
     extpttn = ['*.dll', '*.so', '*.dylib', '*.pyd', '*.pyo']

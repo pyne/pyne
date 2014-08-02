@@ -1,5 +1,6 @@
 """PyNE bins tests"""
 import os
+import warnings
 
 import nose 
 
@@ -7,6 +8,9 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, as
                        assert_true
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
+
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 
 from pyne import bins
 import numpy as np

@@ -1,6 +1,5 @@
 """C++ wrapper for jsoncpp."""
 from libc.string cimport const_char
-
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as std_vector
 

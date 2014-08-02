@@ -3,12 +3,17 @@ include_directories(${PYNE_INCLUDE_DIRS})
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- C_INCLUDE_PATH for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 # extra_types
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/extra_types.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(extra_types extra_types.pyx)
+
+# dtypes
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dtypes.pyx"
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(dtypes dtypes.pyx)
 
 # STL containers
 # If the pyx file is a C++ file, we should specify that here.
@@ -85,3 +90,9 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/enrichment.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(enrichment enrichment.pyx)
 target_link_libraries(enrichment pyne_enrichment pyne_material)
+
+# tally
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/tally.pyx"
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(tally tally.pyx)
+target_link_libraries(tally pyne pyne_tally)

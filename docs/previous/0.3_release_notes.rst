@@ -22,7 +22,7 @@ This release represnts over 850 commits, 418 files changed, 113361 insertions(+)
 84414 deletions(-) since the version v0.2-rc release.  Additionally 63 issues were 
 closed on behalf of this release.
 
-Please visit our website for more information: http://pynesim.org/
+Please visit our website for more information: http://pyne.io/
 Please email us at pyne-users@googlegroups.com if you have any questions
 on how to use or install PyNE.
 

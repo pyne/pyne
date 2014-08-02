@@ -1,16 +1,19 @@
 """
 Tools to generate, set and check the hashes of datasets in pyne.
 """
-
 import hashlib
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy
 import tables
 
 from .. import data
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
 #list of nodes from distinct data sets
-nodelist = ['/atomic_decay', '/atomic_mass', '/material_library',
+nodelist = ['/atomic_mass', '/material_library',
             '/neutron/eaf_xs', '/neutron/scattering_lengths',
             '/neutron/simple_xs']
 
@@ -90,7 +93,7 @@ def calc_hash(node, nuc_data):
                             mhash.update(tiny_item.data)
                     else:
                         for tiny_item in item:
-                            mhash.update(str(tiny_item))
+                            mhash.update(str(tiny_item).encode())
             ret = mhash.hexdigest()
         else:
             ret = hashlib.md5(node[:].data).hexdigest()

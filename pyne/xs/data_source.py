@@ -1,7 +1,17 @@
 """Cross section library data source interfaces.
 """
+from __future__ import division
+
 import os
-import StringIO
+import io
+import sys
+from warnings import warn
+from pyne.utils import VnVWarning
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import numpy as np
 import tables as tb
@@ -11,6 +21,15 @@ from .. import nucname
 from .. import rxname
 from ..endf import Library
 from .models import partial_energy_matrix, group_collapse
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+IO_TYPES = (io.IOBase, StringIO)
+
+py3k = False
+if sys.version_info[0] > 2:
+    basestring = str
+    py3k = True
 
 class DataSource(object):
     """Base cross section data source.
@@ -456,12 +475,15 @@ class CinderDataSource(DataSource):
 
         # Set query condition
         if rx in self._rx_avail:
-            cond = "(from_nuc == {0}) & (reaction_type == '{1}')"
-            cond = cond.format(nuc, self._rx_avail[rx])
+            if py3k:
+                cond = "(from_nuc == {0}) & (reaction_type == {1})"
+            else:
+                cond = "(from_nuc == {0}) & (reaction_type == '{1}')"
+            cond = cond.format(nuc, self._rx_avail[rx].encode())
         elif rx == fissrx:
             cond = 'nuc == {0}'.format(nuc)
         elif rx == absrx:
-            cond = "(from_nuc == {0}) & (reaction_type != 'c')".format(nuc)
+            cond = "(from_nuc == {0}) & (reaction_type != b'c')".format(nuc)
         else:
             return None
 
@@ -502,58 +524,58 @@ class EAFDataSource(DataSource):
     """
 
     # MT#s included in the EAF data
-    _rx_avail = {rxname.id('gamma'): '1020',
-                 rxname.id('gamma_1'): '1021',
-                 rxname.id('gamma_2'): '1022',
-                 rxname.id('p'): '1030',
-                 rxname.id('p_1'): '1031',
-                 rxname.id('p_2'): '1032',
-                 rxname.id('d'): '1040',
-                 rxname.id('d_1'): '1041',
-                 rxname.id('d_2'): '1042',
-                 rxname.id('t'): '1050',
-                 rxname.id('t_1'): '1051',
-                 rxname.id('t_2'): '1052',
-                 rxname.id('He3'): '1060',
-                 rxname.id('He3_1'): '1061',
-                 rxname.id('He3_2'): '1062',
-                 rxname.id('a'): '1070',
-                 rxname.id('a_1'): '1071',
-                 rxname.id('a_2'): '1072',
-                 rxname.id('z_2a'): '1080',
-                 rxname.id('z_2p'): '1110',
-                 rxname.id('z_2p_1'): '1111',
-                 rxname.id('z_2p_2'): '1112',
-                 rxname.id('z_2n'): '160',
-                 rxname.id('z_2n_1'): '161',
-                 rxname.id('z_2n_2'): '162',
-                 rxname.id('z_3n'): '170',
-                 rxname.id('z_3n_1'): '171',
-                 rxname.id('z_3n_2'): '172',
-                 rxname.id('fission'): '180',
-                 rxname.id('na'): '220',
-                 rxname.id('na_1'): '221',
-                 rxname.id('na_2'): '222',
-                 rxname.id('z_2na'): '240',
-                 rxname.id('np'): '280',
-                 rxname.id('np_1'): '281',
-                 rxname.id('np_2'): '282',
-                 rxname.id('n2a'): '290',
-                 rxname.id('nd'): '320',
-                 rxname.id('nd_1'): '321',
-                 rxname.id('nd_2'): '322',
-                 rxname.id('nt'): '330',
-                 rxname.id('nt_1'): '331',
-                 rxname.id('nt_2'): '332',
-                 rxname.id('nHe3'): '340',
-                 rxname.id('nHe3_1'): '341',
-                 rxname.id('nHe3_2'): '342',
-                 rxname.id('z_4n'): '370',
-                 rxname.id('z_4n_1'): '371',
-                 rxname.id('n'): '40',
-                 rxname.id('n_1'): '41',
-                 rxname.id('n_2'): '42',
-                 rxname.id('z_3np'): '420',
+    _rx_avail = {rxname.id('gamma'): b'1020',
+                 rxname.id('gamma_1'): b'1021',
+                 rxname.id('gamma_2'): b'1022',
+                 rxname.id('p'): b'1030',
+                 rxname.id('p_1'): b'1031',
+                 rxname.id('p_2'): b'1032',
+                 rxname.id('d'): b'1040',
+                 rxname.id('d_1'): b'1041',
+                 rxname.id('d_2'): b'1042',
+                 rxname.id('t'): b'1050',
+                 rxname.id('t_1'): b'1051',
+                 rxname.id('t_2'): b'1052',
+                 rxname.id('He3'): b'1060',
+                 rxname.id('He3_1'): b'1061',
+                 rxname.id('He3_2'): b'1062',
+                 rxname.id('a'): b'1070',
+                 rxname.id('a_1'): b'1071',
+                 rxname.id('a_2'): b'1072',
+                 rxname.id('z_2a'): b'1080',
+                 rxname.id('z_2p'): b'1110',
+                 rxname.id('z_2p_1'): b'1111',
+                 rxname.id('z_2p_2'): b'1112',
+                 rxname.id('z_2n'): b'160',
+                 rxname.id('z_2n_1'): b'161',
+                 rxname.id('z_2n_2'): b'162',
+                 rxname.id('z_3n'): b'170',
+                 rxname.id('z_3n_1'): b'171',
+                 rxname.id('z_3n_2'): b'172',
+                 rxname.id('fission'): b'180',
+                 rxname.id('na'): b'220',
+                 rxname.id('na_1'): b'221',
+                 rxname.id('na_2'): b'222',
+                 rxname.id('z_2na'): b'240',
+                 rxname.id('np'): b'280',
+                 rxname.id('np_1'): b'281',
+                 rxname.id('np_2'): b'282',
+                 rxname.id('n2a'): b'290',
+                 rxname.id('nd'): b'320',
+                 rxname.id('nd_1'): b'321',
+                 rxname.id('nd_2'): b'322',
+                 rxname.id('nt'): b'330',
+                 rxname.id('nt_1'): b'331',
+                 rxname.id('nt_2'): b'332',
+                 rxname.id('nHe3'): b'340',
+                 rxname.id('nHe3_1'): b'341',
+                 rxname.id('nHe3_2'): b'342',
+                 rxname.id('z_4n'): b'370',
+                 rxname.id('z_4n_1'): b'371',
+                 rxname.id('n'): b'40',
+                 rxname.id('n_1'): b'41',
+                 rxname.id('n_2'): b'42',
+                 rxname.id('z_3np'): b'420',
                  }
 
     _avail_rx = dict([_[::-1] for _ in _rx_avail.items()])
@@ -596,7 +618,11 @@ class EAFDataSource(DataSource):
         absrx = rxname.id('absorption')
 
         if rx in self._rx_avail:
-            cond = "(nuc_zz == {0}) & (rxnum == '{1}')".format(nuc, self._rx_avail[rx])
+            if py3k is True:
+                cond = "(nuc_zz == {0}) & (rxnum == {1})"
+            else:
+                cond = "(nuc_zz == {0}) & (rxnum == '{1}')"
+            cond = cond.format(nuc, self._rx_avail[rx])
         elif rx == absrx:
             cond = "(nuc_zz == {0})".format(nuc)
         else:
@@ -680,8 +706,8 @@ class ENDFDataSource(DataSource):
             if isinstance(self.fh, basestring):
                 self._exists = os.path.isfile(self.fh)
             else:
-                self._exists = (isinstance(self.fh, file) or \
-                                isinstance(self.fh, StringIO.StringIO))
+                self._exists = isinstance(self.fh, IO_TYPES)
+        print(self.fh)
         return self._exists
 
     def _load_group_structure(self, nuc, rx, nuc_i=None):
@@ -803,8 +829,8 @@ class ENDFDataSource(DataSource):
         internal_src_bounds = [bd for bd in src_bounds if dst_low < bd < dst_high]
         integration_bounds = [dst_low, dst_high]
         integration_bounds[1:1] = internal_src_bounds
-        integration_bounds = zip(integration_bounds[:-1],
-                                 integration_bounds[1:])
+        integration_bounds = list(zip(integration_bounds[:-1],
+                                      integration_bounds[1:]))
 
         schemes = [src_dict[src_bounds[src_bounds >= high][0]] for low,
                    high in integration_bounds]
@@ -823,9 +849,9 @@ class ENDFDataSource(DataSource):
         ----------
         scheme : int
             ENDF-coded interpolation scheme to be used between the data points.
-        e_int : NDArray
+        e_int : ndarray
             Array of energy values to integrate over.
-        xs : NDArray
+        xs : ndarray
             Array of cross-sections corresponding to e_int.
         low, high : float
             Lower and upper bounds of integration.
@@ -833,7 +859,9 @@ class ENDFDataSource(DataSource):
         Returns
         -------
         sigma * dE : float
-            Non-normalized integral. """
+            Non-normalized integral. 
+
+        """
         dE = high - low
         sigma = self.library.integrate_tab_range(scheme,e_int, xs, low, high)
         return sigma * dE

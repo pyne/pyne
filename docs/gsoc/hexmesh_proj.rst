@@ -1,6 +1,6 @@
-===================
+=======================================
 Hexahedral Mesh Sampling
-===================
+=======================================
 The Hexahedral (hex) Mesh Sampling project will provide a tool for generating source distributions in cartesian coordiantes to first order accuracy given values on hexahedral meshes. This provides source definition flexibility to PyNE users.
 
 Brief explanation:
@@ -32,6 +32,6 @@ Professor Rachel Slaybaugh and Postdoctoral Scholar Kathryn Huff, University of 
 More Resources:
 ---------------
 *  Source code : github.com/pyne/pyne
-*  Example gallery : http://pynesim.org/gallery/index.html
+*  Example gallery : http://pyne.io/gallery/index.html
 *  R.N. Slaybaugh, P.P.H. Wilson, L.A. El-Guebaly, E.P. Marriott. “Three-Dimensional Neutron Source Models for Toroidal Fusion Energy Systems.” *Fusion Engineering and Design* **84** (2009) 1774-1778.
 

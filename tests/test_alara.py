@@ -19,6 +19,9 @@ except ImportError:
     HAVE_PYTAPS = False
     pass
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
+
 from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.material import Material
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
@@ -132,8 +135,8 @@ def test_photon_source_to_hdf5():
                 count += 1
 
             assert_equal(count, row['idx'])
-            assert_equal(ls[0].strip(), row['nuc'])
-            assert_equal(ls[1].strip(), row['time'])
+            assert_equal(ls[0].strip(), row['nuc'].decode())
+            assert_equal(ls[1].strip(), row['time'].decode())
             assert_array_equal(np.array(ls[2:], dtype=np.float64),
                                row['phtn_src'])
             old = ls[0]

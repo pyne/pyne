@@ -1,6 +1,8 @@
 """
 Tests for PyNE variance_reduction module.
 """
+import warnings
+
 try:
     from itaps import iBase, iMesh, iMeshExtensions
 except ImportError:
@@ -9,6 +11,8 @@ except ImportError:
 from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_almost_equal
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne.variancereduction import cadis
 from pyne.mesh import Mesh
 from pyne.mesh import MeshError

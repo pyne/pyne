@@ -1,6 +1,10 @@
 """Plotting routines for spectrometry modules"""
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import matplotlib.pyplot as plt
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 
 def plot_spectrum(spect):
@@ -24,6 +28,11 @@ def plot_peak(spect, energy, spread=4):
     plt.xlabel('Energy (keV)')
     plt.ylabel('Counts')
     plt.xlim(xmin=energy-spread, xmax=energy+spread)
+<<<<<<< HEAD
     plt.fill(spect.ebin, spect.counts, 'g')
     plt.title(spect.file_name + ' ' + str(energy) + 'keV')
+=======
+    plt.fill(spect.ebin, spect.counts, "g")
+    plt.title(spect.file_name + " " + str(energy) + "keV")
+>>>>>>> upstream/staging
     plt.show()

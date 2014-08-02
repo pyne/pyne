@@ -32,6 +32,7 @@ The following modules and sub-packages are discussed:
     variancereduction
     mcnp
     alara
+    r2s
     ptrac_to_hdf5
     binaryreader
     rxdata

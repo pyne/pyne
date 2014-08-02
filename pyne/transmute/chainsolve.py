@@ -1,5 +1,8 @@
 """This module implements an ALARA-like chain-based transmutation solver.
 """
+from __future__ import division
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
 from scipy import linalg
@@ -14,6 +17,8 @@ from pyne.material import Material, from_atom_frac
 from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
@@ -135,7 +140,7 @@ class Transmuter(object):
             for part_nuc, part_adens in partial.items():
                 y_atoms[part_nuc] = part_adens * adens + y_atoms.get(part_nuc, 0.0)
         mw_x = x.molecular_mass()
-        y = from_atom_frac(y_atoms, atoms_per_mol=x.atoms_per_mol)
+        y = from_atom_frac(y_atoms, atoms_per_molecule=x.atoms_per_molecule)
         # even though it doesn't look likt it, the following line is actually
         #   mass_y = MW_y * mass_x / MW_x
         y.mass *= x.mass / mw_x 
@@ -188,7 +193,7 @@ class Transmuter(object):
         xscache = self.xscache
         sig_a = sigma_a(nuc, xs_cache=xscache)
         d = utils.from_barns(sig_a[0], 'cm2') * xscache['phi_g'][0]
-        if decay:
+        if decay and not np.isnan(data.decay_const(nuc)):
             d += data.decay_const(nuc) 
         return d
 

@@ -1,7 +1,13 @@
 from __future__ import print_function
 import os
 import argparse
-import urllib2
+from warnings import warn
+from pyne.utils import VnVWarning
+
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 import shutil
 from distutils.dir_util import mkpath, remove_tree
 
@@ -13,11 +19,14 @@ from pyne.dbgen.atomic_mass import make_atomic_mass
 from pyne.dbgen.materials_library import make_materials_library
 from pyne.dbgen.scattering_lengths import make_scattering_lengths
 from pyne.dbgen.simple_xs import make_simple_xs
+from pyne.dbgen.q_val import make_q_value
 from pyne.dbgen.cinder import make_cinder
 from pyne.dbgen.eaf import make_eaf
 from pyne.dbgen import wimsdfpy
 from pyne.dbgen import ndsfpy
 from pyne.dbgen.hashtools import check_hashes
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -54,7 +63,7 @@ pyne_logo = """\
 def _fetch_prebuilt(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
     prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
-    prebuilt_nuc_data_url = "http://s3.amazonaws.com/pyne/prebuilt_nuc_data.h5"
+    prebuilt_nuc_data_url = "http://data.pyne.io/prebuilt_nuc_data.h5"
 
     if not os.path.exists(prebuilt_nuc_data):
         print("Fetching pre-built nuc_data.h5 from " + prebuilt_nuc_data_url)
@@ -76,13 +85,14 @@ def main():
                   ('simple_xs', make_simple_xs),
                   ('cinder', make_cinder),
                   ('materials', make_materials_library),
+                  ('q_values', make_q_value),
                   ('eaf', make_eaf),
                   ('wimsd_fpy', wimsdfpy.make_fpy),
                   ('nds_fpy', ndsfpy.make_fpy)
                   ]
     make_map = dict(make_funcs)
     make_open = set(['atomic_mass', 'scattering_lengths', 'simple_xs', 'materials',
-                     'wimsd_fpy', 'nds_fpy'])
+                     'wimsd_fpy', 'nds_fpy', 'q_values'])
 
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Make a nuclear data library.')

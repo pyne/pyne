@@ -2,11 +2,16 @@
 the data to PyNE's HDF5 storage.  The data here is autonatically grabbed from
 the IAEA. 
 """
-
 from __future__ import print_function
 import re
 import os
-import urllib
+from warnings import warn
+from pyne.utils import VnVWarning
+
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 from gzip import GzipFile
 
 import numpy as np
@@ -15,6 +20,7 @@ import tables as tb
 from .. import nucname
 from .api import BASIC_FILTERS
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def grab_eaf_data(build_dir=""):
     """Grabs the EAF activation data files
@@ -36,7 +42,7 @@ def grab_eaf_data(build_dir=""):
     # Grab ENSDF files and unzip them.
     # This link was taken from 'http://www-nds.iaea.org/fendl/fen-activation.htm'
     iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/libout/fendlg-2.0_175-gz'
-    s3_base_url = 'http://s3.amazonaws.com/pyne/'
+    cf_base_url = 'http://data.pyne.io/'
     eaf_gzip = 'fendlg-2.0_175-gz'
 
     fpath = os.path.join(build_dir, eaf_gzip)
@@ -58,7 +64,7 @@ def grab_eaf_data(build_dir=""):
         ofile = os.path.join(build_dir, 'fendlg-2.0_175')
         with open(ofile, 'w') as fw:
             for line in gf:
-                fw.write(line)
+                fw.write(line.decode("us-ascii"))
     finally:
         gf.close()
         

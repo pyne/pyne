@@ -1,11 +1,13 @@
 """The enrichment module contains tools for defining and manipulating 
 enrichment cascades.  The Cascade class is a simple container for storing 
-parameters which define and enrichment setup.  These include feed, product, 
+parameters that define an enrichment setup.  These include feed, product, 
 and tail materials, target enrichments, and separation factors.  The main 
-functions in this modules computes the total flow rate and separation factors
-from an initial cascade.  Other helper function compute relative flow rates 
+functions in this module compute the total flow rate and separation factors
+from an initial cascade.  Other helper functions compute relative flow rates 
 and nuclide-specific separation factors.
 """
+from __future__ import unicode_literals
+
 # Cython imports
 from cython cimport pointer
 from cython.operator cimport dereference as deref
@@ -13,17 +15,19 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
+from warnings import warn
+from pyne.utils import VnVWarning
+
 from pyne cimport nucname
 from pyne import nucname
-
 from pyne cimport stlcontainers as conv
-
 cimport pyne.cpp_material
 cimport pyne.material
 import pyne.material
-
 from pyne cimport cpp_enrichment
 
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 
 #####################
@@ -32,8 +36,8 @@ from pyne cimport cpp_enrichment
 
 
 cdef class Cascade:
-    """This class is a container for enrichment cascade parameters which 
-    defines the perfomance of a separations plant. Instances of this class 
+    """This class is a container for enrichment cascade parameters that 
+    define the perfomance of a separations plant. Instances of this class 
     are passed into and out of many enrichment functions.  
     """
 
@@ -433,7 +437,7 @@ def solve_numeric(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
     return casc
 
 
-def multicomponent(Cascade orig_casc, char * solver="symbolic", 
+def multicomponent(Cascade orig_casc, solver="symbolic", 
                    double tolerance=1.0E-7, int max_iter=100):
     """multicomponent(orig_casc, solver="symbolic", tolerance=1.0E-7, max_iter=100)
     Calculates the optimal value of Mstar by minimzing the seperative power.
@@ -463,8 +467,11 @@ def multicomponent(Cascade orig_casc, char * solver="symbolic",
         are also computed on this instance.
 
     """
+    cdef char * csolver
+    s_bytes = solver.encode('UTF-8')
+    csolver = s_bytes
     cdef Cascade casc = Cascade()
-    cdef std_string strsolver = std_string(solver)
+    cdef std_string strsolver = std_string(csolver)
     cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(\
                                     orig_casc._inst[0], strsolver, tolerance, max_iter)
     casc._inst[0] = ccasc

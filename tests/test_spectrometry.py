@@ -1,8 +1,14 @@
 """Spectrometry tests """
 import nose 
 from nose.tools import assert_equal, assert_true
+<<<<<<< HEAD
 import numpy as np
+=======
+import warnings
+>>>>>>> upstream/staging
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import gammaspec
 
 gspec1 = gammaspec.read_spe_file('test.spe')

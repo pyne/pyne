@@ -4,9 +4,15 @@
   will have functions for general spectrum processing
 
 """
+from warnings import warn
+from pyne.utils import VnVWarning
 
+<<<<<<< HEAD
 import copy
 
+=======
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+>>>>>>> upstream/staging
 
 class PhSpectrum(object):
     """Pulse height spectrum class"""

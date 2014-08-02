@@ -57,6 +57,7 @@ Development:
     pubs
     dev_team
     gsoc/index
+    theorymanual/index
 
 ------------
 Search Links
@@ -71,6 +72,6 @@ Search Links
 
 .. _github: https://github.com/pyne/pyne
 
-.. _zip: https://github.com/pyne/pyne/zipball/0.3
-.. _tar: https://github.com/pyne/pyne/tarball/0.3
+.. _zip: https://github.com/pyne/pyne/zipball/0.4
+.. _tar: https://github.com/pyne/pyne/tarball/0.4
 

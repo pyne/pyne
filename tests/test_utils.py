@@ -117,7 +117,6 @@ def test_fromstring_token4():
     s = "1, 2.3 ,4"
     obs = utils.fromstring_token(s, sep=' ,', inplace=True)
     exp = np.array([1.0, 2.3, 4.0])
-    assert_equal(s, "1\x00 2.3\x00,4")
     assert_array_equal(obs, exp)
 
 

@@ -1,7 +1,7 @@
 """chainsolve transmutation tests."""
-
 import os
 import nose
+import warnings
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_is, with_setup, \
@@ -13,6 +13,8 @@ import numpy  as np
 import tables as tb
 from scipy import linalg
 
+from pyne.utils import VnVWarning
+warnings.simplefilter("ignore", VnVWarning)
 from pyne import nuc_data
 from pyne import nucname as nn
 from pyne import data
