@@ -14,22 +14,36 @@ endif(APPLE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${PYNE_PLATFORM}")
 message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
 
+# Fortran settings
+# FFLAGS depend on the compiler
+get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  # gfortran
+  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
+elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
+  # ifort (untested)
+  set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g")
+elseif (Fortran_COMPILER_NAME MATCHES "g77")
+  # g77
+  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -m32")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
+else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
+  message ("Fortran compiler: " ${Fortran_COMPILER_NAME})
+  message ("No optimized Fortran compiler flags are known, we just try -O2...")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
+endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+
 macro( add_lib_to_pyne _name _source )
   # add the library
   add_library(${_name}             ${_source})
   # add it to the list of pyne libraries
   set(PYNE_LIBRARIES ${PYNE_LIBRARIES} ${_name})
 endmacro()
-
-macro( install_lib _name )
-  # install it
-  set(lib_type LIBRARY)
-  if(WIN32)
-    set(lib_type RUNTIME)
-  endif(WIN32)
-  install(TARGETS ${_name} ${lib_type} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-endmacro()
-
 
 macro( print_logo )
   set(cat_prog cat)

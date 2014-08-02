@@ -4,7 +4,7 @@ from copy import deepcopy
 import warnings
 
 from unittest import TestCase
-import nose 
+import nose
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
@@ -14,14 +14,15 @@ warnings.simplefilter("ignore", VnVWarning)
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
     MapStrMaterial, MultiMaterial, MaterialLibrary
-from pyne import jsoncpp 
+from pyne import jsoncpp
 from pyne import data
-import numpy  as np
+import numpy as np
+from numpy.testing import assert_array_equal
 import tables as tb
 
 nclides = 9
-nucvec = {10010000:  1.0,   
-          80160000:  1.0,   
+nucvec = {10010000:  1.0,
+          80160000:  1.0,
           691690000: 1.0,
           922350000: 1.0,
           922380000: 1.0,
@@ -204,18 +205,18 @@ class TestMaterialMethods(TestCase):
         try:
             assert_almost_equal(mw_u238, 238.050788423)
         except AssertionError:
-            assert_almost_equal(mw_u238, 238.0)            
+            assert_almost_equal(mw_u238, 238.0)
 
         mat_mixed = Material({922350000: 0.5, 922380000: 0.5})
         mw_mixed = mat_mixed.molecular_mass()
         try:
-            assert_almost_equal(mw_mixed/236.547360417, 1.0, 4)            
+            assert_almost_equal(mw_mixed/236.547360417, 1.0, 4)
         except AssertionError:
             assert_almost_equal(mw_mixed/236.5, 1.0, 4)
 
 
 def test_expand_elements1():
-    natmat = Material({'C': 1.0, 902320000: 0.5, 'PU': 4.0, 'U': 3.0}, 
+    natmat = Material({'C': 1.0, 902320000: 0.5, 'PU': 4.0, 'U': 3.0},
                        metadata={'y': 1.0})
     expmat = natmat.expand_elements()
     assert_true(60120000 in expmat.comp)
@@ -434,7 +435,7 @@ class TestMassSubMaterialMethods(TestCase):
         for nuc in mat1:
             assert_true(nuc < 922380000)
 
-        
+
 class TestMaterialOperatorOverloading(TestCase):
     "Tests that the Material operator overloads work."
     u235 = Material({922350000: 1.0})
@@ -476,7 +477,7 @@ def test_to_atom_frac():
     assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(af[10010000], 2.0)
     assert_equal(af[80160000], 1.0)
-    assert_equal(mat.molecular_mass(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)
 
 
 def test_from_atom_frac_meth():
@@ -486,8 +487,8 @@ def test_from_atom_frac_meth():
     assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
-    assert_equal(mat.mass, 18.01056468403)    
-    assert_equal(mat.molecular_mass(), 18.01056468403)    
+    assert_equal(mat.mass, 18.01056468403)
+    assert_equal(mat.molecular_mass(), 18.01056468403)
 
     h2 = Material({10010000: 1.0}, atoms_per_molecule=2.0)
     h2o = {'O16': 1.0, h2: 1.0}
@@ -496,7 +497,7 @@ def test_from_atom_frac_meth():
     assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
-    assert_equal(mat.molecular_mass(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)
 
     ihm = Material()
     ihm.from_atom_frac({922350000: 0.5, 922380000: 0.5})
@@ -529,29 +530,29 @@ def test_contains():
 
 def test_getitem_int():
     mat = Material(nucvec)
-    assert_equal(mat[922350000], 1.0) 
-    assert_raises(KeyError, lambda: mat[42]) 
+    assert_equal(mat[922350000], 1.0)
+    assert_raises(KeyError, lambda: mat[42])
 
     mat = Material(leu)
-    assert_equal(mat[922350000], 0.04) 
-    assert_equal(mat[922380000], 0.96) 
-    assert_raises(KeyError, lambda: mat[922340000]) 
+    assert_equal(mat[922350000], 0.04)
+    assert_equal(mat[922380000], 0.96)
+    assert_raises(KeyError, lambda: mat[922340000])
 
 
 def test_getitem_str():
     mat = Material(nucvec)
-    assert_equal(mat['U235'], 1.0) 
-    assert_raises(RuntimeError, lambda: mat['word']) 
+    assert_equal(mat['U235'], 1.0)
+    assert_raises(RuntimeError, lambda: mat['word'])
 
     mat = Material(leu)
-    assert_equal(mat['U235'], 0.04) 
-    assert_equal(mat['U238'], 0.96) 
-    assert_raises(KeyError, lambda: mat['U234']) 
+    assert_equal(mat['U235'], 0.04)
+    assert_equal(mat['U238'], 0.96)
+    assert_raises(KeyError, lambda: mat['U234'])
 
 
 def test_getitem_slice_int():
     mat = Material(nucvec)
-    mat1 = mat[920000000:930000000] 
+    mat1 = mat[920000000:930000000]
     assert_equal(mat1.mass, 2.0)
     for nuc in mat1:
         assert_true(920000000 <= nuc < 930000000)
@@ -569,7 +570,7 @@ def test_getitem_slice_int():
 
 def test_getitem_slice_str():
     mat = Material(nucvec)
-    mat1 = mat['U':'NP'] 
+    mat1 = mat['U':'NP']
     assert_equal(mat1.mass, 2.0)
     for nuc in mat1:
         assert_true(920000000 <= nuc < 930000000)
@@ -587,7 +588,7 @@ def test_getitem_slice_str():
 
 def test_getitem_sequence():
     mat = Material(nucvec)
-    mat1 = mat[922380000, 922350000] 
+    mat1 = mat[922380000, 922350000]
     assert_equal(mat1.mass, 2.0)
     assert_equal(set(mat1), set([922380000, 922350000]))
 
@@ -599,42 +600,42 @@ def test_getitem_sequence():
 def test_setitem_int():
     mat = Material(nucvec)
     assert_equal(mat.mass, 9.0)
-    assert_equal(mat[922350000], 1.0) 
+    assert_equal(mat[922350000], 1.0)
     mat[922350000] = 2.0
     assert_equal(mat.mass, 10.0)
-    assert_equal(mat[922350000], 2.0) 
+    assert_equal(mat[922350000], 2.0)
 
     mat = Material(leu)
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat[922350000], 0.04) 
-    assert_equal(mat[922380000], 0.96) 
-    assert_raises(KeyError, lambda: mat[922340000]) 
+    assert_equal(mat[922350000], 0.04)
+    assert_equal(mat[922380000], 0.96)
+    assert_raises(KeyError, lambda: mat[922340000])
     mat[922340000] = 17.0
     assert_equal(mat.mass, 18.0)
-    assert_equal(mat[922340000], 17.0) 
-    assert_equal(mat[922350000], 0.04) 
-    assert_equal(mat[922380000], 0.96) 
+    assert_equal(mat[922340000], 17.0)
+    assert_equal(mat[922350000], 0.04)
+    assert_equal(mat[922380000], 0.96)
 
 
 
 def test_setitem_str():
     mat = Material(nucvec)
     assert_equal(mat.mass, 9.0)
-    assert_equal(mat[922350000], 1.0) 
+    assert_equal(mat[922350000], 1.0)
     mat['U235'] = 2.0
     assert_equal(mat.mass, 10.0)
-    assert_equal(mat[922350000], 2.0) 
+    assert_equal(mat[922350000], 2.0)
 
     mat = Material(leu)
     assert_equal(mat.mass, 1.0)
-    assert_equal(mat[922350000], 0.04) 
-    assert_equal(mat[922380000], 0.96) 
-    assert_raises(KeyError, lambda: mat[922340000]) 
+    assert_equal(mat[922350000], 0.04)
+    assert_equal(mat[922380000], 0.96)
+    assert_raises(KeyError, lambda: mat[922340000])
     mat['U234'] = 17.0
     assert_equal(mat.mass, 18.0)
-    assert_equal(mat[922340000], 17.0) 
-    assert_equal(mat[922350000], 0.04) 
-    assert_equal(mat[922380000], 0.96) 
+    assert_equal(mat[922340000], 17.0)
+    assert_equal(mat[922350000], 0.04)
+    assert_equal(mat[922380000], 0.96)
 
 
 
@@ -731,28 +732,28 @@ def test_delitem_int():
     mat = Material(nucvec)
     assert_equal(mat[922350000], 1.0)
     del mat[922350000]
-    assert_raises(KeyError, lambda: mat[922350000]) 
+    assert_raises(KeyError, lambda: mat[922350000])
 
     mat = Material(leu)
     assert_equal(mat[922350000], 0.04)
     del mat[922350000]
-    assert_equal(mat.mass, 0.96) 
-    assert_equal(mat.comp[922380000], 1.0) 
-    assert_raises(KeyError, lambda: mat[922350000]) 
+    assert_equal(mat.mass, 0.96)
+    assert_equal(mat.comp[922380000], 1.0)
+    assert_raises(KeyError, lambda: mat[922350000])
 
 
 def test_delitem_str():
     mat = Material(nucvec)
     assert_equal(mat[922350000], 1.0)
     del mat['U235']
-    assert_raises(KeyError, lambda: mat[922350000]) 
+    assert_raises(KeyError, lambda: mat[922350000])
 
     mat = Material(leu)
     assert_equal(mat[922350000], 0.04)
     del mat['U235']
-    assert_equal(mat.mass, 0.96) 
-    assert_equal(mat.comp[922380000], 1.0) 
-    assert_raises(KeyError, lambda: mat[922350000]) 
+    assert_equal(mat.mass, 0.96)
+    assert_equal(mat.comp[922380000], 1.0)
+    assert_raises(KeyError, lambda: mat[922350000])
 
 
 def test_delitem_slice_int():
@@ -760,15 +761,15 @@ def test_delitem_slice_int():
     del mat[920000000:930000000]
     assert_equal(mat.mass, 7.0)
     assert_equal(mat[10010000], 1.0)
-    assert_raises(KeyError, lambda: mat[922350000]) 
-    assert_raises(KeyError, lambda: mat[922380000]) 
+    assert_raises(KeyError, lambda: mat[922350000])
+    assert_raises(KeyError, lambda: mat[922380000])
 
     mat = Material(nucvec)
     del mat[:922380000]
     assert_equal(mat.mass, 5.0)
     for nuc in mat:
         if (nuc < 922380000):
-            assert_raises(KeyError, lambda: mat[nuc]) 
+            assert_raises(KeyError, lambda: mat[nuc])
         else:
             assert_equal(mat[nuc], 1.0)
 
@@ -777,7 +778,7 @@ def test_delitem_slice_int():
     assert_equal(mat.mass, 3.0)
     for nuc in mat:
         if (922350000 <= nuc):
-            assert_raises(KeyError, lambda: mat[nuc]) 
+            assert_raises(KeyError, lambda: mat[nuc])
         else:
             assert_equal(mat[nuc], 1.0)
 
@@ -787,15 +788,15 @@ def test_delitem_slice_str():
     del mat['U':'Np']
     assert_equal(mat.mass, 7.0)
     assert_equal(mat[10010000], 1.0)
-    assert_raises(KeyError, lambda: mat[922350000]) 
-    assert_raises(KeyError, lambda: mat[922380000]) 
+    assert_raises(KeyError, lambda: mat[922350000])
+    assert_raises(KeyError, lambda: mat[922380000])
 
     mat = Material(nucvec)
     del mat[:'U238']
     assert_equal(mat.mass, 5.0)
     for nuc in mat:
         if (nuc < 922380000):
-            assert_raises(KeyError, lambda: mat[nuc]) 
+            assert_raises(KeyError, lambda: mat[nuc])
         else:
             assert_equal(mat[nuc], 1.0)
 
@@ -804,7 +805,7 @@ def test_delitem_slice_str():
     assert_equal(mat.mass, 3.0)
     for nuc in mat:
         if (922350000 <= nuc):
-            assert_raises(KeyError, lambda: mat[nuc]) 
+            assert_raises(KeyError, lambda: mat[nuc])
         else:
             assert_equal(mat[nuc], 1.0)
 
@@ -814,15 +815,15 @@ def test_delitem_sequence():
     del mat[922380000, 922350000]
     assert_equal(mat.mass, 7.0)
     assert_equal(mat[10010000], 1.0)
-    assert_raises(KeyError, lambda: mat[922350000]) 
-    assert_raises(KeyError, lambda: mat[922380000]) 
+    assert_raises(KeyError, lambda: mat[922350000])
+    assert_raises(KeyError, lambda: mat[922380000])
 
     mat = Material(nucvec)
     del mat[922380000, 'H2', 'h1']
     assert_equal(mat.mass, 7.0)
-    assert_raises(KeyError, lambda: mat[10010000]) 
-    assert_raises(KeyError, lambda: mat[10020000]) 
-    assert_raises(KeyError, lambda: mat[922380000]) 
+    assert_raises(KeyError, lambda: mat[10010000])
+    assert_raises(KeyError, lambda: mat[10020000])
+    assert_raises(KeyError, lambda: mat[922380000])
 
 
 
@@ -842,7 +843,7 @@ def test_iter():
 
 
 
-# 
+#
 # test material generation functions
 #
 
@@ -852,8 +853,8 @@ def test_from_atom_frac_func():
     assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
-    assert_equal(mat.mass, 18.01056468403)    
-    assert_equal(mat.molecular_mass(), 18.01056468403)    
+    assert_equal(mat.mass, 18.01056468403)
+    assert_equal(mat.molecular_mass(), 18.01056468403)
 
     h2 = Material({10010000: 1.0}, atoms_per_molecule=2.0)
     h2o = {'O16': 1.0, h2: 1.0}
@@ -861,7 +862,7 @@ def test_from_atom_frac_func():
     assert_equal(mat.atoms_per_molecule, 3.0)
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
-    assert_equal(mat.molecular_mass(), 18.01056468403)    
+    assert_equal(mat.molecular_mass(), 18.01056468403)
 
     ihm = from_atom_frac({922350000: 0.5, 922380000: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
@@ -951,7 +952,7 @@ def test_metadata():
     mat.metadata['units'] = 'kg'
     assert_equal(len(mat.metadata), 1)
     assert_equal(mat.metadata['units'], 'kg')
-    
+
     mat.metadata = {'comment': 'rawr', 'amount': 42.0}
     assert_equal(mat.metadata.keys(), ['amount', 'comment'])
     assert_true(isinstance(mat.metadata, jsoncpp.Value))
@@ -1000,7 +1001,7 @@ def test_multimaterial_mix_density():
     assert_equal(mat3.density, mat4.density)
 
 def test_deepcopy():
-    x = Material({'H1': 1.0}, mass=2.0, density=3.0, atoms_per_molecule=4.0, 
+    x = Material({'H1': 1.0}, mass=2.0, density=3.0, atoms_per_molecule=4.0,
                  metadata={'name': 'loki'})
     y = deepcopy(x)
     assert_equal(x, y)
@@ -1012,19 +1013,19 @@ def test_deepcopy():
     y.mass = 48.0
     y.metadata['name'] = 'odin'
     assert_not_equal(x, y)
-    assert_equal(x, Material({'H1': 1.0}, mass=2.0, density=3.0, atoms_per_molecule=4.0, 
+    assert_equal(x, Material({'H1': 1.0}, mass=2.0, density=3.0, atoms_per_molecule=4.0,
                              metadata={'name': 'loki'}))
 
 def test_mcnp():
 
-    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
-                   metadata={'mat_number': 2, 
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU', 
+                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
-                          'name':'leu'}, 
+                          'name':'leu'},
                    density=19.1)
 
     mass = leu.mcnp()
@@ -1034,8 +1035,8 @@ def test_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c -4.0000E-02\n'
-                '     92238.25c -9.6000E-01\n')
+                '     92235.15c -4.0000e-02\n'
+                '     92238.25c -9.6000e-01\n')
     assert_equal(mass, mass_exp)
 
     atom = leu.mcnp(frac_type='atom')
@@ -1045,8 +1046,8 @@ def test_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c 4.0491E-02\n'
-                '     92238.25c 9.5951E-01\n')
+                '     92235.15c 4.0491e-02\n'
+                '     92238.25c 9.5951e-01\n')
     assert_equal(atom, atom_exp)
 
 
@@ -1087,14 +1088,14 @@ def test_write_mcnp():
     if 'mcnp_mass_fracs.txt' in os.listdir('.'):
         os.remove('mcnp_mass_fracs.txt')
 
-    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96}, 
-                   metadata={'mat_number': 2, 
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU', 
+                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
-                          'name':'leu'}, 
+                          'name':'leu'},
                    density=19.1)
 
     leu.write_mcnp('mcnp_mass_fracs.txt')
@@ -1108,18 +1109,51 @@ def test_write_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c -4.0000E-02\n'
-                '     92238.25c -9.6000E-01\n'
+                '     92235.15c -4.0000e-02\n'
+                '     92238.25c -9.6000e-01\n'
                 'C name: leu\n'
                 'C density = 19.1\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c 4.0491E-02\n'
-                '     92238.25c 9.5951E-01\n')
+                '     92235.15c 4.0491e-02\n'
+                '     92238.25c 9.5951e-01\n')
     assert_equal(written, expected)
     os.remove('mcnp_mass_fracs.txt')
+
+def test_fluka():
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'name':'LEU',
+                          'fluka_name':'leu',
+			  'fluka_material_index': 0,
+                          'source':'Some URL',
+                          'comments': ('Fluka Material Attributes'),
+                          },
+                   density=19.1)
+
+    written = leu.fluka();
+    expected = ('* Fluka Material Attributes\n'
+                'MATERIAL                            19.1       26.                    LEU       \n')
+    assert_equal(written, expected)
+
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'name':'LEU2',
+                          'fluka_name':'leu2',
+			  'fluka_material_index': 1,
+                          'source':'Some URL',
+                          'comments': ('Fluka Material Attributes, again'),
+                          },
+                   density=19.15)
+
+    written2 = leu2.fluka();
+    expected2 = ('* Fluka Material Attributes, again\n'
+                'MATERIAL                           19.15       27.                    LEU2      \n')
+    assert_equal(written2, expected2)
 
 
 def test_write_alara():
@@ -1171,14 +1205,14 @@ def test_load_json():
     leu = {"U238": 0.96, "U235": 0.04}
     exp = Material(leu)
     obs = Material()
-    json = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "metadata": {}, 
+    json = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "metadata": {},
                          "atoms_per_molecule": -1.0})
     obs.load_json(json)
     assert_equal(exp, obs)
 
 def test_dump_json():
     leu = {"U238": 0.96, "U235": 0.04}
-    exp = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "metadata": {}, 
+    exp = jsoncpp.Value({"mass": 1.0, "comp": leu, "density": -1.0, "metadata": {},
                          "atoms_per_molecule": -1.0})
     obs = Material(leu).dump_json()
     assert_equal(exp, obs)
@@ -1216,7 +1250,7 @@ def test_matlib_json():
 
 def test_matlib_hdf5_nuc_data():
     matlib = MaterialLibrary()
-    matlib.from_hdf5(nuc_data, datapath="/material_library/materials", 
+    matlib.from_hdf5(nuc_data, datapath="/material_library/materials",
                      nucpath="/material_library/nucid")
 
 def test_matlib_hdf5():
@@ -1239,6 +1273,211 @@ def test_matlib_hdf5():
     for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
+
+
+def test_material_gammas():
+    leu = {"U238": 0.96, "U235": 0.04}
+    mat = Material(leu)
+    assert_array_equal(mat.gammas(), [(19.55, np.nan),
+                 (31.6, 2.1476136491211186e-20),
+                 (34.7, 4.674217942204787e-20),
+                 (41.4, 3.789906439625503e-20),
+                 (41.96, 7.579812879251006e-20),
+                 (51.21, 4.295227298242237e-20),
+                 (54.1, 1.2633021465418345e-21),
+                 (54.25, 3.789906439625503e-20),
+                 (60.5, np.nan),
+                 (64.45, np.nan),
+                 (72.7, 1.5159625758502012e-19),
+                 (74.94, 6.442840947363355e-20),
+                 (76.2, np.nan),
+                 (94.0, np.nan),
+                 (95.7, np.nan),
+                 (96.09, 1.1496049533530693e-19),
+                 (109.19, 2.097081563259445e-18),
+                 (115.45, 3.789906439625503e-20),
+                 (120.35, 3.2845855810087694e-20),
+                 (136.55, 1.5159625758502013e-20),
+                 (140.76, 2.526604293083669e-19),
+                 (142.4, 6.316510732709172e-21),
+                 (143.76, 1.3845791526098507e-17),
+                 (147.0, np.nan),
+                 (150.93, 1.136971931887651e-19),
+                 (163.356, 6.4175749044325184e-18),
+                 (173.3, 7.579812879251007e-21),
+                 (182.1, np.nan),
+                 (182.62, 4.926878371513154e-19),
+                 (185.715, 7.200822235288456e-17),
+                 (194.94, 7.958803523213557e-19),
+                 (198.9, 4.5478877275506033e-20),
+                 (202.12, 1.3643663182651812e-18),
+                 (205.316, 6.3417767756400084e-18),
+                 (215.28, 3.66357622497132e-20),
+                 (221.386, 1.4906965329193644e-19),
+                 (228.78, 8.843115025792842e-21),
+                 (233.5, 4.800548156858971e-20),
+                 (240.88, 9.348435884409573e-20),
+                 (246.83, 6.948161805980088e-20),
+                 (266.45, 7.579812879251007e-21),
+                 (275.35, 6.442840947363355e-20),
+                 (275.49, 4.0425668689338704e-20),
+                 (281.42, 7.579812879251007e-21),
+                 (282.92, 7.579812879251007e-21),
+                 (289.56, 8.843115025792842e-21),
+                 (291.2, np.nan),
+                 (291.65, 5.0532085861673375e-20),
+                 (301.7, 6.316510732709172e-21),
+                 (317.1, 1.2633021465418345e-21),
+                 (343.5, 3.789906439625503e-21),
+                 (345.92, 5.0532085861673375e-20),
+                 (356.03, 6.316510732709172e-21),
+                 (387.84, 5.0532085861673375e-20),
+                 (410.29, 3.789906439625503e-21),
+                 (428.7, np.nan),
+                 (448.4, 1.2633021465418345e-21),
+                 (49.55, 3.0188209868525946e-19),
+                 (113.5, 4.811245947796322e-20)])
+
+def test_material_xrays():
+    leu = {"U238": 0.96, "U235": 0.04}
+    mat = Material(leu)
+    assert_equal(mat.xrays(), [(93.35, 7.135646053967512e-18),
+     (89.953, 4.4112563905627166e-18),
+     (105.0, 3.394789318691889e-18),
+     (13.0, 2.965225083810098e-17),
+     (93.35, 5.2767097758422435e-21),
+     (89.953, 3.262061983425675e-21),
+     (105.0, 2.5103988972247685e-21),
+     (13.0, 3.4433858449448927e-17)])
+
+def test_material_photons():
+    leu = {"U238": 0.96, "U235": 0.04}
+    mat = Material(leu)
+    assert_array_equal(mat.photons(), [(19.55, np.nan),
+                 (31.6, 2.1476136491211186e-20),
+                 (34.7, 4.674217942204787e-20),
+                 (41.4, 3.789906439625503e-20),
+                 (41.96, 7.579812879251006e-20),
+                 (51.21, 4.295227298242237e-20),
+                 (54.1, 1.2633021465418345e-21),
+                 (54.25, 3.789906439625503e-20),
+                 (60.5, np.nan),
+                 (64.45, np.nan),
+                 (72.7, 1.5159625758502012e-19),
+                 (74.94, 6.442840947363355e-20),
+                 (76.2, np.nan),
+                 (94.0, np.nan),
+                 (95.7, np.nan),
+                 (96.09, 1.1496049533530693e-19),
+                 (109.19, 2.097081563259445e-18),
+                 (115.45, 3.789906439625503e-20),
+                 (120.35, 3.2845855810087694e-20),
+                 (136.55, 1.5159625758502013e-20),
+                 (140.76, 2.526604293083669e-19),
+                 (142.4, 6.316510732709172e-21),
+                 (143.76, 1.3845791526098507e-17),
+                 (147.0, np.nan),
+                 (150.93, 1.136971931887651e-19),
+                 (163.356, 6.4175749044325184e-18),
+                 (173.3, 7.579812879251007e-21),
+                 (182.1, np.nan),
+                 (182.62, 4.926878371513154e-19),
+                 (185.715, 7.200822235288456e-17),
+                 (194.94, 7.958803523213557e-19),
+                 (198.9, 4.5478877275506033e-20),
+                 (202.12, 1.3643663182651812e-18),
+                 (205.316, 6.3417767756400084e-18),
+                 (215.28, 3.66357622497132e-20),
+                 (221.386, 1.4906965329193644e-19),
+                 (228.78, 8.843115025792842e-21),
+                 (233.5, 4.800548156858971e-20),
+                 (240.88, 9.348435884409573e-20),
+                 (246.83, 6.948161805980088e-20),
+                 (266.45, 7.579812879251007e-21),
+                 (275.35, 6.442840947363355e-20),
+                 (275.49, 4.0425668689338704e-20),
+                 (281.42, 7.579812879251007e-21),
+                 (282.92, 7.579812879251007e-21),
+                 (289.56, 8.843115025792842e-21),
+                 (291.2, np.nan),
+                 (291.65, 5.0532085861673375e-20),
+                 (301.7, 6.316510732709172e-21),
+                 (317.1, 1.2633021465418345e-21),
+                 (343.5, 3.789906439625503e-21),
+                 (345.92, 5.0532085861673375e-20),
+                 (356.03, 6.316510732709172e-21),
+                 (387.84, 5.0532085861673375e-20),
+                 (410.29, 3.789906439625503e-21),
+                 (428.7, np.nan),
+                 (448.4, 1.2633021465418345e-21),
+                 (49.55, 3.0188209868525946e-19),
+                 (113.5, 4.811245947796322e-20),
+                 (93.35, 7.135646053967512e-18),
+                 (89.953, 4.4112563905627166e-18),
+                 (105.0, 3.394789318691889e-18),
+                 (13.0, 2.965225083810098e-17),
+                 (93.35, 5.2767097758422435e-21),
+                 (89.953, 3.262061983425675e-21),
+                 (105.0, 2.5103988972247685e-21),
+                 (13.0, 3.4433858449448927e-17)])
+    assert_equal(mat.photons(True), [(31.6, 0.00011635441715962317),
+                 (34.7, 0.0002532419667591798),
+                 (41.4, 0.000205331324399335),
+                 (41.96, 0.00041066264879867),
+                 (51.21, 0.00023270883431924635),
+                 (54.1, 6.844377479977834e-06),
+                 (54.25, 0.000205331324399335),
+                 (72.7, 0.00082132529759734),
+                 (74.94, 0.00034906325147886946),
+                 (96.09, 0.0006228383506779829),
+                 (109.19, 0.011361666616763204),
+                 (115.45, 0.000205331324399335),
+                 (120.35, 0.00017795381447942367),
+                 (136.55, 8.213252975973401e-05),
+                 (140.76, 0.0013688754959955667),
+                 (142.4, 3.422188739988917e-05),
+                 (143.76, 0.07501437718055706),
+                 (150.93, 0.0006159939731980049),
+                 (163.356, 0.03476943759828739),
+                 (173.3, 4.1066264879867005e-05),
+                 (182.62, 0.002669307217191355),
+                 (185.715, 0.39012951635873655),
+                 (194.94, 0.004311957812386035),
+                 (198.9, 0.00024639758927920197),
+                 (202.12, 0.007391927678376061),
+                 (205.316, 0.034358774949488725),
+                 (215.28, 0.00019848694691935719),
+                 (221.386, 0.0008076365426373843),
+                 (228.78, 4.791064235984484e-05),
+                 (233.5, 0.00026008634423915766),
+                 (240.88, 0.0005064839335183596),
+                 (246.83, 0.0003764407613987808),
+                 (266.45, 4.1066264879867005e-05),
+                 (275.35, 0.00034906325147886946),
+                 (275.49, 0.00021902007935929068),
+                 (281.42, 4.1066264879867005e-05),
+                 (282.92, 4.1066264879867005e-05),
+                 (289.56, 4.791064235984484e-05),
+                 (291.65, 0.00027377509919911336),
+                 (301.7, 3.422188739988917e-05),
+                 (317.1, 6.844377479977834e-06),
+                 (343.5, 2.0533132439933503e-05),
+                 (345.92, 0.00027377509919911336),
+                 (356.03, 3.422188739988917e-05),
+                 (387.84, 0.00027377509919911336),
+                 (410.29, 2.0533132439933503e-05),
+                 (448.4, 6.844377479977834e-06),
+                 (49.55, 0.0016355509594484913),
+                 (113.5, 0.0002606659341621033),
+                 (93.35, 0.038659837071091864),
+                 (89.953, 0.023899511277348993),
+                 (105.0, 0.018392448414441622),
+                 (13.0, 0.1606513520320623),
+                 (93.35, 2.858840512304754e-05),
+                 (89.953, 1.767335204706799e-05),
+                 (105.0, 1.3600956608013968e-05),
+                 (13.0, 0.18655736948227228)])
+
 
 # Run as script
 #

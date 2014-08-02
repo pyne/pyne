@@ -6,7 +6,7 @@ from libc.stdlib cimport atof
 from libc.string cimport strtok, strcpy, strncpy
 
 cimport numpy as np
-cimport pyne.cpp_pyne
+cimport pyne.cpp_utils
 from cython.operator cimport dereference as deref
 import numpy as np
 
@@ -124,7 +124,7 @@ def endftod(s):
     if isinstance(s, str):
         s = s.encode()
     cs = s
-    return pyne.cpp_pyne.endftod(cs)
+    return pyne.cpp_utils.endftod(cs)
 
 
 def fromendf_tok(s):
@@ -155,6 +155,6 @@ def fromendf_tok(s):
     while i < num_entries:
         pos = i*11 + i//6 * 15
         strncpy(entry, cs+pos, 11)
-        cdata[i] = pyne.cpp_pyne.endftod(entry)
+        cdata[i] = pyne.cpp_utils.endftod(entry)
         i += 1
     return cdata

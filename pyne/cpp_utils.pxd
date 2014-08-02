@@ -1,0 +1,12 @@
+"""C++ wrapper for utils header."""
+from libcpp.map cimport map
+from libcpp.set cimport set
+from libcpp.string cimport string as std_string
+from libcpp.vector cimport vector
+
+cdef extern from "utils.h" namespace "pyne":
+    std_string PYNE_DATA
+    std_string NUC_DATA_PATH
+
+    double endftod(char *) except +
+    void pyne_start() except +

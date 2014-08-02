@@ -23,3 +23,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The views and conclusions contained in the software and documentation are those of the
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of the stakeholders of the PyNE project or the employers of PyNE developers.
+
+-------------------------------------------------------------------------------
+The files cpp/measure.cpp and cpp/measure.hpp are covered by:
+
+Copyright 2004 Sandia Corporation.  Under the terms of Contract
+DE-AC04-94AL85000 with Sandia Coroporation, the U.S. Government
+retains certain rights in this software.
+
+http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB
