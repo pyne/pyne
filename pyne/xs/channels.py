@@ -4,22 +4,31 @@ structure.  Additionally, it provides interfaces for some higher level functiona
 such as computing cross sections for materials, fission energy spectra, metastable
 ratios, etc.
 """
+from __future__ import division
+import sys
 import collections
+from warnings import warn
+from pyne.utils import VnVWarning
 
 import numpy as np
-np.seterr(all='ignore')
-
 import scipy.integrate
 import tables as tb
 
-import pyne
-import pyne.data
-import pyne.xs.models
-from pyne import nucname
-from pyne.xs import cache
-from pyne.xs.models import group_collapse
-from pyne.material import Material
+from .. import nuc_data
+from .. import data
+from .. import nucname
+from .. import rxname
+from ..material import Material
+from . import models
+from . import cache
+from .models import group_collapse
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+if sys.version_info[0] > 2:
+  basestring = str
+
+np.seterr(all='ignore')
 
 def _prep_cache(xs_cache, E_g=None, phi_g=None):
     """Ensures that certain values are in the cache safely."""
@@ -30,10 +39,10 @@ def _prep_cache(xs_cache, E_g=None, phi_g=None):
         xs_cache['phi_g'] = phi_g
 
 
-def _atom_weight_channel(chanfunc, nucspec, *args, **kwargs):
-    """Convolves a channel for several nuclides based on atomic weights."""
+def _atom_mass_channel(chanfunc, nucspec, *args, **kwargs):
+    """Convolves a channel for several nuclides based on atomic mass."""
     xs_cache = kwargs['xs_cache'] if 'xs_cache' in kwargs else cache.xs_cache
-    # convert to atom weights
+    # convert to atomic mass
     if isinstance(nucspec, Material):
         aws = nucspec.to_atom_frac()
     elif isinstance(nucspec, collections.Mapping):
@@ -42,16 +51,16 @@ def _atom_weight_channel(chanfunc, nucspec, *args, **kwargs):
         aws = dict(nucspec)
 
     # tally the channels as we go
-    weight_total = 0.0
+    mass_total = 0.0
     chan = np.zeros(len(xs_cache['E_g']) - 1, float)
-    for nuc, weight in aws.items():
-        weight_total += weight
+    for nuc, mass in aws.items():
+        mass_total += mass
         nuc_chan = chanfunc(nuc, *args, **kwargs)
-        chan += weight * nuc_chan
+        chan += mass * nuc_chan
 
     # re-normalize
-    if weight_total != 1.0:
-        chan = chan / weight_total
+    if mass_total != 1.0:
+        chan = chan / mass_total
 
     return chan
 
@@ -87,9 +96,9 @@ def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
-    key = (nuc, 'f', temp)
+        return _atom_mass_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
+    nuc = nucname.id(nuc)
+    key = (nuc, rxname.id('fission'), temp)
     return xs_cache[key]
 
 
@@ -133,8 +142,8 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_s_gh, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+        return _atom_mass_channel(sigma_s_gh, nuc, temp=temp, xs_cache=xs_cache)
+    nuc = nucname.id(nuc)
     key = (nuc, 's_gh', temp)
 
     # Don't recalculate anything if you don't have to
@@ -144,8 +153,8 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     # Get some needed data
     E_g = xs_cache['E_g']
     G = len(E_g) - 1
-    b = pyne.data.b(nuc)
-    aw = pyne.data.atomic_mass(nuc)
+    b = data.b(nuc)
+    aw = data.atomic_mass(nuc)
 
     # OMG FIXME So hard!
     ## Initialize the scattering kernel
@@ -171,7 +180,7 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
 
     # Temporary stub
     E_g_centers = (E_g[1:] + E_g[:-1]) / 2.0
-    sig_s = pyne.xs.models.sigma_s(E_g_centers, b, aw, temp)
+    sig_s = models.sigma_s(E_g_centers, b, aw, temp)
     sig_s_gh = np.diag(sig_s)
 
     xs_cache[key] = sig_s_gh
@@ -208,8 +217,8 @@ def sigma_s(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_s, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+        return _atom_mass_channel(sigma_s, nuc, temp=temp, xs_cache=xs_cache)
+    nuc = nucname.id(nuc)
     key_g  = (nuc, 's_g', temp)
     key_gh = (nuc, 's_gh', temp)
 
@@ -264,17 +273,19 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     pyne.xs.data_source.RX_TYPES_MAP 
 
     """
+    rx = rxname.id(rx)
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_a_reaction, nuc, rx=rx, temp=temp, 
+        return _atom_mass_channel(sigma_a_reaction, nuc, rx=rx, temp=temp, 
                                     xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
+    nuc = nucname.id(nuc)
     key= (nuc, rx, temp)
     return xs_cache[key]
 
 
-def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
+def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, 
+                     xs_cache=None):
     """Calculates the ratio between a reaction that leaves the nuclide in a 
     metastable state and the equivalent reaction that leaves the nuclide in 
     the ground state.  This allows the calculation of metastable cross sections 
@@ -316,14 +327,14 @@ def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     if isinstance(nuc, int) or isinstance(nuc, basestring):
         xs_cache = cache.xs_cache if xs_cache is None else xs_cache
         _prep_cache(xs_cache, group_struct, phi_g)
-        nuc = nucname.zzaaam(nuc)
+        nuc = nucname.id(nuc)
         key = (nuc, rx + '_x_ratio', temp)
         if key in xs_cache:
             return xs_cache[key]
 
     # Get the cross-sections
     sigma_rx = sigma_a_reaction(nuc, rx, temp, group_struct, phi_g, xs_cache)
-    sigma_rx_x = sigma_a_reaction(nuc, rx + '_x', temp, group_struct, phi_g, xs_cache)
+    sigma_rx_x = sigma_a_reaction(nuc, rx + '_1', temp, group_struct, phi_g, xs_cache)
 
     # Get the ratio
     ratio_rx_g = sigma_rx_x / sigma_rx
@@ -367,9 +378,9 @@ def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
-    key = (nuc, 'a', temp)
+        return _atom_mass_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
+    nuc = nucname.id(nuc)
+    key = (nuc, rxname.id('absorption'), temp)
     return xs_cache[key]
 
 
@@ -406,8 +417,8 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(chi, nuc, temp=temp, xs_cache=xs_cache, eres=eres)
-    nuc = nucname.zzaaam(nuc)
+        return _atom_mass_channel(chi, nuc, temp=temp, xs_cache=xs_cache, eres=eres)
+    nuc = nucname.id(nuc)
     key = (nuc, 'chi', temp)
 
     # Don't recalculate anything if you don't have to
@@ -416,14 +427,14 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
 
     # Get the the set of nuclides we know we need chi for.  
     if 'fissionable_nucs' not in xs_cache:
-        with tb.openFile(pyne.nuc_data, 'r') as f:
+        with tb.openFile(nuc_data, 'r') as f:
             if '/neutron/cinder_xs/fission' in f:
                 fn = set(f.root.neutron.cinder_xs.fission.cols.nuc)
             else:
                 fn = set()
         xs_cache['fissionable_nucs'] = fn
     fissionable_nucs = xs_cache['fissionable_nucs']
-    if (nuc not in fissionable_nucs) and (86 <= nuc/10000):
+    if (nuc not in fissionable_nucs) and (86 <= nucname.znum(nuc)):
         fissionable_nucs.add(nuc)
 
     # Perform the group collapse on a continuous chi
@@ -433,7 +444,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
     if (nuc in fissionable_nucs):
         for g in range(G):
             E_space = np.logspace(np.log10(E_g[g]), np.log10(E_g[g+1]), eres)
-            dnumer = pyne.xs.models.chi(E_space)
+            dnumer = models.chi(E_space)
             numer = scipy.integrate.trapz(dnumer, E_space)
             denom = (E_g[g+1] - E_g[g])
             chi_g[g] = (numer / denom)
@@ -474,11 +485,11 @@ def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
     if isinstance(nuc, collections.Iterable) and not isinstance(nuc, basestring):
-        return _atom_weight_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
-    nuc = nucname.zzaaam(nuc)
-    key_a = (nuc, 'a', temp)
-    key_s = (nuc, 's', temp)
-    key_t = (nuc, 't', temp)
+        return _atom_mass_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
+    nuc = nucname.id(nuc)
+    key_a = (nuc, rxname.id('absorption'), temp)
+    key_s = (nuc, rxname.id('scattering'), temp)
+    key_t = (nuc, rxname.id('total'), temp)
 
     # Don't recalculate anything if you don't have to
     if key_t in xs_cache:

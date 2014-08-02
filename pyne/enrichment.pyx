@@ -1,34 +1,33 @@
 """The enrichment module contains tools for defining and manipulating 
 enrichment cascades.  The Cascade class is a simple container for storing 
-parameters which define and enrichment setup.  These include feed, product, 
+parameters that define an enrichment setup.  These include feed, product, 
 and tail materials, target enrichments, and separation factors.  The main 
-functions in this modules computes the total flow rate and separation factors
-from an initial cascade.  Other helper function compute relative flow rates 
+functions in this module compute the total flow rate and separation factors
+from an initial cascade.  Other helper functions compute relative flow rates 
 and nuclide-specific separation factors.
 """
+from __future__ import unicode_literals
+
 # Cython imports
 from cython cimport pointer
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
+from libcpp.string cimport string as std_string
 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
+from warnings import warn
+from pyne.utils import VnVWarning
 
 from pyne cimport nucname
 from pyne import nucname
-
-from pyne cimport stlconverters as conv
-
+from pyne cimport stlcontainers as conv
 cimport pyne.cpp_material
 cimport pyne.material
 import pyne.material
-
 from pyne cimport cpp_enrichment
 
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 
 #####################
@@ -37,8 +36,8 @@ from pyne cimport cpp_enrichment
 
 
 cdef class Cascade:
-    """This class is a container for enrichment cascade parameters which 
-    defines the perfomance of a separations plant. Instances of this class 
+    """This class is a container for enrichment cascade parameters that 
+    define the perfomance of a separations plant. Instances of this class 
     are passed into and out of many enrichment functions.  
     """
 
@@ -54,6 +53,9 @@ cdef class Cascade:
             Any keyword argument which is supplied is applied as an attribute
             to this instance.
         """
+        self._mat_feed = None
+        self._mat_prod = None
+        self._mat_tail = None
         for key, val in kwargs.items():
             setattr(self, key, val)
 
@@ -91,7 +93,7 @@ cdef class Cascade:
             self._inst.Mstar = <double> value
 
     property j:
-        """This is an integer in zzaaam-form that represents the jth key component.
+        """This is an integer in id-form that represents the jth key component.
         This nuclide is preferentially enriched in the product stream. For standard 
         uranium cascades j is 922350 (ie U-235).
         """
@@ -99,10 +101,10 @@ cdef class Cascade:
             return self._inst.j
 
         def __set__(self, value):
-            self._inst.j = nucname.zzaaam(value)
+            self._inst.j = nucname.id(value)
 
     property k:
-        """This is an integer in zzaaam-form that represents the kth key component.
+        """This is an integer in id-form that represents the kth key component.
         This nuclide is preferentially enriched in the tails stream. For standard 
         uranium cascades k is 922380 (ie U-238).
         """
@@ -110,7 +112,7 @@ cdef class Cascade:
             return self._inst.k
 
         def __set__(self, value):
-            self._inst.k = nucname.zzaaam(value)
+            self._inst.k = nucname.id(value)
 
     property N:
         """The number of enriching stages."""
@@ -168,49 +170,52 @@ cdef class Cascade:
         """Feed material to be enriched.  Often set at initialization.
         """
         def __get__(self):
-            cdef pyne.material._Material pymat = pyne.material.Material()
-            pymat.mat_pointer[0] = self._inst.mat_feed
-            return pymat
-
-        def __set__(self, mat):
-            cdef pyne.material._Material pymat
-            if isinstance(mat, pyne.material._Material):
-                pymat = mat
-            else:
-                pymat = pyne.material.Material(mat)
-            self._inst.mat_feed = <pyne.cpp_material.Material> pymat.mat_pointer[0]
+            cdef pyne.material._Material mat_feed_proxy
+            if self._mat_feed is None:
+                mat_feed_proxy = pyne.material.Material(free_mat=False)
+                mat_feed_proxy.mat_pointer = &(<cpp_enrichment.Cascade *> self._inst).mat_feed
+                self._mat_feed = mat_feed_proxy
+            return self._mat_feed
+    
+        def __set__(self, value):
+            cdef pyne.material._Material value_proxy
+            value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
+            (<cpp_enrichment.Cascade *> self._inst).mat_feed = value_proxy.mat_pointer[0]
+            self._mat_feed = None
 
     property mat_prod:
         """Product (enriched) material.
         """
         def __get__(self):
-            cdef pyne.material._Material pymat = pyne.material.Material()
-            pymat.mat_pointer[0] = self._inst.mat_prod
-            return pymat
-
-        def __set__(self, mat):
-            cdef pyne.material._Material pymat
-            if isinstance(mat, pyne.material._Material):
-                pymat = mat
-            else:
-                pymat = pyne.material.Material(mat)
-            self._inst.mat_prod = <pyne.cpp_material.Material> pymat.mat_pointer[0]
+            cdef pyne.material._Material mat_prod_proxy
+            if self._mat_prod is None:
+                mat_prod_proxy = pyne.material.Material(free_mat=False)
+                mat_prod_proxy.mat_pointer = &(<cpp_enrichment.Cascade *> self._inst).mat_prod
+                self._mat_prod = mat_prod_proxy
+            return self._mat_prod
+    
+        def __set__(self, value):
+            cdef pyne.material._Material value_proxy
+            value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
+            (<cpp_enrichment.Cascade *> self._inst).mat_prod = value_proxy.mat_pointer[0]
+            self._mat_prod = None
 
     property mat_tail:
         """Tails (de-enriched) material.
         """
         def __get__(self):
-            cdef pyne.material._Material pymat = pyne.material.Material()
-            pymat.mat_pointer[0] = self._inst.mat_tail
-            return pymat
-
-        def __set__(self, mat):
-            cdef pyne.material._Material pymat
-            if isinstance(mat, pyne.material._Material):
-                pymat = mat
-            else:
-                pymat = pyne.material.Material(mat)
-            self._inst.mat_tail = <pyne.cpp_material.Material> pymat.mat_pointer[0]
+            cdef pyne.material._Material mat_tail_proxy
+            if self._mat_tail is None:
+                mat_tail_proxy = pyne.material.Material(free_mat=False)
+                mat_tail_proxy.mat_pointer = &(<cpp_enrichment.Cascade *> self._inst).mat_tail
+                self._mat_tail = mat_tail_proxy
+            return self._mat_tail
+    
+        def __set__(self, value):
+            cdef pyne.material._Material value_proxy
+            value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
+            (<cpp_enrichment.Cascade *> self._inst).mat_tail = value_proxy.mat_pointer[0]
+            self._mat_tail = None
 
     property l_t_per_feed:
         """Total flow rate (:math:`L_t`) per feed flow rate.  This is a 
@@ -432,7 +437,7 @@ def solve_numeric(Cascade orig_casc, double tolerance=1.0E-7, int max_iter=100):
     return casc
 
 
-def multicomponent(Cascade orig_casc, char * solver="symbolic", 
+def multicomponent(Cascade orig_casc, solver="symbolic", 
                    double tolerance=1.0E-7, int max_iter=100):
     """multicomponent(orig_casc, solver="symbolic", tolerance=1.0E-7, max_iter=100)
     Calculates the optimal value of Mstar by minimzing the seperative power.
@@ -462,8 +467,11 @@ def multicomponent(Cascade orig_casc, char * solver="symbolic",
         are also computed on this instance.
 
     """
+    cdef char * csolver
+    s_bytes = solver.encode('UTF-8')
+    csolver = s_bytes
     cdef Cascade casc = Cascade()
-    cdef std_string strsolver = std_string(solver)
+    cdef std_string strsolver = std_string(csolver)
     cdef cpp_enrichment.Cascade ccasc = cpp_enrichment.multicomponent(\
                                     orig_casc._inst[0], strsolver, tolerance, max_iter)
     casc._inst[0] = ccasc

@@ -98,32 +98,24 @@ namespace Json {
 
 /// Converts a unicode code-point to UTF-8.
 static inline std::string 
-codePointToUTF8(unsigned int cp)
-{
+codePointToUTF8(unsigned int cp) {
    std::string result;
    
    // based on description from http://en.wikipedia.org/wiki/UTF-8
 
-   if (cp <= 0x7f) 
-   {
+   if (cp <= 0x7f) {
       result.resize(1);
       result[0] = static_cast<char>(cp);
-   } 
-   else if (cp <= 0x7FF) 
-   {
+   } else if (cp <= 0x7FF) {
       result.resize(2);
       result[1] = static_cast<char>(0x80 | (0x3f & cp));
       result[0] = static_cast<char>(0xC0 | (0x1f & (cp >> 6)));
-   } 
-   else if (cp <= 0xFFFF) 
-   {
+   } else if (cp <= 0xFFFF) {
       result.resize(3);
       result[2] = static_cast<char>(0x80 | (0x3f & cp));
       result[1] = 0x80 | static_cast<char>((0x3f & (cp >> 6)));
       result[0] = 0xE0 | static_cast<char>((0xf & (cp >> 12)));
-   }
-   else if (cp <= 0x10FFFF) 
-   {
+   } else if (cp <= 0x10FFFF) {
       result.resize(4);
       result[3] = static_cast<char>(0x80 | (0x3f & cp));
       result[2] = static_cast<char>(0x80 | (0x3f & (cp >> 6)));
@@ -137,8 +129,7 @@ codePointToUTF8(unsigned int cp)
 
 /// Returns true if ch is a control character (in range [0,32[).
 static inline bool 
-isControlCharacter(char ch)
-{
+isControlCharacter(char ch) {
    return ch > 0 && ch <= 0x1F;
 }
 
@@ -159,11 +150,9 @@ typedef char UIntToStringBuffer[uintToStringBufferSize];
  */
 static inline void 
 uintToString( LargestUInt value, 
-              char *&current )
-{
+              char *&current ) {
    *--current = 0;
-   do
-   {
+   do {
       *--current = char(value % 10) + '0';
       value /= 10;
    }
@@ -215,21 +204,18 @@ namespace Json {
 
 Features::Features()
    : allowComments_( true )
-   , strictRoot_( false )
-{
+   , strictRoot_( false ) {
 }
 
 
 Features 
-Features::all()
-{
+Features::all() {
    return Features();
 }
 
 
 Features 
-Features::strictMode()
-{
+Features::strictMode() {
    Features features;
    features.allowComments_ = false;
    features.strictRoot_ = true;
@@ -241,22 +227,19 @@ Features::strictMode()
 
 
 static inline bool 
-in( Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4 )
-{
+in( Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4 ) {
    return c == c1  ||  c == c2  ||  c == c3  ||  c == c4;
 }
 
 static inline bool 
-in( Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4, Reader::Char c5 )
-{
+in( Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4, Reader::Char c5 ) {
    return c == c1  ||  c == c2  ||  c == c3  ||  c == c4  ||  c == c5;
 }
 
 
 static bool 
 containsNewLine( Reader::Location begin, 
-                 Reader::Location end )
-{
+                 Reader::Location end ) {
    for ( ;begin < end; ++begin )
       if ( *begin == '\n'  ||  *begin == '\r' )
          return true;
@@ -268,22 +251,19 @@ containsNewLine( Reader::Location begin,
 // //////////////////////////////////////////////////////////////////
 
 Reader::Reader()
-   : features_( Features::all() )
-{
+   : features_( Features::all() ) {
 }
 
 
 Reader::Reader( const Features &features )
-   : features_( features )
-{
+   : features_( features ) {
 }
 
 
 bool
 Reader::parse( const std::string &document, 
                Value &root,
-               bool collectComments )
-{
+               bool collectComments ) {
    document_ = document;
    const char *begin = document_.c_str();
    const char *end = begin + document_.length();
@@ -294,8 +274,7 @@ Reader::parse( const std::string &document,
 bool
 Reader::parse( std::istream& sin,
                Value &root,
-               bool collectComments )
-{
+               bool collectComments ) {
    //std::istream_iterator<char> begin(sin);
    //std::istream_iterator<char> end;
    // Those would allow streamed input from a file, if parse() were a
@@ -311,10 +290,8 @@ Reader::parse( std::istream& sin,
 bool 
 Reader::parse( const char *beginDoc, const char *endDoc, 
                Value &root,
-               bool collectComments )
-{
-   if ( !features_.allowComments_ )
-   {
+               bool collectComments ) {
+   if ( !features_.allowComments_ ) {
       collectComments = false;
    }
 
@@ -335,10 +312,8 @@ Reader::parse( const char *beginDoc, const char *endDoc,
    skipCommentTokens( token );
    if ( collectComments_  &&  !commentsBefore_.empty() )
       root.setComment( commentsBefore_, commentAfter );
-   if ( features_.strictRoot_ )
-   {
-      if ( !root.isArray()  &&  !root.isObject() )
-      {
+   if ( features_.strictRoot_ ) {
+      if ( !root.isArray()  &&  !root.isObject() ) {
          // Set error location to start of doc, ideally should be first token found in doc
          token.type_ = tokenError;
          token.start_ = beginDoc;
@@ -353,21 +328,18 @@ Reader::parse( const char *beginDoc, const char *endDoc,
 
 
 bool
-Reader::readValue()
-{
+Reader::readValue() {
    Token token;
    skipCommentTokens( token );
    bool successful = true;
 
-   if ( collectComments_  &&  !commentsBefore_.empty() )
-   {
+   if ( collectComments_  &&  !commentsBefore_.empty() ) {
       currentValue().setComment( commentsBefore_, commentBefore );
       commentsBefore_ = "";
    }
 
 
-   switch ( token.type_ )
-   {
+   switch ( token.type_ ) {
    case tokenObjectBegin:
       successful = readObject( token );
       break;
@@ -393,8 +365,7 @@ Reader::readValue()
       return addError( "Syntax error: value, object or array expected.", token );
    }
 
-   if ( collectComments_ )
-   {
+   if ( collectComments_ ) {
       lastValueEnd_ = current_;
       lastValue_ = &currentValue();
    }
@@ -404,26 +375,20 @@ Reader::readValue()
 
 
 void 
-Reader::skipCommentTokens( Token &token )
-{
-   if ( features_.allowComments_ )
-   {
-      do
-      {
+Reader::skipCommentTokens( Token &token ) {
+   if ( features_.allowComments_ ) {
+      do {
          readToken( token );
       }
       while ( token.type_ == tokenComment );
-   }
-   else
-   {
+   } else {
       readToken( token );
    }
 }
 
 
 bool 
-Reader::expectToken( TokenType type, Token &token, const char *message )
-{
+Reader::expectToken( TokenType type, Token &token, const char *message ) {
    readToken( token );
    if ( token.type_ != type )
       return addError( message, token );
@@ -432,14 +397,12 @@ Reader::expectToken( TokenType type, Token &token, const char *message )
 
 
 bool 
-Reader::readToken( Token &token )
-{
+Reader::readToken( Token &token ) {
    skipSpaces();
    token.start_ = current_;
    Char c = getNextChar();
    bool ok = true;
-   switch ( c )
-   {
+   switch ( c ) {
    case '{':
       token.type_ = tokenObjectBegin;
       break;
@@ -507,10 +470,8 @@ Reader::readToken( Token &token )
 
 
 void 
-Reader::skipSpaces()
-{
-   while ( current_ != end_ )
-   {
+Reader::skipSpaces() {
+   while ( current_ != end_ ) {
       Char c = *current_;
       if ( c == ' '  ||  c == '\t'  ||  c == '\r'  ||  c == '\n' )
          ++current_;
@@ -522,8 +483,7 @@ Reader::skipSpaces()
 
 bool 
 Reader::match( Location pattern, 
-               int patternLength )
-{
+               int patternLength ) {
    if ( end_ - current_ < patternLength )
       return false;
    int index = patternLength;
@@ -536,8 +496,7 @@ Reader::match( Location pattern,
 
 
 bool
-Reader::readComment()
-{
+Reader::readComment() {
    Location commentBegin = current_ - 1;
    Char c = getNextChar();
    bool successful = false;
@@ -548,8 +507,7 @@ Reader::readComment()
    if ( !successful )
       return false;
 
-   if ( collectComments_ )
-   {
+   if ( collectComments_ ) {
       CommentPlacement placement = commentBefore;
       if ( lastValueEnd_  &&  !containsNewLine( lastValueEnd_, commentBegin ) )
       {
@@ -566,16 +524,13 @@ Reader::readComment()
 void 
 Reader::addComment( Location begin, 
                     Location end, 
-                    CommentPlacement placement )
-{
+                    CommentPlacement placement ) {
    assert( collectComments_ );
    if ( placement == commentAfterOnSameLine )
    {
       assert( lastValue_ != 0 );
       lastValue_->setComment( std::string( begin, end ), placement );
-   }
-   else
-   {
+   } else {
       if ( !commentsBefore_.empty() )
          commentsBefore_ += "\n";
       commentsBefore_ += std::string( begin, end );
@@ -584,10 +539,8 @@ Reader::addComment( Location begin,
 
 
 bool 
-Reader::readCStyleComment()
-{
-   while ( current_ != end_ )
-   {
+Reader::readCStyleComment() {
+   while ( current_ != end_ ) {
       Char c = getNextChar();
       if ( c == '*'  &&  *current_ == '/' )
          break;
@@ -597,10 +550,8 @@ Reader::readCStyleComment()
 
 
 bool 
-Reader::readCppStyleComment()
-{
-   while ( current_ != end_ )
-   {
+Reader::readCppStyleComment() {
+   while ( current_ != end_ ) {
       Char c = getNextChar();
       if (  c == '\r'  ||  c == '\n' )
          break;
@@ -610,10 +561,8 @@ Reader::readCppStyleComment()
 
 
 void 
-Reader::readNumber()
-{
-   while ( current_ != end_ )
-   {
+Reader::readNumber() {
+   while ( current_ != end_ ) {
       if ( !(*current_ >= '0'  &&  *current_ <= '9')  &&
            !in( *current_, '.', 'e', 'E', '+', '-' ) )
          break;
@@ -622,11 +571,9 @@ Reader::readNumber()
 }
 
 bool
-Reader::readString()
-{
+Reader::readString() {
    Char c = 0;
-   while ( current_ != end_ )
-   {
+   while ( current_ != end_ ) {
       c = getNextChar();
       if ( c == '\\' )
          getNextChar();
@@ -638,13 +585,11 @@ Reader::readString()
 
 
 bool 
-Reader::readObject( Token &/*tokenStart*/ )
-{
+Reader::readObject( Token &/*tokenStart*/ ) {
    Token tokenName;
    std::string name;
    currentValue() = Value( objectValue );
-   while ( readToken( tokenName ) )
-   {
+   while ( readToken( tokenName ) ) {
       bool initialTokenOk = true;
       while ( tokenName.type_ == tokenComment  &&  initialTokenOk )
          initialTokenOk = readToken( tokenName );
@@ -660,8 +605,7 @@ Reader::readObject( Token &/*tokenStart*/ )
          return recoverFromError( tokenObjectEnd );
 
       Token colon;
-      if ( !readToken( colon ) ||  colon.type_ != tokenMemberSeparator )
-      {
+      if ( !readToken( colon ) ||  colon.type_ != tokenMemberSeparator ) {
          return addErrorAndRecover( "Missing ':' after object member name", 
                                     colon, 
                                     tokenObjectEnd );
@@ -677,8 +621,7 @@ Reader::readObject( Token &/*tokenStart*/ )
       if ( !readToken( comma )
             ||  ( comma.type_ != tokenObjectEnd  &&  
                   comma.type_ != tokenArraySeparator &&
-                  comma.type_ != tokenComment ) )
-      {
+                  comma.type_ != tokenComment ) ) {
          return addErrorAndRecover( "Missing ',' or '}' in object declaration", 
                                     comma, 
                                     tokenObjectEnd );
@@ -697,19 +640,16 @@ Reader::readObject( Token &/*tokenStart*/ )
 
 
 bool 
-Reader::readArray( Token &/*tokenStart*/ )
-{
+Reader::readArray( Token &/*tokenStart*/ ) {
    currentValue() = Value( arrayValue );
    skipSpaces();
-   if ( *current_ == ']' ) // empty array
-   {
+   if ( *current_ == ']' ) { // empty array
       Token endArray;
       readToken( endArray );
       return true;
    }
    int index = 0;
-   for (;;)
-   {
+   for (;;) {
       Value &value = currentValue()[ index++ ];
       nodes_.push( &value );
       bool ok = readValue();
@@ -720,14 +660,12 @@ Reader::readArray( Token &/*tokenStart*/ )
       Token token;
       // Accept Comment after last item in the array.
       ok = readToken( token );
-      while ( token.type_ == tokenComment  &&  ok )
-      {
+      while ( token.type_ == tokenComment  &&  ok ) {
          ok = readToken( token );
       }
       bool badTokenType = ( token.type_ != tokenArraySeparator  &&
                             token.type_ != tokenArrayEnd );
-      if ( !ok  ||  badTokenType )
-      {
+      if ( !ok  ||  badTokenType ) {
          return addErrorAndRecover( "Missing ',' or ']' in array declaration", 
                                     token, 
                                     tokenArrayEnd );
@@ -740,8 +678,7 @@ Reader::readArray( Token &/*tokenStart*/ )
 
 
 bool 
-Reader::decodeNumber( Token &token )
-{
+Reader::decodeNumber( Token &token ) {
    bool isDouble = false;
    for ( Location inspect = token.start_; inspect != token.end_; ++inspect )
    {
@@ -764,19 +701,16 @@ Reader::decodeNumber( Token &token )
    Value::UInt lastDigitThreshold = Value::UInt( maxIntegerValue % 10 );
    assert( lastDigitThreshold >=0  &&  lastDigitThreshold <= 9 );
    Value::LargestUInt value = 0;
-   while ( current < token.end_ )
-   {
+   while ( current < token.end_ ) {
       Char c = *current++;
       if ( c < '0'  ||  c > '9' )
          return addError( "'" + std::string( token.start_, token.end_ ) + "' is not a number.", token );
       Value::UInt digit(c - '0');
-      if ( value >= threshold )
-      {
+      if ( value >= threshold ) {
          // If the current digit is not the last one, or if it is
          // greater than the last digit of the maximum integer value,
          // the parse the number as a double.
-         if ( current != token.end_  ||  digit > lastDigitThreshold )
-         {
+         if ( current != token.end_  ||  digit > lastDigitThreshold ) {
             return decodeDouble( token );
          }
       }
@@ -793,21 +727,17 @@ Reader::decodeNumber( Token &token )
 
 
 bool 
-Reader::decodeDouble( Token &token )
-{
+Reader::decodeDouble( Token &token ) {
    double value = 0;
    const int bufferSize = 32;
    int count;
    int length = int(token.end_ - token.start_);
-   if ( length <= bufferSize )
-   {
+   if ( length <= bufferSize ) {
       Char buffer[bufferSize+1];
       memcpy( buffer, token.start_, length );
       buffer[length] = 0;
       count = sscanf( buffer, "%lf", &value );
-   }
-   else
-   {
+   } else {
       std::string buffer( token.start_, token.end_ );
       count = sscanf( buffer.c_str(), "%lf", &value );
    }
@@ -820,8 +750,7 @@ Reader::decodeDouble( Token &token )
 
 
 bool 
-Reader::decodeString( Token &token )
-{
+Reader::decodeString( Token &token ) {
    std::string decoded;
    if ( !decodeString( token, decoded ) )
       return false;
@@ -831,23 +760,19 @@ Reader::decodeString( Token &token )
 
 
 bool 
-Reader::decodeString( Token &token, std::string &decoded )
-{
+Reader::decodeString( Token &token, std::string &decoded ) {
    decoded.reserve( token.end_ - token.start_ - 2 );
    Location current = token.start_ + 1; // skip '"'
    Location end = token.end_ - 1;      // do not include '"'
-   while ( current != end )
-   {
+   while ( current != end ) {
       Char c = *current++;
       if ( c == '"' )
          break;
-      else if ( c == '\\' )
-      {
+      else if ( c == '\\' ) {
          if ( current == end )
             return addError( "Empty escape sequence in string", token, current );
          Char escape = *current++;
-         switch ( escape )
-         {
+         switch ( escape ) {
          case '"': decoded += '"'; break;
          case '/': decoded += '/'; break;
          case '\\': decoded += '\\'; break;
@@ -856,8 +781,7 @@ Reader::decodeString( Token &token, std::string &decoded )
          case 'n': decoded += '\n'; break;
          case 'r': decoded += '\r'; break;
          case 't': decoded += '\t'; break;
-         case 'u':
-            {
+         case 'u': {
                unsigned int unicode;
                if ( !decodeUnicodeCodePoint( token, current, end, unicode ) )
                   return false;
@@ -868,8 +792,7 @@ Reader::decodeString( Token &token, std::string &decoded )
             return addError( "Bad escape sequence in string", token, current );
          }
       }
-      else
-      {
+      else {
          decoded += c;
       }
    }
@@ -880,27 +803,21 @@ bool
 Reader::decodeUnicodeCodePoint( Token &token, 
                                      Location &current, 
                                      Location end, 
-                                     unsigned int &unicode )
-{
+                                     unsigned int &unicode ) {
 
    if ( !decodeUnicodeEscapeSequence( token, current, end, unicode ) )
       return false;
-   if (unicode >= 0xD800 && unicode <= 0xDBFF)
-   {
+   if (unicode >= 0xD800 && unicode <= 0xDBFF) {
       // surrogate pairs
       if (end - current < 6)
          return addError( "additional six characters expected to parse unicode surrogate pair.", token, current );
       unsigned int surrogatePair;
-      if (*(current++) == '\\' && *(current++)== 'u')
-      {
-         if (decodeUnicodeEscapeSequence( token, current, end, surrogatePair ))
-         {
+      if (*(current++) == '\\' && *(current++)== 'u') {
+         if (decodeUnicodeEscapeSequence( token, current, end, surrogatePair )) {
             unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
-         } 
-         else
+         } else
             return false;
-      } 
-      else
+      } else
          return addError( "expecting another \\u token to begin the second half of a unicode surrogate pair", token, current );
    }
    return true;
@@ -910,13 +827,11 @@ bool
 Reader::decodeUnicodeEscapeSequence( Token &token, 
                                      Location &current, 
                                      Location end, 
-                                     unsigned int &unicode )
-{
+                                     unsigned int &unicode ) {
    if ( end - current < 4 )
       return addError( "Bad unicode escape sequence in string: four digits expected.", token, current );
    unicode = 0;
-   for ( int index =0; index < 4; ++index )
-   {
+   for ( int index =0; index < 4; ++index ) {
       Char c = *current++;
       unicode *= 16;
       if ( c >= '0'  &&  c <= '9' )
@@ -935,8 +850,7 @@ Reader::decodeUnicodeEscapeSequence( Token &token,
 bool 
 Reader::addError( const std::string &message, 
                   Token &token,
-                  Location extra )
-{
+                  Location extra ) {
    ErrorInfo info;
    info.token_ = token;
    info.message_ = message;
@@ -947,12 +861,10 @@ Reader::addError( const std::string &message,
 
 
 bool 
-Reader::recoverFromError( TokenType skipUntilToken )
-{
+Reader::recoverFromError( TokenType skipUntilToken ) {
    int errorCount = int(errors_.size());
    Token skip;
-   for (;;)
-   {
+   for (;;) {
       if ( !readToken(skip) )
          errors_.resize( errorCount ); // discard errors caused by recovery
       if ( skip.type_ == skipUntilToken  ||  skip.type_ == tokenEndOfStream )
@@ -966,23 +878,20 @@ Reader::recoverFromError( TokenType skipUntilToken )
 bool 
 Reader::addErrorAndRecover( const std::string &message, 
                             Token &token,
-                            TokenType skipUntilToken )
-{
+                            TokenType skipUntilToken ) {
    addError( message, token );
    return recoverFromError( skipUntilToken );
 }
 
 
 Value &
-Reader::currentValue()
-{
+Reader::currentValue() {
    return *(nodes_.top());
 }
 
 
 Reader::Char 
-Reader::getNextChar()
-{
+Reader::getNextChar() {
    if ( current_ == end_ )
       return 0;
    return *current_++;
@@ -992,23 +901,18 @@ Reader::getNextChar()
 void 
 Reader::getLocationLineAndColumn( Location location,
                                   int &line,
-                                  int &column ) const
-{
+                                  int &column ) const {
    Location current = begin_;
    Location lastLineStart = current;
    line = 0;
-   while ( current < location  &&  current != end_ )
-   {
+   while ( current < location  &&  current != end_ ) {
       Char c = *current++;
-      if ( c == '\r' )
-      {
+      if ( c == '\r' ) {
          if ( *current == '\n' )
             ++current;
          lastLineStart = current;
          ++line;
-      }
-      else if ( c == '\n' )
-      {
+      } else if ( c == '\n' ) {
          lastLineStart = current;
          ++line;
       }
@@ -1020,8 +924,7 @@ Reader::getLocationLineAndColumn( Location location,
 
 
 std::string
-Reader::getLocationLineAndColumn( Location location ) const
-{
+Reader::getLocationLineAndColumn( Location location ) const {
    int line, column;
    getLocationLineAndColumn( location, line, column );
    char buffer[18+16+16+1];
@@ -1032,20 +935,17 @@ Reader::getLocationLineAndColumn( Location location ) const
 
 // Deprecated. Preserved for backward compatibility
 std::string 
-Reader::getFormatedErrorMessages() const
-{
+Reader::getFormatedErrorMessages() const {
     return getFormattedErrorMessages();
 }
 
 
 std::string 
-Reader::getFormattedErrorMessages() const
-{
+Reader::getFormattedErrorMessages() const {
    std::string formattedMessage;
    for ( Errors::const_iterator itError = errors_.begin();
          itError != errors_.end();
-         ++itError )
-   {
+         ++itError ) {
       const ErrorInfo &error = *itError;
       formattedMessage += "* " + getLocationLineAndColumn( error.token_.start_ ) + "\n";
       formattedMessage += "  " + error.message_ + "\n";
@@ -1056,8 +956,7 @@ Reader::getFormattedErrorMessages() const
 }
 
 
-std::istream& operator>>( std::istream &sin, Value &root )
-{
+std::istream& operator>>( std::istream &sin, Value &root ) {
     Json::Reader reader;
     bool ok = reader.parse(sin, root, true);
     //JSON_ASSERT( ok );
@@ -1110,15 +1009,13 @@ namespace Json {
  */
 template<typename AllocatedType
         ,const unsigned int objectPerAllocation>
-class BatchAllocator
-{
+class BatchAllocator {
 public:
    typedef AllocatedType Type;
 
    BatchAllocator( unsigned int objectsPerPage = 255 )
       : freeHead_( 0 )
-      , objectsPerPage_( objectsPerPage )
-   {
+      , objectsPerPage_( objectsPerPage ) {
 //      printf( "Size: %d => %s\n", sizeof(AllocatedType), typeid(AllocatedType).name() );
       assert( sizeof(AllocatedType) * objectPerAllocation >= sizeof(AllocatedType *) ); // We must be able to store a slist in the object free space.
       assert( objectsPerPage >= 16 );
@@ -1126,10 +1023,8 @@ public:
       currentBatch_ = batches_;
    }
 
-   ~BatchAllocator()
-   {
-      for ( BatchInfo *batch = batches_; batch;  )
-      {
+   ~BatchAllocator() {
+      for ( BatchInfo *batch = batches_; batch;  ) {
          BatchInfo *nextBatch = batch->next_;
          free( batch );
          batch = nextBatch;
@@ -1138,22 +1033,18 @@ public:
 
    /// allocate space for an array of objectPerAllocation object.
    /// @warning it is the responsability of the caller to call objects constructors.
-   AllocatedType *allocate()
-   {
-      if ( freeHead_ ) // returns node from free list.
-      {
+   AllocatedType *allocate() {
+      if ( freeHead_ ) { // returns node from free list.
          AllocatedType *object = freeHead_;
          freeHead_ = *(AllocatedType **)object;
          return object;
       }
-      if ( currentBatch_->used_ == currentBatch_->end_ )
-      {
+      if ( currentBatch_->used_ == currentBatch_->end_ ) {
          currentBatch_ = currentBatch_->next_;
          while ( currentBatch_  &&  currentBatch_->used_ == currentBatch_->end_ )
             currentBatch_ = currentBatch_->next_;
 
-         if ( !currentBatch_  ) // no free batch found, allocate a new one
-         { 
+         if ( !currentBatch_  ) { // no free batch found, allocate a new one
             currentBatch_ = allocateBatch( objectsPerPage_ );
             currentBatch_->next_ = batches_; // insert at the head of the list
             batches_ = currentBatch_;
@@ -1166,16 +1057,14 @@ public:
 
    /// Release the object.
    /// @warning it is the responsability of the caller to actually destruct the object.
-   void release( AllocatedType *object )
-   {
+   void release( AllocatedType *object ) {
       assert( object != 0 );
       *(AllocatedType **)object = freeHead_;
       freeHead_ = object;
    }
 
 private:
-   struct BatchInfo
-   {
+   struct BatchInfo {
       BatchInfo *next_;
       AllocatedType *used_;
       AllocatedType *end_;
@@ -1186,8 +1075,7 @@ private:
    BatchAllocator( const BatchAllocator & );
    void operator =( const BatchAllocator &);
 
-   static BatchInfo *allocateBatch( unsigned int objectsPerPage )
-   {
+   static BatchInfo *allocateBatch( unsigned int objectsPerPage ) {
       const unsigned int mallocSize = sizeof(BatchInfo) - sizeof(AllocatedType)* objectPerAllocation
                                 + sizeof(AllocatedType) * objectPerAllocation * objectsPerPage;
       BatchInfo *batch = static_cast<BatchInfo*>( malloc( mallocSize ) );
@@ -1245,13 +1133,11 @@ namespace Json {
 ValueIteratorBase::ValueIteratorBase()
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    : current_()
-   , isNull_( true )
-{
+   , isNull_( true ) {
 }
 #else
    : isArray_( true )
-   , isNull_( true )
-{
+   , isNull_( true ) {
    iterator_.array_ = ValueInternalArray::IteratorState();
 }
 #endif
@@ -1260,27 +1146,23 @@ ValueIteratorBase::ValueIteratorBase()
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
 ValueIteratorBase::ValueIteratorBase( const Value::ObjectValues::iterator &current )
    : current_( current )
-   , isNull_( false )
-{
+   , isNull_( false ) {
 }
 #else
 ValueIteratorBase::ValueIteratorBase( const ValueInternalArray::IteratorState &state )
-   : isArray_( true )
-{
+   : isArray_( true ) {
    iterator_.array_ = state;
 }
 
 
 ValueIteratorBase::ValueIteratorBase( const ValueInternalMap::IteratorState &state )
-   : isArray_( false )
-{
+   : isArray_( false ) {
    iterator_.map_ = state;
 }
 #endif
 
 Value &
-ValueIteratorBase::deref() const
-{
+ValueIteratorBase::deref() const {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    return current_->second;
 #else
@@ -1292,8 +1174,7 @@ ValueIteratorBase::deref() const
 
 
 void 
-ValueIteratorBase::increment()
-{
+ValueIteratorBase::increment() {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    ++current_;
 #else
@@ -1305,8 +1186,7 @@ ValueIteratorBase::increment()
 
 
 void 
-ValueIteratorBase::decrement()
-{
+ValueIteratorBase::decrement() {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    --current_;
 #else
@@ -1318,8 +1198,7 @@ ValueIteratorBase::decrement()
 
 
 ValueIteratorBase::difference_type 
-ValueIteratorBase::computeDistance( const SelfType &other ) const
-{
+ValueIteratorBase::computeDistance( const SelfType &other ) const {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
 # ifdef JSON_USE_CPPTL_SMALLMAP
    return current_ - other.current_;
@@ -1329,8 +1208,7 @@ ValueIteratorBase::computeDistance( const SelfType &other ) const
    // std::map::iterator. As begin() and end() are two instance 
    // of the default std::map::iterator, they can not be compared.
    // To allow this, we handle this comparison specifically.
-   if ( isNull_  &&  other.isNull_ )
-   {
+   if ( isNull_  &&  other.isNull_ ) {
       return 0;
    }
 
@@ -1340,8 +1218,7 @@ ValueIteratorBase::computeDistance( const SelfType &other ) const
    // Using a portable hand-made version for non random iterator instead:
    //   return difference_type( std::distance( current_, other.current_ ) );
    difference_type myDistance = 0;
-   for ( Value::ObjectValues::iterator it = current_; it != other.current_; ++it )
-   {
+   for ( Value::ObjectValues::iterator it = current_; it != other.current_; ++it ) {
       ++myDistance;
    }
    return myDistance;
@@ -1355,11 +1232,9 @@ ValueIteratorBase::computeDistance( const SelfType &other ) const
 
 
 bool 
-ValueIteratorBase::isEqual( const SelfType &other ) const
-{
+ValueIteratorBase::isEqual( const SelfType &other ) const {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
-   if ( isNull_ )
-   {
+   if ( isNull_ ) {
       return other.isNull_;
    }
    return current_ == other.current_;
@@ -1372,8 +1247,7 @@ ValueIteratorBase::isEqual( const SelfType &other ) const
 
 
 void 
-ValueIteratorBase::copy( const SelfType &other )
-{
+ValueIteratorBase::copy( const SelfType &other ) {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    current_ = other.current_;
 #else
@@ -1385,12 +1259,10 @@ ValueIteratorBase::copy( const SelfType &other )
 
 
 Value 
-ValueIteratorBase::key() const
-{
+ValueIteratorBase::key() const {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    const Value::CZString czstring = (*current_).first;
-   if ( czstring.c_str() )
-   {
+   if ( czstring.c_str() ) {
       if ( czstring.isStaticString() )
          return Value( StaticString( czstring.c_str() ) );
       return Value( czstring.c_str() );
@@ -1409,8 +1281,7 @@ ValueIteratorBase::key() const
 
 
 UInt 
-ValueIteratorBase::index() const
-{
+ValueIteratorBase::index() const {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    const Value::CZString czstring = (*current_).first;
    if ( !czstring.c_str() )
@@ -1425,8 +1296,7 @@ ValueIteratorBase::index() const
 
 
 const char *
-ValueIteratorBase::memberName() const
-{
+ValueIteratorBase::memberName() const {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    const char *name = (*current_).first.c_str();
    return name ? name : "";
@@ -1446,31 +1316,26 @@ ValueIteratorBase::memberName() const
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueConstIterator::ValueConstIterator()
-{
+ValueConstIterator::ValueConstIterator() {
 }
 
 
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
 ValueConstIterator::ValueConstIterator( const Value::ObjectValues::iterator &current )
-   : ValueIteratorBase( current )
-{
+   : ValueIteratorBase( current ) {
 }
 #else
 ValueConstIterator::ValueConstIterator( const ValueInternalArray::IteratorState &state )
-   : ValueIteratorBase( state )
-{
+   : ValueIteratorBase( state ) {
 }
 
 ValueConstIterator::ValueConstIterator( const ValueInternalMap::IteratorState &state )
-   : ValueIteratorBase( state )
-{
+   : ValueIteratorBase( state ) {
 }
 #endif
 
 ValueConstIterator &
-ValueConstIterator::operator =( const ValueIteratorBase &other )
-{
+ValueConstIterator::operator =( const ValueIteratorBase &other ) {
    copy( other );
    return *this;
 }
@@ -1484,41 +1349,34 @@ ValueConstIterator::operator =( const ValueIteratorBase &other )
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueIterator::ValueIterator()
-{
+ValueIterator::ValueIterator() {
 }
 
 
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
 ValueIterator::ValueIterator( const Value::ObjectValues::iterator &current )
-   : ValueIteratorBase( current )
-{
+   : ValueIteratorBase( current ) {
 }
 #else
 ValueIterator::ValueIterator( const ValueInternalArray::IteratorState &state )
-   : ValueIteratorBase( state )
-{
+   : ValueIteratorBase( state ) {
 }
 
 ValueIterator::ValueIterator( const ValueInternalMap::IteratorState &state )
-   : ValueIteratorBase( state )
-{
+   : ValueIteratorBase( state ) {
 }
 #endif
 
 ValueIterator::ValueIterator( const ValueConstIterator &other )
-   : ValueIteratorBase( other )
-{
+   : ValueIteratorBase( other ) {
 }
 
 ValueIterator::ValueIterator( const ValueIterator &other )
-   : ValueIteratorBase( other )
-{
+   : ValueIteratorBase( other ) {
 }
 
 ValueIterator &
-ValueIterator::operator =( const SelfType &other )
-{
+ValueIterator::operator =( const SelfType &other ) {
    copy( other );
    return *this;
 }
@@ -1592,8 +1450,7 @@ static const unsigned int unknown = (unsigned)-1;
  */
 static inline char *
 duplicateStringValue( const char *value, 
-                      unsigned int length = unknown )
-{
+                      unsigned int length = unknown ) {
    if ( length == unknown )
       length = (unsigned int)strlen(value);
    char *newString = static_cast<char *>( malloc( length + 1 ) );
@@ -1607,8 +1464,7 @@ duplicateStringValue( const char *value,
 /** Free the string duplicated by duplicateStringValue().
  */
 static inline void 
-releaseStringValue( char *value )
-{
+releaseStringValue( char *value ) {
    if ( value )
       free( value );
 }
@@ -1644,20 +1500,17 @@ namespace Json {
 
 
 Value::CommentInfo::CommentInfo()
-   : comment_( 0 )
-{
+   : comment_( 0 ) {
 }
 
-Value::CommentInfo::~CommentInfo()
-{
+Value::CommentInfo::~CommentInfo() {
    if ( comment_ )
       releaseStringValue( comment_ );
 }
 
 
 void 
-Value::CommentInfo::setComment( const char *text )
-{
+Value::CommentInfo::setComment( const char *text ) {
    if ( comment_ )
       releaseStringValue( comment_ );
    JSON_ASSERT( text != 0 );
@@ -1681,15 +1534,13 @@ Value::CommentInfo::setComment( const char *text )
 
 Value::CZString::CZString( ArrayIndex index )
    : cstr_( 0 )
-   , index_( index )
-{
+   , index_( index ) {
 }
 
 Value::CZString::CZString( const char *cstr, DuplicationPolicy allocate )
    : cstr_( allocate == duplicate ? duplicateStringValue(cstr) 
                                   : cstr )
-   , index_( allocate )
-{
+   , index_( allocate ) {
 }
 
 Value::CZString::CZString( const CZString &other )
@@ -1697,42 +1548,36 @@ Value::CZString::CZString( const CZString &other )
                 ?  duplicateStringValue( other.cstr_ )
                 : other.cstr_ )
    , index_( other.cstr_ ? (other.index_ == noDuplication ? noDuplication : duplicate)
-                         : other.index_ )
-{
+                         : other.index_ ) {
 }
 
-Value::CZString::~CZString()
-{
+Value::CZString::~CZString() {
    if ( cstr_  &&  index_ == duplicate )
       releaseStringValue( const_cast<char *>( cstr_ ) );
 }
 
 void 
-Value::CZString::swap( CZString &other )
-{
+Value::CZString::swap( CZString &other ) {
    std::swap( cstr_, other.cstr_ );
    std::swap( index_, other.index_ );
 }
 
 Value::CZString &
-Value::CZString::operator =( const CZString &other )
-{
+Value::CZString::operator =( const CZString &other ) {
    CZString temp( other );
    swap( temp );
    return *this;
 }
 
 bool 
-Value::CZString::operator<( const CZString &other ) const 
-{
+Value::CZString::operator<( const CZString &other ) const  {
    if ( cstr_ )
       return strcmp( cstr_, other.cstr_ ) < 0;
    return index_ < other.index_;
 }
 
 bool 
-Value::CZString::operator==( const CZString &other ) const 
-{
+Value::CZString::operator==( const CZString &other ) const  {
    if ( cstr_ )
       return strcmp( cstr_, other.cstr_ ) == 0;
    return index_ == other.index_;
@@ -1740,21 +1585,18 @@ Value::CZString::operator==( const CZString &other ) const
 
 
 ArrayIndex 
-Value::CZString::index() const
-{
+Value::CZString::index() const {
    return index_;
 }
 
 
 const char *
-Value::CZString::c_str() const
-{
+Value::CZString::c_str() const {
    return cstr_;
 }
 
 bool 
-Value::CZString::isStaticString() const
-{
+Value::CZString::isStaticString() const {
    return index_ == noDuplication;
 }
 
@@ -1781,8 +1623,7 @@ Value::Value( ValueType type )
    , itemIsUsed_( 0 )
 #endif
 {
-   switch ( type )
-   {
+   switch ( type ) {
    case nullValue:
       break;
    case intValue:
@@ -1904,7 +1745,7 @@ Value::Value( const std::string &value )
    , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
-#endif
+#endif 
 {
    value_.string_ = duplicateStringValue( value.c_str(), 
                                           (unsigned int)value.length() );
@@ -1954,8 +1795,7 @@ Value::Value( const Value &other )
    , itemIsUsed_( 0 )
 #endif
 {
-   switch ( type_ )
-   {
+   switch ( type_ ) {
    case nullValue:
    case intValue:
    case uintValue:
@@ -1964,8 +1804,7 @@ Value::Value( const Value &other )
       value_ = other.value_;
       break;
    case stringValue:
-      if ( other.value_.string_ )
-      {
+      if ( other.value_.string_ ) {
          value_.string_ = duplicateStringValue( other.value_.string_ );
          allocated_ = true;
       }
@@ -1988,11 +1827,9 @@ Value::Value( const Value &other )
    default:
       JSON_ASSERT_UNREACHABLE;
    }
-   if ( other.comments_ )
-   {
+   if ( other.comments_ ) {
       comments_ = new CommentInfo[numberOfCommentPlacement];
-      for ( int comment =0; comment < numberOfCommentPlacement; ++comment )
-      {
+      for ( int comment =0; comment < numberOfCommentPlacement; ++comment ) {
          const CommentInfo &otherComment = other.comments_[comment];
          if ( otherComment.comment_ )
             comments_[comment].setComment( otherComment.comment_ );
@@ -2001,10 +1838,8 @@ Value::Value( const Value &other )
 }
 
 
-Value::~Value()
-{
-   switch ( type_ )
-   {
+Value::~Value() {
+   switch ( type_ ) {
    case nullValue:
    case intValue:
    case uintValue:
@@ -2037,16 +1872,14 @@ Value::~Value()
 }
 
 Value &
-Value::operator=( const Value &other )
-{
+Value::operator=( const Value &other ) {
    Value temp( other );
    swap( temp );
    return *this;
 }
 
 void 
-Value::swap( Value &other )
-{
+Value::swap( Value &other ) {
    ValueType temp = type_;
    type_ = other.type_;
    other.type_ = temp;
@@ -2057,15 +1890,13 @@ Value::swap( Value &other )
 }
 
 ValueType 
-Value::type() const
-{
+Value::type() const {
    return type_;
 }
 
 
 int 
-Value::compare( const Value &other ) const
-{
+Value::compare( const Value &other ) const {
    if ( *this < other )
       return -1;
    if ( *this > other )
@@ -2075,13 +1906,11 @@ Value::compare( const Value &other ) const
 
 
 bool 
-Value::operator <( const Value &other ) const
-{
+Value::operator <( const Value &other ) const {
    int typeDelta = type_ - other.type_;
    if ( typeDelta )
       return typeDelta < 0 ? true : false;
-   switch ( type_ )
-   {
+   switch ( type_ ) {
    case nullValue:
       return false;
    case intValue:
@@ -2099,8 +1928,7 @@ Value::operator <( const Value &other ) const
                   && strcmp( value_.string_, other.value_.string_ ) < 0 );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
-   case objectValue:
-      {
+   case objectValue: {
          int delta = int( value_.map_->size() - other.value_.map_->size() );
          if ( delta )
             return delta < 0;
@@ -2119,26 +1947,22 @@ Value::operator <( const Value &other ) const
 }
 
 bool 
-Value::operator <=( const Value &other ) const
-{
+Value::operator <=( const Value &other ) const {
    return !(other < *this);
 }
 
 bool 
-Value::operator >=( const Value &other ) const
-{
+Value::operator >=( const Value &other ) const {
    return !(*this < other);
 }
 
 bool 
-Value::operator >( const Value &other ) const
-{
+Value::operator >( const Value &other ) const {
    return other < *this;
 }
 
 bool 
-Value::operator ==( const Value &other ) const
-{
+Value::operator ==( const Value &other ) const {
    //if ( type_ != other.type_ )
    // GCC 2.95.3 says:
    // attempt to take address of bit-field structure member `Json::Value::type_'
@@ -2146,8 +1970,7 @@ Value::operator ==( const Value &other ) const
    int temp = other.type_;
    if ( type_ != temp )
       return false;
-   switch ( type_ )
-   {
+   switch ( type_ ) {
    case nullValue:
       return true;
    case intValue:
@@ -2187,18 +2010,15 @@ Value::operator !=( const Value &other ) const
 }
 
 const char *
-Value::asCString() const
-{
+Value::asCString() const {
    JSON_ASSERT( type_ == stringValue );
    return value_.string_;
 }
 
 
 std::string 
-Value::asString() const
-{
-   switch ( type_ )
-   {
+Value::asString() const {
+   switch ( type_ ) {
    case nullValue:
       return "";
    case stringValue:
@@ -2227,8 +2047,7 @@ Value::asConstString() const
 
 
 Value::Int 
-Value::asInt() const
-{
+Value::asInt() const {
    switch ( type_ )
    {
    case nullValue:
@@ -2256,10 +2075,8 @@ Value::asInt() const
 
 
 Value::UInt 
-Value::asUInt() const
-{
-   switch ( type_ )
-   {
+Value::asUInt() const {
+   switch ( type_ ) {
    case nullValue:
       return 0;
    case intValue:
@@ -2288,10 +2105,8 @@ Value::asUInt() const
 # if defined(JSON_HAS_INT64)
 
 Value::Int64
-Value::asInt64() const
-{
-   switch ( type_ )
-   {
+Value::asInt64() const {
+   switch ( type_ ) {
    case nullValue:
       return 0;
    case intValue:
@@ -2316,10 +2131,8 @@ Value::asInt64() const
 
 
 Value::UInt64
-Value::asUInt64() const
-{
-   switch ( type_ )
-   {
+Value::asUInt64() const {
+   switch ( type_ ) {
    case nullValue:
       return 0;
    case intValue:
@@ -2345,8 +2158,7 @@ Value::asUInt64() const
 
 
 LargestInt 
-Value::asLargestInt() const
-{
+Value::asLargestInt() const {
 #if defined(JSON_NO_INT64)
     return asInt();
 #else
@@ -2356,8 +2168,7 @@ Value::asLargestInt() const
 
 
 LargestUInt 
-Value::asLargestUInt() const
-{
+Value::asLargestUInt() const {
 #if defined(JSON_NO_INT64)
     return asUInt();
 #else
@@ -2367,10 +2178,8 @@ Value::asLargestUInt() const
 
 
 double 
-Value::asDouble() const
-{
-   switch ( type_ )
-   {
+Value::asDouble() const {
+   switch ( type_ ) {
    case nullValue:
       return 0.0;
    case intValue:
@@ -2396,10 +2205,8 @@ Value::asDouble() const
 }
 
 float
-Value::asFloat() const
-{
-   switch ( type_ )
-   {
+Value::asFloat() const {
+   switch ( type_ ) {
    case nullValue:
       return 0.0f;
    case intValue:
@@ -2425,10 +2232,8 @@ Value::asFloat() const
 }
 
 bool 
-Value::asBool() const
-{
-   switch ( type_ )
-   {
+Value::asBool() const {
+   switch ( type_ ) {
    case nullValue:
       return false;
    case intValue:
@@ -2451,10 +2256,8 @@ Value::asBool() const
 
 
 bool 
-Value::isConvertibleTo( ValueType other ) const
-{
-   switch ( type_ )
-   {
+Value::isConvertibleTo( ValueType other ) const {
+   switch ( type_ ) {
    case nullValue:
       return true;
    case intValue:
@@ -2503,10 +2306,8 @@ Value::isConvertibleTo( ValueType other ) const
 
 /// Number of values in array or object
 ArrayIndex 
-Value::size() const
-{
-   switch ( type_ )
-   {
+Value::size() const {
+   switch ( type_ ) {
    case nullValue:
    case intValue:
    case uintValue:
@@ -2516,8 +2317,7 @@ Value::size() const
       return 0;
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:  // size of the array is highest index + 1
-      if ( !value_.map_->empty() )
-      {
+      if ( !value_.map_->empty() ) {
          ObjectValues::const_iterator itLast = value_.map_->end();
          --itLast;
          return (*itLast).first.index()+1;
@@ -2539,8 +2339,7 @@ Value::size() const
 
 
 bool 
-Value::empty() const
-{
+Value::empty() const {
    if ( isNull() || isArray() || isObject() )
       return size() == 0u;
    else
@@ -2549,15 +2348,13 @@ Value::empty() const
 
 
 bool
-Value::operator!() const
-{
+Value::operator!() const {
    return isNull();
 }
 
 
 void 
-Value::clear()
-{
+Value::clear() {
    JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue  || type_ == objectValue );
 
    switch ( type_ )
@@ -2581,8 +2378,7 @@ Value::clear()
 }
 
 void 
-Value::resize( ArrayIndex newSize )
-{
+Value::resize( ArrayIndex newSize ) {
    JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
    if ( type_ == nullValue )
       *this = Value( arrayValue );
@@ -2592,8 +2388,7 @@ Value::resize( ArrayIndex newSize )
       clear();
    else if ( newSize > oldSize )
       (*this)[ newSize - 1 ];
-   else
-   {
+   else {
       for ( ArrayIndex index = newSize; index < oldSize; ++index )
       {
          value_.map_->erase( index );
@@ -2607,8 +2402,7 @@ Value::resize( ArrayIndex newSize )
 
 
 Value &
-Value::operator[]( ArrayIndex index )
-{
+Value::operator[]( ArrayIndex index ) {
    JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
    if ( type_ == nullValue )
       *this = Value( arrayValue );
@@ -2628,16 +2422,14 @@ Value::operator[]( ArrayIndex index )
 
 
 Value &
-Value::operator[]( int index )
-{
+Value::operator[]( int index ) {
    JSON_ASSERT( index >= 0 );
    return (*this)[ ArrayIndex(index) ];
 }
 
 
 const Value &
-Value::operator[]( ArrayIndex index ) const
-{
+Value::operator[]( ArrayIndex index ) const {
    JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
    if ( type_ == nullValue )
       return null;
@@ -2655,24 +2447,21 @@ Value::operator[]( ArrayIndex index ) const
 
 
 const Value &
-Value::operator[]( int index ) const
-{
+Value::operator[]( int index ) const {
    JSON_ASSERT( index >= 0 );
    return (*this)[ ArrayIndex(index) ];
 }
 
 
 Value &
-Value::operator[]( const char *key )
-{
+Value::operator[]( const char *key ) {
    return resolveReference( key, false );
 }
 
 
 Value &
 Value::resolveReference( const char *key, 
-                         bool isStatic )
-{
+                         bool isStatic ) {
    JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
    if ( type_ == nullValue )
       *this = Value( objectValue );
@@ -2695,24 +2484,21 @@ Value::resolveReference( const char *key,
 
 Value 
 Value::get( ArrayIndex index, 
-            const Value &defaultValue ) const
-{
+            const Value &defaultValue ) const {
    const Value *value = &((*this)[index]);
    return value == &null ? defaultValue : *value;
 }
 
 
 bool 
-Value::isValidIndex( ArrayIndex index ) const
-{
+Value::isValidIndex( ArrayIndex index ) const {
    return index < size();
 }
 
 
 
 const Value &
-Value::operator[]( const char *key ) const
-{
+Value::operator[]( const char *key ) const {
    JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
    if ( type_ == nullValue )
       return null;
@@ -2730,52 +2516,45 @@ Value::operator[]( const char *key ) const
 
 
 Value &
-Value::operator[]( const std::string &key )
-{
+Value::operator[]( const std::string &key ) {
    return (*this)[ key.c_str() ];
 }
 
 
 const Value &
-Value::operator[]( const std::string &key ) const
-{
+Value::operator[]( const std::string &key ) const {
    return (*this)[ key.c_str() ];
 }
 
 Value &
-Value::operator[]( const StaticString &key )
-{
+Value::operator[]( const StaticString &key ) {
    return resolveReference( key, true );
 }
 
 
 # ifdef JSON_USE_CPPTL
 Value &
-Value::operator[]( const CppTL::ConstString &key )
-{
+Value::operator[]( const CppTL::ConstString &key ) {
    return (*this)[ key.c_str() ];
 }
 
 
 const Value &
-Value::operator[]( const CppTL::ConstString &key ) const
-{
+Value::operator[]( const CppTL::ConstString &key ) const {
    return (*this)[ key.c_str() ];
 }
 # endif
 
 
 Value &
-Value::append( const Value &value )
-{
+Value::append( const Value &value ) {
    return (*this)[size()] = value;
 }
 
 
 Value 
 Value::get( const char *key, 
-            const Value &defaultValue ) const
-{
+            const Value &defaultValue ) const {
    const Value *value = &((*this)[key]);
    return value == &null ? defaultValue : *value;
 }
@@ -2783,14 +2562,12 @@ Value::get( const char *key,
 
 Value 
 Value::get( const std::string &key,
-            const Value &defaultValue ) const
-{
+            const Value &defaultValue ) const {
    return get( key.c_str(), defaultValue );
 }
 
 Value
-Value::removeMember( const char* key )
-{
+Value::removeMember( const char* key ) {
    JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
    if ( type_ == nullValue )
       return null;
@@ -2815,46 +2592,40 @@ Value::removeMember( const char* key )
 }
 
 Value
-Value::removeMember( const std::string &key )
-{
+Value::removeMember( const std::string &key ) {
    return removeMember( key.c_str() );
 }
 
 # ifdef JSON_USE_CPPTL
 Value 
 Value::get( const CppTL::ConstString &key,
-            const Value &defaultValue ) const
-{
+            const Value &defaultValue ) const {
    return get( key.c_str(), defaultValue );
 }
 # endif
 
 bool 
-Value::isMember( const char *key ) const
-{
+Value::isMember( const char *key ) const {
    const Value *value = &((*this)[key]);
    return value != &null;
 }
 
 
 bool 
-Value::isMember( const std::string &key ) const
-{
+Value::isMember( const std::string &key ) const {
    return isMember( key.c_str() );
 }
 
 
 # ifdef JSON_USE_CPPTL
 bool 
-Value::isMember( const CppTL::ConstString &key ) const
-{
+Value::isMember( const CppTL::ConstString &key ) const {
    return isMember( key.c_str() );
 }
 #endif
 
 Value::Members 
-Value::getMemberNames() const
-{
+Value::getMemberNames() const {
    JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
    if ( type_ == nullValue )
        return Value::Members();
@@ -2903,36 +2674,31 @@ Value::getMemberNames() const
 
 
 bool
-Value::isNull() const
-{
+Value::isNull() const {
    return type_ == nullValue;
 }
 
 
 bool 
-Value::isBool() const
-{
+Value::isBool() const {
    return type_ == booleanValue;
 }
 
 
 bool 
-Value::isInt() const
-{
+Value::isInt() const {
    return type_ == intValue;
 }
 
 
 bool 
-Value::isUInt() const
-{
+Value::isUInt() const {
    return type_ == uintValue;
 }
 
 
 bool 
-Value::isIntegral() const
-{
+Value::isIntegral() const {
    return type_ == intValue  
           ||  type_ == uintValue  
           ||  type_ == booleanValue;
@@ -2940,44 +2706,38 @@ Value::isIntegral() const
 
 
 bool 
-Value::isDouble() const
-{
+Value::isDouble() const {
    return type_ == realValue;
 }
 
 
 bool 
-Value::isNumeric() const
-{
+Value::isNumeric() const {
    return isIntegral() || isDouble();
 }
 
 
 bool 
-Value::isString() const
-{
+Value::isString() const {
    return type_ == stringValue;
 }
 
 
 bool 
-Value::isArray() const
-{
+Value::isArray() const {
    return type_ == nullValue  ||  type_ == arrayValue;
 }
 
 
 bool 
-Value::isObject() const
-{
+Value::isObject() const {
    return type_ == nullValue  ||  type_ == objectValue;
 }
 
 
 void 
 Value::setComment( const char *comment,
-                   CommentPlacement placement )
-{
+                   CommentPlacement placement ) {
    if ( !comments_ )
       comments_ = new CommentInfo[numberOfCommentPlacement];
    comments_[placement].setComment( comment );
@@ -2986,21 +2746,18 @@ Value::setComment( const char *comment,
 
 void 
 Value::setComment( const std::string &comment,
-                   CommentPlacement placement )
-{
+                   CommentPlacement placement ) {
    setComment( comment.c_str(), placement );
 }
 
 
 bool 
-Value::hasComment( CommentPlacement placement ) const
-{
+Value::hasComment( CommentPlacement placement ) const {
    return comments_ != 0  &&  comments_[placement].comment_ != 0;
 }
 
 std::string 
-Value::getComment( CommentPlacement placement ) const
-{
+Value::getComment( CommentPlacement placement ) const {
    if ( hasComment(placement) )
       return comments_[placement].comment_;
    return "";
@@ -3008,30 +2765,25 @@ Value::getComment( CommentPlacement placement ) const
 
 
 std::string 
-Value::toStyledString() const
-{
+Value::toStyledString() const {
    StyledWriter writer;
    return writer.write( *this );
 }
 
 
 Value::const_iterator 
-Value::begin() const
-{
-   switch ( type_ )
-   {
+Value::begin() const {
+   switch ( type_ ) {
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
-      if ( value_.array_ )
-      {
+      if ( value_.array_ ) {
          ValueInternalArray::IteratorState it;
          value_.array_->makeBeginIterator( it );
          return const_iterator( it );
       }
       break;
    case objectValue:
-      if ( value_.map_ )
-      {
+      if ( value_.map_ ) {
          ValueInternalMap::IteratorState it;
          value_.map_->makeBeginIterator( it );
          return const_iterator( it );
@@ -3051,22 +2803,18 @@ Value::begin() const
 }
 
 Value::const_iterator 
-Value::end() const
-{
-   switch ( type_ )
-   {
+Value::end() const {
+   switch ( type_ ) {
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
-      if ( value_.array_ )
-      {
+      if ( value_.array_ ) {
          ValueInternalArray::IteratorState it;
          value_.array_->makeEndIterator( it );
          return const_iterator( it );
       }
       break;
    case objectValue:
-      if ( value_.map_ )
-      {
+      if ( value_.map_ ) {
          ValueInternalMap::IteratorState it;
          value_.map_->makeEndIterator( it );
          return const_iterator( it );
@@ -3087,22 +2835,18 @@ Value::end() const
 
 
 Value::iterator 
-Value::begin()
-{
-   switch ( type_ )
-   {
+Value::begin() {
+   switch ( type_ ) {
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
-      if ( value_.array_ )
-      {
+      if ( value_.array_ ) {
          ValueInternalArray::IteratorState it;
          value_.array_->makeBeginIterator( it );
          return iterator( it );
       }
       break;
    case objectValue:
-      if ( value_.map_ )
-      {
+      if ( value_.map_ ) {
          ValueInternalMap::IteratorState it;
          value_.map_->makeBeginIterator( it );
          return iterator( it );
@@ -3122,22 +2866,18 @@ Value::begin()
 }
 
 Value::iterator 
-Value::end()
-{
-   switch ( type_ )
-   {
+Value::end() {
+   switch ( type_ ) {
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:
-      if ( value_.array_ )
-      {
+      if ( value_.array_ ) {
          ValueInternalArray::IteratorState it;
          value_.array_->makeEndIterator( it );
          return iterator( it );
       }
       break;
    case objectValue:
-      if ( value_.map_ )
-      {
+      if ( value_.map_ ) {
          ValueInternalMap::IteratorState it;
          value_.map_->makeEndIterator( it );
          return iterator( it );
@@ -3161,29 +2901,25 @@ Value::end()
 // //////////////////////////////////////////////////////////////////
 
 PathArgument::PathArgument()
-   : kind_( kindNone )
-{
+   : kind_( kindNone ) {
 }
 
 
 PathArgument::PathArgument( ArrayIndex index )
    : index_( index )
-   , kind_( kindIndex )
-{
+   , kind_( kindIndex ) {
 }
 
 
 PathArgument::PathArgument( const char *key )
    : key_( key )
-   , kind_( kindKey )
-{
+   , kind_( kindKey ) {
 }
 
 
 PathArgument::PathArgument( const std::string &key )
    : key_( key.c_str() )
-   , kind_( kindKey )
-{
+   , kind_( kindKey ) {
 }
 
 // class Path
@@ -3194,8 +2930,7 @@ Path::Path( const std::string &path,
             const PathArgument &a2,
             const PathArgument &a3,
             const PathArgument &a4,
-            const PathArgument &a5 )
-{
+            const PathArgument &a5 ) {
    InArgs in;
    in.push_back( &a1 );
    in.push_back( &a2 );
@@ -3208,20 +2943,16 @@ Path::Path( const std::string &path,
 
 void 
 Path::makePath( const std::string &path,
-                const InArgs &in )
-{
+                const InArgs &in ) {
    const char *current = path.c_str();
    const char *end = current + path.length();
    InArgs::const_iterator itInArg = in.begin();
-   while ( current != end )
-   {
-      if ( *current == '[' )
-      {
+   while ( current != end ) {
+      if ( *current == '[' ) {
          ++current;
          if ( *current == '%' )
             addPathInArg( path, in, itInArg, PathArgument::kindIndex );
-         else
-         {
+         else {
             ArrayIndex index = 0;
             for ( ; current != end && *current >= '0'  &&  *current <= '9'; ++current )
                index = index * 10 + ArrayIndex(*current - '0');
@@ -3230,17 +2961,13 @@ Path::makePath( const std::string &path,
          if ( current == end  ||  *current++ != ']' )
             invalidPath( path, int(current - path.c_str()) );
       }
-      else if ( *current == '%' )
-      {
+      else if ( *current == '%' ) {
          addPathInArg( path, in, itInArg, PathArgument::kindKey );
          ++current;
       }
-      else if ( *current == '.' )
-      {
+      else if ( *current == '.' ) {
          ++current;
-      }
-      else
-      {
+      } else {
          const char *beginName = current;
          while ( current != end  &&  !strchr( "[.", *current ) )
             ++current;
@@ -3254,18 +2981,12 @@ void
 Path::addPathInArg( const std::string &path, 
                     const InArgs &in, 
                     InArgs::const_iterator &itInArg, 
-                    PathArgument::Kind kind )
-{
-   if ( itInArg == in.end() )
-   {
+                    PathArgument::Kind kind ) {
+   if ( itInArg == in.end() ) {
       // Error: missing argument %d
-   }
-   else if ( (*itInArg)->kind_ != kind )
-   {
+   } else if ( (*itInArg)->kind_ != kind ) {
       // Error: bad argument type
-   }
-   else
-   {
+   } else {
       args_.push_back( **itInArg );
    }
 }
@@ -3273,36 +2994,27 @@ Path::addPathInArg( const std::string &path,
 
 void 
 Path::invalidPath( const std::string &path, 
-                   int location )
-{
+                   int location ) {
    // Error: invalid path.
 }
 
 
 const Value &
-Path::resolve( const Value &root ) const
-{
+Path::resolve( const Value &root ) const {
    const Value *node = &root;
-   for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it )
-   {
+   for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it ) {
       const PathArgument &arg = *it;
-      if ( arg.kind_ == PathArgument::kindIndex )
-      {
-         if ( !node->isArray()  ||  node->isValidIndex( arg.index_ ) )
-         {
+      if ( arg.kind_ == PathArgument::kindIndex ) {
+         if ( !node->isArray()  ||  node->isValidIndex( arg.index_ ) ) {
             // Error: unable to resolve path (array value expected at position...
          }
          node = &((*node)[arg.index_]);
-      }
-      else if ( arg.kind_ == PathArgument::kindKey )
-      {
-         if ( !node->isObject() )
-         {
+      } else if ( arg.kind_ == PathArgument::kindKey ) {
+         if ( !node->isObject() ) {
             // Error: unable to resolve path (object value expected at position...)
          }
          node = &((*node)[arg.key_]);
-         if ( node == &Value::null )
-         {
+         if ( node == &Value::null ) {
             // Error: unable to resolve path (object has no member named '' at position...)
          }
       }
@@ -3313,20 +3025,15 @@ Path::resolve( const Value &root ) const
 
 Value 
 Path::resolve( const Value &root, 
-               const Value &defaultValue ) const
-{
+               const Value &defaultValue ) const {
    const Value *node = &root;
-   for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it )
-   {
+   for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it ) {
       const PathArgument &arg = *it;
-      if ( arg.kind_ == PathArgument::kindIndex )
-      {
+      if ( arg.kind_ == PathArgument::kindIndex ) {
          if ( !node->isArray()  ||  node->isValidIndex( arg.index_ ) )
             return defaultValue;
          node = &((*node)[arg.index_]);
-      }
-      else if ( arg.kind_ == PathArgument::kindKey )
-      {
+      } else if ( arg.kind_ == PathArgument::kindKey ) {
          if ( !node->isObject() )
             return defaultValue;
          node = &((*node)[arg.key_]);
@@ -3339,24 +3046,17 @@ Path::resolve( const Value &root,
 
 
 Value &
-Path::make( Value &root ) const
-{
+Path::make( Value &root ) const {
    Value *node = &root;
-   for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it )
-   {
+   for ( Args::const_iterator it = args_.begin(); it != args_.end(); ++it ) {
       const PathArgument &arg = *it;
-      if ( arg.kind_ == PathArgument::kindIndex )
-      {
-         if ( !node->isArray() )
-         {
+      if ( arg.kind_ == PathArgument::kindIndex ) {
+         if ( !node->isArray() ) {
             // Error: node is not an array at position ...
          }
          node = &((*node)[arg.index_]);
-      }
-      else if ( arg.kind_ == PathArgument::kindKey )
-      {
-         if ( !node->isObject() )
-         {
+      } else if ( arg.kind_ == PathArgument::kindKey ) {
+         if ( !node->isObject() ) {
             // Error: node is not an object at position...
          }
          node = &((*node)[arg.key_]);
@@ -3404,10 +3104,8 @@ Path::make( Value &root ) const
 
 namespace Json {
 
-static bool containsControlCharacter( const char* str )
-{
-   while ( *str ) 
-   {
+static bool containsControlCharacter( const char* str ) {
+   while ( *str ) {
       if ( isControlCharacter( *(str++) ) )
          return true;
    }
@@ -3415,8 +3113,7 @@ static bool containsControlCharacter( const char* str )
 }
 
 
-std::string valueToString( LargestInt value )
-{
+std::string valueToString( LargestInt value ) {
    UIntToStringBuffer buffer;
    char *current = buffer + sizeof(buffer);
    bool isNegative = value < 0;
@@ -3430,8 +3127,7 @@ std::string valueToString( LargestInt value )
 }
 
 
-std::string valueToString( LargestUInt value )
-{
+std::string valueToString( LargestUInt value ) {
    UIntToStringBuffer buffer;
    char *current = buffer + sizeof(buffer);
    uintToString( value, current );
@@ -3447,16 +3143,14 @@ std::string valueToString( Int value )
 }
 
 
-std::string valueToString( UInt value )
-{
+std::string valueToString( UInt value ) {
    return valueToString( LargestUInt(value) );
 }
 
 #endif // # if defined(JSON_HAS_INT64)
 
 
-std::string valueToString( double value )
-{
+std::string valueToString( double value ) {
    char buffer[32];
 #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__) // Use secure version with visual studio 2005 to avoid warning. 
    sprintf_s(buffer, sizeof(buffer), "%#.16g", value); 
@@ -3495,13 +3189,11 @@ std::string valueToString( double value )
 }
 
 
-std::string valueToString( bool value )
-{
+std::string valueToString( bool value ) {
    return value ? "true" : "false";
 }
 
-std::string valueToQuotedString( const char *value )
-{
+std::string valueToQuotedString( const char *value ) {
    // Not sure how to handle unicode...
    if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter( value ))
       return std::string("\"") + value + "\"";
@@ -3512,10 +3204,8 @@ std::string valueToQuotedString( const char *value )
    std::string result;
    result.reserve(maxsize); // to avoid lots of mallocs
    result += "\"";
-   for (const char* c=value; *c != 0; ++c)
-   {
-      switch(*c)
-      {
+   for (const char* c=value; *c != 0; ++c) {
+      switch(*c) {
          case '\"':
             result += "\\\"";
             break;
@@ -3546,14 +3236,11 @@ std::string valueToQuotedString( const char *value )
             // Should add a flag to allow this compatibility mode and prevent this 
             // sequence from occurring.
          default:
-            if ( isControlCharacter( *c ) )
-            {
+            if ( isControlCharacter( *c ) ) {
                std::ostringstream oss;
                oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
                result += oss.str();
-            }
-            else
-            {
+            } else {
                result += *c;
             }
             break;
@@ -3565,8 +3252,7 @@ std::string valueToQuotedString( const char *value )
 
 // Class Writer
 // //////////////////////////////////////////////////////////////////
-Writer::~Writer()
-{
+Writer::~Writer() {
 }
 
 
@@ -3574,21 +3260,18 @@ Writer::~Writer()
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-   : yamlCompatiblityEnabled_( false )
-{
+   : yamlCompatiblityEnabled_( false ) {
 }
 
 
 void 
-FastWriter::enableYAMLCompatibility()
-{
+FastWriter::enableYAMLCompatibility() {
    yamlCompatiblityEnabled_ = true;
 }
 
 
 std::string 
-FastWriter::write( const Value &root )
-{
+FastWriter::write( const Value &root ) {
    document_ = "";
    writeValue( root );
    document_ += "\n";
@@ -3597,10 +3280,8 @@ FastWriter::write( const Value &root )
 
 
 void 
-FastWriter::writeValue( const Value &value )
-{
-   switch ( value.type() )
-   {
+FastWriter::writeValue( const Value &value ) {
+   switch ( value.type() ) {
    case nullValue:
       document_ += "null";
       break;
@@ -3619,12 +3300,10 @@ FastWriter::writeValue( const Value &value )
    case booleanValue:
       document_ += valueToString( value.asBool() );
       break;
-   case arrayValue:
-      {
+   case arrayValue: {
          document_ += "[";
          int size = value.size();
-         for ( int index =0; index < size; ++index )
-         {
+         for ( int index =0; index < size; ++index ) {
             if ( index > 0 )
                document_ += ",";
             writeValue( value[index] );
@@ -3632,14 +3311,12 @@ FastWriter::writeValue( const Value &value )
          document_ += "]";
       }
       break;
-   case objectValue:
-      {
+   case objectValue: {
          Value::Members members( value.getMemberNames() );
          document_ += "{";
          for ( Value::Members::iterator it = members.begin(); 
                it != members.end(); 
-               ++it )
-         {
+               ++it ) {
             const std::string &name = *it;
             if ( it != members.begin() )
                document_ += ",";
@@ -3660,14 +3337,12 @@ FastWriter::writeValue( const Value &value )
 
 StyledWriter::StyledWriter()
    : rightMargin_( 74 )
-   , indentSize_( 3 )
-{
+   , indentSize_( 3 ) {
 }
 
 
 std::string 
-StyledWriter::write( const Value &root )
-{
+StyledWriter::write( const Value &root ) {
    document_ = "";
    addChildValues_ = false;
    indentString_ = "";
@@ -3680,10 +3355,8 @@ StyledWriter::write( const Value &root )
 
 
 void 
-StyledWriter::writeValue( const Value &value )
-{
-   switch ( value.type() )
-   {
+StyledWriter::writeValue( const Value &value ) {
+   switch ( value.type() ) {
    case nullValue:
       pushValue( "null" );
       break;
@@ -3710,21 +3383,18 @@ StyledWriter::writeValue( const Value &value )
          Value::Members members( value.getMemberNames() );
          if ( members.empty() )
             pushValue( "{}" );
-         else
-         {
+         else {
             writeWithIndent( "{" );
             indent();
             Value::Members::iterator it = members.begin();
-            for (;;)
-            {
+            for (;;) {
                const std::string &name = *it;
                const Value &childValue = value[name];
                writeCommentBeforeValue( childValue );
                writeWithIndent( valueToQuotedString( name.c_str() ) );
                document_ += " : ";
                writeValue( childValue );
-               if ( ++it == members.end() )
-               {
+               if ( ++it == members.end() ) {
                   writeCommentAfterValueOnSameLine( childValue );
                   break;
                }
@@ -3741,33 +3411,27 @@ StyledWriter::writeValue( const Value &value )
 
 
 void 
-StyledWriter::writeArrayValue( const Value &value )
-{
+StyledWriter::writeArrayValue( const Value &value ) {
    unsigned size = value.size();
    if ( size == 0 )
       pushValue( "[]" );
-   else
-   {
+   else {
       bool isArrayMultiLine = isMultineArray( value );
-      if ( isArrayMultiLine )
-      {
+      if ( isArrayMultiLine ) {
          writeWithIndent( "[" );
          indent();
          bool hasChildValue = !childValues_.empty();
          unsigned index =0;
-         for (;;)
-         {
+         for (;;) {
             const Value &childValue = value[index];
             writeCommentBeforeValue( childValue );
             if ( hasChildValue )
                writeWithIndent( childValues_[index] );
-            else
-            {
+            else {
                writeIndent();
                writeValue( childValue );
             }
-            if ( ++index == size )
-            {
+            if ( ++index == size ) {
                writeCommentAfterValueOnSameLine( childValue );
                break;
             }
@@ -3776,13 +3440,10 @@ StyledWriter::writeArrayValue( const Value &value )
          }
          unindent();
          writeWithIndent( "]" );
-      }
-      else // output on a single line
-      {
+      } else { // output on a single line
          assert( childValues_.size() == size );
          document_ += "[ ";
-         for ( unsigned index =0; index < size; ++index )
-         {
+         for ( unsigned index =0; index < size; ++index ) {
             if ( index > 0 )
                document_ += ", ";
             document_ += childValues_[index];
@@ -3794,25 +3455,21 @@ StyledWriter::writeArrayValue( const Value &value )
 
 
 bool 
-StyledWriter::isMultineArray( const Value &value )
-{
+StyledWriter::isMultineArray( const Value &value ) {
    int size = value.size();
    bool isMultiLine = size*3 >= rightMargin_ ;
    childValues_.clear();
-   for ( int index =0; index < size  &&  !isMultiLine; ++index )
-   {
+   for ( int index =0; index < size  &&  !isMultiLine; ++index ) {
       const Value &childValue = value[index];
       isMultiLine = isMultiLine  ||
                      ( (childValue.isArray()  ||  childValue.isObject())  &&  
                         childValue.size() > 0 );
    }
-   if ( !isMultiLine ) // check if line length > max line length
-   {
+   if ( !isMultiLine ) { // check if line length > max line length
       childValues_.reserve( size );
       addChildValues_ = true;
       int lineLength = 4 + (size-1)*2; // '[ ' + ', '*n + ' ]'
-      for ( int index =0; index < size  &&  !isMultiLine; ++index )
-      {
+      for ( int index =0; index < size  &&  !isMultiLine; ++index ) {
          writeValue( value[index] );
          lineLength += int( childValues_[index].length() );
          isMultiLine = isMultiLine  &&  hasCommentForValue( value[index] );
@@ -3825,8 +3482,7 @@ StyledWriter::isMultineArray( const Value &value )
 
 
 void 
-StyledWriter::pushValue( const std::string &value )
-{
+StyledWriter::pushValue( const std::string &value ) {
    if ( addChildValues_ )
       childValues_.push_back( value );
    else
@@ -3835,8 +3491,7 @@ StyledWriter::pushValue( const std::string &value )
 
 
 void 
-StyledWriter::writeIndent()
-{
+StyledWriter::writeIndent() {
    if ( !document_.empty() )
    {
       char last = document_[document_.length()-1];
@@ -3850,31 +3505,27 @@ StyledWriter::writeIndent()
 
 
 void 
-StyledWriter::writeWithIndent( const std::string &value )
-{
+StyledWriter::writeWithIndent( const std::string &value ) {
    writeIndent();
    document_ += value;
 }
 
 
 void 
-StyledWriter::indent()
-{
+StyledWriter::indent() {
    indentString_ += std::string( indentSize_, ' ' );
 }
 
 
 void 
-StyledWriter::unindent()
-{
+StyledWriter::unindent() {
    assert( int(indentString_.size()) >= indentSize_ );
    indentString_.resize( indentString_.size() - indentSize_ );
 }
 
 
 void 
-StyledWriter::writeCommentBeforeValue( const Value &root )
-{
+StyledWriter::writeCommentBeforeValue( const Value &root ) {
    if ( !root.hasComment( commentBefore ) )
       return;
    document_ += normalizeEOL( root.getComment( commentBefore ) );
@@ -3883,13 +3534,11 @@ StyledWriter::writeCommentBeforeValue( const Value &root )
 
 
 void 
-StyledWriter::writeCommentAfterValueOnSameLine( const Value &root )
-{
+StyledWriter::writeCommentAfterValueOnSameLine( const Value &root ) {
    if ( root.hasComment( commentAfterOnSameLine ) )
       document_ += " " + normalizeEOL( root.getComment( commentAfterOnSameLine ) );
 
-   if ( root.hasComment( commentAfter ) )
-   {
+   if ( root.hasComment( commentAfter ) ) {
       document_ += "\n";
       document_ += normalizeEOL( root.getComment( commentAfter ) );
       document_ += "\n";
@@ -3898,8 +3547,7 @@ StyledWriter::writeCommentAfterValueOnSameLine( const Value &root )
 
 
 bool 
-StyledWriter::hasCommentForValue( const Value &value )
-{
+StyledWriter::hasCommentForValue( const Value &value ) {
    return value.hasComment( commentBefore )
           ||  value.hasComment( commentAfterOnSameLine )
           ||  value.hasComment( commentAfter );
@@ -3907,23 +3555,19 @@ StyledWriter::hasCommentForValue( const Value &value )
 
 
 std::string 
-StyledWriter::normalizeEOL( const std::string &text )
-{
+StyledWriter::normalizeEOL( const std::string &text ) {
    std::string normalized;
    normalized.reserve( text.length() );
    const char *begin = text.c_str();
    const char *end = begin + text.length();
    const char *current = begin;
-   while ( current != end )
-   {
+   while ( current != end ) {
       char c = *current++;
-      if ( c == '\r' ) // mac or dos EOL
-      {
+      if ( c == '\r' ) { // mac or dos EOL
          if ( *current == '\n' ) // convert dos EOL
             ++current;
          normalized += '\n';
-      }
-      else // handle unix EOL & other char
+      } else // handle unix EOL & other char
          normalized += c;
    }
    return normalized;
@@ -3936,14 +3580,12 @@ StyledWriter::normalizeEOL( const std::string &text )
 StyledStreamWriter::StyledStreamWriter( std::string indentation )
    : document_(NULL)
    , rightMargin_( 74 )
-   , indentation_( indentation )
-{
+   , indentation_( indentation ) {
 }
 
 
 void
-StyledStreamWriter::write( std::ostream &out, const Value &root )
-{
+StyledStreamWriter::write( std::ostream &out, const Value &root ) {
    document_ = &out;
    addChildValues_ = false;
    indentString_ = "";
@@ -3956,10 +3598,8 @@ StyledStreamWriter::write( std::ostream &out, const Value &root )
 
 
 void 
-StyledStreamWriter::writeValue( const Value &value )
-{
-   switch ( value.type() )
-   {
+StyledStreamWriter::writeValue( const Value &value ) {
+   switch ( value.type() ) {
    case nullValue:
       pushValue( "null" );
       break;
@@ -3981,26 +3621,22 @@ StyledStreamWriter::writeValue( const Value &value )
    case arrayValue:
       writeArrayValue( value);
       break;
-   case objectValue:
-      {
+   case objectValue: {
          Value::Members members( value.getMemberNames() );
          if ( members.empty() )
             pushValue( "{}" );
-         else
-         {
+         else {
             writeWithIndent( "{" );
             indent();
             Value::Members::iterator it = members.begin();
-            for (;;)
-            {
+            for (;;) {
                const std::string &name = *it;
                const Value &childValue = value[name];
                writeCommentBeforeValue( childValue );
                writeWithIndent( valueToQuotedString( name.c_str() ) );
                *document_ << " : ";
                writeValue( childValue );
-               if ( ++it == members.end() )
-               {
+               if ( ++it == members.end() ) {
                   writeCommentAfterValueOnSameLine( childValue );
                   break;
                }
@@ -4017,33 +3653,27 @@ StyledStreamWriter::writeValue( const Value &value )
 
 
 void 
-StyledStreamWriter::writeArrayValue( const Value &value )
-{
+StyledStreamWriter::writeArrayValue( const Value &value ) {
    unsigned size = value.size();
    if ( size == 0 )
       pushValue( "[]" );
-   else
-   {
+   else {
       bool isArrayMultiLine = isMultineArray( value );
-      if ( isArrayMultiLine )
-      {
+      if ( isArrayMultiLine ) {
          writeWithIndent( "[" );
          indent();
          bool hasChildValue = !childValues_.empty();
          unsigned index =0;
-         for (;;)
-         {
+         for (;;) {
             const Value &childValue = value[index];
             writeCommentBeforeValue( childValue );
             if ( hasChildValue )
                writeWithIndent( childValues_[index] );
-            else
-            {
+            else {
                writeIndent();
                writeValue( childValue );
             }
-            if ( ++index == size )
-            {
+            if ( ++index == size ) {
                writeCommentAfterValueOnSameLine( childValue );
                break;
             }
@@ -4053,12 +3683,10 @@ StyledStreamWriter::writeArrayValue( const Value &value )
          unindent();
          writeWithIndent( "]" );
       }
-      else // output on a single line
-      {
+      else { // output on a single line
          assert( childValues_.size() == size );
          *document_ << "[ ";
-         for ( unsigned index =0; index < size; ++index )
-         {
+         for ( unsigned index =0; index < size; ++index ) {
             if ( index > 0 )
                *document_ << ", ";
             *document_ << childValues_[index];
@@ -4070,25 +3698,21 @@ StyledStreamWriter::writeArrayValue( const Value &value )
 
 
 bool 
-StyledStreamWriter::isMultineArray( const Value &value )
-{
+StyledStreamWriter::isMultineArray( const Value &value ) {
    int size = value.size();
    bool isMultiLine = size*3 >= rightMargin_ ;
    childValues_.clear();
-   for ( int index =0; index < size  &&  !isMultiLine; ++index )
-   {
+   for ( int index =0; index < size  &&  !isMultiLine; ++index ) {
       const Value &childValue = value[index];
       isMultiLine = isMultiLine  ||
                      ( (childValue.isArray()  ||  childValue.isObject())  &&  
                         childValue.size() > 0 );
    }
-   if ( !isMultiLine ) // check if line length > max line length
-   {
+   if ( !isMultiLine ) { // check if line length > max line length
       childValues_.reserve( size );
       addChildValues_ = true;
       int lineLength = 4 + (size-1)*2; // '[ ' + ', '*n + ' ]'
-      for ( int index =0; index < size  &&  !isMultiLine; ++index )
-      {
+      for ( int index =0; index < size  &&  !isMultiLine; ++index ) {
          writeValue( value[index] );
          lineLength += int( childValues_[index].length() );
          isMultiLine = isMultiLine  &&  hasCommentForValue( value[index] );
@@ -4101,8 +3725,7 @@ StyledStreamWriter::isMultineArray( const Value &value )
 
 
 void 
-StyledStreamWriter::pushValue( const std::string &value )
-{
+StyledStreamWriter::pushValue( const std::string &value ) {
    if ( addChildValues_ )
       childValues_.push_back( value );
    else
@@ -4111,8 +3734,7 @@ StyledStreamWriter::pushValue( const std::string &value )
 
 
 void 
-StyledStreamWriter::writeIndent()
-{
+StyledStreamWriter::writeIndent() {
   /*
     Some comments in this method would have been nice. ;-)
 
@@ -4130,31 +3752,27 @@ StyledStreamWriter::writeIndent()
 
 
 void 
-StyledStreamWriter::writeWithIndent( const std::string &value )
-{
+StyledStreamWriter::writeWithIndent( const std::string &value ) {
    writeIndent();
    *document_ << value;
 }
 
 
 void 
-StyledStreamWriter::indent()
-{
+StyledStreamWriter::indent() {
    indentString_ += indentation_;
 }
 
 
 void 
-StyledStreamWriter::unindent()
-{
+StyledStreamWriter::unindent() {
    assert( indentString_.size() >= indentation_.size() );
    indentString_.resize( indentString_.size() - indentation_.size() );
 }
 
 
 void 
-StyledStreamWriter::writeCommentBeforeValue( const Value &root )
-{
+StyledStreamWriter::writeCommentBeforeValue( const Value &root ) {
    if ( !root.hasComment( commentBefore ) )
       return;
    *document_ << normalizeEOL( root.getComment( commentBefore ) );
@@ -4163,13 +3781,11 @@ StyledStreamWriter::writeCommentBeforeValue( const Value &root )
 
 
 void 
-StyledStreamWriter::writeCommentAfterValueOnSameLine( const Value &root )
-{
+StyledStreamWriter::writeCommentAfterValueOnSameLine( const Value &root ) {
    if ( root.hasComment( commentAfterOnSameLine ) )
       *document_ << " " + normalizeEOL( root.getComment( commentAfterOnSameLine ) );
 
-   if ( root.hasComment( commentAfter ) )
-   {
+   if ( root.hasComment( commentAfter ) ) {
       *document_ << "\n";
       *document_ << normalizeEOL( root.getComment( commentAfter ) );
       *document_ << "\n";
@@ -4178,8 +3794,7 @@ StyledStreamWriter::writeCommentAfterValueOnSameLine( const Value &root )
 
 
 bool 
-StyledStreamWriter::hasCommentForValue( const Value &value )
-{
+StyledStreamWriter::hasCommentForValue( const Value &value ) {
    return value.hasComment( commentBefore )
           ||  value.hasComment( commentAfterOnSameLine )
           ||  value.hasComment( commentAfter );
@@ -4187,31 +3802,26 @@ StyledStreamWriter::hasCommentForValue( const Value &value )
 
 
 std::string 
-StyledStreamWriter::normalizeEOL( const std::string &text )
-{
+StyledStreamWriter::normalizeEOL( const std::string &text ) {
    std::string normalized;
    normalized.reserve( text.length() );
    const char *begin = text.c_str();
    const char *end = begin + text.length();
    const char *current = begin;
-   while ( current != end )
-   {
+   while ( current != end ) {
       char c = *current++;
-      if ( c == '\r' ) // mac or dos EOL
-      {
+      if ( c == '\r' ) { // mac or dos EOL
          if ( *current == '\n' ) // convert dos EOL
             ++current;
          normalized += '\n';
-      }
-      else // handle unix EOL & other char
+      } else // handle unix EOL & other char
          normalized += c;
    }
    return normalized;
 }
 
 
-std::ostream& operator<<( std::ostream &sout, const Value &root )
-{
+std::ostream& operator<<( std::ostream &sout, const Value &root ) {
    Json::StyledStreamWriter writer;
    writer.write(sout, root);
    return sout;

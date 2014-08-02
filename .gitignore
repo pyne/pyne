@@ -1,5 +1,5 @@
 # Ignore possible build & documentation
-doc/build/
+docs/_build/
 build/
 *egg-info/
 build_nuc_data/
@@ -17,9 +17,21 @@ pyne/*.c
 pyne/*.cpp
 pyne/*/*.cpp
 
-# Ignore binary files
+# Ignore data &binary files
 *.h5
+*.ace
 
 # Ignore specific files
 examples/BASE_TAPE9.INP
-pyne/tests/test.file
+examples/*.txt
+examples/*.eps
+examples/*.svg
+examples/*.png
+examples/*.h5m
+tests/test.file
+tests/test.txt
+tests/U235.txt
+tests/Ni59.txt
+tutorial/Ni59.txt
+docs/rxname_listing
+.ipynb_checkpoints

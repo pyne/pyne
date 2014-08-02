@@ -1,0 +1,32 @@
+geometry rectangular
+
+volume
+     1.000000E+00    zone_0
+     1.000000E+00    zone_1
+     1.000000E+00    zone_2
+     1.000000E+00    zone_3
+end
+
+mat_loading
+    zone_0    mix_0
+    zone_1    mix_1
+    zone_2    mix_2
+    zone_3    mix_3
+end
+
+mixture mix_0
+    material mat_0 1 1
+end
+
+mixture mix_1
+    material mat_1 1 1
+end
+
+mixture mix_2
+    material mat_2 1 1
+end
+
+mixture mix_3
+    material mat_3 1 1
+end
+

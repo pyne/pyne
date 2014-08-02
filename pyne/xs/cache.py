@@ -1,16 +1,23 @@
 """This module provides a cross section cache which automatically extracts 
 cross-sections from provided nuclear data sets."""
+from warnings import warn
+from pyne.utils import VnVWarning
+import sys
 from itertools import product
 from collections import MutableMapping
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.pyne_config import pyne_conf
-from pyne.xs.models import partial_energy_matrix, phi_g
-from pyne.xs import data_source
+from .. import nucname
+from ..pyne_config import pyne_conf
+from .models import partial_energy_matrix, phi_g
+from . import data_source
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+if sys.version_info[0] > 2:
+  basestring = str
 
 def _same_arr_or_none(a, b): 
     if a is None or b is None:
@@ -137,7 +144,12 @@ class XSCache(MutableMapping):
         E_g, phi_g = self._cache['E_g'], self._cache['phi_g'] 
         self._cache.clear()
         self._cache['E_g'], self._cache['phi_g'] = E_g, phi_g
-        
+
+
+    def load(self, temp=300.0):
+        """Loads the cross sections from all data sources."""
+        for ds in self.data_sources:
+            ds.load(temp=temp)
 
 # Make a singleton of the cross-section cache
 xs_cache = XSCache()

@@ -1,0 +1,8 @@
+.. _tutorial-05:
+
+Cross Sections
+==============
+
+Download the :download:`full notebook <../../tutorial/05-cross-sections.ipynb>`.
+
+.. notebook:: ../../tutorial/05-cross-sections.ipynb

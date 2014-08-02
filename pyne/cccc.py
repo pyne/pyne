@@ -27,10 +27,13 @@ Report LA-5324-MS_.
 
 """
 
-import struct
-import math
+from __future__ import division
+from warnings import warn
+from pyne.utils import VnVWarning
 
-from binaryreader import _BinaryReader, _FortranRecord
+from pyne.binaryreader import _BinaryReader, _FortranRecord
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 class Isotxs(_BinaryReader):
     """An Isotxs object represents a binary ISOTXS file written according to the
@@ -196,7 +199,7 @@ class Isotxs(_BinaryReader):
         nuc.libParams['nuclide'] = r.get_string(8)[0].strip() # absolute nuclide label
         nuc.libParams['libName'] = r.get_string(8)[0] # library name (ENDFV, etc. )
         nuc.libParams['isoIdent'] = r.get_string(8)[0]
-        nuc.libParams['amass'] = r.get_float()[0] # gram atomic weight
+        nuc.libParams['amass'] = r.get_float()[0] # gram atomic mass
         nuc.libParams['efiss'] = r.get_float()[0] # thermal energy yield/fission
         nuc.libParams['ecapt'] = r.get_float()[0] # thermal energy yield/capture
         nuc.libParams['temp'] = r.get_float()[0] # nuclide temperature (K)
@@ -329,8 +332,8 @@ class Isotxs(_BinaryReader):
 
         # This is basically how many scattering cross sections there are for
         # this scatter type for this nuclide
-        jl = (m - 1)*((ng - 1)/nsblok + 1) + 1
-        jup = m*((ng - 1)/nsblok + 1)
+        jl = (m - 1)*((ng - 1)//nsblok + 1) + 1
+        jup = m*((ng - 1)//nsblok + 1)
         ju = min(ng, jup)
 
         # Figure out kmax for this sub-block. 
@@ -352,13 +355,13 @@ class Isotxs(_BinaryReader):
                 # be multiplied by 2 to get the correct neutron balance.
                 g = j-1 
                 assert g>=0, "loading negative group in ISOTXS."
-                jup   = nuc.libParams['jj'][g,block] - 1
-                jdown = nuc.libParams['jband'][g,block] - nuc.libParams['jj'][g,block]
-                fromGroups = range(j-jdown,j+jup+1)
-                fromGroups.reverse()
-                for k in fromGroups:
-                    fromG = k-1
-                    nuc.micros['scat',block,g,fromG,order] = r.get_float()[0]
+                jup   = nuc.libParams['jj'][g, block] - 1
+                jdown = nuc.libParams['jband'][g, block] - nuc.libParams['jj'][g, block]
+                fromgroups = list(range(j-jdown, j+jup+1))
+                fromgroups.reverse()
+                for k in fromgroups:
+                    fromg = k-1
+                    nuc.micros['scat', block, g, fromg, order] = r.get_float()[0]
 
     def find_nuclide(self, name):
         """Returns a nuclide with a given name.

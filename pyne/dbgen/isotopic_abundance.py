@@ -1,8 +1,18 @@
 #!/usr/bin/env python
+from __future__ import print_function
+import pkgutil
+from warnings import warn
+from pyne.utils import VnVWarning
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 def get_isotopic_abundances():
-    """Creates a dictionary of isotopic abundances based off of the IUPAC
-    Technical Report entitled "Isotopic Compositions of the Elements 1997".
+    """Creates a dictionary of isotopic abundances based off of [1].
+    
+    [1] M. Berglund, M. Wieser: Isotopic compositions of the elements 2009
+        (IUPAC Technical Report).
+        Pure Appl. Chem., 2011, Vol. 83, No. 2, pp. 397-410
+        http://dx.doi.org/10.1351/PAC-REP-10-06-02
 
     Returns
     -------
@@ -12,29 +22,29 @@ def get_isotopic_abundances():
         isotope relative to all atoms of that element.
     """
 
-    abundance_file = open('abundances.txt', 'r')
+    abundance_file = pkgutil.get_data('pyne.dbgen', 'abundances.txt').split('\n')
     
-    # Skip first line describing file
-    abundance_file.readline()
-
     # Create dictionary
     abundance = {}
     abundance_by_Z = dict([(i, []) for i in range(1,93)])
 
     # Read data
     for line in abundance_file:
+        if line.startswith('#') or not line:
+            continue
         words = line.split()
         assert len(words) == 4
 
         # Read atomic number and mass number
         Z = int(words[0])
         A = int(words[2])
-        zaid = Z*1000 + A
+        nuc = (Z*1000 + A)*10000
+        name = '-'.join(words[1:3])
         
         # Read value and add to dictionary
-        val = float(words[3])
-        abundance[zaid] = val
-        abundance_by_Z[Z].append((zaid,val))
+        val = 0.01*float(words[3])
+        abundance[nuc] = val
+        abundance_by_Z[Z].append((name,val))
 
 
     # Check data
@@ -47,18 +57,18 @@ def get_isotopic_abundances():
             continue
     
         # Add abundance
-        for zaid, val in abundance_by_Z[Z]:
+        for name, val in abundance_by_Z[Z]:
             total += val
 
-        # Check if sum is 100.0 (within floating point error)
+        # Check if sum is 1.0 (within floating point error)
         try:
-            assert approx_equal(total, 100.0)
+            assert approx_equal(total, 1.0)
         except AssertionError:
             print("Atomic number: {0}".format(Z))
-            for zaid in abundance_by_Z[Z]:
-                print("  {0} = {1}".format(zaid, abundance[zaid]))
+            for name, val in abundance_by_Z[Z]:
+                print("  {0} = {1}".format(name, val))
             print("  Total = {0}".format(total))
             raise
     
     # Return dictionary
-    return abundance, abundance_by_Z
+    return abundance
