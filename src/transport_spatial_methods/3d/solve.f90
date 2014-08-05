@@ -46,6 +46,7 @@ IF (solver == "AHOTN") THEN
 				           DO i = 1, nx
 				              m = mat(i,j,k)
 				              xsct = sigs(m,g,gp)
+
 				              s(0,0,0,i,j,k,g) = s(0,0,0,i,j,k,g) + xsct*f(1,i,j,k,gp,1,1)
 				              s(0,0,1,i,j,k,g) = s(0,0,1,i,j,k,g) + xsct*f(2,i,j,k,gp,1,1)
 				              s(0,1,0,i,j,k,g) = s(0,1,0,i,j,k,g) + xsct*f(3,i,j,k,gp,1,1)

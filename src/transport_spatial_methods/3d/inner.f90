@@ -40,8 +40,14 @@ IF (solver == "AHOTN") THEN
 				           ! Compute the difference depending on 'e' value
 				           IF (e(v,i,j,k,1,1) >= tolr) THEN
 				              df = ABS((f(v,i,j,k,g,1,1) - e(v,i,j,k,1,1))/e(v,i,j,k,1,1))
+                      !WRITE (8,*) " DF ", df, " dfmx ", dfmx
+                      !WRITE (8,*) "itmx: ", itmx, " nz: ", nz, " ny: ", ny, " nx: ", nx, " iall+1: ", iall+1
+                      !WRITE (8,*) " E ", e(v,i,j,k,1,1), " F ", f(v,i,j,k,g,1,1)
 				           ELSE
 				              df = ABS((f(v,i,j,k,g,1,1) - e(v,i,j,k,1,1)))
+                      !WRITE (8,*) "itmx: ", itmx, " nz: ", nz, " ny: ", ny, " nx: ", nx, " iall+1: ", iall+1
+                      !WRITE (8,*) " DF ", df, " dfmx ", dfmx
+                      !WRITE (8,*) " E ", e(v,i,j,k,1,1), " F ", f(v,i,j,k,g,1,1)
 				           END IF
 				           ! Find the largest value
 				           IF (df > dfmx) THEN

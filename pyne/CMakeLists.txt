@@ -104,17 +104,17 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/source_sampling.pyx"
 cython_add_module(source_sampling source_sampling.pyx)
 target_link_libraries(source_sampling pyne)
 
-# AHOT wrapper
+# TRANSPORT_SPATIAL_METHODS wrapper
 # I don't know which method is better...
-#add_custom_target(ahot ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/ahot${CMAKE_SHARED_LIBRARY_SUFFIX}) 
-#add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/ahot${CMAKE_SHARED_LIBRARY_SUFFIX} 
-add_custom_target(ahot ALL DEPENDS ahot${CMAKE_SHARED_LIBRARY_SUFFIX}) 
-add_custom_command(OUTPUT ahot${CMAKE_SHARED_LIBRARY_SUFFIX} 
-    COMMAND f2py -m ahot -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src 
-                -c ${PROJECT_SOURCE_DIR}/src/ahot/spatial_solvers_3d/source/main.f90 
+#add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
+#add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
+add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
+add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
+    COMMAND f2py -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src 
+                -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90 
                 -lpyne
                 #-lpyne --debug-capi
     DEPENDS pyne
     )
-target_link_libraries(ahot pyne)
+target_link_libraries(transport_spatial_methods pyne)
 

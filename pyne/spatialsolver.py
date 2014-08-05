@@ -8,7 +8,7 @@ import time
 
 #Solver imports
 #sys.path.append("../pyne_transport/pyne/fortran/spatial_solvers_3d/source")
-import pyne.ahot as ahot
+import pyne.transport_spatial_methods as transport_spatial_methods
 
 #imports being used for testing
 #from dict_util import dict_complete
@@ -19,7 +19,7 @@ def solve(inputdict_unchecked):
   solver_output = {
      };
   #if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
-  fortran_returns = ahot.main("test title in",
+  fortran_returns = transport_spatial_methods.main("test title in",
   inputdict['solver'],
   inputdict['solver_type'],
   inputdict['spatial_order'], 

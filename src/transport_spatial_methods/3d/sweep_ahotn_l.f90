@@ -242,6 +242,7 @@ DO n = 1, apo
             sig = sigt(m,g)
             ord = lambda
             c = sigs(m,g,g)/sig     ! Scattering ratio 
+            !WRITE (8,*) " c ", c, " e(1,i,j,k) " , e(1,i,j,k,1,1), " s ", s(0,0,0,i,j,k,g) ," sig " , sig
             b(1)=c*e(1,i,j,k,1,1) + s(0,0,0,i,j,k,g)/sig
             b(2)=c*e(2,i,j,k,1,1) + s(0,0,1,i,j,k,g)/sig
             b(3)=c*e(3,i,j,k,1,1) + s(0,1,0,i,j,k,g)/sig
@@ -254,6 +255,8 @@ DO n = 1, apo
 							call  ahotn_ll_kernel(x,y,z,mu,eta,xi,incx,incy,incz,sig,c,fx,fy(:,i,nfy),fz(:,i,j,nfy,nfz),b)
 						END IF
             ! Update the scalar flux solution
+            !WRITE(8,*) "ffffffffffffffffffffffff",f(1,i,j,k,g,1,1)
+            !WRITE (8,*) " w(n): ", w(n), " b(1) ", b(1)
             f(1,i,j,k,g,1,1) = f(1,i,j,k,g,1,1) + w(n)*b(1)
             f(2,i,j,k,g,1,1) = f(2,i,j,k,g,1,1) + w(n)*b(2)
             f(3,i,j,k,g,1,1) = f(3,i,j,k,g,1,1) + w(n)*b(3)
