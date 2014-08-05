@@ -73,6 +73,9 @@ void pyne::Tally::from_hdf5(char * filename, char *datapath, int row)
 //
 void pyne::Tally::from_hdf5(std::string filename, std::string datapath, int row) 
 { 
+  // line of data to acces
+  int data_row = row;
+
   // check for file existence
   if (!pyne::file_exists(filename))
     throw pyne::FileNotFound(filename);
@@ -99,11 +102,17 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath, int row)
   
   hsize_t chunk_dimsr[1];
   int rank_chunk;
+
   if(H5D_CHUNKED == H5Pget_layout(prop))
     rank_chunk = H5Pget_chunk(prop,rank,chunk_dimsr);
   
   // allocate memory for data from file
   tally_struct* read_data = new tally_struct[dims[0]];
+
+  // if row number is larger than data set only give last element
+  if ( row >= dims[0] )
+    data_row = dims[0]-1;
+    
   
   // Create variable-length string datatype.
   hid_t strtype = H5Tcopy (H5T_C_S1);
@@ -140,13 +149,14 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath, int row)
   status = H5Dread (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
 
   // unpack the data and set values
-  entity_id = read_data[0].entity_id;
-  entity_type = entity_type_enum2string[read_data[0].entity_type];
-  tally_type = tally_type_enum2string[read_data[0].tally_type];
-  particle_name = std::string(read_data[0].particle_name);
-  tally_name = std::string(read_data[0].tally_name);
-  entity_name = std::string(read_data[0].tally_name);
-  entity_size = read_data[0].entity_size;
+  entity_id = read_data[data_row].entity_id;
+  entity_type = entity_type_enum2string[read_data[data_row].entity_type];
+  tally_type = tally_type_enum2string[read_data[data_row].tally_type];
+  particle_name = std::string(read_data[data_row].particle_name);
+  tally_name = std::string(read_data[data_row].tally_name);
+  entity_name = std::string(read_data[data_row].tally_name);
+  entity_size = read_data[data_row].entity_size;
+
 
   // close the data sets
   status = H5Dclose (dset);
@@ -170,6 +180,9 @@ void pyne::Tally::write_hdf5( char * filename, char * datapath) {
 // if file exists & data path doesnt creates new datapath, 
 // otherwise creates new file
 void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
+
+  // turn of annoying hdf5 errors
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   tally_struct tally_data[1]; // storage for the tally to add
 
@@ -206,14 +219,10 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   // check to make sure is a HDF5 file
   bool is_h5 = H5Fis_hdf5(filename.c_str());
 
-  std::cout << is_exist << std::endl;
-  std::cout << datapath << std::endl;
-
   if ( is_exist && !is_h5)
     throw h5wrap::FileNotHDF5(filename);
 
   if ( !is_exist ) { // is a new file        
-    std::cout << "creating a new file" << std::endl;
     hid_t file = H5Fcreate (filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     // enable chunking 
