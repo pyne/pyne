@@ -38,7 +38,8 @@ namespace pyne
     /// \param entity_type (volume or surface)
     /// \param entity_name string identifying the entity
     Tally(std::string type, std::string particle_name, int entity,
-  	std::string entity_type, std::string entity_name);
+	  std::string entity_type, std::string entity_name,
+	  std::string tally_name = "", double entity_size = 0.0);
    
     ~Tally (); ///< default destructor
 
@@ -71,6 +72,7 @@ namespace pyne
     std::string entity_name; // the name of the entity (optional)
     std::string particle_name; // particle name string
     std::string tally_type; // type of tally flux or current
+    std::string tally_name; // name of the tally 
     int entity_id; // id number of the entity being tallied upon    
     double entity_size; // the physical size of the entity 
   };
@@ -96,9 +98,9 @@ namespace pyne
 typedef struct tally_struct {
     int entity_id;
     int entity_type;
-  //    int tally_type;
-  //    const char * particle_name;
-  //    const char * entity_name;
+    int tally_type;
+    const char * particle_name;
+    const char * entity_name;
     const char * tally_name;
     double entity_size;
   } tally_struct;
