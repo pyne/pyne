@@ -86,9 +86,9 @@ namespace pyne
     int entity_id;
     int entity_type;
     int tally_type;
-    char * particle_name;
-    char * entity_name;
-    char * tally_name;
+    const char * particle_name;
+    const char * entity_name;
+    const char * tally_name;
     double entity_size;
   } tally_struct;
   
