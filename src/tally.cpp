@@ -9,8 +9,8 @@
   #include "tally.h"
 #endif
 
-enum entity_type {VOLUME,SURFACE}; // Enumeration for entity types
-enum tally_type  {FLUX,CURRENT};   // Enumeration for tally types
+enum entity_type_enum {VOLUME,SURFACE}; // Enumeration for entity types
+enum tally_type_enum  {FLUX,CURRENT};   // Enumeration for tally types
 
 
 /***************************/
@@ -158,9 +158,9 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   // setup the data to write
   tally_data[0].entity_id = entity_id;
   // entity type
-  if (tally_type.find("Volume") != std::string::npos)
+  if (entity_type.find("Volume") != std::string::npos)
     tally_data[0].entity_type = VOLUME;
-  else if (tally_type.find("Surface") != std::string::npos)
+  else if (entity_type.find("Surface") != std::string::npos)
     tally_data[0].entity_type = SURFACE;
 
   // tally kind
@@ -172,10 +172,14 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   // entity id
   tally_data[0].entity_id = entity_id;
   // entity_name
-  tally_data[0].entity_name = entity_name.c_str();
+  //*  tally_data[0].entity_name = entity_name.c_str();
   // particle name
-  tally_data[0].particle_name = particle_name.c_str();
+  //*  tally_data[0].particle_name = particle_name.c_str();
 
+  tally_data[0].tally_name = "bob_name";
+  tally_data[0].entity_size = 12.0;
+
+  //  std::cout << tally_data[0].entity_id << " " << tally_data[0].tally_type << std::endl;
   
   // check for file existence
   bool is_exist = pyne::file_exists(filename);
@@ -183,22 +187,27 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 
   // check to make sure is a HDF5 file
   bool is_h5 = H5Fis_hdf5(filename.c_str());
+
+  std::cout << is_exist << std::endl;
+  std::cout << datapath << std::endl;
+
   if ( is_exist && !is_h5)
     throw h5wrap::FileNotHDF5(filename);
 
   if ( !is_exist ) { // is a new file        
+    std::cout << "creating a new file" << std::endl;
     hid_t file = H5Fcreate (filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     // enable chunking 
     hid_t prop = H5Pcreate(H5P_DATASET_CREATE);
     // set chunk size
-    hsize_t chunk_dimensions[1]={2};
+    hsize_t chunk_dimensions[1]={1};
     herr_t status = H5Pset_chunk(prop,1,chunk_dimensions);
     
     // allow varaible length strings
     hid_t strtype = H5Tcopy (H5T_C_S1);
     status = H5Tset_size (strtype, H5T_VARIABLE);
-
+       
     // Create the compound datatype for memory.
     hid_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (tally_struct));
     status = H5Tinsert (memtype, "Entity ID",
@@ -224,7 +233,8 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     hid_t space = H5Screate_simple (1, dims, NULL);
 
     // Create the dataset and write the compound data to it.
-    hid_t dset = H5Dcreate2 (file, datapath.c_str(), filetype, space, H5P_DEFAULT, prop,
+    //    hid_t dset = H5Dcreate2 (file, datapath.c_str(), filetype, space, H5P_DEFAULT, prop,
+    hid_t dset = H5Dcreate2 (file, "tally", filetype, space, H5P_DEFAULT, prop,
 			     H5P_DEFAULT);
     status = H5Dwrite (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tally_data);
 
@@ -276,12 +286,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     status = H5Tinsert (memtype, "Entity Size",
 		HOFFSET (tally_struct, entity_size), H5T_NATIVE_DOUBLE);
 
-    /*
-     * Create the compound datatype for the file.  Because the standard
-     * types we are using for the file may have different sizes than
-     * the corresponding native types, we must manually calculate the
-     * offset of each member.
-     */
+    // Create the compound datatype for the file.  
     hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + sizeof (hvl_t) + 8);
     status = H5Tinsert (filetype, "Entity ID", 0, H5T_STD_I64BE);
     status = H5Tinsert (filetype, "Entity Type", 8, H5T_STD_I64BE);
@@ -311,7 +316,6 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 
     // Write the dataset to memory
     status = H5Dwrite (dset, memtype, space, filespace, H5P_DEFAULT, tally_data);
-    std::cout << "status = " << status << std::endl;
 
     // tidy up
     status = H5Dvlen_reclaim (memtype, space, H5P_DEFAULT, read_data);
