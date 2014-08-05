@@ -12,6 +12,8 @@
 enum entity_type_enum {VOLUME,SURFACE}; // Enumeration for entity types
 enum tally_type_enum  {FLUX,CURRENT};   // Enumeration for tally types
 
+const std::string tally_type_enum2string[] = {"Flux","Current"};
+const std::string entity_type_enum2string[] = {"Volume","Surface"};
 
 /***************************/
 /*** Protected Functions ***/
@@ -33,11 +35,14 @@ pyne::Tally::Tally()
   entity_id = -1;
   entity_type = "";
   entity_name = "";
+  tally_name = "";
+  entity_size = -1.0;
 }
 
 pyne::Tally::Tally(std::string type, std::string part_name, 
 		   int ent, std::string ent_type, 
-		   std::string ent_name)
+		   std::string ent_name, std::string tal_name,
+		   double size)
 {
   // Empty Tally Constructor
   tally_type = type;
@@ -45,6 +50,8 @@ pyne::Tally::Tally(std::string type, std::string part_name,
   entity_id = ent;
   entity_type = ent_type;
   entity_name = ent_name;
+  tally_name = tal_name;
+  entity_size = size;
 }
 
 // Destructor
@@ -53,6 +60,7 @@ pyne::Tally::~Tally()
 };
 
 /*--- Method definitions ---*/
+
 
 //
 void pyne::Tally::from_hdf5(char * filename, char *datapath, int row) 
@@ -107,28 +115,38 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath, int row)
 		      HOFFSET (tally_struct, entity_id), H5T_NATIVE_INT);
   status = H5Tinsert (memtype, "Entity Type",
 		      HOFFSET (tally_struct, entity_type), H5T_NATIVE_INT);
+  status = H5Tinsert (memtype, "Tally Type",
+		      HOFFSET (tally_struct, tally_type), H5T_NATIVE_INT);
+  status = H5Tinsert (memtype, "Particle Name", HOFFSET (tally_struct, particle_name),
+		      strtype);
+  status = H5Tinsert (memtype, "Entity Name", HOFFSET (tally_struct, entity_name),
+		      strtype);
   status = H5Tinsert (memtype, "Tally Name", HOFFSET (tally_struct, tally_name),
 		      strtype);
   status = H5Tinsert (memtype, "Entity Size",
 		      HOFFSET (tally_struct, entity_size), H5T_NATIVE_DOUBLE);
   
-  /*
-   * Create the compound datatype for the file.  Because the standard
-   * types we are using for the file may have different sizes than
-   * the corresponding native types, we must manually calculate the
-   * offset of each member.
-   */
-  hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + sizeof (hvl_t) + 8);
+  // Create the compound datatype for the file
+  hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + 8 + (3*sizeof (hvl_t)) + 8);
   status = H5Tinsert (filetype, "Entity ID", 0, H5T_STD_I64BE);
   status = H5Tinsert (filetype, "Entity Type", 8, H5T_STD_I64BE);
-  status = H5Tinsert (filetype, "Tally Name", 8+8, strtype);
-  status = H5Tinsert (filetype, "Entity Size", 8+8 + sizeof (hvl_t),
-		      H5T_IEEE_F64BE);
+  status = H5Tinsert (filetype, "Tally Type", 8 + 8, H5T_STD_I64BE);
+  status = H5Tinsert (filetype, "Particle Name", 8 + 8 + 8, strtype);
+  status = H5Tinsert (filetype, "Entity Name", 8 + 8 + 8 + sizeof(hvl_t), strtype);
+  status = H5Tinsert (filetype, "Tally Name", 8 + 8 + 8 + (2*sizeof(hvl_t)) , strtype);
+  status = H5Tinsert (filetype, "Entity Size", 8 + 8 + 8 + (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
   
   // Read the data.
   status = H5Dread (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
 
   // unpack the data and set values
+  entity_id = read_data[0].entity_id;
+  entity_type = entity_type_enum2string[read_data[0].entity_type];
+  tally_type = tally_type_enum2string[read_data[0].tally_type];
+  particle_name = std::string(read_data[0].particle_name);
+  tally_name = std::string(read_data[0].tally_name);
+  entity_name = std::string(read_data[0].tally_name);
+  entity_size = read_data[0].entity_size;
 
   // close the data sets
   status = H5Dclose (dset);
@@ -165,21 +183,21 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 
   // tally kind
   if (tally_type.find("Flux") != std::string::npos)
-    tally_data[0].entity_type = FLUX;
+    tally_data[0].tally_type = FLUX;
   else if (tally_type.find("Current") != std::string::npos)
-    tally_data[0].entity_type = CURRENT;
+    tally_data[0].tally_type = CURRENT;
 
   // entity id
   tally_data[0].entity_id = entity_id;
   // entity_name
-  //*  tally_data[0].entity_name = entity_name.c_str();
+  tally_data[0].entity_name = entity_name.c_str();
   // particle name
-  //*  tally_data[0].particle_name = particle_name.c_str();
+  tally_data[0].particle_name = particle_name.c_str();
+  // tally name
+  tally_data[0].tally_name = tally_name.c_str();
+  // entity size
+  tally_data[0].entity_size = entity_size;
 
-  tally_data[0].tally_name = "bob_name";
-  tally_data[0].entity_size = 12.0;
-
-  //  std::cout << tally_data[0].entity_id << " " << tally_data[0].tally_type << std::endl;
   
   // check for file existence
   bool is_exist = pyne::file_exists(filename);
@@ -207,26 +225,35 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     // allow varaible length strings
     hid_t strtype = H5Tcopy (H5T_C_S1);
     status = H5Tset_size (strtype, H5T_VARIABLE);
-       
+
     // Create the compound datatype for memory.
     hid_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (tally_struct));
     status = H5Tinsert (memtype, "Entity ID",
-		HOFFSET (tally_struct, entity_id), H5T_NATIVE_INT);
+			HOFFSET (tally_struct, entity_id), H5T_NATIVE_INT);
     status = H5Tinsert (memtype, "Entity Type",
-                HOFFSET (tally_struct, entity_type), H5T_NATIVE_INT);
+			HOFFSET (tally_struct, entity_type), H5T_NATIVE_INT);
+    status = H5Tinsert (memtype, "Tally Type",
+			HOFFSET (tally_struct, tally_type), H5T_NATIVE_INT);
+    status = H5Tinsert (memtype, "Particle Name", HOFFSET (tally_struct, particle_name),
+			strtype);
+    status = H5Tinsert (memtype, "Entity Name", HOFFSET (tally_struct, entity_name),
+			strtype);
     status = H5Tinsert (memtype, "Tally Name", HOFFSET (tally_struct, tally_name),
-                strtype);
+			strtype);
     status = H5Tinsert (memtype, "Entity Size",
-		HOFFSET (tally_struct, entity_size), H5T_NATIVE_DOUBLE);
-
-    // Create the compound datatype for the file.
-    hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + sizeof (hvl_t) + 8);
+			HOFFSET (tally_struct, entity_size), H5T_NATIVE_DOUBLE);
+    
+    // Create the compound datatype for the file
+    hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + 8 + (3*sizeof (hvl_t)) + 8);
     status = H5Tinsert (filetype, "Entity ID", 0, H5T_STD_I64BE);
     status = H5Tinsert (filetype, "Entity Type", 8, H5T_STD_I64BE);
-    status = H5Tinsert (filetype, "Tally Name", 8+8, strtype);
-    status = H5Tinsert (filetype, "Entity Size", 8+8 + sizeof (hvl_t),
-			H5T_IEEE_F64BE);
-
+    status = H5Tinsert (filetype, "Tally Type", 8 + 8, H5T_STD_I64BE);
+    status = H5Tinsert (filetype, "Particle Name", 8 + 8 + 8, strtype);
+    status = H5Tinsert (filetype, "Entity Name", 8 + 8 + 8 + sizeof(hvl_t), strtype);
+    status = H5Tinsert (filetype, "Tally Name", 8 + 8 + 8 + (2*sizeof(hvl_t)) , strtype);
+    status = H5Tinsert (filetype, "Entity Size", 8 + 8 + 8 + (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
+    
+    
     // only ever let 1 tally object be added
     hsize_t dims[1] = {1};  
     // Create dataspace.  Setting maximum size to NULL sets the maximum
@@ -278,22 +305,30 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     // Create the compound datatype for memory.
     hid_t memtype = H5Tcreate (H5T_COMPOUND, sizeof (tally_struct));
     status = H5Tinsert (memtype, "Entity ID",
-                HOFFSET (tally_struct, entity_id), H5T_NATIVE_INT);
+			HOFFSET (tally_struct, entity_id), H5T_NATIVE_INT);
     status = H5Tinsert (memtype, "Entity Type",
-                HOFFSET (tally_struct, entity_type), H5T_NATIVE_INT);
+			HOFFSET (tally_struct, entity_type), H5T_NATIVE_INT);
+    status = H5Tinsert (memtype, "Tally Type",
+			HOFFSET (tally_struct, tally_type), H5T_NATIVE_INT);
+    status = H5Tinsert (memtype, "Particle Name", HOFFSET (tally_struct, particle_name),
+			strtype);
+    status = H5Tinsert (memtype, "Entity Name", HOFFSET (tally_struct, entity_name),
+			strtype);
     status = H5Tinsert (memtype, "Tally Name", HOFFSET (tally_struct, tally_name),
-                strtype);
+			strtype);
     status = H5Tinsert (memtype, "Entity Size",
-		HOFFSET (tally_struct, entity_size), H5T_NATIVE_DOUBLE);
-
-    // Create the compound datatype for the file.  
-    hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + sizeof (hvl_t) + 8);
+			HOFFSET (tally_struct, entity_size), H5T_NATIVE_DOUBLE);
+    
+    // Create the compound datatype for the file
+    hid_t filetype = H5Tcreate (H5T_COMPOUND, 8 + 8 + 8 + (3*sizeof (hvl_t)) + 8);
     status = H5Tinsert (filetype, "Entity ID", 0, H5T_STD_I64BE);
     status = H5Tinsert (filetype, "Entity Type", 8, H5T_STD_I64BE);
-    status = H5Tinsert (filetype, "Tally Name", 8+8, strtype);
-    status = H5Tinsert (filetype, "Entity Size", 8+8 + sizeof (hvl_t),
-			H5T_IEEE_F64BE);
-
+    status = H5Tinsert (filetype, "Tally Type", 8 + 8, H5T_STD_I64BE);
+    status = H5Tinsert (filetype, "Particle Name", 8 + 8 + 8, strtype);
+    status = H5Tinsert (filetype, "Entity Name", 8 + 8 + 8 + sizeof(hvl_t), strtype);
+    status = H5Tinsert (filetype, "Tally Name", 8 + 8 + 8 + (2*sizeof(hvl_t)) , strtype);
+    status = H5Tinsert (filetype, "Entity Size", 8 + 8 + 8 + (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
+    
     // Read the data.
     status = H5Dread (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
 
