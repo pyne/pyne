@@ -19,8 +19,8 @@ const std::string entity_type_enum2string[] = {"Volume","Surface"};
 /*** Protected Functions ***/
 /***************************/
 
-/// there are no protected functions currently
-/// fool.
+// there are no protected functions currently
+// fool.
 
 /************************/
 /*** Public Functions ***/
