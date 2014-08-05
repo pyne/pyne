@@ -82,12 +82,23 @@ namespace pyne
   /// A stuct for reprensenting fundemental data in a tally
   /// Maybe Useful for HDF5 representations.
   /// following scoptaz's lead here
+  /*
   typedef struct tally_struct {
     int entity_id;
     int entity_type;
     int tally_type;
     const char * particle_name;
     const char * entity_name;
+    const char * tally_name;
+    double entity_size;
+  } tally_struct;
+  */
+typedef struct tally_struct {
+    int entity_id;
+    int entity_type;
+  //    int tally_type;
+  //    const char * particle_name;
+  //    const char * entity_name;
     const char * tally_name;
     double entity_size;
   } tally_struct;
