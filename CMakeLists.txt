@@ -24,13 +24,16 @@ IF(NOT ${BUILD_TYPE} STREQUAL "release")
 ENDIF()
 
 # Include the HDF5 library and c++ headers
-find_package( HDF5 COMPONENTS C )
+find_package( HDF5 COMPONENTS C REQUIRED)
 include_directories(${HDF5_INCLUDE_DIRS})
 if(WIN32)
     # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
     get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
     list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/bin")
 	list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
+elseif(NOT HDF5_LIBRARY_DIRS)
+  list(GET HDF5_LIBRARIES 0 _hdf5lib)
+  get_filename_component(HDF5_LIBRARY_DIRS ${_hdf5lib} PATH)
 endif(WIN32)
 link_directories(${HDF5_LIBRARY_DIRS})
 add_definitions(${HDF5_DEFINITIONS})
