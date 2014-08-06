@@ -21,7 +21,7 @@ Fundamental solver theory
 i.e. neutrons or photons, in a host medium. It can be obtained from the general Boltzmann
 transport equation by neglecting particle-particle interactions, the dependence of the material
 properties of the host medium on the particle flux, and assuming that no electric force field is
-present." [Thesis page 5 section 1.1].
+present." (1 p.5).
 The following are all spatial discretization methods used to solve the Sn equations of the Neutron Transport Equation (nte).  There are three major assumptions each makes: (1) all systems are steady state (no time dependence), (2) in a non-multiplying medium (sigmaf = 0), and (3) featuring isotropic scattering.  The Sn equations make the transport equation solvable by solving the transport equation along specific segments of omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N.  A nodal method is then used to come up with a specific solution.  The nodal method is what differentiates each of these codes, as outlined below.
 
 
@@ -35,7 +35,7 @@ Ahotn-LN theory
 
 Linear Nodal Method:
 
-Advantage: Very efficient when computing integral quantities [Sebastian thesis abstract]
+Advantage: Very efficient when computing integral quantities (1,p.0)
 
 **Merge with LL description?
 
@@ -63,7 +63,7 @@ and +k = N, T and −k = S, B. In addition, the indices m k and m p are defined 
 if k = y then m k = m y and m p = m z , while for k = z we have m k = m z and m p = m y . For
 making Eq. 2.51 amenable to a solution χ km k ,m p (x)’s dependence on x is approximated by:
 <<INSERT THESIS LATEX HERE>
-(2.53)where λ = 0 for the LN method and λ = 1 for the LL method." [thesis p.38-39]
+(2.53)where λ = 0 for the LN method and λ = 1 for the LL method." (1, p.38-39)
 
 *****************************
 Ahotn-NEFD theory
@@ -75,14 +75,14 @@ Ahotn-NEFD theory
 specifics lumped into the spatial weights, a standard WDD solver can be used to solve the
 per-cell AHOTN system of equations. Typically, the WDD relations Eq. 2.48 are solved for
 the outflow face moments and substituted into the nodal balance relations Eq. 2.23 which are
-then solved for the (Λ + 1) 3 unknown nodal flux moments (NEFD algorithm),"[Thesis p.37]
+then solved for the (Λ + 1) 3 unknown nodal flux moments (NEFD algorithm),"(1, p.37)
 
 *****************************
 DGFEM General Theory
 *****************************
 "The discontinuous Galerkin finite element method (DGFEM) uses identical polynomial test
 and trial function spaces that are typically substituted into the weak form and tested against
-all members of the test space to obtain a per-cell system of equations." [Thesis p.25]
+all members of the test space to obtain a per-cell system of equations." (1, p.25)
 
 There are three families of solvers under the general DGFEM label, linearly-discontinuous, lagrange and complete.  The Lagrange family is more accurate, while the complete family excecutes faster.
 
@@ -96,7 +96,7 @@ The linear discontinuous DGFEM method (LD) is the special case of the complete D
 method of order Λ = 1. It is special in that the local matrix T is of size 4 × 4 and therefore its
 inverse can be precomputed thus saving execution time. Following [24] we decided to implement
 the LD method distinctly from the arbitrary order complete DGFEM kernel in order to create
-a highly optimized method." [Thesis p.92]
+a highly optimized method." (1, p.92)
 
 "The first DGFEM methods which he refers to as linear discontinuous (LD) method uses the following approximation for the angular flux:
 i,h
@@ -105,7 +105,7 @@ p m (r) ,
 ψ n i,h (r) =
 (2.29)
 m≤1
-where m = m x + m y + m z ." [Thesis p.26]
+where m = m x + m y + m z ." (1, p.26)
 
 Part of the complete family?
 
@@ -162,8 +162,7 @@ discrete ordinate and, in addition, restriction and prolongation operators need 
 exchange information between these meshes.
 The SCT-Step method is added to the selection of promising discretization methods because
 it is expected to perform well in C 0 configurations where it is expected to restore cell-wise
-convergence." [thesis p.109-110]
-
+convergence." (1, p.109-110)
 
 *************************************
 Advantages & Disadvantages discussion
@@ -184,9 +183,7 @@ only marginally cheaper than AHOTN, and DGFEM with Lagrange function space and �
 surprisingly takes the longest execution time. The reason why DGLA-Λ with Λ > 1 features
 much longer execution times than AHOTN or HODD of the same order is the significantly more
 expensive solution of the linear system of equations. We conjecture that the structure of the
-DGLA matrices causes the Lapack routine dgesv to execute slower." [thesis p.103]
-
-
+DGLA matrices causes the Lapack routine dgesv to execute slower." (1, p.103)
 
 
 
@@ -208,19 +205,20 @@ Support is limited to a subset of LaTeX math by the conversion required for many
 Assumptions
 ***********
 
-Any assumptions (explicit or implicit) about this method that would impact use, conclusions, validity, etc.
+1.  All systems are steady state (no time dependence)
+2.  All mediums are non-multiplying (sigmaf = 0)
+3.  Isotropic scattering present.
 
 **********************
 Additional Information
 **********************
 
-Details about impact of this theory on method use.
+
 
 **********
 References
 **********
 
-All of the justification for us listening to you.
-
-
-
+1. SCHUNERT, SEBASTIAN. Development of a Quantitative Decision Metric for Selecting the
+Most Suitable Discretization Method for S N Transport Problems. (Under the direction of
+Yousry Y. Azmy.)
