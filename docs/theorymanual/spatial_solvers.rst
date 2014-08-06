@@ -12,6 +12,14 @@ appropriate use of this physics.
 
 
 *****************************
+Fundamental solver theory
+*****************************
+
+@TODO: add latex formatting for variables/equations, etc
+The following are all spatial discretization methods used to solve the Sn equations of the Neutron Transport Equation (nte).  There are three major assumptions each makes: (1) all systems are steady state (no time dependence), (2) in a non-multiplying medium (sigmaf = 0), and (3) featuring isotropic scattering.  The Sn equations make the transport equation solvable by solving the transport equation along specific segments of omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N.  A nodal method is then used to come up with a specific solution.  The nodal method is what differentiates each of these codes, as outlined below.
+
+
+*****************************
 Ahotn-LN theory
 *****************************
 
