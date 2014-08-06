@@ -48,13 +48,16 @@
 !> @todo write the rest of the subroutine
 
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
- solver_in, solver_type_in, spatial_order_in, spatial_method_in, angular_quadrature_order_in,&
- qdtypin, nodes_x_in, nodes_y_in, nodes_z_in, num_groups_in, num_materials_in, x_cell_widths_in,&
- y_cell_widths_in, z_cell_widths_in, x_boundry_condition_1_in, x_boundry_condition_2_in,&
- y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in, z_boundry_condition_2_in,&
- material_id_in, quadrature_file, xs_file_in, source_input_file_in, bc_input_filein, flux_output_filein, &
- convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence, ichk_in, ichk_tolerence_in, &
- max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout)
+ solver_in, solver_type_in, spatial_order_in, spatial_method_in,&
+ angular_quadrature_order_in, qdtypin, nodes_x_in, nodes_y_in, nodes_z_in,&
+ num_groups_in, num_materials_in, x_cell_widths_in, y_cell_widths_in,&
+ z_cell_widths_in, x_boundry_condition_1_in, x_boundry_condition_2_in,&
+ y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in,&
+ z_boundry_condition_2_in, material_id_in, quadrature_file, xs_file_in,&
+ source_input_file_in, bc_input_filein, flux_output_filein, &
+ convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence, &
+ ichk_in, ichk_tolerence_in, max_mom_printed_in, moment_sum_flag_in,&
+ mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout)
 
 !-------------------------------------------------------------
 !
@@ -105,16 +108,19 @@ REAL*8 :: wtsum
 
 CHARACTER(80), INTENT(IN) :: titlein
 CHARACTER(30), INTENT(IN) :: solver_in, solver_type_in
-INTEGER, INTENT(IN) :: spatial_order_in, spatial_method_in, angular_quadrature_order_in, qdtypin, nodes_x_in, nodes_y_in, nodes_z_in,&
-                       num_groups_in, num_materials_in
+INTEGER, INTENT(IN) :: spatial_order_in, spatial_method_in, angular_quadrature_order_in,&
+ qdtypin, nodes_x_in, nodes_y_in, nodes_z_in, num_groups_in, num_materials_in
 REAL*8, INTENT(IN), DIMENSION(:) :: x_cell_widths_in, y_cell_widths_in, z_cell_widths_in
-INTEGER, INTENT(IN) :: x_boundry_condition_1_in, x_boundry_condition_2_in, y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in, z_boundry_condition_2_in 
+INTEGER, INTENT(IN) :: x_boundry_condition_1_in, x_boundry_condition_2_in,&
+ y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in,&
+ z_boundry_condition_2_in 
 
 ! Cell materials
 INTEGER, INTENT(IN), DIMENSION(:,:,:) :: material_id_in
 !ALLOCATE(mat(nodes_x_in,nodes_y_in,nodes_z_in))
 
-CHARACTER(30), INTENT(IN) :: quadrature_file, xs_file_in, source_input_file_in, bc_input_filein, flux_output_filein
+CHARACTER(30), INTENT(IN) :: quadrature_file, xs_file_in, source_input_file_in,&
+ bc_input_filein, flux_output_filein
 
 ! Iteration Controls
 REAL*8, INTENT(IN) :: convergence_criterion_in, converge_tolerence
@@ -125,7 +131,8 @@ REAL*8, INTENT(IN) :: ichk_in
 INTEGER, INTENT(IN) :: ichk_tolerence_in
 
 ! Editing data
-INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_in, quad_flux_print_flag_in
+INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_in,&
+ quad_flux_print_flag_in
 
 !INTEGER, INTENT(IN), DIMENSION(:) :: out_dims 
 
