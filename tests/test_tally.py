@@ -105,6 +105,161 @@ def test_tally17():
     assert_equal(tally.entity_type,new_tally.entity_type)
 
 
+def test_tally18():
+    tally = Tally("Flux","photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_equal(tally.entity_name,new_tally.entity_name)
+
+
+def test_tally19():
+    tally = Tally("Flux","photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_equal(tally.entity_id,new_tally.entity_id)
+
+def test_tally20():
+    tally = Tally("Flux","photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_equal(tally.tally_name,new_tally.tally_name)
+
+def test_tally21():
+    tally = Tally("Flux","photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_equal(tally.entity_size,new_tally.entity_size)
+
+################################################################################
+# tests the append and load abilty
+def test_tally22():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+    tally.write_hdf5("test_tally.h5","tally")
+    # there are now two tallies in the h5 file
+    
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+    assert_equal(tally.tally_type,new_tally.tally_type)
+
+def test_tally23():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+   
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+
+    assert_equal(tally.particle_name,new_tally.particle_name)
+
+def test_tally24():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+   
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+
+    assert_equal(tally.entity_type,new_tally.entity_type)
+
+
+def test_tally25():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+
+    assert_equal(tally.entity_name,new_tally.entity_name)
+
+
+def test_tally26():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+
+    assert_equal(tally.entity_id,new_tally.entity_id)
+
+def test_tally27():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+
+    assert_equal(tally.tally_name,new_tally.tally_name)
+
+def test_tally28():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+
+    assert_equal(tally.entity_size,new_tally.entity_size)
+
+################################################################################
+# tests the load abilty
+def test_tally29():
+    # there are currently two tallies in the h5 file
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+    
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+    assert_not_equal(tally.tally_type,new_tally.tally_type)
+
+def test_tally30():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+   
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_not_equal(tally.particle_name,new_tally.particle_name)
+
+def test_tally31():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+   
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_not_equal(tally.entity_type,new_tally.entity_type)
+
+
+def test_tally32():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_not_equal(tally.entity_name,new_tally.entity_name)
+
+
+def test_tally33():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_not_equal(tally.entity_id,new_tally.entity_id)
+
+def test_tally34():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_not_equal(tally.tally_name,new_tally.tally_name)
+
+def test_tally35():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",0)
+
+    assert_not_equal(tally.entity_size,new_tally.entity_size)
+
+
 
 # Run as script
 #
