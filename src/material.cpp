@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>  // std::setprecision
+#include <math.h>   // modf
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
@@ -237,7 +238,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
   // Close the database
   status = H5Fclose(db);
 
-  // Renomalize the composition, just to be safe.
+  // Renormalize the composition, just to be safe.
   norm_comp();
 };
 
@@ -574,46 +575,62 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   return oss.str();
 }
 
-std::string pyne::Material::fluka() {
+std::string pyne::Material::fluka(bool include_znum_mass) {
   // Per the FLUKA manual, the first index is 26
   //  and is incremented for every defined material.
+  // Currently this is already done in the tagging step
   const int mat_idx_start = 0;
 
   std::stringstream rs;
   std::string name;
   std::string comment;
+  // Make sure something is in rs
   if (metadata.isMember("fluka_name")) {
 
     name = metadata["fluka_name"].asString();
-
     int fluka_mat_idx;
     bool is_mat_idx = true;
     if (metadata.isMember("fluka_material_index") ) {
-      std::string fluka_mat_idx_str = metadata["fluka_material_index"].asString();
-      fluka_mat_idx = atoi(fluka_mat_idx_str.c_str());
+      // Currently the fluka_material_index is wrapped in a str() call in
+      // the tagging script. 
+      std::string index_str = metadata["fluka_material_index"].asString();
+      fluka_mat_idx = atoi(index_str.c_str());
     } else { // There isn't a mat_index
       is_mat_idx = false;
     }
 
     if (metadata.isMember("comments") ) {
        comment = metadata["comments"].asString();
-       rs << "* " << comment << std::endl;
+       rs << "* " << comment;
     }
+    rs << std::endl;
 
-    std::cout.precision(0);
+    rs << std::setw(10) << std::left << "MATERIAL";
+    if (include_znum_mass) {
+      comp_iter mptr = comp.begin();
+      int nucid = mptr->first;
+      if (mptr->second > 1) {
+        std::cerr << "Error: Expecting one component for nucid " << nucid << std::endl;
+      }
+      int znum = pyne::nucname::znum(nucid);
+      rs << std::setprecision(0) << std::fixed << std::showpoint <<
+            std::setw(10) << std::right << (float)znum; 
+      rs << std::setprecision(0) << std::fixed << std::showpoint <<
+            std::setw(10) << std::right << pyne::atomic_mass(nucid);
+    } else {
+      rs << std::setw(10) << std::right << "";
+      rs << std::setw(10) << std::right << "";
+    }
+    // If density is an int, ensure there is a '.' after it
     double intpart;
     modf (density, &intpart);
-    rs << std::setw(10) << std::left << "MATERIAL";
-    rs << std::setw(10) << std::right << "";
-    rs << std::setw(10) << std::right << "";
-    // Density is an int, ensure there is a '.' after it
     if (density == intpart) {
       rs << std::setprecision(0) << std::fixed << std::showpoint << 
             std::setw(10) << std::right << density;
     } else {
       rs << std::setw(10) << std::right << density;
     }
-    if (is_mat_idx) { 
+    if (is_mat_idx) {
       rs << std::setprecision(0) << std::fixed << std::showpoint <<
       std::setw(10) << std::right << (float)(fluka_mat_idx + mat_idx_start); 
     } else {
@@ -986,20 +1003,17 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
       if (0 < ptr->second) {
         // There is a nonzero amount of this nucid in the current material, 
-	// check if znum and anum are in the exception list, 
+    // check if znum and anum are in the exception list, 
         int cur_stripped_id = nucname::znum(ptr->first)*10000000 
-	                    + nucname::anum(ptr->first)*10000;
+                        + nucname::anum(ptr->first)*10000;
         if (0 < exception_ids.count(cur_stripped_id)) {
           // The znum/anum combination identify the current material as a 
-	  // fluka-named exception list => copy, don't collapse
+      // fluka-named exception list => copy, don't collapse
           cm[ptr->first] = (ptr->second) * mass;
         } else {
           // Not on exception list => add frac to id-component
           int znum_id = nucname::id(nucname::znum(ptr->first));
-          std::cout << "cur_id is " << nucname::id(ptr->first);
-	  std::cout << ":  Collapsing amount " << ptr->second << 
-	               " to nucid " << znum_id << std::endl;
-	  cm[znum_id] += (ptr->second) * mass;
+      cm[znum_id] += (ptr->second) * mass;
         }
       }
   }

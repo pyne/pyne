@@ -1163,7 +1163,7 @@ def test_fluka():
                           'table_ids': {'92235':'15c', '92238':'25c'},
                           'name':'LEU',
                           'fluka_name':'leu',
-			  'fluka_material_index': 0,
+			  'fluka_material_index': '26',
                           'source':'Some URL',
                           'comments': ('Fluka Material Attributes'),
                           },
@@ -1171,7 +1171,7 @@ def test_fluka():
 
     written = leu.fluka()
     expected = ('* Fluka Material Attributes\n'
-                'MATERIAL                            19.1       26.                    LEU       \n')
+                'MATERIAL                            19.1       26.                    leu       \n')
     assert_equal(written, expected)
 
     leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96},
@@ -1179,7 +1179,7 @@ def test_fluka():
                           'table_ids': {'92235':'15c', '92238':'25c'},
                           'name':'LEU2',
                           'fluka_name':'leu2',
-			  'fluka_material_index': 1,
+			  'fluka_material_index': '27',
                           'source':'Some URL',
                           'comments': ('Fluka Material Attributes, again'),
                           },
@@ -1187,7 +1187,7 @@ def test_fluka():
 
     written2 = leu2.fluka()
     expected2 = ('* Fluka Material Attributes, again\n'
-                'MATERIAL                           19.15       27.                    LEU2      \n')
+               'MATERIAL                           19.15       27.                    leu2      \n')
     assert_equal(written2, expected2)
 
 

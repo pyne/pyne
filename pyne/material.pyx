@@ -343,7 +343,7 @@ cdef class _Material:
         card = self.mat_pointer.mcnp(frac_type)
         return card
 
-    def fluka(self):
+    def fluka(self, include_znum_mass=False):
         """fluka()
         Return a fluka material card
         Parameters none
@@ -351,7 +351,7 @@ cdef class _Material:
  	   The sequential material id starting from 26 unless predefined
         """
         cdef std_string card
-        card = self.mat_pointer.fluka()
+        card = self.mat_pointer.fluka(include_znum_mass)
         return card
 
 
