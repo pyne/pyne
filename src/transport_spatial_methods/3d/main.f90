@@ -1,8 +1,60 @@
+!*TRANSPORT CODE SOLVER INTERFACE FOR AHOTN DGFEM AND SCTSTEP
+!> @brief Solves the neutron transport equation for the specified solver with the passed in input information
+!> @detail Standard usage of these solveres should be through the pyne spatial_solver interface.
+!> 
+!Do we want author names?
+!
+!> @param titlein desired title for solver run
+!> @param solver_in spatial solver class
+!> @param solver_type_in spatial solver specific type
+!> @param spatial_order_in lambda order value
+!> @param spatial_method_in spatial method
+!> @param angular_quadrature_order_in quadrature order
+!> @param angular_quadrature_type_in quadrature type
+!> @param nodes_x_in number of nodes in x direction
+!> @param nodes_y_in number of nodes in y direction
+!> @param nodes_z_in number of nodes in z direction
+!> @param num_groups_in number of groups of ???
+!> @param num_materials_in number of materials
+!> @param x_cell_widths_in x node size
+!> @param y_cell_widths_in y node size
+!> @param z_cell_widths_in z node size
+!> @param x_boundry_condition_1_in x south boundry conditions
+!> @param x_boundry_condition_2_in x east boundry conditions
+!> @param y_boundry_condition_1_in y ?north? boundry conditions
+!> @param y_boundry_condition_2_in y ?west? boundry conditions
+!> @param z_boundry_condition_1_in z ?upper? boundry conditions
+!> @param z_boundry_condition_2_in z ?lower? boundry conditions
+!> @param material_id_in material file in
+!> @param quadrature_file
+!> @param xs_file_in
+!> @param source_input_file_in
+!> @param bc_input_filein
+!> @param flux_output_filein
+!> @param convergence_criterion_in
+!> @param max_iterations_in
+!> @param moments_converged_in
+!> @param converge_tolerence
+!> @param ichk_in
+!> @param ichk_tolerence_in
+!> @param max_mom_printed_in
+!> @param moment_sum_flag_in
+!> @param mom_at_a_pt_flag_in
+!> @param quad_flux_print_flag_in
+
+!OUTPUT NOT PARAM!> @param fluxout
+!> @param Array2 Second array 
+!> @param Out Returned array 
+!> @todo write the rest of the subroutine
+
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
- solverin, solvertypein, lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin,&
- ngin, nmin, dxin, dyin, dzin, xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin,&
- matin, qdfilein, xsfilein, srcfilein, bc_input_filein, flux_output_filein, errin, itmxin, iallin, tolrin, tchkin,&
- ichkin, mompin, momsumin, momptin, qdflxin,fluxout)
+ solver_in, solver_type_in, spatial_order_in, spatial_method_in, angular_quadrature_order_in,&
+ qdtypin, nodes_x_in, nodes_y_in, nodes_z_in, num_groups_in, num_materials_in, x_cell_widths_in,&
+ y_cell_widths_in, z_cell_widths_in, x_boundry_condition_1_in, x_boundry_condition_2_in,&
+ y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in, z_boundry_condition_2_in,&
+ material_id_in, quadrature_file, xs_file_in, source_input_file_in, bc_input_filein, flux_output_filein, &
+ convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence, ichk_in, ichk_tolerence_in, &
+ max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout)
 
 !-------------------------------------------------------------
 !
@@ -24,8 +76,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
 !    Solver types =  "AHOTN", "DGFEM", and "SCTSTEP"
 !                    - AHOTN solvers: "LL" "LN" and "NEFD"
 !                    - DGFEM solvers: "LD" "DENSE" and "LAGRANGE"
-!		     - SCTSTEP solvers:
-!                    - SCTSTEP (only one)
+!		                 - SCTSTEP solvers: SCTSTEP (only one)
 !
 ! Some problem size specifications that are passed in:
 !   lambda => LAMDBA, the AHOT spatial order
@@ -53,71 +104,71 @@ LOGICAL :: ex1, ex2, ex3, ex4
 REAL*8 :: wtsum
 
 CHARACTER(80), INTENT(IN) :: titlein
-CHARACTER(30), INTENT(IN) :: solverin, solvertypein
-INTEGER, INTENT(IN) :: lambdain, methin, qdordin, qdtypin, nxin, nyin, nzin,&
-                       ngin, nmin
-REAL*8, INTENT(IN), DIMENSION(:) :: dxin, dyin, dzin
-INTEGER, INTENT(IN) :: xsbcin, xebcin, ysbcin, yebcin, zsbcin, zebcin 
+CHARACTER(30), INTENT(IN) :: solver_in, solver_type_in
+INTEGER, INTENT(IN) :: spatial_order_in, spatial_method_in, angular_quadrature_order_in, qdtypin, nodes_x_in, nodes_y_in, nodes_z_in,&
+                       num_groups_in, num_materials_in
+REAL*8, INTENT(IN), DIMENSION(:) :: x_cell_widths_in, y_cell_widths_in, z_cell_widths_in
+INTEGER, INTENT(IN) :: x_boundry_condition_1_in, x_boundry_condition_2_in, y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in, z_boundry_condition_2_in 
 
 ! Cell materials
-INTEGER, INTENT(IN), DIMENSION(:,:,:) :: matin
-!ALLOCATE(mat(nxin,nyin,nzin))
+INTEGER, INTENT(IN), DIMENSION(:,:,:) :: material_id_in
+!ALLOCATE(mat(nodes_x_in,nodes_y_in,nodes_z_in))
 
-CHARACTER(30), INTENT(IN) :: qdfilein, xsfilein, srcfilein, bc_input_filein, flux_output_filein
+CHARACTER(30), INTENT(IN) :: quadrature_file, xs_file_in, source_input_file_in, bc_input_filein, flux_output_filein
 
 ! Iteration Controls
-REAL*8, INTENT(IN) :: errin, tolrin
-INTEGER, INTENT(IN) :: itmxin, iallin
+REAL*8, INTENT(IN) :: convergence_criterion_in, converge_tolerence
+INTEGER, INTENT(IN) :: itmxin, moments_converged_in
 
 ! Solution check frequency
-REAL*8, INTENT(IN) :: tchkin
-INTEGER, INTENT(IN) :: ichkin
+REAL*8, INTENT(IN) :: ichk_in
+INTEGER, INTENT(IN) :: ichk_tolerence_in
 
 ! Editing data
-INTEGER, INTENT(IN) :: mompin, momsumin, momptin, qdflxin
+INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_in, quad_flux_print_flag_in
 
 !INTEGER, INTENT(IN), DIMENSION(:) :: out_dims 
 
-REAL*8, INTENT(OUT), DIMENSION(4,1,nyin,nzin,ngin,1,1) :: fluxout
+REAL*8, INTENT(OUT), DIMENSION(4,1,nodes_y_in,nodes_z_in,num_groups_in,1,1) :: fluxout
 !Works for AHOTN/LL, AHOTN/LN, DGFEM/LD only so far
 
 ! Set all of the input values
 title = titlein
-solver = solverin
-solvertype = solvertypein
-lambda = lambdain
-meth = methin
-qdord = qdordin
+solver = solver_in
+solvertype = solver_type_in
+lambda = spatial_order_in
+meth = spatial_method_in
+qdord = angular_quadrature_order_in
 qdtyp = qdtypin
-nx = nxin
-ny = nyin
-nz = nzin
-ng = ngin
-nm = nmin
-dx = dxin
-dy = dyin
-dz = dzin
-xsbc = xsbcin
-xebc = xebcin
-ysbc = ysbcin
-yebc = yebcin
-zsbc = zsbcin
-zebc = zebcin
-mat = matin
+nx = nodes_x_in
+ny = nodes_y_in
+nz = nodes_z_in
+ng = num_groups_in
+nm = num_materials_in
+dx = x_cell_widths_in
+dy = y_cell_widths_in
+dz = z_cell_widths_in
+xsbc = x_boundry_condition_1_in
+xebc = x_boundry_condition_2_in
+ysbc = y_boundry_condition_1_in
+yebc = y_boundry_condition_2_in
+zsbc = z_boundry_condition_1_in
+zebc = z_boundry_condition_2_in
+mat = material_id_in
 inflow_file = bc_input_filein
 phi_file = flux_output_filein
 !inflow_file = "bc_4.dat"
 !phi_file = "phi_4.ahot"
-err = errin
-tolr = tolrin
+err = convergence_criterion_in
+tolr = converge_tolerence
 itmx = itmxin
-iall = iallin
-tchk = tchkin
-ichk = ichkin
-momp = mompin
-momsum = momsumin
-mompt = momptin
-qdflx = qdflxin
+iall = moments_converged_in
+tchk = ichk_in
+ichk = ichk_tolerence_in
+momp = max_mom_printed_in
+momsum = moment_sum_flag_in
+mompt = mom_at_a_pt_flag_in
+qdflx = quad_flux_print_flag_in
 
 !ALLOCATE(fluxout(4,nx,ny,nz,ng,1,1))
 
@@ -145,8 +196,8 @@ ELSE IF (MOD(qdord,2) /= 0) THEN
     STOP
 END IF
 
-!INQUIRE(FILE = xsfilein, EXIST = ex1)
-!INQUIRE(FILE = srcfilein, EXIST = ex2)
+!INQUIRE(FILE = xs_file_in, EXIST = ex1)
+!INQUIRE(FILE = source_input_file_in, EXIST = ex2)
 !IF (ex1 .eqv. .FALSE. .OR. ex2 .eqv. .FALSE.) THEN
 !   WRITE(8,'(/,3x,A)') "ERROR: File does not exist for reading."
 !   STOP
@@ -178,12 +229,12 @@ END IF
 ! Angular quadrature
 ALLOCATE(ang(apo,3), w(apo))
 IF (qdtyp == 2) THEN
-  INQUIRE(FILE=qdfilein, EXIST=ex3)
+  INQUIRE(FILE=quadrature_file, EXIST=ex3)
   IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
     WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
     STOP
    END IF
-   OPEN(UNIT=10, FILE=qdfilein)
+   OPEN(UNIT=10, FILE=quadrature_file)
    READ(10,*)
    READ(10,*) (ang(n,1),ang(n,2),w(n),n=1,apo)
    ! Renormalize all the weights
@@ -209,8 +260,8 @@ IF (solver == "DGFEM") THEN
     END IF
 END IF
 
-CALL readxs(xsfilein)
-CALL readsrc(srcfilein)
+CALL readxs(xs_file_in)
+CALL readsrc(source_input_file_in)
 
 IF (xsbc .eq. 2) THEN
     IF (solver == "AHOTN") THEN
@@ -227,6 +278,9 @@ CALL solve
 CALL output
 !CALL output_phi("phifile")
 fluxout = f
+
+
+!Cleanup previously found in old main file
 
 IF( allocated(ang)) deallocate(ang)
 IF( allocated(w)) deallocate(w)
