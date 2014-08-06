@@ -154,7 +154,7 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath, int row)
   tally_type = tally_type_enum2string[read_data[data_row].tally_type];
   particle_name = std::string(read_data[data_row].particle_name);
   tally_name = std::string(read_data[data_row].tally_name);
-  entity_name = std::string(read_data[data_row].tally_name);
+  entity_name = std::string(read_data[data_row].entity_name);
   entity_size = read_data[data_row].entity_size;
 
 
