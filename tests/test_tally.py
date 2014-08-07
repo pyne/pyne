@@ -260,6 +260,26 @@ def test_tally35():
     assert_not_equal(tally.entity_size,new_tally.entity_size)
 
 
+################################################################################
+# test write and retrive from arbitrary location
+def test_tally36():
+    tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+    tally.write_hdf5("new_test_tally.h5","bob_geldof")
+    
+    new_tally = Tally()
+    new_tally.from_hdf5("new_test_tally.h5","bob_geldof",0)
+    assert_equal(tally.tally_type,new_tally.tally_type)
+
+# test append and retrive from arbitrary location
+def test_tally36():
+    tally = Tally("Flux","photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+    tally.write_hdf5("new_test_tally.h5","bob_geldof")
+    
+    new_tally = Tally()
+    new_tally.from_hdf5("new_test_tally.h5","bob_geldof",1)
+    assert_equal(tally.tally_type,new_tally.tally_type)
+
+
 
 # Run as script
 #
