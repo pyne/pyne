@@ -9,8 +9,6 @@
 
 
 from libcpp.string cimport string as std_string
-from libcpp.vector cimport vector as cpp_vector
-from pyne cimport cpp_tally
 
 cdef extern from "tally.h" namespace "pyne":
 
@@ -35,11 +33,6 @@ cdef extern from "tally.h" namespace "pyne":
         std_string tally_type
 
         # methods
-        cpp_vector[Tally] collection_from_hdf5() except +
-        cpp_vector[Tally] collection_from_hdf5(std_string) except +
-        cpp_vector[Tally] collection_from_hdf5(std_string, std_string) except +
-        cpp_vector[Tally] collection_from_hdf5(char *) except +
-        cpp_vector[Tally] collection_from_hdf5(char *, char *) except +
         void from_hdf5() except +
         void from_hdf5(std_string) except +
         void from_hdf5(std_string, std_string) except +

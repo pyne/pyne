@@ -8,18 +8,10 @@
 ################################################
 """
 """
-cimport dtypes
-cimport numpy as np
-cimport tally
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
-from libcpp.vector cimport vector as cpp_vector
-from pyne cimport cpp_tally
 
-import dtypes
-import numpy as np
 
-np.import_array()
 
 
 
@@ -304,64 +296,6 @@ cdef class Tally:
     
     
     # methods
-    def _tally_collection_from_hdf5_0(self, filename, datapath):
-        """collection_from_hdf5(self, filename, datapath)
-        no docstring for collection_from_hdf5, please file a bug report!"""
-        cdef char * filename_proxy
-        cdef char * datapath_proxy
-        cdef cpp_vector[cpp_tally.Tally] rtnval
-        
-        cdef np.npy_intp rtnval_proxy_shape[1]
-        filename_bytes = filename.encode()
-        datapath_bytes = datapath.encode()
-        rtnval = (<cpp_tally.Tally *> self._inst).collection_from_hdf5(std_string(<char *> filename_bytes), std_string(<char *> datapath_bytes))
-        rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
-        rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, dtypes.xd_tally.num, &rtnval[0])
-        rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
-        return rtnval_proxy
-    
-    
-    def _tally_collection_from_hdf5_1(self, filename, datapath):
-        """collection_from_hdf5(self, filename, datapath)
-        no docstring for collection_from_hdf5, please file a bug report!"""
-        cdef char * filename_proxy
-        cdef char * datapath_proxy
-        cdef cpp_vector[cpp_tally.Tally] rtnval
-        
-        cdef np.npy_intp rtnval_proxy_shape[1]
-        filename_bytes = filename.encode()
-        datapath_bytes = datapath.encode()
-        rtnval = (<cpp_tally.Tally *> self._inst).collection_from_hdf5(<char *> filename_bytes, <char *> datapath_bytes)
-        rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
-        rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, dtypes.xd_tally.num, &rtnval[0])
-        rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
-        return rtnval_proxy
-    
-    
-    _tally_collection_from_hdf5_0_argtypes = frozenset(((0, str), (1, str), ("filename", str), ("datapath", str)))
-    _tally_collection_from_hdf5_1_argtypes = frozenset(((0, str), (1, str), ("filename", str), ("datapath", str)))
-    
-    def collection_from_hdf5(self, *args, **kwargs):
-        """collection_from_hdf5(self, filename, datapath)
-        no docstring for collection_from_hdf5, please file a bug report!"""
-        types = set([(i, type(a)) for i, a in enumerate(args)])
-        types.update([(k, type(v)) for k, v in kwargs.items()])
-        # vtable-like dispatch for exactly matching types
-        if types <= self._tally_collection_from_hdf5_0_argtypes:
-            return self._tally_collection_from_hdf5_0(*args, **kwargs)
-        if types <= self._tally_collection_from_hdf5_1_argtypes:
-            return self._tally_collection_from_hdf5_1(*args, **kwargs)
-        # duck-typed dispatch based on whatever works!
-        try:
-            return self._tally_collection_from_hdf5_0(*args, **kwargs)
-        except (RuntimeError, TypeError, NameError):
-            pass
-        try:
-            return self._tally_collection_from_hdf5_1(*args, **kwargs)
-        except (RuntimeError, TypeError, NameError):
-            pass
-        raise RuntimeError('method collection_from_hdf5() could not be dispatched')
-    
     def _tally_from_hdf5_0(self, filename, datapath, row=-1):
         """from_hdf5(self, filename, datapath, row=-1)
          This method was overloaded in the C-based source. To overcome
