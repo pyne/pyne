@@ -25,7 +25,7 @@ namespace pyne
   class Tally
   {
   public:
-    // Tally Constructors
+    /// Tally Constructors
     Tally (); /// empty constructor
 
     /// Constructor from passed in vars
@@ -44,40 +44,40 @@ namespace pyne
     ~Tally (); /// default destructor
 
 
-    // Dummy read method wrapper around c style strings
+    /// Dummy read method wrapper around c style strings
     /// \param filename the filename of the file to read from
     /// \param datapath _name the name of the region where tallies 
     ///          are stored
     /// \param row  the array index of data to access
     void from_hdf5(char * filename, char *datapath, int row = -1);
 
-    // Main read tally method
+    /// Main read tally method
     /// \param filename the filename of the file to read from
     /// \param datapath _name the name of the region where tallies 
     ///          are stored
     /// \param row  the array index of data to access
     void from_hdf5(std::string filename, std::string datapath, int row = -1);
 
-    // Dummy write method wrapper around c style strings
+    /// Dummy write method wrapper around c style strings
     /// \param filename the filename of the file to write to
     /// \param datapath _name the name of the region where tallies 
     ///          are to be stored
     void write_hdf5( char * filename, char * datapath);
 
-    // Main write tally method
+    /// Main write tally method
     /// \param filename the filename of the file to write to
     /// \param datapath _name the name of the region where tallies 
     ///          are to be stored
     void write_hdf5(std::string filename, std::string datapath);
 
-    // fundamental tally variables
-    std::string entity_type; /// the type of entity (volume,surface)
-    std::string entity_name; /// the name of the entity (optional)
-    std::string particle_name; /// particle name string
-    std::string tally_type; /// type of tally flux or current
-    std::string tally_name; /// name of the tally 
-    int entity_id; /// id number of the entity being tallied upon    
-    double entity_size; /// the physical size of the entity 
+    /// fundamental tally variables
+    std::string entity_type; ///< the type of entity (volume,surface)
+    std::string entity_name; ///< the name of the entity (optional)
+    std::string particle_name; ///< particle name string
+    std::string tally_type; ///< type of tally flux or current
+    std::string tally_name; ///< name of the tally 
+    int entity_id; ///< id number of the entity being tallied upon    
+    double entity_size; ///< the physical size of the entity 
   };
 
   /// Converts a Tally to a string stream representation.
