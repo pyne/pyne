@@ -271,7 +271,7 @@ def test_tally36():
     assert_equal(tally.tally_type,new_tally.tally_type)
 
 # test append and retrive from arbitrary location
-def test_tally36():
+def test_tally37():
     tally = Tally("Flux","photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
     tally.write_hdf5("new_test_tally.h5","bob_geldof")
     
