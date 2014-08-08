@@ -21,6 +21,7 @@ def clean(files):
     for f in files:
         if os.path.isfile(f):
             os.remove(f)
+
 # writes the neutron tally to the file filename
 def write_neutron(file_name):
     tally = Tally("Current","neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
@@ -352,7 +353,7 @@ def test_tally36():
     assert_equal(tally.tally_type,new_tally.tally_type)
 
 # test append and retrive from arbitrary location
-def test_tally36():
+def test_tally37():
     clean(["test_tally.h5"])
     write_arb_n("test_tally.h5","bob_geldof")
     write_arb_p("test_tally.h5","bob_geldof")
