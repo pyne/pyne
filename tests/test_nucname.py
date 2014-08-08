@@ -324,6 +324,34 @@ def test_serpent_to_id():
             continue
         yield check_cases, nucname.serpent_to_id, val, id
 
+
+def test_openmc():
+    assert_equal(nucname.openmc(942390), "Pu-239")
+    assert_equal(nucname.openmc(952421), "Am-242m")
+
+    assert_equal(nucname.openmc("Pu-239"), "Pu-239")
+
+    assert_equal(nucname.openmc(94239), "Pu-239")
+    assert_equal(nucname.openmc(95642), "Am-242")
+    assert_equal(nucname.openmc(95242), "Am-242m")
+    assert_equal(nucname.openmc(92636), "U-236m")
+
+    assert_equal(nucname.openmc(2390940), "Pu-239")
+    assert_equal(nucname.openmc(2420951), "Am-242m")
+
+    assert_equal(nucname.openmc("C"), "C-Nat")
+
+def test_openmc_to_id():
+    # use None for impossible forms
+    vals = ["He-4", "He-4", "Cm-244", "Pu-239", "Am-242m", "He-4", "Am-242", 
+            "Am-242m", "U-236m", None, "Am-242m", "He-Nat", "U-Nat", 
+            "Np-Nat", "He-4", "Cm-244", "Pu-239", "Am-242", "He-4", "Cm-244m", 
+            "Pu-239", "Am-242", "U-Nat"]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.openmc_to_id, val, id
+
 def test_nist():
     assert_equal(nucname.nist(942390), "239Pu")
     assert_equal(nucname.nist(952421), "242Am")

@@ -453,7 +453,7 @@ def zzllaaam_to_id(nuc):
 
 
 def serpent(nuc):
-    """Converts a nuclide to its Serepnt form ('Am-242m'). 
+    """Converts a nuclide to its Serpent form ('Am-242m'). 
 
     Parameters
     ----------
@@ -499,6 +499,56 @@ def serpent_to_id(nuc):
         newnuc = cpp_nucname.serpent_to_id(<char *> nuc_bytes)
     #elif isinstance(nuc, int) or isinstance(nuc, long):
     #    newnuc = cpp_nucname.serpent_to_id(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+
+def openmc(nuc):
+    """Converts a nuclide to its OpenMC form ('Am-242m'). 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : str 
+        Output nuclide in OpenMC form.
+
+    """
+    cdef std_string newnuc
+
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.openmc(<char *> nuc_bytes)
+    elif isinstance(nuc, int):
+        newnuc = cpp_nucname.openmc(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+
+    return bytes(<char *> newnuc.c_str()).decode()
+
+
+def openmc_to_id(nuc):
+    """Converts a nuclide directly from OpenMC form ('Am-242m') to
+    the canonical identifier form. 
+
+    Parameters
+    ----------
+    nuc : int or str 
+        Input nuclide in OpenMC form.
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.openmc_to_id(<char *> nuc_bytes)
     else:
         raise NucTypeError(nuc)
     return newnuc

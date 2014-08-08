@@ -810,11 +810,6 @@ std::string pyne::nucname::serpent(std::string nuc) {
 //
 // Serpent -> id
 //
-//int pyne::nucname::serpent_to_id(int nuc)
-//{
-// Should be ZAID
-//};
-
 
 int pyne::nucname::serpent_to_id(char * nuc) {
   return serpent_to_id(std::string(nuc));
@@ -861,6 +856,73 @@ int pyne::nucname::serpent_to_id(std::string nuc) {
     throw NotANuclide(nucstr, nucid);
   return nucid;
 };
+
+
+/*************************/
+/*** openmc functions ***/
+/*************************/
+std::string pyne::nucname::openmc(int nuc) {
+  int nucid = id(nuc);
+  std::string newnuc = "";
+
+  int ssss = nucid % 10000;
+  int aaassss = nucid % 10000000;
+  int zzz = nucid / 10000000;
+  int aaa = aaassss / 10000;
+
+  // Make sure the LL value is correct
+  if (0 == zz_name.count(zzz))
+    throw NotANuclide(nuc, nucid);
+
+  // Add LL
+  std::string llupper = pyne::to_upper(zz_name[zzz]);
+  std::string lllower = pyne::to_lower(zz_name[zzz]);
+  newnuc += llupper[0];
+  for (int l = 1; l < lllower.size(); l++)
+    newnuc += lllower[l];  
+
+  // Add required dash
+  newnuc += "-";
+
+  // Add A-number
+  if (0 < aaassss)
+    newnuc += pyne::to_str(aaa);
+  else if (0 == aaassss)
+    newnuc += "Nat";
+
+  // Add meta-stable flag
+  if (0 < ssss)
+    newnuc += "m";
+
+  return newnuc;
+};
+
+
+std::string pyne::nucname::openmc(char * nuc) {
+  std::string newnuc (nuc);
+  return openmc(newnuc);
+};
+
+
+std::string pyne::nucname::openmc(std::string nuc) {
+  return openmc(id(nuc));
+};
+
+//
+// OpenMC -> id
+//
+
+int pyne::nucname::openmc_to_id(char * nuc) {
+  return openmc_to_id(std::string(nuc));
+};
+
+
+int pyne::nucname::openmc_to_id(std::string nuc) {
+  // Cheating a bit here since the serpent version is implemented such that
+  // it should work for openmc, too.
+  return serpent_to_id(nuc);
+};
+
 
 
 /**********************/

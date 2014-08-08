@@ -404,9 +404,30 @@ namespace nucname
   /// to the id canonical form  for nuclides in PyNE. 
   /// \param nuc a nuclide in Serpent form.
   /// \return an integer id nuclide identifier.
-  //int serpent_to_id(int nuc);  Should be ZAID
   int serpent_to_id(char * nuc);
   int serpent_to_id(std::string nuc);
+  /// \}
+
+  /// \name OpenMC Form Functions
+  /// \{
+  /// This is the string-based naming convention used by OpenMC.
+  /// This is very similar to the serpent naming convention. However, 
+  /// in the case of natural elements, the 'Nat' is capitalized.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  std::string openmc(int nuc);
+  std::string openmc(char * nuc);
+  std::string openmc(std::string nuc);
+  /// \}
+
+  /// \name OpenMC Form to Identifier Form Functions
+  /// \{
+  /// This converts from the OpenMC nuclide naming convention 
+  /// to the id canonical form  for nuclides in PyNE. 
+  /// \param nuc a nuclide in OpenMC form.
+  /// \return an integer id nuclide identifier.
+  int openmc_to_id(char * nuc);
+  int openmc_to_id(std::string nuc);
   /// \}
 
   /// \name NIST Form Functions
