@@ -20,16 +20,31 @@ cdef extern from "tally.h" namespace "pyne":
         Tally(std_string, std_string, int) except +
         Tally(std_string, std_string, int, std_string) except +
         Tally(std_string, std_string, int, std_string, std_string) except +
+        Tally(std_string, std_string, int, std_string, std_string, std_string) except +
+        Tally(std_string, std_string, int, std_string, std_string, std_string, double) except +
 
         # attributes
         int entity_id
         std_string entity_name
+        double entity_size
         std_string entity_type
         std_string particle_name
+        std_string tally_name
         std_string tally_type
 
         # methods
-
+        void from_hdf5() except +
+        void from_hdf5(std_string) except +
+        void from_hdf5(std_string, std_string) except +
+        void from_hdf5(std_string, std_string, int) except +
+        void from_hdf5(char *) except +
+        void from_hdf5(char *, char *) except +
+        void from_hdf5(char *, char *, int) except +
+        void write_hdf5() except +
+        void write_hdf5(std_string) except +
+        void write_hdf5(std_string, std_string) except +
+        void write_hdf5(char *) except +
+        void write_hdf5(char *, char *) except +
         pass
 
 
