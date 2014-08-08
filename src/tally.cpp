@@ -253,11 +253,13 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     status = H5Tinsert(filetype, "tally_name", 8 + 8 + 8 + (2*sizeof(hvl_t)) , strtype);
     status = H5Tinsert(filetype, "entity_size", 8 + 8 + 8 + (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
     
-    
+
+    // max dims unlimted
+    hsize_t max_dims[1] = {H5S_UNLIMITED};
     // only ever let 1 tally object be added
     hsize_t dims[1] = {1};  
     // Create dataspace.  Setting maximum size to NULL sets the maximum
-    hid_t space = H5Screate_simple(1, dims, NULL);
+    hid_t space = H5Screate_simple(1, dims, max_dims);
 
     // Create the dataset and write the compound data to it.
     //    hid_t dset = H5Dcreate2 (file, datapath.c_str(), filetype, space, H5P_DEFAULT, prop,
