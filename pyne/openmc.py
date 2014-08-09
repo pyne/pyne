@@ -20,12 +20,14 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
     """A simple data structure reprsenenting an <ace_table /> tag in a 
     cross_sections.xml file.
     """
-
-   def __init__(self, alias=None, awr=None, location=None, metastable=None, name=None,
+    def __new__(cls, alias=None, awr=None, location=None, metastable=None, name=None,
                 path=None, temperature=None, zaid=None, cross_sections_path=None):
-        super(AceTable, self).__init__(alias=alias, awr=awr, location=location, 
-            metastable=metastable, name=name, path=path, temperature=temperature, 
-            zaid=zaid)
+        return super(AceTable, cls).__new__(cls, alias=alias, awr=awr, 
+            location=location, metastable=metastable, name=name, path=path,
+            temperature=temperature, zaid=zaid)
+
+    def __init__(self, alias=None, awr=None, location=None, metastable=None, name=None,
+                path=None, temperature=None, zaid=None, cross_sections_path=None):
         """Parameters
         ----------
         alias : str, optional
@@ -49,6 +51,9 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
             If this and path are both present then the abspath attribute will be
             set.
         """
+        super(AceTable, self).__init__(alias=alias, awr=awr, location=location, 
+            metastable=metastable, name=name, path=path, temperature=temperature, 
+            zaid=zaid)
         nuc = None
         if zaid is not None or zaid != '0':
             meta = "0" if metastable is None else metastable
@@ -80,7 +85,8 @@ class CrossSections(HTMLParser):
             This is a path to the cross_sections.xml file, a file handle, or 
             None indicating an empty container.
         """
-        super(CrossSections, self).__init__()
+        #super(CrossSections, self).__init__()
+        self.reset()
         self._tag = None
         self.path = None
         self.filetype = 'ascii'
@@ -110,21 +116,21 @@ class CrossSections(HTMLParser):
             self.handle_ace_table(attrs)
 
     def handle_data(self, data):
-        if self._tag = 'filetype':
+        if self._tag == 'filetype':
             self.filetype = data
 
     def handle_ace_table(self, attrs):
-        ace_table = AceTable(cross_section_path=self.path, **dict(attrs))
+        ace_table = AceTable(cross_sections_path=self.path, **dict(attrs))
         self.ace_tables.append(ace_table)
 
     def xml(self):
         """Returns an XML representation of the cross sections file.
         """
-        template = ("<?xml version="1.0" ?>\n
-                    "<cross_sections>\n"
-                    "  <filetype>{filetype}</filetype>\n
-                    "  {ace_tables}\n"
-                    "</cross_sections>\n")
+        template = ('<?xml version="1.0" ?>\n'
+                    '<cross_sections>\n'
+                    '  <filetype>{filetype}</filetype>\n'
+                    '  {ace_tables}\n'
+                    '</cross_sections>\n')
         ace_tables = "\n  ".join([a.xml() for a in self.ace_tables])
         s = template.format(filetype=self.filetype, ace_tables=ace_tables)
         return s
