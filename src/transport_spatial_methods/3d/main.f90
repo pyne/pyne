@@ -286,6 +286,7 @@ IF (xsbc .eq. 2) THEN
 END IF
 
 !CALL echo
+WRITE(8,*) "Solver type: ", solvertype
 CALL solve
 CALL output
 !CALL output_phi("phifile")
@@ -319,6 +320,8 @@ IF( allocated(dz)) deallocate(dz)
 IF( allocated(mat)) deallocate(mat)
 IF( allocated(f)) deallocate(f)
 IF( allocated(e)) deallocate(e)
+IF( allocated(f_ahot_l)) deallocate(f_ahot_l)
+IF( allocated(e_ahot_l)) deallocate(e_ahot_l)
 IF( allocated(cnvf)) deallocate(cnvf)
 IF( allocated(amat)) deallocate(amat)
 IF( allocated(bmat)) deallocate(bmat)

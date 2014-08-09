@@ -9,7 +9,7 @@
 import pyne.spatialsolver
 from dictionary_populate_test import populate_simple, populate_simple_with_warnings, populate_intermediate_1
 
-'''
+
 def test_ahotn_ln():
   a = populate_simple("AHOTN","LN") 
   dict_results = pyne.spatialsolver.solve(a)
@@ -24,7 +24,6 @@ def test_ahotn_ll():
 def test_ahotn_nefd():
   a = populate_simple("AHOTN","NEFD")
   dict_results = pyne.spatialsolver.solve(a)
-BAD
 
 def test_dgfem_ld():
   a = populate_simple("DGFEM","LD")
@@ -41,7 +40,6 @@ def test_dgfem_lagrange():
 def test_sct_step():
   a = populate_simple("SCTSTEP","anything")
   dict_results = pyne.spatialsolver.solve(a)
-'''
 
 def test_ahotn_ln_alternating():
   a = populate_intermediate_1("AHOTN", "LN")
