@@ -18,18 +18,16 @@ INTEGER :: id, jd, kd, td, ud, vd, gd
 REAL*8 :: df, dfmx
 
 ! Initialize the previous flux iterate
-e = 0.0
 ! Initialize the old time point
 told = ttosolve
 
-
 IF (solver == "AHOTN") THEN
-
 	IF (solvertype == "LN" .or. solvertype == "LL") THEN
+    e_ahot_l = 0.0
 		DO it = 1, itmx
 			 ! Call for the mesh sweep
 			 CALL sweep_ahotn_l(g)
-			 
+			 !WRITE(8,*) "f: ", f_ahot_l, " e: ", e_ahot_l 
 			 ! Compare new and old flux iterates for user chosen range of moments, iall
 			 dfmx = -1.0
 			 DO k = 1, nz
@@ -38,16 +36,16 @@ IF (solver == "AHOTN") THEN
 				        DO v = 1, iall+1
 
 				           ! Compute the difference depending on 'e' value
-				           IF (e(v,i,j,k,1,1) >= tolr) THEN
-				              df = ABS((f(v,i,j,k,g,1,1) - e(v,i,j,k,1,1))/e(v,i,j,k,1,1))
+				           IF (e_ahot_l(v,i,j,k) >= tolr) THEN
+				              df = ABS((f_ahot_l(v,i,j,k,g) - e_ahot_l(v,i,j,k))/e_ahot_l(v,i,j,k))
                       !WRITE (8,*) " DF ", df, " dfmx ", dfmx
                       !WRITE (8,*) "itmx: ", itmx, " nz: ", nz, " ny: ", ny, " nx: ", nx, " iall+1: ", iall+1
-                      !WRITE (8,*) " E ", e(v,i,j,k,1,1), " F ", f(v,i,j,k,g,1,1)
+                      !WRITE (8,*) " E ", e(v,i,j,k), " F ", f(v,i,j,k,g)
 				           ELSE
-				              df = ABS((f(v,i,j,k,g,1,1) - e(v,i,j,k,1,1)))
+				              df = ABS((f_ahot_l(v,i,j,k,g) - e_ahot_l(v,i,j,k)))
                       !WRITE (8,*) "itmx: ", itmx, " nz: ", nz, " ny: ", ny, " nx: ", nx, " iall+1: ", iall+1
                       !WRITE (8,*) " DF ", df, " dfmx ", dfmx
-                      !WRITE (8,*) " E ", e(v,i,j,k,1,1), " F ", f(v,i,j,k,g,1,1)
+                      !WRITE (8,*) " E ", e(v,i,j,k), " F ", f(v,i,j,k,g)
 				           END IF
 				           ! Find the largest value
 				           IF (df > dfmx) THEN
@@ -69,11 +67,11 @@ IF (solver == "AHOTN") THEN
 			 ! Print whether or not convergence was reached
 			 IF (dfmx > err .AND. it < itmx) THEN
 				  ! Set previous iterate of flux equal to current iterate
-				  WRITE(8,11102) g, it, id, jd, kd, vd, dfmx, f(vd,id,jd,kd,gd,1,1), titer-told
+				  WRITE(8,11102) g, it, id, jd, kd, vd, dfmx, f_ahot_l(vd,id,jd,kd,gd), titer-told
 				  DO k = 1, nz
 				     DO j = 1, ny
 				        DO i = 1, nx
-				           e(:,i,j,k,1,1) = f(:,i,j,k,g,1,1)
+				           e_ahot_l(:,i,j,k) = f_ahot_l(:,i,j,k,g)
 				        END DO
 				     END DO
 				  END DO
@@ -91,7 +89,7 @@ IF (solver == "AHOTN") THEN
 				  WRITE (8,*)
 				  WRITE (8,*) "  Group ", g, " did not converge in maximum number of iterations ", itmx
 				  WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ",&
-						f(vd,id,jd,kd,gd,1,1)
+						f_ahot_l(vd,id,jd,kd,gd)
 				  WRITE (8,*) "Pos ", id, jd, kd, " Moment ", vd
 				  cnvf(g) = 0
 				  EXIT
@@ -100,6 +98,7 @@ IF (solver == "AHOTN") THEN
 		! End the iterations
 		END DO
 	ELSE IF (solvertype == "NEFD") THEN
+    e = 0.0
 		DO it = 1, itmx
 			 ! Call for the mesh sweep
 			 CALL sweep_ahotn_nefd(g)
@@ -183,6 +182,7 @@ IF (solver == "AHOTN") THEN
 	END IF 
 
 ELSE IF (solver == "DGFEM") THEN
+  e = 0.0
 	! Start the iterations
 	DO it = 1, itmx
 	! Call for the mesh sweep
@@ -263,7 +263,7 @@ ELSE IF (solver == "DGFEM") THEN
 
 
 ELSE IF (solver == "SCTSTEP") THEN
-
+  e = 0.0
   ! Start the iterations
   DO it = 1, itmx
      ! Call for the mesh sweep

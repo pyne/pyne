@@ -9,9 +9,11 @@ REAL*8 :: alpha, beta, gamma, ex, ey, ez
 
 ! Scalar flux moments
 REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: f
+REAL*8, DIMENSION(:,:,:,:,:), ALLOCATABLE :: f_ahot_l
 
 ! Previous iterate to scalar flux
 REAL*8, DIMENSION(:,:,:,:,:,:), ALLOCATABLE :: e
+REAL*8, DIMENSION(:,:,:,:), ALLOCATABLE :: e_ahot_l
 
 ! Convergence flag
 INTEGER, DIMENSION(:), ALLOCATABLE :: cnvf

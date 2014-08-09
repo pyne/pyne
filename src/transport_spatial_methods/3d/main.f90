@@ -137,6 +137,7 @@ INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_
 !INTEGER, INTENT(IN), DIMENSION(:) :: out_dims 
 
 REAL*8, INTENT(OUT), DIMENSION(4,1,nodes_y_in,nodes_z_in,num_groups_in,1,1) :: fluxout
+!REAL*8, INTENT(OUT), DIMENSTION(
 !Works for AHOTN/LL, AHOTN/LN, DGFEM/LD only so far
 
 ! Set all of the input values
@@ -178,6 +179,7 @@ mompt = mom_at_a_pt_flag_in
 qdflx = quad_flux_print_flag_in
 
 !ALLOCATE(fluxout(4,nx,ny,nz,ng,1,1))
+CALL version
 
 IF (solver == "DGFEM") THEN
     IF (solvertype == "LD") THEN
@@ -235,6 +237,8 @@ END IF
 
 ! Angular quadrature
 ALLOCATE(ang(apo,3), w(apo))
+ang = 0.0d0
+   write(8,*) "angle initial: ", ang
 IF (qdtyp == 2) THEN
   INQUIRE(FILE=quadrature_file, EXIST=ex3)
   IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
@@ -244,6 +248,7 @@ IF (qdtyp == 2) THEN
    OPEN(UNIT=10, FILE=quadrature_file)
    READ(10,*)
    READ(10,*) (ang(n,1),ang(n,2),w(n),n=1,apo)
+   write(8,*) ang
    ! Renormalize all the weights
    wtsum = SUM(w)
    DO n = 1, apo
@@ -280,11 +285,11 @@ IF (xsbc .eq. 2) THEN
     END IF
 END IF
 
-CALL echo
+!CALL echo
 CALL solve
 CALL output
 !CALL output_phi("phifile")
-fluxout = f
+!fluxout = f
 
 
 !Cleanup previously found in old main file

@@ -162,6 +162,15 @@ subroutine ahotn_ln_kernel(x,y,z,mu,eta,xi,sgm,sge,sgx,sig,c,inflow_x,inflow_y,i
 !write(6,101) b
 !101 FORMAT(1X,4ES25.16)
 
+!write(8,*) spwt0(ex)
+!write(8,*) ex,ey,ez
+!write(8,*) inflow_x
+!write(8,*) inflow_y
+!write(8,*) inflow_z
+!write(8,*) alpha0,beta0,gamma0
+!write(8,*) alpha1,beta1,gamma1
+!write(8,*) real(sgm),real(sge),real(sgx)
+
    ! Define a11 through a44 
    a11 = 1.0d0 + ex0 + ey0 + ez0 
    a22 = 1.0d0 + ex1 + ey1 + 3.0d0*gamma0*ez0 

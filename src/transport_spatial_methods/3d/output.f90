@@ -22,7 +22,7 @@ END IF
 IF (solver == "AHOTN") THEN
 	! Start the echo of the output for each group
 	IF (solvertype == "LL" .or. solvertype == "LN") THEN
-		DO g = 1, ng   
+		DO g = 1, ng
 			 ! Check if the flux converged
 			 IF (cnvf(g) == 1) THEN
 				  WRITE (8,*)
@@ -33,7 +33,7 @@ IF (solver == "AHOTN") THEN
 				  DO k = 1, nz
 				     DO j = 1, ny
 				        WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
-				        WRITE (8,113) (f(1,i,j,k,g,1,1), i = 1, nx)
+				        WRITE (8,113) (f_ahot_l(1,i,j,k,g), i = 1, nx)
 				     END DO
 				  END DO
 			 END IF

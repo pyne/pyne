@@ -25,7 +25,10 @@ REAL*8, DIMENSION(ordcb) :: b
 REAL*8 :: sig, mu, eta, xi, x, y, z, c, sgn
 
 ! Initialize the flux solution to zero
-f=0.0d0
+!f=0.0d0
+!WRITE(8,*) "f: ", f_ahot_l, " e: ", e_ahot_l 
+f_ahot_l=0.0
+!WRITE(8,*) "f: ", f_ahot_l, " e: ", e_ahot_l 
 
 ! Start with loop over all angles
 DO n = 1, apo
@@ -243,10 +246,10 @@ DO n = 1, apo
             ord = lambda
             c = sigs(m,g,g)/sig     ! Scattering ratio 
             !WRITE (8,*) " c ", c, " e(1,i,j,k) " , e(1,i,j,k,1,1), " s ", s(0,0,0,i,j,k,g) ," sig " , sig
-            b(1)=c*e(1,i,j,k,1,1) + s(0,0,0,i,j,k,g)/sig
-            b(2)=c*e(2,i,j,k,1,1) + s(0,0,1,i,j,k,g)/sig
-            b(3)=c*e(3,i,j,k,1,1) + s(0,1,0,i,j,k,g)/sig
-            b(4)=c*e(4,i,j,k,1,1) + s(1,0,0,i,j,k,g)/sig
+            b(1)=c*e_ahot_l(1,i,j,k) + s(0,0,0,i,j,k,g)/sig
+            b(2)=c*e_ahot_l(2,i,j,k) + s(0,0,1,i,j,k,g)/sig
+            b(3)=c*e_ahot_l(3,i,j,k) + s(0,1,0,i,j,k,g)/sig
+            b(4)=c*e_ahot_l(4,i,j,k) + s(1,0,0,i,j,k,g)/sig
 
             ! call AHOTN kernel
 						IF (solvertype == "LN" ) THEN
@@ -257,10 +260,10 @@ DO n = 1, apo
             ! Update the scalar flux solution
             !WRITE(8,*) "ffffffffffffffffffffffff",f(1,i,j,k,g,1,1)
             !WRITE (8,*) " w(n): ", w(n), " b(1) ", b(1)
-            f(1,i,j,k,g,1,1) = f(1,i,j,k,g,1,1) + w(n)*b(1)
-            f(2,i,j,k,g,1,1) = f(2,i,j,k,g,1,1) + w(n)*b(2)
-            f(3,i,j,k,g,1,1) = f(3,i,j,k,g,1,1) + w(n)*b(3)
-            f(4,i,j,k,g,1,1) = f(4,i,j,k,g,1,1) + w(n)*b(4)
+            f_ahot_l(1,i,j,k,g) = f_ahot_l(1,i,j,k,g) + w(n)*b(1)
+            f_ahot_l(2,i,j,k,g) = f_ahot_l(2,i,j,k,g) + w(n)*b(2)
+            f_ahot_l(3,i,j,k,g) = f_ahot_l(3,i,j,k,g) + w(n)*b(3)
+            f_ahot_l(4,i,j,k,g) = f_ahot_l(4,i,j,k,g) + w(n)*b(4)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

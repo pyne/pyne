@@ -20,9 +20,10 @@ END IF
 
 ! Prepare the cs array that temporarily holds info
 ALLOCATE(cs(qdord/2))
-
 ! If qdtyp is 0, use the TWOTRAN formalism
 ! Completely symmetric angular quadrature
+write(8,*)"qdtyp: ", qdtyp
+write(8,*)"qdord: ",qdord
 IF (qdtyp == 0) THEN
    ! Set up the first values to initialize
    ! No degrees of freedom for N=2
@@ -97,16 +98,19 @@ ELSE
       ang(1,2) = ang(1,1)
       ang(1,3) = ang(1,1)
    ELSE IF (qdord == 4) THEN
+    write(8,*)"ang before: ",ang
       l = 3
-      ang(1,1) = 0.350021174582
+!INCREASED PRECISION FOR COMPILER CONSISTANCY
+      ang(1,1) = 0.3500211745820000000000000
       ang(1,2) = ang(1,1)
-      ang(1,3) = 0.868890300722
+      ang(1,3) = 0.8688903007220000000000000
       ang(2,1) = ang(1,1)
       ang(2,2) = ang(1,3)
       ang(2,3) = ang(1,1)
       ang(3,1) = ang(1,3)
       ang(3,2) = ang(1,1)
       ang(3,3) = ang(1,1)
+    write(8,*)"ang after: ",ang
    ELSE IF (qdord == 6) THEN
       l = 6
       ang(1,1) = 0.2666355

@@ -30,9 +30,11 @@ WRITE (8,*)
 
 IF (solver == "AHOTN") THEN
 	IF (solvertype == "LN" .or. solvertype == "LL") THEN
-		ALLOCATE(f(4,nx,ny,nz,ng,1,1), e(4,nx,ny,nz,1,1))
+		ALLOCATE(f_ahot_l(4,nx,ny,nz,ng), e_ahot_l(4,nx,ny,nz))
+    f_ahot_l = 0.0d0
+		!ALLOCATE(f(4,nx,ny,nz,ng,1,1),e(4,nx,ny,nz,1,1))
+    !WRITE(8,*) "f: ", f_ahot_l, " e: ", e_ahot_l 
 		call read_sp_wts_ahotn_l
-	
 		! Read spatial weights
 		!!call read_sp_wts(lambda)
 
@@ -47,10 +49,10 @@ IF (solver == "AHOTN") THEN
 				              m = mat(i,j,k)
 				              xsct = sigs(m,g,gp)
 
-				              s(0,0,0,i,j,k,g) = s(0,0,0,i,j,k,g) + xsct*f(1,i,j,k,gp,1,1)
-				              s(0,0,1,i,j,k,g) = s(0,0,1,i,j,k,g) + xsct*f(2,i,j,k,gp,1,1)
-				              s(0,1,0,i,j,k,g) = s(0,1,0,i,j,k,g) + xsct*f(3,i,j,k,gp,1,1)
-				              s(1,0,0,i,j,k,g) = s(1,0,0,i,j,k,g) + xsct*f(4,i,j,k,gp,1,1)
+				              s(0,0,0,i,j,k,g) = s(0,0,0,i,j,k,g) + xsct*f_ahot_l(1,i,j,k,gp)
+				              s(0,0,1,i,j,k,g) = s(0,0,1,i,j,k,g) + xsct*f_ahot_l(2,i,j,k,gp)
+				              s(0,1,0,i,j,k,g) = s(0,1,0,i,j,k,g) + xsct*f_ahot_l(3,i,j,k,gp)
+				              s(1,0,0,i,j,k,g) = s(1,0,0,i,j,k,g) + xsct*f_ahot_l(4,i,j,k,gp)
 				           END DO
 				        END DO
 				     END DO
