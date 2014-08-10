@@ -56,7 +56,7 @@ endif(${MOAB_FOUND})
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
 
-execute_process(COMMAND "${CYTHON_EXECUTABLE}" "-V" 
+execute_process(COMMAND "${CYTHON_EXECUTABLE}" "-V"
     ERROR_VARIABLE CYTHON_VERSION
     ERROR_STRIP_TRAILING_WHITESPACE)
 message( STATUS "Cython Version: " ${CYTHON_VERSION} )
@@ -74,7 +74,7 @@ message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
 # RPATH Settings
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
     # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
