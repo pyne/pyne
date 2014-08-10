@@ -268,6 +268,9 @@ ELSE IF (solver == "SCTSTEP") THEN
      CALL CPU_TIME(tsolve)
      
   END DO
+  IF( allocated(xmesh)) deallocate(xmesh)
+  IF( allocated(ymesh)) deallocate(ymesh)
+  IF( allocated(zmesh)) deallocate(zmesh)
 END IF
 
    

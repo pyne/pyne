@@ -136,7 +136,8 @@ INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_
 
 !INTEGER, INTENT(IN), DIMENSION(:) :: out_dims 
 
-REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in*nodes_z_in) :: fluxout
+REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in,num_groups_in*nodes_z_in) :: fluxout
+!REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in*nodes_z_in) :: fluxout
 !REAL*8, INTENT(OUT), DIMENSION(4,1,nodes_y_in,nodes_z_in,num_groups_in,1,1) :: fluxout
 !REAL*8, INTENT(OUT), DIMENSTION(
 !Works for AHOTN/LL, AHOTN/LN, DGFEM/LD only so far

@@ -9,7 +9,7 @@ SUBROUTINE output
 USE invar
 USE solvar
 IMPLICIT NONE
-INTEGER :: i, j, k, t, u, v, g, l, y, za
+INTEGER :: i, j, k, t, u, v, g, l , za
 !Printing iteration counters for DGFEM solvers.  Vary based on solver type
 Integer :: iter1, iter2
 
@@ -19,10 +19,8 @@ IF (momsum == 1) THEN
    phisum = 0.0
 END IF
 
-ALLOCATE(flux_out(nx,ng*nz*ny))
+ALLOCATE(flux_out(nx,ng*nz,ng*ny))
 flux_out = 0.0d0
-!y is a counter variable to help with populating the flux_out
-y = 1
 
 IF (solver == "AHOTN") THEN
 	! Start the echo of the output for each group
@@ -41,17 +39,14 @@ IF (solver == "AHOTN") THEN
 				        WRITE (8,113) (f_ahot_l(1,i,j,k,g), i = 1, nx)
                 
                 !Populate the flux_out array for return to python
-
                 DO za = 1, nx
-                  flux_out(za,y) = f_ahot_l(1,za,j,k,g)
+                  flux_out(g*k,g*j,za) = f_ahot_l(1,za,j,k,g)
                 END DO
-                y = y+1
 				     END DO
 				  END DO
 			 END IF
 		END DO
 	ELSE IF(solvertype == "NEFD") THEN
-
 		DO g = 1, ng   
 			 ! Check if the flux converged
 			 IF (cnvf(g) == 1) THEN
@@ -64,6 +59,10 @@ IF (solver == "AHOTN") THEN
 				     DO j = 1, ny
 				        WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
 				        WRITE (8,113) (f(t,u,v,i,j,k,g), i = 1, nx)
+                !Populate the flux_out array for return to python
+                DO za = 1, nx
+                  flux_out(g*k,g*j,za) = f(t,u,v,za,j,k,g)
+                END DO
 				     END DO
 				  END DO
 				  ! Print the optional flux moments as determined by momp
@@ -106,6 +105,10 @@ ELSE IF (solver == "DGFEM") THEN
 		       DO j = 1, ny
 		          WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
 		          WRITE (8,113) (f(l,i,j,k,g,1,1), i = 1, nx)
+              !Populate the flux_out array for return to python
+              DO za = 1, nx
+                flux_out(g*k,g*j,za) = f(l,za,j,k,g,1,1)
+              END DO
 		       END DO
 		    END DO
 		    ! Print the optional flux moments as determined by momp
@@ -159,6 +162,10 @@ ELSE IF (solver == "SCTSTEP") THEN
            DO j = 1, ny
               WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
               WRITE (8,113) (f(i,j,k,g,1,1,1), i = 1, nx)
+              !Populate the flux_out array for return to python
+              DO za = 1, nx
+                flux_out(g*k,g*j,za) = f(za,j,k,g,1,1,1)
+              END DO
            END DO
         END DO
         ! Call for the sum of the scalar flux moments if requested by momsum = 1
