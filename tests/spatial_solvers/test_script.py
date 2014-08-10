@@ -1,4 +1,7 @@
 import test_ahot
+
+test_ahot.test_ahotn_ln()
+'''
 test_ahot.test_ahotn_ln_alternating()
 print("ln alternating passed!")
 test_ahot.test_ahotn_ln()
@@ -15,3 +18,4 @@ test_ahot.test_dgfem_lagrange()
 print("lagrange simple passed!")
 test_ahot.test_sct_step()
 print("sct-step simple passed!")
+'''
