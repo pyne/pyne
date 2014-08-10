@@ -10,35 +10,35 @@ import numpy as np
 
 import configure
 
-# Thanks to http://patorjk.com/software/taag/  
+# Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
 # for ASCII art inspiriation
 
 pyne_logo = """\
 
-                                  /   \       
- _                        )      ((   ))     (                          
-(@)                      /|\      ))_((     /|\                          
-|-|                     / | \    (/\|/\)   / | \                      (@) 
+                                  /   \
+ _                        )      ((   ))     (
+(@)                      /|\      ))_((     /|\
+|-|                     / | \    (/\|/\)   / | \                      (@)
 | | -------------------/--|-voV---\`|'/--Vov-|--\---------------------|-|
 |-|                         '^`   (o o)  '^`                          | |
 | |                               `\Y/'                               |-|
 |-|                                                                   | |
 | |        /\             ___           __  __             /\         |-|
-|-|       /^~\           / _ \_   _  /\ \ \/__\           /^~\        | |  
+|-|       /^~\           / _ \_   _  /\ \ \/__\           /^~\        | |
 | |       /^~\          / /_)/ | | |/  \/ /_\             /^~\        |-|
-|-|       /^~\         / ___/| |_| / /\  //__             /^~\        | | 
-| |       ^||`         \/     \__, \_\ \/\__/             ^||`        |-|  
-|-|        ||                |____/                        ||         | | 
+|-|       /^~\         / ___/| |_| / /\  //__             /^~\        | |
+| |       ^||`         \/     \__, \_\ \/\__/             ^||`        |-|
+|-|        ||                |____/                        ||         | |
 | |       ====                                            ====        |-|
 |-|                                                                   | |
 | |                                                                   |-|
 |-|___________________________________________________________________| |
 (@)              l   /\ /         ( (       \ /\   l                `\|-|
                  l /   V           \ \       V   \ l                  (@)
-                 l/                _) )_          \I                   
+                 l/                _) )_          \I
                                    `\ /'
-                                     `  
+                                     `
 """
 
 def assert_np_version():
@@ -78,7 +78,7 @@ def parse_args():
         cmake.append('-DCMAKE_BUILD_TYPE=' + btopt[0])
         distutils_args = [o for o in distutils_args \
                           if not o.startswith('--build-type=')]
-    
+
     # Change egg-base entry to absolute path so it behaves as expected
     import argparse
     parser = argparse.ArgumentParser()
@@ -86,7 +86,7 @@ def parse_args():
     res, distutils_args = parser.parse_known_args(distutils_args)
     if res.egg_base is not None:
         local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
-        distutils_args.append('--egg-base='+os.path.join(local_path, 
+        distutils_args.append('--egg-base='+os.path.join(local_path,
                                                          res.egg_base))
     return distutils_args, cmake, make
 
