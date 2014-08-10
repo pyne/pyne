@@ -7,6 +7,32 @@ project( pyne )
 # languages
 enable_language(Fortran)
 
+# Augment the Fortran implicit link libraries
+message(STATUS
+  "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES = ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
+if (APPLE)
+  message(STATUS
+    "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+  set(LIBGCC_S)
+  foreach (gcc_s_ver 3 2 1)
+    set(LIBGCC_S_PATH)
+    find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
+      PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
+      NODEFAULTPATH
+    )
+    if (LIBGCC_S_PATH)
+      set(LIBGCC_S gcc_s.${gcc_s_ver})
+      break()
+    endif ()
+  endforeach ()
+  message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
+  if (LIBGCC_S)
+    set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
+  endif ()
+endif ()
+message(STATUS
+  "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
