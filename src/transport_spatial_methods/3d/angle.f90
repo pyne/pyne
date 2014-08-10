@@ -101,16 +101,16 @@ ELSE
     write(8,*)"ang before: ",ang
       l = 3
 !INCREASED PRECISION FOR COMPILER CONSISTANCY
-      ang(1,1) = 0.3500211745820000000000000
+      ang(1,1) = 0.350021174582
       ang(1,2) = ang(1,1)
-      ang(1,3) = 0.8688903007220000000000000
+      ang(1,3) = 0.868890300722
+    write(8,*)"ang after: ",ang
       ang(2,1) = ang(1,1)
       ang(2,2) = ang(1,3)
       ang(2,3) = ang(1,1)
       ang(3,1) = ang(1,3)
       ang(3,2) = ang(1,1)
       ang(3,3) = ang(1,1)
-    write(8,*)"ang after: ",ang
    ELSE IF (qdord == 6) THEN
       l = 6
       ang(1,1) = 0.2666355

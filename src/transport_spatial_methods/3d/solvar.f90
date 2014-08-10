@@ -14,6 +14,7 @@ REAL*8, DIMENSION(:,:,:,:,:), ALLOCATABLE :: f_ahot_l
 ! Previous iterate to scalar flux
 REAL*8, DIMENSION(:,:,:,:,:,:), ALLOCATABLE :: e
 REAL*8, DIMENSION(:,:,:,:), ALLOCATABLE :: e_ahot_l
+REAL*8, DIMENSION(:,:),ALLOCATABLE :: flux_out
 
 ! Convergence flag
 INTEGER, DIMENSION(:), ALLOCATABLE :: cnvf

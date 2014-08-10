@@ -9,7 +9,7 @@ SUBROUTINE output
 USE invar
 USE solvar
 IMPLICIT NONE
-INTEGER :: i, j, k, t, u, v, g, l
+INTEGER :: i, j, k, t, u, v, g, l, y, za
 !Printing iteration counters for DGFEM solvers.  Vary based on solver type
 Integer :: iter1, iter2
 
@@ -18,6 +18,11 @@ IF (momsum == 1) THEN
    ALLOCATE(phisum(nx,ny,nz,ng))
    phisum = 0.0
 END IF
+
+ALLOCATE(flux_out(nx,ng*nz*ny))
+flux_out = 0.0d0
+!y is a counter variable to help with populating the flux_out
+y = 1
 
 IF (solver == "AHOTN") THEN
 	! Start the echo of the output for each group
@@ -34,6 +39,13 @@ IF (solver == "AHOTN") THEN
 				     DO j = 1, ny
 				        WRITE (8,*) " Plane(z) : ", k, " Row(j) : ", j
 				        WRITE (8,113) (f_ahot_l(1,i,j,k,g), i = 1, nx)
+                
+                !Populate the flux_out array for return to python
+
+                DO za = 1, nx
+                  flux_out(za,y) = f_ahot_l(1,za,j,k,g)
+                END DO
+                y = y+1
 				     END DO
 				  END DO
 			 END IF
