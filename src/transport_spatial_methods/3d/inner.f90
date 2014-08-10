@@ -38,14 +38,8 @@ IF (solver == "AHOTN") THEN
 				           ! Compute the difference depending on 'e' value
 				           IF (e_ahot_l(v,i,j,k) >= tolr) THEN
 				              df = ABS((f_ahot_l(v,i,j,k,g) - e_ahot_l(v,i,j,k))/e_ahot_l(v,i,j,k))
-                      !WRITE (8,*) " DF ", df, " dfmx ", dfmx
-                      !WRITE (8,*) "itmx: ", itmx, " nz: ", nz, " ny: ", ny, " nx: ", nx, " iall+1: ", iall+1
-                      !WRITE (8,*) " E ", e(v,i,j,k), " F ", f(v,i,j,k,g)
 				           ELSE
 				              df = ABS((f_ahot_l(v,i,j,k,g) - e_ahot_l(v,i,j,k)))
-                      !WRITE (8,*) "itmx: ", itmx, " nz: ", nz, " ny: ", ny, " nx: ", nx, " iall+1: ", iall+1
-                      !WRITE (8,*) " DF ", df, " dfmx ", dfmx
-                      !WRITE (8,*) " E ", e(v,i,j,k), " F ", f(v,i,j,k,g)
 				           END IF
 				           ! Find the largest value
 				           IF (df > dfmx) THEN

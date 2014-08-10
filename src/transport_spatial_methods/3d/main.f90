@@ -137,10 +137,7 @@ INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_
 !INTEGER, INTENT(IN), DIMENSION(:) :: out_dims 
 
 REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in,num_groups_in*nodes_z_in) :: fluxout
-!REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in*nodes_z_in) :: fluxout
-!REAL*8, INTENT(OUT), DIMENSION(4,1,nodes_y_in,nodes_z_in,num_groups_in,1,1) :: fluxout
-!REAL*8, INTENT(OUT), DIMENSTION(
-!Works for AHOTN/LL, AHOTN/LN, DGFEM/LD only so far
+! Works for all solvers!
 
 ! Set all of the input values
 title = titlein
@@ -167,8 +164,6 @@ zebc = z_boundry_condition_2_in
 mat = material_id_in
 inflow_file = bc_input_filein
 phi_file = flux_output_filein
-!inflow_file = "bc_4.dat"
-!phi_file = "phi_4.ahot"
 err = convergence_criterion_in
 tolr = converge_tolerence
 itmx = itmxin
@@ -261,7 +256,6 @@ ELSE
 END IF
 
 IF (qdtyp == 2) CLOSE(UNIT=10)
-
 ! Call for the input check
 CALL check
 
@@ -292,7 +286,6 @@ WRITE(8,*) "Solver type: ", solvertype
 CALL solve
 CALL output
 !CALL output_phi("phifile")
-!fluxout = f
 fluxout = flux_out
 
 !Cleanup previously found in old main file

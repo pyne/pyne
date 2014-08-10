@@ -32,8 +32,6 @@ IF (solver == "AHOTN") THEN
 	IF (solvertype == "LN" .or. solvertype == "LL") THEN
 		ALLOCATE(f_ahot_l(4,nx,ny,nz,ng), e_ahot_l(4,nx,ny,nz))
     f_ahot_l = 0.0d0
-		!ALLOCATE(f(4,nx,ny,nz,ng,1,1),e(4,nx,ny,nz,1,1))
-    !WRITE(8,*) "f: ", f_ahot_l, " e: ", e_ahot_l 
 		call read_sp_wts_ahotn_l
 		! Read spatial weights
 		!!call read_sp_wts(lambda)
@@ -66,7 +64,6 @@ IF (solver == "AHOTN") THEN
 			 IF (meth == 0) THEN
 				  WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
 				  ! Call for the inner iteration (or ITM solver later)
-				  !CALL inner_ahotn_l(g)
 					CALL inner(g)
 			 ELSE IF (meth == 1) THEN
 				  STOP
@@ -112,7 +109,6 @@ IF (solver == "AHOTN") THEN
 			 IF (meth == 0) THEN
 				  WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
 				  ! Call for the inner iteration (or ITM solver later)
-				  !CALL inner_ahotn_nefd(g)
 					CALL inner(g)
 			 ELSE IF (meth == 1) THEN
 				  STOP
