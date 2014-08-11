@@ -3,6 +3,7 @@
 from __future__ import print_function
 import os
 import sys
+from warnings import warn
 from collections import namedtuple
 
 if sys.version_info[0] == 2:
@@ -11,6 +12,9 @@ else:
     from html.parser import HTMLParser
 
 from pyne import nucname
+from pyne.utils import VnVWarning
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 if sys.version_info[0] > 2:
     basestring = str

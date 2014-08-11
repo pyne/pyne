@@ -1,9 +1,10 @@
-"""Module for tools to generate and handle various binning structures."""
+"""Tools to generate and handle various binning structures."""
 from warnings import warn
-from pyne.utils import VnVWarning
 
 import numpy as np
 from numpy import logspace
+
+from pyne.utils import VnVWarning
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
@@ -90,3 +91,33 @@ def stair_step(x, y):
     yss[1::2] = y
 
     return xss, yss
+
+def pointwise_linear_collapse(x_g, x, y):
+    """Collapses pointwise data to G groups based on a linear interpolation
+    between the points.
+
+    Parameters
+    ----------
+    x_g : array-like
+        Group boundaries, length G+1 for G groups, must be monotonic in the 
+        same direction as x.
+    x : array-like
+        Pointwise abscissa to be collapsed, must be monotonic in the same direction
+        as x_g and have the same length as y.
+    y : array-like
+        Pointwise data to be interpolated, must have the same length as x.
+
+    Returns
+    -------
+    y_g : np.ndarray
+        The group collapsed data, length G. 
+    """
+    x_g = np.asarray(x_g)
+    x = np.asarray(x)
+    y = np.asarray(y)
+    G = len(x_g) - 1 
+    y_g = np.empty(G, dtype=y.dtype)
+    return y_g
+    
+
+
