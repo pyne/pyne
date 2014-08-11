@@ -97,19 +97,14 @@ def main_body():
         os.mkdir('build')
     sys.argv, cmake_args, make_args = parse_args()
     makefile = os.path.join('build', 'Makefile')
-    cmake_cmdstr = ""
     if not os.path.exists(makefile):
         if os.name != 'nt':
             rtn = subprocess.call(['which', 'cmake'])
             if rtn != 0:
                 sys.exit('CMake is not installed, aborting PyNE build.')
         cmake_cmd = ['cmake', '..'] + cmake_args
-        cmake_cmdstr = 'cmake'
-        for arg in cmake_args:
-          cmake_cmdstr += ' ' + "'" + arg + "'"
         pyarg = '-DPYTHON_EXECUTABLE=' + sys.executable
         cmake_cmd += [pyarg, ]
-        cmake_cmdstr += ' ' + "'" + pyarg + "'"
         if os.name == 'nt':
             files_on_path = set()
             for p in os.environ['PATH'].split(';')[::-1]:
@@ -119,12 +114,11 @@ def main_body():
                 pass
             elif 'sh.exe' in files_on_path:
                 cmake_cmd += ['-G "MSYS Makefiles"']
-                cmake_cmdstr += ' ' + "'" + "-G MSYS Makefiles" + "'"
             elif 'gcc.exe' in files_on_path:
                 cmake_cmd += ['-G "MinGW Makefiles"']
-                cmake_cmdstr += ' ' + "'" + "-G MinGW Makefiles" + "'"
             cmake_cmd = ' '.join(cmake_cmd)
         is_nt = os.name == 'nt'
+        cmake_cmdstr = "'" + "' '".join(cmake_cmd) + "'"
         print("CMake command is\n", cmake_cmdstr, sep="")
         rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=is_nt)
     rtn = subprocess.check_call(['make'] + make_args, cwd='build')
