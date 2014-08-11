@@ -1,6 +1,7 @@
 """Tools to generate and handle various binning structures."""
 from warnings import warn
 
+cimport numpy as np
 import numpy as np
 from numpy import logspace
 
@@ -92,7 +93,9 @@ def stair_step(x, y):
 
     return xss, yss
 
-def pointwise_linear_collapse(x_g, x, y):
+def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g, 
+                              np.ndarray[np.float64_t, ndim=1] x, 
+                              np.ndarray[np.float64_t, ndim=1] y):
     """Collapses pointwise data to G groups based on a linear interpolation
     between the points.
 
@@ -112,11 +115,37 @@ def pointwise_linear_collapse(x_g, x, y):
     y_g : np.ndarray
         The group collapsed data, length G. 
     """
-    x_g = np.asarray(x_g)
-    x = np.asarray(x)
-    y = np.asarray(y)
-    G = len(x_g) - 1 
-    y_g = np.empty(G, dtype=y.dtype)
+    cdef int G = x_g.shape[0] - 1
+    cdef int N = x.shape[0]
+    cdef int g0, g1  # current group index
+    cdef int n0, n1  # current point index
+    cdef double val, ylower, yupper
+    cdef np.ndarray[np.float64_t, ndim=1] y_g = np.empty(G, dtype='float64')
+    n0 = 0
+    n1 = 1
+    for g0 in range(G):
+        g1 = g0 + 1
+        val = 0.0
+        while x[n1] <= x_g[g1] and n1 < N:
+            if x_g[g0] <= x[n0]:
+                # interpolation fully in group, can take midpoint
+                val += 0.5 * (y[n1] + y[n0]) * (x[n1] - x[n0])
+            else: 
+                # lower bound intersection
+                ylower = ((y[n1] + y[n0])/(x[n1] - x[n0]))*(x_g[g0] - x[n0]) + y[n0]
+                val += 0.5 * (y[n1] + ylower) * (x[n1] - x_g[g0])
+            n0 += 1
+            n1 += 1
+        # upper bound intersection
+        if x_g[g1] < x[n1]:
+            if x_g[g0] <= x[n0]:
+                yupper = ((y[n1] + y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
+                val += 0.5 * (yupper + y[n0]) * (x_g[g1] - x[n0])
+            else: 
+                yupper = ((y[n1] + y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
+                ylower = ((y[n1] + y[n0])/(x[n1] - x[n0]))*(x_g[g0] - x[n0]) + y[n0]
+                val += 0.5 * (yupper + ylower) * (x_g[g1] - x_g[g0])
+        y_g[g0] = val / (x_g[g1] - x_g[g0])
     return y_g
     
 
