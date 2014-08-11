@@ -35,6 +35,22 @@ def test_stair_step():
     assert_array_almost_equal(xobs, xexp)
     assert_array_almost_equal(yobs, yexp)
 
+def check_pointwise_linear_collapse(x_g, x, y, exp):
+    obs = bins.pointwise_linear_collapse(x_g, x, y)
+    assert_equal(len(exp), len(obs))
+    assert_equal(len(x_g) - 1, len(obs))
+    assert_array_almost_equal(exp, obs)
+
+def test_pointwise_linear_collapse():
+    cases = [
+        [np.array([0.0, 1.0, 2.0]), np.linspace(0.0, 2.0, 101), np.ones(101), [1.0, 1.0]],
+
+        ]
+
+    for x_g, x, y, exp in cases:
+        yield check_pointwise_linear_collapse, x_g, x, y, exp
+    
+
 if __name__ == "__main__":
     nose.main()
 

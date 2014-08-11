@@ -1,6 +1,8 @@
 """Tools to generate and handle various binning structures."""
 from warnings import warn
 
+cimport cython
+
 cimport numpy as np
 import numpy as np
 from numpy import logspace
@@ -93,11 +95,12 @@ def stair_step(x, y):
 
     return xss, yss
 
+@cython.boundscheck(False)
 def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g, 
                               np.ndarray[np.float64_t, ndim=1] x, 
                               np.ndarray[np.float64_t, ndim=1] y):
     """Collapses pointwise data to G groups based on a linear interpolation
-    between the points.
+    between the points. This is useful for cross section data.
 
     Parameters
     ----------
@@ -148,5 +151,3 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
         y_g[g0] = val / (x_g[g1] - x_g[g0])
     return y_g
     
-
-
