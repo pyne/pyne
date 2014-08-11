@@ -16,11 +16,12 @@ except ImportError:
 import numpy as np
 import tables as tb
 
-from .. import nuc_data
-from .. import nucname
-from .. import rxname
-from ..endf import Library
-from .models import partial_energy_matrix, group_collapse
+from pyne import nuc_data
+from pyne import nucname
+from pyne import rxname
+from pyne import endf
+from pyne import ace
+from pyne.xs.models import partial_energy_matrix, group_collapse
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
@@ -680,7 +681,7 @@ class ENDFDataSource(DataSource):
 
     Parameters
     ----------
-    f : string, file handle
+    fh : string, file handle
         Path to ENDF file, or ENDF file itself.
     kwargs : optional
         Keyword arguments to be sent to base class.
@@ -695,7 +696,7 @@ class ENDFDataSource(DataSource):
         if not self.exists:
             raise ValueError
         else:
-            self.library = Library(fh)
+            self.library = endf.Library(fh)
         self.rxcache = {}
         self.dst_group_struct = dst_group_struct
         self._src_phi_g = src_phi_g
