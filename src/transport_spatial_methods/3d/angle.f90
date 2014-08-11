@@ -100,7 +100,7 @@ ELSE
    ELSE IF (qdord == 4) THEN
     write(8,*)"ang before: ",ang
       l = 3
-!INCREASED PRECISION FOR COMPILER CONSISTANCY
+!PLace compiler precision was causing difference
       ang(1,1) = 0.350021174582
       ang(1,2) = ang(1,1)
       ang(1,3) = 0.868890300722
