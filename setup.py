@@ -103,8 +103,7 @@ def main_body():
             if rtn != 0:
                 sys.exit('CMake is not installed, aborting PyNE build.')
         cmake_cmd = ['cmake', '..'] + cmake_args
-        pyarg = '-DPYTHON_EXECUTABLE=' + sys.executable
-        cmake_cmd += [pyarg, ]
+        cmake_cmd += ['-DPYTHON_EXECUTABLE=' + sys.executable]
         if os.name == 'nt':
             files_on_path = set()
             for p in os.environ['PATH'].split(';')[::-1]:
@@ -118,7 +117,7 @@ def main_body():
                 cmake_cmd += ['-G "MinGW Makefiles"']
             cmake_cmd = ' '.join(cmake_cmd)
         is_nt = os.name == 'nt'
-        cmake_cmdstr = "'" + "' '".join(cmake_cmd) + "'"
+        cmake_cmdstr = cmake_cmd if isinstance(cmake_cmd, str) else ' '.join(cmake_cmd)
         print("CMake command is\n", cmake_cmdstr, sep="")
         rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=is_nt)
     rtn = subprocess.check_call(['make'] + make_args, cwd='build')
