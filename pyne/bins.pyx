@@ -124,6 +124,11 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
     cdef int n0, n1  # current point index
     cdef double val, ylower, yupper
     cdef np.ndarray[np.float64_t, ndim=1] y_g = np.empty(G, dtype='float64')
+    if x_g[0] > x_g[-1]:
+        # monotonically decreaing, make increasing so logic is simpler
+        x_g = x_g[::-1]
+        x = x[::-1]
+        y = y[::-1]
     n0 = 0
     n1 = 1
     for g0 in range(G):
