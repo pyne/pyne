@@ -43,13 +43,20 @@ def check_pointwise_linear_collapse(x_g, x, y, exp):
 
 def test_pointwise_linear_collapse():
     cases = [
-        [np.array([0.0, 1.0, 2.0]), np.linspace(0.0, 2.0, 101), np.ones(101), [1.0, 1.0]],
-
+        [np.array([0.0, 1.0, 2.0]), np.linspace(0.0, 2.0, 101), 
+         np.ones(101), [1.0, 1.0]],
+        [np.array([0.0, 1.0, 2.0]), np.linspace(0.0, 2.0, 101), 
+         np.linspace(0.0, 2.0, 101), [0.5, 1.5]],
+        [np.array([-1.0, 0.0]), np.array([-1.0, 2.0]), np.array([3.0, 6.0]), [3.5]],
+        [np.array([0.0, 1.0]), np.array([-1.0, 2.0]), np.array([3.0, 6.0]), [4.5]],
+        [np.array([1.0, 2.0]), np.array([-1.0, 2.0]), np.array([3.0, 6.0]), [5.5]],
+        [np.array([0.0, 1.0]), np.array([0.0, 2.0]), np.array([0.0, 2.0]), [0.5]],
+        [np.array([0.5, 1.5]), np.array([0.0, 2.0]), np.array([0.0, 2.0]), [1.0]],
+        [np.array([0.0, 1.0]), np.array([0.0, 0.75]), np.array([0.0, 1.0]), [3.0/8.0]],
+        [np.array([1.0, 2.0]), np.array([0.0, 2.0]), np.array([4.0, 6.0]), [5.5]],
         ]
-
     for x_g, x, y, exp in cases:
         yield check_pointwise_linear_collapse, x_g, x, y, exp
-    
 
 if __name__ == "__main__":
     nose.main()
