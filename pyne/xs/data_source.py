@@ -882,7 +882,7 @@ class OpenMCDataSource(DataSource):
     def __init__(self, cross_sections=None, src_group_struct=None, **kwargs):
         """Parameters
         ----------
-        cross_sections : string or file-like, optional
+        cross_sections : openmc.CrossSections or string or file-like, optional
             Path or file to OpenMC cross_sections.xml
         src_group_struct : array-like, optional
             The group structure to discretize the ACE data to, defaults to 
@@ -891,8 +891,10 @@ class OpenMCDataSource(DataSource):
             Keyword arguments to be sent to DataSource base class.
 
         """
-        cross_sections = cross_sections or os.getenv('CROSS_SECTIONS')
-        self.cross_sections = openmc.CrossSections(f=cross_sections)
+        if not isinstance(cross_sections, openmc.CrossSections):
+            cross_sections = cross_sections or os.getenv('CROSS_SECTIONS')
+            cross_sections = openmc.CrossSections(f=cross_sections)
+        self.cross_sections = cross_sections
         self._src_group_struct = src_group_struct
         super(OpenMCDataSource, self).__init__(**kwargs)
         self.libs = {}  # cross section libraries, index by openmc.AceTables
@@ -904,7 +906,9 @@ class OpenMCDataSource(DataSource):
         return self._exists
 
     def _load_group_structure(self):
-        self.src_group_struct = self._src_group_struct or np.logspace(1, -9, 101)
+        if self._src_group_struct is None:
+            self._src_group_struct = np.logspace(1, -9, 101) 
+        self.src_group_struct = self._src_group_struct
 
     def _load_reaction(self, nuc, rx, temp=300.0):
         """Loads reaction data from ACE files indexed by OpenMC.
@@ -919,23 +923,31 @@ class OpenMCDataSource(DataSource):
             The nuclide temperature in [K].
 
         """
+        rx = rxname.id(rx)
         mt = rxname.mt(rx)
+        totrx = rxname.id('total')
+        absrx = rxname.id('absorption')
         ace_tables = self._rank_ace_tables(nuc, temp=temp)
         lib = ntab = None
         for atab in ace_tables: 
             if atab not in self.libs:
-                lib = self.libs[atab] = ace.Library(atab.abspath)
+                lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
                 lib.read(atab.name)
             lib = self.libs[atab]
             ntab = lib.tables[atab.name]
-            if mt in ntab.reactions:
+            if mt in ntab.reactions or rx == totrx or rx == absrx:
                 break
             lib = ntab = None
         if lib is None:
             return None  # no reaction available
         E_g = self.src_group_struct
         E_points = ntab.energy
-        rawdata = ntab[mt].sigma
+        if rx == totrx:
+            rawdata = ntab.sigma_t
+        elif rx == absrx:
+            rawdata = ntab.sigma_a
+        else:
+            rawdata = ntab.reactions[mt].sigma
         if (E_g[0] <= E_g[-1] and E_points[-1] <= E_points[0]) or \
            (E_g[0] >= E_g[-1] and E_points[-1] >= E_points[0]):
             E_points = E_points[::-1]
@@ -948,8 +960,10 @@ class OpenMCDataSource(DataSource):
         temperature.
         """
         tabs = [t for t in self.cross_sections.ace_tables if t.nucid == nuc]
+        if len(tabs) == 0:
+            return tabs
         temps = {t.temperature for t in tabs}
-        temps.sort(key=lambda s: abs(float(s) - temp*MeV_per_K))
+        temps = sorted(temps, key=lambda s: abs(float(s) - temp*MeV_per_K))
         nearest_temp = temps[0]
         tabs = [t for t in tabs if t.temperature == nearest_temp]
         tabs.sort(reverse=True, key=lambda t: t.name)
@@ -960,5 +974,5 @@ class OpenMCDataSource(DataSource):
         lots of ACE data.
         """
         for atab in self.cross_sections.ace_tables:
-            lib = self.libs[atab] = ace.Library(atab.abspath)
+            lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
             lib.read(atab.name)

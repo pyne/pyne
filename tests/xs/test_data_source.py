@@ -1,14 +1,31 @@
+from __future__ import unicode_literals, print_function
 import os
+import sys
+import warnings
+from io import StringIO
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
 
 import numpy as np
 import tables as tb
 
 from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, \
-                       assert_true
+    assert_true, assert_is
 from numpy.testing import assert_array_equal, assert_array_almost_equal
+
+from pyne.utils import VnVWarning
+
+warnings.simplefilter('ignore', VnVWarning)
 
 from pyne.xs import data_source
 from pyne.pyne_config import pyne_conf
+
+if not os.path.isfile('W180.ace'):
+    u, f = 'https://www-nds.iaea.org/wolfram/w180/beta3/W180.ace', 'W180.ace'
+    print('Downloading {0} to {1} ...'.format(u, f), file=sys.stderr)
+    urllib.urlretrieve(u, f)
 
 nuc_data = pyne_conf.NUC_DATA_PATH
 
@@ -371,4 +388,21 @@ def test_eaf_multiple_xs():
     # Currently no case where multiple rows from nuc_data should be combined...
     pass
 
+sample_xs_openmc = StringIO("""<?xml version="1.0" ?>
+<cross_sections>
+  <filetype>ascii</filetype>
+  <ace_table alias="W-180.21c" awr="178.401" location="1" name="74180.21c" path="W180.ace" temperature="2.585e-08" zaid="74180"/>
+</cross_sections>
+""")
 
+def test_openmc():
+    ods = data_source.OpenMCDataSource(cross_sections=sample_xs_openmc, 
+                                       src_group_struct=np.logspace(1, -9, 11))
+    obs = ods.reaction('W180', 2)
+    assert_equal(10, len(obs))
+
+    obs = ods.reaction('W180', 'total')
+    assert_equal(10, len(obs))
+
+    obs = ods.reaction('U-235', 42)
+    assert_is(None, obs)

@@ -60,5 +60,5 @@ def test_pointwise_linear_collapse():
         yield check_pointwise_linear_collapse, x_g[::-1], x[::-1], y[::-1], exp[::-1]
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 
