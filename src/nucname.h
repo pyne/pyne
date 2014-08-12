@@ -31,6 +31,10 @@ namespace nucname
   zzname_t get_zz_name();   ///< Creates standard Z number to name mapping.
   extern zzname_t zz_name;  ///< Z num to name map
 
+  name_zz_t get_fluka_zz();  ///< Creates standard fluka-name to nucid mapping.
+  extern name_zz_t fluka_zz; ///< fluka-name to nucid map
+  zzname_t get_zz_fluka();   ///< Creates standard nucid to fluka-name mapping.
+  extern zzname_t zz_fluka;  ///< nucid to fluka-name map
   /******************************************/
   /*** Define useful elemental group sets ***/
   /******************************************/

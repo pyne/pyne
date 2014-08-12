@@ -36,6 +36,18 @@ namespace pyne
   typedef std::map<int, double> comp_map; ///< Nuclide-mass composition map type
   typedef comp_map::iterator comp_iter;   ///< Nuclide-mass composition iter type
 
+  // These 37 strings are predefined FLUKA materials. 
+  // Materials not on this list requires a MATERIAL card. 
+  static std::string flukaMatStrings[] = {
+   "BLCKHOLE", "VACUUM",   "HYDROGEN", "HELIUM",   "BERYLLIU", "CARBON", 
+   "NITROGEN", "OXYGEN",   "MAGNESIU", "ALUMINUM", "IRON",     "COPPER", 
+   "SILVER",   "SILICON",  "GOLD",     "MERCURY",  "LEAD",     "TANTALUM", 
+   "SODIUM",   "ARGON",    "CALCIUM",  "TIN",      "TUNGSTEN", "TITANIUM", 
+   "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP", 
+   "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON", "POLYETHY", "AIR"
+  };
+  static int FLUKA_MAT_NUM = 37;
+
   /// Material composed of nuclides.
   class Material
   {
@@ -146,15 +158,14 @@ namespace pyne
 
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
-
+    /// 
     /// Return a fluka input deck MATERIAL card as a string
-    // std::string fluka(bool include_znum_mass=false);
     std::string fluka(int fid, int& last_id);
-    bool builtin(std::string fluka_name);
+    bool notBuiltin(std::string fluka_name);
+    std::string write_material(int& id);
+    std::string material_component(int fid, int nucid, std::string fluka_name);
     std::string material_line(int znum, double atomic_mass, 
                               int fid, std::string fluka_name);
-    std::string compound_100pct(std::string fluka_name);
-    std::string write_material(int& id);
     std::string write_compound(int& id);
 
     /// Reads data from a plaintext file at \a filename into this Material instance.
