@@ -2,6 +2,7 @@
 """
 from __future__ import print_function
 import os
+import io
 import sys
 from warnings import warn
 from collections import namedtuple
