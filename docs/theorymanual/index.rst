@@ -20,7 +20,7 @@ The following describe methods implemented natively in PyNE:
     nuclear_reaction_channels.rst
     r2s.rst
     simplesim.rst
-
+    bins.rst
 
 For information on methods for which PyNE provides an interface but does not
 implement natively, please refer to the manuals associated with those methods.
