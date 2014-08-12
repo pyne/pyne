@@ -52,6 +52,9 @@ cm2_per_barn = cpp_data.cm2_per_barn
 sec_per_day = cpp_data.sec_per_day
 """The number of seconds in a canonical day."""
 
+MeV_per_K = cpp_data.MeV_per_K
+"""Megaelectronvolts per Kelvin."""
+
 
 #
 # hash map and initialization
