@@ -1162,33 +1162,20 @@ def test_fluka():
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
                           'name':'LEU',
-                          'fluka_name':'leu',
-			  'fluka_material_index': '26',
+                          'fluka_name':'URANIUM?',
+			  'fluka_material_index': '35',
                           'source':'Some URL',
-                          'comments': ('Fluka Material Attributes'),
+                          'comments': ('Fluka Compound '),
                           },
                    density=19.1)
 
-    written = leu.fluka()
-    expected = ('* Fluka Material Attributes\n'
-                'MATERIAL                            19.1       26.                    leu       \n')
+    id = 25
+    last_id = id
+    written = leu.fluka(id, last_id)
+    expected = (
+'\nMATERIAL         92.      235.       -1.       25.                    URAN-235  \n\nMATERIAL         92.      238.       -1.       26.                    URAN-238  \n* Fluka Compound \nMATERIAL        999.      999.      19.1       27.                    URANIUM?  \nCOMPOUND        0.04  URAN-235      0.96  URAN-238                    URANIUM?  \n')
     assert_equal(written, expected)
-
-    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96},
-                   metadata={'mat_number': 2,
-                          'table_ids': {'92235':'15c', '92238':'25c'},
-                          'name':'LEU2',
-                          'fluka_name':'leu2',
-			  'fluka_material_index': '27',
-                          'source':'Some URL',
-                          'comments': ('Fluka Material Attributes, again'),
-                          },
-                   density=19.15)
-
-    written2 = leu2.fluka()
-    expected2 = ('* Fluka Material Attributes, again\n'
-               'MATERIAL                           19.15       27.                    leu2      \n')
-    assert_equal(written2, expected2)
+    # assert_equal(last_id, 28);
 
 
 def test_write_alara():

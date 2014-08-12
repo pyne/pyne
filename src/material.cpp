@@ -672,6 +672,20 @@ std::string pyne::Material::material_component(int fid, int nucid, std::string f
 std::string pyne::Material::material_line (int znum, double atomic_mass, 
                                            int fid, std::string fluka_name)
 {
+  // Prepare the density to a separate stream in order to control the precision
+  // Note this is the current object density, and may or may not be defined
+  // density may be an int (as a float), or a true float, affects the
+  // precision required
+  double intpart;
+  modf (density, &intpart);
+  std::stringstream ds;
+  if (density == intpart) {
+    // There is no part after the decimal
+    ds << std::setprecision(0) << std::fixed << std::showpoint << density;
+  } else {
+    ds << density;
+  }
+
   std::stringstream ls;
 
   if (metadata.isMember("comments") ) {
@@ -684,9 +698,7 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
         std::setw(10) << std::right << (float)znum; 
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
         std::setw(10) << std::right << atomic_mass;
-  // Note this is the current object density, and may or may not be defined
-  ls << std::setprecision(0) << std::fixed << std::showpoint << 
-        std::setw(10) << std::right << density;
+  ls << std::setw(10) << std::right << ds.str();
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
         std::setw(10) << std::right << (float)fid;
   ls << std::setw(10) << std::right << "";
