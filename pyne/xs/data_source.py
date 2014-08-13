@@ -924,7 +924,10 @@ class OpenMCDataSource(DataSource):
 
         """
         rx = rxname.id(rx)
-        mt = rxname.mt(rx)
+        try:
+            mt = rxname.mt(rx)
+        except RuntimeError:
+            return None
         totrx = rxname.id('total')
         absrx = rxname.id('absorption')
         ace_tables = self._rank_ace_tables(nuc, temp=temp)
