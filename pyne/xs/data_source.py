@@ -966,7 +966,7 @@ class OpenMCDataSource(DataSource):
         if len(tabs) == 0:
             return tabs
         temps = {t.temperature for t in tabs}
-        temps = sorted(temps, key=lambda s: abs(float(s) - temp*MeV_per_K))
+        temps = sorted(temps, key=lambda s: abs(float(s) - temp * MeV_per_K))
         nearest_temp = temps[0]
         tabs = [t for t in tabs if t.temperature == nearest_temp]
         tabs.sort(reverse=True, key=lambda t: t.name)
@@ -975,6 +975,12 @@ class OpenMCDataSource(DataSource):
     def load(self, temp=300.0):
         """Loads the entire data source into memory. This can be expensive for 
         lots of ACE data.
+
+        Parameters
+        ----------
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+
         """
         for atab in self.cross_sections.ace_tables:
             lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
