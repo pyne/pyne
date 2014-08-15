@@ -4,8 +4,8 @@ import warnings
 
 import nose 
 
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
-                       assert_true
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
+    assert_in, assert_true
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
@@ -57,8 +57,8 @@ def test_pointwise_linear_collapse():
         ]
     for x_g, x, y, exp in cases:
         yield check_pointwise_linear_collapse, x_g, x, y, exp
-        yield check_pointwise_linear_collapse, x_g[::-1], x[::-1], y[::-1], exp
+        yield check_pointwise_linear_collapse, x_g[::-1], x[::-1], y[::-1], exp[::-1]
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 

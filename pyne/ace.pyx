@@ -17,6 +17,7 @@ generates ACE-format cross sections.
 """
 
 from __future__ import division, unicode_literals
+import io
 import struct
 from warnings import warn
 from pyne.utils import VnVWarning
@@ -127,7 +128,7 @@ class Library(object):
     def __init__(self, filename):
         # Determine whether file is ASCII or binary
         try:
-            self.f = open(filename, 'r')
+            self.f = io.open(filename, 'r')
             # Grab 10 lines of the library
             s = ''.join([self.f.readline() for i in range(10)])
 
