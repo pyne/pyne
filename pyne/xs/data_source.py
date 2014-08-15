@@ -16,11 +16,15 @@ except ImportError:
 import numpy as np
 import tables as tb
 
-from .. import nuc_data
-from .. import nucname
-from .. import rxname
-from ..endf import Library
-from .models import partial_energy_matrix, group_collapse
+from pyne import nuc_data
+from pyne import nucname
+from pyne import openmc
+from pyne import rxname
+from pyne import endf
+from pyne import bins
+from pyne import ace
+from pyne.data import MeV_per_K
+from pyne.xs.models import partial_energy_matrix, group_collapse
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
@@ -123,6 +127,7 @@ class DataSource(object):
     def src_group_struct(self, src_group_struct):
         self._src_group_struct = np.asarray(src_group_struct, dtype='f8')
         self._src_ngroups = len(src_group_struct) - 1
+        self.rxcache.clear()
 
     @property
     def src_ngroups(self):
@@ -224,6 +229,7 @@ class DataSource(object):
 
     # Optional mix-in methods to implement
     def load(self, temp=300.0):
+        """Loads the entire data source into memory."""
         pass
 
     _USES_TEMP = True
@@ -680,7 +686,7 @@ class ENDFDataSource(DataSource):
 
     Parameters
     ----------
-    f : string, file handle
+    fh : string, file handle
         Path to ENDF file, or ENDF file itself.
     kwargs : optional
         Keyword arguments to be sent to base class.
@@ -695,7 +701,7 @@ class ENDFDataSource(DataSource):
         if not self.exists:
             raise ValueError
         else:
-            self.library = Library(fh)
+            self.library = endf.Library(fh)
         self.rxcache = {}
         self.dst_group_struct = dst_group_struct
         self._src_phi_g = src_phi_g
@@ -707,7 +713,6 @@ class ENDFDataSource(DataSource):
                 self._exists = os.path.isfile(self.fh)
             else:
                 self._exists = isinstance(self.fh, IO_TYPES)
-        print(self.fh)
         return self._exists
 
     def _load_group_structure(self, nuc, rx, nuc_i=None):
@@ -865,3 +870,118 @@ class ENDFDataSource(DataSource):
         dE = high - low
         sigma = self.library.integrate_tab_range(scheme,e_int, xs, low, high)
         return sigma * dE
+
+
+class OpenMCDataSource(DataSource):
+    """Data source for ACE data that is listed in an OpenMC cross_sections.xml 
+    file. This data source discretizes the reactions to a given group
+    stucture when the reactions are loaded in. Reseting this source group
+    structure will clear the reaction cache. 
+    """
+
+    def __init__(self, cross_sections=None, src_group_struct=None, **kwargs):
+        """Parameters
+        ----------
+        cross_sections : openmc.CrossSections or string or file-like, optional
+            Path or file to OpenMC cross_sections.xml
+        src_group_struct : array-like, optional
+            The group structure to discretize the ACE data to, defaults to 
+            ``np.logspace(1, -9, 101)``.
+        kwargs : optional
+            Keyword arguments to be sent to DataSource base class.
+
+        """
+        if not isinstance(cross_sections, openmc.CrossSections):
+            cross_sections = cross_sections or os.getenv('CROSS_SECTIONS')
+            cross_sections = openmc.CrossSections(f=cross_sections)
+        self.cross_sections = cross_sections
+        self._src_group_struct = src_group_struct
+        super(OpenMCDataSource, self).__init__(**kwargs)
+        self.libs = {}  # cross section libraries, index by openmc.AceTables
+
+    @property
+    def exists(self):
+        if self._exists is None:
+            self._exists = len(self.cross_sections.ace_tables) > 0
+        return self._exists
+
+    def _load_group_structure(self):
+        if self._src_group_struct is None:
+            self._src_group_struct = np.logspace(1, -9, 101) 
+        self.src_group_struct = self._src_group_struct
+
+    def _load_reaction(self, nuc, rx, temp=300.0):
+        """Loads reaction data from ACE files indexed by OpenMC.
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide id.
+        rx : int
+            Reaction id.
+        temp : float, optional
+            The nuclide temperature in [K].
+
+        """
+        rx = rxname.id(rx)
+        try:
+            mt = rxname.mt(rx)
+        except RuntimeError:
+            return None
+        totrx = rxname.id('total')
+        absrx = rxname.id('absorption')
+        ace_tables = self._rank_ace_tables(nuc, temp=temp)
+        lib = ntab = None
+        for atab in ace_tables: 
+            if atab not in self.libs:
+                lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
+                lib.read(atab.name)
+            lib = self.libs[atab]
+            ntab = lib.tables[atab.name]
+            if mt in ntab.reactions or rx == totrx or rx == absrx:
+                break
+            lib = ntab = None
+        if lib is None:
+            return None  # no reaction available
+        E_g = self.src_group_struct
+        E_points = ntab.energy
+        if rx == totrx:
+            rawdata = ntab.sigma_t
+        elif rx == absrx:
+            rawdata = ntab.sigma_a
+        else:
+            rawdata = ntab.reactions[mt].sigma
+        if (E_g[0] <= E_g[-1] and E_points[-1] <= E_points[0]) or \
+           (E_g[0] >= E_g[-1] and E_points[-1] >= E_points[0]):
+            E_points = E_points[::-1]
+            rawdata = rawdata[::-1]
+        rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata) 
+        return rxdata
+
+    def _rank_ace_tables(self, nuc, temp=300.0):
+        """Filters and sorts the potential ACE tables based on nucliude and
+        temperature.
+        """
+        tabs = [t for t in self.cross_sections.ace_tables if t.nucid == nuc]
+        if len(tabs) == 0:
+            return tabs
+        temps = {t.temperature for t in tabs}
+        temps = sorted(temps, key=lambda s: abs(float(s) - temp * MeV_per_K))
+        nearest_temp = temps[0]
+        tabs = [t for t in tabs if t.temperature == nearest_temp]
+        tabs.sort(reverse=True, key=lambda t: t.name)
+        return tabs
+
+    def load(self, temp=300.0):
+        """Loads the entire data source into memory. This can be expensive for 
+        lots of ACE data.
+
+        Parameters
+        ----------
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+
+        """
+        for atab in self.cross_sections.ace_tables:
+            lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
+            lib.read(atab.name)

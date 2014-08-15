@@ -7,6 +7,32 @@ project( pyne )
 # languages
 enable_language(Fortran)
 
+# Augment the Fortran implicit link libraries
+message(STATUS
+  "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES = ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
+if (APPLE)
+  message(STATUS
+    "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+  set(LIBGCC_S)
+  foreach (gcc_s_ver 3 2 1)
+    set(LIBGCC_S_PATH)
+    find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
+      PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
+      NODEFAULTPATH
+    )
+    if (LIBGCC_S_PATH)
+      set(LIBGCC_S gcc_s.${gcc_s_ver})
+      break()
+    endif ()
+  endforeach ()
+  message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
+  if (LIBGCC_S)
+    set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
+  endif ()
+endif ()
+message(STATUS
+  "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -24,13 +50,16 @@ IF(NOT ${BUILD_TYPE} STREQUAL "release")
 ENDIF()
 
 # Include the HDF5 library and c++ headers
-find_package( HDF5 COMPONENTS C )
+find_package( HDF5 COMPONENTS C REQUIRED)
 include_directories(${HDF5_INCLUDE_DIRS})
 if(WIN32)
     # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
     get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
     list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/bin")
 	list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
+elseif(NOT HDF5_LIBRARY_DIRS)
+  list(GET HDF5_LIBRARIES 0 _hdf5lib)
+  get_filename_component(HDF5_LIBRARY_DIRS ${_hdf5lib} PATH)
 endif(WIN32)
 link_directories(${HDF5_LIBRARY_DIRS})
 add_definitions(${HDF5_DEFINITIONS})
@@ -53,7 +82,7 @@ endif(${MOAB_FOUND})
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
 
-execute_process(COMMAND "${CYTHON_EXECUTABLE}" "-V" 
+execute_process(COMMAND "${CYTHON_EXECUTABLE}" "-V"
     ERROR_VARIABLE CYTHON_VERSION
     ERROR_STRIP_TRAILING_WHITESPACE)
 message( STATUS "Cython Version: " ${CYTHON_VERSION} )
@@ -71,7 +100,7 @@ message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
 # RPATH Settings
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
     # I think that this is the right thing to do for MacOSX 10.5+ --Anthony

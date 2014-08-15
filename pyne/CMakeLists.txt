@@ -42,11 +42,11 @@ target_link_libraries(_utils pyne)
 
 # dagmc
 if (MOAB_FOUND)
-set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
-                            PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
-target_link_libraries(_dagmc dagmc MOAB pyne)
-set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
+    set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
+                                PROPERTIES CYTHON_IS_CXX TRUE)
+    cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
+    target_link_libraries(_dagmc dagmc MOAB pyne)
+    set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
 endif (MOAB_FOUND)
 
 # endf
@@ -99,10 +99,18 @@ target_link_libraries(tally pyne)
 
 
 # source_sampling
-set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/source_sampling.pyx"
+if (MOAB_FOUND)
+    set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/source_sampling.pyx"
+                                PROPERTIES CYTHON_IS_CXX TRUE)
+    cython_add_module(source_sampling source_sampling.pyx)
+    target_link_libraries(source_sampling pyne)
+endif (MOAB_FOUND)
+
+# bins
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/bins.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(source_sampling source_sampling.pyx)
-target_link_libraries(source_sampling pyne)
+cython_add_module(bins bins.pyx)
+target_link_libraries(bins pyne)
 
 # TRANSPORT_SPATIAL_METHODS wrapper
 # I don't know which method is better...
@@ -117,4 +125,3 @@ add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX
     DEPENDS pyne
     )
 target_link_libraries(transport_spatial_methods pyne)
-
