@@ -92,6 +92,13 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int serpent_to_id(char *) except +
     int serpent_to_id(std_string) except +
 
+    # OpenMC Functions
+    std_string openmc(int) except +
+    std_string openmc(char *) except +
+    std_string openmc(std_string) except +
+    int openmc_to_id(char *) except +
+    int openmc_to_id(std_string) except +
+
     # NIST Functions
     std_string nist(int) except +
     std_string nist(char *) except +
