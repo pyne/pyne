@@ -595,9 +595,8 @@ bool pyne::Material::notBuiltin(std::string fluka_name)
 // fluka
 //---------------------------------------------------------------------------//
 // Main external call
-std::string pyne::Material::fluka(int fid, int& last_id)
+std::string pyne::Material::fluka(int id )
 {
-  int id = fid;
   std::stringstream rs;
 
   // Element, one nucid
@@ -612,7 +611,6 @@ std::string pyne::Material::fluka(int fid, int& last_id)
   // Compound
     rs << write_compound(id);
   }
-  last_id = id;
   return rs.str();
 }
 
@@ -626,30 +624,43 @@ std::string pyne::Material::fluka(int fid, int& last_id)
 // may be called from a user-defined material, i.e. on that is not 
 // read out of a UW^2-tagged geometry file, and thus does not have
 // certain metadata.
-std::string pyne::Material::write_material(int& id)
+// Result:        The MATERIAL line is returned.  
+//                The fluka_name metadata is set
+//                The true, final material index metadata is set
+std::string pyne::Material::write_material(int id)
 {
-   std::stringstream ms;
    // The nucid of the first component is the only nucid
    int nucid = comp.begin()->first;
 
-   // Construct the nucid-to-fluka_name map, "zfd"
-   pyne::nucname::zzname_t zfd = pyne::nucname::get_zz_fluka();
-
    std::string fluka_name; 
+   int za_id;
+
    if (metadata.isMember("fluka_name")) {
      fluka_name = metadata["fluka_name"].asString();
    } else {
-     fluka_name = zfd[nucid];
+      int znum = pyne::nucname::znum(nucid);
+      int anum = pyne::nucname::anum(nucid);
+      // Make the za_id
+      za_id = znum*10000000 + anum*10000;
+      // Use za_id to get the fluka_name from special database
+      // Need nucid map to either material or fluka name
+      fluka_name = nucname::zz_fluka[za_id];
+      metadata["fluka_name"] = fluka_name;
    }
+
+   std::stringstream ms;
 
    if (notBuiltin(fluka_name)) {  
-     ms << material_component(id, nucid, fluka_name);
-     id++;
+     std::stringstream ss;
+     ss << id;
+     metadata["fluka_material_index"] = ss.str();
+     ms << material_component(id, za_id, fluka_name);
    }
 
+  // could be empty
   return ms.str();
 }
-
+    
 //---------------------------------------------------------------------------//
 // material_component
 //---------------------------------------------------------------------------//
@@ -660,7 +671,10 @@ std::string pyne::Material::material_component(int fid, int nucid, std::string f
   std::stringstream ls;
 
   int znum = pyne::nucname::znum(nucid); 
-  double atomic_mass = pyne::atomic_mass(nucid);
+  //  Hmmm, this call needs to load a file, pyne::NUC_DATA_PATH
+  // or is this really the mass?
+  // double atomic_mass = pyne::atomic_mass(nucid);
+  double atomic_mass = -1;
 
   return material_line(znum, atomic_mass, fid, fluka_name);
 }
@@ -673,9 +687,9 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
                                            int fid, std::string fluka_name)
 {
   // Prepare the density to a separate stream in order to control the precision
-  // Note this is the current object density, and may or may not be defined
-  // density may be an int (as a float), or a true float, affects the
-  // precision required
+  // Note this is the current object density, and may or may not be meaningful
+  // Full disclosure:  doing this because unsetting floatformat is apparently
+  // insufficient to undo the fixed precision.  Maybe unset showpoint?
   double intpart;
   modf (density, &intpart);
   std::stringstream ds;
@@ -714,13 +728,13 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
 // a) MATERIAL lines for those components that need it
 // b) MATERIAL line for compound
 // c) COMPOUND lines
-std::string pyne::Material::write_compound(int& id)
+std::string pyne::Material::write_compound(int id)
 {
   std::stringstream ss;
   std::map<double, std::string> frac_name_map;
 
   // Go through the composition of this material
-  for (comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++) {
+  for (comp_iter nuc = comp.begin(); nuc != comp.end(); ++nuc) {
 
     std::cout << nuc->first << ", " << nuc->second << ", ";
     std::cout << pyne::nucname::name(nuc->first) << std::endl;
@@ -744,7 +758,6 @@ std::string pyne::Material::write_compound(int& id)
     frac_name_map.insert(std::pair<double, std::string>(frac, comp_name));
 
     // This call will determine all the necessary info from the nucid and
-    // call material_line with the deets
     ss << tmat.material_component(id, comp_nucid, comp_name);
     id++;
   }  // end components
@@ -1160,11 +1173,14 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
         } else {
           // Not on exception list => add frac to id-component
           int znum_id = nucname::id(nucname::znum(ptr->first));
-      cm[znum_id] += (ptr->second) * mass;
+          cm[znum_id] += (ptr->second) * mass;
         }
       }
   }
-  return pyne::Material(cm, -1, -1);
+  // Copy 
+  pyne::Material collapsed = pyne::Material(cm, mass, density, 
+                                            atoms_per_molecule, metadata);
+  return collapsed;
 }
 
 // Wrapped version for calling from python

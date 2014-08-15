@@ -160,13 +160,13 @@ namespace pyne
     std::string mcnp(std::string frac_type = "mass");
     /// 
     /// Return a fluka input deck MATERIAL card as a string
-    std::string fluka(int fid, int& last_id);
+    std::string fluka(int id );
     bool notBuiltin(std::string fluka_name);
-    std::string write_material(int& id);
+    std::string write_material(int id);
     std::string material_component(int fid, int nucid, std::string fluka_name);
     std::string material_line(int znum, double atomic_mass, 
                               int fid, std::string fluka_name);
-    std::string write_compound(int& id);
+    std::string write_compound(int id);
 
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);

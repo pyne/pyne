@@ -1171,7 +1171,8 @@ def test_fluka():
 
     id = 25
     last_id = id
-    written = leu.fluka(id, last_id)
+    # written = leu.fluka(id, last_id)
+    written = leu.write_material(id)
     expected = (
 '\nMATERIAL         92.      235.       -1.       25.                    URAN-235  \n\nMATERIAL         92.      238.       -1.       26.                    URAN-238  \n* Fluka Compound \nMATERIAL        999.      999.      19.1       27.                    URANIUM?  \nCOMPOUND        0.04  URAN-235      0.96  URAN-238                    URANIUM?  \n')
     assert_equal(written, expected)

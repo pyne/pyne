@@ -40,7 +40,8 @@ cdef extern from "material.h" namespace "pyne":
         void norm_comp() except +
         std_string mcnp(std_string ) except +
         # std_string fluka(bool) except +
-        std_string fluka(int, int) except +
+        # std_string fluka(int, int) except +
+        std_string write_material(int) except +
         void from_hdf5(char *, char *) except +
         void from_hdf5(char *, char *, int) except +
         void from_hdf5(char *, char *, int, int) except +
