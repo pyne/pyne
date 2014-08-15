@@ -1,6 +1,8 @@
 import test_ahot
 
 test_ahot.test_ahotn_ln()
+test_ahot.test_ahotn_ll()
+test_ahot.test_ahotn_nefd()
 '''
 test_ahot.test_ahotn_ln_alternating()
 print("ln alternating passed!")
