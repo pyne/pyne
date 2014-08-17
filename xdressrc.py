@@ -5,7 +5,7 @@ package = 'pyne'
 packagedir = 'pyne'
 
 plugins = ('xdress.stlwrap', 'xdress.autoall', 'xdress.autodescribe',
-           'xdress.descfilter', 'xdress.doxygen', 'xdress.cythongen')  # 
+           'xdress.descfilter', 'xdress.doxygen', 'xdress.cythongen')
 
 doxygen_config = {'PROJECT_NAME': 'PYNE',
                   'EXTRACT_ALL': False,  # Note usage of python False
@@ -65,4 +65,5 @@ classes = [apiname('Tally',   'cpp/tally.*', incfiles='tally.h'),
 
 functions = []
 
+skipmethods = {'library': ['gen_content_list', ]}
 skipattrs = {'library': ['contents', ]}

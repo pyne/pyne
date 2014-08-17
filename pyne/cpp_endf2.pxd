@@ -231,34 +231,34 @@ cdef extern from "endf.h" namespace "pyne":
         cpp_vector[cpp_vector[int]] get_content_list() except +
         void read_endf() except +
         void read_endf(std_string) except +
-        mt451 get_mt451 "get< pyne::mt451 >" () except +
-        mt451 get_mt451 "get< pyne::mt451 >" (int) except +
-        mt451 get_mt451 "get< pyne::mt451 >" (int, int) except +
-        mt451 get_mt451 "get< pyne::mt451 >" (int, int, int) except +
-        mt452_mf1 get_mt452_mf1 "get< pyne::mt452_mf1 >" () except +
-        mt452_mf1 get_mt452_mf1 "get< pyne::mt452_mf1 >" (int) except +
-        mt452_mf1 get_mt452_mf1 "get< pyne::mt452_mf1 >" (int, int) except +
-        mt452_mf1 get_mt452_mf1 "get< pyne::mt452_mf1 >" (int, int, int) except +
-        mt455_mf1 get_mt455_mf1 "get< pyne::mt455_mf1 >" () except +
-        mt455_mf1 get_mt455_mf1 "get< pyne::mt455_mf1 >" (int) except +
-        mt455_mf1 get_mt455_mf1 "get< pyne::mt455_mf1 >" (int, int) except +
-        mt455_mf1 get_mt455_mf1 "get< pyne::mt455_mf1 >" (int, int, int) except +
-        mt456_mf1 get_mt456_mf1 "get< pyne::mt456_mf1 >" () except +
-        mt456_mf1 get_mt456_mf1 "get< pyne::mt456_mf1 >" (int) except +
-        mt456_mf1 get_mt456_mf1 "get< pyne::mt456_mf1 >" (int, int) except +
-        mt456_mf1 get_mt456_mf1 "get< pyne::mt456_mf1 >" (int, int, int) except +
-        mt458_mf1 get_mt458_mf1 "get< pyne::mt458_mf1 >" () except +
-        mt458_mf1 get_mt458_mf1 "get< pyne::mt458_mf1 >" (int) except +
-        mt458_mf1 get_mt458_mf1 "get< pyne::mt458_mf1 >" (int, int) except +
-        mt458_mf1 get_mt458_mf1 "get< pyne::mt458_mf1 >" (int, int, int) except +
-        mt460_mf1 get_mt460_mf1 "get< pyne::mt460_mf1 >" () except +
-        mt460_mf1 get_mt460_mf1 "get< pyne::mt460_mf1 >" (int) except +
-        mt460_mf1 get_mt460_mf1 "get< pyne::mt460_mf1 >" (int, int) except +
-        mt460_mf1 get_mt460_mf1 "get< pyne::mt460_mf1 >" (int, int, int) except +
-        mtfpy_mf8 get_mtfpy_mf8 "get< pyne::mtfpy_mf8 >" () except +
-        mtfpy_mf8 get_mtfpy_mf8 "get< pyne::mtfpy_mf8 >" (int) except +
-        mtfpy_mf8 get_mtfpy_mf8 "get< pyne::mtfpy_mf8 >" (int, int) except +
-        mtfpy_mf8 get_mtfpy_mf8 "get< pyne::mtfpy_mf8 >" (int, int, int) except +
+        mt451 get_mt451 "get< mt451 >" () except +
+        mt451 get_mt451 "get< mt451 >" (int) except +
+        mt451 get_mt451 "get< mt451 >" (int, int) except +
+        mt451 get_mt451 "get< mt451 >" (int, int, int) except +
+        mt452_mf1 get_mt452_mf1 "get< mt452_mf1 >" () except +
+        mt452_mf1 get_mt452_mf1 "get< mt452_mf1 >" (int) except +
+        mt452_mf1 get_mt452_mf1 "get< mt452_mf1 >" (int, int) except +
+        mt452_mf1 get_mt452_mf1 "get< mt452_mf1 >" (int, int, int) except +
+        mt455_mf1 get_mt455_mf1 "get< mt455_mf1 >" () except +
+        mt455_mf1 get_mt455_mf1 "get< mt455_mf1 >" (int) except +
+        mt455_mf1 get_mt455_mf1 "get< mt455_mf1 >" (int, int) except +
+        mt455_mf1 get_mt455_mf1 "get< mt455_mf1 >" (int, int, int) except +
+        mt456_mf1 get_mt456_mf1 "get< mt456_mf1 >" () except +
+        mt456_mf1 get_mt456_mf1 "get< mt456_mf1 >" (int) except +
+        mt456_mf1 get_mt456_mf1 "get< mt456_mf1 >" (int, int) except +
+        mt456_mf1 get_mt456_mf1 "get< mt456_mf1 >" (int, int, int) except +
+        mt458_mf1 get_mt458_mf1 "get< mt458_mf1 >" () except +
+        mt458_mf1 get_mt458_mf1 "get< mt458_mf1 >" (int) except +
+        mt458_mf1 get_mt458_mf1 "get< mt458_mf1 >" (int, int) except +
+        mt458_mf1 get_mt458_mf1 "get< mt458_mf1 >" (int, int, int) except +
+        mt460_mf1 get_mt460_mf1 "get< mt460_mf1 >" () except +
+        mt460_mf1 get_mt460_mf1 "get< mt460_mf1 >" (int) except +
+        mt460_mf1 get_mt460_mf1 "get< mt460_mf1 >" (int, int) except +
+        mt460_mf1 get_mt460_mf1 "get< mt460_mf1 >" (int, int, int) except +
+        mtfpy_mf8 get_mtfpy_mf8 "get< mtfpy_mf8 >" () except +
+        mtfpy_mf8 get_mtfpy_mf8 "get< mtfpy_mf8 >" (int) except +
+        mtfpy_mf8 get_mtfpy_mf8 "get< mtfpy_mf8 >" (int, int) except +
+        mtfpy_mf8 get_mtfpy_mf8 "get< mtfpy_mf8 >" (int, int, int) except +
         pass
 
 

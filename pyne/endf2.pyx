@@ -25,7 +25,26 @@ np.import_array()
 
 
 cdef class mt_base:
-    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'mt_base', 'language': 'c++', 'srcname': 'mt_base', 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    nuc_id (int) : ENDF style nuc id ZZZAAA.
+    awr (double) : mass relative to neutron [double]
+    mat (int) : ENDF material.
+    mf (int) : ENDF file number.
+    mt (int) : ENDF reaction designation
+
+
+    Methods
+    -------
+    ~mt_base
+
+    Notes
+    -----
+    This class was defined in endf_mt.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -41,8 +60,8 @@ cdef class mt_base:
         """mt_base(self, )
         """
         self._inst = new cpp_endf2.mt_base()
-    
-    
+
+
     def __dealloc__(self):
         if self._free_inst and self._inst is not NULL:
             free(self._inst)
@@ -52,49 +71,49 @@ cdef class mt_base:
         """no docstring for awr, please file a bug report!"""
         def __get__(self):
             return float((<cpp_endf2.mt_base *> self._inst).awr)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt_base *> self._inst).awr = <double> value
-    
-    
+
+
     property mat:
         """no docstring for mat, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt_base *> self._inst).mat)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt_base *> self._inst).mat = <int> value
-    
-    
+
+
     property mf:
         """no docstring for mf, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt_base *> self._inst).mf)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt_base *> self._inst).mf = <int> value
-    
-    
+
+
     property mt:
         """no docstring for mt, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt_base *> self._inst).mt)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt_base *> self._inst).mt = <int> value
-    
-    
+
+
     property nuc_id:
         """no docstring for nuc_id, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt_base *> self._inst).nuc_id)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt_base *> self._inst).nuc_id = <int> value
-    
-    
+
+
     # methods
-    
+
 
     pass
 
@@ -103,7 +122,45 @@ cdef class mt_base:
 
 
 cdef class mt458_mf1(mt_base):
-    """no docstring for {'tarbase': 'endf2', 'tarname': 'mt458_mf1', 'language': 'c++', 'srcname': 'mt458_mf1', 'sidecars': (), 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    efr (std::vector< double >) : kinetic energy from fission
+        products
+    defr (std::vector< double >) : error in efr
+    enp (std::vector< double >) : kinetic energy of prompt fission
+        neutrons
+    denp (std::vector< double >) : error in denp
+    end (std::vector< double >) : kinetic energy of delayed fission
+        neutrons
+    dend (std::vector< double >) : error in dend
+    egp (std::vector< double >) : total energy released by prompt
+        gamma rays
+    degp (std::vector< double >) : error in degp
+    egd (std::vector< double >) : total energy released by delayed
+        gamma rays
+    degd (std::vector< double >) : error in egd
+    eb (std::vector< double >) : total energy released by delayed
+        betas
+    deb (std::vector< double >) : error in deb
+    enu (std::vector< double >) : energy carried away by neutrinos
+    denu (std::vector< double >) : error in enu
+    er (std::vector< double >) : total energy release not lost to
+        neutrinos
+    der (std::vector< double >) : error in er
+    et (std::vector< double >) : total energy release per fission
+    det (std::vector< double >) : error in et
+
+
+    Methods
+    -------
+
+    Notes
+    -----
+    This class was defined in endf_mt.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -136,8 +193,8 @@ cdef class mt458_mf1(mt_base):
         """mt458_mf1(self, )
         """
         self._inst = new cpp_endf2.mt458_mf1()
-    
-    
+
+
 
     # attributes
     property deb:
@@ -150,7 +207,7 @@ cdef class mt458_mf1(mt_base):
                 deb_proxy = np.PyArray_SimpleNewFromData(1, deb_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).deb[0])
                 self._deb = deb_proxy
             return self._deb
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -169,8 +226,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).deb = value_proxy
             self._deb = None
-    
-    
+
+
     property defr:
         """no docstring for defr, please file a bug report!"""
         def __get__(self):
@@ -181,7 +238,7 @@ cdef class mt458_mf1(mt_base):
                 defr_proxy = np.PyArray_SimpleNewFromData(1, defr_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).defr[0])
                 self._defr = defr_proxy
             return self._defr
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -200,8 +257,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).defr = value_proxy
             self._defr = None
-    
-    
+
+
     property degd:
         """no docstring for degd, please file a bug report!"""
         def __get__(self):
@@ -212,7 +269,7 @@ cdef class mt458_mf1(mt_base):
                 degd_proxy = np.PyArray_SimpleNewFromData(1, degd_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).degd[0])
                 self._degd = degd_proxy
             return self._degd
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -231,8 +288,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).degd = value_proxy
             self._degd = None
-    
-    
+
+
     property degp:
         """no docstring for degp, please file a bug report!"""
         def __get__(self):
@@ -243,7 +300,7 @@ cdef class mt458_mf1(mt_base):
                 degp_proxy = np.PyArray_SimpleNewFromData(1, degp_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).degp[0])
                 self._degp = degp_proxy
             return self._degp
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -262,8 +319,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).degp = value_proxy
             self._degp = None
-    
-    
+
+
     property dend:
         """no docstring for dend, please file a bug report!"""
         def __get__(self):
@@ -274,7 +331,7 @@ cdef class mt458_mf1(mt_base):
                 dend_proxy = np.PyArray_SimpleNewFromData(1, dend_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).dend[0])
                 self._dend = dend_proxy
             return self._dend
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -293,8 +350,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).dend = value_proxy
             self._dend = None
-    
-    
+
+
     property denp:
         """no docstring for denp, please file a bug report!"""
         def __get__(self):
@@ -305,7 +362,7 @@ cdef class mt458_mf1(mt_base):
                 denp_proxy = np.PyArray_SimpleNewFromData(1, denp_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).denp[0])
                 self._denp = denp_proxy
             return self._denp
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -324,8 +381,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).denp = value_proxy
             self._denp = None
-    
-    
+
+
     property denu:
         """no docstring for denu, please file a bug report!"""
         def __get__(self):
@@ -336,7 +393,7 @@ cdef class mt458_mf1(mt_base):
                 denu_proxy = np.PyArray_SimpleNewFromData(1, denu_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).denu[0])
                 self._denu = denu_proxy
             return self._denu
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -355,8 +412,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).denu = value_proxy
             self._denu = None
-    
-    
+
+
     property der:
         """no docstring for der, please file a bug report!"""
         def __get__(self):
@@ -367,7 +424,7 @@ cdef class mt458_mf1(mt_base):
                 der_proxy = np.PyArray_SimpleNewFromData(1, der_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).der[0])
                 self._der = der_proxy
             return self._der
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -386,8 +443,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).der = value_proxy
             self._der = None
-    
-    
+
+
     property det:
         """no docstring for det, please file a bug report!"""
         def __get__(self):
@@ -398,7 +455,7 @@ cdef class mt458_mf1(mt_base):
                 det_proxy = np.PyArray_SimpleNewFromData(1, det_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).det[0])
                 self._det = det_proxy
             return self._det
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -417,8 +474,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).det = value_proxy
             self._det = None
-    
-    
+
+
     property eb:
         """no docstring for eb, please file a bug report!"""
         def __get__(self):
@@ -429,7 +486,7 @@ cdef class mt458_mf1(mt_base):
                 eb_proxy = np.PyArray_SimpleNewFromData(1, eb_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).eb[0])
                 self._eb = eb_proxy
             return self._eb
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -448,8 +505,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).eb = value_proxy
             self._eb = None
-    
-    
+
+
     property efr:
         """no docstring for efr, please file a bug report!"""
         def __get__(self):
@@ -460,7 +517,7 @@ cdef class mt458_mf1(mt_base):
                 efr_proxy = np.PyArray_SimpleNewFromData(1, efr_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).efr[0])
                 self._efr = efr_proxy
             return self._efr
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -479,8 +536,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).efr = value_proxy
             self._efr = None
-    
-    
+
+
     property egd:
         """no docstring for egd, please file a bug report!"""
         def __get__(self):
@@ -491,7 +548,7 @@ cdef class mt458_mf1(mt_base):
                 egd_proxy = np.PyArray_SimpleNewFromData(1, egd_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).egd[0])
                 self._egd = egd_proxy
             return self._egd
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -510,8 +567,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).egd = value_proxy
             self._egd = None
-    
-    
+
+
     property egp:
         """no docstring for egp, please file a bug report!"""
         def __get__(self):
@@ -522,7 +579,7 @@ cdef class mt458_mf1(mt_base):
                 egp_proxy = np.PyArray_SimpleNewFromData(1, egp_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).egp[0])
                 self._egp = egp_proxy
             return self._egp
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -541,8 +598,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).egp = value_proxy
             self._egp = None
-    
-    
+
+
     property end:
         """no docstring for end, please file a bug report!"""
         def __get__(self):
@@ -553,7 +610,7 @@ cdef class mt458_mf1(mt_base):
                 end_proxy = np.PyArray_SimpleNewFromData(1, end_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).end[0])
                 self._end = end_proxy
             return self._end
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -572,8 +629,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).end = value_proxy
             self._end = None
-    
-    
+
+
     property enp:
         """no docstring for enp, please file a bug report!"""
         def __get__(self):
@@ -584,7 +641,7 @@ cdef class mt458_mf1(mt_base):
                 enp_proxy = np.PyArray_SimpleNewFromData(1, enp_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).enp[0])
                 self._enp = enp_proxy
             return self._enp
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -603,8 +660,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).enp = value_proxy
             self._enp = None
-    
-    
+
+
     property enu:
         """no docstring for enu, please file a bug report!"""
         def __get__(self):
@@ -615,7 +672,7 @@ cdef class mt458_mf1(mt_base):
                 enu_proxy = np.PyArray_SimpleNewFromData(1, enu_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).enu[0])
                 self._enu = enu_proxy
             return self._enu
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -634,8 +691,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).enu = value_proxy
             self._enu = None
-    
-    
+
+
     property er:
         """no docstring for er, please file a bug report!"""
         def __get__(self):
@@ -646,7 +703,7 @@ cdef class mt458_mf1(mt_base):
                 er_proxy = np.PyArray_SimpleNewFromData(1, er_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).er[0])
                 self._er = er_proxy
             return self._er
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -665,8 +722,8 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).er = value_proxy
             self._er = None
-    
-    
+
+
     property et:
         """no docstring for et, please file a bug report!"""
         def __get__(self):
@@ -677,7 +734,7 @@ cdef class mt458_mf1(mt_base):
                 et_proxy = np.PyArray_SimpleNewFromData(1, et_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt458_mf1 *> self._inst).et[0])
                 self._et = et_proxy
             return self._et
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -696,10 +753,10 @@ cdef class mt458_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt458_mf1 *> self._inst).et = value_proxy
             self._et = None
-    
-    
+
+
     # methods
-    
+
 
     pass
 
@@ -708,7 +765,40 @@ cdef class mt458_mf1(mt_base):
 
 
 cdef class mt451(mt_base):
-    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'mt451', 'language': 'c++', 'srcname': 'mt451', 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    lrp (int) : resonance parameters given
+    lfi (int) : does material fission
+    nlib (int) : library identifier
+    nmod (int) : material modification
+    elis (double) : excitation energy
+    sta (int) : target stability
+    lis (int) : state number of the nucleas
+    liso (int) : isomeric state number
+    nfor (int) : library format
+    awi (double) : projectile mass relative to neutron
+    emax (double) : upper energy limit
+    lrel (int) : library release number
+    nsub (int) : sub library number
+    nver (int) : library version number
+    temp (double) : temperature in kelvin
+    ldrv (int) : derived material flag
+    nwd (int) : number of descriptove records
+    nxc (int) : number of mt record in this file
+    mt_list (std::vector< std::vector< int > >) : list of
+        [mf,mt,lines,mod]
+
+
+    Methods
+    -------
+
+    Notes
+    -----
+    This class was defined in endf_mt.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -724,91 +814,91 @@ cdef class mt451(mt_base):
         """mt451(self, )
         """
         self._inst = new cpp_endf2.mt451()
-    
-    
+
+
 
     # attributes
     property awi:
         """no docstring for awi, please file a bug report!"""
         def __get__(self):
             return float((<cpp_endf2.mt451 *> self._inst).awi)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).awi = <double> value
-    
-    
+
+
     property elis:
         """no docstring for elis, please file a bug report!"""
         def __get__(self):
             return float((<cpp_endf2.mt451 *> self._inst).elis)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).elis = <double> value
-    
-    
+
+
     property emax:
         """no docstring for emax, please file a bug report!"""
         def __get__(self):
             return float((<cpp_endf2.mt451 *> self._inst).emax)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).emax = <double> value
-    
-    
+
+
     property ldrv:
         """no docstring for ldrv, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).ldrv)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).ldrv = <int> value
-    
-    
+
+
     property lfi:
         """no docstring for lfi, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).lfi)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).lfi = <int> value
-    
-    
+
+
     property lis:
         """no docstring for lis, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).lis)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).lis = <int> value
-    
-    
+
+
     property liso:
         """no docstring for liso, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).liso)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).liso = <int> value
-    
-    
+
+
     property lrel:
         """no docstring for lrel, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).lrel)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).lrel = <int> value
-    
-    
+
+
     property lrp:
         """no docstring for lrp, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).lrp)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).lrp = <int> value
-    
-    
+
+
     property mt_list:
         """no docstring for mt_list, please file a bug report!"""
         def __get__(self):
@@ -819,7 +909,7 @@ cdef class mt451(mt_base):
                 mt_list_proxy = np.PyArray_SimpleNewFromData(1, mt_list_proxy_shape, dtypes.xd_vector_int.num, &(<cpp_endf2.mt451 *> self._inst).mt_list[0])
                 self._mt_list = mt_list_proxy
             return self._mt_list
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[int]] value_proxy
             cdef int ivalue
@@ -838,91 +928,91 @@ cdef class mt451(mt_base):
                     value_proxy[ivalue] = <cpp_vector[int]> value[ivalue]
             (<cpp_endf2.mt451 *> self._inst).mt_list = value_proxy
             self._mt_list = None
-    
-    
+
+
     property nfor:
         """no docstring for nfor, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).nfor)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).nfor = <int> value
-    
-    
+
+
     property nlib:
         """no docstring for nlib, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).nlib)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).nlib = <int> value
-    
-    
+
+
     property nmod:
         """no docstring for nmod, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).nmod)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).nmod = <int> value
-    
-    
+
+
     property nsub:
         """no docstring for nsub, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).nsub)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).nsub = <int> value
-    
-    
+
+
     property nver:
         """no docstring for nver, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).nver)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).nver = <int> value
-    
-    
+
+
     property nwd:
         """no docstring for nwd, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).nwd)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).nwd = <int> value
-    
-    
+
+
     property nxc:
         """no docstring for nxc, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).nxc)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).nxc = <int> value
-    
-    
+
+
     property sta:
         """no docstring for sta, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt451 *> self._inst).sta)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).sta = <int> value
-    
-    
+
+
     property temp:
         """no docstring for temp, please file a bug report!"""
         def __get__(self):
             return float((<cpp_endf2.mt451 *> self._inst).temp)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt451 *> self._inst).temp = <double> value
-    
-    
+
+
     # methods
-    
+
 
     pass
 
@@ -931,7 +1021,29 @@ cdef class mt451(mt_base):
 
 
 cdef class library:
-    """no docstring for {'tarbase': 'endf2', 'tarname': 'library', 'language': 'c++', 'srcname': 'library', 'sidecars': ('cpp/endf.py',), 'incfiles': ('endf.h',), 'srcfiles': ('cpp/endf.cpp', 'cpp/endf.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    contents (std::map< ) : library data
+    content_list (std::vector< std::vector< int > >) : content_list
+        is vector of vectors containing information about the loaded
+        data in the form of [mat, mf, mt]
+
+
+    Methods
+    -------
+    gen_content_list
+    ~library
+    get
+    getl
+    read_endf
+
+    Notes
+    -----
+    This class was defined in endf.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -947,8 +1059,8 @@ cdef class library:
         """library(self, )
         """
         self._inst = new cpp_endf2.library()
-    
-    
+
+
     def __dealloc__(self):
         if self._free_inst and self._inst is not NULL:
             free(self._inst)
@@ -964,7 +1076,7 @@ cdef class library:
                 content_list_proxy = np.PyArray_SimpleNewFromData(1, content_list_proxy_shape, dtypes.xd_vector_int.num, &(<cpp_endf2.library *> self._inst).content_list[0])
                 self._content_list = content_list_proxy
             return self._content_list
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[int]] value_proxy
             cdef int ivalue
@@ -983,105 +1095,416 @@ cdef class library:
                     value_proxy[ivalue] = <cpp_vector[int]> value[ivalue]
             (<cpp_endf2.library *> self._inst).content_list = value_proxy
             self._content_list = None
-    
-    
-    # methods
-    def get_content_list(self, ):
-        """get_content_list(self, )
-        no docstring for get_content_list, please file a bug report!"""
-        cdef cpp_vector[cpp_vector[int]] rtnval
-        
-        cdef np.npy_intp rtnval_proxy_shape[1]
-        rtnval = (<cpp_endf2.library *> self._inst).get_content_list()
-        rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
-        rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, dtypes.xd_vector_int.num, &rtnval[0])
-        rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
-        return rtnval_proxy
-    
-    
+
+
     def read_endf(self, filenm):
         """read_endf(self, filenm)
-        no docstring for read_endf, please file a bug report!"""
+        add data in the file to this library
+
+        Parameters
+        ----------
+        filenm : std::string
+
+        Returns
+        -------
+        res1 : void
+
+        """
         cdef char * filenm_proxy
         filenm_bytes = filenm.encode()
         (<cpp_endf2.library *> self._inst).read_endf(std_string(<char *> filenm_bytes))
-    
-    
+
+
     def get_mt451(self, mat, mf, mt):
         """get_mt451(self, mat, mf, mt)
-        no docstring for ('get', 'mt451'), please file a bug report!"""
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Access to library data by mf and mt number returns a vector of
+        structs of the templated type
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        Returns
+        -------
+        res1 : std::vector< T >
+
+        ################################################################
+
+        Access to library data by id struct.
+
+        Parameters
+        ----------
+        comp : None
+
+        Returns
+        -------
+        res1 : T
+
+        ################################################################
+
+        Access to library data by mat number, mf, and mt number
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        mat : int
+
+        Returns
+        -------
+        res1 : T
+
+        """
         cdef cpp_endf2.mt451 rtnval
         rtnval = (<cpp_endf2.library *> self._inst).get_mt451(<int> mat, <int> mf, <int> mt)
         rtnval_proxy = mt451()
         (<cpp_endf2.mt451 *> rtnval_proxy._inst)[0] = rtnval
         return rtnval_proxy
-    
-    
+
+
     def get_mt452_mf1(self, mat, mf, mt):
         """get_mt452_mf1(self, mat, mf, mt)
-        no docstring for ('get', 'mt452_mf1'), please file a bug report!"""
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Access to library data by mf and mt number returns a vector of
+        structs of the templated type
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        Returns
+        -------
+        res1 : std::vector< T >
+
+        ################################################################
+
+        Access to library data by id struct.
+
+        Parameters
+        ----------
+        comp : None
+
+        Returns
+        -------
+        res1 : T
+
+        ################################################################
+
+        Access to library data by mat number, mf, and mt number
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        mat : int
+
+        Returns
+        -------
+        res1 : T
+
+        """
         cdef cpp_endf2.mt452_mf1 rtnval
         rtnval = (<cpp_endf2.library *> self._inst).get_mt452_mf1(<int> mat, <int> mf, <int> mt)
         rtnval_proxy = mt452_mf1()
         (<cpp_endf2.mt452_mf1 *> rtnval_proxy._inst)[0] = rtnval
         return rtnval_proxy
-    
-    
+
+
     def get_mt455_mf1(self, mat, mf, mt):
         """get_mt455_mf1(self, mat, mf, mt)
-        no docstring for ('get', 'mt455_mf1'), please file a bug report!"""
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Access to library data by mf and mt number returns a vector of
+        structs of the templated type
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        Returns
+        -------
+        res1 : std::vector< T >
+
+        ################################################################
+
+        Access to library data by id struct.
+
+        Parameters
+        ----------
+        comp : None
+
+        Returns
+        -------
+        res1 : T
+
+        ################################################################
+
+        Access to library data by mat number, mf, and mt number
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        mat : int
+
+        Returns
+        -------
+        res1 : T
+
+        """
         cdef cpp_endf2.mt455_mf1 rtnval
         rtnval = (<cpp_endf2.library *> self._inst).get_mt455_mf1(<int> mat, <int> mf, <int> mt)
         rtnval_proxy = mt455_mf1()
         (<cpp_endf2.mt455_mf1 *> rtnval_proxy._inst)[0] = rtnval
         return rtnval_proxy
-    
-    
+
+
     def get_mt456_mf1(self, mat, mf, mt):
         """get_mt456_mf1(self, mat, mf, mt)
-        no docstring for ('get', 'mt456_mf1'), please file a bug report!"""
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Access to library data by mf and mt number returns a vector of
+        structs of the templated type
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        Returns
+        -------
+        res1 : std::vector< T >
+
+        ################################################################
+
+        Access to library data by id struct.
+
+        Parameters
+        ----------
+        comp : None
+
+        Returns
+        -------
+        res1 : T
+
+        ################################################################
+
+        Access to library data by mat number, mf, and mt number
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        mat : int
+
+        Returns
+        -------
+        res1 : T
+
+        """
         cdef cpp_endf2.mt456_mf1 rtnval
         rtnval = (<cpp_endf2.library *> self._inst).get_mt456_mf1(<int> mat, <int> mf, <int> mt)
         rtnval_proxy = mt456_mf1()
         (<cpp_endf2.mt456_mf1 *> rtnval_proxy._inst)[0] = rtnval
         return rtnval_proxy
-    
-    
+
+
     def get_mt458_mf1(self, mat, mf, mt):
         """get_mt458_mf1(self, mat, mf, mt)
-        no docstring for ('get', 'mt458_mf1'), please file a bug report!"""
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Access to library data by mf and mt number returns a vector of
+        structs of the templated type
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        Returns
+        -------
+        res1 : std::vector< T >
+
+        ################################################################
+
+        Access to library data by id struct.
+
+        Parameters
+        ----------
+        comp : None
+
+        Returns
+        -------
+        res1 : T
+
+        ################################################################
+
+        Access to library data by mat number, mf, and mt number
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        mat : int
+
+        Returns
+        -------
+        res1 : T
+
+        """
         cdef cpp_endf2.mt458_mf1 rtnval
         rtnval = (<cpp_endf2.library *> self._inst).get_mt458_mf1(<int> mat, <int> mf, <int> mt)
         rtnval_proxy = mt458_mf1()
         (<cpp_endf2.mt458_mf1 *> rtnval_proxy._inst)[0] = rtnval
         return rtnval_proxy
-    
-    
+
+
     def get_mt460_mf1(self, mat, mf, mt):
         """get_mt460_mf1(self, mat, mf, mt)
-        no docstring for ('get', 'mt460_mf1'), please file a bug report!"""
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Access to library data by mf and mt number returns a vector of
+        structs of the templated type
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        Returns
+        -------
+        res1 : std::vector< T >
+
+        ################################################################
+
+        Access to library data by id struct.
+
+        Parameters
+        ----------
+        comp : None
+
+        Returns
+        -------
+        res1 : T
+
+        ################################################################
+
+        Access to library data by mat number, mf, and mt number
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        mat : int
+
+        Returns
+        -------
+        res1 : T
+
+        """
         cdef cpp_endf2.mt460_mf1 rtnval
         rtnval = (<cpp_endf2.library *> self._inst).get_mt460_mf1(<int> mat, <int> mf, <int> mt)
         rtnval_proxy = mt460_mf1()
         (<cpp_endf2.mt460_mf1 *> rtnval_proxy._inst)[0] = rtnval
         return rtnval_proxy
-    
-    
+
+
     def get_mtfpy_mf8(self, mat, mf, mt):
         """get_mtfpy_mf8(self, mat, mf, mt)
-        no docstring for ('get', 'mtfpy_mf8'), please file a bug report!"""
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Access to library data by mf and mt number returns a vector of
+        structs of the templated type
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        Returns
+        -------
+        res1 : std::vector< T >
+
+        ################################################################
+
+        Access to library data by id struct.
+
+        Parameters
+        ----------
+        comp : None
+
+        Returns
+        -------
+        res1 : T
+
+        ################################################################
+
+        Access to library data by mat number, mf, and mt number
+
+        Parameters
+        ----------
+        mt : int
+
+        mf : int
+
+        mat : int
+
+        Returns
+        -------
+        res1 : T
+
+        """
         cdef cpp_endf2.mtfpy_mf8 rtnval
         rtnval = (<cpp_endf2.library *> self._inst).get_mtfpy_mf8(<int> mat, <int> mf, <int> mt)
         rtnval_proxy = mtfpy_mf8()
         (<cpp_endf2.mtfpy_mf8 *> rtnval_proxy._inst)[0] = rtnval
         return rtnval_proxy
-    
-    
-        
+
+
+
     #
     # Function Dispatchers
     #
-    
+
     # get dispatcher
     get = {}
     get['mt451'] = get_mt451
@@ -1106,7 +1529,26 @@ cdef class library:
 
 
 cdef class mtfpy_mf8(mt_base):
-    """no docstring for {'tarbase': 'endf2', 'tarname': 'mtfpy_mf8', 'language': 'c++', 'srcname': 'mtfpy_mf8', 'sidecars': (), 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    le (int) : number of energy dependent yields given
+    i (std::vector< int >) : interpolation to be used between E[i-1]
+        and E[i]
+    e (std::vector< double >) : list of energies
+    yields (std::vector< std::vector< std::vector< double > > >) :
+        yield data [zafp,fps,yi,dyi]
+
+
+    Methods
+    -------
+
+    Notes
+    -----
+    This class was defined in endf_mt.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -1124,8 +1566,8 @@ cdef class mtfpy_mf8(mt_base):
         """mtfpy_mf8(self, )
         """
         self._inst = new cpp_endf2.mtfpy_mf8()
-    
-    
+
+
 
     # attributes
     property e:
@@ -1138,7 +1580,7 @@ cdef class mtfpy_mf8(mt_base):
                 e_proxy = np.PyArray_SimpleNewFromData(1, e_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mtfpy_mf8 *> self._inst).e[0])
                 self._e = e_proxy
             return self._e
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -1157,8 +1599,8 @@ cdef class mtfpy_mf8(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mtfpy_mf8 *> self._inst).e = value_proxy
             self._e = None
-    
-    
+
+
     property i:
         """no docstring for i, please file a bug report!"""
         def __get__(self):
@@ -1169,7 +1611,7 @@ cdef class mtfpy_mf8(mt_base):
                 i_proxy = np.PyArray_SimpleNewFromData(1, i_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mtfpy_mf8 *> self._inst).i[0])
                 self._i = i_proxy
             return self._i
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -1188,17 +1630,17 @@ cdef class mtfpy_mf8(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mtfpy_mf8 *> self._inst).i = value_proxy
             self._i = None
-    
-    
+
+
     property le:
         """no docstring for le, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mtfpy_mf8 *> self._inst).le)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mtfpy_mf8 *> self._inst).le = <int> value
-    
-    
+
+
     property yields:
         """no docstring for yields, please file a bug report!"""
         def __get__(self):
@@ -1209,7 +1651,7 @@ cdef class mtfpy_mf8(mt_base):
                 yields_proxy = np.PyArray_SimpleNewFromData(1, yields_proxy_shape, dtypes.xd_vector_vector_double.num, &(<cpp_endf2.mtfpy_mf8 *> self._inst).yields[0])
                 self._yields = yields_proxy
             return self._yields
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[cpp_vector[double]]] value_proxy
             cdef int ivalue
@@ -1228,10 +1670,10 @@ cdef class mtfpy_mf8(mt_base):
                     value_proxy[ivalue] = <cpp_vector[cpp_vector[double]]> value[ivalue]
             (<cpp_endf2.mtfpy_mf8 *> self._inst).yields = value_proxy
             self._yields = None
-    
-    
+
+
     # methods
-    
+
 
     pass
 
@@ -1240,7 +1682,33 @@ cdef class mtfpy_mf8(mt_base):
 
 
 cdef class mt460_mf1(mt_base):
-    """no docstring for {'tarbase': 'endf2', 'tarname': 'mt460_mf1', 'language': 'c++', 'srcname': 'mt460_mf1', 'sidecars': (), 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    lo (int) : representation type: 1 if discrete, 2 if continuous
+    ng (int) : lo = 1  number
+    elist (std::vector< double >) : energy of the ith photon in eV
+    nbt (std::vector< std::vector< int > >) : list^2 interpolation
+        segments
+    intn (std::vector< std::vector< int > >) : list^2 of
+        interpolations
+    tint (std::vector< std::vector< double > >) : time of ith
+        multiplicity
+    t (std::vector< std::vector< double > >) : Time dependence of
+        ith multiplicity
+    lambdas (std::vector< double >) : lo = 2  decay constant for the
+        ith precursor
+
+
+    Methods
+    -------
+
+    Notes
+    -----
+    This class was defined in endf_mt.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -1261,8 +1729,8 @@ cdef class mt460_mf1(mt_base):
         """mt460_mf1(self, )
         """
         self._inst = new cpp_endf2.mt460_mf1()
-    
-    
+
+
 
     # attributes
     property elist:
@@ -1275,7 +1743,7 @@ cdef class mt460_mf1(mt_base):
                 elist_proxy = np.PyArray_SimpleNewFromData(1, elist_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt460_mf1 *> self._inst).elist[0])
                 self._elist = elist_proxy
             return self._elist
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -1294,8 +1762,8 @@ cdef class mt460_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt460_mf1 *> self._inst).elist = value_proxy
             self._elist = None
-    
-    
+
+
     property intn:
         """no docstring for intn, please file a bug report!"""
         def __get__(self):
@@ -1306,7 +1774,7 @@ cdef class mt460_mf1(mt_base):
                 intn_proxy = np.PyArray_SimpleNewFromData(1, intn_proxy_shape, dtypes.xd_vector_int.num, &(<cpp_endf2.mt460_mf1 *> self._inst).intn[0])
                 self._intn = intn_proxy
             return self._intn
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[int]] value_proxy
             cdef int ivalue
@@ -1325,8 +1793,8 @@ cdef class mt460_mf1(mt_base):
                     value_proxy[ivalue] = <cpp_vector[int]> value[ivalue]
             (<cpp_endf2.mt460_mf1 *> self._inst).intn = value_proxy
             self._intn = None
-    
-    
+
+
     property lambdas:
         """no docstring for lambdas, please file a bug report!"""
         def __get__(self):
@@ -1337,7 +1805,7 @@ cdef class mt460_mf1(mt_base):
                 lambdas_proxy = np.PyArray_SimpleNewFromData(1, lambdas_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt460_mf1 *> self._inst).lambdas[0])
                 self._lambdas = lambdas_proxy
             return self._lambdas
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -1356,17 +1824,17 @@ cdef class mt460_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt460_mf1 *> self._inst).lambdas = value_proxy
             self._lambdas = None
-    
-    
+
+
     property lo:
         """no docstring for lo, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt460_mf1 *> self._inst).lo)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt460_mf1 *> self._inst).lo = <int> value
-    
-    
+
+
     property nbt:
         """no docstring for nbt, please file a bug report!"""
         def __get__(self):
@@ -1377,7 +1845,7 @@ cdef class mt460_mf1(mt_base):
                 nbt_proxy = np.PyArray_SimpleNewFromData(1, nbt_proxy_shape, dtypes.xd_vector_int.num, &(<cpp_endf2.mt460_mf1 *> self._inst).nbt[0])
                 self._nbt = nbt_proxy
             return self._nbt
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[int]] value_proxy
             cdef int ivalue
@@ -1396,17 +1864,17 @@ cdef class mt460_mf1(mt_base):
                     value_proxy[ivalue] = <cpp_vector[int]> value[ivalue]
             (<cpp_endf2.mt460_mf1 *> self._inst).nbt = value_proxy
             self._nbt = None
-    
-    
+
+
     property ng:
         """no docstring for ng, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt460_mf1 *> self._inst).ng)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt460_mf1 *> self._inst).ng = <int> value
-    
-    
+
+
     property t:
         """no docstring for t, please file a bug report!"""
         def __get__(self):
@@ -1417,7 +1885,7 @@ cdef class mt460_mf1(mt_base):
                 t_proxy = np.PyArray_SimpleNewFromData(1, t_proxy_shape, dtypes.xd_vector_double.num, &(<cpp_endf2.mt460_mf1 *> self._inst).t[0])
                 self._t = t_proxy
             return self._t
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[double]] value_proxy
             cdef int ivalue
@@ -1436,8 +1904,8 @@ cdef class mt460_mf1(mt_base):
                     value_proxy[ivalue] = <cpp_vector[double]> value[ivalue]
             (<cpp_endf2.mt460_mf1 *> self._inst).t = value_proxy
             self._t = None
-    
-    
+
+
     property tint:
         """no docstring for tint, please file a bug report!"""
         def __get__(self):
@@ -1448,7 +1916,7 @@ cdef class mt460_mf1(mt_base):
                 tint_proxy = np.PyArray_SimpleNewFromData(1, tint_proxy_shape, dtypes.xd_vector_double.num, &(<cpp_endf2.mt460_mf1 *> self._inst).tint[0])
                 self._tint = tint_proxy
             return self._tint
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[double]] value_proxy
             cdef int ivalue
@@ -1467,10 +1935,10 @@ cdef class mt460_mf1(mt_base):
                     value_proxy[ivalue] = <cpp_vector[double]> value[ivalue]
             (<cpp_endf2.mt460_mf1 *> self._inst).tint = value_proxy
             self._tint = None
-    
-    
+
+
     # methods
-    
+
 
     pass
 
@@ -1496,8 +1964,8 @@ cdef class endf_id:
         """
         self._inst = malloc(sizeof(cpp_endf2.endf_id))
         (<cpp_endf2.endf_id *> self._inst)[0] = cpp_endf2.endf_id()
-    
-    
+
+
     def __dealloc__(self):
         if self._free_inst and self._inst is not NULL:
             free(self._inst)
@@ -1507,31 +1975,31 @@ cdef class endf_id:
         """no docstring for mat, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.endf_id *> self._inst).mat)
-    
+
         def __set__(self, value):
             (<cpp_endf2.endf_id *> self._inst).mat = <int> value
-    
-    
+
+
     property mf:
         """no docstring for mf, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.endf_id *> self._inst).mf)
-    
+
         def __set__(self, value):
             (<cpp_endf2.endf_id *> self._inst).mf = <int> value
-    
-    
+
+
     property mt:
         """no docstring for mt, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.endf_id *> self._inst).mt)
-    
+
         def __set__(self, value):
             (<cpp_endf2.endf_id *> self._inst).mt = <int> value
-    
-    
+
+
     # methods
-    
+
 
     pass
 
@@ -1540,7 +2008,30 @@ cdef class endf_id:
 
 
 cdef class mt452_mf1(mt_base):
-    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'mt452_mf1', 'language': 'c++', 'srcname': 'mt452_mf1', 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    lnu (int) : type of data in section
+    poly (std::vector< double >) : if LNU = 1 this will be an nth
+        order polynomial describing nu  polynomial describing
+        neutrons per fission(E)
+    nbt (std::vector< int >) : if LNU = 2 this will contain the
+        tabulated data parameters  list of interpolation segments
+    intn (std::vector< int >) : list of interpolations to be used
+    eint (std::vector< double >) : Energy of the incident neutron.
+    nu_e (std::vector< double >) : Neutrons per fission at the given
+        energy.
+
+
+    Methods
+    -------
+
+    Notes
+    -----
+    This class was defined in endf_mt.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -1560,8 +2051,8 @@ cdef class mt452_mf1(mt_base):
         """mt452_mf1(self, )
         """
         self._inst = new cpp_endf2.mt452_mf1()
-    
-    
+
+
 
     # attributes
     property eint:
@@ -1574,7 +2065,7 @@ cdef class mt452_mf1(mt_base):
                 eint_proxy = np.PyArray_SimpleNewFromData(1, eint_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt452_mf1 *> self._inst).eint[0])
                 self._eint = eint_proxy
             return self._eint
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -1593,8 +2084,8 @@ cdef class mt452_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt452_mf1 *> self._inst).eint = value_proxy
             self._eint = None
-    
-    
+
+
     property intn:
         """no docstring for intn, please file a bug report!"""
         def __get__(self):
@@ -1605,7 +2096,7 @@ cdef class mt452_mf1(mt_base):
                 intn_proxy = np.PyArray_SimpleNewFromData(1, intn_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mt452_mf1 *> self._inst).intn[0])
                 self._intn = intn_proxy
             return self._intn
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -1624,17 +2115,17 @@ cdef class mt452_mf1(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mt452_mf1 *> self._inst).intn = value_proxy
             self._intn = None
-    
-    
+
+
     property lnu:
         """no docstring for lnu, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt452_mf1 *> self._inst).lnu)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt452_mf1 *> self._inst).lnu = <int> value
-    
-    
+
+
     property nbt:
         """no docstring for nbt, please file a bug report!"""
         def __get__(self):
@@ -1645,7 +2136,7 @@ cdef class mt452_mf1(mt_base):
                 nbt_proxy = np.PyArray_SimpleNewFromData(1, nbt_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mt452_mf1 *> self._inst).nbt[0])
                 self._nbt = nbt_proxy
             return self._nbt
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -1664,8 +2155,8 @@ cdef class mt452_mf1(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mt452_mf1 *> self._inst).nbt = value_proxy
             self._nbt = None
-    
-    
+
+
     property nu_e:
         """no docstring for nu_e, please file a bug report!"""
         def __get__(self):
@@ -1676,7 +2167,7 @@ cdef class mt452_mf1(mt_base):
                 nu_e_proxy = np.PyArray_SimpleNewFromData(1, nu_e_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt452_mf1 *> self._inst).nu_e[0])
                 self._nu_e = nu_e_proxy
             return self._nu_e
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -1695,8 +2186,8 @@ cdef class mt452_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt452_mf1 *> self._inst).nu_e = value_proxy
             self._nu_e = None
-    
-    
+
+
     property poly:
         """no docstring for poly, please file a bug report!"""
         def __get__(self):
@@ -1707,7 +2198,7 @@ cdef class mt452_mf1(mt_base):
                 poly_proxy = np.PyArray_SimpleNewFromData(1, poly_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt452_mf1 *> self._inst).poly[0])
                 self._poly = poly_proxy
             return self._poly
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -1726,10 +2217,10 @@ cdef class mt452_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt452_mf1 *> self._inst).poly = value_proxy
             self._poly = None
-    
-    
+
+
     # methods
-    
+
 
     pass
 
@@ -1738,7 +2229,35 @@ cdef class mt452_mf1(mt_base):
 
 
 cdef class mt455_mf1(mt_base):
-    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'mt455_mf1', 'language': 'c++', 'srcname': 'mt455_mf1', 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    ldg (int) : energy dependence of decay constants
+    lnu (int) : data representation type
+    lambdas (std::vector< double >) : decay constant of ith
+        precursor
+    nbt (std::vector< int >) : list of interpolation segments
+    intn (std::vector< int >) : list of interpolations to be used
+    ne (std::vector< int >) : number of energies
+    eint (std::vector< double >) : ith energy
+    einti (std::vector< int >) : energy interpolation scheme
+    nu_d (std::vector< double >) : average neutrons per delayed
+        fission event
+    lambda_arr (std::vector< std::vector< double > >) : decay
+        constant of ith precursor with neutron energy energy E
+    alpha_arr (std::vector< std::vector< double > >) : fraction of
+        ith precursor with neutron energy E
+
+
+    Methods
+    -------
+
+    Notes
+    -----
+    This class was defined in endf_mt.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -1762,8 +2281,8 @@ cdef class mt455_mf1(mt_base):
         """mt455_mf1(self, )
         """
         self._inst = new cpp_endf2.mt455_mf1()
-    
-    
+
+
 
     # attributes
     property alpha_arr:
@@ -1776,7 +2295,7 @@ cdef class mt455_mf1(mt_base):
                 alpha_arr_proxy = np.PyArray_SimpleNewFromData(1, alpha_arr_proxy_shape, dtypes.xd_vector_double.num, &(<cpp_endf2.mt455_mf1 *> self._inst).alpha_arr[0])
                 self._alpha_arr = alpha_arr_proxy
             return self._alpha_arr
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[double]] value_proxy
             cdef int ivalue
@@ -1795,8 +2314,8 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <cpp_vector[double]> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).alpha_arr = value_proxy
             self._alpha_arr = None
-    
-    
+
+
     property eint:
         """no docstring for eint, please file a bug report!"""
         def __get__(self):
@@ -1807,7 +2326,7 @@ cdef class mt455_mf1(mt_base):
                 eint_proxy = np.PyArray_SimpleNewFromData(1, eint_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt455_mf1 *> self._inst).eint[0])
                 self._eint = eint_proxy
             return self._eint
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -1826,8 +2345,8 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).eint = value_proxy
             self._eint = None
-    
-    
+
+
     property einti:
         """no docstring for einti, please file a bug report!"""
         def __get__(self):
@@ -1838,7 +2357,7 @@ cdef class mt455_mf1(mt_base):
                 einti_proxy = np.PyArray_SimpleNewFromData(1, einti_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mt455_mf1 *> self._inst).einti[0])
                 self._einti = einti_proxy
             return self._einti
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -1857,8 +2376,8 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).einti = value_proxy
             self._einti = None
-    
-    
+
+
     property intn:
         """no docstring for intn, please file a bug report!"""
         def __get__(self):
@@ -1869,7 +2388,7 @@ cdef class mt455_mf1(mt_base):
                 intn_proxy = np.PyArray_SimpleNewFromData(1, intn_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mt455_mf1 *> self._inst).intn[0])
                 self._intn = intn_proxy
             return self._intn
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -1888,8 +2407,8 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).intn = value_proxy
             self._intn = None
-    
-    
+
+
     property lambda_arr:
         """no docstring for lambda_arr, please file a bug report!"""
         def __get__(self):
@@ -1900,7 +2419,7 @@ cdef class mt455_mf1(mt_base):
                 lambda_arr_proxy = np.PyArray_SimpleNewFromData(1, lambda_arr_proxy_shape, dtypes.xd_vector_double.num, &(<cpp_endf2.mt455_mf1 *> self._inst).lambda_arr[0])
                 self._lambda_arr = lambda_arr_proxy
             return self._lambda_arr
-    
+
         def __set__(self, value):
             cdef cpp_vector[cpp_vector[double]] value_proxy
             cdef int ivalue
@@ -1919,8 +2438,8 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <cpp_vector[double]> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).lambda_arr = value_proxy
             self._lambda_arr = None
-    
-    
+
+
     property lambdas:
         """no docstring for lambdas, please file a bug report!"""
         def __get__(self):
@@ -1931,7 +2450,7 @@ cdef class mt455_mf1(mt_base):
                 lambdas_proxy = np.PyArray_SimpleNewFromData(1, lambdas_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt455_mf1 *> self._inst).lambdas[0])
                 self._lambdas = lambdas_proxy
             return self._lambdas
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -1950,26 +2469,26 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).lambdas = value_proxy
             self._lambdas = None
-    
-    
+
+
     property ldg:
         """no docstring for ldg, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt455_mf1 *> self._inst).ldg)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt455_mf1 *> self._inst).ldg = <int> value
-    
-    
+
+
     property lnu:
         """no docstring for lnu, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt455_mf1 *> self._inst).lnu)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt455_mf1 *> self._inst).lnu = <int> value
-    
-    
+
+
     property nbt:
         """no docstring for nbt, please file a bug report!"""
         def __get__(self):
@@ -1980,7 +2499,7 @@ cdef class mt455_mf1(mt_base):
                 nbt_proxy = np.PyArray_SimpleNewFromData(1, nbt_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mt455_mf1 *> self._inst).nbt[0])
                 self._nbt = nbt_proxy
             return self._nbt
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -1999,8 +2518,8 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).nbt = value_proxy
             self._nbt = None
-    
-    
+
+
     property ne:
         """no docstring for ne, please file a bug report!"""
         def __get__(self):
@@ -2011,7 +2530,7 @@ cdef class mt455_mf1(mt_base):
                 ne_proxy = np.PyArray_SimpleNewFromData(1, ne_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mt455_mf1 *> self._inst).ne[0])
                 self._ne = ne_proxy
             return self._ne
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -2030,8 +2549,8 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).ne = value_proxy
             self._ne = None
-    
-    
+
+
     property nu_d:
         """no docstring for nu_d, please file a bug report!"""
         def __get__(self):
@@ -2042,7 +2561,7 @@ cdef class mt455_mf1(mt_base):
                 nu_d_proxy = np.PyArray_SimpleNewFromData(1, nu_d_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt455_mf1 *> self._inst).nu_d[0])
                 self._nu_d = nu_d_proxy
             return self._nu_d
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -2061,10 +2580,10 @@ cdef class mt455_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt455_mf1 *> self._inst).nu_d = value_proxy
             self._nu_d = None
-    
-    
+
+
     # methods
-    
+
 
     pass
 
@@ -2073,7 +2592,31 @@ cdef class mt455_mf1(mt_base):
 
 
 cdef class mt456_mf1(mt_base):
-    """no docstring for {'sidecars': (), 'tarbase': 'endf2', 'tarname': 'mt456_mf1', 'language': 'c++', 'srcname': 'mt456_mf1', 'incfiles': ('endf_mt.h',), 'srcfiles': ('cpp/endf_mt.cpp', 'cpp/endf_mt.h')}, please file a bug report!"""
+    """
+
+    Attributes
+    ----------
+    lnu (int) :
+    nu (std::vector< double >) : If lnu = 1 nu contains an nth order
+        polynomial describing neutrons as a function of energy.
+        polynomial describing neutrons per fission(E)
+    nbt (std::vector< int >) : If lnu = 2 a list of tabulated values
+        are give in tab1 style format.  list of interpolation
+        segments
+    intn (std::vector< int >) : list of interpolations to be used
+    eint (std::vector< double >) : ith energy
+    nu_e (std::vector< double >) : average neutrons per prompt
+        fission event
+
+
+    Methods
+    -------
+
+    Notes
+    -----
+    This class was defined in endf_mt.h
+
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -2093,8 +2636,8 @@ cdef class mt456_mf1(mt_base):
         """mt456_mf1(self, )
         """
         self._inst = new cpp_endf2.mt456_mf1()
-    
-    
+
+
 
     # attributes
     property eint:
@@ -2107,7 +2650,7 @@ cdef class mt456_mf1(mt_base):
                 eint_proxy = np.PyArray_SimpleNewFromData(1, eint_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt456_mf1 *> self._inst).eint[0])
                 self._eint = eint_proxy
             return self._eint
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -2126,8 +2669,8 @@ cdef class mt456_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt456_mf1 *> self._inst).eint = value_proxy
             self._eint = None
-    
-    
+
+
     property intn:
         """no docstring for intn, please file a bug report!"""
         def __get__(self):
@@ -2138,7 +2681,7 @@ cdef class mt456_mf1(mt_base):
                 intn_proxy = np.PyArray_SimpleNewFromData(1, intn_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mt456_mf1 *> self._inst).intn[0])
                 self._intn = intn_proxy
             return self._intn
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -2157,17 +2700,17 @@ cdef class mt456_mf1(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mt456_mf1 *> self._inst).intn = value_proxy
             self._intn = None
-    
-    
+
+
     property lnu:
         """no docstring for lnu, please file a bug report!"""
         def __get__(self):
             return int((<cpp_endf2.mt456_mf1 *> self._inst).lnu)
-    
+
         def __set__(self, value):
             (<cpp_endf2.mt456_mf1 *> self._inst).lnu = <int> value
-    
-    
+
+
     property nbt:
         """no docstring for nbt, please file a bug report!"""
         def __get__(self):
@@ -2178,7 +2721,7 @@ cdef class mt456_mf1(mt_base):
                 nbt_proxy = np.PyArray_SimpleNewFromData(1, nbt_proxy_shape, np.NPY_INT32, &(<cpp_endf2.mt456_mf1 *> self._inst).nbt[0])
                 self._nbt = nbt_proxy
             return self._nbt
-    
+
         def __set__(self, value):
             cdef cpp_vector[int] value_proxy
             cdef int ivalue
@@ -2197,8 +2740,8 @@ cdef class mt456_mf1(mt_base):
                     value_proxy[ivalue] = <int> value[ivalue]
             (<cpp_endf2.mt456_mf1 *> self._inst).nbt = value_proxy
             self._nbt = None
-    
-    
+
+
     property nu:
         """no docstring for nu, please file a bug report!"""
         def __get__(self):
@@ -2209,7 +2752,7 @@ cdef class mt456_mf1(mt_base):
                 nu_proxy = np.PyArray_SimpleNewFromData(1, nu_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt456_mf1 *> self._inst).nu[0])
                 self._nu = nu_proxy
             return self._nu
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -2228,8 +2771,8 @@ cdef class mt456_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt456_mf1 *> self._inst).nu = value_proxy
             self._nu = None
-    
-    
+
+
     property nu_e:
         """no docstring for nu_e, please file a bug report!"""
         def __get__(self):
@@ -2240,7 +2783,7 @@ cdef class mt456_mf1(mt_base):
                 nu_e_proxy = np.PyArray_SimpleNewFromData(1, nu_e_proxy_shape, np.NPY_FLOAT64, &(<cpp_endf2.mt456_mf1 *> self._inst).nu_e[0])
                 self._nu_e = nu_e_proxy
             return self._nu_e
-    
+
         def __set__(self, value):
             cdef cpp_vector[double] value_proxy
             cdef int ivalue
@@ -2259,10 +2802,10 @@ cdef class mt456_mf1(mt_base):
                     value_proxy[ivalue] = <double> value[ivalue]
             (<cpp_endf2.mt456_mf1 *> self._inst).nu_e = value_proxy
             self._nu_e = None
-    
-    
+
+
     # methods
-    
+
 
     pass
 

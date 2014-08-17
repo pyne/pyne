@@ -42,7 +42,7 @@ pyne::endf_id pyne::make_endf_id(mt_base input) {
   return ret;
 }
 
-std::vector<std::vector<int> >  pyne::library::get_content_list() {
+std::vector<std::vector<int> >  pyne::library::gen_content_list() {
   std::vector<std::vector<int> > retlist;
   std::map<endf_id, mt_base*>::iterator endf_begin, endf_end, it;
   endf_begin = contents.begin();

@@ -60,7 +60,7 @@ namespace pyne
       template<typename T> std::vector<T> getl (int mf, int mt);
       /// Get the list of contents loaded into the library as a vector of
       /// vectors of the form [mat, mf, mt]
-      std::vector<std::vector<int> > get_content_list();
+      std::vector<std::vector<int> > gen_content_list();
       /// add data in the file to this library
       /// \param filenm path to a ENDF file to be loaded
       void read_endf(std::string filenm);

@@ -16,7 +16,27 @@ from libcpp.string cimport string as std_string
 
 
 cdef class Tally:
-    """no docstring for {'sidecars': (), 'tarbase': 'tally', 'tarname': 'Tally', 'language': 'c++', 'srcname': 'Tally', 'incfiles': ('tally.h',), 'srcfiles': ('cpp/tally.cpp', 'cpp/tally.h')}, please file a bug report!"""
+    """there are no protected functions currently fool.
+    
+    Attributes
+    ----------
+    entity_type (std::string) :
+    entity_name (std::string) :
+    particle_name (std::string) :
+    tally_type (std::string) :
+    entity_id (int) :
+    
+    
+    Methods
+    -------
+    Tally
+    ~Tally
+    
+    Notes
+    -----
+    This class was defined in tally.h
+    
+    The class is found in the "pyne" namespace"""
 
 
 
@@ -30,12 +50,82 @@ cdef class Tally:
 
     def _tally_tally_0(self, ):
         """Tally(self, )
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+        
+        empty constructor   there are no protected functions currently
+        fool.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        
+        ################################################################
+        
+        Constructor from passed in vars
+        
+        Parameters
+        ----------
+        particle_name : std::string
+        
+        entity_type : std::string
+        
+        type : std::string
+        
+        entity_name : std::string
+        
+        entity : int
+        
+        Returns
+        -------
+        None
+        
         """
         self._inst = new cpp_tally.Tally()
     
     
     def _tally_tally_1(self, type, part_name, ent, ent_type, ent_name):
         """Tally(self, type, part_name, ent, ent_type, ent_name)
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+        
+        empty constructor   there are no protected functions currently
+        fool.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        
+        ################################################################
+        
+        Constructor from passed in vars
+        
+        Parameters
+        ----------
+        particle_name : std::string
+        
+        entity_type : std::string
+        
+        type : std::string
+        
+        entity_name : std::string
+        
+        entity : int
+        
+        Returns
+        -------
+        None
+        
         """
         cdef char * type_proxy
         cdef char * part_name_proxy
@@ -53,6 +143,41 @@ cdef class Tally:
     
     def __init__(self, *args, **kwargs):
         """Tally(self, type, part_name, ent, ent_type, ent_name)
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+        
+        empty constructor   there are no protected functions currently
+        fool.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        
+        ################################################################
+        
+        Constructor from passed in vars
+        
+        Parameters
+        ----------
+        particle_name : std::string
+        
+        entity_type : std::string
+        
+        type : std::string
+        
+        entity_name : std::string
+        
+        entity : int
+        
+        Returns
+        -------
+        None
+        
         """
         types = set([(i, type(a)) for i, a in enumerate(args)])
         types.update([(k, type(v)) for k, v in kwargs.items()])
