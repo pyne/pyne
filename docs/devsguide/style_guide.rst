@@ -440,10 +440,16 @@ or function scope, which only grab the names you intend to use, are allowed.
     using namespace std;  
 
 ***************
-Access Patterns
+Access Control
 ***************
-We are all adults here. Everything should be public.  Use private and protected 
-variables only when absolutely necessary.
+Access control is a tool. Use it as needed but not dogmatically.
+
+* Access control may not be used to hide prototypical/unstable/untested/bad interfaces!
+* Private and protected members must be tested through the public interface.
+* You must be prepared to defend your choice or criticism of public, private, or 
+  protected for any and all members
+
+These rules apply to authors and reviewers equally. In the event of an impasse consider the physics.
 
 *************************
 Accessors/Mutator Pattern

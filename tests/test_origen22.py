@@ -486,7 +486,7 @@ def test_xslibs():
            44: {'_type': 'xsfpy', '_subtype': 'fission_products', 
                 'title': 'PyNE Cross Section Data for Fission Products'},
            }
-    xsc = XSCache(data_source_classes=[NullDataSource])
+    xsc = XSCache(data_sources=[NullDataSource])
     nucs = [922350000, 10010000, 461080000]
     obs = origen22.xslibs(nucs=nucs, xscache=xsc, nlb=(42, 43, 44))
     obs_meta = {}

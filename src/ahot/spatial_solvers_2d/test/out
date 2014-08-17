@@ -1,0 +1,292 @@
+ CODE: Arbitrarily High Order with or without ITM
+ VERSION: Modified versions of codes originally by Y. Azmy, et al.
+ AUTHOR: Robert Joseph Zerr modified by Sebastian Schunert
+ Ran on  5-19-2014 at time 13:21:36
+ 
+ -----------------------------------------------------------------------------
+
+   No input errors have been detected.
+
+
+ -------------------- BEGIN INPUT ECHO ------------------------------------
+
+
+ Test Problem                                                                    
+ AHOT Order =     3
+ AHOT-N Method with asymptotic weights
+ Angular Order N =     2
+ Number of x-cells =     4
+ Number of y-cells =     4
+ Number of energy groups =     1
+ Number of materials =     1
+
+ Iteration Control Parameters
+ Maximum number of iterations =  6000
+ Pointwise convergence criterion =  1.000E-06
+ Highest moment converged =     0
+
+ Data read from input file: in4a    
+
+ Material map read from file: matrl   
+ Cross sections from file: xs      
+ Source data from file: source1 
+ Output written to file: out     
+
+ EQN-type Discrete Ordinates/Octant
+  n    mu      eta       w
+  1  0.57735  0.57735  0.25000    #Q#
+ 
+ Boundary Conditions: 0-Vacuum, 1-Reflective, 2-Fixed Source
+ Left  Right  Bottom  Top
+  1      0      1      0
+
+ 
+ x-dimension of cells 1 to     4
+   2.500E-01 2.500E-01 2.500E-01 2.500E-01
+ 
+ y-dimension of cells 1 to     4
+   2.500E-01 2.500E-01 2.500E-01 2.500E-01
+
+ Cross Section Data
+  Material    Group  Sigma_t      Sigma_s
+     1           1    2.000E+00    0.000E+00
+
+ Row   1   2   3   4 
+  4    1   1   1   1
+  3    1   1   1   1
+  2    1   1   1   1
+  1    1   1   1   1
+ 
+ Source for Group:   1 Moment  0 0 Row(j):   1
+   1.000E+00 1.000E+00 1.000E+00 1.000E+00
+ 
+ Source for Group:   1 Moment  0 0 Row(j):   2
+   1.000E+00 1.000E+00 1.000E+00 1.000E+00
+ 
+ Source for Group:   1 Moment  0 0 Row(j):   3
+   1.000E+00 1.000E+00 1.000E+00 1.000E+00
+ 
+ Source for Group:   1 Moment  0 0 Row(j):   4
+   1.000E+00 1.000E+00 1.000E+00 1.000E+00
+ 
+ Source for Group:   1 Moment  1 0 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 0 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 0 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 0 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 0 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 0 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 0 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 0 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 0 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 0 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 0 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 0 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 1 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 1 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 1 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 1 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 1 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 1 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 1 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 1 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 1 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 1 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 1 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 1 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 1 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 1 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 1 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 1 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 2 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 2 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 2 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 2 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 2 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 2 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 2 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 2 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 2 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 2 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 2 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 2 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 2 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 2 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 2 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 2 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 3 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 3 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 3 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  0 3 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 3 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 3 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 3 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  1 3 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 3 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 3 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 3 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  2 3 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 3 Row(j):   1
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 3 Row(j):   2
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 3 Row(j):   3
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ Source for Group:   1 Moment  3 3 Row(j):   4
+   0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 
+ ------------------------- END INPUT ECHO ---------------------------------
+ 
+ 
+ -------------------------- THE SOLUTION ----------------------------------
+ 
+ Group   1 iterations...
+  Gr  1 It     1 Pos    1   1 Mom  0 0 DfMx   4.775E-01 Flx   4.775E-01  Time(s)     0.001
+ 
+  Group            1  converged in            2  iterations
+  Maximum error estimated:   0.000E+00 <   1.000E-06
+  Pos            1           1  Moment            0           0
+  Final iteration time     0.001 seconds
+ 
+ ========== Group    1 Converged Scalar Flux Zero Moment ========== %0%0
+  Row(j) :            1
+    4.774625E-01  4.615572E-01  4.208110E-01  3.239066E-01
+  Row(j) :            2
+    4.615572E-01  4.522710E-01  4.137403E-01  3.168522E-01
+  Row(j) :            3
+    4.208110E-01  4.137403E-01  3.889550E-01  2.970976E-01
+  Row(j) :            4
+    3.239066E-01  3.168522E-01  2.970976E-01  2.369886E-01
+ ========== Group    1 End Converged Scalar Flux Zero Moment ====== %0%0
+ 
+
+
+  0 warnings have been issued
+
+ 
+ -------------------------- END SOLUTION ----------------------------------
+ 
+
+  Fortran95 Timing Estimates with CPU_TIME...
+
+     WorkDone   Absolute(s)      Difference(s)
+     InputWrk       0.007         0.007
+     SolveTot       0.018         0.011
+     PrintOut       0.026         0.008
+
+
+*********************   END PROGRAM  ************************

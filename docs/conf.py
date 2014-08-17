@@ -252,7 +252,7 @@ autosummary_generate = []
 breathe_projects = {"pyne": None,}
 breathe_default_project = 'pyne'
 breathe_domain_by_extension = {"h": "cpp",}
-breathe_projects_source = {"pyne": '../cpp',}
+breathe_projects_source = {"pyne": '../src',}
 
 for p in os.listdir(breathe_projects_source['pyne']):
     p, _ = os.path.splitext(p)

@@ -205,7 +205,8 @@ class UsrbinTally(Mesh):
 	super(UsrbinTally, self).__init__(structured_coords=[self.x_bounds,
                                      self.y_bounds, self.z_bounds],
                                      structured=True,
-                                     structured_ordering='zyx')
+                                     structured_ordering='zyx',
+                                     mats=None)
 	self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 
                                   name="part_data_{0}".format(self.particle))
 	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 

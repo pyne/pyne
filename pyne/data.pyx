@@ -19,7 +19,7 @@ from pyne.utils import VnVWarning
 cimport numpy as np
 import numpy as np
 
-# local imports 
+# local imports
 cimport extra_types
 
 cimport pyne.cpp_utils
@@ -51,6 +51,9 @@ cm2_per_barn = cpp_data.cm2_per_barn
 
 sec_per_day = cpp_data.sec_per_day
 """The number of seconds in a canonical day."""
+
+MeV_per_K = cpp_data.MeV_per_K
+"""Megaelectronvolts per Kelvin."""
 
 
 #
@@ -255,24 +258,24 @@ def simple_xs(nuc, rx, energy):
         raise ValueError('nuc must be int or string')
     elif not isinstance(rx, int) and not isinstance(rx, basestring):
         raise ValueError('rx must be int or string')
-    
+
     energy_bytes = energy.encode()
     if isinstance(nuc, int) and isinstance(rx, int):
-        xs = cpp_data.simple_xs(<int> nuc, <int> rx, 
+        xs = cpp_data.simple_xs(<int> nuc, <int> rx,
                                 std_string(<char *> energy_bytes))
     elif isinstance(nuc, int) and isinstance(rx, basestring):
         rxin_bytes = rx.encode()
-        xs = cpp_data.simple_xs(<int> nuc, std_string(<char *> rxin_bytes), 
+        xs = cpp_data.simple_xs(<int> nuc, std_string(<char *> rxin_bytes),
                                 std_string(<char *> energy_bytes))
     elif isinstance(nuc, basestring) and isinstance(rx, int):
         nucin_bytes = nuc.encode()
-        xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes), 
+        xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes),
                                 <int> rx, std_string(<char *> energy_bytes))
     elif isinstance(nuc, basestring) and isinstance(rx, basestring):
         rxin_bytes = rx.encode()
         nucin_bytes = nuc.encode()
         xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes),
-                                std_string(<char *> rxin_bytes), 
+                                std_string(<char *> rxin_bytes),
                                 std_string(<char *> energy_bytes))
 
     return xs
@@ -286,10 +289,10 @@ def simple_xs(nuc, rx, energy):
 
 def ext_air_dose(nuc, source=0):
     """Finds the external air dose factor for a tracked nuclide.
-    
+
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Parent nuclide.
     source : int or str
         The int or corresponding dictionary key for the source dataset.
@@ -303,7 +306,7 @@ def ext_air_dose(nuc, source=0):
 
     Notes
     ----
-    The only source that provides this data is EPA; all other 
+    The only source that provides this data is EPA; all other
     sources will give a value of -1.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
@@ -336,7 +339,7 @@ def dose_ratio(nuc, source=0):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Parent nuclide.
     source : int or str
         The int or corresponding dictionary key for the source dataset.
@@ -350,7 +353,7 @@ def dose_ratio(nuc, source=0):
 
     Notes
     -----
-    The only source that provides this data is EPA; all other 
+    The only source that provides this data is EPA; all other
     sources will give a value of -1.
     """
     srcmap = {'EPA': 0, 'DOE': 1, 'GENII': 2}
@@ -383,7 +386,7 @@ def ext_soil_dose(nuc, source=0):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Parent nuclide.
     source : int or str
         The int or corresponding dictionary key for the source dataset.
@@ -421,7 +424,7 @@ def ext_soil_dose(nuc, source=0):
         return float('nan')
 
     return ext_soil_dose
-    
+
 # ingestion dose
 
 def ingest_dose(nuc, source=0):
@@ -429,7 +432,7 @@ def ingest_dose(nuc, source=0):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Parent nuclide.
     source : int or str
         The int or corresponding dictionary key for the source dataset.
@@ -465,9 +468,9 @@ def ingest_dose(nuc, source=0):
 
     if ingest_dose < 0:
         return float('nan')
-    
+
     return ingest_dose
-    
+
 # fluid_frac
 
 def dose_fluid_frac(nuc, source=0):
@@ -475,7 +478,7 @@ def dose_fluid_frac(nuc, source=0):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Parent nuclide.
     source : int or str
         The int or corresponding dictionary key for the source dataset.
@@ -521,7 +524,7 @@ def inhale_dose(nuc, source=0):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Parent nuclide.
     source : int or str
         The int or corresponding dictionary key for the source dataset.
@@ -567,7 +570,7 @@ def dose_lung_model(nuc, source=0):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Parent nuclide.
     source : int or str
         The int or corresponding dictionary key for the source dataset.
@@ -617,7 +620,7 @@ def b_coherent(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
@@ -627,8 +630,8 @@ def b_coherent(nuc):
 
     Notes
     -----
-    If nuc is not found, the value for a nuclide with the same A-number 
-    is used instead. If still no value is found, the an isotope of the 
+    If nuc is not found, the value for a nuclide with the same A-number
+    is used instead. If still no value is found, the an isotope of the
     same element as nuc is used.  If still no values are found, zero is
     returned.
     """
@@ -657,7 +660,7 @@ def b_incoherent(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
@@ -667,8 +670,8 @@ def b_incoherent(nuc):
 
     Notes
     -----
-    If nuc is not found, the value for a nuclide with the same A-number 
-    is used instead. If still no value is found, the an isotope of the 
+    If nuc is not found, the value for a nuclide with the same A-number
+    is used instead. If still no value is found, the an isotope of the
     same element as nuc is used.  If still no values are found, zero is
     returned.
     """
@@ -697,7 +700,7 @@ def b(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
@@ -707,12 +710,12 @@ def b(nuc):
 
     Notes
     -----
-    If nuc is not found, the value for a nuclide with the same A-number 
-    is used instead. If still no value is found, the an isotope of the 
+    If nuc is not found, the value for a nuclide with the same A-number
+    is used instead. If still no value is found, the an isotope of the
     same element as nuc is used.  If still no values are found, zero is
     returned.
 
-    This value is computed from the coherent and incoherent scattering 
+    This value is computed from the coherent and incoherent scattering
     lengths as follows:
 
     .. math::
@@ -741,9 +744,9 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
 
     Parameters
     ----------
-    from_nuc : int or str 
+    from_nuc : int or str
         Parent nuclide.
-    to_nuc : int or str 
+    to_nuc : int or str
         Child nuclide.
     source : int or str
         The int or corresponding dictionary key for the source dataset.
@@ -801,10 +804,10 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
 def calculate_xray_data(nuc, k_conv, l_conv):
     """Calculates X-ray intensities for a given atom with
     k and l conversion intensities
-    
+
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
     k_conv : float
         k electron converion coefficient arbitrary units
@@ -814,11 +817,11 @@ def calculate_xray_data(nuc, k_conv, l_conv):
     Returns
     -------
     arr : vector of pairs
-        Vector of pairs containing the four primary X-rays and their 
+        Vector of pairs containing the four primary X-rays and their
         intensities: Ka1, Ka2, Kb, L
     """
     z = pyne.nucname.znum(nuc)
-    return cpp_data.calculate_xray_data(<int> z, <double> k_conv, 
+    return cpp_data.calculate_xray_data(<int> z, <double> k_conv,
                                         <double> l_conv)
 #
 # decay data functions
@@ -830,7 +833,7 @@ def half_life(nuc, use_metastable=True):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide, if metastable is false this uses state_id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
@@ -867,7 +870,7 @@ def decay_const(nuc, use_metastable=True):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide, if metastable is false this uses state_id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
@@ -902,9 +905,9 @@ def branch_ratio(from_nuc, to_nuc, use_metastable=True):
 
     Parameters
     ----------
-    from_nuc : int or str 
+    from_nuc : int or str
         Parent nuclide, if metastable is false this uses state id
-    to_nuc : int or str 
+    to_nuc : int or str
         Child nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
@@ -952,7 +955,7 @@ def state_energy(nuc, use_metastable=True):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
@@ -987,7 +990,7 @@ def decay_children(nuc, use_metastable=True):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide, if metastable is false this uses state id
     use_metastable : bool
         Assume state of input nuc_id refers to metastable state. Defaults to
@@ -1086,7 +1089,7 @@ def decay_half_life(from_nuc, to_nuc):
     error : double
         Error in seconds
     """
-    half_life, error = cpp_data.decay_half_life(cpp_pair[int,int](from_nuc, to_nuc)) 
+    half_life, error = cpp_data.decay_half_life(cpp_pair[int,int](from_nuc, to_nuc))
     return half_life, error
 
 def decay_half_life_byparent(parent):
@@ -1106,6 +1109,25 @@ def decay_half_life_byparent(parent):
     half_lives = cpp_data.decay_half_lifes(<int> parent)
     return half_lives
 
+
+def decay_data_children(parent):
+    """
+    Returns a list of child nuclides from the given parent based on decay
+    datasets with the input parent listed.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in state_id form
+
+    Returns
+    -------
+    children : vector of ints
+        An vector of child state_id's for a given parent nuclide
+    """
+    return cpp_data.decay_data_children(<int> parent)
+
+
 def decay_branch_ratio(from_nuc, to_nuc):
     """
     Returns the branch ratio from ENSDF decay dataset data
@@ -1122,7 +1144,7 @@ def decay_branch_ratio(from_nuc, to_nuc):
     ratio : double
         branching ratio
     """
-    ratio = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc)) 
+    ratio = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
     return ratio
 
 def decay_branch_ratio_byparent(parent):
@@ -1160,7 +1182,7 @@ def decay_photon_branch_ratio(from_nuc, to_nuc):
         photon branching ratio
     """
     ratio, error = \
-    cpp_data.decay_photon_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc)) 
+    cpp_data.decay_photon_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
     return ratio, error
 
 def decay_photon_branch_ratio_byparent(parent):
@@ -1198,7 +1220,7 @@ def decay_beta_branch_ratio(from_nuc, to_nuc):
          branching ratio
     """
     ratio, error = \
-    cpp_data.decay_beta_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc)) 
+    cpp_data.decay_beta_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
     return ratio, error
 
 def decay_beta_branch_ratio_byparent(parent):
@@ -1221,7 +1243,7 @@ def decay_beta_branch_ratio_byparent(parent):
 
 def gamma_energy(parent):
     """
-    Returns a list of gamma ray energies from ENSDF decay dataset from a given 
+    Returns a list of gamma ray energies from ENSDF decay dataset from a given
     parent
 
     Parameters
@@ -1238,7 +1260,7 @@ def gamma_energy(parent):
 
 def gamma_photon_intensity(parent):
     """
-    Returns a list of gamma ray photon intensities from ENSDF decay dataset 
+    Returns a list of gamma ray photon intensities from ENSDF decay dataset
     from a given parent
 
     Parameters
@@ -1256,7 +1278,7 @@ def gamma_photon_intensity(parent):
 
 def gamma_photon_intensity_byen(en, enerror=None):
     """
-    Returns a list of gamma ray photon intensities from ENSDF decay dataset 
+    Returns a list of gamma ray photon intensities from ENSDF decay dataset
     from a given gamma ray energy
 
     Parameters
@@ -1275,7 +1297,7 @@ def gamma_photon_intensity_byen(en, enerror=None):
     if enerror == None:
         enerror = en * 0.01
     return cpp_data.gamma_photon_intensity(<double> en,<double> enerror)
-    
+
 def gamma_conversion_intensity(parent):
     """
     Returns a list of gamma ray conversion intensities from ENSDF decay dataset
@@ -1292,7 +1314,7 @@ def gamma_conversion_intensity(parent):
         An array of gamma ray conversion intensities and errors
     """
     return cpp_data.gamma_conversion_intensity(<int> parent)
-    
+
 def gamma_total_intensity(parent):
     """
     Returns a list of gamma ray total intensities from ENSDF decay dataset from
@@ -1326,11 +1348,11 @@ def gamma_from_to_byparent(parent):
         An array of gamma ray level pairs in state_id form
     """
     return cpp_data.gamma_from_to(<int> parent)
-    
+
 def gamma_from_to_byen(en, enerror=None):
     """
-    Returns a list of gamma ray level pairs from ENSDF decay dataset 
-    based on gamma-ray energy. 
+    Returns a list of gamma ray level pairs from ENSDF decay dataset
+    based on gamma-ray energy.
 
     Parameters
     ----------
@@ -1347,12 +1369,12 @@ def gamma_from_to_byen(en, enerror=None):
     """
     if enerror == None:
         enerror = en * 0.01
-    return cpp_data.gamma_from_to(<double> en,<double> enerror)   
+    return cpp_data.gamma_from_to(<double> en,<double> enerror)
 
 def gamma_parent(en, enerror=None):
     """
-    Returns a list of gamma ray parents from ENSDF decay dataset 
-    based on gamma-ray energy. 
+    Returns a list of gamma ray parents from ENSDF decay dataset
+    based on gamma-ray energy.
 
     Parameters
     ----------
@@ -1373,9 +1395,9 @@ def gamma_parent(en, enerror=None):
 
 def gamma_xrays(parent):
     """
-    Returns an array of arrays of xrays associated with the gamma 
+    Returns an array of arrays of xrays associated with the gamma
     rays from an input parent nuclide
-    
+
     Parameters
     ----------
     parent : int
@@ -1386,13 +1408,13 @@ def gamma_xrays(parent):
     ratios : array of arrays
         This returns an array of length 4 arrays containing pairs of energies
         and intensities of the following X-rays: Ka1, Ka2, Kb, L
-    
+
     """
     return cpp_data.gamma_xrays(<int> parent)
-    
+
 def alpha_energy(parent):
     """
-    Returns a list of alpha energies from ENSDF decay dataset from a given 
+    Returns a list of alpha energies from ENSDF decay dataset from a given
     parent
 
     Parameters
@@ -1409,7 +1431,7 @@ def alpha_energy(parent):
 
 def alpha_intensity(parent):
     """
-    Returns a list of alpha intensities from ENSDF decay dataset from a given 
+    Returns a list of alpha intensities from ENSDF decay dataset from a given
     parent
 
     Parameters
@@ -1422,12 +1444,12 @@ def alpha_intensity(parent):
     ratios : array of pairs
         An array of alpha intensities and errors
     """
-    return cpp_data.alpha_intensity(<int> parent) 
+    return cpp_data.alpha_intensity(<int> parent)
 
 def alpha_parent(en, enerror=None):
     """
-    Returns a list of alpha parents from ENSDF decay dataset 
-    based on alpha energy. 
+    Returns a list of alpha parents from ENSDF decay dataset
+    based on alpha energy.
 
     Parameters
     ----------
@@ -1448,7 +1470,7 @@ def alpha_parent(en, enerror=None):
 
 def alpha_child_byen(en, enerror=None):
     """
-    Returns a list of alpha children from ENSDF decay dataset 
+    Returns a list of alpha children from ENSDF decay dataset
     based on alpha energy.
 
     Parameters
@@ -1467,10 +1489,10 @@ def alpha_child_byen(en, enerror=None):
     if enerror == None:
         enerror = en * 0.01
     return cpp_data.alpha_child(<double> en, <double> enerror)
-    
+
 def alpha_child_byparent(parent):
     """
-    Returns a list of alpha children from ENSDF decay dataset 
+    Returns a list of alpha children from ENSDF decay dataset
     based on alpha parent.
 
     Parameters
@@ -1487,7 +1509,7 @@ def alpha_child_byparent(parent):
 
 def beta_endpoint_energy(parent):
     """
-    Returns a list of beta endpoint energies from ENSDF decay dataset 
+    Returns a list of beta endpoint energies from ENSDF decay dataset
     based on parent nuclide.
 
     Parameters
@@ -1504,7 +1526,7 @@ def beta_endpoint_energy(parent):
 
 def beta_average_energy(parent):
     """
-    Returns a list of beta average energies from ENSDF decay dataset 
+    Returns a list of beta average energies from ENSDF decay dataset
     based on parent nuclide.
 
     Parameters
@@ -1521,7 +1543,7 @@ def beta_average_energy(parent):
 
 def beta_intensity(parent):
     """
-    Returns a list of beta intensities from ENSDF decay dataset 
+    Returns a list of beta intensities from ENSDF decay dataset
     based on parent nuclide.
 
     Parameters
@@ -1534,11 +1556,11 @@ def beta_intensity(parent):
     ratios : array of ints
         An array of beta intensities and errors
     """
-    return cpp_data.beta_intensity(<int> parent) 
+    return cpp_data.beta_intensity(<int> parent)
 
 def beta_parent(en, enerror=None):
     """
-    Returns a list of beta minus parents from ENSDF decay dataset 
+    Returns a list of beta minus parents from ENSDF decay dataset
     based on beta energy.
 
     Parameters
@@ -1560,7 +1582,7 @@ def beta_parent(en, enerror=None):
 
 def beta_child_byen(en, enerror=None):
     """
-    Returns a list of beta minus children from ENSDF decay dataset 
+    Returns a list of beta minus children from ENSDF decay dataset
     based on beta energy.
 
     Parameters
@@ -1579,10 +1601,10 @@ def beta_child_byen(en, enerror=None):
     if enerror == None:
         enerror = en * 0.01
     return cpp_data.beta_child(<double> en, <double> enerror)
-    
+
 def beta_child_byparent(parent):
     """
-    Returns a list of beta minus children from ENSDF decay dataset 
+    Returns a list of beta minus children from ENSDF decay dataset
     based on parent.
 
     Parameters
@@ -1663,11 +1685,11 @@ def beta_plus_intensity(parent):
     ratios : array of pairs
         An array of beta plus intensities and errors
     """
-    return cpp_data.bp_intensity(<int> parent) 
+    return cpp_data.bp_intensity(<int> parent)
 
 def ecbp_parent(en, enerror=None):
     """
-    Returns a list of beta plus/electron capture parents from ENSDF decay 
+    Returns a list of beta plus/electron capture parents from ENSDF decay
     dataset based on beta energy.
 
     Parameters
@@ -1689,7 +1711,7 @@ def ecbp_parent(en, enerror=None):
 
 def ecbp_child_byen(en, enerror=None):
     """
-    Returns a list of beta plus/electron capture parents from ENSDF decay 
+    Returns a list of beta plus/electron capture parents from ENSDF decay
     dataset based on beta energy.
 
     Parameters
@@ -1708,10 +1730,10 @@ def ecbp_child_byen(en, enerror=None):
     if enerror == None:
         enerror = en * 0.01
     return cpp_data.ecbp_child(<double> en, <double> enerror)
-    
+
 def ecbp_child_byparent(parent):
     """
-    Returns a list of beta plus children from ENSDF decay dataset 
+    Returns a list of beta plus children from ENSDF decay dataset
     based on parent.
 
     Parameters
@@ -1728,9 +1750,9 @@ def ecbp_child_byparent(parent):
 
 def ecbp_xrays(parent):
     """
-    Returns an array of arrays of xrays associated with the electron capture 
+    Returns an array of arrays of xrays associated with the electron capture
     and beta plus decays from an input parent nuclide
-    
+
     Parameters
     ----------
     parent : int
@@ -1741,6 +1763,6 @@ def ecbp_xrays(parent):
     ratios : array of arrays
         This returns an array of length 4 arrays containing pairs of energies
         and intensities of the following X-rays: Ka1, Ka2, Kb, L
-    
+
     """
     return cpp_data.ecbp_xrays(<int> parent)
