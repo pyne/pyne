@@ -109,9 +109,9 @@ where m = m x + m y + m z ." (1, p.26)
 
 Part of the complete family?
 
-*****************************
+********************************
 DGFEM-LL theory (linear-linear?)
-*****************************
+********************************
 
 Part of the complete family?
 

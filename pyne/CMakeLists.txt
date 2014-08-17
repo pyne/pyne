@@ -118,7 +118,8 @@ target_link_libraries(bins pyne)
 #add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
 add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
 add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
-    COMMAND f2py -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src 
+    COMMAND f2py -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
+                --f90flags="-fdefault-real-8" 
                 -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90 
                 -lpyne
                 #-lpyne --debug-capi

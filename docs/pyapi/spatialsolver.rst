@@ -26,6 +26,28 @@ Dictionary Entries
 As these are complicated solvers, they require a large amount of input data supplied by the user.  The
 format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overriden by default values if not present/not specified. 
 
+**Entry: Solver type (AHOTN, DGFEM or SCTSTEP)**::
+
+  key: "solver" 
+  type: String
+  ex: "AHOTN"
+  default: no default
+  Note:  The three supported "solver"s are the following:
+    1.  "AHOTN"
+    2.  "DGFEM"
+    3.  "SCTSTEP"
+  
+**Entry: Spatial expansion order **::
+
+  key: "solver_type" 
+  type: String
+  ex: "LN"
+  default: No default
+  Note: This entry is dependent on the "solver" entry.
+    For AHOTN solver, there exist the LN, LL and NEFD solver types
+    For the DGFEM solvers, there exist the LD, DENSE and LAGRANGE solver types
+    For the SCTSTEP solver, no solver_type key is required.  The key can be set to something or be left empty.
+
 **Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**::
 
   key: "spatial_order" 
