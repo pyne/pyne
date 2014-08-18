@@ -212,6 +212,7 @@ def dict_complete(inputdict):
 
 
 class InputDictError(Exception):
+    global missing
     def __init__(self, missing=None):
         self.missing = missing
 
