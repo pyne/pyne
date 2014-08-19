@@ -627,36 +627,42 @@ std::string pyne::Material::fluka(int id )
 // Result:        The MATERIAL line is returned.  
 //                The fluka_name metadata is set
 //                The true, final material index metadata is set
+#define FAKE_ZNUM 999
 std::string pyne::Material::write_material(int id)
 {
-   // The nucid of the first component is the only nucid
-   int nucid = comp.begin()->first;
+  std::stringstream ms;
+  std::string fluka_name; 
+  int za_id = FAKE_ZNUM;
+   
+  if (metadata.isMember("fluka_name")) {
+    fluka_name = metadata["fluka_name"].asString();
+    std::cout << "fluka name is " << fluka_name << std::endl;
+  } else {  // Should be elemental
+    if (comp.size() > 1 ) {
+      std::cerr << "Error: this mix is a compound, there should be a fluka_name defined."
+                << std::endl;
+      // ToDo:  Perhaps should throw an exception here
+      return ms.str();
+    }
 
-   std::string fluka_name; 
-   int za_id;
+    // The nucid of the first component is the only nucid
+    int nucid = comp.begin()->first;
+    int znum = pyne::nucname::znum(nucid);
+    int anum = pyne::nucname::anum(nucid);
+    // Make the za_id
+    za_id = znum*10000000 + anum*10000;
+    // Use za_id to get the fluka_name from special database
+    // Need nucid map to either material or fluka name
+    fluka_name = nucname::zz_fluka[za_id];
+    metadata["fluka_name"] = fluka_name;
+  }
 
-   if (metadata.isMember("fluka_name")) {
-     fluka_name = metadata["fluka_name"].asString();
-   } else {
-      int znum = pyne::nucname::znum(nucid);
-      int anum = pyne::nucname::anum(nucid);
-      // Make the za_id
-      za_id = znum*10000000 + anum*10000;
-      // Use za_id to get the fluka_name from special database
-      // Need nucid map to either material or fluka name
-      fluka_name = nucname::zz_fluka[za_id];
-      metadata["fluka_name"] = fluka_name;
-   }
-
-   std::stringstream ms;
-
-   if (notBuiltin(fluka_name)) {  
-     std::stringstream ss;
-     ss << id;
-     metadata["fluka_material_index"] = ss.str();
-     ms << material_component(id, za_id, fluka_name);
-   }
-
+  if (notBuiltin(fluka_name)) {  
+    std::stringstream ss;
+    ss << id;
+    metadata["fluka_material_index"] = ss.str();
+    ms << material_component(id, za_id, fluka_name);
+  }
   // could be empty
   return ms.str();
 }
@@ -669,12 +675,20 @@ std::string pyne::Material::write_material(int id)
 std::string pyne::Material::material_component(int fid, int nucid, std::string fluka_name)
 {
   std::stringstream ls;
+  int znum;
+  if (FAKE_ZNUM != nucid) {
+    znum = pyne::nucname::znum(nucid); 
+  } else {
+    znum = nucid;
+  }
 
-  int znum = pyne::nucname::znum(nucid); 
-  //  Hmmm, this call needs to load a file, pyne::NUC_DATA_PATH
-  // or is this really the mass?
-  // double atomic_mass = pyne::atomic_mass(nucid);
-  double atomic_mass = -1;
+  double atomic_mass;
+  if (0 != pyne::NUC_DATA_PATH.length() ) { 
+    // for compounds (i.e., unrecognized nucids), this will be 0
+    atomic_mass = pyne::atomic_mass(nucid);
+  } else {
+    atomic_mass = -1; 
+  }  
 
   return material_line(znum, atomic_mass, fid, fluka_name);
 }
@@ -686,19 +700,6 @@ std::string pyne::Material::material_component(int fid, int nucid, std::string f
 std::string pyne::Material::material_line (int znum, double atomic_mass, 
                                            int fid, std::string fluka_name)
 {
-  // Prepare the density to a separate stream in order to control the precision
-  // Note this is the current object density, and may or may not be meaningful
-  // Full disclosure:  doing this because unsetting floatformat is apparently
-  // insufficient to undo the fixed precision.  Maybe unset showpoint?
-  double intpart;
-  modf (density, &intpart);
-  std::stringstream ds;
-  if (density == intpart) {
-    // There is no part after the decimal
-    ds << std::setprecision(0) << std::fixed << std::showpoint << density;
-  } else {
-    ds << density;
-  }
 
   std::stringstream ls;
 
@@ -710,9 +711,27 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
   ls << std::setw(10) << std::left << "MATERIAL";
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
         std::setw(10) << std::right << (float)znum; 
-  ls << std::setprecision(0) << std::fixed << std::showpoint <<
-        std::setw(10) << std::right << atomic_mass;
-  ls << std::setw(10) << std::right << ds.str();
+
+  // Control the maximum precision:  this will print however many digits 
+  // there are after the decimal, up to a maximum of six
+  ls.unsetf(std::ios::showpoint);
+  ls.unsetf(std::ios::floatfield);
+  ls.precision(6);
+  ls << std::setw(10) << std::right << atomic_mass;
+
+  // Density formatting depends on whether it is a true float
+  // Note this is the current object density, and may or may not be meaningful
+  double intpart;
+  modf (density, &intpart);
+  if (density == intpart) {
+    // There is no part after the decimal
+    ls << std::setprecision(0) << std::fixed << std::showpoint 
+       << std::setw(10) << std::right << density;
+  } else {
+    // Use the previous field's setting (atomic mass: max precision = 6)
+    ls << std::setw(10) << std::right << density;
+  }
+
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
         std::setw(10) << std::right << (float)fid;
   ls << std::setw(10) << std::right << "";
