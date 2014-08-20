@@ -44,6 +44,18 @@ extern "C" {
 
 namespace pyne {
 
+  /// MCNP interface for source sampling setup
+  void mcnp_sampling_setup_(int* mode);
+  /// MCNP interface to sample particle birth parameters after sampling setup
+  void mcnp_particle_birth_(double* rands,
+                            double* x,
+                            double* y,
+                            double* z,
+                            double* e,
+                            double* w);
+  /// Helper function for MCNP interface
+  std::vector<double> read_e_bounds(std::string e_bounds_file);
+
   /// Stores 4 connected points in a mesh volume element
   struct edge_points {
     MBCartVect o_point;
