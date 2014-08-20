@@ -601,15 +601,12 @@ std::string pyne::Material::fluka(int id )
 
   // Element, one nucid
   if (comp.size() == 1) {
-    // one nucid
-    // todo:  this function needs to be specialezed to
-    // an elemental form AND DO NOT ASSUME metadata fluka_name
-    // is defined:  get the FLUKA_NAME FROM a special map
-    // from the nucid if necessary
     rs << write_material(id);
-  } else {
+  } else if (comp.size() > 1 ) {
   // Compound
     rs << write_compound(id);
+  } else {
+    rs << "There is no nuclide information in the Material Object" << std::endl;
   }
   return rs.str();
 }
@@ -633,10 +630,11 @@ std::string pyne::Material::write_material(int id)
   std::stringstream ms;
   std::string fluka_name; 
   int za_id = FAKE_ZNUM;
+
+  pyne::nucname::zzname_t zfd = pyne::nucname::get_zz_fluka();
    
   if (metadata.isMember("fluka_name")) {
     fluka_name = metadata["fluka_name"].asString();
-    std::cout << "fluka name is " << fluka_name << std::endl;
   } else {  // Should be elemental
     if (comp.size() > 1 ) {
       std::cerr << "Error: this mix is a compound, there should be a fluka_name defined."
@@ -647,21 +645,16 @@ std::string pyne::Material::write_material(int id)
 
     // The nucid of the first component is the only nucid
     int nucid = comp.begin()->first;
-    int znum = pyne::nucname::znum(nucid);
-    int anum = pyne::nucname::anum(nucid);
-    // Make the za_id
-    za_id = znum*10000000 + anum*10000;
-    // Use za_id to get the fluka_name from special database
-    // Need nucid map to either material or fluka name
-    fluka_name = nucname::zz_fluka[za_id];
+    fluka_name = zfd[nucid];
     metadata["fluka_name"] = fluka_name;
   }
 
   if (notBuiltin(fluka_name)) {  
+    int nucid = comp.begin()->first;
     std::stringstream ss;
     ss << id;
     metadata["fluka_material_index"] = ss.str();
-    ms << material_component(id, za_id, fluka_name);
+    ms << material_component(id, nucid, fluka_name);
   }
   // could be empty
   return ms.str();
@@ -674,7 +667,6 @@ std::string pyne::Material::write_material(int id)
 // Density is either object density or it is ignored ==> use object density
 std::string pyne::Material::material_component(int fid, int nucid, std::string fluka_name)
 {
-  std::stringstream ls;
   int znum;
   if (FAKE_ZNUM != nucid) {
     znum = pyne::nucname::znum(nucid); 
@@ -706,8 +698,8 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
   if (metadata.isMember("comments") ) {
      std::string comment = metadata["comments"].asString();
      ls << "* " << comment;
+     ls << std::endl;
   }
-  ls << std::endl;
   ls << std::setw(10) << std::left << "MATERIAL";
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
         std::setw(10) << std::right << (float)znum; 
@@ -751,38 +743,11 @@ std::string pyne::Material::write_compound(int id)
 {
   std::stringstream ss;
   std::map<double, std::string> frac_name_map;
+  std::string compound_string = "";
+  std::vector<std::string> material_names;
 
-  // Go through the composition of this material
-  for (comp_iter nuc = comp.begin(); nuc != comp.end(); ++nuc) {
+  pyne::nucname::zzname_t zfd = pyne::nucname::get_zz_fluka();
 
-    std::cout << nuc->first << ", " << nuc->second << ", ";
-    std::cout << pyne::nucname::name(nuc->first) << std::endl;
-
-    int comp_nucid = nuc->first;
-    double frac    = nuc->second;
-
-    ////////////////////////////////////////////////////////
-    // KEY STEP
-    // Create a material object out of the *single* component
-    // Creating the component material object ==> can get nucid
-    comp_map tcm;
-    tcm.insert(*nuc);
-    pyne::Material tmat = Material(tcm);
-    
-    // Use nucname map to get fluka_name 
-    pyne::nucname::zzname_t zfd = pyne::nucname::get_zz_fluka();
-    std::string comp_name = zfd[comp_nucid];
-
-    // Store fluka-name of component for later use
-    frac_name_map.insert(std::pair<double, std::string>(frac, comp_name));
-
-    // This call will determine all the necessary info from the nucid and
-    ss << tmat.material_component(id, comp_nucid, comp_name);
-    id++;
-  }  // end components
-
-  // Required material cards have been written for the components.
-  // Last MATERIAL card is for the compound itself
   // The nucid doesn't make sense for a compound
   int znum = 999;
   double atomic_mass = 999.;
@@ -796,30 +761,25 @@ std::string pyne::Material::write_compound(int id)
     compound_name = "NotFound";
   }  
   ss << material_line(znum, atomic_mass, id, compound_name);
-  id++;
   
-  // Go through the map created earlier to put three fracs per
-  // line of the compound
-  std::map<double, std::string>::iterator mptr;
-  for (mptr = frac_name_map.begin(); mptr != frac_name_map.end(); ++mptr) {
-    ss << std::setw(10) << std::left << "COMPOUND";
-    // Add three frac/name combos unless we hit the end of the comp list
-    int count = 3;
-    while (0 != count--) {
-      if (mptr != frac_name_map.end()) {
-        ss << std::setw(10) << std::right << mptr->first;
-        ss << std::setw(10) << std::right << mptr->second;
-      } else {
-          ss << std::setw(20) << "";
-      }
-      ++mptr;
-    } 
-     
-    // Have added a suitable number of items, finish the line
-    ss << std::setw(10) << std::left << compound_name;
-    ss << std::endl;  
+  int count = 1;
+  for (comp_iter nuc = comp.begin(); nuc != comp.end(); ++nuc) {
+    if ( count%2 == 0 ) {
+	ss << std::setw(10) << std::right << zfd[nuc->first];
+	ss << std::setw(10) << std::right << nuc->second;
+    } else if ( count%3 == 0 ) {
+	ss << std::setw(10) << std::right << zfd[nuc->first];
+	ss << std::setw(10) << std::right << nuc->second;
+	ss << std::setw(10) << std::left << compound_name << std::endl;
+	count = 0;
+    } else  {
+	ss << std::setw(10) << std::left << "COMPOUND";
+	ss << std::setw(10) << std::right << zfd[nuc->first];
+	ss << std::setw(10) << std::right << nuc->second;
+    }
+    count++;
   }
-
+  ss<< std::endl;
   return ss.str();
 }
 

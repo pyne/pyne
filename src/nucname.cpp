@@ -151,7 +151,7 @@ pyne::nucname::zzname_t pyne::nucname::zz_name = pyne::nucname::get_zz_name();
 pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   pyne::nucname::name_zz_t fzd;
 
-  fzd["BERYLLIU"] = 040000000;
+  fzd["BERYLLIU"] = 40000000;
   fzd["BARIUM"]   = 560000000;
   fzd["BOHRIUM"]  = 1070000000;   // No fluka
   fzd["BISMUTH"]  = 830000000;
@@ -166,7 +166,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["RADON"]    = 860000000;    // no fluka
   fzd["RHODIUM"]  = 450000000;    // no fluka
   fzd["THULIUM"]  = 690000000;    // no fluka
-  fzd["HYDROGEN"] = 010000000;        
+  fzd["HYDROGEN"] = 10000000;        
   fzd["PHOSPHO"]  = 150000000;	
   fzd["GERMANIU"] = 320000000;
   fzd["GADOLINI"] = 640000000;
@@ -177,7 +177,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["HOLMIUM"]  = 670000000;    // no fluka
   fzd["HAFNIUM"]  = 720000000;
   fzd["MERCURY"]  = 800000000;
-  fzd["HELIUM"]   = 020000000;
+  fzd["HELIUM"]   = 20000000;
   fzd["PRASEODY"] = 590000000;   // no fluka
   fzd["PLATINUM"] = 780000000;
   fzd["PLUTONIU"] = 940000000;   // "239-PU"
@@ -204,6 +204,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["IRON"]     = 260000000;
   fzd["FERMIUM"]  = 1000000000;  // no fluka
   fzd["NICKEL"]   = 280000000;
+  fzd["NITROGEN"] = 70000000;
   fzd["NOBELIUM"] = 1020000000;  // no fluka
   fzd["SODIUM"]   = 110000000;
   fzd["NIOBIUM"]  = 410000000;
@@ -211,7 +212,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["NEON"]     = 100000000;
   fzd["ZIRCONIU"] = 400000000;
   fzd["NEPTUNIU"] = 930000000;   // no fluka
-  fzd["BORON"]    = 050000000;
+  fzd["BORON"]    = 50000000;
   fzd["COBALT"]   = 270000000;
   fzd["CURIUM"]   = 960000000;   // no fluka
   fzd["FLUORINE"] = 90000000;
@@ -260,20 +261,19 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["ASTATINE"] = 850000000;   // no fluka
   fzd["INDIUM"]   = 490000000;
   fzd["YTTRIUM"]  = 390000000;
-  fzd["NITROGEN"] = 070000000;
   fzd["XENON"]    = 540000000;
   fzd["COPERNIC"] = 1120000000;  // no fluka
   fzd["FLEROVIU"] = 1140000000;  // no fluka:  UNUNQUADIUM
   fzd["LIVERMOR"] = 1160000000;  // no fluka:  UNUNHEXIUM  
-  fzd["HYDROG-1"] = 010010000;        
-  fzd["DEUTERIU"] = 010020000;        
-  fzd["TRITIUM"]  = 010040000;        
-  fzd["HELIUM-3"] = 020030000;
-  fzd["HELIUM-4"] = 020040000;
-  fzd["LITHIU-6"] = 030060000;
-  fzd["LITHIU-7"] = 030070000;
-  fzd["BORON-10"] = 050100000;
-  fzd["BORON-11"] = 050110000;
+  fzd["HYDROG-1"] = 10010000;        
+  fzd["DEUTERIU"] = 10020000;        
+  fzd["TRITIUM"]  = 10040000;        
+  fzd["HELIUM-3"] = 20030000;
+  fzd["HELIUM-4"] = 20040000;
+  fzd["LITHIU-6"] = 30060000;
+  fzd["LITHIU-7"] = 30070000;
+  fzd["BORON-10"] = 50100000;
+  fzd["BORON-11"] = 50110000;
   fzd["STRON-90"] = 380900000;   // fluka "90-SR"
   fzd["IODI-129"] = 531290000;   // fluka "129-I"
   fzd["XENO-124"] = 541240000;   // fluka "124-XE"
