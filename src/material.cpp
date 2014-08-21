@@ -629,10 +629,11 @@ std::string pyne::Material::write_material(int id)
 {
   std::stringstream ms;
   std::string fluka_name; 
-  int za_id = FAKE_ZNUM;
+  // int za_id = FAKE_ZNUM;
 
   pyne::nucname::zzname_t zfd = pyne::nucname::get_zz_fluka();
    
+  // NOTE:  first part of if may never be called
   if (metadata.isMember("fluka_name")) {
     fluka_name = metadata["fluka_name"].asString();
   } else {  // Should be elemental
@@ -644,6 +645,7 @@ std::string pyne::Material::write_material(int id)
     }
 
     // The nucid of the first component is the only nucid
+    // Question:  is it necessary to set this?
     int nucid = comp.begin()->first;
     fluka_name = zfd[nucid];
     metadata["fluka_name"] = fluka_name;
@@ -651,9 +653,12 @@ std::string pyne::Material::write_material(int id)
 
   if (notBuiltin(fluka_name)) {  
     int nucid = comp.begin()->first;
+
+    // Question: is this necessary?
     std::stringstream ss;
     ss << id;
     metadata["fluka_material_index"] = ss.str();
+
     ms << material_component(id, nucid, fluka_name);
   }
   // could be empty
@@ -665,9 +670,13 @@ std::string pyne::Material::write_material(int id)
 //---------------------------------------------------------------------------//
 // Material has only one component, 
 // Density is either object density or it is ignored ==> use object density
-std::string pyne::Material::material_component(int fid, int nucid, std::string fluka_name)
+// This function is not called for a compound, but it is called on the 
+// material-ized components of compounds
+std::string pyne::Material::material_component(int fid, int nucid, 
+                                               std::string fluka_name)
 {
   int znum;
+  // NOTE:  nucid is never set to FAKE_ZNUM
   if (FAKE_ZNUM != nucid) {
     znum = pyne::nucname::znum(nucid); 
   } else {
