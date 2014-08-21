@@ -29,7 +29,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_name_zz() {
   lzd["Rh"] = 45;
   lzd["Tm"] = 69;
   lzd["H"] = 01;
-  lzd["P"] = 15;	
+  lzd["P"] = 15;
   lzd["Ge"] = 32;
   lzd["Gd"] = 64;
   lzd["Ga"] = 31;
@@ -167,7 +167,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["RHODIUM"]  = 450000000;    // no fluka
   fzd["THULIUM"]  = 690000000;    // no fluka
   fzd["HYDROGEN"] = 10000000;        
-  fzd["PHOSPHO"]  = 150000000;	
+  fzd["PHOSPHO"]  = 150000000;
   fzd["GERMANIU"] = 320000000;
   fzd["GADOLINI"] = 640000000;
   fzd["GALLIUM"]  = 310000000;
@@ -180,7 +180,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["HELIUM"]   = 20000000;
   fzd["PRASEODY"] = 590000000;   // no fluka
   fzd["PLATINUM"] = 780000000;
-  fzd["PLUTONIU"] = 940000000;   // "239-PU"
+  fzd["239-PU"]   = 940000000;   // "239-PU"
   fzd["LEAD"]     = 820000000;
   fzd["PROTACTI"] = 910000000;   // no fluka
   fzd["PALLADIU"] = 460000000;   // no fluka
@@ -247,13 +247,13 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["TITANIUM"] = 220000000;
   fzd["TELLURIU"] = 520000000;   // no fluka
   fzd["TERBIUM"]  = 650000000;
-  fzd["TECHNETI"] = 430000000;   // "99-TC"
+  fzd["99-TC"]    = 430000000;   // "99-TC"
   fzd["TANTALUM"] = 730000000;
   fzd["ACTINIUM"] = 890000000;   // no fluka
   fzd["SILVER"]   = 470000000;
   fzd["IODINE"]   = 530000000;
   fzd["IRIDIUM"]  = 770000000;
-  fzd["AMERICIU"] = 950000000;   // "241-AM"
+  fzd["241-AM"]   = 950000000;   // "241-AM"
   fzd["ALUMINUM"] = 130000000;
   fzd["ARSENIC"]  = 330000000;
   fzd["ARGON"]    = 180000000;
@@ -263,8 +263,8 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["YTTRIUM"]  = 390000000;
   fzd["XENON"]    = 540000000;
   fzd["COPERNIC"] = 1120000000;  // no fluka
-  fzd["FLEROVIU"] = 1140000000;  // no fluka:  UNUNQUADIUM
-  fzd["LIVERMOR"] = 1160000000;  // no fluka:  UNUNHEXIUM  
+  fzd["UNUNQUAD"] = 1140000000;  // no fluka:  UNUNQUADIUM,  "Flerovium"
+  fzd["UNUNHEXI"] = 1160000000;  // no fluka:  UNUNHEXIUM , "Livermorium" 
   fzd["HYDROG-1"] = 10010000;        
   fzd["DEUTERIU"] = 10020000;        
   fzd["TRITIUM"]  = 10040000;        
@@ -274,25 +274,25 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["LITHIU-7"] = 30070000;
   fzd["BORON-10"] = 50100000;
   fzd["BORON-11"] = 50110000;
-  fzd["STRON-90"] = 380900000;   // fluka "90-SR"
-  fzd["IODI-129"] = 531290000;   // fluka "129-I"
-  fzd["XENO-124"] = 541240000;   // fluka "124-XE"
-  fzd["XENO-126"] = 541260000;   // fluka "126-XE"
-  fzd["XENO-128"] = 541280000;   // fluka "128-XE"
-  fzd["XENO-130"] = 541300000;   // fluka "130-XE"
-  fzd["XENO-131"] = 541310000;   // fluka "131-XE"
-  fzd["XENO-132"] = 541320000;   // fluka "132-XE"
-  fzd["XENO-134"] = 541340000;   // fluka "134-XE"
-  fzd["XENO-135"] = 541350000;   // fluka "135-XE"
-  fzd["XENO-136"] = 541360000;   // fluka "136-XE"
-  fzd["CESI-135"] = 551350000;   // fluka "135-CS"
-  fzd["CESI-137"] = 551370000;   // fluka "137-CS"
-  fzd["THOR-230"] = 902300000;   // fluka "230-TH"
-  fzd["THOR-232"] = 902320000;   // fluka "232-TH"
-  fzd["URAN-233"] = 922330000;   // fluka "233-U"
-  fzd["URAN-234"] = 922340000;   // fluka "234-U"
-  fzd["URAN-235"] = 922350000;   // fluka "235-U"
-  fzd["URAN-238"] = 922380000;   // fluka "238-U"
+  fzd["90-SR"]    = 380900000;   // fluka "90-SR"
+  fzd["129-I"]    = 531290000;   // fluka "129-I"
+  fzd["124-XE"]   = 541240000;   // fluka "124-XE"
+  fzd["126-XE"]   = 541260000;   // fluka "126-XE"
+  fzd["128-XE"]   = 541280000;   // fluka "128-XE"
+  fzd["130-XE"]   = 541300000;   // fluka "130-XE"
+  fzd["131-XE"]   = 541310000;   // fluka "131-XE"
+  fzd["132-XE"]   = 541320000;   // fluka "132-XE"
+  fzd["134-XE"]   = 541340000;   // fluka "134-XE"
+  fzd["135-XE"]   = 541350000;   // fluka "135-XE"
+  fzd["136-XE"]   = 541360000;   // fluka "136-XE"
+  fzd["135-CS"]   = 551350000;   // fluka "135-CS"
+  fzd["137-CS"]   = 551370000;   // fluka "137-CS"
+  fzd["230-TH"]   = 902300000;   // fluka "230-TH"
+  fzd["232-TH"]   = 902320000;   // fluka "232-TH"
+  fzd["233-U"]    = 922330000;   // fluka "233-U"
+  fzd["234-U"]    = 922340000;   // fluka "234-U"
+  fzd["235-U"]    = 922350000;   // fluka "235-U"
+  fzd["238-U"]    = 922380000;   // fluka "238-U"
 
   return fzd;
 };
@@ -494,7 +494,7 @@ int pyne::nucname::id(int nuc) {
 
   // Not a normal nuclide, might be a 
   // Natural elemental nuclide.  
-  // ie 92 for Urnaium = 920000
+  // ie 92 for Uranium = 920000
   if (0 < zz_name.count(nuc))
     return nuc * 10000000;
   throw IndeterminateNuclideForm(nuc, "");

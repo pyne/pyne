@@ -621,46 +621,30 @@ std::string pyne::Material::fluka(int id )
 // may be called from a user-defined material, i.e. on that is not 
 // read out of a UW^2-tagged geometry file, and thus does not have
 // certain metadata.
-// Result:        The MATERIAL line is returned.  
-//                The fluka_name metadata is set
-//                The true, final material index metadata is set
-#define FAKE_ZNUM 999
 std::string pyne::Material::write_material(int id)
 {
   std::stringstream ms;
-  std::string fluka_name; 
-  // int za_id = FAKE_ZNUM;
+  std::string fluka_name; // needed to determine if built-in
 
   pyne::nucname::zzname_t zfd = pyne::nucname::get_zz_fluka();
+  int nucid = comp.begin()->first;
    
-  // NOTE:  first part of if may never be called
+  // NOTE:  first part of 'if' may never be called
   if (metadata.isMember("fluka_name")) {
     fluka_name = metadata["fluka_name"].asString();
   } else {  // Should be elemental
     if (comp.size() > 1 ) {
       std::cerr << "Error: this mix is a compound, there should be a fluka_name defined."
                 << std::endl;
-      // ToDo:  Perhaps should throw an exception here
       return ms.str();
     }
-
-    // The nucid of the first component is the only nucid
-    // Question:  is it necessary to set this?
-    int nucid = comp.begin()->first;
     fluka_name = zfd[nucid];
-    metadata["fluka_name"] = fluka_name;
   }
 
   if (notBuiltin(fluka_name)) {  
-    int nucid = comp.begin()->first;
-
-    // Question: is this necessary?
-    std::stringstream ss;
-    ss << id;
-    metadata["fluka_material_index"] = ss.str();
-
     ms << material_component(id, nucid, fluka_name);
   }
+
   // could be empty
   return ms.str();
 }
@@ -675,13 +659,7 @@ std::string pyne::Material::write_material(int id)
 std::string pyne::Material::material_component(int fid, int nucid, 
                                                std::string fluka_name)
 {
-  int znum;
-  // NOTE:  nucid is never set to FAKE_ZNUM
-  if (FAKE_ZNUM != nucid) {
-    znum = pyne::nucname::znum(nucid); 
-  } else {
-    znum = nucid;
-  }
+  int znum = pyne::nucname::znum(nucid);
 
   double atomic_mass;
   if (0 != pyne::NUC_DATA_PATH.length() ) { 
@@ -701,7 +679,6 @@ std::string pyne::Material::material_component(int fid, int nucid,
 std::string pyne::Material::material_line (int znum, double atomic_mass, 
                                            int fid, std::string fluka_name)
 {
-
   std::stringstream ls;
 
   if (metadata.isMember("comments") ) {
@@ -745,9 +722,8 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
 // write_compound
 //---------------------------------------------------------------------------//
 // Returns
-// a) MATERIAL lines for those components that need it
-// b) MATERIAL line for compound
-// c) COMPOUND lines
+// -- MATERIAL line for compound
+// -- COMPOUND lines
 std::string pyne::Material::write_compound(int id)
 {
   std::stringstream ss;
@@ -765,29 +741,56 @@ std::string pyne::Material::write_compound(int id)
   if (metadata.isMember("fluka_name")) {
     compound_name = metadata["fluka_name"].asString();
   } else {
-    // ToDo:  what to do?  
     std::cerr << "Error:  metadata \"fluka_name\" expected." << std::endl;
     compound_name = "NotFound";
   }  
   ss << material_line(znum, atomic_mass, id, compound_name);
   
-  int count = 1;
-  for (comp_iter nuc = comp.begin(); nuc != comp.end(); ++nuc) {
-    if ( count%2 == 0 ) {
-	ss << std::setw(10) << std::right << zfd[nuc->first];
-	ss << std::setw(10) << std::right << nuc->second;
-    } else if ( count%3 == 0 ) {
-	ss << std::setw(10) << std::right << zfd[nuc->first];
-	ss << std::setw(10) << std::right << nuc->second;
-	ss << std::setw(10) << std::left << compound_name << std::endl;
-	count = 0;
-    } else  {
-	ss << std::setw(10) << std::left << "COMPOUND";
-	ss << std::setw(10) << std::right << zfd[nuc->first];
-	ss << std::setw(10) << std::right << nuc->second;
-    }
-    count++;
+  int counter = comp.size();
+  pyne::comp_iter nuc = comp.begin();
+  // This will pick up multiples of 3 components
+  while (counter >= 3) {
+    ss << std::setw(10) << std::left  << "COMPOUND";
+
+    ss << std::setw(10) << std::right << zfd[nuc->first];
+    ss << std::setw(10) << std::right << nuc->second;
+    nuc++;
+
+    ss << std::setw(10) << std::right << zfd[nuc->first];
+    ss << std::setw(10) << std::right << nuc->second;
+    nuc++;
+
+    ss << std::setw(10) << std::right << zfd[nuc->first];
+    ss << std::setw(10) << std::right << nuc->second;
+    nuc++;
+
+    ss << std::setw(10) << std::left << compound_name;
+    ss << std::endl;
+
+    counter -= 3;
   }
+
+  // Get the last (or only, as the case may be) one or two fractions
+  if ( nuc != comp.end()) {
+    ss << std::setw(10) << std::left  << "COMPOUND";
+    ss << std::setw(10) << std::right << zfd[nuc->first];
+    ss << std::setw(10) << std::right << nuc->second;
+    nuc++;
+    
+    if ( nuc != comp.end()) {
+      ss << std::setw(10) << std::right << zfd[nuc->first];
+      ss << std::setw(10) << std::right << nuc->second;
+      nuc++;
+    } else {
+      ss << std::setw(10) << std::right << ""; 
+      ss << std::setw(10) << std::right << ""; 
+    }
+
+    ss << std::setw(10) << std::right << ""; 
+    ss << std::setw(10) << std::right << ""; 
+    ss << std::setw(10) << std::left << compound_name;
+    }
+
   ss<< std::endl;
   return ss.str();
 }
