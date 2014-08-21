@@ -69,3 +69,16 @@ def test_parse_det1():
     assert_array_equal(det['DETphi'][6], 
                        [7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 2.92709E-02, 0.00857, 16768])
     assert_array_equal(det['DETphiE'][-3], [1.49182E+01, 1.69046E+01, 1.49182E+01])
+
+def test_parse_det2():
+    det = serpent.parse_det('serp2_det.m')
+    for key in det:
+        if '_' in key:
+            assert_true(isinstance(det[key], int))
+        elif isinstance(det[key], np.ndarray):
+            assert_true(det[key].shape[1] in [3, 13])
+
+    # Check values
+    assert_array_equal(det['DET1'][4], 
+        [5, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5.11865E+05, 0.00417])
+    assert_array_equal(det['DET1E'][-3], [5.25306E-05, 3.80731E-03, 1.92992E-03])
