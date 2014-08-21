@@ -24,6 +24,16 @@ def test_parse_res1():
     assert_array_equal(res['SIX_FF_ETA'][1],  [1.16446E+00, 0.00186])
     assert_array_equal(res['PEAKF10'][rank0-1], [12, 11, 1.09824E+00, 0.01768])
 
+def test_parse_res2():
+    res = serpent.parse_res('serp2_res.m')
+    rank0 = res['IDX']
+    assert_equal(res['idx']+1, rank0)
+    for key in res:
+        if isinstance(res[key], np.ndarray):
+            assert_equal(res[key].shape[0], rank0)
+
+    # Check values
+    assert_array_equal(res['MEAN_POP_SIZE'][0], [1.00140E+02, 0.00359])
 
 def test_parse_dep1():
     dep = serpent.parse_dep('sample_dep.m')

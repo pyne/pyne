@@ -10,12 +10,21 @@ if sys.version_info[0] > 2:
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
-_if_idx_str = ("""if (exist("idx", "var"));\n"""
-              """  idx = idx + 1;\n"""
-              """else;\n"""
-              """  idx = 1;\n"""
-              """end;"""
-              )
+_if_idx_str_serpent1 = (
+    'if (exist("idx", "var"));\n'
+    '  idx = idx + 1;\n'
+    'else;\n'
+    '  idx = 1;\n'
+    'end;'
+    )
+
+_if_idx_str_serpent2 = (
+    "if (exist('idx', 'var'));\n"
+    '  idx = idx + 1;\n'
+    'else;\n'
+    '  idx = 1;\n'
+    'end;'
+    )
 
 _num_pattern = "([0-9]+[.]?[0-9]*[Ee]?[+-]?[0-9]*)"
 
@@ -85,12 +94,16 @@ def parse_res(resfile, write_py=False):
     f = _replace_comments(f)
 
     # Grab the number of 'if' statements
-    IDX = f.count(_if_idx_str)
+    if_idx_str = _if_idx_str_serpent1
+    IDX = f.count(if_idx_str)
+    if IDX == 0:
+        if_idx_str = _if_idx_str_serpent2
+        IDX = f.count(if_idx_str)
 
     # Replace if statements with something more meaningful
-    fpart = f.partition(_if_idx_str)
+    fpart = f.partition(if_idx_str)
     f = fpart[0] + "idx = 0" + fpart[2]
-    f = f.replace(_if_idx_str, 'idx += 1')
+    f = f.replace(if_idx_str, 'idx += 1')
 
     # Replace matlab Arrays
     f = _replace_arrays(f)
