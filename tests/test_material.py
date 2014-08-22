@@ -1162,7 +1162,7 @@ def test_fluka():
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
                           'name':'LEU',
-                          'fluka_name':'URANIUM?',
+                          'fluka_name':'URANIUM',
 			  'fluka_material_index': '35',
                           'source':'Some URL',
                           'comments': ('Fluka Compound '),
@@ -1170,11 +1170,10 @@ def test_fluka():
                    density=19.1)
 
     id = 25
-    last_id = id
-    # written = leu.fluka(id, last_id)
-    written = leu.write_material(id)
+    written = leu.fluka(id)
+   
     expected = (
-'\nMATERIAL         92.      235.       -1.       25.                    URAN-235  \n\nMATERIAL         92.      238.       -1.       26.                    URAN-238  \n* Fluka Compound \nMATERIAL        999.      999.      19.1       27.                    URANIUM?  \nCOMPOUND        0.04  URAN-235      0.96  URAN-238                    URANIUM?  \n')
+'\nMATERIAL         92.      235.       -1.       25.                    235-U  \n\nMATERIAL         92.      238.       -1.       26.                    238-U  \n* Fluka Compound \nMATERIAL        999.      999.      19.1       27.                    URANIUM  \nCOMPOUND        0.04  235-U      0.96  238-U                    URANIUM  \n')
     assert_equal(written, expected)
     # assert_equal(last_id, 28);
 
