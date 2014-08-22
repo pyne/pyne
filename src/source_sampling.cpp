@@ -6,12 +6,12 @@
 static pyne::Sampler* mcnp_sampler = NULL;
 
 void pyne::mcnp_sampling_setup_(int* mode) {
-  if(mcnp_sampler == NULL) {
+  if (mcnp_sampler == NULL) {
     std::string filename ("source.h5m");
     std::string src_tag_name ("source_density");
     std::string e_bounds_file ("e_bounds");
     std::vector<double> e_bounds = read_e_bounds(e_bounds_file);
-    if(*mode == 1) {
+    if (*mode == 1) {
       mcnp_sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, false);
     } else if (*mode == 2) {
       mcnp_sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, true);
@@ -40,8 +40,8 @@ void pyne::mcnp_particle_birth_(double* rands,
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
   std::vector<double> e_bounds;
   std::ifstream inputFile(e_bounds_file.c_str());
+  double value;
   if (inputFile) {
-    double value;
     while (inputFile >> value)
       e_bounds.push_back(value);
   }
