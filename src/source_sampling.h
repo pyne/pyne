@@ -46,7 +46,7 @@ namespace pyne {
 
   /// MCNP interface for source sampling setup
   /// \param mode The sampling mode: 1 = analog, 2 = uniform, 3 = user-specified
-  void mcnp_sampling_setup_(int* mode);
+  void sampling_setup_(int* mode);
   /// MCNP interface to sample particle birth parameters after sampling setup
   /// \param rands Six pseudo-random numbers supplied from the Fortran side.
   /// \param x The sampled x position returned by this function
@@ -54,7 +54,7 @@ namespace pyne {
   /// \param z The sampled z position returned by this function
   /// \param e The sampled energy returned by this function
   /// \param w The sampled y statistical weight returned by this function
-  void mcnp_particle_birth_(double* rands,
+  void particle_birth_(double* rands,
                             double* x,
                             double* y,
                             double* z,

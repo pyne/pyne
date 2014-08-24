@@ -2,34 +2,35 @@
 #include "source_sampling.h"
 #endif
 
-// MCNP Fortran API
-static pyne::Sampler* mcnp_sampler = NULL;
+// Global sampler instance
+static pyne::Sampler* sampler = NULL;
 
-void pyne::mcnp_sampling_setup_(int* mode) {
-  if (mcnp_sampler == NULL) {
+// Fortran API
+void pyne::sampling_setup_(int* mode) {
+  if (sampler == NULL) {
     std::string filename ("source.h5m");
     std::string src_tag_name ("source_density");
     std::string e_bounds_file ("e_bounds");
     std::vector<double> e_bounds = read_e_bounds(e_bounds_file);
     if (*mode == 1) {
-      mcnp_sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, false);
+      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, false);
     } else if (*mode == 2) {
-      mcnp_sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, true);
+      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, true);
     } else if (*mode == 3) {
       std::string bias_tag_name ("biased_source_density");
-      mcnp_sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
+      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
     }
   }
 }
 
-void pyne::mcnp_particle_birth_(double* rands,
-                          double* x,
-                          double* y,
-                          double* z,
-                          double* e,
-                          double* w) {
+void pyne::particle_birth_(double* rands,
+                           double* x,
+                           double* y,
+                           double* z,
+                           double* e,
+                           double* w) {
     std::vector<double> rands2(rands, rands + 6);
-    std::vector<double> samp = mcnp_sampler->particle_birth(rands2);
+    std::vector<double> samp = sampler->particle_birth(rands2);
     *x = samp[0];
     *y = samp[1];
     *z = samp[2];
