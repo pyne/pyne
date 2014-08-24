@@ -465,16 +465,16 @@ inlining is not guaranteed, and slows down run times.
 
 Use this pattern only if implementing a Python/Cython-like property where
 getting or setting a member variable is non-trivial. In these cases, the
-storage variable should be named with a leading underscore (even though it may be
+storage variable should be named with a trailing underscore (even though it may be
 public) and the get/set names should have the same name as the variable but without
-the leading underscore:
+the trailing underscore:
 
 .. code-block:: c++
 
     class WithAnX {
      public:
       // storage variable
-      int _x;
+      int x_;
 
       // getter
       int x();
