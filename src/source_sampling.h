@@ -44,6 +44,26 @@ extern "C" {
 
 namespace pyne {
 
+  /// MCNP interface for source sampling setup
+  /// \param mode The sampling mode: 1 = analog, 2 = uniform, 3 = user-specified
+  void sampling_setup_(int* mode);
+  /// MCNP interface to sample particle birth parameters after sampling setup
+  /// \param rands Six pseudo-random numbers supplied from the Fortran side.
+  /// \param x The sampled x position returned by this function
+  /// \param y The sampled y position returned by this function
+  /// \param z The sampled z position returned by this function
+  /// \param e The sampled energy returned by this function
+  /// \param w The sampled y statistical weight returned by this function
+  void particle_birth_(double* rands,
+                            double* x,
+                            double* y,
+                            double* z,
+                            double* e,
+                            double* w);
+  /// Helper function for MCNP interface that reads energy boudaries from a file
+  /// \param e_bounds_file A file containing the energy group boundaries.
+  std::vector<double> read_e_bounds(std::string e_bounds_file);
+
   /// Stores 4 connected points in a mesh volume element
   struct edge_points {
     MBCartVect o_point;
