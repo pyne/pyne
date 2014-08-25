@@ -690,25 +690,9 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
         std::setw(10) << std::right << (float)znum; 
 
-  // Control the maximum precision:  this will print however many digits 
-  // there are after the decimal, up to a maximum of six
-  ls.unsetf(std::ios::showpoint);
-  ls.unsetf(std::ios::floatfield);
-  ls.precision(6);
-  ls << std::setw(10) << std::right << atomic_mass;
-
-  // Density formatting depends on whether it is a true float
+  ls << fluka_format_field(atomic_mass);
   // Note this is the current object density, and may or may not be meaningful
-  double intpart;
-  modf (density, &intpart);
-  if (density == intpart) {
-    // There is no part after the decimal
-    ls << std::setprecision(0) << std::fixed << std::showpoint 
-       << std::setw(10) << std::right << density;
-  } else {
-    // Use the previous field's setting (atomic mass: max precision = 6)
-    ls << std::setw(10) << std::right << density;
-  }
+  ls << fluka_format_field(density);
 
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
         std::setw(10) << std::right << (float)fid;
@@ -718,6 +702,34 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
 
   return ls.str();
 }
+
+//---------------------------------------------------------------------------//
+// fluka_format_field
+//---------------------------------------------------------------------------//
+// Convenience function that returns a 10-character formatted string
+// 999 -> 999.
+// 999.12 -> 999.12
+// 999.123 -> 999.123
+// 999.1234 -> 999.123
+std::string pyne::Material::fluka_format_field(float field)
+{
+  std::stringstream ls;
+  double intpart;
+  modf (field, &intpart);
+  if (field == intpart) {
+    ls << std::setprecision(0) << std::fixed << std::showpoint 
+       << std::setw(10) << std::right << field;
+  } else {
+  // This will print however many digits after the decimal, up to a max of six
+    ls.unsetf(std::ios::showpoint);
+    ls.unsetf(std::ios::floatfield);
+    ls.precision(6);
+    ls << std::setw(10) << std::right << field;
+  }  
+
+  return ls.str();
+}
+
 //---------------------------------------------------------------------------//
 // write_compound
 //---------------------------------------------------------------------------//
@@ -752,16 +764,16 @@ std::string pyne::Material::write_compound(int id)
   while (counter >= 3) {
     ss << std::setw(10) << std::left  << "COMPOUND";
 
-    ss << std::setw(10) << std::right << zfd[nuc->first];
     ss << std::setw(10) << std::right << nuc->second;
+    ss << std::setw(10) << std::right << zfd[nuc->first];
     nuc++;
 
-    ss << std::setw(10) << std::right << zfd[nuc->first];
     ss << std::setw(10) << std::right << nuc->second;
+    ss << std::setw(10) << std::right << zfd[nuc->first];
     nuc++;
 
-    ss << std::setw(10) << std::right << zfd[nuc->first];
     ss << std::setw(10) << std::right << nuc->second;
+    ss << std::setw(10) << std::right << zfd[nuc->first];
     nuc++;
 
     ss << std::setw(10) << std::left << compound_name;
@@ -773,13 +785,13 @@ std::string pyne::Material::write_compound(int id)
   // Get the last (or only, as the case may be) one or two fractions
   if ( nuc != comp.end()) {
     ss << std::setw(10) << std::left  << "COMPOUND";
-    ss << std::setw(10) << std::right << zfd[nuc->first];
     ss << std::setw(10) << std::right << nuc->second;
+    ss << std::setw(10) << std::right << zfd[nuc->first];
     nuc++;
     
     if ( nuc != comp.end()) {
-      ss << std::setw(10) << std::right << zfd[nuc->first];
       ss << std::setw(10) << std::right << nuc->second;
+      ss << std::setw(10) << std::right << zfd[nuc->first];
       nuc++;
     } else {
       ss << std::setw(10) << std::right << ""; 
@@ -1134,9 +1146,9 @@ pyne::Material pyne::Material::expand_elements() {
 pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   ////////////////////////////////////////////////////////////////////////
   // Assumptions
-  //    - list passed in is formed of znum-anum of Fluka-named isotopes,
-  //      since we want to preserve the full nucid of any such material in
-  //      the problem
+  //    - list passed in is of nucid's formed from the znum-anum of 
+  //      Fluka-named isotopes, since we want to preserve the full 
+  //      nucid of any such material in the problem
   // Algorithm
   // for each component listed in this material that has a nonzero frac or 
   //    weight amount, look at its 'stripped' nucid, that is, the last four 
@@ -1154,12 +1166,12 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
       if (0 < ptr->second) {
         // There is a nonzero amount of this nucid in the current material, 
-    // check if znum and anum are in the exception list, 
+        // check if znum and anum are in the exception list, 
         int cur_stripped_id = nucname::znum(ptr->first)*10000000 
                         + nucname::anum(ptr->first)*10000;
         if (0 < exception_ids.count(cur_stripped_id)) {
-          // The znum/anum combination identify the current material as a 
-      // fluka-named exception list => copy, don't collapse
+        // The znum/anum combination identify the current material as a 
+        // fluka-named exception list => copy, don't collapse
           cm[ptr->first] = (ptr->second) * mass;
         } else {
           // Not on exception list => add frac to id-component

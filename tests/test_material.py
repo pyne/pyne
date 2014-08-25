@@ -1168,15 +1168,43 @@ def test_fluka():
                           'comments': ('Fluka Compound '),
                           },
                    density=19.1)
-
     id = 25
-    written = leu.fluka(id)
-   
-    expected = (
-'\nMATERIAL         92.      235.       -1.       25.                    235-U  \n\nMATERIAL         92.      238.       -1.       26.                    238-U  \n* Fluka Compound \nMATERIAL        999.      999.      19.1       27.                    URANIUM  \nCOMPOUND        0.04  235-U      0.96  238-U                    URANIUM  \n')
-    assert_equal(written, expected)
-    # assert_equal(last_id, 28);
+    matlines = []
+    # call fluka() on a material made up of each component
+    for key in leu.comp:
+	element = Material(nucvec={key:1})
+	matlines.append(element.fluka(id))
+	id=id+1
+    compound = leu.fluka(id)
+    matlines.append(compound)
+    written = ''.join(matlines)
 
+   
+    exp  = 'MATERIAL         92.   235.044       -1.       25.                    235-U'
+    exp += '     \n'
+    exp += 'MATERIAL         92.   238.051       -1.       26.                    238-U'
+    exp += '     \n'
+    exp += '* Fluka Compound'
+    exp += ' \n'
+    exp += 'MATERIAL        999.      999.      19.1       27.                    URANIUM'
+    exp += '   \n'
+    exp += 'COMPOUND        0.04     235-U      0.96     238-U                    URANIUM'
+    exp += '   \n'
+
+    assert_equal(exp,written)
+
+    coll = leu.collapse_elements({920000000})
+    coll.metadata['comments'] = 'Fluka Element '
+
+    exp = '* Fluka Element'
+    exp += ' \n'
+    exp += 'MATERIAL         92.   238.029      19.1       25.                    URANIUM'
+    exp += '   \n'
+    
+    # print exp
+    written = coll.fluka(25)
+    # print written
+    assert_equal(exp, written)
 
 def test_write_alara():
     if 'alara.txt' in os.listdir('.'):
