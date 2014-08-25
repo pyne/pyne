@@ -170,6 +170,7 @@ namespace pyne
     /// Format information into a FLUKA material card
     std::string material_line(int znum, double atomic_mass, 
                               int fid, std::string fluka_name);
+    /// Convenience function to format a single fluka field
     std::string fluka_format_field(float field);
     /// Return FLUKA compound card and the material card for the named compound
     /// but not the material cards of the components
