@@ -590,19 +590,18 @@ bool pyne::Material::notBuiltin(std::string fluka_name)
   return (FLUKA_builtin.find(fluka_name) == FLUKA_builtin.end());
 }
 
-
 //---------------------------------------------------------------------------//
 // fluka
 //---------------------------------------------------------------------------//
 // Main external call
-std::string pyne::Material::fluka(int id )
+std::string pyne::Material::fluka(int id)
 {
   std::stringstream rs;
 
   // Element, one nucid
   if (comp.size() == 1) {
     rs << write_material(id);
-  } else if (comp.size() > 1 ) {
+  } else if (comp.size() > 1) {
   // Compound
     rs << write_compound(id);
   } else {
@@ -662,7 +661,7 @@ std::string pyne::Material::material_component(int fid, int nucid,
   int znum = pyne::nucname::znum(nucid);
 
   double atomic_mass;
-  if (0 != pyne::NUC_DATA_PATH.length() ) { 
+  if (0 != pyne::NUC_DATA_PATH.length()) { 
     // for compounds (i.e., unrecognized nucids), this will be 0
     atomic_mass = pyne::atomic_mass(nucid);
   } else {
@@ -783,13 +782,13 @@ std::string pyne::Material::write_compound(int id)
   }
 
   // Get the last (or only, as the case may be) one or two fractions
-  if ( nuc != comp.end()) {
+  if (nuc != comp.end()) {
     ss << std::setw(10) << std::left  << "COMPOUND";
     ss << std::setw(10) << std::right << nuc->second;
     ss << std::setw(10) << std::right << zfd[nuc->first];
     nuc++;
     
-    if ( nuc != comp.end()) {
+    if  nuc != comp.end()) {
       ss << std::setw(10) << std::right << nuc->second;
       ss << std::setw(10) << std::right << zfd[nuc->first];
       nuc++;
