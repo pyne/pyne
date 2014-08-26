@@ -38,7 +38,7 @@ namespace pyne
 
   // These 37 strings are predefined FLUKA materials. 
   // Materials not on this list requires a MATERIAL card. 
-  static std::string flukaMatStrings[] = {
+  static std::string fluka_mat_strings[] = {
    "BLCKHOLE", "VACUUM",   "HYDROGEN", "HELIUM",   "BERYLLIU", "CARBON", 
    "NITROGEN", "OXYGEN",   "MAGNESIU", "ALUMINUM", "IRON",     "COPPER", 
    "SILVER",   "SILICON",  "GOLD",     "MERCURY",  "LEAD",     "TANTALUM", 
@@ -162,7 +162,7 @@ namespace pyne
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id );
     /// Convenience function to tell whether a given name needs a material card
-    bool notBuiltin(std::string fluka_name);
+    bool not_builtin(std::string fluka_name);
     /// High level call to get details and call material_component(..)
     std::string write_material(int id);
     /// Intermediate level call to prepare final info and call material_line(..)

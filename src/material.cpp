@@ -577,16 +577,16 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 
 //---------------------------------------------------------------------------//
 // Create a set out of the static string array. 
-std::set<std::string> FLUKA_builtin(pyne::flukaMatStrings, 
-                                    pyne::flukaMatStrings+pyne::FLUKA_MAT_NUM);
+std::set<std::string> fluka_builtin(pyne::fluka_mat_strings, 
+                                    pyne::fluka_mat_strings+pyne::FLUKA_MAT_NUM);
 
 //---------------------------------------------------------------------------//
 // notBuiltin
 //---------------------------------------------------------------------------//
 // Convenience function
 // This is written as a negative because that is what we care about
-bool pyne::Material::notBuiltin(std::string fluka_name) {
-  return (FLUKA_builtin.find(fluka_name) == FLUKA_builtin.end());
+bool pyne::Material::not_builtin(std::string fluka_name) {
+  return (fluka_builtin.find(fluka_name) == fluka_builtin.end());
 }
 
 //---------------------------------------------------------------------------//
@@ -637,7 +637,7 @@ std::string pyne::Material::write_material(int id) {
     fluka_name = zfd[nucid];
   }
 
-  if (notBuiltin(fluka_name)) {  
+  if (not_builtin(fluka_name)) {  
     ms << material_component(id, nucid, fluka_name);
   }
 
@@ -781,7 +781,7 @@ std::string pyne::Material::write_compound(int id) {
     ss << std::setw(10) << std::right << zfd[nuc->first];
     nuc++;
     
-    if  nuc != comp.end()) {
+    if  (nuc != comp.end()) {
       ss << std::setw(10) << std::right << nuc->second;
       ss << std::setw(10) << std::right << zfd[nuc->first];
       nuc++;
