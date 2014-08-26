@@ -575,24 +575,24 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   return oss.str();
 }
 
-//---------------------------------------------------------------------------//
-// Create a set out of the static string array. 
+///---------------------------------------------------------------------------//
+/// Create a set out of the static string array. 
 std::set<std::string> fluka_builtin(pyne::fluka_mat_strings, 
                                     pyne::fluka_mat_strings+pyne::FLUKA_MAT_NUM);
 
-//---------------------------------------------------------------------------//
-// notBuiltin
-//---------------------------------------------------------------------------//
-// Convenience function
-// This is written as a negative because that is what we care about
+///---------------------------------------------------------------------------//
+/// not_builtin
+///---------------------------------------------------------------------------//
+/// Convenience function
+/// This is written as a negative because that is what we care about
 bool pyne::Material::not_builtin(std::string fluka_name) {
   return (fluka_builtin.find(fluka_name) == fluka_builtin.end());
 }
 
-//---------------------------------------------------------------------------//
-// fluka
-//---------------------------------------------------------------------------//
-// Main external call
+///---------------------------------------------------------------------------//
+/// fluka
+///---------------------------------------------------------------------------//
+/// Main external call
 std::string pyne::Material::fluka(int id) {
   std::stringstream rs;
 
@@ -608,16 +608,16 @@ std::string pyne::Material::fluka(int id) {
   return rs.str();
 }
 
-//---------------------------------------------------------------------------//
-// write_material
-//---------------------------------------------------------------------------//
-//
-// Requirement:  the material upon which this function is called has
-//               exactly one nucid component, i.e. it is elemental
-// Do not assume fluka_name is defined in the metadata.  This function
-// may be called from a user-defined material, i.e. on that is not 
-// read out of a UW^2-tagged geometry file, and thus does not have
-// certain metadata.
+///---------------------------------------------------------------------------//
+/// write_material
+///---------------------------------------------------------------------------//
+///
+/// Requirement:  the material upon which this function is called has
+///               exactly one nucid component, i.e. it is elemental
+/// Do not assume fluka_name is defined in the metadata.  This function
+/// may be called from a user-defined material, i.e. on that is not 
+/// read out of a UW^2-tagged geometry file, and thus does not have
+/// certain metadata.
 std::string pyne::Material::write_material(int id) {
   std::stringstream ms;
   std::string fluka_name; // needed to determine if built-in
@@ -645,13 +645,13 @@ std::string pyne::Material::write_material(int id) {
   return ms.str();
 }
     
-//---------------------------------------------------------------------------//
-// material_component
-//---------------------------------------------------------------------------//
-// Material has only one component, 
-// Density is either object density or it is ignored ==> use object density
-// This function is not called for a compound, but it is called on the 
-// material-ized components of compounds
+///---------------------------------------------------------------------------//
+/// material_component
+///---------------------------------------------------------------------------//
+/// Material has only one component, 
+/// Density is either object density or it is ignored ==> use object density
+/// This function is not called for a compound, but it is called on the 
+/// material-ized components of compounds
 std::string pyne::Material::material_component(int fid, int nucid, 
                                                std::string fluka_name) {
   int znum = pyne::nucname::znum(nucid);
@@ -667,12 +667,12 @@ std::string pyne::Material::material_component(int fid, int nucid,
   return material_line(znum, atomic_mass, fid, fluka_name);
 }
 
-//---------------------------------------------------------------------------//
-// material_line
-//---------------------------------------------------------------------------//
-// Given all the info, return the Material string
-std::string pyne::Material::material_line (int znum, double atomic_mass, 
-                                           int fid, std::string fluka_name) {
+///---------------------------------------------------------------------------//
+/// material_line
+///---------------------------------------------------------------------------//
+/// Given all the info, return the Material string
+std::string pyne::Material::material_line(int znum, double atomic_mass, 
+                                          int fid, std::string fluka_name) {
   std::stringstream ls;
 
   if (metadata.isMember("comments") ) {
@@ -697,14 +697,14 @@ std::string pyne::Material::material_line (int znum, double atomic_mass,
   return ls.str();
 }
 
-//---------------------------------------------------------------------------//
-// fluka_format_field
-//---------------------------------------------------------------------------//
-// Convenience function that returns a 10-character formatted string
-// 999 -> 999.
-// 999.12 -> 999.12
-// 999.123 -> 999.123
-// 999.1234 -> 999.123
+///---------------------------------------------------------------------------//
+/// fluka_format_field
+///---------------------------------------------------------------------------//
+/// Convenience function that returns a 10-character formatted string
+/// 999 -> 999.
+/// 999.12 -> 999.12
+/// 999.123 -> 999.123
+/// 999.1234 -> 999.123
 std::string pyne::Material::fluka_format_field(float field) {
   std::stringstream ls;
   double intpart;
@@ -723,12 +723,12 @@ std::string pyne::Material::fluka_format_field(float field) {
   return ls.str();
 }
 
-//---------------------------------------------------------------------------//
-// write_compound
-//---------------------------------------------------------------------------//
-// Returns
-// -- MATERIAL line for compound
-// -- COMPOUND lines
+///---------------------------------------------------------------------------//
+/// write_compound
+///---------------------------------------------------------------------------//
+/// Returns
+/// -- MATERIAL line for compound
+/// -- COMPOUND lines
 std::string pyne::Material::write_compound(int id) {
   std::stringstream ss;
   std::map<double, std::string> frac_name_map;
