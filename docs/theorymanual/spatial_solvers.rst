@@ -8,62 +8,32 @@ Ahot Spatial Solvers
 
 This page presents a detailed explanation of how :py:mod:`spatialsolver` works, including
 underlying theory, any assocaited assumptions, and information about correct and
-appropriate use of this physics. 
-
+appropriate use of this physics. Excerpts are taken from  Development of a Quantitative Decision Metric for Selecting the Most Suitable Discretization Method for S N Transport Problems by Sebastian Schunert.
 
 *****************************
 Fundamental solver theory
 *****************************
 
-@TODO: add latex formatting for variables/equations, etc
+  This suit of solvers uses the SN equations to solve the Boltzmann transport equation.  "The linear Boltzmann transport equation describes the evolution of the flux of neutral particles, i.e. neutrons or photons, in a host medium. It can be obtained from the general Boltzmann transport equation by neglecting particle-particle interactions, the dependence of the material properties of the host medium on the particle flux, and assuming that no electric force field is present." (1 p.5).  
 
-"The linear Boltzmann transport equation describes the evolution of the flux of neutral particles,
-i.e. neutrons or photons, in a host medium. It can be obtained from the general Boltzmann
-transport equation by neglecting particle-particle interactions, the dependence of the material
-properties of the host medium on the particle flux, and assuming that no electric force field is
-present." (1 p.5).
-The following are all spatial discretization methods used to solve the Sn equations of the Neutron Transport Equation (nte).  There are three major assumptions each makes: (1) all systems are steady state (no time dependence), (2) in a non-multiplying medium (sigmaf = 0), and (3) featuring isotropic scattering.  The Sn equations make the transport equation solvable by solving the transport equation along specific segments of omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N.  A nodal method is then used to come up with a specific solution.  The nodal method is what differentiates each of these codes, as outlined below.
+  The following are all spatial discretization methods used to solve the Sn equations of the Neutron Transport Equation (nte).  There are three major assumptions each makes: (1) all systems are steady state (no time dependence), (2) in a non-multiplying medium (sigmaf = 0), and (3) featuring isotropic scattering.  The Sn equations make the transport equation solvable by solving the transport equation along specific segments of omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N.  A nodal method is then used to come up with a specific solution.  The nodal method is what differentiates each of these codes, as outlined below.
 
 
 *****************************
 General AHOTN theory
 *****************************
 
-*****************************
-Ahotn-LN theory 
-*****************************
-
-Linear Nodal Method:
-
-Advantage: Very efficient when computing integral quantities (1,p.0)
-
-**Merge with LL description?
+The arbitrarily high-order transport method of the nodal type is a Transverse Moment Type Method.  It is derived for arbitrary expansion orders with the order Λ
 
 *****************************
-Ahotn-LL theory
+Ahotn-LL/-LN theory
 *****************************
 
-Linear Linear Method:
+The Linear Linear and Linear Nodal Methods use linear TMB approximations to solve the SN equations.
 
-"The LN and LL methods both utilize moments of the balance equations, Eq. 2.23, satisfying
-m x + m y + m z ≤ 1 augmented by three WDD equations per dimensions. Thus, the full set of
-LN and LL equations comprises four balance relations and twelve WDD equations. Within this
-subsection the WDD equations for the LL and LN method are derived in three-dimensional
-Cartesian geometry. In particular, the WDD equations for the x-direction will be developed
-for each of these two methods, but equivalent equations can be derived using the exact same
-procedure for the y and z-direction.
-Applying the operator Eq. 2.43 to the transport equation leads to an ordinary differential
-h, i
-equation for ψ m
-<<INSERT THESIS LATEX HERE>
-(2.51)
-where χ km k ,m p (x) with k = y or k = z is given by:
-<<INSERT THESIS LATEX HERE>
-and +k = N, T and −k = S, B. In addition, the indices m k and m p are defined as follows:
-if k = y then m k = m y and m p = m z , while for k = z we have m k = m z and m p = m y . For
-making Eq. 2.51 amenable to a solution χ km k ,m p (x)’s dependence on x is approximated by:
-<<INSERT THESIS LATEX HERE>
-(2.53)where λ = 0 for the LN method and λ = 1 for the LL method." (1, p.38-39)
+"TMB approximation is a good compromise
+for achieving high accuracy at a reasonably short execution time, thus resulting in improved
+computational efficiency." (1, p.38)
 
 *****************************
 Ahotn-NEFD theory
@@ -80,34 +50,34 @@ then solved for the (Λ + 1) 3 unknown nodal flux moments (NEFD algorithm),"(1, 
 *****************************
 DGFEM General Theory
 *****************************
-"The discontinuous Galerkin finite element method (DGFEM) uses identical polynomial test
-and trial function spaces that are typically substituted into the weak form and tested against
-all members of the test space to obtain a per-cell system of equations." (1, p.25)
 
-There are three families of solvers under the general DGFEM label, linearly-discontinuous, lagrange and complete.  The Lagrange family is more accurate, while the complete family excecutes faster.
+The DGFEM solvers use the Discontinuous Galerkin Finite Element Method (DGFEM) to solve the SN equations.  These use identical polynomial test and trial function spaces that are typically substituted into the weak form and tested against all members of the test space to obtain a per-cell system of equations." (1, p.25)  "In summary two families of DGFEM function spaces are mostly used in discretizing the spatial variable in the SN approximation of the transport equation: (1) the complete family and (2) the Lagrange family." (1,p27) 
+
+"Assume that we formulate our function spaces such that we solve for point values of the flux, i.e. we use Lagrange polynomials as basis functions. Then, in two-dimensional triangular geometry and three-dimensional tetrahedral geometry the complete basis would require one flux value per corner point. The Lagrange basis would introduce more degrees of freedom that are not associated with the flux values in the corner points. In two-dimensional and three-dimensional Cartesian geometry the Lagrange family would result in one flux value per corner point. The complete basis would result in less degrees of freedom. For Λ = 1 for example, the Lagrange function space seems for more natural for Cartesian meshes, while the complete family appears to be a more natural choice for triangles/tetrahedra." (1,p.28)
+
+When comparing these three included DGFEM solvers with a fixed expansion order, the Lagrange family
+is more accurate, while the complete family excecutes faster.
+
+*****************************
+DGFEM-Lagrange theory
+*****************************
+
+DGFEM-Lagrange is part of the lagrange family of solvers of the DGFEM type.  All lagrange solvers are
+implemented on the lagrange function space, rather than the complete function space.  For an explanation 
+of both spaces see 4.4.1 and 4.4.2 from [1].  "The DGFEM method for discretizing the SN equations was first suggested by Reed and Hill [36] for two-dimensional triangular cells using a basis of Lagrange polynomials: Each Lagrange basis function is associated with a support point at which its value is unity while it assumes
+a zero value at all other support points. The unknowns in Reed’s methods are then the flux
+values at the support points and the method’s order is related to the number of support points
+within a single cell."
 
 *****************************
 DGFEM-LD theory
 *****************************
 
-Linearly Discontinous Method:
-
-The linear discontinuous DGFEM method (LD) is the special case of the complete DGFEM
-method of order Λ = 1. It is special in that the local matrix T is of size 4 × 4 and therefore its
-inverse can be precomputed thus saving execution time. Following [24] we decided to implement
+Linearly Discontinous Method:  "The linear discontinuous DGFEM method (LD) is the special case of the
+complete DGFEM method of order Λ = 1. It is special in that the local matrix T is of size 4 × 4 and
+therefore its inverse can be precomputed thus saving execution time. Following [24] we decided to implement
 the LD method distinctly from the arbitrary order complete DGFEM kernel in order to create
 a highly optimized method." (1, p.92)
-
-"The first DGFEM methods which he refers to as linear discontinuous (LD) method uses the following approximation for the angular flux:
-i,h
-ψ m
-p m (r) ,
-ψ n i,h (r) =
-(2.29)
-m≤1
-where m = m x + m y + m z ." (1, p.26)
-
-Part of the complete family?
 
 ********************************
 DGFEM-LL theory (linear-linear?)
@@ -116,53 +86,34 @@ DGFEM-LL theory (linear-linear?)
 Part of the complete family?
 
 *****************************
-DGFEM-Lagrange theory
-*****************************
-
-Part of the lagrange family?
-
-*****************************
 Sct-step theory
 *****************************
 
-"For the implementation of the SCT-Step method, the mesh sweep has to account for the
-possibility of multiple distinct outflow segments on a single cell face as, for example, depicted in
-Fig. 4.4. It is at the heart of the algorithm that the outflow averages are not mixed across the
-boundaries imposed by the singular planes because mixing would defeat the initial purpose of
-this algorithm: separating the solution slices illuminated by different boundary faces. Within
-the described work, the SCT-Step algorithm was included into a standard sweep algorithm
-ˆ n , for example the x-index runs fastest,
-that sweeps the cells in a certain order dependent on Ω
-followed by the y-index and finally the z-index runs slowest.
-The subcell expressions, Eqs. 4.47, 4.48 and 4.49, are applied locally, i.e. whenever a
-cell intersected by at least a singular planes is encountered, Eqs. 4.47 and 4.48 are used to
-h, i
-compute the segment’s outflow and cell averages. Then the segment volume-averaged flux ψ  ̄ n,m
-is immediately collapsed into one cell-averaged scalar flux using Eq. 4.49.
-This is in contrast to the treatment of the face-averaged fluxes, because they need to be
-stored by illumination segment. Take for example a face that is intersected by the singular
-characteristic as depicted on the left in Fig. 4.4: In this case, the cell downstream across this
-109face from the one just solved, will be intersected by the singular characteristic, and the three
-face-averaged segment fluxes will be needed as input for the three instances of Eq. 4.48 to be
-solved. Similarly, for a face intersected by a single singular plane, two solution segments exist
-and the two face-averaged segment fluxes will be required as input.
-In the absence of reflective boundary conditions, at most n a = J · K + J + 1 angular face
-information sets need to be stored (compared to at least I · J · K scalar fluxes), and therefore
-the SCT-Step method does not increase the memory consumption significantly to store three
-instead of one angular face flux per cell face. The memory consumption for solving the angular
-face fluxes therefore increases to n a = 3n a .
-The SCT-Step method does not superimpose an additional grid over the Cartesian mesh, it
-merely splits a mesh cell appropriately into segments and collapses them immediately before the
-cell’s solution is complete. It is important to contrast this to the idea of creating an unstructured
-mesh specifically to isolate the illumination segments from each other e.g. as suggested in [11].
-The disadvantage of this latter approach is that the mesh becomes dependent on the angular
-ˆ n so that, for a practical algorithm, separate meshes need to be created for each
-direction Ω
-discrete ordinate and, in addition, restriction and prolongation operators need to be devised to
-exchange information between these meshes.
-The SCT-Step method is added to the selection of promising discretization methods because
-it is expected to perform well in C 0 configurations where it is expected to restore cell-wise
-convergence." (1, p.109-110)
+The Sct-step solver is an implementation of Duo's Sct step algorithm in three dimensional cartesian geometry. [1, p.105]
+
+SCT history and introduction to SCT-STEP:
+
+"In addition, a novel method that explicitly tracks and eliminates lines and planes of non-
+smoothness originating from “inconsistent” boundary conditions was developed and imple-
+mented. This method uses the Step approximation in all cells that are intersected by lines
+and planes of non-smoothness. It can be considered an extension of Duo’s Singular Character-
+istic Tracking algorithm[17] to three spatial coordinates. However, it is important to point out
+that this extension is highly non-trivial because of the tremendous increase in complexity of the
+tracking and cell-splitting algorithms involved. The new method is labeled SCT-Step method." (1,p.4)
+
+Maybe use this for the history and introduction instead:
+
+"In two-dimensional geometry Duo[17] suggested tracking of the singular characteristic line
+through the mesh and applying a sub-cell approach in intersected cells to keep segments in
+these cells isolated from each other. For the solution of the subcell equations, Duo used the
+Step Characteristic method applied to each of the segments separately. For further details of
+the Duo’s SCT algorithm, references [17] and [1] may be consulted. The results found in these
+two references were that the SCT algorithm (1) restored convergence in the infinity norm for
+C 0 type problems and (2) improved accuracy and observed rate of convergence for C 0 and C 1
+test problems. Encouraged by the success of Duo’s SCT algorithm we decided to implement a
+similar algorithm for three-dimensional Cartesian geometry." (1, p.105)
+
+SCT
 
 *************************************
 Advantages & Disadvantages discussion
@@ -185,24 +136,8 @@ much longer execution times than AHOTN or HODD of the same order is the signific
 expensive solution of the linear system of equations. We conjecture that the structure of the
 DGLA matrices causes the Lapack routine dgesv to execute slower." (1, p.103)
 
-
-
-
-Mathematical Details, some example math syntax:
-
-You can use LaTeX format in rst. To do inline expressions (what $expression$ would
-do in LaTeX) :math:`A\vec{x} = \vec{b}`.
-
-To have blocks of mathematical content, do this
-
-.. math::
-    
-    A\vec{x} = \vec{b}
-
-Support is limited to a subset of LaTeX math by the conversion required for many output formats.
-
 ***********
-Assumptions
+Solver Assumptions
 ***********
 
 1.  All systems are steady state (no time dependence)
@@ -222,3 +157,4 @@ References
 1. SCHUNERT, SEBASTIAN. Development of a Quantitative Decision Metric for Selecting the
 Most Suitable Discretization Method for S N Transport Problems. (Under the direction of
 Yousry Y. Azmy.)
+36.  Add 36 from thesis!
