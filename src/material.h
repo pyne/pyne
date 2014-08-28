@@ -162,19 +162,20 @@ namespace pyne
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id );
     /// Convenience function to tell whether a given name needs a material card
-    bool not_builtin(std::string fluka_name);
+    bool not_fluka_builtin(std::string fluka_name);
     /// High level call to get details and call material_component(..)
-    std::string write_material(int id);
+    std::string fluka_material_str(int id);
     /// Intermediate level call to prepare final info and call material_line(..)
-    std::string material_component(int fid, int nucid, std::string fluka_name);
+    std::string fluka_material_component(int fid, int nucid, 
+                                         std::string fluka_name);
     /// Format information into a FLUKA material card
-    std::string material_line(int znum, double atomic_mass, 
+    std::string fluka_material_line(int znum, double atomic_mass, 
                               int fid, std::string fluka_name);
     /// Convenience function to format a single fluka field
     std::string fluka_format_field(float field);
     /// Return FLUKA compound card and the material card for the named compound
     /// but not the material cards of the components
-    std::string write_compound(int id);
+    std::string fluka_compound_str(int id);
 
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
