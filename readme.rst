@@ -26,6 +26,8 @@ Dependencies
 ------------
 PyNE has the following dependencies:
 
+   #. `Fortran compiler <https://gcc.gnu.org/wiki/GFortran>`_
+   #. `C++ compiler <https://gcc.gnu.org/>`_
    #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
    #. `NumPy <http://www.numpy.org/>`_ (>= 1.8.0)
    #. `SciPy <http://www.scipy.org/>`_
