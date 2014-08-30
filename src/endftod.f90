@@ -7,6 +7,7 @@ function endftod(str) result(val)
     character (len=11) :: str
     read( str, "(E11.0)",iostat=reason) val
     if (reason > 0) then
+        print *, "Something went wrong converting: ", str
         val = 0
     end if
 end function
