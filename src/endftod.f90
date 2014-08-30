@@ -1,0 +1,12 @@
+!Simple Fortran function to convert ENDF-6 values to doubles
+
+function endftod(str) result(val)
+    integer, parameter:: dp=kind(0.d0)
+    integer :: reason
+    real(dp) :: val
+    character (len=11) :: str
+    read( str, "(E11.0)",iostat=reason) val
+    if (reason > 0) then
+        val = 0
+    end if
+end function
