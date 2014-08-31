@@ -1,5 +1,5 @@
-!Simple Fortran function to convert ENDF-6 values to doubles
-
+!> @brief Simple Fortran function to convert ENDF-6 values to doubles.
+!! @param str 11-charachter string in ENDF format
 function endftod(str) result(val)
     integer, parameter:: dp=kind(0.d0)
     integer :: reason
