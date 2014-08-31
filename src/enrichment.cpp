@@ -35,15 +35,15 @@ pyne_enr::Cascade pyne_enr::default_uranium_cascade(pyne_enr::_fill_default_uran
 
 
 double pyne_enr::feed_per_prod(double x_feed, double x_prod, double x_tail) {
-  return 1 / pyne_enr::prod_per_feed(x_feed, x_prod, x_tail);
+  return 1 / prod_per_feed(x_feed, x_prod, x_tail);
 }
 
 double pyne_enr::feed_per_tail(double x_feed, double x_prod, double x_tail) {
-  return 1 / pyne_enr::tail_per_feed(x_feed, x_prod, x_tail);
+  return 1 / tail_per_feed(x_feed, x_prod, x_tail);
 }
 
 double pyne_enr::prod_per_tail(double x_feed, double x_prod, double x_tail) {
-  return 1 / pyne_enr::tail_per_prod(x_feed, x_prod, x_tail);
+  return 1 / tail_per_prod(x_feed, x_prod, x_tail);
 }
 
 double pyne_enr::prod_per_feed(double x_feed, double x_prod, double x_tail) {

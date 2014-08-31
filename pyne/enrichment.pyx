@@ -367,7 +367,7 @@ def value_func(double x):
 
     .. math::
 
-        \V(x) = (2x - 1) \\log{\\frac{x}{x - 1}}
+        V(x) = (2x - 1) \\log{\\frac{x}{x - 1}}
 
     Parameters
     ----------
