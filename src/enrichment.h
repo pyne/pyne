@@ -22,15 +22,35 @@ namespace enrichment {
   /// a cascade instance with default values for a uranium enrichment.
   extern Cascade default_uranium_cascade;
 
+  /// Computes the feed per product mass ratio for feed, product, and tails
+  /// enrichments \a x_feed, \a x_prod, and \a x_tails.
+  double feed_per_prod(double x_feed, double x_prod, double x_tail);
+  /// Computes the feed per tails mass ratio for feed, product, and tails
+  /// enrichments \a x_feed, \a x_prod, and \a x_tails.
+  double feed_per_tail(double x_feed, double x_prod, double x_tail);
   /// Computes the product per feed mass ratio for feed, product, and tails
   /// enrichments \a x_feed, \a x_prod, and \a x_tails.
   double prod_per_feed(double x_feed, double x_prod, double x_tail);
+  /// Computes the product per tails mass ratio for feed, product, and tails
+  /// enrichments \a x_feed, \a x_prod, and \a x_tails.
+  double prod_per_tail(double x_feed, double x_prod, double x_tail);
   /// Computes the tails per feed mass ratio for feed, product, and tails
   /// enrichments \a x_feed, \a x_prod, and \a x_tails.
   double tail_per_feed(double x_feed, double x_prod, double x_tail);
   /// Computes the tails per product mass ratio for feed, product, and tails
   /// enrichments \a x_feed, \a x_prod, and \a x_tails.
   double tail_per_prod(double x_feed, double x_prod, double x_tail);
+  /// Computes the value or separation potential of an assay \a x.
+  double value_func(double x);
+  /// Computes the swu per feed ratio for feed, product, and tails
+  /// enrichments \a x_feed, \a x_prod, and \a x_tails.
+  double swu_per_feed(double x_feed, double x_prod, double x_tail);
+  /// Computes the swu per product ratio for feed, product, and tails
+  /// enrichments \a x_feed, \a x_prod, and \a x_tails.
+  double swu_per_prod(double x_feed, double x_prod, double x_tail);
+  /// Computes the swu per tails ratio for feed, product, and tails
+  /// enrichments \a x_feed, \a x_prod, and \a x_tails.
+  double swu_per_tail(double x_feed, double x_prod, double x_tail);
 
   /// Computes the nuclide-specific stage separation factor from the 
   /// overall stage separation factor \a alpha, the key mass \a Mstar, 
