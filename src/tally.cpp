@@ -7,6 +7,7 @@
 
 #ifndef PYNE_IS_AMALGAMATED
   #include "tally.h"
+  #include "rxname.h"
 #endif
 
 enum entity_type_enum {VOLUME, SURFACE}; // Enumeration for entity types
@@ -14,6 +15,47 @@ enum tally_type_enum  {FLUX, CURRENT};   // Enumeration for tally types
 
 const std::string tally_type_enum2string[] = {"Flux", "Current"};
 const std::string entity_type_enum2string[] = {"Volume", "Surface"};
+
+std::map<std::string particle_name, std::string fluka_name> rx2fluka;
+std::map<std::string particle_name, std::string mcnp6_name> rx2mcnp6; // to do
+std::map<std::string particle_name, std::string mcnp5_name> rx2mcnp5;
+
+// fluka names
+rx2fluka["n"]="NEUTRON";
+rx2fluka["antin"]="ANEUTRON";
+rx2fluka["gamma"]="PHOTON";
+rx2fluka["p"]="  PROTON";
+rx2fluka["antip"]=" APROTON";
+rx2fluka["d"]="DEUTERON";
+rx2fluka["t"]="  TRITON";
+rx2fluka["He3"]="3-HELIUM";
+rx2fluka["a"]="4-HELIUM";
+rx2fluka["e"]="ELECTRON";
+rx2fluka["antie"]="POSITRON";
+rx2fluka["muonp"]="MUON+";
+rx2fluka["muonm"]="MUON-"
+rx2fluka["kaonp"]="KAON+";
+rx2fluka["kaonm"]="KAON-";
+rx2fluka["kaon0"]="KAONZERO";
+rx2fluka["antikaon0"]="AKAONZER";
+rx2fluka["kaon_0_long"]="KAONLONG";
+rx2fluka["kaon_0_short"]="KAONSHRT";
+rx2fluka["heavy_ion"]="HEAVY_ION";
+rx2fluka["muon_neutrino"]="NEUTRIM";
+rx2fluka["muon_antineutrino"]="ANEUTRIM";
+
+// mcnp5 names
+rx2mcnp5["n"]="N";
+rx2mcnp5["gamma"]="P";
+rx2mcnp5["e"]="e";
+
+// mcnp6 names
+rx2mcnp6["n"]="N";
+rx2mcnp6["gamma"]="P";
+rx2mcnp6["e"]="E";
+rx2mcnp6["p"]="H";
+rx2mcnp6["d"]="D";
+rx2mcnp6["t"]="T";
 
 /***************************/
 /*** Protected Functions ***/
@@ -372,3 +414,89 @@ std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
   os << "\t in/on " << tal.entity_type << " " << tal.entity_id << "\n";
   return os;
 };
+
+// Sets string to valid mcnp formatted tally
+// Takes mcnp version as arg, like 5 or 6
+std::string pyne::tally::mcnp(int tally_index, std::string mcnp_version) {
+  std::stringstream output; // output stream
+  // neednt check entity type
+  if ( tally_type == CURRENT && entity_type == surface ) {
+    // f1 tally
+    output << "F"<< tally_index <<"1:" << particle_type << " " << entity_id << std:endl;
+  } else if ( tally_type == FLUX && entity_type == surface ) {
+    // f2
+    output << "F"<< tally_index <<"2:" << particle_type << " " << entity_id << std:endl;
+  } else if ( tally_type == FLUX && entity_type == volume ) {
+    // f4 tally
+    output << "F"<< tally_index <<"4:" << particle_type << " " << entity_id << std:endl;
+  } else if ( tally_type == CURRENT && entity_type == volume ) {   
+    // makes no sense in MCNP
+  } else {
+    std::cout << "tally/entity combination makes no sense for MCNP" << std::endl;
+  }
+} 
+
+// Produces valid fluka tally
+std::string pyne::tally::fluka(std::string unit_number = -21) {
+  std::stringstream output; // output stream
+
+  // check entity type
+  if( entity_type == VOLUME ) {
+    continue;
+  }  else if ( entity_type == SURFACE ) {
+      std::cout << "Surface tally not valid in FLUKA" << std::endl;
+  } else {
+      std::cout << "Unknown entity type" << std::endl;
+  }
+
+  part_name = rx2fluka[particle_name];
+
+  // check tally type
+  if( tally_type == FLUX ) {
+      output << std::setw(10) << std::left  << "USRTRACK";
+      output << std::setw(10) << std::right << "     1.0";
+      output << std::setw(10) << std::right << part_name;
+      output << std::setw(10) << std::right << unit_number;
+      output << std::setw(10) << std::right << entity_name;
+      output << std::setw(10) << std::right << entity_size;
+      output << std::setw(10) << std::right << "   1000."; // number of ebins
+      output << std::setw(10) << std::right << tally_name; // may need to make sure less than 10 chars
+      output << std::endl;
+      output << std::setw(10) << std::left  << "USRTRACK";
+      output << std::setw(10) << std::right << "   1.E-3";
+      output << std::setw(10) << std::right << "   10.E1";
+      output << std::setw(10) << std::right << "        ";
+      output << std::setw(10) << std::right << "        ";
+      output << std::setw(10) << std::right << "        ";
+      output << std::setw(10) << std::right << "        ";
+      output << std::setw(10) << std::right << "       &";      
+      // end of usrtrack
+  } else if ( tally_type == CURRENT ) {
+      output << std::setw(10) << std::left  << "USRBDX  ";    
+      output << std::setw(10) << std::right << "   110.0";
+      output << std::setw(10) << std::right << part_name;
+      output << std::setw(10) << std::right << unit_number;
+      output << std::setw(10) << std::right << entity_name; // upstream
+      output << std::setw(10) << std::right << entity_name; // downstream
+      output << std::setw(10) << std::right << entity_size; // area
+      output << std::setw(10) << std::right << tally_name; // may need to make sure less than 10 chars
+      output << std::endl;
+      output << std::setw(10) << std::left  << "USRBDX  ";    
+      output << std::setw(10) << std::right << "  10.0E1";
+      output << std::setw(10) << std::right << "     0.0";
+      output << std::setw(10) << std::right << "  1000.0"; // number of bins
+      output << std::setw(10) << std::right << "12.56637"; // 4pi
+      output << std::setw(10) << std::right << "     0.0";
+      output << std::setw(10) << std::right << "   240.0"; // number of angular bins
+      output << std::setw(10) << std::right << "       &";      
+      // end of usrbdx
+  } else {
+    std::cout << "Unknown tally type" << std::endl;
+  }
+
+}
+    
+
+  
+  
+
