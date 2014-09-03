@@ -127,6 +127,7 @@ class Library(object):
 
     def __init__(self, filename):
         # Determine whether file is ASCII or binary
+        self.f = None
         try:
             self.f = io.open(filename, 'r')
             # Grab 10 lines of the library
@@ -339,7 +340,8 @@ class Library(object):
         return self.tables.get(name, None)
 
     def __del__(self):
-        self.f.close()
+        if self.f is not None:
+            self.f.close()
 
 
 class AceTable(object):
@@ -477,7 +479,7 @@ class NeutronTable(AceTable):
         # Create elastic scattering reaction
         elastic_scatter = Reaction(2, self)
         elastic_scatter.Q = 0.0
-        elastic_scatter.IE = 1
+        elastic_scatter.IE = 0
         elastic_scatter.multiplicity = 1
         elastic_scatter.sigma = sigma_el
         self.reactions[2] = elastic_scatter
@@ -504,7 +506,7 @@ class NeutronTable(AceTable):
             loc = int(self.xss[self.jxs[6] + i])
 
             # Determine starting index on energy grid
-            reaction.IE = int(self.xss[self.jxs[7] + loc - 1])
+            reaction.IE = int(self.xss[self.jxs[7] + loc - 1]) - 1
 
             # Determine number of energies in reaction
             n_energies = int(self.xss[self.jxs[7] + loc])
@@ -1220,7 +1222,7 @@ class NeutronTable(AceTable):
             elif MFTYPE == 13:
                 # Cross-section data from ENDF File 13
                 # Energy grid index at which data starts
-                rxn.IE = int(self.xss[ind])
+                rxn.IE = int(self.xss[ind]) - 1
 
                 # Cross sections
                 NE = int(self.xss[ind+1])
@@ -1292,7 +1294,7 @@ class NeutronTable(AceTable):
             return
 
         # Read fission cross sections
-        self.IE_fission = int(self.xss[ind])  # Energy grid index
+        self.IE_fission = int(self.xss[ind]) - 1  # Energy grid index
         NE = int(self.xss[ind+1])
         self.sigma_f = self.xss[ind+2:ind+2+NE]
 
@@ -1519,7 +1521,7 @@ class Reaction(object):
         self.MT = MT       # MT value
         self.Q = None      # Q-value
         self.TY = None     # Neutron release
-        self.IE = None     # Energy grid index
+        self.IE = 0        # Energy grid index
         self.sigma = []    # Cross section values
 
     def broaden(self, T_high):
