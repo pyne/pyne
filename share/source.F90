@@ -53,6 +53,7 @@ subroutine source
     logical, save :: first_run = .true.
     real(dknd), dimension(6) :: rands
     integer :: icl_tmp ! temporary cell variable
+    integer :: find_cell
   
     if (first_run .eqv. .true.) then
         call sampling_setup(idum(1))
@@ -72,7 +73,12 @@ subroutine source
    if (mat(icl_tmp).eq.0) then
        goto 100
    end if
+
+   if (wgt.eq.0) then
+       wgt = 1E-99
+   end if
  
+   icl = icl_tmp
    tme = 0.0
    ipt = 2
    jsu = 0
