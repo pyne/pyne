@@ -622,7 +622,6 @@ std::string pyne::Material::fluka_material_str(int id) {
   std::stringstream ms;
   std::string fluka_name; // needed to determine if built-in
 
-  pyne::nucname::zzname_t zfd = pyne::nucname::get_zz_fluka();
   int nucid = comp.begin()->first;
    
   // NOTE:  first part of 'if' may never be called
@@ -634,7 +633,7 @@ std::string pyne::Material::fluka_material_str(int id) {
                 << std::endl;
       return ms.str();
     }
-    fluka_name = zfd[nucid];
+    fluka_name = nucname::fluka(nucid);
   }
 
   if (not_fluka_builtin(fluka_name)) {  
@@ -735,8 +734,6 @@ std::string pyne::Material::fluka_compound_str(int id) {
   std::string compound_string = "";
   std::vector<std::string> material_names;
 
-  pyne::nucname::zzname_t zfd = pyne::nucname::get_zz_fluka();
-
   // The nucid doesn't make sense for a compound
   int znum = 999;
   double atomic_mass = 999.;
@@ -757,15 +754,15 @@ std::string pyne::Material::fluka_compound_str(int id) {
     ss << std::setw(10) << std::left  << "COMPOUND";
 
     ss << std::setw(10) << std::right << nuc->second;
-    ss << std::setw(10) << std::right << zfd[nuc->first];
+    ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
 
     ss << std::setw(10) << std::right << nuc->second;
-    ss << std::setw(10) << std::right << zfd[nuc->first];
+    ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
 
     ss << std::setw(10) << std::right << nuc->second;
-    ss << std::setw(10) << std::right << zfd[nuc->first];
+    ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
 
     ss << std::setw(10) << std::left << compound_name;
@@ -778,12 +775,12 @@ std::string pyne::Material::fluka_compound_str(int id) {
   if (nuc != comp.end()) {
     ss << std::setw(10) << std::left  << "COMPOUND";
     ss << std::setw(10) << std::right << nuc->second;
-    ss << std::setw(10) << std::right << zfd[nuc->first];
+    ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
     
     if  (nuc != comp.end()) {
       ss << std::setw(10) << std::right << nuc->second;
-      ss << std::setw(10) << std::right << zfd[nuc->first];
+      ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
       nuc++;
     } else {
       ss << std::setw(10) << std::right << ""; 

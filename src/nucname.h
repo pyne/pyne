@@ -388,6 +388,28 @@ namespace nucname
   int mcnp_to_id(std::string nuc);
   /// \}
 
+  /// \name FLUKA Form Functions
+  /// \{
+  /// This is the naming convention used by the FLUKA suite of codes.
+  /// The FLUKA format for entering nuclides requires some knowledge of FLUKA
+  /// The nuclide in must cases should be the atomic # times 10000000.  
+  /// The exceptions are for FLUKA's named isotopes
+  /// See the FLUKA Manual for more information.
+  /// \param nuc a nuclide
+  /// \return the received FLUKA name
+  std::string fluka(int nuc);
+  /// \}
+
+  /// \name FLUKA Form to Identifier Form Functions
+  /// \{
+  /// This converts from the FLUKA name to the
+  /// id canonical form  for nuclides in PyNE. 
+  /// \param name a fluka name
+  /// \return an integer id nuclide identifier.
+  int fluka_to_id(std::string name);
+  int fluka_to_id(char * name);
+  /// \}
+
   /// \name Serpent Form Functions
   /// \{
   /// This is the string-based naming convention used by the Serpent suite of codes.

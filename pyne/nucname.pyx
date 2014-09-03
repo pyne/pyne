@@ -404,6 +404,44 @@ def mcnp_to_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
+
+def fluka(nuc):
+    """Converts a nuclide to its FLUKA name.
+
+    Parameters
+    ----------
+    nuc : int 
+        Input nuclide.
+
+    Returns
+    -------
+    fluka_name : string 
+        Output name in FLUKA form.
+
+
+    """
+    fluka_name = cpp_nucname.fluka(nuc)
+    return fluka_name
+
+
+def fluka_to_id(name):
+    """Converts a fluka name to the canonical identifier form. 
+
+    Parameters
+    ----------
+    name : str 
+        Input name, expectedt to be one FLUKA knows
+
+    Returns
+    -------
+    newnuc : int 
+        Output nuclide in identifier form.
+
+    """
+    newnuc = cpp_nucname.fluka_to_id(<char *> name)
+    return newnuc
+
+
 def zzllaaam(nuc):
     """Converts a nuclide to its zzllaaam form (95-Am-241m). 
 

@@ -433,7 +433,7 @@ int pyne::nucname::id(int nuc) {
     // Normal nuclide
     return nuc;
   } else if (aaassss == 0 && 0 < zz_name.count(zzz)) {
-    // Natural elemental nuclide:  ie for Urnaium = 920000000
+    // Natural elemental nuclide:  ie for Uranium = 920000000
     return nuc;
   } else if (nuc < 1000 && 0 < zz_name.count(nuc))
     //  Gave Z-number
@@ -921,6 +921,33 @@ int pyne::nucname::mcnp_to_id(char * nuc) {
 int pyne::nucname::mcnp_to_id(std::string nuc) {
   return mcnp_to_id(pyne::to_int(nuc));
 };
+
+
+/**********************/
+/*** fluka functions ***/
+/**********************/
+std::string pyne::nucname::fluka(int nuc) {
+  int x = id(nuc);
+  if (zz_fluka.count(x) == 0) {
+    throw NotANuclide(nuc, "fluka name could not be found");
+  }
+  return zz_fluka[x];
+};
+
+
+//
+// FLUKA name -> id
+//
+int pyne::nucname::fluka_to_id(std::string name) {
+  if (fluka_zz.count(name) == 0) {
+    throw NotANuclide(-1, "No nuclide: fluka name could not be found");
+  }
+  return fluka_zz[name];
+}
+
+int pyne::nucname::fluka_to_id(char * name) {
+  return fluka_to_id(std::string(name));
+}
 
 
 /*************************/
