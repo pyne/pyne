@@ -17,7 +17,7 @@
 #endif
 
 /// Number of reactions supported by default.
-#define NUM_RX_NAMES 579
+#define NUM_RX_NAMES 580
 
 namespace pyne
 {

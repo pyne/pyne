@@ -25,6 +25,10 @@ namespace pyne
   class Tally
   {
   public:
+    std::map<std::string, std::string> rx2fluka;
+    std::map<std::string, std::string> rx2mcnp5;
+    std::map<std::string, std::string> rx2mcnp6;
+
     /// Tally Constructors
     Tally (); /// empty constructor
 
@@ -42,6 +46,10 @@ namespace pyne
 	  std::string tally_name = "", double entity_size = 0.0);
 
     ~Tally (); /// default destructor
+
+
+    // Sets up the particle aliases
+    void setup_alias();
 
 
     /// Dummy read method wrapper around c style strings
@@ -78,6 +86,14 @@ namespace pyne
     std::string tally_name; ///< name of the tally 
     int entity_id; ///< id number of the entity being tallied upon    
     double entity_size; ///< the physical size of the entity 
+
+    // mcnp tally
+    std::string mcnp(int tally_index, std::string mcnp_version = "mcnp5" );
+    
+    // fluka tally 
+    std::string fluka(std::string unit_number = "-21");
+
+
   };
 
   /// Converts a Tally to a string stream representation.

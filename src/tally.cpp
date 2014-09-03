@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <iomanip>
 
 #ifndef PYNE_IS_AMALGAMATED
   #include "tally.h"
@@ -16,46 +17,10 @@ enum tally_type_enum  {FLUX, CURRENT};   // Enumeration for tally types
 const std::string tally_type_enum2string[] = {"Flux", "Current"};
 const std::string entity_type_enum2string[] = {"Volume", "Surface"};
 
-std::map<std::string particle_name, std::string fluka_name> rx2fluka;
-std::map<std::string particle_name, std::string mcnp6_name> rx2mcnp6; // to do
-std::map<std::string particle_name, std::string mcnp5_name> rx2mcnp5;
+//std::map<std::string particle_name, std::string fluka_name> pyne::Tally::rx2fluka;
+//std::map<std::string particle_name, std::string mcnp6_name> pyne::Tally::rx2mcnp6; // to do
+//std::map<std::string particle_name, std::string mcnp5_name> pyne::Tally::rx2mcnp5;
 
-// fluka names
-rx2fluka["n"]="NEUTRON";
-rx2fluka["antin"]="ANEUTRON";
-rx2fluka["gamma"]="PHOTON";
-rx2fluka["p"]="  PROTON";
-rx2fluka["antip"]=" APROTON";
-rx2fluka["d"]="DEUTERON";
-rx2fluka["t"]="  TRITON";
-rx2fluka["He3"]="3-HELIUM";
-rx2fluka["a"]="4-HELIUM";
-rx2fluka["e"]="ELECTRON";
-rx2fluka["antie"]="POSITRON";
-rx2fluka["muonp"]="MUON+";
-rx2fluka["muonm"]="MUON-"
-rx2fluka["kaonp"]="KAON+";
-rx2fluka["kaonm"]="KAON-";
-rx2fluka["kaon0"]="KAONZERO";
-rx2fluka["antikaon0"]="AKAONZER";
-rx2fluka["kaon_0_long"]="KAONLONG";
-rx2fluka["kaon_0_short"]="KAONSHRT";
-rx2fluka["heavy_ion"]="HEAVY_ION";
-rx2fluka["muon_neutrino"]="NEUTRIM";
-rx2fluka["muon_antineutrino"]="ANEUTRIM";
-
-// mcnp5 names
-rx2mcnp5["n"]="N";
-rx2mcnp5["gamma"]="P";
-rx2mcnp5["e"]="e";
-
-// mcnp6 names
-rx2mcnp6["n"]="N";
-rx2mcnp6["gamma"]="P";
-rx2mcnp6["e"]="E";
-rx2mcnp6["p"]="H";
-rx2mcnp6["d"]="D";
-rx2mcnp6["t"]="T";
 
 /***************************/
 /*** Protected Functions ***/
@@ -78,6 +43,8 @@ pyne::Tally::Tally() {
   entity_name = "";
   tally_name = "";
   entity_size = -1.0;
+
+  setup_alias();
 }
 
 pyne::Tally::Tally(std::string type, std::string part_name, 
@@ -92,14 +59,55 @@ pyne::Tally::Tally(std::string type, std::string part_name,
   entity_name = ent_name;
   tally_name = tal_name;
   entity_size = size;
+  setup_alias();
 }
 
 // Destructor
 pyne::Tally::~Tally() {
 };
 
+
 /*--- Method definitions ---*/
 
+void pyne::Tally::setup_alias(){
+// fluka names
+  rx2fluka["n"]="NEUTRON";
+  rx2fluka["antin"]="ANEUTRON";
+  rx2fluka["gamma"]="PHOTON";
+  rx2fluka["p"]="  PROTON";
+  rx2fluka["antip"]=" APROTON";
+  rx2fluka["d"]="DEUTERON";
+  rx2fluka["t"]="  TRITON";
+  rx2fluka["He3"]="3-HELIUM";
+  rx2fluka["a"]="4-HELIUM";
+  rx2fluka["e"]="ELECTRON";
+  rx2fluka["antie"]="POSITRON";
+  rx2fluka["muonp"]="MUON+";
+  rx2fluka["muonm"]="MUON-";
+  rx2fluka["kaonp"]="KAON+";
+  rx2fluka["kaonm"]="KAON-";
+  rx2fluka["kaon0"]="KAONZERO";
+  rx2fluka["antikaon0"]="AKAONZER";
+  rx2fluka["kaon_0_long"]="KAONLONG";
+  rx2fluka["kaon_0_short"]="KAONSHRT";
+  rx2fluka["heavy_ion"]="HEAVY_ION";
+  rx2fluka["muon_neutrino"]="NEUTRIM";
+  rx2fluka["muon_antineutrino"]="ANEUTRIM";
+
+  // mcnp5 names
+  rx2mcnp5["n"]="N";
+  rx2mcnp5["gamma"]="P";
+  rx2mcnp5["e"]="e";
+  
+  // mcnp6 names
+  rx2mcnp6["n"]="N";
+  rx2mcnp6["gamma"]="P";
+  rx2mcnp6["e"]="E";
+  rx2mcnp6["p"]="H";
+  rx2mcnp6["d"]="D";
+  rx2mcnp6["t"]="T";
+
+}
 
 //
 void pyne::Tally::from_hdf5(char * filename, char *datapath, int row) {
@@ -417,42 +425,43 @@ std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
 
 // Sets string to valid mcnp formatted tally
 // Takes mcnp version as arg, like 5 or 6
-std::string pyne::tally::mcnp(int tally_index, std::string mcnp_version) {
+std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   std::stringstream output; // output stream
   // neednt check entity type
-  if ( tally_type == CURRENT && entity_type == surface ) {
-    // f1 tally
-    output << "F"<< tally_index <<"1:" << particle_type << " " << entity_id << std:endl;
-  } else if ( tally_type == FLUX && entity_type == surface ) {
-    // f2
-    output << "F"<< tally_index <<"2:" << particle_type << " " << entity_id << std:endl;
-  } else if ( tally_type == FLUX && entity_type == volume ) {
-    // f4 tally
-    output << "F"<< tally_index <<"4:" << particle_type << " " << entity_id << std:endl;
-  } else if ( tally_type == CURRENT && entity_type == volume ) {   
-    // makes no sense in MCNP
+  if ( entity_type.find("Surface") != std::string::npos ) {
+    if ( tally_type.find("Current") != std::string::npos ) {
+      output << "F"<< tally_index <<"1:" << particle_name << " " << entity_id << std::endl;
+    } else if ( tally_type.find("Flux") != std::string::npos ) {
+      output << "F"<< tally_index <<"2:" << particle_name << " " << entity_id << std::endl;
+    }
+  } else if ( entity_type.find("Volume") != std::string::npos ) {
+    if ( tally_type.find("Flux") != std::string::npos ) {
+      output << "F"<< tally_index <<"4:" << particle_name << " " << entity_id << std::endl;
+    } else if ( tally_type.find("Current") != std::string::npos ) {
+      // makes no sense in mcnp
+    }
   } else {
     std::cout << "tally/entity combination makes no sense for MCNP" << std::endl;
   }
 } 
 
 // Produces valid fluka tally
-std::string pyne::tally::fluka(std::string unit_number = -21) {
+std::string pyne::Tally::fluka(std::string unit_number) {
   std::stringstream output; // output stream
 
   // check entity type
-  if( entity_type == VOLUME ) {
-    continue;
-  }  else if ( entity_type == SURFACE ) {
+  if( entity_type.find("Volume") != std::string::npos ) {
+    // ok
+  }  else if ( entity_type.find("Surface") != std::string::npos ) {
       std::cout << "Surface tally not valid in FLUKA" << std::endl;
   } else {
       std::cout << "Unknown entity type" << std::endl;
   }
 
-  part_name = rx2fluka[particle_name];
+  std::string part_name = rx2fluka[particle_name];
 
   // check tally type
-  if( tally_type == FLUX ) {
+  if (tally_type.find("Flux") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRTRACK";
       output << std::setw(10) << std::right << "     1.0";
       output << std::setw(10) << std::right << part_name;
@@ -471,7 +480,7 @@ std::string pyne::tally::fluka(std::string unit_number = -21) {
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "       &";      
       // end of usrtrack
-  } else if ( tally_type == CURRENT ) {
+  } else if ( tally_type.find("Current") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRBDX  ";    
       output << std::setw(10) << std::right << "   110.0";
       output << std::setw(10) << std::right << part_name;
