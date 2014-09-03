@@ -1294,7 +1294,7 @@ class NeutronTable(AceTable):
             return
 
         # Read fission cross sections
-        self.IE_fission = int(self.xss[ind])  # Energy grid index
+        self.IE_fission = int(self.xss[ind]) - 1  # Energy grid index
         NE = int(self.xss[ind+1])
         self.sigma_f = self.xss[ind+2:ind+2+NE]
 
