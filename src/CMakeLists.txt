@@ -12,7 +12,7 @@ set(AHOT_SRCS
     "ahot/spatial_solvers_3d/source/read_inflow_ahotn.f90"
     "ahot/spatial_solvers_3d/source/dgfem_kernel.f90"
     "ahot/spatial_solvers_3d/source/read_inflow_dgfem.f90"
-    "ahot/spatial_solvers_3d/source/echo.f90"      
+    "ahot/spatial_solvers_3d/source/echo.f90"
     "ahot/spatial_solvers_3d/source/solvar.f90"
     "ahot/spatial_solvers_3d/source/inner.f90"
     "ahot/spatial_solvers_3d/source/solve.f90"
@@ -41,11 +41,12 @@ set(PYNE_SRCS
     "rxname.cpp"
     "tally.cpp"
     "utils.cpp"
+    "endftod.f90"
     "${AHOT_SRCS}"
     )
 
 if (MOAB_FOUND)
-    set(PYNE_SRCS "${PYNE_SRCS}" 
+    set(PYNE_SRCS "${PYNE_SRCS}"
         "dagmc_bridge.cpp"
         "measure.cpp"
         "source_sampling.cpp"
