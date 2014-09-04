@@ -2,7 +2,7 @@
 cmake_minimum_required( VERSION 2.8.5 )
 
 # Set the project name
-project( pyne )
+project( pyne Fortran CXX)
 
 # languages
 enable_language(Fortran)
