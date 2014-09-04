@@ -482,7 +482,8 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << entity_name;
       output << std::setw(10) << std::right << entity_size;
       output << std::setw(10) << std::right << "   1000."; // number of ebins
-      output << std::setw(10) << std::right << tally_name; // may need to make sure less than 10 chars
+      tally_name.resize(8);
+      output << std::setw(8) << std::left << tally_name; // may need to make sure less than 10 chars
       output << std::endl;
       output << std::setw(10) << std::left  << "USRTRACK";
       output << std::setw(10) << std::right << "   1.E-3";
@@ -491,7 +492,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "        ";
-      output << std::setw(10) << std::right << "       &";      
+      output << std::setw(8) << std::right << "       &";      
       // end of usrtrack
   } else if ( tally_type.find("Current") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRBDX  ";    
@@ -501,7 +502,8 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << entity_name; // upstream
       output << std::setw(10) << std::right << entity_name; // downstream
       output << std::setw(10) << std::right << entity_size; // area
-      output << std::setw(10) << std::right << tally_name; // may need to make sure less than 10 chars
+      tally_name.resize(8);
+      output << std::setw(8) << std::right << tally_name; // may need to make sure less than 10 chars
       output << std::endl;
       output << std::setw(10) << std::left  << "USRBDX  ";    
       output << std::setw(10) << std::right << "  10.0E1";
@@ -510,7 +512,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << "12.56637"; // 4pi
       output << std::setw(10) << std::right << "     0.0";
       output << std::setw(10) << std::right << "   240.0"; // number of angular bins
-      output << std::setw(10) << std::right << "       &";      
+      output << std::setw(8) << std::right << "       &";      
       // end of usrbdx
   } else {
     std::cout << "Unknown tally type" << std::endl;
