@@ -1483,15 +1483,33 @@ int pyne::metastable_id(int nuc) {
 
 
 std::set<int> pyne::decay_children(int nuc) {
+  // make sure spontaneous fission data is loaded
+  if (wimsdfpy_data.empty())
+    _load_wimsdfpy();
+
   std::vector<unsigned int> part = data_access<unsigned int, level_data>(nuc,
     offsetof(level_data, rx_id), level_data_rx_map);
+  std::vector<unsigned int>::iterator it = part.begin();
   std::set<int> result;
-  for (std::vector<unsigned int>::iterator it=part.begin(); it!=part.end();
-  ++it) {
-    if (*it == 36125)
-      result.insert((nuc /10000) * 10000);
-    else
-      result.insert((rxname::child(nuc,*it,"decay") /10000) * 10000);
+  for (; it != part.end(); ++it) {
+    switch (*it) {
+      case 36125: {
+        // internal conversion, rx == 'it'
+        result.insert((nuc /10000) * 10000);
+        break;
+      }
+      case 36565: {
+        // spontaneous fission, rx == 'sf'
+        std::map<std::pair<int, int>, double>::iterator sf = wimsdfpy_data.begin();
+        for (; sf != wimsdfpy_data.end(); ++sf)
+          if (sf->first.first == nuc)
+            result.insert(sf->first.second);
+        break;
+      }
+      default: {
+        result.insert((rxname::child(nuc, *it, "decay") /10000) * 10000);
+      }
+    }
   }
   return result;
 }
