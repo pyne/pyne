@@ -1173,9 +1173,9 @@ def test_fluka():
     # call fluka() on a material made up of each component
     for key in leu.comp:
 	element = Material(nucvec={key:1})
-	matlines.append(element.fluka(id))
+	matlines.append(element.fluka(id,'atom'))
 	id=id+1
-    compound = leu.fluka(id)
+    compound = leu.fluka(id,'atom')
     matlines.append(compound)
     written = ''.join(matlines)
 
@@ -1193,6 +1193,7 @@ def test_fluka():
 
     assert_equal(exp,written)
 
+    # Test a collapsed material
     coll = leu.collapse_elements({920000000})
     coll.metadata['comments'] = 'Fluka Element '
 
@@ -1201,9 +1202,7 @@ def test_fluka():
     exp += 'MATERIAL         92.   238.029      19.1       25.                    URANIUM'
     exp += '   \n'
     
-    # print exp
-    written = coll.fluka(25)
-    # print written
+    written = coll.fluka(25,'atom')
     assert_equal(exp, written)
 
 def test_write_alara():

@@ -39,13 +39,13 @@ cdef extern from "material.h" namespace "pyne":
         # Methods
         void norm_comp() except +
         std_string mcnp(std_string) except +
-        std_string fluka(int) except +
+        std_string fluka(int, std_string) except +
         bool not_fluka_builtin(std_string) except +
         std_string fluka_material_str(int) except +
         std_string fluka_material_component(int, int, std_string) except +
         std_string fluka_material_line(int, double, int, std_string) except +
         std_string fluka_format_field(float) except +
-        std_string fluka_compound_str(int) except +
+        std_string fluka_compound_str(int, std_string) except +
         void from_hdf5(char *, char *) except +
         void from_hdf5(char *, char *, int) except +
         void from_hdf5(char *, char *, int, int) except +

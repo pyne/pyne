@@ -160,7 +160,7 @@ namespace pyne
     std::string mcnp(std::string frac_type = "mass");
     /// 
     /// Return a fluka input deck MATERIAL card as a string
-    std::string fluka(int id );
+    std::string fluka(int id, std::string frac_type = "mass");
     /// Convenience function to tell whether a given name needs a material card
     bool not_fluka_builtin(std::string fluka_name);
     /// High level call to get details and call material_component(..)
@@ -175,7 +175,7 @@ namespace pyne
     std::string fluka_format_field(float field);
     /// Return FLUKA compound card and the material card for the named compound
     /// but not the material cards of the components
-    std::string fluka_compound_str(int id);
+    std::string fluka_compound_str(int id, std::string frac_type = "mass");
 
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);

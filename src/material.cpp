@@ -552,7 +552,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
     // Clear first
     ss.str(std::string() );
-    ss.clear();
+    ss.str("");
     ss << pyne::nucname::mcnp(i->first );
     nucmcnp = ss.str();
 
@@ -593,7 +593,7 @@ bool pyne::Material::not_fluka_builtin(std::string fluka_name) {
 /// fluka
 ///---------------------------------------------------------------------------//
 /// Main external call
-std::string pyne::Material::fluka(int id) {
+std::string pyne::Material::fluka(int id, std::string frac_type) {
   std::stringstream rs;
 
   // Element, one nucid
@@ -601,7 +601,7 @@ std::string pyne::Material::fluka(int id) {
     rs << fluka_material_str(id);
   } else if (comp.size() > 1) {
   // Compound
-    rs << fluka_compound_str(id);
+    rs << fluka_compound_str(id, frac_type);
   } else {
     rs << "There is no nuclide information in the Material Object" << std::endl;
   }
@@ -728,7 +728,7 @@ std::string pyne::Material::fluka_format_field(float field) {
 /// Returns
 /// -- MATERIAL line for compound
 /// -- COMPOUND lines
-std::string pyne::Material::fluka_compound_str(int id) {
+std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
   std::stringstream ss;
   std::map<double, std::string> frac_name_map;
   std::string compound_string = "";
@@ -747,23 +747,37 @@ std::string pyne::Material::fluka_compound_str(int id) {
   }  
   ss << fluka_material_line(znum, atomic_mass, id, compound_name);
   
+  std::string frac_sign;
+  if ("atom" == frac_type) {
+    frac_sign = "";
+  } else {
+    frac_sign = "-";
+  }
+
+  std::stringstream temp_s;
   int counter = comp.size();
   pyne::comp_iter nuc = comp.begin();
   // This will pick up multiples of 3 components
   while (counter >= 3) {
     ss << std::setw(10) << std::left  << "COMPOUND";
 
-    ss << std::setw(10) << std::right << nuc->second;
+    temp_s << frac_sign << nuc->second;
+    ss << std::setw(10) << std::right << temp_s.str();
     ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
+    temp_s.str("");  // reset the stringstream for reuse
 
-    ss << std::setw(10) << std::right << nuc->second;
+    temp_s << frac_sign << nuc->second;
+    ss << std::setw(10) << std::right << temp_s.str();
     ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
+    temp_s.str("");
 
-    ss << std::setw(10) << std::right << nuc->second;
+    temp_s << frac_sign << nuc->second;
+    ss << std::setw(10) << std::right << temp_s.str();
     ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
+    temp_s.str("");
 
     ss << std::setw(10) << std::left << compound_name;
     ss << std::endl;
@@ -773,15 +787,20 @@ std::string pyne::Material::fluka_compound_str(int id) {
 
   // Get the last (or only, as the case may be) one or two fractions
   if (nuc != comp.end()) {
+    std::stringstream temp_s;
     ss << std::setw(10) << std::left  << "COMPOUND";
-    ss << std::setw(10) << std::right << nuc->second;
+    temp_s << frac_sign << nuc->second;
+    ss << std::setw(10) << std::right << temp_s.str();
     ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
+    temp_s.str("");
     
     if  (nuc != comp.end()) {
-      ss << std::setw(10) << std::right << nuc->second;
+      temp_s << frac_sign << nuc->second;
+      ss << std::setw(10) << std::right << temp_s.str();
       ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
       nuc++;
+      temp_s.str("");
     } else {
       ss << std::setw(10) << std::right << ""; 
       ss << std::setw(10) << std::right << ""; 

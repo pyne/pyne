@@ -343,7 +343,7 @@ cdef class _Material:
         card = self.mat_pointer.mcnp(frac_type)
         return card
 
-    def fluka(self, fid):
+    def fluka(self, fid, frac_type='mass'):
         """fluka()
         Return a fluka material record if there is only one component,
         otherwise return the compound material record and the fluka
@@ -353,7 +353,7 @@ cdef class _Material:
  	   The sequential material id starting from 26 unless predefined
         """
         cdef std_string card
-        card = self.mat_pointer.fluka(fid)
+        card = self.mat_pointer.fluka(fid, frac_type)
         return card
 
     def not_fluka_builtin(self, fluka_name):
@@ -413,7 +413,7 @@ cdef class _Material:
         card = self.mat_pointer.fluka_format_field(field)
         return card
 
-    def fluka_compound_str(self, id):
+    def fluka_compound_str(self, id, frac_type='mass'):
         """fluka_compound_str()
         Return the FLUKA MATERIAL record for the compound, and the 
 	FLUKA COMPOUND record for the components
@@ -422,7 +422,7 @@ cdef class _Material:
  	   The sequential compound id starting from 26 unless predefined
         """
         cdef std_string card
-        card = self.mat_pointer.fluka_compound_str(id)
+        card = self.mat_pointer.fluka_compound_str(id, frac_type)
         return card
 
     def from_text(self, filename):
