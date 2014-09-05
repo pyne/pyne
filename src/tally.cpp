@@ -427,6 +427,30 @@ std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
 // Takes mcnp version as arg, like 5 or 6
 std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   std::stringstream output; // output stream
+  std::string particle_token;
+  // particle token
+  if (mcnp_version.find("mcnp5") != std::string::npos)
+    {
+      if (rx2mcnp5.find(particle_name) != rx2mcnp5.end())
+	particle_token = rx2mcnp5[particle_name];
+      else
+	{
+	  std::cout << "Not a valid MCNP5 particle type" << std::endl;
+	  particle_token = "?";
+	}
+    }
+  else if ( mcnp_version.find("mcnp6") != std::string::npos )
+    {
+      if (rx2mcnp6.find(particle_name) != rx2mcnp6.end() )
+	particle_token = rx2mcnp6[particle_name];
+      else
+	{
+	  std::cout << "Not a valid MCNP6 particle type" << std::endl;
+	  particle_token = "?";
+	}
+    }
+  else
+    particle_token = "?";
 
   // print out comment line
   output << "C " << tally_name << std::endl;
@@ -434,16 +458,16 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   // neednt check entity type
   if ( entity_type.find("Surface") != std::string::npos ) {
     if ( tally_type.find("Current") != std::string::npos ) {
-      output << "F"<< tally_index <<"1:" << particle_name << " " << entity_id << std::endl;
+      output << "F"<< tally_index <<"1:" << particle_token << " " << entity_id << std::endl;
       output << "SD"<<tally_index <<"1 " << entity_size << std::endl;
     } else if ( tally_type.find("Flux") != std::string::npos ) {
-      output << "F"<< tally_index <<"2:" << particle_name << " " << entity_id << std::endl;
+      output << "F"<< tally_index <<"2:" << particle_token << " " << entity_id << std::endl;
       output << "SD"<<tally_index <<"2 " << entity_size << std::endl;
 
     }
   } else if ( entity_type.find("Volume") != std::string::npos ) {
     if ( tally_type.find("Flux") != std::string::npos ) {
-      output << "F"<< tally_index <<"4:" << particle_name << " " << entity_id << std::endl;
+      output << "F"<< tally_index <<"4:" << particle_token << " " << entity_id << std::endl;
       output << "SD"<<tally_index <<"4 " << entity_size << std::endl;
     } else if ( tally_type.find("Current") != std::string::npos ) {
       // makes no sense in mcnp
