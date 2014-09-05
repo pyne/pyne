@@ -4,7 +4,8 @@ import math
 import warnings
 
 import nose
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, assert_true
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
+    assert_in, assert_true
 import numpy as np
 import numpy.testing as npt
 
@@ -122,6 +123,11 @@ def test_branch_ratio():
     assert_equal(data.branch_ratio(922350001, 922350000), 1.0)
     assert_equal(data.branch_ratio(922350001, 922360000), 0.0)
     assert_equal(data.branch_ratio(611460000, 621460000), 0.34)
+
+    children = data.decay_children('U235')
+    for child in children:
+        obs = data.branch_ratio('U235', child)
+        assert_true(obs >= 0.0 and obs <= 1.0)
 
 
 def test_state_energy():

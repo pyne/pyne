@@ -513,9 +513,9 @@ namespace nucname
   /// form as ID, but the four last digits are all zeros.
   /// \param nuc a nuclide
   /// \return a integer groundstate id
-  int groundstate(int nuc);
-  int groundstate(char * nuc);
-  int groundstate(std::string nuc);
+  inline int groundstate(int nuc) {return (id(nuc) / 10000 ) * 10000;};
+  inline int groundstate(std::string nuc) {return groundstate(id(nuc));};
+  inline int groundstate(char * nuc) {return groundstate(std::string(nuc));};
   /// \}
   
   /// \name State Map functions
