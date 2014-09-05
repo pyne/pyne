@@ -1168,6 +1168,8 @@ def test_fluka():
                           'comments': ('Fluka Compound '),
                           },
                    density=19.1)
+    ########################################
+    # Part I:  Do not collapse the materials
     id = 25
     matlines = []
     # call fluka() on a material made up of each component
@@ -1179,7 +1181,6 @@ def test_fluka():
     matlines.append(compound)
     written = ''.join(matlines)
 
-   
     exp  = 'MATERIAL         92.   235.044       -1.       25.                    235-U'
     exp += '     \n'
     exp += 'MATERIAL         92.   238.051       -1.       26.                    238-U'
@@ -1193,7 +1194,8 @@ def test_fluka():
 
     assert_equal(exp,written)
 
-    # Test a collapsed material
+    #####################################
+    # Part II:  Test a collapsed material
     coll = leu.collapse_elements({920000000})
     coll.metadata['comments'] = 'Fluka Element '
 
@@ -1204,6 +1206,32 @@ def test_fluka():
     
     written = coll.fluka(25,'atom')
     assert_equal(exp, written)
+    
+    ##################################
+    # Repeat Part I for mass frac_type
+    id = 25
+    matlines = []
+    # call fluka() on a material made up of each component
+    for key in leu.comp:
+	element = Material(nucvec={key:1})
+	matlines.append(element.fluka(id,'mass'))
+	id=id+1
+    compound = leu.fluka(id,'mass')
+    matlines.append(compound)
+    written = ''.join(matlines)
+
+    exp  = 'MATERIAL         92.   235.044       -1.       25.                    235-U'
+    exp += '     \n'
+    exp += 'MATERIAL         92.   238.051       -1.       26.                    238-U'
+    exp += '     \n'
+    exp += '* Fluka Compound'
+    exp += ' \n'
+    exp += 'MATERIAL        999.      999.      19.1       27.                    URANIUM'
+    exp += '   \n'
+    exp += 'COMPOUND       -0.04     235-U     -0.96     238-U                    URANIUM'
+    exp += '   \n'
+
+    assert_equal(exp,written)
 
 def test_write_alara():
     if 'alara.txt' in os.listdir('.'):
