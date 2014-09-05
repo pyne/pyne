@@ -1,0 +1,23 @@
+#! /bin/bash
+#
+gfortran -c -fdefault-real-8 invar.f90
+gfortran -c -fdefault-real-8 solvar.f90
+gfortran -c -fdefault-real-8 ahotn_kernel_module.f90
+gfortran -c -fdefault-real-8 timevar.f90
+gfortran -c -fdefault-real-8 main.f90
+gfortran -c -fdefault-real-8 version.f90
+gfortran -c -fdefault-real-8 input.f90
+gfortran -c -fdefault-real-8 angle.f90
+gfortran -c -fdefault-real-8 readmt.f90
+gfortran -c -fdefault-real-8 readxs.f90
+gfortran -c -fdefault-real-8 readsrc.f90
+gfortran -c -fdefault-real-8 read_inflow.f90
+gfortran -c -fdefault-real-8 check.f90
+gfortran -c -fdefault-real-8 echo.f90
+gfortran -c -fdefault-real-8 solve.f90
+gfortran -c -fdefault-real-8 inner.f90
+gfortran -c -fdefault-real-8 sweep.f90
+gfortran -c -fdefault-real-8 output.f90
+gfortran -c -fdefault-real-8 output_phi.f90
+gfortran -o ../ahotn_nefd.exe *.o lapack.a
+rm *.o *.mod

@@ -1,12 +1,16 @@
 """C++ wrapper for material class."""
 from libcpp.set cimport set
 from libcpp.string cimport string as std_string
+from libcpp.set cimport set as std_set
 from libcpp.map cimport map
+from libcpp.vector cimport vector
+from libcpp.utility cimport pair
+from libcpp cimport bool
 
-cimport cpp_jsoncpp 
+cimport cpp_jsoncpp
 
 cdef extern from "material.h" namespace "pyne":
-    # Cython does not allow for typdef'ing tamplated types :( 
+    # Cython does not allow for typdef'ing tamplated types :(
     #ctypedef map[int, double] comp_map
     #ctypedef map[int, double].iterator comp_iter
 
@@ -26,7 +30,7 @@ cdef extern from "material.h" namespace "pyne":
 
         # Attributes
         map[int, double] comp
-    
+
         double mass
         double density
         double atoms_per_molecule
@@ -34,8 +38,14 @@ cdef extern from "material.h" namespace "pyne":
 
         # Methods
         void norm_comp() except +
-        std_string mcnp(std_string ) except +
-        std_string fluka() except +
+        std_string mcnp(std_string) except +
+        std_string fluka(int, std_string) except +
+        bool not_fluka_builtin(std_string) except +
+        std_string fluka_material_str(int) except +
+        std_string fluka_material_component(int, int, std_string) except +
+        std_string fluka_material_line(int, double, int, std_string) except +
+        std_string fluka_format_field(float) except +
+        std_string fluka_compound_str(int, std_string) except +
         void from_hdf5(char *, char *) except +
         void from_hdf5(char *, char *, int) except +
         void from_hdf5(char *, char *, int, int) except +
@@ -58,6 +68,7 @@ cdef extern from "material.h" namespace "pyne":
         double molecular_mass() except +
         double molecular_mass(double) except +
         Material expand_elements() except +
+        Material collapse_elements(std_set[int]) except +
         double mass_density() except +
         double mass_density(double) except +
         double mass_density(double, double) except +
@@ -84,6 +95,11 @@ cdef extern from "material.h" namespace "pyne":
         # Atom frac member functions
         map[int, double] to_atom_frac() except +
         void from_atom_frac(map[int, double]) except +
+
+
+        vector[pair[double, double]] gammas() except +
+        vector[pair[double, double]] xrays() except +
+        vector[pair[double, double]] photons(bool) except +
 
         # Operator Overloads
         Material operator+(double) except +

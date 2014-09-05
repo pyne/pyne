@@ -11,6 +11,9 @@ pyne/include/
 *.bak
 .*.swp
 *~
+*.o
+*.mod
+*.so
 
 # Ignore Cython'd files
 pyne/*.c

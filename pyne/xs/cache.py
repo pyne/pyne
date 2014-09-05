@@ -1,18 +1,19 @@
 """This module provides a cross section cache which automatically extracts 
 cross-sections from provided nuclear data sets."""
-from warnings import warn
-from pyne.utils import VnVWarning
 import sys
+import inspect
+from warnings import warn
 from itertools import product
 from collections import MutableMapping
 
 import numpy as np
 import tables as tb
 
-from .. import nucname
-from ..pyne_config import pyne_conf
-from .models import partial_energy_matrix, phi_g
-from . import data_source
+from pyne import nucname
+from pyne.pyne_config import pyne_conf
+from pyne.xs.models import partial_energy_matrix, phi_g
+from pyne.xs import data_source
+from pyne.utils import VnVWarning
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
@@ -51,22 +52,24 @@ class XSCache(MutableMapping):
         Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1.
         If the group structure is not present in the cache or is None, all cross 
         sections pulled from the sources will not be discretized or collapsed.
-    data_source_classes : list of DataSource classes, optional
-        Sequence of DataSource classes (not instances!) from which to grab cross 
+    data_sources : list of DataSources and DataSource classes, optional
+        Sequence of DataSource obejects or classes from which to grab cross 
         section data. Data from a source earlier in the sequence (eg, index 1)
         will take precednce over data later in the sequence (eg, index 5).
+        If a class is given rather than an object, the class is instantiated.
 
     """
 
     def __init__(self, group_struct=None, 
-                 data_source_classes=(data_source.CinderDataSource,
-                                      data_source.SimpleDataSource,
-                                      data_source.EAFDataSource,
-                                      data_source.NullDataSource,)):
+                 data_sources=(data_source.CinderDataSource,
+                               data_source.SimpleDataSource,
+                               data_source.EAFDataSource,
+                               data_source.NullDataSource,)):
         self._cache = {}
         self.data_sources = []
-        for cls in data_source_classes:
-            ds = cls(dst_group_struct=group_struct)
+        for ds in data_sources:
+            if inspect.isclass(ds):
+                ds = ds(dst_group_struct=group_struct)
             if ds.exists:
                 self.data_sources.append(ds)
         self._cache['E_g'] = _valid_group_struct(group_struct) 

@@ -1,0 +1,34 @@
+#! /bin/bash
+#
+gfortran -c -fdefault-real-8 invar.f90
+gfortran -c -fdefault-real-8 solvar.f90
+gfortran -c -fdefault-real-8 timevar.f90
+gfortran -c -fdefault-real-8 main.f90
+gfortran -c -fdefault-real-8 version.f90
+gfortran -c -fdefault-real-8 input.f90
+gfortran -c -fdefault-real-8 angle.f90
+gfortran -c -fdefault-real-8 readmt.f90
+gfortran -c -fdefault-real-8 readxs.f90
+gfortran -c -fdefault-real-8 readsrc.f90
+gfortran -c -fdefault-real-8 check.f90
+gfortran -c -fdefault-real-8 echo.f90
+gfortran -c -fdefault-real-8 solve.f90
+gfortran -c -fdefault-real-8 inner.f90
+gfortran -c -fdefault-real-8 sweep.f90
+gfortran -c -fdefault-real-8 scell.f90
+gfortran -c -fdefault-real-8 jima.f90
+gfortran -c -fdefault-real-8 weitn.f90
+gfortran -c -fdefault-real-8 odev.f90
+gfortran -c -fdefault-real-8 weitc.f90
+gfortran -c -fdefault-real-8 conab.f90
+gfortran -c -fdefault-real-8 cong.f90
+gfortran -c -fdefault-real-8 gammas.f90
+gfortran -c -fdefault-real-8 cgsolve.f90
+gfortran -c -fdefault-real-8 output.f90
+gfortran -c -fdefault-real-8 fluxsum.f90
+gfortran -c -fdefault-real-8 qdrntflux.f90
+gfortran -c -fdefault-real-8 p.f90
+gfortran -c -fdefault-real-8 printPsi.f90
+gfortran -c -fdefault-real-8 printPhi.f90
+gfortran -lblas -llapack -o ../ahot2d *.o
+rm *.o

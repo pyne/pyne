@@ -1,0 +1,197 @@
+Test problem 3d  ! problem name
+1 0          Order (lambda; ahot spatial order; I think can only be 0, 1, or 2?) & Method (meth): 0/1 => AHOT-N-SI/AHOT-N-ITM !(I need to check which methods need 0 vs. 1, or if both are ok with all)
+4 1          Order (qdord; can only be an even number) & Qudrature Type (qdtyp): 0/1/2 => TWOTRAN/EQN/Read-in
+! quadrature selection; not sure if you choose Read-in what the file needs to be named
+4 4 4        Number of Nodes in x- y- & z-Directions (nx/y/z)
+1 1          Number of Groups (ng) & Number of Materials (nm)
+4*0.25                x-size of cells (dx)
+4*0.25                y-size of cells (dy)
+4*0.25                z-size of cells (dz)
+2  2         x-start and -end BCs (xsbc, xebc) ! 0 = vacuum, 1 = reflective, 2 = fixed inflow
+2  2         y-start and -end BCs (ysbc, yebc)
+2  2         z-start and -end BCs (zsbc, zebc)
+mat4         ! material file name (mtfile)
+! This line is supposed to be quadrature file name (qdfile) if you need one (type 2)            
+xs           ! xs file name (xsfile)
+src_4.dat    ! src file name (srcfile; not sure how it's produced or what format it needs to be in)
+bc_4.dat     ! incoming boundary condition file (inflow_file; not sure how it's produced or what format it needs to be in)
+phi_4.ahot   ! output of the flux in some sort of format (phi_file)
+1.e-12 6000 0 1.e-10     Conv.Crit. (err), Max.Its. (itmx), Moments Converged (iall), Tolerence (tolr)
+0 1.e-14     Frequency of Checking Solution (ichk), and Tolerence (tchk)
+0 0 0        Max [mom]ent to [p]rint=0-Lambda (momp), flag for [mom]ent [sum]=0/1 (momsum), flag for [mom]ent at a [p]oin[t]=0/1 (mompt)
+0            Flag for computing, presenting quadrant fluxes (qdflx)
+0            Flag for printing matrix file: 1=yes, /1=no
+0            ITM solution flag, Direct/Conjugate Gradient = 0/1
+
+
+!---------------------------------------------
+! Notes from AHOTN (likely extends to all):
+!---------------------------------------------
+! items added in parentheses above are the code variable names and any associated comments.
+!
+! starting from main and working my way down 
+!
+!main:
+! unit 7 = input file
+! unit 8 = output file (also where errors are written); will overwrite existing file
+! open files
+! call version
+! call input
+! call echo
+! call solve
+! call output
+! call output_phi
+! get timing info and print it
+! deallocate and end
+!
+!version: 
+! write the version info and time
+!
+!input:
+! It appears that if you don't need one of the files you should leave the line blank 
+! and it will be skipped (read in as nothing).
+! Only checks if mtfile, xsfile, and srcfile exist
+! The last two entries aren't read
+! If quadrature type 2, need the qdfile
+! Only need the inflow file if bcs are 2
+!
+!readmt:
+! unit 13 = mtfile
+! Read by the z-plane, then by the y-row, then by the x-node
+!
+!quadrature, in input
+! unit 10 = qdfile (if needed)
+! read first line and don't do anything with it
+! from 1 to number of angles/octant [(qdord*(qdord+2))/8; in this file qdord=4]:
+!   read angle_1 angle_2 weight (likely angle_1=mu angle_2=theta)
+! normalize the weights to sum to 1 over all quadrants
+!
+!angle:
+! for quadrature if not option 2
+! qdtype=0 gives completely symmetric angular quadrature (can choose N = 2, 4, 6, or 8) 
+! qdtype=1 gives a fixed quadrature valid up to N=16 (also all even)
+! normalizes weights
+!
+!check:
+! checks spatial order non-negative
+! checks method is 0 or 1
+! checks number of cells in each direction, groups, and materials are at least 1
+! checks cells sizes are positive
+! checks material numbers are between 1 and nm
+! checks all starting bcs are either 0, 1, or 2
+! checks all end bcs are either 0 or 2 (can't be reflective)
+! checks convergence criterion max inner iterations, and tolerance are positive
+! checks that value for moments to converge (iall) is [0, lambda]
+! frequency of check (ichk) must be non-negative [typo in error message]
+! tolerance of check must be non-negative
+! angles must be (0,1) 
+! weights must be (0, 0.125]
+! (calculated) discrete ordinate lengths must be [0.99, 1.01] [checking rounding error more or less
+! momp [0, lambda]
+! momsum either 0 or 1
+! mompt either 0 or 1
+! qdflx either 0 or 1
+!
+!readxs:
+! unit 11 = xsfile
+! loop over materials (m)
+! loop over group (g)
+! read sigmat(m,g)
+! read sigs(m,g,gp) where gp = 1,ng
+! check that all cross sections are non-negative
+! check that the sum of the scattering cross sections are less that the total
+!
+!readsrc:
+! unit 12 = srcfile
+! loop over group, x, y, z, x-lambda, y-lambda, z-lambda
+! (i.e. s(0:lambda,0:lambda,0:lambda,nx,ny,nz,ng))
+!
+!read_inflow (if xsbc=2):
+! The condition for getting in here implies that you can't only have ysbc or zsbc 
+! have inflow conditions witout having xsbc have it. 
+! unit 12 = inflow_file also
+! loop over octants; loop over angles per octant
+! read mu, eta, xi
+! check which of the 4 sweep directions the data is and assign it (1=++, 2 = +-, 3=-+, 4=--)
+! based on direction, read the appropriate bc data
+!
+!echo:
+! when writing file names it only writes 8 characters for some reason; which is src_4.dat gets cut off
+! in material map, the Row line contains the x indices, the subequent lines go from y=ny backwards to 1
+! The echoing of the source data doesn't have space between the values (which is why it's so hard to read)
+! For each of the 4 possible incoming direction possibilities, this writes
+!   - the quadrature values
+!   - for each combination of spatial moments:
+!       - the x indices from 1 to nx (not sure why this is informative?)
+!       - it's the supposed to write the boundary condition values for each z
+!         (each row contains all x values) - maybe the incoming flux is empty in this example?
+!   this repeats for each boundary (without checking if that boundary is supposed to have an
+!   incoming flux) and for each angle per octant. 
+!
+!solve:
+! calls read_sp_wts, which is in ahotn_kernel_module
+! loop over groups to compute external + scattering source (downscattering only, so does nothing in group 1)
+! loop over gp = 1, g-1; z; y; x; (get mat and sigs here); z order; y order; x order
+!    s = s + sigs(m,g,gp)*f [but I can't figure out what f is???]
+!       [ah, f is flux, but I think it's unset (i.e. memory garbage?) until after the first inner iteration]
+! call CPU_TIME
+! call inner iteration solver [note: method 1 doesn't work!]
+! call CPU_TIME
+! 
+!
+!ahotn_kernel_module, read_sp_wts:
+! open a weights file depending on order (w0.dat, w1.dat, w2.dat, or w3.dat); unit = 9 [we don't have these, which is why this fails for us; no error checking]
+! read 4 weights from each line for 1000 lines
+!
+!inner:
+! iterate. Call sweep for this group.
+! compare new and old moments (I don't quite see why it's done this way)
+! if not converged and still iterating, update iterates
+! otherwise, write convergence information
+!
+!sweep:
+! Starts at top, far, right corner (mu, eta, xi < 0)
+! initalize f to 0
+! loop over angles per octant
+! get angles for that octant (loop over z, y, x)
+!
+! do the two boundary zs: +z then -z
+! if vacuum, fz = 0
+! if incoming flux, loop over y, x, y moment, z moment: fz=incoming flux (top when heading downward, bottom when heading upward)
+! now do the non-boundary z elements; first down then up
+!
+! do the two boundary ys: first back-to-front then front-to-back
+! if vacuum, fy = 0
+! if incoming flux, loop over x, y moment, z moment: fy=incoming flux (back when heading forward, front when heading backward)
+! now do the non-boundary y elements; first back-to-front then front-to-back
+!
+! do the two boundary xs: first right-to-left then left-to-right
+! if vacuum, fx=0
+! if incoming flux, fx=incoming flux (right when heading left, left when heading right)
+! now do the non-boundary x-elements [here is where the real work actually happens!]
+! 
+! the real work:
+! get dx, cell material sigt, and scattering ratio (sigs/sigt)
+! source = scattering ratio*e (previous flux?) + source/sigt
+! set up an index based on order
+! set the rhs (b) as the cell source [recalculated for some reason]
+! call ahotn_kernel with the fx, fy, fz, and b just computed
+! flux = flux + weight*b (scalar flux update)
+! 
+!ahotn_kernel_module, ahotn_kernel:
+! solves the ahotn kernel for a single cell
+! gets the spatial weight (given the optical thickness) for the cell
+! constructs and solves the ahotn equations
+! returns the outgoing flux moments in each direction.  
+!
+!output: 
+! loops over groups and print the scalar flux.
+! print flux higher-order moments if desired
+! ability to print sum of flux moments or flux at specific points is commented out
+! provide info about warnings
+! 
+!output_phi:
+! phi_file unit = 31
+! open, write all of the flux data (all groups, moments, spatial locations); unformatted, binary
+!
+
