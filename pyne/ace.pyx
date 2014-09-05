@@ -63,6 +63,8 @@ def ascii_to_binary(ascii_file, binary_file):
     binary = open(binary_file, 'wb')
 
     idx = 0
+    if lines[0].split()[0] == '2.0.0':
+        idx = 3
     while idx < len(lines):
         # Read/write header block
         hz = lines[idx][:10].encode('UTF-8')
@@ -248,7 +250,12 @@ class Library(object):
 
         f = self.f
         tables_seen = set()
-    
+        firstline = f.readline()
+        if firstline.split()[0] == '2.0.0':
+            for i in range(2): 
+                f.readline()
+        else:
+            f.seek(0)
         lines = [f.readline() for i in range(13)]
 
         while (0 != len(lines)) and (lines[0] != ''):
