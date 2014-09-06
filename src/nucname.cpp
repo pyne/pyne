@@ -1330,28 +1330,6 @@ int pyne::nucname::sza_to_id(std::string nuc) {
 }
 
 
-
-/*******************************/
-/***  Groundstate functions  ***/
-/*******************************/
-int pyne::nucname::groundstate(int nuc) {
-  int nucid = id(nuc);
-  int nostate = (nucid / 10000 ) * 10000;
-  return nostate;
-}
-
-
-int pyne::nucname::groundstate(char * nuc) {
-  std::string newnuc (nuc);
-  return groundstate(newnuc);
-}
-
-
-int pyne::nucname::groundstate(std::string nuc) {
-  return groundstate(id(nuc));
-}
-
-
 void pyne::nucname::_load_state_map(){
     for (int i = 0; i < TOTAL_STATE_MAPS; ++i) {
        state_id_map[map_nuc_ids[i]] = map_metastable[i];
