@@ -1613,8 +1613,9 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
   vector<unsigned int> part1 = \
     data_access<unsigned int, level_data>(from_to.first, offsetof(level_data, rx_id),
                                           level_data_rx_map);
-  vector<double> part2 = data_access<double, level_data>(from_to.first, 
-                            offsetof(level_data, branch_ratio), level_data_rx_map);
+  vector<double> part2 = \
+    data_access<double, level_data>(from_to.first, offsetof(level_data, branch_ratio),
+                                    level_data_rx_map);
   double result = 0.0;
   if ((from_to.first == from_to.second) && (decay_const(from_to.first) == 0.0))
     return 1.0;
