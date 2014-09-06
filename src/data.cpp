@@ -1619,7 +1619,7 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
   double result = 0.0;
   if ((from_to.first == from_to.second) && (decay_const(from_to.first) == 0.0))
     return 1.0;
-  for (vector<unsigned int>::size_type i=0; i < part1.size(); ++i) {
+  for (vector<unsigned int>::size_type i = 0; i < part1.size(); ++i) {
     if ((part1[i] == 36125) &&
         (groundstate(from_to.first) == groundstate(from_to.second)) &&
         (from_to.second % 10000 == 0)) {
@@ -1630,7 +1630,7 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
       // spontaneous fission, rx == 'sf'
       result += part2[i] * 0.01 * wimsdfpy_data[from_to];
     } else if ((part1[i] != 0) && (groundstate(rxname::child(from_to.first, 
-                                    part1[i], "decay")) == from_to.second)) {
+                                   part1[i], "decay")) == from_to.second)) {
       result += part2[i] * 0.01;
     }
   }
