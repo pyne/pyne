@@ -8,6 +8,7 @@
 ################################################
 
 
+from libcpp.map cimport map as cpp_map
 from libcpp.string cimport string as std_string
 
 cdef extern from "tally.h" namespace "pyne":
@@ -29,10 +30,15 @@ cdef extern from "tally.h" namespace "pyne":
         double entity_size
         std_string entity_type
         std_string particle_name
+        cpp_map[std_string, std_string] rx2fluka
+        cpp_map[std_string, std_string] rx2mcnp5
+        cpp_map[std_string, std_string] rx2mcnp6
         std_string tally_name
         std_string tally_type
 
         # methods
+        std_string fluka() except +
+        std_string fluka(std_string) except +
         void from_hdf5() except +
         void from_hdf5(std_string) except +
         void from_hdf5(std_string, std_string) except +
@@ -40,6 +46,10 @@ cdef extern from "tally.h" namespace "pyne":
         void from_hdf5(char *) except +
         void from_hdf5(char *, char *) except +
         void from_hdf5(char *, char *, int) except +
+        std_string mcnp() except +
+        std_string mcnp(int) except +
+        std_string mcnp(int, std_string) except +
+        void setup_alias() except +
         void write_hdf5() except +
         void write_hdf5(std_string) except +
         void write_hdf5(std_string, std_string) except +
