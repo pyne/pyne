@@ -51,7 +51,15 @@ namespace pyne
     // Sets up the particle aliases
     void setup_alias();
 
+    // Create hdf5 datatable for tallies
+    hid_t create_dataspace(hid_t file, std::string datapath);
 
+    // create filetype of data
+    hid_t create_filetype();
+
+    // create memory type for tally struct
+    hid_t create_memtype();
+    
     /// Dummy read method wrapper around c style strings
     /// \param filename the filename of the file to read from
     /// \param datapath _name the name of the region where tallies 
