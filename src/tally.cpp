@@ -459,16 +459,18 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   if ( entity_type.find("Surface") != std::string::npos ) {
     if ( tally_type.find("Current") != std::string::npos ) {
       output << "F"<< tally_index <<"1:" << particle_token << " " << entity_id << std::endl;
-      output << "SD"<<tally_index <<"1 " << entity_size << std::endl;
+      if ( entity_size > 0.0 )
+	output << "SD"<<tally_index <<"1 " << entity_size << std::endl;
     } else if ( tally_type.find("Flux") != std::string::npos ) {
       output << "F"<< tally_index <<"2:" << particle_token << " " << entity_id << std::endl;
-      output << "SD"<<tally_index <<"2 " << entity_size << std::endl;
-
+      if ( entity_size > 0.0 )
+	output << "SD"<<tally_index <<"2 " << entity_size << std::endl;
     }
   } else if ( entity_type.find("Volume") != std::string::npos ) {
     if ( tally_type.find("Flux") != std::string::npos ) {
       output << "F"<< tally_index <<"4:" << particle_token << " " << entity_id << std::endl;
-      output << "SD"<<tally_index <<"4 " << entity_size << std::endl;
+      if ( entity_size > 0.0 )
+	output << "SD"<<tally_index <<"4 " << entity_size << std::endl;
     } else if ( tally_type.find("Current") != std::string::npos ) {
       // makes no sense in mcnp
     }
@@ -496,7 +498,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
   std::string part_name = rx2fluka[particle_name];
 
   output << "* " << tally_name << std::endl;
-
+  output << std::setiosflags(std::ios::fixed) << std::setprecision(1);
   // check tally type
   if (tally_type.find("Flux") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRTRACK";
@@ -504,7 +506,11 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << part_name;
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name;
-      output << std::setw(10) << std::right << entity_size;
+      if(entity_size > 0.0 )
+	output << std::setw(10) << std::right << entity_size;
+      else
+	output << std::setw(10) << std::right << 1.0;
+
       output << std::setw(10) << std::right << "   1000."; // number of ebins
       tally_name.resize(8);
       output << std::setw(8) << std::left << tally_name; // may need to make sure less than 10 chars
@@ -516,7 +522,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "        ";
-      output << std::setw(8) << std::right << "       &";      
+      output << std::setw(8) << std::left << "       &";      
       // end of usrtrack
   } else if ( tally_type.find("Current") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRBDX  ";    
@@ -525,7 +531,11 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name; // upstream
       output << std::setw(10) << std::right << entity_name; // downstream
-      output << std::setw(10) << std::right << entity_size; // area
+      if ( entity_size > 0.0 )
+	output << std::setw(10) << std::right << entity_size; // area
+      else
+	output << std::setw(10) << std::right << 1.0;
+
       tally_name.resize(8);
       output << std::setw(8) << std::right << tally_name; // may need to make sure less than 10 chars
       output << std::endl;
@@ -536,7 +546,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << "12.56637"; // 4pi
       output << std::setw(10) << std::right << "     0.0";
       output << std::setw(10) << std::right << "   240.0"; // number of angular bins
-      output << std::setw(8) << std::right << "       &";      
+      output << std::setw(8) << std::left << "       &";      
       // end of usrbdx
   } else {
     std::cout << "Unknown tally type" << std::endl;

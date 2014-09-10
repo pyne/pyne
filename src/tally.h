@@ -78,6 +78,12 @@ namespace pyne
     ///          are to be stored
     void write_hdf5(std::string filename, std::string datapath);
 
+    // mcnp tally
+    std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5" );
+    
+    // fluka tally 
+    std::string fluka(std::string unit_number = "-21");
+
     /// fundamental tally variables
     std::string entity_type; ///< the type of entity (volume,surface)
     std::string entity_name; ///< the name of the entity (optional)
@@ -86,13 +92,6 @@ namespace pyne
     std::string tally_name; ///< name of the tally 
     int entity_id; ///< id number of the entity being tallied upon    
     double entity_size; ///< the physical size of the entity 
-
-    // mcnp tally
-    std::string mcnp(int tally_index, std::string mcnp_version = "mcnp5" );
-    
-    // fluka tally 
-    std::string fluka(std::string unit_number = "-21");
-
 
   };
 
