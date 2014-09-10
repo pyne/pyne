@@ -364,6 +364,34 @@ def test_tally37():
     new_tally.from_hdf5("test_tally.h5","bob_geldof",1)
     assert_equal(tally.tally_type,new_tally.tally_type)
 
+# test write particle for mcnp
+def test_mcnp5_tally_surf_current():
+    tally = Tally("Current","n",12,"Surface","Surface 12","Neutron Current across surface 12",-1.0)
+    assert_equal("C Neutron Current across surface 12\nF11:N 12\n",tally.mcnp(1,"mcnp5"))
+
+def test_mcnp5_tally_surf_flux():
+    tally = Tally("Flux","n",12,"Surface","Surface 12","Neutron Flux across surface 12",-1.0)
+    assert_equal("C Neutron Flux across surface 12\nF12:N 12\n",tally.mcnp(1,"mcnp5"))
+
+def test_mcnp5_tally_vol():
+    tally = Tally("Flux","gamma",12,"Volume","Volume 12","Photon Flux in Cell 12",-1.0)
+    assert_equal("C Photon Flux in Cell 12\nF14:P 12\n",tally.mcnp(1,"mcnp5"))
+
+def test_mcnp6_tally_vol():
+    tally = Tally("Flux","gamma",12,"Volume","Volume 12","Photon Flux in Cell 12",-1.0)
+    assert_equal("C Photon Flux in Cell 12\nF14:P 12\n",tally.mcnp(1,"mcnp6"))
+
+def test_mcnp6_tally_vol_proton():
+    tally = Tally("Flux","p",12,"Volume","Volume 12","Proton Flux in Cell 12",-1.0)
+    assert_equal("C Proton Flux in Cell 12\nF14:H 12\n",tally.mcnp(1,"mcnp6"))
+
+# test write particle for fluka
+def test_fluka_tally():
+    tally = Tally("Flux","gamma",12,"Volume","Reg12","Photon Flux in Cell 12",-1.0)
+    fluka_string = '* Photon Flux in Cell 12\n'+\
+                   'USRTRACK         1.0    PHOTON     -21.0     Reg12       1.0     1000.Photon F\n'+\
+                   'USRTRACK       1.E-3     10.E1                                               &'
+    assert_equal(fluka_string,tally.fluka("-21.0"))
 
 
 # Run as script
