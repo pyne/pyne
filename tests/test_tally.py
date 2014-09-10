@@ -385,6 +385,12 @@ def test_mcnp6_tally_vol_proton():
     tally = Tally("Flux","p",12,"Volume","Volume 12","Proton Flux in Cell 12",-1.0)
     assert_equal("C Proton Flux in Cell 12\nF14:H 12\n",tally.mcnp(1,"mcnp6"))
 
+def test_mcnp6_tally_vol_proton_volume_set():
+    tally = Tally("Flux","p",12,"Volume","Volume 12","Proton Flux in Cell 12",100.0)
+    assert_equal("C Proton Flux in Cell 12\n"+\
+                 "F14:H 12\n"+\
+                 "SD14 100.000000\n",tally.mcnp(1,"mcnp6"))
+
 # test write particle for fluka
 def test_fluka_tally():
     tally = Tally("Flux","gamma",12,"Volume","Reg12","Photon Flux in Cell 12",-1.0)

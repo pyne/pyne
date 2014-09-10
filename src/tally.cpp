@@ -469,6 +469,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
 
   // print out comment line
   output << "C " << tally_name << std::endl;
+  output << std::setiosflags(std::ios::fixed) << std::setprecision(6);
 
   // neednt check entity type
   if ( entity_type.find("Surface") != std::string::npos ) {
