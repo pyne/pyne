@@ -1,5 +1,7 @@
 // General Library
+#ifndef PYNE_IS_AMALGAMATED
 extern "C" double endftod_(char *str, int len);
+#endif
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "utils.h"
@@ -44,7 +46,7 @@ void pyne::pyne_start() {
 
 
 // String Transformations
-std::string pyne::to_str (int t) {
+std::string pyne::to_str(int t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
@@ -56,28 +58,28 @@ std::string pyne::to_str(unsigned int t) {
   return ss.str();
 }
 
-std::string pyne::to_str (double t) {
+std::string pyne::to_str(double t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
 }
 
-std::string pyne::to_str (bool t) {
+std::string pyne::to_str(bool t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
 }
 
 
-int pyne::to_int (std::string s) {
+int pyne::to_int(std::string s) {
   return atoi( s.c_str() );
 }
 
-double pyne::to_dbl (std::string s) {
+double pyne::to_dbl(std::string s) {
   return strtod( s.c_str(), NULL );
 }
 
-double pyne::endftod_cpp (char * s) {
+double pyne::endftod_cpp(char * s) {
   // Converts string from ENDF only handles "E-less" format but is 5x faster
   int pos, mant, exp;
   double v, dbl_exp;
@@ -132,8 +134,12 @@ double pyne::endftod_cpp (char * s) {
   return v;
 }
 
-double pyne::endftod_f (char * s) {
-  return endftod_(s,12);
+double pyne::endftod_f(char * s) {
+#ifdef PYNE_IS_AMALGAMATED
+  return endftod_cpp(s);
+#else
+  return endftod_(s, 12);
+#endif
 }
 
 double (*pyne::endftod)(char * s) = &pyne::endftod_f;
