@@ -35,6 +35,10 @@ PyNE has the following dependencies:
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
    #. `Python 2.7 <http://www.python.org/>`_
+   #. `LAPACK <http://www.netlib.org/lapack/>`
+   #. `BLAS <http://www.netlib.org/blas/>`
+
+Most of the dependencies are readily availible through package managers. 
 
 Additionally, building the documentation requires the following:
 
@@ -60,6 +64,7 @@ moab/pytaps/mesh support (yet).
 ------
 Source
 ------
+
 Installing PyNE from source is a two-step process.  First, download and 
 unzip the source (`zip`_, `tar`_).  Then run the following commands from 
 the unzipped directory::
@@ -75,7 +80,8 @@ data is under some form of license restriction or export control which
 prevents the developers from distributing it with PyNE.  However, the 
 ``nuc_data_make`` program (which is installed by ``setup.py``) will
 do its best to find relevant nuclear data elsewhere on your machine
-or from public sources on the internet.  
+or from public sources on the internet.
+
 
 ^^^^^^^^^^^^^^^^^^^
 Supported Platforms
@@ -171,6 +177,14 @@ Once those lines have been added, run the following command before running
 .. _tar: https://github.com/pyne/pyne/tarball/0.4
 
 .. install-end
+
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Ubuntu 14.04 Build script
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A script for installing PyNE and all it's depencies from scratch on Ubuntu
+14.04 is found `here
+<https://github.com/elliottbiondo/vb-build/blob/master/vb-build.sh>`
 
 
 ============
