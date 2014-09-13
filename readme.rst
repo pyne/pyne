@@ -38,7 +38,9 @@ PyNE has the following dependencies:
    #. `LAPACK <http://www.netlib.org/lapack/>`
    #. `BLAS <http://www.netlib.org/blas/>`
 
-Most of the dependencies are readily available through package managers. 
+Optional Depenendencies:
+   #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
+   #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
 
 Additionally, building the documentation requires the following:
 
@@ -46,6 +48,8 @@ Additionally, building the documentation requires the following:
    #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
    #. `breathe <http://michaeljones.github.io/breathe/>`_ 
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
+
+Most of the dependencies are readily available through package managers. 
 
 ------
 Binary
