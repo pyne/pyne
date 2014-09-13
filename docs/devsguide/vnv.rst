@@ -14,7 +14,7 @@ compliant must contain Python import warnings.
 In order to be declared V&V compliant, a module must meet the criteria
 described below. These V&V criteria are internal to PyNE, but they were
 developed by adapting other QA criteria important within the nuclear
-engineering field. First, the Nuclear Regulatory Commission (NRC) endorses the
+engineering field. The Nuclear Regulatory Commission (NRC) endorses the
 American Society of Mechanical Engineers (ASME) NQA-1-2008/NQA-1a-2009 quality
 assurance standard for the licensing of power plants and reprocessing
 facilities. Since PyNE, for the most part, is a library intended to be used as
@@ -23,7 +23,7 @@ NQA-1 compliant purposes will likely evoke Part II
 Subpart 2.7 Requirement 302 "Otherwise Acquired Software" of NQA-1-2008. The PyNE V&V
 criteria ensure that Requirement 302 criteria are addressed and readily
 available within PyNE documentation. In addition, the PyNE V&V criteria are
-intented to correspond roughly with the Quality Rigor Level 1 Verification and
+intended to correspond roughly with the Quality Rigor Level 1 Verification and
 Validation requirements as defined by the Nuclear Energy Modeling and Simulation
 (NEAMS) Program toolkit verification and validation plan `[pdf]
 <http://www.energy.gov/sites/prod/files/2013/09/f2/NEAMS%20Software%20Verification%20and%20Validation%20Plan%20Requirements%20Version%200.pdf>`_.
