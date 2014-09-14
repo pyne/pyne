@@ -21,7 +21,7 @@ if (APPLE)
       NODEFAULTPATH
     )
     if (LIBGCC_S_PATH)
-      set(LIBGCC_S gcc_s.${gcc_s_ver})
+      set(LIBGCC_S ${LIBGCC_S_PATH})
       break()
     endif ()
   endforeach ()
