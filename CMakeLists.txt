@@ -74,9 +74,15 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 # Check for MOAB library
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
-if(${MOAB_FOUND})
-    include_directories(${MOAB_INCLUDE_DIR})
-endif(${MOAB_FOUND})
+if(MOAB_FOUND)
+  include_directories(${MOAB_INCLUDE_DIRS})
+  find_package(DagMC)
+
+  if (DAGMC_FOUND)
+    include_directories(${DAGMC_INCLUDE_DIRS})
+  endif()
+endif()
+
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
