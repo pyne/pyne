@@ -21,7 +21,7 @@ if (APPLE)
       NODEFAULTPATH
     )
     if (LIBGCC_S_PATH)
-      set(LIBGCC_S gcc_s.${gcc_s_ver})
+      set(LIBGCC_S ${LIBGCC_S_PATH})
       break()
     endif ()
   endforeach ()
@@ -38,7 +38,12 @@ message(STATUS
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Default to release build type
-set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type" FORCE)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo
+      MinSizeRel."
+      FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
 
 # quiets fortify_source warnings when not compiling with optimizations
 # in linux distros where compilers were compiled with fortify_source enabled by
@@ -74,9 +79,15 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 # Check for MOAB library
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
-if(${MOAB_FOUND})
-    include_directories(${MOAB_INCLUDE_DIR})
-endif(${MOAB_FOUND})
+if(MOAB_FOUND)
+  include_directories(${MOAB_INCLUDE_DIRS})
+  find_package(DagMC)
+
+  if (DAGMC_FOUND)
+    include_directories(${DAGMC_INCLUDE_DIRS})
+  endif()
+endif()
+
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.

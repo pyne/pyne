@@ -21,7 +21,7 @@ cython_add_module(dtypes dtypes.pyx)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/stlcontainers.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(stlcontainers stlcontainers.pyx)
-                            
+
 # jsoncpp
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/jsoncpp.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
@@ -41,13 +41,14 @@ cython_add_module(_utils _utils.pyx)
 target_link_libraries(_utils pyne)
 
 # dagmc
-if (MOAB_FOUND)
-    set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
-                                PROPERTIES CYTHON_IS_CXX TRUE)
-    cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
-    target_link_libraries(_dagmc dagmc MOAB pyne)
-    set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
-endif (MOAB_FOUND)
+if (MOAB_FOUND AND DAGMC_FOUND)
+  include_directories(${DAGMC_INCLUDE_DIRS})
+  set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
+                              PROPERTIES CYTHON_IS_CXX TRUE)
+  cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
+  target_link_libraries(_dagmc ${DAGMC_LIBRARIES} ${MOAB_LIBRARIES} pyne)
+  set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
+endif()
 
 # endf
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/endf.pyx"
