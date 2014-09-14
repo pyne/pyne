@@ -74,8 +74,8 @@ def parse_args():
     # handle build type
     btopt = [o.split('=')[1] for o in distutils_args \
              if o.startswith('--build-type=')]
-    if 0 < len(btopt):
-        cmake.append('-DCMAKE_BUILD_TYPE=' + btopt[0])
+    if btopt:
+        cmake += ['-D','CMAKE_BUILD_TYPE:STRING=' + btopt[0]]
         distutils_args = [o for o in distutils_args \
                           if not o.startswith('--build-type=')]
 
@@ -103,8 +103,8 @@ def main_body():
             rtn = subprocess.call(['which', 'cmake'])
             if rtn != 0:
                 sys.exit('CMake is not installed, aborting PyNE build.')
-        cmake_cmd = ['cmake', source_dir] + cmake_args
-        cmake_cmd += ['-DPYTHON_EXECUTABLE=' + sys.executable]
+        cmake_cmd = ['cmake'] + cmake_args
+        cmake_cmd += ['-D', 'PYTHON_EXECUTABLE:FILEPATH=' + sys.executable]
         if os.name == 'nt':
             files_on_path = set()
             for p in os.environ['PATH'].split(';')[::-1]:
@@ -118,6 +118,7 @@ def main_body():
                 cmake_cmd += ['-G "MinGW Makefiles"']
             cmake_cmd = ' '.join(cmake_cmd)
         is_nt = os.name == 'nt'
+        cmake_cmd.append(source_dir)
         cmake_cmdstr = cmake_cmd if isinstance(cmake_cmd, str) else ' '.join(cmake_cmd)
         print("CMake command is\n", cmake_cmdstr, sep="")
         rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=is_nt)

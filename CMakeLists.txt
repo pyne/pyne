@@ -38,7 +38,12 @@ message(STATUS
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Default to release build type
-set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type" FORCE)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo
+      MinSizeRel."
+      FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
 
 # quiets fortify_source warnings when not compiling with optimizations
 # in linux distros where compilers were compiled with fortify_source enabled by
