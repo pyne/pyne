@@ -561,7 +561,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
       mcnp_id = pyne::nucname::mcnp(i->first);
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
-      if ( !table_item.empty() ) {
+      if (!table_item.empty()) {
 	oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
 	oss << "     " << mcnp_id << " ";
