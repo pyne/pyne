@@ -1180,7 +1180,6 @@ void * pyne::rxname::_fill_maps() {
     0,
     0,
     0,
-    0,
     0
   };
   std::string _labels[NUM_RX_NAMES] = {
@@ -1756,6 +1755,13 @@ void * pyne::rxname::_fill_maps() {
     "(z,sf)",
     "(z,2b+)",
     "(z,2ec)",
+    "(e)", // electron
+    "(antie)", // anti electron
+    "(kaon0)",
+    "(antikaon0)",
+    "(heavy_ion)", // generic heavy ion for fluka
+    "(muon_neutrino)", // muon neutrino
+    "(muon_antineutrino)" // muon anti-neutrino   
   };
   std::string _docs[NUM_RX_NAMES] = {
     "(n,total) Neutron total",
