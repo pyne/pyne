@@ -550,15 +550,15 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   std::string nucmcnp;
   std::string table_item;
   for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
-    if ( i->second > 0.0 ) {
+    if (i->second > 0.0) {
       // Clear first
-      ss.str(std::string() );
+      ss.str(std::string());
       ss.str("");
-      ss << pyne::nucname::mcnp(i->first );
+      ss << pyne::nucname::mcnp(i->first);
       nucmcnp = ss.str();
       
       int mcnp_id;
-      mcnp_id = pyne::nucname::mcnp(i->first );
+      mcnp_id = pyne::nucname::mcnp(i->first);
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if ( !table_item.empty() ) {
