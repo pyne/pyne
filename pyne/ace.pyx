@@ -63,9 +63,14 @@ def ascii_to_binary(ascii_file, binary_file):
     binary = open(binary_file, 'wb')
 
     idx = 0
-    if lines[0].split()[0] == '2.0.0':
-        idx = 3
+        
     while idx < len(lines):
+        #check if it's a > 2.0.0 version header
+        if lines[idx].split()[0][1] == '.':
+            if lines[idx + 1].split()[3] == '3':
+                idx = idx + 3
+            else:
+                raise NotImplementedError('Only backwards compatible headers currently supported')
         # Read/write header block
         hz = lines[idx][:10].encode('UTF-8')
         aw0 = float(lines[idx][10:22])
@@ -250,21 +255,33 @@ class Library(object):
 
         f = self.f
         tables_seen = set()
-        firstline = f.readline()
-        if firstline.split()[0] == '2.0.0':
-            for i in range(2): 
-                f.readline()
-        else:
-            f.seek(0)
+        
+        
         lines = [f.readline() for i in range(13)]
 
         while (0 != len(lines)) and (lines[0] != ''):
             # Read name of table, atomic mass ratio, and temperature. If first
             # line is empty, we are at end of file
-            words = lines[0].split()
-            name = words[0]
-            awr = float(words[1])
-            temp = float(words[2])
+            
+            #check if it's a 2.0 style header
+            if lines[0].split()[0][1] == '.':
+                words = lines[0].split()
+                version = words[0]
+                name = words[1]
+                if len(words) == 3:
+                    source = words[2]
+                words = lines[1].split()
+                awr = float(words[0])
+                temp = float(words[1])
+                commentlines = int(words[3])
+                for i in range(commentlines):
+                    lines.pop(0)
+                    lines.append(f.readline())
+            else: 
+                words = lines[0].split()
+                name = words[0]
+                awr = float(words[1])
+                temp = float(words[2])
 
             datastr = '0 ' + ' '.join(lines[6:8])
             nxs = fromstring_split(datastr, dtype=int)
