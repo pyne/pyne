@@ -38,6 +38,7 @@ set(PYNE_SRCS
     "jsoncpp.cpp"
     "material.cpp"
     "nucname.cpp"
+    "particle.cpp"
     "rxname.cpp"
     "tally.cpp"
     "utils.cpp"
