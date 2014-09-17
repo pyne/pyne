@@ -8,32 +8,70 @@ Ahot Spatial Solvers
 
 This page presents a detailed explanation of how :py:mod:`spatialsolver` works, including
 underlying theory, any assocaited assumptions, and information about correct and
-appropriate use of this physics. Excerpts are taken from  Development of a Quantitative Decision Metric for Selecting the Most Suitable Discretization Method for S N Transport Problems by Sebastian Schunert.
+appropriate use of this physics. Excerpts are taken from  Development of a Quantitative 
+Decision Metric for Selecting the Most Suitable Discretization Method for S N Transport 
+Problems by Sebastian Schunert.
 
 *****************************
 Fundamental solver theory
 *****************************
 
-  This suit of solvers uses the SN equations to solve the Boltzmann transport equation.  "The linear Boltzmann transport equation describes the evolution of the flux of neutral particles, i.e. neutrons or photons, in a host medium. It can be obtained from the general Boltzmann transport equation by neglecting particle-particle interactions, the dependence of the material properties of the host medium on the particle flux, and assuming that no electric force field is present." (1 p.5).  
+  This suit of solvers uses the SN equations to solve the Boltzmann transport equation.  "The
+linear Boltzmann transport equation describes the evolution of the flux of neutral particles, 
+i.e. neutrons or photons, in a host medium. It can be obtained from the general Boltzmann transport 
+equation by neglecting particle-particle interactions, the dependence of the material properties 
+of the host medium on the particle flux, and assuming that no electric force field is present." (1 p.5).  
 
-  The following are all spatial discretization methods used to solve the Sn equations of the Neutron Transport Equation (nte).  There are three major assumptions each makes: (1) all systems are steady state (no time dependence), (2) in a non-multiplying medium (sigmaf = 0), and (3) featuring isotropic scattering.  The Sn equations make the transport equation solvable by solving the transport equation along specific segments of omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N.  A nodal method is then used to come up with a specific solution.  The nodal method is what differentiates each of these codes, as outlined below.
+  The following are all spatial discretization methods used to solve the Sn equations of the Neutron
+Transport Equation (nte).  There are three major assumptions each makes: (1) all systems are steady
+state (no time dependence), (2) in a non-multiplying medium (sigmaf = 0), and (3) featuring
+isotropic scattering.  The Sn equations make the transport equation solvable by solving the transport
+equation along specific segments of omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N.  A 
+nodal method is then used to come up with a specific solution.  The nodal method is what differentiates 
+each of these codes, as outlined below.
 
 
 *****************************
 General AHOTN theory
 *****************************
 
-The arbitrarily high-order transport method of the nodal type is a Transverse Moment Type Method.  It is derived for arbitrary expansion orders with the order Λ
+The AHOTN methods are a type of Transverse Moment Type Methods (TMB).  TMB methods are a nodal method 
+derived for an arbitrary expansion with order lambda.  They constitute the “per mesh-cell system of 
+equations from the spatial Legendre moments of the transport Eq. 2.23 augmented by closure/auxiliary 
+relations derived via the transverse moment procedure, followed by an approximate direction-by-direction
+analytical solution of the resulting 1D transport equation.” (1, p.33).  
+
+TMB methods are particularly good at resulting in accurate solutions on “course spatial meshes, thus 
+potentially increasing solution efficiency” (1,33).  This is needed, because most other methods developed
+at the time such as DD failed at solving course spatial meshes, resulting in either extremely inaccurate
+or negative solutions.  
+
+The AHOTN (Arbitrarily High Order Transport Method of the Nodal type) methods are unique from most other 
+TMB methods because they are developed to have a very compact weighted diamond difference (WDD) representation 
+of the per-cell set of equations.  A full derivation of the AHOTN solutions to the SN equations can be found 
+from pages 34 through 40 of [1].  
+
+There are three solvers that use the AHOTN method to solve the neutron transport equation packaged with pyne.  
+They are the following: Linear-Nodal (LN), Linear-Linear (LL), and the NEFD algorithm.  They are discussed 
+further below.
 
 *****************************
 Ahotn-LL/-LN theory
 *****************************
 
-The Linear Linear and Linear Nodal Methods use linear TMB approximations to solve the SN equations.
+Both the AHOTN Linear Linear and Linear Nodal methods use linear TMB approximations to solve the SN equations.  
+The linear nature of this approximation allows for “achieving high accuracy at a reasonably short execution time, 
+thus resulting in improved computational efficiency” [1,p.37].  The LL and LN methods also both “utilize moments 
+of the balance equations, Eq. 2.23, satisfying mx + my + mz <= 1 augmented by three WDD equations per dimensions.  
+Thus, the full set of LN and LL equations comprises four balance relations and twelve WDD equations.  Within this 
+subsection the WDD equations for the LL and LN method are derived in three-dimensional Cartesian geometry” [1,p.38].
 
-"TMB approximation is a good compromise
-for achieving high accuracy at a reasonably short execution time, thus resulting in improved
-computational efficiency." (1, p.38)
+“The difference between the LN and LL method is that the LL method retains the bilinear leakage component while 
+the LN neglects it. From an algorithmic (i.e. solution of the local equations within the mesh sweep) point of 
+view the LN provides the least coupling among the set of equations while the LL has stronger coupling in the WDD 
+relations than both LN and AHOTN-1 and AHOTN-1 has stronger coupling than LL and LN in the nodal balance 
+equations” [1,p.40].
+
 
 *****************************
 Ahotn-NEFD theory
@@ -51,69 +89,73 @@ then solved for the (Λ + 1) 3 unknown nodal flux moments (NEFD algorithm),"(1, 
 DGFEM General Theory
 *****************************
 
-The DGFEM solvers use the Discontinuous Galerkin Finite Element Method (DGFEM) to solve the SN equations.  These use identical polynomial test and trial function spaces that are typically substituted into the weak form and tested against all members of the test space to obtain a per-cell system of equations." (1, p.25)  "In summary two families of DGFEM function spaces are mostly used in discretizing the spatial variable in the SN approximation of the transport equation: (1) the complete family and (2) the Lagrange family." (1,p27) 
+The DGFEM solvers use the Discontinuous Galerkin Finite Element Method (DGFEM) to solve the SN equations.  
+These use identical polynomial test and trial function spaces that are typically substituted into the weak 
+form and tested against all members of the test space to obtain a per-cell system of equations." (1, p.25)  
+"In summary two families of DGFEM function spaces are mostly used in discretizing the spatial variable in 
+the SN approximation of the transport equation: (1) the complete family and (2) the Lagrange family." (1,p27) 
 
-"Assume that we formulate our function spaces such that we solve for point values of the flux, i.e. we use Lagrange polynomials as basis functions. Then, in two-dimensional triangular geometry and three-dimensional tetrahedral geometry the complete basis would require one flux value per corner point. The Lagrange basis would introduce more degrees of freedom that are not associated with the flux values in the corner points. In two-dimensional and three-dimensional Cartesian geometry the Lagrange family would result in one flux value per corner point. The complete basis would result in less degrees of freedom. For Λ = 1 for example, the Lagrange function space seems for more natural for Cartesian meshes, while the complete family appears to be a more natural choice for triangles/tetrahedra." (1,p.28)
+"Assume that we formulate our function spaces such that we solve for point values of the flux, i.e. we use 
+Lagrange polynomials as basis functions. Then, in two-dimensional triangular geometry and three-dimensional 
+tetrahedral geometry the complete basis would require one flux value per corner point. The Lagrange basis 
+would introduce more degrees of freedom that are not associated with the flux values in the corner points. 
+In two-dimensional and three-dimensional Cartesian geometry the Lagrange family would result in one flux 
+value per corner point. The complete basis would result in less degrees of freedom. For Λ = 1 for example, 
+the Lagrange function space seems for more natural for Cartesian meshes, while the complete family appears 
+to be a more natural choice for triangles/tetrahedra." (1,p.28)
 
 When comparing these three included DGFEM solvers with a fixed expansion order, the Lagrange family
-is more accurate, while the complete family excecutes faster.
+is more accurate, while the complete family executes faster.
 
 *****************************
 DGFEM-Lagrange theory
 *****************************
 
-DGFEM-Lagrange is part of the lagrange family of solvers of the DGFEM type.  All lagrange solvers are
-implemented on the lagrange function space, rather than the complete function space.  For an explanation 
-of both spaces see 4.4.1 and 4.4.2 from [1].  "The DGFEM method for discretizing the SN equations was first suggested by Reed and Hill [36] for two-dimensional triangular cells using a basis of Lagrange polynomials: Each Lagrange basis function is associated with a support point at which its value is unity while it assumes
-a zero value at all other support points. The unknowns in Reed’s methods are then the flux
-values at the support points and the method’s order is related to the number of support points
-within a single cell."
+DGFEM-Lagrange is part of the Lagrange family of solvers of the DGFEM type.  All Lagrange solvers are implemented 
+on the Lagrange function space, rather than the complete function space.  For an explanation of both spaces see 
+4.4.1 and 4.4.2 from [1].  "The DGFEM method for discretizing the SN equations was first suggested by Reed and 
+Hill [36] for two-dimensional triangular cells using a basis of Lagrange polynomials: Each Lagrange basis function 
+is associated with a support point at which its value is unity while it assumes a zero value at all other support 
+points. The unknowns in Reed’s methods are then the flux values at the support points and the method’s order is 
+related to the number of support points within a single cell." [1,p.26]
 
 *****************************
 DGFEM-LD theory
 *****************************
 
-Linearly Discontinous Method:  "The linear discontinuous DGFEM method (LD) is the special case of the
-complete DGFEM method of order Λ = 1. It is special in that the local matrix T is of size 4 × 4 and
-therefore its inverse can be precomputed thus saving execution time. Following [24] we decided to implement
-the LD method distinctly from the arbitrary order complete DGFEM kernel in order to create
-a highly optimized method." (1, p.92)
+Linearly Discontinuous Method:  "The linear discontinuous DGFEM method (LD) is the special case of the complete 
+DGFEM method of order Λ = 1. It is special in that the local matrix T is of size 4 × 4 and therefore its inverse 
+can be precomputed thus saving execution time. Following [24] we decided to implement the LD method distinctly 
+from the arbitrary order complete DGFEM kernel in order to create a highly optimized method." (1, p.92)
 
 ********************************
 DGFEM-LL theory (linear-linear?)
 ********************************
 
-Part of the complete family?
+Part of the complete family?  Or is this the complete dgfem solver?
 
 *****************************
 Sct-step theory
 *****************************
 
-The Sct-step solver is an implementation of Duo's Sct step algorithm in three dimensional cartesian geometry. [1, p.105]
+One of the problems with most spatial solvers is the inconsistent and sharp boundary conditions.  A new method 
+called SCT-STEP was developed to try to fix this, by using a “Step approximation in all cells that are intersected 
+by lines and planes of non-smoothness.” [1,p.4] The SCT-STEP method is an implementation of Duo’s SCT Step 
+algorithm in three dimensional cartesian geometry.
 
-SCT history and introduction to SCT-STEP:
+“It is important to point out that this extension is highly non-trivial because of the tremendous increase in 
+complexity of the tracking and cell-splitting algorithms involved. The new method is labeled SCT-Step method." (1,p.4)
 
-"In addition, a novel method that explicitly tracks and eliminates lines and planes of non-
-smoothness originating from “inconsistent” boundary conditions was developed and imple-
-mented. This method uses the Step approximation in all cells that are intersected by lines
-and planes of non-smoothness. It can be considered an extension of Duo’s Singular Character-
-istic Tracking algorithm[17] to three spatial coordinates. However, it is important to point out
-that this extension is highly non-trivial because of the tremendous increase in complexity of the
-tracking and cell-splitting algorithms involved. The new method is labeled SCT-Step method." (1,p.4)
 
-Maybe use this for the history and introduction instead:
-
-"In two-dimensional geometry Duo[17] suggested tracking of the singular characteristic line
-through the mesh and applying a sub-cell approach in intersected cells to keep segments in
-these cells isolated from each other. For the solution of the subcell equations, Duo used the
-Step Characteristic method applied to each of the segments separately. For further details of
-the Duo’s SCT algorithm, references [17] and [1] may be consulted. The results found in these
-two references were that the SCT algorithm (1) restored convergence in the infinity norm for
-C 0 type problems and (2) improved accuracy and observed rate of convergence for C 0 and C 1
-test problems. Encouraged by the success of Duo’s SCT algorithm we decided to implement a
-similar algorithm for three-dimensional Cartesian geometry." (1, p.105)
-
-SCT
+Background on Duo’s two dimensional SCT algorithm:
+"In two-dimensional geometry Duo[17] suggested tracking of the singular characteristic line through the mesh 
+and applying a sub-cell approach in intersected cells to keep segments in these cells isolated from each 
+other. For the solution of the subcell equations, Duo used the Step Characteristic method applied to each 
+of the segments separately. For further details of the Duo’s SCT algorithm, references [17] and [1] may be 
+consulted. The results found in these two references were that the SCT algorithm (1) restored convergence 
+in the infinity norm for C 0 type problems and (2) improved accuracy and observed rate of convergence for 
+C 0 and C 1 test problems. Encouraged by the success of Duo’s SCT algorithm we decided to implement a similar 
+algorithm for three-dimensional Cartesian geometry." (1, p.105)
 
 *************************************
 Advantages & Disadvantages discussion
