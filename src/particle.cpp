@@ -125,7 +125,7 @@ void * pyne::particle::_fill_maps() {
     // light baryons
     "Neutron",
     "Anti Neutron",
-    "I am a Proton",
+    "Proton",
     "Anti Proton",
     // strange baryons
     "Lambda",
