@@ -339,3 +339,135 @@ def test_ahotn_nefd_alternating():
   #print(dict_results)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def test_dgfem_ld_alternating():
+  a = populate_intermediate_1("DGFEM", "LD")
+  dict_results = pyne.spatialsolver.solve(a)
+  rounded_flux = np.around(dict_results['flux'], decimals=4)
+
+  correct_flux =  [[[2.420725,  2.104426,  1.900442,  2.889886],
+                    [2.104426,  1.299636,  1.433389,  1.900442],
+                    [1.900442,  1.433389,  1.299636,  2.104426],
+                    [2.889886,  1.900442,  2.104426,  2.420725],],
+                    
+                    [[2.224013,  1.498666,  1.647904,  1.894524],
+                    [1.498666,  1.119896,  1.039153,  1.647904],
+                    [1.647904,  1.039153,  1.119896,  1.498666],
+                    [1.894524,  1.647904,  1.498666,  2.224013],],
+
+                    [[1.894524,  1.647904,  1.498666,  2.224013],
+                    [1.647904,  1.039153,  1.119896,  1.498666],
+                    [1.498666,  1.119896,  1.039153,  1.647904],
+                    [2.224013,  1.498666,  1.647904,  1.894524],],
+
+                    [[2.889886,  1.900442,  2.104426,  2.420725],
+                    [1.900442,  1.433389,  1.299636,  2.104426],
+                    [2.104426,  1.299636,  1.433389,  1.900442],
+                    [2.420725,  2.104426,  1.900442,  2.889886]]]
+
+
+
+  correct_flux_rounded = np.around(correct_flux, decimals=4)
+  if (rounded_flux==correct_flux_rounded).all():
+    print("flux's are equal!")
+  else:
+    raise AssertionError("Flux outputs are not equal for ahotn-nefd example.  Check system setup.")
+  #print(dict_results)
+
+def test_dgfem_dense_alternating():
+  a = populate_intermediate_1("DGFEM", "DENSE")
+  dict_results = pyne.spatialsolver.solve(a)
+  rounded_flux = np.around(dict_results['flux'], decimals=4)
+
+  correct_flux =  [[[2.420725,  2.104426,  1.900442,  2.889886],
+                    [2.104426,  1.299636,  1.433389,  1.900442],
+                    [1.900442,  1.433389,  1.299636,  2.104426],
+                    [2.889886,  1.900442,  2.104426,  2.420725],],
+                    
+                    [[2.224013,  1.498666,  1.647904,  1.894524],
+                    [1.498666,  1.119896,  1.039153,  1.647904],
+                    [1.647904,  1.039153,  1.119896,  1.498666],
+                    [1.894524,  1.647904,  1.498666,  2.224013],],
+
+                    [[1.894524,  1.647904,  1.498666,  2.224013],
+                    [1.647904,  1.039153,  1.119896,  1.498666],
+                    [1.498666,  1.119896,  1.039153,  1.647904],
+                    [2.224013,  1.498666,  1.647904,  1.894524],],
+
+                    [[2.889886,  1.900442,  2.104426,  2.420725],
+                    [1.900442,  1.433389,  1.299636,  2.104426],
+                    [2.104426,  1.299636,  1.433389,  1.900442],
+                    [2.420725,  2.104426,  1.900442,  2.889886]]]
+
+
+  correct_flux_rounded = np.around(correct_flux, decimals=4)
+  if (rounded_flux==correct_flux_rounded).all():
+    print("flux's are equal!")
+  else:
+    raise AssertionError("Flux outputs are not equal for ahotn-nefd example.  Check system setup.")
+  #print(dict_results)
+
+def test_dgfem_lagrange_alternating():
+  a = populate_intermediate_1("DGFEM", "LAGRANGE")
+  dict_results = pyne.spatialsolver.solve(a)
+  rounded_flux = np.around(dict_results['flux'], decimals=4)
+
+  correct_flux =  [[[2.403548,  2.135009,  1.885348,  2.906123],
+                    [2.135009,  1.300693,  1.469197,  1.885348],
+                    [1.885348,  1.469197,  1.300693,  2.135009],
+                    [2.906123,  1.885348,  2.135009,  2.403548],],
+
+                    [[2.241881,  1.486578,  1.673153,  1.882209],
+                    [1.486578,  1.145347,  1.036189,  1.673153],
+                    [1.673153,  1.036189,  1.145347,  1.486578],
+                    [1.882209,  1.673153,  1.486578,  2.241881],],
+
+                    [[1.882209,  1.673153,  1.486578,  2.241881],
+                    [1.673153,  1.036189,  1.145347,  1.486578],
+                    [1.486578,  1.145347,  1.036189,  1.673153],
+                    [2.241881,  1.486578,  1.673153,  1.882209],],
+
+                    [[2.906123,  1.885348,  2.135009,  2.403548],
+                    [1.885348,  1.469197,  1.300693,  2.135009],
+                    [2.135009,  1.300693,  1.469197,  1.885348],
+                    [2.403548,  2.135009,  1.885348,  2.906123]]]
+
+  correct_flux_rounded = np.around(correct_flux, decimals=4)
+  if (rounded_flux==correct_flux_rounded).all():
+    print("flux's are equal!")
+  else:
+    raise AssertionError("Flux outputs are not equal for ahotn-nefd example.  Check system setup.")
+  #print(dict_results)
+
+
