@@ -21,7 +21,7 @@ can be found in the pyne theory doccumentation.
     geometry.
 
 -----------------------------------
-Dictionary Entries
+Input Dictionary Entries
 -----------------------------------
 As these are complicated solvers, they require a large amount of input data supplied by the user.  The
 format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overriden by default values if not present/not specified. 
@@ -37,7 +37,7 @@ format we choose to take all this information in by is with a python dictionary.
     2.  "DGFEM"
     3.  "SCTSTEP"
   
-**Entry: Spatial expansion order **::
+**Entry: Spatial expansion order**::
 
   key: "solver_type" 
   type: String
@@ -307,6 +307,40 @@ _i'm guessing one of these is a zero MM
 _We need to double check the meaning of this one. RS
 _I have not added this yet.  As soon as we verify the meaning I can add it. JH
 _great RS
+
+-----------------------------------
+Output Dictionary Entries
+-----------------------------------
+When ran, the solvers return a dictionary of useful solution data.  It contains the following key-pair entries:
+
+**Entry: Flux outut array**::
+key:  "flux"
+type: Double Array of 3 dimensions
+format: Flux output array is in following format.  It contains the flux values across the z plane for every cell in the mesh.  The first index refers to the plane on the z axis, beginning at 0 with the lowest plane, and moving upwards to the highest plane on the mesh.  The second index is the row on the z plane, and the third index is the cell in the row.
+format examples: If you had a mesh with 4 by 4 by 4 cells extending in the x, y and z directions, then to get the following flux values, you would use the following index's:
+
+(1.) Flux (z) across top of cell 1,1,1:  flux_array[1][1][1]
+     Geometric location of this cell:
+        Plane: Bottom of cube
+        Row: First y row (j) of cells
+        Cell: First cell in x direction
+(2.) Flux (z) across top of cell 1,1,2:  flux_array[1][1][2]
+     Geometric location of this cell:
+        Plane: Bottom of cube
+        Row: First y row (j) of cells
+        Cell: Second cell in x direction
+(3.) Flux (z) across top of cell 1,2,1:  flux_array[1][2][1]
+     Geometric location of this cell:
+        Plane: Bottom of cube
+        Row: Second y row (j) of cells
+        Cell: First cell in x direction
+(4.) Flux (z) across top of cell 2,1,1:  flux_array[2][1][1]
+     Geometric location of this cell:
+        Plane: Top of one cell up from bottom of cube
+        Row: First y row (j) of cells
+        Cell: First cell in x direction
+
+
 
 .. currentmodule:: pyne.spatialsolver
 
