@@ -550,26 +550,28 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   std::string nucmcnp;
   std::string table_item;
   for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
-    // Clear first
-    ss.str(std::string() );
-    ss.str("");
-    ss << pyne::nucname::mcnp(i->first );
-    nucmcnp = ss.str();
-
-    int mcnp_id;
-    mcnp_id = pyne::nucname::mcnp(i->first );
-    // Spaces are important for tests
-    table_item = metadata["table_ids"][nucmcnp].asString();
-    if ( !table_item.empty() ) {
-      oss << "     " << mcnp_id << "." << table_item << " ";
-    } else {
-      oss << "     " << mcnp_id << " ";
+    if (i->second > 0.0) {
+      // Clear first
+      ss.str(std::string());
+      ss.str("");
+      ss << pyne::nucname::mcnp(i->first);
+      nucmcnp = ss.str();
+      
+      int mcnp_id;
+      mcnp_id = pyne::nucname::mcnp(i->first);
+      // Spaces are important for tests
+      table_item = metadata["table_ids"][nucmcnp].asString();
+      if (!table_item.empty()) {
+	oss << "     " << mcnp_id << "." << table_item << " ";
+      } else {
+	oss << "     " << mcnp_id << " ";
+      }
+      // The int needs a little formatting
+      std::stringstream fs;
+      fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
+	 << std::endl;
+      oss << fs.str();
     }
-    // The int needs a little formatting
-    std::stringstream fs;
-    fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
-       << std::endl;
-    oss << fs.str();
   }
 
   return oss.str();
