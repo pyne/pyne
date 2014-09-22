@@ -249,6 +249,9 @@ namespace nucname
   ///   - name form
   ///   - Serpent
   ///   - LL (element symbol)
+  /// For well-defined situations where you know ahead of time what format the
+  /// nuclide is in, you should use the various form_to_id() functions, rather 
+  /// than the id() function which is meant to resolve possibly ambiquous cases.
   /// \param nuc a nuclide
   /// \return nucid 32-bit integer identifier
   int id(int nuc);
@@ -266,7 +269,7 @@ namespace nucname
   /// chemical symbol used for letter casing (ie 'Pu'), and a trailing upercase 'M' 
   /// for a metastable flag. The name() function first converts functions to id form
   /// using the id() function. Thus the form order resolution for id() also applies 
-  /// to here.
+  /// here.
   /// \param nuc a nuclide
   /// \return a string nuclide identifier.
   std::string name(int nuc);
