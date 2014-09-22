@@ -6,7 +6,7 @@ Ahot Spatial Solvers
 
 .. currentmodule:: pyne.spatialsolver
 
-This page presents a brief summary of the underlying methods used in the :py:mod:`spatialsolver` module. For full details, consult "Development of a Quantitative Decision Metric for Selecting the Most Suitable Discretization Method for S_N Transport Problems", a disseration by Sebastian Schunert (2013). All code in this module is derived from Dr. Schunert's PhD work.
+This page presents a brief summary of the underlying methods used in the :py:mod:`spatialsolver` module. For full details, consult "Development of a Quantitative Decision Metric for Selecting the Most Suitable Discretization Method for S_N Transport Problems", a disseration by Sebastian Schunert (2013). Chapter 2 has a detailed description of the methods implemented in PyNE. All code in this module is derived from Dr. Schunert's PhD work.
 
 *****************************
 Fundamental solver theory
