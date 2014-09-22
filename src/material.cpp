@@ -687,7 +687,7 @@ std::string pyne::Material::fluka_material_line(int znum, double atomic_mass,
 
   ls << fluka_format_field(atomic_mass);
   // Note this is the current object density, and may or may not be meaningful
-  ls << fluka_format_field(density);
+  ls << fluka_format_field(std::sqrt(density*density));
 
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
         std::setw(10) << std::right << (float)fid;
