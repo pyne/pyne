@@ -35,8 +35,8 @@ PyNE has the following dependencies:
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
    #. `Python 2.7 <http://www.python.org/>`_
-   #. `LAPACK <http://www.netlib.org/lapack/>`
-   #. `BLAS <http://www.netlib.org/blas/>`
+   #. `LAPACK <http://www.netlib.org/lapack/>`_
+   #. `BLAS <http://www.netlib.org/blas/>`_
 
 Optional Depenendencies:
    #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
@@ -178,7 +178,6 @@ Once those lines have been added, run the following command before running
 .. _zip: https://github.com/pyne/pyne/zipball/0.4
 .. _tar: https://github.com/pyne/pyne/tarball/0.4
 
-.. install-end
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 Ubuntu 14.04 Build script
@@ -186,8 +185,9 @@ Ubuntu 14.04 Build script
 
 A script for installing PyNE and all its dependencies from scratch on Ubuntu
 14.04 is found `here
-<https://github.com/elliottbiondo/vb-build/blob/master/vb-build.sh>`
+<https://github.com/pyne/install_scripts/blob/master/ubuntu_14.04.sh>`_
 
+.. install-end
 
 ============
 Contributing
