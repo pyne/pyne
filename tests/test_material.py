@@ -1204,13 +1204,13 @@ def test_fluka():
     matlines.append(compound)
     written = ''.join(matlines)
 
-    exp  = 'MATERIAL         92.   235.044       -1.       25.                    235-U'
+    exp  = 'MATERIAL         92.   235.044        1.       25.                    235-U'
     exp += '     \n'
-    exp += 'MATERIAL         92.   238.051       -1.       26.                    238-U'
+    exp += 'MATERIAL         92.   238.051        1.       26.                    238-U'
     exp += '     \n'
     exp += '* Fluka Compound'
     exp += ' \n'
-    exp += 'MATERIAL        999.      999.      19.1       27.                    URANIUM'
+    exp += 'MATERIAL          1.        1.      19.1       27.                    URANIUM'
     exp += '   \n'
     exp += 'COMPOUND        0.04     235-U      0.96     238-U                    URANIUM'
     exp += '   \n'
@@ -1243,13 +1243,13 @@ def test_fluka():
     matlines.append(compound)
     written = ''.join(matlines)
 
-    exp  = 'MATERIAL         92.   235.044       -1.       25.                    235-U'
+    exp  = 'MATERIAL         92.   235.044        1.       25.                    235-U'
     exp += '     \n'
-    exp += 'MATERIAL         92.   238.051       -1.       26.                    238-U'
+    exp += 'MATERIAL         92.   238.051        1.       26.                    238-U'
     exp += '     \n'
     exp += '* Fluka Compound'
     exp += ' \n'
-    exp += 'MATERIAL        999.      999.      19.1       27.                    URANIUM'
+    exp += 'MATERIAL          1.        1.      19.1       27.                    URANIUM'
     exp += '   \n'
     exp += 'COMPOUND       -0.04     235-U     -0.96     238-U                    URANIUM'
     exp += '   \n'
