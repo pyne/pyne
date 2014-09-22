@@ -229,6 +229,26 @@ namespace nucname
   /// nuclides in PyNE. This is termed a ZAS, or ZZZAAASSSS, representation because 
   /// It stores 3 Z-number digits, 3 A-number digits, followed by 4 S-number digits
   /// which the nucleus excitation state. 
+  ///
+  /// The id() function will always return an nuclide in id form, if successful. 
+  /// If the input nuclide is in id form already, then this is function does no
+  /// work. For all other formats, the id() function provides a best-guess based
+  /// on a heirarchy of other formats that is used to resolve ambiguities between
+  /// naming conventions. For integer input the form resolution order is:
+  ///   - id
+  ///   - zz (elemental z-num only given)
+  ///   - zzaaam
+  ///   - cinder (aaazzzm)
+  ///   - mcnp
+  ///   - zzaaa
+  ///   - sza
+  /// For string (or char *) input the form resolution order is as follows:
+  ///   - ZZ-LL-AAAM
+  ///   - Integer form in a string representation, uses interger resolution
+  ///   - NIST
+  ///   - name form
+  ///   - Serpent
+  ///   - LL (element symbol)
   /// \param nuc a nuclide
   /// \return nucid 32-bit integer identifier
   int id(int nuc);
@@ -242,8 +262,11 @@ namespace nucname
   /// notation. The chemical symbol (one or two characters long) is first, followed 
   /// by the nucleon number. Lastly if the nuclide is metastable, the letter M is 
   /// concatenated to the end. For example, ‘H-1’ and ‘Am242M’ are both valid. 
-  /// Note that nucname will always return name form with the dash removed and all 
-  /// letters uppercase.
+  /// Note that nucname will always return name form with dashes removed, the 
+  /// chemical symbol used for letter casing (ie 'Pu'), and a trailing upercase 'M' 
+  /// for a metastable flag. The name() function first converts functions to id form
+  /// using the id() function. Thus the form order resolution for id() also applies 
+  /// to here.
   /// \param nuc a nuclide
   /// \return a string nuclide identifier.
   std::string name(int nuc);
