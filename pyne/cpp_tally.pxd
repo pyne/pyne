@@ -49,7 +49,6 @@ cdef extern from "tally.h" namespace "pyne":
         std_string mcnp() except +
         std_string mcnp(int) except +
         std_string mcnp(int, std_string) except +
-        void setup_alias() except +
         void write_hdf5() except +
         void write_hdf5(std_string) except +
         void write_hdf5(std_string, std_string) except +

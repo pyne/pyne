@@ -48,9 +48,6 @@ namespace pyne
     ~Tally (); /// default destructor
 
 
-    // Sets up the particle aliases
-    void setup_alias();
-
     // Create hdf5 datatable for tallies
     hid_t create_dataspace(hid_t file, std::string datapath);
 

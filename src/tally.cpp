@@ -8,6 +8,7 @@
 
 #ifndef PYNE_IS_AMALGAMATED
   #include "tally.h"
+  #include "particle.h"
   #include "rxname.h"
 #endif
 
@@ -43,23 +44,21 @@ pyne::Tally::Tally() {
   entity_name = "";
   tally_name = "";
   entity_size = -1.0;
-
-  setup_alias();
 }
 
 pyne::Tally::Tally(std::string type, std::string part_name, 
 		   int ent, std::string ent_type, 
 		   std::string ent_name, std::string tal_name,
 		   double size) {
+
   // Empty Tally Constructor
   tally_type = type;
-  particle_name = part_name;
+  particle_name = pyne::particle::name(part_name);
   entity_id = ent;
   entity_type = ent_type;
   entity_name = ent_name;
   tally_name = tal_name;
   entity_size = size;
-  setup_alias();
 }
 
 // Destructor
@@ -68,47 +67,6 @@ pyne::Tally::~Tally() {
 
 
 /*--- Method definitions ---*/
-
-void pyne::Tally::setup_alias(){
-// fluka names
-  rx2fluka["n"]="NEUTRON";
-  rx2fluka["antin"]="ANEUTRON";
-  rx2fluka["gamma"]="PHOTON";
-  rx2fluka["p"]="  PROTON";
-  rx2fluka["antip"]=" APROTON";
-  rx2fluka["d"]="DEUTERON";
-  rx2fluka["t"]="  TRITON";
-  rx2fluka["He3"]="3-HELIUM";
-  rx2fluka["a"]="4-HELIUM";
-  rx2fluka["e"]="ELECTRON";
-  rx2fluka["antie"]="POSITRON";
-  rx2fluka["muonp"]="MUON+";
-  rx2fluka["muonm"]="MUON-";
-  rx2fluka["kaonp"]="KAON+";
-  rx2fluka["kaonm"]="KAON-";
-  rx2fluka["kaon0"]="KAONZERO";
-  rx2fluka["antikaon0"]="AKAONZER";
-  rx2fluka["kaon_0_long"]="KAONLONG";
-  rx2fluka["kaon_0_short"]="KAONSHRT";
-  rx2fluka["heavy_ion"]="HEAVY_ION";
-  rx2fluka["muon_neutrino"]="NEUTRIM";
-  rx2fluka["muon_antineutrino"]="ANEUTRIM";
-
-  // mcnp5 names
-  rx2mcnp5["n"]="N";
-  rx2mcnp5["gamma"]="P";
-  rx2mcnp5["e"]="e";
-  
-  // mcnp6 names
-  rx2mcnp6["n"]="N";
-  rx2mcnp6["gamma"]="P";
-  rx2mcnp6["e"]="E";
-  rx2mcnp6["p"]="H";
-  rx2mcnp6["d"]="D";
-  rx2mcnp6["t"]="T";
-
-}
-
 //
 void pyne::Tally::from_hdf5(char * filename, char *datapath, int row) {
   std::string fname(filename);
@@ -445,25 +403,9 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   std::string particle_token;
   // particle token
   if (mcnp_version.find("mcnp5") != std::string::npos)
-    {
-      if (rx2mcnp5.find(particle_name) != rx2mcnp5.end())
-	particle_token = rx2mcnp5[particle_name];
-      else
-	{
-	  std::cout << "Not a valid MCNP5 particle type" << std::endl;
-	  particle_token = "?";
-	}
-    }
+    particle_token = pyne::particle::mcnp(particle_name);
   else if ( mcnp_version.find("mcnp6") != std::string::npos )
-    {
-      if (rx2mcnp6.find(particle_name) != rx2mcnp6.end() )
-	particle_token = rx2mcnp6[particle_name];
-      else
-	{
-	  std::cout << "Not a valid MCNP6 particle type" << std::endl;
-	  particle_token = "?";
-	}
-    }
+    particle_token = pyne::particle::mcnp6(particle_name);
   else
     particle_token = "?";
 
@@ -511,15 +453,13 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       std::cout << "Unknown entity type" << std::endl;
   }
 
-  std::string part_name = rx2fluka[particle_name];
-
   output << "* " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(1);
   // check tally type
   if (tally_type.find("Flux") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRTRACK";
       output << std::setw(10) << std::right << "     1.0";
-      output << std::setw(10) << std::right << part_name;
+      output << std::setw(10) << std::right << pyne::particle::fluka(particle_name);
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name;
       if(entity_size > 0.0 )
@@ -543,7 +483,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
   } else if ( tally_type.find("Current") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRBDX  ";    
       output << std::setw(10) << std::right << "   110.0";
-      output << std::setw(10) << std::right << part_name;
+      output << std::setw(10) << std::right << pyne::particle::fluka(particle_name);
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name; // upstream
       output << std::setw(10) << std::right << entity_name; // downstream

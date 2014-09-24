@@ -43,7 +43,6 @@ cdef class Tally:
     fluka
     from_hdf5
     mcnp
-    setup_alias
     write_hdf5
     
     Notes
@@ -545,22 +544,7 @@ cdef class Tally:
         rtnval = (<cpp_tally.Tally *> self._inst).mcnp(<int> tally_index, std_string(<char *> mcnp_version_bytes))
         return bytes(<char *> rtnval.c_str()).decode()
     
-    
-    def setup_alias(self, ):
-        """setup_alias(self, )
-        default destructor
-        
-        Parameters
-        ----------
-        None
-        
-        Returns
-        -------
-        res1 : void
-        
-        """
-        (<cpp_tally.Tally *> self._inst).setup_alias()
-    
+      
     
     def _tally_write_hdf5_0(self, filename, datapath):
         """write_hdf5(self, filename, datapath)
