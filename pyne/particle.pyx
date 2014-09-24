@@ -77,6 +77,77 @@ def name(x):
     
     return n
 
+def mcnp(x):
+    """mcnp(x)
+    
+    Gives the unique mcnp name for particle.
+
+    Parameters
+    ----------
+    x : str, int, or char*
+
+    Returns
+    -------
+    n : str Unique particle name
+    """
+    if isinstance(x, basestring):
+        x_bytes = x.encode()
+        cn = cpp_particle.mcnp(std_string(<char *> x_bytes))
+    elif isinstance(x, int):
+        cn = cpp_particle.mcnp(<int> long(x))
+
+    n = bytes(<char *> cn.c_str()).decode()
+    
+    return n
+
+
+def mcnp6(x):
+    """mcnp6(x)
+    
+    Gives the unique mcnp6 name for particle.
+
+    Parameters
+    ----------
+    x : str, int, or char*
+
+    Returns
+    -------
+    n : str Unique particle name
+    """
+    if isinstance(x, basestring):
+        x_bytes = x.encode()
+        cn = cpp_particle.mcnp6(std_string(<char *> x_bytes))
+    elif isinstance(x, int):
+        cn = cpp_particle.mcnp6(<int> long(x))
+
+    n = bytes(<char *> cn.c_str()).decode()
+    
+    return n
+
+
+def fluka(x):
+    """fluka(x)
+    
+    Gives the unique fluka name for particle.
+
+    Parameters
+    ----------
+    x : str, int, or char*
+
+    Returns
+    -------
+    n : str Unique particle name
+    """
+    if isinstance(x, basestring):
+        x_bytes = x.encode()
+        cn = cpp_particle.fluka(std_string(<char *> x_bytes))
+    elif isinstance(x, int):
+        cn = cpp_particle.fluka(<int> long(x))
+
+    n = bytes(<char *> cn.c_str()).decode()
+    
+    return n
+
 
 def describe(x):
     """describe(x)

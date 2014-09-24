@@ -94,6 +94,11 @@ std::map<int,std::string> pyne::particle::id_name;
 std::map<std::string,int> pyne::particle::name_id;
 std::map<std::string,std::string> pyne::particle::docs;
 
+std::map<std::string,std::string> pyne::particle::part2fluka;
+std::map<std::string,std::string> pyne::particle::part2mcnp;
+std::map<std::string,std::string> pyne::particle::part2mcnp6;
+
+
 void * pyne::particle::_fill_maps() {
   using std::make_pair;
 
@@ -158,6 +163,54 @@ void * pyne::particle::_fill_maps() {
   altnames["Beta+"] = name_id["Positron"];
   altnames["Gamma"] = name_id["Photon"];
   altnames["X-Ray"] = name_id["Photon"];
+
+  part2mcnp["Neutron"]="N";
+  part2mcnp["Photon"]="P";
+  part2mcnp["Electron"]="E";
+
+  part2mcnp6["Neutron"]="N";
+  part2mcnp6["Photon"]="P";
+  part2mcnp6["Electron"]="E";
+  part2mcnp6["Proton"]="H";
+
+  part2fluka["Electron"]="ELECTRON";
+  part2fluka["Positron"]="POSITRON";
+  part2fluka["ElectronNeutrino"] ="NEUTRIE";
+  part2fluka["ElectronAntiNeutrino"] ="ANEUTRIE";
+  part2fluka["Muon"]="MUON+";
+  part2fluka["AntiMuon"]="MUON-";
+  part2fluka["MuonNeutrino"]="NEUTRIM";
+  part2fluka["MuonAntiNeutrino"]="ANEUTRIM",
+  part2fluka["Tauon"]="TAU+";
+  part2fluka["Anti Tauon"]="TAU-";
+  part2fluka["TauNeutrino"]="NEUTRIT";
+  part2fluka["TauAntiNeutrino"]="ANEUTRIT";
+  // gauge bosons
+  part2fluka["Photon"]="PHOTON";
+  // light mesons
+  part2fluka["Pion"]="PION-";
+  part2fluka["Anti Pion"]="PION+";
+  // strange mesons
+  part2fluka["Kaon"]="KAON+";
+  part2fluka["AntiKaon"]="KAON-";
+  part2fluka["KaonZero Short"]="KAONSHRT";
+  part2fluka["KaonZero"]="KAONZERO";
+  part2fluka["AntiKaonZero"]="AKAONZER";
+  // light baryons
+  part2fluka["Neutron"]="NEUTRON";
+  part2fluka["AntiNeutron"]="ANEUTRON";
+  part2fluka["Proton"]="PROTON";
+  part2fluka["AntiProton"]="APROTON";
+  // strange baryons
+  part2fluka["Lambda"]="LAMBDA";
+  part2fluka["AntiLambda"]="ALAMBDA";
+  part2fluka["Sigma-"]="SIGMA-";
+  part2fluka["Anti Sigma-"]="ASIGMA-";
+  part2fluka["Sigma+"]="SIGMA+";
+  part2fluka["Anti Sigma+"]="ASIGMA+";
+  part2fluka["Sigma"]="SIGMAZER";
+  part2fluka["AntiSigmaZero"]="ASIGMAZE";
+
 };
 
 void * pyne::particle::_ = pyne::particle::_fill_maps();
@@ -236,6 +289,7 @@ int pyne::particle::pdc_number(int s) {
   else
     return 0;
 }
+
 int pyne::particle::pdc_number(char *s) {
   return pyne::particle::pdc_number(std::string(s));
 }
@@ -258,6 +312,8 @@ int pyne::particle::pdc_number(std::string s) {
 
 // name functions
 std::string pyne::particle::name(int s) {
+  if(s < 9999999)
+    return pyne::particle::name(id_name[s]);
   if(pyne::nucname::isnuclide(s))
     return pyne::particle::name(pyne::nucname::name(s));
   return pyne::particle::name(id_name[s]);
@@ -286,6 +342,66 @@ std::string pyne::particle::name(std::string s) {
   else
     throw NotAParticle(s);
 };
+
+// convert name to mcnp id
+std::string pyne::particle::mcnp(int s) {
+  return pyne::particle::mcnp(pyne::particle::name(s));
+};
+
+std::string pyne::particle::mcnp(char *s) {
+  return pyne::particle::mcnp(pyne::particle::name(s));
+};
+
+std::string pyne::particle::mcnp(std::string s) {
+  if( 0 < part2mcnp.count(pyne::particle::name(s)) )
+    return part2mcnp[pyne::particle::name(s)];
+  else 
+    {
+      std::cout << "Not a valid MCNP5 particle" << std::endl;
+      return "?";
+    }
+};
+
+// convert name to mcnp6 id
+std::string pyne::particle::mcnp6(int s) {
+  return pyne::particle::mcnp6(pyne::particle::name(s));
+};
+
+std::string pyne::particle::mcnp6(char *s) {
+  return pyne::particle::mcnp6(pyne::particle::name(s));
+};
+
+std::string pyne::particle::mcnp6(std::string s) {
+  if( 0 < part2mcnp6.count(pyne::particle::name(s)) )
+    return part2mcnp6[pyne::particle::name(s)];
+  else 
+    {
+      std::cout << "Not a valid MCNP6 particle" << std::endl;
+      return "?";
+    }
+};
+
+// convert name to fluka id
+std::string pyne::particle::fluka(int s) {
+  return pyne::particle::fluka(pyne::particle::name(s));
+};
+
+std::string pyne::particle::fluka(char *s) {
+  return pyne::particle::fluka(pyne::particle::name(s));
+};
+
+std::string pyne::particle::fluka(std::string s) {
+  if ( pyne::particle::is_heavy_ion(s) )
+    return "HEAVYION";
+  else if( 0 < part2fluka.count(pyne::particle::name(s)) )
+    return part2fluka[pyne::particle::name(s)];
+  else 
+    {
+      std::cout << "Not a valid Fluka particle" << std::endl;
+      return "???????";
+    }
+};
+    
 
 // describe functions
 std::string pyne::particle::describe(int s) {

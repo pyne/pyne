@@ -37,6 +37,13 @@ namespace particle
   /// map of name to doc string
   extern std::map<std::string,int> altnames;
   /// map of alternative name to pdc number
+  extern std::map<std::string,std::string> part2mcnp;
+  /// map of name to mcnp string
+  extern std::map<std::string,std::string> part2mcnp6;
+  /// map of name to mcnp6 string
+  extern std::map<std::string,std::string> part2fluka;
+  /// map of name to fluka string
+
 
   /// \name is_hydrogen functions
   /// \{
@@ -96,6 +103,33 @@ namespace particle
   std::string name(int s);
   std::string name(char *s);
   std::string name(std::string s);
+  ///\}
+
+  /// \name mcnp functions
+  /// \{
+  /// Returns the mcnp string of a valid pyne::particle name  
+  /// \param s int, char*, String valid particle name, altname or nucid
+  std::string mcnp(int s);
+  std::string mcnp(char *s);
+  std::string mcnp(std::string s);
+  ///\}
+
+  /// \name mcnp6 functions
+  /// \{
+  /// Returns the mcnp6 string of a valid pyne::particle name  
+  /// \param s int, char*, String valid particle name, altname or nucid
+  std::string mcnp6(int s);
+  std::string mcnp6(char *s);
+  std::string mcnp6(std::string s);
+  ///\}
+
+  /// \name fluka functions
+  /// \{
+  /// Returns the Fluka string of a valid pyne::particle name, or heavy ion
+  /// \param s int, char*, String valid particle name, altname or nucid
+  std::string fluka(int s);
+  std::string fluka(char *s);
+  std::string fluka(std::string s);
   ///\}
 
   /// \name describe functions

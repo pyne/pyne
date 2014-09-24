@@ -33,6 +33,18 @@ cdef extern from "particle.h" namespace "pyne::particle":
     int pdc_number(int) except +
     int pdc_number(char *) except +
     int pdc_number(std_string) except +
+    # mcnp
+    std_string mcnp(int) except +
+    std_string mcnp(char *) except +
+    std_string mcnp(std_string) except +
+    # mcnp6
+    std_string mcnp6(int) except +
+    std_string mcnp6(char *) except +
+    std_string mcnp6(std_string) except +
+    # fluka
+    std_string fluka(int) except +
+    std_string fluka(char *) except +
+    std_string fluka(std_string) except +
     # name
     std_string name(int) except +
     std_string name(char *) except +
