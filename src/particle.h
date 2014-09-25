@@ -4,6 +4,9 @@
 // some monte carlo codes allow us to score so called "heavy ions", in fact we
 // define heavy ions to be particles with more than one neutron or proton
 
+#ifndef PYNE_UWPOP4EE6BEB5CZK4BQQHYTCEI
+#define PYNE_UWPOP4EE6BEB5CZK4BQQHYTCEI
+
 #include <string>
 #include <map>
 #include <set>
@@ -179,4 +182,5 @@ namespace particle
   };
 };
 };
-  
+
+#endif  
