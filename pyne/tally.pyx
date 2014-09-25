@@ -34,12 +34,16 @@ cdef class Tally:
     tally_name (std::string) : name of the tally
     entity_id (int) : id number of the entity being tallied upon
     entity_size (double) : the physical size of the entity
+    normalization (double) : the tally normalization
     
     
     Methods
     -------
     Tally
     ~Tally
+    create_dataspace
+    create_filetype
+    create_memtype
     fluka
     from_hdf5
     mcnp
@@ -93,6 +97,8 @@ cdef class Tally:
         
         entity : int
         
+        normalization : double
+        
         particle_name : std::string
         
         type : std::string
@@ -107,8 +113,8 @@ cdef class Tally:
         self._inst = new cpp_tally.Tally()
     
     
-    def _tally_tally_1(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0):
-        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0)
+    def _tally_tally_1(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0):
+        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
         this we ill put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
@@ -136,6 +142,8 @@ cdef class Tally:
         entity_size : double
         
         entity : int
+        
+        normalization : double
         
         particle_name : std::string
         
@@ -158,14 +166,14 @@ cdef class Tally:
         ent_type_bytes = ent_type.encode()
         ent_name_bytes = ent_name.encode()
         tal_name_bytes = tal_name.encode()
-        self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size)
+        self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
     
     
     _tally_tally_0_argtypes = frozenset()
-    _tally_tally_1_argtypes = frozenset(((0, str), (1, str), (2, int), (3, str), (4, str), (5, str), (6, float), ("type", str), ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str), ("tal_name", str), ("size", float)))
+    _tally_tally_1_argtypes = frozenset(((0, str), (1, str), (2, int), (3, str), (4, str), (5, str), (6, float), (7, float), ("type", str), ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str), ("tal_name", str), ("size", float), ("norm", float)))
     
     def __init__(self, *args, **kwargs):
-        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0)
+        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
         this we ill put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
@@ -193,6 +201,8 @@ cdef class Tally:
         entity_size : double
         
         entity : int
+        
+        normalization : double
         
         particle_name : std::string
         
@@ -270,6 +280,15 @@ cdef class Tally:
             cdef char * value_proxy
             value_bytes = value.encode()
             (<cpp_tally.Tally *> self._inst).entity_type = std_string(<char *> value_bytes)
+    
+    
+    property normalization:
+        """no docstring for normalization, please file a bug report!"""
+        def __get__(self):
+            return float((<cpp_tally.Tally *> self._inst).normalization)
+    
+        def __set__(self, value):
+            (<cpp_tally.Tally *> self._inst).normalization = <double> value
     
     
     property particle_name:
@@ -357,6 +376,64 @@ cdef class Tally:
     
     
     # methods
+    def create_dataspace(self, file, datapath):
+        """create_dataspace(self, file, datapath)
+        default destructor
+        
+        Parameters
+        ----------
+        datapath : std::string
+        
+        file : hid_t
+        
+        Returns
+        -------
+        res1 : hid_t
+        
+        """
+        cdef char * datapath_proxy
+        cdef int rtnval
+        datapath_bytes = datapath.encode()
+        rtnval = (<cpp_tally.Tally *> self._inst).create_dataspace(<int> file, std_string(<char *> datapath_bytes))
+        return int(rtnval)
+    
+    
+    def create_filetype(self, ):
+        """create_filetype(self, )
+        
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : hid_t
+        
+        """
+        cdef int rtnval
+        rtnval = (<cpp_tally.Tally *> self._inst).create_filetype()
+        return int(rtnval)
+    
+    
+    def create_memtype(self, ):
+        """create_memtype(self, )
+        
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : hid_t
+        
+        """
+        cdef int rtnval
+        rtnval = (<cpp_tally.Tally *> self._inst).create_memtype()
+        return int(rtnval)
+    
+    
     def fluka(self, unit_number='-21'):
         """fluka(self, unit_number='-21')
         
@@ -523,8 +600,8 @@ cdef class Tally:
             pass
         raise RuntimeError('method from_hdf5() could not be dispatched')
     
-    def mcnp(self, tally_index, mcnp_version='mcnp5'):
-        """mcnp(self, tally_index, mcnp_version='mcnp5')
+    def mcnp(self, tally_index=1, mcnp_version='mcnp5'):
+        """mcnp(self, tally_index=1, mcnp_version='mcnp5')
         
         
         Parameters
@@ -544,7 +621,6 @@ cdef class Tally:
         rtnval = (<cpp_tally.Tally *> self._inst).mcnp(<int> tally_index, std_string(<char *> mcnp_version_bytes))
         return bytes(<char *> rtnval.c_str()).decode()
     
-      
     
     def _tally_write_hdf5_0(self, filename, datapath):
         """write_hdf5(self, filename, datapath)

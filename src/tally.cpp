@@ -18,10 +18,6 @@ enum tally_type_enum  {FLUX, CURRENT};   // Enumeration for tally types
 const std::string tally_type_enum2string[] = {"Flux", "Current"};
 const std::string entity_type_enum2string[] = {"Volume", "Surface"};
 
-//std::map<std::string particle_name, std::string fluka_name> pyne::Tally::rx2fluka;
-//std::map<std::string particle_name, std::string mcnp6_name> pyne::Tally::rx2mcnp6; // to do
-//std::map<std::string particle_name, std::string mcnp5_name> pyne::Tally::rx2mcnp5;
-
 
 /***************************/
 /*** Protected Functions ***/
@@ -44,12 +40,14 @@ pyne::Tally::Tally() {
   entity_name = "";
   tally_name = "";
   entity_size = -1.0;
+  normalization = 1.0;
 }
 
+// Default constructor
 pyne::Tally::Tally(std::string type, std::string part_name, 
 		   int ent, std::string ent_type, 
 		   std::string ent_name, std::string tal_name,
-		   double size) {
+		   double size, double norm ) {
 
   // Empty Tally Constructor
   tally_type = type;
@@ -59,6 +57,7 @@ pyne::Tally::Tally(std::string type, std::string part_name,
   entity_name = ent_name;
   tally_name = tal_name;
   entity_size = size;
+  normalization = norm;
 }
 
 // Destructor
@@ -138,7 +137,7 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath, int row)
   tally_name = std::string(read_data[data_row].tally_name);
   entity_name = std::string(read_data[data_row].entity_name);
   entity_size = read_data[data_row].entity_size;
-
+  normalization = read_data[data_row].normalization;
 
   // close the data sets
   status = H5Dclose(dset);
@@ -166,7 +165,7 @@ hid_t pyne::Tally::create_filetype() {
   hid_t strtype = H5Tcopy(H5T_C_S1);
   status = H5Tset_size(strtype, H5T_VARIABLE);
 
-  hid_t filetype = H5Tcreate(H5T_COMPOUND, 8 + 8 + 8 + (3*sizeof(hvl_t)) + 8);
+  hid_t filetype = H5Tcreate(H5T_COMPOUND, 8 + 8 + 8 + (3*sizeof(hvl_t)) + 8 + 8);
   status = H5Tinsert(filetype, "entity_id", 0, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "entity_type", 8, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "tally_type", 8 + 8, H5T_STD_I64BE);
@@ -174,6 +173,7 @@ hid_t pyne::Tally::create_filetype() {
   status = H5Tinsert(filetype, "entity_name", 8 + 8 + 8 + sizeof(hvl_t), strtype);
   status = H5Tinsert(filetype, "tally_name", 8 + 8 + 8 + (2*sizeof(hvl_t)) , strtype);
   status = H5Tinsert(filetype, "entity_size", 8 + 8 + 8 + (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
+  status = H5Tinsert(filetype, "normalization", 8 + 8 + 8 + (3*sizeof(hvl_t)) + 8, H5T_IEEE_F64BE);
   return filetype;
 }
 
@@ -202,6 +202,8 @@ hid_t pyne::Tally::create_memtype() {
 		     strtype);
   status = H5Tinsert(memtype, "entity_size",
 		     HOFFSET(tally_struct, entity_size), H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(memtype, "normalization",
+		     HOFFSET(tally_struct, normalization), H5T_NATIVE_DOUBLE);
   return memtype;
 }
 
@@ -265,6 +267,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   tally_data[0].particle_name = particle_name.c_str();
   tally_data[0].tally_name = tally_name.c_str();
   tally_data[0].entity_size = entity_size;
+  tally_data[0].normalization = normalization;
 
   
   // check for file existence
@@ -413,28 +416,42 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   output << "C " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(6);
 
+  if (normalization > 1.0 )
+    output << std::scientific;
+
   // neednt check entity type
   if ( entity_type.find("Surface") != std::string::npos ) {
     if ( tally_type.find("Current") != std::string::npos ) {
       output << "F"<< tally_index <<"1:" << particle_token << " " << entity_id << std::endl;
       if ( entity_size > 0.0 )
 	output << "SD"<<tally_index <<"1 " << entity_size << std::endl;
+      // normalisation
+      if( normalization > 1.0 )
+	output << "FM" << tally_index << "1 " << normalization << std::endl;
     } else if ( tally_type.find("Flux") != std::string::npos ) {
       output << "F"<< tally_index <<"2:" << particle_token << " " << entity_id << std::endl;
       if ( entity_size > 0.0 )
 	output << "SD"<<tally_index <<"2 " << entity_size << std::endl;
+      // normalisation
+      if( normalization > 1.0 )
+	output << "FM" << tally_index << "2 " << normalization << std::endl;
+
     }
   } else if ( entity_type.find("Volume") != std::string::npos ) {
     if ( tally_type.find("Flux") != std::string::npos ) {
       output << "F"<< tally_index <<"4:" << particle_token << " " << entity_id << std::endl;
       if ( entity_size > 0.0 )
 	output << "SD"<<tally_index <<"4 " << entity_size << std::endl;
+            // normalisation
+      if( normalization > 1.0 )
+	output << "FM" << tally_index << "4 " << normalization << std::endl;
     } else if ( tally_type.find("Current") != std::string::npos ) {
       // makes no sense in mcnp
     }
   } else {
     std::cout << "tally/entity combination makes no sense for MCNP" << std::endl;
   }
+  
 
   // print sd card if area/volume specified
   return output.str();

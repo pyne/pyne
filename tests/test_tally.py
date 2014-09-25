@@ -29,8 +29,8 @@ def write_neutron(file_name):
 
 # writes the photon tally to the file filename
 def write_photon(file_name):
-    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
-    tally.write_hdf5(file_name,"tally")
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
+    tally.write_hdf5(file_name,"/tally")
 
 # writes the neutron tally to arb file and path
 def write_arb_n(file_name,path):
@@ -73,6 +73,10 @@ def test_tally7():
     tally = Tally()
     assert_equal(tally.entity_size,-1.0)
 
+def test_tally7a():
+    tally = Tally()
+    assert_equal(tally.normalization,1.0)
+
 
 ###############################################################################
 # tests the constructor
@@ -104,11 +108,16 @@ def test_tally14():
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
     assert_equal(tally.entity_size,35.0)
 
+def test_tally14a():
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,1.0E20)
+    assert_equal(tally.normalization,1.0E20)
+
+
 ################################################################################
 # tests the save abilty
 def test_tally15():
     clean(["test_tally.h5"])
-    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
     write_photon("test_tally.h5")
 
     new_tally = Tally()
@@ -117,7 +126,7 @@ def test_tally15():
 
 def test_tally16():
     clean(["test_tally.h5"])
-    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
     write_photon("test_tally.h5")
    
     new_tally = Tally()
@@ -126,17 +135,17 @@ def test_tally16():
 
 def test_tally17():
     clean(["test_tally.h5"])
-    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
     write_photon("test_tally.h5")
   
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",0)
     assert_equal(tally.entity_type,new_tally.entity_type)
 
-
+7
 def test_tally18():
     clean(["test_tally.h5"])
-    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
     write_photon("test_tally.h5")
 
     new_tally = Tally()
@@ -146,7 +155,7 @@ def test_tally18():
 
 def test_tally19():
     clean(["test_tally.h5"])
-    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
     write_photon("test_tally.h5")
 
     new_tally = Tally()
@@ -155,7 +164,7 @@ def test_tally19():
 
 def test_tally20():
     clean(["test_tally.h5"])
-    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
     write_photon("test_tally.h5")
 
     new_tally = Tally()
@@ -164,13 +173,23 @@ def test_tally20():
 
 def test_tally21():
     clean(["test_tally.h5"])
-    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
     write_photon("test_tally.h5")
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",0)
 
     assert_equal(tally.entity_size,new_tally.entity_size)
+
+def test_tally21a():
+    clean(["test_tally_21.h5"])
+    tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
+    write_photon("test_tally_21.h5")
+
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally_21.h5","/tally",0)
+
+    assert_equal(tally.normalization,new_tally.normalization)
 
 ################################################################################
 # tests the append and load abilty
@@ -258,6 +277,19 @@ def test_tally28():
     new_tally.from_hdf5("test_tally.h5","tally",1)
 
     assert_equal(tally.entity_size,new_tally.entity_size)
+
+def test_tally28():
+    clean(["test_tally.h5"])
+    write_photon("test_tally.h5")
+    write_neutron("test_tally.h5")
+
+    # there are now two tallies in the h5 file
+    tally = Tally("Current","Neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0) 
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+
+    assert_equal(tally.normalization,new_tally.normalization)
+
 
 ################################################################################
 # tests the load abilty
@@ -369,9 +401,17 @@ def test_mcnp5_tally_surf_current():
     tally = Tally("Current","Neutron",12,"Surface","Surface 12","Neutron Current across surface 12",-1.0)
     assert_equal("C Neutron Current across surface 12\nF11:N 12\n",tally.mcnp(1,"mcnp5"))
 
+def test_mcnp5_tally_surf_current_norm():
+    tally = Tally("Current","Neutron",12,"Surface","Surface 12","Neutron Current across surface 12",-1.0,1.0e13)
+    assert_equal("C Neutron Current across surface 12\nF11:N 12\nFM11 1.000000e+13\n",tally.mcnp(1,"mcnp5"))
+
 def test_mcnp5_tally_surf_flux():
     tally = Tally("Flux","Neutron",12,"Surface","Surface 12","Neutron Flux across surface 12",-1.0)
     assert_equal("C Neutron Flux across surface 12\nF12:N 12\n",tally.mcnp(1,"mcnp5"))
+
+def test_mcnp5_tally_surf_flux_norm():
+    tally = Tally("Flux","Neutron",12,"Surface","Surface 12","Neutron Flux across surface 12",-1.0,1.0e13)
+    assert_equal("C Neutron Flux across surface 12\nF12:N 12\nFM12 1.000000e+13\n",tally.mcnp(1,"mcnp5"))
 
 def test_mcnp5_tally_vol():
     tally = Tally("Flux","Gamma",12,"Volume","Volume 12","Photon Flux in Cell 12",-1.0)
@@ -380,6 +420,11 @@ def test_mcnp5_tally_vol():
 def test_mcnp6_tally_vol():
     tally = Tally("Flux","Gamma",12,"Volume","Volume 12","Photon Flux in Cell 12",-1.0)
     assert_equal("C Photon Flux in Cell 12\nF14:P 12\n",tally.mcnp(1,"mcnp6"))
+
+def test_mcnp6_tally_vol_norm():
+    tally = Tally("Flux","Gamma",12,"Volume","Volume 12","Photon Flux in Cell 12",-1.0,1.0e13)
+    assert_equal("C Photon Flux in Cell 12\nF14:P 12\nFM14 1.000000e+13\n",tally.mcnp(1,"mcnp6"))
+
 
 def test_mcnp6_tally_vol_proton():
     tally = Tally("Flux","Proton",12,"Volume","Volume 12","Proton Flux in Cell 12",-1.0)

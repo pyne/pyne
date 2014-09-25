@@ -41,9 +41,11 @@ namespace pyne
     /// \param entity_name string identifying the entity
     /// \param tally_name string identifying the tally 
     /// \param entity_size the physical size of the tally volume
+    /// \param normalization the number required to normalize your tally
     Tally(std::string type, std::string particle_name, int entity,
 	  std::string entity_type, std::string entity_name,
-	  std::string tally_name = "", double entity_size = 0.0);
+	  std::string tally_name = "", double entity_size = 0.0, 
+	  double normalization = 1.0);
 
     ~Tally (); /// default destructor
 
@@ -97,7 +99,7 @@ namespace pyne
     std::string tally_name; ///< name of the tally 
     int entity_id; ///< id number of the entity being tallied upon    
     double entity_size; ///< the physical size of the entity 
-
+    double normalization; ///< the tally normalization 
   };
 
   /// Converts a Tally to a string stream representation.
@@ -115,6 +117,7 @@ namespace pyne
     const char * entity_name;
     const char * tally_name;
     double entity_size;
+    double normalization;
   } tally_struct;
   
 // End pyne namespace
