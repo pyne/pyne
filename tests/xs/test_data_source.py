@@ -406,3 +406,8 @@ def test_openmc():
 
     obs = ods.reaction('U-235', 42)
     assert_is(None, obs)
+
+    # threshold reactoin
+    obs = ods.reaction('W180', 'z_3n')
+    assert_equal(10, len(obs))
+    assert_true(np.all(obs >= 0.0))

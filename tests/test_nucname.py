@@ -299,6 +299,18 @@ def test_mcnp_to_id():
             continue
         yield check_cases, nucname.mcnp_to_id, val, id
 
+def test_fluka():
+    assert_equal(nucname.fluka(  40000000), 'BERYLLIU')
+    assert_equal(nucname.fluka( 640000000), 'GADOLINI')
+    assert_equal(nucname.fluka( 280000000), 'NICKEL')
+    assert_equal(nucname.fluka(1140000000), 'UNUNQUAD')
+    assert_not_equal(nucname.fluka(1140000000), 'UNUNQUA')
+
+def test_fluka_to_id():
+    assert_equal(nucname.fluka_to_id('BERYLLIU'),40000000)
+    assert_equal(nucname.fluka_to_id('NICKEL'), 280000000)
+    assert_equal(nucname.fluka_to_id('LITHIU-7'),30070000)
+
 def test_serpent():
     assert_equal(nucname.serpent(942390), "Pu-239")
     assert_equal(nucname.serpent(952421), "Am-242m")

@@ -343,17 +343,87 @@ cdef class _Material:
         card = self.mat_pointer.mcnp(frac_type)
         return card
 
-    def fluka(self):
+    def fluka(self, fid, frac_type='mass'):
         """fluka()
-        Return a fluka material card
-        Parameters none
+        Return a fluka material record if there is only one component,
+        otherwise return the compound material record and the fluka
+        compound record
+        Parameters 
         ----------
  	   The sequential material id starting from 26 unless predefined
         """
         cdef std_string card
-        card = self.mat_pointer.fluka()
+        card = self.mat_pointer.fluka(fid, frac_type)
         return card
 
+    def not_fluka_builtin(self, fluka_name):
+        """not_fluka_builtin()
+        Return whether a string is in the fluka built-in list
+        Parameters 
+        ----------
+ 	   A string representing a FLUKA material name
+        """
+        cdef cpp_bool card
+        card = self.mat_pointer.not_fluka_builtin(fluka_name)
+        return card
+        
+    def fluka_material_str(self, id):
+        """fluka_material_str()
+        Return the FLUKA MATERIAL record with the given id. 
+        A single-component material is expected
+        Parameters 
+        ----------
+ 	   The sequential material id starting from 26 unless predefined
+        """
+        cdef std_string card
+        card = self.mat_pointer.fluka_material_str(id)
+        return card
+
+    def fluka_material_component(self, id, nucid, fluka_name):
+        """fluka_material_component()
+        Return the FLUKA MATERIAL record with the given id, nucid and name. 
+        Parameters 
+        ----------
+ 	   The sequential material id, the (single) nucid, and the fluka name 
+        """
+        cdef std_string card
+        card = self.mat_pointer.fluka_material_component(id, nucid, fluka_name)
+        return card
+
+    def fluka_material_line(self, znum, mass, id, name):
+        """fluka_material_line()
+        Return the FLUKA MATERIAL record with the given znum, atomic mass, id, 
+        and fluka name
+        Parameters 
+        ----------
+ 	   The znum, atomic mass, material id, and the fluka name 
+        """
+        cdef std_string card
+        card = self.mat_pointer.fluka_material_line(znum, mass, id, name)
+        return card
+
+    def fluka_format_field(self, field):
+        """fluka_format_field()
+        Return a string for a single field in the FLUKA MATERIAL record
+        Parameters 
+        ----------
+ 	   The field value
+        """
+        cdef std_string card
+        card = self.mat_pointer.fluka_format_field(field)
+        return card
+
+    def fluka_compound_str(self, id, frac_type='mass'):
+        """fluka_compound_str()
+        Return the FLUKA MATERIAL record for the compound, and the 
+	FLUKA COMPOUND record for the components
+        Parameters 
+        ----------
+ 	   The sequential compound id starting from 26 unless predefined
+        """
+        cdef std_string card
+        card = self.mat_pointer.fluka_compound_str(id, frac_type)
+        return card
 
     def from_text(self, filename):
         """from_text(char * filename)
@@ -551,6 +621,21 @@ cdef class _Material:
         """
         cdef _Material newmat = Material()
         newmat.mat_pointer[0] = self.mat_pointer.expand_elements()
+        return newmat
+
+    def collapse_elements(self, nucset):
+        """collapse_elements(self)
+        Collapses the elements in the material, excluding the nucids in 
+	paramater set. This function returns a copy of the material.
+
+        Returns
+        -------
+        newmat : Material
+            A copied and collapseed material.
+
+        """
+        cdef _Material newmat = Material()
+        newmat.mat_pointer[0] = self.mat_pointer.collapse_elements(nucset)
         return newmat
 
     def mass_density(self, double num_dens=-1.0, double atoms_per_molecule=-1.0):
