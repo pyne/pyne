@@ -40,11 +40,11 @@ namespace particle
   /// map of name to doc string
   extern std::map<std::string,int> altnames;
   /// map of alternative name to pdc number
-  extern std::map<std::string,std::string> part2mcnp;
+  extern std::map<std::string,std::string> part_to_mcnp;
   /// map of name to mcnp string
-  extern std::map<std::string,std::string> part2mcnp6;
+  extern std::map<std::string,std::string> part_to_mcnp6;
   /// map of name to mcnp6 string
-  extern std::map<std::string,std::string> part2fluka;
+  extern std::map<std::string,std::string> part_to_fluka;
   /// map of name to fluka string
 
 

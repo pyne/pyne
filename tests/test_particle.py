@@ -10,7 +10,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 
 from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
-from pyne.particle import is_valid,name,is_heavy_ion,pdc_number,mcnp,mcnp6, \
+from pyne.particle import is_valid,name,is_heavy_ion,id,mcnp,mcnp6, \
     fluka
 
 
@@ -43,13 +43,13 @@ def test_is_heavy_ion():
     assert_equal(is_heavy_ion("3He"),True)
     assert_equal(is_heavy_ion("22Na"),True)
 
-def test_pdc_number():
-    assert_equal(pdc_number("Proton"),2212)
-    assert_not_equal(pdc_number("AntiProton"),2212)
-    assert_equal(pdc_number("AntiProton"),-2212)
-    assert_not_equal(pdc_number("Proton"),-2212)
-    assert_equal(pdc_number("Hydrogen"),2212)
-    assert_equal(pdc_number("22Na"),0)
+def test_id_number():
+    assert_equal(id("Proton"),2212)
+    assert_not_equal(id("AntiProton"),2212)
+    assert_equal(id("AntiProton"),-2212)
+    assert_not_equal(id("Proton"),-2212)
+    assert_equal(id("Hydrogen"),2212)
+    assert_equal(id("22Na"),0)
 
 def test_mcnp_id():
     assert_equal(mcnp("Neutron"),"N")

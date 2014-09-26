@@ -249,7 +249,7 @@ bool pyne::particle::is_heavy_ion(char *s) {
 
 bool pyne::particle::is_heavy_ion(std::string s) {
   if(pyne::nucname::isnuclide(s))
-    if(pyne::particle::_is_hydrogen(s))
+    if(pyne::particle::is_hydrogen(s))
       return false;
     else
       return true;
@@ -297,7 +297,7 @@ int pyne::particle::id(char *s) {
 int pyne::particle::id(std::string s) {
   if(pyne::nucname::isnuclide(s))
     {
-      if(pyne::particle::_is_hydrogen(s))
+      if(pyne::particle::is_hydrogen(s))
 	return name_id["Proton"];
       if( pyne::particle::is_heavy_ion(s) )
 	return 0;
@@ -327,7 +327,7 @@ std::string pyne::particle::name(std::string s) {
   // check if is a hydrogen
   if(pyne::nucname::isnuclide(s))
     {
-      if(pyne::particle::_is_hydrogen(s))
+      if(pyne::particle::is_hydrogen(s))
 	return "Proton";
       if( pyne::particle::is_heavy_ion(s) )
 	return s;
@@ -418,7 +418,7 @@ std::string pyne::particle::describe(std::string s) {
   // check if is a hydrogen
   if(pyne::nucname::isnuclide(s))
     {
-      if(pyne::particle::_is_hydrogen(s))
+      if(pyne::particle::is_hydrogen(s))
 	return docs[pyne::particle::name(s)];
       if( pyne::particle::is_heavy_ion(s) )
 	return "Is a heavy ion";
