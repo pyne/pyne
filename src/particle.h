@@ -56,9 +56,9 @@ namespace particle
   /// Protium, "H1", "1H", 100001000, PDC(2212)
   /// \param n Integer PDC number or nucid
   /// \param s String valid particle name, altname or nucid
-  bool _is_hydrogen(int n);
-  bool _is_hydrogen(char *s);
-  bool _is_hydrogen(std::string s);
+  bool is_hydrogen(int n);
+  bool is_hydrogen(char *s);
+  bool is_hydrogen(std::string s);
   /// \}
 
   /// \name is_heavy_ion functions

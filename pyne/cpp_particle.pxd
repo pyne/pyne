@@ -1,4 +1,4 @@
-"""C++ wrapper for rxname library."""
+"""C++ wrapper for particle library."""
 from libcpp.map cimport map
 from libcpp.set cimport set
 from libc.string cimport const_char
@@ -18,9 +18,9 @@ cdef extern from "particle.h" namespace "pyne::particle":
 
     # functions
     # is_hydrogen
-    bint _is_hydrogen(int) except +
-    bint _is_hydrogen(char *) except +
-    bint _is_hydrogen(std_string) except +
+    bint is_hydrogen(int) except +
+    bint is_hydrogen(char *) except +
+    bint is_hydrogen(std_string) except +
     # is_heavy_ion
     bint is_heavy_ion(int) except +
     bint is_heavy_ion(char *) except +
