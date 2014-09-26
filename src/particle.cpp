@@ -283,18 +283,18 @@ bool pyne::particle::is_valid(std::string s) {
 };
 
 // pdc functions
-int pyne::particle::pdc_number(int s) {
+int pyne::particle::id(int s) {
   if ( 0 < pdc_nums.count(s))
     return s;
   else
     return 0;
 }
 
-int pyne::particle::pdc_number(char *s) {
-  return pyne::particle::pdc_number(std::string(s));
+int pyne::particle::id(char *s) {
+  return pyne::particle::id(std::string(s));
 }
 
-int pyne::particle::pdc_number(std::string s) {
+int pyne::particle::id(std::string s) {
   if(pyne::nucname::isnuclide(s))
     {
       if(pyne::particle::_is_hydrogen(s))

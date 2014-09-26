@@ -223,8 +223,8 @@ def describe(x):
     
     return n
 
-def pdc_number(x):
-    """pdc_number(x)
+def id(x):
+    """id(x)
     
     Gives the unique particle id number
 
@@ -239,9 +239,9 @@ def pdc_number(x):
 
     if isinstance(x, basestring):
         x_bytes = x.encode()
-        cn = cpp_particle.pdc_number(std_string(<char *> x_bytes))
+        cn = cpp_particle.id(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.pdc_number(<int> long(x))
+        cn = cpp_particle.id(<int> long(x))
 
     n = cn
     

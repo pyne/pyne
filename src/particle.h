@@ -91,9 +91,9 @@ namespace particle
   /// will return the number, for heavy ions will return 0.
   /// \param n Integer PDC number or nucid
   /// \param s String valid particle name, altname or nucid
-  int pdc_number(int n);
-  int pdc_number(char *s);
-  int pdc_number(std::string s);
+  int id(int n);
+  int id(char *s);
+  int id(std::string s);
   ///\}
 
   /// \name name functions

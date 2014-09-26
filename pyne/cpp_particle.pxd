@@ -30,9 +30,9 @@ cdef extern from "particle.h" namespace "pyne::particle":
     bint is_valid(char *) except +
     bint is_valid(std_string) except +
     # pdc_number
-    int pdc_number(int) except +
-    int pdc_number(char *) except +
-    int pdc_number(std_string) except +
+    int id(int) except +
+    int id(char *) except +
+    int id(std_string) except +
     # mcnp
     std_string mcnp(int) except +
     std_string mcnp(char *) except +
