@@ -441,7 +441,7 @@ def test_fluka_tally():
     tally = Tally("Flux","Gamma",12,"Volume","Reg12","Photon Flux in Cell 12",-1.0)
     fluka_string = '* Photon Flux in Cell 12\n'+\
                    'USRTRACK         1.0    PHOTON     -21.0     Reg12       1.0     1000.Photon F\n'+\
-                   'USRTRACK       1.E-3     10.E1                                               &'
+                   'USRTRACK       10.E1     1.E-3                                               &'
     assert_equal(fluka_string,tally.fluka("-21.0"))
 
 # test write particle for fluka
@@ -449,7 +449,7 @@ def test_fluka_tally_proton():
     tally = Tally("Flux","Proton",12,"Volume","Reg12","Proton Flux in Cell 12",-1.0)
     fluka_string = '* Proton Flux in Cell 12\n'+\
                    'USRTRACK         1.0    PROTON     -21.0     Reg12       1.0     1000.Proton F\n'+\
-                   'USRTRACK       1.E-3     10.E1                                               &'
+                   'USRTRACK       10.E1     1.E-3                                               &'
     assert_equal(fluka_string,tally.fluka("-21.0"))
 
 # test write particle for fluka
@@ -457,7 +457,7 @@ def test_fluka_tally_muonp():
     tally = Tally("Flux","Muon",12,"Volume","Reg12","Muon Flux in Cell 12",-1.0)
     fluka_string = '* Muon Flux in Cell 12\n'+\
                    'USRTRACK         1.0     MUON+     -21.0     Reg12       1.0     1000.Muon Flu\n'+\
-                   'USRTRACK       1.E-3     10.E1                                               &'
+                   'USRTRACK       10.E1     1.E-3                                               &'
     assert_equal(fluka_string,tally.fluka("-21.0"))
 
 

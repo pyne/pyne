@@ -489,8 +489,8 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(8) << std::left << tally_name; // may need to make sure less than 10 chars
       output << std::endl;
       output << std::setw(10) << std::left  << "USRTRACK";
-      output << std::setw(10) << std::right << "   1.E-3";
       output << std::setw(10) << std::right << "   10.E1";
+      output << std::setw(10) << std::right << "   1.E-3";
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "        ";
