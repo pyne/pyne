@@ -46,6 +46,8 @@ namespace particle
   /// map of name to mcnp6 string
   extern std::map<std::string,std::string> part_to_fluka;
   /// map of name to fluka string
+  extern std::map<std::string,std::string> part_to_geant4;
+  /// map of name to geant4 string
 
 
   /// \name is_hydrogen functions
@@ -134,6 +136,16 @@ namespace particle
   std::string fluka(char *s);
   std::string fluka(std::string s);
   ///\}
+
+  /// \name geant4 functions
+  /// \{
+  /// Returns the Geant4 string of a valid pyne::particle name, or heavy ion
+  /// \param s int, char*, String valid particle name, altname or nucid
+  std::string geant4(int s);
+  std::string geant4(char *s);
+  std::string geant4(std::string s);
+  ///\}
+
 
   /// \name describe functions
   /// \{

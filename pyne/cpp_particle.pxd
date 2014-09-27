@@ -45,6 +45,10 @@ cdef extern from "particle.h" namespace "pyne::particle":
     std_string fluka(int) except +
     std_string fluka(char *) except +
     std_string fluka(std_string) except +
+    # geant4
+    std_string geant4(int) except +
+    std_string geant4(char *) except +
+    std_string geant4(std_string) except +
     # name
     std_string name(int) except +
     std_string name(char *) except +

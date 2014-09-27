@@ -11,7 +11,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
 from pyne.particle import is_valid,name,is_heavy_ion,id,mcnp,mcnp6, \
-    fluka
+    fluka,geant4
 
 
 def test_is_valid():
@@ -76,6 +76,16 @@ def test_fluka_id():
     assert_equal(fluka("Beta-"),"ELECTRON")
     assert_equal(fluka("Proton"),"PROTON")
     assert_equal(fluka("Hydrogen"),"PROTON")
+
+def test_geant4_id():
+    assert_equal(geant4("Neutron"),"neutron")
+    assert_equal(geant4(2112),"neutron")
+    assert_equal(geant4("Photon"),"gamma")
+    assert_equal(geant4("Gamma"),"gamma")
+    assert_equal(geant4("Electron"),"e-")
+    assert_equal(geant4("Beta-"),"e-")
+    assert_equal(geant4("Proton"),"proton")
+    assert_equal(geant4("Hydrogen"),"proton")
 
 
 # Run as script

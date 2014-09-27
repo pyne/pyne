@@ -198,6 +198,29 @@ def fluka(x):
     
     return n
 
+def geant4(x):
+    """geant4(x)
+    
+    Gives the unique geant name for particle.
+
+    Parameters
+    ----------
+    x : str, int, or char*
+
+    Returns
+    -------
+    n : str Unique particle name
+    """
+    if isinstance(x, basestring):
+        x_bytes = x.encode()
+        cn = cpp_particle.geant4(std_string(<char *> x_bytes))
+    elif isinstance(x, int):
+        cn = cpp_particle.geant4(<int> long(x))
+
+    n = bytes(<char *> cn.c_str()).decode()
+    
+    return n
+
 
 def describe(x):
     """describe(x)

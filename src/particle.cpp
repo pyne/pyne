@@ -97,6 +97,7 @@ std::map<std::string,std::string> pyne::particle::docs;
 std::map<std::string,std::string> pyne::particle::part_to_fluka;
 std::map<std::string,std::string> pyne::particle::part_to_mcnp;
 std::map<std::string,std::string> pyne::particle::part_to_mcnp6;
+std::map<std::string,std::string> pyne::particle::part_to_geant4;
 
 
 void * pyne::particle::_fill_maps() {
@@ -211,6 +212,42 @@ void * pyne::particle::_fill_maps() {
   part_to_fluka["Sigma"]="SIGMAZER";
   part_to_fluka["AntiSigmaZero"]="ASIGMAZE";
 
+  part_to_geant4["Electron"]="e-";
+  part_to_geant4["Positron"]="e+";
+  part_to_geant4["ElectronNeutrino"] ="nu_e";
+  part_to_geant4["ElectronAntiNeutrino"] ="anti_nu_e";
+  part_to_geant4["Muon"]="mu+";
+  part_to_geant4["AntiMuon"]="mu-";
+  part_to_geant4["MuonNeutrino"]="nu_mu";
+  part_to_geant4["MuonAntiNeutrino"]="anti_nu_mu",
+  part_to_geant4["Tauon"]="tau+";
+  part_to_geant4["Anti Tauon"]="tau-";
+  part_to_geant4["TauNeutrino"]="nu_tau";
+  part_to_geant4["TauAntiNeutrino"]="anti_nu_tau";
+  // gauge bosons
+  part_to_geant4["Photon"]="gamma";
+  // light mesons
+  part_to_geant4["Pion"]="pi-";
+  part_to_geant4["Anti Pion"]="pi+";
+  // strange mesons
+  part_to_geant4["Kaon"]="kaon+";
+  part_to_geant4["AntiKaon"]="kaon-";
+  part_to_geant4["KaonZero Short"]="kaon0S";
+  part_to_geant4["KaonZero"]="kaon0";
+  // light baryons
+  part_to_geant4["Neutron"]="neutron";
+  part_to_geant4["AntiNeutron"]="anti_neutron";
+  part_to_geant4["Proton"]="proton";
+  part_to_geant4["AntiProton"]="anti_proton";
+  // strange baryons
+  part_to_geant4["Lambda"]="lambda";
+  part_to_geant4["AntiLambda"]="anti_lambda";
+  part_to_geant4["Sigma-"]="sigma-";
+  part_to_geant4["Anti Sigma-"]="anti_sigma-";
+  part_to_geant4["Sigma+"]="sigma+";
+  part_to_geant4["Anti Sigma+"]="anti_sigma+";
+  part_to_geant4["Sigma"]="sigma0";
+  part_to_geant4["AntiSigmaZero"]="anti_sigma0";
 };
 
 void * pyne::particle::_ = pyne::particle::_fill_maps();
@@ -398,6 +435,27 @@ std::string pyne::particle::fluka(std::string s) {
   else 
     {
       std::cout << "Not a valid Fluka particle" << std::endl;
+      return "???????";
+    }
+};
+
+// convert name to geant4 id
+std::string pyne::particle::geant4(int s) {
+  return pyne::particle::geant4(pyne::particle::name(s));
+};
+
+std::string pyne::particle::geant4(char *s) {
+  return pyne::particle::geant4(pyne::particle::name(s));
+};
+
+std::string pyne::particle::geant4(std::string s) {
+  if ( pyne::particle::is_heavy_ion(s) )
+    return "GenericIon";
+  else if( 0 < part_to_geant4.count(pyne::particle::name(s)) )
+    return part_to_geant4[pyne::particle::name(s)];
+  else 
+    {
+      std::cout << "Not a valid Geant4 particle" << std::endl;
       return "???????";
     }
 };
