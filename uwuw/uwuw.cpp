@@ -82,11 +82,8 @@ std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string file
 	}
       else
 	{
-	  std::string result;
-	  std::ostringstream matnum;   // stream used for the conversion
-	  matnum << i+1;      // insert the textual representation of 'Number' in the characters in the streamng
-	  mat.metadata["mat_number"]=matnum.str();
-
+	  // renumber material number by position in the library
+	  mat.metadata["mat_number"]=i+1;
 	  library[mat.metadata["name"].asString()]=mat;
 	}
     }
@@ -103,7 +100,7 @@ std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string file
   return library;
 }
 
-// loads all materials into map
+// loads all tallies into map
 std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename) 
 {
   std::map<std::string, pyne::Tally> library; // material library
