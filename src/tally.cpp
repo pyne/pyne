@@ -320,8 +320,6 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 
 	// close the data sets
 	status = H5Dclose(dset);
-	//    status = H5Sclose(space);
-	//    status = H5Tclose(filetype);
 	status = H5Fclose(file);
       } else {
       
@@ -416,7 +414,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   output << "C " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(6);
 
-  if (normalization > 1.0 )
+  if (normalization > 1.0)
     output << std::scientific;
 
   // neednt check entity type
@@ -479,8 +477,11 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << pyne::particle::fluka(particle_name);
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name;
-      if(entity_size > 0.0 )
-	output << std::setw(10) << std::right << entity_size;
+      if(entity_size > 0.0 ) {
+	output << std::scientific;
+	output << std::setprecision(4);
+      	output << std::setw(10) << std::right << entity_size;
+      }
       else
 	output << std::setw(10) << std::right << 1.0;
 
