@@ -811,9 +811,9 @@ std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
     ss << std::setw(10) << std::right << ""; 
     ss << std::setw(10) << std::right << ""; 
     ss << std::setw(10) << std::left << compound_name;
+    ss << std::endl;
     }
 
-  ss<< std::endl;
   return ss.str();
 }
 
