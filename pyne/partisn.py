@@ -58,7 +58,7 @@ except ImportError:
 if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
-class PartisnMesh(object):
+class PartisnReadMesh(object):
     """This class will create the pyne mesh based a provided h5m geometry
     and user-specified values for the mesh. These user specified values
     are contained within a supplementary file.
@@ -133,4 +133,4 @@ class PartisnMesh(object):
 
 h5m_f = "/userspace/k/kiesling/Documents/CNERG/partisn_geoms/fngn_checked_zip.h5m"
 sup_f = "/userspace/k/kiesling/Documents/CNERG/partisn_geoms/test_bounds"
-my_file = PartisnMesh(h5m_f, sup_f)
+my_file = PartisnReadMesh(h5m_f, sup_f)
