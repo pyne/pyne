@@ -59,78 +59,11 @@ if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 class PartisnReadMesh(object):
-    """This class will create the pyne mesh based a provided h5m geometry
-    and user-specified values for the mesh. These user specified values
-    are contained within a supplementary file.
+    """This class reads all the attributes provided by the mesh object
+    and stores the information necessary for creating partisn geometry
     """
-    def __init__(self, h5m_f, sup_f):
+    def __init__(self, mesh):
         """Opens the two provided files and creates a mesh
         h5m_f :: path to h5m file
-        sup_f :: path to supplementary file containing bound data
         """
-
-        fs = open(sup_f) # supplementary file containing mesh bounds
-        fg = open(h5m_f) # h5m file containing
-
-        self._create_bounds(fs)
-        
-    def _create_bounds(self, fs):
-        # Reads the file and stores the bound data in a list
-        # Note: This will store cartesian data ONLY
-        """Data format:
-            - Lines can be in any order
-            - Must provide at least 2 different dimensions
-            - "ic" refers to the to the list of coarse mesh floating
-                point values for the ith direction
-            - "if" refers to the list integer number of fine mesh intervals
-                in each coarse mesh for the ith direction
-            - the number of if entries must be one less than the number of
-                ic entries for the ith direction
-            - the jth entry in the fine mesh list refers to the number of 
-                intervals between value j and j+1 in the coarse mesh list
-
-                    xc = [a,b,c]
-                    yc = [a,b,c]
-                    zc = [a,b,c]
-                    xf = [d,e]
-                    yf = [d,e]
-                    zf = [d,e]
-        """
-        x_tf = False
-        y_tf = False
-        z_tf = False
-        line = fs.readline()
-        coarse_list = {}
-        fine_list = {}
-        while line:
-            if not line.isspace():
-                if (line.strip()[0][0] != "#"):
-
-                    coord = line.split("=")[0].strip()[0]
-                    if (coord == 'x') or (coord == 'X'):
-                        x_tf = True
-                    elif (coord == 'y') or (coord == 'Y'):
-                        y_tf = True
-                    elif (coord == 'z') or (coord == 'Z'):
-                        z_tf = True
-                    else:
-                        print("Coordinate system not supported")
-    
-                    if line.split("=")[0].strip()[1] == 'c':
-                        # coarse mesh values
-                        if coord not in coarse_list.keys():
-                            coarse_list[coord] = []
-                        coarse_list[coord] += [float(x) for x in line.split('[')[1].split(']')[0].split(',')]
-
-                    elif line.split("=")[0].strip()[1] == 'f':
-                        # fine mesh values
-                        if coord not in fine_list.keys():
-                            fine_list[coord] = []
-                        fine_list[coord] += [int(x) for x in line.split('[')[1].split(']')[0].split(',')]
-
-            line = fs.readline()
-        print(coarse_list, fine_list)
-
-h5m_f = "/userspace/k/kiesling/Documents/CNERG/partisn_geoms/fngn_checked_zip.h5m"
-sup_f = "/userspace/k/kiesling/Documents/CNERG/partisn_geoms/test_bounds"
-my_file = PartisnReadMesh(h5m_f, sup_f)
+        print(mesh)
