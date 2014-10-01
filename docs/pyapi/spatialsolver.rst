@@ -5,7 +5,7 @@ Spatialsolver Support -- :mod:`pyne.spatialsolver`
 ==================================================
 Spatialsolver is a pyne module that contains seven neutron transport equation solvers.  Each
 solver is its own unique nodal method.  The solvers included in this module are listed below.  The theory and methodology behind each
-can be found in the pyne theory doccumentation.
+can be found in the pyne theory documentation.
 
  #. **AHOTN-LN**: Arbitrarily higher order transport method of the nodal type linear-nodal method
  #. **AHOTN-LL**:  Arbitrarily higher order transport method of the nodal type linear-linear method
@@ -24,11 +24,11 @@ can be found in the pyne theory doccumentation.
 Input Dictionary Entries
 -----------------------------------
 As these are complicated solvers, they require a large amount of input data supplied by the user.  The
-format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overriden by default values if not present/not specified. 
+format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overridden by default values if not present/not specified.
 
 **Entry: Solver type (AHOTN, DGFEM or SCTSTEP)**::
 
-  key: "solver" 
+  key: "solver"
   type: String
   ex: "AHOTN"
   default: no default
@@ -36,10 +36,10 @@ format we choose to take all this information in by is with a python dictionary.
     1.  "AHOTN"
     2.  "DGFEM"
     3.  "SCTSTEP"
-  
+ 
 **Entry: Spatial expansion order**::
 
-  key: "solver_type" 
+  key: "solver_type"
   type: String
   ex: "LN"
   default: No default
@@ -50,7 +50,7 @@ format we choose to take all this information in by is with a python dictionary.
 
 **Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**::
 
-  key: "spatial_order" 
+  key: "spatial_order"
   type: Integer
   ex: 0
   default: 1
@@ -82,7 +82,7 @@ format we choose to take all this information in by is with a python dictionary.
   type: Integer array
   ex: [4, 4, 4]
   default: No default
-	
+    
 **Entry: Number of groupds (ng)**::
 
  key: "num_groups"
@@ -148,7 +148,7 @@ format we choose to take all this information in by is with a python dictionary.
  Note:  Dimensions must match cell spacing and ordering
 
 _Note: we need to give directions about the ordering. RS
-	
+    
 **Entry: "quadrature_file" [optional; only needed for quadrature type 2]**::
 
  type: string
@@ -166,9 +166,9 @@ _note: need to add more specific file format / contents description, see convers
 
 **Entry: source file name**::
 
-		key: "source_input_file"
-		type: string
-		default: 'src.dat'
+        key: "source_input_file"
+        type: string
+        default: 'src.dat'
 
 _note: need to add file format / contents description
 
@@ -217,9 +217,9 @@ _We need to define what this criterion means. That is, what is it checking exact
 
 _We need to provide a clear explanation of what this means. RS
 
-**Entry: Tolerence**::
+**Entry: Tolerance**::
 
- key: "tolerence"
+ key: "tolerance"
  type: float
  ex: 1.e-10
  default: 1.e-10
@@ -251,7 +251,7 @@ _I left it as ichk and ichk_tolerance.  I'll try and think of something better, 
 _Sounds good. RS
 
 _The three entries below may not be necessary.
-	
+    
 **Entry: Max moment to print**::
 
  key: "max_mom_printed"
@@ -264,13 +264,13 @@ _The three entries below may not be necessary.
  key: "moment_sum_flag"
  type: Integer
  ex: 1
- default: 0 
+ default: 0
 
 **Entry: flag for moment at a point**::
 
  key: "mom_at_a_pt_flag"
  type: Integer
- ex: 1 
+ ex: 1
  default: 0
 
 _I'm not sure if we actually need any of these, so we may want to take all or some of them out. We don't have to take them out of the code for now, but we can keep the defaults as off and not tell the user about them. RS
@@ -313,7 +313,7 @@ Output Dictionary Entries
 -----------------------------------
 When ran, the solvers return a dictionary of useful solution data.  It contains the following key-pair entries:
 
-**Entry: Flux outut array**::
+**Entry: Flux output array**::
   key:  "flux"
   type: Double Array of 3 dimensions
   format: Flux output array is in following format.  Each cell in the array has a scalar flux, the integral of the angular flux over all angles in that cell.   The first index refers to the plane on the z axis, beginning at 0 with the lowest plane, and moving upwards to the highest plane on the mesh.  The second index is the row on the z plane, and the third index is the cell in the row.
@@ -354,3 +354,4 @@ Spatialsolver API
     :members:
 
 .. _Spatialsolver: http://something.com/
+
