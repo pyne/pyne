@@ -18,7 +18,17 @@ Auto-Documentation Hooks
 ------------------------
 The docstrings that you have written will automatically be connected to the 
 website, once the appropriate hooks have been setup.  At this stage, all 
-documentation lives within pyne's top-level ``docs`` directory. For each new 
+documentation lives within pyne's top-level ``docs`` directory. 
+PyNE uses the sphinx tool to manage and generate the documentation, which 
+you can learn about from `the sphinx website <http://sphinx-doc.org/>`_.
+If you want to generate the documentaion, first pyne itself must be installed 
+and then you may run the following command from the ``docs`` dir:
+
+.. code-block:: bash
+
+    ~/pyne/docs $ make html
+
+For each new 
 module, you will have to supply the appropriate hooks. This should be done the 
 first time that the module appears in a pull request.  From here, call the 
 new module ``mymod``.  The following explains how to add hooks based on language:
