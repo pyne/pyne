@@ -37,6 +37,7 @@ import itertools
 import numpy as np
 import tables
 
+from pyne import dagmc
 from pyne.material import Material
 from pyne.material import MultiMaterial
 
@@ -58,12 +59,23 @@ except ImportError:
 if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
-class PartisnReadMesh(object):
-    """This class reads all the attributes provided by the mesh object
-    and stores the information necessary for creating partisn geometry
+
+class PartisnRead(object):
+    """ This class read in a material-laden mesh object and an h5m 
+    geometry file and stores each attribute. It then manipulates/
+    rearranges and stores the information into the necessary 
+    Partisn blocks.
     """
-    def __init__(self, mesh):
-        """Opens the two provided files and creates a mesh
-        h5m_f :: path to h5m file
-        """
-        print(mesh)
+    def __init__(self, mesh_obj, h5m_file):
+        
+        h5mf = open(h5m_file)
+        discretized_mesh = dagmc.discretize_geom(mesh_obj)
+        
+
+class PartisnWrite(object):
+    """This class writes out the information stored by PartisnRead to
+    a text partisn input file.
+    """
+    def __init__(self):
+        pass
+        
