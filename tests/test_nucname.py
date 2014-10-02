@@ -301,6 +301,10 @@ def test_mcnp_to_id():
             continue
         yield check_cases, nucname.mcnp_to_id, val, id
 
+    # tests for invalid inputs
+    yield assert_raises, RuntimeError, nucname.mcnp_to_id, 92
+
+
 def test_fluka():
     assert_equal(nucname.fluka(  40000000), 'BERYLLIU')
     assert_equal(nucname.fluka( 640000000), 'GADOLINI')

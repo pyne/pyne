@@ -886,7 +886,9 @@ int pyne::nucname::mcnp(std::string nuc) {
 int pyne::nucname::mcnp_to_id(int nuc) {
   int zzz = nuc / 1000;
   int aaa = nuc % 1000; 
-  if (zzz <= aaa) {
+  if (zzz == 0)
+    throw NotANuclide(nuc, "not in the MCNP format");
+  else if (zzz <= aaa) {
     if (aaa - 400 < 0) {
       if (nuc == 95242)
         return nuc * 10000 + 1;  // special case MCNP Am-242m
