@@ -55,6 +55,22 @@ Code internal to PyNE use ``zzzaaammmm``, and except for human readability, you 
 Natural elements are specified in this form by having zero A-number and excitation flags
 (``zzzaaammmm('U') == 920000``).
 
+Well-Defined vs Ambiguous Situations
+....................................
+In situations where the input naming convention is well-defined, it is *highly*
+recommended that you use the direct ``<form>_to_id()`` functions (e.g. 
+``mcnp_to_id()``) to convert from a nuclide in the given form to the id form 
+representation. When a high level of quality assurance is required, it is 
+advisable to require an specific input format to leverage the exactness of the 
+direct-to-id functions.
+
+However, in situations where arbitrary nuclide naming conventions are allowed, 
+you must use the ``id()`` function. An example of such a situation is when accepting 
+human input. This function attempts to resolve the underlying nuclide identifier. 
+For most nuclides and most normal spellings, this resolution is straightforward. 
+However, some nulcides are ambiguous between the various supported naming conventions.
+For more information please refer to the 
+:ref:`nucname theory manual <theorymanual_nucname>`.
 
 ---------------
 Examples of Use
