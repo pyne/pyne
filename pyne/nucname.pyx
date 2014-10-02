@@ -140,7 +140,6 @@ def id(nuc):
         - cinder (aaazzzm)
         - mcnp
         - zzaaa
-        - sza
 
     For string (or char *) input the form resolution order is as follows:
 
