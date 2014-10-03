@@ -341,6 +341,85 @@ When ran, the solvers return a dictionary of useful solution data.  It contains 
           Cell: First cell in x direction
 
 
+
+-----------------------------------
+Source File Formatting
+-----------------------------------
+
+The spatial solver dictionary requires multiple input binary source files.  The required files are the following:
+    **BC input file
+    **Source input file
+    **...
+
+Here is a breif description of how each should be formatted.
+
+  (1.) Source file:
+      The source file is a file contaning source information for each cell ????.  The formatting is dependant on the solver
+      you select.
+
+      For the AHOTN solvers, the source file should be formatted as following.  
+      There should be ng * nx * ny * nz * lambda * lambda * lambda ?source? values present.
+      We will refer to the index of each ?source? value as (ng, nx, ny, nz, lambda_x, lambda_y, lambda_z).
+      Thus, the source values should be in the following order:
+          (1,1,1,1,1,1,1)
+          (1,1,1,1,1,1,2)
+          (1,1,1,1,1,1,.)
+
+          (1,1,1,1,1,2,1)
+          (1,1,1,1,1,2,2)
+          (1,1,1,1,1,2,.)
+          (1,1,1,1,1,.,.)
+
+          (1,1,1,1,2,1,1)
+          (1,1,1,1,2,1,2)
+          (1,1,1,1,2,1,.)
+          (1,1,1,1,2,2,1)
+          (1,1,1,1,2,2,2)
+          (1,1,1,1,2,2,.)
+          (1,1,1,1,2,.,.)
+          (1,1,1,1,.,.,.)
+
+          (1,1,1,2,1,1,1)
+          (1,1,1,2,1,1,2)
+          (1,1,1,2,1,1,.)
+          (1,1,1,2,1,2,1)
+          (1,1,1,2,1,2,2)
+          (1,1,1,2,1,2,.)
+          (1,1,1,2,1,.,.)
+          (1,1,1,2,2,1,1)
+          (1,1,1,2,2,1,2)
+          (1,1,1,2,2,1,.)
+          (1,1,1,2,2,2,1)
+          (1,1,1,2,2,2,2)
+          (1,1,1,2,2,2,.)
+          (1,1,1,2,2,.,.)
+          (1,1,1,.,.,.,.)
+
+          ...
+
+          (1,1,.,.,.,.,.)
+
+          ...
+
+          (1,.,.,.,.,.,.)
+
+          ...
+
+          (1,.,.,.,.,.,.)
+
+      When being read in, they will be iterated over by the following loop:
+	      DO g=1,ng
+		       DO ix=1,nx
+		          DO iy=1,ny
+		             DO iz=1,nz
+		                DO jx=0,lambda
+		                   DO jy=0,lambda
+		                      DO jz=0,lambda
+		                         READ(12) s(jx,jy,jz,ix,iy,iz,g)
+
+    
+
+
 .. currentmodule:: pyne.spatialsolver
 
 All functionality may be found in the ``spatialsolver`` package::
