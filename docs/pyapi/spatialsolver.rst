@@ -405,7 +405,7 @@ Here is a breif description of how each should be formatted.
 
           ...
 
-          (1,.,.,.,.,.,.)
+          (.,.,.,.,.,.,.)
 
       When being read in, they will be iterated over by the following loop:
 	      DO g=1,ng
