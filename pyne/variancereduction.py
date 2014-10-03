@@ -85,14 +85,14 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     adj_ves = adj_flux_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
     q_ves = q_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
 
-    for adj_ve, q_ve in zip(list(adj_ves), list(q_ves)):
+    for adj_ve, q_ve in zip(adj_ves, q_ves):
         adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
         q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
         adj_flux = np.atleast_1d(adj_flux)
         q = np.atleast_1d(q)
 
         for i in range(0, num_e_groups):
-            R[i] += adj_flux[i]*q[i]
+            R[i] += adj_flux[i]*q[i]*adj_flux_mesh.elem_volume(adj_ve)
 
     # generate weight windows and biased source densities using total response
     tag_ww = ww_mesh.mesh.createTag(ww_tag, num_e_groups, float)
@@ -103,15 +103,15 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     q_ves.reset()
     adj_ves.reset()
 
-    for adj_ve, q_ve, ww_ve, q_bias_ve in izip(list(adj_ves), list(q_ves), 
-                                               list(ww_ves), list(q_bias_ves)):
+    for adj_ve, q_ve, ww_ve, q_bias_ve in izip(adj_ves, q_ves, 
+                                               ww_ves, q_bias_ves):
         adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
         q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
         adj_flux = np.atleast_1d(adj_flux)
         q = np.atleast_1d(q)
 
-        tag_ww[ww_ve] = [R[i]/(adj_flux[i]*q[i]*(beta + 1)/2) 
+        tag_ww[ww_ve] = [R[i]/(adj_flux[i]*q[i]*adj_flux_mesh.elem_volume(adj_ve)*(beta + 1)/2) 
                          for i in range(0, num_e_groups)]
 
-        tag_q_bias[q_bias_ve] = [adj_flux[i]*q[i]/R[i] 
+        tag_q_bias[q_bias_ve] = [adj_flux[i]*adj_flux_mesh.elem_volume(adj_ve)*q[i]/R[i] 
                                  for i in range(0, num_e_groups)]
