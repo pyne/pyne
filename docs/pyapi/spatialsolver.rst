@@ -83,7 +83,7 @@ format we choose to take all this information in by is with a python dictionary.
   ex: [4, 4, 4]
   default: No default
     
-**Entry: Number of groupds (ng)**::
+**Entry: Number of groups (ng)**::
 
  key: "num_groups"
  type: Integer
@@ -138,6 +138,17 @@ format we choose to take all this information in by is with a python dictionary.
  type: Integer array
  ex: [2, 2]
  default: No default
+    'x_boundry_conditions', 'y_boundry_conditions', and 'z_boundry_conditions' are the boundry conditions for each face of the cubic mesh. The entries are as following:
+    x[0] = xsbc
+    x[1] = xebc
+    y[0] = ysbc
+    y[1] = yebc
+    y[0] = zsbc
+    y[1] = zebc
+    The following are supported boundry conditions: 
+      0 - vacuum
+      1 - reflective
+      2 - fixed inflow
 
 **Entry: Material info**::
 
@@ -353,7 +364,21 @@ The spatial solver dictionary requires multiple input binary source files.  The 
 
 Here is a breif description of how each should be formatted.
 
-  (1.) Source file:
+
+  (1.) XS file:
+      The xs file contains information about the cross sections for materials used.  Each material should be assigned an ID,
+      and the cross section data should be in the following format.  It should be saved as either an extensionless or .txt file.
+
+        ! Cross section file
+          ! Material # 1
+          ! Group #1
+          1.1          ! Total XS
+          0.2         ! Scattering matrix
+          ! Material 2
+          ...
+        ! End Cross section file
+
+  (2.) Source file:
       The source file is a file contaning source information for each cell ????.  The formatting is dependant on the solver
       you select.
 
@@ -418,7 +443,10 @@ Here is a breif description of how each should be formatted.
 		                         READ(12) s(jx,jy,jz,ix,iy,iz,g)
 
     
+  (3.) Quadrature file (optional):
+      If the quadrature type you selected was 2, a quadrature file is required for running the solver.  If the quadrature type is not 2, no quadrature file is necessary.
 
+! This line is supposed to be quadrature file name (qdfile) if you need one (type 2)            
 
 .. currentmodule:: pyne.spatialsolver
 
