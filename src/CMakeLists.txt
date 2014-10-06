@@ -20,7 +20,6 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
     "transport_spatial_methods/3d/read_inflow_ahotn.f90"
     "transport_spatial_methods/3d/read_inflow_dgfem.f90"
     "transport_spatial_methods/3d/read_inflow_sct_step.f90"
-    "transport_spatial_methods/3d/readmt.f90"
     "transport_spatial_methods/3d/readsrc.f90"
     "transport_spatial_methods/3d/readxs.f90"
     "transport_spatial_methods/3d/sct_module.f90"

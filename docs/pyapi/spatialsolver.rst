@@ -5,7 +5,7 @@ Spatialsolver Support -- :mod:`pyne.spatialsolver`
 ==================================================
 Spatialsolver is a pyne module that contains seven neutron transport equation solvers.  Each
 solver is its own unique nodal method.  The solvers included in this module are listed below.  The theory and methodology behind each
-can be found in the pyne theory doccumentation.
+can be found in the pyne theory documentation.
 
  #. **AHOTN-LN**: Arbitrarily higher order transport method of the nodal type linear-nodal method
  #. **AHOTN-LL**:  Arbitrarily higher order transport method of the nodal type linear-linear method
@@ -24,11 +24,11 @@ can be found in the pyne theory doccumentation.
 Input Dictionary Entries
 -----------------------------------
 As these are complicated solvers, they require a large amount of input data supplied by the user.  The
-format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overriden by default values if not present/not specified. 
+format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overridden by default values if not present/not specified.
 
 **Entry: Solver type (AHOTN, DGFEM or SCTSTEP)**::
 
-  key: "solver" 
+  key: "solver"
   type: String
   ex: "AHOTN"
   default: no default
@@ -36,10 +36,10 @@ format we choose to take all this information in by is with a python dictionary.
     1.  "AHOTN"
     2.  "DGFEM"
     3.  "SCTSTEP"
-  
+ 
 **Entry: Spatial expansion order**::
 
-  key: "solver_type" 
+  key: "solver_type"
   type: String
   ex: "LN"
   default: No default
@@ -50,7 +50,7 @@ format we choose to take all this information in by is with a python dictionary.
 
 **Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**::
 
-  key: "spatial_order" 
+  key: "spatial_order"
   type: Integer
   ex: 0
   default: 1
@@ -82,8 +82,8 @@ format we choose to take all this information in by is with a python dictionary.
   type: Integer array
   ex: [4, 4, 4]
   default: No default
-	
-**Entry: Number of groupds (ng)**::
+    
+**Entry: Number of groups (ng)**::
 
  key: "num_groups"
  type: Integer
@@ -138,6 +138,17 @@ format we choose to take all this information in by is with a python dictionary.
  type: Integer array
  ex: [2, 2]
  default: No default
+    'x_boundry_conditions', 'y_boundry_conditions', and 'z_boundry_conditions' are the boundry conditions for each face of the cubic mesh. The entries are as following:
+    x[0] = xsbc
+    x[1] = xebc
+    y[0] = ysbc
+    y[1] = yebc
+    y[0] = zsbc
+    y[1] = zebc
+    The following are supported boundry conditions: 
+      0 - vacuum
+      1 - reflective
+      2 - fixed inflow
 
 **Entry: Material info**::
 
@@ -148,7 +159,7 @@ format we choose to take all this information in by is with a python dictionary.
  Note:  Dimensions must match cell spacing and ordering
 
 _Note: we need to give directions about the ordering. RS
-	
+    
 **Entry: "quadrature_file" [optional; only needed for quadrature type 2]**::
 
  type: string
@@ -166,9 +177,9 @@ _note: need to add more specific file format / contents description, see convers
 
 **Entry: source file name**::
 
-		key: "source_input_file"
-		type: string
-		default: 'src.dat'
+        key: "source_input_file"
+        type: string
+        default: 'src.dat'
 
 _note: need to add file format / contents description
 
@@ -217,9 +228,9 @@ _We need to define what this criterion means. That is, what is it checking exact
 
 _We need to provide a clear explanation of what this means. RS
 
-**Entry: Tolerence**::
+**Entry: Tolerance**::
 
- key: "tolerence"
+ key: "tolerance"
  type: float
  ex: 1.e-10
  default: 1.e-10
@@ -251,7 +262,7 @@ _I left it as ichk and ichk_tolerance.  I'll try and think of something better, 
 _Sounds good. RS
 
 _The three entries below may not be necessary.
-	
+    
 **Entry: Max moment to print**::
 
  key: "max_mom_printed"
@@ -264,13 +275,13 @@ _The three entries below may not be necessary.
  key: "moment_sum_flag"
  type: Integer
  ex: 1
- default: 0 
+ default: 0
 
 **Entry: flag for moment at a point**::
 
  key: "mom_at_a_pt_flag"
  type: Integer
- ex: 1 
+ ex: 1
  default: 0
 
 _I'm not sure if we actually need any of these, so we may want to take all or some of them out. We don't have to take them out of the code for now, but we can keep the defaults as off and not tell the user about them. RS
@@ -313,34 +324,129 @@ Output Dictionary Entries
 -----------------------------------
 When ran, the solvers return a dictionary of useful solution data.  It contains the following key-pair entries:
 
-**Entry: Flux outut array**::
+**Entry: Flux output array**::
   key:  "flux"
   type: Double Array of 3 dimensions
-  format: Flux output array is in following format.  It contains the flux values across the z plane for every cell in the mesh.  The first index refers to the plane on the z axis, beginning at 0 with the lowest plane, and moving upwards to the highest plane on the mesh.  The second index is the row on the z plane, and the third index is the cell in the row.
+  format: Flux output array is in following format.  Each cell in the array has a scalar flux, the integral of the angular flux over all angles in that cell.   The first index refers to the plane on the z axis, beginning at 0 with the lowest plane, and moving upwards to the highest plane on the mesh.  The second index is the row on the z plane, and the third index is the cell in the row.
   format examples: If you had a mesh with 4 by 4 by 4 cells extending in the x, y and z directions, then to get the following flux values, you would use the following index's:
 
-  (1.) Flux (z) across top of cell 1,1,1:  flux_array[1][1][1]
+  (1.) Scalar flux across top of cell 1,1,1:  flux_array[1][1][1]
        Geometric location of this cell:
           Plane: Bottom of cube
           Row: First y row (j) of cells
           Cell: First cell in x direction
-  (2.) Flux (z) across top of cell 1,1,2:  flux_array[1][1][2]
+  (2.) Scalar flux across top of cell 1,1,2:  flux_array[1][1][2]
        Geometric location of this cell:
           Plane: Bottom of cube
           Row: First y row (j) of cells
           Cell: Second cell in x direction
-  (3.) Flux (z) across top of cell 1,2,1:  flux_array[1][2][1]
+  (3.) Scalar flux across top of cell 1,2,1:  flux_array[1][2][1]
        Geometric location of this cell:
           Plane: Bottom of cube
           Row: Second y row (j) of cells
           Cell: First cell in x direction
-  (4.) Flux (z) across top of cell 2,1,1:  flux_array[2][1][1]
+  (4.) Scalar flux across top of cell 2,1,1:  flux_array[2][1][1]
        Geometric location of this cell:
           Plane: Top of one cell up from bottom of cube
           Row: First y row (j) of cells
           Cell: First cell in x direction
 
 
+
+-----------------------------------
+Source File Formatting
+-----------------------------------
+
+The spatial solver dictionary requires multiple input binary source files.  The required files are the following:
+    **BC input file
+    **Source input file
+    **...
+
+Here is a breif description of how each should be formatted.
+
+
+  (1.) XS file:
+      The xs file contains information about the cross sections for materials used.  Each material should be assigned an ID,
+      and the cross section data should be in the following format.  It should be saved as either an extensionless or .txt file.
+
+        ! Cross section file
+          ! Material # 1
+          ! Group #1
+          1.1          ! Total XS
+          0.2         ! Scattering matrix
+          ! Material 2
+          ...
+        ! End Cross section file
+
+  (2.) Source file:
+      The source file is a file contaning source information for each cell ????.  The formatting is dependant on the solver
+      you select.
+
+      For the AHOTN solvers, the source file should be formatted as following.  
+      There should be ng * nx * ny * nz * lambda * lambda * lambda ?source? values present.
+      We will refer to the index of each ?source? value as (ng, nx, ny, nz, lambda_x, lambda_y, lambda_z).
+      Thus, the source values should be in the following order:
+          (1,1,1,1,1,1,1)
+          (1,1,1,1,1,1,2)
+          (1,1,1,1,1,1,.)
+
+          (1,1,1,1,1,2,1)
+          (1,1,1,1,1,2,2)
+          (1,1,1,1,1,2,.)
+          (1,1,1,1,1,.,.)
+
+          (1,1,1,1,2,1,1)
+          (1,1,1,1,2,1,2)
+          (1,1,1,1,2,1,.)
+          (1,1,1,1,2,2,1)
+          (1,1,1,1,2,2,2)
+          (1,1,1,1,2,2,.)
+          (1,1,1,1,2,.,.)
+          (1,1,1,1,.,.,.)
+
+          (1,1,1,2,1,1,1)
+          (1,1,1,2,1,1,2)
+          (1,1,1,2,1,1,.)
+          (1,1,1,2,1,2,1)
+          (1,1,1,2,1,2,2)
+          (1,1,1,2,1,2,.)
+          (1,1,1,2,1,.,.)
+          (1,1,1,2,2,1,1)
+          (1,1,1,2,2,1,2)
+          (1,1,1,2,2,1,.)
+          (1,1,1,2,2,2,1)
+          (1,1,1,2,2,2,2)
+          (1,1,1,2,2,2,.)
+          (1,1,1,2,2,.,.)
+          (1,1,1,.,.,.,.)
+
+          ...
+
+          (1,1,.,.,.,.,.)
+
+          ...
+
+          (1,.,.,.,.,.,.)
+
+          ...
+
+          (.,.,.,.,.,.,.)
+
+      When being read in, they will be iterated over by the following loop:
+	      DO g=1,ng
+		       DO ix=1,nx
+		          DO iy=1,ny
+		             DO iz=1,nz
+		                DO jx=0,lambda
+		                   DO jy=0,lambda
+		                      DO jz=0,lambda
+		                         READ(12) s(jx,jy,jz,ix,iy,iz,g)
+
+    
+  (3.) Quadrature file (optional):
+      If the quadrature type you selected was 2, a quadrature file is required for running the solver.  If the quadrature type is not 2, no quadrature file is necessary.
+
+! This line is supposed to be quadrature file name (qdfile) if you need one (type 2)            
 
 .. currentmodule:: pyne.spatialsolver
 
@@ -355,3 +461,4 @@ Spatialsolver API
     :members:
 
 .. _Spatialsolver: http://something.com/
+
