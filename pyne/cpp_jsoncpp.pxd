@@ -91,3 +91,20 @@ cdef extern from "json.h" namespace "Json":
         StyledWriter() except +
         std_string write(Value &)
 
+cdef extern from "jsoncustomwriter.h" namespace "Json":
+
+    cdef cppclass CustomWriter:
+        CustomWriter() except +
+        CustomWriter(std_string) except +
+        CustomWriter(std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+                     std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+                     std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+                     std_string, std_string, int) except +
+        std_string write(Value &)
+
