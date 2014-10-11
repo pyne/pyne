@@ -1042,7 +1042,7 @@ def id_from_level(nuc, level, special=""):
     cdef std_string spc
     if len(special) == 1:
         spc = special[0].encode('UTF-8')
-    if level > 0.0:
+    if level is not None and level > 0.0:
         if len(special) == 1:
             return cpp_data.id_from_level(<int> nuc, <double> level, <std_string> spc)
         else:
