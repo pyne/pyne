@@ -90,4 +90,7 @@ INTEGER :: itmflag
 ! Matrix printing
 INTEGER :: matrix
 
+! Error code
+INTEGER :: error_code
+
 END MODULE

@@ -54,6 +54,7 @@ format we choose to take all this information in by is with a python dictionary.
   type: Integer
   ex: 0
   default: 1
+    Spatial order is the expansion of the spatial moment. 
 
 **Entry: Method (meth): 0/1 => AHOT-N-SI/AHOT-N-ITM**::
 
@@ -61,6 +62,7 @@ format we choose to take all this information in by is with a python dictionary.
   type: Integer
   ex: 0
   default: 0
+    xxxxxxxxxxx
 
 **Entry: Quadrature order (can only be an even number)**::
 
@@ -68,6 +70,8 @@ format we choose to take all this information in by is with a python dictionary.
   type: Integer
   ex: 4
   default: 4
+    The quadrature order is the number of angles to be used per octet.  For N sets of angles, there will
+    be (N * (N + 2) / 8) ordinates per octet.  xxxxxx
 
 **Entry: Qudrature type:**::
 
@@ -75,6 +79,10 @@ format we choose to take all this information in by is with a python dictionary.
   type: Integer
   ex: 1
   default: 1
+    The quadrature type is the type of quadrature scheme the code should use.  The possibilities are as follow:
+      1 - TWOTRAN
+      2 - EQN
+      3 - Read-in
 
 **Entry: Number of Nodes in x, y, and z directions (nx/ny/nz)**::
 
@@ -165,31 +173,29 @@ _Note: we need to give directions about the ordering. RS
  type: string
  ex: 'quad_file'
  default: No default  
- note: need to add file format / contents description
+ note: See input file formatting notes in the Source File Formatting section.
 
 **Entry: cross section info file name**::
 
  key: "xs_file"
  type: string
  default: 'xs_file'
+ note: See input file formatting notes in the Source File Formatting section.
 
-_note: need to add more specific file format / contents description, see conversation in working notes
 
 **Entry: source file name**::
 
-        key: "source_input_file"
-        type: string
-        default: 'src.dat'
-
-_note: need to add file format / contents description
+  key: "source_input_file"
+  type: string
+  default: 'src.dat'
+  note: See input file formatting notes in the Source File Formatting section.
 
 **Entry: boundary condition file name [optional]**::
 
  key: "bc_input_file"
  type: string
  default: No default
-
-_note: need to add file format / contents description
+ note: See input file formatting notes in the Source File Formatting section.
 
 _Rachel, how should we deal with these? They're both required for the example to run, but future users of pyne won't necessarily have them relevant to their problems. MM
 
@@ -358,9 +364,10 @@ Source File Formatting
 -----------------------------------
 
 The spatial solver dictionary requires multiple input binary source files.  The required files are the following:
-    **BC input file
-    **Source input file
-    **...
+    1. XS file
+    2. Source input file
+    3. BC input file
+    4. Quad file (optional)
 
 Here is a breif description of how each should be formatted.
 
@@ -441,9 +448,10 @@ Here is a breif description of how each should be formatted.
 		                   DO jy=0,lambda
 		                      DO jz=0,lambda
 		                         READ(12) s(jx,jy,jz,ix,iy,iz,g)
-
+  (3.) Boundry Condition file:
+      The boundry condition file contains information about the incoming scalar flux on each face of each cell.
     
-  (3.) Quadrature file (optional):
+  (4.) Quadrature file (optional):
       If the quadrature type you selected was 2, a quadrature file is required for running the solver.  If the quadrature type is not 2, no quadrature file is necessary.
 
 ! This line is supposed to be quadrature file name (qdfile) if you need one (type 2)            

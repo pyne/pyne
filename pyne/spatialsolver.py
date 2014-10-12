@@ -60,7 +60,13 @@ def solve(inputdict_unchecked):
     )
     #time.sleep(.5)
   solver_output['flux'] = fortran_returns[6].tolist()
-  solver_output['success'] = 1
+  error_code = fortran_returns[7]
+  if(error_code == 0):
+    solver_output['success'] = 1
+  else:
+    solver_output['success'] = 0
+    solver_output['error_msg'] = error_toString(error_code)
+    print(solver_output['error_msg'])
   return solver_output
   #elif(inputdict['solver'] == "SCTSTEP"):
   #  print("SCT-STEP NOT IMPLEMENTED YET...")
@@ -68,6 +74,86 @@ def solve(inputdict_unchecked):
   #else:
     #Throw error
   #  print("Not a supported solver")
+
+def error_toString(error_code):
+  err_str = ""  
+  
+  if(error_code == 1001):
+    err_str = "ERROR: Lambda must be equal to one."
+  elif(error_code == 1002):
+    err_str = "ERROR: Illegal value for qdord. Must be greater than zero."
+  elif(error_code == 1003):
+    err_str = "ERROR: Illegal value for the quadrature order. Even #s only."
+  elif(error_code == 1004):
+    err_str = "ERROR: illegal entry for the qdfile name."
+  elif(error_code == 1005):
+    err_str = "ERROR: illegal entry for lambda. Must be zero or greater."
+  elif(error_code == 1006):
+    err_str = "ERROR: Method value 'meth' must be 0 or 1."
+  elif(error_code == 1007):
+    err_str = "ERROR: Illegal number of x cells. Must be positive."
+  elif(error_code == 1008):
+    err_str = "ERROR: Illegal number of y cells. Must be positive."
+  elif(error_code == 1009):
+    err_str = "ERROR: Illegal number of z cells. Must be positive."
+  elif(error_code == 1010):
+    err_str = "ERROR: Illegal number of energy groups. Must be positive."
+  elif(error_code == 1011):
+    err_str = "ERROR: Illegal number of materials. Must be positive."
+  elif(error_code == 1012):
+    err_str = "ERROR: Illegal x cell dimension, dx. Must be positive."
+  elif(error_code == 1013):
+    err_str = "ERROR: Illegal y cell dimension, dy. Must be positive."
+  elif(error_code == 1014):
+    err_str = "ERROR: Illegal z cell dimension, dz. Must be positive."
+  elif(error_code == 1015):
+    err_str = "ERROR: Illegal value in material map. Must be in [1, #materials]."
+  elif(error_code == 1016):
+    err_str = "ERROR: Illegal lower x BC. Must be 0-Vac, 1-Refl or 2-Fixed."
+  elif(error_code == 1017):
+    err_str = "ERROR: Illegal lower y BC. Must be 0-Vac, 1-Refl or 2-Fixed."
+  elif(error_code == 1018):
+    err_str = "ERROR: Illegal lower z BC. Must be 0-Vac, 1-Refl or 2-Fixed."
+  elif(error_code == 1019):
+    err_str = "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed."
+  elif(error_code == 1020):
+    err_str = "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed."
+  elif(error_code == 1021):
+    err_str = "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed."
+  elif(error_code == 1022):
+    err_str = "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed."
+  elif(error_code == 1023):
+    err_str = "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed."
+  elif(error_code == 1024):
+    err_str = "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed."
+  elif(error_code == 1025):
+    err_str = "ERROR: Illegal convergence criterion. Must be positive."
+  elif(error_code == 1026):
+    err_str = "ERROR: Illegal max inner iterations, itmx. Must be positive."
+  elif(error_code == 1027):
+    err_str = "ERROR: Illegal tolerance setting, tolr. Must be positive."
+  elif(error_code == 1028):
+    err_str = "ERROR: Illegal value for moments to converge, iall. Must be in [0, lambda]."
+  elif(error_code == 1029):
+    err_str = "ERROR: Illegal value for solution check flag, iall. iall is 0 (skip check) or positive integer"
+  elif(error_code == 1030):
+    err_str = "ERROR: Illegal value for solution check tolerance, tchk. Must be positive."
+  elif(error_code == 1031):
+    err_str = "ERROR: Illegal value for direction cosine. Must be entered positive, less than 1."
+  elif(error_code == 1032):
+    err_str = "ERROR: Illegal value for weight. Must be entered positive, less than 0.125."
+  elif(error_code == 1033):
+    err_str = "ERROR: a discrete ordinate has length not in range 0.99<1.00<1.01 based on mu, eta, xi values."
+  elif(error_code == 1034):
+    err_str = "ERROR: Illegal value for max moment to print, momp. Must be between 0 and lambda."
+  elif(error_code == 1035):
+    err_str = "ERROR: Illegal value for flag for moment summing. Must be 0 for off or 1 for on."
+  elif(error_code == 1036):
+    err_str = "ERROR: Illegal value for flag for moment sum at non-center point. Must be 0/1=off/on."
+  elif(error_code == 1037):
+    err_str = "ERROR: Illegal value for flag for printing average flux of the four quadrants. Must be 0/1 = off/on."
+
+  return "Error code: %d" % (error_code,) + " " + err_str
 
 def dict_complete(inputdict):
 

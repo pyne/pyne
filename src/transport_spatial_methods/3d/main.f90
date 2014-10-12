@@ -57,7 +57,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  source_input_file_in, bc_input_filein, flux_output_filein, &
  convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence, &
  ichk_in, ichk_tolerence_in, max_mom_printed_in, moment_sum_flag_in,&
- mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout)
+ mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout,error_code_out)
 
 !-------------------------------------------------------------
 !
@@ -139,6 +139,11 @@ INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_
 REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in,num_groups_in*nodes_z_in) :: fluxout
 ! Works for all solvers!
 
+INTEGER, INTENT(OUT) :: error_code_out
+! Set error codes to 0 initially
+error_code = 0
+error_code_out = error_code
+
 ! Set all of the input values
 title = titlein
 solver = solver_in
@@ -186,7 +191,9 @@ ELSE IF (solver == "AHOTN") THEN
     IF (solvertype == "LN" .or. solvertype == "LL") THEN
         IF (lambda .ne. 1) then
             WRITE(8,*) "ERROR: Lambda must be equal to one." 
-            STOP
+            error_code_out = 1001
+            RETURN
+            !STOP
         END IF
     END IF
 ELSE IF (solver == "SCTSTEP") THEN
@@ -196,10 +203,14 @@ END IF
 ! Check that the order given is greater than zero and is even
 IF (qdord <= 0) THEN
     WRITE(8,'(/,3x,A)') "ERROR: Illegal value for qdord. Must be greater than zero."
-    STOP
+    error_code_out = 1002
+    RETURN
+    !STOP
 ELSE IF (MOD(qdord,2) /= 0) THEN
     WRITE(8,'(/,3x,A)') "ERROR: Illegal value for the quadrature order. Even #s only."
-    STOP
+    error_code_out = 1003
+    return
+    !STOP
 END IF
 
 !INQUIRE(FILE = xs_file_in, EXIST = ex1)
@@ -240,7 +251,9 @@ IF (qdtyp == 2) THEN
   INQUIRE(FILE=quadrature_file, EXIST=ex3)
   IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
     WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
-    STOP
+    error_code_out = 1004
+    RETURN
+    !STOP
    END IF
    OPEN(UNIT=10, FILE=quadrature_file)
    READ(10,*)
@@ -258,6 +271,11 @@ END IF
 IF (qdtyp == 2) CLOSE(UNIT=10)
 ! Call for the input check
 CALL check
+
+IF (error_code /= 0) THEN
+  error_code_out = error_code
+  RETURN
+END IF
 
 ! Setting orpc value for sweep.
 IF (solver == "DGFEM") THEN
