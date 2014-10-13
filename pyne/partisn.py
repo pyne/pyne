@@ -68,8 +68,9 @@ class PartisnRead(object):
     """
     def __init__(self, mesh_obj, h5m_file):
         
-        h5mf = open(h5m_file)
-        discretized_mesh = dagmc.discretize_geom(mesh_obj)
+        #h5mf = open(h5m_file)
+        dagmc.load(h5m_file)
+        discretized_record_array = dagmc.discretize_geom(mesh_obj)
         
 
 class PartisnWrite(object):
