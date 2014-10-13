@@ -8,7 +8,8 @@
     <tr> <td>Electron</td> <td>11</td> <td>Electron</td> </tr>
     <tr> <td>Positron</td> <td>-11</td> <td>Anti Electron</td> </tr>
     <tr> <td>ElectronNeutrino</td> <td>12</td> <td>Electron Neutrino</td> </tr>
-    <tr> <td>ElectronAntiNeutrino</td> <td>-12</td> <td>Electron Anti Neutrino</td> </tr>
+    <tr> <td>ElectronAntiNeutrino</td> <td>-12</td> <td>Electron Anti Neutrino
+    </td> </tr>
     <tr> <td>Muon</td> <td>13</td> <td>Muon</td> </tr>
     <tr> <td>AntiMuon</td> <td>-13</td> <td>AntiMuon</td> </tr>
     <tr> <td>MuonNeutrino</td> <td>14</td> <td>MuonNeutrino</td> </tr>

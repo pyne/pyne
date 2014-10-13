@@ -16,31 +16,39 @@ idenfification, and a more human readable form"
   Photon    Gamma, X-Ray
   Electron  Beta-, Beta
 
-  All alternaive particle names map back to the cannonical form, e.g. Hydrogen maps back to Proton
+  All alternaive particle names map back to the cannonical form, e.g. Hydrogen 
+  maps  back to Proton
 
-  A valid particle name is ANY particle from the names map, i.e. those that MAP to the Berkley Particle 
-  Data Centre numbering scheme [PDC]_, and any valid nucid/name, like H1 or 10010000, this is to support the
-  high energy physics codes that some users are starting to employ.
+  A valid particle name is ANY particle from the names map, i.e. those that MAP 
+ to the Berkley Particle Data Centre numbering scheme [PDC]_, and any valid 
+ nucid/name, like H1 or 10010000, this is to support the high energy physics 
+ codes that some users are starting to employ.
 
-  **PDC Numbers:** The PDC numbers map from those specified by the Berkley Particle Data Centre and only
-  have valid numbers for those in the name map, some valid particle names, like H1, have a PDC number of 0.
+  **PDC Numbers:** The PDC numbers map from those specified by the Berkley 
+  Particle Data Centre and only have valid numbers for those in the name map, 
+  some valid particle names, like H1, have a PDC number of 0.
 
-  **Doc strings:** The doc strings are human readable versions of the name, with grammar and spaces, like what
-  humans enjoy.
+  **Doc strings:** The doc strings are human readable versions of the name, 
+  with grammar and spaces, like what humans enjoy.
   
-The particle module has a variety of functions to convert between forms, for example the name() function
-will take either the full name or the pdc number, or a valid nucid and return in its true name form. The same
-is true of the pdc() function, returning the valid PDC number of the particle.
+The particle module has a variety of functions to convert between forms, for 
+example the name() function will take either the full name or the pdc number,
+or a valid nucid and return in its true name form. The same is true of the 
+id() function, returning the valid PDC number of the particle.
 
 ------------------------
 Adding more particles!
 ------------------------
 
-Adding more particles will be nessesary in time, but it is very straightforward to add more.
+Adding more particles will be nessesary in time, but it is very straight
+forward to add more.
 
-1. add to the define NUM_PARTICLES variable, the number of particles you are going to add
-2. add the name to the ``_names`` array, add the pdc number to the ``_pdcids`` array.
-3. in the _fill_maps() function add the human readable form to the ``_docs`` array.
+1. add to the define NUM_PARTICLES variable, the number of particles you 
+ are going to add
+2. add the name to the ``_names`` array, add the pdc number to the 
+ ``_pdcids`` array.
+3. in the _fill_maps() function add the human readable form to the 
+ ``_docs`` array.
 4. in the _fill_maps() function add to the altnames map if there are other forms.
 5. in the _fill_maps() function add the mcnp and fluka forms to part2* arrays.
 

@@ -282,7 +282,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   if (!is_exist ) { // is a new file        
     hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     // create a dataspace
-    hid_t dset = create_dataspace(file,datapath);
+    hid_t dset = create_dataspace(file, datapath);
 
     hid_t memtype = create_memtype();
   
@@ -309,7 +309,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     hid_t dset;
     // if fails neet to create dataset
     // still need to check that the datapath exists
-    if ( data_status != 0 ) // doesnt exist
+    if (data_status != 0) // doesnt exist
       {
 	dset = create_dataspace(file,datapath.c_str());
 	hid_t memtype = create_memtype();
