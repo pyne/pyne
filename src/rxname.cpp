@@ -574,7 +574,7 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "bplus_3p",
   "sf",
   "decay_2bplus",
-  "decay_2ec",
+  "decay_2ec"
   };
 std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
                                           pyne::rxname::_names+NUM_RX_NAMES);
@@ -1143,13 +1143,6 @@ void * pyne::rxname::_fill_maps() {
     848,
     849,
     851,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
     0,
     0,
     0,
@@ -1747,14 +1740,7 @@ void * pyne::rxname::_fill_maps() {
     "(z,b+3p)",
     "(z,sf)",
     "(z,2b+)",
-    "(z,2ec)",
-    "(e)", // electron
-    "(antie)", // anti electron
-    "(kaon0)",
-    "(antikaon0)",
-    "(heavy_ion)", // generic heavy ion for fluka
-    "(muon_neutrino)", // muon neutrino
-    "(muon_antineutrino)" // muon anti-neutrino   
+    "(z,2ec)"
   };
   std::string _docs[NUM_RX_NAMES] = {
     "(n,total) Neutron total",
@@ -2328,14 +2314,7 @@ void * pyne::rxname::_fill_maps() {
     "(z,b+3p)",
     "(z,sf)",
     "(z,2b+)",
-    "(z,2ec)",
-    "dummy entry for electron particle type",
-    "dummy entry for anti-electron particle type",
-    "dummy entry for kaon0 particle type"
-    "dummy entry for anti-kaon0 partcle type",
-    "dummy entry for generic heavy ion particle type",
-    "dummy entry for muon neutrino",
-    "dummy entry for muon anti-neutrino"
+    "(z,2ec)"
   };
 
   // fill the maps
