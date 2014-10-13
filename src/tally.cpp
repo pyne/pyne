@@ -9,7 +9,6 @@
 #ifndef PYNE_IS_AMALGAMATED
   #include "tally.h"
   #include "particle.h"
-  #include "rxname.h"
 #endif
 
 enum entity_type_enum {VOLUME, SURFACE}; // Enumeration for entity types
@@ -405,7 +404,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   // particle token
   if (mcnp_version.find("mcnp5") != std::string::npos)
     particle_token = pyne::particle::mcnp(particle_name);
-  else if ( mcnp_version.find("mcnp6") != std::string::npos )
+  else if (mcnp_version.find("mcnp6") != std::string::npos)
     particle_token = pyne::particle::mcnp6(particle_name);
   else
     particle_token = "?";
@@ -418,32 +417,32 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
     output << std::scientific;
 
   // neednt check entity type
-  if ( entity_type.find("Surface") != std::string::npos ) {
-    if ( tally_type.find("Current") != std::string::npos ) {
+  if (entity_type.find("Surface") != std::string::npos) {
+    if (tally_type.find("Current") != std::string::npos) {
       output << "F"<< tally_index <<"1:" << particle_token << " " << entity_id << std::endl;
-      if ( entity_size > 0.0 )
+      if (entity_size > 0.0)
 	output << "SD"<<tally_index <<"1 " << entity_size << std::endl;
       // normalisation
-      if( normalization > 1.0 )
+      if (normalization > 1.0)
 	output << "FM" << tally_index << "1 " << normalization << std::endl;
-    } else if ( tally_type.find("Flux") != std::string::npos ) {
+    } else if (tally_type.find("Flux") != std::string::npos) {
       output << "F"<< tally_index <<"2:" << particle_token << " " << entity_id << std::endl;
-      if ( entity_size > 0.0 )
+      if (entity_size > 0.0)
 	output << "SD"<<tally_index <<"2 " << entity_size << std::endl;
       // normalisation
-      if( normalization > 1.0 )
+      if(normalization > 1.0)
 	output << "FM" << tally_index << "2 " << normalization << std::endl;
 
     }
-  } else if ( entity_type.find("Volume") != std::string::npos ) {
-    if ( tally_type.find("Flux") != std::string::npos ) {
+  } else if (entity_type.find("Volume") != std::string::npos) {
+    if (tally_type.find("Flux") != std::string::npos) {
       output << "F"<< tally_index <<"4:" << particle_token << " " << entity_id << std::endl;
-      if ( entity_size > 0.0 )
+      if (entity_size > 0.0)
 	output << "SD"<<tally_index <<"4 " << entity_size << std::endl;
             // normalisation
-      if( normalization > 1.0 )
+      if(normalization > 1.0)
 	output << "FM" << tally_index << "4 " << normalization << std::endl;
-    } else if ( tally_type.find("Current") != std::string::npos ) {
+    } else if (tally_type.find("Current") != std::string::npos) {
       // makes no sense in mcnp
     }
   } else {
@@ -460,9 +459,9 @@ std::string pyne::Tally::fluka(std::string unit_number) {
   std::stringstream output; // output stream
 
   // check entity type
-  if( entity_type.find("Volume") != std::string::npos ) {
+  if (entity_type.find("Volume") != std::string::npos) {
     // ok
-  }  else if ( entity_type.find("Surface") != std::string::npos ) {
+  }  else if (entity_type.find("Surface") != std::string::npos) {
       std::cout << "Surface tally not valid in FLUKA" << std::endl;
   } else {
       std::cout << "Unknown entity type" << std::endl;
@@ -477,7 +476,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << pyne::particle::fluka(particle_name);
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name;
-      if(entity_size > 0.0 ) {
+      if(entity_size > 0.0) {
 	output << std::scientific;
 	output << std::setprecision(4);
       	output << std::setw(10) << std::right << entity_size;
@@ -498,7 +497,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << "        ";
       output << std::setw(8) << std::left << "       &";      
       // end of usrtrack
-  } else if ( tally_type.find("Current") != std::string::npos) {
+  } else if (tally_type.find("Current") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRBDX  ";    
       output << std::setw(10) << std::right << "   110.0";
       output << std::setw(10) << std::right << pyne::particle::fluka(particle_name);
