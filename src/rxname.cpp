@@ -575,13 +575,6 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "sf",
   "decay_2bplus",
   "decay_2ec",
-  "e", // electron
-  "antie", // anti electron
-  "kaon0",
-  "antikaon0",
-  "heavy_ion", // generic heavy ion for fluka
-  "muon_neutrino", // muon neutrino
-  "muon_antineutrino" // muon anti-neutrino
   };
 std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
                                           pyne::rxname::_names+NUM_RX_NAMES);
