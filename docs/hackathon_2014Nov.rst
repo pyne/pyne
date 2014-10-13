@@ -4,9 +4,12 @@ PyNE Development Hack-a-thon
 =============================
 Schedule of Events
 =============================
-University of California-Berkeley
 
 November 14-16, 2014
+
+UC Berkeley
+
+(add building/room/location/etc here)
 
 ---------------------------------
 Day 1: Friday, November 14, 2014
