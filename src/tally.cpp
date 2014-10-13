@@ -73,7 +73,8 @@ void pyne::Tally::from_hdf5(char * filename, char *datapath, int row) {
 }
 
 //
-void pyne::Tally::from_hdf5(std::string filename, std::string datapath, int row) { 
+void pyne::Tally::from_hdf5(std::string filename, std::string datapath, 
+			    int row) { 
   // line of data to acces
   int data_row = row;
 
@@ -164,15 +165,20 @@ hid_t pyne::Tally::create_filetype() {
   hid_t strtype = H5Tcopy(H5T_C_S1);
   status = H5Tset_size(strtype, H5T_VARIABLE);
 
-  hid_t filetype = H5Tcreate(H5T_COMPOUND, 8 + 8 + 8 + (3*sizeof(hvl_t)) + 8 + 8);
+  hid_t filetype = H5Tcreate(H5T_COMPOUND, 8 + 8 + 8 + 
+			     (3*sizeof(hvl_t)) + 8 + 8);
   status = H5Tinsert(filetype, "entity_id", 0, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "entity_type", 8, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "tally_type", 8 + 8, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "particle_name", 8 + 8 + 8, strtype);
-  status = H5Tinsert(filetype, "entity_name", 8 + 8 + 8 + sizeof(hvl_t), strtype);
-  status = H5Tinsert(filetype, "tally_name", 8 + 8 + 8 + (2*sizeof(hvl_t)) , strtype);
-  status = H5Tinsert(filetype, "entity_size", 8 + 8 + 8 + (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
-  status = H5Tinsert(filetype, "normalization", 8 + 8 + 8 + (3*sizeof(hvl_t)) + 8, H5T_IEEE_F64BE);
+  status = H5Tinsert(filetype, "entity_name", 8 + 8 + 8 + 
+		     sizeof(hvl_t), strtype);
+  status = H5Tinsert(filetype, "tally_name", 8 + 8 + 8 + 
+		     (2*sizeof(hvl_t)) , strtype);
+  status = H5Tinsert(filetype, "entity_size", 8 + 8 + 8 + 
+		     (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
+  status = H5Tinsert(filetype, "normalization", 8 + 8 + 8 + 
+		     (3*sizeof(hvl_t)) + 8, H5T_IEEE_F64BE);
   return filetype;
 }
 
@@ -193,7 +199,8 @@ hid_t pyne::Tally::create_memtype() {
 		     HOFFSET(tally_struct, entity_type), H5T_NATIVE_INT);
   status = H5Tinsert(memtype, "tally_type",
 		     HOFFSET(tally_struct, tally_type), H5T_NATIVE_INT);
-  status = H5Tinsert(memtype, "particle_name",HOFFSET(tally_struct, particle_name),
+  status = H5Tinsert(memtype, "particle_name",
+		     HOFFSET(tally_struct, particle_name),
 		     strtype);
   status = H5Tinsert(memtype, "entity_name",HOFFSET(tally_struct, entity_name),
 		     strtype);
@@ -231,7 +238,6 @@ hid_t pyne::Tally::create_dataspace(hid_t file, std::string datapath) {
     hid_t space = H5Screate_simple(1, dims, max_dims);
 
     // Create the dataset and write the compound data to it.
-    //    hid_t dset = H5Dcreate2 (file, datapath.c_str(), filetype, space, H5P_DEFAULT, prop,
     return H5Dcreate2(file, datapath.c_str(), filetype, space, H5P_DEFAULT, prop,
 			     H5P_DEFAULT);
 }
@@ -280,7 +286,8 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     throw h5wrap::FileNotHDF5(filename);
 
   if (!is_exist ) { // is a new file        
-    hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, 
+			   H5P_DEFAULT);
     // create a dataspace
     hid_t dset = create_dataspace(file, datapath);
 
@@ -419,14 +426,16 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   // neednt check entity type
   if (entity_type.find("Surface") != std::string::npos) {
     if (tally_type.find("Current") != std::string::npos) {
-      output << "F"<< tally_index <<"1:" << particle_token << " " << entity_id << std::endl;
+      output << "F"<< tally_index <<"1:" << particle_token 
+	     << " " << entity_id << std::endl;
       if (entity_size > 0.0)
 	output << "SD"<<tally_index <<"1 " << entity_size << std::endl;
       // normalisation
       if (normalization > 1.0)
 	output << "FM" << tally_index << "1 " << normalization << std::endl;
     } else if (tally_type.find("Flux") != std::string::npos) {
-      output << "F"<< tally_index <<"2:" << particle_token << " " << entity_id << std::endl;
+      output << "F"<< tally_index <<"2:" << particle_token 
+	     << " " << entity_id << std::endl;
       if (entity_size > 0.0)
 	output << "SD"<<tally_index <<"2 " << entity_size << std::endl;
       // normalisation
@@ -436,7 +445,8 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
     }
   } else if (entity_type.find("Volume") != std::string::npos) {
     if (tally_type.find("Flux") != std::string::npos) {
-      output << "F"<< tally_index <<"4:" << particle_token << " " << entity_id << std::endl;
+      output << "F"<< tally_index <<"4:" << particle_token << " " 
+	     << entity_id << std::endl;
       if (entity_size > 0.0)
 	output << "SD"<<tally_index <<"4 " << entity_size << std::endl;
             // normalisation
@@ -473,7 +483,8 @@ std::string pyne::Tally::fluka(std::string unit_number) {
   if (tally_type.find("Flux") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRTRACK";
       output << std::setw(10) << std::right << "     1.0";
-      output << std::setw(10) << std::right << pyne::particle::fluka(particle_name);
+      output << std::setw(10) << std::right 
+	     << pyne::particle::fluka(particle_name);
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name;
       if(entity_size > 0.0) {
@@ -486,7 +497,8 @@ std::string pyne::Tally::fluka(std::string unit_number) {
 
       output << std::setw(10) << std::right << "   1000."; // number of ebins
       tally_name.resize(8);
-      output << std::setw(8) << std::left << tally_name; // may need to make sure less than 10 chars
+      output << std::setw(8) << std::left 
+	     << tally_name; // may need to make sure less than 10 chars
       output << std::endl;
       output << std::setw(10) << std::left  << "USRTRACK";
       output << std::setw(10) << std::right << "   10.E1";
@@ -500,7 +512,8 @@ std::string pyne::Tally::fluka(std::string unit_number) {
   } else if (tally_type.find("Current") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRBDX  ";    
       output << std::setw(10) << std::right << "   110.0";
-      output << std::setw(10) << std::right << pyne::particle::fluka(particle_name);
+      output << std::setw(10) << std::right 
+	     << pyne::particle::fluka(particle_name);
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name; // upstream
       output << std::setw(10) << std::right << entity_name; // downstream
@@ -510,7 +523,8 @@ std::string pyne::Tally::fluka(std::string unit_number) {
 	output << std::setw(10) << std::right << 1.0;
 
       tally_name.resize(8);
-      output << std::setw(8) << std::right << tally_name; // may need to make sure less than 10 chars
+      output << std::setw(8) << std::right 
+	     << tally_name; // may need to make sure less than 10 chars
       output << std::endl;
       output << std::setw(10) << std::left  << "USRBDX  ";    
       output << std::setw(10) << std::right << "  10.0E1";
@@ -518,7 +532,8 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << "  1000.0"; // number of bins
       output << std::setw(10) << std::right << "12.56637"; // 4pi
       output << std::setw(10) << std::right << "     0.0";
-      output << std::setw(10) << std::right << "   240.0"; // number of angular bins
+      output << std::setw(10) << std::right 
+	     << "   240.0"; // number of angular bins
       output << std::setw(8) << std::left << "       &";      
       // end of usrbdx
   } else {
