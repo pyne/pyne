@@ -35,6 +35,8 @@ DEFAULT_FILES = [
     'src/json-forwards.h',
     'src/json.h',
     'src/jsoncpp.cpp',
+    'src/jsoncustomwriter.h',
+    'src/jsoncustomwriter.cpp',
     'src/material.h',
     'src/material.cpp',
     'src/enrichment_cascade.h',

@@ -570,3 +570,49 @@ cdef class StyledWriter(object):
         """
         cdef std_string s = self._inst.write(deref(tocppval(value)))
         return bytes(s).decode()
+
+cdef class CustomWriter(object):
+    """A class to convert values in memory to expanded strings with a custom 
+    formtting.
+    """
+
+    def __cinit__(self, opencurly='{', closecurly='}', opensquare='[', 
+                  closesquare=']', colon=':', comma=',', indent='  ', maxwidth = 74):
+        """Custom writer C++ constuctor."""
+        b_opencurly = opencurly.encode()  # bytes
+        cdef std_string c_opencurly = std_string(<char *> b_opencurly)  # C-str 
+        b_closecurly = closecurly.encode()  # bytes
+        cdef std_string c_closecurly = std_string(<char *> b_closecurly)  # C-str 
+        b_opensquare = opensquare.encode() # bytes
+        cdef std_string c_opensquare = std_string(<char *> b_opensquare)  # C-str 
+        b_closesquare = closesquare.encode() # bytes
+        cdef std_string c_closesquare = std_string(<char *> b_closesquare)  # C-str 
+        b_colon = colon.encode() # bytes
+        cdef std_string c_colon = std_string(<char *> b_colon)  # C-str 
+        b_comma = comma.encode() # bytes
+        cdef std_string c_comma = std_string(<char *> b_comma)  # C-str 
+        b_indent = indent.encode() # bytes
+        cdef std_string c_indent = std_string(<char *> b_indent)  # C-str 
+        self._inst = new cpp_jsoncpp.CustomWriter(c_opencurly, c_closecurly, 
+                                                  c_opensquare, c_closesquare, 
+                                                  c_colon, c_comma, c_indent, 
+                                                  maxwidth)
+
+    def __dealloc__(self):
+        """Styled writer C++ destructor."""
+        del self._inst
+
+    def write(self, value):
+        """Writes a value out to a custom human-readable JSON string.
+
+        Parameters
+        ----------
+        value : Value or anything Value-convertable
+
+        Returns
+        -------
+        s : str
+
+        """
+        cdef std_string s = self._inst.write(deref(tocppval(value)))
+        return bytes(s).decode()

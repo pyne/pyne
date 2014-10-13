@@ -16,6 +16,7 @@ work builds upon past work well.
 
     style_guide
     testing
+    doc
     release
     endf
     binaries

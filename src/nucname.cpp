@@ -484,12 +484,6 @@ int pyne::nucname::id(int nuc) {
   } else if (aaa == 0 && 0 < zz_name.count(zzz)) {
     // MCNP form natural nuclide
     return zzz * 10000000;
-  } else if (zzz > 1000) {
-    // SZA form with a metastable state (sss != 0)
-    int sss = zzz / 1000;
-    int newzzz = zzz % 1000;
-    
-    return newzzz * 10000000 + aaa * 10000 + sss;
   }
 
   // Not a normal nuclide, might be a 
@@ -506,27 +500,28 @@ int pyne::nucname::id(char * nuc) {
 };
 
 int pyne::nucname::id(std::string nuc) {
+  size_t npos = std::string::npos;
   if (nuc.empty())
     throw NotANuclide(nuc, "<empty>");
   int newnuc;
   std::string elem_name;
+  int dash1 = nuc.find("-"); 
+  int dash2;
+  if (dash1 == npos)
+    dash2 = npos;
+  else
+    dash2 = nuc.find("-", dash1+1);
   
-  if(nuc.length()>=5) { //nuc must be at least 4 characters or greater if it is in ZZLLAAAM form.
-    if((pyne::contains_substring(nuc.substr(1, 3), "-")) && (pyne::contains_substring(nuc.substr(4, 5), "-")) ){
-       // Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
-       int dashIndex = nuc.find("-"); 
-       std::string zz = nuc.substr(0, dashIndex);
-       std::string ll_aaa_m = nuc.substr(dashIndex+1);
-       int dash2Index = ll_aaa_m.find("-");
-       std::string ll = ll_aaa_m.substr(0, dash2Index);
-       int zz_int;
-       std::stringstream s_str(zz);
-       s_str >> zz_int;
-       if(znum(ll)==zz_int ) {    // Verifying that the LL and ZZ point to the same element as secondary
-	  			  // verification that nuc is in ZZLLAAAM form.
-         return zzllaaam_to_id(nuc);
-       }
-    }
+  // nuc must be at least 4 characters or greater if it is in ZZLLAAAM form.
+  if (nuc.length() >= 5 && dash1 != npos && dash2 != npos) {
+    // Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
+    std::string zz = nuc.substr(0, dash1);
+    std::string ll = nuc.substr(dash1+1, dash2);
+    int zz_int = to_int(zz);
+    // Verifying that the LL and ZZ point to the same element as secondary
+    if(znum(ll) != zz_int)
+      throw NotANuclide(nuc, "mismatched znum and chemical symbol");
+    return zzllaaam_to_id(nuc);
   }
 
   // Get the string into a regular form
@@ -891,7 +886,9 @@ int pyne::nucname::mcnp(std::string nuc) {
 int pyne::nucname::mcnp_to_id(int nuc) {
   int zzz = nuc / 1000;
   int aaa = nuc % 1000; 
-  if (zzz <= aaa) {
+  if (zzz == 0)
+    throw NotANuclide(nuc, "not in the MCNP format");
+  else if (zzz <= aaa) {
     if (aaa - 400 < 0) {
       if (nuc == 95242)
         return nuc * 10000 + 1;  // special case MCNP Am-242m

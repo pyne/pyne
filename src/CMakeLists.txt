@@ -36,6 +36,7 @@ set(PYNE_SRCS
     "enrichment_cascade.cpp"
     "enrichment_symbolic.cpp"
     "jsoncpp.cpp"
+    "jsoncustomwriter.cpp"
     "material.cpp"
     "nucname.cpp"
     "particle.cpp"
