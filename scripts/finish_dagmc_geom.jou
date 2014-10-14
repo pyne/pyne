@@ -1,0 +1,18 @@
+set attrib on
+import acis {Quote(fname_input)}
+imprint all
+merge all
+export acis {Quote(fname_no_graveyard)} overwrite
+group "allvols" add vol all
+brick bounding box vol all
+#{_gin=Id("volume")}
+vol {_gin} scale 1.1
+move vol {_gin} location group allvols
+vol {_gin} copy
+#{_gout=Id("volume")}
+vol {_gout} scale 1.01
+move vol {_gout} location vol {_gin}
+subtract vol {_gin} from vol {_gout}
+group "graveyard" add vol {Id("volume")}
+export acis {Quote(fname_output)} overwrite
+

@@ -1,0 +1,1578 @@
+diff --git a/Makefile b/Makefile
+index 552c43e..1df0ad0 100755
+--- a/Makefile
++++ b/Makefile
+@@ -22 +22 @@ ifneq (,$(premake))
+-  CONFIG = $(menup) $(menuproc) $(menub) $(debug) $(menuf90) $(menucc) $(MPI)
++  CONFIG = $(menup) $(menudag) $(menuproc) $(menub) $(debug) $(menuf90) $(menucc) $(MPI)
+@@ -69,0 +70,2 @@ build:
++	@ rm -f dagmc
++	@ ln -s $(DAGMC_DIR) dagmc
+diff --git a/config/Linux.gcf b/config/Linux.gcf
+index ea765da..221831e 100755
+--- a/config/Linux.gcf
++++ b/config/Linux.gcf
+@@ -691,0 +692 @@ CFLAGS   = $(CCPU) $(CDEBUG) $(COPT)
++CXXFLAGS = $(CFLAGS)
+@@ -735,0 +737,32 @@ endif
++# --- DAGMC option.
++DAGMC_MOD=
++
++ifeq (dagmc,$(filter dagmc,$(CONFIG)))
++
++  ifeq (,$(premake)) 
++    include $(MOAB_DIR)/lib/moab.make   
++    CUBIT_LINK_PATH=$(CUBIT_DIR)
++  else
++    include $(menudagpath)/lib/moab.make
++    CUBIT_LINK_PATH=$(menucubitpath)
++  endif
++
++  ifneq (,$(CUBIT_LINK_PATH))
++    # Cubit-based MOAB build specified; ensure library paths work
++    DAGMC_CFLAGS += -DCUBIT_LIBS_PRESENT
++    MOAB_LDFLAGS += -Wl,-rpath=$(CUBIT_LINK_PATH)
++  endif
++
++  CPP_FLAGS += $(MOAB_CPPFLAGS)
++  CXXFLAGS += $(MOAB_CXXFLAGS) $(DAGMC_CFLAGS) 
++  INCLUDES += $(MOAB_INCLUDES)
++  LDFLAGS = $(MOAB_LDFLAGS) $(CXX_FORTRAN_LDFLAGS) 
++
++  DAGMC_LIBS += $(MOAB_LIBS_LINK) -ldagmc -lstdc++
++
++  DAGMC_MOD=  dagmc_mod$(OBJF)
++
++endif
++# ---END DAGMC OPTIONS-------------------
++
++
+diff --git a/config/Makefile b/config/Makefile
+index d335c8c..edd829f 100755
+--- a/config/Makefile
++++ b/config/Makefile
+@@ -29,0 +30,6 @@ custom:
++	@ $(ECHO) '# --- DAGMC Option ---' >> "$(custfile)"
++	@ $(ECHO) 'menudagmc='$(menudagmc) >> "$(custfile)"
++	@ $(ECHO) '# --- DAGMC library path ---' >> "$(custfile)"
++	@ $(ECHO) 'menudagpath='$(menudagpath) >> "$(custfile)"
++	@ $(ECHO) '# --- Cubit binary path ---' >> "$(custfile)"
++	@ $(ECHO) 'menucubitpath='$(menucubitpath) >> "$(custfile)"
+diff --git a/install b/install
+index 2c241c6..15f67aa 100755
+--- a/install
++++ b/install
+@@ -220,0 +221,90 @@ Graphics () {
++#----------
++# DAGMC
++#----------
++# This sets the DAGMC library location and toggles use of DAGMC
++DagMC () {
++# Loop until told to exit.
++ while [ "$EXIT" = '0' ]; do
++  Clear
++  echo '**************************** DAGMC OPTIONS *************************'
++  echo ' '
++  echo 'Configurable Numbered Items                   Current Value'
++  echo '-----------------------------------------------------------' 
++  echo '1. Enable DAGMC (toggle)                      '$menudagmc
++
++  if [ "$menudagmc" = 'on' ] 
++  then {
++  echo ' ' 
++  echo '2. DAGMC Library Path (entry)                 '$menudagpath
++  echo ' ' 
++
++  if [ ! -d "$menudagpath" ]
++  then {
++    echo "Warning:  DAGMC Library Path $menudagpath is not set or is not valid."
++  }
++  else 
++    echo "Confirmed:  DAGMC Library Path $menudagpath is valid."
++  fi 
++
++  echo ' ' 
++  echo '3. Cubit Binary Path (entry)                 '$menucubitpath
++  echo ' ' 
++
++  if [ ! -d "$menucubitpath" ]
++  then {
++    echo "Warning:  Cubit Binary Path $menucubitpath is not set or is not valid."
++    echo "          (It might not be needed.)"
++  }
++  else 
++    echo "Confirmed:  Cubit Binary Path $menucubitpath is valid."
++  fi 
++
++  }
++  fi
++
++
++  echo ' '
++  echo 'Permitted Letter Actions'
++  echo '------------------------' 
++  echo 'X. Exit DAGMC Options'
++  echo ' '
++  echo ' ' 
++  echo '***************** Type your choice and hit <Enter> ********************' 
++  echo '***********************************************************************'
++  read menuselect
++  case $menuselect in
++     1 | 1*)
++       if [ "$menudagmc" = 'on' ]
++       then {
++         menudagmc=off
++       }
++       else
++         menudagmc=on
++       fi
++     ;;
++
++     2 | 2*)
++       echo ' '
++       echo ' Enter the DAGMC Library Path:'
++       read menudagpath
++       menudagpath32=$menudagpath
++       menudagpath64=$menudagpath
++     ;;
++
++     3 | 3*)
++       echo ' '
++       echo ' Enter the Cubit Binary Path:'
++       read menucubitpath
++       menucubitpath32=$menucubitpath
++       menucubitpath64=$menucubitpath
++     ;;
++
++     X | x | X* | x*)
++       EXIT='1'
++     ;;
++
++     *)
++     ;;
++  esac 
++  done
++}
+@@ -944,0 +1035 @@ menudata='no'
++menudagmc='off'
+@@ -1536,0 +1628,5 @@ CreateAnsfile () {
++    echo "menudagmc=$menudagmc" >> $ansfile
++    echo "menudagpath=$menudagpath" >> $ansfile
++    echo "menucubitpath=$menucubitpath" >> $ansfile
++
++
+@@ -1615,0 +1712,16 @@ ExportVariables () {
++    menudagmc=$menudagmc
++    export menudagmc
++
++    menudagpath=$menudagpath
++    export menudagpath
++
++    menucubitpath=$menucubitpath
++    export menucubitpath
++    if [ "$LD_LIBRARY_PATH" == '' ] 
++    then
++	LD_LIBRARY_PATH=$menucubitpath
++    else
++	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$menucubitpath
++    fi
++    export LD_LIBRARY_PATH
++
+@@ -1652,0 +1765,7 @@ ExportVariables () {
++    if [ "$menudagmc" = 'on' ]
++    then {
++       menudag=dagmc
++       export menudag
++    }
++    fi
++
+@@ -1800,0 +1920,11 @@ while [ "$EXIT" = '0' ]; do
++  if [ "$menudagmc" = 'on' ]
++  then {
++    echo ' '
++    echo '7. DAGMC (menu driven)                           on'
++    echo '   DAGMC Library Path                            '$menudagpath
++    echo '   Cubit Binary Path                             '$menucubitpath
++  }
++  else 
++    echo ' '
++    echo '7. DAGMC (menu driven)                           off'
++  fi
+@@ -1862,0 +1993,4 @@ while [ "$EXIT" = '0' ]; do
++     7 | 7*)
++       DagMC
++       EXIT='0'
++     ;;
+diff --git a/src/Depends b/src/Depends
+index 8ddb086..42d9bae 100755
+--- a/src/Depends
++++ b/src/Depends
+@@ -21 +21 @@ amatrx$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF)
+-angl$(OBJF)   : mcnp_global$(OBJF) mcnp_debug$(OBJF)
++angl$(OBJF)   : mcnp_global$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -46 +46 @@ celsrf$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) mcnp_input$(OBJF) \
+-		erprnt$(OBJF)
++		erprnt$(OBJF) $(DAGMC_MOD)
+@@ -54 +54 @@ chektr$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) mcnp_input$(OBJF) \
+-chkcel$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF)
++chkcel$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -72 +72 @@ crtcze$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) erprnt$(OBJF)
+-dbmin$(OBJF)  : mcnp_global$(OBJF) mcnp_debug$(OBJF)
++dbmin$(OBJF)  : mcnp_global$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -88 +88,2 @@ electr$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) fmesh_mod$(OBJF) \
+-		dxtran_mod$(OBJF)  mcnp_landau$(OBJF) eventp$(OBJF)
++		dxtran_mod$(OBJF)  mcnp_landau$(OBJF) eventp$(OBJF) \
++		$(DAGMC_MOD)
+@@ -141 +142 @@ hstory$(OBJF) : mcnp_global$(OBJF) smmp$(OBJF) ra1_mod$(OBJF) fmesh_mod$(OBJF) \
+-		phtvr_mod$(OBJF) 
++		phtvr_mod$(OBJF) $(DAGMC_MOD)
+@@ -143 +144 @@ igeom$(OBJF)  : mcnp_global$(OBJF) mcnp_input$(OBJF) mcnp_debug$(OBJF) \
+-		erprnt$(OBJF)
++		erprnt$(OBJF) $(DAGMC_MOD)
+@@ -146 +147 @@ imcn$(OBJF)   : mcnp_global$(OBJF) mcnp_input$(OBJF) crit1_mod$(OBJF) \
+-		fmesh_mod$(OBJF) rmc_mod$(OBJF) mcnp_debug$(OBJF)
++		fmesh_mod$(OBJF) rmc_mod$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -160 +161 @@ itally$(OBJF) : mcnp_global$(OBJF) mcnp_input$(OBJF) mcnp_debug$(OBJF) \
+-		fmesh_mod$(OBJF) phtvr_mod$(OBJF) erprnt$(OBJF)
++		fmesh_mod$(OBJF) phtvr_mod$(OBJF) erprnt$(OBJF) $(DAGMC_MOD)
+@@ -188 +189 @@ main$(OBJF)   : mcnp_global$(OBJF) dmmp$(OBJF) lx5_mod$(OBJF) \
+-		mcnp_debug$(OBJF)
++		mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -229 +230 @@ msgtsk$(OBJF) : mcnp_global$(OBJF) dmmp$(OBJF) messages$(OBJF) dynamic_arrays$(O
+-namchg$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF)
++namchg$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -234 +235 @@ newcd1$(OBJF) : mcnp_global$(OBJF) dynamic_arrays$(OBJF) mcnp_input$(OBJF) \
+-newcel$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF)
++newcel$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -238 +239,2 @@ nextit$(OBJF) : mcnp_global$(OBJF) mcnp_input$(OBJF) ra1_mod$(OBJF) ra2_mod$(OBJ
+-		fmesh_mod$(OBJF) mcnp_debug$(OBJF) phtvr_mod$(OBJF) erprnt$(OBJF)
++		fmesh_mod$(OBJF) mcnp_debug$(OBJF) phtvr_mod$(OBJF) erprnt$(OBJF)  \
++		$(DAGMC_MOD)
+@@ -249 +251 @@ oldcrd$(OBJF) : mcnp_global$(OBJF) mcnp_input$(OBJF) ra1_mod$(OBJF) \
+-		fmesh_mod$(OBJF) mcnp_debug$(OBJF) erprnt$(OBJF)
++		fmesh_mod$(OBJF) mcnp_debug$(OBJF) erprnt$(OBJF) $(DAGMC_MOD)
+@@ -253 +255,2 @@ pareto$(OBJF) : mcnp_params$(OBJF) mcnp_debug$(OBJF)
+-pass1$(OBJF)  : mcnp_global$(OBJF) dynamic_arrays$(OBJF) mcnp_input$(OBJF) mcnp_debug$(OBJF)
++pass1$(OBJF)  : mcnp_global$(OBJF) dynamic_arrays$(OBJF) mcnp_input$(OBJF) mcnp_debug$(OBJF) \
++		$(DAGMC_MOD)
+@@ -339 +342 @@ smpsrc$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF)
+-sourcb$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF)
++sourcb$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -363 +366 @@ talloc$(OBJF) : mcnp_global$(OBJF) mcnp_input$(OBJF) mcnp_debug$(OBJF) erprnt$(O
+-tally$(OBJF)  : mcnp_global$(OBJF) mcnp_debug$(OBJF)
++tally$(OBJF)  : mcnp_global$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -380,2 +383,2 @@ tpefil$(OBJF) : mcnp_global$(OBJF) dynamic_arrays$(OBJF) lx5_mod$(OBJF) ra1_mod$
+-track$(OBJF)  : mcnp_global$(OBJF) mcnp_debug$(OBJF) qttyin$(OBJF)
+-transm$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF)
++track$(OBJF)  : mcnp_global$(OBJF) mcnp_debug$(OBJF) qttyin$(OBJF) $(DAGMC_MOD)
++transm$(OBJF) : mcnp_global$(OBJF) mcnp_debug$(OBJF) $(DAGMC_MOD)
+@@ -400 +403 @@ volume$(OBJF) : mcnp_global$(OBJF) mcnp_input$(OBJF) mcnp_debug$(OBJF) qttyin$(O
+-		erprnt$(OBJF)
++		erprnt$(OBJF) $(DAGMC_MOD)
+@@ -428,0 +432,19 @@ endif
++#
++# DagMC objects
++ifneq (,$(DAGMC_MOD))
++dagmc_mod$(OBJF) : mcnp_global$(OBJF) messages$(OBJF)
++../dagmc/mcnp_funcs$(OBJC) : ../dagmc/mcnp_funcs.h 
++../dagmc/meshtal_funcs$(OBJC): ../dagmc/meshtal_funcs.h ../dagmc/MeshTally.hpp \
++                               ../dagmc/TrackLengthMeshTally.hpp ../dagmc/KDEMeshTally.hpp
++../dagmc/TrackLengthMeshTally$(OBJC): ../dagmc/MeshTally.hpp ../dagmc/Matrix3.hpp \
++                                      ../dagmc/TrackLengthMeshTally.hpp
++../dagmc/KDEKernel$(OBJC): ../dagmc/KDEKernel.hpp
++../dagmc/KDECollision$(OBJC): ../dagmc/KDECollision.hpp ../dagmc/KDEKernel.hpp 
++../dagmc/KDETrack$(OBJC): ../dagmc/KDETrack.hpp ../dagmc/KDEKernel.hpp
++../dagmc/KDEMeshTally$(OBJC): ../dagmc/KDEMeshTally.hpp ../dagmc/MeshTally.hpp \
++                              ../dagmc/KDECollision.hpp ../dagmc/KDEKernel.hpp \
++                              ../dagmc/KDETrack.hpp ../dagmc/meshtal_funcs.h
++../dagmc/MeshTally$(OBJC): ../dagmc/MeshTally.hpp
++endif
++
++
+diff --git a/src/FILE.list b/src/FILE.list
+index 1261693..36aa740 100755
+--- a/src/FILE.list
++++ b/src/FILE.list
+@@ -74,0 +75,5 @@ C_SRC :=  mc.c
++####################
++# C++ Source Files #
++####################
++CXX_SRC :=  
++
+@@ -79,0 +85 @@ UNWANTED_C_SRC :=
++UNWANTED_CXX_SRC :=
+@@ -92,0 +99,8 @@ endif
++ifeq (dagmc,$(filter dagmc,$(CONFIG)))
++  F_SRC   := $(F_SRC) dagmc_mod.F90
++  CXX_SRC := $(CXX_SRC) ../dagmc/mcnp_funcs.cpp ../dagmc/meshtal_funcs.cpp \
++  ../dagmc/KDEMeshTally.cpp ../dagmc/KDEKernel.cpp ../dagmc/KDECollision.cpp \
++  ../dagmc/KDETrack.cpp ../dagmc/TrackLengthMeshTally.cpp ../dagmc/MeshTally.cpp
++
++endif
++
+@@ -98,0 +113 @@ C_SRC :=	$(filter-out $(UNWANTED_C_SRC),$(C_SRC))
++CXX_SRC :=	$(filter-out $(UNWANTED_CXX_SRC),$(CXX_SRC))
+@@ -101,0 +117 @@ C_OBJS =	$(C_SRC:.c=$(OBJC))
++CXX_OBJS =	$(CXX_SRC:.cpp=$(OBJC))
+diff --git a/src/Makefile b/src/Makefile
+index c5b6e17..0d65eb5 100755
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -12 +12 @@
+-#    DEF_MACH,  DEF_PLOT,  DEF_SMMP,  DEF_DMMP
++#    DEF_MACH,  DEF_PLOT,  DEF_DAGMC, DEF_SMMP,  DEF_DMMP
+@@ -15,0 +16 @@
++#    MOAB_DIR
+@@ -84 +85 @@ DEF_CODEINFO = \
+-DEFS    = $(DEF_CODEINFO) $(DEF_MACH) $(DEF_PLOT) $(DEF_SMMP) $(DEF_DMMP) $(DMMP_NAME) 
++DEFS    = $(DEF_CODEINFO) $(DEF_MACH) $(DEF_PLOT) $(DEF_DAGMC) $(DEF_SMMP) $(DEF_DMMP) $(DMMP_NAME) 
+@@ -89 +90 @@ DEFS    = $(DEF_CODEINFO) $(DEF_MACH) $(DEF_PLOT) $(DEF_SMMP) $(DEF_DMMP) $(DMMP
+-# Defined in FILE.list:  F_SRC, F_OBJS, C_SRC, C_OBJS
++# Defined in FILE.list:  F_SRC, F_OBJS, C_SRC, C_OBJS, CXX_SRC, CXX_OBJS
+@@ -98,2 +99,2 @@ include FILE.list
+-LIBS	= $(PLOTLIBS)  $(LIB_DMMP) $(EXTRALIBS) 
+-INCLUDES= -I.  $(INC_DMMP)  $(INCLUDE_DIRS) 
++LIBS	  = $(PLOTLIBS)  $(LIB_DMMP) $(EXTRALIBS) $(DAGMC_LIBS) 
++INCLUDES += -I.  $(INC_DMMP)  $(INCLUDE_DIRS) 
+@@ -105,0 +107 @@ ifeq (,$(PREPROCESS))
++  ALL_CXXFLAGS  = $(CPPFLAGS) $(INCLUDES) $(CXXFLAGS)
+@@ -111,0 +114 @@ else
++  ALL_CXXFLAGS  = $(CPPFLAGS) $(INCLUDES) $(CXXFLAGS)
+@@ -120 +123 @@ endif
+-$(EXEC):   $(F_OBJS) $(C_OBJS) 
++$(EXEC):   $(F_OBJS) $(C_OBJS) $(CXX_OBJS)
+@@ -122 +125 @@ $(EXEC):   $(F_OBJS) $(C_OBJS)
+-	@ $(LD)  $(OUT)$(EXEC) $(F_OBJS) $(C_OBJS) $(ALL_LDFLAGS)
++	@ $(LD)  $(OUT)$(EXEC) $(F_OBJS) $(C_OBJS) $(CXX_OBJS) $(ALL_LDFLAGS)
+@@ -126 +129 @@ clean:
+-	@ $(RM) -f $(F_OBJS) $(C_OBJS) ./*$(OBJF)
++	@ $(RM) -f $(F_OBJS) $(C_OBJS) $(CXX_OBJS) ./*$(OBJF) ../dagmc/*$(OBJC)
+@@ -131 +134 @@ realclean:
+-	@ $(RM) -f $(F_OBJS) $(C_OBJS) ./*$(OBJF)
++	@ $(RM) -f $(F_OBJS) $(C_OBJS) $(CXX_OBJS) ./*$(OBJF) ../dagmc/*$(OBJC)
+@@ -146 +149 @@ include Depends
+-.SUFFIXES:      .F90    .c      $(OBJF)		$(OBJC)		$(I)	.a
++.SUFFIXES:      .F90    .c	.cpp	 $(OBJF)	$(OBJC)		$(I)	.a
+@@ -161,0 +165,7 @@ $(DOTCOMMROOT)/src/libdotcomm.a :
++%$(OBJC) : %.cpp
++	$(ECHO) "--- $@ ---"
++  ifeq (1,$(scr_trace))
++	$(ECHO) "$(CXX) $(ALL_CXXFLAGS) -c -o $@ $<"
++  endif
++	$(CXX) $(ALL_CXXFLAGS) -c -o $@ $<
++
+diff --git a/src/angl.F90 b/src/angl.F90
+index 02f7186..6d23d86 100755
+--- a/src/angl.F90
++++ b/src/angl.F90
+@@ -11,0 +12 @@ function angl()
++  use dagmc_mod
+@@ -16,0 +18,7 @@ function angl()
++  ! DAGMC: In CAD mode, circumvent entire function and call DAGMC version instead
++  if (isdgmc == 1) then
++     call dagmcangl(jsu,xxx,yyy,zzz,ang)
++     angl=max(-one,min(one,ang(1)*uuu+ang(2)*vvv+ang(3)*www))
++     return
++  endif
++
+diff --git a/src/bankit.F90 b/src/bankit.F90
+index 3669d14..bb589cd 100755
+--- a/src/bankit.F90
++++ b/src/bankit.F90
+@@ -11,0 +12 @@ subroutine bankit(m)
++  use dagmc_mod
+@@ -52,0 +54,5 @@ contains
++    ! DAGMC: 
++    if ( isdgmc == 1 ) then    
++       call dagmc_bank_push( nbnk )
++    endif
++
+@@ -174,0 +181,6 @@ contains
++
++    ! DAGMC: 
++    if ( isdgmc == 1 ) then    
++       call dagmc_bank_usetop(  )
++    endif
++
+@@ -240,0 +253,4 @@ contains
++       ! DAGMC: 
++       if ( isdgmc == 1 ) then    
++          call dagmc_bank_pop( nbnk  )
++       endif
+diff --git a/src/celsrf.F90 b/src/celsrf.F90
+index eab1e35..2677cf6 100755
+--- a/src/celsrf.F90
++++ b/src/celsrf.F90
+@@ -12,0 +13 @@ subroutine celsrf
++  use dagmc_mod
+@@ -309,0 +311,4 @@ subroutine celsrf
++     
++    ! DAGMC: Skip tihs loop if in CAD mode
++     if (isdgmc == 1) exit
++
+diff --git a/src/chekit.F90 b/src/chekit.F90
+index c304db8..43dc561 100755
+--- a/src/chekit.F90
++++ b/src/chekit.F90
+@@ -1097,0 +1098 @@ subroutine chekit
++        & .and.hitm(1:3)/='dag'  &  ! DAGMC option  
+diff --git a/src/chkcel.F90 b/src/chkcel.F90
+index 4312cd6..1cc2fcc 100755
+--- a/src/chkcel.F90
++++ b/src/chkcel.F90
+@@ -22,0 +23 @@ subroutine chkcel(i1,m,j)
++  use dagmc_mod
+@@ -27,0 +29,6 @@ subroutine chkcel(i1,m,j)
++  ! DAGMC: In CAD mode, circumvent this function and call DAGMC version instead
++  if ( isdgmc == 1 .and. (m == 0 .or. m==2) ) then
++     call dagmcchkcel(uuu,vvv,www,xxx,yyy,zzz,i1,j)
++     return
++  endif
++  
+diff --git a/src/dagmc_mod.F90 b/src/dagmc_mod.F90
+new file mode 100755
+index 0000000..1c4fc89
+--- /dev/null
++++ b/src/dagmc_mod.F90
+@@ -0,0 +1,254 @@
++module dagmc_mod
++
++  use mcnp_params
++  use pblcom, only: mpb
++
++  integer, parameter, public :: & ! named constant for file distribution mode
++     & DGFM_SEQ   = 0, &
++     & DGFM_READ  = 1, & 
++     & DGFM_BCAST = 2 
++
++  integer, save :: isdgmc 
++
++  integer, save :: dagmc_geom_file_mode = DGFM_SEQ  ! default to a distributed read
++
++  integer, save :: dagmc_srcmode = 0
++  integer, save :: dagmc_usecad  = 0
++  integer, save :: dagmc_distlimit = 0
++  
++  real(dknd), save :: dagmc_facet_tol
++  real(dknd), save :: dagmc_overlap_thickness
++  real(dknd), save :: dagmc_version
++  
++  integer, save :: dagmc_subversion
++
++  public :: &
++    &   lcadrd, &        ! read log file information
++    &   dagmc_msgput, &  ! share dagmc settings to slave tasks
++    &   dagmc_msgget    ! receive dagmc settings from master task
++
++contains
++
++  subroutine lcadrd
++    ! Description:
++    ! Reads in the CAD log file and "inserts" it at the header
++    ! of the input file.
++    
++    ! >>>>> Modules used
++    use mcnp_global
++    use mcnp_params
++    use mcnp_iofiles
++    
++    ! >>>>> Implict declaration of real variables as doubles
++    implicit real(dknd) (a-h,o-z)
++    
++    ! >>>>> Other variables
++    character(len=80)  :: hk          ! Character for line of file being read
++    integer, parameter :: ie = 70     ! I/O index of a scratch file
++    integer            :: it, iu = 0  ! Indices for nxtsym function
++    integer            :: ios = 0     ! IOSTAT for file reading
++    
++    ! >>>>> Initialize the scratch file and get to beginning of input file
++    open(ie,status='scratch')
++    rewind iui
++    
++    ! >>>>> Check if first line is message block, otherwise assume a title card
++    read(iui,'(a80)',end=1000) hk
++    call nxtsym(hk,' ',1,it,iu,1)
++    
++    if (hk(it:iu) == 'message:') then
++       ! Message block exists, read until blank line found
++       do
++          read(iui,'(a80)',end=1000) hk   ! Read in string: exception for eof
++          if (hk == ' ') exit             ! Terminate loop once blank line found 
++       enddo
++       ! Read in title card, for message block case
++       read(iui,'(a80)',end=1000) hk
++    endif
++    
++    ! Write title card to scratch file
++    write(ie,'(a80)') hk
++    
++    ! >>>>> Read in cell/surface cards from log
++    rewind iulc
++    do
++       read(iulc, '(a80)', iostat=ios) hk
++       
++       ! Check for end of file or errors
++       if (ios == 0) then
++          write(ie,'(a80)') hk     ! Write the line normally
++       elseif (ios < 0) then
++          exit                     ! Break loop at EOF
++       else
++          goto 2000                ! Exception for severe I/O error
++       endif
++    enddo
++    
++    ! >>>> Read in rest of input file
++    ios = 0
++    do
++       read(iui, '(a80)', iostat = ios) hk
++       
++       ! Check for end of file or errors
++       if (ios == 0) then
++          write(ie,'(a80)') hk     ! Write the line to scratch file
++       elseif (ios < 0) then
++          exit                     ! Break loop at EOF
++       else
++          goto 3000                ! Exception for severe I/O error
++       endif
++    enddo
++    
++    ! >>>>> Echo back to new scratch input file
++    close(iui)
++    rewind ie
++    open(iui,status='scratch')
++    ios = 0
++    do      
++       read(ie, '(a80)', iostat = ios) hk
++       
++       ! Check for end of file or errors
++       if (ios == 0) then
++          write(iui,'(a80)') hk    ! Write the line in the scratch input file
++       elseif (ios < 0) then
++          exit                     ! Break loop at EOF
++       else
++          goto 4000                ! Exception for severe I/O error
++       endif
++       
++    enddo
++    
++    ! >>>>> Finish up
++    rewind iui
++    ! pass1 expects iui to be advanced beyond the title card, 
++    ! so read past the first line now
++    read(iui, '(a)')
++
++    close(ie)
++    return
++    
++    ! >>>>> Exceptions
++    ! End of File at header of input file
++1000 call expire(0,'lcadrd','unexpected eof in file '//inp)
++    return
++    ! Severe I/O error during reading of CAD log
++2000 call expire(0,'lcadrd','error during read of file '//lcad)
++    return
++    ! Severe I/O error during reading of CAD log
++3000 call expire(0,'lcadrd','error during read of file '//inp)
++    return
++    ! Severe I/O error during echo of scratch file to new input file
++4000 call expire(0,'lcadrd','error stitching input and CAD log')
++    return
++    
++  end subroutine lcadrd
++
++  subroutine dagmc_msgput
++
++    use messages, only : msg_put
++    use mcnp_iofiles, only: gcad, ftol
++    use fixcom, only : ntal
++    use mcnp_debug
++
++    call msg_put (isdgmc)
++    call msg_put (dagmc_geom_file_mode)
++    call msg_put (gcad)
++    call msg_put (ftol)
++    call msg_put (dagmc_srcmode)
++    call msg_put (dagmc_usecad)
++    call msg_put (dagmc_distlimit)
++    call msg_put (dagmc_overlap_thickness)
++    call msg_put (dagmc_facet_tol)
++    call msg_put (dagmc_version)
++
++  end subroutine dagmc_msgput
++
++  subroutine dagmc_msgget
++   
++    use messages, only : msg_get
++    use mcnp_iofiles, only: gcad, ftol
++    use fixcom, only : ntal
++    use mcnp_debug
++
++    implicit none
++
++    real(dknd) :: master_dagmc_version
++
++    call msg_get (isdgmc)
++    call msg_get (dagmc_geom_file_mode)
++    call msg_get (gcad)
++    call msg_get (ftol)
++    call msg_get (dagmc_srcmode)
++    call msg_get (dagmc_usecad)
++    call msg_get (dagmc_distlimit)
++    call msg_get (dagmc_overlap_thickness)
++    call msg_get (dagmc_facet_tol)
++    call msg_get (master_dagmc_version)
++
++    if ( isdgmc == 1 ) then
++       call dagmcinit(gcad//char(0),len_trim(gcad),      &
++          &           ftol//char(0),len_trim(ftol),      &
++          &           dagmc_geom_file_mode, dagmc_version, dagmc_subversion, mpb )
++       if (dagmc_version /= master_dagmc_version) then
++          ! errprt and fail!
++       end if
++       call dagmc_set_settings(dagmc_distlimit, dagmc_usecad, dagmc_overlap_thickness, dagmc_srcmode )
++    end if
++
++  end subroutine dagmc_msgget
++  
++  subroutine init_dagmc
++
++     use mcnp_iofiles
++
++     ! Check to see if the CAD file exists, if not, abort
++     inquire( file = gcad, exist = file_exists)
++     if (.not.file_exists) then
++        call expire(0,'main','CAD geometry file '//gcad// &
++             &            ' does not exist.')
++     endif
++     
++     ! initialize DAGMC, read geometry and initialize OBBTree
++     call dagmcinit(gcad//char(0),len_trim(gcad),      &
++          &         ftol//char(0),len_trim(ftol),      &
++          &         dagmc_geom_file_mode,dagmc_version, dagmc_subversion, mpb )
++
++
++     call dagmc_init_settings(dagmc_distlimit, dagmc_usecad, &
++                              dagmc_overlap_thickness, dagmc_facet_tol, dagmc_srcmode)
++
++     ! print version number message to terminal
++     call dagmc_version_heading(jtty)
++
++     ! write mesh file if requested
++     if ( len_trim(fcad) .gt. 0) then
++        call dagmcwritefacets(fcad//char(0),len_trim(fcad))     
++     endif
++
++
++     ! parse metadata and write input cards
++     call dagmcwritemcnp(lcad//char(0), len_trim(lcad))
++     
++     ! Check to ensure that the log file is written
++     inquire( file = lcad, exist = file_exists)
++     if (.not.file_exists) then
++        call expire(0,'main','CAD list file '//lcad// &
++             &             ' not written by DAGMC.')
++     endif
++     
++     ! Open the cad log file on the MCNP side
++     open( unit=iulc, file=lcad, status='old' )
++
++  end subroutine init_dagmc
++
++  ! write DagMC version number message to given file
++  subroutine dagmc_version_heading(o)
++    
++    integer :: o 
++
++     write(o,150) dagmc_version, dagmc_subversion
++150  format(1x,'This problem is using DAGMC version ',f8.3,' w/ DagMC r', i4)
++
++  end subroutine dagmc_version_heading
++
++end module dagmc_mod
+diff --git a/src/dbmin.F90 b/src/dbmin.F90
+index 8863acb..af12733 100755
+--- a/src/dbmin.F90
++++ b/src/dbmin.F90
+@@ -11,0 +12 @@ function dbmin()
++  use dagmc_mod
+@@ -14,0 +16,11 @@ function dbmin()
++  ! DAGMC: Explicitly declare variable for return value for inter-language call
++  real(dknd) :: dbmin_retval = zero
++
++  ! DAGMC: In CAD mode, call MOAB version instead
++  if ( isdgmc == 1 ) then
++     call dagmcdbmin(icl,xxx,yyy,zzz,huge_float,dbmin_retval)
++     dbmin = dbmin_retval
++     return
++  endif
++
++
+diff --git a/src/echkcl.F90 b/src/echkcl.F90
+index 9629f4c..e8b7482 100755
+--- a/src/echkcl.F90
++++ b/src/echkcl.F90
+@@ -11,0 +12 @@ subroutine echkcl(j)
++  use dagmc_mod
+@@ -18 +19,10 @@ subroutine echkcl(j)
+-    call  chkcel(icl,2,j)
++    if( isdgmc == 1 ) then
++       ! dagmc note: I'm not aware that lev/levp ever differ during dagmc execution,
++       !           : and I know that repeated structures are not involved,
++       !           : so I have not modified the other call to chkcel in this function.
++       !           : If I'm wrong, this same check should be added below.
++       call dagmcchkcel_by_angle( uuu, vvv, www, xxx, yyy, zzz, jsu, icl, j )
++       call dagmc_surf_reflection( uuu, vvv, www, 1 )
++    else
++       call  chkcel(icl,2,j)
++    endif
+diff --git a/src/electr.F90 b/src/electr.F90
+index 3810d81..fdd6c2a 100755
+--- a/src/electr.F90
++++ b/src/electr.F90
+@@ -12,0 +13 @@ subroutine electron_history_4c3
++  use dagmc_mod
+@@ -84,0 +86,7 @@ subroutine electron_history_4c3
++        
++        ! DAGMC: In DAGMC mode, use the known physics distance to limit geometry search
++        if ( isdgmc == 1 ) then
++           d = min(dtc,pmf)
++           call dagmc_setdis(d)
++        endif
++        
+diff --git a/src/fmesh_mod.F90 b/src/fmesh_mod.F90
+index efdc0e8..ef4e7d3 100755
+--- a/src/fmesh_mod.F90
++++ b/src/fmesh_mod.F90
+@@ -12,0 +13,2 @@ module fmesh_mod
++  use dagmc_mod
++
+@@ -19,0 +22,2 @@ module fmesh_mod
++  logical :: enable_dag_collision_tallies = .false. != DAGMC: Flag indiciating presence of KDE tally
++
+@@ -125,0 +130,31 @@ module fmesh_mod
++
++  ! DAGMC: These helper functions must be called with non-dereferenced Fortran pointers.
++  ! This interface specification ensures that the calls to these functions
++  ! (which are implemented in C) are made with the correct types
++  interface
++     subroutine dagmc_fmesh_get_tally_data( idx, fref )
++       implicit none
++       integer :: idx
++       ! The dknd parameter is unavailable in this scope for some reason,
++       ! so I have copied the definition of dknd from mcnp_params
++       real(selected_real_kind(15,307)) , dimension(:), pointer :: fref 
++       !real(dknd), dimension(:), pointer :: fref
++     end subroutine dagmc_fmesh_get_tally_data
++
++     subroutine dagmc_fmesh_get_error_data( idx, fref )
++       implicit none
++       integer :: idx
++       real(selected_real_kind(15,307)) , dimension(:), pointer :: fref
++       !real(dknd), dimension(:), pointer :: fref
++     end subroutine dagmc_fmesh_get_error_data
++
++     subroutine dagmc_fmesh_get_scratch_data( idx, fref )
++       implicit none
++       integer :: idx
++       real(selected_real_kind(15,307)), dimension(:), pointer:: fref 
++       !real(dknd), dimension(:), pointer :: fref
++     end subroutine dagmc_fmesh_get_scratch_data
++
++  end interface
++
++
+@@ -129,0 +165,42 @@ CONTAINS
++  ! DAGMC: Helper function - create a valid Fortran pointer from a C array and a length 
++  subroutine dagmc_make_fortran_pointer( fref, carray, size )
++    implicit none
++
++    integer :: size ! The size (in doubles) of the array in C
++    real(dknd), dimension(size), target :: carray ! The C pointer
++    real(dknd), dimension(:), pointer :: fref     ! The returned Fortran pointer
++    
++    fref => carray
++
++  end subroutine dagmc_make_fortran_pointer
++
++  subroutine dagmc_setup_mesh_tally( idx )
++    implicit none
++    integer :: idx
++    integer :: dagmc_iscol
++
++    print *, shape(fm(idx)%fmarry)
++
++    ! Setup dagmc mesh; paramaters will be read in from FC card
++    if( fm(idx)%n_comment_lines > 0 ) then 
++       call dagmc_fmesh_setup_mesh( fm(idx)%ipt, fm(idx)%id, idx, &
++                                    fm(idx)%enbin, fm(idx)%nenb, fm(idx)%tot_energy_bin, &
++                                    fm(idx)%comment, fm(idx)%n_comment_lines, dagmc_iscol )
++    else
++       ! No FC card; avoid passing uninitialized pointer to C
++       ! The following call will halt mcnp with an error because of the missing card.
++       ! We could also signal an error and halt here instead.
++       call dagmc_fmesh_setup_mesh( fm(idx)%ipt, fm(idx)%id, idx, &
++                                    fm(idx)%enbin, fm(idx)%nenb, fm(idx)%tot_energy_bin, &
++                                    0, 0, dagmc_iscol )
++    endif
++    
++    if( dagmc_iscol == 1 ) then 
++       enable_dag_collision_tallies = .true. 
++    endif
++    
++  end subroutine dagmc_setup_mesh_tally
++    
++    
++  !-----------------------------------------------------------------------------------------
++
+@@ -136,0 +214 @@ CONTAINS
++    real(dknd), dimension(:), pointer :: dagmc_runtpe_data
+@@ -137,0 +216,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_runtpw'
++
+@@ -180,0 +262,9 @@ CONTAINS
++
++       ! DAGMC: 
++       if ( fm(i)%icrd==3 ) then          
++          ! Get pointer to mesh's working data and fill runtpe with those contents
++          call dagmc_fmesh_get_tally_data( i, dagmc_runtpe_data )
++          write(iu) dagmc_runtpe_data
++          call dagmc_fmesh_get_error_data( i, dagmc_runtpe_data )
++          write(iu) dagmc_runtpe_data
++       endif
+@@ -191 +281 @@ CONTAINS
+-    use mcnp_global, only:ntasks,iovr
++    use mcnp_global, only:ntasks,iovr,icl
+@@ -201,0 +292,5 @@ CONTAINS
++    real(dknd), dimension(:), pointer :: dagmc_runtpe_data
++
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_runtpr'
++
+@@ -252,0 +348,2 @@ CONTAINS
++          ! From reading tpefil.F90, I think this branch only executes if runtpe file 
++          ! has suffered a read failure-- which should be uncommon. --sjackson
+@@ -347,0 +445,16 @@ CONTAINS
++
++
++       if ( fm(i)%icrd==3 ) then 
++          ! DAGMC:
++
++          call dagmc_fmesh_initialize( icl )
++          call dagmc_setup_mesh_tally( i )
++
++          ! Get pointer to mesh's working memory and fill it with runtpe data
++          call dagmc_fmesh_get_tally_data( i, dagmc_runtpe_data )
++          read(iu) dagmc_runtpe_data
++          call dagmc_fmesh_get_error_data( i, dagmc_runtpe_data )
++          read(iu) dagmc_runtpe_data
++ 
++       endif
++
+@@ -384,0 +498,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: ifmesh_print'
++
+@@ -510,0 +627,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_allocate'
++
+@@ -583,0 +703,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: wtmult_fmesh'
++
+@@ -761 +883,5 @@ CONTAINS
+-    integer :: i
++    integer :: i,j
++    
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_msgput'
++
+@@ -807,0 +934,9 @@ CONTAINS
++       ! DAGMC: send comment contents if this is a dagmc mesh
++       if( fm(i)%icrd == 3 ) then
++          call msg_put( fm(i)%n_comment_lines )
++
++          do j=1,fm(i)%n_comment_lines
++             call msg_put( fm(i)%comment(j) )
++          enddo
++       endif
++
+@@ -821 +956 @@ CONTAINS
+-    use mcnp_global, only: ntasks
++    use mcnp_global, only: ntasks, icl
+@@ -823,0 +959,4 @@ CONTAINS
++    integer :: j
++
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_msgget'
+@@ -900,0 +1040,13 @@ CONTAINS
++       ! DAGMC: receive comment contents if this is a dagmc mesh
++       if( fm(i)%icrd == 3 ) then
++          call msg_get( fm(i)%n_comment_lines )
++
++          allocate( fm(i)%comment( fm(i)%n_comment_lines ), stat=is )
++          if(is/=0) call erprnt(1,1,0,0,0,0,0,1,' "mesh tally memory allocation failure"')
++
++          do j=1,fm(i)%n_comment_lines 
++             call msg_get( fm(i)%comment(j) )
++          enddo
++
++       endif
++
+@@ -940,0 +1093,9 @@ CONTAINS
++   ! DAGMC: 
++    call dagmc_fmesh_initialize( icl )
++
++    do i = 1,nmesh
++       if( fm(i)%icrd == 3 ) then
++          call dagmc_setup_mesh_tally( i )
++       endif
++    enddo
++
+@@ -952,0 +1114,4 @@ CONTAINS
++    real(dknd), dimension(:), pointer :: dagmc_mpi_data
++
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_msgcon'
+@@ -963,0 +1129 @@ CONTAINS
++       if( fm(i)%icrd /= 3 ) then 
+@@ -972,0 +1139,11 @@ CONTAINS
++       
++       else
++          ! DAGMC
++          call dagmc_fmesh_get_scratch_data( i, dagmc_mpi_data )
++          call msg_get( dagmc_mpi_data, 1, size(dagmc_mpi_data) )
++          call dagmc_fmesh_add_scratch_to_tally( i )
++          call msg_get( dagmc_mpi_data, 1, size(dagmc_mpi_data) )
++          call dagmc_fmesh_add_scratch_to_error( i )
++
++       endif
++
+@@ -987,0 +1165,4 @@ CONTAINS
++    real(dknd), dimension(:), pointer :: dagmc_mpi_data
++
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_msgtsk'
+@@ -998,0 +1180,2 @@ CONTAINS
++       if( fm(i)%icrd /= 3 ) then
++
+@@ -1005,0 +1189,11 @@ CONTAINS
++       
++       else
++          ! DAGMC
++          call dagmc_fmesh_get_tally_data( i, dagmc_mpi_data )
++          call msg_put( dagmc_mpi_data, 1, size(dagmc_mpi_data) )
++          call dagmc_fmesh_get_error_data( i, dagmc_mpi_data )
++          call msg_put( dagmc_mpi_data, 1, size(dagmc_mpi_data) )
++          call dagmc_fmesh_clear_data( i )
++
++       endif
++
+@@ -1021,0 +1216,3 @@ CONTAINS
++    ! DAGMC: 
++    call dagmc_fmesh_end_history()
++
+@@ -1069,0 +1267,49 @@ CONTAINS
++  
++  subroutine dagmc_mesh_choose_ebin( i, erg, ien )
++    integer :: i, ien
++    real(dknd) :: erg
++    
++    ! See if energy is within the desired bins
++    if( fm(i)%nenb>1 ) then
++       if( erg<fm(i)%enbin(1) .or. erg>fm(i)%enbin(fm(i)%nenb)) then
++          ien = -1
++       else
++          ien = ibin_search(erg,fm(i)%enbin,fm(i)%nenb)
++       endif
++    else
++       ien = 1
++    endif
++
++  end subroutine dagmc_mesh_choose_ebin
++
++  !-----------------------------------------------------------------------------------------
++
++  subroutine dagmc_mesh_score( i, erg, wgt, d, score )
++
++    use mcnp_params, only:dknd
++    use mcnp_global, only:rho,icl
++
++    integer   , intent(in) :: i
++    real(dknd), intent(in) :: erg,wgt,d 
++    real(dknd), intent(out) :: score
++    real(dknd) :: t
++
++    t = 1._dknd
++    if( fm(i)%ifm_card/=0 ) then
++       call wtmult_fmesh(t,i)
++    endif
++    t = t*fm(i)%fmult
++    if( fm(i)%fmult < 0 ) t = -t*rho(icl)
++    
++    if ( fm(i)%ifm_card == -1 ) then ! Special tally multiplier -- # of tracks
++       score = t
++    else
++       score = d*wgt*t
++       if ( fm(i)%icx == 1 ) score = score*erg
++       if ( fm(i)%intrpol /= 0 ) score = score*dosef_fmesh(erg,i)
++    endif
++
++    return
++  end subroutine dagmc_mesh_score
++          
++  !-----------------------------------------------------------------------------------------
+@@ -1096,0 +1343 @@ CONTAINS
++  
+@@ -1105,0 +1353,16 @@ CONTAINS
++       ! DAGMC: 
++       if ( fm(i)%icrd==3 ) then
++
++          ! See if energy is within the desired bins
++          if( fm(i)%nenb>1 ) then
++             if( erg<fm(i)%enbin(1) .or. erg>fm(i)%enbin(fm(i)%nenb)) cycle Loop1
++             
++             ien = ibin_search(erg,fm(i)%enbin,fm(i)%nenb)
++          else
++             ien = 1
++          endif
++
++          call dagmc_fmesh_score(i,x,y,z,u,v,w,erg,wgt,d,ien)
++          cycle
++       endif
++
+@@ -1296,0 +1560 @@ CONTAINS
++            ! DAGMC: begin borrowed source for subroutine dagmc_mesh_score
+@@ -1311,0 +1576 @@ CONTAINS
++            ! DAGMC: end borrowed source 
+@@ -1379,0 +1645,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: mesh_score_cyl'
++
+@@ -1687,0 +1956,5 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmsh_setup'
++    ! For a dagmc mesh (icrd==3), origin and bins information will be missing
++    ! In these cases, allocate a single bin in all directions to keep this code happy
++
+@@ -1690,4 +1963,8 @@ CONTAINS
+-    fm(nmesh)%nxrb = 1
+-    do i = 1,ifmsh(6)
+-       fm(nmesh)%nxrb = fm(nmesh)%nxrb+ixrtmp(i)
+-    enddo
++    if( fm(nmesh)%icrd /= 3 ) then
++       fm(nmesh)%nxrb = 1
++       do i = 1,ifmsh(6)
++          fm(nmesh)%nxrb = fm(nmesh)%nxrb+ixrtmp(i)
++       enddo
++    else
++       fm(nmesh)%nxrb = 2
++    endif
+@@ -1697,4 +1974,8 @@ CONTAINS
+-    fm(nmesh)%nyzb = 1
+-    do i = 1,ifmsh(8)
+-       fm(nmesh)%nyzb = fm(nmesh)%nyzb+iyztmp(i)
+-    enddo
++    if( fm(nmesh)%icrd /= 3 ) then
++       fm(nmesh)%nyzb = 1
++       do i = 1,ifmsh(8)
++          fm(nmesh)%nyzb = fm(nmesh)%nyzb+iyztmp(i)
++       enddo
++    else
++       fm(nmesh)%nyzb = 2 
++    endif
+@@ -1704,4 +1985,8 @@ CONTAINS
+-    fm(nmesh)%nztb = 1
+-    do i = 1,ifmsh(10)
+-       fm(nmesh)%nztb = fm(nmesh)%nztb+izttmp(i)
+-    enddo
++    if( fm(nmesh)%icrd /= 3 ) then
++       fm(nmesh)%nztb = 1
++       do i = 1,ifmsh(10)
++          fm(nmesh)%nztb = fm(nmesh)%nztb+izttmp(i)
++       enddo
++    else
++       fm(nmesh)%nztb = 2
++    endif
+@@ -1831,0 +2117,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: dosef_fmesh'
++
+@@ -1891,0 +2180,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_print'
++
+@@ -1930,0 +2222,6 @@ CONTAINS
++       ! DAGMC
++       if( fm(j)%icrd == 3 ) then
++          call dagmc_fmesh_print( j, sp_norm, fm(j)%fact ) 
++          cycle
++       endif
++
+@@ -2396,0 +2694,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    !print '(a80)', 'DAGMC MESTHAL: fmesh_initialize'
++
+@@ -2702,0 +3003,9 @@ CONTAINS
++   ! DAGMC: 
++    call dagmc_fmesh_initialize( icl )
++
++    do i = 1,nmesh
++       if( fm(i)%icrd == 3 ) then
++          call dagmc_setup_mesh_tally( i )
++       endif
++    enddo
++    
+@@ -2717,0 +3027,3 @@ CONTAINS
++    ! DAGMC DEBUGGING
++    ! print '(a80)', 'DAGMC MESTHAL: fmesh_vtask'
++   
+@@ -2737,0 +3050,3 @@ CONTAINS
++  ! DAGMC DEBUGGING
++  !  print '(a80)', 'DAGMC MESTHAL: ibin_search'
++
+diff --git a/src/getpar.F90 b/src/getpar.F90
+index b9e81a5..2ce82f1 100755
+--- a/src/getpar.F90
++++ b/src/getpar.F90
+@@ -11,0 +12 @@ subroutine getpar(k1,k2)
++  use dagmc_mod
+@@ -17,0 +19,6 @@ subroutine getpar(k1,k2)
++
++  ! DAGMC: Restore the ray history associated with this particle
++  if (isdgmc == 1) then 
++     call dagmc_getpar(n)
++  endif
++
+diff --git a/src/hstory.F90 b/src/hstory.F90
+index 9b98447..57b4aff 100755
+--- a/src/hstory.F90
++++ b/src/hstory.F90
+@@ -19 +19 @@ subroutine hstory
+-  use fmesh_mod, only: mesh_end_history, mesh_score, nmesh
++  use fmesh_mod, only: mesh_end_history, mesh_score, nmesh, enable_dag_collision_tallies
+@@ -21,0 +22 @@ subroutine hstory
++  use dagmc_mod
+@@ -111 +112,2 @@ subroutine hstory
+-  if( lca(icl)<0 ) then
++  ! DAGMC: only do this when running in non-CAD mode
++  if( lca(icl)<0 .and. (isdgmc == 0) ) then
+@@ -122 +124,2 @@ subroutine hstory
+-  call track(icl)
++  ! DAGMC: only call track here if in normal mode (NOT in CAD mode)
++  if (isdgmc == 0) call track(icl)
+@@ -179 +182,9 @@ subroutine hstory
+-        ! Force a collision.
++        ! DAGMC: In CAD mode, call DAGMC before forcing collision
++        if ( isdgmc == 1 ) then
++           if ( lca(icl) < 0 ) call chkcel(icl,3,j)
++           call dagmc_setdis(huge_float)
++           call track(icl)
++           if ( kdb /= 0 ) goto 390
++        endif
++         
++        !  Force a collision.
+@@ -191,0 +203,10 @@ subroutine hstory
++
++  ! DAGMC: In CAD mode, get particle information
++  if ( isdgmc == 1 ) then
++     if (lca(icl) < 0) call chkcel(icl,3,j)
++     d = min( pmf, dxl, dtc, deb, dw )
++     call dagmc_setdis(d)
++     call track(icl)
++     if ( kdb /= 0 ) goto 390
++  endif
++
+@@ -449,0 +471,6 @@ subroutine hstory
++
++  ! DAGMC: Alternative Tally - Kernel Density Estimator
++  if ( enable_dag_collision_tallies ) then
++     call dagmc_kde_tally( xxx, yyy, zzz, wgt, ple, erg )
++  endif
++
+@@ -494,0 +522,2 @@ subroutine hstory
++
++  if (isdgmc == 1) call dagmc_particle_terminate()
+diff --git a/src/igeom.F90 b/src/igeom.F90
+index 7505e6b..db9defc 100755
+--- a/src/igeom.F90
++++ b/src/igeom.F90
+@@ -10,0 +11 @@ subroutine igeom
++  use dagmc_mod
+@@ -103 +104,2 @@ subroutine igeom
+-  call chekcs
++  ! DAGMC: only call this when running in normal (non-CAD) mode
++  if (isdgmc == 0) call chekcs
+diff --git a/src/imcn.F90 b/src/imcn.F90
+index e392c23..16f88fc 100755
+--- a/src/imcn.F90
++++ b/src/imcn.F90
+@@ -16 +16 @@ subroutine imcn
+-
++  use dagmc_mod
+@@ -437,0 +438,6 @@ contains
++    ! Initialize DAGMC
++    if (isdgmc == 1) then   ! set DAGMC parameters from idum & rdum
++       call dagmc_set_settings(dagmc_distlimit, dagmc_usecad, dagmc_overlap_thickness, dagmc_srcmode)
++    endif
++       
++
+diff --git a/src/itally.F90 b/src/itally.F90
+index 9619ae3..4474c1a 100755
+--- a/src/itally.F90
++++ b/src/itally.F90
+@@ -20,0 +21 @@ subroutine itally
++  use dagmc_mod
+@@ -92,0 +94,7 @@ subroutine itally
++
++        ! DAGMC: If in CAD mode, skip up until line prior to marker 40
++        if ( isdgmc == 1 ) then
++          itds(li+i) = k
++          goto 40
++        endif
++
+diff --git a/src/main.F90 b/src/main.F90
+index 760725c..4382a5b 100755
+--- a/src/main.F90
++++ b/src/main.F90
+@@ -56,10 +56 @@ program main
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
++  use dagmc_mod
+@@ -70,0 +62,2 @@ program main
++  
++
+@@ -155,0 +149,26 @@ program main
++
++  ! DAGMC: initialize a DAGMC run if specified
++  if (gcad /= ' ') then
++     isdgmc = 1
++
++     if (mcnp_opt_multp) dagmc_geom_file_mode = DGFM_READ;
++
++  else
++     
++     ! Error checking for user specifying worthless files
++     if(lcad /= ' ') then
++        call expire(0,'main','CAD list file specified &
++             &   without a geometry file.')
++     endif
++     if(fcad /= ' ') then
++        call expire(0,'main','CAD facet file specified &
++             &   without a geometry file.')
++     endif
++     if(ftol /= ' ') then
++        call expire(0,'main','Facet tolerance specified &
++             &   without a geometry file.')
++     endif
++     
++  endif
++  
++
+@@ -190 +209,2 @@ program main
+-    if( isub(i)==' ' .and. msub(i)/='com' )  isub(i)=msub(i)
++    if( isub(i)==' ' .and. msub(i)/='com' .and. msub(i)/='fcad')  isub(i)=msub(i)
++     
+@@ -193,0 +214,4 @@ program main
++  if (isdgmc == 1) then
++     call init_dagmc
++  endif 
++
+@@ -204,0 +229 @@ program main
++  if (isdgmc == 1) call dagmc_version_heading(iuo)
+diff --git a/src/mcnp_input.F90 b/src/mcnp_input.F90
+index e16cd80..69169ca 100755
+--- a/src/mcnp_input.F90
++++ b/src/mcnp_input.F90
+@@ -11 +11 @@ module mcnp_input
+-integer,parameter :: nkcd   = 105     != Number of different types of input cards.
++  integer,parameter :: nkcd   = 107     != Number of different types of input cards.
+@@ -125,0 +126,6 @@ integer,parameter :: nkcd   = 105     != Number of different types of input card
++  ! dagmc card keywords, input values
++  character(len=18), parameter :: hdagmc(4) = (/'check_src_cell    ', &
++    &                                           'usecad            ', &
++    &                                           'distlimit         ', &
++    &                                           'overlap_thickness ' /)
++
+@@ -247,0 +254 @@ integer,parameter :: nkcd   = 105     != Number of different types of input card
++  data cnm(107),(krq(i,107),i=1,7)/ 'dagmc',0,0, 0,0, 0,  12,0 / 
+@@ -248,0 +256 @@ end module mcnp_input
++  
+diff --git a/src/mcnp_iofiles.F90 b/src/mcnp_iofiles.F90
+index 79c56e4..0c147b0 100755
+--- a/src/mcnp_iofiles.F90
++++ b/src/mcnp_iofiles.F90
+@@ -37 +37,5 @@ module mcnp_iofiles
+-    &  dumn2   
++    &  dumn2   , &
++    &  gcad    , &  != DAGMC geometry input file (CAD or facets)
++    &  lcad    , &  != DAGMC input log file
++    &  fcad    , &  != DAGMC facets output file
++    &  ftol         != DAGMC faceting tolerance
+@@ -77,0 +82,4 @@ contains
++    gcad    = isub(19)
++    lcad    = isub(20)
++    fcad    = isub(21)
++    ftol    = isub(22)
+@@ -105,0 +114,4 @@ contains
++      gcad(i:i)   = ' '
++      lcad(i:i)   = ' '
++      fcad(i:i)   = ' '
++      ftol(i:i)   = ' '
+@@ -129,0 +142,4 @@ contains
++    msub(19)(1:8) = 'gcad    '
++    msub(20)(1:8) = 'lcad    '
++    msub(21)(1:8) = 'fcad    '
++    msub(22)(1:8) = 'ftol    '
+diff --git a/src/mcnp_params.F90 b/src/mcnp_params.F90
+index 66000b6..f2097d2 100755
+--- a/src/mcnp_params.F90
++++ b/src/mcnp_params.F90
+@@ -132,0 +133 @@ module mcnp_params
++  integer,parameter :: iulc = 57        != I/O unit for DAGMC log file
+diff --git a/src/msgcon.F90 b/src/msgcon.F90
+index 7e509b3..3f9834d 100755
+--- a/src/msgcon.F90
++++ b/src/msgcon.F90
+@@ -20 +20 @@ subroutine msgcon( msgcon_action )
+-
++  use dagmc_mod 
+@@ -171,0 +172,5 @@ subroutine msgcon( msgcon_action )
++  write(jtty,*) "master sending DAGMC information...."
++  call dm_sndi
++  call dagmc_msgput
++  call dm_send(-1,20,i)
++
+diff --git a/src/msgtsk.F90 b/src/msgtsk.F90
+index 017cd7d..4994707 100755
+--- a/src/msgtsk.F90
++++ b/src/msgtsk.F90
+@@ -20 +20 @@ subroutine msgtsk
+-
++  use dagmc_mod
+@@ -96,0 +97,3 @@ subroutine msgtsk
++  call dm_recv(-1,20,i)
++  call dagmc_msgget  
++
+diff --git a/src/namchg.F90 b/src/namchg.F90
+index f4b4961..4cbce59 100755
+--- a/src/namchg.F90
++++ b/src/namchg.F90
+@@ -8,0 +9 @@ function namchg(mm,ji)
++  use dagmc_mod
+@@ -12 +13,4 @@ function namchg(mm,ji)
+-  if( mm==2 ) then
++  ! DAGMC: Need to change some of these conditionals, no bounding
++  !        surfaces exist in CAD mode, handle as regular surface
++
++  if( ( mm==2 ) .or. ( ( mm == 3) .and. ( isdgmc == 1 ) ) ) then
+@@ -17 +21 @@ function namchg(mm,ji)
+-  elseif( mm==3 ) then
++  elseif( ( mm==3 ) .and. ( isdgmc == 0 ) ) then
+diff --git a/src/newcel.F90 b/src/newcel.F90
+index e8b561d..a66cb7f 100755
+--- a/src/newcel.F90
++++ b/src/newcel.F90
+@@ -10,0 +11,2 @@ subroutine newcel(cs)
++  use dagmc_mod
++
+@@ -12,0 +15,7 @@ subroutine newcel(cs)
++  ! DAGMC: In CAD mode, call MOAB version of this
++  if ( isdgmc == 1 ) then
++    if ( cs /= 0 ) cs = angl()
++    call dagmcnewcel(jsu,icl,iap)
++    if ( mxa == -1 ) kdb = 1
++  endif
++
+@@ -36 +45,4 @@ subroutine newcel(cs)
+-    call expirx(1,'newcel','the surface crossed is not a surface of this cell.')
++    ! DAGMC: Only check this if running normally, (NOT in CAD mode)
++    if (isdgmc == 0) then
++      call expirx(1,'newcel','the surface crossed is not a surface of this cell.')
++    endif
+diff --git a/src/nextit.F90 b/src/nextit.F90
+index 8823673..8ae33f9 100755
+--- a/src/nextit.F90
++++ b/src/nextit.F90
+@@ -14 +14 @@ subroutine nextit
+-
++  use dagmc_mod
+@@ -1469,0 +1470 @@ subroutine nextit
++        if( hitm(1:3)=='dag' )                        fm(nmesh)%icrd=3 ! DAGMC option
+@@ -1638,0 +1640,23 @@ subroutine nextit
++
++  case( 107 )
++    !  >>>>>  DAGMC parameters                                          dagmc
++    !  Modeled after RAND (99)
++    ! m1c=index of current dagmc keyword.
++    if( m1c == 0 ) then
++      if( index(',=',hitm(1:1))==0 ) then
++        do m1c = 1,4
++          if( hitm(1:18)==hdagmc(m1c) )  return
++        enddo
++        m1c = 0
++      endif
++    else
++      if( index(',=',hitm(1:1))==0 ) then
++        if( m1c==1 .and. ( hitm(1:2) == 'of' .or. hitm(1:2) == 'no') )  dagmc_srcmode = 1 
++        if( m1c==2 .and. ( hitm(1:2) == 'on' .or. hitm(1:2) == 'ye') )  dagmc_usecad = 1
++        if( m1c==3 .and. ( hitm(1:2) == 'on' .or. hitm(1:2) == 'ye') )  dagmc_distlimit = 1
++        if( m1c==4 )  dagmc_overlap_thickness = ritm
++        m1c = 0
++      endif
++    endif
++
++
+diff --git a/src/oldcrd.F90 b/src/oldcrd.F90
+index e3bc2d2..478ebf6 100755
+--- a/src/oldcrd.F90
++++ b/src/oldcrd.F90
+@@ -12 +12 @@ subroutine oldcrd
+-
++  use dagmc_mod
+@@ -36 +36,2 @@ subroutine oldcrd
+-      if( lca(mxa)==nlja+1 ) &
++      ! DAGMC: In CAD mode, cells should have no surfaces
++      if( ( lca(mxa)==nlja+1 ) .and. ( isdgmc == 0 ) ) &
+@@ -47,0 +49,4 @@ subroutine oldcrd
++
++    ! DAGMC: Break out of subroutine here in CAD mode
++     if ( isdgmc == 1 ) return
++
+@@ -750,0 +756,3 @@ subroutine oldcrd
++     ! DAGMC: skip handling imesh/jmesh/kmesh/orig when geom=DAG; check emesh before jump
++    if( ifmsh(13)==0 ) ientmp(1:ifmsh(12)) = 1
++     if( fm(nmesh)%icrd==3 ) goto 4900
+@@ -754 +762 @@ subroutine oldcrd
+-    if( ifmsh(13)==0 ) ientmp(1:ifmsh(12)) = 1
++
+@@ -860,0 +869 @@ subroutine oldcrd
++4900 continue ! DAGMC jump target
+diff --git a/src/pass1.F90 b/src/pass1.F90
+index 889d9bd..7be03a7 100755
+--- a/src/pass1.F90
++++ b/src/pass1.F90
+@@ -13,0 +14 @@ subroutine pass1
++  use dagmc_mod
+@@ -16,0 +18,3 @@ subroutine pass1
++  ! DAGMC: For CAD mode, read cell/surface cards from log file
++  if ( isdgmc == 1) call lcadrd
++
+diff --git a/src/read_line.F90 b/src/read_line.F90
+index 5756e93..0b40eae 100755
+--- a/src/read_line.F90
++++ b/src/read_line.F90
+@@ -26 +26 @@ subroutine read_line( iunit, line, ierr )
+-  line = ' '
++  line = " "
+diff --git a/src/reflec.F90 b/src/reflec.F90
+index 59fdf73..76a6057 100755
+--- a/src/reflec.F90
++++ b/src/reflec.F90
+@@ -10,0 +11 @@ subroutine reflec
++  use dagmc_mod
+@@ -73,0 +75 @@ subroutine reflec
++  if( isdgmc == 1 ) call dagmc_surf_reflection( uuu, vvv, www, 0 )
+diff --git a/src/savpar.F90 b/src/savpar.F90
+index 031ee50..ea3527a 100755
+--- a/src/savpar.F90
++++ b/src/savpar.F90
+@@ -11,0 +12 @@ subroutine savpar(k1,k2)
++  use dagmc_mod
+@@ -18,0 +20,6 @@ subroutine savpar(k1,k2)
++
++  ! DAGMC: save this particle's ray history
++  if (isdgmc == 1) then 
++     call dagmc_savpar(n)
++  endif
++
+diff --git a/src/sourcb.F90 b/src/sourcb.F90
+index 48555ed..9d16762 100755
+--- a/src/sourcb.F90
++++ b/src/sourcb.F90
+@@ -9 +9,2 @@ subroutine sourcb
+- 
++  use dagmc_mod
++
+@@ -517 +518,6 @@ subroutine sourcb
+-      call chkcel(ji,0,j)
++      ! DAGMC: if dagmc_srcmode is on, skip chkcel and assume particle is in user-specified cell
++      if( isdgmc==1 .and. dagmc_srcmode==1 ) then 
++         j = 0
++      else
++         call chkcel(ji,0,j)
++      endif
+@@ -566 +572,2 @@ subroutine sourcb
+-  if( icl==0 ) then
++
++   if( icl==0 ) then
+diff --git a/src/startp.F90 b/src/startp.F90
+index 08bd788..997fa1c 100755
+--- a/src/startp.F90
++++ b/src/startp.F90
+@@ -15,0 +16 @@ subroutine startp
++  use dagmc_mod
+@@ -58,0 +60,4 @@ subroutine startp
++ ! DAGMC: nbnk = 0
++  if ( isdgmc == 1 ) then
++     call dagmc_bank_clear
++  endif
+diff --git a/src/tally.F90 b/src/tally.F90
+index f7ba1d1..e70c823 100755
+--- a/src/tally.F90
++++ b/src/tally.F90
+@@ -10,0 +11 @@ subroutine tally( lo, dr )
++  use dagmc_mod
+@@ -292,0 +294,4 @@ subroutine tally( lo, dr )
++
++    ! DAGMC: If in CAD mode, make sure distance to physics collision is initialized
++    if ( isdgmc == 1 ) call dagmc_setdis(huge_float)
++
+diff --git a/src/track.F90 b/src/track.F90
+index bd37b45..0493545 100755
+--- a/src/track.F90
++++ b/src/track.F90
+@@ -14,0 +15 @@ subroutine track(ih)
++  use dagmc_mod
+@@ -25,0 +27,9 @@ subroutine track(ih)
++
++  ! DAGMC: If in CAD mode, call DAGMC version of track instead
++  if ( isdgmc == 1 ) then    
++    call dagmctrack(ih,uuu,vvv,www,xxx,yyy,zzz,huge_float,dls, &
++     &               jap,jsu,nps)
++    if ( dls == huge_float ) kdb = 2
++    return
++  endif
++
+diff --git a/src/transm.F90 b/src/transm.F90
+index 521f653..22b8ff0 100755
+--- a/src/transm.F90
++++ b/src/transm.F90
+@@ -10,0 +11,2 @@ subroutine transm(dd,st,iz)
++  use dagmc_mod
++
+@@ -32,0 +35,2 @@ subroutine transm(dd,st,iz)
++    ! DAGMC: If in CAD mode, call dagmc_setdis first
++    if ( isdgmc == 1 ) call dagmc_setdis( dd - sd )
+diff --git a/src/volume.F90 b/src/volume.F90
+index 73fb9a3..f0981cf 100755
+--- a/src/volume.F90
++++ b/src/volume.F90
+@@ -11,0 +12 @@ subroutine volume
++  use dagmc_mod
+@@ -15,0 +17,6 @@ subroutine volume
++  ! DAGMC: In CAD mode, circumvent most of this function and call DAGMC version
++  if (isdgmc == 1) then
++    call dagmcvolume(mxa,vols,mxj,aras)
++    goto 260
++  endif
++
