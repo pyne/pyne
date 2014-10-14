@@ -11,6 +11,7 @@ The following files and libraries are part of the PyNE C++ interface:
     pyne
     nucname
     rxname
+    particle
     data
     material
     enrichment
