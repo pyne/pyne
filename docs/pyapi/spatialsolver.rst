@@ -389,10 +389,10 @@ Here is a breif description of how each should be formatted.
       The source file is a file contaning source information for each cell ????.  The formatting is dependant on the solver
       you select.
 
-      For the AHOTN solvers, the source file should be formatted as following.  
-      There should be ng * nx * ny * nz * lambda * lambda * lambda ?source? values present.
+      For the AHOTN and DGFEM solvers, the source file should be formatted as following.  
+      There should be ng * nx * ny * nz * lambda * lambda * lambda ?source? entries present.
       We will refer to the index of each ?source? value as (ng, nx, ny, nz, lambda_x, lambda_y, lambda_z).
-      Thus, the source values should be in the following order:
+      The source entries should be in the following order:
           (1,1,1,1,1,1,1)
           (1,1,1,1,1,1,2)
           (1,1,1,1,1,1,.)
@@ -448,7 +448,55 @@ Here is a breif description of how each should be formatted.
 		                   DO jy=0,lambda
 		                      DO jz=0,lambda
 		                         READ(12) s(jx,jy,jz,ix,iy,iz,g)
-  (3.) Boundry Condition file:
+
+
+      For the SCT STEP solver, the source file should be formatted as following.  
+      There should be ng * nx * ny * nz ?source? entries present.
+      We will refer to the index of each ?source? value as (ng, nx, ny, nz).
+      The source entries should be in the following order:
+          (1,1,1,1)
+          (1,1,1,2)
+          (1,1,1,.)
+
+          (1,1,2,1)
+          (1,1,2,2)
+          (1,1,2,.)
+          (1,1,.,.)
+
+          (1,2,1,1)
+          (1,2,1,2)
+          (1,2,1,.)
+          (1,2,2,1)
+          (1,2,2,2)
+          (1,2,2,.)
+          (1,2,.,.)
+          (1,.,.,.)
+
+          (2,1,1,1)
+          (2,1,1,2)
+          (2,1,1,.)
+          (2,1,2,1)
+          (2,1,2,2)
+          (2,1,2,.)
+          (2,1,.,.)
+          (2,2,1,1)
+          (2,2,1,2)
+          (2,2,1,.)
+          (2,2,2,1)
+          (2,2,2,2)
+          (2,2,2,.)
+          (2,2,.,.)
+          (.,.,.,.)
+
+      When being read in, they will be iterated over by the following loop:
+        DO g=1,ng
+           DO ix=1,nx
+              DO iy=1,ny
+                 DO iz=1,nz
+                     READ(12) s(ix,iy,iz,g,1,1,1)
+
+
+  (3.) Boundry Condition file (only needed if one of the boundry conditions specified above is 2):
       The boundry condition file contains information about the incoming scalar flux on each face of each cell.
     
   (4.) Quadrature file (optional):

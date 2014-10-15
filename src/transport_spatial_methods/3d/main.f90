@@ -186,6 +186,11 @@ CALL version
 IF (solver == "DGFEM") THEN
     IF (solvertype == "LD") THEN
         lambda=1
+        WRITE(8,*) "DGFEM LN SOLVER" 
+    ELSE IF (solvertype == "DENSE") THEN
+        WRITE(8,*) "DGFEM DENSE SOLVER" 
+    ELSE IF (solvertype == "LAGRANGE") THEN
+        WRITE(8,*) "DGFEM LAGRANGE SOLVER"
     END IF
 ELSE IF (solver == "AHOTN") THEN
     IF (solvertype == "LN" .or. solvertype == "LL") THEN
@@ -196,7 +201,15 @@ ELSE IF (solver == "AHOTN") THEN
             !STOP
         END IF
     END IF
+    IF (solvertype == "LN") THEN
+        WRITE(8,*) "AHOTN LN SOLVER" 
+    ELSE IF (solvertype == "LL") THEN
+        WRITE(8,*) "AHOTN LL SOLVER" 
+    ELSE IF (solvertype == "NEFD") THEN
+        WRITE(8,*) "AHOTN NEFD SOLVER" 
+    END IF
 ELSE IF (solver == "SCTSTEP") THEN
+    WRITE(8,*) "SCT STEP SOLVER" 
     lambda = 0
 END IF
 

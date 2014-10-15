@@ -21,6 +21,7 @@ def populate_simple(solverin, solvertypein):
     'quadrature_file':'quad_file',
     'xs_file':'xs',
     'source_input_file':'src_4.dat',
+    #'source_input_file':'src_non_binary',
     'bc_input_file':'bc_4.dat',
     'flux_output_file':'phi_4.ahot',
     'convergence_criterion':1.e-12,
