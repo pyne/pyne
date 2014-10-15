@@ -13,7 +13,6 @@ UWUW::UWUW(char* file)
   // turn the filename into a full filepath
   full_filepath = get_full_filepath(filename);
 
-  std::cout << full_filepath << std::endl;
   // load materials
   material_library = load_pyne_materials(full_filepath);
   // load tallies
@@ -64,6 +63,17 @@ std::string UWUW::get_full_filepath(std::string filename)
 std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string filename) 
 {
   std::map<std::string, pyne::Material> library; // material library
+
+  pyne::Material test_mat;
+  try
+    {
+      test_mat.from_hdf5(filename,"/materials");
+    }
+  catch (const std::exception &except) // catch the exception from from_hdf5
+    {
+      std::cout << "No Materials found in the file, " << filename << std::endl;
+      return library;
+    }
   
   bool end = false; // end of materials
   int i = -1;
@@ -104,6 +114,18 @@ std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string file
 std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename) 
 {
   std::map<std::string, pyne::Tally> library; // material library
+
+  pyne::Tally test_tally;
+  try
+    {
+      test_tally.from_hdf5(filename,"/materials");
+    }
+  catch (const std::exception &except) // catch the exception from from_hdf5
+    {
+      std::cout << "No Tallies found in the file, " << filename << std::endl;
+      return library;
+    }
+
   
   bool end = false; // end of materials
   int i = -1;
