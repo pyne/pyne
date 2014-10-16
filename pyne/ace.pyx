@@ -203,7 +203,9 @@ class Library(object):
             length = nxs[0]
             n_records = (length + entries - 1)//entries
 
-            # verify that we are suppossed to read this table in
+            # name is bytes, make it a string
+            name = name.decode()
+            # verify that we are supposed to read this table in
             if (table_names is not None) and (name not in table_names):
                 self.f.seek(start_position + recl_length*(n_records + 1))
                 continue
@@ -520,7 +522,7 @@ class NeutronTable(AceTable):
         self.reactions.update(reactions)
 
         # Loop over all reactions other than elastic scattering
-        for i, reaction in enumerate(self.reactions.values()[1:]):
+        for i, reaction in enumerate(list(self.reactions.values())[1:]):
             # Copy Q values and multiplicities and determine if scattering
             # should be treated in the center-of-mass or lab system
             reaction.Q = qvalues[i]
@@ -664,7 +666,7 @@ class NeutronTable(AceTable):
         n_reactions = self.nxs[5] + 1
 
         # Angular distribution for all reactions with secondary neutrons
-        for i, reaction in enumerate(self.reactions.values()[:n_reactions]):
+        for i, reaction in enumerate(list(self.reactions.values())[:n_reactions]):
             loc = int(self.xss[self.jxs[8] + i])
 
             # Check if angular distribution data exist
@@ -730,7 +732,7 @@ class NeutronTable(AceTable):
         # determined from kinematics.
         n_reactions = self.nxs[5]
 
-        for i, reaction in enumerate(self.reactions.values()[1:n_reactions + 1]):
+        for i, reaction in enumerate(list(self.reactions.values())[1:n_reactions + 1]):
             # Determine locator for ith energy distribution
             location_start = int(self.xss[self.jxs[10] + i])
 

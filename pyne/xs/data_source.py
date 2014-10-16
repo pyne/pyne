@@ -937,7 +937,6 @@ class OpenMCDataSource(DataSource):
                 lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
                 lib.read(atab.name)
             lib = self.libs[atab]
-            import pdb; pdb.set_trace();
             ntab = lib.tables[atab.name]
             if mt in ntab.reactions or rx == totrx or rx == absrx:
                 break
