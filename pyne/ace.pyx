@@ -189,10 +189,6 @@ class Library(object):
 
             # Read name, atomic mass ratio, temperature, date, comment, and
             # material
-            print(len(self.f.read(116)))
-            self.f.seek(start_position)
-            print(repr(self.f.read(1)))
-            self.f.seek(start_position)
             name, awr, temp, date, comment, mat = \
                 struct.unpack(str('=10sdd10s70s10s'), self.f.read(116))
             name = name.strip()
