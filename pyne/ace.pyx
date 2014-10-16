@@ -148,7 +148,6 @@ class Library(object):
             self.f.seek(0)
             self.binary = False
         except UnicodeDecodeError:
-            import os.path; print(os.path.getSize(f))
             self.f.close()
             self.f = open(filename, 'rb')
             self.binary = True
@@ -184,12 +183,16 @@ class Library(object):
             start_position = self.f.tell()
 
             # Check for end-of-file
-            if self.f.read(1) == '':
+            if len(self.f.read(1)) == 0:
                 return
             self.f.seek(start_position)
 
             # Read name, atomic mass ratio, temperature, date, comment, and
             # material
+            print(len(self.f.read(116)))
+            self.f.seek(start_position)
+            print(repr(self.f.read(1)))
+            self.f.seek(start_position)
             name, awr, temp, date, comment, mat = \
                 struct.unpack(str('=10sdd10s70s10s'), self.f.read(116))
             name = name.strip()
