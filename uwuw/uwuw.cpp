@@ -24,6 +24,7 @@ UWUW::UWUW(std::string filename)
 {
   // turn the filename into a full filepath
   full_filepath = get_full_filepath(filename);
+
   // load materials
   material_library = load_pyne_materials(full_filepath);
   // load tallies
@@ -118,7 +119,7 @@ std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename)
   pyne::Tally test_tally;
   try
     {
-      test_tally.from_hdf5(filename,"/materials");
+      test_tally.from_hdf5(filename,"/tally");
     }
   catch (const std::exception &except) // catch the exception from from_hdf5
     {
