@@ -148,6 +148,7 @@ class Library(object):
             self.f.seek(0)
             self.binary = False
         except UnicodeDecodeError:
+            import os.path; print(os.path.getSize(f))
             self.f.close()
             self.f = open(filename, 'rb')
             self.binary = True
