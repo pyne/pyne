@@ -22,7 +22,7 @@ if sys.version_info[0] > 2:
 
 class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable', 
                                         'name', 'path', 'temperature', 'zaid'])):
-    """A simple data structure reprsenenting an <ace_table /> tag in a 
+    """A simple data structure representing an <ace_table /> tag in a 
     cross_sections.xml file.
     """
     def __new__(cls, alias=None, awr=None, location=None, metastable=None, name=None,
@@ -56,9 +56,10 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
             If this and path are both present then the abspath attribute will be
             set.
         """
-        super(AceTable, self).__init__(alias=alias, awr=awr, location=location, 
-            metastable=metastable, name=name, path=path, temperature=temperature, 
-            zaid=zaid)
+        # super(AceTable, self).__init__(alias=alias, awr=awr, location=location, 
+        #     metastable=metastable, name=name, path=path, temperature=temperature, 
+        #     zaid=zaid)
+        super(AceTable, self).__init__()
         nuc = None
         if zaid is not None or zaid != '0':
             meta = "0" if metastable is None else metastable
@@ -90,7 +91,7 @@ class CrossSections(HTMLParser):
             This is a path to the cross_sections.xml file, a file handle, or 
             None indicating an empty container.
         """
-        #super(CrossSections, self).__init__()
+        super(CrossSections, self).__init__()
         self.reset()
         self._tag = None
         self.path = None
