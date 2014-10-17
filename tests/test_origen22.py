@@ -7,14 +7,14 @@ except ImportError:
     from io import StringIO
 
 import numpy as np
-from nose.tools import assert_equal, assert_true
+from nose.tools import assert_equal, assert_true, assert_raises
 from numpy.testing import assert_array_equal
 
 from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
 from pyne import origen22
 from pyne.xs.cache import XSCache
-from pyne.xs.data_source import NullDataSource
+from pyne.xs.data_source import NullDataSource, OpenMCDataSource
 from pyne.material import Material
 
 
@@ -520,4 +520,19 @@ def test_nlbs():
     assert_equal(exp, obs)
 
 def test_valid_nucs():
-    pass 
+    ds = OpenMCDataSource()
+    nucs = {n.nucid for n in ds.cross_sections.ace_tables if n.nucid is not None}
+    valid_nucs = origen22.validate_nucs(nucs, ds)
+    assert len(nucs) > len(valid_nucs)
+    assert len(origen22.NUCS) > len(valid_nucs)
+
+    bad_ds = NullDataSource()
+    assert_raises(NotImplementedError, origen22.validate_nucs, nucs, bad_ds)
+
+def test_make_tape9_from_ds():
+    ds = OpenMCDataSource()
+    nucs = ["U235"]
+    tape9 = origen22.make_tape9_from_ds(ds, nucs, filter_nucs=True)
+    origen22.write_tape9(tape9, outfile="test_TAPE9.INP")
+    obs = origen22.parse_tape9(tape9="test_TAPE9.INP")
+    assert_equal(tape9, obs)

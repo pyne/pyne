@@ -1494,17 +1494,20 @@ def nlbs(t9):
     decay_nlb.sort()
     return tuple(decay_nlb), tuple(xsfpy_nlb)
 
-def valid_nucs(nucs, ds):
+def validate_nucs(nucs, ds):
     """Filters a list of nucs by whether or not they are valid in the data
     source and in TAPE9 format. Only works with OpenMCDataSource.
     """
-    if ds is data_source.OpenMCDataSource:
+    if isinstance(ds, data_source.OpenMCDataSource):
         nucs_in_data_source = {n.nucid for n in ds.cross_sections.ace_tables \
                           if n.nucid is not None}
+    else:
+        raise NotImplementedError
     valid_nucs = NUCS & nucs_in_data_source
     return set(nucs) & valid_nucs
 
-def make_tape9_from_ds(ds, nucs, filter_nucs=True):
+def make_tape9(ds, nucs, filter_nucs=True):
+    "Show me a DataSource and some nucs, and I'll show you a TAPE9 dictionary."
     if filter_nucs:
         nucs = valid_nucs(nucs, ds)
     tape9 = {1:{"_type": "decay", "title": "for your eyes only"},
