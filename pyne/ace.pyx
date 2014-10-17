@@ -137,14 +137,16 @@ class Library(object):
         # Determine whether file is ASCII or binary
         self.f = None
         try:
-            self.f = io.open(filename, 'r')
+            self.f = io.open(filename, 'rb')
             # Grab 10 lines of the library
-            s = ''.join([self.f.readline() for i in range(10)])
+            sb = b''.join([self.f.readline() for i in range(10)])
 
             # Try to decode it with ascii
-            sd = s.decode('ascii')
+            sd = sb.decode('ascii')
 
-            # No exception so proceed with ASCII
+            # No exception so proceed with ASCII - reopen in non-binary
+            self.f.close()
+            self.f = io.open(filename, 'r')
             self.f.seek(0)
             self.binary = False
         except UnicodeDecodeError:

@@ -18,6 +18,7 @@ from pyne import data
 from pyne import rxname
 from pyne import nucname
 from pyne.xs import cache
+from pyne.xs import data_source
 from pyne.material import Material, from_atom_frac
 
 if sys.version_info[0] > 2:
@@ -1493,9 +1494,21 @@ def nlbs(t9):
     decay_nlb.sort()
     return tuple(decay_nlb), tuple(xsfpy_nlb)
 
-def make_tape9_from_ds(ds):
-    tape9 = {1:{"_type": "decay"},
+def valid_nucs(nucs, ds):
+    """Filters a list of nucs by whether or not they are valid in the data
+    source and in TAPE9 format. Only works with OpenMCDataSource.
+    """
+    if ds is data_source.OpenMCDataSource:
+        nucs_in_data_source = {n.nucid for n in ds.cross_sections.ace_tables \
+                          if n.nucid is not None}
+    valid_nucs = NUCS & nucs_in_data_source
+    return set(nucs) & valid_nucs
+
+def make_tape9_from_ds(ds, nucs, filter_nucs=True):
+    if filter_nucs:
+        nucs = valid_nucs(nucs, ds)
+    tape9 = {1:{"_type": "decay", "title": "for your eyes only"},
              2:{"_type": "decay"},
-             3:{},
+             3:{"_type": "decay"},
              219:{}, 220:{}, 221:{}}
     return tape9

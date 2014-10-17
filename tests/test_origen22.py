@@ -518,3 +518,6 @@ def test_nlbs():
           }
     obs = origen22.nlbs(t9)
     assert_equal(exp, obs)
+
+def test_valid_nucs():
+    pass 
