@@ -8,6 +8,7 @@ except ImportError:
 
 import numpy as np
 from nose.tools import assert_equal, assert_true, assert_raises
+from nose.plugins.skip import SkipTest
 from numpy.testing import assert_array_equal
 
 from pyne.utils import VnVWarning
@@ -530,6 +531,7 @@ def test_valid_nucs():
     assert_raises(NotImplementedError, origen22.validate_nucs, nucs, bad_ds)
 
 def test_make_tape9_from_ds():
+    raise SkipTest
     ds = OpenMCDataSource()
     nucs = ["U235"]
     tape9 = origen22.make_tape9_from_ds(ds, nucs, filter_nucs=True)
