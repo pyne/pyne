@@ -6,6 +6,7 @@ except ImportError:
 import os
 import re
 import sys
+from io import StringIO
 from collections import Mapping
 from copy import deepcopy
 from itertools import chain
@@ -19,6 +20,7 @@ from pyne import rxname
 from pyne import nucname
 from pyne.xs import cache
 from pyne.xs import data_source
+from pyne import decay_tape9
 from pyne.material import Material, from_atom_frac
 
 if sys.version_info[0] > 2:
@@ -1504,14 +1506,51 @@ def validate_nucs(nucs, ds):
     else:
         raise NotImplementedError
     valid_nucs = NUCS & nucs_in_data_source
-    return set(nucs) & valid_nucs
+    return set([nucname.id(nuc) for nuc in nucs]) & valid_nucs
 
 def make_tape9(ds, nucs, filter_nucs=True):
     "Show me a DataSource and some nucs, and I'll show you a TAPE9 dictionary."
     if filter_nucs:
-        nucs = valid_nucs(nucs, ds)
-    tape9 = {1:{"_type": "decay", "title": "for your eyes only"},
-             2:{"_type": "decay"},
-             3:{"_type": "decay"},
-             219:{}, 220:{}, 221:{}}
+        nucs = validate_nucs(nucs, ds)
+    decay_file = StringIO(decay_tape9.decay_tape9)
+    decay = parse_tape9(decay_file)
+    xsfpy = {
+             "_type": "xsfpy",
+             "_subtype": "",
+             "title": "",
+             "sigma_gamma": {},
+             "sigma_2n": {},
+             "sigma_gamma_x": {},
+             "sigma_2n_x": {},
+             "fiss_yields": {},
+            }
+
+    activation_products = actinides = fission_products = dict(xsfpy)
+    activation_products.update({"_subtype": "activation_products",
+                                "title": "activation products",
+                                "sigma_3n": {},
+                                "sigma_p": {}})
+
+    actinides.update({"_subtype": "actinides",
+                      "title": "actinides",
+                      "sigma_alpha": {},
+                      "sigma_f": {}})
+
+    fission_products.update({"_subtype": "fission_products",
+                             "title": "fission products",
+                             "sigma_3n": {},
+                             "sigma_p": {},
+                             "TH232_fiss_yield":{},
+                             "U233_fiss_yield":{},
+                             "U235_fiss_yield":{},
+                             "U238_fiss_yield":{},
+                             "PU239_fiss_yield":{},
+                             "PU241_fiss_yield":{},
+                             "CM245_fiss_yield":{},
+                             "CF249_fiss_yield":{},
+                            })
+
+    xsfpys = {219: activation_products, 220: actinides, 221: fission_products}
+    tape9 = merge_tape9([decay, xsfpys])
+    # tape9 = dict(decay).update(xsfpys)
     return tape9

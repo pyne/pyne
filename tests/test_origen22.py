@@ -8,6 +8,7 @@ except ImportError:
 
 import numpy as np
 from nose.tools import assert_equal, assert_true, assert_raises
+from nose.tools import set_trace
 from nose.plugins.skip import SkipTest
 from numpy.testing import assert_array_equal
 
@@ -530,11 +531,15 @@ def test_valid_nucs():
     bad_ds = NullDataSource()
     assert_raises(NotImplementedError, origen22.validate_nucs, nucs, bad_ds)
 
-def test_make_tape9_from_ds():
-    raise SkipTest
+def test_make_tape9_has_right_decks():
     ds = OpenMCDataSource()
     nucs = ["U235"]
-    tape9 = origen22.make_tape9_from_ds(ds, nucs, filter_nucs=True)
-    origen22.write_tape9(tape9, outfile="test_TAPE9.INP")
-    obs = origen22.parse_tape9(tape9="test_TAPE9.INP")
-    assert_equal(tape9, obs)
+    tape9 = origen22.make_tape9(ds, nucs, filter_nucs=True)
+    assert_equal(list(tape9.keys()), [1, 2, 3, 219, 220, 221])
+
+def test_make_tape9_structure():
+    ds = OpenMCDataSource()
+    nucs = ["U235"]
+    tape9 = origen22.make_tape9(ds, nucs, filter_nucs=True)
+    # do all the checks described in the parse_tape9 docs
+    set_trace()
