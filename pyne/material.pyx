@@ -340,8 +340,8 @@ cdef class _Material:
  	   int 0 means use "mass" as the frac_type
         """
         cdef std_string card
-        card = self.mat_pointer.mcnp(frac_type)
-        return card
+        card = self.mat_pointer.mcnp(frac_type.encode())
+        return card.decode()
 
     def fluka(self, fid, frac_type='mass'):
         """fluka()
@@ -353,8 +353,8 @@ cdef class _Material:
  	   The sequential material id starting from 26 unless predefined
         """
         cdef std_string card
-        card = self.mat_pointer.fluka(fid, frac_type)
-        return card
+        card = self.mat_pointer.fluka(fid, frac_type.encode())
+        return card.decode()
 
     def not_fluka_builtin(self, fluka_name):
         """not_fluka_builtin()

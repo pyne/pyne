@@ -7,14 +7,14 @@ except ImportError:
     from io import StringIO
 
 import numpy as np
-from nose.tools import assert_equal, assert_true
+from nose.tools import assert_equal, assert_true, assert_raises
 from numpy.testing import assert_array_equal
 
 from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
 from pyne import origen22
 from pyne.xs.cache import XSCache
-from pyne.xs.data_source import NullDataSource
+from pyne.xs.data_source import NullDataSource, OpenMCDataSource
 from pyne.material import Material
 
 
