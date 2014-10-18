@@ -8,7 +8,6 @@ except ImportError:
 
 import numpy as np
 from nose.tools import assert_equal, assert_true, assert_raises
-from nose.plugins.skip import SkipTest
 from numpy.testing import assert_array_equal
 
 from pyne.utils import VnVWarning
@@ -519,23 +518,3 @@ def test_nlbs():
           }
     obs = origen22.nlbs(t9)
     assert_equal(exp, obs)
-
-def test_valid_nucs():
-    raise SkipTest
-    ds = OpenMCDataSource()
-    nucs = {n.nucid for n in ds.cross_sections.ace_tables if n.nucid is not None}
-    valid_nucs = origen22.validate_nucs(nucs, ds)
-    assert len(nucs) > len(valid_nucs)
-    assert len(origen22.NUCS) > len(valid_nucs)
-
-    bad_ds = NullDataSource()
-    assert_raises(NotImplementedError, origen22.validate_nucs, nucs, bad_ds)
-
-def test_make_tape9_from_ds():
-    raise SkipTest
-    ds = OpenMCDataSource()
-    nucs = ["U235"]
-    tape9 = origen22.make_tape9_from_ds(ds, nucs, filter_nucs=True)
-    origen22.write_tape9(tape9, outfile="test_TAPE9.INP")
-    obs = origen22.parse_tape9(tape9="test_TAPE9.INP")
-    assert_equal(tape9, obs)
