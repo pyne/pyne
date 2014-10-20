@@ -444,7 +444,7 @@ def fluka(nuc):
 
     """
     fluka_name = cpp_nucname.fluka(nuc)
-    return fluka_name
+    return fluka_name.decode()
 
 
 def fluka_to_id(name):
@@ -461,6 +461,7 @@ def fluka_to_id(name):
         Output nuclide in identifier form.
 
     """
+    name = name.encode()
     newnuc = cpp_nucname.fluka_to_id(<char *> name)
     return newnuc
 

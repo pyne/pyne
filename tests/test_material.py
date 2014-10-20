@@ -235,31 +235,31 @@ def test_expand_elements2():
 
 def test_collapse_elements1():
     """ Very simple test to combine nucids"""
-    nucvec = {10010000:  1.0,   
-      80160000: 1.0,   
-      80160001: 1.0,   
-      691690000: 1.0, 
-      922350000: 1.0, 
-      922380000: 1.0, 
-      942390000: 1.0, 
-      952420000: 1.0, 
+    nucvec = {10010000:  1.0,
+      80160000: 1.0,
+      80160001: 1.0,
+      691690000: 1.0,
+      922350000: 1.0,
+      922380000: 1.0,
+      942390000: 1.0,
+      952420000: 1.0,
       962440000: 1.0 }
 
-    exception_ids = {nucname.id(1001), 
-                     nucname.id("U-235"), 
-		     nucname.id("U-238"), 
-		     nucname.id("Pu-239"),
-		     nucname.id("Pu-241"),
-		     }
+    exception_ids = {nucname.id(1001),
+                     nucname.id("U-235"),
+                     nucname.id("U-238"),
+                     nucname.id("Pu-239"),
+                     nucname.id("Pu-241"),
+                     }
 
     mat  = Material(nucvec)
 
-    print "Original"
-    print mat
-    
+    print("Original")
+    print(mat)
+
     cmat = mat.collapse_elements(exception_ids)
-    print "Collapsed"
-    print cmat
+    print("Collapsed")
+    print(cmat)
 
     assert_equal(cmat.comp[80000000],  mat.comp[80160000] + mat.comp[80160001])
     assert_equal(cmat.comp[922350000], mat.comp[922350000])
@@ -1186,7 +1186,7 @@ def test_fluka():
                           'table_ids': {'92235':'15c', '92238':'25c'},
                           'name':'LEU',
                           'fluka_name':'URANIUM',
-			  'fluka_material_index': '35',
+                          'fluka_material_index': '35',
                           'source':'Some URL',
                           'comments': ('Fluka Compound '),
                           },
@@ -1197,9 +1197,9 @@ def test_fluka():
     matlines = []
     # call fluka() on a material made up of each component
     for key in leu.comp:
-	element = Material(nucvec={key:1})
-	matlines.append(element.fluka(id,'atom'))
-	id=id+1
+        element = Material(nucvec={key:1})
+        matlines.append(element.fluka(id,'atom'))
+        id=id+1
     compound = leu.fluka(id,'atom')
     matlines.append(compound)
     written = ''.join(matlines)
@@ -1226,19 +1226,19 @@ def test_fluka():
     exp += ' \n'
     exp += 'MATERIAL         92.   238.029      19.1       25.                    URANIUM'
     exp += '   \n'
-    
+
     written = coll.fluka(25,'atom')
     assert_equal(exp, written)
-    
+
     ##################################
     # Repeat Part I for mass frac_type
     id = 25
     matlines = []
     # call fluka() on a material made up of each component
     for key in leu.comp:
-	element = Material(nucvec={key:1})
-	matlines.append(element.fluka(id,'mass'))
-	id=id+1
+        element = Material(nucvec={key:1})
+        matlines.append(element.fluka(id,'mass'))
+        id=id+1
     compound = leu.fluka(id,'mass')
     matlines.append(compound)
     written = ''.join(matlines)
