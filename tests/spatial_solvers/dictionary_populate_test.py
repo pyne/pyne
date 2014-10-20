@@ -5,7 +5,6 @@ def populate_simple(solverin, solvertypein):
     'solver':solverin,
     'solver_type':solvertypein,
     'spatial_order':1,
-    'spatial_method':0,
     'angular_quadrature_order':4,
     'angular_quadrature_type':1,
     'nodes_xyz':[4,4,4],
@@ -28,8 +27,6 @@ def populate_simple(solverin, solvertypein):
     'max_iterations':6000,
     'moments_converged':0,
     'converge_tolerence':1.e-10,
-    'ichk':0,
-    'ichk_tolerence':1.e-14
     };
     if(solverin == "SCTSTEP"):
       solver_dict['bc_input_file'] = 'bc_4_sct.dat'
@@ -40,7 +37,6 @@ def populate_simple_with_warnings(solverin):
     'solver':solverin,
     #'solver_type':solvertypein,
     #'spatial_order':1,
-    #'spatial_method':0,
     #'angular_quadrature_order':4,
     #'angular_quadrature_type':1,
     'nodes_xyz':[4,4,4],
@@ -62,8 +58,6 @@ def populate_simple_with_warnings(solverin):
     #'max_iterations':6000,
     #'moments_converged':0,
     #'converge_tolerence':1.e-10,
-    #'ichk':0,
-    #'ichk_tolerence':1.e-14
     };
     return solver_dict
 
@@ -73,7 +67,6 @@ def populate_intermediate_1(solverin, solvertypein):
     'solver':solverin,
     'solver_type':solvertypein,
     'spatial_order':1,
-    'spatial_method':0,
     'angular_quadrature_order':4,
     'angular_quadrature_type':1,
     'nodes_xyz':[4,4,4],
@@ -120,8 +113,6 @@ def populate_intermediate_1(solverin, solvertypein):
     'max_iterations':6000,
     'moments_converged':0,
     'converge_tolerence':1.e-10,
-    'ichk':0,
-    'ichk_tolerence':1.e-14
     };
     if(solverin == "SCTSTEP"):
       solver_dict['bc_input_file'] = 'bc_4_sct.dat'
