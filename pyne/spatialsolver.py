@@ -23,7 +23,7 @@ def solve(inputdict_unchecked):
   inputdict['solver'],
   inputdict['solver_type'],
   inputdict['spatial_order'], 
-  inputdict['spatial_method'],
+  #inputdict['spatial_method'],
   inputdict['angular_quadrature_order'],
   inputdict['angular_quadrature_type'],
   inputdict['nodes_xyz'][0],
@@ -50,8 +50,6 @@ def solve(inputdict_unchecked):
   inputdict['max_iterations'],
   inputdict['moments_converged'],
   inputdict['converge_tolerence'],
-  inputdict['ichk'],
-  inputdict['ichk_tolerence'],
   inputdict['max_mom_printed'],
   inputdict['moment_sum_flag'],
   inputdict['mom_at_a_pt_flag'],
@@ -61,8 +59,16 @@ def solve(inputdict_unchecked):
     #time.sleep(.5)
   solver_output['flux'] = fortran_returns[6].tolist()
   error_code = fortran_returns[7]
+  tsolve = fortran_returns[8]
+  ttosolve = fortran_returns[9]
+  tend = fortran_returns[10]
+
   if(error_code == 0):
     solver_output['success'] = 1
+    solver_output['time_start'] = tsolve
+    solver_output['total_time'] = tsolve-ttosolve
+    solver_output['print_time'] = tend-ttosolve
+    solver_output['error_msg'] = 0
   else:
     solver_output['success'] = 0
     solver_output['error_msg'] = error_toString(error_code)
@@ -181,11 +187,12 @@ def dict_complete(inputdict):
     except:
       formatted_dict['spatial_order'] = 1
       warn(warning_msg + " spatial_order value of 1")
-    try:
-      formatted_dict['spatial_method'] = inputdict['spatial_method']
-    except:
-      formatted_dict['spatial_method'] = 0
-      warn(warning_msg + " spatial_method value of 0")
+#No longer needed.  Spatial method of 1 was never implemented!
+    #try:
+    #  formatted_dict['spatial_method'] = inputdict['spatial_method']
+    #except:
+    #  formatted_dict['spatial_method'] = 0
+    #  warn(warning_msg + " spatial_method value of 0")
     try:
       formatted_dict['angular_quadrature_order'] = inputdict['angular_quadrature_order']
     except:
@@ -276,16 +283,6 @@ def dict_complete(inputdict):
     except:
       formatted_dict['converge_tolerence'] = 1e-10
       warn(warning_msg + " converge_tolerence value of 1e-10")
-    try:
-      formatted_dict['ichk'] = inputdict['ichk']
-    except:
-      formatted_dict['ichk'] = 0
-      warn(warning_msg + " ichk value of 0")
-    try:
-      formatted_dict['ichk_tolerence'] = inputdict['ichk_tolerence']
-    except:
-      formatted_dict['ichk_tolerence'] = 1e-14
-      warn(warning_msg + " ichk_tolerence value of 1e-14")
 			
     formatted_dict['max_mom_printed'] = 0
     formatted_dict['moment_sum_flag'] = 0

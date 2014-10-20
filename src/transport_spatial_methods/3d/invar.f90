@@ -22,10 +22,6 @@ INTEGER :: xsbc, xebc, ysbc, yebc, zsbc, zebc
 REAL*8 :: err, tolr
 INTEGER :: itmx, iall
 
-! Solution check frequency
-REAL*8 :: tchk
-INTEGER :: ichk
-
 ! Extra variables derived from input
 INTEGER :: apo, dofpc, order, ordsq, ordcb, orpc
 REAL*8, DIMENSION(:,:), ALLOCATABLE :: ssum

@@ -61,6 +61,7 @@ IF (solver == "AHOTN") THEN
 			 CALL CPU_TIME(ttosolve)
 			 
 			 ! Check which solution scheme will be employed
+       !Note: Meth is 0 by default now.  Should remove later and default to calling inner
 			 IF (meth == 0) THEN
 				  WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
 				  ! Call for the inner iteration (or ITM solver later)
@@ -106,6 +107,7 @@ IF (solver == "AHOTN") THEN
 			 CALL CPU_TIME(ttosolve)
 			 
 			 ! Check which solution scheme will be employed
+       !Note: Meth is 0 by default now.  Should remove later and default to calling inner
 			 IF (meth == 0) THEN
 				  WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
 				  ! Call for the inner iteration (or ITM solver later)
@@ -160,6 +162,7 @@ ELSE IF (solver == "DGFEM") THEN
 		 CALL CPU_TIME(ttosolve)
 		 
 		 ! Check which solution scheme will be employed
+     !Note: Meth is 0 by default now.  Should remove later and default to calling inner
 		 IF (meth == 0) THEN
 		    WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
 		    ! Call for the inner iteration (or ITM solver later)
@@ -251,6 +254,7 @@ ELSE IF (solver == "SCTSTEP") THEN
      CALL CPU_TIME(ttosolve)
      
      ! Check which solution scheme will be employed
+     !Note: Meth is 0 by default now.  Should remove later and default to calling inner
      IF (meth == 0) THEN
         WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
         ! Call for the inner iteration (or ITM solver later)

@@ -165,19 +165,6 @@ ELSE IF (iall < 0 .OR. iall > lambda) THEN
    RETURN
    !STOP
 
-! Checks on the solution
-ELSE IF (ichk < 0) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: Illegal value for solution check flag, iall."
-   WRITE(8,'(/,3x,A)') "iall is 0 (skip check) or positive integer"
-   error_code = 1029
-   RETURN
-   !STOP
-ELSE IF (tchk < 0.) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: Illegal value for solution check tolerance, tchk. Must be positive."
-   error_code = 1030
-   RETURN
-   !STOP
-   
 ! Checks on the angular quadrature
 ELSE IF (MINVAL(ang) <= 0. .OR. MAXVAL(ang) >= 1.) THEN
    WRITE(8,'(/,3x,A)') "ERROR: Illegal value for direction cosine. Must be entered positive, less than 1."
