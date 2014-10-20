@@ -7,12 +7,8 @@ except ImportError:
     from io import StringIO
 
 import numpy as np
-from nose.tools import assert_equal, assert_true, assert_raises
-<<<<<<< HEAD
+from nose.tools import assert_equal, assert_true, assert_raises, assert_in, assert_is_instance
 from nose.tools import set_trace
-from nose.plugins.skip import SkipTest
-=======
->>>>>>> upstream/develop
 from numpy.testing import assert_array_equal
 
 from pyne.utils import VnVWarning
@@ -21,6 +17,7 @@ from pyne import origen22
 from pyne.xs.cache import XSCache
 from pyne.xs.data_source import NullDataSource, OpenMCDataSource
 from pyne.material import Material
+
 
 
 def test_sec_to_time_unit():
@@ -523,3 +520,78 @@ def test_nlbs():
           }
     obs = origen22.nlbs(t9)
     assert_equal(exp, obs)
+
+def test_tape9_dict_structure():
+    ds = OpenMCDataSource()
+    nucs = ["U233", "U234", "U235", "U236", "U238"]
+    tape9 = origen22.make_tape9(ds, nucs, filter_nucs=True)
+
+    # check for correct deck ids: 1,2,3 for decay, 219, 220, 221 for xsfpy
+    assert_equal(set(list(tape9.keys())), {1, 2, 3, 219, 220, 221})
+
+    # check decay decks for correct structure
+    for field in origen22.DECAY_FIELDS:
+        assert_in(field, tape9[1].keys())
+        assert_in(field, tape9[2].keys())
+        assert_in(field, tape9[3].keys())
+
+        # check to see if the values are float-valued dicts
+        assert_is_instance(tape9[1][field], dict)
+        for value in tape9[1][field].values():
+            assert_is_instance(value, float)
+        assert_is_instance(tape9[2][field], dict)
+        for value in tape9[2][field].values():
+            assert_is_instance(value, float)
+        assert_is_instance(tape9[3][field], dict)
+        for value in tape9[3][field].values():
+            assert_is_instance(value, float)
+
+    # check xsfpy decks for correct structure
+    for field in origen22.XSFPY_FIELDS:
+        assert_in(field, tape9[219].keys())
+        assert_in(field, tape9[220].keys())
+        assert_in(field, tape9[221].keys())
+
+        # check to see if the values are float-valued dicts
+        assert_is_instance(tape9[219][field], dict)
+        for value in tape9[219][field].values():
+            if value == 'fiss_yields_present': # except for these bool-valued dicts
+                assert_is_instance(value, bool)
+            else:
+                assert_is_instance(value, float)
+        assert_is_instance(tape9[220][field], dict)
+        for value in tape9[220][field].values():
+            if value == 'fiss_yields_present':
+                assert_is_instance(value, bool)
+            else:
+                assert_is_instance(value, float)
+        for value in tape9[221][field].values():
+            if value == 'fiss_yields_present':
+                assert_is_instance(value, bool)
+            else:
+                assert_is_instance(value, float)
+
+    # check activation product deck for correct structure
+    for field in origen22.ACTIVATION_PRODUCT_FIELDS:
+        assert_in(field, tape9[219].keys())
+        # make sure everything's a float-valued dict
+        assert_is_instance(tape9[219][field], dict)
+        for value in tape9[219][field].values():
+            assert_is_instance(value, float)
+
+    # check actinide deck for correct structure
+    for field in origen22.ACTINIDE_FIELDS:
+        assert_in(field, tape9[220].keys())
+        # make sure everything's a float-valued dict
+        assert_is_instance(tape9[220][field], dict)
+        for value in tape9[220][field].values():
+            assert_is_instance(value, float)
+
+    # check fission product deck for correct structure
+    for field in origen22.FISSION_PRODUCT_FIELDS:
+        assert_in(field, tape9[221].keys())
+        # make sure everything's a float-valued dict
+        assert_is_instance(tape9[221][field], dict)
+        for value in tape9[221][field].values():
+            assert_is_instance(value, float)
+
