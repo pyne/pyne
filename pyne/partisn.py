@@ -61,26 +61,25 @@ if HAVE_PYTAPS:
 
 
 class PartisnRead(object):
-<<<<<<< HEAD
     """ This class reads all necessary attributes from a material-laden
     geometry file, a pre-made PyNE mesh object, and the nuclear data
     cross section library.
     
     Parameters
     ----------
-		mesh :: a premade mesh object that conforms to the geometry.
-			Can be 1-D, 2-D, or 3-D.
-			note: only Cartesian based geometries are supported
-		hfm :: path to a material-laden dagmc geometry file
-		nucdata :: path to the nuclear data cross section library
-			note: only BXSLIB format is currently supported
+        mesh :: a premade mesh object that conforms to the geometry.
+            Can be 1-D, 2-D, or 3-D.
+            note: only Cartesian based geometries are supported
+        hfm :: path to a material-laden dagmc geometry file
+        nucdata :: path to the nuclear data cross section library
+            note: only BXSLIB format is currently supported
 
-		
-	Attributes
-	----------
-		dim :: number of dimensions represented in model
-			dim = 1 for 1-D, 2 for 2-D, and 3 for 3-D
-		
+        
+    Attributes
+    ----------
+        dim :: number of dimensions represented in model
+            dim = 1 for 1-D, 2 for 2-D, and 3 for 3-D
+        
     """
     
     def __init__(self, mesh, h5m, nucdata, **kwargs):
@@ -93,46 +92,46 @@ class PartisnRead(object):
         
         
     def get_dimensions(self, mesh):
-		# determines the system geometry (1-D, 2-D, or 3-D Cartesian)
-		# currently cartesian is only supported
-		
-		nx = len(mesh.structured_get_divisions("x"))
-		ny = len(mesh.structured_get_divisions("y"))
-		nz = len(mesh.structured_get_divisions("z"))
-		
-		# Check for dimensions with >1 voxel (>2 bounds)
-		# This determines 1-D, 2-D, or 3-D
-		dim = 0
-		if nx > 2:
-			dim += 1
-			i = "x"
-		if ny > 2:
-			dim += 1
-			if not i:
-				i = "y"
-			else:
-				j = "y"
-		if nz > 2:
-			dim += 1
-			if not i:
-				i = "z"
-			elif not j:
-				j = "z"
-			else:
-				k = "z"
-		# Return dimension data
-		if dim == 1:
-			return [i]
-		elif dim == 2:
-			return [i, j]
-		elif dim == 3:
-			return [i, j, k]
-			
+        # determines the system geometry (1-D, 2-D, or 3-D Cartesian)
+        # currently cartesian is only supported
+        
+        nx = len(mesh.structured_get_divisions("x"))
+        ny = len(mesh.structured_get_divisions("y"))
+        nz = len(mesh.structured_get_divisions("z"))
+        
+        # Check for dimensions with >1 voxel (>2 bounds)
+        # This determines 1-D, 2-D, or 3-D
+        dim = 0
+        if nx > 2:
+            dim += 1
+            i = "x"
+        if ny > 2:
+            dim += 1
+            if not i:
+                i = "y"
+            else:
+                j = "y"
+        if nz > 2:
+            dim += 1
+            if not i:
+                i = "z"
+            elif not j:
+                j = "z"
+            else:
+                k = "z"
+        # Return dimension data
+        if dim == 1:
+            return [i]
+        elif dim == 2:
+            return [i, j]
+        elif dim == 3:
+            return [i, j, k]
+            
     
     def _read_materials(self, dagmc_geom):
-		# reads material properties from the loaded dagmc_geometry
-		# cell # -> material name & vol fract -> isotope name & dens
-		pass
+        # reads material properties from the loaded dagmc_geometry
+        # cell # -> material name & vol fract -> isotope name & dens
+        pass
        
 
 class PartisnWrite(object):
