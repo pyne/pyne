@@ -133,19 +133,7 @@ class PartisnRead(object):
 		# reads material properties from the loaded dagmc_geometry
 		# cell # -> material name & vol fract -> isotope name & dens
 		pass
-=======
-    """ This class read in a material-laden mesh object and an h5m 
-    geometry file and stores each attribute. It then manipulates/
-    rearranges and stores the information into the necessary 
-    Partisn blocks.
-    """
-    def __init__(self, mesh_obj, h5m_file):
-        
-        #h5mf = open(h5m_file)
-        dagmc.load(h5m_file)
-        discretized_record_array = dagmc.discretize_geom(mesh_obj)
->>>>>>> 67d881397caf2dbeef2a61465ec7d9fb38b2f1fa
-        
+       
 
 class PartisnWrite(object):
     """This class writes out the information stored by PartisnRead to
