@@ -67,28 +67,53 @@ class PartisnRead(object):
     
     Parameters
     ----------
-        mesh :: a premade mesh object that conforms to the geometry.
+        mesh :: mesh object, a premade mesh object that conforms to the 
+            geometry.
             Can be 1-D, 2-D, or 3-D.
-            note: only Cartesian based geometries are supported
-        hfm :: path to a material-laden dagmc geometry file
-        nucdata :: path to the nuclear data cross section library
-            note: only BXSLIB format is currently supported
-
+            note: only Cartesian based geometries are supported.
+        hfm :: file, a material-laden dagmc geometry file.
+        nucdata :: file, nuclear data cross section library.
+            note: only BXSLIB format is currently supported.
+        coord_sys :: int, (optional), defines the coordinate system used.
+            1 = Cartesian (default)
+            2 = cylindrical
+            3 = spherical
+        fine :: int, (optional), number of fine mesh intervals per
+            coarse mesh.
+            default = 10
         
     Attributes
     ----------
-        dim :: number of dimensions represented in model
-            dim = 1 for 1-D, 2 for 2-D, and 3 for 3-D
+        bounds :: dict of lists of floats, values for the mesh bounds
+            in each dimension present
+        fine :: int, (optional), number of fine mesh intervals
+        
+
         
     """
     
     def __init__(self, mesh, h5m, nucdata, **kwargs):
         
-        dagmc_geom = dagmc.load(h5m)
-        self.discretized_results = dagmc.discretize_geom(mesh)
+        # read optional inputs
+        coord_sys = kwargs['coord_sys'] if 'coord_sys' in kwargs else 1
+        if coord_sys != 1:
+            warn("Only Cartesian geometries are currently supported")
+            
+        #self.fine = kwargs['fine'] if 'fine' in kwargs else 10
         
+        dagmc_geom = dagmc.load(h5m)
+        dg = dagmc.discretize_geom(mesh)
+               
         # determine if 1D, 2D, or 3D
         dim = self.get_dimensions(mesh)
+
+        
+        # collect the bounds data
+        self.bounds = {}
+        for i in dim:
+            self.bounds[i] = mesh.structured_get_divisions(i)
+        
+        self._define_zones(dg)
         
         
     def get_dimensions(self, mesh):
@@ -102,6 +127,9 @@ class PartisnRead(object):
         # Check for dimensions with >1 voxel (>2 bounds)
         # This determines 1-D, 2-D, or 3-D
         dim = 0
+        i = False
+        j = False
+        k = False
         if nx > 2:
             dim += 1
             i = "x"
@@ -119,6 +147,7 @@ class PartisnRead(object):
                 j = "z"
             else:
                 k = "z"
+        
         # Return dimension data
         if dim == 1:
             return [i]
@@ -132,6 +161,56 @@ class PartisnRead(object):
         # reads material properties from the loaded dagmc_geometry
         # cell # -> material name & vol fract -> isotope name & dens
         pass
+        
+    def _define_zones(self, dg):
+        # defines the "zones" based on unique discretize_geom results
+        # dg = discretize_geom record array
+        
+        voxel = {}
+        
+        # define a single voxel
+        for i in dg:
+            idx = i[0]
+            #print(i[1])
+            #print(idx)
+            if idx not in voxel.keys():
+                voxel[idx] = {}
+                voxel[idx]['cell'] = []
+                voxel[idx]['vol_frac'] = []
+                #voxel[idx]['rel_error'] = []
+                
+            voxel[idx]['cell'].append(i[1])
+            voxel[idx]['vol_frac'].append(i[2])
+            #voxel[idx]['rel_error'].append(i[3])
+        
+        # !!!! Come back to this later !!!!
+        # determine which voxels are identical
+        z = 1    # start zone counter
+        zones = {}
+        for idx in voxel.keys():
+            if z not in zones.keys():
+                zones[z] = {}
+                zones[z]['cell'] = voxel[idx]['cell']
+                zones[z]['vol_frac'] = voxel[idx]['vol_frac']
+            else:
+                for zz in zones.keys():
+                    c_tf = False
+                    vf_tf = False
+                    if zones[zz]['cell'] == voxel[idx]['cell']:
+                        c_tf = True
+                    if zones[zz]['vol_frac'] == voxel[idx]['vol_frac']:
+                        vf_tf = True
+                    if c_tf and vf_tf:
+                        break
+        print(zones)
+                        
+        
+        #for item in voxel.iteritems():
+        #    print(item)
+            
+        names = dg.dtype.names
+        print(names)
+        
        
 
 class PartisnWrite(object):
