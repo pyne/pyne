@@ -40,6 +40,7 @@ import tables
 from pyne import dagmc
 from pyne.material import Material
 from pyne.material import MultiMaterial
+from pyne.material import MaterialLibrary
 
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
@@ -68,52 +69,65 @@ class PartisnRead(object):
     Parameters
     ----------
         mesh :: mesh object, a premade mesh object that conforms to the 
-            geometry.
-            Can be 1-D, 2-D, or 3-D.
-            note: only Cartesian based geometries are supported.
-        hfm :: file, a material-laden dagmc geometry file.
+                geometry.
+                    Can be 1-D, 2-D, or 3-D.
+                    note: only Cartesian based geometries are supported.
+        hdf5 :: file, a material-laden dagmc geometry file.
         nucdata :: file, nuclear data cross section library.
-            note: only BXSLIB format is currently supported.
-        coord_sys :: int, (optional), defines the coordinate system used.
-            1 = Cartesian (default)
-            2 = cylindrical
-            3 = spherical
-        fine :: int, (optional), number of fine mesh intervals per
-            coarse mesh.
-            default = 10
+                    note: only BXSLIB format is currently supported.
+        coord_sys :: int, optional, defines the coordinate system used.
+                    1 = Cartesian (default)
+                    2 = cylindrical
+                    3 = spherical
+        datapath :: str, optional, The path in the heirarchy to the data table 
+                in an HDF5 file. (for MaterialLibrary)
+                    default = material_library/materials
+        nucpath :: str, optional, The path in the heirarchy to the 
+                nuclide array in an HDF5 file. (for MaterialLibrary)
+                    default = material_library/nucid
+            
+        *fine :: int, optional, number of fine mesh intervals per
+                coarse mesh.
+                    default = 10
         
     Attributes
     ----------
         bounds :: dict of lists of floats, values for the mesh bounds
-            in each dimension present
-        fine :: int, (optional), number of fine mesh intervals
-        
+                in each dimension present
+
 
         
     """
     
-    def __init__(self, mesh, h5m, nucdata, **kwargs):
+    def __init__(self, mesh, hdf5, nucdata, **kwargs):
         
         # read optional inputs
         coord_sys = kwargs['coord_sys'] if 'coord_sys' in kwargs else 1
         if coord_sys != 1:
             warn("Only Cartesian geometries are currently supported")
-            
-        #self.fine = kwargs['fine'] if 'fine' in kwargs else 10
         
-        dagmc_geom = dagmc.load(h5m)
+        # change the default paths once they are known!
+        datapath = kwargs['datapath'] if 'datapath' in kwargs else '/materials'
+        nucpath = kwargs['nucpath'] if 'nucpath' in kwargs else '/nucid'
+            
+        self.fine = kwargs['fine'] if 'fine' in kwargs else 10
+        
+        dagmc_geom = dagmc.load(hdf5)
         dg = dagmc.discretize_geom(mesh)
+        #print(dg)
                
         # determine if 1D, 2D, or 3D
         dim = self.get_dimensions(mesh)
-
         
         # collect the bounds data
         self.bounds = {}
         for i in dim:
             self.bounds[i] = mesh.structured_get_divisions(i)
         
-        self._define_zones(dg)
+        # Read the materials from the hdf5
+        self._read_materials(hdf5, datapath, nucpath)
+        
+        #self._define_zones(dg)
         
         
     def get_dimensions(self, mesh):
@@ -157,12 +171,16 @@ class PartisnRead(object):
             return [i, j, k]
             
     
-    def _read_materials(self, dagmc_geom):
+    def _read_materials(self, hdf5, datapath, nucpath):
         # reads material properties from the loaded dagmc_geometry
         # cell # -> material name & vol fract -> isotope name & dens
-        pass
         
+        self.matlib = MaterialLibrary(hdf5,datapath=datapath,nucpath=nucpath)
+        print(self.matlib['mat:M9'])
+        
+            
     def _define_zones(self, dg):
+        ### !!! NOT FINSIHED !!! ###
         # defines the "zones" based on unique discretize_geom results
         # dg = discretize_geom record array
         
@@ -210,7 +228,16 @@ class PartisnRead(object):
             
         names = dg.dtype.names
         print(names)
-        
+    
+    def _read_nucdata(self, nucdata):
+        # will read the binary file's nuc data
+        pass
+    
+    def _convert_isotopes(self):
+        # input arguments TBD
+        # will convert the names of the PyNE isotopes to names in the
+        # BXSLIB
+        pass
        
 
 class PartisnWrite(object):
