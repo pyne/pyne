@@ -25,6 +25,18 @@ present" (p. 5). The S_N equations define the transport equation along specific
 segments of the angular variable, omega, such that omega(n)=(mu,eta,xi)^T, with
 n = 1,..,N. 
 
+All of the methods discussed here are discontinous finite element methods (DFEM),
+which can also be called nodal methods. 
+"Common to all FEM schemes is that the solution of the PDE is approximated by a linear
+combination of functions belonging to some finite dimensional trial function space. The un-
+knowns of the FEM computation are the coefficients of the linear combination of trial functions,
+also referred to as expansion coefficients." (P. 14)
+Nodal methods share these properties:
+* All function spaces are defined local to a mesh cell.
+* Coupling between cells occurs only through their faces.
+* Coupling between cells is only imposed in an integral sense.
+* Increasing the order of the methods is achieved by increasing the local order of expansion. 
+
 *****************************
 General AHOTN Theory
 *****************************
@@ -50,7 +62,7 @@ They are the following: Linear-Nodal (LN), Linear-Linear (LL), and the NEFD algo
 further below.
 
 *****************************
-Ahotn-LL/-LN theory
+AHOTN-LL/-LN theory
 *****************************
 
 Both the AHOTN Linear Linear and Linear Nodal methods use linear TMB approximations to solve the SN equations.  
@@ -68,7 +80,7 @@ equations” [1,p.40].
 
 
 *****************************
-Ahotn-NEFD theory
+AHOTN-NEFD theory
 *****************************
 
 ?????? Method:
