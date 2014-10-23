@@ -37,8 +37,26 @@ Nodal methods share these properties:
 * Coupling between cells is only imposed in an integral sense.
 * Increasing the order of the methods is achieved by increasing the local order of expansion. 
 
+These methods are implemented and described below:
+* :ref:`hodd`
+* :ref:`ahotn`
+* :ref:`ahotn-ll-ln`
+* :ref:`ahotn-nefd`
+* :ref:`dgfem-lagrange`
+* :ref:`dgfem-ld`
+* :ref:`dgfem-ll`
+* :ref:`sct-step`
+
+.. _hodd:
 *****************************
-General AHOTN Theory
+HODD
+*****************************
+
+Higher Order Diamond Difference (HODD)
+
+.. _ahotn:
+*****************************
+General AHOTN
 *****************************
 
 The AHOTN methods are a type of Transverse Moment Type Methods (TMB).  TMB methods are a nodal method 
@@ -61,8 +79,9 @@ There are three solvers that use the AHOTN method to solve the neutron transport
 They are the following: Linear-Nodal (LN), Linear-Linear (LL), and the NEFD algorithm.  They are discussed 
 further below.
 
+.. _ahotn-ll-ln:
 *****************************
-AHOTN-LL/-LN theory
+AHOTN-LL/-LN
 *****************************
 
 Both the AHOTN Linear Linear and Linear Nodal methods use linear TMB approximations to solve the SN equations.  
@@ -78,9 +97,9 @@ view the LN provides the least coupling among the set of equations while the LL 
 relations than both LN and AHOTN-1 and AHOTN-1 has stronger coupling than LL and LN in the nodal balance 
 equations” [1,p.40].
 
-
+.. _ahotn-nefd:
 *****************************
-AHOTN-NEFD theory
+AHOTN-NEFD
 *****************************
 
 ?????? Method:
@@ -91,14 +110,16 @@ per-cell AHOTN system of equations. Typically, the WDD relations Eq. 2.48 are so
 the outflow face moments and substituted into the nodal balance relations Eq. 2.23 which are
 then solved for the (Λ + 1) 3 unknown nodal flux moments (NEFD algorithm),"(1, p.37)
 
+.. _dgfem:
 *****************************
-DGFEM General Theory
+DGFEM General
 *****************************
 
-The DGFEM solvers use the Discontinuous Galerkin Finite Element Method (DGFEM) to solve the SN equations.  
-These use identical polynomial test and trial function spaces that are typically substituted into the weak 
-form and tested against all members of the test space to obtain a per-cell system of equations." (1, p.25)  
-"In summary two families of DGFEM function spaces are mostly used in discretizing the spatial variable in 
+The Discontinuous Galerkin Finite Element Method (DGFEM) solver uses 
+identical test and trial function spaces that are typically substituted into the weak 
+form of the transport equation and tested against all members of the test space 
+to obtain a per-cell system of equations.
+Two families of DGFEM function spaces are mostly used in discretizing the spatial variable in 
 the SN approximation of the transport equation: (1) the complete family and (2) the Lagrange family." (1,p27) 
 
 "Assume that we formulate our function spaces such that we solve for point values of the flux, i.e. we use 
@@ -113,8 +134,9 @@ to be a more natural choice for triangles/tetrahedra." (1,p.28)
 When comparing these three included DGFEM solvers with a fixed expansion order, the Lagrange family
 is more accurate, while the complete family executes faster.
 
+.. _dgfem-lagrange:
 *****************************
-DGFEM-Lagrange theory
+DGFEM-Lagrange
 *****************************
 
 DGFEM-Lagrange is part of the Lagrange family of solvers of the DGFEM type.  All Lagrange solvers are implemented 
@@ -125,8 +147,9 @@ is associated with a support point at which its value is unity while it assumes 
 points. The unknowns in Reed’s methods are then the flux values at the support points and the method’s order is 
 related to the number of support points within a single cell." [1,p.26]
 
+.. _dgfem-ld:
 *****************************
-DGFEM-LD theory
+DGFEM-LD
 *****************************
 
 Linearly Discontinuous Method:  "The linear discontinuous DGFEM method (LD) is the special case of the complete 
@@ -134,14 +157,16 @@ DGFEM method of order Λ = 1. It is special in that the local matrix T is of siz
 can be precomputed thus saving execution time. Following [24] we decided to implement the LD method distinctly 
 from the arbitrary order complete DGFEM kernel in order to create a highly optimized method." (1, p.92)
 
+.. _dgfem-ll:
 ********************************
-DGFEM-LL theory (linear-linear?)
+DGFEM-LL
 ********************************
 
 Part of the complete family?  Or is this the complete dgfem solver?
 
+.. _sct-step:
 *****************************
-Sct-step theory
+Sct-Step
 *****************************
 
 One of the problems with most spatial solvers is the inconsistent and sharp boundary conditions.  A new method 
@@ -163,8 +188,9 @@ in the infinity norm for C 0 type problems and (2) improved accuracy and observe
 C 0 and C 1 test problems. Encouraged by the success of Duo’s SCT algorithm we decided to implement a similar 
 algorithm for three-dimensional Cartesian geometry." (1, p.105)
 
+.. _advantages:
 *************************************
-Advantages & Disadvantages discussion
+Advantages & Disadvantages Discussion
 *************************************
 
 "The fastest executing methods are as expected the zeroth order Diamond Difference and
@@ -184,6 +210,7 @@ much longer execution times than AHOTN or HODD of the same order is the signific
 expensive solution of the linear system of equations. We conjecture that the structure of the
 DGLA matrices causes the Lapack routine dgesv to execute slower." (1, p.103)
 
+.. _assumptions:
 ***********
 Solver Assumptions
 ***********
@@ -192,12 +219,7 @@ Solver Assumptions
 2.  All mediums are non-multiplying (sigmaf = 0)
 3.  Isotropic scattering present.
 
-**********************
-Additional Information
-**********************
-
-
-
+.. _refs:
 **********
 References
 **********
