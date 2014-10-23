@@ -22,10 +22,6 @@ INTEGER :: xsbc, xebc, ysbc, yebc, zsbc, zebc
 REAL*8 :: err, tolr
 INTEGER :: itmx, iall
 
-! Solution check frequency
-REAL*8 :: tchk
-INTEGER :: ichk
-
 ! Extra variables derived from input
 INTEGER :: apo, dofpc, order, ordsq, ordcb, orpc
 REAL*8, DIMENSION(:,:), ALLOCATABLE :: ssum
@@ -89,5 +85,8 @@ INTEGER :: itmflag
 
 ! Matrix printing
 INTEGER :: matrix
+
+! Error code
+INTEGER :: error_code
 
 END MODULE

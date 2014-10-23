@@ -11,8 +11,14 @@ import pyne.spatialsolver
 from dictionary_populate_test import populate_simple, populate_simple_with_warnings, populate_intermediate_1
 
 def test_ahotn_ln():
-  a = populate_simple("AHOTN","LN") 
+  a = populate_simple("AHOTN","LN")
+  #a['spatial_order'] = 100
   dict_results = pyne.spatialsolver.solve(a)
+
+  if(dict_results['success'] == 0):
+    raise AssertionError("Error: " + dict_results['error_msg'])
+  
+
   rounded_flux = np.around(dict_results['flux'], decimals=4)
 
   correct_flux =  [[[ 3.52650199,  3.09260257,  3.09260257,  3.52650199],

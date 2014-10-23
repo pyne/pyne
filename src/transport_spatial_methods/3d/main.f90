@@ -8,7 +8,7 @@
 !> @param solver_in spatial solver class
 !> @param solver_type_in spatial solver specific type
 !> @param spatial_order_in lambda order value
-!> @param spatial_method_in spatial method
+!> REMOVED @param spatial_method_in spatial method
 !> @param angular_quadrature_order_in quadrature order
 !> @param angular_quadrature_type_in quadrature type
 !> @param nodes_x_in number of nodes in x direction
@@ -35,8 +35,6 @@
 !> @param max_iterations_in
 !> @param moments_converged_in
 !> @param converge_tolerence
-!> @param ichk_in
-!> @param ichk_tolerence_in
 !> @param max_mom_printed_in
 !> @param moment_sum_flag_in
 !> @param mom_at_a_pt_flag_in
@@ -48,7 +46,7 @@
 !> @todo write the rest of the subroutine
 
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
- solver_in, solver_type_in, spatial_order_in, spatial_method_in,&
+ solver_in, solver_type_in, spatial_order_in,&
  angular_quadrature_order_in, qdtypin, nodes_x_in, nodes_y_in, nodes_z_in,&
  num_groups_in, num_materials_in, x_cell_widths_in, y_cell_widths_in,&
  z_cell_widths_in, x_boundry_condition_1_in, x_boundry_condition_2_in,&
@@ -56,8 +54,9 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  z_boundry_condition_2_in, material_id_in, quadrature_file, xs_file_in,&
  source_input_file_in, bc_input_filein, flux_output_filein, &
  convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence, &
- ichk_in, ichk_tolerence_in, max_mom_printed_in, moment_sum_flag_in,&
- mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout)
+ max_mom_printed_in, moment_sum_flag_in,&
+ mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout,error_code_out,&
+ tsolve_out, ttosolve_out, tend_out) !solver_in, solver_type_in, spatial_order_in, spatial_method_in,&
 
 !-------------------------------------------------------------
 !
@@ -97,6 +96,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
 
 USE invar
 USE solvar
+USE timevar
 IMPLICIT NONE
   
 INTEGER :: i, j, k, n
@@ -108,7 +108,8 @@ REAL*8 :: wtsum
 
 CHARACTER(80), INTENT(IN) :: titlein
 CHARACTER(30), INTENT(IN) :: solver_in, solver_type_in
-INTEGER, INTENT(IN) :: spatial_order_in, spatial_method_in, angular_quadrature_order_in,&
+!INTEGER, INTENT(IN) :: spatial_order_in, spatial_method_in, angular_quadrature_order_in,&
+INTEGER, INTENT(IN) :: spatial_order_in, angular_quadrature_order_in,&
  qdtypin, nodes_x_in, nodes_y_in, nodes_z_in, num_groups_in, num_materials_in
 REAL*8, INTENT(IN), DIMENSION(:) :: x_cell_widths_in, y_cell_widths_in, z_cell_widths_in
 INTEGER, INTENT(IN) :: x_boundry_condition_1_in, x_boundry_condition_2_in,&
@@ -126,10 +127,6 @@ CHARACTER(30), INTENT(IN) :: quadrature_file, xs_file_in, source_input_file_in,&
 REAL*8, INTENT(IN) :: convergence_criterion_in, converge_tolerence
 INTEGER, INTENT(IN) :: itmxin, moments_converged_in
 
-! Solution check frequency
-REAL*8, INTENT(IN) :: ichk_in
-INTEGER, INTENT(IN) :: ichk_tolerence_in
-
 ! Editing data
 INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_in,&
  quad_flux_print_flag_in
@@ -139,12 +136,20 @@ INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_
 REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in,num_groups_in*nodes_z_in) :: fluxout
 ! Works for all solvers!
 
+INTEGER, INTENT(OUT) :: error_code_out
+REAL*8, INTENT(OUT) :: tsolve_out, ttosolve_out, tend_out
+
+! Set error codes to 0 initially
+error_code = 0
+error_code_out = error_code
+
 ! Set all of the input values
 title = titlein
 solver = solver_in
 solvertype = solver_type_in
 lambda = spatial_order_in
-meth = spatial_method_in
+!meth = spatial_method_in
+meth = 0
 qdord = angular_quadrature_order_in
 qdtyp = qdtypin
 nx = nodes_x_in
@@ -168,8 +173,6 @@ err = convergence_criterion_in
 tolr = converge_tolerence
 itmx = itmxin
 iall = moments_converged_in
-tchk = ichk_in
-ichk = ichk_tolerence_in
 momp = max_mom_printed_in
 momsum = moment_sum_flag_in
 mompt = mom_at_a_pt_flag_in
@@ -181,25 +184,44 @@ CALL version
 IF (solver == "DGFEM") THEN
     IF (solvertype == "LD") THEN
         lambda=1
+        WRITE(8,*) "DGFEM LN SOLVER" 
+    ELSE IF (solvertype == "DENSE") THEN
+        WRITE(8,*) "DGFEM DENSE SOLVER" 
+    ELSE IF (solvertype == "LAGRANGE") THEN
+        WRITE(8,*) "DGFEM LAGRANGE SOLVER"
     END IF
 ELSE IF (solver == "AHOTN") THEN
     IF (solvertype == "LN" .or. solvertype == "LL") THEN
         IF (lambda .ne. 1) then
             WRITE(8,*) "ERROR: Lambda must be equal to one." 
-            STOP
+            error_code_out = 1001
+            RETURN
+            !STOP
         END IF
     END IF
+    IF (solvertype == "LN") THEN
+        WRITE(8,*) "AHOTN LN SOLVER" 
+    ELSE IF (solvertype == "LL") THEN
+        WRITE(8,*) "AHOTN LL SOLVER" 
+    ELSE IF (solvertype == "NEFD") THEN
+        WRITE(8,*) "AHOTN NEFD SOLVER" 
+    END IF
 ELSE IF (solver == "SCTSTEP") THEN
+    WRITE(8,*) "SCT STEP SOLVER" 
     lambda = 0
 END IF
 
 ! Check that the order given is greater than zero and is even
 IF (qdord <= 0) THEN
     WRITE(8,'(/,3x,A)') "ERROR: Illegal value for qdord. Must be greater than zero."
-    STOP
+    error_code_out = 1002
+    RETURN
+    !STOP
 ELSE IF (MOD(qdord,2) /= 0) THEN
     WRITE(8,'(/,3x,A)') "ERROR: Illegal value for the quadrature order. Even #s only."
-    STOP
+    error_code_out = 1003
+    return
+    !STOP
 END IF
 
 !INQUIRE(FILE = xs_file_in, EXIST = ex1)
@@ -240,7 +262,9 @@ IF (qdtyp == 2) THEN
   INQUIRE(FILE=quadrature_file, EXIST=ex3)
   IF (qdfile == '        ' .OR. ex3 .eqv. .FALSE.) THEN
     WRITE(8,'(/,3x,A)') "ERROR: illegal entry for the qdfile name."
-    STOP
+    error_code_out = 1004
+    RETURN
+    !STOP
    END IF
    OPEN(UNIT=10, FILE=quadrature_file)
    READ(10,*)
@@ -258,6 +282,11 @@ END IF
 IF (qdtyp == 2) CLOSE(UNIT=10)
 ! Call for the input check
 CALL check
+
+IF (error_code /= 0) THEN
+  error_code_out = error_code
+  RETURN
+END IF
 
 ! Setting orpc value for sweep.
 IF (solver == "DGFEM") THEN
@@ -288,10 +317,23 @@ CALL output
 !CALL output_phi("phifile")
 fluxout = flux_out
 
+! Time the end of the job
+CALL CPU_TIME(tend)
+
+tsolve_out = tsolve
+ttosolve_out = ttosolve
+tend_out = tend
+
+!WRITE(8,101) "SolveTot", tsolve, tsolve-ttosolve
+!WRITE(8,101) "PrintOut", tend, tend-tsolve
+!WRITE(8,102)
+!100 FORMAT(5X,'WorkDone',3X,'Absolute(s)',6X,'Difference(s)')
+!101 FORMAT(5X,A8,3X,F9.3,5X,F9.3)
+!102 FORMAT(//,'*********************   END PROGRAM  ************************')
+
+
 !Cleanup previously found in old main file
-
 IF( allocated(flux_out)) deallocate(flux_out)
-
 IF( allocated(ang)) deallocate(ang)
 IF( allocated(w)) deallocate(w)
 IF( allocated(sigt)) deallocate(sigt)

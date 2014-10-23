@@ -49,27 +49,26 @@ format we choose to take all this information in by is with a python dictionary.
     For the SCTSTEP solver, no solver_type key is required.  The key can be set to something or be left empty.
 
 **Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**::
-
+  The Spatial expansion order is the expansion order of the spatial moment.
   key: "spatial_order"
   type: Integer
   ex: 0
   default: 1
+    Spatial order is the expansion of the spatial moment. 
 
-**Entry: Method (meth): 0/1 => AHOT-N-SI/AHOT-N-ITM**::
-
-  key: "spatial_method"   
-  type: Integer
-  ex: 0
-  default: 0
-
-**Entry: Quadrature order (can only be an even number)**::
-
+**Entry: Quadrature order**::
+  The quadrature order is the number of angles to be used per octet.  For N sets of angles, there will
+  be (N * (N + 2) / 8) ordinates per octet. The quadrature order may only be an even number!
   key: "quadrature_order"
   type: Integer
   ex: 4
   default: 4
 
 **Entry: Qudrature type:**::
+  The quadrature type is the type of quadrature scheme the code should use.  The possibilities are as follow:
+    1 - TWOTRAN
+    2 - EQN
+    3 - Read-in
 
   key: "quadrature_type"
   type: Integer
@@ -119,7 +118,17 @@ format we choose to take all this information in by is with a python dictionary.
  default: No default
 
 **Entry: x start and end boundary conditions**::
-
+ 'x_boundry_conditions', 'y_boundry_conditions', and 'z_boundry_conditions' are the boundry conditions for each face of the cubic mesh. The entries are as following:
+    x[0] = xsbc
+    x[1] = xebc
+    y[0] = ysbc
+    y[1] = yebc
+    y[0] = zsbc
+    y[1] = zebc
+    The following are supported boundry conditions: 
+      0 - vacuum
+      1 - reflective
+      2 - fixed inflow
  key: "x_boundry_conditions"
  type: Integer array
  ex: [2, 2]
@@ -138,17 +147,6 @@ format we choose to take all this information in by is with a python dictionary.
  type: Integer array
  ex: [2, 2]
  default: No default
-    'x_boundry_conditions', 'y_boundry_conditions', and 'z_boundry_conditions' are the boundry conditions for each face of the cubic mesh. The entries are as following:
-    x[0] = xsbc
-    x[1] = xebc
-    y[0] = ysbc
-    y[1] = yebc
-    y[0] = zsbc
-    y[1] = zebc
-    The following are supported boundry conditions: 
-      0 - vacuum
-      1 - reflective
-      2 - fixed inflow
 
 **Entry: Material info**::
 
@@ -165,35 +163,29 @@ _Note: we need to give directions about the ordering. RS
  type: string
  ex: 'quad_file'
  default: No default  
- note: need to add file format / contents description
+ note: See input file formatting notes in the Source File Formatting section.
 
 **Entry: cross section info file name**::
 
  key: "xs_file"
  type: string
  default: 'xs_file'
+ note: See input file formatting notes in the Source File Formatting section.
 
-_note: need to add more specific file format / contents description, see conversation in working notes
 
 **Entry: source file name**::
 
-        key: "source_input_file"
-        type: string
-        default: 'src.dat'
-
-_note: need to add file format / contents description
+  key: "source_input_file"
+  type: string
+  default: 'src.dat'
+  note: See input file formatting notes in the Source File Formatting section.
 
 **Entry: boundary condition file name [optional]**::
 
  key: "bc_input_file"
  type: string
  default: No default
-
-_note: need to add file format / contents description
-
-_Rachel, how should we deal with these? They're both required for the example to run, but future users of pyne won't necessarily have them relevant to their problems. MM
-
-_We need to figure out how to generate them so we can give directions for that. Sebastian can help us with this part RS
+ note: See input file formatting notes in the Source File Formatting section.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 **Entry: output file name [optional]**::
 
@@ -351,16 +343,43 @@ When ran, the solvers return a dictionary of useful solution data.  It contains 
           Row: First y row (j) of cells
           Cell: First cell in x direction
 
+**Entry: Solver success code**::
+  key:  "success"
+  type: Integer
+  format: 1 means yes, the solve succeeded.  0 means it failed.
 
+**Entry: Raw system time of solver start **::
+  time_start provides you with the system time when the solver began running.
+  key:  "time_start"
+  type: double
+  format: system time
+
+**Entry: Total run time **::
+  total_time is the total time the solver took to solve.
+  key:  "total_time"
+  type: double
+  format: system time
+
+**Entry: Total print time **::
+  print_time is the total time the solver took to print results.
+  key:  "print_time"
+  type: double
+  format: system time
+
+**Entry: Error Message **::
+  If the solver fails, error_msg is a string describing why the solver failed.
+  key:  "error_msg"
+  type: String
 
 -----------------------------------
 Source File Formatting
 -----------------------------------
 
 The spatial solver dictionary requires multiple input binary source files.  The required files are the following:
-    **BC input file
-    **Source input file
-    **...
+    1. XS file
+    2. Source input file
+    3. BC input file
+    4. Quad file (optional)
 
 Here is a breif description of how each should be formatted.
 
@@ -382,10 +401,10 @@ Here is a breif description of how each should be formatted.
       The source file is a file contaning source information for each cell ????.  The formatting is dependant on the solver
       you select.
 
-      For the AHOTN solvers, the source file should be formatted as following.  
-      There should be ng * nx * ny * nz * lambda * lambda * lambda ?source? values present.
+      For the AHOTN and DGFEM solvers, the source file should be formatted as following.  
+      There should be ng * nx * ny * nz * lambda * lambda * lambda ?source? entries present.
       We will refer to the index of each ?source? value as (ng, nx, ny, nz, lambda_x, lambda_y, lambda_z).
-      Thus, the source values should be in the following order:
+      The source entries should be in the following order:
           (1,1,1,1,1,1,1)
           (1,1,1,1,1,1,2)
           (1,1,1,1,1,1,.)
@@ -442,8 +461,57 @@ Here is a breif description of how each should be formatted.
 		                      DO jz=0,lambda
 		                         READ(12) s(jx,jy,jz,ix,iy,iz,g)
 
+
+      For the SCT STEP solver, the source file should be formatted as following.  
+      There should be ng * nx * ny * nz ?source? entries present.
+      We will refer to the index of each ?source? value as (ng, nx, ny, nz).
+      The source entries should be in the following order:
+          (1,1,1,1)
+          (1,1,1,2)
+          (1,1,1,.)
+
+          (1,1,2,1)
+          (1,1,2,2)
+          (1,1,2,.)
+          (1,1,.,.)
+
+          (1,2,1,1)
+          (1,2,1,2)
+          (1,2,1,.)
+          (1,2,2,1)
+          (1,2,2,2)
+          (1,2,2,.)
+          (1,2,.,.)
+          (1,.,.,.)
+
+          (2,1,1,1)
+          (2,1,1,2)
+          (2,1,1,.)
+          (2,1,2,1)
+          (2,1,2,2)
+          (2,1,2,.)
+          (2,1,.,.)
+          (2,2,1,1)
+          (2,2,1,2)
+          (2,2,1,.)
+          (2,2,2,1)
+          (2,2,2,2)
+          (2,2,2,.)
+          (2,2,.,.)
+          (.,.,.,.)
+
+      When being read in, they will be iterated over by the following loop:
+        DO g=1,ng
+           DO ix=1,nx
+              DO iy=1,ny
+                 DO iz=1,nz
+                     READ(12) s(ix,iy,iz,g,1,1,1)
+
+
+  (3.) Boundry Condition file (only needed if one of the boundry conditions specified above is 2):
+      The boundry condition file contains information about the incoming scalar flux on each face of each cell.
     
-  (3.) Quadrature file (optional):
+  (4.) Quadrature file (optional):
       If the quadrature type you selected was 2, a quadrature file is required for running the solver.  If the quadrature type is not 2, no quadrature file is necessary.
 
 ! This line is supposed to be quadrature file name (qdfile) if you need one (type 2)            

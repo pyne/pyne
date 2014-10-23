@@ -26,7 +26,6 @@ s = 0.
 
 ! Open the source file for use
 OPEN(UNIT=12, FILE=srcfile,STATUS = "OLD", ACTION = "READ",FORM='UNFORMATTED')
-
 IF (solver == "AHOTN") THEN
 	DO g=1,ng
 		 DO ix=1,nx
@@ -75,6 +74,13 @@ ELSE IF (solver == "SCTSTEP") THEN
         DO iy=1,ny
            DO iz=1,nz
                READ(12) s(ix,iy,iz,g,1,1,1)
+               ! write(8,*) "source value: ", s(ix,iy,iz,g,1,1,1)
+
+write (8,40) s(ix,iy,iz,g,1,1,1), 0.9999, 0.9999
+40   format (3f20.14)
+
+
+
   !!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Needs to be removed
   ! s=0.0d0
