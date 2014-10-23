@@ -1,47 +1,32 @@
 .. _theorymanual_template:
 
 ===============================
-Ahot Spatial Solvers
+Spatial Solvers
 ===============================
 
 .. currentmodule:: pyne.spatialsolver
 
-<<<<<<< HEAD
-This page presents a brief summary of the underlying methods used in the :py:mod:`spatialsolver` module. For full details, consult "Development of a Quantitative Decision Metric for Selecting the Most Suitable Discretization Method for S_N Transport Problems", a disseration by Sebastian Schunert (2013). Chapter 2 has a detailed description of the methods implemented in PyNE. All code in this module is derived from Dr. Schunert's PhD work.
-=======
-This page presents a detailed explanation of how :py:mod:`spatialsolver` works, including
-underlying theory, any assocaited assumptions, and information about correct and
-appropriate use of this physics. Excerpts are taken from  Development of a Quantitative 
-Decision Metric for Selecting the Most Suitable Discretization Method for S N Transport 
-Problems by Sebastian Schunert.
->>>>>>> 2cc39cbbcd07e1fbf8d80a5d9ff8a62bc86dbeea
+This page presents a brief summary of the underlying methods used in the 
+:py:mod:`spatialsolver` module. For full details, consult "Development of a 
+Quantitative Decision Metric for Selecting the Most Suitable Discretization 
+Method for S_N Transport Problems", a disseration by Sebastian Schunert (2013).
+Chapter 2 has a detailed description of the methods implemented in PyNE. All 
+code in this module is derived from Dr. Schunert's PhD work.
+
+The spatial solver module contains a suite of methods that solve the S_N 
+formulation of the Boltzmann transport equation. What differentiates the 
+methods are their treatment of the spatial aspect of the solution process. 
+"The linear Boltzmann transport equation describes the evolution of the flux of
+neutral particles, i.e. neutrons or photons, in a host medium. It can be 
+obtained from the general Boltzmann transport equation by neglecting particle-
+particle interactions, the dependence of the material properties of the host 
+medium on the particle flux, and assuming that no electric force field is 
+present" (p. 5). The S_N equations define the transport equation along specific
+segments of the angular variable, omega, such that omega(n)=(mu,eta,xi)^T, with
+n = 1,..,N. 
 
 *****************************
-Fundamental solver theory
-*****************************
-
-<<<<<<< HEAD
-The spatial solver module contains a suite of methods that solve the S_N formulation of the Boltzmann transport equation. What differentiates the methods are their treatment of the spatial aspect of the solution process. "The linear Boltzmann transport equation describes the evolution of the flux of neutral particles, i.e. neutrons or photons, in a host medium. It can be obtained from the general Boltzmann transport equation by neglecting particle-particle interactions, the dependence of the material properties of the host medium on the particle flux, and assuming that no electric force field is present" (p. 5). The S_N equations define the transport equation along specific segments of the angular variable, omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N.
-=======
-  This suit of solvers uses the SN equations to solve the Boltzmann transport equation.  "The
-linear Boltzmann transport equation describes the evolution of the flux of neutral particles, 
-i.e. neutrons or photons, in a host medium. It can be obtained from the general Boltzmann transport 
-equation by neglecting particle-particle interactions, the dependence of the material properties 
-of the host medium on the particle flux, and assuming that no electric force field is present." (1 p.5).  
-
-  The following are all spatial discretization methods used to solve the Sn equations of the Neutron
-Transport Equation (nte).  There are three major assumptions each makes: (1) all systems are steady
-state (no time dependence), (2) in a non-multiplying medium (sigmaf = 0), and (3) featuring
-isotropic scattering.  The Sn equations make the transport equation solvable by solving the transport
-equation along specific segments of omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N.  A 
-nodal method is then used to come up with a specific solution.  The nodal method is what differentiates 
-each of these codes, as outlined below.
->>>>>>> 2cc39cbbcd07e1fbf8d80a5d9ff8a62bc86dbeea
-
-%The following are spatial discretization methods used to solve the S_N equations of the Neutron Transport Equation (nte). There are three major assumptions each makes: (1) all systems are steady state (no time dependence), (2) in a non-multiplying medium (sigmaf = 0), and (3) featuring isotropic scattering. The S_N equations define the transport equation along specific segments of the angular variable, omega, such that omega(n)=(mu,eta,xi)^T, with n = 1,..,N. A nodal method is then used to come up with a specific solution.  The nodal method is what differentiates each of these codes, as outlined below.
-
-*****************************
-General AHOTN theory
+General AHOTN Theory
 *****************************
 
 The AHOTN methods are a type of Transverse Moment Type Methods (TMB).  TMB methods are a nodal method 
