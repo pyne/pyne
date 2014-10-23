@@ -9,7 +9,7 @@ Spatial Solvers
 This page presents a brief summary of the underlying methods used in the 
 :py:mod:`spatialsolver` module. For full details, consult "Development of a 
 Quantitative Decision Metric for Selecting the Most Suitable Discretization 
-Method for SN Transport Problems", a disseration by Schunertastian Schunert (2013).
+Method for SN Transport Problems", a disseration by Schunertastian Schunert [Schunert]_.
 Chapter 2 has a detailed description of the methods implemented in PyNE. All 
 code in this module is derived from Dr. Schunert's PhD work.
 
@@ -21,59 +21,68 @@ neutral particles, i.e. neutrons or photons, in a host medium. It can be
 obtained from the general Boltzmann transport equation by neglecting particle-
 particle interactions, the dependence of the material properties of the host 
 medium on the particle flux, and assuming that no electric force field is 
-present" ([Schunert]_, p.5). The SN equations define the transport equation along specific
-segments of the angular variable, omega, such that omega(n)=(mu,eta,xi)^T, with
-n = 1,..,N. 
+present" ([Schunert]_, p.5). The SN equations define the transport equation 
+along specific segments of the angular variable, omega, such that omega(n)=(mu,
+eta,xi)^T, with n = 1,..,N. 
 
 All of the methods discussed here are discontinous finite element methods (DFEM),
-which can also be called nodal methods. 
-"Common to all FEM schemes is that the solution of the PDE is approximated by a linear
-combination of functions belonging to some finite dimensional trial function space. The un-
-knowns of the FEM computation are the coefficients of the linear combination of trial functions,
-also referred to as expansion coefficients." ([Schunert]_, p.14)
-Nodal methods share these properties:
+which can also be called nodal methods. "Common to all FEM schemes is that the 
+solution of the PDE is approximated by a linear combination of functions 
+belonging to some finite dimensional trial function space. The unknowns of the 
+FEM computation are the coefficients of the linear combination of trial functions,
+also referred to as expansion coefficients" ([Schunert]_, p.14). Nodal methods 
+share these properties:
 
 * All function spaces are defined local to a mesh cell.
 * Coupling between cells occurs only through their faces.
 * Coupling between cells is only imposed in an integral sense.
-* Increasing the order of the methods is achieved by increasing the local order of expansion. 
+* Increasing the order of the methods is achieved by increasing the local order
+  of expansion. 
 
 These methods are implemented and described below:
 
 * :ref:`ahotn`
 * :ref:`ahotn-ll-ln`
 * :ref:`ahotn-nefd`
+* :ref:`dgfem`
 * :ref:`dgfem-lagrange`
 * :ref:`dgfem-ld`
 * :ref:`dgfem-ll`
 * :ref:`sct-step`
 
 .. _ahotn:
+
 *****************************
 General AHOTN
 *****************************
 
-The AHOTN methods are a type of Transverse Moment Type Methods (TMB).  TMB methods are a nodal method 
-derived for an arbitrary expansion with order lambda.  They constitute the “per mesh-cell system of 
-equations from the spatial Legendre moments of the transport Eq. 2.23 augmented by closure/auxiliary 
-relations derived via the transverse moment procedure, followed by an approximate direction-by-direction
-analytical solution of the resulting 1D transport equation.” ([Schunert]_, p.33).  
+The Arbitrarily High Order Transport Method of the Nodal type (AHOTN) methods
+are a type of transverse moment based (TMB) method.  TMB 
+methods are derived for an arbitrary expansion with order lambda.  They 
+constitute the per mesh-cell system of equations from the spatial Legendre 
+moments of the transport equation augmented by closure/auxiliary relations 
+derived via the transverse moment procedure, followed by an approximate 
+direction-by-direction analytical solution of the resulting 1D transport 
+equation ([Schunert]_, p.33).  
 
-TMB methods are particularly good at resulting in accurate solutions on “course spatial meshes, thus 
-potentially increasing solution efficiency” ([Schunert]_,33).  This is needed, because most other methods developed
-at the time such as DD failed at solving course spatial meshes, resulting in either extremely inaccurate
-or negative solutions.  
+TMB methods are particularly good at resulting in accurate solutions on coarse 
+spatial meshes ([Schunert]_,33).  This is needed, because many traditional methods,
+such as diamond difference (DD) fail when applied to coarse spatial meshes, 
+resulting in either extremely inaccurate or negative solutions.  
 
-The AHOTN (Arbitrarily High Order Transport Method of the Nodal type) methods are unique from most other 
-TMB methods because they are developed to have a very compact weighted diamond difference (WDD) representation 
-of the per-cell set of equations.  A full derivation of the AHOTN solutions to the SN equations can be found 
-from pages 34 through 40 of [[Schunert]_].  
+The AHOTN methods are unique compared to most other TMB methods because they are
+developed to have a very compact weighted diamond difference (WDD) representation 
+of the per-cell set of equations.  A full derivation of the AHOTN solutions to 
+the SN equations can be found on pages 34-40 of [Schunert]_.  
 
-There are three solvers that use the AHOTN method to solve the neutron transport equation packaged with pyne.  
-They are the following: Linear-Nodal (LN), Linear-Linear (LL), and the NEFD algorithm.  They are discussed 
-further below.
+There are three AHOTN-type solvers accessible in PyNE, discussed further below:
+
+1. :ref:`Linear-Nodal (LN) <ahotn-ll-ln>`
+2. :ref:`Linear-Linear (LL) <ahotn-ll-ln>`
+3. :ref:`NEFD <ahotn-nefd>`
 
 .. _ahotn-ll-ln:
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AHOTN-LL/-LN
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -92,6 +101,7 @@ relations than both LN and AHOTN-1 and AHOTN-1 has stronger coupling than LL and
 equations” [[Schunert]_,p.40].
 
 .. _ahotn-nefd:
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AHOTN-NEFD
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -105,8 +115,9 @@ the outflow face moments and substituted into the nodal balance relations Eq. 2.
 then solved for the (Λ + 1) 3 unknown nodal flux moments (NEFD algorithm),"([Schunert]_, p.37)
 
 .. _dgfem:
+
 *****************************
-DGFEM General
+General DGFEM 
 *****************************
 
 "The Discontinuous Galerkin Finite Element Method (DGFEM) solver uses 
@@ -114,7 +125,7 @@ identical test and trial function spaces that are typically substituted into the
 form of the transport equation and tested against all members of the test space 
 to obtain a per-cell system of equations." ([Schunert]_, p.25)
 Two families of DGFEM function spaces are mostly used in discretizing the spatial variable in 
-the SN approximation of the transport equation: (1) the complete family and (2) the Lagrange family." ([Schunert]_,p.27) 
+the SN approximation of the transport equation: (1) the *complete* family and (2) the *Lagrange* family." ([Schunert]_,p.27) 
 
 "Assume that we formulate our function spaces such that we solve for point values of the flux, i.e. we use 
 Lagrange polynomials as basis functions. Then, in two-dimensional triangular geometry and three-dimensional 
@@ -129,29 +140,32 @@ When comparing these three included DGFEM solvers with a fixed expansion order, 
 is more accurate, while the complete family executes faster.
 
 .. _dgfem-lagrange:
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 DGFEM-Lagrange
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-DGFEM-Lagrange is part of the Lagrange family of solvers of the DGFEM type.  All Lagrange solvers are implemented 
-on the Lagrange function space, rather than the complete function space.  For an explanation of both spaces see 
+All Lagrange solvers are implemented 
+on the Lagrange function space rather than the complete function space.  For an explanation of both spaces see 
 4.4.1 and 4.4.2 from [[Schunert]_].  "The DGFEM method for discretizing the SN equations was first suggested by Reed and 
-Hill [36] for two-dimensional triangular cells using a basis of Lagrange polynomials: Each Lagrange basis function 
+Hill for two-dimensional triangular cells using a basis of *Lagrange* polynomials: Each Lagrange basis function 
 is associated with a support point at which its value is unity while it assumes a zero value at all other support 
 points. The unknowns in Reed’s methods are then the flux values at the support points and the method’s order is 
 related to the number of support points within a single cell." [[Schunert]_,p.26]
 
 .. _dgfem-ld:
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 DGFEM-LD
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Linearly Discontinuous Method:  "The linear discontinuous DGFEM method (LD) is the special case of the complete 
+Linear Discontinuous (LD) Method:  "The linear discontinuous DGFEM method (LD) is the special case of the complete 
 DGFEM method of order Λ = 1. It is special in that the local matrix T is of size 4 × 4 and therefore its inverse 
 can be precomputed thus saving execution time. Following [24] we decided to implement the LD method distinctly 
 from the arbitrary order complete DGFEM kernel in order to create a highly optimized method." ([Schunert]_, p.92)
 
 .. _dgfem-ll:
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 DGFEM-LL
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -159,6 +173,7 @@ DGFEM-LL
 Part of the complete family?  Or is this the complete dgfem solver?
 
 .. _sct-step:
+
 *****************************
 Sct-Step
 *****************************
@@ -183,6 +198,7 @@ C 0 and C 1 test problems. Encouraged by the success of Duo’s SCT algorithm we
 algorithm for three-dimensional Cartesian geometry." ([Schunert]_, p.105)
 
 .. _advantages:
+
 *************************************
 Advantages & Disadvantages Discussion
 *************************************
@@ -205,6 +221,7 @@ expensive solution of the linear system of equations. We conjecture that the str
 DGLA matrices causes the Lapack routine dgesv to execute slower." ([Schunert]_, p.103)
 
 .. _assumptions:
+
 *************************************
 Solver Assumptions
 *************************************
@@ -214,6 +231,7 @@ Solver Assumptions
 3.  Isotropic scattering present.
 
 .. _refs:
+
 *************************************
 References
 *************************************
