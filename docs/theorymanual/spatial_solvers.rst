@@ -131,10 +131,10 @@ test and trial function spaces that are typically substituted into the weak form
 of the transport equation and tested against all members of the test space to 
 obtain a per-cell system of equations." ([Schunert]_, p.25)
 Two families of DGFEM function spaces are most commonly used in discretizing the
-spatial variable in the SN approximation of the transport equation:
+spatial variable in the SN approximation of the transport equation ([Schunert]_, p.27):
 
 1. the *complete* family and 
-2. the *Lagrange* family" ([Schunert]_, p.27)
+2. the *Lagrange* family 
 
 Assume that we formulate our function spaces such that we solve for point values of the flux, i.e. we use 
 *Lagrange* polynomials as basis functions. Then, in two-dimensional triangular geometry and three-dimensional 
@@ -188,11 +188,12 @@ saving execution time ([Schunert]_, p.92).
 DGFEM-LL
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Need information here.
 
 .. _sct-step:
 
 *****************************
-Sct-Step
+SCT-STEP
 *****************************
 
 One of the problems with most spatial solvers is the inconsistent and sharp 
