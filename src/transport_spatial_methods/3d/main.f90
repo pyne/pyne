@@ -56,7 +56,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence, &
  max_mom_printed_in, moment_sum_flag_in,&
  mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout,error_code_out,&
- tsolve_out, ttosolve_out, tend_out) !solver_in, solver_type_in, spatial_order_in, spatial_method_in,&
+ tsolve_out, ttosolve_out, tend_out) 
 
 !-------------------------------------------------------------
 !
@@ -78,7 +78,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
 !    Solver types =  "AHOTN", "DGFEM", and "SCTSTEP"
 !                    - AHOTN solvers: "LL" "LN" and "NEFD"
 !                    - DGFEM solvers: "LD" "DENSE" and "LAGRANGE"
-!		                 - SCTSTEP solvers: SCTSTEP (only one)
+!		     - SCTSTEP solvers: SCTSTEP (only one)
 !
 ! Some problem size specifications that are passed in:
 !   lambda => LAMDBA, the AHOT spatial order
