@@ -2,7 +2,7 @@
 !> @brief Solves the neutron transport equation for the specified solver with the passed in input information
 !> @detail Standard usage of these solveres should be through the pyne spatial_solver interface.
 !> 
-!Do we want author names?
+!Code originally by Sebastian Schunert, modified by Josh Howland.
 !
 !> @param titlein desired title for solver run
 !> @param solver_in spatial solver class
@@ -108,7 +108,6 @@ REAL*8 :: wtsum
 
 CHARACTER(80), INTENT(IN) :: titlein
 CHARACTER(30), INTENT(IN) :: solver_in, solver_type_in
-!INTEGER, INTENT(IN) :: spatial_order_in, spatial_method_in, angular_quadrature_order_in,&
 INTEGER, INTENT(IN) :: spatial_order_in, angular_quadrature_order_in,&
  qdtypin, nodes_x_in, nodes_y_in, nodes_z_in, num_groups_in, num_materials_in
 REAL*8, INTENT(IN), DIMENSION(:) :: x_cell_widths_in, y_cell_widths_in, z_cell_widths_in
@@ -118,7 +117,6 @@ INTEGER, INTENT(IN) :: x_boundry_condition_1_in, x_boundry_condition_2_in,&
 
 ! Cell materials
 INTEGER, INTENT(IN), DIMENSION(:,:,:) :: material_id_in
-!ALLOCATE(mat(nodes_x_in,nodes_y_in,nodes_z_in))
 
 CHARACTER(30), INTENT(IN) :: quadrature_file, xs_file_in, source_input_file_in,&
  bc_input_filein, flux_output_filein
@@ -130,8 +128,6 @@ INTEGER, INTENT(IN) :: itmxin, moments_converged_in
 ! Editing data
 INTEGER, INTENT(IN) :: max_mom_printed_in, moment_sum_flag_in, mom_at_a_pt_flag_in,&
  quad_flux_print_flag_in
-
-!INTEGER, INTENT(IN), DIMENSION(:) :: out_dims 
 
 REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in,num_groups_in*nodes_z_in) :: fluxout
 ! Works for all solvers!
@@ -148,7 +144,6 @@ title = titlein
 solver = solver_in
 solvertype = solver_type_in
 lambda = spatial_order_in
-!meth = spatial_method_in
 meth = 0
 qdord = angular_quadrature_order_in
 qdtyp = qdtypin
@@ -178,7 +173,6 @@ momsum = moment_sum_flag_in
 mompt = mom_at_a_pt_flag_in
 qdflx = quad_flux_print_flag_in
 
-!ALLOCATE(fluxout(4,nx,ny,nz,ng,1,1))
 CALL version
 
 IF (solver == "DGFEM") THEN
@@ -248,7 +242,6 @@ ELSE IF (solver == "DGFEM") THEN
         ordcb = order**3
     END IF
 ELSE IF (solver=="SCTSTEP") THEN
-  !apo = (qdord*(qdord+2))/8
   order = lambda+1
   ordsq = order**2
   ordcb = order**3
@@ -314,7 +307,6 @@ END IF
 WRITE(8,*) "Solver type: ", solvertype
 CALL solve
 CALL output
-!CALL output_phi("phifile")
 fluxout = flux_out
 
 ! Time the end of the job
@@ -323,14 +315,6 @@ CALL CPU_TIME(tend)
 tsolve_out = tsolve
 ttosolve_out = ttosolve
 tend_out = tend
-
-!WRITE(8,101) "SolveTot", tsolve, tsolve-ttosolve
-!WRITE(8,101) "PrintOut", tend, tend-tsolve
-!WRITE(8,102)
-!100 FORMAT(5X,'WorkDone',3X,'Absolute(s)',6X,'Difference(s)')
-!101 FORMAT(5X,A8,3X,F9.3,5X,F9.3)
-!102 FORMAT(//,'*********************   END PROGRAM  ************************')
-
 
 !Cleanup previously found in old main file
 IF( allocated(flux_out)) deallocate(flux_out)
