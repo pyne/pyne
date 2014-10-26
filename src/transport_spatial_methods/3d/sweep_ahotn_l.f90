@@ -252,11 +252,12 @@ DO n = 1, apo
             b(4)=c*e_ahot_l(4,i,j,k) + s(1,0,0,i,j,k,g)/sig
 
             ! call AHOTN kernel
-						IF (solvertype == "LN" ) THEN
-	            call  ahotn_ln_kernel(x,y,z,mu,eta,xi,incx,incy,incz,sig,c,fx,fy(:,i,nfy),fz(:,i,j,nfy,nfz),b)
-						ELSE IF (solvertype == "LL" ) THEN
-							call  ahotn_ll_kernel(x,y,z,mu,eta,xi,incx,incy,incz,sig,c,fx,fy(:,i,nfy),fz(:,i,j,nfy,nfz),b)
-						END IF
+            IF (solvertype == "LN" ) THEN
+                call  ahotn_ln_kernel(x,y,z,mu,eta,xi,incx,incy,incz,sig,c,fx,fy(:,i,nfy),fz(:,i,j,nfy,nfz),b)
+            ELSE IF (solvertype == "LL" ) THEN
+                call  ahotn_ll_kernel(x,y,z,mu,eta,xi,incx,incy,incz,sig,c,fx,fy(:,i,nfy),fz(:,i,j,nfy,nfz),b)
+            END IF
+            
             ! Update the scalar flux solution
             !WRITE(8,*) "ffffffffffffffffffffffff",f(1,i,j,k,g,1,1)
             !WRITE (8,*) " w(n): ", w(n), " b(1) ", b(1)
