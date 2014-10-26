@@ -49,31 +49,35 @@ format we choose to take all this information in by is with a python dictionary.
     For the SCTSTEP solver, no solver_type key is required.  The key can be set to something or be left empty.
 
 **Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**::
-  The Spatial expansion order is the expansion order of the spatial moment.
+
   key: "spatial_order"
   type: Integer
   ex: 0
   default: 1
-    Spatial order is the expansion of the spatial moment. 
+
+  The Spatial expansion order is the expansion order of the spatial moment.
 
 **Entry: Quadrature order**::
-  The quadrature order is the number of angles to be used per octet.  For N sets of angles, there will
-  be (N * (N + 2) / 8) ordinates per octet. The quadrature order may only be an even number!
+
   key: "quadrature_order"
   type: Integer
   ex: 4
   default: 4
 
-**Entry: Qudrature type:**::
-  The quadrature type is the type of quadrature scheme the code should use.  The possibilities are as follow:
-    1 - TWOTRAN
-    2 - EQN
-    3 - Read-in
+  The quadrature order is the number of angles to be used per octet.  For N sets of angles, there will
+  be (N * (N + 2) / 8) ordinates per octet. The quadrature order may only be an even number!
+
+**Entry: Quadrature type:**::
 
   key: "quadrature_type"
   type: Integer
   ex: 1
   default: 1
+
+  The quadrature type is the type of quadrature scheme the code should use.  The possibilities are as follow:
+    1 - TWOTRAN
+    2 - EQN
+    3 - Read-in
 
 **Entry: Number of Nodes in x, y, and z directions (nx/ny/nz)**::
 
@@ -118,21 +122,21 @@ format we choose to take all this information in by is with a python dictionary.
  default: No default
 
 **Entry: x start and end boundary conditions**::
- 'x_boundry_conditions', 'y_boundry_conditions', and 'z_boundry_conditions' are the boundry conditions for each face of the cubic mesh. The entries are as following:
+ key: "x_boundry_conditions"
+ type: Integer array
+ ex: [2, 2]
+ default: No default
+ 'x_boundary_conditions', 'y_boundary_conditions', and 'z_boundary_conditions' are the boundary conditions for each face of the cubic mesh. The entries are as following:
     x[0] = xsbc
     x[1] = xebc
     y[0] = ysbc
     y[1] = yebc
     y[0] = zsbc
     y[1] = zebc
-    The following are supported boundry conditions: 
+    The following are supported boundary conditions: 
       0 - vacuum
       1 - reflective
       2 - fixed inflow
- key: "x_boundry_conditions"
- type: Integer array
- ex: [2, 2]
- default: No default
 
 **Entry: y start and end boundary conditions**::
 
@@ -175,7 +179,7 @@ _Note: we need to give directions about the ordering. RS
 
 **Entry: source file name**::
 
-  key: "source_input_file"
+  key: "source_input_file"roman atwood
   type: string
   default: 'src.dat'
   note: See input file formatting notes in the Source File Formatting section.
@@ -185,7 +189,7 @@ _Note: we need to give directions about the ordering. RS
  key: "bc_input_file"
  type: string
  default: No default
- note: See input file formatting notes in the Source File Formatting section.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ note: See input file formatting notes in the Source File Formatting section.
 
 **Entry: output file name [optional]**::
 
@@ -201,8 +205,17 @@ _note: need to add file format / contents description
  type: float
  ex: 1.e-12
  default: 1.e-12
-
-_We need to define what this criterion means. That is, what is it checking exactly so the user can pick a good value. Our default might change as well. RS
+ The convergence criterion is the maximum allowed relative difference (df) in the flux value from one sweep to the next.  The more times the solver
+ sweeps the more definite the solution will be.  As soon as the convergence criterion is met, the solver will stop sweeping and calculate
+ the final flux for that cell. ??Correct??
+ df is calculated as the following:  
+ f = current flux value
+ ct = convergence tolerance (key pair value "converge_tolerance"0
+ f1 = flux value from one iteration prior
+ If f - f1 > ct:
+   df = absolute(f - f1) / f1
+ Else
+   df = absolute(f - f1)
 
 **Entry: Maximum Iterations**::
 
@@ -222,64 +235,13 @@ _We need to provide a clear explanation of what this means. RS
 
 **Entry: Tolerance**::
 
- key: "tolerance"
+ key: "converge_tolerance"
  type: float
  ex: 1.e-10
  default: 1.e-10
-
-_We also need to define what this criterion means. That is, what is it checking exactly so the user can pick a good value. Our default might change as well. RS
-
-_I would call this relative_convergence_criteria. I would format double, since long is an integer format, right? But double precision has ~16 significant digits of precision, so maybe we should have a warning if the user goes beyond that?  MM
-
-**Entry: Frequency of Checking Solution**::
-
- key: "need_a_better_name"
- type: Integer
- ex:  0
- default: 0
-
-**Entry: Tolerance of Check**::
-
- key: "need_a_better_name"
- type: float
- ex: 1.e-14
- default: 1.e-14
-
-_Call it ichk_tolerance because it implies a relation/dependence on ichk, which it has. I think the double precision question (slash warning) is relevant here too. MM
-
-_We need better names on both of these based on what they actually do. RS
-
-_I left it as ichk and ichk_tolerance.  I'll try and think of something better, if one of you comes up with a better name in the meantime let me know JH
-
-_Sounds good. RS
-
-_The three entries below may not be necessary.
-    
-**Entry: Max moment to print**::
-
- key: "max_mom_printed"
- type: Integer
- ex: 0
- default: 0
-
-**Entry: flag for moment sum**::
-
- key: "moment_sum_flag"
- type: Integer
- ex: 1
- default: 0
-
-**Entry: flag for moment at a point**::
-
- key: "mom_at_a_pt_flag"
- type: Integer
- ex: 1
- default: 0
-
-_I'm not sure if we actually need any of these, so we may want to take all or some of them out. We don't have to take them out of the code for now, but we can keep the defaults as off and not tell the user about them. RS
-_I removed all three of these for now, but they are still passed in on the python side.  That way, later on we can go back and add them or chose to remove them once again. JH
-
-_great RS
+ Converge tolerance is the tolerance that determines how the relative difference between flux iterations (df)
+ will be calculated.  This effects when the solver will stop its mesh sweeps.  See the convergence criterion key
+ value pair for more information.
 
 **Entry: Flag for computing, presenting quadrant fluxes**::
 
@@ -294,11 +256,6 @@ _great RS
  type: Integer
  ex: 0
  default: 0
-
-_I'm not sure if we actually need either of these ones either. We don't have to take them out of the code for now, but we can keep the defaults as off and not tell the user about them. RS
-
-_i'm guessing one of these is a zero MM
-
 
 **Entry: ITM solution flag**::
 
@@ -381,7 +338,7 @@ The spatial solver dictionary requires multiple input binary source files.  The 
     3. BC input file
     4. Quad file (optional)
 
-Here is a breif description of how each should be formatted.
+Here is a brief description of how each should be formatted.
 
 
   (1.) XS file:
@@ -398,7 +355,7 @@ Here is a breif description of how each should be formatted.
         ! End Cross section file
 
   (2.) Source file:
-      The source file is a file contaning source information for each cell ????.  The formatting is dependant on the solver
+      The source file is a file containing source information for each cell ????.  The formatting is dependant on the solver
       you select.
 
       For the AHOTN and DGFEM solvers, the source file should be formatted as following.  
@@ -508,8 +465,8 @@ Here is a breif description of how each should be formatted.
                      READ(12) s(ix,iy,iz,g,1,1,1)
 
 
-  (3.) Boundry Condition file (only needed if one of the boundry conditions specified above is 2):
-      The boundry condition file contains information about the incoming scalar flux on each face of each cell.
+  (3.) Boundary Condition file (only needed if one of the boundary conditions specified above is 2):
+      The boundary condition file contains information about the incoming scalar flux on each face of each cell.
     
   (4.) Quadrature file (optional):
       If the quadrature type you selected was 2, a quadrature file is required for running the solver.  If the quadrature type is not 2, no quadrature file is necessary.
@@ -529,4 +486,6 @@ Spatialsolver API
     :members:
 
 .. _Spatialsolver: http://something.com/
+
+
 
