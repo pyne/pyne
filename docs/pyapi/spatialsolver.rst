@@ -226,19 +226,15 @@ if not present/specified.
 ::
  key: "convergence_criterion"
  type: float
- ex: 1.e-12
- default: 1.e-12
- To terminate the calculation, the convergence criterion 
- The convergence criterion is the cell-wise relative difference (df) in the flux value between solution iterates. 
- Once the flux in each cell satisfies this criterion, the solver will calculate the final flux.
- df is calculated as the following:  
- f = current flux value
- ct = convergence tolerance (value for this key, "converge_tolerance")
- f1 = flux value from the previous iteration
- If (f - f1) > ct:
-   df = absolute(f - f1) / f1
- Else
-   df = absolute(f - f1)
+ ex: 1.e-5
+ default: 1.e-5
+ The solution is considered converged and the calculation completes when the flux
+ in each cell at the current iteration is within "convergence_criterion" of the
+ previous iterate. This is generally the relative difference, but in cases of 
+ very small flux values the absolute difference is used instead (see the 
+ Convergence Tolerance entry below).  
+
+.. Josh: we should set this to default to 1.e-5
 
 **Entry: Tolerance**
 ::
@@ -246,9 +242,18 @@ if not present/specified.
  type: float
  ex: 1.e-10
  default: 1.e-10
- Converge tolerance is the tolerance that determines how the relative difference between flux iterations (df)
- will be calculated.  This effects when the solver will stop its mesh sweeps.  See the convergence criterion key
- value pair for more information.
+ Converge tolerance is the tolerance that determines how the difference between
+ flux iterates (df) that is used to determine convergence will be calculated. 
+ df is calculated as follows:
+   f = current flux value
+   ct = convergence tolerance (value for this key, "converge_tolerance")
+   f1 = flux value from the previous iteration
+   If f1 > ct:
+     df = absolute(f - f1) / f1
+   Else
+     df = absolute(f - f1)
+ The idea is to use the absolute difference instead of the relative difference
+ between iterates when the flux is very small to help avoid rounding error.
 
 **Entry: Maximum Iterations**
 ::
@@ -267,7 +272,7 @@ if not present/specified.
  ex: 0
  default: 0
 
-.. Josh: Isn't this taken out now?
+.. Josh: Can you look in the code and write about what this does?
 
 **Entry: Flag for computing, presenting quadrant fluxes**
 ::
@@ -276,7 +281,7 @@ if not present/specified.
  ex: 0
  default: 0
 
-.. Josh: Isn't this taken out now?
+.. Josh: Can you look in the code and write about what this does?
 
 **Entry: Flag for printing matrix file**
 ::
@@ -299,7 +304,7 @@ if not present/specified.
 -----------------------------------
 Output Dictionary Entries
 -----------------------------------
-When ran, the solvers return a dictionary of useful solution data.  It contains the following key-pair entries:
+When run, the solvers return a dictionary of useful solution data.  It contains the following key-pair entries:
 
 **Entry: Flux output array**::
   key:  "flux"
