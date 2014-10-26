@@ -27,49 +27,46 @@ WRITE (8,*)
 WRITE (8,*) "-------------------------- THE SOLUTION ----------------------------------"
 WRITE (8,*)
 
-
 IF (solver == "AHOTN") THEN
-	IF (solvertype == "LN" .or. solvertype == "LL") THEN
-		ALLOCATE(f_ahot_l(4,nx,ny,nz,ng), e_ahot_l(4,nx,ny,nz))
-    f_ahot_l = 0.0d0
-		call read_sp_wts_ahotn_l
-		! Read spatial weights
-		!!call read_sp_wts(lambda)
+    IF (solvertype == "LN" .or. solvertype == "LL") THEN
+        ALLOCATE(f_ahot_l(4,nx,ny,nz,ng), e_ahot_l(4,nx,ny,nz))
+        f_ahot_l = 0.0d0
+        ! Read spatial weights
+        call read_sp_wts_ahotn_l
+        ! Start the loop over all energy groups
+        DO g = 1, ng
+            ! Reset the source as external + scattering
+            IF (g > 1) THEN ! Downscattering only considered
+                DO gp = 1, (g-1)
+                     DO k = 1, nz
+                        DO j = 1, ny
+                           DO i = 1, nx
+                              m = mat(i,j,k)
+                              xsct = sigs(m,g,gp)
 
-		! Start the loop over all energy groups
-		DO g = 1, ng
-			 ! Reset the source as external + scattering
-			 IF (g > 1) THEN ! Downscattering only considered
-				  DO gp = 1, (g-1)
-				     DO k = 1, nz
-				        DO j = 1, ny
-				           DO i = 1, nx
-				              m = mat(i,j,k)
-				              xsct = sigs(m,g,gp)
+                              s(0,0,0,i,j,k,g) = s(0,0,0,i,j,k,g) + xsct*f_ahot_l(1,i,j,k,gp)
+                              s(0,0,1,i,j,k,g) = s(0,0,1,i,j,k,g) + xsct*f_ahot_l(2,i,j,k,gp)
+                              s(0,1,0,i,j,k,g) = s(0,1,0,i,j,k,g) + xsct*f_ahot_l(3,i,j,k,gp)
+                              s(1,0,0,i,j,k,g) = s(1,0,0,i,j,k,g) + xsct*f_ahot_l(4,i,j,k,gp)
+                           END DO
+                        END DO
+                     END DO
+                END DO
+            END IF
 
-				              s(0,0,0,i,j,k,g) = s(0,0,0,i,j,k,g) + xsct*f_ahot_l(1,i,j,k,gp)
-				              s(0,0,1,i,j,k,g) = s(0,0,1,i,j,k,g) + xsct*f_ahot_l(2,i,j,k,gp)
-				              s(0,1,0,i,j,k,g) = s(0,1,0,i,j,k,g) + xsct*f_ahot_l(3,i,j,k,gp)
-				              s(1,0,0,i,j,k,g) = s(1,0,0,i,j,k,g) + xsct*f_ahot_l(4,i,j,k,gp)
-				           END DO
-				        END DO
-				     END DO
-				  END DO
-			 END IF
-
-			 ! Get the time to reach this point
-			 CALL CPU_TIME(ttosolve)
-			 
-			 ! Check which solution scheme will be employed
-       !Note: Meth is 0 by default now.  Should remove later and default to calling inner
-			 IF (meth == 0) THEN
-				  WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
-				  ! Call for the inner iteration (or ITM solver later)
-					CALL inner(g)
-			 ELSE IF (meth == 1) THEN
-				  STOP
-				  WRITE(8,*) 'Option meth=1 was removed'
-			 END IF
+            ! Get the time to reach this point
+            CALL CPU_TIME(ttosolve)
+ 
+            ! Check which solution scheme will be employed
+            ! Note: Meth is 0 by default now.  Should remove later and default to calling inner
+            IF (meth == 0) THEN
+                WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
+                ! Call for the inner iteration (or ITM solver later)
+                CALL inner(g)
+            ELSE IF (meth == 1) THEN
+                WRITE(8,*) 'Option meth=1 was removed'
+                STOP
+            END IF
 
 			 ! Get the time out of the solution
 			 CALL CPU_TIME(tsolve)
