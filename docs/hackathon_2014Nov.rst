@@ -2,7 +2,7 @@
 PyNE Development Hack-a-thon
 =============================
 
-The PyNE Develoent Hack-a-thon is intended to be an opportunity for our
+The PyNE Development Hack-a-thon is intended to be an opportunity for our
 geographically dispersed developers to gather. This allows us to concurrently 
 concentrate on closing issues, making decisions, and proposing extensions to 
 the code.
