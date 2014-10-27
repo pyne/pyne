@@ -3,14 +3,14 @@ PyNE Develoent Hack-a-thon
 =============================
 
 The PyNE Develoent Hack-a-thon is intended to be an opportunity for our
-geographically dispersed developers to gather. This allows us to concentrate on
-concurrently closing issues, making decisinos, and proposing extensions to the
-code.
+geographically dispersed developers to gather. This allows us to concurrently 
+concentrate on closing issues, making decisions, and proposing extensions to 
+the code.
 
-New developers are welcome, but are strongly encouraged to arrive having built
-PyNE from source. Any installation issues will be handled in the first two
-hours of Friday morning. However, developers will be focused on development
-thereafter.
+New developers are welcome, but are strongly encouraged to arrive having 
+already built PyNE from source. Any installation issues will be handled in the 
+first two hours of Friday morning. However, developers will be focused on 
+development thereafter.
 
 When : **November 14-16, 2014**
 
@@ -36,13 +36,13 @@ Location   Start      End        Activity
 ---------  ---------  ---------  ----------------------------------------
 190 Doe    10:00      12:00      Brainstorm and Claim Hackathon Goals 
 ---------  ---------  ---------  ----------------------------------------
-TBD        12:00      13:00      Lunch [TBD] 
+TBD        12:00      13:00      Lunch 
 ---------  ---------  ---------  ----------------------------------------
 190 Doe    13:00      17:00      Hack 
 ---------  ---------  ---------  ----------------------------------------
 190 Doe    17:00      24:00      Continued Hacking? 
 ---------  ---------  ---------  ----------------------------------------
-190 Doe    21:00      --         Doe library closes
+190 Doe    21:00      --         **Note** Doe library closes
 =========  =========  =========  ========================================
 
 -----------------------------------
@@ -52,15 +52,15 @@ Day 2: Saturday, November 15, 2014
 =========  =========  =========  ========================================
 Location   Start      End        Activity
 =========  =========  =========  ========================================
-190 Doe    08:00      10:00      Continue Hacking 
+190 Doe    08:00      12:00      Continue Hacking 
 ---------  ---------  ---------  ----------------------------------------
-190 Doe    12:00      13:00      Lunch [TBD] 
+TBD        12:00      13:00      Lunch 
 ---------  ---------  ---------  ----------------------------------------
 190 Doe    13:00      17:00      Hack 
 ---------  ---------  ---------  ----------------------------------------
-190 Doe    17:00      21:00      Continued Hacking?
+190 Doe    17:00      --         **Note** Doe library closes
 ---------  ---------  ---------  ----------------------------------------
-190 Doe    21:00      --         Doe library closes
+190 Doe    17:00      21:00      Continued Hacking?
 =========  =========  =========  ========================================
 
 
