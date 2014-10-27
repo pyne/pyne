@@ -14,7 +14,7 @@ from numpy.testing import assert_array_almost_equal
 from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
 from pyne.variancereduction import cadis
-from pyne.mesh import Mesh
+from pyne.mesh import Mesh, IMeshTag
 from pyne.mesh import MeshError
 
 def test_cadis_single_e():
@@ -31,44 +31,33 @@ def test_cadis_single_e():
     ww_mesh = Mesh(structured=True, structured_coords=coords)
     q_bias_mesh = Mesh(structured=True, structured_coords=coords)
     
-    #add tags to input meshes
-    tag_adj_flux = adj_flux_mesh.mesh.createTag(adj_flux_tag, 1, float)
-    tag_q = q_mesh.mesh.createTag(q_tag, 1, float)
+    #add tags to meshes
+    adj_flux_mesh.adj_flux = IMeshTag(1, float)
+    q_mesh.q = IMeshTag(1, float)
 
     #create data for input meshes
     adj_flux_data = [1.1, 1.3, 1.5, 1.7]
     q_data = [2.9, 2.6, 2.4, 2.2]
 
     #data data to mesh
-    adj_flux_ves = list(adj_flux_mesh.mesh.iterate(iBase.Type.region, 
-                                                   iMesh.Topology.all))
-    for i, adj_flux_ve in enumerate(adj_flux_ves):
-        tag_adj_flux[adj_flux_ve] = adj_flux_data[i]
-
-    q_ves = list(q_mesh.mesh.iterate(iBase.Type.region, 
-                                         iMesh.Topology.all))
-    for i, q_ve in enumerate(q_ves):
-        tag_q[q_ve] = q_data[i]
+    adj_flux_mesh.adj_flux[:] = adj_flux_data
+    q_mesh.q[:] = q_data
 
     #run CADIS
     cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
           ww_mesh, ww_tag, q_bias_mesh, q_bias_tag, beta=5)
     
     #checkout output meshes
-    expected_ww = [1.4535005225, 1.3717948718, 1.287962963, 1.2397504456]
-    expected_q_bias = [0.2293314162, 0.2429906542, 0.2588066139, 0.2688713156]
+    expected_ww = [0.3995338, 0.33806706, 0.29299145, 0.258521908]
+    expected_q_bias = [0.04652859, 0.04929988, 0.052508751, 0.0545507858]
+    ww_mesh.ww = IMeshTag(1, float)
+    q_bias_mesh.q_bias = IMeshTag(1, float)
     
-    ww_ves = list(ww_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all))
-    for i, ww_ve in enumerate(ww_ves):
-        assert_almost_equal(ww_mesh.mesh.getTagHandle(ww_tag)[ww_ve], 
-                            expected_ww[i])
+    for i in range(4):
+        assert_almost_equal(ww_mesh.ww[i], expected_ww[i])
 
-    q_bias_ves = list(q_bias_mesh.mesh.iterate(iBase.Type.region, 
-                                         iMesh.Topology.all))
-    for i, q_bias_ve in enumerate(q_bias_ves):
-        assert_almost_equal(
-            q_bias_mesh.mesh.getTagHandle(q_bias_tag)[q_bias_ve], 
-            expected_q_bias[i])
+    for i in range(4):
+        assert_almost_equal(q_bias_mesh.q_bias[i], expected_q_bias[i])
             
 
 def test_cadis_multiple_e():
