@@ -1,4 +1,4 @@
-.. _theorymanual_template:
+.. _theorymanual_spatialsolver:
 
 ===============================
 Spatial Solvers

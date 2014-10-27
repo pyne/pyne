@@ -5,29 +5,34 @@ Spatialsolver Support -- :mod:`pyne.spatialsolver`
 ==================================================
 Spatialsolver is a pyne module that contains seven neutron transport equation solvers.  Each
 solver is its own unique nodal method.  The solvers included in this module are listed below.  The theory and methodology behind each
-can be found in the pyne theory documentation.
+can be found in the :ref:`theory documentation <theorymanual_spatialsolver>`.
 
- #. **AHOTN-LN**: Arbitrarily higher order transport method of the nodal type linear-nodal method
- #. **AHOTN-LL**:  Arbitrarily higher order transport method of the nodal type linear-linear method
- #. **AHOTN-NEFD**: Arbitrarily higher order transport method of the nodal type that makes use of the
-    unknown nodal flux moments (NEFD algorithm).
- #. **DGFEM-LD**: The Discontinuous Galerkin Finite Element Method (DGFEM) with a linear discontinuous (LD)
-    approximation for angular flux. (SEE PAGE 27 of thesis)
- #. **DGFEM-DENSE**: The Discontinuous Galerkin Finite Element Method (DGFEM) that use ??dense??? lagrange
-    polynomials to "create a function space per dimension" [add citation thesis page 27].
- #. **DGFEM-LAGRANGE**:   The Discontinuous Galerkin Finite Element Method (DGFEM) that use lagrange
-    polynomials to "create a function space per dimension" [add citation thesis page 27].
- #. **SCTSTEP**: SCT Step algorithm similar to Duo's SCT algorithm implemented in three dimensional Cartesian
-    geometry.
+ #. **AHOTN-LN**: Arbitrarily higher order transport method of the nodal type 
+    linear-nodal method
+ #. **AHOTN-LL**:  Arbitrarily higher order transport method of the nodal type 
+    linear-linear method
+ #. **AHOTN-NEFD**: Arbitrarily higher order transport method of the nodal type
+    that makes use of the unknown nodal flux moments (NEFD algorithm).
+ #. **DGFEM-LD**: The Discontinuous Galerkin Finite Element Method (DGFEM) with
+    a linear discontinuous (LD) approximation for angular flux.
+ #. **DGFEM-DENSE**: The Discontinuous Galerkin Finite Element Method (DGFEM) 
+    that use Lagrange polynomials to create a function space in each  dimension. 
+ #. **DGFEM-LAGRANGE**:   The Discontinuous Galerkin Finite Element Method (DGFEM) 
+    uses Lagrange polynomials to create a function space in each dimension.
+ #. **SCTSTEP**: SCT Step algorithm uses a step approximation in all cells that
+    are intersected by lines and planes of non-smoothness.
 
 -----------------------------------
 Input Dictionary Entries
 -----------------------------------
-As these are complicated solvers, they require a large amount of input data supplied by the user.  The
-format we choose to take all this information in by is with a python dictionary.   Of the many key-pair values listed below, most are required, but some are optional.  The optional entries will be overridden by default values if not present/not specified.
+As these are complicated solvers, they require a large amount of input data 
+supplied by the user.  This information needs to be entered as a Python 
+dictionary. Of the many key-pair values listed below, most are required, but 
+some are optional.  The optional entries will be overridden by default values 
+if not present/specified.
 
-**Entry: Solver type (AHOTN, DGFEM or SCTSTEP)**::
-
+**Entry: Solver type (AHOTN, DGFEM or SCTSTEP)**
+::
   key: "solver"
   type: String
   ex: "AHOTN"
@@ -37,19 +42,19 @@ format we choose to take all this information in by is with a python dictionary.
     2.  "DGFEM"
     3.  "SCTSTEP"
  
-**Entry: Spatial expansion order**::
-
+**Entry: Spatial expansion order**
+::
   key: "solver_type"
   type: String
   ex: "LN"
   default: No default
   Note: This entry is dependent on the "solver" entry.
-    For AHOTN solver, there exist the LN, LL and NEFD solver types
-    For the DGFEM solvers, there exist the LD, DENSE and LAGRANGE solver types
-    For the SCTSTEP solver, no solver_type key is required.  The key can be set to something or be left empty.
+    For AHOTN solver, there exist the "LN", "LL", and "NEFD" solver types
+    For the DGFEM solvers, there exist the "LD", "DENSE", and "LAGRANGE" solver types
+    For the SCTSTEP solver, the "solver_type" key is not used.
 
-**Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**::
-
+**Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**
+::
   key: "spatial_order"
   type: Integer
   ex: 0
@@ -57,221 +62,249 @@ format we choose to take all this information in by is with a python dictionary.
 
   The Spatial expansion order is the expansion order of the spatial moment.
 
-**Entry: Quadrature order**::
-
+**Entry: Angular quadrature order**
+::
   key: "quadrature_order"
   type: Integer
   ex: 4
   default: 4
 
-  The quadrature order is the number of angles to be used per octet.  For N sets of angles, there will
-  be (N * (N + 2) / 8) ordinates per octet. The quadrature order may only be an even number!
+  The angular quadrature order is the number of angles to be used per octant.  
+  For N sets of angles, there will be (N * (N + 2) / 8) ordinates per octant. 
+  The quadrature order may only be an even number!
 
-**Entry: Quadrature type:**::
-
+**Entry: Quadrature type:**
+::
   key: "quadrature_type"
   type: Integer
   ex: 1
   default: 1
 
-  The quadrature type is the type of quadrature scheme the code should use.  The possibilities are as follow:
+  The quadrature type is the type of quadrature scheme the code uses.  
+  The possibilities are:
     1 - TWOTRAN
     2 - EQN
     3 - Read-in
 
-**Entry: Number of Nodes in x, y, and z directions (nx/ny/nz)**::
-
+**Entry: Number of spatial nodes in x, y, and z directions (nx/ny/nz)**
+::
   key: "nodes_xyz"
   type: Integer array
   ex: [4, 4, 4]
   default: No default
     
-**Entry: Number of groups (ng)**::
-
+**Entry: Number of energy groups (ng)**
+::
  key: "num_groups"
  type: Integer
  ex: 1
  default: No default
 
-**Entry: Number of Materials (nm)**::
-
+**Entry: Number of materials (nm)**
+::
  key: "num_materials"
  type: Integer
  ex: 1
  default: No default
 
-**Entry: x-size of cells (dx)**::
-
+**Entry: x-size of cells (dx)**
+::
  key: "x_cells_widths"
  type: double array
  ex: [0.25, 0.25, 0.25, 0.25]
  default: No default
 
-**Entry: y-size of cells (dy)**::
-
+**Entry: y-size of cells (dy)**
+::
  key: "y_cells_widths"
  type: double array
  ex: [0.25, 0.25, 0.25, 0.25]
  default: No default
 
-**Entry: z-size of cells (dz)**::
-
+**Entry: z-size of cells (dz)**
+::
  key: "z_cells_widths"
  type: double array
  ex: [0.25, 0.25, 0.25, 0.25]
  default: No default
 
-**Entry: x start and end boundary conditions**::
+**Entry: x start and end boundary conditions**
+::
  key: "x_boundry_conditions"
  type: Integer array
  ex: [2, 2]
  default: No default
- 'x_boundary_conditions', 'y_boundary_conditions', and 'z_boundary_conditions' are the boundary conditions for each face of the cubic mesh. The entries are as following:
-    x[0] = xsbc
-    x[1] = xebc
-    y[0] = ysbc
-    y[1] = yebc
-    y[0] = zsbc
-    y[1] = zebc
+ 'x_boundary_conditions' are the x boundary conditions for each face of the cubic mesh. 
+ The entries are:
+    x[0] = x starting bc; the left
+    x[1] = x ending bc; the right
     The following are supported boundary conditions: 
       0 - vacuum
       1 - reflective
       2 - fixed inflow
 
-**Entry: y start and end boundary conditions**::
-
+**Entry: y start and end boundary conditions**
+::
  key: "y_boundry_conditions"
  type: Integer array
  ex: [2, 2]
  default: No default
+ 'y_boundary_conditions' are the y boundary conditions for each face of the cubic mesh. 
+ The entries are:
+    y[0] = y starting bc; the front
+    y[1] = y ending bc; the back
+    The following are supported boundary conditions: 
+      0 - vacuum
+      1 - reflective
+      2 - fixed inflow
 
-**Entry: z start and end boundary conditions**::
-
+**Entry: z start and end boundary conditions**
+::
  key: "z_boundry_conditions"
  type: Integer array
  ex: [2, 2]
  default: No default
+ 'z_boundary_conditions' are the z boundary conditions for each face of the cubic mesh. 
+ The entries are:
+    z[0] = z starting bc; the bottom
+    z[1] = z ending bc; the top
+    The following are supported boundary conditions: 
+      0 - vacuum
+      1 - reflective
+      2 - fixed inflow
 
-**Entry: Material info**::
-
+**Entry: Material info**
+::
  key: "material_id"
- type: Integer 3 Dimensional Array
- ex: [ [ [1 1 1 1] [1 1 1 1] [1 1 1 1] [1 1 1 1] ] [ [1 1 1 1] [1 1 1 1] [1 1 1 1] [1 1 1 1] ] [ [1 1 1 1] [1 1 1 1] [1 1 1 1] [1 1 1 1] ] ]
+ type: Integer 3 dimensional array
+ ex: [ [ [1 1 1 1] [1 1 1 1] [1 1 1 1] [1 1 1 1] ] 
+       [ [1 1 1 1] [1 1 1 1] [1 1 1 1] [1 1 1 1] ] 
+       [ [1 1 1 1] [1 1 1 1] [1 1 1 1] [1 1 1 1] ] ]
  default: No default
- Note:  Dimensions must match cell spacing and ordering
+ note: Dimensions must match cells such that there is one material number
+       in each spatial cell. The cells are ordered as x, y, z.
 
-_Note: we need to give directions about the ordering. RS
     
-**Entry: "quadrature_file" [optional; only needed for quadrature type 2]**::
-
- type: string
+**Entry: "quadrature_file" [optional; only needed for quadrature type 2]**
+::
+ type: String
  ex: 'quad_file'
  default: No default  
  note: See input file formatting notes in the Source File Formatting section.
 
-**Entry: cross section info file name**::
-
+**Entry: cross section info file name**
+::
  key: "xs_file"
- type: string
+ type: String
  default: 'xs_file'
  note: See input file formatting notes in the Source File Formatting section.
 
-
-**Entry: source file name**::
-
-  key: "source_input_file"roman atwood
-  type: string
+**Entry: source file name**
+::
+  key: "source_input_file"
+  type: String
   default: 'src.dat'
   note: See input file formatting notes in the Source File Formatting section.
 
-**Entry: boundary condition file name [optional]**::
-
+**Entry: boundary condition file name [optional]**
+::
  key: "bc_input_file"
- type: string
+ type: String
  default: No default
  note: See input file formatting notes in the Source File Formatting section.
 
-**Entry: output file name [optional]**::
-
+**Entry: output file name [optional]**
+::
  key: "flux_output_file"
- type: string
+ type: String
  default: 'flux.out'
+ note: See input file formatting notes in the Source File Formatting section.
 
-_note: need to add file format / contents description
+.. Josh: please to add file format / contents description
 
-**Entry: Convergence Criterion**::
-
+**Entry: Convergence Criterion**
+::
  key: "convergence_criterion"
  type: float
- ex: 1.e-12
- default: 1.e-12
- The convergence criterion is the maximum allowed relative difference (df) in the flux value from one sweep to the next.  The more times the solver
- sweeps the more definite the solution will be.  As soon as the convergence criterion is met, the solver will stop sweeping and calculate
- the final flux for that cell. ??Correct??
- df is calculated as the following:  
- f = current flux value
- ct = convergence tolerance (key pair value "converge_tolerance"0
- f1 = flux value from one iteration prior
- If f - f1 > ct:
-   df = absolute(f - f1) / f1
- Else
-   df = absolute(f - f1)
+ ex: 1.e-5
+ default: 1.e-5
+ The solution is considered converged and the calculation completes when the flux
+ in each cell at the current iteration is within "convergence_criterion" of the
+ previous iterate. This is generally the relative difference, but in cases of 
+ very small flux values the absolute difference is used instead (see the 
+ Convergence Tolerance entry below).  
 
-**Entry: Maximum Iterations**::
+.. Josh: we should set this to default to 1.e-5
 
+**Entry: Tolerance**
+::
+ key: "converge_tolerance"
+ type: float
+ ex: 1.e-10
+ default: 1.e-10
+ Converge tolerance is the tolerance that determines how the difference between
+ flux iterates (df) that is used to determine convergence will be calculated. 
+ df is calculated as follows:
+   f = current flux value
+   ct = convergence tolerance (value for this key, "converge_tolerance")
+   f1 = flux value from the previous iteration
+   If f1 > ct:
+     df = absolute(f - f1) / f1
+   Else
+     df = absolute(f - f1)
+ The idea is to use the absolute difference instead of the relative difference
+ between iterates when the flux is very small to help avoid rounding error.
+
+**Entry: Maximum Iterations**
+::
  key: "max_iterations"
  type: int
  ex: 10000
  default: 10000
+ note: If this number of iterations is reached before the convergence criterion
+       is satisfied, the calculation will terminate and report the current flux
+       estimate.
 
-**Entry: Moments Converged**::
-
+**Entry: Moments Converged**
+::
  key: "moments_converged" ??
  type: int
  ex: 0
  default: 0
 
-_We need to provide a clear explanation of what this means. RS
+.. Josh: Can you look in the code and write about what this does?
 
-**Entry: Tolerance**::
-
- key: "converge_tolerance"
- type: float
- ex: 1.e-10
- default: 1.e-10
- Converge tolerance is the tolerance that determines how the relative difference between flux iterations (df)
- will be calculated.  This effects when the solver will stop its mesh sweeps.  See the convergence criterion key
- value pair for more information.
-
-**Entry: Flag for computing, presenting quadrant fluxes**::
-
+**Entry: Flag for computing, presenting quadrant fluxes**
+::
  key: "quad_flux_print_flag"
  type: Integer
  ex: 0
  default: 0
 
-**Entry: Flag for printing matrix file**::
+.. Josh: Can you look in the code and write about what this does?
 
+**Entry: Flag for printing matrix file**
+::
  key: "matrix_print_flag"
  type: Integer
  ex: 0
  default: 0
 
-**Entry: ITM solution flag**::
+.. Josh: Isn't this taken out now?
 
+**Entry: ITM solution flag**
+::
  key: "itm_direct_solution_flag" [only relevant if itm is selected]
  type: Integer
  ex: 0
  default: default of 0 if itm solution method
 
-_We need to double check the meaning of this one. RS
-_I have not added this yet.  As soon as we verify the meaning I can add it. JH
-_great RS
+.. Josh: Isn't this taken out now?
 
 -----------------------------------
 Output Dictionary Entries
 -----------------------------------
-When ran, the solvers return a dictionary of useful solution data.  It contains the following key-pair entries:
+When run, the solvers return a dictionary of useful solution data.  It contains the following key-pair entries:
 
 **Entry: Flux output array**::
   key:  "flux"
@@ -300,33 +333,40 @@ When ran, the solvers return a dictionary of useful solution data.  It contains 
           Row: First y row (j) of cells
           Cell: First cell in x direction
 
-**Entry: Solver success code**::
+**Entry: Solver success code**
+::
   key:  "success"
   type: Integer
   format: 1 means yes, the solve succeeded.  0 means it failed.
 
-**Entry: Raw system time of solver start **::
+**Entry: Raw system time of solver start**
+::
   time_start provides you with the system time when the solver began running.
   key:  "time_start"
   type: double
   format: system time
 
-**Entry: Total run time **::
+**Entry: Total run time**
+::
   total_time is the total time the solver took to solve.
   key:  "total_time"
   type: double
   format: system time
 
-**Entry: Total print time **::
+**Entry: Total print time**
+::
   print_time is the total time the solver took to print results.
   key:  "print_time"
   type: double
   format: system time
 
-**Entry: Error Message **::
+**Entry: Error Message**
+::
   If the solver fails, error_msg is a string describing why the solver failed.
   key:  "error_msg"
   type: String
+
+.. _source_file_formatting:
 
 -----------------------------------
 Source File Formatting
