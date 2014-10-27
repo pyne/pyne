@@ -1852,9 +1852,7 @@ class Wwinp(Mesh):
             # and the number of fine meshes between them.
             j = 1
             while j < len(points) - 1:
-                 # Floating point comparison characterizes coarse vs. fine.
-                 # The value 1.01E-2 is used because MCNP prints
-                 # to the nearest 0.01.
+                # Floating point comparison characterizes coarse vs. fine.
                 if abs((points[j] - points[j-1]) -
                        (points[j+1] - points[j])) <= 1.01E-4:
                     self.fm[i][len(self.cm[i])] += 1
