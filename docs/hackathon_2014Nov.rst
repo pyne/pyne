@@ -14,11 +14,14 @@ development thereafter.
 
 When : **November 14-16, 2014**
 
-Where : **The University of California Berkeley** is thrilled to host this
-event. Friday and Saturday hacking will take place in the glassed-off
-conference rooms in the Doe Library. Sunday hacking will take place in the
-conference space of 2150 Shattuck, Suite 230. 
- 
+Where : **The University of California Berkeley** is thrilled to host this 
+event. Friday and Saturday hacking will take place in the glassed-off 
+conference rooms in the Berkeley Institute for Data Science (`190, Doe Library 
+<https://goo.gl/maps/9YCRb>`_).  This building is in the middle of the Berkeley 
+campus.  Sunday hacking will take place in the Nuclear Science and Security 
+Consortium conference space (`2150 Shattuck, Suite 230 
+<https://goo.gl/maps/I06Fa>`_). This building is immediately next to the BART 
+station in Downtown Berkeley.  
 
 =============================
 Schedule of Events
