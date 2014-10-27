@@ -1,5 +1,5 @@
 =============================
-PyNE Develoent Hack-a-thon
+PyNE Development Hack-a-thon
 =============================
 
 The PyNE Develoent Hack-a-thon is intended to be an opportunity for our
