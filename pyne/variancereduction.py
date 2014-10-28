@@ -86,7 +86,7 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     # calculate total source strength
     q_tot = 0
     for q_ve in q_ves:
-        q_tot += np.sum(q_mesh.mesh.getTagHandle(q_tag)[q_ve])
+        q_tot += np.sum(q_mesh.mesh.getTagHandle(q_tag)[q_ve]) \
                  *q_mesh.elem_volume(q_ve)
 
     q_ves.reset()
