@@ -65,6 +65,8 @@ class PartisnRead(object):
         hdf5 :: file, a material-laden dagmc geometry file.
         nucdata :: file, nuclear data cross section library.
                     note: only BXSLIB format is currently supported.
+        nuc_names :: dict, pyne element/isotope names to bxslib name assignment,
+                    keys are pyne nucids (int) and values are bxslib names (str)
         coord_sys :: int, optional, defines the coordinate system used.
                     1 = Cartesian (default)
                     2 = cylindrical
@@ -99,14 +101,14 @@ class PartisnRead(object):
                 length of bounds in each direction.        
     """
     
-    def __init__(self, mesh, hdf5, nucdata, **kwargs):
+    def __init__(self, mesh, hdf5, nucdata, nuc_names, **kwargs):
         
         coord_sys = kwargs['coord_sys'] if 'coord_sys' in kwargs else 1
         if coord_sys != 1:
             warn("Only Cartesian geometries are currently supported")
         
-        datapath = kwargs['datapath'] if 'datapath' in kwargs else '/materials'
-        nucpath = kwargs['nucpath'] if 'nucpath' in kwargs else '/nucid'
+        datapath = kwargs['datapath'] if 'datapath' in kwargs else 'material_library/materials'
+        nucpath = kwargs['nucpath'] if 'nucpath' in kwargs else 'material_library/nucid'
 
         dagmc_geom = dagmc.load(hdf5)
         dg = dagmc.discretize_geom(mesh)
@@ -114,11 +116,14 @@ class PartisnRead(object):
         # determine if 1D, 2D, or 3D
         self.dim = self.get_dimensions(mesh)
         
-        # collect the bounds (coarse mesh and fine mesh) data
+        # collect values of mesh boundaries
         self.bounds = {}
-        self.fine = {}
         for i in self.dim:
             self.bounds[i] = mesh.structured_get_divisions(i)
+        
+        # set fine mesh
+        self.fine = {}
+        for i in self.dim:
             if 'fine' in kwargs:
                 if len(kwargs['fine'][i]) == 1:
                     self.fine[i] = kwargs['fine'][i]*len(self.bounds[i])
@@ -130,13 +135,14 @@ class PartisnRead(object):
                         self.fine[i] = [10]*len(self.bounds[i])
             else:
                 self.fine[i] = [10]*len(self.bounds[i])
-        
+                
+                
         # Read the BXSLIB data
         bxslib = open(nucdata, 'rb')
-        #self._read_nucdata(bxslib)
+        self._read_nucdata(bxslib)
 
         # Read the materials from the hdf5
-        self._read_materials(hdf5, datapath, nucpath)       
+        self._read_materials(hdf5, datapath, nucpath, nuc_names)       
         
     def get_dimensions(self, mesh):
         # determines the system geometry (1-D, 2-D, or 3-D Cartesian)
@@ -177,7 +183,7 @@ class PartisnRead(object):
         elif dim == 3:
             return [i, j, k]
             
-    def _read_materials(self, hdf5, datapath, nucpath):
+    def _read_materials(self, hdf5, datapath, nucpath, nuc_names):
         # reads material properties from the loaded dagmc_geometry
         # cell # -> material name & vol fract -> isotope name & dens
         
@@ -188,10 +194,23 @@ class PartisnRead(object):
             # mat_name will be used for the 
             mat_name = '{0}'.format(key.split(':')[1])
             self.matlib[mat_name] = {}
-            for element in matls[key]:
+            for pyne_element in matls[key]:
                 # insert conversion of element name to bxslib name here and then
                 # use that new name as the dict key instead of 'element'
-                self.matlib[mat_name][element] = matls[key][element]
+                
+                if pyne_element in nuc_names.keys():
+                    element = nuc_names[pyne_element]
+                else:
+                    element = pyne_element
+                    warn("Pyne Element {0} not listed in nuc_names".format(element))
+                # convert mass fraction to atom density [at/b*cm]
+                # rho/mw*Na    
+                rho_frac = matls[key][element]
+                mw = matls[key].molecular_mass()
+                Na = 60.22
+                self.matlib[mat_name][element] = rho_frac/mw*Na
+                
+        print(self.matlib)
             
     def _define_zones(self, dg):
         ### !!! NOT FINSIHED !!! ###
