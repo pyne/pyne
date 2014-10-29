@@ -524,7 +524,7 @@ def test_nlbs():
 def test_tape9_dict_structure():
     ds = OpenMCDataSource()
     nucs = ["U233", "U234", "U235", "U236", "U238"]
-    tape9 = origen22.make_tape9(ds, nucs, filter_nucs=True)
+    tape9 = origen22.make_tape9(nucs)
 
     # check for correct deck ids: 1,2,3 for decay, 219, 220, 221 for xsfpy
     assert_equal(set(list(tape9.keys())), {1, 2, 3, 219, 220, 221})
@@ -561,7 +561,7 @@ def test_tape9_dict_structure():
                 assert_is_instance(value, float)
         assert_is_instance(tape9[220][field], dict)
         for value in tape9[220][field].values():
-            if value == 'fiss_yields_present':
+            if field == 'fiss_yields_present':
                 assert_is_instance(value, bool)
             else:
                 assert_is_instance(value, float)

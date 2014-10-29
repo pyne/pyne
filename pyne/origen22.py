@@ -1496,71 +1496,15 @@ def nlbs(t9):
     decay_nlb.sort()
     return tuple(decay_nlb), tuple(xsfpy_nlb)
 
-def validate_nucs(nucs, ds):
-    """Validate a list of nucs by whether or not they are valid in the data
-    source and in TAPE9 format. Only works with OpenMCDataSource so far.
 
-    Parameters
-    ----------
-    nucs: list
-        list of nuclides to validate.
-    ds: subclass of pyne.xs.data_source.DataSource
-        A PyNE data source to pull data from.
-
-    Returns
-    -------
-    validated: set
-        Subset of desired nuclides that are accepted by Origen and also in
-        your chosen data source.
-    """
-    if isinstance(ds, data_source.OpenMCDataSource):
-        nucs_in_data_source = {n.nucid for n in ds.cross_sections.ace_tables \
-                          if n.nucid is not None}
-    else:
-        raise NotImplementedError
-    valid_nucs = NUCS & nucs_in_data_source
-    validated = set([nucname.id(nuc) for nuc in nucs]) & valid_nucs
-    return validated
-
-def get_field_from_ds(ds, nucs, field):
-    """Take a data source and a list of nucs, then grab the one-group data
-    for a reaction.
-
-    Parameters
-    ----------
-    ds: subclass of pyne.xs.data_source.DataSource
-        A PyNE data source to pull data from.
-    nucs: list
-        list of nuclides to get data for.
-    field: str
-        name of a reaction.
-
-    Returns
-    -------
-    fdict: dict
-        Float-valued dict with nuclides as keys and single-group data as values.
-    """
-    ls = [(nuc, ds.discretize(nuc, field)) for nuc in nucs]
-    ls = map((lambda x: (x[0], float(x[1])) if x[1] is not None \
-                         else (x[0], 0.0)), ls)
-    fdict = dict(ls)
-    return fdict
-
-
-def make_tape9(ds, nucs, filter_nucs=False):
+def make_tape9(nucs, xscache=None):
     """Make a TAPE9 dict with data for a given list of nucs using data from
     a given data source.
 
     Parameters
     ----------
-    ds: subclass of pyne.xs.data_source.DataSource
-        A PyNE data source to pull data from.
     nucs: list
         list of nuclides to get data for.
-    filter_nucs: bool
-        If True, will automatically filter for nuclides that are valid in
-        Origen and your data source. Only works with OpenMC so far. Defaults
-        to False.
 
     Returns
     -------
@@ -1569,78 +1513,17 @@ def make_tape9(ds, nucs, filter_nucs=False):
         to decay decks. 219 is the activation products deck. 220 is the
         actinides deck. 221 is the fission product yield deck.
     """
-    if filter_nucs:
-        nucs = validate_nucs(nucs, ds)
-
     # build decay decks
     decay_file = StringIO(decay_tape9.decay_tape9)
     decay = parse_tape9(decay_file)
 
-    # ORIGEN takes single-group data
-    ds.dst_group_struct = np.array([np.max(ds.src_group_struct),
-                                    np.min(ds.src_group_struct)])
+    # # ORIGEN takes single-group data
+    # dst_group_struct = np.array([np.max(ds.src_group_struct),
+    #                                 np.min(ds.src_group_struct)])
 
-    # build up base cross-section and fission product yield deck
-    xsfpy = {
-             "_type": "xsfpy",
-             "sigma_gamma": {},
-             "sigma_2n": {},
-             "sigma_gamma_x": {},
-             "sigma_2n_x": {},
-             "fiss_yields_present": {},
-            }
-
-    xsfpy.update({
-        "sigma_gamma": get_field_from_ds(ds, nucs, "gamma"),
-        "sigma_2n": get_field_from_ds(ds, nucs, "z_2n"),
-        "sigma_gamma_x": get_field_from_ds(ds, nucs, "gamma_1"),
-        "sigma_2n_x": get_field_from_ds(ds, nucs, "z_2n_1") # is this right?
-        # todo: fiss_yields
-    })
-    activation_products = actinides = fission_products = dict(xsfpy)
-
-    # build up activation products deck
-    activation_products.update({"_subtype": "activation_products",
-                                "title": "activation products",
-                                "sigma_3n": {},
-                                "sigma_p": {}})
-    activation_products.update({
-        "sigma_3n": get_field_from_ds(ds, nucs, "z_3n"),
-        "sigma_p": get_field_from_ds(ds, nucs, "p"),
-    })
-
-    # build up actinides deck
-    actinides.update({
-        "_subtype": "actinides",
-        "title": "actinides",
-        "sigma_alpha": {},
-        "sigma_f": {}
-    })
-    actinides.update({
-        "sigma_alpha": get_field_from_ds(ds, nucs, "a"),
-        "sigma_f": get_field_from_ds(ds, nucs, "fission"),
-    })
-
-    # build up fission_products deck
-    fission_products.update({"_subtype": "fission_products",
-                             "title": "fission products",
-                             "sigma_3n": {},
-                             "sigma_p": {},
-                             "TH232_fiss_yield":{},
-                             "U233_fiss_yield":{},
-                             "U235_fiss_yield":{},
-                             "U238_fiss_yield":{},
-                             "PU239_fiss_yield":{},
-                             "PU241_fiss_yield":{},
-                             "CM245_fiss_yield":{},
-                             "CF249_fiss_yield":{},
-                            })
-    fission_products.update({
-        "sigma_3n": get_field_from_ds(ds, nucs, "z_3n"),
-        "sigma_p": get_field_from_ds(ds, nucs, "p"),
-    })
-
-
-    xsfpys = {219: activation_products, 220: actinides, 221: fission_products}
+    if xscache is None:
+        xscache = cache.XSCache()
+    nucs = [nucname.id(nuc) for nuc in nucs]
+    xsfpys = xslibs(nucs = nucs, xscache=xscache, nlb=(219, 220, 221))
     tape9 = merge_tape9([decay, xsfpys])
     return tape9
