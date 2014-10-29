@@ -52,7 +52,7 @@ capabilities in the source_sampling module. This means that the above method, wh
 is continuous in phase space must be adapted for discretization of space (mesh
 volume elements) and energy (in energy bins).
 
-Source density (:math:`q'`, units: :math:`time^{-1}length{-3}`) is the
+Source density (:math:`q'`, units: :math:`time^{-1}length^{-3}`) is the
 canonical quantity for representing a mesh-based source within PyNE. This
 means that the first step of the CADIS method within PyNE is to create a :math:`q`
 PDF from a source density mesh. The total source strength :math:`q_tot` is
@@ -135,18 +135,18 @@ calculate :math:`q_{tot}` and :math:`R`:
 .. math::
     
     q_{tot} & = \sum_{i \in I} \, \sum_{j \in J} V_i \, q'_{i, j} \\
-            & = 8 \cdot 2.9 + 8 \cdot 2.8 + 2 \cdot 2.6 + 2 \cdot 2.5
+            & = 8 \cdot 2.9 + 8 \cdot 2.8 + 2 \cdot 2.6 + 2 \cdot 2.5 \\
             &   + 8 \cdot 2.4 + 8 \cdot 2.2 + 2 \cdot 2.9 + 2 \cdot 0  \\
             & = 98.4
 
 .. math::
     
     R & = \sum_{i \in I} \, \sum_{j \in J} \Psi_{i, j}^{+} \, \frac{V_i \, q'_{i, j}}{q_{tot}} \\
-      & = \frac{1}{98.4} \left(
+      & = \frac{1}{98.4} (
                1.1 \cdot 8 \cdot 2.9 + 1.2 \cdot 8 \cdot 2.8 
-               + 1.3 \cdot 2 \cdot 2.6 + 1.4 \cdot 2 \cdot 2.5 
-               + 0 \cdot 8 \cdot 2.4 + 1.6 \cdot 8 \cdot 2.2 
-               + 1.7 \cdot 2 \cdot 2.9 + 1.9 \cdot 2 \cdot 0 \right) \\
+              + 1.3 \cdot 2 \cdot 2.6 + 1.4 \cdot 2 \cdot 2.5 \\
+              & \qquad \quad + 0 \cdot 8 \cdot 2.4 + 1.6 \cdot 8 \cdot 2.2 
+              + 1.7 \cdot 2 \cdot 2.9 + 1.9 \cdot 2 \cdot 0 ) \\
       & = 1.0587398374
 
 
@@ -156,20 +156,20 @@ The expected results are:
 
    \hat{q}' &= \frac{\Psi_{i, j}^{+} \, q'_{i, j}}{R \, q_{tot}} \\
             &= \frac{1}{98.4 \cdot 1.0587398374}
-             [1.1 \cdot 2.9, 1.2 \cdot 2.8, 1.3 \cdot 2.6, 1.4 \cdot 2.5, 
-              0 \cdot 2.4, 1.6 \cdot 2.2, 1.7 \cdot 2.9, 1.9 \cdot 0] \\
-            &= [0.0306200806, 0.0322518718, 0.0324438472, 0.0335956998, 
-               0.0, 0.0337876752, 0.0473219428, 0.0]
+             [1.1 \cdot 2.9, 1.2 \cdot 2.8, 1.3 \cdot 2.6, 1.4 \cdot 2.5, \\
+            & \qquad \qquad \qquad \qquad \qquad 0 \cdot 2.4, 1.6 \cdot 2.2, 1.7 \cdot 2.9, 1.9 \cdot 0] \\
+            &= [0.0306200806, 0.0322518718, 0.0324438472, 0.0335956998, \\
+            & \qquad 0.0, 0.0337876752, 0.0473219428, 0.0]
 
 .. math::
 
     ww &= \frac{R}{\Psi_{i, j}^{+} \, \frac{\beta + 1}{2}} \\
-       &= \left[ \frac{1.0587398374}{1.1 \cdot{3}}, \frac{1.0587398374}{1.2 \cdot{3}},
-                 \frac{1.0587398374}{1.3 \cdot{3}}, \frac{1.0587398374}{1.4 \cdot{3}},
-                 \frac{1.0587398374}{0 \cdot{3}}, \frac{1.0587398374}{1.6 \cdot{3}},
-                 \frac{1.0587398374}{1.7 \cdot{3}}, \frac{1.0587398374}{1.9 \cdot{3}} \right] \\
-       &= [0.3208302538, 0.2940943993, 0.2714717532, 0.2520809137, 
-           0.0, 0.2205707995, 0.2075960465, 0.1857438311]
+       &= [ \frac{1.0587398374}{1.1 \cdot{3}}, \frac{1.0587398374}{1.2 \cdot{3}},
+                 \frac{1.0587398374}{1.3 \cdot{3}}, \frac{1.0587398374}{1.4 \cdot{3}}, \\
+       & \qquad  \frac{1.0587398374}{0 \cdot{3}}, \frac{1.0587398374}{1.6 \cdot{3}},
+                 \frac{1.0587398374}{1.7 \cdot{3}}, \frac{1.0587398374}{1.9 \cdot{3}} ] \\
+       &= [0.3208302538, 0.2940943993, 0.2714717532, 0.2520809137, \\
+       & \qquad  0.0, 0.2205707995, 0.2075960465, 0.1857438311]
 
 Notice that the value in the :math:`ww` vector that is a division by 0 has been replaced with 0.
 
