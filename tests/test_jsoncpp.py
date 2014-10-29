@@ -13,7 +13,7 @@ import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
                        assert_true, assert_false
 
-from pyne.jsoncpp import Value, Reader, FastWriter, StyledWriter
+from pyne.jsoncpp import Value, Reader, FastWriter, StyledWriter, CustomWriter
 
 
 def test_strvalue():
@@ -372,6 +372,10 @@ def test_styledwriter():
     assert_equal(sw.write(Value({'hello': 1})), '{\n   "hello" : 1\n}\n')
     assert_equal(sw.write(Value('hello')), '"hello"\n')
 
+def test_customwriter():
+    cw = CustomWriter(colon=": ", closecurly="\n}")
+    assert_equal(cw.write(Value({'hello': 1})), '{"hello": 1\n}\n')
+    assert_equal(cw.write(Value('hello')), '"hello"\n')
 
 if __name__ == "__main__":
     nose.runmodule()

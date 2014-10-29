@@ -11,6 +11,7 @@ The following describe methods implemented natively in PyNE:
 .. toctree::
     :maxdepth: 1
 
+    nucname
     chain_solve.rst
     cross_section_models.rst
     enrichment.rst

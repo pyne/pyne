@@ -323,7 +323,8 @@ def ext_air_dose(nuc, source=0):
     if isinstance(nuc, int):
         ext_air_dose = cpp_data.ext_air_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ext_air_dose = cpp_data.ext_air_dose(<char *> nuc, <int> source)
+        nuc_bytes = nuc.encode()
+        ext_air_dose = cpp_data.ext_air_dose(<char *> nuc_bytes, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -370,7 +371,8 @@ def dose_ratio(nuc, source=0):
     if isinstance(nuc, int):
         ratio = cpp_data.dose_ratio(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ratio = cpp_data.dose_ratio(<char *> nuc, <int> source)
+        nuc_bytes = nuc.encode()
+        ratio = cpp_data.dose_ratio(<char *> nuc_bytes, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -416,7 +418,8 @@ def ext_soil_dose(nuc, source=0):
     if isinstance(nuc, int):
         ext_soil_dose = cpp_data.ext_soil_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ext_soil_dose = cpp_data.ext_soil_dose(<char *> nuc, <int> source)
+        nuc_bytes = nuc.encode()
+        ext_soil_dose = cpp_data.ext_soil_dose(<char *> nuc_bytes, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -462,7 +465,8 @@ def ingest_dose(nuc, source=0):
     if isinstance(nuc, int):
         ingest_dose = cpp_data.ingest_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        ingest_dose = cpp_data.ingest_dose(<char *> nuc, <int> source)
+        nuc_bytes = nuc.encode()
+        ingest_dose = cpp_data.ingest_dose(<char *> nuc_bytes, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -508,7 +512,8 @@ def dose_fluid_frac(nuc, source=0):
     if isinstance(nuc, int):
         fluid_frac = cpp_data.dose_fluid_frac(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        fluid_frac = cpp_data.dose_fluid_frac(<char *> nuc, <int> source)
+        nuc_bytes = nuc.encode()
+        fluid_frac = cpp_data.dose_fluid_frac(<char *> nuc_bytes, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -554,7 +559,8 @@ def inhale_dose(nuc, source=0):
     if isinstance(nuc, int):
         inhale_dose = cpp_data.inhale_dose(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        inhale_dose = cpp_data.inhale_dose(<char *> nuc, <int> source)
+        nuc_bytes = nuc.encode()
+        inhale_dose = cpp_data.inhale_dose(<char *> nuc_bytes, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -600,7 +606,8 @@ def dose_lung_model(nuc, source=0):
     if isinstance(nuc, int):
         lung_mod = cpp_data.dose_lung_model(<int> nuc, <int> source)
     elif isinstance(nuc, basestring):
-        lung_mod = cpp_data.dose_lung_model(<char *> nuc, <int> source)
+        nuc_bytes = nuc.encode()
+        lung_mod = cpp_data.dose_lung_model(<char *> nuc_bytes, <int> source)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -856,7 +863,8 @@ def half_life(nuc, use_metastable=True):
     if isinstance(nuc, int):
         hl = cpp_data.half_life(<int> nuc)
     elif isinstance(nuc, basestring):
-        hl = cpp_data.half_life(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        hl = cpp_data.half_life(<char *> nuc_bytes)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -893,7 +901,8 @@ def decay_const(nuc, use_metastable=True):
     if isinstance(nuc, int):
         dc = cpp_data.decay_const(<int> nuc)
     elif isinstance(nuc, basestring):
-        dc = cpp_data.decay_const(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        dc = cpp_data.decay_const(<char *> nuc_bytes)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -935,14 +944,16 @@ def branch_ratio(from_nuc, to_nuc, use_metastable=True):
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
     elif isinstance(from_nuc, basestring):
-        fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc))
+        from_nuc_bytes = from_nuc.encode()
+        fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc_bytes))
     else:
         raise pyne.nucname.NucTypeError(from_nuc)
 
     if isinstance(to_nuc, int):
         tn = pyne.cpp_nucname.id(<int> to_nuc)
     elif isinstance(to_nuc, basestring):
-        tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc))
+        to_nuc_bytes = to_nuc.encode()
+        tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc_bytes))
     else:
         raise pyne.nucname.NucTypeError(to_nuc)
 
@@ -978,7 +989,8 @@ def state_energy(nuc, use_metastable=True):
     if isinstance(nuc, int):
         se = cpp_data.state_energy(<int> nuc)
     elif isinstance(nuc, basestring):
-        se = cpp_data.state_energy(<char *> nuc)
+        nuc_bytes = nuc.encode()
+        se = cpp_data.state_energy(<char *> nuc_bytes)
     else:
         raise pyne.nucname.NucTypeError(nuc)
 
@@ -1045,7 +1057,7 @@ def id_from_level(nuc, level, special=""):
     cdef std_string spc
     if len(special) == 1:
         spc = special[0].encode('UTF-8')
-    if level > 0.0:
+    if level is not None and level > 0.0:
         if len(special) == 1:
             return cpp_data.id_from_level(<int> nuc, <double> level, <std_string> spc)
         else:
