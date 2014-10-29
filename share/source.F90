@@ -82,10 +82,6 @@ subroutine source
        goto 100
    end if
 
-   !if (wgt.eq.0) then
-   !    wgt = 1E-99
-   !end if
- 
    icl = icl_tmp
    tme = 0.0
    ipt = 2

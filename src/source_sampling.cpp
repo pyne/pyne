@@ -12,11 +12,11 @@ void pyne::sampling_setup_(int* mode) {
     std::string src_tag_name ("source_density");
     std::string e_bounds_file ("e_bounds");
     std::vector<double> e_bounds = read_e_bounds(e_bounds_file);
-    if (*mode == 1) {
+    if (*mode == 0) {
       sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, false);
-    } else if (*mode == 2) {
+    } else if (*mode == 1) {
       sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, true);
-    } else if (*mode == 3) {
+    } else if (*mode == 2) {
       std::string bias_tag_name ("biased_source_density");
       sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
     }
@@ -74,6 +74,7 @@ pyne::Sampler::Sampler(std::string filename,
 
 std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
+  //
   int pdf_idx =at->sample_pdf(rands[0], rands[1]);
   int ve_idx = pdf_idx/num_e_groups;
   int e_idx = pdf_idx % num_e_groups;
@@ -193,28 +194,42 @@ void pyne::Sampler::mesh_tag_data(MBRange ves,
   if (mode == ANALOG) {
     at = new AliasTable(pdf);
   } else {
-    std::vector<double> bias_pdf = read_bias_pdf(ves, volumes);
+    std::vector<double> bias_pdf = read_bias_pdf(ves, volumes, pdf);
     normalize_pdf(bias_pdf);
     //  Create alias table based off biased pdf and calculate birth weights.
     biased_weights.resize(num_ves*num_e_groups);
-      for (i=0; i<num_ves*num_e_groups; ++i) {
-        biased_weights[i] = pdf[i]/bias_pdf[i];
-      }
+    for (i=0; i<num_ves*num_e_groups; ++i) {
+      biased_weights[i] = pdf[i]/bias_pdf[i];
+    }
     at = new AliasTable(bias_pdf);
   }
 }
 
 std::vector<double> pyne::Sampler::read_bias_pdf(MBRange ves, 
-                                                 std::vector<double> volumes) {
+                                                 std::vector<double> volumes,
+                                                 std::vector<double> pdf) {
     std::vector<double> bias_pdf(num_ves*num_e_groups);
     int i, j;
     MBErrorCode rval;
     if (mode == UNIFORM) {
       // In unform sampling, the biased PDF is just the volume of the mesh
       // volume element
+      double q_in_group;
       for (i=0; i<num_ves; ++i) {
-        for (j=0; j<num_e_groups; ++j)
-           bias_pdf[i*num_e_groups + j] =  volumes[i];
+        q_in_group = 0;
+        for (j=0; j<num_e_groups; ++j){
+          q_in_group += pdf[i*num_e_groups + j];
+        }
+        if (q_in_group > 0) {
+          for (j=0; j<num_e_groups; ++j) {
+            bias_pdf[i*num_e_groups + j] =
+                volumes[i]*pdf[i*num_e_groups + j]/q_in_group;
+          }
+        } else {
+          for (j=0; j<num_e_groups; ++j) {
+            bias_pdf[i*num_e_groups + j] = 0.0;
+          }
+        }
       }
     } else if (mode == USER) {
       // Get the biased PDF from the mesh
