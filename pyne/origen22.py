@@ -1535,10 +1535,6 @@ def make_tape9(nucs, xscache=None):
     decay_file = StringIO(decay_tape9.decay_tape9)
     decay = parse_tape9(decay_file)
 
-    # # ORIGEN takes single-group data
-    # dst_group_struct = np.array([np.max(ds.src_group_struct),
-    #                                 np.min(ds.src_group_struct)])
-
     if xscache is None:
         xscache = cache.XSCache()
     nucs = [nucname.id(nuc) for nuc in nucs]
