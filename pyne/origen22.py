@@ -1290,16 +1290,16 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
                                  p=precision,
                                  )
         s += _fpy_card_fmt.format(nlb=nlb,
-                                 y1=_double_get(deck, 'TH232_fiss_yield', nuc),
-                                 y2=_double_get(deck, 'U233_fiss_yield', nuc),
-                                 y3=_double_get(deck, 'U235_fiss_yield', nuc),
-                                 y4=_double_get(deck, 'U238_fiss_yield', nuc),
-                                 y5=_double_get(deck, 'PU239_fiss_yield', nuc),
-                                 y6=_double_get(deck, 'PU241_fiss_yield', nuc),
-                                 y7=_double_get(deck, 'CM245_fiss_yield', nuc),
-                                 y8=_double_get(deck, 'CF249_fiss_yield', nuc),
-                                 p=precision,
-                                 )
+                                  y1=_double_get(deck, 'TH232_fiss_yield', nuc),
+                                  y2=_double_get(deck, 'U233_fiss_yield', nuc),
+                                  y3=_double_get(deck, 'U235_fiss_yield', nuc),
+                                  y4=_double_get(deck, 'U238_fiss_yield', nuc),
+                                  y5=_double_get(deck, 'PU239_fiss_yield', nuc),
+                                  y6=_double_get(deck, 'PU241_fiss_yield', nuc),
+                                  y7=_double_get(deck, 'CM245_fiss_yield', nuc),
+                                  y8=_double_get(deck, 'CF249_fiss_yield', nuc),
+                                  p=precision,
+                                  )
     return s
 
 def _del_deck_nuc(deck, nuc):
@@ -1448,7 +1448,12 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
         xscache = cache.xs_cache
     old_flux = xscache.get('phi_g', None)
     old_group_struct = xscache.get('E_g', None)
-    xscache['E_g'] = [10.0, 1e-7]
+    if old_group_struct is None:
+        xscache['E_g'] = [10.0, 1e-7]
+    elif len(old_group_struct) == 2:
+        pass
+    else:
+        xscache['E_g'] = [old_group_struct[0], old_group_struct[-1]]
     nucs = sorted(nucs)
 
     # setup tape9
@@ -1515,14 +1520,14 @@ def nlbs(t9):
     return tuple(decay_nlb), tuple(xsfpy_nlb)
 
 
-def make_tape9(nucs, xscache=None):
+def make_tape9(nucs, xscache=None, nlb=(201, 202, 203)):
     """Make a TAPE9 dict with data for a given list of nucs using data from
     a given data source.
 
     Parameters
     ----------
-    nucs: list
-        list of nuclides to get data for.
+    nucs : iterable of ints, optional
+        Set of nuclides in any format.
 
     Returns
     -------
@@ -1537,7 +1542,7 @@ def make_tape9(nucs, xscache=None):
 
     if xscache is None:
         xscache = cache.XSCache()
-    nucs = [nucname.id(nuc) for nuc in nucs]
-    xsfpys = xslibs(nucs = nucs, xscache=xscache, nlb=(219, 220, 221))
+    nucs = {nucname.id(nuc) for nuc in nucs}
+    xsfpys = xslibs(nucs=nucs, xscache=xscache, nlb=nlb)
     tape9 = merge_tape9([decay, xsfpys])
     return tape9

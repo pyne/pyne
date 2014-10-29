@@ -526,7 +526,7 @@ def test_nlbs():
 def test_tape9_dict_structure():
     ds = OpenMCDataSource()
     nucs = ["U233", "U234", "U235", "U236", "U238"]
-    tape9 = origen22.make_tape9(nucs)
+    tape9 = origen22.make_tape9(nucs, nlb=(219, 220, 221))
 
     # check for correct deck ids: 1,2,3 for decay, 219, 220, 221 for xsfpy
     assert_equal(set(list(tape9.keys())), {1, 2, 3, 219, 220, 221})
