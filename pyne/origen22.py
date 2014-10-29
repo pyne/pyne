@@ -1448,7 +1448,12 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
         xscache = cache.xs_cache
     old_flux = xscache.get('phi_g', None)
     old_group_struct = xscache.get('E_g', None)
-    xscache['E_g'] = [10.0, 1e-7]
+    if old_group_struct is None:
+        xscache['E_g'] = [10.0, 1e-7]
+    elif len(old_group_struct) == 2:
+        pass
+    else:
+        xscache['E_g'] = [old_group_struct[0], old_group_struct[-1]]
     nucs = sorted(nucs)
 
     # setup tape9
