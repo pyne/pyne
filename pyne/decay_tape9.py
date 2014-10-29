@@ -1,4 +1,4 @@
-decay_tape9 = """   1                       DECAY LIBRARY: ACTIVATION PRODUCTS                   
+decay_tape9 = """   1                PyNE decay library for activation products              
    1  380930  2     7.500E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
    1                0.000E+00 0.000E+00 2.556E+00 0.000E+00 3.000E-08 1.000E+00
    1  280580  6     0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
@@ -1376,7 +1376,7 @@ decay_tape9 = """   1                       DECAY LIBRARY: ACTIVATION PRODUCTS
    1  571390  6     0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
    1                0.000E+00 0.000E+00 0.000E+00 9.991E-01 1.000E+00 1.000E+00
   -1
-   2                     DECAY LIBRARY: ACTINIDES AND DAUGHTERS                 
+   2                PyNE decay library for actinides and daughters            
    2  982530  4     1.781E+01 0.000E+00 0.000E+00 0.000E+00 3.100E-03 0.000E+00
    2                0.000E+00 0.000E+00 9.782E-02 0.000E+00 3.000E-11 1.000E-04
    2  932360  7     1.150E+02 0.000E+00 9.100E-01 0.000E+00 0.000E+00 0.000E+00
@@ -1636,7 +1636,7 @@ decay_tape9 = """   1                       DECAY LIBRARY: ACTIVATION PRODUCTS
    2  932350  5     1.084E+00 0.000E+00 9.999E-01 0.000E+00 1.400E-05 0.000E+00
    2                0.000E+00 0.000E+00 9.800E-03 0.000E+00 2.000E-14 3.000E-08
   -1
-   3                        DECAY LIBRARY: FISSION PRODUCTS                     
+   3                PyNE decay library for fisson products
    3  481280  1     1.290E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
    3                0.000E+00 0.000E+00 3.695E+00 0.000E+00 3.000E-08 1.000E+00
    3  380930  2     7.500E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
