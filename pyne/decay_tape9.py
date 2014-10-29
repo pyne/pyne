@@ -1,3 +1,13 @@
+"""This modeule represents decay data that has been used with ORIGEN. This data 
+has been placed in the public domain via the technical report ORNL/TM-13624 [1]
+and is available for download online [2].
+
+1. Hermann, O. W., P. R. Daniel, and J. C. Ryman. "ORIGEN-S decay data library 
+   and half-life uncertainties." ORNL/TM-13624, Lockheed Martin Energy Research 
+   Corp., Oak Ridge Natl. Lab (1989).
+2. http://web.ornl.gov/~webworks/cppr/y2001/rpt/97914.pdf
+"""
+
 decay_tape9 = """   1                PyNE decay library for activation products              
    1  380930  2     7.500E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
    1                0.000E+00 0.000E+00 2.556E+00 0.000E+00 3.000E-08 1.000E+00
