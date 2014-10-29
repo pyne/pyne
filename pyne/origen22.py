@@ -1290,16 +1290,16 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
                                  p=precision,
                                  )
         s += _fpy_card_fmt.format(nlb=nlb,
-                                 y1=_double_get(deck, 'TH232_fiss_yield', nuc),
-                                 y2=_double_get(deck, 'U233_fiss_yield', nuc),
-                                 y3=_double_get(deck, 'U235_fiss_yield', nuc),
-                                 y4=_double_get(deck, 'U238_fiss_yield', nuc),
-                                 y5=_double_get(deck, 'PU239_fiss_yield', nuc),
-                                 y6=_double_get(deck, 'PU241_fiss_yield', nuc),
-                                 y7=_double_get(deck, 'CM245_fiss_yield', nuc),
-                                 y8=_double_get(deck, 'CF249_fiss_yield', nuc),
-                                 p=precision,
-                                 )
+                                  y1=_double_get(deck, 'TH232_fiss_yield', nuc),
+                                  y2=_double_get(deck, 'U233_fiss_yield', nuc),
+                                  y3=_double_get(deck, 'U235_fiss_yield', nuc),
+                                  y4=_double_get(deck, 'U238_fiss_yield', nuc),
+                                  y5=_double_get(deck, 'PU239_fiss_yield', nuc),
+                                  y6=_double_get(deck, 'PU241_fiss_yield', nuc),
+                                  y7=_double_get(deck, 'CM245_fiss_yield', nuc),
+                                  y8=_double_get(deck, 'CF249_fiss_yield', nuc),
+                                  p=precision,
+                                  )
     return s
 
 def _del_deck_nuc(deck, nuc):
