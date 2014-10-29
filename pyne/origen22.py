@@ -1526,8 +1526,8 @@ def make_tape9(nucs, xscache=None, nlb=(201, 202, 203)):
 
     Parameters
     ----------
-    nucs: list
-        list of nuclides to get data for.
+    nucs : iterable of ints, optional
+        Set of nuclides in any format.
 
     Returns
     -------
@@ -1546,7 +1546,7 @@ def make_tape9(nucs, xscache=None, nlb=(201, 202, 203)):
 
     if xscache is None:
         xscache = cache.XSCache()
-    nucs = [nucname.id(nuc) for nuc in nucs]
-    xsfpys = xslibs(nucs = nucs, xscache=xscache, nlb=nlb)
+    nucs = {nucname.id(nuc) for nuc in nucs}
+    xsfpys = xslibs(nucs=nucs, xscache=xscache, nlb=nlb)
     tape9 = merge_tape9([decay, xsfpys])
     return tape9
