@@ -1520,7 +1520,7 @@ def nlbs(t9):
     return tuple(decay_nlb), tuple(xsfpy_nlb)
 
 
-def make_tape9(nucs, xscache=None):
+def make_tape9(nucs, xscache=None, nlb=(201, 202, 203)):
     """Make a TAPE9 dict with data for a given list of nucs using data from
     a given data source.
 
@@ -1547,6 +1547,6 @@ def make_tape9(nucs, xscache=None):
     if xscache is None:
         xscache = cache.XSCache()
     nucs = [nucname.id(nuc) for nuc in nucs]
-    xsfpys = xslibs(nucs = nucs, xscache=xscache, nlb=(219, 220, 221))
+    xsfpys = xslibs(nucs = nucs, xscache=xscache, nlb=nlb)
     tape9 = merge_tape9([decay, xsfpys])
     return tape9
