@@ -1546,6 +1546,7 @@ def get_field_from_ds(ds, nucs, field):
     fdict = dict(ls)
     return fdict
 
+
 def make_tape9(ds, nucs, filter_nucs=False):
     """Make a TAPE9 dict with data for a given list of nucs using data from
     a given data source.
@@ -1582,8 +1583,6 @@ def make_tape9(ds, nucs, filter_nucs=False):
     # build up base cross-section and fission product yield deck
     xsfpy = {
              "_type": "xsfpy",
-             # "_subtype": "",
-             # "title": "",
              "sigma_gamma": {},
              "sigma_2n": {},
              "sigma_gamma_x": {},
