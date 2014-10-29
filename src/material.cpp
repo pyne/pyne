@@ -757,6 +757,9 @@ std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
   }
 
   std::stringstream temp_s;
+  temp_s << std::scientific;
+  temp_s << std::setprecision(3);
+
   int counter = comp.size();
   pyne::comp_iter nuc = comp.begin();
   // This will pick up multiples of 3 components
@@ -764,6 +767,7 @@ std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
     ss << std::setw(10) << std::left  << "COMPOUND";
 
     temp_s << frac_sign << nuc->second;
+
     ss << std::setw(10) << std::right << temp_s.str();
     ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
@@ -789,7 +793,6 @@ std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
 
   // Get the last (or only, as the case may be) one or two fractions
   if (nuc != comp.end()) {
-    std::stringstream temp_s;
     ss << std::setw(10) << std::left  << "COMPOUND";
     temp_s << frac_sign << nuc->second;
     ss << std::setw(10) << std::right << temp_s.str();
