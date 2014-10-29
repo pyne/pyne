@@ -164,9 +164,10 @@ namespace pyne {
     // helper functions
     void normalize_pdf(std::vector<double> & pdf);
     int num_groups(MBTag tag);
-    std::vector<double> read_bias_pdf(MBRange ves, std::vector<double> volumes);
+    std::vector<double> read_bias_pdf(MBRange ves, std::vector<double> volumes, 
+                                      std::vector<double> pdf);
   };
-}; //end namespace pyne
+} //end namespace pyne
 
 #ifdef __cplusplus
 } // extern "C"

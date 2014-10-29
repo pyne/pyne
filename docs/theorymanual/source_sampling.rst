@@ -87,7 +87,10 @@ Assumptions
 
 The Sampler class chooses the (x, y, z) position within a mesh volume element
 with no regard for what geometry cell it lies in. Cell rejection must be
-implemented within the physic-code-specific wrapper script.
+implemented within the physic-code-specific wrapper script. In non-analog
+sampling modes, particles of zero weight may be produced. The wrapper script
+is also responsible for ensuring these are handled properly within the physics
+code. 
 
 **********************
 Sample Calculations
