@@ -1013,7 +1013,8 @@ def _parse_tape9_xsfpy(deck):
 
 
 def parse_tape9(tape9="TAPE9.INP"):
-    """Parses an ORIGEN 2.2 TAPE9 file and returns the data as a dictionary of nuclide dictionaries.
+    """Parses an ORIGEN 2.2 TAPE9 file and returns the data as a dictionary of 
+    nuclide dictionaries.
 
     Parameters
     ----------
@@ -1131,6 +1132,23 @@ def parse_tape9(tape9="TAPE9.INP"):
 
     return parsed
 
+def loads_tape9(tape9):
+    """Parses a string that represents an ORIGEN 2.2 TAPE9 file and returns the data 
+    as a dictionary of nuclide dictionaries. See ``parse_tape9()`` for more details.
+
+    Parameters
+    ----------
+    tape9 : str
+        String represetation of the TAPE9 file.
+
+    Returns
+    -------
+    parsed : dict
+        A dictionary of the data from the TAPE9 file.
+    """
+    t9 = StringIO(tape9.decode())
+    parsed = parse_tape9(t9)
+    return parsed
 
 
 def merge_tape9(tape9s):

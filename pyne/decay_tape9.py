@@ -7,6 +7,7 @@ and is available for download online [2].
    Corp., Oak Ridge Natl. Lab (1989).
 2. http://web.ornl.gov/~webworks/cppr/y2001/rpt/97914.pdf
 """
+from __future__ import unicode_literals
 
 decay_tape9 = """   1                PyNE decay library for activation products              
    1  380930  2     7.500E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00

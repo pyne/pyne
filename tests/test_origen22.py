@@ -420,7 +420,9 @@ def test_parse_tape9():
     assert_equal(deck383['CM245_fiss_yield'][300670], 0.0)
     assert_equal(deck383['CF249_fiss_yield'][300670], 0.0)
 
-
+def test_loads_tape9():
+    tape9 = origen22.loads_tape9(sample_tape9)
+    assert_equal(set(tape9), set([1, 2, 3, 381, 382, 383]))
 
 def test_merge_tape9():
     tape9_file = StringIO(sample_tape9)
