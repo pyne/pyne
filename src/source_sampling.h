@@ -18,8 +18,8 @@
 /// for sampling and particle weights are adjusted accordingly. The biased 
 /// source density distribution must have the same number of energy groups as 
 /// the unbiased distribution. Alternatively, it may have exactly 1 energy
-/// group, in which case this value is used for all energies within a particular
-/// mesh volume element.
+/// group, in which case only spatial biasing is done, and energies are sampled
+/// in analog.
  
 #ifndef PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
 #define PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY

@@ -215,7 +215,7 @@ selected in void (MCNP materal 0) the source position is resampled within the
 selected mesh volume element until either a non-void position is found, or this
 user-specified limit is researched.
 
-For example, this "idum" card specifies uniform sampling with a resample limite
+For example, this "idum" card specifies uniform sampling with a resample limit
 of 100:
 
 .. code-block:: bash
