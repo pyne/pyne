@@ -1146,10 +1146,12 @@ def loads_tape9(tape9):
     parsed : dict
         A dictionary of the data from the TAPE9 file.
     """
-    if isinstance(tape9, basestring):
+    if isinstance(tape9, bytes):
+        t9 = StringIO(tape9.decode())
+    elif isinstance(tape9, basestring):
         t9 = StringIO(tape9)
     else:
-        t9 = StringIO(tape9.decode())
+        raise TypeError("tape9 you are trying to parse is not a string!")
     parsed = parse_tape9(t9)
     return parsed
 
