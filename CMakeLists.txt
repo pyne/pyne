@@ -2,7 +2,7 @@
 cmake_minimum_required( VERSION 2.8.5 )
 
 # Set the project name
-project( pyne )
+project( pyne Fortran CXX)
 
 # languages
 enable_language(Fortran)
@@ -38,7 +38,7 @@ message(STATUS
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Default to release build type
-set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type")
+set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type" FORCE)
 
 # quiets fortify_source warnings when not compiling with optimizations
 # in linux distros where compilers were compiled with fortify_source enabled by
@@ -161,4 +161,3 @@ file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" DESTINATION "${CMAKE_BINARY_DIR}
 message("-- Making Metadata.")
 execute_process(COMMAND "${PYTHON_EXECUTABLE}"
                         "${CMAKE_CURRENT_SOURCE_DIR}/configure.py" metadata)
-

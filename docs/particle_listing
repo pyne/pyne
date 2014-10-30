@@ -1,0 +1,58 @@
+**Particles:**
+
+.. raw:: html
+
+    <div>
+    <table style="margin-left:auto;margin-right:auto;">     
+    <tr> <th>Particle</th> <th>PDC ID</th> <th>Description</th> </tr>     
+    <tr> <td>Electron</td> <td>11</td> <td>Electron</td> </tr>
+    <tr> <td>Positron</td> <td>-11</td> <td>Anti Electron</td> </tr>
+    <tr> <td>ElectronNeutrino</td> <td>12</td> <td>Electron Neutrino</td> </tr>
+    <tr> <td>ElectronAntiNeutrino</td> <td>-12</td> <td>Electron Anti Neutrino
+    </td> </tr>
+    <tr> <td>Muon</td> <td>13</td> <td>Muon</td> </tr>
+    <tr> <td>AntiMuon</td> <td>-13</td> <td>AntiMuon</td> </tr>
+    <tr> <td>MuonNeutrino</td> <td>14</td> <td>MuonNeutrino</td> </tr>
+    <tr> <td>MuonAntiNeutrino</td> <td>-14</td> <td>MuonAntiNeutrino</td> </tr>
+    <tr> <td>Tauon</td> <td>15</td> <td>Tauon</td> </tr>
+    <tr> <td>AntiTauon</td> <td>-15</td> <td>AntiTauon</td> </tr>
+    <tr> <td>TauNeutrino</td> <td>16</td> <td>TauNeutrino</td> </tr>
+    <tr> <td>TauAntiNeutrino</td> <td>-16</td> <td>TauAntiNeutrino</td> </tr>
+    <tr> <td>Photon</td> <td>22</td> <td>Photon</td> </tr>
+    <tr> <td>Pion</td> <td>211</td> <td>Pion</td> </tr>
+    <tr> <td>AntiPion</td> <td>-211</td> <td>AntiPion</td> </tr>
+    <tr> <td>Kaon</td> <td>321</td> <td>Kaon</td> </tr>
+    <tr> <td>AntiKaon</td> <td>-321</td> <td>AntiKaon</td> </tr>
+    <tr> <td>KaonZeroShort</td> <td>310</td> <td>KaonZeroShort</td> </tr>
+    <tr> <td>KaonZero</td> <td>311</td> <td>KaonZero</td> </tr>
+    <tr> <td>AntiKaonZero</td> <td>-311</td> <td>AntiKaonZero</td> </tr>
+    <tr> <td>Neutron</td> <td>2112</td> <td>Neutron</td> </tr>
+    <tr> <td>AntiNeutron</td> <td>-2112</td> <td>AntiNeutron</td> </tr>
+    <tr> <td>Proton</td> <td>2212</td> <td>Proton</td> </tr>
+    <tr> <td>AntiProton</td> <td>-2212</td> <td>AntiProton</td> </tr>
+    <tr> <td>Lambda</td> <td>3122</td> <td>Lambda</td> </tr>
+    <tr> <td>AntiLambda</td> <td>-3122</td> <td>AntiLambda</td> </tr>
+    <tr> <td>Sigma-</td> <td>3112</td> <td>Sigma-</td> </tr>
+    <tr> <td>AntiSigma-</td> <td>3112</td> <td>AntiSigma-</td> </tr>
+    <tr> <td>Sigma+</td> <td>3222</td> <td>Sigma+</td> </tr>
+    <tr> <td>AntiSigma+</td> <td>-3222</td> <td>AntiSigma+</td> </tr>
+    <tr> <td>Sigma</td> <td>3212</td> <td>Sigma</td> </tr>
+    <tr> <td>AntiSigmaZero</td> <td>-3212</td> <td>AntiSigmaZero</td> </tr>
+    </table> </div> 
+
+**Particle Aliases:**
+
+.. raw:: html
+
+    <div>
+    <table style="margin-left:auto;margin-right:auto;">     
+    <tr> <th>Alias</th> <th>Particle Name</th> </tr>     
+    <tr> <td>Hydrogen</td> <td>Proton</td> </tr>
+    <tr> <td>Protium</td> <td>Proton</td> </tr>
+    <tr> <td>Beta</td> <td>Electron</td> </tr>
+    <tr> <td>Beta-</td> <td>Electron</td> </tr>
+    <tr> <td>Beta+</td> <td>Positron</td> </tr>
+    <tr> <td>Gamma</td> <td>Photon</td> </tr>
+    <tr> <td>X-Ray</td> <td>Photon</td> </tr>
+    </table> </div>
+

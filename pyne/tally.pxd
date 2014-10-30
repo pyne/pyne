@@ -8,6 +8,9 @@
 ################################################
 
 
+cimport stlcontainers
+from libcpp.map cimport map as cpp_map
+from libcpp.string cimport string as std_string
 from pyne cimport cpp_tally
 
 
@@ -15,6 +18,9 @@ from pyne cimport cpp_tally
 cdef class Tally:
     cdef void * _inst
     cdef public bint _free_inst
+    cdef public stlcontainers._MapStrStr _rx2fluka
+    cdef public stlcontainers._MapStrStr _rx2mcnp5
+    cdef public stlcontainers._MapStrStr _rx2mcnp6
     pass
 
 
