@@ -1146,7 +1146,10 @@ def loads_tape9(tape9):
     parsed : dict
         A dictionary of the data from the TAPE9 file.
     """
-    t9 = StringIO(tape9.decode())
+    if isinstance(tape9, str):
+        t9 = StringIO(tape9)
+    elif isinstance(tape9, bytes):
+        t9 = StringIO(tape9.decode())
     parsed = parse_tape9(t9)
     return parsed
 
