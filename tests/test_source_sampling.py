@@ -134,39 +134,49 @@ def test_uniform():
        in the Theory Manual.
     """
     m = Mesh(structured=True, 
-             structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]],
+             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
-    m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
+    m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, True)
 
-    num_samples = 5000
+    num_samples = 10000
     score = 1.0/num_samples
     num_divs = 2
-    tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    num_e = 2
+    spatial_tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    e_tally = np.zeros(shape=(4)) # number of phase space groups
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        if s[0] < 2.5:
-            if s[3] < 0.5:
-              assert_almost_equal(s[4], 0.8) # hand calcs
-            else:
-              assert_almost_equal(s[4], 1.2) # hand calcs
+        if s[0] < 3.0:
+            assert_almost_equal(s[4], 0.7) # hand calcs
         else:
-            if s[3] < 0.5:
-              assert_almost_equal(s[4], 0.4) # hand calcs
-            else:
-              assert_almost_equal(s[4], 1.6) # hand calcs
+            assert_almost_equal(s[4], 2.8) # hand calcs
 
-        tally[int(s[0]*num_divs)/10, 
-              int(s[1]*num_divs)/10, 
-              int(s[2]*num_divs)/10]  += score
+        spatial_tally[int(s[0]*num_divs/3.5), 
+                      int(s[1]*num_divs/1.0), 
+                      int(s[2]*num_divs/1.0)]  += score
+
+        if s[0] < 3 and s[3] < 0.5:
+            e_tally[0] += score
+        elif s[0] < 3 and s[3] > 0.5:
+            e_tally[1] += score
+        if s[0] > 3 and s[3] < 0.5:
+            e_tally[2] += score
+        if s[0] > 3 and s[3] > 0.5:
+            e_tally[3] += score
 
     for i in range(0, 3):
         for j in range(0, 2):
-            halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:])
+            halfspace_sum = np.sum(np.rollaxis(spatial_tally, i)[j,:,:])
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
+
+    expected_e_tally = [4./7, 2./7, 3./28, 1./28] # hand calcs
+    for i in range(4):
+        assert(abs(e_tally[i] - expected_e_tally[i]) \
+               /expected_e_tally[i] < 0.1)
 
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
@@ -177,38 +187,38 @@ def test_bias():
        in the Theory Manual.
     """
     m = Mesh(structured=True, 
-             structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]], 
+             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]], 
              mats = None)
     m.src = IMeshTag(2, float)
-    m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
+    m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
     m.bias = IMeshTag(2, float)
-    m.bias[:] = [[8.0, 3.0], [5.0, 8.0]]
+    m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, "bias")
 
-    num_samples = 5000
+    num_samples = 10000
     score = 1.0/num_samples
     num_divs = 2
     tally = np.zeros(shape=(4))
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        if s[0] < 2.5:
+        if s[0] < 3:
             if s[3] < 0.5:
-              assert_almost_equal(s[4], 0.625) # hand calcs
+              assert_almost_equal(s[4], 1.6) # hand calcs
               tally[0] += score
             else:
-              assert_almost_equal(s[4], 2.5) # hand calcs
+              assert_almost_equal(s[4], 0.4) # hand calcs
               tally[1] += score
         else:
             if s[3] < 0.5:
-              assert_almost_equal(s[4], 0.5) # hand calcs
+              assert_almost_equal(s[4], 2.4) # hand calcs
               tally[2] += score
             else:
-              assert_almost_equal(s[4], 1.25) # hand calcs
+              assert_almost_equal(s[4], 0.8) # hand calcs
               tally[3] += score
 
-    expected_tally = [0.16, 0.06, 0.3, 0.48]
+    expected_tally = [0.25, 0.5, 0.125, 0.125] # hand calcs
     for a, b in zip(tally, expected_tally):
        assert(abs(a-b)/b < 0.25)
 
@@ -222,41 +232,51 @@ def test_bias_spacial():
     theory manual.
     """
     m = Mesh(structured=True, 
-             structured_coords=[[0, 2.5, 10], [0, 10], [0, 10]],
+             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
-    m.src[:] = [[2.0, 3.0], [1.0, 4.0]]
-    m.bias = IMeshTag(2, float)
+    m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
+    m.bias = IMeshTag(1, float)
     m.bias[:] = [1, 1]
     e_bounds = np.array([0, 0.5, 1.0])
     m.mesh.save("sampling_mesh.h5m")
     sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, "bias")
 
-    num_samples = 5000
+    num_samples = 10000
     score = 1.0/num_samples
     num_divs = 2
-    tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    num_e = 2
+    spatial_tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    e_tally = np.zeros(shape=(4)) # number of phase space groups
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        if s[0] < 2.5:
-            if s[3] < 0.5:
-              assert_almost_equal(s[4], 0.8) # hand calcs
-            else:
-              assert_almost_equal(s[4], 1.2) # hand calcs
+        if s[0] < 3.0:
+            assert_almost_equal(s[4], 0.7) # hand calcs
         else:
-            if s[3] < 0.5:
-              assert_almost_equal(s[4], 0.4) # hand calcs
-            else:
-              assert_almost_equal(s[4], 1.6) # hand calcs
+            assert_almost_equal(s[4], 2.8) # hand calcs
 
-        tally[int(s[0]*num_divs)/10, 
-              int(s[1]*num_divs)/10, 
-              int(s[2]*num_divs)/10]  += score
+        spatial_tally[int(s[0]*num_divs/3.5), 
+                      int(s[1]*num_divs/1.0), 
+                      int(s[2]*num_divs/1.0)]  += score
+
+        if s[0] < 3 and s[3] < 0.5:
+            e_tally[0] += score
+        elif s[0] < 3 and s[3] > 0.5:
+            e_tally[1] += score
+        if s[0] > 3 and s[3] < 0.5:
+            e_tally[2] += score
+        if s[0] > 3 and s[3] > 0.5:
+            e_tally[3] += score
 
     for i in range(0, 3):
         for j in range(0, 2):
-            halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:])
+            halfspace_sum = np.sum(np.rollaxis(spatial_tally, i)[j,:,:])
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
+
+    expected_e_tally = [4./7, 2./7, 3./28, 1./28] # hand calcs
+    for i in range(4):
+        assert(abs(e_tally[i] - expected_e_tally[i])
+               /expected_e_tally[i] < 0.1)
 
 def test_alias_table():
     """This tests that the AliasTable class produces samples in the ratios
@@ -305,3 +325,4 @@ def point_in_tet(t, p):
 
     determinates =[np.linalg.det(x) for x in matricies]
     return all(x >= 0 for x in determinates) or all(x < 0 for x in determinates)
+

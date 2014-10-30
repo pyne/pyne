@@ -12,13 +12,14 @@
 /// of a particle upon birth. 
 /// There are three sampling modes: analog, uniform, and user-speficied
 /// In analog sampling, no source biasing is used and birth weights
-/// are all 1. In uniform sampling, all phase space is sampled evenly and weights
-/// are adjusted accordingly. In user-speficied mode, a supplied biased source
-/// density distribution is used for sampling and particle weights are adjusted
-/// accordingly. The biased source density distribution must have the same number 
-/// of energy groups as the unbiased distribution. Alternatively, it may have 
-/// exactly 1 energy group, in which case this value is used for all energies
-/// within a particular mesh volume element.
+/// are all 1. In uniform sampling, the position of the particle (but not the 
+/// energy) is sampled uniformly and weights are adjusted accordingly. In 
+/// user-speficied mode, a supplied biased source density distribution is used 
+/// for sampling and particle weights are adjusted accordingly. The biased 
+/// source density distribution must have the same number of energy groups as 
+/// the unbiased distribution. Alternatively, it may have exactly 1 energy
+/// group, in which case this value is used for all energies within a particular
+/// mesh volume element.
  
 #ifndef PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
 #define PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
