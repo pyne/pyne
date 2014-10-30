@@ -25,6 +25,7 @@ from pyne.material import Material, from_atom_frac
 
 if sys.version_info[0] > 2:
   basestring = str
+  unicode = str
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
@@ -1146,12 +1147,10 @@ def loads_tape9(tape9):
     parsed : dict
         A dictionary of the data from the TAPE9 file.
     """
-    if isinstance(tape9, bytes):
-        t9 = StringIO(tape9.decode())
-    elif isinstance(tape9, basestring):
+    if isinstance(tape9, unicode):
         t9 = StringIO(tape9)
     else:
-        raise TypeError("tape9 you are trying to parse is not a string!")
+        t9 = StringIO(tape9.decode())
     parsed = parse_tape9(t9)
     return parsed
 
