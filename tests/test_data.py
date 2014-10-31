@@ -4,7 +4,8 @@ import math
 import warnings
 
 import nose
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, assert_true
+from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
+    assert_in, assert_true
 import numpy as np
 import numpy.testing as npt
 
@@ -123,6 +124,11 @@ def test_branch_ratio():
     assert_equal(data.branch_ratio(922350001, 922360000), 0.0)
     assert_equal(data.branch_ratio(611460000, 621460000), 0.34)
 
+    children = data.decay_children('U235')
+    for child in children:
+        obs = data.branch_ratio('U235', child)
+        assert_true(obs >= 0.0 and obs <= 1.0)
+
 
 def test_state_energy():
     assert_equal(data.state_energy('H1'), 0.0)
@@ -135,6 +141,18 @@ def test_decay_children():
     assert_equal(data.decay_children(611460000), set([601460000, 621460000]))
     assert_equal(data.decay_children('O16'), set())
     assert_equal(data.decay_children('80166', False), set([60120000, 80160000]))
+    # Spontaneous fission case
+    assert_equal(data.decay_children('U-235'), set([360830000, 420950000, 
+        430990000, 441010000, 441030000, 441060000, 451030000, 451050000, 
+        461050000, 461070000, 461080000, 471090000, 481130000, 491150000, 
+        511250000, 521270000, 531270000, 531350000, 541310000, 541340000, 
+        541350000, 541360000, 551330000, 551340000, 551350000, 551370000,
+        601430000, 601450000, 611470000, 611480000, 611480001, 611490000,
+        621470000, 621480000, 621490000, 621500000, 621510000, 621520000,
+        631510000, 631520000, 631530000, 631540000, 631550000, 641540000,
+        641550000, 641560000, 641570000, 641580000, 661600000, 661610000,
+        661620000, 661630000, 661640000, 671650000, 681660000, 681670000,
+        902310000]))
 
 
 def test_abundance_by_z_for_soundness():

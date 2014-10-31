@@ -84,6 +84,11 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     int mcnp_to_id(char *) except +
     int mcnp_to_id(std_string) except +
 
+    # FLUKA Functions 
+    std_string fluka(int) except + 
+    int fluka_to_id(char *) except + 
+    int fluka_to_id(std_string) except + 
+
     # Serpent Functions
     std_string serpent(int) except +
     std_string serpent(char *) except +

@@ -1,4 +1,7 @@
 // General Library
+#ifndef PYNE_IS_AMALGAMATED
+extern "C" double endftod_(char *str, int len);
+#endif
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "utils.h"
@@ -43,7 +46,7 @@ void pyne::pyne_start() {
 
 
 // String Transformations
-std::string pyne::to_str (int t) {
+std::string pyne::to_str(int t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
@@ -55,29 +58,29 @@ std::string pyne::to_str(unsigned int t) {
   return ss.str();
 }
 
-std::string pyne::to_str (double t) {
+std::string pyne::to_str(double t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
 }
 
-std::string pyne::to_str (bool t) {
+std::string pyne::to_str(bool t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
 }
 
 
-int pyne::to_int (std::string s) {
+int pyne::to_int(std::string s) {
   return atoi( s.c_str() );
 }
 
-double pyne::to_dbl (std::string s) {
+double pyne::to_dbl(std::string s) {
   return strtod( s.c_str(), NULL );
 }
 
-double pyne::endftod (char * s) {
-  // Converts string from ENDF to float64.
+double pyne::endftod_cpp(char * s) {
+  // Converts string from ENDF only handles "E-less" format but is 5x faster
   int pos, mant, exp;
   double v, dbl_exp;
 
@@ -129,6 +132,20 @@ double pyne::endftod (char * s) {
     v *= (s[pos] == '-'? -1: 1);
   }
   return v;
+}
+
+double pyne::endftod_f(char * s) {
+#ifdef PYNE_IS_AMALGAMATED
+  return endftod_cpp(s);
+#else
+  return endftod_(s, 12);
+#endif
+}
+
+double (*pyne::endftod)(char * s) = &pyne::endftod_f;
+
+void pyne::use_fast_endftod() {
+  pyne::endftod = &pyne::endftod_cpp;
 }
 
 std::string pyne::to_upper(std::string s) {
@@ -294,27 +311,27 @@ double pyne::coth(double x) {
 bool pyne::file_exists(std::string strfilename) {
   // Thank you intarwebz for this function!
   // Sepcifically: http://www.techbytes.ca/techbyte103.html
-  struct stat stFileInfo; 
-  bool blnReturn; 
-  int intStat; 
+  struct stat stFileInfo;
+  bool blnReturn;
+  int intStat;
 
-  // Attempt to get the file attributes 
-  intStat = stat(strfilename.c_str(), &stFileInfo); 
+  // Attempt to get the file attributes
+  intStat = stat(strfilename.c_str(), &stFileInfo);
 
-  if(intStat == 0) { 
-    // We were able to get the file attributes 
-    // so the file obviously exists. 
-    blnReturn = true; 
-  } 
-  else { 
-    // We were not able to get the file attributes. 
-    // This may mean that we don't have permission to 
-    // access the folder which contains this file. If you 
-    // need to do that level of checking, lookup the 
-    // return values of stat which will give you 
-    // more details on why stat failed. 
-    blnReturn = false; 
-  } 
-   
-  return(blnReturn); 
+  if(intStat == 0) {
+    // We were able to get the file attributes
+    // so the file obviously exists.
+    blnReturn = true;
+  }
+  else {
+    // We were not able to get the file attributes.
+    // This may mean that we don't have permission to
+    // access the folder which contains this file. If you
+    // need to do that level of checking, lookup the
+    // return values of stat which will give you
+    // more details on why stat failed.
+    blnReturn = false;
+  }
+
+  return(blnReturn);
 };

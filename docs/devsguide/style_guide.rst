@@ -7,6 +7,10 @@ PyNE is a polyglot project about a technical subject with many independent devel
 and users. To keep our heads on straight we have adopted the following styles and
 conventions.  We use these throughout the code base to ensure consistency.
 
+* `Python Style Guide <style_guide.rst#python-style-guide>`__
+* `Cython Style Guide <style_guide.rst#cython-style-guide>`__
+* `C++ Style Guide <style_guide.rst#cc-style-guide>`__
+
 ----------------------------------
 Rules to Write By
 ----------------------------------

@@ -16,44 +16,9 @@ three pieces of information that *should* be included in a radionuclide's name
 Some common naming conventions exist.  The following are the ones currently 
 supported by PyNE.  Functions to convert between forms may be seen in :ref:`name_cast`.
 
- #. **zzaaam**: This type places the charge of the nucleus out front, then has three
-    digits for the atomic mass number, and ends with a metastable flag (0 = ground,
-    1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would
-    be expressed as '922350'.
- #. **zzllaaam**: The ZZLLAAAM naming convention is similar to name form.  However, it is preceded by
-    the nuclides two AA numbers, followed by the two LL characters.  Of the two LL characters, only 
-    the first letter in the chemical symbol is uppercase, the dash is always present, and the the
-    meta-stable flag is lowercase.  For instance, '95-Am-242m' is the valid serpent notation for 
-    this nuclide.
- #. **name**: This is the more common, human readable notation.  The chemical symbol
-    (one or two characters long) is first, followed by the atomic weight.  Lastly if
-    the nuclide is metastable, the letter *M* is concatenated to the end.  For example,
-    'H-1' and 'Am242M' are both valid.  Note that nucname will always return name form with
-    the dash removed and all letters uppercase.
- #. **MCNP**: The MCNP format for entering nuclides is unfortunately non-standard.  In most
-    ways it is similar to zzaaam form, except that it lacks the metastable flag.  For information
-    on how metastable isotopes are named, please consult the MCNPX documentation for more information.
- #. **Serpent**: The serpent naming convention is similar to name form.  However, only the first
-    letter in the chemical symbol is uppercase, the dash is always present, and the the meta-stable
-    flag is lowercase.  For instance, 'Am-242m' is the valid serpent notation for this nuclide.
- #. **NIST**: The NIST naming convention is also similar to the Serpent form.  However, this
-    convention contains no metastable information.  Moreover, the A-number comes before the
-    element symbol.  For example, '242Am' is the valid NIST notation.
- #. **CINDER**: The CINDER format is similar to zzaaam form except that the placement of the Z- and
-    A-numbers are swapped. Therefore, this format is effectively aaazzzm.  For example, '2420951' is
-    the valid cinder notation for 'AM242M'.
- #. **ALARA**: In ALARA format, elements are denoted by the lower case atomic symbol. Isotopes are
-    specified by appending a semicolon and A-number. For example, "fe" and "fe:56" represent
-    elemental iron and iron-56 respectively. No metastable flag exists.
- #. **state_id**: The state id naming convention uses the form zzzaaassss. It is different from the
-    canonical zzzaaammmm form in that ssss refers to a list of states by ordered by energy. This is
-    derived from the levels listed in the ENSDF files for a given nuclide. Using this form is
-    dangerous as it may change with new releases of ENSDF data.
- #. **Groundstate**:  In Groundstate format, the nuclide is stored in a form similar to the standard
-    id form, but the last four digits are zero to eliminate the information about the nuclides state.  
+.. include:: ../nucnameforms.rst
 
 If there are more conventions that you would like to see supported, please contact the :ref:`dev_team`.
-
 
 --------------
 Canonical Form
@@ -90,6 +55,22 @@ Code internal to PyNE use ``zzzaaammmm``, and except for human readability, you 
 Natural elements are specified in this form by having zero A-number and excitation flags
 (``zzzaaammmm('U') == 920000``).
 
+Well-Defined vs Ambiguous Situations
+....................................
+In situations where the input naming convention is well-defined, it is *highly*
+recommended that you use the direct ``<form>_to_id()`` functions (e.g. 
+``mcnp_to_id()``) to convert from a nuclide in the given form to the id form 
+representation. When a high level of quality assurance is required, it is 
+advisable to require an specific input format to leverage the exactness of the 
+direct-to-id functions.
+
+However, in situations where arbitrary nuclide naming conventions are allowed, 
+you must use the ``id()`` function. An example of such a situation is when accepting 
+human input. This function attempts to resolve the underlying nuclide identifier. 
+For most nuclides and most normal spellings, this resolution is straightforward. 
+However, some nulcides are ambiguous between the various supported naming conventions.
+For more information please refer to the 
+:ref:`nucname theory manual <theorymanual_nucname>`.
 
 ---------------
 Examples of Use
