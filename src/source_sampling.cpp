@@ -123,7 +123,7 @@ void pyne::Sampler::setup() {
   }
   else throw std::invalid_argument("Mesh file must contain only tets or hexes.");
 
-  // Process all the spacial and tag data and create an alias table.
+  // Process all the spatial and tag data and create an alias table.
   std::vector<double> volumes(num_ves);
   mesh_geom_data(ves, volumes);
   mesh_tag_data(ves, volumes);
@@ -249,15 +249,28 @@ std::vector<double> pyne::Sampler::read_bias_pdf(MBRange ves,
              bias_pdf[i*num_e_groups + j] *=  volumes[i];
         }
       } else if (num_bias_groups == 1) {
-        // Spacial biasing only: the supplied bias PDF values are supplied
-        // to all energy groups within a mesh volume element
-        std::vector<double> spacial_pdf(num_ves); 
-        rval = mesh->tag_get_data(bias_tag, ves, &spacial_pdf[0]);
+        // Spatial biasing only: the supplied bias PDF values are applied
+        // to all energy groups within a mesh volume element, which are
+        // sampled in analog.
+        std::vector<double> spatial_pdf(num_ves); 
+        rval = mesh->tag_get_data(bias_tag, ves, &spatial_pdf[0]);
         if (rval != moab::MB_SUCCESS)
           throw std::runtime_error("Problem getting bias tag data.");
+        double q_in_group;
         for (i=0; i<num_ves; ++i) {
-          for (j=0; j<num_e_groups; ++j)
-            bias_pdf[i*num_e_groups + j] =  spacial_pdf[i]*volumes[i];
+          q_in_group = 0;
+          for (j=0; j<num_e_groups; ++j){
+            q_in_group += pdf[i*num_e_groups + j];
+          }
+          if (q_in_group > 0){
+            for (j=0; j<num_e_groups; ++j){
+              bias_pdf[i*num_e_groups + j] = 
+                spatial_pdf[i]*volumes[i]*pdf[i*num_e_groups + j]/q_in_group;
+            }
+          } else {
+            for (j=0; j<num_e_groups; ++j)
+              bias_pdf[i*num_e_groups + j] =  0;
+          }
         }
       } else {
         throw std::length_error("Length of bias tag must equal length of the"
