@@ -249,7 +249,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(MBRange ves,
              bias_pdf[i*num_e_groups + j] *=  volumes[i];
         }
       } else if (num_bias_groups == 1) {
-        // Spacial biasing only: the supplied bias PDF values are applied
+        // Spatial biasing only: the supplied bias PDF values are applied
         // to all energy groups within a mesh volume element, which are
         // sampled in analog.
         std::vector<double> spatial_pdf(num_ves); 

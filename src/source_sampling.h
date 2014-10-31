@@ -116,7 +116,7 @@ namespace pyne {
     /// \param bias_tag_name The name of the tag describing the biased source
     ///                       density distribution. The tag must have the same
     ///                       number of energy groups as <src_tag_name> or 1.
-    ///                       If 1 (i.e. spacial biasing only), all energy groups
+    ///                       If 1 (i.e. spatial biasing only), all energy groups
     ///                       within a mesh volume element are sampled equally.
     Sampler(std::string filename, 
             std::string src_tag_name, 

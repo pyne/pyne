@@ -223,7 +223,7 @@ def test_bias():
        assert(abs(a-b)/b < 0.25)
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
-def test_bias_spacial():
+def test_bias_spatial():
     """This test tests a user-specified biasing scheme for which the only 1
     bias group is supplied for a source distribution containing two energy 
     groups. This bias group is applied to both energy groups. In this test,
