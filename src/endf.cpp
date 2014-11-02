@@ -141,7 +141,7 @@ void pyne::library::read_endf(std::string filenm) {
       }
     }
   }
-  content_list = get_content_list();
+  content_list = gen_content_list();
 }
 
 template<typename T> T pyne::library::get (endf_id comp){

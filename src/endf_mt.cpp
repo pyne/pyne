@@ -311,3 +311,70 @@ pyne::mt460_mf1 pyne::read_mt460_mf1(std::ifstream &infile) {
   getline(infile, line);
   return mt460;
 }
+
+pyne::mt457_mf8 pyne::read_mt457_mf8(std::ifstream &infile) {
+  mt457_mf8 mt457;
+  control cs = read_cont(infile);
+
+  mt457.nuc_id = cs.c1;
+  mt457.awr = cs.c2;
+  mt457.mat = cs.mat;
+  mt457.mf = cs.mf;
+  mt457.mt = cs.mt;
+
+  mt457.lis = cs.l1;
+  mt457.liso = cs.l2;
+  mt457.nst = cs.n1;
+  mt457.nsp = cs.n2;
+
+  if (mt457.nst == 1) {
+    //boring stable nucleus
+  } else {
+    list lst = read_list(infile); //decay heat data
+    mt457.erel = std::vector<std::pair<double,double> >(lst.npl/2);
+    for (int i = 0; i < lst.npl/2; ++i) {
+      mt457.erel[i] = std::make_pair(lst.data[i * 2], lst.data[i * 2 + 1]);
+    }
+    lst = read_list(infile); //Q values and branching ratios
+    mt457.styp = std::vector<double>(mt457.nsp);
+    mt457.lcon = std::vector<int>(mt457.nsp);
+    mt457.ner = std::vector<int>(mt457.nsp);
+    mt457.fd = std::vector<std::pair<double,double> >(mt457.nsp);
+    mt457.eav = std::vector<std::pair<double,double> >(mt457.nsp);
+    mt457.fc = std::vector<std::pair<double,double> >(mt457.nsp);
+    for (int i = 0; i < mt457.nsp; ++i) {
+      list spec = read_list(infile); //Basic spectrum information
+      mt457.styp[i] = spec.c2;
+      mt457.lcon[i] = spec.l1;
+      mt457.ner[i] = spec.l2;
+      mt457.fd[i] = std::make_pair(spec.data[0], spec.data[1]);
+      mt457.eav[i] = std::make_pair(spec.data[2], spec.data[3]);
+      mt457.fc[i] = std::make_pair(spec.data[4], spec.data[5]);
+
+      if (spec.l1 != 1) { //LCON != 1
+        for (int j = 0; i < spec.n2; ++j) {
+          list rad = read_list(infile); //info for each discrete radiation
+          mt457.er.push_back(std::make_pair(rad.c1, rad.c2));
+          mt457.rtyp.push_back(rad.data[0]);
+          mt457.type.push_back(rad.data[1]);
+          mt457.ri.push_back(std::make_pair(rad.data[2], rad.data[3]));
+          mt457.ris.push_back(std::make_pair(rad.data[4], rad.data[5]));
+          if (rad.npl == 12) {
+            mt457.ricc.push_back(std::make_pair(rad.data[6], rad.data[7]));
+            mt457.rick.push_back(std::make_pair(rad.data[8], rad.data[9]));
+            mt457.ricl.push_back(std::make_pair(rad.data[10], rad.data[11]));
+          }
+        }
+      }
+      if (spec.l1 != 0) { //LCON != 0
+        tab1 tab = read_tab1(infile);//continuum radiation
+        if (tab.l2 != 0) { //LCON != 0 and LCOV != 0
+          list cov = read_list(infile); //covariance information
+        }
+      }
+    }
+  }
+  std::string line;
+  getline(infile, line);
+  return mt457;
+}

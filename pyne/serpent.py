@@ -10,12 +10,21 @@ if sys.version_info[0] > 2:
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
-_if_idx_str = ("""if (exist("idx", "var"));\n"""
-              """  idx = idx + 1;\n"""
-              """else;\n"""
-              """  idx = 1;\n"""
-              """end;"""
-              )
+_if_idx_str_serpent1 = (
+    'if (exist("idx", "var"));\n'
+    '  idx = idx + 1;\n'
+    'else;\n'
+    '  idx = 1;\n'
+    'end;'
+    )
+
+_if_idx_str_serpent2 = (
+    "if (exist('idx', 'var'));\n"
+    '  idx = idx + 1;\n'
+    'else;\n'
+    '  idx = 1;\n'
+    'end;'
+    )
 
 _num_pattern = "([0-9]+[.]?[0-9]*[Ee]?[+-]?[0-9]*)"
 
@@ -31,6 +40,8 @@ _rhs_variable_pattern = r"(\w+)\s*\(idx.*?\)\s*=\s*(.*)"
 _zeros_pattern = r"(zeros)\((.*)\)"
 
 _detector_pattern = r"(DET\w+)\s*=\s*np.array\("
+
+_detector_pattern_all = r"(DET\w+)\s*=\s*"
 
 def _replace_comments(s):
     """Replaces matlab comments with python arrays in string s."""
@@ -85,12 +96,16 @@ def parse_res(resfile, write_py=False):
     f = _replace_comments(f)
 
     # Grab the number of 'if' statements
-    IDX = f.count(_if_idx_str)
+    if_idx_str = _if_idx_str_serpent1
+    IDX = f.count(if_idx_str)
+    if IDX == 0:
+        if_idx_str = _if_idx_str_serpent2
+        IDX = f.count(if_idx_str)
 
     # Replace if statements with something more meaningful
-    fpart = f.partition(_if_idx_str)
+    fpart = f.partition(if_idx_str)
     f = fpart[0] + "idx = 0" + fpart[2]
-    f = f.replace(_if_idx_str, 'idx += 1')
+    f = f.replace(if_idx_str, 'idx += 1')
 
     # Replace matlab Arrays
     f = _replace_arrays(f)
@@ -296,14 +311,27 @@ def parse_det(detfile, write_py=False):
     # Find detector variable names 
     det_names = re.findall(_detector_pattern, f)
     det_names = np.unique(det_names)
+    all_det_names = re.findall(_detector_pattern_all, f)
+    all_det_names = np.unique(all_det_names)
+
+    is_serpent_1 = any([(dn.endswith('_VALS') and dn[:-5] in det_names) or \
+                        (dn.endswith('_EBINS') and dn[:-6] in det_names) \
+                        for dn in all_det_names])
 
     # Append detector reshaping
-    f += "\n\n# Reshape detectors\n"
+    f += '\n\n# Reshape detectors\n'
     for dn in det_names:
-        if dn + "E" in det_names:
-            f += "{name}.shape = ({name}_VALS, 13)\n".format(name=dn)
+        if is_serpent_1:
+            if dn + 'E' in det_names:
+                f += '{name}.shape = ({name}_VALS, 13)\n'.format(name=dn)
+            else:
+                f += '{name}.shape = ({name_min_E}_EBINS, 3)\n'.format(name=dn,
+                                                            name_min_E=dn[:-1])
         else:
-            f += "{name}.shape = ({name_min_E}_EBINS, 3)\n".format(name=dn, name_min_E=dn[:-1])
+            if (dn + 'E' in det_names) or (dn + 'T' in det_names):
+                f += '{name}.shape = (len({name})//13, 13)\n'.format(name=dn)
+            else:
+                f += '{name}.shape = (len({name})//3, 3)\n'.format(name=dn)
 
     # Add imports to header
     header = "import numpy as np\n\n"
@@ -322,7 +350,6 @@ def parse_det(detfile, write_py=False):
             new_filename = detfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-
     # Execute the adjusted file
     det = {}
     exec(f, {}, det)

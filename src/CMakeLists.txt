@@ -36,14 +36,17 @@ set(PYNE_SRCS
     "enrichment_cascade.cpp"
     "enrichment_symbolic.cpp"
     "jsoncpp.cpp"
+    "jsoncustomwriter.cpp"
     "material.cpp"
     "nucname.cpp"
+    "particle.cpp"
     "rxname.cpp"
     "tally.cpp"
     "utils.cpp"
     "endf_base.cpp"
     "endf_mt.cpp"
     "endf.cpp"
+    "endftod.f90"
     "${AHOT_SRCS}"
     )
 

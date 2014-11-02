@@ -42,10 +42,17 @@ cdef extern from "enrichment.h" namespace "pyne::enrichment":
     Cascade _fill_default_uranium_cascade() except +
     extern Cascade default_uranium_cascade
 
+    double feed_per_prod(double, double, double) except +
+    double feed_per_tail(double, double, double) except +
     double prod_per_feed(double, double, double) except +
+    double prod_per_tail(double, double, double) except +
     double tail_per_feed(double, double, double) except +
     double tail_per_prod(double, double, double) except +
-
+    double value_func(double) except +
+    double swu_per_feed(double, double, double) except +
+    double swu_per_prod(double, double, double) except +
+    double swu_per_tail(double, double, double) except +
+    
     double alphastar_i(double, double, double) except +
 
     void _recompute_nm(Cascade &, double) except +

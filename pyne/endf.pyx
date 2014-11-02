@@ -1631,7 +1631,7 @@ class Evaluation(object):
         items = self._get_head_record()
         iyield.ZA = items[0]
         iyield.AWR = items[1]
-        LE = items[2] - 1 # Determine energy-dependence
+        LE = items[2] # Determine energy-dependence
 
         for i in range(LE):
             items, itemList = self._get_list_record()
@@ -1671,7 +1671,7 @@ class Evaluation(object):
         items = self._get_head_record()
         cyield.ZA = items[0]
         cyield.AWR = items[1]
-        LE = items[2] - 1 # Determine energy-dependence
+        LE = items[2] # Determine energy-dependence
 
         for i in range(LE):
             items, itemList = self._get_list_record()

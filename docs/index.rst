@@ -54,6 +54,7 @@ Contents
     pyapi/index
     cppapi/index
     previous/index
+    devsguide/vnv
 
 **Theory:**
 

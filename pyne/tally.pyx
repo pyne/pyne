@@ -8,18 +8,27 @@
 ################################################
 """
 """
+cimport stlcontainers
 from libc.stdlib cimport free
+from libcpp.map cimport map as cpp_map
 from libcpp.string cimport string as std_string
 
+import collections
+import stlcontainers
 
+from warnings import warn
+from pyne.utils import VnVWarning
 
-
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 cdef class Tally:
     """
     
     Attributes
     ----------
+    rx2fluka (std::map< std::string, std::string >) :
+    rx2mcnp5 (std::map< std::string, std::string >) :
+    rx2mcnp6 (std::map< std::string, std::string >) :
     entity_type (std::string) : fundamental tally variables  the
         type of entity (volume,surface)
     entity_name (std::string) : the name of the entity (optional)
@@ -28,13 +37,19 @@ cdef class Tally:
     tally_name (std::string) : name of the tally
     entity_id (int) : id number of the entity being tallied upon
     entity_size (double) : the physical size of the entity
+    normalization (double) : the tally normalization
     
     
     Methods
     -------
     Tally
     ~Tally
+    create_dataspace
+    create_filetype
+    create_memtype
+    fluka
     from_hdf5
+    mcnp
     write_hdf5
     
     Notes
@@ -51,7 +66,9 @@ cdef class Tally:
         self._free_inst = True
 
         # cached property defaults
-
+        self._rx2fluka = None
+        self._rx2mcnp5 = None
+        self._rx2mcnp6 = None
 
     def _tally_tally_0(self, ):
         """Tally(self, )
@@ -83,6 +100,8 @@ cdef class Tally:
         
         entity : int
         
+        normalization : double
+        
         particle_name : std::string
         
         type : std::string
@@ -97,8 +116,8 @@ cdef class Tally:
         self._inst = new cpp_tally.Tally()
     
     
-    def _tally_tally_1(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0):
-        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0)
+    def _tally_tally_1(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0):
+        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
         this we ill put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
@@ -126,6 +145,8 @@ cdef class Tally:
         entity_size : double
         
         entity : int
+        
+        normalization : double
         
         particle_name : std::string
         
@@ -148,14 +169,14 @@ cdef class Tally:
         ent_type_bytes = ent_type.encode()
         ent_name_bytes = ent_name.encode()
         tal_name_bytes = tal_name.encode()
-        self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size)
+        self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
     
     
     _tally_tally_0_argtypes = frozenset()
-    _tally_tally_1_argtypes = frozenset(((0, str), (1, str), (2, int), (3, str), (4, str), (5, str), (6, float), ("type", str), ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str), ("tal_name", str), ("size", float)))
+    _tally_tally_1_argtypes = frozenset(((0, str), (1, str), (2, int), (3, str), (4, str), (5, str), (6, float), (7, float), ("type", str), ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str), ("tal_name", str), ("size", float), ("norm", float)))
     
     def __init__(self, *args, **kwargs):
-        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0)
+        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
         this we ill put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
@@ -183,6 +204,8 @@ cdef class Tally:
         entity_size : double
         
         entity : int
+        
+        normalization : double
         
         particle_name : std::string
         
@@ -262,6 +285,15 @@ cdef class Tally:
             (<cpp_tally.Tally *> self._inst).entity_type = std_string(<char *> value_bytes)
     
     
+    property normalization:
+        """no docstring for normalization, please file a bug report!"""
+        def __get__(self):
+            return float((<cpp_tally.Tally *> self._inst).normalization)
+    
+        def __set__(self, value):
+            (<cpp_tally.Tally *> self._inst).normalization = <double> value
+    
+    
     property particle_name:
         """no docstring for particle_name, please file a bug report!"""
         def __get__(self):
@@ -271,6 +303,57 @@ cdef class Tally:
             cdef char * value_proxy
             value_bytes = value.encode()
             (<cpp_tally.Tally *> self._inst).particle_name = std_string(<char *> value_bytes)
+    
+    
+    property rx2fluka:
+        """no docstring for rx2fluka, please file a bug report!"""
+        def __get__(self):
+            cdef stlcontainers._MapStrStr rx2fluka_proxy
+            if self._rx2fluka is None:
+                rx2fluka_proxy = stlcontainers.MapStrStr(False, False)
+                rx2fluka_proxy.map_ptr = &(<cpp_tally.Tally *> self._inst).rx2fluka
+                self._rx2fluka = rx2fluka_proxy
+            return self._rx2fluka
+    
+        def __set__(self, value):
+            cdef stlcontainers._MapStrStr value_proxy
+            value_proxy = stlcontainers.MapStrStr(value, not isinstance(value, stlcontainers._MapStrStr))
+            (<cpp_tally.Tally *> self._inst).rx2fluka = value_proxy.map_ptr[0]
+            self._rx2fluka = None
+    
+    
+    property rx2mcnp5:
+        """no docstring for rx2mcnp5, please file a bug report!"""
+        def __get__(self):
+            cdef stlcontainers._MapStrStr rx2mcnp5_proxy
+            if self._rx2mcnp5 is None:
+                rx2mcnp5_proxy = stlcontainers.MapStrStr(False, False)
+                rx2mcnp5_proxy.map_ptr = &(<cpp_tally.Tally *> self._inst).rx2mcnp5
+                self._rx2mcnp5 = rx2mcnp5_proxy
+            return self._rx2mcnp5
+    
+        def __set__(self, value):
+            cdef stlcontainers._MapStrStr value_proxy
+            value_proxy = stlcontainers.MapStrStr(value, not isinstance(value, stlcontainers._MapStrStr))
+            (<cpp_tally.Tally *> self._inst).rx2mcnp5 = value_proxy.map_ptr[0]
+            self._rx2mcnp5 = None
+    
+    
+    property rx2mcnp6:
+        """no docstring for rx2mcnp6, please file a bug report!"""
+        def __get__(self):
+            cdef stlcontainers._MapStrStr rx2mcnp6_proxy
+            if self._rx2mcnp6 is None:
+                rx2mcnp6_proxy = stlcontainers.MapStrStr(False, False)
+                rx2mcnp6_proxy.map_ptr = &(<cpp_tally.Tally *> self._inst).rx2mcnp6
+                self._rx2mcnp6 = rx2mcnp6_proxy
+            return self._rx2mcnp6
+    
+        def __set__(self, value):
+            cdef stlcontainers._MapStrStr value_proxy
+            value_proxy = stlcontainers.MapStrStr(value, not isinstance(value, stlcontainers._MapStrStr))
+            (<cpp_tally.Tally *> self._inst).rx2mcnp6 = value_proxy.map_ptr[0]
+            self._rx2mcnp6 = None
     
     
     property tally_name:
@@ -296,6 +379,84 @@ cdef class Tally:
     
     
     # methods
+    def create_dataspace(self, file, datapath):
+        """create_dataspace(self, file, datapath)
+        default destructor
+        
+        Parameters
+        ----------
+        datapath : std::string
+        
+        file : hid_t
+        
+        Returns
+        -------
+        res1 : hid_t
+        
+        """
+        cdef char * datapath_proxy
+        cdef int rtnval
+        datapath_bytes = datapath.encode()
+        rtnval = (<cpp_tally.Tally *> self._inst).create_dataspace(<int> file, std_string(<char *> datapath_bytes))
+        return int(rtnval)
+    
+    
+    def create_filetype(self, ):
+        """create_filetype(self, )
+        
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : hid_t
+        
+        """
+        cdef int rtnval
+        rtnval = (<cpp_tally.Tally *> self._inst).create_filetype()
+        return int(rtnval)
+    
+    
+    def create_memtype(self, ):
+        """create_memtype(self, )
+        
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : hid_t
+        
+        """
+        cdef int rtnval
+        rtnval = (<cpp_tally.Tally *> self._inst).create_memtype()
+        return int(rtnval)
+    
+    
+    def fluka(self, unit_number='-21'):
+        """fluka(self, unit_number='-21')
+        
+        
+        Parameters
+        ----------
+        unit_number : std::string
+        
+        Returns
+        -------
+        res1 : std::string
+        
+        """
+        cdef char * unit_number_proxy
+        cdef std_string rtnval
+        unit_number_bytes = unit_number.encode()
+        rtnval = (<cpp_tally.Tally *> self._inst).fluka(std_string(<char *> unit_number_bytes))
+        return bytes(<char *> rtnval.c_str()).decode()
+    
+    
     def _tally_from_hdf5_0(self, filename, datapath, row=-1):
         """from_hdf5(self, filename, datapath, row=-1)
          This method was overloaded in the C-based source. To overcome
@@ -318,8 +479,7 @@ cdef class Tally:
         
         ################################################################
         
-        default destructor   Dummy read method wrapper around c style
-        strings
+        Dummy read method wrapper around c style strings
         
         Parameters
         ----------
@@ -363,8 +523,7 @@ cdef class Tally:
         
         ################################################################
         
-        default destructor   Dummy read method wrapper around c style
-        strings
+        Dummy read method wrapper around c style strings
         
         Parameters
         ----------
@@ -411,8 +570,7 @@ cdef class Tally:
         
         ################################################################
         
-        default destructor   Dummy read method wrapper around c style
-        strings
+        Dummy read method wrapper around c style strings
         
         Parameters
         ----------
@@ -444,6 +602,28 @@ cdef class Tally:
         except (RuntimeError, TypeError, NameError):
             pass
         raise RuntimeError('method from_hdf5() could not be dispatched')
+    
+    def mcnp(self, tally_index=1, mcnp_version='mcnp5'):
+        """mcnp(self, tally_index=1, mcnp_version='mcnp5')
+        
+        
+        Parameters
+        ----------
+        tally_index : int
+        
+        mcnp_version : std::string
+        
+        Returns
+        -------
+        res1 : std::string
+        
+        """
+        cdef char * mcnp_version_proxy
+        cdef std_string rtnval
+        mcnp_version_bytes = mcnp_version.encode()
+        rtnval = (<cpp_tally.Tally *> self._inst).mcnp(<int> tally_index, std_string(<char *> mcnp_version_bytes))
+        return bytes(<char *> rtnval.c_str()).decode()
+    
     
     def _tally_write_hdf5_0(self, filename, datapath):
         """write_hdf5(self, filename, datapath)

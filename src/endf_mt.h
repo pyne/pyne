@@ -186,6 +186,37 @@ namespace pyne
   mt460_mf1 read_mt460_mf1(std::ifstream &infile);
 
 
+  /// data structure for ENDF decay data
+  class mt457_mf8 : public mt_base {
+  public:
+    int lis; ///< state of the original nuclide
+    int liso; ///< isomeric state of the original nuclide
+    int nst; ///< nucleus stability flag: 0 = radioactive
+    int nsp; ///< total number of radiation types for which information is given
+    std::vector<std::pair<double,double> > erel; ///< energy released
+    std::vector<double> styp; ///< Decay radiation
+    std::vector<int> lcon;
+    std::vector<int> ner;
+    std::vector<std::pair<double,double> > fd;
+    std::vector<std::pair<double,double> > eav;
+    std::vector<std::pair<double,double> > fc;
+    std::vector<std::pair<double,double> > er;
+    std::vector<double> rtyp;
+    std::vector<double> type;
+    std::vector<std::pair<double,double> > ri;
+    std::vector<std::pair<double,double> > ris;
+    std::vector<std::pair<double,double> > ricc;
+    std::vector<std::pair<double,double> > rick;
+    std::vector<std::pair<double,double> > ricl;
+  };
+
+  /// read decay data from a filestream
+  /// \param infile An ENDF filestream
+  mt457_mf8 read_mt457_mf8(std::ifstream &infile);
+
+
+
+
 }
 
 #endif

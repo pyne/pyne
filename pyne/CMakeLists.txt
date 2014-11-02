@@ -68,6 +68,13 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/rxname.pyx"
 cython_add_module(rxname rxname.pyx)
 target_link_libraries(rxname pyne)
 
+# particle
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/particle.pyx"
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(particle particle.pyx)
+target_link_libraries(particle pyne)
+
+
 # data
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/data.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)

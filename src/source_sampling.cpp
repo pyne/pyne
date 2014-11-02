@@ -2,6 +2,55 @@
 #include "source_sampling.h"
 #endif
 
+// Global sampler instance
+static pyne::Sampler* sampler = NULL;
+
+// Fortran API
+void pyne::sampling_setup_(int* mode) {
+  if (sampler == NULL) {
+    std::string filename ("source.h5m");
+    std::string src_tag_name ("source_density");
+    std::string e_bounds_file ("e_bounds");
+    std::vector<double> e_bounds = read_e_bounds(e_bounds_file);
+    if (*mode == 1) {
+      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, false);
+    } else if (*mode == 2) {
+      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, true);
+    } else if (*mode == 3) {
+      std::string bias_tag_name ("biased_source_density");
+      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
+    }
+  }
+}
+
+void pyne::particle_birth_(double* rands,
+                           double* x,
+                           double* y,
+                           double* z,
+                           double* e,
+                           double* w) {
+    std::vector<double> rands2(rands, rands + 6);
+    std::vector<double> samp = sampler->particle_birth(rands2);
+    *x = samp[0];
+    *y = samp[1];
+    *z = samp[2];
+    *e = samp[3];
+    *w = samp[4];
+}
+
+std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
+  std::vector<double> e_bounds;
+  std::ifstream inputFile(e_bounds_file.c_str());
+  double value;
+  if (inputFile) {
+    while (inputFile >> value)
+      e_bounds.push_back(value);
+  }
+  return e_bounds;
+}
+
+
+// C++ API
 pyne::Sampler::Sampler(std::string filename, 
                  std::string src_tag_name, 
                  std::vector<double> e_bounds, 

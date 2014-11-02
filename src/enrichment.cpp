@@ -34,19 +34,53 @@ pyne_enr::Cascade pyne_enr::default_uranium_cascade(pyne_enr::_fill_default_uran
 
 
 
+double pyne_enr::feed_per_prod(double x_feed, double x_prod, double x_tail) {
+  return 1 / prod_per_feed(x_feed, x_prod, x_tail);
+}
+
+double pyne_enr::feed_per_tail(double x_feed, double x_prod, double x_tail) {
+  return 1 / tail_per_feed(x_feed, x_prod, x_tail);
+}
+
+double pyne_enr::prod_per_tail(double x_feed, double x_prod, double x_tail) {
+  return 1 / tail_per_prod(x_feed, x_prod, x_tail);
+}
+
 double pyne_enr::prod_per_feed(double x_feed, double x_prod, double x_tail) {
-  // Product over Feed Enrichment Ratio
-  return ((x_feed - x_tail)/(x_prod - x_tail));
+  return (x_feed - x_tail) / (x_prod - x_tail);
 }
 
 double pyne_enr::tail_per_feed(double x_feed, double x_prod, double x_tail) {
-  // Tails over Feed Enrichment Ratio
-  return ((x_feed - x_prod)/(x_tail - x_prod));
+  return (x_feed - x_prod) / (x_tail - x_prod);
 }
 
 double pyne_enr::tail_per_prod(double x_feed, double x_prod, double x_tail) {
-  // Tails over Product Enrichment Ratio
-  return ((x_feed - x_prod) / (x_tail - x_feed));
+  return (x_feed - x_prod) / (x_tail - x_feed);
+}
+
+double pyne_enr::value_func(double x) {
+  return (2 * x - 1) * log(x / (1 - x));
+}
+
+double pyne_enr::swu_per_feed(double x_feed, double x_prod, double x_tail) {
+  return
+      prod_per_feed(x_feed, x_prod, x_tail) * value_func(x_prod) + \
+      tail_per_feed(x_feed, x_prod, x_tail) * value_func(x_tail) - \
+      value_func(x_feed);
+}
+
+double pyne_enr::swu_per_prod(double x_feed, double x_prod, double x_tail) {
+  return
+      value_func(x_prod) + \
+      tail_per_prod(x_feed, x_prod, x_tail) * value_func(x_tail) - \
+      feed_per_prod(x_feed, x_prod, x_tail) * value_func(x_feed);
+}
+
+double pyne_enr::swu_per_tail(double x_feed, double x_prod, double x_tail) {
+  return
+      prod_per_tail(x_feed, x_prod, x_tail) * value_func(x_prod) + \
+      value_func(x_tail) - \
+      feed_per_tail(x_feed, x_prod, x_tail) * value_func(x_feed);
 }
 
 
