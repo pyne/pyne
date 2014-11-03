@@ -111,14 +111,13 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)       
     
     # determine the zones
-    
-        
     zones = _define_zones(mesh)
     
-    for key, item in zones.iteritems():
-        print(key, item)
-    
-    return coord_sys, bounds, mat_lib, zones
+    # read nucdata
+    bxslib = open(nucdata, 'rb')
+    xs_names = _read_bxslib(bxslib)
+
+    return coord_sys, bounds, mat_lib, zones, xs_names
     
 def _read_mesh(mesh):
     # determines the system geometry (1-D, 2-D, or 3-D Cartesian)
@@ -166,31 +165,24 @@ def _read_mesh(mesh):
     
     return coord_sys, bounds
 
-#def _read_nucdata(nucdata_file):
-#    # figure out how to generically determine the form of lib
-#    nucdata = open(nucdata_file,'rb')
-#    libname = 'bxslib'
-#    if libname == 'bxslib':
-#        return _read_bxslib(nucdata)
-#    # make it so that more lib types can be included
-#    
-#def _read_bxslib(bxslib):
-#    string = ""
-#    edits = ""
-#    xs_names=[]
-#    # 181st byte is the start of xsnames
-#    bxslib.seek(180)
-#    done = False
-#    while not done:
-#        for i in range(0,8):
-#            bytes = bxslib.read(1)
-#            pad1=struct.unpack('s',bytes)[0]
-#            if '\x00' in pad1:
-#                done = True
-#                return xs_names
-#            string += pad1
-#        xs_names.append(string.strip(" "))
-#        string=""
+  
+def _read_bxslib(bxslib):
+    string = ""
+    edits = ""
+    xs_names=[]
+    # 181st byte is the start of xsnames
+    bxslib.seek(180)
+    done = False
+    while not done:
+        for i in range(0,8):
+            bytes = bxslib.read(1)
+            pad1=struct.unpack('s',bytes)[0]
+            if '\x00' in pad1:
+                done = True
+                return xs_names
+            string += pad1
+        xs_names.append(string.strip(" "))
+        string=""
     
 def _get_materials(hdf5, datapath, nucpath, nuc_names):
     # reads material properties from the loaded dagmc_geometry
@@ -259,6 +251,51 @@ def _define_zones(mesh):
 """This class writes out the information stored by PartisnRead to
 a text partisn input file.
 """
-def write_partisn(coord_sys, bounds, mat_lib, zones):
+def write_partisn(coord_sys, bounds, mat_lib, zones, xs_names, input_file):
+    block01(coord_sys, xs_names, mat_lib, zones, bounds)
+
+def title():
+    # figure out what to make the title
     pass
+        
+def block01(coord_sys, xs_names, mat_lib, zones, bounds):
+    
+    # Determine IGEOM
+    if len(coord_sys) == 1:
+        IGEOM = 'SLAB'
+    elif len(coord_sys) == 2:
+        IGEOM = 'X-Y' # assuming cartesian
+    elif len(coord_sys) == 3:
+        IGEOM = 'X-Y-Z' # assuming cartesian
+    
+    # NGROUP
+    
+    # ISN
+    
+    NISO = len(xs_names)
+    MT = len(mat_lib)
+    NZONE = len(zones)
+    
+    # Number of Fine and Coarse Meshes
+    # one fine mesh per coarse by default
+    for key in bounds.keys():
+        if key == 'x':
+            IM = len(bounds[key]) - 1
+            IT = IM
+        elif key == 'y':
+            JM = len(bounds[key]) - 1
+            JT = IM
+        elif key == 'z':
+            KM = len(bounds[key]) - 1
+            KT = IM
+
+def block02():
+    pass
+
+def block03():
+    pass
+
+def block04():
+    pass
+    
     
