@@ -265,8 +265,8 @@ def dict_complete(inputdict):
     try:
       formatted_dict['convergence_criterion'] = inputdict['convergence_criterion']
     except:
-      formatted_dict['convergence_criterion'] = 1e-12
-      warn(warning_msg + " convergence_criterion value of 1e-12")
+      formatted_dict['convergence_criterion'] = 1e-5
+      warn(warning_msg + " convergence_criterion value of 1e-5")
     try:
       formatted_dict['max_iterations'] = inputdict['max_iterations']
     except:

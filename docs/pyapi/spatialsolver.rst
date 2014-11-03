@@ -190,14 +190,14 @@ if not present/specified.
  type: String
  ex: 'quad_file'
  default: No default  
- note: See input file formatting notes in the Source File Formatting section.
+ note: See input file formatting notes in the Quadrature File Formatting section.
 
 **Entry: cross section info file name**
 ::
  key: "xs_file"
  type: String
  default: 'xs_file'
- note: See input file formatting notes in the Source File Formatting section.
+ note: See input file formatting notes in the Cross Section File Formatting section.
 
 **Entry: source file name**
 ::
@@ -211,16 +211,14 @@ if not present/specified.
  key: "bc_input_file"
  type: String
  default: No default
- note: See input file formatting notes in the Source File Formatting section.
+ note: See input file formatting notes in the Boundry Condition File Formatting section.
 
 **Entry: output file name [optional]**
 ::
  key: "flux_output_file"
  type: String
  default: 'flux.out'
- note: See input file formatting notes in the Source File Formatting section.
-
-.. Josh: please to add file format / contents description
+ note: See input file formatting notes in the Flux Output (5.) File Formatting section.
 
 **Entry: Convergence Criterion**
 ::
@@ -233,8 +231,6 @@ if not present/specified.
  previous iterate. This is generally the relative difference, but in cases of 
  very small flux values the absolute difference is used instead (see the 
  Convergence Tolerance entry below).  
-
-.. Josh: we should set this to default to 1.e-5
 
 **Entry: Tolerance**
 ::
@@ -351,7 +347,7 @@ The spatial solver dictionary requires multiple input binary source files.  The 
     3. BC input file
     4. Quad file (optional)
 
-Here is a brief description of how each should be formatted.
+Here is a brief description of how each should be (or is) formatted.
 
 
   (1.) XS file:
@@ -375,39 +371,73 @@ Here is a brief description of how each should be formatted.
       There should be ng * nx * ny * nz * lambda * lambda * lambda ?source? entries present.
       We will refer to the index of each ?source? value as (ng, nx, ny, nz, lambda_x, lambda_y, lambda_z).
       The source entries should be in the following order:
+
           (1,1,1,1,1,1,1)
+
           (1,1,1,1,1,1,2)
+
           (1,1,1,1,1,1,.)
 
+
+
           (1,1,1,1,1,2,1)
+
           (1,1,1,1,1,2,2)
+
           (1,1,1,1,1,2,.)
+
           (1,1,1,1,1,.,.)
 
+
+
           (1,1,1,1,2,1,1)
+
           (1,1,1,1,2,1,2)
+
           (1,1,1,1,2,1,.)
+
           (1,1,1,1,2,2,1)
+
           (1,1,1,1,2,2,2)
+
           (1,1,1,1,2,2,.)
+
           (1,1,1,1,2,.,.)
+
           (1,1,1,1,.,.,.)
 
+
+
           (1,1,1,2,1,1,1)
+
           (1,1,1,2,1,1,2)
+
           (1,1,1,2,1,1,.)
+
           (1,1,1,2,1,2,1)
+
           (1,1,1,2,1,2,2)
+
           (1,1,1,2,1,2,.)
+
           (1,1,1,2,1,.,.)
+
           (1,1,1,2,2,1,1)
+
           (1,1,1,2,2,1,2)
+
           (1,1,1,2,2,1,.)
+
           (1,1,1,2,2,2,1)
+
           (1,1,1,2,2,2,2)
+
           (1,1,1,2,2,2,.)
+
           (1,1,1,2,2,.,.)
+
           (1,1,1,.,.,.,.)
+
 
           ...
 
@@ -436,38 +466,68 @@ Here is a brief description of how each should be formatted.
       There should be ng * nx * ny * nz ?source? entries present.
       We will refer to the index of each ?source? value as (ng, nx, ny, nz).
       The source entries should be in the following order:
+
           (1,1,1,1)
+
           (1,1,1,2)
+
           (1,1,1,.)
 
+
           (1,1,2,1)
+
           (1,1,2,2)
+
           (1,1,2,.)
+
           (1,1,.,.)
 
+
           (1,2,1,1)
+
           (1,2,1,2)
+
           (1,2,1,.)
+
           (1,2,2,1)
+
           (1,2,2,2)
+
           (1,2,2,.)
+
           (1,2,.,.)
+
           (1,.,.,.)
 
+
           (2,1,1,1)
+
           (2,1,1,2)
+
           (2,1,1,.)
+
           (2,1,2,1)
+
           (2,1,2,2)
+
           (2,1,2,.)
+
           (2,1,.,.)
+
           (2,2,1,1)
+
           (2,2,1,2)
+
           (2,2,1,.)
+
           (2,2,2,1)
+
           (2,2,2,2)
+
           (2,2,2,.)
+
           (2,2,.,.)
+
           (.,.,.,.)
 
       When being read in, they will be iterated over by the following loop:
@@ -484,7 +544,122 @@ Here is a brief description of how each should be formatted.
   (4.) Quadrature file (optional):
       If the quadrature type you selected was 2, a quadrature file is required for running the solver.  If the quadrature type is not 2, no quadrature file is necessary.
 
-! This line is supposed to be quadrature file name (qdfile) if you need one (type 2)            
+  (5.) Flux output file (output & optional):
+      If a output file name was specified, the final flux will be printed to that file in the following format.  Note that
+      all flux values will be printed as a fortran REAL, and the termination key will be 0.0d0 (to indicate the end of the flux info)
+      AHOTN Solvers:  Unformatted file, with all mesh scalar flux values in the following order:
+             NOTE ORDERING: flux(ng,nx,ny,nz,jx,jy,jz)
+
+                                (0,0,0,0,0,0,0)
+
+                                (0,0,0,0,0,0,1)
+
+                                (0,0,0,0,0,1,0)
+
+                                (0,0,0,0,0,1,1)
+
+                                ...
+
+                                (0,0,0,0,0,.,.)
+
+                                ...
+
+                                (0,0,0,0,.,.,.)
+
+                                ...
+
+                                (0,0,0,nz,.,.,.)
+
+                                ...
+
+                                (0,0,0,.,.,.,.)
+
+                                ...
+
+                                (0,0,ny,.,.,.,.)
+
+                                ...
+
+                                (0,0,.,.,.,.,.)
+
+                                ...
+
+                                (0,nz,.,.,.,.,.)
+
+                                ...
+
+                                (0,.,.,.,.,.,.)
+
+                                ...
+
+                                (ng,.,.,.,.,.,.)
+
+                                ...
+
+
+      DGFEM Solvers: Unformatted file, with all mesh scalar flux values in the following order:
+             NOTE ORDERING: flux(ng,nx,ny,nz,spatial_order,spatial_order,spatial_order)
+
+                                (0,0,0,0,0,0,0)
+
+                                (0,0,0,0,0,0,1)
+
+                                ...
+
+                                (0,0,0,0,0,0,spatial_order)
+
+                                (0,0,0,0,0,1,0)
+
+                                (0,0,0,0,0,1,1)
+
+                                ...
+
+                                (0,0,0,0,0,1,spatial_order)
+
+                                ...
+
+                                (0,0,0,0,0,spatial_order,.)
+
+                                ...
+
+                                (0,0,0,0,spatial_order,.,.)
+
+                                ...
+
+                                (0,0,0,0,.,.,.)
+
+                                ...
+
+                                (0,0,0,nz,.,.,.)
+
+                                ...
+
+                                (0,0,0,.,.,.,.)
+
+                                ...
+
+                                (0,0,ny,.,.,.,.)
+
+                                ...
+
+                                (0,0,.,.,.,.,.)
+
+                                ...
+
+                                (0,nz,.,.,.,.,.)
+
+                                ...
+
+                                (0,.,.,.,.,.,.)
+
+                                ...
+
+                                (ng,.,.,.,.,.,.)
+
+                                ...
+
+      SCTSTEP Solvers: SCTSTEP Currently not supported.  Nothing will be printed to file (although file may still be created).
+
 
 .. currentmodule:: pyne.spatialsolver
 

@@ -79,8 +79,8 @@ ELSE IF (solver == "DGFEM") THEN
      END DO
   END DO
 
-ELSE IF (solver == "SCTC") THEN
-
+ELSE IF (solver == "SCTSTEP") THEN
+  !NEEDS TO BE IMPLEMENTED!
 END IF
 
 CLOSE(UNIT=31)
