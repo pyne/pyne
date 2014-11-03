@@ -8,7 +8,6 @@
 !> @param solver_in spatial solver class
 !> @param solver_type_in spatial solver specific type
 !> @param spatial_order_in lambda order value
-!> REMOVED @param spatial_method_in spatial method
 !> @param angular_quadrature_order_in quadrature order
 !> @param angular_quadrature_type_in quadrature type
 !> @param nodes_x_in number of nodes in x direction
@@ -82,7 +81,6 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
 !
 ! Some problem size specifications that are passed in:
 !   lambda => LAMDBA, the AHOT spatial order
-!   meth  => = 0/1 = AHOT-N/AHOT-N-ITM
 !   qdord => Angular quadrature order
 !   qdtyp => Angular quadrature type = 0/1/2 = TWOTRAN/EQN/Read-in
 !   nx    => Number of 'x' cells
@@ -144,7 +142,6 @@ title = titlein
 solver = solver_in
 solvertype = solver_type_in
 lambda = spatial_order_in
-meth = 0
 qdord = angular_quadrature_order_in
 qdtyp = qdtypin
 nx = nodes_x_in

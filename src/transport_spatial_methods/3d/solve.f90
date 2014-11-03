@@ -58,15 +58,9 @@ IF (solver == "AHOTN") THEN
             CALL CPU_TIME(ttosolve)
  
             ! Check which solution scheme will be employed
-            ! Note: Meth is 0 by default now.  Should remove later and default to calling inner
-            IF (meth == 0) THEN
-                WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
-                ! Call for the inner iteration (or ITM solver later)
-                CALL inner(g)
-            ELSE IF (meth == 1) THEN
-                WRITE(8,*) 'Option meth=1 was removed'
-                STOP
-            END IF
+            WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
+            ! Call for the inner iteration (or ITM solver later)
+            CALL inner(g)
 
        ! Get the time out of the solution
        CALL CPU_TIME(tsolve)
@@ -104,15 +98,9 @@ IF (solver == "AHOTN") THEN
        CALL CPU_TIME(ttosolve)
        
        ! Check which solution scheme will be employed
-       !Note: Meth is 0 by default now.  Should remove later and default to calling inner
-       IF (meth == 0) THEN
-          WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
-          ! Call for the inner iteration (or ITM solver later)
-          CALL inner(g)
-       ELSE IF (meth == 1) THEN
-          STOP
-          WRITE(8,*) 'Option meth=1 was removed'
-       END IF
+       WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
+       ! Call for the inner iteration (or ITM solver later)
+       CALL inner(g)
 
        ! Get the time out of the solution
        CALL CPU_TIME(tsolve)
@@ -159,15 +147,9 @@ ELSE IF (solver == "DGFEM") THEN
      CALL CPU_TIME(ttosolve)
      
      ! Check which solution scheme will be employed
-     !Note: Meth is 0 by default now.  Should remove later and default to calling inner
-     IF (meth == 0) THEN
-        WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
-        ! Call for the inner iteration (or ITM solver later)
-        CALL inner(g)
-     ELSE IF (meth == 1) THEN
-        WRITE(8,*) 'This option does not exist in this code. Execution terminates.'
-        STOP
-     END IF
+     WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
+     ! Call for the inner iteration (or ITM solver later)
+     CALL inner(g)
 
      ! Get the time out of the solution
      CALL CPU_TIME(tsolve)
@@ -251,15 +233,9 @@ ELSE IF (solver == "SCTSTEP") THEN
      CALL CPU_TIME(ttosolve)
      
      ! Check which solution scheme will be employed
-     !Note: Meth is 0 by default now.  Should remove later and default to calling inner
-     IF (meth == 0) THEN
-        WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
-        ! Call for the inner iteration (or ITM solver later)
-        CALL inner(g)
-     ELSE IF (meth == 1) THEN
-        STOP
-        WRITE(8,*) 'Option meth=1 was removed'
-     END IF
+     WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
+     ! Call for the inner iteration (or ITM solver later)
+     CALL inner(g)
 
      ! Get the time out of the solution
      CALL CPU_TIME(tsolve)

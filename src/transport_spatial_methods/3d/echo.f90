@@ -20,8 +20,7 @@ WRITE (8,*) "-------------------- BEGIN INPUT ECHO -----------------------------
 ! Write the title of the case and the basics of the problem setup
 WRITE (8,'(//,1X, A)') title
 WRITE (8,105) "AHOT Order = ", lambda
-IF (meth == 0) WRITE (8,106) "AHOT-N-3D Method"
-IF (meth == 1) WRITE (8,106) "AHOT-N-NS-3D Method (ITM)"
+WRITE (8,106) "AHOT-N-3D Method"
 WRITE (8,105) "Angular Order N = ", qdord
 WRITE (8,105) "Number of x-cells = ", nx
 WRITE (8,105) "Number of y-cells = ", ny

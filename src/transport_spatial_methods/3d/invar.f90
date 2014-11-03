@@ -9,7 +9,7 @@ CHARACTER(80) :: title
 CHARACTER(30) :: solver, solvertype
 
 ! Problem Size Specifications
-INTEGER :: lambda, meth, qdord, qdtyp, nx, ny, nz, ng, nm
+INTEGER :: lambda, qdord, qdtyp, nx, ny, nz, ng, nm
 REAL*8, DIMENSION(:), ALLOCATABLE :: dx, dy, dz
 
 ! Cell materials

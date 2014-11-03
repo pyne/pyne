@@ -26,13 +26,6 @@ IF (lambda < 0) THEN
    RETURN
    !STOP
 
-! Method of solution
-ELSE IF (meth /= 0 .AND. meth /= 1) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: Method value 'meth' must be 0 or 1."
-   error_code = 1006
-   RETURN
-   !STOP
-
 ! Cell number of cells, groups, materials
 ELSE IF (nx < 1) THEN
    WRITE(8,'(/,3x,A)') "ERROR: Illegal number of x cells. Must be positive."
