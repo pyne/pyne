@@ -1,6 +1,6 @@
 // General Library
 #ifndef PYNE_IS_AMALGAMATED
-extern "C" double endftod_(char *str, int len);
+extern "C" double endftod_(const char *str, int len);
 #endif
 
 #ifndef PYNE_IS_AMALGAMATED
@@ -79,7 +79,7 @@ double pyne::to_dbl(std::string s) {
   return strtod( s.c_str(), NULL );
 }
 
-double pyne::endftod_cpp(char * s) {
+double pyne::endftod_cpp(const char * s) {
   // Converts string from ENDF only handles "E-less" format but is 5x faster
   int pos, mant, exp;
   double v, dbl_exp;
@@ -134,7 +134,7 @@ double pyne::endftod_cpp(char * s) {
   return v;
 }
 
-double pyne::endftod_f(char * s) {
+double pyne::endftod_f(const char * s) {
 #ifdef PYNE_IS_AMALGAMATED
   return endftod_cpp(s);
 #else
@@ -142,7 +142,7 @@ double pyne::endftod_f(char * s) {
 #endif
 }
 
-double (*pyne::endftod)(char * s) = &pyne::endftod_f;
+double (*pyne::endftod)(const char * s) = &pyne::endftod_f;
 
 void pyne::use_fast_endftod() {
   pyne::endftod = &pyne::endftod_cpp;

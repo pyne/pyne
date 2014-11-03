@@ -197,6 +197,7 @@ namespace pyne
     std::vector<double> styp; ///< Decay radiation
     std::vector<int> lcon;
     std::vector<int> ner;
+    std::vector<int> nd;
     std::vector<std::pair<double,double> > fd;
     std::vector<std::pair<double,double> > eav;
     std::vector<std::pair<double,double> > fc;

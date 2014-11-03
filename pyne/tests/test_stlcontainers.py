@@ -45,6 +45,22 @@ def test_set_int():
 
 
 
+# PairDoubleDouble
+def test_pair_double_double():
+    from numpy.testing import assert_array_equal
+    p = stlcontainers.PairDoubleDouble()
+    p[0] = 18
+    p[1] = -65.5555
+    assert_array_equal(p[0], p.first)
+    assert_array_equal(p[1], p.second)
+    
+    import copy
+    r = copy.copy(p)
+    assert_array_equal(p.first, r.first)
+    assert_array_equal(p.second, r.second)
+
+
+
 # MapStrStr
 def test_map_str_str():
     m = stlcontainers.MapStrStr()
@@ -757,6 +773,8 @@ def test_map_int_vector_double():
                 assert_equal(value, [1.0, -65.5555, 1.0, -65.5555][key])
     else:
         assert_array_almost_equal(m[42], [1.0, -65.5555, 1.0, -65.5555])
+
+
 
 
 

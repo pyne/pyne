@@ -15,13 +15,14 @@ doxygen_config = {'PROJECT_NAME': 'PYNE',
 
 doxyfile_name = './build/tally_doxyfile'
 
-includes = ['/mnt/data/opt/dagmc/hdf5/include']
+includes = ['/opt/local/include']
 
 extra_types = 'extra_types'  # non-default value
 
 stlcontainers = [
     ('set', 'str'),
     ('set', 'int32'),
+    ('pair', 'double', 'double'),
     ('map', 'str', 'str'),
     ('map', 'str', 'int32'),
     ('map', 'int32', 'str'),
@@ -38,30 +39,33 @@ stlcontainers = [
     ('vector', ('vector', 'int')),
     ('vector', ('vector', 'double')),
     ('vector', ('vector', ('vector', 'double'))),
+    ('vector', ('pair', 'double','double')),
     ]
 
 # stlcontainers_module = 'stlcontainers'
 
-classes = [apiname('Tally',  'cpp/tally.*', incfiles='tally.h'),
-           apiname('mt_base', 'cpp/endf_mt.*', tarbase='endf2',
+classes = [apiname('Tally',  'src/tally.*', incfiles='tally.h'),
+           apiname('mt_base', 'src/endf_mt.*', tarbase='endf2',
                    incfiles=['endf_mt.h']),
-           apiname('mt451',  'cpp/endf_mt.*', tarbase='endf2',
+           apiname('mt451',  'src/endf_mt.*', tarbase='endf2',
                    incfiles=['endf_mt.h']),
-           apiname('mt452_mf1', 'cpp/endf_mt.*', tarbase='endf2',
+           apiname('mt452_mf1', 'src/endf_mt.*', tarbase='endf2',
                    incfiles=['endf_mt.h']),
-           apiname('mt455_mf1', 'cpp/endf_mt.*', tarbase='endf2',
+           apiname('mt455_mf1', 'src/endf_mt.*', tarbase='endf2',
                    incfiles=['endf_mt.h']),
-           apiname('mt456_mf1', 'cpp/endf_mt.*', tarbase='endf2',
+           apiname('mt456_mf1', 'src/endf_mt.*', tarbase='endf2',
                    incfiles=['endf_mt.h']),
-           apiname('mt458_mf1', 'cpp/endf_mt.*', tarbase='endf2',
+           apiname('mt458_mf1', 'src/endf_mt.*', tarbase='endf2',
                    incfiles=['endf_mt.h']),
-           apiname('mt460_mf1', 'cpp/endf_mt.*', tarbase='endf2',
+           apiname('mt460_mf1', 'src/endf_mt.*', tarbase='endf2',
                    incfiles=['endf_mt.h']),
-           apiname('mtfpy_mf8', 'cpp/endf_mt.*', tarbase='endf2',
+           apiname('mtfpy_mf8', 'src/endf_mt.*', tarbase='endf2',
                    incfiles=['endf_mt.h']),
-           apiname('endf_id', 'cpp/endf.[hc]*', tarbase='endf2',
+           apiname('mt457_mf8', 'src/endf_mt.*', tarbase='endf2',
+                   incfiles=['endf_mt.h']),
+           apiname('endf_id', 'src/endf.[hc]*', tarbase='endf2',
                    incfiles=['endf.h']),
-           apiname('library', 'cpp/endf.[hc]*', tarbase='endf2',
+           apiname('library', 'src/endf.[hc]*', tarbase='endf2',
                    incfiles=['endf.h'])]
 
 functions = []

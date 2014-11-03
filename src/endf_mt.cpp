@@ -339,6 +339,7 @@ pyne::mt457_mf8 pyne::read_mt457_mf8(std::ifstream &infile) {
     mt457.styp = std::vector<double>(mt457.nsp);
     mt457.lcon = std::vector<int>(mt457.nsp);
     mt457.ner = std::vector<int>(mt457.nsp);
+    mt457.nd = std::vector<int>(mt457.nsp);
     mt457.fd = std::vector<std::pair<double,double> >(mt457.nsp);
     mt457.eav = std::vector<std::pair<double,double> >(mt457.nsp);
     mt457.fc = std::vector<std::pair<double,double> >(mt457.nsp);
@@ -347,12 +348,12 @@ pyne::mt457_mf8 pyne::read_mt457_mf8(std::ifstream &infile) {
       mt457.styp[i] = spec.c2;
       mt457.lcon[i] = spec.l1;
       mt457.ner[i] = spec.l2;
+      mt457.nd[i] = spec.n2;
       mt457.fd[i] = std::make_pair(spec.data[0], spec.data[1]);
       mt457.eav[i] = std::make_pair(spec.data[2], spec.data[3]);
       mt457.fc[i] = std::make_pair(spec.data[4], spec.data[5]);
-
       if (spec.l1 != 1) { //LCON != 1
-        for (int j = 0; i < spec.n2; ++j) {
+        for (int j = 0; j < spec.n2; ++j) {
           list rad = read_list(infile); //info for each discrete radiation
           mt457.er.push_back(std::make_pair(rad.c1, rad.c2));
           mt457.rtyp.push_back(rad.data[0]);

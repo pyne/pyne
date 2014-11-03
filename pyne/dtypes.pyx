@@ -23,11 +23,14 @@ np.import_array()
 cimport extra_types
 
 # Cython imports for types
+from libcpp.utility cimport pair as cpp_pair
 cimport numpy as np
+cimport stlcontainers
 from libcpp.vector cimport vector as cpp_vector
 
 # imports for types
 import numpy as np
+import stlcontainers
 
 dtypes = {}
 
@@ -249,7 +252,7 @@ cdef PyMemberDef pyxd_vector_int_type_members[1]
 pyxd_vector_int_type_members[0] = PyMemberDef(NULL, 0, 0, 0, NULL)
 
 cdef PyGetSetDef pyxd_vector_int_type_getset[1]
-pyxd_vector_int_type_getset[0] = PyGetSetDef(NULL)
+pyxd_vector_int_type_getset[0] = PyGetSetDef(NULL, NULL, NULL, NULL, NULL)
 
 cdef bint pyxd_vector_int_is_ready
 cdef type PyXD_VectorInt = type("xd_vector_int", ((<object> PyArray_API[10]),), {})
@@ -283,7 +286,7 @@ c_xd_vector_int_descr.typeobj = <PyTypeObject *> PyXD_VectorInt # typeobj
 c_xd_vector_int_descr.kind = 'x'  # kind, for xdress
 c_xd_vector_int_descr.type = 'x'  # type
 c_xd_vector_int_descr.byteorder = '='  # byteorder
-c_xd_vector_int_descr.flags = 0    # flags
+c_xd_vector_int_descr.flags = NPY_USE_GETITEM  # flags
 c_xd_vector_int_descr.type_num = 0    # type_num, assigned at registration
 c_xd_vector_int_descr.elsize = sizeof(cpp_vector[int])  # elsize, 
 c_xd_vector_int_descr.alignment = 8  # alignment
@@ -509,7 +512,7 @@ cdef PyMemberDef pyxd_vector_double_type_members[1]
 pyxd_vector_double_type_members[0] = PyMemberDef(NULL, 0, 0, 0, NULL)
 
 cdef PyGetSetDef pyxd_vector_double_type_getset[1]
-pyxd_vector_double_type_getset[0] = PyGetSetDef(NULL)
+pyxd_vector_double_type_getset[0] = PyGetSetDef(NULL, NULL, NULL, NULL, NULL)
 
 cdef bint pyxd_vector_double_is_ready
 cdef type PyXD_VectorDouble = type("xd_vector_double", ((<object> PyArray_API[10]),), {})
@@ -543,7 +546,7 @@ c_xd_vector_double_descr.typeobj = <PyTypeObject *> PyXD_VectorDouble # typeobj
 c_xd_vector_double_descr.kind = 'x'  # kind, for xdress
 c_xd_vector_double_descr.type = 'x'  # type
 c_xd_vector_double_descr.byteorder = '='  # byteorder
-c_xd_vector_double_descr.flags = 0    # flags
+c_xd_vector_double_descr.flags = NPY_USE_GETITEM  # flags
 c_xd_vector_double_descr.type_num = 0    # type_num, assigned at registration
 c_xd_vector_double_descr.elsize = sizeof(cpp_vector[double])  # elsize, 
 c_xd_vector_double_descr.alignment = 8  # alignment
@@ -769,7 +772,7 @@ cdef PyMemberDef pyxd_vector_vector_double_type_members[1]
 pyxd_vector_vector_double_type_members[0] = PyMemberDef(NULL, 0, 0, 0, NULL)
 
 cdef PyGetSetDef pyxd_vector_vector_double_type_getset[1]
-pyxd_vector_vector_double_type_getset[0] = PyGetSetDef(NULL)
+pyxd_vector_vector_double_type_getset[0] = PyGetSetDef(NULL, NULL, NULL, NULL, NULL)
 
 cdef bint pyxd_vector_vector_double_is_ready
 cdef type PyXD_VectorVectorDouble = type("xd_vector_vector_double", ((<object> PyArray_API[10]),), {})
@@ -803,7 +806,7 @@ c_xd_vector_vector_double_descr.typeobj = <PyTypeObject *> PyXD_VectorVectorDoub
 c_xd_vector_vector_double_descr.kind = 'x'  # kind, for xdress
 c_xd_vector_vector_double_descr.type = 'x'  # type
 c_xd_vector_vector_double_descr.byteorder = '='  # byteorder
-c_xd_vector_vector_double_descr.flags = 0    # flags
+c_xd_vector_vector_double_descr.flags = NPY_USE_GETITEM  # flags
 c_xd_vector_vector_double_descr.type_num = 0    # type_num, assigned at registration
 c_xd_vector_vector_double_descr.elsize = sizeof(cpp_vector[cpp_vector[double]])  # elsize, 
 c_xd_vector_vector_double_descr.alignment = 8  # alignment
@@ -819,6 +822,250 @@ cdef int xd_vector_vector_double_num = PyArray_RegisterDataType(c_xd_vector_vect
 dtypes['vector_vector_double'] = xd_vector_vector_double
 dtypes['xd_vector_vector_double'] = xd_vector_vector_double
 dtypes[xd_vector_vector_double_num] = xd_vector_vector_double
+
+
+
+# cpp_pair[double, double] dtype
+cdef MemoryKnight[cpp_pair[double, double]] mk_pair_double_double = MemoryKnight[cpp_pair[double, double]]()
+cdef MemoryKnight[PyXDPairDoubleDouble_Type] mk_pair_double_double_type = MemoryKnight[PyXDPairDoubleDouble_Type]()
+
+cdef object pyxd_pair_double_double_getitem(void * data, void * arr):
+    cdef stlcontainers._PairDoubleDouble data_proxy
+    data_proxy = stlcontainers.PairDoubleDouble(False, False)
+    data_proxy.pair_ptr = <cpp_pair[double, double]*> &(<cpp_pair[double, double] *> data)[0]
+    pyval = data_proxy
+    return pyval
+
+cdef int pyxd_pair_double_double_setitem(object value, void * data, void * arr):
+    cdef cpp_pair[double, double] * new_data
+    cdef stlcontainers._PairDoubleDouble value_proxy
+    if isinstance(value, tuple):
+        value_proxy = stlcontainers.PairDoubleDouble(value, not isinstance(value, stlcontainers._PairDoubleDouble))
+        new_data = mk_pair_double_double.renew(data)
+        new_data[0] = value_proxy.pair_ptr[0]
+        return 0
+    else:
+        return -1
+
+cdef void pyxd_pair_double_double_copyswapn(void * dest, np.npy_intp dstride, void * src, np.npy_intp sstride, np.npy_intp n, int swap, void * arr):
+    cdef np.npy_intp i
+    cdef char * a 
+    cdef char * b 
+    cdef char c = 0
+    cdef int j
+    cdef int m
+    cdef cpp_pair[double, double] * new_dest
+
+    if src != NULL:
+        if (sstride == sizeof(cpp_pair[double, double]) and dstride == sizeof(cpp_pair[double, double])):
+            new_dest = mk_pair_double_double.renew(dest)
+            new_dest[0] = deref(<cpp_pair[double, double] *> src)
+        else:
+            a = <char *> dest
+            b = <char *> src
+            for i in range(n):
+                new_dest = mk_pair_double_double.renew(<void *> a)
+                new_dest[0] = deref(<cpp_pair[double, double] *> b)
+                a += dstride
+                b += sstride
+    if swap: 
+        m = sizeof(cpp_pair[double, double]) / 2
+        a = <char *> dest
+        for i in range(n, 0, -1):
+            b = a + (sizeof(cpp_pair[double, double]) - 1);
+            for j in range(m):
+                c = a[0]
+                a[0] = b[0]
+                a += 1
+                b[0] = c
+                b -= 1
+            a += dstride - m
+
+cdef void pyxd_pair_double_double_copyswap(void * dest, void * src, int swap, void * arr):
+    cdef char * a 
+    cdef char * b 
+    cdef char c = 0
+    cdef int j
+    cdef int m
+    cdef cpp_pair[double, double] * new_dest
+    if src != NULL:
+        new_dest = mk_pair_double_double.renew(dest)
+        new_dest[0] = (<cpp_pair[double, double] *> src)[0]
+    if swap:
+        m = sizeof(cpp_pair[double, double]) / 2
+        a = <char *> dest
+        b = a + (sizeof(cpp_pair[double, double]) - 1);
+        for j in range(m):
+            c = a[0]
+            a[0] = b[0]
+            a += 1
+            b[0] = c
+            b -= 1
+
+cdef np.npy_bool pyxd_pair_double_double_nonzero(void * data, void * arr):
+    return (data != NULL)
+    # FIXME comparisons not defined for arbitrary types
+    #cdef cpp_pair[double, double] zero = cpp_pair[double, double]()
+    #return ((<cpp_pair[double, double] *> data)[0] != zero)
+
+cdef int pyxd_pair_double_double_compare(const void * d1, const void * d2, void * arr):
+    return (d1 == d2) - 1
+    # FIXME comparisons not defined for arbitrary types
+    #if deref(<cpp_pair[double, double] *> d1) == deref(<cpp_pair[double, double] *> d2):
+    #    return 0
+    #else:
+    #    return -1
+
+cdef PyArray_ArrFuncs PyXD_PairDoubleDouble_ArrFuncs 
+PyArray_InitArrFuncs(&PyXD_PairDoubleDouble_ArrFuncs)
+PyXD_PairDoubleDouble_ArrFuncs.getitem = <PyArray_GetItemFunc *> (&pyxd_pair_double_double_getitem)
+PyXD_PairDoubleDouble_ArrFuncs.setitem = <PyArray_SetItemFunc *> (&pyxd_pair_double_double_setitem)
+PyXD_PairDoubleDouble_ArrFuncs.copyswapn = <PyArray_CopySwapNFunc *> (&pyxd_pair_double_double_copyswapn)
+PyXD_PairDoubleDouble_ArrFuncs.copyswap = <PyArray_CopySwapFunc *> (&pyxd_pair_double_double_copyswap)
+PyXD_PairDoubleDouble_ArrFuncs.nonzero = <PyArray_NonzeroFunc *> (&pyxd_pair_double_double_nonzero)
+PyXD_PairDoubleDouble_ArrFuncs.compare = <PyArray_CompareFunc *> (&pyxd_pair_double_double_compare)
+
+cdef object pyxd_pair_double_double_type_alloc(PyTypeObject * self, Py_ssize_t nitems):
+    cdef PyXDPairDoubleDouble_Type * cval
+    cdef object pyval
+    cval = mk_pair_double_double_type.defnew()
+    cval.ob_typ = self
+    pyval = <object> cval
+    return pyval
+
+cdef void pyxd_pair_double_double_type_dealloc(object self):
+    cdef PyXDPairDoubleDouble_Type * cself = <PyXDPairDoubleDouble_Type *> self
+    mk_pair_double_double_type.deall(cself)
+    return
+
+cdef object pyxd_pair_double_double_type_new(PyTypeObject * subtype, object args, object kwds):
+    return pyxd_pair_double_double_type_alloc(subtype, 0)
+
+cdef void pyxd_pair_double_double_type_free(void * self):
+    return
+
+cdef object pyxd_pair_double_double_type_str(object self):
+    cdef PyXDPairDoubleDouble_Type * cself = <PyXDPairDoubleDouble_Type *> self
+    cdef stlcontainers._PairDoubleDouble val_proxy
+    val_proxy = stlcontainers.PairDoubleDouble(False, False)
+    val_proxy.pair_ptr = <cpp_pair[double, double]*> &(cself.obval)
+    pyval = val_proxy
+    s = str(pyval)
+    return s
+
+cdef object pyxd_pair_double_double_type_repr(object self):
+    cdef PyXDPairDoubleDouble_Type * cself = <PyXDPairDoubleDouble_Type *> self
+    cdef stlcontainers._PairDoubleDouble val_proxy
+    val_proxy = stlcontainers.PairDoubleDouble(False, False)
+    val_proxy.pair_ptr = <cpp_pair[double, double]*> &(cself.obval)
+    pyval = val_proxy
+    s = repr(pyval)
+    return s
+
+cdef int pyxd_pair_double_double_type_compare(object a, object b):
+    return (a is b) - 1
+    # FIXME comparisons not defined for arbitrary types
+    #cdef PyXDPairDoubleDouble_Type * x
+    #cdef PyXDPairDoubleDouble_Type * y
+    #if type(a) is not type(b):
+    #    raise NotImplementedError
+    #x = <PyXDPairDoubleDouble_Type *> a
+    #y = <PyXDPairDoubleDouble_Type *> b
+    #if (x.obval == y.obval):
+    #    return 0
+    #elif (x.obval < y.obval):
+    #    return -1
+    #elif (x.obval > y.obval):
+    #    return 1
+    #else:
+    #    raise NotImplementedError
+
+cdef object pyxd_pair_double_double_type_richcompare(object a, object b, int op):
+    if op == Py_EQ:
+        return (a is b)
+    elif op == Py_NE:
+        return (a is not b)
+    else:
+        return NotImplemented
+    # FIXME comparisons not defined for arbitrary types
+    #cdef PyXDPairDoubleDouble_Type * x
+    #cdef PyXDPairDoubleDouble_Type * y
+    #if type(a) is not type(b):
+    #    return NotImplemented
+    #x = <PyXDPairDoubleDouble_Type *> a
+    #y = <PyXDPairDoubleDouble_Type *> b
+    #if op == Py_LT:
+    #    return (x.obval < y.obval)
+    #elif op == Py_LE:
+    #    return (x.obval <= y.obval)
+    #elif op == Py_EQ:
+    #    return (x.obval == y.obval)
+    #elif op == Py_NE:
+    #    return (x.obval != y.obval)
+    #elif op == Py_GT:
+    #    return (x.obval > y.obval)
+    #elif op == Py_GE:
+    #    return (x.obval >= y.obval)
+    #else:
+    #    return NotImplemented    
+
+cdef long pyxd_pair_double_double_type_hash(object self):
+    return id(self)
+
+cdef PyMemberDef pyxd_pair_double_double_type_members[1]
+pyxd_pair_double_double_type_members[0] = PyMemberDef(NULL, 0, 0, 0, NULL)
+
+cdef PyGetSetDef pyxd_pair_double_double_type_getset[1]
+pyxd_pair_double_double_type_getset[0] = PyGetSetDef(NULL, NULL, NULL, NULL, NULL)
+
+cdef bint pyxd_pair_double_double_is_ready
+cdef type PyXD_PairDoubleDouble = type("xd_pair_double_double", ((<object> PyArray_API[10]),), {})
+pyxd_pair_double_double_is_ready = PyType_Ready(<object> PyXD_PairDoubleDouble)
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_basicsize = sizeof(PyXDPairDoubleDouble_Type)
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_itemsize = 0
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_doc = "Python scalar type for cpp_pair[double, double]"
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES | Py_TPFLAGS_HEAPTYPE
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_alloc = pyxd_pair_double_double_type_alloc
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_dealloc = pyxd_pair_double_double_type_dealloc
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_new = pyxd_pair_double_double_type_new
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_free = pyxd_pair_double_double_type_free
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_str = pyxd_pair_double_double_type_str
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_repr = pyxd_pair_double_double_type_repr
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_base = (<PyTypeObject *> PyArray_API[10])  # PyGenericArrType_Type
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_hash = pyxd_pair_double_double_type_hash
+emit_ifpy2k()
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_compare = &pyxd_pair_double_double_type_compare
+emit_endif()
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_richcompare = pyxd_pair_double_double_type_richcompare
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_members = pyxd_pair_double_double_type_members
+(<PyTypeObject *> PyXD_PairDoubleDouble).tp_getset = pyxd_pair_double_double_type_getset
+pyxd_pair_double_double_is_ready = PyType_Ready(<object> PyXD_PairDoubleDouble)
+Py_INCREF(PyXD_PairDoubleDouble)
+XDPairDoubleDouble = PyXD_PairDoubleDouble
+
+cdef PyArray_Descr * c_xd_pair_double_double_descr = <PyArray_Descr *> malloc(sizeof(PyArray_Descr))
+(<PyObject *> c_xd_pair_double_double_descr).ob_refcnt = 0 # ob_refcnt
+(<PyObject *> c_xd_pair_double_double_descr).ob_type = <PyTypeObject *> PyArray_API[3]
+c_xd_pair_double_double_descr.typeobj = <PyTypeObject *> PyXD_PairDoubleDouble # typeobj
+c_xd_pair_double_double_descr.kind = 'x'  # kind, for xdress
+c_xd_pair_double_double_descr.type = 'x'  # type
+c_xd_pair_double_double_descr.byteorder = '='  # byteorder
+c_xd_pair_double_double_descr.flags = NPY_USE_GETITEM  # flags
+c_xd_pair_double_double_descr.type_num = 0    # type_num, assigned at registration
+c_xd_pair_double_double_descr.elsize = sizeof(cpp_pair[double, double])  # elsize, 
+c_xd_pair_double_double_descr.alignment = 8  # alignment
+c_xd_pair_double_double_descr.subarray = NULL  # subarray
+c_xd_pair_double_double_descr.fields = NULL  # fields
+c_xd_pair_double_double_descr.names = NULL
+(<PyArray_Descr *> c_xd_pair_double_double_descr).f = <PyArray_ArrFuncs *> &PyXD_PairDoubleDouble_ArrFuncs  # f == PyArray_ArrFuncs
+
+cdef object xd_pair_double_double_descr = <object> (<void *> c_xd_pair_double_double_descr)
+Py_INCREF(<object> xd_pair_double_double_descr)
+xd_pair_double_double = xd_pair_double_double_descr
+cdef int xd_pair_double_double_num = PyArray_RegisterDataType(c_xd_pair_double_double_descr)
+dtypes['pair_double_double'] = xd_pair_double_double
+dtypes['xd_pair_double_double'] = xd_pair_double_double
+dtypes[xd_pair_double_double_num] = xd_pair_double_double
 
 
 

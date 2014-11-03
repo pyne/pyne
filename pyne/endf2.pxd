@@ -10,6 +10,8 @@
 
 cimport dtypes
 cimport numpy as np
+cimport stlcontainers
+from libcpp.utility cimport pair as cpp_pair
 from libcpp.vector cimport vector as cpp_vector
 from pyne cimport cpp_endf2
 
@@ -62,6 +64,29 @@ cdef class mt458_mf1(mt_base):
     cdef public np.ndarray _enu
     cdef public np.ndarray _er
     cdef public np.ndarray _et
+    pass
+
+
+
+
+
+cdef class mt457_mf8(mt_base):
+    cdef public np.ndarray _eav
+    cdef public np.ndarray _er
+    cdef public np.ndarray _erel
+    cdef public np.ndarray _fc
+    cdef public np.ndarray _fd
+    cdef public np.ndarray _lcon
+    cdef public np.ndarray _nd
+    cdef public np.ndarray _ner
+    cdef public np.ndarray _ri
+    cdef public np.ndarray _ricc
+    cdef public np.ndarray _rick
+    cdef public np.ndarray _ricl
+    cdef public np.ndarray _ris
+    cdef public np.ndarray _rtyp
+    cdef public np.ndarray _styp
+    cdef public np.ndarray _type
     pass
 
 

@@ -22,6 +22,9 @@ mod = {
             (('get', 'mt460_mf1'), ('mat', 'int'), ('mf', 'int'), ('mt', 'int')): {
                 'return': 'mt460_mf1',
                 'defaults': ((Arg.NONE, None), (Arg.NONE, None), (Arg.NONE, None))},
+            (('get', 'mt457_mf8'), ('mat', 'int'), ('mf', 'int'), ('mt', 'int')): {
+                'return': 'mt457_mf8',
+                'defaults': ((Arg.NONE, None), (Arg.NONE, None), (Arg.NONE, None))},
             (('get', 'mtfpy_mf8'), ('mat', 'int'), ('mf', 'int'), ('mt', 'int')): {
                 'return': 'mtfpy_mf8',
                 'defaults': ((Arg.NONE, None), (Arg.NONE, None), (Arg.NONE, None))},

@@ -1629,7 +1629,7 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
     } else if (part1[i] == 36565) {
       // spontaneous fission, rx == 'sf'
       result += part2[i] * 0.01 * wimsdfpy_data[from_to];
-    } else if ((part1[i] != 0) && (groundstate(rxname::child(from_to.first, 
+    } else if ((part1[i] != 0) && (groundstate(rxname::child(from_to.first,
                                    part1[i], "decay")) == from_to.second)) {
       result += part2[i] * 0.01;
     }
@@ -2299,7 +2299,7 @@ std::vector<std::pair<double, double> > pyne::ecbp_xrays(int parent) {
 
 std::vector<std::pair<double, double> > pyne::gammas(int parent_state_id) {
   std::vector<std::pair<double, double> > result;
-  double decay_c = decay_const(parent_state_id);
+  double decay_c = 1;//decay_const(parent_state_id);
   std::vector<std::pair<double, double> > energies = gamma_energy(parent_state_id);
   std::vector<std::pair<double, double> > intensities =
     gamma_photon_intensity(parent_state_id);

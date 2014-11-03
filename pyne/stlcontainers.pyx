@@ -27,8 +27,9 @@ np.import_array()
 cimport extra_types
 
 # Cython Imports For Types
-cimport dtypes
 cimport extra_types
+cimport dtypes
+from libcpp.utility cimport pair as cpp_pair
 from libcpp.vector cimport vector as cpp_vector
 cimport numpy as np
 from libcpp.string cimport string as std_string
@@ -300,6 +301,99 @@ class SetInt(_SetInt, collections.Set):
 
     def __repr__(self):
         return "set([" + ", ".join([repr(i) for i in self]) + "])"
+
+
+
+# Pair(Double, Double)
+cdef class _PairDoubleDouble:
+    def __cinit__(self, first_val = None, second_val = None, bint free_pair=True):
+
+
+        cdef pair[double, double] * pair_ptr
+
+        if first_val is not None and second_val is not None:
+
+
+            self.pair_ptr = new pair[double, double](<double> first_val, <double> second_val)
+        elif first_val is not None or second_val is not None:
+            raise TypeError("Constructor requires either both first and second defined or neither.")
+        else:
+            self.pair_ptr = new pair[double, double]()
+
+        # Store free_pair
+        self._free_pair = free_pair
+
+    # c++-like members
+    property first:
+        def __get__(self):
+
+
+            return float(self.pair_ptr[0].first)
+        def __set__(self, first_val):
+
+
+            self.pair_ptr[0].first = <double> first_val
+
+    property second:
+        def __get__(self):
+
+
+            return float(self.pair_ptr[0].second)
+        def __set__(self, second_val):
+
+
+            self.pair_ptr[0].second = <double> second_val
+
+    def __copy__(self):
+        return _PairDoubleDouble(self.first, self.second)
+
+    def __dealloc__(self):
+        if self._free_pair and self.pair_ptr is not NULL:
+            del self.pair_ptr
+
+    def __getitem__(self, i):
+        if i == 0:
+            return self.first
+        elif i == 1:
+            return self.second
+        else:
+            raise IndexError("Index must be either 0 or 1 for pairs.")
+
+    def __setitem__(self, i, value):
+        if i == 0:
+            self.first = value
+        elif i == 1:
+            self.second = value
+        else:
+            raise IndexError("Index must be either 0 or 1 for pairs.")
+
+    def __iter__(self):
+        yield self.first
+        yield self.second
+
+class PairDoubleDouble(_PairDoubleDouble):
+    """Wrapper class for C++ standard library pairs of type <double, double>.
+    Provides tuple interface on the Python level.
+
+    Parameters
+    ----------
+    new_pair : bool or dict-like
+        Boolean on whether to make a new pair or not, or dict-like object
+        with keys and values which are castable to the appropriate type.
+    free_pair : bool
+        Flag for whether the pointer to the C++ pair should be deallocated
+        when the wrapper is dereferenced.
+    """
+    ## pair somehow needs to be able to reference the base class' first and second members
+    ## via super or some other mechanism, and I'm not sure how this should works.. 
+    #def __init__(self, first_val = None, second_val = None, bint free_pair=True):
+    #    return _PairDoubleDouble.__cinit__(self, first_val, second_val, free_pair)
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return "Pair({0}, {1})".format(repr(self.__getitem__(0)), repr(self.__getitem__(1)))
 
 
 
@@ -2349,5 +2443,8 @@ class MapIntVectorDouble(_MapIntVectorDouble, collections.MutableMapping):
 
 
 # cpp_vector[cpp_vector[double]] vector
+
+
+# cpp_pair[double, double] vector
 
 
