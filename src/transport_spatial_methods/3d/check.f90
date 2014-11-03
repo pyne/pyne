@@ -137,7 +137,7 @@ END IF
 !Added a break in if statements to allow for solver specific checking above^
 ! (they were all else if before.."
 ! Iteration control parameters
-IF (err <= 0.) THEN
+IF (convergence_criterion <= 0.) THEN
    WRITE(8,'(/,3x,A)') "ERROR: Illegal convergence criterion. Must be positive."
    error_code = 1025
    RETURN

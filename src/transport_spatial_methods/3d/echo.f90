@@ -33,7 +33,7 @@ WRITE (8,105) "Number of materials = ", nm
 ! Write the iteration controls
 WRITE (8,'(/,1X,A)') "Iteration Control Parameters"
 WRITE (8,105) "Maximum number of iterations = ", itmx
-WRITE (8,107) "Pointwise convergence criterion = ", err
+WRITE (8,107) "Pointwise convergence criterion = ", convergence_criterion
 WRITE (8,105) "Highest moment converged = ", moments_converged
 107 FORMAT(1X,A,ES10.3)
 

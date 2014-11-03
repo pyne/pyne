@@ -59,7 +59,7 @@ IF (solver == "AHOTN") THEN
              CALL CPU_time(titer)
 
              ! Print whether or not convergence was reached
-             IF (dfmx > err .AND. it < itmx) THEN
+             IF (dfmx > convergence_criterion .AND. it < itmx) THEN
                   ! Set previous iterate of flux equal to current iterate
                   WRITE(8,11102) g, it, id, jd, kd, vd, dfmx, f_ahot_l(vd,id,jd,kd,gd), titer-told
                   DO k = 1, nz
@@ -71,10 +71,10 @@ IF (solver == "AHOTN") THEN
                   END DO
                   ! Reset the time point
                   told = titer
-             ELSE IF (dfmx < err) THEN
+             ELSE IF (dfmx < convergence_criterion) THEN
                   WRITE (8,*)
                   WRITE (8,*) " Group ", g, " converged in ", it, " iterations"
-                  WRITE (8,'(2X,A,ES11.3,A,ES11.3)') "Maximum error estimated: ", dfmx, " < ", err
+                  WRITE (8,'(2X,A,ES11.3,A,ES11.3)') "Maximum error estimated: ", dfmx, " < ", convergence_criterion
                   WRITE (8,'(A, 3I5, A, 3I5)') " Pos ", id, jd, kd, " Moment ", vd
                   WRITE (8,'(2X,A,F9.3,A)') "Final iteration time ", titer-told, " seconds"
                   cnvf(g) = 1
@@ -82,7 +82,8 @@ IF (solver == "AHOTN") THEN
              ELSE IF (it == itmx) THEN
                   WRITE (8,*)
                   WRITE (8,*) "  Group ", g, " did not converge in maximum number of iterations ", itmx
-                  WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ",&
+                  WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", convergence_criterion,&
+                         " And flux = ",&
                         f_ahot_l(vd,id,jd,kd,gd)
                   WRITE (8,*) "Pos ", id, jd, kd, " Moment ", vd
                   cnvf(g) = 0
@@ -135,7 +136,7 @@ IF (solver == "AHOTN") THEN
              CALL CPU_time(titer)
 
              ! Print whether or not convergence was reached
-             IF (dfmx > err .AND. it < itmx) THEN
+             IF (dfmx > convergence_criterion .AND. it < itmx) THEN
                   ! Set previous iterate of flux equal to current iterate
                   WRITE(8,11101) g, it, id, jd, kd, td, ud, vd, dfmx, f(td,ud,vd,id,jd,kd,gd), titer-told
                   DO k = 1, nz
@@ -153,10 +154,10 @@ IF (solver == "AHOTN") THEN
                   END DO
                   ! Reset the time point
                   told = titer
-             ELSE IF (dfmx < err) THEN
+             ELSE IF (dfmx < convergence_criterion) THEN
                   WRITE (8,*)
                   WRITE (8,*) " Group ", g, " converged in ", it, " iterations"
-                  WRITE (8,'(2X,A,ES11.3,A,ES11.3)') "Maximum error estimated: ", dfmx, " < ", err
+                  WRITE (8,'(2X,A,ES11.3,A,ES11.3)') "Maximum error estimated: ", dfmx, " < ", convergence_criterion
                   WRITE (8,'(A, 3I5, A, 3I5)') " Pos ", id, jd, kd, " Moment ", td, ud, vd
                   WRITE (8,'(2X,A,F9.3,A)') "Final iteration time ", titer-told, " seconds"
                   cnvf(g) = 1
@@ -164,7 +165,8 @@ IF (solver == "AHOTN") THEN
              ELSE IF (it == itmx) THEN
                   WRITE (8,*)
                   WRITE (8,*) "  Group ", g, " did not converge in maximum number of iterations ", itmx
-                  WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ", &
+                  WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", convergence_criterion,&
+                         " And flux = ", &
                         f(td,ud,vd,id,jd,kd,gd)
                   WRITE (8,*) "Pos ", id, jd, kd, " Moment ", td, ud, vd
                   cnvf(g) = 0
@@ -220,7 +222,7 @@ ELSE IF (solver == "DGFEM") THEN
 
          ! Print whether or not convergence was reached
          l = vd+1+(lambda+1)*ud+(lambda+1)**2*td
-         IF (dfmx > err .AND. it < itmx) THEN
+         IF (dfmx > convergence_criterion .AND. it < itmx) THEN
             ! Set previous iterate of flux equal to current iterate
             WRITE(8,11103) g, it, id, jd, kd, td, ud, vd, dfmx, f(l,id,jd,kd,gd,1,1), titer-told
             DO k = 1, nz
@@ -232,10 +234,10 @@ ELSE IF (solver == "DGFEM") THEN
             END DO
             ! Reset the time point
             told = titer
-         ELSE IF (dfmx < err) THEN
+         ELSE IF (dfmx < convergence_criterion) THEN
             WRITE (8,*)
             WRITE (8,*) " Group ", g, " converged in ", it, " iterations"
-            WRITE (8,'(2X,A,ES11.3,A,ES11.3)') "Maximum error estimated: ", dfmx, " < ", err
+            WRITE (8,'(2X,A,ES11.3,A,ES11.3)') "Maximum error estimated: ", dfmx, " < ", convergence_criterion
             WRITE (8,'(A, 3I5, A, 3I5)') " Pos ", id, jd, kd, " Moment ", td, ud, vd
             WRITE (8,'(2X,A,F9.3,A)') "Final iteration time ", titer-told, " seconds"
             cnvf(g) = 1
@@ -243,7 +245,8 @@ ELSE IF (solver == "DGFEM") THEN
          ELSE IF (it == itmx) THEN
             WRITE (8,*)
             WRITE (8,*) "  Group ", g, " did not converge in maximum number of iterations ", itmx
-            WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ", f(l,id,jd,kd,gd,1,1)
+            WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", convergence_criterion,&
+                  " And flux = ", f(l,id,jd,kd,gd,1,1)
             WRITE (8,*) "Pos ", id, jd, kd, " Moment ", td, ud, vd
             cnvf(g) = 0
             EXIT
@@ -291,7 +294,7 @@ ELSE IF (solver == "SCTSTEP") THEN
      CALL CPU_time(titer)
 
      ! Print whether or not convergence was reached
-     IF (dfmx > err .AND. it < itmx) THEN
+     IF (dfmx > convergence_criterion .AND. it < itmx) THEN
         ! Set previous iterate of flux equal to current iterate
         WRITE(8,11104) g, it, id, jd, kd, dfmx, f(id,jd,kd,gd,1,1,1), titer-told
         DO k = 1, nz
@@ -303,10 +306,10 @@ ELSE IF (solver == "SCTSTEP") THEN
         END DO
         ! Reset the time point
         told = titer
-     ELSE IF (dfmx < err) THEN
+     ELSE IF (dfmx < convergence_criterion) THEN
         WRITE (8,*)
         WRITE (8,*) " Group ", g, " converged in ", it, " iterations"
-        WRITE (8,'(2X,A,ES11.3,A,ES11.3)') "Maximum error estimated: ", dfmx, " < ", err
+        WRITE (8,'(2X,A,ES11.3,A,ES11.3)') "Maximum error estimated: ", dfmx, " < ", convergence_criterion
         WRITE (8,'(A, 3I5)') " Pos ", id, jd, kd
         WRITE (8,'(2X,A,F9.3,A)') "Final iteration time ", titer-told, " seconds"
         cnvf(g) = 1
@@ -314,7 +317,8 @@ ELSE IF (solver == "SCTSTEP") THEN
      ELSE IF (it == itmx) THEN
         WRITE (8,*)
         WRITE (8,*) "  Group ", g, " did not converge in maximum number of iterations ", itmx
-        WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", err, " And flux = ", f(id,jd,kd,gd,1,1,1)
+        WRITE (8,'(2X,A,ES11.3,A,ES11.3,A,ES11.3)') "Max error = ", dfmx, " > ", convergence_criterion,&
+               " And flux = ", f(id,jd,kd,gd,1,1,1)
         WRITE (8,*) "Pos ", id, jd, kd
         cnvf(g) = 0
         EXIT
