@@ -67,18 +67,13 @@ Parameters
                 note: only BXSLIB format is currently supported.
     nuc_names :: dict, pyne element/isotope names to bxslib name assignment,
                 keys are pyne nucids (int) and values are bxslib names (str)
-    coord_sys :: int, optional, defines the coordinate system used.
-                1 = Cartesian (default)
-                2 = cylindrical
-                3 = spherical
     datapath :: str, optional, The path in the heirarchy to the data table 
             in an HDF5 file. (for MaterialLibrary)
                 default = material_library/materials
     nucpath :: str, optional, The path in the heirarchy to the 
             nuclide array in an HDF5 file. (for MaterialLibrary)
                 default = material_library/nucid
-        
-    fine :: dict of lists, optional, number of fine mesh intervals per coarse
+    ****fine :: dict of lists, optional, number of fine mesh intervals per coarse
             mesh interval. Fine mesh is used for solver.
                 keys must be 'x', 'y', or 'z'. Value is list of ints. List 
                 can be of length 1 so that the value is applied to all coarse
@@ -86,6 +81,8 @@ Parameters
                 meshes in that direction.
                     example: fine = {'x':[5], 'y':[3,5,6,8,2]}
                 default: 10 in all directions.
+                NOTE: make user supply fine mesh only, make it default one fine
+                mesh per coarse mesh
 Attributes
 ----------
     dim :: list of str, specifies the dimensions in problem. Currently
@@ -102,40 +99,26 @@ Attributes
 """
 
 def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
-    
-    coord_sys = kwargs['coord_sys'] if 'coord_sys' in kwargs else 1
-    if coord_sys != 1:
-        warn("Only Cartesian geometries are currently supported")
-    
+    dagmc.load(hdf5)
+    # optional inputs
     datapath = kwargs['datapath'] if 'datapath' in kwargs else 'material_library/materials'
     nucpath = kwargs['nucpath'] if 'nucpath' in kwargs else 'material_library/nucid'
 
-    dagmc_geom = dagmc.load(hdf5)
-    dg = dagmc.discretize_geom(mesh)
-           
+    # get coordinate system and mesh bounds from mesh       
     coord_sys, bounds = _read_mesh(mesh)
 
-    #xs_names = _read_nucdata(nucdata)
-
-    # Read the materials from the hdf5
-    matlib = _get_materials(hdf5, datapath, nucpath, nuc_names)       
+    # Read the materials from the hdf5 and convert to correct naming convention
+    mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)       
+    
+    # determine the zones
     
         
+    zones = _define_zones(mesh)
     
-    # set fine mesh
-    fine = {}
-    for i in coord_sys:
-        if 'fine' in kwargs:
-            if len(kwargs['fine'][i]) == 1:
-                fine[i] = kwargs['fine'][i]*len(bounds[i])
-            else:
-                if len(kwargs['fine'][i]) == len(bounds[i]):
-                    fine[i] = kwargs['fine'][i]
-                else:
-                    warn("Number of fine mesh entries must be same length as coarse mesh entries. Using default value of 10.")
-                    fine[i] = [10]*len(bounds[i])
-        else:
-            fine[i] = [10]*len(bounds[i])
+    for key, item in zones.iteritems():
+        print(key, item)
+    
+    return coord_sys, bounds, mat_lib, zones
     
 def _read_mesh(mesh):
     # determines the system geometry (1-D, 2-D, or 3-D Cartesian)
@@ -183,31 +166,31 @@ def _read_mesh(mesh):
     
     return coord_sys, bounds
 
-def _read_nucdata(nucdata_file):
-    # figure out how to generically determine the form of lib
-    nucdata = open(nucdata_file,'rb')
-    libname = 'bxslib'
-    if libname == 'bxslib':
-        return _read_bxslib(nucdata)
-    # make it so that more lib types can be included
-    
-def _read_bxslib(bxslib):
-    string = ""
-    edits = ""
-    xs_names=[]
-    # 181st byte is the start of xsnames
-    bxslib.seek(180)
-    done = False
-    while not done:
-        for i in range(0,8):
-            bytes = bxslib.read(1)
-            pad1=struct.unpack('s',bytes)[0]
-            if '\x00' in pad1:
-                done = True
-                return xs_names
-            string += pad1
-        xs_names.append(string.strip(" "))
-        string=""
+#def _read_nucdata(nucdata_file):
+#    # figure out how to generically determine the form of lib
+#    nucdata = open(nucdata_file,'rb')
+#    libname = 'bxslib'
+#    if libname == 'bxslib':
+#        return _read_bxslib(nucdata)
+#    # make it so that more lib types can be included
+#    
+#def _read_bxslib(bxslib):
+#    string = ""
+#    edits = ""
+#    xs_names=[]
+#    # 181st byte is the start of xsnames
+#    bxslib.seek(180)
+#    done = False
+#    while not done:
+#        for i in range(0,8):
+#            bytes = bxslib.read(1)
+#            pad1=struct.unpack('s',bytes)[0]
+#            if '\x00' in pad1:
+#                done = True
+#                return xs_names
+#            string += pad1
+#        xs_names.append(string.strip(" "))
+#        string=""
     
 def _get_materials(hdf5, datapath, nucpath, nuc_names):
     # reads material properties from the loaded dagmc_geometry
@@ -217,18 +200,14 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
     mat_lib = {}
     
     for key in mats.keys():
-        # mat_name will be used for the 
         mat_name = '{0}'.format(key.split(':')[1])
         mat_lib[mat_name] = {}
         for nuc in mats[key]:
-            # insert conversion of element name to bxslib name here and then
-            # use that new name as the dict key instead of 'element'
-            
             if nuc in nuc_names.keys():
                 nuc_name = nuc_names[nuc]
             else:
                 nuc_name = nuc
-                warn("Pyne nuclide {0} not listed in nuc_names".format(nuc))
+                warn("PyNE nuclide {0} not listed in nuc_names".format(nuc))
             # convert mass fraction to atom density [at/b*cm]
             # rho/mw*Na    
             rho_frac = mats[key][nuc_name]
@@ -238,18 +217,14 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
             
     return mat_lib
         
-def _define_zones(dg):
-    ### !!! NOT FINSIHED !!! ###
-    # defines the "zones" based on unique discretize_geom results
-    # dg = discretize_geom record array
-    
+def _define_zones(mesh):
+    """This function takes results of discretize_geom and finds unique voxels
+    """
+    dg = dagmc.discretize_geom(mesh)
+    # Create dictionary of each voxel's info    
     voxel = {}
-    
-    # define a single voxel
     for i in dg:
         idx = i[0]
-        #print(i[1])
-        #print(idx)
         if idx not in voxel.keys():
             voxel[idx] = {}
             voxel[idx]['cell'] = []
@@ -260,39 +235,30 @@ def _define_zones(dg):
         voxel[idx]['vol_frac'].append(i[2])
         #voxel[idx]['rel_error'].append(i[3])
     
-    # !!!! Come back to this later !!!!
-    # determine which voxels are identical
-    z = 1    # start zone counter
+    # determine which voxels are identical and remove
+    z = 0
     zones = {}
-    for idx in voxel.keys():
-        if z not in zones.keys():
-            zones[z] = {}
-            zones[z]['cell'] = voxel[idx]['cell']
-            zones[z]['vol_frac'] = voxel[idx]['vol_frac']
-        else:
-            for zz in zones.keys():
-                c_tf = False
-                vf_tf = False
-                if zones[zz]['cell'] == voxel[idx]['cell']:
-                    c_tf = True
-                if zones[zz]['vol_frac'] == voxel[idx]['vol_frac']:
-                    vf_tf = True
-                if c_tf and vf_tf:
-                    break
-    print(zones)
-                    
-    
-    #for item in voxel.iteritems():
-    #    print(item)
-        
-    names = dg.dtype.names
-    print(names)
+    match = False
+    first = True    
+    for idx, vals in voxel.iteritems():
+        for zone, info in zones.iteritems():
+            if vals == info:
+                match = True
+                break
+            else:
+                match = False
+        if first or not match:
+            z += 1
+            zones[z] = voxel[idx]
+            first = False
+            
+    return zones
 
 
 #class PartisnWrite(object):
 """This class writes out the information stored by PartisnRead to
 a text partisn input file.
 """
-def write_partisn(self):
+def write_partisn(coord_sys, bounds, mat_lib, zones):
     pass
     
