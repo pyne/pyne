@@ -271,35 +271,8 @@ if not present/specified.
  type: int
  ex: 0
  default: 0
-
-.. Josh: Can you look in the code and write about what this does?
-
-**Entry: Flag for computing, presenting quadrant fluxes**
-::
- key: "quad_flux_print_flag"
- type: Integer
- ex: 0
- default: 0
-
-.. Josh: Can you look in the code and write about what this does?
-
-**Entry: Flag for printing matrix file**
-::
- key: "matrix_print_flag"
- type: Integer
- ex: 0
- default: 0
-
-.. Josh: Isn't this taken out now?
-
-**Entry: ITM solution flag**
-::
- key: "itm_direct_solution_flag" [only relevant if itm is selected]
- type: Integer
- ex: 0
- default: default of 0 if itm solution method
-
-.. Josh: Isn't this taken out now?
+ Moments converged is the number of moments that should be converged upon for each quadrature in the
+ solution space.  Value for moments converged must be in range [0, spatial_order_in].
 
 -----------------------------------
 Output Dictionary Entries

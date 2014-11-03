@@ -94,8 +94,7 @@ def error_toString(error_code):
     err_str = "ERROR: illegal entry for the qdfile name."
   elif(error_code == 1005):
     err_str = "ERROR: illegal entry for lambda. Must be zero or greater."
-  elif(error_code == 1006):
-    err_str = "ERROR: Method value 'meth' must be 0 or 1."
+  #Error code 1006 removed.  Leaving spot 1006 as a placeholder for new error
   elif(error_code == 1007):
     err_str = "ERROR: Illegal number of x cells. Must be positive."
   elif(error_code == 1008):

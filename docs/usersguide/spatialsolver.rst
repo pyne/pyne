@@ -48,7 +48,17 @@ Example Use of Spatial Solver
    In [29]: input_dict['ichk'] = 0
    In [30]: input_dict['ichk_tolerence'] = 1.e-14
    In [31]: dict_results = {}
-   In [32]: #dict_results = pyne.spatialsolver.solve(input_dict)
+   In [32]: dict_results = pyne.spatialsolver.solve(input_dict)
+   In [33]: if(dict_results['success']):
+   In [34]:   print('Yay, job ran succesfully!')
+   In [35]: print(dict_results['success'])
+   In [36]: print(dict_results['error_msg'])
+   In [37]: print(dict_results['flux'])
+   In [38]: print('Total solving time was: ')
+   In [39]: print(dict_results['total_time'])
+   In [40]: print('Solver call started at: ')
+   In [41]: print(dict_results['time_start'])
+   
  
 For meanings of the above keys, see the pyne.spatialsolver python api!
 
