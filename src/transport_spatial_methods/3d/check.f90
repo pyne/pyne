@@ -84,7 +84,7 @@ ELSE IF (MINVAL(mat) < 1 .OR. MAXVAL(mat) > nm) THEN
    RETURN
    !STOP
    
-! the potentially reflective BCs
+! the potentmoments_convergedy reflective BCs
 ELSE IF (xsbc /= 0 .AND. xsbc /= 1 .AND. xsbc /= 2 ) THEN
    WRITE(8,'(/,3x,A)') "ERROR: Illegal lower x BC. Must be 0-Vac, 1-Refl or 2-Fixed."
    error_code = 1016
@@ -159,8 +159,8 @@ ELSE IF (tolr <= 0.) THEN
    error_code = 1027
    RETURN
    !STOP
-ELSE IF (iall < 0 .OR. iall > lambda) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: Illegal value for moments to converge, iall. Must be in [0, lambda]."
+ELSE IF (moments_converged < 0 .OR. moments_converged > lambda) THEN
+   WRITE(8,'(/,3x,A)') "ERROR: Illegal value for moments to converge, moments_converged. Must be in [0, lambda]."
    error_code = 1028
    RETURN
    !STOP

@@ -35,7 +35,7 @@ WRITE (8,105) "Number of materials = ", nm
 WRITE (8,'(/,1X,A)') "Iteration Control Parameters"
 WRITE (8,105) "Maximum number of iterations = ", itmx
 WRITE (8,107) "Pointwise convergence criterion = ", err
-WRITE (8,105) "Highest moment converged = ", iall
+WRITE (8,105) "Highest moment converged = ", moments_converged
 107 FORMAT(1X,A,ES10.3)
 
 ! Write the names of the files used
@@ -129,10 +129,10 @@ ELSE
                  DO j = 1, ny
                     WRITE (8,*)
                     WRITE (8,110) "Source for Group: ", g, " Moment ", t, u, v, "z-plane(k): ", k, " Row(j): ", j
-									  IF (solver == "DGFEM") THEN
-	                    l=v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6
-	                 		WRITE (8,108) (s(l,i,j,k,g,1,1), i = 1, nx)
-									  END IF		  
+                    IF (solver == "DGFEM") THEN
+                      l=v+1-u*(-3+2*t+u-2*lambda)/2+t*(11+t**2-3*t*(2+lambda)+3*lambda*(4+lambda))/6
+                       WRITE (8,108) (s(l,i,j,k,g,1,1), i = 1, nx)
+                    END IF      
                  END DO
               END DO
            END DO
@@ -233,12 +233,12 @@ IF (xsbc .eq. 2) THEN
              WRITE(8,202) 'Spatial order in (y,z): ',jy,jz
              WRITE(8,203) 'z->',(iz,iz=1,nz)
              iy=1
-						 IF (solver == "AHOTN") THEN
+             IF (solver == "AHOTN") THEN
                WRITE(8,205) 'y',iy,(lebc(jy,jz,1,iz,n,k),iz=1,nz)
                DO iy=2,ny
                   WRITE(8,204) iy,(lebc(jy,jz,iy,iz,n,k),iz=1,nz)
                END DO
-						 END IF
+             END IF
            END DO
          END DO
          !
@@ -263,12 +263,12 @@ IF (xsbc .eq. 2) THEN
              WRITE(8,202) 'Spatial order in (y,z): ',jy,jz
              WRITE(8,203) 'z->',(iz,iz=1,nz)
              iy=1
-					   IF (solver == "AHOTN") THEN
+             IF (solver == "AHOTN") THEN
                WRITE(8,205) 'y',iy,(ribc(jy,jz,1,iz,n,k),iz=1,nz)
                DO iy=2,ny
                   WRITE(8,204) iy,(ribc(jy,jz,iy,iz,n,k),iz=1,nz)
                END DO
-						 END IF
+             END IF
            END DO
          END DO
          !
@@ -292,13 +292,13 @@ IF (xsbc .eq. 2) THEN
            DO jy=0,lambda
              WRITE(8,202) 'Spatial order in (x,y): ',jx,jy
              WRITE(8,203) 'y->',(iy,iy=1,ny)
-             ix=1	
-						 IF (solver == "AHOTN") THEN
+             ix=1  
+             IF (solver == "AHOTN") THEN
                WRITE(8,205) 'x',ix,(bobc(jx,jy,1,iy,n,k),iy=1,ny)
                DO ix=2,nx
                   WRITE(8,204) ix,(bobc(jx,jy,ix,iy,n,k),iy=1,ny)
                END DO
-						 END IF
+             END IF
            END DO
          END DO
          !
@@ -323,12 +323,12 @@ IF (xsbc .eq. 2) THEN
              WRITE(8,202) 'Spatial order in (x,y): ',jx,jy
              WRITE(8,203) 'y->',(iy,iy=1,ny)
              ix=1
-						 IF (solver == "AHOTN") THEN
+             IF (solver == "AHOTN") THEN
                WRITE(8,205) 'x',ix,(tobc(jx,jy,1,iy,n,k),iy=1,ny)
                DO ix=2,nx
                   WRITE(8,204) ix,(tobc(jx,jy,ix,iy,n,k),iy=1,ny)
                END DO
-						 END IF
+             END IF
            END DO
          END DO
          !

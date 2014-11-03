@@ -20,7 +20,7 @@ INTEGER :: xsbc, xebc, ysbc, yebc, zsbc, zebc
 
 ! Iteration Controls
 REAL*8 :: err, tolr
-INTEGER :: itmx, iall
+INTEGER :: itmx, moments_converged
 
 ! Extra variables derived from input
 INTEGER :: apo, dofpc, order, ordsq, ordcb, orpc

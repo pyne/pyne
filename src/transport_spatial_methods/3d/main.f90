@@ -78,7 +78,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
 !    Solver types =  "AHOTN", "DGFEM", and "SCTSTEP"
 !                    - AHOTN solvers: "LL" "LN" and "NEFD"
 !                    - DGFEM solvers: "LD" "DENSE" and "LAGRANGE"
-!		     - SCTSTEP solvers: SCTSTEP (only one)
+!         - SCTSTEP solvers: SCTSTEP (only one)
 !
 ! Some problem size specifications that are passed in:
 !   lambda => LAMDBA, the AHOT spatial order
@@ -135,7 +135,7 @@ REAL*8, INTENT(OUT), DIMENSION(nodes_x_in,num_groups_in*nodes_y_in,num_groups_in
 INTEGER, INTENT(OUT) :: error_code_out
 REAL*8, INTENT(OUT) :: tsolve_out, ttosolve_out, tend_out
 
-! Set error codes to 0 initially
+! Set error codes to 0 initmoments_convergedy
 error_code = 0
 error_code_out = error_code
 
@@ -167,7 +167,7 @@ phi_file = flux_output_filein
 err = convergence_criterion_in
 tolr = converge_tolerence
 itmx = itmxin
-iall = moments_converged_in
+moments_converged = moments_converged_in
 momp = max_mom_printed_in
 momsum = moment_sum_flag_in
 mompt = mom_at_a_pt_flag_in

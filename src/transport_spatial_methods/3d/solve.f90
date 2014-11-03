@@ -68,118 +68,118 @@ IF (solver == "AHOTN") THEN
                 STOP
             END IF
 
-			 ! Get the time out of the solution
-			 CALL CPU_TIME(tsolve)
-			 
-		END DO
+       ! Get the time out of the solution
+       CALL CPU_TIME(tsolve)
+       
+    END DO
 
-	ELSE IF (solvertype == "NEFD") THEN
-		ALLOCATE(f(0:lambda,0:lambda,0:lambda,nx,ny,nz,ng), e(0:lambda,0:lambda,0:lambda,nx,ny,nz))
-		call read_sp_wts_ahotn_nefd(lambda)
+  ELSE IF (solvertype == "NEFD") THEN
+    ALLOCATE(f(0:lambda,0:lambda,0:lambda,nx,ny,nz,ng), e(0:lambda,0:lambda,0:lambda,nx,ny,nz))
+    call read_sp_wts_ahotn_nefd(lambda)
 
-		! Start the loop over all energy groups
-		DO g = 1, ng
-			 ! Reset the source as external + scattering
-			 IF (g > 1) THEN ! Downscattering only considered
-				  DO gp = 1, (g-1)
-				     DO k = 1, nz
-				        DO j = 1, ny
-				           DO i = 1, nx
-				              m = mat(i,j,k)
-				              xsct = sigs(m,g,gp)
-				              DO v = 0, lambda
-				                 DO u = 0, lambda
-				                    DO t = 0, lambda
-				                       s(t,u,v,i,j,k,g) = s(t,u,v,i,j,k,g) + xsct*f(t,u,v,i,j,k,gp)
-				                    END DO
-				                 END DO
-				              END DO
-				           END DO
-				        END DO
-				     END DO
-				  END DO
-			 END IF
+    ! Start the loop over all energy groups
+    DO g = 1, ng
+       ! Reset the source as external + scattering
+       IF (g > 1) THEN ! Downscattering only considered
+          DO gp = 1, (g-1)
+             DO k = 1, nz
+                DO j = 1, ny
+                   DO i = 1, nx
+                      m = mat(i,j,k)
+                      xsct = sigs(m,g,gp)
+                      DO v = 0, lambda
+                         DO u = 0, lambda
+                            DO t = 0, lambda
+                               s(t,u,v,i,j,k,g) = s(t,u,v,i,j,k,g) + xsct*f(t,u,v,i,j,k,gp)
+                            END DO
+                         END DO
+                      END DO
+                   END DO
+                END DO
+             END DO
+          END DO
+       END IF
 
-			 ! Get the time to reach this point
-			 CALL CPU_TIME(ttosolve)
-			 
-			 ! Check which solution scheme will be employed
+       ! Get the time to reach this point
+       CALL CPU_TIME(ttosolve)
+       
+       ! Check which solution scheme will be employed
        !Note: Meth is 0 by default now.  Should remove later and default to calling inner
-			 IF (meth == 0) THEN
-				  WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
-				  ! Call for the inner iteration (or ITM solver later)
-					CALL inner(g)
-			 ELSE IF (meth == 1) THEN
-				  STOP
-				  WRITE(8,*) 'Option meth=1 was removed'
-			 END IF
+       IF (meth == 0) THEN
+          WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
+          ! Call for the inner iteration (or ITM solver later)
+          CALL inner(g)
+       ELSE IF (meth == 1) THEN
+          STOP
+          WRITE(8,*) 'Option meth=1 was removed'
+       END IF
 
-			 ! Get the time out of the solution
-			 CALL CPU_TIME(tsolve)
-			 
-		END DO
-			 
-	ENDIF
+       ! Get the time out of the solution
+       CALL CPU_TIME(tsolve)
+       
+    END DO
+       
+  ENDIF
 ELSE IF (solver == "DGFEM") THEN
 
-	IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
-		ALLOCATE(f(dofpc,nx,ny,nz,ng,1,1), e(dofpc,nx,ny,nz,1,1))
-	ELSE IF (solvertype == "LAGRANGE") THEN
-		ALLOCATE(f(ordcb,nx,ny,nz,ng,1,1), e(ordcb,nx,ny,nz,1,1))
-	END IF
+  IF (solvertype == "LD" .or. solvertype == "DENSE") THEN
+    ALLOCATE(f(dofpc,nx,ny,nz,ng,1,1), e(dofpc,nx,ny,nz,1,1))
+  ELSE IF (solvertype == "LAGRANGE") THEN
+    ALLOCATE(f(ordcb,nx,ny,nz,ng,1,1), e(ordcb,nx,ny,nz,1,1))
+  END IF
 
-	! Intitialize warn to indicate where warnings may occur
-	warn = 0
+  ! Intitialize warn to indicate where warnings may occur
+  warn = 0
 
-	! Construct matrix templates
-	IF (solvertype == "DENSE") THEN
-		call build_tmats_complete(lambda)
-	ELSE IF (solvertype == "LAGRANGE") THEN
-		call build_tmats_lagrange(lambda)
-	END IF
+  ! Construct matrix templates
+  IF (solvertype == "DENSE") THEN
+    call build_tmats_complete(lambda)
+  ELSE IF (solvertype == "LAGRANGE") THEN
+    call build_tmats_lagrange(lambda)
+  END IF
 
-	! Start the loop over all energy groups
-	DO g = 1, ng
-		 ! Reset the source as external + scattering
-		 IF (g > 1) THEN ! Downscattering only considered
-		    DO gp = 1, (g-1)
-		       DO k = 1, nz
-		          DO j = 1, ny
-		             DO i = 1, nx
-		                m = mat(i,j,k)
-		                xsct = sigs(m,g,gp)
-		                s(:,i,j,k,g,1,1) = s(:,i,j,k,g,1,1) + xsct*f(:,i,j,k,gp,1,1)
-		             END DO
-		          END DO
-		       END DO
-		    END DO
-		 END IF
+  ! Start the loop over all energy groups
+  DO g = 1, ng
+     ! Reset the source as external + scattering
+     IF (g > 1) THEN ! Downscattering only considered
+        DO gp = 1, (g-1)
+           DO k = 1, nz
+              DO j = 1, ny
+                 DO i = 1, nx
+                    m = mat(i,j,k)
+                    xsct = sigs(m,g,gp)
+                    s(:,i,j,k,g,1,1) = s(:,i,j,k,g,1,1) + xsct*f(:,i,j,k,gp,1,1)
+                 END DO
+              END DO
+           END DO
+        END DO
+     END IF
 
-		 ! Get the time to reach this point
-		 CALL CPU_TIME(ttosolve)
-		 
-		 ! Check which solution scheme will be employed
+     ! Get the time to reach this point
+     CALL CPU_TIME(ttosolve)
+     
+     ! Check which solution scheme will be employed
      !Note: Meth is 0 by default now.  Should remove later and default to calling inner
-		 IF (meth == 0) THEN
-		    WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
-		    ! Call for the inner iteration (or ITM solver later)
-		    CALL inner(g)
-		 ELSE IF (meth == 1) THEN
-		    WRITE(8,*) 'This option does not exist in this code. Execution terminates.'
-		    STOP
-		 END IF
+     IF (meth == 0) THEN
+        WRITE(8,'(1X,A,I4,A)') "Group", g, " iterations..."
+        ! Call for the inner iteration (or ITM solver later)
+        CALL inner(g)
+     ELSE IF (meth == 1) THEN
+        WRITE(8,*) 'This option does not exist in this code. Execution terminates.'
+        STOP
+     END IF
 
-		 ! Get the time out of the solution
-		 CALL CPU_TIME(tsolve)
+     ! Get the time out of the solution
+     CALL CPU_TIME(tsolve)
 
-	IF (solvertype == "DENSE") THEN
-		 ! Clean up
-		 CALL clean_complete_kernel
-	ELSE IF (solvertype == "LAGRANGE") THEN
-		 CALL clean_lagrange_kernel
-	END IF
+  IF (solvertype == "DENSE") THEN
+     ! Clean up
+     CALL clean_complete_kernel
+  ELSE IF (solvertype == "LAGRANGE") THEN
+     CALL clean_lagrange_kernel
+  END IF
 
-	END DO
+  END DO
 
 ELSE IF (solver == "SCTSTEP") THEN
   ALLOCATE(f(nx,ny,nz,ng,1,1,1), e(nx,ny,nz,1,1,1))

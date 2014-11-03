@@ -32,11 +32,11 @@ DO m = 1, nm
   READ (11,*)
   ! Next loop is the INTO group
   DO g = 1, ng
-	  READ(11,*)
-	  READ(11,*) sigt(m,g)
-	  ! Implied DO loop for OUT OF groups
-	  ! Input then 'looks' like the actual matrix and is read that way
-	  READ(11,*) (sigs(m,g,gp), gp = 1, ng)
+    READ(11,*)
+    READ(11,*) sigt(m,g)
+    ! Implied DO loop for OUT OF groups
+    ! Input then 'looks' like the actual matrix and is read that way
+    READ(11,*) (sigs(m,g,gp), gp = 1, ng)
   END DO
 END DO
 CLOSE(UNIT=11)

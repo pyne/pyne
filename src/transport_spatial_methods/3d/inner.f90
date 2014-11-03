@@ -28,12 +28,12 @@ IF (solver == "AHOTN") THEN
              ! Call for the mesh sweep
              CALL sweep_ahotn_l(g)
              !WRITE(8,*) "f: ", f_ahot_l, " e: ", e_ahot_l 
-             ! Compare new and old flux iterates for user chosen range of moments, iall
+             ! Compare new and old flux iterates for user chosen range of moments, moments_converged
              dfmx = -1.0
              DO k = 1, nz
                   DO j = 1, ny
                      DO i = 1, nx
-                        DO v = 1, iall+1
+                        DO v = 1, moments_converged+1
 
                            ! Compute the difference depending on 'e' value
                            IF (e_ahot_l(v,i,j,k) >= tolr) THEN
@@ -97,14 +97,14 @@ IF (solver == "AHOTN") THEN
              ! Call for the mesh sweep
              CALL sweep_ahotn_nefd(g)
              
-             ! Compare new and old flux iterates for user chosen range of moments, iall
+             ! Compare new and old flux iterates for user chosen range of moments, moments_converged
              dfmx = -1.0
              DO k = 1, nz
                   DO j = 1, ny
                      DO i = 1, nx
-                        DO v = 0, iall
-                           DO u = 0, iall
-                              DO t = 0, iall
+                        DO v = 0, moments_converged
+                           DO u = 0, moments_converged
+                              DO t = 0, moments_converged
 
                                  ! Compute the difference depending on 'e' value
                                  IF (e(t,u,v,i,j,k) >= tolr) THEN
@@ -182,11 +182,11 @@ ELSE IF (solver == "DGFEM") THEN
     ! Call for the mesh sweep
          CALL sweep_dgfem(g)
          
-         ! Compare new and old flux iterates for user chosen range of moments, iall
+         ! Compare new and old flux iterates for user chosen range of moments, moments_converged
          dfmx = -1.0
-         DO v = 0, iall
-            DO u = 0, iall
-               DO t = 0, iall
+         DO v = 0, moments_converged
+            DO u = 0, moments_converged
+               DO t = 0, moments_converged
                   DO k = 1, nz
                      DO j = 1, ny
                         DO i = 1, nx
@@ -263,7 +263,7 @@ ELSE IF (solver == "SCTSTEP") THEN
      ! Call for the mesh sweep
      CALL sweep_sct_step(g)
      
-     ! Compare new and old flux iterates for user chosen range of moments, iall
+     ! Compare new and old flux iterates for user chosen range of moments, moments_converged
      dfmx = -1.0
      DO k = 1, nz
         DO j = 1, ny

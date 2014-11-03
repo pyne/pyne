@@ -409,7 +409,7 @@ subroutine ahotn_nefd_kernel(x,y,z,mu,eta,xi,sgm,sge,sgx,sig,c,inflow_x,inflow_y
 !*********************************************************
 
    ! Arguments
- 	 Integer :: lambda, ordcb
+    Integer :: lambda, ordcb
    real(kind=8) :: x,y,z,sig,c,mu,eta,xi
    real(kind=8), dimension(0:lambda, 0:lambda) :: inflow_x,inflow_y,inflow_z 
    real(kind=8), dimension(ordcb) :: b

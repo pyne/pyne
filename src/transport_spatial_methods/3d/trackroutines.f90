@@ -1517,7 +1517,7 @@ SUBROUTINE printlist(TrUnit,UnitNr,edit,mu,eta,xi)
       STOP   
    END IF
 
-   WRITE(UnitNr,*) "=================================================="	
+   WRITE(UnitNr,*) "=================================================="  
    !
    101 FORMAT(1X,A5,1ES12.4)
    102 FORMAT (1X,4A6)

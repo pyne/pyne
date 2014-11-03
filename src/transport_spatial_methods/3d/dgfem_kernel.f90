@@ -496,7 +496,7 @@ subroutine build_tmats_lagrange(lmbd)
 end subroutine
 
 subroutine clean_complete_kernel
-	! cleaning not needed?
+  ! cleaning not needed?
    if( allocated(tmass) )   deallocate(tmass)
    if( allocated(tstiffx) ) deallocate(tstiffx)
    if( allocated(tstiffy) ) deallocate(tstiffy)
