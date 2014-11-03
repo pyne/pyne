@@ -36,7 +36,7 @@ IF (solver == "AHOTN") THEN
                         DO v = 1, moments_converged+1
 
                            ! Compute the difference depending on 'e' value
-                           IF (e_ahot_l(v,i,j,k) >= tolr) THEN
+                           IF (e_ahot_l(v,i,j,k) >= converge_tolerence) THEN
                               df = ABS((f_ahot_l(v,i,j,k,g) - e_ahot_l(v,i,j,k))/e_ahot_l(v,i,j,k))
                            ELSE
                               df = ABS((f_ahot_l(v,i,j,k,g) - e_ahot_l(v,i,j,k)))
@@ -108,7 +108,7 @@ IF (solver == "AHOTN") THEN
                               DO t = 0, moments_converged
 
                                  ! Compute the difference depending on 'e' value
-                                 IF (e(t,u,v,i,j,k) >= tolr) THEN
+                                 IF (e(t,u,v,i,j,k) >= converge_tolerence) THEN
                                     df = ABS((f(t,u,v,i,j,k,g) - e(t,u,v,i,j,k))/&
                                                             e(t,u,v,i,j,k))
                                  ELSE
@@ -194,7 +194,7 @@ ELSE IF (solver == "DGFEM") THEN
                         DO i = 1, nx
                            l = v+1+(lambda+1)*u+(lambda+1)**2*t
                            ! Compute the difference depending on 'e' value
-                           IF (e(l,i,j,k,1,1) >= tolr) THEN
+                           IF (e(l,i,j,k,1,1) >= converge_tolerence) THEN
                               df = ABS((f(l,i,j,k,g,1,1) - e(l,i,j,k,1,1))/e(l,i,j,k,1,1))
                            ELSE
                               df = ABS(f(l,i,j,k,g,1,1) - e(l,i,j,k,1,1))
@@ -273,7 +273,7 @@ ELSE IF (solver == "SCTSTEP") THEN
            DO i = 1, nx
 
                        ! Compute the difference depending on 'e' value
-                       IF (e(i,j,k,1,1,1) >= tolr) THEN
+                       IF (e(i,j,k,1,1,1) >= converge_tolerence) THEN
                           df = ABS((f(i,j,k,g,1,1,1) - e(i,j,k,1,1,1))/e(i,j,k,1,1,1))
                        ELSE
                           df = ABS((f(i,j,k,g,1,1,1) - e(i,j,k,1,1,1)))

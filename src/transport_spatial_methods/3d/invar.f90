@@ -19,7 +19,7 @@ INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: mat
 INTEGER :: xsbc, xebc, ysbc, yebc, zsbc, zebc 
 
 ! Iteration Controls
-REAL*8 :: convergence_criterion, tolr
+REAL*8 :: convergence_criterion, converge_tolerence
 INTEGER :: itmx, moments_converged
 
 ! Extra variables derived from input

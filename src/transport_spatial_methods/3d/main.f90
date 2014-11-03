@@ -33,7 +33,7 @@
 !> @param convergence_criterion_in
 !> @param max_iterations_in
 !> @param moments_converged_in
-!> @param converge_tolerence
+!> @param converge_tolerence_in
 !> @param max_mom_printed_in
 !> @param moment_sum_flag_in
 !> @param mom_at_a_pt_flag_in
@@ -52,7 +52,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in,&
  z_boundry_condition_2_in, material_id_in, quadrature_file, xs_file_in,&
  source_input_file_in, bc_input_filein, flux_output_filein, &
- convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence, &
+ convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence_in, &
  max_mom_printed_in, moment_sum_flag_in,&
  mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout,error_code_out,&
  tsolve_out, ttosolve_out, tend_out) 
@@ -120,7 +120,7 @@ CHARACTER(30), INTENT(IN) :: quadrature_file, xs_file_in, source_input_file_in,&
  bc_input_filein, flux_output_filein
 
 ! Iteration Controls
-REAL*8, INTENT(IN) :: convergence_criterion_in, converge_tolerence
+REAL*8, INTENT(IN) :: convergence_criterion_in, converge_tolerence_in
 INTEGER, INTENT(IN) :: itmxin, moments_converged_in
 
 ! Editing data
@@ -162,7 +162,7 @@ mat = material_id_in
 inflow_file = bc_input_filein
 phi_file = flux_output_filein
 convergence_criterion = convergence_criterion_in
-tolr = converge_tolerence
+converge_tolerence = converge_tolerence_in
 itmx = itmxin
 moments_converged = moments_converged_in
 momp = max_mom_printed_in

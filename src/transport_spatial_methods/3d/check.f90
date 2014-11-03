@@ -147,8 +147,8 @@ ELSE IF (itmx <= 0) THEN
    error_code = 1026
    RETURN
    !STOP
-ELSE IF (tolr <= 0.) THEN
-   WRITE(8,'(/,3x,A)') "ERROR: Illegal tolerance setting, tolr. Must be positive."
+ELSE IF (converge_tolerence <= 0.) THEN
+   WRITE(8,'(/,3x,A)') "ERROR: Illegal tolerance setting, converge_tolerence. Must be positive."
    error_code = 1027
    RETURN
    !STOP
