@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import warnings
 import itertools
@@ -293,7 +291,6 @@ def test_alias_table():
         tally[s] += score
 
     for i in range(0, 3):
-       print(tally[i])
        assert(abs(tally[i] - pdf[i])/pdf[i] < 0.05)
 
 def point_in_tet(t, p):
