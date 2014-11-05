@@ -33,6 +33,7 @@ if not present/specified.
 
 **Entry: Solver type (AHOTN, DGFEM or SCTSTEP)**
 ::
+
   key: "solver"
   type: String
   ex: "AHOTN"
@@ -44,6 +45,7 @@ if not present/specified.
  
 **Entry: Spatial expansion order**
 ::
+  
   key: "solver_type"
   type: String
   ex: "LN"
@@ -55,6 +57,7 @@ if not present/specified.
 
 **Entry: Spatial expansion order (lambda; ahot spatial order, 0, 1, or 2)**
 ::
+
   key: "spatial_order"
   type: Integer
   ex: 0
@@ -64,6 +67,7 @@ if not present/specified.
 
 **Entry: Angular quadrature order**
 ::
+
   key: "quadrature_order"
   type: Integer
   ex: 4
@@ -75,6 +79,7 @@ if not present/specified.
 
 **Entry: Quadrature type:**
 ::
+
   key: "quadrature_type"
   type: Integer
   ex: 1
@@ -88,6 +93,7 @@ if not present/specified.
 
 **Entry: Number of spatial nodes in x, y, and z directions (nx/ny/nz)**
 ::
+
   key: "nodes_xyz"
   type: Integer array
   ex: [4, 4, 4]
@@ -95,6 +101,7 @@ if not present/specified.
     
 **Entry: Number of energy groups (ng)**
 ::
+
  key: "num_groups"
  type: Integer
  ex: 1
@@ -102,6 +109,7 @@ if not present/specified.
 
 **Entry: Number of materials (nm)**
 ::
+
  key: "num_materials"
  type: Integer
  ex: 1
@@ -109,6 +117,7 @@ if not present/specified.
 
 **Entry: x-size of cells (dx)**
 ::
+
  key: "x_cells_widths"
  type: double array
  ex: [0.25, 0.25, 0.25, 0.25]
@@ -116,6 +125,7 @@ if not present/specified.
 
 **Entry: y-size of cells (dy)**
 ::
+
  key: "y_cells_widths"
  type: double array
  ex: [0.25, 0.25, 0.25, 0.25]
@@ -123,6 +133,7 @@ if not present/specified.
 
 **Entry: z-size of cells (dz)**
 ::
+
  key: "z_cells_widths"
  type: double array
  ex: [0.25, 0.25, 0.25, 0.25]
@@ -130,6 +141,7 @@ if not present/specified.
 
 **Entry: x start and end boundary conditions**
 ::
+
  key: "x_boundry_conditions"
  type: Integer array
  ex: [2, 2]
@@ -145,6 +157,7 @@ if not present/specified.
 
 **Entry: y start and end boundary conditions**
 ::
+
  key: "y_boundry_conditions"
  type: Integer array
  ex: [2, 2]
@@ -160,6 +173,7 @@ if not present/specified.
 
 **Entry: z start and end boundary conditions**
 ::
+
  key: "z_boundry_conditions"
  type: Integer array
  ex: [2, 2]
@@ -175,6 +189,7 @@ if not present/specified.
 
 **Entry: Material info**
 ::
+
  key: "material_id"
  type: Integer 3 dimensional array
  ex: [ [ [1 1 1 1] [1 1 1 1] [1 1 1 1] [1 1 1 1] ] 
@@ -187,6 +202,8 @@ if not present/specified.
     
 **Entry: "quadrature_file" [optional; only needed for quadrature type 2]**
 ::
+
+ key: "quad_file"
  type: String
  ex: 'quad_file'
  default: No default  
@@ -194,6 +211,7 @@ if not present/specified.
 
 **Entry: cross section info file name**
 ::
+
  key: "xs_file"
  type: String
  default: 'xs_file'
@@ -201,6 +219,7 @@ if not present/specified.
 
 **Entry: source file name**
 ::
+
   key: "source_input_file"
   type: String
   default: 'src.dat'
@@ -208,6 +227,7 @@ if not present/specified.
 
 **Entry: boundary condition file name [optional]**
 ::
+
  key: "bc_input_file"
  type: String
  default: No default
@@ -215,6 +235,7 @@ if not present/specified.
 
 **Entry: output file name [optional]**
 ::
+
  key: "flux_output_file"
  type: String
  default: 'flux.out'
@@ -222,6 +243,7 @@ if not present/specified.
 
 **Entry: Convergence Criterion**
 ::
+
  key: "convergence_criterion"
  type: float
  ex: 1.e-5
@@ -234,6 +256,7 @@ if not present/specified.
 
 **Entry: Tolerance**
 ::
+
  key: "converge_tolerance"
  type: float
  ex: 1.e-10
@@ -253,6 +276,7 @@ if not present/specified.
 
 **Entry: Maximum Iterations**
 ::
+
  key: "max_iterations"
  type: int
  ex: 10000
@@ -263,6 +287,7 @@ if not present/specified.
 
 **Entry: Moments Converged**
 ::
+
  key: "moments_converged" ??
  type: int
  ex: 0
@@ -275,11 +300,21 @@ Output Dictionary Entries
 -----------------------------------
 When run, the solvers return a dictionary of useful solution data.  It contains the following key-pair entries:
 
-**Entry: Flux output array**::
+**Entry: Flux output array**
+::
+
   key:  "flux"
   type: Double Array of 3 dimensions
-  format: Flux output array is in following format.  Each cell in the array has a scalar flux, the integral of the angular flux over all angles in that cell.   The first index refers to the plane on the z axis, beginning at 0 with the lowest plane, and moving upwards to the highest plane on the mesh.  The second index is the row on the z plane, and the third index is the cell in the row.
-  format examples: If you had a mesh with 4 by 4 by 4 cells extending in the x, y and z directions, then to get the following flux values, you would use the following index's:
+  format: Flux output array is in following format:
+  Each cell in the array has a scalar flux, the integral of the angular
+  flux over all angles in that cell.   The first index refers to the 
+  plane on the z axis, beginning at 0 with the lowest plane, and moving
+  upwards to the highest plane on the mesh.  The second index is the 
+  row on the z plane, and the third index is the cell in the row.
+
+  format examples: If you had a mesh with 4 by 4 by 4 cells extending
+  in the x, y and z directions, then to get the following flux values,
+  you would use the following indices:
 
   (1.) Scalar flux across top of cell 1,1,1:  flux_array[1][1][1]
        Geometric location of this cell:
@@ -304,12 +339,14 @@ When run, the solvers return a dictionary of useful solution data.  It contains 
 
 **Entry: Solver success code**
 ::
+
   key:  "success"
   type: Integer
   format: 1 means yes, the solve succeeded.  0 means it failed.
 
 **Entry: Raw system time of solver start**
 ::
+
   time_start provides you with the system time when the solver began running.
   key:  "time_start"
   type: double
@@ -317,6 +354,7 @@ When run, the solvers return a dictionary of useful solution data.  It contains 
 
 **Entry: Total run time**
 ::
+
   total_time is the total time the solver took to solve.
   key:  "total_time"
   type: double
@@ -324,6 +362,7 @@ When run, the solvers return a dictionary of useful solution data.  It contains 
 
 **Entry: Total print time**
 ::
+
   print_time is the total time the solver took to print results.
   key:  "print_time"
   type: double
@@ -331,6 +370,7 @@ When run, the solvers return a dictionary of useful solution data.  It contains 
 
 **Entry: Error Message**
 ::
+
   If the solver fails, error_msg is a string describing why the solver failed.
   key:  "error_msg"
   type: String
@@ -360,8 +400,8 @@ Here is a brief description of how each should be (or is) formatted.
           1.1          ! Total XS
           0.2         ! Scattering matrix
           ! Material 2
-          ...
-        ! End Cross section file
+          . . .
+          ! End Cross section file
 
   (2.) Source file:
       The source file is a file containing source information for each cell ????.  The formatting is dependant on the solver
@@ -545,10 +585,11 @@ Here is a brief description of how each should be (or is) formatted.
       If the quadrature type you selected was 2, a quadrature file is required for running the solver.  If the quadrature type is not 2, no quadrature file is necessary.
 
   (5.) Flux output file (output & optional):
-      If a output file name was specified, the final flux will be printed to that file in the following format.  Note that
-      all flux values will be printed as a fortran REAL, and the termination key will be 0.0d0 (to indicate the end of the flux info)
+      If a output file name was specified, the final flux will be printed to that file in the following format.  Note that all flux values will be printed as a fortran REAL, and the termination key will be 0.0d0 (to indicate the end of the flux info)
+
       AHOTN Solvers:  Unformatted file, with all mesh scalar flux values in the following order:
-             NOTE ORDERING: flux(ng,nx,ny,nz,jx,jy,jz)
+
+      NOTE ORDERING: flux(ng,nx,ny,nz,jx,jy,jz)
 
                                 (0,0,0,0,0,0,0)
 
@@ -668,10 +709,10 @@ All functionality may be found in the ``spatialsolver`` package::
  from pyne import spatialsolver
 
 Spatialsolver API
------------
+-----------------
 
-.. automodule:: pyne.spatialsolver
-    :members:
+.. .. automodule:: pyne.spatialsolver
+..    :members:
 
 .. _Spatialsolver: http://something.com/
 
