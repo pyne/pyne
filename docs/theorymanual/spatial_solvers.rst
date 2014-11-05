@@ -23,13 +23,13 @@ SN transport equations.
 
 All of the methods discussed here belong to a broader class of methods referred to as
 nodal methods. Nodal methods are characterized by the following properties:
+
 * All function spaces are defined local to a mesh cell.
 * Coupling between cells occurs only through their faces.
 * Coupling between cells is only imposed in an integral sense.
-* Increasing the order of the methods is achieved by increasing the local order
-  of expansion.
-* As the test space typically contains a constant test function, nodal methods are
-  conservative.
+* Increasing the order of the methods is achieved by increasing the local order of expansion.
+* As the test space typically contains a constant test function, nodal methods are conservative.
+
 Nodal methods are closely related to discontinuous Finite Element Methods (DFEM) - a class of 
 methods that was successfully deployed for the discretization of hyperbolic PDEs. 
 Further, they are related to certain classes of Finite Volume Methods [Hesthaven]_. 
@@ -279,7 +279,7 @@ summarizes these findings:
 Solver Assumptions
 *************************************
 
-1.  All systems are steady state (no time dependence)
+1.  All systems are steady state (no time dependence).
 2.  All mediums are non-multiplying (sigmaf = 0). This is a limitation of the iteration structure around the 
     spatial solvers. The spatial solvers are not limited to non-multiplying media.
 3.  Isotropic scattering present.
