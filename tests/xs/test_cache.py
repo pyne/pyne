@@ -74,7 +74,7 @@ def test_xs_cache_set_E_g():
 
 def test_xs_cache_get_phi_g():
     xs_cache.clear()        
-    xs_cache['E_g'] = np.array([1E-11, 5.0, 10.0])
+    xs_cache['E_g'] = np.array([1E-8, 5.0, 10.0])
     xs_cache['phi_g'] = [1.0, 1.0]
     phi_g = xs_cache['phi_g']
     expected = np.array([1.0, 1.0])

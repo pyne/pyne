@@ -6,6 +6,7 @@ except ImportError:
 import os
 import re
 import sys
+from io import StringIO
 from collections import Mapping
 from copy import deepcopy
 from itertools import chain
@@ -19,10 +20,12 @@ from pyne import rxname
 from pyne import nucname
 from pyne.xs import cache
 from pyne.xs import data_source
+from pyne import decay_tape9
 from pyne.material import Material, from_atom_frac
 
 if sys.version_info[0] > 2:
   basestring = str
+  unicode = str
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
@@ -1011,7 +1014,8 @@ def _parse_tape9_xsfpy(deck):
 
 
 def parse_tape9(tape9="TAPE9.INP"):
-    """Parses an ORIGEN 2.2 TAPE9 file and returns the data as a dictionary of nuclide dictionaries.
+    """Parses an ORIGEN 2.2 TAPE9 file and returns the data as a dictionary of 
+    nuclide dictionaries.
 
     Parameters
     ----------
@@ -1129,6 +1133,26 @@ def parse_tape9(tape9="TAPE9.INP"):
 
     return parsed
 
+def loads_tape9(tape9):
+    """Parses a string that represents an ORIGEN 2.2 TAPE9 file and returns the data 
+    as a dictionary of nuclide dictionaries. See ``parse_tape9()`` for more details.
+
+    Parameters
+    ----------
+    tape9 : str
+        String represetation of the TAPE9 file.
+
+    Returns
+    -------
+    parsed : dict
+        A dictionary of the data from the TAPE9 file.
+    """
+    if isinstance(tape9, unicode):
+        t9 = StringIO(tape9)
+    else:
+        t9 = StringIO(tape9.decode())
+    parsed = parse_tape9(t9)
+    return parsed
 
 
 def merge_tape9(tape9s):
@@ -1270,16 +1294,16 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
                                  p=precision,
                                  )
         s += _fpy_card_fmt.format(nlb=nlb,
-                                 y1=_double_get(deck, 'TH232_fiss_yield', nuc),
-                                 y2=_double_get(deck, 'U233_fiss_yield', nuc),
-                                 y3=_double_get(deck, 'U235_fiss_yield', nuc),
-                                 y4=_double_get(deck, 'U238_fiss_yield', nuc),
-                                 y5=_double_get(deck, 'PU239_fiss_yield', nuc),
-                                 y6=_double_get(deck, 'PU241_fiss_yield', nuc),
-                                 y7=_double_get(deck, 'CM245_fiss_yield', nuc),
-                                 y8=_double_get(deck, 'CF249_fiss_yield', nuc),
-                                 p=precision,
-                                 )
+                                  y1=_double_get(deck, 'TH232_fiss_yield', nuc),
+                                  y2=_double_get(deck, 'U233_fiss_yield', nuc),
+                                  y3=_double_get(deck, 'U235_fiss_yield', nuc),
+                                  y4=_double_get(deck, 'U238_fiss_yield', nuc),
+                                  y5=_double_get(deck, 'PU239_fiss_yield', nuc),
+                                  y6=_double_get(deck, 'PU241_fiss_yield', nuc),
+                                  y7=_double_get(deck, 'CM245_fiss_yield', nuc),
+                                  y8=_double_get(deck, 'CF249_fiss_yield', nuc),
+                                  p=precision,
+                                  )
     return s
 
 def _del_deck_nuc(deck, nuc):
@@ -1428,7 +1452,12 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
         xscache = cache.xs_cache
     old_flux = xscache.get('phi_g', None)
     old_group_struct = xscache.get('E_g', None)
-    xscache['E_g'] = [10.0, 1e-7]
+    if old_group_struct is None:
+        xscache['E_g'] = [10.0, 1e-7]
+    elif len(old_group_struct) == 2:
+        pass
+    else:
+        xscache['E_g'] = [old_group_struct[0], old_group_struct[-1]]
     nucs = sorted(nucs)
 
     # setup tape9
@@ -1493,3 +1522,31 @@ def nlbs(t9):
             xsfpy_nlb[2] = n
     decay_nlb.sort()
     return tuple(decay_nlb), tuple(xsfpy_nlb)
+
+
+def make_tape9(nucs, xscache=None, nlb=(201, 202, 203)):
+    """Make a TAPE9 dict with data for a given list of nucs using data from
+    a given data source.
+
+    Parameters
+    ----------
+    nucs : iterable of ints, optional
+        Set of nuclides in any format.
+
+    Returns
+    -------
+    tape9: dict
+        A full TAPE9 nested structure inside a dict. Keys 1, 2, and 3 correspond
+        to decay decks. 219 is the activation products deck. 220 is the
+        actinides deck. 221 is the fission product yield deck.
+    """
+    # build decay decks
+    decay_file = StringIO(decay_tape9.decay_tape9)
+    decay = parse_tape9(decay_file)
+
+    if xscache is None:
+        xscache = cache.XSCache()
+    nucs = {nucname.id(nuc) for nuc in nucs}
+    xsfpys = xslibs(nucs=nucs, xscache=xscache, nlb=nlb)
+    tape9 = merge_tape9([decay, xsfpys])
+    return tape9

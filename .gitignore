@@ -1,6 +1,7 @@
 # Ignore possible build & documentation
 docs/_build/
 build/
+build-*
 *egg-info/
 build_nuc_data/
 pyne/include/
