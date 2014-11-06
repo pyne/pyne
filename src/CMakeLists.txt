@@ -37,7 +37,6 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
 
     #"transport_spatial_methods/3d/main.f90"
     )
-
 # setup source files
 set(PYNE_SRCS
     "data.cpp"
@@ -45,16 +44,19 @@ set(PYNE_SRCS
     "enrichment_cascade.cpp"
     "enrichment_symbolic.cpp"
     "jsoncpp.cpp"
+    "jsoncustomwriter.cpp"
     "material.cpp"
     "nucname.cpp"
+    "particle.cpp"
     "rxname.cpp"
     "tally.cpp"
     "utils.cpp"
+    "endftod.f90"
     "${TRANSPORT_SPATIAL_METHODS_SRCS}"
     )
 
 if (MOAB_FOUND)
-    set(PYNE_SRCS "${PYNE_SRCS}" 
+    set(PYNE_SRCS "${PYNE_SRCS}"
         "dagmc_bridge.cpp"
         "measure.cpp"
         "source_sampling.cpp"

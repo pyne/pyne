@@ -123,6 +123,8 @@ def test_id():
     assert_equal(nucname.id("94-Pu-239"), nucname.id("Pu-239"))
     assert_equal(nucname.id("95-Am-242"), nucname.id("Am-242"))
 
+    assert_raises(RuntimeError, nucname.id, '0-H-1')
+
 def test_name():
     assert_equal(nucname.name(942390), "Pu239")
     assert_equal(nucname.name(952421), "Am242M")
@@ -298,6 +300,22 @@ def test_mcnp_to_id():
         if val is None:
             continue
         yield check_cases, nucname.mcnp_to_id, val, id
+
+    # tests for invalid inputs
+    yield assert_raises, RuntimeError, nucname.mcnp_to_id, 92
+
+
+def test_fluka():
+    assert_equal(nucname.fluka(  40000000), 'BERYLLIU')
+    assert_equal(nucname.fluka( 640000000), 'GADOLINI')
+    assert_equal(nucname.fluka( 280000000), 'NICKEL')
+    assert_equal(nucname.fluka(1140000000), 'UNUNQUAD')
+    assert_not_equal(nucname.fluka(1140000000), 'UNUNQUA')
+
+def test_fluka_to_id():
+    assert_equal(nucname.fluka_to_id('BERYLLIU'),40000000)
+    assert_equal(nucname.fluka_to_id('NICKEL'), 280000000)
+    assert_equal(nucname.fluka_to_id('LITHIU-7'),30070000)
 
 def test_serpent():
     assert_equal(nucname.serpent(942390), "Pu-239")

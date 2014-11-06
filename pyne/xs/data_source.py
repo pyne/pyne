@@ -950,7 +950,13 @@ class OpenMCDataSource(DataSource):
         elif rx == absrx:
             rawdata = ntab.sigma_a
         else:
-            rawdata = ntab.reactions[mt].sigma
+            ntabrx = ntab.reactions[mt] 
+            if ntabrx.IE is None or ntabrx.IE == 0:
+                rawdata = ntabrx.sigma
+            else:
+                rawdata = np.empty(len(E_points), dtype='f8')
+                rawdata[:ntabrx.IE] = 0.0
+                rawdata[ntabrx.IE:] = ntabrx.sigma
         if (E_g[0] <= E_g[-1] and E_points[-1] <= E_points[0]) or \
            (E_g[0] >= E_g[-1] and E_points[-1] >= E_points[0]):
             E_points = E_points[::-1]

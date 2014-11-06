@@ -8,43 +8,7 @@ Currently the following naming conventions are supported:
 
 .. _name_forms:
 
- #. **id (zas)**: This type places the charge of the nucleus out front, then has three
-    digits for the atomic mass number, and ends with four state digits (0 = ground,
-    1 = first excited state, 2 = second excited state, etc).  Uranium-235 here would
-    be expressed as '922350000'.  This is th canonical form for nuclides.
- #. **name**: This is the more common, human readable notation.  The chemical symbol
-    (one or two characters long) is first, followed by the atomic weight.  Lastly if
-    the nuclide is metastable, the letter *M* is concatenated to the end.  For
-    example, 'H-1' and 'Am242M' are both valid.  Note that nucname will always
-    return name form with the dash removed and all letters uppercase.
- #. **zzzaaa**: This type places the charge of the nucleus out front, then has three
-    digits for the atomic mass.  It contains no information about the excited state.
- #. **zzllaaam**: This type places the two digit atomic mass followed by the redundant
-    two character elemental abreviation, followed by the elements ZZZ and exited state.
- #. **SZA**: This type places three state digits out front, the charge of the nucleus in 
-    the middle, and then has three digits for the atomic mass number. Uranium-235M here 
-    would be expressed as '1092235'.  
- #. **MCNP**: The MCNP format for entering nuclides is unfortunately
-    non-standard.  In most ways it is similar to zzaaam form, except that it
-    lacks the metastable flag.  For information on how metastable isotopes are
-    named, please consult the MCNPX documentation for more information.
- #. **Serpent**: The serpent naming convention is similar to name form.
-    However, only the first letter in the chemical symbol is uppercase, the
-    dash is always present, and the the meta-stable flag is lowercase.  For
-    instance, 'Am-242m' is the valid serpent notation for this nuclide.
- #. **NIST**: The NIST naming convention is also similar to the Serpent form.
-    However, this convention contains no metastable information.  Moreover, the
-    A-number comes before the element symbol.  For example, '242Am' is the
-    valid NIST notation.
- #. **CINDER**: The CINDER format is similar to zzaaam form except that the
-    placement of the Z- and A-numbers are swapped. Therefore, this format is
-    effectively aaazzzm.  For example, '2420951' is the valid cinder notation
-    for 'AM242M'.
- #. **ALARA**: In ALARA format, elements are denoted by the lower case atomic symbol. Isotopes are
-    specified by appending a semicolon and A-number. For example, "fe" and "fe:56" represent
-    elemental iron and iron-56 respectively. No metastable flag exists.
- #. **Groundstate**:  In Groundstate format, the nuclide is stored in a form similar to the standard
-    id form, but the last four digits are zero to eliminate the information about the nuclides state.  
+.. include:: ../nucnameforms.rst
 
 .. currentmodule:: pyne.nucname
 
@@ -52,8 +16,8 @@ All functionality may be found in the ``nucname`` package::
 
  from pyne import nucname
 
-This contains several zzaaam, zzzaaa, zzllaaam, name, MCNP, Groundstate and Serpent converter function as
-well as other helpful module attributes.
+This contains several zzaaam, zzzaaa, zzllaaam, name, MCNP, Groundstate and Serpent 
+converter function as well as other helpful module attributes.
 
 .. _name_cast:
 

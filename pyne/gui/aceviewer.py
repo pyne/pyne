@@ -207,7 +207,7 @@ class AceViewer(QMainWindow):
                 table = reaction.table
                 
                 # Plot reaction cross section
-                self.axes.loglog(table.energy[reaction.IE-1:], reaction.sigma)
+                self.axes.loglog(table.energy[reaction.IE:], reaction.sigma)
             
             # Customize plot
             self.axes.grid(True)
