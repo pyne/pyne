@@ -32,7 +32,7 @@ some are optional.  The optional entries will be overridden by default values
 if not present/specified.
 
 **Entry: Solver type (AHOTN, DGFEM or SCTSTEP)**
-::
+::  
 
   key: "solver"
   type: String
@@ -288,7 +288,7 @@ if not present/specified.
 **Entry: Moments Converged**
 ::
 
- key: "moments_converged" ??
+ key: "moments_converged"
  type: int
  ex: 0
  default: 0

@@ -62,8 +62,5 @@ Example Use of Spatial Solver
  
 For meanings of the above keys, see the pyne.spatialsolver python api!
 
-dict_results = pyne.spatialsolver.solve(a)
-print(dict_results['flux']
-
 For a more in depth example see the spatial solver section of the tutorials.
 :ref:`pyne_spatialsolver`.
