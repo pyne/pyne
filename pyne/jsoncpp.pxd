@@ -18,3 +18,6 @@ cdef class FastWriter:
 
 cdef class StyledWriter:
     cdef cpp_jsoncpp.StyledWriter * _inst
+
+cdef class CustomWriter:
+    cdef cpp_jsoncpp.CustomWriter * _inst

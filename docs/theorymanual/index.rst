@@ -12,12 +12,13 @@ The following describe methods implemented natively in PyNE:
     :maxdepth: 1
 
     spatial_solvers.rst
+    nucname
     chain_solve.rst
     cross_section_models.rst
     enrichment.rst
     materials.rst
     source_sampling.rst
-    mesh_based_variance_reduction.rst
+    variance_reduction.rst
     nuclear_reaction_channels.rst
     r2s.rst
     simplesim.rst
