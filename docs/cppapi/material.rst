@@ -1,5 +1,5 @@
 Materials -- ``libpyne_material``
 =================================
 
-.. autodoxygenindex:: material.h
-    :source: pyne_material
+.. autodoxygenindex::
+    :project: pyne_material

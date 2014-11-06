@@ -1,5 +1,5 @@
-Nuclear Data -- ``libpyne_data``
+Nuclear Data -- ``libpyne``
 =====================================
 
-.. autodoxygenindex:: data.h
-    :source: pyne_data
+.. autodoxygenindex::
+    :project: pyne_data

@@ -1,5 +1,5 @@
 h5wrap: An HDF5 Wrapper (header only)
 =====================================
 
-.. autodoxygenindex:: h5wrap.h
-    :source: pyne_h5wrap
+.. autodoxygenindex::
+    :project:  pyne_h5wrap

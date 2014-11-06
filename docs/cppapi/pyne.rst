@@ -1,5 +1,5 @@
 PyNE Globals -- ``libpyne``
 =====================================
 
-.. autodoxygenindex:: pyne.h
-    :source: pyne_pyne
+.. autodoxygenindex::
+    :project:  pyne_pyne

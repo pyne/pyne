@@ -4,6 +4,6 @@ The following nuclide naming forms are supported:
 
 .. include:: ../nucnameforms.rst
 
-.. autodoxygenindex:: nucname.h
-    :source: pyne_nucname
+.. autodoxygenindex::
+    :project: pyne_nucname
 
