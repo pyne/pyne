@@ -674,6 +674,7 @@ def _parse_decay_dataset(lines, decay_s):
                     gp2 = pfinal
                 else:
                     gp2 = parent2
+                dat.insert(0, daughter_id)
                 dat.insert(0, gp2)
                 dat.insert(0, gdaughter)
                 dat.insert(0, gparent)
@@ -686,8 +687,8 @@ def _parse_decay_dataset(lines, decay_s):
             continue
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
-            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][5],
-                                                    gammarays[-1][9])
+            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][6],
+                                                    gammarays[-1][10])
             if 'K' in conv:
                 gammarays[-1][-3] = conv['K'][0]
             if 'L' in conv:
