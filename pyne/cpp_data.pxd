@@ -147,7 +147,7 @@ cdef extern from "data.h" namespace "pyne":
 
     vector[pair[double, double]] gamma_energy(int parent) except +
     vector[pair[double, double]] gamma_energy(double energy,
-                                                        double error) except +
+                                              double error) except +
     vector[pair[double, double]] gamma_photon_intensity(int parent) except +
     vector[pair[double, double]] gamma_photon_intensity(double energy,
                                                         double error) except +
