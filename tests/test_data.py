@@ -220,7 +220,7 @@ def test_gamma_energy():
 
 
 def test_gamma_energy_byen():
-    assert_equal(data.gamma_energy_byen(103.5, .05), [(103.5, np.nan),
+    npt.assert_equal(data.gamma_energy_byen(103.5, .05), [(103.5, np.nan),
                  (103.5, 0.1),
                  (103.5, 0.3),
                  (103.5, 0.4),
