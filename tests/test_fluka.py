@@ -277,3 +277,12 @@ def test_degenerate_usrbin():
         read = usrbin_object.tally['degen3'].mesh.getTagHandle('error_data_8')[v_e]
         expected = expected_error_data[i]
         assert_equal(read, expected)
+
+# test file writing to catch upstream changes in mesh
+def test_mesh_write():
+    thisdir = os.path.dirname(__file__)
+    usrbin_file = os.path.join(thisdir, "fluka_usrbin_single.lis")
+
+    usrbin_object = fluka.Usrbin(usrbin_file)
+    data = usrbin_object.tally['single_n']
+    data.write_hdf5("test_data.h5m")

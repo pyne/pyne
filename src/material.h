@@ -36,6 +36,18 @@ namespace pyne
   typedef std::map<int, double> comp_map; ///< Nuclide-mass composition map type
   typedef comp_map::iterator comp_iter;   ///< Nuclide-mass composition iter type
 
+  // These 37 strings are predefined FLUKA materials. 
+  // Materials not on this list requires a MATERIAL card. 
+  static std::string fluka_mat_strings[] = {
+   "BLCKHOLE", "VACUUM",   "HYDROGEN", "HELIUM",   "BERYLLIU", "CARBON", 
+   "NITROGEN", "OXYGEN",   "MAGNESIU", "ALUMINUM", "IRON",     "COPPER", 
+   "SILVER",   "SILICON",  "GOLD",     "MERCURY",  "LEAD",     "TANTALUM", 
+   "SODIUM",   "ARGON",    "CALCIUM",  "TIN",      "TUNGSTEN", "TITANIUM", 
+   "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP", 
+   "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON", "POLYETHY", "AIR"
+  };
+  static int FLUKA_MAT_NUM = 37;
+
   /// Material composed of nuclides.
   class Material
   {
@@ -146,12 +158,29 @@ namespace pyne
 
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
+    /// 
     /// Return a fluka input deck MATERIAL card as a string
-    std::string fluka();
+    std::string fluka(int id, std::string frac_type = "mass");
+    /// Convenience function to tell whether a given name needs a material card
+    bool not_fluka_builtin(std::string fluka_name);
+    /// High level call to get details and call material_component(..)
+    std::string fluka_material_str(int id);
+    /// Intermediate level call to prepare final info and call material_line(..)
+    std::string fluka_material_component(int fid, int nucid, 
+                                         std::string fluka_name);
+    /// Format information into a FLUKA material card
+    std::string fluka_material_line(int znum, double atomic_mass, 
+                              int fid, std::string fluka_name);
+    /// Convenience function to format a single fluka field
+    std::string fluka_format_field(float field);
+    /// Return FLUKA compound card and the material card for the named compound
+    /// but not the material cards of the components
+    std::string fluka_compound_str(int id, std::string frac_type = "mass");
+
     /// Reads data from a plaintext file at \a filename into this Material instance.
     void from_text(char * filename);
     /// Reads data from a plaintext file at \a filename into this Material instance.
-    void from_text(std::string filname);
+    void from_text(std::string filename);
 
     /// Writes the Material out to a simple plaintext file readable by from_text().
     void write_text(char * filename);
@@ -194,6 +223,12 @@ namespace pyne
     /// Returns a copy of the current material where all natural elements in the
     /// composition are expanded to their natural isotopic abundances.
     Material expand_elements();
+    // Returns a copy of the current material where all the isotopes of the elements
+    // are added up, atomic-fraction-wise, unless they are in the exception set
+    Material collapse_elements(std::set<int> exception_znum);
+    // Wrapped version to facilitate calling from python
+    Material collapse_elements(int **int_ptr_arry);
+    // void print_material( pyne::Material test_mat);
     /// Computes, sets, and returns the mass density when \a num_dens is greater
     /// than or equal zero.  If \a num_dens is negative, this simply returns the
     /// current value of the density member variable.  You may also use / set the

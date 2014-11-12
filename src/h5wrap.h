@@ -143,7 +143,7 @@ namespace h5wrap
   T get_array_index(hid_t dset, int n, hid_t dtype=H5T_NATIVE_DOUBLE)
   {
     hsize_t count  [1] = {1};
-    hsize_t offset [1] = {n};
+    hsize_t offset [1] = {static_cast<hsize_t>(n)};
 
     hid_t dspace = H5Dget_space(dset);
     hsize_t npoints = H5Sget_simple_extent_npoints(dspace);

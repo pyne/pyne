@@ -1,7 +1,7 @@
 EXAMPLE README:
 
 NOTE:  This example is set up in a very very very poor fashon.
-Currently, the pyne hookup is not complete, so while the built 
+Currently, the pyne hookup is not complete, so while the built
 pyne module is called, it relies on the pyne/fortran source folder
 from which you built pyne from.  It also requires the compile script
 in pyne/fortran/spatial_solvers_3d/source to be run. See below for
@@ -14,15 +14,15 @@ To run the new pyne interface example, do the following:
 (3) CHANGE THE FOLLOWING LINE IN pyne/pyne/spatialsolver.py
 		sys.path.append("../pyne_transport/pyne/fortran/spatial_solvers_3d/source")
 		Change the "../pyne_transport..." to the relative path from the example folder
-		you copied to the pyne folder that you built pyne with.   
-			For example, if your pyne folder (the folder that you ran setup.py from) is 
+		you copied to the pyne folder that you built pyne with.
+			For example, if your pyne folder (the folder that you ran setup.py from) is
 			located at : desktop/pyne, and the copy of this example folder that you copied
 			is located at: desktop/example, then change the path line in spatialsolver.py to:
 				"../pyne/pyne/fortran/spatial_solvers_3d/source"
 (4) Rebuild pyne (python setup.py install)
 (5) Run the example by either:
-	(a) Running the python test_script.py file located in the example folder 
-			**the example folder you copied to the location outside of the 
+	(a) Running the python test_script.py file located in the example folder
+			**the example folder you copied to the location outside of the
 	(b) Run the following in an interactive python session:
 			$import pyne.spatialsolver
 			$ from dictionary_populate_test import populate, populate_with_warnings
@@ -48,7 +48,7 @@ Alternately, you could use the old example that does not use the new pyne interf
 the pyne interface is finished, this is probably the best way to go.
 
 Requirements:
-	
+
 	(1) In addition to the pyne dependencies, you must have the following packages installed:
 			(a) gfortran compiler
 			(b) f2py
@@ -62,7 +62,7 @@ There are two options for running this example:
 
 (1) Cd into the directory pyne/pyne/spatialsolver.  Run the test_script.py python file.  It generates a dictionary
 	with all needed key-pair entries, then runs the NEFD solver.  To change dictionary entries, alter
-	the dictionary_populate_test.py file.   
+	the dictionary_populate_test.py file.
 		To change the solver, change the "solver" entry.  Note that so far, only AHOTN and DGFEM are supported
 		To change the solver type, change the "solver_type" entry.  See below for full list of solver "flavors"
 	Once the test_script.py file is run, it will generate a file called fort.8.  This file contains the
@@ -72,7 +72,7 @@ There are two options for running this example:
 			**Note: you must be in the pyne/fortran/spatial_solver_3d directory.  Integration to pyne is not
 					supported yet, so this (and pyne/fortran/spatial_solver_3d/soure) is the only directory that
 					has access to the solvers python interface.
-		
+
 		# Imports
 		$ import spatial_solver
 		$ from dictionary_populate_test import populate, populate_with_warnings
