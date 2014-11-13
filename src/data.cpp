@@ -12,6 +12,7 @@ const double pyne::N_A = 6.0221415e+23;
 const double pyne::barns_per_cm2 = 1e24;
 const double pyne::cm2_per_barn = 1e-24;
 const double pyne::sec_per_day = 24.0 * 3600.0;
+const double pyne::MeV_per_K = 8.617343e-11;
 
 /********************************/
 /*** data_checksums Functions ***/
@@ -1482,15 +1483,33 @@ int pyne::metastable_id(int nuc) {
 
 
 std::set<int> pyne::decay_children(int nuc) {
+  // make sure spontaneous fission data is loaded
+  if (wimsdfpy_data.empty())
+    _load_wimsdfpy();
+
   std::vector<unsigned int> part = data_access<unsigned int, level_data>(nuc,
     offsetof(level_data, rx_id), level_data_rx_map);
+  std::vector<unsigned int>::iterator it = part.begin();
   std::set<int> result;
-  for (std::vector<unsigned int>::iterator it=part.begin(); it!=part.end();
-  ++it) {
-    if (*it == 36125)
-      result.insert((nuc /10000) * 10000);
-    else
-      result.insert((rxname::child(nuc,*it,"decay") /10000) * 10000);
+  for (; it != part.end(); ++it) {
+    switch (*it) {
+      case 36125: {
+        // internal conversion, rx == 'it'
+        result.insert((nuc /10000) * 10000);
+        break;
+      }
+      case 36565: {
+        // spontaneous fission, rx == 'sf'
+        std::map<std::pair<int, int>, double>::iterator sf = wimsdfpy_data.begin();
+        for (; sf != wimsdfpy_data.end(); ++sf)
+          if (sf->first.first == nuc)
+            result.insert(sf->first.second);
+        break;
+      }
+      default: {
+        result.insert((rxname::child(nuc, *it, "decay") /10000) * 10000);
+      }
+    }
   }
   return result;
 }
@@ -1560,8 +1579,6 @@ double pyne::decay_const(std::string nuc) {
 //
 // Half-life data
 //
-
-
 double pyne::half_life(int nuc) {
     std::vector<double> result = data_access<double, level_data>(nuc, 0.0,
     DBL_MAX, offsetof(level_data, half_life), level_data_lvl_map);
@@ -1582,31 +1599,41 @@ double pyne::half_life(std::string nuc) {
   return half_life(nuc_zz);
 };
 
+
 //
 // Branch ratio data
 //
-
-
 double pyne::branch_ratio(std::pair<int, int> from_to) {
-  std::vector<unsigned int> part1 = data_access<unsigned int, level_data>(
-    from_to.first, offsetof(level_data, rx_id), level_data_rx_map);
-  std::vector<double> part2 = data_access<double, level_data>(from_to.first,
-    offsetof(level_data, branch_ratio), level_data_rx_map);
-  double result = 0;
-  if ((from_to.first == from_to.second) &&
-      (half_life(from_to.first) == std::numeric_limits<double>::infinity()))
+  using std::vector;
+  using pyne::nucname::groundstate;
+  // make sure spontaneous fission data is loaded
+  if (wimsdfpy_data.empty())
+    _load_wimsdfpy();
+
+  vector<unsigned int> part1 = \
+    data_access<unsigned int, level_data>(from_to.first, offsetof(level_data, rx_id),
+                                          level_data_rx_map);
+  vector<double> part2 = \
+    data_access<double, level_data>(from_to.first, offsetof(level_data, branch_ratio),
+                                    level_data_rx_map);
+  double result = 0.0;
+  if ((from_to.first == from_to.second) && (decay_const(from_to.first) == 0.0))
     return 1.0;
-  for (std::vector<unsigned int>::size_type i=0; i < part1.size(); ++i) {
-    if ((part1[i] != 0) && ((rxname::child(from_to.first,part1[i],"decay")
-      / 10000) * 10000 == from_to.second))
-      result = result + part2[i]*0.01;
+  for (vector<unsigned int>::size_type i = 0; i < part1.size(); ++i) {
     if ((part1[i] == 36125) &&
-        (((from_to.first/10000)*10000) == ((from_to.second/10000)*10000)) &&
+        (groundstate(from_to.first) == groundstate(from_to.second)) &&
         (from_to.second % 10000 == 0)) {
-      return 1.0;
+      // internal conversion, rx == 'it'
+      result = 1.0;
+      break;
+    } else if (part1[i] == 36565) {
+      // spontaneous fission, rx == 'sf'
+      result += part2[i] * 0.01 * wimsdfpy_data[from_to];
+    } else if ((part1[i] != 0) && (groundstate(rxname::child(from_to.first,
+                                   part1[i], "decay")) == from_to.second)) {
+      result += part2[i] * 0.01;
     }
   }
-
   return result;
 }
 
@@ -1789,6 +1816,8 @@ template<> void pyne::_load_data<pyne::gamma>() {
                      H5T_NATIVE_INT);
   status = H5Tinsert(desc, "parent_nuc", HOFFSET(gamma, parent_nuc),
                      H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "child_nuc", HOFFSET(gamma, child_nuc),
+                     H5T_NATIVE_INT);
   status = H5Tinsert(desc, "energy", HOFFSET(gamma, energy),
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "energy_err", HOFFSET(gamma, energy_err),
@@ -1838,12 +1867,25 @@ template<> void pyne::_load_data<pyne::gamma>() {
   delete[] gamma_array;
 }
 
-std::vector<std::pair<double, double> > pyne::gamma_energy(int parent){
+std::vector<std::pair<double, double> > pyne::gamma_energy(int parent) {
   std::vector<std::pair<double, double> > result;
   std::vector<double> part1 = data_access<double, gamma>(parent, 0.0,
     DBL_MAX, offsetof(gamma, energy), gamma_data);
   std::vector<double> part2 = data_access<double, gamma>(parent, 0.0,
     DBL_MAX, offsetof(gamma, energy_err), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+
+std::vector<std::pair<double, double> > pyne::gamma_energy(double energy,
+double error) {
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma>(energy+error,
+    energy-error, offsetof(gamma, energy), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma>(energy+error,
+    energy-error, offsetof(gamma, energy_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1921,6 +1963,20 @@ double error) {
     energy-error, offsetof(gamma, from_nuc), gamma_data);
   std::vector<int> part2 = data_access<int, gamma>(energy+error,
     energy-error, offsetof(gamma, to_nuc), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+
+
+std::vector<std::pair<int, int> > pyne::gamma_parent_child(double energy,
+double error) {
+  std::vector<std::pair<int, int> > result;
+  std::vector<int> part1 = data_access<int, gamma>(energy+error,
+    energy-error, offsetof(gamma, parent_nuc), gamma_data);
+  std::vector<int> part2 = data_access<int, gamma>(energy+error,
+    energy-error, offsetof(gamma, child_nuc), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }

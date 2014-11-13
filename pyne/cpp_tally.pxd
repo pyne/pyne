@@ -8,6 +8,7 @@
 ################################################
 
 
+from libcpp.map cimport map as cpp_map
 from libcpp.string cimport string as std_string
 
 cdef extern from "tally.h" namespace "pyne":
@@ -22,17 +23,29 @@ cdef extern from "tally.h" namespace "pyne":
         Tally(std_string, std_string, int, std_string, std_string) except +
         Tally(std_string, std_string, int, std_string, std_string, std_string) except +
         Tally(std_string, std_string, int, std_string, std_string, std_string, double) except +
+        Tally(std_string, std_string, int, std_string, std_string, std_string, double, double) except +
 
         # attributes
         int entity_id
         std_string entity_name
         double entity_size
         std_string entity_type
+        double normalization
         std_string particle_name
+        cpp_map[std_string, std_string] rx2fluka
+        cpp_map[std_string, std_string] rx2mcnp5
+        cpp_map[std_string, std_string] rx2mcnp6
         std_string tally_name
         std_string tally_type
 
         # methods
+        int create_dataspace() except +
+        int create_dataspace(int) except +
+        int create_dataspace(int, std_string) except +
+        int create_filetype() except +
+        int create_memtype() except +
+        std_string fluka() except +
+        std_string fluka(std_string) except +
         void from_hdf5() except +
         void from_hdf5(std_string) except +
         void from_hdf5(std_string, std_string) except +
@@ -40,6 +53,9 @@ cdef extern from "tally.h" namespace "pyne":
         void from_hdf5(char *) except +
         void from_hdf5(char *, char *) except +
         void from_hdf5(char *, char *, int) except +
+        std_string mcnp() except +
+        std_string mcnp(int) except +
+        std_string mcnp(int, std_string) except +
         void write_hdf5() except +
         void write_hdf5(std_string) except +
         void write_hdf5(std_string, std_string) except +

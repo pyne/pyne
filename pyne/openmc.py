@@ -2,7 +2,9 @@
 """
 from __future__ import print_function
 import os
+import io
 import sys
+from warnings import warn
 from collections import namedtuple
 
 if sys.version_info[0] == 2:
@@ -11,6 +13,9 @@ else:
     from html.parser import HTMLParser
 
 from pyne import nucname
+from pyne.utils import VnVWarning
+
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -51,9 +56,7 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
             If this and path are both present then the abspath attribute will be
             set.
         """
-        super(AceTable, self).__init__(alias=alias, awr=awr, location=location, 
-            metastable=metastable, name=name, path=path, temperature=temperature, 
-            zaid=zaid)
+        super(AceTable, self).__init__()
         nuc = None
         if zaid is not None or zaid != '0':
             meta = "0" if metastable is None else metastable
@@ -85,7 +88,11 @@ class CrossSections(HTMLParser):
             This is a path to the cross_sections.xml file, a file handle, or 
             None indicating an empty container.
         """
-        #super(CrossSections, self).__init__()
+        # HTMLParser is only a new-style class in python 3
+        if sys.version_info[0] > 2:
+            super(CrossSections, self).__init__()
+        else:
+            HTMLParser.__init__(self)
         self.reset()
         self._tag = None
         self.path = None

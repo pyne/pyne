@@ -37,6 +37,7 @@ namespace pyne
   extern const double barns_per_cm2;  ///< barns per cm^2
   extern const double cm2_per_barn;   ///< cm^2 per barn
   extern const double sec_per_day;    ///< seconds per day
+  extern const double MeV_per_K;    ///< MeV per Kelvin
   /// \}
 
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
@@ -516,6 +517,7 @@ namespace pyne
     int from_nuc; ///< state id of starting level
     int to_nuc; ///< state id of final level
     int parent_nuc; ///< state id of the primary decaying nucleus
+    int child_nuc; ///< stateless id of the child nucleus
     double energy; ///< energy of the photon [keV]
     double energy_err; ///< energy error of the photon [keV]
     double photon_intensity; ///< photon intensity
@@ -536,6 +538,8 @@ namespace pyne
 
   //returns a list of gamma decay energies from input parent nuclide
   std::vector<std::pair<double, double> > gamma_energy(int parent);
+  std::vector<std::pair<double, double> > gamma_energy(double energy,
+   double error);
   //returns a list of gamma photon intensities from input parent nuclide
   std::vector<std::pair<double, double> > gamma_photon_intensity(int parent);
   std::vector<std::pair<double, double> > gamma_photon_intensity(double energy,
@@ -548,6 +552,8 @@ namespace pyne
   std::vector<std::pair<int, int> > gamma_from_to(int parent);
   //returns a list of pairs of excited state transitions from an decay energy
   std::vector<std::pair<int, int> > gamma_from_to(double energy, double error);
+  //returns a list of parent/child pairs associated with an input decay energy
+  std::vector<std::pair<int, int> > gamma_parent_child(double energy, double error);
   //returns a list of parent nuclides associated with an input decay energy
   std::vector<int> gamma_parent(double energy, double error);
   //returns an array of arrays of X-ray energies and intesities for a

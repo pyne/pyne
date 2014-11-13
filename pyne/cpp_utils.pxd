@@ -9,4 +9,5 @@ cdef extern from "utils.h" namespace "pyne":
     std_string NUC_DATA_PATH
 
     double endftod(char *) except +
+    void use_fast_endftod() except +
     void pyne_start() except +

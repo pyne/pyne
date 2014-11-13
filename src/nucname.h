@@ -31,6 +31,10 @@ namespace nucname
   zzname_t get_zz_name();   ///< Creates standard Z number to name mapping.
   extern zzname_t zz_name;  ///< Z num to name map
 
+  name_zz_t get_fluka_zz();  ///< Creates standard fluka-name to nucid mapping.
+  extern name_zz_t fluka_zz; ///< fluka-name to nucid map
+  zzname_t get_zz_fluka();   ///< Creates standard nucid to fluka-name mapping.
+  extern zzname_t zz_fluka;  ///< nucid to fluka-name map
   /******************************************/
   /*** Define useful elemental group sets ***/
   /******************************************/
@@ -225,6 +229,28 @@ namespace nucname
   /// nuclides in PyNE. This is termed a ZAS, or ZZZAAASSSS, representation because 
   /// It stores 3 Z-number digits, 3 A-number digits, followed by 4 S-number digits
   /// which the nucleus excitation state. 
+  ///
+  /// The id() function will always return an nuclide in id form, if successful. 
+  /// If the input nuclide is in id form already, then this is function does no
+  /// work. For all other formats, the id() function provides a best-guess based
+  /// on a heirarchy of other formats that is used to resolve ambiguities between
+  /// naming conventions. For integer input the form resolution order is:
+  ///   - id
+  ///   - zz (elemental z-num only given)
+  ///   - zzaaam
+  ///   - cinder (aaazzzm)
+  ///   - mcnp
+  ///   - zzaaa
+  /// For string (or char *) input the form resolution order is as follows:
+  ///   - ZZ-LL-AAAM
+  ///   - Integer form in a string representation, uses interger resolution
+  ///   - NIST
+  ///   - name form
+  ///   - Serpent
+  ///   - LL (element symbol)
+  /// For well-defined situations where you know ahead of time what format the
+  /// nuclide is in, you should use the various form_to_id() functions, rather 
+  /// than the id() function which is meant to resolve possibly ambiquous cases.
   /// \param nuc a nuclide
   /// \return nucid 32-bit integer identifier
   int id(int nuc);
@@ -238,8 +264,11 @@ namespace nucname
   /// notation. The chemical symbol (one or two characters long) is first, followed 
   /// by the nucleon number. Lastly if the nuclide is metastable, the letter M is 
   /// concatenated to the end. For example, ‘H-1’ and ‘Am242M’ are both valid. 
-  /// Note that nucname will always return name form with the dash removed and all 
-  /// letters uppercase.
+  /// Note that nucname will always return name form with dashes removed, the 
+  /// chemical symbol used for letter casing (ie 'Pu'), and a trailing upercase 'M' 
+  /// for a metastable flag. The name() function first converts functions to id form
+  /// using the id() function. Thus the form order resolution for id() also applies 
+  /// here.
   /// \param nuc a nuclide
   /// \return a string nuclide identifier.
   std::string name(int nuc);
@@ -384,6 +413,28 @@ namespace nucname
   int mcnp_to_id(std::string nuc);
   /// \}
 
+  /// \name FLUKA Form Functions
+  /// \{
+  /// This is the naming convention used by the FLUKA suite of codes.
+  /// The FLUKA format for entering nuclides requires some knowledge of FLUKA
+  /// The nuclide in must cases should be the atomic # times 10000000.  
+  /// The exceptions are for FLUKA's named isotopes
+  /// See the FLUKA Manual for more information.
+  /// \param nuc a nuclide
+  /// \return the received FLUKA name
+  std::string fluka(int nuc);
+  /// \}
+
+  /// \name FLUKA Form to Identifier Form Functions
+  /// \{
+  /// This converts from the FLUKA name to the
+  /// id canonical form  for nuclides in PyNE. 
+  /// \param name a fluka name
+  /// \return an integer id nuclide identifier.
+  int fluka_to_id(std::string name);
+  int fluka_to_id(char * name);
+  /// \}
+
   /// \name Serpent Form Functions
   /// \{
   /// This is the string-based naming convention used by the Serpent suite of codes.
@@ -513,9 +564,9 @@ namespace nucname
   /// form as ID, but the four last digits are all zeros.
   /// \param nuc a nuclide
   /// \return a integer groundstate id
-  int groundstate(int nuc);
-  int groundstate(char * nuc);
-  int groundstate(std::string nuc);
+  inline int groundstate(int nuc) {return (id(nuc) / 10000 ) * 10000;};
+  inline int groundstate(std::string nuc) {return groundstate(id(nuc));};
+  inline int groundstate(char * nuc) {return groundstate(std::string(nuc));};
   /// \}
   
   /// \name State Map functions
