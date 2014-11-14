@@ -156,7 +156,7 @@ def failure(s):
     return msg
 
 def warning(s):
-    """Formats a warning message for printing. If on a posix wystem the message will be in color. 
+    """Formats a warning message for printing. If on a posix system the message will be in color. 
 
     """
     head = "\033[1;33m" if USE_COLOR else "*** WARNING ***: "

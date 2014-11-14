@@ -43,7 +43,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
         shutil.copy(local_filename[0], build_filename)
         rtn = True
     else:
-        print(failure("cinder.dat file not found in DATAPATH dir - skipping."))
+        print(warning("cinder.dat file not found in DATAPATH dir - skipping."))
         rtn = False
     return rtn
 
