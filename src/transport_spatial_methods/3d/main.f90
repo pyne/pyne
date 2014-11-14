@@ -4,26 +4,27 @@
 !> 
 !Code originally by Sebastian Schunert, modified by Josh Howland.
 !
-!> @param titlein desired title for solver run
+!> @param titlein desired title for solver run 
 !> @param solver_in spatial solver class
 !> @param solver_type_in spatial solver specific type
 !> @param spatial_order_in lambda order value
 !> @param angular_quadrature_order_in quadrature order
 !> @param angular_quadrature_type_in quadrature type
+!> @param qdtypin type of quadrature scheme the code uses.
 !> @param nodes_x_in number of nodes in x direction
 !> @param nodes_y_in number of nodes in y direction
 !> @param nodes_z_in number of nodes in z direction
-!> @param num_groups_in number of groups of ???
+!> @param num_groups_in number of groups of ?????????????
 !> @param num_materials_in number of materials
 !> @param x_cell_widths_in x node size
 !> @param y_cell_widths_in y node size
 !> @param z_cell_widths_in z node size
 !> @param x_boundry_condition_1_in x south boundry conditions
 !> @param x_boundry_condition_2_in x east boundry conditions
-!> @param y_boundry_condition_1_in y ?north? boundry conditions
-!> @param y_boundry_condition_2_in y ?west? boundry conditions
-!> @param z_boundry_condition_1_in z ?upper? boundry conditions
-!> @param z_boundry_condition_2_in z ?lower? boundry conditions
+!> @param y_boundry_condition_1_in y north boundry conditions
+!> @param y_boundry_condition_2_in y west boundry conditions
+!> @param z_boundry_condition_1_in z upper boundry conditions
+!> @param z_boundry_condition_2_in z lower boundry conditions
 !> @param material_id_in material file in
 !> @param quadrature_file
 !> @param xs_file_in
@@ -31,7 +32,7 @@
 !> @param bc_input_filein
 !> @param flux_output_filein
 !> @param convergence_criterion_in
-!> @param max_iterations_in
+!> @param max_iterations_in (itmxin)
 !> @param moments_converged_in
 !> @param converge_tolerence_in
 !> @param max_mom_printed_in
@@ -39,10 +40,12 @@
 !> @param mom_at_a_pt_flag_in
 !> @param quad_flux_print_flag_in
 
-!OUTPUT NOT PARAM!> @param fluxout
-!> @param Array2 Second array 
-!> @param Out Returned array 
-!> @todo write the rest of the subroutine
+!OUTPUT NOT PARAM
+!> @param fluxout: ouput array of final solution
+!> @param error_code: error code if solver failed
+!> @param tsolve_out: system time when solver began
+!> @param ttosolve_out: system time when solver terminated
+!> @param tend_out: solver runtime
 
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  solver_in, solver_type_in, spatial_order_in,&

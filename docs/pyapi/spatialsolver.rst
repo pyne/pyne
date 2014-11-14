@@ -395,21 +395,29 @@ Here is a brief description of how each should be (or is) formatted.
       and the cross section data should be in the following format.  It should be saved as either an extensionless or .txt file.
 
         ! Cross section file
+
           ! Material # 1
+
           ! Group #1
+
           1.1          ! Total XS
+
           0.2         ! Scattering matrix
+
           ! Material 2
+
           . . .
+
           ! End Cross section file
 
+
   (2.) Source file:
-      The source file is a file containing source information for each cell ????.  The formatting is dependant on the solver
+      The source file is a file containing source information for each cell.  The formatting is dependant on the solver
       you select.
 
       For the AHOTN and DGFEM solvers, the source file should be formatted as following.  
-      There should be ng * nx * ny * nz * lambda * lambda * lambda ?source? entries present.
-      We will refer to the index of each ?source? value as (ng, nx, ny, nz, lambda_x, lambda_y, lambda_z).
+      There should be ng * nx * ny * nz * lambda * lambda * lambda source entries present.
+      We will refer to the index of each source value as (ng, nx, ny, nz, lambda_x, lambda_y, lambda_z).
       The source entries should be in the following order:
 
           (1,1,1,1,1,1,1)
@@ -503,8 +511,8 @@ Here is a brief description of how each should be (or is) formatted.
 
 
       For the SCT STEP solver, the source file should be formatted as following.  
-      There should be ng * nx * ny * nz ?source? entries present.
-      We will refer to the index of each ?source? value as (ng, nx, ny, nz).
+      There should be ng * nx * ny * nz source entries present.
+      We will refer to the index of each source value as (ng, nx, ny, nz).
       The source entries should be in the following order:
 
           (1,1,1,1)
