@@ -3,19 +3,20 @@ import os
 
 from distutils.dir_util import remove_tree
 
-from pyne._utils import fromstring_split, fromstring_token, endftod, fromendf_tok
+from pyne._utils import fromstring_split, fromstring_token, endftod,\
+                        use_fast_endftod, fromendf_tok
 
 class VnVWarning(UserWarning):
     pass
 
 time_conv_dict = {
-          'as': 1e-18, 
-		  'attosec': 1e-18, 
-		  'attosecond': 1e-18, 
+          'as': 1e-18,
+		  'attosec': 1e-18,
+		  'attosecond': 1e-18,
 		  'attoseconds': 1e-18,
-          'fs': 1e-15, 
-		  'femtosec': 1e-15, 
-		  'femtosecond': 1e-15, 
+          'fs': 1e-15,
+		  'femtosec': 1e-15,
+		  'femtosecond': 1e-15,
 		  'femtoseconds': 1e-15,
 		  'ps': 1e-12,
 		  'picosec': 1e-12,
@@ -68,7 +69,7 @@ def to_sec(input_time, units):
     Returns
     -------
     sec_time : float
-        Time value in [sec]. 
+        Time value in [sec].
 
     """
     sec_time = input_time * time_conv_dict[units.lower()]
@@ -95,14 +96,14 @@ def to_barns(xs, units):
 
     Parameters
     ----------
-    xs : 
+    xs :
         Cross section value in [units].
     units : str
         Units flag, eg 'b', 'microbarn'.
 
     Returns
     -------
-    barn_xs : 
+    barn_xs :
         Cross section value in [barns].
 
     """
@@ -113,14 +114,14 @@ def from_barns(xs, units):
 
     Parameters
     ----------
-    xs : 
+    xs :
         Cross section value in [barns].
     units : str
         Units flag, eg 'b', 'microbarn'.
 
     Returns
     -------
-    unit_xs : 
+    unit_xs :
         Cross section value in [units].
 
     """

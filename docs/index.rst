@@ -31,6 +31,13 @@ For a quick install from source, please  clone from the official repo::
     python setup.py install --user
     scripts/nuc_data_make
 
+**RPSD Tutorial Session:**
+
+.. toctree::
+    :maxdepth: 1
+
+    virtualbox
+
 --------
 Contents
 --------
@@ -47,6 +54,7 @@ Contents
     pyapi/index
     cppapi/index
     previous/index
+    devsguide/vnv
 
 **Theory:**
 

@@ -1,6 +1,7 @@
 # Ignore possible build & documentation
 docs/_build/
 build/
+build-*
 *egg-info/
 build_nuc_data/
 pyne/include/
@@ -11,6 +12,9 @@ pyne/include/
 *.bak
 .*.swp
 *~
+*.o
+*.mod
+*.so
 
 # Ignore Cython'd files
 pyne/*.c

@@ -105,10 +105,10 @@ def setup():
         }
     libpynes = set()
     for ext in extpttn:
-        libpynes |= set(glob('cpp/' + ext))
+        libpynes |= set(glob('src/' + ext))
     data_files = [
         ('lib', libpynes),
-        ('include/pyne', glob('../cpp/*.h')),
+        ('include/pyne', glob('../src/*.h')),
         ]
     setup_kwargs = {
         "name": "pyne",

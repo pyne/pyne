@@ -8,6 +8,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 import os
 import warnings
 import numpy as np
+import math
 
 from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
@@ -102,6 +103,58 @@ def test_default_uranium_cascade():
     assert_equal(casc.x_tail_j, 0.0025)
     assert_equal(casc.mat_feed, Material({922340000: 5.5e-05, 922350000: 0.0072, 
                                 922380000: 0.992745}, 1.0, 1.0))
+
+def test_prod():
+    xf, xp, xt = 0.0072, 0.05, 0.0025
+    feed, prod, tails = 15.1596, 1.5, 13.6596
+    swu = 11765.0
+    
+    exp = prod
+    obs = enr.product(xf, xp, xt, feed=feed)
+    assert_almost_equal(obs, exp, places=4)
+    obs = enr.product(xf, xp, xt, tails=tails)
+    assert_almost_equal(obs, exp, places=4)
+
+def test_feed():
+    xf, xp, xt = 0.0072, 0.05, 0.0025
+    feed, prod, tails = 15.1596, 1.5, 13.6596
+    swu = 11765.0
+        
+    exp = feed
+    obs = enr.feed(xf, xp, xt, product=prod)
+    assert_almost_equal(obs, exp, places=4)
+    obs = enr.feed(xf, xp, xt, tails=tails)
+    assert_almost_equal(obs, exp, places=4)
+
+def test_tails():
+    xf, xp, xt = 0.0072, 0.05, 0.0025
+    feed, prod, tails = 15.1596, 1.5, 13.6596
+    swu = 11765.0
+        
+    exp = tails
+    obs = enr.tails(xf, xp, xt, feed=feed)
+    assert_almost_equal(obs, exp, places=4)
+    obs = enr.tails(xf, xp, xt, product=prod)
+    assert_almost_equal(obs, exp, places=4)
+
+def test_value():
+    x = 0.0072
+    exp = (2 * x - 1) * math.log(x / (1 - x))
+    obs = enr.value_func(x)
+    assert_almost_equal(exp, obs)
+
+def test_swu():
+    xf, xp, xt = 0.0072, 0.05, 0.0025
+    feed, prod, tails = 15.1596, 1.5, 13.6596
+    swu = 11765.0 / 1e3
+        
+    exp = swu
+    obs = enr.swu(xf, xp, xt, feed=feed)
+    assert_almost_equal(obs, exp, places=3)
+    obs = enr.swu(xf, xp, xt, product=prod)
+    assert_almost_equal(obs, exp, places=3)
+    obs = enr.swu(xf, xp, xt, tails=tails)
+    assert_almost_equal(obs, exp, places=3)
 
 def test_prod_per_feed():
     xf, xp, xt = 0.0072, 0.05, 0.0025

@@ -74,7 +74,7 @@ sys.path.pop(0)
 #today_fmt = '%B %d, %Y'
 
 # List of documents that shouldn't be included in the build.
-#unused_docs = []
+unused_docs = ['nucnameforms']
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
@@ -252,7 +252,7 @@ autosummary_generate = []
 breathe_projects = {"pyne": None,}
 breathe_default_project = 'pyne'
 breathe_domain_by_extension = {"h": "cpp",}
-breathe_projects_source = {"pyne": '../cpp',}
+breathe_projects_source = {"pyne": '../src',}
 
 for p in os.listdir(breathe_projects_source['pyne']):
     p, _ = os.path.splitext(p)
