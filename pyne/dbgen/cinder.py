@@ -13,7 +13,6 @@ import numpy as np
 import tables as tb
 
 from .. import nucname
-from ..utils import failure
 from ..utils import warning
 from .api import BASIC_FILTERS
 
