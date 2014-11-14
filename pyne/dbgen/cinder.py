@@ -14,6 +14,7 @@ import tables as tb
 
 from .. import nucname
 from ..utils import failure
+from ..utils import warning
 from .api import BASIC_FILTERS
 
 if sys.version_info[0] > 2:
@@ -32,7 +33,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
     elif 'DATAPATH' in os.environ:
         datapath = os.environ['DATAPATH']
     else:
-        print(failure("DATAPATH not defined in environment; cinder.dat not found - skipping."))
+        print(warning("TEST DATAPATH not defined in environment; cinder.dat not found - skipping."))
         return False
 
     local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr].[Dd][Aa][Tt]")
