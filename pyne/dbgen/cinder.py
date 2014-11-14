@@ -33,7 +33,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
     elif 'DATAPATH' in os.environ:
         datapath = os.environ['DATAPATH']
     else:
-        print(warning("TEST DATAPATH not defined in environment; cinder.dat not found - skipping."))
+        print(warning("DATAPATH not defined in environment; cinder.dat not found - skipping."))
         return False
 
     local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr].[Dd][Aa][Tt]")
