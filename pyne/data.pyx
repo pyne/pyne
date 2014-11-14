@@ -1270,6 +1270,30 @@ def gamma_energy(parent):
     """
     return cpp_data.gamma_energy(<int> parent)
 
+
+def gamma_energy_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray energies from ENSDF decay dataset in a given
+    energy range.
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray energies and errors
+    """
+    if enerror is None:
+        enerror = en * 0.01
+    return cpp_data.gamma_energy(<double> en, <double> enerror)
+
+
 def gamma_photon_intensity(parent):
     """
     Returns a list of gamma ray photon intensities from ENSDF decay dataset
@@ -1306,7 +1330,7 @@ def gamma_photon_intensity_byen(en, enerror=None):
     ratios : array of pairs
         An array of gamma ray photon intensities and errors
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.gamma_photon_intensity(<double> en,<double> enerror)
 
@@ -1379,9 +1403,32 @@ def gamma_from_to_byen(en, enerror=None):
     ratios : array of pairs
         An array of gamma ray level pairs in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.gamma_from_to(<double> en,<double> enerror)
+
+def gamma_parent_child(en, enerror=None):
+    """
+    Returns a list of gamma ray parents from ENSDF decay dataset
+    based on gamma-ray energy.
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray parents in state_id form
+    """
+    if enerror is None:
+        enerror = en * 0.01
+    return cpp_data.gamma_parent_child(<double> en, <double> enerror)
+
 
 def gamma_parent(en, enerror=None):
     """
@@ -1401,7 +1448,7 @@ def gamma_parent(en, enerror=None):
     ratios : array of ints
         An array of gamma ray parents in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.gamma_parent(<double> en, <double> enerror)
 
@@ -1476,7 +1523,7 @@ def alpha_parent(en, enerror=None):
     ratios : array of ints
         An array of alpha parents in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.alpha_parent(<double> en, <double> enerror)
 
@@ -1498,7 +1545,7 @@ def alpha_child_byen(en, enerror=None):
     ratios : array of ints
         An array of alpha children in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.alpha_child(<double> en, <double> enerror)
 
@@ -1588,7 +1635,7 @@ def beta_parent(en, enerror=None):
     ratios : array of ints
         An array of beta minus parents in nuc_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.beta_parent(<double> en, <double> enerror)
 
@@ -1610,7 +1657,7 @@ def beta_child_byen(en, enerror=None):
     ratios : array of ints
         An array of beta minus children in nuc_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.beta_child(<double> en, <double> enerror)
 
@@ -1717,7 +1764,7 @@ def ecbp_parent(en, enerror=None):
     ratios : array of ints
         An array of beta plus/electron capture children in nuc_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.ecbp_parent(<double> en, <double> enerror)
 
@@ -1739,7 +1786,7 @@ def ecbp_child_byen(en, enerror=None):
     ratios : array of ints
         An array of beta plus/electron capture children in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.ecbp_child(<double> en, <double> enerror)
 
