@@ -250,7 +250,7 @@ void * pyne::particle::_fill_maps() {
   part_to_geant4["AntiSigmaZero"]="anti_sigma0";
 };
 
-void * pyne::particle::_ = pyne::particle::_fill_maps();
+void * pyne::particle::filler = pyne::particle::_fill_maps();
 
 // is hydrogen
 bool pyne::particle::is_hydrogen(int s) {
