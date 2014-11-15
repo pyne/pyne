@@ -1,0 +1,43 @@
+KDE Boundary Correction Tool
+============================
+
+The boundary correction tool is a prototype for modifying input meshes to
+identify boundary points that require correction for KDE mesh tallies.  This
+tool determines the distance to the upper and lower boundaries in each
+dimension using the ray-fire method in the DAGMC toolkit.  Rays are fired in
+all six axis-aligned directions at all calculation points in the input mesh
+to find which ones lie within one bandwidth of the six external geometrical
+boundaries.  Once these distances are computed, they are then tagged to the
+mesh as follows:
+
+    1. DISTANCE_TO_BOUNDARY (x, y, z): stores nearest distances to boundary
+    2. BOUNDARY (x, y, z): lower = 0, upper = 1, none = -1
+
+Note that if any dimension has a BOUNDARY tag value of -1, then the value in
+DISTANCE_TO_BOUNDARY corresponding to that dimension is not defined.
+
+This boundary correction tool will only need to be used once per input mesh
+per input geometry per bandwidth vector.  It could be added to the setup phase
+of the KDEMeshTally class, but for now it is a standalone tool that must be run
+prior to running any KDE mesh tally with the boundary correction option.
+
+Building the executable
+-----------------------
+
+1. Create a new directory: mkdir build ; cd build
+2. Run the configure script: ../configure.sh
+3. Build the 'boundary.exe' executable: make
+
+Using the boundary correction tool
+----------------------------------
+
+The command for running the boundary correction tool is:
+
+    boundary.exe <input_mesh.h5m> <input_geometry.h5m> <hx hy hz>
+
+where (hx, hy, hz) is the bandwidth vector that will be used with the KDE
+mesh tally.  When running the KDE mesh tally be sure to include the 'boundary =
+default' key-value pair in the tally options.
+
+The output file 'ouput_mesh.h5m' includes the original input mesh with the
+DISTANCE_TO_BOUNDARY and BOUNDARY tags added.

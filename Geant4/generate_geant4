@@ -1,0 +1,1732 @@
+#!/usr/bin/python
+
+from optparse import OptionParser
+import os,errno
+from itaps import iMesh,iBase
+# for material handling
+from pyne.material import Material,MaterialLibrary
+from pyne.nucname import name, znum, anum, id, alara
+from pyne.data import atomic_mass
+
+# for coloring the volumes
+import colorsys
+
+#from pyne.dagmc import *
+
+import re
+
+"""
+main driver 
+"""
+def main():
+    options = parse_arguments()
+
+    # get the materials present in the intput file
+    (g4_isotopes,g4_elements,g4_materials, material_dict) = _get_material_info(options.dag_file)
+
+    # get the volumes present in the input file
+    (dag_volume_names,dag_materials) = _get_dag_info(options.dag_file)
+
+    # create the dir structure for g4 file
+    _create_directory_structure(options.directory)
+    # build the generic header files
+    header_files = _setup_headers()
+    # create dag geom specific headers
+    dag_header_files = _setup_dagspecific_headers(dag_volume_names,options.tally)
+    header_files.update(dag_header_files)
+    _write_files(options.directory+"/include",header_files)
+    # setup the soruce
+    source_files = _setup_source()
+    # dag specific source
+    dag_source_files = _setup_dagspecific_source(dag_volume_names,dag_materials, material_dict, options.dag_file,
+                                                 g4_isotopes, g4_elements, g4_materials, options.tally, 
+                                                 options.history_printing)
+    source_files.update(dag_source_files)
+    _write_files(options.directory+"/src",source_files)
+
+    # write the main dir files
+    geant4_files = _setup_build(options.dag_file)
+    _write_files(options.directory,geant4_files)
+
+def parse_arguments():
+    parser = OptionParser()
+
+    parser.add_option("-f", "--file", dest="dag_file",
+                      help=" filename the name of the DAG h5m file")
+    parser.add_option("-d", "--dir", dest="directory",
+                      help=" filename the name of the DAG h5m file")
+    parser.add_option("-v", "--verbose", action="store_true", default=False, \
+                          help="print limited amount of text to screen", dest="verbose")
+    parser.add_option("-t", "--tallies", action="store_true", default=False, \
+                          help="produce tallies for each volume", dest="tally")
+    parser.add_option("--hist", action="store_true", default=False, \
+                          help="print tallies every history", dest="history_printing")
+
+
+    (options, args) = parser.parse_args()
+
+    if len(args) != 1:
+        if options.dag_file:
+            try:
+                fh = open(options.dag_file, "r")
+            except IOError:
+                print "Error: can\'t find DAG file"
+            else:
+                fh.close()
+        if not options.directory:
+            options.directory = os.getcwd()
+    else:
+        parser.print_help()
+
+    return options
+
+""" 
+Function to open geometry file and pull out
+the number of volumes and list of info
+
+Parameters
+----------
+dag_filename : h5m filename
+
+Returns
+---------
+dag_volnames : dictionary of volume names
+
+"""
+
+def _get_dag_info(dag_filename):
+    dag_vol_names = [] # list of dag volume names (Cubit id)
+    dag_materials = {} # list of material assignments from group
+
+    # create imesh instance
+    dag_geom = iMesh.Mesh()
+    # load the file
+    dag_geom.load(dag_filename)
+
+    # get all entities
+    ents = dag_geom.getEntities()
+
+    # create a  mesh set
+    mesh_set = dag_geom.getEntSets()
+    # list of volume ent handles
+
+    mat_list = []
+    # get all geom_dimension ents
+    geom_list = []
+
+    cat_list = []
+
+    vol_tag = dag_geom.getTagHandle('GEOM_DIMENSION')
+
+    name_tag = dag_geom.getTagHandle('GLOBAL_ID')
+
+    mat_tag = dag_geom.getTagHandle('NAME')
+
+    cat_tag = dag_geom.getTagHandle('CATEGORY')
+
+    # get the list we need
+    for i in mesh_set:
+        tags = dag_geom.getAllTags(i)
+        for tag in tags:
+            if tag == vol_tag:
+                geom_list.append(i)
+            if tag == mat_tag:
+                mat_list.append(i)
+            if tag == cat_tag:
+                cat_list.append(i)
+
+    # for the 3d entities
+    for entity in geom_list:
+        if vol_tag[entity] == 3:
+             dag_vol_names.append(str(name_tag[entity]))          
+
+
+    # loop over all the volumes
+    for entity in geom_list:
+        # loop over the material sets
+        for meshset in mat_list:
+            # if volume in set
+            if meshset.contains(entity):
+                mat_name = mat_tag[meshset]
+                volume_name = name_tag[entity]
+                dag_materials[volume_name]="".join( chr( val ) for val in mat_name )
+
+
+    return dag_vol_names,dag_materials
+
+"""
+Function to pull out the pyne materials from the h5m file
+and also pull superset of all isotopes in the materials
+
+Parameters
+----------
+dag_file : filename of the dag file
+
+Returns
+---------
+nuclide_dict : dictionary of nuclides
+material_dict : dictionary of materials
+
+"""
+def _get_material_info(dag_file):
+
+    # material object
+    mat_lib = MaterialLibrary()
+    mat = Material()
+
+    # load material library
+    try:
+        mat_lib.from_hdf5(dag_file)
+        materials =  mat_lib.keys()
+    except:
+        print "!! There are no materials in the h5m file !!"
+        print " Assuming all volumes contain vacuum "
+        materials = {}
+    
+    nuclides = set()
+
+    for material in materials:
+        nuclides.update(name(x) for x in mat_lib[material].comp.keys())
+
+    # get list of elements defines elements
+    g4_isotopes = _nucs_to_g4isotopes(nuclides)
+
+    # get list of nuclides defines isoptes
+
+    # use elements to define full mixtures of materials
+    # need mixture defined by elements whih in turn defined by isotopes
+
+    # we now have nuclide list of all nuclides in problem
+    # need to loop through full pyne materials creating a unique
+    # G4element for each 'element' in the material
+
+    g4_elements = _materials_to_g4elements(materials, mat_lib)
+
+    # now need to create g4 materials using the elements we created previously
+
+    (g4_materials,material_dictionary) = _materials_to_g4materials(materials,mat_lib)
+
+    return g4_isotopes, g4_elements, g4_materials, material_dictionary
+
+""" 
+Function to translate nuclide in zzzaaammmm form
+to names of the form 22Na
+
+Parameters 
+----------
+nuclides_zzzaaammmm : list of nuclides
+
+Returns
+----------
+nuc_names : dictionary of names, zzzaaammm as key and value is name
+"""
+def _nucs_to_g4isotopes(nuclides_zzzaaammm):
+    g4_isotopes = []
+    g4_isotopes.append("  std::string name; \n")
+    g4_isotopes.append("  std::string symbol; \n")
+    g4_isotopes.append("  G4int iz, n; \n")
+    g4_isotopes.append("  G4double abundance; \n")
+    g4_isotopes.append("  G4double fractionmass; \n")
+
+    for nuclide in nuclides_zzzaaammm:
+        g4_isotopes.append('  G4Isotope* '+name(nuclide)+' = new G4Isotope(name="'+name(nuclide)+  \
+        '", iz='+str(znum(nuclide))+', n='+str(anum(nuclide))+', a='+str(atomic_mass(nuclide))+'*g/mole); \n')
+
+    # index of g4_isotopes now created, now make G4Elements
+    # need the isotopic composition of each G4Element
+    
+    return g4_isotopes
+
+""" 
+Function to generate g4materials from PyNE Materials, need a new
+G4Element for each unique true isotopic material. 
+
+Parameters 
+----------
+materials : dictionary of material
+
+Returns
+----------
+g4_elements : list of G4Elements ready to write to disk
+"""
+def _materials_to_g4elements(materials, material_lib):
+    g4_elements = []
+    
+    g4_elements.append("  G4int ncomponents;\n")
+
+    # for each material
+    for material_name in materials:
+        # 1 to N+1 index
+        mat_idx = materials.index(material_name)+1
+        # material object
+        material = material_lib[material_name]
+        # get the element names
+
+        element_list = [] # list of elements in the current material
+        for nuclide in material.keys():
+            element_name = name(nuclide) #name(nuclide)
+            elem = " ".join(re.findall("[a-zA-Z]+", element_name))  
+            if elem not in element_list:
+                element_list.append(elem)
+
+        # for each element in element_list, slice the originating materials
+        # normalise the composition of this new material, this is the isotopic
+        # mix
+        for elem in element_list:
+            new_mat = material[elem:id(elem)+9999999]
+            g4_elements.append("  // Element for "+elem+" in material "+material_name+"\n")
+            ## normalise it
+            new_mat.normalize()
+            # get each material
+            g4_elements.append('  G4Element* el_'+str(mat_idx)+'_'+elem+' = new G4Element(name = "'+str(mat_idx) \
+                   +'_'+elem+'", symbol="'+elem+'", ncomponents='+str(len(new_mat.keys()))+'); \n')
+            for isotope in new_mat.keys():
+                # get each isotope
+                g4_elements.append("  el_"+str(mat_idx)+"_"+elem+"->AddIsotope("+name(isotope)+", abundance = "+ \
+                    str(new_mat.comp[isotope]*100.)+"*perCent); \n")
+
+    
+    return g4_elements
+
+""" 
+Function to generate g4materials from PyNE Materials, need a new
+G4Element for each unique true isotopic material. 
+
+Parameters 
+----------
+materials : dictionary of material
+
+Returns
+----------
+g4_elements : list of G4Elements ready to write to disk
+"""
+def _materials_to_g4materials(materials, material_lib):
+    g4materials = []
+
+    material_index_dict = {}
+
+    # for each material
+    for material_name in materials:
+        # 1 to N+1 index
+        mat_idx = materials.index(material_name)+1
+        # material object
+        material = material_lib[material_name]
+        # set correspondnce between name and index
+        material_index_dict[material_name]=mat_idx
+
+#        print material.comp
+        # get the element names
+        
+        elem_dict = {}  # list of elements in the current material
+        for nuclide in material.keys():
+            if znum(nuclide) not in elem_dict:
+                elem_dict[znum(nuclide)] = material.comp[nuclide]
+            else:
+                elem_dict[znum(nuclide)] += material.comp[nuclide]
+                
+        # setup material
+        g4materials.append('  density = {0}*g/cm3; \n'.format(material.density))
+        g4materials.append('  G4Material* mat_{0} = new G4Material(name= "{1}", density, ncomponents = {2}); \n'.format(mat_idx,material_name,len(elem_dict)))
+        for elem in elem_dict.keys():
+            nucname = name(elem*10000000)
+            g4materials.append("  mat_{0}->AddElement( el_{0}_{1} , fractionmass = {2}*perCent); \n".format(mat_idx,nucname,elem_dict[elem]*100.))
+        
+    return g4materials,material_index_dict
+
+""" 
+Function to create headers for Geant4 problem
+creates dictionary of lists, where each list 
+contains complete header
+"""
+
+def _setup_headers():
+    headers = {}
+
+    file_contents=[]
+
+    file_contents.append("#ifndef ExN01ActionInitialization_h \n")
+    file_contents.append("#define ExN01ActionInitialization_h 1 \n")
+    file_contents.append("  \n")
+    file_contents.append('#include "G4VUserActionInitialization.hh"\n')
+    file_contents.append('  \n')
+    file_contents.append('/// Action initialization class. \n')
+    file_contents.append('/// \n')
+    file_contents.append('  \n')
+    file_contents.append('class ExN01ActionInitialization : public G4VUserActionInitialization \n')
+    file_contents.append('{ \n')
+    file_contents.append('  public: \n')
+    file_contents.append('    ExN01ActionInitialization(); \n')
+    file_contents.append('    virtual ~ExN01ActionInitialization(); \n')
+    file_contents.append('  \n')
+    file_contents.append('    virtual void BuildForMaster() const; \n')
+    file_contents.append('    virtual void Build() const; \n')
+    file_contents.append('}; \n')
+    file_contents.append('  \n')
+    file_contents.append('#endif \n')
+
+    headers['ExN01ActionInitialization.hh']=file_contents
+
+    file_contents = []
+    file_contents.append('//\n')
+    file_contents.append('// $Id: B4Analysis.hh 68058 2013-03-13 14:47:43Z gcosmo $\n')
+    file_contents.append('//\n')
+    file_contents.append('/// \file B4Analysis.hh\n')
+    file_contents.append('/// \brief Selection of the analysis technology\n')
+    file_contents.append('\n')
+    file_contents.append('#ifndef ExN01Analysis_h\n')
+    file_contents.append('#define ExN01Analysis_h 1\n')
+    file_contents.append('\n')
+    file_contents.append('#include "g4root.hh"\n')
+    file_contents.append('//#include "g4xml.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#endif\n')
+
+    headers['ExN01Analysis.hh'] = file_contents
+    
+
+    ###
+    # new file
+    ###
+    file_contents = []
+
+    file_contents.append('//\n')
+    file_contents.append('//\n')
+    file_contents.append('// $Id$\n')
+    file_contents.append('//\n')
+    file_contents.append('// \n')
+    file_contents.append('//\n')
+    file_contents.append('// ExN01PhysicsList\n')
+    file_contents.append('//  Construct/define particles and physics processes\n')
+    file_contents.append('//\n')
+    file_contents.append('//  Particle defined in ExampleN01\n')
+    file_contents.append('//    geantino\n')
+    file_contents.append('//\n')
+    file_contents.append('//  Process defined in ExampleN01\n')
+    file_contents.append('//    transportation\n')
+    file_contents.append('//\n')
+    file_contents.append('\n')
+    file_contents.append('#ifndef ExN01PhysicsList_h\n')
+    file_contents.append('#define ExN01PhysicsList_h 1\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4VUserPhysicsList.hh"\n')
+    file_contents.append('#include "globals.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('class ExN01PhysicsList: public G4VUserPhysicsList\n')
+    file_contents.append('{\n')
+    file_contents.append('  public:\n')
+    file_contents.append('    ExN01PhysicsList();\n')
+    file_contents.append('    ~ExN01PhysicsList();\n')
+    file_contents.append('\n')
+    file_contents.append('  protected:\n')
+    file_contents.append('    // Construct particle and physics process\n')
+    file_contents.append('    void ConstructParticle();\n')
+    file_contents.append('    void ConstructProcess();\n')
+    file_contents.append('    void SetCuts();\n')
+    file_contents.append('\n')
+    file_contents.append('};\n')
+    file_contents.append('\n')
+    file_contents.append('#endif\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+
+    headers['ExN01PhysicsList.hh'] = file_contents
+
+    ###
+    # new file Primary Generator - make source particles
+    ###
+
+    file_contents = []
+
+    file_contents.append('//\n')
+    file_contents.append('//\n')
+    file_contents.append('// $Id$\n')
+    file_contents.append('//\n')
+    file_contents.append('\n')
+    file_contents.append('#ifndef ExN01PrimaryGeneratorAction_h\n')
+    file_contents.append('#define ExN01PrimaryGeneratorAction_h 1\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4VUserPrimaryGeneratorAction.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('class G4ParticleGun;\n')
+    file_contents.append('class G4Event;\n')
+    file_contents.append('\n')
+    file_contents.append('class ExN01PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction\n')
+    file_contents.append('{\n')
+    file_contents.append('  public:\n')
+    file_contents.append('    ExN01PrimaryGeneratorAction();\n')
+    file_contents.append('    ~ExN01PrimaryGeneratorAction();\n')
+    file_contents.append('\n')
+    file_contents.append('  public:\n')
+    file_contents.append('    void GeneratePrimaries(G4Event* anEvent);\n')
+    file_contents.append('\n')
+    file_contents.append('  private:\n')
+    file_contents.append('    G4ParticleGun* particleGun;\n')
+    file_contents.append('};\n')
+    file_contents.append('\n')
+    file_contents.append('#endif\n')
+    file_contents.append('\n')
+
+    # save the file
+    headers['ExN01PrimaryGeneratorAction.hh'] = file_contents
+
+    ###
+    # new file
+    ###
+
+    file_contents = []
+
+    file_contents.append('// $Id: B4RunAction.hh 74265 2013-10-02 14:41:20Z gcosmo $\n')
+    file_contents.append('// \n')
+    file_contents.append('/// \file B4RunAction.hh\n')
+    file_contents.append('/// \brief Definition of the B4RunAction class\n')
+    file_contents.append('\n')
+    file_contents.append('#ifndef ExN01RunAction_h\n')
+    file_contents.append('#define ExN01RunAction_h 1\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4UserRunAction.hh"\n')
+    file_contents.append('#include "globals.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('class G4Run;\n')
+    file_contents.append('\n')
+    file_contents.append('/// Run action class\n')
+    file_contents.append('///\n')
+    file_contents.append('/// It accumulates statistic  \n')
+    file_contents.append('/// and track lengths of charged particles with use of analysis tools:\n')
+    file_contents.append('/// H1D histograms are created in BeginOfRunAction() for the following \n')
+    file_contents.append('/// The same values are also saved in the ntuple.\n')
+    file_contents.append('/// The histograms and ntuple are saved in the output file in a format\n')
+    file_contents.append('/// accoring to a selected technology in B4Analysis.hh.\n')
+    file_contents.append('///\n')
+    file_contents.append('/// In EndOfRunAction(), the accumulated statistic and computed \n')
+    file_contents.append('/// dispersion is printed.\n')
+    file_contents.append('///\n')
+    file_contents.append('\n')
+    file_contents.append('class ExN01RunAction : public G4UserRunAction\n')
+    file_contents.append('{\n')
+    file_contents.append('  public:\n')
+    file_contents.append('    ExN01RunAction();\n')
+    file_contents.append('    virtual ~ExN01RunAction();\n')
+    file_contents.append('\n')
+    file_contents.append('    virtual void BeginOfRunAction(const G4Run*);\n')
+    file_contents.append('    virtual void   EndOfRunAction(const G4Run*);\n')
+    file_contents.append('};\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('#endif\n')
+
+    # save the file
+    headers['ExN01RunAction.hh'] = file_contents
+    
+    return headers
+
+"""
+Function to create DAG Geometry specific headers for Geant4 problem
+returns a dictionary of lists containg the files to write out
+contains complete header
+
+Parameters
+----------
+dag_volume_names : list or dictionary of volume names
+
+"""
+
+def _setup_dagspecific_headers(dag_volume_names, tallies_needed):
+
+    if not dag_volume_names:
+        print "dag volume names not assigned", sys.exc_info()[0]
+        raise
+
+    headers = {}
+
+    file_contents = []
+    
+    file_contents.append('\n')
+    file_contents.append('#ifndef ExN01DetectorConstruction_H\n')
+    file_contents.append('#define ExN01DetectorConstruction_H 1\n')
+    file_contents.append('\n')
+    file_contents.append('class G4LogicalVolume;\n')
+    file_contents.append('class G4VPhysicalVolume;\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4VUserDetectorConstruction.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('class ExN01DetectorConstruction : public G4VUserDetectorConstruction\n')
+    file_contents.append('{\n')
+    file_contents.append('  public:\n')
+    file_contents.append('\n')
+    file_contents.append('    ExN01DetectorConstruction();\n')
+    file_contents.append('    ~ExN01DetectorConstruction();\n')
+    file_contents.append('\n')
+    file_contents.append('  public:\n')
+    file_contents.append('    virtual G4VPhysicalVolume* Construct();\n')
+    file_contents.append('    virtual void ConstructSDandField();\n')
+    file_contents.append('\n')
+    file_contents.append('  private:\n')
+    file_contents.append('    \n')
+    file_contents.append('    // Logical volumes\n')
+    file_contents.append('    //\n')
+    file_contents.append('\n')
+    file_contents.append('    G4LogicalVolume* world_volume_log;\n')
+
+    # for each dag volume insert logical name
+    # eg file_contents.append('    G4LogicalVolume* slab1_log;\n')
+
+    file_contents.append('    // DAG Logical volumes\n')
+    for volume_name in dag_volume_names:
+        volume = 'vol_'+volume_name
+        file_contents.append('    G4LogicalVolume* '+volume+'_log;\n')
+
+    file_contents.append('\n')
+    file_contents.append('    // Physical volumes\n')
+    file_contents.append('    //\n')
+    file_contents.append('    G4VPhysicalVolume* world_volume_phys;\n')
+    
+    # for each dag volume insert physical name
+    # eg file_contents.append('    G4VPhysicalVolume* slab1_phys;\n')
+
+    file_contents.append('    // DAG Physical volumes\n')
+    for volume_name in dag_volume_names:
+        volume = 'vol_'+volume_name
+        file_contents.append('    G4VPhysicalVolume* '+volume+'_phys;\n')
+
+    # may want to store the name in list for later
+
+    file_contents.append('\n')
+    file_contents.append('};\n')
+    file_contents.append('\n')
+    file_contents.append('#endif\n')
+    file_contents.append('\n')
+
+    headers['ExN01DetectorConstruction.hh'] = file_contents
+
+    ####### 
+    ## new file
+    #######
+    file_contents = [] # reset file contents
+
+    file_contents.append('/// \file ExN01EventAction.hh\n')
+    file_contents.append('/// \brief Definition of the ExN01EventAction class\n')
+    file_contents.append('\n')
+    file_contents.append('#ifndef ExN01EventAction_h\n')
+    file_contents.append('#define ExN01EventAction_h 1\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4UserEventAction.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4THitsMap.hh"\n')
+    file_contents.append('#include "globals.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('/// Event action class\n')
+    file_contents.append('///\n')
+    file_contents.append('/// In EndOfEventAction(), it prints the accumulated quantities of the energy \n')
+    file_contents.append('/// deposit and track lengths of charged particles in Absober and Gap layers \n')
+    file_contents.append('/// stored in the hits collections.\n')
+    file_contents.append('\n')
+    file_contents.append('class ExN01EventAction : public G4UserEventAction\n')
+    file_contents.append('{\n')
+    file_contents.append('public:\n')
+    file_contents.append('  ExN01EventAction();\n')
+    file_contents.append('  virtual ~ExN01EventAction();\n')
+    file_contents.append('\n')
+    file_contents.append('  virtual void  BeginOfEventAction(const G4Event* event);\n')
+    file_contents.append('  virtual void    EndOfEventAction(const G4Event* event);\n')
+    file_contents.append('    \n')
+    file_contents.append('private:\n')
+    file_contents.append('  // methods\n')
+    file_contents.append('  G4THitsMap<G4double>* GetHitsCollection(G4int hcID,\n')
+    file_contents.append('                                          const G4Event* event) const;\n')
+    file_contents.append('  G4double GetSum(G4THitsMap<G4double>* hitsMap) const;\n')
+
+    if tallies_needed:
+        if len(dag_volume_names) == 1:
+            file_contents.append('  void PrintEventStatistics(G4double vol_'+str(dag_volume_names[0])+'_tracklength) const;\n')
+        else:
+            file_contents.append('  void PrintEventStatistics(G4double vol_'+str(dag_volume_names[0])+'_tracklength, \n')
+            for i in range(1,len(dag_volume_names)-1):
+                file_contents.append('			          G4double vol_'+str(dag_volume_names[i])+'_tracklength,\n')
+            file_contents.append('                            G4double vol_'+str(dag_volume_names[-1])+'_tracklength) const;\n')
+
+    file_contents.append('  \n')
+    file_contents.append('  // data members                   \n')
+    # data objecs to index detectors
+    if tallies_needed:
+        for vol in dag_volume_names:
+            file_contents.append('  G4int  vol_'+str(vol)+'_tl_HCID;\n')
+
+    file_contents.append('};\n')
+    file_contents.append('                     \n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('#endif\n')
+    file_contents.append('\n')
+    file_contents.append('    \n')
+
+    headers['ExN01EventAction.hh'] = file_contents
+
+    return headers
+
+""" 
+Function to create source files for Geant4 problem
+creates dictionary of lists, where each list 
+contains complete source file
+"""
+
+def _setup_source():
+    ###
+    # Action Initialisation
+    ###
+
+    source_files = {}
+
+    file_contents=[]
+
+    file_contents.append('//\n')
+    file_contents.append('// $Id: B4dActionInitialization.cc 68058 2013-03-13 14:47:43Z gcosmo $\n')
+    file_contents.append('//\n')
+    file_contents.append('/// \file B4dActionInitialization.cc\n')
+    file_contents.append('/// \brief Implementation of the B4dActionInitialization class\n')
+    file_contents.append('\n')
+    file_contents.append('#include "ExN01ActionInitialization.hh"\n')
+    file_contents.append('#include "ExN01PrimaryGeneratorAction.hh"\n')
+    file_contents.append('#include "ExN01RunAction.hh"\n')
+    file_contents.append('#include "ExN01EventAction.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01ActionInitialization::ExN01ActionInitialization()\n')
+    file_contents.append(' : G4VUserActionInitialization()\n')
+    file_contents.append('{}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01ActionInitialization::~ExN01ActionInitialization()\n')
+    file_contents.append('{;}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01ActionInitialization::BuildForMaster() const\n')
+    file_contents.append('{\n')
+    file_contents.append('  SetUserAction(new ExN01RunAction);\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01ActionInitialization::Build() const\n')
+    file_contents.append('{\n')
+    file_contents.append('  SetUserAction(new ExN01PrimaryGeneratorAction);\n')
+    file_contents.append('  SetUserAction(new ExN01RunAction);\n')
+    file_contents.append('  SetUserAction(new ExN01EventAction);\n')
+    file_contents.append('}  \n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    
+    source_files['ExN01ActionInitialization.cc'] = file_contents
+
+    ###
+    # new file physics_list
+    ###
+
+    file_contents = []
+
+    file_contents.append('//\n')
+    file_contents.append('//\n')
+    file_contents.append('// $Id$\n')
+    file_contents.append('//\n')
+    file_contents.append('// \n')
+    file_contents.append('\n')
+    file_contents.append('#include "ExN01PhysicsList.hh"\n')
+    file_contents.append('#include "G4ParticleTypes.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01PhysicsList::ExN01PhysicsList()\n')
+    file_contents.append('{;}\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01PhysicsList::~ExN01PhysicsList()\n')
+    file_contents.append('{;}\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01PhysicsList::ConstructParticle()\n')
+    file_contents.append('{\n')
+    file_contents.append('  // In this method, static member functions should be called\n')
+    file_contents.append('  // for all particles which you want to use.\n')
+    file_contents.append('  // This ensures that objects of these particle types will be\n')
+    file_contents.append('  // created in the program. \n')
+    file_contents.append('\n')
+    file_contents.append('  G4Geantino::GeantinoDefinition();\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01PhysicsList::ConstructProcess()\n')
+    file_contents.append('{\n')
+    file_contents.append('  // Define transportation process\n')
+    file_contents.append('\n')
+    file_contents.append('  AddTransportation();\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01PhysicsList::SetCuts()\n')
+    file_contents.append('{\n')
+    file_contents.append('  // uppress error messages even in case e/gamma/proton do not exist            \n')
+    file_contents.append('  G4int temp = GetVerboseLevel();                                                SetVerboseLevel(0);                                                           \n')
+    file_contents.append('  //  " G4VUserPhysicsList::SetCutsWithDefault" method sets \n')
+    file_contents.append('  //   the default cut value for all particle types \n')
+    file_contents.append('  SetCutsWithDefault();   \n')
+    file_contents.append('\n')
+    file_contents.append('  // Retrieve verbose level\n')
+    file_contents.append('  SetVerboseLevel(temp);  \n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+
+    source_files['ExN01PhysicsList.cc'] = file_contents
+
+    ###
+    # new file PrimaryGeneratorAction - create source particles
+    ###
+    
+    file_contents = []
+
+    file_contents.append('//\n')
+    file_contents.append('//\n')
+    file_contents.append('// $Id$\n')
+    file_contents.append('//\n')
+    file_contents.append('\n')
+    file_contents.append('#include "ExN01PrimaryGeneratorAction.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4Event.hh"\n')
+    file_contents.append('#include "G4ParticleGun.hh"\n')
+    file_contents.append('#include "G4ParticleTable.hh"\n')
+    file_contents.append('#include "G4ParticleDefinition.hh"\n')
+    file_contents.append('#include "globals.hh"\n')
+    file_contents.append('#include "G4SystemOfUnits.hh"\n')
+    file_contents.append('#include "Randomize.hh"\n')
+    file_contents.append('#include "G4PhysicalConstants.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01PrimaryGeneratorAction::ExN01PrimaryGeneratorAction()\n')
+    file_contents.append('{\n')
+    file_contents.append('  G4int n_particle = 1;\n')
+    file_contents.append('  particleGun = new G4ParticleGun(n_particle);\n')
+    file_contents.append('\n')
+    file_contents.append('  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();\n')
+    file_contents.append('  G4String particleName;\n')
+    file_contents.append('  particleGun->SetParticleDefinition(particleTable->FindParticle(particleName="geantino"));\n')
+    file_contents.append('  particleGun->SetParticleEnergy(1.0*GeV);\n')
+    file_contents.append('\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01PrimaryGeneratorAction::~ExN01PrimaryGeneratorAction()\n')
+    file_contents.append('{\n')
+    file_contents.append('  delete particleGun;\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)\n')
+    file_contents.append('{\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+    file_contents.append('  //G4double y = 1.0*(G4UniformRand()-0.5);\n')
+    file_contents.append('  //  G4double z = 1.0*(G4UniformRand()-0.5);\n')
+    file_contents.append('  particleGun->SetParticlePosition(G4ThreeVector(0.0*cm,0.0*cm,0.0*cm));\n')
+    file_contents.append('  //  particleGun->SetParticlePosition(G4ThreeVector(-10.0*cm,y*cm,z*cm));\n')
+    file_contents.append('  //  G4int i = anEvent->GetEventID() % 3;\n')
+    file_contents.append('\n')
+    file_contents.append('  G4double cosTheta = 2*G4UniformRand() - 1.;\n')
+    file_contents.append('  G4double phi = twopi*G4UniformRand();\n')
+    file_contents.append('  G4double sinTheta = std::sqrt(1. - cosTheta*cosTheta);\n')
+    file_contents.append('  G4double ux = sinTheta*std::cos(phi),\n')
+    file_contents.append('           uy = sinTheta*std::sin(phi),\n')
+    file_contents.append('           uz = cosTheta;\n')
+    file_contents.append('  particleGun->SetParticleMomentumDirection(G4ThreeVector(ux,uy,uz));\n')
+    file_contents.append('\n')
+    file_contents.append('  particleGun->GeneratePrimaryVertex(anEvent);\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+
+    source_files['ExN01PrimaryGeneratorAction.cc'] = file_contents
+
+
+
+    return source_files
+
+def _setup_dagspecific_source(dag_volume_names, dag_materials, material_dict, dag_h5m,
+                              g4_isotopes,g4_elements,g4_materials, tallies_needed,
+                              every_history):
+
+    source_files = {}
+    ###
+    #  new file detector construction
+    ###
+
+    file_contents = []
+
+    file_contents.append('//\n')
+    file_contents.append('//\n')
+    file_contents.append('// $Id$\n')
+    file_contents.append('//\n')
+    file_contents.append('\n')
+    file_contents.append('#include "ExN01DetectorConstruction.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4Material.hh"\n')
+    file_contents.append('#include "G4Box.hh"\n')
+    file_contents.append('#include "G4Tubs.hh"\n')
+    file_contents.append('#include "G4LogicalVolume.hh"\n')
+    file_contents.append('#include "G4ThreeVector.hh"\n')
+    file_contents.append('#include "G4PVPlacement.hh"\n')
+    file_contents.append('#include "globals.hh"\n')
+    file_contents.append('#include "G4SystemOfUnits.hh"\n')
+    file_contents.append('#include "G4VisAttributes.hh"\n')
+    file_contents.append('#include "G4SDManager.hh"\n')
+    file_contents.append('#include "G4SDChargedFilter.hh"\n')
+    file_contents.append('#include "G4MultiFunctionalDetector.hh"\n')
+    file_contents.append('#include "G4VPrimitiveScorer.hh"\n')
+    file_contents.append('#include "G4PSEnergyDeposit.hh"\n')
+    file_contents.append('#include "G4PSTrackLength.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "DagSolid.hh"\n')
+    file_contents.append('#include "DagMC.hpp"\n')
+    file_contents.append('\n')
+    file_contents.append('using namespace moab;\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01DetectorConstruction::ExN01DetectorConstruction()\n')
+    file_contents.append('  :  world_volume_log(0)\n')
+    file_contents.append('\n')
+    file_contents.append('{;}\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01DetectorConstruction::~ExN01DetectorConstruction()\n')
+    file_contents.append('{\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('G4VPhysicalVolume* ExN01DetectorConstruction::Construct()\n')
+    file_contents.append('{\n')
+    file_contents.append('\n')
+    file_contents.append('  //------------------------------------------------------ materials\n')
+    
+    # will pull materials from appropriately tagged geometry
+
+    file_contents.append('\n')
+    file_contents.append('  G4double a;  // atomic mass\n')
+    file_contents.append('  G4double z;  // atomic number\n')
+    file_contents.append('  G4double density;\n')
+    file_contents.append('\n')
+    for iso in g4_isotopes:
+        file_contents.append(iso)
+    for elem in g4_elements:
+        file_contents.append(elem)
+    for mat in g4_materials:
+        file_contents.append(mat)
+    file_contents.append('\n')
+    file_contents.append('  G4Material* Vacuum = \n')
+    file_contents.append('  new G4Material("Vacuum",z=1., a=1.0*g/mole, density=1.0e-20*mg/cm3);\n')
+    file_contents.append('  // set the visibility based on the material   \n')
+    file_contents.append('  G4VisAttributes * invis = new G4VisAttributes(G4VisAttributes::Invisible);\n')
+    file_contents.append('\n')
+
+    # will pull world size from max min in problem, maybe even take graveyard instead
+
+    file_contents.append('  //------------------------------------------------------ volumes\n')
+    file_contents.append('  // -- World Volume in which we place other volumes\n')
+    file_contents.append('  \n')
+    file_contents.append('  \n')
+    file_contents.append('  G4double world_width  = 12.0*cm;\n')
+    file_contents.append('  G4double world_height = 12.0*cm;\n')
+    file_contents.append('  G4double world_depth  = 12.0*cm;\n')
+    file_contents.append('  \n')
+    file_contents.append('  G4Box* world_volume = new G4Box("world_volume_box",world_width,world_height,world_depth);\n')
+    file_contents.append('  world_volume_log = new G4LogicalVolume(world_volume,Vacuum,"world_vol_log",0,0,0);\n')
+    file_contents.append('  world_volume_log->SetVisAttributes(invis);\n')
+    file_contents.append('  G4PVPlacement* world_volume_phys = new G4PVPlacement(0,G4ThreeVector(),world_volume_log,\n')
+    file_contents.append('						      "world_vol",0,false,0); \n')
+    file_contents.append('  \n')
+    file_contents.append('  \n')
+    file_contents.append('  // dag_volumes\n')
+    file_contents.append('  DagMC* dagmc = DagMC::instance(); // create dag instance\n')
+    file_contents.append('  const char* h5mfilename = "'+dag_h5m+'";\n')
+    file_contents.append('  G4cout << "Load sample file = "     << dagmc->load_file(h5mfilename,0) << G4endl;\n')
+    file_contents.append('  G4cout << "Initialize OBB tree = "  << dagmc->init_OBBTree() << G4endl;\n')
+    file_contents.append('\n')
+    file_contents.append('  G4int Num_of_survertices = dagmc->num_entities(2);\n')
+    file_contents.append('  G4int Num_of_objects = dagmc->num_entities(3);\n')
+    file_contents.append('\n')
+    file_contents.append('  G4cout << "There are " << Num_of_objects << " dag volumes" << G4endl;\n')
+    file_contents.append('\n')
+
+    # generate colors
+    num_col = len(material_dict) 
+    HSV_tuples = [(x*1.0/num_col, 0.5, 0.5) for x in range(num_col)] 
+    RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
+
+
+    for volume_name in dag_volume_names:
+        idx = dag_volume_names.index(volume_name)
+        # material 
+
+#        for keys in dag_materials.keys():
+ #           print volume_name,keys,dag_materials[keys]
+  #          print dag_materials[1]
+   #         exit()
+
+        if int(volume_name) not in dag_materials.keys():
+            material = "Vacuum"
+        else:
+            tmp_name = dag_materials[int(volume_name)].split(":")[1].strip()
+            material = tmp_name.replace('\x00', '')
+ #           print material
+            if 'Graveyard' in material:
+                material = "Vacuum"
+            else:
+                material = "mat_"+str(material_dict[material])
+  
+        # should exit if material not in list
+
+#        print material, volume_name
+        volume='vol_'+volume_name
+        file_contents.append('  DagSolid* '+volume+' = new DagSolid("'+volume+'",dagmc,'+str(idx+1)+');\n')
+        file_contents.append('  G4LogicalVolume* '+volume+'_log = new G4LogicalVolume('+volume+','+material+',"'+volume+'_log",0,0,0);\n')
+        # set the visualisation
+        if "Vacuum" in material:
+            file_contents.append('  '+volume+'_log->SetVisAttributes(invis); \n')
+        else:
+            mat_num = int(material.split('_')[1])
+            colors = RGB_tuples[mat_num-1]
+            file_contents.append('  '+volume+'_log->SetVisAttributes(G4Color('+str(colors[0])+','+str(colors[1])+ \
+                                     ','+str(colors[2])+'));\n')
+        file_contents.append('  G4PVPlacement* '+volume+'_phys = new G4PVPlacement(0,G4ThreeVector(0*cm,0*cm,0*cm),'+volume+'_log,"'+volume+'_phys",world_volume_log,false,0);\n')
+        file_contents.append('\n')
+
+
+    file_contents.append('  return world_volume_phys;\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01DetectorConstruction::ConstructSDandField()\n')
+    file_contents.append('{\n')
+    file_contents.append('  G4SDManager::GetSDMpointer()->SetVerboseLevel(1);\n')
+
+    # options if tracklength 
+    if tallies_needed:
+        file_contents.append(' // TrackLength Scorer\n')
+        for volume_name in dag_volume_names:
+            volume = "vol_"+volume_name
+            file_contents.append('  G4MultiFunctionalDetector* '+volume+'_det = new G4MultiFunctionalDetector("'+volume+'_flux");\n')
+            if dag_volume_names.index(volume_name) == 0:
+                file_contents.append('  G4VPrimitiveScorer* primitive;\n')
+
+            file_contents.append('  primitive = new G4PSTrackLength("TrackLength");\n')
+            file_contents.append('  '+volume+'_det->RegisterPrimitive(primitive);  \n')
+            file_contents.append('  SetSensitiveDetector("'+volume+'_log",'+volume+'_det);\n')
+            file_contents.append('\n')
+
+    file_contents.append('\n')
+    file_contents.append('}\n')
+
+    source_files['ExN01DetectorConstruction.cc'] = file_contents
+    
+    ###
+    # new file EventAction, after a particle step updates results
+    ###
+
+    file_contents = []
+
+    file_contents.append('//\n')
+    file_contents.append('/// \file ExN01EventAction.cc\n')
+    file_contents.append('/// \brief Implementation of the ExN01EventAction class\n')
+    file_contents.append('\n')
+    file_contents.append('#include "ExN01EventAction.hh"\n')
+    file_contents.append('#include "ExN01Analysis.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4RunManager.hh"\n')
+    file_contents.append('#include "G4Event.hh"\n')
+    file_contents.append('#include "G4SDManager.hh"\n')
+    file_contents.append('#include "G4HCofThisEvent.hh"\n')
+    file_contents.append('#include "G4UnitsTable.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "Randomize.hh"\n')
+    file_contents.append('#include <iomanip>\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01EventAction::ExN01EventAction()\n')
+    
+    if tallies_needed:
+        file_contents.append(' : G4UserEventAction(),\n')
+    
+    # for each volume if scoring
+        for idx in range(0,len(dag_volume_names)-1):
+            volume = dag_volume_names[idx]
+            file_contents.append('   vol_'+volume+'_tl_HCID(-1),\n')
+        volume = dag_volume_names[-1]
+        file_contents.append('   vol_'+volume+'_tl_HCID(-1)\n')
+    else:
+        file_contents.append(' : G4UserEventAction() \n')
+
+    file_contents.append('{}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01EventAction::~ExN01EventAction()\n')
+    file_contents.append('{}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('G4THitsMap<G4double>* \n')
+    file_contents.append('ExN01EventAction::GetHitsCollection(G4int hcID,\n')
+    file_contents.append('                                  const G4Event* event) const\n')
+    file_contents.append('{\n')
+    file_contents.append('  G4THitsMap<G4double>* hitsCollection \n')
+    file_contents.append('    = static_cast<G4THitsMap<G4double>*>(\n')
+    file_contents.append('        event->GetHCofThisEvent()->GetHC(hcID));\n')
+    file_contents.append('  \n')
+    file_contents.append('  if ( ! hitsCollection ) {\n')
+    file_contents.append('    G4ExceptionDescription msg;\n')
+    file_contents.append('    msg << "Cannot access hitsCollection ID " << hcID; \n')
+    file_contents.append('    G4Exception("ExN01EventAction::GetHitsCollection()",\n')
+    file_contents.append('      "MyCode0003", FatalException, msg);\n')
+    file_contents.append('  }         \n')
+    file_contents.append('\n')
+    file_contents.append('  return hitsCollection;\n')
+    file_contents.append('}    \n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('G4double ExN01EventAction::GetSum(G4THitsMap<G4double>* hitsMap) const\n')
+    file_contents.append('{\n')
+    file_contents.append('  G4double sumValue = 0;\n')
+    file_contents.append('  std::map<G4int, G4double*>::iterator it;\n')
+    file_contents.append('  for ( it = hitsMap->GetMap()->begin(); it != hitsMap->GetMap()->end(); it++) {\n')
+    file_contents.append('    sumValue += *(it->second);\n')
+    file_contents.append('  }\n')
+    file_contents.append('  return sumValue;  \n')
+    file_contents.append('}  \n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+
+    if tallies_needed and every_history:
+        file_contents.append('void ExN01EventAction::PrintEventStatistics(\n')
+
+        # for each volume if scoring
+        for idx in range(0,len(dag_volume_names)-1):
+            volume = 'vol_'+dag_volume_names[idx]
+            file_contents.append('                            G4double '+volume+'_tracklength, \n')
+        volume = "vol_"+dag_volume_names[-1]
+        file_contents.append('                            G4double '+volume+'_tracklength) const \n')
+
+        file_contents.append('{\n')
+        file_contents.append('  // Print event statistics\n')
+        file_contents.append('  //\n')
+
+        # for each volume print scores
+        for volume in dag_volume_names:
+            volume = "vol_"+volume
+            file_contents.append('  G4cout\n')
+            file_contents.append('     << "   '+volume+': total tracklength: " \n')
+            file_contents.append('     << std::setw(7) << G4BestUnit('+volume+'_tracklength, "Length")\n')
+            file_contents.append('     << "       total track length: " << G4endl;\n')
+            file_contents.append('  G4cout << "----------------------------------------------" << G4endl; \n')
+
+
+        file_contents.append('}\n')
+
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01EventAction::BeginOfEventAction(const G4Event* /*event*/)\n')
+    file_contents.append('{}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01EventAction::EndOfEventAction(const G4Event* event)\n')
+    file_contents.append('{  \n')
+
+    if tallies_needed:
+        file_contents.append('   // Get hist collections IDs\n')
+        # if initialisation
+        volume = "vol_"+dag_volume_names[0] 
+        file_contents.append('  if ( '+volume+'_tl_HCID == -1 ) {\n')
+        file_contents.append('      // name has to match that in detector construction?!\n')
+        # for each volume print scores
+        for volume in dag_volume_names:
+            file_contents.append('    vol_'+volume+'_tl_HCID\n')
+            file_contents.append('      = G4SDManager::GetSDMpointer()->GetCollectionID("vol_'+volume+'_flux/TrackLength");\n')
+
+        file_contents.append('  }\n')
+        file_contents.append('  \n')
+        file_contents.append('  // Get sum values from hits collections\n')
+        file_contents.append('  //\n')
+
+        # for each volume print scores
+        for volume in dag_volume_names:
+            volume = "vol_"+volume
+            file_contents.append('  G4double '+volume+'_tracklength = GetSum(GetHitsCollection('+volume+'_tl_HCID, event));\n')
+        file_contents.append('\n')
+        file_contents.append('  // get analysis manager\n')
+        file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
+        file_contents.append('\n')
+        file_contents.append('  // fill histograms\n')
+        file_contents.append('  //  \n')
+
+        # for each volume print scores
+        for idx in range(0,len(dag_volume_names)):
+            volume = "vol_"+dag_volume_names[idx]
+            file_contents.append('  analysisManager->FillH1('+str(idx+1)+', '+volume+'_tracklength);\n')
+
+            file_contents.append('  \n')
+            file_contents.append('  // fill ntuple\n')
+            file_contents.append('  //\n')
+
+        # for each volume print scores
+        for idx in range(0,len(dag_volume_names)):
+            volume = "vol_"+dag_volume_names[idx]
+            file_contents.append('  analysisManager->FillNtupleDColumn('+str(idx)+', '+volume+'_tracklength);\n')
+
+        file_contents.append('  analysisManager->AddNtupleRow();  \n')
+        file_contents.append('  \n')
+        
+        if every_history:
+            file_contents.append('  //print per event (modulo n)\n')
+            file_contents.append('  //\n')
+            file_contents.append('  G4int eventID = event->GetEventID();\n')
+            file_contents.append('  G4int printModulo = G4RunManager::GetRunManager()->GetPrintProgress();\n')
+            file_contents.append('  if ( ( printModulo > 0 ) && ( eventID % printModulo == 0 ) ) {\n')
+            file_contents.append('    G4cout << "---> End of event: " << eventID << G4endl;     \n')
+
+
+            file_contents.append('    PrintEventStatistics( \n')
+            # for each volume print scores
+            for volume in dag_volume_names:
+                idx = dag_volume_names.index(volume)
+                volume = "vol_"+volume
+                if idx != len(dag_volume_names)-1:
+                    file_contents.append('                         '+volume+'_tracklength, \n')
+                else:
+                    file_contents.append('                         '+volume+'_tracklength \n')
+
+            file_contents.append('                                       );\n')   
+            file_contents.append('  }\n')
+
+    file_contents.append('}  \n')
+    file_contents.append('\n')
+
+    source_files['ExN01EventAction.cc'] = file_contents
+
+    ###
+    # new file run action generic controls
+    ###
+
+    file_contents = []
+
+    file_contents.append('\n')
+    file_contents.append('#include "ExN01RunAction.hh"\n')
+    file_contents.append('#include "ExN01Analysis.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4Run.hh"\n')
+    file_contents.append('#include "G4RunManager.hh"\n')
+    file_contents.append('#include "G4UnitsTable.hh"\n')
+    file_contents.append('#include "G4SystemOfUnits.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01RunAction::ExN01RunAction()\n')
+    file_contents.append(' : G4UserRunAction()\n')
+    file_contents.append('{ \n')
+    file_contents.append('  // set printing event number per each event\n')
+    file_contents.append('  G4RunManager::GetRunManager()->SetPrintProgress(1);     \n')
+    file_contents.append('\n')
+    file_contents.append('  // Create analysis manager\n')
+    if tallies_needed:
+        file_contents.append('  // The choice of analysis technology is done via selectin of a namespace\n')
+        file_contents.append('  // in ExNO1Analysis.hh\n')
+        file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
+        file_contents.append('  G4cout << "Using " << analysisManager->GetType() << G4endl;\n')
+        file_contents.append('\n')
+        file_contents.append('  // Create directories \n')
+        file_contents.append('  //analysisManager->SetHistoDirectoryName("histograms");\n')
+        file_contents.append('  //analysisManager->SetNtupleDirectoryName("ntuple");\n')
+        file_contents.append('  analysisManager->SetVerboseLevel(1);\n')
+        file_contents.append('  analysisManager->SetFirstHistoId(1);\n')
+        file_contents.append('\n')
+        file_contents.append('  // Book histograms, ntuple\n')
+        file_contents.append('  //\n')
+        file_contents.append('  \n')
+        file_contents.append('  // Creating histograms\n')
+    
+
+        # for each volume in tally
+        for volume in dag_volume_names:
+            idx = dag_volume_names.index(volume)
+            file_contents.append('  analysisManager->CreateH1("'+str(idx+1)+'","trackL in '+volume+'", 100, 0., 1.*m);\n')
+
+#            file_contents.append('\n')
+        file_contents.append('\n')
+        file_contents.append('  // Creating ntuple\n')
+        file_contents.append('  analysisManager->CreateNtuple("N01", "TrackL");\n')
+            
+        for volume in dag_volume_names:
+            file_contents.append('  analysisManager->CreateNtupleDColumn("'+volume+'");\n')
+
+        file_contents.append('  analysisManager->FinishNtuple();\n')
+
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('ExN01RunAction::~ExN01RunAction()\n')
+    file_contents.append('{\n')
+
+    if tallies_needed:
+        file_contents.append('  delete G4AnalysisManager::Instance();  \n')
+
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+
+    file_contents.append('void ExN01RunAction::BeginOfRunAction(const G4Run* /*run*/)\n')
+    file_contents.append('{ \n')
+    file_contents.append('  //inform the runManager to save random number seed\n')
+    file_contents.append('  //G4RunManager::GetRunManager()->SetRandomNumberStore(true);\n')
+    file_contents.append('  \n')
+    if tallies_needed:
+        file_contents.append('  // Get analysis manager\n')
+        file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
+        file_contents.append('\n')
+        file_contents.append('  // Open an output file\n')
+        file_contents.append('  //\n')
+        file_contents.append('  G4String fileName = "ExN01";\n')
+        file_contents.append('  analysisManager->OpenFile(fileName);\n')
+
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......\n')
+    file_contents.append('\n')
+    file_contents.append('void ExN01RunAction::EndOfRunAction(const G4Run* /*run*/)\n')
+    file_contents.append('{\n')
+    if tallies_needed:
+        file_contents.append('  // print histogram statistics\n')
+        file_contents.append('  //\n')
+        file_contents.append('  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();\n')
+        file_contents.append('  if ( analysisManager->GetH1(1) ) {\n')
+        file_contents.append('    G4cout << "\\n ----> print histograms statistic ";\n')
+        file_contents.append('    if(isMaster) {\n')
+        file_contents.append('      G4cout << "for the entire run \\n" << G4endl; \n')
+        file_contents.append('    }\n')
+        file_contents.append('    else {\n')
+        file_contents.append('      G4cout << "for the local thread \\n" << G4endl; \n')
+        file_contents.append('    }\n')
+        file_contents.append('    \n')
+
+        for volume in dag_volume_names:
+            idx = dag_volume_names.index(volume)
+            volume = "vol_"+volume
+            file_contents.append('    G4cout << " '+volume+' : mean = " \n')
+            file_contents.append('       << G4BestUnit(analysisManager->GetH1('+str(idx+1)+')->mean(), "Length") \n')
+            file_contents.append('       << " rms = " \n')
+            file_contents.append('       << G4BestUnit(analysisManager->GetH1('+str(idx+1)+')->rms(),  "Length") << G4endl;\n')
+            file_contents.append('    \n')
+        
+        file_contents.append('  }\n')
+
+        file_contents.append('\n')
+        file_contents.append('  // save histograms & ntuple\n')
+        file_contents.append('  //\n')
+        file_contents.append('  analysisManager->Write();\n')
+        file_contents.append('  analysisManager->CloseFile();\n')
+        file_contents.append('\n')
+    file_contents.append('}\n')
+
+    source_files['ExN01RunAction.cc'] = file_contents
+
+    return source_files
+
+"""
+Function to write all build files in main directory
+"""
+def _setup_build(dag_h5m):
+
+    build_files = { }
+    ###
+    # new file Cmakelists
+    ### 
+    file_contents = []
+
+    file_contents.append('#----------------------------------------------------------------------------\n')
+    file_contents.append('# Setup the project\n')
+    file_contents.append('cmake_minimum_required(VERSION 2.6 FATAL_ERROR)\n')
+    file_contents.append('project(N01)\n')
+    file_contents.append('\n')
+    file_contents.append('#----------------------------------------------------------------------------\n')
+    file_contents.append('# Find Geant4 package, no UI and Vis drivers activated\n')
+    file_contents.append('#\n')
+    file_contents.append('find_package(Geant4 REQUIRED)\n')
+    file_contents.append('\n')
+    file_contents.append('#----------------------------------------------------------------------------\n')
+    file_contents.append('# Setup Geant4 include directories and compile definitions\n')
+    file_contents.append('#\n')
+    file_contents.append('include(${Geant4_USE_FILE})\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+    file_contents.append('#----------------------------------------------------------------------------\n')
+    file_contents.append('# Locate sources and headers for this project\n')
+    file_contents.append('#\n')
+    file_contents.append('include_directories(${PROJECT_SOURCE_DIR}/include \n')
+    file_contents.append('                    ${Geant4_INCLUDE_DIR})\n')
+    file_contents.append('file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)\n')
+    file_contents.append('file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)\n')
+    file_contents.append('\n')
+    file_contents.append('#----------------------------------------------------------------------------\n')
+    file_contents.append('# Add the executable, and link it to the Geant4 libraries\n')
+    file_contents.append('#\n')
+    file_contents.append('add_executable(exampleN01 exampleN01.cc ${sources} ${headers})\n')
+    file_contents.append('target_link_libraries(exampleN01 ${Geant4_LIBRARIES} )\n')
+    file_contents.append('\n')
+    file_contents.append('#----------------------------------------------------------------------------\n')
+    file_contents.append('# Copy all scripts to the build directory, i.e. the directory in which we\n')
+    file_contents.append('# build N01. This is so that we can run the executable directly because it\n')
+    file_contents.append('# relies on these scripts being in the current working directory.\n')
+    file_contents.append('#\n')
+    file_contents.append('set(N01_SCRIPTS\n')
+    file_contents.append('    exampleN01.in exampleN01.out\n')
+    file_contents.append('  )\n')
+    file_contents.append('\n')
+    file_contents.append('foreach(_script ${N01_SCRIPTS})\n')
+    file_contents.append('  configure_file(\n')
+    file_contents.append('    ${PROJECT_SOURCE_DIR}/${_script}\n')
+    file_contents.append('    ${PROJECT_BINARY_DIR}/${_script}\n')
+    file_contents.append('    COPYONLY\n')
+    file_contents.append('    )\n')
+    file_contents.append('endforeach()\n')
+    file_contents.append('\n')
+    file_contents.append('#----------------------------------------------------------------------------\n')
+    file_contents.append('# Add program to the project targets\n')
+    file_contents.append('# (this avoids the need of typing the program name after make)\n')
+    file_contents.append('#\n')
+    file_contents.append('add_custom_target(N01 DEPENDS exampleN01)\n')
+    file_contents.append('\n')
+    file_contents.append('#----------------------------------------------------------------------------\n')
+    file_contents.append('# Install the executable to "bin" directory under CMAKE_INSTALL_PREFIX\n')
+    file_contents.append('#\n')
+    file_contents.append('install(TARGETS exampleN01 DESTINATION bin)\n')
+    file_contents.append('\n')
+    
+    build_files['CMakeLists.txt'] = file_contents
+    
+    ###
+    # new file main.cc file
+    ###
+ 
+    file_contents = []
+
+    file_contents.append('//\n')
+    file_contents.append('// \n')
+    file_contents.append('// --------------------------------------------------------------\n')
+    file_contents.append('//      GEANT 4 - exampleN01\n')
+    file_contents.append('// --------------------------------------------------------------\n')
+    file_contents.append('\n')
+    file_contents.append('#include "G4RunManager.hh"\n')
+    file_contents.append('#include "G4UImanager.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "ExN01DetectorConstruction.hh"\n')
+    file_contents.append('#include "ExN01PhysicsList.hh"\n')
+    file_contents.append('#include "ExN01PrimaryGeneratorAction.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#include "ExN01ActionInitialization.hh"\n')
+    file_contents.append('\n')
+    file_contents.append('#ifdef G4VIS_USE\n')
+    file_contents.append('#include "G4VisExecutive.hh"\n')
+    file_contents.append('#endif\n')
+    file_contents.append('\n')
+    file_contents.append('#ifdef G4UI_USE\n')
+    file_contents.append('#include "G4UIExecutive.hh"\n')
+    file_contents.append('#endif\n')
+    file_contents.append('\n')
+    file_contents.append('int main(int argc, char* argv[])\n')
+    file_contents.append('{\n')
+    file_contents.append('  // Construct the default run manager\n')
+    file_contents.append('  //\n')
+    file_contents.append('  G4RunManager* runManager = new G4RunManager;\n')
+    file_contents.append('\n')
+    file_contents.append('  // set mandatory initialization classes\n')
+    file_contents.append('  //\n')
+    file_contents.append('  G4VUserDetectorConstruction* detector = new ExN01DetectorConstruction;\n')
+    file_contents.append('  runManager->SetUserInitialization(detector);\n')
+    file_contents.append('  //\n')
+    file_contents.append('  G4VUserPhysicsList* physics = new ExN01PhysicsList;\n')
+    file_contents.append('  runManager->SetUserInitialization(physics);\n')
+    file_contents.append('\n')
+    file_contents.append('  // set mandatory user action class\n')
+    file_contents.append('  //\n')
+    file_contents.append('  ExN01ActionInitialization* actionInitialization = new ExN01ActionInitialization();\n')
+    file_contents.append('  runManager->SetUserInitialization(actionInitialization);\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+    file_contents.append('  //  G4VUserPrimaryGeneratorAction* gen_action = new ExN01PrimaryGeneratorAction;\n')
+    file_contents.append('  //runManager->SetUserAction(gen_action);\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+    file_contents.append('  //  G4VUserSteppingAction* step_action = new ExN01SteppingAction;\n')
+    file_contents.append('  // runManager->SetUserAction(step_action);\n')
+    file_contents.append('\n')
+    file_contents.append('  // Initialize G4 kernel\n')
+    file_contents.append('  //\n')
+    file_contents.append('  runManager->Initialize();\n')
+    file_contents.append('  G4VisManager* visManager = new G4VisExecutive;\n')
+    file_contents.append('  visManager->Initialize();\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+    file_contents.append('  // Get the pointer to the UI manager and set verbosities\n')
+    file_contents.append('  //\n')
+    file_contents.append('  G4UImanager* UImanager = G4UImanager::GetUIpointer();\n')
+    file_contents.append('  G4UIExecutive* UI = new G4UIExecutive(argc, argv);\n')
+    file_contents.append('  UImanager->ApplyCommand("/control/execute vis.mac");\n')
+    file_contents.append('  UI->SessionStart();\n')
+    file_contents.append('\n')
+    file_contents.append('  delete UI;\n')
+    file_contents.append('  return 0;\n')
+    file_contents.append('\n')
+    file_contents.append('  UImanager->ApplyCommand("/run/verbose 1");\n')
+    file_contents.append('  UImanager->ApplyCommand("/event/verbose 1");\n')
+    file_contents.append('  UImanager->ApplyCommand("/tracking/verbose 1");\n')
+    file_contents.append('\n')
+    file_contents.append('  // Start a run\n')
+    file_contents.append('  //\n')
+    file_contents.append('  G4int numberOfEvent = 3;\n')
+    file_contents.append('  runManager->BeamOn(numberOfEvent);\n')
+    file_contents.append('\n')
+    file_contents.append('  // Job termination\n')
+    file_contents.append('  //\n')
+    file_contents.append('  // Free the store: user actions, physics_list and detector_description are\n')
+    file_contents.append('  //                 owned and deleted by the run manager, so they should not\n')
+    file_contents.append('  //                 be deleted in the main() program !\n')
+    file_contents.append('  //\n')
+    file_contents.append('  delete runManager;\n')
+    file_contents.append('\n')
+    file_contents.append('  return 0;\n')
+    file_contents.append('}\n')
+    file_contents.append('\n')
+    file_contents.append('\n')
+
+    build_files['exampleN01.cc'] = file_contents
+
+    ###
+    # new file Gnumakefile
+    ###
+
+    file_contents = []
+
+    file_contents.append('# $Id: GNUmakefile,v 1.1 1999-01-07 16:05:40 gunter Exp $\n')
+    file_contents.append('# --------------------------------------------------------------\n')
+    file_contents.append('# GNUmakefile for examples module.  Gabriele Cosmo, 06/04/98.\n')
+    file_contents.append('# --------------------------------------------------------------\n')
+    file_contents.append('\n')
+    file_contents.append('name := exampleN01\n')
+    file_contents.append('G4TARGET := $(name)\n')
+    file_contents.append('G4EXLIB := true\n')
+    file_contents.append('\n')
+    file_contents.append('ifndef G4INSTALL\n')
+    file_contents.append('  G4INSTALL = ../../..\n')
+    file_contents.append('endif\n')
+    file_contents.append('\n')
+    file_contents.append('.PHONY: all\n')
+    file_contents.append('all: lib bin\n')
+    file_contents.append('\n')
+    file_contents.append('include $(G4INSTALL)/config/binmake.gmk\n')
+    file_contents.append('\n')
+    file_contents.append('DAGSOLID_HOME  := /data/opt/andy_dag/DAGMC/Geant4/dagsolid\n')
+    file_contents.append('DAGSOLID_LIB   := ${DAGSOLID_HOME}/lib\n')
+    file_contents.append('DAGSOLID_INC   := -I${DAGSOLID_HOME}/include\n')
+    file_contents.append('\n')
+    file_contents.append('MOAB_DIR       := /data/opt/moab_dev/\n')
+    file_contents.append('MOAB_LDFLAGS   := -L/data/opt/dagmc/hdf5/lib \n')
+    file_contents.append('MOAB_LIBDIR    := ${MOAB_DIR}/lib\n')
+    file_contents.append('MOAB_INCLUDES  :=-I${MOAB_DIR}/include\n')
+    file_contents.append('MOAB_LIBS_LINK := ${MOAB_LDFLAGS} -L${MOAB_LIBDIR} -lMOAB -lm  -lhdf5 -g -pg\n')
+    file_contents.append('\n')
+    file_contents.append('CPPFLAGS  += $(MOAB_INCLUDES) $(DAGSOLID_INC) -g -pg\n')
+    file_contents.append('CXXFLAGS  = $(CPPFLAGS) -fPIC\n')
+    file_contents.append('LDFLAGS   += $(MOAB_LIBS_LINK) -g -pg \n')
+    file_contents.append('LDLIBS += ${MOAB_DIR}/lib/libdagmc.so\n')
+    file_contents.append('LDLIBS += ${MOAB_LIBDIR}/libMOAB.so\n')
+    file_contents.append('LDLIBS += ${DAGSOLID_LIB}/libdagsolid.so\n')
+
+    build_files['GNUmakefile'] = file_contents
+
+    ###
+    # new file vis.mac - visualisation attrs
+    ###
+
+    file_contents = []
+
+    file_contents.append('# Macro file for the visualization setting in the initialization phase \n')
+    file_contents.append('# of the B1 example when running in interactive mode\n')
+    file_contents.append('#\n')
+    file_contents.append('\n')
+    file_contents.append('# Use these open statements to open selected visualization\n')
+    file_contents.append('#\n')
+    file_contents.append('# Use this open statement to create an OpenGL view:\n')
+    file_contents.append('/vis/open OGL 600x600-0+0\n')
+    file_contents.append('#\n')
+    file_contents.append('# Use this open statement to create an OpenInventor view:\n')
+    file_contents.append('#/vis/open OI\n')
+    file_contents.append('#\n')
+    file_contents.append('# Use this open statement to create a .prim file suitable for\n')
+    file_contents.append('# viewing in DAWN:\n')
+    file_contents.append('#/vis/open DAWNFILE\n')
+    file_contents.append('#\n')
+    file_contents.append('# Use this open statement to create a .heprep file suitable for\n')
+    file_contents.append('# viewing in HepRApp:\n')
+    file_contents.append('#/vis/open HepRepFile\n')
+    file_contents.append('#\n')
+    file_contents.append('# Use this open statement to create a .wrl file suitable for\n')
+    file_contents.append('# viewing in a VRML viewer:\n')
+    file_contents.append('#/vis/open VRML2FILE\n')
+    file_contents.append('#\n')
+    file_contents.append('# Disable auto refresh and quieten vis messages whilst scene and\n')
+    file_contents.append('# trajectories are established:\n')
+    file_contents.append('/vis/viewer/set/autoRefresh false\n')
+    file_contents.append('/vis/verbose errors\n')
+    file_contents.append('#\n')
+    file_contents.append('# Draw geometry:\n')
+    file_contents.append('/vis/drawVolume\n')
+    file_contents.append('#\n')
+    file_contents.append('# Specify view angle:\n')
+    file_contents.append('/vis/viewer/set/viewpointVector -1 0 0\n')
+    file_contents.append('/vis/viewer/set/lightsVector -1 0 0\n')
+    file_contents.append('#\n')
+    file_contents.append('# Specify style (surface, wireframe, auxiliary edges,...)\n')
+    file_contents.append('/vis/viewer/set/style wireframe\n')
+    file_contents.append('/vis/viewer/set/auxiliaryEdge true\n')
+    file_contents.append('/vis/viewer/set/lineSegmentsPerCircle 100\n')
+    file_contents.append('#\n')
+    file_contents.append('# Draw smooth trajectories at end of event, showing trajectory points\n')
+    file_contents.append('# as markers 2 pixels wide:\n')
+    file_contents.append('/vis/scene/add/trajectories smooth\n')
+    file_contents.append('/vis/modeling/trajectories/create/drawByCharge\n')
+    file_contents.append('/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true\n')
+    file_contents.append('/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2\n')
+    file_contents.append('# (if too many tracks cause core dump => /tracking/storeTrajectory 0)\n')
+    file_contents.append('#\n')
+    file_contents.append('# Draw hits at end of event:\n')
+    file_contents.append('#/vis/scene/add/hits\n')
+    file_contents.append('#\n')
+    file_contents.append('# To draw only gammas:\n')
+    file_contents.append('#/vis/filtering/trajectories/create/particleFilter\n')
+    file_contents.append('#/vis/filtering/trajectories/particleFilter-0/add gamma\n')
+    file_contents.append('#\n')
+    file_contents.append('# To invert the above, drawing all particles except gammas,\n')
+    file_contents.append('# keep the above two lines but also add:\n')
+    file_contents.append('#/vis/filtering/trajectories/particleFilter-0/invert true\n')
+    file_contents.append('#\n')
+    file_contents.append('# Many other options are available with /vis/modeling and /vis/filtering.\n')
+    file_contents.append('# For example, to select colour by particle ID:\n')
+    file_contents.append('#/vis/modeling/trajectories/create/drawByParticleID\n')
+    file_contents.append('#/vis/modeling/trajectories/drawByParticleID-0/default/setDrawStepPts true\n')
+    file_contents.append('# To select or override default colours (note: e+ is blue by default):\n')
+    file_contents.append('#/vis/modeling/trajectories/list\n')
+    file_contents.append('#/vis/modeling/trajectories/drawByParticleID-0/set e+ yellow\n')
+    file_contents.append('#\n')
+    file_contents.append('# To superimpose all of the events from a given run:\n')
+    file_contents.append('/vis/scene/endOfEventAction accumulate\n')
+    file_contents.append('#\n')
+    file_contents.append('# Decorations\n')
+    file_contents.append('# Name\n')
+    file_contents.append('/vis/set/textColour green\n')
+    file_contents.append('/vis/set/textLayout right\n')
+    file_contents.append('/vis/scene/add/text2D 0.9 -.9 24 ! ! exampleB1\n')
+    file_contents.append('# or, if your system does not support right-adjustment\n')
+    file_contents.append('#/vis/scene/add/text2D 0 -.9 24 ! ! exampleB1\n')
+    file_contents.append('/vis/set/textLayout    # Revert to normal (left adjusted) layout\n')
+    file_contents.append('/vis/set/textColour    # Revert to default text colour (blue)\n')
+    file_contents.append('#\n')
+    file_contents.append('# Axes, scale, etc.\n')
+    file_contents.append('/vis/scene/add/scale   # Simple scale line\n')
+    file_contents.append('/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.\n')
+    file_contents.append('/vis/scene/add/eventID # Drawn at end of event\n')
+    file_contents.append('/vis/scene/add/date    # Date stamp\n')
+    file_contents.append('/vis/scene/add/logo2D  # Simple logo\n')
+    file_contents.append('/vis/scene/add/logo    # 3D logo\n')
+    file_contents.append('#\n')
+    file_contents.append('# Frame\n')
+    file_contents.append('/vis/set/colour red\n')
+    file_contents.append('/vis/set/lineWidth 2\n')
+    file_contents.append('/vis/scene/add/frame   # Simple frame around the view\n')
+    file_contents.append('/vis/set/colour        # Revert to default colour (white)\n')
+    file_contents.append('/vis/set/lineWidth     # Revert to default line width (1.)\n')
+    file_contents.append('#\n')
+    file_contents.append('# Attach text to one edge of Shape1, with a small, fixed offset\n')
+    file_contents.append('/vis/scene/add/text 0 6 -4 cm 18 4 4 Shape1\n')
+    file_contents.append('# Attach text to one corner of Shape2, with a small, fixed offset\n')
+    file_contents.append('/vis/scene/add/text 6 7 10 cm 18 4 4 Shape2\n')
+    file_contents.append('#\n')
+    file_contents.append('# To get nice view\n')
+    file_contents.append('/vis/geometry/set/visibility World 0 false\n')
+    file_contents.append('/vis/geometry/set/visibility Envelope 0 false\n')
+    file_contents.append('/vis/viewer/set/style surface\n')
+    file_contents.append('/vis/viewer/set/hiddenMarker true\n')
+    file_contents.append('/vis/viewer/set/viewpointThetaPhi 120 150\n')
+    file_contents.append('#\n')
+    file_contents.append('# Re-establish auto refreshing and verbosity:\n')
+    file_contents.append('/vis/viewer/set/autoRefresh true\n')
+    file_contents.append('/vis/verbose warnings\n')
+    file_contents.append('#\n')
+    file_contents.append('# For file-based drivers, use this to create an empty detector view:\n')
+    file_contents.append('#/vis/viewer/flush\n')
+
+    build_files['vis.mac'] = file_contents
+
+    return build_files
+
+""" 
+Function to write files stored as a dictionary of lists
+"""
+
+def _write_files(path, dictionary_files):
+    for key in dictionary_files:
+        try:
+            fh = open(path+'/'+key, "w")
+        except IOError:
+                print "Error: "+file+" file exists"
+        else:
+            for line in dictionary_files[key]:
+                fh.write(line)
+                fh.close
+
+
+""" 
+Function to create directory strucutre to expand 
+files into uses, the standard Geant4 example
+structure 
+
+     cwd/+
+         |
+         +-> /include
+         +-> /src
+
+Parameters
+----------
+directory : path to the directory where we should 
+            expand the source files into
+"""
+def _create_directory_structure(directory):
+    _mkdir_p(directory+'/include')
+    _mkdir_p(directory+'/src')
+    return
+
+def _dagmc_volume_material(dagmc_h5m, index):
+
+    return material_name
+
+"""
+Function from http://stackoverflow.com/questions
+/600268/mkdir-p-functionality-in-python, to create 
+directory tree
+
+Parameters
+----------
+path : path to create
+"""
+def _mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError:     
+        print "Error: can\'t create directory, "+path
+        raise
+
+
+if __name__ == "__main__":
+    main()

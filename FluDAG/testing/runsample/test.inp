@@ -1,0 +1,47 @@
+TITLE
+nTOF lead target
+* Set the defaults for precision simulations
+DEFAULTS                                                              PRECISIO
+* Define the beam characteristics
+BEAM          -0.014             10001.7                              NEUTRON
+* Define the beam position
+BEAMPOS          0.0       0.0       0.0
+GEOBEGIN         0.0                                                  FLUGG
+GEOEND
+MATERIAL         76.    190.23     22.57       26.                    OSMIUM
+MATERIAL                            2.35       27.                    OSALLOY
+COMPOUND         1.0    OSMIUM       4.0       TIN                    OSALLOY
+* 276 Water liquid H2_O
+* Chemical Formula:      H -- O -- H
+MATERIAL                             1.0       28.                    H2O
+COMPOUND         2.0  HYDROGEN       1.0    OXYGEN                    H2O
+LOW-MAT      PHOSPHO
+LOW-MAT     CHROMIUM
+LOW-MAT     MANGANES
+LOW-MAT       SULFUR
+LOW-MAT       OSMIUM       74.       -2.      296.                    TUNGSTEN
+MATERIAL         24.   51.9961      7.18       29.                    CHROMIUM
+MATERIAL         25. 54.938049      7.21       30.                    MANGANES
+MATERIAL         15. 30.973761      1.82       31.                    PHOSPHO
+MATERIAL         16.    32.066      2.07       32.                    SULFUR
+* Steel316LN
+* Stainless steel AISI316LN
+MATERIAL                             7.8       33.                    SS316LN
+COMPOUND     -.67145      IRON    -0.185  CHROMIUM   -0.1125    NICKELSS316LN
+COMPOUND       -0.02  MANGANES     -0.01   SILICON   -4.5E-4   PHOSPHOSS316LN
+COMPOUND      -3.E-4    SULFUR    -3.E-4    CARBON                    SS316LN
+*...+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+ASSIGNMAT     VACUUM         1
+ASSIGNMAT     VACUUM         2
+ASSIGNMAT   BLCKHOLE         3
+ASSIGNMAT     VACUUM         4
+* ASSIGNMA    BLCKHOLE       BHL
+* ASSIGNMA     SS316LN    TARGET
+* ASSIGNMA         H2O    WATERL
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+* ASSIGNMA     OSALLOY    OSLAYR
+USRBIN           10.   NEUTRON      -21.       5.0       5.0       5.0asdf
+USRBIN          -5.0      -5.0      -5.0       11.       11.       11.&
+* Set the number of primary histories to be simulated in the run
+START          1000.                            1.
+STOP

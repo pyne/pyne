@@ -1,0 +1,9 @@
+59c59
+<     while getopts "e:hN:M:t:" opt; do
+---
+>     while getopts "d:e:hN:M:t:" opt; do
+106a107,110
+> 	  d)
+>             DAGMCFILE=${OPTARG}
+>             ln -s ${DAGMCFILE} dagmc.h5m
+>             ;;

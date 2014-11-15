@@ -1,0 +1,264 @@
+          Thread Name & Version = MCNP5, 1.60
+                                  _                                      
+            ._ _    _  ._   ._   |_                                      
+            | | |  (_  | |  |_)   _)                                     
+                            |                                            
+  +---------------------------------------------------------------------+
+  | Copyright 2010. Los Alamos National Security, LLC.  All rights      |
+  | reserved.                                                           |
+  |   This material was produced under U.S. Government contract         |
+  | DE-AC52-06NA25396 for Los Alamos National Laboratory, which is      |
+  | operated by Los Alamos National Security, LLC, for the U.S.         |
+  | Department of Los Energy. The Government is granted for itself and  |
+  | others acting on its behalf a paid-up, nonexclusive, irrevocable    |
+  | worldwide license in this material to reproduce, prepare derivative |
+  | works, and perform publicly and display publicly. Beginning five    |
+  | (5) years after 2010, subject to additional five-year worldwide     |
+  | renewals, the Government is granted for itself and others acting on |
+  | its behalf a paid-up, nonexclusive, irrevocable worldwide license   |
+  | in this material to reproduce, prepare derivative works, distribute |
+  | copies to the public, perform publicly and display publicly, and to |
+  | permit others to do so. NEITHER THE UNITED STATES NOR THE UNITED    |
+  | STATES DEPARTMENT OF ENERGY, NOR LOS ALAMOS NATIONAL SECURITY, LLC, |
+  | NOR ANY OF THEIR EMPLOYEES, MAKES ANY WARRANTY, EXPRESS OR IMPLIED, |
+  | OR ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY,  |
+  | COMPLETENESS, OR USEFULNESS OF ANY INFORMATION, APPARATUS, PRODUCT, |
+  | OR PROCESS DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE |
+  | PRIVATELY OWNED RIGHTS.                                             |
+  +---------------------------------------------------------------------+
+  
+1mcnp     version 5     ld=10012012                     10/23/12 21:00:29 
+ *************************************************************************                 probid =  10/23/12 21:00:29 
+ i=sample01.i g=sample01.sat ftol=1e-4 fcad=sample01.h5m                         
+
+ This problem is using DAGMC version    1.000 w/ DagMC r5633
+         1-       dag-mcnp5 Sample Problem 01 - water sphere                                      
+         2-       1 1 -1 imp:n=1                                                                  
+         3-       4  0 imp:n=0                                                                    
+         4-       5 0 imp:n=1 $ implicit complement                                               
+         5-                                                                                       
+         6-       1                                                                               
+         7-       8                                                                               
+         8-       9                                                                               
+         9-       10                                                                              
+        10-       11                                                                              
+        11-       12                                                                              
+        12-       13                                                                              
+        13-       14                                                                              
+        14-       15                                                                              
+        15-       16                                                                              
+        16-       17                                                                              
+        17-       18                                                                              
+        18-       19                                                                              
+        19-                                                                                       
+        20-       f14:n 1 T                                                                       
+        21-       C Data cards                                                                    
+        22-       C ********************                                                          
+        23-       C --------------------                                                          
+        24-       C Materials                                                                     
+        25-       C --------------------                                                          
+        26-       C Material 1: Water                                                             
+        27-       M1 1001 2 8016 1                                                                
+        28-       C --------------------                                                          
+        29-       C Source                                                                        
+        30-       C --------------------                                                          
+        31-       C isotropic 14 MeV point source at the origin                                   
+        32-       SDEF                                                                            
+        33-       C --------------------                                                          
+        34-       C Job Control                                                                   
+        35-       C --------------------                                                          
+        36-       C run in neutron only mode                                                      
+        37-       mode n                                                                          
+        38-       C run for 1000 histories                                                        
+        39-       nps 1000                                                                        
+ 
+  warning.    1 materials had unnormalized fractions. print table 40.
+1cells                                                                                                  print table 60
+
+                               atom        gram                                            neutron                                     
+              cell     mat    density     density     volume       mass            pieces importance                                   
+
+        1        1        1  1.00309E-01 1.00000E+00 3.35092E+04 3.35092E+04           0  1.0000E+00                                   
+        2        4        0  0.00000E+00 0.00000E+00 4.13750E+04 0.00000E+00           0  0.0000E+00                                   
+        3        5        0  0.00000E+00 0.00000E+00 1.00000E+00 0.00000E+00           0  1.0000E+00                                   
+
+ total                                               7.48852E+04 3.35092E+04
+
+    minimum source weight = 1.0000E+00    maximum source weight = 1.0000E+00
+
+ ***************************************************
+ * Random Number Generator  =                    1 *
+ * Random Number Seed       =       19073486328125 *
+ * Random Number Multiplier =       19073486328125 *
+ * Random Number Adder      =                    0 *
+ * Random Number Bits Used  =                   48 *
+ * Random Number Stride     =               152917 *
+ ***************************************************
+
+
+          1 warning message so far.
+1cross-section tables                                                                                   print table 100
+
+     table    length
+
+                        tables from file c00740/endf70a                                                  
+
+   1001.70c    3652   1-H -  1 at 293.6K from endf/b-vii.0 njoy99.248                             mat 125      03/27/08
+   8016.70c  170922   8-O - 16 at 293.6K from endf/b-vii.0 njoy99.248                             mat 825      08/25/07
+
+  total      174574
+
+ ***********************************************************************************************************************
+
+ dump no.    1 on file runtpf     nps =           0     coll =              0     ctm =        0.00   nrn =             
+    0
+
+          1 warning message so far.
+1problem summary                                                                                                           
+
+      run terminated when        1000  particle histories were done.
++                                                                                                    10/23/12 21:01:23 
+      dag-mcnp5 Sample Problem 01 - water sphere                                           probid =  10/23/12 21:00:29 
+0
+ neutron creation    tracks      weight        energy            neutron loss        tracks      weight        energy
+                                 (per source particle)                                           (per source particle)
+
+ source                1000    1.0000E+00    1.4000E+01          escape                 807    6.7126E-01    5.0266E+00
+                                                                 energy cutoff            0    0.            0.        
+                                                                 time cutoff              0    0.            0.        
+ weight window            0    0.            0.                  weight window            0    0.            0.        
+ cell importance          0    0.            0.                  cell importance          0    0.            0.        
+ weight cutoff            0    4.7757E-02    1.7078E-09          weight cutoff          193    4.7991E-02    1.9367E-09
+ e or t importance        0    0.            0.                  e or t importance        0    0.            0.        
+ dxtran                   0    0.            0.                  dxtran                   0    0.            0.        
+ forced collisions        0    0.            0.                  forced collisions        0    0.            0.        
+ exp. transform           0    0.            0.                  exp. transform           0    0.            0.        
+ upscattering             0    0.            2.9504E-07          downscattering           0    0.            7.7083E+00
+ photonuclear             0    0.            0.                  capture                  0    3.2850E-01    1.2651E+00
+ (n,xn)                   0    0.            0.                  loss to (n,xn)           0    0.            0.        
+ prompt fission           0    0.            0.                  loss to fission          0    0.            0.        
+ delayed fission          0    0.            0.                                                                        
+     total             1000    1.0478E+00    1.4000E+01              total             1000    1.0478E+00    1.4000E+01
+
+   number of neutrons banked                       0        average time of (shakes)              cutoffs
+   neutron tracks per source particle     1.0000E+00          escape            2.1111E+03          tco   1.0000E+33
+   neutron collisions per source particle 5.8271E+01          capture           1.0740E+04          eco   0.0000E+00
+   total neutron collisions                    58271          capture or escape 4.9465E+03          wc1  -5.0000E-01
+   net multiplication              1.0000E+00 0.0000          any termination   6.3538E+03          wc2  -2.5000E-01
+
+ computer time so far in this run     0.90 minutes            maximum number ever in bank         0
+ computer time in mcrun               0.02 minutes            bank overflows to backup file       0
+ source particles per minute            6.0000E+04
+ random numbers generated                   982946            most random numbers used was       10195 in history         174
+
+ range of sampled source weights = 1.0000E+00 to 1.0000E+00
+1neutron  activity in each cell                                                                         print table 126
+
+                       tracks     population   collisions   collisions     number        flux        average      average
+              cell    entering                               * weight     weighted     weighted   track weight   track mfp
+                                                          (per history)    energy       energy     (relative)      (cm)
+
+        1        1        1000         1000        58271    3.2141E+01   9.1092E-04   5.6893E+00   7.1253E-01   4.8878E+00
+        3        5         807          807            0    0.0000E+00   3.6785E-03   7.0070E+00   8.2535E-01   0.0000E+00
+
+           total          1807         1807        58271    3.2141E+01
+
+1tally       14        nps =        1000
+           tally type 4    track length estimate of particle flux.      units   1/cm**2   
+           tally for  neutrons 
+
+           volumes 
+                   cell:       1          total                                                                    
+                         3.35092E+04  3.35092E+04
+ 
+ cell  1                                                                                                                               
+                 1.02949E-03 0.0195
+ 
+ cell union total                                                                                                                      
+                 1.02949E-03 0.0195
+
+
+ ***** the nps-dependent tfc bin check results are suspect because there are only  1 nps tally values to analyze *****
+
+
+ ===================================================================================================================================
+
+           results of 10 statistical checks for the estimated answer for the tally fluctuation chart (tfc) bin of tally       14
+
+ tfc bin     --mean--      ---------relative error---------      ----variance of the variance----      --figure of merit--     -pdf-
+ behavior    behavior      value   decrease   decrease rate      value   decrease   decrease rate       value     behavior     slope
+
+ desired      random       <0.10      yes      1/sqrt(nps)       <0.10      yes        1/nps           constant    random      >3.00
+ observed     random        0.02      yes          yes            0.00      yes         yes            constant    random      10.00
+ passed?        yes          yes      yes          yes             yes      yes         yes               yes        yes         yes
+
+ ===================================================================================================================================
+
+
+ this tally meets the statistical criteria used to form confidence intervals: check the tally fluctuation chart to verify.
+ the results in other bins associated with this tally may not meet these statistical criteria.
+
+ ----- estimated confidence intervals:  -----
+
+ estimated asymmetric confidence interval(1,2,3 sigma): 1.0099E-03 to 1.0500E-03; 9.8983E-04 to 1.0701E-03; 9.6977E-04 to 1.0901E-03
+ estimated  symmetric confidence interval(1,2,3 sigma): 1.0094E-03 to 1.0495E-03; 9.8940E-04 to 1.0696E-03; 9.6935E-04 to 1.0896E-03
+
+1analysis of the results in the tally fluctuation chart bin (tfc) for tally       14 with nps=        1000 print table 160
+
+
+ normed average tally per history  = 1.02949E-03          unnormed average tally per history  = 3.44975E+01
+ estimated tally relative error    = 0.0195               estimated variance of the variance  = 0.0033
+ relative error from zero tallies  = 0.0000               relative error from nonzero scores  = 0.0195
+
+ number of nonzero history tallies =        1000          efficiency for the nonzero tallies  = 1.0000
+ history number of largest  tally  =         174          largest  unnormalized history tally = 1.48751E+02
+ (largest  tally)/(average tally)  = 4.31193E+00          (largest  tally)/(avg nonzero tally)= 4.31193E+00
+
+ (confidence interval shift)/mean  = 0.0004               shifted confidence interval center  = 1.02994E-03
+
+
+ if the largest  history score sampled so far were to occur on the next history, the tfc bin quantities would change as follows:
+
+      estimated quantities           value at nps           value at nps+1           value(nps+1)/value(nps)-1.
+
+      mean                            1.02949E-03             1.03290E-03                     0.003309
+      relative error                  1.94748E-02             1.96694E-02                     0.009988
+      variance of the variance        3.34442E-03             3.86318E-03                     0.155111
+      shifted center                  1.02994E-03             1.02995E-03                     0.000004
+      figure of merit                 1.62746E+05             1.59543E+05                    -0.019681
+
+ the estimated slope of the  50 largest  tallies starting at  7.75741E+01 appears to be decreasing at least exponentially.
+ the large score tail of the empirical history score probability density function appears to have no unsampled regions.
+
+ fom = (histories/minute)*(f(x) signal-to-noise ratio)**2 = (6.172E+04)*( 1.624E+00)**2 = (6.172E+04)*(2.637E+00) = 1.627E+05
+
+1status of the statistical checks used to form confidence intervals for the mean for each tally bin
+
+
+ tally   result of statistical checks for the tfc bin (the first check not passed is listed) and error magnitude check for all bins
+
+       14   passed the 10 statistical checks for the tally fluctuation chart bin result               
+         passed all bin error check:     2 tally bins all have relative errors less than 0.10 with no zero bins
+
+
+ the 10 statistical checks are only for the tally fluctuation chart bin and do not apply to other tally bins.
+
+1tally fluctuation charts                              
+
+                            tally       14
+          nps      mean     error   vov  slope    fom
+         1000   1.0295E-03 0.0195 0.0033 10.0  162746
+
+ ***********************************************************************************************************************
+
+ dump no.    2 on file runtpf     nps =        1000     coll =          58271     ctm =        0.02   nrn =           
+ 982946
+
+          1 warning message so far.
+
+
+ run terminated when        1000  particle histories were done.
+
+ computer time =    0.90 minutes
+
+ mcnp     version 5     10012012                     10/23/12 21:01:26                     probid =  10/23/12 21:00:29 
