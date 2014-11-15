@@ -29,7 +29,6 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
               'numpydoc',
               'sphinxext.ipython_console_highlighting',
-              'breathe',
               'sphinxext.notebook_sphinxext',
               'sphinxcontrib.bibtex',
               ]
@@ -246,21 +245,6 @@ latex_documents = [
 autodoc_member_order = "groupwise"
 autoclass_content = "both"
 autosummary_generate = []
-
-
-# C++ Autodocumentation Flags
-breathe_projects = {"pyne": None, }
-breathe_default_project = 'pyne'
-breathe_domain_by_extension = {"h": "cpp", }
-#breathe_projects_source = {"pyne": ('../src', []), }
-breathe_projects_source = {}
-srcdir = '../src'
-
-for p in os.listdir(srcdir):
-    if 'json' not in p and 'cpp' not in p:
-        p2, _ = os.path.splitext(p)
-        breathe_projects['pyne_' + p2] = breathe_projects['pyne']
-        breathe_projects_source['pyne_' + p2] = (srcdir, 'data.h')
 
 # Prevent numpy from making silly tables
 numpydoc_show_class_members = False

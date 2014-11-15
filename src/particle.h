@@ -18,8 +18,9 @@
 /// Number of pure particle types currently supported
 #define NUM_PARTICLES 32
 
-namespace pyne 
+namespace pyne
 {
+//! Converts betweeen naming/numbering conventions for particle types
 namespace particle
 {
   extern int _pdcids[NUM_PARTICLES]; ///
@@ -53,7 +54,7 @@ namespace particle
   /// \name is_hydrogen functions
   /// \{
   /// Returns whether or not the given particle is hydrogen or not, for
-  /// example, Protons (Hydrogen) are both valid nucids and fundamental 
+  /// example, Protons (Hydrogen) are both valid nucids and fundamental
   /// pdc types, all the following identify as hydrogen, Proton, Hydrogen,
   /// Protium, "H1", "1H", 100001000, PDC(2212)
   /// \param n Integer PDC number or nucid
@@ -89,7 +90,7 @@ namespace particle
 
   /// \name pdc_number functions
   /// \{
-  /// Returns the PDC number of the particle given, if a valid pdc particle, 
+  /// Returns the PDC number of the particle given, if a valid pdc particle,
   /// will return the number, for heavy ions will return 0.
   /// \param n Integer PDC number or nucid
   /// \param s String valid particle name, altname or nucid
@@ -100,7 +101,7 @@ namespace particle
 
   /// \name name functions
   /// \{
-  /// Returns the pyne::particle name of the particle given, 
+  /// Returns the pyne::particle name of the particle given,
   /// if a valid pdc particle number, name or nucname. Raises
   /// exception if not a valid name
   /// \param n Integer PDC number or nucid
@@ -112,7 +113,7 @@ namespace particle
 
   /// \name mcnp functions
   /// \{
-  /// Returns the mcnp string of a valid pyne::particle name  
+  /// Returns the mcnp string of a valid pyne::particle name
   /// \param s int, char*, String valid particle name, altname or nucid
   std::string mcnp(int s);
   std::string mcnp(char *s);
@@ -121,7 +122,7 @@ namespace particle
 
   /// \name mcnp6 functions
   /// \{
-  /// Returns the mcnp6 string of a valid pyne::particle name  
+  /// Returns the mcnp6 string of a valid pyne::particle name
   /// \param s int, char*, String valid particle name, altname or nucid
   std::string mcnp6(int s);
   std::string mcnp6(char *s);
@@ -158,7 +159,7 @@ namespace particle
   std::string describe(std::string s);
 
   /// A helper function to set the contents of the variables in this library.
-  void * _fill_maps();  
+  void * _fill_maps();
   extern void * _;  ///< A dummy variable used when calling #_fill_maps().
 
   /// Custom excpeption for failed particle types
@@ -195,4 +196,4 @@ namespace particle
 };
 };
 
-#endif  
+#endif

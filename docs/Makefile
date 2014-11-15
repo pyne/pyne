@@ -36,6 +36,7 @@ clean:
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	doxygen Doxyfile
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
@@ -126,4 +127,3 @@ push-root:
 	git add . && \
 	git commit -am "Pushed root-level docs at $(date)" && \
 	git push
-
