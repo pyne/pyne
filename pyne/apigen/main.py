@@ -1,9 +1,9 @@
 from __future__ import print_function
 import argparse
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def main():
     parser = argparse.ArgumentParser("Generates PyNE API")

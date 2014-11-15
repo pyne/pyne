@@ -20,7 +20,7 @@ from __future__ import division, unicode_literals
 import io
 import struct
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 from collections import OrderedDict
 
 cimport numpy as np
@@ -35,7 +35,7 @@ from pyne.rxname import label
 from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def ascii_to_binary(ascii_file, binary_file):
     """Convert an ACE file in ASCII format (type 1) to binary format (type 2).

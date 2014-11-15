@@ -14,9 +14,9 @@ import os
 import sys
 import warnings
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warnings.simplefilter("ignore", VnVWarning)
+warnings.simplefilter("ignore", QAWarning)
 # -- General configuration -----------------------------------------------------
 
 sys.path.insert(0, os.path.dirname(__file__))

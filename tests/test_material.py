@@ -9,17 +9,21 @@ import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
     MapStrMaterial, MultiMaterial, MaterialLibrary
 from pyne import jsoncpp
 from pyne import data
 from pyne import nucname
+from pyne import utils
 import numpy as np
 from numpy.testing import assert_array_equal
 import tables as tb
+
+if utils.use_warnings():
+    utils.toggle_warnings()
 
 nclides = 9
 nucvec = {10010000:  1.0,
@@ -533,6 +537,12 @@ def test_from_atom_frac_meth():
     assert_equal(mat.comp[10010000], 0.11191487328808077)
     assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.molecular_mass(), 18.01056468403)
+
+    mt1 = from_atom_frac({1001: 0.1, 6000: 0.8, 8016: 0.1})
+    assert_equal(mt1.comp[10010000], 0.008911815984674479)
+    assert_equal(mt1.comp[60000000], 0.849651197215362)
+    assert_equal(mt1.comp[80160000], 0.14143698679996367)
+    assert_equal(mt1.molecular_mass(), 11.3088626825682)
 
     ihm = Material()
     ihm.from_atom_frac({922350000: 0.5, 922380000: 0.5})
