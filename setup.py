@@ -49,6 +49,15 @@ def assert_np_version():
         msg = "numpy version too low! {0} (have) < 1.8.0 (min)".format(v)
         raise ValueError(msg)
 
+def assert_ipthon_version():
+    import IPython;
+    low = (1, 2, 1)
+    v = IPython.__version__;
+    cur = tuple(map(int, v.split('.')))
+    if cur < low:
+        msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
+        raise ValueError(msg)
+
 def assert_dep_versions():
     assert_np_version()
 
