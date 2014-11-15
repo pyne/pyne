@@ -21,17 +21,16 @@ warnings.simplefilter("ignore", VnVWarning)
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-extensions = ['sphinx.ext.autodoc', 
-              'sphinx.ext.doctest', 
-              'sphinx.ext.pngmath', 
-              'sphinx.ext.inheritance_diagram', 
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.doctest',
+              'sphinx.ext.pngmath',
+              'sphinx.ext.inheritance_diagram',
               'sphinx.ext.autosummary',  # autosummary doesn't work with numpydoc...
-              'sphinx.ext.viewcode', 
-              'scisphinx.numpydoc', 
-              'scisphinx.ipython_console_highlighting', 
-              'breathe',
-              'sphinxext.notebook_sphinxext', 
-              'scisphinx.bibtex',
+              'sphinx.ext.viewcode',
+              'numpydoc',
+              'sphinxext.ipython_console_highlighting',
+              'sphinxext.notebook_sphinxext',
+              'sphinxcontrib.bibtex',
               ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -124,24 +123,24 @@ html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'sidebartextcolor': '#864907',
                       'sidebarlinkcolor': '#A92727',
                       'sidebartrimcolor': '#504A4B',
-                      'collapsiblesidebar': True, 
+                      'collapsiblesidebar': True,
                       'relbarbgcolor': '#38761D',
                       'footerbgcolor': '#BED4EB',
                       'footertextcolor': '#504A4B',
                       'bodytrimcolor': '#80858a',
                       'linkcolor': '#A92727',
-                      'textcolor': '#323039', 
+                      'textcolor': '#323039',
                       'sectionbgcolor': '#864907',
                       #'sectiontextcolor': '#777777',
-                      'sectiontrimcolor': '#f6fcfc', 
+                      'sectiontrimcolor': '#f6fcfc',
                       'codebgcolor': '#F1FFF0',
-                      'codetextcolor': '#000000', 
+                      'codetextcolor': '#000000',
                       'quotebgcolor': '#f6fcfc',
                       #'rubricbgcolor': '#D17519',
                       #'rubricbgcolor': '#69A74E',
                       'rubricbgcolor': '#996600',
                       #'min_height': 'bottom',
-                      'googleanalytics_id': 'UA-37452818-1', 
+                      'googleanalytics_id': 'UA-37452818-1',
                       }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -247,19 +246,7 @@ autodoc_member_order = "groupwise"
 autoclass_content = "both"
 autosummary_generate = []
 
-
-# C++ Autodocumentation Flags
-breathe_projects = {"pyne": None,}
-breathe_default_project = 'pyne'
-breathe_domain_by_extension = {"h": "cpp",}
-breathe_projects_source = {"pyne": '../src',}
-
-for p in os.listdir(breathe_projects_source['pyne']):
-    p, _ = os.path.splitext(p)
-    breathe_projects['pyne_' + p] = breathe_projects['pyne']
-    breathe_projects_source['pyne_' + p] = breathe_projects_source['pyne']
-
-# Prevent numpy from making silly tables 
+# Prevent numpy from making silly tables
 numpydoc_show_class_members = False
 
 
@@ -270,7 +257,7 @@ from textwrap import TextWrapper
 from prettytable import PrettyTable, FRAME
 from pyne import rxname
 
-tw = TextWrapper(initial_indent="    ", subsequent_indent="    ", 
+tw = TextWrapper(initial_indent="    ", subsequent_indent="    ",
                  break_long_words=False)
 style = {"style": "margin-left:auto;margin-right:auto;"}
 rxtab = PrettyTable(['reaction', 'id', 'description'])
