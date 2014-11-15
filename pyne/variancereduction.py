@@ -20,6 +20,7 @@ except ImportError:
 from mesh import Mesh
 from mesh import MeshError
 from mesh import IMeshTag
+from mcnp import Wwinp
 
 def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag, 
           ww_mesh, ww_tag, q_bias_mesh, q_bias_tag, beta=5):
@@ -116,16 +117,34 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
         tag_q_bias[q_bias_ve] = [adj_flux[i]*q[i]/R[i] 
                                  for i in range(0, num_e_groups)]
 
-def magic(tally, tag_name, totals = False):
+def magic(tally, tag_name, total=False):
     """Magic variance reduction technique
     Parameters:
         tally :: pyne meshtally obj
     """
-    if not totals:
+    if not total:
         # need to iterate through each energy group
-        root_tag = tally.mesh.createTag("e_upper_bounds",1,float)
-        root_tag[tally.mesh.rootSet] = tally.e_bounds[1:]
+        #root_tag = tally.mesh.createTag("e_upper_bounds",1,float)
+        #root_tag[tally.mesh.rootSet] = tally.e_bounds
 
         for bound in tally.e_bounds:
-            
+            pass
+    elif total:
+        tally.vals = IMeshTag(1, float, mesh=tally, name=tag_name)
+        tally.ww_n = IMeshTag(1, float, name="ww_{0}".format(tally.particle))
+        
+        root_tag = tally.mesh.createTag("n_e_upper_bounds",1, float)
+        root_tag[tally.mesh.rootSet] = 100 
+        
+        max_val = np.max(tally.vals[:])
+        
+        ww = []
+        
+        for ve, flux in enumerate(tally.vals):
+            ww.append(tally.vals[ve]/(2*max_val))
+        
+        tally.ww_n = ww
+        wwinp = Wwinp()
+        wwinp.read_mesh(tally.mesh)
+        wwinp.write_wwinp("{0}".format(tag_name))
          
