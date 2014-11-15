@@ -131,48 +131,88 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
         tag_q_bias[q_bias_ve] = [adj_flux[i]*q[i]/R[i] 
                                  for i in range(0, num_e_groups)]
 
-def magic(tally, tag_name, total=False):
+def magic(tally, tag_name, tag_name_error, tolerance, null_value):
     """Magic variance reduction technique
     Parameters:
         tally :: pyne meshtally obj
+        tag_name :: str
+            meshtally tag_name (example n_result or n_total_result)
+            If the string "total" exists in the name, then it addressed as a
+            single total energy bin. If not, then different energy bins.
+        tag_name_error :: str
+            the meshtally tag_name for the error associated with tag_name 
+            (example: n_rel_error)
+        tolerance :: float
+            The maximum relative error allowable for the MAGIC algorithm to create
+            a weight window lower bound for for a given voxel for the intial weight
+            window lower bound generation, or overwrite preexisting weight window
+            lower bounds for subsequent iterations. 
+        null_value : float
+            The weight window lower bound value that is assigned to voxels where the
+            relative error on flux exceeds the tolerance. This is only done for
+            initial weight window lower bound generation, not subsequent iterations.
     """
     
-    # Convert particle name to the recognized abreviation
+    tolerance = float(tolerance)
+    null_value = float(null_value)
+    
+    # Convert particle name to the recognized abbreviation
     if tally.particle == "neutron":
         tally.particle = "n"
     elif tally.particle == "photon":
         tally.particle = "p"
     elif tally.particle == "electron":
         tally.particle = "e"
-            
     
-    if not total:
-        # need to iterate through each energy group
-        #root_tag = tally.mesh.createTag("e_upper_bounds",1,float)
-        #root_tag[tally.mesh.rootSet] = tally.e_bounds
-
-        for bound in tally.e_bounds:
-            pass
+    # Determine if total energy or energy bins
+    if "total" in tag_name:
+        total = True
+    else:
+        total = False
     
-    elif total:
-        # only need total energy
-        tally.vals = IMeshTag(1, float, mesh=tally, name=tag_name)
-        tally.ww_x = IMeshTag(1, float, name="ww_{0}".format(tally.particle))
-        
+    # Tag values and particle type
+    tally.vals = IMeshTag(1, float, mesh=tally, name=tag_name)
+    tally.errors = IMeshTag(1, float, mesh=tally, name=tag_name_error)
+    tally.ww_x = IMeshTag(1, float, name="ww_{0}".format(tally.particle))
+    
+    if total:
         root_tag = tally.mesh.createTag(
             "{0}_e_upper_bounds".format(tally.particle),1, float)
         root_tag[tally.mesh.rootSet] = np.max(tally.e_bounds[:])
         
         max_val = np.max(tally.vals[:])
         ww = []
+        for ve, flux in enumerate(tally.vals[:]):
+            ww.append(flux/(2.0*max_val))
         
-        for ve, flux in enumerate(tally.vals):
-            ww.append(tally.vals[ve]/(2*max_val))
+    else:
+        root_tag = tally.mesh.createTag(
+            "{0}_e_upper_bounds".format(tally.particle), len(tally.e_bounds)-1, float)
+        root_tag[tally.mesh.rootSet] = tally.e_bounds[1:]
         
-        tally.ww_x = ww
+        # Determine the max values for each energy bin
+        max_val = []
+        for i in range(len(tally.e_bounds)-1):
+            vals_in_e = []
+            for ve, flux in enumerate(tally.vals[:]):
+                vals_in_e.append(tally.vals[ve][i])
+            
+            max_val.append(np.max(vals_in_e))
         
-        wwinp = Wwinp()
-        wwinp.read_mesh(tally.mesh)
-        wwinp.mesh.save("test.h5m")
-        wwinp.write_wwinp("{0}".format(tag_name))
+        # Apply normalization
+        ww = []
+        for ve, flux_list in enumerate(tally.vals[:]):
+            
+            flux = []
+            for i, value in enumerate(flux_list):
+                flux.append(value/(2*max_val[i]))
+            
+            ww.append(flux)
+            
+    tally.ww_x = ww
+
+    wwinp = Wwinp()
+    wwinp.read_mesh(tally.mesh)
+    wwinp.mesh.save("test.h5m")
+    wwinp.write_wwinp("{0}".format(tag_name))
          
