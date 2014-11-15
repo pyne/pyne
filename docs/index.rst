@@ -52,10 +52,9 @@ Contents
     gallery/index
     usersguide/index
     pyapi/index
+    cppapi/index
     previous/index
     devsguide/vnv
-
-- `C++ API`_
 
 **Theory:**
 
