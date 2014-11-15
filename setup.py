@@ -58,6 +58,14 @@ def assert_ipthon_version():
         msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
         raise ValueError(msg)
 
+def assert_ubuntu_version():
+    import platform
+    v = platform.uname();
+    for itm in v:
+        if 'precise' in itm:
+            msg = "ubuntu 12/precise packages may be outdated, it is highly recommended to update to ubuntu 14 LTS"
+            raise ValueError(msg);
+
 def assert_dep_versions():
     assert_np_version()
 
