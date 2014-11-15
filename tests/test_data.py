@@ -16,6 +16,10 @@ warnings.simplefilter("ignore", VnVWarning)
 import pyne
 from pyne import data
 
+from pyne import utils
+
+if utils.use_warnings():
+    utils.toggle_warnings()
 
 # These tests require nuc_data
 if not os.path.isfile(pyne.nuc_data):
