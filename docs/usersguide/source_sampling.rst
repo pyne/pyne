@@ -24,16 +24,17 @@ source sampling module allows for three sampling modes:
   (i.e. positions/energies with high source density are sampled more often
   than those of low source density). 
 :uniform:
-  All mesh volume elements and energy bins are equiprobable and the statistical
-  weight of particles is modified accordingly.
+  All mesh volume elements are sampled with equal probability. Energy bins are
+  sampled in analog from the distribution within a given mesh volume element.
+  Statistical weights of particles are modified accordingly.
 :user:
   In addition to source densities, the user supplies (on the same mesh) biased
   source densities. Particle birth parameters are then sampled on the basis of
   the biased source densities, and the statistical weight of particles is
   modified accordingly. The biased source density tag has the same length as the
   source density tag. Alternatively, the tag may have a length of 1, in which
-  case the bias is only applied spatially and all energy groups are sampled 
-  uniformly.
+  case the bias is only applied spatially and energy groups are sampled in
+  analog.
 
 A complete description of the theory involved can be found in the 
 source_sampling entry in the PyNE theory manual.
@@ -140,8 +141,8 @@ Fortran Interface
 Because Fortran cannot store an instance of the Sampler class, to perform
 source sampling from Fortran, a free-standing function "sampling_setup" is
 called to create a global instance of the sampling class. This function takes
-a single argument: an integer representing the problem mode (1: analog, 2:
-uniform, 3: user). This function assumes the mesh file is "source.h5m" and
+a single argument: an integer representing the problem mode (0: analog, 1:
+uniform, 2: user). This function assumes the mesh file is "source.h5m" and
 that the tag names are "source_density" and "biased_source_density". In 
 addition, this function assumes that a file "e_bounds" is present which is
 a plain text file containing the energy boundaries.
@@ -202,3 +203,22 @@ The simplest way to compile MCNP5 with the source subroutine is as follows:
   #. Open the file MCNP/Source/src/FILE.list.
   #. Edit line 78 to include the additional source files. It should look like "CXX_SRC := measure.cpp source_sampling.cpp".
   #. Compile MCNP5 using the standard build method.
+
+Once MCNP5 is compiled, MCNP5 can be run normally. The file "source.h5m" must
+be present in the working directory that MCNP5 is run from. This file should
+contain source densities (on the "source_density" tag) and optionally biased
+source densities (the "biased_source_density" tag). An "idum" card must be used
+in the MCNP5 input file. This card should have two arguments. The first is the
+sampling mode (0: analog, 1: uniform, 2: user). The second is the resample
+limit for void rejection. For a given particle, if a source position is
+selected in void (MCNP materal 0) the source position is resampled within the
+selected mesh volume element until either a non-void position is found, or this
+user-specified limit is researched.
+
+For example, this "idum" card specifies uniform sampling with a resample limit
+of 100:
+
+.. code-block:: bash
+
+  idum 1 100
+

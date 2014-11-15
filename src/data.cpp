@@ -1629,7 +1629,7 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
     } else if (part1[i] == 36565) {
       // spontaneous fission, rx == 'sf'
       result += part2[i] * 0.01 * wimsdfpy_data[from_to];
-    } else if ((part1[i] != 0) && (groundstate(rxname::child(from_to.first, 
+    } else if ((part1[i] != 0) && (groundstate(rxname::child(from_to.first,
                                    part1[i], "decay")) == from_to.second)) {
       result += part2[i] * 0.01;
     }
@@ -1816,6 +1816,8 @@ template<> void pyne::_load_data<pyne::gamma>() {
                      H5T_NATIVE_INT);
   status = H5Tinsert(desc, "parent_nuc", HOFFSET(gamma, parent_nuc),
                      H5T_NATIVE_INT);
+  status = H5Tinsert(desc, "child_nuc", HOFFSET(gamma, child_nuc),
+                     H5T_NATIVE_INT);
   status = H5Tinsert(desc, "energy", HOFFSET(gamma, energy),
                      H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "energy_err", HOFFSET(gamma, energy_err),
@@ -1865,12 +1867,25 @@ template<> void pyne::_load_data<pyne::gamma>() {
   delete[] gamma_array;
 }
 
-std::vector<std::pair<double, double> > pyne::gamma_energy(int parent){
+std::vector<std::pair<double, double> > pyne::gamma_energy(int parent) {
   std::vector<std::pair<double, double> > result;
   std::vector<double> part1 = data_access<double, gamma>(parent, 0.0,
     DBL_MAX, offsetof(gamma, energy), gamma_data);
   std::vector<double> part2 = data_access<double, gamma>(parent, 0.0,
     DBL_MAX, offsetof(gamma, energy_err), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+
+std::vector<std::pair<double, double> > pyne::gamma_energy(double energy,
+double error) {
+  std::vector<std::pair<double, double> > result;
+  std::vector<double> part1 = data_access<double, gamma>(energy+error,
+    energy-error, offsetof(gamma, energy), gamma_data);
+  std::vector<double> part2 = data_access<double, gamma>(energy+error,
+    energy-error, offsetof(gamma, energy_err), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
@@ -1948,6 +1963,20 @@ double error) {
     energy-error, offsetof(gamma, from_nuc), gamma_data);
   std::vector<int> part2 = data_access<int, gamma>(energy+error,
     energy-error, offsetof(gamma, to_nuc), gamma_data);
+  for(int i = 0; i < part1.size(); ++i){
+    result.push_back(std::make_pair(part1[i],part2[i]));
+  }
+  return result;
+};
+
+
+std::vector<std::pair<int, int> > pyne::gamma_parent_child(double energy,
+double error) {
+  std::vector<std::pair<int, int> > result;
+  std::vector<int> part1 = data_access<int, gamma>(energy+error,
+    energy-error, offsetof(gamma, parent_nuc), gamma_data);
+  std::vector<int> part2 = data_access<int, gamma>(energy+error,
+    energy-error, offsetof(gamma, child_nuc), gamma_data);
   for(int i = 0; i < part1.size(); ++i){
     result.push_back(std::make_pair(part1[i],part2[i]));
   }

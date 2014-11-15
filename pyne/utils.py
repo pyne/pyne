@@ -155,6 +155,14 @@ def failure(s):
     msg = head + s + tail
     return msg
 
+def warning(s):
+    """Formats a warning message for printing. If on a posix system the message will be in color. 
+
+    """
+    head = "\033[1;33m" if USE_COLOR else "*** WARNING ***: "
+    tail = "\033[0m" if USE_COLOR else ""
+    msg = head + s + tail
+    return msg
 
 ##################################
 ### Path manipulation routines ###
