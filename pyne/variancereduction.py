@@ -136,6 +136,16 @@ def magic(tally, tag_name, total=False):
     Parameters:
         tally :: pyne meshtally obj
     """
+    
+    # Convert particle name to the recognized abreviation
+    if tally.particle == "neutron":
+        tally.particle = "n"
+    elif tally.particle == "photon":
+        tally.particle = "p"
+    elif tally.particle == "electron":
+        tally.particle = "e"
+            
+    
     if not total:
         # need to iterate through each energy group
         #root_tag = tally.mesh.createTag("e_upper_bounds",1,float)
@@ -143,22 +153,26 @@ def magic(tally, tag_name, total=False):
 
         for bound in tally.e_bounds:
             pass
+    
     elif total:
+        # only need total energy
         tally.vals = IMeshTag(1, float, mesh=tally, name=tag_name)
-        tally.ww_n = IMeshTag(1, float, name="ww_{0}".format(tally.particle))
+        tally.ww_x = IMeshTag(1, float, name="ww_{0}".format(tally.particle))
         
-        root_tag = tally.mesh.createTag("n_e_upper_bounds",1, float)
-        root_tag[tally.mesh.rootSet] = 100 
+        root_tag = tally.mesh.createTag(
+            "{0}_e_upper_bounds".format(tally.particle),1, float)
+        root_tag[tally.mesh.rootSet] = np.max(tally.e_bounds[:])
         
         max_val = np.max(tally.vals[:])
-        
         ww = []
         
         for ve, flux in enumerate(tally.vals):
             ww.append(tally.vals[ve]/(2*max_val))
         
-        tally.ww_n = ww
+        tally.ww_x = ww
+        
         wwinp = Wwinp()
         wwinp.read_mesh(tally.mesh)
+        wwinp.mesh.save("test.h5m")
         wwinp.write_wwinp("{0}".format(tag_name))
          
