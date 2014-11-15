@@ -20,7 +20,7 @@ try:
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the mcnp module may be incomplete.",
-                  VnVWarning)
+                  QAWarning)
     HAVE_PYTAPS = False
 
 from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag

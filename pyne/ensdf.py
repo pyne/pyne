@@ -3,7 +3,7 @@ import re
 import sys
 import copy
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 
@@ -13,7 +13,7 @@ from pyne.utils import to_sec
 if sys.version_info[0] > 2:
   basestring = str
     
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')

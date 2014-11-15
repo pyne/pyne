@@ -8,9 +8,9 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, as
 import numpy as np
 import numpy.testing as npt
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warnings.simplefilter("ignore", VnVWarning)
+warnings.simplefilter("ignore", QAWarning)
 
 import pyne
 from pyne import data

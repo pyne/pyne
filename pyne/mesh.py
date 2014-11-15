@@ -4,18 +4,18 @@ import copy
 import itertools
 from collections import Iterable, Sequence
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 import tables as tb
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", VnVWarning)
+         "Some aspects of the mesh module may be incomplete.", QAWarning)
 
 from pyne.material import Material, MaterialLibrary, MultiMaterial
 

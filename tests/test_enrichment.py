@@ -9,8 +9,8 @@ import os
 import warnings
 import numpy as np
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 
 import pyne
 from pyne.material import Material

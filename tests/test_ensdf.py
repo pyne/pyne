@@ -9,8 +9,8 @@ import nose
 
 from nose.tools import assert_equal, assert_almost_equal
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne import ensdf
 
 ensdf_sample = """\

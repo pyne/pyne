@@ -12,7 +12,7 @@ from libcpp.string cimport string as std_string
 # Python imports 
 #from collections import Iterable
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 # local imports 
 cimport pyne.cpp_utils
@@ -23,7 +23,7 @@ from pyne cimport cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 #
 # Conversion dictionaries

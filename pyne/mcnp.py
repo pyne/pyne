@@ -21,7 +21,7 @@ import os
 import linecache
 import datetime
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 import itertools
 
 import numpy as np
@@ -32,7 +32,7 @@ from pyne.material import MultiMaterial
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
 try:
@@ -41,7 +41,7 @@ try:
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
                   "Some aspects of the mcnp module may be incomplete.",
-                  VnVWarning)
+                  QAWarning)
     HAVE_PYTAPS = False
 
 from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag

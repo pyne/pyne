@@ -1,14 +1,14 @@
 import re
 import sys
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 
 if sys.version_info[0] > 2:
   basestring = str
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 _if_idx_str = ("""if (exist("idx", "var"));\n"""
               """  idx = idx + 1;\n"""
