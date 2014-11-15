@@ -5,34 +5,37 @@ PyNE Development Team
 =====================
 The Python for Nuclear Engineering Team includes:
 
-* `Anthony Scopatz`_
-* `Seth Johnson`_
-* `Paul Romano`_
-* Paul Wilson
-* Nick Touran
-* Katy Huff
-* `Chris Dembia`_
-* `Eric Relson`_
-* `Elliott Biondo`_
-* `Matthew Gidden`_
 * Cameron Bates
+* `Elliott Biondo`_
+* `Chris Dembia`_
+* `Matthew Gidden`_
+* Katy Huff
+* `Seth Johnson`_
+* `Kalin Kiesling`_
 * `Kevin Manalo`_
-
-.. _Anthony Scopatz: http://www.scopatz.com/
-
-.. _Seth Johnson: http://reference-man.com/
-
-.. _Paul Romano: mailto:romano7@gmail.com
-
-.. _Chris Dembia: mailto:cld72@cornell.edu
-
-.. _Eric Relson: mailto:erelson@umich.edu
+* `Eric Relson`_
+* `Paul Romano`_
+* `Anthony Scopatz`_
+* Nick Touran
+* Paul Wilson
 
 .. _Elliott Biondo: mailto:biondo@wisc.edu
 
+.. _Chris Dembia: mailto:cld72@cornell.edu
+
 .. _Matthew Gidden: http://mattgidden.com/
 
+.. _Seth Johnson: http://reference-man.com/
+
+.. _Kalin Kiesling: mailto:krkiesling@gmail.com
+
 .. _Kevin Manalo: mailto:kmanalo@gmail.com
+
+.. _Eric Relson: mailto:erelson@umich.edu
+
+.. _Paul Romano: mailto:romano7@gmail.com
+
+.. _Anthony Scopatz: http://www.scopatz.com/
 
 Contact us via pyne-dev@googlegroups.com
 

@@ -88,6 +88,8 @@ def test_structured_mesh_from_coords():
     sm = Mesh(structured_coords = [range(1,5), range(1,4), range(1,3)], \
               structured=True)
     assert_true(all(sm.dims == [0, 0, 0, 3, 2, 1]))
+    assert_array_equal(sm.structured_coords, [range(1,5), range(1,4), range(1,3)])
+    assert_equal(sm.structured_ordering, 'xyz')
 
 def test_create_by_set():
     mesh = iMesh.Mesh()
@@ -650,6 +652,25 @@ def test_imeshtag_broadcasting():
     m.grape[[2, 0]] = [7.0, 8.0]
     assert_array_equal(m.grape[:], [[7.0, 8.0], [0.0, 0.0], [7.0, 8.0], [0.0, 0.0]])
 
+def test_imeshtag_expand():
+    m = Mesh(structured=True, structured_coords=[[-1, 0, 1],[0, 1],[0, 1]])
+    m.clam = IMeshTag(2, float)
+    m.clam[:] = [[1.1, 2.2], [3.3, 4.4]]
+    m.clam.expand()
+    m.clam_000 = IMeshTag(1, float)
+    assert_array_equal(m.clam_000[:], [1.1, 3.3])
+    m.clam_001 = IMeshTag(1, float)
+    assert_array_equal(m.clam_001[:], [2.2, 4.4])
+
+    # corner case: mesh with a single volume element
+    m = Mesh(structured=True, structured_coords=[[0, 1],[0, 1],[0, 1]])
+    m.clam = IMeshTag(2, float)
+    m.clam[:] = [[1.1, 2.2]]
+    m.clam.expand()
+    m.clam_000 = IMeshTag(1, float)
+    assert_array_equal(m.clam_000[:], 1.1)
+    m.clam_001 = IMeshTag(1, float)
+    assert_array_equal(m.clam_001[:], 2.2)
 
 def test_comptag():
     mats = {
