@@ -63,6 +63,7 @@ def parse_args():
             i += 1
         else:
             argsets[i].append(arg)
+
     # handle HDF5
     hdf5opt = [o.split('=')[1] for o in distutils_args \
                if o.startswith('--hdf5=')]
@@ -70,6 +71,14 @@ def parse_args():
         os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
         distutils_args = [o for o in distutils_args \
                           if not o.startswith('--hdf5=')]
+
+    # handle MOAB
+    moabopt = [o.split('=')[1] for o in distutils_args \
+               if o.startswith('--moab=')]
+    if 0 < len(moabopt):
+        os.environ['MOAB_ROOT'] = moabopt[0]  # Expose to CMake
+        distutils_args = [o for o in distutils_args \
+                          if not o.startswith('--moab=')]
 
     # handle build type
     btopt = [o.split('=')[1] for o in distutils_args \
