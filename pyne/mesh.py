@@ -443,6 +443,23 @@ class IMeshTag(Tag):
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))        
 
+    def expand(self):
+        """This function creates a group of scalar tags from a vector tag. For
+        a vector tag named <tag_name> of length N, scalar tags in the form:
+
+        <tag_name>_000, <tag_name>_001, <tag_name>_002... <tag_name>_N
+
+        are created and the data is tagged accordingly.
+        """
+        if self.size < 2:
+            raise TypeError("Cannot expand a tag that is already a scalar.")
+        for j in range(self.size):
+            data = [x[j] for x in self[:]]
+            tag = self.mesh.mesh.createTag("{0}_{1:03d}".format(self.name, j), 
+                                           1, self.dtype)
+            tag[list(self.mesh.iter_ve())] = data
+
+
 class ComputedTag(Tag):
     '''A mesh tag which looks itself up by calling a function (or other callable)
     with the following signature::
