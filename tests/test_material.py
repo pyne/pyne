@@ -534,6 +534,12 @@ def test_from_atom_frac_meth():
     assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.molecular_mass(), 18.01056468403)
 
+    mt1 = from_atom_frac({1001: 0.1, 6000: 0.8, 8016: 0.1})
+    assert_equal(mt1.comp[10010000], 0.008911815984674479)
+    assert_equal(mt1.comp[60000000], 0.849651197215362)
+    assert_equal(mt1.comp[80160000], 0.14143698679996367)
+    assert_equal(mt1.molecular_mass(), 11.3088626825682)
+
     ihm = Material()
     ihm.from_atom_frac({922350000: 0.5, 922380000: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
