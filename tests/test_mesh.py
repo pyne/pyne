@@ -88,6 +88,8 @@ def test_structured_mesh_from_coords():
     sm = Mesh(structured_coords = [range(1,5), range(1,4), range(1,3)], \
               structured=True)
     assert_true(all(sm.dims == [0, 0, 0, 3, 2, 1]))
+    assert_array_equal(sm.structured_coords, [range(1,5), range(1,4), range(1,3)])
+    assert_equal(sm.structured_ordering, 'xyz')
 
 def test_create_by_set():
     mesh = iMesh.Mesh()

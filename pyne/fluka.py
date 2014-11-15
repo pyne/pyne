@@ -1,14 +1,14 @@
 #!/usr/bin/python
 """Module for parsing FLUKA output data. FLUKA is a fully integrated particle
-physics MonteCarlo simulation package. It has many applications in high 
+physics MonteCarlo simulation package. It has many applications in high
 energy experimental physics and engineering, shielding, detector and telescope
 design, cosmic ray studies, dosimetry, medical physics and radio-biology.
-Further information on FLUKA can be obtained from 
+Further information on FLUKA can be obtained from
 http://www.fluka.org/fluka.php
 
 Currently, only usrbin output files can be read.
 
-If PyTAPS is not installed, then Usrbin and UsrbinTally will not be 
+If PyTAPS is not installed, then Usrbin and UsrbinTally will not be
 available to use.
 
 """
@@ -27,17 +27,17 @@ from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 
 class Usrbin(object):
-    """This class is the wrapper class for UsrbinTally. This class stores 
+    """This class is the wrapper class for UsrbinTally. This class stores
     all information for a single file that contains one or more usrbin
-    tallies. The "tally" attribute provides key/value access to individual 
+    tallies. The "tally" attribute provides key/value access to individual
     UsrbinTally objects.
 
     Attributes:
     -----------
     filename : string
-        Path to Fluka usrbin file 
+        Path to Fluka usrbin file
     tally : dict
-        A dictionary with user-specified tally names as keys and UsrbinTally 
+        A dictionary with user-specified tally names as keys and UsrbinTally
         objects as values.
     """
 
@@ -70,7 +70,7 @@ class Usrbin(object):
 
 
 class UsrbinTally(Mesh):
-    """This class reads a single FLUKA USRBIN tally from a USRBIN file. 
+    """This class reads a single FLUKA USRBIN tally from a USRBIN file.
 
     Attributes
     ----------
@@ -89,11 +89,11 @@ class UsrbinTally(Mesh):
     z_bounds : list of floats
         The locations of mesh vertices in the z direction
     part_data_tag : string
-    	The name of the tag for the track-length tally data.
-    	Follows form "part_data_X" where X is the number of the particle
+        The name of the tag for the track-length tally data.
+        Follows form "part_data_X" where X is the number of the particle
     error_data_tag : string
-    	The name of the tag for the error data.
-    	Follows form "error_data_X" where X is the number of the particle
+        The name of the tag for the error data.
+        Follows form "error_data_X" where X is the number of the particle
     """
 
     def __init__(self, fh):
@@ -112,10 +112,10 @@ class UsrbinTally(Mesh):
         part_data = []
         error_data = []
 
-        line = fh.readline()    
+        line = fh.readline()
 
-        # Read the header for the tally. 
-        # Information obtained: coordinate system used, user-defined tally 
+        # Read the header for the tally.
+        # Information obtained: coordinate system used, user-defined tally
         # name, particle, and x, y, and z dimension information.
         [self.coord_sys, self.name, self.particle] = line.split('"')
         self.name = self.name.strip()
@@ -147,7 +147,7 @@ class UsrbinTally(Mesh):
         while (len(error_data) < num_volume_element):
             line = fh.readline()
             error_data += [float(x) for x in line.split()]
-                            
+
         # create mesh object
         self.x_bounds = self._generate_bounds(x_info)
         self.y_bounds = self._generate_bounds(y_info)
@@ -168,16 +168,16 @@ class UsrbinTally(Mesh):
         line = fh.readline()
         # assume next line is z coord info
         z_info = self._parse_dimensions(line)
-           
+
         line = fh.readline()
 
         # return lists of info for each dimension: [min, max, number of bins, width]
         return x_info, y_info, z_info
 
-	
-    def _parse_dimensions(self, line): 
-        """This retrieves the specific dimensions and binning information for 
-        the x, y, and z dimensions. Information retrieved is the minimum and 
+
+    def _parse_dimensions(self, line):
+        """This retrieves the specific dimensions and binning information for
+        the x, y, and z dimensions. Information retrieved is the minimum and
         maximum value for each dimension, the number of bins in each direction,
         and the width of each evenly spaced bin.
         """
@@ -186,7 +186,7 @@ class UsrbinTally(Mesh):
                float(tokens[10])
 
 
-    def _generate_bounds(self, dim_info): 
+    def _generate_bounds(self, dim_info):
         """This takes in the dimension information (min, max, bins, and width)
         and returns a list of bound values for that given dimension.
         """
@@ -198,18 +198,18 @@ class UsrbinTally(Mesh):
 
 
     def _create_mesh(self, part_data, error_data):
-        """This will create the mesh object with the name of the tally 
+        """This will create the mesh object with the name of the tally
         specified by the user. One mesh object contains both the part_data and
         the error_data.
         """
-	super(UsrbinTally, self).__init__(structured_coords=[self.x_bounds,
+        super(UsrbinTally, self).__init__(structured_coords=[self.x_bounds,
                                      self.y_bounds, self.z_bounds],
                                      structured=True,
                                      structured_ordering='zyx',
                                      mats=None)
-	self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 
+        self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self,
                                   name="part_data_{0}".format(self.particle))
-	self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self, 
+        self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self,
                                   name="error_data_{0}".format(self.particle))
-	self.part_data_tag[:] = part_data
-	self.error_data_tag[:] = error_data
+        self.part_data_tag[:] = part_data
+        self.error_data_tag[:] = error_data

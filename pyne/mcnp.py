@@ -1686,24 +1686,23 @@ class Wwinp(Mesh):
 
         # Append line 1.
         block1 += \
-            "         1         1         " \
-            "{0}        {1}                     {2}\n".format(
-                self.ni, self.nr, time)
+            "{0:10.0f}{1:10.0f}{2:10.0f}{3:10.0f}" \
+            "{4:>38}\n".format(1, 1,  self.ni, self.nr, time)
 
         # Append line 2.
         for i in self.ne:
-            block1 += '         {0}'.format(int(i))
+            block1 += '{0:10.0f}'.format(int(i))
 
         block1 += '\n'
 
         # Append line 3.
         block1 += \
-            ' {0: 1.5E} {1: 1.5E} {2: 1.5E} {3: 1.5E} {4: 1.5E} {5: 1.5E}\n'\
+            '{0:13.5E}{1:13.5E}{2:13.5E}{3:13.5E}{4:13.5E}{5:13.5E}\n'\
             .format(self.nf[0], self.nf[1], self.nf[2],
                     self.origin[0], self.origin[1], self.origin[2])
 
         # Append line 4.
-        block1 += ' {0: 1.5E} {1: 1.5E} {2: 1.5E} {3: 1.5E}\n'\
+        block1 += '{0:13.5E}{1:13.5E}{2:13.5E}{3:13.5E}\n'\
             .format(self.nc[0], self.nc[1], self.nc[2], self.nwg)
 
         f.write(block1)
@@ -1723,7 +1722,7 @@ class Wwinp(Mesh):
         for i in range(0, 3):
             line_count = 0  # number of entries printed to current line, max=6
             for j in range(0, len(block2_array[i])):
-                block2 += ' {0: 1.5E}'.format(block2_array[i][j])
+                block2 += '{0:13.5E}'.format(block2_array[i][j])
                 line_count += 1
                 if line_count == 6:
                     block2 += '\n'
@@ -1759,10 +1758,11 @@ class Wwinp(Mesh):
         line_count = 0
 
         for e_upper_bound in self.e[particle_index]:
-            block3 += '  {0:1.5E}'.format(e_upper_bound)
+            block3 += '{0:13.5E}'.format(e_upper_bound)
             line_count += 1
             if line_count == 6:
                 block3 += '\n'
+                line_count = 0
 
         if line_count != 0:
             block3 += '\n'
@@ -1778,7 +1778,7 @@ class Wwinp(Mesh):
             # Append ww_data to block3 string.
             line_count = 0
             for ww in ww_data[:, i]:
-                block3 += ' {0: 1.5E}'.format(ww)
+                block3 += '{0:13.5E}'.format(ww)
                 line_count += 1
 
                 if line_count == 6:
@@ -1852,11 +1852,9 @@ class Wwinp(Mesh):
             # and the number of fine meshes between them.
             j = 1
             while j < len(points) - 1:
-                 # Floating point comparison characterizes coarse vs. fine.
-                 # The value 1.01E-2 is used because MCNP prints
-                 # to the nearest 0.01.
+                # Floating point comparison characterizes coarse vs. fine.
                 if abs((points[j] - points[j-1]) -
-                       (points[j+1] - points[j])) <= 1.01E-2:
+                       (points[j+1] - points[j])) <= 1.01E-4:
                     self.fm[i][len(self.cm[i])] += 1
                 else:
                     self.cm[i].append(points[j])
