@@ -15,6 +15,9 @@ import sys
 import warnings
 
 from pyne.utils import VnVWarning
+import cloud_sptheme as csp
+
+print("Cloud Version: " + csp.__version__)
 
 warnings.simplefilter("ignore", VnVWarning)
 # -- General configuration -----------------------------------------------------
@@ -112,8 +115,8 @@ pygments_style = 'tango'
 # Sphinx are currently 'default' and 'sphinxdoc'.
 #html_theme = 'default'
 #html_theme = 'sphinxdoc'
-#html_theme = 'altered_nature'
-html_theme = 'cloud_pyne'
+#html_theme = 'cloud'
+html_theme_path = ['_theme', csp.get_theme_dir()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -122,25 +125,26 @@ html_theme = 'cloud_pyne'
 html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'sidebartextcolor': '#864907',
                       'sidebarlinkcolor': '#A92727',
-                      'sidebartrimcolor': '#504A4B',
-                      'collapsiblesidebar': True,
+                      #'sidebartrimcolor': '#504A4B',
+                      'collapsiblesidebar': False,
+                      'stickysidebar':False,
                       'relbarbgcolor': '#38761D',
-                      'footerbgcolor': '#BED4EB',
+                      'footerbgcolor': '#94ba87',
                       'footertextcolor': '#504A4B',
-                      'bodytrimcolor': '#80858a',
+                      #'bodytrimcolor': '#80858a',
                       'linkcolor': '#A92727',
                       'textcolor': '#323039',
-                      'sectionbgcolor': '#864907',
+                      #'sectionbgcolor': '#578d40',
                       #'sectiontextcolor': '#777777',
-                      'sectiontrimcolor': '#f6fcfc',
+                      #'sectiontrimcolor': '#f6fcfc',
                       'codebgcolor': '#F1FFF0',
                       'codetextcolor': '#000000',
-                      'quotebgcolor': '#f6fcfc',
+                      #'quotebgcolor': '#f6fcfc',
                       #'rubricbgcolor': '#D17519',
                       #'rubricbgcolor': '#69A74E',
-                      'rubricbgcolor': '#996600',
+                      #'rubricbgcolor': '#996600',
                       #'min_height': 'bottom',
-                      'googleanalytics_id': 'UA-37452818-1',
+                      #'googleanalytics_id':'UA-37452818-1',
                       }
 
 # Add any paths that contain custom themes here, relative to this directory.
