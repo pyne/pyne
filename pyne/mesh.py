@@ -454,9 +454,7 @@ class IMeshTag(Tag):
         if self.size < 2:
             raise TypeError("Cannot expand a tag that is already a scalar.")
         for j in range(self.size):
-            data = []
-            for x in self[:]:
-                data.append(x[j])
+            data = [x[j] for x in self[:]]
             tag = self.mesh.mesh.createTag("{0}_{1:03d}".format(self.name, j), 
                                            1, self.dtype)
             tag[list(self.mesh.iter_ve())] = data
