@@ -10,6 +10,7 @@ essential aspects of using PyNE to do nuclear engineering.
     :maxdepth: 1
 
     nucname
+    particle
     material
     mcnp
     njoy
@@ -19,3 +20,4 @@ essential aspects of using PyNE to do nuclear engineering.
     enrichment
     stlcontainers
     jsoncpp
+    source_sampling

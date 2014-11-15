@@ -52,8 +52,7 @@ class Transmuter(object):
         eafds.load(temp=temp)
         gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
         eafds.dst_group_struct = gs
-        self.xscache = XSCache(group_struct=gs, data_source_classes=(NullDataSource,))
-        self.xscache.data_sources.insert(0, eafds)
+        self.xscache = XSCache(group_struct=gs, data_sources=(eafds, NullDataSource,))
 
         self.t = t
         self._phi = None

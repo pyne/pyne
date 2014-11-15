@@ -9,7 +9,7 @@ and contribute, please let us know either on the mailing list
 pyne-dev@googlegroups.com) or `github`_.
 
 Examples, documentation, and more can be found at 
-http://pyne.io/, the official PyNE projectsite.
+http://pyne.io/, the official PyNE project site.
 
 .. _github: https://github.com/pyne/pyne
 
@@ -26,6 +26,8 @@ Dependencies
 ------------
 PyNE has the following dependencies:
 
+   #. `Fortran compiler <https://gcc.gnu.org/wiki/GFortran>`_
+   #. `C++ compiler <https://gcc.gnu.org/>`_
    #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
    #. `NumPy <http://www.numpy.org/>`_ (>= 1.8.0)
    #. `SciPy <http://www.scipy.org/>`_
@@ -33,6 +35,12 @@ PyNE has the following dependencies:
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
    #. `Python 2.7 <http://www.python.org/>`_
+   #. `LAPACK <http://www.netlib.org/lapack/>`_
+   #. `BLAS <http://www.netlib.org/blas/>`_
+
+Optional Depenendencies:
+   #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
+   #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
 
 Additionally, building the documentation requires the following:
 
@@ -40,6 +48,8 @@ Additionally, building the documentation requires the following:
    #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
    #. `breathe <http://michaeljones.github.io/breathe/>`_ 
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
+
+Most of the dependencies are readily available through package managers. 
 
 ------
 Binary
@@ -73,7 +83,28 @@ data is under some form of license restriction or export control which
 prevents the developers from distributing it with PyNE.  However, the 
 ``nuc_data_make`` program (which is installed by ``setup.py``) will
 do its best to find relevant nuclear data elsewhere on your machine
-or from public sources on the internet.  
+or from public sources on the internet.
+
+^^^^^^^^^^^^^^^^^^^
+Supported Platforms
+^^^^^^^^^^^^^^^^^^^
+PyNE is currently built and tested daily on the following platforms
+on Python 2.7
+
+ * Ubuntu 12.04 - x86_64
+ * OSX 10.8 - x86_64
+
+PyNE has pre-built binaries for the lastest release (0.4) on windows
+mac and linux 
+
+ * Mac (Python 2.7 and Python 3.3) - x86_64
+ * Linux (Python 2.7 and Python 3.3) - x86_64
+ * Windows (Python 2.7) - x86
+
+PyNE has known issues on the following platforms
+
+ * Windows (64-bit build currently not feasible)
+ * 32-bit platforms (all variants) have known problems - see #315
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Conda Install Instructions
@@ -147,8 +178,16 @@ Once those lines have been added, run the following command before running
 .. _zip: https://github.com/pyne/pyne/zipball/0.4
 .. _tar: https://github.com/pyne/pyne/tarball/0.4
 
-.. install-end
 
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Ubuntu 14.04 Build script
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A script for installing PyNE and all its dependencies from scratch on Ubuntu
+14.04 is found `here
+<https://github.com/pyne/install_scripts/blob/master/ubuntu_14.04.sh>`_
+
+.. install-end
 
 ============
 Contributing

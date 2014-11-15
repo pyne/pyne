@@ -15,6 +15,7 @@ doxygen_config = {'PROJECT_NAME': 'PYNE',
 
 doxyfile_name = './build/tally_doxyfile'
 
+includes = ['/mnt/data/opt/dagmc/hdf5/include']
 
 extra_types = 'extra_types'  # non-default value
 
@@ -38,6 +39,4 @@ stlcontainers = [
 
 #stlcontainers_module = 'stlcontainers'
 
-classes = [apiname('Tally','cpp/tally.*',incfiles='tally.h')]
-
-functions = []
+classes = [apiname('Tally','src/tally.*',incfiles='tally.h')]

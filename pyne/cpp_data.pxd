@@ -15,10 +15,11 @@ cdef extern from "data.h" namespace "pyne":
     double barns_per_cm2
     double cm2_per_barn
     double sec_per_day
+    double MeV_per_K
 
     # hash map and initialization function
     map[std_string, std_string] data_checksums
-    
+
     # atomic_mass functions
     map[int, double] atomic_mass_map
     double atomic_mass(int) except +
@@ -56,7 +57,7 @@ cdef extern from "data.h" namespace "pyne":
     double dose_ratio(int, int) except +
     double dose_ratio(char *, int) except +
     double dose_ratio(std_string, int) except +
-    
+
     # ext_soil_dose functions
     double ext_soil_dose(int, int) except +
     double ext_soil_dose(char *, int) except +
@@ -77,7 +78,7 @@ cdef extern from "data.h" namespace "pyne":
     std_string dose_lung_model(int, int) except +
     std_string dose_lung_model(char *, int) except +
     std_string dose_lung_model(std_string, int) except +
-    
+
     # Scattering length functions
     map[int, extra_types.complex_t] b_coherent_map
     extra_types.complex_t b_coherent(int) except +
@@ -129,7 +130,7 @@ cdef extern from "data.h" namespace "pyne":
 
     int metastable_id(int, int) except +
     int metastable_id(int) except +
-    
+
     int id_from_level(int, double) except +
     int id_from_level(int, double, std_string) except +
 
@@ -142,8 +143,11 @@ cdef extern from "data.h" namespace "pyne":
     vector[pair[double, double]] decay_photon_branch_ratios(int) except +
     pair[double,double] decay_beta_branch_ratio(pair[int, int] from_to) except +
     vector[pair[double, double]] decay_beta_branch_ratios(int) except +
+    vector[int] decay_data_children(int) except +
 
     vector[pair[double, double]] gamma_energy(int parent) except +
+    vector[pair[double, double]] gamma_energy(double energy,
+                                              double error) except +
     vector[pair[double, double]] gamma_photon_intensity(int parent) except +
     vector[pair[double, double]] gamma_photon_intensity(double energy,
                                                         double error) except +
@@ -151,9 +155,10 @@ cdef extern from "data.h" namespace "pyne":
     vector[pair[double, double]] gamma_total_intensity(int parent) except +
     vector[pair[int, int]] gamma_from_to(int parent) except +
     vector[pair[int, int]] gamma_from_to(double energy, double error) except +
+    vector[pair[int, int]] gamma_parent_child(double energy, double error) except +
     vector[int] gamma_parent(double energy, double error) except +
-    vector[vector[pair[double, double]]] gamma_xrays(int parent) except +
-    
+    vector[pair[double, double]] gamma_xrays(int parent) except +
+
     vector[double] alpha_energy(int parent) except +
     vector[double] alpha_intensity(int parent) except +
     vector[int] alpha_parent(double energy, double error) except +
@@ -174,4 +179,4 @@ cdef extern from "data.h" namespace "pyne":
     vector[int] ecbp_parent(double energy, double error) except +
     vector[int] ecbp_child(double energy, double error) except +
     vector[int] ecbp_child(int parent) except +
-    vector[vector[pair[double, double]]] ecbp_xrays(int parent) except +
+    vector[pair[double, double]] ecbp_xrays(int parent) except +

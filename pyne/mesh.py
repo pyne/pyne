@@ -600,6 +600,7 @@ class Mesh(object):
         self.structured = structured
 
         if self.structured:
+            self.structured_coords = structured_coords
             self.structured_ordering = structured_ordering
             if (mesh is not None) and not structured_coords and not structured_set:
                 try:
