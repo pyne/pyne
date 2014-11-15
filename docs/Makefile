@@ -37,6 +37,7 @@ clean:
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	doxygen Doxyfile
+	find _build/html/tutorial/ -type f -exec sed -i -e 's/container{width:940px}/container{width:95%}/g' {} \; 
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
