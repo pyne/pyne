@@ -55,7 +55,7 @@ Contents
     previous/index
     devsguide/vnv
 
-`C++ API`_
+- `C++ API`_
 
 **Theory:**
 
