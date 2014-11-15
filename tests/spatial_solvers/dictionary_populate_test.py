@@ -18,18 +18,18 @@ def populate_simple(solverin, solvertypein):
     'z_boundry_conditions':[2,2],
     'material_id': [[[1]*4]*4]*4,
     'quadrature_file':'quad_file',
-    'xs_file':'xs',
-    'source_input_file':'src_4.dat',
+    'xs_file':'spatial_solvers/xs',
+    'source_input_file':'spatial_solvers/src_4.dat',
     #'source_input_file':'src_non_binary',
-    'bc_input_file':'bc_4.dat',
-    'flux_output_file':'phi_4.ahot',
+    'bc_input_file':'spatial_solvers/bc_4.dat',
+    'flux_output_file':'spatial_solvers/phi_4.ahot',
     'convergence_criterion':1.e-12,
     'max_iterations':6000,
     'moments_converged':0,
     'converge_tolerence':1.e-10,
     };
     if(solverin == "SCTSTEP"):
-      solver_dict['bc_input_file'] = 'bc_4_sct.dat'
+      solver_dict['bc_input_file'] = 'spatial_solvers/bc_4_sct.dat'
     return solver_dict
 
 def populate_simple_with_warnings(solverin):
@@ -49,11 +49,11 @@ def populate_simple_with_warnings(solverin):
     'y_boundry_conditions':[2,2],
     'z_boundry_conditions':[2,2],
     'material_id': [[[1]*4]*4]*4,
-    'quadrature_file':'quad_file',
-    'xs_file':'xs',
-    'source_input_file':'src_4.dat',
-    'bc_input_file':'bc_4.dat',
-    'flux_output_file':'phi_4.ahot',
+    'quadrature_file':'spatial_solvers/quad_file',
+    'xs_file':'spatial_solvers/xs',
+    'source_input_file':'spatial_solvers/src_4.dat',
+    'bc_input_file':'spatial_solvers/bc_4.dat',
+    'flux_output_file':'spatial_solvers/phi_4.ahot',
     #'convergence_criterion':1.e-12,
     #'max_iterations':6000,
     #'moments_converged':0,
@@ -105,15 +105,15 @@ def populate_intermediate_1(solverin, solvertypein):
     ]
     ],
     'quadrature_file':'quad_file',
-    'xs_file':'xs_alternating',
-    'source_input_file':'src_4.dat',
-    'bc_input_file':'bc_4.dat',
-    'flux_output_file':'phi_4.ahot',
+    'xs_file':'spatial_solvers/xs_alternating',
+    'source_input_file':'spatial_solvers/src_4.dat',
+    'bc_input_file':'spatial_solvers/bc_4.dat',
+    'flux_output_file':'spatial_solvers/phi_4.ahot',
     'convergence_criterion':1.e-12,
     'max_iterations':6000,
     'moments_converged':0,
     'converge_tolerence':1.e-10,
     };
     if(solverin == "SCTSTEP"):
-      solver_dict['bc_input_file'] = 'bc_4_sct.dat'
+      solver_dict['bc_input_file'] = 'spatial_solvers/bc_4_sct.dat'
     return solver_dict

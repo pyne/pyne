@@ -12,7 +12,6 @@ from dictionary_populate_test import populate_simple, populate_simple_with_warni
 
 def test_ahotn_ln():
   a = populate_simple("AHOTN","LN")
-  #a['spatial_order'] = 100
   dict_results = pyne.spatialsolver.solve(a)
 
   if(dict_results['success'] == 0):
