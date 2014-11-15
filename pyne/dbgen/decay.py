@@ -19,6 +19,7 @@ from pyne.dbgen.api import BASIC_FILTERS
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
+
 def _readpoint(line, dstart, dlen):
     data = ensdf._getvalue(line[dstart:dstart + dlen])
     error = ensdf._getvalue(line[dstart + dlen:dstart + dlen + 2])
@@ -54,7 +55,7 @@ def parse_atomic_data(build_dir=""):
             Z = int(line[0:3])
             k_shell_fluor, k_shell_fluor_error = _readpoint(line, 9, 6)
             l_shell_fluor, l_shell_fluor_error = _readpoint(line, 18, 6)
-            #Probability of creating L-shell vacancy by filling K-shell vacancy
+            # Probability of creating L-shell vacancy by filling K-shell
             prob, prob_error = _readpoint(line, 27, 6)
             k_shell_be, k_shell_be_err = _readpoint(line, 36, 8)
             li_shell_be, li_shell_be_err = _readpoint(line, 47, 8)
@@ -101,7 +102,8 @@ def grab_ensdf_decay(build_dir=""):
     # Grab ENSDF files and unzip them.
     iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2014-April/'
     cf_base_url = 'http://data.pyne.io/'
-    ensdf_zip = ['ensdf_140416_099.zip', 'ensdf_140416_199.zip', 'ensdf_140416_294.zip', ]
+    ensdf_zip = ['ensdf_140416_099.zip', 'ensdf_140416_199.zip',
+                 'ensdf_140416_294.zip', ]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
@@ -152,6 +154,7 @@ gammas_dtype = np.dtype([
     ('from_nuc', int),
     ('to_nuc', int),
     ('parent_nuc', int),
+    ('child_nuc', int),
     ('energy', float),
     ('energy_err', float),
     ('photon_intensity', float),
@@ -385,7 +388,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                               'metastable [int]', expectedrows=len(level_list))
     ll_table.flush()
 
-    #now that the level data is in nuc_data we can build the decay data fast
+    # now that the level data is in nuc_data we can build the decay data fast
     decay, gammas, alphas, betas, ecbp = parse_decay_data(build_dir)
 
     decay_table = db.createTable('/decay/', 'decays', decay,
@@ -401,7 +404,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
 
     gamma_table = db.createTable('/decay/', 'gammas', gammas,
                                  'from_nuc [int], to_nuc [int], primary parent'
-                                 'nuc_id [int],'
+                                 'nuc_id [int], child nuc_id [int]'
                                  'Energy [keV], Energy error [keV], '
                                  'photon intensity [ratio], '
                                  'photon intensity error [ratio],'
@@ -426,8 +429,8 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     betas_table = db.createTable('/decay/', 'betas', betas,
                                  'from_nuc [int], to_nuc [int],'
                                  'Endpoint Energy [keV], Average Energy [keV],'
-                                 'Intensity [ratio]'
-                                 , expectedrows=len(betas))
+                                 'Intensity [ratio]',
+                                 expectedrows=len(betas))
 
     betas_table.flush()
 
@@ -469,4 +472,3 @@ def make_decay(args):
 
     print("Making atomic decay data table")
     make_atomic_decay_table(nuc_data, build_dir)
-

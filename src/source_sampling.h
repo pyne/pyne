@@ -12,13 +12,14 @@
 /// of a particle upon birth. 
 /// There are three sampling modes: analog, uniform, and user-speficied
 /// In analog sampling, no source biasing is used and birth weights
-/// are all 1. In uniform sampling, all phase space is sampled evenly and weights
-/// are adjusted accordingly. In user-speficied mode, a supplied biased source
-/// density distribution is used for sampling and particle weights are adjusted
-/// accordingly. The biased source density distribution must have the same number 
-/// of energy groups as the unbiased distribution. Alternatively, it may have 
-/// exactly 1 energy group, in which case this value is used for all energies
-/// within a particular mesh volume element.
+/// are all 1. In uniform sampling, the position of the particle (but not the 
+/// energy) is sampled uniformly and weights are adjusted accordingly. In 
+/// user-speficied mode, a supplied biased source density distribution is used 
+/// for sampling and particle weights are adjusted accordingly. The biased 
+/// source density distribution must have the same number of energy groups as 
+/// the unbiased distribution. Alternatively, it may have exactly 1 energy
+/// group, in which case only spatial biasing is done, and energies are sampled
+/// in analog.
  
 #ifndef PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
 #define PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
@@ -115,7 +116,7 @@ namespace pyne {
     /// \param bias_tag_name The name of the tag describing the biased source
     ///                       density distribution. The tag must have the same
     ///                       number of energy groups as <src_tag_name> or 1.
-    ///                       If 1 (i.e. spacial biasing only), all energy groups
+    ///                       If 1 (i.e. spatial biasing only), all energy groups
     ///                       within a mesh volume element are sampled equally.
     Sampler(std::string filename, 
             std::string src_tag_name, 
@@ -164,9 +165,10 @@ namespace pyne {
     // helper functions
     void normalize_pdf(std::vector<double> & pdf);
     int num_groups(MBTag tag);
-    std::vector<double> read_bias_pdf(MBRange ves, std::vector<double> volumes);
+    std::vector<double> read_bias_pdf(MBRange ves, std::vector<double> volumes, 
+                                      std::vector<double> pdf);
   };
-}; //end namespace pyne
+} //end namespace pyne
 
 #ifdef __cplusplus
 } // extern "C"

@@ -1204,16 +1204,11 @@ def test_fluka():
     matlines.append(compound)
     written = ''.join(matlines)
 
-    exp  = 'MATERIAL         92.   235.044        1.       25.                    235-U'
-    exp += '     \n'
-    exp += 'MATERIAL         92.   238.051        1.       26.                    238-U'
-    exp += '     \n'
-    exp += '* Fluka Compound'
-    exp += ' \n'
-    exp += 'MATERIAL          1.        1.      19.1       27.                    URANIUM'
-    exp += '   \n'
-    exp += 'COMPOUND        0.04     235-U      0.96     238-U                    URANIUM'
-    exp += '   \n'
+    exp =  'MATERIAL         92.   235.044        1.       25.                    235-U     \n'
+    exp += 'MATERIAL         92.   238.051        1.       26.                    238-U     \n'
+    exp += '* Fluka Compound \n'
+    exp += 'MATERIAL          1.        1.      19.1       27.                    URANIUM   \n'
+    exp += 'COMPOUND   4.000e-02     235-U 9.600e-01     238-U                    URANIUM   \n'
 
     assert_equal(exp,written)
 
@@ -1243,18 +1238,35 @@ def test_fluka():
     matlines.append(compound)
     written = ''.join(matlines)
 
-    exp  = 'MATERIAL         92.   235.044        1.       25.                    235-U'
-    exp += '     \n'
-    exp += 'MATERIAL         92.   238.051        1.       26.                    238-U'
-    exp += '     \n'
-    exp += '* Fluka Compound'
-    exp += ' \n'
-    exp += 'MATERIAL          1.        1.      19.1       27.                    URANIUM'
-    exp += '   \n'
-    exp += 'COMPOUND       -0.04     235-U     -0.96     238-U                    URANIUM'
-    exp += '   \n'
-
+    exp =  'MATERIAL         92.   235.044        1.       25.                    235-U     \n'
+    exp += 'MATERIAL         92.   238.051        1.       26.                    238-U     \n'
+    exp += '* Fluka Compound \n'
+    exp += 'MATERIAL          1.        1.      19.1       27.                    URANIUM   \n'
+    exp += 'COMPOUND  -4.000e-02     235-U-9.600e-01     238-U                    URANIUM   \n'
     assert_equal(exp,written)
+
+def test_fluka_scientific():
+    # baseline test for scientific formatting
+    mat = Material({'H':0.1,'O':0.8,'C':0.1})
+    mat.density=1.0
+    mat.metadata['fluka_name'] = 'ORGPOLYM'
+    written = mat.fluka(25)
+
+    exp  = 'MATERIAL          1.        1.        1.       25.                    ORGPOLYM  \n'
+    exp += 'COMPOUND  -1.000e-01  HYDROGEN-1.000e-01    CARBON-8.000e-01    OXYGENORGPOLYM  \n'
+    assert_equal(exp,written)
+
+    mat = Material({'H':0.01,'O':0.8,'C':0.19})
+    mat.density=1.0
+    mat.metadata['fluka_name'] = 'ORGPOLYM'
+    written = mat.fluka(25)
+    
+    exp =  'MATERIAL          1.        1.        1.       25.                    ORGPOLYM  \n'
+    exp += 'COMPOUND  -1.000e-02  HYDROGEN-1.900e-01    CARBON-8.000e-01    OXYGENORGPOLYM  \n'
+    assert_equal(exp,written)
+
+
+    
 
 def test_write_alara():
     if 'alara.txt' in os.listdir('.'):

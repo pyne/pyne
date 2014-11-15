@@ -53,26 +53,36 @@ subroutine source
     logical, save :: first_run = .true.
     real(dknd), dimension(6) :: rands
     integer :: icl_tmp ! temporary cell variable
+    integer :: find_cell
+    integer :: tries
   
     if (first_run .eqv. .true.) then
         call sampling_setup(idum(1))
         first_run = .false.
     endif
-  
-100 continue
-   rands(1) = rang()
-   rands(2) = rang()
-   rands(3) = rang()
-   rands(4) = rang()
-   rands(5) = rang()
-   rands(6) = rang()
+ 
+100 continue 
+   tries = 0
+   rands(1) = rang() ! sample alias table
+   rands(2) = rang() ! sample alias table
+   rands(6) = rang() ! sample energy
+200 continue
+   rands(3) = rang() ! sample x
+   rands(4) = rang() ! sample y
+   rands(5) = rang() ! sample z
  
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt)
    icl_tmp = find_cell()
-   if (mat(icl_tmp).eq.0) then
+   if (mat(icl_tmp).eq.0 .and. tries < idum(2)) then
+       tries = tries + 1
+       goto 200
+   end if
+
+   if(tries.eq.idum(2)) then
        goto 100
    end if
- 
+
+   icl = icl_tmp
    tme = 0.0
    ipt = 2
    jsu = 0

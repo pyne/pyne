@@ -17,7 +17,7 @@ The following describe methods implemented natively in PyNE:
     enrichment.rst
     materials.rst
     source_sampling.rst
-    mesh_based_variance_reduction.rst
+    variance_reduction.rst
     nuclear_reaction_channels.rst
     r2s.rst
     simplesim.rst
