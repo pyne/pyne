@@ -17,9 +17,13 @@ from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
 from pyne import jsoncpp
 from pyne import data
 from pyne import nucname
+from pyne import utils
 import numpy as np
 from numpy.testing import assert_array_equal
 import tables as tb
+
+if utils.use_warnings():
+    utils.toggle_warnings()
 
 nclides = 9
 nucvec = {10010000:  1.0,
