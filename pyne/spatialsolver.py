@@ -7,245 +7,228 @@ import os
 import time
 
 #Solver imports
-#sys.path.append("../pyne_transport/pyne/fortran/spatial_solvers_3d/source")
 import pyne.transport_spatial_methods as transport_spatial_methods
 
-#imports being used for testing
-#from dict_util import dict_complete
-
 def solve(inputdict_unchecked):
-  inputdict = dict_complete(inputdict_unchecked)
-  flux_output = []
-  solver_output = {
-     };
-  #if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
-  fortran_returns = transport_spatial_methods.main("test title in",
-  inputdict['solver'],
-  inputdict['solver_type'],
-  inputdict['spatial_order'], 
-  #inputdict['spatial_method'],
-  inputdict['angular_quadrature_order'],
-  inputdict['angular_quadrature_type'],
-  inputdict['nodes_xyz'][0],
-  inputdict['nodes_xyz'][1],
-  inputdict['nodes_xyz'][2],
-  inputdict['num_groups'],
-  inputdict['num_materials'],
-  inputdict['x_cells_widths'],
-  inputdict['y_cells_widths'],
-  inputdict['z_cells_widths'],
-  inputdict['x_boundry_conditions'][0],
-  inputdict['x_boundry_conditions'][1],
-  inputdict['y_boundry_conditions'][0],
-  inputdict['y_boundry_conditions'][1],
-  inputdict['z_boundry_conditions'][0],
-  inputdict['z_boundry_conditions'][1],
-  inputdict['material_id'],
-  inputdict['quadrature_file'],
-  inputdict['xs_file'],
-  inputdict['source_input_file'],
-  inputdict['bc_input_file'],
-  inputdict['flux_output_file'],
-  inputdict['convergence_criterion'],
-  inputdict['max_iterations'],
-  inputdict['moments_converged'],
-  inputdict['converge_tolerence'],
-  inputdict['max_mom_printed'],
-  inputdict['moment_sum_flag'],
-  inputdict['mom_at_a_pt_flag'],
-  inputdict['quad_flux_print_flag']#,
-#    inputdict['out_dims']
-    )
-    #time.sleep(.5)
-  solver_output['flux'] = fortran_returns[6].tolist()
-  error_code = fortran_returns[7]
-  tsolve = fortran_returns[8]
-  ttosolve = fortran_returns[9]
-  tend = fortran_returns[10]
+    inputdict = dict_complete(inputdict_unchecked)
+    flux_output = []
+    solver_output = {};
+    fortran_returns = transport_spatial_methods.main("test title in",
+    inputdict['solver'],
+    inputdict['solver_type'],
+    inputdict['spatial_order'], 
+    #inputdict['spatial_method'],
+    inputdict['angular_quadrature_order'],
+    inputdict['angular_quadrature_type'],
+    inputdict['nodes_xyz'][0],
+    inputdict['nodes_xyz'][1],
+    inputdict['nodes_xyz'][2],
+    inputdict['num_groups'],
+    inputdict['num_materials'],
+    inputdict['x_cells_widths'],
+    inputdict['y_cells_widths'],
+    inputdict['z_cells_widths'],
+    inputdict['x_boundry_conditions'][0],
+    inputdict['x_boundry_conditions'][1],
+    inputdict['y_boundry_conditions'][0],
+    inputdict['y_boundry_conditions'][1],
+    inputdict['z_boundry_conditions'][0],
+    inputdict['z_boundry_conditions'][1],
+    inputdict['material_id'],
+    inputdict['quadrature_file'],
+    inputdict['xs_file'],
+    inputdict['source_input_file'],
+    inputdict['bc_input_file'],
+    inputdict['flux_output_file'],
+    inputdict['convergence_criterion'],
+    inputdict['max_iterations'],
+    inputdict['moments_converged'],
+    inputdict['converge_tolerence'],
+    inputdict['max_mom_printed'],
+    inputdict['moment_sum_flag'],
+    inputdict['mom_at_a_pt_flag'],
+    inputdict['quad_flux_print_flag'])
 
-  if(error_code == 0):
-    solver_output['success'] = 1
-    solver_output['time_start'] = tsolve
-    solver_output['total_time'] = tsolve-ttosolve
-    solver_output['print_time'] = tend-ttosolve
-    solver_output['error_msg'] = 0
-  else:
-    solver_output['success'] = 0
-    solver_output['error_msg'] = error_toString(error_code)
-    print(solver_output['error_msg'])
-  return solver_output
+    solver_output['flux'] = fortran_returns[6].tolist()
+    error_code = fortran_returns[7]
+    tsolve = fortran_returns[8]
+    ttosolve = fortran_returns[9]
+    tend = fortran_returns[10]
+  
+    if(error_code == 0):
+        solver_output['success'] = 1
+        solver_output['time_start'] = tsolve
+        solver_output['total_time'] = tsolve-ttosolve
+        solver_output['print_time'] = tend-ttosolve
+        solver_output['error_msg'] = 0
+    else:
+        solver_output['success'] = 0
+        solver_output['error_msg'] = error_toString(error_code)
+        print(solver_output['error_msg'])
+    return solver_output
 
 def error_toString(error_code):
-  err_dictionary = {
-    1001 : "ERROR: Lambda must be equal to one.",
-    1002 : "ERROR: Illegal value for qdord. Must be greater than zero.",
-    1003 : "ERROR: Illegal value for the quadrature order. Even #s only.",
-    1004 : "ERROR: illegal entry for the qdfile name.",
-    1005 : "ERROR: illegal entry for lambda. Must be zero or greater.",
-    1007 : "ERROR: Illegal number of x cells. Must be positive.",
-    1008 : "ERROR: Illegal number of y cells. Must be positive.",
-    1009 : "ERROR: Illegal number of z cells. Must be positive.",
-    1010 : "ERROR: Illegal number of energy groups. Must be positive.",
-    1011 : "ERROR: Illegal number of materials. Must be positive.",
-    1012 : "ERROR: Illegal x cell dimension, dx. Must be positive.",
-    1013 : "ERROR: Illegal y cell dimension, dy. Must be positive.",
-    1014 : "ERROR: Illegal z cell dimension, dz. Must be positive.",
-    1015 : "ERROR: Illegal value in material map. Must be in [1, #materials].",
-    1016 : "ERROR: Illegal lower x BC. Must be 0-Vac, 1-Refl or 2-Fixed.",
-    1017 : "ERROR: Illegal lower y BC. Must be 0-Vac, 1-Refl or 2-Fixed.",
-    1018 : "ERROR: Illegal lower z BC. Must be 0-Vac, 1-Refl or 2-Fixed.",
-    1019 : "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed.",
-    1020 : "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed.",
-    1021 : "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed.",
-    1022 : "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed.",
-    1023 : "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed.",
-    1024 : "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed.",
-    1025 : "ERROR: Illegal convergence criterion. Must be positive.",
-    1026 : "ERROR: Illegal max inner iterations, itmx. Must be positive.",
-    1027 : "ERROR: Illegal tolerance setting, tolr. Must be positive.",
-    1028 : "ERROR: Illegal value for moments to converge, iall. Must be in [0, lambda].",
-    1029 : "ERROR: Illegal value for solution check flag, iall. iall is 0 (skip check) or positive integer",
-    1030 : "ERROR: Illegal value for solution check tolerance, tchk. Must be positive.",
-    1031 : "ERROR: Illegal value for direction cosine. Must be entered positive, less than 1.",
-    1032 : "ERROR: Illegal value for weight. Must be entered positive, less than 0.125.",
-    1033 : "ERROR: a discrete ordinate has length not in range 0.99<1.00<1.01 based on mu, eta, xi values.",
-    1034 : "ERROR: Illegal value for max moment to print, momp. Must be between 0 and lambda.",
-    1035 : "ERROR: Illegal value for flag for moment summing. Must be 0 for off or 1 for on.",
-    1036 : "ERROR: Illegal value for flag for moment sum at non-center point. Must be 0/1=off/on.",
-    1037 : "ERROR: Illegal value for flag for printing average flux of the four quadrants. Must be 0/1 = off/on."
+    err_dictionary = {
+        1001 : "ERROR: Lambda must be equal to one.",
+        1002 : "ERROR: Illegal value for qdord. Must be greater than zero.",
+        1003 : "ERROR: Illegal value for the quadrature order. Even #s only.",
+        1004 : "ERROR: illegal entry for the qdfile name.",
+        1005 : "ERROR: illegal entry for lambda. Must be zero or greater.",
+        1007 : "ERROR: Illegal number of x cells. Must be positive.",
+        1008 : "ERROR: Illegal number of y cells. Must be positive.",
+        1009 : "ERROR: Illegal number of z cells. Must be positive.",
+        1010 : "ERROR: Illegal number of energy groups. Must be positive.",
+        1011 : "ERROR: Illegal number of materials. Must be positive.",
+        1012 : "ERROR: Illegal x cell dimension, dx. Must be positive.",
+        1013 : "ERROR: Illegal y cell dimension, dy. Must be positive.",
+        1014 : "ERROR: Illegal z cell dimension, dz. Must be positive.",
+        1015 : "ERROR: Illegal value in material map. Must be in [1, #materials].",
+        1016 : "ERROR: Illegal lower x BC. Must be 0-Vac, 1-Refl or 2-Fixed.",
+        1017 : "ERROR: Illegal lower y BC. Must be 0-Vac, 1-Refl or 2-Fixed.",
+        1018 : "ERROR: Illegal lower z BC. Must be 0-Vac, 1-Refl or 2-Fixed.",
+        1019 : "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed.",
+        1020 : "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed.",
+        1021 : "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed.",
+        1022 : "ERROR: Illegal upper x BC. Must be 0-Vac or 2-Fixed.",
+        1023 : "ERROR: Illegal upper y BC. Must be 0-Vac or 2-Fixed.",
+        1024 : "ERROR: Illegal upper z BC. Must be 0-Vac or 2-Fixed.",
+        1025 : "ERROR: Illegal convergence criterion. Must be positive.",
+        1026 : "ERROR: Illegal max inner iterations, itmx. Must be positive.",
+        1027 : "ERROR: Illegal tolerance setting, tolr. Must be positive.",
+        1028 : "ERROR: Illegal value for moments to converge, iall. Must be in [0, lambda].",
+        1029 : "ERROR: Illegal value for solution check flag, iall. iall is 0 (skip check) or positive integer",
+        1030 : "ERROR: Illegal value for solution check tolerance, tchk. Must be positive.",
+        1031 : "ERROR: Illegal value for direction cosine. Must be entered positive, less than 1.",
+        1032 : "ERROR: Illegal value for weight. Must be entered positive, less than 0.125.",
+        1033 : "ERROR: a discrete ordinate has length not in range 0.99<1.00<1.01 based on mu, eta, xi values.",
+        1034 : "ERROR: Illegal value for max moment to print, momp. Must be between 0 and lambda.",
+        1035 : "ERROR: Illegal value for flag for moment summing. Must be 0 for off or 1 for on.",
+        1036 : "ERROR: Illegal value for flag for moment sum at non-center point. Must be 0/1=off/on.",
+        1037 : "ERROR: Illegal value for flag for printing average flux of the four quadrants. Must be 0/1 = off/on."
   };
 
-  return err_dictionary[error_code] 
+    return err_dictionary[error_code] 
 
 def dict_complete(inputdict):
 
     warning_msg = "Input dictionary taking on default "
-
     formatted_dict = {}
     try:
-      if((inputdict['solver'] == "AHOTN") or (inputdict['solver']=="DGFEM") or (inputdict['solver']=="SCTSTEP")):
-        formatted_dict['solver'] = inputdict['solver']
-      else:
-        raise InputDictError("solver does not exist")
+        if((inputdict['solver'] == "AHOTN") or (inputdict['solver']=="DGFEM") or (inputdict['solver']=="SCTSTEP")):
+            formatted_dict['solver'] = inputdict['solver']
+        else:
+            raise InputDictError("solver does not exist")
     except:
-      raise InputDictError("solver")
+        raise InputDictError("solver")
     try:
-      formatted_dict['solver_type'] = inputdict['solver_type']
+        formatted_dict['solver_type'] = inputdict['solver_type']
     except:
-      #raise InputDictError("solver_type")
-       if(inputdict['solver'] == "AHOTN"):
-        formatted_dict['solver_type'] = "LN"
-       elif(inputdict['solver'] == "DGFEM"):
-        formatted_dict['solver_type'] = "LD"
-		
+        #raise InputDictError("solver_type")
+        if(inputdict['solver'] == "AHOTN"):
+            formatted_dict['solver_type'] = "LN"
+        elif(inputdict['solver'] == "DGFEM"):
+            formatted_dict['solver_type'] = "LD"
+
     try:
-      formatted_dict['spatial_order'] = inputdict['spatial_order']
+        formatted_dict['spatial_order'] = inputdict['spatial_order']
     except:
-      formatted_dict['spatial_order'] = 1
-      warn(warning_msg + " spatial_order value of 1")
-#No longer needed.  Spatial method of 1 was never implemented!
-    #try:
-    #  formatted_dict['spatial_method'] = inputdict['spatial_method']
-    #except:
-    #  formatted_dict['spatial_method'] = 0
-    #  warn(warning_msg + " spatial_method value of 0")
+        formatted_dict['spatial_order'] = 1
+        warn(warning_msg + " spatial_order value of 1")
     try:
-      formatted_dict['angular_quadrature_order'] = inputdict['angular_quadrature_order']
+        formatted_dict['angular_quadrature_order'] = inputdict['angular_quadrature_order']
     except:
-      formatted_dict['angular_quadrature_order'] = 4
-      warn(warning_msg + " angular_quadrature_order value of 4")
+        formatted_dict['angular_quadrature_order'] = 4
+        warn(warning_msg + " angular_quadrature_order value of 4")
     try:
-      formatted_dict['angular_quadrature_type'] = inputdict['angular_quadrature_type']
+        formatted_dict['angular_quadrature_type'] = inputdict['angular_quadrature_type']
     except:
-      formatted_dict['qangular_uadrature_type'] = 1
-      warn(warning_msg + " angular_quadrature_type value of 1")
+        formatted_dict['qangular_uadrature_type'] = 1
+        warn(warning_msg + " angular_quadrature_type value of 1")
     try:
-      formatted_dict['nodes_xyz'] = inputdict['nodes_xyz']
+        formatted_dict['nodes_xyz'] = inputdict['nodes_xyz']
     except:
-      raise InputDictError("nodes_xyz")
+        raise InputDictError("nodes_xyz")
     try:
-      formatted_dict['num_groups'] = inputdict['num_groups']
+        formatted_dict['num_groups'] = inputdict['num_groups']
     except:
-      raise InputDictError("num_groups")
+        raise InputDictError("num_groups")
     try:
-      formatted_dict['num_materials'] = inputdict['num_materials']
+        formatted_dict['num_materials'] = inputdict['num_materials']
     except:
-      raise InputDictError('num_materials')
+        raise InputDictError('num_materials')
     try:
-      formatted_dict['x_cells_widths'] = inputdict['x_cells_widths']
+        formatted_dict['x_cells_widths'] = inputdict['x_cells_widths']
     except:
-      raise InputDictError("x_cells_widths")		
+        raise InputDictError("x_cells_widths")		
     try:
-      formatted_dict['y_cells_widths'] = inputdict['y_cells_widths']
+        formatted_dict['y_cells_widths'] = inputdict['y_cells_widths']
     except:
-      raise InputDictError("y_cells_widths")	
+        raise InputDictError("y_cells_widths")	
     try:
-      formatted_dict['z_cells_widths'] = inputdict['z_cells_widths']
+        formatted_dict['z_cells_widths'] = inputdict['z_cells_widths']
     except:
-      raise InputDictError("z_cells_widths")
+        raise InputDictError("z_cells_widths")
     try:
-      formatted_dict['x_boundry_conditions'] = inputdict['x_boundry_conditions']
+        formatted_dict['x_boundry_conditions'] = inputdict['x_boundry_conditions']
     except:
-      raise InputDictError("x_boundry_conditions")
+        raise InputDictError("x_boundry_conditions")
     try:
-      formatted_dict['y_boundry_conditions'] = inputdict['y_boundry_conditions']
+        formatted_dict['y_boundry_conditions'] = inputdict['y_boundry_conditions']
     except:
-      raise InputDictError("y_boundry_conditions")
+        raise InputDictError("y_boundry_conditions")
     try:
-      formatted_dict['z_boundry_conditions'] = inputdict['z_boundry_conditions']
+        formatted_dict['z_boundry_conditions'] = inputdict['z_boundry_conditions']
     except:
-      raise InputDictError("z_boundry_conditions")
+        raise InputDictError("z_boundry_conditions")
     try:
-      formatted_dict['material_id'] = inputdict['material_id']
+        formatted_dict['material_id'] = inputdict['material_id']
     except:
-      raise InputDictError("material_id file")
+        raise InputDictError("material_id file")
     try:
-      formatted_dict['quadrature_file'] = inputdict['quadrature_file']
+        formatted_dict['quadrature_file'] = inputdict['quadrature_file']
     except:
-      raise InputDictError("quadrature_file")
+        raise InputDictError("quadrature_file")
     try:
-		  formatted_dict['xs_file'] = inputdict['xs_file']
+        formatted_dict['xs_file'] = inputdict['xs_file']
     except:
-      raise InputDictError("xs_file")
+        raise InputDictError("xs_file")
     try:
-      formatted_dict['source_input_file'] = inputdict['source_input_file']
+        formatted_dict['source_input_file'] = inputdict['source_input_file']
     except:
-      raise InputDictError("source_input_file")
+        raise InputDictError("source_input_file")
     try:
-      formatted_dict['bc_input_file'] = inputdict['bc_input_file']
+        formatted_dict['bc_input_file'] = inputdict['bc_input_file']
     except:
-      raise InputDictError("bc_input_file")
+        raise InputDictError("bc_input_file")
     try:
-      formatted_dict['flux_output_file'] = inputdict['flux_output_file']
+        formatted_dict['flux_output_file'] = inputdict['flux_output_file']
     except:
-      raise InputDictError("flux_output_file")
+        raise InputDictError("flux_output_file")
     try:
-      formatted_dict['convergence_criterion'] = inputdict['convergence_criterion']
+        formatted_dict['convergence_criterion'] = inputdict['convergence_criterion']
     except:
-      formatted_dict['convergence_criterion'] = 1e-5
-      warn(warning_msg + " convergence_criterion value of 1e-5")
+        formatted_dict['convergence_criterion'] = 1e-5
+        warn(warning_msg + " convergence_criterion value of 1e-5")
     try:
-      formatted_dict['max_iterations'] = inputdict['max_iterations']
+        formatted_dict['max_iterations'] = inputdict['max_iterations']
     except:
-      formatted_dict['max_iterations'] = 6000
-      warn(warning_msg + " max_iterations value of 6000")
+        formatted_dict['max_iterations'] = 6000
+        warn(warning_msg + " max_iterations value of 6000")
     try:
-      formatted_dict['moments_converged'] = inputdict['moments_converged']
+        formatted_dict['moments_converged'] = inputdict['moments_converged']
     except:
-      formatted_dict['moments_converged'] = 0
-      warn(warning_msg + " moments_converged value of 0")
+        formatted_dict['moments_converged'] = 0
+        warn(warning_msg + " moments_converged value of 0")
     try:
-      formatted_dict['converge_tolerence'] = inputdict['converge_tolerence']
+        formatted_dict['converge_tolerence'] = inputdict['converge_tolerence']
     except:
-      formatted_dict['converge_tolerence'] = 1e-10
-      warn(warning_msg + " converge_tolerence value of 1e-10")
-			
+        formatted_dict['converge_tolerence'] = 1e-10
+        warn(warning_msg + " converge_tolerence value of 1e-10")
+
     formatted_dict['max_mom_printed'] = 0
     formatted_dict['moment_sum_flag'] = 0
     formatted_dict['mom_at_a_pt_flag'] = 0
     formatted_dict['quad_flux_print_flag'] = 0
-#!if solver == ahotn if solvertype == ln
-#    formatted_dict['out_dims'] = [4,formatted_dict['nodes_xyz'][0],formatted_dict['nodes_xyz'][1],formatted_dict##['nodes_xyz'][2],formatted_dict['num_groups'],1,1];
 
     return formatted_dict
 
