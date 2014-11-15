@@ -49,7 +49,7 @@ def assert_np_version():
         msg = "numpy version too low! {0} (have) < 1.8.0 (min)".format(v)
         raise ValueError(msg)
 
-def assert_ipthon_version():
+def assert_ipython_version():
     import IPython;
     low = (1, 2, 1)
     v = IPython.__version__;
@@ -59,15 +59,17 @@ def assert_ipthon_version():
         raise ValueError(msg)
 
 def assert_ubuntu_version():
-    import platform
+    import platform,warnings
     v = platform.uname();
     for itm in v:
         if 'precise' in itm:
-            msg = "ubuntu 12/precise packages may be outdated, it is highly recommended to update to ubuntu 14 LTS"
-            raise ValueError(msg);
+            msg = "ubuntu 12/precise packages may be outdated, it is highly recommended to update to ubuntu 14 LTS."
+            warnings.warn(msg, Warning);
 
 def assert_dep_versions():
     assert_np_version()
+    assert_ubuntu_version()
+    assert_ipython_version()
 
 def parse_args():
     distutils_args = []
