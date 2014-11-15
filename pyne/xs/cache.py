@@ -3,7 +3,7 @@ cross-sections from provided nuclear data sets."""
 import sys
 import inspect
 from warnings import warn
-from pyne.utils import QAWarning
+
 from itertools import product
 from collections import MutableMapping
 

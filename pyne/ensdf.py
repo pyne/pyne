@@ -12,7 +12,7 @@ from pyne.utils import to_sec
 
 if sys.version_info[0] > 2:
     basestring = str
-    
+
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
