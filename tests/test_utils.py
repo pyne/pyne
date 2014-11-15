@@ -121,5 +121,5 @@ def test_fromstring_token4():
 
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 

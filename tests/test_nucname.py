@@ -518,5 +518,5 @@ def test_id_to_state_id():
 
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 
