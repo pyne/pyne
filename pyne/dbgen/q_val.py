@@ -9,7 +9,7 @@ from __future__ import print_function
 import csv
 import os
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 import tables as tb
@@ -18,7 +18,7 @@ from pyne import nucname
 from pyne.api import nuc_data
 from pyne.dbgen.api import BASIC_FILTERS
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Parses data from .csv
 def grab_q_values(fname):

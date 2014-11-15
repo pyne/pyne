@@ -7,8 +7,8 @@ import warnings
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
     assert_true, assert_false
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne import nucname
 
 def test_name_zz():

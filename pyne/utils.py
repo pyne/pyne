@@ -7,7 +7,7 @@ from pyne._utils import fromstring_split, fromstring_token, endftod,\
                         use_fast_endftod, fromendf_tok, toggle_warnings,\
                         use_warnings
 
-class VnVWarning(UserWarning):
+class QAWarning(UserWarning):
     pass
 
 time_conv_dict = {

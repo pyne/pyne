@@ -87,11 +87,11 @@ import re as _re
 import sys as _sys
 import textwrap as _textwrap
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 from gettext import gettext as _
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
     set

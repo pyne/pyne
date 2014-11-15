@@ -3,14 +3,14 @@ Tools to generate, set and check the hashes of datasets in pyne.
 """
 import hashlib
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy
 import tables
 
 from .. import data
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 #list of nodes from distinct data sets
 nodelist = ['/atomic_mass', '/material_library',
