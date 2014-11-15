@@ -20,6 +20,7 @@
 
 namespace pyne
 {
+//! Converts betweeen naming/numbering conventions for particle types
 namespace particle
 {
   extern int _pdcids[NUM_PARTICLES]; ///
@@ -160,6 +161,7 @@ namespace particle
   /// A helper function to set the contents of the variables in this library.
   void * _fill_maps();
   extern void * filler;  ///< A dummy variable used when calling #_fill_maps().
+
 
   /// Custom excpeption for failed particle types
   class NotAParticle : public std::exception
