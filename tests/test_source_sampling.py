@@ -14,8 +14,8 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 
 from pyne.mesh import Mesh, IMeshTag
 from pyne.source_sampling import Sampler, AliasTable
