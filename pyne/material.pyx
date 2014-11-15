@@ -1085,7 +1085,7 @@ cdef class _Material:
         for key, value in atom_fracs.items():
             val = <double> value
             if isinstance(key, int):
-                key_zz = <int> key
+                key_zz = <int> nucname.id(key)
                 if 0 == af.count(key_zz):
                     af[key_zz] = 0.0
                 af[key_zz] = af[key_zz] + val
