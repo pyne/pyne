@@ -9,7 +9,7 @@ The Python for Nuclear Engineering Team includes:
 * `Elliott Biondo`_
 * `Chris Dembia`_
 * `Matthew Gidden`_
-* Katy Huff
+* `Katy Huff`_
 * `Seth Johnson`_
 * `Kalin Kiesling`_
 * `Kevin Manalo`_
@@ -25,6 +25,8 @@ The Python for Nuclear Engineering Team includes:
 .. _Chris Dembia: mailto:cld72@cornell.edu
 
 .. _Matthew Gidden: http://mattgidden.com/
+
+.. _Katy Huff: http://katyhuff.github.io
 
 .. _Seth Johnson: http://reference-man.com/
 
