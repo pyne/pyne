@@ -13,7 +13,7 @@ from numpy.testing import assert_array_almost_equal
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-from pyne.variancereduction import cadis
+from pyne.variancereduction import cadis, magic
 
 from pyne.mesh import Mesh, IMeshTag
 from pyne.mesh import MeshError
@@ -105,8 +105,24 @@ def test_cadis_multiple_e():
 
 def test_magic_multi_bins():
     # create a basic meshtally
-    pass
-
+    meshtal_file = "mcnp_meshtal_single_meshtal.txt"
+    tags = {4: ["n_result", "n_rel_error",
+                "n_total_result", "n_total_rel_error"]}
+    meshtal_object = mcnp.Meshtal(meshtal_file, tags, meshes_have_mats=True)
+    
+    magic(meshtal_object.tally[4], "n_result", 
+                "n_rel_error", .2, .001)
+    expected_ww_x = [ 0.0727709   0.09303473  0.05973245  0.11605089  
+                        0.15358968  0.09446185  0.13288133  0.20116779  
+                        0.11247224  0.11745254  0.15682268  0.09338495
+                        0.07237543  0.09706171  0.06452718  0.10439888  
+                        0.14226393  0.09148097  0.17794095  0.2902493   
+                        0.14431317  0.22078935  0.5         0.16993262
+                        0.1833384   0.29779333  0.13810424  0.10030041  
+                        0.14697729  0.08678777  0.07130232  0.09394698  
+                        0.06765712  0.11029486  0.15721929  0.09428047
+                        0.13549031  0.19141024  0.10496243  0.11572691
+                        0.15536779  0.09631373
+  0.07414555  0.09211715  0.06157482]
 def test_magic_e_total():
     pass
-    
