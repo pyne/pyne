@@ -195,3 +195,13 @@ def test_magic_e_total():
                         0.06157482]
 
     assert_array_almost_equal(tally.ww_x[:], expected_ww_x[:])
+
+def test_magic_single_e():
+
+    coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
+    flux_data = [1.2, 3.3, 1.6, 1.7]
+    flux_error = [.11, .013, .14, .016, .19]]
+    tolerance = 0.15
+    null_value = 0.001
+    
+
