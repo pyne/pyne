@@ -9,7 +9,6 @@ PyNE: The Nuclear Engineering Toolkit
     .. image:: gallery/discretized_teapot_thumb.png
     .. image:: gallery/ace_thumb.png
 
-
 PyNE, or Python for Nuclear Engineering, is a suite of tools to aid in
 computational nuclear science & engineering.  PyNE seeks to provide
 native implementations of common nuclear algorithms, as well as Python
@@ -24,79 +23,28 @@ involved with this project, please contact us via pyne-dev@googlegroups.com,
 or `github`_.
 
 The source code for PyNE may be found at the `GitHub project site`_.
-For a quick install from source, please  clone from the official repo::
-
-    git clone git://github.com/pyne/pyne.git
-    cd pyne/
-    python setup.py install --user
-    scripts/nuc_data_make
-
-----------
-Hello
-----------
-
 
 .. toctree::
      :maxdepth: 1
      install
      tutorial
-
-
-..  **RPSD Tutorial Session:**
+     users_guide
+     devsguide
+     theorymanual
+     pyapi
+     cppapi
 ..  
-..  .. toctree::
-..      :maxdepth: 1
-..  
-..      virtualbox
-..  --------
-..  Usage
-..  --------
-..  
-..  .. toctree::
-..      :maxdepth: 1
-..  
-..      install
-..      tutorial/index
 ..      gallery/index
-..      usersguide/index
-..      pyapi/index
-..      cppapi/index
 ..      previous/index
-..      devsguide/vnv
-..  
-..  --------
-..  Theory
-..  --------
-..  
-..  .. toctree::
-..      :maxdepth: 1
-..  
-..      theorymanual/index
-..  
-..  -----------
-..  Development
-..  -----------
-..  
-..  .. toctree::
-..      :maxdepth: 1
-..  
-..      devsguide/index
 ..      dev_team
 ..      pubs
 ..      gsoc/index
 ..  
-..  ------------
-..  Search Links
-..  ------------
-..  
-..  * :ref:`genindex`
-..  * :ref:`modindex`
-..  * :ref:`search`
-..  
-..  .. _C++ API: cppapi/html/index.html
-..  .. _GitHub project site: https://github.com/pyne
-..  
-..  .. _github: https://github.com/pyne/pyne
-..  
-..  .. _zip: https://github.com/pyne/pyne/zipball/0.4
-..  .. _tar: https://github.com/pyne/pyne/tarball/0.4
+.. _C++ API: cppapi/html/index.html
+
+.. _GitHub project site: https://github.com/pyne
+
+.. _github: https://github.com/pyne/pyne
+
+.. _zip: https://github.com/pyne/pyne/zipball/0.4
+.. _tar: https://github.com/pyne/pyne/tarball/0.4

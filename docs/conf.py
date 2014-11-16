@@ -125,29 +125,23 @@ html_theme_path = [csp.get_theme_dir()]
 #html_theme_options = {}
 html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'sidebartextcolor': '#864907',
-                      'sidebarlinkcolor': '#A92727',
+                      'sidebarlinkcolor': '#4b1a07',
                       'sidebartrimcolor': '#504A4B',
                       'collapsiblesidebar': False,
                       'stickysidebar':False,
                       'relbarbgcolor': '#38761D',
                       'footerbgcolor': '#94ba87',
-                      #'footertextcolor': '#504A4B',
-                      #'bodytrimcolor': '#80858a',
                       'linkcolor': '#A92727',
                       'textcolor': '#323039',
-                      #'sectionbgcolor': '#578d40',
-                      #'sectiontextcolor': '#777777',
-                      #'sectiontrimcolor': '#f6fcfc',
+                      'sectionbgcolor': '#F1FFF0',
+                      'sectiontextcolor': '#777777',
+                      'sectiontrimcolor': '#f6fcfc',
                       'codebgcolor': '#F1FFF0',
                       'codetextcolor': '#000000',
-                      #'quotebgcolor': '#f6fcfc',
-                      #'rubricbgcolor': '#D17519',
-                      #'rubricbgcolor': '#69A74E',
-                      #'rubricbgcolor': '#996600',
-                      #'min_height': 'bottom',
-                      #'googleanalytics_id':'UA-37452818-1',
+                      'min_height': 'bottom',
+                      'googleanalytics_id':'UA-37452818-1',
+                      'highlighttoc': False,
                       }
-
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -174,7 +168,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.

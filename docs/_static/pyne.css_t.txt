@@ -1,0 +1,120 @@
+@import url("cloud.css");
+
+body {
+    background-image:url('gear_flourish_transp.png'), 
+                     url('curlydivider-right.png'), 
+                     url('curlydivider-left.png'), 
+                     url('metal.png'),
+                     url('corner_flourish.png'),
+                     url('pocket-watch.png'),
+                     url('smallalarmclock.png');
+    background-repeat: no-repeat, 
+                       repeat-y, 
+                       repeat-y, 
+                       repeat,
+                       no-repeat, 
+                       no-repeat,
+                       no-repeat;
+    background-position: bottom left, 
+                         top right, 
+                         top left,  
+                         0 0,
+                         98% 0px,
+                         97% 99%,
+                         42px 42px;
+    background-attachment: scroll, scroll, scroll, scroll, scroll, scroll, scroll;
+    background-size:20%, 51px, 51px, auto, auto, auto, auto;
+}
+
+table.docutils th.field-name {
+    white-space: nowrap;
+}
+
+div.body h2 {
+  background-color: #7b7f82;
+}
+
+div.body h2.highlighted {
+  border: 0.25em solid #ece48b;
+}
+
+div.note {
+  background-color: #c8e8b0;
+}
+
+h2 a {
+ color: #fff3b6;
+}
+
+div.body h2.html-toggle-button:hover
+{
+ background: #4b1a07;
+  -moz-box-shadow: 0 0 2px #bb3f3f;
+  -webkit-box-shadow: 0 0 2px #bb3f3f;
+  -o-box-shadow: 0 0 2px #bb3f3f;
+  -ms-box-shadow: 0 0 2px #bb3f3f;
+  box-shadow: 0 0 2px #bb3f3f;
+}
+
+div#cyclus.section h1 {
+  display: none;
+}
+
+#dashboard {
+    max-height: 600px;
+    overflow: auto;
+}
+
+#dashboard table {
+    width:80%;
+    border-color:#a9a9a9;
+    color:#333333;
+    border-collapse:collapse;
+    margin:auto;
+    border-width:1px;
+    text-align:center;
+}
+#dashboard th {
+    padding:4px;
+    border-style:solid;
+    border-color:#a9a9a9;
+    border-width:1px;
+    background-color:#b8b8b8;
+    text-align:left;
+}
+#dashboard tr {
+    background-color:#ffffff;
+    text-align:center;
+}
+#dashboard td {
+    padding:4px;
+    border-color:#a9a9a9;
+    border-style:solid;
+    border-width:1px;
+    text-align:center;
+}
+#dashboard tr.status-complete {
+    background-color:#E0FFC2;
+}
+#dashboard tr.status-queued {
+    background-color:#FFFFCC;
+}
+#dashboard tr.status-running {
+    background-color:#D1F0FF;
+}
+#dashboard tr.status-failed {
+    background-color:#F0C2B2;
+}
+
+#infile-form {
+    width:80%;
+    margin:auto;
+}
+#infile-form textarea {
+    width: 100%;
+}
+
+div.sphinxlocaltoc ul a, div.sphinxglobaltoc ul a {
+    display: inline;
+    white-space: normal;
+}
