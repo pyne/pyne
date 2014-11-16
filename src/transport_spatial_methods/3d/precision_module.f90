@@ -12,7 +12,9 @@ MODULE precision_module
 !                                     are with a corner/edge as opposed to face  
 !                      peps         - Minimum distance of two points to be considered distinct points
 !
-INTEGER, PARAMETER :: pr = selected_real_kind(32,4000)
+!INTEGER, PARAMETER :: pr = selected_real_kind(32,4000)
+INTEGER, PARAMETER :: pr = selected_real_kind(16,4000)
+
 REAL(kind=pr),  PARAMETER :: eps       = 1.0E-14_pr 
 REAL(kind=pr),  PARAMETER :: peps      = 1.8E-14_pr
 !
