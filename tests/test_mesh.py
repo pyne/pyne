@@ -16,8 +16,8 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag, \
     ComputedTag
 from pyne.material import Material, MaterialLibrary
@@ -652,6 +652,25 @@ def test_imeshtag_broadcasting():
     m.grape[[2, 0]] = [7.0, 8.0]
     assert_array_equal(m.grape[:], [[7.0, 8.0], [0.0, 0.0], [7.0, 8.0], [0.0, 0.0]])
 
+def test_imeshtag_expand():
+    m = Mesh(structured=True, structured_coords=[[-1, 0, 1],[0, 1],[0, 1]])
+    m.clam = IMeshTag(2, float)
+    m.clam[:] = [[1.1, 2.2], [3.3, 4.4]]
+    m.clam.expand()
+    m.clam_000 = IMeshTag(1, float)
+    assert_array_equal(m.clam_000[:], [1.1, 3.3])
+    m.clam_001 = IMeshTag(1, float)
+    assert_array_equal(m.clam_001[:], [2.2, 4.4])
+
+    # corner case: mesh with a single volume element
+    m = Mesh(structured=True, structured_coords=[[0, 1],[0, 1],[0, 1]])
+    m.clam = IMeshTag(2, float)
+    m.clam[:] = [[1.1, 2.2]]
+    m.clam.expand()
+    m.clam_000 = IMeshTag(1, float)
+    assert_array_equal(m.clam_000[:], 1.1)
+    m.clam_001 = IMeshTag(1, float)
+    assert_array_equal(m.clam_001[:], 2.2)
 
 def test_comptag():
     mats = {

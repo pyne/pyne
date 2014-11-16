@@ -12,9 +12,9 @@ from nose.plugins.skip import SkipTest
 
 import tables
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warnings.simplefilter("ignore", VnVWarning)
+warnings.simplefilter("ignore", QAWarning)
 try:
     from pyne import mcnp
     from pyne.mcnp import read_mcnp_inp
