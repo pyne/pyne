@@ -50,13 +50,16 @@ def assert_np_version():
         raise ValueError(msg)
 
 def assert_ipython_version():
-    import IPython
-    low = (1, 2, 1)
-    v = IPython.__version__
-    cur = tuple(map(int, v.split('.')))
-    if cur < low:
-        msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
-        raise ValueError(msg)
+    try:
+        import IPython
+        low = (1, 2, 1)
+        v = IPython.__version__
+        cur = tuple(map(int, v.split('.')))
+        if cur < low:
+            msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
+            raise ValueError(msg)
+    except ImportError:
+        pass;
 
 def assert_ubuntu_version():
     import platform,warnings
@@ -70,7 +73,7 @@ def assert_dep_versions():
     assert_np_version()
     assert_ubuntu_version()
     assert_ipython_version()
-
+        
 def parse_args():
     distutils_args = []
     cmake = []
