@@ -128,13 +128,10 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
                          for i in range(num_e_groups)]
 
 
-        tag_q_bias[q_bias_ve] = [adj_flux[i]*q[i]/R[i] 
-                                 for i in range(0, num_e_groups)]
-
 def magic(tally, tag_name, tag_name_error, tolerance, null_value):
     """This function reads a PyNE MeshTally and preforms the MAGIC algorithm 
     and returns the resulting weight window mesh.
-    
+
     Parameters:
     -----------
         tally :: a single PyNE MeshTally obj
