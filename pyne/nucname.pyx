@@ -130,7 +130,7 @@ def iselement(nuc):
     Parameters
     ----------
     nuc : int or str 
-        Input element(s).
+        Input element.
 
     Returns
     -------

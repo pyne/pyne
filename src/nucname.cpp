@@ -634,8 +634,8 @@ bool pyne::nucname::iselement(int nuc) {
  
   if (n <= 10000000)
     return false;
-  int zzz = n / 10000000;
-  int aaa = (n % 10000000) / 10000;
+  int zzz = znum(n);
+  int aaa = anum(n);
   if (zzz > 0 && aaa == 0)
     return true;  // is element
   return false;
