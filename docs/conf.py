@@ -115,8 +115,9 @@ pygments_style = 'tango'
 # Sphinx are currently 'default' and 'sphinxdoc'.
 #html_theme = 'default'
 #html_theme = 'sphinxdoc'
-#html_theme = 'cloud'
-html_theme_path = ['_theme', csp.get_theme_dir()]
+#html_theme = 'nature'
+html_theme = 'cloud'
+html_theme_path = [csp.get_theme_dir()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -125,12 +126,12 @@ html_theme_path = ['_theme', csp.get_theme_dir()]
 html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'sidebartextcolor': '#864907',
                       'sidebarlinkcolor': '#A92727',
-                      #'sidebartrimcolor': '#504A4B',
+                      'sidebartrimcolor': '#504A4B',
                       'collapsiblesidebar': False,
                       'stickysidebar':False,
                       'relbarbgcolor': '#38761D',
                       'footerbgcolor': '#94ba87',
-                      'footertextcolor': '#504A4B',
+                      #'footertextcolor': '#504A4B',
                       #'bodytrimcolor': '#80858a',
                       'linkcolor': '#A92727',
                       'textcolor': '#323039',
@@ -147,8 +148,6 @@ html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       #'googleanalytics_id':'UA-37452818-1',
                       }
 
-# Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ["_theme"]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -179,7 +178,7 @@ html_static_path = ['_static']
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
-#html_use_smartypants = True
+html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
@@ -192,13 +191,16 @@ html_static_path = ['_static']
 #html_use_modindex = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = True
 
 # If true, the index is split into individual pages for each letter.
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
+
+# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+html_show_sphinx = False
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the

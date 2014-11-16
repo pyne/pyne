@@ -31,60 +31,72 @@ For a quick install from source, please  clone from the official repo::
     python setup.py install --user
     scripts/nuc_data_make
 
-**RPSD Tutorial Session:**
+----------
+Hello
+----------
+
 
 .. toctree::
-    :maxdepth: 1
+     :maxdepth: 1
+     install
+     tutorial
 
-    virtualbox
 
---------
-Contents
---------
-
-**Usage:**
-
-.. toctree::
-    :maxdepth: 1
-
-    install
-    tutorial/index
-    gallery/index
-    usersguide/index
-    pyapi/index
-    cppapi/index
-    previous/index
-    devsguide/vnv
-
-**Theory:**
-
-.. toctree::
-    :maxdepth: 1
-
-    theorymanual/index
-
-**Development:**
-
-.. toctree::
-    :maxdepth: 1
-
-    devsguide/index
-    dev_team
-    pubs
-    gsoc/index
-
-------------
-Search Links
-------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-.. _C++ API: cppapi/html/index.html
-.. _GitHub project site: https://github.com/pyne
-
-.. _github: https://github.com/pyne/pyne
-
-.. _zip: https://github.com/pyne/pyne/zipball/0.4
-.. _tar: https://github.com/pyne/pyne/tarball/0.4
+..  **RPSD Tutorial Session:**
+..  
+..  .. toctree::
+..      :maxdepth: 1
+..  
+..      virtualbox
+..  --------
+..  Usage
+..  --------
+..  
+..  .. toctree::
+..      :maxdepth: 1
+..  
+..      install
+..      tutorial/index
+..      gallery/index
+..      usersguide/index
+..      pyapi/index
+..      cppapi/index
+..      previous/index
+..      devsguide/vnv
+..  
+..  --------
+..  Theory
+..  --------
+..  
+..  .. toctree::
+..      :maxdepth: 1
+..  
+..      theorymanual/index
+..  
+..  -----------
+..  Development
+..  -----------
+..  
+..  .. toctree::
+..      :maxdepth: 1
+..  
+..      devsguide/index
+..      dev_team
+..      pubs
+..      gsoc/index
+..  
+..  ------------
+..  Search Links
+..  ------------
+..  
+..  * :ref:`genindex`
+..  * :ref:`modindex`
+..  * :ref:`search`
+..  
+..  .. _C++ API: cppapi/html/index.html
+..  .. _GitHub project site: https://github.com/pyne
+..  
+..  .. _github: https://github.com/pyne/pyne
+..  
+..  .. _zip: https://github.com/pyne/pyne/zipball/0.4
+..  .. _tar: https://github.com/pyne/pyne/tarball/0.4

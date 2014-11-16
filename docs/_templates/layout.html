@@ -1,0 +1,30 @@
+{% extends "!layout.html" %}
+
+{% block sidebarsearch %}
+  <div class="sphinxlocaltoc">
+  <h3>{{ _('Useful Pages') }}</h3>
+    <ul><li><ul>
+    <li><a href="http://fuelcycle.org/user/index.html">Capabilities</a></li>
+    <li><a href="http://fuelcycle.org/arche/index.html">Install</a></li>
+    <li><a href="http://fuelcycle.org/cyclus/api/">User's Guide</a></li>
+    <li><a href="http://fuelcycle.org/cycamore/api/">API Documentation</a></li>
+    <li><a href="http://fuelcycle.org/basics/glossary.html">Glossary</a></li>
+    <li><a href="mailto:pyne-users+subscribe@googlegroups.com?subject=Subscribe&body=Send this message to subscribe to the list">Join</a> the 
+      <a href="https://groups.google.com/forum/#!forum/pyne-users" target="_blank"><span style="font-variant:small-caps">Cyclus</span> Users</a> mailing list.
+    <li><a href="mailto:pyne-dev+subscribe@googlegroups.com?subject=Subscribe&body=Send this message to subscribe to the list">Join</a> the 
+      <a href="https://groups.google.com/forum/#!forum/pyne-dev" target="_blank"><span style="font-variant:small-caps">PyNE</span> Developers</a> mailing list.
+    </ul></li></ul>
+  </div>
+    {{ super() }}
+    <h3>Get PyNE</h3>
+    <br>
+    Current version: <b>1.1.0</b>
+    <br><br>
+    Install:
+    <div class="highlight-bash" style="width:97.5%"><div class="highlight"><pre><span class="nv">$ </span>conda install cyclus cycamore</pre></div></div>
+    Get the Source:
+    <ul><li><ul>
+          <li><a href="https://github.com/pyne/pyne">Cyclus</a></li>
+    </ul></li></ul>
+    
+{% endblock %}
