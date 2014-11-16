@@ -4,6 +4,7 @@ from pyne.utils import QAWarning
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 class RxLib(object):
     """RxLib is a parent type that implements an abstract representation of
     nuclear data. Eventually it will be able to represent ENDF, ACE, and other
@@ -14,6 +15,7 @@ class RxLib(object):
 
     def write(self, filename, file_type_out):
         pass
+
 
 class DoubleSpinDict(collections.MutableMapping):
     """Sanitizes input, avoiding errors arising from half-integer values of spin.

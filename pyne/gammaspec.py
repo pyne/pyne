@@ -1,5 +1,5 @@
-"""This module is for gamma spectrometry analysis. Currently defines a 
-GammaSpectrum class, reads a .spe file Will in the future have functions 
+"""This module is for gamma spectrometry analysis. Currently defines a
+GammaSpectrum class, reads a .spe file Will in the future have functions
 for activity calculations.
 """
 
@@ -11,6 +11,7 @@ import numpy as np
 from pyne import spectanalysis
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
 
 class GammaSpectrum(spectanalysis.PhSpectrum):
     """GammaSpec class includes gamma specific variables"""
@@ -62,7 +63,7 @@ def read_spe_file(spec_file_path):
 
     Parameters
     ----------
-    spec_file_path : str 
+    spec_file_path : str
         Path to spe file
 
     Returns
@@ -141,18 +142,18 @@ def calc_e_eff(energy, eff_coeff, eff_fit=1):
 
     Parameters
     ----------
-    energy : float  
-        Energy to calcuate det eff 
+    energy : float
+        Energy to calcuate det eff
     eff_coeff : arr
         An array with the coefficients for the energy fit
-        the length is not fixed, the length of the array determines the 
+        the length is not fixed, the length of the array determines the
         number of terms in the expansion
     eff_fit : int
         Determines what type of fit to use
 
     Returns
     -------
-    eff : float 
+    eff : float
         Value of efficiency for the input energy using the selected fitting eqn
 
     """
