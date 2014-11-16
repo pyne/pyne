@@ -98,7 +98,7 @@ class NucTypeError(Exception):
 
 
 #
-# Is Nuclide Function
+# Is Nuclide and Is Element Functions
 #
 
 def isnuclide(nuc):
@@ -124,7 +124,28 @@ def isnuclide(nuc):
 
     return flag
 
+def iselement(nuc):
+    """Test if nuc is a valid element.
 
+    Parameters
+    ----------
+    nuc : int or str 
+        Input element(s).
+
+    Returns
+    -------
+    flag : bool
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        flag = cpp_nucname.iselement(<char *> nuc_bytes)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        flag = cpp_nucname.iselement(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+
+    return flag
 
 def id(nuc):
     """Converts a nuclide to its identifier form (952420000).

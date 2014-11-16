@@ -223,6 +223,16 @@ namespace nucname
   bool isnuclide(int nuc);
   /// \}
 
+  /// \name iselement functions
+  /// \{
+  /// These functions test if an input \a nuc is a valid element.
+  /// \param nuc a possible element
+  /// \return a bool
+  bool iselement(std::string nuc);
+  bool iselement(char * nuc);
+  bool iselement(int nuc);
+
+  /// \}
   /// \name Identifier Form Functions
   /// \{
   /// The 'id' nuclide naming convention is the canonical form for representing
