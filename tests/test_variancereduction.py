@@ -13,7 +13,7 @@ from numpy.testing import assert_array_almost_equal
 
 from pyne.utils import VnVWarning
 warnings.simplefilter("ignore", VnVWarning)
-from pyne.variancereduction import cadis
+from pyne.variancereduction import cadis, magic
 from pyne.mesh import Mesh, IMeshTag
 from pyne.mesh import MeshError
 
@@ -100,3 +100,12 @@ def test_cadis_multiple_e():
     
     assert_array_almost_equal(ww_mesh.ww[:], expected_ww[:])
     assert_array_almost_equal(q_bias_mesh.q_bias[:], expected_q_bias[:])
+    
+
+def test_magic_multi_bins():
+    # create a basic meshtally
+    pass
+
+def test_magic_e_total():
+    pass
+    
