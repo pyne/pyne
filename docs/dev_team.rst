@@ -13,6 +13,7 @@ The Python for Nuclear Engineering Team includes:
 * `Seth Johnson`_
 * `Kalin Kiesling`_
 * `Kevin Manalo`_
+* `Ryan Pavlovsky`_
 * `Eric Relson`_
 * `Paul Romano`_
 * `Anthony Scopatz`_
@@ -32,6 +33,8 @@ The Python for Nuclear Engineering Team includes:
 .. _Kalin Kiesling: mailto:krkiesling@gmail.com
 
 .. _Kevin Manalo: mailto:kmanalo@gmail.com
+
+.. _Ryan Pavlovsky: mailto:rp@berkeley.edu
 
 .. _Eric Relson: mailto:erelson@umich.edu
 
