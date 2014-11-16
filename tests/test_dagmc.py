@@ -13,8 +13,8 @@ try:
 except ImportError:
     HAVE_IMESH = False
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 
 try:
     from pyne import dagmc
