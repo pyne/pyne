@@ -9,9 +9,9 @@ import warnings
 from nose.tools import assert_equal
 from nose.plugins.skip import SkipTest
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warnings.simplefilter("ignore", VnVWarning)
+warnings.simplefilter("ignore", QAWarning)
 
 from pyne.binaryreader import (_FortranRecord, _BinaryReader)
 

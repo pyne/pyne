@@ -13,9 +13,9 @@ else:
     from html.parser import HTMLParser
 
 from pyne import nucname
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 if sys.version_info[0] > 2:
     basestring = str

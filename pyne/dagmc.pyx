@@ -4,7 +4,7 @@ from __future__ import print_function, division, unicode_literals
 import sys
 from contextlib import contextmanager
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 cimport numpy as np
 import numpy as np
@@ -14,7 +14,7 @@ from pyne.mesh import Mesh
 from numpy.linalg import norm
 np.import_array()
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Globals
 VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid

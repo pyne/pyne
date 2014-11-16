@@ -9,10 +9,11 @@ The Python for Nuclear Engineering Team includes:
 * `Elliott Biondo`_
 * `Chris Dembia`_
 * `Matthew Gidden`_
-* Katy Huff
+* `Katy Huff`_
 * `Seth Johnson`_
 * `Kalin Kiesling`_
 * `Kevin Manalo`_
+* `Ryan Pavlovsky`_
 * `Eric Relson`_
 * `Paul Romano`_
 * `Anthony Scopatz`_
@@ -25,11 +26,15 @@ The Python for Nuclear Engineering Team includes:
 
 .. _Matthew Gidden: http://mattgidden.com/
 
+.. _Katy Huff: http://katyhuff.github.io
+
 .. _Seth Johnson: http://reference-man.com/
 
 .. _Kalin Kiesling: mailto:krkiesling@gmail.com
 
 .. _Kevin Manalo: mailto:kmanalo@gmail.com
+
+.. _Ryan Pavlovsky: mailto:rp@berkeley.edu
 
 .. _Eric Relson: mailto:erelson@umich.edu
 
