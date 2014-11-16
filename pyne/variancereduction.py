@@ -226,7 +226,8 @@ def magic(tally, tag_name, tag_name_error, tolerance, null_value):
     
     # Create wwinp mesh
     wwinp = Wwinp()
-    wwinp.read_mesh(tally.mesh)
+    wwinp_obj = wwinp.read_mesh(tally.mesh)
     print(tally.ww_x[:])
+    return(wwinp_obj)
     
     
