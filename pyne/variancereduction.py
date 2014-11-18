@@ -134,22 +134,23 @@ def magic(tally, tag_name, tag_name_error, tolerance, null_value):
 
     Parameters:
     -----------
-        tally :: a single PyNE MeshTally obj
-        tag_name :: string
+        tally : a single PyNE MeshTally obj
+        tag_name : string
             The meshtally tag_name (example: n_result or n_total_result). If 
             the string "total" exists in the name, then it addressed as a
             single total energy bin. If not, then different energy bins.
-        tag_name_error :: string
+        tag_name_error : string
             The meshtally tag_name for the error associated with provided 
             tag_name. Example: n_rel_error
-        tolerance :: float
+        tolerance : float
             The maximum relative error allowable for the MAGIC algorithm to 
-            create a weight window lower bound for for a given voxel for the 
-            intial weight window lower bound generation, or overwrite 
-            preexisting weight window lower bounds for subsequent iterations. 
-        null_value :: float
-            The weight window lower bound value that is assigned to voxels 
-            where the relative error on flux exceeds the tolerance.
+            create a weight window lower bound for for a given mesh volume 
+            element for the intial weight window lower bound generation, or 
+            overwrite preexisting weight window lower bounds for subsequent 
+            iterations. 
+        null_value : float
+            The weight window lower bound value that is assigned to mesh volume
+             elements where the relative error on flux exceeds the tolerance.
     """
     
     tolerance = float(tolerance)
@@ -173,8 +174,7 @@ def magic(tally, tag_name, tag_name_error, tolerance, null_value):
     
     # create tag values
     tally.vals = IMeshTag(1, float, mesh=tally, name=tag_name)
-    tally.errors = IMeshTag(1, float, mesh=tally, name=tag_name_error)
-    
+    tally.errors = IMeshTag(1, float, mesh=tally, name=tag_name_error)  
     
     if total:
         tally.ww_x = IMeshTag(1, float, name="ww_{0}".format(tally.particle))
