@@ -53,7 +53,7 @@ def assert_ipython_version():
     try:
         import IPython
         low = (1, 2, 1)
-        v = IPython.__version__
+        v = IPython.__version__.split('-')[0]
         cur = tuple(map(int, v.split('.')))
         if cur < low:
             msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
@@ -66,7 +66,8 @@ def assert_ubuntu_version():
     v = platform.uname()
     for itm in v:
         if 'precise' in itm:
-            msg = "ubuntu 12/precise packages may be outdated, it is highly recommended to update to ubuntu 14 LTS."
+            msg = ("ubuntu 12/precise packages may be outdated, it is highly "
+                   "recommended to update to ubuntu 14 LTS.")
             warnings.warn(msg, Warning)
 
 def assert_dep_versions():
