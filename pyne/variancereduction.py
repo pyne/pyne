@@ -166,6 +166,8 @@ def magic(tally, tag_name, tag_name_error, tolerance, null_value):
     # Determine if total energy or separate energy bins
     if "total" in tag_name:
         total = True
+    elif len(tally.e_bounds) == 2:
+        total = True
     else:
         total = False
     

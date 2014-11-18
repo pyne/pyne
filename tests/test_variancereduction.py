@@ -200,8 +200,24 @@ def test_magic_single_e():
 
     coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
     flux_data = [1.2, 3.3, 1.6, 1.7]
-    flux_error = [.11, .013, .14, .016, .19]]
+    flux_error = [.11, .013, .14, .19]
+    tally = Mesh(structured=True, structured_coords = coords)
+    
+    #tally.particle = IMeshTag(1, str)
+    tally.particle = "neutron"
+    tally.e_bounds = [0.0, 1.0]
+    tally.n_flux = IMeshTag(1, float)
+    tally.n_flux[:] = flux_data
+    
+    tally.n_rel_error = IMeshTag(1, float)
+    tally.n_rel_error[:] = flux_error
+    
     tolerance = 0.15
     null_value = 0.001
+    
+    magic(tally, "n_flux", "n_rel_error", tolerance, null_value)
+    
+    expected_ww = [0.181818182, 0.5, 0.2424242, 0.001]
+    assert_array_almost_equal(tally.ww_x[:], expected_ww[:])
     
 
