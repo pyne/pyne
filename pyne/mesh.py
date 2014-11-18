@@ -146,8 +146,8 @@ class MaterialPropertyTag(Tag):
                     setattr(mats[i], name, value)
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match \
-                                the length of the mesh.")
+                raise KeyError("boolean mask must match "
+                               "the length of the mesh.")
             idx = np.where(key)[0]
             if isinstance(value, _SEQUENCE_TYPES) and len(value) == key.sum():
                 for i, v in zip(idx, value):
@@ -167,8 +167,8 @@ class MaterialPropertyTag(Tag):
                             "or fancy index.".format(key))
 
     def __delitem__(self, key):
-        msg = "the material property tag {0!r} may \
-               not be deleted".format(self.name)
+        msg = ("the material property tag {0!r} may "
+               "not be deleted").format(self.name)
         raise AttributeError(msg)
 
 
@@ -196,8 +196,8 @@ class MaterialMethodTag(Tag):
                              range(*key.indices(size))])
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match the \
-                                length of the mesh.")
+                raise KeyError("boolean mask must match the "
+                               "length of the mesh.")
             return np.array([getattr(mats[i], name)() for i, b in
                              enumerate(key) if b])
         elif isinstance(key, Iterable):
@@ -211,8 +211,8 @@ class MaterialMethodTag(Tag):
         raise AttributeError(msg)
 
     def __delitem__(self, key):
-        msg = "the material method tag {0!r} may not be \
-               deleted".format(self.name)
+        msg = ("the material method tag {0!r} may not be "
+               "deleted").format(self.name)
         raise AttributeError(msg)
 
 
@@ -242,8 +242,8 @@ class MetadataTag(Tag):
             return [mats[i].metadata[name] for i in range(*key.indices(size))]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match the length \
-                                of the mesh.")
+                raise KeyError("boolean mask must match the length "
+                               "of the mesh.")
             return [mats[i].metadata[name] for i, b in enumerate(key) if b]
         elif isinstance(key, Iterable):
             return [mats[i].metadata[name] for i in key]
@@ -269,8 +269,8 @@ class MetadataTag(Tag):
                     mats[i].metadata[name] = value
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match the length \
-                                of the mesh.")
+                raise KeyError("boolean mask must match the length "
+                               "of the mesh.")
             idx = np.where(key)[0]
             if isinstance(value, _SEQUENCE_TYPES) and len(value) == key.sum():
                 for i, v in zip(idx, value):
@@ -302,8 +302,8 @@ class MetadataTag(Tag):
                 del mats[i].metadata[name]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match the length \
-                                of the mesh.")
+                raise KeyError("boolean mask must match the length "
+                               "of the mesh.")
             for i, b in enumerate(key):
                 if b:
                     del mats[i].metadata[name]
@@ -383,8 +383,8 @@ class IMeshTag(Tag):
             return mtag[list(miter)[key]]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match the length \
-                                of the mesh.")
+                raise KeyError("boolean mask must match the length "
+                               "of the mesh.")
             return mtag[[ve for b, ve in zip(key, miter) if b]]
         elif isinstance(key, Iterable):
             ves = list(miter)
@@ -418,8 +418,8 @@ class IMeshTag(Tag):
             mtag[key] = v
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != msize:
-                raise KeyError("boolean mask must match the length \
-                                of the mesh.")
+                raise KeyError("boolean mask must match the length "
+                               "of the mesh.")
             key = [ve for b, ve in zip(key, miter) if b]
             v = np.empty(len(key), self.tag.type) if tsize == 1 else \
                 np.empty((len(key), tsize), self.tag.type)
@@ -452,8 +452,8 @@ class IMeshTag(Tag):
             del mtag[list(miter)[key]]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match the \
-                                length of the mesh.")
+                raise KeyError("boolean mask must match the "
+                               "length of the mesh.")
             del mtag[[ve for b, ve in zip(key, miter) if b]]
         elif isinstance(key, Iterable):
             ves = list(miter)
@@ -539,8 +539,8 @@ class ComputedTag(Tag):
             return [f(m, i) for i in range(*key.indices(size))]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match the length \
-                                of the mesh.")
+                raise KeyError("boolean mask must match the length "
+                               "of the mesh.")
             return [f(m, i) for i, b in enumerate(key) if b]
         elif isinstance(key, Iterable):
             return [f(m, i) for i in key]
@@ -754,8 +754,8 @@ class Mesh(object):
             self.metadata = MaterialPropertyTag(mesh=self, name='metadata',
                             doc='metadata attributes, stored on the material')
             self.comp = MaterialPropertyTag(mesh=self, name='comp',
-                        doc='normalized composition mapping from nuclides to \
-                             mass fractions')
+                        doc='normalized composition mapping from nuclides to '
+                            'mass fractions')
             self.mass = MaterialPropertyTag(mesh=self, name='mass',
                                             doc='the mass of the material')
             self.density = MaterialPropertyTag(mesh=self, name='density',
@@ -857,8 +857,8 @@ class Mesh(object):
                 tagtype = MetadataTag
             elif isinstance(value, _SEQUENCE_TYPES):
                 raise ValueError('ambiguous tag {0!r} creation when value is a'
-                                 ' sequence, please set tagtype, size, \
-                                  or dtype'.format(name))
+                                 ' sequence, please set tagtype, size, '
+                                 'or dtype'.format(name))
             else:
                 tagtype = MetadataTag
         if tagtype is IMeshTag or tagtype.lower() == 'imesh':
@@ -1248,8 +1248,8 @@ def _structured_iter_setup(dims, order, **kw):
                 spec[d] = [spec[d]]
             if not all(x in range(dims[idx], dims[idx + 3])
                        for x in spec[d]):
-                raise MeshError("Invalid iterator kwarg: \
-                                {0}={1}".format(d, spec[d]))
+                raise MeshError("Invalid iterator kwarg: "
+                                "{0}={1}".format(d, spec[d]))
             if d not in order and len(spec[d]) > 1:
                 raise MeshError("Cannot iterate over" + str(spec[d]) +
                                 "without a proper iteration order")
