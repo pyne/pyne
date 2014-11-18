@@ -1,4 +1,5 @@
-"""This module provides a way to locate, parse, and store CINDER cross sections."""
+"""This module provides a way to locate, parse, and store CINDER cross
+sections."""
 from __future__ import print_function
 import os
 import io
@@ -21,9 +22,10 @@ if sys.version_info[0] > 2:
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def grab_cinder_dat(build_dir="", datapath=''):
     """Grabs the cinder.dat file from the DATAPATH directory if not already
-       present."""
+    present."""
     build_filename = os.path.join(build_dir, 'cinder.dat')
     if os.path.exists(build_filename):
         return True
@@ -33,17 +35,17 @@ def grab_cinder_dat(build_dir="", datapath=''):
     elif 'DATAPATH' in os.environ:
         datapath = os.environ['DATAPATH']
     else:
-        print(warning("DATAPATH not defined in environment; cinder.dat not \
-                       found - skipping."))
+        print(warning("DATAPATH not defined in environment; cinder.dat not "
+                      "found - skipping."))
         return False
 
-    local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr].\
-                                             [Dd][Aa][Tt]")
+    local_filename = os.path.join(datapath, "[Cc][Ii][Nn][Dd][Ee][Rr]."
+                                            "[Dd][Aa][Tt]")
     local_filename = glob(local_filename)
     if 0 < len(local_filename):
         print("Grabbing cinder.dat from " + datapath)
-        print(warning("cinder.dat contains export controlled information \
-                       nuc_data.h5 is now export controlled!"))
+        print(warning("cinder.dat contains export controlled information "
+                      "nuc_data.h5 is now export controlled!"))
         shutil.copy(local_filename[0], build_filename)
         rtn = True
     else:
@@ -75,8 +77,8 @@ def _init_cinder(db):
     # Create xs group
     if not hasattr(db.root.neutron, 'cinder_xs'):
         nxs_mg_group = db.createGroup("/neutron", "cinder_xs",
-                                      "CINDER Multi-Group Neutron Cross \
-                                       Section Data")
+                                      "CINDER Multi-Group Neutron Cross "
+                                      "Section Data")
 
     # Create source groups
     if not hasattr(db.root.photon, 'cinder_source'):
@@ -86,8 +88,8 @@ def _init_cinder(db):
     # Create fission_yield groups
     if not hasattr(db.root.neutron, 'cinder_fission_products'):
         nxs_mg_group = db.createGroup("/neutron", "cinder_fission_products",
-                                      "CINDER Neutron Fission Product \
-                                       Yield Data")
+                                      "CINDER Neutron Fission Product "
+                                      "Yield Data")
 
     if not hasattr(db.root.photon, 'cinder_fission_products'):
         nxs_mg_group = db.createGroup("/photon", "cinder_fission_products",
@@ -114,8 +116,8 @@ def get_group_sizes(raw_data):
         The number of photon energy groups in the dataset
     """
     # Search for the group pattern
-    G_pattern = "(\d+) nuclides,\s+(\d+) neutron groups,\s+(\d+) proton groups,\
-                 \s+(\d+) photon groups"
+    G_pattern = ("(\d+) nuclides,\s+(\d+) neutron groups,\s+(\d+) proton "
+                 "groups,\s+(\d+) photon groups")
     m = re.search(G_pattern, raw_data)
     g = m.groups()
 
