@@ -128,7 +128,7 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
                          for i in range(num_e_groups)]
 
 
-def magic(tally, tag_name, tag_name_error, tolerance, null_value):
+def magic(meshtally, tag_name, tag_name_error, tolerance, null_value):
     """This function reads a PyNE MeshTally and preforms the MAGIC algorithm 
     and returns the resulting weight window mesh.
 
@@ -157,61 +157,61 @@ def magic(tally, tag_name, tag_name_error, tolerance, null_value):
     null_value = float(null_value)
     
     # Convert particle name to the recognized abbreviation
-    if tally.particle == "neutron":
-        tally.particle = "n"
-    elif tally.particle == "photon":
-        tally.particle = "p"
-    elif tally.particle == "electron":
-        tally.particle = "e"
+    if meshtally.particle == "neutron":
+        meshtally.particle = "n"
+    elif meshtally.particle == "photon":
+        meshtally.particle = "p"
+    elif meshtally.particle == "electron":
+        meshtally.particle = "e"
     
     # Determine if total energy or separate energy bins
     if "total" in tag_name:
         total = True
-    elif len(tally.e_bounds) == 2:
+    elif len(meshtally.e_bounds) == 2:
         total = True
     else:
         total = False
     
     # create tag values
-    tally.vals = IMeshTag(1, float, mesh=tally, name=tag_name)
-    tally.errors = IMeshTag(1, float, mesh=tally, name=tag_name_error)  
+    meshtally.vals = IMeshTag(1, float, mesh=meshtally, name=tag_name)
+    meshtally.errors = IMeshTag(1, float, mesh=meshtally, name=tag_name_error)  
     
     if total:
-        tally.ww_x = IMeshTag(1, float, name="ww_{0}".format(tally.particle))
-        root_tag = tally.mesh.createTag(
-            "{0}_e_upper_bounds".format(tally.particle),1, float)
-        root_tag[tally.mesh.rootSet] = np.max(tally.e_bounds[:])
+        meshtally.ww_x = IMeshTag(1, float, name="ww_{0}".format(meshtally.particle))
+        root_tag = meshtally.mesh.createTag(
+            "{0}_e_upper_bounds".format(meshtally.particle),1, float)
+        root_tag[meshtally.mesh.rootSet] = np.max(meshtally.e_bounds[:])
         
-        max_val = np.max(tally.vals[:])
+        max_val = np.max(meshtally.vals[:])
 
         ww = []
-        for ve, flux in enumerate(tally.vals[:]):
-            if tally.errors[ve] > tolerance:
+        for ve, flux in enumerate(meshtally.vals[:]):
+            if meshtally.errors[ve] > tolerance:
                 ww.append(null_value)
             else:
                 ww.append(flux/(2.0*max_val))
         
     else:
-        tally.ww_x = IMeshTag(len(tally.e_bounds)-1, float, name="ww_{0}".format(tally.particle))
-        root_tag = tally.mesh.createTag(
-                    "{0}_e_upper_bounds".format(tally.particle), 
-                    len(tally.e_bounds)-1, 
+        meshtally.ww_x = IMeshTag(len(meshtally.e_bounds)-1, float, name="ww_{0}".format(meshtally.particle))
+        root_tag = meshtally.mesh.createTag(
+                    "{0}_e_upper_bounds".format(meshtally.particle), 
+                    len(meshtally.e_bounds)-1, 
                     float)
-        root_tag[tally.mesh.rootSet] = tally.e_bounds[1:]
+        root_tag[meshtally.mesh.rootSet] = meshtally.e_bounds[1:]
         
         # Determine the max values for each energy bin
         max_val = []
-        for i in range(len(tally.e_bounds)-1):
+        for i in range(len(meshtally.e_bounds)-1):
             vals_in_e = []
-            for ve, flux in enumerate(tally.vals[:]):
-                vals_in_e.append(tally.vals[ve][i])
+            for ve, flux in enumerate(meshtally.vals[:]):
+                vals_in_e.append(meshtally.vals[ve][i])
             
             max_val.append(np.max(vals_in_e))
         
         # Apply normalization to create weight windows
         ww = []
-        for ve, flux_list in enumerate(tally.vals[:]):
-            tally_list = tally.errors[ve]
+        for ve, flux_list in enumerate(meshtally.vals[:]):
+            tally_list = meshtally.errors[ve]
             flux = []
             for i, value in enumerate(flux_list):
                 if tally_list[i] > tolerance:
@@ -221,8 +221,8 @@ def magic(tally, tag_name, tag_name_error, tolerance, null_value):
             
             ww.append(flux)
 
-    tally.ww_x[:] = ww
+    meshtally.ww_x[:] = ww
     
     # Create wwinp mesh
     wwinp = Wwinp()
-    wwinp.read_mesh(tally.mesh)
+    wwinp.read_mesh(meshtally.mesh)
