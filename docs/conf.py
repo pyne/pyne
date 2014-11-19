@@ -129,7 +129,7 @@ html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'collapsiblesidebar': False,
                       'stickysidebar':False,
                       'relbarbgcolor': '#38761D',
-                      'footerbgcolor': '#94ba87',
+                      'footerbgcolor': '#fffffff',
                       'linkcolor': '#A92727',
                       'textcolor': '#323039',
                       'sectionbgcolor': '#F1FFF0',
@@ -140,6 +140,7 @@ html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'min_height': 'bottom',
                       'googleanalytics_id':'UA-37452818-1',
                       'highlighttoc': False,
+                      'bgcolor':'#ffffff'
                       }
 
 # Add any paths that contain custom themes here, relative to this directory.
