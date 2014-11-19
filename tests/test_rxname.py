@@ -247,5 +247,5 @@ def test_no_id_mt_clash():
 
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 

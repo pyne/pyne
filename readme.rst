@@ -45,8 +45,7 @@ Optional Depenendencies:
 Additionally, building the documentation requires the following:
 
    #. `Sphinx <http://sphinx-doc.org/>`_
-   #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
-   #. `breathe <http://michaeljones.github.io/breathe/>`_ 
+   #. `sphinxcontrib-bibtex <https://pypi.python.org/pypi/sphinxcontrib-bibtex/>`_
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
 
 Most of the dependencies are readily available through package managers. 
