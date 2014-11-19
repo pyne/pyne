@@ -111,7 +111,7 @@ def test_magic_multi_bins():
     coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
     flux_data = [[1.2, 3.3], [1.6, 1.7], [1.5, 1.4], [2.6, 1.0]]
     flux_error = [[0.11, 0.013], [0.14, 0.19], [0.02, 0.16], [0.04, 0.09]]
-    tally = Mesh(structured=True, structured_coords = coords)
+    tally = Mesh(structured=True, structured_coords=coords)
     
     tally.particle = "neutron"
     tally.e_bounds = [0.0, 0.5, 1.0]
@@ -141,7 +141,7 @@ def test_magic_e_total():
     coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
     flux_data = [1.2, 3.3, 1.6, 1.7]
     flux_error = [0.11, 0.013, 0.14, 0.19]
-    tally = Mesh(structured=True, structured_coords = coords)
+    tally = Mesh(structured=True, structured_coords=coords)
     
     tally.particle = "neutron"
     tally.e_bounds = [0.0, 0.5, 1.0]
@@ -168,7 +168,7 @@ def test_magic_single_e():
     coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
     flux_data = [1.2, 3.3, 1.6, 1.7]
     flux_error = [0.11, 0.013, 0.14, 0.19]
-    tally = Mesh(structured=True, structured_coords = coords)
+    tally = Mesh(structured=True, structured_coords=coords)
     
     tally.particle = "neutron"
     tally.e_bounds = [0.0, 1.0]

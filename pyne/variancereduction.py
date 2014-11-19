@@ -21,6 +21,7 @@ from mesh import Mesh
 from mesh import MeshError
 from mesh import IMeshTag
 from mcnp import Wwinp
+from pyne.particle import mcnp
 
 def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag, 
           ww_mesh, ww_tag, q_bias_mesh, q_bias_tag, beta=5):
@@ -157,24 +158,21 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     null_value = kwargs["null_value"] if "null_value" in kwargs else 0.0
     
     # Convert particle name to the recognized abbreviation
-    if meshtally.particle == "neutron":
-        meshtally.particle = "n"
-    elif meshtally.particle == "photon":
-        meshtally.particle = "p"
-    elif meshtally.particle == "electron":
-        meshtally.particle = "e"
-    
-    # Determine if total energy or separate energy bins
-    if "total" in tag_name:
-        total = True
-    elif len(meshtally.e_bounds) == 2:
-        total = True
-    else:
-        total = False
-    
+    particle = (meshtally.particle[0].upper() + meshtally.particle[1:])
+    if  particle == ("Neutron" or "Photon" or "Electron"):
+        meshtally.particle = mcnp(particle).lower()
+
     # create tag values
-    meshtally.vals = IMeshTag(1, float, mesh=meshtally, name=tag_name)
-    meshtally.errors = IMeshTag(1, float, mesh=meshtally, name=tag_name_error)  
+    meshtally.vals = IMeshTag(mesh=meshtally, name=tag_name)
+    meshtally.errors = IMeshTag(mesh=meshtally, name=tag_name_error)
+
+    # Determine if total energy or separate energy bins
+    if meshtally.vals[0].size == 1 and len(meshtally.e_bounds) > 1:
+        total = True
+    elif meshtally.vals[0].size == 1 and len(meshtally.e_bounds) == 1:
+        total = True
+    elif meshtally.vals[0].size > 1 and len(meshtally.e_bounds) > 1:
+        total = False
     
     if total:
         meshtally.ww_x = IMeshTag(1, float, name="ww_{0}".format(meshtally.particle))
@@ -192,7 +190,8 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
                 ww.append(flux/(2.0*max_val))
         
     else:
-        meshtally.ww_x = IMeshTag(len(meshtally.e_bounds)-1, float, name="ww_{0}".format(meshtally.particle))
+        meshtally.ww_x = IMeshTag(len(meshtally.e_bounds)-1, float, 
+                                  name="ww_{0}".format(meshtally.particle))
         root_tag = meshtally.mesh.createTag(
                     "{0}_e_upper_bounds".format(meshtally.particle), 
                     len(meshtally.e_bounds)-1, 
