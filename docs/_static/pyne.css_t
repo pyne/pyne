@@ -1,5 +1,4 @@
 @import url("cloud.css");
-
 body {
     background-image:url('gear_flourish_transp.png'), 
                      url('curlydivider-right.png'), 

@@ -117,7 +117,6 @@ pygments_style = 'tango'
 #html_theme = 'sphinxdoc'
 #html_theme = 'nature'
 html_theme = 'cloud'
-html_theme_path = [csp.get_theme_dir()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -143,6 +142,8 @@ html_theme_options = {'sidebarbgcolor': '#F1FFF0',
                       'highlighttoc': False,
                       }
 
+# Add any paths that contain custom themes here, relative to this directory.
+html_theme_path = [csp.get_theme_dir()]
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
 #html_title = None
