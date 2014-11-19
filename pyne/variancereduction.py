@@ -128,13 +128,13 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
                          for i in range(num_e_groups)]
 
 
-def magic(meshtally, tag_name, tag_name_error, tolerance, null_value):
+def magic(meshtally, tag_name, tag_name_error, **kwargs):
     """This function reads a PyNE MeshTally and preforms the MAGIC algorithm 
     and returns the resulting weight window mesh.
 
     Parameters:
     -----------
-        tally : a single PyNE MeshTally obj
+        meshtally : a single PyNE MeshTally obj
         tag_name : string
             The meshtally tag_name (example: n_result or n_total_result). If 
             the string "total" exists in the name, then it addressed as a
@@ -142,19 +142,19 @@ def magic(meshtally, tag_name, tag_name_error, tolerance, null_value):
         tag_name_error : string
             The meshtally tag_name for the error associated with provided 
             tag_name. Example: n_rel_error
-        tolerance : float
+        tolerance : float, optional
             The maximum relative error allowable for the MAGIC algorithm to 
             create a weight window lower bound for for a given mesh volume 
             element for the intial weight window lower bound generation, or 
             overwrite preexisting weight window lower bounds for subsequent 
             iterations. 
-        null_value : float
+        null_value : float, optional
             The weight window lower bound value that is assigned to mesh volume
              elements where the relative error on flux exceeds the tolerance.
     """
     
-    tolerance = float(tolerance)
-    null_value = float(null_value)
+    tolerance = kwargs["tolerance"] if "tolerance" in kwargs else 0.001
+    null_value = kwargs["null_value"] if "null_value" in kwargs else 0.0
     
     # Convert particle name to the recognized abbreviation
     if meshtally.particle == "neutron":

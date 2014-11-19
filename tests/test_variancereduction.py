@@ -124,7 +124,7 @@ def test_magic_multi_bins():
     tolerance = 0.15
     null_value = 0.001
     
-    magic(tally, "n_flux", "n_rel_error", tolerance, null_value)
+    magic(tally, "n_flux", "n_rel_error", tolerance=tolerance, null_value=null_value)
     
     expected_ww = [[0.2307692308, 0.5], 
                    [0.3076923077, 0.001], 
@@ -154,7 +154,7 @@ def test_magic_e_total():
     tolerance = 0.15
     null_value = 0.001
     
-    magic(tally, "n_total_flux", "n_rel_error", tolerance, null_value)
+    magic(tally, "n_total_flux", "n_rel_error", tolerance=tolerance, null_value=null_value)
     
     expected_ww = [0.181818182, 0.5, 0.2424242, 0.001]
     
@@ -181,7 +181,7 @@ def test_magic_single_e():
     tolerance = 0.15
     null_value = 0.001
     
-    magic(tally, "n_flux", "n_rel_error", tolerance, null_value)
+    magic(tally, "n_flux", "n_rel_error", tolerance=tolerance, null_value=null_value)
     
     expected_ww = [0.181818182, 0.5, 0.2424242, 0.001]
     
