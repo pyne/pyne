@@ -130,16 +130,14 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
 
 
 def magic(meshtally, tag_name, tag_name_error, **kwargs):
-    """This function reads a PyNE MeshTally and preforms the MAGIC algorithm 
-    and returns the resulting weight window mesh.
+    """This function reads a PyNE MeshTally object and preforms the MAGIC 
+    algorithm and returns the resulting weight window mesh.
 
     Parameters:
     -----------
         meshtally : a single PyNE MeshTally obj
         tag_name : string
-            The meshtally tag_name (example: n_result or n_total_result). If 
-            the string "total" exists in the name, then it addressed as a
-            single total energy bin. If not, then different energy bins.
+            The meshtally tag_name (example: n_result or n_total_result).
         tag_name_error : string
             The meshtally tag_name for the error associated with provided 
             tag_name. Example: n_rel_error
@@ -151,7 +149,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
             iterations. 
         null_value : float, optional
             The weight window lower bound value that is assigned to mesh volume
-             elements where the relative error on flux exceeds the tolerance.
+            elements where the relative error on flux exceeds the tolerance.
     """
     
     tolerance = kwargs["tolerance"] if "tolerance" in kwargs else 0.001
@@ -166,7 +164,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     meshtally.vals = IMeshTag(mesh=meshtally, name=tag_name)
     meshtally.errors = IMeshTag(mesh=meshtally, name=tag_name_error)
 
-    # Determine if total energy or separate energy bins
+    # Determine if total energy or single energy bin or multiple energy bins
     if meshtally.vals[0].size == 1 and len(meshtally.e_bounds) > 1:
         total = True
     elif meshtally.vals[0].size == 1 and len(meshtally.e_bounds) == 1:
