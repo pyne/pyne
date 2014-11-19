@@ -130,12 +130,12 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
 
 
 def magic(meshtally, tag_name, tag_name_error, **kwargs):
-    """This function reads a PyNE MeshTally object and preforms the MAGIC 
+    """This function reads a PyNE mcnp.MeshTally object and preforms the MAGIC 
     algorithm and returns the resulting weight window mesh.
 
     Parameters:
     -----------
-        meshtally : a single PyNE MeshTally obj
+        meshtally : a single PyNE mcnp.MeshTally obj
         tag_name : string
             The meshtally tag_name (example: n_result or n_total_result).
         tag_name_error : string
@@ -159,25 +159,30 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     particle = (meshtally.particle[0].upper() + meshtally.particle[1:])
     if  particle == ("Neutron" or "Photon" or "Electron"):
         meshtally.particle = mcnp(particle).lower()
-
-    # create tag values
+    
+    # Create tag values
     meshtally.vals = IMeshTag(mesh=meshtally, name=tag_name)
     meshtally.errors = IMeshTag(mesh=meshtally, name=tag_name_error)
 
     # Determine if total energy or single energy bin or multiple energy bins
-    if meshtally.vals[0].size == 1 and len(meshtally.e_bounds) > 1:
+    tag_size = meshtally.vals[0].size
+    if tag_size == 1 and len(meshtally.e_bounds) > 1:
         total = True
-    elif meshtally.vals[0].size == 1 and len(meshtally.e_bounds) == 1:
+    elif tag_size == 1 and len(meshtally.e_bounds) == 1:
         total = True
-    elif meshtally.vals[0].size > 1 and len(meshtally.e_bounds) > 1:
+    elif tag_size > 1 and len(meshtally.e_bounds) > 1:
         total = False
     
+    # Create weight window tags
+    meshtally.ww_x = IMeshTag(tag_size, float, 
+                              name="ww_{0}".format(meshtally.particle))
+    root_tag = meshtally.mesh.createTag(
+                        "{0}_e_upper_bounds".format(meshtally.particle), 
+                        tag_size, float)
+    
+    # Determine weight window values
     if total:
-        meshtally.ww_x = IMeshTag(1, float, name="ww_{0}".format(meshtally.particle))
-        root_tag = meshtally.mesh.createTag(
-            "{0}_e_upper_bounds".format(meshtally.particle),1, float)
         root_tag[meshtally.mesh.rootSet] = np.max(meshtally.e_bounds[:])
-        
         max_val = np.max(meshtally.vals[:])
 
         ww = []
@@ -188,17 +193,11 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
                 ww.append(flux/(2.0*max_val))
         
     else:
-        meshtally.ww_x = IMeshTag(len(meshtally.e_bounds)-1, float, 
-                                  name="ww_{0}".format(meshtally.particle))
-        root_tag = meshtally.mesh.createTag(
-                    "{0}_e_upper_bounds".format(meshtally.particle), 
-                    len(meshtally.e_bounds)-1, 
-                    float)
         root_tag[meshtally.mesh.rootSet] = meshtally.e_bounds[1:]
         
         # Determine the max values for each energy bin
         max_val = []
-        for i in range(len(meshtally.e_bounds)-1):
+        for i in range(tag_size):
             vals_in_e = []
             for ve, flux in enumerate(meshtally.vals[:]):
                 vals_in_e.append(meshtally.vals[ve][i])
