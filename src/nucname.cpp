@@ -604,6 +604,42 @@ int pyne::nucname::id(std::string nuc) {
 };
 
 
+/***************************/
+/*** iselement functions ***/
+/***************************/
+
+bool pyne::nucname::iselement(std::string nuc) {
+  int n;
+  try {
+    n = id(nuc);
+  }
+  catch(NotANuclide) {
+    return false;
+  }
+  return iselement(n);
+};
+
+bool pyne::nucname::iselement(char * nuc) {
+  return iselement(std::string(nuc));
+};
+
+bool pyne::nucname::iselement(int nuc) {
+  int n;
+  try {
+    n = id(nuc);
+  }
+  catch(NotANuclide) {
+    return false;
+  }
+ 
+  if (n <= 10000000)
+    return false;
+  int zzz = znum(n);
+  int aaa = anum(n);
+  if (zzz > 0 && aaa == 0)
+    return true;  // is element
+  return false;
+};
 
 /**********************/
 /*** name functions ***/

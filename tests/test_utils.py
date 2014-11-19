@@ -130,5 +130,5 @@ def test_toggle_warnings():
     assert_equal(state, not observed)
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 
