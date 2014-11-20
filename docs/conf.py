@@ -122,13 +122,14 @@ html_theme = 'cloud'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #html_theme_options = {}
-html_theme_options = {'sidebarbgcolor': '#F1FFF0',
+html_theme_options = {'sidebarbgcolor': '#EBF5D5',
                       'sidebartextcolor': '#864907',
                       'sidebarlinkcolor': '#4b1a07',
                       'sidebartrimcolor': '#504A4B',
                       'collapsiblesidebar': False,
                       'stickysidebar':False,
-                      'relbarbgcolor': '#38761D',
+                      #'relbarbgcolor': '#38761D',
+                      'relbarbgcolor': '#6EA55B',
                       'footerbgcolor': '#fffffff',
                       'linkcolor': '#A92727',
                       'textcolor': '#323039',
