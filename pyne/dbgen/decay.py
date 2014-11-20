@@ -455,7 +455,7 @@ def make_decay(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     with tb.openFile(nuc_data, 'r') as f:
-        if hasattr(f.root, 'decay'):
+        if hasattr(f.root, 'decay') and hasattr(f.root.decay, 'ecbp'):
             print("skipping ENSDF decay data table creation; already exists.")
             return
 
