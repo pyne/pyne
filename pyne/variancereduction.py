@@ -220,8 +220,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     
     # Resassign weight windows to meshtally
     if total:
-        size = len(ww)
-        meshtally.ww_x[:] = np.reshape(ww, size)
+        meshtally.ww_x[:] = np.reshape(ww, len(ww))
     else:
         meshtally.ww_x[:] = ww
     
