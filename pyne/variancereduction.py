@@ -160,12 +160,19 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     if  particle == ("Neutron" or "Photon" or "Electron"):
         meshtally.particle = mcnp(particle).lower()
     
-    # Create tag values
+    # Create tags for values and errors
     meshtally.vals = IMeshTag(mesh=meshtally, name=tag_name)
     meshtally.errors = IMeshTag(mesh=meshtally, name=tag_name_error)
-
-    # Determine if total energy or single energy bin or multiple energy bins
+    
+    # Create weight window tags
     tag_size = meshtally.vals[0].size
+    meshtally.ww_x = IMeshTag(tag_size, float, 
+                              name="ww_{0}".format(meshtally.particle))
+    root_tag = meshtally.mesh.createTag(
+                        "{0}_e_upper_bounds".format(meshtally.particle), 
+                        tag_size, float)
+                        
+    # Determine if total energy or single energy bin or multiple energy bins
     if tag_size == 1 and len(meshtally.e_bounds) > 1:
         total = True
     elif tag_size == 1 and len(meshtally.e_bounds) == 1:
@@ -173,51 +180,50 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     elif tag_size > 1 and len(meshtally.e_bounds) > 1:
         total = False
     
-    # Create weight window tags
-    meshtally.ww_x = IMeshTag(tag_size, float, 
-                              name="ww_{0}".format(meshtally.particle))
-    root_tag = meshtally.mesh.createTag(
-                        "{0}_e_upper_bounds".format(meshtally.particle), 
-                        tag_size, float)
-    
-    # Determine weight window values
+    # Reassign arrays for total and not total case
     if total:
         root_tag[meshtally.mesh.rootSet] = np.max(meshtally.e_bounds[:])
         max_val = np.max(meshtally.vals[:])
-
-        ww = []
+        
+        vals = []
+        errors = []
         for ve, flux in enumerate(meshtally.vals[:]):
-            if meshtally.errors[ve] > tolerance:
-                ww.append(null_value)
-            else:
-                ww.append(flux/(2.0*max_val))
+            vals.append(np.atleast_1d(flux))
+            errors.append(np.atleast_1d(meshtally.errors[ve]))
+        vals = np.array(vals)
+        errors = np.array(errors)
         
     else:
         root_tag[meshtally.mesh.rootSet] = meshtally.e_bounds[1:]
-        
-        # Determine the max values for each energy bin
-        max_val = []
-        for i in range(tag_size):
-            vals_in_e = []
-            for ve, flux in enumerate(meshtally.vals[:]):
-                vals_in_e.append(meshtally.vals[ve][i])
-            
-            max_val.append(np.max(vals_in_e))
-        
-        # Apply normalization to create weight windows
-        ww = []
-        for ve, flux_list in enumerate(meshtally.vals[:]):
-            tally_list = meshtally.errors[ve]
-            flux = []
-            for i, value in enumerate(flux_list):
-                if tally_list[i] > tolerance:
-                    flux.append(null_value)
-                else:    
-                    flux.append(value/(2.0*max_val[i]))
-            
-            ww.append(flux)
-
-    meshtally.ww_x[:] = ww
+        vals = meshtally.vals[:]
+        errors = meshtally.errors[:]
+    
+    # Determine the max values for each energy bin
+    max_val = []
+    for i in range(tag_size):
+        vals_in_e = []
+        for ve, flux in enumerate(vals[:]):
+            vals_in_e.append(vals[ve][i])
+        max_val.append(np.max(vals_in_e))
+    
+    # Apply normalization to create weight windows
+    ww = []
+    for ve, flux_list in enumerate(vals[:]):
+        tally_list = errors[ve]
+        flux = []
+        for i, value in enumerate(flux_list):
+            if tally_list[i] > tolerance:
+                flux.append(null_value)
+            else:    
+                flux.append(value/(2.0*max_val[i]))
+        ww.append(flux)
+    
+    # Resassign weight windows to meshtally
+    if total:
+        size = len(ww)
+        meshtally.ww_x[:] = np.reshape(ww, size)
+    else:
+        meshtally.ww_x[:] = ww
     
     # Create wwinp mesh
     wwinp = Wwinp()
