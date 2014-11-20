@@ -5,9 +5,9 @@ import warnings
 
 from nose.tools import assert_equal, assert_raises
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warnings.simplefilter("ignore", VnVWarning)
+warnings.simplefilter("ignore", QAWarning)
 
 from pyne.cccc import Isotxs
 

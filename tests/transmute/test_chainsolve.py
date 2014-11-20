@@ -13,8 +13,8 @@ import numpy  as np
 import tables as tb
 from scipy import linalg
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne import nuc_data
 from pyne import nucname as nn
 from pyne import data

@@ -163,3 +163,14 @@ def fromendf_tok(s):
         cdata[i] = pyne.cpp_utils.endftod(entry)
         i += 1
     return cdata
+
+def use_warnings():
+    """Displays if warnings are off or on
+    """    
+    return pyne.cpp_utils.USE_WARNINGS
+
+def toggle_warnings():
+    """Toggles warnings on and off
+    """
+    return pyne.cpp_utils.toggle_warnings()
+   

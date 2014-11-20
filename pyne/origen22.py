@@ -11,7 +11,7 @@ from collections import Mapping
 from copy import deepcopy
 from itertools import chain
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 
@@ -27,7 +27,7 @@ if sys.version_info[0] > 2:
   basestring = str
   unicode = str
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 BASE_TAPE9 = os.path.join(os.path.dirname(__file__), 'base_tape9.inp')
 

@@ -7,9 +7,9 @@ cimport numpy as np
 import numpy as np
 from numpy import logspace
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def ninespace(start, stop, num=50, endpoint=True):
     """Splits the range into one-minus-log-uniform bins defined by num points.
