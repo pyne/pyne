@@ -20,7 +20,7 @@ import os
 import linecache
 import datetime
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 import itertools
 
 import numpy as np
@@ -34,7 +34,7 @@ from pyne.material import MaterialLibrary
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
 try:
@@ -58,44 +58,21 @@ PARTISN input file. Supported are 1D, 2D, and 3D geometries.
 
 Parameters
 ----------
-    mesh :: mesh object, a premade mesh object that conforms to the 
-            geometry.
-                Can be 1-D, 2-D, or 3-D.
-                note: only Cartesian based geometries are supported.
-    hdf5 :: file, a material-laden dagmc geometry file.
-    nucdata :: file, nuclear data cross section library.
+    mesh : mesh object, a premade mesh object that conforms to the geometry. 
+        Bounds of the mesh must correspond to the desired PartiSn fine mesh. 
+        One fine mesh per coarse mesh will be created. Can be 1-D, 2-D, or 3-D.
+        Only Cartesian based geometries are currently supported.
+    hdf5 : file, a material-laden dagmc geometry file.
+    nucdata : file, nuclear data cross section library.
                 note: only BXSLIB format is currently supported.
-    nuc_names :: dict, pyne element/isotope names to bxslib name assignment,
+    nuc_names : dict, pyne element/isotope names to bxslib name assignment,
                 keys are pyne nucids (int) and values are bxslib names (str)
-    datapath :: str, optional, The path in the heirarchy to the data table 
+    datapath : str, optional, The path in the heirarchy to the data table 
             in an HDF5 file. (for MaterialLibrary)
                 default = material_library/materials
-    nucpath :: str, optional, The path in the heirarchy to the 
+    nucpath : str, optional, The path in the heirarchy to the 
             nuclide array in an HDF5 file. (for MaterialLibrary)
                 default = material_library/nucid
-    ****fine :: dict of lists, optional, number of fine mesh intervals per coarse
-            mesh interval. Fine mesh is used for solver.
-                keys must be 'x', 'y', or 'z'. Value is list of ints. List 
-                can be of length 1 so that the value is applied to all coarse
-                meshes in that direction. Or list can be length of coarse
-                meshes in that direction.
-                    example: fine = {'x':[5], 'y':[3,5,6,8,2]}
-                default: 10 in all directions.
-                NOTE: make user supply fine mesh only, make it default one fine
-                mesh per coarse mesh
-Attributes
-----------
-    dim :: list of str, specifies the dimensions in problem. Currently
-            only Cartesian is supported so can be any combination of one or
-            more of 'x', 'y', or 'z'.
-    bounds :: dict of lists of floats, values for the coarse mesh bounds
-            in each dimension present
-    matlib :: dict of dict, keys are names of pyne materials whose keys are
-            *pyne* element/isotope names and their value is *density*
-    xs_names :: list of strings, names of isotope/elements from the bxslib
-    fine :: dict of lists, number of fine mesh intervals per coarse mesh in 
-            bounds, keys are the dimensions (x, y, or z), values is list of
-            length of bounds in each direction.        
 """
 
 def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
@@ -106,18 +83,19 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
 
     # get coordinate system and mesh bounds from mesh       
     coord_sys, bounds = _read_mesh(mesh)
-
+    
     # Read the materials from the hdf5 and convert to correct naming convention
     mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)       
     
     # determine the zones
     zones = _define_zones(mesh)
-    
+
     # read nucdata
     bxslib = open(nucdata, 'rb')
     xs_names = _read_bxslib(bxslib)
 
     return coord_sys, bounds, mat_lib, zones, xs_names
+ 
     
 def _read_mesh(mesh):
     # determines the system geometry (1-D, 2-D, or 3-D Cartesian)
@@ -160,12 +138,14 @@ def _read_mesh(mesh):
         
     # collect values of mesh boundaries for each coordinate
     bounds = {}
+    fine = {}
     for i in coord_sys:
         bounds[i] = mesh.structured_get_divisions(i)
+        #fine[i] = [1]*(len(bounds[i]) - 1)
     
     return coord_sys, bounds
 
-  
+ 
 def _read_bxslib(bxslib):
     string = ""
     edits = ""
@@ -183,7 +163,8 @@ def _read_bxslib(bxslib):
             string += pad1
         xs_names.append(string.strip(" "))
         string=""
-    
+
+
 def _get_materials(hdf5, datapath, nucpath, nuc_names):
     # reads material properties from the loaded dagmc_geometry
     # cell # -> material name & vol fract -> isotope name & dens
@@ -208,7 +189,8 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
             mat_lib[mat_name][nuc_name] = rho_frac/mw*Na
             
     return mat_lib
-        
+
+
 def _define_zones(mesh):
     """This function takes results of discretize_geom and finds unique voxels
     """
@@ -248,18 +230,39 @@ def _define_zones(mesh):
 
 
 #class PartisnWrite(object):
-"""This class writes out the information stored by PartisnRead to
-a text partisn input file.
-"""
-def write_partisn(coord_sys, bounds, mat_lib, zones, xs_names, input_file):
-    block01(coord_sys, xs_names, mat_lib, zones, bounds)
 
-def title():
+def write_partisn_input(coord_sys, bounds, mat_lib, zones, xs_names, input_file):
+    """This function writes out the necessary information to a text partisn 
+    input file.
+    
+    Parameters
+    ----------
+        coord_sys : list of str, indicator of either 1-D, 2-D, or 3-D Cartesian
+            geometry. 
+                1-D: [i]
+                2-D: [i ,j]
+                3-D: [i, j, k]
+                where i, j, and k are either "x", "y", or "z".
+        bounds : dict of list of floats, coarse mesh bounds for each dimension. 
+            Dictionary keys are the dimension "x", "y" or "z" for Cartesian. 
+            Must correspond to a 1:1 fine mesh to coarse mesh interval.
+        mat_lib : dict of dicts, keys are names of PyNE materials whose keys 
+            are bxslib names and their value is atomic density in units 
+            [at/b-cm].
+        zones : dict of dict of lists, first dict key is PartiSn zone number 
+            (int). Inner dict keys are "cell" with a list of cell numbers (int) 
+            as values and "vol_frac" with a list of corresponding cell volume 
+            fractions (float).
+        xs_names : list of str, names of isotope/elements from the bxslib
+    
+    """
+    _block01(coord_sys, xs_names, mat_lib, zones, bounds)
+
+def _title():
     # figure out what to make the title
     pass
         
-def block01(coord_sys, xs_names, mat_lib, zones, bounds):
-    
+def _block01(coord_sys, xs_names, mat_lib, zones, bounds):
     # Determine IGEOM
     if len(coord_sys) == 1:
         IGEOM = 'SLAB'
@@ -288,14 +291,20 @@ def block01(coord_sys, xs_names, mat_lib, zones, bounds):
         elif key == 'z':
             KM = len(bounds[key]) - 1
             KT = IM
+    
+    # Optional Input IQUAD
+    IQUAD = 1 # default
 
-def block02():
+def _block02():
     pass
 
-def block03():
+def _block03():
     pass
 
-def block04():
+def _block04():
+    pass
+
+def _write():
     pass
     
     
