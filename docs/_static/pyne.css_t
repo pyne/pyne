@@ -1,0 +1,13 @@
+@import url("cloud.css");
+body {
+    background-image:url('subtle_texture.jpg');
+    background-repeat: repeat; 
+    background-position:0 0;
+    background-attachment: scroll; 
+    background-size: auto;
+}
+
+div.sphinxlocaltoc ul a, div.sphinxglobaltoc ul a {
+    display: inline;
+    white-space: normal;
+}
