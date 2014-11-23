@@ -3,7 +3,7 @@ import os
 import re
 import sys
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 try:
     import urllib.request as urllib2
@@ -14,7 +14,7 @@ except ImportError:
 
 from pyne import nucname
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 if sys.version_info[0] > 2:
   basestring = str

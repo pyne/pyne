@@ -9,13 +9,17 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 import numpy as np
 import numpy.testing as npt
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warnings.simplefilter("ignore", VnVWarning)
+warnings.simplefilter("ignore", QAWarning)
 
 import pyne
 from pyne import data
 
+from pyne import utils
+
+if utils.use_warnings():
+    utils.toggle_warnings()
 
 # These tests require nuc_data
 if not os.path.isfile(pyne.nuc_data):
@@ -104,8 +108,8 @@ def test_wims_fpyield():
 
 
 def test_nds_fpyield():
-    assert_equal(data.fpyield('Th-232', 'Eu-154', 3), 9.6000E-8)
-    assert_equal(data.fpyield('Th-232', 'Eu-154', 3, True), 3.8000E-8)
+    assert_equal(data.fpyield('Th-232', 'Eu-154', 3), 2.79e-07)
+    assert_equal(data.fpyield('Th-232', 'Eu-154', 3, True), 9.3e-08)
 
 
 def test_half_life():

@@ -3,7 +3,7 @@ from __future__ import print_function, division
 import os
 import glob
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 try:
     import urllib.request as urllib
@@ -17,7 +17,7 @@ import tables as tb
 from pyne import ensdf
 from pyne.dbgen.api import BASIC_FILTERS
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
 def _readpoint(line, dstart, dlen):
@@ -455,7 +455,7 @@ def make_decay(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     with tb.openFile(nuc_data, 'r') as f:
-        if hasattr(f.root, 'decay'):
+        if hasattr(f.root, 'decay') and hasattr(f.root.decay, 'ecbp'):
             print("skipping ENSDF decay data table creation; already exists.")
             return
 

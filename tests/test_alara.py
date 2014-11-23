@@ -19,8 +19,8 @@ except ImportError:
     HAVE_PYTAPS = False
     pass
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 
 from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.material import Material

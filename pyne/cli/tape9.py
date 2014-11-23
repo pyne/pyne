@@ -6,7 +6,7 @@ import sys
 import argparse
 from glob import glob
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 
@@ -19,7 +19,7 @@ from pyne.xs.data_source import EAFDataSource, SimpleDataSource, NullDataSource
 from pyne.dbgen.api import build_dir
 from pyne.dbgen.decay import grab_ensdf_decay
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def parse_ensdf(files):
     """Parses a list of ensdf files for origen."""

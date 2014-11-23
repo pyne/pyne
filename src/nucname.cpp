@@ -428,9 +428,14 @@ int pyne::nucname::id(int nuc) {
   int zzz = nuc / 10000000;     // ZZZ ?
   int aaassss = nuc % 10000000; // AAA-SSSS ?
   int aaa = aaassss / 10000;    // AAA ?
+  int ssss = aaassss % 10000;   // SSSS ?
   // Nuclide must already be in id form
   if (0 < zzz && zzz <= aaa && aaa <= zzz * 7) {
     // Normal nuclide
+    if (5 < ssss){
+    // Unphysical metastable state warning 
+     warning("You have indicated a metastable state of " + pyne::to_str(ssss) + ". Metastable state above 5, possibly unphysical. ");
+    }
     return nuc;
   } else if (aaassss == 0 && 0 < zz_name.count(zzz)) {
     // Natural elemental nuclide:  ie for Uranium = 920000000
@@ -443,11 +448,20 @@ int pyne::nucname::id(int nuc) {
   zzz = nuc / 10000;     // ZZZ ?
   aaassss = nuc % 10000; // AAA-SSSS ?
   aaa = aaassss / 10;    // AAA ?
+  ssss = nuc % 10;       // SSSS ?          
   if (zzz <= aaa && aaa <= zzz * 7) {
     // ZZZAAAM nuclide
+    if (5 < ssss){
+    // Unphysical metastable state warning
+      warning("You have indicated a metastable state of " + pyne::to_str(ssss) + ". Metastable state above 5, possibly unphysical. ");
+    }
     return (zzz*10000000) + (aaa*10000) + (nuc%10);
   } else if (aaa <= zzz && zzz <= aaa * 7 && 0 < zz_name.count(aaa)) {
     // Cinder-form (aaazzzm), ie 2350920
+    if (5 < ssss){
+    // Unphysical metastable state warning
+      warning("You have indicated a metastable state of " + pyne::to_str(ssss) + ". Metastable state above 5, possibly unphysical. ");
+    }
     return (aaa*10000000) + (zzz*10000) + (nuc%10);
   }
   //else if (aaassss == 0 && 0 == zz_name.count(nuc/1000) && 0 < zz_name.count(zzz))
@@ -590,6 +604,42 @@ int pyne::nucname::id(std::string nuc) {
 };
 
 
+/***************************/
+/*** iselement functions ***/
+/***************************/
+
+bool pyne::nucname::iselement(std::string nuc) {
+  int n;
+  try {
+    n = id(nuc);
+  }
+  catch(NotANuclide) {
+    return false;
+  }
+  return iselement(n);
+};
+
+bool pyne::nucname::iselement(char * nuc) {
+  return iselement(std::string(nuc));
+};
+
+bool pyne::nucname::iselement(int nuc) {
+  int n;
+  try {
+    n = id(nuc);
+  }
+  catch(NotANuclide) {
+    return false;
+  }
+ 
+  if (n <= 10000000)
+    return false;
+  int zzz = znum(n);
+  int aaa = anum(n);
+  if (zzz > 0 && aaa == 0)
+    return true;  // is element
+  return false;
+};
 
 /**********************/
 /*** name functions ***/
@@ -1312,6 +1362,10 @@ int pyne::nucname::sza(std::string nuc) {
 int pyne::nucname::sza_to_id(int nuc) {
   int sss = nuc / 1000000;
   int zzzaaa = nuc % 1000000;
+  if (5 < sss){
+  // Unphysical metastable state warning 
+   warning("You have indicated a metastable state of " + pyne::to_str(sss) + ". Metastable state above 5, possibly unphysical. ");
+  }
   return zzzaaa * 10000 + sss;
 }
 
