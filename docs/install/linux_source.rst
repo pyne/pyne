@@ -25,13 +25,6 @@ Optional Depenendencies:
    #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
    #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
 
-Additionally, building the documentation requires the following:
-
-   #. `Sphinx <http://sphinx-doc.org/>`_
-   #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
-   #. `breathe <http://michaeljones.github.io/breathe/>`_ 
-   #. `PrettyTable <https://code.google.com/p/prettytable/>`_
-
 Most of the dependencies are readily available through package managers.  Once
 all the dependencies are installed, PyNE can be installed. Download and unzip
 the source (`zip`_, `tar`_) or checkout a verison from the PyNE repository
