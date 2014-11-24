@@ -8,6 +8,21 @@ body {
     background-size: auto;
 }
 
+{% set bordercolor = "#556B2F" %}
+
+div.document {
+    border-right-style: solid;
+    border-left-style: solid;
+    border-width: thin;
+    border-color: {{ bordercolor }};
+}
+
+div.related {
+    border-style: solid;
+    border-width: thin;
+    border-color: {{ bordercolor }};
+}
+
 div.sphinxlocaltoc ul a, div.sphinxglobaltoc ul a {
     display: inline;
     white-space: normal;
