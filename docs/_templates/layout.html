@@ -35,3 +35,11 @@
   </div>
     {{ super() }}
 {% endblock %}
+
+{%- block footer %}
+    <div class="footer">
+    <div style="background-color:rgba(255,255,255,0.5);display:inline-block;border-radius:10px;padding:6px;">
+        {{ super() }}
+    </div>
+    </div>
+{%- endblock %}
