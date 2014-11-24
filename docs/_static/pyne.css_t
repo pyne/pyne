@@ -1,6 +1,7 @@
 @import url("cloud.css");
 body {
-    background-image:url('subtle_texture.jpg');
+    background-image:url('pinstripes.jpg');
+    background-size: 10%;
     background-repeat: repeat; 
     background-position:0 0;
     background-attachment: scroll; 
