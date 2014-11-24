@@ -121,12 +121,11 @@ html_theme = 'cloud'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
 html_theme_options = {'sidebarbgcolor': '#F5FAEB',
                       'sidebartextcolor': '#864907',
                       'sidebarlinkcolor': '#4b1a07',
                       'sidebartrimcolor': '#504A4B',
-                      'collapsiblesidebar': False,
+                      'collapsiblesidebar': True,
                       'stickysidebar':False,
                       'relbarbgcolor': '#98bc8c',
                       'footerbgcolor': '#fffffff',
@@ -142,7 +141,9 @@ html_theme_options = {'sidebarbgcolor': '#F5FAEB',
                       'min_height': 'bottom',
                       'googleanalytics_id':'UA-37452818-1',
                       'highlighttoc': False,
-                      'bgcolor':'#ffffff'
+                      'bgcolor':'#ffffff',
+                      'max_width': '1250px',
+                      'sidebarwidth': '280px',
                       }
 
 # Add any paths that contain custom themes here, relative to this directory.
