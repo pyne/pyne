@@ -1,6 +1,6 @@
 @import url("cloud.css");
 body {
-    background-image:url('pneed.png'),
+    background-image:url('wood.png'),
                      url('subtle_texture.jpg');
     background-repeat: repeat, repeat; 
     background-position:0 0;
