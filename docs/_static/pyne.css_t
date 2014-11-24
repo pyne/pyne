@@ -1,10 +1,26 @@
 @import url("cloud.css");
 body {
-    background-image:url('subtle_texture.jpg');
-    background-repeat: repeat; 
+    background-image:url('wood.png'),
+                     url('subtle_texture.jpg');
+    background-repeat: repeat, repeat; 
     background-position:0 0;
-    background-attachment: scroll; 
+    background-attachment: scroll;
     background-size: auto;
+}
+
+{% set bordercolor = "#556B2F" %}
+
+div.document {
+    border-right-style: solid;
+    border-left-style: solid;
+    border-width: thin;
+    border-color: {{ bordercolor }};
+}
+
+div.related {
+    border-style: solid;
+    border-width: thin;
+    border-color: {{ bordercolor }};
 }
 
 div.sphinxlocaltoc ul a, div.sphinxglobaltoc ul a {
