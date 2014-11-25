@@ -26,3 +26,8 @@ div.sphinxlocaltoc ul a, div.sphinxglobaltoc ul a {
     display: inline;
     white-space: normal;
 }
+
+/* Fixes numpy colon wrapping issue */
+table.docutils th.field-name {
+    white-space: nowrap;
+}
