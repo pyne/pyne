@@ -2,29 +2,29 @@
 """Welcome to PyNE's setup.py script. This is a little non-standard because pyne
 is a multilanguage projects.  Still this script follows a predicatable ordering:
 
-1. Parse command line arguments, 
+1. Parse command line arguments,
 2. Call cmake from the 'build' directory
 3. Call make from the 'build' directory
 4. Use distuitls/setuptools from the 'build' directory
 
 This gives us the best of both worlds. Compiled code is installed with cmake/make
-and Cython/Python code is installed with normal Python tools. The only trick here is 
+and Cython/Python code is installed with normal Python tools. The only trick here is
 how the various command line arguments are handed off to the three sub-processes.
 
-To acomplish this we use argparser groups to group command line arguments based on 
+To acomplish this we use argparser groups to group command line arguments based on
 whether they go to:
 
 1. the setup() function,
-2. cmake, 
+2. cmake,
 3. make, or
-4. other - typically used for args that apply to multiple other groups or 
+4. other - typically used for args that apply to multiple other groups or
    modify the environment in some way.
 
 To add a new command line argument, first add it to the appropriate group in the
 ``parse_args()`` function.  Then, modify the logic in the cooresponding
 ``parse_setup()``, ``parse_cmake()``, ``parse_make()``, or ``parse_others()``
 functions to consume your new command line argument.  It is OK for more than
-one of the parser functions to comsume the argument. Where appropriate, 
+one of the parser functions to comsume the argument. Where appropriate,
 ensure the that argument is appended to the argument list that is returned by these
 functions.
 """
@@ -38,6 +38,7 @@ import platform
 import warnings
 import subprocess
 from glob import glob
+from distutils import core, dir_util
 
 import numpy as np
 
@@ -76,12 +77,13 @@ VERSION = '0.5-dev'
 IS_NT = os.name == 'nt'
 
 CMAKE_BUILD_TYPES = {
-    'none': 'None', 
+    'none': 'None',
     'debug': 'Debug',
     'release': 'Release',
     'relwithdebinfo': 'RelWithDebInfo',
     'minsizerel': 'MinSizeRel',
     }
+
 
 def assert_np_version():
     low = (1, 8, 0)
@@ -129,6 +131,14 @@ def parse_setup(ns):
     if ns.egg_base is not None:
         local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
         a.append('--egg-base=' + os.path.join(local_path, ns.egg_base))
+    if ns.cmd == 'clean':
+        if os.path.exists('build'):
+            dir_util.remove_tree('build')
+        print('build directory cleaned ... exiting')
+        sys.exit()
+    if ns.clean is not None:
+        if os.path.exists('build'):
+            dir_util.remove_tree('build')
     return a
 
 
@@ -162,13 +172,14 @@ def parse_args():
     setup = parser.add_argument_group('setup', 'Group for normal setup.py arguments')
     setup.add_argument('cmd', help="command to send to normal setup, e.g. "
                        "install or build.")
+    parser.add_argument('--clean', nargs='?', const=True, default=False)
     parser.add_argument('--user', nargs='?', const=True, default=False)
     parser.add_argument('--egg-base')
 
     cmake = parser.add_argument_group('cmake', 'Group for CMake arguments.')
-    cmake.add_argument('-D', metavar='VAR', action='append', 
+    cmake.add_argument('-D', metavar='VAR', action='append',
                        help='Set enviornment variable.')
-    cmake.add_argument('--build-type', metavar='BT', 
+    cmake.add_argument('--build-type', metavar='BT',
                        help='Set build type via CMAKE_BUILD_TYPE, '
                             'e.g. Release or Debug.')
 
@@ -189,7 +200,6 @@ def parse_args():
 
 
 def setup():
-    from distutils import core
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat'))
                                      or (os.name != 'nt' and
@@ -263,14 +273,13 @@ def cmake_cli(cmake_args):
     return cmake_cmd
 
 
-def main_body():
+def main_body(cmake_args, make_args):
     assert_dep_versions()
-    cmake_args, make_args = parse_args()
     if not os.path.exists('build'):
         os.mkdir('build')
     cmake_cmd = cmake_cli(cmake_args)
     rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=IS_NT)
-    
+
     rtn = subprocess.check_call(['make'] + make_args, cwd='build')
 
     cwd = os.getcwd()
@@ -290,8 +299,9 @@ def final_message(success=True):
 
 def main():
     success = False
+    cmake_args, make_args = parse_args()
     try:
-        main_body()
+        main_body(cmake_args, make_args)
         success = True
     finally:
         final_message(success)
@@ -315,6 +325,7 @@ def main():
            'export PATH="{binpath}:${{PATH}}"\n'
            'export LD_LIBRARY_PATH="{libpath}:${{LD_LIBRARY_PATH}}"'
            ).format(binpath=binpath, libpath=libpath)
+
     print(msg, file=sys.stderr)
 
 
