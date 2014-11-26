@@ -38,6 +38,7 @@ import platform
 import warnings
 import subprocess
 from glob import glob
+from distutils import core, dir_util
 
 import numpy as np
 
@@ -83,6 +84,7 @@ CMAKE_BUILD_TYPES = {
     'minsizerel': 'MinSizeRel',
     }
 
+
 def assert_np_version():
     low = (1, 8, 0)
     v = np.version.short_version
@@ -121,7 +123,6 @@ def assert_dep_versions():
 
 
 def parse_setup(ns):
-    from distutils import dir_util
     a = [sys.argv[0], ns.cmd]
     if ns.user:
         a.append('--user')
@@ -197,7 +198,6 @@ def parse_args():
 
 
 def setup():
-    from distutils import core
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat'))
                                      or (os.name != 'nt' and
