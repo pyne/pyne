@@ -130,8 +130,12 @@ def parse_setup(ns):
     if ns.egg_base is not None:
         local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
         a.append('--egg-base=' + os.path.join(local_path, ns.egg_base))
-    if ns.all is not None and ns.cmd == 'clean':
-        dir_util.remove_tree('build')
+    if ns.cmd == 'clean':
+        if os.path.exists('build'):
+            dir_util.remove_tree('build')
+    if ns.clean is not None:
+        if os.path.exists('build'):
+            dir_util.remove_tree('build')
     return a
 
 
@@ -165,7 +169,7 @@ def parse_args():
     setup = parser.add_argument_group('setup', 'Group for normal setup.py arguments')
     setup.add_argument('cmd', help="command to send to normal setup, e.g. "
                        "install or build.")
-    parser.add_argument('--all', nargs='?', const=True, default=False)
+    parser.add_argument('--clean', nargs='?', const=True, default=False)
     parser.add_argument('--user', nargs='?', const=True, default=False)
     parser.add_argument('--egg-base')
 
@@ -270,17 +274,22 @@ def cmake_cli(cmake_args):
 def main_body():
     assert_dep_versions()
     cmake_args, make_args = parse_args()
-    if not os.path.exists('build'):
-        os.mkdir('build')
-    cmake_cmd = cmake_cli(cmake_args)
-    rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=IS_NT)
+    if sys.argv[1] != 'clean':
+        if not os.path.exists('build'):
+            os.mkdir('build')
+        cmake_cmd = cmake_cli(cmake_args)
+        rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=IS_NT)
 
-    rtn = subprocess.check_call(['make'] + make_args, cwd='build')
+        rtn = subprocess.check_call(['make'] + make_args, cwd='build')
 
-    cwd = os.getcwd()
-    os.chdir('build')
-    setup()
-    os.chdir(cwd)
+        cwd = os.getcwd()
+        os.chdir('build')
+        setup()
+        os.chdir(cwd)
+        return True
+    else:
+        print('build directory cleaned')
+        return False
 
 
 def final_message(success=True):
@@ -294,8 +303,9 @@ def final_message(success=True):
 
 def main():
     success = False
+    build = False
     try:
-        main_body()
+        build = main_body()
         success = True
     finally:
         final_message(success)
@@ -319,7 +329,8 @@ def main():
            'export PATH="{binpath}:${{PATH}}"\n'
            'export LD_LIBRARY_PATH="{libpath}:${{LD_LIBRARY_PATH}}"'
            ).format(binpath=binpath, libpath=libpath)
-    print(msg, file=sys.stderr)
+    if build:
+        print(msg, file=sys.stderr)
 
 
 if __name__ == "__main__":
