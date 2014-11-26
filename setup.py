@@ -41,6 +41,17 @@ pyne_logo = """\
                                      `
 """
 
+VERSION = '0.5-dev'
+IS_NT = os.name == 'nt'
+
+CMAKE_BUILD_TYPES = {
+    'none': 'None', 
+    'debug': 'Debug',
+    'release': 'Release',
+    'relwithdebinfo': 'RelWithDebInfo',
+    'minsizerel': 'MinSizeRel',
+    }
+
 def assert_np_version():
     low = (1, 8, 0)
     v = np.version.short_version
@@ -74,79 +85,63 @@ def assert_dep_versions():
     assert_np_version()
     assert_ubuntu_version()
     assert_ipython_version()
-        
-def parse_args():
-    distutils_args = []
-    cmake = []
-    make = []
-    argsets = [distutils_args, cmake, make]
-    i = 0
-    for arg in sys.argv:
-        if arg == '--':
-            i += 1
-        else:
-            argsets[i].append(arg)
-    # handle HDF5
-    hdf5opt = [o.split('=')[1] for o in distutils_args \
-               if o.startswith('--hdf5=')]
-    if 0 < len(hdf5opt):
-        os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
-        distutils_args = [o for o in distutils_args \
-                          if not o.startswith('--hdf5=')]
 
-    # handle build type
-    btopt = [o.split('=')[1] for o in distutils_args \
-             if o.startswith('--build-type=')]
-    if 0 < len(btopt):
-        cmake.append('-DCMAKE_BUILD_TYPE=' + btopt[0])
-        distutils_args = [o for o in distutils_args \
-                          if not o.startswith('--build-type=')]
-
-    # Change egg-base entry to absolute path so it behaves as expected
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--egg-base')
-    res, distutils_args = parser.parse_known_args(distutils_args)
-    if res.egg_base is not None:
+def parse_setup(ns):
+    a = [sys.argv[0], ns.cmd]
+    if ns.user:
+        a.append('--user')
+    if ns.egg_base is not None:
         local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
-        distutils_args.append('--egg-base='+os.path.join(local_path,
-                                                         res.egg_base))
-    return distutils_args, cmake, make
+        a.append('--egg-base='+os.path.join(local_path, ns.egg_base))
+    return a
 
-INFO = {'version': '0.5-dev'}
+def parse_cmake(ns):
+    a = []
+    if ns.D is not None:
+        a += ['-D' + x for x in ns.D]
+    if ns.build_type is not None:
+        a.append('-DCMAKE_BUILD_TYPE=' + CMAKE_BUILD_TYPES[ns.build_type.lower()])
+    return a
 
-def final_message(success=True):
-    if success:
-        return
+def parse_make(ns):
+    a = []
+    if ns.j is not None:
+        a.append('-j' + ns.j)
+    return a
 
-    metadata = None
-    mdpath = os.path.join('pyne', 'metadata.json')
-    if os.path.exists(mdpath):
-        with open(mdpath) as f:
-            metadata = json.load(f)
-    if metadata is not None:
-        msg = "\n\nCURRENT METADATA:\n"
-        for k, v in sorted(metadata.items()):
-            msg += "  {0} = {1}\n".format(k, repr(v))
-        print(msg[:-1])
+def parse_others(ns):
+    if ns.hdf5 is not None:
+        os.environ['HDF5_ROOT'] = ns.hdf5
 
-    if os.name != 'nt':
-        return
+def parse_args():
+    parser = argparse.ArgumentParser()
 
-    try:
-        import tables as tb
-        h5ver = tb.getHDF5Version()
-    except ImportError:
-        h5ver = '1.8.5-patch1'
+    setup = parser.add_argument_group('setup', 'Group for normal setup.py arguments')
+    setup.add_argument('cmd', help="command to send to normal setup, e.g. "
+                       "install or build.")
+    parser.add_argument('--user', nargs='?', const=True, default=False)
+    parser.add_argument('--egg-base')
 
-    msg = ("\n\nUSAGE: "
-           "python setup.py <distutils-args> [-- <cmake-arg>] "
-           "[-- <make-args>]\n CMake and make command line "
-           "arguments are optional, but must be preceeded by '--'.\n"
-           "Should this still fail, please report your problem to "
-           "pyne-dev@googlegroups.com\n\n"
-           ).format(h5ver=h5ver)
-    print(msg)
+    cmake = parser.add_argument_group('cmake', 'Group for CMake arguments.')
+    cmake.add_argument('-D', metavar='VAR', action='append', 
+                       help='Set enviornment variable.')
+    cmake.add_argument('--build-type', metavar='BT', 
+                       help='Set build type via CMAKE_BUILD_TYPE, '
+                            'e.g. Release or Debug.')
+
+    make = parser.add_argument_group('make', 'Group for make arguments.')
+    make.add_argument('-j', help='Degree of parallelism for build.')
+
+    other = parser.add_argument_group('other', 'Group for miscellaneous arguments.')
+    other.add_argument('--hdf5', help='Path to HDF5 root directory.')
+
+    ns = parser.parse_args()
+    sys.argv = parse_setup(ns)
+    cmake_args = parse_cmake(ns)
+    make_args = parse_make(ns)
+    parse_others(ns)
+
+    return cmake_args, make_args
 
 
 def setup():
@@ -186,7 +181,7 @@ def setup():
         ]
     setup_kwargs = {
         "name": "pyne",
-        "version": INFO['version'],
+        "version": VERSION,
         "description": 'The Nuclear Engineering Toolkit',
         "author": 'PyNE Development Team',
         "author_email": 'pyne-dev@googlegroups.com',
@@ -199,48 +194,60 @@ def setup():
         }
     rtn = core.setup(**setup_kwargs)
 
+def cmake_cli(cmake_args):
+    if not IS_NT:
+        rtn = subprocess.call(['which', 'cmake'])
+        if rtn != 0:
+            sys.exit('CMake is not installed, aborting PyNE build.')
+    cmake_cmd = ['cmake', '..'] + cmake_args
+    cmake_cmd += ['-DPYTHON_EXECUTABLE=' + sys.executable]
+    if IS_NT:
+        files_on_path = set()
+        for p in os.environ['PATH'].split(';')[::-1]:
+            if os.path.exists(p):
+                files_on_path.update(os.listdir(p))
+        if 'cl.exe' in files_on_path:
+            pass
+        elif 'sh.exe' in files_on_path:
+            cmake_cmd += ['-G "MSYS Makefiles"']
+        elif 'gcc.exe' in files_on_path:
+            cmake_cmd += ['-G "MinGW Makefiles"']
+        cmake_cmd = ' '.join(cmake_cmd)
+    cmake_cmdstr = cmake_cmd if isinstance(cmake_cmd, str) else ' '.join(cmake_cmd)
+    print("CMake command is\n", cmake_cmdstr, sep="")
+    return cmake_cmd
 
 def main_body():
+    assert_dep_versions()
+    cmake_args, make_args = parse_args()
     if not os.path.exists('build'):
         os.mkdir('build')
-    sys.argv, cmake_args, make_args = parse_args()
-    makefile = os.path.join('build', 'Makefile')
-    if not os.path.exists(makefile):
-        if os.name != 'nt':
-            rtn = subprocess.call(['which', 'cmake'])
-            if rtn != 0:
-                sys.exit('CMake is not installed, aborting PyNE build.')
-        cmake_cmd = ['cmake', '..'] + cmake_args
-        cmake_cmd += ['-DPYTHON_EXECUTABLE=' + sys.executable]
-        if os.name == 'nt':
-            files_on_path = set()
-            for p in os.environ['PATH'].split(';')[::-1]:
-                if os.path.exists(p):
-                    files_on_path.update(os.listdir(p))
-            if 'cl.exe' in files_on_path:
-                pass
-            elif 'sh.exe' in files_on_path:
-                cmake_cmd += ['-G "MSYS Makefiles"']
-            elif 'gcc.exe' in files_on_path:
-                cmake_cmd += ['-G "MinGW Makefiles"']
-            cmake_cmd = ' '.join(cmake_cmd)
-        is_nt = os.name == 'nt'
-        cmake_cmdstr = cmake_cmd if isinstance(cmake_cmd, str) else ' '.join(cmake_cmd)
-        print("CMake command is\n", cmake_cmdstr, sep="")
-        rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=is_nt)
+    cmake_cmd = cmake_cli(cmake_args)
+    rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=IS_NT)
+    
     rtn = subprocess.check_call(['make'] + make_args, cwd='build')
+
     cwd = os.getcwd()
     os.chdir('build')
-    configure.setup()
+    setup()
     os.chdir(cwd)
 
-def old_main():
+def final_message(success=True):
+    if success:
+        return
+    msg = ("\n\nYou seem to be having issues building pyne. please report your problem "
+           "to pyne-dev@googlegroups.com or look for help at http://pyne.io\n\n"
+           )
+    print("-"*20 + msg + '-'* 20)
+
+
+def main():
     success = False
     try:
         main_body()
         success = True
     finally:
-        configure.final_message(success)
+        final_message(success)
     # trick to get install path
     abspath = os.path.abspath
     joinpath = os.path.join
@@ -262,11 +269,6 @@ def old_main():
            'export LD_LIBRARY_PATH="{libpath}:${{LD_LIBRARY_PATH}}"'
            ).format(binpath=binpath, libpath=libpath)
     print(msg, file=sys.stderr)
-
-def main():
-    assert_dep_versions()
-    parse_args()
-
 
 if __name__ == "__main__":
     main()
