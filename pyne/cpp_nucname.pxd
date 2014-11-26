@@ -28,6 +28,11 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     bint isnuclide(char *) except +
     bint isnuclide(std_string) except +
 
+    # iselement
+    bint iselement(int) except +
+    bint iselement(char *) except +
+    bint iselement(std_string) except +
+
     # id functions
     int id(int) except +
     int id(char *) except +

@@ -1,23 +1,25 @@
 .. _cppapi:
 
 =================
-C++ API
+`C++ API`_
 =================
+The Doxygen generated C++ API reference can be found `here`_
+
 The following files and libraries are part of the PyNE C++ interface:
 
-.. toctree::
-    :maxdepth: 1
+- pyne
+- nucname
+- rxname
+- particle
+- data
+- material
+- enrichment
+- extra_types
+- h5wrap
 
-    pyne
-    nucname
-    rxname
-    particle
-    data
-    material
-    enrichment
-    extra_types
-    h5wrap
 
+.. _here: html/index.html
+.. _C++ API: html/index.html
 
 -----------------
 Using the C++ API

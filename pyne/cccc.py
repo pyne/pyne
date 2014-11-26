@@ -29,11 +29,11 @@ Report LA-5324-MS_.
 
 from __future__ import division
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 class Isotxs(_BinaryReader):
     """An Isotxs object represents a binary ISOTXS file written according to the

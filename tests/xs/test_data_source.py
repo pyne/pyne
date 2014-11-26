@@ -15,9 +15,9 @@ from nose.tools import assert_equal, assert_not_equal, assert_almost_equal, \
     assert_true, assert_is
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warnings.simplefilter('ignore', VnVWarning)
+warnings.simplefilter('ignore', QAWarning)
 
 from pyne.xs import data_source
 from pyne.pyne_config import pyne_conf
