@@ -34,6 +34,8 @@ import os
 import sys
 import imp
 import argparse
+import platform
+import warnings
 import subprocess
 from glob import glob
 
@@ -89,20 +91,21 @@ def assert_np_version():
         msg = "numpy version too low! {0} (have) < 1.8.0 (min)".format(v)
         raise ValueError(msg)
 
+
 def assert_ipython_version():
     try:
         import IPython
-        low = (1, 2, 1)
-        v = IPython.__version__.split('-')[0]
-        cur = tuple(map(int, v.split('.')))
-        if cur < low:
-            msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
-            raise ValueError(msg)
     except ImportError:
-        pass;
+        return
+    low = (1, 2, 1)
+    v = IPython.__version__.split('-')[0]
+    cur = tuple(map(int, v.split('.')))
+    if cur < low:
+        msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
+        raise ValueError(msg)
+
 
 def assert_ubuntu_version():
-    import platform,warnings
     v = platform.uname()
     for itm in v:
         if 'precise' in itm:
@@ -110,19 +113,24 @@ def assert_ubuntu_version():
                    "recommended to update to ubuntu 14 LTS.")
             warnings.warn(msg, Warning)
 
+
 def assert_dep_versions():
     assert_np_version()
     assert_ubuntu_version()
     assert_ipython_version()
 
+
 def parse_setup(ns):
     a = [sys.argv[0], ns.cmd]
     if ns.user:
         a.append('--user')
+    if ns.prefix is not None:
+        a.append('--prefix=' + ns.prefix)
     if ns.egg_base is not None:
         local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
         a.append('--egg-base='+os.path.join(local_path, ns.egg_base))
     return a
+
 
 def parse_cmake(ns):
     a = []
@@ -130,7 +138,10 @@ def parse_cmake(ns):
         a += ['-D' + x for x in ns.D]
     if ns.build_type is not None:
         a.append('-DCMAKE_BUILD_TYPE=' + CMAKE_BUILD_TYPES[ns.build_type.lower()])
+    if ns.prefix is not None:
+        a.append('-DCMAKE_INSTALL_PREFIX=' + ns.prefix)
     return a
+
 
 def parse_make(ns):
     a = []
@@ -138,11 +149,14 @@ def parse_make(ns):
         a.append('-j' + ns.j)
     return a
 
+
 def parse_others(ns):
     if ns.hdf5 is not None:
         os.environ['HDF5_ROOT'] = ns.hdf5
 
+
 def parse_args():
+    argv = [a for a in sys.argv[1:] if a != '--']  # needed for backwards compat.
     parser = argparse.ArgumentParser()
 
     setup = parser.add_argument_group('setup', 'Group for normal setup.py arguments')
@@ -163,8 +177,9 @@ def parse_args():
 
     other = parser.add_argument_group('other', 'Group for miscellaneous arguments.')
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
+    other.add_argument('--prefix', help='Prefix for install location.')
 
-    ns = parser.parse_args()
+    ns = parser.parse_args(argv)
     sys.argv = parse_setup(ns)
     cmake_args = parse_cmake(ns)
     make_args = parse_make(ns)
@@ -223,6 +238,7 @@ def setup():
         }
     rtn = core.setup(**setup_kwargs)
 
+
 def cmake_cli(cmake_args):
     if not IS_NT:
         rtn = subprocess.call(['which', 'cmake'])
@@ -246,6 +262,7 @@ def cmake_cli(cmake_args):
     print("CMake command is\n", cmake_cmdstr, sep="")
     return cmake_cmd
 
+
 def main_body():
     assert_dep_versions()
     cmake_args, make_args = parse_args()
@@ -261,6 +278,7 @@ def main_body():
     setup()
     os.chdir(cwd)
 
+
 def final_message(success=True):
     if success:
         return
@@ -268,6 +286,7 @@ def final_message(success=True):
            "to pyne-dev@googlegroups.com or look for help at http://pyne.io\n\n"
            )
     print('\n' + '-'*20 + msg + '-'*20)
+
 
 def main():
     success = False
@@ -297,6 +316,7 @@ def main():
            'export LD_LIBRARY_PATH="{libpath}:${{LD_LIBRARY_PATH}}"'
            ).format(binpath=binpath, libpath=libpath)
     print(msg, file=sys.stderr)
+
 
 if __name__ == "__main__":
     main()
