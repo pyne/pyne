@@ -1,4 +1,33 @@
 #!/usr/bin/env python
+"""Welcome to PyNE's setup.py script. This is a little non-standard because pyne
+is a multilanguage projects.  Still this script follows a predicatable ordering:
+
+1. Parse command line arguments, 
+2. Call cmake from the 'build' directory
+3. Call make from the 'build' directory
+4. Use distuitls/setuptools from the 'build' directory
+
+This gives us the best of both worlds. Compiled code is installed with cmake/make
+and Cython/Python code is installed with normal Python tools. The only trick here is 
+how the various command line arguments are handed off to the three sub-processes.
+
+To acomplish this we use argparser groups to group command line argrs based on 
+whether they go to:
+
+1. the setup() function,
+2. cmake, 
+3. make, or
+4. other - typically used for args that apply to multiple other groups or 
+   modify the environment in some way.
+
+To add a new command line argument, first add it to the appropriate group in the
+``parse_args()`` function.  Then, modify the logic in the cooresponding
+``parse_setup()``, ``parse_cmake()``, ``parse_make()``, or ``parse_others()``
+functions to consume your new command line argument.  It is OK for more than
+one of the parser functions to comsume to the argument. Where appropriate, 
+ensure that argument is appended to the argument list that is returned by these
+functions.
+"""
 from __future__ import print_function
 
 import os
@@ -235,11 +264,10 @@ def main_body():
 def final_message(success=True):
     if success:
         return
-    msg = ("\n\nYou seem to be having issues building pyne. please report your problem "
+    msg = ("\n\nIf you are having issues building pyne, please report your problem "
            "to pyne-dev@googlegroups.com or look for help at http://pyne.io\n\n"
            )
-    print("-"*20 + msg + '-'* 20)
-
+    print('\n' + '-'*20 + msg + '-'*20)
 
 def main():
     success = False
