@@ -11,7 +11,7 @@ This gives us the best of both worlds. Compiled code is installed with cmake/mak
 and Cython/Python code is installed with normal Python tools. The only trick here is 
 how the various command line arguments are handed off to the three sub-processes.
 
-To acomplish this we use argparser groups to group command line argrs based on 
+To acomplish this we use argparser groups to group command line arguments based on 
 whether they go to:
 
 1. the setup() function,
@@ -24,8 +24,8 @@ To add a new command line argument, first add it to the appropriate group in the
 ``parse_args()`` function.  Then, modify the logic in the cooresponding
 ``parse_setup()``, ``parse_cmake()``, ``parse_make()``, or ``parse_others()``
 functions to consume your new command line argument.  It is OK for more than
-one of the parser functions to comsume to the argument. Where appropriate, 
-ensure that argument is appended to the argument list that is returned by these
+one of the parser functions to comsume the argument. Where appropriate, 
+ensure the that argument is appended to the argument list that is returned by these
 functions.
 """
 from __future__ import print_function
@@ -128,7 +128,7 @@ def parse_setup(ns):
         a.append('--prefix=' + ns.prefix)
     if ns.egg_base is not None:
         local_path = os.path.dirname(os.path.abspath(sys.argv[0]))
-        a.append('--egg-base='+os.path.join(local_path, ns.egg_base))
+        a.append('--egg-base=' + os.path.join(local_path, ns.egg_base))
     return a
 
 
