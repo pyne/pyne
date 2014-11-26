@@ -135,9 +135,19 @@ cd to the conda-recipes directory and run::
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Mac OSX Specific Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-These instructions are based on using the homebrew http://brew.sh/ package manager
-Install command line tools from https://developer.apple.com/downloads/
-you will need to create an account in order to download::
+The simplest method of installing PyNE on mac is via macports. Version 0.4 
+can be installed using the following commands(assuming you are using python 2.7)::
+
+   sudo port install py27-pyne
+   nuc_data_make --fetch-prebuilt False
+
+The latest development version of PyNE can also be installed from source. The 
+instructions below outline how it can be installed
+using the homebrew http://brew.sh/ package manager.
+
+Before starting install the command line tools from https://developer.apple.com/downloads/
+you will need to create an account in order to download them. After installing brew and
+the command line tools run the following commands::
 
     ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
     brew doctor
