@@ -134,6 +134,8 @@ def parse_setup(ns):
     if ns.cmd == 'clean':
         if os.path.exists('build'):
             dir_util.remove_tree('build')
+        print('build directory cleaned ... exiting')
+        sys.exit()
     if ns.clean is not None:
         if os.path.exists('build'):
             dir_util.remove_tree('build')
@@ -271,25 +273,19 @@ def cmake_cli(cmake_args):
     return cmake_cmd
 
 
-def main_body():
+def main_body(cmake_args, make_args):
     assert_dep_versions()
-    cmake_args, make_args = parse_args()
-    if sys.argv[1] != 'clean':
-        if not os.path.exists('build'):
-            os.mkdir('build')
-        cmake_cmd = cmake_cli(cmake_args)
-        rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=IS_NT)
+    if not os.path.exists('build'):
+        os.mkdir('build')
+    cmake_cmd = cmake_cli(cmake_args)
+    rtn = subprocess.check_call(cmake_cmd, cwd='build', shell=IS_NT)
 
-        rtn = subprocess.check_call(['make'] + make_args, cwd='build')
+    rtn = subprocess.check_call(['make'] + make_args, cwd='build')
 
-        cwd = os.getcwd()
-        os.chdir('build')
-        setup()
-        os.chdir(cwd)
-        return True
-    else:
-        print('build directory cleaned')
-        return False
+    cwd = os.getcwd()
+    os.chdir('build')
+    setup()
+    os.chdir(cwd)
 
 
 def final_message(success=True):
@@ -303,9 +299,9 @@ def final_message(success=True):
 
 def main():
     success = False
-    build = False
+    cmake_args, make_args = parse_args()
     try:
-        build = main_body()
+        main_body(cmake_args, make_args)
         success = True
     finally:
         final_message(success)
@@ -329,8 +325,8 @@ def main():
            'export PATH="{binpath}:${{PATH}}"\n'
            'export LD_LIBRARY_PATH="{libpath}:${{LD_LIBRARY_PATH}}"'
            ).format(binpath=binpath, libpath=libpath)
-    if build:
-        print(msg, file=sys.stderr)
+
+    print(msg, file=sys.stderr)
 
 
 if __name__ == "__main__":
