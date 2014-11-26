@@ -157,6 +157,8 @@ cdef extern from "data.h" namespace "pyne":
     vector[pair[int, int]] gamma_from_to(double energy, double error) except +
     vector[pair[int, int]] gamma_parent_child(double energy, double error) except +
     vector[int] gamma_parent(double energy, double error) except +
+    vector[int] gamma_child(double energy, double error) except +
+    vector[int] gamma_child(int parent) except +
     vector[pair[double, double]] gamma_xrays(int parent) except +
 
     vector[double] alpha_energy(int parent) except +

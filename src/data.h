@@ -556,6 +556,10 @@ namespace pyne
   std::vector<std::pair<int, int> > gamma_parent_child(double energy, double error);
   //returns a list of parent nuclides associated with an input decay energy
   std::vector<int> gamma_parent(double energy, double error);
+  // returns a list of child state_id's based on a gamma-ray energy
+  std::vector<int> gamma_child(double energy, double error);
+  // returns a list of child state_id's based on a parent state_id
+  std::vector<int> gamma_child(int parent);
   //returns an array of arrays of X-ray energies and intesities for a
   //given parent
   std::vector<std::pair<double, double> > gamma_xrays(int parent);

@@ -1452,6 +1452,47 @@ def gamma_parent(en, enerror=None):
         enerror = en * 0.01
     return cpp_data.gamma_parent(<double> en, <double> enerror)
 
+def gamma_child_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray children from ENSDF decay dataset
+    based on gamma-ray energy.
+
+    Parameters
+    ----------
+    en : double
+       gamma ray energy in keV
+    enerror : double
+       gamma ray energy error (range which you want to search) this defaults
+       to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+       An array of gamma ray children in state_id form
+    """
+    if enerror is None:
+      enerror = en * 0.01
+      return cpp_data.gamma_child(<double> en, <double> enerror)
+
+def gamma_child_byparent(parent):
+    """
+    Returns a list of gamma ray children from ENSDF decay dataset
+    based on gamma-ray energy.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in state_id form
+
+
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of gamma ray children in state_id form
+    """
+    return cpp_data.gamma_child(<int> parent)
+
 def gamma_xrays(parent):
     """
     Returns an array of arrays of xrays associated with the gamma
