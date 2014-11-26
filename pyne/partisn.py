@@ -22,6 +22,7 @@ import datetime
 from warnings import warn
 from pyne.utils import QAWarning
 import itertools
+from sets import Set
 
 import numpy as np
 import tables
@@ -78,14 +79,16 @@ Parameters
 def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     dagmc.load(hdf5)
     # optional inputs
-    datapath = kwargs['datapath'] if 'datapath' in kwargs else 'material_library/materials'
-    nucpath = kwargs['nucpath'] if 'nucpath' in kwargs else 'material_library/nucid'
+    datapath = kwargs['datapath'] if 'datapath' in kwargs else '/material_library/materials'
+    nucpath = kwargs['nucpath'] if 'nucpath' in kwargs else '/material_library/nucid'
 
     # get coordinate system and mesh bounds from mesh       
     coord_sys, bounds = _read_mesh(mesh)
     
     # Read the materials from the hdf5 and convert to correct naming convention
-    mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)       
+    mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)
+    print(mat_lib)
+    #mat_lib = Material.collapse_elements(mat_lib_expanded)
     
     # determine the zones
     zones = _define_zones(mesh)
@@ -170,11 +173,13 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
     # cell # -> material name & vol fract -> isotope name & dens
     
     mats = MaterialLibrary(hdf5,datapath=datapath,nucpath=nucpath)
+    mat_lib_expanded = {}
     mat_lib = {}
     
     for key in mats.keys():
         mat_name = '{0}'.format(key.split(':')[1])
-        mat_lib[mat_name] = {}
+        mat_lib_expanded[mat_name] = {}
+        #mat_lib[mat_name] = {}
         for nuc in mats[key]:
             if nuc in nuc_names.keys():
                 nuc_name = nuc_names[nuc]
@@ -186,8 +191,12 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
             rho_frac = mats[key][nuc_name]
             mw = mats[key].molecular_mass()
             Na = 60.22
-            mat_lib[mat_name][nuc_name] = rho_frac/mw*Na
-            
+            mat_lib_expanded[mat_name][nuc_name] = rho_frac/mw*Na
+        mat_obj = Material(mat_lib_expanded[mat_name])
+        print(mat_obj)
+        mat_lib[mat_name] = mat_obj.collapse_elements(Set([]))
+        print(mat_lib[mat_name])
+        
     return mat_lib
 
 
