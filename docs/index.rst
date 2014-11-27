@@ -1,6 +1,6 @@
-=====================================
-PyNE: The Nuclear Engineering Toolkit
-=====================================
+======================================
+PyNE - The Nuclear Engineering Toolkit
+======================================
 
 .. raw:: html
 
@@ -17,20 +17,98 @@ PyNE: The Nuclear Engineering Toolkit
 
     </div>
 
-PyNE, or Python for Nuclear Engineering, is a suite of tools to aid in
+PyNE is a suite of tools to aid in
 computational nuclear science & engineering.  PyNE seeks to provide
 native implementations of common nuclear algorithms, as well as Python
 bindings and I/O support for other industry standard nuclear codes.
 
-Please email us at pyne-users@googlegroups.com if you have any questions
-on how to use or install PyNE.
+.. raw:: html
 
-Note that PyNE development is a continuing effort and we are always looking for
-more developers, testers, and users.  If you are interested in being
-involved with this project, please contact us via pyne-dev@googlegroups.com,
-or `github`_.
+    <script language="javascript"> 
+    function pyneToggle(title, showHideDiv, switchTextDiv) {
+        var ele = document.getElementById(showHideDiv);
+        var text = document.getElementById(switchTextDiv);
+        if(ele.style.display == "block") {
+                ele.style.display = "none";
+            text.innerHTML = title + " [+]";
+        }
+        else {
+            ele.style.display = "block";
+            text.innerHTML = title + " [-]";
+        }
+    } 
+    </script>
 
-The source code for PyNE may be found at the `GitHub project site`_.
+    <div id="pynemenuheader">
+      <a id="startHeader" 
+         href="javascript:pyneToggle('Getting Started', 'startContent', 'startHeader');">
+         Getting Started [+]</a>
+    </div>
+    <div style="clear:both;"></div>
+    <div id="pynemenucontent">
+      <div id="startContent" style="display:none;">
+        <ul>
+          <li><a href="install/index.html">Install</a></li>
+          <li><a href="tutorial/index.html">Tutorial</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <br />
+    <div id="pynemenuheader">
+      <a id="usingHeader" 
+         href="javascript:pyneToggle('Using PyNE', 'usingContent', 'usingHeader');">
+         Using PyNE [+]</a>
+    </div>
+    <div style="clear:both;"></div>
+    <div id="pynemenucontent">
+      <div id="usingContent" style="display:none;">
+        <ul>
+          <li><a href="usersguide/index.html">User's Guide</a></li>
+          <li><a href="pyapi/index.html}}">Python API Documentation</a></li>
+          <li><a href="cppapi/index.html">C++ & Fortran API Documentation</a></li>
+          <li><a href="mailto:pyne-users+subscribe@googlegroups.com?subject=Subscribe&body=Send this message to subscribe to the list">Join</a> the <a href="https://groups.google.com/forum/#!forum/pyne-users" target="_blank"> Users</a> mailing list.
+          <li><a href="https://github.com/pyne/pyne/issues">Report an Issue</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <br />
+    <div id="pynemenuheader">
+      <a id="contributeHeader" 
+         href="javascript:pyneToggle('Contribute', 'contributeContent', 'contributeHeader');">
+         Contribute [+]</a>
+    </div>
+    <div style="clear:both;"></div>
+    <div id="pynemenucontent">
+      <div id="contributeContent" style="display:none;">
+        <ul>
+          <li><a href="devsguide/index.html">Developer's Guide</a></li>
+          <li><a href="http://github.com/pyne/pyne">Source Code</a></li>
+          <li><a href="mailto:pyne-users+subscribe@googlegroups.com?subject=Subscribe&body=Send this message to subscribe to the list">Join</a> the 
+              <a href="https://groups.google.com/forum/#!forum/pyne-users" target="_blank">Developers</a> mailing list.
+          <li><a href="dev_team.html">The PyNE Team</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <br />
+    <div id="pynemenuheader">
+      <a id="learnHeader" 
+         href="javascript:pyneToggle('Learn More', 'learnContent', 'learnHeader');">
+         Learn More [+]</a>
+    </div>
+    <div style="clear:both;"></div>
+    <div id="pynemenucontent">
+      <div id="learnContent" style="display:none;">
+        <ul>
+          <li><a href="theorymanual/index.html">Theory Manual</a></li>
+          <li><a href="pubs.html">Publications</a></li>
+          <li><a href="previous/index.html">Release Notes</a></li>
+          <li><a href="gsoc/index.html">Project Ideas</a></li>
+        </ul>
+      </div>
+    </div>
 
 .. toctree::
      :maxdepth: 1
