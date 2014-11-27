@@ -1,4 +1,4 @@
-from os.path import isfile, join, dirname
+from os.path import isfile
 from warnings import warn
 from pyne.utils import QAWarning
 
@@ -10,10 +10,11 @@ from pyne.dagmc import load, discretize_geom
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       geom=None, num_rays=10, grid=False, flux_tag="n_flux",
-                      fluxin="alara_fluxin", reverse=False, 
-                      alara_inp="alara_geom", alara_matlib="alara_matlib",  
+                      fluxin="alara_fluxin", reverse=False,
+                      alara_inp="alara_geom", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
@@ -60,7 +61,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         A mesh containing all the fluxes and materials used for irradiation
         setup.
     output_material : bool, optional
-        If true, output mesh will have materials as determined by 
+        If true, output mesh will have materials as determined by
         dagmc.discretize_geom()
     """
     if geom is not None and isfile(geom):
@@ -71,25 +72,25 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         m = flux_mesh
     #  flux_mesh is unstructured mesh file
     elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
-                                  and flux_mesh.endswith(".h5m"):
+         and flux_mesh.endswith(".h5m"):
             m = Mesh(structured=False, mesh=flux_mesh)
     #  flux_mesh is Meshtal or meshtal file
     else:
         #  flux_mesh is meshtal file
         if isinstance(flux_mesh, str) and isfile(flux_mesh):
-            flux_mesh = Meshtal(flux_mesh, 
-                                {tally_num: (flux_tag, flux_tag + "_err", 
-                                             flux_tag + "_total", 
+            flux_mesh = Meshtal(flux_mesh,
+                                {tally_num: (flux_tag, flux_tag + "_err",
+                                             flux_tag + "_total",
                                              flux_tag + "_err_total")},
-                                             meshes_have_mats=output_material)
+                                meshes_have_mats=output_material)
             m = flux_mesh.tally[tally_num]
         #  flux_mesh is Meshtal object
-        elif instance(flux_mesh, Meshtal):
+        elif isinstance(flux_mesh, Meshtal):
             m = flux_mesh.tally[tally_num]
         else:
             raise ValueError("meshtal argument not a Mesh object, Meshtal"
                              " object, MCNP meshtal file or meshtal.h5m file.")
-       
+
     if m.structured:
         cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
     else:
@@ -107,8 +108,9 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
 
     with open(alara_inp, 'a') as f:
         f.write("\n" + alara_params)
- 
+
     m.write_hdf5(output_mesh)
+
 
 def photon_sampling_setup(mesh, phtn_src, tags):
     """This function reads in an ALARA photon source file and creates and tags
@@ -136,4 +138,3 @@ def photon_sampling_setup(mesh, phtn_src, tags):
     photon_source_to_hdf5(phtn_src)
     h5_file = phtn_src + ".h5"
     photon_source_hdf5_to_mesh(mesh, h5_file, tags)
-

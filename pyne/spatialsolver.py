@@ -17,13 +17,14 @@ from main import main as main
 #imports being used for testing
 #from dict_util import dict_complete
 
+
 def solve(inputdict_unchecked):
 	inputdict = dict_complete(inputdict_unchecked)
 	if(inputdict['solver'] == "AHOTN" or inputdict['solver'] == "DGFEM"):
 		main("test title in",
 		inputdict['solver'],
 		inputdict['solver_type'],
-		inputdict['spatial_order'], 
+		inputdict['spatial_order'],
 		inputdict['spatial_method'],
 		inputdict['angular_quadrature_order'],
 		inputdict['angular_quadrature_type'],
@@ -85,7 +86,7 @@ def dict_complete(inputdict):
 				formatted_dict['solver_type'] = "LN"
 			elif(inputdict['solver'] == "DGFEM"):
 				formatted_dict['solver_type'] = "LD"
-		
+
 		try:
 			formatted_dict['spatial_order'] = inputdict['spatial_order']
 		except:
@@ -121,11 +122,11 @@ def dict_complete(inputdict):
 		try:
 			formatted_dict['x_cells_widths'] = inputdict['x_cells_widths']
 		except:
-			raise InputDictError("x_cells_widths")		
+			raise InputDictError("x_cells_widths")
 		try:
 			formatted_dict['y_cells_widths'] = inputdict['y_cells_widths']
 		except:
-			raise InputDictError("y_cells_widths")	
+			raise InputDictError("y_cells_widths")
 		try:
 			formatted_dict['z_cells_widths'] = inputdict['z_cells_widths']
 		except:
@@ -196,7 +197,7 @@ def dict_complete(inputdict):
 		except:
 			formatted_dict['ichk_tolerence'] = 1e-14
 			warn(warning_msg + " ichk_tolerence value of 1e-14")
-			
+
 		formatted_dict['max_mom_printed'] = 0
 		formatted_dict['moment_sum_flag'] = 0
 		formatted_dict['mom_at_a_pt_flag'] = 0
@@ -212,6 +213,5 @@ class InputDictError(Exception):
     def __str__(self):
         msg = "Input dictionary missing required key value pair: "
         if self.missing is not None:
-            msg += ": " + missing 
+            msg += ": " + missing
         return msg
-
