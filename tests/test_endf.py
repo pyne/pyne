@@ -832,6 +832,10 @@ def test_xs():
     del exp_600_flags[0]
     assert_equal(obs_600_flags, exp_600_flags)
 
+def test_xs_data_without_res():
+    nuc8017 = nucname.id(8017)
+    library._read_res(nuc8017)
+    library._read_xs(nuc8017, 4, nuc8017)
 
 def test_u235():
     try:
