@@ -1,4 +1,5 @@
 @import url("cloud.css");
+
 body {
     background-image:url('wood.jpg');
     background-repeat: repeat; 
@@ -25,6 +26,11 @@ div.related {
 div.sphinxlocaltoc ul a, div.sphinxglobaltoc ul a {
     display: inline;
     white-space: normal;
+}
+
+div.sphinxsidebar ul {
+    margin-left: 20px;
+    list-style: square;
 }
 
 /* Fixes numpy colon wrapping issue */
