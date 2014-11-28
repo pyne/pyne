@@ -514,8 +514,21 @@ class Library(rx.RxLib):
         """
         lrp = self.structure[mat_id]['matflags']['LRP']
         if (lrp == -1 or mat_id in (-1,0)):
-            # If the LRP flag for the material is -1, there's no resonance data.
+            # If the LRP flag for the material is -1,
+            # there's no resonance data.
             # Also if the mat id is invalid.
+            #
+            # However other methods expects _read_res to set
+            # structur[nuc]['data'], so fill it with a single
+            # entry for mat_id and empty values:
+            self.structure[mat_id]['data'].update(
+                {mat_id: {'resolved': [],
+                          'unresolved': [],
+                          'datadocs': [],
+                          'xs': {},
+                          'output': {'channel1': [],
+                                     'channel2': []},
+                          'isotope_flags': {}}})
             pass
         else:
             # Load the resonance data.
