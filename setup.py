@@ -167,6 +167,43 @@ def parse_others(ns):
 
 def parse_args():
     argv = [a for a in sys.argv[1:] if a != '--']  # needed for backwards compat.
+    distutils_args = []
+    cmake = []
+    make = []
+    argsets = [distutils_args, cmake, make]
+    i = 0
+    for arg in sys.argv:
+        if arg == '--':
+            i += 1
+        else:
+            argsets[i].append(arg)
+
+    # handle HDF5
+    hdf5opt = [o.split('=')[1] for o in distutils_args \
+               if o.startswith('--hdf5=')]
+    if 0 < len(hdf5opt):
+        os.environ['HDF5_ROOT'] = hdf5opt[0]  # Expose to CMake
+        distutils_args = [o for o in distutils_args \
+                          if not o.startswith('--hdf5=')]
+
+    # handle MOAB
+    moabopt = [o.split('=')[1] for o in distutils_args \
+               if o.startswith('--moab=')]
+    if 0 < len(moabopt):
+        os.environ['MOAB_ROOT'] = moabopt[0]  # Expose to CMake
+        distutils_args = [o for o in distutils_args \
+                          if not o.startswith('--moab=')]
+
+    # handle build type
+    btopt = [o.split('=')[1] for o in distutils_args \
+             if o.startswith('--build-type=')]
+    if 0 < len(btopt):
+        cmake.append('-DCMAKE_BUILD_TYPE=' + btopt[0])
+        distutils_args = [o for o in distutils_args \
+                          if not o.startswith('--build-type=')]
+
+    # Change egg-base entry to absolute path so it behaves as expected
+    import argparse
     parser = argparse.ArgumentParser()
 
     setup = parser.add_argument_group('setup', 'Group for normal setup.py arguments')
@@ -188,6 +225,7 @@ def parse_args():
 
     other = parser.add_argument_group('other', 'Group for miscellaneous arguments.')
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
+    other.add_argument('--moab', help='Path to MOAB root directory.')
     other.add_argument('--prefix', help='Prefix for install location.')
 
     ns = parser.parse_args(argv)

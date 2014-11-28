@@ -13,18 +13,23 @@ message(STATUS
 if (APPLE)
   message(STATUS
     "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+# The previous method found the gcc_s library by version,
+    # find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
+# but this always found the library regardless of version, and then
+# the name as set was different from what was found.  This new way
+# ensures that the name is consistent with what was found.
   set(LIBGCC_S)
-  foreach (gcc_s_ver 3 2 1)
-    set(LIBGCC_S_PATH)
-    find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
-      PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
-      NODEFAULTPATH
-    )
-    if (LIBGCC_S_PATH)
-      set(LIBGCC_S gcc_s.${gcc_s_ver})
-      break()
-    endif ()
-  endforeach ()
+  find_library(LIBGCC_S_PATH gcc_s}
+    PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
+    NODEFAULTPATH
+  )
+  if (LIBGCC_S_PATH)
+    message(STATUS "Found ${LIBGCC_S_PATH}.")
+    get_filename_component(LIBGCC_S ${LIBGCC_S_PATH} NAME)
+# Pull off leading lib and trailing .dylib.
+    string(REGEX REPLACE "^lib" "" LIBGCC_S ${LIBGCC_S})
+    string(REGEX REPLACE "\\.dylib$" "" LIBGCC_S ${LIBGCC_S})
+  endif ()
   message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
   if (LIBGCC_S)
     set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
@@ -59,6 +64,11 @@ if(WIN32)
 	list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
 elseif(NOT HDF5_LIBRARY_DIRS)
   list(GET HDF5_LIBRARIES 0 _hdf5lib)
+# Fix in case libraries include debug;...;release;...
+  if (${_hdf5lib} STREQUAL debug)
+    list(GET HDF5_LIBRARIES 1 _hdf5lib)
+  endif ()
+  # message(STATUS "_hdf5lib = ${_hdf5lib}.")
   get_filename_component(HDF5_LIBRARY_DIRS ${_hdf5lib} PATH)
 endif(WIN32)
 link_directories(${HDF5_LIBRARY_DIRS})
@@ -75,7 +85,9 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
-    include_directories(${MOAB_INCLUDE_DIR})
+  include_directories(${MOAB_INCLUDE_DIR})
+  get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
+  link_directories(${MOAB_LIBRARY_DIRS})
 endif(${MOAB_FOUND})
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().

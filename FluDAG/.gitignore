@@ -1,0 +1,35 @@
+# Targets to ignore
+myfluka
+mainfludag
+readvol
+*~
+# fortran stuff
+.timer.out
+ran*
+*fort*
+# extraneous build details
+*.map
+makefile.local
+local.cmake
+Makefile
+# Directories to ignore
+html
+mainf
+*old
+remove
+removeme
+run
+runs
+bin
+bld
+build
+# Extensions to ignore
+*.cmake
+*.err
+*.jou
+*.log
+*.out
+*.sat
+*.stl
+*.sw?
+*.jcz
