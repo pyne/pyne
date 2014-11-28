@@ -3,7 +3,7 @@ import re
 import sys
 import copy
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 
@@ -13,7 +13,7 @@ from pyne.utils import to_sec
 if sys.version_info[0] > 2:
     basestring = str
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
 _val = re.compile('(\d*)[.](\d*)')
@@ -198,7 +198,7 @@ def _parse_level_continuation_record(lc_rec):
             br = br.strip()
         else:
             continue
-        if '%' in rx and not '?' in br and len(br) > 0:
+        if '%' in rx and '?' not in br and len(br) > 0:
             dat[rx] = br
     return dat
 
@@ -264,9 +264,9 @@ def _parse_gamma_continuation_record(g, inten, tti):
                 conv, err = _get_val_err(eff[0], eff[1])
             elif len(eff) == 1:
                 conv = _getvalue(eff[0])
-            if conv is None and not contype in conversions:
+            if conv is None and contype not in conversions:
                 conversions[contype] = (None, None)
-            elif not contype in conversions:
+            elif contype not in conversions:
                 conversions[contype] = (conv * greff, err)
     return conversions
 

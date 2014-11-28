@@ -1,8 +1,9 @@
 import collections
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
+
 
 class RxLib(object):
     """RxLib is a parent type that implements an abstract representation of
@@ -14,6 +15,7 @@ class RxLib(object):
 
     def write(self, filename, file_type_out):
         pass
+
 
 class DoubleSpinDict(collections.MutableMapping):
     """Sanitizes input, avoiding errors arising from half-integer values of spin.

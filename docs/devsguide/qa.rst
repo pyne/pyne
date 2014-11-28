@@ -8,11 +8,11 @@ prescribed by industry standards [1]. In regard to software products, due to PyN
 community-developed and ongoing project, the degree to which different areas of
 the codebase are rigorously verified, validated, and documented is not expected to be
 homogeneous. For this reason, PyNE code is declared Verification and
-Validation (V&V) complaint on a per-module basis. Modules that are not V&V
+Validation (QA) complaint on a per-module basis. Modules that are not QA
 compliant must contain Python import warnings.
 
-In order to be declared V&V compliant, a module must meet the criteria
-described below. These V&V criteria are internal to PyNE, but they were
+In order to be declared QA compliant, a module must meet the criteria
+described below. These QA criteria are internal to PyNE, but they were
 developed by adapting other QA criteria important within the nuclear
 engineering field. The Nuclear Regulatory Commission (NRC) endorses the
 American Society of Mechanical Engineers (ASME) NQA-1-2008/NQA-1a-2009 quality
@@ -20,9 +20,9 @@ assurance standard for the licensing of power plants and reprocessing
 facilities. Since PyNE, for the most part, is a library intended to be used as
 a component within an end-user application, those who seek to use PyNE code for
 NQA-1 compliant purposes will likely evoke Part II
-Subpart 2.7 Requirement 302 "Otherwise Acquired Software" of NQA-1-2008. The PyNE V&V
+Subpart 2.7 Requirement 302 "Otherwise Acquired Software" of NQA-1-2008. The PyNE QA
 criteria ensure that Requirement 302 criteria are addressed and readily
-available within PyNE documentation. In addition, the PyNE V&V criteria are
+available within PyNE documentation. In addition, the PyNE QA criteria are
 intended to correspond roughly with the Quality Rigor Level 1 Verification and
 Validation requirements as defined by the Nuclear Energy Modeling and Simulation
 (NEAMS) Program toolkit verification and validation plan `[pdf]
@@ -30,7 +30,7 @@ Validation requirements as defined by the Nuclear Energy Modeling and Simulation
 This will facilitate the process of formally declaring PyNE modules compliant
 with these standards, if desired by some party.
 
-Criteria for declaring a module V&V compliant
+Criteria for declaring a module QA compliant
 ------------------------------------------------
 
 1. The module has a theory manual entry that describes or cites all non-trivial mathematics and/or physics that occur within a module, and also lists the assumptions and limitations of the module.

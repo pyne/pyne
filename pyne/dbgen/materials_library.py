@@ -10,7 +10,7 @@ import csv
 import re
 import os
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import tables as tb
 import numpy as np
@@ -19,7 +19,7 @@ from .. import nucname
 from ..data import natural_abund, natural_abund_map
 from ..material import Material
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 elemental_mats = {}
 names = []

@@ -9,8 +9,8 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne.r2s import irradiation_setup, photon_sampling_setup
 from pyne.material import Material
 from pyne.mesh import Mesh, IMeshTag

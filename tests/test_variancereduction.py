@@ -11,8 +11,8 @@ except ImportError:
 from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_almost_equal
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne.variancereduction import cadis
 from pyne.mesh import Mesh, IMeshTag
 from pyne.mesh import MeshError

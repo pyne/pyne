@@ -38,18 +38,9 @@ def pyne_start():
     if "NUC_DATA_PATH" not in os.environ:
         os.environ['NUC_DATA_PATH'] = nuc_data
 
-    # load cached metadata
-    with open(os.path.join(prefix, "metadata.json"), 'r') as f:
-        md = json.load(f)
-
-    # set HDF5 dir on path
-    if os.getenv('HDF5_DIR'):
-        md['HDF5_DIR'] = os.environ['HDF5_DIR']
     libdll = 'dll' if os.name == 'nt' else 'lib'
     ldpath = 'PATH' if os.name == 'nt' else 'LD_LIBRARY_PATH'
     sepcha = ';' if os.name == 'nt' else ':'
-    #if isinstance(md['HDF5_DIR'], basestring) and 0 < len(md['HDF5_DIR']):
-    #    os.environ[ldpath] += sepcha + os.path.join(md['HDF5_DIR'], libdll)
     
     # Call the C-version of pyne_start
     cpp_utils.pyne_start()
