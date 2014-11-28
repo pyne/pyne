@@ -225,6 +225,7 @@ def parse_args():
 
     other = parser.add_argument_group('other', 'Group for miscellaneous arguments.')
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
+    other.add_argument('--moab', help='Path to MOAB root directory.')
     other.add_argument('--prefix', help='Prefix for install location.')
 
     ns = parser.parse_args(argv)
