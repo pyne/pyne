@@ -57,10 +57,11 @@ endif (MOAB_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
-target_link_libraries(pyne hdf5 blas lapack)
+# Add libraries in dependency order
 if (MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
 endif (MOAB_FOUND)
+target_link_libraries(pyne hdf5 blas lapack)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
