@@ -14,17 +14,27 @@ if (APPLE)
   message(STATUS
     "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
   set(LIBGCC_S)
+# The previous method found the gcc_s library by version,
+    # find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
+# but this always found the library regardless of version, and then
+# the name as set was different from what was found.  This new way
+# ensures that the name is consistent with what was found.
+  set(LIBGCC_S_PATH)
   foreach (gcc_s_ver 3 2 1)
-    set(LIBGCC_S_PATH)
-    find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
+    find_library(LIBGCC_S_PATH gcc_s.1
       PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
       NODEFAULTPATH
     )
     if (LIBGCC_S_PATH)
-      set(LIBGCC_S gcc_s.${gcc_s_ver})
-      break()
     endif ()
   endforeach ()
+  message(STATUS "LIBGCC_S_PATH = ${LIBGCC_S_PATH}.")
+  if (LIBGCC_S_PATH)
+    get_filename_component(LIBGCC_S ${LIBGCC_S_PATH} NAME)
+# Pull off leading lib and trailing .dylib.
+    string(REGEX REPLACE "^lib" "" LIBGCC_S ${LIBGCC_S})
+    string(REGEX REPLACE "\\.dylib$" "" LIBGCC_S ${LIBGCC_S})
+  endif ()
   message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
   if (LIBGCC_S)
     set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
