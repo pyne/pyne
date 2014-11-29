@@ -163,6 +163,8 @@ def parse_make(ns):
 def parse_others(ns):
     if ns.hdf5 is not None:
         os.environ['HDF5_ROOT'] = ns.hdf5
+    if ns.moab is not None:
+        os.environ['MOAB_ROOT'] = ns.moab
 
 
 def parse_args():
@@ -188,6 +190,7 @@ def parse_args():
 
     other = parser.add_argument_group('other', 'Group for miscellaneous arguments.')
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
+    other.add_argument('--moab', help='Path to MOAB root directory.')
     other.add_argument('--prefix', help='Prefix for install location.')
 
     ns = parser.parse_args(argv)
