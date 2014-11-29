@@ -21,7 +21,7 @@ if (APPLE)
 # ensures that the name is consistent with what was found.
   set(LIBGCC_S_PATH)
   foreach (gcc_s_ver 3 2 1)
-    find_library(LIBGCC_S_PATH gcc_s.1
+    find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
       PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
       NODEFAULTPATH
     )
