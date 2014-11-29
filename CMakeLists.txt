@@ -25,6 +25,9 @@ if (APPLE)
       PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
       NODEFAULTPATH
     )
+    if (LIBGCC_S_PATH)
+      break()
+    endif ()
   endforeach ()
   message(STATUS "LIBGCC_S_PATH = ${LIBGCC_S_PATH}.")
   if (LIBGCC_S_PATH)
