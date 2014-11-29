@@ -13,20 +13,17 @@ available to use.
 """
 from __future__ import print_function, division
 import sys
-import collections
-import string
 import struct
 import math
 import os
 import linecache
 import datetime
 from warnings import warn
-from pyne.utils import QAWarning
-import itertools
 
 import numpy as np
 import tables
 
+from pyne.utils import QAWarning
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
@@ -44,7 +41,7 @@ except ImportError:
                   QAWarning)
     HAVE_PYTAPS = False
 
-from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
+from pyne.mesh import Mesh, StatMesh, IMeshTag
 
 if sys.version_info[0] > 2:
     def cmp(a, b):
@@ -441,7 +438,7 @@ class SurfSrc(_BinaryReader):
         for j in range(self.njsw, self.njsw+self.niwr):
             self.get_fortran_record()
             warn("Extra info in header not handled: {0}".format(j),
-                          RuntimeWarning)
+                 RuntimeWarning)
 
         # read summary table record
         summary_info = self.get_fortran_record()
@@ -553,7 +550,7 @@ class SurfSrc(_BinaryReader):
         return
 
     def write_header(self):
-        """Write the first part of the MCNP surface source file. The header content 
+        """Write the first part of the MCNP surface source file. The header content
         comprises five parts shown below.
         """
         self.put_header()
@@ -563,7 +560,7 @@ class SurfSrc(_BinaryReader):
         self.put_summary()
 
     def write_tracklist(self):
-        """Write track records for individual particles. Second part of the MCNP 
+        """Write track records for individual particles. Second part of the MCNP
         surface source file.  Tracklist is also known as a 'phase space'.
         """
 
@@ -640,7 +637,7 @@ class Srctp(_BinaryReader):
         header = self.get_fortran_record()
 
         # interpret header block
-        #NOTUSED k = header.get_int()  # unique code (947830)
+        # NOTUSED k = header.get_int()  # unique code (947830)
         self.loc_next = header.get_int()  # loc. of next site in FSO arr (ixak)
         self.n_run = header.get_int()  # source particles yet to be run (nsa)
         self.loc_store = header.get_int()  # where to put nxt src neutron (ist)
@@ -823,12 +820,12 @@ class Xsdir(object):
 
     def find_table(self, name):
         """Find all tables for a given ZIAD.
-        
+
         Parameters
         ----------
         name : str
             The ZIAD name.
- 
+
         Returns
         -------
         tables : list
@@ -868,15 +865,16 @@ class Xsdir(object):
         valid_nucs : set
             The valid nuclide ids.
         """
-        valid_nucs = set(nucname.id(table.name.split('.')[0]) for table in self.tables if
+        valid_nucs = set(nucname.id(table.name.split('.')[0])
+                         for table in self.tables if
                          nucname.isnuclide(table.name.split('.')[0]))
         return valid_nucs
 
 
 class XsdirTable(object):
     """Stores all information that describes a xsdir table entry, which appears
-    as a single line in xsdir file. Attribute names are based off of those found in
-    the MCNP5 User's Guide Volume 3, appendix K.
+    as a single line in xsdir file. Attribute names are based off of those
+    found in the MCNP5 User's Guide Volume 3, appendix K.
 
     Attributes
     ----------
@@ -1121,7 +1119,7 @@ class PtracReader(object):
             number = length // format_length
 
             b = self.f.read(length + 4)
-            tmp = struct.unpack(b"".join([self.endianness.encode(), 
+            tmp = struct.unpack(b"".join([self.endianness.encode(),
                                 (format*number).encode(), b'i']), b)
             length2 = tmp[-1]
             tmp = tmp[:-1]
@@ -1604,7 +1602,7 @@ class Wwinp(Mesh):
                             * k / removed_values[j] + removed_values[j-1])
 
     def _read_block3(self, f):
-        #Retrives all the information of the block 3 of a wwinp file.
+        # Retrives all the information of the block 3 of a wwinp file.
 
         self.e = [[]]
         if self.ne[0] != 0:
@@ -1640,7 +1638,7 @@ class Wwinp(Mesh):
         elif particle == 'p':
             particle_index = 1
 
-       # read in WW data for a single particle type
+        # read in WW data for a single particle type
         ww_data = np.empty(shape=(self.ne[particle_index], self.nft))
         for i in range(0, self.ne[particle_index]):
             count = 0
@@ -1651,11 +1649,11 @@ class Wwinp(Mesh):
 
             ww_data[i] = ww_row
 
-        #create vector tags for data
+        # create vector tags for data
         tag_ww = self.mesh.createTag(
             "ww_{0}".format(particle), self.ne[particle_index], float)
 
-        #tag vector data to mesh
+        # tag vector data to mesh
         for i, volume_element in enumerate(volume_elements):
             tag_ww[volume_element] = ww_data[:, i]
 
@@ -1674,7 +1672,7 @@ class Wwinp(Mesh):
             self._write_block3(f)
 
     def _write_block1(self, f):
-        #Writes the all block 1 data to WWINP file
+        # Writes the all block 1 data to WWINP file
 
         block1 = ''
 
@@ -1708,7 +1706,7 @@ class Wwinp(Mesh):
         f.write(block1)
 
     def _write_block2(self, f):
-        #Writes the all block 2 data to WWINP file
+        # Writes the all block 2 data to WWINP file
 
         # Create an array of values to be print in block 2.
         block2_array = [[], [], []]
@@ -1734,7 +1732,7 @@ class Wwinp(Mesh):
         f.write(block2)
 
     def _write_block3(self, f):
-        #Writes the all block 3 data to WWINP file
+        # Writes the all block 3 data to WWINP file
 
         if self.ne[0] != 0:
             self._write_block3_single('n', f)
@@ -1895,7 +1893,7 @@ class Meshtal(object):
         Maps integer tally numbers to iterables containing four strs, the
         results tag name, the relative error tag name, the total results
         tag name, and the total relative error tag name. If tags is None
-        the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
+        the tags are named 'x_result', 'x_rel_error', 'x_result_total',
         'x_rel_error_total' where x is n or p for neutrons or photons.
 
     """
@@ -1909,11 +1907,11 @@ class Meshtal(object):
             Maps integer tally numbers to iterables containing four strs: the
             results tag name, the relative error tag name, the total results
             tag name, and the total relative error tag name. If tags is None
-            the tags are named 'x_result', 'x_rel_error', 'x_result_total', 
+            the tags are named 'x_result', 'x_rel_error', 'x_result_total',
             'x_rel_error_total' where x is n or p for neutrons or photons.
         meshes_have_mats : bool
              If false, Meshtally objects will be created without PyNE material
-             material objects. 
+             material objects.
         """
 
         if not HAVE_PYTAPS:
@@ -1933,13 +1931,13 @@ class Meshtal(object):
         """
 
         line_1 = f.readline()
-        #set mcnp version
+        # set mcnp version
         self.version = line_1.split()[2]
-        #get version date ("ld" in MCNP User's Manual)
+        # get version date ("ld" in MCNP User's Manual)
         self.ld = line_1.split()[3][3:]
 
         line_2 = f.readline()
-        #store title card
+        # store title card
         self.title = line_2.strip()
 
         line_3 = f.readline()
@@ -1956,11 +1954,11 @@ class Meshtal(object):
                 tally_num = int(line.split()[3])
                 if self.tags is not None and tally_num in self.tags.keys():
                     self.tally[tally_num] = MeshTally(f, tally_num,
-                                            self.tags[tally_num],
-                                            mesh_has_mats=self._meshes_have_mats)
+                                                      self.tags[tally_num],
+                                          mesh_has_mats=self._meshes_have_mats)
                 else:
                     self.tally[tally_num] = MeshTally(f, tally_num,
-                                            mesh_has_mats=self._meshes_have_mats)
+                                          mesh_has_mats=self._meshes_have_mats)
 
             line = f.readline()
 
@@ -2015,12 +2013,12 @@ class MeshTally(StatMesh):
         tally number : int
             The MCNP fmesh4 tally number (e.g. 4, 14, 24).
         tag_names : iterable, optional
-            Four strs that specify the tag names for the results, relative 
+            Four strs that specify the tag names for the results, relative
             errors, total results and relative errors of the total results.
             This should come from the Meshtal.tags attribute dict.
         mesh_has_mats : bool
              If false, Meshtally objects will be created without PyNE material
-             objects. 
+             objects.
         """
 
         if not HAVE_PYTAPS:
@@ -2030,9 +2028,9 @@ class MeshTally(StatMesh):
         self.tally_number = tally_number
         self._read_meshtally_head(f)
         self._read_column_order(f)
-        
+
         if tag_names is None:
-            self.tag_names = ("{0}_result".format(self.particle), 
+            self.tag_names = ("{0}_result".format(self.particle),
                               "{0}_rel_error".format(self.particle),
                               "{0}_result_total".format(self.particle),
                               "{0}_rel_error_total".format(self.particle))
@@ -2051,7 +2049,7 @@ class MeshTally(StatMesh):
         elif ('photon' in line):
             self.particle = 'photon'
 
-        #determine if meshtally flux-to-dose conversion factors are being used.
+        # determine if meshtally flux-to-dose conversion factors are being used.
         line = f.readline()
         dr_str = 'This mesh tally is modified by a dose response function.'
         if line.strip() == dr_str:
@@ -2059,7 +2057,7 @@ class MeshTally(StatMesh):
         else:
             self.dose_response = False
 
-        #advance the file to the line where x, y, z, bounds start
+        # advance the file to the line where x, y, z, bounds start
         while line.strip() != 'Tally bin boundaries:':
             line = f.readline()
 
@@ -2073,7 +2071,7 @@ class MeshTally(StatMesh):
                                  len(self.y_bounds) - 1,
                                  len(self.z_bounds) - 1]
 
-        #skip blank line between enery bin boundaries and table headings
+        # skip blank line between enery bin boundaries and table headings
         f.readline()
 
     def _read_column_order(self, f):
@@ -2114,18 +2112,20 @@ class MeshTally(StatMesh):
             result[i] = result_row
             rel_error[i] = rel_error_row
 
-        #Tag results and error vector to mesh
-        res_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[0])
-        rel_err_tag = IMeshTag(num_e_groups, float, mesh=self, name=self.tag_names[1])
+        # Tag results and error vector to mesh
+        res_tag = IMeshTag(num_e_groups, float, mesh=self,
+                           name=self.tag_names[0])
+        rel_err_tag = IMeshTag(num_e_groups, float, mesh=self,
+                               name=self.tag_names[1])
         if num_e_groups == 1:
             res_tag[:] = result[0]
             rel_err_tag[:] = rel_error[0]
         else:
             res_tag[:] = result.transpose()
             rel_err_tag[:] = rel_error.transpose()
-        
-        #If "total" data exists (i.e. if there is more than
-        #1 energy group) get it and tag it onto the mesh.
+
+        # If "total" data exists (i.e. if there is more than
+        # 1 energy group) get it and tag it onto the mesh.
         if num_e_groups > 1:
             result = []
             rel_error = []
@@ -2136,7 +2136,8 @@ class MeshTally(StatMesh):
                     float(line[self._column_idx["Rel_Error"]]))
 
             res_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[2])
-            rel_err_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[3])
+            rel_err_tot_tag = IMeshTag(1, float, mesh=self,
+                                       name=self.tag_names[3])
             res_tot_tag[:] = result
             rel_err_tot_tag[:] = rel_error
 
@@ -2156,7 +2157,7 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
         definition.
     title_card : str, optional
         The MCNP title card to appear at the top of the input file.
-   
+
     Returns
     -------
     geom : str
@@ -2168,13 +2169,14 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     divs = (mesh.structured_get_divisions('x'),
             mesh.structured_get_divisions('y'),
             mesh.structured_get_divisions('z'))
- 
+
     cell_cards = _mesh_to_cell_cards(mesh, divs)
     surf_cards = _mesh_to_surf_cards(mesh, divs)
     mat_cards = _mesh_to_mat_cards(mesh, divs, frac_type)
- 
-    return "{0}\n{1}\n{2}\n{3}".format(title_card, cell_cards, 
-                                              surf_cards, mat_cards)
+
+    return "{0}\n{1}\n{2}\n{3}".format(title_card, cell_cards,
+                                       surf_cards, mat_cards)
+
 
 def _mesh_to_cell_cards(mesh, divs):
     """Prepares the cell cards for mesh_to_geom."""
@@ -2191,22 +2193,23 @@ def _mesh_to_cell_cards(mesh, divs):
     z_max = y_max + len(divs[2])
 
     for i in range(1, len(divs[0])):
-       for j in range(1, len(divs[1])):
-           for k in range(1, len(divs[2])):
-               # Cell number, mat number, density
-               cell_cards += "{0} {1} {2} ".format(count, count, 
-                                                   mesh.density[idx.next()])
-               # x, y, and z surfaces
-               cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
-                            i, i + 1, j + x_max, j + x_max + 1,
-                            k + y_max, k + y_max + 1)
-               count += 1
+        for j in range(1, len(divs[1])):
+            for k in range(1, len(divs[2])):
+                # Cell number, mat number, density
+                cell_cards += "{0} {1} {2} ".format(count, count,
+                                                    mesh.density[idx.next()])
+                # x, y, and z surfaces
+                cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
+                              i, i + 1, j + x_max, j + x_max + 1,
+                              k + y_max, k + y_max + 1)
+                count += 1
 
     # Append graveyard.
     cell_cards += "{0} 0 -{1}:{2}:-{3}:{4}:-{5}:{6}\n".format(
-                   count, x_min, x_max, y_min, y_max, z_min, z_max)
+                  count, x_min, x_max, y_min, y_max, z_min, z_max)
 
     return cell_cards
+
 
 def _mesh_to_surf_cards(mesh, divs):
     """Prepares the surface cards for mesh_to_geom."""
@@ -2219,6 +2222,7 @@ def _mesh_to_surf_cards(mesh, divs):
 
     return surf_cards
 
+
 def _mesh_to_mat_cards(mesh, divs, frac_type):
     """Prepares the material cards for mesh_to_geom."""
     mat_cards = ""
@@ -2226,5 +2230,5 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
     for i in idx:
         mesh.mats[i].metadata['mat_number'] = i + 1
         mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
-  
+
     return mat_cards

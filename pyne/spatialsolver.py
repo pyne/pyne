@@ -11,9 +11,6 @@ import pyne.transport_spatial_methods as transport_spatial_methods
 
 def solve(inputdict_unchecked):
     """ 
-
-
-
     As these are complicated solvers, they require a large amount of input data 
     supplied by the user.  This information needs to be entered as a Python 
     dictionary. Of the many key-pair values listed below, most are required, but 
@@ -485,9 +482,6 @@ def _dict_complete(inputdict):
         elif(inputdict['solver'] == "DGFEM"):
             formatted_dict['solver_type'] = "LD"
 
-    formatted_dict['spatial_order'] = inputdict.get('spatial_order', 1)
-    formatted_dict['angular_quadrature_order'] = inputdict.get('angular_quadrature_order',4)
-    formatted_dict['angular_quadrature_type'] = inputdict.get('angular_quadrature_type',1)
     assert 'nodes_xyz' in inputdict, 'nodes_xyz key not in dict'
     formatted_dict['nodes_xyz'] = inputdict['nodes_xyz']
     assert 'num_groups' in inputdict, 'num_groups key not in dict'
@@ -516,7 +510,11 @@ def _dict_complete(inputdict):
     formatted_dict['source_input_file'] = inputdict['source_input_file']
     assert 'bc_input_file' in inputdict, 'bc_input_file not in dict'
     formatted_dict['bc_input_file'] = inputdict['bc_input_file']
-    assert 'flux_output_file' in inputdict, 'flux_output_file not in dict'  
+    assert 'flux_output_file' in inputdict, 'flux_output_file not in dict'
+ 
+    formatted_dict['spatial_order'] = inputdict.get('spatial_order', 1)
+    formatted_dict['angular_quadrature_order'] = inputdict.get('angular_quadrature_order',4)
+    formatted_dict['angular_quadrature_type'] = inputdict.get('angular_quadrature_type',1)
     formatted_dict['flux_output_file'] = inputdict['flux_output_file']  
     formatted_dict['convergence_criterion'] = inputdict.get('convergence_criterion',1e-5)
     formatted_dict['max_iterations'] = inputdict.get('max_iterations', 6000)
@@ -528,3 +526,5 @@ def _dict_complete(inputdict):
     formatted_dict['quad_flux_print_flag'] = 0
 
     return formatted_dict
+
+

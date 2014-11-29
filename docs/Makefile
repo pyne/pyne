@@ -18,6 +18,8 @@ DOCREPOURL  = git@github.com:pyne/pyne.github.com.git
 
 .PHONY: help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest
 
+all: html
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html      to make standalone HTML files"

@@ -9,6 +9,7 @@ from pyne.utils import QAWarning
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 class PhSpectrum(object):
     """Pulse height spectrum class"""
 

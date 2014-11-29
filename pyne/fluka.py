@@ -13,6 +13,9 @@ available to use.
 
 """
 
+from warnings import warn
+from pyne.utils import QAWarning
+
 # Mesh specific imports
 try:
     from itaps import iMesh
@@ -56,7 +59,6 @@ class Usrbin(object):
 
         with open(filename, 'r') as fh:
             self._read_tallies(fh)
-
 
     def _read_tallies(self, fh):
         """Read in all of the USRBIN tallies from the USRBIN file.
@@ -142,7 +144,7 @@ class UsrbinTally(Mesh):
         while (len(part_data) < num_volume_element):
             line = fh.readline()
             part_data += [float(x) for x in line.split()]
-        for count in range (0, 3):
+        for count in range(0, 3):
             line = fh.readline()
         while (len(error_data) < num_volume_element):
             line = fh.readline()
@@ -153,7 +155,6 @@ class UsrbinTally(Mesh):
         self.y_bounds = self._generate_bounds(y_info)
         self.z_bounds = self._generate_bounds(z_info)
         self._create_mesh(part_data, error_data)
-
 
     def _read_usrbin_head(self, fh):
         """Get the minimum bound, maximum bound, number of bins, and bin width
@@ -171,9 +172,9 @@ class UsrbinTally(Mesh):
 
         line = fh.readline()
 
-        # return lists of info for each dimension: [min, max, number of bins, width]
+        # return lists of info for each dimension:
+        # [min, max, number of bins, width]
         return x_info, y_info, z_info
-
 
     def _parse_dimensions(self, line):
         """This retrieves the specific dimensions and binning information for
@@ -185,17 +186,15 @@ class UsrbinTally(Mesh):
         return float(tokens[3]), float(tokens[5]), int(tokens[7]), \
                float(tokens[10])
 
-
     def _generate_bounds(self, dim_info):
         """This takes in the dimension information (min, max, bins, and width)
         and returns a list of bound values for that given dimension.
         """
         [dim_min, dim_max, bins, width] = dim_info
-        bound_data=[]
+        bound_data = []
         for i in range(0, bins + 1):
             bound_data.append(dim_min+(i*width))
         return bound_data
-
 
     def _create_mesh(self, part_data, error_data):
         """This will create the mesh object with the name of the tally
@@ -203,10 +202,10 @@ class UsrbinTally(Mesh):
         the error_data.
         """
         super(UsrbinTally, self).__init__(structured_coords=[self.x_bounds,
-                                     self.y_bounds, self.z_bounds],
-                                     structured=True,
-                                     structured_ordering='zyx',
-                                     mats=None)
+                                          self.y_bounds, self.z_bounds],
+                                          structured=True,
+                                          structured_ordering='zyx',
+                                          mats=None)
         self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self,
                                   name="part_data_{0}".format(self.particle))
         self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self,
