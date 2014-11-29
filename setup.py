@@ -163,6 +163,8 @@ def parse_make(ns):
 def parse_others(ns):
     if ns.hdf5 is not None:
         os.environ['HDF5_ROOT'] = ns.hdf5
+    if ns.moab is not None:
+        os.environ['MOAB_ROOT'] = ns.moab
 
 
 def parse_args():

@@ -79,6 +79,8 @@ find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
     include_directories(${MOAB_INCLUDE_DIR})
+    get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
+    link_directories(${MOAB_LIBRARY_DIRS})
 endif(${MOAB_FOUND})
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
