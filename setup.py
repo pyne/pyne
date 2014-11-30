@@ -136,7 +136,7 @@ def parse_setup(ns):
             dir_util.remove_tree('build')
         print('build directory cleaned ... exiting')
         sys.exit()
-    if ns.clean is not None:
+    if ns.clean:
         if os.path.exists('build'):
             dir_util.remove_tree('build')
     return a
