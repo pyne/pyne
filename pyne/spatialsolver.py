@@ -52,7 +52,10 @@ def solve(inputdict_unchecked):
     | total_time |    Double    |    Total Solver Run Time    |
     | print_time |    Double    | Time Taken to Print Results |
     | error_msg  |    String    |  Error Message (if failure) |
-    +------------+--------------+-----------------------------+
+    +------------+--------------+-----------------------------+'
+
+    For more detailed information about the input & output key-pair values, see:
+        http://pyne.io/pyapi/spatialsolver.html
 
     """
     inputdict = _dict_complete(inputdict_unchecked)
