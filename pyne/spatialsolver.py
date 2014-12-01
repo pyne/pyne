@@ -11,55 +11,51 @@ import pyne.transport_spatial_methods as transport_spatial_methods
 
 def solve(inputdict_unchecked):
     """ 
-Input Dictionary Required Key Pair Values
-+-----------------------+--------------+----------------------------------+--------------------------+
-|          Key          |     Type     |           Description            |         Example          |
-+-----------------------+--------------+----------------------------------+--------------------------+
-|         solver        |    String    |              Solver              |          AHOTN           |
-|      solver_type      |    String    |           Solver type            |            LN            |
-|     spatial_order     |     Int      |     Spatial expansion order      |            1             |
-|    quadrature_order   |     Int      |         Angles per Octet         |            4             |
-|    quadrature_type    |     Int      |        Quadrature Scheme         |            1             |
-|       nodes_xyz       |  Int Array   | Spatial nodes in XY&Z Directions |        [4, 4, 4]         |
-|       num_groups      |     Int      |     Number of Energy Groups      |            1             |
-|     num_materials     |     Int      |       Number of Materials        |            1             |
-|     x_cells_widths    | Double Array |           Cell X Size            | [0.25, 0.25, 0.25, 0.25] |
-|     y_cells_widths    | Double Array |           Cell Y Size            | [0.25, 0.25, 0.25, 0.25] |
-|     z_cells_widths    | Double Array |           Cell Z Size            | [0.25, 0.25, 0.25, 0.25] |
-|  x_boundry_conditions |  Int Array   |       X Boundry Conditions       |          [2,2]           |
-|  y_boundry_conditions |  Int Array   |       Y Boundry Conditions       |          [2,2]           |
-|  z_boundry_conditions |  Int Array   |       Z Boundry Conditions       |          [2,2]           |
-|      material_id      | 3d Int Array |     Material Mesh Type Info      |           n/a            |
-|       quad_file       |    String    |   Only needed for quad type 2    |        quad_file         |
-|        xs_file        |    String    |     Cross Section Data File      |         xs_file          |
-|   source_input_file   |    String    |      Source Input Info File      |         src.dat          |
-|     bc_input_file     |    String    |   Boundry Condition Input File   |          bc.dat          |
-|    flux_output_file   |    String    |       File for Flux Write        |         flux.out         |
-| convergence_criterion |    float     |      Convergence Criterion       |          1.e-5           |
-|   converge_tolerance  |    float     |            Tolerance             |          1.e-10          |
-|     max_iterations    |     Int      |     Max Iterations for Sweep     |          10000           |
-|   moments_converged   |     Int      | Moments Converged Upon Per Quad  |            0             |
-+-----------------------+--------------+----------------------------------+--------------------------+
+    Input Dictionary Required Key Pair Values
+    +-----------------------+--------------+----------------------------------+--------------------------+
+    |          Key          |     Type     |           Description            |         Example          |
+    +-----------------------+--------------+----------------------------------+--------------------------+
+    |         solver        |    String    |              Solver              |          AHOTN           |
+    |      solver_type      |    String    |           Solver type            |            LN            |
+    |     spatial_order     |     Int      |     Spatial expansion order      |            1             |
+    |    quadrature_order   |     Int      |         Angles per Octet         |            4             |
+    |    quadrature_type    |     Int      |        Quadrature Scheme         |            1             |
+    |       nodes_xyz       |  Int Array   | Spatial nodes in XY&Z Directions |        [4, 4, 4]         |
+    |       num_groups      |     Int      |     Number of Energy Groups      |            1             |
+    |     num_materials     |     Int      |       Number of Materials        |            1             |
+    |     x_cells_widths    | Double Array |           Cell X Size            | [0.25, 0.25, 0.25, 0.25] |
+    |     y_cells_widths    | Double Array |           Cell Y Size            | [0.25, 0.25, 0.25, 0.25] |
+    |     z_cells_widths    | Double Array |           Cell Z Size            | [0.25, 0.25, 0.25, 0.25] |
+    |  x_boundry_conditions |  Int Array   |       X Boundry Conditions       |          [2,2]           |
+    |  y_boundry_conditions |  Int Array   |       Y Boundry Conditions       |          [2,2]           |
+    |  z_boundry_conditions |  Int Array   |       Z Boundry Conditions       |          [2,2]           |
+    |      material_id      | 3d Int Array |     Material Mesh Type Info      |           n/a            |
+    |       quad_file       |    String    |   Only needed for quad type 2    |        quad_file         |
+    |        xs_file        |    String    |     Cross Section Data File      |         xs_file          |
+    |   source_input_file   |    String    |      Source Input Info File      |         src.dat          |
+    |     bc_input_file     |    String    |   Boundry Condition Input File   |          bc.dat          |
+    |    flux_output_file   |    String    |       File for Flux Write        |         flux.out         |
+    | convergence_criterion |    float     |      Convergence Criterion       |          1.e-5           |
+    |   converge_tolerance  |    float     |            Tolerance             |          1.e-10          |
+    |     max_iterations    |     Int      |     Max Iterations for Sweep     |          10000           |
+    |   moments_converged   |     Int      | Moments Converged Upon Per Quad  |            0             |
+    +-----------------------+--------------+----------------------------------+--------------------------+
 
-Output Dictionary Key Pair Values 
-+------------+--------------+-----------------------------+
-|    Key     |     Type     |         Description         |
-+------------+--------------+-----------------------------+
-|   solver   |    String    |            Solver           |
-|    flux    | Double Array |  Flux Solution Output Array |
-|  success   |     Int      | Solver Success Code (1 yes) |
-| time_start |    Double    |      System Start Time      |
-| total_time |    Double    |    Total Solver Run Time    |
-| print_time |    Double    | Time Taken to Print Results |
-| error_msg  |    String    |  Error Message (if failure) |
-+------------+--------------+-----------------------------+
-
+    Output Dictionary Key Pair Values 
+    +------------+--------------+-----------------------------+
+    |    Key     |     Type     |         Description         |
+    +------------+--------------+-----------------------------+
+    |   solver   |    String    |            Solver           |
+    |    flux    | Double Array |  Flux Solution Output Array |
+    |  success   |     Int      | Solver Success Code (1 yes) |
+    | time_start |    Double    |      System Start Time      |
+    | total_time |    Double    |    Total Solver Run Time    |
+    | print_time |    Double    | Time Taken to Print Results |
+    | error_msg  |    String    |  Error Message (if failure) |
+    +------------+--------------+-----------------------------+
 
     """
-
     inputdict = _dict_complete(inputdict_unchecked)
-    flux_output = []
-    solver_output = {};
     fortran_returns = transport_spatial_methods.main("test title in",
         inputdict['solver'],
         inputdict['solver_type'],
@@ -96,6 +92,7 @@ Output Dictionary Key Pair Values
         inputdict['mom_at_a_pt_flag'],
         inputdict['quad_flux_print_flag'])
 
+    solver_output = inputdict;
     solver_output['flux'] = fortran_returns[6].tolist()
     error_code = fortran_returns[7]
     tsolve = fortran_returns[8]
@@ -155,7 +152,6 @@ def _error_to_string(error_code):
   };
     return err_dictionary[error_code] 
 
-
 def _dict_complete(inputdict):
 
     formatted_dict = {}
@@ -173,10 +169,21 @@ def _dict_complete(inputdict):
             formatted_dict['solver_type'] = "LN"
         elif(inputdict['solver'] == "DGFEM"):
             formatted_dict['solver_type'] = "LD"
-
-    formatted_dict['spatial_order'] = inputdict.get('spatial_order', 1)
-    formatted_dict['angular_quadrature_order'] = inputdict.get('angular_quadrature_order',4)
-    formatted_dict['angular_quadrature_type'] = inputdict.get('angular_quadrature_type',1)
+    try:
+        formatted_dict['spatial_order'] = inputdict['spatial_order']
+    except:
+        formatted_dict['spatial_order'] = 1
+        warn(warning_msg + " spatial_order value of 1")
+    try:
+        formatted_dict['angular_quadrature_order'] = inputdict['angular_quadrature_order']
+    except:
+        formatted_dict['angular_quadrature_order'] = 4
+        warn(warning_msg + " angular_quadrature_order value of 4")
+    try:
+        formatted_dict['angular_quadrature_type'] = inputdict['angular_quadrature_type']
+    except:
+        formatted_dict['qangular_uadrature_type'] = 1
+        warn(warning_msg + " angular_quadrature_type value of 1")
     assert 'nodes_xyz' in inputdict, 'nodes_xyz key not in dict'
     formatted_dict['nodes_xyz'] = inputdict['nodes_xyz']
     assert 'num_groups' in inputdict, 'num_groups key not in dict'
@@ -207,13 +214,28 @@ def _dict_complete(inputdict):
     formatted_dict['bc_input_file'] = inputdict['bc_input_file']
     assert 'flux_output_file' in inputdict, 'flux_output_file not in dict'  
     formatted_dict['flux_output_file'] = inputdict['flux_output_file']  
-    formatted_dict['convergence_criterion'] = inputdict.get('convergence_criterion',1e-5)
-    formatted_dict['max_iterations'] = inputdict.get('max_iterations', 6000)
-    formatted_dict['moments_converged'] = inputdict.get('moments_converged',0)
-    formatted_dict['converge_tolerence'] = inputdict.get('converge_tolerence',1e-10)
     formatted_dict['max_mom_printed'] = 0
     formatted_dict['moment_sum_flag'] = 0
     formatted_dict['mom_at_a_pt_flag'] = 0
     formatted_dict['quad_flux_print_flag'] = 0
-
+    try:
+        formatted_dict['convergence_criterion'] = inputdict['convergence_criterion']
+    except:
+        formatted_dict['convergence_criterion'] = 1e-12
+        warn(warning_msg + " convergence_criterion value of 1e-12")
+    try:
+        formatted_dict['max_iterations'] = inputdict['max_iterations']
+    except:
+        formatted_dict['max_iterations'] = 6000
+        warn(warning_msg + " max_iterations value of 6000")
+    try:
+        formatted_dict['moments_converged'] = inputdict['moments_converged']
+    except:
+        formatted_dict['moments_converged'] = 0
+        warn(warning_msg + " moments_converged value of 0")
+    try:
+        formatted_dict['converge_tolerence'] = inputdict['converge_tolerence']
+    except:
+        formatted_dict['converge_tolerence'] = 1e-10
+        warn(warning_msg + " converge_tolerence value of 1e-10")
     return formatted_dict

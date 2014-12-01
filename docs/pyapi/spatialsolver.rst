@@ -382,6 +382,12 @@ When run, the solvers return a dictionary of useful solution data.  It contains 
   key:  "error_msg"
   type: String
 
+**Output Dictionary Entries**
+::
+    The output dictionary also contains all of the relevant input values found in the input dictionary.  If one
+    of the optional input entries was not present, the default key-pair value will be present in this new output 
+    dictionary.
+::
 -----------------------------------
 Source File Formatting
 -----------------------------------
