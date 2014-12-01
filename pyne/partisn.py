@@ -87,7 +87,7 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     
     # Read the materials from the hdf5 and convert to correct naming convention
     mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)
-    print(mat_lib)
+    #print(mat_lib)
     #mat_lib = Material.collapse_elements(mat_lib_expanded)
     
     # determine the zones
@@ -172,30 +172,45 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
     # reads material properties from the loaded dagmc_geometry
     # cell # -> material name & vol fract -> isotope name & dens
     
-    mats = MaterialLibrary(hdf5,datapath=datapath,nucpath=nucpath)
-    mat_lib_expanded = {}
-    mat_lib = {}
+    # set of exception nuclides for collapse_elements
+    mat_exceptions = Set(nuc_names.keys())
     
-    for key in mats.keys():
-        mat_name = '{0}'.format(key.split(':')[1])
-        mat_lib_expanded[mat_name] = {}
-        #mat_lib[mat_name] = {}
-        for nuc in mats[key]:
-            if nuc in nuc_names.keys():
-                nuc_name = nuc_names[nuc]
-            else:
-                nuc_name = nuc
-                warn("PyNE nuclide {0} not listed in nuc_names".format(nuc))
-            # convert mass fraction to atom density [at/b*cm]
-            # rho/mw*Na    
-            rho_frac = mats[key][nuc_name]
-            mw = mats[key].molecular_mass()
-            Na = 60.22
-            mat_lib_expanded[mat_name][nuc_name] = rho_frac/mw*Na
-        mat_obj = Material(mat_lib_expanded[mat_name])
-        print(mat_obj)
-        mat_lib[mat_name] = mat_obj.collapse_elements(Set([]))
-        print(mat_lib[mat_name])
+    # collapse isotopes into elements
+    mats = MaterialLibrary(hdf5,datapath=datapath,nucpath=nucpath)
+    mats_collapsed = {}
+    for mat_name in mats.keys():
+        mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_exceptions)
+    
+    # Check that the materials are valid:
+    #   1) non zero and non-negative densities (density = True)
+    #   2) set of nuclides is not empty (else it is vacuum) (empty = False)
+    #   3) nucids appear in nuc_names
+    # might put 2 and 3 later      
+    
+    # convert mass fraction to atom fraction and then to [at/b-cm]
+    Na = 6.022*(10.**23) # Avagadro's number [at/mol]
+    barn_conv = 10.**-24 # [cm^2/b]
+    mat_lib = {}
+    for name, comp in mats_collapsed.iteritems():
+        print(comp)
+        mat_name = '{0}'.format(name.split(':')[1])
+        comp_atom_frac = comp.to_atom_frac() # atom fractions
+        #print(comp_atom_frac)
+        
+        density = comp.mass_density() # [g/cc]
+        if density < 0.0:
+            warn("Material {0} has an invalid negative density.".format(mat_name))
+        
+        mol_mass = comp.molecular_mass() # [g/mol]
+        comp_list = {}
+        total = 0
+        for nucid, frac in comp_atom_frac.iteritems():
+            comp_list[nucid] = frac*density*Na*barn_conv/mol_mass # [at/b-cm]
+            total += frac*density*Na*barn_conv/mol_mass # [at/b-cm]
+        mat_lib[mat_name] = comp_list
+        #print(total)    
+    
+    #print(mat_lib)
         
     return mat_lib
 
@@ -220,7 +235,7 @@ def _define_zones(mesh):
     
     # determine which voxels are identical and remove
     z = 0
-    zones = {}
+    zones = {} # defined by cell number
     match = False
     first = True    
     for idx, vals in voxel.iteritems():
@@ -234,6 +249,9 @@ def _define_zones(mesh):
             z += 1
             zones[z] = voxel[idx]
             first = False
+            
+    
+    ## Add section here which replaces cell number with materials
             
     return zones
 
