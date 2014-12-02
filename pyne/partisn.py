@@ -87,12 +87,15 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     
     # Read the materials from the hdf5 and convert to correct naming convention
     mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)
-    #print(mat_lib)
-    #mat_lib = Material.collapse_elements(mat_lib_expanded)
+    
+    # Assign materials to cells   
+    mat_assigns = _materials_to_cells(hdf5)
     
     # determine the zones
-    zones = _define_zones(mesh)
-
+    zones = _define_zones(mesh, mat_assigns)
+    for key, item in zones.iteritems():
+        print(key, item)
+    
     # read nucdata
     bxslib = open(nucdata, 'rb')
     xs_names = _read_bxslib(bxslib)
@@ -170,7 +173,6 @@ def _read_bxslib(bxslib):
 
 def _get_materials(hdf5, datapath, nucpath, nuc_names):
     # reads material properties from the loaded dagmc_geometry
-    # cell # -> material name & vol fract -> isotope name & dens
     
     # set of exception nuclides for collapse_elements
     mat_exceptions = Set(nuc_names.keys())
@@ -191,31 +193,78 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
     Na = 6.022*(10.**23) # Avagadro's number [at/mol]
     barn_conv = 10.**-24 # [cm^2/b]
     mat_lib = {}
-    for name, comp in mats_collapsed.iteritems():
+    for mat_name, comp in mats_collapsed.iteritems():
         print(comp)
-        mat_name = '{0}'.format(name.split(':')[1])
         comp_atom_frac = comp.to_atom_frac() # atom fractions
-        #print(comp_atom_frac)
-        
         density = comp.mass_density() # [g/cc]
+        
         if density < 0.0:
             warn("Material {0} has an invalid negative density.".format(mat_name))
         
         mol_mass = comp.molecular_mass() # [g/mol]
         comp_list = {}
-        total = 0
+        
         for nucid, frac in comp_atom_frac.iteritems():
             comp_list[nucid] = frac*density*Na*barn_conv/mol_mass # [at/b-cm]
-            total += frac*density*Na*barn_conv/mol_mass # [at/b-cm]
-        mat_lib[mat_name] = comp_list
-        #print(total)    
-    
-    #print(mat_lib)
         
+        mat_lib[mat_name] = comp_list
+
     return mat_lib
 
 
-def _define_zones(mesh):
+def _materials_to_cells(hdf5):
+    """Takes the material-laden geometry and matches cells to materials
+    """
+    # Load the geometry
+    dag_geom = iMesh.Mesh()
+    dag_geom.load(hdf5)
+    dag_geom.getEntities()
+    mesh_set = dag_geom.getEntSets()
+
+    # Get tag handle
+    vol_tag = dag_geom.getTagHandle('GEOM_DIMENSION')
+    name_tag = dag_geom.getTagHandle('GLOBAL_ID')
+    mat_tag = dag_geom.getTagHandle('NAME')
+
+    # Get list of materials and list of cells
+    mat_list = []
+    geom_list = []
+    for i in mesh_set:
+        tags = dag_geom.getAllTags(i)
+        for tag in tags:
+            if tag == vol_tag:
+                geom_list.append(i)
+            if tag == mat_tag:
+                mat_list.append(i)
+
+    # assign material to cell
+    dag_properties = set()
+    mat_assigns={}
+    for entity in geom_list:
+        for meshset in mat_list:
+            if meshset.contains(entity):
+                mat_name = mat_tag[meshset]
+                cell = name_tag[entity]
+                dag_properties.add(_tag_to_script(mat_name))
+                if 'mat:' in _tag_to_script(mat_name):
+                    mat_assigns[cell] = _tag_to_script(mat_name)
+    
+    print(mat_assigns)
+    return mat_assigns
+
+def _tag_to_script(tag):
+    a = []
+    # since we have a byte type tag loop over the 32 elements
+    for part in tag:
+        # if the byte char code is non 0
+        if (part != 0):
+            # convert to ascii
+            a.append(str(unichr(part)))
+            # join to end string
+            script = ''.join(a)
+    return script
+
+def _define_zones(mesh, mat_assigns):
     """This function takes results of discretize_geom and finds unique voxels
     """
     dg = dagmc.discretize_geom(mesh)
@@ -235,11 +284,11 @@ def _define_zones(mesh):
     
     # determine which voxels are identical and remove
     z = 0
-    zones = {} # defined by cell number
+    zones_cells = {} # defined by cell number
     match = False
     first = True    
     for idx, vals in voxel.iteritems():
-        for zone, info in zones.iteritems():
+        for zone, info in zones_cells.iteritems():
             if vals == info:
                 match = True
                 break
@@ -247,12 +296,14 @@ def _define_zones(mesh):
                 match = False
         if first or not match:
             z += 1
-            zones[z] = voxel[idx]
+            zones_cells[z] = voxel[idx]
             first = False
-            
+    #print(zones_cells)
+    #zones = {}
+    #for zone in zones_cells.keys():
+    #    for 
     
-    ## Add section here which replaces cell number with materials
-            
+    zones = zones_cells
     return zones
 
 
