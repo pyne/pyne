@@ -142,3 +142,21 @@ def make_materials_library(args):
     # Make atomic mass table once we have the array
     print("Making materials library...")
     make_materials_compendium(nuc_data)
+
+def test_grab_materials_compendium():
+
+    # First make the elements
+    print("Making the elements...")
+    make_elements()
+
+    # Then grab the materials compendium
+    print("Grabbing materials compendium...")
+    grab_materials_compendium(os.path.join(os.path.split(__file__)[0], 
+                              'test_mat.csv'))
+
+    for mat in mats:
+        print(mat)
+    
+    
+    
+    
