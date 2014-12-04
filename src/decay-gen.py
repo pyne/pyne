@@ -106,9 +106,6 @@ const int all_nucs [{{ nucs|length }}] = {
 }  // namespace pyne
 """.strip())
 
-
-# In[44]:
-
 # Some strings that need not be redefined
 BREAK = '  break;'
 CHAIN_STMT = '  out[{0}] = out[{0}] + {1};'
@@ -223,7 +220,7 @@ def gencases(nucs):
 
 def gencases(nucs):
     idx = dict(zip(nucs, range(len(nucs))))
-    cases = {i: [] for i in range(116)}
+    cases = {i: [] for i in range(1, 116)}
     for nuc in nucs:
         #if nucname.znum(nuc) > 70:
         #    continue
@@ -232,11 +229,27 @@ def gencases(nucs):
     for i, kases in cases.items():
         c = ['case {0}:'.format(i), '  switch (it->first) {']
         for case in kases:
-            c += ['  ' + s for s in case.splitlines()]
-        c += ['  default:', '    outcomp.insert(*it);', '    break;', '}']
+            c += ['    ' + s for s in case.splitlines()]
+        c += ['    default:', '      outcomp.insert(*it);', '      break;', 
+              '  }', '  break;']
         switches.append('\n'.join(c))
     return '\n'.join(switches)
 
+"""
+def gencases(nucs):
+    idx = dict(zip(nucs, range(len(nucs))))
+    cases = {i: [] for i in range(116)}
+    for nuc in nucs:
+        #if nucname.znum(nuc) > 70:
+        #    continue
+        cases[nucname.znum(nuc)] += gencase(nuc, idx)
+    switches = []
+    for i, kases in cases.items():
+        c = ['case {0}:'.format(i), 
+             '    break;', '}']
+        switches.append('\n'.join(c))
+    return '\n'.join(switches)
+"""
 
 def load_default_nucs():
     with tb.open_file(nuc_data) as f:
