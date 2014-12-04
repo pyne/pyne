@@ -68,6 +68,8 @@ SOURCE = ENV.from_string("""
 namespace pyne {
 namespace decayers {
 
+{{ elemfuncs }}
+
 std::map<int, double> decay(std::map<int, double> comp, double t) {
   // setup
   using std::map;
@@ -106,6 +108,19 @@ const int all_nucs [{{ nucs|length }}] = {
 }  // namespace pyne
 """.strip())
 
+
+ELEM_FUNC = ENV.from_string("""
+void decay_{{ elem|lower }}(double &t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[{{ nucs|length }}]) {
+  switch (it->first) {
+    {{ cases|indent(4) }}
+    default:
+      outcomp.insert(*it);
+      break;
+  }
+}
+""".strip())
+
+
 # Some strings that need not be redefined
 BREAK = '  break;'
 CHAIN_STMT = '  out[{0}] = out[{0}] + {1};'
@@ -120,6 +135,7 @@ def genfiles(nucs):
         autogenwarn=autogenwarn,
         )
     ctx.cases = gencases(nucs)
+    ctx.elemfuncs = genelemfuncs(nucs)
     hdr = HEADER.render(ctx.__dict__)
     src = SOURCE.render(ctx.__dict__)
     return hdr, src
@@ -206,6 +222,9 @@ def gencase(nuc, idx):
     return case
 
 
+def elems(nucs):
+    return sorted(set(map(nucname.znum, nucs)))
+
 """
 def gencases(nucs):
     idx = dict(zip(nucs, range(len(nucs))))
@@ -216,7 +235,6 @@ def gencases(nucs):
         cases += gencase(nuc, idx)
     #cases[0] = cases[0][2:]
     return '\n'.join(cases)
-"""
 
 def gencases(nucs):
     idx = dict(zip(nucs, range(len(nucs))))
@@ -234,22 +252,34 @@ def gencases(nucs):
               '  }', '  break;']
         switches.append('\n'.join(c))
     return '\n'.join(switches)
-
 """
+
 def gencases(nucs):
-    idx = dict(zip(nucs, range(len(nucs))))
-    cases = {i: [] for i in range(116)}
-    for nuc in nucs:
-        #if nucname.znum(nuc) > 70:
-        #    continue
-        cases[nucname.znum(nuc)] += gencase(nuc, idx)
     switches = []
-    for i, kases in cases.items():
+    for i in elems(nucs):
         c = ['case {0}:'.format(i), 
-             '    break;', '}']
+             '  decay_{0}(t, it, outcomp, out);'.format(nucname.name(i).lower()), 
+             '  break;']
         switches.append('\n'.join(c))
     return '\n'.join(switches)
+
 """
+"""
+
+def genelemfuncs(nucs):
+    return ''
+
+def genelemfuncs(nucs):
+    idx = dict(zip(nucs, range(len(nucs))))
+    cases = {i: [] for i in elems(nucs)}
+    for nuc in nucs:
+        cases[nucname.znum(nuc)] += gencase(nuc, idx)
+    funcs = []
+    for i, kases in cases.items():
+        ctx = dict(nucs=nucs, elem=nucname.name(i), cases='\n'.join(kases))
+        funcs.append(ELEM_FUNC.render(ctx))
+    return "\n\n".join(funcs)
+
 
 def load_default_nucs():
     with tb.open_file(nuc_data) as f:
