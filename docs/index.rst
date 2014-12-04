@@ -65,7 +65,7 @@ bindings and I/O support for other industry standard nuclear codes.
       <div id="usingContent" style="display:none;">
         <ul>
           <li><a href="usersguide/index.html">User's Guide</a></li>
-          <li><a href="pyapi/index.html}}">Python API Documentation</a></li>
+          <li><a href="pyapi/index.html">Python API Documentation</a></li>
           <li><a href="cppapi/index.html">C++ & Fortran API Documentation</a></li>
           <li><a href="mailto:pyne-users+subscribe@googlegroups.com?subject=Subscribe&body=Send this message to subscribe to the list">Join</a> the <a href="https://groups.google.com/forum/#!forum/pyne-users" target="_blank"> Users</a> mailing list.
           <li><a href="https://github.com/pyne/pyne/issues">Report an Issue</a></li>
