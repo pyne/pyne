@@ -63,6 +63,10 @@ if (MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
 endif (MOAB_FOUND)
 
+set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
+    "-O0 -fno-gcse -time -std=c++11 -Q")
+#    "-O0 -fno-function-cse -fno-merge-constants -fno-gcse -fno-delete-null-pointer-checks -fno-guess-branch-probability")
+
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")

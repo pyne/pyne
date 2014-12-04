@@ -11,13 +11,15 @@ warnings.simplefilter('ignore', RuntimeWarning)
 import tables as tb
 import jinja2
 
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, toggle_warnings
 warnings.simplefilter('ignore', QAWarning)
+toggle_warnings()
 from pyne import nuc_data
 from pyne import data
 from pyne import rxname
 from pyne import nucname
-from pyne.data import branch_ratio, half_life, decay_const, decay_children
+from pyne.data import branch_ratio, half_life, decay_const, decay_children, \
+    decay_data_children, fpyield
 from pyne.material import Material
 
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
@@ -40,8 +42,10 @@ HEADER = ENV.from_string("""
 {{ autogenwarn }}
 
 #include <map>
+#include <cmath>
 
 #include "data.h"
+#include "nucname.h"
 
 namespace pyne {
 namespace decayers {
@@ -67,24 +71,28 @@ namespace decayers {
 std::map<int, double> decay(std::map<int, double> comp, double t) {
   // setup
   using std::map;
+  using std::exp2;
   int nuc;
+  int i = 0;
   double out [{{ nucs|length }}] = {};  // init to zero
+  //double* out = new double[{{ nucs|length }}];  // init to zero
+  //for (; i < {{ nucs|length }}; ++i)
+  //  out[i] = 0.0;
   map<int, double> outcomp;
   
   // body
   map<int, double>::const_iterator it = comp.begin();
   for (; it != comp.end(); ++it) {
-    switch (it->first) {
+    switch (nucname::znum(it->first)) {
       {{ cases|indent(6) }}
-      } default: {
+      default:
         outcomp.insert(*it);
         break;
-      }
     }
   }
   
   // cleanup
-  for (int i = 0; i < {{ nucs|length }}; ++i)
+  for (i = 0; i < {{ nucs|length }}; ++i)
     if (out[i] > 0.0)
       outcomp[all_nucs[i]] = out[i];
   return outcomp;
@@ -103,10 +111,11 @@ const int all_nucs [{{ nucs|length }}] = {
 
 # Some strings that need not be redefined
 BREAK = '  break;'
-CHAIN_STMT = '  out[{0}] += {1};'
+CHAIN_STMT = '  out[{0}] = out[{0}] + {1};'
+#CHAIN_STMT = '  out[{0}] = out[{0}];'
 CHAIN_EXPR = '(it->second) * ({0})'
-EXP_EXPR = 'exp2({a}*t)'
-KEXP_EXPR = '{k}*' + EXP_EXPR
+EXP_EXPR = 'exp2({a:e}*t)'
+KEXP_EXPR = '{k:e}*' + EXP_EXPR
 
 def genfiles(nucs):
     ctx = Namespace(
@@ -122,6 +131,8 @@ def genfiles(nucs):
 def genchains(chains):
     chain = chains[-1]
     children = decay_children(chain[-1])
+    children = {c for c in children if 0.0 == fpyield(chain[-1], c)}
+    children = {c for c in children if 1e-8 < branch_ratio(chain[-1], c)}
     for child in children:
         chains.append(chain + (child,))
         chains = genchains(chains)
@@ -129,7 +140,7 @@ def genchains(chains):
 
 
 def k_a(chain):
-    a = [-1.0 / half_life(n) for n in chain]
+    a = np.array([-1.0 / half_life(n) for n in chain])
     dc = np.array(list(map(decay_const, chain)))
     if np.isnan(dc).any():
         return None, None
@@ -138,7 +149,11 @@ def k_a(chain):
     cij[mask, mask] = 1.0
     ci = cij.prod(axis=0)
     k = (dc / dc[-1]) * ci
-    return k, a
+    if np.isinf(k).any():
+        return None, None
+    kfrac = np.abs(k) / np.sum(np.abs(k))
+    mask = (kfrac > 1e-8)
+    return k[mask], a[mask]
 
 
 def kexpexpr(k, a):
@@ -159,28 +174,33 @@ def chainexpr(chain):
         if k is None:
             return None
         terms = ['1.0']
-        terms += [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a)]
+        terms += [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a) if a_i > -1e1]
         terms = ' - '.join(terms)
     else:
         k, a = k_a(chain)
         if k is None:
             return None
-        terms = [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a)]
+        terms = [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a) if a_i > -1e1]
+        if len(terms) == 0:
+            terms = [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a)]
         terms = ' + '.join(terms)
     return CHAIN_EXPR.format(terms)
 
 
 def gencase(nuc, idx):
-    case = ['}} case {0}: {{'.format(nuc)]
+    case = ['case {0}:'.format(nuc)]
     dc = decay_const(nuc)
     if dc == 0.0:
         # stable nuclide
         case.append(CHAIN_STMT.format(idx[nuc], 'it->second'))
     else:
         chains = genchains([(nuc,)])
+        print(len(chains), len(set(chains)), nuc)
         for c in chains:
             if c[-1] not in idx:
                 continue
+            if len(c) > 50:
+                import pdb; pdb.set_trace()
             cexpr = chainexpr(c)
             if cexpr is None:
                 continue
@@ -189,13 +209,33 @@ def gencase(nuc, idx):
     return case
 
 
+"""
 def gencases(nucs):
     idx = dict(zip(nucs, range(len(nucs))))
     cases = []
     for nuc in nucs:
+        if nucname.znum(nuc) > 95:
+            continue
         cases += gencase(nuc, idx)
-    cases[0] = cases[0][2:]
+    #cases[0] = cases[0][2:]
     return '\n'.join(cases)
+"""
+
+def gencases(nucs):
+    idx = dict(zip(nucs, range(len(nucs))))
+    cases = {i: [] for i in range(116)}
+    for nuc in nucs:
+        #if nucname.znum(nuc) > 70:
+        #    continue
+        cases[nucname.znum(nuc)] += gencase(nuc, idx)
+    switches = []
+    for i, kases in cases.items():
+        c = ['case {0}:'.format(i), '  switch (it->first) {']
+        for case in kases:
+            c += ['  ' + s for s in case.splitlines()]
+        c += ['  default:', '    outcomp.insert(*it);', '    break;', '}']
+        switches.append('\n'.join(c))
+    return '\n'.join(switches)
 
 
 def load_default_nucs():
