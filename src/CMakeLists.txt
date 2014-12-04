@@ -32,6 +32,7 @@ set(AHOT_SRCS
 # setup source files
 set(PYNE_SRCS
     "data.cpp"
+    "decay.cpp"
     "enrichment.cpp"
     "enrichment_cascade.cpp"
     "enrichment_symbolic.cpp"
