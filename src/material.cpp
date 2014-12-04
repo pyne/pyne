@@ -10,6 +10,7 @@
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
 #include "nucname.h"
+#include "decay.h"
 #endif
 
 // h5wrap template
@@ -1537,6 +1538,15 @@ std::vector<std::pair<double, double> > unnormed) {
   }
   return normed;
 }
+
+
+pyne::Material pyne::Material::decay(double t) {
+  // Overloads x + y
+  Material rtn;
+  comp_map out = pyne::decayers::decay(to_atom_frac(), t);
+  rtn.from_atom_frac(out);
+  return rtn;
+};
 
 
 pyne::Material pyne::Material::operator+ (double y) {

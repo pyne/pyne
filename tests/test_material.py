@@ -1601,6 +1601,14 @@ def test_material_photons():
                  (13.0, 0.18655736948227228)])
 
 
+def test_decay():
+    mat = Material({'H3': 1.0})
+    obs = mat.decay(data.half_life('H3'))
+    print(mat.to_atom_frac())
+    print(obs.to_atom_frac())
+    assert_equal(0.5, obs['H3'])
+
+
 # Run as script
 #
 if __name__ == "__main__":

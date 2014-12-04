@@ -309,6 +309,8 @@ namespace pyne
     std::vector<std::pair<double, double> > normalize_radioactivity(
       std::vector<std::pair<double, double> > unnormed);
 
+    /// Decays this material for a given amount of time in seconds
+    Material decay(double t);
 
     // Overloaded Operators
     /// Adds mass to a material instance.
