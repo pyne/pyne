@@ -7,6 +7,7 @@ import warnings
 from argparse import ArgumentParser, Namespace
 
 import numpy as np
+warnings.simplefilter('ignore', RuntimeWarning)
 import tables as tb
 import jinja2
 

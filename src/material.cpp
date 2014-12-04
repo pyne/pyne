@@ -1545,6 +1545,7 @@ pyne::Material pyne::Material::decay(double t) {
   Material rtn;
   comp_map out = pyne::decayers::decay(to_atom_frac(), t);
   rtn.from_atom_frac(out);
+  rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
   return rtn;
 };
 

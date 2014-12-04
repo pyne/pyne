@@ -16,7 +16,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   // setup
   using std::map;
   int nuc;
-  double out [3] = {};  // init to zero
+  double out [4] = {};  // init to zero
   map<int, double> outcomp;
   
   // body
@@ -31,6 +31,10 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
         break;
       } case 10030000: {
         out[2] += (it->second) * (exp2(-2.572085049840012e-09*t));
+        out[3] += (it->second) * (1.0 - exp2(-2.572085049840012e-09*t));
+        break;
+      } case 20030000: {
+        out[3] += it->second;
         break;
       } default: {
         outcomp.insert(*it);
@@ -40,14 +44,14 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   }
   
   // cleanup
-  for (int i = 0; i < 3; ++i)
+  for (int i = 0; i < 4; ++i)
     if (out[i] > 0.0)
       outcomp[all_nucs[i]] = out[i];
   return outcomp;
 }
 
-const int all_nucs [3] = {
-  10010000, 10020000, 10030000
+const int all_nucs [4] = {
+  10010000, 10020000, 10030000, 20030000
 };
 
 }  // namespace decayers

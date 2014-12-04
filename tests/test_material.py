@@ -1606,6 +1606,9 @@ def test_decay():
     obs = mat.decay(data.half_life('H3'))
     print(mat.to_atom_frac())
     print(obs.to_atom_frac())
+    print(mat)
+    print(obs)
+    assert False
     assert_equal(0.5, obs['H3'])
 
 

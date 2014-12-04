@@ -17,7 +17,7 @@
 namespace pyne {
 namespace decayers {
 
-extern const int all_nucs[3];
+extern const int all_nucs[4];
 
 std::map<int, double> decay(std::map<int, double> comp, double t);
 
