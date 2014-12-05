@@ -73,20 +73,15 @@ namespace decayers {
 std::map<int, double> decay(std::map<int, double> comp, double t) {
   // setup
   using std::map;
-  using std::exp2;
   int nuc;
   int i = 0;
   double out [{{ nucs|length }}] = {};  // init to zero
-  //double* out = new double[{{ nucs|length }}];  // init to zero
-  //for (; i < {{ nucs|length }}; ++i)
-  //  out[i] = 0.0;
   map<int, double> outcomp;
   
   // body
   map<int, double>::const_iterator it = comp.begin();
   for (; it != comp.end(); ++it) {
     switch (nucname::znum(it->first)) {
-    //switch (it->first) {
       {{ cases|indent(6) }}
       default:
         outcomp.insert(*it);
@@ -112,18 +107,13 @@ const int all_nucs [{{ nucs|length }}] = {
 
 ELEM_FUNC = ENV.from_string("""
 void decay_{{ elem|lower }}(double &t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[{{ nucs|length }}]) {
+  using std::exp2;
   switch (it->first) {
     {{ cases|indent(4) }}
     default:
       outcomp.insert(*it);
       break;
   }
-}
-""".strip())
-
-NUC_FUNC = ENV.from_string("""
-void decay_{{ nuc|lower }}(double &t, std::map<int, double>::const_iterator &it, double (&out)[{{ nucs|length }}]) {
-  {{ chains|indent(2) }}
 }
 """.strip())
 
@@ -142,7 +132,6 @@ def genfiles(nucs):
         )
     ctx.cases = gencases(nucs)
     ctx.funcs = genelemfuncs(nucs)
-    #ctx.funcs = gennucfuncs(nucs)
     hdr = HEADER.render(ctx.__dict__)
     src = SOURCE.render(ctx.__dict__)
     return hdr, src
@@ -219,8 +208,6 @@ def gencase(nuc, idx):
         for c in chains:
             if c[-1] not in idx:
                 continue
-            if len(c) > 50:
-                import pdb; pdb.set_trace()
             cexpr = chainexpr(c)
             if cexpr is None:
                 continue
@@ -232,35 +219,6 @@ def gencase(nuc, idx):
 def elems(nucs):
     return sorted(set(map(nucname.znum, nucs)))
 
-"""
-def gencases(nucs):
-    idx = dict(zip(nucs, range(len(nucs))))
-    cases = []
-    for nuc in nucs:
-        if nucname.znum(nuc) > 95:
-            continue
-        cases += gencase(nuc, idx)
-    #cases[0] = cases[0][2:]
-    return '\n'.join(cases)
-
-def gencases(nucs):
-    idx = dict(zip(nucs, range(len(nucs))))
-    cases = {i: [] for i in range(1, 116)}
-    for nuc in nucs:
-        #if nucname.znum(nuc) > 70:
-        #    continue
-        cases[nucname.znum(nuc)] += gencase(nuc, idx)
-    switches = []
-    for i, kases in cases.items():
-        c = ['case {0}:'.format(i), '  switch (it->first) {']
-        for case in kases:
-            c += ['    ' + s for s in case.splitlines()]
-        c += ['    default:', '      outcomp.insert(*it);', '      break;', 
-              '  }', '  break;']
-        switches.append('\n'.join(c))
-    return '\n'.join(switches)
-
-"""
 
 def gencases(nucs):
     switches = []
@@ -271,20 +229,6 @@ def gencases(nucs):
         switches.append('\n'.join(c))
     return '\n'.join(switches)
 
-"""
-def gencases(nucs):
-    switches = []
-    #for i in elems(nucs):
-    for i in nucs:
-        c = ['case {0}:'.format(i), 
-             '  decay_{0}(t, it, out);'.format(i), 
-             '  break;']
-        switches.append('\n'.join(c))
-    return '\n'.join(switches)
-"""
-
-def genelemfuncs(nucs):
-    return ''
 
 def genelemfuncs(nucs):
     idx = dict(zip(nucs, range(len(nucs))))
@@ -295,15 +239,6 @@ def genelemfuncs(nucs):
     for i, kases in cases.items():
         ctx = dict(nucs=nucs, elem=nucname.name(i), cases='\n'.join(kases))
         funcs.append(ELEM_FUNC.render(ctx))
-    return "\n\n".join(funcs)
-
-def gennucfuncs(nucs):
-    idx = dict(zip(nucs, range(len(nucs))))
-    funcs = []
-    for nuc in nucs:
-        case = gencase(nuc, idx)[1:-1]
-        ctx = dict(nucs=nucs, nuc=nuc, chains='\n'.join(case))
-        funcs.append(NUC_FUNC.render(ctx))
     return "\n\n".join(funcs)
 
 
@@ -335,4 +270,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
