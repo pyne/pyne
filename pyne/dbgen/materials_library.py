@@ -9,7 +9,7 @@ from __future__ import print_function
 import re
 import os
 import csv
-from itertools import takewhile, islice, filterfalse
+from itertools import takewhile, groupby
 from warnings import warn
 from pyne.utils import QAWarning
 
@@ -25,29 +25,37 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 nucids = set()
 natural_abund("H1")  # initialize natural_abund_map
 
+
 # Make a dictionary that represents elements as dicts of their isotopes
 def make_elements():
-    """Make natural elemental materials based on isotopic abundances."""
-    elemental_mats = {}
-    for name, zz in nucname.name_zz.items():
-        elemental_mats[name] = {}
-    for nuc, abund in natural_abund_map.items():
-        nucid = nucname.id(nuc)
-        anum = nucname.anum(nucid)
-        if 0 == anum or abund == 0.0:
-            continue
-        znum = nucname.znum(nuc)
-        if znum not in nucname.zz_name:
-            continue
-        name = nucname.zz_name[znum]
-        elemental_mats[name][nucid] = abund
-        nucids.add(nucid)
-    return elemental_mats
+    """Make natural elemental materials based on isotopic abundances.
+
+    Returns
+    -------
+    elts : [pyne.material.Material]
+        Natural elements as materials.
+    """
+    sorted_abunds = sorted(list(natural_abund_map.items()))
+    grouped_abunds = groupby(sorted_abunds, lambda x: nucname.zzzaaa(x[0])//1000)
+    elts = (Material(dict(abunds), metadata={"name": nucname.name(zz)})
+            for zz, abunds in grouped_abunds)
+    return elts
 
 
 # Parses data from .csv
 def grab_materials_compendium(location='materials_compendium.csv'):
-    """Parses data from a materials compendium csv file."""
+    """Parses data from a materials compendium csv file.
+
+    Parameters
+    ----------
+    location : str
+        The file to read in compendium from.
+
+    Returns
+    -------
+    mats : [pyne.material.Material]
+        The materials in the compendium.
+    """
     with open(location, 'r', newline='') as f:
         lines = csv.reader(f, delimiter=',', quotechar='"')
         lines = list(filter(is_comp_matname_or_density, lines))
@@ -56,8 +64,26 @@ def grab_materials_compendium(location='materials_compendium.csv'):
 
 
 def is_comp_matname_or_density(line):
-    return ((line[0] == "Density (g/cm3) =" or
-             re.match(r'\d+. +$|[A-Za-z]{1,2}-?(\d{1,3})?$', line[0])))
+    """Detect composition, material name, or density lines.
+
+    Parameters
+    ----------
+    line : [str]
+        The input line.
+
+    Returns
+    -------
+    result : bool
+        True if the input line has composition, material name, or density data.
+        False otherwise.
+    """
+    if not line[0]:
+        return False
+    if line[0] == "Density (g/cm3) =":
+        return True
+    if re.match(r'\d+. +$|[A-Za-z]{1,2}-?(\d{1,3})?$', line[0]):
+        return True
+    return False
 
 
 def elem_line_to_mat(line):
@@ -70,7 +96,7 @@ def elem_line_to_mat(line):
 
     Returns
     =======
-    mat : pyne.Material
+    mat : pyne.material.Material
         The material represented by this line, weighted by mass fraction.
     """
     name = line[0]
@@ -107,19 +133,24 @@ def expand_elt_to_mat(elt_id):
 
 
 def parse_materials(mats, lines):
-    try:
-        name = lines[0][1]
-    except IndexError:
+    """Take first material from ``lines`` and append to ``mats``.
+
+    Parameters
+    ----------
+    mats : [pyne.material.Material]
+        The growing list of materials.
+    lines: [[str]]
+        The shrinking list of lines.
+    """
+    if len(lines) == 0:
         return mats
-    density = float(lines[1][2])
     material_lines = list(takewhile(lambda l: re.match(r"^\d+. +", l[0]) is None, lines[2:]))
     material_length = len(material_lines) + 2
     mat = sum((elem_line_to_mat(l) for l in material_lines))
-    mat.density = density
-    mat.metadata = {"name": name}
+    mat.density = float(lines[1][2])
+    mat.metadata = {"name": lines[0][1]}
     mat.normalize()
     mats.append(mat)
-    # return parse_materials(mats, islice(lines, material_length))
     return parse_materials(mats, lines[material_length:])
 
 # Writes to file
@@ -131,19 +162,15 @@ def make_materials_compendium(nuc_data, mats, elts):
         f.createGroup('/', 'material_library')
         f.createArray('/material_library', 'nucid', np.array(sorted(nucids)))
 
-    # Writes elements for which we have compositional data to file
-    for zz in elts:
-        if 0 == len(elts[zz]):
-            continue
-        element = Material(elts[zz], mass=1.0,
-                           metadata={'name': nucname.name(zz)})
-        element.write_hdf5(nuc_data, datapath="/material_library/materials",
+    for elt in elts:
+        elt.write_hdf5(nuc_data, datapath="/material_library/materials",
                            nucpath="/material_library/nucid", chunksize=70)
 
     # Writes materials from mats to file, and names them.
     for mat in mats:
         mat.write_hdf5(nuc_data, datapath="/material_library/materials",
                        nucpath="/material_library/nucid", chunksize=70)
+
 
 def make_materials_library(args):
     """Controller function for adding materials library."""
@@ -154,22 +181,14 @@ def make_materials_library(args):
                 print("skipping materials library data table creation; already exists.")
                 return
 
-    # First make the elements
     print("Making the elements...")
     elts = make_elements()
-
-    # Then grab the materials compendium
     print("Grabbing materials compendium...")
     mats = grab_materials_compendium(os.path.join(os.path.split(__file__)[0],
                                                   'materials_compendium.csv'))
-
-    # Make atomic mass table once we have the array
     print("Making materials library...")
     make_materials_compendium(nuc_data, mats, elts)
 
-
 if __name__ == "__main__":
-    elts = make_elements()
-    mats = grab_materials_compendium()
-    import pdb; pdb.set_trace()
+    make_elements()
         
