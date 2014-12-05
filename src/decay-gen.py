@@ -68,7 +68,7 @@ SOURCE = ENV.from_string("""
 namespace pyne {
 namespace decayers {
 
-{{ elemfuncs }}
+{{ funcs }}
 
 std::map<int, double> decay(std::map<int, double> comp, double t) {
   // setup
@@ -86,6 +86,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   map<int, double>::const_iterator it = comp.begin();
   for (; it != comp.end(); ++it) {
     switch (nucname::znum(it->first)) {
+    //switch (it->first) {
       {{ cases|indent(6) }}
       default:
         outcomp.insert(*it);
@@ -120,11 +121,16 @@ void decay_{{ elem|lower }}(double &t, std::map<int, double>::const_iterator &it
 }
 """.strip())
 
+NUC_FUNC = ENV.from_string("""
+void decay_{{ nuc|lower }}(double &t, std::map<int, double>::const_iterator &it, double (&out)[{{ nucs|length }}]) {
+  {{ chains|indent(2) }}
+}
+""".strip())
+
 
 # Some strings that need not be redefined
 BREAK = '  break;'
-CHAIN_STMT = '  out[{0}] = out[{0}] + {1};'
-#CHAIN_STMT = '  out[{0}] = out[{0}];'
+CHAIN_STMT = '  out[{0}] += {1};'
 CHAIN_EXPR = '(it->second) * ({0})'
 EXP_EXPR = 'exp2({a:e}*t)'
 KEXP_EXPR = '{k:e}*' + EXP_EXPR
@@ -135,7 +141,8 @@ def genfiles(nucs):
         autogenwarn=autogenwarn,
         )
     ctx.cases = gencases(nucs)
-    ctx.elemfuncs = genelemfuncs(nucs)
+    ctx.funcs = genelemfuncs(nucs)
+    #ctx.funcs = gennucfuncs(nucs)
     hdr = HEADER.render(ctx.__dict__)
     src = SOURCE.render(ctx.__dict__)
     return hdr, src
@@ -145,7 +152,7 @@ def genchains(chains):
     chain = chains[-1]
     children = decay_children(chain[-1])
     children = {c for c in children if 0.0 == fpyield(chain[-1], c)}
-    children = {c for c in children if 1e-8 < branch_ratio(chain[-1], c)}
+    #children = {c for c in children if 1e-8 < branch_ratio(chain[-1], c)}
     for child in children:
         chains.append(chain + (child,))
         chains = genchains(chains)
@@ -252,6 +259,7 @@ def gencases(nucs):
               '  }', '  break;']
         switches.append('\n'.join(c))
     return '\n'.join(switches)
+
 """
 
 def gencases(nucs):
@@ -264,6 +272,15 @@ def gencases(nucs):
     return '\n'.join(switches)
 
 """
+def gencases(nucs):
+    switches = []
+    #for i in elems(nucs):
+    for i in nucs:
+        c = ['case {0}:'.format(i), 
+             '  decay_{0}(t, it, out);'.format(i), 
+             '  break;']
+        switches.append('\n'.join(c))
+    return '\n'.join(switches)
 """
 
 def genelemfuncs(nucs):
@@ -278,6 +295,15 @@ def genelemfuncs(nucs):
     for i, kases in cases.items():
         ctx = dict(nucs=nucs, elem=nucname.name(i), cases='\n'.join(kases))
         funcs.append(ELEM_FUNC.render(ctx))
+    return "\n\n".join(funcs)
+
+def gennucfuncs(nucs):
+    idx = dict(zip(nucs, range(len(nucs))))
+    funcs = []
+    for nuc in nucs:
+        case = gencase(nuc, idx)[1:-1]
+        ctx = dict(nucs=nucs, nuc=nuc, chains='\n'.join(case))
+        funcs.append(NUC_FUNC.render(ctx))
     return "\n\n".join(funcs)
 
 

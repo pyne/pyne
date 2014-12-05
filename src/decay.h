@@ -11,13 +11,15 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #include <map>
+#include <cmath>
 
 #include "data.h"
+#include "nucname.h"
 
 namespace pyne {
 namespace decayers {
 
-extern const int all_nucs[4];
+extern const int all_nucs[3972];
 
 std::map<int, double> decay(std::map<int, double> comp, double t);
 
