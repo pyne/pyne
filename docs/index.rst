@@ -10,7 +10,6 @@ PyNE - The Nuclear Engineering Toolkit
 
     .. image:: gallery/data_sources_thumb.png
     .. image:: gallery/fng_model_thumb.png
-    .. image:: gallery/discretized_teapot_thumb.png
     .. image:: gallery/ace_thumb.png
 
 .. raw:: html
