@@ -103,7 +103,6 @@ def elem_line_to_mat(line):
     mass_frac = float(line[3])
     try:
         za = int(line[1])
-        # maybe we should check if za % 1000 == 0?
         mat = Material({nucname.id(za): mass_frac})
     except ValueError:
         za = None
@@ -188,7 +187,3 @@ def make_materials_library(args):
                                                   'materials_compendium.csv'))
     print("Making materials library...")
     make_materials_compendium(nuc_data, mats, elts)
-
-if __name__ == "__main__":
-    make_elements()
-        
