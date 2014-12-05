@@ -11,7 +11,7 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #include <map>
-#include <cmath>
+//#include <cmath>
 
 #include "data.h"
 #include "nucname.h"

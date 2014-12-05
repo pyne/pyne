@@ -42,7 +42,7 @@ HEADER = ENV.from_string("""
 {{ autogenwarn }}
 
 #include <map>
-#include <cmath>
+//#include <cmath>
 
 #include "data.h"
 #include "nucname.h"
@@ -107,7 +107,7 @@ const int all_nucs [{{ nucs|length }}] = {
 
 ELEM_FUNC = ENV.from_string("""
 void decay_{{ elem|lower }}(double &t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[{{ nucs|length }}]) {
-  using std::exp2;
+  //using std::exp2;
   switch (it->first) {
     {{ cases|indent(4) }}
     default:
@@ -149,7 +149,8 @@ def genchains(chains):
 
 
 def k_a(chain):
-    a = np.array([-1.0 / half_life(n) for n in chain])
+    hl = np.array([half_life(n) for n in chain])
+    a = -1.0 / hl
     dc = np.array(list(map(decay_const, chain)))
     if np.isnan(dc).any():
         return None, None
@@ -160,8 +161,18 @@ def k_a(chain):
     k = (dc / dc[-1]) * ci
     if np.isinf(k).any():
         return None, None
-    kfrac = np.abs(k) / np.sum(np.abs(k))
-    mask = (kfrac > 1e-8)
+    gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
+    if gamma == 0.0:
+        return None, None
+    k *= gamma
+    # no filter
+    #return k, a
+    # k filter
+    #kfrac = np.abs(k) / np.sum(np.abs(k))
+    #mask = (kfrac > 1e-8)
+    #return k[mask], a[mask]
+    # half-life  filter2
+    mask = (hl / hl.sum()) > 1e-8
     return k[mask], a[mask]
 
 
