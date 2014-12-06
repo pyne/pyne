@@ -210,9 +210,14 @@ def chainexpr(chain):
         k, a = k_a(chain)
         if k is None:
             return None
-        terms = [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a)]
-        if dc_child == 0.0:
-            terms = ['1.0'] + terms[:-1]
+        terms = [] 
+        for k_i, a_i in zip(k, a):
+            if k_i == 1.0 and a_i == 0.0:
+                # a slight optimization 
+                term = '1.0'
+            else:
+                term = kexpexpr(k_i, a_i) 
+            terms.append(term)
         terms = ' + '.join(terms)
     return CHAIN_EXPR.format(terms)
 
