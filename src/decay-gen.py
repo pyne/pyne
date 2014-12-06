@@ -191,6 +191,8 @@ def k_a(chain):
         mask = np.append(mask, True)
     else:
         mask = (hl / hl.sum()) > 1e-8
+    if mask.sum() < 2:
+        mask = np.ones(len(chain), dtype=bool)
     return k[mask], a[mask]
 
 
