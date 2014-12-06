@@ -22,6 +22,31 @@ from pyne.data import branch_ratio, half_life, decay_const, decay_children, \
     decay_data_children, fpyield
 from pyne.material import Material
 
+def _branch_ratio(f):
+    special_cases = {
+        (451040000, 461040000): 0.9955, 
+        (451040000, 441040000): 0.0045, 
+        }
+    def br(x, y):
+        if (x, y) in special_cases:
+            return special_cases[x, y]
+        return f(x, y)
+    return br
+branch_ratio = _branch_ratio(branch_ratio)
+
+
+def _decay_children(f):
+    special_cases = {
+        451040000: set([441040000, 461040000]),
+        }
+    def dc(x):
+        if x in special_cases:
+            return special_cases[x]
+        return f(x)
+    return dc
+decay_children = _decay_children(decay_children)
+            
+
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
 autogenwarn = """
