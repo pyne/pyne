@@ -26,6 +26,8 @@ def _branch_ratio(f):
     special_cases = {
         (451040000, 461040000): 0.9955, 
         (451040000, 441040000): 0.0045, 
+        (521270000, 531270000): 1.0,
+        (471100001, 471100000): 1.0 - 0.9867, 
         }
     def br(x, y):
         if (x, y) in special_cases:
@@ -38,6 +40,7 @@ branch_ratio = _branch_ratio(branch_ratio)
 def _decay_children(f):
     special_cases = {
         451040000: set([441040000, 461040000]),
+        521270000: set([531270000]),
         }
     def dc(x):
         if x in special_cases:
