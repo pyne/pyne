@@ -147,20 +147,32 @@ def genchains(chains):
         chains = genchains(chains)
     return chains
 
-
 def k_a(chain):
+    # gather data
     hl = np.array([half_life(n) for n in chain])
     a = -1.0 / hl
     dc = np.array(list(map(decay_const, chain)))
     if np.isnan(dc).any():
-        return None, None
+        # NaNs are bad, mmmkay.  Nones mean we should skip
+        return None, None  
+    ends_stable = (dc[-1] == 0.0)  # check if last nuclide is a stable species
+    # compute cij -> ci in prep for k
     cij = dc[:, np.newaxis] / (dc[:, np.newaxis] - dc)
+    if ends_stable:
+        cij[-1] = -1.0 / dc  # adjustment for stable end nuclide
     mask = np.ones(len(chain), dtype=bool)
-    cij[mask, mask] = 1.0
+    cij[mask, mask] = 1.0  # identity is ignored, set to unity
     ci = cij.prod(axis=0)
-    k = (dc / dc[-1]) * ci
+    # compute k
+    if ends_stable:
+        k = dc * ci
+        k[-1] = 1.0
+    else:
+        k = (dc / dc[-1]) * ci
     if np.isinf(k).any():
-        return None, None
+        # if this happens then something wen very wrong, skip
+        return None, None 
+    # compute and apply branch ratios
     gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0:
         return None, None
@@ -171,8 +183,13 @@ def k_a(chain):
     #kfrac = np.abs(k) / np.sum(np.abs(k))
     #mask = (kfrac > 1e-8)
     #return k[mask], a[mask]
-    # half-life  filter2
-    mask = (hl / hl.sum()) > 1e-8
+    # half-life  filter, makes compiling faster by pre-ignoring negligible species 
+    # in this chain. They'll still be picked up in their own chains.
+    if ends_stable:
+        mask = (hl[:-1] / hl[:-1].sum()) > 1e-8
+        mask = np.append(mask, True)
+    else:
+        mask = (hl / hl.sum()) > 1e-8
     return k[mask], a[mask]
 
 
@@ -189,20 +206,13 @@ def chainexpr(chain):
     if len(chain) == 1:
         a = -1.0 / half_life(child)
         terms = EXP_EXPR.format(a=a)
-    elif dc_child == 0.0:
-        k, a = k_a(chain[:-1])
-        if k is None:
-            return None
-        terms = ['1.0']
-        terms += [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a) if a_i > -1e1]
-        terms = ' - '.join(terms)
     else:
         k, a = k_a(chain)
         if k is None:
             return None
-        terms = [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a) if a_i > -1e1]
-        if len(terms) == 0:
-            terms = [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a)]
+        terms = [kexpexpr(k_i, a_i) for k_i, a_i in zip(k, a)]
+        if dc_child == 0.0:
+            terms = ['1.0'] + terms[:-1]
         terms = ' + '.join(terms)
     return CHAIN_EXPR.format(terms)
 

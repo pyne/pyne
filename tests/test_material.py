@@ -1606,8 +1606,8 @@ def test_decay():
     obs = mat.decay(data.half_life('H3'))
     obs = obs.to_atom_frac()
     assert_equal(2, len(obs))
-    assert_equal(0.5, obs[nucname.id('H3')])
-    assert_equal(0.5, obs[nucname.id('He3')])
+    assert_almost_equal(0.5, obs[nucname.id('H3')])
+    assert_almost_equal(0.5, obs[nucname.id('He3')])
 
 
 # Run as script
