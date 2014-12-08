@@ -14,16 +14,12 @@ from warnings import warn
 from pyne.utils import QAWarning
 
 import tables as tb
-import numpy as np
 
 from pyne import nucname
 from pyne.data import natural_abund, natural_abund_map
 from pyne.material import Material
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
-
-nucids = set()
-natural_abund("H1")  # initialize natural_abund_map
 
 
 # Make a dictionary that represents elements as dicts of their isotopes
@@ -35,6 +31,7 @@ def make_elements():
     elts : [pyne.material.Material]
         Natural elements as materials.
     """
+    natural_abund("H1")  # initialize natural_abund_map
     sorted_abunds = sorted(list(natural_abund_map.items()))
     grouped_abunds = groupby(sorted_abunds, lambda x: nucname.zzzaaa(x[0])//1000)
     elts = (Material(dict(abunds), metadata={"name": nucname.name(zz)})
@@ -56,6 +53,7 @@ def grab_materials_compendium(location='materials_compendium.csv'):
     mats : [pyne.material.Material]
         The materials in the compendium.
     """
+    natural_abund("H1")  # initialize natural_abund_map
     with open(location, 'r', newline='') as f:
         lines = csv.reader(f, delimiter=',', quotechar='"')
         lines = list(filter(is_comp_matname_or_density, lines))
@@ -152,6 +150,7 @@ def parse_materials(mats, lines):
     mats.append(mat)
     return parse_materials(mats, lines[material_length:])
 
+
 # Writes to file
 def make_materials_compendium(nuc_data, mats, elts):
     """Adds materials compendium to nuc_data.h5."""
@@ -159,11 +158,11 @@ def make_materials_compendium(nuc_data, mats, elts):
     filters = tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)
     with tb.openFile(nuc_data, 'r+', filters=filters) as f:
         f.createGroup('/', 'material_library')
-        f.createArray('/material_library', 'nucid', np.array(sorted(nucids)))
+        f.createArray('/material_library', 'nucid', natural_abund_map.keys())
 
     for elt in elts:
         elt.write_hdf5(nuc_data, datapath="/material_library/materials",
-                           nucpath="/material_library/nucid", chunksize=70)
+                       nucpath="/material_library/nucid", chunksize=70)
 
     # Writes materials from mats to file, and names them.
     for mat in mats:
