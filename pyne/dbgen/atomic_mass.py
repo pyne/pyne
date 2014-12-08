@@ -30,7 +30,7 @@ def copy_atomic_mass_adjustment(build_dir=""):
         return 
 
     mass = pkgutil.get_data('pyne.dbgen', MASS_FILE)
-    with open(os.path.join(build_dir, MASS_FILE), 'w') as f:
+    with open(os.path.join(build_dir, MASS_FILE), 'wb') as f:
         f.write(mass)
 
 
