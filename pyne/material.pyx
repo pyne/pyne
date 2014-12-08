@@ -592,6 +592,11 @@ cdef class _Material:
     def activity(self):
         """This provides the activity of the comp of the material.
 
+        Returns
+		-------
+		nucvec : dict
+		    For a Material mat
+
         """
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](
