@@ -572,7 +572,7 @@ cdef class _Material:
 
 
     def mult_by_mass(self):
-        """This multiplies multiplies comp by mass and returns the resultant
+        """This multiplies comp by mass and returns the resultant
         nuctopic vector.
 
         Returns
@@ -586,6 +586,16 @@ cdef class _Material:
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](
                 self.mat_pointer.mult_by_mass())
+        return nucvec_proxy
+
+
+    def activity(self):
+        """This provides the activity of the comp of the material.
+
+        """
+        cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
+        nucvec_proxy.map_ptr = new cpp_map[int, double](
+                self.mat_pointer.activity())
         return nucvec_proxy
 
 
