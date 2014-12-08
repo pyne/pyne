@@ -15,12 +15,10 @@ from pyne.utils import QAWarning, toggle_warnings
 warnings.simplefilter('ignore', QAWarning)
 toggle_warnings()
 from pyne import nuc_data
-from pyne import data
-from pyne import rxname
 from pyne import nucname
 from pyne.data import branch_ratio, half_life, decay_const, decay_children, \
     decay_data_children, fpyield
-from pyne.material import Material
+
 
 def _branch_ratio(f):
     special_cases = {
@@ -42,6 +40,7 @@ def _branch_ratio(f):
             return special_cases[x, y]
         return f(x, y)
     return br
+
 branch_ratio = _branch_ratio(branch_ratio)
 
 
@@ -55,6 +54,7 @@ def _decay_children(f):
             return special_cases[x]
         return f(x)
     return dc
+
 decay_children = _decay_children(decay_children)
             
 
@@ -161,6 +161,7 @@ CHAIN_EXPR = '(it->second) * ({0})'
 EXP_EXPR = 'exp2({a:e}*t)'
 KEXP_EXPR = '{k:e}*' + EXP_EXPR
 
+
 def genfiles(nucs):
     ctx = Namespace(
         nucs=nucs,
@@ -177,11 +178,11 @@ def genchains(chains):
     chain = chains[-1]
     children = decay_children(chain[-1])
     children = {c for c in children if 0.0 == fpyield(chain[-1], c)}
-    #children = {c for c in children if 1e-8 < branch_ratio(chain[-1], c)}
     for child in children:
         chains.append(chain + (child,))
         chains = genchains(chains)
     return chains
+
 
 def k_a(chain):
     # gather data
@@ -241,7 +242,6 @@ def kexpexpr(k, a):
 
 def chainexpr(chain):
     child = chain[-1]
-    dc_child = decay_const(child)
     if len(chain) == 1:
         a = -1.0 / half_life(child)
         terms = EXP_EXPR.format(a=a)

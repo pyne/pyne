@@ -1541,7 +1541,6 @@ std::vector<std::pair<double, double> > unnormed) {
 
 
 pyne::Material pyne::Material::decay(double t) {
-  // Overloads x + y
   Material rtn;
   comp_map out = pyne::decayers::decay(to_atom_frac(), t);
   rtn.from_atom_frac(out);
