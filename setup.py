@@ -30,6 +30,7 @@ functions.
 """
 from __future__ import print_function
 
+import io
 import os
 import sys
 import imp
@@ -145,11 +146,16 @@ DECAY_URL = 'http://data.pyne.io/decay.tar.gz'
 
 
 def download_decay():
+    print('Downloading ' + DECAY_URL)
     try:
         durl = urlopen(DECAY_URL)
+        d = durl.read()
+        durl.close()
     except IOError:
+        print('...failed!')
         return False
-    tar = tarfile.open(fileobj=durl, mode='r:gz')
+    f = io.BytesIO(d)
+    tar = tarfile.open(fileobj=f, mode='r:gz')
     tar.extractall('src')
     tar.close()
     durl.close()
@@ -172,7 +178,7 @@ def generate_decay():
 def ensure_decay():
     mb = 1024**2
     if os.path.isfile(DECAY_H) and os.path.isfile(DECAY_CPP) and \
-       os.stat(DECAY_H).st_size > mb and os.stat(DECAY_CPP).st_size > mb:
+       os.stat(DECAY_CPP).st_size > mb:
         return
     downloaded = download_decay()
     if downloaded:
@@ -276,7 +282,7 @@ def parse_args():
     make_args = parse_make(ns)
     parse_others(ns)
 
-    return cmake_args, make_args
+    return cmake_args, make_args, ns.bootstrap
 
 
 def setup():
@@ -378,7 +384,7 @@ def final_message(success=True):
     print('\n' + '-'*20 + msg + '-'*20)
 
 
-def main_safe(make_args, make_args):
+def main_safe(cmake_args, make_args):
     success = False
     try:
         main_body(cmake_args, make_args)
@@ -389,10 +395,10 @@ def main_safe(make_args, make_args):
 
 def main():
     cmake_args, make_args, bootstrap = parse_args()
-    main_safe(make_args, make_args)
+    main_safe(cmake_args, make_args)
     if bootstrap:
         ensure_nuc_data()
-        main_safe(make_args, make_args)
+        main_safe(cmake_args, make_args)
     # trick to get install path
     abspath = os.path.abspath
     joinpath = os.path.join
