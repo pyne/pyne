@@ -160,6 +160,9 @@ CHAIN_STMT = '  out[{0}] += {1};'
 CHAIN_EXPR = '(it->second) * ({0})'
 EXP_EXPR = 'exp2({a:e}*t)'
 KEXP_EXPR = '{k:e}*' + EXP_EXPR
+B_STMT = 'double b{b} = {exp};'
+B_EXPR = 'b{b}'
+KB_EXPR = '{k:e}*' + B_EXPR
 
 
 def genfiles(nucs):
@@ -191,7 +194,7 @@ def k_a(chain):
     dc = np.array(list(map(decay_const, chain)))
     if np.isnan(dc).any():
         # NaNs are bad, mmmkay.  Nones mean we should skip
-        return None, None  
+        return None, None
     #ends_stable = (dc[-1] == 0.0)  # check if last nuclide is a stable species
     ends_stable = (dc[-1] < 1e-16)  # check if last nuclide is a stable species
     # compute cij -> ci in prep for k
@@ -209,7 +212,7 @@ def k_a(chain):
         k = (dc / dc[-1]) * ci
     if np.isinf(k).any():
         # if this happens then something wen very wrong, skip
-        return None, None 
+        return None, None
     # compute and apply branch ratios
     gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0:
@@ -233,6 +236,7 @@ def k_a(chain):
     return k[mask], a[mask]
 
 
+"""
 def kexpexpr(k, a):
     if k == 1.0:
         return EXP_EXPR.format(a=a)
@@ -279,6 +283,67 @@ def gencase(nuc, idx):
             case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
     case.append(BREAK)
     return case
+"""
+
+def kbexpr(k, b):
+    if k == 1.0:
+        return B_EXPR.format(b=b)
+    else:
+        return KB_EXPR.format(k=k, b=b)
+
+def ensure_cse(a_i, b, cse):
+    bkey = EXP_EXPR.format(a=a_i)
+    if bkey not in cse:
+        b += 1
+        cse[bkey] = b
+    return b
+
+def chainexpr(chain, cse, b):
+    child = chain[-1]
+    if len(chain) == 1:
+        a_i = -1.0 / half_life(child)
+        b = ensure_cse(a_i, b, cse)
+        terms = B_EXPR.format(b=b)
+    else:
+        k, a = k_a(chain)
+        if k is None:
+            return None, b
+        terms = [] 
+        for k_i, a_i in zip(k, a):
+            if k_i == 1.0 and a_i == 0.0:
+                term = '1.0'  # a slight optimization 
+            elif a_i == 0.0:
+                term = '{0:e}'.format(k_i)  # another slight optimization 
+            else:
+                b = ensure_cse(a_i, b, cse)
+                term = kbexpr(k_i, b) 
+            terms.append(term)
+        terms = ' + '.join(terms)
+    return CHAIN_EXPR.format(terms), b
+
+
+def gencase(nuc, idx, b):
+    case = ['case {0}: {{'.format(nuc)]
+    dc = decay_const(nuc)
+    if dc == 0.0:
+        # stable nuclide
+        case.append(CHAIN_STMT.format(idx[nuc], 'it->second'))
+    else:
+        chains = genchains([(nuc,)])
+        print(len(chains), len(set(chains)), nuc)
+        cse = {}  # common sub-expression exponents to elimnate
+        for c in chains:
+            if c[-1] not in idx:
+                continue
+            cexpr, b = chainexpr(c, cse, b)
+            if cexpr is None:
+                continue
+            case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
+        bstmts = ['  ' + B_STMT.format(exp=exp, b=bval) for exp, bval in \
+                  sorted(cse.items(), key=lambda x: x[1])]
+        case = case[:1] + bstmts + case[1:] 
+    case.append(BREAK + '}')
+    return case, b
 
 
 def elems(nucs):
@@ -297,11 +362,13 @@ def gencases(nucs):
 
 def genelemfuncs(nucs):
     idx = dict(zip(nucs, range(len(nucs))))
-    cases = {i: [] for i in elems(nucs)}
+    cases = {i: [-1, []] for i in elems(nucs)}
     for nuc in nucs:
-        cases[nucname.znum(nuc)] += gencase(nuc, idx)
+        z = nucname.znum(nuc)
+        case, cases[z][0] = gencase(nuc, idx, cases[z][0])
+        cases[z][1] += case
     funcs = []
-    for i, kases in cases.items():
+    for i, (b, kases) in cases.items():
         ctx = dict(nucs=nucs, elem=nucname.name(i), cases='\n'.join(kases))
         funcs.append(ELEM_FUNC.render(ctx))
     return "\n\n".join(funcs)
