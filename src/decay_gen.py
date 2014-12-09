@@ -1,1 +1,0 @@
-decay-gen.py

@@ -357,6 +357,15 @@ def upload(ns):
     obj = cf.store_object('pyne-data', 'decay.tar.gz', fdata)
 
 
+def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False):
+    nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
+    h, s = genfiles(nucs, short=short, sf=sf)
+    with io.open(hdr, 'w') as f:
+        f.write(h)
+    with io.open(src, 'w') as f:
+        f.write(s)
+
+
 def main():
     parser = ArgumentParser('decay-gen')
     parser.add_argument('--hdr', default='decay.h', help='The header file name.')
@@ -377,13 +386,8 @@ def main():
     parser.add_argument('--no-build', dest='build', default=True, action='store_false',
                        help='Does not build the source code.')
     ns = parser.parse_args()
-    nucs = load_default_nucs() if ns.nucs is None else list(map(nucname.id, ns.nucs))
     if ns.build:
-        hdr, src = genfiles(nucs, short=ns.short, sf=ns.sf)
-        with io.open(ns.hdr, 'w') as f:
-            f.write(hdr)
-        with io.open(ns.src, 'w') as f:
-            f.write(src)
+        build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf)
     if ns.upload:
         print("uploading to rackspace...")
         upload(ns)

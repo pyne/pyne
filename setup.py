@@ -33,6 +33,7 @@ from __future__ import print_function
 import os
 import sys
 import imp
+import shutil
 import tarfile
 import argparse
 import platform
@@ -40,6 +41,11 @@ import warnings
 import subprocess
 from glob import glob
 from distutils import core, dir_util
+from contextlib import contextmanager
+if sys.version_info[0] < 3:
+    from urllib import urlopen
+else:
+    from urllib.request import urlopen
 
 import numpy as np
 
@@ -86,6 +92,14 @@ CMAKE_BUILD_TYPES = {
     }
 
 
+@contextmanager
+def indir(path):
+    orig = os.getcwd()
+    os.chdir(path)
+    yield
+    os.chdir(orig)
+
+
 def assert_np_version():
     low = (1, 8, 0)
     v = np.version.short_version
@@ -122,6 +136,65 @@ def assert_dep_versions():
     assert_ubuntu_version()
     assert_ipython_version()
 
+
+DECAY_H = os.path.join('src', 'decay.h')
+DECAY_CPP = os.path.join('src', 'decay.cpp')
+DECAY_H_REP = os.path.join('src', '_decay.h')
+DECAY_CPP_REP = os.path.join('src', '_decay.cpp')
+DECAY_URL = 'http://data.pyne.io/decay.tar.gz'
+
+
+def download_decay():
+    try:
+        durl = urlopen(DECAY_URL)
+    except IOError:
+        return False
+    tar = tarfile.open(fileobj=durl, mode='r:gz')
+    tar.extractall('src')
+    tar.close()
+    durl.close()
+    return True
+
+
+def generate_decay():
+    with indir('src'):
+        try:
+            import decaygen
+        except ImportError:
+            return False
+        try:
+            decaygen.build()
+        except Exception:
+            return False
+    return True
+
+
+def ensure_decay():
+    mb = 1024**2
+    if os.path.isfile(DECAY_H) and os.path.isfile(DECAY_CPP) and \
+       os.stat(DECAY_H).st_size > mb and os.stat(DECAY_CPP).st_size > mb:
+        return
+    downloaded = download_decay()
+    if downloaded:
+        return
+    generated = generate_decay()
+    if generated:
+        return
+    print('!'*42)
+    print('Decay files could not be downloaded or generated, using surrogates instead.')
+    print('Please consider using the --bootstrap command line argument.')
+    print('!'*42)
+    shutil.copy(DECAY_H_REP, DECAY_H)
+    shutil.copy(DECAY_CPP_REP, DECAY_CPP)
+
+
+def ensure_nuc_data():
+    import tempfile
+    from pyne.dbgen import nuc_data_make
+    from pyne.dbgen.api import build_dir
+    bdir = os.path.join(os.getcwd(), 'build', build_dir)
+    with tempfile.TemporaryDirectory() as tdir, indir(tdir):
+        nuc_data_make(args=['-b', bdir])
 
 def parse_setup(ns):
     a = [sys.argv[0], ns.cmd]
@@ -193,6 +266,9 @@ def parse_args():
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
     other.add_argument('--moab', help='Path to MOAB root directory.')
     other.add_argument('--prefix', help='Prefix for install location.')
+    other.add_argument('--bootstrap', default=False, action='store_true', 
+                       help='Bootstraps the PyNE installation, including '
+                            'nuc_data_make and possibly decaygen.')
 
     ns = parser.parse_args(argv)
     sys.argv = parse_setup(ns)
@@ -279,6 +355,7 @@ def cmake_cli(cmake_args):
 
 def main_body(cmake_args, make_args):
     assert_dep_versions()
+    ensure_decay()
     if not os.path.exists('build'):
         os.mkdir('build')
     cmake_cmd = cmake_cli(cmake_args)
@@ -301,14 +378,21 @@ def final_message(success=True):
     print('\n' + '-'*20 + msg + '-'*20)
 
 
-def main():
+def main_safe(make_args, make_args):
     success = False
-    cmake_args, make_args = parse_args()
     try:
         main_body(cmake_args, make_args)
         success = True
     finally:
         final_message(success)
+
+
+def main():
+    cmake_args, make_args, bootstrap = parse_args()
+    main_safe(make_args, make_args)
+    if bootstrap:
+        ensure_nuc_data()
+        main_safe(make_args, make_args)
     # trick to get install path
     abspath = os.path.abspath
     joinpath = os.path.join
@@ -329,7 +413,6 @@ def main():
            'export PATH="{binpath}:${{PATH}}"\n'
            'export LD_LIBRARY_PATH="{libpath}:${{LD_LIBRARY_PATH}}"'
            ).format(binpath=binpath, libpath=libpath)
-
     print(msg, file=sys.stderr)
 
 
