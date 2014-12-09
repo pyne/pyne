@@ -33,6 +33,7 @@ from __future__ import print_function
 import os
 import sys
 import imp
+import tarfile
 import argparse
 import platform
 import warnings
