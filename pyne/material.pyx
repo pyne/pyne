@@ -593,9 +593,9 @@ cdef class _Material:
         """This provides the activity of the comp of the material.
 
         Returns
-		-------
-		nucvec : dict
-		    For a Material mat
+	-------
+	nucvec : dict
+	    For a Material mat
 
         """
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
