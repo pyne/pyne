@@ -166,29 +166,31 @@ B_EXPR = 'b{b}'
 KB_EXPR = '{k:e}*' + B_EXPR
 
 
-def genfiles(nucs):
+def genfiles(nucs, short=1e-8, sf=False):
     ctx = Namespace(
         nucs=nucs,
         autogenwarn=autogenwarn,
         )
     ctx.cases = gencases(nucs)
-    ctx.funcs = genelemfuncs(nucs)
+    ctx.funcs = genelemfuncs(nucs, short=short, sf=sf)
     hdr = HEADER.render(ctx.__dict__)
     src = SOURCE.render(ctx.__dict__)
     return hdr, src
 
 
-def genchains(chains):
+def genchains(chains, sf=False):
     chain = chains[-1]
     children = decay_children(chain[-1])
-    children = {c for c in children if 0.0 == fpyield(chain[-1], c)}
+    # filters spontaneous fission
+    if not sf:
+        children = {c for c in children if 0.0 == fpyield(chain[-1], c)}
     for child in children:
         chains.append(chain + (child,))
-        chains = genchains(chains)
+        chains = genchains(chains, sf=sf)
     return chains
 
 
-def k_a(chain):
+def k_a(chain, short=1e-8):
     # gather data
     hl = np.array([half_life(n) for n in chain])
     a = -1.0 / hl
@@ -228,10 +230,10 @@ def k_a(chain):
     # half-life  filter, makes compiling faster by pre-ignoring negligible species 
     # in this chain. They'll still be picked up in their own chains.
     if ends_stable:
-        mask = (hl[:-1] / hl[:-1].sum()) > 1e-8
+        mask = (hl[:-1] / hl[:-1].sum()) > short
         mask = np.append(mask, True)
     else:
-        mask = (hl / hl.sum()) > 1e-8
+        mask = (hl / hl.sum()) > short
     if mask.sum() < 2:
         mask = np.ones(len(chain), dtype=bool)
     return k[mask], a[mask]
@@ -251,14 +253,14 @@ def ensure_cse(a_i, b, cse):
         cse[bkey] = b
     return b
 
-def chainexpr(chain, cse, b):
+def chainexpr(chain, cse, b, short=1e-8):
     child = chain[-1]
     if len(chain) == 1:
         a_i = -1.0 / half_life(child)
         b = ensure_cse(a_i, b, cse)
         terms = B_EXPR.format(b=b)
     else:
-        k, a = k_a(chain)
+        k, a = k_a(chain, short=short)
         if k is None:
             return None, b
         terms = [] 
@@ -275,20 +277,20 @@ def chainexpr(chain, cse, b):
     return CHAIN_EXPR.format(terms), b
 
 
-def gencase(nuc, idx, b):
+def gencase(nuc, idx, b, short=1e-8, sf=False):
     case = ['}} case {0}: {{'.format(nuc)]
     dc = decay_const(nuc)
     if dc == 0.0:
         # stable nuclide
         case.append(CHAIN_STMT.format(idx[nuc], 'it->second'))
     else:
-        chains = genchains([(nuc,)])
+        chains = genchains([(nuc,)], sf=sf)
         print(len(chains), len(set(chains)), nuc)
         cse = {}  # common sub-expression exponents to elimnate
         for c in chains:
             if c[-1] not in idx:
                 continue
-            cexpr, b = chainexpr(c, cse, b)
+            cexpr, b = chainexpr(c, cse, b, short=short)
             if cexpr is None:
                 continue
             case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
@@ -313,12 +315,12 @@ def gencases(nucs):
     return '\n'.join(switches)
 
 
-def genelemfuncs(nucs):
+def genelemfuncs(nucs, short=1e-8, sf=False):
     idx = dict(zip(nucs, range(len(nucs))))
     cases = {i: [-1, []] for i in elems(nucs)}
     for nuc in nucs:
         z = nucname.znum(nuc)
-        case, cases[z][0] = gencase(nuc, idx, cases[z][0])
+        case, cases[z][0] = gencase(nuc, idx, cases[z][0], short=short, sf=sf)
         cases[z][1] += case
     funcs = []
     for i, (b, kases) in cases.items():
@@ -345,9 +347,15 @@ def main():
     parser.add_argument('--src', default='decay.cpp', help='The source file name.')
     parser.add_argument('--nucs', nargs='+', default=None, 
                         help='Nuclides to generate for.')
+    parser.add_argument('--filter-short', default=1e-8, type=float, dest='short',
+                        help='Fraction of sum of all half-lives below which a '
+                             'nuclide is filtered from a decay chain, default 1e-8.')
+    parser.add_argument('--spontaneous-fission', default=False, action='store_true', 
+                        dest='sf', help='Includes spontaneous fission decay chains, '
+                                        'default False.')
     ns = parser.parse_args()
     nucs = load_default_nucs() if ns.nucs is None else list(map(nucname.id, ns.nucs))
-    hdr, src = genfiles(nucs)
+    hdr, src = genfiles(nucs, ns.short, ns.sf)
     with io.open(ns.hdr, 'w') as f:
         f.write(hdr)
     with io.open(ns.src, 'w') as f:
