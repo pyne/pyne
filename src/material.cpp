@@ -1091,11 +1091,20 @@ pyne::comp_map pyne::Material::mult_by_mass() {
 
 
 
-pyne::comp_map pyne::Material::activity() {
+pyne::comp_map pyne::Material::decay_heat() {
   using pyne::decay_const;
   using pyne::atomic_mass;
   using pyne::q_val;
-
+  pyne::comp_map dh;
+  double masspermole = mass * pyne::N_A;
+  // converts MeV/s to MW
+  double qconv = 1.602e-19;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+    dh[i->first] = qconv * masspermole * (i->second) * \
+                   decay_const(i->first) * q_val(i->first) / \
+                   atomic_mass(i->first);
+  }
+  return dh;
 }
 
 
