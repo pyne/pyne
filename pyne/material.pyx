@@ -589,6 +589,21 @@ cdef class _Material:
         return nucvec_proxy
 
 
+    def decay_heat(self):
+        """This provides the decay heat using the comp of the the Material.
+
+        Returns
+        -------
+        nucvec : dict
+            For a Material mat
+
+        """
+        cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
+        nucvec_proxy.map_ptr = new cpp_map[int, double](
+                self.mat_pointer.decay_heat())
+        return nucvec_proxy
+
+
     def molecular_mass(self, atoms_per_molecule=-1.0):
         """molecular_mass(atoms_per_molecule=-1.0)
         This method returns the molecular mass of the comp of this
