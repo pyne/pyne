@@ -9,7 +9,6 @@
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
-#include "nucname.h"
 #endif
 
 // h5wrap template
@@ -1088,6 +1087,19 @@ pyne::comp_map pyne::Material::mult_by_mass() {
   };
   return cm;
 };
+
+
+
+pyne::comp_map pyne::Material::activity() {
+  using pyne::decay_const;
+  using pyne::atomic_mass;
+  pyne::comp_map act;
+  double masspermole = mass * pyne::N_A;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+    act[i->first] = masspermole * (i->second) * decay_const(i->first) / atomic_mass(i->first);
+  }
+  return act;
+}	
 
 
 
