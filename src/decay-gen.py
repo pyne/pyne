@@ -198,7 +198,6 @@ def k_a(chain, short=1e-8):
     if np.isnan(dc).any():
         # NaNs are bad, mmmkay.  Nones mean we should skip
         return None, None
-    #ends_stable = (dc[-1] == 0.0)  # check if last nuclide is a stable species
     ends_stable = (dc[-1] < 1e-16)  # check if last nuclide is a stable species
     # compute cij -> ci in prep for k
     cij = dc[:, np.newaxis] / (dc[:, np.newaxis] - dc)
@@ -229,6 +228,8 @@ def k_a(chain, short=1e-8):
     #return k[mask], a[mask]
     # half-life  filter, makes compiling faster by pre-ignoring negligible species 
     # in this chain. They'll still be picked up in their own chains.
+    #if short != 1e-8:
+    #    import pdb; pdb.set_trace()
     if ends_stable:
         mask = (hl[:-1] / hl[:-1].sum()) > short
         mask = np.append(mask, True)
@@ -253,12 +254,16 @@ def ensure_cse(a_i, b, cse):
         cse[bkey] = b
     return b
 
+def b_from_a(cse, a_i):
+    bkey = EXP_EXPR.format(a=a_i)
+    return cse[bkey]
+
 def chainexpr(chain, cse, b, short=1e-8):
     child = chain[-1]
     if len(chain) == 1:
         a_i = -1.0 / half_life(child)
         b = ensure_cse(a_i, b, cse)
-        terms = B_EXPR.format(b=b)
+        terms = B_EXPR.format(b=b_from_a(cse, a_i))
     else:
         k, a = k_a(chain, short=short)
         if k is None:
@@ -271,7 +276,7 @@ def chainexpr(chain, cse, b, short=1e-8):
                 term = '{0:e}'.format(k_i)  # another slight optimization 
             else:
                 b = ensure_cse(a_i, b, cse)
-                term = kbexpr(k_i, b) 
+                term = kbexpr(k_i, b_from_a(cse, a_i))
             terms.append(term)
         terms = ' + '.join(terms)
     return CHAIN_EXPR.format(terms), b
@@ -355,7 +360,7 @@ def main():
                                         'default False.')
     ns = parser.parse_args()
     nucs = load_default_nucs() if ns.nucs is None else list(map(nucname.id, ns.nucs))
-    hdr, src = genfiles(nucs, ns.short, ns.sf)
+    hdr, src = genfiles(nucs, short=ns.short, sf=ns.sf)
     with io.open(ns.hdr, 'w') as f:
         f.write(hdr)
     with io.open(ns.src, 'w') as f:
