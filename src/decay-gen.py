@@ -338,6 +338,25 @@ def load_default_nucs():
     return nucs
 
 
+
+
+def upload(ns):
+    import tarfile
+    import pyrax
+    pyrax.set_setting('identity_type', 'rackspace')
+    pyrax.set_setting('region', 'ORD')
+    pyrax.set_credential_file(ns.cred)
+    cf = pyrax.cloudfiles
+    f = io.BytesIO()
+    tar = tarfile.open(fileobj=f, mode='w:gz', name='decay.tar.gz')
+    tar.add(ns.hdr)
+    tar.add(ns.src)
+    tar.close()
+    f.seek(0)
+    fdata = f.read()
+    obj = cf.store_object('pyne-data', 'decay.tar.gz', fdata)
+
+
 def main():
     parser = ArgumentParser('decay-gen')
     parser.add_argument('--hdr', default='decay.h', help='The header file name.')
@@ -350,13 +369,24 @@ def main():
     parser.add_argument('--spontaneous-fission', default=False, action='store_true', 
                         dest='sf', help='Includes spontaneous fission decay chains, '
                                         'default False.')
+    parser.add_argument('--upload', action='store_true', default=False, 
+                        help='Uploads decay.tar.gz file to http://data.pyne.io, '
+                             'must have local credentials file.')
+    parser.add_argument('--cred', default='../rs.cred', 
+                        help='Path to credentials file.')
+    parser.add_argument('--no-build', dest='build', default=True, action='store_false',
+                       help='Does not build the source code.')
     ns = parser.parse_args()
     nucs = load_default_nucs() if ns.nucs is None else list(map(nucname.id, ns.nucs))
-    hdr, src = genfiles(nucs, short=ns.short, sf=ns.sf)
-    with io.open(ns.hdr, 'w') as f:
-        f.write(hdr)
-    with io.open(ns.src, 'w') as f:
-        f.write(src)
+    if ns.build:
+        hdr, src = genfiles(nucs, short=ns.short, sf=ns.sf)
+        with io.open(ns.hdr, 'w') as f:
+            f.write(hdr)
+        with io.open(ns.src, 'w') as f:
+            f.write(src)
+    if ns.upload:
+        print("uploading to rackspace...")
+        upload(ns)
 
 
 if __name__ == '__main__':
