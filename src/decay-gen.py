@@ -220,16 +220,8 @@ def k_a(chain, short=1e-8):
     if gamma == 0.0:
         return None, None
     k *= gamma
-    # no filter
-    #return k, a
-    # k filter
-    #kfrac = np.abs(k) / np.sum(np.abs(k))
-    #mask = (kfrac > 1e-8)
-    #return k[mask], a[mask]
     # half-life  filter, makes compiling faster by pre-ignoring negligible species 
     # in this chain. They'll still be picked up in their own chains.
-    #if short != 1e-8:
-    #    import pdb; pdb.set_trace()
     if ends_stable:
         mask = (hl[:-1] / hl[:-1].sum()) > short
         mask = np.append(mask, True)
