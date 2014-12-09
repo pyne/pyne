@@ -146,9 +146,10 @@ void decay_{{ elem|lower }}(double &t, std::map<int, double>::const_iterator &it
   //using std::exp2;
   switch (it->first) {
     {{ cases|indent(4) }}
-    default:
+    } default: {
       outcomp.insert(*it);
       break;
+    }
   }
 }
 """.strip())
@@ -236,60 +237,12 @@ def k_a(chain):
     return k[mask], a[mask]
 
 
-"""
-def kexpexpr(k, a):
-    if k == 1.0:
-        return EXP_EXPR.format(a=a)
-    else:
-        return KEXP_EXPR.format(k=k, a=a)
-
-
-def chainexpr(chain):
-    child = chain[-1]
-    if len(chain) == 1:
-        a = -1.0 / half_life(child)
-        terms = EXP_EXPR.format(a=a)
-    else:
-        k, a = k_a(chain)
-        if k is None:
-            return None
-        terms = [] 
-        for k_i, a_i in zip(k, a):
-            if k_i == 1.0 and a_i == 0.0:
-                # a slight optimization 
-                term = '1.0'
-            else:
-                term = kexpexpr(k_i, a_i) 
-            terms.append(term)
-        terms = ' + '.join(terms)
-    return CHAIN_EXPR.format(terms)
-
-
-def gencase(nuc, idx):
-    case = ['case {0}:'.format(nuc)]
-    dc = decay_const(nuc)
-    if dc == 0.0:
-        # stable nuclide
-        case.append(CHAIN_STMT.format(idx[nuc], 'it->second'))
-    else:
-        chains = genchains([(nuc,)])
-        print(len(chains), len(set(chains)), nuc)
-        for c in chains:
-            if c[-1] not in idx:
-                continue
-            cexpr = chainexpr(c)
-            if cexpr is None:
-                continue
-            case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
-    case.append(BREAK)
-    return case
-"""
-
 def kbexpr(k, b):
     if k == 1.0:
         return B_EXPR.format(b=b)
     else:
         return KB_EXPR.format(k=k, b=b)
+
 
 def ensure_cse(a_i, b, cse):
     bkey = EXP_EXPR.format(a=a_i)
@@ -323,7 +276,7 @@ def chainexpr(chain, cse, b):
 
 
 def gencase(nuc, idx, b):
-    case = ['case {0}: {{'.format(nuc)]
+    case = ['}} case {0}: {{'.format(nuc)]
     dc = decay_const(nuc)
     if dc == 0.0:
         # stable nuclide
@@ -342,7 +295,7 @@ def gencase(nuc, idx, b):
         bstmts = ['  ' + B_STMT.format(exp=exp, b=bval) for exp, bval in \
                   sorted(cse.items(), key=lambda x: x[1])]
         case = case[:1] + bstmts + case[1:] 
-    case.append(BREAK + '}')
+    case.append(BREAK)
     return case, b
 
 
@@ -369,6 +322,7 @@ def genelemfuncs(nucs):
         cases[z][1] += case
     funcs = []
     for i, (b, kases) in cases.items():
+        kases[0] = kases[0][2:]
         ctx = dict(nucs=nucs, elem=nucname.name(i), cases='\n'.join(kases))
         funcs.append(ELEM_FUNC.render(ctx))
     return "\n\n".join(funcs)
