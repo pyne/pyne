@@ -1091,6 +1091,15 @@ pyne::comp_map pyne::Material::mult_by_mass() {
 
 
 
+pyne::comp_map pyne::Material::activity() {
+  using pyne::decay_const;
+  using pyne::atomic_mass;
+  using pyne::q_val;
+
+}
+
+
+
 double pyne::Material::molecular_mass(double apm) {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
