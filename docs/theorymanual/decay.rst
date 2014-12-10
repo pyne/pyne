@@ -48,7 +48,7 @@ Additionally, :math:`c_{i}` is defined as:
     c_i = \prod_{j=1,i\ne j}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
 
 Furthermore, the total chain branch ratio is defined as the product of the 
-branch ration between any two species [2]_:
+branch ratio between any two species [2]_:
 
 .. math:: 
 
@@ -99,8 +99,8 @@ where the coefficients :math:`k_i` are defined as:
 
 If :math:`k_i` are computed at run time then the this expression results in much more
 computational effort that than the original Bateman equations since :math:`\gamma/\lambda_C` 
-are brought into the summation. However, when :math:`k_i` are precaluclated, many floating 
-point operations are saved by avoiding explicitly computing :math:`c_i`.
+are brought into the summation. However, when :math:`k_i` are pre-caluclated, 
+many floating point operations are saved by avoiding explicitly computing :math:`c_i`.
 
 The second strategy is to note that computers are much better at dealing with powers of
 2 then then any other base, even :math:`e`. Thus the ``exp2(x)`` function, or :math:`2^x`,
@@ -147,7 +147,7 @@ as follows:
 
     N_C(t) = N_1(0) \sum_{i=1}^C k_{i} 2^{a_i t}
 
-**First Nulcide in Chain:**
+**First Nuclide in Chain:**
 
 .. math:: 
 
@@ -162,7 +162,7 @@ as follows:
 
 With completely precomputed :math:`k`, :math:`a`, and the ``exp2()`` function, this 
 formulation minimizes the number of floating point operations while completely 
-preserving physics. No assumptions where made aside from the Bateman equations 
+preserving physics. No assumptions were made aside from the Bateman equations 
 themselves in this proof.
 
 Note that it is not possible to reduce the number of operations further.  This 

@@ -65,7 +65,6 @@ endif (MOAB_FOUND)
 
 set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
     "-O0 -time")
-#    "-O0 -fno-gcse -time -std=c++11")
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

@@ -20,6 +20,11 @@ from pyne.data import branch_ratio, half_life, decay_const, decay_children, \
     decay_data_children, fpyield
 
 
+# These are bugs in nuc_data.h5 that I have manually verified to be wrong as 
+# well as being verified incorrect via the ORIGEN benchmark. 
+# This monkey patching should be removed once the pyne data is fixed. 
+# This is not part of the theoretical underpinnings of the method.
+# -el Scopz
 def _branch_ratio(f):
     special_cases = {
         (451040000, 461040000): 0.9955, 
@@ -43,7 +48,7 @@ def _branch_ratio(f):
 
 branch_ratio = _branch_ratio(branch_ratio)
 
-
+# More monkey patching of bad data to be removed.
 def _decay_children(f):
     special_cases = {
         451040000: set([441040000, 461040000]),
