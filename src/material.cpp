@@ -1094,7 +1094,8 @@ pyne::comp_map pyne::Material::activity() {
   pyne::comp_map act;
   double masspermole = mass * pyne::N_A;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-    act[i->first] = masspermole * (i->second) * decay_const(i->first) / atomic_mass(i->first);
+    act[i->first] = masspermole * (i->second) * decay_const(i->first) / \
+                    atomic_mass(i->first);
   }
   return act;
 }	
@@ -1111,6 +1112,38 @@ pyne::comp_map pyne::Material::decay_heat() {
   return dh;
 }
 
+
+pyne::comp_map pyne::Material::dose_per_g(int dose_type, int source) {
+  enum Type {EXT_AIR=0, EXT_SOIL, INGEST, INHALE}; 
+  Type type;
+  pyne::comp_map dose; 
+  const double pCi_per_Bq = 0.037;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+    switch(type) {
+    case EXT_AIR:
+      dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ext_air_dose(i->first, source) / \
+                       atomic_mass(i->first);
+      break;
+    case EXT_SOIL:
+      dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ext_soil_dose(i->first, source) / \
+                       atomic_mass(i->first);
+      break;
+    case INGEST:
+      dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ingest_dose(i->first, source) / \
+                       atomic_mass(i->first);
+      break;
+    case INHALE:
+      dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * inhale_dose(i->first, source) / \
+                       atomic_mass(i->first);
+      break;
+    }
+  }
+  return dose;
+}	
 
 
 double pyne::Material::molecular_mass(double apm) {
@@ -1134,16 +1167,6 @@ double pyne::Material::molecular_mass(double apm) {
 
   return atsperm / inverseA;
 };
-
-
-pyne::comp_map pyne::Material::dose_per_g() {
-  pyne::comp_map dose;
-  double masspermole = mass * pyne::N_A;
-  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-    dose[i->first] = masspermole * (i->second) * decay_const(i->first) / atomic_mass(i->first);
-  }
-  return dose;
-}	
 
 
 pyne::Material pyne::Material::expand_elements() {

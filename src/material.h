@@ -226,6 +226,8 @@ namespace pyne
     comp_map decay_heat();
     ///  Calculates the decay heat of a material based on the composition and
     /// each nuclide's mass, q_val, decay_const, and atomic_mass.
+    comp_map dose_per_g(int dose_type, int source=0);
+    /// add info!
     double molecular_mass(double apm=-1.0);
     /// Returns a copy of the current material where all natural elements in the
     /// composition are expanded to their natural isotopic abundances.

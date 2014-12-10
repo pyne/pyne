@@ -618,6 +618,29 @@ cdef class _Material:
         return nucvec_proxy
 
 
+    def dose_per_g(self, dose_type, source=0):
+        """This provides the dose per gram using the comp of the the Material.
+        ext_air_dose returns mrem/h per g per m^3
+        ext_soil_dose returns mrem/h per g per m^2
+        ingest_dose returns mrem per g
+        inhale_dose returns mrem per g
+
+        Parameters
+        ----------
+        dose_type : required. {EXT_AIR=0, EXT_SOIL=1, INGEST=2, INHALE=4}
+        source : {EPA=0, DOE=1, GENII=2}, default is EPA
+
+        Returns
+        -------
+        nucvec : dict
+            For a Material mat
+        """
+        cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
+        nucvec_proxy.map_ptr = new cpp_map[int, double](
+                self.mat_pointer.dose_per_g(dose_type, source))
+        return nucvec_proxy
+
+
     def molecular_mass(self, atoms_per_molecule=-1.0):
         """molecular_mass(atoms_per_molecule=-1.0)
         This method returns the molecular mass of the comp of this
