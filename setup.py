@@ -101,6 +101,14 @@ def indir(path):
     os.chdir(orig)
 
 
+@contextmanager
+def cleanpypath(path):
+    orig = sys.path
+    sys.path = [p for p in sys.path if p != path]
+    yield
+    sys.path = orig
+
+
 def assert_np_version():
     low = (1, 8, 0)
     v = np.version.short_version
@@ -189,18 +197,19 @@ def ensure_decay():
     print('!'*42)
     print('Decay files could not be downloaded or generated, using surrogates instead.')
     print('Please consider using the --bootstrap command line argument.')
-    print('!'*42)
+    print('!'*42 + '\n')
     shutil.copy(DECAY_H_REP, DECAY_H)
     shutil.copy(DECAY_CPP_REP, DECAY_CPP)
 
 
 def ensure_nuc_data():
     import tempfile
-    from pyne.dbgen import nuc_data_make
-    from pyne.dbgen.api import build_dir
-    bdir = os.path.join(os.getcwd(), 'build', build_dir)
-    with tempfile.TemporaryDirectory() as tdir, indir(tdir):
-        nuc_data_make(args=['-b', bdir])
+    tdir = tempfile.gettempdir()
+    with cleanpypath('.'), cleanpypath(os.getcwd()), indir(tdir):
+        from pyne.dbgen import nuc_data_make
+        from pyne.dbgen.api import build_dir
+        bdir = os.path.join(os.getcwd(), 'build', build_dir)
+        nuc_data_make.main(args=['-b', bdir])
 
 def parse_setup(ns):
     a = [sys.argv[0], ns.cmd]
@@ -245,6 +254,11 @@ def parse_others(ns):
         os.environ['HDF5_ROOT'] = ns.hdf5
     if ns.moab is not None:
         os.environ['MOAB_ROOT'] = ns.moab
+    if ns.clean:
+        if os.path.isfile(DECAY_H):
+            os.remove(DECAY_H)
+        if os.path.isfile(DECAY_CPP):
+            os.remove(DECAY_CPP)
 
 
 def parse_args():
