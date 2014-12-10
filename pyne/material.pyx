@@ -1185,6 +1185,16 @@ cdef class _Material:
             intensities are in decays/s/atom material
         """
         return self.mat_pointer.photons(<cpp_bool> norm)
+
+    def decay(self, double t):
+        """decay(double t)
+        Decays a material for a time t, in seconds. Returns a new material.
+        """
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.decay(t)
+        return pymat
+
+    
     #
     # Operator Overloads
     #
