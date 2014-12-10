@@ -1091,8 +1091,6 @@ pyne::comp_map pyne::Material::mult_by_mass() {
 
 
 pyne::comp_map pyne::Material::activity() {
-  using pyne::decay_const;
-  using pyne::atomic_mass;
   pyne::comp_map act;
   double masspermole = mass * pyne::N_A;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
@@ -1103,9 +1101,6 @@ pyne::comp_map pyne::Material::activity() {
 
 
 pyne::comp_map pyne::Material::decay_heat() {
-  using pyne::decay_const;
-  using pyne::atomic_mass;
-  using pyne::q_val;
   pyne::comp_map dh;
   double masspermole = mass * pyne::N_A;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
