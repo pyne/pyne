@@ -102,6 +102,8 @@ cdef extern from "material.h" namespace "pyne":
         vector[pair[double, double]] xrays() except +
         vector[pair[double, double]] photons(bool) except +
 
+        Material decay(double) except +
+
         # Operator Overloads
         Material operator+(double) except +
         Material operator+(Material) except +
