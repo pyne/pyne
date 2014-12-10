@@ -1,4 +1,4 @@
-Verification and Validation
+Quality Assurance
 ===========================
 
 Software Quality Assurance (QA) standards describe requirements for both software
