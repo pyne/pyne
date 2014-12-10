@@ -201,6 +201,14 @@ class TestMaterialMethods(TestCase):
         assert_equal(nucvec, {922350000: 0.75, 922380000: 14.25})
 
 
+    def test_activity(self):
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
+        obs = mat.activity()
+        exp = {922350000: 59953.15101810882, 922380000: 177216.65112976026}       
+        assert_equal(set(obs), set(exp))
+        assert_equal(set(obs.values()), set(exp.values()))
+
+
     def test_decay_heat(self):
         mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
         obs = mat.decay_heat()
