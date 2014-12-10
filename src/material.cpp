@@ -1126,6 +1126,16 @@ double pyne::Material::molecular_mass(double apm) {
 };
 
 
+pyne::comp_map pyne::Material::dose_per_g() {
+  pyne::comp_map dose;
+  double masspermole = mass * pyne::N_A;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+    dose[i->first] = masspermole * (i->second) * decay_const(i->first) / atomic_mass(i->first);
+  }
+  return dose;
+}	
+
+
 pyne::Material pyne::Material::expand_elements() {
   // Expands the natural elements of a material and returns a new material note
   // that this implementation relies on the fact that maps of ints are stored in
