@@ -1115,32 +1115,37 @@ pyne::comp_map pyne::Material::decay_heat() {
 
 pyne::comp_map pyne::Material::dose_per_g(int dose_type, int source) {
   enum Type {EXT_AIR=0, EXT_SOIL, INGEST, INHALE}; 
-  Type type;
   pyne::comp_map dose; 
-  const double pCi_per_Bq = 0.037;
-  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-    switch(type) {
-    case EXT_AIR:
+  const double pCi_per_Bq = 27.027027;
+  switch(dose_type) {
+  case EXT_AIR:
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
       dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
                        decay_const(i->first) * ext_air_dose(i->first, source) / \
                        atomic_mass(i->first);
-      break;
-    case EXT_SOIL:
+    }
+    break;
+  case EXT_SOIL:
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
       dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
                        decay_const(i->first) * ext_soil_dose(i->first, source) / \
                        atomic_mass(i->first);
-      break;
-    case INGEST:
+    }
+    break;
+  case INGEST:
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
       dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
                        decay_const(i->first) * ingest_dose(i->first, source) / \
                        atomic_mass(i->first);
-      break;
-    case INHALE:
+    }
+    break;
+  case INHALE:
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
       dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
                        decay_const(i->first) * inhale_dose(i->first, source) / \
                        atomic_mass(i->first);
-      break;
     }
+    break;
   }
   return dose;
 }	
