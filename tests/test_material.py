@@ -209,6 +209,15 @@ class TestMaterialMethods(TestCase):
         assert_equal(set(obs.values()), set(exp.values()))
 
 
+    def test_decay_heat(self):
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
+        obs = mat.decay_heat()
+        exp = {922350000: 4.48963565256e-14, 922380000: 1.2123912039e-13}
+        assert_equal(set(obs), set(exp))
+        for key in exp:
+            assert_almost_equal(obs[key], exp[key])
+
+
     def test_molecular_mass(self):
         mat_empty = Material({})
         assert_equal(mat_empty.molecular_mass(), 0.0)
