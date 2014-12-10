@@ -17,7 +17,7 @@ import tables as tb
 
 from pyne import nucname
 from pyne.data import natural_abund, natural_abund_map
-from pyne.material import Material
+from pyne.material import Material, MaterialLibrary
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -28,15 +28,17 @@ def make_elements():
 
     Returns
     -------
-    elts : [pyne.material.Material]
+    eltsdict : {str: pyne.material.Material}
         Natural elements as materials.
     """
     natural_abund("H1")  # initialize natural_abund_map
     sorted_abunds = sorted(list(natural_abund_map.items()))
     grouped_abunds = groupby(sorted_abunds, lambda x: nucname.zzzaaa(x[0])//1000)
+    # filter out 111, 113, 115, 117, 118 - the ones with no names
     elts = (Material(dict(abunds), metadata={"name": nucname.name(zz)})
-            for zz, abunds in grouped_abunds)
-    return elts
+            for zz, abunds in grouped_abunds if zz in nucname.zz_name.keys())
+    eltsdict = dict(((elt.metadata["name"], elt) for elt in elts))
+    return eltsdict
 
 
 # Parses data from .csv
@@ -57,7 +59,7 @@ def grab_materials_compendium(location='materials_compendium.csv'):
     with open(location, 'r', newline='') as f:
         lines = csv.reader(f, delimiter=',', quotechar='"')
         lines = list(filter(is_comp_matname_or_density, lines))
-        mats = parse_materials([], lines)
+        mats = parse_materials({}, lines)
         return mats
 
 
@@ -84,58 +86,13 @@ def is_comp_matname_or_density(line):
     return False
 
 
-def elem_line_to_mat(line):
-    """Take an element line and turn it into a PyNE material
-
-    Parameters
-    ==========
-    line : [str]
-        The input line.
-
-    Returns
-    =======
-    mat : pyne.material.Material
-        The material represented by this line, weighted by mass fraction.
-    """
-    name = line[0]
-    mass_frac = float(line[3])
-    try:
-        za = int(line[1])
-        mat = Material({nucname.id(za): mass_frac})
-    except ValueError:
-        za = None
-        mat = expand_elt_to_mat(name) * mass_frac
-    return mat
-
-
-def expand_elt_to_mat(elt_id):
-    """Expands an element into a material based on its natural abundances.
-
-    Parameters
-    ----------
-    elt_id : int or str
-        The element you wish to expand.
-
-    Returns
-    -------
-    mat : pyne.material.Material
-        A material with the isotopic abundances.
-    """
-    if nucname.anum(elt_id) != 0:
-        raise ValueError("Expected an element, got a specific nuclide instead.")
-    elt_z = nucname.zzzaaa(elt_id) // 1000
-    nucs = ((nuc, abund) for (nuc, abund) in natural_abund_map.items()
-            if nucname.zzzaaa(nuc) // 1000 == elt_z and nucname.anum(nuc) != 0)
-    return Material(dict(nucs))
-
-
 def parse_materials(mats, lines):
     """Take first material from ``lines`` and append to ``mats``.
 
     Parameters
     ----------
-    mats : [pyne.material.Material]
-        The growing list of materials.
+    mats : {str: pyne.material.Material}
+        The growing dict of materials.
     lines: [[str]]
         The shrinking list of lines.
     """
@@ -143,31 +100,28 @@ def parse_materials(mats, lines):
         return mats
     material_lines = list(takewhile(lambda l: re.match(r"^\d+. +", l[0]) is None, lines[2:]))
     material_length = len(material_lines) + 2
-    mat = sum((elem_line_to_mat(l) for l in material_lines))
+    # mat = sum((elem_line_to_mat(l) for l in material_lines))
+    mat = sum((Material({l[0]: float(l[3])}) for l in material_lines))
     mat.density = float(lines[1][2])
-    mat.metadata = {"name": lines[0][1]}
+    name = lines[0][1]
+    mat.metadata = {"name": name}
     mat.normalize()
-    mats.append(mat)
+    mat = mat.expand_elements()
+    mats.update({name: mat})
     return parse_materials(mats, lines[material_length:])
 
 
 # Writes to file
-def make_materials_compendium(nuc_data, mats, elts):
+def make_materials_compendium(nuc_data, matslib):
     """Adds materials compendium to nuc_data.h5."""
     # open nuc_data, make nuc_zz an array
     filters = tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)
-    with tb.openFile(nuc_data, 'r+', filters=filters) as f:
+    with tb.open_file(nuc_data, 'r+', filters=filters) as f:
         f.createGroup('/', 'material_library')
-        f.createArray('/material_library', 'nucid', natural_abund_map.keys())
+        # f.createArray('/material_library', 'nucid', list(natural_abund_map.keys()))
 
-    for elt in elts:
-        elt.write_hdf5(nuc_data, datapath="/material_library/materials",
-                       nucpath="/material_library/nucid", chunksize=70)
-
-    # Writes materials from mats to file, and names them.
-    for mat in mats:
-        mat.write_hdf5(nuc_data, datapath="/material_library/materials",
-                       nucpath="/material_library/nucid", chunksize=70)
+        matslib.write_hdf5(nuc_data, datapath="/material_library/materials",
+                           nucpath="/material_library/nucid")
 
 
 def make_materials_library(args):
@@ -180,9 +134,11 @@ def make_materials_library(args):
                 return
 
     print("Making the elements...")
-    elts = make_elements()
+    eltsdict = make_elements()
+    matslib = MaterialLibrary(eltsdict)
     print("Grabbing materials compendium...")
-    mats = grab_materials_compendium(os.path.join(os.path.split(__file__)[0],
-                                                  'materials_compendium.csv'))
+    matsdict = grab_materials_compendium(os.path.join(os.path.split(__file__)[0],
+                                                      'materials_compendium.csv'))
+    matslib.update(matsdict)
     print("Making materials library...")
-    make_materials_compendium(nuc_data, mats, elts)
+    make_materials_compendium(nuc_data, matslib)
