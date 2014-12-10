@@ -13,8 +13,10 @@
 #include <map>
 //#include <cmath>
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "data.h"
 #include "nucname.h"
+#endif
 
 namespace pyne {
 namespace decayers {

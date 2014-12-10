@@ -7,7 +7,9 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "decay.h"
+#endif
 
 namespace pyne {
 namespace decayers {
