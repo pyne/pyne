@@ -330,7 +330,9 @@ cdef class _Material:
         cdef char * c_nucpath
         nucpath_bytes = nucpath.encode('UTF-8')
         c_nucpath = nucpath_bytes
+        print("hit this!")
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
+
 
     def mcnp(self, frac_type='mass'):
         """mcnp(frac_type)
@@ -2212,12 +2214,12 @@ cdef class _MaterialLibrary(object):
                 name = "_" + str(i)
             _lib[name] = mat
 
-    def write_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+    def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid"):
         """Writes this material library to an HDF5 file.
 
         Parameters
         ----------
-        file : str
+        filename : str
             A path to an HDF5 file.
         datapath : str, optional
             The path in the heirarchy to the data table in an HDF5 file.
@@ -2230,14 +2232,21 @@ cdef class _MaterialLibrary(object):
         cdef set nucids = set()
         for mat in _lib.values():
             nucids.update(mat.comp.keys())
-        with tb.openFile(file, 'a') as f:
+        print("filename is: " + repr(filename))
+        with tb.openFile(filename, 'a') as f:
+            print("opened file")
             nucgrp, nucdsname = os.path.split(nucpath)
+            print("opened file 2")
             f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)),
                           createparents=True)
+        print("done opening")
         for key, mat in _lib.items():
+            print("hit for loop")
             if "name" not in mat.metadata:
+                print("name not in mat.metadata")
                 mat.metadata["name"] = key
-            mat.write_hdf5(file, datapath=datapath, nucpath=nucpath)
+            print("writing hdf5")
+            mat.write_hdf5(filename, datapath=datapath, nucpath=nucpath)
 
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     """The material library is a collection of unique keys mapped to

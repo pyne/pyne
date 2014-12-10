@@ -9,6 +9,7 @@ from __future__ import print_function
 import re
 import os
 import csv
+import sys
 from itertools import takewhile, groupby
 from warnings import warn
 from pyne.utils import QAWarning
@@ -56,11 +57,18 @@ def grab_materials_compendium(location='materials_compendium.csv'):
         The materials in the compendium.
     """
     natural_abund("H1")  # initialize natural_abund_map
-    with open(location, 'r', newline='') as f:
-        lines = csv.reader(f, delimiter=',', quotechar='"')
-        lines = list(filter(is_comp_matname_or_density, lines))
-        mats = parse_materials({}, lines)
-        return mats
+    if sys.version_info[0] >= 3:
+        with open(location, 'r', newline='') as f:
+            lines = csv.reader(f, delimiter=',', quotechar='"')
+            lines = list(filter(is_comp_matname_or_density, lines))
+            mats = parse_materials({}, lines)
+            return mats
+    else:
+        with open(location, 'r') as f:
+            lines = csv.reader(f, delimiter=',', quotechar='"')
+            lines = list(filter(is_comp_matname_or_density, lines))
+            mats = parse_materials({}, lines)
+            return mats
 
 
 def is_comp_matname_or_density(line):
@@ -116,12 +124,12 @@ def make_materials_compendium(nuc_data, matslib):
     """Adds materials compendium to nuc_data.h5."""
     # open nuc_data, make nuc_zz an array
     filters = tb.Filters(complevel=5, complib='zlib', shuffle=True, fletcher32=False)
-    with tb.open_file(nuc_data, 'r+', filters=filters) as f:
-        f.createGroup('/', 'material_library')
+    # with tb.open_file(nuc_data, 'r+', filters=filters) as f:
+    #     f.createGroup('/', 'material_library')
         # f.createArray('/material_library', 'nucid', list(natural_abund_map.keys()))
 
-        matslib.write_hdf5(nuc_data, datapath="/material_library/materials",
-                           nucpath="/material_library/nucid")
+    matslib.write_hdf5(nuc_data, datapath="/material_library/materials",
+                       nucpath="/material_library/nucid")
 
 
 def make_materials_library(args):

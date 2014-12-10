@@ -375,6 +375,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     (*data_fill_value).atoms_per_mol = -1.0;
     for (int n = 0; n != nuc_size; n++)
       (*data_fill_value).comp[n] = 0.0;
+    std::cout << "Hello, I am the first H5Pset_fill\n";
     H5Pset_fill_value(data_set_params, desc, &data_fill_value);
 
     // Create the data set
