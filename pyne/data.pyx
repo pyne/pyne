@@ -58,6 +58,12 @@ MeV_per_K = cpp_data.MeV_per_K
 MeV_per_MJ = cpp_data.MeV_per_MJ
 """Megaelectronvolts per megajoule."""
 
+Bq_per_Ci = cpp_data.Bq_per_Ci
+"""Becquerel per Curie"""
+
+Ci_per_Bq = cpp_data.Ci_per_Bq
+"""Curies per Becquerel"""
+
 #
 # hash map and initialization
 #

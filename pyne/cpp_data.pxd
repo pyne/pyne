@@ -17,7 +17,9 @@ cdef extern from "data.h" namespace "pyne":
     double sec_per_day
     double MeV_per_K
     double MeV_per_MJ
-    # hash map and initialization function
+    double Bq_per_Ci 
+    double Ci_per_Bq
+   # hash map and initialization function
     map[std_string, std_string] data_checksums
 
     # atomic_mass functions
