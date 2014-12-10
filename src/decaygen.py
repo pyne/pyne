@@ -85,8 +85,10 @@ HEADER = ENV.from_string("""
 #include <map>
 //#include <cmath>
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "data.h"
 #include "nucname.h"
+#endif
 
 namespace pyne {
 namespace decayers {
@@ -104,7 +106,9 @@ std::map<int, double> decay(std::map<int, double> comp, double t);
 SOURCE = ENV.from_string("""
 {{ autogenwarn }}
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "decay.h"
+#endif
 
 namespace pyne {
 namespace decayers {
