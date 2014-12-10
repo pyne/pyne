@@ -1295,15 +1295,26 @@ class PtracReader(object):
 
 
 def read_mcnp_inp(inp):
-    """This function reads an MCNP inp file and returns a list of Materials
-    material objects (for single density materials) and MultiMaterial objects
-    (for multiple density materials). This function relys on
-    mat_from_mcnp."""
+    """This function reads an MCNP inp file and returns a mapping of material
+    numbers to material objects.
+
+    Parameters
+    ----------
+    inp : str
+        MCNP input file
+
+    Returns
+    --------
+    materials : dict
+       Keys are MCNP material numbers and values are PyNE material objects (for 
+       single density materials) and MultiMaterial objects (for multiple density 
+       materials). 
+    """
 
     mat_lines = []  # line of lines that begin material cards
-    densities = {}  # dictionary to be popul. with material nos. and densities
+    densities = {}  # dictionary to be populuated with material # and densities
     mat_nums = []  # list of material numbers to be printed to stdout
-    material_list = []  # to be populated with material objectes and returned
+    materials = {}  # to be populated with material objectes and returned
 
     line_count = 1
     line = linecache.getline(inp, line_count)
@@ -1319,19 +1330,19 @@ def read_mcnp_inp(inp):
                     line[0:5] != '     ' and \
                     line.split()[1] != '0':
 
-                if line.split()[1] not in densities.keys():
-                    densities[line.split()[1]] = [float(line.split()[2])]
+                if int(line.split()[1]) not in densities.keys():
+                    densities[int(line.split()[1])] = [float(line.split()[2])]
 
                 else:
                     same_bool = False
-                    for j in range(0, len(densities[line.split()[1]])):
+                    for j in range(0, len(densities[int(line.split()[1])])):
                         if abs((float(line.split()[2])
-                               - densities[line.split()[1]][j])
+                               - densities[int(line.split()[1])][j])
                                / float(line.split()[2])) < 1E-4:
                             same_bool = True
 
                     if same_bool is False:
-                        densities[line.split()[1]].append(
+                        densities[int(line.split()[1])].append(
                             float(line.split()[2]))
 
         # check line to see if it contain a material card, in the form
@@ -1340,20 +1351,18 @@ def read_mcnp_inp(inp):
             if line.split()[0][0] == 'm' or line.split()[0][0] == 'M':
                 if line.split()[0][1].isdigit() is True:
                     mat_lines.append(line_count)
-                    mat_nums.append(line.split()[0][1:])
+                    mat_nums.append(int(line.split()[0][1:]))
 
         line_count += 1
         line = linecache.getline(inp, line_count)
 
     for i in range(0, len(mat_nums)):
-        print(mat_nums[i])
         if mat_nums[i] in densities.keys():
-            material_list.append(
-                mat_from_mcnp(inp, mat_lines[i], densities[mat_nums[i]]))
+            materials[mat_nums[i]] = mat_from_mcnp(inp, mat_lines[i],
+                                                   densities[mat_nums[i]])
         else:
-            material_list.append(mat_from_mcnp(inp, mat_lines[i]))
-
-    return material_list
+            materials[mat_nums[i]] = mat_from_mcnp(inp, mat_lines[i])
+    return materials
 
 
 def mat_from_mcnp(filename, mat_line, densities='None'):
