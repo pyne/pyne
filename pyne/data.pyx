@@ -55,6 +55,8 @@ sec_per_day = cpp_data.sec_per_day
 MeV_per_K = cpp_data.MeV_per_K
 """Megaelectronvolts per Kelvin."""
 
+MeV_per_MJ = cpp_data.MeV_per_MJ
+"""Megaelectronvolts per megajoule."""
 
 #
 # hash map and initialization
