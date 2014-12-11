@@ -21,7 +21,7 @@ from libc.string cimport strtok, strcpy, strncpy
 
 import re
 import os
-from warnings import warn
+from warnings import warn, catch_warnings, filterwarnings
 from pyne.utils import QAWarning
 
 cimport numpy as np
@@ -37,6 +37,9 @@ from pyne.utils import fromendf_tok, endftod
 np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+with catch_warnings():
+    filterwarnings("ignore", category=FutureWarning)
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
@@ -481,6 +484,7 @@ class Library(rx.RxLib):
 
     def _nls_njs_loop(self, L_keys, j_keys, itemkeys, data, total_lines,
                      range_flags, subsection_dict):
+        print(repr(j_keys))
         nls = int(range_flags['NLS'])
         for nls_iter in range(nls):
             if j_keys is None:

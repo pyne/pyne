@@ -448,10 +448,11 @@ def test_endftod():
 
 def test_get():
     obs = library.get_rx(nuc40000, 4, 2)
-    exp = [4.898421e+3,6.768123e+0,0,1,0,0,2.123124e+6,8.123142e-6,2.123212e+6,
-           8.231231e-6,-2.231211e+6,8.123421e-6]
+    exp = [4.898421e+3, 6.768123e+0, 0, 1, 0, 0, 2.123124e+6, 8.123142e-6, 2.123212e+6,
+           8.231231e-6, -2.231211e+6, 8.123421e-6]
     try:
-        badkey = library.get_rx(111, 1, 1)
+        # try to get a bad key
+        library.get_rx(111, 1, 1)
         assert(False)
     except ValueError:
         assert(True)
