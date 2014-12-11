@@ -1357,10 +1357,10 @@ def mats_from_inp(inp):
 
     for i in range(0, len(mat_nums)):
         if mat_nums[i] in densities.keys():
-            materials[mat_nums[i]] = mat_from_mcnp(inp, mat_lines[i],
+            materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i],
                                                    densities[mat_nums[i]])
         else:
-            materials[mat_nums[i]] = mat_from_mcnp(inp, mat_lines[i])
+            materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i])
     return materials
 
 

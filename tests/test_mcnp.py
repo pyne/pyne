@@ -17,7 +17,7 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 try:
     from pyne import mcnp
-    from pyne.mcnp import read_mcnp_inp
+    from pyne.mcnp import mats_from_inp
 except ImportError:
     raise SkipTest
 
@@ -544,7 +544,7 @@ def test_read_mcnp():
              "source": " internet",
              "table_ids": {'10000': "05c"}}): 1})
 
-    read_materials = read_mcnp_inp('mcnp_inp.txt')
+    read_materials = mats_from_inp('mcnp_inp.txt')
     assert_equal(expected_material, read_materials[1])
     assert_equal(
         list(expected_multimaterial._mats.keys())[0].comp,
