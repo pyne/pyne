@@ -58,7 +58,7 @@ def grab_materials_compendium(location='materials_compendium.csv'):
     """
     natural_abund("H1")  # initialize natural_abund_map
     try:
-        f = open(location, 'r', newline='')
+        f = open(location, 'r', newline='', encoding="utf-8")
     except TypeError:  # python2
         f = open(location, 'rb')
     reader = csv.reader(f, delimiter=',', quotechar='"')
@@ -105,7 +105,6 @@ def parse_materials(mats, lines):
         return mats
     material_lines = list(takewhile(lambda l: re.match(r"^\d+. +", l[0]) is None, lines[2:]))
     material_length = len(material_lines) + 2
-    # mat = sum((elem_line_to_mat(l) for l in material_lines))
     mat = sum((Material({l[0]: float(l[3])}) for l in material_lines))
     mat.density = float(lines[1][2])
     name = lines[0][1]
