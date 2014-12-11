@@ -1367,7 +1367,7 @@ def mats_from_inp(inp):
 def mat_from_inp_line(filename, mat_line, densities='None'):
     """ This function reads an MCNP material card from a file and returns a
     Material or Multimaterial object for the material described by the card.
-    This function is used by :func:mats_from_inp.
+    This function is used by :func:`mats_from_inp`.
     
     Parameters
     ----------
