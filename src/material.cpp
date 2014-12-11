@@ -369,15 +369,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     H5Pset_chunk(data_set_params, 1, chunk_dims);
     H5Pset_deflate(data_set_params, 1);
 
-    material_data * data_fill_value  = new material_data[material_data_size];
-    (*data_fill_value).mass = -1.0;
-    (*data_fill_value).density= -1.0;
-    (*data_fill_value).atoms_per_mol = -1.0;
-    for (int n = 0; n != nuc_size; n++)
-      (*data_fill_value).comp[n] = 0.0;
-    std::cout << "Hello, I am the first H5Pset_fill\n";
-    H5Pset_fill_value(data_set_params, desc, &data_fill_value);
-
     // Create the data set
     data_set = H5Dcreate2(db, datapath.c_str(), desc, data_space, H5P_DEFAULT,
                             data_set_params, H5P_DEFAULT);
@@ -391,9 +382,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
                                 H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
     H5Fflush(db, H5F_SCOPE_GLOBAL);
-
-    // Remember to de-allocate
-    delete[] data_fill_value;
   };
 
   // Get the data hyperslab

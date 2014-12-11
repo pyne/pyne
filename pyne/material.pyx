@@ -330,7 +330,6 @@ cdef class _Material:
         cdef char * c_nucpath
         nucpath_bytes = nucpath.encode('UTF-8')
         c_nucpath = nucpath_bytes
-        print("hit this!")
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
 
@@ -2232,20 +2231,13 @@ cdef class _MaterialLibrary(object):
         cdef set nucids = set()
         for mat in _lib.values():
             nucids.update(mat.comp.keys())
-        print("filename is: " + repr(filename))
         with tb.openFile(filename, 'a') as f:
-            print("opened file")
             nucgrp, nucdsname = os.path.split(nucpath)
-            print("opened file 2")
             f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)),
                           createparents=True)
-        print("done opening")
         for key, mat in _lib.items():
-            print("hit for loop")
             if "name" not in mat.metadata:
-                print("name not in mat.metadata")
                 mat.metadata["name"] = key
-            print("writing hdf5")
             mat.write_hdf5(filename, datapath=datapath, nucpath=nucpath)
 
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
