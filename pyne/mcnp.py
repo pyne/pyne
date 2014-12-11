@@ -1294,7 +1294,7 @@ class PtracReader(object):
                     print("processing event {0}".format(counter))
 
 
-def read_mcnp_inp(inp):
+def mats_from_inp(inp):
     """This function reads an MCNP inp file and returns a mapping of material
     numbers to material objects.
 
@@ -1364,9 +1364,10 @@ def read_mcnp_inp(inp):
     return materials
 
 
-def mat_from_mcnp(filename, mat_line, densities='None'):
+def mat_from_inp_line(filename, mat_line, densities='None'):
     """ This function reads an MCNP material card from a file and returns a
     Material or Multimaterial object for the material described by the card.
+    This function is used by :func:mats_from_inp.
     
     Parameters
     ----------
