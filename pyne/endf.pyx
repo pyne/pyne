@@ -21,7 +21,7 @@ from libc.string cimport strtok, strcpy, strncpy
 
 import re
 import os
-from warnings import warn, catch_warnings, filterwarnings
+from warnings import warn, simplefilter
 from pyne.utils import QAWarning
 
 cimport numpy as np
@@ -38,8 +38,7 @@ np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-with catch_warnings():
-    filterwarnings("ignore", category=FutureWarning)
+simplefilter("ignore", category=FutureWarning)
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
