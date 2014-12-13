@@ -1001,6 +1001,7 @@ def test_int_loglog_only_interpolate_one_endpoint():
     exp = e/3 * (5**3 - 2 **3) / (5-2)
     assert_allclose(exp, obs, rtol=1e-12)
 
+
 def test_discretize():
     from os.path import isfile
     try:
@@ -1028,6 +1029,33 @@ def test_discretize():
            74.217617672501689, 162.26091389706099, 218.90153743636509,
            312.62178192130619, 590.40136068709603, 724.64216445611373]
     assert_array_almost_equal(nonelastic_c, exp)
+
+
+def test_photoatomic():
+    try:
+        assert(os.path.isfile('Zn.txt'))
+    except AssertionError:
+        try:
+            import urllib.request as urllib
+        except ImportError:
+            import urllib
+        urllib.urlretrieve("https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt",
+                           "Zn.txt")
+    photondata = Library('Zn.txt')
+    xs_data = photondata.get_xs(300000000, 501)[0]
+    Eints, sigmas = xs_data['e_int'], xs_data['xs']
+    assert_equal(len(Eints),1864)
+    assert_equal(len(sigmas),1864)
+    assert_array_equal(Eints[0:5],[1.,  1.109887,  1.217224,
+                                   1.2589,  1.334942])
+    assert_array_equal(Eints[-5:],[6.30960000e+10,   7.94328000e+10,  
+                                   7.94330000e+10, 8.00000000e+10, 
+                                   1.00000000e+11])
+    assert_array_almost_equal(sigmas[0:5],[0.00460498,  0.00710582,
+                                           0.01047864,  0.01210534,
+                                           0.01556538])
+    assert_array_almost_equal(sigmas[-5:],[ 6.71525 ,  6.716781,  6.716781,
+                                           6.716829,  6.717811])
 
 if __name__ == "__main__":
     nose.runmodule()
