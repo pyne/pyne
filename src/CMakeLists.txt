@@ -64,7 +64,7 @@ if (MOAB_FOUND)
 endif (MOAB_FOUND)
 
 set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
-    "-O0 -time")
+    "-O0")
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

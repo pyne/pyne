@@ -301,7 +301,8 @@ class Library(object):
 
             # verify that we are suppossed to read this table in
             if (table_names is not None) and (name not in table_names):
-                f.seek(n_bytes, 1)
+                cur = f.tell()
+                f.seek(cur + n_bytes)
                 f.readline()
                 lines = [f.readline() for i in range(13)]
                 continue
@@ -309,7 +310,8 @@ class Library(object):
             # ensure we have a valid table type
             if 0 == len(name) or name[-1] not in table_types:
                 warn("Unsupported table: " + name, RuntimeWarning)
-                f.seek(n_bytes, 1)
+                cur = f.tell()
+                f.seek(cur + n_bytes)
                 f.readline()
                 lines = [f.readline() for i in range(13)]
                 continue
@@ -319,7 +321,8 @@ class Library(object):
             if 12+n_lines < len(lines):
                 goback = sum([len(line) for line in lines[12+n_lines:]])
                 lines = lines[:12+n_lines]
-                f.seek(-goback, 1)
+                cur = f.tell()
+                f.seek(cur - goback)
 
             # get the table
             table = table_types[name[-1]](name, awr, temp)
