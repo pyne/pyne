@@ -221,13 +221,13 @@ class TestMaterialMethods(TestCase):
     def test_dose_per_g(self):
         mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
         # testing for default source
-        obs1 = mat.dose_per_g(0)
+        obs1 = mat.dose_per_g("ext_air")
         exp1 = {922350000: 1.11264406283e-14, 922380000: 5.01315571163e-15}
         assert_equal(set(obs1), set(exp1))
         for key in exp1:
             assert_almost_equal(obs1[key], exp1[key])
         # testing for non-default source
-        obs2 = mat.dose_per_g(2, 1)
+        obs2 = mat.dose_per_g("ingest", 1)
         exp2 = {922350000: 27.1139475504, 922380000: 77.5921552819}
         assert_equal(set(obs2), set(exp2))
         for key in exp2:
