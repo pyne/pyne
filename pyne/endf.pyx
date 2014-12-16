@@ -21,7 +21,7 @@ from libc.string cimport strtok, strcpy, strncpy
 
 import re
 import os
-from warnings import warn, simplefilter
+from warnings import warn
 from pyne.utils import QAWarning
 
 cimport numpy as np
@@ -38,8 +38,6 @@ np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-simplefilter("ignore", category=FutureWarning)
-
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
              31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
@@ -49,6 +47,7 @@ CONTENTS_R = re.compile(' +\d{1,2} +\d{1,3} +\d{1,10} +')
 SPACE66_R = re.compile(' {66}')
 NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
 SPACE66_R = re.compile(' {66}')
+
 
 class Library(rx.RxLib):
     """A class for a file which contains multiple ENDF evaluations."""
