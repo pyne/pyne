@@ -6,6 +6,7 @@
 #include <vector>
 #include <iomanip>  // std::setprecision
 #include <math.h>   // modf
+#include <stdexcept>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
