@@ -1,7 +1,11 @@
+import os
+
+from nose.tools import assert_true, assert_false
 from pyne.dbgen.materials_library import *
 from pyne.material import Material
-from nose.tools import assert_true, assert_false
+from pyne.pyne_config import pyne_conf
 import pyne.nucname as nucname
+import tables as tb
 
 
 def assert_close(obs, exp, margin=1e-6):
@@ -46,3 +50,11 @@ def test_grab_materials_compendium():
     bromium = sum((frac for nuc, frac in pubr.comp.items() if nucname.zzzaaa(nuc) // 1000 == 35))
     assert_close(bromium, 0.500617)
     assert_close(pubr[942380000], 0.000250)
+
+def test_output_h5():
+    nuc_data = pyne_conf.NUC_DATA_PATH
+    if not os.path.isfile(nuc_data):
+        raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
+    with tb.openFile(nuc_data, 'r') as f:
+        E_g = np.array(f.root.neutron.cinder_xs.E_g)
+    pass
