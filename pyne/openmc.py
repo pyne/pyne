@@ -65,9 +65,10 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
         nuc = None
         if zaid is not None or zaid != '0':
             meta = "0" if metastable is None else metastable
-            if not nucname.isnuclide(zaid):
-                nuc = nucname.zzaaam_to_id(zaid + meta)
-            if not nucname.isnuclide(nuc):  # then it's in MCNP metastable form
+            nuc = nucname.zzaaam_to_id(zaid + meta)
+            if nuc == 0:
+                pass
+            elif not nucname.isnuclide(nuc):  # then it's in MCNP metastable form
                 nuc = nucname.mcnp_to_id(zaid)
         self.nucid = nuc
         abspath = None
