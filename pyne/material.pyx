@@ -42,6 +42,9 @@ import pyne.data as data
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+if sys.version_info[0] > 2:
+    basestring = (str, bytes)
+
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647
 
@@ -638,9 +641,6 @@ cdef class _Material:
         nucvec : dict
             For a Material mat
         """
-        if sys.version_info[0] > 2:
-            basestring = bytes 
-
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](
                 self.mat_pointer.dose_per_g(dose_type, source))
