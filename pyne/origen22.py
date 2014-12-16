@@ -1215,12 +1215,19 @@ def _double_get(dict, key1, key2, default=0.0):
 
 _deck_title_fmt = "{nlb:>4}    {title:^72}\n"
 
-_decay_card_fmt = ("{nlb:>4}{nuc:>8}  {unit}     {time:<9.{p}E} {fbx:<9.{p}E} {fpec:<9.{p}E} {fpecx:<9.{p}E} {fa:<9.{p}E} {fit:<9.{p}E}\n"
-                   "{nlb:>4}                {fsf:<9.{p}E} {fn:<9.{p}E} {qrec:<9.{p}E} {abund:<9.{p}E} {arcg:<9.{p}E} {wrcg:<9.{p}E}\n")
+_decay_card_fmt = ("{nlb:>4}{nuc:>8}  {unit}     {time:<9.{p}E} {fbx:<9.{p}E} "
+                   "{fpec:<9.{p}E} {fpecx:<9.{p}E} {fa:<9.{p}E} {fit:<9.{p}E}\n"
+                   "{nlb:>4}                {fsf:<9.{p}E} {fn:<9.{p}E} "
+                   "{qrec:<9.{p}E} {abund:<9.{p}E} {arcg:<9.{p}E} "
+                   "{wrcg:<9.{p}E}\n")
 
-_xs_card_fmt = "{nlb:>4}{nuc:>8} {sg:<9.{p}E} {s2n:<9.{p}E} {s3n_or_a:<9.{p}E} {sf_or_p:<9.{p}E} {sg_x:<9.{p}E} {s2n_x:<9.{p}E} {fpy_flag:>6.1F} \n"
+_xs_card_fmt = ("{nlb:>4}{nuc:>8} {sg:<9.{p}E} {s2n:<9.{p}E} {s3n_or_a:<9.{p}E} "
+                "{sf_or_p:<9.{p}E} {sg_x:<9.{p}E} {s2n_x:<9.{p}E} "
+                "{fpy_flag:>6.1F} \n")
 
-_fpy_card_fmt = "{nlb:>4}     {y1:<9.{p}E} {y2:<9.{p}E} {y3:<9.{p}E} {y4:<9.{p}E} {y5:<9.{p}E} {y6:<9.{p}E} {y7:<9.{p}E} {y8:<9.{p}E}\n"
+_fpy_card_fmt = ("{nlb:>4}     {y1:<8.{p}E} {y2:<8.{p}E} {y3:<8.{p}E} "
+                 "{y4:<8.{p}E} {y5:<8.{p}E} {y6:<8.{p}E} {y7:<8.{p}E} "
+                 "{y8:<8.{p}E}\n")
 
 
 def _decay_deck_2_str(nlb, deck, precision):
@@ -1288,6 +1295,7 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
     nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
     nucset = sorted(nucset)
     s = ""
+    fpy_precision = precision-1  # otherwise it doesn't fit in 80 chars
     for nuc in nucset:
         fpy_flag = 1.0
         s += _xs_card_fmt.format(nlb=nlb,
@@ -1310,7 +1318,7 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
                                   y6=_double_get(deck, 'PU241_fiss_yield', nuc),
                                   y7=_double_get(deck, 'CM245_fiss_yield', nuc),
                                   y8=_double_get(deck, 'CF249_fiss_yield', nuc),
-                                  p=precision,
+                                  p=fpy_precision,
                                   )
     return s
 
