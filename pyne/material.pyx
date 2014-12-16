@@ -638,13 +638,6 @@ cdef class _Material:
         nucvec : dict
             For a Material mat
         """
-#        if sys.version_info[0] > 2:
-#            fn = cpp_nucname.id(std_string(<char *> from_nuc))
-#        elif sys.version_info[0] == 2:
-#            from_nuc_bytes = from_nuc.encode()
-#            fn = cpp_nucname.id(std_string(<char *> from_nuc_bytes))
-
-
         if sys.version_info[0] > 2:
             basestring = str
 
