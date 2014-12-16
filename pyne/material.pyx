@@ -639,7 +639,7 @@ cdef class _Material:
             For a Material mat
         """
         if sys.version_info[0] > 2:
-            basestring = str
+            basestring = std_string
 
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](
