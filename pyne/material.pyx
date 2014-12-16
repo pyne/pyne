@@ -627,8 +627,11 @@ cdef class _Material:
 
         Parameters
         ----------
-        dose_type : required, one of: ext_air, ext_soil, ingest, inhale
-        source : {EPA=0, DOE=1, GENII=2}, default is EPA
+        dose_type : string
+            One of: ext_air, ext_soil, ingest, inhale
+        source : int
+            optional; default is EPA
+            0 for EPA, 1 for DOE, 2 for GENII
 
         Returns
         -------
