@@ -1141,7 +1141,7 @@ pyne::comp_map pyne::Material::dose_per_g(std::string dose_type, int source) {
                        atomic_mass(i->first);
     }
   } else {
-    std::cout << "Dose type must be one of: ext_air, ext_soil, ingest, inhale.";
+    throw std::invalid_argument("Dose type must be one of: ext_air, ext_soil, ingest, inhale.");
   }
   return dose;
 }	
