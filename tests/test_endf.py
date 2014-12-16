@@ -13,7 +13,6 @@ from numpy.testing import assert_array_equal, assert_allclose, \
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-warnings.simplefilter("ignore", FutureWarning)
 
 from pyne.endf import Library
 from pyne.utils import endftod
