@@ -22,6 +22,16 @@ sample_xs = StringIO("""<?xml version="1.0" ?>
 </cross_sections>
 """)
 
+sample_xs_with_dir = StringIO("""<?xml version="1.0" ?>
+<cross_sections>
+  <directory>/</directory>
+  <filetype>ascii</filetype>
+  <ace_table alias="H-1.71c" awr="0.999167" location="1" name="1001.71c" path="293.6K/H_001_293.6K.ace" temperature="2.53e-08" zaid="1001"/>
+  <ace_table alias="Am-242m.73c" awr="239.9801" location="1" metastable="1" name="95242.73c" path="900K/Am_242_900K.ace" temperature="7.756e-08" zaid="95242"/>
+  <ace_table awr="89.1324" location="1" name="ZrZrH.71t" path="tsl/zrzrh.acer" temperature="2.551e-08" zaid="0"/>
+</cross_sections>
+""")
+
 def test_ace_table_init():
     atab = openmc.AceTable(zaid='92235', path='U235.ace', 
                            cross_sections_path='/tmp/cross_sections.xml')
@@ -36,6 +46,7 @@ def test_ace_table_xml():
     exp = '<ace_table path="U235.ace" zaid="92235"/>'
     obs = atab.xml()
     assert_equal(exp, obs)
+
 
 def test_cross_sections_read():
     sample_xs.seek(0)
@@ -54,6 +65,18 @@ def test_cross_sections_read():
                            path='tsl/zrzrh.acer', temperature='2.551e-08', 
                            zaid='0')]
     assert_equal(exp, xs.ace_tables)
+
+
+def test_cross_sections_abspath_with_dir():
+    xs = openmc.CrossSections(sample_xs_with_dir)
+    assert_equal('ascii', xs.filetype)
+    assert_equal(xs.path, "/")
+
+    exp_abspaths = ["/293.6K/H_001_293.6K.ace",
+                    "/900K/Am_242_900K.ace", "/tsl/zrzrh.acer"]
+    obs_abspaths = [table.abspath for table in xs.ace_tables]
+    assert_equal(exp_abspaths, obs_abspaths)
+
 
 def test_cross_sections_roundtrip():
     sample_xs.seek(0)
