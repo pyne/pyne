@@ -220,15 +220,15 @@ namespace pyne
     /// used (and stored on the instance) as the atoms_per_molecule for this calculation.
     /// If \a apm and atoms_per_molecule on this instance are both negative, then the best
     /// guess value calculated from the normailized composition is used here.
-    comp_map activity();
+    double molecular_mass(double apm=-1.0);
     /// Calculates the activity of a material based on the composition and each
     /// nuclide's mass, decay_const, and atmoic_mass. 
-    comp_map decay_heat();
+    comp_map activity();
     ///  Calculates the decay heat of a material based on the composition and
     /// each nuclide's mass, q_val, decay_const, and atomic_mass.
-    comp_map dose_per_g(std::string dose_type, int source=0);
+    comp_map decay_heat();
     /// add info!
-    double molecular_mass(double apm=-1.0);
+    comp_map dose_per_g(std::string dose_type, int source=0);
     /// Returns a copy of the current material where all natural elements in the
     /// composition are expanded to their natural isotopic abundances.
     Material expand_elements();
