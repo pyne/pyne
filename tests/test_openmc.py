@@ -22,6 +22,14 @@ sample_xs = StringIO("""<?xml version="1.0" ?>
 </cross_sections>
 """)
 
+sample_xs_with_mcnp_id = StringIO("""<?xml version="1.0" ?>
+<cross_sections>
+  <filetype>ascii</filetype>
+  <ace_table alias="Co-58m.70c" awr="57.4381" location="28897" metastable="1" name="27458.70c" path="endf70b" temperature="2.5301e-08" zaid="27458"/>
+  <ace_table alias="Co-58.70c" awr="57.4381" location="28699" name="27058.70c" path="endf70b" temperature="2.5301e-08" zaid="27058"/>
+</cross_sections>
+""")
+
 def test_ace_table_init():
     atab = openmc.AceTable(zaid='92235', path='U235.ace', 
                            cross_sections_path='/tmp/cross_sections.xml')
@@ -54,6 +62,13 @@ def test_cross_sections_read():
                            path='tsl/zrzrh.acer', temperature='2.551e-08', 
                            zaid='0')]
     assert_equal(exp, xs.ace_tables)
+
+def test_cross_sections_mcnp_id():
+    xstables = openmc.CrossSections(sample_xs_with_mcnp_id).ace_tables
+    mcnp_obs = [table.nucid for table in xstables if table.alias == "Co-58m.70c"][0]
+    assert_equal(mcnp_obs, 270580001)
+    nucid_obs = [table.nucid for table in xstables if table.alias == "Co-58.70c"][0]
+    assert_equal(nucid_obs, 270580000)
 
 def test_cross_sections_roundtrip():
     sample_xs.seek(0)
