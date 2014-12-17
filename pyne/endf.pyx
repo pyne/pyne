@@ -1,4 +1,4 @@
-#!/use/bin/env python
+#!/usr/bin/env python
 
 """Module for parsing and manipulating data from ENDF evaluations. Currently, it
 only can read several MTs from File 1, but with time it will be expanded to
