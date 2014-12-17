@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/use/bin/env python
 
 """Module for parsing and manipulating data from ENDF evaluations. Currently, it
 only can read several MTs from File 1, but with time it will be expanded to
@@ -482,7 +482,6 @@ class Library(rx.RxLib):
 
     def _nls_njs_loop(self, L_keys, j_keys, itemkeys, data, total_lines,
                      range_flags, subsection_dict):
-        print(repr(j_keys))
         nls = int(range_flags['NLS'])
         for nls_iter in range(nls):
             if j_keys is None:
