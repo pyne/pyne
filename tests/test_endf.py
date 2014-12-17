@@ -403,6 +403,19 @@ magna aliquyam erat, sed diam voluptua.                            828 1451   15
 """)
 
 
+def ignore_future_warnings(func):
+    """This is a decorator which can be used to ignore FutureWarnings
+    occurring in a function."""
+    def new_func(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            return func(*args, **kwargs)
+    new_func.__name__ = func.__name__
+    new_func.__doc__ = func.__doc__
+    new_func.__dict__.update(func.__dict__)
+    return new_func
+
+
 library = Library(str_library)
 nuc1002, nuc10031, nuc40000 = nucname.id(1002), nucname.id(10031), nucname.id(40000)
 library._read_res(nuc1002)
@@ -448,10 +461,11 @@ def test_endftod():
 
 def test_get():
     obs = library.get_rx(nuc40000, 4, 2)
-    exp = [4.898421e+3,6.768123e+0,0,1,0,0,2.123124e+6,8.123142e-6,2.123212e+6,
-           8.231231e-6,-2.231211e+6,8.123421e-6]
+    exp = [4.898421e+3, 6.768123e+0, 0, 1, 0, 0, 2.123124e+6, 8.123142e-6, 2.123212e+6,
+           8.231231e-6, -2.231211e+6, 8.123421e-6]
     try:
-        badkey = library.get_rx(111, 1, 1)
+        # try to get a bad key
+        library.get_rx(111, 1, 1)
         assert(False)
     except ValueError:
         assert(True)
@@ -877,7 +891,7 @@ def test_u235():
 
 
 # Test ENDF Data Source
-
+@ignore_future_warnings
 def test_int_hist():
     exp_Eint = np.array([1,4,10, 20])
     exp_xs = np.array([15, 12, -7, 10])

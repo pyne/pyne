@@ -48,6 +48,7 @@ SPACE66_R = re.compile(' {66}')
 NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
 SPACE66_R = re.compile(' {66}')
 
+
 class Library(rx.RxLib):
     """A class for a file which contains multiple ENDF evaluations."""
     def __init__(self, fh):
