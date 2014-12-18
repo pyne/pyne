@@ -4,6 +4,8 @@
 Source Sampling
 =============================
 
+:Author: Elliott Biondo
+
 .. currentmodule:: pyne.source_sampling
 
 ******
