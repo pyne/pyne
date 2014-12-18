@@ -138,7 +138,7 @@ class CrossSections(HTMLParser):
     def handle_data(self, data):
         if self._tag == 'filetype':
             self.filetype = data
-        if self._tag == 'directory':
+        elif self._tag == 'directory':
             self.path = data.strip()
 
     def handle_ace_table(self, attrs):
