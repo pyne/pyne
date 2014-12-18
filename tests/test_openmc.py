@@ -29,6 +29,13 @@ sample_xs_with_dir = StringIO("""<?xml version="1.0" ?>
   <ace_table alias="H-1.71c" awr="0.999167" location="1" name="1001.71c" path="293.6K/H_001_293.6K.ace" temperature="2.53e-08" zaid="1001"/>
   <ace_table alias="Am-242m.73c" awr="239.9801" location="1" metastable="1" name="95242.73c" path="900K/Am_242_900K.ace" temperature="7.756e-08" zaid="95242"/>
   <ace_table awr="89.1324" location="1" name="ZrZrH.71t" path="tsl/zrzrh.acer" temperature="2.551e-08" zaid="0"/>
+""")
+
+sample_xs_with_mcnp_id = StringIO("""<?xml version="1.0" ?>
+<cross_sections>
+  <filetype>ascii</filetype>
+  <ace_table alias="Co-58m.70c" awr="57.4381" location="28897" metastable="1" name="27458.70c" path="endf70b" temperature="2.5301e-08" zaid="27458"/>
+  <ace_table alias="Co-58.70c" awr="57.4381" location="28699" name="27058.70c" path="endf70b" temperature="2.5301e-08" zaid="27058"/>
 </cross_sections>
 """)
 
@@ -66,6 +73,7 @@ def test_cross_sections_read():
                            zaid='0')]
     assert_equal(exp, xs.ace_tables)
 
+<<<<<<< HEAD
 
 def test_cross_sections_abspath_with_dir():
     xs = openmc.CrossSections(sample_xs_with_dir)
@@ -77,6 +85,14 @@ def test_cross_sections_abspath_with_dir():
     obs_abspaths = [table.abspath for table in xs.ace_tables]
     assert_equal(exp_abspaths, obs_abspaths)
 
+=======
+def test_cross_sections_mcnp_id():
+    xstables = openmc.CrossSections(sample_xs_with_mcnp_id).ace_tables
+    mcnp_obs = [table.nucid for table in xstables if table.alias == "Co-58m.70c"][0]
+    assert_equal(mcnp_obs, 270580001)
+    nucid_obs = [table.nucid for table in xstables if table.alias == "Co-58.70c"][0]
+    assert_equal(nucid_obs, 270580000)
+>>>>>>> up/develop
 
 def test_cross_sections_roundtrip():
     sample_xs.seek(0)

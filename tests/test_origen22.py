@@ -469,7 +469,9 @@ def test_write_tape9():
     # Test that basic functionality works
     origen22.write_tape9(tape9_dict, tape9_file)
     tape9_file.seek(0)
-    t9str = tape9_file.read()
+    t9str = tape9_file.readlines()
+    for line in t9str:
+        assert(len(line) <= 81)  # 81 since newline is counted in len
 
     # Try to round-trip
     full_tape9_file = StringIO(sample_tape9)
