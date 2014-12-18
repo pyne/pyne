@@ -126,26 +126,6 @@ def make_materials_compendium(nuc_data, matslib):
                        nucpath="/material_library/nucid")
 
 
-def make_matslib(fname):
-    """Make a pyne.material.MaterialLibrary. First makes elements, then
-    materials from compendium.
-
-    Parameters
-    ----------
-    fname : str
-        Path to materials compendium.
-
-    Returns
-    -------
-    matslib : pyne.material.MaterialLibrary
-        All the materials you could want, in a handy MaterialLibrary instance.
-    """
-    matslib = MaterialLibrary(make_elements())
-    matsdict = grab_materials_compendium(fname)
-    matslib.update(matsdict)
-    return matslib
-
-
 def make_materials_library(args):
     """Controller function for adding materials library."""
     nuc_data = args.nuc_data

@@ -21,6 +21,9 @@ import numpy as np
 from warnings import warn
 from pyne.utils import QAWarning
 import os
+import sys
+if sys.version_info[0] >= 3:
+    basestring = str
 
 import tables as tb
 
@@ -2078,7 +2081,8 @@ cdef class _MaterialLibrary(object):
             for key, mat in lib.items():
                 _lib[key] = ensure_material(mat)
             self._lib = _lib
-        elif isinstance(lib, basestring):
+        elif isinstance(lib.decode(), basestring):
+            lib = lib.decode()
             self._lib = _lib
             if lib.endswith('.json') or lib.endswith('.js'):
                 self.from_json(lib)

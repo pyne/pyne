@@ -1,6 +1,6 @@
 import os
 
-from nose.tools import assert_true, assert_false, assert_in
+from nose.tools import assert_true, assert_false, assert_in, assert_equal
 from pyne.dbgen.materials_library import *
 from pyne.material import Material, MaterialLibrary
 from pyne.pyne_config import pyne_conf
@@ -53,39 +53,37 @@ def test_grab_materials_compendium():
     assert_close(pubr[942380000], 0.000250)
 
 
-def get_comps_from_nuc_data(nuc_data):
-    with tb.openFile(nuc_data, 'r') as f:
-        comps = np.array([m['comp'] for m in f.root.material_library.materials])
-        nucids = np.array(f.root.material_library.nucid)
-    comps_zipped = (zip(nucids, comp) for comp in comps)
-    comps_cleaned = ((p for p in comp if p[1] != 0) for comp in comps_zipped)
-    obs_comps = filter(lambda x: x != {}, [dict(comp) for comp in comps_cleaned])
-    return obs_comps
-
-
-def test_output_h5():
-    nuc_data = "test_nd.h5"
-    if os.path.isfile(nuc_data):
-        os.remove(nuc_data)
-    matslib = make_matslib(os.path.join(os.path.split(__file__)[0],
-                                        '../pyne/dbgen/materials_compendium.csv'))
-    make_materials_compendium(nuc_data, matslib)
-
-    obs_comps = get_comps_from_nuc_data(nuc_data)
-    os.remove(nuc_data)
-    exp_comps = [mat.comp for mat in list(matslib.values())]
-    for obs_comp in obs_comps:
-        assert(obs_comp in exp_comps)
-
-
 def test_against_nuc_data():
     nuc_data = pyne_conf.NUC_DATA_PATH
     if not os.path.isfile(nuc_data):
         raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
-    matslib = make_matslib(os.path.join(os.path.split(__file__)[0],
-                                        '../pyne/dbgen/materials_compendium.csv'))
+    obs_matslib = MaterialLibrary(nuc_data,
+                                  datapath="/material_library/materials",
+                                  nucpath="/material_library/nucid")
+    gasoline = Material({
+        "H": 0.157000,
+        "C": 0.843000,
+        },
+        density=0.721,
+        metadata={"name": "Gasoline"}).expand_elements()
 
-    obs_comps = get_comps_from_nuc_data(nuc_data)
-    exp_comps = [mat.comp for mat in list(matslib.values())]
-    for obs_comp in obs_comps:
-        assert_in(obs_comp, exp_comps)
+    pubr3 = Material({
+        "Br": 0.500617,
+        "Pu-238": 0.000250,
+        "Pu-239": 0.466923,
+        "Pu-240": 0.029963,
+        "Pu-241": 0.001998,
+        "Pu-242": 0.000250
+        },
+        density=6.75,
+        metadata={"name": "Plutonium Bromide"}).expand_elements()
+
+    obs_gasoline = obs_matslib["Gasoline"]
+    assert_equal(set(obs_gasoline.comp.items()), set(gasoline.comp.items()))
+    assert_equal(obs_gasoline.density, gasoline.density)
+    assert_equal(obs_gasoline.metadata["name"], gasoline.metadata["name"])
+
+    obs_pubr3 = obs_matslib["Plutonium Bromide"]
+    assert_equal(set(obs_pubr3.comp.items()), set(pubr3.comp.items()))
+    assert_equal(obs_pubr3.density, pubr3.density)
+    assert_equal(obs_pubr3.metadata["name"], pubr3.metadata["name"])
