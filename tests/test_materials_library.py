@@ -1,11 +1,12 @@
 import os
 
-from nose.tools import assert_true, assert_false
+from nose.tools import assert_true, assert_false, assert_in
 from pyne.dbgen.materials_library import *
-from pyne.material import Material
+from pyne.material import Material, MaterialLibrary
 from pyne.pyne_config import pyne_conf
 import pyne.nucname as nucname
 import tables as tb
+import numpy as np
 
 
 def assert_close(obs, exp, margin=1e-6):
@@ -51,10 +52,40 @@ def test_grab_materials_compendium():
     assert_close(bromium, 0.500617)
     assert_close(pubr[942380000], 0.000250)
 
+
+def get_comps_from_nuc_data(nuc_data):
+    with tb.openFile(nuc_data, 'r') as f:
+        comps = np.array([m['comp'] for m in f.root.material_library.materials])
+        nucids = np.array(f.root.material_library.nucid)
+    comps_zipped = (zip(nucids, comp) for comp in comps)
+    comps_cleaned = ((p for p in comp if p[1] != 0) for comp in comps_zipped)
+    obs_comps = filter(lambda x: x != {}, [dict(comp) for comp in comps_cleaned])
+    return obs_comps
+
+
 def test_output_h5():
+    nuc_data = "test_nd.h5"
+    if os.path.isfile(nuc_data):
+        os.remove(nuc_data)
+    matslib = make_matslib(os.path.join(os.path.split(__file__)[0],
+                                        '../pyne/dbgen/materials_compendium.csv'))
+    make_materials_compendium(nuc_data, matslib)
+
+    obs_comps = get_comps_from_nuc_data(nuc_data)
+    os.remove(nuc_data)
+    exp_comps = [mat.comp for mat in list(matslib.values())]
+    for obs_comp in obs_comps:
+        assert(obs_comp in exp_comps)
+
+
+def test_against_nuc_data():
     nuc_data = pyne_conf.NUC_DATA_PATH
     if not os.path.isfile(nuc_data):
         raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
-    with tb.openFile(nuc_data, 'r') as f:
-        E_g = np.array(f.root.neutron.cinder_xs.E_g)
-    pass
+    matslib = make_matslib(os.path.join(os.path.split(__file__)[0],
+                                        '../pyne/dbgen/materials_compendium.csv'))
+
+    obs_comps = get_comps_from_nuc_data(nuc_data)
+    exp_comps = [mat.comp for mat in list(matslib.values())]
+    for obs_comp in obs_comps:
+        assert_in(obs_comp, exp_comps)

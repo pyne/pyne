@@ -23,7 +23,6 @@ from pyne.material import Material, MaterialLibrary
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
-# Make a dictionary that represents elements as dicts of their isotopes
 def make_elements():
     """Make natural elemental materials based on isotopic abundances.
 
@@ -33,7 +32,11 @@ def make_elements():
         Natural elements as materials.
     """
     natural_abund("H1")  # initialize natural_abund_map
-    sorted_abunds = sorted(list(natural_abund_map.items()))
+    # get rid of elemental total abundances and empty isotopic abundances
+    abunds_no_trivial = [abund for abund in natural_abund_map.items() if
+                         nucname.zzzaaa(abund[0]) % 1000 != 0 and
+                         abund[1] != 0]
+    sorted_abunds = sorted(abunds_no_trivial)
     grouped_abunds = groupby(sorted_abunds, lambda x: nucname.zzzaaa(x[0])//1000)
     # filter out 111, 113, 115, 117, 118 - the ones with no names
     elts = (Material(dict(abunds), metadata={"name": nucname.name(zz)})
@@ -111,6 +114,7 @@ def parse_materials(mats, lines):
     mat.metadata = {"name": name}
     mat.normalize()
     mat = mat.expand_elements()
+    mat.comp = dict((frac for frac in mat.comp.items() if frac[1] != 0))
     mats.update({name: mat})
     return parse_materials(mats, lines[material_length:])
 
@@ -122,6 +126,26 @@ def make_materials_compendium(nuc_data, matslib):
                        nucpath="/material_library/nucid")
 
 
+def make_matslib(fname):
+    """Make a pyne.material.MaterialLibrary. First makes elements, then
+    materials from compendium.
+
+    Parameters
+    ----------
+    fname : str
+        Path to materials compendium.
+
+    Returns
+    -------
+    matslib : pyne.material.MaterialLibrary
+        All the materials you could want, in a handy MaterialLibrary instance.
+    """
+    matslib = MaterialLibrary(make_elements())
+    matsdict = grab_materials_compendium(fname)
+    matslib.update(matsdict)
+    return matslib
+
+
 def make_materials_library(args):
     """Controller function for adding materials library."""
     nuc_data = args.nuc_data
@@ -131,12 +155,7 @@ def make_materials_library(args):
                 print("skipping materials library data table creation; already exists.")
                 return
 
-    print("Making the elements...")
-    eltsdict = make_elements()
-    matslib = MaterialLibrary(eltsdict)
-    print("Grabbing materials compendium...")
-    matsdict = grab_materials_compendium(os.path.join(os.path.split(__file__)[0],
-                                                      'materials_compendium.csv'))
-    matslib.update(matsdict)
     print("Making materials library...")
+    matslib = make_matslib(os.path.join(os.path.split(__file__)[0],
+                                        'materials_compendium.csv'))
     make_materials_compendium(nuc_data, matslib)
