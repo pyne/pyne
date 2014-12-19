@@ -2074,6 +2074,8 @@ cdef class _MaterialLibrary(object):
             The path in the heirarchy to the nuclide array in an HDF5 file.
 
         """
+        if sys.version_info[0] >=3 and isinstance(lib, bytes):
+            lib = lib.decode()
         cdef dict _lib = {}
         if lib is None:
             self._lib = _lib
@@ -2081,8 +2083,7 @@ cdef class _MaterialLibrary(object):
             for key, mat in lib.items():
                 _lib[key] = ensure_material(mat)
             self._lib = _lib
-        elif isinstance(lib.decode(), basestring):
-            lib = lib.decode()
+        elif isinstance(lib, basestring):
             self._lib = _lib
             if lib.endswith('.json') or lib.endswith('.js'):
                 self.from_json(lib)
