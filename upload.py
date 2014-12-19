@@ -21,6 +21,7 @@ Update procedure:
  
  * The new prebuilt_nuc_data.h5 should now be on rackspace it may take 12-24 hours for this to propagate to all the CDN nodes.
 """
+from __future__ import print_function
 import pyrax
 import os
 
@@ -29,6 +30,8 @@ def push_rackspace(fname, cred_file='rs.cred'):
     cf = pyrax.cloudfiles
     with open(fname, 'rb') as f:
         fdata = f.read()
+    cont = cf.get_container("pyne-data")
+    cont.purge_cdn_object('prebuilt_nuc_data.h5')
     obj = cf.store_object("pyne-data", fname, fdata)
 
 
@@ -36,6 +39,6 @@ pyrax.set_setting("identity_type", "rackspace")
 pyrax.set_setting('region', 'ORD')
 pyrax.set_credential_file('rs.cred')
 cf = pyrax.cloudfiles
-print "list_containers:", cf.list_containers()
-print "get_all_containers:", cf.get_all_containers()
+print("list_containers: {}".format(cf.list_containers()))
+print("get_all_containers: {}".format(cf.get_all_containers()))
 push_rackspace('prebuilt_nuc_data.h5')
