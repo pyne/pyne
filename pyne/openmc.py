@@ -73,7 +73,10 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
         self.nucid = nuc
         abspath = None
         if path is not None and cross_sections_path is not None:
-            d = os.path.dirname(cross_sections_path)
+            if os.path.isdir(cross_sections_path):
+                d = cross_sections_path
+            else:
+                d = os.path.dirname(cross_sections_path)
             abspath = os.path.abspath(os.path.join(d, path))
         self.abspath = abspath
 
@@ -135,6 +138,8 @@ class CrossSections(HTMLParser):
     def handle_data(self, data):
         if self._tag == 'filetype':
             self.filetype = data
+        elif self._tag == 'directory':
+            self.path = data.strip()
 
     def handle_ace_table(self, attrs):
         ace_table = AceTable(cross_sections_path=self.path, **dict(attrs))
