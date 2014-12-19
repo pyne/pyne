@@ -151,7 +151,7 @@ const int all_nucs [{{ nucs|length }}] = {
 
 
 ELEM_FUNC = ENV.from_string("""
-void decay_{{ elem|lower }}(double &t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[{{ nucs|length }}]) {
+void decay_{{ elem|lower }}(double t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[{{ nucs|length }}]) {
   //using std::exp2;
   switch (it->first) {
     {{ cases|indent(4) }}
