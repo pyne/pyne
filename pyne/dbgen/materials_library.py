@@ -28,16 +28,15 @@ def make_elements():
 
     Returns
     -------
-    eltsdict : {str: pyne.material.Material}
+    eltsdict : dict from str to pyne.material.Material
         Natural elements as materials.
     """
     natural_abund("H1")  # initialize natural_abund_map
     # get rid of elemental total abundances and empty isotopic abundances
     abunds_no_trivial = [abund for abund in natural_abund_map.items() if
-                         nucname.zzzaaa(abund[0]) % 1000 != 0 and
-                         abund[1] != 0]
+                         nucname.anum(abund[0]) != 0 and abund[1] != 0]
     sorted_abunds = sorted(abunds_no_trivial)
-    grouped_abunds = groupby(sorted_abunds, lambda x: nucname.zzzaaa(x[0])//1000)
+    grouped_abunds = groupby(sorted_abunds, lambda abund: nucname.znum(abund[0]))
     # filter out 111, 113, 115, 117, 118 - the ones with no names
     elts = (Material(dict(abunds), metadata={"name": nucname.name(zz)})
             for zz, abunds in grouped_abunds if zz in nucname.zz_name.keys())
@@ -56,13 +55,13 @@ def grab_materials_compendium(location='materials_compendium.csv'):
 
     Returns
     -------
-    mats : [pyne.material.Material]
+    mats : list of pyne.material.Material
         The materials in the compendium.
     """
     natural_abund("H1")  # initialize natural_abund_map
-    try:
+    if sys.version_info[0] > 2:
         f = open(location, 'r', newline='', encoding="utf-8")
-    except TypeError:  # python2
+    else:
         f = open(location, 'rb')
     reader = csv.reader(f, delimiter=',', quotechar='"')
     lines = list(filter(is_comp_matname_or_density, reader))
@@ -71,12 +70,15 @@ def grab_materials_compendium(location='materials_compendium.csv'):
     return mats
 
 
+comp_matname_or_density_re = re.compile(r'\d+. +$|[A-Za-z]{1,2}-?(\d{1,3})?$')
+
+
 def is_comp_matname_or_density(line):
     """Detect composition, material name, or density lines.
 
     Parameters
     ----------
-    line : [str]
+    line : list of str
         The input line.
 
     Returns
@@ -89,9 +91,12 @@ def is_comp_matname_or_density(line):
         return False
     if line[0] == "Density (g/cm3) =":
         return True
-    if re.match(r'\d+. +$|[A-Za-z]{1,2}-?(\d{1,3})?$', line[0]):
+    if comp_matname_or_density_re.match(line[0]):
         return True
     return False
+
+
+first_line_re = re.compile(r"^\d+. +")
 
 
 def parse_materials(mats, lines):
@@ -99,14 +104,15 @@ def parse_materials(mats, lines):
 
     Parameters
     ----------
-    mats : {str: pyne.material.Material}
+    mats : dict from str to pyne.material.Material
         The growing dict of materials.
-    lines: [[str]]
+    lines: list of list of str
         The shrinking list of lines.
     """
     if len(lines) == 0:
         return mats
-    material_lines = list(takewhile(lambda l: re.match(r"^\d+. +", l[0]) is None, lines[2:]))
+    material_lines = list(takewhile(lambda l: first_line_re.match(l[0]) is None,
+                                    lines[2:]))
     material_length = len(material_lines) + 2
     mat = sum((Material({l[0]: float(l[3])}) for l in material_lines))
     mat.density = float(lines[1][2])
@@ -124,6 +130,26 @@ def make_materials_compendium(nuc_data, matslib):
     """Adds materials compendium to nuc_data.h5."""
     matslib.write_hdf5(nuc_data, datapath="/material_library/materials",
                        nucpath="/material_library/nucid")
+
+
+def make_matslib(fname):
+    """Make a pyne.material.MaterialLibrary. First makes elements, then
+    materials from compendium.
+
+    Parameters
+    ----------
+    fname : str
+        Path to materials compendium.
+
+    Returns
+    -------
+    matslib : pyne.material.MaterialLibrary
+        All the materials you could want, in a handy MaterialLibrary instance.
+    """
+    matslib = MaterialLibrary(make_elements())
+    matsdict = grab_materials_compendium(fname)
+    matslib.update(matsdict)
+    return matslib
 
 
 def make_materials_library(args):
