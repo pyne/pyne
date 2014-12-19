@@ -108,6 +108,17 @@ PyNE has known issues on the following platforms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Conda Install Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+After installing anaconda or miniconda from 
+`the Continuum downloads page <http://continuum.io/downloads>`_,
+in a new terminal run the following conda install command::
+
+    conda install -c https://conda.binstar.org/pyne pyne
+
+If you have any issues, please let us know.
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Conda Build Instructions
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 On mac and linux PyNE can be installed via the package manager conda. 
 After installing anaconda or miniconda from 
 `the Continuum downloads page <http://continuum.io/downloads>`_ 
