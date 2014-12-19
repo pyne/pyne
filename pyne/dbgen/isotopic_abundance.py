@@ -6,9 +6,10 @@ from pyne.utils import QAWarning
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def get_isotopic_abundances():
     """Creates a dictionary of isotopic abundances based off of [1].
-    
+
     [1] M. Berglund, M. Wieser: Isotopic compositions of the elements 2009
         (IUPAC Technical Report).
         Pure Appl. Chem., 2011, Vol. 83, No. 2, pp. 397-410
@@ -22,11 +23,11 @@ def get_isotopic_abundances():
         isotope relative to all atoms of that element.
     """
 
-    abundance_file = pkgutil.get_data('pyne.dbgen', 'abundances.txt').split('\n')
-    
+    abundance_file = pkgutil.get_data('pyne.dbgen', 'abundances.txt').decode().split('\n')
+
     # Create dictionary
     abundance = {}
-    abundance_by_Z = dict([(i, []) for i in range(1,93)])
+    abundance_by_Z = dict([(i, []) for i in range(1, 93)])
 
     # Read data
     for line in abundance_file:
@@ -40,12 +41,11 @@ def get_isotopic_abundances():
         A = int(words[2])
         nuc = (Z*1000 + A)*10000
         name = '-'.join(words[1:3])
-        
+
         # Read value and add to dictionary
         val = 0.01*float(words[3])
         abundance[nuc] = val
-        abundance_by_Z[Z].append((name,val))
-
+        abundance_by_Z[Z].append((name, val))
 
     # Check data
     approx_equal = lambda a, b: abs(a - b) < 1e-8
@@ -55,7 +55,7 @@ def get_isotopic_abundances():
         # Skip elements with no stable isotopes
         if not abundance_by_Z[Z]:
             continue
-    
+
         # Add abundance
         for name, val in abundance_by_Z[Z]:
             total += val
@@ -69,6 +69,6 @@ def get_isotopic_abundances():
                 print("  {0} = {1}".format(name, val))
             print("  Total = {0}".format(total))
             raise
-    
+
     # Return dictionary
     return abundance
