@@ -32,7 +32,7 @@ def push_rackspace(fname, cred_file='rs.cred'):
         fdata = f.read()
     cont = cf.get_container("pyne-data")
     obj = cf.store_object("pyne-data", fname, fdata)
-    cont.purge_cdn_object('prebuilt_nuc_data.h5')
+    cont.purge_cdn_object(fname)
 
 
 pyrax.set_setting("identity_type", "rackspace")
