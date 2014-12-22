@@ -16,7 +16,7 @@ cdef extern from "data.h" namespace "pyne":
     double cm2_per_barn
     double sec_per_day
     double MeV_per_K
-
+    double MeV_per_MJ
     # hash map and initialization function
     map[std_string, std_string] data_checksums
 

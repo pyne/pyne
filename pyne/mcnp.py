@@ -1294,16 +1294,27 @@ class PtracReader(object):
                     print("processing event {0}".format(counter))
 
 
-def read_mcnp_inp(inp):
-    """This function reads an MCNP inp file and returns a list of Materials
-    material objects (for single density materials) and MultiMaterial objects
-    (for multiple density materials). This function relys on
-    mat_from_mcnp."""
+def mats_from_inp(inp):
+    """This function reads an MCNP inp file and returns a mapping of material
+    numbers to material objects.
+
+    Parameters
+    ----------
+    inp : str
+        MCNP input file
+
+    Returns
+    --------
+    materials : dict
+       Keys are MCNP material numbers and values are PyNE material objects (for 
+       single density materials) and MultiMaterial objects (for multiple density 
+       materials). 
+    """
 
     mat_lines = []  # line of lines that begin material cards
-    densities = {}  # dictionary to be popul. with material nos. and densities
+    densities = {}  # dictionary to be populuated with material # and densities
     mat_nums = []  # list of material numbers to be printed to stdout
-    material_list = []  # to be populated with material objectes and returned
+    materials = {}  # to be populated with material objectes and returned
 
     line_count = 1
     line = linecache.getline(inp, line_count)
@@ -1318,21 +1329,20 @@ def read_mcnp_inp(inp):
                     line.split()[1].isdigit() is True and \
                     line[0:5] != '     ' and \
                     line.split()[1] != '0':
+                mat_num = int(line.split()[1])
+                den = float(line.split()[2])
 
-                if line.split()[1] not in densities.keys():
-                    densities[line.split()[1]] = [float(line.split()[2])]
+                if mat_num not in densities.keys():
+                    densities[mat_num] = [den]
 
                 else:
                     same_bool = False
-                    for j in range(0, len(densities[line.split()[1]])):
-                        if abs((float(line.split()[2])
-                               - densities[line.split()[1]][j])
-                               / float(line.split()[2])) < 1E-4:
+                    for j in range(0, len(densities[mat_num])):
+                        if abs(den - densities[mat_num][j])/den < 1E-4:
                             same_bool = True
 
                     if same_bool is False:
-                        densities[line.split()[1]].append(
-                            float(line.split()[2]))
+                        densities[mat_num].append(den)
 
         # check line to see if it contain a material card, in the form
         # m* where * is a digit. If so store the line num. and material number
@@ -1340,28 +1350,40 @@ def read_mcnp_inp(inp):
             if line.split()[0][0] == 'm' or line.split()[0][0] == 'M':
                 if line.split()[0][1].isdigit() is True:
                     mat_lines.append(line_count)
-                    mat_nums.append(line.split()[0][1:])
+                    mat_nums.append(int(line.split()[0][1:]))
 
         line_count += 1
         line = linecache.getline(inp, line_count)
 
     for i in range(0, len(mat_nums)):
-        print(mat_nums[i])
         if mat_nums[i] in densities.keys():
-            material_list.append(
-                mat_from_mcnp(inp, mat_lines[i], densities[mat_nums[i]]))
+            materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i],
+                                                   densities[mat_nums[i]])
         else:
-            material_list.append(mat_from_mcnp(inp, mat_lines[i]))
+            materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i])
+    return materials
 
-    return material_list
 
+def mat_from_inp_line(filename, mat_line, densities='None'):
+    """ This function reads an MCNP material card from a file and returns a
+    Material or Multimaterial object for the material described by the card.
+    This function is used by :func:`mats_from_inp`.
+    
+    Parameters
+    ----------
+    filename : str
+        Name of the MCNP input file
+    mat_line : int
+        Line number of the material card or interest
+    densities : list of floats
+        The densities associated with the material
 
-def mat_from_mcnp(filename, mat_line, densities='None'):
-    """This is a function that recieves and MCNP input filename, the
-    line number, and list of densities associated with the material and
-    returns a material object. This function is typically called by
-    read_mcnp_inp. If a material has multiple densities, a multimaterial
-    object is returned."""
+    Returns
+    -------
+    finished_mat : Material or MultiMaterial
+        A Material object is returned if there is 1 density supplied. If
+        multiple densities are supplied a MultiMaterial is returned.
+    """
 
     data_string = linecache.getline(filename, mat_line).split('$')[0]
     # collect all material card data on one string

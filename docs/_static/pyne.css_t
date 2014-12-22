@@ -1,4 +1,9 @@
 @import url("cloud.css");
+
+.logo {
+    width:200px;   
+}
+
 body {
     background-image:url('wood.jpg');
     background-repeat: repeat; 
@@ -27,7 +32,32 @@ div.sphinxlocaltoc ul a, div.sphinxglobaltoc ul a {
     white-space: normal;
 }
 
+div.sphinxsidebar ul {
+    margin-left: 20px;
+    list-style: square;
+}
+
 /* Fixes numpy colon wrapping issue */
 table.docutils th.field-name {
     white-space: nowrap;
+}
+
+div#pynemenuheader {
+    border-style: solid;
+    border-width: thin;
+    border-color: {{ bordercolor }};
+    border-radius: 10px; 
+    background-color: {{ theme_relbarbgcolor }}; 
+    padding: 20px; 
+    text-align: center;
+    font-size: 180%;
+}
+
+div#pynemenucontent {
+    font-size: 130%;
+}
+
+div#pynemenucontent ul {
+    list-style: square;
+    color: {{ theme_sidebartextcolor }};
 }

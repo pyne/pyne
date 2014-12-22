@@ -189,7 +189,8 @@ def parse_simple_xs(build_dir=""):
 
     for eng in simple_xs_energy:
         # Store only non-trivial entries
-        mask = (energy_tables[eng][simple_xs_channels.keys()] != np.zeros(1, dtype=simple_xs_dtype)[simple_xs_channels.keys()])
+        channels_list = list(simple_xs_channels.keys())
+        mask = (energy_tables[eng][channels_list] != np.zeros(1, dtype=simple_xs_dtype)[channels_list])
         energy_tables[eng] = energy_tables[eng][mask]
 
         # Calculate some xs
