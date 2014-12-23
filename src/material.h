@@ -37,6 +37,13 @@ namespace pyne
   typedef std::map<int, double> comp_map; ///< Nuclide-mass composition map type
   typedef comp_map::iterator comp_iter;   ///< Nuclide-mass composition iter type
 
+  #ifdef PYNE_IS_AMALGAMATED
+  namespace decayers {
+    extern comp_map decay(comp_map, double);
+  }  // namespace decayers
+  #endif
+
+
   // These 37 strings are predefined FLUKA materials. 
   // Materials not on this list requires a MATERIAL card. 
   static std::string fluka_mat_strings[] = {
