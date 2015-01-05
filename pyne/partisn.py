@@ -194,7 +194,7 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
     barn_conv = 10.**-24 # [cm^2/b]
     mat_lib = {}
     for mat_name, comp in mats_collapsed.iteritems():
-        print(comp)
+        #print(comp)
         comp_atom_frac = comp.to_atom_frac() # atom fractions
         density = comp.mass_density() # [g/cc]
         
@@ -249,7 +249,7 @@ def _materials_to_cells(hdf5):
                 if 'mat:' in _tag_to_script(mat_name):
                     mat_assigns[cell] = _tag_to_script(mat_name)
     
-    print(mat_assigns)
+    #print(mat_assigns)
     return mat_assigns
 
 def _tag_to_script(tag):
@@ -298,12 +298,17 @@ def _define_zones(mesh, mat_assigns):
             z += 1
             zones_cells[z] = voxel[idx]
             first = False
-    #print(zones_cells)
-    #zones = {}
-    #for zone in zones_cells.keys():
-    #    for 
     
-    zones = zones_cells
+    # Replace cell numbers with materials
+    zones = {}
+    for zone in zones_cells.keys():
+        zones[zone] = {}
+        zones[zone]['vol_frac'] = zones_cells[zone]['vol_frac']
+        zones[zone]['mat'] = []
+        for i in zones_cells[zone]['cell']:
+            zones[zone]['mat'].append(mat_assigns[i])
+
+    #zones = zones_cells
     return zones
 
 
@@ -365,10 +370,10 @@ def _block01(coord_sys, xs_names, mat_lib, zones, bounds):
             IT = IM
         elif key == 'y':
             JM = len(bounds[key]) - 1
-            JT = IM
+            JT = JM
         elif key == 'z':
             KM = len(bounds[key]) - 1
-            KT = IM
+            KT = KM
     
     # Optional Input IQUAD
     IQUAD = 1 # default
