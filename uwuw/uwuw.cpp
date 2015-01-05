@@ -13,10 +13,11 @@ UWUW::UWUW(char* file)
   // turn the filename into a full filepath
   full_filepath = get_full_filepath(filename);
 
-  // load materials
-  material_library = load_pyne_materials(full_filepath);
   // load tallies
   tally_library = load_pyne_tallies(full_filepath);
+
+  // load materials
+  material_library = load_pyne_materials(full_filepath);
 };
 
 // Default constructor
@@ -117,9 +118,14 @@ std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename)
   std::map<std::string, pyne::Tally> library; // material library
 
   pyne::Tally test_tally;
+
+  //  test_tally.from_hdf5("test1_rd.h5m","/tally");
+
   try
     {
       test_tally.from_hdf5(filename,"/tally");
+      std::cout << filename << std::endl;
+
     }
   catch (const std::exception &except) // catch the exception from from_hdf5
     {
