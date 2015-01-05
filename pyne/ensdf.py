@@ -198,7 +198,7 @@ def _parse_level_continuation_record(lc_rec):
             br = br.strip()
         else:
             continue
-        if '%' in rx and not '?' in br and len(br) > 0:
+        if '%' in rx and '?' not in br and len(br) > 0:
             dat[rx] = br
     return dat
 
@@ -264,9 +264,9 @@ def _parse_gamma_continuation_record(g, inten, tti):
                 conv, err = _get_val_err(eff[0], eff[1])
             elif len(eff) == 1:
                 conv = _getvalue(eff[0])
-            if conv is None and not contype in conversions:
+            if conv is None and contype not in conversions:
                 conversions[contype] = (None, None)
-            elif not contype in conversions:
+            elif contype not in conversions:
                 conversions[contype] = (conv * greff, err)
     return conversions
 

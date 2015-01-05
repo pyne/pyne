@@ -15,6 +15,9 @@ import sys
 import warnings
 
 from pyne.utils import QAWarning
+import cloud_sptheme as csp
+
+print("Cloud Version: " + csp.__version__)
 
 warnings.simplefilter("ignore", QAWarning)
 # -- General configuration -----------------------------------------------------
@@ -112,40 +115,41 @@ pygments_style = 'tango'
 # Sphinx are currently 'default' and 'sphinxdoc'.
 #html_theme = 'default'
 #html_theme = 'sphinxdoc'
-#html_theme = 'altered_nature'
-html_theme = 'cloud_pyne'
+#html_theme = 'nature'
+html_theme = 'cloud'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
-html_theme_options = {'sidebarbgcolor': '#F1FFF0',
+html_theme_options = {'sidebarbgcolor': '#F5FAEB',
                       'sidebartextcolor': '#864907',
-                      'sidebarlinkcolor': '#A92727',
-                      'sidebartrimcolor': '#504A4B',
+                      'sidebarlinkcolor': '#4b1a07',
+                      #'sidebartrimcolor': '#504A4B',
+                      'sidebartrimcolor': '#556B2F',
                       'collapsiblesidebar': True,
-                      'relbarbgcolor': '#38761D',
-                      'footerbgcolor': '#BED4EB',
-                      'footertextcolor': '#504A4B',
-                      'bodytrimcolor': '#80858a',
+                      'stickysidebar':False,
+                      'relbarbgcolor': '#98bc8c',
+                      'footerbgcolor': '#fffffff',
+                      'footertextcolor': '#323039',
                       'linkcolor': '#A92727',
                       'textcolor': '#323039',
-                      'sectionbgcolor': '#864907',
-                      #'sectiontextcolor': '#777777',
-                      'sectiontrimcolor': '#f6fcfc',
-                      'codebgcolor': '#F1FFF0',
+                      #'sectionbgcolor': '#EBFAD7',
+                      'sectionbgcolor': '#F2E3C2',
+                      'sectiontextcolor': '#0000000',
+                      'sectiontrimcolor': '#fffffff',
+                      #'codebgcolor': '#BBCBB6',
+                      'codebgcolor': '#F8FFE3',
                       'codetextcolor': '#000000',
-                      'quotebgcolor': '#f6fcfc',
-                      #'rubricbgcolor': '#D17519',
-                      #'rubricbgcolor': '#69A74E',
-                      'rubricbgcolor': '#996600',
-                      #'min_height': 'bottom',
-                      'googleanalytics_id': 'UA-37452818-1',
+                      'min_height': 'bottom',
+                      'googleanalytics_id':'UA-37452818-1',
+                      'highlighttoc': False,
+                      'bgcolor':'#ffffff',
+                      'max_width': '1250px',
+                      'sidebarwidth': '280px',
                       }
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ["_theme"]
-
+html_theme_path = [csp.get_theme_dir()]
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
 #html_title = None
@@ -167,15 +171,17 @@ html_favicon = '../img/pyne_icon.ico'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+
 html_static_path = ['_static']
+html_style = "pyne.css"
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
-#html_use_smartypants = True
+html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
@@ -188,13 +194,16 @@ html_static_path = ['_static']
 #html_use_modindex = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = True
 
 # If true, the index is split into individual pages for each letter.
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
+
+# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+html_show_sphinx = False
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the

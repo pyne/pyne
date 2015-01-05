@@ -7,6 +7,7 @@
 #include "json.h"
 //#include "dagmc_bridge.h"  // figure this out later...
 #include "data.h"
+#include "decay.h"
 #include "enrichment_cascade.h"
 #include "enrichment.h"
 #include "enrichment_symbolic.h"

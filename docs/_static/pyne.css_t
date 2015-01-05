@@ -1,0 +1,63 @@
+@import url("cloud.css");
+
+.logo {
+    width:200px;   
+}
+
+body {
+    background-image:url('wood.jpg');
+    background-repeat: repeat; 
+    background-position:0 0;
+    background-attachment: scroll;
+    background-size: auto;
+}
+
+{% set bordercolor = "#556B2F" %}
+
+div.document {
+    border-right-style: solid;
+    border-left-style: solid;
+    border-width: thin;
+    border-color: {{ bordercolor }};
+}
+
+div.related {
+    border-style: solid;
+    border-width: thin;
+    border-color: {{ bordercolor }};
+}
+
+div.sphinxlocaltoc ul a, div.sphinxglobaltoc ul a {
+    display: inline;
+    white-space: normal;
+}
+
+div.sphinxsidebar ul {
+    margin-left: 20px;
+    list-style: square;
+}
+
+/* Fixes numpy colon wrapping issue */
+table.docutils th.field-name {
+    white-space: nowrap;
+}
+
+div#pynemenuheader {
+    border-style: solid;
+    border-width: thin;
+    border-color: {{ bordercolor }};
+    border-radius: 10px; 
+    background-color: {{ theme_relbarbgcolor }}; 
+    padding: 20px; 
+    text-align: center;
+    font-size: 180%;
+}
+
+div#pynemenucontent {
+    font-size: 130%;
+}
+
+div#pynemenucontent ul {
+    list-style: square;
+    color: {{ theme_sidebartextcolor }};
+}
