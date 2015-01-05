@@ -92,13 +92,15 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     mat_assigns = _materials_to_cells(hdf5)
     
     # determine the zones
-    zones = _define_zones(mesh, mat_assigns)
+    zones, zone_voxel = _define_zones(mesh, mat_assigns)
     for key, item in zones.iteritems():
         print(key, item)
     
+    for key, item in zone_voxel.iteritems():
+        print(key, item)
+    
     # read nucdata
-    bxslib = open(nucdata, 'rb')
-    xs_names = _read_bxslib(bxslib)
+    xs_names = _read_bxslib(nucdata)
 
     return coord_sys, bounds, mat_lib, zones, xs_names
  
@@ -152,7 +154,15 @@ def _read_mesh(mesh):
     return coord_sys, bounds
 
  
-def _read_bxslib(bxslib):
+def _read_bxslib(nucdata):
+    # read entire file
+    #binary_file = _BinaryReader(nucdata, mode='rb')
+    #record = binary_file.get_fortran_record()
+    #print(binary_file)
+    ##print(record.get_double())
+    #print(record.get_string(28))   
+        
+    bxslib = open(nucdata, 'rb')
     string = ""
     edits = ""
     xs_names=[]
@@ -169,7 +179,7 @@ def _read_bxslib(bxslib):
             string += pad1
         xs_names.append(string.strip(" "))
         string=""
-
+    
 
 def _get_materials(hdf5, datapath, nucpath, nuc_names):
     # reads material properties from the loaded dagmc_geometry
@@ -252,6 +262,7 @@ def _materials_to_cells(hdf5):
     #print(mat_assigns)
     return mat_assigns
 
+
 def _tag_to_script(tag):
     a = []
     # since we have a byte type tag loop over the 32 elements
@@ -263,6 +274,7 @@ def _tag_to_script(tag):
             # join to end string
             script = ''.join(a)
     return script
+
 
 def _define_zones(mesh, mat_assigns):
     """This function takes results of discretize_geom and finds unique voxels
@@ -282,34 +294,52 @@ def _define_zones(mesh, mat_assigns):
         voxel[idx]['vol_frac'].append(i[2])
         #voxel[idx]['rel_error'].append(i[3])
     
-    # determine which voxels are identical and remove
+    # determine which voxels are identical and remove and then assign zone to
+    # voxel
+    zone_voxel = {} #
     z = 0
     zones_cells = {} # defined by cell number
     match = False
     first = True    
     for idx, vals in voxel.iteritems():
-        for zone, info in zones_cells.iteritems():
-            if vals == info:
-                match = True
-                break
-            else:
-                match = False
-        if first or not match:
-            z += 1
-            zones_cells[z] = voxel[idx]
-            first = False
-    
-    # Replace cell numbers with materials
+        #for zone, info in zones_cells.iteritems():
+        #    if vals == info:
+        #        match = True
+        #        break
+        #    else:
+        #        match = False
+        #if first or not match:
+        z += 1
+        zones_cells[z] = voxel[idx]
+        #first = False
+        
+        zone_voxel[idx] = z
+    #zone_voxel = {}
+            
+    # Replace cell numbers with materials, eliminating duplicate materials
+    # within single zone definition
     zones = {}
     for zone in zones_cells.keys():
         zones[zone] = {}
-        zones[zone]['vol_frac'] = zones_cells[zone]['vol_frac']
+        #zones[zone]['vol_frac'] = zones_cells[zone]['vol_frac']
+        zones[zone]['vol_frac'] = []
         zones[zone]['mat'] = []
-        for i in zones_cells[zone]['cell']:
-            zones[zone]['mat'].append(mat_assigns[i])
-
-    #zones = zones_cells
-    return zones
+        for i, cell in enumerate(zones_cells[zone]['cell']):
+            if mat_assigns[cell] not in zones[zone]['mat']:
+                # create new entry
+                zones[zone]['mat'].append(mat_assigns[cell])
+                zones[zone]['vol_frac'].append(zones_cells[zone]['vol_frac'][i])
+            else:
+                # update value that already exists with new volume fraction
+                for j, val in enumerate(zones[zone]['mat']):
+                    if mat_assigns[cell] == val:
+                        vol_frac = zones[zone]['vol_frac'][j] + zones_cells[zone]['vol_frac'][i]
+                        zones[zone]['vol_frac'][j] = vol_frac
+                        #break
+    # Alright Kalin, you are working here. You need to start at this point and
+    # eliminate the duplicates in zones and then make sure the volume fractions are
+    # adding properly (right now a vol_frac is > 1) !!!!!!!!
+    return zones, zone_voxel
 
 
 #class PartisnWrite(object):
@@ -339,47 +369,72 @@ def write_partisn_input(coord_sys, bounds, mat_lib, zones, xs_names, input_file)
         xs_names : list of str, names of isotope/elements from the bxslib
     
     """
-    _block01(coord_sys, xs_names, mat_lib, zones, bounds)
+    block01 = _block01(coord_sys, xs_names, mat_lib, zones, bounds)
+    #print(block01)
+    
+    block02 = _block02(bounds)
+    #print(block02)
 
 def _title():
     # figure out what to make the title
     pass
         
 def _block01(coord_sys, xs_names, mat_lib, zones, bounds):
+    block01 = {}
+    
     # Determine IGEOM
     if len(coord_sys) == 1:
-        IGEOM = 'SLAB'
+        block01['IGEOM'] = 'SLAB'
     elif len(coord_sys) == 2:
-        IGEOM = 'X-Y' # assuming cartesian
+        block01['IGEOM'] = 'X-Y' # assuming cartesian
     elif len(coord_sys) == 3:
-        IGEOM = 'X-Y-Z' # assuming cartesian
+        block01['IGEOM'] = 'X-Y-Z' # assuming cartesian
     
-    # NGROUP
+    # NGROUP - have to read from bxslib still
     
-    # ISN
+    # ISN - have to read from bxslib still
     
-    NISO = len(xs_names)
-    MT = len(mat_lib)
-    NZONE = len(zones)
+    block01['NISO'] = len(xs_names)
+    block01['MT'] = len(mat_lib)
+    block01['NZONE'] = len(zones)
     
     # Number of Fine and Coarse Meshes
     # one fine mesh per coarse by default
     for key in bounds.keys():
         if key == 'x':
-            IM = len(bounds[key]) - 1
-            IT = IM
+            block01['IM'] = len(bounds[key]) - 1
+            block01['IT'] = block01['IM']
         elif key == 'y':
-            JM = len(bounds[key]) - 1
-            JT = JM
+            block01['JM'] = len(bounds[key]) - 1
+            block01['JT'] = block01['JM']
         elif key == 'z':
-            KM = len(bounds[key]) - 1
-            KT = KM
+            block01['KM'] = len(bounds[key]) - 1
+            block01['KT'] = block01['KM']
     
     # Optional Input IQUAD
-    IQUAD = 1 # default
+    block01['IQUAD'] = 1 # default
+    
+    return block01
 
-def _block02():
-    pass
+def _block02(bounds):
+    block02 = {}
+    
+    # fine intervals are 1 by default
+    for key in bounds.keys():
+        if key == 'x':
+            block02['XMESH'] = bounds[key]
+            block02['XINTS'] = 1
+        elif key == 'y':
+            block02['YMESH'] = bounds[key]
+            block02['YINTS'] = 1
+        elif key == 'z':
+            block02['XZMESH'] = bounds[key]
+            block02['ZINTS'] = 1  
+    
+    
+    #print(bounds)
+    return block02
+    
 
 def _block03():
     pass
