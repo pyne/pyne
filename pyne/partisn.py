@@ -102,7 +102,7 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     # read nucdata
     xs_names = _read_bxslib(nucdata)
 
-    return coord_sys, bounds, mat_lib, zones, xs_names
+    return coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names
  
     
 def _read_mesh(mesh):
@@ -156,8 +156,8 @@ def _read_mesh(mesh):
  
 def _read_bxslib(nucdata):
     # read entire file
-    #binary_file = _BinaryReader(nucdata, mode='rb')
-    #record = binary_file.get_fortran_record()
+    binary_file = _BinaryReader(nucdata, mode='rb')
+    record = binary_file.get_fortran_record()
     #print(binary_file)
     ##print(record.get_double())
     #print(record.get_string(28))   
@@ -185,13 +185,13 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
     # reads material properties from the loaded dagmc_geometry
     
     # set of exception nuclides for collapse_elements
-    mat_exceptions = Set(nuc_names.keys())
+    mat_except = Set(nuc_names.keys())
     
     # collapse isotopes into elements
     mats = MaterialLibrary(hdf5,datapath=datapath,nucpath=nucpath)
     mats_collapsed = {}
     for mat_name in mats.keys():
-        mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_exceptions)
+        mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)
     
     # Check that the materials are valid:
     #   1) non zero and non-negative densities (density = True)
@@ -342,7 +342,7 @@ def _define_zones(mesh, mat_assigns):
 
 #class PartisnWrite(object):
 
-def write_partisn_input(coord_sys, bounds, mat_lib, zones, xs_names, input_file):
+def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names, nuc_names, input_file):
     """This function writes out the necessary information to a text partisn 
     input file.
     
@@ -368,10 +368,16 @@ def write_partisn_input(coord_sys, bounds, mat_lib, zones, xs_names, input_file)
     
     """
     block01 = _block01(coord_sys, xs_names, mat_lib, zones, bounds)
-    #print(block01)
+    print(block01)
     
-    block02 = _block02(bounds)
-    #print(block02)
+    block02 = _block02(bounds, zone_voxel)
+    print(block02)
+    
+    block03 = _block03()
+    print(block03)
+    
+    block04 = _block04(mat_lib, xs_names, nuc_names, zones)
+    print(block04)
 
 def _title():
     # figure out what to make the title
@@ -388,9 +394,9 @@ def _block01(coord_sys, xs_names, mat_lib, zones, bounds):
     elif len(coord_sys) == 3:
         block01['IGEOM'] = 'X-Y-Z' # assuming cartesian
     
-    # NGROUP - have to read from bxslib still
+    # !!! NGROUP - have to read from bxslib still
     
-    # ISN - have to read from bxslib still
+    # !!! ISN - have to read from bxslib still
     
     block01['NISO'] = len(xs_names)
     block01['MT'] = len(mat_lib)
@@ -414,7 +420,7 @@ def _block01(coord_sys, xs_names, mat_lib, zones, bounds):
     
     return block01
 
-def _block02(bounds):
+def _block02(bounds, zone_voxel):
     block02 = {}
     
     # fine intervals are 1 by default
@@ -429,15 +435,66 @@ def _block02(bounds):
             block02['XZMESH'] = bounds[key]
             block02['ZINTS'] = 1  
     
+    # zones list 
+    if 'x' in bounds.keys():
+        im = len(bounds['x']) - 1
+    else:
+        im = 1
     
-    #print(bounds)
+    if 'y' in bounds.keys():
+        jm = len(bounds['y']) - 1
+    else:
+        jm = 1
+    
+    if 'z' in bounds.keys():
+        km = len(bounds['z']) - 1
+    else:
+        km = 1
+
+    n = 0
+    block02['ZONES'] = np.zeros(shape=(im, jm*km), dtype=int)
+    #print(block02['ZONES'])
+    for i in range(im):
+        for jk in range(jm*km):
+            block02['ZONES'][i,jk] = zone_voxel[n]
+            #print(n, zone_voxel[n], i, jk, block02['ZONES'][i,jk])
+            n += 1
+            
     return block02
     
 
 def _block03():
-    pass
+    block03 = {}
+    
+    block03['LIB'] = 'BXSLIB' # default
+    
+    # Figure out the rest of this block later
+    
+    return block03
 
-def _block04():
+
+def _block04(mat_lib, xs_names, nuc_names, zones):
+    block04 = {}
+    
+    # replace nucids with bsxlib names
+    mat_bxslib = {}
+    for mat in mat_lib.keys():
+        mat_bxslib[mat] = {}
+        for nucid in mat_lib[mat].keys():
+            if nucid in nuc_names.keys():
+                name = nuc_names[nucid]
+                mat_bxslib[mat][name] = mat_lib[mat][nucid]
+            else:
+                warn("Nucid {0} does not exist in nuc_names dictionary".format(nucid))
+                mat_bxslib[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
+    
+    block04['MATLS'] = mat_bxslib
+    block04['ASSIGN'] = zones
+    # ASSIGN
+    
+    return block04
+
+def _block05():
     pass
 
 def _write():
