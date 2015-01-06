@@ -93,11 +93,11 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     
     # determine the zones
     zones, zone_voxel = _define_zones(mesh, mat_assigns)
-    for key, item in zones.iteritems():
-        print(key, item)
-    
-    for key, item in zone_voxel.iteritems():
-        print(key, item)
+    #for key, item in zones.iteritems():
+    #    print(key, item)
+    #
+    #for key, item in zone_voxel.iteritems():
+    #    print(key, item)
     
     # read nucdata
     xs_names = _read_bxslib(nucdata)
@@ -279,7 +279,9 @@ def _tag_to_script(tag):
 def _define_zones(mesh, mat_assigns):
     """This function takes results of discretize_geom and finds unique voxels
     """
+    
     dg = dagmc.discretize_geom(mesh)
+    
     # Create dictionary of each voxel's info    
     voxel = {}
     for i in dg:
@@ -293,53 +295,49 @@ def _define_zones(mesh, mat_assigns):
         voxel[idx]['cell'].append(i[1])
         voxel[idx]['vol_frac'].append(i[2])
         #voxel[idx]['rel_error'].append(i[3])
-    
-    # determine which voxels are identical and remove and then assign zone to
-    # voxel
-    zone_voxel = {} #
-    z = 0
-    zones_cells = {} # defined by cell number
-    match = False
-    first = True    
-    for idx, vals in voxel.iteritems():
-        #for zone, info in zones_cells.iteritems():
-        #    if vals == info:
-        #        match = True
-        #        break
-        #    else:
-        #        match = False
-        #if first or not match:
-        z += 1
-        zones_cells[z] = voxel[idx]
-        #first = False
-        
-        zone_voxel[idx] = z
-    #zone_voxel = {}
-            
+
     # Replace cell numbers with materials, eliminating duplicate materials
     # within single zone definition
     zones = {}
-    for zone in zones_cells.keys():
-        zones[zone] = {}
-        #zones[zone]['vol_frac'] = zones_cells[zone]['vol_frac']
-        zones[zone]['vol_frac'] = []
-        zones[zone]['mat'] = []
-        for i, cell in enumerate(zones_cells[zone]['cell']):
-            if mat_assigns[cell] not in zones[zone]['mat']:
+    for z in voxel.keys():
+        zones[z] = {}
+        zones[z]['vol_frac'] = []
+        zones[z]['mat'] = []
+        for i, cell in enumerate(voxel[z]['cell']):
+            if mat_assigns[cell] not in zones[z]['mat']:
                 # create new entry
-                zones[zone]['mat'].append(mat_assigns[cell])
-                zones[zone]['vol_frac'].append(zones_cells[zone]['vol_frac'][i])
+                zones[z]['mat'].append(mat_assigns[cell])
+                zones[z]['vol_frac'].append(voxel[z]['vol_frac'][i])
             else:
                 # update value that already exists with new volume fraction
-                for j, val in enumerate(zones[zone]['mat']):
+                for j, val in enumerate(zones[z]['mat']):
                     if mat_assigns[cell] == val:
-                        vol_frac = zones[zone]['vol_frac'][j] + zones_cells[zone]['vol_frac'][i]
-                        zones[zone]['vol_frac'][j] = vol_frac
-                        #break
-    # Alright Kalin, you are working here. You need to start at this point and
-    # eliminate the duplicates in zones and then make sure the volume fractions are
-    # adding properly (right now a vol_frac is > 1) !!!!!!!!
-    return zones, zone_voxel
+                        vol_frac = zones[z]['vol_frac'][j] + voxel[z]['vol_frac'][i]
+                        zones[z]['vol_frac'][j] = vol_frac
+    
+    # eliminate duplicate zones and assign each voxel a zone number
+    zone_voxel = {}
+    zones_mats = {}
+    z = 0
+    match = False
+    first = True    
+    for i, vals in zones.iteritems():
+        for zone, info in zones_mats.iteritems():
+            if vals == info:
+                match = True
+                y = zone
+                break
+            else:
+                match = False
+        if first or not match:
+            z += 1
+            zones_mats[z] = zones[i]
+            first = False
+            zone_voxel[i] = z
+        else:
+            zone_voxel[i] = y
+    
+    return zones_mats, zone_voxel
 
 
 #class PartisnWrite(object):
