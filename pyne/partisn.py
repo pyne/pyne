@@ -93,11 +93,11 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     
     # determine the zones
     zones, zone_voxel = _define_zones(mesh, mat_assigns)
-    #for key, item in zones.iteritems():
-    #    print(key, item)
-    #
-    #for key, item in zone_voxel.iteritems():
-    #    print(key, item)
+    for key, item in zones.iteritems():
+        print(key, item)
+    
+    for key, item in zone_voxel.iteritems():
+        print(key, item)
     
     # read nucdata
     xs_names = _read_bxslib(nucdata)
@@ -315,7 +315,8 @@ def _define_zones(mesh, mat_assigns):
                         vol_frac = zones[z]['vol_frac'][j] + voxel[z]['vol_frac'][i]
                         zones[z]['vol_frac'][j] = vol_frac
     
-    # eliminate duplicate zones and assign each voxel a zone number
+    # Eliminate duplicate zones and assign each voxel a zone number.
+    # Assign zone = 0 if vacuum or graveyard and eliminate material definition.
     zone_voxel = {}
     zones_mats = {}
     z = 0
@@ -323,26 +324,34 @@ def _define_zones(mesh, mat_assigns):
     first = True    
     for i, vals in zones.iteritems():
         for zone, info in zones_mats.iteritems():
-            if vals == info:
+            if (vals['mat'] == info['mat']) and np.allclose(np.array(vals['vol_frac']), np.array(info['vol_frac']), rtol=1e-8):
                 match = True
                 y = zone
                 break
             else:
                 match = False
         if first or not match:
-            z += 1
-            zones_mats[z] = zones[i]
-            first = False
-            zone_voxel[i] = z
+            if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
+                    ['mat:graveyard'], ['mat:Graveyard']]:
+                zone_voxel[i] = 0
+            else:
+                z += 1
+                zones_mats[z] = zones[i]
+                zone_voxel[i] = z
+                first = False
         else:
-            zone_voxel[i] = y
+            if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
+                    ['mat:graveyard'], ['mat:Graveyard']]:
+                zone_voxel[i] = 0
+            else:
+                zone_voxel[i] = y
     
     return zones_mats, zone_voxel
 
 
 #class PartisnWrite(object):
 
-def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names, nuc_names, input_file):
+def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names, nuc_names, ngroup, isn, input_file):
     """This function writes out the necessary information to a text partisn 
     input file.
     
@@ -367,23 +376,23 @@ def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names,
         xs_names : list of str, names of isotope/elements from the bxslib
     
     """
-    block01 = _block01(coord_sys, xs_names, mat_lib, zones, bounds)
-    print(block01)
+    block01 = _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn)
+    #print(block01)
     
     block02 = _block02(bounds, zone_voxel)
-    print(block02)
+    #print(block02)
     
-    block03 = _block03()
-    print(block03)
+    block03 = _block03(xs_names)
+    #print(block03)
     
     block04 = _block04(mat_lib, xs_names, nuc_names, zones)
-    print(block04)
+    #print(block04)
 
 def _title():
     # figure out what to make the title
     pass
         
-def _block01(coord_sys, xs_names, mat_lib, zones, bounds):
+def _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn):
     block01 = {}
     
     # Determine IGEOM
@@ -394,7 +403,8 @@ def _block01(coord_sys, xs_names, mat_lib, zones, bounds):
     elif len(coord_sys) == 3:
         block01['IGEOM'] = 'X-Y-Z' # assuming cartesian
     
-    # !!! NGROUP - have to read from bxslib still
+    block01['NGROUP'] = ngroup
+    block01['ISN'] = isn
     
     # !!! ISN - have to read from bxslib still
     
@@ -463,10 +473,12 @@ def _block02(bounds, zone_voxel):
     return block02
     
 
-def _block03():
+def _block03(xs_names):
     block03 = {}
     
     block03['LIB'] = 'BXSLIB' # default
+    block03['NAMES'] = xs_names
+    #block03['MAXORD'] = 
     
     # Figure out the rest of this block later
     
@@ -485,16 +497,19 @@ def _block04(mat_lib, xs_names, nuc_names, zones):
                 name = nuc_names[nucid]
                 mat_bxslib[mat][name] = mat_lib[mat][nucid]
             else:
-                warn("Nucid {0} does not exist in nuc_names dictionary".format(nucid))
+                warn("Nucid {0} does not exist in nuc_names dictionary.".format(nucid))
                 mat_bxslib[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
     
     block04['MATLS'] = mat_bxslib
     block04['ASSIGN'] = zones
-    # ASSIGN
+    
+    # Calculation/Solver inputs
+    block04['IEVT'] = 0 # default? 0 = source
     
     return block04
 
 def _block05():
+    # need volumetric source def here
     pass
 
 def _write():
