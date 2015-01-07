@@ -65,6 +65,8 @@ cdef extern from "material.h" namespace "pyne":
 
         void normalize() except +
         map[int, double] mult_by_mass() except +
+        map[int, double] activity() except +
+        map[int, double] decay_heat() except +
         double molecular_mass() except +
         double molecular_mass(double) except +
         Material expand_elements() except +
@@ -100,6 +102,8 @@ cdef extern from "material.h" namespace "pyne":
         vector[pair[double, double]] gammas() except +
         vector[pair[double, double]] xrays() except +
         vector[pair[double, double]] photons(bool) except +
+
+        Material decay(double) except +
 
         # Operator Overloads
         Material operator+(double) except +

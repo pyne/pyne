@@ -38,6 +38,7 @@ namespace pyne
   extern const double cm2_per_barn;   ///< cm^2 per barn
   extern const double sec_per_day;    ///< seconds per day
   extern const double MeV_per_K;    ///< MeV per Kelvin
+  extern const double MeV_per_MJ;  ///< MeV per MJ
   /// \}
 
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.

@@ -48,6 +48,7 @@ SPACE66_R = re.compile(' {66}')
 NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
 SPACE66_R = re.compile(' {66}')
 
+
 class Library(rx.RxLib):
     """A class for a file which contains multiple ENDF evaluations."""
     def __init__(self, fh):
@@ -887,7 +888,10 @@ class Library(rx.RxLib):
         nuc = nucname.id(nuc)
         if nuc_i == None:
             nuc_i = nuc
-        xsdata = self.get_rx(nuc, 3, mt).reshape(-1,6)
+        if 600 > mt > 500:
+            xsdata = self.get_rx(nuc, 23, mt).reshape(-1,6)
+        else:
+            xsdata = self.get_rx(nuc, 3, mt).reshape(-1,6)
         total_lines = 0
         head_flags = self._get_head(('ZA','AWR',0,0,0,0),
                                     xsdata[total_lines])

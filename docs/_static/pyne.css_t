@@ -1,5 +1,9 @@
 @import url("cloud.css");
 
+.logo {
+    width:200px;   
+}
+
 body {
     background-image:url('wood.jpg');
     background-repeat: repeat; 

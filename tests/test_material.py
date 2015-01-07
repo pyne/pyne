@@ -5,7 +5,7 @@ import warnings
 
 from unittest import TestCase
 import nose
-
+from nose.plugins.skip import SkipTest
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
@@ -199,6 +199,23 @@ class TestMaterialMethods(TestCase):
         mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
         nucvec = mat.mult_by_mass()
         assert_equal(nucvec, {922350000: 0.75, 922380000: 14.25})
+
+
+    def test_activity(self):
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
+        obs = mat.activity()
+        exp = {922350000: 59953.15101810882, 922380000: 177216.65112976026}       
+        assert_equal(set(obs), set(exp))
+        assert_equal(set(obs.values()), set(exp.values()))
+
+
+    def test_decay_heat(self):
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
+        obs = mat.decay_heat()
+        exp = {922350000: 4.48963565256e-14, 922380000: 1.2123912039e-13}
+        assert_equal(set(obs), set(exp))
+        for key in exp:
+            assert_almost_equal(obs[key], exp[key])
 
 
     def test_molecular_mass(self):
@@ -1600,6 +1617,32 @@ def test_material_photons():
                  (105.0, 1.3600956608013968e-05),
                  (13.0, 0.18655736948227228)])
 
+
+def test_decay_h3():
+    mat = Material({'H3': 1.0})
+    obs = mat.decay(data.half_life('H3'))
+    obs = obs.to_atom_frac()
+    assert_equal(2, len(obs))
+    assert_almost_equal(0.5, obs[nucname.id('H3')])
+    assert_almost_equal(0.5, obs[nucname.id('He3')])
+
+def test_decay_u235_h3():
+    mat = Material({'U235': 1.0, 'H3': 1.0})
+    obs = mat.decay(365.25 * 24.0 * 3600.0)
+    if len(obs) < 4:
+        # full decay is not installed
+        raise SkipTest
+    exp = Material({10030000: 0.472645829913563, 20030000: 0.02735407958518153, 
+            812070000: 8.609275765376378e-22, 822090000: 5.262160149924099e-29,
+            822110000: 1.2876726344327517e-20, 832110000: 8.369159135473628e-22,
+            832150000: 4.595084328237903e-27, 842110000: 6.3568211371206766e-27, 
+            842150000: 1.0842337907192214e-26, 852190000: 4.023654648573945e-28,
+            862190000: 3.796661905033895e-24, 872230000: 1.5415521905397778e-22,
+            882230000: 4.431826308123027e-18, 882270000: 2.2016578580798292e-26,
+            892270000: 4.7669120084704354e-15, 902270000: 1.1717834799662062e-17,
+            902310000: 2.0323933632662482e-12, 912310000: 4.83892288435637e-10,
+            922350000: 0.5000000900153261}, 1.99999963797, -1.0, 1.0, {})
+    assert_mat_almost_equal(exp, obs)
 
 # Run as script
 #

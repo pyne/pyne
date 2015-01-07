@@ -21,6 +21,7 @@ else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
     PATHS $ENV{HOME}/.local/include 
         PATH_SUFFIXES include Include
     PATHS "${BASE_DIR}/include" "${BASE_DIR}/../install/include"
+    ENV MOAB_ROOT
     NO_DEFAULT_PATH
     )
   find_path(MOAB_INCLUDE_DIR NAMES MBCore.hpp)
@@ -29,6 +30,7 @@ else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
     PATHS $ENV{HOME}/.local/lib 
         PATH_SUFFIXES lib Lib
     PATHS "${BASE_DIR_LIB}" "${BASE_DIR_LIB}/../../install/lib"
+    ENV MOAB_ROOT
     NO_DEFAULT_PATH
     )
   find_library(MOAB_LIBRARY NAMES MOAB)

@@ -40,6 +40,7 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
 # setup source files
 set(PYNE_SRCS
     "data.cpp"
+    "decay.cpp"
     "enrichment.cpp"
     "enrichment_cascade.cpp"
     "enrichment_symbolic.cpp"
@@ -69,6 +70,9 @@ target_link_libraries(pyne hdf5 blas lapack)
 if (MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
 endif (MOAB_FOUND)
+
+set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
+    "-O0")
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
