@@ -93,11 +93,6 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     
     # determine the zones
     zones, zone_voxel = _define_zones(mesh, mat_assigns)
-    for key, item in zones.iteritems():
-        print(key, item)
-    
-    for key, item in zone_voxel.iteritems():
-        print(key, item)
     
     # read nucdata
     xs_names = _read_bxslib(nucdata)
@@ -324,7 +319,9 @@ def _define_zones(mesh, mat_assigns):
     first = True    
     for i, vals in zones.iteritems():
         for zone, info in zones_mats.iteritems():
-            if (vals['mat'] == info['mat']) and np.allclose(np.array(vals['vol_frac']), np.array(info['vol_frac']), rtol=1e-8):
+            if (vals['mat'] == info['mat']) and \
+                    np.allclose(np.array(vals['vol_frac']), \
+                                np.array(info['vol_frac']), rtol=1e-8):
                 match = True
                 y = zone
                 break
@@ -351,7 +348,7 @@ def _define_zones(mesh, mat_assigns):
 
 #class PartisnWrite(object):
 
-def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names, nuc_names, ngroup, isn, input_file):
+def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names, nuc_names, ngroup, isn, nmq, hdf5, input_file):
     """This function writes out the necessary information to a text partisn 
     input file.
     
@@ -376,6 +373,8 @@ def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names,
         xs_names : list of str, names of isotope/elements from the bxslib
     
     """
+    title = _title(hdf5)
+    
     block01 = _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn)
     #print(block01)
     
@@ -387,10 +386,26 @@ def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names,
     
     block04 = _block04(mat_lib, xs_names, nuc_names, zones)
     #print(block04)
+    
+    block05 = _block05(ngroup, bounds, nmq)
+    #print(block05)
+    
+    _write(title, block01, block02, block03, block04, block05)
 
-def _title():
-    # figure out what to make the title
-    pass
+
+def _title(hdf5):
+    
+    if "/" in hdf5:
+        name = hdf5.split("/")[len(hdf5.split("/"))-1].split(".")[0]
+    else:
+        name = hdf5.split(".")[0]
+    
+    dt = datetime.datetime.now()
+    
+    title = [name, dt]
+    
+    return title
+
         
 def _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn):
     block01 = {}
@@ -430,6 +445,7 @@ def _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn):
     
     return block01
 
+
 def _block02(bounds, zone_voxel):
     block02 = {}
     
@@ -463,11 +479,9 @@ def _block02(bounds, zone_voxel):
 
     n = 0
     block02['ZONES'] = np.zeros(shape=(im, jm*km), dtype=int)
-    #print(block02['ZONES'])
     for i in range(im):
         for jk in range(jm*km):
             block02['ZONES'][i,jk] = zone_voxel[n]
-            #print(n, zone_voxel[n], i, jk, block02['ZONES'][i,jk])
             n += 1
             
     return block02
@@ -503,16 +517,40 @@ def _block04(mat_lib, xs_names, nuc_names, zones):
     block04['MATLS'] = mat_bxslib
     block04['ASSIGN'] = zones
     
-    # Calculation/Solver inputs
-    block04['IEVT'] = 0 # default? 0 = source
+    
     
     return block04
 
-def _block05():
+def _block05(ngroup, bounds, nmq):
+    block05 = {}
     # need volumetric source def here
-    pass
+    # Calculation/Solver inputs
+    
+    block05['IEVT'] = 0 # default? 0 = source
 
-def _write():
+    # create source definition
+    # Volumetric source option 3
+    for i in bounds.keys():
+        if i == 'x':
+            it = len(bounds[i]) - 1
+            block05['SOURCX'] = np.zeros(shape=(it, nmq), dtype=float)
+            block05['SOURCX'][:,0] = 1.0
+        elif i == 'y':
+            jt = len(bounds[i]) - 1
+            block05['SOURCY'] = np.zeros(shape=(jt, nmq), dtype=float)
+            block05['SOURCY'][:,0] = 1.0
+        elif i == 'z':
+            kt = len(bounds[i]) - 1
+            block05['SOURCZ'] = np.zeros(shape=(kt, nmq), dtype=float)
+            block05['SOURCZ'][:,0] = 1.0
+    
+    block05['SOURCE'] = np.zeros(shape=(ngroup, nmq), dtype=float)
+    block05['SOURCE'][:,0] = 1.0
+    
+    return block05
+    
+
+def _write(title, block01, block02, block03, block04, block05):
     pass
     
     
