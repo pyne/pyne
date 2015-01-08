@@ -81,76 +81,12 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     # optional inputs
     datapath = kwargs['datapath'] if 'datapath' in kwargs else '/material_library/materials'
     nucpath = kwargs['nucpath'] if 'nucpath' in kwargs else '/material_library/nucid'
-
-    # get coordinate system and mesh bounds from mesh       
-    # not necessary
-    coord_sys, bounds = _read_mesh(mesh)
     
     # Read the materials from the hdf5 and convert to correct naming convention
     mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)
-    
-    # Assign materials to cells   
-    mat_assigns = dagmc.materials_to_cells(hdf5)
-    
-    # determine the zones
-    zones, voxel_zone = _define_zones(mesh, mat_assigns)
-    
-    # read nucdata
     xs_names = _read_bxslib(nucdata)
 
-    return coord_sys, bounds, mat_lib, zones, voxel_zone, xs_names
- 
-    
-def _read_mesh(mesh):
-    # determines the system geometry (1-D, 2-D, or 3-D Cartesian)
-    # currently cartesian is only supported
-    nx = len(mesh.structured_get_divisions("x"))
-    ny = len(mesh.structured_get_divisions("y"))
-    nz = len(mesh.structured_get_divisions("z"))
-    
-    # Check for dimensions with >1 voxel (>2 bounds)
-    # This determines 1-D, 2-D, or 3-D
-    
-    # !!! change coord_sys to string "xyz" etc
-    
-    dim = 0
-    i = False
-    j = False
-    k = False
-    if nx > 2:
-        dim += 1
-        i = "x"
-    if ny > 2:
-        dim += 1
-        if not i:
-            i = "y"
-        else:
-            j = "y"
-    if nz > 2:
-        dim += 1
-        if not i:
-            i = "z"
-        elif not j:
-            j = "z"
-        else:
-            k = "z"
-    
-    # coordinate system data
-    if dim == 1:
-        coord_sys = [i]
-    elif dim == 2:
-        coord_sys = [i, j]
-    elif dim == 3:
-        coord_sys = [i, j, k]
-        
-    # collect values of mesh boundaries for each coordinate
-    bounds = {}
-    fine = {}
-    for i in coord_sys:
-        bounds[i] = mesh.structured_get_divisions(i)
-        #fine[i] = [1]*(len(bounds[i]) - 1)
-    
-    return coord_sys, bounds
+    return mat_lib, xs_names
 
  
 def _read_bxslib(nucdata):
@@ -204,11 +140,122 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
     return mat_lib
 
 
-def _define_zones(mesh, mat_assigns):
-    """This function takes results of discretize_geom and finds unique voxels
+
+def write_partisn_input(mesh, mat_lib, ngroup, isn, xs_names, nmq, hdf5, input_file):
+    """This function writes out the necessary information to a text partisn 
+    input file.
+    
+    Parameters
+    ----------
+        coord_sys : list of str, indicator of either 1-D, 2-D, or 3-D Cartesian
+            geometry. 
+                1-D: [i]
+                2-D: [i ,j]
+                3-D: [i, j, k]
+                where i, j, and k are either "x", "y", or "z".
+        bounds : dict of list of floats, coarse mesh bounds for each dimension. 
+            Dictionary keys are the dimension "x", "y" or "z" for Cartesian. 
+            Must correspond to a 1:1 fine mesh to coarse mesh interval.
+        mat_lib : dict of dicts, keys are names of PyNE materials whose keys 
+            are bxslib names and their value is atomic density in units 
+            [at/b-cm].
+        zones : dict of dict of lists, first dict key is PartiSn zone number 
+            (int). Inner dict keys are "cell" with a list of cell numbers (int) 
+            as values and "vol_frac" with a list of corresponding cell volume 
+            fractions (float).
+        xs_names : list of str, names of isotope/elements from the bxslib
+    
     """
     
+    # Initialize dictionaries for each PARTISN block
+    block01 = {}
+    block02 = {}
+    block03 = {}
+    block04 = {}
+    block05 = {}
+    
+    #############################
+    #   Set block01 variables   #
+    #############################
+    
+    block01['IGEOM'], bounds = _get_coord_sys(mesh)
+    block01['NGROUP'] = ngroup
+    block01['ISN'] = isn
+    block01['NISO'] = len(xs_names)
+    block01['MT'] = len(mat_lib)
+    
+    block02['ZONES'], zones = _get_zones(mesh, hdf5, bounds)
+    block01['NZONE'] = len(zones)
+    
+    for key in bounds.keys():
+        if key == 'x':
+            block01['IM'] = len(bounds[key]) - 1
+            block01['IT'] = block01['IM']
+        elif key == 'y':
+            block01['JM'] = len(bounds[key]) - 1
+            block01['JT'] = block01['JM']
+        elif key == 'z':
+            block01['KM'] = len(bounds[key]) - 1
+            block01['KT'] = block01['KM']
+    
+    #############################
+    #   Set block02 variables   #
+    #############################
+    
+    # fine intervals are 1 by default
+    for key in bounds.keys():
+        if key == 'x':
+            block02['XMESH'] = bounds[key]
+            block02['XINTS'] = 1
+        elif key == 'y':
+            block02['YMESH'] = bounds[key]
+            block02['YINTS'] = 1
+        elif key == 'z':
+            block02['XZMESH'] = bounds[key]
+            block02['ZINTS'] = 1
+    
+    
+
+
+def _get_coord_sys(mesh):
+    
+    # Determine coordinate system and get bounds
+    nx = len(mesh.structured_get_divisions("x"))
+    ny = len(mesh.structured_get_divisions("y"))
+    nz = len(mesh.structured_get_divisions("z"))
+    
+    coord_sys = ""
+    if nx > 2:
+        coord_sys += "x"
+    if ny > 2:
+        coord_sys += "y"
+    if nz > 2:
+        coord_sys += "z"
+
+    # collect values of mesh boundaries for each coordinate
+    bounds = {}
+    fine = {}
+    for i in coord_sys:
+        bounds[i] = mesh.structured_get_divisions(i)
+
+    # Determine IGEOM
+    # assumes a Cartesian system
+    if len(coord_sys) == 1:
+        IGEOM = 'SLAB'
+    elif len(coord_sys) == 2:
+        IGEOM = 'X-Y'
+    elif len(coord_sys) == 3:
+        IGEOM = 'X-Y-Z'
+    
+    return IGEOM, bounds
+
+
+
+
+def _get_zones(mesh, hdf5, bounds):
+
     dg = dagmc.discretize_geom(mesh)
+    mat_assigns = dagmc.materials_to_cells(hdf5)
     
     # Create dictionary of each voxel's info    
     voxel = {}
@@ -276,127 +323,6 @@ def _define_zones(mesh, mat_assigns):
             else:
                 voxel_zone[i] = y
     
-    return zones_mats, voxel_zone
-
-
-#class PartisnWrite(object):
-
-def write_partisn_input(coord_sys, bounds, mat_lib, zones, voxel_zone, xs_names, nuc_names, ngroup, isn, nmq, hdf5, input_file):
-    """This function writes out the necessary information to a text partisn 
-    input file.
-    
-    Parameters
-    ----------
-        coord_sys : list of str, indicator of either 1-D, 2-D, or 3-D Cartesian
-            geometry. 
-                1-D: [i]
-                2-D: [i ,j]
-                3-D: [i, j, k]
-                where i, j, and k are either "x", "y", or "z".
-        bounds : dict of list of floats, coarse mesh bounds for each dimension. 
-            Dictionary keys are the dimension "x", "y" or "z" for Cartesian. 
-            Must correspond to a 1:1 fine mesh to coarse mesh interval.
-        mat_lib : dict of dicts, keys are names of PyNE materials whose keys 
-            are bxslib names and their value is atomic density in units 
-            [at/b-cm].
-        zones : dict of dict of lists, first dict key is PartiSn zone number 
-            (int). Inner dict keys are "cell" with a list of cell numbers (int) 
-            as values and "vol_frac" with a list of corresponding cell volume 
-            fractions (float).
-        xs_names : list of str, names of isotope/elements from the bxslib
-    
-    """
-    title = _title(hdf5)
-    
-    block01 = _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn)
-    #print(block01)
-    
-    block02 = _block02(bounds, voxel_zone)
-    #print(block02)
-    
-    block03 = _block03(xs_names)
-    #print(block03)
-    
-    block04 = _block04(mat_lib, xs_names, nuc_names, zones)
-    #print(block04)
-    
-    block05 = _block05(ngroup, bounds, nmq)
-    #print(block05)
-    
-    _write(title, block01, block02, block03, block04, block05)
-
-
-def _title(hdf5):
-    
-    if "/" in hdf5:
-        name = hdf5.split("/")[len(hdf5.split("/"))-1].split(".")[0]
-    else:
-        name = hdf5.split(".")[0]
-    
-    dt = datetime.datetime.now()
-    
-    title = [name, dt]
-    
-    return title
-
-        
-def _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn):
-    block01 = {}
-    
-    # !!!! do get_coord_sys here and pull bounds here (not in read step)
-    
-    # Determine IGEOM
-    if len(coord_sys) == 1:
-        block01['IGEOM'] = 'SLAB'
-    elif len(coord_sys) == 2:
-        block01['IGEOM'] = 'X-Y' # assuming cartesian
-    elif len(coord_sys) == 3:
-        block01['IGEOM'] = 'X-Y-Z' # assuming cartesian
-    
-    block01['NGROUP'] = ngroup
-    block01['ISN'] = isn
-    
-    # !!! ISN - have to read from bxslib still
-    
-    block01['NISO'] = len(xs_names)
-    block01['MT'] = len(mat_lib)
-    block01['NZONE'] = len(zones)
-    
-    # Number of Fine and Coarse Meshes
-    # one fine mesh per coarse by default
-    for key in bounds.keys():
-        if key == 'x':
-            block01['IM'] = len(bounds[key]) - 1
-            block01['IT'] = block01['IM']
-        elif key == 'y':
-            block01['JM'] = len(bounds[key]) - 1
-            block01['JT'] = block01['JM']
-        elif key == 'z':
-            block01['KM'] = len(bounds[key]) - 1
-            block01['KT'] = block01['KM']
-    
-    # Optional Input IQUAD
-    block01['IQUAD'] = 1 # default
-    
-    return block01
-
-
-def _block02(bounds, voxel_zone):
-    block02 = {}
-    
-    # fine intervals are 1 by default
-    for key in bounds.keys():
-        if key == 'x':
-            block02['XMESH'] = bounds[key]
-            block02['XINTS'] = 1
-        elif key == 'y':
-            block02['YMESH'] = bounds[key]
-            block02['YINTS'] = 1
-        elif key == 'z':
-            block02['XZMESH'] = bounds[key]
-            block02['ZINTS'] = 1  
-    
-    # zones list 
     if 'x' in bounds.keys():
         im = len(bounds['x']) - 1
     else:
@@ -413,13 +339,13 @@ def _block02(bounds, voxel_zone):
         km = 1
 
     n = 0
-    block02['ZONES'] = np.zeros(shape=(im, jm*km), dtype=int)
+    ZONES = np.zeros(shape=(im, jm*km), dtype=int)
     for i in range(im):
         for jk in range(jm*km):
-            block02['ZONES'][i,jk] = voxel_zone[n]
+            ZONES[i,jk] = voxel_zone[n]
             n += 1
             
-    return block02
+    return ZONES, zones_mats
     
 
 def _block03(xs_names):
@@ -490,3 +416,15 @@ def _write(title, block01, block02, block03, block04, block05):
     pass
     
     
+def _title(hdf5):
+    
+    if "/" in hdf5:
+        name = hdf5.split("/")[len(hdf5.split("/"))-1].split(".")[0]
+    else:
+        name = hdf5.split(".")[0]
+    
+    dt = datetime.datetime.now()
+    
+    title = [name, dt]
+    
+    return title
