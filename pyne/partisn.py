@@ -187,35 +187,18 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
     mat_except = Set(nuc_names.keys())
     
     # collapse isotopes into elements
-    mats = MaterialLibrary(hdf5,datapath=datapath,nucpath=nucpath)
+    mats = MaterialLibrary(hdf5, datapath=datapath, nucpath=nucpath)
     mats_collapsed = {}
     for mat_name in mats.keys():
-        mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)
+        mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)      
     
-    # Check that the materials are valid:
-    #   1) non zero and non-negative densities (density = True)
-    #   2) set of nuclides is not empty (else it is vacuum) (empty = False)
-    #   3) nucids appear in nuc_names
-    # might put 2 and 3 later      
-    
-    # convert mass fraction to atom fraction and then to [at/b-cm]
-    Na = 6.022*(10.**23) # Avagadro's number [at/mol]
-    barn_conv = 10.**-24 # [cm^2/b]
+    # convert mass fraction to atom density in units [at/b-cm]
     mat_lib = {}
+    comp_list = {}
     for mat_name, comp in mats_collapsed.iteritems():
-        #print(comp)
-        comp_atom_frac = comp.to_atom_frac() # atom fractions
-        density = comp.mass_density() # [g/cc]
-        
-        if density < 0.0:
-            warn("Material {0} has an invalid negative density.".format(mat_name))
-        
-        mol_mass = comp.molecular_mass() # [g/mol]
-        comp_list = {}
-        
-        for nucid, frac in comp_atom_frac.iteritems():
-            comp_list[nucid] = frac*density*Na*barn_conv/mol_mass # [at/b-cm]
-        
+        atom_dens_dict = comp.to_atom_dens()
+        for nucid, dens in atom_dens_dict.iteritems():
+            comp_list[nucid] = dens*10.**-24 # convert from [at/cc] to [at/b-cm]
         mat_lib[mat_name] = comp_list
 
     return mat_lib

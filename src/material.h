@@ -295,11 +295,15 @@ namespace pyne
 
     // Atom fraction functions
     /// Returns a mapping of the nuclides in this material to their atom fractions.
-    /// This calculation is based off of the materials molecular weight.
+    /// This calculation is based off of the material's molecular weight.
     std::map<int, double> to_atom_frac();
     /// Sets the composition, mass, and atoms_per_molecule of this material to those
     /// calculated from \a atom_fracs, a mapping of nuclides to atom fractions values.
     void from_atom_frac(std::map<int, double> atom_fracs);
+    
+    /// Returns a mapping of the nuclides in this material to their atom densities.
+    /// This calculation is based off of the material's density.
+    std::map<int, double> to_atom_dens();
 
     // Radioactive Material functions
     /// Returns a list of gamma-rays energies in keV and intensities in
