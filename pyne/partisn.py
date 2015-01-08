@@ -83,6 +83,7 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     nucpath = kwargs['nucpath'] if 'nucpath' in kwargs else '/material_library/nucid'
 
     # get coordinate system and mesh bounds from mesh       
+    # not necessary
     coord_sys, bounds = _read_mesh(mesh)
     
     # Read the materials from the hdf5 and convert to correct naming convention
@@ -92,12 +93,12 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     mat_assigns = _materials_to_cells(hdf5)
     
     # determine the zones
-    zones, zone_voxel = _define_zones(mesh, mat_assigns)
+    zones, voxel_zone = _define_zones(mesh, mat_assigns)
     
     # read nucdata
     xs_names = _read_bxslib(nucdata)
 
-    return coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names
+    return coord_sys, bounds, mat_lib, zones, voxel_zone, xs_names
  
     
 def _read_mesh(mesh):
@@ -109,6 +110,9 @@ def _read_mesh(mesh):
     
     # Check for dimensions with >1 voxel (>2 bounds)
     # This determines 1-D, 2-D, or 3-D
+    
+    # !!! change coord_sys to string "xyz" etc
+    
     dim = 0
     i = False
     j = False
@@ -224,41 +228,39 @@ def _materials_to_cells(hdf5):
     dag_geom = iMesh.Mesh()
     dag_geom.load(hdf5)
     dag_geom.getEntities()
-    mesh_set = dag_geom.getEntSets()
+    mesh_sets = dag_geom.getEntSets()
 
     # Get tag handle
-    vol_tag = dag_geom.getTagHandle('GEOM_DIMENSION')
-    name_tag = dag_geom.getTagHandle('GLOBAL_ID')
-    mat_tag = dag_geom.getTagHandle('NAME')
+    cat_tag = dag_geom.getTagHandle('CATEGORY')
+    id_tag = dag_geom.getTagHandle('GLOBAL_ID')
+    name_tag = dag_geom.getTagHandle('NAME')
 
     # Get list of materials and list of cells
-    mat_list = []
-    geom_list = []
-    for i in mesh_set:
-        tags = dag_geom.getAllTags(i)
-        for tag in tags:
-            if tag == vol_tag:
-                geom_list.append(i)
-            if tag == mat_tag:
-                mat_list.append(i)
-
-    # assign material to cell
-    dag_properties = set()
     mat_assigns={}
-    for entity in geom_list:
-        for meshset in mat_list:
-            if meshset.contains(entity):
-                mat_name = mat_tag[meshset]
-                cell = name_tag[entity]
-                dag_properties.add(_tag_to_script(mat_name))
-                if 'mat:' in _tag_to_script(mat_name):
-                    mat_assigns[cell] = _tag_to_script(mat_name)
     
-    #print(mat_assigns)
+    # loop over all mesh_sets in model
+    for mesh_set in mesh_sets:
+        tags = dag_geom.getAllTags(mesh_set)
+        
+        # check for mesh_sets that are groups
+        if name_tag in tags and cat_tag in tags \
+                and _tag_to_string(cat_tag[mesh_set]) == 'Group':
+            child_sets = mesh_set.getEntSets()
+            name = _tag_to_string(name_tag[mesh_set])
+            
+            # if mesh_set is a group with a material name_tag, loop over child
+            # mesh_sets and assign name to cell
+            if 'mat:' in name:
+                for child_set in child_sets:
+                    child_tags = dag_geom.getAllTags(child_set)
+                    if id_tag in child_tags:
+                        cell = id_tag[child_set]
+                        mat_assigns[cell] = name
+                        
     return mat_assigns
 
 
-def _tag_to_script(tag):
+def _tag_to_string(tag):
     a = []
     # since we have a byte type tag loop over the 32 elements
     for part in tag:
@@ -267,8 +269,8 @@ def _tag_to_script(tag):
             # convert to ascii
             a.append(str(unichr(part)))
             # join to end string
-            script = ''.join(a)
-    return script
+            string = ''.join(a)
+    return string
 
 
 def _define_zones(mesh, mat_assigns):
@@ -312,7 +314,7 @@ def _define_zones(mesh, mat_assigns):
     
     # Eliminate duplicate zones and assign each voxel a zone number.
     # Assign zone = 0 if vacuum or graveyard and eliminate material definition.
-    zone_voxel = {}
+    voxel_zone = {}
     zones_mats = {}
     z = 0
     match = False
@@ -330,25 +332,25 @@ def _define_zones(mesh, mat_assigns):
         if first or not match:
             if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
                     ['mat:graveyard'], ['mat:Graveyard']]:
-                zone_voxel[i] = 0
+                voxel_zone[i] = 0
             else:
                 z += 1
                 zones_mats[z] = zones[i]
-                zone_voxel[i] = z
+                voxel_zone[i] = z
                 first = False
         else:
             if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
                     ['mat:graveyard'], ['mat:Graveyard']]:
-                zone_voxel[i] = 0
+                voxel_zone[i] = 0
             else:
-                zone_voxel[i] = y
+                voxel_zone[i] = y
     
-    return zones_mats, zone_voxel
+    return zones_mats, voxel_zone
 
 
 #class PartisnWrite(object):
 
-def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names, nuc_names, ngroup, isn, nmq, hdf5, input_file):
+def write_partisn_input(coord_sys, bounds, mat_lib, zones, voxel_zone, xs_names, nuc_names, ngroup, isn, nmq, hdf5, input_file):
     """This function writes out the necessary information to a text partisn 
     input file.
     
@@ -378,7 +380,7 @@ def write_partisn_input(coord_sys, bounds, mat_lib, zones, zone_voxel, xs_names,
     block01 = _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn)
     #print(block01)
     
-    block02 = _block02(bounds, zone_voxel)
+    block02 = _block02(bounds, voxel_zone)
     #print(block02)
     
     block03 = _block03(xs_names)
@@ -409,6 +411,8 @@ def _title(hdf5):
         
 def _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn):
     block01 = {}
+    
+    # !!!! do get_coord_sys here and pull bounds here (not in read step)
     
     # Determine IGEOM
     if len(coord_sys) == 1:
@@ -446,7 +450,7 @@ def _block01(coord_sys, xs_names, mat_lib, zones, bounds, ngroup, isn):
     return block01
 
 
-def _block02(bounds, zone_voxel):
+def _block02(bounds, voxel_zone):
     block02 = {}
     
     # fine intervals are 1 by default
@@ -481,7 +485,7 @@ def _block02(bounds, zone_voxel):
     block02['ZONES'] = np.zeros(shape=(im, jm*km), dtype=int)
     for i in range(im):
         for jk in range(jm*km):
-            block02['ZONES'][i,jk] = zone_voxel[n]
+            block02['ZONES'][i,jk] = voxel_zone[n]
             n += 1
             
     return block02
