@@ -90,7 +90,7 @@ def read_hdf5_mesh(mesh, hdf5, nucdata, nuc_names, **kwargs):
     mat_lib = _get_materials(hdf5, datapath, nucpath, nuc_names)
     
     # Assign materials to cells   
-    mat_assigns = _materials_to_cells(hdf5)
+    mat_assigns = dagmc.materials_to_cells(hdf5)
     
     # determine the zones
     zones, voxel_zone = _define_zones(mesh, mat_assigns)
@@ -219,58 +219,6 @@ def _get_materials(hdf5, datapath, nucpath, nuc_names):
         mat_lib[mat_name] = comp_list
 
     return mat_lib
-
-
-def _materials_to_cells(hdf5):
-    """Takes the material-laden geometry and matches cells to materials
-    """
-    # Load the geometry
-    dag_geom = iMesh.Mesh()
-    dag_geom.load(hdf5)
-    dag_geom.getEntities()
-    mesh_sets = dag_geom.getEntSets()
-
-    # Get tag handle
-    cat_tag = dag_geom.getTagHandle('CATEGORY')
-    id_tag = dag_geom.getTagHandle('GLOBAL_ID')
-    name_tag = dag_geom.getTagHandle('NAME')
-
-    # Get list of materials and list of cells
-    mat_assigns={}
-    
-    # loop over all mesh_sets in model
-    for mesh_set in mesh_sets:
-        tags = dag_geom.getAllTags(mesh_set)
-        
-        # check for mesh_sets that are groups
-        if name_tag in tags and cat_tag in tags \
-                and _tag_to_string(cat_tag[mesh_set]) == 'Group':
-            child_sets = mesh_set.getEntSets()
-            name = _tag_to_string(name_tag[mesh_set])
-            
-            # if mesh_set is a group with a material name_tag, loop over child
-            # mesh_sets and assign name to cell
-            if 'mat:' in name:
-                for child_set in child_sets:
-                    child_tags = dag_geom.getAllTags(child_set)
-                    if id_tag in child_tags:
-                        cell = id_tag[child_set]
-                        mat_assigns[cell] = name
-                        
-    return mat_assigns
-
-
-def _tag_to_string(tag):
-    a = []
-    # since we have a byte type tag loop over the 32 elements
-    for part in tag:
-        # if the byte char code is non 0
-        if (part != 0):
-            # convert to ascii
-            a.append(str(unichr(part)))
-            # join to end string
-            string = ''.join(a)
-    return string
 
 
 def _define_zones(mesh, mat_assigns):
