@@ -43,8 +43,8 @@ try:
     HAVE_PYTAPS = True
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
-                  "All aspects of the PartiSn module are not imported.",
-                  VnVWarning)
+                  "All aspects of the partisn module are not imported.",
+                  QAWarning)
     HAVE_PYTAPS = False
 
 if HAVE_PYTAPS:
@@ -85,10 +85,14 @@ def write_partisn_input(mesh, hdf5, ngroup, isn, nmq, **kwargs):
         names_dict : dict, pyne element/isotope names to bxslib name assignment,
             keys are pyne nucids (int) and values are bxslib names (str)
                 Example: names_dict[250550000] ='mn55'
+        input_file : str, desired name of generated PARTISN input file
+            If no name is provided the name will default to 
+            '<hdf5 file name>_partisn.inp'. Any file already existing by the 
+            same name will be overwritten.
     
     Output:
     -------
-        PARTISN Input file. 
+        PARTISN Input file named by 'input_file' above or the default name.
             Note: read comments generated in file. Not all variables will be 
             assigned that are necessary.
     """
@@ -107,7 +111,7 @@ def write_partisn_input(mesh, hdf5, ngroup, isn, nmq, **kwargs):
     if 'nuc_hdf5path' in kwargs:
         nuc_hdf5path = kwargs['nuc_hdf5path']
     else:
-         nuc_hdf5path = '/material_library/nucid'
+        nuc_hdf5path = '/material_library/nucid'
     
     # Dictionary of hdf5 names and cross section library names
     # Assumes PyNE naming convention in the cross section library if no dict
@@ -118,6 +122,12 @@ def write_partisn_input(mesh, hdf5, ngroup, isn, nmq, **kwargs):
         # read a function
         pass
     
+    if 'input_file' in kwargs:
+        input_file = kwargs['input_file']
+        input_file_tf = True
+    else:
+        input_file_tf = False
+    
     # Initialize dictionaries for each PARTISN block
     block01 = {}
     block02 = {}
@@ -127,64 +137,64 @@ def write_partisn_input(mesh, hdf5, ngroup, isn, nmq, **kwargs):
     
     # Set input variables
     
-    block01['IGEOM'], bounds = _get_coord_sys(mesh)
-    block01['NGROUP'] = ngroup
-    block01['ISN'] = isn
+    block01['igeom'], bounds = _get_coord_sys(mesh)
+    block01['ngroup'] = ngroup
+    block01['isn'] = isn
     
     xs_names = _get_xs_names(nuc_names)
-    block01['NISO'] = len(xs_names)
+    block01['niso'] = len(xs_names)
     
     mat_lib = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names)
-    block01['MT'] = len(mat_lib)
+    block01['mt'] = len(mat_lib)
     
-    block02['ZONES'], zones = _get_zones(mesh, hdf5, bounds)
-    block01['NZONE'] = len(zones)
+    block02['zones'], zones = _get_zones(mesh, hdf5, bounds)
+    block01['nzone'] = len(zones)
     
     for key in bounds.keys():
         if key == 'x':
             n = len(bounds[key]) - 1
-            block01['IM'] = n
-            block01['IT'] = block01['IM']
-            block02['XMESH'] = bounds[key]
-            block02['XINTS'] = 1
-            block05['SOURCX'] = np.zeros(shape=(n, nmq), dtype=float)
-            block05['SOURCX'][:,0] = 1.0
+            block01['im'] = n
+            block01['it'] = block01['im']
+            block02['xmesh'] = bounds[key]
+            block05['sourcx'] = np.zeros(shape=(n, nmq), dtype=float)
+            block05['sourcx'][:,0] = 1.0
         elif key == 'y':
             n = len(bounds[key]) - 1
-            block01['JM'] = n
-            block01['JT'] = block01['JM']
-            block02['YMESH'] = bounds[key]
-            block02['YINTS'] = 1
-            block05['SOURCY'] = np.zeros(shape=(n, nmq), dtype=float)
-            block05['SOURCY'][:,0] = 1.0
+            block01['jm'] = n
+            block01['jt'] = block01['jm']
+            block02['ymesh'] = bounds[key]
+            block05['sourcy'] = np.zeros(shape=(n, nmq), dtype=float)
+            block05['sourcy'][:,0] = 1.0
         elif key == 'z':
             n = len(bounds[key]) - 1
-            block01['KM'] = n
-            block01['KT'] = block01['KM']
-            block02['XZMESH'] = bounds[key]
-            block02['ZINTS'] = 1
-            block05['SOURCZ'] = np.zeros(shape=(n, nmq), dtype=float)
-            block05['SOURCZ'][:,0] = 1.0
+            block01['km'] = n
+            block01['kt'] = block01['km']
+            block02['zmesh'] = bounds[key]
+            block05['sourcz'] = np.zeros(shape=(n, nmq), dtype=float)
+            block05['sourcz'][:,0] = 1.0
     
-    block03['NAMES'] = xs_names
+    block03['names'] = xs_names
     
     mat_xs_names = _nucid_to_xs(mat_lib, xs_names, nuc_names)
-    block04['MATLS'] = mat_xs_names
+    block04['matls'] = mat_xs_names
     
-    block04['ASSIGN'] = zones
+    block04['assign'] = zones
     
-    block05['IEVT'] = 0 # default? 0 = source
-    block05['SOURCE'] = np.zeros(shape=(ngroup, nmq), dtype=float)
-    block05['SOURCE'][:,0] = 1.0
+    block05['ievt'] = 0 # default? 0 = source
+    block05['source'] = np.zeros(shape=(ngroup, nmq), dtype=float)
+    block05['source'][:,0] = 1.0
     
     title = _title(hdf5)
     
-    _write_input(title, block01, block02, block03, block04, block05)
+    if input_file_tf:
+        _write_input(title, block01, block02, block03, block04, block05, name=input_file)
+    else:
+        _write_input(title, block01, block02, block03, block04, block05)
     
     
 def _get_xs_names(nuc_names):
     xs_names = []
-    for name in nuc_names.items():
+    for nucid, name in nuc_names.iteritems():
         xs_names.append(name)
     
     return xs_names
@@ -276,14 +286,14 @@ def _get_zones(mesh, hdf5, bounds):
         zones[z]['vol_frac'] = []
         zones[z]['mat'] = []
         for i, cell in enumerate(voxel[z]['cell']):
-            if mat_assigns[cell] not in zones[z]['mat']:
+            if mat_assigns[cell].strip(":")[1] not in zones[z]['mat']:
                 # create new entry
-                zones[z]['mat'].append(mat_assigns[cell])
+                zones[z]['mat'].append(mat_assigns[cell].strip(":")[1])
                 zones[z]['vol_frac'].append(voxel[z]['vol_frac'][i])
             else:
                 # update value that already exists with new volume fraction
                 for j, val in enumerate(zones[z]['mat']):
-                    if mat_assigns[cell] == val:
+                    if mat_assigns[cell].strip(":")[1] == val:
                         vol_frac = zones[z]['vol_frac'][j] + voxel[z]['vol_frac'][i]
                         zones[z]['vol_frac'][j] = vol_frac
     
@@ -305,8 +315,8 @@ def _get_zones(mesh, hdf5, bounds):
             else:
                 match = False
         if first or not match:
-            if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
-                    ['mat:graveyard'], ['mat:Graveyard']]:
+            if vals['mat'] in [['Vacuum'], ['vacuum'], 
+                    ['graveyard'], ['Graveyard']]:
                 voxel_zone[i] = 0
             else:
                 z += 1
@@ -314,8 +324,8 @@ def _get_zones(mesh, hdf5, bounds):
                 voxel_zone[i] = z
                 first = False
         else:
-            if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
-                    ['mat:graveyard'], ['mat:Graveyard']]:
+            if vals['mat'] in [['Vacuum'], ['vacuum'], 
+                    ['graveyard'], ['Graveyard']]:
                 voxel_zone[i] = 0
             else:
                 voxel_zone[i] = y
@@ -337,13 +347,13 @@ def _get_zones(mesh, hdf5, bounds):
         km = 1
 
     n = 0
-    ZONES = np.zeros(shape=(im, jm*km), dtype=int)
+    zones_formatted = np.zeros(shape=(im, jm*km), dtype=int)
     for i in range(im):
         for jk in range(jm*km):
-            ZONES[i,jk] = voxel_zone[n]
+            zones_formatted[i,jk] = voxel_zone[n]
             n += 1
             
-    return ZONES, zones_mats
+    return zones_formatted, zones_mats
     
 
 def _nucid_to_xs(mat_lib, xs_names, nuc_names):
@@ -377,6 +387,157 @@ def _title(hdf5):
     return title
 
 
-def _write_input(title, block01, block02, block03, block04, block05):
-    pass
+def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     
+    # Create file to write to
+    if 'name' in kwargs:
+        f = open(kwargs['name'], 'w')
+    else:
+        file_name = str(title[0]) + '_partisn.inp'
+        f = open(file_name, 'w')
+    
+    # Write title
+    f.write("     1     0     0\n")
+    f.write(str(title[0])+'  ')
+    f.write(str(title[1]))
+    
+    # Write Block 1
+    f.write("\n\ \n")
+    f.write("\ ------------ Block 1 (Control and Dimensions) ------------")
+    f.write("\n\ \n")
+    f.write("igeom='{0}'".format(block01['igeom']))
+    f.write("  ngroup={0}".format(block01['ngroup']))
+    #f.write("  isn={0}".format(block01['isn']))
+    f.write("  niso={0}".format(block01['niso']))
+    f.write("  mt={0}".format(block01['mt']))
+    f.write("  nzone={0}\n".format(block01['nzone']))
+    
+    
+    
+    if 'im' in block01.keys():
+        f.write("im={0}".format(block01['im']))
+        f.write("  it={0}  ".format(block01['it']))
+    if 'jm' in block01.keys():
+        f.write("jm={0}".format(block01['jm']))
+        f.write("  jt={0}  ".format(block01['jt']))
+    if 'km' in block01.keys():
+        f.write("km={0}".format(block01['km']))
+        f.write("  kt={0}  ".format(block01['kt']))
+    
+    f.write("\n")
+    
+    f.write("\ Must provide a value for variable ISN\n")
+    f.write("\ isn=\n")
+    
+    f.write("\ \n")
+    f.write('t')
+    
+    # Write Block 2
+    f.write("\n\ \n")
+    f.write("\ ------------ Block 2 (Geometry) ------------")
+    f.write("\n\ \n")
+    
+    if 'xmesh' in block02.keys():
+        f.write("xmesh= ")
+        count = 0
+        for i in block02['xmesh']:
+            count += 1
+            f.write("{:.3f} ".format(i))
+            if count == 8:
+                f.write("\n       ")
+                count = 0
+        f.write("\nxints= ")
+        f.write("{0}R {1}".format(len(block02['xmesh'])-1, 1))
+        f.write("\n")
+        
+    if 'ymesh' in block02.keys():
+        f.write("ymesh= ")
+        count = 0
+        for i in block02['ymesh']:
+            count += 1
+            f.write("{:.3f} ".format(i))
+            if count == 8:
+                f.write("\n       ")
+                count = 0
+        f.write("\nyints= ")
+        f.write("{0}R {1}".format(len(block02['ymesh'])-1, 1))
+        f.write("\n")
+        
+    if 'zmesh' in block02.keys():
+        f.write("zmesh= ")
+        count = 0
+        for i in block02['zmesh']:
+            count += 1
+            f.write("{:.3f} ".format(i))
+            if count == 8:
+                f.write("\n       ")
+                count = 0
+        f.write("\nzints= ")
+        f.write("{0}R {1}".format(len(block02['xmesh'])-1, 1))
+        f.write("\n")
+    
+    f.write("zones= ")
+    for row in block02['zones']:
+        count = 0
+        for i in row:
+            count += 1
+            f.write("{:3d} ".format(i))
+            if count == 15:
+                f.write("\n       ")
+                count = 0
+        f.write(";\n       ")
+    
+    f.write("\ \n")
+    f.write("t")
+    
+    # Write Block 3
+    f.write("\n\ \n")
+    f.write("\ ------------ Block 3 (Nuclear Data) ------------")
+    f.write("\n\ \n")
+    f.write("\ The following variables must be set (optional variables are not set):")
+    f.write("\ lib=\n")
+    f.write("\ maxord=\n")
+    f.write("\ ihm=\n")
+    f.write("\ iht=\n")
+    
+    f.write("names= ")
+    count = 0
+    for name in block03['names']:
+        count += 1
+        f.write("{0} ".format(name))
+        if count == 10:
+                f.write("\n       ")
+                count = 0
+    
+    f.write("\n\ \n")
+    f.write("t")
+    
+    # Write Block 4
+    f.write("\n\ \n")
+    f.write("\ ------------ Block 4 (Cross-Section Mixing) ------------")
+    f.write("\n\ \n")
+    
+    f.write("matls= ")
+    for mat in block04['matls']:
+        f.write("{0} ".format(mat))
+        count = 0
+        for iso, dens in block04['matls'][mat].iteritems():
+            count += 1
+            f.write("{} {:.4e}, ".format(iso, dens))
+            if count == 3:
+                f.write("\n       ")
+                count = 0
+        f.write(";\n       ")
+    
+    f.write("\n\ ")
+    f.write("assign= ")
+    for z in block04['assign']:
+        f.write("{0} ".format(z))
+        count = 0
+        for i, mat in enumerate(block04['assign'][z]['mat']):
+            count += 1
+            f.write("{} {:.4e}, ".format(mat, block04['assign'][z]['vol_frac'][i]))
+            if count == 3:
+                f.write("\n       ")
+                count = 0
+        f.write(";\n        ")
