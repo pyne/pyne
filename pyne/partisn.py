@@ -119,9 +119,9 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     # provided.
     if 'names_dict' in kwargs:
         nuc_names = kwargs['names_dict']
+        names_tf = True
     else:
-        # read a function
-        pass
+        names_tf = False
     
     if 'input_file' in kwargs:
         input_file = kwargs['input_file']
@@ -140,8 +140,13 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     
     block01['igeom'], bounds = _get_coord_sys(mesh)
     block01['ngroup'] = ngroup
+    
+    ## !!!!!!! Need to read a function here to get nuc_names if not provided
+    if names_tf:
+        xs_names = _get_xs_names(nuc_names)
+    else:
+        pass
         
-    xs_names = _get_xs_names(nuc_names)
     block01['niso'] = len(xs_names)
     
     mat_lib = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names)
@@ -189,7 +194,9 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
         _write_input(title, block01, block02, block03, block04, block05, name=input_file)
     else:
         _write_input(title, block01, block02, block03, block04, block05)
-    
+
+def _get_nuc_names():
+    pass    
     
 def _get_xs_names(nuc_names):
     """Create list of names (strings) of the nuclides that appear in the cross
