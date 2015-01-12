@@ -51,7 +51,7 @@ if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 
-def write_partisn_input(mesh, hdf5, ngroup, isn, nmq, **kwargs):
+def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     """This class reads all necessary attributes from a material-laden 
     geometry file, a pre-made PyNE mesh object, and the nuclear data cross 
     section library, and any optional inputs that are necessary for creating a 
@@ -71,7 +71,6 @@ def write_partisn_input(mesh, hdf5, ngroup, isn, nmq, **kwargs):
             Note: Only Cartesian meshes are currently supported.
         hdf5 : file path, a material-laden dagmc geometry file.
         ngroup : int, the number of energy groups in the cross section library
-        isn : int, S_n order to be used MIGHT NOT KEEP AS AN INPUT
         nmq : int, the number of moments in a P_n expansion of the source
         
     Optional Parameters:
@@ -139,8 +138,7 @@ def write_partisn_input(mesh, hdf5, ngroup, isn, nmq, **kwargs):
     
     block01['igeom'], bounds = _get_coord_sys(mesh)
     block01['ngroup'] = ngroup
-    block01['isn'] = isn
-    
+        
     xs_names = _get_xs_names(nuc_names)
     block01['niso'] = len(xs_names)
     
@@ -180,7 +178,6 @@ def write_partisn_input(mesh, hdf5, ngroup, isn, nmq, **kwargs):
     
     block04['assign'] = zones
     
-    block05['ievt'] = 0 # default? 0 = source
     block05['source'] = np.zeros(shape=(ngroup, nmq), dtype=float)
     block05['source'][:,0] = 1.0
     
@@ -244,12 +241,12 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names):
     mats_collapsed = {}
     for mat_name in mats.keys():
         mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)      
-    
+
     # convert mass fraction to atom density in units [at/b-cm]
     mat_lib = {}
-    comp_list = {}
     for mat_name, comp in mats_collapsed.iteritems():
         atom_dens_dict = comp.to_atom_dens()
+        comp_list = {}
         for nucid, dens in atom_dens_dict.iteritems():
             # convert from [at/cc] to [at/b-cm]
             comp_list[nucid] = dens*10.**-24
@@ -286,14 +283,14 @@ def _get_zones(mesh, hdf5, bounds):
         zones[z]['vol_frac'] = []
         zones[z]['mat'] = []
         for i, cell in enumerate(voxel[z]['cell']):
-            if mat_assigns[cell].strip(":")[1] not in zones[z]['mat']:
+            if mat_assigns[cell] not in zones[z]['mat']:
                 # create new entry
-                zones[z]['mat'].append(mat_assigns[cell].strip(":")[1])
+                zones[z]['mat'].append(mat_assigns[cell])
                 zones[z]['vol_frac'].append(voxel[z]['vol_frac'][i])
             else:
                 # update value that already exists with new volume fraction
                 for j, val in enumerate(zones[z]['mat']):
-                    if mat_assigns[cell].strip(":")[1] == val:
+                    if mat_assigns[cell] == val:
                         vol_frac = zones[z]['vol_frac'][j] + voxel[z]['vol_frac'][i]
                         zones[z]['vol_frac'][j] = vol_frac
     
@@ -308,15 +305,15 @@ def _get_zones(mesh, hdf5, bounds):
         for zone, info in zones_mats.iteritems():
             if (vals['mat'] == info['mat']) and \
                     np.allclose(np.array(vals['vol_frac']), \
-                                np.array(info['vol_frac']), rtol=1e-8):
+                                np.array(info['vol_frac']), rtol=1e-5):
                 match = True
                 y = zone
                 break
             else:
                 match = False
         if first or not match:
-            if vals['mat'] in [['Vacuum'], ['vacuum'], 
-                    ['graveyard'], ['Graveyard']]:
+            if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
+                    ['mat:graveyard'], ['mat:Graveyard']]:
                 voxel_zone[i] = 0
             else:
                 z += 1
@@ -324,8 +321,8 @@ def _get_zones(mesh, hdf5, bounds):
                 voxel_zone[i] = z
                 first = False
         else:
-            if vals['mat'] in [['Vacuum'], ['vacuum'], 
-                    ['graveyard'], ['Graveyard']]:
+            if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
+                    ['mat:graveyard'], ['mat:Graveyard']]:
                 voxel_zone[i] = 0
             else:
                 voxel_zone[i] = y
@@ -398,21 +395,33 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     
     # Write title
     f.write("     1     0     0\n")
-    f.write(str(title[0])+'  ')
+    f.write(str(title[0])+' ')
     f.write(str(title[1]))
     
-    # Write Block 1
+    f.write("\n\ ")
+    f.write("\n\ Notes: This input assumes a volumetric source calculation using")
+    f.write("\n\ default PARTISN values in many cases. Please refer to the comments")
+    f.write("\n\ throughout and the PARTISN input manual.")
+    f.write("\n\ Variables that MUST be set in each block (other defaults and \n")
+    f.write("\ optional variables may exist):")
+    f.write("\n\     Block 1:  ISN")
+    f.write("\n\     Block 3:  LIB, MAXORD, IHM, IHT")
+    f.write("\n\     Block 6:  no input is provided for block 6")
+    
+    ###########################################
+    #              Write Block 1              #
+    ###########################################
     f.write("\n\ \n")
     f.write("\ ------------ Block 1 (Control and Dimensions) ------------")
     f.write("\n\ \n")
     f.write("igeom='{0}'".format(block01['igeom']))
     f.write("  ngroup={0}".format(block01['ngroup']))
-    #f.write("  isn={0}".format(block01['isn']))
     f.write("  niso={0}".format(block01['niso']))
     f.write("  mt={0}".format(block01['mt']))
     f.write("  nzone={0}\n".format(block01['nzone']))
     
-    
+    f.write("\ Please provide input for ISN variable:\n")
+    f.write("\ isn=  \n")
     
     if 'im' in block01.keys():
         f.write("im={0}".format(block01['im']))
@@ -425,14 +434,11 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
         f.write("  kt={0}  ".format(block01['kt']))
     
     f.write("\n")
-    
-    f.write("\ Must provide a value for variable ISN\n")
-    f.write("\ isn=\n")
-    
-    f.write("\ \n")
     f.write('t')
     
-    # Write Block 2
+    ###########################################
+    #              Write Block 2              #
+    ###########################################
     f.write("\n\ \n")
     f.write("\ ------------ Block 2 (Geometry) ------------")
     f.write("\n\ \n")
@@ -440,11 +446,12 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     if 'xmesh' in block02.keys():
         f.write("xmesh= ")
         count = 0
-        for i in block02['xmesh']:
+        for i, val in enumerate(block02['xmesh']):
             count += 1
-            f.write("{:.3f} ".format(i))
+            f.write("{:.3f} ".format(val))
             if count == 8:
-                f.write("\n       ")
+                if i != len(block02['xmesh'])-1:
+                    f.write("\n       ")
                 count = 0
         f.write("\nxints= ")
         f.write("{0}R {1}".format(len(block02['xmesh'])-1, 1))
@@ -453,11 +460,12 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     if 'ymesh' in block02.keys():
         f.write("ymesh= ")
         count = 0
-        for i in block02['ymesh']:
+        for i, val in enumerate(block02['ymesh']):
             count += 1
-            f.write("{:.3f} ".format(i))
+            f.write("{:.3f} ".format(val))
             if count == 8:
-                f.write("\n       ")
+                if i != len(block02['ymesh'])-1:
+                    f.write("\n       ")
                 count = 0
         f.write("\nyints= ")
         f.write("{0}R {1}".format(len(block02['ymesh'])-1, 1))
@@ -466,35 +474,43 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     if 'zmesh' in block02.keys():
         f.write("zmesh= ")
         count = 0
-        for i in block02['zmesh']:
+        for i, val in enumerate(block02['zmesh']):
             count += 1
-            f.write("{:.3f} ".format(i))
+            f.write("{:.3f} ".format(val))
             if count == 8:
-                f.write("\n       ")
+                if i != len(block02['zmesh'])-1:
+                    f.write("\n       ")
                 count = 0
         f.write("\nzints= ")
-        f.write("{0}R {1}".format(len(block02['xmesh'])-1, 1))
+        f.write("{0}R {1}".format(len(block02['zmesh'])-1, 1))
         f.write("\n")
-    
+        
     f.write("zones= ")
-    for row in block02['zones']:
+    for i, row in enumerate(block02['zones']):
+        string = format_repeated_vector(row)
+        list_string = string.split()
         count = 0
-        for i in row:
+        for num in list_string:
+            f.write("{} ".format(num))
             count += 1
-            f.write("{:3d} ".format(i))
-            if count == 15:
+            if count == 20:
                 f.write("\n       ")
                 count = 0
-        f.write(";\n       ")
-    
-    f.write("\ \n")
+        f.write(";")
+        if i != len(block02['zones'])-1:
+            f.write("\n       ")
+        else:
+            f.write("\n")
+
     f.write("t")
     
-    # Write Block 3
+    ###########################################
+    #              Write Block 3              #
+    ###########################################
     f.write("\n\ \n")
     f.write("\ ------------ Block 3 (Nuclear Data) ------------")
     f.write("\n\ \n")
-    f.write("\ The following variables must be set (optional variables are not set):")
+    f.write("\ Please provide input for the following variables:\n")
     f.write("\ lib=\n")
     f.write("\ maxord=\n")
     f.write("\ ihm=\n")
@@ -502,42 +518,206 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     
     f.write("names= ")
     count = 0
-    for name in block03['names']:
+    for i, name in enumerate(block03['names']):
         count += 1
         f.write("{0} ".format(name))
         if count == 10:
+            if i != len(block03['names'])-1:
                 f.write("\n       ")
-                count = 0
+            else:
+                f.write("\n")
+            count = 0
     
-    f.write("\n\ \n")
+    #f.write("\n\ \n")
     f.write("t")
     
-    # Write Block 4
+    ###########################################
+    #              Write Block 4              #
+    ###########################################
     f.write("\n\ \n")
     f.write("\ ------------ Block 4 (Cross-Section Mixing) ------------")
     f.write("\n\ \n")
     
     f.write("matls= ")
-    for mat in block04['matls']:
+    for i, mat in enumerate(block04['matls']):
         f.write("{0} ".format(mat))
         count = 0
+        j = 0
         for iso, dens in block04['matls'][mat].iteritems():
             count += 1
-            f.write("{} {:.4e}, ".format(iso, dens))
+            j += 1
+            if j != len(block04['matls'][mat]):
+                f.write("{} {:.4e}, ".format(iso, dens))
+            else:
+                f.write("{} {:.4e} ".format(iso, dens))
             if count == 3:
                 f.write("\n       ")
                 count = 0
-        f.write(";\n       ")
+        if i != len(block04['matls'])-1:
+            f.write(";\n       ")
+        else:
+            f.write(";\n")
     
-    f.write("\n\ ")
     f.write("assign= ")
-    for z in block04['assign']:
+    for j, z in enumerate(block04['assign']):
         f.write("{0} ".format(z))
         count = 0
         for i, mat in enumerate(block04['assign'][z]['mat']):
             count += 1
-            f.write("{} {:.4e}, ".format(mat, block04['assign'][z]['vol_frac'][i]))
+            if i != len(block04['assign'][z]['mat'])-1:
+                f.write("{} {:.4e}, ".format(mat, block04['assign'][z]['vol_frac'][i]))
+            else:
+                f.write("{} {:.4e} ".format(mat, block04['assign'][z]['vol_frac'][i]))
             if count == 3:
-                f.write("\n       ")
+                if i != len(block04['assign'][z]['mat'])-1:
+                    f.write("\n          ")
                 count = 0
-        f.write(";\n        ")
+        if j != len(block04['assign'])-1:
+            f.write(";\n        ")
+        else:
+            f.write(";\n")
+    
+    f.write("t")
+    
+    ###########################################
+    #              Write Block 5              #
+    ###########################################
+    f.write("\n\ \n")
+    f.write("\ ------------ Block 5 (Solver Inputs) ------------")
+    f.write("\n\ \n")
+    f.write("\ This input assumes a volumetric source calculation with vacuum boundary conditions.\n")
+    f.write("\ Please provide inputs below if otherwise.\n")
+    f.write("ievt=0      \ source calculation\n")
+    f.write("\ isct=     \ Legendre order of scattering (default=0)\n")
+    f.write("\ ith=      \ 0/1/2= direct/adjoint/POI calculation (default=0)\n")
+    f.write("\ ibl=      \ left BC (default=0, vacuum)\n")
+    f.write("\ ibr=      \ right BC (default=0, vacuum)\n")
+    f.write("\ ibt=      \ top BC (default=0, vacuum)\n")
+    f.write("\ ibb=      \ bottom BC (default=0, vacuum)\n")
+    f.write("\ ibfrnt=   \ front BC (default=0, vacuum)\n")
+    f.write("\ ibback=   \ back BC (default=0, vacuum)\n")
+    f.write("\ \n")
+    
+    f.write("\ Source is in format of option 3 according to PARTISN input manual.\n")
+    
+    f.write("source= ")
+    count = 0
+    tot = 0
+    for row in block05['source']:
+        formatted_string = format_repeated_vector(row)
+        f.write(formatted_string)
+        tot += 1
+        count += 1
+        if count == 4:
+            if tot != len(block05['source']):
+                f.write(";\n        ")
+            else:
+                f.write(";")
+            count = 0
+        else:
+            f.write("; ")
+    f.write("\n")
+        
+    if 'sourcx' in block05.keys():
+        f.write("sourcx= ")
+        count = 0
+        tot = 0
+        for row in block05['sourcx']:
+            formatted_string = format_repeated_vector(row)
+            f.write(formatted_string)
+            tot += 1
+            count += 1
+            if count == 4:
+                if tot != len(block05['sourcx']):
+                    f.write(";\n        ")
+                else:
+                    f.write(";")
+                count = 0
+            else:
+                f.write("; ")
+        f.write("\n")
+                
+    if 'sourcy' in block05.keys():
+        f.write("sourcy= ")
+        count = 0
+        tot = 0
+        for row in block05['sourcy']:
+            formatted_string = format_repeated_vector(row)
+            f.write(formatted_string)
+            tot += 1
+            count += 1
+            if count == 4:
+                if tot != len(block05['sourcy']):
+                    f.write(";\n        ")
+                else:
+                    f.write(";")
+                count = 0
+            else:
+                f.write("; ")
+        f.write("\n")
+            
+    if 'sourcz' in block05.keys():
+        f.write("sourcz= ")
+        count = 0
+        tot = 0
+        for row in block05['sourcz']:
+            formatted_string = format_repeated_vector(row)
+            f.write(formatted_string)
+            tot += 1
+            count += 1
+            if count == 4:
+                if tot != len(block05['sourcz']):
+                    f.write(";\n        ")
+                else:
+                    f.write(";")
+                count = 0
+            else:
+                f.write("; ")
+        f.write("\n")
+
+
+def format_repeated_vector(vector):
+    """Creates string out of a vector with the PARTISN format for repeated
+    numbers.
+    
+    Parameters:
+    -----------
+        vector: list of numbers, desired list to be formatted
+    
+    Returns:
+    --------
+        string: str, formatted string representation of the vector
+    
+    Example:
+        vector = [1, 2, 0, 0, 0, 7, 8, 3, 3]
+        string = "1 2 3R 0 7 8 2R 3"
+    """
+    
+    # put vector into a list of lists formatted as 
+    # [[number , R], [number, R], ...]
+    tot = 0
+    repeats = []
+    for i, val in enumerate(vector):
+        if tot == 0:
+            repeats.append([val, 1])
+            tot += 1
+        else:
+            if val == repeats[tot-1][0]:
+                repeats[tot - 1][1] += 1
+            else:
+                repeats.append([val, 1])
+                tot += 1
+    
+    # make into a string of characters
+    string = ""
+    n = 0
+    for pair in repeats:
+        if pair[1] == 1:
+            string += "{} ".format(pair[0])
+            n =+ 1
+        else:
+            string += "{0}R {1} ".format(pair[1], pair[0])
+            n += 2
+
+    return string
+    
