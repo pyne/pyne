@@ -52,10 +52,12 @@ if HAVE_PYTAPS:
 
 
 def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
-    """This class reads all necessary attributes from a material-laden 
+    """This definition reads all necessary attributes from a material-laden 
     geometry file, a pre-made PyNE mesh object, and the nuclear data cross 
     section library, and any optional inputs that are necessary for creating a 
-    PARTISN input file. It then writes a PARTISN text input file.
+    PARTISN input file. It then writes a PARTISN text input file for blocks 1-5.
+    Note that comments appear in the created input file where more variables
+    must be set. 
     
     Notes:
         This does not write out all necessary inputs for the solver and cross
@@ -190,6 +192,9 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     
     
 def _get_xs_names(nuc_names):
+    """Create list of names (strings) of the nuclides that appear in the cross
+    section library from the list of nuc_names.
+    """
     xs_names = []
     for nucid, name in nuc_names.iteritems():
         xs_names.append(name)
@@ -198,8 +203,10 @@ def _get_xs_names(nuc_names):
 
 
 def _get_coord_sys(mesh):
+    """Determine coordinate system and get bounds
+    """
     
-    # Determine coordinate system and get bounds
+    # get number of divisions
     nx = len(mesh.structured_get_divisions("x"))
     ny = len(mesh.structured_get_divisions("y"))
     nz = len(mesh.structured_get_divisions("z"))
@@ -221,17 +228,18 @@ def _get_coord_sys(mesh):
     # Determine IGEOM
     # assumes a Cartesian system
     if len(coord_sys) == 1:
-        IGEOM = 'SLAB'
+        igeom = 'SLAB'
     elif len(coord_sys) == 2:
-        IGEOM = 'X-Y'
+        igeom = 'X-Y'
     elif len(coord_sys) == 3:
-        IGEOM = 'X-Y-Z'
+        igeom = 'X-Y-Z'
     
-    return IGEOM, bounds
+    return igeom, bounds
 
 
 def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names):
-    # reads material properties from the loaded dagmc_geometry
+    """Read material properties from the loaded dagmc geometry.
+    """
     
     # set of exception nuclides for collapse_elements
     mat_except = Set(nuc_names.keys())
@@ -256,6 +264,8 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names):
 
 
 def _get_zones(mesh, hdf5, bounds):
+    """Get the minimum zone definitions for the geometry.
+    """
     
     # Descretize the geometry and get cell fractions
     dg = dagmc.discretize_geom(mesh)
@@ -354,8 +364,9 @@ def _get_zones(mesh, hdf5, bounds):
     
 
 def _nucid_to_xs(mat_lib, xs_names, nuc_names):
-
-    # replace nucids with xs library names
+    """Replace nucids with xs library names.
+    """
+    
     mat_xs_names = {}
     for mat in mat_lib.keys():
         mat_xs_names[mat] = {}
@@ -371,7 +382,8 @@ def _nucid_to_xs(mat_lib, xs_names, nuc_names):
 
 
 def _title(hdf5):
-    
+    """Create a title for the input based on the geometry name.
+    """
     if "/" in hdf5:
         name = hdf5.split("/")[len(hdf5.split("/"))-1].split(".")[0]
     else:
@@ -381,6 +393,8 @@ def _title(hdf5):
 
 
 def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
+    """Write all variables and comments to a file.
+    """
     
     # Create file to write to
     if 'name' in kwargs:
