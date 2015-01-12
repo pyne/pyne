@@ -377,11 +377,7 @@ def _title(hdf5):
     else:
         name = hdf5.split(".")[0]
     
-    dt = datetime.datetime.now()
-    
-    title = [name, dt]
-    
-    return title
+    return name
 
 
 def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
@@ -390,14 +386,13 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     if 'name' in kwargs:
         f = open(kwargs['name'], 'w')
     else:
-        file_name = str(title[0]) + '_partisn.inp'
+        file_name = str(title) + '_partisn.inp'
         f = open(file_name, 'w')
     
     # Write title
     f.write("     1     0     0\n")
-    f.write(str(title[0])+' ')
-    f.write(str(title[1]))
-    
+    f.write(str(title))
+
     f.write("\n\ ")
     f.write("\n\ Notes: This input assumes a volumetric source calculation using")
     f.write("\n\ default PARTISN values in many cases. Please refer to the comments")
