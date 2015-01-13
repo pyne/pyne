@@ -394,63 +394,6 @@ def find_volume(xyz, uvw=[1,0,0]):
     raise DagmcError("The point {0} does not appear to be in any volume".format(xyz))
 
 
-def materials_to_cells(hdf5):
-    """Get dictionary of material to cell assignments
-    
-    Parameters:
-        hdf5 : str, path to hdf5 material-laden geometry
-    
-    Returns:
-        mat_assigns : dict, keys are cell numbers and values are material names
-    """
-    # Load the geometry
-    dag_geom = iMesh.Mesh()
-    dag_geom.load(hdf5)
-    dag_geom.getEntities()
-    mesh_sets = dag_geom.getEntSets()
-
-    # Get tag handle
-    cat_tag = dag_geom.getTagHandle('CATEGORY')
-    id_tag = dag_geom.getTagHandle('GLOBAL_ID')
-    name_tag = dag_geom.getTagHandle('NAME')
-
-    # Get list of materials and list of cells
-    mat_assigns={}
-    
-    # loop over all mesh_sets in model
-    for mesh_set in mesh_sets:
-        tags = dag_geom.getAllTags(mesh_set)
-        
-        # check for mesh_sets that are groups
-        if name_tag in tags and cat_tag in tags \
-                and _tag_to_string(cat_tag[mesh_set]) == 'Group':
-            child_sets = mesh_set.getEntSets()
-            name = _tag_to_string(name_tag[mesh_set])
-            
-            # if mesh_set is a group with a material name_tag, loop over child
-            # mesh_sets and assign name to cell
-            if 'mat:' in name:
-                for child_set in child_sets:
-                    child_tags = dag_geom.getAllTags(child_set)
-                    if id_tag in child_tags:
-                        cell = id_tag[child_set]
-                        mat_assigns[cell] = name
-                        
-    return mat_assigns
-
-
-def _tag_to_string(tag):
-    a = []
-    # since we have a byte type tag loop over the 32 elements
-    for part in tag:
-        # if the byte char code is non 0
-        if (part != 0):
-            # convert to ascii and join to string
-            a.append(str(unichr(part)))
-            string = ''.join(a)
-    return string
-
-
 def fire_one_ray(vol_id, xyz, uvw):
     """Fire a ray from xyz, in the direction uvw, at the specified volume
 
@@ -655,6 +598,64 @@ def get_material_set(**kw):
         else:
             mat_ids.add(d['material'])
     return mat_ids
+
+
+def materials_to_cells(hdf5):
+    """Get dictionary of material to cell assignments
+    
+    Parameters:
+        hdf5 : str, path to hdf5 material-laden geometry
+    
+    Returns:
+        mat_assigns : dict, keys are cell numbers and values are material names
+    """
+    # Load the geometry
+    dag_geom = iMesh.Mesh()
+    dag_geom.load(hdf5)
+    dag_geom.getEntities()
+    mesh_sets = dag_geom.getEntSets()
+
+    # Get tag handle
+    cat_tag = dag_geom.getTagHandle('CATEGORY')
+    id_tag = dag_geom.getTagHandle('GLOBAL_ID')
+    name_tag = dag_geom.getTagHandle('NAME')
+
+    # Get list of materials and list of cells
+    mat_assigns={}
+    
+    # loop over all mesh_sets in model
+    for mesh_set in mesh_sets:
+        tags = dag_geom.getAllTags(mesh_set)
+        
+        # check for mesh_sets that are groups
+        if name_tag in tags and cat_tag in tags \
+                and _tag_to_string(cat_tag[mesh_set]) == 'Group':
+            child_sets = mesh_set.getEntSets()
+            name = _tag_to_string(name_tag[mesh_set])
+            
+            # if mesh_set is a group with a material name_tag, loop over child
+            # mesh_sets and assign name to cell
+            if 'mat:' in name:
+                for child_set in child_sets:
+                    child_tags = dag_geom.getAllTags(child_set)
+                    if id_tag in child_tags:
+                        cell = id_tag[child_set]
+                        mat_assigns[cell] = name
+                        
+    return mat_assigns
+
+
+def _tag_to_string(tag):
+    a = []
+    # since we have a byte type tag loop over the 32 elements
+    for part in tag:
+        # if the byte char code is non 0
+        if (part != 0):
+            # convert to ascii and join to string
+            a.append(str(unichr(part)))
+            string = ''.join(a)
+    return string
+    
 
 #### start util
 def discretize_geom(mesh, **kwargs):
