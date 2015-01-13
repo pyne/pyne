@@ -176,3 +176,19 @@ def test_write_partisn_input_2D():
 
 def test_write_partisn_input_3D():
     pass
+
+
+def test_format_repeated_vector():
+    """Test the format_repeated_vector function.
+    """
+    # Create vector
+    vector = [1.0, 1, 1, 0, 0, 1, 2, 2.0, 2.1]
+    
+    # Expected string
+    string_expected = "3R 1.0 2R 0 1 2R 2 2.1 "
+    
+    # Call function
+    string = partisn.format_repeated_vector(vector)
+    
+    # Test if equal
+    assert(string == string_expected)
