@@ -1,5 +1,6 @@
 """This file creates a sample dictionary to test the spatial_solver code's."""
 import numpy as np
+cell_widths = np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F")
 
 def populate_simple(solverin, solvertypein):
     solver_dict = {
@@ -11,9 +12,9 @@ def populate_simple(solverin, solvertypein):
         'nodes_xyz':[4,4,4],
         'num_groups':1,
         'num_materials':1,
-        'x_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
-        'y_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
-        'z_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
+        'x_cells_widths': cell_widths,
+        'y_cells_widths': cell_widths,
+        'z_cells_widths': cell_widths,
         #'x_cells_widths':[0.25, 0.25, 0.25, 0.25],
         #'y_cells_widths':[0.25, 0.25, 0.25, 0.25],
         #'z_cells_widths':[0.25, 0.25, 0.25, 0.25],
@@ -47,12 +48,9 @@ def populate_simple_with_warnings(solverin):
         'nodes_xyz':[4,4,4],
         'num_groups':1,
         'num_materials':1,
-        'x_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
-        'y_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
-        'z_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
-        #'x_cells_widths':[0.25, 0.25, 0.25, 0.25],
-        #'y_cells_widths':[0.25, 0.25, 0.25, 0.25],
-        #'z_cells_widths':[0.25, 0.25, 0.25, 0.25],
+        'x_cells_widths': cell_widths,
+        'y_cells_widths': cell_widths,
+        'z_cells_widths': cell_widths,
         'x_boundry_conditions':[2,2],
         'y_boundry_conditions':[2,2],
         'z_boundry_conditions':[2,2],
@@ -80,12 +78,9 @@ def populate_intermediate_1(solverin, solvertypein):
         'nodes_xyz':[4,4,4],
         'num_groups':1,
         'num_materials':2,
-        'x_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
-        'y_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
-        'z_cells_widths': np.array([0.25, 0.25, 0.25, 0.25], 'float64', order = "F"),
-        #'x_cells_widths':[0.25, 0.25, 0.25, 0.25],
-        #'y_cells_widths':[0.25, 0.25, 0.25, 0.25],
-        #'z_cells_widths':[0.25, 0.25, 0.25, 0.25],
+        'x_cells_widths': cell_widths,
+        'y_cells_widths': cell_widths,
+        'z_cells_widths': cell_widths,
         'x_boundry_conditions':[2,2],
         'y_boundry_conditions':[2,2],
         'z_boundry_conditions':[2,2],

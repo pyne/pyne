@@ -5,6 +5,7 @@ from __future__ import division
 import sys
 import os
 import time
+import numpy as np
 
 #Solver imports
 import pyne.transport_spatial_methods as transport_spatial_methods
@@ -74,6 +75,8 @@ def solve(inputdict_unchecked):
         inputdict['x_cells_widths'],
         inputdict['y_cells_widths'],
         inputdict['z_cells_widths'],
+#       np.asfortranarray(inputdict['y_cells_widths']),
+#       np.asfortranarray(inputdict['z_cells_widths']),
         inputdict['x_boundry_conditions'][0],
         inputdict['x_boundry_conditions'][1],
         inputdict['y_boundry_conditions'][0],
