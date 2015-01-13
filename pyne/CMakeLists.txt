@@ -129,6 +129,7 @@ add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX
                 --f90flags="-fdefault-real-8" 
                 -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90 
                 -lpyne
+                --debug --debug-capi
                 #-lpyne --debug-capi
     DEPENDS pyne
     )
