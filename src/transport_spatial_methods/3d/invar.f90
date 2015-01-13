@@ -51,7 +51,7 @@ REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: s
 ! tobc(nx,ny,0:lambda,0:lambda,apo,4)
 !
 ! last index: 
-!
+! 
 ! frba: xi>0 and mu>0 => 1 
 ! frba: xi>0 and mu<0 => 2 
 ! frba: xi<0 and mu>0 => 3 

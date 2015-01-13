@@ -12,8 +12,12 @@ MODULE precision_module
 !                                     are with a corner/edge as opposed to face  
 !                      peps         - Minimum distance of two points to be considered distinct points
 !
+use iso_c_binding, only: c_double, c_int
+
 !INTEGER, PARAMETER :: pr = selected_real_kind(32,4000)
 INTEGER, PARAMETER :: pr = selected_real_kind(16,4000)
+integer, parameter :: dp = kind(0.d0)
+
 
 REAL(kind=pr),  PARAMETER :: eps       = 1.0E-14_pr 
 REAL(kind=pr),  PARAMETER :: peps      = 1.8E-14_pr

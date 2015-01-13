@@ -98,6 +98,7 @@ SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
 USE invar
 USE solvar
 USE timevar
+USE precision_module
 IMPLICIT NONE
   
 INTEGER :: i, j, k, n
@@ -111,7 +112,9 @@ CHARACTER(80), INTENT(IN) :: titlein
 CHARACTER(30), INTENT(IN) :: solver_in, solver_type_in
 INTEGER, INTENT(IN) :: spatial_order_in, angular_quadrature_order_in,&
  qdtypin, nodes_x_in, nodes_y_in, nodes_z_in, num_groups_in, num_materials_in
+
 REAL*8, INTENT(IN), DIMENSION(:) :: x_cell_widths_in, y_cell_widths_in, z_cell_widths_in
+
 INTEGER, INTENT(IN) :: x_boundry_condition_1_in, x_boundry_condition_2_in,&
  y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in,&
  z_boundry_condition_2_in 
