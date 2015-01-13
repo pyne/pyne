@@ -119,6 +119,11 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/bins.pyx"
 cython_add_module(bins bins.pyx)
 target_link_libraries(bins pyne)
 
+
+IF(${PYNE_PLATFORM} STREQUAL "__LINUX__")
+  EXECUTE_PROCESS(COMMAND gcc -dumpversion GCC_VERSION)
+  IF("${GCC_VERSION}" VERSION_GREATER "4.6")
+
 # TRANSPORT_SPATIAL_METHODS wrapper
 # I don't know which method is better...
 #add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
@@ -134,3 +139,6 @@ add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX
     DEPENDS pyne
     )
 target_link_libraries(transport_spatial_methods pyne)
+
+  ENDIF("${GCC_VERSION}" VERSION_GREATER "4.6")
+ENDIF("${PYNE_PLATFORM}" STREQUAL "__LINUX__")
