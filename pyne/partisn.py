@@ -210,7 +210,70 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     else:
         _write_input(title, block01, block02, block03, block04, block05)
   
+
+def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
+    """Read material properties from the loaded dagmc geometry.
+    """
     
+    # If a set of nuc_names is provided, then collapse elements
+    if 'nuc_names' in kwargs:
+        nuc_names = kwargs['nuc_names']
+        collapse = True
+        # set of exception nuclides for collapse_elements
+        mat_except = Set(nuc_names.keys())
+    else:
+        collapse = False
+    
+    # collapse isotopes into elements (if required)
+    mats = MaterialLibrary(hdf5, datapath=data_hdf5path, nucpath=nuc_hdf5path)
+    mats_collapsed = {}
+    for mat_name in mats.keys():
+        if collapse:
+            mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)
+        else:
+            mats_collapsed[mat_name] = mats[mat_name]
+
+    # convert mass fraction to atom density in units [at/b-cm]
+    mat_lib = {}
+    for mat_name, comp in mats_collapsed.iteritems():
+        atom_dens_dict = comp.to_atom_dens()
+        comp_list = {}
+        for nucid, dens in atom_dens_dict.iteritems():
+            # convert from [at/cc] to [at/b-cm]
+            comp_list[nucid] = dens*10.**-24
+        mat_lib[mat_name] = comp_list
+
+    return mat_lib
+
+
+def _nucid_to_xs(mat_lib, **kwargs):
+    """Replace nucids with xs library names.
+    """
+    
+    if 'nuc_names' in kwargs:
+        nuc_names = kwargs['nuc_names']
+        names_tf = True
+    else:
+        names_tf = False
+    
+    mat_xs_names = {}
+    for mat in mat_lib.keys():
+        mat_xs_names[mat] = {}
+        for nucid in mat_lib[mat].keys():
+            
+            if names_tf:
+                if nucid in nuc_names.keys():
+                    name = nuc_names[nucid]
+                    mat_xs_names[mat][name] = mat_lib[mat][nucid]
+                else:
+                    warn("Nucid {0} does not exist in the provided nuc_names dictionary.".format(nucid))
+                    mat_xs_names[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
+            else:
+                mat_xs_names[mat][nucname.name(nucid)] = mat_lib[mat][nucid]
+
+    return mat_xs_names
+    
+
 def _get_xs_names(mat_xs_names):
     """Create list of names (strings) of the nuclides that appear in the cross
     section library from the list of nuc_names.
@@ -258,41 +321,6 @@ def _get_coord_sys(mesh):
         igeom = 'X-Y-Z'
     
     return igeom, bounds
-
-
-def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
-    """Read material properties from the loaded dagmc geometry.
-    """
-    
-    # If a set of nuc_names is provided, then collapse elements
-    if 'nuc_names' in kwargs:
-        nuc_names = kwargs['nuc_names']
-        collapse = True
-        # set of exception nuclides for collapse_elements
-        mat_except = Set(nuc_names.keys())
-    else:
-        collapse = False
-    
-    # collapse isotopes into elements (if required)
-    mats = MaterialLibrary(hdf5, datapath=data_hdf5path, nucpath=nuc_hdf5path)
-    mats_collapsed = {}
-    for mat_name in mats.keys():
-        if collapse:
-            mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)
-        else:
-            mats_collapsed[mat_name] = mats[mat_name]
-
-    # convert mass fraction to atom density in units [at/b-cm]
-    mat_lib = {}
-    for mat_name, comp in mats_collapsed.iteritems():
-        atom_dens_dict = comp.to_atom_dens()
-        comp_list = {}
-        for nucid, dens in atom_dens_dict.iteritems():
-            # convert from [at/cc] to [at/b-cm]
-            comp_list[nucid] = dens*10.**-24
-        mat_lib[mat_name] = comp_list
-
-    return mat_lib
 
 
 def _get_zones(mesh, hdf5, bounds, num_rays, grid):
@@ -394,34 +422,6 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
             
     return zones_formatted, zones_mats
     
-
-def _nucid_to_xs(mat_lib, **kwargs):
-    """Replace nucids with xs library names.
-    """
-    
-    if 'nuc_names' in kwargs:
-        nuc_names = kwargs['nuc_names']
-        names_tf = True
-    else:
-        names_tf = False
-    
-    mat_xs_names = {}
-    for mat in mat_lib.keys():
-        mat_xs_names[mat] = {}
-        for nucid in mat_lib[mat].keys():
-            
-            if names_tf:
-                if nucid in nuc_names.keys():
-                    name = nuc_names[nucid]
-                    mat_xs_names[mat][name] = mat_lib[mat][nucid]
-                else:
-                    warn("Nucid {0} does not exist in the provided nuc_names dictionary.".format(nucid))
-                    mat_xs_names[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
-            else:
-                mat_xs_names[mat][nucname.name(nucid)] = mat_lib[mat][nucid]
-
-    return mat_xs_names
-
 
 def _title(hdf5):
     """Create a title for the input based on the geometry name.
