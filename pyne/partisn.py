@@ -101,8 +101,14 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     # Load the geometry
     dagmc.load(hdf5)
     
-    # Read optional inputs:
+    # Initialize dictionaries for each PARTISN block
+    block01 = {}
+    block02 = {}
+    block03 = {}
+    block04 = {}
+    block05 = {}
     
+    # Read optional inputs:
     # hdf5 paths
     if 'data_hdf5path' in kwargs:
         data_hdf5path = kwargs['data_hdf5path']  
@@ -114,46 +120,39 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     else:
         nuc_hdf5path = '/material_library/nucid'
     
-    # Dictionary of hdf5 names and cross section library names
-    # Assumes PyNE naming convention in the cross section library if no dict
-    # provided.
-    if 'names_dict' in kwargs:
-        nuc_names = kwargs['names_dict']
-        names_tf = True
-    else:
-        names_tf = False
-    
+    # input file name
     if 'input_file' in kwargs:
         input_file = kwargs['input_file']
         input_file_tf = True
     else:
         input_file_tf = False
     
-    # Initialize dictionaries for each PARTISN block
-    block01 = {}
-    block02 = {}
-    block03 = {}
-    block04 = {}
-    block05 = {}
+    # Dictionary of hdf5 names and cross section library names
+    # Assumes PyNE naming convention in the cross section library if no dict
+    # provided.
+    if 'names_dict' in kwargs:
+        nuc_names = kwargs['names_dict']
+        mat_lib = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names=nuc_names)
+        mat_xs_names = _nucid_to_xs(mat_lib, nuc_names=nuc_names)
+    else:
+        mat_lib = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path)
+        mat_xs_names = _nucid_to_xs(mat_lib)
     
     # Set input variables
     
+    block04['matls'] = mat_xs_names
+    
+    xs_names = _get_xs_names(mat_xs_names)
+    block01['niso'] = len(xs_names)
+    block03['names'] = xs_names
+
     block01['igeom'], bounds = _get_coord_sys(mesh)
     block01['ngroup'] = ngroup
-    
-    ## !!!!!!! Need to read a function here to get nuc_names if not provided
-    if names_tf:
-        xs_names = _get_xs_names(nuc_names)
-    else:
-        pass
-        
-    block01['niso'] = len(xs_names)
-    
-    mat_lib = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names)
     block01['mt'] = len(mat_lib)
     
     block02['zones'], zones = _get_zones(mesh, hdf5, bounds)
     block01['nzone'] = len(zones)
+    block04['assign'] = zones
     
     for key in bounds.keys():
         if key == 'x':
@@ -177,34 +176,30 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
             block02['zmesh'] = bounds[key]
             block05['sourcz'] = np.zeros(shape=(n, nmq), dtype=float)
             block05['sourcz'][:,0] = 1.0
-    
-    block03['names'] = xs_names
-    
-    mat_xs_names = _nucid_to_xs(mat_lib, xs_names, nuc_names)
-    block04['matls'] = mat_xs_names
-    
-    block04['assign'] = zones
-    
+
     block05['source'] = np.zeros(shape=(ngroup, nmq), dtype=float)
     block05['source'][:,0] = 1.0
     
+    # create title
     title = _title(hdf5)
     
+    # call function to write to file
     if input_file_tf:
         _write_input(title, block01, block02, block03, block04, block05, name=input_file)
     else:
         _write_input(title, block01, block02, block03, block04, block05)
-
-def _get_nuc_names():
-    pass    
+  
     
-def _get_xs_names(nuc_names):
+def _get_xs_names(mat_xs_names):
     """Create list of names (strings) of the nuclides that appear in the cross
     section library from the list of nuc_names.
     """
+    
     xs_names = []
-    for nucid, name in nuc_names.iteritems():
-        xs_names.append(name)
+    for mat, nuc_set in mat_xs_names.iteritems():
+        for name in nuc_set.keys():
+            if name not in xs_names:
+                xs_names.append(name)
     
     return xs_names
 
@@ -244,18 +239,27 @@ def _get_coord_sys(mesh):
     return igeom, bounds
 
 
-def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names):
+def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
     """Read material properties from the loaded dagmc geometry.
     """
     
-    # set of exception nuclides for collapse_elements
-    mat_except = Set(nuc_names.keys())
+    # If a set of nuc_names is provided, then collapse elements
+    if 'nuc_names' in kwargs:
+        nuc_names = kwargs['nuc_names']
+        collapse = True
+        # set of exception nuclides for collapse_elements
+        mat_except = Set(nuc_names.keys())
+    else:
+        collapse = False
     
-    # collapse isotopes into elements
+    # collapse isotopes into elements (if required)
     mats = MaterialLibrary(hdf5, datapath=data_hdf5path, nucpath=nuc_hdf5path)
     mats_collapsed = {}
     for mat_name in mats.keys():
-        mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)      
+        if collapse:
+            mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)
+        else:
+            mats_collapsed[mat_name] = mats[mat_name]
 
     # convert mass fraction to atom density in units [at/b-cm]
     mat_lib = {}
@@ -370,20 +374,30 @@ def _get_zones(mesh, hdf5, bounds):
     return zones_formatted, zones_mats
     
 
-def _nucid_to_xs(mat_lib, xs_names, nuc_names):
+def _nucid_to_xs(mat_lib, **kwargs):
     """Replace nucids with xs library names.
     """
+    
+    if 'nuc_names' in kwargs:
+        nuc_names = kwargs['nuc_names']
+        names_tf = True
+    else:
+        names_tf = False
     
     mat_xs_names = {}
     for mat in mat_lib.keys():
         mat_xs_names[mat] = {}
         for nucid in mat_lib[mat].keys():
-            if nucid in nuc_names.keys():
-                name = nuc_names[nucid]
-                mat_xs_names[mat][name] = mat_lib[mat][nucid]
+            
+            if names_tf:
+                if nucid in nuc_names.keys():
+                    name = nuc_names[nucid]
+                    mat_xs_names[mat][name] = mat_lib[mat][nucid]
+                else:
+                    warn("Nucid {0} does not exist in the provided nuc_names dictionary.".format(nucid))
+                    mat_xs_names[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
             else:
-                warn("Nucid {0} does not exist in the hdf5 geometry.".format(nucid))
-                mat_xs_names[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
+                mat_xs_names[mat][nucname.name(nucid)] = mat_lib[mat][nucid]
 
     return mat_xs_names
 
@@ -532,6 +546,8 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     f.write("\ ihm=\n")
     f.write("\ iht=\n")
     
+    f.write("\ Note: NAMES is not all inclusive. Only NAMES that are present in\n")
+    f.write("\ meshed area are listed.\n")
     f.write("names= ")
     count = 0
     for i, name in enumerate(block03['names']):
@@ -540,12 +556,10 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
         if count == 10:
             if i != len(block03['names'])-1:
                 f.write("\n       ")
-            else:
-                f.write("\n")
             count = 0
     
     #f.write("\n\ \n")
-    f.write("t")
+    f.write("\nt")
     
     ###########################################
     #              Write Block 4              #
@@ -564,34 +578,34 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
             j += 1
             if j != len(block04['matls'][mat]):
                 f.write("{} {:.4e}, ".format(iso, dens))
+                if count == 3:
+                    if j != len(block04['matls'][mat]):
+                        f.write("\n       ")
+                    count = 0
             else:
-                f.write("{} {:.4e} ".format(iso, dens))
-            if count == 3:
-                f.write("\n       ")
-                count = 0
-        if i != len(block04['matls'])-1:
-            f.write(";\n       ")
-        else:
-            f.write(";\n")
+                if i == len(block04['matls']) - 1:
+                    f.write("{} {:.4e};\n".format(iso, dens))
+                else:
+                    f.write("{} {:.4e};\n       ".format(iso, dens))
+            
     
     f.write("assign= ")
-    for j, z in enumerate(block04['assign']):
+    for i, z in enumerate(block04['assign']):
         f.write("{0} ".format(z))
         count = 0
-        for i, mat in enumerate(block04['assign'][z]['mat']):
+        for j, mat in enumerate(block04['assign'][z]['mat']):
             count += 1
-            if i != len(block04['assign'][z]['mat'])-1:
-                f.write("{} {:.4e}, ".format(mat, block04['assign'][z]['vol_frac'][i]))
+            if j != len(block04['assign'][z]['mat'])-1:
+                f.write("{} {:.4e}, ".format(mat, block04['assign'][z]['vol_frac'][j]))
+                if count == 3:
+                    if i != len(block04['assign'][z]['mat'])-1:
+                        f.write("\n          ")
+                    count = 0
             else:
-                f.write("{} {:.4e} ".format(mat, block04['assign'][z]['vol_frac'][i]))
-            if count == 3:
-                if i != len(block04['assign'][z]['mat'])-1:
-                    f.write("\n          ")
-                count = 0
-        if j != len(block04['assign'])-1:
-            f.write(";\n        ")
-        else:
-            f.write(";\n")
+                if i == len(block04['assign']) - 1:
+                    f.write("{} {:.4e};\n".format(mat, block04['assign'][z]['vol_frac'][j]))
+                else:
+                    f.write("{} {:.4e};\n        ".format(mat, block04['assign'][z]['vol_frac'][j]))
     
     f.write("t")
     
@@ -602,7 +616,7 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     f.write("\ ------------ Block 5 (Solver Inputs) ------------")
     f.write("\n\ \n")
     f.write("\ This input assumes a volumetric source calculation with vacuum boundary conditions.\n")
-    f.write("\ Please provide inputs below if otherwise.\n")
+    f.write("\ Change inputs below if otherwise.\n")
     f.write("ievt=0      \ source calculation\n")
     f.write("\ isct=     \ Legendre order of scattering (default=0)\n")
     f.write("\ ith=      \ 0/1/2= direct/adjoint/POI calculation (default=0)\n")
@@ -615,7 +629,7 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     f.write("\ \n")
     
     f.write("\ Source is in format of option 3 according to PARTISN input manual.\n")
-    
+    f.write("\ Default is an evenly distributed volume source.\n")
     f.write("source= ")
     count = 0
     tot = 0
@@ -711,6 +725,7 @@ def format_repeated_vector(vector):
     
     # put vector into a list of lists formatted as 
     # [[number , R], [number, R], ...]
+    # where 'R' is the number of times that 'number' is repeated
     tot = 0
     repeats = []
     for i, val in enumerate(vector):
@@ -736,4 +751,3 @@ def format_repeated_vector(vector):
             n += 2
 
     return string
-    
