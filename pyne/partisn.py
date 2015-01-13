@@ -90,6 +90,15 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
             If no name is provided the name will default to 
             '<hdf5 file name>_partisn.inp'. Any file already existing by the 
             same name will be overwritten.
+        num_rays : (for discretize_geom), int, optional, default = 10
+            Structured mesh only. The number of rays to fire in each mesh row 
+            for each direction.
+        grid : (for discretize_geom), boolean, optional, default = False
+            Structured mesh only. If false, rays starting points are chosen 
+            randomly (on the boundary) for each mesh row. If true, a linearly 
+            spaced grid of starting points is used, with dimension 
+            sqrt(num_rays) x sqrt(num_rays). In this case, "num_rays" must be 
+            a perfect square.
     
     Output:
     -------
@@ -109,6 +118,18 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     block05 = {}
     
     # Read optional inputs:
+    
+    # discretize_geom inputs
+    if 'num_rays' in kwargs:
+        num_rays = kwargs['num_rays']
+    else:
+        num_rays = 10
+    
+    if 'grid' in kwargs:
+        grid = kwargs['grid']
+    else:
+        grid = False
+    
     # hdf5 paths
     if 'data_hdf5path' in kwargs:
         data_hdf5path = kwargs['data_hdf5path']  
@@ -150,7 +171,7 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     block01['ngroup'] = ngroup
     block01['mt'] = len(mat_lib)
     
-    block02['zones'], zones = _get_zones(mesh, hdf5, bounds)
+    block02['zones'], zones = _get_zones(mesh, hdf5, bounds, num_rays, grid)
     block01['nzone'] = len(zones)
     block04['assign'] = zones
     
@@ -274,12 +295,12 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
     return mat_lib
 
 
-def _get_zones(mesh, hdf5, bounds):
+def _get_zones(mesh, hdf5, bounds, num_rays, grid):
     """Get the minimum zone definitions for the geometry.
     """
     
     # Descretize the geometry and get cell fractions
-    dg = dagmc.discretize_geom(mesh)
+    dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
     
     # Reorganize dictionary of each voxel's info with the key the voxel number 
     # and values of cell and volume fraction   
