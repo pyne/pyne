@@ -329,7 +329,7 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
     
     # Descretize the geometry and get cell fractions
     dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
-    print(dg)
+
     # Reorganize dictionary of each voxel's info with the key the voxel number 
     # and values of cell and volume fraction   
     voxel = {}
