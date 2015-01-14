@@ -609,7 +609,7 @@ def materials_to_cells(hdf5):
     Returns:
         mat_assigns : dict, keys are cell numbers and values are material names
     """
-    # Load the geometry
+    # Load the geometry as an iMesh instance
     dag_geom = iMesh.Mesh()
     dag_geom.load(hdf5)
     dag_geom.getEntities()
@@ -623,10 +623,16 @@ def materials_to_cells(hdf5):
     # Get list of materials and list of cells
     mat_assigns={}
     
+    # Assign the implicit complement to vacuum
+    # NOTE: This is a temporary work-around and it is just assumed that there
+    # is no material already assigned to the implicit complement volume.
+    implicit_vol = find_implicit_complement()
+    mat_assigns[implicit_vol] = "mat:Vacuum"
+    
     # loop over all mesh_sets in model
     for mesh_set in mesh_sets:
         tags = dag_geom.getAllTags(mesh_set)
-        
+            
         # check for mesh_sets that are groups
         if name_tag in tags and cat_tag in tags \
                 and _tag_to_string(cat_tag[mesh_set]) == 'Group':
@@ -645,6 +651,16 @@ def materials_to_cells(hdf5):
     return mat_assigns
 
 
+def find_implicit_complement():
+    """Find the implicit complement and return the volume id.
+    Note that a DAGMC geometry must already be loaded into memory.
+    """
+    volumes = get_volume_list()
+    for vol in volumes:
+        if volume_is_implicit_complement(vol):
+            return vol
+            
+            
 def _tag_to_string(tag):
     a = []
     # since we have a byte type tag loop over the 32 elements
