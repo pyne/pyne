@@ -171,9 +171,8 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     block01['ngroup'] = ngroup
     block01['mt'] = len(mat_lib)
     
-    block02['zones'], zones = _get_zones(mesh, hdf5, bounds, num_rays, grid)
-    block01['nzone'] = len(zones)
-    block04['assign'] = zones
+    block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays, grid)
+    block01['nzone'] = len(block04['assign'])
     
     for key in bounds.keys():
         if key == 'x':
@@ -202,7 +201,10 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     block05['source'][:,0] = 1.0
     
     # create title
-    title = _title(hdf5)
+    if "/" in hdf5:
+        title = hdf5.split("/")[len(hdf5.split("/"))-1].split(".")[0]
+    else:
+        title = hdf5.split(".")[0]
     
     # call function to write to file
     if input_file_tf:
@@ -258,18 +260,18 @@ def _nucid_to_xs(mat_lib, **kwargs):
     
     mat_xs_names = {}
     for mat in mat_lib.keys():
-        mat_xs_names[mat] = {}
+        mat_name = strip_mat_name(mat)
+        mat_xs_names[mat_name] = {}
         for nucid in mat_lib[mat].keys():
-            
             if names_tf:
                 if nucid in nuc_names.keys():
                     name = nuc_names[nucid]
-                    mat_xs_names[mat][name] = mat_lib[mat][nucid]
+                    mat_xs_names[mat_name][name] = mat_lib[mat][nucid]
                 else:
                     warn("Nucid {0} does not exist in the provided nuc_names dictionary.".format(nucid))
-                    mat_xs_names[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
+                    mat_xs_names[mat_name]["{0}".format(nucid)] = mat_lib[mat][nucid]
             else:
-                mat_xs_names[mat][nucname.name(nucid)] = mat_lib[mat][nucid]
+                mat_xs_names[mat_name][nucname.name(nucid)] = mat_lib[mat][nucid]
 
     return mat_xs_names
     
@@ -366,12 +368,14 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
     
     # Eliminate duplicate zones and assign each voxel a zone number.
     # Assign zone = 0 if vacuum or graveyard and eliminate material definition.
+    skip_list = [['mat:Vacuum'], ['mat:vacuum'], ['mat:Graveyard'], ['mat:graveyard']]
     voxel_zone = {}
     zones_mats = {}
     z = 0
     match = False
     first = True    
     for i, vals in zones.iteritems():
+        # Find if the zone already exists
         for zone, info in zones_mats.iteritems():
             if (vals['mat'] == info['mat']) and \
                     np.allclose(np.array(vals['vol_frac']), \
@@ -381,9 +385,10 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
                 break
             else:
                 match = False
+        # Create a new zone if first zone or does not match other zones
         if first or not match:
-            if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
-                    ['mat:graveyard'], ['mat:Graveyard']]:
+            # Check that the material is not 100% void (assign zone 0 otherwise)
+            if vals['mat'] in skip_list:
                 voxel_zone[i] = 0
             else:
                 z += 1
@@ -391,11 +396,22 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
                 voxel_zone[i] = z
                 first = False
         else:
-            if vals['mat'] in [['mat:Vacuum'], ['mat:vacuum'], 
-                    ['mat:graveyard'], ['mat:Graveyard']]:
+            if vals['mat'] in skip_list:
                 voxel_zone[i] = 0
             else:
                 voxel_zone[i] = y
+    
+    # Remove any instances of graveyard or vacuum in zone definitions
+    skip_list = ['mat:Vacuum', 'mat:vacuum', 'mat:Graveyard', 'mat:graveyard']
+    zones_novoid = {}
+    for z in zones_mats.keys():
+        zones_novoid[z] = {'mat':[], 'vol_frac':[]}
+        for i, mat in enumerate(zones_mats[z]['mat']):
+            if mat not in skip_list:
+                name = strip_mat_name(mat)
+                zones_novoid[z]['mat'].append(name)
+                zones_novoid[z]['vol_frac'].append(zones_mats[z]['vol_frac'][i])
+
     
     # Put zones into format for PARTISN input
     if 'x' in bounds.keys():
@@ -420,19 +436,8 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
             zones_formatted[i,jk] = voxel_zone[n]
             n += 1
             
-    return zones_formatted, zones_mats
+    return zones_formatted, zones_novoid
     
-
-def _title(hdf5):
-    """Create a title for the input based on the geometry name.
-    """
-    if "/" in hdf5:
-        name = hdf5.split("/")[len(hdf5.split("/"))-1].split(".")[0]
-    else:
-        name = hdf5.split(".")[0]
-    
-    return name
-
 
 def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
     """Write all variables and comments to a file.
@@ -609,14 +614,13 @@ def _write_input(title, block01, block02, block03, block04, block05, **kwargs):
                 else:
                     f.write("{} {:.4e};\n       ".format(iso, dens))
             
-    
     f.write("assign= ")
     for i, z in enumerate(block04['assign']):
         f.write("{0} ".format(z))
         count = 0
         for j, mat in enumerate(block04['assign'][z]['mat']):
-            count += 1
             if j != len(block04['assign'][z]['mat'])-1:
+                count += 1
                 f.write("{} {:.4e}, ".format(mat, block04['assign'][z]['vol_frac'][j]))
                 if count == 3:
                     if i != len(block04['assign'][z]['mat'])-1:
@@ -772,3 +776,21 @@ def format_repeated_vector(vector):
             n += 2
 
     return string
+
+
+def strip_mat_name(mat_name):
+    """Provide a material name (string) and receive a compacted name without 
+    'mat:' or special characters.
+    Assumes PyNE naming convention (must start with 'mat:').
+    """
+    
+    # Remove 'mat:'
+    tmp1 = mat_name.split(':')[1]
+    
+    # Remove other special characters
+    special_char = [':', ',', ' ', ';', "'", '"']
+    for char in special_char:
+        tmp2 = tmp1.split(char)
+        tmp1 = ''.join(tmp2)
+    
+    return tmp1
