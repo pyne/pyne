@@ -3,6 +3,12 @@ Tests for PyNE partisn module.
 """
 import warnings
 import os
+import numpy as np
+import filecmp
+from nose.tools import assert_almost_equal
+from numpy.testing import assert_array_almost_equal
+from pyne import partisn, dagmc
+from pyne.utils import QAWarning
 
 try:
     from itaps import iBase, iMesh, iMeshExtensions
@@ -15,15 +21,7 @@ except ImportError:
 if HAVE_PYTAPS:
     from pyne.mesh import Mesh
 
-import numpy as np
-import filecmp
-from nose.tools import assert_almost_equal
-from numpy.testing import assert_array_almost_equal
-from pyne import partisn, dagmc
-
-from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-
 
 
 def test_get_material_lib_with_names():
