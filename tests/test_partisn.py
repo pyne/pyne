@@ -16,11 +16,13 @@ if HAVE_PYTAPS:
     from pyne.mesh import Mesh
 
 from nose.tools import assert_almost_equal
+import filecmp
+import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-from pyne import partisn
+from pyne import partisn, dagmc
 
 
 def test_get_material_lib_with_names():
@@ -40,13 +42,33 @@ def test_get_material_lib_with_names():
     names[20040000] = 'he4'
     
     mat_lib = partisn._get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names=names)
-    #### THIS DOES NOT PASS 
-    # ~~~~~ YOU SHALL NOT PASS ~~~~~ #
-    mat_lib_expected = {'mat:Mercury':{'hg':4.0668241e-2}, 'mat:Helium, Natural':{'he4':2.4976e-05, 'he3':4.4415e-11}}
+    mat_lib_expected = {u'mat:Mercury':{800000000:4.066613534078662e-2}, 
+                        u'mat:Helium, Natural':{20040000:2.4975599277878773e-05, 
+                                                20030000:4.4414858514189387e-11}}
     assert(mat_lib == mat_lib_expected)
 
+
 def test_get_material_lib_no_names():
-    pass
+    """Test get_material_lib without a provided nuc_names list.
+    """
+    
+    # Path to hdf5 test file
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
+    data_hdf5path = '/materials'
+    nuc_hdf5path = '/nucid'
+    
+    mat_lib = partisn._get_material_lib(hdf5, data_hdf5path, nuc_hdf5path)
+    mat_lib_expected = {'mat:Mercury': {802020000:1.2060451913893048e-02, 
+                                        802000000:9.423512145483618e-03,
+                                        802010000:5.3498985962366465e-03, 
+                                        801960000:6.24414427454006e-05, 
+                                        802040000:2.7475463582858147e-03, 
+                                        801980000:4.108325935058038e-03, 
+                                        801990000:6.916609590819954e-03},
+                        'mat:Helium, Natural':{20040000:2.4975599277878773e-05, 
+                                               20030000:4.4414858514189387e-11}}
+    assert(mat_lib == mat_lib_expected)
 
 
 def test_nucid_to_xs_with_names():
@@ -147,21 +169,207 @@ def test_get_coord_sys_3D():
     assert(bounds == bounds_expected)
 
 
-def test_get_zones():
-    pass
+def test_get_zones_no_void():
+    """Test the _get_zones function if no void is in the meshed area.
+    """
+    # hdf5 test file
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
+    data_hdf5path = '/materials'
+    nuc_hdf5path = '/nucid'
+    dagmc.load(hdf5)
+    
+    # mesh
+    xvals = [-5., 0., 10., 15.]
+    yvals = [-5., 0., 5.]
+    zvals = [-5., 0., 5.]
+    mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
+                structured_ordering='xyz')
+    # more inputs
+    bounds = {'x':xvals, 'y':yvals, 'z':zvals}
+    num_rays = 144
+    grid = True
+    
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid)
+    
+    # expected results
+    voxel_zones_expected = np.array([[1, 1, 1, 1],
+                                     [2, 2, 2, 2],
+                                     [3, 3, 3, 3]])
+    zones_expected = {1:{'vol_frac':[1.0], 'mat':[u'HeliumNatural']}, 
+                      2:{'vol_frac':[0.5, 0.5], 'mat':[u'HeliumNatural', u'Mercury']}, 
+                      3:{'vol_frac':[1.0], 'mat':[u'Mercury']}}
+    
+    assert(voxel_zones.all() == voxel_zones_expected.all())
+    assert(zones == zones_expected)
 
 
+def test_get_zones_with_void():
+    """Test the _get_zones function if a void is present.
+    """
+    # hdf5 test file
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
+    data_hdf5path = '/materials'
+    nuc_hdf5path = '/nucid'
+    dagmc.load(hdf5)
+    
+    # mesh
+    xvals = [-5., 0., 10., 15., 15.1]
+    yvals = [-5., 0., 5.]
+    zvals = [-5., 0., 5.]
+    mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
+                structured_ordering='xyz')
+    # more inputs
+    bounds = {'x':xvals, 'y':yvals, 'z':zvals}
+    num_rays = 400
+    grid = True
+    
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid)
+    
+    # expected results
+    voxel_zones_expected = np.array([[1, 1, 1, 1],
+                                     [2, 2, 2, 2],
+                                     [3, 3, 3, 3],
+                                     [0, 0, 0, 0]])
+    zones_expected = {1:{'vol_frac':[1.0], 'mat':[u'HeliumNatural']}, 
+                      2:{'vol_frac':[0.5, 0.5], 'mat':[u'HeliumNatural', u'Mercury']}, 
+                      3:{'vol_frac':[1.0], 'mat':[u'Mercury']}}
+    
+    assert_array_almost_equal(voxel_zones, voxel_zones_expected)
+    assert(zones == zones_expected)
+    
+    
 def test_write_partisn_input_1D():
-    pass
+    
+    # Path to hdf5 test file
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
+    data_hdf5path = '/materials'
+    nuc_hdf5path = '/nucid'
+    
+    # Create mesh
+    xvals = [-5., 0., 10., 15.]
+    yvals = [-5., 5.]
+    zvals = [-5., 5.]
+    mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
+                structured_ordering='xyz')
+    
+    # Path for output file
+    input_file = THIS_DIR + '/files_test_partisn/partisn_1D.inp'
+    
+    # other inputs
+    ngroup = 5
+    nmq = 4
+    
+    # expected output file
+    file_expected = THIS_DIR + '/files_test_partisn/partisn_1D_expected.inp'
+    
+    partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
+        data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
+        input_file=input_file, num_rays=100, grid=True)
+    
+    out = filecmp.cmp(input_file, file_expected)
+    assert(out == True)
     
 
 def test_write_partisn_input_2D():
-    pass
+        
+    # Path to hdf5 test file
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
+    data_hdf5path = '/materials'
+    nuc_hdf5path = '/nucid'
+    
+    # Create mesh
+    xvals = [-5., 0., 10., 15.]
+    yvals = [-5., 0., 5.]
+    zvals = [-5., 0., 5.]
+    mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
+                structured_ordering='xyz')
+    
+    # Path for output file
+    input_file = THIS_DIR + '/files_test_partisn/partisn_2D.inp'
+    
+    # other inputs
+    ngroup = 5
+    nmq = 4
+    
+    # expected output file
+    file_expected = THIS_DIR + '/files_test_partisn/partisn_2D_expected.inp'
+    
+    partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
+        data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
+        input_file=input_file, num_rays=100, grid=True)
+    
+    out = filecmp.cmp(input_file, file_expected)
+    assert(out == True)
 
 
 def test_write_partisn_input_3D():
-    pass
+        
+    # Path to hdf5 test file
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
+    data_hdf5path = '/materials'
+    nuc_hdf5path = '/nucid'
+    
+    # Create mesh
+    xvals = [-5., 0., 10., 15.]
+    yvals = [-5., 0., 5.]
+    zvals = [-5., 0., 5.]
+    mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
+                structured_ordering='xyz')
+    
+    # Path for output file
+    input_file = THIS_DIR + '/files_test_partisn/partisn_3D.inp'
+    
+    # other inputs
+    ngroup = 5
+    nmq = 4
+    
+    # expected output file
+    file_expected = THIS_DIR + '/files_test_partisn/partisn_3D_expected.inp'
+    
+    partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
+        data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
+        input_file=input_file, num_rays=100, grid=True)
+    
+    out = filecmp.cmp(input_file, file_expected)
+    assert(out == True)
 
+def test_write_partisn_input_with_nucnames():
+        
+    # Path to hdf5 test file
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
+    data_hdf5path = '/materials'
+    nuc_hdf5path = '/nucid'
+    
+    # Create mesh
+    xvals = [-5., 0., 10., 15.]
+    yvals = [-5., 0., 5.]
+    zvals = [-5., 0., 5.]
+    mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
+                structured_ordering='xyz')
+    
+    # Path for output file
+    input_file = THIS_DIR + '/files_test_partisn/partisn_nucnames.inp'
+    
+    # other inputs
+    ngroup = 5
+    nmq = 4
+    
+    # expected output file
+    file_expected = THIS_DIR + '/files_test_partisn/partisn_nucnames_expected.inp'
+    
+    partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
+        data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
+        input_file=input_file, num_rays=100, grid=True)
+    
+    out = filecmp.cmp(input_file, file_expected)
+    assert(out == True)
+    
 
 def test_format_repeated_vector():
     """Test the format_repeated_vector function.

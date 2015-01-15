@@ -366,20 +366,42 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
                         vol_frac = zones[z]['vol_frac'][j] + voxel[z]['vol_frac'][i]
                         zones[z]['vol_frac'][j] = vol_frac
     
+    # Remove vacuum or graveyard from material definition if not vol_frac of 1.0
+    skip_array = [['mat:Vacuum'], ['mat:vacuum'], ['mat:Graveyard'], ['mat:graveyard']]
+    skip_list = ['mat:Vacuum', 'mat:vacuum', 'mat:Graveyard', 'mat:graveyard']
+    zones_compressed = {}
+    for z, info in zones.iteritems():
+        # check first if the definition is 100% void, keep same if is
+        if zones[z]['mat'] in skip_array and zones[z]['vol_frac'] == [1.0]:
+            zones_compressed[z] = info
+        else:
+            # check for partial void
+            zones_compressed[z] = {'mat':[], 'vol_frac':[]}
+            for i, mat in enumerate(zones[z]['mat']):
+                if mat not in skip_list:
+                    zones_compressed[z]['mat'].append(mat)
+                    zones_compressed[z]['vol_frac'].append(zones[z]['vol_frac'][i])
+    
     # Eliminate duplicate zones and assign each voxel a zone number.
     # Assign zone = 0 if vacuum or graveyard and eliminate material definition.
-    skip_list = [['mat:Vacuum'], ['mat:vacuum'], ['mat:Graveyard'], ['mat:graveyard']]
     voxel_zone = {}
     zones_mats = {}
     z = 0
     match = False
     first = True    
-    for i, vals in zones.iteritems():
+    for i, vals in zones_compressed.iteritems():
         # Find if the zone already exists
         for zone, info in zones_mats.iteritems():
-            if (vals['mat'] == info['mat']) and \
-                    np.allclose(np.array(vals['vol_frac']), \
-                                np.array(info['vol_frac']), rtol=1e-5):
+            # Iterate through both sets to disregard order
+            match_all = np.empty(len(vals['mat']), dtype=bool)
+            match_all.fill(False)
+            for ii, mat in enumerate(vals['mat']):
+                for jj, mat_info in enumerate(info['mat']):
+                    if mat == mat_info and np.allclose(np.array(vals['vol_frac'][ii]), \
+                                np.array(info['vol_frac'][jj]), rtol=1e-5):
+                        match_all[ii] = True
+                        break
+            if match_all.all() == True:
                 match = True
                 y = zone
                 break
@@ -388,21 +410,20 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
         # Create a new zone if first zone or does not match other zones
         if first or not match:
             # Check that the material is not 100% void (assign zone 0 otherwise)
-            if vals['mat'] in skip_list:
+            if vals['mat'] in skip_array:
                 voxel_zone[i] = 0
             else:
                 z += 1
-                zones_mats[z] = zones[i]
+                zones_mats[z] = zones_compressed[i]
                 voxel_zone[i] = z
                 first = False
         else:
-            if vals['mat'] in skip_list:
+            if vals['mat'] in skip_array:
                 voxel_zone[i] = 0
             else:
                 voxel_zone[i] = y
     
     # Remove any instances of graveyard or vacuum in zone definitions
-    skip_list = ['mat:Vacuum', 'mat:vacuum', 'mat:Graveyard', 'mat:graveyard']
     zones_novoid = {}
     for z in zones_mats.keys():
         zones_novoid[z] = {'mat':[], 'vol_frac':[]}
@@ -411,7 +432,6 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
                 name = strip_mat_name(mat)
                 zones_novoid[z]['mat'].append(name)
                 zones_novoid[z]['vol_frac'].append(zones_mats[z]['vol_frac'][i])
-
     
     # Put zones into format for PARTISN input
     if 'x' in bounds.keys():
@@ -435,7 +455,7 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
         for jk in range(jm*km):
             zones_formatted[i,jk] = voxel_zone[n]
             n += 1
-            
+    
     return zones_formatted, zones_novoid
     
 
