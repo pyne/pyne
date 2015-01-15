@@ -153,7 +153,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
             elements where the relative error on flux exceeds the tolerance.
     """
     
-    tolerance = kwargs["tolerance"] if "tolerance" in kwargs else 0.001
+    tolerance = kwargs["tolerance"] if "tolerance" in kwargs else 0.5
     null_value = kwargs["null_value"] if "null_value" in kwargs else 0.0
     
     # Convert particle name to the recognized abbreviation
