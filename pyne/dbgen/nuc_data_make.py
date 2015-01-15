@@ -76,7 +76,7 @@ def _fetch_prebuilt(args):
         shutil.copyfile(prebuilt_nuc_data, nuc_data)
 
 
-def main():
+def main(args=None):
     """Entry point for nuc_data_make utility."""
     print(message(pyne_logo))
 
@@ -120,7 +120,7 @@ def main():
 				 0: no cleaning (default).
 				 1: clean nuc_data.
 				 2: clean nuc_data and build_dir.""")
-    args = parser.parse_args()
+    args = parser.parse_args(args=args)
 
     # clean nuc data
     if args.clean in [1, 2]:

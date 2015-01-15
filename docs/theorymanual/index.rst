@@ -12,10 +12,11 @@ The following describe methods implemented natively in PyNE:
     :maxdepth: 1
 
     nucname
-    source_sampling.rst
-    variance_reduction.rst
-    r2s.rst
-    bins.rst
+    decay
+    source_sampling
+    variance_reduction
+    r2s
+    bins
 
 For information on methods for which PyNE provides an interface but does not
 implement natively, please refer to the manuals associated with those methods.

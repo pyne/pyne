@@ -36,6 +36,10 @@ tests/test.file
 tests/test.txt
 tests/U235.txt
 tests/Ni59.txt
+tests/Zn.txt
 tutorial/Ni59.txt
 docs/rxname_listing
 .ipynb_checkpoints
+rs.cred
+src/decay.h
+src/decay.cpp

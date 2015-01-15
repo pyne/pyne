@@ -4,6 +4,8 @@
 Variance Reduction
 =============================
 
+:Author: Elliott Biondo
+
 .. currentmodule::variancereduction
 
 ************
