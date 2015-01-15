@@ -600,8 +600,8 @@ def get_material_set(**kw):
     return mat_ids
 
 
-def materials_to_cells(hdf5):
-    """Get dictionary of material to cell assignments
+def get_cell_material_assignments(hdf5):
+    """Get dictionary of cell to material assignments
     
     Parameters:
         hdf5 : str, path to hdf5 material-laden geometry

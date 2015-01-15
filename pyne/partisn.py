@@ -345,7 +345,7 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
         voxel[idx]['vol_frac'].append(i[2])
 
     # get material to cell assignments
-    mat_assigns = dagmc.materials_to_cells(hdf5)
+    mat_assigns = dagmc.get_cell_material_assignments(hdf5)
 
     # Replace cell numbers with materials, eliminating duplicate materials
     # within single zone definition
