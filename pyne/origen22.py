@@ -151,7 +151,7 @@ ACTINIDE_AND_DAUGHTER_NUCS = frozenset([
     962490000, 962500000, 962510000, 972490000, 972500000, 972510000, 982490000,
     982500000, 982510000, 982520000, 982530000, 982540000, 982550000, 992530000,
     992540000, 992540001, 992550000])
-"""Set of acinide & daughter nuclides in id form."""
+"""Set of actinide & daughter nuclides in id form."""
 
 FISSION_PRODUCT_NUCS = frozenset([
     10030000,  30060000,  30070000,  40090000,  40100000,  60140000,  270720000,
@@ -492,7 +492,7 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
         Flag that determines whether this is a constant power "IRP"
         irradiation or a constant flux "IRF" irradiation calculation.
     irr_time : float
-        Irradiation time durration in days.
+        Irradiation time duration in days.
     irr_value : float
         Magnitude of the irradiation. If irr_type = "IRP", then
         this is a power.  If irr_type = "IRF", then this is a flux.
@@ -577,12 +577,12 @@ def write_tape5_decay(dec_time,
                       out_table_nes=(False, False, True),
                       out_table_laf=(True,  True,  True),
                       out_table_num=None):
-    """Writes an irradiation TAPE5 file.
+    """Writes a decay TAPE5 file.
 
     Parameters
     ----------
     dec_time : float
-        Decay time durration in days.
+        Decay time duration in days.
     outfile : str or file-like object
         Path or file to write the tape5 to.
     decay_nlb : length 3 sequence
