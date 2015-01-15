@@ -241,7 +241,8 @@ def test_get_zones_with_void():
     
     
 def test_write_partisn_input_1D():
-    
+    """Test full input file creation for 1D case
+    """
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -274,7 +275,8 @@ def test_write_partisn_input_1D():
     
 
 def test_write_partisn_input_2D():
-        
+    """Test full input file creation for 2D case
+    """
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -284,7 +286,7 @@ def test_write_partisn_input_2D():
     # Create mesh
     xvals = [-5., 0., 10., 15.]
     yvals = [-5., 0., 5.]
-    zvals = [-5., 0., 5.]
+    zvals = [-5., 5.]
     mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
                 structured_ordering='xyz')
     
@@ -307,7 +309,8 @@ def test_write_partisn_input_2D():
 
 
 def test_write_partisn_input_3D():
-        
+    """Test full input file creation for 2D case
+    """
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -338,8 +341,10 @@ def test_write_partisn_input_3D():
     out = filecmp.cmp(input_file, file_expected)
     assert(out == True)
 
-def test_write_partisn_input_with_nucnames():
-        
+
+def test_write_partisn_input_with_names_dict():
+    """Test full input file creation for 1D case with a names_dict provided
+    """
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -348,10 +353,16 @@ def test_write_partisn_input_with_nucnames():
     
     # Create mesh
     xvals = [-5., 0., 10., 15.]
-    yvals = [-5., 0., 5.]
-    zvals = [-5., 0., 5.]
+    yvals = [-5., 5.]
+    zvals = [-5., 5.]
     mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
                 structured_ordering='xyz')
+    
+    # nuc_names list
+    names = {}
+    names[800000000] = 'hg'
+    names[20030000] = 'he3'
+    names[20040000] = 'he4'
     
     # Path for output file
     input_file = THIS_DIR + '/files_test_partisn/partisn_nucnames.inp'
@@ -365,7 +376,7 @@ def test_write_partisn_input_with_nucnames():
     
     partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
-        input_file=input_file, num_rays=100, grid=True)
+        input_file=input_file, num_rays=100, grid=True, names_dict=names)
     
     out = filecmp.cmp(input_file, file_expected)
     assert(out == True)

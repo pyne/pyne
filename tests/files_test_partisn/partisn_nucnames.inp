@@ -12,23 +12,19 @@ partisn_test_geom
 \ 
 \ ------------ Block 1 (Control and Dimensions) ------------
 \ 
-igeom='X-Y-Z'  ngroup=5  niso=9  mt=2  nzone=3
+igeom='SLAB'  ngroup=5  niso=3  mt=2  nzone=3
 \ Please provide input for ISN variable:
 \ isn=  
-im=3  it=3  jm=2  jt=2  km=2  kt=2  
+im=3  it=3  
 t
 \ 
 \ ------------ Block 2 (Geometry) ------------
 \ 
 xmesh= -5.000 0.000 10.000 15.000 
 xints= 3R 1
-ymesh= -5.000 0.000 5.000 
-yints= 2R 1
-zmesh= -5.000 0.000 5.000 
-zints= 2R 1
-zones= 4R 1 ;
-       4R 2 ;
-       4R 3 ;
+zones= 1 ;
+       2 ;
+       3 ;
 t
 \ 
 \ ------------ Block 3 (Nuclear Data) ------------
@@ -40,15 +36,13 @@ t
 \ iht=
 \ Note: NAMES is not all inclusive. Only NAMES that are present in
 \ meshed area are listed.
-names= Hg202 Hg200 Hg201 Hg196 Hg204 Hg198 Hg199 He4 He3 
+names= hg he4 he3 
 t
 \ 
 \ ------------ Block 4 (Cross-Section Mixing) ------------
 \ 
-matls= Mercury Hg202 1.2060e-02, Hg200 9.4235e-03, Hg201 5.3499e-03, 
-       Hg196 6.2441e-05, Hg204 2.7475e-03, Hg198 4.1083e-03, 
-       Hg199 6.9166e-03;
-       HeliumNatural He4 2.4976e-05, He3 4.4415e-11;
+matls= Mercury hg 4.0666e-02;
+       HeliumNatural he4 2.4976e-05, he3 4.4415e-11;
 assign= 1 HeliumNatural 1.0000e+00;
         2 HeliumNatural 5.0000e-01, Mercury 5.0000e-01;
         3 Mercury 1.0000e+00;
@@ -73,5 +67,3 @@ ievt=0      \ source calculation
 source= 1.0 3R 0.0 ; 1.0 3R 0.0 ; 1.0 3R 0.0 ; 1.0 3R 0.0 ;
         1.0 3R 0.0 ; 
 sourcx= 1.0 3R 0.0 ; 1.0 3R 0.0 ; 1.0 3R 0.0 ; 
-sourcy= 1.0 3R 0.0 ; 1.0 3R 0.0 ; 
-sourcz= 1.0 3R 0.0 ; 1.0 3R 0.0 ; 
