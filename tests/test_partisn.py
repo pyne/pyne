@@ -9,6 +9,7 @@ from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_almost_equal
 from pyne import partisn, dagmc
 from pyne.utils import QAWarning
+import multiprocessing
 
 try:
     from itaps import iBase, iMesh, iMeshExtensions
@@ -167,8 +168,15 @@ def test_get_coord_sys_3D():
     assert(igeom == igeom_expected)
     assert(bounds == bounds_expected)
 
-
 def test_get_zones_no_void():
+    p = multiprocessing.Process(target=get_zones_no_void)
+    p.start()
+    
+def test_get_zones_with_void():
+    p = multiprocessing.Process(target=get_zones_with_void)
+    p.start()
+    
+def get_zones_no_void():
     """Test the _get_zones function if no void is in the meshed area.
     """
     # hdf5 test file
@@ -203,7 +211,7 @@ def test_get_zones_no_void():
     assert(zones == zones_expected)
 
 
-def test_get_zones_with_void():
+def get_zones_with_void():
     """Test the _get_zones function if a void is present.
     """
     # hdf5 test file
@@ -238,8 +246,61 @@ def test_get_zones_with_void():
     assert_array_almost_equal(voxel_zones, voxel_zones_expected)
     assert(zones == zones_expected)
     
-    
+
 def test_write_partisn_input_1D():
+    """Test full input file creation for 1D case
+    """
+    
+    #THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    #input_file = THIS_DIR + '/files_test_partisn/partisn_1D.inp'
+    #if os.path.exists(input_file):
+    #    os.remove(input_file)
+    p = multiprocessing.Process(target=write_partisn_input_1D)
+    p.start()
+    #p.apply_async(write_partisn_input_1D)
+    #THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    #input_file = THIS_DIR + '/files_test_partisn/partisn_1D.inp'
+    #file_expected = THIS_DIR + '/files_test_partisn/partisn_1D_expected.inp'
+    #out = filecmp.cmp(input_file, file_expected)
+    #assert(out == True)
+
+def test_write_partisn_input_2D():
+    """Test full input file creation for 2D case
+    """
+    p = multiprocessing.Process(target=write_partisn_input_2D)
+    p.start()
+    #THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    #input_file = THIS_DIR + '/files_test_partisn/partisn_2D.inp'
+    #file_expected = THIS_DIR + '/files_test_partisn/partisn_2D_expected.inp'
+    #out = filecmp.cmp(input_file, file_expected)
+    #assert(out == True)
+
+
+def test_write_partisn_input_3D():
+    """Test full input file creation for 3D case
+    """
+    p = multiprocessing.Process(target=write_partisn_input_3D)
+    p.start()
+    #THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    #input_file = THIS_DIR + '/files_test_partisn/partisn_3D.inp'
+    #file_expected = THIS_DIR + '/files_test_partisn/partisn_3D_expected.inp'
+    #out = filecmp.cmp(input_file, file_expected)
+    #assert(out == True)
+    
+
+def test_write_partisn_input_with_names_dict():
+    """Test full input file creation for 1D case with a names_dict provided
+    """
+    p = multiprocessing.Process(target=write_partisn_input_with_names_dict)
+    p.start()
+    #THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    #input_file = THIS_DIR + '/files_test_partisn/partisn_nucnames.inp'
+    #file_expected = THIS_DIR + '/files_test_partisn/partisn_nucnames_expected.inp'
+    #out = filecmp.cmp(input_file, file_expected)
+    #assert(out == True)
+    
+
+def write_partisn_input_1D():
     """Test full input file creation for 1D case
     """
     # Path to hdf5 test file
@@ -273,7 +334,7 @@ def test_write_partisn_input_1D():
     assert(out == True)
     
 
-def test_write_partisn_input_2D():
+def write_partisn_input_2D():
     """Test full input file creation for 2D case
     """
     # Path to hdf5 test file
@@ -307,7 +368,7 @@ def test_write_partisn_input_2D():
     assert(out == True)
 
 
-def test_write_partisn_input_3D():
+def write_partisn_input_3D():
     """Test full input file creation for 2D case
     """
     # Path to hdf5 test file
@@ -341,7 +402,7 @@ def test_write_partisn_input_3D():
     assert(out == True)
 
 
-def test_write_partisn_input_with_names_dict():
+def write_partisn_input_with_names_dict():
     """Test full input file creation for 1D case with a names_dict provided
     """
     # Path to hdf5 test file
