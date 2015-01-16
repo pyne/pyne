@@ -36,7 +36,7 @@ t
 \ iht=
 \ Note: NAMES is not all inclusive. Only NAMES that are present in
 \ meshed area are listed.
-names= Hg202 Hg200 Hg201 Hg196 Hg204 Hg198 Hg199 He4 He3 
+names= Hg202 He4 Hg200 Hg201 Hg196 Hg204 He3 Hg198 Hg199 
 t
 \ 
 \ ------------ Block 4 (Cross-Section Mixing) ------------

@@ -600,14 +600,19 @@ def get_material_set(**kw):
     return mat_ids
 
 
-def get_cell_material_assignments(hdf5):
+def cell_material_assignments(hdf5):
     """Get dictionary of cell to material assignments
     
     Parameters:
-        hdf5 : str, path to hdf5 material-laden geometry
+    -----------
+    hdf5 : string
+        Path to hdf5 material-laden geometry
     
     Returns:
-        mat_assigns : dict, keys are cell numbers and values are material names
+    --------
+    mat_assigns : dict
+        Dictionary of the cell to material assignments. Keys are cell 
+        numbers and values are material names
     """
     # Load the geometry as an iMesh instance
     dag_geom = iMesh.Mesh()
@@ -662,6 +667,8 @@ def find_implicit_complement():
             
             
 def _tag_to_string(tag):
+    """Convert ascii to string
+    """
     a = []
     # since we have a byte type tag loop over the 32 elements
     for part in tag:

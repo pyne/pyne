@@ -36,7 +36,7 @@ t
 \ iht=
 \ Note: NAMES is not all inclusive. Only NAMES that are present in
 \ meshed area are listed.
-names= hg he4 he3 
+names= he4 hg he3 
 t
 \ 
 \ ------------ Block 4 (Cross-Section Mixing) ------------

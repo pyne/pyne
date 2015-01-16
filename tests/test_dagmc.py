@@ -287,7 +287,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         cells = dagmc.cells_at_ve_centers(mesh)
         assert_array_equal(cells, [2, 3])
     
-    def test_get_cell_material_assignments(self):
+    def test_cell_material_assignments(self):
         """Test that cell-material assignment dictionary is correctly created.
         """
         if not HAVE_IMESH:
@@ -295,7 +295,7 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         THIS_DIR = os.path.dirname(os.path.realpath(__file__))
         hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
         
-        mat_assigns = dagmc.get_cell_material_assignments(hdf5)
+        mat_assigns = dagmc.cell_material_assignments(hdf5)
         mat_assigns_expected = {1:u'mat:Helium, Natural', 2:u'mat:Mercury', 5:u'mat:Vacuum', 6:u'mat:Vacuum'}
         assert(mat_assigns == mat_assigns)
     
