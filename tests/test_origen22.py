@@ -77,6 +77,30 @@ def test_out_table_string5():
     assert_equal(obs, exp)
 
 
+def test_write_nan_tape5_irradiation():
+    tape5 = StringIO()
+    with assert_raises(ValueError) as context:
+        origen22.write_tape5_irradiation("IRP", 100, np.nan, xsfpy_nlb=[204, 205, 206],
+                                         outfile=tape5,
+                                         out_table_nes=(False, False, True),
+                                         out_table_laf=(True,  False,  True),
+                                         out_table_num=[5, 10])
+    ex = context.exception
+    assert_equal(ex.args[0], "Irradiation value is NaN.")
+
+
+def test_write_inf_tape5_irradiation():
+    tape5 = StringIO()
+    with assert_raises(ValueError) as context:
+        origen22.write_tape5_irradiation("IRP", 100, np.inf, xsfpy_nlb=[204, 205, 206],
+                                         outfile=tape5,
+                                         out_table_nes=(False, False, True),
+                                         out_table_laf=(True,  False,  True),
+                                         out_table_num=[5, 10])
+    ex = context.exception
+    assert_equal(ex.args[0], "Irradiation value is infinite.")
+
+
 def test_write_tape5_irradiation():
     tape5 = StringIO()
     origen22.write_tape5_irradiation("IRP", 100, 0.550, xsfpy_nlb=[204, 205, 206], 

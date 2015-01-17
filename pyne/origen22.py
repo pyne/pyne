@@ -526,6 +526,12 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
     if irr_type not in ["IRP", "IRF"]:
         raise TypeError("Irradiation type must be either 'IRP' or 'IRF'.")
 
+    if np.isnan(irr_value):
+        raise ValueError("Irradiation value is NaN.")
+
+    if np.isinf(irr_value):
+        raise ValueError("Irradiation value is infinite.")
+
     # Make template fill-value dictionary
     tape5_kw = {
         'CUT_OFF': "{0:.3E}".format(cut_off),
