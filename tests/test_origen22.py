@@ -1,6 +1,5 @@
 from __future__ import print_function
-import os
-import warnings 
+import warnings
 try:
     from StringIO import StringIO
 except ImportError:
@@ -8,30 +7,27 @@ except ImportError:
 
 import numpy as np
 from nose.tools import assert_equal, assert_true, assert_raises, assert_in, assert_is_instance
-from nose.tools import set_trace
 from numpy.testing import assert_array_equal
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne import origen22
 from pyne.xs.cache import XSCache
-from pyne.xs.data_source import NullDataSource, OpenMCDataSource
+from pyne.xs.data_source import NullDataSource
 from pyne.material import Material
 
 
-
 def test_sec_to_time_unit():
-    assert_equal(origen22.sec_to_time_unit(1.0),  (1.0, 1)) 
-    assert_equal(origen22.sec_to_time_unit(10.0),  (10.0, 1)) 
+    assert_equal(origen22.sec_to_time_unit(1.0),  (1.0, 1))
+    assert_equal(origen22.sec_to_time_unit(10.0),  (10.0, 1))
 
-    assert_equal(origen22.sec_to_time_unit(60.0),  (1.0, 2)) 
-    assert_equal(origen22.sec_to_time_unit(120.0),  (2.0, 2)) 
+    assert_equal(origen22.sec_to_time_unit(60.0),  (1.0, 2))
+    assert_equal(origen22.sec_to_time_unit(120.0),  (2.0, 2))
 
-    assert_equal(origen22.sec_to_time_unit(np.inf),  (0.0, 6)) 
-    assert_equal(origen22.sec_to_time_unit(315569260.0),  (10.0, 5)) 
-    assert_equal(origen22.sec_to_time_unit(31556926.0 * 1E7),  (10.0, 8)) 
-    assert_equal(origen22.sec_to_time_unit(31556926.0 * 1E10),  (10.0, 9)) 
-
+    assert_equal(origen22.sec_to_time_unit(np.inf),  (0.0, 6))
+    assert_equal(origen22.sec_to_time_unit(315569260.0),  (10.0, 5))
+    assert_equal(origen22.sec_to_time_unit(31556926.0 * 1E7),  (10.0, 8))
+    assert_equal(origen22.sec_to_time_unit(31556926.0 * 1E10),  (10.0, 9))
 
 
 def test_write_tape4():
@@ -44,7 +40,6 @@ def test_write_tape4():
                 "2 922350 9.5000000000E-01   0 0   0 0   0 0\n"
                 "0 0 0 0\n")
     assert_equal(observed, expected)
-
 
 
 def test_out_table_string1():
@@ -77,28 +72,54 @@ def test_out_table_string5():
     assert_equal(obs, exp)
 
 
+def test_write_nan_tape5_irradiation():
+    tape5 = StringIO()
+    with assert_raises(ValueError) as context:
+        origen22.write_tape5_irradiation("IRP", 100, np.nan, xsfpy_nlb=[204, 205, 206],
+                                         outfile=tape5,
+                                         out_table_nes=(False, False, True),
+                                         out_table_laf=(True,  False,  True),
+                                         out_table_num=[5, 10])
+    ex = context.exception
+    assert_equal(ex.args[0], "Irradiation value is NaN.")
+
+
+def test_write_inf_tape5_irradiation():
+    tape5 = StringIO()
+    with assert_raises(ValueError) as context:
+        origen22.write_tape5_irradiation("IRP", 100, np.inf, xsfpy_nlb=[204, 205, 206],
+                                         outfile=tape5,
+                                         out_table_nes=(False, False, True),
+                                         out_table_laf=(True,  False,  True),
+                                         out_table_num=[5, 10])
+    ex = context.exception
+    assert_equal(ex.args[0], "Irradiation value is infinite.")
+
+
 def test_write_tape5_irradiation():
     tape5 = StringIO()
-    origen22.write_tape5_irradiation("IRP", 100, 0.550, xsfpy_nlb=[204, 205, 206], 
+    origen22.write_tape5_irradiation("IRP", 100, 0.550, xsfpy_nlb=[204, 205, 206],
                                      outfile=tape5,
-                                     out_table_nes=(False, False, True), 
-                                     out_table_laf=(True,  False,  True),  
+                                     out_table_nes=(False, False, True),
+                                     out_table_laf=(True,  False,  True),
                                      out_table_num=[5, 10])
 
     tape5.seek(0)
     observed = tape5.read()
 
     expected = ("  -1\n"
-                "  -1\n"  
+                "  -1\n"
                 "  -1\n"
                 "  CUT     5 1.000E-10 -1\n"
-                "  RDA     Make sure thet the library identifier numbers match those in the TAPE9.INP file\n"
+                "  RDA     Make sure thet the library identifier numbers match those in the"
+                " TAPE9.INP file\n"
                 "  LIB     0 1 2 3 204 205 206 9 3 0 4 0\n"
                 "  OPTL    8 8 8 8 7 8 8 8 8 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
                 "  OPTA    8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
                 "  OPTF    8 8 8 8 7 8 8 8 8 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
                 "  INP     1 -1  0  -1  4  4\n"
-                "  RDA     All irradiation (IRF and IRP) cards must be between burnup (BUP) cards.\n"
+                "  RDA     All irradiation (IRF and IRP) cards must be between burnup (BUP) "
+                "cards.\n"
                 "  BUP\n"
                 "  IRP     1.0000000000E+02  5.5000000000E-01   1   2   4  2\n"
                 "  BUP\n"
@@ -107,35 +128,37 @@ def test_write_tape5_irradiation():
 
     assert_equal(observed, expected)
 
+
 def test_write_tape5_decay():
     tape5 = StringIO()
-    origen22.write_tape5_decay(100, xsfpy_nlb=[204, 205, 206], 
+    origen22.write_tape5_decay(100, xsfpy_nlb=[204, 205, 206],
                                outfile=tape5,
-                               out_table_nes=(False, False, True), 
-                               out_table_laf=(True,  False,  True),  
+                               out_table_nes=(False, False, True),
+                               out_table_laf=(True,  False,  True),
                                out_table_num=[5, 10])
-    
+
     tape5.seek(0)
     observed = tape5.read()
 
     expected = ("  -1\n"
-                "  -1\n"  
+                "  -1\n"
                 "  -1\n"
                 "  CUT     5 1.000E-10 -1\n"
-                "  RDA     Make sure thet the library identifier numbers match those in the TAPE9.INP file\n"
+                "  RDA     Make sure thet the library identifier numbers match those in the "
+                "TAPE9.INP file\n"
                 "  LIB     0 1 2 3 204 205 206 9 3 0 4 0\n"
                 "  OPTL    8 8 8 8 7 8 8 8 8 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
                 "  OPTA    8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
                 "  OPTF    8 8 8 8 7 8 8 8 8 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8\n"
                 "  INP     1 -1  0  -1  4  4\n"
-                "  RDA     All irradiation (IRF and IRP) cards must be between burnup (BUP) cards.\n"
+                "  RDA     All irradiation (IRF and IRP) cards must be between burnup (BUP) "
+                "cards.\n"
                 "  BUP\n"
                 "  DEC     1.0000000000E+02  1   2   4  2\n"
                 "  BUP\n"
                 "  OUT     2  1 1 0\n"
                 "  END\n")
     assert_equal(observed, expected)
-
 
 
 def test_parse_tape6():
@@ -153,70 +176,88 @@ def test_parse_tape6():
     assert_array_equal(r['average_flux'], [0.0, 1.71E+17])
     assert_array_equal(r['average_specific_power'], [0.0, 5.50E-01])
 
-    tab_keys = set(['table_{0}'.format(n) for n in range(1, 11) + range(13, 25)])
-    assert_true(tab_keys <=  set(r))
+    tab_keys = set(['table_{0}'.format(n)
+                    for n in list(range(1, 11)) + list(range(13, 25))])
+    assert_true(tab_keys <= set(r))
 
     for tk in tab_keys:
         for ttype in ['nuclide', 'element', 'summary']:
             if ttype in r[tk]:
-                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products',
+                                                      'actinides', 'fission_products']))
 
     assert_array_equal(r['alpha_neutron_source']['U235'], [7.509E-04, 2.442E-14])
     assert_array_equal(r['spont_fiss_neutron_source']['ES255'], [0.000E+00, 1.917E+05])
-    
+
     assert_true('materials' in r)
     assert_equal(len(r['materials']), len(r['time_sec']))
 
 
-
 def test_parse_tape6_PWRM021():
-    """Originally found at https://typhoon.jaea.go.jp/origen22/sample_pwrmox_orlibj33/PWRM0210.out"""
+    "Originally found at https://typhoon.jaea.go.jp/origen22/sample_pwrmox_orlibj33/PWRM0210.out"
     r = origen22.parse_tape6('tape6_PWRM0210.test')
     assert_true(0 < len(r))
 
-    assert_array_equal(r['time_sec'], [0.00E+00,  1.21E+07,  2.42E+07,  3.63E+07,  4.84E+07,  6.05E+07,  7.26E+07, 8.47E+07,  9.68E+07,  1.09E+08,  1.21E+08, 1.33E+08])
-    assert_array_equal(r['average_flux'], [0.00E+00,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14])
+    assert_array_equal(r['time_sec'],
+                       [0.00E+00,  1.21E+07,  2.42E+07,  3.63E+07,  4.84E+07,
+                        6.05E+07,  7.26E+07, 8.47E+07,  9.68E+07,  1.09E+08,
+                        1.21E+08, 1.33E+08])
+
+    assert_array_equal(r['average_flux'],
+                       [0.00E+00,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,
+                        3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,  3.46E+14,
+                        3.46E+14,  3.46E+14])
 
     tab_keys = set(['table_{0}'.format(n) for n in [5]])
-    assert_true(tab_keys <=  set(r))
+    assert_true(tab_keys <= set(r))
 
     for tk in tab_keys:
         for ttype in ['nuclide', 'element', 'summary']:
             if ttype in r[tk]:
-                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products',
+                                                      'actinides', 'fission_products']))
 
-    assert_array_equal(r['alpha_neutron_source']['CM242'], [0.00000E+00, 8.50160E+08, 1.28411E+09, 1.48965E+09, 1.57830E+09, 1.60855E+09, 1.61128E+09, 1.60202E+09, 1.58856E+09, 1.57406E+09, 1.55987E+09, 1.54529E+09])
-    assert_array_equal(r['spont_fiss_neutron_source']['PU238'], [5.58385E+06, 5.52908E+06, 5.68992E+06, 5.94790E+06, 6.24106E+06, 6.53804E+06, 6.82350E+06, 7.09041E+06, 7.33580E+06, 7.55876E+06, 7.75904E+06, 7.93683E+06])
-    
+    assert_array_equal(r['alpha_neutron_source']['CM242'],
+                       [0.00000E+00, 8.50160E+08, 1.28411E+09, 1.48965E+09,
+                        1.57830E+09, 1.60855E+09, 1.61128E+09, 1.60202E+09,
+                        1.58856E+09, 1.57406E+09, 1.55987E+09, 1.54529E+09])
+    assert_array_equal(r['spont_fiss_neutron_source']['PU238'],
+                       [5.58385E+06, 5.52908E+06, 5.68992E+06, 5.94790E+06,
+                        6.24106E+06, 6.53804E+06, 6.82350E+06, 7.09041E+06,
+                        7.33580E+06, 7.55876E+06, 7.75904E+06, 7.93683E+06])
+
     assert_true('materials' in r)
     assert_equal(len(r['materials']), len(r['time_sec']))
 
 
-def test_parse_tape6():
+def test_parse_tape6_sf97():
     """Originally found at https://typhoon.jaea.go.jp/origen22/sample_pwruo2_orlibj33/SF97-4.out"""
     r = origen22.parse_tape6('tape6_SF97_4.test')
     assert_true(0 < len(r))
 
-    assert_array_equal(r['time_sec'], [1.07E+08,  1.11E+08,  1.13E+08,  1.15E+08,  1.16E+08, 1.16E+08,  1.25E+08])
-    assert_array_equal(r['k_inf'], [1.17263, 1.16222, 1.15412, 1.14823, 1.14351, 1.14351, 1.14238])
+    assert_array_equal(r['time_sec'], [1.07E+08, 1.11E+08, 1.13E+08, 1.15E+08,
+                                       1.16E+08, 1.16E+08, 1.25E+08])
+    assert_array_equal(r['k_inf'], [1.17263, 1.16222, 1.15412, 1.14823, 1.14351,
+                                    1.14351, 1.14238])
 
     tab_keys = set(['table_{0}'.format(n) for n in [5]])
-    assert_true(tab_keys <=  set(r))
+    assert_true(tab_keys <= set(r))
 
     for tk in tab_keys:
         for ttype in ['nuclide', 'element', 'summary']:
             if ttype in r[tk]:
-                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products', 'actinides', 'fission_products']))
+                assert_true(set(r[tk][ttype]) <= set(['title', 'units', 'activation_products',
+                                                      'actinides', 'fission_products']))
 
-    assert_array_equal(r['alpha_neutron_source']['PU240'], [4.51852E+05, 4.62660E+05, 4.71046E+05, 4.76390E+05, 4.81151E+05, 4.81151E+05, 4.82556E+05])
-    assert_array_equal(r['spont_fiss_neutron_source']['CM246'], [2.78744E+06, 3.40763E+06, 3.98241E+06, 4.41669E+06, 4.83645E+06, 4.83645E+06, 4.83365E+06])
-    
+    assert_array_equal(r['alpha_neutron_source']['PU240'],
+                       [4.51852E+05, 4.62660E+05, 4.71046E+05, 4.76390E+05,
+                        4.81151E+05, 4.81151E+05, 4.82556E+05])
+    assert_array_equal(r['spont_fiss_neutron_source']['CM246'],
+                       [2.78744E+06, 3.40763E+06, 3.98241E+06, 4.41669E+06,
+                        4.83645E+06, 4.83645E+06, 4.83365E+06])
+
     assert_true('materials' in r)
     assert_equal(len(r['materials']), len(r['time_sec']))
-
-
-
-
 
 
 sample_tape9 = """\
@@ -303,6 +344,7 @@ sample_tape9 = """\
   -1
 """
 
+
 def test_parse_tape9():
     tape9_file = StringIO(sample_tape9)
     tape9 = origen22.parse_tape9(tape9_file)
@@ -329,14 +371,12 @@ def test_parse_tape9():
     assert_equal(deck1['inhilation_concentration'][781900], 2.000E-14)
     assert_equal(deck1['ingestion_concentration'][781900], 3.000E-08)
 
-
     # Actinide Decay
     deck2 = tape9[2]
     assert_equal(deck2['_type'], 'decay')
     assert_equal(deck2['title'], 'SAMPLE DECAY LIB: ACTINIDES')
     assert_equal(deck2['half_life'][932410], 1.600E+01 * 60.0)
     assert_equal(deck2['half_life'][942370], 4.560E+01 * 86400.0)
-
 
     # Fission Product Decay
     deck3 = tape9[3]
@@ -345,7 +385,6 @@ def test_parse_tape9():
     assert_equal(deck3['half_life'][611460], 5.500E+00 * 31556926.0)
     assert_equal(deck3['half_life'][621460], 7.000E+01 * 31556926.0 * 1E6)
     assert_equal(deck3['half_life'][691720], 6.360E+01 * 3600.0)
-
 
     # Activation product cross sections
     deck381 = tape9[381]
@@ -368,7 +407,6 @@ def test_parse_tape9():
     assert_equal(deck381['sigma_2n_x'][80170], 0.0)
     assert_equal(deck381['fiss_yields_present'][80170], False)
 
-
     # Actinide cross sections
     deck382 = tape9[382]
     assert_equal(deck382['_type'], 'xsfpy')
@@ -389,7 +427,6 @@ def test_parse_tape9():
     assert_equal(deck382['sigma_gamma_x'][922380], 0.0)
     assert_equal(deck382['sigma_2n_x'][922380], 0.0)
     assert_equal(deck382['fiss_yields_present'][922380], False)
-
 
     # Fission product cross sections
     deck383 = tape9[383]
@@ -420,9 +457,11 @@ def test_parse_tape9():
     assert_equal(deck383['CM245_fiss_yield'][300670], 0.0)
     assert_equal(deck383['CF249_fiss_yield'][300670], 0.0)
 
+
 def test_loads_tape9():
     tape9 = origen22.loads_tape9(sample_tape9)
     assert_equal(set(tape9), set([1, 2, 3, 381, 382, 383]))
+
 
 def test_merge_tape9():
     tape9_file = StringIO(sample_tape9)
@@ -431,8 +470,7 @@ def test_merge_tape9():
     tape9_dict = {1: {'_type': 'decay', 'half_life': {10010: 42.0}},
                   2: {'_type': 'decay', '_bad_key': None},
                   3: {'_type': 'decay', 'title': "Sweet Decay"},
-                  382: {'_type': 'xsfpy', '_subtype': 'actinides', 'sigma_f': {922350: 16.0}},
-                 }
+                  382: {'_type': 'xsfpy', '_subtype': 'actinides', 'sigma_f': {922350: 16.0}}}
 
     # merge so that dict takes precedence
     tape9 = origen22.merge_tape9([tape9_dict, tape9_file])
@@ -451,20 +489,22 @@ def test_merge_tape9():
     assert_true('_cards' in tape9[383])
 
 
-
 def test_write_tape9():
     tape9_file = StringIO()
 
     tape9_dict = {1: {'_type': 'decay', 'half_life': {10010: 42.0}, 'title': 'decay1'},
-                  2: {'_type': 'decay', '_bad_key': None, 'title': 'decay2', 'half_life': {922350: 42.0}},
-                  3: {'_type': 'decay', 'title': "Sweet Decay", 'half_life': {10010: 42.0, 421000: 42.0}},
-                  381: {'_type': 'xsfpy', '_subtype': 'activation_products', 'sigma_gamma': {10010: 12.0}, 'title': 'xs1'},
-                  382: {'_type': 'xsfpy', '_subtype': 'actinides', 'sigma_f': {922350: 16.0}, 'title': 'xs2'},
-                  383: {'_type': 'xsfpy', '_subtype': 
-                        'fission_products', 'sigma_gamma': {10010: 20.0}, 
+                  2: {'_type': 'decay', '_bad_key': None, 'title': 'decay2',
+                      'half_life': {922350: 42.0}},
+                  3: {'_type': 'decay', 'title': "Sweet Decay",
+                      'half_life': {10010: 42.0, 421000: 42.0}},
+                  381: {'_type': 'xsfpy', '_subtype': 'activation_products',
+                        'sigma_gamma': {10010: 12.0}, 'title': 'xs1'},
+                  382: {'_type': 'xsfpy', '_subtype': 'actinides', 'sigma_f': {922350: 16.0},
+                        'title': 'xs2'},
+                  383: {'_type': 'xsfpy', '_subtype':
+                        'fission_products', 'sigma_gamma': {10010: 20.0},
                         'title': 'xsfpy3', 'U235_fiss_yield': {421000: 42.0},
-                        'fiss_yields_present': {421000: True}},
-                 }
+                        'fiss_yields_present': {421000: True}}}
 
     # Test that basic functionality works
     origen22.write_tape9(tape9_dict, tape9_file)
@@ -485,11 +525,11 @@ def test_write_tape9():
 
 
 def test_xslibs():
-    exp = {42: {'_type': 'xsfpy', '_subtype': 'activation_products', 
+    exp = {42: {'_type': 'xsfpy', '_subtype': 'activation_products',
                 'title': 'PyNE Cross Section Data for Activation Products'},
-           43: {'_type': 'xsfpy', '_subtype': 'actinides', 
+           43: {'_type': 'xsfpy', '_subtype': 'actinides',
                 'title': 'PyNE Cross Section Data for Actinides & Daughters'},
-           44: {'_type': 'xsfpy', '_subtype': 'fission_products', 
+           44: {'_type': 'xsfpy', '_subtype': 'fission_products',
                 'title': 'PyNE Cross Section Data for Fission Products'},
            }
     xsc = XSCache(data_sources=[NullDataSource])
@@ -506,18 +546,19 @@ def test_xslibs():
             if not field.startswith('sigma_'):
                 continue
             assert_true(all([v == 0.0 for v in obs[n][field].values()]))
-    assert_true(set(obs[42].keys()) >= set(origen22.ACTIVATION_PRODUCT_FIELDS + 
+    assert_true(set(obs[42].keys()) >= set(origen22.ACTIVATION_PRODUCT_FIELDS +
                                            origen22.XSFPY_FIELDS))
-    assert_true(set(obs[43].keys()) >= set(origen22.ACTINIDE_FIELDS + 
+    assert_true(set(obs[43].keys()) >= set(origen22.ACTINIDE_FIELDS +
                                            origen22.XSFPY_FIELDS))
     assert_true(set(obs[44].keys()) >= set(origen22.FISSION_PRODUCT_FIELDS +
                                            origen22.XSFPY_FIELDS))
 
+
 def test_nlbs():
     exp = (1, 2, 3), (42, 43, 44)
-    t9 = {42: {'_type': 'xsfpy', '_subtype': 'activation_products'}, 
-          43: {'_type': 'xsfpy', '_subtype': 'actinides'}, 
-          44: {'_type': 'xsfpy', '_subtype': 'fission_products'}, 
+    t9 = {42: {'_type': 'xsfpy', '_subtype': 'activation_products'},
+          43: {'_type': 'xsfpy', '_subtype': 'actinides'},
+          44: {'_type': 'xsfpy', '_subtype': 'fission_products'},
           1: {'_type': 'decay'},
           2: {'_type': 'decay'},
           3: {'_type': 'decay'},
@@ -525,8 +566,8 @@ def test_nlbs():
     obs = origen22.nlbs(t9)
     assert_equal(exp, obs)
 
+
 def test_tape9_dict_structure():
-    ds = OpenMCDataSource()
     nucs = ["U233", "U234", "U235", "U236", "U238"]
     tape9 = origen22.make_tape9(nucs, nlb=(219, 220, 221))
 
@@ -559,7 +600,7 @@ def test_tape9_dict_structure():
         # check to see if the values are float-valued dicts
         assert_is_instance(tape9[219][field], dict)
         for value in tape9[219][field].values():
-            if value == 'fiss_yields_present': # except for these bool-valued dicts
+            if value == 'fiss_yields_present':  # except for these bool-valued dicts
                 assert_is_instance(value, bool)
             else:
                 assert_is_instance(value, float)
