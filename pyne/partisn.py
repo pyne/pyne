@@ -68,8 +68,10 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     -----------
     mesh : PyNE mesh 
         A premade mesh object that conforms to the geometry. Bounds of the mesh
-        must correspond to the desired PARTISN fine mesh intervals. One fine 
-        mesh per coarse mesh will be created. Can be 1-D, 2-D, or 3-D.
+        must correspond to the desired PARTISN fine mesh intervals. Two fine 
+        mesh intervals per coarse mesh interval will be created. The sum of all
+        fine mesh intervals in the problem must be greater than or equal to 7.
+        Mesh can be 1-D (Nx1x1 mesh), 2-D (NxMx1 mesh), or 3-D (NxMxP mesh).
         Note: Only Cartesian meshes are currently supported.
     hdf5 : string
         File path to a material-laden dagmc geometry file.
@@ -176,24 +178,28 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
         if dim == 'x':
             n = len(bounds[dim]) - 1
             block01['im'] = n
-            block01['it'] = block01['im']
+            block01['it'] = block01['im']*2
             block02['xmesh'] = bounds[dim]
             block05['sourcx'] = np.zeros(shape=(n, nmq), dtype=float)
             block05['sourcx'][:,0] = 1.0
         elif dim == 'y':
             n = len(bounds[dim]) - 1
             block01['jm'] = n
-            block01['jt'] = block01['jm']
+            block01['jt'] = block01['jm']*2
             block02['ymesh'] = bounds[dim]
             block05['sourcy'] = np.zeros(shape=(n, nmq), dtype=float)
             block05['sourcy'][:,0] = 1.0
         elif dim == 'z':
             n = len(bounds[dim]) - 1
             block01['km'] = n
-            block01['kt'] = block01['km']
+            block01['kt'] = block01['km']*2
             block02['zmesh'] = bounds[dim]
             block05['sourcz'] = np.zeros(shape=(n, nmq), dtype=float)
             block05['sourcz'][:,0] = 1.0
+    
+    warn_fm = _check_fine_mesh_total(block01)
+    if warn_fm:
+        warn("Please supply a larger mesh. Number of fine mesh intervals is less than 7.")
 
     block05['source'] = np.zeros(shape=(ngroup, nmq), dtype=float)
     block05['source'][:,0] = 1.0
@@ -207,7 +213,7 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     # call function to write to file
     input_file = input_file if input_file_tf else None
     _write_input(title, block01, block02, block03, block04, block05, name=input_file)
-  
+
 
 def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
     """Read material properties from the loaded dagmc geometry.
@@ -309,11 +315,11 @@ def _get_coord_sys(mesh):
     # Determine IGEOM
     # assumes a Cartesian system
     if len(coord_sys) == 1:
-        igeom = 'SLAB'
+        igeom = 'slab'
     elif len(coord_sys) == 2:
-        igeom = 'X-Y'
+        igeom = 'x-y'
     elif len(coord_sys) == 3:
-        igeom = 'X-Y-Z'
+        igeom = 'x-y-z'
     
     return igeom, bounds
 
@@ -452,6 +458,22 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
     return zones_formatted, zones_novoid
     
 
+def _check_fine_mesh_total(block01):
+    """Check that the fine mesh total is greater than or equal to 7.
+    """
+    total = 0
+    for key in block01:
+        if key in ['it', 'jt', 'kt']:
+            total += block01[key]
+    
+    if total >= 7:
+        # no warning necessary
+        return False
+    else:
+        # warn the user
+        return True
+
+
 def _write_input(title, block01, block02, block03, block04, block05, name=None):
     """Write all variables and comments to a file.
     """
@@ -465,30 +487,30 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
     partisn += "     1     0     0\n"
     partisn += str(title)
 
-    partisn += "\n\ "
-    partisn += "\n\ Notes: This input assumes a volumetric source calculation using"
-    partisn += "\n\ default PARTISN values in many cases. Please refer to the comments"
-    partisn += "\n\ throughout and the PARTISN input manual."
-    partisn += "\n\ Variables that MUST be set in each block (other defaults and \n"
-    partisn += "\ optional variables may exist):"
-    partisn += "\n\     Block 1:  ISN"
-    partisn += "\n\     Block 3:  LIB, MAXORD, IHM, IHT"
-    partisn += "\n\     Block 6:  no input is provided for block 6"
+    partisn += "\n/ "
+    partisn += "\n/ Notes: This input assumes a volumetric source calculation using"
+    partisn += "\n/ default PARTISN values in many cases. Please refer to the comments"
+    partisn += "\n/ throughout and the PARTISN input manual."
+    partisn += "\n/ Variables that MUST be set in each block (other defaults and \n"
+    partisn += "/ optional variables may exist):"
+    partisn += "\n/     Block 1:  ISN"
+    partisn += "\n/     Block 3:  LIB, MAXORD, IHM, IHT"
+    partisn += "\n/     Block 6:  no input is provided for block 6"
     
     ###########################################
     #              Write Block 1              #
     ###########################################
-    partisn += "\n\ \n"
-    partisn += "\ ------------ Block 1 (Control and Dimensions) ------------"
-    partisn += "\n\ \n"
-    partisn += "igeom='{0}'".format(block01['igeom'])
+    partisn += "\n/ \n"
+    partisn += "/ ------------ Block 1 (Control and Dimensions) ------------"
+    partisn += "\n/ \n"
+    partisn += "igeom={0}".format(block01['igeom'])
     partisn += "  ngroup={0}".format(block01['ngroup'])
     partisn += "  niso={0}".format(block01['niso'])
     partisn += "  mt={0}".format(block01['mt'])
     partisn += "  nzone={0}\n".format(block01['nzone'])
     
-    partisn += "\ Please provide input for ISN variable:\n"
-    partisn += "\ isn=  \n"
+    partisn += "/ Please provide input for ISN variable:\n"
+    partisn += "/ isn=  \n"
     
     if 'im' in block01:
         partisn += "im={0}".format(block01['im'])
@@ -506,9 +528,9 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
     ###########################################
     #              Write Block 2              #
     ###########################################
-    partisn += "\n\ \n"
-    partisn += "\ ------------ Block 2 (Geometry) ------------"
-    partisn += "\n\ \n"
+    partisn += "\n/ \n"
+    partisn += "/ ------------ Block 2 (Geometry) ------------"
+    partisn += "\n/ \n"
     
     if 'xmesh' in block02:
         partisn += "xmesh= "
@@ -521,7 +543,7 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
                     partisn += "\n       "
                 count = 0
         partisn += "\nxints= "
-        partisn += "{0}R {1}".format(len(block02['xmesh'])-1, 1)
+        partisn += "{0}R {1}".format(len(block02['xmesh'])-1, 2)
         partisn += "\n"
         
     if 'ymesh' in block02:
@@ -535,7 +557,7 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
                     partisn += "\n       "
                 count = 0
         partisn += "\nyints= "
-        partisn += "{0}R {1}".format(len(block02['ymesh'])-1, 1)
+        partisn += "{0}R {1}".format(len(block02['ymesh'])-1, 2)
         partisn += "\n"
         
     if 'zmesh' in block02:
@@ -549,15 +571,13 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
                     partisn += "\n       "
                 count = 0
         partisn += "\nzints= "
-        partisn += "{0}R {1}".format(len(block02['zmesh'])-1, 1)
+        partisn += "{0}R {1}".format(len(block02['zmesh'])-1, 2)
         partisn += "\n"
         
     partisn += "zones= "
     for i, row in enumerate(block02['zones']):
-        string = format_repeated_vector(row)
-        list_string = string.split()
         count = 0
-        for num in list_string:
+        for num in row:
             partisn += "{} ".format(num)
             count += 1
             if count == 20:
@@ -574,17 +594,17 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
     ###########################################
     #              Write Block 3              #
     ###########################################
-    partisn += "\n\ \n"
-    partisn += "\ ------------ Block 3 (Nuclear Data) ------------"
-    partisn += "\n\ \n"
-    partisn += "\ Please provide input for the following variables:\n"
-    partisn += "\ lib=\n"
-    partisn += "\ maxord=\n"
-    partisn += "\ ihm=\n"
-    partisn += "\ iht=\n"
+    partisn += "\n/ \n"
+    partisn += "/ ------------ Block 3 (Nuclear Data) ------------"
+    partisn += "\n/ \n"
+    partisn += "/ Please provide input for the following variables:\n"
+    partisn += "/ lib=\n"
+    partisn += "/ maxord=\n"
+    partisn += "/ ihm=\n"
+    partisn += "/ iht=\n"
     
-    partisn += "\ Note: NAMES is not all inclusive. Only NAMES that are present in\n"
-    partisn += "\ meshed area are listed.\n"
+    partisn += "/ Note: NAMES is not all inclusive. Only NAMES that are present in\n"
+    partisn += "/ meshed area are listed.\n"
     partisn += "names= "
     count = 0
     for i, name in enumerate(block03['names']):
@@ -600,9 +620,9 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
     ###########################################
     #              Write Block 4              #
     ###########################################
-    partisn += "\n\ \n"
-    partisn += "\ ------------ Block 4 (Cross-Section Mixing) ------------"
-    partisn += "\n\ \n"
+    partisn += "\n/ \n"
+    partisn += "/ ------------ Block 4 (Cross-Section Mixing) ------------"
+    partisn += "\n/ \n"
     
     partisn += "matls= "
     for i, mat in enumerate(block04['matls']):
@@ -647,24 +667,24 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
     ###########################################
     #              Write Block 5              #
     ###########################################
-    partisn += "\n\ \n"
-    partisn += "\ ------------ Block 5 (Solver Inputs) ------------"
-    partisn += "\n\ \n"
-    partisn += "\ This input assumes a volumetric source calculation with vacuum boundary conditions.\n"
-    partisn += "\ Change inputs below if otherwise.\n"
-    partisn += "ievt=0      \ source calculation\n"
-    partisn += "\ isct=     \ Legendre order of scattering (default=0)\n"
-    partisn += "\ ith=      \ 0/1/2= direct/adjoint/POI calculation (default=0)\n"
-    partisn += "\ ibl=      \ left BC (default=0, vacuum)\n"
-    partisn += "\ ibr=      \ right BC (default=0, vacuum)\n"
-    partisn += "\ ibt=      \ top BC (default=0, vacuum)\n"
-    partisn += "\ ibb=      \ bottom BC (default=0, vacuum)\n"
-    partisn += "\ ibfrnt=   \ front BC (default=0, vacuum)\n"
-    partisn += "\ ibback=   \ back BC (default=0, vacuum)\n"
-    partisn += "\ \n"
+    partisn += "\n/ \n"
+    partisn += "/ ------------ Block 5 (Solver Inputs) ------------"
+    partisn += "\n/ \n"
+    partisn += "/ This input assumes a volumetric source calculation with vacuum\n"
+    partisn += "/ boundary conditions. Change inputs below if otherwise.\n"
+    partisn += "ievt=0      / source calculation\n"
+    partisn += "/ isct=     / Legendre order of scattering (default=0)\n"
+    partisn += "/ ith=      / 0/1/2= direct/adjoint/POI calculation (default=0)\n"
+    partisn += "/ ibl=      / left BC (default=0, vacuum)\n"
+    partisn += "/ ibr=      / right BC (default=0, vacuum)\n"
+    partisn += "/ ibt=      / top BC (default=0, vacuum)\n"
+    partisn += "/ ibb=      / bottom BC (default=0, vacuum)\n"
+    partisn += "/ ibfrnt=   / front BC (default=0, vacuum)\n"
+    partisn += "/ ibback=   / back BC (default=0, vacuum)\n"
+    partisn += "/ \n"
     
-    partisn += "\ Source is in format of option 3 according to PARTISN input manual.\n"
-    partisn += "\ Default is an evenly distributed volume source.\n"
+    partisn += "/ Source is in format of option 3 according to PARTISN input manual.\n"
+    partisn += "/ Default is an evenly distributed volume source.\n"
     partisn += "source= "
     count = 0
     tot = 0
@@ -735,6 +755,8 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
             else:
                 partisn += "; "
         partisn += "\n"
+    
+    partisn += "t"
     
     # Write to the file
     f.write(partisn)

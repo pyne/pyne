@@ -242,6 +242,22 @@ def test_get_zones_with_void():
     assert(zones == zones_expected)
 
 
+def test_check_fine_mesh_total_true():
+    """Check that if fine mesh is less than 7, warning is issued.
+    """
+    block01 = {'it':2, 'jt':4}
+    warn_out = partisn._check_fine_mesh_total(block01)
+    assert(warn_out == True)
+    
+
+def test_check_fine_mesh_total_false():
+    """Check that if fine mesh is greater than 7, warning is not issued.
+    """
+    block01 = {'it':2, 'jt':4, 'kt':4}
+    warn_out = partisn._check_fine_mesh_total(block01)
+    assert(warn_out == False)
+    
+
 def test_write_partisn_input_1D():
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
