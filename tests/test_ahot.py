@@ -1,5 +1,10 @@
-from spatial_solvers import ahot_script
 import nose
+from nose.plugins.skip import Skip, SkipTest
+
+try:
+  from spatial_solvers import ahot_script
+except:
+  raise SkipTest
 
 def test_ahotn_ln():
   ahot_script.test_ahotn_ln()
