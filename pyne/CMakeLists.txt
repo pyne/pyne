@@ -119,26 +119,34 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/bins.pyx"
 cython_add_module(bins bins.pyx)
 target_link_libraries(bins pyne)
 
+#IF(${PYNE_PLATFORM} STREQUAL "__LINUX__")
+  #EXECUTE_PROCESS(COMMAND gcc -dumpversion GCC_VERSION)
+#execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
+#            OUTPUT_VARIABLE GCC_VERSION)
+#IF("${GCC_VERSION}" VERSION_GREATER "4.6")
 
-IF(${PYNE_PLATFORM} STREQUAL "__LINUX__")
-  EXECUTE_PROCESS(COMMAND gcc -dumpversion GCC_VERSION)
-  IF("${GCC_VERSION}" VERSION_GREATER "4.6")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
 
-# TRANSPORT_SPATIAL_METHODS wrapper
-# I don't know which method is better...
-#add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
-#add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
-add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
-add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
-    COMMAND f2py -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
-                --f90flags="-fdefault-real-8" 
-                -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90 
-                -lpyne
-                --debug --debug-capi
-                #-lpyne --debug-capi
-    DEPENDS pyne
-    )
-target_link_libraries(transport_spatial_methods pyne)
+    # TRANSPORT_SPATIAL_METHODS wrapper
+    # I don't know which method is better...
+    #add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
+    #add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
+    add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
+    add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
+        COMMAND f2py -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
+                    --f90flags="-fdefault-real-8" 
+                    -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90 
+                    -lpyne
+                    --debug --debug-capi
+                    #-lpyne --debug-capi
+        DEPENDS pyne
+        )
+    target_link_libraries(transport_spatial_methods pyne)
 
-  ENDIF("${GCC_VERSION}" VERSION_GREATER "4.6")
-ENDIF("${PYNE_PLATFORM}" STREQUAL "__LINUX__")
+
+  endif()
+endif()
+
+#ENDIF("${GCC_VERSION}" VERSION_GREATER "4.6")
+#ENDIF("${PYNE_PLATFORM}" STREQUAL "__LINUX__")
