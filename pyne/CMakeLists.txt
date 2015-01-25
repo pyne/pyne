@@ -119,14 +119,7 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/bins.pyx"
 cython_add_module(bins bins.pyx)
 target_link_libraries(bins pyne)
 
-#IF(${PYNE_PLATFORM} STREQUAL "__LINUX__")
-  #EXECUTE_PROCESS(COMMAND gcc -dumpversion GCC_VERSION)
-#execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
-#            OUTPUT_VARIABLE GCC_VERSION)
-#IF("${GCC_VERSION}" VERSION_GREATER "4.6")
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
+if(BUILD_SPATIAL_SOLVER)
 
     # TRANSPORT_SPATIAL_METHODS wrapper
     # I don't know which method is better...
@@ -138,15 +131,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
                     --f90flags="-fdefault-real-8" 
                     -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90 
                     -lpyne
-                    --debug --debug-capi
+                    #--debug --debug-capi
                     #-lpyne --debug-capi
         DEPENDS pyne
         )
     target_link_libraries(transport_spatial_methods pyne)
-
-
-  endif()
 endif()
-
-#ENDIF("${GCC_VERSION}" VERSION_GREATER "4.6")
-#ENDIF("${PYNE_PLATFORM}" STREQUAL "__LINUX__")

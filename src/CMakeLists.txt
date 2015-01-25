@@ -37,24 +37,49 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
 
     #"transport_spatial_methods/3d/main.f90"
     )
+
+#check operating system
+IF(NOT ${PYNE_PLATFORM} STREQUAL "__LINUX__")
+    set(BUILD_SPATIAL_SOLVER false)
+ENDIF()
+
 # setup source files
-set(PYNE_SRCS
-    "data.cpp"
-    "decay.cpp"
-    "enrichment.cpp"
-    "enrichment_cascade.cpp"
-    "enrichment_symbolic.cpp"
-    "jsoncpp.cpp"
-    "jsoncustomwriter.cpp"
-    "material.cpp"
-    "nucname.cpp"
-    "particle.cpp"
-    "rxname.cpp"
-    "tally.cpp"
-    "utils.cpp"
-    "endftod.f90"
-    "${TRANSPORT_SPATIAL_METHODS_SRCS}"
-    )
+IF(BUILD_SPATIAL_SOLVER)
+    set(PYNE_SRCS
+        "data.cpp"
+        "decay.cpp"
+        "enrichment.cpp"
+        "enrichment_cascade.cpp"
+        "enrichment_symbolic.cpp"
+        "jsoncpp.cpp"
+        "jsoncustomwriter.cpp"
+        "material.cpp"
+        "nucname.cpp"
+        "particle.cpp"
+        "rxname.cpp"
+        "tally.cpp"
+        "utils.cpp"
+        "endftod.f90"
+        "${TRANSPORT_SPATIAL_METHODS_SRCS}"
+        )
+ELSE()
+    set(PYNE_SRCS
+        "data.cpp"
+        "decay.cpp"
+        "enrichment.cpp"
+        "enrichment_cascade.cpp"
+        "enrichment_symbolic.cpp"
+        "jsoncpp.cpp"
+        "jsoncustomwriter.cpp"
+        "material.cpp"
+        "nucname.cpp"
+        "particle.cpp"
+        "rxname.cpp"
+        "tally.cpp"
+        "utils.cpp"
+        "endftod.f90"
+        )
+ENDIF()
 
 if (MOAB_FOUND)
     set(PYNE_SRCS "${PYNE_SRCS}"
