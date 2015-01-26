@@ -27,7 +27,7 @@ from sets import Set
 import numpy as np
 import tables
 
-from pyne import dagmc
+#from pyne import dagmc
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne.material import MaterialLibrary
@@ -51,7 +51,7 @@ if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 
 
-def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
+def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     """This definition reads all necessary attributes from a material-laden 
     geometry file, a pre-made PyNE mesh object, and the nuclear data cross 
     section library, and any optional inputs that are necessary for creating a 
@@ -77,7 +77,7 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
         File path to a material-laden dagmc geometry file.
     ngroup : int
         The number of energy groups in the cross section library.
-    nmq : int
+    pn : int
         The number of moments in a P_n expansion of the source.
     data_hdf5path : string, optional, default = material_library/materials
         the path in the heirarchy to the data table in an HDF5 file.
@@ -106,9 +106,6 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
         Note: read comments generated in file. Not all variables will be 
         assigned that are necessary.
     """
-    
-    # Load the geometry
-    dagmc.load(hdf5)
     
     # Initialize dictionaries for each PARTISN block
     block01 = {}
@@ -167,7 +164,7 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
     block01['niso'] = len(xs_names)
     block03['names'] = xs_names
 
-    block01['igeom'], bounds = _get_coord_sys(mesh)
+    block01['igeom'], bounds, nmq = _get_coord_sys(mesh, pn)
     block01['ngroup'] = ngroup
     block01['mt'] = len(mat_lib)
     
@@ -180,28 +177,28 @@ def write_partisn_input(mesh, hdf5, ngroup, nmq, **kwargs):
             block01['im'] = n
             block01['it'] = block01['im']*2
             block02['xmesh'] = bounds[dim]
-            block05['sourcx'] = np.zeros(shape=(n, nmq), dtype=float)
+            block05['sourcx'] = np.zeros(shape=(nmq, n), dtype=float)
             block05['sourcx'][:,0] = 1.0
         elif dim == 'y':
             n = len(bounds[dim]) - 1
             block01['jm'] = n
             block01['jt'] = block01['jm']*2
             block02['ymesh'] = bounds[dim]
-            block05['sourcy'] = np.zeros(shape=(n, nmq), dtype=float)
+            block05['sourcy'] = np.zeros(shape=(nmq, n), dtype=float)
             block05['sourcy'][:,0] = 1.0
         elif dim == 'z':
             n = len(bounds[dim]) - 1
             block01['km'] = n
             block01['kt'] = block01['km']*2
             block02['zmesh'] = bounds[dim]
-            block05['sourcz'] = np.zeros(shape=(n, nmq), dtype=float)
+            block05['sourcz'] = np.zeros(shape=(nmq, n), dtype=float)
             block05['sourcz'][:,0] = 1.0
     
     warn_fm = _check_fine_mesh_total(block01)
     if warn_fm:
         warn("Please supply a larger mesh. Number of fine mesh intervals is less than 7.")
 
-    block05['source'] = np.zeros(shape=(ngroup, nmq), dtype=float)
+    block05['source'] = np.zeros(shape=(nmq, ngroup), dtype=float)
     block05['source'][:,0] = 1.0
     
     # create title
@@ -289,7 +286,7 @@ def _get_xs_names(mat_xs_names):
     return list(xs_names)
 
 
-def _get_coord_sys(mesh):
+def _get_coord_sys(mesh, pn):
     """Determine coordinate system and get bounds
     """
     
@@ -316,17 +313,24 @@ def _get_coord_sys(mesh):
     # assumes a Cartesian system
     if len(coord_sys) == 1:
         igeom = 'slab'
+        nmq = pn + 1
     elif len(coord_sys) == 2:
         igeom = 'x-y'
+        nmq = (pn + 1)*(pn + 2)/2
     elif len(coord_sys) == 3:
         igeom = 'x-y-z'
+        nmq = (pn + 1)**2
     
-    return igeom, bounds
+    return igeom, bounds, nmq
 
 
 def _get_zones(mesh, hdf5, bounds, num_rays, grid):
     """Get the minimum zone definitions for the geometry.
     """
+    
+    # load the geometry
+    from pyne import dagmc
+    dagmc.load(hdf5)
     
     # Descretize the geometry and get cell fractions
     dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
@@ -449,10 +453,10 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
         km = 1
 
     n = 0
-    zones_formatted = np.zeros(shape=(im, jm*km), dtype=int)
+    zones_formatted = np.zeros(shape=(jm*km, im), dtype=int)
     for i in range(im):
         for jk in range(jm*km):
-            zones_formatted[i,jk] = voxel_zone[n]
+            zones_formatted[jk, i] = voxel_zone[n]
             n += 1
     
     return zones_formatted, zones_novoid
@@ -756,7 +760,7 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
                 partisn += "; "
         partisn += "\n"
     
-    partisn += "t"
+    partisn += "t\n"
     
     # Write to the file
     f.write(partisn)

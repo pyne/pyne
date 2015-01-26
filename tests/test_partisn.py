@@ -8,7 +8,7 @@ import filecmp
 from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_almost_equal
 from pyne import partisn
-import pyne.dagmc as dagmc
+#import pyne.dagmc as dagmc
 from pyne.utils import QAWarning
 import multiprocessing
 import unittest
@@ -121,16 +121,18 @@ def test_get_coord_sys_1D():
     xvals = [0.0, 2.0]
     yvals = [0.0, 3.0]
     zvals = [-1.0, 0.0, 1.0]
+    pn = 2
     mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
                 structured_ordering='xyz')
     
     # Expected values
-    igeom_expected = 'SLAB'
+    igeom_expected = 'slab'
     bounds_expected = {'z':[-1.0, 0.0, 1.0]}
     
-    igeom, bounds = partisn._get_coord_sys(mesh)
+    igeom, bounds, nmq = partisn._get_coord_sys(mesh, pn)
     assert(igeom == igeom_expected)
     assert(bounds == bounds_expected)
+    assert(nmq == 3)
 
 
 def test_get_coord_sys_2D():
@@ -140,16 +142,18 @@ def test_get_coord_sys_2D():
     xvals = [-1.0, 0.0, 2.0]
     yvals = [-3.0, 3.0]
     zvals = [-1.0, 0.0, 1.0]
+    pn = 2
     mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
                 structured_ordering='xyz')
     
     # Expected values
-    igeom_expected = 'X-Y'
+    igeom_expected = 'x-y'
     bounds_expected = {'x': [-1.0, 0.0, 2.0], 'z':[-1.0, 0.0, 1.0]}
     
-    igeom, bounds = partisn._get_coord_sys(mesh)
+    igeom, bounds, nmq = partisn._get_coord_sys(mesh, pn)
     assert(igeom == igeom_expected)
     assert(bounds == bounds_expected)
+    assert(nmq == 6)
 
 
 def test_get_coord_sys_3D():
@@ -159,20 +163,22 @@ def test_get_coord_sys_3D():
     xvals = [-1.0, 0.0, 2.0]
     yvals = [-3.0, 0.0, 3.0]
     zvals = [-1.0, 0.0, 1.0]
+    pn = 2
     mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
                 structured_ordering='xyz')
     
     # Expected values
-    igeom_expected = 'X-Y-Z'
+    igeom_expected = 'x-y-z'
     bounds_expected = {'x': [-1.0, 0.0, 2.0], 'y':[-3.0, 0.0, 3.0], 
                         'z':[-1.0, 0.0, 1.0]}
     
-    igeom, bounds = partisn._get_coord_sys(mesh)
+    igeom, bounds, nmq = partisn._get_coord_sys(mesh, pn)
     assert(igeom == igeom_expected)
     assert(bounds == bounds_expected)
+    assert(nmq == 9)
 
    
-def test_get_zones_no_void():
+def get_zones_no_void():
     """Test the _get_zones function if no void is in the meshed area.
     """
     # hdf5 test file
@@ -180,6 +186,9 @@ def test_get_zones_no_void():
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
     nuc_hdf5path = '/nucid'
+    
+    # Load dagmc geometry
+    from pyne import dagmc
     dagmc.load(hdf5)
     
     # mesh
@@ -202,11 +211,26 @@ def test_get_zones_no_void():
                     2:{'vol_frac':[0.5, 0.5], 'mat':[u'HeliumNatural', u'Mercury']}, 
                     3:{'vol_frac':[1.0], 'mat':[u'Mercury']}}
     
-    assert(voxel_zones.all() == voxel_zones_expected.all())
-    assert(zones == zones_expected)
+    vz_tf = False
+    z_tf = False
+    if voxel_zones.all() == voxel_zones_expected.all():
+        vz_tf = True
+    if zones == zones_expected:
+        z_tf = True
+    #assert(voxel_zones.all() == voxel_zones_expected.all())
+    #assert(zones == zones_expected)
+    return [vz_tf, z_tf]
+
+
+def test_get_zones_no_void():
+    """Test the _get_zones function if no void is in the meshed area.
+    """
+    p = multiprocessing.Pool()
+    r = p.apply_async(get_zones_no_void)
+    assert(r.get() == [True, True])
 
     
-def test_get_zones_with_void():
+def get_zones_with_void():
     """Test the _get_zones function if a void is present.
     """
     # hdf5 test file
@@ -214,6 +238,8 @@ def test_get_zones_with_void():
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
     nuc_hdf5path = '/nucid'
+    
+    from pyne import dagmc
     dagmc.load(hdf5)
     
     # mesh
@@ -238,8 +264,23 @@ def test_get_zones_with_void():
                     2:{'vol_frac':[0.5, 0.5], 'mat':[u'HeliumNatural', u'Mercury']}, 
                     3:{'vol_frac':[1.0], 'mat':[u'Mercury']}}
     
-    assert(voxel_zones.all() == voxel_zones_expected.all())
-    assert(zones == zones_expected)
+    vz_tf = False
+    z_tf = False
+    if voxel_zones.all() == voxel_zones_expected.all():
+        vz_tf = True
+    if zones == zones_expected:
+        z_tf = True
+    #assert(voxel_zones.all() == voxel_zones_expected.all())
+    #assert(zones == zones_expected)
+    return [vz_tf, z_tf]
+    
+    
+def test_get_zones_with_void():
+    """Test the _get_zones function if a void is present.
+    """
+    p = multiprocessing.Pool()
+    r = p.apply_async(get_zones_with_void)
+    assert(r.get() == [True, True])
 
 
 def test_check_fine_mesh_total_true():
@@ -258,7 +299,7 @@ def test_check_fine_mesh_total_false():
     assert(warn_out == False)
     
 
-def test_write_partisn_input_1D():
+def write_partisn_input_1D():
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -277,26 +318,26 @@ def test_write_partisn_input_1D():
     
     # other inputs
     ngroup = 5
-    nmq = 4
+    pn = 2
     
     # expected output file
     file_expected = THIS_DIR + '/files_test_partisn/partisn_1D_expected.inp'
     
-    partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
+    partisn.write_partisn_input(mesh, hdf5, ngroup, pn, 
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
         input_file=input_file, num_rays=100, grid=True)
     
     out = filecmp.cmp(input_file, file_expected)
     assert(out == True)
-    #return out
+    return out
         
         
-#def test_write_partisn_input_1D():
-#    """Test full input file creation for 1D case
-#    """
-#    p = multiprocessing.Pool()
-#    r = p.apply_async(self.write_partisn_input_1D)
-#    assert(r.get() == True)
+def test_write_partisn_input_1D():
+    """Test full input file creation for 1D case
+    """
+    p = multiprocessing.Pool()
+    r = p.apply_async(write_partisn_input_1D)
+    assert(r.get() == True)
 
 
 def write_partisn_input_2D():
@@ -318,12 +359,12 @@ def write_partisn_input_2D():
     
     # other inputs
     ngroup = 5
-    nmq = 4
+    pn = 2
     
     # expected output file
     file_expected = THIS_DIR + '/files_test_partisn/partisn_2D_expected.inp'
     
-    partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
+    partisn.write_partisn_input(mesh, hdf5, ngroup, pn, 
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
         input_file=input_file, num_rays=100, grid=True)
     
@@ -358,12 +399,12 @@ def write_partisn_input_3D():
     
     # other inputs
     ngroup = 5
-    nmq = 4
+    pn = 2
     
     # expected output file
     file_expected = THIS_DIR + '/files_test_partisn/partisn_3D_expected.inp'
     
-    partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
+    partisn.write_partisn_input(mesh, hdf5, ngroup, pn, 
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
         input_file=input_file, num_rays=100, grid=True)
     
@@ -404,12 +445,12 @@ def write_partisn_input_with_names_dict():
     
     # other inputs
     ngroup = 5
-    nmq = 4
+    pn = 2
     
     # expected output file
     file_expected = THIS_DIR + '/files_test_partisn/partisn_nucnames_expected.inp'
     
-    partisn.write_partisn_input(mesh, hdf5, ngroup, nmq, 
+    partisn.write_partisn_input(mesh, hdf5, ngroup, pn, 
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
         input_file=input_file, num_rays=100, grid=True, names_dict=names)
     

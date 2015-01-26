@@ -26,9 +26,10 @@ ymesh= -5.000 0.000 5.000
 yints= 2R 2
 zmesh= -5.000 0.000 5.000 
 zints= 2R 2
-zones= 4R 1 ;
-       4R 2 ;
-       4R 3 ;
+zones= 1 2 3 ;
+       1 2 3 ;
+       1 2 3 ;
+       1 2 3 ;
 t
 / 
 / ------------ Block 3 (Nuclear Data) ------------
@@ -70,9 +71,16 @@ ievt=0      / source calculation
 / 
 / Source is in format of option 3 according to PARTISN input manual.
 / Default is an evenly distributed volume source.
-source= 1.0 3R 0.0 ; 1.0 3R 0.0 ; 1.0 3R 0.0 ; 1.0 3R 0.0 ;
-        1.0 3R 0.0 ; 
-sourcx= 1.0 3R 0.0 ; 1.0 3R 0.0 ; 1.0 3R 0.0 ; 
-sourcy= 1.0 3R 0.0 ; 1.0 3R 0.0 ; 
-sourcz= 1.0 3R 0.0 ; 1.0 3R 0.0 ; 
+source= 1.0 4R 0.0 ; 1.0 4R 0.0 ; 1.0 4R 0.0 ; 1.0 4R 0.0 ;
+        1.0 4R 0.0 ; 1.0 4R 0.0 ; 1.0 4R 0.0 ; 1.0 4R 0.0 ;
+        1.0 4R 0.0 ; 
+sourcx= 1.0 2R 0.0 ; 1.0 2R 0.0 ; 1.0 2R 0.0 ; 1.0 2R 0.0 ;
+        1.0 2R 0.0 ; 1.0 2R 0.0 ; 1.0 2R 0.0 ; 1.0 2R 0.0 ;
+        1.0 2R 0.0 ; 
+sourcy= 1.0 0.0 ; 1.0 0.0 ; 1.0 0.0 ; 1.0 0.0 ;
+        1.0 0.0 ; 1.0 0.0 ; 1.0 0.0 ; 1.0 0.0 ;
+        1.0 0.0 ; 
+sourcz= 1.0 0.0 ; 1.0 0.0 ; 1.0 0.0 ; 1.0 0.0 ;
+        1.0 0.0 ; 1.0 0.0 ; 1.0 0.0 ; 1.0 0.0 ;
+        1.0 0.0 ; 
 t
