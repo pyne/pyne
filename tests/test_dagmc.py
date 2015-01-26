@@ -6,6 +6,7 @@ import warnings
 from nose.tools import assert_equal, assert_almost_equal, assert_raises
 from nose.plugins.skip import SkipTest
 from numpy.testing import assert_array_equal
+import multiprocessing
 
 try:
     from itaps import iMesh
@@ -17,7 +18,7 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
 try:
-    from pyne import dagmc
+    #from pyne import dagmc
     from pyne.mesh import Mesh
 except ImportError:
     raise SkipTest
@@ -26,18 +27,30 @@ if sys.version_info[0] < 3:
     STRING_TYPES = (basestring, str, unicode)
 else:
     STRING_TYPES = (str,)
-
+path = os.path.join(os.path.dirname(__file__), 'unitbox.h5m')
 class TestDagmcWithUnitbox(unittest.TestCase):
 
     # use extra underscore to ensure this function is first in alpabetical
     # sorted order, because it must run before the others.
-    def test__load(self):
+    def load(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         # FIXME laoding causes infor to be printied to stderr (or stdout).
         path = os.path.join(os.path.dirname(__file__), 'unitbox.h5m')
         dagmc.load(path)
+        
+    def test__load(self):
+        p = multiprocessing.Pool()
+        r = p.apply_async(self.load)
 
     def test_metadata(self):
-
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
+        
         rets = [dagmc.volume_is_graveyard(x) for x in range(1, 5)]
         self.assertEqual(rets, [True, False, False, False])
 
@@ -50,13 +63,20 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         self.assertTrue(all(x in md for x in ['material', 'rho', 'imp']))
 
     def test_versions(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         returned = dagmc.versions()
         self.assertEqual(len(returned), 2)
         self.assertTrue(isinstance(returned[0], STRING_TYPES))
         self.assertTrue(isinstance(returned[1], int))
 
     def test_list_functions(self):
-
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         surfs = dagmc.get_surface_list()
         self.assertEqual(set(surfs), set(range(1, 19)))
 
@@ -64,12 +84,20 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         self.assertEqual(set(vols), set(range(1, 5)))
 
     def test_boundary(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         low, high = dagmc.volume_boundary(2)
         for i in range(0, 3):
             self.assertTrue(low[i] <= -1.0)
             self.assertTrue(high[i] >= 1.0)
 
     def test_pt_in_vol(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
 
         # there are 4 volumes; (0,0,.2) is in volume 2
         rets = [dagmc.point_in_volume(x, [0, 0, .2]) for x in range(1, 5)]
@@ -80,6 +108,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         self.assertEqual(rets, [False, False, True, False])
 
     def test_find_volume(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
 
         vol = dagmc.find_volume([0, 0, 0])
         self.assertEqual(vol, 2)
@@ -102,6 +134,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         self.assertEqual(vol, 3)
 
     def test_one_ray(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
 
         fromcenter = dagmc.fire_one_ray(2, [0, 0, 0], [1, 0, 0])
         self.assertAlmostEqual(fromcenter[1], 1.0)
@@ -123,12 +159,20 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         self.assertAlmostEqual(fromvol3[1], 3.056921938)
 
     def test_failures(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
 
         self.assertRaises(Exception, dagmc.point_in_volume, [100, (0, 0, 0)])
         self.assertRaises(Exception, dagmc.point_in_volume, [1, (0, 0, 0, 0)])
         self.assertRaises(Exception, dagmc.fire_one_ray, [2, (0, 0, 0), 1])
 
     def test_ray_iterator(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
 
         start = [-2, 0, 0]
         startvol = dagmc.find_volume(start)
@@ -153,6 +197,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         self.assertEqual(i, 1)
 
     def test_ray_story(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         # Run with `nosetests -s` to see output printed on stdout
         dagmc.tell_ray_story((0, 0, 0), (1, 1, 0))
         dagmc.tell_ray_story((-3, 0, 0), (1, 0, 0))
@@ -161,6 +209,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         dagmc.tell_ray_story((-3, 0, 0), (1, 0, 0), dist_limit=4.1)
 
     def test_util_graveyard_bound(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
 
         lo, hi = dagmc.find_graveyard_inner_box()
 
@@ -170,6 +222,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
             self.assertAlmostEqual(hi[i], grave_diam)
 
     def test_util_matlist(self):
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
 
         mats = dagmc.get_material_set()
         self.assertEqual(set((0, 5)), mats)
@@ -181,6 +237,11 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """The 14th (index 13) mesh volume element fully contains volume 2. Use 
         random sampling.
         """
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
+            
         if not HAVE_IMESH:
             raise SkipTest
         coords = [-4, -1, 1, 4]
@@ -201,6 +262,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """The 14th (index 13) mesh volume element fully contains volume 2. Use 
         grid sampling.
         """
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         if not HAVE_IMESH:
             raise SkipTest
         coords = [-4, -1, 1, 4]
@@ -221,6 +286,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """Single mesh volume element that is a 50:50 split of geometry volumes
         2 and 3.
         """
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         if not HAVE_IMESH:
             raise SkipTest
         coords = [0, 1]
@@ -246,6 +315,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """Test to make sure requesting a grid with a num_rays that is not a
         perfect square raises ValueError.
         """
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         if not HAVE_IMESH:
             raise SkipTest
         coords = [0, 1]
@@ -256,6 +329,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
     def test_discretize_geom_centers(self):
         """Test that unstructured mesh is sampled by mesh ve centers.
         """
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         if not HAVE_IMESH:
             raise SkipTest
         coords = [0, 1]
@@ -278,6 +355,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """Test that a mesh with one ve in cell 2 and one ve in cell 3 produces
         correct results.
         """
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         if not HAVE_IMESH:
             raise SkipTest
         coords = [0, 1]
@@ -290,6 +371,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
     def test_cell_material_assignments(self):
         """Test that cell-material assignment dictionary is correctly created.
         """
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         if not HAVE_IMESH:
             raise SkipTest
         THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -303,6 +388,10 @@ class TestDagmcWithUnitbox(unittest.TestCase):
         """Test that the volume number of the implicit complement is properly 
         identified.
         """
+        try:
+            from pyne import dagmc
+        except ImportError:
+            raise SkipTest
         vol = dagmc.find_implicit_complement()
         assert_equal(vol, 4)
 

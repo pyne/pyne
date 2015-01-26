@@ -26,7 +26,6 @@ if HAVE_PYTAPS:
 
 warnings.simplefilter("ignore", QAWarning)
 
-#class TestPartisnWrite(unittest.TestCase):
 
 def test_get_material_lib_with_names():
     """Test get_material_lib with a provided nuc_names list.
