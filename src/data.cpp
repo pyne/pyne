@@ -1684,6 +1684,8 @@ template<> void pyne::_load_data<pyne::decay>() {
                      half_life_error), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "branch_ratio", HOFFSET(decay, branch_ratio),
                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "branch_ratio_error", HOFFSET(decay, branch_ratio_error),
+                     H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio", HOFFSET(decay,
                      photon_branch_ratio), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio_err", HOFFSET(decay,
@@ -1743,9 +1745,10 @@ std::vector<std::pair<double, double> >pyne::decay_half_lifes(int parent) {
   return result;
 }
 
-double pyne::decay_branch_ratio(std::pair<int, int> from_to) {
-  return data_access<double, decay>(from_to, offsetof(decay,
-    branch_ratio), decay_data);
+std::pair<double, double> pyne::decay_branch_ratio(std::pair<int, int> from_to) {
+  return std::make_pair(data_access<double, decay>(from_to, offsetof(decay,
+    branch_ratio), decay_data),data_access<double, decay>(from_to, offsetof(decay,
+    branch_ratio_error), decay_data));
 };
 
 std::vector<double> pyne::decay_branch_ratios(int parent) {

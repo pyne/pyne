@@ -15,9 +15,10 @@ if sys.version_info[0] > 2:
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-_valexp = re.compile('([0-9.]*)([Ee][+-]\d*)')
+_valexp = re.compile('([0-9.]*)([Ee][+-]?\d*)')
 _val = re.compile('(\d*)[.](\d*)')
 _specialval = re.compile("([0-9.]*)[+]([A-Z])")
+_specialval2 = re.compile("([A-Z]*)[+]([0-9.]*)")
 _errpm = re.compile('[+](\d*)[-](\d*)')
 _err = re.compile('[ ]*(\d*)')
 _base = '([ \d]{3}[ A-Za-z]{2})'
@@ -148,8 +149,9 @@ def _parse_level_record(l_rec):
         A-Z character denoting a group of known levels with no reference
         to the ground state
     """
-    lm = re.match("([A-Z])", l_rec.group(2))
-    spv = _specialval.match(l_rec.group(2))
+    lm = re.match("([A-Z]) ", l_rec.group(2))
+    spv = _specialval.match(l_rec.group(2).strip())
+    spv2 = _specialval2.match(l_rec.group(2).strip())
     special = ' '
     if lm is not None:
         special = lm.group(1)
@@ -158,6 +160,9 @@ def _parse_level_record(l_rec):
     elif spv is not None:
         e, de = _get_val_err(spv.group(1), l_rec.group(3))
         special = spv.group(2)
+    elif spv2 is not None:
+        e, de = _get_val_err(spv2.group(2), l_rec.group(3))
+        special = spv2.group(1)
     else:
         e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
@@ -455,10 +460,25 @@ def _parse_parent_record(p_rec):
     tfinalerr : float
         Uncertainty in half-life in seconds
     """
-    e, e_err = _get_val_err(p_rec.group(2), p_rec.group(3))
+    lm = re.match("([A-Z]) ", p_rec.group(2))
+    spv = _specialval.match(p_rec.group(2).strip())
+    spv2 = _specialval2.match(p_rec.group(2).strip())
+    special = ' '
+    if lm is not None:
+        special = lm.group(1)
+        e = 0.0
+        de = np.nan
+    elif spv is not None:
+        e, de = _get_val_err(spv.group(1), p_rec.group(3))
+        special = spv.group(2)
+    elif spv2 is not None:
+        e, de = _get_val_err(spv2.group(2), p_rec.group(3))
+        special = spv2.group(1)
+    else:
+        e, de = _get_val_err(p_rec.group(2), p_rec.group(3))
     j = p_rec.group(4)
     tfinal, tfinalerr = _to_time(p_rec.group(5), p_rec.group(6))
-    return p_rec.group(1), tfinal, tfinalerr, e, e_err
+    return p_rec.group(1), tfinal, tfinalerr, e, de, special
 
 
 def _parse_qvalue_record(q_rec):
@@ -616,9 +636,10 @@ def _parse_decay_dataset(lines, decay_s):
         if b_rec is not None:
             dat = _parse_beta_record(b_rec)
             if parent2 is None:
-                parent2 = pfinal
+                bparent = pfinal
+            else:
+                bparent = parent2
             level = 0.0 if level is None else level
-            bparent = parent2
             bdaughter = data.id_from_level(_to_id(daughter), level)
             betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
         bc_rec = _betac.match(line)
@@ -642,18 +663,20 @@ def _parse_decay_dataset(lines, decay_s):
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
             if parent2 is None:
-                parent2 = pfinal
+                aparent = pfinal
+            else:
+                aparent = parent2
             level = 0.0 if level is None else level
-            aparent = parent2
             adaughter = data.id_from_level(_to_id(daughter), level)
             alphas.append((aparent, adaughter, dat[0], dat[2]))
         ec_rec = _ec.match(line)
         if ec_rec is not None:
             dat = _parse_ec_record(ec_rec)
             if parent2 is None:
-                parent2 = pfinal
+                ecparent = pfinal
+            else:
+                ecparent = parent2
             level = 0.0 if level is None else level
-            ecparent = parent2
             ecdaughter = data.id_from_level(_to_id(daughter), level)
             ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
                          0, 0, 0])
@@ -718,20 +741,34 @@ def _parse_decay_dataset(lines, decay_s):
             continue
         p_rec = _p.match(line)
         if p_rec is not None:
-            parent2, tfinal, tfinalerr, e, e_err = _parse_parent_record(p_rec)
-            parent2 = data.id_from_level(_to_id(parent2), e, " ")
+            # only 2 parents are supported so this can be here
+            multi = False
+            if parent2 is not None:
+                multi = True
+                pfinal = [parent2,]
+                tfinal = [t,]
+                tfinalerr = [terr,]
+            parent2, t, terr, e, e_err, special = _parse_parent_record(p_rec)
+            parent2 = data.id_from_level(_to_id(parent2), e, special)
+            if terr is not None and not isinstance(terr, float):
+                terr = (terr[0] + terr[1])/2.0
+            if multi:
+                tfinal.append(t)
+                tfinalerr.append(terr)
+                pfinal.append(parent2)
+            else:
+                tfinal = t
+                tfinalerr = terr
+                pfinal = parent2
             continue
     if len(gammarays) > 0 or len(alphas) > 0 or len(betas) > 0 or len(ecbp) > 0:
-        # FIXME: Handle uneven errors
-        if tfinalerr is not None and not isinstance(tfinalerr, float):
-            tfinalerr = tfinalerr[0]
-        if len(parents) > 1:
+        if len(parents) > 1 and parent2 is None:
             pfinal = []
             for item in parents:
                 pfinal.append(_to_id(item))
         return pfinal, daughter_id, rxname.id(decay_s.strip().lower()), \
                tfinal, tfinalerr, \
-               br, nrbr, nrbr_err, nbbr, nbbr_err, gammarays, alphas, \
+               br, br_err, nrbr, nrbr_err, nbbr, nbbr_err, gammarays, alphas, \
                betas, ecbp
     return None
 
@@ -950,18 +987,34 @@ def decays(filename, decaylist=None):
             decay = _parse_decay_dataset(lines, decay_s)
             if decay is not None:
                 if isinstance(decay[0], list):
-                    for parent in decay[0]:
-                        dc = copy.deepcopy(list(decay))
-                        dc[0] = parent
-                        for gamma in dc[10]:
-                            gamma[2] = parent
-                        for alpha in dc[11]:
-                            alpha[0] = parent
-                        for beta in dc[12]:
-                            beta[0] = parent
-                        for ecbp in dc[13]:
-                            ecbp[0] = parent
-                        decaylist.append(tuple(dc))
+                    if isinstance(decay[3], list):
+                        for i, parent in enumerate(decay[0]):
+                            dc = copy.deepcopy(list(decay))
+                            dc[0] = parent
+                            dc[3] = decay[3][i]
+                            dc[4] = decay[4][i]
+                            for gamma in dc[11]:
+                                gamma[2] = parent
+                            for alpha in dc[12]:
+                                alpha[0] = parent
+                            for beta in dc[13]:
+                                beta[0] = parent
+                            for ecbp in dc[14]:
+                                ecbp[0] = parent
+                            decaylist.append(tuple(dc))
+                    else:
+                        for parent in decay[0]:
+                            dc = copy.deepcopy(list(decay))
+                            dc[0] = parent
+                            for gamma in dc[11]:
+                                gamma[2] = parent
+                            for alpha in dc[12]:
+                                alpha[0] = parent
+                            for beta in dc[13]:
+                                beta[0] = parent
+                            for ecbp in dc[14]:
+                                ecbp[0] = parent
+                            decaylist.append(tuple(dc))
                 else:
                     decaylist.append(decay)
     return decaylist

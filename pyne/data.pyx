@@ -1059,7 +1059,7 @@ def id_from_level(nuc, level, special=""):
     cdef std_string spc
     if len(special) == 1:
         spc = special[0].encode('UTF-8')
-    if level is not None and level > 0.0:
+    if level is not None and (level > 0.0 or len(special) == 1):
         if len(special) == 1:
             return cpp_data.id_from_level(<int> nuc, <double> level, <std_string> spc)
         else:
@@ -1158,8 +1158,8 @@ def decay_branch_ratio(from_nuc, to_nuc):
     ratio : double
         branching ratio
     """
-    ratio = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
-    return ratio
+    ratio, error = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
+    return ratio, error
 
 def decay_branch_ratio_byparent(parent):
     """
