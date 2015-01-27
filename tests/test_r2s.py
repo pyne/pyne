@@ -9,7 +9,8 @@ import sys
 
 if sys.version_info[0] > 2:
     izip = zip
-from itertools import izip
+else:
+    from itertools import izip
 
 try:
     from itaps import iMesh
