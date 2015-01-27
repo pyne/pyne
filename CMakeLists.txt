@@ -97,6 +97,15 @@ if(${MOAB_FOUND})
     link_directories(${MOAB_LIBRARY_DIRS})
 endif(${MOAB_FOUND})
 
+#determine if spatial solver module should be built
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
+    SET(BUILD_SPATIAL_SOLVER true)
+  ELSE()
+    SET(BUILD_SPATIAL_SOLVER false)
+  ENDIF()
+ENDIF()
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
