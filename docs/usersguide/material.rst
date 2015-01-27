@@ -305,16 +305,16 @@ and low-enriched uranium.
 
 User-defined Metadata
 ----------------------------------
-Materials also have an ``attrs`` attribute which allows users to store arbitrary 
+Materials also have an ``metadata`` attribute which allows users to store arbitrary 
 custom information about the material.  This can include things like units, comments, 
 provenance information, or anything else the user desires.  This is implemented as an
 in-memory JSON object attached to the C++ class.  Therefore, what may be stored in
-the ``attrs`` is subject to the same restrictions as JSON itself.  The top-level 
-of the attrs *should* be a dictionary, though this is not explicitly enforced.
+the ``metadata`` is subject to the same restrictions as JSON itself.  The top-level 
+of the metadata *should* be a dictionary, though this is not explicitly enforced.
 
 .. code-block:: ipython
 
-    In [50]: leu = Material({922350: 0.05, 922380: 0.95}, 15, attrs={'units': 'kg'})
+    In [50]: leu = Material({922350: 0.05, 922380: 0.95}, 15, metadata={'units': 'kg'})
 
     In [51]: print leu
     Material: 
@@ -328,18 +328,18 @@ of the attrs *should* be a dictionary, though this is not explicitly enforced.
     In [52]: leu
     Out[52]: pyne.material.Material({922350: 0.05, 922380: 0.95}, 15.0, -1.0 {"units":"kg"})
 
-    In [53]: leu.attrs
+    In [53]: leu.metadata
     Out[53]: {"units":"kg"}
 
-    In [54]: a = leu.attrs
+    In [54]: a = leu.metadata
 
     In [55]: a['comments'] = ['Anthony made this material.']
 
-    In [56]: leu.attrs['comments'].append('And then Katy made it better!')
+    In [56]: leu.metadata['comments'].append('And then Katy made it better!')
 
     In [57]: a['id'] = 42
 
-    In [58]: leu.attrs
+    In [58]: leu.metadata
     Out[58]: {"comments":["Anthony made this material.","And then Katy made it better!"],\
               "id":42,"units":"kg"}
 
@@ -357,9 +357,9 @@ of the attrs *should* be a dictionary, though this is not explicitly enforced.
     In [63]: leu.attr['units']
     Out[63]: 'not solar masses'
 
-As you can see from the above, the attrs interface provides a view into the underlying 
+As you can see from the above, the metadata interface provides a view into the underlying 
 JSON object.  This can be manipulated directly or by renaming it to another variable.
-Additionally, ``attrs`` can be replaced with a new object of the appropriate type.  
+Additionally, ``metadata`` can be replaced with a new object of the appropriate type.  
 Doing so invalidates any previous views into this container.
 
 ------------------
