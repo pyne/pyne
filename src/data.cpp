@@ -91,8 +91,13 @@ double pyne::atomic_mass(int nuc) {
   nuc_end = atomic_mass_map.end();
 
   // First check if we already have the nuc mass in the map
-  if (nuc_iter != nuc_end)
-    return (*nuc_iter).second;
+  double aw;
+  if (nuc_iter != nuc_end) {
+    aw = nuc_iter->second;
+    if (aw != 0.0) {
+      return (*nuc_iter).second;
+    }
+  }
 
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
@@ -102,7 +107,6 @@ double pyne::atomic_mass(int nuc) {
     return atomic_mass(nuc);
   }
 
-  double aw;
   int nucid = nucname::id(nuc);
 
   // If in an excited state, return the ground
