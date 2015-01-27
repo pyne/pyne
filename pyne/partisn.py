@@ -22,12 +22,11 @@ import datetime
 from warnings import warn
 from pyne.utils import QAWarning
 import itertools
-from sets import Set
+#from sets import Set
 
 import numpy as np
 import tables
 
-#from pyne import dagmc
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne.material import MaterialLibrary
@@ -221,7 +220,7 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
         nuc_names = kwargs['nuc_names']
         collapse = True
         # set of exception nuclides for collapse_elements
-        mat_except = Set(nuc_names.keys())
+        mat_except = set(nuc_names.keys())
     else:
         collapse = False
     

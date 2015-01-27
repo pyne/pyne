@@ -4,8 +4,12 @@ from nose.tools import assert_equal, assert_almost_equal
 import numpy as np
 from numpy.testing import assert_array_equal
 import multiprocessing
-from itertools import izip
 import filecmp
+import sys
+
+if sys.version_info[0] > 2:
+    izip = zip
+from itertools import izip
 
 try:
     from itaps import iMesh

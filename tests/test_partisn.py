@@ -8,7 +8,6 @@ import filecmp
 from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_almost_equal
 from pyne import partisn
-#import pyne.dagmc as dagmc
 from pyne.utils import QAWarning
 import multiprocessing
 import unittest
