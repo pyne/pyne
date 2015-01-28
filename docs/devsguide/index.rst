@@ -20,5 +20,6 @@ work builds upon past work well.
     release
     endf
     binaries
+    fortran
     qa
     website

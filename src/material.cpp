@@ -1483,6 +1483,18 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs) {
 };
 
 
+std::map<int, double> pyne::Material::to_atom_dens() {
+  // Returns an atom density map from this material's composition
+  // the material's density
+
+  std::map<int, double> atom_dens = std::map<int, double>();
+
+  for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
+    atom_dens[ci->first] = (ci->second) * density * pyne::N_A / pyne::atomic_mass(ci->first);
+
+  return atom_dens;
+};
+
 
 std::vector<std::pair<double, double> > pyne::Material::gammas() {
   std::vector<std::pair<double, double> > result;
