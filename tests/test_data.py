@@ -37,6 +37,18 @@ def test_atomic_mass():
     assert_in(data.atomic_mass(952421), am242m)
 
 
+def test_natural_abund_excited_state():
+    # initialize natural_abund_map
+    gnd = 902320000
+    excited = gnd + 1
+    data.natural_abund(gnd)
+    # excited state should not be in the map yet
+    assert_equal(data.natural_abund_map.get(excited), None)
+    nabund = data.natural_abund(excited)
+    assert_equal(nabund, data.natural_abund_map.get(excited))
+    data.natural_abund_map.clear()
+
+
 def test_q_val():
     assert_equal(data.q_val(110240001), 0.473)
     assert_equal(data.q_val('H1'), 0.0)
