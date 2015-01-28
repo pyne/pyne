@@ -300,6 +300,12 @@ def parse_args():
 
 
 def setup():
+    try:
+        from setuptools import setup as _setup
+        have_setuptools = True
+    except ImportError:
+        from distutils.core import setup as _setup
+        have_setuptools = False
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat'))
                                      or (os.name != 'nt' and
@@ -346,7 +352,7 @@ def setup():
         "data_files": data_files,
         "scripts": scripts,
         }
-    rtn = core.setup(**setup_kwargs)
+    rtn = _setup(**setup_kwargs)
 
 
 def cmake_cli(cmake_args):
