@@ -4,8 +4,7 @@ import math
 import warnings
 
 import nose
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_in, assert_true
+from nose.tools import assert_equal, assert_in, assert_true
 import numpy as np
 import numpy.testing as npt
 
@@ -46,7 +45,6 @@ def test_natural_abund_excited_state():
     assert_equal(data.natural_abund_map.get(excited), None)
     nabund = data.natural_abund(excited)
     assert_equal(nabund, data.natural_abund_map.get(excited))
-    data.natural_abund_map.clear()
 
 
 def test_q_val():

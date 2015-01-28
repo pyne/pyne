@@ -1151,7 +1151,7 @@ pyne::Material pyne::Material::expand_elements() {
         nabund = (*abund_itr).first;
         if (zabund == znuc && 0 != nucname::anum(nabund) && 0.0 != (*abund_itr).second)
           newcomp[nabund] = (*abund_itr).second * (*nuc).second * \
-                            atomic_mass_map.at(nabund) / atomic_mass_map.at(n);
+                            atomic_mass(nabund) / atomic_mass(n);
         else if (n == nabund && 0.0 == (*abund_itr).second)
           newcomp.insert(*nuc);
         abund_itr++;
