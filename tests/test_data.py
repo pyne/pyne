@@ -4,8 +4,7 @@ import math
 import warnings
 
 import nose
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_in, assert_true
+from nose.tools import assert_equal, assert_in, assert_true
 import numpy as np
 import numpy.testing as npt
 
@@ -35,6 +34,17 @@ def test_atomic_mass():
     assert_in(data.atomic_mass(80160), o16)
     assert_in(data.atomic_mass(922350), u235)
     assert_in(data.atomic_mass(952421), am242m)
+
+
+def test_natural_abund_excited_state():
+    # initialize natural_abund_map
+    gnd = 902320000
+    excited = gnd + 1
+    data.natural_abund(gnd)
+    # excited state should not be in the map yet
+    assert_equal(data.natural_abund_map.get(excited), None)
+    nabund = data.natural_abund(excited)
+    assert_equal(nabund, data.natural_abund_map.get(excited))
 
 
 def test_q_val():
