@@ -73,10 +73,12 @@ void pyne::_load_atomic_mass_map() {
   H5Dclose(atomic_mass_set);
   H5Fclose(nuc_data_h5);
 
-  // Ok now that we have the array of stucts, put it in the map
+  // Ok now that we have the array of structs, put it in the map
   for(int n = 0; n < atomic_mass_length; n++) {
-    atomic_mass_map[atomic_mass_array[n].nuc] = atomic_mass_array[n].mass;
-    natural_abund_map[atomic_mass_array[n].nuc] = atomic_mass_array[n].abund;
+    atomic_mass_map.insert(std::pair<int, double>(atomic_mass_array[n].nuc, \
+                                                  atomic_mass_array[n].mass));
+    natural_abund_map.insert(std::pair<int, double>(atomic_mass_array[n].nuc, \
+                                                    atomic_mass_array[n].abund));
   }
 
   delete[] atomic_mass_array;
@@ -91,8 +93,9 @@ double pyne::atomic_mass(int nuc) {
   nuc_end = atomic_mass_map.end();
 
   // First check if we already have the nuc mass in the map
-  if (nuc_iter != nuc_end)
+  if (nuc_iter != nuc_end) {
     return (*nuc_iter).second;
+  }
 
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
@@ -109,7 +112,9 @@ double pyne::atomic_mass(int nuc) {
   // state mass...not strictly true, but good guess.
   if (0 < nucid%10000) {
     aw = atomic_mass((nucid/10000)*10000);
-    atomic_mass_map[nuc] = aw;
+    if (atomic_mass_map.count(nuc) != 1) {
+      atomic_mass_map.insert(std::pair<int, double>(nuc, aw));
+    }
     return aw;
   };
 
@@ -117,7 +122,9 @@ double pyne::atomic_mass(int nuc) {
   // take a best guess based on the
   // aaa number.
   aw = (double) ((nucid/10000)%1000);
-  atomic_mass_map[nuc] = aw;
+  if (atomic_mass_map.count(nuc) != 1) {
+    atomic_mass_map.insert(std::pair<int, double>(nuc, aw));
+  }
   return aw;
 };
 
@@ -166,7 +173,7 @@ double pyne::natural_abund(int nuc) {
   // state abundance...not strictly true, but good guess.
   if (0 < nucid%10000) {
     na = natural_abund((nucid/10000)*10000);
-    atomic_mass_map[nuc] = na;
+    natural_abund_map[nuc] = na;
     return na;
   };
 
