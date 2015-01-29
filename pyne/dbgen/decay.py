@@ -100,10 +100,11 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2014-April/'
+    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist14/'
+
     cf_base_url = 'http://data.pyne.io/'
-    ensdf_zip = ['ensdf_140416_099.zip', 'ensdf_140416_199.zip',
-                 'ensdf_140416_294.zip', ]
+    ensdf_zip = ['ensdf_141022_099.zip', 'ensdf_141022_199.zip',
+                 'ensdf_141022_299.zip', ]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
@@ -112,7 +113,7 @@ def grab_ensdf_decay(build_dir=""):
             urllib.urlretrieve(iaea_base_url + f, fpath)
 
             if os.path.getsize(fpath) < 1048576:
-                print("  could not get {0} from IAEA; trying mirror".format(f))
+                print("  could not get {0} from NNDC; trying mirror".format(f))
                 os.remove(fpath)
                 urllib.urlretrieve(cf_base_url + f, fpath)
 
@@ -462,7 +463,7 @@ def make_decay(args):
             return
 
             # grab the decay data
-    print("Grabbing the ENSDF decay data from IAEA")
+    print("Grabbing the ENSDF decay data from NNDC")
     grab_ensdf_decay(build_dir)
 
     # Make atomic mass table once we have the array

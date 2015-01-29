@@ -573,6 +573,13 @@ def test_from_atom_frac_meth():
     assert_almost_equal(mat.molecular_mass()/268.53718851614, 1.0, 15)
 
 
+def test_to_atom_dens():
+    h2o = {10010000: 0.11191487328808077, 80160000: 0.8880851267119192}
+    mat = Material(h2o, density=1.0)
+    ad = mat.to_atom_dens()
+    assert_almost_equal(ad[10010000]/(10.**22), 6.68734335169385)
+    assert_almost_equal(ad[80160000]/(10.**22), 3.34367167584692)
+    
 #
 # Test mapping functions
 #

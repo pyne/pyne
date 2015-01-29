@@ -976,9 +976,11 @@ def decays(filename, decaylist=None):
             dat = f.read()
     else:
         dat = filename.read()
-    datasets = dat.split(80 * " " + "\n")[0:-1]
+    datasets = dat.split(80 * " " + "\n")
     for dataset in datasets:
         lines = dataset.splitlines()
+        if len(lines) == 0:
+            continue
         ident = re.match(_ident, lines[0])
         if ident is None:
             continue

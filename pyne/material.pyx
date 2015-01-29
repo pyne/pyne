@@ -1143,6 +1143,22 @@ cdef class _Material:
 
         self.mat_pointer.from_atom_frac(af)
 
+
+    def to_atom_dens(self):
+        """Converts the material to a map of nuclides to atom densities.
+
+        Returns
+        -------
+        atom_dens : mapping
+            Dictionary-like object that maps nuclides to atom densites in the
+            material.
+
+        """
+        cdef conv._MapIntDouble comp_proxy = conv.MapIntDouble()
+        comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.to_atom_dens())
+        return comp_proxy
+        
+        
     #
     # Radioactive Properties
     #
