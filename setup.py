@@ -351,6 +351,7 @@ def setup():
         "package_data": pack_data,
         "data_files": data_files,
         "scripts": scripts,
+        "zip_safe": False,
         }
     rtn = _setup(**setup_kwargs)
 
