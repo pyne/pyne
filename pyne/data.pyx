@@ -1473,8 +1473,8 @@ def gamma_child_byen(en, enerror=None):
        An array of gamma ray children in state_id form
     """
     if enerror is None:
-      enerror = en * 0.01
-      return cpp_data.gamma_child(<double> en, <double> enerror)
+        enerror = en * 0.01
+    return cpp_data.gamma_child(<double> en, <double> enerror)
 
 def gamma_child_byparent(parent):
     """
