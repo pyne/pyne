@@ -16,52 +16,8 @@ warnings.simplefilter('ignore', QAWarning)
 toggle_warnings()
 from pyne import nuc_data
 from pyne import nucname
-from pyne.data import branch_ratio, half_life, decay_const, decay_children, \
-    decay_data_children, fpyield
-
-
-# These are bugs in nuc_data.h5 that I have manually verified to be wrong as 
-# well as being verified incorrect via the ORIGEN benchmark. 
-# This monkey patching should be removed once the pyne data is fixed. 
-# This is not part of the theoretical underpinnings of the method.
-# -el Scopz
-def _branch_ratio(f):
-    special_cases = {
-        (451040000, 461040000): 0.9955, 
-        (451040000, 441040000): 0.0045, 
-        (521270000, 531270000): 1.0,
-        (471100001, 471100000): 1.0 - 0.9867, 
-        (491190001, 491190000): 1.0 - 0.956,
-        (511260001, 511260000): 0.14,
-        (320770001, 320770000): 0.19, 
-        (360850001, 360850000): 1.0 - 0.788, 
-        (711770001, 711770000): 0.217, 
-        (461110001, 461110000): 0.73,
-        (842110001, 842110000): 0.0002,
-        (521290001, 531290000): 0.63,
-        }
-    def br(x, y):
-        if (x, y) in special_cases:
-            return special_cases[x, y]
-        return f(x, y)
-    return br
-
-branch_ratio = _branch_ratio(branch_ratio)
-
-# More monkey patching of bad data to be removed.
-def _decay_children(f):
-    special_cases = {
-        451040000: set([441040000, 461040000]),
-        521270000: set([531270000]),
-        }
-    def dc(x):
-        if x in special_cases:
-            return special_cases[x]
-        return f(x)
-    return dc
-
-decay_children = _decay_children(decay_children)
-            
+from pyne.data import branch_ratio, half_life, decay_const, \
+    decay_data_children, fpyield, decay_branch_ratio
 
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
@@ -189,21 +145,22 @@ def genfiles(nucs, short=1e-8, sf=False):
 
 def genchains(chains, sf=False):
     chain = chains[-1]
-    children = decay_children(chain[-1])
+    children = decay_data_children(chain[-1])
     # filters spontaneous fission
     if not sf:
-        children = {c for c in children if 0.0 == fpyield(chain[-1], c)}
+        children = {c for c in children if (0.0 == fpyield(chain[-1], c)) and (c not in chain) }
     for child in children:
-        chains.append(chain + (child,))
-        chains = genchains(chains, sf=sf)
+        if child not in chain:
+            chains.append(chain + (child,))
+            chains = genchains(chains, sf=sf)
     return chains
 
 
 def k_a(chain, short=1e-8):
     # gather data
-    hl = np.array([half_life(n) for n in chain])
-    a = -1.0 / hl
-    dc = np.array(list(map(decay_const, chain)))
+    hl = np.array([half_life(n, False) for n in chain])
+    a = -1.0 / hl 
+    dc = np.array(list(map(lambda nuc: decay_const(nuc, False), chain)))
     if np.isnan(dc).any():
         # NaNs are bad, mmmkay.  Nones mean we should skip
         return None, None
@@ -225,8 +182,8 @@ def k_a(chain, short=1e-8):
         # if this happens then something wen very wrong, skip
         return None, None
     # compute and apply branch ratios
-    gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
-    if gamma == 0.0:
+    gamma = np.prod([decay_branch_ratio(p, c)[0] for p, c in zip(chain[:-1], chain[1:])])
+    if gamma == 0.0 or np.isnan(gamma):
         return None, None
     k *= gamma
     # half-life  filter, makes compiling faster by pre-ignoring negligible species 
@@ -262,7 +219,7 @@ def b_from_a(cse, a_i):
 def chainexpr(chain, cse, b, short=1e-8):
     child = chain[-1]
     if len(chain) == 1:
-        a_i = -1.0 / half_life(child)
+        a_i = -1.0 / half_life(child, False)
         b = ensure_cse(a_i, b, cse)
         terms = B_EXPR.format(b=b_from_a(cse, a_i))
     else:
@@ -274,7 +231,10 @@ def chainexpr(chain, cse, b, short=1e-8):
             if k_i == 1.0 and a_i == 0.0:
                 term = '1.0'  # a slight optimization 
             elif a_i == 0.0:
-                term = '{0:e}'.format(k_i)  # another slight optimization 
+                if not np.isnan(k_i):
+                    term = '{0:e}'.format(k_i)  # another slight optimization 
+                else:
+                    term = '0'
             else:
                 b = ensure_cse(a_i, b, cse)
                 term = kbexpr(k_i, b_from_a(cse, a_i))
@@ -285,7 +245,7 @@ def chainexpr(chain, cse, b, short=1e-8):
 
 def gencase(nuc, idx, b, short=1e-8, sf=False):
     case = ['}} case {0}: {{'.format(nuc)]
-    dc = decay_const(nuc)
+    dc = decay_const(nuc, False)
     if dc == 0.0:
         # stable nuclide
         case.append(CHAIN_STMT.format(idx[nuc], 'it->second'))
@@ -342,8 +302,8 @@ def load_default_nucs():
         stable = ll.read_where('(nuc_id%10000 == 0) & (nuc_id != 0)')
         metastable = ll.read_where('metastable > 0')
     nucs = set(int(nuc) for nuc in stable['nuc_id']) 
-    nucs |= set(nucname.state_id_to_id(int(nuc)) for nuc in metastable['nuc_id']) 
-    nucs = sorted(nuc for nuc in nucs if not np.isnan(decay_const(nuc)))
+    nucs |= set(int(nuc) for nuc in metastable['nuc_id']) 
+    nucs = sorted(nuc for nuc in nucs if not np.isnan(decay_const(nuc, False)))
     return nucs
 
 
