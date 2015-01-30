@@ -27,7 +27,8 @@ std::map<std::string, std::string> pyne::get_data_checksums() {
     temp_map["/neutron/eaf_xs"]="29622c636c4a3a46802207b934f9516c";
     temp_map["/neutron/scattering_lengths"]="a24d391cc9dc0fc146392740bb97ead4";
     temp_map["/neutron/simple_xs"]="3d6e086977783dcdf07e5c6b0c2416be";
-
+    temp_map["/decay"]="4f41f3e46f4306cc44449f08a20922e0";
+    temp_map["/dose_factors"]="dafa32c24b2303850a0bebdf3e6b122e";
     return temp_map;
 };
 
@@ -1690,6 +1691,8 @@ template<> void pyne::_load_data<pyne::decay>() {
                      half_life_error), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "branch_ratio", HOFFSET(decay, branch_ratio),
                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "branch_ratio_error", HOFFSET(decay, branch_ratio_error),
+                     H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio", HOFFSET(decay,
                      photon_branch_ratio), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio_err", HOFFSET(decay,
@@ -1749,9 +1752,10 @@ std::vector<std::pair<double, double> >pyne::decay_half_lifes(int parent) {
   return result;
 }
 
-double pyne::decay_branch_ratio(std::pair<int, int> from_to) {
-  return data_access<double, decay>(from_to, offsetof(decay,
-    branch_ratio), decay_data);
+std::pair<double, double> pyne::decay_branch_ratio(std::pair<int, int> from_to) {
+  return std::make_pair(data_access<double, decay>(from_to, offsetof(decay,
+    branch_ratio), decay_data),data_access<double, decay>(from_to, offsetof(decay,
+    branch_ratio_error), decay_data));
 };
 
 std::vector<double> pyne::decay_branch_ratios(int parent) {
@@ -1996,6 +2000,15 @@ std::vector<int> pyne::gamma_parent(double energy, double error) {
     offsetof(gamma, parent_nuc), gamma_data);
 };
 
+std::vector<int> pyne::gamma_child(double energy, double error) {
+  return data_access<int, gamma>(energy+error, energy-error,
+  offsetof(gamma, child_nuc), gamma_data);
+};
+
+std::vector<int> pyne::gamma_child(int parent) {
+  return data_access<int, gamma>(parent, 0.0, DBL_MAX,
+  offsetof(gamma, child_nuc), gamma_data);
+};
 
 std::vector<std::pair<double, double> > pyne::gamma_xrays(int parent) {
   std::vector<std::pair<double, double> > result;
