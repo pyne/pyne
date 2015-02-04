@@ -1,16 +1,24 @@
 """This module provides a way to grab and store simple cross sections from KAERI."""
+from __future__ import print_function
 import os
-import re
-import urllib2
+from warnings import warn
+from pyne.utils import QAWarning
+
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
+from zipfile import ZipFile
 
 import numpy as np
 import tables as tb
 
-from pyne import nucname
-from pyne.utils import to_barns
-from pyne.dbgen.api import BASIC_FILTERS
-from pyne.dbgen.kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
+from .. import nucname
+from ..utils import to_barns
+from .api import BASIC_FILTERS
+from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def grab_kaeri_simple_xs(build_dir=""):
     """Grabs the KAERI files needed for the simple cross sections table, 
@@ -21,6 +29,20 @@ def grab_kaeri_simple_xs(build_dir=""):
     build_dir : str
         Major directory to place html files in. 'KAERI/' will be appended.
     """
+    zip_path = os.path.join(build_dir, 'kaeri.zip')
+    zip_url = 'http://data.pyne.io/kaeri.zip'
+    if not os.path.exists(zip_path):
+        print("  grabbing {0} and placing it in {1}".format(zip_url, zip_path))
+        urllib.urlretrieve(zip_url, zip_path)
+        try:
+            zf = ZipFile(zip_path)
+            for name in zf.namelist():
+                if not os.path.exists(os.path.join(build_dir, name)):
+                    print("    extracting {0} from {1}".format(name, zip_path))
+                    zf.extract(name, build_dir)
+        finally:
+            zf.close()
+
     # Add kaeri to build_dir
     build_dir = os.path.join(build_dir, 'KAERI')
     try:
@@ -32,18 +54,18 @@ def grab_kaeri_simple_xs(build_dir=""):
     # Grab and parse elemental summary files.
     all_nuclides = set()
     for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
+        htmlfile = element.upper() + '.html'
         if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(element, build_dir)
-
-        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
+            grab_kaeri_nuclide(element.upper(), build_dir)
+        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
+                                                                          htmlfile))
 
     # Grab nuclide XS summary files
     for nuc in sorted(all_nuclides):
         nuc = nucname.name(nuc)
-        htmlfile = nuc + '_2.html'
+        htmlfile = nuc.upper() + '_2.html'
         if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(nuc, build_dir, 2)
+            grab_kaeri_nuclide(nuc.upper(), build_dir, 2)
 
 
 
@@ -145,17 +167,16 @@ def parse_simple_xs(build_dir=""):
     # Grab and parse elemental summary files.
     all_nuclides = set()
     for element in nucname.name_zz.keys():
-        htmlfile = element + '.html'
-        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, htmlfile))
-
-    all_nuclides = sorted([nucname.zzaaam(nuc) for nuc in all_nuclides])
-
+        htmlfile = element.upper() + '.html'
+        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
+                                                                          htmlfile))
+    all_nuclides = sorted([nucname.id(nuc) for nuc in all_nuclides])
     energy_tables = dict([(eng, np.zeros(len(all_nuclides), dtype=simple_xs_dtype)) \
                           for eng in simple_xs_energy.keys()])
 
     # Loop through species
     for i, nuc in enumerate(all_nuclides):
-        nuc_name = nucname.name(nuc)
+        nuc_name = nucname.name(nuc).upper()
         filename = os.path.join(build_dir, nuc_name + '_2.html')
 
         # Loop through all energy types
@@ -168,7 +189,8 @@ def parse_simple_xs(build_dir=""):
 
     for eng in simple_xs_energy:
         # Store only non-trivial entries
-        mask = (energy_tables[eng][simple_xs_channels.keys()] != np.zeros(1, dtype=simple_xs_dtype)[simple_xs_channels.keys()])
+        channels_list = list(simple_xs_channels.keys())
+        mask = (energy_tables[eng][channels_list] != np.zeros(1, dtype=simple_xs_dtype)[channels_list])
         energy_tables[eng] = energy_tables[eng][mask]
 
         # Calculate some xs
@@ -235,14 +257,14 @@ def make_simple_xs(args):
 
     with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
-            print "skipping simple XS data table creation; already exists."
+            print("skipping simple XS data table creation; already exists.")
             return 
 
     # First grab the atomic abundance data
-    print "Grabbing neutron summary files from KAERI"
+    print("Grabbing neutron summary files from KAERI")
     grab_kaeri_simple_xs(build_dir)
 
     # Make simple table once we have the array
-    print "Making simple cross section data tables"
+    print("Making simple cross section data tables")
     make_simple_xs_tables(nuc_data, build_dir)
 

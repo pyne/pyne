@@ -1,0 +1,24 @@
+h-1	shutdown	0	0
+h-1	1 h	1.1	2.2
+h-2	shutdown	0	0
+h-2	1 h	0	0
+TOTAL	shutdown	11.1	12.2
+TOTAL	1 h	0	0	
+h-1	shutdown	0	0
+h-1	1 h	3.3	4.4
+h-2	shutdown	0	0
+h-2	1 h	0	0
+TOTAL	shutdown	13.3	14.4
+TOTAL	1 h	0	0	
+h-1	shutdown	0	0
+h-1	1 h	5.5	6.6
+h-2	shutdown	0	0
+h-2	1 h	0	0
+TOTAL	shutdown	15.5	16.6
+TOTAL	1 h	0	0	
+h-1	shutdown	0	0
+h-1	1 h	7.7	8.8
+h-2	shutdown	0	0
+h-2	1 h	0	0
+TOTAL	shutdown	17.7	18.8
+TOTAL	1 h	0	0	

@@ -4,10 +4,13 @@ from being used with infinities.  For a work around see [1].
 
 1. https://groups.google.com/forum/#!msg/sympy/YL1R_hR6OKQ/axKrCsCSMQsJ
 """
+from __future__ import print_function, division
 import os
-import time
-import multiprocessing
 import logging
+import multiprocessing
+import time
+from warnings import warn
+from pyne.utils import QAWarning
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \
     log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand, Abs
@@ -16,11 +19,13 @@ from sympy.utilities.iterables import numbered_symbols
 
 from utils import cse_to_c
 
+warn(__name__ + " is not yet QA compliant.", QAWarning)
+
 NPROCS = 10
 
 def _aggstatus(stat, msg, aggstat):
     if not aggstat:
-        print msg
+        print(msg)
     stat += msg + '\n'
     return stat
 
@@ -169,7 +174,7 @@ def cgen_ncomp(ncomp=3, nporder=2, aggstat=False, debug=False):
     msg = "  completed in {0:.3G} s".format(time.time() - start_time)
     stat = _aggstatus(stat, msg, aggstat)
     if aggstat:
-        print stat
+        print(stat)
     return ccode, repnames, stat
 
 
@@ -293,28 +298,42 @@ def cgen_func(max_ncomp=40, debug=False):
     ccode += _func_footer
     return ccode
 
-_header_file = """ 
+_header_file_template = r""" 
+/// \file {hfname}
+/// \author Anthony Scopatz (scopatz\@gmail.com)
+///
+/// \brief A multicomponent enrichment cascade solver using
+///     a symbolic solution to the mass flow rate equations.
+
 /*********************************************************/
 /***            Symbolic Enrichment Functions          ***/
 /*** WARNING: This file is auto-generated.             ***/
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
 
-#if !defined(_PYNE_ENRICHMENT_SYMBOLIC_)
-#define _PYNE_ENRICHMENT_SYMBOLIC_
+#ifndef PYNE_OU4PO4TJDBDM5PY4VKAVL7JCSM
+#define PYNE_OU4PO4TJDBDM5PY4VKAVL7JCSM
 
 #include <math.h>
+
+#ifndef PYNE_IS_AMALGAMATED
 #include "enrichment_cascade.h"
+#endif
 
-namespace pyne {
-namespace enrichment {
+namespace pyne {{
+namespace enrichment {{
 
-  Cascade solve_symbolic(Cascade &);
+  /// A multicomponent enrichment cascade solver using     
+  /// a symbolic solution to the mass flow rate equations.
+  /// \param orig_casc The original state of the cascade.
+  /// \return A cascade solved for new N, M, and total flow
+  ///         rates.
+  Cascade solve_symbolic(Cascade & orig_casc);
 
 // end enrichment
-};
+}};
 // end pyne
-};
+}};
 
 #endif
 """
@@ -325,9 +344,18 @@ _source_file_header_template = """
 /*** WARNING: This file is auto-generated.             ***/
 /***                  DO NOT MODIFY!!!                 ***/
 /*********************************************************/
+#ifndef PYNE_IS_AMALGAMATED
 #include "{hfname}"
+#endif
 
 """
+
+def cgen_header_file(hfname="temp"):
+    """ Generates a valid C/C++ header file for multicomponent enrichment cascades.
+    """
+    hcode = _header_file_template.format(hfname=os.path.split(hfname)[-1])
+    return hcode
+
 
 def cgen_source_file(hfname="temp", max_ncomp=40, debug=False):
     """ Generates a valid C/C++ source file for multicomponent enrichment cascades.
@@ -335,7 +363,6 @@ def cgen_source_file(hfname="temp", max_ncomp=40, debug=False):
     ccode = _source_file_header_template.format(hfname=os.path.split(hfname)[-1])
     ccode += cgen_func(max_ncomp, debug=debug)
     return ccode
-
 
 
 def cgen_file(filename="temp", header_filename=None, lang='C++', max_ncomp=40, 
@@ -356,9 +383,10 @@ def cgen_file(filename="temp", header_filename=None, lang='C++', max_ncomp=40,
     logging.info("language: " + lang)
     logging.info("maximum number of components: {0}".format(max_ncomp))
     logging.info("debug enabled: {0}".format(debug))
+    hcode = cgen_header_file(hfname)
     ccode = cgen_source_file(hfname, max_ncomp, debug=debug)
     with open(hfname, 'w') as f:
-        f.write(_header_file)
+        f.write(hcode)
     with open(sfname, 'w') as f:
         f.write(ccode)
 

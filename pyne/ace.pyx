@@ -1,6 +1,6 @@
-"""This module is for reading ACE-format cross sections. ACE stands for "A Compact
-ENDF" format and originated from work on MCNP_. It is used in a number of other
-Monte Carlo particle transport codes.
+"""This module is for reading ACE-format cross sections. ACE stands for "A
+Compact ENDF" format and originated from work on MCNP_. It is used in a number
+of other Monte Carlo particle transport codes.
 
 ACE-format cross sections are typically generated from ENDF_ files through a
 cross section processing program like NJOY_. The ENDF data consists of tabulated
@@ -10,15 +10,17 @@ ENDF data has been reconstructed and Doppler-broadened, the ACER module
 generates ACE-format cross sections.
 
 .. _MCNP: https://laws.lanl.gov/vhosts/mcnp.lanl.gov/
-
 .. _NJOY: http://t2.lanl.gov/codes.shtml
-
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
 """
+
+from __future__ import division, unicode_literals
+import io
 import struct
 from warnings import warn
+from pyne.utils import QAWarning
 from collections import OrderedDict
 
 cimport numpy as np
@@ -27,14 +29,91 @@ from bisect import bisect_right
 
 from pyne cimport nucname
 from pyne import nucname
+from pyne.rxname import label
 
 # fromstring func should depend on numpy verison
 from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
+warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+def ascii_to_binary(ascii_file, binary_file):
+    """Convert an ACE file in ASCII format (type 1) to binary format (type 2).
+
+    Parameters
+    ----------
+    ascii_file : str
+        Filename of ASCII ACE file
+    binary_file : str
+        Filename of binary ACE file to be written
+
+    """
+
+    # Open ASCII file
+    ascii = open(ascii_file, 'r')
+
+    # Set default record length
+    record_length = 4096
+
+    # Read data from ASCII file
+    lines = ascii.readlines()
+    ascii.close()
+
+    # Open binary file
+    binary = open(binary_file, 'wb')
+
+    idx = 0
+
+    while idx < len(lines):
+        #check if it's a > 2.0.0 version header
+        if lines[idx].split()[0][1] == '.':
+            if lines[idx + 1].split()[3] == '3':
+                idx = idx + 3
+            else:
+                raise NotImplementedError('Only backwards compatible ACE'
+                                          'headers currently supported')
+        # Read/write header block
+        hz = lines[idx][:10].encode('UTF-8')
+        aw0 = float(lines[idx][10:22])
+        tz = float(lines[idx][22:34])
+        hd = lines[idx][35:45].encode('UTF-8')
+        hk = lines[idx + 1][:70].encode('UTF-8')
+        hm = lines[idx + 1][70:80].encode('UTF-8')
+        binary.write(struct.pack(str('=10sdd10s70s10s'), hz, aw0, tz, hd, hk, hm))
+
+        # Read/write IZ/AW pairs
+        data = ' '.join(lines[idx + 2:idx + 6]).split()
+        iz = list(map(int, data[::2]))
+        aw = list(map(float, data[1::2]))
+        izaw = [item for sublist in zip(iz, aw) for item in sublist]
+        binary.write(struct.pack(str('=' + 16*'id'), *izaw))
+
+        # Read/write NXS and JXS arrays. Null bytes are added at the end so
+        # that XSS will start at the second record
+        nxs = list(map(int, ' '.join(lines[idx + 6:idx + 8]).split()))
+        jxs = list(map(int, ' '.join(lines[idx + 8:idx + 12]).split()))
+        binary.write(struct.pack(str('=16i32i{0}x'.format(record_length - 500)),
+                                 *(nxs + jxs)))
+
+        # Read/write XSS array. Null bytes are added to form a complete record
+        # at the end of the file
+        n_lines = (nxs[0] + 3)//4
+        xss = list(map(float, ' '.join(lines[
+            idx + 12:idx + 12 + n_lines]).split()))
+        extra_bytes = record_length - ((len(xss)*8 - 1) % record_length + 1)
+        binary.write(struct.pack(str('={0}d{1}x'.format(nxs[0], extra_bytes)),
+                                 *xss))
+
+        # Advance to next table in file
+        idx += 12 + n_lines
+
+    # Close binary file
+    binary.close()
+
 
 class Library(object):
-    """A Library objects represents an ACE-formatted file which may contain
+    """
+    A Library objects represents an ACE-formatted file which may contain
     multiple tables with data.
 
     Parameters
@@ -42,31 +121,32 @@ class Library(object):
     filename : str
         Path of the ACE library file to load.
 
-    :attributes:
-      **binary** : bool
+    Attributes
+    ----------
+    binary : bool
         Identifies Whether the library is in binary format or not
-
-      **tables** : dict
-        Dictionary whose keys are the names of the ACE tables and whose values
-        are the instances of subclasses of AceTable (e.g. NeutronTable)
-
-      **verbose** : bool
+    tables : dict
+        Dictionary whose keys are the names of the ACE tables and whose
+        values are the instances of subclasses of AceTable (e.g. NeutronTable)
+    verbose : bool
         Determines whether output is printed to the stdout when reading a
         Library
-
     """
 
     def __init__(self, filename):
         # Determine whether file is ASCII or binary
+        self.f = None
         try:
-            self.f = open(filename, 'r')
+            self.f = io.open(filename, 'rb')
             # Grab 10 lines of the library
-            s = ''.join([self.f.readline() for i in range(10)])
+            sb = b''.join([self.f.readline() for i in range(10)])
 
             # Try to decode it with ascii
-            sd = s.decode('ascii')
+            sd = sb.decode('ascii')
 
-            # No exception so proceed with ASCII
+            # No exception so proceed with ASCII - reopen in non-binary
+            self.f.close()
+            self.f = io.open(filename, 'r')
             self.f.seek(0)
             self.binary = False
         except UnicodeDecodeError:
@@ -86,7 +166,7 @@ class Library(object):
         Parameters
         ----------
         table_names : None, str, or iterable, optional
-            Tables from the file to read in.  If None, reads in all of the 
+            Tables from the file to read in.  If None, reads in all of the
             tables. If str, reads in only the single table of a matching name.
         """
         if isinstance(table_names, basestring):
@@ -105,27 +185,29 @@ class Library(object):
             start_position = self.f.tell()
 
             # Check for end-of-file
-            if self.f.read(1) == '':
+            if len(self.f.read(1)) == 0:
                 return
             self.f.seek(start_position)
 
-            # Read name, atomic weight ratio, temperature, date, comment, and
+            # Read name, atomic mass ratio, temperature, date, comment, and
             # material
             name, awr, temp, date, comment, mat = \
-                struct.unpack('=10sdd10s70s10s', self.f.read(116))
+                struct.unpack(str('=10sdd10s70s10s'), self.f.read(116))
             name = name.strip()
 
             # Read ZAID/awr combinations
-            data = struct.unpack('=' + 16*'id', self.f.read(192))
+            data = struct.unpack(str('=' + 16*'id'), self.f.read(192))
 
             # Read NXS
-            nxs = list(struct.unpack('=16i', self.f.read(64)))
+            nxs = list(struct.unpack(str('=16i'), self.f.read(64)))
 
             # Determine length of XSS and number of records
             length = nxs[0]
-            n_records = (length + entries - 1)/entries
+            n_records = (length + entries - 1)//entries
 
-            # verify that we are suppossed to read this table in
+            # name is bytes, make it a string
+            name = name.decode()
+            # verify that we are supposed to read this table in
             if (table_names is not None) and (name not in table_names):
                 self.f.seek(start_position + recl_length*(n_records + 1))
                 continue
@@ -146,11 +228,11 @@ class Library(object):
             self.tables[name] = table
 
             # Read JXS
-            table.jxs = list(struct.unpack('=32i', self.f.read(128)))
+            table.jxs = list(struct.unpack(str('=32i'), self.f.read(128)))
 
             # Read XSS
             self.f.seek(start_position + recl_length)
-            table.xss = list(struct.unpack('={0}d'.format(length),
+            table.xss = list(struct.unpack(str('={0}d'.format(length)),
                                            self.f.read(length*8)))
 
             # Insert empty object at beginning of NXS, JXS, and XSS
@@ -178,21 +260,38 @@ class Library(object):
 
         f = self.f
         tables_seen = set()
-    
+
+        cdef int i
         lines = [f.readline() for i in range(13)]
 
         while (0 != len(lines)) and (lines[0] != ''):
-            # Read name of table, atomic weight ratio, and temperature. If first
+            # Read name of table, atomic mass ratio, and temperature. If first
             # line is empty, we are at end of file
-            words = lines[0].split()
-            name = words[0]
-            awr = float(words[1])
-            temp = float(words[2])
+
+            # check if it's a 2.0 style header
+            if lines[0].split()[0][1] == '.':
+                words = lines[0].split()
+                version = words[0]
+                name = words[1]
+                if len(words) == 3:
+                    source = words[2]
+                words = lines[1].split()
+                awr = float(words[0])
+                temp = float(words[1])
+                commentlines = int(words[3])
+                for i in range(commentlines):
+                    lines.pop(0)
+                    lines.append(f.readline())
+            else:
+                words = lines[0].split()
+                name = words[0]
+                awr = float(words[1])
+                temp = float(words[2])
 
             datastr = '0 ' + ' '.join(lines[6:8])
             nxs = fromstring_split(datastr, dtype=int)
 
-            n_lines = (nxs[1] + 3)/4
+            n_lines = (nxs[1] + 3)//4
             n_bytes = len(lines[-1]) * (n_lines - 2) + 1
 
             # Ensure that we have more tables to read in
@@ -202,7 +301,8 @@ class Library(object):
 
             # verify that we are suppossed to read this table in
             if (table_names is not None) and (name not in table_names):
-                f.seek(n_bytes, 1)
+                cur = f.tell()
+                f.seek(cur + n_bytes)
                 f.readline()
                 lines = [f.readline() for i in range(13)]
                 continue
@@ -210,7 +310,8 @@ class Library(object):
             # ensure we have a valid table type
             if 0 == len(name) or name[-1] not in table_types:
                 warn("Unsupported table: " + name, RuntimeWarning)
-                f.seek(n_bytes, 1)
+                cur = f.tell()
+                f.seek(cur + n_bytes)
                 f.readline()
                 lines = [f.readline() for i in range(13)]
                 continue
@@ -220,7 +321,8 @@ class Library(object):
             if 12+n_lines < len(lines):
                 goback = sum([len(line) for line in lines[12+n_lines:]])
                 lines = lines[:12+n_lines]
-                f.seek(-goback, 1)
+                cur = f.tell()
+                f.seek(cur - goback)
 
             # get the table
             table = table_types[name[-1]](name, awr, temp)
@@ -270,7 +372,8 @@ class Library(object):
         return self.tables.get(name, None)
 
     def __del__(self):
-        self.f.close()
+        if self.f is not None:
+            self.f.close()
 
 
 class AceTable(object):
@@ -283,8 +386,8 @@ class AceTable(object):
 
     def _read_all(self):
         raise NotImplementedError
-        
-        
+
+
 class NeutronTable(AceTable):
     """A NeutronTable object contains continuous-energy neutron interaction data
     read from an ACE-formatted Type I table. These objects are not normally
@@ -297,59 +400,60 @@ class NeutronTable(AceTable):
     name : str
         ZAID identifier of the table, e.g. '92235.70c'.
     awr : float
-        Atomic weight ratio of the target nuclide.
+        Atomic mass ratio of the target nuclide.
     temp : float
         Temperature of the target nuclide in eV.
-    
-    :Attributes:
-      **awr** : float
-        Atomic weight ratio of the target nuclide.
 
-      **energy** : list of floats
+    Attributes
+    ----------
+    awr : float
+        Atomic mass ratio of the target nuclide.
+
+    energy : list of floats
         The energy values (MeV) at which reaction cross-sections are tabulated.
 
-      **name** : str
+    name : str
         ZAID identifier of the table, e.g. 92235.70c.
 
-      **nu_p_energy** : list of floats
+    nu_p_energy : list of floats
         Energies in MeV at which the number of prompt neutrons emitted per
         fission is tabulated.
 
-      **nu_p_type** : str
+    nu_p_type : str
         Indicates how number of prompt neutrons emitted per fission is
         stored. Can be either "polynomial" or "tabular".
 
-      **nu_p_value** : list of floats
+    nu_p_value : list of floats
         The number of prompt neutrons emitted per fission, if data is stored in
         "tabular" form, or the polynomial coefficients for the "polynomial"
         form.
 
-      **nu_t_energy** : list of floats
+    nu_t_energy : list of floats
         Energies in MeV at which the total number of neutrons emitted per
         fission is tabulated.
 
-      **nu_t_type** : str
+    nu_t_type : str
         Indicates how total number of neutrons emitted per fission is
         stored. Can be either "polynomial" or "tabular".
 
-      **nu_t_value** : list of floats
+    nu_t_value : list of floats
         The total number of neutrons emitted per fission, if data is stored in
         "tabular" form, or the polynomial coefficients for the "polynomial"
         form.
 
-      **reactions** : list of Reactions
+    reactions : list of Reactions
         A list of Reaction instances containing the cross sections, secondary
         angle and energy distributions, and other associated data for each
         reaction for this nuclide.
 
-      **sigma_a** : list of floats
+    sigma_a : list of floats
         The microscopic absorption cross section for each value on the energy
         grid.
 
-      **sigma_t** : list of floats
+    sigma_t : list of floats
         The microscopic total cross section for each value on the energy grid.
 
-      **temp** : float
+    temp : float
         Temperature of the target nuclide in eV.
 
     """
@@ -407,23 +511,23 @@ class NeutronTable(AceTable):
         # Create elastic scattering reaction
         elastic_scatter = Reaction(2, self)
         elastic_scatter.Q = 0.0
-        elastic_scatter.IE = 1
+        elastic_scatter.IE = 0
         elastic_scatter.multiplicity = 1
         elastic_scatter.sigma = sigma_el
         self.reactions[2] = elastic_scatter
 
         # Create all other reactions with MT values
         mts = np.asarray(self.xss[self.jxs[3]:self.jxs[3] + n_reactions], dtype=int)
-        qvalues = np.asarray(self.xss[self.jxs[4]:self.jxs[4] + 
+        qvalues = np.asarray(self.xss[self.jxs[4]:self.jxs[4] +
                                       n_reactions], dtype=float)
         tys = np.asarray(self.xss[self.jxs[5]:self.jxs[5] + n_reactions], dtype=int)
 
-                             # Create all reactions other than elastic scatter
+        # Create all reactions other than elastic scatter
         reactions = [(mt, Reaction(mt, self)) for mt in mts]
         self.reactions.update(reactions)
 
         # Loop over all reactions other than elastic scattering
-        for i, reaction in enumerate(self.reactions.values()[1:]):
+        for i, reaction in enumerate(list(self.reactions.values())[1:]):
             # Copy Q values and multiplicities and determine if scattering
             # should be treated in the center-of-mass or lab system
             reaction.Q = qvalues[i]
@@ -434,7 +538,7 @@ class NeutronTable(AceTable):
             loc = int(self.xss[self.jxs[6] + i])
 
             # Determine starting index on energy grid
-            reaction.IE = int(self.xss[self.jxs[7] + loc - 1])
+            reaction.IE = int(self.xss[self.jxs[7] + loc - 1]) - 1
 
             # Determine number of energies in reaction
             n_energies = int(self.xss[self.jxs[7] + loc])
@@ -465,7 +569,7 @@ class NeutronTable(AceTable):
                 self.nu_t_type = "polynomial"
                 NC = int(self.xss[KNU+1])
                 coeffs = self.xss[KNU+2 : KNU+2+NC]
-                
+
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_t_type = "tabular"
@@ -486,7 +590,7 @@ class NeutronTable(AceTable):
                 self.nu_p_type = "polynomial"
                 NC = int(self.xss[KNU+1])
                 coeffs = self.xss[KNU+2 : KNU+2+NC]
-                
+
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_p_type = "tabular"
@@ -497,7 +601,7 @@ class NeutronTable(AceTable):
                 NE = int(self.xss[KNU+2+2*NR])
                 self.nu_p_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_p_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
-                
+
             KNU = jxs2 + int(abs(self.xss[jxs2])) + 1
             LNU = int(self.xss[KNU])
 
@@ -506,7 +610,7 @@ class NeutronTable(AceTable):
                 self.nu_t_type = "polynomial"
                 NC = int(self.xss[KNU+1])
                 coeffs = self.xss[KNU+2 : KNU+2+NC]
-                
+
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_t_type = "tabular"
@@ -517,7 +621,7 @@ class NeutronTable(AceTable):
                 NE = int(self.xss[KNU+2+2*NR])
                 self.nu_t_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_t_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
-    
+
         # Check for delayed nu data
         if self.jxs[24] > 0:
             KNU = self.jxs[24]
@@ -554,7 +658,7 @@ class NeutronTable(AceTable):
                 energy_dist = self._get_energy_distribution(
                     location_start, delayed_n=True)
                 self.nu_d_energy_dist.append(energy_dist)
-                    
+
 
     def _read_angular_distributions(self):
         """Find the angular distribution for each reaction MT
@@ -567,10 +671,10 @@ class NeutronTable(AceTable):
         n_reactions = self.nxs[5] + 1
 
         # Angular distribution for all reactions with secondary neutrons
-        for i, reaction in enumerate(self.reactions.values()[:n_reactions]):
+        for i, reaction in enumerate(list(self.reactions.values())[:n_reactions]):
             loc = int(self.xss[self.jxs[8] + i])
 
-            # Check if angular distribution data exist 
+            # Check if angular distribution data exist
             if loc == -1:
                 # Angular distribution data are specified through LAWi
                 # = 44 in the DLW block
@@ -633,7 +737,7 @@ class NeutronTable(AceTable):
         # determined from kinematics.
         n_reactions = self.nxs[5]
 
-        for i, reaction in enumerate(self.reactions.values()[1:n_reactions + 1]):
+        for i, reaction in enumerate(list(self.reactions.values())[1:n_reactions + 1]):
             # Determine locator for ith energy distribution
             location_start = int(self.xss[self.jxs[10] + i])
 
@@ -690,7 +794,7 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Number of outgoing energies in each E_out table
             NE = int(self.xss[ind])
@@ -721,7 +825,7 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Number of outgoing energies in each E_out table
             NE = int(self.xss[ind])
@@ -770,8 +874,8 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
-                
+                ind += 2 * n_regions
+
             NE = int(self.xss[ind])
             edist.energy_in = self.xss[ind+1:ind+1+NE]
             edist.T = self.xss[ind+1+NE:ind+1+2*NE]
@@ -781,14 +885,14 @@ class NeutronTable(AceTable):
             edist.X = self.xss[ind+1:ind+1+NET]
             ind += 1 + NET
         elif law == 7:
-            # Simple Maxwell fission spectrum (ENDF-6 File 5 LF=7) 
+            # Simple Maxwell fission spectrum (ENDF-6 File 5 LF=7)
             n_regions = int(self.xss[ind])
             ind += 1
             if n_regions > 0:
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             NE = int(self.xss[ind])
             edist.energy_in = self.xss[ind+1:ind+1+NE]
@@ -803,7 +907,7 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             NE = int(self.xss[ind])
             edist.energy_in = self.xss[ind+1:ind+1+NE]
@@ -812,14 +916,14 @@ class NeutronTable(AceTable):
             ind += 2 + 2*NE
         elif law == 11:
             # Energy dependent Watt spectrum (ENDF-6 File 5 LF=11)
-            # Interpolation scheme between a's    
+            # Interpolation scheme between a's
             n_regions = int(self.xss[ind])
             ind += 1
             if n_regions > 0:
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBTa, edist.INTa = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Incident energy table and tabulated a's
             NE = int(self.xss[ind])
@@ -834,7 +938,7 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBTb, edist.INTb = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Incident energy table and tabulated b's
             NE = int(self.xss[ind])
@@ -852,7 +956,7 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Number of incident energies
             NE = int(self.xss[ind])
@@ -890,13 +994,13 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Number of incident energies
             NE = int(self.xss[ind])
             edist.energy_in = self.xss[ind+1:ind+1+NE]
             ind += 1 + NE
-                
+
             # Outgoing energy tables
             NET = int(self.xss[ind])
             edist.T = self.xss[ind+1:ind+1+NE*NET]
@@ -911,7 +1015,7 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Number of outgoing energies in each E_out table
             NE = int(self.xss[ind])
@@ -964,7 +1068,7 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Number of outgoing energies in each E_out table
             NE = int(self.xss[ind])
@@ -1047,18 +1151,18 @@ class NeutronTable(AceTable):
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
-                ind += 2 * n_regions                    
+                ind += 2 * n_regions
 
             # Number of outgoing energies in each E_out table
             NE = int(self.xss[ind])
             edist.energy_in = self.xss[ind+1:ind+1+NE]
             L = np.asarray(self.xss[ind+1+NE:ind+1+2*NE], dtype=int)
             ind += 1 + 2*NE
-                    
+
         # TODO: Read rest of data
 
         return edist
-        
+
 
     def _read_gpd(self):
         """Read total photon production cross section.
@@ -1133,7 +1237,7 @@ class NeutronTable(AceTable):
                 # Yield data taken from ENDF File 12 or 6
                 MTMULT = int(self.xss[ind])
                 ind += 1
-    
+
                 # ENDF interpolation parameters
                 n_regions = int(self.xss[ind])
                 dat = np.asarray(self.xss[ind+1:ind+1+2*n_regions], dtype=int)
@@ -1150,7 +1254,7 @@ class NeutronTable(AceTable):
             elif MFTYPE == 13:
                 # Cross-section data from ENDF File 13
                 # Energy grid index at which data starts
-                rxn.IE = int(self.xss[ind])
+                rxn.IE = int(self.xss[ind]) - 1
 
                 # Cross sections
                 NE = int(self.xss[ind+1])
@@ -1222,7 +1326,7 @@ class NeutronTable(AceTable):
             return
 
         # Read fission cross sections
-        self.IE_fission = int(self.xss[ind])  # Energy grid index
+        self.IE_fission = int(self.xss[ind]) - 1  # Energy grid index
         NE = int(self.xss[ind+1])
         self.sigma_f = self.xss[ind+2:ind+2+NE]
 
@@ -1274,42 +1378,43 @@ class SabTable(AceTable):
     name : str
         ZAID identifier of the table, e.g. lwtr.10t.
     awr : float
-        Atomic weight ratio of the target nuclide.
+        Atomic mass ratio of the target nuclide.
     temp : float
         Temperature of the target nuclide in eV.
 
-    :Attributes:
-      **awr** : float
-        Atomic weight ratio of the target nuclide.
+    Attributes
+    ----------
+    awr : float
+        Atomic mass ratio of the target nuclide.
 
-      **elastic_e_in** : list of floats
+    elastic_e_in : list of floats
         Incoming energies in MeV for which the elastic cross section is
         tabulated.
 
-      **elastic_P** : list of floats
+    elastic_P : list of floats
         Elastic scattering cross section for data derived in the incoherent
         approximation, or Bragg edge parameters for data derived in the coherent
         approximation.
 
-      **elastic_type** : str
+    elastic_type : str
         Describes the behavior of the elastic cross section, i.e. whether it was
         derived in the incoherent or coherent approximation.
 
-      **inelastic_e_in** : list of floats
+    inelastic_e_in : list of floats
         Incoming energies in MeV for which the inelastic cross section is
         tabulated.
 
-      **inelastic_sigma** : list of floats
+    inelastic_sigma : list of floats
         Inelastic scattering cross section in barns at each energy.
 
-      **name** : str
+    name : str
         ZAID identifier of the table, e.g. 92235.70c.
 
-      **temp** : float
+    temp : float
         Temperature of the target nuclide in eV.
 
     """
-    
+
 
     def __init__(self, name, awr, temp):
         super(SabTable, self).__init__(name, awr, temp)
@@ -1360,7 +1465,7 @@ class SabTable(AceTable):
         NE_out = self.nxs[4]
         NMU = self.nxs[3]
         ind = self.jxs[3]
-        
+
         self.inelastic_e_out = self.xss[ind:ind+NE_in*NE_out*(NMU+2):NMU+2]
         self.inelastic_e_out.shape = (NE_in, NE_out)
 
@@ -1380,7 +1485,7 @@ class SabTable(AceTable):
         self.elastic_mu_out = self.xss[ind:ind+NE*NMU]
         self.elastic_mu_out.shape = (NE, NMU)
 
-            
+
 class Reaction(object):
     """Reaction(MT, table=None)
 
@@ -1399,42 +1504,43 @@ class Reaction(object):
         the parent nuclide is needed (for instance, the energy grid at which
         cross sections are tabulated)
 
-    :Attributes:
-      **ang_energy_in** : list of floats
+    Attributes
+    ----------
+    ang_energy_in : list of floats
         Incoming energies in MeV at which angular distributions are tabulated.
 
-      **ang_energy_cos** : list of floats
+    ang_energy_cos : list of floats
         Scattering cosines corresponding to each point of the angular distribution
         functions.
 
-      **ang_energy_pdf** : list of floats
+    ang_energy_pdf : list of floats
         Probability distribution function for angular distribution.
 
-      **ang_energy_cdf** : list of floats
+    ang_energy_cdf : list of floats
         Cumulative distribution function for angular distribution.
 
-      **e_dist_energy** : list of floats
+    e_dist_energy : list of floats
         Incoming energies in MeV at which energy distributions are tabulated.
 
-      **e_dist_law** : int
+    e_dist_law : int
         ACE law used for secondary energy distribution.
 
-      **IE** : int
+    IE : int
         The index on the energy grid corresponding to the threshold of this
         reaction.
 
-      **MT** : int
+    MT : int
         The ENDF MT number for this reaction. On occasion, MCNP uses MT numbers
         that don't correspond exactly to the ENDF specification.
 
-      **Q** : float
+    Q : float
         The Q-value of this reaction in MeV.
 
-      **sigma** : list of floats
+    sigma : list of floats
         Microscopic cross section for this reaction at each point on the energy
         grid above the threshold value.
 
-      **TY** : int
+    TY : int
         An integer whose absolute value is the number of neutrons emitted in
         this reaction. If negative, it indicates that scattering should be
         performed in the center-of-mass system. If positive, scattering should
@@ -1447,11 +1553,11 @@ class Reaction(object):
         self.MT = MT       # MT value
         self.Q = None      # Q-value
         self.TY = None     # Neutron release
-        self.IE = None     # Energy grid index
+        self.IE = 0        # Energy grid index
         self.sigma = []    # Cross section values
 
     def broaden(self, T_high):
-        pass        
+        pass
 
     def threshold(self):
         """threshold()
@@ -1461,7 +1567,7 @@ class Reaction(object):
         return self.table.energy[self.IE]
 
     def __repr__(self):
-        name = reaction_names.get(self.MT, None)
+        name = label(self.MT)
         if name is not None:
             rep = "<ACE Reaction: MT={0} {1}>".format(self.MT, name)
         else:
@@ -1479,7 +1585,7 @@ class DosimetryTable(AceTable):
             return "<ACE Dosimetry Table: {0}>".format(self.name)
         else:
             return "<ACE Dosimetry Table>"
-        
+
 
 class NeutronDiscreteTable(AceTable):
 
@@ -1491,7 +1597,7 @@ class NeutronDiscreteTable(AceTable):
             return "<ACE Discrete-E Neutron Table: {0}>".format(self.name)
         else:
             return "<ACE Discrete-E Neutron Table>"
-        
+
 
 class NeutronMGTable(AceTable):
 
@@ -1503,7 +1609,7 @@ class NeutronMGTable(AceTable):
             return "<ACE Multigroup Neutron Table: {0}>".format(self.name)
         else:
             return "<ACE Multigroup Neutron Table>"
-        
+
 
 class PhotoatomicTable(AceTable):
 
@@ -1515,7 +1621,7 @@ class PhotoatomicTable(AceTable):
             return "<ACE Continuous-E Photoatomic Table: {0}>".format(self.name)
         else:
             return "<ACE Continuous-E Photoatomic Table>"
-        
+
 
 class PhotoatomicMGTable(AceTable):
 
@@ -1527,7 +1633,7 @@ class PhotoatomicMGTable(AceTable):
             return "<ACE Multigroup Photoatomic Table: {0}>".format(self.name)
         else:
             return "<ACE Multigroup Photoatomic Table>"
-        
+
 
 class ElectronTable(AceTable):
 
@@ -1539,7 +1645,7 @@ class ElectronTable(AceTable):
             return "<ACE Electron Table: {0}>".format(self.name)
         else:
             return "<ACE Electron Table>"
-        
+
 
 class PhotonuclearTable(AceTable):
 
@@ -1562,78 +1668,6 @@ table_types = {
     "g": PhotoatomicMGTable,
     "e": ElectronTable,
     "u": PhotonuclearTable}
-
-reaction_names = {
-    # TODO: This should be provided as part of the ENDF module functionality
-    1: '(n,total)',
-    2: '(n,elastic)',
-    3: '(n,nonelastic)',
-    4: '(n,inelastic)',
-    5: '(misc)',
-    10: '(n,continuum)',
-    11: '(n,2n d)',
-    16: '(n,2n)',
-    17: '(n,3n)',
-    18: '(n,fission)',
-    19: '(n,f)',
-    20: '(n,nf)',
-    21: '(n,2nf)',
-    22: '(n,na)',
-    23: '(n,n3a)',
-    24: '(n,2na)',
-    25: '(n,3na)',
-    28: '(n,np)',
-    29: '(n,n2a)',
-    30: '(n,2n2a)',
-    32: '(n,nd)',
-    33: '(n,nt)',
-    34: '(n,n He-3)',
-    35: '(n,nd3a)',
-    36: '(n,nt2a)',
-    37: '(n,4n)',
-    38: '(n,3nf)',
-    41: '(n,2np)',
-    42: '(n,3np)',
-    44: '(n,2np)',
-    45: '(n,npa)',
-    91: '(n,nc)',
-    102: '(n,gamma)',
-    103: '(n,p)',
-    104: '(n,d)',
-    105: '(n,t)',
-    106: '(n,3He)',
-    107: '(n,a)',
-    108: '(n,2a)',
-    109: '(n,3a)',
-    111: '(n,2p)',
-    112: '(n,pa)',
-    113: '(n,t2a)',
-    114: '(n,d2a)',
-    115: '(n,pd)',
-    116: '(n,pt)',
-    117: '(n,da)',
-    201: '(n,Xn)',
-    202: '(n,Xgamma)',
-    203: '(n,Xp)',
-    204: '(n,Xd)',
-    205: '(n,Xt)',
-    206: '(n,X3He)',
-    207: '(n,Xa)',
-    444: '(damage)',
-    649: '(n,pc)',
-    699: '(n,dc)',
-    749: '(n,tc)',
-    799: '(n,3Hec)',
-    849: '(n,ac)',
-    }
-"""Dictionary of MT reaction labels"""
-reaction_names.update({mt: '(n,n{0})'.format(mt - 50) for mt in range(50, 91)})
-reaction_names.update({mt: '(n,p{0})'.format(mt - 600) for mt in range(600, 649)})
-reaction_names.update({mt: '(n,d{0})'.format(mt - 650) for mt in range(650, 699)})
-reaction_names.update({mt: '(n,t{0})'.format(mt - 700) for mt in range(700, 649)})
-reaction_names.update({mt: '(n,3He{0})'.format(mt - 750) for mt in range(750, 799)})
-reaction_names.update({mt: '(n,a{0})'.format(mt - 800) for mt in range(700, 649)})
-
 
 if __name__ == '__main__':
     # Might be nice to check environment variable DATAPATH to search for xsdir

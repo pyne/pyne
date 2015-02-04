@@ -1,0 +1,8 @@
+.. _tutorial-01:
+
+Nuclide Naming
+==============
+
+Download the :download:`full notebook <../../tutorial/01-nuclide-naming.ipynb>`.
+
+.. notebook:: ../../tutorial/01-nuclide-naming.ipynb

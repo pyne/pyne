@@ -1,9 +1,5 @@
 """Cython header for enrichment library."""
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
+from libcpp.string cimport string as std_string
 
 from pyne cimport cpp_material
 
@@ -46,10 +42,17 @@ cdef extern from "enrichment.h" namespace "pyne::enrichment":
     Cascade _fill_default_uranium_cascade() except +
     extern Cascade default_uranium_cascade
 
+    double feed_per_prod(double, double, double) except +
+    double feed_per_tail(double, double, double) except +
     double prod_per_feed(double, double, double) except +
+    double prod_per_tail(double, double, double) except +
     double tail_per_feed(double, double, double) except +
     double tail_per_prod(double, double, double) except +
-
+    double value_func(double) except +
+    double swu_per_feed(double, double, double) except +
+    double swu_per_prod(double, double, double) except +
+    double swu_per_tail(double, double, double) except +
+    
     double alphastar_i(double, double, double) except +
 
     void _recompute_nm(Cascade &, double) except +

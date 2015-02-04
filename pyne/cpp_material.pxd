@@ -1,17 +1,16 @@
 """C++ wrapper for material class."""
-from libcpp.map cimport map
 from libcpp.set cimport set
+from libcpp.string cimport string as std_string
+from libcpp.set cimport set as std_set
+from libcpp.map cimport map
+from libcpp.vector cimport vector
+from libcpp.utility cimport pair
+from libcpp cimport bool
 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-
-cimport cpp_jsoncpp 
+cimport cpp_jsoncpp
 
 cdef extern from "material.h" namespace "pyne":
-    # Cython does not allow for typdef'ing tamplated types :( 
+    # Cython does not allow for typdef'ing tamplated types :(
     #ctypedef map[int, double] comp_map
     #ctypedef map[int, double].iterator comp_iter
 
@@ -31,13 +30,22 @@ cdef extern from "material.h" namespace "pyne":
 
         # Attributes
         map[int, double] comp
+
         double mass
         double density
-        double atoms_per_mol
-        cpp_jsoncpp.Value attrs
+        double atoms_per_molecule
+        cpp_jsoncpp.Value metadata
 
         # Methods
         void norm_comp() except +
+        std_string mcnp(std_string) except +
+        std_string fluka(int, std_string) except +
+        bool not_fluka_builtin(std_string) except +
+        std_string fluka_material_str(int) except +
+        std_string fluka_material_component(int, int, std_string) except +
+        std_string fluka_material_line(int, double, int, std_string) except +
+        std_string fluka_format_field(float) except +
+        std_string fluka_compound_str(int, std_string) except +
         void from_hdf5(char *, char *) except +
         void from_hdf5(char *, char *, int) except +
         void from_hdf5(char *, char *, int, int) except +
@@ -50,9 +58,25 @@ cdef extern from "material.h" namespace "pyne":
 
         void write_text(char *) except +
 
+        void load_json(cpp_jsoncpp.Value) except +
+        cpp_jsoncpp.Value dump_json() except +
+        void from_json(char *) except +
+        void write_json(char *) except +
+
         void normalize() except +
         map[int, double] mult_by_mass() except +
-        double molecular_weight(double) except +
+        map[int, double] activity() except +
+        map[int, double] decay_heat() except +
+        double molecular_mass() except +
+        double molecular_mass(double) except +
+        Material expand_elements() except +
+        Material collapse_elements(std_set[int]) except +
+        double mass_density() except +
+        double mass_density(double) except +
+        double mass_density(double, double) except +
+        double number_density() except +
+        double number_density(double) except +
+        double number_density(double, double) except +
 
         # Substream Methods
         Material sub_mat(set[int]) except +
@@ -63,8 +87,7 @@ cdef extern from "material.h" namespace "pyne":
         Material set_range(int, int, double) except +
         Material del_range(int, int) except +
 
-        Material sub_u() except +
-        Material sub_pu() except +
+        Material sub_elem(int) except +
         Material sub_lan() except +
         Material sub_act() except +
         Material sub_tru() except +
@@ -74,6 +97,15 @@ cdef extern from "material.h" namespace "pyne":
         # Atom frac member functions
         map[int, double] to_atom_frac() except +
         void from_atom_frac(map[int, double]) except +
+        
+        map[int, double] to_atom_dens() except +
+
+
+        vector[pair[double, double]] gammas() except +
+        vector[pair[double, double]] xrays() except +
+        vector[pair[double, double]] photons(bool) except +
+
+        Material decay(double) except +
 
         # Operator Overloads
         Material operator+(double) except +

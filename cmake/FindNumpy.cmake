@@ -28,7 +28,7 @@
 find_package ( PythonInterp )
 
 if ( PYTHONINTERP_FOUND )
-  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print numpy.get_include()"
+  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
                     OUTPUT_VARIABLE NUMPY_INCLUDE_DIR
                     ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE )
@@ -39,7 +39,7 @@ set ( NUMPY_INCLUDE_DIRS ${NUMPY_INCLUDE_DIR} )
 
 # version
 if ( PYTHONINTERP_FOUND )
-  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print numpy.__version__"
+  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print(numpy.__version__)"
                     OUTPUT_VARIABLE NUMPY_VERSION_STRING
                     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
@@ -65,6 +65,8 @@ if ( Numpy_FIND_VERSION AND NUMPY_VERSION )
     endif ()
   endif ()
 endif ()
+
+message("-- NUMPY_VERSION_STRING = ${NUMPY_VERSION_STRING}")
 
 # handle REQUIRED and QUIET options
 include ( FindPackageHandleStandardArgs )

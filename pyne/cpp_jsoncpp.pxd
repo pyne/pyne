@@ -1,15 +1,10 @@
 """C++ wrapper for jsoncpp."""
 from libc.string cimport const_char
+from libcpp.string cimport string as std_string
+from libcpp.vector cimport vector as std_vector
 
-include "include/cython_version.pxi"
-IF CYTHON_VERSION_MAJOR == 0 and CYTHON_VERSION_MINOR >= 17:
-    from libcpp.string cimport string as std_string
-    from libcpp.vector cimport vector as std_vector
-ELSE:
-    from pyne._includes.libcpp.string cimport string as std_string
-    from pyne._includes.libcpp.vector cimport vector as std_vector
+cdef extern from "json.h" namespace "Json":
 
-cdef extern from "json/json.h" namespace "Json":
     cdef enum ValueType:
         nullValue,
         intValue,      
@@ -94,5 +89,22 @@ cdef extern from "json/json.h" namespace "Json":
 
     cdef cppclass StyledWriter:
         StyledWriter() except +
+        std_string write(Value &)
+
+cdef extern from "jsoncustomwriter.h" namespace "Json":
+
+    cdef cppclass CustomWriter:
+        CustomWriter() except +
+        CustomWriter(std_string) except +
+        CustomWriter(std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+                     std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+                     std_string, std_string) except +
+        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+                     std_string, std_string, int) except +
         std_string write(Value &)
 

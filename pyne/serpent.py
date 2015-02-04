@@ -1,12 +1,30 @@
-import numpy as np
 import re
+import sys
+from warnings import warn
+from pyne.utils import QAWarning
 
-_if_idx_str = ("""if (exist("idx", "var"));\n"""
-              """  idx = idx + 1;\n"""
-              """else;\n"""
-              """  idx = 1;\n"""
-              """end;"""
-              )
+import numpy as np
+
+if sys.version_info[0] > 2:
+    basestring = str
+
+warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+_if_idx_str_serpent1 = (
+    'if (exist("idx", "var"));\n'
+    '  idx = idx + 1;\n'
+    'else;\n'
+    '  idx = 1;\n'
+    'end;'
+    )
+
+_if_idx_str_serpent2 = (
+    "if (exist('idx', 'var'));\n"
+    '  idx = idx + 1;\n'
+    'else;\n'
+    '  idx = 1;\n'
+    'end;'
+    )
 
 _num_pattern = "([0-9]+[.]?[0-9]*[Ee]?[+-]?[0-9]*)"
 
@@ -23,15 +41,20 @@ _zeros_pattern = r"(zeros)\((.*)\)"
 
 _detector_pattern = r"(DET\w+)\s*=\s*np.array\("
 
+_detector_pattern_all = r"(DET\w+)\s*=\s*"
+
+
 def _replace_comments(s):
     """Replaces matlab comments with python arrays in string s."""
     s = s.replace('%', '#')
     return s
 
+
 def _replace_semicolons(s):
     """Replaces matlab semicolons with nothing in string s."""
     s = s.replace(';', '')
     return s
+
 
 def _replace_arrays(s):
     """Replaces matlab arrays with numpy arrays in string s."""
@@ -43,13 +66,14 @@ def _replace_arrays(s):
         s = s.replace(a, new_a)
 
     # Encapsulate python lists in numpy arrays
-    s = re.sub(_numpy_array_pattern, lambda mo: 'np.array(' + mo.group(0) + ')', s)
+    s = re.sub(_numpy_array_pattern,
+               lambda mo: 'np.array(' + mo.group(0) + ')', s)
 
     return s
 
 
 def parse_res(resfile, write_py=False):
-    """Converts a serpent results ``*_res.m`` output file to a dictionary (and 
+    """Converts a serpent results ``*_res.m`` output file to a dictionary (and
     optionally to a ``*_res.py`` file).
 
     Parameters
@@ -76,12 +100,16 @@ def parse_res(resfile, write_py=False):
     f = _replace_comments(f)
 
     # Grab the number of 'if' statements
-    IDX = f.count(_if_idx_str)
+    if_idx_str = _if_idx_str_serpent1
+    IDX = f.count(if_idx_str)
+    if IDX == 0:
+        if_idx_str = _if_idx_str_serpent2
+        IDX = f.count(if_idx_str)
 
     # Replace if statements with something more meaningful
-    fpart = f.partition(_if_idx_str)
+    fpart = f.partition(if_idx_str)
     f = fpart[0] + "idx = 0" + fpart[2]
-    f = f.replace(_if_idx_str, 'idx += 1')
+    f = f.replace(if_idx_str, 'idx += 1')
 
     # Replace matlab Arrays
     f = _replace_arrays(f)
@@ -90,14 +118,14 @@ def parse_res(resfile, write_py=False):
     header = "import numpy as np\n\n"
 
     # Find all variables and shape
-    vars_shape = np.unique( re.findall(_lhs_variable_pattern, f) )
-    vars_dtype = dict( re.findall(_rhs_variable_pattern, f) )
+    vars_shape = np.array(list(set(re.findall(_lhs_variable_pattern, f))))
+    vars_dtype = dict(re.findall(_rhs_variable_pattern, f))
     # Initialize variables to zero
     header = header + "# Initialize variables\n"
     for vs in vars_shape:
         # Determine shape
-        s = re.search(r'\[.*:(.*?)\]', vs[1])
-        if s == None:
+        s = re.search(r'\[.*?:(.*?)\]', vs[1])
+        if s is None:
             vs_shape = ""
         else:
             vs_shape = s.group(1)
@@ -107,14 +135,15 @@ def parse_res(resfile, write_py=False):
         # Determine Data type
         rhs = vars_dtype[vs[0]]
         if ("\'" in rhs) or ("\"" in rhs):
-            dt = "'S{0}'".format(int( s.group(1) ))
+            dt = "'S{0}'".format(int(s.group(1)))
             vs_shape = ""
         elif ('.' in rhs) or ('E' in rhs) or ('e' in rhs):
             dt = "float"
         else:
             dt = "int"
 
-        zero_line = "{0} = np.zeros([{1}, {2}], dtype={3})\n".format(vs[0], IDX, vs_shape, dt)
+        zero_line = "{0} = np.zeros([{1}, {2}], dtype={3})\n".format(vs[0],
+                     IDX, vs_shape, dt)
         header = header + zero_line
 
     # Add IDx to file
@@ -125,7 +154,7 @@ def parse_res(resfile, write_py=False):
     f = header + f
 
     # Replace variable overrides
-    vars = np.unique( re.findall("(" + _lhs_variable_pattern + ")", f) )
+    vars = np.array(list(set(re.findall("(" + _lhs_variable_pattern + ")", f))))
     for v in vars:
         f = f.replace(v[0], "{0}[idx] ".format(v[1]))
 
@@ -143,14 +172,14 @@ def parse_res(resfile, write_py=False):
 
     # Execute the adjusted file
     res = {}
-    exec(f, {}, res)
-
+    exec(f, res, res)
+    if '__builtins__' in res:
+        del res['__builtins__']
     return res
 
 
-
 def parse_dep(depfile, write_py=False, make_mats=True):
-    """Converts a serpent depletion ``*_dep.m`` output file to a dictionary (and 
+    """Converts a serpent depletion ``*_dep.m`` output file to a dictionary (and
     optionally to a ``*_dep.py`` file).
 
     Parameters
@@ -160,14 +189,14 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     write_py : bool, optional
         Flag for whether to write the dep file to an analogous python file.
     make_mats : bool, optional
-        Flag for whether or not to build Materials out of mass data and add 
-        these to the return dictionary.  Materials so added have names which 
+        Flag for whether or not to build Materials out of mass data and add
+        these to the return dictionary.  Materials so added have names which
         end in '_MATERIAL'.
 
     Returns
     -------
     dep : dict
-        Dictionary of the parsed depletion information.  Please see the Serpent 
+        Dictionary of the parsed depletion information.  Please see the Serpent
         manual for a complete description of contents.
 
     """
@@ -197,7 +226,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
 
             new_ca = new_ca.replace(cl[1], new_cl)
 
-        new_ca = 'np.array( ' + new_ca + ' )'    
+        new_ca = 'np.array( ' + new_ca + ' )'
         f = f.replace(ca[0], new_ca)
 
     # Indent close of array
@@ -223,7 +252,9 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     footer = ""
     if make_mats:
         mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
-        footer += "\n\n# Construct materials\nzai = map(int, ZAI)\ncols = range(len(DAYS))\n"
+        footer += ('\n\n# Construct materials\n'
+                   'zai = list(map(int, ZAI))\n'
+                   'cols = list(range(len(DAYS)))\n')
         base_names = re.findall('(MAT_\w*_)MDENS = ', f)
         for base_name in base_names:
             footer += mat_gen_line.format(name=base_name)
@@ -244,14 +275,14 @@ def parse_dep(depfile, write_py=False, make_mats=True):
 
     # Execute the adjusted file
     dep = {}
-    exec(f, {}, dep)
-
+    exec(f, dep, dep)
+    if '__builtins__' in dep:
+        del dep['__builtins__']
     return dep
 
 
-
 def parse_det(detfile, write_py=False):
-    """Converts a serpent detector ``*_det.m`` output file to a dictionary (and 
+    """Converts a serpent detector ``*_det.m`` output file to a dictionary (and
     optionally to a ``*_det.py`` file).
 
     Parameters
@@ -280,17 +311,30 @@ def parse_det(detfile, write_py=False):
     # Replace matlab Arrays
     f = _replace_arrays(f)
 
-    # Find detector variable names 
+    # Find detector variable names
     det_names = re.findall(_detector_pattern, f)
     det_names = np.unique(det_names)
+    all_det_names = re.findall(_detector_pattern_all, f)
+    all_det_names = np.unique(all_det_names)
+
+    is_serpent_1 = any([(dn.endswith('_VALS') and dn[:-5] in det_names) or
+                        (dn.endswith('_EBINS') and dn[:-6] in det_names)
+                        for dn in all_det_names])
 
     # Append detector reshaping
-    f += "\n\n# Reshape detectors\n"
+    f += '\n\n# Reshape detectors\n'
     for dn in det_names:
-        if dn + "E" in det_names:
-            f += "{name}.shape = ({name}_VALS, 13)\n".format(name=dn)
+        if is_serpent_1:
+            if dn + 'E' in det_names:
+                f += '{name}.shape = ({name}_VALS, 13)\n'.format(name=dn)
+            else:
+                f += '{name}.shape = ({name_min_E}_EBINS, 3)\n'.format(name=dn,
+                                                            name_min_E=dn[:-1])
         else:
-            f += "{name}.shape = ({name_min_E}_EBINS, 3)\n".format(name=dn, name_min_E=dn[:-1])
+            if (dn + 'E' in det_names) or (dn + 'T' in det_names):
+                f += '{name}.shape = (len({name})//13, 13)\n'.format(name=dn)
+            else:
+                f += '{name}.shape = (len({name})//3, 3)\n'.format(name=dn)
 
     # Add imports to header
     header = "import numpy as np\n\n"
@@ -309,7 +353,6 @@ def parse_det(detfile, write_py=False):
             new_filename = detfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-
     # Execute the adjusted file
     det = {}
     exec(f, {}, det)

@@ -1,9 +1,23 @@
+from __future__ import print_function
 import os
 import re
-import urllib2
+import sys
+from warnings import warn
+from pyne.utils import QAWarning
+
+try:
+    import urllib.request as urllib2
+    from urllib.error import URLError
+except ImportError:
+    import urllib2
+    from urllib2 import URLError
 
 from pyne import nucname
 
+warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+if sys.version_info[0] > 2:
+  basestring = str
 
 def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     """Grabs a nuclide file from KAERI from the web and places 
@@ -20,7 +34,7 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
         2 = cross section summary, 3 = cross section graphs.
     """
     if not isinstance(nuc, basestring):
-        nuc = nucname.name(nuc)
+        nuc = nucname.name(nuc).upper()
 
     if n is None:
         filename = os.path.join(build_dir, nuc + '.html')
@@ -28,7 +42,7 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     else:
         filename = os.path.join(build_dir, '{nuc}_{n}.html'.format(nuc=nuc, n=n))
         kaeri_url = 'http://atom.kaeri.re.kr/cgi-bin/nuclide?nuc={0}&n={n}'.format(nuc, n=n)
-    print "    getting {0} and placing in {1}".format(nuc, filename)
+    print("    getting {0} and placing in {1}".format(nuc, filename))
 
     # Get the url 
     req = urllib2.Request(kaeri_url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -41,10 +55,10 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
         try:
             kaeri_html = hdl.read()
             read_in = True
-        except urllib2.URLError:
+        except URLError:
             hdl.close()
             i += 1
-            print "    getting {0} and placing in {1}, attempt {2}".format(nuc, filename, i)
+            print("    getting {0} and placing in {1}, attempt {2}".format(nuc, filename, i))
             hdl = urllib2.urlopen(req, timeout=30.0)
 
     # Write out to the file    
@@ -60,7 +74,7 @@ def parse_for_natural_isotopes(htmlfile):
         for line in f:
             m = nat_iso_regex.search(line)
             if m is not None:
-                nat_isos.add(nucname.zzaaam(m.group(1)))
+                nat_isos.add(nucname.id(m.group(1)))
     return nat_isos
 
 
@@ -73,6 +87,6 @@ def parse_for_all_isotopes(htmlfile):
         for line in f:
             m = all_iso_regex.search(line)
             if m is not None:
-                isos.add(nucname.zzaaam(m.group(1)))
+                isos.add(nucname.id(m.group(1)))
     return isos
 
