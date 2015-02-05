@@ -33,6 +33,26 @@ Enrichment Solvers
 ****************
 Helper Functions
 ****************
+.. autofunction:: swu
+
+------------
+
+.. autofunction:: feed
+
+------------
+
+.. autofunction:: prod
+
+------------
+
+.. autofunction:: tails
+
+------------
+
+.. autofunction:: value_func
+
+------------
+
 .. autofunction:: prod_per_feed
 
 ------------
