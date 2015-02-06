@@ -12,6 +12,9 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 import copy
 
 
+warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+
+
 class PhSpectrum(object):
     """Pulse height spectrum class"""
 
@@ -69,6 +72,39 @@ def rect_smooth(spectrum, m):
     while len(smooth_spec.counts) < (len(spectrum.counts)):
         smooth_spec.counts.append(0)
 	
-    smooth_spec.spec_name=spectrum.spec_name +' smoothed'
+    smooth_spec.spec_name = spectrum.spec_name + ' smoothed'
     return smooth_spec
 
+def five_point_smooth(spec):
+    """5 point smoothing function.
+
+    Recommended for use in low statistics in 
+    G.W. Phillips , Nucl. Instrum. Methods 153 (1978), 449
+    
+    Parameters
+    ---------- 
+    spec: str 
+    a spectrum object
+    
+    Returns
+    -------
+    smooth_spect: a spectrum object
+
+    """
+
+    smooth_spec = copy.deepcopy(spec)
+    smooth_spec.counts = []
+    smooth_spec.counts[0] = spec.counts[0]
+    smooth_spec.counts[1] = spec.counts[1]
+    
+    spec_len = len(spec.counts)
+    i = 2
+    while i < spec_len - 1:
+        smooth_spec.counts[i] = (1 / 9) * (spec.counts[i - 2] +
+                               spec.counts[i + 2] + (2 * spec.counts[i + 1]) +
+                               (2 * spec.counts[i - 1]) + (3 * spec.counts[i]))
+        i= i + 1
+    smooth_spec.counts[i] = spec.counts[i]
+    smooth_spec.counts[i + 1] = spec.counts[i + 1]
+    smooth_spec.spec_name = spec.spec_name + ' smoothed'
+    return smooth_spec

@@ -58,7 +58,7 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
         return print_string
 
 
-def read_alt_spe_file(spec_file_path):
+def read_dollar_spe_file(spec_file_path):
     """Reads a .spe file with the $format
     """
 
@@ -144,7 +144,7 @@ def read_spe_file(spec_file_path):
 
     # check version of .spe file matches currently supported version
     if (file_split[0] == '$SPEC_ID:'):
-        raise RuntimeError('This type of spe file is not supported')
+        raise RuntimeError('Spe file format is not supported by this function')
 
     for item in file_split:
         line = item.split(":")
