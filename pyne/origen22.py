@@ -504,7 +504,7 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
         Three tuple of library numbers from the tape9 file for cross section and fission
         product yields, eg (204, 205, 206).
     cut_off : float, optional
-        Cut-off concentration, below which reults are not recorded.
+        Cut-off concentration, below which results are not recorded.
     out_table_nes :  length 3 sequence of bools, optional
         Specifies which type of output tables should be printed by ORIGEN.  The fields
         represent (Nuclide, Element, Summary).  The default value of (False, False, True)
@@ -517,9 +517,20 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
         out_table_nes and out_table_laf.  For example the list [10, 5] would print
         tables 5 and 10.  There are 24 tables available. If None, then all tables
         are printed.
+
+    Warnings
+    --------
+    If ``irr_value`` is ``NaN`` or ``inf``, ORIGEN will still run without
+    complaint, but the TAPE6.OUT file will only contain headers and no data.
     """
     if irr_type not in ["IRP", "IRF"]:
         raise TypeError("Irradiation type must be either 'IRP' or 'IRF'.")
+
+    if np.isnan(irr_value):
+        raise ValueError("Irradiation value is NaN.")
+
+    if np.isinf(irr_value):
+        raise ValueError("Irradiation value is infinite.")
 
     # Make template fill-value dictionary
     tape5_kw = {

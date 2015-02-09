@@ -1151,7 +1151,7 @@ pyne::Material pyne::Material::expand_elements() {
         nabund = (*abund_itr).first;
         if (zabund == znuc && 0 != nucname::anum(nabund) && 0.0 != (*abund_itr).second)
           newcomp[nabund] = (*abund_itr).second * (*nuc).second * \
-                            atomic_mass_map[nabund] / atomic_mass_map[n];
+                            atomic_mass(nabund) / atomic_mass(n);
         else if (n == nabund && 0.0 == (*abund_itr).second)
           newcomp.insert(*nuc);
         abund_itr++;
@@ -1482,6 +1482,18 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs) {
   norm_comp();
 };
 
+
+std::map<int, double> pyne::Material::to_atom_dens() {
+  // Returns an atom density map from this material's composition
+  // the material's density
+
+  std::map<int, double> atom_dens = std::map<int, double>();
+
+  for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
+    atom_dens[ci->first] = (ci->second) * density * pyne::N_A / pyne::atomic_mass(ci->first);
+
+  return atom_dens;
+};
 
 
 std::vector<std::pair<double, double> > pyne::Material::gammas() {

@@ -266,6 +266,20 @@ already set on the material, the molecular mass will be used.
     Out[43]: 18.01056468403
 
 
+Similarly, you may also be interested in knowing the atom density of a material. This
+can be done by using the :meth:`Material.to_atom_dens` method which returns the atom
+densities in units [atoms/cc]. Below is an example using water.
+
+.. code-block:: ipython
+
+    In [44]: h2o = {10010000: 0.11191487328808077, 80160000: 0.8880851267119192}
+    
+    In [45]: mat = Material(h2o, density=1.0)
+    
+    In [46]: mat.to_atom_dens()
+    Out[46]: {10010000: 6.687343351693846e+22, 80160000: 3.343671675846923e+22}
+
+
 Moreover, other materials may also be used to specify a new material from atom fractions.
 This is a typical case for reactors where the fuel vector is convolved inside of another 
 chemical form.  Below is an example of obtaining the Uranium-Oxide material from Oxygen
@@ -273,11 +287,11 @@ and low-enriched uranium.
 
 .. code-block:: ipython
 
-    In [44]: uox = Material()
+    In [47]: uox = Material()
 
-    In [46]: uox.from_atom_frac({leu: 1.0, 'O16': 2.0})
+    In [48]: uox.from_atom_frac({leu: 1.0, 'O16': 2.0})
 
-    In [47]: print uox
+    In [49]: print uox
     Material:
     mass = 269.918868043
     atoms per molecule = 3.0
@@ -291,18 +305,18 @@ and low-enriched uranium.
 
 User-defined Metadata
 ----------------------------------
-Materials also have an ``attrs`` attribute which allows users to store arbitrary 
+Materials also have an ``metadata`` attribute which allows users to store arbitrary 
 custom information about the material.  This can include things like units, comments, 
 provenance information, or anything else the user desires.  This is implemented as an
 in-memory JSON object attached to the C++ class.  Therefore, what may be stored in
-the ``attrs`` is subject to the same restrictions as JSON itself.  The top-level 
-of the attrs *should* be a dictionary, though this is not explicitly enforced.
+the ``metadata`` is subject to the same restrictions as JSON itself.  The top-level 
+of the metadata *should* be a dictionary, though this is not explicitly enforced.
 
 .. code-block:: ipython
 
-    In [48]: leu = Material({922350: 0.05, 922380: 0.95}, 15, attrs={'units': 'kg'})
+    In [50]: leu = Material({922350: 0.05, 922380: 0.95}, 15, metadata={'units': 'kg'})
 
-    In [49]: print leu
+    In [51]: print leu
     Material: 
     mass = 15.0
     atoms per molecule = -1.0
@@ -311,41 +325,41 @@ of the attrs *should* be a dictionary, though this is not explicitly enforced.
     U235   0.05
     U238   0.95
 
-    In [50]: leu
-    Out[50]: pyne.material.Material({922350: 0.05, 922380: 0.95}, 15.0, -1.0 {"units":"kg"})
+    In [52]: leu
+    Out[52]: pyne.material.Material({922350: 0.05, 922380: 0.95}, 15.0, -1.0 {"units":"kg"})
 
-    In [51]: leu.attrs
-    Out[51]: {"units":"kg"}
+    In [53]: leu.metadata
+    Out[53]: {"units":"kg"}
 
-    In [52]: a = leu.attrs
+    In [54]: a = leu.metadata
 
-    In [53]: a['comments'] = ['Anthony made this material.']
+    In [55]: a['comments'] = ['Anthony made this material.']
 
-    In [54]: leu.attrs['comments'].append('And then Katy made it better!')
+    In [56]: leu.metadata['comments'].append('And then Katy made it better!')
 
-    In [55]: a['id'] = 42
+    In [57]: a['id'] = 42
 
-    In [56]: leu.attrs
-    Out[56]: {"comments":["Anthony made this material.","And then Katy made it better!"],\
+    In [58]: leu.metadata
+    Out[58]: {"comments":["Anthony made this material.","And then Katy made it better!"],\
               "id":42,"units":"kg"}
 
-    In [57]: leu.attr = {'units': 'solar mass'}
+    In [59]: leu.attr = {'units': 'solar mass'}
 
-    In [58]: leu.attr
-    Out[58]: {'units': 'solar mass'}
+    In [60]: leu.attr
+    Out[60]: {'units': 'solar mass'}
 
-    In [59]: a
-    Out[59]: {"comments":["Anthony made this material.","And then Katy made it better!"],\
+    In [61]: a
+    Out[61]: {"comments":["Anthony made this material.","And then Katy made it better!"],\
               "id":42,"units":"kg"}
 
-    In [60]: leu.attr['units'] = 'not solar masses'
+    In [62]: leu.attr['units'] = 'not solar masses'
 
-    In [61]: leu.attr['units']
-    Out[61]: 'not solar masses'
+    In [63]: leu.attr['units']
+    Out[63]: 'not solar masses'
 
-As you can see from the above, the attrs interface provides a view into the underlying 
+As you can see from the above, the metadata interface provides a view into the underlying 
 JSON object.  This can be manipulated directly or by renaming it to another variable.
-Additionally, ``attrs`` can be replaced with a new object of the appropriate type.  
+Additionally, ``metadata`` can be replaced with a new object of the appropriate type.  
 Doing so invalidates any previous views into this container.
 
 ------------------

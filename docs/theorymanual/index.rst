@@ -1,4 +1,4 @@
-.. _theorymanual:
+.. _ahot_solvers:
 
 =============
 Theory Manual
@@ -11,6 +11,7 @@ The following describe methods implemented natively in PyNE:
 .. toctree::
     :maxdepth: 1
 
+    spatial_solvers.rst
     nucname
     decay
     source_sampling

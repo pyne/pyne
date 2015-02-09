@@ -35,29 +35,29 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 pyne_logo = """\
 
-                                  /   \       
- _                        )      ((   ))     (                          
-(@)                      /|\      ))_((     /|\                          
-|-|                     / | \    (/\|/\)   / | \                      (@) 
+                                  /   \
+ _                        )      ((   ))     (
+(@)                      /|\      ))_((     /|\
+|-|                     / | \    (/\|/\)   / | \                      (@)
 | | -------------------/--|-voV---\`|'/--Vov-|--\---------------------|-|
 |-|                         '^`   (o o)  '^`                          | |
 | |                               `\Y/'                               |-|
 |-|                                                                   | |
 | |        /\             ___           __  __             /\         |-|
-|-|       /^~\           / _ \_   _  /\ \ \/__\           /^~\        | |  
+|-|       /^~\           / _ \_   _  /\ \ \/__\           /^~\        | |
 | |       /^~\          / /_)/ | | |/  \/ /_\             /^~\        |-|
-|-|       /^~\         / ___/| |_| / /\  //__             /^~\        | | 
-| |       ^||`         \/     \__, \_\ \/\__/             ^||`        |-|  
-|-|        ||                |____/                        ||         | | 
+|-|       /^~\         / ___/| |_| / /\  //__             /^~\        | |
+| |       ^||`         \/     \__, \_\ \/\__/             ^||`        |-|
+|-|        ||                |____/                        ||         | |
 | |       ====                                            ====        |-|
 |-|                                                                   | |
 | |                                                                   |-|
 |-|___________________________________________________________________| |
 (@)              l   /\ /         ( (       \ /\   l                `\|-|
                  l /   V           \ \       V   \ l                  (@)
-                 l/                _) )_          \I                   
+                 l/                _) )_          \I
                                    `\ /'
-                                     `  
+                                     `
 """
 
 
@@ -160,11 +160,17 @@ def main(args=None):
         print("Checking hashes")
         result = check_hashes(args.nuc_data)
         print("Results:")
+        badsum = False
         for name, value in result:
             if value:
                 print(" node " + name + " checksum matches")
             else:
+                badsum = True
                 print(" node " + name + " checksum doesn't match!!")
+        if badsum is True:
+            print("""You may need to try building the data from scratch using:\n
+                  nuc_data_make --fetch-prebuilt False
+                  """)
 
 
 if __name__ == '__main__':

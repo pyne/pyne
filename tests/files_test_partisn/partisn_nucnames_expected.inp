@@ -1,0 +1,67 @@
+     1     0     0
+partisn_test_geom
+/ 
+/ Notes: This input assumes a volumetric source calculation using
+/ default PARTISN values in many cases. Please refer to the comments
+/ throughout and the PARTISN input manual.
+/ Variables that MUST be set in each block (other defaults and 
+/ optional variables may exist):
+/     Block 1:  ISN
+/     Block 3:  LIB, MAXORD, IHM, IHT
+/     Block 6:  no input is provided for block 6
+/ 
+/ ------------ Block 1 (Control and Dimensions) ------------
+/ 
+igeom=slab  ngroup=5  niso=3  mt=2  nzone=3
+/ Please provide input for ISN variable:
+/ isn=  
+im=3  it=6  
+t
+/ 
+/ ------------ Block 2 (Geometry) ------------
+/ 
+xmesh= -5.000 0.000 10.000 15.000 
+xints= 3R 2
+zones= 1 2 3 ;
+t
+/ 
+/ ------------ Block 3 (Nuclear Data) ------------
+/ 
+/ Please provide input for the following variables:
+/ lib=
+/ maxord=
+/ ihm=
+/ iht=
+/ Note: NAMES is not all inclusive. Only NAMES that are present in
+/ meshed area are listed.
+names= he4 hg he3 
+t
+/ 
+/ ------------ Block 4 (Cross-Section Mixing) ------------
+/ 
+matls= Mercury hg 4.0666e-02;
+       HeliumNatural he4 2.4976e-05, he3 4.4415e-11;
+assign= 1 HeliumNatural 1.0000e+00;
+        2 HeliumNatural 5.0000e-01, Mercury 5.0000e-01;
+        3 Mercury 1.0000e+00;
+t
+/ 
+/ ------------ Block 5 (Solver Inputs) ------------
+/ 
+/ This input assumes a volumetric source calculation with vacuum
+/ boundary conditions. Change inputs below if otherwise.
+ievt=0      / source calculation
+/ isct=     / Legendre order of scattering (default=0)
+/ ith=      / 0/1/2= direct/adjoint/POI calculation (default=0)
+/ ibl=      / left BC (default=0, vacuum)
+/ ibr=      / right BC (default=0, vacuum)
+/ ibt=      / top BC (default=0, vacuum)
+/ ibb=      / bottom BC (default=0, vacuum)
+/ ibfrnt=   / front BC (default=0, vacuum)
+/ ibback=   / back BC (default=0, vacuum)
+/ 
+/ Source is in format of option 3 according to PARTISN input manual.
+/ Default is an evenly distributed volume source.
+source= 1.0 4R 0.0 ; 1.0 4R 0.0 ; 1.0 4R 0.0 ; 
+sourcx= 1.0 2R 0.0 ; 1.0 2R 0.0 ; 1.0 2R 0.0 ; 
+t

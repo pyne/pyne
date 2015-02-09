@@ -43,3 +43,4 @@ docs/rxname_listing
 rs.cred
 src/decay.h
 src/decay.cpp
+tests/fort.8
