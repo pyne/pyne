@@ -119,11 +119,22 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/bins.pyx"
 cython_add_module(bins bins.pyx)
 target_link_libraries(bins pyne)
 
+# figure out which f2py to use
+find_program(F2PY_C f2py)
 if(${PYTHON_VERSION_MAJOR} GREATER 2)
-  set(F2PY_C "f2py3")
-else(${PYTHON_VERSION_MAJOR} GREATER 2)
-  set(F2PY_C "f2py")
+  find_program(F2PY_C2 f2py3)
+  if(F2PY_C2)
+    set(F2PY_C ${F2PY_C2})
+  endif(F2PY_C2)
+elseif(${PYTHON_VERSION_MAJOR} LESS 3)
+  #because arch is dumb
+  find_program(F2PY_C2 f2py2)
+  if(F2PY_C2)
+    set(F2PY_C ${F2PY_C2})
+  endif(F2PY_C2)
 endif(${PYTHON_VERSION_MAJOR} GREATER 2)
+
+
 
 if(BUILD_SPATIAL_SOLVER)
     # TRANSPORT_SPATIAL_METHODS wrapper
