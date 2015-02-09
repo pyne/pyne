@@ -21,7 +21,7 @@ cython_add_module(dtypes dtypes.pyx)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/stlcontainers.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(stlcontainers stlcontainers.pyx)
-                            
+
 # jsoncpp
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/jsoncpp.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
@@ -119,17 +119,22 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/bins.pyx"
 cython_add_module(bins bins.pyx)
 target_link_libraries(bins pyne)
 
-if(BUILD_SPATIAL_SOLVER)
+if(${PYTHON_VERSION_MAJOR} GREATER 2)
+  set(F2PY_C "f2py3")
+else(${PYTHON_VERSION_MAJOR} GREATER 2)
+  set(F2PY_C "f2py")
+endif(${PYTHON_VERSION_MAJOR} GREATER 2)
 
+if(BUILD_SPATIAL_SOLVER)
     # TRANSPORT_SPATIAL_METHODS wrapper
     # I don't know which method is better...
-    #add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
-    #add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
-    add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}) 
-    add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX} 
-        COMMAND f2py -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
-                    --f90flags="-fdefault-real-8" 
-                    -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90 
+    #add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
+    #add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}
+    add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
+    add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}
+        COMMAND ${F2PY_C} -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
+                    --f90flags="-fdefault-real-8"
+                    -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90
                     -lpyne
                     #--debug --debug-capi
                     #-lpyne --debug-capi
