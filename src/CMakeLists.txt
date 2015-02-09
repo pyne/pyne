@@ -39,9 +39,6 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
     )
 
 #check operating system
-IF(NOT ${PYNE_PLATFORM} STREQUAL "__LINUX__")
-    set(BUILD_SPATIAL_SOLVER false)
-ENDIF()
 
 # setup source files
 IF(BUILD_SPATIAL_SOLVER)
