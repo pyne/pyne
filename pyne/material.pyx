@@ -23,7 +23,10 @@ from pyne.utils import QAWarning
 import os
 import sys
 if sys.version_info[0] >= 3:
+    #Python2 basestring is now Python3 string
     basestring = str
+    #Python2 string is now Python3 bytes
+    str = bytes
 
 import tables as tb
 
@@ -44,12 +47,6 @@ import pyne.data as data
 
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
-
-if sys.version_info[0] > 2:
-    #Python2 basestring is now Python3 string
-    basestring = str
-    #Python2 string is now Python3 bytes
-    str = bytes
 
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647
