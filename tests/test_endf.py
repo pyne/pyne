@@ -403,6 +403,19 @@ magna aliquyam erat, sed diam voluptua.                            828 1451   15
 """)
 
 
+def ignore_future_warnings(func):
+    """This is a decorator which can be used to ignore FutureWarnings
+    occurring in a function."""
+    def new_func(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            return func(*args, **kwargs)
+    new_func.__name__ = func.__name__
+    new_func.__doc__ = func.__doc__
+    new_func.__dict__.update(func.__dict__)
+    return new_func
+
+
 library = Library(str_library)
 nuc1002, nuc10031, nuc40000 = nucname.id(1002), nucname.id(10031), nucname.id(40000)
 library._read_res(nuc1002)
@@ -448,10 +461,11 @@ def test_endftod():
 
 def test_get():
     obs = library.get_rx(nuc40000, 4, 2)
-    exp = [4.898421e+3,6.768123e+0,0,1,0,0,2.123124e+6,8.123142e-6,2.123212e+6,
-           8.231231e-6,-2.231211e+6,8.123421e-6]
+    exp = [4.898421e+3, 6.768123e+0, 0, 1, 0, 0, 2.123124e+6, 8.123142e-6, 2.123212e+6,
+           8.231231e-6, -2.231211e+6, 8.123421e-6]
     try:
-        badkey = library.get_rx(111, 1, 1)
+        # try to get a bad key
+        library.get_rx(111, 1, 1)
         assert(False)
     except ValueError:
         assert(True)
@@ -877,7 +891,7 @@ def test_u235():
 
 
 # Test ENDF Data Source
-
+@ignore_future_warnings
 def test_int_hist():
     exp_Eint = np.array([1,4,10, 20])
     exp_xs = np.array([15, 12, -7, 10])
@@ -1001,6 +1015,7 @@ def test_int_loglog_only_interpolate_one_endpoint():
     exp = e/3 * (5**3 - 2 **3) / (5-2)
     assert_allclose(exp, obs, rtol=1e-12)
 
+
 def test_discretize():
     from os.path import isfile
     try:
@@ -1028,6 +1043,33 @@ def test_discretize():
            74.217617672501689, 162.26091389706099, 218.90153743636509,
            312.62178192130619, 590.40136068709603, 724.64216445611373]
     assert_array_almost_equal(nonelastic_c, exp)
+
+
+def test_photoatomic():
+    try:
+        assert(os.path.isfile('Zn.txt'))
+    except AssertionError:
+        try:
+            import urllib.request as urllib
+        except ImportError:
+            import urllib
+        urllib.urlretrieve("https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt",
+                           "Zn.txt")
+    photondata = Library('Zn.txt')
+    xs_data = photondata.get_xs(300000000, 501)[0]
+    Eints, sigmas = xs_data['e_int'], xs_data['xs']
+    assert_equal(len(Eints),1864)
+    assert_equal(len(sigmas),1864)
+    assert_array_equal(Eints[0:5],[1.,  1.109887,  1.217224,
+                                   1.2589,  1.334942])
+    assert_array_equal(Eints[-5:],[6.30960000e+10,   7.94328000e+10,  
+                                   7.94330000e+10, 8.00000000e+10, 
+                                   1.00000000e+11])
+    assert_array_almost_equal(sigmas[0:5],[0.00460498,  0.00710582,
+                                           0.01047864,  0.01210534,
+                                           0.01556538])
+    assert_array_almost_equal(sigmas[-5:],[ 6.71525 ,  6.716781,  6.716781,
+                                           6.716829,  6.717811])
 
 if __name__ == "__main__":
     nose.runmodule()

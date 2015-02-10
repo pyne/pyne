@@ -21,7 +21,7 @@ cython_add_module(dtypes dtypes.pyx)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/stlcontainers.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(stlcontainers stlcontainers.pyx)
-                            
+
 # jsoncpp
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/jsoncpp.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
@@ -118,3 +118,38 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/bins.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(bins bins.pyx)
 target_link_libraries(bins pyne)
+
+# figure out which f2py to use
+find_program(F2PY_C f2py)
+if(${PYTHON_VERSION_MAJOR} GREATER 2)
+  find_program(F2PY_C2 f2py3)
+  if(F2PY_C2)
+    set(F2PY_C ${F2PY_C2})
+  endif(F2PY_C2)
+elseif(${PYTHON_VERSION_MAJOR} LESS 3)
+  #because arch is dumb
+  find_program(F2PY_C2 f2py2)
+  if(F2PY_C2)
+    set(F2PY_C ${F2PY_C2})
+  endif(F2PY_C2)
+endif(${PYTHON_VERSION_MAJOR} GREATER 2)
+
+
+
+if(BUILD_SPATIAL_SOLVER)
+    # TRANSPORT_SPATIAL_METHODS wrapper
+    # I don't know which method is better...
+    #add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
+    #add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}
+    add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
+    add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}
+        COMMAND ${F2PY_C} -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
+                    --f90flags="-fdefault-real-8"
+                    -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90
+                    -lpyne
+                    #--debug --debug-capi
+                    #-lpyne --debug-capi
+        DEPENDS pyne
+        )
+    target_link_libraries(transport_spatial_methods pyne)
+endif()

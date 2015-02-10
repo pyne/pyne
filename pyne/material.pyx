@@ -22,6 +22,9 @@ from warnings import warn
 from pyne.utils import QAWarning
 import os
 import sys
+if sys.version_info[0] >= 3:
+    basestring = str
+
 import tables as tb
 
 # local imports
@@ -1171,6 +1174,22 @@ cdef class _Material:
 
         self.mat_pointer.from_atom_frac(af)
 
+
+    def to_atom_dens(self):
+        """Converts the material to a map of nuclides to atom densities.
+
+        Returns
+        -------
+        atom_dens : mapping
+            Dictionary-like object that maps nuclides to atom densites in the
+            material.
+
+        """
+        cdef conv._MapIntDouble comp_proxy = conv.MapIntDouble()
+        comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.to_atom_dens())
+        return comp_proxy
+        
+        
     #
     # Radioactive Properties
     #
@@ -2102,6 +2121,8 @@ cdef class _MaterialLibrary(object):
             The path in the heirarchy to the nuclide array in an HDF5 file.
 
         """
+        if sys.version_info[0] >=3 and isinstance(lib, bytes):
+            lib = lib.decode()
         cdef dict _lib = {}
         if lib is None:
             self._lib = _lib
@@ -2244,12 +2265,12 @@ cdef class _MaterialLibrary(object):
                 name = "_" + str(i)
             _lib[name] = mat
 
-    def write_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+    def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid"):
         """Writes this material library to an HDF5 file.
 
         Parameters
         ----------
-        file : str
+        filename : str
             A path to an HDF5 file.
         datapath : str, optional
             The path in the heirarchy to the data table in an HDF5 file.
@@ -2262,14 +2283,14 @@ cdef class _MaterialLibrary(object):
         cdef set nucids = set()
         for mat in _lib.values():
             nucids.update(mat.comp.keys())
-        with tb.openFile(file, 'a') as f:
+        with tb.openFile(filename, 'a') as f:
             nucgrp, nucdsname = os.path.split(nucpath)
             f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)),
                           createparents=True)
         for key, mat in _lib.items():
             if "name" not in mat.metadata:
                 mat.metadata["name"] = key
-            mat.write_hdf5(file, datapath=datapath, nucpath=nucpath)
+            mat.write_hdf5(filename, datapath=datapath, nucpath=nucpath)
 
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     """The material library is a collection of unique keys mapped to

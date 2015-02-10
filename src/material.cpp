@@ -370,14 +370,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     H5Pset_chunk(data_set_params, 1, chunk_dims);
     H5Pset_deflate(data_set_params, 1);
 
-    material_data * data_fill_value  = new material_data[material_data_size];
-    (*data_fill_value).mass = -1.0;
-    (*data_fill_value).density= -1.0;
-    (*data_fill_value).atoms_per_mol = -1.0;
-    for (int n = 0; n != nuc_size; n++)
-      (*data_fill_value).comp[n] = 0.0;
-    H5Pset_fill_value(data_set_params, desc, &data_fill_value);
-
     // Create the data set
     data_set = H5Dcreate2(db, datapath.c_str(), desc, data_space, H5P_DEFAULT,
                             data_set_params, H5P_DEFAULT);
@@ -391,9 +383,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
                                 H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
     H5Fflush(db, H5F_SCOPE_GLOBAL);
-
-    // Remember to de-allocate
-    delete[] data_fill_value;
   };
 
   // Get the data hyperslab
@@ -1197,7 +1186,7 @@ pyne::Material pyne::Material::expand_elements() {
         nabund = (*abund_itr).first;
         if (zabund == znuc && 0 != nucname::anum(nabund) && 0.0 != (*abund_itr).second)
           newcomp[nabund] = (*abund_itr).second * (*nuc).second * \
-                            atomic_mass_map[nabund] / atomic_mass_map[n];
+                            atomic_mass(nabund) / atomic_mass(n);
         else if (n == nabund && 0.0 == (*abund_itr).second)
           newcomp.insert(*nuc);
         abund_itr++;
@@ -1528,6 +1517,18 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs) {
   norm_comp();
 };
 
+
+std::map<int, double> pyne::Material::to_atom_dens() {
+  // Returns an atom density map from this material's composition
+  // the material's density
+
+  std::map<int, double> atom_dens = std::map<int, double>();
+
+  for (comp_iter ci = comp.begin(); ci != comp.end(); ci++)
+    atom_dens[ci->first] = (ci->second) * density * pyne::N_A / pyne::atomic_mass(ci->first);
+
+  return atom_dens;
+};
 
 
 std::vector<std::pair<double, double> > pyne::Material::gammas() {

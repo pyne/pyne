@@ -283,7 +283,8 @@ def default_uranium_cascade():
 
 def feed(double x_feed, double x_prod, double x_tail, double product=0, 
          double tails=0):
-    """Calculates the feed quantity in kg from either the product or tails.
+    """feed(x_feed, x_prod, x_tail, product=0, tails=0)
+    Calculates the feed quantity in kg from either the product or tails.
 
     Parameters
     ----------
@@ -310,7 +311,8 @@ def feed(double x_feed, double x_prod, double x_tail, double product=0,
     
 def product(double x_feed, double x_prod, double x_tail, double feed=0, 
             double tails=0):
-    """Calculates the product quantity in kg from either the feed or tails.
+    """product(x_feed, x_prod, x_tail, feed=0, tails=0)
+    Calculates the product quantity in kg from either the feed or tails.
 
     Parameters
     ----------
@@ -337,7 +339,8 @@ def product(double x_feed, double x_prod, double x_tail, double feed=0,
 
 def tails(double x_feed, double x_prod, double x_tail, double feed=0, 
           double product=0):
-    """Calculates the tails quantity in kg from either the feed or product.
+    """tails(x_feed, x_prod, x_tail, feed=0, product=0)
+    Calculates the tails quantity in kg from either the feed or product.
 
     Parameters
     ----------
@@ -363,7 +366,8 @@ def tails(double x_feed, double x_prod, double x_tail, double feed=0,
         return product * cpp_enrichment.tail_per_prod(x_feed, x_prod, x_tail)
 
 def value_func(double x):
-    """Calculates the value or separation potential of an assay.
+    """value_func(x)
+    Calculates the value or separation potential of an assay.
 
     .. math::
 
@@ -383,7 +387,8 @@ def value_func(double x):
 
 def swu(double x_feed, double x_prod, double x_tail, double feed=0, 
         double product=0, double tails=0):
-    """Calculates the SWU required to reach a given quantity of an enrichment
+    """swu(x_feed, x_prod, x_tail, feed=0, product=0, tails=0)
+    Calculates the SWU required to reach a given quantity of an enrichment
     level. One of feed, product, or tails must be provided.
 
     Parameters

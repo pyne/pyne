@@ -140,7 +140,7 @@ def natural_abund(nuc):
     If the nuclide is not found, abundance is 0.
     """
     if isinstance(nuc, int):
-        abund = cpp_data.natural_abund(<int> nuc)
+        abund = cpp_data.natural_abund(<int> pyne.nucname.id(nuc))
     elif isinstance(nuc, basestring):
         nuc_bytes = nuc.encode()
         abund = cpp_data.natural_abund(<char *> nuc_bytes)
@@ -1065,7 +1065,7 @@ def id_from_level(nuc, level, special=""):
     cdef std_string spc
     if len(special) == 1:
         spc = special[0].encode('UTF-8')
-    if level is not None and level > 0.0:
+    if level is not None and (level > 0.0 or len(special) == 1):
         if len(special) == 1:
             return cpp_data.id_from_level(<int> nuc, <double> level, <std_string> spc)
         else:
@@ -1164,8 +1164,8 @@ def decay_branch_ratio(from_nuc, to_nuc):
     ratio : double
         branching ratio
     """
-    ratio = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
-    return ratio
+    ratio, error = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
+    return ratio, error
 
 def decay_branch_ratio_byparent(parent):
     """
@@ -1459,6 +1459,47 @@ def gamma_parent(en, enerror=None):
     if enerror is None:
         enerror = en * 0.01
     return cpp_data.gamma_parent(<double> en, <double> enerror)
+
+def gamma_child_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray children from ENSDF decay dataset
+    based on gamma-ray energy.
+
+    Parameters
+    ----------
+    en : double
+       gamma ray energy in keV
+    enerror : double
+       gamma ray energy error (range which you want to search) this defaults
+       to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+       An array of gamma ray children in state_id form
+    """
+    if enerror is None:
+        enerror = en * 0.01
+    return cpp_data.gamma_child(<double> en, <double> enerror)
+
+def gamma_child_byparent(parent):
+    """
+    Returns a list of gamma ray children from ENSDF decay dataset
+    based on gamma-ray energy.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in state_id form
+
+
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of gamma ray children in state_id form
+    """
+    return cpp_data.gamma_child(<int> parent)
 
 def gamma_xrays(parent):
     """

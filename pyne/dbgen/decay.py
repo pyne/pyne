@@ -100,10 +100,11 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2014-April/'
+    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist14/'
+
     cf_base_url = 'http://data.pyne.io/'
-    ensdf_zip = ['ensdf_140416_099.zip', 'ensdf_140416_199.zip',
-                 'ensdf_140416_294.zip', ]
+    ensdf_zip = ['ensdf_141022_099.zip', 'ensdf_141022_199.zip',
+                 'ensdf_141022_299.zip', ]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
@@ -112,7 +113,7 @@ def grab_ensdf_decay(build_dir=""):
             urllib.urlretrieve(iaea_base_url + f, fpath)
 
             if os.path.getsize(fpath) < 1048576:
-                print("  could not get {0} from IAEA; trying mirror".format(f))
+                print("  could not get {0} from NNDC; trying mirror".format(f))
                 os.remove(fpath)
                 urllib.urlretrieve(cf_base_url + f, fpath)
 
@@ -144,6 +145,7 @@ decay_dtype = np.dtype([
     ('half_life', float),
     ('half_life_error', float),
     ('branch_ratio', float),
+    ('branch_ratio_error', float),
     ('photon_branch_ratio', float),
     ('photon_branch_ratio_err', float),
     ('beta_branch_ratio', float),
@@ -289,18 +291,18 @@ def parse_decay_data(build_dir=""):
     all_betas = []
     all_ecbp = []
     for item in decay_data:
-        all_decays.append(item[:10])
-        if len(item[10]) > 0:
-            for subitem in item[10]:
-                all_gammas.append(tuple(subitem))
+        all_decays.append(item[:11])
         if len(item[11]) > 0:
             for subitem in item[11]:
-                all_alphas.append(tuple(subitem))
+                all_gammas.append(tuple(subitem))
         if len(item[12]) > 0:
             for subitem in item[12]:
-                all_betas.append(tuple(subitem))
+                all_alphas.append(tuple(subitem))
         if len(item[13]) > 0:
             for subitem in item[13]:
+                all_betas.append(tuple(subitem))
+        if len(item[14]) > 0:
+            for subitem in item[14]:
                 all_ecbp.append(tuple(subitem))
 
     all_decay_array = np.array(all_decays, dtype=decay_dtype)
@@ -395,6 +397,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                                  'parent nuclide [nuc_id], daughter nuclide '
                                  '[nuc_id], decay [string], half life [s],'
                                  'half life error [s], branch ratio [frac],'
+                                 'branch ratio error [frac],'
                                  'photon branch ratio [ratio],'
                                  'photon branch ratio error [ratio],'
                                  'beta branch ratio [ratio],'
@@ -460,7 +463,7 @@ def make_decay(args):
             return
 
             # grab the decay data
-    print("Grabbing the ENSDF decay data from IAEA")
+    print("Grabbing the ENSDF decay data from NNDC")
     grab_ensdf_decay(build_dir)
 
     # Make atomic mass table once we have the array
