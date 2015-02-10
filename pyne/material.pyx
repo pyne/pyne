@@ -25,8 +25,6 @@ import sys
 if sys.version_info[0] >= 3:
     #Python2 basestring is now Python3 string
     basestring = str
-    #Python2 string is now Python3 bytes
-    str = bytes
 
 import tables as tb
 
