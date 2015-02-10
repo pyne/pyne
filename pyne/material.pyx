@@ -643,8 +643,12 @@ cdef class _Material:
             For a Material mat
         """
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
+        cdef std_string dosetype
+        if not isinstance(dose_type, bytes):
+            dose_type = dose_type.encode()
+        dosetype = std_string(<char *> dose_type)
         nucvec_proxy.map_ptr = new cpp_map[int, double](
-                self.mat_pointer.dose_per_g(dose_type, source))
+                self.mat_pointer.dose_per_g(dosetype, source))
         return nucvec_proxy
 
 
