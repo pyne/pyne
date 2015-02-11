@@ -5,9 +5,10 @@ This makes the C++ portion of pyne more portable to other projects.
 
 Originally inspired by JsonCpp: http://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp/amalgamate.py
 """
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import os
 import sys
+import io
 from argparse import ArgumentParser
 
 CODE_EXTS = {'.c', '.cpp', '.cxx', '.h', '.hpp', '.hxx'}
@@ -85,18 +86,21 @@ class AmalgamatedFile(object):
 
     def write(self):
         self.prepend_files()
-        txt = ''.join(self._blocks)
+        if sys.version > '3':
+            txt = ''.join(self._blocks)
+        else:
+            txt = ''.join([block.decode('utf-8') for block in self._blocks])
         d = os.path.dirname(self.path)
         if len(d) > 0 and not os.path.isdir(d):
             os.makedirs(d)
-        with open(self.path, 'wb') as f:
-            f.write(txt)
+        with io.open(self.path, 'wb') as f:
+            f.write(txt.encode('utf-8'))
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('-s', dest='source_path', action='store', 
+    parser.add_argument('-s', dest='source_path', action='store',
                         default='pyne.cpp', help='Output *.cpp source path.')
-    parser.add_argument('-i', dest='header_path', action='store', 
+    parser.add_argument('-i', dest='header_path', action='store',
                         default='pyne.h', help='Output header path.')
     parser.add_argument('-f', dest='files', nargs='+', help='Files to amalgamate.',
                         default=DEFAULT_FILES)
@@ -120,7 +124,7 @@ def main():
     # source file
     src = AmalgamatedFile(ns.source_path)
     src.append_line('// PyNE amalgated source http://pyne.io/')
-    src.append_line('#include "{0}"'.format(os.path.relpath(ns.header_path, 
+    src.append_line('#include "{0}"'.format(os.path.relpath(ns.header_path,
                                             os.path.dirname(ns.source_path))))
     src.append_line('')
     for f in ns.files:
@@ -132,6 +136,6 @@ def main():
     # write both
     hdr.write()
     src.write()
- 
+
 if __name__ == '__main__':
     main()
