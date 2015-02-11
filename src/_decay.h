@@ -1,3 +1,4 @@
+#ifdef PYNE_DECAY_IS_DUMMY
 #ifndef PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
 #define PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
 
@@ -29,3 +30,4 @@ std::map<int, double> decay(std::map<int, double> comp, double t);
 }  // namespace pyne
 
 #endif  // PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
+#endif  // PYNE_DECAY_IS_DUMMY
