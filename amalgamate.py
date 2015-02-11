@@ -45,6 +45,8 @@ DEFAULT_FILES = [
     'src/enrichment.cpp',
     'src/enrichment_symbolic.h',
     'src/enrichment_symbolic20.cpp',
+    'src/_decay.h',
+    'src/_decay.cpp',
     ]
 
 class AmalgamatedFile(object):
