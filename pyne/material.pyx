@@ -624,10 +624,6 @@ cdef class _Material:
 
     def dose_per_g(self, dose_type, source=0):
         """This provides the dose per gram using the comp of the the Material.
-        ext_air_dose returns mrem/h per g per m^3
-        ext_soil_dose returns mrem/h per g per m^2
-        ingest_dose returns mrem per g
-        inhale_dose returns mrem per g
 
         Parameters
         ----------
@@ -640,7 +636,11 @@ cdef class _Material:
         Returns
         -------
         nucvec : dict
-            For a Material mat
+            For a Material mat:
+            ext_air_dose returns mrem/h per g per m^3
+            ext_soil_dose returns mrem/h per g per m^2
+            ingest_dose returns mrem per g
+            inhale_dose returns mrem per g
         """
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         cdef std_string dosetype
