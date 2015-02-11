@@ -33,6 +33,7 @@ autogenwarn = """
 """.strip()
 
 HEADER = ENV.from_string("""
+#{{ dummy_ifdef }} PYNE_DECAY_IS_DUMMY
 #ifndef PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
 #define PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
 
@@ -57,9 +58,11 @@ std::map<int, double> decay(std::map<int, double> comp, double t);
 }  // namespace pyne
 
 #endif  // PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
+#endif  // PYNE_DECAY_IS_DUMMY
 """.strip())
 
 SOURCE = ENV.from_string("""
+#{{ dummy_ifdef }} PYNE_DECAY_IS_DUMMY
 {{ autogenwarn }}
 
 #ifndef PYNE_IS_AMALGAMATED
@@ -103,6 +106,8 @@ const int all_nucs [{{ nucs|length }}] = {
 
 }  // namespace decayers
 }  // namespace pyne
+
+#endif  // PYNE_DECAY_IS_DUMMY
 """.strip())
 
 
@@ -131,10 +136,11 @@ B_EXPR = 'b{b}'
 KB_EXPR = '{k:e}*' + B_EXPR
 
 
-def genfiles(nucs, short=1e-8, sf=False):
+def genfiles(nucs, short=1e-8, sf=False, dummy=False):
     ctx = Namespace(
         nucs=nucs,
         autogenwarn=autogenwarn,
+        dummy_ifdef=('ifdef' if dummy else 'ifndef'),
         )
     ctx.cases = gencases(nucs)
     ctx.funcs = genelemfuncs(nucs, short=short, sf=sf)
@@ -326,9 +332,10 @@ def upload(ns):
     obj = cf.store_object('pyne-data', 'decay.tar.gz', fdata)
 
 
-def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False):
+def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False, 
+          dummy=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
-    h, s = genfiles(nucs, short=short, sf=sf)
+    h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
     with io.open(hdr, 'w') as f:
         f.write(h)
     with io.open(src, 'w') as f:
@@ -341,6 +348,11 @@ def main():
     parser.add_argument('--src', default='decay.cpp', help='The source file name.')
     parser.add_argument('--nucs', nargs='+', default=None, 
                         help='Nuclides to generate for.')
+    parser.add_argument('--dummy', action='store_true', default=False,
+                        dest='dummy', help='Makes dummy versions as '
+                        'compile-time fallbacks.')
+    parser.add_argument('--no-dummy', action='store_false', default=False, 
+                        dest='dummy', help='Makes regular files.')
     parser.add_argument('--filter-short', default=1e-8, type=float, dest='short',
                         help='Fraction of sum of all half-lives below which a '
                              'nuclide is filtered from a decay chain, default 1e-8.')
@@ -356,7 +368,8 @@ def main():
                        help='Does not build the source code.')
     ns = parser.parse_args()
     if ns.build:
-        build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf)
+        build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf, 
+              dummy=ns.dummy)
     if ns.upload:
         print("uploading to rackspace...")
         upload(ns)

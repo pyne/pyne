@@ -1,3 +1,4 @@
+#ifdef PYNE_DECAY_IS_DUMMY
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //              WARNING
@@ -14,7 +15,7 @@
 namespace pyne {
 namespace decayers {
 
-void decay_h(double &t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[4]) {
+void decay_h(double t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[4]) {
   //using std::exp2;
   switch (it->first) {
     case 10010000: {
@@ -35,7 +36,7 @@ void decay_h(double &t, std::map<int, double>::const_iterator &it, std::map<int,
   }
 }
 
-void decay_he(double &t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[4]) {
+void decay_he(double t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[4]) {
   //using std::exp2;
   switch (it->first) {
     case 20030000: {
@@ -85,3 +86,5 @@ const int all_nucs [4] = {
 
 }  // namespace decayers
 }  // namespace pyne
+
+#endif  // PYNE_DECAY_IS_DUMMY
