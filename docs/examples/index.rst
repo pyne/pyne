@@ -1,9 +1,9 @@
-.. _gallery:
+.. _examples:
 
 ============
-Gallery
+Examples
 ============
-Browse and borrow code from the PyNE gallery!
+Browse and borrow code from the PyNE examples!
 
 .. toctree::
     :glob:
