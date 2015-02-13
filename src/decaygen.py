@@ -67,6 +67,7 @@ SOURCE = ENV.from_string("""
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "decay.h"
+#include "nucname.h"
 #endif
 
 namespace pyne {
@@ -82,9 +83,16 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   double out [{{ nucs|length }}] = {};  // init to zero
   map<int, double> outcomp;
   
-  // body
+  //convert to state id's
+  std::map<int, double> scomp;
   map<int, double>::const_iterator it = comp.begin();
   for (; it != comp.end(); ++it) {
+      scomp.insert(std::pair<int,double>(nucname::id_to_state_id(it->first),it->second));
+  }
+  
+  // body
+  it = scomp.begin();
+  for (; it != scomp.end(); ++it) {
     switch (nucname::znum(it->first)) {
       {{ cases|indent(6) }}
       default:
@@ -96,7 +104,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   // cleanup
   for (i = 0; i < {{ nucs|length }}; ++i)
     if (out[i] > 0.0)
-      outcomp[all_nucs[i]] = out[i];
+      outcomp[nucname::state_id_to_id(all_nucs[i])] = out[i];
   return outcomp;
 }
 
