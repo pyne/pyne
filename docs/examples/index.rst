@@ -17,6 +17,7 @@ Browse and borrow code from the PyNE examples!
 
 .. |ace| image:: ace_thumb.png
     :target: ace.html
+    :width: 150 px
 
 .. |chainsolve_transmutation| image:: chainsolve_transmutation_thumb.png
     :target: chainsolve_transmutation.html
@@ -29,12 +30,14 @@ Browse and borrow code from the PyNE examples!
 
 .. |data_source| image:: data_sources_thumb.png
     :target: data_sources.html
+    :width: 150 px
 
 .. |enrichment_mstar_vs_flowrate| image:: enrichment_mstar_vs_flowrate_thumb.png
     :target: enrichment_mstar_vs_flowrate.html
 
 .. |fng_model| image:: fng_model_thumb.png
     :target: fng_model.html
+    :width: 150 px
 
 .. |materials| image:: materials_thumb.png
     :target: materials.html

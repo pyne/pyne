@@ -9,9 +9,14 @@ PyNE - The Nuclear Engineering Toolkit
 .. container:: frontpage-images
 
     .. image:: examples/data_sources_thumb.png
+       :width: 25 %
+       :target: examples/data_sources.html
     .. image:: examples/fng_model_thumb.png
+       :width: 30 %
+       :target: examples/fng_model.html
     .. image:: examples/ace_thumb.png
-
+       :width: 25 %
+       :target: examples/ace.html
 .. raw:: html
 
     </div>
