@@ -11,7 +11,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose, \
     assert_array_almost_equal
 
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, use_fast_endftod
 warnings.simplefilter("ignore", QAWarning)
 
 from pyne.endf import Library
@@ -415,6 +415,8 @@ def ignore_future_warnings(func):
     new_func.__dict__.update(func.__dict__)
     return new_func
 
+if endftod(" 3.28559+12") != 3.28559e+12:
+    use_fast_endftod()
 
 library = Library(str_library)
 nuc1002, nuc10031, nuc40000 = nucname.id(1002), nucname.id(10031), nucname.id(40000)
@@ -1060,11 +1062,11 @@ def test_photoatomic():
     Eints, sigmas = xs_data['e_int'], xs_data['xs']
     assert_equal(len(Eints),1864)
     assert_equal(len(sigmas),1864)
-    assert_array_equal(Eints[0:5],[1.,  1.109887,  1.217224,
+    assert_array_almost_equal(Eints[0:5],[1.,  1.109887,  1.217224,
                                    1.2589,  1.334942])
-    assert_array_equal(Eints[-5:],[6.30960000e+10,   7.94328000e+10,  
-                                   7.94330000e+10, 8.00000000e+10, 
-                                   1.00000000e+11])
+    assert_array_almost_equal(Eints[-5:],[6.3096e+10,   7.94328e+10,  
+                                   7.9433e+10, 8.0e+10, 
+                                   1.0e+11],4)
     assert_array_almost_equal(sigmas[0:5],[0.00460498,  0.00710582,
                                            0.01047864,  0.01210534,
                                            0.01556538])
