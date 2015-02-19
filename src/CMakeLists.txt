@@ -91,7 +91,10 @@ endif (MOAB_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
-target_link_libraries(pyne hdf5 blas lapack)
+target_link_libraries(pyne hdf5)
+IF(BUILD_SPATIAL_SOLVER)
+    target_link_libraries(pyne hdf5 blas lapack)
+ENDIF(BUILD_SPATIAL_SOLVER)
 if (MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
 endif (MOAB_FOUND)
