@@ -1,5 +1,4 @@
 """Python wrapper for material library."""
-
 from __future__ import division, unicode_literals
 
 # Cython imports
@@ -2243,10 +2242,10 @@ cdef class _MaterialLibrary(object):
         cdef _Material mat
         cdef dict _lib = (<_MaterialLibrary> self)._lib
         cdef np.ndarray mattable
-        with tb.openFile(file, 'r') as f:
-            matstable = f.getNode(datapath)[:]
-            nucs = f.getNode(nucpath)[:]
-            matsmetadata = f.getNode(datapath + '_metadata').read()
+        with tb.open_file(file, 'r') as f:
+            matstable = f.get_node(datapath)[:]
+            nucs = f.get_node(nucpath)[:]
+            matsmetadata = f.get_node(datapath + '_metadata').read()
         for i in range(len(matstable)):
             row = matstable[i]
             comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
