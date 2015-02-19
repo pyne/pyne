@@ -1,5 +1,7 @@
 """This module implements an ALARA-like chain-based transmutation solver.
 """
+# for the record, lots of people don't know what ALARA is, so this should have
+# a reference or be changed. 
 from __future__ import division
 from warnings import warn
 from pyne.utils import QAWarning
