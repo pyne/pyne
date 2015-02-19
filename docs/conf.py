@@ -30,7 +30,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.autosummary',  # autosummary doesn't work with numpydoc...
               'sphinx.ext.viewcode',
-              'sphinxext.numpydoc',
+              'numpydoc',
               'sphinxext.ipython_console_highlighting',
               'sphinxext.notebook_sphinxext',
               'sphinxcontrib.bibtex',
