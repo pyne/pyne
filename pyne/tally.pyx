@@ -16,7 +16,10 @@ from libcpp.string cimport string as std_string
 import collections
 import stlcontainers
 
+from warnings import warn
+from pyne.utils import QAWarning
 
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 cdef class Tally:
     """

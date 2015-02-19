@@ -4,18 +4,18 @@ import os
 import re
 import pkgutil
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 import tables as tb
 
-from .. import nucname
-from .api import BASIC_FILTERS
-from .isotopic_abundance import get_isotopic_abundances
+from pyne import nucname
+from pyne.dbgen.api import BASIC_FILTERS
+from pyne.dbgen.isotopic_abundance import get_isotopic_abundances
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-# Note that since ground state and meta-stable isotopes are of the same atomic mass, 
+# Note that since ground state and meta-stable isotopes are of the same atomic mass,
 # the meta-stables have been discluded from the following data sets.
 
 MASS_FILE = 'mass.mas12'
@@ -27,19 +27,20 @@ def copy_atomic_mass_adjustment(build_dir=""):
     communication, November 2012."""
 
     if os.path.exists(os.path.join(build_dir, MASS_FILE)):
-        return 
+        return
 
     mass = pkgutil.get_data('pyne.dbgen', MASS_FILE)
-    with open(os.path.join(build_dir, MASS_FILE), 'w') as f:
+    with open(os.path.join(build_dir, MASS_FILE), 'wb') as f:
         f.write(mass)
 
 
 # Note, this regex specifically leaves our free neutrons
-#amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
+# amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
 amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{5,12}) ([ #.\d]+)[ ]*?$')
 
+
 def parse_atomic_mass_adjustment(build_dir=""):
-    """Parses the atomic mass adjustment data into a list of tuples of 
+    """Parses the atomic mass adjustment data into a list of tuples of
     the nuclide, atomic mass, and error."""
     f = open(os.path.join(build_dir, MASS_FILE), 'r')
 
@@ -55,12 +56,10 @@ def parse_atomic_mass_adjustment(build_dir=""):
         error = 1E-6 * float(m.group(5).strip().replace('#', ''))
 
         atomic_masses.append((nuc, mass, error))
-        
+
     f.close()
 
-    return atomic_masses    
-
-
+    return atomic_masses
 
 
 atomic_mass_desc = {
@@ -73,9 +72,10 @@ atomic_mass_desc = {
 atomic_mass_dtype = np.dtype([
     ('nuc',   int),
     ('mass',  float),
-    ('error', float), 
-    ('abund', float), 
+    ('error', float),
+    ('abund', float),
     ])
+
 
 def make_atomic_mass_table(nuc_data, build_dir=""):
     """Makes an atomic mass table in the nuc_data library.
@@ -88,7 +88,7 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
         Directory to place html files in.
     """
     # Grab raw data
-    atomic_abund  = get_isotopic_abundances()
+    atomic_abund = get_isotopic_abundances()
     atomic_masses = parse_atomic_mass_adjustment(build_dir)
 
     A = {}
@@ -104,7 +104,7 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
     for element in nucname.name_zz:
         nuc = nucname.id(element)
         A[nuc] = nuc, 0.0, 0.0, 0.0
-        
+
     for nuc, abund in atomic_abund.items():
         zz = nucname.znum(nuc)
         element_zz = nucname.id(zz)
@@ -116,14 +116,13 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
         new_elem_mass = elem_mass + (nuc_mass * abund)
         A[element_zz] = element_zz, new_elem_mass, 0.0, float(0.0 < new_elem_mass)
 
-
     A = sorted(A.values(), key=lambda x: x[0])
 
     # Open the HDF5 File
     kdb = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
-    Atable = kdb.createTable("/", "atomic_mass", atomic_mass_desc, 
+    Atable = kdb.createTable("/", "atomic_mass", atomic_mass_desc,
                              "Atomic Mass Data [amu]", expectedrows=len(A))
     Atable.append(A)
 
@@ -132,8 +131,6 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
 
     # Close the hdf5 file
     kdb.close()
-
-
 
 
 def make_atomic_mass(args):
@@ -153,4 +150,3 @@ def make_atomic_mass(args):
     # Make atomic mass table once we have the array
     print("Making atomic mass data table.")
     make_atomic_mass_table(nuc_data, build_dir)
-

@@ -3,6 +3,7 @@ cross-sections from provided nuclear data sets."""
 import sys
 import inspect
 from warnings import warn
+
 from itertools import product
 from collections import MutableMapping
 
@@ -13,9 +14,9 @@ from pyne import nucname
 from pyne.pyne_config import pyne_conf
 from pyne.xs.models import partial_energy_matrix, phi_g
 from pyne.xs import data_source
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 if sys.version_info[0] > 2:
   basestring = str
@@ -62,6 +63,7 @@ class XSCache(MutableMapping):
 
     def __init__(self, group_struct=None, 
                  data_sources=(data_source.CinderDataSource,
+                               data_source.OpenMCDataSource,
                                data_source.SimpleDataSource,
                                data_source.EAFDataSource,
                                data_source.NullDataSource,)):

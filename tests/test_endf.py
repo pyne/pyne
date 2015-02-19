@@ -11,8 +11,8 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose, \
     assert_array_almost_equal
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 
 from pyne.endf import Library
 from pyne.utils import endftod
@@ -362,7 +362,58 @@ convallis tristique sem.                                           419 1451   14
  0.000000+0 0.000000+0          0          0          0          0 419 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  0.000000+0 0.000000+0          0          0          0          0  -1 0  0    0
+   ENDL/AN-2005                                                      0         0
+ 8.017000+3 1.685310+1         -1          0          6          2 828 1451    1
+ 0.000000+0 0.000000+0          0          0          0          6 828 1451    2
+ 3.968220+0 1.500000+7          0          0      20040          1 828 1451    3
+ 0.000000+0 0.000000+0          0          0         88         11 828 1451    4
+  8-O - 17 Some Evaluation Some Author (no resonances test)        828 1451    5
+                                                                   828 1451    6
+----JENDL/AN-2005     MATERIAL  828                                828 1451    7
+-----Incident Alpha Data                                           828 1451    8
+------ENDF-6 Format                                                828 1451    9
+                                                                   828 1451   10
+ ***************************************************************** 828 1451   11
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum 828 1451   12
+dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing  828 1451   13
+elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore  828 1451   14
+magna aliquyam erat, sed diam voluptua.                            828 1451   15
+ ***************************************************************** 828 1451   16
+                                                                   828 1451   17
+                                                                   828 1451   18
+                                1        451         20          2 828 1451   19
+                                3          4         11          1 828 1451   20
+                                                                   828 1  099999
+                                                                   828 0  0    0
+ 8.017000+3 1.685310+1          0          0          0          0 828 3  4    1
+ 5.865160+5 5.865160+5          0          0          1        404 828 3  4    2
+        404          2          0          0          0          0 828 3  4    3
+ 1.000000-5 0.000000+0 3.000000+5 0.000000+0 4.000000+5 7.000000-6 828 3  4    4
+ 1.300000+6 2.431509-5 1.400000+6 3.700050-5 1.500000+6 7.710000-4 828 3  4    5
+ 1.700000+6 1.048193-2 1.900000+6 1.131485-2 2.300000+6 1.214660-2 828 3  4    6
+ 2.700000+6 1.743714-2 3.100000+6 6.973340-3 3.800000+6 4.476150-3 828 3  4    7
+ 4.500000+6 1.288137-2 5.200000+6 1.058416-2 5.900000+6 9.003420-3 828 3  4    8
+ 6.800000+6 8.425410-2 7.700000+6 1.083730-1 8.600000+6 1.133051-1 828 3  4    9
+ 9.500000+6 2.044808-2 1.060000+7 2.413670-2 1.170000+7 3.050680-2 828 3  4   10
+ 1.280000+7 1.405968-1 1.390000+7 1.421148-1 1.500000+7 1.385511-1 828 3  4   11
+                                                                   828 3  099999
+                                                                   828 0  0    0
+                                                                     0 0  0    0
+                                                                    -1 0  0    0
 """)
+
+
+def ignore_future_warnings(func):
+    """This is a decorator which can be used to ignore FutureWarnings
+    occurring in a function."""
+    def new_func(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            return func(*args, **kwargs)
+    new_func.__name__ = func.__name__
+    new_func.__doc__ = func.__doc__
+    new_func.__dict__.update(func.__dict__)
+    return new_func
 
 
 library = Library(str_library)
@@ -410,10 +461,11 @@ def test_endftod():
 
 def test_get():
     obs = library.get_rx(nuc40000, 4, 2)
-    exp = [4.898421e+3,6.768123e+0,0,1,0,0,2.123124e+6,8.123142e-6,2.123212e+6,
-           8.231231e-6,-2.231211e+6,8.123421e-6]
+    exp = [4.898421e+3, 6.768123e+0, 0, 1, 0, 0, 2.123124e+6, 8.123142e-6, 2.123212e+6,
+           8.231231e-6, -2.231211e+6, 8.123421e-6]
     try:
-        badkey = library.get_rx(111, 1, 1)
+        # try to get a bad key
+        library.get_rx(111, 1, 1)
         assert(False)
     except ValueError:
         assert(True)
@@ -794,6 +846,10 @@ def test_xs():
     del exp_600_flags[0]
     assert_equal(obs_600_flags, exp_600_flags)
 
+def test_xs_data_without_res():
+    nuc8017 = nucname.id(8017)
+    library._read_res(nuc8017)
+    library._read_xs(nuc8017, 4, nuc8017)
 
 def test_u235():
     try:
@@ -835,7 +891,7 @@ def test_u235():
 
 
 # Test ENDF Data Source
-
+@ignore_future_warnings
 def test_int_hist():
     exp_Eint = np.array([1,4,10, 20])
     exp_xs = np.array([15, 12, -7, 10])
@@ -959,6 +1015,7 @@ def test_int_loglog_only_interpolate_one_endpoint():
     exp = e/3 * (5**3 - 2 **3) / (5-2)
     assert_allclose(exp, obs, rtol=1e-12)
 
+
 def test_discretize():
     from os.path import isfile
     try:
@@ -986,6 +1043,33 @@ def test_discretize():
            74.217617672501689, 162.26091389706099, 218.90153743636509,
            312.62178192130619, 590.40136068709603, 724.64216445611373]
     assert_array_almost_equal(nonelastic_c, exp)
+
+
+def test_photoatomic():
+    try:
+        assert(os.path.isfile('Zn.txt'))
+    except AssertionError:
+        try:
+            import urllib.request as urllib
+        except ImportError:
+            import urllib
+        urllib.urlretrieve("https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt",
+                           "Zn.txt")
+    photondata = Library('Zn.txt')
+    xs_data = photondata.get_xs(300000000, 501)[0]
+    Eints, sigmas = xs_data['e_int'], xs_data['xs']
+    assert_equal(len(Eints),1864)
+    assert_equal(len(sigmas),1864)
+    assert_array_equal(Eints[0:5],[1.,  1.109887,  1.217224,
+                                   1.2589,  1.334942])
+    assert_array_equal(Eints[-5:],[6.30960000e+10,   7.94328000e+10,  
+                                   7.94330000e+10, 8.00000000e+10, 
+                                   1.00000000e+11])
+    assert_array_almost_equal(sigmas[0:5],[0.00460498,  0.00710582,
+                                           0.01047864,  0.01210534,
+                                           0.01556538])
+    assert_array_almost_equal(sigmas[-5:],[ 6.71525 ,  6.716781,  6.716781,
+                                           6.716829,  6.717811])
 
 if __name__ == "__main__":
     nose.runmodule()

@@ -335,3 +335,23 @@ bool pyne::file_exists(std::string strfilename) {
 
   return(blnReturn);
 };
+
+// Message Helpers
+ 
+bool pyne::USE_WARNINGS = true;
+
+bool pyne::toggle_warnings(){
+  USE_WARNINGS = !USE_WARNINGS;
+  return USE_WARNINGS;
+}
+
+void pyne::warning(std::string s){
+  // Prints a warning message
+  if (USE_WARNINGS){
+    std::cout << "\033[1;33m WARNING: \033[0m" << s << "\n"; 
+  }  
+}
+
+
+
+

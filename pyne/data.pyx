@@ -14,7 +14,7 @@ from libcpp.utility cimport pair as cpp_pair
 
 #Standard lib import
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 cimport numpy as np
 import numpy as np
@@ -34,7 +34,7 @@ cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mathematical constants
 pi = cpp_data.pi
@@ -55,6 +55,14 @@ sec_per_day = cpp_data.sec_per_day
 MeV_per_K = cpp_data.MeV_per_K
 """Megaelectronvolts per Kelvin."""
 
+MeV_per_MJ = cpp_data.MeV_per_MJ
+"""Megaelectronvolts per megajoule."""
+
+Bq_per_Ci = cpp_data.Bq_per_Ci
+"""Becquerel per Curie"""
+
+Ci_per_Bq = cpp_data.Ci_per_Bq
+"""Curies per Becquerel"""
 
 #
 # hash map and initialization
@@ -132,7 +140,7 @@ def natural_abund(nuc):
     If the nuclide is not found, abundance is 0.
     """
     if isinstance(nuc, int):
-        abund = cpp_data.natural_abund(<int> nuc)
+        abund = cpp_data.natural_abund(<int> pyne.nucname.id(nuc))
     elif isinstance(nuc, basestring):
         nuc_bytes = nuc.encode()
         abund = cpp_data.natural_abund(<char *> nuc_bytes)
@@ -1057,7 +1065,7 @@ def id_from_level(nuc, level, special=""):
     cdef std_string spc
     if len(special) == 1:
         spc = special[0].encode('UTF-8')
-    if level is not None and level > 0.0:
+    if level is not None and (level > 0.0 or len(special) == 1):
         if len(special) == 1:
             return cpp_data.id_from_level(<int> nuc, <double> level, <std_string> spc)
         else:
@@ -1156,8 +1164,8 @@ def decay_branch_ratio(from_nuc, to_nuc):
     ratio : double
         branching ratio
     """
-    ratio = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
-    return ratio
+    ratio, error = cpp_data.decay_branch_ratio(cpp_pair[int,int](from_nuc, to_nuc))
+    return ratio, error
 
 def decay_branch_ratio_byparent(parent):
     """
@@ -1270,6 +1278,30 @@ def gamma_energy(parent):
     """
     return cpp_data.gamma_energy(<int> parent)
 
+
+def gamma_energy_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray energies from ENSDF decay dataset in a given
+    energy range.
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray energies and errors
+    """
+    if enerror is None:
+        enerror = en * 0.01
+    return cpp_data.gamma_energy(<double> en, <double> enerror)
+
+
 def gamma_photon_intensity(parent):
     """
     Returns a list of gamma ray photon intensities from ENSDF decay dataset
@@ -1306,7 +1338,7 @@ def gamma_photon_intensity_byen(en, enerror=None):
     ratios : array of pairs
         An array of gamma ray photon intensities and errors
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.gamma_photon_intensity(<double> en,<double> enerror)
 
@@ -1379,9 +1411,32 @@ def gamma_from_to_byen(en, enerror=None):
     ratios : array of pairs
         An array of gamma ray level pairs in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.gamma_from_to(<double> en,<double> enerror)
+
+def gamma_parent_child(en, enerror=None):
+    """
+    Returns a list of gamma ray parents from ENSDF decay dataset
+    based on gamma-ray energy.
+
+    Parameters
+    ----------
+    en : double
+        gamma ray energy in keV
+    enerror : double
+        gamma ray energy error (range which you want to search) this defaults
+        to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of pairs
+        An array of gamma ray parents in state_id form
+    """
+    if enerror is None:
+        enerror = en * 0.01
+    return cpp_data.gamma_parent_child(<double> en, <double> enerror)
+
 
 def gamma_parent(en, enerror=None):
     """
@@ -1401,9 +1456,50 @@ def gamma_parent(en, enerror=None):
     ratios : array of ints
         An array of gamma ray parents in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.gamma_parent(<double> en, <double> enerror)
+
+def gamma_child_byen(en, enerror=None):
+    """
+    Returns a list of gamma ray children from ENSDF decay dataset
+    based on gamma-ray energy.
+
+    Parameters
+    ----------
+    en : double
+       gamma ray energy in keV
+    enerror : double
+       gamma ray energy error (range which you want to search) this defaults
+       to 1% of the energy if it is not provided
+
+    Returns
+    -------
+    ratios : array of ints
+       An array of gamma ray children in state_id form
+    """
+    if enerror is None:
+        enerror = en * 0.01
+    return cpp_data.gamma_child(<double> en, <double> enerror)
+
+def gamma_child_byparent(parent):
+    """
+    Returns a list of gamma ray children from ENSDF decay dataset
+    based on gamma-ray energy.
+
+    Parameters
+    ----------
+    parent : int
+        parent nuclide in state_id form
+
+
+
+    Returns
+    -------
+    ratios : array of ints
+        An array of gamma ray children in state_id form
+    """
+    return cpp_data.gamma_child(<int> parent)
 
 def gamma_xrays(parent):
     """
@@ -1476,7 +1572,7 @@ def alpha_parent(en, enerror=None):
     ratios : array of ints
         An array of alpha parents in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.alpha_parent(<double> en, <double> enerror)
 
@@ -1498,7 +1594,7 @@ def alpha_child_byen(en, enerror=None):
     ratios : array of ints
         An array of alpha children in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.alpha_child(<double> en, <double> enerror)
 
@@ -1588,7 +1684,7 @@ def beta_parent(en, enerror=None):
     ratios : array of ints
         An array of beta minus parents in nuc_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.beta_parent(<double> en, <double> enerror)
 
@@ -1610,7 +1706,7 @@ def beta_child_byen(en, enerror=None):
     ratios : array of ints
         An array of beta minus children in nuc_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.beta_child(<double> en, <double> enerror)
 
@@ -1717,7 +1813,7 @@ def ecbp_parent(en, enerror=None):
     ratios : array of ints
         An array of beta plus/electron capture children in nuc_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.ecbp_parent(<double> en, <double> enerror)
 
@@ -1739,7 +1835,7 @@ def ecbp_child_byen(en, enerror=None):
     ratios : array of ints
         An array of beta plus/electron capture children in state_id form
     """
-    if enerror == None:
+    if enerror is None:
         enerror = en * 0.01
     return cpp_data.ecbp_child(<double> en, <double> enerror)
 

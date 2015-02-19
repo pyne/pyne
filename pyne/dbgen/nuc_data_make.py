@@ -2,7 +2,7 @@ from __future__ import print_function
 import os
 import argparse
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 try:
     import urllib.request as urllib2
@@ -27,7 +27,7 @@ from pyne.dbgen import wimsdfpy
 from pyne.dbgen import ndsfpy
 from pyne.dbgen.hashtools import check_hashes
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons (Jeff Ferris)
@@ -35,29 +35,29 @@ warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 
 pyne_logo = """\
 
-                                  /   \       
- _                        )      ((   ))     (                          
-(@)                      /|\      ))_((     /|\                          
-|-|                     / | \    (/\|/\)   / | \                      (@) 
+                                  /   \
+ _                        )      ((   ))     (
+(@)                      /|\      ))_((     /|\
+|-|                     / | \    (/\|/\)   / | \                      (@)
 | | -------------------/--|-voV---\`|'/--Vov-|--\---------------------|-|
 |-|                         '^`   (o o)  '^`                          | |
 | |                               `\Y/'                               |-|
 |-|                                                                   | |
 | |        /\             ___           __  __             /\         |-|
-|-|       /^~\           / _ \_   _  /\ \ \/__\           /^~\        | |  
+|-|       /^~\           / _ \_   _  /\ \ \/__\           /^~\        | |
 | |       /^~\          / /_)/ | | |/  \/ /_\             /^~\        |-|
-|-|       /^~\         / ___/| |_| / /\  //__             /^~\        | | 
-| |       ^||`         \/     \__, \_\ \/\__/             ^||`        |-|  
-|-|        ||                |____/                        ||         | | 
+|-|       /^~\         / ___/| |_| / /\  //__             /^~\        | |
+| |       ^||`         \/     \__, \_\ \/\__/             ^||`        |-|
+|-|        ||                |____/                        ||         | |
 | |       ====                                            ====        |-|
 |-|                                                                   | |
 | |                                                                   |-|
 |-|___________________________________________________________________| |
 (@)              l   /\ /         ( (       \ /\   l                `\|-|
                  l /   V           \ \       V   \ l                  (@)
-                 l/                _) )_          \I                   
+                 l/                _) )_          \I
                                    `\ /'
-                                     `  
+                                     `
 """
 
 
@@ -76,7 +76,7 @@ def _fetch_prebuilt(args):
         shutil.copyfile(prebuilt_nuc_data, nuc_data)
 
 
-def main():
+def main(args=None):
     """Entry point for nuc_data_make utility."""
     print(message(pyne_logo))
 
@@ -120,7 +120,7 @@ def main():
 				 0: no cleaning (default).
 				 1: clean nuc_data.
 				 2: clean nuc_data and build_dir.""")
-    args = parser.parse_args()
+    args = parser.parse_args(args=args)
 
     # clean nuc data
     if args.clean in [1, 2]:
@@ -160,11 +160,17 @@ def main():
         print("Checking hashes")
         result = check_hashes(args.nuc_data)
         print("Results:")
+        badsum = False
         for name, value in result:
             if value:
                 print(" node " + name + " checksum matches")
             else:
+                badsum = True
                 print(" node " + name + " checksum doesn't match!!")
+        if badsum is True:
+            print("""You may need to try building the data from scratch using:\n
+                  nuc_data_make --fetch-prebuilt False
+                  """)
 
 
 if __name__ == '__main__':

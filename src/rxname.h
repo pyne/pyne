@@ -21,14 +21,15 @@
 
 namespace pyne
 {
-namespace rxname 
+//! Converts between naming conventions for reaction channels.
+namespace rxname
 {
   extern std::string _names[NUM_RX_NAMES];  ///< Raw array of reaction names
   /// Set of reaction names, must be valid variable names.
-  extern std::set<std::string> names;       
-  /// Mapping from reaction ids to reaction names. 
+  extern std::set<std::string> names;
+  /// Mapping from reaction ids to reaction names.
   extern std::map<unsigned int, std::string> id_name;
-  /// Mapping from reaction names to reaction ids. 
+  /// Mapping from reaction names to reaction ids.
   extern std::map<std::string, unsigned int> name_id;
   /// Mapping between alternative names for reactions and the reaction id.
   extern std::map<std::string, unsigned int> altnames;
@@ -40,7 +41,7 @@ namespace rxname
   extern std::map<unsigned int, std::string> labels;
   /// Mapping from reaction ids to documentation strings (long descriptions).
   extern std::map<unsigned int, std::string> docs;
-  /// Mapping from particle type and offset pairs to reaction ids.  
+  /// Mapping from particle type and offset pairs to reaction ids.
   /// Particle flags are 'n', 'p', 'd', 't', 'He3', 'a', 'gamma', and 'decay'.
   extern std::map<std::pair<std::string, int>, unsigned int> offset_id;
   /// Mapping from particle type and reaction ids to offsets.
@@ -48,7 +49,7 @@ namespace rxname
   extern std::map<std::pair<std::string, unsigned int>, int> id_offset;
 
   /// A helper function to set the contents of the variables in this library.
-  void * _fill_maps();  
+  void * _fill_maps();
   extern void * _;  ///< A dummy variable used when calling #_fill_maps().
 
   /// A helper function to compute nuclide id offsets from z-, a-, and s- deltas
@@ -86,7 +87,7 @@ namespace rxname
 
   /// \name ID Functions
   /// \{
-  /// Returns the recation id of a reaction channel.  This id has been precomputed  
+  /// Returns the recation id of a reaction channel.  This id has been precomputed
   /// from the hash of the name.
   /// \param x Input reaction specification, may be a reaction name, alternate name,
   ///          an id, or an MT number.
@@ -199,7 +200,7 @@ namespace rxname
   int child(std::string nuc, std::string rx, std::string z="n");
   /// \}
 
-  /// Custom exception for declaring a value not to be a valid reaction.  
+  /// Custom exception for declaring a value not to be a valid reaction.
   class NotAReaction : public std::exception
   {
   public:
@@ -275,7 +276,7 @@ namespace rxname
 
       if (!rxnow.empty())
       {
-        narxstr += " --> "; 
+        narxstr += " --> ";
         narxstr += rxnow;
       }
       return (const char *) narxstr.c_str();
@@ -340,7 +341,7 @@ namespace rxname
 
       if (!rxnow.empty())
       {
-        INFEstr += " --> "; 
+        INFEstr += " --> ";
         INFEstr += rxnow;
       }
       return (const char *) INFEstr.c_str();

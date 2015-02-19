@@ -22,7 +22,7 @@ from libc.string cimport strtok, strcpy, strncpy
 import re
 import os
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 cimport numpy as np
 import numpy as np
@@ -36,7 +36,7 @@ from pyne.utils import fromendf_tok, endftod
 
 np.import_array()
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
              4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
@@ -47,6 +47,7 @@ CONTENTS_R = re.compile(' +\d{1,2} +\d{1,3} +\d{1,10} +')
 SPACE66_R = re.compile(' {66}')
 NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
 SPACE66_R = re.compile(' {66}')
+
 
 class Library(rx.RxLib):
     """A class for a file which contains multiple ENDF evaluations."""
@@ -514,8 +515,21 @@ class Library(rx.RxLib):
         """
         lrp = self.structure[mat_id]['matflags']['LRP']
         if (lrp == -1 or mat_id in (-1,0)):
-            # If the LRP flag for the material is -1, there's no resonance data.
+            # If the LRP flag for the material is -1,
+            # there's no resonance data.
             # Also if the mat id is invalid.
+            #
+            # However other methods expects _read_res to set
+            # structur[nuc]['data'], so fill it with a single
+            # entry for mat_id and empty values:
+            self.structure[mat_id]['data'].update(
+                {mat_id: {'resolved': [],
+                          'unresolved': [],
+                          'datadocs': [],
+                          'xs': {},
+                          'output': {'channel1': [],
+                                     'channel2': []},
+                          'isotope_flags': {}}})
             pass
         else:
             # Load the resonance data.
@@ -874,7 +888,10 @@ class Library(rx.RxLib):
         nuc = nucname.id(nuc)
         if nuc_i == None:
             nuc_i = nuc
-        xsdata = self.get_rx(nuc, 3, mt).reshape(-1,6)
+        if 600 > mt > 500:
+            xsdata = self.get_rx(nuc, 23, mt).reshape(-1,6)
+        else:
+            xsdata = self.get_rx(nuc, 3, mt).reshape(-1,6)
         total_lines = 0
         head_flags = self._get_head(('ZA','AWR',0,0,0,0),
                                     xsdata[total_lines])

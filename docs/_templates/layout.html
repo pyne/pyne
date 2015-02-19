@@ -1,0 +1,47 @@
+{% extends "!layout.html" %}
+
+{%- set url_root = pathto('', 1) %}
+{%- if url_root == '#' %}{% set url_root = '' %}{% endif %}
+
+{% block sidebarsearch %}
+  <div class="sphinxlocaltoc">
+  <h3>Getting Started</h3>
+  <ul>
+    <li><a href="{{ pathto('install/index') }}">Install</a></li>
+    <li><a href="{{ pathto('tutorial/index') }}">Tutorial</a></li>
+    <li><a href="{{ pathto('examples/index') }}">Examples</a></li>
+  </ul>
+  <h3>Using PyNE</h3>
+  <ul>
+    <li><a href="{{ pathto('usersguide/index') }}">User's Guide</a></li>
+    <li><a href="{{ pathto('pyapi/index') }}">Python API Documentation</a></li>
+    <li><a href="{{ pathto('cppapi/index') }}">C++ & Fortran API Documentation</a></li>
+    <li><a href="mailto:pyne-users+subscribe@googlegroups.com?subject=Subscribe&body=Send this message to subscribe to the list">Join</a> the <a href="https://groups.google.com/forum/#!forum/pyne-users" target="_blank"> Users</a> mailing list.
+    <li><a href="https://github.com/pyne/pyne/issues">Report an Issue</a></li>
+  </ul>
+  <h3>Contribute</h3>
+  <ul>
+    <li><a href="{{ pathto('devsguide/index') }}">Developer's Guide</a></li>
+    <li><a href="http://github.com/pyne/pyne">Source Code</a></li>
+    <li><a href="mailto:pyne-users+subscribe@googlegroups.com?subject=Subscribe&body=Send this message to subscribe to the list">Join</a> the
+        <a href="https://groups.google.com/forum/#!forum/pyne-users" target="_blank">Developers</a> mailing list.
+    <li><a href="{{ pathto('dev_team') }}">The PyNE Team</a></li>
+  </ul>
+  <h3>Learn More</h3>
+  <ul>
+    <li><a href="{{ pathto('theorymanual/index') }}">Theory Manual</a></li>
+    <li><a href="{{ pathto('pubs') }}">Publications</a></li>
+    <li><a href="{{ pathto('previous/index') }}">Release Notes</a></li>
+    <li><a href="{{ pathto('gsoc/index') }}">Project Ideas</a></li>
+  </ul>
+  </div>
+  {{ super() }}
+{% endblock %}
+
+{%- block footer %}
+    <div class="footer">
+    <div style="background-color:rgba(255,255,255,0.5);display:inline-block;border-radius:10px;padding:6px;">
+        {{ super() }}
+    </div>
+    </div>
+{%- endblock %}

@@ -20,7 +20,7 @@ from __future__ import division, unicode_literals
 import io
 import struct
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 from collections import OrderedDict
 
 cimport numpy as np
@@ -35,7 +35,7 @@ from pyne.rxname import label
 from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def ascii_to_binary(ascii_file, binary_file):
     """Convert an ACE file in ASCII format (type 1) to binary format (type 2).
@@ -301,7 +301,8 @@ class Library(object):
 
             # verify that we are suppossed to read this table in
             if (table_names is not None) and (name not in table_names):
-                f.seek(n_bytes, 1)
+                cur = f.tell()
+                f.seek(cur + n_bytes)
                 f.readline()
                 lines = [f.readline() for i in range(13)]
                 continue
@@ -309,7 +310,8 @@ class Library(object):
             # ensure we have a valid table type
             if 0 == len(name) or name[-1] not in table_types:
                 warn("Unsupported table: " + name, RuntimeWarning)
-                f.seek(n_bytes, 1)
+                cur = f.tell()
+                f.seek(cur + n_bytes)
                 f.readline()
                 lines = [f.readline() for i in range(13)]
                 continue
@@ -319,7 +321,8 @@ class Library(object):
             if 12+n_lines < len(lines):
                 goback = sum([len(line) for line in lines[12+n_lines:]])
                 lines = lines[:12+n_lines]
-                f.seek(-goback, 1)
+                cur = f.tell()
+                f.seek(cur - goback)
 
             # get the table
             table = table_types[name[-1]](name, awr, temp)
