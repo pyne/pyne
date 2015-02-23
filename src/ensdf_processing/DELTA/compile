@@ -1,0 +1,5 @@
+#! /bin/bash
+#!gfortran alphad.f nsdflib95.o -o alphad
+#./alphad alphad.inp
+gfortran delta.for -o delta
+
