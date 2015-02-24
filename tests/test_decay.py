@@ -160,7 +160,7 @@ def mat_err_compare(nuc_keys, threshold=1e-3):
     * the child's mass weighted relative error, weightederr
 
     Note that this also filters by when Origen itself has messed up by 
-    gaining or lossing too much mass (1%). Furthermore, the maximum relative 
+    gaining or losing too much mass (1%). Furthermore, the maximum relative 
     error is only computed for species that have a certain threshold 
     unit mass (default 1e-3).
     """
