@@ -4,11 +4,12 @@ import os
 import sys
 import json
 import warnings
-from functools import lru_cache
 if sys.version_info[0] >= 3:
     from urllib.request import urlretrieve
+    from functools import lru_cache
 else:
     from urllib import urlretrieve
+    lru_cache = lamda *args, **kwargs: (lambda f: f)
 
 import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
