@@ -1876,8 +1876,9 @@ template<> void pyne::_load_data<pyne::gamma>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < gamma_length; ++i) {
-    gamma_data[std::make_pair(gamma_array[i].parent_nuc,
-      gamma_array[i].energy)] = gamma_array[i];
+    if ((gamma_array[i].parent_nuc != 0) && !isnan(gamma_array[i].energy))
+      gamma_data[std::make_pair(gamma_array[i].parent_nuc,
+        gamma_array[i].energy)] = gamma_array[i];
   }
   delete[] gamma_array;
 }
@@ -2098,6 +2099,7 @@ template<> void pyne::_load_data<pyne::alpha>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < alpha_length; ++i) {
+    if ((alpha_array[i].from_nuc != 0) && !isnan(alpha_array[i].energy))
     alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
     = alpha_array[i];
   }
@@ -2175,8 +2177,9 @@ template<> void pyne::_load_data<pyne::beta>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < beta_length; ++i) {
-    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
-    = beta_array[i];
+    if ((beta_array[i].from_nuc != 0) && !isnan(beta_array[i].avg_energy))
+      beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
+        = beta_array[i];
   }
   delete[] beta_array;
 }
@@ -2266,8 +2269,9 @@ template<> void pyne::_load_data<pyne::ecbp>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < ecbp_length; ++i) {
-    ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
-    = ecbp_array[i];
+    if ((ecbp_array[i].from_nuc != 0) && !isnan(ecbp_array[i].avg_energy))
+      ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
+        = ecbp_array[i];
   }
   delete[] ecbp_array;
 }
