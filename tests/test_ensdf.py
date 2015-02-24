@@ -11,7 +11,7 @@ from nose.tools import assert_equal, assert_almost_equal
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-from pyne import ensdf
+from pyne import ensdf, nuc_data
 
 ensdf_sample = """\
 152GD    ADOPTED LEVELS, GAMMAS                                  96NDS    199701
@@ -431,6 +431,12 @@ def test_decays():
     [641520023, 641520003, 631520000, 641520000, 937.05, 0.15, 0.013, 0.005, 0.0043, 0.0012, None, None, 4.81e-05, 0, 0],
     [641520023, 641520001, 631520000, 641520000, 1348.1, 0.07, 0.067, 0.004, 0.00153, None, None, None, 8.643e-05, 0, 0]])
 
+def test_no_nan_levels():
+    import tables as tb
+    with tb.open_file(nuc_data) as f:
+        ll = f.root.decay.level_list
+        nans = ll.read_where('(level != 0) & ~(level > 0) & ~(level < 0)')
+    assert(len(nans) == 0)
 
 if __name__ == "__main__":
     nose.runmodule()
