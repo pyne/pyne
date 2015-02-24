@@ -16,6 +16,7 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_in, assert_true, assert_less
 
 import numpy as np
+import tables as tb
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.utils import QAWarning
@@ -31,8 +32,12 @@ srcdir = os.path.abspath(srcdir)
 sys.path.insert(0, srcdir)
 import decaygen
 
+h5ver = tuple(map(int, tb.hdf5_version.split('-', 1)[0].split('.')))
+if h5ver >= (1, 8, 14):
+    H5NAME = 'origen-benchmark-hdf5-1.8.14.h5'
+else:
+    H5NAME = 'origen-benchmark-hdf5-1.8.13.h5'
 MATS = None
-H5NAME = 'origen-benchmark-py{0}k.h5'.format(sys.version_info[0])
 O2HLS = None  # Origen Half-lives
 
 def setup():
