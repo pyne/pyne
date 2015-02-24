@@ -234,44 +234,26 @@ pyne::mt458_mf1 pyne::read_mt458_mf1(std::ifstream &infile) {
 
   list lst = read_list(infile);
 
-  mt458.efr = std::vector<double> (lst.l2 + 1, 0);
-  mt458.defr = std::vector<double> (lst.l2 + 1, 0);
-  mt458.enp = std::vector<double> (lst.l2 + 1, 0);
-  mt458.denp = std::vector<double> (lst.l2 + 1, 0);
-  mt458.end = std::vector<double> (lst.l2 + 1, 0);
-  mt458.dend = std::vector<double> (lst.l2 + 1, 0);
-  mt458.egp = std::vector<double> (lst.l2 + 1, 0);
-  mt458.degp = std::vector<double> (lst.l2 + 1, 0);
-  mt458.egd = std::vector<double> (lst.l2 + 1, 0);
-  mt458.degd = std::vector<double> (lst.l2 + 1, 0);
-  mt458.eb = std::vector<double> (lst.l2 + 1, 0);
-  mt458.deb = std::vector<double> (lst.l2 + 1, 0);
-  mt458.enu = std::vector<double> (lst.l2 + 1, 0);
-  mt458.denu = std::vector<double> (lst.l2 + 1, 0);
-  mt458.er = std::vector<double> (lst.l2 + 1, 0);
-  mt458.der = std::vector<double> (lst.l2 + 1, 0);
-  mt458.et = std::vector<double> (lst.l2 + 1, 0);
-  mt458.det = std::vector<double> (lst.l2 + 1, 0);
+  mt458.efr = std::vector<std::pair<double,double> > (lst.l2 + 1);
+  mt458.pen = std::vector<std::pair<double,double> > (lst.l2 + 1);
+  mt458.den = std::vector<std::pair<double,double> > (lst.l2 + 1);
+  mt458.egp = std::vector<std::pair<double,double> > (lst.l2 + 1);
+  mt458.egd = std::vector<std::pair<double,double> > (lst.l2 + 1);
+  mt458.eb = std::vector<std::pair<double,double> > (lst.l2 + 1);
+  mt458.enu = std::vector<std::pair<double,double> > (lst.l2 + 1);
+  mt458.er = std::vector<std::pair<double,double> > (lst.l2 + 1);
+  mt458.et = std::vector<std::pair<double,double> > (lst.l2 + 1);
 
   for (int i = 0; i < lst.l2 + 1; ++i) {
-    mt458.efr[i] = lst.data[i*18];
-    mt458.defr[i] = lst.data[i*18+1];
-    mt458.enp[i] = lst.data[i*18+2];
-    mt458.denp[i] = lst.data[i*18+3];
-    mt458.end[i] = lst.data[i*18+4];
-    mt458.dend[i] = lst.data[i*18+5];
-    mt458.egp[i] = lst.data[i*18+6];
-    mt458.degp[i] = lst.data[i*18+7];
-    mt458.egd[i] = lst.data[i*18+8];
-    mt458.degd[i] = lst.data[i*18+9];
-    mt458.eb[i] = lst.data[i*18+10];
-    mt458.deb[i] = lst.data[i*18+11];
-    mt458.enu[i] = lst.data[i*18+12];
-    mt458.denu[i] = lst.data[i*18+13];
-    mt458.er[i] = lst.data[i*18+14];
-    mt458.der[i] = lst.data[i*18+15];
-    mt458.et[i] = lst.data[i*18+16];
-    mt458.det[i] = lst.data[i*18+17];
+    mt458.efr[i] = std::make_pair(lst.data[i*18], lst.data[i*18+1]);
+    mt458.pen[i] = std::make_pair(lst.data[i*18+2], lst.data[i*18+3]);
+    mt458.den[i] = std::make_pair(lst.data[i*18+4], lst.data[i*18+5]);
+    mt458.egp[i] = std::make_pair(lst.data[i*18+6], lst.data[i*18+7]);
+    mt458.egd[i] = std::make_pair(lst.data[i*18+8], lst.data[i*18+9]);
+    mt458.eb[i] = std::make_pair(lst.data[i*18+10], lst.data[i*18+11]);
+    mt458.enu[i] = std::make_pair(lst.data[i*18+12], lst.data[i*18+13]);
+    mt458.er[i] = std::make_pair(lst.data[i*18+14], lst.data[i*18+15]);
+    mt458.et[i] = std::make_pair(lst.data[i*18+16], lst.data[i*18+17]);
   }
 
   std::string line;

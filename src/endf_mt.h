@@ -138,24 +138,15 @@ namespace pyne
   class mt458_mf1 : public mt_base {
   public:
 
-    std::vector<double> efr; ///< kinetic energy from fission products
-    std::vector<double> defr; ///< error in efr
-    std::vector<double> enp; ///< kinetic energy of prompt fission neutrons
-    std::vector<double> denp; ///< error in denp
-    std::vector<double> end; ///< kinetic energy of delayed fission neutrons
-    std::vector<double> dend; ///< error in dend
-    std::vector<double> egp; ///< total energy released by prompt gamma rays
-    std::vector<double> degp; ///< error in degp
-    std::vector<double> egd; ///< total energy released by delayed gamma rays
-    std::vector<double> degd; ///< error in egd
-    std::vector<double> eb; ///< total energy released by delayed betas
-    std::vector<double> deb; ///< error in deb
-    std::vector<double> enu; ///< energy carried away by neutrinos
-    std::vector<double> denu; ///< error in enu
-    std::vector<double> er; ///< total energy release not lost to neutrinos
-    std::vector<double> der; ///< error in er
-    std::vector<double> et; ///< total energy release per fission
-    std::vector<double> det; ///< error in et
+    std::vector<std::pair<double,double> > efr; ///< kinetic energy from fission products
+    std::vector<std::pair<double,double> > pen; ///< kinetic energy of prompt fission neutrons
+    std::vector<std::pair<double,double> > den; ///< kinetic energy of delayed fission neutrons
+    std::vector<std::pair<double,double> > egp; ///< total energy released by prompt gamma rays
+    std::vector<std::pair<double,double> > egd; ///< total energy released by delayed gamma rays
+    std::vector<std::pair<double,double> > eb; ///< total energy released by delayed betas
+    std::vector<std::pair<double,double> > enu; ///< energy carried away by neutrinos
+    std::vector<std::pair<double,double> > er; ///< total energy release not lost to neutrinos
+    std::vector<std::pair<double,double> > et; ///< total energy release per fission
 
   };
 
@@ -195,20 +186,20 @@ namespace pyne
     int nsp; ///< total number of radiation types for which information is given
     std::vector<std::pair<double,double> > erel; ///< energy released
     std::vector<double> styp; ///< Decay radiation
-    std::vector<int> lcon;
-    std::vector<int> ner;
-    std::vector<int> nd;
-    std::vector<std::pair<double,double> > fd;
-    std::vector<std::pair<double,double> > eav;
-    std::vector<std::pair<double,double> > fc;
-    std::vector<std::pair<double,double> > er;
-    std::vector<double> rtyp;
-    std::vector<double> type;
-    std::vector<std::pair<double,double> > ri;
-    std::vector<std::pair<double,double> > ris;
-    std::vector<std::pair<double,double> > ricc;
-    std::vector<std::pair<double,double> > rick;
-    std::vector<std::pair<double,double> > ricl;
+    std::vector<int> lcon; ///< Continuum spectrum flag
+    std::vector<int> ner; ///< number of tabulated discrete energies
+    std::vector<int> nd; ///< number of decay modes given 
+    std::vector<std::pair<double,double> > fd; ///< discrete spectrum normalization factor
+    std::vector<std::pair<double,double> > eav; ///< average decay energy of radiation
+    std::vector<std::pair<double,double> > fc; ///< continuum spectrum normalization
+    std::vector<std::pair<double,double> > er; ///< discrete energy of radiation
+    std::vector<double> rtyp; ///< decay mode of the nuclide
+    std::vector<double> type; ///< type of beta/ec transition
+    std::vector<std::pair<double,double> > ri; ///< intensity of discrete radiation
+    std::vector<std::pair<double,double> > ris; ///< internal pair formation coefficient
+    std::vector<std::pair<double,double> > ricc; ///< total internal conversion coefficient
+    std::vector<std::pair<double,double> > rick; ///< k-shell internal conversion coefficient
+    std::vector<std::pair<double,double> > ricl; ///< l-shell internal conversion coefficient
   };
 
   /// read decay data from a filestream
