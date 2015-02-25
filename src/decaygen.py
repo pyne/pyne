@@ -83,16 +83,9 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   double out [{{ nucs|length }}] = {};  // init to zero
   map<int, double> outcomp;
   
-  //convert to state id's
-  std::map<int, double> scomp;
+  // body
   map<int, double>::const_iterator it = comp.begin();
   for (; it != comp.end(); ++it) {
-      scomp.insert(std::pair<int,double>(nucname::id_to_state_id(it->first),it->second));
-  }
-  
-  // body
-  it = scomp.begin();
-  for (; it != scomp.end(); ++it) {
     switch (nucname::znum(it->first)) {
       {{ cases|indent(6) }}
       default:
@@ -122,7 +115,7 @@ const int all_nucs [{{ nucs|length }}] = {
 ELEM_FUNC = ENV.from_string("""
 void decay_{{ elem|lower }}(double t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[{{ nucs|length }}]) {
   //using std::exp2;
-  switch (it->first) {
+  switch (nucname::id_to_state_id(it->first)) {
     {{ cases|indent(4) }}
     } default: {
       outcomp.insert(*it);
