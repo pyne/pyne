@@ -8,10 +8,15 @@ PyNE - The Nuclear Engineering Toolkit
 
 .. container:: frontpage-images
 
-    .. image:: gallery/data_sources_thumb.png
-    .. image:: gallery/fng_model_thumb.png
-    .. image:: gallery/ace_thumb.png
-
+    .. image:: examples/data_sources_thumb.png
+       :width: 25 %
+       :target: examples/data_sources.html
+    .. image:: examples/fng_model_thumb.png
+       :width: 30 %
+       :target: examples/fng_model.html
+    .. image:: examples/ace_thumb.png
+       :width: 25 %
+       :target: examples/ace.html
 .. raw:: html
 
     </div>
@@ -49,6 +54,7 @@ bindings and I/O support for other industry standard nuclear codes.
         <ul>
           <li><a href="install/index.html">Install</a></li>
           <li><a href="tutorial/index.html">Tutorial</a></li>
+          <li><a href="examples/index.html">Examples</a></li>
         </ul>
       </div>
     </div>
