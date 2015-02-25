@@ -2100,8 +2100,8 @@ template<> void pyne::_load_data<pyne::alpha>() {
 
   for (int i = 0; i < alpha_length; ++i) {
     if ((alpha_array[i].from_nuc != 0) && !isnan(alpha_array[i].energy))
-    alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
-    = alpha_array[i];
+      alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
+        = alpha_array[i];
   }
   delete[] alpha_array;
 }
