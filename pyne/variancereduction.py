@@ -136,28 +136,27 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
 
     Parameters:
     -----------
-        meshtally : a single PyNE mcnp.MeshTally obj
-        tag_name : string
-            The meshtally tag_name (example: n_result or n_total_result).
-        tag_name_error : string
-            The meshtally tag_name for the error associated with provided 
-            tag_name. Example: n_rel_error
-        tolerance : float, optional
-            The maximum relative error allowable for the MAGIC algorithm to 
-            create a weight window lower bound for for a given mesh volume 
-            element for the intial weight window lower bound generation, or 
-            overwrite preexisting weight window lower bounds for subsequent 
-            iterations. 
-        null_value : float, optional
-            The weight window lower bound value that is assigned to mesh volume
-            elements where the relative error on flux exceeds the tolerance.
+    meshtally : a single PyNE mcnp.MeshTally obj
+    tag_name : string
+        The meshtally tag_name (example: n_result or n_total_result).
+    tag_name_error : string
+        The meshtally tag_name for the error associated with provided tag_name.
+        Example: n_rel_error
+    tolerance : float, optional
+        The maximum relative error allowable for the MAGIC algorithm to create 
+        a weight window lower bound for for a given mesh volume element for the
+        intial weight window lower bound generation, or overwrite preexisting 
+        weight window lower bounds for subsequent iterations. 
+    null_value : float, optional
+        The weight window lower bound value that is assigned to mesh volume
+        elements where the relative error on flux exceeds the tolerance.
     """
     
-    tolerance = kwargs["tolerance"] if "tolerance" in kwargs else 0.5
-    null_value = kwargs["null_value"] if "null_value" in kwargs else 0.0
+    tolerance = kwargs.get('tolerance',0.5)
+    null_value = kwargs.get('null_value',0.0)
     
     # Convert particle name to the recognized abbreviation
-    particle = (meshtally.particle[0].upper() + meshtally.particle[1:])
+    particle = (meshtally.particle.capitalize())
     if  particle == ("Neutron" or "Photon" or "Electron"):
         meshtally.particle = mcnp(particle).lower()
     

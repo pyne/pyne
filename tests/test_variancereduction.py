@@ -104,6 +104,30 @@ def test_cadis_multiple_e():
     assert_array_almost_equal(q_bias_mesh.q_bias[:], expected_q_bias[:])
     
 
+def test_magic_below_tolerance():
+    """Test MAGIC case when all flux errors are below the default tolerance"""
+    
+    # create mesh
+    coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
+    flux_data = [1.2, 3.3, 1.6, 1.7]
+    flux_error = [0.11, 0.013, 0.14, 0.19]
+    tally = Mesh(structured=True, structured_coords=coords)
+    
+    tally.particle = "neutron"
+    tally.e_bounds = [0.0, 0.5, 1.0]
+    tally.n_total_flux = IMeshTag(1, float)
+    tally.n_total_flux[:] = flux_data
+    
+    tally.n_rel_error = IMeshTag(1, float)
+    tally.n_rel_error[:] = flux_error
+    
+    magic(tally, "n_total_flux", "n_rel_error")
+    
+    expected_ww = [0.181818182, 0.5, 0.2424242, 0.2575757576]
+    
+    assert_array_almost_equal(tally.ww_x[:], expected_ww[:])
+    
+    
 def test_magic_multi_bins():
     """Test multiple energy bins MAGIC case"""
 
