@@ -1451,6 +1451,7 @@ int pyne::id_from_level(int nuc, double level, std::string special) {
       ret_id = it->second.nuc_id;
     }
   }
+  // This value was chosen so important transitions in U-235 are not missed
   if (min > 3.0)
     ret_id = nuc;
   return ret_id;
