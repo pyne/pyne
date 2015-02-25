@@ -4,6 +4,17 @@ cmake_minimum_required( VERSION 2.8.5 )
 # Set the project name
 project( pyne Fortran CXX)
 
+
+#determine if spatial solver module should be built
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND NOT APPLE)
+    SET(BUILD_SPATIAL_SOLVER true)
+  ELSE()
+    SET(BUILD_SPATIAL_SOLVER false)
+  ENDIF()
+ENDIF()
+
+IF(BUILD_SPATIAL_SOLVER)
 # languages
 enable_language(Fortran)
 
@@ -43,6 +54,7 @@ if (APPLE)
 endif ()
 message(STATUS
   "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+ENDIF(BUILD_SPATIAL_SOLVER)
 
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
@@ -96,15 +108,6 @@ if(${MOAB_FOUND})
     get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
     link_directories(${MOAB_LIBRARY_DIRS})
 endif(${MOAB_FOUND})
-
-#determine if spatial solver module should be built
-IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
-    SET(BUILD_SPATIAL_SOLVER true)
-  ELSE()
-    SET(BUILD_SPATIAL_SOLVER false)
-  ENDIF()
-ENDIF()
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.

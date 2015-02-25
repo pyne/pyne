@@ -1,5 +1,4 @@
 """Python wrapper for material library."""
-
 from __future__ import division, unicode_literals
 
 # Cython imports
@@ -23,6 +22,7 @@ from pyne.utils import QAWarning
 import os
 import sys
 if sys.version_info[0] >= 3:
+    #Python2 basestring is now Python3 string
     basestring = str
 
 import tables as tb
@@ -335,7 +335,6 @@ cdef class _Material:
         c_nucpath = nucpath_bytes
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
-
     def mcnp(self, frac_type='mass'):
         """mcnp(frac_type)
         Return an mcnp card
@@ -619,6 +618,36 @@ cdef class _Material:
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](
                 self.mat_pointer.decay_heat())
+        return nucvec_proxy
+
+
+    def dose_per_g(self, dose_type, source=0):
+        """This provides the dose per gram using the comp of the the Material.
+
+        Parameters
+        ----------
+        dose_type : string
+            One of: ext_air, ext_soil, ingest, inhale
+        source : int
+            optional; default is EPA
+            0 for EPA, 1 for DOE, 2 for GENII
+
+        Returns
+        -------
+        nucvec : dict
+            For a Material mat:
+            ext_air_dose returns mrem/h per g per m^3
+            ext_soil_dose returns mrem/h per g per m^2
+            ingest_dose returns mrem per g
+            inhale_dose returns mrem per g
+        """
+        cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
+        cdef std_string dosetype
+        if not isinstance(dose_type, bytes):
+            dose_type = dose_type.encode()
+        dosetype = std_string(<char *> dose_type)
+        nucvec_proxy.map_ptr = new cpp_map[int, double](
+                self.mat_pointer.dose_per_g(dosetype, source))
         return nucvec_proxy
 
 
@@ -2213,10 +2242,10 @@ cdef class _MaterialLibrary(object):
         cdef _Material mat
         cdef dict _lib = (<_MaterialLibrary> self)._lib
         cdef np.ndarray mattable
-        with tb.openFile(file, 'r') as f:
-            matstable = f.getNode(datapath)[:]
-            nucs = f.getNode(nucpath)[:]
-            matsmetadata = f.getNode(datapath + '_metadata').read()
+        with tb.open_file(file, 'r') as f:
+            matstable = f.get_node(datapath)[:]
+            nucs = f.get_node(nucpath)[:]
+            matsmetadata = f.get_node(datapath + '_metadata').read()
         for i in range(len(matstable)):
             row = matstable[i]
             comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)

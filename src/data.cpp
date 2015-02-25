@@ -14,6 +14,9 @@ const double pyne::cm2_per_barn = 1e-24;
 const double pyne::sec_per_day = 24.0 * 3600.0;
 const double pyne::MeV_per_K = 8.617343e-11;
 const double pyne::MeV_per_MJ = 1.60217657e-19;
+const double pyne::Bq_per_Ci = 3.7e10;
+const double pyne::Ci_per_Bq = 2.7027027e-11;
+
 
 /********************************/
 /*** data_checksums Functions ***/
@@ -1873,8 +1876,9 @@ template<> void pyne::_load_data<pyne::gamma>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < gamma_length; ++i) {
-    gamma_data[std::make_pair(gamma_array[i].parent_nuc,
-      gamma_array[i].energy)] = gamma_array[i];
+    if ((gamma_array[i].parent_nuc != 0) && !isnan(gamma_array[i].energy))
+      gamma_data[std::make_pair(gamma_array[i].parent_nuc,
+        gamma_array[i].energy)] = gamma_array[i];
   }
   delete[] gamma_array;
 }
@@ -2095,8 +2099,9 @@ template<> void pyne::_load_data<pyne::alpha>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < alpha_length; ++i) {
-    alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
-    = alpha_array[i];
+    if ((alpha_array[i].from_nuc != 0) && !isnan(alpha_array[i].energy))
+      alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
+        = alpha_array[i];
   }
   delete[] alpha_array;
 }
@@ -2172,8 +2177,9 @@ template<> void pyne::_load_data<pyne::beta>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < beta_length; ++i) {
-    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
-    = beta_array[i];
+    if ((beta_array[i].from_nuc != 0) && !isnan(beta_array[i].avg_energy))
+      beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
+        = beta_array[i];
   }
   delete[] beta_array;
 }
@@ -2263,8 +2269,9 @@ template<> void pyne::_load_data<pyne::ecbp>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < ecbp_length; ++i) {
-    ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
-    = ecbp_array[i];
+    if ((ecbp_array[i].from_nuc != 0) && !isnan(ecbp_array[i].avg_energy))
+      ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
+        = ecbp_array[i];
   }
   delete[] ecbp_array;
 }
