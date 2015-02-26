@@ -33,10 +33,10 @@ sys.path.insert(0, srcdir)
 import decaygen
 
 h5ver = tuple(map(int, tb.hdf5_version.split('-', 1)[0].split('.')))
-if h5ver >= (1, 8, 14):
-    H5NAME = 'origen-benchmark-hdf5-1.8.14.h5'
-else:
+if h5ver == (1, 8, 13):
     H5NAME = 'origen-benchmark-hdf5-1.8.13.h5'
+else:
+    H5NAME = 'origen-benchmark-hdf5-1.8.14.h5'
 MATS = None
 O2HLS = None  # Origen Half-lives
 
