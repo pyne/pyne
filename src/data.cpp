@@ -1443,7 +1443,7 @@ int pyne::id_from_level(int nuc, double level, std::string special) {
   //by default return input nuc_id with level stripped
   int ret_id = nuc;
   for (std::map<std::pair<int, double>, level_data>::iterator it=nuc_lower;
-  it!=nuc_upper; ++it) {
+       it!=nuc_upper; ++it) {
     if ((abs(level - it->second.level) < min) &&
     ((char)it->second.special == special.c_str()[0]) &&
     !isnan(it->second.level)) {
