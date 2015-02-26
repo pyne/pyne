@@ -61,7 +61,7 @@ def _getvalue(obj, fn=float, rn=None):
 
 def _to_id(nuc):
     if 'NN' not in nuc:
-        nucid = nucname.id(nuc.strip())
+        nucid = nucname.ensdf_to_id(nuc.strip())
     else:
         warn('Neutron data not supported!')
         return 0
