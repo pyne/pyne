@@ -118,7 +118,7 @@ class Library(rx.RxLib):
         flags = dict(zip(flagkeys, fromendf_tok(matflagstring)))
         nuc = cpp_nucname.id(<int> (<int> flags['ZA'] * 10000 + flags['LIS0']))
         # go back to line after first line
-        warn(str(pos))
+        fh.seek(pos)
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
