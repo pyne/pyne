@@ -577,7 +577,14 @@ class Library(rx.RxLib):
         """
         isotope_flags = self._get_cont(['ZAI','ABN',0,'LFW','NER',0],
                                        isotope_data[0])
-        nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
+        # according to endf manual, there is no specification for metastable states in ZAI
+        # if we have a LIS0 != 0 we add the state to all isotopes
+        if(self.structure[mat_id]['matflags']['LIS0'] == 0):
+            nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
+        else:
+            nuc_i = nucname.id(int(isotope_flags['ZAI']*10+self.structure[mat_id]['matflags']['LIS0']))
+#        nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
+
         self.structure[mat_id]['data'].update(
             {nuc_i:{'resolved':[],
                        'unresolved':[],
