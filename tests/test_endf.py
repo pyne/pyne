@@ -183,7 +183,7 @@ str_library = StringIO(
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  0.000000+0 0.000000+0          0          0          0          0  -1 0  0    0
  $Rev:: 513      $  $Date:: 2006-12-05#$                             1 0  0    0
- 1.003100+3 2.098312+0          1          0          0          1 131 1451    1
+ 1.003000+3 2.098312+0          1          0          0          1 131 1451    1
  0.564324+0 1.123121+0          0          0          0          6 131 1451    2
  1.905018+0 2.401998+7          1          0         10          7 131 1451    3
  0.109590+0 0.123112+0          0          0         90          8 131 1451    4
@@ -206,8 +206,8 @@ inceptos himenaeos. Curabitur sodales ligula in libero. Sed        131 1451   13
                                 4          2          1          1 131 1451   21
  0.000000+0 0.000000+0          0          0          0          0 131 1  099999
  0.000000+0 0.000000+0          0          0          0          0 131 0  0    0
- 1.003100+3 2.898897+0          0          0          1          0 131 2151    1
- 1.003100+3 1.000000+0          0          0          2          0 131 2151    2
+ 1.003000+3 2.898897+0          0          0          1          0 131 2151    1
+ 1.003000+3 1.000000+0          0          0          2          0 131 2151    2
  1.700000+3 1.000000+5          2          1          0          0 131 2151    3
  3.500000+0 5.101200-1          0          0          2          0 131 2151    4
  1.357310+2 0.000000+0          0          0         18          3 131 2151    5
@@ -439,9 +439,9 @@ def ignore_future_warnings(func):
 
 
 library = Library(str_library)
-nuc1002, nuc10031, nuc40000 = nucname.id(1002), nucname.id(10031), nucname.id(40000)
+nuc1002, nuc1003, nuc40000 = nucname.id(1002), nucname.id(1003), nucname.id(40000)
 library._read_res(nuc1002)
-library._read_res(nuc10031)
+library._read_res(nuc1003)
 library._read_res(nuc40000)
 nuc40040 = nucname.id(40040)
 
@@ -496,7 +496,7 @@ def test_get():
 
 def test_unresolved_resonances_a():
     # Case A (ENDF Manual p.70)
-    obs = library.structure[nuc10031]['data'][nuc10031]['unresolved']
+    obs = library.structure[nuc1003]['data'][nuc1003]['unresolved']
     obs_LIST = obs[1][2][2,2]
 
     exp = array_from_ENDF(io.BytesIO(
