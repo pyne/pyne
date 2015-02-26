@@ -13,9 +13,11 @@ from numpy.testing import assert_array_almost_equal
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-from pyne.variancereduction import cadis
+from pyne.variancereduction import cadis, magic
+
 from pyne.mesh import Mesh, IMeshTag
 from pyne.mesh import MeshError
+from pyne import mcnp
 
 def test_cadis_single_e():
     """Test single energy group cadis case"""
@@ -100,3 +102,111 @@ def test_cadis_multiple_e():
     
     assert_array_almost_equal(ww_mesh.ww[:], expected_ww[:])
     assert_array_almost_equal(q_bias_mesh.q_bias[:], expected_q_bias[:])
+    
+
+def test_magic_below_tolerance():
+    """Test MAGIC case when all flux errors are below the default tolerance"""
+    
+    # create mesh
+    coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
+    flux_data = [1.2, 3.3, 1.6, 1.7]
+    flux_error = [0.11, 0.013, 0.14, 0.19]
+    tally = Mesh(structured=True, structured_coords=coords)
+    
+    tally.particle = "neutron"
+    tally.e_bounds = [0.0, 0.5, 1.0]
+    tally.n_total_flux = IMeshTag(1, float)
+    tally.n_total_flux[:] = flux_data
+    
+    tally.n_rel_error = IMeshTag(1, float)
+    tally.n_rel_error[:] = flux_error
+    
+    magic(tally, "n_total_flux", "n_rel_error")
+    
+    expected_ww = [0.181818182, 0.5, 0.2424242, 0.2575757576]
+    
+    assert_array_almost_equal(tally.ww_x[:], expected_ww[:])
+    
+    
+def test_magic_multi_bins():
+    """Test multiple energy bins MAGIC case"""
+
+    # create a basic meshtally
+    coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
+    flux_data = [[1.2, 3.3], [1.6, 1.7], [1.5, 1.4], [2.6, 1.0]]
+    flux_error = [[0.11, 0.013], [0.14, 0.19], [0.02, 0.16], [0.04, 0.09]]
+    tally = Mesh(structured=True, structured_coords=coords)
+    
+    tally.particle = "neutron"
+    tally.e_bounds = [0.0, 0.5, 1.0]
+    tally.n_flux = IMeshTag(2, float)
+    tally.n_flux[:] = flux_data
+    
+    tally.n_rel_error = IMeshTag(2, float)
+    tally.n_rel_error[:] = flux_error
+    
+    tolerance = 0.15
+    null_value = 0.001
+    
+    magic(tally, "n_flux", "n_rel_error", tolerance=tolerance, null_value=null_value)
+    
+    expected_ww = [[0.2307692308, 0.5], 
+                   [0.3076923077, 0.001], 
+                   [0.2884615385, 0.001], 
+                   [0.5, 0.15151515]]
+    
+    assert_array_almost_equal(tally.ww_x[:], expected_ww[:])
+
+
+def test_magic_e_total():
+    """Test total energy group MAGIC case"""
+    
+    # create mesh
+    coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
+    flux_data = [1.2, 3.3, 1.6, 1.7]
+    flux_error = [0.11, 0.013, 0.14, 0.19]
+    tally = Mesh(structured=True, structured_coords=coords)
+    
+    tally.particle = "neutron"
+    tally.e_bounds = [0.0, 0.5, 1.0]
+    tally.n_total_flux = IMeshTag(1, float)
+    tally.n_total_flux[:] = flux_data
+    
+    tally.n_rel_error = IMeshTag(1, float)
+    tally.n_rel_error[:] = flux_error
+    
+    tolerance = 0.15
+    null_value = 0.001
+    
+    magic(tally, "n_total_flux", "n_rel_error", tolerance=tolerance, null_value=null_value)
+    
+    expected_ww = [0.181818182, 0.5, 0.2424242, 0.001]
+    
+    assert_array_almost_equal(tally.ww_x[:], expected_ww[:])
+    
+
+def test_magic_single_e():
+    """Test a single energy group MAGIC case"""
+    
+    # create mesh
+    coords = [[0, 1, 2], [-1, 3, 4], [10, 12]]
+    flux_data = [1.2, 3.3, 1.6, 1.7]
+    flux_error = [0.11, 0.013, 0.14, 0.19]
+    tally = Mesh(structured=True, structured_coords=coords)
+    
+    tally.particle = "neutron"
+    tally.e_bounds = [0.0, 1.0]
+    tally.n_flux = IMeshTag(1, float)
+    tally.n_flux[:] = flux_data
+    
+    tally.n_rel_error = IMeshTag(1, float)
+    tally.n_rel_error[:] = flux_error
+    
+    tolerance = 0.15
+    null_value = 0.001
+    
+    magic(tally, "n_flux", "n_rel_error", tolerance=tolerance, null_value=null_value)
+    
+    expected_ww = [0.181818182, 0.5, 0.2424242, 0.001]
+    
+    assert_array_almost_equal(tally.ww_x[:], expected_ww[:])

@@ -2032,7 +2032,7 @@ class MeshTally(StatMesh):
         ----------
         f : filestream
             Open to the neutron/photon line.
-        tally number : int
+        tally_number : int
             The MCNP fmesh4 tally number (e.g. 4, 14, 24).
         tag_names : iterable, optional
             Four strs that specify the tag names for the results, relative
