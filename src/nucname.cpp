@@ -1429,3 +1429,32 @@ int pyne::nucname::id_to_state_id(int nuc_id) {
     }
     throw IndeterminateNuclideForm(state, "no matching state id");
 }
+
+
+/************************/
+/*** ENSDF functions ***/
+/************************/
+//
+// ENSDF  -> Id
+//
+
+int pyne::nucname::ensdf_to_id(const char * nuc) {
+  return ensdf_to_id(std::string(nuc));
+};
+
+int pyne::nucname::ensdf_to_id(std::string nuc) {
+  if (nuc.size() < 4) {
+    return nucname::id(nuc);
+  } else if (std::isdigit(nuc[3])) {
+    int aaa = to_int(nuc.substr(0, 3));
+    int zzz;
+    std::string xx_str = nuc.substr(3,2); 
+    zzz = to_int(xx_str) + 100;
+    int nid = 10000 * aaa + 10000000 * zzz;
+    return nid;
+  } else {
+    return nucname::id(nuc);
+  }
+  
+};
+

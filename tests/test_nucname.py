@@ -524,6 +524,12 @@ def test_id_to_state_id():
     assert_equal(nucname.id_to_state_id(190380002), 190380015)
 
 
+def test_ensdf_to_id():
+    assert_equal(nucname.ensdf_to_id('16O'), 80160000)
+    assert_equal(nucname.ensdf_to_id('28614'), 1142860000)
+    assert_equal(nucname.ensdf_to_id('269Hs'), 1082690000)
+
+
 if __name__ == "__main__":
     nose.runmodule()
 
