@@ -107,8 +107,14 @@ class Library(rx.RxLib):
         self.offset += 81 - len_headline
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
-        # originally in a float version of ZZAAA.M, ie 94242.1
-        nuc = cpp_nucname.id(<int> (endftod(line[:11])*10))
+        # check for isomer (LIS0/LISO entry)
+        matflagstring = line + fh.read(3*81)
+        flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
+                    'STA', 'LIS', 'LIS0', 0, 'NFOR', 'AWI', 'EMAX',
+                    'LREL', 0, 'NSUB', 'NVER', 'TEMP', 0, 'LDRV',
+                    0, 'NWD', 'NXC']
+        flags = dict(zip(flagkeys, fromendf_tok(matflagstring)))
+        nuc = cpp_nucname.id(<int> (<int> flags['ZA'] * 10000 + flags['LIS0']))
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
