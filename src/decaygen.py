@@ -17,7 +17,7 @@ toggle_warnings()
 from pyne import nuc_data
 from pyne import nucname
 from pyne.data import branch_ratio, half_life, decay_const, \
-    decay_data_children, fpyield, decay_branch_ratio
+    all_children, fpyield, all_branch_ratio
 
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
@@ -152,7 +152,7 @@ def genfiles(nucs, short=1e-8, sf=False, dummy=False):
 
 def genchains(chains, sf=False):
     chain = chains[-1]
-    children = decay_data_children(chain[-1])
+    children = all_children(chain[-1])
     # filters spontaneous fission
     if not sf:
         children = {c for c in children if (0.0 == fpyield(chain[-1], c)) and (c not in chain) }
@@ -189,7 +189,7 @@ def k_a(chain, short=1e-8):
         # if this happens then something wen very wrong, skip
         return None, None
     # compute and apply branch ratios
-    gamma = np.prod([decay_branch_ratio(p, c)[0] for p, c in zip(chain[:-1], chain[1:])])
+    gamma = np.prod([all_branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
         return None, None
     k *= gamma

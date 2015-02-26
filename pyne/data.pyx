@@ -1044,6 +1044,52 @@ def decay_children(nuc, use_metastable=True):
 
     return dc
 
+def all_children(nuc):
+    """
+    returns child nuclides from both level and decay data
+
+    Parameters
+    ----------
+    nuc : int
+        input nuclide in state id form
+
+    Returns
+    -------
+    ids : list of ints
+        list of all known decay children from ensdf data.
+    """
+
+    return list(set(decay_children(nuc, False)) & set(decay_data_children(nuc)))
+
+def all_branch_ratio(from_nuc, to_nuc):
+    """
+    returns the branching ratio if its in either level or decay data
+
+    Parameters
+    ----------
+    from_nuc : int or str
+        Parent nuclide, this uses state id
+    to_nuc : int or str
+        Child nuclide, this uses state id
+
+    Returns
+    -------
+    br : float
+        Branch ratio of this nuclide pair [fraction].
+    """
+    br1 = branch_ratio(from_nuc, to_nuc, use_metastable=False)   
+    br2 = decay_branch_ratio(from_nuc, to_nuc)[0]
+    if np.isnan(br1) and not np.isnan(br2):
+        return br2
+    elif not np.isnan(br1) and np.isnan(br2):
+        return br1
+    elif br2 == 0 and br1 != 0:
+        return br1
+    elif br1 == 0 and br2 != 0:
+        return br2
+    else:
+        return br2
+
 def id_from_level(nuc, level, special=""):
     """
     return the state_id for input energy level
