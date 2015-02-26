@@ -1059,7 +1059,7 @@ def all_children(nuc):
         list of all known decay children from ensdf data.
     """
 
-    return list(set(decay_children(nuc, False)) & set(decay_data_children(nuc)))
+    return set(decay_children(nuc, False)) | set(decay_data_children(nuc))
 
 def all_branch_ratio(from_nuc, to_nuc):
     """
