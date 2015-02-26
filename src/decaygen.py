@@ -156,10 +156,11 @@ def genchains(chains, sf=False):
     # filters spontaneous fission
     if not sf:
         children = {c for c in children if (0.0 == fpyield(chain[-1], c)) and (c not in chain) }
-    for child in children:
-        if child not in chain:
-            chains.append(chain + (child,))
-            chains = genchains(chains, sf=sf)
+    if decay_const(chain[-1]) != 0:
+        for child in children:
+            if child not in chain:
+                chains.append(chain + (child,))
+                chains = genchains(chains, sf=sf)
     return chains
 
 
