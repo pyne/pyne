@@ -107,6 +107,8 @@ class Library(rx.RxLib):
         self.offset += 81 - len_headline
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
+        # store position of read
+        pos = fh.tell()
         # check for isomer (LIS0/LISO entry)
         matflagstring = line + fh.read(3*81)
         flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
@@ -115,6 +117,8 @@ class Library(rx.RxLib):
                     0, 'NWD', 'NXC']
         flags = dict(zip(flagkeys, fromendf_tok(matflagstring)))
         nuc = cpp_nucname.id(<int> (<int> flags['ZA'] * 10000 + flags['LIS0']))
+        # go back to line after first line
+        warn(str(pos))
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
