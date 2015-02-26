@@ -400,6 +400,28 @@ magna aliquyam erat, sed diam voluptua.                            828 1451   15
                                                                    828 0  0    0
                                                                      0 0  0    0
                                                                     -1 0  0    0
+Some data to test isomeric treatment                                 1 0  0    0
+ 6.114800+4 1.466500+2          1          0          0          16153 1451    1
+ 1.379000+5 1.000000+0          2          1          0          66153 1451    2
+ 1.000000+0 2.000000+7          1          0         10          76153 1451    3
+ 0.000000+0 0.000000+0          0          0         75         306153 1451    4
+ 61-Pm-148MCNDC       EVAL-SEP01 Some Person                      6153 1451    5
+                      DIST-DEC06                       20111222   6153 1451    6
+----ENDF/B-VII.1      MATERIAL 6153                               6153 1451    7
+-----INCIDENT NEUTRON DATA                                        6153 1451    8
+------ENDF-6 FORMAT                                               6153 1451    9
+                                                                  6153 1451   10
+***************************************************************** 6153 1451   11
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum6153 1451   12
+dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing 6153 1451   13
+elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore 6153 1451   14
+magna aliquyam erat, sed diam voluptua.                           6153 1451   15
+***************************************************************** 6153 1451   16
+                                                                  6153 1451   17
+                                1        451         18          16153 1451   18
+                                                                  6153 1  099999
+                                                                  6153 0  0    0
+                                                                    -1 0  0    0
 """)
 
 
@@ -851,6 +873,12 @@ def test_xs_data_without_res():
     library._read_res(nuc8017)
     library._read_xs(nuc8017, 4, nuc8017)
 
+def test_isomeric():
+    nuc61148m = nucname.id("Pm148m")
+    library._read_res(nuc61148m)
+    assert (library.structure[nuc61148m]['matflags']['LIS0'] == 1)
+    assert (nuc61148m in library.structure)
+    
 def test_u235():
     try:
         assert(os.path.isfile('U235.txt'))
