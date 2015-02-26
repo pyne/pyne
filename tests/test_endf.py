@@ -873,6 +873,12 @@ def test_xs_data_without_res():
     library._read_res(nuc8017)
     library._read_xs(nuc8017, 4, nuc8017)
 
+def test_isomeric():
+    nuc61148m = nucname.id("Pm148m")
+    library._read_res(nuc61148m)
+    assert (library.structure[nuc61148m]['matflags']['LIS0'] == 1)
+    assert (nuc61148m in library.structure)
+    
 def test_u235():
     try:
         assert(os.path.isfile('U235.txt'))
