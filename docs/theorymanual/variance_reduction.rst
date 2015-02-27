@@ -4,7 +4,7 @@
 Variance Reduction
 =============================
 
-:Author: Elliott Biondo
+:Author: Elliott Biondo, Kalin Kiesling
 
 .. currentmodule::variancereduction
 
@@ -175,6 +175,109 @@ The expected results are:
 
 Notice that the value in the :math:`ww` vector that is a division by 0 has been replaced with 0.
 
+************
+MAGIC Method
+************
+
+The Method of Automatic Generation of Importances by Calculation (MAGIC) is 
+a global variance reduction technique in which an initial particle distribution, 
+in the form of fluxes, populations, or weights is obtained and then used to 
+generate mesh-based weight windows or importances. This method recognizes 
+the initial particle distribution will be poor in some highly attenuated regions
+but upon iteration of the MAGIC method, the solution will improve. Below are the
+steps for the MAGIC method. [2]
+
+1. Run MCNP, in analogue mode, to set up a flux meshtally. Multigroup cross 
+   section data and a high energy cut-off, corresponding to a mean-free path no 
+   greater than the mesh voxel size, should be used.
+
+2. Process the resulting meshtally data by normalizing the fluz to have a value 
+   of 0.5 in the source (or highest) region. Use the normilized flux to create
+   a new weight window file to be used for MCNP.
+
+3. Modify the original MCNP input to use the generated weight window file and 
+   run again.
+
+4. If results are are sufficient, no further iterations are necessary. Else, 
+   repeat starting from step 2 until desired flux results are obtained.
+   
+5. If a high energy cut-off was used, reduce the cut-off energy and repeat 
+   iterations until the particle distribution is acceptable. The final iteration
+   should be performed with the appropriate energy cut-off and cross section data.
+
+...................
+PyNE implementation
+...................
+
+The implementation of MAGIC in PyNE uses a PyNE meshtally object, which is the 
+result of a meshtal file processed by PyNE's mcnp.Meshtally. Using the results 
+of the meshtal file and a specified tolerance for relative error :math:`t` and 
+null value :math:`\phi_o`, the flux will be normalized for each energy bin and 
+then be used to generate a wwinp file to be used in a subsequent iteration. The 
+steps are as follows:
+
+1. Read meshtally and determine maximum flux :math:`\phi_m^k` for each enery bin :math:`k`.
+
+2. Normalize flux :math:`\phi_i^k` in every mesh voxel :math:`i` for each energy 
+   bin :math:`k` according to :math:`\phi_m^k` to obtain a new :math:`\phi_i^{'k}`. 
+   If the relative error :math:`e_i^k` 
+   for voxel :math:`i` in energy bin :math:`k` is larger than the tolerance 
+   value :math:`t`, then set flux :math:`\phi_i^{'k}` to the null value :math:`\phi_o` 
+   instead.
+ 
+ 
+ .. math::  
+        
+        \text{If } e_i^k < t \text{ then, } \phi_i^{'k} = \frac{\phi_i^{k}}{2 \, \phi_m^k}
+        
+        \text{If } e_i^k > t \text{ then, } \phi_i^{'k} = \phi_o
+        
+        
+3. Use new flux values to create a weight window tag on the provide meshtally 
+   and use PyNE's Wwinp class to create a weight window mesh.
+   
+...................
+Sample Calculations
+...................
+
+In this section, the expected results of the test_variancereduction.py unit test
+"test_magic_multi_bins" are shown. In this test, a 3D 2x2 mesh is given. Each
+voxel contains flux data corresponding to 2 energy bins. The mesh is described by
+the following flux and relative error data.
+
++--------------------------+----------------------+--------------------------+-----------------------+
+| :math:`\phi_1^{1} = 1.2` | :math:`e_1^1 = 0.11` | :math:`\phi_1^{2} = 3.3` | :math:`e_1^2 = 0.013` |
++--------------------------+----------------------+--------------------------+-----------------------+
+| :math:`\phi_2^{1} = 1.6` | :math:`e_2^1 = 0.14` | :math:`\phi_2^{2} = 1.7` | :math:`e_2^2 = 0.19`  |
++--------------------------+----------------------+--------------------------+-----------------------+
+| :math:`\phi_3^{1} = 1.5` | :math:`e_3^1 = 0.02` | :math:`\phi_3^{2} = 1.4` | :math:`e_3^2 = 0.16`  |
++--------------------------+----------------------+--------------------------+-----------------------+
+| :math:`\phi_4^{1} = 2.6` | :math:`e_4^1 = 0.04` | :math:`\phi_4^{2} = 1.0` | :math:`e_4^2 = 0.09`  |
++--------------------------+----------------------+--------------------------+-----------------------+
+
+First, the maximum flux for each energy bin is found. In this case the maximum 
+for energy bin :math:`k = 1` occurs in voxel 4 :math:`\phi_4^{1} = 2.6` and in 
+voxel 1 :math:`\phi_1^{2} = 3.3` for energy bin :math:`k = 2`. In the first 
+energy bin, the flux values are normalized by :math:`\phi_m^1 = 2.6` and in the 
+second :math:`\phi_m^2 = 3.3`. If the error tolerance is set :math:`t = 0.15` and the
+null value set to :math:`\phi_o = 0.001`, then voxels 
+2 and 3 in the second energy bin have errors larger than the tolerance and are 
+therefore set to the null value while everything else is normalized. The following
+is the result.
+
++------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| :math:`\phi_1^{'1} = \frac{\phi_1^1}{2 \, \phi_m^1} = \frac{1.2}{2*2.6} = 0.23077` | :math:`\phi_1^{'2} = \frac{\phi_1^2}{2 \, \phi_m^2} = \frac{3.3}{2*3.3} = 0.5`     |
++------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| :math:`\phi_2^{'1} = \frac{\phi_2^1}{2 \, \phi_m^1} = \frac{1.6}{2*2.6} = 0.30769` | :math:`\phi_2^{'2} = \phi_o = 0.001`                                               |
++------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| :math:`\phi_3^{'1} = \frac{\phi_3^1}{2 \, \phi_m^1} = \frac{1.5}{2*2.6} = 0.28846` | :math:`\phi_3^{'2} = \phi_o = 0.001`                                               |
++------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+| :math:`\phi_4^{'1} = \frac{\phi_4^1}{2 \, \phi_m^1} = \frac{2.6}{2*2.6} = 0.5`     | :math:`\phi_4^{'2} = \frac{\phi_4^2}{2 \, \phi_m^2} = \frac{1.0}{2*3.3} = 0.12122` |
++------------------------------------------------------------------------------------+------------------------------------------------------------------------------------+
+
+The values :math:`\phi_i^{'k}` are then set as the new weight window values.
+
+
 **********
 References
 **********
@@ -182,4 +285,8 @@ References
 [1] Haghighat, A. and Wagner, J. C., "Monte Carlo Variance Reduction with 
     Deterministic Importance Functions," Progress in Nuclear Energy, Vol. 42,
     No. 1, pp. 25-53, 2003.
+    
+[2] Davis, A. and Turner, A., "Comparison of global variance reduction 
+    techniques for Monte Carlo radiation transport simulations of ITER," Fusion 
+    Engineering and Design, Vol. 86, Issues 9-11, pp. 2698-2700, 2011.
 
