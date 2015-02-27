@@ -47,6 +47,12 @@ if sys.version_info[0] < 3:
     from urllib import urlopen
 else:
     from urllib.request import urlopen
+try:
+    from setuptools import setup as _setup
+    have_setuptools = True
+except ImportError:
+    from distutils.core import setup as _setup
+    have_setuptools = False
 
 import numpy as np
 
@@ -239,6 +245,8 @@ def parse_cmake(ns):
         a.append('-DCMAKE_BUILD_TYPE=' + CMAKE_BUILD_TYPES[ns.build_type.lower()])
     if ns.prefix is not None:
         a.append('-DCMAKE_INSTALL_PREFIX=' + ns.prefix)
+    if have_setuptools:
+        a.append('-DHAVE_SETUPTOOLS=TRUE')
     return a
 
 
@@ -300,12 +308,6 @@ def parse_args():
 
 
 def setup():
-    try:
-        from setuptools import setup as _setup
-        have_setuptools = True
-    except ImportError:
-        from distutils.core import setup as _setup
-        have_setuptools = False
     scripts = [os.path.join('scripts', f) for f in os.listdir('scripts')]
     scripts = [s for s in scripts if (os.name == 'nt' and s.endswith('.bat'))
                                      or (os.name != 'nt' and
@@ -351,7 +353,7 @@ def setup():
         "package_data": pack_data,
         "data_files": data_files,
         "scripts": scripts,
-        "zip_safe": False,
+        #"zip_safe": False,
         }
     rtn = _setup(**setup_kwargs)
 
