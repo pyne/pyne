@@ -332,7 +332,8 @@ def upload(ns):
     f.seek(0)
     fdata = f.read()
     obj = cf.store_object('pyne-data', 'decay.tar.gz', fdata)
-
+    cont = cf.get_container("pyne-data")
+    cont.purge_cdn_object('decay.tar.gz')
 
 def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False, 
           dummy=False):
