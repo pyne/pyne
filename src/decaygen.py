@@ -224,7 +224,7 @@ def b_from_a(cse, a_i):
     bkey = EXP_EXPR.format(a=a_i)
     return cse[bkey]
 
-def chainexpr(chain, cse, b, short=1e-8):
+def chainexpr(chain, cse, b, bt, short=1e-8):
     child = chain[-1]
     if len(chain) == 1:
         a_i = -1.0 / half_life(child, False)
@@ -233,14 +233,23 @@ def chainexpr(chain, cse, b, short=1e-8):
     else:
         k, a = k_a(chain, short=short)
         if k is None:
-            return None, b
+            return None, b, bt
         terms = [] 
         for k_i, a_i in zip(k, a):
             if k_i == 1.0 and a_i == 0.0:
-                term = '1.0'  # a slight optimization 
+                term = str(1.0 - bt)  # a slight optimization
+                bt = 1
             elif a_i == 0.0:
                 if not np.isnan(k_i):
-                    term = '{0:e}'.format(k_i)  # another slight optimization 
+                    if bt < 1:
+                        if k_i + bt < 1:
+                            term = '{0:e}'.format(k_i)  # another slight optimization 
+                            bt += k_i
+                        else:
+                            term = '{0:e}'.format(1.0 - bt)
+                            bt = 1.0
+                    else:
+                        term = '0'
                 else:
                     term = '0'
             else:
@@ -248,7 +257,7 @@ def chainexpr(chain, cse, b, short=1e-8):
                 term = kbexpr(k_i, b_from_a(cse, a_i))
             terms.append(term)
         terms = ' + '.join(terms)
-    return CHAIN_EXPR.format(terms), b
+    return CHAIN_EXPR.format(terms), b, bt
 
 
 def gencase(nuc, idx, b, short=1e-8, sf=False):
@@ -261,10 +270,11 @@ def gencase(nuc, idx, b, short=1e-8, sf=False):
         chains = genchains([(nuc,)], sf=sf)
         print(len(chains), len(set(chains)), nuc)
         cse = {}  # common sub-expression exponents to elimnate
+        bt = 0
         for c in chains:
             if c[-1] not in idx:
                 continue
-            cexpr, b = chainexpr(c, cse, b, short=short)
+            cexpr, b, bt = chainexpr(c, cse, b, bt, short=short)
             if cexpr is None:
                 continue
             case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
