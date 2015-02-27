@@ -17,7 +17,9 @@ cdef extern from "data.h" namespace "pyne":
     double sec_per_day
     double MeV_per_K
     double MeV_per_MJ
-    # hash map and initialization function
+    double Bq_per_Ci 
+    double Ci_per_Bq
+   # hash map and initialization function
     map[std_string, std_string] data_checksums
 
     # atomic_mass functions
@@ -137,7 +139,7 @@ cdef extern from "data.h" namespace "pyne":
     #ENSDF data functions
     pair[double,double] decay_half_life(pair[int, int]) except +
     vector[pair[double, double]] decay_half_lifes(int) except +
-    double decay_branch_ratio(pair[int, int] from_to) except +
+    pair[double,double] decay_branch_ratio(pair[int, int] from_to) except +
     vector[double] decay_branch_ratios(int) except +
     pair[double,double] decay_photon_branch_ratio(pair[int, int] from_to) except +
     vector[pair[double, double]] decay_photon_branch_ratios(int) except +
@@ -157,6 +159,8 @@ cdef extern from "data.h" namespace "pyne":
     vector[pair[int, int]] gamma_from_to(double energy, double error) except +
     vector[pair[int, int]] gamma_parent_child(double energy, double error) except +
     vector[int] gamma_parent(double energy, double error) except +
+    vector[int] gamma_child(double energy, double error) except +
+    vector[int] gamma_child(int parent) except +
     vector[pair[double, double]] gamma_xrays(int parent) except +
 
     vector[double] alpha_energy(int parent) except +

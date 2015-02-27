@@ -1389,7 +1389,8 @@ void pyne::nucname::_load_state_map(){
 
 int pyne::nucname::state_id_to_id(int state) {
     int zzzaaa = (state / 10000) * 10000;
-    
+    int state_number = state % 10000;
+    if (state_number == 0) return state;
     std::map<int, int>::iterator nuc_iter, nuc_end;
 
     nuc_iter = state_id_map.find(state);
@@ -1410,7 +1411,7 @@ int pyne::nucname::state_id_to_id(int state) {
 int pyne::nucname::id_to_state_id(int nuc_id) {
     int zzzaaa = (nuc_id / 10000) * 10000;
     int state = nuc_id % 10000;
-    
+    if (state == 0) return nuc_id;
     std::map<int, int>::iterator nuc_iter, nuc_end, it;
     
     nuc_iter = state_id_map.lower_bound(nuc_id);
@@ -1428,3 +1429,32 @@ int pyne::nucname::id_to_state_id(int nuc_id) {
     }
     throw IndeterminateNuclideForm(state, "no matching state id");
 }
+
+
+/************************/
+/*** ENSDF functions ***/
+/************************/
+//
+// ENSDF  -> Id
+//
+
+int pyne::nucname::ensdf_to_id(const char * nuc) {
+  return ensdf_to_id(std::string(nuc));
+};
+
+int pyne::nucname::ensdf_to_id(std::string nuc) {
+  if (nuc.size() < 4) {
+    return nucname::id(nuc);
+  } else if (std::isdigit(nuc[3])) {
+    int aaa = to_int(nuc.substr(0, 3));
+    int zzz;
+    std::string xx_str = nuc.substr(3,2); 
+    zzz = to_int(xx_str) + 100;
+    int nid = 10000 * aaa + 10000000 * zzz;
+    return nid;
+  } else {
+    return nucname::id(nuc);
+  }
+  
+};
+

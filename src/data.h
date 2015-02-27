@@ -39,6 +39,8 @@ namespace pyne
   extern const double sec_per_day;    ///< seconds per day
   extern const double MeV_per_K;    ///< MeV per Kelvin
   extern const double MeV_per_MJ;  ///< MeV per MJ
+  extern const double Bq_per_Ci;   ///< Becquerel per Curie
+  extern const double Ci_per_Bq;   ///< Curies per Becquerel
   /// \}
 
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
@@ -484,6 +486,7 @@ namespace pyne
     double half_life; ///< half life of the decay [s]
     double half_life_error; ///< half life error of the decay [s]
     double branch_ratio; ///< branching ratio of this decay [fraction]
+    double branch_ratio_error; ///< branching ratio of this decay [fraction]
     /// photon branching ratio of this decay [fraction]
     double photon_branch_ratio;
     /// photon branching ratio error of this decay [fraction]
@@ -505,7 +508,7 @@ namespace pyne
   std::vector<int> decay_data_children(int parent);
   std::pair<double, double> decay_half_life(std::pair<int,int>);
   std::vector<std::pair<double, double> > decay_half_lifes(int);
-  double decay_branch_ratio(std::pair<int,int>);
+  std::pair<double, double> decay_branch_ratio(std::pair<int,int>);
   std::vector<double> decay_branch_ratios(int parent);
   std::pair<double, double> decay_photon_branch_ratio(std::pair<int,int>);
   std::vector<std::pair<double, double> >decay_photon_branch_ratios(int parent);
@@ -557,6 +560,10 @@ namespace pyne
   std::vector<std::pair<int, int> > gamma_parent_child(double energy, double error);
   //returns a list of parent nuclides associated with an input decay energy
   std::vector<int> gamma_parent(double energy, double error);
+  // returns a list of child state_id's based on a gamma-ray energy
+  std::vector<int> gamma_child(double energy, double error);
+  // returns a list of child state_id's based on a parent state_id
+  std::vector<int> gamma_child(int parent);
   //returns an array of arrays of X-ray energies and intesities for a
   //given parent
   std::vector<std::pair<double, double> > gamma_xrays(int parent);

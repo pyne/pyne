@@ -6,6 +6,7 @@
 #include <vector>
 #include <iomanip>  // std::setprecision
 #include <math.h>   // modf
+#include <stdexcept>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material.h"
@@ -1083,7 +1084,8 @@ pyne::comp_map pyne::Material::activity() {
   pyne::comp_map act;
   double masspermole = mass * pyne::N_A;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-    act[i->first] = masspermole * (i->second) * decay_const(i->first) / atomic_mass(i->first);
+    act[i->first] = masspermole * (i->second) * decay_const(i->first) / \
+                    atomic_mass(i->first);
   }
   return act;
 }	
@@ -1100,6 +1102,39 @@ pyne::comp_map pyne::Material::decay_heat() {
   return dh;
 }
 
+
+pyne::comp_map pyne::Material::dose_per_g(std::string dose_type, int source) {
+  pyne::comp_map dose; 
+  const double pCi_per_Bq = 27.027027;
+  if (dose_type == "ext_air") {
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+      dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ext_air_dose(i->first, source) / \
+                       atomic_mass(i->first);
+    }
+  } else if (dose_type == "ext_soil") {
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+      dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ext_soil_dose(i->first, source) / \
+                       atomic_mass(i->first);
+    }
+  } else if (dose_type == "ingest") {
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+      dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ingest_dose(i->first, source) / \
+                       atomic_mass(i->first);
+    }
+  } else if (dose_type == "inhale") {
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+      dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * inhale_dose(i->first, source) / \
+                       atomic_mass(i->first);
+    }
+  } else {
+    throw std::invalid_argument("Dose type must be one of: ext_air, ext_soil, ingest, inhale.");
+  }
+  return dose;
+}	
 
 
 double pyne::Material::molecular_mass(double apm) {
@@ -1151,7 +1186,7 @@ pyne::Material pyne::Material::expand_elements() {
         nabund = (*abund_itr).first;
         if (zabund == znuc && 0 != nucname::anum(nabund) && 0.0 != (*abund_itr).second)
           newcomp[nabund] = (*abund_itr).second * (*nuc).second * \
-                            atomic_mass_map[nabund] / atomic_mass_map[n];
+                            atomic_mass(nabund) / atomic_mass(n);
         else if (n == nabund && 0.0 == (*abund_itr).second)
           newcomp.insert(*nuc);
         abund_itr++;

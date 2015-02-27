@@ -20,8 +20,8 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
-  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -c -fpic -fdefault-real-8")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fdefault-real-8")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -c -fpic -fdefault-real-8 -fdefault-double-8")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -fdefault-real-8 -fdefault-double-8")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
   set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3 -r8")

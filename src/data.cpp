@@ -14,6 +14,9 @@ const double pyne::cm2_per_barn = 1e-24;
 const double pyne::sec_per_day = 24.0 * 3600.0;
 const double pyne::MeV_per_K = 8.617343e-11;
 const double pyne::MeV_per_MJ = 1.60217657e-19;
+const double pyne::Bq_per_Ci = 3.7e10;
+const double pyne::Ci_per_Bq = 2.7027027e-11;
+
 
 /********************************/
 /*** data_checksums Functions ***/
@@ -27,7 +30,8 @@ std::map<std::string, std::string> pyne::get_data_checksums() {
     temp_map["/neutron/eaf_xs"]="29622c636c4a3a46802207b934f9516c";
     temp_map["/neutron/scattering_lengths"]="a24d391cc9dc0fc146392740bb97ead4";
     temp_map["/neutron/simple_xs"]="3d6e086977783dcdf07e5c6b0c2416be";
-
+    temp_map["/decay"]="4f41f3e46f4306cc44449f08a20922e0";
+    temp_map["/dose_factors"]="dafa32c24b2303850a0bebdf3e6b122e";
     return temp_map;
 };
 
@@ -73,10 +77,12 @@ void pyne::_load_atomic_mass_map() {
   H5Dclose(atomic_mass_set);
   H5Fclose(nuc_data_h5);
 
-  // Ok now that we have the array of stucts, put it in the map
+  // Ok now that we have the array of structs, put it in the map
   for(int n = 0; n < atomic_mass_length; n++) {
-    atomic_mass_map[atomic_mass_array[n].nuc] = atomic_mass_array[n].mass;
-    natural_abund_map[atomic_mass_array[n].nuc] = atomic_mass_array[n].abund;
+    atomic_mass_map.insert(std::pair<int, double>(atomic_mass_array[n].nuc, \
+                                                  atomic_mass_array[n].mass));
+    natural_abund_map.insert(std::pair<int, double>(atomic_mass_array[n].nuc, \
+                                                    atomic_mass_array[n].abund));
   }
 
   delete[] atomic_mass_array;
@@ -91,8 +97,9 @@ double pyne::atomic_mass(int nuc) {
   nuc_end = atomic_mass_map.end();
 
   // First check if we already have the nuc mass in the map
-  if (nuc_iter != nuc_end)
+  if (nuc_iter != nuc_end) {
     return (*nuc_iter).second;
+  }
 
   // Next, fill up the map with values from the
   // nuc_data.h5, if the map is empty.
@@ -109,7 +116,9 @@ double pyne::atomic_mass(int nuc) {
   // state mass...not strictly true, but good guess.
   if (0 < nucid%10000) {
     aw = atomic_mass((nucid/10000)*10000);
-    atomic_mass_map[nuc] = aw;
+    if (atomic_mass_map.count(nuc) != 1) {
+      atomic_mass_map.insert(std::pair<int, double>(nuc, aw));
+    }
     return aw;
   };
 
@@ -117,7 +126,9 @@ double pyne::atomic_mass(int nuc) {
   // take a best guess based on the
   // aaa number.
   aw = (double) ((nucid/10000)%1000);
-  atomic_mass_map[nuc] = aw;
+  if (atomic_mass_map.count(nuc) != 1) {
+    atomic_mass_map.insert(std::pair<int, double>(nuc, aw));
+  }
   return aw;
 };
 
@@ -166,7 +177,7 @@ double pyne::natural_abund(int nuc) {
   // state abundance...not strictly true, but good guess.
   if (0 < nucid%10000) {
     na = natural_abund((nucid/10000)*10000);
-    atomic_mass_map[nuc] = na;
+    natural_abund_map[nuc] = na;
     return na;
   };
 
@@ -1432,8 +1443,7 @@ int pyne::id_from_level(int nuc, double level, std::string special) {
   //by default return input nuc_id with level stripped
   int ret_id = nuc;
   for (std::map<std::pair<int, double>, level_data>::iterator it=nuc_lower;
-  it!=nuc_upper;
-       ++it) {
+       it!=nuc_upper; ++it) {
     if ((abs(level - it->second.level) < min) &&
     ((char)it->second.special == special.c_str()[0]) &&
     !isnan(it->second.level)) {
@@ -1441,7 +1451,8 @@ int pyne::id_from_level(int nuc, double level, std::string special) {
       ret_id = it->second.nuc_id;
     }
   }
-  if (min > 1.0)
+  // This value was chosen so important transitions in U-235 are not missed
+  if (min > 3.0)
     ret_id = nuc;
   return ret_id;
 }
@@ -1683,6 +1694,8 @@ template<> void pyne::_load_data<pyne::decay>() {
                      half_life_error), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "branch_ratio", HOFFSET(decay, branch_ratio),
                      H5T_NATIVE_DOUBLE);
+  status = H5Tinsert(desc, "branch_ratio_error", HOFFSET(decay, branch_ratio_error),
+                     H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio", HOFFSET(decay,
                      photon_branch_ratio), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(desc, "photon_branch_ratio_err", HOFFSET(decay,
@@ -1742,9 +1755,10 @@ std::vector<std::pair<double, double> >pyne::decay_half_lifes(int parent) {
   return result;
 }
 
-double pyne::decay_branch_ratio(std::pair<int, int> from_to) {
-  return data_access<double, decay>(from_to, offsetof(decay,
-    branch_ratio), decay_data);
+std::pair<double, double> pyne::decay_branch_ratio(std::pair<int, int> from_to) {
+  return std::make_pair(data_access<double, decay>(from_to, offsetof(decay,
+    branch_ratio), decay_data),data_access<double, decay>(from_to, offsetof(decay,
+    branch_ratio_error), decay_data));
 };
 
 std::vector<double> pyne::decay_branch_ratios(int parent) {
@@ -1862,8 +1876,9 @@ template<> void pyne::_load_data<pyne::gamma>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < gamma_length; ++i) {
-    gamma_data[std::make_pair(gamma_array[i].parent_nuc,
-      gamma_array[i].energy)] = gamma_array[i];
+    if ((gamma_array[i].parent_nuc != 0) && !isnan(gamma_array[i].energy))
+      gamma_data[std::make_pair(gamma_array[i].parent_nuc,
+        gamma_array[i].energy)] = gamma_array[i];
   }
   delete[] gamma_array;
 }
@@ -1989,6 +2004,15 @@ std::vector<int> pyne::gamma_parent(double energy, double error) {
     offsetof(gamma, parent_nuc), gamma_data);
 };
 
+std::vector<int> pyne::gamma_child(double energy, double error) {
+  return data_access<int, gamma>(energy+error, energy-error,
+  offsetof(gamma, child_nuc), gamma_data);
+};
+
+std::vector<int> pyne::gamma_child(int parent) {
+  return data_access<int, gamma>(parent, 0.0, DBL_MAX,
+  offsetof(gamma, child_nuc), gamma_data);
+};
 
 std::vector<std::pair<double, double> > pyne::gamma_xrays(int parent) {
   std::vector<std::pair<double, double> > result;
@@ -2075,8 +2099,9 @@ template<> void pyne::_load_data<pyne::alpha>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < alpha_length; ++i) {
-    alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
-    = alpha_array[i];
+    if ((alpha_array[i].from_nuc != 0) && !isnan(alpha_array[i].energy))
+      alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
+        = alpha_array[i];
   }
   delete[] alpha_array;
 }
@@ -2152,8 +2177,9 @@ template<> void pyne::_load_data<pyne::beta>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < beta_length; ++i) {
-    beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
-    = beta_array[i];
+    if ((beta_array[i].from_nuc != 0) && !isnan(beta_array[i].avg_energy))
+      beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
+        = beta_array[i];
   }
   delete[] beta_array;
 }
@@ -2243,8 +2269,9 @@ template<> void pyne::_load_data<pyne::ecbp>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < ecbp_length; ++i) {
-    ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
-    = ecbp_array[i];
+    if ((ecbp_array[i].from_nuc != 0) && !isnan(ecbp_array[i].avg_energy))
+      ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
+        = ecbp_array[i];
   }
   delete[] ecbp_array;
 }

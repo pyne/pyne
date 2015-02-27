@@ -8,7 +8,7 @@
 import numpy as np
 
 import pyne.spatialsolver
-from dictionary_populate_test import populate_simple, populate_simple_with_warnings, populate_intermediate_1
+from .dictionary_populate_test import populate_simple, populate_simple_with_warnings, populate_intermediate_1
 
 def test_ahotn_ln():
     a = populate_simple("AHOTN","LN")
@@ -16,7 +16,7 @@ def test_ahotn_ln():
 
     if(dict_results['success'] == 0):
         raise AssertionError("Error: " + dict_results['error_msg'])
-  
+
 
     rounded_flux = np.around(dict_results['flux'], decimals=4)
 
@@ -182,7 +182,7 @@ def test_dgfem_lagrange():
                     [3.096808,  2.732475,  2.732475,  3.096808],
                     [3.096808,  2.732475,  2.732475,  3.096808],
                     [3.536038,  3.096808,  3.096808,  3.536038],],
-                   
+
                     [[2.896267,  2.615275,  2.615275,  2.896267],
                     [2.615275,  2.385484,  2.385484,  2.615275],
                     [2.615275,  2.385484,  2.385484,  2.615275],
@@ -342,7 +342,7 @@ def test_dgfem_ld_alternating():
                     [2.104426,  1.299636,  1.433389,  1.900442],
                     [1.900442,  1.433389,  1.299636,  2.104426],
                     [2.889886,  1.900442,  2.104426,  2.420725],],
-                    
+
                     [[2.224013,  1.498666,  1.647904,  1.894524],
                     [1.498666,  1.119896,  1.039153,  1.647904],
                     [1.647904,  1.039153,  1.119896,  1.498666],
@@ -375,7 +375,7 @@ def test_dgfem_dense_alternating():
                     [2.104426,  1.299636,  1.433389,  1.900442],
                     [1.900442,  1.433389,  1.299636,  2.104426],
                     [2.889886,  1.900442,  2.104426,  2.420725],],
-                    
+
                     [[2.224013,  1.498666,  1.647904,  1.894524],
                     [1.498666,  1.119896,  1.039153,  1.647904],
                     [1.647904,  1.039153,  1.119896,  1.498666],
