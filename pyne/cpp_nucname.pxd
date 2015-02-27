@@ -142,3 +142,6 @@ cdef extern from "nucname.h" namespace "pyne::nucname":
     # State id Functions
     int state_id_to_id(int state) except +
     int id_to_state_id(int nuc_id) except +
+
+    # ENSDF id Functions
+    int ensdf_to_id(char *) except +
