@@ -17,7 +17,7 @@ toggle_warnings()
 from pyne import nuc_data
 from pyne import nucname
 from pyne.data import branch_ratio, half_life, decay_const, \
-    decay_data_children, fpyield, decay_branch_ratio
+    all_children, fpyield, all_branch_ratio
 
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
@@ -67,6 +67,7 @@ SOURCE = ENV.from_string("""
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "decay.h"
+#include "nucname.h"
 #endif
 
 namespace pyne {
@@ -96,7 +97,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   // cleanup
   for (i = 0; i < {{ nucs|length }}; ++i)
     if (out[i] > 0.0)
-      outcomp[all_nucs[i]] = out[i];
+      outcomp[nucname::state_id_to_id(all_nucs[i])] = out[i];
   return outcomp;
 }
 
@@ -114,7 +115,7 @@ const int all_nucs [{{ nucs|length }}] = {
 ELEM_FUNC = ENV.from_string("""
 void decay_{{ elem|lower }}(double t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[{{ nucs|length }}]) {
   //using std::exp2;
-  switch (it->first) {
+  switch (nucname::id_to_state_id(it->first)) {
     {{ cases|indent(4) }}
     } default: {
       outcomp.insert(*it);
@@ -151,14 +152,15 @@ def genfiles(nucs, short=1e-8, sf=False, dummy=False):
 
 def genchains(chains, sf=False):
     chain = chains[-1]
-    children = decay_data_children(chain[-1])
+    children = all_children(chain[-1])
     # filters spontaneous fission
     if not sf:
         children = {c for c in children if (0.0 == fpyield(chain[-1], c)) and (c not in chain) }
-    for child in children:
-        if child not in chain:
-            chains.append(chain + (child,))
-            chains = genchains(chains, sf=sf)
+    if decay_const(chain[-1]) != 0:
+        for child in children:
+            if child not in chain:
+                chains.append(chain + (child,))
+                chains = genchains(chains, sf=sf)
     return chains
 
 
@@ -188,7 +190,7 @@ def k_a(chain, short=1e-8):
         # if this happens then something wen very wrong, skip
         return None, None
     # compute and apply branch ratios
-    gamma = np.prod([decay_branch_ratio(p, c)[0] for p, c in zip(chain[:-1], chain[1:])])
+    gamma = np.prod([all_branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
         return None, None
     k *= gamma
