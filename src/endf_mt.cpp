@@ -3,7 +3,7 @@
   #include "endf_mt.h"
 #endif
 
-pyne::mt451 pyne::read_mt451(std::ifstream &infile) {
+pyne::endf::mt451 pyne::endf::read_mt451(std::ifstream &infile) {
     mt451 mt451;
 
     control cs = read_cont(infile);
@@ -59,7 +59,7 @@ pyne::mt451 pyne::read_mt451(std::ifstream &infile) {
     return mt451;
 }
 
-pyne::mtfpy_mf8 pyne::read_mtfpy_mf8(std::ifstream &infile) {
+pyne::endf::mtfpy_mf8 pyne::endf::read_mtfpy_mf8(std::ifstream &infile) {
     mtfpy_mf8 mt_fpy;
 
     control cs = read_cont(infile);
@@ -89,7 +89,7 @@ pyne::mtfpy_mf8 pyne::read_mtfpy_mf8(std::ifstream &infile) {
     return mt_fpy;
 }
 
-pyne::mt452_mf1 pyne::read_mt452_mf1(std::ifstream &infile) {
+pyne::endf::mt452_mf1 pyne::endf::read_mt452_mf1(std::ifstream &infile) {
   mt452_mf1 mt452;
 
   control cs = read_cont(infile);
@@ -116,7 +116,7 @@ pyne::mt452_mf1 pyne::read_mt452_mf1(std::ifstream &infile) {
   return mt452;
 }
 
-pyne::mt455_mf1 pyne::read_mt455_mf1(std::ifstream &infile) {
+pyne::endf::mt455_mf1 pyne::endf::read_mt455_mf1(std::ifstream &infile) {
   mt455_mf1 mt455;
 
   control cs = read_cont(infile);
@@ -196,7 +196,7 @@ pyne::mt455_mf1 pyne::read_mt455_mf1(std::ifstream &infile) {
   return mt455;
 }
 
-pyne::mt456_mf1 pyne::read_mt456_mf1(std::ifstream &infile) {
+pyne::endf::mt456_mf1 pyne::endf::read_mt456_mf1(std::ifstream &infile) {
   mt456_mf1 mt456;
   control cs = read_cont(infile);
   mt456.nuc_id = cs.c1;
@@ -223,7 +223,7 @@ pyne::mt456_mf1 pyne::read_mt456_mf1(std::ifstream &infile) {
   return mt456;
 }
 
-pyne::mt458_mf1 pyne::read_mt458_mf1(std::ifstream &infile) {
+pyne::endf::mt458_mf1 pyne::endf::read_mt458_mf1(std::ifstream &infile) {
   mt458_mf1 mt458;
   control cs = read_cont(infile);
   mt458.nuc_id = cs.c1;
@@ -261,7 +261,7 @@ pyne::mt458_mf1 pyne::read_mt458_mf1(std::ifstream &infile) {
   return mt458;
 }
 
-pyne::mt460_mf1 pyne::read_mt460_mf1(std::ifstream &infile) {
+pyne::endf::mt460_mf1 pyne::endf::read_mt460_mf1(std::ifstream &infile) {
   mt460_mf1 mt460;
   control cs = read_cont(infile);
 
@@ -294,7 +294,7 @@ pyne::mt460_mf1 pyne::read_mt460_mf1(std::ifstream &infile) {
   return mt460;
 }
 
-pyne::mt457_mf8 pyne::read_mt457_mf8(std::ifstream &infile) {
+pyne::endf::mt457_mf8 pyne::endf::read_mt457_mf8(std::ifstream &infile) {
   mt457_mf8 mt457;
   control cs = read_cont(infile);
 
@@ -360,4 +360,25 @@ pyne::mt457_mf8 pyne::read_mt457_mf8(std::ifstream &infile) {
   std::string line;
   getline(infile, line);
   return mt457;
+}
+
+
+pyne::endf::mf3 pyne::endf::read_mf3(std::ifstream &infile) {
+  mf3 mf3_ob;
+  control cs = read_cont(infile);
+  mf3_ob.nuc_id = cs.c1;
+  mf3_ob.awr = cs.c2;
+  mf3_ob.mat = cs.mat;
+  mf3_ob.mf = cs.mf;
+  mf3_ob.mt = cs.mt;
+
+  tab1 tab = read_tab1(infile);
+  mf3_ob.nbt = tab.nbt;
+  mf3_ob.intn = tab.intn;
+  mf3_ob.energy = tab.x;
+  mf3_ob.sigma = tab.y;
+
+  std::string line;
+  getline(infile, line);
+  return mf3_ob;
 }

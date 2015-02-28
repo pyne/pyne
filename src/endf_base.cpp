@@ -3,7 +3,7 @@
   #include "utils.h"
 #endif
 
-pyne::control pyne::read_cont(std::ifstream &infile) {
+pyne::endf::control pyne::endf::read_cont(std::ifstream &infile) {
     control cts;
     std::string line;
     getline(infile, line);
@@ -19,7 +19,7 @@ pyne::control pyne::read_cont(std::ifstream &infile) {
     return cts;
 }
 
-pyne::list pyne::read_list(std::ifstream &infile) {
+pyne::endf::list pyne::endf::read_list(std::ifstream &infile) {
     list lst;
     std::string line;
     getline(infile, line);
@@ -48,7 +48,7 @@ pyne::list pyne::read_list(std::ifstream &infile) {
     return lst;
 }
 
-pyne::tab1 pyne::read_tab1(std::ifstream &infile){
+pyne::endf::tab1 pyne::endf::read_tab1(std::ifstream &infile){
   tab1 tab1;
   std::string line;
   getline(infile, line);
@@ -94,7 +94,7 @@ pyne::tab1 pyne::read_tab1(std::ifstream &infile){
   return tab1;
 }
 
-pyne::tab2 pyne::read_tab2(std::ifstream &infile){
+pyne::endf::tab2 pyne::endf::read_tab2(std::ifstream &infile){
   tab2 tab2;
   std::string line;
   getline(infile, line);

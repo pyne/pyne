@@ -105,11 +105,11 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/tally.pyx"
 cython_add_module(tally tally.pyx)
 target_link_libraries(tally pyne)
 
-# endf
-#set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/endf2.pyx"
-#                            PROPERTIES CYTHON_IS_CXX TRUE)
-#cython_add_module(endf2 endf2.pyx)
-#target_link_libraries(endf2 pyne)
+# endf2
+set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/endf2.pyx"
+                            PROPERTIES CYTHON_IS_CXX TRUE)
+cython_add_module(endf2 endf2.pyx)
+target_link_libraries(endf2 pyne)
 
 # source_sampling
 if (MOAB_FOUND)

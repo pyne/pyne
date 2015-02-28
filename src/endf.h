@@ -19,28 +19,28 @@
 
 namespace pyne
 {
-  /// struct used for indexing endf library
-  typedef struct endf_id {
-    int mat;
-    int mf;
-    int mt;
-    friend bool operator <(const endf_id &lhs, const endf_id &rhs);
-    friend bool operator ==(const endf_id &lhs, const endf_id &rhs);
-  } endf_id;
+  namespace endf {
+    /// struct used for indexing endf library
+    typedef struct endf_id {
+      int mat;
+      int mf;
+      int mt;
+      friend bool operator <(const endf_id &lhs, const endf_id &rhs);
+      friend bool operator ==(const endf_id &lhs, const endf_id &rhs);
+    } endf_id;
 
-  bool operator <(const endf_id &lhs, const endf_id &rhs);
-  bool operator ==(const endf_id &lhs, const endf_id &rhs);
+    bool operator <(const endf_id &lhs, const endf_id &rhs);
+    bool operator ==(const endf_id &lhs, const endf_id &rhs);
 
-  /// utility function to convert an mt_base into an id
-  endf_id make_endf_id(mt_base input);
+    /// utility function to convert an mt_base into an id
+    endf_id make_endf_id(mt_base input);
 
-  /// Class for storing raw endf data
-  class library {
-  public:
+    /// Class for storing raw endf data
+    typedef struct library {
 
       ~library();///< delete contents cleanly
 
-      std::map<endf_id , mt_base*> contents;///< library data
+      std::map<endf_id, mt_base*> contents;///< library data
 
       /// content_list is vector of vectors containing information about
       /// the loaded data in the form of [mat, mf, mt]
@@ -64,9 +64,8 @@ namespace pyne
       /// add data in the file to this library
       /// \param filenm path to a ENDF file to be loaded
       void read_endf(std::string filenm);
-  };
-
-
+    } library;
+  }
 }
 
 #endif

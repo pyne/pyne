@@ -44,31 +44,6 @@ stlcontainers = [
 
 # stlcontainers_module = 'stlcontainers'
 
-classes = [apiname('Tally',  'src/tally.*', incfiles='tally.h'),
-           apiname('mt_base', 'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('mt451',  'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('mt452_mf1', 'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('mt455_mf1', 'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('mt456_mf1', 'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('mt458_mf1', 'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('mt460_mf1', 'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('mtfpy_mf8', 'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('mt457_mf8', 'src/endf_mt.*', tarbase='endf2',
-                   incfiles=['endf_mt.h']),
-           apiname('endf_id', 'src/endf.[hc]*', tarbase='endf2',
-                   incfiles=['endf.h']),
-           apiname('library', 'src/endf.[hc]*', tarbase='endf2',
-                   incfiles=['endf.h'])]
+classes = [apiname('Tally',  'src/tally.*', incfiles='tally.h'),]
 
 functions = []
-
-skipmethods = {'library': ['gen_content_list', ]}
-skipattrs = {'library': ['contents', ]}
