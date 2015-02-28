@@ -14,7 +14,6 @@ cython_add_module(extra_types extra_types.pyx)
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dtypes.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(dtypes dtypes.pyx)
-target_link_libraries(dtypes hdf5)
 
 # STL containers
 # If the pyx file is a C++ file, we should specify that here.

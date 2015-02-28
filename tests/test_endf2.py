@@ -10,16 +10,16 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose, \
     assert_array_almost_equal
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 
-from pyne.endf2 import library
+from pyne.endf2 import endf as library
 
 import nose
 from nose.tools import assert_equal
 
 
-def test_endcpp_basics():
+def test_endfcpp_basics():
     try:
         assert(os.path.isfile('U235.txt'))
     except AssertionError:
@@ -40,14 +40,68 @@ def test_endcpp_basics():
 
     test_library = library()
     test_library.read_endf('U235.txt')
-    contents = [[9228,    1,  451],
-                [9228,    1,  452],
-                [9228,    1,  455],
-                [9228,    1,  456],
-                [9228,    1,  458],
-                [9228,    1,  460]]
-    for index, item in enumerate(test_library.content_list):
-        assert_array_equal(item, contents[index])
+    contents = [[9228, 1, 451],
+                 [9228, 1, 452],
+                 [9228, 1, 455],
+                 [9228, 1, 456],
+                 [9228, 1, 458],
+                 [9228, 1, 460],
+                 [9228, 3, 1],
+                 [9228, 3, 2],
+                 [9228, 3, 3],
+                 [9228, 3, 4],
+                 [9228, 3, 16],
+                 [9228, 3, 17],
+                 [9228, 3, 18],
+                 [9228, 3, 19],
+                 [9228, 3, 20],
+                 [9228, 3, 21],
+                 [9228, 3, 37],
+                 [9228, 3, 38],
+                 [9228, 3, 51],
+                 [9228, 3, 52],
+                 [9228, 3, 53],
+                 [9228, 3, 54],
+                 [9228, 3, 55],
+                 [9228, 3, 56],
+                 [9228, 3, 57],
+                 [9228, 3, 58],
+                 [9228, 3, 59],
+                 [9228, 3, 60],
+                 [9228, 3, 61],
+                 [9228, 3, 62],
+                 [9228, 3, 63],
+                 [9228, 3, 64],
+                 [9228, 3, 65],
+                 [9228, 3, 66],
+                 [9228, 3, 67],
+                 [9228, 3, 68],
+                 [9228, 3, 69],
+                 [9228, 3, 70],
+                 [9228, 3, 71],
+                 [9228, 3, 72],
+                 [9228, 3, 73],
+                 [9228, 3, 74],
+                 [9228, 3, 75],
+                 [9228, 3, 76],
+                 [9228, 3, 77],
+                 [9228, 3, 78],
+                 [9228, 3, 79],
+                 [9228, 3, 80],
+                 [9228, 3, 81],
+                 [9228, 3, 82],
+                 [9228, 3, 83],
+                 [9228, 3, 84],
+                 [9228, 3, 85],
+                 [9228, 3, 86],
+                 [9228, 3, 87],
+                 [9228, 3, 88],
+                 [9228, 3, 89],
+                 [9228, 3, 90],
+                 [9228, 3, 91],
+                 [9228, 3, 102]]
+    cl = test_library.get_content_list()
+    assert_array_equal(cl, contents)
     allcontent = [[1, 451, 934, 7],
      [1, 452, 30, 6],
      [1, 455, 7, 7],
@@ -180,8 +234,8 @@ def test_endcpp_basics():
      [33, 18, 81910, 7],
      [33, 102, 23060, 7],
      [35, 18, 6606, 7]]
-    for index, item in enumerate(test_library.get_mt451(9228, 1, 451).mt_list):
-        assert_array_equal(allcontent[index], item)
+    mtl = test_library.get(9228, 1, 451).mt_list
+    assert_array_equal(allcontent, mtl)
 
 
 if __name__ == "__main__":
