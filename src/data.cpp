@@ -2356,7 +2356,7 @@ std::vector<std::pair<double, double> > pyne::ecbp_xrays(int parent) {
 
 std::vector<std::pair<double, double> > pyne::gammas(int parent_state_id) {
   std::vector<std::pair<double, double> > result;
-  double decay_c = 1;//decay_const(parent_state_id);
+  double decay_c = decay_const(parent_state_id);
   std::vector<std::pair<double, double> > energies = gamma_energy(parent_state_id);
   std::vector<std::pair<double, double> > intensities =
     gamma_photon_intensity(parent_state_id);

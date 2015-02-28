@@ -26,7 +26,6 @@ cimport numpy as np
 
 
 # Cython Imports For Types
-from libcpp.utility cimport pair as cpp_pair
 cimport extra_types
 from libcpp.vector cimport vector as cpp_vector
 from libcpp.string cimport string as std_string
@@ -55,12 +54,6 @@ cdef class _SetInt:
     cdef public bint _free_set
 
 
-
-
-# PairDoubleDouble
-cdef class _PairDoubleDouble:
-    cdef pair[double, double] * pair_ptr
-    cdef public bint _free_pair
 
 
 # MapStrStr
@@ -230,17 +223,5 @@ cdef class _MapIntVectorDouble:
     cdef public bint _free_map
 
 
-
-
-# cpp_vector[int] vector
-
-
-# cpp_vector[double] vector
-
-
-# cpp_vector[cpp_vector[double]] vector
-
-
-# cpp_pair[double, double] vector
 
 
