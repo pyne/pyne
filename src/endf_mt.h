@@ -204,7 +204,34 @@ namespace pyne {
     /// read cross section data from a filestream
     /// \param infile An ENDF filestream
     mf3 read_mf3(std::ifstream &infile);
+    
+    typedef struct mf2 : mt_base {
+      std::vector<double> zai;
+      std::vector<double> abn;
+      std::vector<int> lfw;
+      std::vector<int> ner;
+      std::vector<std::vector<double> > el;
+      std::vector<std::vector<double> > eh;
+      std::vector<std::vector<int> > lru;
+      std::vector<std::vector<int> > lrf;
+      std::vector<std::vector<int> > nro;
+      std::vector<std::vector<int> > naps;
+      std::vector<std::vector<double> > spi;
+      std::vector<std::vector<double> > ap;
+      std::vector<std::vector<int> > lad;
+      std::vector<std::vector<int> > nls;
+      std::vector<std::vector<int> > nlsc;
+      std::vector<std::vector<int> > l;
+      std::vector<std::vector<int> > njs;
+      std::vector<std::vector<int> > ifg;
+      std::vector<std::vector<int> > krm;
+      std::vector<std::vector<int> > njs;
+      std::vector<std::vector<int> > krl;
+      std::vector<std::vector<std::vector<int> > > lbk;
+      std::vector<std::vector<std::vector<int> > > lps;
 
+
+    }
   }
 }
 
