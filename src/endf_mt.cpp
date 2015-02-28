@@ -494,19 +494,64 @@ pyne::endf::mf2 pyne::endf::read_mf2(std::ifstream &infile, int lrp) {
             }
           } else if ((mf2_ob.lfw[i] == 0) && (mf2_ob.lrf[i][j] == 1)) {
             for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
-              lst = read_list(infile);
+              lst = read_list(infile); // 
+              mf2_ob.awri[i][j][k] = lst.c1;
+              mf2_ob.l[i][j][k] = lst.l1;
+              for (int m = 0; m < lst.n2; ++m) {
+                mf2_ob.d[i][j][k][m] = lst.data[m*6];
+                mf2_ob.aj[i][j][k][m] = lst.data[m*6 + 1];
+                mf2_ob.amun[i][j][k][m] = lst.data[m*6 + 2];
+                mf2_ob.gno[i][j][k][m] = lst.data[m*6 + 3];
+                mf2_ob.gg[i][j][k][m] = lst.data[m*6 + 4];
+              }
             }
           } else if ((mf2_ob.lfw[i] == 1) && (mf2_ob.lrf[i][j] == 1)) {
-            lst = read_list(infile);
-            cs = read_cont(infile); 
-            for (int k = 0; k < mf2_ob.njs[i][j]; ++k) {
-              lst = read_list(infile);
-            }
+            lst = read_list(infile); // 
+            mf2_ob.spi[i][j] = lst.c1;
+            mf2_ob.ap[i][j] = lst.c2;
+            mf2_ob.lssf[i][j] = lst.l1;
+            mf2_ob.ne[i][j] = lst.n1;
+            mf2_ob.nls[i][j] = lst.n2;
+            mf2_ob.es[i][j] = lst.data;
+
+            for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
+              cs = read_cont(infile); 
+              mf2_ob.awri[i][j][k] = cs.c1;
+              mf2_ob.l[i][j][k] = cs.l1;
+              mf2_ob.njs[i][j][k] = cs.n1;
+              for (int m = 0; m < mf2_ob.njs[i][j][k]; ++m) {
+                lst = read_list(infile);
+                mf2_ob.muf[i][j][k][m] = lst.l2;
+                mf2_ob.d[i][j][k][m] = lst.data[0];
+                mf2_ob.aj[i][j][k][m] = lst.data[1];
+                mf2_ob.amun[i][j][k][m] = lst.data[2];
+                mf2_ob.gno[i][j][k][m] = lst.data[3];
+                mf2_ob.gg[i][j][k][m] = lst.data[4];
+                mf2_ob.gf[i][j][k][m] = std::vector<double>(&lst.data[6], &lst.data[lst.npl]);
+              }
           } else if (mf2_ob.lrf[i][j] == 2) {
-            cs = read_cont(infile);
-            cs = read_cont(infile);
-            for (int k = 0; k < mf2_ob.njs[i][j]; ++k) {
-              lst = read_list(infile);
+            for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
+              cs = read_cont(infile);
+              mf2_ob.awri[i][j][k] = cs.c1;
+              mf2_ob.l[i][j][k] = cs.l1;
+              mf2_ob.njs[i][j][k] = cs.n1;
+              for (int m = 0; m < mf2_ob.njs[i][j][k]; ++m) {
+                lst = read_list(infile);
+                mf2_ob.muf[i][j][k][m] = lst.l2;
+                mf2_ob.aj[i][j][k][m] = lst.c1;
+                mf2_ob.amux[i][j][k][m] = lst.data[2];
+                mf2_ob.amun[i][j][k][m] = lst.data[3];
+                mf2_ob.amug[i][j][k][m] = lst.data[4];
+                mf2_ob.amuf[i][j][k][m] = lst.data[5];
+                for (int n = 6; n < lst.ne; ++n) {
+                  mf2_ob.es[i][j][k][l][m][n] = lst.data(n*6 + 6);
+                  mf2_ob.d[i][j][k][l][m][n] = lst.data(n*6 + 7);
+                  mf2_ob.gx[i][j][k][l][m][n] = lst.data(n*6 + 8);
+                  mf2_ob.gno[i][j][k][l][m][n] = lst.data(n*6 + 9);
+                  mf2_ob.gg[i][j][k][l][m][n] = lst.data(n*6 + 10);
+                  mf2_ob.gf[i][j][k][l][m][n] = lst.data(n*6 + 11);
+                }
+              }
             }
           }
         } else if (mf2_ob.lrf[i][j] == 7) {
