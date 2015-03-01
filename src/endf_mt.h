@@ -39,7 +39,7 @@ namespace pyne {
       int liso; ///< isomeric state number
       int nfor; ///< library format
       double awi; ///< projectile mass relative to neutron
-      double emax; ///< upper energy limit
+      double emax; ///< upper energ, limit
       int lrel; ///< library release number
       int nsub; ///< sub library number
       int nver; ///< library version number
@@ -56,7 +56,7 @@ namespace pyne {
 
     /// A typedef struct for fission profuct yield data MT 454, 459
     typedef struct mtfpy_mf8 : mt_base {
-      int le; ///< number of energy  dependent yields given
+      int le; ///< number of energ,  dependent yields given
       std::vector<int> i; ///< interpolation to be used between E[i-1] and E[i]
       std::vector<double> e; ///< list of energies
       std::vector<std::vector<std::vector<double> > > yields; ///< yield data [zafp,fps,yi,dyi]
@@ -74,7 +74,7 @@ namespace pyne {
       /// if LNU = 2 this will contain the tabulated data parameters
       std::vector<int> nbt; ///< list of interpolation segments
       std::vector<int> intn; ///< list of interpolations to be used
-      std::vector<double> eint; ///< Energy of the incident neutron
+      std::vector<double> eint; ///< Energ, of the incident neutron
       std::vector<double> nu_e; ///< Neutrons per fission at the given energy
     } mt452_mf1;
 
@@ -83,7 +83,7 @@ namespace pyne {
     mt452_mf1 read_mt452_mf1(std::ifstream &infile);
 
     typedef struct mt455_mf1 : mt_base {
-      int ldg; ///< energy dependence of decay constants
+      int ldg, ///< energy dependence of decay constants
       int lnu; ///< data representation type
 
       std::vector<double> lambdas; ///< decay constant of ith precursor
@@ -92,12 +92,12 @@ namespace pyne {
       std::vector<int> intn; ///< list of interpolations to be used
       std::vector<int> ne; ///< number of energies
       std::vector<double> eint; ///< ith energy
-      std::vector<int> einti; ///< energy interpolation scheme
-      std::vector<double> nu_d; ///< average neutrons per delayed fission event
+      std::vector<int> einti; ///< energ, interpolation scheme
+      std::vector<double> nu_d; ///< averag, neutrons per delayed fission event
 
-      /// decay constant of ith precursor with neutron energy energy E
+      /// decay constant of ith precursor with neutron energ, energy E
       std::vector<std::vector<double> > lambda_arr;
-      /// fraction of ith precursor with neutron energy E
+      /// fraction of ith precursor with neutron energ, E
       std::vector<std::vector<double> > alpha_arr;
 
     } mt455_mf1;
@@ -118,7 +118,7 @@ namespace pyne {
       std::vector<int> nbt; ///< list of interpolation segments
       std::vector<int> intn; ///< list of interpolations to be used
       std::vector<double> eint; ///< ith energy
-      std::vector<double> nu_e; ///< average neutrons per prompt fission event
+      std::vector<double> nu_e; ///< averag, neutrons per prompt fission event
 
     } mt456_mf1;
 
@@ -126,21 +126,21 @@ namespace pyne {
     /// \param infile An ENDF filestream
     mt456_mf1 read_mt456_mf1(std::ifstream &infile);
 
-    /// Data structure for fission energy release
+    /// Data structure for fission energ, release
     typedef struct mt458_mf1 : mt_base {
-      std::vector<std::pair<double,double> > efr; ///< kinetic energy from fission products
-      std::vector<std::pair<double,double> > pen; ///< kinetic energy of prompt fission neutrons
-      std::vector<std::pair<double,double> > den; ///< kinetic energy of delayed fission neutrons
-      std::vector<std::pair<double,double> > egp; ///< total energy released by prompt gamma rays
-      std::vector<std::pair<double,double> > egd; ///< total energy released by delayed gamma rays
-      std::vector<std::pair<double,double> > eb; ///< total energy released by delayed betas
-      std::vector<std::pair<double,double> > enu; ///< energy carried away by neutrinos
-      std::vector<std::pair<double,double> > er; ///< total energy release not lost to neutrinos
-      std::vector<std::pair<double,double> > et; ///< total energy release per fission
+      std::vector<std::pair<double,double> > efr; ///< kinetic energ, from fission products
+      std::vector<std::pair<double,double> > pen; ///< kinetic energ, of prompt fission neutrons
+      std::vector<std::pair<double,double> > den; ///< kinetic energ, of delayed fission neutrons
+      std::vector<std::pair<double,double> > egp; ///< total energ, released by prompt gamma rays
+      std::vector<std::pair<double,double> > egd; ///< total energ, released by delayed gamma rays
+      std::vector<std::pair<double,double> > eb; ///< total energ, released by delayed betas
+      std::vector<std::pair<double,double> > enu; ///< energ, carried away by neutrinos
+      std::vector<std::pair<double,double> > er; ///< total energ, release not lost to neutrinos
+      std::vector<std::pair<double,double> > et; ///< total energ, release per fission
 
     } mt458_mf1;
 
-    /// reads ENDF fission energy release data from an ifstream and returns
+    /// reads ENDF fission energ, release data from an ifstream and returns
     /// structure containing associated data
     /// \param infile An ENDF filestream
     mt458_mf1 read_mt458_mf1(std::ifstream &infile);
@@ -150,8 +150,8 @@ namespace pyne {
 
       int lo; ///< representation type: 1 if discrete, 2 if continuous
       /// lo = 1
-      int ng; ///< number
-      std::vector<double> elist; ///< energy of the ith photon in eV
+      int ng, ///< number
+      std::vector<double> elist; ///< energ, of the ith photon in eV
       std::vector<std::vector<int> > nbt; ///< list^2 interpolation segments
       std::vector<std::vector<int> > intn; ///< list^2 of interpolations
       std::vector<std::vector<double> > tint; ///< time of ith multiplicity
@@ -170,17 +170,17 @@ namespace pyne {
     typedef struct mt457_mf8 : mt_base {
       int lis; ///< state of the original nuclide
       int liso; ///< isomeric state of the original nuclide
-      int nst; ///< nucleus stability flag: 0 = radioactive
+      int nst; ///< nucleus stability flag, 0 = radioactive
       int nsp; ///< total number of radiation types for which information is given
-      std::vector<std::pair<double,double> > erel; ///< energy released
+      std::vector<std::pair<double,double> > erel; ///< energ, released
       std::vector<double> styp; ///< Decay radiation
       std::vector<int> lcon; ///< Continuum spectrum flag
       std::vector<int> ner; ///< number of tabulated discrete energies
       std::vector<int> nd; ///< number of decay modes given 
       std::vector<std::pair<double,double> > fd; ///< discrete spectrum normalization factor
-      std::vector<std::pair<double,double> > eav; ///< average decay energy of radiation
+      std::vector<std::pair<double,double> > eav; ///< averag, decay energy of radiation
       std::vector<std::pair<double,double> > fc; ///< continuum spectrum normalization
-      std::vector<std::pair<double,double> > er; ///< discrete energy of radiation
+      std::vector<std::pair<double,double> > er; ///< discrete energ, of radiation
       std::vector<double> rtyp; ///< decay mode of the nuclide
       std::vector<double> type; ///< type of beta/ec transition
       std::vector<std::pair<double,double> > ri; ///< intensity of discrete radiation
@@ -206,76 +206,16 @@ namespace pyne {
     mf3 read_mf3(std::ifstream &infile);
     
     typedef struct mf2 : mt_base {
-      std::vector<double> zai;
-      std::vector<double> abn;
-      std::vector<int> lfw;
-      std::vector<int> ner;
-      std::vector<std::vector<double> > el;
-      std::vector<std::vector<double> > eh;
-      std::vector<std::vector<int> > lru;
-      std::vector<std::vector<int> > lrf;
-      std::vector<std::vector<int> > nro;
-      std::vector<std::vector<int> > naps;
-      std::vector<std::vector<double> > spi;
-      std::vector<std::vector<double> > ap;
-      std::vector<std::vector<int> > lad;
-      std::vector<std::vector<int> > nls;
-      std::vector<std::vector<int> > nlsc;
-      std::vector<std::vector<int> > l;
-      std::vector<std::vector<int> > njs;
-      std::vector<std::vector<int> > ifg;
-      std::vector<std::vector<int> > krm;
-      std::vector<std::vector<int> > njs;
-      std::vector<std::vector<int> > krl;
-      std::vector<std::vector<std::vector<int> > > lbk;
-      std::vector<std::vector<std::vector<int> > > lps;
+      int nis;
 
+      // mega-maps map(pair(quantity, unique_index), data)
+      std::map<std::pair<std::string, std::string>, int> data_i;
+      std::map<std::pair<std::string, std::string>, double> data_d;
+      std::map<std::pair<std::string, std::string>, std::vector<int> > data_vi;
+      std::map<std::pair<std::string, std::string>, std::vector<double> > data_vd;
+    } mf2;
 
-      std::vector<std::vector<std::vector<std::vector<double> > > > abt;
-      std::vector<std::vector<std::vector<std::vector<double> > > > abf;
-      std::vector<std::vector<std::vector<std::vector<double> > > > abc;
-      std::vector<std::vector<std::vector<std::vector<double> > > > gt;
-      std::vector<std::vector<std::vector<std::vector<double> > > > gf;
-      std::vector<std::vector<std::vector<std::vector<double> > > > er;
-      std::vector<std::vector<std::vector<std::vector<double> > > > gn;
-      std::vector<std::vector<std::vector<std::vector<double> > > > gfa;
-      std::vector<std::vector<std::vector<std::vector<double> > > > gfb;
-      std::vector<std::vector<std::vector<std::vector<int> > > > muf;
-      std::vector<std::vector<std::vector<std::vector<double> > > > d;
-      std::vector<std::vector<std::vector<std::vector<double> > > > aj;
-      std::vector<std::vector<std::vector<std::vector<double> > > > gno;
-      std::vector<std::vector<std::vector<std::vector<double> > > > gg;
-      
-      std::vector<std::vector<std::vector<std::vector<double> > > > amux;
-      std::vector<std::vector<std::vector<std::vector<double> > > > amun;
-      std::vector<std::vector<std::vector<std::vector<double> > > > amug;
-      std::vector<std::vector<std::vector<std::vector<double> > > > amuf;
-
-
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gf;
-      /// the really ugly 5-d stuff
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > det;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > dwt;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > grt;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > git;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > def;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > dwf;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > grf;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gif;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > dec;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > dwc;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > grc;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gic;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > es;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > d;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gx;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gno;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gg;
-      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gf;
-
-
-
-    }
+    mf2 read_mf2(std::ifstream &infile);
   }
 }
 

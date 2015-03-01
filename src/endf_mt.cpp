@@ -393,191 +393,191 @@ pyne::endf::mf2 pyne::endf::read_mf2(std::ifstream &infile, int lrp) {
   mf2_ob.mf = cs.mf;
   mf2_ob.mt = cs.mt;
 
-  mf2_ob.nis = cs.n1;
+  mf2_ob.data_d[std::make_pair("nis", = cs.n1;
   tab1 tab;
   list lst;
   for(int i = 0; i < mf2_ob.nis; ++i) {
     cs = read_cont(infile);//isotope info
-    mf2_ob.zai[i] = cs.c1;
-    mf2_ob.abn[i] = cs.c2;
-    mf2_ob.lfw[i] = cs.l2;
-    mf2_ob.ner[i] = cs.n1;
+    mf2_ob.data_d[std::make_pair("zai", istr)] = cs.c1;
+    mf2_ob.data_d[std::make_pair("abn", istr)] = cs.c2;
+    mf2_ob.data_i[std::make_pair("lfw", istr)] = cs.l2;
+    mf2_ob.data_i[std::make_pair("ner", istr)] = cs.n1;
 
-    for(int j = 0; j < mf2_ob.ner; ++j) {
+    for(int j = 0; j < mf2_ob.data_d[std::make_pair("ner", istr)]; ++j) {
       cs = read_cont(infile);// range info
-      mf2_ob.el[i][j] = cs.c1;
-      mf2_ob.eh[i][j] = cs.c2;
-      mf2_ob.lru[i][j] = cs.l1;
-      mf2_ob.lrf[i][j] = cs.l2;
-      mf2_ob.nro[i][j] = cs.n1;
-      mf2_ob.naps[i][j] = cs.n2;
-      if ((mf2_ob.lru[i][j] != 0) && (mf2_ob.nro[i][j] != 0)) {
-        if (mf2_ob.lrf[i][j] < 5) {
-          if ((mf2_ob.lru[i][j] == 1) && (mf2_ob.nro[i][j] != 0)) 
+      mf2_ob.data_d[std::make_pair("el", ijstr)] = cs.c1;
+      mf2_ob.data_d[std::make_pair("eh", ijstr)] = cs.c2;
+      mf2_ob.data_i[std::make_pair("lru", ijstr)] = cs.l1;
+      mf2_ob.data_i[std::make_pair("lrf", ijstr)] = cs.l2;
+      mf2_ob.data_i[std::make_pair("nro", ijstr)] = cs.n1;
+      mf2_ob.data_i[std::make_pair("naps", ijstr)] = cs.n2;
+      if ((mf2_ob.data_d[std::make_pair("lru", ijstr)] != 0) && (mf2_ob.data_d[std::make_pair("nro", ijstr)] != 0)) {
+        if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] < 5) {
+          if ((mf2_ob.data_d[std::make_pair("lru", ijstr)] == 1) && (mf2_ob.data_d[std::make_pair("nro", ijstr)] != 0)) 
             tab = read_tab1(infile);
-            mf2_ob.ap_nbt[i][j] = tab.nbt;
-            mf2_ob.ap_intn[i][j] = tab.intn;
-            mf2_ob.ap_e[i][j] = tab.x;
-            mf2_ob.ap_val[i][j] = tab.y;
-          if !((mf2_ob.lfw[i] == 1) && (mf2_ob.lrf[i][j] == 1)) {
+            mf2_ob.data_vi[std::make_pair("ap_nbt", ijstr)] = tab.nbt;
+            mf2_ob.data_vi[std::make_pair("ap_intn", ijstr)] = tab.intn;
+            mf2_ob.data_vd[std::make_pair("ap_e", ijstr)] = tab.x;
+            mf2_ob.data_vd[std::make_pair("ap_val", ijstr)] = tab.y;
+          if !((mf2_ob.data_d[std::make_pair("lfw", istr)] == 1) && (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 1)) {
             cs = read_cont(infile);// range info
-            mf2_ob.spi[i][j] = cs.c1;
-            mf2_ob.ap[i][j] = cs.c2;
-            mf2_ob.lad[i][j] = cs.l1;
-            mf2_ob.nls[i][j] = cs.n1;
-            mf2_ob.nlsc[i][j] = cs.n2;
+            mf2_ob.data_d[std::make_pair("spi", ijstr)] = cs.c1;
+            mf2_ob.data_d[std::make_pair("ap", ijstr)] = cs.c2;
+            mf2_ob.data_i[std::make_pair("lad", ijstr)] = cs.l1;
+            mf2_ob.data_i[std::make_pair("nls", ijstr)] = cs.n1;
+            mf2_ob.data_i[std::make_pair("nlsc", ijstr)] = cs.n2;
           }
-          if (mf2_ob.lru[i][j] == 1) {
-            if (mf2_ob.lrf[i][j] < 3) {
-              for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
+          if (mf2_ob.data_d[std::make_pair("lru", ijstr)] == 1) {
+            if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] < 3) {
+              for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
                 lst = read_list(infile); //slbw and mlbw           
-                mf2_ob.awri[i][j][k] = lst.c1;
-                mf2_ob.qx[i][j][k] = lst.c2;
-                mf2_ob.l[i][j][k] = lst.l1;
-                mf2_ob.lrx[i][j][k] = lst.l2;
+                mf2_ob.data_d[std::make_pair("awri", ijkstr)] = lst.c1;
+                mf2_ob.data_d[std::make_pair("qx", ijkstr)] = lst.c2;
+                mf2_ob.data_d[std::make_pair("l", ijkstr)] = lst.l1;
+                mf2_ob.data_d[std::make_pair("lrx", ijkstr)] = lst.l2;
                 for (int m = 0; m < lst.n2; ++m) {
-                  mf2_ob.er[i][j][k][m] = lst.data[m*6];
-                  mf2_ob.aj[i][j][k][m] = lst.data[m*6 + 1];
-                  mf2_ob.gt[i][j][k][m] = lst.data[m*6 + 2];
-                  mf2_ob.gn[i][j][k][m] = lst.data[m*6 + 3];
-                  mf2_ob.gg[i][j][k][m] = lst.data[m*6 + 4];
-                  mf2_ob.gf[i][j][k][m] = lst.data[m*6 + 5];
+                  mf2_ob.data_d[std::make_pair("er", ijkmstr)] = lst.data[m*6];
+                  mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.data[m*6 + 1];
+                  mf2_ob.data_d[std::make_pair("gt", ijkmstr)] = lst.data[m*6 + 2];
+                  mf2_ob.data_d[std::make_pair("gn", ijkmstr)] = lst.data[m*6 + 3];
+                  mf2_ob.data_d[std::make_pair("gg", ijkmstr)] = lst.data[m*6 + 4];
+                  mf2_ob.data_d[std::make_pair("gf", ijkmstr)] = lst.data[m*6 + 5];
                 }
               }
-            } else if (mf2_ob.lrf[i][j] == 3) {
-              for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
+            } else if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 3) {
+              for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
                 lst = read_list(infile); // Reiche-Moore          
-                mf2_ob.awri[i][j][k] = lst.c1;
-                mf2_ob.apl[i][j][k] = lst.c2;
-                mf2_ob.l[i][j][k] = lst.l1;
+                mf2_ob.data_d[std::make_pair("awri", ijkstr)] = lst.c1;
+                mf2_ob.data_d[std::make_pair("apl", ijkstr)] = lst.c2;
+                mf2_ob.data_d[std::make_pair("l", ijkstr)] = lst.l1;
                 for (int m = 0; m < lst.n2; ++m) {
-                  mf2_ob.er[i][j][k][m] = lst.data[m*6];
-                  mf2_ob.aj[i][j][k][m] = lst.data[m*6 + 1];
-                  mf2_ob.gn[i][j][k][m] = lst.data[m*6 + 2];
-                  mf2_ob.gg[i][j][k][m] = lst.data[m*6 + 3];
-                  mf2_ob.gfa[i][j][k][m] = lst.data[m*6 + 4];
-                  mf2_ob.gfb[i][j][k][m] = lst.data[m*6 + 5];
+                  mf2_ob.data_d[std::make_pair("er", ijkmstr)] = lst.data[m*6];
+                  mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.data[m*6 + 1];
+                  mf2_ob.data_d[std::make_pair("gn", ijkmstr)] = lst.data[m*6 + 2];
+                  mf2_ob.data_d[std::make_pair("gg", ijkmstr)] = lst.data[m*6 + 3];
+                  mf2_ob.data_d[std::make_pair("gfa", ijkmstr)] = lst.data[m*6 + 4];
+                  mf2_ob.data_d[std::make_pair("gfb", ijkmstr)] = lst.data[m*6 + 5];
                 }
               }
             } else {
-              for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
+              for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
                 lst = read_list(infile); // Adler-Adler          
-                mf2_ob.awri[i][j][k] = lst.c1;
-                mf2_ob.li[i][j][k] = lst.l1;
-                mf2_ob.abt[i][j][k] = std::vector<double>(&lst.data[0],&lst.data[6]);
-                mf2_ob.abf[i][j][k] = std::vector<double>(&lst.data[6],&lst.data[12]);
-                mf2_ob.abc[i][j][k] = std::vector<double>(&lst.data[12],&lst.data[18]);
+                mf2_ob.data_d[std::make_pair("awri", ijkstr)] = lst.c1;
+                mf2_ob.data_d[std::make_pair("li", ijkstr)] = lst.l1;
+                mf2_ob.data_d[std::make_pair("abt", ijkstr)] = std::vector<double>(&lst.data[0],&lst.data[6]);
+                mf2_ob.data_d[std::make_pair("abf", ijkstr)] = std::vector<double>(&lst.data[6],&lst.data[12]);
+                mf2_ob.data_d[std::make_pair("abc", ijkstr)] = std::vector<double>(&lst.data[12],&lst.data[18]);
 
                 cs = read_cont(infile);
-                mf2_ob.l[i][j][k] = cs.l1;
-                mf2_ob.njs[i][j][k] = cs.n1;
-                for (int m = 0; m < mf2_ob.njs[i][j]; ++m) {
+                mf2_ob.data_d[std::make_pair("l", ijkstr)] = cs.l1;
+                mf2_ob.data_d[std::make_pair("njs", ijkstr)] = cs.n1;
+                for (int m = 0; m < mf2_ob.data_d[std::make_pair("njs", ijstr)]; ++m) {
                   lst = read_list(infile);
-                  mf2_ob.aj[i][j][k][m] = lst.c1;
+                  mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.c1;
                   for (int n = 0; n < lst.n2; ++n) {
-                    mf2_ob.det[i][j][k][m][n] = lst.data[n*12 + 0];
-                    mf2_ob.dwt[i][j][k][m][n] = lst.data[n*12 + 1];
-                    mf2_ob.grt[i][j][k][m][n] = lst.data[n*12 + 2];
-                    mf2_ob.git[i][j][k][m][n] = lst.data[n*12 + 3];
-                    mf2_ob.def[i][j][k][m][n] = lst.data[n*12 + 4];
-                    mf2_ob.dwf[i][j][k][m][n] = lst.data[n*12 + 5];
-                    mf2_ob.grf[i][j][k][m][n] = lst.data[n*12 + 6];
-                    mf2_ob.gif[i][j][k][m][n] = lst.data[n*12 + 7];
-                    mf2_ob.dec[i][j][k][m][n] = lst.data[n*12 + 8];
-                    mf2_ob.dwc[i][j][k][m][n] = lst.data[n*12 + 9];
-                    mf2_ob.grc[i][j][k][m][n] = lst.data[n*12 + 10];
-                    mf2_ob.gic[i][j][k][m][n] = lst.data[n*12 + 11];
+                    mf2_ob.data_d[std::make_pair("det", ijkmstr)][n] = lst.data[n*12 + 0];
+                    mf2_ob.data_d[std::make_pair("dwt", ijkmstr)][n] = lst.data[n*12 + 1];
+                    mf2_ob.data_d[std::make_pair("grt", ijkmstr)][n] = lst.data[n*12 + 2];
+                    mf2_ob.data_d[std::make_pair("git", ijkmstr)][n] = lst.data[n*12 + 3];
+                    mf2_ob.data_d[std::make_pair("def", ijkmstr)][n] = lst.data[n*12 + 4];
+                    mf2_ob.data_d[std::make_pair("dwf", ijkmstr)][n] = lst.data[n*12 + 5];
+                    mf2_ob.data_d[std::make_pair("grf", ijkmstr)][n] = lst.data[n*12 + 6];
+                    mf2_ob.data_d[std::make_pair("gif", ijkmstr)][n] = lst.data[n*12 + 7];
+                    mf2_ob.data_d[std::make_pair("dec", ijkmstr)][n] = lst.data[n*12 + 8];
+                    mf2_ob.data_d[std::make_pair("dwc", ijkmstr)][n] = lst.data[n*12 + 9];
+                    mf2_ob.data_d[std::make_pair("grc", ijkmstr)][n] = lst.data[n*12 + 10];
+                    mf2_ob.data_d[std::make_pair("gic", ijkmstr)][n] = lst.data[n*12 + 11];
                   }
 
                 }
               }
             }
-          } else if ((mf2_ob.lfw[i] == 0) && (mf2_ob.lrf[i][j] == 1)) {
-            for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
+          } else if ((mf2_ob.data_d[std::make_pair("lfw", istr)] == 0) && (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 1)) {
+            for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
               lst = read_list(infile); // 
-              mf2_ob.awri[i][j][k] = lst.c1;
-              mf2_ob.l[i][j][k] = lst.l1;
+              mf2_ob.data_d[std::make_pair("awri", ijkstr)] = lst.c1;
+              mf2_ob.data_d[std::make_pair("l", ijkstr)] = lst.l1;
               for (int m = 0; m < lst.n2; ++m) {
-                mf2_ob.d[i][j][k][m] = lst.data[m*6];
-                mf2_ob.aj[i][j][k][m] = lst.data[m*6 + 1];
-                mf2_ob.amun[i][j][k][m] = lst.data[m*6 + 2];
-                mf2_ob.gno[i][j][k][m] = lst.data[m*6 + 3];
-                mf2_ob.gg[i][j][k][m] = lst.data[m*6 + 4];
+                mf2_ob.data_d[std::make_pair("d", ijkmstr)] = lst.data[m*6];
+                mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.data[m*6 + 1];
+                mf2_ob.data_d[std::make_pair("amun", ijkmstr)] = lst.data[m*6 + 2];
+                mf2_ob.data_d[std::make_pair("gno", ijkmstr)] = lst.data[m*6 + 3];
+                mf2_ob.data_d[std::make_pair("gg", ijkmstr)] = lst.data[m*6 + 4];
               }
             }
-          } else if ((mf2_ob.lfw[i] == 1) && (mf2_ob.lrf[i][j] == 1)) {
+          } else if ((mf2_ob.data_d[std::make_pair("lfw", istr)] == 1) && (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 1)) {
             lst = read_list(infile); // 
-            mf2_ob.spi[i][j] = lst.c1;
-            mf2_ob.ap[i][j] = lst.c2;
-            mf2_ob.lssf[i][j] = lst.l1;
-            mf2_ob.ne[i][j] = lst.n1;
-            mf2_ob.nls[i][j] = lst.n2;
-            mf2_ob.es[i][j] = lst.data;
+            mf2_ob.data_d[std::make_pair("spi", ijstr)] = lst.c1;
+            mf2_ob.data_d[std::make_pair("ap", ijstr)] = lst.c2;
+            mf2_ob.data_d[std::make_pair("lssf", ijstr)] = lst.l1;
+            mf2_ob.data_d[std::make_pair("ne", ijstr)] = lst.n1;
+            mf2_ob.data_d[std::make_pair("nls", ijstr)] = lst.n2;
+            mf2_ob.data_d[std::make_pair("es", ijstr)] = lst.data;
 
-            for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
+            for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
               cs = read_cont(infile); 
-              mf2_ob.awri[i][j][k] = cs.c1;
-              mf2_ob.l[i][j][k] = cs.l1;
-              mf2_ob.njs[i][j][k] = cs.n1;
-              for (int m = 0; m < mf2_ob.njs[i][j][k]; ++m) {
+              mf2_ob.data_d[std::make_pair("awri", ijkstr)] = cs.c1;
+              mf2_ob.data_d[std::make_pair("l", ijkstr)] = cs.l1;
+              mf2_ob.data_d[std::make_pair("njs", ijkstr)] = cs.n1;
+              for (int m = 0; m < mf2_ob.data_d[std::make_pair("njs", ijkstr)]; ++m) {
                 lst = read_list(infile);
-                mf2_ob.muf[i][j][k][m] = lst.l2;
-                mf2_ob.d[i][j][k][m] = lst.data[0];
-                mf2_ob.aj[i][j][k][m] = lst.data[1];
-                mf2_ob.amun[i][j][k][m] = lst.data[2];
-                mf2_ob.gno[i][j][k][m] = lst.data[3];
-                mf2_ob.gg[i][j][k][m] = lst.data[4];
-                mf2_ob.gf[i][j][k][m] = std::vector<double>(&lst.data[6], &lst.data[lst.npl]);
+                mf2_ob.data_d[std::make_pair("muf", ijkmstr)] = lst.l2;
+                mf2_ob.data_d[std::make_pair("d", ijkmstr)] = lst.data[0];
+                mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.data[1];
+                mf2_ob.data_d[std::make_pair("amun", ijkmstr)] = lst.data[2];
+                mf2_ob.data_d[std::make_pair("gno", ijkmstr)] = lst.data[3];
+                mf2_ob.data_d[std::make_pair("gg", ijkmstr)] = lst.data[4];
+                mf2_ob.data_d[std::make_pair("gf", ijkmstr)] = std::vector<double>(&lst.data[6], &lst.data[lst.npl]);
               }
-          } else if (mf2_ob.lrf[i][j] == 2) {
-            for (int k = 0; k < mf2_ob.nls[i][j]; ++k) {
+          } else if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 2) {
+            for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
               cs = read_cont(infile);
-              mf2_ob.awri[i][j][k] = cs.c1;
-              mf2_ob.l[i][j][k] = cs.l1;
-              mf2_ob.njs[i][j][k] = cs.n1;
-              for (int m = 0; m < mf2_ob.njs[i][j][k]; ++m) {
+              mf2_ob.data_d[std::make_pair("awri", ijkstr)] = cs.c1;
+              mf2_ob.data_d[std::make_pair("l", ijkstr)] = cs.l1;
+              mf2_ob.data_d[std::make_pair("njs", ijkstr)] = cs.n1;
+              for (int m = 0; m < mf2_ob.data_d[std::make_pair("njs", ijkstr)]; ++m) {
                 lst = read_list(infile);
-                mf2_ob.muf[i][j][k][m] = lst.l2;
-                mf2_ob.aj[i][j][k][m] = lst.c1;
-                mf2_ob.amux[i][j][k][m] = lst.data[2];
-                mf2_ob.amun[i][j][k][m] = lst.data[3];
-                mf2_ob.amug[i][j][k][m] = lst.data[4];
-                mf2_ob.amuf[i][j][k][m] = lst.data[5];
+                mf2_ob.data_d[std::make_pair("muf", ijkmstr)] = lst.l2;
+                mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.c1;
+                mf2_ob.data_d[std::make_pair("amux", ijkmstr)] = lst.data[2];
+                mf2_ob.data_d[std::make_pair("amun", ijkmstr)] = lst.data[3];
+                mf2_ob.data_d[std::make_pair("amug", ijkmstr)] = lst.data[4];
+                mf2_ob.data_d[std::make_pair("amuf", ijkmstr)] = lst.data[5];
                 for (int n = 6; n < lst.ne; ++n) {
-                  mf2_ob.es[i][j][k][l][m][n] = lst.data(n*6 + 6);
-                  mf2_ob.d[i][j][k][m][n] = lst.data(n*6 + 7);
-                  mf2_ob.gx[i][j][k][m][n] = lst.data(n*6 + 8);
-                  mf2_ob.gno[i][j][k][m][n] = lst.data(n*6 + 9);
-                  mf2_ob.gg[i][j][k][m][n] = lst.data(n*6 + 10);
-                  mf2_ob.gf[i][j][k][m][n] = lst.data(n*6 + 11);
+                  mf2_ob.data_d[std::make_pair("es", ijkmstr)][n] = lst.data(n*6 + 6);
+                  mf2_ob.data_d[std::make_pair("d", ijkmstr)][n] = lst.data(n*6 + 7);
+                  mf2_ob.data_d[std::make_pair("gx", ijkmstr)][n] = lst.data(n*6 + 8);
+                  mf2_ob.data_d[std::make_pair("gno", ijkmstr)][n] = lst.data(n*6 + 9);
+                  mf2_ob.data_d[std::make_pair("gg", ijkmstr)][n] = lst.data(n*6 + 10);
+                  mf2_ob.data_d[std::make_pair("gf", ijkmstr)][n] = lst.data(n*6 + 11);
                 }
               }
             }
           }
-        } else if (mf2_ob.lrf[i][j] == 7) {
+        } else if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 7) {
           cs = read_cont(infile);
 
-          mf2_ob.ifg[i][j] = cs.l1;
-          mf2_ob.krm[i][j] = cs.l2;
-          mf2_ob.njs[i][j] = cs.n1;
-          mf2_ob.krl[i][j] = cs.n2;
+          mf2_ob.data_d[std::make_pair("ifg", ijstr)] = cs.l1;
+          mf2_ob.data_d[std::make_pair("krm", ijstr)] = cs.l2;
+          mf2_ob.data_d[std::make_pair("njs", ijstr)] = cs.n1;
+          mf2_ob.data_d[std::make_pair("krl", ijstr)] = cs.n2;
           lst = read_list(infile);
-          for (int k = 0; k < mf2_ob.njs[i][j]; ++k) {
+          for (int k = 0; k < mf2_ob.data_d[std::make_pair("njs", ijstr)]; ++k) {
             lst = read_list(infile);
             lst = read_list(infile);
             lst = read_list(infile);
-            mf2_ob.lbk[i][j][k] = lst.npl;
-            if (mf2_ob.lbk[i][j][k] == 1) {
+            mf2_ob.data_d[std::make_pair("lbk", ijkstr)] = lst.npl;
+            if (mf2_ob.data_d[std::make_pair("lbk", ijkstr)] == 1) {
               tab = read_tab1(infile);
               tab = read_tab1(infile);
-            } else if (mf2_ob.lbk[i][j][k] == 2) {
+            } else if (mf2_ob.data_d[std::make_pair("lbk", ijkstr)] == 2) {
               lst = read_list(infile);
-            } else if (mf2_ob.lbk[i][j][k] == 3) {
+            } else if (mf2_ob.data_d[std::make_pair("lbk", ijkstr)] == 3) {
               lst = read_list(infile);
             }
             lst = read_list(infile);
-            mf2_ob.lps[i][j][k] = lst.npl;
-            if (mf2_ob.lps[i][j][k] == 1) {
+            mf2_ob.data_d[std::make_pair("lps", ijkstr)] = lst.npl;
+            if (mf2_ob.data_d[std::make_pair("lps", ijkstr)] == 1) {
               tab = read_tab1(infile);
               tab = read_tab1(infile);
             }
@@ -585,9 +585,9 @@ pyne::endf::mf2 pyne::endf::read_mf2(std::ifstream &infile, int lrp) {
         }
       } else {
         cs = read_cont(infile);// range info
-        mf2_ob.spi[i][j] = cs.c1;
-        mf2_ob.ap[i][j] = cs.c2;
-        mf2_ob.nls[i][j] = cs.n1;
+        mf2_ob.data_d[std::make_pair("spi", ijstr)] = cs.c1;
+        mf2_ob.data_d[std::make_pair("ap", ijstr)] = cs.c2;
+        mf2_ob.data_d[std::make_pair("nls", ijstr)] = cs.n1;
 
       }
     }
