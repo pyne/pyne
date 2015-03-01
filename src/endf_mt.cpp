@@ -393,7 +393,7 @@ pyne::endf::mf2 pyne::endf::read_mf2(std::ifstream &infile, int lrp) {
   mf2_ob.mf = cs.mf;
   mf2_ob.mt = cs.mt;
 
-  mf2_ob.data_d[std::make_pair("nis", = cs.n1;
+  mf2_ob.nis = cs.n1;
   tab1 tab;
   list lst;
   for(int i = 0; i < mf2_ob.nis; ++i) {
