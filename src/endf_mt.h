@@ -231,6 +231,50 @@ namespace pyne {
       std::vector<std::vector<std::vector<int> > > lps;
 
 
+      std::vector<std::vector<std::vector<std::vector<double> > > > abt;
+      std::vector<std::vector<std::vector<std::vector<double> > > > abf;
+      std::vector<std::vector<std::vector<std::vector<double> > > > abc;
+      std::vector<std::vector<std::vector<std::vector<double> > > > gt;
+      std::vector<std::vector<std::vector<std::vector<double> > > > gf;
+      std::vector<std::vector<std::vector<std::vector<double> > > > er;
+      std::vector<std::vector<std::vector<std::vector<double> > > > gn;
+      std::vector<std::vector<std::vector<std::vector<double> > > > gfa;
+      std::vector<std::vector<std::vector<std::vector<double> > > > gfb;
+      std::vector<std::vector<std::vector<std::vector<int> > > > muf;
+      std::vector<std::vector<std::vector<std::vector<double> > > > d;
+      std::vector<std::vector<std::vector<std::vector<double> > > > aj;
+      std::vector<std::vector<std::vector<std::vector<double> > > > gno;
+      std::vector<std::vector<std::vector<std::vector<double> > > > gg;
+      
+      std::vector<std::vector<std::vector<std::vector<double> > > > amux;
+      std::vector<std::vector<std::vector<std::vector<double> > > > amun;
+      std::vector<std::vector<std::vector<std::vector<double> > > > amug;
+      std::vector<std::vector<std::vector<std::vector<double> > > > amuf;
+
+
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gf;
+      /// the really ugly 5-d stuff
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > det;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > dwt;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > grt;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > git;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > def;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > dwf;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > grf;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gif;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > dec;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > dwc;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > grc;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gic;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > es;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > d;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gx;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gno;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gg;
+      std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > gf;
+
+
+
     }
   }
 }

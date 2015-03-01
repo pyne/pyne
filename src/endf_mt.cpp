@@ -545,11 +545,11 @@ pyne::endf::mf2 pyne::endf::read_mf2(std::ifstream &infile, int lrp) {
                 mf2_ob.amuf[i][j][k][m] = lst.data[5];
                 for (int n = 6; n < lst.ne; ++n) {
                   mf2_ob.es[i][j][k][l][m][n] = lst.data(n*6 + 6);
-                  mf2_ob.d[i][j][k][l][m][n] = lst.data(n*6 + 7);
-                  mf2_ob.gx[i][j][k][l][m][n] = lst.data(n*6 + 8);
-                  mf2_ob.gno[i][j][k][l][m][n] = lst.data(n*6 + 9);
-                  mf2_ob.gg[i][j][k][l][m][n] = lst.data(n*6 + 10);
-                  mf2_ob.gf[i][j][k][l][m][n] = lst.data(n*6 + 11);
+                  mf2_ob.d[i][j][k][m][n] = lst.data(n*6 + 7);
+                  mf2_ob.gx[i][j][k][m][n] = lst.data(n*6 + 8);
+                  mf2_ob.gno[i][j][k][m][n] = lst.data(n*6 + 9);
+                  mf2_ob.gg[i][j][k][m][n] = lst.data(n*6 + 10);
+                  mf2_ob.gf[i][j][k][m][n] = lst.data(n*6 + 11);
                 }
               }
             }
