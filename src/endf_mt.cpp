@@ -398,186 +398,246 @@ pyne::endf::mf2 pyne::endf::read_mf2(std::ifstream &infile, int lrp) {
   list lst;
   for(int i = 0; i < mf2_ob.nis; ++i) {
     cs = read_cont(infile);//isotope info
-    mf2_ob.data_d[std::make_pair("zai", istr)] = cs.c1;
-    mf2_ob.data_d[std::make_pair("abn", istr)] = cs.c2;
-    mf2_ob.data_i[std::make_pair("lfw", istr)] = cs.l2;
-    mf2_ob.data_i[std::make_pair("ner", istr)] = cs.n1;
-
-    for(int j = 0; j < mf2_ob.data_d[std::make_pair("ner", istr)]; ++j) {
+    mf2_ob.data_d[std::make_tuple("zai", i, -1, -1, -1)] = cs.c1;
+    mf2_ob.data_d[std::make_tuple("abn", i, -1, -1, -1)] = cs.c2;
+    mf2_ob.data_i[std::make_tuple("lfw", i, -1, -1, -1)] = cs.l2;
+    mf2_ob.data_i[std::make_tuple("ner", i, -1, -1, -1)] = cs.n1;
+    for(int j = 0; j < mf2_ob.data_i[std::make_tuple("ner", i, -1, -1, -1)]; ++j) {
       cs = read_cont(infile);// range info
-      mf2_ob.data_d[std::make_pair("el", ijstr)] = cs.c1;
-      mf2_ob.data_d[std::make_pair("eh", ijstr)] = cs.c2;
-      mf2_ob.data_i[std::make_pair("lru", ijstr)] = cs.l1;
-      mf2_ob.data_i[std::make_pair("lrf", ijstr)] = cs.l2;
-      mf2_ob.data_i[std::make_pair("nro", ijstr)] = cs.n1;
-      mf2_ob.data_i[std::make_pair("naps", ijstr)] = cs.n2;
-      if ((mf2_ob.data_d[std::make_pair("lru", ijstr)] != 0) && (mf2_ob.data_d[std::make_pair("nro", ijstr)] != 0)) {
-        if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] < 5) {
-          if ((mf2_ob.data_d[std::make_pair("lru", ijstr)] == 1) && (mf2_ob.data_d[std::make_pair("nro", ijstr)] != 0)) 
+      mf2_ob.data_d[std::make_tuple("el", i, j, -1, -1)] = cs.c1;
+      mf2_ob.data_d[std::make_tuple("eh", i, j, -1, -1)] = cs.c2;
+      mf2_ob.data_i[std::make_tuple("lru", i, j, -1, -1)] = cs.l1;
+      mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] = cs.l2;
+      mf2_ob.data_i[std::make_tuple("nro", i, j, -1, -1)] = cs.n1;
+      mf2_ob.data_i[std::make_tuple("naps", i, j, -1, -1)] = cs.n2;
+      if ((mf2_ob.data_i[std::make_tuple("lru", i, j, -1, -1)] != 0) && (mf2_ob.data_i[std::make_tuple("nro", i, j, -1, -1)] != 0)) {
+        if (mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] < 5) {
+          if ((mf2_ob.data_i[std::make_tuple("lru", i, j, -1, -1)] == 1) && (mf2_ob.data_i[std::make_tuple("nro", i, j, -1, -1)] != 0)) 
             tab = read_tab1(infile);
-            mf2_ob.data_vi[std::make_pair("ap_nbt", ijstr)] = tab.nbt;
-            mf2_ob.data_vi[std::make_pair("ap_intn", ijstr)] = tab.intn;
-            mf2_ob.data_vd[std::make_pair("ap_e", ijstr)] = tab.x;
-            mf2_ob.data_vd[std::make_pair("ap_val", ijstr)] = tab.y;
-          if !((mf2_ob.data_d[std::make_pair("lfw", istr)] == 1) && (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 1)) {
+            mf2_ob.data_vi[std::make_tuple("ap_nbt", i, j, -1, -1)] = tab.nbt;
+            mf2_ob.data_vi[std::make_tuple("ap_intn", i, j, -1, -1)] = tab.intn;
+            mf2_ob.data_vd[std::make_tuple("ap_e", i, j, -1, -1)] = tab.x;
+            mf2_ob.data_vd[std::make_tuple("ap_val", i, j, -1, -1)] = tab.y;
+          if (!((mf2_ob.data_i[std::make_tuple("lfw", i, -1, -1, -1)] == 1) && (mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] == 1))) {
             cs = read_cont(infile);// range info
-            mf2_ob.data_d[std::make_pair("spi", ijstr)] = cs.c1;
-            mf2_ob.data_d[std::make_pair("ap", ijstr)] = cs.c2;
-            mf2_ob.data_i[std::make_pair("lad", ijstr)] = cs.l1;
-            mf2_ob.data_i[std::make_pair("nls", ijstr)] = cs.n1;
-            mf2_ob.data_i[std::make_pair("nlsc", ijstr)] = cs.n2;
+            mf2_ob.data_d[std::make_tuple("spi", i, j, -1, -1)] = cs.c1;
+            mf2_ob.data_d[std::make_tuple("ap", i, j, -1, -1)] = cs.c2;
+            mf2_ob.data_i[std::make_tuple("lad", i, j, -1, -1)] = cs.l1;
+            mf2_ob.data_i[std::make_tuple("nls", i, j, -1, -1)] = cs.n1;
+            mf2_ob.data_i[std::make_tuple("nlsc", i, j, -1, -1)] = cs.n2;
           }
-          if (mf2_ob.data_d[std::make_pair("lru", ijstr)] == 1) {
-            if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] < 3) {
-              for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
+          if (mf2_ob.data_i[std::make_tuple("lru", i, j, -1, -1)] == 1) {
+            if (mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] < 3) {
+              for (int k = 0; k < mf2_ob.data_i[std::make_tuple("nls", i, j, -1, -1)]; ++k) {
                 lst = read_list(infile); //slbw and mlbw           
-                mf2_ob.data_d[std::make_pair("awri", ijkstr)] = lst.c1;
-                mf2_ob.data_d[std::make_pair("qx", ijkstr)] = lst.c2;
-                mf2_ob.data_d[std::make_pair("l", ijkstr)] = lst.l1;
-                mf2_ob.data_d[std::make_pair("lrx", ijkstr)] = lst.l2;
+                mf2_ob.data_d[std::make_tuple("awri", i, j, k, -1)] = lst.c1;
+                mf2_ob.data_d[std::make_tuple("qx", i, j, k, -1)] = lst.c2;
+                mf2_ob.data_i[std::make_tuple("l", i, j, k, -1)] = lst.l1;
+                mf2_ob.data_i[std::make_tuple("lrx", i, j, k, -1)] = lst.l2;
+                mf2_ob.data_vd[std::make_tuple("er", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("aj", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gt", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gn", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gg", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gf", i, j, k, -1)] = std::vector<double>(lst.n2);
                 for (int m = 0; m < lst.n2; ++m) {
-                  mf2_ob.data_d[std::make_pair("er", ijkmstr)] = lst.data[m*6];
-                  mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.data[m*6 + 1];
-                  mf2_ob.data_d[std::make_pair("gt", ijkmstr)] = lst.data[m*6 + 2];
-                  mf2_ob.data_d[std::make_pair("gn", ijkmstr)] = lst.data[m*6 + 3];
-                  mf2_ob.data_d[std::make_pair("gg", ijkmstr)] = lst.data[m*6 + 4];
-                  mf2_ob.data_d[std::make_pair("gf", ijkmstr)] = lst.data[m*6 + 5];
+                  mf2_ob.data_vd[std::make_tuple("er", i, j, k, -1)][m] = lst.data[m*6];
+                  mf2_ob.data_vd[std::make_tuple("aj", i, j, k, -1)][m] = lst.data[m*6 + 1];
+                  mf2_ob.data_vd[std::make_tuple("gt", i, j, k, -1)][m] = lst.data[m*6 + 2];
+                  mf2_ob.data_vd[std::make_tuple("gn", i, j, k, -1)][m] = lst.data[m*6 + 3];
+                  mf2_ob.data_vd[std::make_tuple("gg", i, j, k, -1)][m] = lst.data[m*6 + 4];
+                  mf2_ob.data_vd[std::make_tuple("gf", i, j, k, -1)][m] = lst.data[m*6 + 5];
                 }
               }
-            } else if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 3) {
-              for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
+            } else if (mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] == 3) {
+              for (int k = 0; k < mf2_ob.data_i[std::make_tuple("nls", i, j, -1, -1)]; ++k) {
                 lst = read_list(infile); // Reiche-Moore          
-                mf2_ob.data_d[std::make_pair("awri", ijkstr)] = lst.c1;
-                mf2_ob.data_d[std::make_pair("apl", ijkstr)] = lst.c2;
-                mf2_ob.data_d[std::make_pair("l", ijkstr)] = lst.l1;
+                mf2_ob.data_d[std::make_tuple("awri", i, j, k, -1)] = lst.c1;
+                mf2_ob.data_d[std::make_tuple("apl", i, j, k, -1)] = lst.c2;
+                mf2_ob.data_i[std::make_tuple("l", i, j, k, -1)] = lst.l1;
+                mf2_ob.data_vd[std::make_tuple("er", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("aj", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gn", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gg", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gfa", i, j, k, -1)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gfb", i, j, k, -1)] = std::vector<double>(lst.n2);
                 for (int m = 0; m < lst.n2; ++m) {
-                  mf2_ob.data_d[std::make_pair("er", ijkmstr)] = lst.data[m*6];
-                  mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.data[m*6 + 1];
-                  mf2_ob.data_d[std::make_pair("gn", ijkmstr)] = lst.data[m*6 + 2];
-                  mf2_ob.data_d[std::make_pair("gg", ijkmstr)] = lst.data[m*6 + 3];
-                  mf2_ob.data_d[std::make_pair("gfa", ijkmstr)] = lst.data[m*6 + 4];
-                  mf2_ob.data_d[std::make_pair("gfb", ijkmstr)] = lst.data[m*6 + 5];
+                  mf2_ob.data_vd[std::make_tuple("er", i, j, k, -1)][m] = lst.data[m*6];
+                  mf2_ob.data_vd[std::make_tuple("aj", i, j, k, -1)][m] = lst.data[m*6 + 1];
+                  mf2_ob.data_vd[std::make_tuple("gn", i, j, k, -1)][m] = lst.data[m*6 + 2];
+                  mf2_ob.data_vd[std::make_tuple("gg", i, j, k, -1)][m] = lst.data[m*6 + 3];
+                  mf2_ob.data_vd[std::make_tuple("gfa", i, j, k, -1)][m] = lst.data[m*6 + 4];
+                  mf2_ob.data_vd[std::make_tuple("gfb", i, j, k, -1)][m] = lst.data[m*6 + 5];
                 }
               }
             } else {
-              for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
+              for (int k = 0; k < mf2_ob.data_d[std::make_tuple("nls", i, j, -1, -1)]; ++k) {
                 lst = read_list(infile); // Adler-Adler          
-                mf2_ob.data_d[std::make_pair("awri", ijkstr)] = lst.c1;
-                mf2_ob.data_d[std::make_pair("li", ijkstr)] = lst.l1;
-                mf2_ob.data_d[std::make_pair("abt", ijkstr)] = std::vector<double>(&lst.data[0],&lst.data[6]);
-                mf2_ob.data_d[std::make_pair("abf", ijkstr)] = std::vector<double>(&lst.data[6],&lst.data[12]);
-                mf2_ob.data_d[std::make_pair("abc", ijkstr)] = std::vector<double>(&lst.data[12],&lst.data[18]);
+                mf2_ob.data_d[std::make_tuple("awri", i, j, k, -1)] = lst.c1;
+                mf2_ob.data_i[std::make_tuple("li", i, j, k, -1)] = lst.l1;
+                mf2_ob.data_vd[std::make_tuple("abt", i, j, k, -1)] = std::vector<double>(&lst.data[0],&lst.data[6]);
+                mf2_ob.data_vd[std::make_tuple("abf", i, j, k, -1)] = std::vector<double>(&lst.data[6],&lst.data[12]);
+                mf2_ob.data_vd[std::make_tuple("abc", i, j, k, -1)] = std::vector<double>(&lst.data[12],&lst.data[18]);
 
                 cs = read_cont(infile);
-                mf2_ob.data_d[std::make_pair("l", ijkstr)] = cs.l1;
-                mf2_ob.data_d[std::make_pair("njs", ijkstr)] = cs.n1;
-                for (int m = 0; m < mf2_ob.data_d[std::make_pair("njs", ijstr)]; ++m) {
+                mf2_ob.data_i[std::make_tuple("l", i, j, k, -1)] = cs.l1;
+                mf2_ob.data_i[std::make_tuple("njs", i, j, k, -1)] = cs.n1;
+                for (int m = 0; m < mf2_ob.data_d[std::make_tuple("njs", i, j, -1, -1)]; ++m) {
                   lst = read_list(infile);
-                  mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.c1;
+                  mf2_ob.data_d[std::make_tuple("aj", i, j, k, m)] = lst.c1;
+                  mf2_ob.data_vd[std::make_tuple("det", i, j, k, m)] = std::vector<double>(lst.n2); 
+                  mf2_ob.data_vd[std::make_tuple("dwt", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("grt", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("git", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("def", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("dwf", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("grf", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("gif", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("dec", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("dwc", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("grc", i, j, k, m)] = std::vector<double>(lst.n2);
+                  mf2_ob.data_vd[std::make_tuple("gic", i, j, k, m)] = std::vector<double>(lst.n2);
                   for (int n = 0; n < lst.n2; ++n) {
-                    mf2_ob.data_d[std::make_pair("det", ijkmstr)][n] = lst.data[n*12 + 0];
-                    mf2_ob.data_d[std::make_pair("dwt", ijkmstr)][n] = lst.data[n*12 + 1];
-                    mf2_ob.data_d[std::make_pair("grt", ijkmstr)][n] = lst.data[n*12 + 2];
-                    mf2_ob.data_d[std::make_pair("git", ijkmstr)][n] = lst.data[n*12 + 3];
-                    mf2_ob.data_d[std::make_pair("def", ijkmstr)][n] = lst.data[n*12 + 4];
-                    mf2_ob.data_d[std::make_pair("dwf", ijkmstr)][n] = lst.data[n*12 + 5];
-                    mf2_ob.data_d[std::make_pair("grf", ijkmstr)][n] = lst.data[n*12 + 6];
-                    mf2_ob.data_d[std::make_pair("gif", ijkmstr)][n] = lst.data[n*12 + 7];
-                    mf2_ob.data_d[std::make_pair("dec", ijkmstr)][n] = lst.data[n*12 + 8];
-                    mf2_ob.data_d[std::make_pair("dwc", ijkmstr)][n] = lst.data[n*12 + 9];
-                    mf2_ob.data_d[std::make_pair("grc", ijkmstr)][n] = lst.data[n*12 + 10];
-                    mf2_ob.data_d[std::make_pair("gic", ijkmstr)][n] = lst.data[n*12 + 11];
+                    mf2_ob.data_vd[std::make_tuple("det", i, j, k, m)][n] = lst.data[n*12 + 0];
+                    mf2_ob.data_vd[std::make_tuple("dwt", i, j, k, m)][n] = lst.data[n*12 + 1];
+                    mf2_ob.data_vd[std::make_tuple("grt", i, j, k, m)][n] = lst.data[n*12 + 2];
+                    mf2_ob.data_vd[std::make_tuple("git", i, j, k, m)][n] = lst.data[n*12 + 3];
+                    mf2_ob.data_vd[std::make_tuple("def", i, j, k, m)][n] = lst.data[n*12 + 4];
+                    mf2_ob.data_vd[std::make_tuple("dwf", i, j, k, m)][n] = lst.data[n*12 + 5];
+                    mf2_ob.data_vd[std::make_tuple("grf", i, j, k, m)][n] = lst.data[n*12 + 6];
+                    mf2_ob.data_vd[std::make_tuple("gif", i, j, k, m)][n] = lst.data[n*12 + 7];
+                    mf2_ob.data_vd[std::make_tuple("dec", i, j, k, m)][n] = lst.data[n*12 + 8];
+                    mf2_ob.data_vd[std::make_tuple("dwc", i, j, k, m)][n] = lst.data[n*12 + 9];
+                    mf2_ob.data_vd[std::make_tuple("grc", i, j, k, m)][n] = lst.data[n*12 + 10];
+                    mf2_ob.data_vd[std::make_tuple("gic", i, j, k, m)][n] = lst.data[n*12 + 11];
                   }
-
                 }
               }
             }
-          } else if ((mf2_ob.data_d[std::make_pair("lfw", istr)] == 0) && (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 1)) {
-            for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
+          } else if ((mf2_ob.data_i[std::make_tuple("lfw", i, -1, -1, -1)] == 0) && (mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] == 1)) {
+            for (int k = 0; k < mf2_ob.data_i[std::make_tuple("nls", i, j, -1, -1)]; ++k) {
               lst = read_list(infile); // 
-              mf2_ob.data_d[std::make_pair("awri", ijkstr)] = lst.c1;
-              mf2_ob.data_d[std::make_pair("l", ijkstr)] = lst.l1;
+              mf2_ob.data_d[std::make_tuple("awri", i, j, k, -1)] = lst.c1;
+              mf2_ob.data_i[std::make_tuple("l", i, j, k, -1)] = lst.l1;
+              mf2_ob.data_vd[std::make_tuple("d", i, j, k, -1)] = std::vector<double>(lst.n2);
+              mf2_ob.data_vd[std::make_tuple("aj", i, j, k, -1)] = std::vector<double>(lst.n2);
+              mf2_ob.data_vd[std::make_tuple("amun", i, j, k, -1)] = std::vector<double>(lst.n2);
+              mf2_ob.data_vd[std::make_tuple("gno", i, j, k, -1)] = std::vector<double>(lst.n2);
+              mf2_ob.data_vd[std::make_tuple("gg", i, j, k, -1)] = std::vector<double>(lst.n2);
               for (int m = 0; m < lst.n2; ++m) {
-                mf2_ob.data_d[std::make_pair("d", ijkmstr)] = lst.data[m*6];
-                mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.data[m*6 + 1];
-                mf2_ob.data_d[std::make_pair("amun", ijkmstr)] = lst.data[m*6 + 2];
-                mf2_ob.data_d[std::make_pair("gno", ijkmstr)] = lst.data[m*6 + 3];
-                mf2_ob.data_d[std::make_pair("gg", ijkmstr)] = lst.data[m*6 + 4];
+                mf2_ob.data_vd[std::make_tuple("d", i, j, k, -1)][m] = lst.data[m*6];
+                mf2_ob.data_vd[std::make_tuple("aj", i, j, k, -1)][m] = lst.data[m*6 + 1];
+                mf2_ob.data_vd[std::make_tuple("amun", i, j, k, -1)][m] = lst.data[m*6 + 2];
+                mf2_ob.data_vd[std::make_tuple("gno", i, j, k, -1)][m] = lst.data[m*6 + 3];
+                mf2_ob.data_vd[std::make_tuple("gg", i, j, k, -1)][m] = lst.data[m*6 + 4];
               }
             }
-          } else if ((mf2_ob.data_d[std::make_pair("lfw", istr)] == 1) && (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 1)) {
+          } else if ((mf2_ob.data_i[std::make_tuple("lfw", i, -1, -1, -1)] == 1) && (mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] == 1)) {
             lst = read_list(infile); // 
-            mf2_ob.data_d[std::make_pair("spi", ijstr)] = lst.c1;
-            mf2_ob.data_d[std::make_pair("ap", ijstr)] = lst.c2;
-            mf2_ob.data_d[std::make_pair("lssf", ijstr)] = lst.l1;
-            mf2_ob.data_d[std::make_pair("ne", ijstr)] = lst.n1;
-            mf2_ob.data_d[std::make_pair("nls", ijstr)] = lst.n2;
-            mf2_ob.data_d[std::make_pair("es", ijstr)] = lst.data;
-
-            for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
+            mf2_ob.data_d[std::make_tuple("spi", i, j, -1, -1)] = lst.c1;
+            mf2_ob.data_d[std::make_tuple("ap", i, j, -1, -1)] = lst.c2;
+            mf2_ob.data_i[std::make_tuple("lssf", i, j, -1, -1)] = lst.l1;
+            mf2_ob.data_i[std::make_tuple("ne", i, j, -1, -1)] = lst.npl;
+            mf2_ob.data_i[std::make_tuple("nls", i, j, -1, -1)] = lst.n2;
+            mf2_ob.data_vd[std::make_tuple("es", i, j, -1, -1)] = lst.data;
+            for (int k = 0; k < mf2_ob.data_i[std::make_tuple("nls", i, j, -1, -1)]; ++k) {
               cs = read_cont(infile); 
-              mf2_ob.data_d[std::make_pair("awri", ijkstr)] = cs.c1;
-              mf2_ob.data_d[std::make_pair("l", ijkstr)] = cs.l1;
-              mf2_ob.data_d[std::make_pair("njs", ijkstr)] = cs.n1;
-              for (int m = 0; m < mf2_ob.data_d[std::make_pair("njs", ijkstr)]; ++m) {
+              mf2_ob.data_d[std::make_tuple("awri", i, j, k, -1)] = cs.c1;
+              mf2_ob.data_i[std::make_tuple("l", i, j, k, -1)] = cs.l1;
+              mf2_ob.data_i[std::make_tuple("njs", i, j, k, -1)] = cs.n1;
+              for (int m = 0; m < mf2_ob.data_i[std::make_tuple("njs", i, j, k, -1)]; ++m) {
                 lst = read_list(infile);
-                mf2_ob.data_d[std::make_pair("muf", ijkmstr)] = lst.l2;
-                mf2_ob.data_d[std::make_pair("d", ijkmstr)] = lst.data[0];
-                mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.data[1];
-                mf2_ob.data_d[std::make_pair("amun", ijkmstr)] = lst.data[2];
-                mf2_ob.data_d[std::make_pair("gno", ijkmstr)] = lst.data[3];
-                mf2_ob.data_d[std::make_pair("gg", ijkmstr)] = lst.data[4];
-                mf2_ob.data_d[std::make_pair("gf", ijkmstr)] = std::vector<double>(&lst.data[6], &lst.data[lst.npl]);
+                mf2_ob.data_i[std::make_tuple("muf", i, j, k, m)] = lst.l2;
+                mf2_ob.data_d[std::make_tuple("d", i, j, k, m)] = lst.data[0];
+                mf2_ob.data_d[std::make_tuple("aj", i, j, k, m)] = lst.data[1];
+                mf2_ob.data_d[std::make_tuple("amun", i, j, k, m)] = lst.data[2];
+                mf2_ob.data_d[std::make_tuple("gno", i, j, k, m)] = lst.data[3];
+                mf2_ob.data_d[std::make_tuple("gg", i, j, k, m)] = lst.data[4];
+                mf2_ob.data_vd[std::make_tuple("gf", i, j, k, m)] = std::vector<double>(&lst.data[6], &lst.data[lst.npl]);
               }
-          } else if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 2) {
-            for (int k = 0; k < mf2_ob.data_d[std::make_pair("nls", ijstr)]; ++k) {
+            }
+          } else if (mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] == 2) {
+            for (int k = 0; k < mf2_ob.data_i[std::make_tuple("nls", i, j, -1, -1)]; ++k) {
               cs = read_cont(infile);
-              mf2_ob.data_d[std::make_pair("awri", ijkstr)] = cs.c1;
-              mf2_ob.data_d[std::make_pair("l", ijkstr)] = cs.l1;
-              mf2_ob.data_d[std::make_pair("njs", ijkstr)] = cs.n1;
-              for (int m = 0; m < mf2_ob.data_d[std::make_pair("njs", ijkstr)]; ++m) {
+              mf2_ob.data_d[std::make_tuple("awri", i, j, k, -1)] = cs.c1;
+              mf2_ob.data_d[std::make_tuple("l", i, j, k, -1)] = cs.l1;
+              mf2_ob.data_d[std::make_tuple("njs", i, j, k, -1)] = cs.n1;
+              for (int m = 0; m < mf2_ob.data_i[std::make_tuple("njs", i, j, k, -1)]; ++m) {
                 lst = read_list(infile);
-                mf2_ob.data_d[std::make_pair("muf", ijkmstr)] = lst.l2;
-                mf2_ob.data_d[std::make_pair("aj", ijkmstr)] = lst.c1;
-                mf2_ob.data_d[std::make_pair("amux", ijkmstr)] = lst.data[2];
-                mf2_ob.data_d[std::make_pair("amun", ijkmstr)] = lst.data[3];
-                mf2_ob.data_d[std::make_pair("amug", ijkmstr)] = lst.data[4];
-                mf2_ob.data_d[std::make_pair("amuf", ijkmstr)] = lst.data[5];
-                for (int n = 6; n < lst.ne; ++n) {
-                  mf2_ob.data_d[std::make_pair("es", ijkmstr)][n] = lst.data(n*6 + 6);
-                  mf2_ob.data_d[std::make_pair("d", ijkmstr)][n] = lst.data(n*6 + 7);
-                  mf2_ob.data_d[std::make_pair("gx", ijkmstr)][n] = lst.data(n*6 + 8);
-                  mf2_ob.data_d[std::make_pair("gno", ijkmstr)][n] = lst.data(n*6 + 9);
-                  mf2_ob.data_d[std::make_pair("gg", ijkmstr)][n] = lst.data(n*6 + 10);
-                  mf2_ob.data_d[std::make_pair("gf", ijkmstr)][n] = lst.data(n*6 + 11);
+                mf2_ob.data_d[std::make_tuple("muf", i, j, k, m)] = lst.l2;
+                mf2_ob.data_d[std::make_tuple("aj", i, j, k, m)] = lst.c1;
+                mf2_ob.data_d[std::make_tuple("amux", i, j, k, m)] = lst.data[2];
+                mf2_ob.data_d[std::make_tuple("amun", i, j, k, m)] = lst.data[3];
+                mf2_ob.data_d[std::make_tuple("amug", i, j, k, m)] = lst.data[4];
+                mf2_ob.data_d[std::make_tuple("amuf", i, j, k, m)] = lst.data[5];
+                mf2_ob.data_vd[std::make_tuple("es", i, j, k, m)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("d", i, j, k, m)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gx", i, j, k, m)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gno", i, j, k, m)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gg", i, j, k, m)] = std::vector<double>(lst.n2);
+                mf2_ob.data_vd[std::make_tuple("gf", i, j, k, m)] = std::vector<double>(lst.n2);
+                for (int n = 6; n < lst.n2; ++n) {
+                  mf2_ob.data_vd[std::make_tuple("es", i, j, k, m)][n] = lst.data[n*6 + 6];
+                  mf2_ob.data_vd[std::make_tuple("d", i, j, k, m)][n] = lst.data[n*6 + 7];
+                  mf2_ob.data_vd[std::make_tuple("gx", i, j, k, m)][n] = lst.data[n*6 + 8];
+                  mf2_ob.data_vd[std::make_tuple("gno", i, j, k, m)][n] = lst.data[n*6 + 9];
+                  mf2_ob.data_vd[std::make_tuple("gg", i, j, k, m)][n] = lst.data[n*6 + 10];
+                  mf2_ob.data_vd[std::make_tuple("gf", i, j, k, m)][n] = lst.data[n*6 + 11];
                 }
               }
             }
           }
-        } else if (mf2_ob.data_d[std::make_pair("lrf", ijstr)] == 7) {
+        } else if (mf2_ob.data_i[std::make_tuple("lrf", i, j, -1, -1)] == 7) {
           cs = read_cont(infile);
-
-          mf2_ob.data_d[std::make_pair("ifg", ijstr)] = cs.l1;
-          mf2_ob.data_d[std::make_pair("krm", ijstr)] = cs.l2;
-          mf2_ob.data_d[std::make_pair("njs", ijstr)] = cs.n1;
-          mf2_ob.data_d[std::make_pair("krl", ijstr)] = cs.n2;
+          mf2_ob.data_i[std::make_tuple("ifg", i, j, -1, -1)] = cs.l1;
+          mf2_ob.data_i[std::make_tuple("krm", i, j, -1, -1)] = cs.l2;
+          mf2_ob.data_i[std::make_tuple("njs", i, j, -1, -1)] = cs.n1;
+          mf2_ob.data_i[std::make_tuple("krl", i, j, -1, -1)] = cs.n2;
           lst = read_list(infile);
-          for (int k = 0; k < mf2_ob.data_d[std::make_pair("njs", ijstr)]; ++k) {
+          mf2_ob.data_i[std::make_tuple("npp", i, j, -1, -1)] = lst.l1; 
+          mf2_ob.data_i[std::make_tuple("npp12", i, j, -1, -1)] = lst.npl; 
+          mf2_ob.data_vd[std::make_tuple("ma", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("mb", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("za", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("zb", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("ia", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("ib", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("q", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("pnt", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("shf", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("mt", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("pa", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          mf2_ob.data_vd[std::make_tuple("pb", i, j, -1, -1)] = std::vector<double>(lst.l1);
+          for (int k = 0; k < mf2_ob.data_i[std::make_tuple("npp", i, j, -1, -1)]; ++k) {
+            mf2_ob.data_vd[std::make_tuple("ma", i, j, -1, -1)][k] = lst.data[k*12]; 
+            mf2_ob.data_vd[std::make_tuple("mb", i, j, -1, -1)][k] = lst.data[k*12 + 1]; 
+            mf2_ob.data_vd[std::make_tuple("za", i, j, -1, -1)][k] = lst.data[k*12 + 2]; 
+            mf2_ob.data_vd[std::make_tuple("zb", i, j, -1, -1)][k] = lst.data[k*12 + 3]; 
+            mf2_ob.data_vd[std::make_tuple("ia", i, j, -1, -1)][k] = lst.data[k*12 + 4]; 
+            mf2_ob.data_vd[std::make_tuple("ib", i, j, -1, -1)][k] = lst.data[k*12 + 5]; 
+            mf2_ob.data_vd[std::make_tuple("q", i, j, -1, -1)][k] = lst.data[k*12 + 6]; 
+            mf2_ob.data_vd[std::make_tuple("pnt", i, j, -1, -1)][k] = lst.data[k*12 + 7]; 
+            mf2_ob.data_vd[std::make_tuple("shf", i, j, -1, -1)][k] = lst.data[k*12 + 8]; 
+            mf2_ob.data_vd[std::make_tuple("mt", i, j, -1, -1)][k] = lst.data[k*12 + 9]; 
+            mf2_ob.data_vd[std::make_tuple("pa", i, j, -1, -1)][k] = lst.data[k*12 + 10]; 
+            mf2_ob.data_vd[std::make_tuple("pb", i, j, -1, -1)][k] = lst.data[k*12 + 11]; 
+          }
+          for (int k = 0; k < mf2_ob.data_i[std::make_tuple("njs", i, j, -1, -1)]; ++k) {
             lst = read_list(infile);
             lst = read_list(infile);
             lst = read_list(infile);
-            mf2_ob.data_d[std::make_pair("lbk", ijkstr)] = lst.npl;
-            if (mf2_ob.data_d[std::make_pair("lbk", ijkstr)] == 1) {
+            mf2_ob.data_i[std::make_tuple("lbk", i, j, k, -1)] = lst.npl;
+            if (mf2_ob.data_i[std::make_tuple("lbk", i, j, k, -1)] == 1) {
               tab = read_tab1(infile);
               tab = read_tab1(infile);
-            } else if (mf2_ob.data_d[std::make_pair("lbk", ijkstr)] == 2) {
+            } else if (mf2_ob.data_i[std::make_tuple("lbk", i, j, k, -1)] == 2) {
               lst = read_list(infile);
-            } else if (mf2_ob.data_d[std::make_pair("lbk", ijkstr)] == 3) {
+            } else if (mf2_ob.data_i[std::make_tuple("lbk", i, j, k, -1)] == 3) {
               lst = read_list(infile);
             }
             lst = read_list(infile);
-            mf2_ob.data_d[std::make_pair("lps", ijkstr)] = lst.npl;
-            if (mf2_ob.data_d[std::make_pair("lps", ijkstr)] == 1) {
+            mf2_ob.data_i[std::make_tuple("lps", i, j, k, -1)] = lst.npl;
+            if (mf2_ob.data_i[std::make_tuple("lps", i, j, k, -1)] == 1) {
               tab = read_tab1(infile);
               tab = read_tab1(infile);
             }
@@ -585,9 +645,9 @@ pyne::endf::mf2 pyne::endf::read_mf2(std::ifstream &infile, int lrp) {
         }
       } else {
         cs = read_cont(infile);// range info
-        mf2_ob.data_d[std::make_pair("spi", ijstr)] = cs.c1;
-        mf2_ob.data_d[std::make_pair("ap", ijstr)] = cs.c2;
-        mf2_ob.data_d[std::make_pair("nls", ijstr)] = cs.n1;
+        mf2_ob.data_d[std::make_tuple("spi", i, j, -1, -1)] = cs.c1;
+        mf2_ob.data_d[std::make_tuple("ap", i, j, -1, -1)] = cs.c2;
+        mf2_ob.data_i[std::make_tuple("nls", i, j, -1, -1)] = cs.n1;
 
       }
     }

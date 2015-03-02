@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <list>
+#include <tuple>
 
 #ifndef PYNE_IS_AMALGAMATED
   #include "pyne.h"
@@ -39,7 +40,7 @@ namespace pyne {
       int liso; ///< isomeric state number
       int nfor; ///< library format
       double awi; ///< projectile mass relative to neutron
-      double emax; ///< upper energ, limit
+      double emax; ///< upper energy limit
       int lrel; ///< library release number
       int nsub; ///< sub library number
       int nver; ///< library version number
@@ -56,7 +57,7 @@ namespace pyne {
 
     /// A typedef struct for fission profuct yield data MT 454, 459
     typedef struct mtfpy_mf8 : mt_base {
-      int le; ///< number of energ,  dependent yields given
+      int le; ///< number of energy  dependent yields given
       std::vector<int> i; ///< interpolation to be used between E[i-1] and E[i]
       std::vector<double> e; ///< list of energies
       std::vector<std::vector<std::vector<double> > > yields; ///< yield data [zafp,fps,yi,dyi]
@@ -74,7 +75,7 @@ namespace pyne {
       /// if LNU = 2 this will contain the tabulated data parameters
       std::vector<int> nbt; ///< list of interpolation segments
       std::vector<int> intn; ///< list of interpolations to be used
-      std::vector<double> eint; ///< Energ, of the incident neutron
+      std::vector<double> eint; ///< Energy of the incident neutron
       std::vector<double> nu_e; ///< Neutrons per fission at the given energy
     } mt452_mf1;
 
@@ -83,7 +84,7 @@ namespace pyne {
     mt452_mf1 read_mt452_mf1(std::ifstream &infile);
 
     typedef struct mt455_mf1 : mt_base {
-      int ldg, ///< energy dependence of decay constants
+      int ldg; ///< energy dependence of decay constants
       int lnu; ///< data representation type
 
       std::vector<double> lambdas; ///< decay constant of ith precursor
@@ -92,12 +93,12 @@ namespace pyne {
       std::vector<int> intn; ///< list of interpolations to be used
       std::vector<int> ne; ///< number of energies
       std::vector<double> eint; ///< ith energy
-      std::vector<int> einti; ///< energ, interpolation scheme
-      std::vector<double> nu_d; ///< averag, neutrons per delayed fission event
+      std::vector<int> einti; ///< energy interpolation scheme
+      std::vector<double> nu_d; ///< average neutrons per delayed fission event
 
-      /// decay constant of ith precursor with neutron energ, energy E
+      /// decay constant of ith precursor with neutron energy energy E
       std::vector<std::vector<double> > lambda_arr;
-      /// fraction of ith precursor with neutron energ, E
+      /// fraction of ith precursor with neutron energy E
       std::vector<std::vector<double> > alpha_arr;
 
     } mt455_mf1;
@@ -118,7 +119,7 @@ namespace pyne {
       std::vector<int> nbt; ///< list of interpolation segments
       std::vector<int> intn; ///< list of interpolations to be used
       std::vector<double> eint; ///< ith energy
-      std::vector<double> nu_e; ///< averag, neutrons per prompt fission event
+      std::vector<double> nu_e; ///< averagy neutrons per prompt fission event
 
     } mt456_mf1;
 
@@ -126,21 +127,21 @@ namespace pyne {
     /// \param infile An ENDF filestream
     mt456_mf1 read_mt456_mf1(std::ifstream &infile);
 
-    /// Data structure for fission energ, release
+    /// Data structure for fission energy release
     typedef struct mt458_mf1 : mt_base {
-      std::vector<std::pair<double,double> > efr; ///< kinetic energ, from fission products
-      std::vector<std::pair<double,double> > pen; ///< kinetic energ, of prompt fission neutrons
-      std::vector<std::pair<double,double> > den; ///< kinetic energ, of delayed fission neutrons
-      std::vector<std::pair<double,double> > egp; ///< total energ, released by prompt gamma rays
-      std::vector<std::pair<double,double> > egd; ///< total energ, released by delayed gamma rays
-      std::vector<std::pair<double,double> > eb; ///< total energ, released by delayed betas
-      std::vector<std::pair<double,double> > enu; ///< energ, carried away by neutrinos
-      std::vector<std::pair<double,double> > er; ///< total energ, release not lost to neutrinos
-      std::vector<std::pair<double,double> > et; ///< total energ, release per fission
+      std::vector<std::pair<double,double> > efr; ///< kinetic energy from fission products
+      std::vector<std::pair<double,double> > pen; ///< kinetic energy of prompt fission neutrons
+      std::vector<std::pair<double,double> > den; ///< kinetic energy of delayed fission neutrons
+      std::vector<std::pair<double,double> > egp; ///< total energy released by prompt gamma rays
+      std::vector<std::pair<double,double> > egd; ///< total energy released by delayed gamma rays
+      std::vector<std::pair<double,double> > eb; ///< total energy released by delayed betas
+      std::vector<std::pair<double,double> > enu; ///< energy carried away by neutrinos
+      std::vector<std::pair<double,double> > er; ///< total energy release not lost to neutrinos
+      std::vector<std::pair<double,double> > et; ///< total energy release per fission
 
     } mt458_mf1;
 
-    /// reads ENDF fission energ, release data from an ifstream and returns
+    /// reads ENDF fission energy release data from an ifstream and returns
     /// structure containing associated data
     /// \param infile An ENDF filestream
     mt458_mf1 read_mt458_mf1(std::ifstream &infile);
@@ -150,8 +151,8 @@ namespace pyne {
 
       int lo; ///< representation type: 1 if discrete, 2 if continuous
       /// lo = 1
-      int ng, ///< number
-      std::vector<double> elist; ///< energ, of the ith photon in eV
+      int ng; ///< number
+      std::vector<double> elist; ///< energy of the ith photon in eV
       std::vector<std::vector<int> > nbt; ///< list^2 interpolation segments
       std::vector<std::vector<int> > intn; ///< list^2 of interpolations
       std::vector<std::vector<double> > tint; ///< time of ith multiplicity
@@ -172,7 +173,7 @@ namespace pyne {
       int liso; ///< isomeric state of the original nuclide
       int nst; ///< nucleus stability flag, 0 = radioactive
       int nsp; ///< total number of radiation types for which information is given
-      std::vector<std::pair<double,double> > erel; ///< energ, released
+      std::vector<std::pair<double,double> > erel; ///< energy released
       std::vector<double> styp; ///< Decay radiation
       std::vector<int> lcon; ///< Continuum spectrum flag
       std::vector<int> ner; ///< number of tabulated discrete energies
@@ -180,7 +181,7 @@ namespace pyne {
       std::vector<std::pair<double,double> > fd; ///< discrete spectrum normalization factor
       std::vector<std::pair<double,double> > eav; ///< averag, decay energy of radiation
       std::vector<std::pair<double,double> > fc; ///< continuum spectrum normalization
-      std::vector<std::pair<double,double> > er; ///< discrete energ, of radiation
+      std::vector<std::pair<double,double> > er; ///< discrete energy of radiation
       std::vector<double> rtyp; ///< decay mode of the nuclide
       std::vector<double> type; ///< type of beta/ec transition
       std::vector<std::pair<double,double> > ri; ///< intensity of discrete radiation
@@ -209,13 +210,13 @@ namespace pyne {
       int nis;
 
       // mega-maps map(pair(quantity, unique_index), data)
-      std::map<std::pair<std::string, std::string>, int> data_i;
-      std::map<std::pair<std::string, std::string>, double> data_d;
-      std::map<std::pair<std::string, std::string>, std::vector<int> > data_vi;
-      std::map<std::pair<std::string, std::string>, std::vector<double> > data_vd;
+      std::map<std::tuple<std::string, int, int, int, int>, int> data_i;
+      std::map<std::tuple<std::string, int, int, int, int>, double> data_d;
+      std::map<std::tuple<std::string, int, int, int, int>, std::vector<int> > data_vi;
+      std::map<std::tuple<std::string, int, int, int, int>, std::vector<double> > data_vd;
     } mf2;
 
-    mf2 read_mf2(std::ifstream &infile);
+    mf2 read_mf2(std::ifstream &infile, int lrp);
   }
 }
 
