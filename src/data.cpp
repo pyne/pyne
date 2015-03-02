@@ -1453,7 +1453,7 @@ int pyne::id_from_level(int nuc, double level, std::string special) {
   }
   // This value was chosen so important transitions in U-235 are not missed
   if (minv > 3.0)
-    return nuc + 9999;
+    return -nuc;
   else 
     return ret_id;
 }
