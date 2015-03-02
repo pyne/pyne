@@ -90,7 +90,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   std::string nucpath;
   hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
 
-  hsize_t data_offset[1] = {row};
+  hsize_t data_offset[1] = {static_cast<hsize_t>(row)};
   if (row < 0) {
     // Handle negative row indices
     hid_t data_space = H5Dget_space(data_set);
@@ -114,7 +114,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   // Grab the nuclides
   std::vector<int> nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
   int nuc_size = nuclides.size();
-  hsize_t nuc_dims[1] = {nuc_size};
+  hsize_t nuc_dims[1] = {static_cast<hsize_t>(nuc_size)};
 
   // Get the data hyperslab
   hid_t data_hyperslab = H5Dget_space(data_set);
@@ -366,7 +366,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
     // Make data set properties to enable chunking
     hid_t data_set_params = H5Pcreate(H5P_DATASET_CREATE);
-    hsize_t chunk_dims[1] ={chunksize};
+    hsize_t chunk_dims[1] ={static_cast<hsize_t>(chunksize)};
     H5Pset_chunk(data_set_params, 1, chunk_dims);
     H5Pset_deflate(data_set_params, 1);
 
