@@ -242,3 +242,4 @@ def calc_e_eff(energy, eff_coeff, eff_fit=1):
         eff = 0
 
     return eff
+
