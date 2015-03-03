@@ -107,8 +107,18 @@ class Library(rx.RxLib):
         self.offset += 81 - len_headline
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
-        # originally in a float version of ZZAAA.M, ie 94242.1
-        nuc = cpp_nucname.id(<int> (endftod(line[:11])*10))
+        # store position of read
+        pos = fh.tell()
+        # check for isomer (LIS0/LISO entry)
+        matflagstring = line + fh.read(3*81)
+        flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
+                    'STA', 'LIS', 'LIS0', 0, 'NFOR', 'AWI', 'EMAX',
+                    'LREL', 0, 'NSUB', 'NVER', 'TEMP', 0, 'LDRV',
+                    0, 'NWD', 'NXC']
+        flags = dict(zip(flagkeys, fromendf_tok(matflagstring)))
+        nuc = cpp_nucname.id(<int> (<int> flags['ZA'] * 10000 + flags['LIS0']))
+        # go back to line after first line
+        fh.seek(pos)
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
@@ -567,7 +577,14 @@ class Library(rx.RxLib):
         """
         isotope_flags = self._get_cont(['ZAI','ABN',0,'LFW','NER',0],
                                        isotope_data[0])
-        nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
+        # according to endf manual, there is no specification for metastable states in ZAI
+        # if we have a LIS0 != 0 we add the state to all isotopes
+        if(self.structure[mat_id]['matflags']['LIS0'] == 0):
+            nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
+        else:
+            nuc_i = nucname.id(int(isotope_flags['ZAI']*10 + \
+                               self.structure[mat_id]['matflags']['LIS0']))
+
         self.structure[mat_id]['data'].update(
             {nuc_i:{'resolved':[],
                        'unresolved':[],
