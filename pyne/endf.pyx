@@ -582,8 +582,8 @@ class Library(rx.RxLib):
         if(self.structure[mat_id]['matflags']['LIS0'] == 0):
             nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
         else:
-            nuc_i = nucname.id(int(isotope_flags['ZAI']*10+self.structure[mat_id]['matflags']['LIS0']))
-#        nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
+            nuc_i = nucname.id(int(isotope_flags['ZAI']*10 + \
+                               self.structure[mat_id]['matflags']['LIS0']))
 
         self.structure[mat_id]['data'].update(
             {nuc_i:{'resolved':[],
