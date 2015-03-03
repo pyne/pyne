@@ -855,7 +855,26 @@ def id_to_state_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
+def ensdf_to_id(nuc):
+    """
+    Converts an ENSDF style id to a PyNE nuc_id
 
+    Parameters
+    ----------
+    nuc : int
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in nuc_id form.
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        return cpp_nucname.ensdf_to_id(<char *> nuc_bytes)
+    else:
+        raise NucTypeError(nuc)
 #
 # C++ Helper Functions
 #

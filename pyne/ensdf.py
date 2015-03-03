@@ -17,7 +17,7 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]?\d*)')
 _val = re.compile('(\d*)[.](\d*)')
-_specialval = re.compile("([0-9.]*)[+]([A-Z])")
+_specialval = re.compile("([0-9. ]*)[+]([A-Z])")
 _specialval2 = re.compile("([A-Z]*)[+]([0-9.]*)")
 _errpm = re.compile('[+](\d*)[-](\d*)')
 _err = re.compile('[ ]*(\d*)')
@@ -61,7 +61,7 @@ def _getvalue(obj, fn=float, rn=None):
 
 def _to_id(nuc):
     if 'NN' not in nuc:
-        nucid = nucname.id(nuc.strip())
+        nucid = nucname.ensdf_to_id(nuc.strip())
     else:
         warn('Neutron data not supported!')
         return 0
@@ -147,14 +147,17 @@ def _parse_level_record(l_rec):
         metastable state of level
     special : str
         A-Z character denoting a group of known levels with no reference
-        to the ground state
+        to the ground state. P and N are special characters reserved for
+        proton and neutron resonances given in center of mass system energy.
     """
-    lm = re.match("([A-Z]) ", l_rec.group(2))
+    lm = re.match("[ ]*([A-Z]+)(?![A-Z0-9+])", l_rec.group(2))
     spv = _specialval.match(l_rec.group(2).strip())
     spv2 = _specialval2.match(l_rec.group(2).strip())
     special = ' '
     if lm is not None:
         special = lm.group(1)
+        if "S" in special and len(special.strip()) > 1:
+            special = special.strip()[1]
         e = 0.0
         de = np.nan
     elif spv is not None:
@@ -163,8 +166,10 @@ def _parse_level_record(l_rec):
     elif spv2 is not None:
         e, de = _get_val_err(spv2.group(2), l_rec.group(3))
         special = spv2.group(1)
+        if "S" in special and len(special.strip()) > 1:
+            special = special.strip()[1]
     else:
-        e, de = _get_val_err(l_rec.group(2), l_rec.group(3))
+        e, de = _get_val_err(l_rec.group(2).strip('() '), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
     from_nuc = _to_id(l_rec.group(1))
     m = l_rec.group(11)
