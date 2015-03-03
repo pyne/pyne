@@ -465,12 +465,14 @@ def _parse_parent_record(p_rec):
     tfinalerr : float
         Uncertainty in half-life in seconds
     """
-    lm = re.match("([A-Z]) ", p_rec.group(2))
+    lm = re.match("[ ]*([A-Z]+)(?![A-Z0-9+])", p_rec.group(2))
     spv = _specialval.match(p_rec.group(2).strip())
     spv2 = _specialval2.match(p_rec.group(2).strip())
     special = ' '
     if lm is not None:
         special = lm.group(1)
+        if "S" in special and len(special.strip()) > 1:
+            special = special.strip()[1]
         e = 0.0
         de = np.nan
     elif spv is not None:
@@ -479,8 +481,10 @@ def _parse_parent_record(p_rec):
     elif spv2 is not None:
         e, de = _get_val_err(spv2.group(2), p_rec.group(3))
         special = spv2.group(1)
+        if "S" in special and len(special.strip()) > 1:
+            special = special.strip()[1]
     else:
-        e, de = _get_val_err(p_rec.group(2), p_rec.group(3))
+        e, de = _get_val_err(p_rec.group(2).strip('() '), p_rec.group(3))
     j = p_rec.group(4)
     tfinal, tfinalerr = _to_time(p_rec.group(5), p_rec.group(6))
     return p_rec.group(1), tfinal, tfinalerr, e, de, special
