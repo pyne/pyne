@@ -1,0 +1,87 @@
+======================
+PyNE 0.5 Release Notes
+======================
+
+Welcome to PyNE v0.5, the Nuclear Engineering Toolkit. This release is the 
+culmination of ten months of effort by several individuals and teams, 
+both new and prior contributors. PyNE is a free and open source 
+(BSD licensed) project whose goal is to become a necessary package in the 
+computational nuclear engineer's toolkit.  It is meant to play nicely with 
+existing, industry standard nuclear engineering tools and to have unique 
+capabilities of its own. PyNE is both fast and useful.  
+
+Release highlights:
+
+- AHOT intergration with a Python interface
+- Decay solver using binary method
+- More comprehensive inclusion of ENSDF data
+- Source sampling, with Fortran interface
+- MAGIC method for variance reduction
+- Partisn support
+- New particles tally class
+- Single, all-inclusive libpyne.so for easy dynamic linking
+- Dose factor and radiotoxicity data 
+- Meshtal to h5m command line interface
+- SWU and enrichment helper functions
+- OpenMC cross section DataSource class
+- OpenMC cross_section.xml parsing 
+- OpenMC nuclide naming convention
+- Origen v2.2 TAPE9 writing improvements
+- Activity and decay heat Material methods
+- Fluka Material support
+- ENDF photon cross section support
+- ENDF and ACE reader fixes and improvements
+- Materials compendium fix
+- Source amalgamation now includes JsonCpp
+- Website redesign
+- Moved from breathe to doxygen for C++ and Fortran docs
+- Many build system improvements
+
+This release represents over 1385 commits, 542 files changed, 
+168647 insertions(+), 110838 deletions(-)
+since the version v0.4 release.  Additionally, over 175 issues were 
+closed on during this release.
+
+Please visit our website for more information: http://pyne.io/
+Please contact us via our users mailing list 
+(https://groups.google.com/forum/#!forum/pyne-users or pyne-users@googlegroups.com) 
+if you have any questions on how to use or install pyne.
+
+Authors
+=======
+This release contains code written by the following people (in alphabetical 
+order). An (*) indicates a first-time contributor to pyne.
+
+* Cameron Bates
+* Elliott Biondo
+* Carsten Brachem
+* Robert Carlsen
+* John Cary*
+* Andrew Davis
+* Christopher Dembia
+* Markus Elfring
+* Robert Flanagan
+* Matthew Gidden
+* Tim Haines
+* Joshua Howland
+* Blake Huff
+* Katy Huff
+* Steve Jackson
+* Kalin Kiesling*
+* Matthew Klebenow
+* Moritz Kuett
+* Kevin Manalo
+* Matt McCormick
+* Arrielle Christine Opotowsky
+* Ryan Pavlovsky*
+* Mohamad Rabbani
+* Eric Relson
+* Paul Romano
+* Anthony Scopatz
+* Patrick Shriwise
+* Rachel Slaybaugh
+* py1sl
+* Paul Wilson
+* John Xia
+* Julie C. Zachman*
+* Marissa Zweig*
