@@ -4,6 +4,17 @@ cmake_minimum_required( VERSION 2.8.5 )
 # Set the project name
 project( pyne Fortran CXX)
 
+
+#determine if spatial solver module should be built
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND NOT APPLE)
+    SET(BUILD_SPATIAL_SOLVER true)
+  ELSE()
+    SET(BUILD_SPATIAL_SOLVER false)
+  ENDIF()
+ENDIF()
+
+IF(BUILD_SPATIAL_SOLVER)
 # languages
 enable_language(Fortran)
 
@@ -43,6 +54,7 @@ if (APPLE)
 endif ()
 message(STATUS
   "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+ENDIF(BUILD_SPATIAL_SOLVER)
 
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
@@ -97,15 +109,6 @@ if(${MOAB_FOUND})
     link_directories(${MOAB_LIBRARY_DIRS})
 endif(${MOAB_FOUND})
 
-#determine if spatial solver module should be built
-IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
-    SET(BUILD_SPATIAL_SOLVER true)
-  ELSE()
-    SET(BUILD_SPATIAL_SOLVER false)
-  ENDIF()
-ENDIF()
-
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
@@ -131,18 +134,19 @@ set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
-    # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
     set(CMAKE_MACOSX_RPATH 1)
-    set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
-elseif(WIN32)
-    if(MSVC)
-        # ??? Who knows what to do here?! --Anthony
-    elseif(CMAKE_COMPILER_IS_GNUC OR CMAKE_COMPILER_IS_GNUCXX)
-        set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
-    endif(MSVC)
+    if(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
+    else(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
+    endif(HAVE_SETUPTOOLS)
 else(APPLE)
     # For linux
-    set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+    if(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
+    else(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+    endif(HAVE_SETUPTOOLS)
 endif(APPLE)
 message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
 

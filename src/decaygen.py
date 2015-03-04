@@ -17,7 +17,7 @@ toggle_warnings()
 from pyne import nuc_data
 from pyne import nucname
 from pyne.data import branch_ratio, half_life, decay_const, \
-    decay_data_children, fpyield, decay_branch_ratio
+    all_children, fpyield, all_branch_ratio
 
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
@@ -67,6 +67,7 @@ SOURCE = ENV.from_string("""
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "decay.h"
+#include "nucname.h"
 #endif
 
 namespace pyne {
@@ -96,7 +97,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   // cleanup
   for (i = 0; i < {{ nucs|length }}; ++i)
     if (out[i] > 0.0)
-      outcomp[all_nucs[i]] = out[i];
+      outcomp[nucname::state_id_to_id(all_nucs[i])] = out[i];
   return outcomp;
 }
 
@@ -114,7 +115,7 @@ const int all_nucs [{{ nucs|length }}] = {
 ELEM_FUNC = ENV.from_string("""
 void decay_{{ elem|lower }}(double t, std::map<int, double>::const_iterator &it, std::map<int, double> &outcomp, double (&out)[{{ nucs|length }}]) {
   //using std::exp2;
-  switch (it->first) {
+  switch (nucname::id_to_state_id(it->first)) {
     {{ cases|indent(4) }}
     } default: {
       outcomp.insert(*it);
@@ -151,14 +152,15 @@ def genfiles(nucs, short=1e-8, sf=False, dummy=False):
 
 def genchains(chains, sf=False):
     chain = chains[-1]
-    children = decay_data_children(chain[-1])
+    children = all_children(chain[-1])
     # filters spontaneous fission
     if not sf:
         children = {c for c in children if (0.0 == fpyield(chain[-1], c)) and (c not in chain) }
-    for child in children:
-        if child not in chain:
-            chains.append(chain + (child,))
-            chains = genchains(chains, sf=sf)
+    if decay_const(chain[-1]) != 0:
+        for child in children:
+            if child not in chain:
+                chains.append(chain + (child,))
+                chains = genchains(chains, sf=sf)
     return chains
 
 
@@ -188,7 +190,7 @@ def k_a(chain, short=1e-8):
         # if this happens then something wen very wrong, skip
         return None, None
     # compute and apply branch ratios
-    gamma = np.prod([decay_branch_ratio(p, c)[0] for p, c in zip(chain[:-1], chain[1:])])
+    gamma = np.prod([all_branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
         return None, None
     k *= gamma
@@ -222,7 +224,7 @@ def b_from_a(cse, a_i):
     bkey = EXP_EXPR.format(a=a_i)
     return cse[bkey]
 
-def chainexpr(chain, cse, b, short=1e-8):
+def chainexpr(chain, cse, b, bt, short=1e-8):
     child = chain[-1]
     if len(chain) == 1:
         a_i = -1.0 / half_life(child, False)
@@ -231,14 +233,23 @@ def chainexpr(chain, cse, b, short=1e-8):
     else:
         k, a = k_a(chain, short=short)
         if k is None:
-            return None, b
+            return None, b, bt
         terms = [] 
         for k_i, a_i in zip(k, a):
             if k_i == 1.0 and a_i == 0.0:
-                term = '1.0'  # a slight optimization 
+                term = str(1.0 - bt)  # a slight optimization
+                bt = 1
             elif a_i == 0.0:
                 if not np.isnan(k_i):
-                    term = '{0:e}'.format(k_i)  # another slight optimization 
+                    if bt < 1:
+                        if k_i + bt < 1:
+                            term = '{0:e}'.format(k_i)  # another slight optimization 
+                            bt += k_i
+                        else:
+                            term = '{0:e}'.format(1.0 - bt)
+                            bt = 1.0
+                    else:
+                        term = '0'
                 else:
                     term = '0'
             else:
@@ -246,7 +257,7 @@ def chainexpr(chain, cse, b, short=1e-8):
                 term = kbexpr(k_i, b_from_a(cse, a_i))
             terms.append(term)
         terms = ' + '.join(terms)
-    return CHAIN_EXPR.format(terms), b
+    return CHAIN_EXPR.format(terms), b, bt
 
 
 def gencase(nuc, idx, b, short=1e-8, sf=False):
@@ -259,10 +270,11 @@ def gencase(nuc, idx, b, short=1e-8, sf=False):
         chains = genchains([(nuc,)], sf=sf)
         print(len(chains), len(set(chains)), nuc)
         cse = {}  # common sub-expression exponents to elimnate
+        bt = 0
         for c in chains:
             if c[-1] not in idx:
                 continue
-            cexpr, b = chainexpr(c, cse, b, short=short)
+            cexpr, b, bt = chainexpr(c, cse, b, bt, short=short)
             if cexpr is None:
                 continue
             case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
@@ -330,7 +342,8 @@ def upload(ns):
     f.seek(0)
     fdata = f.read()
     obj = cf.store_object('pyne-data', 'decay.tar.gz', fdata)
-
+    cont = cf.get_container("pyne-data")
+    cont.purge_cdn_object('decay.tar.gz')
 
 def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False, 
           dummy=False):

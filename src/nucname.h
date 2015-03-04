@@ -588,7 +588,16 @@ namespace nucname
   int state_id_to_id(int state);
   int id_to_state_id(int nuc_id);
   extern std::map<int, int> state_id_map;
+  /// \}
 
+  /// \name ENSDF Form Functions
+  /// \{
+  /// This converts id's stored using standard ensdf syntax to nuc_id's
+  /// \param ensdf nuc string
+  /// \return PyNE nuc_id
+  int ensdf_to_id(const char * nuc);
+  int ensdf_to_id(std::string nuc);
+  /// \}
 
 };
 };
