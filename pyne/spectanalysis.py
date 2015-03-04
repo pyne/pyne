@@ -107,6 +107,28 @@ def five_point_smooth(spec):
     smooth_spec.spec_name = spec.spec_name + ' smoothed'
     return smooth_spec
 
+def calc_bg(spec, c1, c2):
+    """Returns background under a peak"""
+    low_sum = sum(spec.counts[c1 - 2:c1))
+    high_sum = sum(spec.counts[c2:c2 + 2))
+    bg = (low_sum + high_sum)*((c2 - c1 + 1) / 6)
+    return bg
+
+def gross_count(spec, c1, c2):
+    """Returns total number of counts in a spectrum between two channels"""
+    i = c1
+    gc = 0
+    while i <= c2:
+        gc = gc + spec.counts[i]
+        i = i + 1
+    return gc
+
+def net_counts(spec, c1, c2):
+    """Calculates net counts between two channels"""
+    bg = calc_bg(spec, c1, c2)
+    gc = gross_counts(spec, c1, c2)
+    nc = gc - bg
+    return nc
 
    
 
