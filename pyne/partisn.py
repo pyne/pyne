@@ -22,7 +22,6 @@ import datetime
 from warnings import warn
 from pyne.utils import QAWarning
 import itertools
-#from sets import Set
 
 import numpy as np
 import tables
@@ -58,13 +57,14 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     Note that comments appear in the created input file where more variables
     must be set. 
     
-    Notes:
+    Notes
+    -----
         This does not write out all necessary inputs for the solver and cross
         section library (block 3 and 5). There is no assumed cross section 
         library type.
     
-    Parameters:
-    -----------
+    Parameters
+    ----------
     mesh : PyNE mesh 
         A premade mesh object that conforms to the geometry. Bounds of the mesh
         must correspond to the desired PARTISN fine mesh intervals. Two fine 
@@ -99,7 +99,7 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
         sqrt(num_rays) x sqrt(num_rays). In this case, "num_rays" must be a 
         perfect square.
     
-    Output:
+    Returns
     -------
     PARTISN Input file named by 'input_file' above or the default name.
         Note: read comments generated in file. Not all variables will be 
