@@ -78,6 +78,25 @@ def test_endftod():
     exp = np.array(exp)
     assert_allclose(obs, exp, rtol = 1e-8)
 
+def test_loadtape():
+    try:
+        assert(os.path.isfile('endftape.100'))
+    except AssertionError:
+        try:
+            import urllib.request as urllib
+        except ImportError:
+            import urllib
+        urllib.urlretrieve("http://www.nndc.bnl.gov/endf/b6.8/tapes/tape.100",
+                    "endftape.100")
+    from hashlib import md5
+    with open("endftape.100", "rb") as f:
+        obs_hash = md5(f.read()).hexdigest()
+    exp_hash = "b56dd0aee38bd006c58181e473232776"
+    try:
+        assert_equal(obs_hash, exp_hash)
+    except AssertionError:
+        raise AssertionError("endftape.100 hash check failed; please try redownloading the endftape.100 data file.")
+    testlib = Library("endftape.100")
 
 def test_get():
     obs = library.get_rx(nuc40000, 4, 2)
