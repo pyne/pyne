@@ -25,7 +25,7 @@ collapsed value :math:`y_g` is:
 
 .. math::
 
-    y_g = \frac{1}{x_{g+1} - x_g} \Sum_{n|x_g \le x_n}^{x_n \le x_{g+1}}
+    y_g = \frac{1}{x_{g+1} - x_g} \sum_{n|x_g \le x_n}^{x_n \le x_{g+1}}
         \frac{y_{n+1} + y_n}{2} * (x_{n+1} - x_n)
 
 The term :math:`(y_{n+1} + y_n)/2` is the center (average) value of a linear 
