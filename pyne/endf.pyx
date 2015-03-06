@@ -65,6 +65,8 @@ class Library(rx.RxLib):
         self.chars_til_now = 0
         self.offset = 0
         self.fh = fh
+        #read first line (Tape ID)
+        self._read_tpid()
         while self.more_files:
             self._read_headers()
 
@@ -90,6 +92,21 @@ class Library(rx.RxLib):
         if opened_here:
             fh.close()
         return data
+
+    def _read_tpid(self):
+        if(self.chars_til_now == 0):
+            opened_here = False
+            if isinstance(self.fh, basestring):
+                fh = open(self.fh, 'r')
+                opened_here = True
+            else:
+                fh = self.fh
+            line = fh.readline()
+            self.chars_til_now = len(line)
+            self.offset = 81 - len(line)
+        else:
+            print("TPID is the first line, has been read already")
+
 
     def _read_headers(self):
         cdef int nuc
