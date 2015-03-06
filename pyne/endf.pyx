@@ -67,6 +67,7 @@ class Library(rx.RxLib):
         self.fh = fh
         #read first line (Tape ID)
         self._read_tpid()
+        #read headers for all materials
         while self.more_files:
             self._read_headers()
 
@@ -118,7 +119,9 @@ class Library(rx.RxLib):
             opened_here = True
         else:
             fh = self.fh
+        # Go to current file position
         fh.seek(self.chars_til_now)
+        # get mat_id
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
         # store position of read
@@ -169,6 +172,8 @@ class Library(rx.RxLib):
                 self.structure[nuc]['docs'].append(line[0:66])
                 line = fh.readline()
         # Find where the end of the material is and then jump to it.
+        # The end is 3 lines after the last mf,mt
+        # combination (SEND, FEND, MEND)
         self.chars_til_now = (stop + 3)*81 - self.offset
         fh.seek(self.chars_til_now)
         nextline = fh.readline()
