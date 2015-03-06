@@ -118,10 +118,7 @@ class Library(rx.RxLib):
             opened_here = True
         else:
             fh = self.fh
-        # Skip the first line and get the material ID.
         fh.seek(self.chars_til_now)
-        len_headline = len(fh.readline())
-        self.offset += 81 - len_headline
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
         # store position of read
