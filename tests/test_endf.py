@@ -97,6 +97,9 @@ def test_loadtape():
     except AssertionError:
         raise AssertionError("endftape.100 hash check failed; please try redownloading the endftape.100 data file.")
     testlib = Library("endftape.100")
+    exp_nuclides = [10010000, 30060000, 40090000, 50110000, 30070000, 60000000, 50100000]
+    obs_nuclides = testlib.structure.keys()
+    assert_array_equal(exp_nuclides, obs_nuclides)
 
 def test_get():
     obs = library.get_rx(nuc40000, 4, 2)
