@@ -42,6 +42,7 @@ The following modules and sub-packages are discussed:
     njoy
     alara
     origen22
+    partisn
 
 **Data Formats:**
 
