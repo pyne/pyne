@@ -94,7 +94,7 @@ class Library(rx.RxLib):
         return data
 
     def _read_tpid(self):
-        if(self.chars_til_now == 0):
+        if self.chars_til_now == 0:
             opened_here = False
             if isinstance(self.fh, basestring):
                 fh = open(self.fh, 'r')
@@ -599,7 +599,7 @@ class Library(rx.RxLib):
         # according to endf manual, there is no specification
         # for metastable states in ZAI
         # if we have a LIS0 != 0 we add the state to all isotopes
-        if(self.structure[mat_id]['matflags']['LIS0'] == 0):
+        if self.structure[mat_id]['matflags']['LIS0'] == 0:
             nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
         else:
             nuc_i = nucname.id(int(isotope_flags['ZAI']*10 +
