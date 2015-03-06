@@ -142,21 +142,21 @@ class Library(rx.RxLib):
                                           'mfs':{}}})
         # Parse header (all lines with 1451)
         mf = 1
-        stop = (self.chars_til_now+self.offset)//81
+        start = (self.chars_til_now+self.offset)//81
+        stop = start # if no 451 can be found
         while FILE1_R.search(line):
             # parse contents section
             if CONTENTS_R.match(line):
                 # When MF and MT change, add offset due to SEND/FEND records.
                 old_mf = mf
                 mf, mt = int(line[22:33]), int(line[33:44])
+                if old_mf != mf:
+                    start += 1
                 mt_length = int(line[44:55])
-                if old_mf == mf:
-                    start = stop + 1
-                else:
-                    start = stop + 2
                 stop = start + mt_length
                 self.mat_dict[nuc]['mfs'][mf,mt] = (81*start-self.offset,
                                                     81*stop-self.offset)
+                start = stop + 1
                 line = fh.readline()
             # parse comment
             elif SPACE66_R.match(line):
@@ -169,7 +169,7 @@ class Library(rx.RxLib):
                 self.structure[nuc]['docs'].append(line[0:66])
                 line = fh.readline()
         # Find where the end of the material is and then jump to it.
-        self.chars_til_now = (stop + 4)*81 - self.offset
+        self.chars_til_now = (stop + 3)*81 - self.offset
         fh.seek(self.chars_til_now)
         nextline = fh.readline()
         self.more_files = (nextline != '' and nextline[68:70] != "-1")
