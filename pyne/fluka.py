@@ -35,8 +35,8 @@ class Usrbin(object):
     tallies. The "tally" attribute provides key/value access to individual
     UsrbinTally objects.
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     filename : string
         Path to Fluka usrbin file
     tally : dict
@@ -101,8 +101,8 @@ class UsrbinTally(Mesh):
     def __init__(self, fh):
         """Creates a UsrbinTally object by reading through the file
 
-        Paramters
-        ---------
+        Parameters
+        ----------
         fh : filehandle
             An open usrbin file
         """
