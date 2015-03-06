@@ -105,7 +105,7 @@ class Library(rx.RxLib):
             self.chars_til_now = len(line)
             self.offset = 81 - len(line)
         else:
-            print('TPID is the first line, has been read already')
+            warn('TPID is the first line, has been read already', UserWarning)
 
     def _read_headers(self):
         cdef int nuc
