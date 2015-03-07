@@ -36,12 +36,12 @@ from pyne.utils import fromendf_tok, endftod
 
 np.import_array()
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+warn(__name__ + ' is not yet QA compliant.', QAWarning)
 
-libraries = {0: "ENDF/B", 1: "ENDF/A", 2: "JEFF", 3: "EFF",
-             4: "ENDF/B High Energy", 5: "CENDL", 6: "JENDL",
-             31: "INDL/V", 32: "INDL/A", 33: "FENDL", 34: "IRDF",
-             35: "BROND", 36: "INGDB-90", 37: "FENDL/A", 41: "BROND"}
+libraries = {0: 'ENDF/B', 1: 'ENDF/A', 2: 'JEFF', 3: 'EFF',
+             4: 'ENDF/B High Energy', 5: 'CENDL', 6: 'JENDL',
+             31: 'INDL/V', 32: 'INDL/A', 33: 'FENDL', 34: 'IRDF',
+             35: 'BROND', 36: 'INGDB-90', 37: 'FENDL/A', 41: 'BROND'}
 FILE1_R = re.compile(r'1451 *\d{1,5}$')
 CONTENTS_R = re.compile(' +\d{1,2} +\d{1,3} +\d{1,10} +')
 SPACE66_R = re.compile(' {66}')
@@ -57,17 +57,19 @@ class Library(rx.RxLib):
         self.mat_dict = {}
         self.more_files = True
         self.intdict = {1: self._histogram, 2: self._linlin, 3: self._linlog, 4:
-                        self._loglin, 5: self._loglog, 6:self._chargedparticles,
-                        11: self._histogram, 12: self._linlin, 13: self._linlog,
-                        14: self._loglin, 15: self._loglog, 21: self._histogram,
-                        22: self._linlin, 23: self._linlog, 24: self._loglin,
-                        25: self._loglog}
+                        self._loglin, 5: self._loglog, 6:
+                        self._chargedparticles, 11: self._histogram,
+                        12: self._linlin, 13: self._linlog, 14: self._loglin,
+                        15: self._loglog, 21: self._histogram, 22: self._linlin,
+                        23: self._linlog, 24: self._loglin, 25: self._loglog}
         self.chars_til_now = 0
         self.offset = 0
         self.fh = fh
+        # read first line (Tape ID)
+        self._read_tpid()
+        # read headers for all materials
         while self.more_files:
             self._read_headers()
-
 
     def load(self):
         """load()
@@ -91,6 +93,20 @@ class Library(rx.RxLib):
             fh.close()
         return data
 
+    def _read_tpid(self):
+        if self.chars_til_now == 0:
+            opened_here = False
+            if isinstance(self.fh, basestring):
+                fh = open(self.fh, 'r')
+                opened_here = True
+            else:
+                fh = self.fh
+            line = fh.readline()
+            self.chars_til_now = len(line)
+            self.offset = 81 - len(line)
+        else:
+            warn('TPID is the first line, has been read already', UserWarning)
+
     def _read_headers(self):
         cdef int nuc
         cdef int mat_id
@@ -101,10 +117,9 @@ class Library(rx.RxLib):
             opened_here = True
         else:
             fh = self.fh
-        # Skip the first line and get the material ID.
+        # Go to current file position
         fh.seek(self.chars_til_now)
-        len_headline = len(fh.readline())
-        self.offset += 81 - len_headline
+        # get mat_id
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
         # store position of read
@@ -116,33 +131,33 @@ class Library(rx.RxLib):
                     'LREL', 0, 'NSUB', 'NVER', 'TEMP', 0, 'LDRV',
                     0, 'NWD', 'NXC']
         flags = dict(zip(flagkeys, fromendf_tok(matflagstring)))
-        nuc = cpp_nucname.id(<int> (<int> flags['ZA'] * 10000 + flags['LIS0']))
+        nuc = cpp_nucname.id(<int> (<int> flags['ZA']*10000 + flags['LIS0']))
         # go back to line after first line
         fh.seek(pos)
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
-                {nuc:{'styles': "", 'docs': [], 'particles': [], 'data': {},
-                         'matflags': {}}})
-            self.mat_dict.update({nuc:{'end_line':[],
-                                          'mfs':{}}})
+                {nuc: {'styles': '', 'docs': [], 'particles': [], 'data': {},
+                       'matflags': {}}})
+            self.mat_dict.update({nuc: {'end_line': [],
+                                        'mfs': {}}})
         # Parse header (all lines with 1451)
         mf = 1
-        stop = (self.chars_til_now+self.offset)//81
+        start = (self.chars_til_now+self.offset)//81
+        stop = start  # if no 451 can be found
         while FILE1_R.search(line):
             # parse contents section
             if CONTENTS_R.match(line):
                 # When MF and MT change, add offset due to SEND/FEND records.
                 old_mf = mf
                 mf, mt = int(line[22:33]), int(line[33:44])
+                if old_mf != mf:
+                    start += 1
                 mt_length = int(line[44:55])
-                if old_mf == mf:
-                    start = stop + 1
-                else:
-                    start = stop + 2
                 stop = start + mt_length
-                self.mat_dict[nuc]['mfs'][mf,mt] = (81*start-self.offset,
-                                                    81*stop-self.offset)
+                self.mat_dict[nuc]['mfs'][mf, mt] = (81*start-self.offset,
+                                                     81*stop-self.offset)
+                start = stop + 1
                 line = fh.readline()
             # parse comment
             elif SPACE66_R.match(line):
@@ -155,14 +170,17 @@ class Library(rx.RxLib):
                 self.structure[nuc]['docs'].append(line[0:66])
                 line = fh.readline()
         # Find where the end of the material is and then jump to it.
-        self.chars_til_now = (stop + 4)*81 - self.offset
+        # The end is 3 lines after the last mf,mt
+        # combination (SEND, FEND, MEND)
+        self.chars_til_now = (stop + 3)*81 - self.offset
         fh.seek(self.chars_til_now)
         nextline = fh.readline()
-        self.more_files = (nextline != '' and nextline[68:70] != "-1")
+        self.more_files = (nextline != '' and nextline[68:70] != '-1')
         # Update materials dict
         if mat_id != -1:
-            self.mat_dict[nuc]['end_line'] = (self.chars_til_now+self.offset)//81
-            setattr(self, "mat{0}".format(nuc), self.structure[nuc])
+            self.mat_dict[nuc]['end_line'] = \
+                (self.chars_til_now+self.offset)//81
+            setattr(self, 'mat{0}'.format(nuc), self.structure[nuc])
         self._read_mat_flags(nuc)
         fh.seek(0)
         if opened_here:
@@ -227,7 +245,7 @@ class Library(rx.RxLib):
             return self._get_cont(keys, line)
         else:
             raise ValueError('This is not a HEAD record: {}'.format(
-                    dict(zip(keys,line))))
+                dict(zip(keys, line))))
 
     def _get_list(self, headkeys, itemkeys, lines):
         """Read some lines of the array, treating it as a LIST record.
@@ -267,7 +285,7 @@ class Library(rx.RxLib):
         arraylines = (npl-1)//6 + 1
         if len(itemkeys) == 1:
             array_len = npl - (headlines-1) * 6
-            items={itemkeys[0]: lines[headlines:].flat[:array_len]}
+            items = {itemkeys[0]: lines[headlines:].flat[:array_len]}
         else:
             array_width = ((len(itemkeys)-1)//6 + 1)*6
             items_transposed = np.transpose(
@@ -280,7 +298,7 @@ class Library(rx.RxLib):
         total_lines = 1+arraylines
         return head, items, total_lines
 
-    def _get_tab1(self, headkeys, xykeys,lines):
+    def _get_tab1(self, headkeys, xykeys, lines):
         """Read some lines of the array, treating it as a TAB1 record.
 
         Parameters
@@ -312,7 +330,7 @@ class Library(rx.RxLib):
         nr, np_ = int(lines[0][4]), int(lines[0][5])
         meta_len = (nr*2-1)//6 + 1
         data_len = (np_*2-1)//6 + 1
-        intmeta = dict(zip(('intpoints','intschemes'),
+        intmeta = dict(zip(('intpoints', 'intschemes'),
                            (lines[1:1+meta_len].flat[:nr*2:2],
                             lines[1:1+meta_len].flat[1:nr*2:2])))
         intdata = dict(zip(xykeys,
@@ -362,7 +380,7 @@ class Library(rx.RxLib):
                 xs = np.append(xs[e_int < high], high_xs)
                 e_int = np.append(e_int[e_int < high], high)
         de_int = float(e_int[-1]-e_int[0])
-        return np.nansum((e_int[1:]-e_int[:-1])* (xs[1:]+xs[:-1])/2./de_int)
+        return np.nansum((e_int[1:]-e_int[:-1]) * (xs[1:]+xs[:-1])/2./de_int)
 
     def _linlog(self, e_int, xs, low, high):
         if low is not None or high is not None:
@@ -389,7 +407,8 @@ class Library(rx.RxLib):
         y2 = xs[1:]
         A = (y1-y2)/(np.log(x1/x2))
         B = y1-A*np.log(x1)
-        return np.nansum(A*(x2*np.log(x2) - x1*np.log(x1)-x2+x1) + B*(x2-x1))/de_int
+        return np.nansum(A*(x2*np.log(x2) -
+                            x1*np.log(x1)-x2+x1) + B*(x2-x1))/de_int
 
     def _loglin(self, e_int, xs, low, high):
         if low is not None or high is not None:
@@ -459,7 +478,7 @@ class Library(rx.RxLib):
         B = np.log(y2*x2/(x1*y1)) / (1/(x1-T)**0.5 - 1/(x2-T)**0.5)
         A = np.e**(B/(x1-T)**0.5)*y1*x1
         # FIXME
-        raise NotImplementedError("see docs for more details.")
+        raise NotImplementedError('see docs for more details.')
 
     def integrate_tab_range(self, intscheme, e_int, xs, low=None, high=None):
         """integrate_tab_range(intscheme, e_int, xs, low=None, high=None)
@@ -481,7 +500,7 @@ class Library(rx.RxLib):
         sigma_g : float
             The group xs.
         """
-        with np.errstate(divide="ignore", invalid="ignore"):
+        with np.errstate(divide='ignore', invalid='ignore'):
             # each of these functions returns a normalized integration
             # over the range
             return self.intdict[intscheme](e_int, xs, low, high)
@@ -491,7 +510,7 @@ class Library(rx.RxLib):
         return flags, total_lines+1
 
     def _nls_njs_loop(self, L_keys, j_keys, itemkeys, data, total_lines,
-                     range_flags, subsection_dict):
+                      range_flags, subsection_dict):
         nls = int(range_flags['NLS'])
         for nls_iter in range(nls):
             if j_keys is None:
@@ -524,7 +543,7 @@ class Library(rx.RxLib):
             Material id .
         """
         lrp = self.structure[mat_id]['matflags']['LRP']
-        if (lrp == -1 or mat_id in (-1,0)):
+        if (lrp == -1 or mat_id in (-1, 0)):
             # If the LRP flag for the material is -1,
             # there's no resonance data.
             # Also if the mat id is invalid.
@@ -543,10 +562,10 @@ class Library(rx.RxLib):
             pass
         else:
             # Load the resonance data.
-            mf2 = self.get_rx(mat_id,2,151).reshape(-1, 6)
+            mf2 = self.get_rx(mat_id, 2, 151).reshape(-1, 6)
 
             self.structure[mat_id]['matflags'].update(
-                self._get_head(['ZA','AWR',0,0,'NIS',0], mf2[0]))
+                self._get_head(['ZA', 'AWR', 0, 0, 'NIS', 0], mf2[0]))
             total_lines = 1
             for isotope_num in range(
                     int(self.structure[mat_id]['matflags']['NIS'])):
@@ -575,24 +594,25 @@ class Library(rx.RxLib):
         total_lines: int
             The number of lines the isotope takes up.
         """
-        isotope_flags = self._get_cont(['ZAI','ABN',0,'LFW','NER',0],
+        isotope_flags = self._get_cont(['ZAI', 'ABN', 0, 'LFW', 'NER', 0],
                                        isotope_data[0])
-        # according to endf manual, there is no specification for metastable states in ZAI
+        # according to endf manual, there is no specification
+        # for metastable states in ZAI
         # if we have a LIS0 != 0 we add the state to all isotopes
-        if(self.structure[mat_id]['matflags']['LIS0'] == 0):
+        if self.structure[mat_id]['matflags']['LIS0'] == 0:
             nuc_i = nucname.id(int(isotope_flags['ZAI']*10))
         else:
-            nuc_i = nucname.id(int(isotope_flags['ZAI']*10 + \
+            nuc_i = nucname.id(int(isotope_flags['ZAI']*10 +
                                self.structure[mat_id]['matflags']['LIS0']))
 
         self.structure[mat_id]['data'].update(
-            {nuc_i:{'resolved':[],
-                       'unresolved':[],
-                       'datadocs':[],
-                       'xs':{},
-                       'output':{'channel1':[],
-                                 'channel2':[]},
-                       'isotope_flags': isotope_flags}})
+            {nuc_i: {'resolved': [],
+                     'unresolved': [],
+                     'datadocs': [],
+                     'xs': {},
+                     'output': {'channel1': [],
+                                'channel2': []},
+                     'isotope_flags': isotope_flags}})
         total_lines = 1
         for er in range(int(isotope_flags['NER'])):
             total_lines += self._read_subsection(isotope_data[total_lines:],
@@ -624,7 +644,7 @@ class Library(rx.RxLib):
         total_lines: int
             The number of lines the energy range subsection takes up.
         """
-        range_flags = self._get_cont(('EL','EH','LRU','LRF','NRO','NAPS'),
+        range_flags = self._get_cont(('EL', 'EH', 'LRU', 'LRF', 'NRO', 'NAPS'),
                                      subsection[0])
         total_lines = 1
         lru = int(round(range_flags['LRU']))
@@ -663,8 +683,8 @@ class Library(rx.RxLib):
         def read_kbks(nch, subsection, aj_data, total_lines):
             for ch in range(nch):
                 lbk = int(subsection[total_lines][4])
-                lbk_list_keys = {2: ('R0','R1','R2','S0','S1',0),
-                                 3: ('R0','SO','GA',0,0,0)}
+                lbk_list_keys = {2: ('R0', 'R1', 'R2', 'S0', 'S1', 0),
+                                 3: ('R0', 'SO', 'GA', 0, 0, 0)}
                 aj_data['ch{}'.format(ch)] = {'LBK': lbk}
                 ch_data = aj_data['ch{}'.format(ch)]
                 if lbk == 0:
@@ -672,18 +692,18 @@ class Library(rx.RxLib):
                 elif lbk == 1:
                     total_lines += 2
                     rbr, rbr_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('e_int','RBR'),
+                        (0, 0, 0, 0, 'NR', 'NP'), ('e_int', 'RBR'),
                         subsection[total_lines:])[1:3]
                     total_lines += rbr_size
                     ch_data['RBR'] = rbr
                     rbi, rbi_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('e_int','RBI'),
+                        (0, 0, 0, 0, 'NR', 'NP'), ('e_int', 'RBI'),
                         (subsection[total_lines:]))[1:3]
                     total_lines += rbi_size
                     ch_data['RBI'] = rbi
                 else:
                     ch_data, total_lines = self._cont_and_update(
-                        ch_data, ('ED','EU',0,0,'LBK',0), subsection,
+                        ch_data, ('ED', 'EU', 0, 0, 'LBK', 0), subsection,
                         total_lines)
                     ch_data, total_lines = self._cont_and_update(
                         ch_data, lbk_list_keys[lbk], subsection,
@@ -698,12 +718,12 @@ class Library(rx.RxLib):
                 total_lines += 2
                 if lps == 1:
                     psr, psr_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('e_int','PSR'),
+                        (0, 0, 0, 0, 'NR', 'NP'), ('e_int', 'PSR'),
                         subsection[total_lines:])[1:3]
                     total_lines += psr_size
                     ch_data['PSR'] = psr
                     psi, psi_size = self._get_tab1(
-                        (0,0,0,0,'NR','NP'), ('e_int','PSI'),
+                        (0, 0, 0, 0, 'NR', 'NP'), ('e_int', 'PSI'),
                         (subsection[total_lines:]))[1:3]
                     total_lines += psi_size
                     ch_data['PSI'] = psi
@@ -713,90 +733,95 @@ class Library(rx.RxLib):
         lrf = int(range_flags['LRF'])
         subsection_dict = rx.DoubleSpinDict({})
         headers = [None,
-                   ('SPI','AP',0,0,'NLS',0),
-                   ('SPI','AP',0,0,'NLS',0),
-                   ('SPI','AP','LAD',0,'NLS','NLSC'),
-                   ('SPI','AP',0,0,'NLS',0),
+                   ('SPI', 'AP', 0, 0, 'NLS', 0),
+                   ('SPI', 'AP', 0, 0, 'NLS', 0),
+                   ('SPI', 'AP', 'LAD', 0, 'NLS', 'NLSC'),
+                   ('SPI', 'AP', 0, 0, 'NLS', 0),
                    None,
                    None,
-                   (0,0,'IFG','KRM','NJS','KRL')]
+                   (0, 0, 'IFG', 'KRM', 'NJS', 'KRL')]
         if range_flags['NRO'] > 0:
-            intdata, total_lines = self._get_tab1((0,0,0,0,'NR','NP'),
-                                                  ('E','AP'),
+            intdata, total_lines = self._get_tab1((0, 0, 0, 0, 'NR', 'NP'),
+                                                  ('E', 'AP'),
                                                   subsection)[1:3]
             subsection_dict['int'] = intdata
         else:
             total_lines = 0
         range_flags, total_lines = self._cont_and_update(
-                range_flags, headers[lrf], subsection, total_lines)
+            range_flags, headers[lrf], subsection, total_lines)
 
         lrf_L_keys = [None,
-                      ('AWRI','QX','L','LRX','6*NRS','NRS'),
-                      ('AWRI','QX','L','LRX','6*NRS','NRS'),
-                      ('AWRI','APL','L',0,'6*NRS','NRS'),
-                      (0,0,'L',0,'NJS',0)]
-        lrf_J_keys = [None, None, None, None, ('AJ',0,0,0,'12*NLJ','NLJ')]
+                      ('AWRI', 'QX', 'L', 'LRX', '6*NRS', 'NRS'),
+                      ('AWRI', 'QX', 'L', 'LRX', '6*NRS', 'NRS'),
+                      ('AWRI', 'APL', 'L', 0, '6*NRS', 'NRS'),
+                      (0, 0, 'L', 0, 'NJS', 0)]
+        lrf_J_keys = [None, None, None, None, ('AJ', 0, 0, 0, '12*NLJ', 'NLJ')]
         lrf_itemkeys = [None,
-                        ('ER','AJ','GT','GN','GG','GF'),
-                        ('ER','AJ','GT','GN','GG','GF'),
-                        ('ER','AJ','GN','GG','GFA','GFB'),
-                        ('DET','DWT','GRT','GIT','DEF','DWF','GRF','GIF','DEC',
-                         'DWC','GRC','GIC')]
+                        ('ER', 'AJ', 'GT', 'GN', 'GG', 'GF'),
+                        ('ER', 'AJ', 'GT', 'GN', 'GG', 'GF'),
+                        ('ER', 'AJ', 'GN', 'GG', 'GFA', 'GFB'),
+                        ('DET', 'DWT', 'GRT', 'GIT', 'DEF', 'DWF',
+                         'GRF', 'GIF', 'DEC', 'DWC', 'GRC', 'GIC')]
         if lrf == 4:
             # Adler-Adler
             bg_flags, bg, bg_size = self._get_list(
-                ('AWRI',0,'LI',0,'6*NX','NX'),
-                ('A1','A2','A3','A4','B1','B2'),
+                ('AWRI', 0, 'LI', 0, '6*NX', 'NX'),
+                ('A1', 'A2', 'A3', 'A4', 'B1', 'B2'),
                 subsection[total_lines:])
             total_lines += bg_size
             subsection_dict['bg'] = bg
 
         if lrf < 5:
             total_lines = self._nls_njs_loop(lrf_L_keys[lrf],
-                                            lrf_J_keys[lrf],
-                                            lrf_itemkeys[lrf],
-                                            subsection,
-                                            total_lines,
-                                            range_flags,
-                                            subsection_dict)
+                                             lrf_J_keys[lrf],
+                                             lrf_itemkeys[lrf],
+                                             subsection,
+                                             total_lines,
+                                             range_flags,
+                                             subsection_dict)
         if lrf == 7:
             # R-Matrix Limited Format (ENDF Manual pp. 62-67)
             # Particle pair descriptions for the whole range
             particle_pair_data, pp_size = self._get_list(
-                (0,0,'NPP',0,'12*NPP','2*NPP'),
-                ('MA','MB','ZA','ZB','IA','IB','Q','PNT','SHF','MT','PA','PB'),
+                (0, 0, 'NPP', 0, '12*NPP', '2*NPP'),
+                ('MA', 'MB', 'ZA', 'ZB', 'IA', 'IB',
+                 'Q', 'PNT', 'SHF', 'MT', 'PA', 'PB'),
                 subsection[total_lines:])[1:3]
             total_lines += pp_size
             range_flags.update(particle_pair_data)
             for aj_section in range(int(range_flags['NJS'])):
                 # Read first LIST record, with channel descriptions
                 aj_flags, ch_items, ch_size = self._get_list(
-                    ('AJ','PJ','KBK','KPS','6*NCH','NCH'),
-                    ('IPP','L','SCH','BND','APE','APT'),
+                    ('AJ', 'PJ', 'KBK', 'KPS', '6*NCH', 'NCH'),
+                    ('IPP', 'L', 'SCH', 'BND', 'APE', 'APT'),
                     subsection[total_lines:])
                 total_lines += ch_size
                 # Second LIST record, with resonance energies and widths.
                 er_flags, er_data, er_size = self._get_list(
-                    (0,0,0,'NRS','6*NX','NX'), ('ER',), subsection[total_lines:])
+                    (0, 0, 0, 'NRS', '6*NX', 'NX'), ('ER',),
+                    subsection[total_lines:])
                 total_lines += er_size
                 nch = int(aj_flags['NCH'])
                 er_array_width = (nch//6+1)*6
-                er_data = er_data['ER'].reshape(-1,er_array_width).transpose()
-                aj_data = {'ER': er_data[0], 'GAM': er_data[1:1+nch].transpose()}
+                er_data = er_data['ER'].reshape(-1, er_array_width).transpose()
+                aj_data = {'ER': er_data[0],
+                           'GAM': er_data[1:1+nch].transpose()}
                 aj_data.update(ch_items)
                 aj = aj_flags['AJ']
                 # Additional records
                 if aj_flags['KBK'] > 0:
-                    lbk_list_keys = ((),(),#('ED','EU',0,0,'LBK',0),
-                                     ('R0','R1','R2','S0','S1',0),
-                                     ('R0','SO','GA',0,0,0))
-                    total_lines = read_kbks(nch, subsection, aj_data, total_lines)
+                    lbk_list_keys = ((), (),  # ('ED','EU',0,0,'LBK',0),
+                                     ('R0', 'R1', 'R2', 'S0', 'S1', 0),
+                                     ('R0', 'SO', 'GA', 0, 0, 0))
+                    total_lines = read_kbks(nch, subsection,
+                                            aj_data, total_lines)
                 if aj_flags['KPS'] > 0:
-                    total_lines = read_kpss(nch, subsection, aj_data, total_lines)
+                    total_lines = read_kpss(nch, subsection,
+                                            aj_data, total_lines)
                 subsection_dict[aj] = aj_data
 
         el, eh = range_flags['EL'], range_flags['EH']
-        subsection_data = (el,eh,subsection_dict,range_flags)
+        subsection_data = (el, eh, subsection_dict, range_flags)
         isotope_dict = self.structure[mat_id]['data'][nuc_i]
         isotope_dict['resolved'].append(subsection_data)
         return total_lines
@@ -822,71 +847,74 @@ class Library(rx.RxLib):
         --------
         total_lines: int
         """
-        head_cont = ('SPI','AP','LSSF',0,'NLS',0)
-        has_head_cont = {(0,1): True, (1,1): False, (0,2): True, (1,2): True}
-        L_keys = {(0,1): ('AWRI',0,'L',0,'6*NJS','NJS'),
-                  (1,1): ('AWRI',0,'L',0,'NJS',0),
-                  (0,2): ('AWRI',0,'L',0,'NJS',0),
-                  (1,2): ('AWRI',0,'L',0,'NJS',0)}
-        j_keys = {(0,1): None,
-                  (1,1): (0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG',
-                          0),
-                  (0,2): ('AJ',0,'INT',0,'6*NE+6','NE',0,0,'AMUX','AMUN',
-                      'AMUG','AMUF'),
-                  (1,2): ('AJ',0,'INT',0,'6*NE+6','NE',0,0,'AMUX','AMUN',
-                      'AMUG','AMUF')}
-        itemkeys = {(0,1): ('D','AJ','AMUN','GN0','GG',0),
-                    (1,1): ('GF',),
-                    (0,2): ('ES','D','GX','GN0','GG','GF'),
-                    (1,2): ('ES','D','GX','GN0','GG','GF')}
+        head_cont = ('SPI', 'AP', 'LSSF', 0, 'NLS', 0)
+        has_head_cont = {(0, 1): True, (1, 1): False,
+                         (0, 2): True, (1, 2): True}
+        L_keys = {(0, 1): ('AWRI', 0, 'L', 0, '6*NJS', 'NJS'),
+                  (1, 1): ('AWRI', 0, 'L', 0, 'NJS', 0),
+                  (0, 2): ('AWRI', 0, 'L', 0, 'NJS', 0),
+                  (1, 2): ('AWRI', 0, 'L', 0, 'NJS', 0)}
+        j_keys = {(0, 1): None,
+                  (1, 1): (0, 0, 'L', 'MUF', 'NE+6', 0,
+                           'D', 'AJ', 'AMUN', 'GN0', 'GG', 0),
+                  (0, 2): ('AJ', 0, 'INT', 0, '6*NE+6', 'NE',
+                           0, 0, 'AMUX', 'AMUN', 'AMUG', 'AMUF'),
+                  (1, 2): ('AJ', 0, 'INT', 0, '6*NE+6', 'NE',
+                           0, 0, 'AMUX', 'AMUN', 'AMUG', 'AMUF')}
+        itemkeys = {(0, 1): ('D', 'AJ', 'AMUN', 'GN0', 'GG', 0),
+                    (1, 1): ('GF', ),
+                    (0, 2): ('ES', 'D', 'GX', 'GN0', 'GG', 'GF'),
+                    (1, 2): ('ES', 'D', 'GX', 'GN0', 'GG', 'GF')}
 
         lfw, lrf = int(isotope_flags['LFW']), int(range_flags['LRF'])
         subsection_dict = rx.DoubleSpinDict({})
         if range_flags['NRO'] > 0:
-            tabhead,intdata,total_lines=self._get_tab1((0,0,0,0,'NR','NP'),
-                                                       ('E','AP'),
-                                                       subsection)
-            subsection_dict['int']= intdata
+            tabhead, intdata, total_lines = self._get_tab1((0, 0, 0,
+                                                            0, 'NR', 'NP'),
+                                                           ('E', 'AP'),
+                                                           subsection)
+            subsection_dict['int'] = intdata
         else:
             total_lines = 0
         if has_head_cont[(lfw, lrf)]:
             range_flags, total_lines = self._cont_and_update(
                 range_flags, head_cont, subsection, total_lines)
-        if (lfw, lrf) == (1,1):
+        if (lfw, lrf) == (1, 1):
             # Case B in ENDF manual p.70
             head_flags, es_array, lines = self._get_list(
-                ('SPI','AP','LSSF',0,'NE','NLS'),
-                ('ES',),
+                ('SPI', 'AP', 'LSSF', 0, 'NE', 'NLS'),
+                ('ES', ),
                 subsection[total_lines:])
             subsection_dict['ES'] = es_array['ES']
             total_lines += lines
             range_flags.update(head_flags)
         total_lines = self._nls_njs_loop(L_keys[(lfw, lrf)],
-                                        j_keys[(lfw, lrf)],
-                                        itemkeys[(lfw, lrf)],
-                                        subsection,
-                                        total_lines,
-                                        range_flags,
-                                        subsection_dict)
+                                         j_keys[(lfw, lrf)],
+                                         itemkeys[(lfw, lrf)],
+                                         subsection,
+                                         total_lines,
+                                         range_flags,
+                                         subsection_dict)
         el, eh = range_flags['EL'], range_flags['EH']
-        subsection_data = (el,eh,subsection_dict,range_flags)
+        subsection_data = (el, eh, subsection_dict, range_flags)
         isotope_dict = self.structure[mat_id]['data'][nuc_i]
         isotope_dict['unresolved'].append(subsection_data)
         return total_lines
 
     def _read_ap_only(self, subsection, range_flags, isotope_flags, mat_id,
                       nuc_i):
-        "Read in scattering radius when it is the only resonance data given."
+        'Read in scattering radius when it is the only resonance data given.'
         subsection_dict = {}
         if range_flags['NRO'] > 0:
-            tabhead,intdata,total_lines=self._get_tab1((0,0,0,0,'NR','NP'),
-                                                       ('E','AP'),
-                                                       subsection)
-            subsection_dict['int']= intdata
+            tabhead, intdata, total_lines = self._get_tab1((0, 0, 0, 0,
+                                                            'NR', 'NP'),
+                                                           ('E', 'AP'),
+                                                           subsection)
+            subsection_dict['int'] = intdata
         else:
             total_lines = 0
         range_flags, total_lines = self._cont_and_update(
-            range_flags, ('SPI','AP',0,0,'NLS',0), subsection, total_lines)
+            range_flags, ('SPI', 'AP', 0, 0, 'NLS', 0), subsection, total_lines)
         return total_lines
 
     def _read_xs(self, nuc, mt, nuc_i=None):
@@ -903,19 +931,19 @@ class Library(rx.RxLib):
             Isotope to find; if None, defaults to mat_id.
         """
         nuc = nucname.id(nuc)
-        if nuc_i == None:
+        if nuc_i is None:
             nuc_i = nuc
         if 600 > mt > 500:
-            xsdata = self.get_rx(nuc, 23, mt).reshape(-1,6)
+            xsdata = self.get_rx(nuc, 23, mt).reshape(-1, 6)
         else:
-            xsdata = self.get_rx(nuc, 3, mt).reshape(-1,6)
+            xsdata = self.get_rx(nuc, 3, mt).reshape(-1, 6)
         total_lines = 0
-        head_flags = self._get_head(('ZA','AWR',0,0,0,0),
+        head_flags = self._get_head(('ZA', 'AWR', 0, 0, 0, 0),
                                     xsdata[total_lines])
         total_lines += 1
         int_flags, int_data, int_size = self._get_tab1(
-            ('QM','QI',0,'LM','NR','NP'),
-            ('e_int','xs'),
+            ('QM', 'QI', 0, 'LM', 'NR', 'NP'),
+            ('e_int', 'xs'),
             xsdata[total_lines:])
         int_flags.update(head_flags)
         isotope_dict = self.structure[nuc]['data'][nuc_i]
@@ -977,7 +1005,7 @@ class Library(rx.RxLib):
         if nuc in self.structure:
             return self._read_nucmfmt(nuc, mf, mt, lines)
         else:
-            raise ValueError("Material {} does not exist.".format(nuc))
+            raise ValueError('Material {} does not exist.'.format(nuc))
 
     def _read_nucmfmt(self, nuc, mf, mt, lines):
         """Load in the data from one reaction into self.structure.
@@ -1003,9 +1031,9 @@ class Library(rx.RxLib):
         else:
             fh = self.fh
         try:
-            start, stop = self.mat_dict[nuc]['mfs'][mf,mt]
+            start, stop = self.mat_dict[nuc]['mfs'][mf, mt]
         except KeyError as e:
-            msg = "MT {1} not found in File {0}.".format(mf, mt)
+            msg = 'MT {1} not found in File {0}.'.format(mf, mt)
             e.args = (msg,)
             raise e
         fh.readline()
@@ -1017,6 +1045,7 @@ class Library(rx.RxLib):
         if opened_here:
             fh.close
         return fromendf_tok(s)
+
 
 class Evaluation(object):
     """
@@ -1037,7 +1066,7 @@ class Evaluation(object):
     def read(self, reactions=None):
         if not reactions:
             if self.verbose:
-                print("No reaction given. Read all")
+                print('No reaction given. Read all')
             reactions = []
             for r in self.reactionList[1:]:
                 reactions.append(r[0:2])
@@ -1125,7 +1154,7 @@ class Evaluation(object):
 
             if not found:
                 if self.verbose:
-                    print("Reaction not found")
+                    print('Reaction not found')
                 raise NotFound('Reaction')
 
     def _read_header(self):
@@ -1211,7 +1240,7 @@ class Evaluation(object):
             MT = items[3]
             NC = items[4]
             MOD = items[5]
-            self.reactionList.append((MF,MT,NC,MOD))
+            self.reactionList.append((MF, MT, NC, MOD))
 
     def _read_total_nu(self):
         self.print_info(1, 452)
@@ -1355,9 +1384,9 @@ class Evaluation(object):
 
         # Read TAB1 record with reaction cross section
         xs.sigma = self._get_tab1_record()
-        xs.QM = xs.sigma.params[0] # Mass difference Q value
-        xs.QI = xs.sigma.params[1] # Reaction Q value
-        xs.LR = xs.sigma.params[3] # Complex breakup flag
+        xs.QM = xs.sigma.params[0]  # Mass difference Q value
+        xs.QI = xs.sigma.params[1]  # Reaction Q value
+        xs.LR = xs.sigma.params[3]  # Complex breakup flag
 
         # Skip SEND record
         self.fh.readline()
@@ -1414,22 +1443,22 @@ class Evaluation(object):
 
         # Determine whether discrete or continuous representation
         items = self._get_head_record()
-        res.NIS = items[4] # Number of isotopes
+        res.NIS = items[4]  # Number of isotopes
 
         for iso in range(res.NIS):
             items = self._get_cont_record()
-            res.ABN = items[1] # isotopic abundance
-            res.LFW = items[3] # fission widths present?
-            res.NER = items[4] # number of resonance energy ranges
+            res.ABN = items[1]  # isotopic abundance
+            res.LFW = items[3]  # fission widths present?
+            res.NER = items[4]  # number of resonance energy ranges
 
             for erange in range(res.NER):
                 items = self._get_cont_record()
-                res.EL = items[0] # lower limit of energy range
-                res.EH = items[1] # upper limit of energy range
-                res.LRU = items[2] # flag for resolved (1)/unresolved (2)
-                res.LRF = items[3] # resonance representation
-                res.NRO = items[4] # flag for energy dependence of scattering radius
-                res.NAPS = items[5] # flag controlling use of channel/scattering radius
+                res.EL = items[0]  # lower limit of energy range
+                res.EH = items[1]  # upper limit of energy range
+                res.LRU = items[2]  # flag for resolved (1)/unresolved (2)
+                res.LRF = items[3]  # resonance representation
+                res.NRO = items[4]  # flag for energy dep. of scattering radius
+                res.NAPS = items[5]  # flag controlling use of channel/scattering radius
 
                 # Only scattering radius specified
                 if res.LRU == 0 and res.NRO == 0:
@@ -1453,10 +1482,10 @@ class Evaluation(object):
 
             # Other scatter radius parameters
             items = self._get_cont_record()
-            res.SPI = items[0] # Spin, I, of the target nucleus
+            res.SPI = items[0]  # Spin, I, of the target nucleus
             if res.NRO == 0:
                 res.AP = items[1]
-            res.NLS = items[4] # Number of l-values
+            res.NLS = items[4]  # Number of l-values
 
             # Read resonance widths, J values, etc
             for l in range(res.NLS):
@@ -1489,12 +1518,12 @@ class Evaluation(object):
 
             # Other scatter radius parameters
             items = self._get_cont_record()
-            res.SPI = items[0] # Spin, I, of the target nucleus
+            res.SPI = items[0]  # Spin, I, of the target nucleus
             if res.NRO == 0:
                 res.AP = items[1]
-            res.LAD = items[3] # Flag for angular distribution
-            res.NLS = items[4] # Number of l-values
-            res.NLSC = items[5] # Number of l-values for convergence
+            res.LAD = items[3]  # Flag for angular distribution
+            res.NLS = items[4]  # Number of l-values
+            res.NLSC = items[5]  # Number of l-values for convergence
 
             # Read resonance widths, J values, etc
             for l in range(res.NLS):
@@ -1534,12 +1563,12 @@ class Evaluation(object):
 
         # Get head record
         items = self._get_head_record()
-        elast.ZA = items[0] # ZA identifier
-        elast.AWR = items[1] # AWR
-        elast.LTHR = items[2] # coherent/incoherent flag
+        elast.ZA = items[0]  # ZA identifier
+        elast.AWR = items[1]  # AWR
+        elast.LTHR = items[2]  # coherent/incoherent flag
         if elast.LTHR == 1:
             if self.verbose:
-                print("Coherent elastic")
+                print('Coherent elastic')
                 temp = []
                 eint = []
                 set = []
@@ -1552,7 +1581,7 @@ class Evaluation(object):
                 set.append(temp0.y)
                 elast.LT = temp0.params[2]
                 if self.veryverbose:
-                    print("Number of temperatures: {0}".format(elast.LT+1))
+                    print('Number of temperatures: {0}'.format(elast.LT+1))
                 for t in range(elast.LT):
                     heads, s = self._get_list_record()
                     # Save S(E,T)
@@ -1564,7 +1593,7 @@ class Evaluation(object):
                 elast.eint = np.array(eint)
         elif elast.LTHR == 2:
             if self.verbose:
-                print("Incoherent elastic")
+                print('Incoherent elastic')
                 temp = []
                 eint = []
                 set = []
@@ -1576,7 +1605,7 @@ class Evaluation(object):
                 # Save W(T)
                 elast.w = np.array(record.y)
         else:
-            print("Invalid value of LHTR")
+            print('Invalid value of LHTR')
         file7.reactions.append(elast)
 
     def _read_thermal_inelastic(self):
@@ -1592,23 +1621,23 @@ class Evaluation(object):
 
         # Get head record
         items = self._get_head_record()
-        inel.ZA = items[0] # ZA identifier
-        inel.AWR = items[1] # AWR
-        inel.LAT = items[3] # Temperature flag
-        inel.LASYM = items[4] # Symmetry flag
+        inel.ZA = items[0]  # ZA identifier
+        inel.AWR = items[1]  # AWR
+        inel.LAT = items[3]  # Temperature flag
+        inel.LASYM = items[4]  # Symmetry flag
         HeaderItems, B = self._get_list_record()
         inel.LLN = HeaderItems[2]
         inel.NS = HeaderItems[5]
         inel.B = B
         if B[0] == 0.0:
             if self.verbose:
-                print("No principal atom")
+                print('No principal atom')
         else:
             nbeta = self._get_tab2_record()
             sabt = []
             beta = []
             for be in range(nbeta.NBT[0]):
-                #Read record for first temperature (always present)
+                # Read record for first temperature (always present)
                 sabt_temp = []
                 temp = []
                 temp0 = self._get_tab1_record()
@@ -1622,9 +1651,9 @@ class Evaluation(object):
                 temp.append(temp0.params[0])
                 inel.LT = temp0.params[2]
                 if self.veryverbose:
-                    print("Number of temperatures: {0}".format(inel.LT+1))
+                    print('Number of temperatures: {0}'.format(inel.LT+1))
                 for t in range(inel.LT):
-                    #Read records for all the other temperatures
+                    # Read records for all the other temperatures
                     headsab, sa = self._get_list_record()
                     # Save S(be, t+1, :)
                     sabt_temp.append(sa)
@@ -1665,21 +1694,21 @@ class Evaluation(object):
         items = self._get_head_record()
         iyield.ZA = items[0]
         iyield.AWR = items[1]
-        LE = items[2] # Determine energy-dependence
+        LE = items[2]  # Determine energy-dependence
 
         for i in range(LE):
             items, itemList = self._get_list_record()
-            E = items[0] # Incident particle energy
+            E = items[0]  # Incident particle energy
             iyield.energies.append(E)
-            NFP = items[5] # Number of fission product nuclide states
+            NFP = items[5]  # Number of fission product nuclide states
             if i > 0:
-                iyield.interp.append(items[2]) # Interpolation scheme
+                iyield.interp.append(items[2])  # Interpolation scheme
 
             # Get data for each yield
             iyield.data[E] = {}
-            iyield.data[E]['zafp'] = [int(i) for i in itemList[0::4]] # ZA for fission products
-            iyield.data[E]['fps'] = itemList[1::4] # State designator
-            iyield.data[E]['yi'] = zip(itemList[2::4],itemList[3::4]) # Independent yield
+            iyield.data[E]['zafp'] = [int(i) for i in itemList[0::4]]  # ZA for fission products
+            iyield.data[E]['fps'] = itemList[1::4]  # State designator
+            iyield.data[E]['yi'] = zip(itemList[2::4], itemList[3::4])  # Independent yield
 
         # Skip SEND record
         self.fh.readline()
@@ -1705,21 +1734,21 @@ class Evaluation(object):
         items = self._get_head_record()
         cyield.ZA = items[0]
         cyield.AWR = items[1]
-        LE = items[2] # Determine energy-dependence
+        LE = items[2]  # Determine energy-dependence
 
         for i in range(LE):
             items, itemList = self._get_list_record()
-            E = items[0] # Incident particle energy
+            E = items[0]  # Incident particle energy
             cyield.energies.append(E)
-            NFP = items[5] # Number of fission product nuclide states
+            NFP = items[5]  # Number of fission product nuclide states
             if i > 0:
-                cyield.interp.append(items[2]) # Interpolation scheme
+                cyield.interp.append(items[2])  # Interpolation scheme
 
             # Get data for each yield
             cyield.data[E] = {}
-            cyield.data[E]['zafp'] = [int(i) for i in itemList[0::4]] # ZA for fission products
-            cyield.data[E]['fps'] = itemList[1::4] # State designator
-            cyield.data[E]['yc'] = zip(itemList[2::4],itemList[3::4]) # Cumulative yield
+            cyield.data[E]['zafp'] = [int(i) for i in itemList[0::4]]  # ZA for fission products
+            cyield.data[E]['fps'] = itemList[1::4]  # State designator
+            cyield.data[E]['yc'] = zip(itemList[2::4], itemList[3::4])  # Cumulative yield
 
         # Skip SEND record
         self.fh.readline()
@@ -1740,15 +1769,15 @@ class Evaluation(object):
 
         # Get head record
         items = self._get_head_record()
-        decay.ZA = items[0] # ZA identifier
-        decay.AWR = items[1] # AWR
-        decay.LIS = items[2] # State of the original nuclide
-        decay.LISO = items[3] # Isomeric state for the original nuclide
-        decay.NST = items[4] # Nucleus stability flag
+        decay.ZA = items[0]  # ZA identifier
+        decay.AWR = items[1]  # AWR
+        decay.LIS = items[2]  # State of the original nuclide
+        decay.LISO = items[3]  # Isomeric state for the original nuclide
+        decay.NST = items[4]  # Nucleus stability flag
 
         # Determine if radioactive (0)/stable (1)
         if decay.NST == 0:
-            decay.NSP = items[5] # Number of radiation types
+            decay.NSP = items[5]  # Number of radiation types
 
             # Half-life and decay energies
             items, itemList = self._get_list_record()
@@ -1758,9 +1787,9 @@ class Evaluation(object):
 
             # Decay mode information
             items, itemList = self._get_list_record()
-            decay.SPI = items[0] # Spin of the nuclide
-            decay.PAR = items[1] # Parity of the nuclide
-            decay.NDK = items[5] # Number of decay modes
+            decay.SPI = items[0]  # Spin of the nuclide
+            decay.PAR = items[1]  # Parity of the nuclide
+            decay.NDK = items[5]  # Number of decay modes
             # Decay type (beta, gamma, etc.)
             decay.RTYP = []
             for i in itemList[0::6]:
@@ -1769,16 +1798,16 @@ class Evaluation(object):
                 else:
                     # TODO: Handle multiple decay
                     raise NotImplementedError
-            decay.RFS = itemList[1::6] # Isomeric state for daughter
-            decay.Q = zip(itemList[2::6], itemList[3::6]) # Total decay energy
-            decay.BR = zip(itemList[4::6], itemList[5::6]) # Branching ratios
+            decay.RFS = itemList[1::6]  # Isomeric state for daughter
+            decay.Q = zip(itemList[2::6], itemList[3::6])  # Total decay energy
+            decay.BR = zip(itemList[4::6], itemList[5::6])  # Branching ratios
 
             # Read spectra
             for i in range(decay.NSP):
                 items, itemList = self._get_list_record()
-                STYP = decay_type[items[1]] # Decay radiation type
-                LCON = items[2] # Continuous spectrum flag
-                NER = items[5] # Number of tabulated discrete energies
+                STYP = decay_type[items[1]]  # Decay radiation type
+                LCON = items[2]  # Continuous spectrum flag
+                NER = items[5]  # Number of tabulated discrete energies
 
                 if LCON != 1:
                     for j in range(NER):
@@ -1816,19 +1845,19 @@ class Evaluation(object):
         # Get head record
         items = self._get_head_record()
         mp.ZA = items[0]
-        mp.AWR = items[1] # Atomic mass ratio
-        mp.LIS = items[2] # Level number of the target
-        mp.NS = items[4] # Number of final states
+        mp.AWR = items[1]  # Atomic mass ratio
+        mp.LIS = items[2]  # Level number of the target
+        mp.NS = items[4]  # Number of final states
 
         mp.multiplicities = []
         for i in range(mp.NS):
             state = self._get_tab1_record()
-            state.QM = state.params[0] # Mass difference Q value (eV)
-            state.QI = state.params[1] # Reaction Q value (eV)
-            state.IZAP = state.params[2] # 1000Z + A
-            state.LFS = state.params[3] # Level number of the nuclide
-            state.NR = state.params[4] # Number of energy ranges
-            state.NP = state.params[5] # Number of energy points
+            state.QM = state.params[0]  # Mass difference Q value (eV)
+            state.QI = state.params[1]  # Reaction Q value (eV)
+            state.IZAP = state.params[2]  # 1000Z + A
+            state.LFS = state.params[3]  # Level number of the nuclide
+            state.NR = state.params[4]  # Number of energy ranges
+            state.NP = state.params[5]  # Number of energy points
             mp.multiplicities.append(state)
 
     def _read_production_xs(self, MT):
@@ -1847,26 +1876,26 @@ class Evaluation(object):
         # Get head record
         items = self._get_head_record()
         rxn.ZA = items[0]
-        rxn.AWR = items[1] # Atomic mass ratio
-        rxn.LIS = items[2] # Level number of the target
-        rxn.NS = items[4] # Number of final states
+        rxn.AWR = items[1]  # Atomic mass ratio
+        rxn.LIS = items[2]  # Level number of the target
+        rxn.NS = items[4]  # Number of final states
 
         rxn.xs = []
         for i in range(rxn.NS):
             state = self._get_tab1_record()
-            state.QM = state.params[0] # Mass difference Q value (eV)
-            state.QI = state.params[1] # Reaction Q value (eV)
-            state.IZAP = state.params[2] # 1000Z + A
-            state.LFS = state.params[3] # Level number of the nuclide
-            state.NR = state.params[4] # Number of energy ranges
-            state.NP = state.params[5] # Number of energy points
+            state.QM = state.params[0]  # Mass difference Q value (eV)
+            state.QI = state.params[1]  # Reaction Q value (eV)
+            state.IZAP = state.params[2]  # 1000Z + A
+            state.LFS = state.params[3]  # Level number of the nuclide
+            state.NR = state.params[4]  # Number of energy ranges
+            state.NP = state.params[5]  # Number of energy points
             rxn.xs.append(state)
 
     def _get_text_record(self, line=None):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
-            print("Get TEXT record")
+            print('Get TEXT record')
         HL = line[0:66]
         MAT = int(line[66:70])
         MF = int(line[70:72])
@@ -1876,7 +1905,7 @@ class Evaluation(object):
 
     def _get_cont_record(self, line=None, skipC=False):
         if self.veryverbose:
-            print("Get CONT record")
+            print('Get CONT record')
         if not line:
             line = self.fh.readline()
         if skipC:
@@ -1899,7 +1928,7 @@ class Evaluation(object):
         if not line:
             line = self.fh.readline()
         if self.veryverbose:
-            print("Get HEAD record")
+            print('Get HEAD record')
         ZA = int(endftod(line[:11]))
         AWR = endftod(line[11:22])
         L1 = int(line[22:33])
@@ -1915,7 +1944,7 @@ class Evaluation(object):
     def _get_list_record(self, onlyList=False):
         # determine how many items are in list
         if self.veryverbose:
-            print("Get LIST record")
+            print('Get LIST record')
         items = self._get_cont_record()
         NPL = items[4]
 
@@ -1924,7 +1953,7 @@ class Evaluation(object):
         m = 0
         for i in range((NPL-1)//6 + 1):
             line = self.fh.readline()
-            toRead = min(6,NPL-m)
+            toRead = min(6, NPL-m)
             for j in range(toRead):
                 val = endftod(line[0:11])
                 itemsList.append(val)
@@ -1937,14 +1966,14 @@ class Evaluation(object):
 
     def _get_tab1_record(self):
         if self.veryverbose:
-            print("Get TAB1 record")
+            print('Get TAB1 record')
         r = ENDFTab1Record()
         r.read(self.fh)
         return r
 
     def _get_tab2_record(self):
         if self.veryverbose:
-            print("Get TAB2 record")
+            print('Get TAB2 record')
         r = ENDFTab2Record()
         r.read(self.fh)
         return r
@@ -1998,7 +2027,7 @@ class Evaluation(object):
             if line == '':
                 # Reached EOF
                 if self.verbose:
-                    print("Could not find MF={0}, MT={1}".format(MF, MT))
+                    print('Could not find MF={0}, MT={1}'.format(MF, MT))
                 raise NotFound('Reaction')
             if line[70:75] == searchString:
                 self.fh.seek(position)
@@ -2006,7 +2035,7 @@ class Evaluation(object):
 
     def print_info(self, MF, MT):
         if self.verbose:
-            print("Reading MF={0}, MT={1} {2}".format(MF, MT, label(MT)))
+            print('Reading MF={0}, MT={1} {2}'.format(MF, MT, label(MT)))
 
     def __iter__(self):
         for f in self.files:
@@ -2017,9 +2046,10 @@ class Evaluation(object):
             name = libraries[self.files[0].NLIB]
             nuclide = self.files[0].ZA
         except:
-            name = "Undetermined"
-            nuclide = "None"
-        return "<{0} Evaluation: {1}>".format(name, nuclide)
+            name = 'Undetermined'
+            nuclide = 'None'
+        return '<{0} Evaluation: {1}>'.format(name, nuclide)
+
 
 class ENDFTab1Record(object):
     def __init__(self):
@@ -2043,7 +2073,7 @@ class ENDFTab1Record(object):
         m = 0
         for i in range((NR-1)//3 + 1):
             line = fh.readline()
-            toRead = min(3,NR-m)
+            toRead = min(3, NR-m)
             for j in range(toRead):
                 NBT = int(line[0:11])
                 INT = int(line[11:22])
@@ -2056,7 +2086,7 @@ class ENDFTab1Record(object):
         m = 0
         for i in range((NP-1)//3 + 1):
             line = fh.readline()
-            toRead = min(3,NP-m)
+            toRead = min(3, NP-m)
             for j in range(toRead):
                 x = endftod(line[:11])
                 y = endftod(line[11:22])
@@ -2064,6 +2094,7 @@ class ENDFTab1Record(object):
                 self.y.append(y)
                 line = line[22:]
             m = m + toRead
+
 
 class ENDFTab2Record(object):
     def __init__(self):
@@ -2085,7 +2116,7 @@ class ENDFTab2Record(object):
         m = 0
         for i in range((NR-1)//3 + 1):
             line = fh.readline()
-            toRead = min(3,NR-m)
+            toRead = min(3, NR-m)
             for j in range(toRead):
                 NBT = int(line[0:11])
                 INT = int(line[11:22])
@@ -2094,11 +2125,13 @@ class ENDFTab2Record(object):
                 line = line[22:]
             m = m + toRead
 
+
 class ENDFRecord(object):
     def __init__(self, fh):
         if fh:
             line = fh.readline()
             self.read(line)
+
 
 class ENDFTextRecord(ENDFRecord):
     """
@@ -2116,6 +2149,7 @@ class ENDFTextRecord(ENDFRecord):
         MT = int(line[72:75])
         NS = int(line[75:80])
         self.items = [HL, MAT, MF, MT, NS]
+
 
 class ENDFContRecord(ENDFRecord):
     """
@@ -2213,6 +2247,7 @@ class ENDFContRecord(ENDFRecord):
 #            raise NotFound('TEND')
 #
 
+
 class ENDFHeadRecord(ENDFRecord):
     """
     An ENDFHeadRecord is the first in a section and has the same form as a
@@ -2238,6 +2273,7 @@ class ENDFHeadRecord(ENDFRecord):
         NS = int(line[75:80])
         self.items = [ZA, AWR, L1, L2, N1, N2, MAT, MF, MT, NS]
 
+
 class ENDFFile(object):
     """Abstract class for an ENDF file within an ENDF evaluation."""
 
@@ -2246,9 +2282,10 @@ class ENDFFile(object):
 
     def __repr__(self):
         try:
-            return "<ENDF File {0.fileNumber}: {0.ZA}>".format(self)
+            return '<ENDF File {0.fileNumber}: {0.ZA}>'.format(self)
         except:
-            return "<ENDF File {0.fileNumber}>".format(self)
+            return '<ENDF File {0.fileNumber}>'.format(self)
+
 
 class ENDFFile1(ENDFFile):
     """
@@ -2259,9 +2296,10 @@ class ENDFFile1(ENDFFile):
     """
 
     def __init__(self):
-        super(ENDFFile1,self).__init__()
+        super(ENDFFile1, self).__init__()
 
         self.fileNumber = 1
+
 
 class ENDFFile2(ENDFFile):
     """
@@ -2271,9 +2309,10 @@ class ENDFFile2(ENDFFile):
     """
 
     def __init__(self):
-        super(ENDFFile2,self).__init__()
+        super(ENDFFile2, self).__init__()
 
         self.fileNumber = 2
+
 
 class ENDFFile3(ENDFFile):
     """
@@ -2285,6 +2324,7 @@ class ENDFFile3(ENDFFile):
         super(ENDFFile3, self).__init__()
         self.fileNumber = 3
 
+
 class ENDFFile4(ENDFFile):
     """
     File4 contains angular distributions of secondary particles.
@@ -2292,6 +2332,7 @@ class ENDFFile4(ENDFFile):
 
     def __init__(self):
         self.fileNumber = 4
+
 
 class ENDFFile5(ENDFFile):
     """
@@ -2301,6 +2342,7 @@ class ENDFFile5(ENDFFile):
     def __init__(self):
         self.fileNumber = 5
 
+
 class ENDFFile6(ENDFFile):
     """
     File6 contains product energy-angle distributions.
@@ -2309,14 +2351,16 @@ class ENDFFile6(ENDFFile):
     def __init__(self):
         self.fileNumber = 6
 
+
 class ENDFFile7(ENDFFile):
     """
     File7 contains thermal neutron scattering law data.
     """
 
     def __init__(self):
-        super(ENDFFile7,self).__init__()
+        super(ENDFFile7, self).__init__()
         self.fileNumber = 7
+
 
 class ENDFFile8(ENDFFile):
     """
@@ -2324,8 +2368,9 @@ class ENDFFile8(ENDFFile):
     """
 
     def __init__(self):
-        super(ENDFFile8,self).__init__()
+        super(ENDFFile8, self).__init__()
         self.fileNumber = 8
+
 
 class ENDFFile9(ENDFFile):
     """
@@ -2333,8 +2378,9 @@ class ENDFFile9(ENDFFile):
     """
 
     def __init__(self):
-        super(ENDFFile9,self).__init__()
+        super(ENDFFile9, self).__init__()
         self.fileNumber = 9
+
 
 class ENDFFile10(ENDFFile):
     """
@@ -2342,8 +2388,9 @@ class ENDFFile10(ENDFFile):
     """
 
     def __init__(self):
-        super(ENDFFile10,self).__init__()
+        super(ENDFFile10, self).__init__()
         self.fileNumber = 10
+
 
 class ENDFReaction(ENDFFile):
     """A single MT record on an ENDF file."""
@@ -2352,214 +2399,220 @@ class ENDFReaction(ENDFFile):
         self.MT = MT
 
     def __repr__(self):
-        return "<ENDF Reaction: MT={0}, {1}>".format(self.MT, label(self.MT))
+        return '<ENDF Reaction: MT={0}, {1}>'.format(self.MT, label(self.MT))
+
 
 class Resonance(object):
     def __init__(self):
         pass
+
 
 class BreitWigner(Resonance):
     def __init__(self):
         pass
 
     def __repr__(self):
-        return "<Breit-Wigner Resonance: l={0.L} J={0.J} E={0.E}>".format(self)
+        return '<Breit-Wigner Resonance: l={0.L} J={0.J} E={0.E}>'.format(self)
+
 
 class ReichMoore(Resonance):
     def __init__(self):
         pass
 
     def __repr__(self):
-        return "<Reich-Moore Resonance: l={0.L} J={0.J} E={0.E}>".format(self)
+        return '<Reich-Moore Resonance: l={0.L} J={0.J} E={0.E}>'.format(self)
+
 
 class AdlerAdler(Resonance):
     def __init__(self):
         pass
+
 
 class RMatrixLimited(Resonance):
     def __init__(self):
         pass
 
 
-MTname = {1: "(n,total) Neutron total",
-          2: "(z,z0) Elastic scattering",
-          3: "(z,nonelas) Nonelastic neutron",
-          4: "(z,n) One neutron in exit channel",
-          5: "(z,anything) Miscellaneous",
-          10: "(z,contin) Total continuum reaction",
-          11: "(z,2nd) Production of 2n and d",
-          16: "(z,2n) Production of 2n",
-          17: "(z,3n) Production of 3n",
-          18: "(z,fiss) Particle-induced fission",
-          19: "(z,f) First-chance fission",
-          20: "(z,nf) Second chance fission",
-          21: "(z,2nf) Third-chance fission",
-          22: "(z,na) Production of n and alpha",
-          23: "(z,n3a) Production of n and 3 alphas",
-          24: "(z,2na) Production of 2n and alpha",
-          25: "(z,3na) Production of 3n and alpha",
-          27: "(n,abs) Absorption",
-          28: "(z,np) Production of n and p",
-          29: "(z,n2a) Production of n and 2 alphas",
-          30: "(z,2n2a) Production of 2n and 2 alphas",
-          32: "(z,nd) Production of n and d",
-          33: "(z,nt) Production of n and t",
-          34: "(z,n3He) Production of n and He-3",
-          35: "(z,nd2a) Production of n, d, and alpha",
-          36: "(z,nt2a) Production of n, t, and 2 alphas",
-          37: "(z,4n) Production of 4n",
-          38: "(z,3nf) Fourth-chance fission",
-          41: "(z,2np) Production of 2n and p",
-          42: "(z,3np) Production of 3n and p",
-          44: "(z,n2p) Production of n and 2p",
-          45: "(z,npa) Production of n, p, and alpha",
-          50: "(z,n0) Production of n, ground state",
-          51: "(z,n1) Production of n, 1st excited state",
-          52: "(z,n2) Production of n, 2nd excited state",
-          53: "(z,n3) Production of n, 3rd excited state",
-          54: "(z,n4) Production of n, 4th excited state",
-          55: "(z,n5) Production of n, 5th excited state",
-          56: "(z,n6) Production of n, 6th excited state",
-          57: "(z,n7) Production of n, 7th excited state",
-          58: "(z,n8) Production of n, 8th excited state",
-          59: "(z,n9) Production of n, 9th excited state",
-          60: "(z,n10) Production of n, 10th excited state",
-          61: "(z,n11) Production of n, 11th excited state",
-          62: "(z,n12) Production of n, 12th excited state",
-          63: "(z,n13) Production of n, 13th excited state",
-          64: "(z,n14) Production of n, 14th excited state",
-          65: "(z,n15) Production of n, 15th excited state",
-          66: "(z,n16) Production of n, 16th excited state",
-          67: "(z,n17) Production of n, 17th excited state",
-          68: "(z,n18) Production of n, 18th excited state",
-          69: "(z,n19) Production of n, 19th excited state",
-          70: "(z,n20) Production of n, 20th excited state",
-          71: "(z,n21) Production of n, 21st excited state",
-          72: "(z,n22) Production of n, 22nd excited state",
-          73: "(z,n23) Production of n, 23rd excited state",
-          74: "(z,n24) Production of n, 24th excited state",
-          75: "(z,n25) Production of n, 25th excited state",
-          76: "(z,n26) Production of n, 26th excited state",
-          77: "(z,n27) Production of n, 27th excited state",
-          78: "(z,n28) Production of n, 28th excited state",
-          79: "(z,n29) Production of n, 29th excited state",
-          80: "(z,n30) Production of n, 30th excited state",
-          81: "(z,n31) Production of n, 31st excited state",
-          82: "(z,n32) Production of n, 32nd excited state",
-          83: "(z,n33) Production of n, 33rd excited state",
-          84: "(z,n34) Production of n, 34th excited state",
-          85: "(z,n35) Production of n, 35th excited state",
-          86: "(z,n36) Production of n, 36th excited state",
-          87: "(z,n37) Production of n, 37th excited state",
-          88: "(z,n38) Production of n, 38th excited state",
-          89: "(z,n39) Production of n, 39th excited state",
-          90: "(z,n40) Production of n, 40th excited state",
-          91: "(z,nc) Production of n in continuum",
-          101: "(n,disap) Neutron disappeareance",
-          102: "(z,gamma) Radiative capture",
-          103: "(z,p) Production of p",
-          104: "(z,d) Production of d",
-          105: "(z,t) Production of t",
-          106: "(z,3He) Production of He-3",
-          107: "(z,a) Production of alpha",
-          108: "(z,2a) Production of 2 alphas",
-          109: "(z,3a) Production of 3 alphas",
-          111: "(z,2p) Production of 2p",
-          112: "(z,pa) Production of p and alpha",
-          113: "(z,t2a) Production of t and 2 alphas",
-          114: "(z,d2a) Production of d and 2 alphas",
-          115: "(z,pd) Production of p and d",
-          116: "(z,pt) Production of p and t",
-          117: "(z,da) Production of d and a",
-          151: "Resonance Parameters",
-          201: "(z,Xn) Total neutron production",
-          202: "(z,Xgamma) Total gamma production",
-          203: "(z,Xp) Total proton production",
-          204: "(z,Xd) Total deuteron production",
-          205: "(z,Xt) Total triton production",
-          206: "(z,X3He) Total He-3 production",
-          207: "(z,Xa) Total alpha production",
-          208: "(z,Xpi+) Total pi+ meson production",
-          209: "(z,Xpi0) Total pi0 meson production",
-          210: "(z,Xpi-) Total pi- meson production",
-          211: "(z,Xmu+) Total anti-muon production",
-          212: "(z,Xmu-) Total muon production",
-          213: "(z,Xk+) Total positive kaon production",
-          214: "(z,Xk0long) Total long-lived neutral kaon production",
-          215: "(z,Xk0short) Total short-lived neutral kaon production",
-          216: "(z,Xk-) Total negative kaon production",
-          217: "(z,Xp-) Total anti-proton production",
-          218: "(z,Xn-) Total anti-neutron production",
-          251: "Average cosine of scattering angle",
-          252: "Average logarithmic energy decrement",
-          253: "Average xi^2/(2*xi)",
-          451: "Desciptive data",
-          452: "Total neutrons per fission",
-          454: "Independent fission product yield",
-          455: "Delayed neutron data",
-          456: "Prompt neutrons per fission",
-          457: "Radioactive decay data",
-          458: "Energy release due to fission",
-          459: "Cumulative fission product yield",
-          460: "Delayed photon data",
-          500: "Total charged-particle stopping power",
-          501: "Total photon interaction",
-          502: "Photon coherent scattering",
-          504: "Photon incoherent scattering",
-          505: "Imaginary scattering factor",
-          506: "Real scattering factor",
-          515: "Pair production, electron field",
-          516: "Total pair production",
-          517: "Pair production, nuclear field",
-          522: "Photoelectric absorption",
-          523: "Photo-excitation cross section",
-          526: "Electro-atomic scattering",
-          527: "Electro-atomic bremsstrahlung",
-          528: "Electro-atomic excitation cross section",
-          533: "Atomic relaxation data",
-          534: "K (1s1/2) subshell",
-          535: "L1 (2s1/2) subshell",
-          536: "L2 (2p1/2) subshell",
-          537: "L3 (2p3/2) subshell",
-          538: "M1 (3s1/2) subshell",
-          539: "M2 (3p1/2) subshell",
-          540: "M3 (3p3/2) subshell",
-          541: "M4 (3d1/2) subshell",
-          542: "M5 (3d1/2) subshell",
-          543: "N1 (4s1/2) subshell",
-          544: "N2 (4p1/2) subshell",
-          545: "N3 (4p3/2) subshell",
-          546: "N4 (4d3/2) subshell",
-          547: "N5 (4d5/2) subshell",
-          548: "N6 (4f5/2) subshell",
-          549: "N7 (4f7/2) subshell",
-          550: "O1 (5s1/2) subshell",
-          551: "O2 (5p1/2) subshell",
-          552: "O3 (5p3/2) subshell",
-          553: "O4 (5d3/2) subshell",
-          554: "O5 (5d5/2) subshell",
-          555: "O6 (5f5/2) subshell",
-          556: "O7 (5f7/2) subshell",
-          557: "O8 (5g7/2) subshell",
-          558: "O9 (5g9/2) subshell",
-          559: "P1 (6s1/2) subshell",
-          560: "P2 (6p1/2) subshell",
-          561: "P3 (6p3/2) subshell",
-          562: "P4 (6d3/2) subshell",
-          563: "P5 (6d5/2) subshell",
-          564: "P6 (6f5/2) subshell",
-          565: "P7 (6f7/2) subshell",
-          566: "P8 (6g7/2) subshell",
-          567: "P9 (6g9/2) subshell",
-          568: "P10 (6h9/2) subshell",
-          569: "P11 (6h11/2) subshell",
-          570: "Q1 (7s1/2) subshell",
-          571: "Q2 (7p1/2) subshell",
-          572: "Q3 (7p3/2) subshell"}
+MTname = {1: '(n,total) Neutron total',
+          2: '(z,z0) Elastic scattering',
+          3: '(z,nonelas) Nonelastic neutron',
+          4: '(z,n) One neutron in exit channel',
+          5: '(z,anything) Miscellaneous',
+          10: '(z,contin) Total continuum reaction',
+          11: '(z,2nd) Production of 2n and d',
+          16: '(z,2n) Production of 2n',
+          17: '(z,3n) Production of 3n',
+          18: '(z,fiss) Particle-induced fission',
+          19: '(z,f) First-chance fission',
+          20: '(z,nf) Second chance fission',
+          21: '(z,2nf) Third-chance fission',
+          22: '(z,na) Production of n and alpha',
+          23: '(z,n3a) Production of n and 3 alphas',
+          24: '(z,2na) Production of 2n and alpha',
+          25: '(z,3na) Production of 3n and alpha',
+          27: '(n,abs) Absorption',
+          28: '(z,np) Production of n and p',
+          29: '(z,n2a) Production of n and 2 alphas',
+          30: '(z,2n2a) Production of 2n and 2 alphas',
+          32: '(z,nd) Production of n and d',
+          33: '(z,nt) Production of n and t',
+          34: '(z,n3He) Production of n and He-3',
+          35: '(z,nd2a) Production of n, d, and alpha',
+          36: '(z,nt2a) Production of n, t, and 2 alphas',
+          37: '(z,4n) Production of 4n',
+          38: '(z,3nf) Fourth-chance fission',
+          41: '(z,2np) Production of 2n and p',
+          42: '(z,3np) Production of 3n and p',
+          44: '(z,n2p) Production of n and 2p',
+          45: '(z,npa) Production of n, p, and alpha',
+          50: '(z,n0) Production of n, ground state',
+          51: '(z,n1) Production of n, 1st excited state',
+          52: '(z,n2) Production of n, 2nd excited state',
+          53: '(z,n3) Production of n, 3rd excited state',
+          54: '(z,n4) Production of n, 4th excited state',
+          55: '(z,n5) Production of n, 5th excited state',
+          56: '(z,n6) Production of n, 6th excited state',
+          57: '(z,n7) Production of n, 7th excited state',
+          58: '(z,n8) Production of n, 8th excited state',
+          59: '(z,n9) Production of n, 9th excited state',
+          60: '(z,n10) Production of n, 10th excited state',
+          61: '(z,n11) Production of n, 11th excited state',
+          62: '(z,n12) Production of n, 12th excited state',
+          63: '(z,n13) Production of n, 13th excited state',
+          64: '(z,n14) Production of n, 14th excited state',
+          65: '(z,n15) Production of n, 15th excited state',
+          66: '(z,n16) Production of n, 16th excited state',
+          67: '(z,n17) Production of n, 17th excited state',
+          68: '(z,n18) Production of n, 18th excited state',
+          69: '(z,n19) Production of n, 19th excited state',
+          70: '(z,n20) Production of n, 20th excited state',
+          71: '(z,n21) Production of n, 21st excited state',
+          72: '(z,n22) Production of n, 22nd excited state',
+          73: '(z,n23) Production of n, 23rd excited state',
+          74: '(z,n24) Production of n, 24th excited state',
+          75: '(z,n25) Production of n, 25th excited state',
+          76: '(z,n26) Production of n, 26th excited state',
+          77: '(z,n27) Production of n, 27th excited state',
+          78: '(z,n28) Production of n, 28th excited state',
+          79: '(z,n29) Production of n, 29th excited state',
+          80: '(z,n30) Production of n, 30th excited state',
+          81: '(z,n31) Production of n, 31st excited state',
+          82: '(z,n32) Production of n, 32nd excited state',
+          83: '(z,n33) Production of n, 33rd excited state',
+          84: '(z,n34) Production of n, 34th excited state',
+          85: '(z,n35) Production of n, 35th excited state',
+          86: '(z,n36) Production of n, 36th excited state',
+          87: '(z,n37) Production of n, 37th excited state',
+          88: '(z,n38) Production of n, 38th excited state',
+          89: '(z,n39) Production of n, 39th excited state',
+          90: '(z,n40) Production of n, 40th excited state',
+          91: '(z,nc) Production of n in continuum',
+          101: '(n,disap) Neutron disappeareance',
+          102: '(z,gamma) Radiative capture',
+          103: '(z,p) Production of p',
+          104: '(z,d) Production of d',
+          105: '(z,t) Production of t',
+          106: '(z,3He) Production of He-3',
+          107: '(z,a) Production of alpha',
+          108: '(z,2a) Production of 2 alphas',
+          109: '(z,3a) Production of 3 alphas',
+          111: '(z,2p) Production of 2p',
+          112: '(z,pa) Production of p and alpha',
+          113: '(z,t2a) Production of t and 2 alphas',
+          114: '(z,d2a) Production of d and 2 alphas',
+          115: '(z,pd) Production of p and d',
+          116: '(z,pt) Production of p and t',
+          117: '(z,da) Production of d and a',
+          151: 'Resonance Parameters',
+          201: '(z,Xn) Total neutron production',
+          202: '(z,Xgamma) Total gamma production',
+          203: '(z,Xp) Total proton production',
+          204: '(z,Xd) Total deuteron production',
+          205: '(z,Xt) Total triton production',
+          206: '(z,X3He) Total He-3 production',
+          207: '(z,Xa) Total alpha production',
+          208: '(z,Xpi+) Total pi+ meson production',
+          209: '(z,Xpi0) Total pi0 meson production',
+          210: '(z,Xpi-) Total pi- meson production',
+          211: '(z,Xmu+) Total anti-muon production',
+          212: '(z,Xmu-) Total muon production',
+          213: '(z,Xk+) Total positive kaon production',
+          214: '(z,Xk0long) Total long-lived neutral kaon production',
+          215: '(z,Xk0short) Total short-lived neutral kaon production',
+          216: '(z,Xk-) Total negative kaon production',
+          217: '(z,Xp-) Total anti-proton production',
+          218: '(z,Xn-) Total anti-neutron production',
+          251: 'Average cosine of scattering angle',
+          252: 'Average logarithmic energy decrement',
+          253: 'Average xi^2/(2*xi)',
+          451: 'Desciptive data',
+          452: 'Total neutrons per fission',
+          454: 'Independent fission product yield',
+          455: 'Delayed neutron data',
+          456: 'Prompt neutrons per fission',
+          457: 'Radioactive decay data',
+          458: 'Energy release due to fission',
+          459: 'Cumulative fission product yield',
+          460: 'Delayed photon data',
+          500: 'Total charged-particle stopping power',
+          501: 'Total photon interaction',
+          502: 'Photon coherent scattering',
+          504: 'Photon incoherent scattering',
+          505: 'Imaginary scattering factor',
+          506: 'Real scattering factor',
+          515: 'Pair production, electron field',
+          516: 'Total pair production',
+          517: 'Pair production, nuclear field',
+          522: 'Photoelectric absorption',
+          523: 'Photo-excitation cross section',
+          526: 'Electro-atomic scattering',
+          527: 'Electro-atomic bremsstrahlung',
+          528: 'Electro-atomic excitation cross section',
+          533: 'Atomic relaxation data',
+          534: 'K (1s1/2) subshell',
+          535: 'L1 (2s1/2) subshell',
+          536: 'L2 (2p1/2) subshell',
+          537: 'L3 (2p3/2) subshell',
+          538: 'M1 (3s1/2) subshell',
+          539: 'M2 (3p1/2) subshell',
+          540: 'M3 (3p3/2) subshell',
+          541: 'M4 (3d1/2) subshell',
+          542: 'M5 (3d1/2) subshell',
+          543: 'N1 (4s1/2) subshell',
+          544: 'N2 (4p1/2) subshell',
+          545: 'N3 (4p3/2) subshell',
+          546: 'N4 (4d3/2) subshell',
+          547: 'N5 (4d5/2) subshell',
+          548: 'N6 (4f5/2) subshell',
+          549: 'N7 (4f7/2) subshell',
+          550: 'O1 (5s1/2) subshell',
+          551: 'O2 (5p1/2) subshell',
+          552: 'O3 (5p3/2) subshell',
+          553: 'O4 (5d3/2) subshell',
+          554: 'O5 (5d5/2) subshell',
+          555: 'O6 (5f5/2) subshell',
+          556: 'O7 (5f7/2) subshell',
+          557: 'O8 (5g7/2) subshell',
+          558: 'O9 (5g9/2) subshell',
+          559: 'P1 (6s1/2) subshell',
+          560: 'P2 (6p1/2) subshell',
+          561: 'P3 (6p3/2) subshell',
+          562: 'P4 (6d3/2) subshell',
+          563: 'P5 (6d5/2) subshell',
+          564: 'P6 (6f5/2) subshell',
+          565: 'P7 (6f7/2) subshell',
+          566: 'P8 (6g7/2) subshell',
+          567: 'P9 (6g9/2) subshell',
+          568: 'P10 (6h9/2) subshell',
+          569: 'P11 (6h11/2) subshell',
+          570: 'Q1 (7s1/2) subshell',
+          571: 'Q2 (7p1/2) subshell',
+          572: 'Q3 (7p3/2) subshell'}
 
 
 class NotFound(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
