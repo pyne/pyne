@@ -45,16 +45,11 @@ def metadata():
     from pyne import dagmc
     dagmc.load(path)
     
-    rets = [dagmc.volume_is_graveyard(x) for x in range(1, 5)]
-    assert_equal(rets, [True, False, False, False])
-
-    rets = [dagmc.volume_is_implicit_complement(x) for x in range(1, 5)]
-    assert_equal(rets, [False, False, False, True])
-
+    rets1 = [dagmc.volume_is_graveyard(x) for x in range(1, 5)]
+    rets2 = [dagmc.volume_is_implicit_complement(x) for x in range(1, 5)]
     md = dagmc.volume_metadata(2)
-    assert_equal(md['material'], 5)
-    assert_equal(md['rho'], 0.5)
-    assert_true(all(x in md for x in ['material', 'rho', 'imp']))
+    
+    return [rets1, rets2, md]
 
 def versions():
     from pyne import dagmc
@@ -316,6 +311,16 @@ def test_metadata():
     p = multiprocessing.Pool()
     results = p.apply_async(metadata)
     r = results.get()
+    
+    rets1 = r[0]
+    rets2 = r[1]
+    md = r[2]
+    
+    assert_equal(rets1, [True, False, False, False])
+    assert_equal(rets2, [False, False, False, True])
+    assert_equal(md['material'], 5)
+    assert_equal(md['rho'], 0.5)
+    assert_true(all(x in md for x in ['material', 'rho', 'imp']))
 
 def test_versions():
     p = multiprocessing.Pool()
