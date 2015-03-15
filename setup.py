@@ -47,6 +47,12 @@ if sys.version_info[0] < 3:
     from urllib import urlopen
 else:
     from urllib.request import urlopen
+try:
+    from setuptools import setup as _setup
+    have_setuptools = True
+except ImportError:
+    from distutils.core import setup as _setup
+    have_setuptools = False
 
 import numpy as np
 
@@ -81,7 +87,7 @@ pyne_logo = """\
                                      `
 """
 
-VERSION = '0.5-dev'
+VERSION = '0.5.0-rc1'
 IS_NT = os.name == 'nt'
 
 CMAKE_BUILD_TYPES = {
@@ -239,6 +245,8 @@ def parse_cmake(ns):
         a.append('-DCMAKE_BUILD_TYPE=' + CMAKE_BUILD_TYPES[ns.build_type.lower()])
     if ns.prefix is not None:
         a.append('-DCMAKE_INSTALL_PREFIX=' + ns.prefix)
+    if have_setuptools:
+        a.append('-DHAVE_SETUPTOOLS=TRUE')
     return a
 
 
@@ -345,8 +353,9 @@ def setup():
         "package_data": pack_data,
         "data_files": data_files,
         "scripts": scripts,
+        #"zip_safe": False,
         }
-    rtn = core.setup(**setup_kwargs)
+    rtn = _setup(**setup_kwargs)
 
 
 def cmake_cli(cmake_args):

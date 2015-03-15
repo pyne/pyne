@@ -37,6 +37,7 @@ PyNE has the following dependencies:
    #. `Python 2.7 <http://www.python.org/>`_
    #. `LAPACK <http://www.netlib.org/lapack/>`_
    #. `BLAS <http://www.netlib.org/blas/>`_
+   #. `Jinja2 <http://jinja.pocoo.org/>`_
 
 Optional Depenendencies:
    #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
@@ -47,6 +48,7 @@ Additionally, building the documentation requires the following:
    #. `Sphinx <http://sphinx-doc.org/>`_
    #. `sphinxcontrib-bibtex <https://pypi.python.org/pypi/sphinxcontrib-bibtex/>`_
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
+   #. `numpydoc <https://pypi.python.org/pypi/numpydoc>`_
 
 Most of the dependencies are readily available through package managers. 
 
