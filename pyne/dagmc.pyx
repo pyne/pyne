@@ -16,6 +16,9 @@ np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+if sys.version_info[0] >= 3:
+    unichr = chr
+
 # Mesh specific imports
 try:
     from itaps import iMesh
