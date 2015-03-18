@@ -44,3 +44,4 @@ rs.cred
 src/decay.h
 src/decay.cpp
 tests/fort.8
+tests/endftape.100
