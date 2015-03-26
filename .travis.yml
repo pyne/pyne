@@ -41,5 +41,5 @@ install:
 script:
   # Your test script goes here
   - cd tests
-  - nosetests
+  - PATH="$HOME/miniconda/bin:$PATH" nosetests
 
