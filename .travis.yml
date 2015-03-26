@@ -19,6 +19,7 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no 
   - conda config --add channels pyne
+  - conda config --add channels cyclus
   - conda update -q conda
   - conda install conda-build jinja2 setuptools binstar patchelf
   # Useful for debugging any issues with conda
