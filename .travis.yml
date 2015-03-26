@@ -17,7 +17,7 @@ install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
-  - conda config --set always_yes yes --set changeps1 no
+  - conda config --set always_yes yes --set changeps1 no --add channels pyne
   - conda update -q conda
   - conda install conda-build jinja2 setuptools binstar patchelf
   # Useful for debugging any issues with conda
