@@ -41,5 +41,7 @@ script:
   - conda list
   - python -c "import sys; import pprint; pprint.pprint(sys.path)"
   - cd tests
+  - pwd
+  - ls -l
   - nosetests
 
