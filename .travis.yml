@@ -7,7 +7,6 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y gfortran
 install:
-  - sudo apt-get update
   # You may want to periodically update this, although the conda update
   # conda line below will keep everything up-to-date.  We do this
   # conditionally because it saves us some downloading if the version is
@@ -39,7 +38,8 @@ install:
   - conda install pyne --use-local
 
 script:
-  # Your test script goes here
+  - conda list
+  - python -c "import sys; import pprint; pprint.pprint(sys.path)"
   - cd tests
-  - PATH="$HOME/miniconda/bin:$PATH" nosetests
+  - nosetests
 
