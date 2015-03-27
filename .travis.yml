@@ -40,6 +40,6 @@ install:
 script:
   - cd tests
   #- nosetests
-  - for x in "$(ls test*.py */test*.py)"; do 
-        nosetests "$x";
+  - for x in $(ls test*.py */test*.py); do 
+        echo && echo && echo "Testing $x:" && echo && nosetests "$x";
     done
