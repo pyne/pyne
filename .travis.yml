@@ -43,5 +43,8 @@ script:
   - cd tests
   - pwd
   - ls -l
+  - which nosetests
+  - conda install nose
+  - which nosetests
   - nosetests
 
