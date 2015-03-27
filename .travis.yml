@@ -41,5 +41,5 @@ script:
   - cd tests
   #- nosetests
   - for x in "$(ls test*.py */test*.py)"; do 
-        nosetests "$x"
+        nosetests "$x";
     done
