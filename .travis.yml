@@ -6,7 +6,8 @@ python:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y gfortran
-  - sudo dd if=/dev/zero of=moreswapfile bs=1M count=1024
+  #- sudo dd if=/dev/zero of=moreswapfile bs=1M count=1024
+  - sudo dd if=/dev/zero of=moreswapfile bs=1024M count=1
   - sudo chmod 600 moreswapfile
   - sudo mkswap moreswapfile
   - sudo swapon moreswapfile
