@@ -6,6 +6,10 @@ python:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y gfortran
+  - sudo dd if=/dev/zero of=moreswapfile bs=1M count=1024
+  - chmod 600 moreswapfile
+  - mkswap moreswapfile
+  - swapon moreswapfile
 install:
   # You may want to periodically update this, although the conda update
   # conda line below will keep everything up-to-date.  We do this
