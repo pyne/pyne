@@ -23,7 +23,7 @@ install:
   - conda config --add channels pyne
   - conda config --add channels cyclus
   - conda update -q conda
-  - conda install conda-build jinja2 setuptools binstar patchelf
+  - conda install conda-build jinja2 setuptools binstar patchelf nose
   # Useful for debugging any issues with conda
   - conda info -a
   
@@ -38,13 +38,6 @@ install:
   - conda install pyne --use-local
 
 script:
-  - conda list
-  - python -c "import sys; import pprint; pprint.pprint(sys.path)"
   - cd tests
-  - pwd
-  - ls -l
-  - which nosetests
-  - conda install nose
-  - which nosetests
   - nosetests
 
