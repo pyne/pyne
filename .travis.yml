@@ -42,4 +42,7 @@ script:
   #- nosetests
   - for x in $(ls test*.py */test*.py); do 
         echo && echo && echo "Testing $x:" && echo && nosetests "$x";
+        if [ $? -ne 0 ]; then 
+            echo "Testing failed on $x" && exit $?; 
+        fi;
     done
