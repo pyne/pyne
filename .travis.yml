@@ -45,4 +45,7 @@ script:
         if [ $? -ne 0 ]; then 
             echo "Testing failed on $x" && exit $?; 
         fi;
-    done
+    done;
+  - if [ $? -ne 0 ]; then exit $?; fi
+
+
