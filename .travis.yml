@@ -40,12 +40,6 @@ install:
 script:
   - cd tests
   #- nosetests
-  - for x in $(ls test*.py */test*.py); do 
-        echo && echo && echo "Testing $x:" && echo && nosetests "$x";
-        if [ $? -ne 0 ]; then 
-            echo "Testing failed on $x" && exit $?; 
-        fi;
-    done;
-  - if [ $? -ne 0 ]; then exit $?; fi
+  - ./travis-run-tests.sh
 
 
