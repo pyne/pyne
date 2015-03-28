@@ -3,8 +3,10 @@ python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "2.7"
   - "3.4"
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y gfortran
 install:
-  - sudo apt-get update
   # You may want to periodically update this, although the conda update
   # conda line below will keep everything up-to-date.  We do this
   # conditionally because it saves us some downloading if the version is
@@ -17,9 +19,11 @@ install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
-  - conda config --set always_yes yes --set changeps1 no --add channels pyne
+  - conda config --set always_yes yes --set changeps1 no 
+  - conda config --add channels pyne
+  - conda config --add channels cyclus
   - conda update -q conda
-  - conda install conda-build jinja2 setuptools binstar patchelf
+  - conda install conda-build jinja2 setuptools binstar patchelf nose
   # Useful for debugging any issues with conda
   - conda info -a
   
@@ -34,7 +38,8 @@ install:
   - conda install pyne --use-local
 
 script:
-  # Your test script goes here
   - cd tests
-  - nosetests
+  #- nosetests
+  - ./travis-run-tests.sh
+
 
