@@ -28,7 +28,7 @@ install:
   - conda info -a
   
   # download CI repo
-  - wget https://github.com/scopatz/pyne-ci/archive/rec.zip -O pyne-ci.zip
+  - wget https://github.com/pyne/pyne-ci/archive/master.zip -O pyne-ci.zip
   - unzip -j pyne-ci.zip "*/pyne/*" -d conda-recipe
   
   # Replace dep1 dep2 ... with your dependencies
