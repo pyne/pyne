@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <iostream>
 #include "uwuw.hpp"
 
 // Empty Constructor
@@ -13,6 +14,12 @@ UWUW::UWUW(char* file)
   // turn the filename into a full filepath
   full_filepath = get_full_filepath(filename);
 
+  if(!check_file_exists(full_filepath))
+    {
+      std::cerr << "The file " << full_filepath << " does not exist or is read protected" << std::endl;
+      exit(1);
+    }
+
   // load tallies
   tally_library = load_pyne_tallies(full_filepath);
 
@@ -26,11 +33,17 @@ UWUW::UWUW(std::string filename)
   // turn the filename into a full filepath
   full_filepath = get_full_filepath(filename);
 
+  // check for file existence
+  if(!check_file_exists(full_filepath))
+    {
+      std::cerr << "The file " << full_filepath << " does not exist or is read protected" << std::endl;
+      exit(1);
+    }
+
   // load materials
   material_library = load_pyne_materials(full_filepath);
   // load tallies
   tally_library = load_pyne_tallies(full_filepath);
-  
 };
 
 // Destructor
@@ -58,7 +71,17 @@ std::string UWUW::get_full_filepath(std::string filename)
   full_filepath.erase(std::remove_if( full_filepath.begin(),
 				      full_filepath.end(), ::isspace),
                                       full_filepath.end());    
+  std::cout << full_filepath << std::endl;
   return full_filepath;
+}
+
+// see if file exists
+bool UWUW::check_file_exists(std::string filename)
+{
+  // from http://stackoverflow.com/questions/12774207/
+  // fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
+  std::ifstream infile(filename.c_str());
+  return infile.good();
 }
 
 // loads all materials into map
