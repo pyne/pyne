@@ -40,10 +40,11 @@ UWUW::UWUW(std::string filename)
       exit(1);
     }
 
-  // load materials
-  material_library = load_pyne_materials(full_filepath);
   // load tallies
   tally_library = load_pyne_tallies(full_filepath);
+
+  // load materials
+  material_library = load_pyne_materials(full_filepath);
 };
 
 // Destructor
@@ -71,7 +72,6 @@ std::string UWUW::get_full_filepath(std::string filename)
   full_filepath.erase(std::remove_if( full_filepath.begin(),
 				      full_filepath.end(), ::isspace),
                                       full_filepath.end());    
-  std::cout << full_filepath << std::endl;
   return full_filepath;
 }
 
@@ -89,12 +89,8 @@ std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string file
 {
   std::map<std::string, pyne::Material> library; // material library
 
-  pyne::Material test_mat;
-  try
-    {
-      test_mat.from_hdf5(filename,"/materials");
-    }
-  catch (const std::exception &except) // catch the exception from from_hdf5
+  std::cout << hdf5_path_exists(filename,"/materials") << std::endl;
+  if(!hdf5_path_exists(filename,"/materials"))
     {
       std::cout << "No Materials found in the file, " << filename << std::endl;
       return library;
@@ -139,23 +135,13 @@ std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string file
 std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename) 
 {
   std::map<std::string, pyne::Tally> library; // material library
+  std::cout << hdf5_path_exists(filename,"/tally") << std::endl;
 
-  pyne::Tally test_tally;
-
-  //  test_tally.from_hdf5("test1_rd.h5m","/tally");
-
-  try
-    {
-      test_tally.from_hdf5(filename,"/tally");
-      std::cout << filename << std::endl;
-
-    }
-  catch (const std::exception &except) // catch the exception from from_hdf5
+  if(!hdf5_path_exists(filename,"/tally"))
     {
       std::cout << "No Tallies found in the file, " << filename << std::endl;
       return library;
     }
-
   
   bool end = false; // end of materials
   int i = -1;
@@ -186,3 +172,26 @@ std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename)
   return library;
 }
 
+// see if path exists before we go on
+bool UWUW::hdf5_path_exists(std::string filename, std::string datapath) 
+{
+  // Turn off annoying HDF5 errors 
+  herr_t status;
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+  //Set file access properties so it closes cleanly                                                                                
+  hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fclose_degree(fapl,H5F_CLOSE_STRONG);
+
+  hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
+
+  bool datapath_exists = h5wrap::path_exists(db, datapath.c_str());
+
+  status = H5Eclear(H5E_DEFAULT);
+  std::cout << datapath.c_str() << std::endl;
+
+  // Close the database 
+  status = H5Fclose(db);   
+
+  return datapath_exists;
+}

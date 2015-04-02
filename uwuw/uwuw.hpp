@@ -110,4 +110,6 @@ private:
    */
   std::map<std::string, pyne::Tally> load_pyne_tallies(std::string filename);
 
+  bool hdf5_path_exists(std::string filename, std::string datapath);
+
 };
