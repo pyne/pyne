@@ -349,6 +349,7 @@ class SimpleDataSource(DataSource):
         .. math::
 
             \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}}
+
             \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1)
 
         Parameters
