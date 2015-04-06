@@ -1325,8 +1325,9 @@ def mats_from_inp(inp):
         # information is stored in a dictionary where:
         # key = material number, value = list of densities
         if len(line.split()) > 3:
-            if line.split()[0].isdigit() is True and \
-                    line.split()[1].isdigit() is True and \
+            if line.split()[0].isdigit() and \
+                    line.split()[1].isdigit() and \
+                    line.split()[2].lstrip("-+").isdigit() and \
                     line[0:5] != '     ' and \
                     line.split()[1] != '0':
                 mat_num = int(line.split()[1])
