@@ -275,11 +275,15 @@ def cells_at_ve_centers():
 def test__load():
     p = multiprocessing.Pool()
     results = p.apply_async(load)
+    p.close()
+    p.join()
     r = results.get()
     
 def test_metadata():
     p = multiprocessing.Pool()
     results = p.apply_async(metadata)
+    p.close()
+    p.join()
     r = results.get()
     
     rets1 = r[0]
@@ -295,6 +299,8 @@ def test_metadata():
 def test_versions():
     p = multiprocessing.Pool()
     results = p.apply_async(versions)
+    p.close()
+    p.join()
     returned = results.get()
     
     assert_equal(len(returned), 2)
@@ -304,6 +310,8 @@ def test_versions():
 def test_list_functions():
     p = multiprocessing.Pool()
     results = p.apply_async(list_functions)
+    p.close()
+    p.join()
     r = results.get()
     surfs = r[0]
     vols = r[1]
@@ -313,6 +321,8 @@ def test_list_functions():
 def test_boundary():
     p = multiprocessing.Pool()
     results = p.apply_async(boundary)
+    p.close()
+    p.join()
     r = results.get()
     low = r[0]
     high = r[1]
@@ -323,6 +333,8 @@ def test_boundary():
 def test_pt_in_vol():
     p = multiprocessing.Pool()
     results = p.apply_async(pt_in_vol)
+    p.close()
+    p.join()
     r = results.get()
     rets1 = r[0]
     rets2 = r[1]
@@ -332,6 +344,8 @@ def test_pt_in_vol():
 def test_find_volume():
     p = multiprocessing.Pool()
     results = p.apply_async(find_volume)
+    p.close()
+    p.join()
     r = results.get()
     
     vol1 = r[0]
@@ -351,6 +365,8 @@ def test_find_volume():
 def test_one_ray():
     p = multiprocessing.Pool()
     results = p.apply_async(one_ray)
+    p.close()
+    p.join()
     r = results.get()
     
     fromcenter = r[0]
@@ -368,6 +384,8 @@ def test_one_ray():
 def test_failures():
     p = multiprocessing.Pool()
     results = p.apply_async(failures)
+    p.close()
+    p.join()
     r = results.get()
     
     i = r[0]
@@ -381,6 +399,8 @@ def test_failures():
 def test_ray_iterator():
     p = multiprocessing.Pool()
     results = p.apply_async(ray_iterator)
+    p.close()
+    p.join()
     r = results.get()
     
     startvol = r[0]
@@ -413,11 +433,15 @@ def test_ray_iterator():
 def test_ray_story():
     p = multiprocessing.Pool()
     results = p.apply_async(ray_story)
+    p.close()
+    p.join()
     r = results.get()
 
 def test_util_graveyard_bounds():
     p = multiprocessing.Pool()
     results = p.apply_async(util_graveyard_bound)
+    p.close()
+    p.join()
     r = results.get()
     
     lo = r[0]
@@ -431,6 +455,8 @@ def test_util_graveyard_bounds():
 def test_util_matlist():
     p = multiprocessing.Pool()
     results = p.apply_async(util_matlist)
+    p.close()
+    p.join()
     r = results.get()
     
     mats1 = r[0]
@@ -447,6 +473,8 @@ def test_discretize_geom_rand():
         
     p = multiprocessing.Pool()
     r = p.apply_async(discretize_geom_rand)
+    p.close()
+    p.join()
     rr = r.get()
     
     results = rr[0]
@@ -471,6 +499,8 @@ def test_discretize_geom_grid():
         
     p = multiprocessing.Pool()
     rr = p.apply_async(discretize_geom_grid)
+    p.close()
+    p.join()
     r = rr.get()
     
     results = r[0]
@@ -495,6 +525,8 @@ def test_discretize_geom_mix():
         
     p = multiprocessing.Pool()
     results = p.apply_async(discretize_geom_mix)
+    p.close()
+    p.join()
     r = results.get()
     
     results1 = r[0]
@@ -529,6 +561,8 @@ def test_discretize_geom_centers():
         
     p = multiprocessing.Pool()
     results = p.apply_async(discretize_geom_centers)
+    p.close()
+    p.join()
     r = results.get()
     
     res = r[0]
@@ -549,6 +583,8 @@ def test_cells_at_ve_centers():
         
     p = multiprocessing.Pool()
     results = p.apply_async(cells_at_ve_centers)
+    p.close()
+    p.join()
     cells = results.get()
 
     assert_array_equal(cells, [2, 3])
