@@ -77,6 +77,8 @@ def irradiation_setup_structured():
 def test_irradiation_setup_structured():
     p = multiprocessing.Pool()
     r = p.apply_async(irradiation_setup_structured)
+    p.close()
+    p.join()
     results = r.get()
     
     # unpack return values
@@ -205,6 +207,8 @@ def irradiation_setup_unstructured():
 def test_irradiation_setup_unstructured():
     p = multiprocessing.Pool()
     r = p.apply_async(irradiation_setup_unstructured)
+    p.close()
+    p.join()
     results = r.get()
     
     # unpack return values
