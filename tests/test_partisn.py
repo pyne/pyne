@@ -225,6 +225,8 @@ def test_get_zones_no_void():
     """
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_no_void)
+    p.close()
+    p.join()
     assert(r.get() == [True, True])
 
     
@@ -278,6 +280,8 @@ def test_get_zones_with_void():
     """
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_with_void)
+    p.close()
+    p.join()
     assert(r.get() == [True, True])
 
 
@@ -335,6 +339,8 @@ def test_write_partisn_input_1D():
     """
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_1D)
+    p.close()
+    p.join()
     assert(r.get() == True)
 
 
@@ -375,6 +381,8 @@ def test_write_partisn_input_2D():
     """
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_2D)
+    p.close()
+    p.join()
     assert(r.get() == True)
 
 
@@ -415,6 +423,8 @@ def test_write_partisn_input_3D():
     """
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_3D)
+    p.close()
+    p.join()
     assert(r.get() == True)
 
 
@@ -461,6 +471,8 @@ def test_write_partisn_input_with_names_dict():
     """
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_with_names_dict)
+    p.close()
+    p.join()
     assert(r.get() == True)
     
     
