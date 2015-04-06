@@ -289,4 +289,4 @@ def test_mesh_write():
 
     usrbin_object = fluka.Usrbin(usrbin_file)
     data = usrbin_object.tally['single_n']
-    data.write_hdf5("test_data.h5m")
+    data.write_hdf5("test_fluka_data.h5m")
