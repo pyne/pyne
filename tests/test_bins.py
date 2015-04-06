@@ -52,7 +52,7 @@ def test_pointwise_linear_collapse():
         [np.array([1.0, 2.0]), np.array([-1.0, 2.0]), np.array([3.0, 6.0]), [5.5]],
         [np.array([0.0, 1.0]), np.array([0.0, 2.0]), np.array([0.0, 2.0]), [0.5]],
         [np.array([0.5, 1.5]), np.array([0.0, 2.0]), np.array([0.0, 2.0]), [1.0]],
-        [np.array([0.0, 1.0]), np.array([0.0, 0.75]), np.array([0.0, 1.0]), [3.0/8.0]],
+        [np.array([0.0, 1.0]), np.array([0.0, 0.75]), np.array([0.0, 1.0]), [2.0/3.0]],
         [np.array([1.0, 2.0]), np.array([0.0, 2.0]), np.array([4.0, 6.0]), [5.5]],
         ]
     for x_g, x, y, exp in cases:
