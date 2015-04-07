@@ -119,7 +119,7 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
         The group collapsed data, length G. 
     """
     cdef int G = x_g.shape[0] - 1
-    cdef int N = x.shape[0]
+    cdef int N = x.shape[0] - 1
     cdef int g0, g1  # current group index
     cdef int n0, n1  # current point index
     cdef double val, ylower, yupper
@@ -146,15 +146,14 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
                 val += 0.5 * (y[n1] + ylower) * (x[n1] - x_g[g0])
             n0 += 1
             n1 += 1
-        # upper bound intersection
-        if x_g[g1] < x[n1]:
-            if x_g[g0] <= x[n0]:
-                yupper = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
-                val += 0.5 * (yupper + y[n0]) * (x_g[g1] - x[n0])
-            else: 
-                yupper = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
-                ylower = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g0] - x[n0]) + y[n0]
-                val += 0.5 * (yupper + ylower) * (x_g[g1] - x_g[g0])
+        # compute end point
+        if x_g[g0] <= x[n0]:
+            yupper = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
+            val += 0.5 * (yupper + y[n0]) * (x_g[g1] - x[n0])
+        else:
+            yupper = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
+            ylower = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g0] - x[n0]) + y[n0]
+            val += 0.5 * (yupper + ylower) * (x_g[g1] - x_g[g0])
         y_g[g0] = val / (x_g[g1] - x_g[g0])
     if reversed:
         y_g = y_g[::-1]
