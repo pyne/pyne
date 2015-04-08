@@ -43,6 +43,11 @@ IF(NOT ${PYNE_PLATFORM} STREQUAL "__LINUX__")
     set(BUILD_SPATIAL_SOLVER false)
 ENDIF()
 
+#set fortran ENSDF processing files
+set(ENSDF_ALPHAD_SRC
+    "ensdf_processing/ALPHAD/nsdflib95.f"
+    )
+
 # setup source files
 IF(BUILD_SPATIAL_SOLVER)
     set(PYNE_SRCS
@@ -61,6 +66,7 @@ IF(BUILD_SPATIAL_SOLVER)
         "utils.cpp"
         "endftod.f90"
         "${TRANSPORT_SPATIAL_METHODS_SRCS}"
+        #"${ENSDF_ALPHAD_SRC}"
         )
 ELSE()
     set(PYNE_SRCS
@@ -91,6 +97,10 @@ endif (MOAB_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
+
+#add_library(alphad_src STATIC ensdf_processing/ALPHAD/nsdflib95.f)
+add_library(alphad_lib ${ENSDF_ALPHAD_SRC})
+
 target_link_libraries(pyne hdf5)
 IF(BUILD_SPATIAL_SOLVER)
     target_link_libraries(pyne hdf5 blas lapack)

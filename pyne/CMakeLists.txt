@@ -152,4 +152,20 @@ if(BUILD_SPATIAL_SOLVER)
         DEPENDS pyne
         )
     target_link_libraries(transport_spatial_methods pyne)
+
+    #add_executable(alphad ${ENSDF_PROCESSING_ALPHAD_SRC})
+    add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f)
+
+    #target_link_libraries(alphad ${ENSDF_ALPHAD_SRC})
+    #target_link_libraries(alphad ${PYNE_SRCS}/${ENSDF_ALPHAD_SRC})
+    #target_link_libraries(alphad ${PROJECT_SOURCE_DIR}/ensdf_processing/ALPHAD/nsdflib95.O)
+    target_link_libraries(alphad alphad_lib)
+
+    #target_link_libraries(alphad ${PROJECT_SOURCE_DIR}/ensdf_processing/ALPHAD/nsdflib95.O)
+    #target_link_libraries(alphad ${PYNE_SRCS}/${ENSDF_ALPHAD_SRC})
+    #target_link_libraries(alphad ${PROJECT_BINARY_DIR}/src)
+
 endif()
+
+
+
