@@ -1439,22 +1439,23 @@ int pyne::id_from_level(int nuc, double level, std::string special) {
   nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0.0));
   nuc_upper = level_data_lvl_map.upper_bound(std::make_pair(nostate+9999,
                                              DBL_MAX));
-  double min = DBL_MAX;
+  double minv = DBL_MAX;
   //by default return input nuc_id with level stripped
   int ret_id = nuc;
   for (std::map<std::pair<int, double>, level_data>::iterator it=nuc_lower;
-  it!=nuc_upper;
-       ++it) {
-    if ((abs(level - it->second.level) < min) &&
+       it!=nuc_upper; ++it) {
+    if ((abs(level - it->second.level) < minv) &&
     ((char)it->second.special == special.c_str()[0]) &&
     !isnan(it->second.level)) {
-      min = abs(level - it->second.level);
+      minv = abs(level - it->second.level);
       ret_id = it->second.nuc_id;
     }
   }
-  if (min > 1.0)
-    ret_id = nuc;
-  return ret_id;
+  // This value was chosen so important transitions in U-235 are not missed
+  if (minv > 3.0)
+    return -nuc;
+  else 
+    return ret_id;
 }
 
 int pyne::id_from_level(int nuc, double level){

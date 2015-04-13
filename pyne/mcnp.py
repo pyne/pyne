@@ -2032,7 +2032,7 @@ class MeshTally(StatMesh):
         ----------
         f : filestream
             Open to the neutron/photon line.
-        tally number : int
+        tally_number : int
             The MCNP fmesh4 tally number (e.g. 4, 14, 24).
         tag_names : iterable, optional
             Four strs that specify the tag names for the results, relative
@@ -2053,9 +2053,9 @@ class MeshTally(StatMesh):
 
         if tag_names is None:
             self.tag_names = ("{0}_result".format(self.particle),
-                              "{0}_rel_error".format(self.particle),
+                              "{0}_result_rel_error".format(self.particle),
                               "{0}_result_total".format(self.particle),
-                              "{0}_rel_error_total".format(self.particle))
+                              "{0}_result_total_rel_error".format(self.particle))
         else:
             self.tag_names = tag_names
 
