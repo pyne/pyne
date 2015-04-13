@@ -115,7 +115,7 @@ set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS
     "-O0")
 
 add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f)
-target_link_libraries(alphad ${PYNE_SRCS})
+target_link_libraries(alphad pyne)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
