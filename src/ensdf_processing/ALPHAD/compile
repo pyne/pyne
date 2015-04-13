@@ -1,6 +1,0 @@
-#! /bin/bash
-#
-gfortran -c nsdflib95.f
-gfortran alphad.f nsdflib95.o -o alphad
-#./alphad alphad.inp
-

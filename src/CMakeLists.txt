@@ -45,6 +45,7 @@ ENDIF()
 
 #set fortran ENSDF processing files
 set(ENSDF_ALPHAD_SRC
+    "ensdf_processing/ALPHAD/alphad.f"
     "ensdf_processing/ALPHAD/nsdflib95.f"
     )
 
@@ -66,7 +67,7 @@ IF(BUILD_SPATIAL_SOLVER)
         "utils.cpp"
         "endftod.f90"
         "${TRANSPORT_SPATIAL_METHODS_SRCS}"
-        #"${ENSDF_ALPHAD_SRC}"
+        "${ENSDF_ALPHAD_SRC}"
         )
 ELSE()
     set(PYNE_SRCS
@@ -99,11 +100,12 @@ endif (MOAB_FOUND)
 add_library(pyne ${PYNE_SRCS})
 
 #add_library(alphad_src STATIC ensdf_processing/ALPHAD/nsdflib95.f)
-add_library(alphad_lib ${ENSDF_ALPHAD_SRC})
+#add_library(alphad_lib ${ENSDF_ALPHAD_SRC})
 
 target_link_libraries(pyne hdf5)
 IF(BUILD_SPATIAL_SOLVER)
     target_link_libraries(pyne hdf5 blas lapack)
+
 ENDIF(BUILD_SPATIAL_SOLVER)
 if (MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
@@ -111,6 +113,9 @@ endif (MOAB_FOUND)
 
 set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
     "-O0")
+
+add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f)
+target_link_libraries(alphad ${PYNE_SRCS})
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
