@@ -43,3 +43,108 @@ def bricc(inputdict_unchecked):
     #@todo: get path to executable
     #       call executable
     #       copy output file to specified out
+
+def delta(inputdict_unchecked):
+    """
+    This function calculates the best values of mixing ratios based of its analysis of
+    the angular correlation and conversion coefficient data.
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    print('Executable not yet linked')
+    #@todo: get path to executable
+    #       call executable
+    #       copy output file to specified out
+
+def gabs(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    print('Executable not yet linked')
+    #@todo: get path to executable
+    #       call executable
+    #       copy output file to specified out
+
+def gtol(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    print('Executable not yet linked')
+    #@todo: get path to executable
+    #       call executable
+    #       copy output file to specified out
+
+def hsicc(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    print('Executable not yet linked')
+    #@todo: get path to executable
+    #       call executable
+    #       copy output file to specified out
+
+def logft(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    print('Executable not yet linked')
+    #@todo: get path to executable
+    #       call executable
+    #       copy output file to specified out
+
+def pandora(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    print('Executable not yet linked')
+    #@todo: get path to executable
+    #       call executable
+    #       copy output file to specified out
+
+def radlist(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    print('Executable not yet linked')
+    #@todo: get path to executable
+    #       call executable
+    #       copy output file to specified out
+
+def ruler(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    print('Executable not yet linked')
+    #@todo: get path to executable
+    #       call executable
+    #       copy output file to specified out
