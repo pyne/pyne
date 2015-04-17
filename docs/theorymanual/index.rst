@@ -14,6 +14,7 @@ The following describe methods implemented natively in PyNE:
     spatial_solvers.rst
     nucname
     decay
+    data
     source_sampling
     variance_reduction
     r2s
