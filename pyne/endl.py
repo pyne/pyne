@@ -25,8 +25,6 @@ import pyne.rxdata as rx
 import numpy as np
 import re
 
-np.import_array()
-
 warn(__name__ + ' is not yet QA compliant.', QAWarning)
 
 END_OF_TABLE_RE = re.compile(' {71}1')
