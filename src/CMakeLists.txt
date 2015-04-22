@@ -49,6 +49,10 @@ set(ENSDF_ALPHAD_SRC
     "ensdf_processing/ALPHAD/nsdflib95.f"
     )
 
+#set(ENSDF_DELTA_SRC
+#    "ensdf_processing/DELTA/delta.for"
+#    )
+
 # setup source files
 IF(BUILD_SPATIAL_SOLVER)
     set(PYNE_SRCS
@@ -115,7 +119,20 @@ set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS
     "-O0")
 
 add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f)
-target_link_libraries(alphad pyne)
+add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
+#target_link_libraries(alphad pyne)
+target_link_libraries(alphad LINK_PUBLIC pyne)
+
+add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/delta.exe
+               COMMAND ${CMAKE_COMMAND} -E copy delta)
+
+#add_custom_command(OUTPUT delta.tmp
+#                   COMMAND objcopy --output-format=binary delta delta.tmp
+#                   COMMAND ${CMAKE_COMMAND} -E copy delta.tmp delta.bin
+#                   DEPENDS delta
+#                   COMMENT "objcopying delta to delta.bin")
+#add_custom_target(delta.bin ALL DEPENDS delta.tmp)
+#set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES delta.bin)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
