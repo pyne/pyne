@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """Module for parsing and manipulating data from ENDL evaluations.
 
 For the moment, classes and functions in this module only implement the
@@ -17,15 +15,15 @@ For more information, contact Davide Mancusi <davide.mancusi@cea.fr>.
 """
 from __future__ import print_function, division, unicode_literals
 
+import re
 from warnings import warn
-from pyne.utils import QAWarning
 
+import numpy as np
+
+from pyne.utils import QAWarning
 import pyne.rxdata as rx
 import pyne.utils as utils
 from pyne import nucname
-
-import numpy as np
-import re
 
 warn(__name__ + ' is not yet QA compliant.', QAWarning)
 
@@ -59,7 +57,7 @@ class Library(rx.RxLib):
 #            Returns a 1d float64 NumPy array.
 #        """
 #        opened_here = False
-#        if isinstance(self.fh, basestring):
+#        if isinstance(self.fh, str):
 #            fh = open(self.fh, 'r')
 #            opened_here = True
 #        else:
@@ -73,7 +71,7 @@ class Library(rx.RxLib):
 
     def _read_headers(self):
         opened_here = False
-        if isinstance(self.fh, basestring):
+        if isinstance(self.fh, str):
             fh = open(self.fh, 'r')
             opened_here = True
         else:
@@ -85,7 +83,7 @@ class Library(rx.RxLib):
             line2 = fh.readline()
 
             # EOF?
-            if not line2:
+            if len(line2) == 0:
                 break
 
             # store the start of the table
@@ -122,10 +120,11 @@ class Library(rx.RxLib):
 
             # skip to the end of the table
             line = fh.readline()
-            while line and not END_OF_TABLE_RE.match(line):
+            while len(line) > 0 and not END_OF_TABLE_RE.match(line):
                 line = fh.readline()
 
-
+        if opened_here:
+            fh.close()
 
     def _linlin(self, e_int, xs, low, high):
         if low is not None or high is not None:
@@ -228,12 +227,3 @@ class Library(rx.RxLib):
         A = - np.log(y2/y1)/np.log(x1/x2)
         B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
         return np.nansum(np.e**B / (A+1) * (x2**(A+1) - x1**(A+1))/de_int)
-
-
-
-class NotFound(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
