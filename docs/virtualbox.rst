@@ -6,8 +6,8 @@ The PyNE VirtualBox is an Lubuntu VirtualBox with PyNE preinstalled. In order to
 the VirtualBox follow these steps:
 
    #. Install Oracle `VirtualBox <https://www.virtualbox.org/>`_.
-   #. Download the PyNE VirtualBox (.ova) file `here <http://data.pyne.io/pyne-lite.ova>`_. 
-      This file is 1.5 GB so this may take a while.
+   #. Download the PyNE VirtualBox (.ova) file `here <http://data.pyne.io/pyne-0.5+yt.ova>`_. 
+      This file is 2.5 GB so this may take a while.
    #. Open Oracle VirtualBox. Click File -> Import Appliance, then open the pyne-lite.ova file.
    #. Follow remaining on-screen instructions.
    #. The VirtualBox can then be started up by clicking the Start arrow. The PyNE installation
