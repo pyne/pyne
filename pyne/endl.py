@@ -21,7 +21,7 @@ from warnings import warn
 import numpy as np
 
 from pyne.utils import QAWarning
-import pyne.rxdata as rx
+from pyne import rxdata
 import pyne.utils as utils
 from pyne import nucname
 
@@ -30,7 +30,7 @@ warn(__name__ + ' is not yet QA compliant.', QAWarning)
 END_OF_TABLE_RE = re.compile(' {71}1')
 
 
-class Library(rx.RxLib):
+class Library(rxdata.RxLib):
     """A class for a file which contains multiple ENDL tables."""
     def __init__(self, fh):
         self.mts = {}
