@@ -82,7 +82,7 @@ class Library(rx.RxLib):
         """
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'r')
+            fh = open(self.fh, 'rU')
             opened_here = True
         else:
             fh = self.fh
@@ -97,7 +97,7 @@ class Library(rx.RxLib):
         if self.chars_til_now == 0:
             opened_here = False
             if isinstance(self.fh, basestring):
-                fh = open(self.fh, 'r')
+                fh = open(self.fh, 'rU')
                 opened_here = True
             else:
                 fh = self.fh
@@ -113,7 +113,7 @@ class Library(rx.RxLib):
         cdef double nucd
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'r')
+            fh = open(self.fh, 'rU')
             opened_here = True
         else:
             fh = self.fh
@@ -1026,7 +1026,7 @@ class Library(rx.RxLib):
         """
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'r')
+            fh = open(self.fh, 'rU')
             opened_here = True
         else:
             fh = self.fh
@@ -1054,7 +1054,7 @@ class Evaluation(object):
     """
 
     def __init__(self, filename, verbose=True):
-        self.fh = open(filename, 'r')
+        self.fh = open(filename, 'rU')
         self.files = []
         self.verbose = verbose
         self.veryverbose = False
