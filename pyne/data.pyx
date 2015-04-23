@@ -1578,8 +1578,8 @@ def alpha_energy(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of alpha energies and errors
+    ratios : array of doubles
+        An array of alpha energies
     """
     return cpp_data.alpha_energy(<int> parent)
 
@@ -1595,8 +1595,8 @@ def alpha_intensity(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of alpha intensities and errors
+    ratios : array of doubles
+        An array of alpha intensities
     """
     return cpp_data.alpha_intensity(<int> parent)
 
@@ -1673,8 +1673,8 @@ def beta_endpoint_energy(parent):
 
     Returns
     -------
-    ratios : array of ints
-        An array of beta endpoint energies and errors
+    ratios : array of doubles
+        An array of beta endpoint energies
     """
     return cpp_data.beta_endpoint_energy(<int> parent)
 
@@ -1690,8 +1690,8 @@ def beta_average_energy(parent):
 
     Returns
     -------
-    ratios : array of ints
-        An array of beta average energies and errors
+    ratios : array of doubles
+        An array of beta average energies
     """
     return cpp_data.beta_average_energy(<int> parent)
 
@@ -1707,8 +1707,8 @@ def beta_intensity(parent):
 
     Returns
     -------
-    ratios : array of ints
-        An array of beta intensities and errors
+    ratios : array of doubles
+        An array of beta intensities
     """
     return cpp_data.beta_intensity(<int> parent)
 
@@ -1785,8 +1785,8 @@ def ecbp_endpoint_energy(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of beta plus endpoint energies and errors
+    ratios : array of doubles
+        An array of beta plus endpoint energies
     """
     return cpp_data.ecbp_endpoint_energy(<int> parent)
 
@@ -1802,8 +1802,8 @@ def ecbp_average_energy(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of beta plus average energies and errors
+    ratios : array of doubles
+        An array of beta plus average energies
     """
     return cpp_data.ecbp_average_energy(<int> parent)
 
@@ -1836,8 +1836,8 @@ def beta_plus_intensity(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of beta plus intensities and errors
+    ratios : array of doubles
+        An array of beta plus intensities
     """
     return cpp_data.bp_intensity(<int> parent)
 

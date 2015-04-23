@@ -65,11 +65,34 @@ class Library(rx.RxLib):
         self.chars_til_now = 0
         self.offset = 0
         self.fh = fh
+        self._set_line_length()
         # read first line (Tape ID)
         self._read_tpid()
         # read headers for all materials
         while self.more_files:
             self._read_headers()
+
+    def _set_line_length(self):
+        opened_here = False
+        if isinstance(self.fh, str):
+            fh = open(self.fh, 'rU')
+            opened_here = True
+        else:
+            fh = self.fh
+
+        # Make sure the newlines attribute is set: read a couple of lines
+        # and rewind to the beginning.
+        # Yes, we need to read two lines to make sure that fh.newlines gets
+        # set. One line seems to be enough for *nix-style line terminators, but
+        # two seem to be necessary for Windows-style terminators.
+        fh.seek(0)
+        fh.readline()
+        fh.readline()
+        self.line_length = 82 if fh.newlines=='\r\n' else 81
+        fh.seek(0)
+
+        if opened_here:
+            fh.close()
 
     def load(self):
         """load()
@@ -82,7 +105,7 @@ class Library(rx.RxLib):
         """
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'r')
+            fh = open(self.fh, 'rU')
             opened_here = True
         else:
             fh = self.fh
@@ -97,13 +120,13 @@ class Library(rx.RxLib):
         if self.chars_til_now == 0:
             opened_here = False
             if isinstance(self.fh, basestring):
-                fh = open(self.fh, 'r')
+                fh = open(self.fh, 'rU')
                 opened_here = True
             else:
                 fh = self.fh
             line = fh.readline()
-            self.chars_til_now = len(line)
-            self.offset = 81 - len(line)
+            self.chars_til_now = len(line) + self.line_length - 81
+            self.offset = self.line_length - self.chars_til_now
         else:
             warn('TPID is the first line, has been read already', UserWarning)
 
@@ -113,7 +136,7 @@ class Library(rx.RxLib):
         cdef double nucd
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'r')
+            fh = open(self.fh, 'rU')
             opened_here = True
         else:
             fh = self.fh
@@ -125,7 +148,7 @@ class Library(rx.RxLib):
         # store position of read
         pos = fh.tell()
         # check for isomer (LIS0/LISO entry)
-        matflagstring = line + fh.read(3*81)
+        matflagstring = line + fh.read(3*self.line_length)
         flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
                     'STA', 'LIS', 'LIS0', 0, 'NFOR', 'AWI', 'EMAX',
                     'LREL', 0, 'NSUB', 'NVER', 'TEMP', 0, 'LDRV',
@@ -143,7 +166,7 @@ class Library(rx.RxLib):
                                         'mfs': {}}})
         # Parse header (all lines with 1451)
         mf = 1
-        start = (self.chars_til_now+self.offset)//81
+        start = (self.chars_til_now+self.offset)//self.line_length
         stop = start  # if no 451 can be found
         while FILE1_R.search(line):
             # parse contents section
@@ -155,8 +178,8 @@ class Library(rx.RxLib):
                     start += 1
                 mt_length = int(line[44:55])
                 stop = start + mt_length
-                self.mat_dict[nuc]['mfs'][mf, mt] = (81*start-self.offset,
-                                                     81*stop-self.offset)
+                self.mat_dict[nuc]['mfs'][mf, mt] = (self.line_length*start-self.offset,
+                                                     self.line_length*stop-self.offset)
                 start = stop + 1
                 line = fh.readline()
             # parse comment
@@ -172,14 +195,14 @@ class Library(rx.RxLib):
         # Find where the end of the material is and then jump to it.
         # The end is 3 lines after the last mf,mt
         # combination (SEND, FEND, MEND)
-        self.chars_til_now = (stop + 3)*81 - self.offset
+        self.chars_til_now = (stop + 3)*self.line_length - self.offset
         fh.seek(self.chars_til_now)
         nextline = fh.readline()
         self.more_files = (nextline != '' and nextline[68:70] != '-1')
         # Update materials dict
         if mat_id != -1:
             self.mat_dict[nuc]['end_line'] = \
-                (self.chars_til_now+self.offset)//81
+                (self.chars_til_now+self.offset)//self.line_length
             setattr(self, 'mat{0}'.format(nuc), self.structure[nuc])
         self._read_mat_flags(nuc)
         fh.seek(0)
@@ -1026,7 +1049,7 @@ class Library(rx.RxLib):
         """
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'r')
+            fh = open(self.fh, 'rU')
             opened_here = True
         else:
             fh = self.fh
@@ -1041,7 +1064,7 @@ class Library(rx.RxLib):
         if lines == 0:
             s = fh.read(stop-start)
         else:
-            s = fh.read(lines*81)
+            s = fh.read(lines*self.line_length)
         if opened_here:
             fh.close
         return fromendf_tok(s)
@@ -1054,7 +1077,7 @@ class Evaluation(object):
     """
 
     def __init__(self, filename, verbose=True):
-        self.fh = open(filename, 'r')
+        self.fh = open(filename, 'rU')
         self.files = []
         self.verbose = verbose
         self.veryverbose = False
