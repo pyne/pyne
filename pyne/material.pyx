@@ -65,7 +65,7 @@ cdef class _Material:
     def __cinit__(self, nucvec=None, double mass=-1.0, double density=-1.0,
                   double atoms_per_molecule=-1.0, metadata=None, bint free_mat=True,
                   *args, **kwargs):
-        """Material C++ constuctor."""
+        """Material C++ constructor."""
         cdef cpp_map[int, double] comp
         cdef jsoncpp.Value cmetadata = jsoncpp.Value({} if metadata is None else metadata)
 
