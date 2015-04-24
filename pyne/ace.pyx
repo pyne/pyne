@@ -273,6 +273,7 @@ class Library(object):
                 words = lines[0].split()
                 version = words[0]
                 name = words[1]
+                name_old = lines[3].split()[0]  # old style name, same as in xsdir
                 if len(words) == 3:
                     source = words[2]
                 words = lines[1].split()
@@ -331,6 +332,8 @@ class Library(object):
                 temp_in_K = round(temp * 1e6 / 8.617342e-5)
                 print("Loading nuclide {0} at {1} K".format(name, temp_in_K))
             self.tables[name] = table
+            if name_old:
+                self.tables[name_old] = table
 
             # Read comment
             table.comment = lines[1].strip()
