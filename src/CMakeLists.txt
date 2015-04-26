@@ -45,8 +45,9 @@ ENDIF()
 
 #set fortran ENSDF processing files
 set(ENSDF_ALPHAD_SRC
-    "ensdf_processing/ALPHAD/alphad.f"
+    #"ensdf_processing/ALPHAD/alphad.f"
     "ensdf_processing/ALPHAD/nsdflib95.f"
+     #ensdf_processing/ALPHAD/alphad.f
     )
 
 #set(ENSDF_DELTA_SRC
@@ -103,7 +104,7 @@ endif (MOAB_FOUND)
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
 
-#add_library(alphad_src STATIC ensdf_processing/ALPHAD/nsdflib95.f)
+add_library(alphad_src STATIC ensdf_processing/ALPHAD/nsdflib95.f)
 #add_library(alphad_lib ${ENSDF_ALPHAD_SRC})
 
 target_link_libraries(pyne hdf5)
@@ -122,6 +123,7 @@ add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
 add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
 #target_link_libraries(alphad pyne)
 target_link_libraries(alphad LINK_PUBLIC pyne)
+target_link_libraries(alphad LINK_PUBLIC alphad_src)
 
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/delta.exe
                COMMAND ${CMAKE_COMMAND} -E copy delta)
