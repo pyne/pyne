@@ -186,7 +186,6 @@ def copy_ensdf_executables(pynepath):
     
     #print(ALPHAD_DEST)
     #print(ALPHAD_H)
-
     shutil.copy(ALPHAD_H, ALPHAD_DEST)
     shutil.copy(DELTA_H, DELTA_DEST)
 

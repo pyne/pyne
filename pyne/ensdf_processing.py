@@ -64,7 +64,7 @@ def delta(inputdict_unchecked):
     sesh_path = sys.argv[0]  
     exe_path = os.path.relpath(exe_path_abs,sys.argv[0])
     exe_path = os.path.join('./',exe_path)
-    #exe_path = exe_path.replace("../","",1)
+    exe_path = exe_path.replace("../","",1)
 
     delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     delta_output.stdin.write(input_file + '\n' + output_file + '\n')
