@@ -35,9 +35,15 @@ def test_data_checksums():
 
 def test_internal_hashes():
     from pyne.dbgen import hashtools
-    hashtools.set_internal_hashes(pyne.nuc_data)
-    for item, val in hashtools.check_internal_hashes(pyne.nuc_data):
+    from shutil import copyfile
+    test_data = './test_nuc_data.h5'
+    # Create a copy so we don't try to modify a file we may not have
+    # permissions for
+    copyfile(pyne.nuc_data, test_data)
+    hashtools.set_internal_hashes(test_data)
+    for item, val in hashtools.check_internal_hashes(test_data):
         assert_true(val)
+    os.remove(test_data)
 
 if __name__ == "__main__":
     nose.runmodule()
