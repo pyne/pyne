@@ -284,6 +284,7 @@ class Library(object):
                     lines.pop(0)
                     lines.append(f.readline())
             else:
+                name_old = False
                 words = lines[0].split()
                 name = words[0]
                 awr = float(words[1])
