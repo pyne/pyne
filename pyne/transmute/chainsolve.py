@@ -1,4 +1,7 @@
-"""This module implements an ALARA-like chain-based transmutation solver.
+"""This module implements an ALARA[1]-like chain-based transmutation solver.
+
+   [1] Wilson, P. P. H. "ALARA: Analytic Laplacian Adaptive Radioactivity 
+   Analysis," a Ph.D. Dissertation, University of Wisconsin, Madison, WI, 1999.
 """
 from __future__ import division
 from warnings import warn
@@ -37,7 +40,7 @@ class Transmuter(object):
         tol : float
             Tolerance level for chain truncation.
         rxs : set of ints or strs
-            Reaction ids or names to use in transmutation which produce well-defined 
+            Reaction ids or names to use in transmutation that produce well-defined 
             children.  This set should thus not include fission.  If None, then the 
             reactions from EAF are used.
         log : file-like or None
@@ -140,7 +143,7 @@ class Transmuter(object):
                 y_atoms[part_nuc] = part_adens * adens + y_atoms.get(part_nuc, 0.0)
         mw_x = x.molecular_mass()
         y = from_atom_frac(y_atoms, atoms_per_molecule=x.atoms_per_molecule)
-        # even though it doesn't look likt it, the following line is actually
+        # even though it doesn't look like it, the following line is actually
         #   mass_y = MW_y * mass_x / MW_x
         y.mass *= x.mass / mw_x 
         return y
@@ -159,8 +162,8 @@ class Transmuter(object):
         partial : dict
             A dictionary containing number densities for each nuclide after
             the transmutation is carried out for the input nuclide. Keys are 
-            nuclide ids and values are float number densities for the coupled.
-
+            nuclide ids and values are float number densities for the coupled
+            # what is the coupled?.
         """
         dest = self._get_destruction(nuc)
         # DENSE
