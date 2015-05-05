@@ -178,16 +178,44 @@ def download_decay():
 
 ALPHAD_H = os.path.join('build', 'src/alphad')
 DELTA_H = os.path.join('build', 'src/delta')
+GABS_H = os.path.join('build', 'src/gabs')
+GTOL_H = os.path.join('build', 'src/gtol')
+BLDHST_H = os.path.join('build', 'src/bldhst')
+HSICC_H = os.path.join('build', 'src/hsicc')
+HSMRG_H = os.path.join('build', 'src/hsmrg')
+LOGFT_H = os.path.join('build', 'src/logft')
+PANDORA_H = os.path.join('build', 'src/pandora')
+#RADLST_H = os.path.join('build', 'src/radlst')
+RULER_H = os.path.join('build', 'src/ruler')
 
 def copy_ensdf_executables(pynepath):
     print('Copying ENSDF Executables to install directory')
     ALPHAD_DEST = os.path.join(pynepath, 'alphad')
     DELTA_DEST = os.path.join(pynepath, 'delta')
-    
+    GABS_DEST = os.path.join(pynepath, 'gabs')
+    GTOL_DEST = os.path.join(pynepath, 'gtol')
+    BLDHST_DEST = os.path.join(pynepath, 'bldhst')
+    HSICC_DEST = os.path.join(pynepath, 'hsicc')
+    HSMRG_DEST = os.path.join(pynepath, 'hsmrg')
+    LOGFT_DEST = os.path.join(pynepath, 'logft')
+    PANDORA_DEST = os.path.join(pynepath, 'pandora')
+    #RADLST_DEST = os.path.join(pynepath, 'radlst')
+    RULER_DEST = os.path.join(pynepath, 'ruler')
+
     #print(ALPHAD_DEST)
     #print(ALPHAD_H)
     shutil.copy(ALPHAD_H, ALPHAD_DEST)
     shutil.copy(DELTA_H, DELTA_DEST)
+    shutil.copy(GABS_H, GABS_DEST)
+    shutil.copy(GTOL_H, GTOL_DEST)
+    shutil.copy(BLDHST_H, BLDHST_DEST)
+    shutil.copy(HSICC_H, HSICC_DEST)
+    shutil.copy(HSMRG_H, HSMRG_DEST)
+    shutil.copy(LOGFT_H, LOGFT_DEST)
+    shutil.copy(PANDORA_H, PANDORA_DEST)
+    #shutil.copy(RADLST_H, RADLST_DEST)
+    shutil.copy(RULER_H, RULER_DEST)
+
 
 
 def generate_decay():
