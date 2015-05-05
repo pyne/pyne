@@ -56,6 +56,17 @@ message(STATUS
   "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
 ENDIF(BUILD_SPATIAL_SOLVER)
 
+# FFLAGS depend on the compiler
+get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  # gfortran
+  set (CMAKE_Fortran_FLAGS_RELEASE "-c")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-c")
+#elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
+endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+
+
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")

@@ -71,6 +71,7 @@ IF(BUILD_SPATIAL_SOLVER)
         "tally.cpp"
         "utils.cpp"
         "endftod.f90"
+        "ensdf_processing/ALPHAD/nsdflib95.f"
         "${TRANSPORT_SPATIAL_METHODS_SRCS}"
         "${ENSDF_ALPHAD_SRC}"
         )
@@ -119,22 +120,33 @@ endif (MOAB_FOUND)
 set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
     "-O0")
 
+#SET(CMAKE_EXE_LINKER_FLAGS "-c")
 add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f)
 add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
+add_executable(gabs ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GABS/gabs.for)
+add_executable(gtol ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f)
+add_executable(bldhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/bldhst.for)
+add_executable(hsicc ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for)
+add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for)
+add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for)
+add_executable(logft ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for)
+add_executable(pandora ${PROJECT_SOURCE_DIR}/src/ensdf_processing/PANDORA/pandora.f)
+#add_executable(radlst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADLST/radlst.for)
+add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f)
+
 #target_link_libraries(alphad pyne)
 target_link_libraries(alphad LINK_PUBLIC pyne)
-target_link_libraries(alphad LINK_PUBLIC alphad_src)
+target_link_libraries(gabs LINK_PUBLIC pyne)
+target_link_libraries(gtol LINK_PUBLIC pyne)
+target_link_libraries(hsicc LINK_PUBLIC pyne)
+target_link_libraries(hsmrg LINK_PUBLIC pyne)
+target_link_libraries(logft LINK_PUBLIC pyne)
+target_link_libraries(pandora LINK_PUBLIC pyne)
+#target_link_libraries(radlst LINK_PUBLIC pyne)
+target_link_libraries(ruler LINK_PUBLIC pyne)
 
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/delta.exe
                COMMAND ${CMAKE_COMMAND} -E copy delta)
-
-#add_custom_command(OUTPUT delta.tmp
-#                   COMMAND objcopy --output-format=binary delta delta.tmp
-#                   COMMAND ${CMAKE_COMMAND} -E copy delta.tmp delta.bin
-#                   DEPENDS delta
-#                   COMMENT "objcopying delta to delta.bin")
-#add_custom_target(delta.bin ALL DEPENDS delta.tmp)
-#set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES delta.bin)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

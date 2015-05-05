@@ -1,0 +1,890 @@
+
+
+ * DATA CLEARED *
+
+ HEADER:  59FE B- DECAY. 142-192 CORR. WITH DELTA DATA FROM OTHER CORR.        
+
+ * A2-DATA   -0.2800    0.0400
+
+ * D -DATA    1.0000   -0.0050    0.0200
+
+ * D -DATA    2.0000    0.2200    0.0190
+
+ * ST-DATA    3.0000    3.0000
+
+ * LI-DATA  -12.0000   12.0000  -90.0000   90.0000
+
+ * GO-DATA   -0.5000   -1.5000   -1.5000
+1 59FE B- DECAY. 142-192 CORR. WITH DELTA DATA FROM OTHER CORR.                  
+
+ SPIN SEQUENCE     1/2- --->  3/2- --->  3/2-     
+
+ KRANE-STEFFEN SIGN CONVENTION FOR MIXING RATIOS
+
+
+ +++++++ DATA +++++++
+ A2 =    -0.280+-   0.040
+ D 1=    -0.286+-   1.146 (ATAN(DELTA))
+  D2=    12.407+-   1.038 (ATAN(DELTA))
+
+ ATAN(D1) VARIED FROM -12.0 TO  12.0 IN STEPS OF 3.0 DEGREES
+
+ ATAN(D2) VARIED FROM -90.0 TO  90.0 IN STEPS OF 3.0 DEGREES
+
+
+
+ DELTA(1) MINIMUM
+
+
+    SQ.RES.        A2        A4  ATAN(D1)  ATAN(D2)
+      1.941    -0.327       NaN      -1.1      12.1
+
+ DELTA(1)= -0.019   + 0.022 - 0.022   SIGMA=   3.639   SIGMA/DEGREE OF FREEDOM=  1.819
+
+
+ ATAN(DELTA1) NSQRES 0.1        0.2          0.5         1          2            5         10         20           50         100
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+   -12.00    65.494   +                                                   X           *                                  O     +
+    -9.00    34.380   +                                                   X           *                        O               +
+    -6.00    13.587   +                                                   X           *          O                             +
+    -3.00     2.821   +                                                  OX           *                                        +
+     0.00     1.587   +                                         O         X           *                                        +
+     3.00     9.262   +                                                   X           *    O                                   +
+     6.00    25.177   +                                                   X           *                   O                    +
+     9.00    48.690   +                                                   X           *                             O          +
+    12.00    79.235   +                                                   X           *                                    O   +
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+
+ DEGREES OF FREEDOM    =  2
+ X = 5 PERCENT LIMIT   =  2.996
+ * = 0.1 PERCENT LIMIT =  6.908
+
+
+
+
+ DELTA(2) MINIMUM
+
+
+    SQ.RES.        A2        A4  ATAN(D1)  ATAN(D2)
+      1.940    -0.327       NaN      -1.1      12.1
+
+ DELTA(2)=  0.214   + 0.024 - 0.024   SIGMA=   3.638   SIGMA/DEGREE OF FREEDOM=  1.819
+
+
+ ATAN(DELTA2) NSQRES 0.1        0.2          0.5         1          2            5         10         20           50         100
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+   -90.00  4888.706   +                                                   X           *                                        O
+   -87.00  4615.082   +                                                   X           *                                        O
+   -84.00  4349.997   +                                                   X           *                                        O
+   -81.00  4093.088   +                                                   X           *                                        O
+   -78.00  3844.051   +                                                   X           *                                        O
+   -75.00  3602.669   +                                                   X           *                                        O
+   -72.00  3368.822   +                                                   X           *                                        O
+   -69.00  3142.469   +                                                   X           *                                        O
+   -66.00  2923.624   +                                                   X           *                                        O
+   -63.00  2712.336   +                                                   X           *                                        O
+   -60.00  2508.660   +                                                   X           *                                        O
+   -57.00  2312.650   +                                                   X           *                                        O
+   -54.00  2124.345   +                                                   X           *                                        O
+   -51.00  1943.767   +                                                   X           *                                        O
+   -48.00  1770.918   +                                                   X           *                                        O
+   -45.00  1605.778   +                                                   X           *                                        O
+   -42.00  1448.312   +                                                   X           *                                        O
+   -39.00  1298.469   +                                                   X           *                                        O
+   -36.00  1156.191   +                                                   X           *                                        O
+   -33.00  1021.429   +                                                   X           *                                        O
+   -30.00   894.161   +                                                   X           *                                        O
+   -27.00   774.414   +                                                   X           *                                        O
+   -24.00   662.295   +                                                   X           *                                        O
+   -21.00   558.003   +                                                   X           *                                        O
+   -18.00   461.830   +                                                   X           *                                        O
+   -15.00   374.130   +                                                   X           *                                        O
+   -12.00   295.272   +                                                   X           *                                        O
+    -9.00   225.584   +                                                   X           *                                        O
+    -6.00   165.306   +                                                   X           *                                        O
+    -3.00   114.560   +                                                   X           *                                        O
+     0.00    73.348   +                                                   X           *                                   O    +
+     3.00    41.570   +                                                   X           *                           O            +
+     6.00    19.053   +                                                   X           *               O                        +
+     9.00     5.592   +                                                   X        O  *                                        +
+    12.00     0.974   +                                  O                X           *                                        +
+    15.00     5.009   +                                                   X      O    *                                        +
+    18.00    17.534   +                                                   X           *              O                         +
+    21.00    38.425   +                                                   X           *                         O              +
+    24.00    67.586   +                                                   X           *                                  O     +
+    27.00   104.950   +                                                   X           *                                        O
+    30.00   150.470   +                                                   X           *                                        O
+    33.00   204.116   +                                                   X           *                                        O
+    36.00   265.869   +                                                   X           *                                        O
+    39.00   335.721   +                                                   X           *                                        O
+    42.00   413.671   +                                                   X           *                                        O
+    45.00   499.727   +                                                   X           *                                        O
+    48.00   593.905   +                                                   X           *                                        O
+    51.00   696.233   +                                                   X           *                                        O
+    54.00   806.754   +                                                   X           *                                        O
+    57.00   925.531   +                                                   X           *                                        O
+    60.00  1052.655   +                                                   X           *                                        O
+    63.00  1188.245   +                                                   X           *                                        O
+    66.00  1332.458   +                                                   X           *                                        O
+    69.00  1485.479   +                                                   X           *                                        O
+    72.00  1647.517   +                                                   X           *                                        O
+    75.00  1818.783   +                                                   X           *                                        O
+    78.00  1999.457   +                                                   X           *                                        O
+    81.00  2189.654   +                                                   X           *                                        O
+    84.00  2389.392   +                                                   X           *                                        O
+    87.00  2598.569   +                                                   X           *                                        O
+    90.00  2816.966   +                                                   X           *                                        O
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+
+ DEGREES OF FREEDOM    =  2
+ X = 5 PERCENT LIMIT   =  2.996
+ * = 0.1 PERCENT LIMIT =  6.908
+
+
+
+
+
+ +++++++ END OF ANALYSIS FOR THIS SPIN COMBINATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ * D -DATA    2.0000  -28.0000   10.0000
+
+ * GO-DATA   -0.5000   -1.5000   -1.5000
+1 59FE B- DECAY. 142-192 CORR. WITH DELTA DATA FROM OTHER CORR.                  
+
+ SPIN SEQUENCE     1/2- --->  3/2- --->  3/2-     
+
+ KRANE-STEFFEN SIGN CONVENTION FOR MIXING RATIOS
+
+
+ +++++++ DATA +++++++
+ A2 =    -0.280+-   0.040
+ D 1=    -0.286+-   1.146 (ATAN(DELTA))
+  D2=   -87.955+-   0.836 (ATAN(DELTA))
+
+ ATAN(D1) VARIED FROM -12.0 TO  12.0 IN STEPS OF 3.0 DEGREES
+
+ ATAN(D2) VARIED FROM -90.0 TO  90.0 IN STEPS OF 3.0 DEGREES
+
+
+ ATAN(DELTA1) NSQRES 0.1        0.2          0.5         1          2            5         10         20           50         100
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+   -12.00    77.687   +                                                   X           *                                    O   +
+    -9.00    56.410   +                                                   X           *                               O        +
+    -6.00    39.925   +                                                   X           *                          O             +
+    -3.00    30.296   +                                                   X           *                      O                 +
+     0.00    27.523   +                                                   X           *                    O                   +
+     3.00    31.606   +                                                   X           *                      O                 +
+     6.00    42.544   +                                                   X           *                           O            +
+     9.00    60.339   +                                                   X           *                                O       +
+    12.00    84.990   +                                                   X           *                                      O +
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+
+ DEGREES OF FREEDOM    =  2
+ X = 5 PERCENT LIMIT   =  2.996
+ * = 0.1 PERCENT LIMIT =  6.908
+
+
+
+ ATAN(DELTA2) NSQRES 0.1        0.2          0.5         1          2            5         10         20           50         100
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+   -90.00    27.491   +                                                   X           *                    O                   +
+   -87.00    32.347   +                                                   X           *                       O                +
+   -84.00    50.262   +                                                   X           *                              O         +
+   -81.00    80.877   +                                                   X           *                                     O  +
+   -78.00   123.886   +                                                   X           *                                        O
+   -75.00   179.074   +                                                   X           *                                        O
+   -72.00   246.317   +                                                   X           *                                        O
+   -69.00   325.577   +                                                   X           *                                        O
+   -66.00   416.868   +                                                   X           *                                        O
+   -63.00   520.238   +                                                   X           *                                        O
+   -60.00   635.743   +                                                   X           *                                        O
+   -57.00   763.436   +                                                   X           *                                        O
+   -54.00   903.357   +                                                   X           *                                        O
+   -51.00  1055.527   +                                                   X           *                                        O
+   -48.00  1219.947   +                                                   X           *                                        O
+   -45.00  1396.601   +                                                   X           *                                        O
+   -42.00  1585.450   +                                                   X           *                                        O
+   -39.00  1786.444   +                                                   X           *                                        O
+   -36.00  1999.527   +                                                   X           *                                        O
+   -33.00  2224.647   +                                                   X           *                                        O
+   -30.00  2461.783   +                                                   X           *                                        O
+   -27.00  2710.965   +                                                   X           *                                        O
+   -24.00  2972.295   +                                                   X           *                                        O
+   -21.00  3245.975   +                                                   X           *                                        O
+   -18.00  3532.296   +                                                   X           *                                        O
+   -15.00  3831.614   +                                                   X           *                                        O
+   -12.00  4144.295   +                                                   X           *                                        O
+    -9.00  4470.669   +                                                   X           *                                        O
+    -6.00  4810.977   +                                                   X           *                                        O
+    -3.00  5165.336   +                                                   X           *                                        O
+     0.00  5533.753   +                                                   X           *                                        O
+     3.00  5916.127   +                                                   X           *                                        O
+     6.00  6312.285   +                                                   X           *                                        O
+     9.00  6722.020   +                                                   X           *                                        O
+    12.00  7145.121   +                                                   X           *                                        O
+    15.00  7581.397   +                                                   X           *                                        O
+    18.00  8030.687   +                                                   X           *                                        O
+    21.00  8492.864   +                                                   X           *                                        O
+    24.00  8967.833   +                                                   X           *                                        O
+    27.00  9455.528   +                                                   X           *                                        O
+    30.00  9955.903   +                                                   X           *                                        O
+    33.00 10468.923   +                                                   X           *                                        O
+    36.00 10994.575   +                                                   X           *                                        O
+    39.00 11532.848   +                                                   X           *                                        O
+    42.00 12083.741   +                                                   X           *                                        O
+    45.00 12647.264   +                                                   X           *                                        O
+    48.00 13223.428   +                                                   X           *                                        O
+    51.00 13812.268   +                                                   X           *                                        O
+    54.00 14413.821   +                                                   X           *                                        O
+    57.00 15028.152   +                                                   X           *                                        O
+    60.00 15655.355   +                                                   X           *                                        O
+    63.00 16295.547   +                                                   X           *                                        O
+    66.00 16948.881   +                                                   X           *                                        O
+    69.00 17615.547   +                                                   X           *                                        O
+    72.00 18295.756   +                                                   X           *                                        O
+    75.00 18989.709   +                                                   X           *                                        O
+    78.00 19697.596   +                                                   X           *                                        O
+    81.00 20419.525   +                                                   X           *                                        O
+    84.00 21155.521   +                                                   X           *                                        O
+    87.00 21905.480   +                                                   X           *                                        O
+    90.00 22669.176   +                                                   X           *                                        O
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+
+ DEGREES OF FREEDOM    =  2
+ X = 5 PERCENT LIMIT   =  2.996
+ * = 0.1 PERCENT LIMIT =  6.908
+
+
+
+
+
+ +++++++ END OF ANALYSIS FOR THIS SPIN COMBINATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ * DATA CLEARED *
+
+ HEADER:  206PO EC DECAY. 286-1032 CORR. WITH K AND L1/L2 CONVERSION DATA      
+
+ * A2-DATA    0.0170    0.0050
+
+ * A4-DATA    0.0080    0.0120
+
+ * KA-DATA    1.0000   46.4000    2.2000   44.8100    7.4230
+
+ * LL-DATA    1.0000    9.6700    0.5000    6.9800    1.0880    0.7259    2.5890
+
+ * KA-DATA    2.0000    1.6000    0.0900    1.5290    0.5272
+
+ * LL-DATA    2.0000   10.9000    0.5000    0.2331    0.0771    0.0211    0.0210
+
+ * ST-DATA    4.0000    4.0000
+
+ * OU-DATA    1.0000
+
+ * GO-DATA    1.0000    2.0000    3.0000
+1 206PO EC DECAY. 286-1032 CORR. WITH K AND L1/L2 CONVERSION DATA                
+
+ SPIN SEQUENCE     1+   --->  2+   --->  3+       
+
+ KRANE-STEFFEN SIGN CONVENTION FOR MIXING RATIOS
+
+
+ +++++++ DATA +++++++
+ A2 =     0.017+-   0.005
+ A4 =     0.008+-   0.012
+ KA =   46.4000+-  2.2000 FOR TRANSITION 1. THEORETICAL VALUES=   44.8100 FOR M1 AND    7.4230 FOR E2
+ LL =    9.6700+-  0.5000 FOR TRANSITION 1. THEORETICAL VALUES=    6.9800 FOR M1 AND    1.0880 FOR E2
+                                        * RATIO *  OTHER SHELL:    0.7259 FOR M1 AND    2.5890 FOR E2
+ KA =    1.6000+-  0.0900 FOR TRANSITION 2. THEORETICAL VALUES=    1.5290 FOR M1 AND    0.5272 FOR E2
+ LL =   10.9000+-  0.5000 FOR TRANSITION 2. THEORETICAL VALUES=    0.2331 FOR M1 AND    0.0771 FOR E2
+                                        * RATIO *  OTHER SHELL:    0.0211 FOR M1 AND    0.0210 FOR E2
+
+ ATAN(D1) VARIED FROM -90.0 TO  90.0 IN STEPS OF 4.0 DEGREES
+
+ ATAN(D2) VARIED FROM -90.0 TO  90.0 IN STEPS OF 4.0 DEGREES
+1 206PO EC DECAY. 286-1032 CORR. WITH K AND L1/L2 CONVERSION DATA                
+
+ SPIN SEQUENCE     1+   --->  2+   --->  3+       
+
+ KRANE-STEFFEN SIGN CONVENTION FOR MIXING RATIOS
+
+ STEPPING IN ATAN(DELTA1)
+
+
+    SQ.RES.        A2        A4  ATAN(D1)  ATAN(D2)     KA(1)     LL(1)     KA(2)     LL(2)
+        NaN       NaN       NaN     -90.0       NaN    7.4230    0.4202       NaN       NaN
+        NaN       NaN       NaN     -86.0       NaN    7.6050    0.4328       NaN       NaN
+        NaN       NaN       NaN     -82.0       NaN    8.1472    0.4709       NaN       NaN
+        NaN       NaN       NaN     -78.0       NaN    9.0392    0.5353       NaN       NaN
+        NaN       NaN       NaN     -74.0       NaN   10.2637    0.6275       NaN       NaN
+        NaN       NaN       NaN     -70.0       NaN   11.7966    0.7496       NaN       NaN
+        NaN       NaN       NaN     -66.0       NaN   13.6083    0.9044       NaN       NaN
+        NaN       NaN       NaN     -62.0       NaN   15.6634    1.0956       NaN       NaN
+        NaN       NaN       NaN     -58.0       NaN   17.9220    1.3276       NaN       NaN
+        NaN       NaN       NaN     -54.0       NaN   20.3401    1.6057       NaN       NaN
+        NaN       NaN       NaN     -50.0       NaN   22.8706    1.9363       NaN       NaN
+        NaN       NaN       NaN     -46.0       NaN   25.4643    2.3262       NaN       NaN
+        NaN       NaN       NaN     -42.0       NaN   28.0706    2.7832       NaN       NaN
+        NaN       NaN       NaN     -38.0       NaN   30.6390    3.3146       NaN       NaN
+        NaN       NaN       NaN     -34.0       NaN   33.1193    3.9264       NaN       NaN
+        NaN       NaN       NaN     -30.0       NaN   35.4633    4.6213       NaN       NaN
+        NaN       NaN       NaN     -26.0       NaN   37.6254    5.3950       NaN       NaN
+        NaN       NaN       NaN     -22.0       NaN   39.5635    6.2320       NaN       NaN
+        NaN       NaN       NaN     -18.0       NaN   41.2399    7.1004       NaN       NaN
+        NaN       NaN       NaN     -14.0       NaN   42.6219    7.9469       NaN       NaN
+        NaN       NaN       NaN     -10.0       NaN   43.6827    8.6978       NaN       NaN
+        NaN       NaN       NaN      -6.0       NaN   44.4015    9.2671       NaN       NaN
+        NaN       NaN       NaN      -2.0       NaN   44.7645    9.5758       NaN       NaN
+        NaN       NaN       NaN       2.0       NaN   44.7645    9.5758       NaN       NaN
+        NaN       NaN       NaN       6.0       NaN   44.4015    9.2671       NaN       NaN
+        NaN       NaN       NaN      10.0       NaN   43.6827    8.6978       NaN       NaN
+        NaN       NaN       NaN      14.0       NaN   42.6219    7.9469       NaN       NaN
+        NaN       NaN       NaN      18.0       NaN   41.2399    7.1004       NaN       NaN
+        NaN       NaN       NaN      22.0       NaN   39.5635    6.2320       NaN       NaN
+        NaN       NaN       NaN      26.0       NaN   37.6254    5.3950       NaN       NaN
+        NaN       NaN       NaN      30.0       NaN   35.4633    4.6213       NaN       NaN
+        NaN       NaN       NaN      34.0       NaN   33.1193    3.9264       NaN       NaN
+        NaN       NaN       NaN      38.0       NaN   30.6390    3.3146       NaN       NaN
+        NaN       NaN       NaN      42.0       NaN   28.0706    2.7832       NaN       NaN
+        NaN       NaN       NaN      46.0       NaN   25.4643    2.3262       NaN       NaN
+        NaN       NaN       NaN      50.0       NaN   22.8706    1.9363       NaN       NaN
+        NaN       NaN       NaN      54.0       NaN   20.3401    1.6057       NaN       NaN
+        NaN       NaN       NaN      58.0       NaN   17.9220    1.3276       NaN       NaN
+        NaN       NaN       NaN      62.0       NaN   15.6634    1.0956       NaN       NaN
+        NaN       NaN       NaN      66.0       NaN   13.6083    0.9044       NaN       NaN
+        NaN       NaN       NaN      70.0       NaN   11.7966    0.7496       NaN       NaN
+        NaN       NaN       NaN      74.0       NaN   10.2637    0.6275       NaN       NaN
+        NaN       NaN       NaN      78.0       NaN    9.0392    0.5353       NaN       NaN
+        NaN       NaN       NaN      82.0       NaN    8.1472    0.4709       NaN       NaN
+        NaN       NaN       NaN      86.0       NaN    7.6050    0.4328       NaN       NaN
+        NaN       NaN       NaN      90.0       NaN    7.4230    0.4202       NaN       NaN
+1 206PO EC DECAY. 286-1032 CORR. WITH K AND L1/L2 CONVERSION DATA                
+
+ SPIN SEQUENCE     1+   --->  2+   --->  3+       
+
+ KRANE-STEFFEN SIGN CONVENTION FOR MIXING RATIOS
+
+ ATAN(DELTA1) NSQRES 0.1        0.2          0.5         1          2            5         10         20           50         100
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+   -90.00       NaN   O                                              X        *                                                +
+   -86.00       NaN   O                                              X        *                                                +
+   -82.00       NaN   O                                              X        *                                                +
+   -78.00       NaN   O                                              X        *                                                +
+   -74.00       NaN   O                                              X        *                                                +
+   -70.00       NaN   O                                              X        *                                                +
+   -66.00       NaN   O                                              X        *                                                +
+   -62.00       NaN   O                                              X        *                                                +
+   -58.00       NaN   O                                              X        *                                                +
+   -54.00       NaN   O                                              X        *                                                +
+   -50.00       NaN   O                                              X        *                                                +
+   -46.00       NaN   O                                              X        *                                                +
+   -42.00       NaN   O                                              X        *                                                +
+   -38.00       NaN   O                                              X        *                                                +
+   -34.00       NaN   O                                              X        *                                                +
+   -30.00       NaN   O                                              X        *                                                +
+   -26.00       NaN   O                                              X        *                                                +
+   -22.00       NaN   O                                              X        *                                                +
+   -18.00       NaN   O                                              X        *                                                +
+   -14.00       NaN   O                                              X        *                                                +
+   -10.00       NaN   O                                              X        *                                                +
+    -6.00       NaN   O                                              X        *                                                +
+    -2.00       NaN   O                                              X        *                                                +
+     2.00       NaN   O                                              X        *                                                +
+     6.00       NaN   O                                              X        *                                                +
+    10.00       NaN   O                                              X        *                                                +
+    14.00       NaN   O                                              X        *                                                +
+    18.00       NaN   O                                              X        *                                                +
+    22.00       NaN   O                                              X        *                                                +
+    26.00       NaN   O                                              X        *                                                +
+    30.00       NaN   O                                              X        *                                                +
+    34.00       NaN   O                                              X        *                                                +
+    38.00       NaN   O                                              X        *                                                +
+    42.00       NaN   O                                              X        *                                                +
+    46.00       NaN   O                                              X        *                                                +
+    50.00       NaN   O                                              X        *                                                +
+    54.00       NaN   O                                              X        *                                                +
+    58.00       NaN   O                                              X        *                                                +
+    62.00       NaN   O                                              X        *                                                +
+    66.00       NaN   O                                              X        *                                                +
+    70.00       NaN   O                                              X        *                                                +
+    74.00       NaN   O                                              X        *                                                +
+    78.00       NaN   O                                              X        *                                                +
+    82.00       NaN   O                                              X        *                                                +
+    86.00       NaN   O                                              X        *                                                +
+    90.00       NaN   O                                              X        *                                                +
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+
+ DEGREES OF FREEDOM    =  5
+ X = 5 PERCENT LIMIT   =  2.214
+ * = 0.1 PERCENT LIMIT =  4.103
+
+1 206PO EC DECAY. 286-1032 CORR. WITH K AND L1/L2 CONVERSION DATA                
+
+ SPIN SEQUENCE     1+   --->  2+   --->  3+       
+
+ KRANE-STEFFEN SIGN CONVENTION FOR MIXING RATIOS
+
+ STEPPING IN ATAN(DELTA2)
+
+
+    SQ.RES.        A2        A4  ATAN(D1)  ATAN(D2)     KA(1)     LL(1)     KA(2)     LL(2)
+        NaN       NaN       NaN       NaN     -90.0       NaN       NaN    0.5272    3.6714
+        NaN       NaN       NaN       NaN     -86.0       NaN       NaN    0.5321    3.7075
+        NaN       NaN       NaN       NaN     -82.0       NaN       NaN    0.5466    3.8150
+        NaN       NaN       NaN       NaN     -78.0       NaN       NaN    0.5705    3.9917
+        NaN       NaN       NaN       NaN     -74.0       NaN       NaN    0.6033    4.2343
+        NaN       NaN       NaN       NaN     -70.0       NaN       NaN    0.6444    4.5379
+        NaN       NaN       NaN       NaN     -66.0       NaN       NaN    0.6929    4.8965
+        NaN       NaN       NaN       NaN     -62.0       NaN       NaN    0.7480    5.3032
+        NaN       NaN       NaN       NaN     -58.0       NaN       NaN    0.8085    5.7498
+        NaN       NaN       NaN       NaN     -54.0       NaN       NaN    0.8733    6.2277
+        NaN       NaN       NaN       NaN     -50.0       NaN       NaN    0.9411    6.7275
+        NaN       NaN       NaN       NaN     -46.0       NaN       NaN    1.0106    7.2395
+        NaN       NaN       NaN       NaN     -42.0       NaN       NaN    1.0805    7.7536
+        NaN       NaN       NaN       NaN     -38.0       NaN       NaN    1.1493    8.2599
+        NaN       NaN       NaN       NaN     -34.0       NaN       NaN    1.2157    8.7485
+        NaN       NaN       NaN       NaN     -30.0       NaN       NaN    1.2786    9.2100
+        NaN       NaN       NaN       NaN     -26.0       NaN       NaN    1.3365    9.6354
+        NaN       NaN       NaN       NaN     -22.0       NaN       NaN    1.3884   10.0166
+        NaN       NaN       NaN       NaN     -18.0       NaN       NaN    1.4333   10.3461
+        NaN       NaN       NaN       NaN     -14.0       NaN       NaN    1.4704   10.6176
+        NaN       NaN       NaN       NaN     -10.0       NaN       NaN    1.4988   10.8260
+        NaN       NaN       NaN       NaN      -6.0       NaN       NaN    1.5181   10.9672
+        NaN       NaN       NaN       NaN      -2.0       NaN       NaN    1.5278   11.0385
+        NaN       NaN       NaN       NaN       2.0       NaN       NaN    1.5278   11.0385
+        NaN       NaN       NaN       NaN       6.0       NaN       NaN    1.5181   10.9672
+        NaN       NaN       NaN       NaN      10.0       NaN       NaN    1.4988   10.8260
+        NaN       NaN       NaN       NaN      14.0       NaN       NaN    1.4704   10.6176
+        NaN       NaN       NaN       NaN      18.0       NaN       NaN    1.4333   10.3461
+        NaN       NaN       NaN       NaN      22.0       NaN       NaN    1.3884   10.0166
+        NaN       NaN       NaN       NaN      26.0       NaN       NaN    1.3365    9.6354
+        NaN       NaN       NaN       NaN      30.0       NaN       NaN    1.2786    9.2100
+        NaN       NaN       NaN       NaN      34.0       NaN       NaN    1.2157    8.7485
+        NaN       NaN       NaN       NaN      38.0       NaN       NaN    1.1493    8.2599
+        NaN       NaN       NaN       NaN      42.0       NaN       NaN    1.0805    7.7536
+        NaN       NaN       NaN       NaN      46.0       NaN       NaN    1.0106    7.2395
+        NaN       NaN       NaN       NaN      50.0       NaN       NaN    0.9411    6.7275
+        NaN       NaN       NaN       NaN      54.0       NaN       NaN    0.8733    6.2277
+        NaN       NaN       NaN       NaN      58.0       NaN       NaN    0.8085    5.7498
+        NaN       NaN       NaN       NaN      62.0       NaN       NaN    0.7480    5.3032
+        NaN       NaN       NaN       NaN      66.0       NaN       NaN    0.6929    4.8965
+        NaN       NaN       NaN       NaN      70.0       NaN       NaN    0.6444    4.5379
+        NaN       NaN       NaN       NaN      74.0       NaN       NaN    0.6033    4.2343
+        NaN       NaN       NaN       NaN      78.0       NaN       NaN    0.5705    3.9917
+        NaN       NaN       NaN       NaN      82.0       NaN       NaN    0.5466    3.8150
+        NaN       NaN       NaN       NaN      86.0       NaN       NaN    0.5321    3.7075
+        NaN       NaN       NaN       NaN      90.0       NaN       NaN    0.5272    3.6714
+1 206PO EC DECAY. 286-1032 CORR. WITH K AND L1/L2 CONVERSION DATA                
+
+ SPIN SEQUENCE     1+   --->  2+   --->  3+       
+
+ KRANE-STEFFEN SIGN CONVENTION FOR MIXING RATIOS
+
+ ATAN(DELTA2) NSQRES 0.1        0.2          0.5         1          2            5         10         20           50         100
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+   -90.00       NaN   O                                              X        *                                                +
+   -86.00       NaN   O                                              X        *                                                +
+   -82.00       NaN   O                                              X        *                                                +
+   -78.00       NaN   O                                              X        *                                                +
+   -74.00       NaN   O                                              X        *                                                +
+   -70.00       NaN   O                                              X        *                                                +
+   -66.00       NaN   O                                              X        *                                                +
+   -62.00       NaN   O                                              X        *                                                +
+   -58.00       NaN   O                                              X        *                                                +
+   -54.00       NaN   O                                              X        *                                                +
+   -50.00       NaN   O                                              X        *                                                +
+   -46.00       NaN   O                                              X        *                                                +
+   -42.00       NaN   O                                              X        *                                                +
+   -38.00       NaN   O                                              X        *                                                +
+   -34.00       NaN   O                                              X        *                                                +
+   -30.00       NaN   O                                              X        *                                                +
+   -26.00       NaN   O                                              X        *                                                +
+   -22.00       NaN   O                                              X        *                                                +
+   -18.00       NaN   O                                              X        *                                                +
+   -14.00       NaN   O                                              X        *                                                +
+   -10.00       NaN   O                                              X        *                                                +
+    -6.00       NaN   O                                              X        *                                                +
+    -2.00       NaN   O                                              X        *                                                +
+     2.00       NaN   O                                              X        *                                                +
+     6.00       NaN   O                                              X        *                                                +
+    10.00       NaN   O                                              X        *                                                +
+    14.00       NaN   O                                              X        *                                                +
+    18.00       NaN   O                                              X        *                                                +
+    22.00       NaN   O                                              X        *                                                +
+    26.00       NaN   O                                              X        *                                                +
+    30.00       NaN   O                                              X        *                                                +
+    34.00       NaN   O                                              X        *                                                +
+    38.00       NaN   O                                              X        *                                                +
+    42.00       NaN   O                                              X        *                                                +
+    46.00       NaN   O                                              X        *                                                +
+    50.00       NaN   O                                              X        *                                                +
+    54.00       NaN   O                                              X        *                                                +
+    58.00       NaN   O                                              X        *                                                +
+    62.00       NaN   O                                              X        *                                                +
+    66.00       NaN   O                                              X        *                                                +
+    70.00       NaN   O                                              X        *                                                +
+    74.00       NaN   O                                              X        *                                                +
+    78.00       NaN   O                                              X        *                                                +
+    82.00       NaN   O                                              X        *                                                +
+    86.00       NaN   O                                              X        *                                                +
+    90.00       NaN   O                                              X        *                                                +
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+
+ DEGREES OF FREEDOM    =  5
+ X = 5 PERCENT LIMIT   =  2.214
+ * = 0.1 PERCENT LIMIT =  4.103
+
+
+
+
+
+ +++++++ END OF ANALYSIS FOR THIS SPIN COMBINATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ * OU-DATA    0.0000
+
+ * UN-DATA    1.0000
+
+ * GO-DATA   13.0000   10.0000    9.0000    9.0000    9.0000    7.0000
+1 206PO EC DECAY. 286-1032 CORR. WITH K AND L1/L2 CONVERSION DATA                
+
+ SPIN SEQUENCE    13+   ---> 10+   --->  9+   --->  9+   --->  9+   --->  7+       
+
+ UNOBSERVED TRANSITIONS:
+  10+   --->  9+      DELTA=   1.000
+   9+   --->  9+      DELTA=   0.000
+   9+   --->  9+      DELTA=   0.000
+
+ KRANE-STEFFEN SIGN CONVENTION FOR MIXING RATIOS
+
+
+
+
+
+ ******* DUMP FOLLOWS *******
+
+ HEADER= 206PO EC DECAY. 286-1032 CORR. WITH K AND L1/L2 CONVERSION DATA                
+
+
+ NUMBER OF LEVELS= 6, ODD= F
+ 2J AND PI FOLLOW
+    26   1.
+    20   1.
+    18   1.
+    18   1.
+    18   1.
+    14   1.
+
+ NUMBER OF DATA ITEMS= 8
+ A2    0.0170    0.0050       NaN T 0    0.0000    0.0000    0.0000    0.0000 F
+
+ A4    0.0080    0.0120       NaN T 0    0.0000    0.0000    0.0000    0.0000 F
+
+ D     0.0000    0.0000       NaN F 1    0.0000    0.0000    0.0000    0.0000 F
+
+  D    0.0000    0.0000   90.0000 F 2    0.0000    0.0000    0.0000    0.0000 F
+
+ KA   46.4000    2.2000       NaN T 1   44.8100    7.4230    1.0000    1.0000 F
+
+ LL    9.6700    0.5000       NaN T 1    6.9800    1.0880    0.7259    2.5890 T
+
+ KA    1.6000    0.0900    0.5272 T 2    1.5290    0.5272    1.0000    1.0000 F
+
+ LL   10.9000    0.5000    3.6714 T 2    0.2331    0.0771    0.0211    0.0210 T
+
+
+ ATAN(DELTA1) VARIATIONS=    -90.00     90.00      4.00 PURE= F
+ MULTIPOLARITIES= M3 AND E4
+
+ ATAN(DELTA2) VARIATIONS=    -90.00     90.00      4.00 PURE= F
+ MULTIPOLARITIES= E2 AND M3
+
+ ANGULAR CORRELATION COEFFICIENTS
+ RK
+   -0.4844   -0.4440    0.0299              0.0281    0.3867   -0.2921
+   -0.3742    0.5858   -0.1965             -0.1620   -0.6340   -0.1031
+ UK
+    0.9551                                  0.8539
+    0.9667                                  0.8889
+    0.9667                                  0.8889
+    0.8925                                  0.6747
+
+
+ DUMP, NFREE, SHORT= T 5 T
+ ALIM=   -90.000   -90.000    90.000    90.000
+
+ DELTAS OF UNOBSERVED GAMMAS  1   1.000   0.000   0.000
+
+ NUMB=  46
+ QSQ=
+       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN
+       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN
+       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN
+       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN       NaN
+       NaN       NaN       NaN       NaN       NaN       NaN
+
+ FA= 
+0.1000E+010.1000E+010.1000E+010.1000E+010.2000E+010.2000E+010.6000E+010.6000E+010.2400E+020.2400E+02
+0.1200E+030.1200E+030.7200E+030.7200E+030.5040E+040.5040E+040.4032E+050.4032E+050.3629E+060.3629E+06
+0.3629E+070.3629E+070.3992E+080.3992E+080.4790E+090.4790E+090.6227E+100.6227E+100.8718E+110.8718E+11
+0.1308E+130.1308E+130.2092E+140.2092E+140.3557E+150.3557E+150.6402E+160.6402E+160.1216E+180.1216E+18
+0.2433E+190.2433E+190.5109E+200.5109E+200.1124E+220.1124E+220.2585E+230.2585E+230.6204E+240.6204E+24
+0.1551E+260.1551E+260.4033E+270.4033E+270.1089E+290.1089E+290.3049E+300.3049E+300.8842E+310.8842E+31
+0.2653E+330.2653E+330.8223E+340.8223E+340.2631E+360.2631E+360.8683E+370.8683E+370.2952E+390.2952E+39
+0.1033E+410.1033E+410.3720E+420.3720E+420.1376E+440.1376E+440.5230E+450.5230E+450.2040E+470.2040E+47
+0.8159E+480.8159E+480.3345E+500.3345E+500.1405E+520.1405E+520.6042E+530.6042E+530.2658E+550.2658E+55
+0.1196E+570.1196E+570.5503E+580.5503E+580.2586E+600.2586E+600.1241E+620.1241E+620.6083E+630.6083E+63
+0.3041E+650.3041E+650.1551E+670.1551E+670.8066E+680.8066E+680.4275E+700.4275E+700.2308E+720.2308E+72
+0.1270E+740.1270E+740.7110E+750.7110E+75
+
+ CARD= GO 13 10 9 9 9 7       $TEST HIGH SPINS                                         
+
+ ******* DUMP ENDS *******
+
+
+ +++++++ DATA +++++++
+ A2 =     0.017+-   0.005
+ A4 =     0.008+-   0.012
+ KA =   46.4000+-  2.2000 FOR TRANSITION 1. THEORETICAL VALUES=   44.8100 FOR M3 AND    7.4230 FOR E4
+ LL =    9.6700+-  0.5000 FOR TRANSITION 1. THEORETICAL VALUES=    6.9800 FOR M3 AND    1.0880 FOR E4
+                                        * RATIO *  OTHER SHELL:    0.7259 FOR M3 AND    2.5890 FOR E4
+ KA =    1.6000+-  0.0900 FOR TRANSITION 2. THEORETICAL VALUES=    1.5290 FOR E2 AND    0.5272 FOR M3
+ LL =   10.9000+-  0.5000 FOR TRANSITION 2. THEORETICAL VALUES=    0.2331 FOR E2 AND    0.0771 FOR M3
+                                        * RATIO *  OTHER SHELL:    0.0211 FOR E2 AND    0.0210 FOR M3
+
+ ATAN(D1) VARIED FROM -90.0 TO  90.0 IN STEPS OF 4.0 DEGREES
+
+ ATAN(D2) VARIED FROM -90.0 TO  90.0 IN STEPS OF 4.0 DEGREES
+
+
+
+ DELTA(1) MINIMUM
+
+
+    SQ.RES.        A2        A4  ATAN(D1)  ATAN(D2)     KA(1)     LL(1)     KA(2)     LL(2)
+      4.243     0.018     0.006      -3.3     -16.2   44.6843    9.5063    1.4506   10.4730
+
+ DELTA(1)= -0.058   + 0.041 - 0.041   SIGMA=   5.287   SIGMA/DEGREE OF FREEDOM=  1.057
+
+
+ ATAN(DELTA1) NSQRES 0.1        0.2          0.5         1          2            5         10         20           50         100
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+   -90.00   137.970   +                                              X        *                                                O
+   -86.00   146.492   +                                              X        *                                                O
+   -82.00   151.873   +                                              X        *                                                O
+   -78.00   154.884   +                                              X        *                                                O
+   -74.00   155.818   +                                              X        *                                                O
+   -70.00   154.673   +                                              X        *                                                O
+   -66.00   151.387   +                                              X        *                                                O
+   -62.00   145.918   +                                              X        *                                                O
+   -58.00   138.280   +                                              X        *                                                O
+   -54.00   128.545   +                                              X        *                                                O
+   -50.00   116.840   +                                              X        *                                                O
+   -46.00   103.321   +                                              X        *                                                O
+   -42.00    88.117   +                                              X        *                                              O +
+   -38.00    71.214   +                                              X        *                                           O    +
+   -34.00    52.357   +                                              X        *                                      O         +
+   -30.00    32.203   +                                              X        *                               O                +
+   -26.00    17.985   +                                              X        *                      O                         +
+   -22.00    14.456   +                                              X        *                   O                            +
+   -18.00    10.856   +                                              X        *              O                                 +
+   -14.00     6.252   +                                              X        *      O                                         +
+   -10.00     2.810   +                                              X   O    *                                                +
+    -6.00     1.114   +                                    O         X        *                                                +
+    -2.00     0.926   +                                 O            X        *                                                +
+     2.00     1.851   +                                           O  X        *                                                +
+     6.00     3.756   +                                              X       O*                                                +
+    10.00     6.829   +                                              X        *       O                                        +
+    14.00    11.347   +                                              X        *               O                                +
+    18.00    17.396   +                                              X        *                     O                          +
+    22.00    24.767   +                                              X        *                           O                    +
+    26.00    33.040   +                                              X        *                               O                +
+    30.00    41.732   +                                              X        *                                   O            +
+    34.00    50.422   +                                              X        *                                      O         +
+    38.00    58.817   +                                              X        *                                        O       +
+    42.00    66.762   +                                              X        *                                          O     +
+    46.00    74.224   +                                              X        *                                           O    +
+    50.00    81.258   +                                              X        *                                             O  +
+    54.00    87.972   +                                              X        *                                              O +
+    58.00    94.492   +                                              X        *                                               O+
+    62.00   100.933   +                                              X        *                                                O
+    66.00   107.367   +                                              X        *                                                O
+    70.00   113.792   +                                              X        *                                                O
+    74.00   120.073   +                                              X        *                                                O
+    78.00   125.782   +                                              X        *                                                O
+    82.00   129.654   +                                              X        *                                                O
+    86.00   130.656   +                                              X        *                                                O
+    90.00   137.967   +                                              X        *                                                O
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+
+ DEGREES OF FREEDOM    =  5
+ X = 5 PERCENT LIMIT   =  2.214
+ * = 0.1 PERCENT LIMIT =  4.103
+
+
+
+
+ DELTA(2) MINIMUM
+
+
+    SQ.RES.        A2        A4  ATAN(D1)  ATAN(D2)     KA(1)     LL(1)     KA(2)     LL(2)
+      4.272     0.019     0.007      -3.5     -16.0   44.6745    9.4979    1.4525   10.4863
+
+ DELTA(2)=-0.288E+00   +0.371E+00 -0.100E+04   SIGMA=   5.323   SIGMA/DEGREE OF FREEDOM=  1.065
+
+
+ ATAN(DELTA2) NSQRES 0.1        0.2          0.5         1          2            5         10         20           50         100
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+   -90.00    77.860   +                                              X        *                                            O   +
+   -86.00    72.614   +                                              X        *                                           O    +
+   -82.00    67.769   +                                              X        *                                          O     +
+   -78.00    71.260   +                                              X        *                                           O    +
+   -74.00    77.777   +                                              X        *                                            O   +
+   -70.00    82.286   +                                              X        *                                             O  +
+   -66.00    84.538   +                                              X        *                                             O  +
+   -62.00    85.019   +                                              X        *                                              O +
+   -58.00    84.055   +                                              X        *                                             O  +
+   -54.00    81.782   +                                              X        *                                             O  +
+   -50.00    78.242   +                                              X        *                                            O   +
+   -46.00    73.426   +                                              X        *                                           O    +
+   -42.00    67.294   +                                              X        *                                          O     +
+   -38.00    59.770   +                                              X        *                                        O       +
+   -34.00    50.706   +                                              X        *                                      O         +
+   -30.00    39.868   +                                              X        *                                  O             +
+   -26.00    27.079   +                                              X        *                            O                   +
+   -22.00    13.061   +                                              X        *                 O                              +
+   -18.00     2.225   +                                              O        *                                                +
+   -14.00     2.351   +                                              XO       *                                                +
+   -10.00     8.145   +                                              X        *          O                                     +
+    -6.00    12.362   +                                              X        *                O                               +
+    -2.00    14.274   +                                              X        *                  O                             +
+     2.00    15.167   +                                              X        *                   O                            +
+     6.00    16.089   +                                              X        *                    O                           +
+    10.00    17.605   +                                              X        *                      O                         +
+    14.00    19.951   +                                              X        *                        O                       +
+    18.00    23.174   +                                              X        *                          O                     +
+    22.00    27.203   +                                              X        *                            O                   +
+    26.00    31.900   +                                              X        *                               O                +
+    30.00    37.080   +                                              X        *                                 O              +
+    34.00    42.544   +                                              X        *                                   O            +
+    38.00    48.089   +                                              X        *                                     O          +
+    42.00    53.527   +                                              X        *                                       O        +
+    46.00    58.694   +                                              X        *                                        O       +
+    50.00    63.459   +                                              X        *                                         O      +
+    54.00    67.732   +                                              X        *                                          O     +
+    58.00    71.457   +                                              X        *                                           O    +
+    62.00    74.614   +                                              X        *                                            O   +
+    66.00    77.205   +                                              X        *                                            O   +
+    70.00    79.246   +                                              X        *                                            O   +
+    74.00    80.738   +                                              X        *                                             O  +
+    78.00    81.634   +                                              X        *                                             O  +
+    82.00    81.767   +                                              X        *                                             O  +
+    86.00    80.746   +                                              X        *                                             O  +
+    90.00    77.861   +                                              X        *                                            O   +
+                      +----------+------------+----------+----------+------------+----------+----------+------------+----------+
+
+ DEGREES OF FREEDOM    =  5
+ X = 5 PERCENT LIMIT   =  2.214
+ * = 0.1 PERCENT LIMIT =  4.103
+
+
+
+
+
+ +++++++ END OF ANALYSIS FOR THIS SPIN COMBINATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ HEADER:  THE FOLLOWING DATA CARD CAUSES AN ERROR                              
+
+ * GO-DATA    1.5000    2.0000    3.0000    4.0000    5.0000    6.0000
+
+
+
+ ***** SERIOUS ERROR IN ROUTINE MAIN *****
+ STATEMENT NUMBER IS:  116
+ MESSAGE IS: MIXED INTEGER/HALF INTEGER SPINS
+ LAST CARD READ IS:
+ 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+ GO 1.5 2 3 4 5 6   $MIXED HALF_INTEGER AND INTEGER SPIN!!!                      
+
+
+
+
+
+ ******* DUMP FOLLOWS *******
+
+ HEADER= THE FOLLOWING DATA CARD CAUSES AN ERROR                                        
+
+
+ NUMBER OF LEVELS= 6, ODD= T
+ 2J AND PI FOLLOW
+     3   1.
+     4   1.
+     6   1.
+     8   1.
+    10   1.
+    12   1.
+
+ NUMBER OF DATA ITEMS= 8
+ A2    0.0170    0.0050    0.0189 T 0    0.0000    0.0000    0.0000    0.0000 F
+
+ A4    0.0080    0.0120    0.0065 T 0    0.0000    0.0000    0.0000    0.0000 F
+
+ D     0.0000    0.0000   -3.4508 F 1    0.0000    0.0000    0.0000    0.0000 F
+
+  D    0.0000    0.0000  -16.0461 F 2    0.0000    0.0000    0.0000    0.0000 F
+
+ KA   46.4000    2.2000   44.6745 T 1   44.8100    7.4230    1.0000    1.0000 F
+
+ LL    9.6700    0.5000    9.4979 T 1    6.9800    1.0880    0.7259    2.5890 T
+
+ KA    1.6000    0.0900    1.4525 T 2    1.5290    0.5272    1.0000    1.0000 F
+
+ LL   10.9000    0.5000   10.4863 T 2    0.2331    0.0771    0.0211    0.0210 T
+
+
+ ATAN(DELTA1) VARIATIONS=    -90.00     90.00      4.00 PURE= F
+ MULTIPOLARITIES= M3 AND E4
+
+ ATAN(DELTA2) VARIATIONS=    -90.00     90.00      4.00 PURE= F
+ MULTIPOLARITIES= E2 AND M3
+
+ ANGULAR CORRELATION COEFFICIENTS
+ RK
+   -0.4844   -0.4440    0.0299              0.0281    0.3867   -0.2921
+   -0.3742    0.5858   -0.1965             -0.1620   -0.6340   -0.1031
+ UK
+    0.9551                                  0.8539
+    0.9667                                  0.8889
+    0.9667                                  0.8889
+    0.8925                                  0.6747
+
+
+ DUMP, NFREE, SHORT= T 5 T
+ ALIM=   -90.000   -90.000    90.000    90.000
+
+ DELTAS OF UNOBSERVED GAMMAS  1   1.000   0.000   0.000
+
+ NUMB=  46
+ QSQ=
+0.3893E+030.3631E+030.3388E+030.3563E+030.3889E+030.4114E+030.4227E+030.4251E+030.4203E+030.4089E+03
+0.3912E+030.3671E+030.3365E+030.2988E+030.2535E+030.1993E+030.1354E+030.6531E+020.1112E+020.1175E+02
+0.4072E+020.6181E+020.7137E+020.7584E+020.8044E+020.8803E+020.9976E+020.1159E+030.1360E+030.1595E+03
+0.1854E+030.2127E+030.2404E+030.2676E+030.2935E+030.3173E+030.3387E+030.3573E+030.3731E+030.3860E+03
+0.3962E+030.4037E+030.4082E+030.4088E+030.4037E+030.3893E+03
+
+ FA= 
+0.1000E+010.1000E+010.1000E+010.1000E+010.2000E+010.2000E+010.6000E+010.6000E+010.2400E+020.2400E+02
+0.1200E+030.1200E+030.7200E+030.7200E+030.5040E+040.5040E+040.4032E+050.4032E+050.3629E+060.3629E+06
+0.3629E+070.3629E+070.3992E+080.3992E+080.4790E+090.4790E+090.6227E+100.6227E+100.8718E+110.8718E+11
+0.1308E+130.1308E+130.2092E+140.2092E+140.3557E+150.3557E+150.6402E+160.6402E+160.1216E+180.1216E+18
+0.2433E+190.2433E+190.5109E+200.5109E+200.1124E+220.1124E+220.2585E+230.2585E+230.6204E+240.6204E+24
+0.1551E+260.1551E+260.4033E+270.4033E+270.1089E+290.1089E+290.3049E+300.3049E+300.8842E+310.8842E+31
+0.2653E+330.2653E+330.8223E+340.8223E+340.2631E+360.2631E+360.8683E+370.8683E+370.2952E+390.2952E+39
+0.1033E+410.1033E+410.3720E+420.3720E+420.1376E+440.1376E+440.5230E+450.5230E+450.2040E+470.2040E+47
+0.8159E+480.8159E+480.3345E+500.3345E+500.1405E+520.1405E+520.6042E+530.6042E+530.2658E+550.2658E+55
+0.1196E+570.1196E+570.5503E+580.5503E+580.2586E+600.2586E+600.1241E+620.1241E+620.6083E+630.6083E+63
+0.3041E+650.3041E+650.1551E+670.1551E+670.8066E+680.8066E+680.4275E+700.4275E+700.2308E+720.2308E+72
+0.1270E+740.1270E+740.7110E+750.7110E+75
+
+ CARD= GO 1.5 2 3 4 5 6   $MIXED HALF_INTEGER AND INTEGER SPIN!!!                      
+
+ ******* DUMP ENDS *******
