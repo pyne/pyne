@@ -15,14 +15,6 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 def path_to_exe(exe_name ):
     exe_path_abs, dp = os.path.split(os.path.abspath(__file__))
     exe_path_abs = os.path.join(exe_path_abs, exe_name)
-    #sesh_path = sys.argv[0]  
-    #print(sesh_path)
-    #print(exe_path_abs)
-    #exe_path = os.path.relpath(exe_path_abs,sys.argv[0])
-    #exe_path = os.path.join('./',exe_path)
-    #exe_path = exe_path.replace("../","",1)
-    #print(exe_path)
-    #return exe_path
     exe_path_abs = os.path.join('./',exe_path_abs)
     print(exe_path)
     return exe_path_abs

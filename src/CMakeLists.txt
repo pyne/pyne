@@ -34,7 +34,6 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
     "transport_spatial_methods/3d/trackroutines.f90"
     "transport_spatial_methods/3d/trackstruct.f90"
     "transport_spatial_methods/3d/version.f90"
-
     #"transport_spatial_methods/3d/main.f90"
     )
 
@@ -42,17 +41,6 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
 IF(NOT ${PYNE_PLATFORM} STREQUAL "__LINUX__")
     set(BUILD_SPATIAL_SOLVER false)
 ENDIF()
-
-#set fortran ENSDF processing files
-set(ENSDF_ALPHAD_SRC
-    #"ensdf_processing/ALPHAD/alphad.f"
-    "#ensdf_processing/ALPHAD/nsdflib95.f"
-     #ensdf_processing/ALPHAD/alphad.f
-    )
-
-#set(ENSDF_DELTA_SRC
-#    "ensdf_processing/DELTA/delta.for"
-#    )
 
 # setup source files
 IF(BUILD_SPATIAL_SOLVER)
@@ -71,9 +59,7 @@ IF(BUILD_SPATIAL_SOLVER)
         "tally.cpp"
         "utils.cpp"
         "endftod.f90"
-        #"ensdf_processing/ALPHAD/nsdflib95.f"
         "${TRANSPORT_SPATIAL_METHODS_SRCS}"
-        #"${ENSDF_ALPHAD_SRC}"
         )
 ELSE()
     set(PYNE_SRCS
@@ -104,9 +90,6 @@ endif (MOAB_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
-
-#add_library(nsdflib ensdf_processing/nsdflib95.f)
-#add_library(alphad_lib ${ENSDF_ALPHAD_SRC})
 
 target_link_libraries(pyne hdf5)
 IF(BUILD_SPATIAL_SOLVER)
@@ -143,17 +126,6 @@ add_executable(pandora ${PROJECT_SOURCE_DIR}/src/ensdf_processing/PANDORA/pandor
 #                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f 
                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-
-#target_link_libraries(alphad pyne)
-#target_link_libraries(alphad nsdflib)
-#target_link_libraries(gabs LINK_PUBLIC nsdflib)
-#target_link_libraries(gtol LINK_PUBLIC nsdflib)
-#target_link_libraries(hsicc LINK_PUBLIC nsdflib)
-#target_link_libraries(hsmrg LINK_PUBLIC nsdflib)
-#target_link_libraries(logft nsdflib)
-#target_link_libraries(pandora LINK_PUBLIC nsdflib)
-#target_link_libraries(radlst LINK_PUBLIC pyne)
-#target_link_libraries(ruler LINK_PUBLIC nsdflib)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
