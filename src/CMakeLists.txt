@@ -46,7 +46,7 @@ ENDIF()
 #set fortran ENSDF processing files
 set(ENSDF_ALPHAD_SRC
     #"ensdf_processing/ALPHAD/alphad.f"
-    "ensdf_processing/ALPHAD/nsdflib95.f"
+    "#ensdf_processing/ALPHAD/nsdflib95.f"
      #ensdf_processing/ALPHAD/alphad.f
     )
 
@@ -71,9 +71,9 @@ IF(BUILD_SPATIAL_SOLVER)
         "tally.cpp"
         "utils.cpp"
         "endftod.f90"
-        "ensdf_processing/ALPHAD/nsdflib95.f"
+        #"ensdf_processing/ALPHAD/nsdflib95.f"
         "${TRANSPORT_SPATIAL_METHODS_SRCS}"
-        "${ENSDF_ALPHAD_SRC}"
+        #"${ENSDF_ALPHAD_SRC}"
         )
 ELSE()
     set(PYNE_SRCS
@@ -105,7 +105,7 @@ endif (MOAB_FOUND)
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
 
-add_library(alphad_src STATIC ensdf_processing/ALPHAD/nsdflib95.f)
+#add_library(nsdflib ensdf_processing/nsdflib95.f)
 #add_library(alphad_lib ${ENSDF_ALPHAD_SRC})
 
 target_link_libraries(pyne hdf5)
@@ -121,32 +121,39 @@ set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS
     "-O0")
 
 #SET(CMAKE_EXE_LINKER_FLAGS "-c")
-add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f)
+add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f  
+                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
-add_executable(gabs ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GABS/gabs.for)
-add_executable(gtol ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f)
+add_executable(gabs ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GABS/gabs.for 
+                    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(gtol ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f 
+                    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(bldhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/bldhst.for)
-add_executable(hsicc ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for)
-add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for)
-add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for)
-add_executable(logft ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for)
-add_executable(pandora ${PROJECT_SOURCE_DIR}/src/ensdf_processing/PANDORA/pandora.f)
-#add_executable(radlst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADLST/radlst.for)
-add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f)
+add_executable(hsicc ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for 
+                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(logft ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(pandora ${PROJECT_SOURCE_DIR}/src/ensdf_processing/PANDORA/pandora.f 
+                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+#add_executable(radlst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADLST/radlst.for
+#                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 
 #target_link_libraries(alphad pyne)
-target_link_libraries(alphad LINK_PUBLIC pyne)
-target_link_libraries(gabs LINK_PUBLIC pyne)
-target_link_libraries(gtol LINK_PUBLIC pyne)
-target_link_libraries(hsicc LINK_PUBLIC pyne)
-target_link_libraries(hsmrg LINK_PUBLIC pyne)
-target_link_libraries(logft LINK_PUBLIC pyne)
-target_link_libraries(pandora LINK_PUBLIC pyne)
+#target_link_libraries(alphad nsdflib)
+#target_link_libraries(gabs LINK_PUBLIC nsdflib)
+#target_link_libraries(gtol LINK_PUBLIC nsdflib)
+#target_link_libraries(hsicc LINK_PUBLIC nsdflib)
+#target_link_libraries(hsmrg LINK_PUBLIC nsdflib)
+#target_link_libraries(logft nsdflib)
+#target_link_libraries(pandora LINK_PUBLIC nsdflib)
 #target_link_libraries(radlst LINK_PUBLIC pyne)
-target_link_libraries(ruler LINK_PUBLIC pyne)
-
-add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/delta.exe
-               COMMAND ${CMAKE_COMMAND} -E copy delta)
+#target_link_libraries(ruler LINK_PUBLIC nsdflib)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

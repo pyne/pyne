@@ -38,10 +38,24 @@ def alphad(inputdict_unchecked):
     behind ALPHAD can be found at:
         http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/alphad/readme-alphad.pdf
     """
-    print('Executable not yet linked')
-    #@todo: get path to executable
-    #       call executable
-    #       copy output file to specified out
+    #@todo: check dictionary
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    report_file = inputdict_unchecked['report_file']
+    new_out = inputdict_unchecked['rewrite_input_with_hinderance_factor']
+    output_file = 'alphad.out'
+    if(new_out):    
+        output_file = inputdict_unchecked['output_file'] #output file if report = yes
+    exe_path = path_to_exe('alphad')
+    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_file + '\n' + report_file + '\n'
+    if (new_out):
+        inp = inp + 'Y' + '\n' + output_file
+    delta_output.stdin.write(inp)
+    delta_output.communicate()[0]
+    delta_output.stdin.close()
+
+
 
 def bricc(inputdict_unchecked):
     """
@@ -137,6 +151,26 @@ def gtol(inputdict_unchecked):
     delta_output.communicate()[0]
     delta_output.stdin.close()
 
+def bldhst(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    #@todo: check dictionary
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    output_table_file = inputdict_unchecked['output_table_file']
+    output_index_file = inputdict_unchecked['output_index_file'] #report file << CHANGE BACK TO REPORT..
+
+    exe_path = path_to_exe('bldhst')
+    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    delta_output.stdin.write(input_file + '\n' + output_table_file + '\n' + output_index_file )
+    delta_output.communicate()[0]
+    delta_output.stdin.close()
+
 def hsicc(inputdict_unchecked):
     """
     This function ...
@@ -145,10 +179,61 @@ def hsicc(inputdict_unchecked):
         input_file : input ensdf file
         output file : file for output to be written to (doesn't have to exist)
     """
-    print('Executable not yet linked')
-    #@todo: get path to executable
-    #       call executable
-    #       copy output file to specified out
+    #@todo: check dictionary
+    inputdict = {}
+    data_deck = inputdict_unchecked['data_deck']
+    icc_index = inputdict_unchecked['icc_index']
+    icc_table = inputdict_unchecked['icc_table']
+    complete_report = inputdict_unchecked['complete_report']
+    new_card_deck = inputdict_unchecked['new_card_deck']
+    comparison_report = inputdict_unchecked['comparison_report']
+    multipol_known = inputdict_unchecked['is_multipol_known'] #'Y or CR'
+
+    exe_path = path_to_exe('hsicc')
+    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    delta_output.stdin.write(data_deck + '\n' + icc_index + '\n' + icc_table + '\n' + complete_report + '\n' + new_card_deck + '\n' + comparison_report + '\n' + multipol_known )
+    delta_output.communicate()[0]
+    delta_output.stdin.close()
+
+def hsmrg(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    #@todo: check dictionary
+    inputdict = {}
+    data_deck = inputdict_unchecked['data_deck']
+    card_deck = inputdict_unchecked['card_deck']
+    merged_data_deck = inputdict_unchecked['merged_data_deck']
+
+    exe_path = path_to_exe('hsmrg')
+    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    delta_output.stdin.write(data_deck + '\n' + card_deck + '\n' + merged_data_deck )
+    delta_output.communicate()[0]
+    delta_output.stdin.close()
+
+def seqhst(inputdict_unchecked):
+    #NOTE: changed input file line length to 90 to support longer file paths
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    #@todo: check dictionary
+    inputdict = {}
+    input_file = inputdict_unchecked['binary_table_input_file']
+    output_file = inputdict_unchecked['sequential_output_file']
+
+    exe_path = path_to_exe('seqhst')
+    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    delta_output.stdin.write(input_file + '\n' + output_file )
+    delta_output.communicate()[0]
+    delta_output.stdin.close()
 
 def logft(inputdict_unchecked):
     """
@@ -197,7 +282,16 @@ def ruler(inputdict_unchecked):
         input_file : input ensdf file
         output file : file for output to be written to (doesn't have to exist)
     """
-    print('Executable not yet linked')
-    #@todo: get path to executable
-    #       call executable
-    #       copy output file to specified out
+    #@todo: check dictionary
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    output_report_file = inputdict_unchecked['output_report_file']
+    mode_of_operation = inputdict_unchecked['mode_of_operation']
+    assumed_dcc_theory = inputdict_unchecked['assumed_dcc_theory']
+    
+    exe_path = path_to_exe('ruler')
+    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_file + '\n' + output_report_file + '\n' + mode_of_operation + '\n' + assumed_dcc_theory
+    delta_output.stdin.write(inp)
+    delta_output.communicate()[0]
+    delta_output.stdin.close()

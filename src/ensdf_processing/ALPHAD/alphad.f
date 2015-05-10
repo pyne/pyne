@@ -1245,7 +1245,7 @@
 !
 !     GET CURRENT DATE
 !
-      XDAte = ' '
+      XDAte = 'DD-MMM-YYYY'
       CALL DATE_20(XDAte)
 !
 !     GET COMMAND LINE PARAMETERS IF THERE ARE ANY

@@ -2997,16 +2997,16 @@ C                                                                       21 00560
       End                                                               21 00580
 C+++MDC+++
 C...VAX, DVF, UNX
-      SUBROUTINE DATE_20(DATE)
- 
-      CHARACTER DATE*(*)
+C      SUBROUTINE DATE_20(DATE)
+C 
+C      CHARACTER DATE*(*)
 C
 C     RETURNS DATE AS A CHARACTER STRING OF 11 CHARACTERS IN THE
 C          FORM  DD-MMM-YYYY
 C
-      Character*3 mon(12)
-      Data mon/'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep',
-     +'Oct','Nov','Dec'/
+C      Character*3 mon(12)
+C      Data mon/'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep',
+C     +'Oct','Nov','Dec'/
 C...VAX, DVF
 C/      Integer im
 C/      Character*4 ccyy
@@ -3019,11 +3019,11 @@ C/      CALL DATE_AND_TIME(DAY)
 C/      Read(day,'(A4,I2,A2)') ccyy,im,dd
 C/      WRITE(DATE,FMT='(A2,''-'',A3,''-'',A4)') dd,MON(im),ccyy
 C...UNX
-      INTEGER IYMD(3)
-      CALL IDATE(IYMD)
-      WRITE(DATE,FMT='(I2,''-'',A3,''-'',I4)') IYMD(1),MON(IYMD(2)),
-     +   IYMD(3)
+C      INTEGER IYMD(3)
+C      CALL IDATE(IYMD)
+C      WRITE(DATE,FMT='(I2,''-'',A3,''-'',I4)') IYMD(1),MON(IYMD(2)),
+C     +   IYMD(3)
 C...VAX, DVF, UNX
-      RETURN
-      END
+C      RETURN
+C      END
 C---MDC---

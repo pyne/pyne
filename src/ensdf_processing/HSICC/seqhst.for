@@ -39,7 +39,7 @@ C                                                                       01 00370
 C                                                                       01 00390
       INTEGER Z, KNT                                                    01 00400
       CHARACTER*2  SHELL                                                01 00410
-      CHARACTER*25 LINE                                                 01 00420
+      CHARACTER*90 LINE                                                 01 00420
       REAL    EG, E(4), M(4)                                            01 00430
       CHARACTER*8  ECHAR(4),MCHAR(4)                                    01 00440
       INTEGER TBLKEY,I                                                  01 00450

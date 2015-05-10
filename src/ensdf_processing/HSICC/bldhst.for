@@ -53,7 +53,7 @@ C                                                                       01 00500
       REAL E(4), M(4)                                                   01 00530
       INTEGER TBLKEY, NDXKEY                                            01 00540
       INTEGER ZOLD                                                      01 00550
-      CHARACTER*16 LINE,line1,line2                                     01 00560
+      CHARACTER*32 LINE,line1,line2                                     01 00560
       Integer i,j                                                       01 00570
       Real eg                                                           01 00580
 C                                                                       01 01020

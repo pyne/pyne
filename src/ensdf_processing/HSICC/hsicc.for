@@ -569,7 +569,7 @@ C                                                                       01 05680
 C-ARRANGE GAMMAS IN ORDER OF INCREASING ENERGY, CARRYING MULTIPOLE AND  01 05690
 C-DATA WITH THEM                                                        01 05700
 C                                                                       01 05710
-  500 CALL SORT(E, NE, QARD, QRDSEQ)                                    01 05720
+  500 CALL SORT_LOCAL(E, NE, QARD, QRDSEQ)                              01 05720
 C                                                                       01 05730
       WRITE(36, 9900) Char(12)                                          01 05740
 C                                                                       01 05750
@@ -1584,7 +1584,7 @@ C                                                                       05 00100
    12     CONTINUE                                                      05 00530
       RETURN                                                            05 00540
       END                                                               05 00550
-      SUBROUTINE SORT(BASE, N, QARD, QRDSEQ)                            06 00010
+      SUBROUTINE SORT_LOCAL(BASE, N, QARD, QRDSEQ)                      06 00010
 C                                                                       06 00020
 C...      SORTS THE FIRST N ELEMENTS OF BASE IN ASCENDING ORDER         06 00030
 C...      CARRYING ALONG QARD AND QRDSEQ.                               06 00040
@@ -2798,16 +2798,16 @@ C                                                                       17 00070
                                                                         18 00010
 C+++MDC+++                                                              18 00020
 C...VAX, DVF, UNX                                                       18 00030
-      SUBROUTINE DATE_20(DATE)                                          18 00040
+C      SUBROUTINE DATE_20(DATE)                                          18 00040
                                                                         18 00050
-      CHARACTER DATE*(*)                                                18 00060
+C      CHARACTER DATE*(*)                                                18 00060
 C                                                                       18 00070
 C     RETURNS DATE AS A CHARACTER STRING OF 11 CHARACTERS IN THE        18 00080
 C          FORM  DD-MMM-YYYY                                            18 00090
 C                                                                       18 00100
-      Character*3 mon(12)                                               18 00110
-      Data mon/'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep',   18 00120
-     +'Oct','Nov','Dec'/                                                18 00130
+C      Character*3 mon(12)                                               18 00110
+C      Data mon/'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep',   18 00120
+C     +'Oct','Nov','Dec'/                                                18 00130
 C...VAX, DVF                                                            18 00140
 C/      Integer im                                                      18 00150
 C/      Character*4 ccyy                                                18 00160
@@ -2820,13 +2820,13 @@ C/      CALL DATE_AND_TIME(DAY)                                         18 00220
 C/      Read(day,'(A4,I2,A2)') ccyy,im,dd                               18 00230
 C/      date=dd//'-'//mon(im)//'-'//ccyy                                18 00240
 C...UNX                                                                 18 00250
-      INTEGER IYMD(3)                                                   18 00260
-      CALL IDATE(IYMD)                                                  18 00270
-      WRITE(DATE,FMT='(I2,''-'',A3,''-'',I4)') IYMD(1),MON(IYMD(2)),    18 00280
-     +   IYMD(3)                                                        18 00290
+C      INTEGER IYMD(3)                                                   18 00260
+C      CALL IDATE(IYMD)                                                  18 00270
+C      WRITE(DATE,FMT='(I2,''-'',A3,''-'',I4)') IYMD(1),MON(IYMD(2)),    18 00280
+C     +   IYMD(3)                                                        18 00290
 C...VAX, DVF, UNX                                                       18 00300
-      RETURN                                                            18 00310
-      END                                                               18 00320
+C      RETURN                                                            18 00310
+C      END                                                               18 00320
 C---MDC---                                                              19 00010
                                                                         19 00020
       Subroutine GivWarn(seq,record,newrec)                             19 00030
