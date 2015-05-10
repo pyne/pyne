@@ -11,7 +11,7 @@ def test_alphad():
     input_dict = {}
     input_dict['input_file'] = 'ensdf_processing/alphad.inp'
     input_dict['report_file'] = 'ensdf_processing/alphad.rpt'
-    input_dict['rewrite_input_with_hinderance_factor'] = 1
+    input_dict['rewrite_input_with_hinderance_factor'] = 'Y'
     input_dict['output_file'] = 'ensdf_processing/alphad.out'
     output_dict = ensdf_processing.alphad(input_dict)
 
@@ -45,25 +45,25 @@ def test_gtol():
 
 def test_bldhst():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/iccseq.dat'
-    input_dict['output_table_file'] = 'ensdf_processing/icctbl.dat'
-    input_dict['output_index_file'] = 'ensdf_processing/iccndx.dat'
+    input_dict['input_file'] = 'ensdf_processing/bldhst_iccseq.dat'
+    input_dict['output_table_file'] = 'ensdf_processing/bldhst_icctbl.dat'
+    input_dict['output_index_file'] = 'ensdf_processing/bldhst_iccndx.dat'
     output_dict = ensdf_processing.bldhst(input_dict)
 
 def test_hsicc():
     input_dict = {}
-    input_dict['data_deck'] = 'ensdf_processing/data.tst'
-    input_dict['icc_index'] = 'ensdf_processing/iccndx.dat'
-    input_dict['icc_table'] = 'ensdf_processing/icctbl.dat'
-    input_dict['complete_report'] = 'ensdf_processing/hscalc.lst'
-    input_dict['new_card_deck'] = 'ensdf_processing/cards.new'
-    input_dict['comparison_report'] = 'ensdf_processing/compar.lst'
+    input_dict['data_deck'] = 'ensdf_processing/hsicc_data.tst'
+    input_dict['icc_index'] = 'ensdf_processing/hsicc_iccndx.dat'
+    input_dict['icc_table'] = 'ensdf_processing/hsicc_icctbl.dat'
+    input_dict['complete_report'] = 'ensdf_processing/hsicc_hscalc.lst'
+    input_dict['new_card_deck'] = 'ensdf_processing/hsicc_cards.new'
+    input_dict['comparison_report'] = 'ensdf_processing/hsicc_compar.lst'
     input_dict['is_multipol_known'] = 'Y'
     output_dict = ensdf_processing.hsicc(input_dict)
 
 def test_hsmrg():
     input_dict = {}
-    input_dict['data_deck'] = 'ensdf_processing/data.tst'
+    input_dict['data_deck'] = 'ensdf_processing/hsicc_data.tst'
     input_dict['card_deck'] = 'ensdf_processing/cards.new'
     input_dict['merged_data_deck'] = 'ensdf_processing/cards.mrg'
     output_dict = ensdf_processing.hsmrg(input_dict)
@@ -71,8 +71,8 @@ def test_hsmrg():
 
 def test_seqhst():
     input_dict = {}
-    input_dict['binary_table_input_file'] = 'ensdf_processing/icctbl.dat'
-    input_dict['sequential_output_file'] = 'ensdf_processing/iccseq.dat'
+    input_dict['binary_table_input_file'] = 'ensdf_processing/seqhst_icctbl.dat'
+    input_dict['sequential_output_file'] = 'ensdf_processing/seqhst_iccseq.dat'
     output_dict = ensdf_processing.seqhst(input_dict)
 
 def test_logft():

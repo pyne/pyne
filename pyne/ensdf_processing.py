@@ -16,7 +16,7 @@ def path_to_exe(exe_name ):
     exe_path_abs, dp = os.path.split(os.path.abspath(__file__))
     exe_path_abs = os.path.join(exe_path_abs, exe_name)
     exe_path_abs = os.path.join('./',exe_path_abs)
-    print(exe_path)
+    print(exe_path_abs)
     return exe_path_abs
 
 def alphad(inputdict_unchecked):
@@ -39,7 +39,7 @@ def alphad(inputdict_unchecked):
     report_file = inputdict_unchecked['report_file']
     new_out = inputdict_unchecked['rewrite_input_with_hinderance_factor']
     output_file = 'alphad.out'
-    if(new_out):    
+    if(new_out == 'Y'):    
         output_file = inputdict_unchecked['output_file'] #output file if report = yes
     exe_path = path_to_exe('alphad')
     delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
