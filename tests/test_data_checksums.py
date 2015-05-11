@@ -1,6 +1,7 @@
 """ test data_checksums and hashing functions"""
 import os
 import warnings
+from shutil import copyfile
 
 import nose
 from nose.tools import assert_equal, assert_true
@@ -35,9 +36,20 @@ def test_data_checksums():
 
 def test_internal_hashes():
     from pyne.dbgen import hashtools
-    hashtools.set_internal_hashes(pyne.nuc_data)
-    for item, val in hashtools.check_internal_hashes(pyne.nuc_data):
+    remove_data = False
+    if os.access(pyne.nuc_data, os.W_OK):
+        test_data = pyne.nuc_data
+    else:
+        # Create a copy so we don't try to modify a file we don't have
+        # permissions for
+        test_data = 'test_nuc_data.h5'
+        copyfile(pyne.nuc_data, test_data)
+        remove_data = True
+    hashtools.set_internal_hashes(test_data)
+    for item, val in hashtools.check_internal_hashes(test_data):
         assert_true(val)
+    if remove_data:
+        os.remove(test_data)
 
 if __name__ == "__main__":
     nose.runmodule()
