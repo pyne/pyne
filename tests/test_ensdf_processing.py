@@ -71,7 +71,7 @@ def test_hsmrg():
 
 def test_seqhst():
     input_dict = {}
-    input_dict['binary_table_input_file'] = 'ensdf_processing/seqhst_icctbl.dat'
+    input_dict['binary_table_input_file'] = 'ensdf_processing/hsicc_icctbl.dat'
     input_dict['sequential_output_file'] = 'ensdf_processing/seqhst_iccseq.dat'
     output_dict = ensdf_processing.seqhst(input_dict)
 
