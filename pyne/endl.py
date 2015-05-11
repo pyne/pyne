@@ -17,6 +17,7 @@ from __future__ import print_function, division, unicode_literals
 
 import re
 from warnings import warn
+from collections import namedtuple, defaultdict
 
 import numpy as np
 
@@ -32,10 +33,32 @@ END_OF_TABLE_RE = re.compile(' {71}1')
 
 class Library(rxdata.RxLib):
     """A class for a file which contains multiple ENDL tables."""
+
+    DataTuple = namedtuple('DataTuple', ['yo', 'limits', 'x1', 'data'])
+
+    @staticmethod
+    def pin_rdesc_rprop_dict_entry():
+        """Static method to generate entries for the pin_rdesc_rprop dict."""
+
+        return {
+                'data_tuples': list()
+                }
+
+    @staticmethod
+    def structure_dict_entry():
+        """Static method to generate entries for the structure dict."""
+
+        return {
+                'pin': set(),
+                'rdesc': set(),
+                'rprop': set(),
+                'pin_rdesc_rprop': defaultdict(
+                    Library.pin_rdesc_rprop_dict_entry
+                    )
+                }
+
     def __init__(self, fh):
-        self.mts = {}
-        self.structure = {}
-        self.mat_dict = {}
+        self.structure = defaultdict(Library.structure_dict_entry)
         self.intdict = {
                 0: self._linlin,
                 2: self._linlin,
@@ -72,7 +95,7 @@ class Library(rxdata.RxLib):
     def _read_headers(self):
         opened_here = False
         if isinstance(self.fh, str):
-            fh = open(self.fh, 'r')
+            fh = open(self.fh, 'rbU')
             opened_here = True
         else:
             fh = self.fh
@@ -108,21 +131,33 @@ class Library(rxdata.RxLib):
             # convert to Pyne native formats
             nuc = nucname.zzzaaa_to_id(nuc_zzzaaa)
 
-            # insert the nucleus in the self.structure dictionary
-#            if nuc not in self.structure:
-#                self.structure.update(
-#                        { nuc: {
-#                            'particle_in': [],
-#                            'particle_out': [],
-#                            'data': {},
-#                            'start': start,
-#                            }})
-
             # skip to the end of the table
             line = fh.readline()
             while len(line) > 0 and not END_OF_TABLE_RE.match(line):
                 line = fh.readline()
 
+            stop = fh.tell()
+
+            # insert the table in the self.structure dictionary
+            self.structure[nuc]['pin'].add(yi)
+            self.structure[nuc]['rdesc'].add(rdesc)
+            self.structure[nuc]['rprop'].add(rprop)
+
+            pdp_dict = self.structure[nuc]['pin_rdesc_rprop']
+            table_dict = pdp_dict[yi, rdesc, rprop]
+            table_dict['limits'] = (start, stop)
+            table_dict['rmod'] = rmod
+
+            x1_in_tuple = x1 if rmod != 0 else None
+            data_tuple = self.DataTuple(
+                    x1=x1_in_tuple,
+                    yo=yo,
+                    limits=(start, stop),
+                    data=[]
+                    )
+            table_dict['data_tuples'].append(data_tuple)
+
+        # close the file if it was opened here
         if opened_here:
             fh.close()
 
