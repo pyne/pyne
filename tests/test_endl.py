@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import io
 import warnings
@@ -5,6 +6,7 @@ import sys
 from hashlib import md5
 
 import numpy as np
+from numpy.testing import assert_array_equal
 import nose
 from nose.tools import assert_equal
 
@@ -38,10 +40,27 @@ def test_loadfile():
             " the epdl97_eedl_Pb data file."
             )
     testlib = Library("epdl97_eedl_Pb")
-#    exp_nuclides = [10010000, 30060000, 40090000, 50110000, 30070000,
-#                    60000000, 50100000]
-#    obs_nuclides = list(map(int, testlib.structure.keys()))
-#    assert_array_equal(exp_nuclides, obs_nuclides)
+
+    # test the nuclides
+    pb_nuclide = 820000000
+    exp_nuclides = [pb_nuclide]
+    obs_nuclides = list(map(int, testlib.structure.keys()))
+    assert_array_equal(exp_nuclides, obs_nuclides)
+
+    # test the incoming particles
+    exp_pin = [9]
+    obs_pin = testlib.structure[pb_nuclide]['pin']
+    assert_array_equal(sorted(exp_pin), sorted(obs_pin))
+
+    # test the reaction properties
+    exp_rdesc = [7, 8, 10, 81, 82, 83]
+    obs_rdesc = testlib.structure[pb_nuclide]['rdesc']
+    assert_array_equal(sorted(exp_rdesc), sorted(obs_rdesc))
+
+    # test the reaction descriptors
+    exp_rprop = [0, 10, 11, 21, 22]
+    obs_rprop = testlib.structure[pb_nuclide]['rprop']
+    assert_array_equal(sorted(exp_rprop), sorted(obs_rprop))
 
 if __name__ == "__main__":
     nose.runmodule()
