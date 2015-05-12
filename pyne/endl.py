@@ -70,28 +70,6 @@ class Library(rxdata.RxLib):
         # read headers for all tables
         self._read_headers()
 
-#    def load(self):
-#        """load()
-#        Read the ENDL file into a NumPy array.
-#
-#        Returns
-#        -------
-#        data : np.array, 1d, float64
-#            Returns a 1d float64 NumPy array.
-#        """
-#        opened_here = False
-#        if isinstance(self.fh, str):
-#            fh = open(self.fh, 'r')
-#            opened_here = True
-#        else:
-#            fh = self.fh
-#        fh.readline()
-#        data = fromendf_tok(fh.read())
-#        fh.seek(0)
-#        if opened_here:
-#            fh.close()
-#        return data
-
     def _read_headers(self):
         opened_here = False
         if isinstance(self.fh, str):
