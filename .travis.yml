@@ -42,4 +42,12 @@ script:
   #- nosetests
   - ./travis-run-tests.sh
 
+  # Build the pyne-amalgamation test program 
+  - git clone https://github.com/pyne/pyne-amalgamation.git
+  - cd ..
+  - python amalgamate.py
+  - mv pyne.h pyne.cpp tests/pyne-amalgamation
+  - cd tests
+  - BASE=/home/travis/miniconda make -C pyne-amalgamation
+
 
