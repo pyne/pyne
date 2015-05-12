@@ -41,23 +41,14 @@ class Library(rxdata.RxLib):
     DataTuple = namedtuple('DataTuple', ['yo', 'limits', 'x1', 'data'])
 
     @staticmethod
-    def pin_rdesc_rprop_dict_entry():
-        """Static method to generate entries for the pin_rdesc_rprop dict."""
-
-        return {
-                'data_tuples': list()
-                }
-
-    @staticmethod
     def structure_dict_entry():
         """Static method to generate entries for the structure dict."""
-
         return {
                 'pin': set(),
                 'rdesc': set(),
                 'rprop': set(),
                 'pin_rdesc_rprop': defaultdict(
-                    Library.pin_rdesc_rprop_dict_entry
+                    lambda: {'data_tuples': list()}
                     )
                 }
 
