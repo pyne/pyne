@@ -16,6 +16,7 @@ For more information, contact Davide Mancusi <davide.mancusi@cea.fr>.
 from __future__ import print_function, division, unicode_literals
 
 import re
+import sys
 from warnings import warn
 from collections import namedtuple, defaultdict
 
@@ -27,6 +28,9 @@ import pyne.utils as utils
 from pyne import nucname
 
 warn(__name__ + ' is not yet QA compliant.', QAWarning)
+
+if sys.version_info[0] > 2:
+  basestring = str
 
 END_OF_TABLE_RE = re.compile(' {71}1')
 
@@ -72,7 +76,7 @@ class Library(rxdata.RxLib):
 
     def _read_headers(self):
         opened_here = False
-        if isinstance(self.fh, str):
+        if isinstance(self.fh, basestring):
             fh = open(self.fh, 'rbU')
             opened_here = True
         else:
