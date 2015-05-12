@@ -34,11 +34,10 @@ if sys.version_info[0] > 2:
 
 END_OF_TABLE_RE = re.compile(' {71}1')
 
+DataTuple = namedtuple('DataTuple', ['yo', 'limits', 'x1', 'data'])
 
 class Library(rxdata.RxLib):
     """A class for a file which contains multiple ENDL tables."""
-
-    DataTuple = namedtuple('DataTuple', ['yo', 'limits', 'x1', 'data'])
 
     @staticmethod
     def structure_dict_entry():
@@ -122,7 +121,7 @@ class Library(rxdata.RxLib):
             table_dict['rmod'] = rmod
 
             x1_in_tuple = x1 if rmod != 0 else None
-            data_tuple = self.DataTuple(
+            data_tuple = DataTuple(
                     x1=x1_in_tuple,
                     yo=yo,
                     limits=(start, stop),
