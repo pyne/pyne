@@ -11,7 +11,7 @@ import nose
 from nose.tools import assert_equal
 
 from pyne.utils import QAWarning
-warnings.simplefilter("ignore", QAWarning)
+warnings.simplefilter('ignore', QAWarning)
 from pyne.endl import Library
 
 if sys.version_info[0] > 2:
@@ -28,18 +28,18 @@ else:
 def test_loadfile():
     if not os.path.isfile('epdl97_eedl_Pb'):
         urllib.urlretrieve(
-                "https://www-nds.iaea.org/epdl97/data/endl/eedl/za082000",
-                "epdl97_eedl_Pb"
+                'https://www-nds.iaea.org/epdl97/data/endl/eedl/za082000',
+                'epdl97_eedl_Pb'
                 )
-    with open("epdl97_eedl_Pb", "rb") as f:
+    with open('epdl97_eedl_Pb', 'rb') as f:
         obs_hash = md5(f.read()).hexdigest()
-    exp_hash = "502105669e0c0ad917301d219c649aaf"
+    exp_hash = '502105669e0c0ad917301d219c649aaf'
     assert_equal(
             obs_hash, exp_hash,
-            msg="epdl97_eedl_Pb hash check failed; please try redownloading"
-            " the epdl97_eedl_Pb data file."
+            msg='epdl97_eedl_Pb hash check failed; please try redownloading'
+            ' the epdl97_eedl_Pb data file.'
             )
-    testlib = Library("epdl97_eedl_Pb")
+    testlib = Library('epdl97_eedl_Pb')
 
     # test the nuclides
     pb_nuclide = 820000000
@@ -62,5 +62,5 @@ def test_loadfile():
     obs_rprop = testlib.structure[pb_nuclide]['rprop']
     assert_array_equal(sorted(exp_rprop), sorted(obs_rprop))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     nose.runmodule()
