@@ -47,7 +47,7 @@ class Library(rxdata.RxLib):
                 'rdesc': set(),
                 'rprop': set(),
                 'pin_rdesc_rprop': defaultdict(
-                    lambda: {'data_tuples': list()}
+                    lambda: {'data_tuples': []}
                     )
                 }
 
