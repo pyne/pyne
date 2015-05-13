@@ -105,11 +105,11 @@ class Library(rxdata.RxLib):
             nuc = nucname.zzzaaa_to_id(nuc_zzzaaa)
 
             # skip to the end of the table
-            line = fh.readline()
-            while len(line) > 0 and not END_OF_TABLE_RE.match(line):
+            read_eot = False
+            while not read_eot:
+                stop = fh.tell()
                 line = fh.readline()
-
-            stop = fh.tell()
+                read_eot = (len(line) == 0 or END_OF_TABLE_RE.match(line))
 
             # insert the table in the self.structure dictionary
             self.structure[nuc]['pin'].add(yi)
