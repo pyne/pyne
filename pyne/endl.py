@@ -243,8 +243,8 @@ class Library(rxdata.RxLib):
         B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
         return np.nansum(np.e**B / (A+1) * (x2**(A+1) - x1**(A+1))/de_int)
 
-    def get_rx(self, nuc, p_in, rdesc, rprop):
-        """get_rx(nuc, p_in, rdesc, rprop)
+    def get_rx(self, nuc, p_in, rdesc, rprop, x1=None, p_out=None):
+        """get_rx(nuc, p_in, rdesc, rprop, x1=None, p_out=None)
         Grab the data for one reaction type.
 
         Parameters
@@ -257,6 +257,10 @@ class Library(rxdata.RxLib):
             ENDL reaction descriptor
         rprop : int
             ENDL reaction property
+        x1 : int or None
+            ENDL atomic subshell indicator (if applicable)
+        yo : int or None
+            ENDL outgoing particle designator (if applicable)
 
         Returns
         -------
@@ -266,11 +270,13 @@ class Library(rxdata.RxLib):
         """
         nuc = nucname.id(nuc)
         if nuc in self.structure:
-            return self._read_nuc_pin_rdesc_rprop(nuc, p_in, rdesc, rprop)
+            return self._read_nuc_pin_rdesc_rprop(nuc, p_in,
+                                                  rdesc, rprop,
+                                                  x1, p_out)
         else:
             raise ValueError('Nucleus {} does not exist.'.format(nuc))
 
-    def _read_nuc_pin_rdesc_rprop(self, nuc, p_in, rdesc, rprop):
+    def _read_nuc_pin_rdesc_rprop(self, nuc, p_in, rdesc, rprop, x1, yo):
         """Load in the data from one reaction into self.structure.
 
         Parameters
@@ -279,8 +285,14 @@ class Library(rxdata.RxLib):
             id of nuclide.
         p_in : int
             ENDL incident particle designator
-        desc : int
+        rdesc : int
             ENDL reaction descriptor
+        rprop : int
+            ENDL reaction property
+        x1 : int or None
+            ENDL atomic subshell indicator (if applicable)
+        yo : int or None
+            ENDL outgoing particle designator (if applicable)
 
         Returns
         -------
@@ -289,11 +301,7 @@ class Library(rxdata.RxLib):
             array depends on the ENDL reaction property.
         """
         opened_here = False
-        if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'r')
-            opened_here = True
-        else:
-            fh = self.fh
+
         try:
             pdp_dict = self.structure[nuc]['pin_rdesc_rprop']
         except KeyError as e:
@@ -301,8 +309,33 @@ class Library(rxdata.RxLib):
                     ' not found.'.format(p_in, rdesc, rprop)
             e.args = (msg,)
             raise e
+
+        data_tuples = pdp_dict[p_in, rdesc, rprop]['data_tuples']
+
+        # Select the first data_tuple matching x1 and yo, if they are provided
+        # (i.e. not None)
+        def match_x1_yo_to_data_tuple(x, y, d):
+            return (x is None or d.x1 == x) and (y is None or d.yo == y)
+        try:
+            index, data_tuple = next((i, d) for i, d in enumerate(data_tuples)
+                                     if match_x1_yo_to_data_tuple(x1, yo, d))
+        except StopIteration as e:
+            msg = 'Outgoing particle {0}/subshell indicator {1}'\
+                    ' not found.'.format(yo, x1)
+            e.args = (msg,)
+            raise e
+
+        start, stop = data_tuple.limits
+        if isinstance(self.fh, basestring):
+            fh = open(self.fh, 'r')
+            opened_here = True
+        else:
+            fh = self.fh
         fh.seek(start)
         s = fh.read(stop-start)
+        parsed_data = utils.fromendl_tok(s, nfields_rprop[rprop])
+
         if opened_here:
             fh.close()
-        return utils.fromendl_tok(s, nfields_rprop[rprop])
+
+        return parsed_data
