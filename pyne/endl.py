@@ -108,7 +108,7 @@ class Library(rxdata.RxLib):
             rprop = int(line2[2:5].strip() or -1)
             rmod = int(line2[5:8].strip() or -1)
             x1_str = line2[21:32]
-            x1 = utils.endftod(x1_str or -1.)
+            x1 = int(utils.endftod(x1_str or -1.))
 
             # convert to Pyne native formats
             nuc = nucname.zzzaaa_to_id(nuc_zzzaaa)
