@@ -67,7 +67,7 @@ class Library(rxdata.RxLib):
     def _read_headers(self):
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'rbU')
+            fh = open(self.fh, 'rU')
             opened_here = True
         else:
             fh = self.fh
@@ -85,7 +85,7 @@ class Library(rxdata.RxLib):
             start = fh.tell()
 
             # parse the first header line
-            nuc_zzzaaa = line1[0:6].strip()
+            nuc_zzzaaa = int(line1[0:6].strip())
             yi = int(line1[7:9].strip() or -1)
             yo = int(line1[10:12].strip() or -1)
             aw_str = line1[13:24]
