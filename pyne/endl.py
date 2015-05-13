@@ -126,7 +126,7 @@ class Library(rxdata.RxLib):
                     x1=x1_in_tuple,
                     yo=yo,
                     limits=(start, stop),
-                    data=[]
+                    data=None
                     )
             table_dict['data_tuples'].append(data_tuple)
 
