@@ -30,7 +30,7 @@ from pyne import nucname
 warn(__name__ + ' is not yet QA compliant.', QAWarning)
 
 if sys.version_info[0] > 2:
-  basestring = str
+    basestring = str
 
 END_OF_TABLE_RE = re.compile(' {71}1')
 
@@ -43,6 +43,7 @@ nfields_rprop = {
         21: 3,
         22: 3
         }
+
 
 class Library(rxdata.RxLib):
     """A class for a file which contains multiple ENDL tables."""
@@ -299,7 +300,7 @@ class Library(rxdata.RxLib):
             pdp_dict = self.structure[nuc]['pin_rdesc_rprop']
             start, stop = pdp_dict[p_in, rdesc, rprop]['limits']
         except KeyError as e:
-            msg = 'Particle {0}/reaction descriptor {1}/reaction property {2}' \
+            msg = 'Particle {0}/reaction descriptor {1}/reaction property {2}'\
                     ' not found.'.format(p_in, rdesc, rprop)
             e.args = (msg,)
             raise e
