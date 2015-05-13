@@ -34,7 +34,7 @@ if sys.version_info[0] > 2:
 
 END_OF_TABLE_RE = re.compile(' {71}1')
 
-DataTuple = namedtuple('DataTuple', ['yo', 'limits', 'x1', 'data'])
+DataTuple = namedtuple('DataTuple', ['yo', 'limits', 'x1'])
 
 nfields_rprop = {
         0: 2,
@@ -127,15 +127,13 @@ class Library(rxdata.RxLib):
 
             pdp_dict = self.structure[nuc]['pin_rdesc_rprop']
             table_dict = pdp_dict[yi, rdesc, rprop]
-            table_dict['limits'] = (start, stop)
             table_dict['rmod'] = rmod
 
             x1_in_tuple = x1 if rmod != 0 else None
             data_tuple = DataTuple(
                     x1=x1_in_tuple,
                     yo=yo,
-                    limits=(start, stop),
-                    data=None
+                    limits=(start, stop)
                     )
             table_dict['data_tuples'].append(data_tuple)
 
@@ -298,7 +296,6 @@ class Library(rxdata.RxLib):
             fh = self.fh
         try:
             pdp_dict = self.structure[nuc]['pin_rdesc_rprop']
-            start, stop = pdp_dict[p_in, rdesc, rprop]['limits']
         except KeyError as e:
             msg = 'Particle {0}/reaction descriptor {1}/reaction property {2}'\
                     ' not found.'.format(p_in, rdesc, rprop)
