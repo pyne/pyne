@@ -6,7 +6,7 @@ import sys
 from hashlib import md5
 
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_allclose
 import nose
 from nose.tools import assert_equal
 
@@ -61,6 +61,33 @@ def test_loadfile():
     exp_rprop = [0, 10, 11, 21, 22]
     obs_rprop = testlib.structure[pb_nuclide]['rprop']
     assert_array_equal(sorted(exp_rprop), sorted(obs_rprop))
+
+def test_parsing():
+    testlib = Library('files_test_endl/testfile')
+
+    # elastic-scattering cross section (2 columns)
+    pb_nuclide = 'Pb'
+    p_in = 9    # electron
+    rdesc = 10  # elastic scattering
+    rprop = 0   # integrated cross section
+    data = testlib.get_rx(pb_nuclide, p_in, rdesc, rprop)
+    # test the min and max values
+    min_values = [1e-5, 3.63530e+5]
+    max_values = [1e+5, 8.42443e+9]
+    assert_allclose(np.min(data, axis=0), min_values)
+    assert_allclose(np.max(data, axis=0), max_values)
+
+    # bremsstrahlung spectra (3 columns)
+    pb_nuclide = 'Pb'
+    p_in = 9    # electron
+    rdesc = 82  # bremsstrahlung
+    rprop = 21  # spectra of secondary photon
+    data = testlib.get_rx(pb_nuclide, p_in, rdesc, rprop)
+    # test the min and max values
+    min_values = [1e-5, 1e-7, 4.61320e-8]
+    max_values = [1e+5, 1e+5, 9.15055e+6]
+    assert_allclose(np.min(data, axis=0), min_values)
+    assert_allclose(np.max(data, axis=0), max_values)
 
 if __name__ == '__main__':
     nose.runmodule()
