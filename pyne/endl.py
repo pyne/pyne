@@ -36,6 +36,14 @@ END_OF_TABLE_RE = re.compile(' {71}1')
 
 DataTuple = namedtuple('DataTuple', ['yo', 'limits', 'x1', 'data'])
 
+nfields_rprop = {
+        0: 2,
+        10: 2,
+        11: 2,
+        21: 3,
+        22: 3
+        }
+
 class Library(rxdata.RxLib):
     """A class for a file which contains multiple ENDL tables."""
 
@@ -235,3 +243,68 @@ class Library(rxdata.RxLib):
         A = - np.log(y2/y1)/np.log(x1/x2)
         B = - (np.log(y1)*np.log(x2) - np.log(y2)*np.log(x1))/np.log(x1/x2)
         return np.nansum(np.e**B / (A+1) * (x2**(A+1) - x1**(A+1))/de_int)
+
+    def get_rx(self, nuc, p_in, rdesc, rprop):
+        """get_rx(nuc, p_in, rdesc, rprop)
+        Grab the data for one reaction type.
+
+        Parameters
+        ----------
+        nuc : int
+            id form of nucleus to read from.
+        p_in : int
+            ENDL incident particle designator
+        rdesc : int
+            ENDL reaction descriptor
+        rprop : int
+            ENDL reaction property
+
+        Returns
+        -------
+        data : NumPy array
+            Contains the reaction data in a n-by-m-dimensional array. The
+            values of n and m depend on the reaction property rprop.
+        """
+        nuc = nucname.id(nuc)
+        if nuc in self.structure:
+            return self._read_nuc_pin_rdesc_rprop(nuc, p_in, rdesc, rprop)
+        else:
+            raise ValueError('Nucleus {} does not exist.'.format(nuc))
+
+    def _read_nuc_pin_rdesc_rprop(self, nuc, p_in, rdesc, rprop):
+        """Load in the data from one reaction into self.structure.
+
+        Parameters
+        ----------
+        nuc : int
+            id of nuclide.
+        p_in : int
+            ENDL incident particle designator
+        desc : int
+            ENDL reaction descriptor
+
+        Returns
+        -------
+        array, float64
+            float64 NumPy array containing the reaction data. The shape of the
+            array depends on the ENDL reaction property.
+        """
+        opened_here = False
+        if isinstance(self.fh, basestring):
+            fh = open(self.fh, 'r')
+            opened_here = True
+        else:
+            fh = self.fh
+        try:
+            pdp_dict = self.structure[nuc]['pin_rdesc_rprop']
+            start, stop = pdp_dict[p_in, rdesc, rprop]['limits']
+        except KeyError as e:
+            msg = 'Particle {0}/reaction descriptor {1}/reaction property {2}' \
+                    ' not found.'.format(p_in, rdesc, rprop)
+            e.args = (msg,)
+            raise e
+        fh.seek(start)
+        s = fh.read(stop-start)
+        if opened_here:
+            fh.close()
+        return utils.fromendl_tok(s, nfields_rprop[rprop])
