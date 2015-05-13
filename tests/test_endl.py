@@ -62,9 +62,8 @@ def test_loadfile():
     obs_rprop = testlib.structure[pb_nuclide]['rprop']
     assert_array_equal(sorted(exp_rprop), sorted(obs_rprop))
 
-def test_parsing():
+def test_elastic_cross_section():
     testlib = Library('files_test_endl/testfile')
-
     # elastic-scattering cross section (2 columns)
     pb_nuclide = 'Pb'
     p_in = 9    # electron
@@ -77,6 +76,8 @@ def test_parsing():
     assert_allclose(np.min(data, axis=0), min_values)
     assert_allclose(np.max(data, axis=0), max_values)
 
+def test_bremsstrahlung_spectra():
+    testlib = Library('files_test_endl/testfile')
     # bremsstrahlung spectra (3 columns)
     pb_nuclide = 'Pb'
     p_in = 9    # electron
@@ -86,6 +87,40 @@ def test_parsing():
     # test the min and max values
     min_values = [1e-5, 1e-7, 4.61320e-8]
     max_values = [1e+5, 1e+5, 9.15055e+6]
+    assert_allclose(np.min(data, axis=0), min_values)
+    assert_allclose(np.max(data, axis=0), max_values)
+
+def test_ionization_cross_section():
+    testlib = Library('files_test_endl/testfile')
+    # ionization cross section (2 columns)
+    # this is non-trivial because this table is indexed by subshell
+    pb_nuclide = 'Pb'
+    p_in = 9    # electron
+    rdesc = 81  # ionization
+    rprop = 0   # integrated cross section
+    x1 = 1      # subshell
+    data = testlib.get_rx(pb_nuclide, p_in, rdesc, rprop, x1=x1)
+    # test the min and max values
+    min_values = [8.82900e-2, 5.66158e-1]
+    max_values = [1e+5, 7.52177e+1]
+    assert_allclose(np.min(data, axis=0), min_values)
+    assert_allclose(np.max(data, axis=0), max_values)
+
+def test_ionization_spectra():
+    testlib = Library('files_test_endl/testfile')
+    # ionization spectra of recoil electron (3 columns)
+    # this is non-trivial because this table is indexed by subshell and
+    # outgoing particle
+    pb_nuclide = 'Pb'
+    p_in = 9    # electron
+    rdesc = 81  # ionization
+    rprop = 21  # spectra of secondary electron
+    x1 = 1      # subshell
+    p_out = 19  # electron as recoil
+    data = testlib.get_rx(pb_nuclide, p_in, rdesc, rprop, x1=x1, p_out=p_out)
+    # test the min and max values
+    min_values = [8.82900e-2, 1e-8, 1.33833e-11]
+    max_values = [1e+5, 5e+4, 7.06473e+7]
     assert_allclose(np.min(data, axis=0), min_values)
     assert_allclose(np.max(data, axis=0), max_values)
 
