@@ -65,6 +65,7 @@ class Library(rxdata.RxLib):
         self._read_headers()
 
     def _read_headers(self):
+        """Read all the table headers from an ENDL file."""
         opened_here = False
         if isinstance(self.fh, basestring):
             fh = open(self.fh, 'rU')
