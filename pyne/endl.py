@@ -40,7 +40,7 @@ class Library(rxdata.RxLib):
     """A class for a file which contains multiple ENDL tables."""
 
     @staticmethod
-    def structure_dict_entry():
+    def _structure_dict_entry():
         """Static method to generate entries for the structure dict."""
         return {
                 'pin': set(),
@@ -52,7 +52,7 @@ class Library(rxdata.RxLib):
                 }
 
     def __init__(self, fh):
-        self.structure = defaultdict(Library.structure_dict_entry)
+        self.structure = defaultdict(Library._structure_dict_entry)
         self.intdict = {
                 0: self._linlin,
                 2: self._linlin,
