@@ -137,6 +137,14 @@ namespace pyne {
   /// Returns true if the file can be found.
   bool file_exists(std::string strfilename);
 
+  // Message Helpers
+  extern bool USE_WARNINGS;
+  /// Toggles warnings on and off
+  bool toggle_warnings();
+
+  /// Prints a warning message.
+  void warning(std::string s);
+
   /// Custom exception to be thrown in the event that a required file is not able to
   /// be found.
   class FileNotFound : public std::exception

@@ -7,8 +7,8 @@
 from warnings import warn
 from pyne.utils import VnVWarning
 
-import copy
 
+import copy
 
 warn(__name__ + " is not yet V&V compliant.", VnVWarning)
 

@@ -4,6 +4,17 @@ cmake_minimum_required( VERSION 2.8.5 )
 # Set the project name
 project( pyne Fortran CXX)
 
+
+#determine if spatial solver module should be built
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND NOT APPLE)
+    SET(BUILD_SPATIAL_SOLVER true)
+  ELSE()
+    SET(BUILD_SPATIAL_SOLVER false)
+  ENDIF()
+ENDIF()
+
+IF(BUILD_SPATIAL_SOLVER)
 # languages
 enable_language(Fortran)
 
@@ -14,17 +25,28 @@ if (APPLE)
   message(STATUS
     "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
   set(LIBGCC_S)
+# The previous method found the gcc_s library by version,
+    # find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
+# but this always found the library regardless of version, and then
+# the name as set was different from what was found.  This new way
+# ensures that the name is consistent with what was found.
+  set(LIBGCC_S_PATH)
   foreach (gcc_s_ver 3 2 1)
-    set(LIBGCC_S_PATH)
     find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
       PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
       NODEFAULTPATH
     )
     if (LIBGCC_S_PATH)
-      set(LIBGCC_S gcc_s.${gcc_s_ver})
       break()
     endif ()
   endforeach ()
+  message(STATUS "LIBGCC_S_PATH = ${LIBGCC_S_PATH}.")
+  if (LIBGCC_S_PATH)
+    get_filename_component(LIBGCC_S ${LIBGCC_S_PATH} NAME)
+# Pull off leading lib and trailing .dylib.
+    string(REGEX REPLACE "^lib" "" LIBGCC_S ${LIBGCC_S})
+    string(REGEX REPLACE "\\.dylib$" "" LIBGCC_S ${LIBGCC_S})
+  endif ()
   message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
   if (LIBGCC_S)
     set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
@@ -32,13 +54,17 @@ if (APPLE)
 endif ()
 message(STATUS
   "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+ENDIF(BUILD_SPATIAL_SOLVER)
 
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Default to release build type
-set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type" FORCE)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type" FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+
 
 # quiets fortify_source warnings when not compiling with optimizations
 # in linux distros where compilers were compiled with fortify_source enabled by
@@ -59,6 +85,9 @@ if(WIN32)
 	list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
 elseif(NOT HDF5_LIBRARY_DIRS)
   list(GET HDF5_LIBRARIES 0 _hdf5lib)
+  if (${_hdf5lib} STREQUAL debug)
+    list(GET HDF5_LIBRARIES 1 _hdf5lib)
+  endif ()
   get_filename_component(HDF5_LIBRARY_DIRS ${_hdf5lib} PATH)
 endif(WIN32)
 link_directories(${HDF5_LIBRARY_DIRS})
@@ -76,6 +105,12 @@ find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
     include_directories(${MOAB_INCLUDE_DIR})
+    get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
+    if(APPLE)
+      link_directories(${MOAB_LIBRARY_DIRS}/lib)
+    else(APPLE)
+      link_directories(${MOAB_LIBRARY_DIRS})
+    endif(APPLE)
 endif(${MOAB_FOUND})
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
@@ -103,18 +138,19 @@ set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
-    # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
     set(CMAKE_MACOSX_RPATH 1)
-    set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
-elseif(WIN32)
-    if(MSVC)
-        # ??? Who knows what to do here?! --Anthony
-    elseif(CMAKE_COMPILER_IS_GNUC OR CMAKE_COMPILER_IS_GNUCXX)
-        set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
-    endif(MSVC)
+    if(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
+    else(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
+    endif(HAVE_SETUPTOOLS)
 else(APPLE)
     # For linux
-    set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+    if(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
+    else(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+    endif(HAVE_SETUPTOOLS)
 endif(APPLE)
 message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
 
@@ -156,8 +192,3 @@ file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/pyne/"
 
 message("-- Copying scripts.")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" DESTINATION "${CMAKE_BINARY_DIR}")
-
-# Add cython version info to source tree
-message("-- Making Metadata.")
-execute_process(COMMAND "${PYTHON_EXECUTABLE}"
-                        "${CMAKE_CURRENT_SOURCE_DIR}/configure.py" metadata)

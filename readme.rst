@@ -37,6 +37,7 @@ PyNE has the following dependencies:
    #. `Python 2.7 <http://www.python.org/>`_
    #. `LAPACK <http://www.netlib.org/lapack/>`_
    #. `BLAS <http://www.netlib.org/blas/>`_
+   #. `Jinja2 <http://jinja.pocoo.org/>`_
 
 Optional Depenendencies:
    #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
@@ -45,9 +46,9 @@ Optional Depenendencies:
 Additionally, building the documentation requires the following:
 
    #. `Sphinx <http://sphinx-doc.org/>`_
-   #. `SciSphinx <https://github.com/numfocus/scisphinx>`_
-   #. `breathe <http://michaeljones.github.io/breathe/>`_ 
+   #. `sphinxcontrib-bibtex <https://pypi.python.org/pypi/sphinxcontrib-bibtex/>`_
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
+   #. `numpydoc <https://pypi.python.org/pypi/numpydoc>`_
 
 Most of the dependencies are readily available through package managers. 
 
@@ -109,6 +110,17 @@ PyNE has known issues on the following platforms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Conda Install Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+After installing anaconda or miniconda from 
+`the Continuum downloads page <http://continuum.io/downloads>`_,
+in a new terminal run the following conda install command::
+
+    conda install -c https://conda.binstar.org/pyne pyne
+
+If you have any issues, please let us know.
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Conda Build Instructions
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 On mac and linux PyNE can be installed via the package manager conda. 
 After installing anaconda or miniconda from 
 `the Continuum downloads page <http://continuum.io/downloads>`_ 
@@ -136,9 +148,19 @@ cd to the conda-recipes directory and run::
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Mac OSX Specific Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-These instructions are based on using the homebrew http://brew.sh/ package manager
-Install command line tools from https://developer.apple.com/downloads/
-you will need to create an account in order to download::
+The simplest method of installing PyNE on mac is via macports. Version 0.4 
+can be installed using the following commands(assuming you are using python 2.7)::
+
+   sudo port install py27-pyne
+   nuc_data_make --fetch-prebuilt False
+
+The latest development version of PyNE can also be installed from source. The 
+instructions below outline how it can be installed
+using the homebrew http://brew.sh/ package manager.
+
+Before starting install the command line tools from https://developer.apple.com/downloads/
+you will need to create an account in order to download them. After installing brew and
+the command line tools run the following commands::
 
     ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
     brew doctor

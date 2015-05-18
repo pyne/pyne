@@ -119,7 +119,16 @@ def test_fromstring_token4():
     exp = np.array([1.0, 2.3, 4.0])
     assert_array_equal(obs, exp)
 
+def test_use_warnings():
+    first = utils.use_warnings()
+    second = utils.use_warnings()
+    assert_equal(first, second)
+
+def test_toggle_warnings():
+    state = utils.use_warnings()
+    observed = utils.toggle_warnings()
+    assert_equal(state, not observed)
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 

@@ -21,7 +21,7 @@ from __future__ import print_function, division
 import os
 import shutil
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 try:
     import urllib.request as urllib2
@@ -35,7 +35,7 @@ import tables as tb
 from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def readtable(i, spdat):
     """
@@ -149,7 +149,7 @@ def make_fpy_table(nuc_data, build_dir=""):
     if not hasattr(db.root, 'neutron'):
         neutron_group = db.createGroup('/', 'neutron', 'Neutron Data')
     fpy_table = db.createTable('/neutron/', 'nds_fission_products', alldata,
-                               'WIMSD Fission Product Yields, percent [unitless]')
+                               'NDS Fission Product Yields, percent [unitless]')
     fpy_table.flush()
     db.close()
 
@@ -164,7 +164,7 @@ def grab_fpy(build_dir='', file_out='nds-fpyield.html'):
         shutil.copy(local_filename, build_filename)
         return
 
-    nist = urllib2.urlopen('https://www-nds.iaea.org/sgnucdat/c2.htm')
+    nist = urllib2.urlopen('https://www-nds.iaea.org/sgnucdat/c3.htm')
     with open(build_filename, 'wb') as f:
         f.write(nist.read())
 

@@ -16,8 +16,8 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne.mesh import Mesh, StatMesh, MeshError, Tag, MetadataTag, IMeshTag, \
     ComputedTag
 from pyne.material import Material, MaterialLibrary
@@ -88,6 +88,8 @@ def test_structured_mesh_from_coords():
     sm = Mesh(structured_coords = [range(1,5), range(1,4), range(1,3)], \
               structured=True)
     assert_true(all(sm.dims == [0, 0, 0, 3, 2, 1]))
+    assert_array_equal(sm.structured_coords, [range(1,5), range(1,4), range(1,3)])
+    assert_equal(sm.structured_ordering, 'xyz')
 
 def test_create_by_set():
     mesh = iMesh.Mesh()
@@ -209,7 +211,7 @@ class TestArithmetic():
         volumes1 = list(self.statmesh_1.structured_iterate_hex("xyz"))
         volumes2 = list(self.statmesh_1.structured_iterate_hex("xyz"))
         flux_tag = self.statmesh_1.mesh.createTag("flux", 1, float)
-        error_tag = self.statmesh_1.mesh.createTag("flux_error", 1, float)
+        error_tag = self.statmesh_1.mesh.createTag("flux_rel_error", 1, float)
         flux_data = [1.0, 2.0, 3.0, 4.0]
         error_data = [0.1, 0.2, 0.3, 0.4]
         flux_tag[volumes1] = flux_data
@@ -219,7 +221,7 @@ class TestArithmetic():
         volumes1 = list(self.statmesh_2.structured_iterate_hex("xyz"))
         volumes2 = list(self.statmesh_2.structured_iterate_hex("xyz"))
         flux_tag = self.statmesh_2.mesh.createTag("flux", 1, float)
-        error_tag = self.statmesh_2.mesh.createTag("flux_error", 1, float)
+        error_tag = self.statmesh_2.mesh.createTag("flux_rel_error", 1, float)
         flux_data = [1.1, 2.2, 3.3, 4.4]
         error_data = [0.1, 0.2, 0.3, 0.4]
         flux_tag[volumes1] = flux_data
@@ -265,7 +267,7 @@ class TestArithmetic():
                    0.21237241067597862, 0.28316321423463819]
         obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_error")[vol] 
+        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol] 
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
@@ -277,7 +279,7 @@ class TestArithmetic():
         exp_err = [-1.4866068747, -2.9732137495, -4.4598206242, -5.9464274989]
         obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_error")[vol] 
+        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol] 
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
@@ -289,7 +291,7 @@ class TestArithmetic():
         exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249,]
         obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_error")[vol] 
+        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol] 
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
@@ -301,7 +303,7 @@ class TestArithmetic():
         exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249]
         obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_error")[vol] 
+        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol] 
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
@@ -650,6 +652,25 @@ def test_imeshtag_broadcasting():
     m.grape[[2, 0]] = [7.0, 8.0]
     assert_array_equal(m.grape[:], [[7.0, 8.0], [0.0, 0.0], [7.0, 8.0], [0.0, 0.0]])
 
+def test_imeshtag_expand():
+    m = Mesh(structured=True, structured_coords=[[-1, 0, 1],[0, 1],[0, 1]])
+    m.clam = IMeshTag(2, float)
+    m.clam[:] = [[1.1, 2.2], [3.3, 4.4]]
+    m.clam.expand()
+    m.clam_000 = IMeshTag(1, float)
+    assert_array_equal(m.clam_000[:], [1.1, 3.3])
+    m.clam_001 = IMeshTag(1, float)
+    assert_array_equal(m.clam_001[:], [2.2, 4.4])
+
+    # corner case: mesh with a single volume element
+    m = Mesh(structured=True, structured_coords=[[0, 1],[0, 1],[0, 1]])
+    m.clam = IMeshTag(2, float)
+    m.clam[:] = [[1.1, 2.2]]
+    m.clam.expand()
+    m.clam_000 = IMeshTag(1, float)
+    assert_array_equal(m.clam_000[:], 1.1)
+    m.clam_001 = IMeshTag(1, float)
+    assert_array_equal(m.clam_001[:], 2.2)
 
 def test_comptag():
     mats = {

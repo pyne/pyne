@@ -1,9 +1,0 @@
-#! /bin/bash
-#
-gfortran -fPIC -c invar.f90
-gfortran -fPIC -c solvar.f90
-gfortran -fPIC -c timevar.f90
-f2py -m input -c invar.o input.f90 read_inflow.f90 readmt.f90 readxs.f90 readsrc.f90 check.f90 angle.f90 solvar.o timevar.o solve.f90 inner.f90 sweep.f90 lin_nodal_module.f90 output.f90
-#f2py -m input -c invar.o input.f90 read_inflow.f90 readmt.f90 readxs.f90 readsrc.f90 check.f90 angle.f90
-#f2py -m solve -c invar.o solvar.o timevar.o solve.f90 inner.f90 sweep.f90 lin_nodal_module.f90
-#f2py -m output -c invar.o solvar.o output.f90

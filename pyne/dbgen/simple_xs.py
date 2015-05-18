@@ -2,7 +2,7 @@
 from __future__ import print_function
 import os
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 try:
     import urllib.request as urllib
@@ -18,7 +18,7 @@ from ..utils import to_barns
 from .api import BASIC_FILTERS
 from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def grab_kaeri_simple_xs(build_dir=""):
     """Grabs the KAERI files needed for the simple cross sections table, 
@@ -189,7 +189,8 @@ def parse_simple_xs(build_dir=""):
 
     for eng in simple_xs_energy:
         # Store only non-trivial entries
-        mask = (energy_tables[eng][simple_xs_channels.keys()] != np.zeros(1, dtype=simple_xs_dtype)[simple_xs_channels.keys()])
+        channels_list = list(simple_xs_channels.keys())
+        mask = (energy_tables[eng][channels_list] != np.zeros(1, dtype=simple_xs_dtype)[channels_list])
         energy_tables[eng] = energy_tables[eng][mask]
 
         # Calculate some xs

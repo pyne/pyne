@@ -4,7 +4,7 @@ from __future__ import print_function, division, unicode_literals
 import sys
 from contextlib import contextmanager
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 cimport numpy as np
 import numpy as np
@@ -14,7 +14,18 @@ from pyne.mesh import Mesh
 from numpy.linalg import norm
 np.import_array()
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+if sys.version_info[0] >= 3:
+    unichr = chr
+
+# Mesh specific imports
+try:
+    from itaps import iMesh
+except ImportError:
+    warn("the PyTAPS optional dependency could not be imported. "
+                  "Some aspects of dagmc module may be incomplete",
+                  QAWarning)
 
 # Globals
 VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid
@@ -311,11 +322,11 @@ def load(filename):
 
 def get_surface_list():
     """return a list of valid surface IDs"""
-    return surf_id_to_handle.keys()
+    return list(surf_id_to_handle.keys())
 
 def get_volume_list():
     """return a list of valid volume IDs"""
-    return vol_id_to_handle.keys()
+    return list(vol_id_to_handle.keys())
 
 
 def volume_is_graveyard(vol_id):
@@ -590,6 +601,87 @@ def get_material_set(**kw):
         else:
             mat_ids.add(d['material'])
     return mat_ids
+
+
+def cell_material_assignments(hdf5):
+    """Get dictionary of cell to material assignments
+    
+    Parameters:
+    -----------
+    hdf5 : string
+        Path to hdf5 material-laden geometry
+    
+    Returns:
+    --------
+    mat_assigns : dict
+        Dictionary of the cell to material assignments. Keys are cell 
+        numbers and values are material names
+    """
+    # Load the geometry as an iMesh instance
+    dag_geom = iMesh.Mesh()
+    dag_geom.load(hdf5)
+    dag_geom.getEntities()
+    mesh_sets = dag_geom.getEntSets()
+
+    # Get tag handle
+    cat_tag = dag_geom.getTagHandle('CATEGORY')
+    id_tag = dag_geom.getTagHandle('GLOBAL_ID')
+    name_tag = dag_geom.getTagHandle('NAME')
+
+    # Get list of materials and list of cells
+    mat_assigns={}
+    
+    # Assign the implicit complement to vacuum
+    # NOTE: This is a temporary work-around and it is just assumed that there
+    # is no material already assigned to the implicit complement volume.
+    implicit_vol = find_implicit_complement()
+    mat_assigns[implicit_vol] = "mat:Vacuum"
+    
+    # loop over all mesh_sets in model
+    for mesh_set in mesh_sets:
+        tags = dag_geom.getAllTags(mesh_set)
+            
+        # check for mesh_sets that are groups
+        if name_tag in tags and cat_tag in tags \
+                and _tag_to_string(cat_tag[mesh_set]) == 'Group':
+            child_sets = mesh_set.getEntSets()
+            name = _tag_to_string(name_tag[mesh_set])
+            
+            # if mesh_set is a group with a material name_tag, loop over child
+            # mesh_sets and assign name to cell
+            if 'mat:' in name:
+                for child_set in child_sets:
+                    child_tags = dag_geom.getAllTags(child_set)
+                    if id_tag in child_tags:
+                        cell = id_tag[child_set]
+                        mat_assigns[cell] = name
+                        
+    return mat_assigns
+
+
+def find_implicit_complement():
+    """Find the implicit complement and return the volume id.
+    Note that a DAGMC geometry must already be loaded into memory.
+    """
+    volumes = get_volume_list()
+    for vol in volumes:
+        if volume_is_implicit_complement(vol):
+            return vol
+            
+            
+def _tag_to_string(tag):
+    """Convert ascii to string
+    """
+    a = []
+    # since we have a byte type tag loop over the 32 elements
+    for part in tag:
+        # if the byte char code is non 0
+        if (part != 0):
+            # convert to ascii and join to string
+            a.append(str(unichr(part)))
+            string = ''.join(a)
+    return string
+    
 
 #### start util
 def discretize_geom(mesh, **kwargs):

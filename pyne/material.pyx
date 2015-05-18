@@ -1,5 +1,4 @@
 """Python wrapper for material library."""
-
 from __future__ import division, unicode_literals
 
 # Cython imports
@@ -19,8 +18,12 @@ import collections
 cimport numpy as np
 import numpy as np
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 import os
+import sys
+if sys.version_info[0] >= 3:
+    #Python2 basestring is now Python3 string
+    basestring = str
 
 import tables as tb
 
@@ -40,7 +43,7 @@ cimport pyne.data as data
 import pyne.data as data
 
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647
@@ -62,7 +65,7 @@ cdef class _Material:
     def __cinit__(self, nucvec=None, double mass=-1.0, double density=-1.0,
                   double atoms_per_molecule=-1.0, metadata=None, bint free_mat=True,
                   *args, **kwargs):
-        """Material C++ constuctor."""
+        """Material C++ constructor."""
         cdef cpp_map[int, double] comp
         cdef jsoncpp.Value cmetadata = jsoncpp.Value({} if metadata is None else metadata)
 
@@ -572,7 +575,7 @@ cdef class _Material:
 
 
     def mult_by_mass(self):
-        """This multiplies multiplies comp by mass and returns the resultant
+        """This multiplies comp by mass and returns the resultant
         nuctopic vector.
 
         Returns
@@ -586,6 +589,65 @@ cdef class _Material:
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
         nucvec_proxy.map_ptr = new cpp_map[int, double](
                 self.mat_pointer.mult_by_mass())
+        return nucvec_proxy
+
+
+    def activity(self):
+        """This provides the activity of the comp of the material.
+
+        Returns
+	-------
+	nucvec : dict
+	    For a Material mat
+
+        """
+        cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
+        nucvec_proxy.map_ptr = new cpp_map[int, double](
+                self.mat_pointer.activity())
+        return nucvec_proxy
+
+
+    def decay_heat(self):
+        """This provides the decay heat using the comp of the the Material.
+
+        Returns
+        -------
+        nucvec : dict
+            For a Material mat
+        """
+        cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
+        nucvec_proxy.map_ptr = new cpp_map[int, double](
+                self.mat_pointer.decay_heat())
+        return nucvec_proxy
+
+
+    def dose_per_g(self, dose_type, source=0):
+        """This provides the dose per gram using the comp of the the Material.
+
+        Parameters
+        ----------
+        dose_type : string
+            One of: ext_air, ext_soil, ingest, inhale
+        source : int
+            optional; default is EPA
+            0 for EPA, 1 for DOE, 2 for GENII
+
+        Returns
+        -------
+        nucvec : dict
+            For a Material mat:
+            ext_air_dose returns mrem/h per g per m^3
+            ext_soil_dose returns mrem/h per g per m^2
+            ingest_dose returns mrem per g
+            inhale_dose returns mrem per g
+        """
+        cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
+        cdef std_string dosetype
+        if not isinstance(dose_type, bytes):
+            dose_type = dose_type.encode()
+        dosetype = std_string(<char *> dose_type)
+        nucvec_proxy.map_ptr = new cpp_map[int, double](
+                self.mat_pointer.dose_per_g(dosetype, source))
         return nucvec_proxy
 
 
@@ -1085,7 +1147,7 @@ cdef class _Material:
         for key, value in atom_fracs.items():
             val = <double> value
             if isinstance(key, int):
-                key_zz = <int> key
+                key_zz = <int> nucname.id(key)
                 if 0 == af.count(key_zz):
                     af[key_zz] = 0.0
                 af[key_zz] = af[key_zz] + val
@@ -1110,6 +1172,22 @@ cdef class _Material:
 
         self.mat_pointer.from_atom_frac(af)
 
+
+    def to_atom_dens(self):
+        """Converts the material to a map of nuclides to atom densities.
+
+        Returns
+        -------
+        atom_dens : mapping
+            Dictionary-like object that maps nuclides to atom densites in the
+            material.
+
+        """
+        cdef conv._MapIntDouble comp_proxy = conv.MapIntDouble()
+        comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.to_atom_dens())
+        return comp_proxy
+        
+        
     #
     # Radioactive Properties
     #
@@ -1156,6 +1234,16 @@ cdef class _Material:
             intensities are in decays/s/atom material
         """
         return self.mat_pointer.photons(<cpp_bool> norm)
+
+    def decay(self, double t):
+        """decay(double t)
+        Decays a material for a time t, in seconds. Returns a new material.
+        """
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.decay(t)
+        return pymat
+
+    
     #
     # Operator Overloads
     #
@@ -2031,6 +2119,8 @@ cdef class _MaterialLibrary(object):
             The path in the heirarchy to the nuclide array in an HDF5 file.
 
         """
+        if sys.version_info[0] >=3 and isinstance(lib, bytes):
+            lib = lib.decode()
         cdef dict _lib = {}
         if lib is None:
             self._lib = _lib
@@ -2152,10 +2242,10 @@ cdef class _MaterialLibrary(object):
         cdef _Material mat
         cdef dict _lib = (<_MaterialLibrary> self)._lib
         cdef np.ndarray mattable
-        with tb.openFile(file, 'r') as f:
-            matstable = f.getNode(datapath)[:]
-            nucs = f.getNode(nucpath)[:]
-            matsmetadata = f.getNode(datapath + '_metadata').read()
+        with tb.open_file(file, 'r') as f:
+            matstable = f.get_node(datapath)[:]
+            nucs = f.get_node(nucpath)[:]
+            matsmetadata = f.get_node(datapath + '_metadata').read()
         for i in range(len(matstable)):
             row = matstable[i]
             comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
@@ -2173,12 +2263,12 @@ cdef class _MaterialLibrary(object):
                 name = "_" + str(i)
             _lib[name] = mat
 
-    def write_hdf5(self, file, datapath="/materials", nucpath="/nucid"):
+    def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid"):
         """Writes this material library to an HDF5 file.
 
         Parameters
         ----------
-        file : str
+        filename : str
             A path to an HDF5 file.
         datapath : str, optional
             The path in the heirarchy to the data table in an HDF5 file.
@@ -2191,14 +2281,14 @@ cdef class _MaterialLibrary(object):
         cdef set nucids = set()
         for mat in _lib.values():
             nucids.update(mat.comp.keys())
-        with tb.openFile(file, 'a') as f:
+        with tb.openFile(filename, 'a') as f:
             nucgrp, nucdsname = os.path.split(nucpath)
             f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)),
                           createparents=True)
         for key, mat in _lib.items():
             if "name" not in mat.metadata:
                 mat.metadata["name"] = key
-            mat.write_hdf5(file, datapath=datapath, nucpath=nucpath)
+            mat.write_hdf5(filename, datapath=datapath, nucpath=nucpath)
 
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     """The material library is a collection of unique keys mapped to

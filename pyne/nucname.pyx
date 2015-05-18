@@ -98,7 +98,7 @@ class NucTypeError(Exception):
 
 
 #
-# Is Nuclide Function
+# Is Nuclide and Is Element Functions
 #
 
 def isnuclide(nuc):
@@ -124,7 +124,28 @@ def isnuclide(nuc):
 
     return flag
 
+def iselement(nuc):
+    """Test if nuc is a valid element.
 
+    Parameters
+    ----------
+    nuc : int or str 
+        Input element.
+
+    Returns
+    -------
+    flag : bool
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        flag = cpp_nucname.iselement(<char *> nuc_bytes)
+    elif isinstance(nuc, int) or isinstance(nuc, long):
+        flag = cpp_nucname.iselement(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+
+    return flag
 
 def id(nuc):
     """Converts a nuclide to its identifier form (952420000).
@@ -834,7 +855,26 @@ def id_to_state_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
+def ensdf_to_id(nuc):
+    """
+    Converts an ENSDF style id to a PyNE nuc_id
 
+    Parameters
+    ----------
+    nuc : int
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in nuc_id form.
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        return cpp_nucname.ensdf_to_id(<char *> nuc_bytes)
+    else:
+        raise NucTypeError(nuc)
 #
 # C++ Helper Functions
 #
