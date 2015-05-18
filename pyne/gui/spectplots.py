@@ -28,11 +28,6 @@ def plot_peak(spect, energy, spread=4):
     plt.xlabel('Energy (keV)')
     plt.ylabel('Counts')
     plt.xlim(xmin=energy-spread, xmax=energy+spread)
-<<<<<<< HEAD
-    plt.fill(spect.ebin, spect.counts, 'g')
-    plt.title(spect.file_name + ' ' + str(energy) + 'keV')
-=======
     plt.fill(spect.ebin, spect.counts, "g")
     plt.title(spect.file_name + " " + str(energy) + "keV")
->>>>>>> upstream/staging
     plt.show()
