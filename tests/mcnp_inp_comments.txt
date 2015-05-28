@@ -1,0 +1,30 @@
+TEST MCNP INPUT FILE -- This is NOT valid MCNP input
+C  cells 
+  1  1  -19.1  -2323   $ These are just random surface numbers
+C 4  2  -2.7 $ Testing comment out capability
+C  materials 
+C
+C name: leu
+C source: Some http://URL.com
+C comments: first line of comments
+C second comments
+c third line of comments
+c forth line of comments
+m1
+     92235.15c -4.0000E-02 $ herere
+     92238     -9.4000E-01
+C    92233.45C -0.01 $ Testing comment out capability
+C sometimes, for some bizzare mcnp readability reason
+c people will put comments halfway through a material
+c and expect everything to be ok
+     92238     -0.1000E-1
+C and we should of course keep on reading, perhaps 
+c for a very long time
+c maybe
+c or not
+     92238     -0.1000E-1
+C      
+c    
+c    
+
+
