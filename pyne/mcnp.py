@@ -1389,12 +1389,19 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
-    while line[0:5] == '     ':
+
+    # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
+    while line[0:5] == '     ' or line[0] == 'c' or line[0] == 'C':
         # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
             data_string += line.split('$')[0]
-        line_index += 1
-        line = linecache.getline(filename, mat_line + line_index)
+            line_index += 1
+            line = linecache.getline(filename, mat_line + line_index)
+        # otherwise this not a line we care about, move on and
+        # skip lines that start with c or C                                                                                                                  
+        else:
+            line_index += 1
+            line = linecache.getline(filename, mat_line + line_index)
 
     # create dictionaries nucvec and table_ids
     nucvec = {}
@@ -1403,7 +1410,13 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
         if i & 1 == 1:
             zzzaaam = str(nucname.zzaaam(
                 nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
-            nucvec[zzzaaam] = float(data_string.split()[i+1])
+
+            # this allows us to read nuclides that are repeated                                                                                              
+            if zzzaaam in nucvec.keys():
+                nucvec[zzzaaam] += float(data_string.split()[i+1])
+            else:
+                nucvec[zzzaaam] = float(data_string.split()[i+1])
+
             if len(data_string.split()[i].split('.')) > 1:
                 table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
 
