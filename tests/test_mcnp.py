@@ -597,7 +597,7 @@ def test_read_mcnp_wcomments():
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
 
     read_materials = mats_from_inp('mcnp_inp_comments.txt')
-    assert_equal(expected_material, read_materials[0])
+    assert_equal(expected_material, read_materials[1])
 
 # Test PtracReader class
 def test_read_headers():
