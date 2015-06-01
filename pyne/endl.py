@@ -36,7 +36,7 @@ END_OF_TABLE_RE = re.compile(' {71}1')
 
 DataTuple = namedtuple('DataTuple', ['yo', 'limits', 'x1'])
 
-nfields_rprop = {
+NFIELDS_RPROP = {
         0: 2,
         10: 2,
         11: 2,
@@ -333,7 +333,7 @@ class Library(rxdata.RxLib):
             fh = self.fh
         fh.seek(start)
         s = fh.read(stop-start)
-        parsed_data = utils.fromendl_tok(s, nfields_rprop[rprop])
+        parsed_data = utils.fromendl_tok(s, NFIELDS_RPROP[rprop])
 
         if opened_here:
             fh.close()
