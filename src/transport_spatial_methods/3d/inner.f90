@@ -11,11 +11,12 @@ SUBROUTINE inner(g)
 USE invar
 USE solvar
 USE timevar
+use precision_module, only: dp
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: g
 INTEGER :: i, j, k, t, u, v, it, l
 INTEGER :: id, jd, kd, td, ud, vd, gd
-REAL*8 :: df, dfmx
+REAL(kind=dp) :: df, dfmx
 
 ! Initialize the previous flux iterate
 ! Initialize the old time point

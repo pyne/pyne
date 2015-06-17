@@ -6,13 +6,14 @@ SUBROUTINE read_inflow_dgfem(inflow_file)
 !
 !-------------------------------------------------------------
 USE invar
+use precision_module, only: dp
 IMPLICIT NONE
 
 CHARACTER(30), INTENT(IN) :: inflow_file
 INTEGER :: octant,n
 INTEGER :: ix,iy,iz,jx,jy,jz,dir,l
 INTEGER :: sgn_mu,sgn_eta,sgn_xi
-real*8 :: sgx,sgy,sgz
+real(kind=dp) :: sgx,sgy,sgz
 
 ALLOCATE(  tfrbc(nz,nx,0:lambda,0:lambda,apo,4),&
            tbabc(nz,nx,0:lambda,0:lambda,apo,4),&

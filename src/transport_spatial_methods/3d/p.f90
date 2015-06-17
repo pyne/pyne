@@ -7,10 +7,11 @@ SUBROUTINE p(k,x,val)
 !-------------------------------------------------------------
 
 USE solvar
+use precision_module, only: dp
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: k
-REAL*8, INTENT(IN) :: x
-REAL*8, INTENT(OUT) :: val
+REAL(kind=dp), INTENT(IN) :: x
+REAL(kind=dp), INTENT(OUT) :: val
 
 IF (k == 0) THEN
    val = 1.0
