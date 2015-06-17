@@ -179,6 +179,6 @@ namespace pyne {
 
 
 // End PyNE namespace
-};
+}
 
 #endif  // PYNE_KMMHYNANYFF5BFMEYIP7TUNLHA

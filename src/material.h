@@ -54,6 +54,7 @@ namespace pyne
    "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP", 
    "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON", "POLYETHY", "AIR"
   };
+
   static int FLUKA_MAT_NUM = 37;
 
   /// Material composed of nuclides.
@@ -371,10 +372,10 @@ namespace pyne
     virtual const char* what() const throw()
     {
       return "Invalid loading protocol number; please use 0 or 1.";
-    };
+    }
   };
 
 // End pyne namespace
-};
+}
 
 #endif  // PYNE_MR34UE5INRGMZK2QYRDWICFHVM

@@ -575,9 +575,9 @@ namespace nucname
   /// form as ID, but the four last digits are all zeros.
   /// \param nuc a nuclide
   /// \return a integer groundstate id
-  inline int groundstate(int nuc) {return (id(nuc) / 10000 ) * 10000;};
-  inline int groundstate(std::string nuc) {return groundstate(id(nuc));};
-  inline int groundstate(const char * nuc) {return groundstate(std::string(nuc));};
+  inline int groundstate(int nuc) {return (id(nuc) / 10000 ) * 10000;}
+  inline int groundstate(std::string nuc) {return groundstate(id(nuc));}
+  inline int groundstate(const char * nuc) {return groundstate(std::string(nuc));}
   /// \}
 
   /// \name State Map functions
@@ -599,7 +599,7 @@ namespace nucname
   int ensdf_to_id(std::string nuc);
   /// \}
 
-};
-};
+}
+}
 
 #endif  // PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA

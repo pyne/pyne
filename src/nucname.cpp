@@ -129,7 +129,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_name_zz() {
   lzd["Lv"] = 116;
 
   return lzd;
-};
+}
 pyne::nucname::name_zz_t pyne::nucname::name_zz = pyne::nucname::get_name_zz();
 
 
@@ -142,7 +142,7 @@ pyne::nucname::zzname_t pyne::nucname::get_zz_name()
     zld[i->second] = i->first;
   }
   return zld;
-};
+}
 pyne::nucname::zzname_t pyne::nucname::zz_name = pyne::nucname::get_zz_name();
 
 
@@ -295,7 +295,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["238-U"]    = 922380000;   // fluka "238-U"
 
   return fzd;
-};
+}
 pyne::nucname::name_zz_t pyne::nucname::fluka_zz = pyne::nucname::get_fluka_zz();
 
 
@@ -308,7 +308,7 @@ pyne::nucname::zzname_t pyne::nucname::get_zz_fluka()
     zfd[i->second] = i->first;
   }
   return zfd;
-};
+}
 pyne::nucname::zzname_t pyne::nucname::zz_fluka = pyne::nucname::get_zz_fluka();
 
 
@@ -323,7 +323,7 @@ pyne::nucname::zz_group pyne::nucname::name_to_zz_group(pyne::nucname::name_grou
   for (name_group_iter i = eg.begin(); i != eg.end(); i++)
     zg.insert(name_zz[*i]);
   return zg;
-};
+}
 
 // Lanthanides
 pyne::nucname::name_t pyne::nucname::LAN_array[15] = {"La", "Ce", "Pr", "Nd", 
@@ -385,13 +385,13 @@ bool pyne::nucname::isnuclide(std::string nuc) {
   }
   catch(IndeterminateNuclideForm) {
     return false;
-  };
+  }
   return isnuclide(n);
-};
+}
 
 bool pyne::nucname::isnuclide(const char * nuc) {
   return isnuclide(std::string(nuc));
-};
+}
 
 bool pyne::nucname::isnuclide(int nuc) {
   int n;
@@ -403,7 +403,7 @@ bool pyne::nucname::isnuclide(int nuc) {
   }
   catch(IndeterminateNuclideForm) {
     return false;
-  };
+  }
   if (n <= 10000000)
     return false;
   int zzz = n / 10000000;
@@ -413,7 +413,7 @@ bool pyne::nucname::isnuclide(int nuc) {
   else if (aaa < zzz)
     return false;
   return true;
-};
+}
 
 
 
@@ -473,7 +473,7 @@ int pyne::nucname::id(int nuc) {
   if (nuc >= 1000000){
     // From now we assume no metastable info has been given.
     throw IndeterminateNuclideForm(nuc, "");
-  };
+  }
 
   // Nuclide is not in zzaaam form, 
   // Try MCNP form, ie zzaaa
@@ -506,12 +506,12 @@ int pyne::nucname::id(int nuc) {
   if (0 < zz_name.count(nuc))
     return nuc * 10000000;
   throw IndeterminateNuclideForm(nuc, "");
-};
+}
 
 int pyne::nucname::id(const char * nuc) {
   std::string newnuc (nuc);
   return id(newnuc);
-};
+}
 
 int pyne::nucname::id(std::string nuc) {
   size_t npos = std::string::npos;
@@ -562,7 +562,7 @@ int pyne::nucname::id(std::string nuc) {
         newnuc = (10000000 * name_zz[elem_name]) + newnuc;
       else
         throw NotANuclide(nucstr, newnuc);
-    };
+    }
   } else if (pyne::contains_substring(pyne::alphabet, nucstr.substr(0, 1))) {
     // Nuclide is probably in name form, or some variation therein
     std::string anum_str = pyne::remove_characters(nucstr, pyne::alphabet);
@@ -601,7 +601,7 @@ int pyne::nucname::id(std::string nuc) {
     throw NotANuclide(nuc, nucstr);
   }
   return newnuc;  
-};
+}
 
 
 /***************************/
@@ -617,11 +617,11 @@ bool pyne::nucname::iselement(std::string nuc) {
     return false;
   }
   return iselement(n);
-};
+}
 
 bool pyne::nucname::iselement(const char * nuc) {
   return iselement(std::string(nuc));
-};
+}
 
 bool pyne::nucname::iselement(int nuc) {
   int n;
@@ -639,7 +639,7 @@ bool pyne::nucname::iselement(int nuc) {
   if (zzz > 0 && aaa == 0)
     return true;  // is element
   return false;
-};
+}
 
 /**********************/
 /*** name functions ***/
@@ -669,7 +669,7 @@ std::string pyne::nucname::name(int nuc) {
     newnuc += "M";
 
   return newnuc;
-};
+}
 
 
 
@@ -689,45 +689,45 @@ std::string pyne::nucname::name(std::string nuc) {
 /**********************/
 int pyne::nucname::znum(int nuc) {
   return id(nuc) / 10000000;
-};
+}
 
 int pyne::nucname::znum(const char * nuc) {
   return id(nuc) / 10000000;
-};
+}
 
 int pyne::nucname::znum(std::string nuc) {
   return id(nuc) / 10000000;
-};
+}
 
 /**********************/
 /*** anum functions ***/
 /**********************/
 int pyne::nucname::anum(int nuc) {
   return (id(nuc) / 10000) % 1000;
-};
+}
 
 int pyne::nucname::anum(const char * nuc) {
   return (id(nuc) / 10000) % 1000;
-};
+}
 
 int pyne::nucname::anum(std::string nuc) {
   return (id(nuc) / 10000) % 1000;
-};
+}
 
 /**********************/
 /*** snum functions ***/
 /**********************/
 int pyne::nucname::snum(int nuc) {
   return id(nuc) % 10000;
-};
+}
 
 int pyne::nucname::snum(const char * nuc) {
   return id(nuc) % 10000;
-};
+}
 
 int pyne::nucname::snum(std::string nuc) {
   return id(nuc) % 10000;
-};
+}
 
 /************************/
 /*** zzaaam functions ***/
@@ -739,33 +739,33 @@ int pyne::nucname::zzaaam(int nuc) {
   if (10 <= ssss)
     ssss = 9;
   return zzzaaa*10 + ssss;
-};
+}
 
 
 int pyne::nucname::zzaaam(const char * nuc) {
   std::string newnuc (nuc);
   return zzaaam(newnuc);
-};
+}
 
 
 int pyne::nucname::zzaaam(std::string nuc) {
   return zzaaam(id(nuc));
-};
+}
 
 
 int pyne::nucname::zzaaam_to_id(int nuc) {
   return (nuc/10)*10000 + (nuc%10);
-};
+}
 
 
 int pyne::nucname::zzaaam_to_id(const char * nuc) {
   return zzaaam_to_id(std::string(nuc));
-};
+}
 
 
 int pyne::nucname::zzaaam_to_id(std::string nuc) {
   return zzaaam_to_id(pyne::to_int(nuc));
-};
+}
 
 /************************/
 /*** zzzaaa functions ***/
@@ -775,33 +775,33 @@ int pyne::nucname::zzzaaa(int nuc) {
   int zzzaaa = nucid/10000;
 
   return zzzaaa;
-};
+}
 
 
 int pyne::nucname::zzzaaa(const char * nuc) {
   std::string newnuc (nuc);
   return zzzaaa(newnuc);
-};
+}
 
 
 int pyne::nucname::zzzaaa(std::string nuc) {
   return zzzaaa(id(nuc));
-};
+}
 
 
 int pyne::nucname::zzzaaa_to_id(int nuc) {
   return (nuc)*10000;
-};
+}
 
 
 int pyne::nucname::zzzaaa_to_id(const char * nuc) {
   return zzzaaa_to_id(std::string(nuc));
-};
+}
 
 
 int pyne::nucname::zzzaaa_to_id(std::string nuc) {
   return zzzaaa_to_id(pyne::to_int(nuc));
-};
+}
 
 /*************************/
 /*** zzllaaam functions ***/
@@ -832,23 +832,23 @@ std::string pyne::nucname::zzllaaam(int nuc) {
   if (0 < ssss)
     newnuc += "m";
   return newnuc;
-};
+}
 
 
 std::string pyne::nucname::zzllaaam(const char * nuc) {
   std::string newnuc (nuc);
   return zzllaaam(newnuc);
-};
+}
 
 
 std::string pyne::nucname::zzllaaam(std::string nuc) {
   return zzllaaam(id(nuc));
-};
+}
 
 
 int pyne::nucname::zzllaaam_to_id(const char * nuc) {
   return zzllaaam_to_id(std::string(nuc));
-};
+}
 
 
 int pyne::nucname::zzllaaam_to_id(std::string nuc) {
@@ -896,7 +896,7 @@ int pyne::nucname::zzllaaam_to_id(std::string nuc) {
   else
     throw NotANuclide(nucstr, nucid);
   return nucid;
-};
+}
 
 /**********************/
 /*** mcnp functions ***/
@@ -915,20 +915,20 @@ int pyne::nucname::mcnp(int nuc) {
     newnuc += 300 + (ssss * 100);
 
   return newnuc;
-};
+}
 
 
 
 int pyne::nucname::mcnp(const char * nuc) {
   std::string newnuc (nuc);
   return mcnp(newnuc);
-};
+}
 
 
 
 int pyne::nucname::mcnp(std::string nuc) {
   return mcnp(id(nuc));
-};
+}
 
 //
 // MCNP -> id
@@ -957,17 +957,17 @@ int pyne::nucname::mcnp_to_id(int nuc) {
     // MCNP form natural nuclide
     return zzz * 10000000;
   throw IndeterminateNuclideForm(nuc, "");
-};
+}
 
 
 int pyne::nucname::mcnp_to_id(const char * nuc) {
   return mcnp_to_id(std::string(nuc));
-};
+}
 
 
 int pyne::nucname::mcnp_to_id(std::string nuc) {
   return mcnp_to_id(pyne::to_int(nuc));
-};
+}
 
 
 /**********************/
@@ -979,7 +979,7 @@ std::string pyne::nucname::fluka(int nuc) {
     throw NotANuclide(nuc, "fluka name could not be found");
   }
   return zz_fluka[x];
-};
+}
 
 
 //
@@ -1034,18 +1034,18 @@ std::string pyne::nucname::serpent(int nuc) {
     newnuc += "m";
 
   return newnuc;
-};
+}
 
 
 std::string pyne::nucname::serpent(const char * nuc) {
   std::string newnuc (nuc);
   return serpent(newnuc);
-};
+}
 
 
 std::string pyne::nucname::serpent(std::string nuc) {
   return serpent(id(nuc));
-};
+}
 
 //
 // Serpent -> id
@@ -1053,12 +1053,12 @@ std::string pyne::nucname::serpent(std::string nuc) {
 //int pyne::nucname::serpent_to_id(int nuc)
 //{
 // Should be ZAID
-//};
+//}
 
 
 int pyne::nucname::serpent_to_id(const char * nuc) {
   return serpent_to_id(std::string(nuc));
-};
+}
 
 
 int pyne::nucname::serpent_to_id(std::string nuc) {
@@ -1100,7 +1100,7 @@ int pyne::nucname::serpent_to_id(std::string nuc) {
   else
     throw NotANuclide(nucstr, nucid);
   return nucid;
-};
+}
 
 
 /**********************/
@@ -1137,18 +1137,18 @@ std::string pyne::nucname::nist(int nuc) {
   //  newnuc += "*";
 
   return newnuc;
-};
+}
 
 
 std::string pyne::nucname::nist(const char * nuc) {
   std::string newnuc (nuc);
   return nist(newnuc);
-};
+}
 
 
 std::string pyne::nucname::nist(std::string nuc) {
   return nist(id(nuc));
-};
+}
 
 
 //
@@ -1161,7 +1161,7 @@ std::string pyne::nucname::nist(std::string nuc) {
 
 int pyne::nucname::nist_to_id(const char * nuc) {
   return nist_to_id(std::string(nuc));
-};
+}
 
 int pyne::nucname::nist_to_id(std::string nuc) {
   if (nuc.empty())
@@ -1190,7 +1190,7 @@ int pyne::nucname::nist_to_id(std::string nuc) {
   else
     throw NotANuclide(nuc, nucid);
   return nucid;
-};
+}
 
 
 /************************/
@@ -1206,20 +1206,20 @@ int pyne::nucname::cinder(int nuc) {
   if (10 <= ssss)
     ssss = 9;
   return (aaa*10000) + (zzz*10) + ssss;
-};
+}
 
 
 
 int pyne::nucname::cinder(const char * nuc) {
   std::string newnuc (nuc);
   return cinder(newnuc);
-};
+}
 
 
 
 int pyne::nucname::cinder(std::string nuc) {
   return cinder(id(nuc));
-};
+}
 
 //
 // Cinder -> Id
@@ -1230,17 +1230,17 @@ int pyne::nucname::cinder_to_id(int nuc) {
   int zzz = aaazzz % 1000;
   int aaa = aaazzz / 1000;
   return (zzz * 10000000) + (aaa * 10000) + ssss;
-};
+}
 
 
 int pyne::nucname::cinder_to_id(const char * nuc) {
   return cinder_to_id(std::string(nuc));
-};
+}
 
 
 int pyne::nucname::cinder_to_id(std::string nuc) {
   return cinder_to_id(pyne::to_int(nuc));
-};
+}
 
 
 
@@ -1277,7 +1277,7 @@ std::string pyne::nucname::alara(int nuc) {
 
   // Note, ALARA input format does not use metastable flag
   return newnuc;
-};
+}
 
 
 std::string pyne::nucname::alara(const char * nuc) {
@@ -1297,12 +1297,12 @@ std::string pyne::nucname::alara(std::string nuc) {
 //int pyne::nucname::alara_to_id(int nuc)
 //{
 // Not Possible
-//};
+//}
 
 
 int pyne::nucname::alara_to_id(const char * nuc) {
   return alara_to_id(std::string(nuc));
-};
+}
 
 
 int pyne::nucname::alara_to_id(std::string nuc) {
@@ -1332,7 +1332,7 @@ int pyne::nucname::alara_to_id(std::string nuc) {
   else
     throw NotANuclide(nuc, nucid);
   return nucid;
-};
+}
 
 
 
@@ -1440,7 +1440,7 @@ int pyne::nucname::id_to_state_id(int nuc_id) {
 
 int pyne::nucname::ensdf_to_id(const char * nuc) {
   return ensdf_to_id(std::string(nuc));
-};
+}
 
 int pyne::nucname::ensdf_to_id(std::string nuc) {
   if (nuc.size() < 4) {
@@ -1456,5 +1456,5 @@ int pyne::nucname::ensdf_to_id(std::string nuc) {
     return nucname::id(nuc);
   }
   
-};
+}
 

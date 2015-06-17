@@ -178,7 +178,7 @@ namespace particle
     NotAParticle(std::string particle_name)
     {
        part_name = particle_name;
-    };
+    }
 
     /// raises error message
     virtual const char* what() const throw()
@@ -187,14 +187,14 @@ namespace particle
       if(!part_name.empty())
 	pname += part_name;
       return (const char *) pname.c_str();
-    };
+    }
 
     private:
        std::string part_name;  /// the particle name
 
 
   };
-};
-};
+}
+}
 
 #endif
