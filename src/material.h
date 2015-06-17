@@ -362,7 +362,7 @@ namespace pyne
     double mass;  ///< material mass
     double density; ///< material density
     double atoms_per_mol; ///< material atoms per mole
-    double comp []; ///< array of material composition mass weights.
+    double *comp; ///< array of material composition mass weights.
   } material_data;
 
   /// Custom exception for invalid HDF5 protocol numbers
