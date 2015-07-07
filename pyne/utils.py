@@ -5,7 +5,7 @@ from distutils.dir_util import remove_tree
 
 from pyne._utils import fromstring_split, fromstring_token, endftod,\
                         use_fast_endftod, fromendf_tok, toggle_warnings,\
-                        use_warnings
+                        use_warnings, fromendl_tok
 
 
 class QAWarning(UserWarning):
