@@ -4,10 +4,11 @@ python:
   - "2.7"
   - "3.4"
 before_install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  #- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update -qq
-  - sudo apt-get install -y gcc-4.9 g++-4.9
-  - sudo apt-get install -y gfortran-4.9
+  #- sudo apt-get install -y gcc-4.9 g++-4.9
+  #- sudo apt-get install -y gfortran-4.9
+  - sudo apt-get install -y gfortran
 install:
   # You may want to periodically update this, although the conda update
   # conda line below will keep everything up-to-date.  We do this
