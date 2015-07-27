@@ -28,7 +28,7 @@ contains
 
 
 subroutine read_sp_wts_sct_step(order)
-  use dtypes, only:dp
+  use precision_module, only:dp
 !*********************************************************
 !
 ! This subroutine reads Pade coefficients from files
@@ -57,7 +57,7 @@ subroutine read_sp_wts_sct_step(order)
 end subroutine
 
 function spwt(e)
-  use dtypes, only:dp
+  use precision_module, only:dp
 !*********************************************************
 !
 ! Given the optical thickness e this functions computes
@@ -74,7 +74,7 @@ function spwt(e)
 end function
 
 subroutine ahotn0_kernel(x,y,z,mu,eta,xi,sig,inflow_x,inflow_y,inflow_z,psia)
-  use dtypes, only:dp
+  use precision_module, only:dp
 !*********************************************************
 !
 ! This subroutine solves the DD equations  
@@ -114,7 +114,7 @@ subroutine ahotn0_kernel(x,y,z,mu,eta,xi,sig,inflow_x,inflow_y,inflow_z,psia)
 end subroutine
 
 subroutine step_kernel(sigt,mu,eta,xi,sc_pol,nfaces_x,nfaces_y,nfaces_z,fx,fy,fz,b)
-  use dtypes, only:dp
+  use precision_module, only:dp
 
 !*********************************************************
 !
