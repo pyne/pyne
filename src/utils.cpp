@@ -41,7 +41,7 @@ void pyne::pyne_start() {
   NUC_DATA_PATH = std::string(tmppath);
 #endif
   return;
-};
+}
 
 
 
@@ -221,7 +221,7 @@ std::string pyne::replace_all_substrings(std::string s, std::string substr, std:
     n_found = s.find(substr);
   }
   return s;
-};
+}
 
 
 
@@ -278,7 +278,7 @@ std::string pyne::natural_naming(std::string name) {
     nat_name.insert(0, "_");
 
   return nat_name;
-};
+}
 
 
 //
@@ -288,21 +288,21 @@ std::string pyne::natural_naming(std::string name) {
 double pyne::slope(double x2, double y2, double x1, double y1) {
   // Finds the slope of a line.
   return (y2 - y1) / (x2 - x1);
-};
+}
 
 
 double pyne::solve_line(double x, double x2, double y2, double x1, double y1) {
   return (slope(x2,y2,x1,y1) * (x - x2)) + y2;
-};
+}
 
 
 double pyne::tanh(double x) {
   return std::tanh(x);
-};
+}
 
 double pyne::coth(double x) {
   return 1.0 / std::tanh(x);
-};
+}
 
 
 
@@ -334,7 +334,7 @@ bool pyne::file_exists(std::string strfilename) {
   }
 
   return(blnReturn);
-};
+}
 
 // Message Helpers
  

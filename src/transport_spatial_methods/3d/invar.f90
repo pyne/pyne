@@ -1,5 +1,7 @@
 MODULE invar
 
+use precision_module, only: dp
+
 ! Module to store the AHOT input variables
 
 IMPLICIT NONE
@@ -10,7 +12,7 @@ CHARACTER(30) :: solver, solvertype
 
 ! Problem Size Specifications
 INTEGER :: lambda, qdord, qdtyp, nx, ny, nz, ng, nm
-REAL*8, DIMENSION(:), ALLOCATABLE :: dx, dy, dz
+real(kind=dp), DIMENSION(:), ALLOCATABLE :: dx, dy, dz
 
 ! Cell materials
 INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: mat
@@ -19,23 +21,23 @@ INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: mat
 INTEGER :: xsbc, xebc, ysbc, yebc, zsbc, zebc 
 
 ! Iteration Controls
-REAL*8 :: convergence_criterion, converge_tolerence
+real(kind=dp) :: convergence_criterion, converge_tolerence
 INTEGER :: itmx, moments_converged
 
 ! Extra variables derived from input
 INTEGER :: apo, dofpc, order, ordsq, ordcb, orpc
-REAL*8, DIMENSION(:,:), ALLOCATABLE :: ssum
+real(kind=dp), DIMENSION(:,:), ALLOCATABLE :: ssum
 
 ! Angular quadrature input
-REAL*8, DIMENSION(:,:), ALLOCATABLE :: ang
-REAL*8, DIMENSION(:), ALLOCATABLE :: w
+real(kind=dp), DIMENSION(:,:), ALLOCATABLE :: ang
+real(kind=dp), DIMENSION(:), ALLOCATABLE :: w
 
 ! Cross section input
-REAL*8, DIMENSION(:,:), ALLOCATABLE :: sigt
-REAL*8, DIMENSION(:,:,:), ALLOCATABLE :: sigs
+real(kind=dp), DIMENSION(:,:), ALLOCATABLE :: sigt
+real(kind=dp), DIMENSION(:,:,:), ALLOCATABLE :: sigs
 
 ! Source data
-REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: s
+real(kind=dp), DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: s
 
 ! Fixed boundary conditions
 ! 
@@ -60,22 +62,22 @@ REAL*8, DIMENSION(:,:,:,:,:,:,:), ALLOCATABLE :: s
 ! correspondingly for the other inflow BC
 !
 
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: frbc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: babc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: lebc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ribc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: bobc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tobc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: frbc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: babc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: lebc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ribc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: bobc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tobc
 
 !
 ! temporary bc arrays
 !
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tfrbc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tbabc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tlebc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tribc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tbobc
-REAL*8, DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ttobc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tfrbc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tbabc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tlebc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tribc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: tbobc
+real(kind=dp), DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: ttobc
 
 ! Editing data
 INTEGER :: momp, momsum, mompt, qdflx

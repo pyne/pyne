@@ -56,9 +56,9 @@ namespace enrichment {
   };
 
 // end enrichment
-};
+}
 // end pyne
-};
+}
 
 #endif
 

@@ -172,7 +172,7 @@ namespace h5wrap
     H5Dread(dset, dtype, memspace, dspace, H5P_DEFAULT, data_out);
 
     return data_out[0];
-  };
+  }
 
 
   // Conversion functions
@@ -205,7 +205,7 @@ namespace h5wrap
 
     delete[] mem_arr;
     return cpp_set;
-  };
+  }
 
 
   /// Reads in data from an HDF5 file as a 1 dimiensional vector.  \a T should roughly
@@ -235,7 +235,7 @@ namespace h5wrap
 
     H5Dclose(dset);
     return cpp_vec;
-  };
+  }
 
 
   /// Reads in data from an HDF5 file as a 2 dimiensional vector.  \a T should roughly
@@ -270,7 +270,7 @@ namespace h5wrap
 
     H5Dclose(dset);
     return cpp_vec;
-  };
+  }
 
 
   /// Reads in data from an HDF5 file as a 3 dimiensional vector.  \a T should roughly
@@ -309,7 +309,7 @@ namespace h5wrap
 
     H5Dclose(dset);
     return cpp_vec;
-  };
+  }
 
 
 
@@ -408,7 +408,7 @@ namespace h5wrap
     H5Tinsert(ct, "r", HOFFSET(xd_complex_t, re), H5T_NATIVE_DOUBLE);
     H5Tinsert(ct, "i", HOFFSET(xd_complex_t, im), H5T_NATIVE_DOUBLE);
     return ct;
-  };
+  }
 
   /// The HDF5 id for a complex data type compatible with PyTables generated data.
   static hid_t PYTABLES_COMPLEX128 = _get_PYTABLES_COMPLEX128();
@@ -437,11 +437,11 @@ namespace h5wrap
       }
     }
     return rtn;
-  };
+  }
 
 
 // End namespace h5wrap
-};
+}
 
 
 

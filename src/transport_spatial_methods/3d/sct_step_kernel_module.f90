@@ -16,15 +16,19 @@ module sct_step_kernel_module
 use invar
 use solvar
 use sct_module
+use precision_module, only: dp
+
 implicit none
 
 ! sp_weights saves Pade coefficients for the computation of the AHOTN
 ! spatial weights
-real(kind=8) :: sp_wts(4,0:1000)
+real(kind=dp) :: sp_wts(4,0:1000)
 
 contains
 
+
 subroutine read_sp_wts_sct_step(order)
+  use precision_module, only:dp
 !*********************************************************
 !
 ! This subroutine reads Pade coefficients from files
@@ -53,15 +57,16 @@ subroutine read_sp_wts_sct_step(order)
 end subroutine
 
 function spwt(e)
+  use precision_module, only:dp
 !*********************************************************
 !
 ! Given the optical thickness e this functions computes
 ! the spatial weight. 
 !
 !*********************************************************
-  real*8 :: spwt
-  real*8 :: e
-  real*8 :: c(4)
+  real(kind=dp) :: spwt
+  real(kind=dp) :: e
+  real(kind=dp) :: c(4)
   integer :: pos
   pos=min(idnint(10.0d0*e),1000)
   c=sp_wts(:,pos)
@@ -69,6 +74,7 @@ function spwt(e)
 end function
 
 subroutine ahotn0_kernel(x,y,z,mu,eta,xi,sig,inflow_x,inflow_y,inflow_z,psia)
+  use precision_module, only:dp
 !*********************************************************
 !
 ! This subroutine solves the DD equations  
@@ -77,14 +83,14 @@ subroutine ahotn0_kernel(x,y,z,mu,eta,xi,sig,inflow_x,inflow_y,inflow_z,psia)
 
    ! Arguments
 
-   real(kind=8) :: x,y,z,sig,mu,eta,xi
-   real(kind=8) :: inflow_x,inflow_y,inflow_z
-   real(kind=8) :: psia
+   real(kind=dp) :: x,y,z,sig,mu,eta,xi
+   real(kind=dp) :: inflow_x,inflow_y,inflow_z
+   real(kind=dp) :: psia
 
    ! Local variables
 
-   real(kind=8) :: ex, ey, ez
-   real(kind=8) :: alpha,beta,gamma
+   real(kind=dp) :: ex, ey, ez
+   real(kind=dp) :: alpha,beta,gamma
 
    ! Optical thickness
    ex = 2.0d0*mu /(x*sig)
@@ -108,6 +114,8 @@ subroutine ahotn0_kernel(x,y,z,mu,eta,xi,sig,inflow_x,inflow_y,inflow_z,psia)
 end subroutine
 
 subroutine step_kernel(sigt,mu,eta,xi,sc_pol,nfaces_x,nfaces_y,nfaces_z,fx,fy,fz,b)
+  use precision_module, only:dp
+
 !*********************************************************
 !
 ! This subroutine computes step solution for SCT cell.
@@ -118,15 +126,15 @@ subroutine step_kernel(sigt,mu,eta,xi,sc_pol,nfaces_x,nfaces_y,nfaces_z,fx,fy,fz
 
   ! Arguments
   
-  real(kind=8)                  :: sigt,mu,eta,xi
+  real(kind=dp)                  :: sigt,mu,eta,xi
   type(polyhedron)              :: sc_pol(3)
   integer(kind=1), dimension(3) :: nfaces_x,nfaces_y,nfaces_z
-  real(kind=8), dimension(3)    :: fx,fy,fz
-  real(kind=8)                  :: b
+  real(kind=dp), dimension(3)    :: fx,fy,fz
+  real(kind=dp)                  :: b
 
   ! Local variables
-  real(kind=8) :: src,vol,area(-3:3)  
-  real(kind=8) :: psib(3),denom
+  real(kind=dp) :: src,vol,area(-3:3)  
+  real(kind=dp) :: psib(3),denom
 
   ! Set source and initialize psib
   src  = sigt*b
