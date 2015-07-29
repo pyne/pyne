@@ -125,7 +125,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   hid_t mem_space = H5Screate_simple(1, data_count, NULL);
 
   // Get material type
-  size_t material_data_size = sizeof(pyne::material_data) + sizeof(double)*nuc_size;
+  size_t material_data_size = sizeof(pyne::material_data) + sizeof(double)*(nuc_size-1);
   hid_t desc = H5Tcreate(H5T_COMPOUND, material_data_size);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
@@ -317,7 +317,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   hsize_t data_max_dims[1] = {H5S_UNLIMITED};
   hsize_t data_offset[1] = {0};
 
-  size_t material_data_size = sizeof(pyne::material_data) + sizeof(double)*nuc_size;
+  size_t material_data_size = sizeof(pyne::material_data) + sizeof(double)*(nuc_size-1);
   hid_t desc = H5Tcreate(H5T_COMPOUND, material_data_size);
   hid_t comp_values_array_type = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, nuc_dims);
 
