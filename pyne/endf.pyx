@@ -1076,57 +1076,73 @@ class Library(rxdata.RxLib):
             fh.close
         return fromendf_tok(s)
 
-class EndfTape(file):
-    """A file-like object with special methods for ENDF files.
+
+def at_end_of_tape(f):
+    """Indicate whether file is positioned at the end of an ENDF tape.
+
+    Parameters
+    ----------
+    f : file_like
+        File to check
+
+    Returns
+    -------
+    bool
+        Whether the file is at the end of the ENDF tape
 
     """
+    position = f.tell()
+    line = f.readline()
+    if line == '' or line[66:70] == '  -1':
+        return True
+    else:
+        f.seek(position)
+        return False
 
-    def __init__(self, *args, **kwargs):
-        file.__init__(self, *args, **kwargs)
 
-    def at_end_of_tape(self):
-        """Indicate whether file is positioned at the end of an ENDF tape.
+def seek_material_end(f):
+    """Position the file at the end of the ENDF material (MAT) currently being read.
 
-        Returns
-        -------
-        bool
-            Whether the file is at the end of the ENDF tape
+    Parameters
+    ----------
+    f : file_like
+        File to position
 
-        """
-        position = self.tell()
-        line = self.readline()
-        if line == '' or line[66:70] == '  -1':
-            return True
-        else:
-            self.seek(position)
-            return False
+    """
+    while True:
+        line = f.readline()
+        if line[66:70] == '   0':
+            break
 
-    def seek_material_end(self):
-        """Position the file at the end of the ENDF material (MAT) currently being read.
 
-        """
-        while True:
-            line = self.readline()
-            if line[66:70] == '   0':
-                break
+def seek_file_end(f):
+    """Position the file at the end of the ENDF file (MF) currently being read.
 
-    def seek_file_end(self):
-        """Position the file at the end of the ENDF file (MF) currently being read.
+    Parameters
+    ----------
+    f : file_like
+        File to position
 
-        """
-        while True:
-            line = self.readline()
-            if line[70:72] == ' 0':
-                break
+    """
+    while True:
+        line = f.readline()
+        if line[70:72] == ' 0':
+            break
 
-    def seek_section_end(self):
-        """Position the file at the end of the ENDF section (MT) currently being read.
 
-        """
-        while True:
-            line = self.readline()
-            if line[72:75] == '  0':
-                break
+def seek_section_end(f):
+    """Position the file at the end of the ENDF section (MT) currently being read.
+
+    Parameters
+    ----------
+    f : file_like
+        File to position
+
+    """
+    while True:
+        line = f.readline()
+        if line[72:75] == '  0':
+            break
 
 
 class Evaluation(object):
@@ -1214,10 +1230,10 @@ class Evaluation(object):
     """
 
     def __init__(self, filename_or_handle, verbose=True):
-        if isinstance(filename_or_handle, file):
+        if hasattr(filename_or_handle, 'read'):
             self._fh = filename_or_handle
         else:
-            self._fh = EndfTape(filename_or_handle, 'rU')
+            self._fh = open(filename_or_handle, 'rU')
         self._verbose = verbose
         self._veryverbose = False
 
@@ -1293,15 +1309,15 @@ class Evaluation(object):
 
             # If there are files/reactions requested to be skipped, check them
             if MF in skip_mf:
-                self._fh.seek_file_end()
+                seek_file_end(self._fh)
                 continue
             if MT in skip_mt:
-                self._fh.seek_section_end()
+                seek_section_end(self._fh)
                 continue
 
             # If reading is restricted to certain reactions, check here
             if reactions and (MF, MT) not in reactions:
-                self._fh.seek_section_end()
+                seek_section_end(self._fh)
                 continue
 
 
@@ -1327,7 +1343,7 @@ class Evaluation(object):
                 if MT == 151:
                     self._read_resonances()
                 else:
-                    self._fh.seek_section_end()
+                    seek_section_end(self._fh)
 
             elif MF == 3:
                 # Reaction cross sections
@@ -1404,7 +1420,7 @@ class Evaluation(object):
                 self._read_atomic_relaxation()
 
             else:
-                self._fh.seek_file_end()
+                seek_file_end(self._fh)
 
     def _read_header(self):
         self._print_info(1, 451)
