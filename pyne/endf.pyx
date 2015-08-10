@@ -46,7 +46,7 @@ SPACE66_R = re.compile(' {66}')
 NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
 SPACE66_R = re.compile(' {66}')
 
-def radiation_type(value):
+def _radiation_type(value):
     p = {0: 'gamma', 1: 'beta-', 2: 'ec/beta+', 3: 'IT',
          4: 'alpha', 5: 'neutron', 6: 'sf', 7: 'proton',
          8: 'e-', 9: 'xray', 10: 'unknown'}
@@ -2015,7 +2015,7 @@ class Evaluation(object):
         LE = items[2] - 1  # Determine energy-dependence
 
         for i in range(LE + 1):
-            items, itemList = self._get_list_record()
+            items, values = self._get_list_record()
             E = items[0]  # Incident particle energy
             iyield['energies'].append(E)
             NFP = items[5]  # Number of fission product nuclide states
@@ -2024,9 +2024,9 @@ class Evaluation(object):
 
             # Get data for each yield
             iyield['data'][E] = {}
-            iyield['data'][E]['zafp'] = [int(i) for i in itemList[0::4]] # ZA for fission products
-            iyield['data'][E]['fps'] = itemList[1::4] # State designator
-            iyield['data'][E]['yi'] = zip(itemList[2::4],itemList[3::4]) # Independent yield
+            iyield['data'][E]['zafp'] = [int(i) for i in values[0::4]] # ZA for fission products
+            iyield['data'][E]['fps'] = values[1::4] # State designator
+            iyield['data'][E]['yi'] = zip(values[2::4],values[3::4]) # Independent yield
 
         # Skip SEND record
         self._fh.readline()
@@ -2044,7 +2044,7 @@ class Evaluation(object):
         LE = items[2] - 1  # Determine energy-dependence
 
         for i in range(LE + 1):
-            items, itemList = self._get_list_record()
+            items, values = self._get_list_record()
             E = items[0]  # Incident particle energy
             cyield['energies'].append(E)
             NFP = items[5]  # Number of fission product nuclide states
@@ -2053,9 +2053,9 @@ class Evaluation(object):
 
             # Get data for each yield
             cyield['data'][E] = {}
-            cyield['data'][E]['zafp'] = [int(i) for i in itemList[0::4]] # ZA for fission products
-            cyield['data'][E]['fps'] = itemList[1::4] # State designator
-            cyield['data'][E]['yc'] = zip(itemList[2::4],itemList[3::4]) # Cumulative yield
+            cyield['data'][E]['zafp'] = [int(i) for i in values[0::4]] # ZA for fission products
+            cyield['data'][E]['fps'] = values[1::4] # State designator
+            cyield['data'][E]['yc'] = zip(values[2::4],values[3::4]) # Cumulative yield
 
         # Skip SEND record
         self._fh.readline()
@@ -2077,13 +2077,13 @@ class Evaluation(object):
             NSP = items[5]  # Number of radiation types
 
             # Half-life and decay energies
-            items, itemList = self._get_list_record()
+            items, values = self._get_list_record()
             decay['half_life'] = (items[0], items[1])
             decay['NC'] = items[4]//2
-            decay['energies'] = zip(itemList[0::2], itemList[1::2])
+            decay['energies'] = zip(values[0::2], values[1::2])
 
             # Decay mode information
-            items, itemList = self._get_list_record()
+            items, values = self._get_list_record()
             decay['spin'] = items[0]  # Spin of the nuclide
             decay['parity'] = items[1]  # Parity of the nuclide
             NDK = items[5]  # Number of decay modes
@@ -2092,10 +2092,10 @@ class Evaluation(object):
             decay['modes'] = []
             for i in range(NDK):
                 mode = {}
-                mode['type'] = radiation_type(itemList[6*i])
-                mode['isomeric_state'] = itemList[6*i + 1]
-                mode['energy'] = tuple(itemList[6*i + 2:6*i + 4])
-                mode['branching_ratio'] = tuple(itemList[6*i + 4:6*(i + 1)])
+                mode['type'] = _radiation_type(values[6*i])
+                mode['isomeric_state'] = values[6*i + 1]
+                mode['energy'] = tuple(values[6*i + 2:6*i + 4])
+                mode['branching_ratio'] = tuple(values[6*i + 4:6*(i + 1)])
                 decay['modes'].append(mode)
 
             discrete_type = {0.0: None, 1.0: 'allowed', 2.0: 'first-forbidden',
@@ -2106,15 +2106,15 @@ class Evaluation(object):
             for i in range(NSP):
                 spectrum = {}
 
-                items, itemList = self._get_list_record()
+                items, values = self._get_list_record()
                 # Decay radiation type
-                spectrum['type'] = radiation_type(items[1])
+                spectrum['type'] = _radiation_type(items[1])
                 # Continuous spectrum flag
                 spectrum['continuous_flag'] = {0: 'discrete', 1: 'continuous',
                                                2: 'both'}[items[2]]
-                spectrum['discrete_normalization'] = tuple(itemList[0:2])
-                spectrum['energy_average'] = tuple(itemList[2:4])
-                spectrum['continuous_normalization'] = tuple(itemList[4:6])
+                spectrum['discrete_normalization'] = tuple(values[0:2])
+                spectrum['energy_average'] = tuple(values[2:4])
+                spectrum['continuous_normalization'] = tuple(values[4:6])
 
                 NER = items[5]  # Number of tabulated discrete energies
 
@@ -2122,33 +2122,33 @@ class Evaluation(object):
                     # Information about discrete spectrum
                     spectrum['discrete'] = []
                     for j in range(NER):
-                        items, itemList = self._get_list_record()
+                        items, values = self._get_list_record()
                         di = {}
                         di['energy'] = tuple(items[0:2])
-                        di['from_mode'] = radiation_type(itemList[0])
-                        di['type'] = discrete_type[itemList[1]]
-                        di['intensity'] = tuple(itemList[2:4])
+                        di['from_mode'] = _radiation_type(values[0])
+                        di['type'] = discrete_type[values[1]]
+                        di['intensity'] = tuple(values[2:4])
                         if spectrum['type'] == 'ec/beta+':
-                            di['positron_intensity'] = tuple(itemList[4:6])
+                            di['positron_intensity'] = tuple(values[4:6])
                         elif spectrum['type'] == 'gamma':
-                            di['internal_pair'] = tuple(itemList[4:6])
-                            di['total_internal_conversion'] = tuple(itemList[6:8])
-                            di['k_shell_conversion'] = tuple(itemList[8:10])
-                            di['l_shell_conversion'] = tuple(itemList[10:12])
+                            di['internal_pair'] = tuple(values[4:6])
+                            di['total_internal_conversion'] = tuple(values[6:8])
+                            di['k_shell_conversion'] = tuple(values[8:10])
+                            di['l_shell_conversion'] = tuple(values[10:12])
                         spectrum['discrete'].append(di)
 
                 if not spectrum['continuous_flag'] == 'discrete':
                     # Read continuous spectrum
                     ci = {}
                     params, ci['probability'] = self._get_tab1_record()
-                    ci['type'] = radiation_type(params[0])
+                    ci['type'] = _radiation_type(params[0])
 
                     # Read covariance (Ek, Fk) table
                     LCOV = params[3]
                     if LCOV != 0:
-                        items, itemList = self._get_list_record()
+                        items, values = self._get_list_record()
                         ci['covariance_lb'] = items[3]
-                        ci['covariance'] = zip(itemList[0::2], itemList[1::2])
+                        ci['covariance'] = zip(values[0::2], values[1::2])
 
                     spectrum['continuous'] = ci
 
@@ -2156,8 +2156,8 @@ class Evaluation(object):
                 decay['spectra'][spectrum['type']] = spectrum
 
         else:
-            items, itemList = self._get_list_record()
-            items, itemList = self._get_list_record()
+            items, values = self._get_list_record()
+            items, values = self._get_list_record()
             decay['spin'] = items[0]
             decay['parity'] = items[1]
 
@@ -2193,7 +2193,7 @@ class Evaluation(object):
                 for j in range(items[4]//6):
                     mode = {}
                     mode['half_life'] = values[6*j]
-                    mode['type'] = radiation_type(values[6*j + 1])
+                    mode['type'] = _radiation_type(values[6*j + 1])
                     mode['za'] = values[6*j + 2]
                     mode['branching_ratio'] = values[6*j + 3]
                     mode['endpoint_energy'] = values[6*j + 4]
@@ -3079,8 +3079,7 @@ class ENDFTab2Record(object):
 
 
 class AngularDistribution(object):
-    def __init__(self):
-        pass
+    pass
 
 
 class Reaction(object):
@@ -3089,7 +3088,7 @@ class Reaction(object):
 
     Parameters
     ----------
-    MT : int
+    mt : int
         The MT number from the ENDF file.
 
     Attributes
@@ -3144,8 +3143,8 @@ class Reaction(object):
 
     """
 
-    def __init__(self, MT):
-        self.MT = MT
+    def __init__(self, mt):
+        self.mt = mt
         self.files = []
         self.photon_production = {}
         self.xs = None
@@ -3167,7 +3166,7 @@ class Reaction(object):
         self.anomalous_scattering_real = None
 
     def __repr__(self):
-        return '<ENDF Reaction: MT={0}, {1}>'.format(self.MT, label(self.MT))
+        return '<ENDF Reaction: MT={0}, {1}>'.format(self.mt, label(self.mt))
 
 
 class ResonanceRange(object):
