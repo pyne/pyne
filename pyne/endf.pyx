@@ -2042,7 +2042,7 @@ class Evaluation(object):
             iyield['data'][E] = {}
             iyield['data'][E]['zafp'] = [int(i) for i in values[0::4]] # ZA for fission products
             iyield['data'][E]['fps'] = values[1::4] # State designator
-            iyield['data'][E]['yi'] = zip(values[2::4],values[3::4]) # Independent yield
+            iyield['data'][E]['yi'] = list(zip(values[2::4],values[3::4])) # Independent yield
 
         # Skip SEND record
         self._fh.readline()
@@ -2071,7 +2071,7 @@ class Evaluation(object):
             cyield['data'][E] = {}
             cyield['data'][E]['zafp'] = [int(i) for i in values[0::4]] # ZA for fission products
             cyield['data'][E]['fps'] = values[1::4] # State designator
-            cyield['data'][E]['yc'] = zip(values[2::4],values[3::4]) # Cumulative yield
+            cyield['data'][E]['yc'] = list(zip(values[2::4],values[3::4])) # Cumulative yield
 
         # Skip SEND record
         self._fh.readline()
@@ -2096,7 +2096,7 @@ class Evaluation(object):
             items, values = self._get_list_record()
             decay['half_life'] = (items[0], items[1])
             decay['NC'] = items[4]//2
-            decay['energies'] = zip(values[0::2], values[1::2])
+            decay['energies'] = list(zip(values[0::2], values[1::2]))
 
             # Decay mode information
             items, values = self._get_list_record()
@@ -2164,7 +2164,7 @@ class Evaluation(object):
                     if LCOV != 0:
                         items, values = self._get_list_record()
                         ci['covariance_lb'] = items[3]
-                        ci['covariance'] = zip(values[0::2], values[1::2])
+                        ci['covariance'] = list(zip(values[0::2], values[1::2]))
 
                     spectrum['continuous'] = ci
 
