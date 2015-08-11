@@ -762,8 +762,8 @@ def test_evaluation_neutron():
 
 def test_evaluation_decay():
     download_file('https://t2.lanl.gov/nis/data/endf/decayVII.1/092_U_233',
-                  'U233-decay.endf', '3db23dc650bae28eabb92942dd7d0de5')
-    u233 = Evaluation('U233-decay.endf', verbose=False)
+                  'U233.txt', '3db23dc650bae28eabb92942dd7d0de5')
+    u233 = Evaluation('U233.txt', verbose=False)
     u233.read()
 
     assert hasattr(u233, 'info')
