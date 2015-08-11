@@ -525,19 +525,56 @@ class Brkoxs(_BinaryReader):
     def __init__(self, filename):
         super(Brkoxs, self).__init__(filename)
 
-class Rtflux(_BinaryReader):
+class Rtflux(object):
     """A Rtflux object represents data stored in a RTFLUX file from the CCCC
     format specification. This file contains regular total fluxes.
 
-    Parameters
+
+    Attributes
     ----------
-    filename : str
-        Path to the RTFLUX file to be read.
+
 
     """
+    def __init__(self, filename):
+        """
+        Parameters
+        ----------
+        filename : str
+            Path to the RTFLUX file to be read.
+        """
+
 
     def __init__(self, filename):
-        super(Rtflux, self).__init__(filename)
+
+        b = _BinaryReader(filename)
+        fr = b.get_fortran_record()
+
+        print fr.get_string(8)
+        print fr.get_string(8)
+        print fr.get_string(8)
+        print fr.get_int(1)
+
+        a = b.get_fortran_record()
+        [ndim, ngroup, ninti, nintj, nintk, niter] = a.get_int(6)
+        print ndim, ngroup, ninti, nintj, nintk, niter
+
+        k, power = a.get_float(2)
+        print k, power
+
+        nblok = a.get_int(1)
+        print nblok
+        nblok = nblok[0]
+
+        flux = []
+        for L in range(1, ngroup + 1):
+            for K in range(1, nintk + 1):
+                for M in range(1, nblok + 1):
+                    a = b.get_fortran_record()
+                    jl = (M - 1)*((nintj - 1)/nblok + 1) + 1
+                    jup = M*((nintj -1)/nblok + 1)
+                    ju = min(nintj, jup)
+                    flux.append(a.get_double(ninti*(ju-jl+1)))
+
 
 
 class Atflux(_BinaryReader):
