@@ -2699,42 +2699,6 @@ class Tab1(object):
         self.y = np.asarray(y)  # Ordinate values
 
     @classmethod
-    def from_ndarray(cls, array, idx=0):
-        """Create a Tab1 object from array.
-
-        Parameters
-        ----------
-        array : ndarray
-            Array is formed as a 1 dimensional array as follows: [number of regions,
-            final pair for each region, interpolation parameters, number of pairs,
-            x-values, y-values]
-        idx : int, optional
-            Offset to read from in array (default of zero)
-
-        """
-
-        # Get number of regions and pairs
-        n_regions = int(array[idx])
-        n_pairs = int(array[idx + 1 + 2*n_regions])
-
-        # Get interpolation information
-        idx += 1
-        if n_regions > 0:
-            nbt = np.asarray(array[idx:idx + n_regions], dtype=int)
-            interp = np.asarray(array[idx + n_regions:idx + 2*n_regions], dtype=int)
-        else:
-            # NR=0 regions implies linear-linear interpolation by default
-            nbt = np.array([n_pairs])
-            interp = np.array([2])
-
-        # Get (x,y) pairs
-        idx += 2*n_regions + 1
-        x = array[idx:idx + n_pairs]
-        y = array[idx + n_pairs:idx + 2*n_pairs]
-
-        return cls(x, y, nbt, interp)
-
-    @classmethod
     def from_file(cls, fh):
         """Create Tab1 object using open file handle.
 
