@@ -558,6 +558,8 @@ class Rtflux(object):
         Number of Fortran data blocks
     flux: ndarray
         Fluxes in the form flux(i, j) where i is interval and j is energy group
+    adjoint: bool
+        Specify if fluxes are adjoint (e.g. for an atflux file)
     """
 
     def __init__(self, filename):
@@ -572,16 +574,21 @@ class Rtflux(object):
         fr = b.get_fortran_record()
 
         # read file identification
-        self.hname = fr.get_string(8)
-        self.huse = fr.get_string(8)
-        self.ivers = fr.get_string(8)
+        self.hname = fr.get_string(8)[0].strip()
+        self.huse = fr.get_string(8)[0].strip()
+        self.ivers = fr.get_string(8)[0].strip()
         mult = fr.get_int(1)
+
+        if self.hname == "rtflux":
+            self.adjoint = False
+        elif self.hname == "atflux":
+            self.adjoint = True
  
         # read specifcations
         fr = b.get_fortran_record()
         self.ndim, self.ngroup, self.ninti, self.nintj, self.nintk, self.niter \
             = fr.get_int(6)
-        self.k, self.power = fr.get_float(2)
+        self.effk, self.power = fr.get_float(2)
         self.nblok = fr.get_int(1)[0]
 
         # read fluxes
