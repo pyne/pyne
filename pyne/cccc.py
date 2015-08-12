@@ -10,6 +10,7 @@ and SPECTR.
 The ISOTXS reader was originally derived from Professor James Holloway's
 open-source C++ classes from the University of Michigan and later expanded by
 Nick Touran for work on his PhD thesis. DLAYXS was later added by Paul Romano.
+RTFLUX was done by Elliott Biondo.
 
 A description of several CCCC formats are available online for ISOTXS_, MATXS_,
 RTFLUX_, and RZFLUX_. Other format specifications can be found in Los Alamos
@@ -29,8 +30,9 @@ Report LA-5324-MS_.
 
 from __future__ import division
 from warnings import warn
-from pyne.utils import QAWarning
+import numpy as np
 
+from pyne.utils import QAWarning
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
@@ -526,15 +528,38 @@ class Brkoxs(_BinaryReader):
         super(Brkoxs, self).__init__(filename)
 
 class Rtflux(object):
-    """A Rtflux object represents data stored in a RTFLUX file from the CCCC
-    format specification. This file contains regular total fluxes.
+    """An Rtflux object represents data stored in a RTFLUX file from the CCCC
+    format specification. This file contains regular (i.e. not adjoint) total
+    fluxes. Attributed names mirror those described in the CCCC specification.
 
-
-    Attributes
-    ----------
-
-
+    Attributes:
+    -----------
+    hname: str
+        Name of file ("rtflux" or "atflux")
+    huse: str
+        User identification string
+    ivers: int
+        File version
+    ndim: int
+        Number of dimenstions
+    ngroup: int
+        Number of energy groups
+    ninti: int
+        Number of fine mesh intervals in the first dimension
+    nintj: int
+        Number of fine mesh intervals in the second dimension
+    nintk: int
+        Number of fine mesh intervals in the third dimension
+    iter: int
+        Outer interation number
+    effk: float
+        Effective multiplication (k)
+    nblok: int
+        Number of Fortran data blocks
+    flux: ndarray
+        Fluxes in the form flux(i, j) where i is interval and j is energy group
     """
+
     def __init__(self, filename):
         """
         Parameters
@@ -543,39 +568,82 @@ class Rtflux(object):
             Path to the RTFLUX file to be read.
         """
 
-
-    def __init__(self, filename):
-
         b = _BinaryReader(filename)
         fr = b.get_fortran_record()
 
-        print fr.get_string(8)
-        print fr.get_string(8)
-        print fr.get_string(8)
-        print fr.get_int(1)
+        # read file identification
+        self.hname = fr.get_string(8)
+        self.huse = fr.get_string(8)
+        self.ivers = fr.get_string(8)
+        mult = fr.get_int(1)
+ 
+        # read specifcations
+        fr = b.get_fortran_record()
+        self.ndim, self.ngroup, self.ninti, self.nintj, self.nintk, self.niter \
+            = fr.get_int(6)
+        self.k, self.power = fr.get_float(2)
+        self.nblok = fr.get_int(1)[0]
 
-        a = b.get_fortran_record()
-        [ndim, ngroup, ninti, nintj, nintk, niter] = a.get_int(6)
-        print ndim, ngroup, ninti, nintj, nintk, niter
-
-        k, power = a.get_float(2)
-        print k, power
-
-        nblok = a.get_int(1)
-        print nblok
-        nblok = nblok[0]
-
+        # read fluxes
         flux = []
-        for L in range(1, ngroup + 1):
-            for K in range(1, nintk + 1):
-                for M in range(1, nblok + 1):
-                    a = b.get_fortran_record()
-                    jl = (M - 1)*((nintj - 1)/nblok + 1) + 1
-                    jup = M*((nintj -1)/nblok + 1)
-                    ju = min(nintj, jup)
-                    flux.append(a.get_double(ninti*(ju-jl+1)))
 
+        if self.ndim == 1:
+            for m in range(1, self.nblok + 1):
+                fr = b.get_fortran_record()
+                jl = (m - 1)*((self.ngroup - 1)/self.nblok + 1) + 1
+                jup = m*((self.ngroup -1)/self.nblok + 1)
+                ju = min(self.ngroup, jup)
+                flux.append(fr.get_double(self.ninti*(ju-jl+1)))
 
+        elif self.ndim >= 2:
+            for l in range(1, self.ngroup + 1):
+                for k in range(1, self.nintk + 1):
+                    for m in range(1, self.nblok + 1):
+                        fr = b.get_fortran_record()
+                        jl = (m - 1)*((self.nintj - 1)/self.nblok + 1) + 1
+                        jup = m*((self.nintj -1)/self.nblok + 1)
+                        ju = min(self.nintj, jup)
+                        flux += fr.get_double(int(self.ninti*(ju-jl+1)))
+
+        flux2 = []
+        num_intervals = self.ninti*self.nintj*self.nintk
+        for i in range(self.ngroup):
+            flux2.append(flux[i*num_intervals:(i+1)*num_intervals])
+        flux2 = np.array(flux2)
+        flux2 = flux2.transpose()
+
+        self.flux = flux2
+
+    def to_mesh(self, m, tag_name):
+        """This member function tags supplied PyNE Mesh object with the fluxes
+        contained in the rtflux file.
+
+        Parameters
+        ----------
+        m: PyNE Mesh
+            A PyNE Mesh object with same x, y, z intervals used to generate
+            the rtflux file.
+        tag_name: str
+             The tag name to use to tag the fluxes onto the mesh.
+        """
+
+        try:
+            from itaps import iMesh
+            HAVE_PYTAPS = True
+        except ImportError:
+            warn("the PyTAPS optional dependency could not be imported. "
+                          "All aspects of the partisn module are not imported.",
+                          QAWarning)
+            HAVE_PYTAPS = False
+        
+        if HAVE_PYTAPS:
+            from pyne.mesh import Mesh, IMeshTag
+
+        temp = m.structured_ordering
+        m.structured_ordering = 'zyx'
+        m.tag = IMeshTag(self.ngroup, float, name=tag_name)
+        m.tag[:] = self.flux
+        m.structured_ordering = temp
 
 class Atflux(_BinaryReader):
     """A Atflux object represents data stored in a ATFLUX file from the CCCC
