@@ -600,7 +600,7 @@ class Rtflux(object):
                 jl = (m - 1)*((self.ngroup - 1)/self.nblok + 1) + 1
                 jup = m*((self.ngroup -1)/self.nblok + 1)
                 ju = min(self.ngroup, jup)
-                flux.append(fr.get_double(self.ninti*(ju-jl+1)))
+                flux += fr.get_double(int(self.ninti*(ju-jl+1)))
 
         elif self.ndim >= 2:
             for l in range(1, self.ngroup + 1):
@@ -620,6 +620,7 @@ class Rtflux(object):
         flux2 = flux2.transpose()
 
         self.flux = flux2
+        b.close()
 
     def to_mesh(self, m, tag_name):
         """This member function tags supplied PyNE Mesh object with the fluxes

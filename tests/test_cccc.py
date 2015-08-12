@@ -61,14 +61,8 @@ class TestIsotxs(TestCase):
         assert nuc == nuc2
 
 
-def test_rtflux_3D():
-    if not HAVE_PYTAPS:
-        raise SkipTest
-
-    from pyne.mesh import Mesh, IMeshTag
-
+def test_rtflux_basics():
     rt = Rtflux("files_test_cccc/rtflux_3D")
-    # Test Basics
     assert_equal(rt.hname, "rtflux")
     assert_equal(rt.huse, "155339")
     assert_equal(rt.ivers,"081220")
@@ -82,7 +76,13 @@ def test_rtflux_3D():
     assert_equal(rt.nblok, 1)
     assert_equal(rt.adjoint, False)
 
-    # grab values from mesh to test
+def test_rtflux_3D():
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+    from pyne.mesh import Mesh, IMeshTag
+
+    rt = Rtflux("files_test_cccc/rtflux_3D")
     structured_coords=[[0.0,  30.0, 40.0, 50.0, 70.0],
                        [0.0, 15.0, 40.0,  50.0, 70.0],
                        [0.0, 20.0, 75.0, 130.0, 150.0]]
@@ -110,4 +110,23 @@ def test_rtflux_3D():
     np.allclose(exp, flux[:,0])
 
 
+def test_rt_flux_1D():
 
+    if not HAVE_PYTAPS:
+        raise SkipTest
+    from pyne.mesh import Mesh, IMeshTag
+
+    rt = Rtflux("files_test_cccc/rtflux_1D")
+    structured_coords=[[10*x for x in range(8)],
+                       [0.0, 1.0],
+                       [0.0, 1.0]]
+    m = Mesh(structured=True, structured_coords=structured_coords)
+    rt.to_mesh(m, "flux")
+    m.tag = IMeshTag(4, float, name="flux")
+    flux = m.tag[:]
+
+
+
+def test_atflux():
+    rt = Rtflux("files_test_cccc/rtflux_3D")
+    assert_equal(rt.adjoint, True)
