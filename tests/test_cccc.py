@@ -110,23 +110,18 @@ def test_rtflux_3D():
     np.allclose(exp, flux[:,0])
 
 
-def test_rt_flux_1D():
-
-    if not HAVE_PYTAPS:
-        raise SkipTest
-    from pyne.mesh import Mesh, IMeshTag
-
-    rt = Rtflux("files_test_cccc/rtflux_1D")
-    structured_coords=[[10*x for x in range(8)],
-                       [0.0, 1.0],
-                       [0.0, 1.0]]
-    m = Mesh(structured=True, structured_coords=structured_coords)
-    rt.to_mesh(m, "flux")
-    m.tag = IMeshTag(4, float, name="flux")
-    flux = m.tag[:]
-
-
+#def test_rt_flux_1D():
+#    if not HAVE_PYTAPS:
+#        raise SkipTest
+#    from pyne.mesh import Mesh, IMeshTag
+#
+#    rt = Rtflux("files_test_cccc/rtflux_1D")
+#    structured_coords=[[10*x for x in range(8)], [0.0, 1.0], [0.0, 1.0]]
+#    m = Mesh(structured=True, structured_coords=structured_coords)
+#    rt.to_mesh(m, "flux")
+#    m.tag = IMeshTag(4, float, name="flux")
+#    flux = m.tag[:]
 
 def test_atflux():
-    rt = Rtflux("files_test_cccc/rtflux_3D")
+    rt = Rtflux("files_test_cccc/atflux_3D")
     assert_equal(rt.adjoint, True)
