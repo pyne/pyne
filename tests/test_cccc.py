@@ -73,6 +73,7 @@ def test_rtflux_basics():
     assert_equal(rt.nintk, 4)
     assert_equal(rt.niter, 23)
     assert_equal(rt.effk, 0.892322838306427)
+    assert_equal(rt.power, 1.0)
     assert_equal(rt.nblok, 1)
     assert_equal(rt.adjoint, False)
 
@@ -109,18 +110,60 @@ def test_rtflux_3D():
            1.91609508e-07, 4.46100170e-07, 4.46100170e-07, 1.91609508e-07]
     np.allclose(exp, flux[:,0])
 
+def test_rtflux_2D():
+    if not HAVE_PYTAPS:
+        raise SkipTest
+    from pyne.mesh import Mesh, IMeshTag
 
-#def test_rt_flux_1D():
-#    if not HAVE_PYTAPS:
-#        raise SkipTest
-#    from pyne.mesh import Mesh, IMeshTag
-#
-#    rt = Rtflux("files_test_cccc/rtflux_1D")
-#    structured_coords=[[10*x for x in range(8)], [0.0, 1.0], [0.0, 1.0]]
-#    m = Mesh(structured=True, structured_coords=structured_coords)
-#    rt.to_mesh(m, "flux")
-#    m.tag = IMeshTag(4, float, name="flux")
-#    flux = m.tag[:]
+    rt = Rtflux("files_test_cccc/rtflux_2D")
+    structured_coords=[[10*x for x in range(8)], [0.0, 10, 20, 30, 40], [0.0, 1.0]]
+    m = Mesh(structured=True, structured_coords=structured_coords)
+    rt.to_mesh(m, "flux")
+    m.tag = IMeshTag(4, float, name="flux")
+    flux = m.tag[:]
+    # test energy ordering
+    np.allclose(flux[0], [1.54202809e-02, 7.35252284e-02, 
+                          4.59426961e-02, 1.66764798e-03])
+    # test spatial ordering
+    exp = [ 1.54202809e-02, 1.22833140e-02, 8.24652761e-03, 4.10247328e-03, 1.29812236e-02,
+            7.31613464e-03, 4.27769488e-03, 2.96312777e-03, 9.98971577e-03, 4.57188750e-03,
+            2.15025301e-03, 1.86188954e-03, 7.46111984e-03, 3.45483912e-03, 1.54143733e-03,
+            1.24946029e-03, 5.24386070e-03, 2.36004487e-03, 1.01537828e-03, 8.43692879e-04,
+            3.31488925e-03, 1.52156795e-03, 6.57790710e-04, 5.31460286e-04, 1.52433295e-03,
+            7.17349305e-04, 3.12441756e-04, 2.43518040e-04]
+    np.allclose(exp, flux[:,0])
+    
+def test_rt_flux_1D():
+    if not HAVE_PYTAPS:
+        raise SkipTest
+    from pyne.mesh import Mesh, IMeshTag
+
+    rt = Rtflux("files_test_cccc/rtflux_1D")
+    structured_coords=[[10*x for x in range(8)], [0.0, 1.0], [0.0, 1.0]]
+    m = Mesh(structured=True, structured_coords=structured_coords)
+    rt.to_mesh(m, "flux")
+    m.tag = IMeshTag(4, float, name="flux")
+    flux = m.tag[:]
+    exp = [[1.12382315e-02, 4.07499865e-02, 2.48423595e-02, 1.13102481e-03],
+           [4.70910079e-03, 2.49217686e-02, 2.06497203e-02, 1.22305619e-03],
+           [1.10359953e-03, 1.08674872e-02, 1.35176066e-02, 9.99735815e-04],
+           [5.60093921e-04, 4.91338778e-03, 7.42586666e-03, 6.18705350e-04],
+           [1.75256136e-04, 2.18964779e-03, 3.81165736e-03, 3.40591572e-04],
+           [1.16255047e-04, 9.88094844e-04, 1.78217782e-03, 1.65193192e-04],
+           [1.42177473e-05, 3.08311260e-04, 6.01543637e-04, 5.67537762e-05]]
+    np.allclose(exp, flux)
+
+
+def test_rtflux_raises():
+    if not HAVE_PYTAPS:
+        raise SkipTest
+    from pyne.mesh import Mesh, IMeshTag
+
+    rt = Rtflux("files_test_cccc/rtflux_1D")
+    structured_coords=[[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]
+    m = Mesh(structured=True, structured_coords=structured_coords)
+    with assert_raises(ValueError):
+        rt.to_mesh(m, "flux")
 
 def test_atflux():
     rt = Rtflux("files_test_cccc/atflux_3D")

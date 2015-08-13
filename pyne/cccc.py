@@ -598,6 +598,10 @@ class Rtflux(object):
         # read fluxes
         flux = []
 
+        # This is the 1D binary spec, specified by CCCC.
+        # It does not work the the PyNE binary reader, but using the 3D format
+        # does work, as tested.
+        #
         #if self.ndim == 1:
         #    for m in range(1, self.nblok + 1):
         #        fr = b.get_fortran_record()
@@ -606,7 +610,8 @@ class Rtflux(object):
         #        jup = m*((self.ngroup -1)/self.nblok + 1)
         #        ju = min(self.ngroup, jup)
         #        flux += fr.get_double(int(self.ninti*(ju-jl+1)))
-        #elif self.ndim >= 2:
+
+        # 3D binary spec
         for l in range(1, self.ngroup + 1):
             for k in range(1, self.nintk + 1):
                 for m in range(1, self.nblok + 1):
@@ -651,6 +656,13 @@ class Rtflux(object):
         if HAVE_PYTAPS:
             from pyne.mesh import Mesh, IMeshTag
 
+        if not m.structured:
+            raise ValueError("Only structured mesh is supported.")
+
+        mesh_dims = [len(x) - 1 for x in m.structured_coords]
+        if mesh_dims != [self.ninti, self.nintj, self.nintk]:
+            raise ValueError("Supplied mesh does not comform to rtflux bounds")
+
         temp = m.structured_ordering
         m.structured_ordering = 'zyx'
         m.tag = IMeshTag(self.ngroup, float, name=tag_name)
@@ -658,17 +670,20 @@ class Rtflux(object):
         m.structured_ordering = temp
 
 class Atflux(_BinaryReader):
-    """A Atflux object represents data stored in a ATFLUX file from the CCCC
-    format specification. This file contains adjoint total fluxes.
-
-    Parameters
-    ----------
-    filename : str
-        Path to the ATFLUX file to be read.
+    """An Atflux object represents data stored in a ATFLUX file from the CCCC
+    format specification. This file contains adjoint total fluxes. Note that
+    this is the same format as RTFLUX. See Rtflux class for a complete list of
+    atrributes.
 
     """
 
     def __init__(self, filename):
+        """
+        Parameters
+        ----------
+        filename : str
+        Path to the ATFLUX file to be read.
+        """
         super(Atflux, self).__init__(filename)
 
 
