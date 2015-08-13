@@ -588,29 +588,33 @@ class Rtflux(object):
         fr = b.get_fortran_record()
         self.ndim, self.ngroup, self.ninti, self.nintj, self.nintk, self.niter \
             = fr.get_int(6)
-        self.effk, self.power = fr.get_float(2)
+        self.effk = fr.get_float(1)[0]
+        if not self.adjoint:
+            self.power = fr.get_float(1)[0]
+        else:
+            fr.get_float(1)
         self.nblok = fr.get_int(1)[0]
 
         # read fluxes
         flux = []
 
-        if self.ndim == 1:
-            for m in range(1, self.nblok + 1):
-                fr = b.get_fortran_record()
-                jl = (m - 1)*((self.ngroup - 1)/self.nblok + 1) + 1
-                jup = m*((self.ngroup -1)/self.nblok + 1)
-                ju = min(self.ngroup, jup)
-                flux += fr.get_double(int(self.ninti*(ju-jl+1)))
-
-        elif self.ndim >= 2:
-            for l in range(1, self.ngroup + 1):
-                for k in range(1, self.nintk + 1):
-                    for m in range(1, self.nblok + 1):
-                        fr = b.get_fortran_record()
-                        jl = (m - 1)*((self.nintj - 1)/self.nblok + 1) + 1
-                        jup = m*((self.nintj -1)/self.nblok + 1)
-                        ju = min(self.nintj, jup)
-                        flux += fr.get_double(int(self.ninti*(ju-jl+1)))
+        #if self.ndim == 1:
+        #    for m in range(1, self.nblok + 1):
+        #        fr = b.get_fortran_record()
+        #        print fr.num_bytes
+        #        jl = (m - 1)*((self.ngroup - 1)/self.nblok + 1) + 1
+        #        jup = m*((self.ngroup -1)/self.nblok + 1)
+        #        ju = min(self.ngroup, jup)
+        #        flux += fr.get_double(int(self.ninti*(ju-jl+1)))
+        #elif self.ndim >= 2:
+        for l in range(1, self.ngroup + 1):
+            for k in range(1, self.nintk + 1):
+                for m in range(1, self.nblok + 1):
+                    fr = b.get_fortran_record()
+                    jl = (m - 1)*((self.nintj - 1)/self.nblok + 1) + 1
+                    jup = m*((self.nintj -1)/self.nblok + 1)
+                    ju = min(self.nintj, jup)
+                    flux += fr.get_double(int(self.ninti*(ju-jl+1)))
 
         flux2 = []
         num_intervals = self.ninti*self.nintj*self.nintk
