@@ -830,3 +830,37 @@ def strip_mat_name(mat_name):
         tmp1 = ''.join(tmp2)
     
     return tmp1
+
+def mesh_to_isotropic_source(m, tag):
+    """This function reads an isotropic source definition from a supplied mesh
+    and creates a corresponding PARTISN SOURCF input card.
+
+    Parameters:
+    m : PyNE Mesh
+        The mesh tagged with the source distribution:
+    tag : str
+        The tag on the mesh with the source information:
+    """
+
+    # get data
+    temp = m.structured_ordering
+    m.structured_ordering = "zyx"
+    m.src = IMeshTag(name=tag)
+    data = m.src[:].transpose()
+    m.structured_ordering = temp
+    ninti = len(m.structured_coords[0]) - 1
+
+    # format output
+    s = "sourcf=\n"
+    count = 1
+    for e_row in data:
+        for src in e_row:
+           s += " {0:9.5E}".format(src)
+           if count % ninti == 0:
+               s += ";"
+           if count % 6 == 0:
+               s += "\n"
+           count += 1
+
+    return s
+        
