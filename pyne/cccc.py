@@ -530,7 +530,10 @@ class Brkoxs(_BinaryReader):
 class Rtflux(object):
     """An Rtflux object represents data stored in a RTFLUX file from the CCCC
     format specification. This file contains regular (i.e. not adjoint) total
-    fluxes. Attributed names mirror those described in the CCCC specification.
+    fluxes. Attribute names mirror those described in the CCCC specification,
+    found here:
+
+    http://t2.lanl.gov/nis/codes/transx-hyper/rtflux.html
 
     Attributes:
     -----------
@@ -673,8 +676,9 @@ class Atflux(_BinaryReader):
     """An Atflux object represents data stored in a ATFLUX file from the CCCC
     format specification. This file contains adjoint total fluxes. Note that
     this is the same format as RTFLUX. See Rtflux class for a complete list of
-    atrributes.
+    atrributes. The RTFLUX/ATFLUX binary specification is found here:
 
+    http://t2.lanl.gov/nis/codes/transx-hyper/rtflux.html
     """
 
     def __init__(self, filename):
