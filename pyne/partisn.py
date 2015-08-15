@@ -48,6 +48,8 @@ except ImportError:
 
 if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
+    from pyne import dagmc
+
 
 
 def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
@@ -888,4 +890,77 @@ def mesh_to_isotropic_source(m, tag):
     # wrap to 80 characters
     s = "\n".join(wrap(s, 80))
     return s
+
+
+def isotropic_vol_source(filename, mesh, cells, spectra, intensities, **kwargs):
+    """This function
+
+    Parameters:
+    -----------
+    filename : str
         
+    mesh : PyNE Mesh
+    
+    tag_name : str
+  
+    num_rays : int, optional, default = 10
+        For discretize_geom. Structured mesh only. The number of rays to fire 
+        in each mesh row for each direction.
+    grid : boolean, optional, default = False
+        For discretize_geom. Structured mesh only. If false, rays starting 
+        points are chosen randomly (on the boundary) for each mesh row. If 
+        true, a linearly spaced grid of starting points is used, with dimension 
+        sqrt(num_rays) x sqrt(num_rays). In this case, "num_rays" must be a 
+        perfect square.
+  
+    Returns:
+    --------
+     
+    """
+    # discretize_geom inputs
+    if 'tag_name' in kwargs:
+        tag_name = kwargs['tag_name']
+    else:
+        tag_name = "src"
+
+    if 'num_rays' in kwargs:
+        num_rays = kwargs['num_rays']
+    else:
+        num_rays = 10
+
+    if 'grid' in kwargs:
+        grid = kwargs['grid']
+    else:
+        grid = False
+
+    # Check lengths of input
+    if len(cells) != len(spectra)  or len(cells) != len(intensities):
+       raise(ValueError, "Cells, spectra, intensities must be the same length")
+    lengths = [len(x) for x in spectra]
+    if not all(lengths[0] == length for length in lengths):
+       raise(ValueError, "Spectra must all be the same length")
+
+    # Normalize spectra
+    norm_spectra = []
+    for spec in spectra:
+        total = np.sum(spec)
+        norm_spectra.append(np.array([x/total for x in spec]))
+
+    norm_spectra = {cell:spec for cell, spec in zip(cells, spectra)}
+    intensities = {cell:inten for cell, inten in zip(cells, intensities)}
+
+    dagmc.load(filename)
+    dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
+    
+    data = np.zeros(shape=(len(mesh), len(spectra[0])))
+    for row in dg:
+       if row[1] in cells:
+           data[row[0], :] += np.multiply(row[2]*intensities[row[1]], 
+                                          norm_spectra[row[1]])
+
+    mesh.tag = IMeshTag(len(spectra[0]), float, name=tag_name)
+    mesh.tag[:] = data
+    
+    s = mesh_to_isotropic_source(mesh, tag_name)
+    return s
+
