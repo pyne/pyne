@@ -552,10 +552,5 @@ def test_isotropic_vol_source():
     exp[87, :] = [0.075, 0.075, 0.075, 0.025]
     exp[88, :] = [0.075, 0.075, 0.075, 0.025]
 
-    print data[22, :]
-    print data[62, :]
-    print data[63, :]
-    print data[87, :]
-    print data[88, :]
     assert(np.allclose(data, exp))
 
