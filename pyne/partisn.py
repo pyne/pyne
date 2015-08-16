@@ -19,6 +19,7 @@ import math
 import os
 import linecache
 import datetime
+from textwrap import wrap
 from warnings import warn
 from pyne.utils import QAWarning
 import itertools
@@ -830,3 +831,61 @@ def strip_mat_name(mat_name):
         tmp1 = ''.join(tmp2)
     
     return tmp1
+
+def mesh_to_isotropic_source(m, tag):
+    """This function reads an isotropic source definition from a supplied mesh
+    and creates a corresponding PARTISN SOURCF input card. The input card wraps
+    to 80 characters and utilizes the "R" repeation notation for zero values 
+    (e.g. 4R 0 = 0 0 0 0).
+
+    Parameters:
+    -----------
+    m : PyNE Mesh
+        The mesh tagged with an energy-dependent source distribution.
+    tag : str
+        The tag on the mesh with the source information.
+
+    Returns:
+    --------
+    s : str
+        SOURF input card wrapped to 80 characters.
+    """
+
+    # get data
+    temp = m.structured_ordering
+    m.structured_ordering = "zyx"
+    m.src = IMeshTag(name=tag)
+    data = m.src[:].transpose()
+    m.structured_ordering = temp
+    ninti = len(m.structured_coords[0]) - 1
+
+    # format output
+    s = "sourcf="
+    count = 1
+    zero_count = 0
+    for e_row in data:
+        for src in e_row:
+            if src == 0.0:
+               zero_count += 1
+            else:
+                if zero_count != 0:
+                    if zero_count == 1:
+                        s += " 0"
+                    else:
+                        s += " {}R 0".format(zero_count)
+                    zero_count = 0
+                s += " {0:9.5E}".format(src)
+            if count % ninti == 0:
+                if zero_count != 0:
+                    if zero_count == 1:
+                       s += " 0"
+                    else:
+                        s += " {}R 0".format(zero_count)
+                    zero_count = 0
+                s += ";"
+            count += 1
+
+    # wrap to 80 characters
+    s = "\n".join(wrap(s, 80))
+    return s
+        
