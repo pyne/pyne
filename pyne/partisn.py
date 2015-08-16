@@ -892,30 +892,60 @@ def mesh_to_isotropic_source(m, tag):
     return s
 
 
-def isotropic_vol_source(filename, mesh, cells, spectra, intensities, **kwargs):
-    """This function
+def isotropic_vol_source(geom, mesh, cells, spectra, intensities, **kwargs):
+    """This function creates an isotropic volumetric source within each
+    requested geometry cell of a DAGMC CAD geometry. This is done by Monte
+    Carlo ray tracing to determine volume fractions of each source cell within
+    each mesh volume element. The PARTISN SOURCF card is returned, as well as
+    the ray-traced volume fractions (dagmc.discretize_geom output), so that ray
+    tracing does not have to be done twice when using this function with
+    write_partisn_input. The supplied mesh is also tagged with the calculated
+    source distribution using this function.
 
     Parameters:
     -----------
-    filename : str
-        
+    geom : str
+        The DAGMC geometry (.h5m) file containing the geometry of interest.
     mesh : PyNE Mesh
-    
-    tag_name : str
-  
+        The superimposed Cartesian mesh that will be used to define the source
+        for PARTISN transport.
+    cells : list of ints
+        The cell numbers of DAGMC geometry cells which have non-zero source
+        intensity.
+    spectra : list of list of floats
+        The normalized energy spectrum for each of the cells. If spectra are
+        not normalized, they will be normalized in this function.
+    intensities : list of floats
+        The volumetric intensity (i.e. s^-1 cm^-3) for each geometry cell. 
+    tag_name : str, optional, default = 'src'
+        The name of the tag for which source data will be tagged on the mesh.
     num_rays : int, optional, default = 10
-        For discretize_geom. Structured mesh only. The number of rays to fire 
-        in each mesh row for each direction.
+        For discretize_geom. The number of rays to fire in each mesh row for 
+        each direction.
     grid : boolean, optional, default = False
-        For discretize_geom. Structured mesh only. If false, rays starting 
-        points are chosen randomly (on the boundary) for each mesh row. If 
-        true, a linearly spaced grid of starting points is used, with dimension 
-        sqrt(num_rays) x sqrt(num_rays). In this case, "num_rays" must be a 
-        perfect square.
+        For discretize_geom. If false, rays starting points are chosen randomly 
+        (on the boundary) for each mesh row. If true, a linearly spaced grid of
+        starting points is used, with dimension sqrt(num_rays) x sqrt(num_rays). 
+        In this case, "num_rays" must be a perfect square.
   
     Returns:
     --------
-     
+    output : str
+        PARTISN SOURF card representing the requested source
+    dg : record array
+        The output of dagmc.discretize_geom; stored in a one dimensional array, 
+        each entry containing the following
+        fields:
+        :idx: int 
+            The volume element index.
+        :cell: int
+            The geometry cell number.
+        :vol_frac: float
+            The volume fraction of the cell withing the mesh ve.
+        :rel_error: float
+            The relative error associated with the volume fraction.
+        This array is returned in sorted order with respect to idx and cell, with
+        cell changing fastest.
     """
     # discretize_geom inputs
     if 'tag_name' in kwargs:
@@ -946,12 +976,14 @@ def isotropic_vol_source(filename, mesh, cells, spectra, intensities, **kwargs):
         total = np.sum(spec)
         norm_spectra.append(np.array([x/total for x in spec]))
 
-    norm_spectra = {cell:spec for cell, spec in zip(cells, spectra)}
+    norm_spectra = {cell:spec for cell, spec in zip(cells, norm_spectra)}
     intensities = {cell:inten for cell, inten in zip(cells, intensities)}
 
-    dagmc.load(filename)
+    # ray trace
+    dagmc.load(geom)
     dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
-    
+
+    # determine  source intensities
     data = np.zeros(shape=(len(mesh), len(spectra[0])))
     for row in dg:
        if row[1] in cells:
@@ -961,6 +993,6 @@ def isotropic_vol_source(filename, mesh, cells, spectra, intensities, **kwargs):
     mesh.tag = IMeshTag(len(spectra[0]), float, name=tag_name)
     mesh.tag[:] = data
     
-    s = mesh_to_isotropic_source(mesh, tag_name)
-    return s
+    output = mesh_to_isotropic_source(mesh, tag_name)
+    return output, dg
 

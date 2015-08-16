@@ -527,3 +527,35 @@ def test_mesh_to_isotropic_source():
            "4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0;")
 
     assert(out == exp)
+
+def test_isotropic_vol_source():
+    """Test isotropic volumetric source generation from DAGMC geometry.
+    """
+    sc = np.linspace(-25, 25, 6)
+    m = Mesh(structured=True, structured_coords = [sc, sc, sc])
+    
+    cells = [14, 15]
+    spectra = [[0.1, 0.1, 0.1, 0.7], [0.3, 0.3, 0.3, 0.1]]
+    intensities = [1, 2]
+    
+    dg, s = partisn. isotropic_vol_source("files_test_partisn/source_boxes.h5m", 
+                                           m, cells, spectra, intensities,
+                                           num_rays=4, tag_name="src", grid=True)
+    m.src = IMeshTag(4, float)
+    data = m.src[:]
+   
+    # setup expected result, confirmed by hand calcs and inspection
+    exp = np.zeros(shape=((len(sc) - 1)**3, len(spectra[0])))
+    exp[22, :] = [0.025, 0.025,  0.025,  0.175]
+    exp[62, :] = [0.075, 0.075, 0.075, 0.025]
+    exp[63, :] = [0.075, 0.075, 0.075, 0.025]
+    exp[87, :] = [0.075, 0.075, 0.075, 0.025]
+    exp[88, :] = [0.075, 0.075, 0.075, 0.025]
+
+    print data[22, :]
+    print data[62, :]
+    print data[63, :]
+    print data[87, :]
+    print data[88, :]
+    assert(np.allclose(data, exp))
+
