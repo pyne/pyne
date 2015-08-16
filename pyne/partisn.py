@@ -948,36 +948,25 @@ def isotropic_vol_source(geom, mesh, cells, spectra, intensities, **kwargs):
         cell changing fastest.
     """
     # discretize_geom inputs
-    if 'tag_name' in kwargs:
-        tag_name = kwargs['tag_name']
-    else:
-        tag_name = "src"
-
-    if 'num_rays' in kwargs:
-        num_rays = kwargs['num_rays']
-    else:
-        num_rays = 10
-
-    if 'grid' in kwargs:
-        grid = kwargs['grid']
-    else:
-        grid = False
+    tag_name = kwargs.get('tag_name', 'src')
+    num_rays = kwargs.get('num_rays', 10)
+    grid = kwargs.get('grid', False)
 
     # Check lengths of input
-    if len(cells) != len(spectra)  or len(cells) != len(intensities):
-       raise(ValueError, "Cells, spectra, intensities must be the same length")
+    if len(cells) != len(spectra) or len(cells) != len(intensities):
+       raise ValueError("Cells, spectra, intensities must be the same length")
     lengths = [len(x) for x in spectra]
     if not all(lengths[0] == length for length in lengths):
-       raise(ValueError, "Spectra must all be the same length")
+       raise ValueError("Spectra must all be the same length")
 
     # Normalize spectra
     norm_spectra = []
     for spec in spectra:
         total = np.sum(spec)
-        norm_spectra.append(np.array([x/total for x in spec]))
+        norm_spectra.append(np.array(spec)/total)
 
-    norm_spectra = {cell:spec for cell, spec in zip(cells, norm_spectra)}
-    intensities = {cell:inten for cell, inten in zip(cells, intensities)}
+    norm_spectra = {cell: spec for cell, spec in zip(cells, norm_spectra)}
+    intensities = {cell: inten for cell, inten in zip(cells, intensities)}
 
     # ray trace
     dagmc.load(geom)
