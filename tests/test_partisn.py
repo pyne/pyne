@@ -21,7 +21,7 @@ except ImportError:
     raise SkipTest
 
 if HAVE_PYTAPS:
-    from pyne.mesh import Mesh
+    from pyne.mesh import Mesh, IMeshTag
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -495,3 +495,35 @@ def test_strip_mat_name():
     
     assert(mat_name_expected == mat_name)
 
+
+def test_mesh_to_isotropic_source():
+    """Test isotropic SOURCF generation.
+    """
+    m = Mesh(structured=True, structured_coords=[range(5), range(5), range(5)])
+    m.src = IMeshTag(4, float)
+    # These source values were carefully choosen so that:
+    # 1. The iteration order could be visually checked based on RTFLUX output using 
+    #    the resulting SOURCF card.
+    # 2. The repeation capability (i.e. 3R 0 = 0 0 0) could be tested.
+    m.src[:] = [[100,0,0,0], [0,0,0,0], [6,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0],
+                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], 
+                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0],
+                [0,100,0,0], [5,0,0,0], [6,0,0,0], [0,0,0,0], [8,0,0,0], [0,0,0,0],
+                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], 
+                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0],
+                [0,0,100,0], [5,0,0,0], [0,0,0,0], [7,0,0,0], [0,0,0,0], [0,0,0,0],
+                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], 
+                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0],
+                [0,0,0,100], [0,0,0,0], [0,0,0,0], [7,0,0,0], [8,0,0,0], [0,0,0,0],
+                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], 
+                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]]
+    out = partisn.mesh_to_isotropic_source(m, "src")
+    exp = ("sourcf= 1.00000E+02 3R 0; 0 8.00000E+00 0 8.00000E+00; 4R 0; 4R 0; 0 5.00000E+00\n"
+           "5.00000E+00 0; 4R 0; 4R 0; 4R 0; 6.00000E+00 6.00000E+00 2R 0; 4R 0; 4R 0; 4R 0;\n"
+           "2R 0 7.00000E+00 7.00000E+00; 4R 0; 4R 0; 4R 0; 0 1.00000E+02 2R 0; 4R 0; 4R 0;\n"
+           "4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 2R\n"
+           "0 1.00000E+02 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R\n"
+           "0; 4R 0; 4R 0; 4R 0; 4R 0; 3R 0 1.00000E+02; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0;\n"
+           "4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0; 4R 0;")
+
+    assert(out == exp)
