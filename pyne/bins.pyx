@@ -118,6 +118,34 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
     y_g : np.ndarray
         The group collapsed data, length G. 
     """
+    return pointwise_collapse(x_g, x, y, (False, False))
+
+@cython.boundscheck(False)
+def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g, 
+                       np.ndarray[np.float64_t, ndim=1] x, 
+                       np.ndarray[np.float64_t, ndim=1] y,
+                       log=(False, False)):
+    """Collapses pointwise data to G groups based on a linear interpolation
+    between the points. This is useful for collapsing cross section data.
+
+    Parameters
+    ----------
+    x_g : array-like
+        Group boundaries, length G+1 for G groups, must be monotonic in the 
+        same direction as x.
+    x : array-like
+        Pointwise abscissa to be collapsed, must be monotonic in the same direction
+        as x_g and have the same length as y.
+    y : array-like
+        Pointwise data to be interpolated, must have the same length as x.
+    log : tuple of bools, optional, default = (False, False)
+       Specify logrithmic interpolation in the x and y dimension, respectively
+
+    Returns
+    -------
+    y_g : np.ndarray
+        The group collapsed data, length G. 
+    """
     cdef int G = x_g.shape[0] - 1
     cdef int N = x.shape[0] - 1
     cdef int g0, g1  # current group index
@@ -131,6 +159,14 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
         x = x[::-1]
         y = y[::-1]
         reversed = True
+
+    # Handle logrithmic interpolations
+    if log[0]:
+        x_g = np.array([np.log(x) for z in x_g])
+        x = np.array([np.log(z) for z in x])
+    if log[1]:
+        y = np.array([np.log(z) for z in y])
+
     n0 = 0
     n1 = 1
     for g0 in range(G):
@@ -157,5 +193,10 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
         y_g[g0] = val / (x_g[g1] - x_g[g0])
     if reversed:
         y_g = y_g[::-1]
+
+    # Handle logrithmic interpolation
+    if log[1]:
+        y_g = np.array([np.power(10, z) for z in y])
+
     return y_g
-    
+
