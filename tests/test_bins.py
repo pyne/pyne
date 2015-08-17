@@ -83,6 +83,21 @@ def test_point_collapse():
     assert(np.allclose(log_lin, exp_log_lin))
     assert(np.allclose(log_log, exp_log_log))
 
+def test_point_collase_raises():
+
+    x_g = np.array([0.1, 1., 2.])
+    x = np.array([0.1, 1., 2.])
+    y = np.array([0.1, 1., 2.])
+
+    with assert_raises(ValueError):
+        bins.pointwise_collapse(x_g, np.array([2., 1., 2.]), y)
+
+    with assert_raises(ValueError):
+        bins.pointwise_collapse(np.array([-1, 1., 2.]), x, y, (True, False))
+
+    with assert_raises(ValueError):
+        bins.pointwise_collapse(x_g, x, np.array([0, 1., 2.]), (True, True))
+
 if __name__ == "__main__":
     nose.runmodule()
 

@@ -152,9 +152,16 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
     cdef int n0, n1  # current point index
     cdef double val, ylower, yupper
     cdef np.ndarray[np.float64_t, ndim=1] y_g = np.empty(G, dtype='float64')
+
+    # Ensure input is monotonically increasing/decreasing
+    for z in [x_g, x]:
+        if not (np.all(np.diff(z) > 0.) or np.all(np.diff(z) < 0)):
+            raise ValueError("x and x_g arrays must be monotonically"  
+                             "increasing/decreasing.")
+
     reversed = False
     if x_g[0] > x_g[-1]:
-        # monotonically decreaing, make increasing so logic is simpler
+        # monotonically decreasing, make increasing so logic is simpler
         x_g = x_g[::-1]
         x = x[::-1]
         y = y[::-1]
@@ -162,9 +169,13 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
 
     # Handle logrithmic interpolations
     if log[0]:
+        if x_g[0] <= 0.0 or x_g[0] <= 0.0:
+            raise ValueError("x values must be positive for logrithmic interpolation")
         x_g = np.array([np.log(z) for z in x_g])
         x = np.array([np.log(z) for z in x])
     if log[1]:
+        if y[0] <= 0.0:
+            raise ValueError("y values must be positive for logrithmic interpolation")
         y = np.array([np.log(z) for z in y])
 
     n0 = 0
