@@ -125,7 +125,7 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
                        np.ndarray[np.float64_t, ndim=1] x, 
                        np.ndarray[np.float64_t, ndim=1] y,
                        log=(False, False)):
-    """Collapses pointwise data to G groups based on a linear interpolation
+    """Collapses pointwise data to G groups based on a interpolation
     between the points. This is useful for collapsing cross section data.
 
     Parameters
