@@ -162,7 +162,7 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
 
     # Handle logrithmic interpolations
     if log[0]:
-        x_g = np.array([np.log(x) for z in x_g])
+        x_g = np.array([np.log(z) for z in x_g])
         x = np.array([np.log(z) for z in x])
     if log[1]:
         y = np.array([np.log(z) for z in y])
@@ -196,7 +196,7 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
 
     # Handle logrithmic interpolation
     if log[1]:
-        y_g = np.array([np.power(10, z) for z in y])
+        y_g = np.array([np.exp(z) for z in y_g])
 
     return y_g
 
