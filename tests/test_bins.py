@@ -67,10 +67,10 @@ def test_point_collapse():
     x = np.array([1., 2., 20., np.power(10., 2.6)])
     y = np.array([100., 100., 1000., 1.])
 
-    lin_lin = bins.pointwise_collapse(x_g, x, y, (False, False))
-    lin_log = bins.pointwise_collapse(x_g, x, y, (False, True))
-    log_lin = bins.pointwise_collapse(x_g, x, y, (True, False))
-    log_log = bins.pointwise_collapse(x_g, x, y, (True, True))
+    lin_lin = bins.pointwise_collapse(x_g, x, y)
+    lin_log = bins.pointwise_collapse(x_g, x, y, logy=True)
+    log_lin = bins.pointwise_collapse(x_g, x, y, logx=True)
+    log_log = bins.pointwise_collapse(x_g, x, y, log=True)
 
     # Verified via hand calcs
     exp_lin_lin = np.array([277.77777778])
@@ -93,10 +93,10 @@ def test_point_collase_raises():
         bins.pointwise_collapse(x_g, np.array([2., 1., 2.]), y)
 
     with assert_raises(ValueError):
-        bins.pointwise_collapse(np.array([-1, 1., 2.]), x, y, (True, False))
+        bins.pointwise_collapse(np.array([-1, 1., 2.]), x, y, logx=True)
 
     with assert_raises(ValueError):
-        bins.pointwise_collapse(x_g, x, np.array([0, 1., 2.]), (True, True))
+        bins.pointwise_collapse(x_g, x, np.array([0, 1., 2.]), log=True)
 
 if __name__ == "__main__":
     nose.runmodule()

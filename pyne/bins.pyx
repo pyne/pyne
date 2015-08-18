@@ -118,13 +118,15 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
     y_g : np.ndarray
         The group collapsed data, length G. 
     """
-    return pointwise_collapse(x_g, x, y, (False, False))
+    return pointwise_collapse(x_g, x, y)
 
 @cython.boundscheck(False)
 def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g, 
                        np.ndarray[np.float64_t, ndim=1] x, 
                        np.ndarray[np.float64_t, ndim=1] y,
-                       log=(False, False)):
+                       logx=False,
+                       logy=False,
+                       log=False):
     """Collapses pointwise data to G groups based on a interpolation
     between the points. This is useful for collapsing cross section data.
 
@@ -138,8 +140,12 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
         as x_g and have the same length as y.
     y : array-like
         Pointwise data to be interpolated, must have the same length as x.
-    log : tuple of bools, optional, default = (False, False)
-       Specify logrithmic interpolation in the x and y dimension, respectively
+    logx: bool, optional, default=False
+        lin-log interpolation
+    logy: bool, optional, default=False
+        log-lin interpolation
+    log : bool, optional, default=False
+        log-log interpolation
 
     Returns
     -------
@@ -168,15 +174,15 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
         reversed = True
 
     # Handle logrithmic interpolations
-    if log[0]:
+    if logx or log:
         if x_g[0] <= 0.0 or x_g[0] <= 0.0:
             raise ValueError("x values must be positive for logrithmic interpolation")
-        x_g = np.array([np.log(z) for z in x_g])
-        x = np.array([np.log(z) for z in x])
-    if log[1]:
+        x_g = np.log(x_g)
+        x = np.log(x)
+    if logy or log:
         if y[0] <= 0.0:
             raise ValueError("y values must be positive for logrithmic interpolation")
-        y = np.array([np.log(z) for z in y])
+        y = np.log(y)
 
     n0 = 0
     n1 = 1
@@ -206,8 +212,8 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
         y_g = y_g[::-1]
 
     # Handle logrithmic interpolation
-    if log[1]:
-        y_g = np.array([np.exp(z) for z in y_g])
+    if logy or log:
+        y_g = np.exp(y_g)
 
     return y_g
 
