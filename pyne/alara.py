@@ -1,4 +1,4 @@
-"""This module contains functions relevant to the ALARA activation code.
+"""This module contains functions relevant to the ALARA activation code and the Chebyshev Rational Approximation Method
 """
 from __future__ import print_function
 import os
@@ -25,7 +25,8 @@ except ImportError:
 
 from pyne.mesh import Mesh, MeshError
 from pyne.material import Material, from_atom_frac
-from pyne.nucname import serpent, alara, znum, anum, id
+from pyne import nucname
+from pyne.nucname import serpent, alara, znum, anum
 from pyne.data import N_A, decay_const, decay_children
 from pyne.xs.data_source import SimpleDataSource
 
@@ -520,9 +521,6 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
 
     return s
 
-""" Chebyshev Rational Approximation Method functions
-"""
-
 def _build_matrix(N):
     """ This function  builds burnup matrix, A. Decay only.
     """
@@ -532,7 +530,7 @@ def _build_matrix(N):
     # convert N to id form
     N_id = []
     for i in xrange(len(N)):
-        ID = id(N[i])
+        ID = nucname.id(N[i])
         N_id.append(ID)
         
     sds = SimpleDataSource()
@@ -553,7 +551,6 @@ def _rat_apprx_14(A, t, n_0):
 
     Parameters
     ---------
-
     A : numpy array
 	Burnup matrix
     t : float
@@ -562,23 +559,23 @@ def _rat_apprx_14(A, t, n_0):
 	Inital composition vector
     """
 	
-    theta = np.array([ complex(-8.8977731864688888199, 16.630982619902085304), 
-                   complex(-3.7032750494234480603, 13.656371871483268171), 
-                   complex(-.2087586382501301251, 10.991260561901260913), 
-                   complex(3.9933697105785685194, 6.0048316422350373178), 
-                   complex(5.0893450605806245066, 3.5888240290270065102), 
-                   complex(5.6231425727459771248, 1.1940690463439669766), 
-                   complex(2.2697838292311127097, 8.4617379730402214019)])
+    theta = np.array([ -8.8977731864688888199 + 16.630982619902085304j,
+                   -3.7032750494234480603 + 13.656371871483268171j,
+                   -.2087586382501301251 + 10.991260561901260913j,
+                   3.9933697105785685194 + 6.0048316422350373178j,
+                   5.0893450605806245066 + 3.5888240290270065102j,
+                   5.6231425727459771248 + 1.1940690463439669766j,
+                   2.2697838292311127097 + 8.4617379730402214019j])
     
-    alpha = np.array([ complex( -.000071542880635890672853, .00014361043349541300111), 
-                   complex(.0094390253107361688779, -.01784791958483017511), 
-                   complex(-.37636003878226968717, .33518347029450104214), 
-                   complex(-23.498232091082701191, -5.8083591297142074004), 
-                   complex(46.933274488831293047, 45.643649768827760791), 
-                   complex(-27.875161940145646468, -102.14733999056451434), 
-                   complex(4.8071120988325088907, -1.3209793837428723881)])
+    alpha = np.array([-.000071542880635890672853 + .00014361043349541300111j,
+                   .0094390253107361688779 - .01784791958483017511j,
+                   -.37636003878226968717 + .33518347029450104214j,
+                   -23.498232091082701191 - 5.8083591297142074004j,
+                   46.933274488831293047 + 45.643649768827760791j,
+                   -27.875161940145646468 - 102.14733999056451434j,
+                   4.8071120988325088907 - 1.3209793837428723881j])
     
-    alpha_0 = np.array([1.8321743782540412751*10**(-14)])
+    alpha_0 = np.array([1.8321743782540412751e-14])
 
     s = 7
     A = A*t
@@ -597,7 +594,6 @@ def _rat_apprx_16(A, t, n_0):
 
     Parameters
     ---------
-
     A : numpy array
         Burnup matrix
     t : float
@@ -605,25 +601,25 @@ def _rat_apprx_16(A, t, n_0):
     n_0: numpy array
         Inital composition vector
     """
-    theta = np.array([ complex(-10.843917078696988026, 19.277446167181652284), 
-                   complex(-5.2649713434426468895, 16.220221473167927305), 
-                   complex(5.9481522689511774808, 3.5874573620183222829), 
-                   complex(3.5091036084149180974, 8.4361989858843750826), 
-                   complex(6.4161776990994341923, 1.1941223933701386874), 
-                   complex(1.4193758971856659786, 10.925363484496722585), 
-                   complex(4.9931747377179963991, 5.9968817136039422260), 
-                   complex(-1.4139284624888862114, 13.497725698892745389)])
+    theta = np.array([ -10.843917078696988026 + 19.277446167181652284j,
+                   -5.2649713434426468895 + 16.220221473167927305j,
+                   5.9481522689511774808 + 3.5874573620183222829j,
+                   3.5091036084149180974 + 8.4361989858843750826j,
+                   6.4161776990994341923 + 1.1941223933701386874j,
+                   1.4193758971856659786 + 10.925363484496722585j,
+                   4.9931747377179963991 + 5.9968817136039422260j,
+                   -1.4139284624888862114 + 13.497725698892745389j])
     
-    alpha = np.array([ complex(-.0000005090152186522491565, -.00002422001765285228797), 
-                   complex(.00021151742182466030907, .0043892969647380673918), 
-                   complex(113.39775178483930527, 101.9472170421585645), 
-                   complex(15.059585270023467528, -5.7514052776421819979), 
-                   complex(-64.500878025539646595, -224.59440762652096056), 
-                   complex(-1.4793007113557999718, 1.7686588323782937906), 
-                   complex(-62.518392463207918892, -11.19039109428322848), 
-                   complex(.041023136835410021273, -.15743466173455468191)])
+    alpha = np.array([ -.0000005090152186522491565 - .00002422001765285228797j,
+                      .00021151742182466030907 + .0043892969647380673918j,
+                      113.39775178483930527 + 101.9472170421585645j,
+                      15.059585270023467528 - 5.7514052776421819979j,
+                      -64.500878025539646595 - 224.59440762652096056j,
+                      -1.4793007113557999718 + 1.7686588323782937906j,
+                      -62.518392463207918892 - 11.19039109428322848j,
+                      .041023136835410021273 - .15743466173455468191j])
     
-    alpha_0 = np.array([2.1248537104952237488*10**(-16)])
+    alpha_0 = np.array([2.1248537104952237488e-16])
     
 
     s = 8
@@ -637,12 +633,11 @@ def _rat_apprx_16(A, t, n_0):
     n = n + alpha_0*n_0
     return n
 
-def CRAM(N, t, n_0, order):
+def cram(N, t, n_0, order):
     """ This function returns matrix exponential solution n using CRAM14 or CRAM16
 
     Parameters
     ----------
-
     N : list or array
 	Array of nuclides under consideration
     t : float
@@ -659,9 +654,10 @@ def CRAM(N, t, n_0, order):
     if order == 14:
         return rat_apprx_14(A, t, n_0)
     
-    if order == 16:
+    elif order == 16:
         return rat_apprx_16(A, t, n_0)
     
     else:
-        return 'Rational approximation of degree %d is not supported.' % order
+        msg = 'Rational approximation of degree {0} is not supported.'.format(order)
+        raise ValueError(msg)
     
