@@ -1390,13 +1390,18 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
-    while len(line.split()) > 0 and \
-          (line[0:5] == '     ' or line.split()[0][0] in 'Cc'):
+    # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
+    while len(line.split()) > 0 and (line[0:5] == '     ' or line[0] in 'Cc'):
         # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
             data_string += line.split('$')[0]
-        line_index += 1
-        line = linecache.getline(filename, mat_line + line_index)
+            line_index += 1
+            line = linecache.getline(filename, mat_line + line_index)
+        # otherwise this not a line we care about, move on and
+        # skip lines that start with c or C                                                                                                                  
+        else:
+            line_index += 1
+            line = linecache.getline(filename, mat_line + line_index)
 
     # create dictionaries nucvec and table_ids
     nucvec = {}
@@ -1405,7 +1410,13 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
         if i & 1 == 1:
             zzzaaam = str(nucname.zzaaam(
                 nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
-            nucvec[zzzaaam] = float(data_string.split()[i+1])
+
+            # this allows us to read nuclides that are repeated                                                                                              
+            if zzzaaam in nucvec.keys():
+                nucvec[zzzaaam] += float(data_string.split()[i+1])
+            else:
+                nucvec[zzzaaam] = float(data_string.split()[i+1])
+
             if len(data_string.split()[i].split('.')) > 1:
                 table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
 
@@ -2034,7 +2045,7 @@ class MeshTally(StatMesh):
         ----------
         f : filestream
             Open to the neutron/photon line.
-        tally number : int
+        tally_number : int
             The MCNP fmesh4 tally number (e.g. 4, 14, 24).
         tag_names : iterable, optional
             Four strs that specify the tag names for the results, relative
@@ -2055,9 +2066,9 @@ class MeshTally(StatMesh):
 
         if tag_names is None:
             self.tag_names = ("{0}_result".format(self.particle),
-                              "{0}_rel_error".format(self.particle),
+                              "{0}_result_rel_error".format(self.particle),
                               "{0}_result_total".format(self.particle),
-                              "{0}_rel_error_total".format(self.particle))
+                              "{0}_result_total_rel_error".format(self.particle))
         else:
             self.tag_names = tag_names
 

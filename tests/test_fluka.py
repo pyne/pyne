@@ -5,6 +5,7 @@ from pyne import fluka
 
 import nose.tools
 from nose.plugins.skip import SkipTest
+from nose.tools import assert_equal
 
 # Mesh specific imports
 try:
@@ -280,9 +281,12 @@ def test_degenerate_usrbin():
 
 # test file writing to catch upstream changes in mesh
 def test_mesh_write():
+    if not HAVE_PYTAPS:
+        raise SkipTest
+        
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_single.lis")
 
     usrbin_object = fluka.Usrbin(usrbin_file)
     data = usrbin_object.tally['single_n']
-    data.write_hdf5("test_data.h5m")
+    data.write_hdf5("test_fluka_data.h5m")

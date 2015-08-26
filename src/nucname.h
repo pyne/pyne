@@ -575,9 +575,9 @@ namespace nucname
   /// form as ID, but the four last digits are all zeros.
   /// \param nuc a nuclide
   /// \return a integer groundstate id
-  inline int groundstate(int nuc) {return (id(nuc) / 10000 ) * 10000;};
-  inline int groundstate(std::string nuc) {return groundstate(id(nuc));};
-  inline int groundstate(const char * nuc) {return groundstate(std::string(nuc));};
+  inline int groundstate(int nuc) {return (id(nuc) / 10000 ) * 10000;}
+  inline int groundstate(std::string nuc) {return groundstate(id(nuc));}
+  inline int groundstate(const char * nuc) {return groundstate(std::string(nuc));}
   /// \}
 
   /// \name State Map functions
@@ -588,9 +588,18 @@ namespace nucname
   int state_id_to_id(int state);
   int id_to_state_id(int nuc_id);
   extern std::map<int, int> state_id_map;
+  /// \}
 
+  /// \name ENSDF Form Functions
+  /// \{
+  /// This converts id's stored using standard ensdf syntax to nuc_id's
+  /// \param ensdf nuc string
+  /// \return PyNE nuc_id
+  int ensdf_to_id(const char * nuc);
+  int ensdf_to_id(std::string nuc);
+  /// \}
 
-};
-};
+}
+}
 
 #endif  // PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA

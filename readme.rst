@@ -37,6 +37,7 @@ PyNE has the following dependencies:
    #. `Python 2.7 <http://www.python.org/>`_
    #. `LAPACK <http://www.netlib.org/lapack/>`_
    #. `BLAS <http://www.netlib.org/blas/>`_
+   #. `Jinja2 <http://jinja.pocoo.org/>`_
 
 Optional Depenendencies:
    #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_

@@ -1044,6 +1044,52 @@ def decay_children(nuc, use_metastable=True):
 
     return dc
 
+def all_children(nuc):
+    """
+    returns child nuclides from both level and decay data
+
+    Parameters
+    ----------
+    nuc : int
+        input nuclide in state id form
+
+    Returns
+    -------
+    ids : list of ints
+        list of all known decay children from ensdf data.
+    """
+
+    return set(decay_children(nuc, False)) | set(decay_data_children(nuc))
+
+def all_branch_ratio(from_nuc, to_nuc):
+    """
+    returns the branching ratio if its in either level or decay data
+
+    Parameters
+    ----------
+    from_nuc : int or str
+        Parent nuclide, this uses state id
+    to_nuc : int or str
+        Child nuclide, this uses state id
+
+    Returns
+    -------
+    br : float
+        Branch ratio of this nuclide pair [fraction].
+    """
+    br1 = branch_ratio(from_nuc, to_nuc, use_metastable=False)   
+    br2 = decay_branch_ratio(from_nuc, to_nuc)[0]
+    if np.isnan(br1) and not np.isnan(br2):
+        return br2
+    elif not np.isnan(br1) and np.isnan(br2):
+        return br1
+    elif br2 == 0 and br1 != 0:
+        return br1
+    elif br1 == 0 and br2 != 0:
+        return br2
+    else:
+        return br2
+
 def id_from_level(nuc, level, special=""):
     """
     return the state_id for input energy level
@@ -1532,8 +1578,8 @@ def alpha_energy(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of alpha energies and errors
+    ratios : array of doubles
+        An array of alpha energies
     """
     return cpp_data.alpha_energy(<int> parent)
 
@@ -1549,8 +1595,8 @@ def alpha_intensity(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of alpha intensities and errors
+    ratios : array of doubles
+        An array of alpha intensities
     """
     return cpp_data.alpha_intensity(<int> parent)
 
@@ -1627,8 +1673,8 @@ def beta_endpoint_energy(parent):
 
     Returns
     -------
-    ratios : array of ints
-        An array of beta endpoint energies and errors
+    ratios : array of doubles
+        An array of beta endpoint energies
     """
     return cpp_data.beta_endpoint_energy(<int> parent)
 
@@ -1644,8 +1690,8 @@ def beta_average_energy(parent):
 
     Returns
     -------
-    ratios : array of ints
-        An array of beta average energies and errors
+    ratios : array of doubles
+        An array of beta average energies
     """
     return cpp_data.beta_average_energy(<int> parent)
 
@@ -1661,8 +1707,8 @@ def beta_intensity(parent):
 
     Returns
     -------
-    ratios : array of ints
-        An array of beta intensities and errors
+    ratios : array of doubles
+        An array of beta intensities
     """
     return cpp_data.beta_intensity(<int> parent)
 
@@ -1739,8 +1785,8 @@ def ecbp_endpoint_energy(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of beta plus endpoint energies and errors
+    ratios : array of doubles
+        An array of beta plus endpoint energies
     """
     return cpp_data.ecbp_endpoint_energy(<int> parent)
 
@@ -1756,8 +1802,8 @@ def ecbp_average_energy(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of beta plus average energies and errors
+    ratios : array of doubles
+        An array of beta plus average energies
     """
     return cpp_data.ecbp_average_energy(<int> parent)
 
@@ -1790,8 +1836,8 @@ def beta_plus_intensity(parent):
 
     Returns
     -------
-    ratios : array of pairs
-        An array of beta plus intensities and errors
+    ratios : array of doubles
+        An array of beta plus intensities
     """
     return cpp_data.bp_intensity(<int> parent)
 

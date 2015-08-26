@@ -54,6 +54,7 @@ namespace pyne
    "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP", 
    "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON", "POLYETHY", "AIR"
   };
+
   static int FLUKA_MAT_NUM = 37;
 
   /// Material composed of nuclides.
@@ -361,7 +362,7 @@ namespace pyne
     double mass;  ///< material mass
     double density; ///< material density
     double atoms_per_mol; ///< material atoms per mole
-    double comp []; ///< array of material composition mass weights.
+    double comp[1]; ///< array of material composition mass weights.
   } material_data;
 
   /// Custom exception for invalid HDF5 protocol numbers
@@ -371,10 +372,10 @@ namespace pyne
     virtual const char* what() const throw()
     {
       return "Invalid loading protocol number; please use 0 or 1.";
-    };
+    }
   };
 
 // End pyne namespace
-};
+}
 
 #endif  // PYNE_MR34UE5INRGMZK2QYRDWICFHVM

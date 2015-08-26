@@ -5,6 +5,7 @@ module sct_module
 ! SCT. 
 !
 !----------------------------------------------------------------------------80
+use precision_module, only: pr
 use tracking_routines
 use igeompack
 implicit none
@@ -14,27 +15,26 @@ implicit none
 !
 
 type :: polyhedron
-
 !
 ! Saves all data for doing step method in SC/SPk cells
 !
 integer                   :: indx(3)
-real(kind=8)              :: volume
-real(kind=8)              :: area(-3:3)
+real(kind=dp)              :: volume
+real(kind=dp)              :: area(-3:3)
 integer(kind=1)           :: area_exist(-3:3) 
-
 end type
  
 contains
 
 function area_pent_3D(pent,ftpe)
+  use precision_module,only: dp
   ! Arguments and return value
-  real(kind=8) :: pent(3,5)
+  real(kind=dp) :: pent(3,5)
   integer      :: ftpe
-  real(kind=8) :: area_pent_3D
+  real(kind=dp) :: area_pent_3D
   ! Local Variables
   real(kind=pr) :: vcl(2,5)
-  real(kind=8)  :: t(3,3)
+  real(kind=dp)  :: t(3,3)
   integer       :: ntri,i,n1,n2,n3
   integer,allocatable :: tri(:,:)
 
@@ -67,12 +67,13 @@ function area_pent_3D(pent,ftpe)
 end function
 
 function area_quad_3D(quad)
+  use precision_module,only: dp
   ! Argument and return value
-  real(kind=8) :: quad(3,4)
-  real(kind=8) :: area_quad_3D
+  real(kind=dp) :: quad(3,4)
+  real(kind=dp) :: area_quad_3D
   ! Local variables
-  real(kind=8) :: angle(3),tri1(3,3),tri2(3,3)
-  real(kind=8) :: a(3),b(3),c(3)
+  real(kind=dp) :: angle(3),tri1(3,3),tri2(3,3)
+  real(kind=dp) :: a(3),b(3),c(3)
   integer      :: lo(1),j,k
   
   ! Set first triangle
@@ -104,11 +105,12 @@ function area_quad_3D(quad)
 end function
 
 function area_tri_3D(tri) 
+  use precision_module,only: dp
    ! Arguments and return values
-   real(kind=8) :: tri(3,3)
-   real(kind=8) :: area_tri_3D
+   real(kind=dp) :: tri(3,3)
+   real(kind=dp) :: area_tri_3D
    ! Local variables
-   real(kind=8) :: a,b,c,s
+   real(kind=dp) :: a,b,c,s
    !
    a=norm(tri(:,2)-tri(:,1)) 
    b=norm(tri(:,3)-tri(:,1))
@@ -118,12 +120,14 @@ function area_tri_3D(tri)
 end function
 
 function norm(x)
-   real(kind=8) :: x(3),norm
+  use precision_module,only: dp
+   real(kind=dp) :: x(3),norm
    norm=sqrt(x(1)**2+x(2)**2+x(3)**2)
 end function
 
 function eq8(a,b)
-  real(kind=8) :: a,b,tol
+  use precision_module,only: dp
+  real(kind=dp) :: a,b,tol
   logical      :: eq8
   if( abs(a-b) < 1.0d-12*max(a,b,1.0d0) ) then
     eq8=.true.
@@ -133,6 +137,7 @@ function eq8(a,b)
 end function
 
 subroutine count_sp_cells(trsp,n)
+  use precision_module,only: dp
   ! Arguments
   type(trackingunitsp_r),pointer :: trsp
   integer                        :: n
@@ -148,6 +153,7 @@ end subroutine
 
 subroutine do_tracking(mu16,eta16,xi16,cell_tpe,nsc,npx,npy,npz,sc_pol_ptr,spx_pol_ptr,&
                        spy_pol_ptr,spz_pol_ptr,sc_pol,spx_pol,spy_pol,spz_pol)
+  use precision_module,only: dp
 
   ! Arguments
   real(kind=pr)                  :: mu16,eta16,xi16
@@ -171,9 +177,9 @@ subroutine do_tracking(mu16,eta16,xi16,cell_tpe,nsc,npx,npy,npz,sc_pol_ptr,spx_p
   integer                        :: i,ix,iy,iz,br
   integer                        :: nspx,nspy,nspz
   integer                        :: sgn(3)
-  real(kind=8)                   :: cell(2,3)
+  real(kind=dp)                   :: cell(2,3)
 
-real*8 :: a,b,c
+  real(kind=dp) :: a,b,c
 
   ! Set counters to 0
   nsc=0;nspx=0;nspy=0;nspz=0
@@ -416,13 +422,14 @@ end subroutine
 ! function tet volume
 !
 function tet_vol(tet)
+  use precision_module,only: dp
 
   ! Arguments
-  real(kind=8) :: tet(3,4)
-  real(kind=8) :: tet_vol 
+  real(kind=dp) :: tet(3,4)
+  real(kind=dp) :: tet_vol 
 
   ! Local variables
-  real(kind=8) :: a(3),b(3),c(3)
+  real(kind=dp) :: a(3),b(3),c(3)
 
   ! Compute a,b,c
   a=tet(:,2)-tet(:,1) 
@@ -436,14 +443,18 @@ end function
 ! inner product of two vectors
 !
 function dotp(x,y)
-   real(kind=8) :: x(3),y(3),dotp
+  use precision_module,only: dp
+
+   real(kind=dp) :: x(3),y(3),dotp
    dotp=x(1)*y(1)+x(2)*y(2)+x(3)*y(3)
 end function
 !
 ! cross product for r*8
 !
 function cross_p(x,y)
-   real(kind=8) :: x(3),y(3),cross_p(3)
+  use precision_module,only: dp
+
+   real(kind=dp) :: x(3),y(3),cross_p(3)
    cross_p(1)=x(2)*y(3)-x(3)*y(2)
    cross_p(2)=x(3)*y(1)-x(1)*y(3)
    cross_p(3)=x(1)*y(2)-x(2)*y(1)
@@ -452,20 +463,21 @@ end function
 ! Set polyhedron for SP cells
 !
 subroutine set_polyhedron_sp(trsp,polyhed,cell,sgn)
+  use precision_module,only: dp
 
   ! Arguments
   type(trackingunitsp_r),pointer :: trsp
   type(polyhedron)               :: polyhed(3)
-  real(kind=8)                   :: cell(2,3)
+  real(kind=dp)                   :: cell(2,3)
   integer                        :: sgn(3)
 
   ! Local variables
   integer                        :: perm(3),pperm(3)
-  real(kind=8)                   :: delta,x3max,x3min
-  real(kind=8)                   :: vol
+  real(kind=dp)                   :: delta,x3max,x3min
+  real(kind=dp)                   :: vol
   integer                        :: s,i,j,k,n1,n2,n3,npoints1,npoints2
-  real(kind=8),allocatable       :: points1(:,:),points2(:,:)
-  real(kind=8)                   :: tri(3,3),quad(3,4),pent(3,5)
+  real(kind=dp),allocatable       :: points1(:,:),points2(:,:)
+  real(kind=dp)                   :: tri(3,3),quad(3,4),pent(3,5)
   integer(kind=1),allocatable    :: p_loc_seg1(:,:)                      
   integer(kind=1),allocatable    :: p_loc_seg2(:,:)                      
   integer                        :: ford(6)=(/-1,1,-2,2,-3,3/)
@@ -685,17 +697,18 @@ end subroutine
 ! Set polyhedron data for SC cells
 !
 subroutine set_polyhedron_sc(trsc,polyhed,cell,sgn)
+  use precision_module, only: dp
 
   ! Arguments
   type(trackingunitsc)  ,pointer :: trsc   
   type(polyhedron)               :: polyhed(3)
-  real(kind=8)                   :: cell(2,3)
+  real(kind=dp)                   :: cell(2,3)
   integer                        :: sgn(3)
 
   ! Local variables
   integer                        :: i,j,k,s,n1,n2,n3,n4
-  real(kind=8)                   :: tet(3,4),tri(3,3),quad(3,4),pent(3,5)
-  real(kind=8)                   :: vol
+  real(kind=dp)                   :: tet(3,4),tri(3,3),quad(3,4),pent(3,5)
+  real(kind=dp)                   :: vol
   integer(kind=1),allocatable    :: p_loc_lr(:,:)                      
   integer(kind=1),allocatable    :: p_loc_fb(:,:)                      
   integer(kind=1),allocatable    :: p_loc_bt(:,:)                      

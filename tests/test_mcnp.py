@@ -577,6 +577,27 @@ def test_read_mcnp():
         list(expected_multimaterial._mats.keys())[1].metadata,
         list(read_materials[2]._mats.keys())[1].metadata)
 
+# test to ensure the mats_from_inp function can read repeated mcnp
+# materials like
+# m1  1001.21c 0.1
+#     1002.21c 0.3
+#     1001.21c 0.5
+def test_read_mcnp_wcomments():
+    expected_material = Material(nucvec={922350000: 0.04, 922380000: 0.96},
+                                 mass=-1.0,
+                                 density=19.1,
+                                 metadata={"comments": (
+                                     " first line of comments second line of "
+                                     "comments third line of comments forth "
+                                     "line of comments"),
+                                           "mat_number": "1",
+                                           "name": " leu",
+                                           "source": " Some http://URL.com",
+                                           "table_ids": {'922350': "15c"}})
+    expected_material.mass = -1.0  # to avoid reassignment to +1.0
+
+    read_materials = mats_from_inp('mcnp_inp_comments.txt')
+    assert_equal(expected_material, read_materials[1])
 
 # Test PtracReader class
 def test_read_headers():

@@ -16,6 +16,9 @@ np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+if sys.version_info[0] >= 3:
+    unichr = chr
+
 # Mesh specific imports
 try:
     from itaps import iMesh
@@ -319,11 +322,11 @@ def load(filename):
 
 def get_surface_list():
     """return a list of valid surface IDs"""
-    return surf_id_to_handle.keys()
+    return list(surf_id_to_handle.keys())
 
 def get_volume_list():
     """return a list of valid volume IDs"""
-    return vol_id_to_handle.keys()
+    return list(vol_id_to_handle.keys())
 
 
 def volume_is_graveyard(vol_id):

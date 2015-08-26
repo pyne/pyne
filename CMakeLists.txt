@@ -106,7 +106,11 @@ message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
     include_directories(${MOAB_INCLUDE_DIR})
     get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
-    link_directories(${MOAB_LIBRARY_DIRS})
+    if(APPLE)
+      link_directories(${MOAB_LIBRARY_DIRS}/lib)
+    else(APPLE)
+      link_directories(${MOAB_LIBRARY_DIRS})
+    endif(APPLE)
 endif(${MOAB_FOUND})
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
@@ -134,24 +138,28 @@ set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
-    # I think that this is the right thing to do for MacOSX 10.5+ --Anthony
     set(CMAKE_MACOSX_RPATH 1)
-    set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
-elseif(WIN32)
-    if(MSVC)
-        # ??? Who knows what to do here?! --Anthony
-    elseif(CMAKE_COMPILER_IS_GNUC OR CMAKE_COMPILER_IS_GNUCXX)
-        set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
-    endif(MSVC)
+    if(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
+    else(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
+    endif(HAVE_SETUPTOOLS)
 else(APPLE)
     # For linux
-    set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+    if(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
+    else(HAVE_SETUPTOOLS)
+      set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+    endif(HAVE_SETUPTOOLS)
 endif(APPLE)
 message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
 
 # find numpy and include the numpy headers
 find_package(Numpy REQUIRED)
 include_directories("${NUMPY_INCLUDE_DIR}")
+
+#compiler warnings
+# add_definitions ("-Wpedantic")
 
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
