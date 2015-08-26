@@ -1390,7 +1390,8 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
-    while line[0:5] == '     ' or line.split()[0][0] in 'Cc':
+    while len(line.split()) > 0 and \
+          (line[0:5] == '     ' or line.split()[0][0] in 'Cc'):
         # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
             data_string += line.split('$')[0]
