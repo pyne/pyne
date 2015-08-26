@@ -1293,6 +1293,16 @@ class PtracReader(object):
                 if print_progress > 0 and counter % print_progress == 0:
                     print("processing event {0}".format(counter))
 
+def _is_cell_line(line):
+    is_cell = False
+    if len(line.split()) > 3:
+        if line.split()[0].isdigit() and \
+           line.split()[1].isdigit() and \
+           not line.split()[2][0].isalpha() and \
+           line[0:5] != '     ' and \
+           line.split()[1] != '0':
+               is_cell = True
+    return is_cell
 
 def mats_from_inp(inp):
     """This function reads an MCNP inp file and returns a mapping of material
@@ -1324,25 +1334,21 @@ def mats_from_inp(inp):
         # check to see if line contains a cell card. If so, grab the density.
         # information is stored in a dictionary where:
         # key = material number, value = list of densities
-        if len(line.split()) > 3:
-            if line.split()[0].isdigit() is True and \
-                    line.split()[1].isdigit() is True and \
-                    line[0:5] != '     ' and \
-                    line.split()[1] != '0':
-                mat_num = int(line.split()[1])
-                den = float(line.split()[2])
+        if _is_cell_line(line):
+           mat_num = int(line.split()[1])
+           den = float(line.split()[2])
 
-                if mat_num not in densities.keys():
-                    densities[mat_num] = [den]
+           if mat_num not in densities.keys():
+               densities[mat_num] = [den]
 
-                else:
-                    same_bool = False
-                    for j in range(0, len(densities[mat_num])):
-                        if abs(den - densities[mat_num][j])/den < 1E-4:
-                            same_bool = True
+           else:
+               same_bool = False
+               for j in range(0, len(densities[mat_num])):
+                   if abs(den - densities[mat_num][j])/den < 1E-4:
+                       same_bool = True
 
-                    if same_bool is False:
-                        densities[mat_num].append(den)
+               if same_bool is False:
+                   densities[mat_num].append(den)
 
         # check line to see if it contain a material card, in the form
         # m* where * is a digit. If so store the line num. and material number
@@ -1389,9 +1395,8 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
-
     # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
-    while line[0:5] == '     ' or line[0] == 'c' or line[0] == 'C':
+    while len(line.split()) > 0 and (line[0:5] == '     ' or line[0].lower() == 'c'):
         # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
             data_string += line.split('$')[0]
