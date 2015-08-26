@@ -2,7 +2,7 @@ from os.path import isfile
 from warnings import warn
 from pyne.utils import QAWarning
 
-from pyne.mesh import Mesh, IMeshTag
+from pyne.mesh import Mesh
 from pyne.mcnp import Meshtal
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
                        photon_source_hdf5_to_mesh
