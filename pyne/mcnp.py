@@ -1344,7 +1344,7 @@ def mats_from_inp(inp):
            else:
                same_bool = False
                for j in range(0, len(densities[mat_num])):
-                   if abs(den - densities[mat_num][j])/den < 1E-4:
+                   if abs(den - densities[mat_num][j]/den) < 1E-4:
                        same_bool = True
 
                if same_bool is False:
