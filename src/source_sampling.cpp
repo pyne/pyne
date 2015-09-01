@@ -86,7 +86,7 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   xyz_rands.push_back(rands[2]);
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
-  MBCartVect pos = sample_xyz(ve_idx, xyz_rands);
+  moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
   samp.push_back(pos[0]); 
   samp.push_back(pos[1]); 
   samp.push_back(pos[2]); 
@@ -96,29 +96,29 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
 }
 
 void pyne::Sampler::setup() {
-  MBErrorCode rval;
-  MBEntityHandle loaded_file_set;
+  moab::ErrorCode rval;
+  moab::EntityHandle loaded_file_set;
   // Create MOAB instance
-  mesh = new MBCore();
-  rval = mesh->create_meshset(MESHSET_SET, loaded_file_set);
+  mesh = new moab::Core();
+  rval = mesh->create_meshset(moab::MESHSET_SET, loaded_file_set);
   rval = mesh->load_file(filename.c_str(), &loaded_file_set);
   if (rval != moab::MB_SUCCESS)
     throw std::invalid_argument("Could not load mesh file.");
 
   // Get mesh volume elemebts 
-  MBRange ves;
+  moab::Range ves;
   rval = mesh->get_entities_by_dimension(loaded_file_set, 3, ves);
   if (rval != moab::MB_SUCCESS)
     throw std::runtime_error("Problem entities of dimension 3");
   num_ves = ves.size();
   int num_hex, num_tet;
-  rval = mesh->get_number_entities_by_type(loaded_file_set, MBHEX, num_hex);
-  rval = mesh->get_number_entities_by_type(loaded_file_set, MBTET, num_tet);
+  rval = mesh->get_number_entities_by_type(loaded_file_set, moab::MBHEX, num_hex);
+  rval = mesh->get_number_entities_by_type(loaded_file_set, moab::MBTET, num_tet);
   if (num_hex == num_ves) {
-    ve_type = MBHEX;
+    ve_type = moab::MBHEX;
     verts_per_ve = 8;
   } else if (num_tet == num_ves) {
-    ve_type = MBTET;
+    ve_type = moab::MBTET;
     verts_per_ve = 4;
   }
   else throw std::invalid_argument("Mesh file must contain only tets or hexes.");
@@ -129,10 +129,10 @@ void pyne::Sampler::setup() {
   mesh_tag_data(ves, volumes);
 }
 
-void pyne::Sampler::mesh_geom_data(MBRange ves, std::vector<double> &volumes) {
+void pyne::Sampler::mesh_geom_data(moab::Range ves, std::vector<double> &volumes) {
   // Get connectivity.
-  MBErrorCode rval;
-  std::vector<MBEntityHandle> connect;
+  moab::ErrorCode rval;
+  std::vector<moab::EntityHandle> connect;
   rval = mesh->get_connectivity_by_type(ve_type, connect);
   if (rval != moab::MB_SUCCESS)
     throw std::runtime_error("Problem getting mesh connectivity.");
@@ -147,31 +147,31 @@ void pyne::Sampler::mesh_geom_data(MBRange ves, std::vector<double> &volumes) {
     if (rval != moab::MB_SUCCESS)
       throw std::runtime_error("Problem vertex coordinates.");
     volumes[i] = measure(ve_type, verts_per_ve, &coords[0]);
-    if (ve_type == MBHEX) {
-      MBCartVect o(coords[0], coords[1], coords[2]);
-      MBCartVect x(coords[3], coords[4], coords[5]);
-      MBCartVect y(coords[9], coords[10], coords[11]);
-      MBCartVect z(coords[12], coords[13], coords[14]);
+    if (ve_type == moab::MBHEX) {
+      moab::CartVect o(coords[0], coords[1], coords[2]);
+      moab::CartVect x(coords[3], coords[4], coords[5]);
+      moab::CartVect y(coords[9], coords[10], coords[11]);
+      moab::CartVect z(coords[12], coords[13], coords[14]);
       edge_points ep = {o, x-o, y-o, z-o};
       all_edge_points.push_back(ep);
-    } else if (ve_type == MBTET) {
-      MBCartVect o(coords[0], coords[1], coords[2]);
-      MBCartVect x(coords[3], coords[4], coords[5]);
-      MBCartVect y(coords[6], coords[7], coords[8]);
-      MBCartVect z(coords[9], coords[10], coords[11]);
+    } else if (ve_type == moab::MBTET) {
+      moab::CartVect o(coords[0], coords[1], coords[2]);
+      moab::CartVect x(coords[3], coords[4], coords[5]);
+      moab::CartVect y(coords[6], coords[7], coords[8]);
+      moab::CartVect z(coords[9], coords[10], coords[11]);
       edge_points ep = {o, x-o, y-o, z-o};
       all_edge_points.push_back(ep);
     }
   }
 }
 
-void pyne::Sampler::mesh_tag_data(MBRange ves, 
+void pyne::Sampler::mesh_tag_data(moab::Range ves, 
                                   const std::vector<double> volumes) {
-  MBErrorCode rval;
-  MBTag src_tag;
+  moab::ErrorCode rval;
+  moab::Tag src_tag;
   rval = mesh->tag_get_handle(src_tag_name.c_str(),
                               moab::MB_TAG_VARLEN, 
-                              MB_TYPE_DOUBLE, 
+                              moab::MB_TYPE_DOUBLE, 
                               src_tag);
   // THIS rval FAILS because we do not know number of energy groups a priori.
   // That's okay. That's what the next line is all about:
@@ -205,12 +205,12 @@ void pyne::Sampler::mesh_tag_data(MBRange ves,
   }
 }
 
-std::vector<double> pyne::Sampler::read_bias_pdf(MBRange ves, 
+std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves, 
                                                  std::vector<double> volumes,
                                                  std::vector<double> pdf) {
     std::vector<double> bias_pdf(num_ves*num_e_groups);
     int i, j;
-    MBErrorCode rval;
+    moab::ErrorCode rval;
     if (mode == UNIFORM) {
       // In unform sampling, the biased PDF is just the volume of the mesh
       // volume element
@@ -233,10 +233,10 @@ std::vector<double> pyne::Sampler::read_bias_pdf(MBRange ves,
       }
     } else if (mode == USER) {
       // Get the biased PDF from the mesh
-      MBTag bias_tag;
+      moab::Tag bias_tag;
       rval = mesh->tag_get_handle(bias_tag_name.c_str(), 
                                   moab::MB_TAG_VARLEN, 
-                                  MB_TYPE_DOUBLE, 
+                                  moab::MB_TYPE_DOUBLE, 
                                   bias_tag);
       num_bias_groups = num_groups(bias_tag);
 
@@ -280,7 +280,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(MBRange ves,
 return bias_pdf;
 }
 
-MBCartVect pyne::Sampler::sample_xyz(int ve_idx, std::vector<double> rands) {
+moab::CartVect pyne::Sampler::sample_xyz(int ve_idx, std::vector<double> rands) {
   double s = rands[0];
   double t = rands[1];
   double u = rands[2];
@@ -288,7 +288,7 @@ MBCartVect pyne::Sampler::sample_xyz(int ve_idx, std::vector<double> rands) {
   // Transform s, t, u to uniformly sample a tetrahedron. See:
   // C. Rocchini and P. Cignoni, “Generating Random Points in a Tetrahedron,” 
   //  Journal of Graphics Tools, 5, 200–202 (2001).
-  if (ve_type == MBTET) {
+  if (ve_type == moab::MBTET) {
     if (s + t > 1) {
       s = 1.0 - s;
       t = 1.0 - t;
@@ -331,8 +331,8 @@ void pyne::Sampler::normalize_pdf(std::vector<double> & pdf) {
     pdf[i] /= sum;
 }
 
-int pyne::Sampler::num_groups(MBTag tag) {
-  MBErrorCode rval;
+int pyne::Sampler::num_groups(moab::Tag tag) {
+  moab::ErrorCode rval;
   int tag_size;
   rval = mesh->tag_get_bytes(tag, *(&tag_size));
   if (rval != moab::MB_SUCCESS)
