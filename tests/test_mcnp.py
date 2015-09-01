@@ -542,6 +542,16 @@ def test_read_mcnp():
              "mat_number": "2",
              "name": " water",
              "source": " internet",
+             "table_ids": {'10000': "05c"}}): 1,
+        Material(
+            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            -1.0, 1.1, 3,
+            {"comments":
+                 (" Here are comments the comments "
+                  "continue here are more even more"),
+             "mat_number": "2",
+             "name": " water",
+             "source": " internet",
              "table_ids": {'10000': "05c"}}): 1})
 
     read_materials = mats_from_inp('mcnp_inp.txt')
@@ -576,6 +586,9 @@ def test_read_mcnp():
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].metadata,
         list(read_materials[2]._mats.keys())[1].metadata)
+    assert_equal(
+        list(expected_multimaterial._mats.keys())[2].density,
+        list(read_materials[2]._mats.keys())[2].density)
 
 # test to ensure the mats_from_inp function can read repeated mcnp
 # materials like
