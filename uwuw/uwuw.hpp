@@ -111,14 +111,15 @@ class UWUW
    * \param[in] filename of the h5m file
    * \return std::map of material name vs Material object
    */
-  std::map<std::string, pyne::Material> load_pyne_materials(std::string filename);
+public:
+  std::map<std::string, pyne::Material> load_pyne_materials(std::string filename, std::string datapath = "/materials");
 
   /**
    * \brief loads the pyne tallies in map of name vs Material
    * \param[in] filename of the h5m file
    * \return std::map of tally name vs Tally object
    */
-  std::map<std::string, pyne::Tally> load_pyne_tallies(std::string filename);
+  std::map<std::string, pyne::Tally> load_pyne_tallies(std::string filename, std::string datapath = "/tally");
 
   /**
    * \brief determines in that datapath exists in the hdf5 file

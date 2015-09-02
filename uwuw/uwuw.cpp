@@ -80,14 +80,17 @@ bool UWUW::check_file_exists(std::string filename)
 }
 
 // loads all materials into map
-std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string filename)
+
+std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string filename, std::string datapath) 
 {
   std::map<std::string, pyne::Material> library; // material library
 
-  if(!hdf5_path_exists(filename,"/materials"))
+  const char* data_path = datapath.c_str();
+
+  if(!hdf5_path_exists(filename,data_path))
     return library;
 
-  num_materials = get_length_of_table(filename,"/materials");
+  num_materials = get_length_of_table(filename,datapath);
 
   for ( int i = 0 ; i < num_materials ; i++ ) {
     pyne::Material mat; // from file
@@ -102,14 +105,16 @@ std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string file
 }
 
 // loads all tallies into map
-std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename)
+std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename, std::string datapath) 
 {
   std::map<std::string, pyne::Tally> library; // material library
 
-  if(!hdf5_path_exists(filename,"/tally"))
+  const char* data_path = datapath.c_str();
+
+  if(!hdf5_path_exists(filename,data_path))
     return library;
 
-  num_tallies = get_length_of_table(filename,"/tally");
+  num_tallies = get_length_of_table(filename,data_path);
 
   for ( int i = 0 ; i < num_tallies ; i++) {
     pyne::Tally tally; // from file
