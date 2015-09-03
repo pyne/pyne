@@ -495,6 +495,12 @@ def test_strip_mat_name():
     
     assert(mat_name_expected == mat_name)
 
+    name = 'mat:Helium/rho:1E-5'
+    mat_name_expected = 'Helium'
+    mat_name = partisn.strip_mat_name(name)
+    
+    assert(mat_name_expected == mat_name)
+
 
 def test_mesh_to_isotropic_source():
     """Test isotropic SOURCF generation.

@@ -102,7 +102,8 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     find_per_coarse : int, optional, default = 1
         The number of fine mesh intervals to coarse mesh intervals
     source : str, optional
-        A valid PARTISN source spefication. If none is supplied,
+        A valid PARTISN source spefication. If none is supplied, an isotropic
+        source, with uniform spatial intensity is used.
     
     Returns
     -------
@@ -160,27 +161,25 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
             block01['im'] = n
             block01['it'] = block01['im']*fine_per_coarse
             block02['xmesh'] = bounds[dim]
-            block05['sourcx'] = np.zeros(shape=(nmq, n), dtype=float)
-            block05['sourcx'][:,0] = 1.0
         elif dim == 'y':
             n = len(bounds[dim]) - 1
             block01['jm'] = n
             block01['jt'] = block01['jm']*fine_per_coarse
             block02['ymesh'] = bounds[dim]
-            block05['sourcy'] = np.zeros(shape=(nmq, n), dtype=float)
-            block05['sourcy'][:,0] = 1.0
         elif dim == 'z':
             n = len(bounds[dim]) - 1
             block01['km'] = n
             block01['kt'] = block01['km']*fine_per_coarse
             block02['zmesh'] = bounds[dim]
-            block05['sourcz'] = np.zeros(shape=(nmq, n), dtype=float)
-            block05['sourcz'][:,0] = 1.0
     
     _check_fine_mesh_total(block01)
 
-    block05['source'] = np.zeros(shape=(nmq, ngroup), dtype=float)
-    block05['source'][:,0] = 1.0
+    if 'source' in kwargs:
+        block05['source'] = kwargs['source']
+    else:
+        uniform_source = np.zeros(shape=(nmq, ngroup), dtype=float)
+        uniform_source[:,0] = 1.0
+        block05['source'] = _default_source(uniform_source)
     
     # call function to write to file
     _write_input(title, block01, block02, block03, block04, block05, input_file)
@@ -603,7 +602,7 @@ def _write_input(title, block01, block02, block03, block04, block05, file_name):
         count = 0
         j = 0
         for iso, dens in block04['matls'][mat].iteritems():
-        .inp    count += 1
+            count += 1
             j += 1
             if j != len(block04['matls'][mat]):
                 partisn += "{} {:.4e}, ".format(iso, dens)
@@ -656,84 +655,33 @@ def _write_input(title, block01, block02, block03, block04, block05, file_name):
     partisn += "/ ibback=   / back BC (default=0, vacuum)\n"
     partisn += "/ \n"
     partisn += block05['source']
+    if block05['source'][-1] != '\n':
+        partisn += '\n'
     partisn += "t\n"
     
     # Write to the file
     f.write(partisn)
 
-def _default_source(block05):
-    partisn = "/ Source is in format of option 3 according to PARTISN input manual.\n"
-    partisn += "/ Default is an evenly distributed volume source.\n"
-    partisn += "source= "
+def _default_source(data):
+    source = "/ Source is in format of option 3 according to PARTISN input manual.\n"
+    source += "/ Default is an evenly distributed volume source.\n"
+    source += "source= "
     count = 0
     tot = 0
-    for row in block05['source']:
-        partisn += format_repeated_vector(row)
+    for row in data:
+        source += format_repeated_vector(row)
         tot += 1
         count += 1
         if count == 4:
-            if tot != len(block05['source']):
-                partisn += ";\n        "
+            if tot != len(data):
+                source += ";\n        "
             else:
-                partisn += ";"
+                source += ";"
             count = 0
         else:
-            partisn += "; "
-    partisn += "\n"
-        
-    if 'sourcx' in block05:
-        partisn += "sourcx= "
-        count = 0
-        tot = 0
-        for row in block05['sourcx']:
-            partisn += format_repeated_vector(row)
-            tot += 1
-            count += 1
-            if count == 4:
-                if tot != len(block05['sourcx']):
-                    partisn += ";\n        "
-                else:
-                    partisn += ";"
-                count = 0
-            else:
-                partisn += "; "
-        partisn += "\n"
-                
-    if 'sourcy' in block05:
-        partisn += "sourcy= "
-        count = 0
-        tot = 0
-        for row in block05['sourcy']:
-            partisn += format_repeated_vector(row)
-            tot += 1
-            count += 1
-            if count == 4:
-                if tot != len(block05['sourcy']):
-                    partisn += ";\n        "
-                else:
-                    partisn += ";"
-                count = 0
-            else:
-                partisn += "; "
-        partisn += "\n"
-            
-    if 'sourcz' in block05:
-        partisn += "sourcz= "
-        count = 0
-        tot = 0
-        for row in block05['sourcz']:
-            partisn += format_repeated_vector(row)
-            tot += 1
-            count += 1
-            if count == 4:
-                if tot != len(block05['sourcz']):
-                    partisn += ";\n        "
-                else:
-                    partisn += ";"
-                count = 0
-            else:
-                partisn += "; "
-        partisn += "\n"
+            source += "; "
+    source += "\n"
+    return source
 
 def format_repeated_vector(vector):
     """Creates string out of a vector with the PARTISN format for repeated
