@@ -772,7 +772,7 @@ def mesh_to_isotropic_source(m, tag):
     temp = m.structured_ordering
     m.structured_ordering = "zyx"
     m.src = IMeshTag(name=tag)
-    data = m.src[:].transpose()
+    data = m.src[:].transpose()[::-1]
     m.structured_ordering = temp
     ninti = len(m.structured_coords[0]) - 1
 

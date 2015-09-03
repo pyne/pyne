@@ -627,7 +627,7 @@ class Rtflux(object):
         flux2 = []
         num_intervals = self.ninti*self.nintj*self.nintk
         for i in range(self.ngroup):
-            flux2.append(flux[i*num_intervals:(i+1)*num_intervals])
+            flux2.insert(0, flux[i*num_intervals:(i+1)*num_intervals])
         flux2 = np.array(flux2)
         flux2 = flux2.transpose()
 
