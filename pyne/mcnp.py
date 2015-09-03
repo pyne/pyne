@@ -1495,7 +1495,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
             if den <= 0:
                 converted_densities.append(-1*float(den))
             else:
-                converted_densities.append(mat.mass_density(float(den)))
+                converted_densities.append(mat.mass_density(float(den)*1E24))
 
         # check to see how many densities are associated with this material.
         # if there is more than one, create a multimaterial"""
