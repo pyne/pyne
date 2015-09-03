@@ -50,8 +50,6 @@ if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
     from pyne import dagmc
 
-
-
 def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     """This definition reads all necessary attributes from a material-laden 
     geometry file, a pre-made PyNE mesh object, and the nuclear data cross 
@@ -101,6 +99,10 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
         true, a linearly spaced grid of starting points is used, with dimension 
         sqrt(num_rays) x sqrt(num_rays). In this case, "num_rays" must be a 
         perfect square.
+    find_per_coarse : int, optional, default = 1
+        The number of fine mesh intervals to coarse mesh intervals
+    source : str, optional
+        A valid PARTISN source spefication. If none is supplied,
     
     Returns
     -------
@@ -117,36 +119,15 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     block05 = {}
     
     # Read optional inputs:
-    
-    # discretize_geom inputs
-    if 'num_rays' in kwargs:
-        num_rays = kwargs['num_rays']
-    else:
-        num_rays = 10
-    
-    if 'grid' in kwargs:
-        grid = kwargs['grid']
-    else:
-        grid = False
-    
-    # hdf5 paths
-    if 'data_hdf5path' in kwargs:
-        data_hdf5path = kwargs['data_hdf5path']  
-    else:
-        data_hdf5path = '/material_library/materials'
-    
-    if 'nuc_hdf5path' in kwargs:
-        nuc_hdf5path = kwargs['nuc_hdf5path']
-    else:
-        nuc_hdf5path = '/material_library/nucid'
-    
-    # input file name
-    if 'input_file' in kwargs:
-        input_file = kwargs['input_file']
-        input_file_tf = True
-    else:
-        input_file_tf = False
-    
+    num_rays = kwargs.get('num_rays', 10)
+    grid = kwargs.get('grid', False)
+    fine_per_coarse = kwargs.get('fine_per_coarse', 1)
+    data_hdf5path = kwargs.get('data_hdf5path', '/materials')
+    nuc_hdf5path = kwargs.get('nuc_hdf5path', '/nucid')
+    # create title
+    title = hdf5.split("/")[-1].split(".")[0]
+    input_file = kwargs.get('input_file', "{}_partisn.inp".format(title))
+
     # Dictionary of hdf5 names and cross section library names
     # Assumes PyNE naming convention in the cross section library if no dict
     # provided.
@@ -159,7 +140,6 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
         mat_xs_names = _nucid_to_xs(mat_lib)
     
     # Set input variables
-    
     block04['matls'] = mat_xs_names
     
     xs_names = _get_xs_names(mat_xs_names)
@@ -172,46 +152,38 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     
     block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays, grid)
     block01['nzone'] = len(block04['assign'])
+    block02['fine_per_coarse'] = fine_per_coarse
     
     for dim in bounds:
         if dim == 'x':
             n = len(bounds[dim]) - 1
             block01['im'] = n
-            block01['it'] = block01['im']*2
+            block01['it'] = block01['im']*fine_per_coarse
             block02['xmesh'] = bounds[dim]
             block05['sourcx'] = np.zeros(shape=(nmq, n), dtype=float)
             block05['sourcx'][:,0] = 1.0
         elif dim == 'y':
             n = len(bounds[dim]) - 1
             block01['jm'] = n
-            block01['jt'] = block01['jm']*2
+            block01['jt'] = block01['jm']*fine_per_coarse
             block02['ymesh'] = bounds[dim]
             block05['sourcy'] = np.zeros(shape=(nmq, n), dtype=float)
             block05['sourcy'][:,0] = 1.0
         elif dim == 'z':
             n = len(bounds[dim]) - 1
             block01['km'] = n
-            block01['kt'] = block01['km']*2
+            block01['kt'] = block01['km']*fine_per_coarse
             block02['zmesh'] = bounds[dim]
             block05['sourcz'] = np.zeros(shape=(nmq, n), dtype=float)
             block05['sourcz'][:,0] = 1.0
     
-    warn_fm = _check_fine_mesh_total(block01)
-    if warn_fm:
-        warn("Please supply a larger mesh. Number of fine mesh intervals is less than 7.")
+    _check_fine_mesh_total(block01)
 
     block05['source'] = np.zeros(shape=(nmq, ngroup), dtype=float)
     block05['source'][:,0] = 1.0
     
-    # create title
-    if "/" in hdf5:
-        title = hdf5.split("/")[len(hdf5.split("/"))-1].split(".")[0]
-    else:
-        title = hdf5.split(".")[0]
-    
     # call function to write to file
-    input_file = input_file if input_file_tf else None
-    _write_input(title, block01, block02, block03, block04, block05, name=input_file)
+    _write_input(title, block01, block02, block03, block04, block05, input_file)
 
 
 def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
@@ -472,20 +444,15 @@ def _check_fine_mesh_total(block01):
         if key in ['it', 'jt', 'kt']:
             total += block01[key]
     
-    if total >= 7:
-        # no warning necessary
-        return False
-    else:
-        # warn the user
-        return True
+    if total < 7:
+        warn("Please supply a larger mesh. Number of fine mesh intervals is less than 7.")
 
 
-def _write_input(title, block01, block02, block03, block04, block05, name=None):
+def _write_input(title, block01, block02, block03, block04, block05, file_name):
     """Write all variables and comments to a file.
     """
-    
+ 
     # Create file to write to
-    file_name = str(title) + '_partisn.inp' if name is None else name
     f = open(file_name, 'w')
     partisn = ''
     
@@ -549,7 +516,7 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
                     partisn += "\n       "
                 count = 0
         partisn += "\nxints= "
-        partisn += "{0}R {1}".format(len(block02['xmesh'])-1, 2)
+        partisn += "{0}R {1}".format(len(block02['xmesh'])-1, block02['fine_per_coarse'])
         partisn += "\n"
         
     if 'ymesh' in block02:
@@ -563,7 +530,7 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
                     partisn += "\n       "
                 count = 0
         partisn += "\nyints= "
-        partisn += "{0}R {1}".format(len(block02['ymesh'])-1, 2)
+        partisn += "{0}R {1}".format(len(block02['ymesh'])-1, block02['fine_per_coarse'])
         partisn += "\n"
         
     if 'zmesh' in block02:
@@ -577,7 +544,7 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
                     partisn += "\n       "
                 count = 0
         partisn += "\nzints= "
-        partisn += "{0}R {1}".format(len(block02['zmesh'])-1, 2)
+        partisn += "{0}R {1}".format(len(block02['zmesh'])-1, block02['fine_per_coarse'])
         partisn += "\n"
         
     partisn += "zones= "
@@ -636,7 +603,7 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
         count = 0
         j = 0
         for iso, dens in block04['matls'][mat].iteritems():
-            count += 1
+        .inp    count += 1
             j += 1
             if j != len(block04['matls'][mat]):
                 partisn += "{} {:.4e}, ".format(iso, dens)
@@ -688,8 +655,14 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
     partisn += "/ ibfrnt=   / front BC (default=0, vacuum)\n"
     partisn += "/ ibback=   / back BC (default=0, vacuum)\n"
     partisn += "/ \n"
+    partisn += block05['source']
+    partisn += "t\n"
     
-    partisn += "/ Source is in format of option 3 according to PARTISN input manual.\n"
+    # Write to the file
+    f.write(partisn)
+
+def _default_source(block05):
+    partisn = "/ Source is in format of option 3 according to PARTISN input manual.\n"
     partisn += "/ Default is an evenly distributed volume source.\n"
     partisn += "source= "
     count = 0
@@ -761,12 +734,6 @@ def _write_input(title, block01, block02, block03, block04, block05, name=None):
             else:
                 partisn += "; "
         partisn += "\n"
-    
-    partisn += "t\n"
-    
-    # Write to the file
-    f.write(partisn)
-
 
 def format_repeated_vector(vector):
     """Creates string out of a vector with the PARTISN format for repeated
@@ -824,7 +791,7 @@ def strip_mat_name(mat_name):
     """
     
     # Remove 'mat:'
-    tmp1 = mat_name.split(':')[1]
+    tmp1 = mat_name.split(':')[1].split('/')[0]
     
     # Remove other special characters
     special_char = [':', ',', ' ', ';', "'", '"']
