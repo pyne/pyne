@@ -185,11 +185,6 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     
     _check_fine_mesh_total(block01)
 
-    if 'source' in kwargs:
-        block05['source'] = kwargs['source']
-    else:
-        block05['source'] = "source={}R 1;".format(ngroup)
-    
     # call function to write to file
     _write_input(title, block01, block02, block03, block04, block05, cards, input_file)
 
@@ -462,19 +457,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
     f = open(file_name, 'w')
     partisn = ''
     
-    # Write title
-    partisn += "     1     0     0\n"
-    partisn += str(title)
-
-    partisn += "\n/ "
-    partisn += "\n/ Notes: This input assumes a volumetric source calculation using"
-    partisn += "\n/ default PARTISN values in many cases. Please refer to the comments"
-    partisn += "\n/ throughout and the PARTISN input manual."
-    partisn += "\n/ Variables that MUST be set in each block (other defaults and \n"
-    partisn += "/ optional variables may exist):"
-    partisn += "\n/     Block 1:  ISN"
-    partisn += "\n/     Block 3:  LIB, MAXORD, IHM, IHT"
-    partisn += "\n/     Block 6:  no input is provided for block 6"
+    # NOTE: header is prepended at the end of this function.
     
     ###########################################
     #              Write Block 1              #
@@ -507,10 +490,10 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
           partisn += "{}={}\n".format(card, value)
           block1_cards.append(card)
     
-    missing = set(['isn', 'maxscm', 'maxlcm']) - set(block1_cards)
-    if len(missing) > 0:
+    missing_1 = set(['isn', 'maxscm', 'maxlcm']) - set(block1_cards)
+    if len(missing_1) > 0:
         partisn += "/ Please provide input for the following variables:\n"
-        for mis in missing:
+        for mis in missing_1:
             partisn += "/{}=\n".format(mis)
     partisn += 't'
     
@@ -578,6 +561,10 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
         else:
             partisn += "\n"
 
+    if 'block2' in cards:
+      for card, value in cards['block2'].iteritems():
+          partisn += "{}={}\n".format(card, value)
+
     partisn += "t"
     
     ###########################################
@@ -607,11 +594,11 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
           partisn += "{}={}\n".format(card, value)
           block3_cards.append(card)
     
-    missing = set(['lib', 'lng', 'maxord', 'ihm', 'iht', 'ihs', 'ifido', 'ititl']) \
+    missing_3 = set(['lib', 'lng', 'maxord', 'ihm', 'iht', 'ihs', 'ifido', 'ititl']) \
               - set(block1_cards)
-    if len(missing) > 0:
+    if len(missing_3) > 0:
         partisn += "/ Please provide input for the following variables:\n"
-        for mis in missing:
+        for mis in missing_3:
             partisn += "/{}=\n".format(mis)
     partisn += "t"
     
@@ -659,6 +646,10 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
                     partisn += "{} {:.4e};\n".format(mat, block04['assign'][z]['vol_frac'][j])
                 else:
                     partisn += "{} {:.4e};\n        ".format(mat, block04['assign'][z]['vol_frac'][j])
+
+    if 'block4' in cards:
+      for card, value in cards['block4'].iteritems():
+          partisn += "{}={}\n".format(card, value)
     
     partisn += "t"
     
@@ -668,10 +659,47 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
     partisn += "\n/ \n"
     partisn += "/ ------------ Block 5 (Solver Inputs) ------------"
     partisn += "\n/ \n"
-    partisn += block05['source']
-    if block05['source'][-1] != '\n':
-        partisn += '\n'
+    if 'block5' in cards and 'source' in cards['block1']:
+        partisn += cards['block5']['source']
+        if partisn[-1] != '\n':
+            partisn += '\n'
+        default_source = False
+    else:
+        # default source
+        partisn += "source={}R 1\n".format(block01['ngroup'])
+        default_source = True
+
+    if 'block4' in cards:
+      for card, value in cards['block4'].iteritems():
+          if card != 'source':
+              partisn += "{}={}\n".format(card, value)
     partisn += "t\n"
+
+    ###########################################
+    #              Write Header               #
+    ###########################################
+    header = "     1     0     0\n"
+    header += "{}\n".format(title)
+    header += "/\n"
+    if default_source:
+        header += "/ NOTE: This input includes a default source that is isotropic\n"
+        header += "/       and uniform in space and energy.\n"
+    if len(missing_1) > 0 or len(missing_3) > 0:
+        header += "/ NOTE: The follow commented out cards must be filled in for\n"
+        header += "/       a complete PARTISN input file:\n"
+        if len(missing_1) > 0:
+           header += '/       Block 1:'
+           for mis in missing_1:
+              header += " {},".format(mis)
+           header += "\n"
+        if len(missing_3) > 0:
+           header += '/       Block 3:'
+           for mis in missing_3:
+              header += " {},".format(mis)
+           header += "\n"
+    header += "/" 
+	# Prepend header to begining of file
+    partisn = header + partisn
     
     # Write to the file
     f.write(partisn)
