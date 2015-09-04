@@ -50,20 +50,24 @@ if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
     from pyne import dagmc
 
-def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
+def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     """This definition reads all necessary attributes from a material-laden 
     geometry file, a pre-made PyNE mesh object, and the nuclear data cross 
     section library, and any optional inputs that are necessary for creating a 
     PARTISN input file. It then writes a PARTISN text input file for blocks 1-5.
     Note that comments appear in the created input file where more variables
     must be set. 
-    
-    Notes
-    -----
-        This does not write out all necessary inputs for the solver and cross
-        section library (block 3 and 5). There is no assumed cross section 
-        library type.
-    
+
+    block 1: igeom, ngroup, niso,  mt, nzone, im, it, jm, jt, km, kt
+    block 2: xmesh, xints, ymesh, yints, zmesh, zints, zones
+    block 3: names
+    block 4: matls, assign
+    block 5: source
+
+    cards for a minimum working PARTISN input file
+    block 1: isn, maxscm, maxlcm
+    block 2: lib, lng, maxord, ihm, iht, ihs, ifido, ititl
+   
     Parameters
     ----------
     mesh : PyNE mesh 
@@ -77,13 +81,12 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
         File path to a material-laden dagmc geometry file.
     ngroup : int
         The number of energy groups in the cross section library.
-    pn : int
-        The number of moments in a P_n expansion of the source.
-    data_hdf5path : string, optional, default = material_library/materials
-        the path in the heirarchy to the data table in an HDF5 file.
-    nuc_hdf5path : string, optional, default = material_library/nucid
-        the path in the heirarchy to the nuclide array in an HDF5 file.
-    names_dict : dict, optional
+    cards : dict, optional, default = {}
+        This is a dictionary with the following keys: 'block1', 'block2', 
+        'block3', 'block4', 'block5'. The values are each dicts in the format:
+         <partisn_card_name>:<partisn_card_value>. These cards will be printed
+        out in the input file produced by this function.
+    names_dict : dict, optional, default = None
         PyNE element/isotope names to bxslib name assignment. Keys are PyNE
         nucids (int) and values are bxslib names (str)
         Example: names_dict[250550000] ='mn55'
@@ -99,11 +102,16 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
         true, a linearly spaced grid of starting points is used, with dimension 
         sqrt(num_rays) x sqrt(num_rays). In this case, "num_rays" must be a 
         perfect square.
+    dg : record array, optional, default = None
+        The output of pyne.dagmc.discretize_geom(). Use this input option if 
+        discretize_geom() has already been run, to avoid duplicating this
+        expensive step.
     find_per_coarse : int, optional, default = 1
         The number of fine mesh intervals to coarse mesh intervals
-    source : str, optional
-        A valid PARTISN source spefication. If none is supplied, an isotropic
-        source, with uniform spatial intensity is used.
+    data_hdf5path : string, optional, default = /materials
+        the path in the heirarchy to the data table in an HDF5 file.
+    nuc_hdf5path : string, optional, default = /nucid
+        the path in the heirarchy to the nuclide array in an HDF5 file.
     
     Returns
     -------
@@ -120,12 +128,15 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     block05 = {}
     
     # Read optional inputs:
+    cards = kwargs.get('cards', {})
+    dg = kwargs.get('dg', None)
     num_rays = kwargs.get('num_rays', 10)
     grid = kwargs.get('grid', False)
+    if dg is not None and ('num_rays' in kwargs or 'grid' in kwargs):
+        warn("discretize_geom() options not used due to 'dg' argument")
     fine_per_coarse = kwargs.get('fine_per_coarse', 1)
     data_hdf5path = kwargs.get('data_hdf5path', '/materials')
     nuc_hdf5path = kwargs.get('nuc_hdf5path', '/nucid')
-    # create title
     title = hdf5.split("/")[-1].split(".")[0]
     input_file = kwargs.get('input_file', "{}_partisn.inp".format(title))
 
@@ -147,11 +158,11 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     block01['niso'] = len(xs_names)
     block03['names'] = xs_names
 
-    block01['igeom'], bounds, nmq = _get_coord_sys(mesh, pn)
+    block01['igeom'], bounds = _get_coord_sys(mesh)
     block01['ngroup'] = ngroup
     block01['mt'] = len(mat_lib)
     
-    block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays, grid)
+    block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays, grid, dg)
     block01['nzone'] = len(block04['assign'])
     block02['fine_per_coarse'] = fine_per_coarse
     
@@ -177,12 +188,10 @@ def write_partisn_input(mesh, hdf5, ngroup, pn, **kwargs):
     if 'source' in kwargs:
         block05['source'] = kwargs['source']
     else:
-        uniform_source = np.zeros(shape=(nmq, ngroup), dtype=float)
-        uniform_source[:,0] = 1.0
-        block05['source'] = _default_source(uniform_source)
+        block05['source'] = "source={}R 1;".format(ngroup)
     
     # call function to write to file
-    _write_input(title, block01, block02, block03, block04, block05, input_file)
+    _write_input(title, block01, block02, block03, block04, block05, cards, input_file)
 
 
 def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
@@ -259,7 +268,7 @@ def _get_xs_names(mat_xs_names):
     return list(xs_names)
 
 
-def _get_coord_sys(mesh, pn):
+def _get_coord_sys(mesh):
     """Determine coordinate system and get bounds
     """
     
@@ -286,18 +295,15 @@ def _get_coord_sys(mesh, pn):
     # assumes a Cartesian system
     if len(coord_sys) == 1:
         igeom = 'slab'
-        nmq = pn + 1
     elif len(coord_sys) == 2:
         igeom = 'x-y'
-        nmq = (pn + 1)*(pn + 2)/2
     elif len(coord_sys) == 3:
         igeom = 'x-y-z'
-        nmq = (pn + 1)**2
     
-    return igeom, bounds, nmq
+    return igeom, bounds
 
 
-def _get_zones(mesh, hdf5, bounds, num_rays, grid):
+def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg):
     """Get the minimum zone definitions for the geometry.
     """
     
@@ -305,8 +311,9 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid):
     from pyne import dagmc
     dagmc.load(hdf5)
     
-    # Descretize the geometry and get cell fractions
-    dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
+    # Discretize the geometry and get cell fractions
+    if dg is None:
+        dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
 
     # Reorganize dictionary of each voxel's info with the key the voxel number 
     # and values of cell and volume fraction   
@@ -447,7 +454,7 @@ def _check_fine_mesh_total(block01):
         warn("Please supply a larger mesh. Number of fine mesh intervals is less than 7.")
 
 
-def _write_input(title, block01, block02, block03, block04, block05, file_name):
+def _write_input(title, block01, block02, block03, block04, block05, cards, file_name):
     """Write all variables and comments to a file.
     """
  
@@ -481,8 +488,6 @@ def _write_input(title, block01, block02, block03, block04, block05, file_name):
     partisn += "  mt={0}".format(block01['mt'])
     partisn += "  nzone={0}\n".format(block01['nzone'])
     
-    partisn += "/ Please provide input for ISN variable:\n"
-    partisn += "/ isn=  \n"
     
     if 'im' in block01:
         partisn += "im={0}".format(block01['im'])
@@ -495,6 +500,18 @@ def _write_input(title, block01, block02, block03, block04, block05, file_name):
         partisn += "  kt={0}  ".format(block01['kt'])
 
     partisn += "\n"
+
+    block1_cards = []
+    if 'block1' in cards:
+      for card, value in cards['block1'].iteritems():
+          partisn += "{}={}\n".format(card, value)
+          block1_cards.append(card)
+    
+    missing = set(['isn', 'maxscm', 'maxlcm']) - set(block1_cards)
+    if len(missing) > 0:
+        partisn += "/ Please provide input for the following variables:\n"
+        for mis in missing:
+            partisn += "/{}=\n".format(mis)
     partisn += 't'
     
     ###########################################
@@ -569,11 +586,6 @@ def _write_input(title, block01, block02, block03, block04, block05, file_name):
     partisn += "\n/ \n"
     partisn += "/ ------------ Block 3 (Nuclear Data) ------------"
     partisn += "\n/ \n"
-    partisn += "/ Please provide input for the following variables:\n"
-    partisn += "/ lib=\n"
-    partisn += "/ maxord=\n"
-    partisn += "/ ihm=\n"
-    partisn += "/ iht=\n"
     
     partisn += "/ Note: NAMES is not all inclusive. Only NAMES that are present in\n"
     partisn += "/ meshed area are listed.\n"
@@ -587,7 +599,21 @@ def _write_input(title, block01, block02, block03, block04, block05, file_name):
                 partisn += "\n       "
             count = 0
     
-    partisn += "\nt"
+    partisn += "\n"
+
+    block3_cards = []
+    if 'block3' in cards:
+      for card, value in cards['block3'].iteritems():
+          partisn += "{}={}\n".format(card, value)
+          block3_cards.append(card)
+    
+    missing = set(['lib', 'lng', 'maxord', 'ihm', 'iht', 'ihs', 'ifido', 'ititl']) \
+              - set(block1_cards)
+    if len(missing) > 0:
+        partisn += "/ Please provide input for the following variables:\n"
+        for mis in missing:
+            partisn += "/{}=\n".format(mis)
+    partisn += "t"
     
     ###########################################
     #              Write Block 4              #
@@ -642,18 +668,6 @@ def _write_input(title, block01, block02, block03, block04, block05, file_name):
     partisn += "\n/ \n"
     partisn += "/ ------------ Block 5 (Solver Inputs) ------------"
     partisn += "\n/ \n"
-    partisn += "/ This input assumes a volumetric source calculation with vacuum\n"
-    partisn += "/ boundary conditions. Change inputs below if otherwise.\n"
-    partisn += "ievt=0      / source calculation\n"
-    partisn += "/ isct=     / Legendre order of scattering (default=0)\n"
-    partisn += "/ ith=      / 0/1/2= direct/adjoint/POI calculation (default=0)\n"
-    partisn += "/ ibl=      / left BC (default=0, vacuum)\n"
-    partisn += "/ ibr=      / right BC (default=0, vacuum)\n"
-    partisn += "/ ibt=      / top BC (default=0, vacuum)\n"
-    partisn += "/ ibb=      / bottom BC (default=0, vacuum)\n"
-    partisn += "/ ibfrnt=   / front BC (default=0, vacuum)\n"
-    partisn += "/ ibback=   / back BC (default=0, vacuum)\n"
-    partisn += "/ \n"
     partisn += block05['source']
     if block05['source'][-1] != '\n':
         partisn += '\n'
@@ -661,27 +675,6 @@ def _write_input(title, block01, block02, block03, block04, block05, file_name):
     
     # Write to the file
     f.write(partisn)
-
-def _default_source(data):
-    source = "/ Source is in format of option 3 according to PARTISN input manual.\n"
-    source += "/ Default is an evenly distributed volume source.\n"
-    source += "source= "
-    count = 0
-    tot = 0
-    for row in data:
-        source += format_repeated_vector(row)
-        tot += 1
-        count += 1
-        if count == 4:
-            if tot != len(data):
-                source += ";\n        "
-            else:
-                source += ";"
-            count = 0
-        else:
-            source += "; "
-    source += "\n"
-    return source
 
 def format_repeated_vector(vector):
     """Creates string out of a vector with the PARTISN format for repeated
