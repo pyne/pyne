@@ -22,6 +22,7 @@ except ImportError:
 
 if HAVE_PYTAPS:
     from pyne.mesh import Mesh, IMeshTag
+    from pyne import dagmc
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -327,6 +328,7 @@ def write_partisn_input_1D():
         input_file=input_file, num_rays=100, grid=True)
     
     out = filecmp.cmp(input_file, file_expected)
+    os.remove(input_file)
     assert(out == True)
     return out
         
@@ -369,6 +371,7 @@ def write_partisn_input_2D():
         input_file=input_file, num_rays=100, grid=True)
     
     out = filecmp.cmp(input_file, file_expected)
+    os.remove(input_file)
     return out
 
         
@@ -410,6 +413,7 @@ def write_partisn_input_3D():
         input_file=input_file, num_rays=100, grid=True)
     
     out = filecmp.cmp(input_file, file_expected)
+    os.remove(input_file)
     return out
 
 
@@ -457,6 +461,7 @@ def write_partisn_input_with_names_dict():
         input_file=input_file, num_rays=100, grid=True, names_dict=names)
     
     out = filecmp.cmp(input_file, file_expected)
+    os.remove(input_file)
     return out
     
     
@@ -468,7 +473,63 @@ def test_write_partisn_input_with_names_dict():
     p.close()
     p.join()
     assert(r.get() == True)
+ 
+   
+def write_partisn_input_options():
+    """Test PARTISN input file creation with a slew of keyword arguments
+    """
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = os.path.join(THIS_DIR, 'files_test_partisn', 'partisn_test_geom.h5m')
+    input_file = os.path.join(THIS_DIR, 'files_test_partisn', 'partisn_options.inp')
+    file_expected = os.path.join(THIS_DIR, 'files_test_partisn', 'partisn_options_expected.inp')
     
+    sc = [-5., 0., 10., 15.], [-5., 5.], [-5., 5.]
+    mesh=Mesh(structured_coords=sc, structured=True)
+    ngroup = 66
+    
+    dagmc.load(hdf5)
+    dg = dagmc.discretize_geom(mesh, num_rays=100, grid=True)
+    
+    cards = {"block1": {"isn": 6,
+                        "maxscm": 3000000,
+                        "maxlcm": 6000000,
+                       },
+             "block2":{"hello":"from block2"},
+             "block3": {"lib": "xsf21-71",
+                       "lng":175,
+                       "maxord": 5,
+                       "ihm": 227,
+                       "iht": 10,
+                       "ihs": 11,
+                       "ifido": 1,
+                       "ititl": 1,
+                       "i2lp1": 0,
+                       "savbxs": 1,
+                       "kwikrd": 1
+                       },
+            "block4":{"hello":"from block4"},
+            "block5": {"source": "<this is a dummy source>"}
+            }
+
+    with warnings.catch_warnings(record=True) as w:
+        partisn.write_partisn_input(mesh, hdf5, ngroup, input_file=input_file,
+                                    dg=dg, fine_per_coarse=3, cards=cards, 
+                                    num_rays=9) # include num_rays to get warning
+    
+    out1 = len(w) == 1 # verify we get a warning from including num_rays and dg
+    out2 = filecmp.cmp(input_file, file_expected)
+    os.remove(input_file)
+    return out1 and out2
+        
+        
+def test_write_partisn_input_options():
+    """Test full input file creation for 1D case with a names_dict provided
+    """
+    p = multiprocessing.Pool()
+    r = p.apply_async(write_partisn_input_options)
+    p.close()
+    p.join()
+    assert(r.get() == True)
     
 def test_format_repeated_vector():
     """Test the format_repeated_vector function.

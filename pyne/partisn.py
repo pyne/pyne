@@ -302,12 +302,9 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg):
     """Get the minimum zone definitions for the geometry.
     """
     
-    # load the geometry
-    from pyne import dagmc
-    dagmc.load(hdf5)
-    
     # Discretize the geometry and get cell fractions
     if dg is None:
+        dagmc.load(hdf5)
         dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
 
     # Reorganize dictionary of each voxel's info with the key the voxel number 
