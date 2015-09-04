@@ -595,7 +595,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
           block3_cards.append(card)
     
     missing_3 = set(['lib', 'lng', 'maxord', 'ihm', 'iht', 'ihs', 'ifido', 'ititl']) \
-              - set(block1_cards)
+              - set(block3_cards)
     if len(missing_3) > 0:
         partisn += "/ Please provide input for the following variables:\n"
         for mis in missing_3:
@@ -659,7 +659,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
     partisn += "\n/ \n"
     partisn += "/ ------------ Block 5 (Solver Inputs) ------------"
     partisn += "\n/ \n"
-    if 'block5' in cards and 'source' in cards['block1']:
+    if 'block5' in cards and 'source' in cards['block5']:
         partisn += cards['block5']['source']
         if partisn[-1] != '\n':
             partisn += '\n'
@@ -669,8 +669,8 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
         partisn += "source={}R 1\n".format(block01['ngroup'])
         default_source = True
 
-    if 'block4' in cards:
-      for card, value in cards['block4'].iteritems():
+    if 'block5' in cards:
+      for card, value in cards['block5'].iteritems():
           if card != 'source':
               partisn += "{}={}\n".format(card, value)
     partisn += "t\n"

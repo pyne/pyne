@@ -119,7 +119,6 @@ def test_get_coord_sys_1D():
     xvals = [0.0, 2.0]
     yvals = [0.0, 3.0]
     zvals = [-1.0, 0.0, 1.0]
-    pn = 2
     mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
                 structured_ordering='xyz')
     
@@ -127,10 +126,9 @@ def test_get_coord_sys_1D():
     igeom_expected = 'slab'
     bounds_expected = {'z':[-1.0, 0.0, 1.0]}
     
-    igeom, bounds, nmq = partisn._get_coord_sys(mesh, pn)
+    igeom, bounds = partisn._get_coord_sys(mesh)
     assert(igeom == igeom_expected)
     assert(bounds == bounds_expected)
-    assert(nmq == 3)
 
 
 def test_get_coord_sys_2D():
@@ -140,7 +138,6 @@ def test_get_coord_sys_2D():
     xvals = [-1.0, 0.0, 2.0]
     yvals = [-3.0, 3.0]
     zvals = [-1.0, 0.0, 1.0]
-    pn = 2
     mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
                 structured_ordering='xyz')
     
@@ -148,10 +145,9 @@ def test_get_coord_sys_2D():
     igeom_expected = 'x-y'
     bounds_expected = {'x': [-1.0, 0.0, 2.0], 'z':[-1.0, 0.0, 1.0]}
     
-    igeom, bounds, nmq = partisn._get_coord_sys(mesh, pn)
+    igeom, bounds = partisn._get_coord_sys(mesh)
     assert(igeom == igeom_expected)
     assert(bounds == bounds_expected)
-    assert(nmq == 6)
 
 
 def test_get_coord_sys_3D():
@@ -161,7 +157,6 @@ def test_get_coord_sys_3D():
     xvals = [-1.0, 0.0, 2.0]
     yvals = [-3.0, 0.0, 3.0]
     zvals = [-1.0, 0.0, 1.0]
-    pn = 2
     mesh=Mesh(structured_coords=[xvals, yvals, zvals], structured=True, 
                 structured_ordering='xyz')
     
@@ -170,10 +165,9 @@ def test_get_coord_sys_3D():
     bounds_expected = {'x': [-1.0, 0.0, 2.0], 'y':[-3.0, 0.0, 3.0], 
                         'z':[-1.0, 0.0, 1.0]}
     
-    igeom, bounds, nmq = partisn._get_coord_sys(mesh, pn)
+    igeom, bounds = partisn._get_coord_sys(mesh)
     assert(igeom == igeom_expected)
     assert(bounds == bounds_expected)
-    assert(nmq == 9)
 
    
 def get_zones_no_void():
@@ -199,8 +193,9 @@ def get_zones_no_void():
     bounds = {'x':xvals, 'y':yvals, 'z':zvals}
     num_rays = 144
     grid = True
+    dg = None
     
-    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid)    
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg)    
 
     voxel_zones_expected = np.array([[1, 1, 1, 1],
                                     [2, 2, 2, 2],
@@ -252,8 +247,9 @@ def get_zones_with_void():
     bounds = {'x':xvals, 'y':yvals, 'z':zvals}
     num_rays = 400
     grid = True
+    dg = None
     
-    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid)
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg)
     
     # expected results
     voxel_zones_expected = np.array([[1, 1, 1, 1],
@@ -289,16 +285,18 @@ def test_check_fine_mesh_total_true():
     """Check that if fine mesh is less than 7, warning is issued.
     """
     block01 = {'it':2, 'jt':4}
-    warn_out = partisn._check_fine_mesh_total(block01)
-    assert(warn_out == True)
+    with warnings.catch_warnings(record=True) as w:
+        partisn._check_fine_mesh_total(block01)
+        assert(len(w) == 1)
     
 
 def test_check_fine_mesh_total_false():
     """Check that if fine mesh is greater than 7, warning is not issued.
     """
     block01 = {'it':2, 'jt':4, 'kt':4}
-    warn_out = partisn._check_fine_mesh_total(block01)
-    assert(warn_out == False)
+    with warnings.catch_warnings(record=True) as w:
+        partisn._check_fine_mesh_total(block01)
+    assert(len(w) == 0)
     
 
 def write_partisn_input_1D():
@@ -320,12 +318,11 @@ def write_partisn_input_1D():
     
     # other inputs
     ngroup = 5
-    pn = 2
     
     # expected output file
     file_expected = THIS_DIR + '/files_test_partisn/partisn_1D_expected.inp'
     
-    partisn.write_partisn_input(mesh, hdf5, ngroup, pn, 
+    partisn.write_partisn_input(mesh, hdf5, ngroup, 
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
         input_file=input_file, num_rays=100, grid=True)
     
@@ -363,12 +360,11 @@ def write_partisn_input_2D():
     
     # other inputs
     ngroup = 5
-    pn = 2
     
     # expected output file
     file_expected = THIS_DIR + '/files_test_partisn/partisn_2D_expected.inp'
     
-    partisn.write_partisn_input(mesh, hdf5, ngroup, pn, 
+    partisn.write_partisn_input(mesh, hdf5, ngroup,
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
         input_file=input_file, num_rays=100, grid=True)
     
@@ -405,12 +401,11 @@ def write_partisn_input_3D():
     
     # other inputs
     ngroup = 5
-    pn = 2
     
     # expected output file
     file_expected = THIS_DIR + '/files_test_partisn/partisn_3D_expected.inp'
     
-    partisn.write_partisn_input(mesh, hdf5, ngroup, pn, 
+    partisn.write_partisn_input(mesh, hdf5, ngroup,
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
         input_file=input_file, num_rays=100, grid=True)
     
@@ -453,12 +448,11 @@ def write_partisn_input_with_names_dict():
     
     # other inputs
     ngroup = 5
-    pn = 2
     
     # expected output file
     file_expected = THIS_DIR + '/files_test_partisn/partisn_nucnames_expected.inp'
     
-    partisn.write_partisn_input(mesh, hdf5, ngroup, pn, 
+    partisn.write_partisn_input(mesh, hdf5, ngroup,
         data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path, 
         input_file=input_file, num_rays=100, grid=True, names_dict=names)
     
