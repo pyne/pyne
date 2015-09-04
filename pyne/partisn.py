@@ -493,7 +493,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
     missing_1 = set(['isn', 'maxscm', 'maxlcm']) - set(block1_cards)
     if len(missing_1) > 0:
         partisn += "/ Please provide input for the following variables:\n"
-        for mis in missing_1:
+        for mis in sorted(missing_1):
             partisn += "/{}=\n".format(mis)
     partisn += 't'
     
@@ -552,7 +552,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
         for num in row:
             partisn += "{} ".format(num)
             count += 1
-            if count == 20:
+            if count == 10:
                 partisn += "\n       "
                 count = 0
         partisn += ";"
@@ -598,7 +598,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
               - set(block3_cards)
     if len(missing_3) > 0:
         partisn += "/ Please provide input for the following variables:\n"
-        for mis in missing_3:
+        for mis in sorted(missing_3):
             partisn += "/{}=\n".format(mis)
     partisn += "t"
     
@@ -683,18 +683,18 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
     header += "/\n"
     if default_source:
         header += "/ NOTE: This input includes a default source that is isotropic\n"
-        header += "/       and uniform in space and energy.\n"
+        header += "/       in direction and uniform in space and energy.\n"
     if len(missing_1) > 0 or len(missing_3) > 0:
         header += "/ NOTE: The follow commented out cards must be filled in for\n"
         header += "/       a complete PARTISN input file:\n"
         if len(missing_1) > 0:
            header += '/       Block 1:'
-           for mis in missing_1:
+           for mis in sorted(missing_1):
               header += " {},".format(mis)
            header += "\n"
         if len(missing_3) > 0:
            header += '/       Block 3:'
-           for mis in missing_3:
+           for mis in sorted(missing_3):
               header += " {},".format(mis)
            header += "\n"
     header += "/" 
