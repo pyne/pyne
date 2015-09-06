@@ -5,6 +5,7 @@ import sys
 from contextlib import contextmanager
 from warnings import warn
 from pyne.utils import QAWarning
+from copy import deepcopy
 
 cimport numpy as np
 import numpy as np
@@ -658,6 +659,44 @@ def cell_material_assignments(hdf5):
                         
     return mat_assigns
 
+def cell_materials(hdf5, **kwargs):
+    """Obtain a material object for each cell in a DAGMC material-laden
+    geometry, tagged in UWUW format, i.e. "mat:<name>/rho:<density>".
+    
+    Parameters:
+    -----------
+    hdf5 : string
+        Path to hdf5 material-laden geometry
+    datapath: str, optional, default ='/materials',
+        The path in the heirarchy to the material data table in the HDF5 file.
+    nucpath, str, optional, default='/nucid'
+        The path in the heirarchy to the nuclide array in the HDF5 file.
+    
+    Returns:
+    --------
+    cell_mats : dict
+        Dictionary that maps cells numbers to PyNE Material objects. 
+    """
+    
+    datapath = kwargs.get('datapath', '/materials')
+    nucpath = kwargs.get('nucpath', '/nucid')
+
+    ml = MaterialLibrary()
+    ml.from_hdf5(datapath=datapath, nucpath=nucpath)
+    mat_assigns = cell_material_assignments(hdf5)
+    cell_mats = {}
+    for raw_name in mat_assigns.keys():
+        # remove <name> from "mat:<name>/rho:<density>"
+        mat_name = raw_name.split(":")[1].split("/rho:")[0]
+        if '/rho:' in raw_name:
+            density = float(raw_name.split("/rho:")[1])
+            temp = deepcopy(ml[mat_name])
+            temp.density = density
+            cell_mats[mat_name] = temp
+        else:
+            cell_mats[mat_name] = ml[mat_name]
+
+    return cell_mats
 
 def find_implicit_complement():
     """Find the implicit complement and return the volume id.
