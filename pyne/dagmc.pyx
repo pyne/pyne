@@ -13,6 +13,7 @@ import numpy as np
 from pyne cimport cpp_dagmc_bridge
 from pyne.mesh import Mesh
 from numpy.linalg import norm
+from pyne.material import Material, MaterialLibrary
 np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
@@ -661,7 +662,8 @@ def cell_material_assignments(hdf5):
 
 def cell_materials(hdf5, **kwargs):
     """Obtain a material object for each cell in a DAGMC material-laden
-    geometry, tagged in UWUW format, i.e. "mat:<name>/rho:<density>".
+    geometry, tagged in UWUW format, i.e. "mat:<name>/rho:<density>" or
+    "mat:<name>".
     
     Parameters:
     -----------
@@ -681,20 +683,23 @@ def cell_materials(hdf5, **kwargs):
     datapath = kwargs.get('datapath', '/materials')
     nucpath = kwargs.get('nucpath', '/nucid')
 
+    # void material
+    void_mat = Material({}, density = 0.0, metadata={"name": "void", 
+                                                      "mat_number": 0})
+    # strings that specify that a region is void
+    void_names = ["vacuum", "graveyard", "void"]
+
     ml = MaterialLibrary()
-    ml.from_hdf5(datapath=datapath, nucpath=nucpath)
+    ml.from_hdf5(hdf5, datapath=datapath, nucpath=nucpath)
     mat_assigns = cell_material_assignments(hdf5)
     cell_mats = {}
-    for raw_name in mat_assigns.keys():
-        # remove <name> from "mat:<name>/rho:<density>"
-        mat_name = raw_name.split(":")[1].split("/rho:")[0]
-        if '/rho:' in raw_name:
-            density = float(raw_name.split("/rho:")[1])
-            temp = deepcopy(ml[mat_name])
-            temp.density = density
-            cell_mats[mat_name] = temp
+    for cell_num, mat_name in mat_assigns.items():
+        if cell_num is None:
+            continue 
+        elif np.any([x in mat_name.lower() for x in void_names]):
+            cell_mats[cell_num] = void_mat
         else:
-            cell_mats[mat_name] = ml[mat_name]
+            cell_mats[cell_num] = ml[mat_name]
 
     return cell_mats
 
