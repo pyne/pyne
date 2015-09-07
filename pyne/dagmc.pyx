@@ -5,7 +5,6 @@ import sys
 from contextlib import contextmanager
 from warnings import warn
 from pyne.utils import QAWarning
-from copy import deepcopy
 
 cimport numpy as np
 import numpy as np
