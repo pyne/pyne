@@ -51,48 +51,58 @@ if HAVE_PYTAPS:
     from pyne import dagmc
 
 def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
-    """This definition reads all necessary attributes from a material-laden 
-    geometry file, a pre-made PyNE mesh object, and the nuclear data cross 
-    section library, and any optional inputs that are necessary for creating a 
-    PARTISN input file. It then writes a PARTISN text input file for blocks 1-5.
-    Note that comments appear in the created input file where more variables
-    must be set. 
+    """This function reads a material-laden geometry file and a pre-made PyNE 
+    mesh object and writes a PARTISN text input file for blocks 1-5. The
+    following cards are included:
 
-    block 1: igeom, ngroup, niso,  mt, nzone, im, it, jm, jt, km, kt
-    block 2: xmesh, xints, ymesh, yints, zmesh, zints, zones
-    block 3: names
-    block 4: matls, assign
-    block 5: source
+    block 1: igeom, ngroup, niso,  mt, nzone, im, it, jm, jt, km, kt,
+    block 2: xmesh, xints, ymesh, yints, zmesh, zints, zones,
+    block 3: names,
+    block 4: matls, assign,
+    block 5: source.
 
-    cards for a minimum working PARTISN input file
-    block 1: isn, maxscm, maxlcm
-    block 2: lib, lng, maxord, ihm, iht, ihs, ifido, ititl
+    The 'source' card that appears by default is uniform in space and energy
+    and isotropic in direction. In addition, "suggested" cards are printed, 
+    commented-out. These suggested cards are the additional cards required for a 
+    minimum working PARTISN input file:
+
+    block 1: isn, maxscm, maxlcm,
+    block 2: lib, lng, maxord, ihm, iht, ihs, ifido, ititl.
+
+    Using the 'cards' parameter, any one of these cards (including 'source') as
+    well as any PARTISN input card not specified here can be supplied and 
+    printed to the input file. Supplied cards will be ommitted from suggested 
+    cards.
    
     Parameters
     ----------
     mesh : PyNE mesh 
         A premade mesh object that conforms to the geometry. Bounds of the mesh
-        must correspond to the desired PARTISN fine mesh intervals. Two fine 
-        mesh intervals per coarse mesh interval will be created. The sum of all
-        fine mesh intervals in the problem must be greater than or equal to 7.
-        Mesh can be 1-D (Nx1x1 mesh), 2-D (NxMx1 mesh), or 3-D (NxMxP mesh).
-        Note: Only Cartesian meshes are currently supported.
+        must correspond to the desired PARTISN coarse mesh intervals. By default
+        one fine mesh inverval per coarse mesh will be used. This can be changed
+        with the fine_per_coarse parameter. The sum of all fine mesh intervals 
+        in the problem must be greater than or equal to 7. Mesh can be 1-D 
+        (Nx1x1 mesh), 2-D (NxMx1 mesh), or 3-D (NxMxP mesh). Only Cartesian 
+        meshes are currently supported.
     hdf5 : string
         File path to a material-laden dagmc geometry file.
     ngroup : int
         The number of energy groups in the cross section library.
+    input_file : string, optional, default = '<hdf5 file name>_partisn.inp'
+        Desired path of generated PARTISN input file. Any file already existing
+        by the same name will be overwritten.
     cards : dict, optional, default = {}
         This is a dictionary with the following keys: 'block1', 'block2', 
         'block3', 'block4', 'block5'. The values are each dicts in the format:
          <partisn_card_name>:<partisn_card_value>. These cards will be printed
-        out in the input file produced by this function.
+        out in the input file produced by this function. When specifying a
+        source via this method, the key source be 'source' and the value should
+        the entire source card, including the card name (e.g. source, sourcx, 
+        sourcef, etc) and '='.
     names_dict : dict, optional, default = None
         PyNE element/isotope names to bxslib name assignment. Keys are PyNE
         nucids (int) and values are bxslib names (str)
         Example: names_dict[250550000] ='mn55'
-    input_file : string, optional, default = '<hdf5 file name>_partisn.inp'
-        Desired path of generated PARTISN input file. Any file already existing
-        by the same name will be overwritten.
     num_rays : int, optional, default = 10
         For discretize_geom. Structured mesh only. The number of rays to fire 
         in each mesh row for each direction.
@@ -107,17 +117,11 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
         discretize_geom() has already been run, to avoid duplicating this
         expensive step.
     find_per_coarse : int, optional, default = 1
-        The number of fine mesh intervals to coarse mesh intervals
+        The number of fine mesh intervals per coarse mesh interval.
     data_hdf5path : string, optional, default = /materials
         the path in the heirarchy to the data table in an HDF5 file.
     nuc_hdf5path : string, optional, default = /nucid
         the path in the heirarchy to the nuclide array in an HDF5 file.
-    
-    Returns
-    -------
-    PARTISN Input file named by 'input_file' above or the default name.
-        Note: read comments generated in file. Not all variables will be 
-        assigned that are necessary.
     """
     
     # Initialize dictionaries for each PARTISN block
