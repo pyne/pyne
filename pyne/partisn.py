@@ -755,17 +755,19 @@ def strip_mat_name(mat_name):
     'mat:' or special characters.
     Assumes PyNE naming convention (must start with 'mat:').
     """
+
+    # Remove "mat:"
+    mat_name = mat_name.split('mat:')[1]
+
+    # Replace "/rho" with an underscore
+    mat_name = string.replace(mat_name, "/rho:", "_")
     
-    # Remove 'mat:'
-    tmp1 = mat_name.split(':')[1].split('/')[0]
-    
-    # Remove other special characters
-    special_char = [':', ',', ' ', ';', "'", '"']
+    # Remove any other special characters
+    special_char = [':', ',', ' ', ';', "'", '"', '/']
     for char in special_char:
-        tmp2 = tmp1.split(char)
-        tmp1 = ''.join(tmp2)
+        mat_name = string.replace(mat_name, char, "")
     
-    return tmp1
+    return mat_name
 
 def mesh_to_isotropic_source(m, tag):
     """This function reads an isotropic source definition from a supplied mesh
