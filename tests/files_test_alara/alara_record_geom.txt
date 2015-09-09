@@ -15,17 +15,18 @@ mat_loading
 end
 
 mixture mix_0
-    material mat_21 1 0.55
-    material mat_22 1 0.45
+    material fake_mat 1 0.55
+    material water 1 0.45
 end
 
 mixture mix_1
-    material mat_21 1 0.2
-    material mat_22 1 0.3
-    material mat_23 1 0.5
+    material fake_mat 1 0.2
+    material water 1 0.3
+    material helium 1 0.5
 end
 
 mixture mix_2
-    material mat_21 1 1.0
+    material fake_mat 1 0.95
+    material mat_void 1 0.05
 end
 

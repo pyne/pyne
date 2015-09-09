@@ -240,7 +240,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
 
      cell_mats : dict
         Maps geometry cell numbers to PyNE Material objects. Each PyNE material
-        object must have the 'mat_number' in Material.metadata.
+        object must have 'name' specified in Material.metadata.
     geom_file : str
         The name of the file to print the geometry and material blocks.
     matlib_file : str
@@ -266,20 +266,21 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
 
         ve_mixture = {}
         for row in cell_fracs[cell_fracs['idx'] == i]:
-            if cell_mats[row['cell']].metadata['mat_number'] \
-                not in ve_mixture.keys():
-                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] = \
-                    round(row['vol_frac'], sig_figs)
+            cell_mat = cell_mats[row['cell']]
+            name = cell_mat.metadata['name']
+            if _is_void(name):
+                name = "mat_void"
+            if name not in ve_mixture.keys():
+                ve_mixture[name] = round(row['vol_frac'], sig_figs)
             else:
-                ve_mixture[cell_mats[row['cell']].metadata['mat_number']] += \
-                    round(row['vol_frac'], sig_figs)
+                ve_mixture[name] += round(row['vol_frac'], sig_figs)
 
         if ve_mixture not in unique_mixtures:
             unique_mixtures.append(ve_mixture)
             mixture += "mixture mix_{0}\n".format(
                                            unique_mixtures.index(ve_mixture))
             for key, value in ve_mixture.items():
-                mixture += "    material mat_{0} 1 {1}\n".format(key, value)
+                mixture += "    material {0} 1 {1}\n".format(key, value)
 
             mixture += "end\n\n"
 
@@ -296,19 +297,34 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
 
     printed_mats = []
     for mat in cell_mats.values():
-        mat_num = mat.metadata['mat_number']
-        if mat_num not in printed_mats:
-            printed_mats.append(mat_num)
-            matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(
-                       mat.metadata['mat_number'], mat.density, len(mat.comp))
+        name = mat.metadata['name']
+        if _is_void(name):
+            print_void = True
+            continue
+        if name not in printed_mats:
+            printed_mats.append(name)
+            matlib += "{0}    {1: 1.6E}    {2}\n".format(name, mat.density,
+                                                         len(mat.comp))
             for nuc, comp in mat.comp.iteritems():
                 matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), 
                                                       comp*100.0, znum(nuc))
             matlib += "\n"
 
+    if print_void:
+       matlib += "# void material\nmat_void 0.0 1\nhe 1 2\n"
+
     with open(matlib_file, 'w') as f:
         f.write(matlib)
 
+def _is_void(name):
+    """Private function for determining if a material name specifies void.
+    """
+    if "vacuum" in name.lower() or "void" in name.lower() \
+        or "graveyard" in name.lower():
+        return True
+    else:
+       return False
+    
 
 def mesh_to_geom(mesh, geom_file, matlib_file):
     """This function reads the materials of a PyNE mesh object and prints the
