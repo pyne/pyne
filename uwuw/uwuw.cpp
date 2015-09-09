@@ -22,11 +22,11 @@ UWUW::UWUW(char* file)
     exit(1);
   }
 
-  // load tallies
-  tally_library = load_pyne_tallies(full_filepath);
-
   // load materials
   material_library = load_pyne_materials(full_filepath);
+
+  // load tallies
+  tally_library = load_pyne_tallies(full_filepath);
 };
 
 // Default constructor
@@ -41,11 +41,11 @@ UWUW::UWUW(std::string filename)
     exit(1);
   }
 
-  // load tallies
-  tally_library = load_pyne_tallies(full_filepath);
-
   // load materials
   material_library = load_pyne_materials(full_filepath);
+
+  // load tallies
+  tally_library = load_pyne_tallies(full_filepath);
 };
 
 // Destructor
@@ -109,12 +109,10 @@ std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename,
 {
   std::map<std::string, pyne::Tally> library; // material library
 
-  const char* data_path = datapath.c_str();
-
-  if(!hdf5_path_exists(filename,data_path))
+  if(!hdf5_path_exists(filename,datapath))
     return library;
 
-  num_tallies = get_length_of_table(filename,data_path);
+  num_tallies = get_length_of_table(filename,datapath);
 
   for ( int i = 0 ; i < num_tallies ; i++) {
     pyne::Tally tally; // from file
