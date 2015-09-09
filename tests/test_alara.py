@@ -187,7 +187,7 @@ def test_record_to_geom():
                                    "alara_record_matlib.txt")
     geom = os.path.join(os.getcwd(), "alara_record_geom")
     matlib = os.path.join(os.getcwd(), "alara_record_matlib")
-    cell_fracs = np.zeros(9, dtype=[('idx', np.int64),
+    cell_fracs = np.zeros(11, dtype=[('idx', np.int64),
                                         ('cell', np.int64),
                                         ('vol_frac', np.float64),
                                         ('rel_error', np.float64)])
@@ -198,11 +198,15 @@ def test_record_to_geom():
                               metadata={'name': 'water'}),
                  13: Material({'He4': 42.0}, density=1.3, 
                               metadata={'name': 'helium'}),
-                 14: Material({}, density=0.0, metadata={'name': 'void'})}
+                 14: Material({}, density=0.0, metadata={'name': 'void'}),
+                 15: Material({}, density=0.0, metadata={'name': 'void'}),
+                 16: Material({'H1': 1.0, 'K39': 1.0}, density=1.1, 
+                              metadata={'name': 'fake_mat'})}
 
     cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0), 
-                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 0.95, 0.0), 
-                     (2, 14, 0.05, 0.0), (3, 11, 0.55, 0.0), (3, 12, 0.45, 0.0)]
+                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 0.15, 0.0), 
+                     (2, 14, 0.01, 0.0), (2, 15, 0.04, 0.0), (2, 16, 0.8, 0.0),
+                     (3, 11, 0.55, 0.0), (3, 12, 0.45, 0.0)]
 
     m = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]], 
              structured=True, mats=None)
