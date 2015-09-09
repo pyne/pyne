@@ -149,10 +149,10 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     # provided.
     if 'names_dict' in kwargs:
         nuc_names = kwargs['names_dict']
-        mat_lib = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names=nuc_names)
+        mat_lib, unique_names= _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names=nuc_names)
         mat_xs_names = _nucid_to_xs(mat_lib, nuc_names=nuc_names)
     else:
-        mat_lib = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path)
+        mat_lib, unique_names = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path)
         mat_xs_names = _nucid_to_xs(mat_lib)
     
     # Set input variables
@@ -166,7 +166,7 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     block01['ngroup'] = ngroup
     block01['mt'] = len(mat_lib)
     
-    block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays, grid, dg)
+    block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names)
     block01['nzone'] = len(block04['assign'])
     block02['fine_per_coarse'] = fine_per_coarse
     
@@ -209,11 +209,14 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
     # collapse isotopes into elements (if required)
     mats = MaterialLibrary(hdf5, datapath=data_hdf5path, nucpath=nuc_hdf5path)
     mats_collapsed = {}
+    unique_names = {}
     for mat_name in mats:
+        fluka_name = mats[mat_name].metadata['fluka_name']
+        unique_names[mat_name] = fluka_name
         if collapse:
-            mats_collapsed[mat_name] = mats[mat_name].collapse_elements(mat_except)
+            mats_collapsed[fluka_name] = mats[mat_name].collapse_elements(mat_except)
         else:
-            mats_collapsed[mat_name] = mats[mat_name]
+            mats_collapsed[fluka_name] = mats[mat_name]
 
     # convert mass fraction to atom density in units [at/b-cm]
     mat_lib = {}
@@ -226,13 +229,12 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
             comp_list[nucid] = dens*10.**-24
         mat_lib[mat_name] = comp_list
 
-    return mat_lib
+    return mat_lib, unique_names
 
 
 def _nucid_to_xs(mat_lib, **kwargs):
     """Replace nucids with xs library names.
     """
-    
     if 'nuc_names' in kwargs:
         nuc_names = kwargs['nuc_names']
         names_tf = True
@@ -241,18 +243,17 @@ def _nucid_to_xs(mat_lib, **kwargs):
     
     mat_xs_names = {}
     for mat in mat_lib:
-        mat_name = strip_mat_name(mat)
-        mat_xs_names[mat_name] = {}
+        mat_xs_names[mat] = {}
         for nucid in mat_lib[mat]:
             if names_tf:
                 if nucid in nuc_names:
                     name = nuc_names[nucid]
-                    mat_xs_names[mat_name][name] = mat_lib[mat][nucid]
+                    mat_xs_names[mat][name] = mat_lib[mat][nucid]
                 else:
                     warn("Nucid {0} does not exist in the provided nuc_names dictionary.".format(nucid))
-                    mat_xs_names[mat_name]["{0}".format(nucid)] = mat_lib[mat][nucid]
+                    mat_xs_names[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
             else:
-                mat_xs_names[mat_name][nucname.name(nucid)] = mat_lib[mat][nucid]
+                mat_xs_names[mat][nucname.name(nucid)] = mat_lib[mat][nucid]
 
     return mat_xs_names
     
@@ -302,7 +303,7 @@ def _get_coord_sys(mesh):
     return igeom, bounds
 
 
-def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg):
+def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names):
     """Get the minimum zone definitions for the geometry.
     """
     
@@ -325,6 +326,14 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg):
 
     # get material to cell assignments
     mat_assigns = dagmc.cell_material_assignments(hdf5)
+    # Replace the names in the material assignments with unique names
+    temp = {}
+    for i, name in mat_assigns.items():
+        if "vacuum" in name.lower() or "graveyard" in name.lower():
+            temp[i] = name
+        else:
+            temp[i] = unique_names[name]
+    mat_assigns = temp
 
     # Replace cell numbers with materials, eliminating duplicate materials
     # within single zone definition
@@ -408,8 +417,7 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg):
         zones_novoid[z] = {'mat':[], 'vol_frac':[]}
         for i, mat in enumerate(zones_mats[z]['mat']):
             if mat not in skip_list:
-                name = strip_mat_name(mat)
-                zones_novoid[z]['mat'].append(name)
+                zones_novoid[z]['mat'].append(mat)
                 zones_novoid[z]['vol_frac'].append(zones_mats[z]['vol_frac'][i])
     
     # Put zones into format for PARTISN input
@@ -753,25 +761,6 @@ def format_repeated_vector(vector):
 
     return string
 
-
-def strip_mat_name(mat_name):
-    """Provide a material name (string) and receive a compacted name without 
-    'mat:' or special characters.
-    Assumes PyNE naming convention (must start with 'mat:').
-    """
-
-    # Remove "mat:"
-    mat_name = mat_name.split('mat:')[1]
-
-    # Replace "/rho" with an underscore
-    mat_name = string.replace(mat_name, "/rho:", "_")
-    
-    # Remove any other special characters
-    special_char = [':', ',', ' ', ';', "'", '"', '/']
-    for char in special_char:
-        mat_name = string.replace(mat_name, char, "")
-    
-    return mat_name
 
 def mesh_to_isotropic_source(m, tag):
     """This function reads an isotropic source definition from a supplied mesh

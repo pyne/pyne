@@ -44,11 +44,11 @@ t
 / 
 / ------------ Block 4 (Cross-Section Mixing) ------------
 / 
-matls= Mercury hg 4.0666e-02;
-       HeliumNatural he4 2.4976e-05, he3 4.4415e-11;
-assign= 1 HeliumNatural 1.0000e+00;
-        2 HeliumNatural 5.0000e-01, Mercury 5.0000e-01;
-        3 Mercury 1.0000e+00;
+matls= HELIUMNA he4 2.4976e-05, he3 4.4415e-11;
+       MERCURY1 hg 4.0666e-02;
+assign= 1 HELIUMNA 1.0000e+00;
+        2 HELIUMNA 5.0000e-01, MERCURY1 5.0000e-01;
+        3 MERCURY1 1.0000e+00;
 t
 / 
 / ------------ Block 5 (Solver Inputs) ------------

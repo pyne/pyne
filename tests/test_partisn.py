@@ -43,10 +43,12 @@ def test_get_material_lib_with_names():
     names[20030000] = 'he3'
     names[20040000] = 'he4'
     
-    mat_lib = partisn._get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names=names)
-    mat_lib_expected = {u'mat:Mercury':{800000000:4.066613534078662e-2}, 
-                        u'mat:Helium, Natural':{20040000:2.4975599277878773e-05, 
+    mat_lib, unique_names = partisn._get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names=names)
+    mat_lib_expected = {u'MERCURY1':{800000000:4.066613534078662e-2}, 
+                        u'HELIUMNA':{20040000:2.4975599277878773e-05, 
                                                 20030000:4.4414858514189387e-11}}
+    expected_unique_names = {'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury':'MERCURY1'}
+    assert(unique_names == expected_unique_names)
     assert(mat_lib == mat_lib_expected)
 
 
@@ -60,16 +62,18 @@ def test_get_material_lib_no_names():
     data_hdf5path = '/materials'
     nuc_hdf5path = '/nucid'
     
-    mat_lib = partisn._get_material_lib(hdf5, data_hdf5path, nuc_hdf5path)
-    mat_lib_expected = {'mat:Mercury': {802020000:1.2060451913893048e-02, 
-                                        802000000:9.423512145483618e-03,
-                                        802010000:5.3498985962366465e-03, 
-                                        801960000:6.24414427454006e-05, 
-                                        802040000:2.7475463582858147e-03, 
-                                        801980000:4.108325935058038e-03, 
-                                        801990000:6.916609590819954e-03},
-                        'mat:Helium, Natural':{20040000:2.4975599277878773e-05, 
-                                            20030000:4.4414858514189387e-11}}
+    mat_lib, unique_names = partisn._get_material_lib(hdf5, data_hdf5path, nuc_hdf5path)
+    mat_lib_expected = {'MERCURY1': {802020000:1.2060451913893048e-02, 
+                                     802000000:9.423512145483618e-03,
+                                     802010000:5.3498985962366465e-03, 
+                                     801960000:6.24414427454006e-05, 
+                                     802040000:2.7475463582858147e-03, 
+                                     801980000:4.108325935058038e-03, 
+                                     801990000:6.916609590819954e-03},
+                        'HELIUMNA':{20040000:2.4975599277878773e-05, 
+                                    20030000:4.4414858514189387e-11}}
+    expected_unique_names = {'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury':'MERCURY1'}
+    assert(unique_names == expected_unique_names)
     assert(mat_lib == mat_lib_expected)
 
 
@@ -85,9 +89,10 @@ def test_nucid_to_xs_with_names():
     nuc_names[10010000] = 'h1'
     nuc_names[80160000] = 'o16'
     
-    mat_xs_names_expected = {'M1': {'cu63': 0.058, 'cu65': 0.026}, 
-                            'M2': {'h1': 0.067, 'o16': 0.033}}
+    mat_xs_names_expected = {'mat:M1': {'cu63': 0.058, 'cu65': 0.026}, 
+                            'mat:M2': {'h1': 0.067, 'o16': 0.033}}
     mat_xs_names = partisn._nucid_to_xs(mat_lib, nuc_names = nuc_names)
+    print(mat_xs_names)
     assert(mat_xs_names == mat_xs_names_expected)
 
     
@@ -96,8 +101,8 @@ def test_nucid_to_xs_no_names():
     """
     mat_lib = {'mat:M1': {290630000: 0.058, 290650000: 0.026}, 
             'mat:M2': {10010000: 0.067, 80160000: 0.033}}
-    mat_xs_names_expected = {'M1': {u'Cu63': 0.058, u'Cu65': 0.026}, 
-                            'M2': {u'H1': 0.067, u'O16': 0.033}}
+    mat_xs_names_expected = {'mat:M1': {u'Cu63': 0.058, u'Cu65': 0.026}, 
+                            'mat:M2': {u'H1': 0.067, u'O16': 0.033}}
     mat_xs_names = partisn._nucid_to_xs(mat_lib)
     assert(mat_xs_names == mat_xs_names_expected)
 
@@ -196,14 +201,15 @@ def get_zones_no_void():
     grid = True
     dg = None
     
-    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg)    
+    unique_names = {'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury':'MERCURY1'}
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names)    
 
     voxel_zones_expected = np.array([[1, 1, 1, 1],
                                     [2, 2, 2, 2],
                                     [3, 3, 3, 3]])
-    zones_expected = {1:{'vol_frac':[1.0], 'mat':[u'HeliumNatural']}, 
-                    2:{'vol_frac':[0.5, 0.5], 'mat':[u'HeliumNatural', u'Mercury']}, 
-                    3:{'vol_frac':[1.0], 'mat':[u'Mercury']}}
+    zones_expected = {1:{'vol_frac':[1.0], 'mat':[u'HELIUMNA']}, 
+                    2:{'vol_frac':[0.5, 0.5], 'mat':[u'HELIUMNA', u'MERCURY1']}, 
+                    3:{'vol_frac':[1.0], 'mat':[u'MERCURY1']}}
     
     vz_tf = False
     z_tf = False
@@ -250,16 +256,17 @@ def get_zones_with_void():
     grid = True
     dg = None
     
-    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg)
+    unique_names = {'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury':'MERCURY1'}
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names)
     
     # expected results
     voxel_zones_expected = np.array([[1, 1, 1, 1],
                                     [2, 2, 2, 2],
                                     [3, 3, 3, 3],
                                     [0, 0, 0, 0]])
-    zones_expected = {1:{'vol_frac':[1.0], 'mat':[u'HeliumNatural']}, 
-                    2:{'vol_frac':[0.5, 0.5], 'mat':[u'HeliumNatural', u'Mercury']}, 
-                    3:{'vol_frac':[1.0], 'mat':[u'Mercury']}}
+    zones_expected = {1:{'vol_frac':[1.0], 'mat':[u'HELIUMNA']}, 
+                    2:{'vol_frac':[0.5, 0.5], 'mat':[u'HELIUMNA', u'MERCURY1']}, 
+                    3:{'vol_frac':[1.0], 'mat':[u'MERCURY1']}}
     
     vz_tf = False
     z_tf = False
@@ -523,7 +530,7 @@ def write_partisn_input_options():
         
         
 def test_write_partisn_input_options():
-    """Test full input file creation for 1D case with a names_dict provided
+    """Test full input file creation for 1D case with lot of key work args
     """
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_options)
@@ -539,22 +546,6 @@ def test_format_repeated_vector():
     string = partisn.format_repeated_vector(vector)
 
     assert(string == string_expected)
-
-
-def test_strip_mat_name():
-    """Test the strip_mat_name function.
-    """
-    name = 'mat:Helium, Natural'
-    mat_name_expected = 'HeliumNatural'
-    mat_name = partisn.strip_mat_name(name)
-    
-    assert(mat_name_expected == mat_name)
-
-    name = 'mat:Helium/rho:1E-5'
-    mat_name_expected = 'Helium_1E-5'
-    mat_name = partisn.strip_mat_name(name)
-    
-    assert(mat_name_expected == mat_name)
 
 
 def test_mesh_to_isotropic_source():
