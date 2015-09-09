@@ -252,24 +252,24 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
     # unstructured meshes are not adversely affected. 
-    geometry = "geometry rectangular\n\n"
+    geometry = 'geometry rectangular\n\n'
 
     # Create three strings in order to create all ALARA input blocks in a
     # single mesh iteration.
-    volume = "volume\n" # volume input block
-    mat_loading = "mat_loading\n" # material loading input block
-    mixture = "" # mixture blocks
+    volume = 'volume\n' # volume input block
+    mat_loading = 'mat_loading\n' # material loading input block
+    mixture = '' # mixture blocks
 
     unique_mixtures = []
     for i, mat, ve in mesh:
-        volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
+        volume += '    {0: 1.6E}    zone_{1}\n'.format(mesh.elem_volume(ve), i)
 
         ve_mixture = {}
         for row in cell_fracs[cell_fracs['idx'] == i]:
             cell_mat = cell_mats[row['cell']]
             name = cell_mat.metadata['name']
             if _is_void(name):
-                name = "mat_void"
+                name = 'mat_void'
             if name not in ve_mixture.keys():
                 ve_mixture[name] = np.round(row['vol_frac'], sig_figs)
             else:
@@ -277,23 +277,23 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
 
         if ve_mixture not in unique_mixtures:
             unique_mixtures.append(ve_mixture)
-            mixture += "mixture mix_{0}\n".format(
+            mixture += 'mixture mix_{0}\n'.format(
                                            unique_mixtures.index(ve_mixture))
             for key, value in ve_mixture.items():
-                mixture += "    material {0} 1 {1}\n".format(key, value)
+                mixture += '    material {0} 1 {1}\n'.format(key, value)
 
-            mixture += "end\n\n"
+            mixture += 'end\n\n'
 
-        mat_loading += "    zone_{0}    mix_{1}\n".format(i, 
+        mat_loading += '    zone_{0}    mix_{1}\n'.format(i, 
                         unique_mixtures.index(ve_mixture))
 
-    volume += "end\n\n"
-    mat_loading += "end\n\n"
+    volume += 'end\n\n'
+    mat_loading += 'end\n\n'
 
     with open(geom_file, 'w') as f:
         f.write(geometry + volume + mat_loading + mixture)
     
-    matlib = "" # ALARA material library string
+    matlib = '' # ALARA material library string
 
     printed_mats = []
     for mat in cell_mats.values():
@@ -303,15 +303,15 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
             continue
         if name not in printed_mats:
             printed_mats.append(name)
-            matlib += "{0}    {1: 1.6E}    {2}\n".format(name, mat.density,
+            matlib += '{0}    {1: 1.6E}    {2}\n'.format(name, mat.density,
                                                          len(mat.comp))
             for nuc, comp in mat.comp.iteritems():
-                matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), 
+                matlib += '{0}    {1: 1.6E}    {2}\n'.format(alara(nuc), 
                                                       comp*100.0, znum(nuc))
-            matlib += "\n"
+            matlib += '\n'
 
     if print_void:
-       matlib += "# void material\nmat_void 0.0 1\nhe 1 2\n"
+       matlib += '# void material\nmat_void 0.0 1\nhe 1 2\n'
 
     with open(matlib_file, 'w') as f:
         f.write(matlib)
@@ -320,7 +320,7 @@ def _is_void(name):
     """Private function for determining if a material name specifies void.
     """
     lname = name.lower()
-    return "vacuum" in lname or "void" in lname or "graveyard" in lname
+    return 'vacuum' in lname or 'void' in lname or 'graveyard' in lname
 
 def mesh_to_geom(mesh, geom_file, matlib_file):
     """This function reads the materials of a PyNE mesh object and prints the
