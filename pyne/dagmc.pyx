@@ -684,10 +684,10 @@ def cell_materials(hdf5, **kwargs):
     nucpath = kwargs.get('nucpath', '/nucid')
 
     # void material
-    void_mat = Material({}, density = 0.0, metadata={"name": "void", 
-                                                      "mat_number": 0})
+    void_mat = Material({}, density = 0.0, metadata={'name': 'void', 
+                                                      'mat_number': 0})
     # strings that specify that a region is void
-    void_names = ["vacuum", "graveyard", "void"]
+    void_names = ['vacuum', 'graveyard', 'void']
 
     ml = MaterialLibrary()
     ml.from_hdf5(hdf5, datapath=datapath, nucpath=nucpath)
