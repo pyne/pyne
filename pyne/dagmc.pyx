@@ -661,7 +661,7 @@ def cell_material_assignments(hdf5):
 
 def cell_materials(hdf5, **kwargs):
     """Obtain a material object for each cell in a DAGMC material-laden
-    geometry, tagged in UWUW format, i.e. "mat:<name>/rho:<density>" or
+    geometry, tagged in UWUW format [1], i.e. "mat:<name>/rho:<density>" or
     "mat:<name>".
     
     Parameters:
@@ -677,8 +677,9 @@ def cell_materials(hdf5, **kwargs):
     --------
     cell_mats : dict
         Dictionary that maps cells numbers to PyNE Material objects. 
+
+    [1] http://svalinn.github.io/DAGMC/usersguide/uw2.html
     """
-    
     datapath = kwargs.get('datapath', '/materials')
     nucpath = kwargs.get('nucpath', '/nucid')
 
