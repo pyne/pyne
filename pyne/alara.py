@@ -271,9 +271,9 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
             if _is_void(name):
                 name = "mat_void"
             if name not in ve_mixture.keys():
-                ve_mixture[name] = round(row['vol_frac'], sig_figs)
+                ve_mixture[name] = np.round(row['vol_frac'], sig_figs)
             else:
-                ve_mixture[name] += round(row['vol_frac'], sig_figs)
+                ve_mixture[name] += np.round(row['vol_frac'], sig_figs)
 
         if ve_mixture not in unique_mixtures:
             unique_mixtures.append(ve_mixture)
@@ -319,12 +319,8 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
 def _is_void(name):
     """Private function for determining if a material name specifies void.
     """
-    if "vacuum" in name.lower() or "void" in name.lower() \
-        or "graveyard" in name.lower():
-        return True
-    else:
-       return False
-    
+    lname = name.lower()
+    return "vacuum" in lname or "void" in lname or "graveyard" in lname
 
 def mesh_to_geom(mesh, geom_file, matlib_file):
     """This function reads the materials of a PyNE mesh object and prints the
