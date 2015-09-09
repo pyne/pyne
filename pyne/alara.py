@@ -296,6 +296,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
     matlib = '' # ALARA material library string
 
     printed_mats = []
+    print_void = False
     for mat in cell_mats.values():
         name = mat.metadata['name']
         if _is_void(name):
