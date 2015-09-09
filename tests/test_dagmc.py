@@ -605,6 +605,8 @@ def cell_material_assignments():
 def test_cell_material_assignments():
     """Test cell_material_assigments().
     """
+    if not HAVE_IMESH:
+        raise SkipTest
     p = multiprocessing.Pool()
     r = p.apply_async(cell_material_assignments)
     p.close()
@@ -634,6 +636,8 @@ def cell_materials():
 def test_cell_materials():
     """Test cell_materials().
     """
+    if not HAVE_IMESH:
+        raise SkipTest
     p = multiprocessing.Pool()
     r = p.apply_async(cell_materials)
     p.close()
