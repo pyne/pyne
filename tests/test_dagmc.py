@@ -591,11 +591,9 @@ def test_cells_at_ve_centers():
     assert_array_equal(cells, [2, 3])
 
 def cell_material_assignments():
-    """Test 
-    """
     from pyne import dagmc
-    path = os.path.join(os.path.dirname(__file__), "files_test_dagmc", 
-                        "three_blocks.h5m")
+    path = os.path.join(os.path.dirname(__file__), 'files_test_dagmc', 
+                        'three_blocks.h5m')
     c = dagmc.cell_material_assignments(path)
     r = []
     r.append(c[1] == 'mat:m1/rho:1.0')
@@ -605,7 +603,7 @@ def cell_material_assignments():
     return np.all(r)
 
 def test_cell_material_assignments():
-    """Test.
+    """Test cell_material_assigments().
     """
     p = multiprocessing.Pool()
     r = p.apply_async(cell_material_assignments)
@@ -614,29 +612,27 @@ def test_cell_material_assignments():
     assert_true(r.get())
 
 def cell_materials():
-    """Test 
-    """
     from pyne import dagmc
-    path = os.path.join(os.path.dirname(__file__), "files_test_dagmc", 
-                        "three_blocks.h5m")
+    path = os.path.join(os.path.dirname(__file__), 'files_test_dagmc', 
+                        'three_blocks.h5m')
     c = dagmc.cell_materials(path)
     r = []
     r.append(c[1].comp == {10010000: 1.0})
     r.append(c[1].density == 1.0)
-    r.append(c[1].metadata["name"] == "mat:m1/rho:1.0")
+    r.append(c[1].metadata['name'] == 'mat:m1/rho:1.0')
     r.append(c[2].comp == {20040000: 1.0})
     r.append(c[2].density == 2.0)
-    r.append(c[2].metadata["name"] == "mat:m2")
+    r.append(c[2].metadata['name'] == 'mat:m2')
     r.append(c[3].comp == {20040000: 1.0})
     r.append(c[3].density == 3.0)
-    r.append(c[3].metadata["name"] == "mat:m2/rho:3.0")
+    r.append(c[3].metadata['name'] == 'mat:m2/rho:3.0')
     r.append(c[6].comp == {})
     r.append(c[6].density == 0)
-    r.append(c[6].metadata["name"] == "void")
+    r.append(c[6].metadata['name'] == 'void')
     return np.all(r)
 
 def test_cell_materials():
-    """Test.
+    """Test cell_materials().
     """
     p = multiprocessing.Pool()
     r = p.apply_async(cell_materials)
