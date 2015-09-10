@@ -3,16 +3,25 @@ import ConfigParser
 
 from pyne.dagmc import cell_materials
 from pyne.r2s import irradiation_setup, photon_sampling_setup
+from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh
 
 config_filename = 'config.ini'
 alara_params_filename = 'alara_params.txt'
 
 config = \
-"""[step1]
-# Path to MCNP MESHTAL file containing neutron fluxes
+"""[general]
+# Specify whether this problem uses structured or unstructured mesh
+structured: True
+
+[step1]
+# Path to MCNP MESHTAL file containing neutron fluxes or a DAG-MCNP5
+# unstructured mesh tally .h5m file.
 meshtal: meshtal
 # Tally number within the meshtal file containing the fluxes for activation.
 tally_num: 4
+# The name of tag used to store flux data on the mesh. For unstructured mesh,
+# this tag must already exist within the file specified in <meshtal>.
+flux_tag: n_flux
 # Path to the DAGMC material-laden geometry.
 geom: geom.h5m
 reverse: True
@@ -78,8 +87,16 @@ def step1():
     config = ConfigParser.ConfigParser()
     config.read(config_filename)
 
+    structured = config.get('general', 'structured')
     meshtal = config.get('step1', 'meshtal')
     tally_num = config.get('step1', 'tally_num')
+    flux_tag = config.get('step1', 'flux_tag')
+    if structured:
+        meshtal = Meshtal(meshtal,
+                        {tally_num: (flux_tag, flux_tag + "_err",
+                                     flux_tag + "_total",
+                                     flux_tag + "_err_total")},
+                        meshes_have_mats=False)
     geom = config.get('step1', 'geom')
     reverse = config.get('step1', 'reverse')
     num_rays = config.get('step1', 'num_rays')
@@ -88,16 +105,30 @@ def step1():
     cell_mats = cell_materials(geom)
     irradiation_setup(meshtal, cell_mats, alara_params_filename, tally_num,
                       num_rays=num_rays, grid=grid, reverse=reverse)
-  
+
+    # create a blank mesh for step 2:
+    ves = list(my_mesh.iter_ve())
+    for tag in my_mesh.mesh.getAlls lTags(ves[0]):
+        meshtal.mesh.destroyTag(tag, True)
+    meshtal.mesh.save("blank_mesh.h5m")
+    print("The file blank_mesh.h5m has been saved to disk.")
+    print("Do not delete this file; it is needed by r2s.py step2.\n")
+        
     print("R2S step1 complete, run ALARA with the command:")
     print(">> alara alara_inp > output.txt")
 
 def step2():
     config = ConfigParser.ConfigParser()
     config.read(config_filename)
-
+    structured = config.get('general', 'structured')
     decay_times = config.get('step2', 'decay_times')
-    print(decay_times)
+
+    for i, dc in enumerate(decay_times):
+        mesh = Mesh(structured=structured, mesh="blank_mesh.h5m")
+        tags = {("TOTAL", dc): 'src'}
+        photon_source_hdf5_to_mesh(mesh, h5_file1, tags)
+        mesh.mesh.save("source_{0}.h5m".format(i+1))
+    print("R2S step2 complete.")
 
 def main():
 
