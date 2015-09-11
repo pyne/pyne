@@ -116,7 +116,7 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
         The output of pyne.dagmc.discretize_geom(). Use this input option if 
         discretize_geom() has already been run, to avoid duplicating this
         expensive step.
-    find_per_coarse : int, optional, default = 1
+    fine_per_coarse : int, optional, default = 1
         The number of fine mesh intervals per coarse mesh interval.
     data_hdf5path : string, optional, default = /materials
         the path in the heirarchy to the data table in an HDF5 file.
