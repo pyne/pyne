@@ -27,7 +27,7 @@ function find_cell() result(icl_tmp)
     icl_tmp = -1
 
     do i = 1, mxa
-      call chkcel(i, 2., j)
+      call chkcel(i, 2, j)
       if (j .eq. 0) then
          ! valid cel set
          icl_tmp = i
