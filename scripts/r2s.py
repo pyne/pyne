@@ -23,30 +23,30 @@ structured: True
 meshtal: meshtal
 # Tally number within the meshtal file containing the fluxes for activation.
 tally_num: 4
-# The name of tag used to store flux data on the mesh. For unstructured mesh,
-# this tag must already exist within the file specified in <meshtal>.
+# The name of the tag used to store flux data on the mesh. For unstructured
+# mesh this tag must already exist within the file specified in <meshtal>.
 flux_tag: n_flux
-# Path to the DAGMC material-laden geometry.
+# Path to the DAGMC material-laden geometry file (.h5m).
 geom: geom.h5m
 # If True the fluxes in the fluxin file will be printed in the reverse
 # order of how they appear within the flux vector tag. Since MCNP and
 # the Meshtal class order fluxes from low energy to high energy, this
 # option should be true if the transmutation data being used is
-# ordered from high energy to low energy.
+# ordered from high-energy to low-energy.
 reverse: True
 # Number of rays to fire down each mesh row in each direction to calculate
-# cell volume fractions
+# cell volume fractions.
 num_rays: 10
 # If true, rays will be fired down mesh rows in evenly spaced intervals.
-# In this case num_rays must be a perfect square. If false, rays are fired
+# In this case <num_rays> must be a perfect square. If false, rays are fired
 # down mesh rows in random intervals.
 grid: False
 
 [step2]
-# List of decays times, seperated by commas. These strings much match exactly with
-# their counterparts in the phtn_src file produced in step1, seperated by commas.
-# No spaces should appear in this line except the space between the time and the
-# unit for each entry.
+# List of decays times, seperated by commas. These strings much match exactly 
+# with their counterparts in the phtn_src file produced in step1. No spaces 
+# should appear in this line except the space between the time and the time unit
+# for each entry.
 decay_times:1E3 s,12 h,3.0 d 
 """
 
@@ -107,9 +107,9 @@ def step1():
     flux_tag = config.get('step1', 'flux_tag')
     if structured:
         meshtal = Meshtal(meshtal,
-                        {tally_num: (flux_tag, flux_tag + "_err",
-                                     flux_tag + "_total",
-                                     flux_tag + "_err_total")},
+                        {tally_num: (flux_tag, flux_tag + '_err',
+                                     flux_tag + '_total',
+                                     flux_tag + '_err_total')},
                         meshes_have_mats=False)
     geom = config.get('step1', 'geom')
     reverse = config.getboolean('step1', 'reverse')
@@ -126,12 +126,12 @@ def step1():
     ves = list(mesh.iter_ve())
     for tag in mesh.mesh.getAllTags(ves[0]):
         mesh.mesh.destroyTag(tag, True)
-    mesh.mesh.save("blank_mesh.h5m")
-    print("The file blank_mesh.h5m has been saved to disk.")
-    print("Do not delete this file; it is needed by r2s.py step2.\n")
+    mesh.mesh.save('blank_mesh.h5m')
+    print('The file blank_mesh.h5m has been saved to disk.')
+    print('Do not delete this file; it is needed by r2s.py step2.\n')
         
-    print("R2S step1 complete, run ALARA with the command:")
-    print(">> alara alara_inp > output.txt")
+    print('R2S step1 complete, run ALARA with the command:')
+    print('>> alara alara_inp > output.txt')
 
 def step2():
     config = ConfigParser.ConfigParser()
@@ -139,29 +139,31 @@ def step2():
     structured = config.getboolean('general', 'structured')
     decay_times = config.get('step2', 'decay_times').split(',')
 
-    h5_file = "phtn_src.h5"
+    h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
-        photon_source_to_hdf5("phtn_src")
+        photon_source_to_hdf5('phtn_src')
     for i, dc in enumerate(decay_times):
-        print("Writing source for decay time: {0}".format(dc)
-        mesh = Mesh(structured=structured, mesh="blank_mesh.h5m")
-        tags = {("TOTAL", dc): 'src'}
+        print('Writing source for decay time: {0}'.format(dc))
+        mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
+        tags = {('TOTAL', dc): 'source_density'}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags)
-        mesh.mesh.save("source_{0}.h5m".format(i+1))
-    print("R2S step2 complete.")
+        mesh.mesh.save('source_{0}.h5m'.format(i+1))
+    print('R2S step2 complete.')
 
 def main():
 
-    r2s_help = ""
-    setup_help = ""
-    step1_help = ""
-    step2_help = ""
+    r2s_help = ('This script automates the process of preforming Rigorous Two-\n'
+                'Step (R2S) analysis using DAG-MCNP5 and the ALARA activation code.')
+    setup_help = ('Prints the files "config.ini" and "alara_params.txt, to be\n'
+                  'filled in by the user.\n')
+    step1_help = 'Creates the necessary files for running ALARA.'
+    step2_help = 'Creates mesh-based photon sources for photon transport.'
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help=r2s_help, dest='command')
 
-    setup_parser = subparsers.add_parser("setup", help=setup_help)
-    step1_parser = subparsers.add_parser("step1", help=step1_help)
-    step2_parser = subparsers.add_parser("step2", help=step2_help)
+    setup_parser = subparsers.add_parser('setup', help=setup_help)
+    step1_parser = subparsers.add_parser('step1', help=step1_help)
+    step2_parser = subparsers.add_parser('step2', help=step2_help)
 
     args, other = parser.parse_known_args()
     if args.command == 'setup':
