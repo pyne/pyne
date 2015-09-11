@@ -47,7 +47,10 @@ grid: False
 # with their counterparts in the phtn_src file produced in step1. No spaces 
 # should appear in this line except the space between the time and the time unit
 # for each entry.
-decay_times:1E3 s,12 h,3.0 d 
+decay_times:1E3 s,12 h,3.0 d
+# The prefix of the .h5m files containing the source density distributations for
+# each decay time.
+output: source
 """
 
 alara_params =\
@@ -138,6 +141,7 @@ def step2():
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
     decay_times = config.get('step2', 'decay_times').split(',')
+    output = config.get('step2', 'output')
 
     h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
@@ -147,7 +151,7 @@ def step2():
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
         tags = {('TOTAL', dc): 'source_density'}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags)
-        mesh.mesh.save('source_{0}.h5m'.format(i+1))
+        mesh.mesh.save('{0}_{1}.h5m'.format(output, i+1))
     print('R2S step2 complete.')
 
 def main():
