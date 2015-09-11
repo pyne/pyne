@@ -13,6 +13,7 @@ UWUW::UWUW()
 UWUW::UWUW(char* file) 
 {
   std::string filename(file);
+
   // turn the filename into a full filepath
   full_filepath = get_full_filepath(filename);
 
@@ -64,8 +65,10 @@ std::string UWUW::get_full_filepath(char *filename)
 // convert convert a filename into path+filename (for pyne)
 std::string UWUW::get_full_filepath(std::string filename)
 {
+  // remove all extra whitespace
+  filename.erase(std::remove(filename.begin(), filename.end(),' '), filename.end());
   // use stdlib call
-  char* full_filepath = realpath(filename.c_str(),NULL);
+  const char* full_filepath = realpath(filename.c_str(),NULL);
   return std::string(full_filepath);
 }
 
