@@ -168,7 +168,7 @@ def main():
     args, other = parser.parse_known_args()
     if args.command == 'setup':
         setup()
-    if args.command == 'step1':
+    elif args.command == 'step1':
         step1()
     elif args.command == 'step2':
         step2()
