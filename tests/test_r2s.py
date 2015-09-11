@@ -31,8 +31,8 @@ def irradiation_setup_structured():
 
     meshtal = os.path.join(thisdir, "files_test_r2s", "meshtal_2x2x1")
     tally_num = 4
-    cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'mat_number': 11}),
-                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'mat_number':12})}
+    cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name': 'mat_11'}),
+                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name': 'mat_12'})}
     alara_params = "Bogus line for testing\n" 
     geom = os.path.join(thisdir, "unitbox.h5m")
     num_rays = 9
@@ -160,8 +160,8 @@ def irradiation_setup_unstructured():
     meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
     meshtal.mesh.save(meshtal_mesh_file)
 
-    cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'mat_number':11}),
-                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'mat_number':12})}
+    cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name':'mat_11'}),
+                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name':'mat_12'})}
     alara_params = "Bogus line for testing\n" 
     geom = os.path.join(thisdir, "unitbox.h5m")
     flux_tag = "n_flux"
