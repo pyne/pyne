@@ -64,24 +64,9 @@ std::string UWUW::get_full_filepath(char *filename)
 // convert convert a filename into path+filename (for pyne)
 std::string UWUW::get_full_filepath(std::string filename)
 {
-  // if we do not find ".." it is not a relative path
-  // and we do find "/" then assume its an absolute path
-  if((filename.find("..") == std::string::npos) && (filename.find("/") != std::string::npos)) {
-    // path is already absolute just return it
-    return filename;
-  }
-
-  char *current_dir = get_current_dir_name(); //current working dir needed for pyne load 
-                                        
-  std::string cwd(current_dir), file(filename);   // pyne needs absolute path
-
-  std::string full_filepath = cwd + '/' + file;
-
-  // get rid of all trailing white space
-  full_filepath.erase(std::remove_if( full_filepath.begin(),
-				      full_filepath.end(), ::isspace),
-                                      full_filepath.end());    
-  return full_filepath;
+  // use stdlib call
+  char* full_filepath = realpath(filename.c_str(),NULL);
+  return std::string(full_filepath);
 }
 
 // see if file exists
