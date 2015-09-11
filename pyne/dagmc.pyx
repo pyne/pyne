@@ -12,6 +12,7 @@ import numpy as np
 from pyne cimport cpp_dagmc_bridge
 from pyne.mesh import Mesh
 from numpy.linalg import norm
+from pyne.material import Material, MaterialLibrary
 np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
@@ -658,6 +659,49 @@ def cell_material_assignments(hdf5):
                         
     return mat_assigns
 
+def cell_materials(hdf5, **kwargs):
+    """Obtain a material object for each cell in a DAGMC material-laden
+    geometry, tagged in UWUW format [1], i.e. "mat:<name>/rho:<density>" or
+    "mat:<name>".
+    
+    Parameters:
+    -----------
+    hdf5 : string
+        Path to hdf5 material-laden geometry
+    datapath: str, optional, default ='/materials',
+        The path in the heirarchy to the material data table in the HDF5 file.
+    nucpath, str, optional, default='/nucid'
+        The path in the heirarchy to the nuclide array in the HDF5 file.
+    
+    Returns:
+    --------
+    cell_mats : dict
+        Dictionary that maps cells numbers to PyNE Material objects. 
+
+    [1] http://svalinn.github.io/DAGMC/usersguide/uw2.html
+    """
+    datapath = kwargs.get('datapath', '/materials')
+    nucpath = kwargs.get('nucpath', '/nucid')
+
+    # void material
+    void_mat = Material({}, density = 0.0, metadata={'name': 'void', 
+                                                      'mat_number': 0})
+    # strings that specify that a region is void
+    void_names = ['vacuum', 'graveyard', 'void']
+
+    ml = MaterialLibrary()
+    ml.from_hdf5(hdf5, datapath=datapath, nucpath=nucpath)
+    mat_assigns = cell_material_assignments(hdf5)
+    cell_mats = {}
+    for cell_num, mat_name in mat_assigns.items():
+        if cell_num is None:
+            continue 
+        elif np.any([x in mat_name.lower() for x in void_names]):
+            cell_mats[cell_num] = void_mat
+        else:
+            cell_mats[cell_num] = ml[mat_name]
+
+    return cell_mats
 
 def find_implicit_complement():
     """Find the implicit complement and return the volume id.
