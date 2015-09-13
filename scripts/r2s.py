@@ -157,7 +157,9 @@ def step2():
 def main():
 
     r2s_help = ('This script automates the process of preforming Rigorous Two-\n'
-                'Step (R2S) analysis using DAG-MCNP5 and the ALARA activation code.')
+                'Step (R2S) analysis using DAG-MCNP5 and the ALARA activation code.\n'
+                'Infomation on how to use this script can be found at:\n'
+                'http://pyne.io/usersguide/r2s.html\n')
     setup_help = ('Prints the files "config.ini" and "alara_params.txt, to be\n'
                   'filled in by the user.\n')
     step1_help = 'Creates the necessary files for running ALARA.'
