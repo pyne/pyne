@@ -436,7 +436,7 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names):
     else:
         km = 1
 
-    n=0
+    n = 0
     zones_formatted = np.zeros(shape=(jm*km, im), dtype=int)
     for i in range(im):
         temp = np.zeros(shape=(jm*km), dtype=int)
