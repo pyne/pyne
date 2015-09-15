@@ -436,13 +436,18 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names):
     else:
         km = 1
 
-    n = 0
+    n=0
     zones_formatted = np.zeros(shape=(jm*km, im), dtype=int)
     for i in range(im):
+        temp = np.zeros(shape=(jm*km), dtype=int)
         for jk in range(jm*km):
-            zones_formatted[jk, i] = voxel_zone[n]
+            temp[jk] = voxel_zone[n]
             n += 1
-    
+        temp = np.reshape(temp, (jm, km))
+        temp = np.transpose(temp)
+        temp = np.reshape(temp, jm*km)
+        zones_formatted[:, i] = temp
+
     return zones_formatted, zones_novoid
     
 
@@ -897,8 +902,10 @@ def isotropic_vol_source(geom, mesh, cells, spectra, intensities, **kwargs):
     intensities = {cell: inten for cell, inten in zip(cells, intensities)}
 
     # ray trace
-    dagmc.load(geom)
-    dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
+    dg = kwargs.get('dg', None)
+    if dg is None:
+        dagmc.load(geom)
+        dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
 
     # determine  source intensities
     data = np.zeros(shape=(len(mesh), len(spectra[0])))
