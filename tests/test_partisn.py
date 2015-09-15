@@ -231,6 +231,53 @@ def test_get_zones_no_void():
     p.join()
     assert(r.get() == [True, True])
 
+def get_zones_iteration_order():
+    """Test that _get_zones function gives results in zyx order.
+    """
+    # hdf5 test file
+    THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+    hdf5 = THIS_DIR + '/files_test_partisn/fractal_box.h5m'
+    data_hdf5path = '/materials'
+    nuc_hdf5path = '/nucid'
+    
+    # Load dagmc geometry
+    from pyne import dagmc
+    dagmc.load(hdf5)
+    
+    bounds = [-5., 0., 5.]
+    sc = [bounds]*3
+    mesh=Mesh(structured_coords=sc, structured=True)
+    bounds = {'x':bounds, 'y':bounds, 'z':bounds}
+    num_rays = 9
+    grid = True
+    dg = None
+    unique_names = {'mat:m1': 'M1', 'mat:m2': 'M2', 'mat:m3': 'M3', 'mat:m4':'M4'}
+
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names)    
+
+    voxel_zones_expected = np.array([[1, 2],
+                                     [1, 4],
+                                     [1, 3],
+                                     [1, 4]])
+    zones_expected = {1:{'vol_frac':[1.0], 'mat':['M2']}, 
+                      2:{'vol_frac':[1.0], 'mat':['M4']},
+                      3:{'vol_frac':[1.0], 'mat':['M1']},
+                      4:{'vol_frac':[1.0], 'mat':['M3']}}
+    
+    vz_tf = voxel_zones.all() == voxel_zones_expected.all()
+    z_tf = zones == zones_expected
+    return [vz_tf, z_tf]
+
+
+def test_get_zones_iteration_order():
+    """Test that _get_zones function gives results in zyx order.
+    """
+    p = multiprocessing.Pool()
+    r = p.apply_async(get_zones_iteration_order)
+    p.close()
+    p.join()
+    assert(r.get() == [True, True])
+
     
 def get_zones_with_void():
     """Test the _get_zones function if a void is present.
