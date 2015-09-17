@@ -1482,7 +1482,7 @@ C              IF(ABS(DSS) .LE. EPS*ABS(SS))RETURN                      03 00450
            S(J+1)=S(J)                                                  03 00480
            H(J+1)=0.25*H(J)                                             03 00490
 100     CONTINUE                                                        03 00500
-        PAUSE 'TOO MANY STEPS --- QROMB'                                03 00510
+C        PAUSE 'TOO MANY STEPS --- QROMB'                                03 00510
         END                                                             03 00520
 C                                                                       04 00010
         SUBROUTINE TRAPZD(FUNC,A,B,S,N)                                 04 00020

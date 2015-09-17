@@ -16,7 +16,7 @@ def path_to_exe(exe_name ):
     exe_path_abs, dp = os.path.split(os.path.abspath(__file__))
     exe_path_abs = os.path.join(exe_path_abs, exe_name)
     exe_path_abs = os.path.join('./',exe_path_abs)
-    print(exe_path_abs)
+    #print(exe_path_abs)
     return exe_path_abs
 
 def alphad(inputdict_unchecked):
@@ -39,13 +39,16 @@ def alphad(inputdict_unchecked):
     report_file = inputdict_unchecked['report_file']
     new_out = inputdict_unchecked['rewrite_input_with_hinderance_factor']
     output_file = 'alphad.out'
-    if(new_out == 'Y'):    
+    if(new_out == 1):    
         output_file = inputdict_unchecked['output_file'] #output file if report = yes
+        print("yes to output file..")
     exe_path = path_to_exe('alphad')
     delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + report_file + '\n'
-    if (new_out):
+    print inp
+    if (new_out == 1):
         inp = inp + 'Y' + '\n' + output_file
+    print inp
     delta_output.stdin.write(inp)
     delta_output.communicate()[0]
     delta_output.stdin.close()
@@ -231,6 +234,7 @@ def seqhst(inputdict_unchecked):
     delta_output.stdin.close()
 
 def logft(inputdict_unchecked):
+    #NOTE: changed input file line length to 90 to support longer file paths
     """
     This function ...
 
@@ -238,10 +242,19 @@ def logft(inputdict_unchecked):
         input_file : input ensdf file
         output file : file for output to be written to (doesn't have to exist)
     """
-    print('Executable not yet linked')
-    #@todo: get path to executable
-    #       call executable
-    #       copy output file to specified out
+    #@todo: check dictionary
+    inputdict = {}
+    input_data_set = inputdict_unchecked['input_data_set']
+    output_report = inputdict_unchecked['output_report']
+    data_table = inputdict_unchecked['data_table']
+    output_data_set = inputdict_unchecked['output_data_set']
+
+    exe_path = path_to_exe('logft')
+    inp = input_data_set + '\n' + output_report + '\n' + data_table + '\n' + output_data_set + '\n'
+    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    delta_output.stdin.write(inp)
+    delta_output.communicate()[0]
+    delta_output.stdin.close()
 
 def pandora(inputdict_unchecked):
     """
@@ -290,3 +303,4 @@ def ruler(inputdict_unchecked):
     delta_output.stdin.write(inp)
     delta_output.communicate()[0]
     delta_output.stdin.close()
+

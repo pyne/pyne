@@ -1,8 +1,7 @@
-import os
+import os, filecmp, numpy
 import nose
 from nose.plugins.skip import Skip, SkipTest
 import pyne
-#try:
 from pyne import ensdf_processing
 #except:
 #  raise SkipTest
@@ -11,15 +10,21 @@ def test_alphad():
     input_dict = {}
     input_dict['input_file'] = 'ensdf_processing/alphad.inp'
     input_dict['report_file'] = 'ensdf_processing/alphad.rpt'
-    input_dict['rewrite_input_with_hinderance_factor'] = 'Y'
+    input_dict['rewrite_input_with_hinderance_factor'] = 1
     input_dict['output_file'] = 'ensdf_processing/alphad.out'
     output_dict = ensdf_processing.alphad(input_dict)
+    print filecmp.cmp('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt')
+
+    d_report = comp_file_with_date_difference('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt',0)
+
 
 def test_delta():
     input_dict = {}
     input_dict['input_file'] = 'ensdf_processing/delta.dat'
     input_dict['output_file'] = 'ensdf_processing/delta.out'
     output_dict = ensdf_processing.delta(input_dict)
+    print filecmp.cmp('ensdf_processing/delta.out','ensdf_processing/compare/delta_ref.rpt')
+    d_report = comp_file_with_date_difference('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt',0)
 
 def test_brick():
     print("not working..")
@@ -75,8 +80,32 @@ def test_seqhst():
     input_dict['sequential_output_file'] = 'ensdf_processing/seqhst_iccseq.dat'
     output_dict = ensdf_processing.seqhst(input_dict)
 
-def test_logft():
-    print("not working")
+def test_logft_functional():
+    input_dict = {}
+    input_dict['input_data_set'] = 'ensdf_processing/logft_data.tst'
+    input_dict['output_report'] = 'ensdf_processing/logft.rpt'
+    input_dict['data_table'] = 'ensdf_processing/logft.dat'
+    input_dict['output_data_set'] = 'ensdf_processing/logft.new'
+    output_dict = ensdf_processing.logft(input_dict)
+    #check output files present?
+
+def test_logft_outputs():
+    input_dict = {}
+    input_dict['input_data_set'] = 'ensdf_processing/logft_data.tst'
+    input_dict['output_report'] = 'ensdf_processing/logft.rpt'
+    input_dict['data_table'] = 'ensdf_processing/logft.dat'
+    input_dict['output_data_set'] = 'ensdf_processing/logft.new'
+    output_dict = ensdf_processing.logft(input_dict)
+    ref_output_report = 'ensdf_processing/compare/logft_ref.rpt'
+    ref_output_data_set = 'ensdf_processing/compare/logft_ref.new'
+    d_report = comp_file_with_date_difference(input_dict['output_report'],ref_output_report,0)
+    d_data = comp_file_with_date_difference(input_dict['output_data_set'], ref_output_data_set,0)
+
+    # It is known that line 5 is the date.  Ignore difference at line 5
+    if(d_report['discrepancy']):
+        print d_report['differences_lines']
+    if(d_data['discrepancy']):
+        print d_data['differences_lines']
 
 def test_pandora():
     print("not working")
@@ -92,19 +121,39 @@ def test_ruler():
     input_dict['assumed_dcc_theory'] = '3'
     output_dict = ensdf_processing.ruler(input_dict)
 
+def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
+    f_out = open(file_out, 'r')
+    f_ref = open(file_ref, 'r')
+    diff_lines = numpy.array([])
 
-#if __name__ == "__main__":
+    line_num = 0
+    for line_out in f_out:
+        line_ref = f_ref.readline()
+        if(line_ref != line_out):
+            print  line_num
+            print '     line_out is: ' + line_out
+            print '     line_ref is: ' + line_ref
+            diff_lines = numpy.append(diff_lines, line_num)
+        line_num = line_num + 1
+
+    diff_dict = {}
+    diff_dict['differences_lines'] = diff_lines
+    return diff_dict
+            
+
+
 #  nose.runmodule()
 if __name__ == "__main__":
     a1 = test_alphad()
-    a = test_delta()
-    b = test_gabs()
-    c = test_gtol()
-    d = test_bldhst()
-    nc = test_hsicc()
-    n = test_hsmrg()
-    l = test_seqhst()
-    # logft test needed
+    #a = test_delta()
+    #b = test_gabs()
+    #c = test_gtol()
+    #d = test_bldhst()
+    #nc = test_hsicc()
+    #n = test_hsmrg()
+    #l = test_seqhst()
+    #z = test_logft_functional()
+    #z = test_logft_outputs()
     # pandora test needed
     # radlist test needed
-    r = test_ruler()
+    #r = test_ruler()
