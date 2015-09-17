@@ -30,12 +30,14 @@ def test_brick():
     print("not working..")
     print("brick only has executable no source..")
 
-def test_gabs():
-    input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/gabs.in'
-    input_dict['output_file'] = 'ensdf_processing/gabs.rpk'
-    input_dict['dataset_file'] = 'ensdf_processing/gabs.dts'
-    output_dict = ensdf_processing.gabs(input_dict)
+#def test_gabs_80Br():
+#    input_dict = {}
+#    input_dict['input_file'] = 'ensdf_processing/gabs_80Br.in'
+#    input_dict['output_file'] = 'ensdf_processing/gabs_80Br.rpt'
+#    input_dict['dataset_file'] = 'ensdf_processing/gabs_80Br.new'
+#    output_dict = ensdf_processing.gabs(input_dict)
+#    d_report1 = comp_file_with_date_difference(input_dict['output_file'],'ensdf_processing/compare/gabs_80Br_ref.rpt',0)
+#    d_report2 = comp_file_with_date_difference(input_dict['dataset_file'],'ensdf_processing/compare/gabs_80Br_ref.new',0)
 
 def test_gtol():
     input_dict = {}
@@ -144,9 +146,9 @@ def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
 
 #  nose.runmodule()
 if __name__ == "__main__":
-    a1 = test_alphad()
+    #a1 = test_alphad()
     #a = test_delta()
-    #b = test_gabs()
+    #b = test_gabs_80Br()
     #c = test_gtol()
     #d = test_bldhst()
     #nc = test_hsicc()

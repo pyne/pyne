@@ -89,7 +89,7 @@ def delta(inputdict_unchecked):
     delta_output.communicate()[0]
     delta_output.stdin.close()
 
-def gabs(inputdict_unchecked):
+#def gabs(inputdict_unchecked):
     """
     This function ...
 
@@ -98,18 +98,18 @@ def gabs(inputdict_unchecked):
         output file : file for output to be written to (doesn't have to exist)
     """
     #@todo: check dictionary
-    inputdict = {}
-    input_file = inputdict_unchecked['input_file']
-    dataset_file = inputdict_unchecked['dataset_file']
-    output_file = inputdict_unchecked['output_file'] #report file << CHANGE BACK TO REPORT..
+#    inputdict = {}
+#    input_file = inputdict_unchecked['input_file']
+#    dataset_file = inputdict_unchecked['dataset_file']
+#    output_file = inputdict_unchecked['output_file'] #report file << CHANGE BACK TO REPORT..
 
     #add option to not get new dataset (currently new dataset is hardprogrammed to yes)
 
-    exe_path = path_to_exe('gabs')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    delta_output.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file )
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+#    exe_path = path_to_exe('gabs')
+#    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+#    delta_output.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file )
+#    delta_output.communicate()[0]
+#    delta_output.stdin.close()
 
 def gtol(inputdict_unchecked):
     """
