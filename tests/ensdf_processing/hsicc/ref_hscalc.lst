@@ -1,0 +1,462 @@
+1PROGRAM  H S I C C  VERSION 11.13f  AS OF 9-Oct-2001 
+
+
+     1: 205TL    205HG B- DECAY                71HI01                   78NDS     780310
+     1:     205TL    205HG B- DECAY                71HI01                   78NDS     780310
+     2:     205HG  P 0            1/2-             5.2 M     1               1538     8     
+     3:     205TL  N 0.022     10           1                                               
+     4:     205TL  L 0            1/2+                                                      
+     5:     205TL  B              96     2              5.27115                             
+     6:     205TL2 B EAV=     542  4$                                                       
+     7:     205TL CB E         SOME APPROXIMATE MEASUREMENTS LISTED IN 71SC35               
+     8:     205TL  L 203.7        3/2+             1.46 NS   8                              
+     9:     205TL CL T         71SH35, 67MA45                                               
+    10:     205TL  G 203.74    3  100       M1+E2    +1.56   15     0.440                   
+    11:     205TL CG E         FROM 72BA53                                                  
+    12:     205TL CG MR        FROM COUL. EX. (73KR02)                                      
+    13:     205TL CG CC        FROM 73KR02                                                  
+    14:     205TL  B              3.1    13           6.5    2                              
+    15:     205TL2 B EAV=     460  4$                                                       
+    16:     205TL1CB IB        ESTIMATED BY 71HI01 TO BE 3.7% 15 BASED ON RATIOS OF         
+    17:     205TL2CB IG(203.7) TO 197HG,203HG IG'S AND CC(203.7)=0.62; IB=3.1% IF CC IS     
+    18:     205TL3CB REDUCED TO 0.44                                                        
+    19:     205TL  L 619.3        5/2+                                                      
+    20:     205TL  B              0.016  7               8.6920                          1U 
+    21:     205TL2 B EAV=     299  3$                                                       
+    22:     205TL  G 415.6     3  0.59   8  (M1)                    0.1691                  
+    23:     205TL  G 618.6     7  0.090  20                                                 
+    24:     205TL CG           RI(618.6)/RI(415.6) IS  AP  TWICE AS LARGE AS IN COUL. EX.   
+    25:     205TL2CG AND (N,N'G)                                                            
+    26:     205TL  L 1140.9      (3/2)+                                                     
+    27:     205TL  B              0.0030 16              7.7424                             
+    28:     205TL2 B EAV=     115  3$                                                       
+    29:     205TL  G 937.2     6  0.093  20                                                 
+    30:     205TL  G 1141.1    15 0.045  20                                                 
+    31:     205TL  L 1218.7       1/2+                                                      
+    32:     205TL  B              0.007  4                7.1 3                             
+    33:     205TL2 B EAV=    90.0 25$                                                       
+    34:     205TL  G 1014.7    8  0.031  10                                                 
+    35:     205TL  G 1218.7    4  0.28   5                                                  
+    36:     205TL  L 1340.3       (3/2)+                                                    
+    37:     205TL  B              0.006  3               6.4723                             
+    38:     205TL2 B EAV=    53.4 24$                                                       
+    39:     205TL  G 720.8     8  0.051  15                                                 
+    40:     205TL  G 1136.8    6  0.21   5                                                  
+    41:     205TL  G 1340.3    8  0.015  5                                                  
+    42:     205TL  L 1433.9      (1/2,3/2)                                                  
+    43:     205TL  B              0.0049 25              5.6925                             
+    44:     205TL2 B EAV=    27.1 22$                                                       
+    45:     205TL  G 1230.8    10 0.023  10                                                 
+    46:     205TL  G 1433.9    5  0.20   5                                                  
+    47:                                                                                     
+
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 203.74    KEV; MULT.=  M1+E2         13-Nov-2001
+
+                    M1            E2            MIXED ICC    DICC(+DMR)    DICC(-DMR)
+                                                  MR=+1.56   15    
+
+                  -----------   -----------   -----------   -----------   -----------
+
+
+        K          9.702E-01     1.637E-01     3.986E-01    -2.936E-02     3.502E-02
+ 
+        L1         1.488E-01     2.207E-02     5.897E-02    -4.612E-03     5.501E-03
+        L2         1.507E-02     9.125E-02     6.906E-02     2.773E-03    -3.308E-03
+        L3         1.179E-03     5.468E-02     3.910E-02     1.948E-03    -2.323E-03
+
+
+  TOTAL-L          1.650E-01     1.680E-01     1.671E-01     1.083E-04    -1.291E-04
+      K/L           5.88          0.97          2.38
+  K+1.33L          1.190E+00     3.872E-01     6.209E-01    -2.921E-02     3.485E-02
+ 
+        M1         3.439E-02     5.177E-03     1.369E-02    -1.063E-03     1.268E-03
+        M2         3.888E-03     2.338E-02     1.771E-02     7.097E-04    -8.465E-04
+        M3         3.062E-04     1.461E-02     1.044E-02     5.207E-04    -6.210E-04
+        M4         9.911E-06     1.698E-04     1.232E-04     5.819E-06    -6.941E-06
+        M5         6.689E-06     1.104E-04     8.019E-05     3.775E-06    -4.503E-06
+
+
+  TOTAL-M          3.860E-02     4.345E-02     4.204E-02     1.765E-04    -2.105E-04
+      M/L           0.23          0.26          0.25
+ K+L+1.33M         1.187E+00     3.895E-01     6.216E-01    -2.901E-02     3.461E-02
+
+
+ N+O+ FROM
+ DRAGOUN           1.243E-02     1.395E-02     1.351E-02     5.560E-05    -6.632E-05
+
+
+
+ K+L+M+NO+         1.186E+00     3.891E-01     6.213E-01    -2.902E-02     3.461E-02
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+                     COMPARE OLD/NEW CARDS
+    10: 205TL  G 203.74    3  100       M1+E2    +1.56   15     0.440                   
++                                                                                          OLD CARD
+    10: 205TL  G 203.74    3  100       M1+E2    +1.56   15      0.62  4                
+  Changing 0.16713 13 to 0.167   due to 3% uncer in theory
+  Changing 0.04204 21 to 0.0420  2 due to 3% uncer in theory
+  Changing 0.01351  7 to 0.0135  1 due to 3% uncer in theory
+    10: 205TLS G KC=0.40 4$LC=0.167$MC=0.0420 2$NC+=0.0135 1                            
+    10:                                                                                 
++                                                                                          NO OLD SECOND CARD
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 415.6     KEV; MULT.=  (M1)          13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          1.134E-02     3.036E-02     7.722E-02     1.988E-01          1.387E-01     4.151E-01     1.002E+00     2.442E+00
+ 
+        L1         1.458E-03     4.358E-03     1.494E-02     5.580E-02          2.111E-02     7.662E-02     2.322E-01     7.191E-01
+        L2         2.165E-04     4.768E-03     4.117E-02     2.385E-01          2.051E-03     1.070E-02     4.600E-02     1.869E-01
+        L3         1.632E-04     1.995E-03     1.223E-02     6.093E-02          1.492E-04     3.650E-03     4.581E-02     3.296E-01
+
+
+  TOTAL-L          1.837E-03     1.112E-02     6.835E-02     3.552E-01          2.331E-02     9.098E-02     3.240E-01     1.236E+00
+      K/L           6.17          2.73          1.13          0.56               5.95          4.56          3.09          1.98
+  K+1.33L          1.379E-02     4.516E-02     1.681E-01     6.713E-01          1.697E-01     5.361E-01     1.433E+00     4.086E+00
+ 
+        M1         3.280E-04     1.008E-03     3.628E-03     1.431E-02          4.854E-03     1.814E-02     5.697E-02     1.824E-01
+        M2         5.410E-05     1.228E-03     1.084E-02     6.389E-02          5.278E-04     2.791E-03     1.223E-02     5.079E-02
+        M3         4.225E-05     5.345E-04     3.351E-03     1.678E-02          3.919E-05     1.000E-03     1.290E-02     9.511E-02
+        M4         6.565E-07     5.584E-06     4.530E-05     8.724E-04          6.872E-07     1.342E-05     2.003E-04     1.937E-03
+        M5         8.151E-07     3.473E-06     3.501E-05     4.559E-04          5.560E-07     1.981E-06     3.763E-05     9.454E-04
+
+
+  TOTAL-M          4.258E-04     2.780E-03     1.790E-02     9.631E-02          5.423E-03     2.195E-02     8.233E-02     3.312E-01
+      M/L           0.23          0.25          0.26          0.27               0.23          0.24          0.25          0.27
+ K+L+1.33M         1.375E-02     4.518E-02     1.694E-01     6.821E-01          1.692E-01     5.352E-01     1.436E+00     4.118E+00
+
+
+ N+O+ FROM
+ DRAGOUN           1.347E-04     8.930E-04     5.862E-03     3.175E-02          1.741E-03     7.131E-03     2.695E-02     1.104E-01
+
+
+
+ K+L+M+NO+         1.374E-02     4.516E-02     1.693E-01     6.821E-01          1.691E-01     5.351E-01     1.436E+00     4.120E+00
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+                     COMPARE OLD/NEW CARDS
+    22: 205TL  G 415.6     3  0.59   8  (M1)                    0.1691                  
++                                                                                          OLD CARD
+    22: 205TL  G 415.6     3  0.59   8  (M1)                    0.169                   
+    22: 205TLS G KC=0.139 5$LC=0.0233 7$MC=0.00542 17$NC+=0.00174 6                     
+    22:                                                                                 
++                                                                                          NO OLD SECOND CARD
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 618.6     KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          4.968E-03     1.298E-02     3.039E-02     6.960E-02          4.880E-02     1.273E-01     2.661E-01     5.574E-01
+ 
+        L1         6.535E-04     1.880E-03     5.328E-03     1.523E-02          7.350E-03     2.187E-02     5.315E-02     1.311E-01
+        L2         7.261E-05     1.043E-03     6.820E-03     3.074E-02          6.814E-04     2.871E-03     9.827E-03     3.167E-02
+        L3         5.123E-05     3.557E-04     1.540E-03     5.823E-03          4.936E-05     5.871E-04     5.452E-03     3.128E-02
+
+
+  TOTAL-L          7.773E-04     3.279E-03     1.369E-02     5.179E-02          8.081E-03     2.532E-02     6.843E-02     1.941E-01
+      K/L           6.39          3.96          2.22          1.34               6.04          5.03          3.89          2.87
+  K+1.33L          6.002E-03     1.734E-02     4.860E-02     1.385E-01          5.954E-02     1.610E-01     3.571E-01     8.155E-01
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 720.8     KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          3.689E-03     9.562E-03     2.165E-02     4.714E-02          3.285E-02     8.230E-02     1.639E-01     3.247E-01
+ 
+        L1         4.880E-04     1.384E-03     3.675E-03     9.631E-03          4.942E-03     1.382E-02     3.132E-02     7.130E-02
+        L2         4.849E-05     5.980E-04     3.538E-03     1.461E-02          4.474E-04     1.759E-03     5.542E-03     1.647E-02
+        L3         3.351E-05     1.900E-04     7.218E-04     2.481E-03          3.268E-05     2.984E-04     2.464E-03     1.305E-02
+
+
+  TOTAL-L          5.700E-04     2.172E-03     7.935E-03     2.672E-02          5.422E-03     1.588E-02     3.933E-02     1.008E-01
+      K/L           6.47          4.40          2.73          1.76               6.06          5.18          4.17          3.22
+  K+1.33L          4.448E-03     1.245E-02     3.221E-02     8.268E-02          4.006E-02     1.034E-01     2.162E-01     4.588E-01
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 937.2     KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          2.254E-03     5.765E-03     1.232E-02     2.475E-02          1.681E-02     3.984E-02     7.377E-02     1.338E-01
+ 
+        L1         3.010E-04     8.290E-04     1.997E-03     4.597E-03          2.515E-03     6.496E-03     1.327E-02     2.666E-02
+        L2         2.453E-05     2.391E-04     1.204E-03     4.313E-03          2.166E-04     7.683E-04     2.144E-03     5.603E-03
+        L3         1.684E-05     6.834E-05     2.110E-04     6.205E-04          1.649E-05     9.737E-05     6.472E-04     3.027E-03
+
+
+  TOTAL-L          3.424E-04     1.136E-03     3.412E-03     9.530E-03          2.748E-03     7.362E-03     1.606E-02     3.529E-02
+      K/L           6.58          5.07          3.61          2.60               6.12          5.41          4.59          3.79
+  K+1.33L          2.710E-03     7.276E-03     1.686E-02     3.743E-02          2.046E-02     4.963E-02     9.513E-02     1.807E-01
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 1014.7    KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          1.951E-03     4.964E-03     1.042E-02     2.049E-02          1.374E-02     3.219E-02     5.840E-02     1.034E-01
+ 
+        L1         2.611E-04     7.119E-04     1.670E-03     3.714E-03          2.052E-03     5.205E-03     1.034E-02     2.010E-02
+        L2         2.005E-05     1.828E-04     8.793E-04     3.025E-03          1.738E-04     6.003E-04     1.621E-03     4.087E-03
+        L3         1.379E-05     5.090E-05     1.481E-04     4.161E-04          1.350E-05     7.031E-05     4.353E-04     1.964E-03
+
+
+  TOTAL-L          2.950E-04     9.456E-04     2.698E-03     7.155E-03          2.239E-03     5.875E-03     1.240E-02     2.615E-02
+      K/L           6.61          5.25          3.86          2.86               6.14          5.48          4.71          3.96
+  K+1.33L          2.343E-03     6.221E-03     1.401E-02     3.001E-02          1.672E-02     4.001E-02     7.488E-02     1.382E-01
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 1136.8    KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          1.596E-03     4.017E-03     8.236E-03     1.572E-02          1.030E-02     2.385E-02     4.205E-02     7.221E-02
+ 
+        L1         2.137E-04     5.742E-04     1.300E-03     2.759E-03          1.536E-03     3.809E-03     7.291E-03     1.357E-02
+        L2         1.509E-05     1.253E-04     5.662E-04     1.845E-03          1.270E-04     4.233E-04     1.093E-03     2.624E-03
+        L3         1.042E-05     3.381E-05     9.054E-05     2.388E-04          1.021E-05     4.472E-05     2.487E-04     1.065E-03
+
+
+  TOTAL-L          2.392E-04     7.333E-04     1.957E-03     4.842E-03          1.673E-03     4.277E-03     8.633E-03     1.726E-02
+      K/L           6.67          5.48          4.21          3.25               6.16          5.58          4.87          4.18
+  K+1.33L          1.914E-03     4.993E-03     1.084E-02     2.216E-02          1.253E-02     2.954E-02     5.353E-02     9.516E-02
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 1141.1    KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          1.585E-03     3.990E-03     8.173E-03     1.558E-02          1.020E-02     2.362E-02     4.160E-02     7.136E-02
+ 
+        L1         2.123E-04     5.701E-04     1.289E-03     2.732E-03          1.521E-03     3.770E-03     7.208E-03     1.340E-02
+        L2         1.495E-05     1.238E-04     5.581E-04     1.815E-03          1.257E-04     4.185E-04     1.079E-03     2.586E-03
+        L3         1.032E-05     3.336E-05     8.910E-05     2.345E-04          1.012E-05     4.407E-05     2.442E-04     1.044E-03
+
+
+  TOTAL-L          2.376E-04     7.272E-04     1.936E-03     4.781E-03          1.657E-03     4.233E-03     8.531E-03     1.703E-02
+      K/L           6.67          5.49          4.22          3.26               6.16          5.58          4.88          4.19
+  K+1.33L          1.901E-03     4.957E-03     1.075E-02     2.194E-02          1.241E-02     2.925E-02     5.295E-02     9.401E-02
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 1218.7    KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          1.416E-03     3.534E-03     7.145E-03     1.340E-02          8.633E-03     1.991E-02     3.451E-02     5.823E-02
+ 
+        L1         1.894E-04     5.041E-04     1.118E-03     2.309E-03          1.287E-03     3.155E-03     5.911E-03     1.074E-02
+        L2         1.272E-05     9.986E-05     4.349E-04     1.372E-03          1.049E-04     3.426E-04     8.607E-04     2.010E-03
+        L3         8.806E-06     2.652E-05     6.756E-05     1.715E-04          8.636E-06     3.417E-05     1.774E-04     7.358E-04
+
+
+  TOTAL-L          2.109E-04     6.305E-04     1.620E-03     3.853E-03          1.400E-03     3.532E-03     6.949E-03     1.349E-02
+      K/L           6.71          5.61          4.41          3.48               6.16          5.64          4.97          4.32
+  K+1.33L          1.696E-03     4.373E-03     9.300E-03     1.852E-02          1.050E-02     2.460E-02     4.375E-02     7.616E-02
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 1230.8    KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          1.392E-03     3.470E-03     7.003E-03     1.310E-02          8.419E-03     1.940E-02     3.356E-02     5.649E-02
+ 
+        L1         1.861E-04     4.949E-04     1.094E-03     2.252E-03          1.255E-03     3.072E-03     5.739E-03     1.039E-02
+        L2         1.242E-05     9.671E-05     4.190E-04     1.317E-03          1.021E-04     3.325E-04     8.322E-04     1.936E-03
+        L3         8.600E-06     2.563E-05     6.485E-05     1.638E-04          8.436E-06     3.291E-05     1.691E-04     6.983E-04
+
+
+  TOTAL-L          2.072E-04     6.172E-04     1.578E-03     3.733E-03          1.366E-03     3.438E-03     6.740E-03     1.303E-02
+      K/L           6.72          5.62          4.44          3.51               6.16          5.64          4.98          4.34
+  K+1.33L          1.668E-03     4.291E-03     9.102E-03     1.806E-02          1.023E-02     2.398E-02     4.253E-02     7.382E-02
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 1340.3    KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          1.205E-03     2.969E-03     5.896E-03     1.080E-02          6.782E-03     1.558E-02     2.646E-02     4.364E-02
+ 
+        L1         1.608E-04     4.227E-04     9.118E-04     1.821E-03          1.011E-03     2.447E-03     4.459E-03     7.866E-03
+        L2         1.011E-05     7.355E-05     3.052E-04     9.244E-04          8.075E-05     2.572E-04     6.235E-04     1.405E-03
+        L3         7.025E-06     1.920E-05     4.577E-05     1.105E-04          6.905E-06     2.390E-05     1.124E-04     4.460E-04
+
+
+  TOTAL-L          1.780E-04     5.154E-04     1.263E-03     2.855E-03          1.099E-03     2.728E-03     5.195E-03     9.717E-03
+      K/L           6.77          5.76          4.67          3.78               6.17          5.71          5.09          4.49
+  K+1.33L          1.441E-03     3.654E-03     7.575E-03     1.460E-02          8.244E-03     1.921E-02     3.337E-02     5.656E-02
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+
+
+
+    ICC (HAGER-SELTZER), Z =  81 (205TL); EG= 1433.9    KEV; MULT.=                13-Nov-2001
+
+                    E1            E2            E3            E4                 M1            M2            M3            M4
+                  -----------   -----------   -----------   -----------        -----------   -----------   -----------   -----------
+
+
+        K          1.074E-03     2.625E-03     5.150E-03     9.288E-03          5.721E-03     1.312E-02     2.199E-02     3.570E-02
+ 
+        L1         1.435E-04     3.735E-04     7.907E-04     1.543E-03          8.526E-04     2.048E-03     3.663E-03     6.343E-03
+        L2         8.614E-06     5.941E-05     2.385E-04     7.027E-04          6.710E-05     2.103E-04     4.972E-04     1.094E-03
+        L3         6.001E-06     1.538E-05     3.499E-05     8.150E-05          5.913E-06     1.868E-05     8.167E-05     3.138E-04
+
+
+  TOTAL-L          1.581E-04     4.482E-04     1.064E-03     2.328E-03          9.256E-04     2.277E-03     4.242E-03     7.750E-03
+      K/L           6.80          5.86          4.84          3.99               6.18          5.76          5.18          4.61
+  K+1.33L          1.284E-03     3.221E-03     6.566E-03     1.238E-02          6.952E-03     1.615E-02     2.763E-02     4.600E-02
+ 
+        M1          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M2          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M3          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M4          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+        M5          ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+
+ N+O+ FROM
+ DRAGOUN            ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL                    ENERGY OUTSIDE TABLE RANGE FOR THIS SHELL
+
+ L=3, 4 CC's multiplied by 0.975 10, 0.975 5, respectively (Cf. 90Ne01).
+

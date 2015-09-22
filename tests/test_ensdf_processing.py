@@ -67,14 +67,20 @@ def test_bldhst():
 
 def test_hsicc():
     input_dict = {}
-    input_dict['data_deck'] = 'ensdf_processing/hsicc_data.tst'
-    input_dict['icc_index'] = 'ensdf_processing/hsicc_iccndx.dat'
-    input_dict['icc_table'] = 'ensdf_processing/hsicc_icctbl.dat'
-    input_dict['complete_report'] = 'ensdf_processing/hsicc_hscalc.lst'
-    input_dict['new_card_deck'] = 'ensdf_processing/hsicc_cards.new'
-    input_dict['comparison_report'] = 'ensdf_processing/hsicc_compar.lst'
+    input_dict['data_deck'] = 'ensdf_processing/hsicc/hsicc_data.tst'
+    input_dict['icc_index'] = 'ensdf_processing/hsicc/hsicc_iccndx.dat'
+    input_dict['icc_table'] = 'ensdf_processing/hsicc/hsicc_icctbl.dat'
+    input_dict['complete_report'] = 'ensdf_processing/hsicc/out_hsicc_hscalc.lst'
+    input_dict['new_card_deck'] = 'ensdf_processing/hsicc/out_hsicc_cards.new'
+    input_dict['comparison_report'] = 'ensdf_processing/hsicc/out_hsicc_compar.lst'
     input_dict['is_multipol_known'] = 'Y'
     output_dict = ensdf_processing.hsicc(input_dict)
+    ref_report = 'ensdf_processing/hsicc/ref_hscalc.lst'
+    ref_card_deck = 'ensdf_processing/hsicc/ref_cards.new'
+    ref_comparison_report = 'ensdf_processing/hsicc/ref_compar.lst'
+    d_report = comp_file_with_date_difference(input_dict['complete_report'],ref_report,0)
+    d_card_deck = comp_file_with_date_difference(input_dict['new_card_deck'],ref_card_deck,0)
+    d_comparison_report = comp_file_with_date_difference(input_dict['comparison_report'],ref_comparison_report,0)
 
 def test_hsmrg():
     input_dict = {}
@@ -157,9 +163,9 @@ if __name__ == "__main__":
     #a = test_delta()
     #b = test_gabs_80Br()
     #c = test_gtol()
-    d = test_bldhst()
+    #d = test_bldhst()
     #nc = test_hsicc()
-    #n = test_hsmrg()
+    n = test_hsmrg()
     #l = test_seqhst()
     #z = test_logft_functional()
     #z = test_logft_outputs()
