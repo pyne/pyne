@@ -84,11 +84,12 @@ def test_hsicc():
 
 def test_hsmrg():
     input_dict = {}
-    input_dict['data_deck'] = 'ensdf_processing/hsicc_data.tst'
-    input_dict['card_deck'] = 'ensdf_processing/cards.new'
-    input_dict['merged_data_deck'] = 'ensdf_processing/cards.mrg'
+    input_dict['data_deck'] = 'ensdf_processing/hsmrg/hsmrg_data.tst'
+    input_dict['card_deck'] = 'ensdf_processing/hsmrg/hsmrg_cards.new'
+    input_dict['merged_data_deck'] = 'ensdf_processing/hsmrg/out_cards.mrg'
     output_dict = ensdf_processing.hsmrg(input_dict)
-        
+    ref_deck = 'ensdf_processing/hsmrg/ref_cards.mrg'
+    d_report = comp_file_with_date_difference(input_dict['merged_data_deck'],ref_deck,0)
 
 def test_seqhst():
     input_dict = {}
