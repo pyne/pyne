@@ -93,9 +93,11 @@ def test_hsmrg():
 
 def test_seqhst():
     input_dict = {}
-    input_dict['binary_table_input_file'] = 'ensdf_processing/hsicc_icctbl.dat'
-    input_dict['sequential_output_file'] = 'ensdf_processing/seqhst_iccseq.dat'
+    input_dict['binary_table_input_file'] = 'ensdf_processing/seqhst/seqhst_icctbl.dat'
+    input_dict['sequential_output_file'] = 'ensdf_processing/seqhst/out_iccseq.dat'
     output_dict = ensdf_processing.seqhst(input_dict)
+    ref_sequence = 'ensdf_processing/seqhst/ref_iccseq.dat'
+    d_report = comp_file_with_date_difference(input_dict['sequential_output_file'],ref_sequence,0)
 
 def test_logft_functional():
     input_dict = {}
@@ -117,12 +119,6 @@ def test_logft_outputs():
     ref_output_data_set = 'ensdf_processing/compare/logft_ref.new'
     d_report = comp_file_with_date_difference(input_dict['output_report'],ref_output_report,0)
     d_data = comp_file_with_date_difference(input_dict['output_data_set'], ref_output_data_set,0)
-
-    # It is known that line 5 is the date.  Ignore difference at line 5
-    if(d_report['discrepancy']):
-        print d_report['differences_lines']
-    if(d_data['discrepancy']):
-        print d_data['differences_lines']
 
 def test_pandora():
     print("not working")
@@ -155,7 +151,6 @@ def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
     diff_dict = {}
     diff_dict['differences_lines'] = diff_lines
     return diff_dict
-            
 
 
 #  nose.runmodule()
@@ -166,10 +161,10 @@ if __name__ == "__main__":
     #c = test_gtol()
     #d = test_bldhst()
     #nc = test_hsicc()
-    n = test_hsmrg()
+    #n = test_hsmrg()
     #l = test_seqhst()
     #z = test_logft_functional()
     #z = test_logft_outputs()
     # pandora test needed
     # radlist test needed
-    #r = test_ruler()
+    r = test_ruler()
