@@ -41,21 +41,29 @@ def test_brick():
 
 def test_gtol():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/gtol.inp'
-    input_dict['report_file'] = 'ensdf_processing/gtol.rpt'
+    input_dict['input_file'] = 'ensdf_processing/gtol/gtol.inp'
+    input_dict['report_file'] = 'ensdf_processing/gtol/gtol.rpt'
     input_dict['new_ensdf_file_with_results'] = 1
-    input_dict['output_file'] = 'ensdf_processing/gtol.out'
+    input_dict['output_file'] = 'ensdf_processing/gtol/gtol.out'
     input_dict['supress_gamma_comparison'] = 0
     input_dict['supress_intensity_comparison'] = 0
     input_dict['dcc_theory_percent'] = 3
     output_dict = ensdf_processing.gtol(input_dict)
+    ref_output_report = 'ensdf_processing/gtol/gtol_ref.rpt'
+    ref_output = 'ensdf_processing/gtol/gtol_ref.out'
+    #d_report = comp_file_with_date_difference(input_dict['report_file'],ref_output_report,0)
+    #d_output = comp_file_with_date_difference(input_dict['output_file'],ref_output,0)
 
 def test_bldhst():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/bldhst_iccseq.dat'
-    input_dict['output_table_file'] = 'ensdf_processing/bldhst_icctbl.dat'
-    input_dict['output_index_file'] = 'ensdf_processing/bldhst_iccndx.dat'
+    input_dict['input_file'] = 'ensdf_processing/bldhst/bldhst_iccseq.dat'
+    input_dict['output_table_file'] = 'ensdf_processing/bldhst/bldhst_icctbl.dat'
+    input_dict['output_index_file'] = 'ensdf_processing/bldhst/bldhst_iccndx.dat'
     output_dict = ensdf_processing.bldhst(input_dict)
+    ref_table = 'ensdf_processing/bldhst/ref_icctbl.dat'
+    ref_index = 'ensdf_processing/bldhst/ref_iccndx.dat'
+    d_table = comp_file_with_date_difference(input_dict['output_table_file'],ref_table,0)
+    d_index = comp_file_with_date_difference(input_dict['output_index_file'],ref_index,0)
 
 def test_hsicc():
     input_dict = {}
@@ -127,7 +135,6 @@ def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
     f_out = open(file_out, 'r')
     f_ref = open(file_ref, 'r')
     diff_lines = numpy.array([])
-
     line_num = 0
     for line_out in f_out:
         line_ref = f_ref.readline()
@@ -150,7 +157,7 @@ if __name__ == "__main__":
     #a = test_delta()
     #b = test_gabs_80Br()
     #c = test_gtol()
-    #d = test_bldhst()
+    d = test_bldhst()
     #nc = test_hsicc()
     #n = test_hsmrg()
     #l = test_seqhst()
