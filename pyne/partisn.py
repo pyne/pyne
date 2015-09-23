@@ -439,10 +439,15 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names):
     n = 0
     zones_formatted = np.zeros(shape=(jm*km, im), dtype=int)
     for i in range(im):
+        temp = np.zeros(shape=(jm*km), dtype=int)
         for jk in range(jm*km):
-            zones_formatted[jk, i] = voxel_zone[n]
+            temp[jk] = voxel_zone[n]
             n += 1
-    
+        temp = np.reshape(temp, (jm, km))
+        temp = np.transpose(temp)
+        temp = np.reshape(temp, jm*km)
+        zones_formatted[:, i] = temp
+
     return zones_formatted, zones_novoid
     
 
