@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 import argparse
 import ConfigParser
 from os.path import isfile
