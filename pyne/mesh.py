@@ -664,8 +664,6 @@ class Mesh(object):
                     raise MeshError("Found {0} structured meshes."
                                     " Instantiate individually using"
                                     " from_ent_set()".format(count))
-
-
             # from coordinates
             elif (mesh is None) and structured_coords and not structured_set:
                 extents = [0, 0, 0] + [len(x) - 1 for x in structured_coords]
@@ -776,7 +774,6 @@ class Mesh(object):
                 doc = "see Material.{0}() for more information".format(name)
                 setattr(self, name, MaterialMethodTag(mesh=self, name=name,
                         doc=doc))
-
 
     def __len__(self):
         return self._len
