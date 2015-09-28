@@ -111,6 +111,10 @@ def test_create_by_file():
     assert_equal(sm.structured_get_divisions("y"), [1.0, 5.0, 10.0, 15.0] )
     assert_equal(sm.structured_get_divisions("z"), [-10.0, 2.0, 12.0] )
 
+    assert_equal(sm.structured_coords[0], range(1,6))
+    assert_equal(sm.structured_coords[1], [1.0, 5.0, 10.0, 15.0] )
+    assert_equal(sm.structured_coords[2], [-10.0, 2.0, 12.0] )
+
     # loading a test file without structured mesh metadata should raise an 
     # error
     filename2 = os.path.join(os.path.dirname(__file__), 

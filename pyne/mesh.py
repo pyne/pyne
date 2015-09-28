@@ -691,6 +691,11 @@ class Mesh(object):
             self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
+ 
+            if self.structured_coords is None:
+                self.structured_coords = [self.structured_get_divisions("x"),
+                                          self.structured_get_divisions("y"),
+                                          self.structured_get_divisions("z")]
         else:
             # Unstructured mesh cases
             # Error if structured arguments are passed

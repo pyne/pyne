@@ -280,9 +280,15 @@ subroutine ahotn_ll_kernel(x,y,z,mu,eta,xi,sgm,sge,sgx,sig,c,inflow_x,inflow_y,i
 
    ! Define a11 through a44 
    a11 = 1.0d0 + ex0 + ey0 + ez0 
-   a22 = 1.0d0 + 2.0d0*ez*(dzx+dzy) + 2.0d0*gamma1*( (ex*ez-36.0d0*alpha1)*dxz/ex + (ey*ez-36.0d0*beta1 )*dyz/ey ) + 3.0d0*gamma0*ez0 
-   a33 = 1.0d0 + 2.0d0*ey*(dyx+dyz) + 2.0d0*beta1 *( (ex*ey-36.0d0*alpha1)*dxy/ex + (ey*ez-36.0d0*gamma1)*dzy/ez ) + 3.0d0*beta0 *ey0 
-   a44 = 1.0d0 + 2.0d0*ex*(dxz+dxy) + 2.0d0*alpha1*( (ex*ey-36.0d0*beta1 )*dyx/ey + (ex*ez-36.0d0*gamma1)*dzx/ez ) + 3.0d0*alpha0*ex0
+   a22 = 1.0d0 + 2.0d0*ez*(dzx+dzy) &
+         + 2.0d0*gamma1*( (ex*ez-36.0d0*alpha1)*dxz/ex &
+         + (ey*ez-36.0d0*beta1 )*dyz/ey ) + 3.0d0*gamma0*ez0 
+   a33 = 1.0d0 + 2.0d0*ey*(dyx+dyz) & 
+         + 2.0d0*beta1 *( (ex*ey-36.0d0*alpha1)*dxy/ex &
+         + (ey*ez-36.0d0*gamma1)*dzy/ez ) + 3.0d0*beta0 *ey0 
+   a44 = 1.0d0 + 2.0d0*ex*(dxz+dxy) &
+         + 2.0d0*alpha1*( (ex*ey-36.0d0*beta1 )*dyx/ey &
+         + (ex*ez-36.0d0*gamma1)*dzx/ez ) + 3.0d0*alpha0*ex0
    a21 = sgx*(ez0-2.0d0/ez) 
    a31 = sge*(ey0-2.0d0/ey)
    a41 = sgm*(ex0-2.0d0/ex)
