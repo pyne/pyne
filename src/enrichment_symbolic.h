@@ -31,8 +31,8 @@ namespace enrichment {
   Cascade solve_symbolic(Cascade & orig_casc);
 
 // end enrichment
-};
+}
 // end pyne
-};
+}
 
 #endif

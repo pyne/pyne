@@ -53,7 +53,7 @@ namespace rxname
   extern void * _;  ///< A dummy variable used when calling #_fill_maps().
 
   /// A helper function to compute nuclide id offsets from z-, a-, and s- deltas
-  inline int offset(int dz, int da, int ds=0) {return dz*10000000 + da*10000 + ds;};
+  inline int offset(int dz, int da, int ds=0) {return dz*10000000 + da*10000 + ds;}
 
   /// \name Hash Functions
   /// \{
@@ -351,7 +351,7 @@ namespace rxname
     std::string rxwas;  ///< previous reaction state
     std::string rxnow;  ///< current reaction state
   };
-};
-};
+}
+}
 
 #endif  // PYNE_7DOEB2PKSBEFFIA3Q2NARI3KFY

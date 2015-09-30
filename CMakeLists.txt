@@ -158,6 +158,9 @@ message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
 find_package(Numpy REQUIRED)
 include_directories("${NUMPY_INCLUDE_DIR}")
 
+#compiler warnings
+# add_definitions ("-Wpedantic")
+
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
 
