@@ -914,6 +914,8 @@ def ray_discretize(mesh, num_rays=10, grid=False):
                 #  Add row results to the full mesh sum matrix.
                 for j, ve_sums in enumerate(row_sums):
                    for cell in ve_sums.keys():
+                       if ve_sums[cell][0] < VOL_FRAC_TOLERANCE:
+                           continue
                        if cell not in mesh_sums[idx[j]].keys():
                            mesh_sums[idx[j]][cell] = [0, 0]
                            len_count += 1
