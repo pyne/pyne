@@ -627,7 +627,11 @@ class Rtflux(object):
         flux2 = []
         num_intervals = self.ninti*self.nintj*self.nintk
         for i in range(self.ngroup):
-            flux2.insert(0, flux[i*num_intervals:(i+1)*num_intervals])
+            if not self.adjoint:
+                flux2.insert(0, flux[i*num_intervals:(i+1)*num_intervals])
+            else:
+                flux2.append(flux[i*num_intervals:(i+1)*num_intervals])
+
         flux2 = np.array(flux2)
         flux2 = flux2.transpose()
 
@@ -672,7 +676,7 @@ class Rtflux(object):
         m.tag[:] = self.flux
         m.structured_ordering = temp
 
-class Atflux(_BinaryReader):
+class Atflux(Rtflux):
     """An Atflux object represents data stored in a ATFLUX file from the CCCC
     format specification. This file contains adjoint total fluxes. Note that
     this is the same format as RTFLUX. See Rtflux class for a complete list of

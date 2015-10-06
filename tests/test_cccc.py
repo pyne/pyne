@@ -8,7 +8,7 @@ import numpy as np
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-from pyne.cccc import Isotxs, Rtflux
+from pyne.cccc import Isotxs, Rtflux, Atflux
 
 try:
     from itaps import iMesh
@@ -165,6 +165,25 @@ def test_rtflux_raises():
     with assert_raises(ValueError):
         rt.to_mesh(m, "flux")
 
-def test_atflux():
-    rt = Rtflux("files_test_cccc/atflux_3D")
-    assert_equal(rt.adjoint, True)
+def test_atflux_adjoint():
+    at = Atflux("files_test_cccc/atflux_3D")
+    assert_equal(at.adjoint, True)
+
+def test_atflux_eng_order():
+    """Ensure the energy order is read in reverse for atflux file."""
+    if not HAVE_PYTAPS:
+        raise SkipTest
+    from pyne.mesh import Mesh, IMeshTag
+
+    # This file is created with: source=1 174R 0 0 1 40R 0
+    # So only the 2 highest energy photon groups and the 1 highest energy
+    # neutron group should have non-zero fluxes.
+    at = Atflux("files_test_cccc/atflux_eng_order")
+    sc = [np.linspace(-100, 100, 5),
+          np.linspace(-100, 100, 5),
+          np.linspace(0, 330, 5)]
+    m = Mesh(structured=True, structured_coords=sc, mats=None)
+    at.to_mesh(m, "flux")
+    m.flux = IMeshTag(217, float)
+    assert(np.allclose(m.flux[0], np.array([0]*40 + [57.3204927667, 1.16690395827] + [0]*174 + [14.2312186922])))
+    
