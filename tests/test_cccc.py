@@ -5,6 +5,7 @@ import warnings
 from nose.tools import assert_equal, assert_raises
 from nose.plugins.skip import SkipTest
 import numpy as np
+from numpy.testing import assert_array_almost_equal
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
@@ -185,5 +186,6 @@ def test_atflux_eng_order():
     m = Mesh(structured=True, structured_coords=sc, mats=None)
     at.to_mesh(m, "flux")
     m.flux = IMeshTag(217, float)
-    assert(np.allclose(m.flux[0], np.array([0]*40 + [57.3204927667, 1.16690395827] + [0]*174 + [14.2312186922])))
+    assert_array_almost_equal(m.flux[0], 
+        np.array([0]*40 + [57.3204927667, 1.16690395827] + [0]*174 + [14.2312186922]))
     
