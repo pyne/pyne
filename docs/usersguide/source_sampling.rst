@@ -208,17 +208,18 @@ Once MCNP5 is compiled, MCNP5 can be run normally. The file "source.h5m" must
 be present in the working directory that MCNP5 is run from. This file should
 contain source densities (on the "source_density" tag) and optionally biased
 source densities (the "biased_source_density" tag). An "idum" card must be used
-in the MCNP5 input file. This card should have two arguments. The first is the
+in the MCNP5 input file. This card should have three arguments. The first is the
 sampling mode (0: analog, 1: uniform, 2: user). The second is the resample
 limit for void rejection. For a given particle, if a source position is
 selected in void (MCNP materal 0) the source position is resampled within the
 selected mesh volume element until either a non-void position is found, or this
-user-specified limit is researched.
+user-specified limit is researched. The third argument should specify the
+particle type: 1 for neutrons, 2 for photons.
 
 For example, this "idum" card specifies uniform sampling with a resample limit
-of 100:
+of 100 with source particles specified as photons:
 
 .. code-block:: bash
 
-  idum 1 100
+  idum 1 100 2
 
