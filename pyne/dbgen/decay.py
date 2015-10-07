@@ -3,7 +3,7 @@ from __future__ import print_function, division
 import os
 import glob
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 try:
     import urllib.request as urllib
@@ -17,7 +17,8 @@ import tables as tb
 from pyne import ensdf
 from pyne.dbgen.api import BASIC_FILTERS
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
+
 
 def _readpoint(line, dstart, dlen):
     data = ensdf._getvalue(line[dstart:dstart + dlen])
@@ -54,7 +55,7 @@ def parse_atomic_data(build_dir=""):
             Z = int(line[0:3])
             k_shell_fluor, k_shell_fluor_error = _readpoint(line, 9, 6)
             l_shell_fluor, l_shell_fluor_error = _readpoint(line, 18, 6)
-            #Probability of creating L-shell vacancy by filling K-shell vacancy
+            # Probability of creating L-shell vacancy by filling K-shell
             prob, prob_error = _readpoint(line, 27, 6)
             k_shell_be, k_shell_be_err = _readpoint(line, 36, 8)
             li_shell_be, li_shell_be_err = _readpoint(line, 47, 8)
@@ -99,9 +100,11 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www-nds.iaea.org/ensdf_base_files/2014-April/'
+    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist14/'
+
     cf_base_url = 'http://data.pyne.io/'
-    ensdf_zip = ['ensdf_140416_099.zip', 'ensdf_140416_199.zip', 'ensdf_140416_294.zip', ]
+    ensdf_zip = ['ensdf_141022_099.zip', 'ensdf_141022_199.zip',
+                 'ensdf_141022_299.zip', ]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
@@ -110,7 +113,7 @@ def grab_ensdf_decay(build_dir=""):
             urllib.urlretrieve(iaea_base_url + f, fpath)
 
             if os.path.getsize(fpath) < 1048576:
-                print("  could not get {0} from IAEA; trying mirror".format(f))
+                print("  could not get {0} from NNDC; trying mirror".format(f))
                 os.remove(fpath)
                 urllib.urlretrieve(cf_base_url + f, fpath)
 
@@ -142,6 +145,7 @@ decay_dtype = np.dtype([
     ('half_life', float),
     ('half_life_error', float),
     ('branch_ratio', float),
+    ('branch_ratio_error', float),
     ('photon_branch_ratio', float),
     ('photon_branch_ratio_err', float),
     ('beta_branch_ratio', float),
@@ -152,6 +156,7 @@ gammas_dtype = np.dtype([
     ('from_nuc', int),
     ('to_nuc', int),
     ('parent_nuc', int),
+    ('child_nuc', int),
     ('energy', float),
     ('energy_err', float),
     ('photon_intensity', float),
@@ -286,18 +291,18 @@ def parse_decay_data(build_dir=""):
     all_betas = []
     all_ecbp = []
     for item in decay_data:
-        all_decays.append(item[:10])
-        if len(item[10]) > 0:
-            for subitem in item[10]:
-                all_gammas.append(tuple(subitem))
+        all_decays.append(item[:11])
         if len(item[11]) > 0:
             for subitem in item[11]:
-                all_alphas.append(tuple(subitem))
+                all_gammas.append(tuple(subitem))
         if len(item[12]) > 0:
             for subitem in item[12]:
-                all_betas.append(tuple(subitem))
+                all_alphas.append(tuple(subitem))
         if len(item[13]) > 0:
             for subitem in item[13]:
+                all_betas.append(tuple(subitem))
+        if len(item[14]) > 0:
+            for subitem in item[14]:
                 all_ecbp.append(tuple(subitem))
 
     all_decay_array = np.array(all_decays, dtype=decay_dtype)
@@ -385,13 +390,14 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                               'metastable [int]', expectedrows=len(level_list))
     ll_table.flush()
 
-    #now that the level data is in nuc_data we can build the decay data fast
+    # now that the level data is in nuc_data we can build the decay data fast
     decay, gammas, alphas, betas, ecbp = parse_decay_data(build_dir)
 
     decay_table = db.createTable('/decay/', 'decays', decay,
                                  'parent nuclide [nuc_id], daughter nuclide '
                                  '[nuc_id], decay [string], half life [s],'
                                  'half life error [s], branch ratio [frac],'
+                                 'branch ratio error [frac],'
                                  'photon branch ratio [ratio],'
                                  'photon branch ratio error [ratio],'
                                  'beta branch ratio [ratio],'
@@ -401,7 +407,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
 
     gamma_table = db.createTable('/decay/', 'gammas', gammas,
                                  'from_nuc [int], to_nuc [int], primary parent'
-                                 'nuc_id [int],'
+                                 'nuc_id [int], child nuc_id [int]'
                                  'Energy [keV], Energy error [keV], '
                                  'photon intensity [ratio], '
                                  'photon intensity error [ratio],'
@@ -426,8 +432,8 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     betas_table = db.createTable('/decay/', 'betas', betas,
                                  'from_nuc [int], to_nuc [int],'
                                  'Endpoint Energy [keV], Average Energy [keV],'
-                                 'Intensity [ratio]'
-                                 , expectedrows=len(betas))
+                                 'Intensity [ratio]',
+                                 expectedrows=len(betas))
 
     betas_table.flush()
 
@@ -452,12 +458,12 @@ def make_decay(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     with tb.openFile(nuc_data, 'r') as f:
-        if hasattr(f.root, 'decay'):
+        if hasattr(f.root, 'decay') and hasattr(f.root.decay, 'ecbp'):
             print("skipping ENSDF decay data table creation; already exists.")
             return
 
             # grab the decay data
-    print("Grabbing the ENSDF decay data from IAEA")
+    print("Grabbing the ENSDF decay data from NNDC")
     grab_ensdf_decay(build_dir)
 
     # Make atomic mass table once we have the array
@@ -469,4 +475,3 @@ def make_decay(args):
 
     print("Making atomic decay data table")
     make_atomic_decay_table(nuc_data, build_dir)
-

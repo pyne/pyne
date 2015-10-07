@@ -29,11 +29,11 @@ pyne_enr::Cascade::Cascade() {
   l_t_per_feed = 0.0;
   swu_per_feed = 0.0;
   swu_per_prod = 0.0;
-};
+}
 
 
 pyne_enr::Cascade::~Cascade() {
-};
+}
 
 
 void pyne_enr::Cascade::_reset_xjs() {
@@ -41,5 +41,5 @@ void pyne_enr::Cascade::_reset_xjs() {
   x_feed_j = mat_feed.comp[j];
   x_prod_j = mat_prod.comp[j];
   x_tail_j = mat_tail.comp[j];
-};
+}
 

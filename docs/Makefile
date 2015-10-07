@@ -18,6 +18,8 @@ DOCREPOURL  = git@github.com:pyne/pyne.github.com.git
 
 .PHONY: help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest
 
+all: html
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html      to make standalone HTML files"
@@ -36,6 +38,9 @@ clean:
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	doxygen Doxyfile
+	find _build/html/tutorial/ -type f -exec sed -i -e 's/container{width:[0-9]*px}/container{width:95%}/g' {} \;
+	find _build/html/examples/ -type f -exec sed -i -e 's/container{width:[0-9]*px}/container{width:95%}/g' {} \;
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
@@ -126,4 +131,3 @@ push-root:
 	git add . && \
 	git commit -am "Pushed root-level docs at $(date)" && \
 	git push
-

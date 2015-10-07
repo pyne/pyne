@@ -7,8 +7,8 @@ import warnings
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, assert_in, \
     assert_true, assert_false
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne import nucname
 
 def test_name_zz():
@@ -508,6 +508,13 @@ def test_isnuclide():
     for nuc in arent:
         yield assert_false, nucname.isnuclide(nuc)
 
+def test_iselement():
+    are = [92, 'U']
+    arent = [922350, 'U235']
+    for nuc in are:
+        yield assert_true, nucname.iselement(nuc)
+    for nuc in arent:
+        yield assert_false, nucname.iselement(nuc)
 
 def test_state_id_to_id():
     assert_equal(nucname.state_id_to_id(190380015), 190380002)
@@ -517,6 +524,12 @@ def test_id_to_state_id():
     assert_equal(nucname.id_to_state_id(190380002), 190380015)
 
 
+def test_ensdf_to_id():
+    assert_equal(nucname.ensdf_to_id('16O'), 80160000)
+    assert_equal(nucname.ensdf_to_id('28614'), 1142860000)
+    assert_equal(nucname.ensdf_to_id('269Hs'), 1082690000)
+
+
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 

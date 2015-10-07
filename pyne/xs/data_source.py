@@ -6,7 +6,7 @@ import os
 import io
 import sys
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 try:
     from StringIO import StringIO
@@ -26,7 +26,7 @@ from pyne import ace
 from pyne.data import MeV_per_K
 from pyne.xs.models import partial_energy_matrix, group_collapse
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 IO_TYPES = (io.IOBase, StringIO)
 
@@ -349,6 +349,7 @@ class SimpleDataSource(DataSource):
         .. math::
 
             \\sigma(E) = \\sigma(2.53E-8) \\sqrt{\\frac{2.53E-8}{E}}
+
             \\sigma(E) = \\frac{\sigma(14) - \\sigma(1)}{14 - 1} (E - 1) + \\sigma(1)
 
         Parameters

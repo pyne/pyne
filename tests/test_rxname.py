@@ -7,8 +7,8 @@ import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_in, assert_greater_equal
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne import rxname
 
 if sys.version_info[0] > 2:
@@ -247,5 +247,5 @@ def test_no_id_mt_clash():
 
 
 if __name__ == "__main__":
-    nose.main()
+    nose.runmodule()
 

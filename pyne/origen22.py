@@ -6,25 +6,26 @@ except ImportError:
 import os
 import re
 import sys
+from io import StringIO
 from collections import Mapping
 from copy import deepcopy
 from itertools import chain
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy as np
 
 from pyne import data
-from pyne import rxname
 from pyne import nucname
 from pyne.xs import cache
-from pyne.xs import data_source
+from pyne import decay_tape9
 from pyne.material import Material, from_atom_frac
 
 if sys.version_info[0] > 2:
-  basestring = str
+    basestring = str
+    unicode = str
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 BASE_TAPE9 = os.path.join(os.path.dirname(__file__), 'base_tape9.inp')
 
@@ -150,7 +151,7 @@ ACTINIDE_AND_DAUGHTER_NUCS = frozenset([
     962490000, 962500000, 962510000, 972490000, 972500000, 972510000, 982490000,
     982500000, 982510000, 982520000, 982530000, 982540000, 982550000, 992530000,
     992540000, 992540001, 992550000])
-"""Set of acinide & daughter nuclides in id form."""
+"""Set of actinide & daughter nuclides in id form."""
 
 FISSION_PRODUCT_NUCS = frozenset([
     10030000,  30060000,  30070000,  40090000,  40100000,  60140000,  270720000,
@@ -285,7 +286,8 @@ NUCS = ACTIVATION_PRODUCT_NUCS | ACTINIDE_AND_DAUGHTER_NUCS | FISSION_PRODUCT_NU
 """Set of all known nuclides."""
 
 DECAY_FIELDS = ('half_life', 'frac_beta_minus_x',
-    'frac_beta_plus_or_electron_capture', 'frac_beta_plus_or_electron_capture_x',
+    'frac_beta_plus_or_electron_capture',
+    'frac_beta_plus_or_electron_capture_x',
     'frac_alpha', 'frac_isomeric_transition', 'frac_spont_fiss', 'frac_beta_n',
     'recoverable_energy', 'frac_natural_abund', 'inhilation_concentration',
     'ingestion_concentration')
@@ -293,18 +295,24 @@ DECAY_FIELDS = ('half_life', 'frac_beta_minus_x',
 
 XSFPY_FIELDS = ('sigma_gamma', 'sigma_2n', 'sigma_gamma_x', 'sigma_2n_x',
     'fiss_yields_present')
-"""The cross section and fission product yield data keys in a tape9 dictionary."""
+"""The cross section and fission product yield data keys in a tape9 dictionary.
+"""
 
 ACTIVATION_PRODUCT_FIELDS = ('sigma_3n', 'sigma_p')
-"""The cross section data keys for activation products in a tape9 dictionary."""
+"""The cross section data keys for activation products in a tape9 dictionary.
+"""
 
 ACTINIDE_FIELDS = ('sigma_alpha', 'sigma_f')
-"""The cross section data keys for actinides & daughters in a tape9 dictionary."""
+"""The cross section data keys for actinides & daughters in a tape9 dictionary.
+"""
 
-FISSION_PRODUCT_FIELDS = ('sigma_3n', 'sigma_p', 'TH232_fiss_yield', 'U233_fiss_yield',
-    'U235_fiss_yield', 'U238_fiss_yield', 'PU239_fiss_yield', 'PU241_fiss_yield',
-    'CM245_fiss_yield', 'CF249_fiss_yield')
-"""The cross section & yield data keys for fission products in a tape9 dictionary."""
+FISSION_PRODUCT_FIELDS = ('sigma_3n', 'sigma_p', 'TH232_fiss_yield',
+                          'U233_fiss_yield',
+                          'U235_fiss_yield', 'U238_fiss_yield',
+                          'PU239_fiss_yield', 'PU241_fiss_yield',
+                          'CM245_fiss_yield', 'CF249_fiss_yield')
+"""The cross section & yield data keys for fission products in a tape9
+   dictionary."""
 
 # Table 4.2 in ORIGEN 2.2 manual
 ORIGEN_TIME_UNITS = [None,              # No zero unit
@@ -317,7 +325,8 @@ ORIGEN_TIME_UNITS = [None,              # No zero unit
                      31556926.0 * 1E3,  # ky
                      31556926.0 * 1E6,  # My
                      31556926.0 * 1E9,  # Gy
-                    ]
+                     ]
+
 
 def sec_to_time_unit(s):
     """Converts seconds to ORIGEN time and units.
@@ -364,7 +373,6 @@ def sec_to_time_unit(s):
 _data_format = "\d+\.\d*[EeDd]?[ +-]?\d+"
 
 
-
 ###################################
 ### ORIGEN Input Deck Functions ###
 ###################################
@@ -400,7 +408,6 @@ def write_tape4(mat, outfile="TAPE4.INP"):
 
     if opened_here:
         outfile.close()
-
 
 
 _tape5_irradiation_template = """\
@@ -454,7 +461,7 @@ _nes_table[False, False, False] = 8
 
 def _out_table_string(out_table_nes, out_table_num):
     """Makes a string output table line from relevant information."""
-    if out_table_num == None:
+    if out_table_num is None:
         arr = np.ones(24, dtype=int)
         s = np.array2string(arr)[1:-1]
         return s
@@ -467,6 +474,7 @@ def _out_table_string(out_table_nes, out_table_num):
     s = np.array2string(arr)[1:-1]
 
     return s
+
 
 def write_tape5_irradiation(irr_type, irr_time, irr_value,
                             outfile="TAPE5.INP",
@@ -484,7 +492,7 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
         Flag that determines whether this is a constant power "IRP"
         irradiation or a constant flux "IRF" irradiation calculation.
     irr_time : float
-        Irradiation time durration in days.
+        Irradiation time duration in days.
     irr_value : float
         Magnitude of the irradiation. If irr_type = "IRP", then
         this is a power.  If irr_type = "IRF", then this is a flux.
@@ -496,7 +504,7 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
         Three tuple of library numbers from the tape9 file for cross section and fission
         product yields, eg (204, 205, 206).
     cut_off : float, optional
-        Cut-off concentration, below which reults are not recorded.
+        Cut-off concentration, below which results are not recorded.
     out_table_nes :  length 3 sequence of bools, optional
         Specifies which type of output tables should be printed by ORIGEN.  The fields
         represent (Nuclide, Element, Summary).  The default value of (False, False, True)
@@ -509,9 +517,20 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
         out_table_nes and out_table_laf.  For example the list [10, 5] would print
         tables 5 and 10.  There are 24 tables available. If None, then all tables
         are printed.
+
+    Warnings
+    --------
+    If ``irr_value`` is ``NaN`` or ``inf``, ORIGEN will still run without
+    complaint, but the TAPE6.OUT file will only contain headers and no data.
     """
     if irr_type not in ["IRP", "IRF"]:
         raise TypeError("Irradiation type must be either 'IRP' or 'IRF'.")
+
+    if np.isnan(irr_value):
+        raise ValueError("Irradiation value is NaN.")
+
+    if np.isinf(irr_value):
+        raise ValueError("Irradiation value is infinite.")
 
     # Make template fill-value dictionary
     tape5_kw = {
@@ -547,7 +566,6 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
     else:
         tape5_kw['optf'] = no_print_string
 
-
     # Fill the template and write it to a file
     tape5 = _tape5_irradiation_template.format(**tape5_kw)
 
@@ -561,6 +579,7 @@ def write_tape5_irradiation(irr_type, irr_time, irr_value,
     if opened_here:
         outfile.close()
 
+
 def write_tape5_decay(dec_time,
                       outfile="TAPE5.INP",
                       decay_nlb=(1, 2, 3),
@@ -569,12 +588,12 @@ def write_tape5_decay(dec_time,
                       out_table_nes=(False, False, True),
                       out_table_laf=(True,  True,  True),
                       out_table_num=None):
-    """Writes an irradiation TAPE5 file.
+    """Writes a decay TAPE5 file.
 
     Parameters
     ----------
     dec_time : float
-        Decay time durration in days.
+        Decay time duration in days.
     outfile : str or file-like object
         Path or file to write the tape5 to.
     decay_nlb : length 3 sequence
@@ -682,12 +701,13 @@ _alpha_n_header_line = re.compile('\s*(\(ALPHA,N\) NEUTRON SOURCE), (NEUTRONS/SE
 
 _spont_fiss_header_line = re.compile('\s*(SPONTANEOUS FISSION NEUTRON SOURCE), (NEUTRONS/SEC)')
 
-_n_source_key_map ={
+_n_source_key_map = {
     '(ALPHA,N) NEUTRON SOURCE': 'alpha_neutron_source',
     'SPONTANEOUS FISSION NEUTRON SOURCE': 'spont_fiss_neutron_source',
     }
 
 _photon_spec_header_line = re.compile("\s+PHOTON SPECTRUM FOR(.*)")
+
 
 def parse_tape6(tape6="TAPE6.OUT"):
     """Parses an ORIGEN 2.2 TAPE6.OUT file.
@@ -812,14 +832,14 @@ def parse_tape6(tape6="TAPE6.OUT"):
                 results[table_key][table_type][table_group] = {}
             continue
 
-
         # Grab nuclide data lines
         m = _nuclide_line.match(line)
         if (m is not None) and (table_key is not None):
             nuc, data = m.groups()
             nuc_name = nuc.replace(' ', '')
 
-            # Don't know WTF element 'SF' is suppossed to be! (Spent fuel, spontaneous fission)
+            # Don't know WTF element 'SF' is suppossed to be!
+            # (Spent fuel, spontaneous fission)
             if nuc_name == 'SF250':
                 continue
 
@@ -841,7 +861,8 @@ def parse_tape6(tape6="TAPE6.OUT"):
             elem, data = m.groups()
             elem = elem.replace(' ', '')
 
-            # Still don't know WTF element 'SF' is suppossed to be! (Spent fuel, spontaneous fission)
+            # Still don't know WTF element 'SF' is suppossed to be!
+            # (Spent fuel, spontaneous fission)
             if elem == 'SF':
                 continue
 
@@ -923,7 +944,8 @@ def _parse_tape9_decay(deck):
 
     # Parse the cards into a structured arrau
     cards = [m.groups()[1:] + n.groups()[1:] for m, n in
-             zip(map(decay_card1_re.match, deck[1::2]), map(decay_card2_re.match, deck[2::2]))]
+             zip(map(decay_card1_re.match, deck[1::2]),
+                 map(decay_card2_re.match, deck[2::2]))]
     cards = [tuple(d.replace(' ', '') for d in card) for card in cards]
     cards = np.array(cards, dtype='i4,i4' + ',f8'*12)
     pdeck['_cards'] = cards
@@ -980,7 +1002,6 @@ def _parse_tape9_xsfpy(deck):
         subtype = 'activation_products'
     pdeck['_subtype'] = subtype
 
-
     # Parse first cards
     pdeck['sigma_gamma'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f1']] ])
     pdeck['sigma_2n'] = dict([(nuc, val) for nuc, val in cards[['f0', 'f2']] ])
@@ -1011,7 +1032,8 @@ def _parse_tape9_xsfpy(deck):
 
 
 def parse_tape9(tape9="TAPE9.INP"):
-    """Parses an ORIGEN 2.2 TAPE9 file and returns the data as a dictionary of nuclide dictionaries.
+    """Parses an ORIGEN 2.2 TAPE9 file and returns the data as a dictionary of
+    nuclide dictionaries.
 
     Parameters
     ----------
@@ -1130,6 +1152,27 @@ def parse_tape9(tape9="TAPE9.INP"):
     return parsed
 
 
+def loads_tape9(tape9):
+    """Parses a string that represents an ORIGEN 2.2 TAPE9 file and returns the data
+    as a dictionary of nuclide dictionaries. See ``parse_tape9()`` for more details.
+
+    Parameters
+    ----------
+    tape9 : str
+        String represetation of the TAPE9 file.
+
+    Returns
+    -------
+    parsed : dict
+        A dictionary of the data from the TAPE9 file.
+    """
+    if isinstance(tape9, unicode):
+        t9 = StringIO(tape9)
+    else:
+        t9 = StringIO(tape9.decode())
+    parsed = parse_tape9(t9)
+    return parsed
+
 
 def merge_tape9(tape9s):
     """Merges a sequence of full or partial TAPE9s into a single tape9 dictionary.
@@ -1174,7 +1217,6 @@ def merge_tape9(tape9s):
     return tape9
 
 
-
 def _double_get(dict, key1, key2, default=0.0):
     if key1 in dict:
         return dict[key1].get(key2, default)
@@ -1184,12 +1226,20 @@ def _double_get(dict, key1, key2, default=0.0):
 
 _deck_title_fmt = "{nlb:>4}    {title:^72}\n"
 
-_decay_card_fmt = ("{nlb:>4}{nuc:>8}  {unit}     {time:<9.{p}E} {fbx:<9.{p}E} {fpec:<9.{p}E} {fpecx:<9.{p}E} {fa:<9.{p}E} {fit:<9.{p}E}\n"
-                   "{nlb:>4}                {fsf:<9.{p}E} {fn:<9.{p}E} {qrec:<9.{p}E} {abund:<9.{p}E} {arcg:<9.{p}E} {wrcg:<9.{p}E}\n")
+_decay_card_fmt = ("{nlb:>4}{nuc:>8}  {unit}     {time:<9.{p}E} {fbx:<9.{p}E} "
+                   "{fpec:<9.{p}E} {fpecx:<9.{p}E} {fa:<9.{p}E} {fit:<9.{p}E}\n"
+                   "{nlb:>4}                {fsf:<9.{p}E} {fn:<9.{p}E} "
+                   "{qrec:<9.{p}E} {abund:<9.{p}E} {arcg:<9.{p}E} "
+                   "{wrcg:<9.{p}E}\n")
 
-_xs_card_fmt = "{nlb:>4}{nuc:>8} {sg:<9.{p}E} {s2n:<9.{p}E} {s3n_or_a:<9.{p}E} {sf_or_p:<9.{p}E} {sg_x:<9.{p}E} {s2n_x:<9.{p}E} {fpy_flag:>6.1F} \n"
+_xs_card_fmt = ("{nlb:>4}{nuc:>8} {sg:<9.{p}E} {s2n:<9.{p}E} {s3n_or_a:<9.{p}E} "
+                "{sf_or_p:<9.{p}E} {sg_x:<9.{p}E} {s2n_x:<9.{p}E} "
+                "{fpy_flag:>6.1F} \n")
 
-_fpy_card_fmt = "{nlb:>4}     {y1:<9.{p}E} {y2:<9.{p}E} {y3:<9.{p}E} {y4:<9.{p}E} {y5:<9.{p}E} {y6:<9.{p}E} {y7:<9.{p}E} {y8:<9.{p}E}\n"
+_fpy_card_fmt = ("{nlb:>4}     {y1:<8.{p}E} {y2:<8.{p}E} {y3:<8.{p}E} "
+                 "{y4:<8.{p}E} {y5:<8.{p}E} {y6:<8.{p}E} {y7:<8.{p}E} "
+                 "{y8:<8.{p}E}\n")
+
 
 def _decay_deck_2_str(nlb, deck, precision):
     # Get unique isotopes
@@ -1256,6 +1306,7 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
     nucset = set([nuc for nuc in chain(*[v.keys() for k, v in deck.items() if hasattr(v, 'keys')]) ])
     nucset = sorted(nucset)
     s = ""
+    fpy_precision = precision-1  # otherwise it doesn't fit in 80 chars
     for nuc in nucset:
         fpy_flag = 1.0
         s += _xs_card_fmt.format(nlb=nlb,
@@ -1270,17 +1321,18 @@ def _xsfpy_deck_2_str(nlb, deck, precision):
                                  p=precision,
                                  )
         s += _fpy_card_fmt.format(nlb=nlb,
-                                 y1=_double_get(deck, 'TH232_fiss_yield', nuc),
-                                 y2=_double_get(deck, 'U233_fiss_yield', nuc),
-                                 y3=_double_get(deck, 'U235_fiss_yield', nuc),
-                                 y4=_double_get(deck, 'U238_fiss_yield', nuc),
-                                 y5=_double_get(deck, 'PU239_fiss_yield', nuc),
-                                 y6=_double_get(deck, 'PU241_fiss_yield', nuc),
-                                 y7=_double_get(deck, 'CM245_fiss_yield', nuc),
-                                 y8=_double_get(deck, 'CF249_fiss_yield', nuc),
-                                 p=precision,
-                                 )
+                                  y1=_double_get(deck, 'TH232_fiss_yield', nuc),
+                                  y2=_double_get(deck, 'U233_fiss_yield', nuc),
+                                  y3=_double_get(deck, 'U235_fiss_yield', nuc),
+                                  y4=_double_get(deck, 'U238_fiss_yield', nuc),
+                                  y5=_double_get(deck, 'PU239_fiss_yield', nuc),
+                                  y6=_double_get(deck, 'PU241_fiss_yield', nuc),
+                                  y7=_double_get(deck, 'CM245_fiss_yield', nuc),
+                                  y8=_double_get(deck, 'CF249_fiss_yield', nuc),
+                                  p=fpy_precision,
+                                  )
     return s
+
 
 def _del_deck_nuc(deck, nuc):
     """removes a nucide from a deck completely."""
@@ -1290,6 +1342,7 @@ def _del_deck_nuc(deck, nuc):
         if nuc not in data:
             continue
         del data[nuc]
+
 
 def _filter_fpy(tape9):
     decay_nlb, xsfpy_nlb = nlbs(tape9)
@@ -1316,6 +1369,7 @@ def _filter_fpy(tape9):
         _del_deck_nuc(fpylib, nuc)
         _del_deck_nuc(declib, nuc)
 
+
 def _ensure_nucs_in_decay(tape9):
     decay_nlb, xsfpy_nlb = nlbs(tape9)
     for dn, xn in zip(decay_nlb, xsfpy_nlb):
@@ -1323,7 +1377,7 @@ def _ensure_nucs_in_decay(tape9):
         dhl = tape9[dn]['half_life']
         xlib = tape9[xn]
         nucset = set([nuc for nuc in chain(*[v.keys() for k, v in xlib.items() \
-                      if isinstance(v, Mapping)]) ])
+                      if isinstance(v, Mapping)])])
         for nuc in nucset:
             if nuc not in dhl:
                 dhl[nuc] = data.half_life(nucname.zzaaam(int(nuc)))
@@ -1369,7 +1423,7 @@ def write_tape9(tape9, outfile="TAPE9.INP", precision=3):
         outfile.close()
 
 _fyp_present = {'activation_products': False,  'actinides': False,
-    'fission_products': True,}
+                'fission_products': True, }
 
 _xslib_computers = {
     'sigma_gamma': lambda nuc, xscache: xscache[nuc, 'gamma'][0],
@@ -1392,6 +1446,7 @@ _xslib_computers = {
     'CF249_fiss_yield': lambda nuc, xscache: data.fpyield(982490000, nuc),
     }
 
+
 def _compute_xslib(nuc, key, lib, xscache):
     for field, data in lib.items():
         if field.startswith('_'):
@@ -1402,6 +1457,7 @@ def _compute_xslib(nuc, key, lib, xscache):
         elif field == 'title':
             continue
         data[key] = _xslib_computers[field](nuc, xscache)
+
 
 def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
     """Generates a TAPE9 dictionary of cross section & fission product yield data
@@ -1414,8 +1470,8 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
     xscache : XSCache, optional
         A cross section cache to get cross section data. If None, uses default.
     nlb : length-3 sequence of ints
-        Library numbers for activation products, actinides & daugthers, and fission
-        products respectively.
+        Library numbers for activation products, actinides & daugthers, and
+        fission products respectively.
     verbose : bool, optional
         Flag to print status as we go.
 
@@ -1428,7 +1484,12 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
         xscache = cache.xs_cache
     old_flux = xscache.get('phi_g', None)
     old_group_struct = xscache.get('E_g', None)
-    xscache['E_g'] = [10.0, 1e-7]
+    if old_group_struct is None:
+        xscache['E_g'] = [10.0, 1e-7]
+    elif len(old_group_struct) == 2:
+        pass
+    else:
+        xscache['E_g'] = [old_group_struct[0], old_group_struct[-1]]
     nucs = sorted(nucs)
 
     # setup tape9
@@ -1493,3 +1554,31 @@ def nlbs(t9):
             xsfpy_nlb[2] = n
     decay_nlb.sort()
     return tuple(decay_nlb), tuple(xsfpy_nlb)
+
+
+def make_tape9(nucs, xscache=None, nlb=(201, 202, 203)):
+    """Make a TAPE9 dict with data for a given list of nucs using data from
+    a given data source.
+
+    Parameters
+    ----------
+    nucs : iterable of ints, optional
+        Set of nuclides in any format.
+
+    Returns
+    -------
+    tape9: dict
+        A full TAPE9 nested structure inside a dict. Keys 1, 2, and 3 correspond
+        to decay decks. 219 is the activation products deck. 220 is the
+        actinides deck. 221 is the fission product yield deck.
+    """
+    # build decay decks
+    decay_file = StringIO(decay_tape9.decay_tape9)
+    decay = parse_tape9(decay_file)
+
+    if xscache is None:
+        xscache = cache.XSCache()
+    nucs = {nucname.id(nuc) for nuc in nucs}
+    xsfpys = xslibs(nucs=nucs, xscache=xscache, nlb=nlb)
+    tape9 = merge_tape9([decay, xsfpys])
+    return tape9

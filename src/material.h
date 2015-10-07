@@ -28,6 +28,7 @@
 #include "utils.h"
 #include "nucname.h"
 #include "data.h"
+#include "decay.h"
 #endif
 
 namespace pyne
@@ -35,6 +36,13 @@ namespace pyne
   // Set Type Definitions
   typedef std::map<int, double> comp_map; ///< Nuclide-mass composition map type
   typedef comp_map::iterator comp_iter;   ///< Nuclide-mass composition iter type
+
+  #ifdef PYNE_IS_AMALGAMATED
+  namespace decayers {
+    extern comp_map decay(comp_map, double);
+  }  // namespace decayers
+  #endif
+
 
   // These 37 strings are predefined FLUKA materials. 
   // Materials not on this list requires a MATERIAL card. 
@@ -46,6 +54,7 @@ namespace pyne
    "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP", 
    "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON", "POLYETHY", "AIR"
   };
+
   static int FLUKA_MAT_NUM = 37;
 
   /// Material composed of nuclides.
@@ -220,6 +229,22 @@ namespace pyne
     /// If \a apm and atoms_per_molecule on this instance are both negative, then the best
     /// guess value calculated from the normailized composition is used here.
     double molecular_mass(double apm=-1.0);
+    /// Calculates the activity of a material based on the composition and each
+    /// nuclide's mass, decay_const, and atmoic_mass. 
+    comp_map activity();
+    /// Calculates the decay heat of a material based on the composition and
+    /// each nuclide's mass, q_val, decay_const, and atomic_mass.
+    comp_map decay_heat();
+    /// Caclulates the dose per gram using the composition of the the
+    /// material, the dose type desired, and the source for dose factors
+    ///   dose_type is one of:
+    ///     ext_air -- returns mrem/h per g per m^3
+    ///     ext_soil -- returns mrem/h per g per m^2
+    ///     ingest -- returns mrem per g
+    ///     inhale -- returns mrem per g
+    ///   source is: 
+    ///     {EPA=0, DOE=1, GENII=2}, default is EPA
+    comp_map dose_per_g(std::string dose_type, int source=0);
     /// Returns a copy of the current material where all natural elements in the
     /// composition are expanded to their natural isotopic abundances.
     Material expand_elements();
@@ -288,11 +313,15 @@ namespace pyne
 
     // Atom fraction functions
     /// Returns a mapping of the nuclides in this material to their atom fractions.
-    /// This calculation is based off of the materials molecular weight.
+    /// This calculation is based off of the material's molecular weight.
     std::map<int, double> to_atom_frac();
     /// Sets the composition, mass, and atoms_per_molecule of this material to those
     /// calculated from \a atom_fracs, a mapping of nuclides to atom fractions values.
     void from_atom_frac(std::map<int, double> atom_fracs);
+    
+    /// Returns a mapping of the nuclides in this material to their atom densities.
+    /// This calculation is based off of the material's density.
+    std::map<int, double> to_atom_dens();
 
     // Radioactive Material functions
     /// Returns a list of gamma-rays energies in keV and intensities in
@@ -309,6 +338,8 @@ namespace pyne
     std::vector<std::pair<double, double> > normalize_radioactivity(
       std::vector<std::pair<double, double> > unnormed);
 
+    /// Decays this material for a given amount of time in seconds
+    Material decay(double t);
 
     // Overloaded Operators
     /// Adds mass to a material instance.
@@ -331,7 +362,7 @@ namespace pyne
     double mass;  ///< material mass
     double density; ///< material density
     double atoms_per_mol; ///< material atoms per mole
-    double comp []; ///< array of material composition mass weights.
+    double comp[1]; ///< array of material composition mass weights.
   } material_data;
 
   /// Custom exception for invalid HDF5 protocol numbers
@@ -341,10 +372,10 @@ namespace pyne
     virtual const char* what() const throw()
     {
       return "Invalid loading protocol number; please use 0 or 1.";
-    };
+    }
   };
 
 // End pyne namespace
-};
+}
 
 #endif  // PYNE_MR34UE5INRGMZK2QYRDWICFHVM

@@ -35,9 +35,9 @@
 #include <string>
 
 #include "moab/Range.hpp"
-#include "MBCore.hpp"
+#include "moab/Core.hpp"
 #include "measure.h"
-#include "MBCartVect.hpp"
+#include "moab/CartVect.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,10 +67,10 @@ namespace pyne {
 
   /// Stores 4 connected points in a mesh volume element
   struct edge_points {
-    MBCartVect o_point;
-    MBCartVect x_vec;
-    MBCartVect y_vec;
-    MBCartVect z_vec;
+    moab::CartVect o_point;
+    moab::CartVect x_vec;
+    moab::CartVect y_vec;
+    moab::CartVect z_vec;
   };
   
   /// A data structure for O(1) source sampling
@@ -143,9 +143,9 @@ namespace pyne {
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
     Mode mode; ///< Problem mode: analog, uniform, user
     // mesh
-    MBInterface* mesh; ///< MOAB mesh
+    moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.
-    MBEntityType ve_type; ///< Type of mesh volume: MBTET or MBHEX
+    moab::EntityType ve_type; ///< Type of mesh volume: moab::TET or moab::HEX
     int verts_per_ve; ///< Number of verticles per mesh volume element
     // sampling
     std::vector<edge_points> all_edge_points; ///< Four connected points on a VE.
@@ -156,16 +156,16 @@ namespace pyne {
   private:
     // instantiation
     void setup();
-    void mesh_geom_data(MBRange ves, std::vector<double> &volumes);
-    void mesh_tag_data(MBRange ves, const std::vector<double> volumes);
+    void mesh_geom_data(moab::Range ves, std::vector<double> &volumes);
+    void mesh_tag_data(moab::Range ves, const std::vector<double> volumes);
     // select birth parameters
-    MBCartVect sample_xyz(int ve_idx, std::vector<double> rands);
+    moab::CartVect sample_xyz(int ve_idx, std::vector<double> rands);
     double sample_e(int e_idx, double rand);
     double sample_w(int pdf_idx);
     // helper functions
     void normalize_pdf(std::vector<double> & pdf);
-    int num_groups(MBTag tag);
-    std::vector<double> read_bias_pdf(MBRange ves, std::vector<double> volumes, 
+    int num_groups(moab::Tag tag);
+    std::vector<double> read_bias_pdf(moab::Range ves, std::vector<double> volumes, 
                                       std::vector<double> pdf);
   };
 } //end namespace pyne

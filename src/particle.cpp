@@ -80,7 +80,7 @@ int pyne::particle::_pdcids[NUM_PARTICLES] = {
   -3222,
   3212,
   -3212
-  // charmed baryons 
+  // charmed baryons
 };
 
 std::set<std::string> pyne::particle::names(pyne::particle::_names,
@@ -155,7 +155,7 @@ void * pyne::particle::_fill_maps() {
     // make doc correspondence
     docs[_names[i]] = _docs[i];
   }
-  
+
   // make the alternates
   altnames["Hydrogen"] = name_id["Proton"];
   altnames["Protium"] = name_id["Proton"];
@@ -248,11 +248,11 @@ void * pyne::particle::_fill_maps() {
   part_to_geant4["Anti Sigma+"]="anti_sigma+";
   part_to_geant4["Sigma"]="sigma0";
   part_to_geant4["AntiSigmaZero"]="anti_sigma0";
-};
+}
 
-void * pyne::particle::_ = pyne::particle::_fill_maps();
+void * pyne::particle::filler = pyne::particle::_fill_maps();
 
-// is hydrogen 
+// is hydrogen
 bool pyne::particle::is_hydrogen(int s) {
   if(s == name_id["Proton"])
     return true;
@@ -278,32 +278,33 @@ bool pyne::particle::is_hydrogen(std::string s) {
 // heavy ion
 bool pyne::particle::is_heavy_ion(int s) {
   return pyne::particle::is_heavy_ion(std::string(id_name[s]));
-};
+}
 
 bool pyne::particle::is_heavy_ion(char *s) {
   return pyne::particle::is_heavy_ion(std::string(s));
-};
+}
 
 bool pyne::particle::is_heavy_ion(std::string s) {
-  if(pyne::nucname::isnuclide(s))
+  if(pyne::nucname::isnuclide(s)) {
     if(pyne::particle::is_hydrogen(s))
       return false;
     else
       return true;
+  }
   return false;
-};
+}
 
 // is valid functions
 bool pyne::particle::is_valid(int s) {
   if(pyne::nucname::isnuclide(s))
     return true;
-  else 
+  else
     return pyne::particle::is_valid(std::string(id_name[s]));
-};
+}
 
 bool pyne::particle::is_valid(char *s) {
   return pyne::particle::is_valid(std::string(s));
-};
+}
 
 bool pyne::particle::is_valid(std::string s) {
   // check std name
@@ -317,7 +318,7 @@ bool pyne::particle::is_valid(std::string s) {
     return true;
   else
     return false;
-};
+}
 
 // pdc functions
 int pyne::particle::id(int s) {
@@ -354,11 +355,11 @@ std::string pyne::particle::name(int s) {
   if(pyne::nucname::isnuclide(s))
     return pyne::particle::name(pyne::nucname::name(s));
   return pyne::particle::name(id_name[s]);
-};
+}
 
 std::string pyne::particle::name(char *s) {
   return pyne::particle::name(std::string(s));
-};
+}
 
 std::string pyne::particle::name(std::string s) {
   // check if is a hydrogen
@@ -378,99 +379,99 @@ std::string pyne::particle::name(std::string s) {
   // check for heavy ion
   else
     throw NotAParticle(s);
-};
+}
 
 // convert name to mcnp id
 std::string pyne::particle::mcnp(int s) {
   return pyne::particle::mcnp(pyne::particle::name(s));
-};
+}
 
 std::string pyne::particle::mcnp(char *s) {
   return pyne::particle::mcnp(pyne::particle::name(s));
-};
+}
 
 std::string pyne::particle::mcnp(std::string s) {
   if(0 < part_to_mcnp.count(pyne::particle::name(s)))
     return part_to_mcnp[pyne::particle::name(s)];
-  else 
+  else
     {
       std::cout << "Not a valid MCNP5 particle" << std::endl;
       return "?";
     }
-};
+}
 
 // convert name to mcnp6 id
 std::string pyne::particle::mcnp6(int s) {
   return pyne::particle::mcnp6(pyne::particle::name(s));
-};
+}
 
 std::string pyne::particle::mcnp6(char *s) {
   return pyne::particle::mcnp6(pyne::particle::name(s));
-};
+}
 
 std::string pyne::particle::mcnp6(std::string s) {
   if(0 < part_to_mcnp6.count(pyne::particle::name(s)))
     return part_to_mcnp6[pyne::particle::name(s)];
-  else 
+  else
     {
       std::cout << "Not a valid MCNP6 particle" << std::endl;
       return "?";
     }
-};
+}
 
 // convert name to fluka id
 std::string pyne::particle::fluka(int s) {
   return pyne::particle::fluka(pyne::particle::name(s));
-};
+}
 
 std::string pyne::particle::fluka(char *s) {
   return pyne::particle::fluka(pyne::particle::name(s));
-};
+}
 
 std::string pyne::particle::fluka(std::string s) {
   if (pyne::particle::is_heavy_ion(s))
     return "HEAVYION";
   else if(0 < part_to_fluka.count(pyne::particle::name(s)))
     return part_to_fluka[pyne::particle::name(s)];
-  else 
+  else
     {
       std::cout << "Not a valid Fluka particle" << std::endl;
       return "???????";
     }
-};
+}
 
 // convert name to geant4 id
 std::string pyne::particle::geant4(int s) {
   return pyne::particle::geant4(pyne::particle::name(s));
-};
+}
 
 std::string pyne::particle::geant4(char *s) {
   return pyne::particle::geant4(pyne::particle::name(s));
-};
+}
 
 std::string pyne::particle::geant4(std::string s) {
   if (pyne::particle::is_heavy_ion(s))
     return "GenericIon";
   else if(0 < part_to_geant4.count(pyne::particle::name(s)))
     return part_to_geant4[pyne::particle::name(s)];
-  else 
+  else
     {
       std::cout << "Not a valid Geant4 particle" << std::endl;
       return "???????";
     }
-};
-    
+}
+
 
 // describe functions
 std::string pyne::particle::describe(int s) {
   if(pyne::nucname::isnuclide(s))
     return pyne::particle::describe(pyne::nucname::name(s));
   return pyne::particle::describe(id_name[s]);
-};
+}
 
 std::string pyne::particle::describe(char *s) {
   return pyne::particle::describe(std::string(s));
-};
+}
 
 std::string pyne::particle::describe(std::string s) {
   // check if is a hydrogen
@@ -490,5 +491,4 @@ std::string pyne::particle::describe(std::string s) {
   // check if is a heavy ion
   else
     throw NotAParticle(s);
-};
-
+}

@@ -121,6 +121,6 @@ namespace pyne
   } tally_struct;
   
 // End pyne namespace
-};
+}
 
 #endif

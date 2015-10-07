@@ -3,19 +3,19 @@ Tools to generate, set and check the hashes of datasets in pyne.
 """
 import hashlib
 from warnings import warn
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
 import numpy
 import tables
 
 from .. import data
 
-warn(__name__ + " is not yet V&V compliant.", VnVWarning)
+warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-#list of nodes from distinct data sets
+# list of nodes from distinct data sets
 nodelist = ['/atomic_mass', '/material_library',
             '/neutron/eaf_xs', '/neutron/scattering_lengths',
-            '/neutron/simple_xs']
+            '/neutron/simple_xs', '/decay', '/dose_factors']
 
 
 def check_hashes(nuc_data):
@@ -32,6 +32,9 @@ def check_hashes(nuc_data):
     check_list = []
     for item in data.data_checksums:
         res = (calc_hash(item, nuc_data) == data.data_checksums[item])
+        if res is False:
+            print("Expected hash: " + str(data.data_checksums[item]))
+            print("I got:" + str(calc_hash(item, nuc_data)))
         check_list.append([item, res])
     return check_list
 

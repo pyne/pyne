@@ -1,0 +1,62 @@
+     1     0     0
+partisn_test_geom
+/
+/ NOTE: This input includes a default source that is isotropic
+/       in direction and uniform in space and energy.
+/ NOTE: The follow commented out cards must be filled in for
+/       a complete PARTISN input file:
+/       Block 1: isn, maxlcm, maxscm,
+/       Block 3: ifido, ihm, ihs, iht, ititl, lib, lng, maxord,
+/
+/ 
+/ ------------ Block 1 (Control and Dimensions) ------------
+/ 
+igeom=x-y  ngroup=5  niso=9  mt=2  nzone=3
+im=3  it=3  jm=2  jt=2  
+/ Please provide input for the following variables:
+/isn=
+/maxlcm=
+/maxscm=
+t
+/ 
+/ ------------ Block 2 (Geometry) ------------
+/ 
+xmesh= -5.000 0.000 10.000 15.000 
+xints= 3R 1
+ymesh= -5.000 0.000 5.000 
+yints= 2R 1
+zones= 1 2 3 ;
+       1 2 3 ;
+t
+/ 
+/ ------------ Block 3 (Nuclear Data) ------------
+/ 
+/ Note: NAMES is not all inclusive. Only NAMES that are present in
+/ meshed area are listed.
+names= He4 Hg202 Hg200 Hg201 Hg196 Hg204 He3 Hg198 Hg199 
+/ Please provide input for the following variables:
+/ifido=
+/ihm=
+/ihs=
+/iht=
+/ititl=
+/lib=
+/lng=
+/maxord=
+t
+/ 
+/ ------------ Block 4 (Cross-Section Mixing) ------------
+/ 
+matls= HELIUMNA He4 2.4976e-05, He3 4.4415e-11;
+       MERCURY1 Hg202 1.2060e-02, Hg200 9.4235e-03, Hg201 5.3499e-03, 
+       Hg196 6.2441e-05, Hg204 2.7475e-03, Hg198 4.1083e-03, 
+       Hg199 6.9166e-03;
+assign= 1 HELIUMNA 1.0000e+00;
+        2 HELIUMNA 5.0000e-01, MERCURY1 5.0000e-01;
+        3 MERCURY1 1.0000e+00;
+t
+/ 
+/ ------------ Block 5 (Solver Inputs) ------------
+/ 
+source=5R 1
+t

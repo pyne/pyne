@@ -4,18 +4,21 @@ import math
 import warnings
 
 import nose
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_in, assert_true
+from nose.tools import assert_equal, assert_in, assert_true
 import numpy as np
 import numpy.testing as npt
 
-from pyne.utils import VnVWarning
+from pyne.utils import QAWarning
 
-warnings.simplefilter("ignore", VnVWarning)
+warnings.simplefilter("ignore", QAWarning)
 
 import pyne
-from pyne import data
+from pyne import data, nucname
 
+from pyne import utils
+
+if utils.use_warnings():
+    utils.toggle_warnings()
 
 # These tests require nuc_data
 if not os.path.isfile(pyne.nuc_data):
@@ -31,6 +34,17 @@ def test_atomic_mass():
     assert_in(data.atomic_mass(80160), o16)
     assert_in(data.atomic_mass(922350), u235)
     assert_in(data.atomic_mass(952421), am242m)
+
+
+def test_natural_abund_excited_state():
+    # initialize natural_abund_map
+    gnd = 902320000
+    excited = gnd + 1
+    data.natural_abund(gnd)
+    # excited state should not be in the map yet
+    assert_equal(data.natural_abund_map.get(excited), None)
+    nabund = data.natural_abund(excited)
+    assert_equal(nabund, data.natural_abund_map.get(excited))
 
 
 def test_q_val():
@@ -104,8 +118,8 @@ def test_wims_fpyield():
 
 
 def test_nds_fpyield():
-    assert_equal(data.fpyield('Th-232', 'Eu-154', 3), 9.6000E-8)
-    assert_equal(data.fpyield('Th-232', 'Eu-154', 3, True), 3.8000E-8)
+    assert_equal(data.fpyield('Th-232', 'Eu-154', 3), 2.79e-07)
+    assert_equal(data.fpyield('Th-232', 'Eu-154', 3, True), 9.3e-08)
 
 
 def test_half_life():
@@ -142,10 +156,10 @@ def test_decay_children():
     assert_equal(data.decay_children('O16'), set())
     assert_equal(data.decay_children('80166', False), set([60120000, 80160000]))
     # Spontaneous fission case
-    assert_equal(data.decay_children('U-235'), set([360830000, 420950000, 
-        430990000, 441010000, 441030000, 441060000, 451030000, 451050000, 
-        461050000, 461070000, 461080000, 471090000, 481130000, 491150000, 
-        511250000, 521270000, 531270000, 531350000, 541310000, 541340000, 
+    assert_equal(data.decay_children('U-235'), set([360830000, 420950000,
+        430990000, 441010000, 441030000, 441060000, 451030000, 451050000,
+        461050000, 461070000, 461080000, 471090000, 481130000, 491150000,
+        511250000, 521270000, 531270000, 531350000, 541310000, 541340000,
         541350000, 541360000, 551330000, 551340000, 551350000, 551370000,
         601430000, 601450000, 611470000, 611480000, 611480001, 611490000,
         621470000, 621480000, 621490000, 621500000, 621510000, 621520000,
@@ -188,7 +202,8 @@ def test_decay_half_life_byparent():
 
 
 def test_decay_branch_ratio():
-    assert_equal(data.decay_branch_ratio(551370000, 561370000), 1.0)
+    npt.assert_array_almost_equal(
+    data.decay_branch_ratio(551370000, 561370000), (1.0, np.nan))
 
 
 def test_decay_photon_branch_ratio():
@@ -219,6 +234,45 @@ def test_gamma_energy():
     assert_equal(data.gamma_energy(551370000), [(283.5, 0.1), (661.657, 0.003)])
 
 
+def test_gamma_energy_byen():
+    npt.assert_equal(data.gamma_energy_byen(103.5, .05), 
+                     [(103.5, 0.4),
+                      (103.5, np.nan),
+                      (103.5, 0.1),
+                      (103.5, 0.3),
+                      (103.5, 0.2),
+                      (103.5, 0.04),
+                      (103.5, np.nan),
+                      (103.519, 0.004),
+                      (103.519, 0.004),
+                      (103.528, 0.019),
+                      (103.54, 0.08)])
+
+
+def test_gamma_parent_child():
+    assert_equal(data.gamma_parent_child(103.5, .05), [(-811910000, 801910000),
+     (380780000, 370780000),
+     (691520018, 691520000),
+     (781860000, 771860000),
+     (902250000, 882210000),
+     (942420000, 922380000),
+     (982520000, 521320000),
+     (511320000, 521320000),
+     (511320001, 521320000),
+     (751800000, 741800000),
+     (671700000, 681700000)])
+
+def test_gamma_child_byen():
+    assert_equal(data.gamma_child_byen(103.5,.1),[391020000, 521320000, 
+                 731720000, 791870000, 791870000, 832120000, 832120000, 
+                 922380000, 982500000, 801910000, 370780000, 691520000,
+                 771860000, 882210000, 922380000, 521320000, 521320000, 
+                 521320000, 741800000, 681700000, 591330000, 591330000, 
+                 741800000, 792000000, 872210000, 611560000, 1002560000])
+
+def test_gamma_child_byparent():
+    assert_equal(data.gamma_child_byparent(551370000), [561370000, 561370000])
+
 def test_gamma_photon_intensity():
     assert_equal(data.gamma_photon_intensity(551370000), [(0.00058, 8e-05),
                                                           (85.1, 0.2)])
@@ -241,33 +295,52 @@ def test_gamma_from_to_byparent():
 
 def test_gamma_from_to_byen():
     assert_equal(data.gamma_from_to_byen(661.65, 0.1),
-                 [(621510087, 621510015),
-                 (641500021, 641500006),
-                 (390990016, 390990005),
-                 (822040062, 822040024),
-                 (902290055, 902290000),
-                 (400880011, 400880004),
-                 (551310023, 551310009),
-                 (0, 0),
-                 (431070028, 431070020),
-                 (972490039, 972490003),
-                 (0, 0),
-                 (380930068, 380930050),
-                 (561370002, 561370000),
-                 (561370002, 561370000),
-                 (621520096, 621520019),
-                 (621540026, 621540006),
-                 (781810026, 781810000),
-                 (791930069, 791930033),
-                 (541390033, 541390028)])
+    [(621510087, 621510015),
+     (641500021, 641500006),
+     (390990016, 390990005),
+     (822040062, 822040024),
+     (902290055, 902290000),
+     (400880011, 400880004),
+     (400880011, 400880004),
+     (551310023, 551310009),
+     (0, 0),
+     (431070028, 431070020),
+     (972490039, 972490003),
+     (0, 0),
+     (380930068, 380930050),
+     (561370002, 561370000),
+     (561370002, 561370000),
+     (621520096, 621520019),
+     (621540026, 621540006),
+     (621540026, 621540006),
+     (781810026, 781810000),
+     (791930069, 791930033),
+     (541390033, 541390028)])
 
 
 def test_gamma_parent():
     assert_equal(data.gamma_parent(661.65, 0.1),
-                 [611510000, 651500000, 380990000, 832040000, 892290000,
-                  410880000, 561310000, 771830000, 962480000, 992530000,
-                  661550000, 370930000, 551370000, 561370002, 611520000,
-                  611540000, 791810000, 801930003, 982520000])
+                 [611510000,
+                  651500000,
+                  380990000,
+                  832040000,
+                  892290000,
+                  410880000,
+                  410880001,
+                  561310000,
+                  771830000,
+                  962480000,
+                  992530000,
+                  661550000,
+                  370930000,
+                  551370000,
+                  561370002,
+                  611520000,
+                  611540000,
+                  611540001,
+                  791810000,
+                  801930003,
+                  982520000])
 
 
 def test_alpha_energy():
@@ -297,7 +370,7 @@ def test_alpha_parent():
 
 
 def test_alpha_child_byen():
-    assert_equal(data.alpha_child_byen(5322.0, 0.1), [932370008, 952450000])
+    assert_equal(data.alpha_child_byen(5322.0, 0.1), [932370008, -952450000])
 
 
 def test_alpha_child_byparent():
@@ -309,6 +382,11 @@ def test_alpha_child_byparent():
                   932370014, 932370013, 932370012, 932370009, 932370008,
                   932370006, 932370005, 932370004, 932370003, 932370002,
                   932370001, 932370000])
+    assert_equal(data.alpha_child_byparent(922350000),
+                 [902310038, -902310000, 902310027, 902310023, 902310020,
+                  902310018, 902310017, 902310016, 902310014, 902310013,
+                  902310012, 902310007, 902310005, 902310004, 902310003,
+                  902310002, 902310001, 902310000])
 
 
 def test_beta_endpoint_energy():
@@ -361,7 +439,7 @@ def test_ecbp_parent():
 
 def test_ecbp_child_byen():
     assert_equal(data.ecbp_child_byen(215.54, 0.5),
-                 [100220001, 330690000, 531230020, 561330006])
+                 [100220001, -330690000, 531230020, 561330006])
 
 
 def test_ecbp_child_byparent():
@@ -402,11 +480,37 @@ def test_gamma_photon_intensity_byen():
                              (85.1, 0.2),
                              (89.9, 0.14),
                              (1.5, 0.1),
+                             (0.27, np.nan),
                              (0.14, np.nan),
                              (160.0, 24.0),
                              (0.32, 0.1),
                              (5.0, np.nan)])
 
+# Tests associated with "special cases" from decaygen.py
+
+def test_special_branches():
+    special_branches = {(320770001, 320770000): 0.19,
+     (360850001, 360850000): 0.212,
+     (451040000, 441040000): 0.0045,
+     (451040000, 461040000): 0.9955,
+     (461110001, 461110000): 0.73,
+     (471100001, 471100000): 0.0133,
+     (491190001, 491190000): 0.044,
+     (511260001, 511260000): 0.14,
+     (521270000, 531270000): 1.0,
+     (521290001, 531290000): 0.36,
+     (711770001, 711770000): 0.214,
+     (842110001, 842110000): 0.00016}
+    for item in special_branches:
+        assert_equal(data.decay_branch_ratio(nucname.id_to_state_id(item[0]),
+                     nucname.id_to_state_id(item[1]))[0], special_branches[item])
+
+def test_special_children():
+    special_children = {451040000: set([441040000, 461040000]),
+                        521270000: set([531270000])}
+    for item in special_children:
+        assert_equal(set(data.decay_data_children(nucname.id_to_state_id(item))), 
+                     special_children[item])
 
 if __name__ == "__main__":
     nose.runmodule()

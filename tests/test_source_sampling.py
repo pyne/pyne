@@ -1,12 +1,10 @@
-from __future__ import print_function
-
 import os
 import warnings
 import itertools
 
 from operator import itemgetter
 from nose.tools import assert_equal, with_setup, assert_almost_equal
-from random import uniform
+from random import uniform, seed
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
@@ -16,8 +14,8 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 
 from pyne.mesh import Mesh, IMeshTag
 from pyne.source_sampling import Sampler, AliasTable
@@ -33,6 +31,7 @@ def test_analog_single_hex():
     sampling particles and tallying on the basis of which of the 2^4 = 8 regions
     of phase space the particle is born into. 
     """
+    seed(1953)
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]], 
              mats = None)
     m.src = IMeshTag(1, float)
@@ -63,6 +62,7 @@ def test_analog_multiple_hex():
     defined on eight mesh volume elements in two energy groups. This is done
     using the exact same method ass test_analog_multiple_hex.
     """
+    seed(1953)
     m = Mesh(structured=True, 
              structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]], 
              mats = None)
@@ -92,6 +92,7 @@ def test_analog_single_tet():
     done by dividing the tetrahedron in 4 smaller tetrahedrons and ensuring
     that each sub-tet is sampled equally.
     """
+    seed(1953)
     mesh = iMesh.Mesh()
     v1 = [0, 0, 0]
     v2 = [1, 0, 0]
@@ -133,6 +134,7 @@ def test_uniform():
     2. Adjusts weights accordingly. Sample calculations are provided in Case 1
        in the Theory Manual.
     """
+    seed(1953)
     m = Mesh(structured=True, 
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
@@ -186,6 +188,7 @@ def test_bias():
     2. Adjusts weights accordingly. Sample calculations are provided in Case 2
        in the Theory Manual.
     """
+    seed(1953)
     m = Mesh(structured=True, 
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]], 
              mats = None)
@@ -231,6 +234,7 @@ def test_bias_spatial():
     uniform sampling, so that results can be checked against Case 1 in the
     theory manual.
     """
+    seed(1953)
     m = Mesh(structured=True, 
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
@@ -282,6 +286,7 @@ def test_alias_table():
     """This tests that the AliasTable class produces samples in the ratios
     consistant with the supplied PDF.
     """
+    seed(1953)
     pdf = np.array([0.1, 0.2, 0.7])
     at = AliasTable(pdf)
     num_samples = 50000
@@ -293,7 +298,6 @@ def test_alias_table():
         tally[s] += score
 
     for i in range(0, 3):
-       print(tally[i])
        assert(abs(tally[i] - pdf[i])/pdf[i] < 0.05)
 
 def point_in_tet(t, p):

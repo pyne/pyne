@@ -1,0 +1,68 @@
+EXAMPLE README:
+AHOT usage example:
+(In a python session, run the following commands:
+      **Note: you must copy the contents of this folder to the directory that 
+        you wish to run the ahot solvers from. This is because the AHOT solvers
+        rely on source data provided through certain files contained in this 
+        folder. You could, in theory, generate those files yourself, but there
+        is not yet an interface to do this.  Dictionary API documentation in
+        progress.
+
+    # Imports
+    $ import pyne.spatialsolver
+    $ from dictionary_populate_test import populate, populate_with_warnings
+
+    # Create a dictionary, a, then populate it with the test script
+    $ solver_dict = populate("AHOTN","LN")
+
+    # Call the solver
+    $ pyne.spatialsolver.solve(solver_dict)
+
+    #ALL supported configurations without warnings
+    #a = populate("AHOTN","LN")
+    #a = populate("AHOTN","LL")
+    #a = populate("AHOTN","NEFD")
+    #a = populate("DGFEM","LD")
+    #a = populate("DGFEM","DENSE")
+    #a = populate("DGFEM","LAGRANGE")
+
+    # Alternately, you could use the test dictionary generate script to generate
+    # a dictionary with only the required key-value pairs. The remaining entries
+    # will be filled in with defaults by the solver. Warnings for each not required
+    # dictionary key-value pair will be printed.
+    #Supported configurations with ALL POSSIBLE warnings
+    #a = populate_with_warnings("AHOTN")
+    #a = populate_with_warnings("DGFEM")
+
+    # You can also create your own dictionary (more realistic, although the test
+    # dictionary script used above does just that). Here is a commented example:
+
+    # solver_dict = {
+    #'solver':'AHOTN',
+    #'solver_type':'NEFD', # OR LN OR LL
+    #'spatial_order':1,
+    #'spatial_method':0,
+    #'angular_quadrature_order':4,  #WORKS
+    #'angular_quadrature_type':1,
+    #'nodes_xyz':[4,4,4],
+    #'num_groups':1,
+    #'num_materials':1,
+    #'x_cells_widths':[0.25, 0.25, 0.25, 0.25],
+    #'y_cells_widths':[0.25, 0.25, 0.25, 0.25],
+    #'z_cells_widths':[0.25, 0.25, 0.25, 0.25],
+    #'x_boundry_conditions':[2,2],
+    #'y_boundry_conditions':[2,2],
+    #'z_boundry_conditions':[2,2],
+    #'material_id': [[[1]*4]*4]*4,
+    #'quadrature_file':'quad_file',
+    #'xs_file':'xs',
+    #'source_input_file':'src_4.dat',
+    #'bc_input_file':'bc_4.dat',
+    #'flux_output_file':'phi_4.ahot',
+    #'convergence_criterion':1.e-12,
+    #'max_iterations':6000,
+    #'moments_converged':0,
+    #'converge_tolerence':1.e-10,
+    #'ichk':0,
+    #'ichk_tolerence':1.e-14
+    #};

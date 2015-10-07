@@ -2,8 +2,15 @@ TEST MCNP INPUT FILE -- This is NOT valid MCNP input
 C  cells 
   1  1  -19.1  -2323   $ These are just random surface numbers
   2  2  -0.9  -1222 1002 -4002                  
-  3  2   1.005e+23 $ atom density of water (not molecule density)                           
+  3  2   1.005E-01 $ atom density of water (not molecule density)                           
+  4  2   -1.1 -1 -2 3 4
 C 4  2  -2.7 $ Testing comment out capability
+c
+c Check to make sure surface cards with transformations are not
+c confused with cell cards:
+99 7 PX 180
+79 77 C/X 7180
+c
 C  materials 
 C
 C name: leu
@@ -13,6 +20,7 @@ C second comments
 c third line of comments
 c forth line of comments
 m1
+c Testing first line as comment
      92235.15c -4.0000E-02 $ herere
      92238     -9.6000E-01
 C    92233.45C -0.01 $ Testing comment out capability
@@ -25,5 +33,5 @@ C comments: Here are comments:
 C the comments continue
 C here are more
 c even more
-m2 1000.05c 2 8000 1 $ Testing single line capability 
+m2 1000.05c 2 8000 1 $ Testing single line capability
 

@@ -5,21 +5,25 @@ import warnings
 
 from unittest import TestCase
 import nose
-
+from nose.plugins.skip import SkipTest
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
-from pyne.utils import VnVWarning
-warnings.simplefilter("ignore", VnVWarning)
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
     MapStrMaterial, MultiMaterial, MaterialLibrary
 from pyne import jsoncpp
 from pyne import data
 from pyne import nucname
+from pyne import utils
 import numpy as np
 from numpy.testing import assert_array_equal
 import tables as tb
+
+if utils.use_warnings():
+    utils.toggle_warnings()
 
 nclides = 9
 nucvec = {10010000:  1.0,
@@ -195,6 +199,39 @@ class TestMaterialMethods(TestCase):
         mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
         nucvec = mat.mult_by_mass()
         assert_equal(nucvec, {922350000: 0.75, 922380000: 14.25})
+
+
+    def test_activity(self):
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
+        obs = mat.activity()
+        exp = {922350000: 59953.15101810882, 922380000: 177216.65112976026}       
+        assert_equal(set(obs), set(exp))
+        assert_equal(set(obs.values()), set(exp.values()))
+
+
+    def test_decay_heat(self):
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
+        obs = mat.decay_heat()
+        exp = {922350000: 4.48963565256e-14, 922380000: 1.2123912039e-13}
+        assert_equal(set(obs), set(exp))
+        for key in exp:
+            assert_almost_equal(obs[key], exp[key])
+
+
+    def test_dose_per_g(self):
+        mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
+        # testing for default source
+        obs1 = mat.dose_per_g("ext_air")
+        exp1 = {922350000: 1.11264406283e-14, 922380000: 5.01315571163e-15}
+        assert_equal(set(obs1), set(exp1))
+        for key in exp1:
+            assert_almost_equal(obs1[key], exp1[key])
+        # testing for non-default source
+        obs2 = mat.dose_per_g("ingest", 1)
+        exp2 = {922350000: 27.1139475504, 922380000: 77.5921552819}
+        assert_equal(set(obs2), set(exp2))
+        for key in exp2:
+            assert_almost_equal(obs2[key], exp2[key])
 
 
     def test_molecular_mass(self):
@@ -534,6 +571,12 @@ def test_from_atom_frac_meth():
     assert_equal(mat.comp[80160000], 0.8880851267119192)
     assert_equal(mat.molecular_mass(), 18.01056468403)
 
+    mt1 = from_atom_frac({1001: 0.1, 6000: 0.8, 8016: 0.1})
+    assert_equal(mt1.comp[10010000], 0.008911815984674479)
+    assert_equal(mt1.comp[60000000], 0.849651197215362)
+    assert_equal(mt1.comp[80160000], 0.14143698679996367)
+    assert_equal(mt1.molecular_mass(), 11.3088626825682)
+
     ihm = Material()
     ihm.from_atom_frac({922350000: 0.5, 922380000: 0.5})
     uox = {ihm: 1.0, 'O16': 2.0}
@@ -546,6 +589,13 @@ def test_from_atom_frac_meth():
     assert_almost_equal(mat.molecular_mass()/268.53718851614, 1.0, 15)
 
 
+def test_to_atom_dens():
+    h2o = {10010000: 0.11191487328808077, 80160000: 0.8880851267119192}
+    mat = Material(h2o, density=1.0)
+    ad = mat.to_atom_dens()
+    assert_almost_equal(ad[10010000]/(10.**22), 6.68734335169385)
+    assert_almost_equal(ad[80160000]/(10.**22), 3.34367167584692)
+    
 #
 # Test mapping functions
 #
@@ -1590,6 +1640,41 @@ def test_material_photons():
                  (105.0, 1.3600956608013968e-05),
                  (13.0, 0.18655736948227228)])
 
+
+def test_decay_h3():
+    mat = Material({'H3': 1.0})
+    obs = mat.decay(data.half_life('H3'))
+    obs = obs.to_atom_frac()
+    assert_equal(2, len(obs))
+    assert_almost_equal(0.5, obs[nucname.id('H3')])
+    assert_almost_equal(0.5, obs[nucname.id('He3')])
+
+def test_decay_u235_h3():
+    mat = Material({'U235': 1.0, 'H3': 1.0})
+    obs = mat.decay(365.25 * 24.0 * 3600.0)
+    if len(obs) < 4:
+        # full decay is not installed
+        raise SkipTest
+    exp = Material({10030000: 0.472645829730143, 20030000: 0.027354079574566214,
+                    812070000: 9.08083992078195e-22, 
+                    822090000: 5.318134090224469e-29,
+                    822110000: 1.2900842350157843e-20, 
+                    832110000: 8.383482900183342e-22, 
+                    832150000: 4.5950843264546854e-27, 
+                    842110000: 6.3727159025095244e-27, 
+                    842150000: 1.086256809210682e-26, 
+                    852190000: 4.0236546470124826e-28, 
+                    862190000: 3.37645671770566e-24,
+                    872230000: 1.5415521899415466e-22,
+                    882230000: 4.443454725452303e-18,
+                    882270000: 2.2016578572254302e-26,
+                    892270000: 4.766912006620537e-15,
+                    902270000: 1.1717834795114714e-17,
+                    902310000: 2.0323933624775356e-12,
+                    912310000: 4.838922882478526e-10,
+                    922350000: 0.5000000898212907},
+                    1.9999996387457337, -1.0, 1.000000000011328, {})
+    assert_mat_almost_equal(exp, obs)
 
 # Run as script
 #

@@ -22,7 +22,7 @@
 #include "extra_types.h"
 #endif
 
-
+//! Wrapper for standard HDF5 operations
 namespace h5wrap
 {
   /// Custom exception for HDF5 indexing errors.
@@ -137,7 +137,7 @@ namespace h5wrap
 
   // Read-in Functions
 
-  /// Retrieves the \a nth index out of the dataset \a dset (which has an HDF5 
+  /// Retrieves the \a nth index out of the dataset \a dset (which has an HDF5
   /// datatype \a dtype).  The value is returned as the C/C++ type given by \a T.
   template <typename T>
   T get_array_index(hid_t dset, int n, hid_t dtype=H5T_NATIVE_DOUBLE)
@@ -165,19 +165,19 @@ namespace h5wrap
     hsize_t count_out  [1] = {1};
     hsize_t offset_out [1] = {0};
 
-    H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
+    H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
                                  count_out, NULL);
 
     T data_out [1];
     H5Dread(dset, dtype, memspace, dspace, H5P_DEFAULT, data_out);
 
     return data_out[0];
-  };
+  }
 
 
   // Conversion functions
 
-  /// Reads in data from an HDF5 file as a C++ set.  \a T should roughly match 
+  /// Reads in data from an HDF5 file as a C++ set.  \a T should roughly match
   /// \a dtype.
   /// \param h5file HDF5 file id for an open file.
   /// \param data_path path to the data in the open file.
@@ -205,17 +205,17 @@ namespace h5wrap
 
     delete[] mem_arr;
     return cpp_set;
-  };
+  }
 
 
-  /// Reads in data from an HDF5 file as a 1 dimiensional vector.  \a T should roughly 
+  /// Reads in data from an HDF5 file as a 1 dimiensional vector.  \a T should roughly
   /// match \a dtype.
   /// \param h5file HDF5 file id for an open file.
   /// \param data_path path to the data in the open file.
   /// \param dtype HDF5 data type for the data set at \a data_path.
   /// \return an in memory 1D vector of type \a T.
   template <typename T>
-  std::vector<T> h5_array_to_cpp_vector_1d(hid_t h5file, std::string data_path, 
+  std::vector<T> h5_array_to_cpp_vector_1d(hid_t h5file, std::string data_path,
                                            hid_t dtype=H5T_NATIVE_DOUBLE)
   {
     std::vector<T> cpp_vec;
@@ -235,17 +235,17 @@ namespace h5wrap
 
     H5Dclose(dset);
     return cpp_vec;
-  };
+  }
 
 
-  /// Reads in data from an HDF5 file as a 2 dimiensional vector.  \a T should roughly 
+  /// Reads in data from an HDF5 file as a 2 dimiensional vector.  \a T should roughly
   /// match \a dtype.
   /// \param h5file HDF5 file id for an open file.
   /// \param data_path path to the data in the open file.
   /// \param dtype HDF5 data type for the data set at \a data_path.
   /// \return an in memory 2D vector of type \a T.
   template <typename T>
-  std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(hid_t h5file, std::string data_path, 
+  std::vector< std::vector<T> > h5_array_to_cpp_vector_2d(hid_t h5file, std::string data_path,
                                                           hid_t dtype=H5T_NATIVE_DOUBLE)
   {
     hsize_t arr_dims [2];
@@ -270,18 +270,18 @@ namespace h5wrap
 
     H5Dclose(dset);
     return cpp_vec;
-  };
+  }
 
 
-  /// Reads in data from an HDF5 file as a 3 dimiensional vector.  \a T should roughly 
+  /// Reads in data from an HDF5 file as a 3 dimiensional vector.  \a T should roughly
   /// match \a dtype.
   /// \param h5file HDF5 file id for an open file.
   /// \param data_path path to the data in the open file.
   /// \param dtype HDF5 data type for the data set at \a data_path.
   /// \return an in memory 3D vector of type \a T.
   template <typename T>
-  std::vector< std::vector< std::vector<T> > > h5_array_to_cpp_vector_3d(hid_t h5file, 
-                                                  std::string data_path, 
+  std::vector< std::vector< std::vector<T> > > h5_array_to_cpp_vector_3d(hid_t h5file,
+                                                  std::string data_path,
                                                   hid_t dtype=H5T_NATIVE_DOUBLE)
   {
     hsize_t arr_dims [3];
@@ -309,7 +309,7 @@ namespace h5wrap
 
     H5Dclose(dset);
     return cpp_vec;
-  };
+  }
 
 
 
@@ -327,7 +327,7 @@ namespace h5wrap
     /// default destructor
     ~HomogenousTypeTable(){};
 
-    /// Constructor to load in data upon initialization.  \a T should roughly 
+    /// Constructor to load in data upon initialization.  \a T should roughly
     /// match \a dtype.
     /// \param h5file HDF5 file id for an open file.
     /// \param data_path path to the data in the open file.
@@ -371,17 +371,17 @@ namespace h5wrap
       delete[] col_buf;
     };
 
-    // Metadata attributes 
+    // Metadata attributes
     std::string path; ///< path in file to the data
     int shape [2];    ///< table shape, rows x columns.
     std::vector<std::string> cols;  ///< column names
     /// mapping from column names to column data
-    std::map<std::string, std::vector<T> > data;  
+    std::map<std::string, std::vector<T> > data;
 
     //
     // operator overloads
     //
-    /// index into the table by column name (string) 
+    /// index into the table by column name (string)
     std::vector<T> operator[] (std::string col_name)
     {
       return data[col_name];
@@ -408,7 +408,7 @@ namespace h5wrap
     H5Tinsert(ct, "r", HOFFSET(xd_complex_t, re), H5T_NATIVE_DOUBLE);
     H5Tinsert(ct, "i", HOFFSET(xd_complex_t, im), H5T_NATIVE_DOUBLE);
     return ct;
-  };
+  }
 
   /// The HDF5 id for a complex data type compatible with PyTables generated data.
   static hid_t PYTABLES_COMPLEX128 = _get_PYTABLES_COMPLEX128();
@@ -427,7 +427,7 @@ namespace h5wrap
       rtn = true;
       H5Dclose(ds);
     }
-    else 
+    else
     {
       hid_t grp = H5Gopen2(h5file, path.c_str(), H5P_DEFAULT);
       if (0 <= grp)
@@ -437,13 +437,12 @@ namespace h5wrap
       }
     }
     return rtn;
-  };
+  }
 
 
 // End namespace h5wrap
-};
+}
 
 
 
 #endif
-
