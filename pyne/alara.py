@@ -668,10 +668,10 @@ def cram(N, t, n_0, order):
     A = _build_matrix(N)
 
     if order == 14:
-        return rat_apprx_14(A, t, n_0)
+        return _rat_apprx_14(A, t, n_0)
 
     elif order == 16:
-        return rat_apprx_16(A, t, n_0)
+        return _rat_apprx_16(A, t, n_0)
 
     else:
         msg = 'Rational approximation of degree {0} is not supported.'.format(order)
