@@ -555,11 +555,7 @@ def _build_matrix(N):
         # Find decay parents
         for k in xrange(len(N)):
             if N_id[i] in decay_children(N_id[k]):
-                A[k, i] += data.branch_ratio(N_id[k],
-                        N_id[i])* :if expand("%") == ""|browse
-                confirm w|else|confirm w|endif
-                decay_const(N_id[k])
-
+                A[i, k] += data.branch_ratio(N_id[k], N_id[i])*decay_const(N_id[k])
     return A
 
 def _rat_apprx_14(A, t, n_0):
@@ -598,7 +594,7 @@ def _rat_apprx_14(A, t, n_0):
     n = 0*n_0
 
     for j in range(7):
-        n = n + np.dot(alpha[j]*n_0, np.linalg.inv(A - theta[j] * np.identity(np.shape(A)[0])))
+        n += np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]), alpha[j]*n_0)
 
     n = 2*n.real
     n = n + alpha_0*n_0
@@ -643,7 +639,7 @@ def _rat_apprx_16(A, t, n_0):
     n = 0*n_0
 
     for j in range(8):
-        n = n + np.dot(alpha[j]*n_0, np.linalg.inv(A - theta[j] * np.identity(np.shape(A)[0])))
+        n += += np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]), alpha[j]*n_0)
 
     n = 2*n.real
     n = n + alpha_0*n_0
