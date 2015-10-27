@@ -43,15 +43,17 @@ def alphad(inputdict_unchecked):
         output_file = inputdict_unchecked['output_file'] #output file if report = yes
         print("yes to output file..")
     exe_path = path_to_exe('alphad')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + report_file + '\n'
     print inp
     if (new_out == 1):
         inp = inp + 'Y' + '\n' + output_file
+    else:
+        inp = inp + 'N' + '\n'
     print inp
-    delta_output.stdin.write(inp)
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    proc.stdin.write(inp)
+    proc.communicate()[0]
+    proc.stdin.close()
 
 
 
@@ -84,10 +86,10 @@ def delta(inputdict_unchecked):
     output_file = inputdict_unchecked['output_file']
 
     exe_path = path_to_exe('delta')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    delta_output.stdin.write(input_file + '\n' + output_file + '\n')
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(input_file + '\n' + output_file + '\n')
+    proc.communicate()[0]
+    proc.stdin.close()
 
 #def gabs(inputdict_unchecked):
     """
@@ -106,10 +108,10 @@ def delta(inputdict_unchecked):
     #add option to not get new dataset (currently new dataset is hardprogrammed to yes)
 
 #    exe_path = path_to_exe('gabs')
-#    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-#    delta_output.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file )
-#    delta_output.communicate()[0]
-#    delta_output.stdin.close()
+#    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+#    proc.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file )
+#    proc.communicate()[0]
+#    proc.stdin.close()
 
 def gtol(inputdict_unchecked):
     """
@@ -132,10 +134,12 @@ def gtol(inputdict_unchecked):
     #add option to not get new dataset (currently new dataset is hardprogrammed to yes)
 
     exe_path = path_to_exe('gtol')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + report_file + '\n'
     if (new_out):
         inp = inp + 'Y' + '\n' + output_file + '\n'
+    else:
+        inp = inp + 'N' + '\n'
     if (supress_g):
         inp = inp + 'Y' + '\n'
     else:
@@ -144,10 +148,9 @@ def gtol(inputdict_unchecked):
         inp = inp + 'Y' + '\n'
     else:
         inp = inp + 'N' + '\n' + `dcc_theory` + '\n'
-
-    delta_output.stdin.write(inp)
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    proc.stdin.write(inp)
+    proc.communicate()[0]
+    proc.stdin.close()
 
 def bldhst(inputdict_unchecked):
     """
@@ -164,10 +167,10 @@ def bldhst(inputdict_unchecked):
     output_index_file = inputdict_unchecked['output_index_file'] #report file << CHANGE BACK TO REPORT..
 
     exe_path = path_to_exe('bldhst')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    delta_output.stdin.write(input_file + '\n' + output_table_file + '\n' + output_index_file )
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(input_file + '\n' + output_table_file + '\n' + output_index_file )
+    proc.communicate()[0]
+    proc.stdin.close()
 
 def hsicc(inputdict_unchecked):
     """
@@ -188,10 +191,10 @@ def hsicc(inputdict_unchecked):
     multipol_known = inputdict_unchecked['is_multipol_known'] #'Y or CR'
 
     exe_path = path_to_exe('hsicc')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    delta_output.stdin.write(data_deck + '\n' + icc_index + '\n' + icc_table + '\n' + complete_report + '\n' + new_card_deck + '\n' + comparison_report + '\n' + multipol_known )
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(data_deck + '\n' + icc_index + '\n' + icc_table + '\n' + complete_report + '\n' + new_card_deck + '\n' + comparison_report + '\n' + multipol_known )
+    proc.communicate()[0]
+    proc.stdin.close()
 
 def hsmrg(inputdict_unchecked):
     """
@@ -208,10 +211,10 @@ def hsmrg(inputdict_unchecked):
     merged_data_deck = inputdict_unchecked['merged_data_deck']
 
     exe_path = path_to_exe('hsmrg')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    delta_output.stdin.write(data_deck + '\n' + card_deck + '\n' + merged_data_deck )
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(data_deck + '\n' + card_deck + '\n' + merged_data_deck )
+    proc.communicate()[0]
+    proc.stdin.close()
 
 def seqhst(inputdict_unchecked):
     #NOTE: changed input file line length to 90 to support longer file paths
@@ -228,10 +231,10 @@ def seqhst(inputdict_unchecked):
     output_file = inputdict_unchecked['sequential_output_file']
 
     exe_path = path_to_exe('seqhst')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    delta_output.stdin.write(input_file + '\n' + output_file )
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(input_file + '\n' + output_file )
+    proc.communicate()[0]
+    proc.stdin.close()
 
 def logft(inputdict_unchecked):
     #NOTE: changed input file line length to 90 to support longer file paths
@@ -251,10 +254,10 @@ def logft(inputdict_unchecked):
 
     exe_path = path_to_exe('logft')
     inp = input_data_set + '\n' + output_report + '\n' + data_table + '\n' + output_data_set + '\n'
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    delta_output.stdin.write(inp)
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(inp)
+    proc.communicate()[0]
+    proc.stdin.close()
 
 def pandora(inputdict_unchecked):
     """
@@ -266,8 +269,35 @@ def pandora(inputdict_unchecked):
     """
     print('Executable not yet linked')
     #@todo: get path to executable
-    #       call executable
-    #       copy output file to specified out
+    inputdict = {}
+    input_data_set = inputdict_unchecked['input_data_set']
+    exe_path = path_to_exe('pandora')
+    inp = input_data_set + '\n' + '0' + '\n' + '0' + '\n' + '0' + '\n' + '0' + '\n' + '0' + '\n'
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(inp)
+    print proc.communicate()[0]
+    proc.stdin.close()
+
+def radd(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output file : file for output to be written to (doesn't have to exist)
+    """
+    #@todo: check dictionary
+    inputdict = {}
+    atomic_number = inputdict_unchecked['atomic_number']
+    neutron_number = inputdict_unchecked['neutron_number']
+
+    exe_path = path_to_exe('radd')
+    inp = atomic_number + '\n' + neutron_number + '\n' + 'NO' + '\n'
+    print exe_path
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(inp)
+    print proc.communicate()[0]
+    proc.stdin.close()
 
 def radlist(inputdict_unchecked):
     """
@@ -298,9 +328,10 @@ def ruler(inputdict_unchecked):
     assumed_dcc_theory = inputdict_unchecked['assumed_dcc_theory']
     
     exe_path = path_to_exe('ruler')
-    delta_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    ruler_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + output_report_file + '\n' + mode_of_operation + '\n' + assumed_dcc_theory
-    delta_output.stdin.write(inp)
-    delta_output.communicate()[0]
-    delta_output.stdin.close()
+    print(inp)
+    ruler_output.stdin.write(inp)
+    ruler_output.communicate()[0]
+    ruler_output.stdin.close()
 

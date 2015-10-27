@@ -8,22 +8,20 @@ from pyne import ensdf_processing
 
 def test_alphad():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/alphad.inp'
-    input_dict['report_file'] = 'ensdf_processing/alphad.rpt'
+    input_dict['input_file'] = 'ensdf_processing/alphad/ref_a228.ens'
+    input_dict['report_file'] = 'ensdf_processing/alphad/tmp_alphad.rpt'
     input_dict['rewrite_input_with_hinderance_factor'] = 1
-    input_dict['output_file'] = 'ensdf_processing/alphad.out'
+    input_dict['output_file'] = 'ensdf_processing/alphad/tmp_alphad.out'
     output_dict = ensdf_processing.alphad(input_dict)
-    print filecmp.cmp('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt')
-
+    print filecmp.cmp('ensdf_processing/alphad/tmp_alphad.rpt','ensdf_processing/alphad/ref_a228.ens.alphad.rpt')
     d_report = comp_file_with_date_difference('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt',0)
-
 
 def test_delta():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/delta.dat'
-    input_dict['output_file'] = 'ensdf_processing/delta.out'
+    input_dict['input_file'] = 'ensdf_processing/d/inp.dat'
+    input_dict['output_file'] = 'ensdf_processing/d/tmp_delta'
     output_dict = ensdf_processing.delta(input_dict)
-    print filecmp.cmp('ensdf_processing/delta.out','ensdf_processing/compare/delta_ref.rpt')
+    print filecmp.cmp('ensdf_processing/d/tmp_delta','ensdf_processing/d/ref_delta.rpt')
     d_report = comp_file_with_date_difference('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt',0)
 
 def test_brick():
@@ -41,18 +39,16 @@ def test_brick():
 
 def test_gtol():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/gtol/gtol.inp'
-    input_dict['report_file'] = 'ensdf_processing/gtol/gtol.rpt'
-    input_dict['new_ensdf_file_with_results'] = 1
-    input_dict['output_file'] = 'ensdf_processing/gtol/gtol.out'
-    input_dict['supress_gamma_comparison'] = 0
-    input_dict['supress_intensity_comparison'] = 0
-    input_dict['dcc_theory_percent'] = 3
+    input_dict['input_file'] = 'ensdf_processing/gtol/ref_gtol.inp'
+    input_dict['report_file'] = 'ensdf_processing/gtol/tmp_gtol.rpt'
+    input_dict['new_ensdf_file_with_results'] = 0
+    input_dict['output_file'] = 'ensdf_processing/gtol/tmp_gtol.out'
+    input_dict['supress_gamma_comparison'] = 1
+    input_dict['supress_intensity_comparison'] = 1
+    input_dict['dcc_theory_percent'] = 1.4
     output_dict = ensdf_processing.gtol(input_dict)
-    ref_output_report = 'ensdf_processing/gtol/gtol_ref.rpt'
-    ref_output = 'ensdf_processing/gtol/gtol_ref.out'
-    #d_report = comp_file_with_date_difference(input_dict['report_file'],ref_output_report,0)
-    #d_output = comp_file_with_date_difference(input_dict['output_file'],ref_output,0)
+    ref_output_report = 'ensdf_processing/gtol/ref_gtol.rpt'
+    d_report = comp_file_with_date_difference(input_dict['report_file'],ref_output_report,0)
 
 def test_bldhst():
     input_dict = {}
@@ -99,15 +95,6 @@ def test_seqhst():
     ref_sequence = 'ensdf_processing/seqhst/ref_iccseq.dat'
     d_report = comp_file_with_date_difference(input_dict['sequential_output_file'],ref_sequence,0)
 
-def test_logft_functional():
-    input_dict = {}
-    input_dict['input_data_set'] = 'ensdf_processing/logft_data.tst'
-    input_dict['output_report'] = 'ensdf_processing/logft.rpt'
-    input_dict['data_table'] = 'ensdf_processing/logft.dat'
-    input_dict['output_data_set'] = 'ensdf_processing/logft.new'
-    output_dict = ensdf_processing.logft(input_dict)
-    #check output files present?
-
 def test_logft_outputs():
     input_dict = {}
     input_dict['input_data_set'] = 'ensdf_processing/logft_data.tst'
@@ -121,18 +108,29 @@ def test_logft_outputs():
     d_data = comp_file_with_date_difference(input_dict['output_data_set'], ref_output_data_set,0)
 
 def test_pandora():
-    print("not working")
+    input_dict = {}
+    input_dict['input_data_set'] = 'ensdf_processing/pandora/pandora.inp'
+    output_dict = ensdf_processing.pandora(input_dict)
+
+def test_radd():
+    input_dict = {}
+    input_dict['atomic_number'] = '86'
+    input_dict['neutron_number'] = '113'
+    ensdf_processing.radd(input_dict)
+
 
 def test_radlist():
     print("not working")
 
 def test_ruler():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/ruler.inp'
-    input_dict['output_report_file'] = 'ensdf_processing/ruler.rpt'
+    input_dict['input_file'] = 'ensdf_processing/ruler/ref_ruler.inp'
+    input_dict['output_report_file'] = 'ensdf_processing/ruler/tmp_ruler.rpt'
     input_dict['mode_of_operation'] = 'R'
-    input_dict['assumed_dcc_theory'] = '3'
+    input_dict['assumed_dcc_theory'] = '1.4'
     output_dict = ensdf_processing.ruler(input_dict)
+    ref_output = 'ensdf_processing/ruler/ref_ruler.rpt'
+    d_report = comp_file_with_date_difference(input_dict['output_report_file'],ref_output,0)
 
 def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
     f_out = open(file_out, 'r')
@@ -152,19 +150,17 @@ def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
     diff_dict['differences_lines'] = diff_lines
     return diff_dict
 
-
 #  nose.runmodule()
 if __name__ == "__main__":
-    #a1 = test_alphad()
-    #a = test_delta()
+    alphad = test_alphad()
     #b = test_gabs_80Br()
     #c = test_gtol()
     #d = test_bldhst()
     #nc = test_hsicc()
     #n = test_hsmrg()
     #l = test_seqhst()
-    #z = test_logft_functional()
     #z = test_logft_outputs()
+    #c = test_radd()
     # pandora test needed
     # radlist test needed
-    r = test_ruler()
+    #r = test_ruler()

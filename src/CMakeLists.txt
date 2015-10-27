@@ -124,8 +124,12 @@ add_executable(pandora ${PROJECT_SOURCE_DIR}/src/ensdf_processing/PANDORA/pandor
                        ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 #add_executable(radlst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADLST/radlst.for
 #                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(radd ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for)
 add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f 
                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+
+file(GLOB "ensdf_processing/RADD/ELE.in") 
+file(GLOB "ensdf_processing/RADD/98AK04.in")
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
