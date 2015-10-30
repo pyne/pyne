@@ -187,9 +187,10 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         
         vals = []
         errors = []
-        for ve, flux in enumerate(meshtally.vals[:]):
+        for flux, error in zip(meshtally.vals[:], meshtally.errors[:]):
             vals.append(np.atleast_1d(flux))
-            errors.append(np.atleast_1d(meshtally.errors[ve]))
+            errors.append(np.atleast_1d(error))
+
         vals = np.array(vals)
         errors = np.array(errors)
         
