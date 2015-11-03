@@ -14,7 +14,7 @@ def test_alphad():
     input_dict['output_file'] = 'ensdf_processing/alphad/tmp_alphad.out'
     output_dict = ensdf_processing.alphad(input_dict)
     print filecmp.cmp('ensdf_processing/alphad/tmp_alphad.rpt','ensdf_processing/alphad/ref_a228.ens.alphad.rpt')
-    d_report = comp_file_with_date_difference('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt',0)
+    #d_report = comp_file_with_date_difference('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt',0)
 
 def test_delta():
     input_dict = {}
@@ -22,7 +22,6 @@ def test_delta():
     input_dict['output_file'] = 'ensdf_processing/d/tmp_delta'
     output_dict = ensdf_processing.delta(input_dict)
     print filecmp.cmp('ensdf_processing/d/tmp_delta','ensdf_processing/d/ref_delta.rpt')
-    d_report = comp_file_with_date_difference('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt',0)
 
 def test_brick():
     print("not working..")
