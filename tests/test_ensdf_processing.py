@@ -152,11 +152,11 @@ def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
 
 #  nose.runmodule()
 if __name__ == "__main__":
-    alphad = test_alphad()
+    #alphad = test_alphad()
     #b = test_gabs_80Br()
     #c = test_gtol()
     #d = test_bldhst()
-    #nc = test_hsicc()
+    nc = test_hsicc()
     #n = test_hsmrg()
     #l = test_seqhst()
     #z = test_logft_outputs()
