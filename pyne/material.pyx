@@ -687,7 +687,7 @@ cdef class _Material:
 
     def collapse_elements(self, nucset):
         """collapse_elements(self, nucset)
-        Collapses the elements in the material, excluding the nuclids in 
+        Collapses the elements in the material, excluding the nucids in 
 	the set nucset. This function returns a copy of the material.
 
         Returns
