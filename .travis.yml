@@ -3,6 +3,7 @@ python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "2.7"
   - "3.4"
+  - "3.5"
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y gfortran
