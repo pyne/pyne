@@ -116,7 +116,7 @@ def cleanpypath(path):
 
 
 def assert_np_version():
-    low = (1, 8, 0)
+    low = (1, 8)
     v = np.version.short_version
     cur = tuple(map(int, v.split('.')[:2]))
     if cur < low:
