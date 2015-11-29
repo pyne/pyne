@@ -593,7 +593,7 @@ C                                                                       02 00020
 C  PROGRAM UNIT 2                                                       02 00030
 C  ROUTINE TO READ (FROM TERMINAL) NAMES OF I/O UNITS AND OPEN THEM.    02 00040
 C                                                                       02 00050
-      CHARACTER*30 INAME,ONAME,NAME                                     02 00060
+      CHARACTER*80 INAME,ONAME,NAME                                     02 00060
 C                                                                       02 00070
  9000 FORMAT(A)                                                         02 00080
 C                                                                       02 00090

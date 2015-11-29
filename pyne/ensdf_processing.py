@@ -37,16 +37,16 @@ def alphad(inputdict_unchecked):
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     report_file = inputdict_unchecked['report_file']
-    new_out = inputdict_unchecked['rewrite_input_with_hinderance_factor']
+    rewrite_hinderance = inputdict_unchecked['rewrite_input_with_hinderance_factor']
     output_file = 'alphad.out'
-    if(new_out == 1):    
+    if(rewrite_hinderance == 1):    
         output_file = inputdict_unchecked['output_file'] #output file if report = yes
         print("yes to output file..")
     exe_path = path_to_exe('alphad')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    inp = input_file + '\n' + report_file + '\n'
+    inp = input_file + '\n' + report_file + '\n' + 'Y' + '\n'
     print inp
-    if (new_out == 1):
+    if (rewrite_hinderance == 1):
         inp = inp + 'Y' + '\n' + output_file
     else:
         inp = inp + 'N' + '\n'
@@ -290,14 +290,17 @@ def radd(inputdict_unchecked):
     inputdict = {}
     atomic_number = inputdict_unchecked['atomic_number']
     neutron_number = inputdict_unchecked['neutron_number']
+    output_file = inputdict_unchecked['output_file']
 
     exe_path = path_to_exe('radd')
     inp = atomic_number + '\n' + neutron_number + '\n' + 'NO' + '\n'
-    print exe_path
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     proc.stdin.write(inp)
-    print proc.communicate()[0]
+    radd_output = proc.communicate()[0]
     proc.stdin.close()
+    f = open(output_file, 'w')
+    f.write(radd_output)
+    f.close()
 
 def radlist(inputdict_unchecked):
     """
@@ -330,7 +333,6 @@ def ruler(inputdict_unchecked):
     exe_path = path_to_exe('ruler')
     ruler_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + output_report_file + '\n' + mode_of_operation + '\n' + assumed_dcc_theory
-    print(inp)
     ruler_output.stdin.write(inp)
     ruler_output.communicate()[0]
     ruler_output.stdin.close()

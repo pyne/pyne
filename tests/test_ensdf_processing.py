@@ -13,15 +13,16 @@ def test_alphad():
     input_dict['rewrite_input_with_hinderance_factor'] = 1
     input_dict['output_file'] = 'ensdf_processing/alphad/tmp_alphad.out'
     output_dict = ensdf_processing.alphad(input_dict)
-    print filecmp.cmp('ensdf_processing/alphad/tmp_alphad.rpt','ensdf_processing/alphad/ref_a228.ens.alphad.rpt')
-    #d_report = comp_file_with_date_difference('ensdf_processing/alphad.rpt','ensdf_processing/alphad_correct.rpt',0)
+    print file_comp('ensdf_processing/alphad/tmp_alphad.rpt','ensdf_processing/alphad/ref_a228.ens.alphad.rpt', [])
+    #print filecmp.cmp('ensdf_processing/alphad/tmp_alphad.rpt','ensdf_processing/alphad/ref_a228.ens.alphad.rpt')
+    #print comp_file_with_date_difference('ensdf_processing/alphad/tmp_alphad.rpt','ensdf_processing/alphad/ref_a228.ens.alphad.rpt',0)
 
 def test_delta():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/d/inp.dat'
-    input_dict['output_file'] = 'ensdf_processing/d/tmp_delta'
+    input_dict['input_file'] = 'ensdf_processing/delta/ref_inp.dat'
+    input_dict['output_file'] = 'ensdf_processing/delta/tmp_delta.dat'
     output_dict = ensdf_processing.delta(input_dict)
-    print filecmp.cmp('ensdf_processing/d/tmp_delta','ensdf_processing/d/ref_delta.rpt')
+    print filecmp.cmp(input_dict['output_file'],'ensdf_processing/delta/ref_delta.rpt')
 
 def test_brick():
     print("not working..")
@@ -47,18 +48,19 @@ def test_gtol():
     input_dict['dcc_theory_percent'] = 1.4
     output_dict = ensdf_processing.gtol(input_dict)
     ref_output_report = 'ensdf_processing/gtol/ref_gtol.rpt'
-    d_report = comp_file_with_date_difference(input_dict['report_file'],ref_output_report,0)
+    exceptions = [[1, 'DATE:'], [1, 'INPUT-FILE name:'], [1, 'TIME:']]
+    d_report = file_comp(input_dict['report_file'], ref_output_report, exceptions)
 
 def test_bldhst():
     input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/bldhst/bldhst_iccseq.dat'
-    input_dict['output_table_file'] = 'ensdf_processing/bldhst/bldhst_icctbl.dat'
-    input_dict['output_index_file'] = 'ensdf_processing/bldhst/bldhst_iccndx.dat'
+    input_dict['input_file'] = 'ensdf_processing/bldhst/ref_bldhst_iccseq.dat'
+    input_dict['output_table_file'] = 'ensdf_processing/bldhst/tmp_bldhst_icctbl.dat'
+    input_dict['output_index_file'] = 'ensdf_processing/bldhst/tmp_bldhst_iccndx.dat'
     output_dict = ensdf_processing.bldhst(input_dict)
     ref_table = 'ensdf_processing/bldhst/ref_icctbl.dat'
     ref_index = 'ensdf_processing/bldhst/ref_iccndx.dat'
-    d_table = comp_file_with_date_difference(input_dict['output_table_file'],ref_table,0)
-    d_index = comp_file_with_date_difference(input_dict['output_index_file'],ref_index,0)
+    d_table = file_comp(input_dict['output_table_file'], ref_table, [])
+    d_index = file_comp(input_dict['output_index_file'], ref_index, [])
 
 def test_hsicc():
     input_dict = {}
@@ -73,9 +75,9 @@ def test_hsicc():
     ref_report = 'ensdf_processing/hsicc/ref_hscalc.lst'
     ref_card_deck = 'ensdf_processing/hsicc/ref_cards.new'
     ref_comparison_report = 'ensdf_processing/hsicc/ref_compar.lst'
-    d_report = comp_file_with_date_difference(input_dict['complete_report'],ref_report,0)
-    d_card_deck = comp_file_with_date_difference(input_dict['new_card_deck'],ref_card_deck,0)
-    d_comparison_report = comp_file_with_date_difference(input_dict['comparison_report'],ref_comparison_report,0)
+    d_report = file_comp(input_dict['complete_report'], ref_report, [])
+    d_card_deck = file_comp(input_dict['new_card_deck'], ref_card_deck, [])
+    d_comparison_report = file_comp(input_dict['comparison_report'], ref_comparison_report, [])
 
 def test_hsmrg():
     input_dict = {}
@@ -84,7 +86,7 @@ def test_hsmrg():
     input_dict['merged_data_deck'] = 'ensdf_processing/hsmrg/out_cards.mrg'
     output_dict = ensdf_processing.hsmrg(input_dict)
     ref_deck = 'ensdf_processing/hsmrg/ref_cards.mrg'
-    d_report = comp_file_with_date_difference(input_dict['merged_data_deck'],ref_deck,0)
+    d_report = file_comp(input_dict['merged_data_deck'], ref_deck, [])
 
 def test_seqhst():
     input_dict = {}
@@ -92,7 +94,7 @@ def test_seqhst():
     input_dict['sequential_output_file'] = 'ensdf_processing/seqhst/out_iccseq.dat'
     output_dict = ensdf_processing.seqhst(input_dict)
     ref_sequence = 'ensdf_processing/seqhst/ref_iccseq.dat'
-    d_report = comp_file_with_date_difference(input_dict['sequential_output_file'],ref_sequence,0)
+    d_report = file_comp(input_dict['sequential_output_file'], ref_sequence, [])
 
 def test_logft_outputs():
     input_dict = {}
@@ -101,22 +103,23 @@ def test_logft_outputs():
     input_dict['data_table'] = 'ensdf_processing/logft.dat'
     input_dict['output_data_set'] = 'ensdf_processing/logft.new'
     output_dict = ensdf_processing.logft(input_dict)
-    ref_output_report = 'ensdf_processing/compare/logft_ref.rpt'
     ref_output_data_set = 'ensdf_processing/compare/logft_ref.new'
-    d_report = comp_file_with_date_difference(input_dict['output_report'],ref_output_report,0)
-    d_data = comp_file_with_date_difference(input_dict['output_data_set'], ref_output_data_set,0)
+    d_data = file_comp(input_dict['output_data_set'], ref_output_data_set, [])
 
 def test_pandora():
     input_dict = {}
     input_dict['input_data_set'] = 'ensdf_processing/pandora/pandora.inp'
     output_dict = ensdf_processing.pandora(input_dict)
+    print output_dict
 
 def test_radd():
     input_dict = {}
     input_dict['atomic_number'] = '86'
     input_dict['neutron_number'] = '113'
+    input_dict['output_file'] = 'ensdf_processing/radd/tmp_output.out'
     ensdf_processing.radd(input_dict)
-
+    ref_output = 'ensdf_processing/radd/ref_output.out'
+    d_report = file_comp(input_dict['output_file'], ref_output, [])
 
 def test_radlist():
     print("not working")
@@ -129,9 +132,13 @@ def test_ruler():
     input_dict['assumed_dcc_theory'] = '1.4'
     output_dict = ensdf_processing.ruler(input_dict)
     ref_output = 'ensdf_processing/ruler/ref_ruler.rpt'
-    d_report = comp_file_with_date_difference(input_dict['output_report_file'],ref_output,0)
+    exceptions = [[1, '         INPUT FILE:'], [1, 'RULER Version 3.2d [20-Jan-2009]']]
+    d_report = file_comp(input_dict['output_report_file'], ref_output, exceptions)
 
-def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
+def file_comp(file_out, file_ref, exceptions):
+    # exceptions format: [type, options]
+    #   type 1: prefix of length n
+    #       options: 'prefix'
     f_out = open(file_out, 'r')
     f_ref = open(file_ref, 'r')
     diff_lines = numpy.array([])
@@ -139,27 +146,41 @@ def comp_file_with_date_difference(file_out, file_ref, num_diff_lines):
     for line_out in f_out:
         line_ref = f_ref.readline()
         if(line_ref != line_out):
-            print  line_num
-            print '     line_out is: ' + line_out
-            print '     line_ref is: ' + line_ref
-            diff_lines = numpy.append(diff_lines, line_num)
+            ignore = False
+            for i in range(0, len(exceptions)):
+                if exceptions[i][0] == 1:
+                	if line_out[0:len(exceptions[i][1])] == exceptions[i][1]:
+              			#print 'ignore should be true'
+              			#print line_out[0:len(exceptions[i][1])]
+              			#print exceptions[i][1]
+              			ignore = True
+            if not ignore:
+            	raise Exception('ENSDF Processing: Incorrect output generated, file: ' + file_ref)
+            	print  line_num
+            	print '     line_out is: ' + line_out
+            	print '     line_ref is: ' + line_ref
+            	diff_lines = numpy.append(diff_lines, line_num)
         line_num = line_num + 1
 
     diff_dict = {}
     diff_dict['differences_lines'] = diff_lines
+    #if len(diff_lines) == 0:
+    	#print file_ref + ' is the same'
     return diff_dict
 
 #  nose.runmodule()
 if __name__ == "__main__":
-    #alphad = test_alphad()
+    alphad = test_alphad()
     #b = test_gabs_80Br()
-    #c = test_gtol()
-    #d = test_bldhst()
-    nc = test_hsicc()
-    #n = test_hsmrg()
-    #l = test_seqhst()
-    #z = test_logft_outputs()
-    #c = test_radd()
+    c = test_gtol()
+    d1 = test_delta()
+    d = test_bldhst()
+    #nc = test_hsicc()
+    n = test_hsmrg()
+    l = test_seqhst()
+    z = test_logft_outputs()
+    c = test_radd()
     # pandora test needed
+    p = test_pandora()
     # radlist test needed
-    #r = test_ruler()
+    r = test_ruler()
