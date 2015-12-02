@@ -10,6 +10,7 @@ Welcome to Github Setup's documentation!
 Go to https://help.github.com/articles/set-up-git/ and follow the directions.
 The download should include the latest Github visual interface as well as a 
 Bash shell terminal if your computer does not already have one.
+Note that the visual interface is not needed and any shell can be used.
 
 **Pushing Code and Documentation to Github**
 
