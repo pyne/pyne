@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import unicode_literals
 import os
 
 from nose.tools import assert_equal, assert_in, assert_almost_equal

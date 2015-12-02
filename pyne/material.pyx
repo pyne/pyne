@@ -686,14 +686,14 @@ cdef class _Material:
         return newmat
 
     def collapse_elements(self, nucset):
-        """collapse_elements(self)
+        """collapse_elements(self, nucset)
         Collapses the elements in the material, excluding the nucids in 
-	paramater set. This function returns a copy of the material.
+	the set nucset. This function returns a copy of the material.
 
         Returns
         -------
         newmat : Material
-            A copied and collapseed material.
+            A copied and collapsed material.
 
         """
         cdef _Material newmat = Material()
