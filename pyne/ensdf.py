@@ -677,7 +677,7 @@ def _parse_decay_dataset(lines, decay_s):
                 aparent = parent2
             level = 0.0 if level is None else level
             adaughter = data.id_from_level(_to_id(daughter), level)
-            alphas.append((aparent, adaughter, dat[0], dat[2]))
+            alphas.append([aparent, adaughter, dat[0], dat[2]])
         ec_rec = _ec.match(line)
         if ec_rec is not None:
             dat = _parse_ec_record(ec_rec)
