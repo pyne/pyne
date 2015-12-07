@@ -1,11 +1,12 @@
 '''This module accesses various ensdf processing tools'''
 
-import sys
-import os
+import sys, os, os.path, shutil, urllib, subprocess, urllib2
+import numpy as np
+
+import urllib
+
 from warnings import warn
 from pyne.utils import QAWarning
-import subprocess
-import numpy as np
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -18,6 +19,23 @@ def path_to_exe(exe_name ):
     exe_path_abs = os.path.join('./',exe_path_abs)
     #print(exe_path_abs)
     return exe_path_abs
+
+def download_exe(exe_path, exe_url):
+    response = urllib2.urlopen(exe_url)
+    print 'opened url'
+    prog = 0
+    CHUNK = 32 * 1024
+    f = open(exe_path, 'wb')
+    print 'opened file'
+    while True:
+        chunk = response.read(CHUNK)
+        prog = prog + (32)
+        print 'read chunk'
+        print prog
+        if not chunk: break
+        f.write(chunk)
+    f.close()
+    return True
 
 def alphad(inputdict_unchecked):
     """
@@ -41,16 +59,13 @@ def alphad(inputdict_unchecked):
     output_file = 'alphad.out'
     if(rewrite_hinderance == 1):    
         output_file = inputdict_unchecked['output_file'] #output file if report = yes
-        print("yes to output file..")
     exe_path = path_to_exe('alphad')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + report_file + '\n' + 'Y' + '\n'
-    print inp
     if (rewrite_hinderance == 1):
         inp = inp + 'Y' + '\n' + output_file
     else:
         inp = inp + 'N' + '\n'
-    print inp
     proc.stdin.write(inp)
     proc.communicate()[0]
     proc.stdin.close()
@@ -66,10 +81,33 @@ def bricc(inputdict_unchecked):
         input_index_file : input index file
         input_icc_file : input icc file
     """
-    print('Executable not yet linked')
-    #@todo: get path to executable
-    #       call executable
-    #       copy output file to specified out
+    
+    exe_path = path_to_exe('bricc')
+    '''
+    try:
+        os.remove(exe_path) # purge for testing
+        print 'file purged'
+    except:
+        print 'file not purged'
+    if os.path.isfile(exe_path):
+        print 'previous executable still present...'
+    else:
+        print 'executable clean/gone'  
+
+    bricc_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/BrIcc/Linux/BriccV23-Linux.tgz"
+    downloaded = download_exe(exe_path, bricc_url)
+    '''
+    #@todo: check dictionary
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    output_file = inputdict_unchecked['output_file']
+
+    exe_path = path_to_exe('delta')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(input_file + '\n' + output_file + '\n')
+    proc.communicate()[0]
+    proc.stdin.close()
+
 
 def delta(inputdict_unchecked):
     """
@@ -91,7 +129,7 @@ def delta(inputdict_unchecked):
     proc.communicate()[0]
     proc.stdin.close()
 
-#def gabs(inputdict_unchecked):
+def gabs(inputdict_unchecked):
     """
     This function ...
 
@@ -100,18 +138,17 @@ def delta(inputdict_unchecked):
         output file : file for output to be written to (doesn't have to exist)
     """
     #@todo: check dictionary
-#    inputdict = {}
-#    input_file = inputdict_unchecked['input_file']
-#    dataset_file = inputdict_unchecked['dataset_file']
-#    output_file = inputdict_unchecked['output_file'] #report file << CHANGE BACK TO REPORT..
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    dataset_file = inputdict_unchecked['dataset_file']
+    output_file = inputdict_unchecked['output_file'] #report file << CHANGE BACK TO REPORT..
 
     #add option to not get new dataset (currently new dataset is hardprogrammed to yes)
-
-#    exe_path = path_to_exe('gabs')
-#    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-#    proc.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file )
-#    proc.communicate()[0]
-#    proc.stdin.close()
+    exe_path = path_to_exe('gabs')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file)
+    proc.communicate()[0]
+    proc.stdin.close()
 
 def gtol(inputdict_unchecked):
     """
@@ -267,16 +304,44 @@ def pandora(inputdict_unchecked):
         input_file : input ensdf file
         output file : file for output to be written to (doesn't have to exist)
     """
-    print('Executable not yet linked')
     #@todo: get path to executable
     inputdict = {}
     input_data_set = inputdict_unchecked['input_data_set']
     exe_path = path_to_exe('pandora')
-    inp = input_data_set + '\n' + '0' + '\n' + '0' + '\n' + '0' + '\n' + '0' + '\n' + '0' + '\n'
+    inp = input_data_set + '\n' + \
+        '0' + '\n' + \
+        '0' + '\n' + \
+        '0' + '\n' + \
+        '0' + '\n' + \
+        '0' + '\n'
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     proc.stdin.write(inp)
     print proc.communicate()[0]
     proc.stdin.close()
+    if os.path.isfile('pandora.err'):  
+        if 'output_err' in inputdict_unchecked:
+            shutil.copyfile('pandora.err', inputdict_unchecked['output_err'])
+    if os.path.isfile('pandora.gam'):
+        if 'output_gam' in inputdict_unchecked:
+            shutil.copyfile('pandora.gam', inputdict_unchecked['output_gam'])
+    if os.path.isfile('pandora.gle'):  
+        if 'output_gle' in inputdict_unchecked:
+            shutil.copyfile('pandora.gle', inputdict_unchecked['output_gle'])
+    if os.path.isfile('pandora.lev'):  
+        if 'output_lev' in inputdict_unchecked:
+            shutil.copyfile('pandora.lev', inputdict_unchecked['output_lev'])
+    if os.path.isfile('pandora.rad'):  
+        if 'output_rad' in inputdict_unchecked:
+            shutil.copyfile('pandora.rad', inputdict_unchecked['output_rad'])
+    if os.path.isfile('pandora.rep'):  
+        if 'output_rep' in inputdict_unchecked:
+            shutil.copyfile('pandora.rep', inputdict_unchecked['output_rep'])
+    if os.path.isfile('pandora.xrf'):  
+        if 'output_xrf' in inputdict_unchecked:
+            shutil.copyfile('pandora.xrf', inputdict_unchecked['output_xrf'])
+    if os.path.isfile('pandora.out'):  
+        if 'output_out' in inputdict_unchecked:
+            shutil.copyfile('pandora.out', inputdict_unchecked['output_out'])
 
 def radd(inputdict_unchecked):
     """
@@ -310,10 +375,36 @@ def radlist(inputdict_unchecked):
         input_file : input ensdf file
         output file : file for output to be written to (doesn't have to exist)
     """
+
     print('Executable not yet linked')
-    #@todo: get path to executable
-    #       call executable
-    #       copy output file to specified out
+
+    exe_path = path_to_exe('radlist')
+    #try:
+    #    os.remove(exe_path) # purge for testing
+    #radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
+    #print exe_path
+    #downloaded = download_exe(exe_path, radllist_url)
+
+    inputdict = {}
+    output_rad_listing = inputdict_unchecked['output_radiation_listing']
+    output_endf_like_file = inputdict_unchecked['output_endf_like_file']
+    output_file_for_nudat = inputdict_unchecked['output_file_for_nudat']
+    output_mird_listing = inputdict_unchecked['output_mird_listing']
+    calculate_continua = inputdict_unchecked['calculate_continua']
+    input_file = inputdict_unchecked['input_file']
+    output_radlst_file = inputdict_unchecked['output_radlst_file']
+    input_radlst_data_table = inputdict_unchecked['input_radlst_data_table']
+    input_masses_data_table = inputdict_unchecked['input_masses_data_table']
+    output_ensdf_file = inputdict_unchecked['output_ensdf_file']
+
+    inp = output_rad_listing + '\n' + output_endf_like_file + '\n' + output_file_for_nudat +\
+          output_mird_listing + '\n' + calculate_continua + '\n' + input_file +\
+          output_radlst_file + '\n' + input_radlst_data_table + '\n' + input_masses_data_table +\
+          output_ensdf_file
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(inp)
+    radd_output = proc.communicate()[0]
+    proc.stdin.close()
 
 def ruler(inputdict_unchecked):
     """
