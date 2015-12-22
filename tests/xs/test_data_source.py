@@ -22,10 +22,12 @@ warnings.simplefilter('ignore', QAWarning)
 from pyne.xs import data_source
 from pyne.pyne_config import pyne_conf
 
-if not os.path.isfile('W180.ace'):
-    u, f = 'https://www-nds.iaea.org/wolfram/w180/beta3/W180.ace', 'W180.ace'
-    print('Downloading {0} to {1} ...'.format(u, f), file=sys.stderr)
-    urllib.urlretrieve(u, f)
+sys.path.insert(0, os.path.dirname(__file__))
+from utils import download_file
+del sys.path[0]
+
+download_file('https://www-nds.iaea.org/wolfram/w180/beta3/W180.ace', 'W180.ace',
+              '5349513f196ad594d172bc6ea61dc382')
 
 nuc_data = pyne_conf.NUC_DATA_PATH
 

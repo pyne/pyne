@@ -1,5 +1,7 @@
 """Some PyNE testing utilities."""
+from __future__ import print_function
 import os
+import sys
 from hashlib import md5
 try:
     import urllib.request as urllib
@@ -13,6 +15,8 @@ def download_file(url, localfile, md5_hash):
         with open(localfile, "rb") as f:
             html = f.read()
     else:
+        msg = 'Downloading {0!r} to {1!r}'.format(url, localfile)
+        print(msg, file=sys.stderr)
         req = urllib.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         f = urllib.urlopen(req, timeout=30.0)
         try:
