@@ -14,8 +14,11 @@ def download_file(url, localfile, md5_hash):
             html = f.read()
     else:
         req = urllib.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.urlopen(req, timeout=30.0) as f:
+        f = urllib.urlopen(req, timeout=30.0)
+        try:
             html = f.read()
+        finally:
+            f.close()
         with open(localfile, 'wb') as f:
             f.write(html)
     obs_hash = md5(html).hexdigest()

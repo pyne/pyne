@@ -19,26 +19,12 @@ if sys.version_info[0] > 2:
 else:
     from StringIO import StringIO
 
-if sys.version_info[0] > 2:
-    import urllib.request as urllib
-else:
-    import urllib
 
+from utils import download_file
 
 def test_loadfile():
-    if not os.path.isfile('epdl97_eedl_Pb'):
-        urllib.urlretrieve(
-                'https://www-nds.iaea.org/epdl97/data/endl/eedl/za082000',
-                'epdl97_eedl_Pb'
-                )
-    with open('epdl97_eedl_Pb', 'rb') as f:
-        obs_hash = md5(f.read()).hexdigest()
-    exp_hash = '502105669e0c0ad917301d219c649aaf'
-    assert_equal(
-            obs_hash, exp_hash,
-            msg='epdl97_eedl_Pb hash check failed; please try redownloading'
-            ' the epdl97_eedl_Pb data file.'
-            )
+    download_file('https://www-nds.iaea.org/epdl97/data/endl/eedl/za082000',
+                  'epdl97_eedl_Pb', '502105669e0c0ad917301d219c649aaf')
     testlib = Library('epdl97_eedl_Pb')
 
     # test the nuclides
