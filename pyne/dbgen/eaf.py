@@ -48,12 +48,18 @@ def grab_eaf_data(build_dir=""):
     fpath = os.path.join(build_dir, eaf_gzip)
     if eaf_gzip not in os.listdir(build_dir):
         print("  grabbing {0} and placing it in {1}".format(eaf_gzip, fpath))
-        urllib.urlretrieve(iaea_url, fpath)
+        try:
+            urllib.urlretrieve(iaea_url, fpath)
+        except (OSError, IOError):
+            open(fpath, 'a').close()  # touch the file
 
         if os.path.getsize(fpath) < 3215713: 
             print("  could not get {0} from IAEA; trying S3 mirror".format(eaf_gzip))
             os.remove(fpath)
-            urllib.urlretrieve(s3_base_url + eaf_gzip, fpath)
+            try:
+                urllib.urlretrieve(cf_base_url + eaf_gzip, fpath)
+            except (OSError, IOError):
+                open(fpath, 'a').close()  # touch the file
             if os.path.getsize(fpath) < 3215713: 
                 print("  could not get {0} from S3 mirror".format(eaf_gzip))
                 return False
