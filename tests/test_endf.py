@@ -4,6 +4,9 @@ import warnings
 from math import e
 from hashlib import md5
 
+import nose
+from nose.tools import assert_equal
+
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose, \
     assert_array_almost_equal
@@ -17,8 +20,7 @@ from pyne.rxdata import DoubleSpinDict
 from pyne.xs.data_source import ENDFDataSource
 from pyne import nucname
 
-import nose
-from nose.tools import assert_equal
+from utils import download_file
 
 def ignore_future_warnings(func):
     """This is a decorator which can be used to ignore FutureWarnings
@@ -47,25 +49,6 @@ def array_from_ENDF(fh):
                          delimiter=11,
                          converters={0: endftod, 1: endftod, 2: endftod,
                                      3: endftod, 4: endftod, 5: endftod})
-
-
-def download_file(url, localfile, md5_hash):
-    """Donwload a file and make sure its MD5 hash matches."""
-    try:
-        assert(os.path.isfile(localfile))
-    except AssertionError:
-        try:
-            import urllib.request as urllib
-        except ImportError:
-            import urllib
-        urllib.urlretrieve(url, localfile)
-    with open(localfile, "rb") as f:
-        obs_hash = md5(f.read()).hexdigest()
-    try:
-        assert_equal(obs_hash, md5_hash)
-    except AssertionError:
-        raise AssertionError("{} hash check failed; please try redownloading "
-                             "the U235 data file.".format(localfile))
 
 
 def test_endftod():
