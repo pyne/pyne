@@ -3486,7 +3486,7 @@
          READ(isori,'(20X,A)',END=20) rec
          WRITE(isoro,'(A)') rec(1:Frecl)
       END DO
-   20 CLOSE(UNIT=isori,STATUS='DELETE')
+   20 CLOSE(UNIT=isori)
       CLOSE(UNIT=isoro)
 !
       RETURN
@@ -3556,7 +3556,7 @@
          READ(isori,'(27X,A)',END=20) rec(1:Frecl)
          WRITE(isoro,'(A)') rec(1:Frecl)
       END DO
-   20 CLOSE(UNIT=isori,STATUS='DELETE')
+   20 CLOSE(UNIT=isori)
       CLOSE(UNIT=isoro)
 !
       RETURN

@@ -1,9 +1,12 @@
 '''This module accesses various ensdf processing tools'''
 
-import sys, os, os.path, shutil, urllib, subprocess, urllib2
+import sys, os, os.path, shutil, subprocess, tarfile
 import numpy as np
 
-import urllib
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 
 from warnings import warn
 from pyne.utils import QAWarning
@@ -17,25 +20,29 @@ def path_to_exe(exe_name ):
     exe_path_abs, dp = os.path.split(os.path.abspath(__file__))
     exe_path_abs = os.path.join(exe_path_abs, exe_name)
     exe_path_abs = os.path.join('./',exe_path_abs)
-    #print(exe_path_abs)
     return exe_path_abs
 
-def download_exe(exe_path, exe_url):
-    response = urllib2.urlopen(exe_url)
-    print 'opened url'
-    prog = 0
-    CHUNK = 32 * 1024
-    f = open(exe_path, 'wb')
-    print 'opened file'
-    while True:
-        chunk = response.read(CHUNK)
-        prog = prog + (32)
-        print 'read chunk'
-        print prog
-        if not chunk: break
-        f.write(chunk)
-    f.close()
-    return True
+def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_size = 0):
+    if not os.path.exists(exe_path):
+        print 'fetching executable'
+
+        response = urllib2.urlopen(exe_url)
+        prog = 0
+        CHUNK = 32 * 1024
+        f = open(exe_path, 'wb')
+        while True:
+            chunk = response.read(CHUNK)
+            prog = prog + (256)
+            if dl_size != 0:
+                print 'Download progress: %d/100' % (100.0 * (float(prog) / float(dl_size)))
+            if not chunk: break
+            f.write(chunk)
+        f.close()
+        # set proper permissions on newly downloaded file
+        os.chmod(exe_path, 0744)
+        if compressed:
+            tfile = tarfile.open(exe_path, 'r:gz')
+            tfile.extractall(decomp_path)
 
 def alphad(inputdict_unchecked):
     """
@@ -46,6 +53,9 @@ def alphad(inputdict_unchecked):
     @TODO: put in pretty table format
         ensdf_input_file : input file
         output_file : file for output to be written to (doesn't have to exist)
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if ALPHAD completes successfully.
 
     Full documentation explaining the details of the functionality and physics
     behind ALPHAD can be found at:
@@ -69,8 +79,7 @@ def alphad(inputdict_unchecked):
     proc.stdin.write(inp)
     proc.communicate()[0]
     proc.stdin.close()
-
-
+    return inputdict_unchecked
 
 def bricc(inputdict_unchecked):
     """
@@ -78,37 +87,49 @@ def bricc(inputdict_unchecked):
     coefficients, and the E0 electron factors.
 
     Input Dictionary Required Key Pair Value:
-        input_index_file : input index file
-        input_icc_file : input icc file
+        input_line : input line to be used, as if bricc was being used in the interactive
+                     command line style.  This line will be passed in verbatim to the
+                     bricc executable, and default output file names will be used.  For
+                     generating new records, or any operation that produces output files,
+                     '<CR>' should be appended on the end of input_line, to force default
+                     file names to be used.
+    Output Dictionary Values:
+        input_line : user defined input
+        output_file_directory : the directory all produced bricc output files will be 
+                                located.
+        bricc_output : data printed to command line.  Useful for interactive use.
+    NOTE:
+        All the various ouptput files bricc can generate are found in the
+        'output_file_directory' path.  '<CR>' must be appended to 'input_line' for this
+        to work properly. 
     """
     
     exe_path = path_to_exe('bricc')
-    '''
-    try:
-        os.remove(exe_path) # purge for testing
-        print 'file purged'
-    except:
-        print 'file not purged'
-    if os.path.isfile(exe_path):
-        print 'previous executable still present...'
-    else:
-        print 'executable clean/gone'  
+    exe_dir = path_to_exe('')
+    compressed_exe_path = exe_path + '.tar.gz'
 
     bricc_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/BrIcc/Linux/BriccV23-Linux.tgz"
-    downloaded = download_exe(exe_path, bricc_url)
-    '''
+    decomp_exe_path = path_to_exe('')
+    decomp_options = ['bricc', '.tgz', True]
+    verify_download_exe(compressed_exe_path, bricc_url, compressed = True, decomp_path = decomp_exe_path, dl_size = 127232)
     #@todo: check dictionary
-    inputdict = {}
-    input_file = inputdict_unchecked['input_file']
-    output_file = inputdict_unchecked['output_file']
-
-    exe_path = path_to_exe('delta')
+    
+    # check if BriIccHome environment variable has been set (needed by BRICC executable)
+    if not os.environ.get('BrIccHome'):
+        os.environ['BrIccHome'] = str(exe_dir)
+    
+    input_line = inputdict_unchecked['input_line']
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    proc.stdin.write(input_file + '\n' + output_file + '\n')
-    proc.communicate()[0]
+    proc.stdin.write(input_line)
+    casdfads = proc.communicate()[0]
     proc.stdin.close()
 
+    output_dict = inputdict_unchecked
+    output_dict['output_file_directory'] = exe_dir
+    output_dict['bricc_output'] = casdfads
+    return output_dict
 
+    
 def delta(inputdict_unchecked):
     """
     This function calculates the best values of mixing ratios based of its analysis of
@@ -117,6 +138,9 @@ def delta(inputdict_unchecked):
     Input Dictionary Required Key Pair Value:
         input_file : input ensdf file
         output_file : file for output to be written to (doesn't have to exist)
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if DELTA completes successfully.
     """
     #@todo: check dictionary
     inputdict = {}
@@ -128,6 +152,7 @@ def delta(inputdict_unchecked):
     proc.stdin.write(input_file + '\n' + output_file + '\n')
     proc.communicate()[0]
     proc.stdin.close()
+    return inputdict_unchecked
 
 def gabs(inputdict_unchecked):
     """
@@ -135,8 +160,17 @@ def gabs(inputdict_unchecked):
 
     Input Dictionary Required Key Pair Value:
         input_file : input ensdf file
+        dataset_file : dataset file to be used
         output file : file for output to be written to (doesn't have to exist)
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if GABS completes successfully.
     """
+    exe_path = path_to_exe('gabs') 
+
+    gabs_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/gabs/unx/gabs"
+    verify_download_exe(exe_path, gabs_url, dl_size = 8704)
+    
     #@todo: check dictionary
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
@@ -149,14 +183,24 @@ def gabs(inputdict_unchecked):
     proc.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file)
     proc.communicate()[0]
     proc.stdin.close()
+    
 
 def gtol(inputdict_unchecked):
     """
     This function ...
 
     Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+        input_file : input ensdf file.
+        report_file : desired gtol report file path.
+        new_ensdf_file_with_results : boolean, if true then a new ensdf file with results
+                                      will be created.
+        output_file : desired gtol output file path.
+        supress_gamma_comparison : boolean, if true the gamma comparison will be suppressed.
+        dcc_theory_percent : double, specifies the dcc theory percentage to be used.
+
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if GTOL completes successfully.
     """
     #@todo: check dictionary
     inputdict = {}
@@ -188,34 +232,50 @@ def gtol(inputdict_unchecked):
     proc.stdin.write(inp)
     proc.communicate()[0]
     proc.stdin.close()
+    return inputdict_unchecked
 
 def bldhst(inputdict_unchecked):
     """
-    This function ...
+    This program builds a direct access file of the internal conversion coefficient 
+    table. (BLDHST readme)
 
     Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+        input_file : input ensdf file.
+        output_table_file : desired output table file path.
+        output_index_file : desired output index file path.
+
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if BLDHST completes successfully.
     """
     #@todo: check dictionary
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     output_table_file = inputdict_unchecked['output_table_file']
-    output_index_file = inputdict_unchecked['output_index_file'] #report file << CHANGE BACK TO REPORT..
+    output_index_file = inputdict_unchecked['output_index_file']
 
     exe_path = path_to_exe('bldhst')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     proc.stdin.write(input_file + '\n' + output_table_file + '\n' + output_index_file )
     proc.communicate()[0]
     proc.stdin.close()
+    return inputdict_unchecked
 
 def hsicc(inputdict_unchecked):
     """
-    This function ...
+    This program calculates internal conversion coefficients. (HSICC readme)
 
     Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+        data_deck : data deck to be used for hsicc program.
+        icc_index : icc index to be used for hsicc program.
+        icc_table : icc table to be used for the hsicc program.
+        complete_report : desired report file path for hsicc program.
+        new_card_deck : desired new card deck file path for hsicc program.
+        comparison_report : desired comparison report path for hsicc program.
+        is_multipol_known : 1 if multipol is known, 0 otherwise.
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if HSICC completes successfully.
     """
     #@todo: check dictionary
     inputdict = {}
@@ -229,17 +289,24 @@ def hsicc(inputdict_unchecked):
 
     exe_path = path_to_exe('hsicc')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    proc.stdin.write(data_deck + '\n' + icc_index + '\n' + icc_table + '\n' + complete_report + '\n' + new_card_deck + '\n' + comparison_report + '\n' + multipol_known )
+    proc.stdin.write(data_deck + '\n' + icc_index + '\n' + icc_table + '\n' + \
+        complete_report + '\n' + new_card_deck + '\n' + comparison_report + '\n' + multipol_known )
     proc.communicate()[0]
     proc.stdin.close()
+    return inputdict_unchecked
 
 def hsmrg(inputdict_unchecked):
     """
-    This function ...
+    This program merges new gamma records created by HSICC with the original input 
+    data.  (HSICC readme)
 
     Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+        data_deck : data deck file path for hsmrg to use.
+        card_deck : card deck file path for hsmrg to use.
+        merged_data_deck : desired merged data deck file path created by hsmrg.
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if HSMRG completes successfully.
     """
     #@todo: check dictionary
     inputdict = {}
@@ -252,17 +319,21 @@ def hsmrg(inputdict_unchecked):
     proc.stdin.write(data_deck + '\n' + card_deck + '\n' + merged_data_deck )
     proc.communicate()[0]
     proc.stdin.close()
+    return inputdict_unchecked
 
 def seqhst(inputdict_unchecked):
-    #NOTE: changed input file line length to 90 to support longer file paths
     """
-    This function ...
+    This program recreates a sequential file of the internal conversion table from the 
+    direct access file.  (HSICC readme)
 
     Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+        binary_table_input_file : binary table input file path.
+        sequential_output_file : desired path of sequential output file.
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if SEQHST completes successfully.
     """
-    #@todo: check dictionary
+    #NOTE: changed input file line length to 90 to support longer file paths
     inputdict = {}
     input_file = inputdict_unchecked['binary_table_input_file']
     output_file = inputdict_unchecked['sequential_output_file']
@@ -272,15 +343,22 @@ def seqhst(inputdict_unchecked):
     proc.stdin.write(input_file + '\n' + output_file )
     proc.communicate()[0]
     proc.stdin.close()
+    return inputdict_unchecked
 
 def logft(inputdict_unchecked):
     #NOTE: changed input file line length to 90 to support longer file paths
     """
-    This function ...
+    This program calculates log ft values for beta and electron-capture decay, average beta energies, 
+    and capture fractions.  (LOGFT readme)
 
     Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+        input_data_set : path to input data file.
+        output_report : desired path to output report file.
+        data_table : path to data table.
+        output_data_set : desired path to output data set.
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if LOGFT completes successfully.
     """
     #@todo: check dictionary
     inputdict = {}
@@ -295,25 +373,38 @@ def logft(inputdict_unchecked):
     proc.stdin.write(inp)
     proc.communicate()[0]
     proc.stdin.close()
+    return inputdict_unchecked
 
 def pandora(inputdict_unchecked):
     """
-    This function ...
+    This program performs a least-squares fit to the gamma-energies to obtain level energies 
+    and calculates the net feeding to levels. (PANDORA readme)
 
     Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+        xxxxxxx
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if PANDORA completes successfully.
     """
     #@todo: get path to executable
     inputdict = {}
     input_data_set = inputdict_unchecked['input_data_set']
     exe_path = path_to_exe('pandora')
+
+    # create temp file for fortran file to write temporary things to
+    tmpfile_path = path_to_exe('tmpfil.tmp')
+    tmpfile = open(tmpfile_path, 'w+')
+    open('tmpfil.tmp', 'w+')
+    tmpfile.close()
     inp = input_data_set + '\n' + \
-        '0' + '\n' + \
-        '0' + '\n' + \
-        '0' + '\n' + \
-        '0' + '\n' + \
-        '0' + '\n'
+         ('1' if inputdict_unchecked['level_report_and_files_sorted'] else '0') + '\n' + \
+         ('1' if inputdict_unchecked['gamma_report_and_files_sorted'] else '0') + '\n' + \
+         ('1' if inputdict_unchecked['radiation_report_and_files_sorted'] else '0') + '\n' + \
+         ('1' if inputdict_unchecked['cross_reference_output'] else '0') + '\n'
+    if inputdict_unchecked['cross_reference_output']:
+        inp = inp + 'pandora.out' + '\n'
+    inp = inp + '1' if  inputdict_unchecked['supress_warning_messages'] else '0 + \n'
+    print inp
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     proc.stdin.write(inp)
     print proc.communicate()[0]
@@ -342,14 +433,29 @@ def pandora(inputdict_unchecked):
     if os.path.isfile('pandora.out'):  
         if 'output_out' in inputdict_unchecked:
             shutil.copyfile('pandora.out', inputdict_unchecked['output_out'])
+        else:
+            print 'could not find output in dictionary'
+    else:
+        print 'could not find output file'
+    return inputdict_unchecked
+
+
 
 def radd(inputdict_unchecked):
     """
-    This function ...
+    This code (RadD.FOR) deduces the radius parameter (r 0 ) for odd-odd and odd-A nuclei 
+    using the even-even radii [1] as input parameters. These radii deduced for odd-A and 
+    odd-odd nuclides can be used in the calculation of alpha hindrance factors. In this 
+    procedure, it is assumed that radius parameter ( r 0 Z , N ) for odd-Z and odd-N 
+    nuclides lies midway between the radius parameters of adjacent even-even neighbors 
+    calculates reduced transition probabilities. (RADD readme)
 
     Input Dictionary Required Key Pair Value:
         input_file : input ensdf file
         output file : file for output to be written to (doesn't have to exist)
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if RADD completes successfully.
     """
     #@todo: check dictionary
     inputdict = {}
@@ -366,25 +472,25 @@ def radd(inputdict_unchecked):
     f = open(output_file, 'w')
     f.write(radd_output)
     f.close()
+    return inputdict_unchecked
 
 def radlist(inputdict_unchecked):
     """
-    This function ...
-
+    This program calculates atomic & nuclear radiations and checks energy balance.  
+    (RADLIST readme)
+    
     Input Dictionary Required Key Pair Value:
         input_file : input ensdf file
         output file : file for output to be written to (doesn't have to exist)
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if RADLIST completes successfully.
     """
-
-    print('Executable not yet linked')
-
     exe_path = path_to_exe('radlist')
-    #try:
-    #    os.remove(exe_path) # purge for testing
-    #radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
-    #print exe_path
-    #downloaded = download_exe(exe_path, radllist_url)
-
+    radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
+    print exe_path
+    verify_download_exe(exe_path, radlist_url, dl_size = 8704)
+    
     inputdict = {}
     output_rad_listing = inputdict_unchecked['output_radiation_listing']
     output_endf_like_file = inputdict_unchecked['output_endf_like_file']
@@ -405,14 +511,19 @@ def radlist(inputdict_unchecked):
     proc.stdin.write(inp)
     radd_output = proc.communicate()[0]
     proc.stdin.close()
+    return inputdict_unchecked
+    
 
 def ruler(inputdict_unchecked):
     """
-    This function ...
+    This program calculates reduced transition probabilities. (RULER readme)
 
     Input Dictionary Required Key Pair Value:
         input_file : input ensdf file
         output file : file for output to be written to (doesn't have to exist)
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if RULER completes successfully.
     """
     #@todo: check dictionary
     inputdict = {}
@@ -427,4 +538,4 @@ def ruler(inputdict_unchecked):
     ruler_output.stdin.write(inp)
     ruler_output.communicate()[0]
     ruler_output.stdin.close()
-
+    return inputdict_unchecked
