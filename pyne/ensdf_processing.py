@@ -1,15 +1,14 @@
 '''This module accesses various ensdf processing tools'''
 
-import sys, os, os.path, shutil, subprocess, tarfile
+import sys, os, shutil, subprocess, tarfile
 import numpy as np
+from warnings import warn
+from pyne.utils import QAWarning
 
 try:
     import urllib.request as urllib2
 except ImportError:
     import urllib2
-
-from warnings import warn
-from pyne.utils import QAWarning
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -25,7 +24,6 @@ def path_to_exe(exe_name ):
 def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_size = 0):
     if not os.path.exists(exe_path):
         print 'fetching executable'
-
         response = urllib2.urlopen(exe_url)
         prog = 0
         CHUNK = 32 * 1024
@@ -33,8 +31,8 @@ def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_
         while True:
             chunk = response.read(CHUNK)
             prog = prog + (256)
-            if dl_size != 0:
-                print 'Download progress: %d/100' % (100.0 * (float(prog) / float(dl_size)))
+            #if dl_size != 0:
+            #    print 'Download progress: %d/100' % (100.0 * (float(prog) / float(dl_size)))
             if not chunk: break
             f.write(chunk)
         f.close()
@@ -50,7 +48,6 @@ def alphad(inputdict_unchecked):
     lives for even even ground state transitions.
 
     Input Dictionary Required Key Pair Value:
-    @TODO: put in pretty table format
         ensdf_input_file : input file
         output_file : file for output to be written to (doesn't have to exist)
 
@@ -61,7 +58,6 @@ def alphad(inputdict_unchecked):
     behind ALPHAD can be found at:
         http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/alphad/readme-alphad.pdf
     """
-    #@todo: check dictionary
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     report_file = inputdict_unchecked['report_file']
@@ -101,9 +97,8 @@ def bricc(inputdict_unchecked):
     NOTE:
         All the various ouptput files bricc can generate are found in the
         'output_file_directory' path.  '<CR>' must be appended to 'input_line' for this
-        to work properly. 
+        to work properly.
     """
-    
     exe_path = path_to_exe('bricc')
     exe_dir = path_to_exe('')
     compressed_exe_path = exe_path + '.tar.gz'
@@ -112,7 +107,6 @@ def bricc(inputdict_unchecked):
     decomp_exe_path = path_to_exe('')
     decomp_options = ['bricc', '.tgz', True]
     verify_download_exe(compressed_exe_path, bricc_url, compressed = True, decomp_path = decomp_exe_path, dl_size = 127232)
-    #@todo: check dictionary
     
     # check if BriIccHome environment variable has been set (needed by BRICC executable)
     if not os.environ.get('BrIccHome'):
@@ -142,7 +136,6 @@ def delta(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if DELTA completes successfully.
     """
-    #@todo: check dictionary
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     output_file = inputdict_unchecked['output_file']
@@ -171,7 +164,6 @@ def gabs(inputdict_unchecked):
     gabs_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/gabs/unx/gabs"
     verify_download_exe(exe_path, gabs_url, dl_size = 8704)
     
-    #@todo: check dictionary
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     dataset_file = inputdict_unchecked['dataset_file']
@@ -202,7 +194,6 @@ def gtol(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if GTOL completes successfully.
     """
-    #@todo: check dictionary
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     report_file = inputdict_unchecked['report_file']
@@ -211,8 +202,6 @@ def gtol(inputdict_unchecked):
     supress_g = inputdict_unchecked['supress_gamma_comparison']
     supress_ic = inputdict_unchecked['supress_intensity_comparison']
     dcc_theory = inputdict_unchecked['dcc_theory_percent']
-
-    #add option to not get new dataset (currently new dataset is hardprogrammed to yes)
 
     exe_path = path_to_exe('gtol')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
@@ -248,7 +237,6 @@ def bldhst(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if BLDHST completes successfully.
     """
-    #@todo: check dictionary
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     output_table_file = inputdict_unchecked['output_table_file']
@@ -277,7 +265,6 @@ def hsicc(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if HSICC completes successfully.
     """
-    #@todo: check dictionary
     inputdict = {}
     data_deck = inputdict_unchecked['data_deck']
     icc_index = inputdict_unchecked['icc_index']
@@ -308,7 +295,6 @@ def hsmrg(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if HSMRG completes successfully.
     """
-    #@todo: check dictionary
     inputdict = {}
     data_deck = inputdict_unchecked['data_deck']
     card_deck = inputdict_unchecked['card_deck']
@@ -333,7 +319,7 @@ def seqhst(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if SEQHST completes successfully.
     """
-    #NOTE: changed input file line length to 90 to support longer file paths
+    #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
     inputdict = {}
     input_file = inputdict_unchecked['binary_table_input_file']
     output_file = inputdict_unchecked['sequential_output_file']
@@ -346,7 +332,7 @@ def seqhst(inputdict_unchecked):
     return inputdict_unchecked
 
 def logft(inputdict_unchecked):
-    #NOTE: changed input file line length to 90 to support longer file paths
+    #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
     """
     This program calculates log ft values for beta and electron-capture decay, average beta energies, 
     and capture fractions.  (LOGFT readme)
@@ -360,7 +346,6 @@ def logft(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if LOGFT completes successfully.
     """
-    #@todo: check dictionary
     inputdict = {}
     input_data_set = inputdict_unchecked['input_data_set']
     output_report = inputdict_unchecked['output_report']
@@ -386,7 +371,6 @@ def pandora(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if PANDORA completes successfully.
     """
-    #@todo: get path to executable
     inputdict = {}
     input_data_set = inputdict_unchecked['input_data_set']
     exe_path = path_to_exe('pandora')
@@ -439,8 +423,6 @@ def pandora(inputdict_unchecked):
         print 'could not find output file'
     return inputdict_unchecked
 
-
-
 def radd(inputdict_unchecked):
     """
     This code (RadD.FOR) deduces the radius parameter (r 0 ) for odd-odd and odd-A nuclei 
@@ -457,7 +439,6 @@ def radd(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if RADD completes successfully.
     """
-    #@todo: check dictionary
     inputdict = {}
     atomic_number = inputdict_unchecked['atomic_number']
     neutron_number = inputdict_unchecked['neutron_number']
@@ -480,8 +461,16 @@ def radlist(inputdict_unchecked):
     (RADLIST readme)
     
     Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+        output_radiation_listing : String, 'Y' if output radiation listing is desired, else 'N'.
+		output_ensdf_like_file : String, 'Y' if output ensdf like file is desired, else 'N'.     
+		output_file_for_nudat : String, 'Y' if output file for nudat is desired, else 'N'.
+		output_mird_listing : String, 'Y' if output mird listing is desired, else 'N'.
+		calculate_continua : String, 'Y' if calculate continua is desired, else 'N'.
+		input_file : input ensdf file.
+		output_radlst_file : path to desired output radlst file.
+		input_radlst_data_table : path to input radlst data table (mednew.dat location).
+		input_masses_data_table : (optional) path to input masses data table.
+		output_ensdf_file : path to desired output ensdf file.
 
     Output Dictionary Values:
         Everything in input dictionary is returned if RADLIST completes successfully.
@@ -493,7 +482,7 @@ def radlist(inputdict_unchecked):
     
     inputdict = {}
     output_rad_listing = inputdict_unchecked['output_radiation_listing']
-    output_endf_like_file = inputdict_unchecked['output_endf_like_file']
+    output_endf_like_file = inputdict_unchecked['output_ensdf_like_file']
     output_file_for_nudat = inputdict_unchecked['output_file_for_nudat']
     output_mird_listing = inputdict_unchecked['output_mird_listing']
     calculate_continua = inputdict_unchecked['calculate_continua']
@@ -515,7 +504,6 @@ def radlist(inputdict_unchecked):
     radd_output = proc.communicate()[0]
     proc.stdin.close()
     return inputdict_unchecked
-    
 
 def ruler(inputdict_unchecked):
     """
@@ -528,7 +516,6 @@ def ruler(inputdict_unchecked):
     Output Dictionary Values:
         Everything in input dictionary is returned if RULER completes successfully.
     """
-    #@todo: check dictionary
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     output_report_file = inputdict_unchecked['output_report_file']

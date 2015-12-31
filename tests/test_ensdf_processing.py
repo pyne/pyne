@@ -24,6 +24,7 @@ def test_delta():
     			 [3,  232], [3, 236], [3, 243], [3, 318], [3, 355], [3, 458]]
     d_ouptut = file_comp(input_dict['output_file'],'ensdf_processing/delta/ref_delta.rpt', exceptions)
 
+'''
 def test_bricc():
     input_dict = {}
     input_dict['input_line'] = '238'
@@ -33,6 +34,7 @@ def test_bricc():
     bricc_outfile = open('ensdf_processing/bricc/tmp_bricc_out.out', 'w+')
     bricc_outfile.write(output_dict['bricc_output'])
     file_comp(bricc_out_tmp, bricc_out_ref,[])
+'''
 
 # Tests gabs output for 80Br sample input.  Date and file names are expected to be different
 # in the test output and reference file sets.
@@ -96,31 +98,32 @@ def test_hsicc():
 
 def test_hsmrg():
     input_dict = {}
-    input_dict['data_deck'] = 'ensdf_processing/hsmrg/hsmrg_data.tst'
-    input_dict['card_deck'] = 'ensdf_processing/hsmrg/hsmrg_cards.new'
-    input_dict['merged_data_deck'] = 'ensdf_processing/hsmrg/out_cards.mrg'
+    input_dict['data_deck'] = 'ensdf_processing/hsmrg/ref_hsmrg_data.tst'
+    input_dict['card_deck'] = 'ensdf_processing/hsmrg/ref_hsmrg_cards.new'
+    input_dict['merged_data_deck'] = 'ensdf_processing/hsmrg/tmp_out_cards.mrg'
     output_dict = ensdf_processing.hsmrg(input_dict)
     ref_deck = 'ensdf_processing/hsmrg/ref_cards.mrg'
     d_report = file_comp(input_dict['merged_data_deck'], ref_deck, [])
 
 def test_seqhst():
     input_dict = {}
-    input_dict['binary_table_input_file'] = 'ensdf_processing/seqhst/seqhst_icctbl.dat'
-    input_dict['sequential_output_file'] = 'ensdf_processing/seqhst/out_iccseq.dat'
+    input_dict['binary_table_input_file'] = 'ensdf_processing/seqhst/ref_seqhst_icctbl.dat'
+    input_dict['sequential_output_file'] = 'ensdf_processing/seqhst/tmp_out_iccseq.dat'
     output_dict = ensdf_processing.seqhst(input_dict)
     ref_sequence = 'ensdf_processing/seqhst/ref_iccseq.dat'
     d_report = file_comp(input_dict['sequential_output_file'], ref_sequence, [])
 
 def test_logft():
     input_dict = {}
-    input_dict['input_data_set'] = 'ensdf_processing/logft_data.tst'
-    input_dict['output_report'] = 'ensdf_processing/logft.rpt'
-    input_dict['data_table'] = 'ensdf_processing/logft.dat'
-    input_dict['output_data_set'] = 'ensdf_processing/logft.new'
+    input_dict['input_data_set'] = 'ensdf_processing/logft/ref_logft.inp'
+    input_dict['output_report'] = 'ensdf_processing/logft/tmp_logft.rpt'
+    input_dict['data_table'] = 'ensdf_processing/logft/ref_logft.dat'
+    input_dict['output_data_set'] = 'ensdf_processing/logft/tmp_logft.new'
     output_dict = ensdf_processing.logft(input_dict)
-    ref_output_data_set = 'ensdf_processing/compare/logft_ref.new'
+    ref_output_data_set = 'ensdf_processing/logft/ref_logft.new'
     d_data = file_comp(input_dict['output_data_set'], ref_output_data_set, [])
 
+'''
 def test_pandora():
     input_dict = {}
     input_dict['level_report_and_files_sorted'] = 1
@@ -138,6 +141,7 @@ def test_pandora():
     input_dict['output_out'] = 'ensdf_processing/pandora/tmp_pandora.out'
     output_dict = ensdf_processing.pandora(input_dict)
     print output_dict
+'''
 
 def test_radd():
     input_dict = {}
@@ -151,7 +155,7 @@ def test_radd():
 def test_radlist():
     input_dict = {}
     input_dict['output_radiation_listing'] = 'Y'
-    input_dict['output_endf_like_file'] = 'N'
+    input_dict['output_ensdf_like_file'] = 'N'
     input_dict['output_file_for_nudat'] = 'N'
     input_dict['output_mird_listing'] = 'N'
     input_dict['calculate_continua'] = 'N'
@@ -168,8 +172,6 @@ def test_radlist():
     d_radlst = file_comp(input_dict['output_radlst_file'], ref_output_radlst_file, radlst_exceptions)
     d_ensdf = file_comp(input_dict['output_ensdf_file'], ref_output_ensdf_file, ensdf_exceptions)
 
-
-
 def test_ruler():
     input_dict = {}
     input_dict['input_file'] = 'ensdf_processing/ruler/ref_ruler.inp'
@@ -182,9 +184,17 @@ def test_ruler():
     d_report = file_comp(input_dict['output_report_file'], ref_output, exceptions)
 
 def file_comp(file_out, file_ref, exceptions):
-    # exceptions format: [type, options]
-    #   type 1: prefix of length n
-    #       options: 'prefix'
+    '''
+    xceptions format: [type, options]
+        type 1: prefix of length n.
+            options: 'prefix'.
+        type 2: general line ignore.
+            options: 'prefix'
+        type 3: minor precision issue ignore.
+            options: line number of line with potential precision issue.
+        type 4: carriage return vs. non standard return type.
+            options: line number of return.
+    '''
     f_out = open(file_out, 'r')
     f_ref = open(file_ref, 'r')
     diff_lines = numpy.array([])
@@ -223,23 +233,21 @@ def file_comp(file_out, file_ref, exceptions):
     f_ref.close()
     diff_dict = {}
     diff_dict['differences_lines'] = diff_lines
-    #if len(diff_lines) == 0:
-    	#print file_ref + ' is the same'
     return diff_dict
 
 #  nose.runmodule()
 if __name__ == "__main__":
     alphad = test_alphad()
-    #b = test_bricc()
-    g = test_gabs()
-    c = test_gtol()
-    d1 = test_delta()
-    d = test_bldhst()
-    nc = test_hsicc()
-    n = test_hsmrg()
-    l = test_seqhst()
-    z = test_logft()
-    c = test_radd()
-    p = test_pandora() # FIX BUG
-    r1 = test_radlist() # FINISH INTERFACE
-    r2 = test_ruler()
+    #bricc = test_bricc()
+    gabs = test_gabs()
+    gtol = test_gtol()
+    delta = test_delta()
+    bldhst = test_bldhst()
+    hsicc = test_hsicc()
+    hsmrg = test_hsmrg()
+    seqhst = test_seqhst()
+    logft = test_logft()
+    radd = test_radd()
+    #pandora = test_pandora() # FIX BUG
+    radlist = test_radlist() # FINISH INTERFACE
+    ruler = test_ruler()
