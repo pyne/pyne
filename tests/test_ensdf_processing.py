@@ -26,9 +26,7 @@ def test_delta():
 
 def test_bricc():
     input_dict = {}
-    input_dict['input_line'] = '80Br'
-    output_dict = ensdf_processing.bricc(input_dict)
-    input_dict['input_line'] = '44'
+    input_dict['input_line'] = '238'
     output_dict = ensdf_processing.bricc(input_dict)
     bricc_out_tmp = 'ensdf_processing/bricc/tmp_bricc_out.out'
     bricc_out_ref = 'ensdf_processing/bricc/ref_bricc_44.out'
@@ -151,19 +149,25 @@ def test_radd():
     d_report = file_comp(input_dict['output_file'], ref_output, [])
 
 def test_radlist():
-    #print("implement once download finished")
     input_dict = {}
     input_dict['output_radiation_listing'] = 'Y'
     input_dict['output_endf_like_file'] = 'N'
     input_dict['output_file_for_nudat'] = 'N'
     input_dict['output_mird_listing'] = 'N'
     input_dict['calculate_continua'] = 'N'
-    input_dict['input_file'] = ''
-    input_dict['output_radlst_file'] = ''
-    input_dict['input_radlst_data_table'] = ''
-    input_dict['input_masses_data_table'] = ''
-    input_dict['output_ensdf_file'] = ''
+    input_dict['input_file'] = 'ensdf_processing/radlst/ref_radlst.inp'
+    input_dict['output_radlst_file'] = 'ensdf_processing/radlst/tmp_radlst.rpt'
+    input_dict['input_radlst_data_table'] = 'ensdf_processing/radlst/ref_mednew.dat'
+    input_dict['output_ensdf_file'] = 'ensdf_processing/radlst/tmp_ensdf.rpt'
     output_dict = ensdf_processing.radlist(input_dict)
+    ref_output_radlst_file = 'ensdf_processing/radlst/ref_radlst.rpt'
+    ref_output_ensdf_file = 'ensdf_processing/radlst/ref_ensdf.rpt'
+    # exceptions contain lines in the ouptut that can have a tolerable precision difference
+    radlst_exceptions = [[1, '1PROGRAM RADLST 5.5 [ 5-OCT-88].  RUN ON'], [3, 66], [3, 135], [3, 713], [3, 714], [3, 760],[3,  944]]
+    ensdf_exceptions = [[3, 341], [3, 351], [3, 357]]
+    d_radlst = file_comp(input_dict['output_radlst_file'], ref_output_radlst_file, radlst_exceptions)
+    d_ensdf = file_comp(input_dict['output_ensdf_file'], ref_output_ensdf_file, ensdf_exceptions)
+
 
 
 def test_ruler():
@@ -226,8 +230,8 @@ def file_comp(file_out, file_ref, exceptions):
 #  nose.runmodule()
 if __name__ == "__main__":
     alphad = test_alphad()
-    b = test_bricc() # FINISH INTERFACE
-    g = test_gabs_80Br()
+    #b = test_bricc()
+    g = test_gabs()
     c = test_gtol()
     d1 = test_delta()
     d = test_bldhst()
@@ -236,6 +240,6 @@ if __name__ == "__main__":
     l = test_seqhst()
     z = test_logft()
     c = test_radd()
-    #p = test_pandora() # FIX BUG
-    r1 = test_radlist() # FINISH DOWNLOAD
+    p = test_pandora() # FIX BUG
+    r1 = test_radlist() # FINISH INTERFACE
     r2 = test_ruler()

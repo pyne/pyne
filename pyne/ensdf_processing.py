@@ -500,13 +500,16 @@ def radlist(inputdict_unchecked):
     input_file = inputdict_unchecked['input_file']
     output_radlst_file = inputdict_unchecked['output_radlst_file']
     input_radlst_data_table = inputdict_unchecked['input_radlst_data_table']
-    input_masses_data_table = inputdict_unchecked['input_masses_data_table']
+    if 'input_masses_data_table' in inputdict_unchecked:
+        input_masses_data_table = inputdict_unchecked['input_masses_data_table']
+    else:
+	    input_masses_data_table = ''
     output_ensdf_file = inputdict_unchecked['output_ensdf_file']
 
     inp = output_rad_listing + '\n' + output_endf_like_file + '\n' + output_file_for_nudat +\
-          output_mird_listing + '\n' + calculate_continua + '\n' + input_file +\
-          output_radlst_file + '\n' + input_radlst_data_table + '\n' + input_masses_data_table +\
-          output_ensdf_file
+          '\n' + output_mird_listing + '\n' + calculate_continua + '\n' + input_file +\
+          '\n' + output_radlst_file + '\n' + input_radlst_data_table + '\n' + input_masses_data_table +\
+          '\n' + output_ensdf_file
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     proc.stdin.write(inp)
     radd_output = proc.communicate()[0]
