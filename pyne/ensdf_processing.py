@@ -444,6 +444,14 @@ def radd(inputdict_unchecked):
     neutron_number = inputdict_unchecked['neutron_number']
     output_file = inputdict_unchecked['output_file']
 
+    # Create symlinks to the two binaries the radd executables uses.
+    AK04_path = path_to_exe('98AK04.in')
+    ELE_path = path_to_exe('ELE.in')
+    if not os.path.exists(AK04_path):
+    	os.symlink(AK04_path, '98AK04.in')
+    if not os.path.exists(ELE_path):
+    	os.symlink(AK04_path, 'ELE.in')
+
     exe_path = path_to_exe('radd')
     inp = atomic_number + '\n' + neutron_number + '\n' + 'NO' + '\n'
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)

@@ -175,10 +175,8 @@ def download_decay():
     durl.close()
     return True
 
-
 ALPHAD_H = os.path.join('build', 'src/alphad')
 DELTA_H = os.path.join('build', 'src/delta')
-#GABS_H = os.path.join('build', 'src/gabs')
 GTOL_H = os.path.join('build', 'src/gtol')
 BLDHST_H = os.path.join('build', 'src/bldhst')
 HSICC_H = os.path.join('build', 'src/hsicc')
@@ -187,16 +185,14 @@ SEQHST_H = os.path.join('build', 'src/seqhst')
 LOGFT_H = os.path.join('build', 'src/logft')
 PANDORA_H = os.path.join('build', 'src/pandora')
 RADD_H = os.path.join('build', 'src/radd')
-RADD_98AK04_H = os.path.join('src', 'ensdf_processing/RADD/ELE.in')
-RADD_ELE_H = os.path.join('src', 'ensdf_processing/RADD/98AK04.in')
-#RADLST_H = os.path.join('build', 'src/radlst')
+RADD_98AK04_H = os.path.join('src', 'ensdf_processing/RADD/98AK04.in')
+RADD_ELE_H = os.path.join('src', 'ensdf_processing/RADD/ELE.in')
 RULER_H = os.path.join('build', 'src/ruler')
 
 def copy_ensdf_executables(pynepath):
     print('Copying ENSDF Executables to install directory')
     ALPHAD_DEST = os.path.join(pynepath, 'alphad')
     DELTA_DEST = os.path.join(pynepath, 'delta')
-    #GABS_DEST = os.path.join(pynepath, 'gabs')
     GTOL_DEST = os.path.join(pynepath, 'gtol')
     BLDHST_DEST = os.path.join(pynepath, 'bldhst')
     HSICC_DEST = os.path.join(pynepath, 'hsicc')
@@ -207,12 +203,10 @@ def copy_ensdf_executables(pynepath):
     RADD_DEST = os.path.join(pynepath, 'radd')
     RADD_98AK04_DEST = os.path.join(pynepath, '98AK04.in')
     RADD_ELE_DEST = os.path.join(pynepath, 'ELE.in')
-    #RADLST_DEST = os.path.join(pynepath, 'radlst')
     RULER_DEST = os.path.join(pynepath, 'ruler')
 
     shutil.copy(ALPHAD_H, ALPHAD_DEST)
     shutil.copy(DELTA_H, DELTA_DEST)
-    #shutil.copy(GABS_H, GABS_DEST)
     shutil.copy(GTOL_H, GTOL_DEST)
     shutil.copy(BLDHST_H, BLDHST_DEST)
     shutil.copy(HSICC_H, HSICC_DEST)
@@ -223,10 +217,7 @@ def copy_ensdf_executables(pynepath):
     shutil.copy(RADD_H, RADD_DEST)
     shutil.copy(RADD_98AK04_H, RADD_98AK04_DEST)
     shutil.copy(RADD_ELE_H, RADD_ELE_DEST)
-    #shutil.copy(RADLST_H, RADLST_DEST)
     shutil.copy(RULER_H, RULER_DEST)
-
-
 
 def generate_decay():
     with indir('src'):
