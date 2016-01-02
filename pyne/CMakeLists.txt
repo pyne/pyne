@@ -152,8 +152,4 @@ if(BUILD_SPATIAL_SOLVER)
         DEPENDS pyne
         )
     target_link_libraries(transport_spatial_methods pyne)
-
 endif()
-
-
-

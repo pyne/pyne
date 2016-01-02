@@ -34,6 +34,7 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
     "transport_spatial_methods/3d/trackroutines.f90"
     "transport_spatial_methods/3d/trackstruct.f90"
     "transport_spatial_methods/3d/version.f90"
+
     #"transport_spatial_methods/3d/main.f90"
     )
 
@@ -90,11 +91,9 @@ endif (MOAB_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
-
 target_link_libraries(pyne hdf5)
 IF(BUILD_SPATIAL_SOLVER)
     target_link_libraries(pyne hdf5 blas lapack)
-
 ENDIF(BUILD_SPATIAL_SOLVER)
 if (MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
@@ -103,7 +102,6 @@ endif (MOAB_FOUND)
 set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
     "-O0")
 
-#SET(CMAKE_EXE_LINKER_FLAGS "-c")
 add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f  
                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
