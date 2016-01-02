@@ -118,19 +118,72 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
     y_g : np.ndarray
         The group collapsed data, length G. 
     """
+    return pointwise_collapse(x_g, x, y)
+
+@cython.boundscheck(False)
+def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g, 
+                       np.ndarray[np.float64_t, ndim=1] x, 
+                       np.ndarray[np.float64_t, ndim=1] y,
+                       logx=False,
+                       logy=False,
+                       log=False):
+    """Collapses pointwise data to G groups based on a interpolation
+    between the points. This is useful for collapsing cross section data.
+
+    Parameters
+    ----------
+    x_g : array-like
+        Group boundaries, length G+1 for G groups, must be monotonic in the 
+        same direction as x.
+    x : array-like
+        Pointwise abscissa to be collapsed, must be monotonic in the same direction
+        as x_g and have the same length as y.
+    y : array-like
+        Pointwise data to be interpolated, must have the same length as x.
+    logx: bool, optional, default=False
+        lin-log interpolation
+    logy: bool, optional, default=False
+        log-lin interpolation
+    log : bool, optional, default=False
+        log-log interpolation
+
+    Returns
+    -------
+    y_g : np.ndarray
+        The group collapsed data, length G. 
+    """
     cdef int G = x_g.shape[0] - 1
-    cdef int N = x.shape[0]
+    cdef int N = x.shape[0] - 1
     cdef int g0, g1  # current group index
     cdef int n0, n1  # current point index
     cdef double val, ylower, yupper
     cdef np.ndarray[np.float64_t, ndim=1] y_g = np.empty(G, dtype='float64')
+
+    # Ensure input is monotonically increasing/decreasing
+    for z in [x_g, x]:
+        if not (np.all(np.diff(z) > 0.) or np.all(np.diff(z) < 0)):
+            raise ValueError("x and x_g arrays must be monotonically"  
+                             "increasing/decreasing.")
+
     reversed = False
     if x_g[0] > x_g[-1]:
-        # monotonically decreaing, make increasing so logic is simpler
+        # monotonically decreasing, make increasing so logic is simpler
         x_g = x_g[::-1]
         x = x[::-1]
         y = y[::-1]
         reversed = True
+
+    # Handle logrithmic interpolations
+    if logx or log:
+        if x_g[0] <= 0.0 or x_g[0] <= 0.0:
+            raise ValueError("x values must be positive for logrithmic interpolation")
+        x_g = np.log(x_g)
+        x = np.log(x)
+    if logy or log:
+        if y[0] <= 0.0:
+            raise ValueError("y values must be positive for logrithmic interpolation")
+        y = np.log(y)
+
     n0 = 0
     n1 = 1
     for g0 in range(G):
@@ -146,17 +199,21 @@ def pointwise_linear_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
                 val += 0.5 * (y[n1] + ylower) * (x[n1] - x_g[g0])
             n0 += 1
             n1 += 1
-        # upper bound intersection
-        if x_g[g1] < x[n1]:
-            if x_g[g0] <= x[n0]:
-                yupper = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
-                val += 0.5 * (yupper + y[n0]) * (x_g[g1] - x[n0])
-            else: 
-                yupper = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
-                ylower = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g0] - x[n0]) + y[n0]
-                val += 0.5 * (yupper + ylower) * (x_g[g1] - x_g[g0])
+        # compute end point
+        if x_g[g0] <= x[n0]:
+            yupper = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
+            val += 0.5 * (yupper + y[n0]) * (x_g[g1] - x[n0])
+        else:
+            yupper = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g1] - x[n0]) + y[n0]
+            ylower = ((y[n1] - y[n0])/(x[n1] - x[n0]))*(x_g[g0] - x[n0]) + y[n0]
+            val += 0.5 * (yupper + ylower) * (x_g[g1] - x_g[g0])
         y_g[g0] = val / (x_g[g1] - x_g[g0])
     if reversed:
         y_g = y_g[::-1]
+
+    # Handle logrithmic interpolation
+    if logy or log:
+        y_g = np.exp(y_g)
+
     return y_g
-    
+

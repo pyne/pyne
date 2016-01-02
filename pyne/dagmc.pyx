@@ -12,9 +12,13 @@ import numpy as np
 from pyne cimport cpp_dagmc_bridge
 from pyne.mesh import Mesh
 from numpy.linalg import norm
+from pyne.material import Material, MaterialLibrary
 np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+if sys.version_info[0] >= 3:
+    unichr = chr
 
 # Mesh specific imports
 try:
@@ -319,11 +323,11 @@ def load(filename):
 
 def get_surface_list():
     """return a list of valid surface IDs"""
-    return surf_id_to_handle.keys()
+    return list(surf_id_to_handle.keys())
 
 def get_volume_list():
     """return a list of valid volume IDs"""
-    return vol_id_to_handle.keys()
+    return list(vol_id_to_handle.keys())
 
 
 def volume_is_graveyard(vol_id):
@@ -655,6 +659,49 @@ def cell_material_assignments(hdf5):
                         
     return mat_assigns
 
+def cell_materials(hdf5, **kwargs):
+    """Obtain a material object for each cell in a DAGMC material-laden
+    geometry, tagged in UWUW format [1], i.e. "mat:<name>/rho:<density>" or
+    "mat:<name>".
+    
+    Parameters:
+    -----------
+    hdf5 : string
+        Path to hdf5 material-laden geometry
+    datapath: str, optional, default ='/materials',
+        The path in the heirarchy to the material data table in the HDF5 file.
+    nucpath, str, optional, default='/nucid'
+        The path in the heirarchy to the nuclide array in the HDF5 file.
+    
+    Returns:
+    --------
+    cell_mats : dict
+        Dictionary that maps cells numbers to PyNE Material objects. 
+
+    [1] http://svalinn.github.io/DAGMC/usersguide/uw2.html
+    """
+    datapath = kwargs.get('datapath', '/materials')
+    nucpath = kwargs.get('nucpath', '/nucid')
+
+    # void material
+    void_mat = Material({}, density = 0.0, metadata={'name': 'void', 
+                                                      'mat_number': 0})
+    # strings that specify that a region is void
+    void_names = ['vacuum', 'graveyard', 'void']
+
+    ml = MaterialLibrary()
+    ml.from_hdf5(hdf5, datapath=datapath, nucpath=nucpath)
+    mat_assigns = cell_material_assignments(hdf5)
+    cell_mats = {}
+    for cell_num, mat_name in mat_assigns.items():
+        if cell_num is None:
+            continue 
+        elif np.any([x in mat_name.lower() for x in void_names]):
+            cell_mats[cell_num] = void_mat
+        else:
+            cell_mats[cell_num] = ml[mat_name]
+
+    return cell_mats
 
 def find_implicit_complement():
     """Find the implicit complement and return the volume id.
@@ -867,6 +914,8 @@ def ray_discretize(mesh, num_rays=10, grid=False):
                 #  Add row results to the full mesh sum matrix.
                 for j, ve_sums in enumerate(row_sums):
                    for cell in ve_sums.keys():
+                       if ve_sums[cell][0] < VOL_FRAC_TOLERANCE:
+                           continue
                        if cell not in mesh_sums[idx[j]].keys():
                            mesh_sums[idx[j]][cell] = [0, 0]
                            len_count += 1

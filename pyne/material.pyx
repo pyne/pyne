@@ -65,7 +65,7 @@ cdef class _Material:
     def __cinit__(self, nucvec=None, double mass=-1.0, double density=-1.0,
                   double atoms_per_molecule=-1.0, metadata=None, bint free_mat=True,
                   *args, **kwargs):
-        """Material C++ constuctor."""
+        """Material C++ constructor."""
         cdef cpp_map[int, double] comp
         cdef jsoncpp.Value cmetadata = jsoncpp.Value({} if metadata is None else metadata)
 
@@ -686,14 +686,14 @@ cdef class _Material:
         return newmat
 
     def collapse_elements(self, nucset):
-        """collapse_elements(self)
+        """collapse_elements(self, nucset)
         Collapses the elements in the material, excluding the nucids in 
-	paramater set. This function returns a copy of the material.
+	the set nucset. This function returns a copy of the material.
 
         Returns
         -------
         newmat : Material
-            A copied and collapseed material.
+            A copied and collapsed material.
 
         """
         cdef _Material newmat = Material()

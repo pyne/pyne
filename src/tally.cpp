@@ -61,7 +61,7 @@ pyne::Tally::Tally(std::string type, std::string part_name,
 
 // Destructor
 pyne::Tally::~Tally() {
-};
+}
 
 
 /*--- Method definitions ---*/
@@ -401,7 +401,7 @@ std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
   os << "\t Tallying " << tal.particle_name << " " << tal.tally_type << "\n";
   os << "\t in/on " << tal.entity_type << " " << tal.entity_id << "\n";
   return os;
-};
+}
 
 // Sets string to valid mcnp formatted tally
 // Takes mcnp version as arg, like 5 or 6

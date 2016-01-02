@@ -127,7 +127,7 @@ namespace enrichment {
     virtual const char* what() const throw()
     {
       return "Inifinite loop found while calculating enrichment cascade.";
-    };
+    }
   };
 
   /// Custom exception for when an enrichment solver has reached its maximum
@@ -138,7 +138,7 @@ namespace enrichment {
     virtual const char* what() const throw()
     {
       return "Iteration limit hit durring enrichment calculation.";
-    };
+    }
   };
 
   /// Custom exception for when an enrichment solver iteration has produced a NaN.
@@ -148,12 +148,12 @@ namespace enrichment {
     virtual const char* what() const throw()
     {
       return "Iteration has hit a point where some values are not-a-number.";
-    };
+    }
   };
 
 // end enrichment
-};
+}
 // end pyne
-};
+}
 
 #endif

@@ -12,17 +12,19 @@ SUBROUTINE sweep_ahotn_nefd(g)
 USE invar
 USE solvar
 use kernel_module 
+use precision_module, only: dp
+
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: g
 INTEGER :: xs, xe, ys, ye, zs, ze, incx, incy, incz, ord, nfy, nfz
 INTEGER :: i, j, k, t, u, v, m, n, ydir, xdir, zdir
 INTEGER :: ix,iy,iz,jx,jy,jz,indx
 
-REAL*8, DIMENSION(0:lambda, 0:lambda) :: fx
-REAL*8, DIMENSION(0:lambda, 0:lambda,nx, 2) :: fy
-REAL*8, DIMENSION(0:lambda, 0:lambda,nx, ny, 2, 2) :: fz
-REAL*8, DIMENSION(ordcb) :: b
-REAL*8 :: sig, mu, eta, xi, x, y, z, c, sgn
+REAL(kind=dp), DIMENSION(0:lambda, 0:lambda) :: fx
+REAL(kind=dp), DIMENSION(0:lambda, 0:lambda,nx, 2) :: fy
+REAL(kind=dp), DIMENSION(0:lambda, 0:lambda,nx, ny, 2, 2) :: fz
+REAL(kind=dp), DIMENSION(ordcb) :: b
+REAL(kind=dp) :: sig, mu, eta, xi, x, y, z, c, sgn
 
 ! Initialize the flux solution to zero
 f=0.0d0

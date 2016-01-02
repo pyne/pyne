@@ -27,7 +27,7 @@ function find_cell() result(icl_tmp)
     icl_tmp = -1
 
     do i = 1, mxa
-      call chkcel(i, 2., j)
+      call chkcel(i, 0, j)
       if (j .eq. 0) then
          ! valid cel set
          icl_tmp = i
@@ -84,7 +84,7 @@ subroutine source
 
    icl = icl_tmp
    tme = 0.0
-   ipt = 2
+   ipt = idum(3)
    jsu = 0
  
    return

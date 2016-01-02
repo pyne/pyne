@@ -43,7 +43,7 @@ namespace extra_types
   };
 
 // End namespace extra_types
-};
+}
 
 #elif defined(__STDC__)
 

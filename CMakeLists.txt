@@ -117,7 +117,11 @@ message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
     include_directories(${MOAB_INCLUDE_DIR})
     get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
-    link_directories(${MOAB_LIBRARY_DIRS})
+    if(APPLE)
+      link_directories(${MOAB_LIBRARY_DIRS}/lib)
+    else(APPLE)
+      link_directories(${MOAB_LIBRARY_DIRS})
+    endif(APPLE)
 endif(${MOAB_FOUND})
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
@@ -164,6 +168,9 @@ message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
 # find numpy and include the numpy headers
 find_package(Numpy REQUIRED)
 include_directories("${NUMPY_INCLUDE_DIR}")
+
+#compiler warnings
+# add_definitions ("-Wpedantic")
 
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")

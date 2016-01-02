@@ -116,9 +116,9 @@ def cleanpypath(path):
 
 
 def assert_np_version():
-    low = (1, 8, 0)
+    low = (1, 8)
     v = np.version.short_version
-    cur = tuple(map(int, v.split('.')))
+    cur = tuple(map(int, v.split('.')[:2]))
     if cur < low:
         msg = "numpy version too low! {0} (have) < 1.8.0 (min)".format(v)
         raise ValueError(msg)

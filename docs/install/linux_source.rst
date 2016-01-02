@@ -28,13 +28,15 @@ Optional Depenendencies:
 Most of the dependencies are readily available through package managers.  Once
 all the dependencies are installed, PyNE can be installed. Download and unzip
 the source (`zip`_, `tar`_) or checkout a verison from the PyNE repository
-(`Github`_).  Then run the following commands from the unzipped directory::
+(`Github`_).  Then run the following commands from the directory above the
+unzipped directory::
 
     cd pyne/
     python setup.py install --user
     scripts/nuc_data_make
 
 The ``setup.py`` command compiles and installs the PyNE source code.
+Note that this command must be done in the top PyNE directory.
 The ``nuc_data_make`` builds and installs a database of nuclear data.
 Unfortunately, this must be done as a second step because most nuclear 
 data is under some form of license restriction or export control which 

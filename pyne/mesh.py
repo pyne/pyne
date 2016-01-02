@@ -691,6 +691,11 @@ class Mesh(object):
             self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
+ 
+            if self.structured_coords is None:
+                self.structured_coords = [self.structured_get_divisions("x"),
+                                          self.structured_get_divisions("y"),
+                                          self.structured_get_divisions("z")]
         else:
             # Unstructured mesh cases
             # Error if structured arguments are passed
@@ -1298,7 +1303,9 @@ class StatMesh(Mesh):
         # Exclude error tags because result and error tags are treated
         # simultaneously so there is not need to include both in the tag
         # list to iterate through.
-        tags = set(tag for tag in tags if not tag.endswith('_error'))
+        error_suffix = "_rel_error"
+
+        tags = set(tag for tag in tags if not tag.endswith(error_suffix))
 
         if in_place:
             mesh_1 = self
@@ -1312,11 +1319,11 @@ class StatMesh(Mesh):
                     zip(iter(other.mesh.iterate(iBase.Type.region,
                                                 iMesh.Topology.all)))):
 
-                mesh_1.mesh.getTagHandle(tag + "_error")[ve_1] = err__ops[op](
+                mesh_1.mesh.getTagHandle(tag + error_suffix)[ve_1] = err__ops[op](
                     mesh_1.mesh.getTagHandle(tag)[ve_1],
                     other.mesh.getTagHandle(tag)[ve_2],
-                    mesh_1.mesh.getTagHandle(tag + "_error")[ve_1],
-                    other.mesh.getTagHandle(tag + "_error")[ve_2])
+                    mesh_1.mesh.getTagHandle(tag + error_suffix)[ve_1],
+                    other.mesh.getTagHandle(tag + error_suffix)[ve_2])
 
                 mesh_1.mesh.getTagHandle(tag)[ve_1] = \
                     _ops[op](mesh_1.mesh.getTagHandle(tag)[ve_1],

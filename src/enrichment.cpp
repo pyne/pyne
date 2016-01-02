@@ -29,7 +29,7 @@ pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade() {
   duc.mat_feed = pyne::Material(cm, 1.0, 1.0);
 
   return duc;
-};
+}
 pyne_enr::Cascade pyne_enr::default_uranium_cascade(pyne_enr::_fill_default_uranium_cascade());
 
 
@@ -117,30 +117,30 @@ void pyne_enr::_recompute_nm(pyne_enr::Cascade & casc, double tolerance) {
     if (tolerance < fabs(delta_prod)) {
       N = N - (delta_prod * N);
       rhs_prod = (pow(astar_j, M+1.0) - 1.0) / (pow(astar_j, M+1.0) - pow(astar_j, -N));
-    };
+    }
 
     if (tolerance < fabs(delta_tail)) {
       M = M - (delta_tail * M);
       rhs_tail = (1.0 - pow(astar_j, -N)) / (pow(astar_j, M+1.0) - pow(astar_j, -N));
-    };
+    }
 
     if (N < tolerance) {
       N = origN + n;
       M = origM + n;
       n = n + 1.0;
-    };
+    }
 
     if (M < tolerance) {
       N = origN + n;
       M = origM + n;
       n = n + 1.0;
-    };
-  };
+    }
+  }
 
   casc.N = N;
   casc.M = M;
   return; 
-};
+}
 
 
 
@@ -175,12 +175,12 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc) {
     numer_tail = casc.mat_feed.comp[nuc] * (1.0 - pow(astar_i, -N));
     denom_tail = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / tpf;
     comp_tail[nuc] = numer_tail / denom_tail;
-  };
+  }
 
   casc.mat_prod = pyne::Material(comp_prod);
   casc.mat_tail = pyne::Material(comp_tail);
   return;
-};
+}
 
 
 
@@ -249,7 +249,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
       // If the new value of N is less than zero, reset.
       if (curr_N < 0.0)
         curr_N = (temp_curr_N + temp_prev_N)/2.0;
-    };
+    }
 
     if (tolerance <= fabs(delta_x_tail_j)/curr_casc.mat_tail.comp[j]) {
       // Make a new guess for M
@@ -262,7 +262,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
       // If the new value of M is less than zero, reset.
       if (curr_M < 0.0)
         curr_M = (temp_curr_M + temp_prev_M)/2.0;
-    };
+    }
 
     // Check for infinite loops
     for (h = 0; h < historyN.size(); h++) {
@@ -272,13 +272,13 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
         curr_M = curr_M + delta_x_tail_j * \
                ((curr_M - prev_M)/(curr_casc.mat_tail.comp[j] - prev_casc.mat_tail.comp[j]));;
         break;
-      };
-    };
+      }
+    }
 
     if (max_hist <= historyN.size()) {
       historyN.erase(historyN.begin());
       historyM.erase(historyM.begin());
-    };
+    }
     historyN.push_back(curr_N);
     historyM.push_back(curr_M);
 
@@ -290,9 +290,9 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
     curr_casc.M = curr_M;
     _recompute_nm(curr_casc, tolerance);
     _recompute_prod_tail_mats(curr_casc);
-  };
+  }
   return curr_casc;
-};
+}
 
 
 
@@ -308,7 +308,7 @@ double pyne_enr::_deltaU_i_OverG(pyne_enr::Cascade & casc, int i) {
   double astar_i = alphastar_i(casc.alpha, casc.Mstar, pyne::atomic_mass(i));
   return log(pow(casc.alpha, (casc.Mstar - pyne::atomic_mass(casc.j)) )) * \
                              ((astar_i - 1.0)/(astar_i + 1.0));
-};
+}
 
 
 pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
@@ -340,7 +340,7 @@ pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
                       casc.mat_feed.comp[nuc]*log(rfeed));
     ltotpf = ltotpf + (temp_numer / _deltaU_i_OverG(casc, nuc));
     swupf = swupf + temp_numer;
-  };
+  }
 
   // Assign flow rates
   casc.l_t_per_feed = ltotpf;
@@ -356,13 +356,13 @@ pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
   casc.mat_prod.mass = casc.mat_feed.mass * ppf;
   casc.mat_tail.mass = casc.mat_feed.mass * tpf;
   return casc;
-};
+}
 
 pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
                                     char * solver, double tolerance, int max_iter) {
   std::string strsolver(solver);
   return multicomponent(orig_casc, strsolver, tolerance, max_iter);
-};
+}
 
 pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
                                     std::string solver, double tolerance, int max_iter) {
@@ -390,7 +390,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     double ms = (pyne::atomic_mass(orig_casc.j) + pyne::atomic_mass(orig_casc.k)) / 2.0;
     prev_casc.Mstar = ms;
     curr_casc.Mstar = ms;
-  };
+  }
 
   // xpn is the exponential index 
   double ooe = -log10(tolerance);
@@ -404,7 +404,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     case 1:
       prev_casc = solve_numeric(prev_casc, tolerance, max_iter);
       break;
-  };
+  }
 
   // Initialize curr_ent point
   curr_casc.Mstar = (pyne::atomic_mass(curr_casc.j) + curr_casc.Mstar) / 2.0;
@@ -415,7 +415,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     case 1:
       curr_casc = solve_numeric(curr_casc, tolerance, max_iter);
       break;
-  };
+  }
 
   double m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
                          prev_casc.Mstar, prev_casc.l_t_per_feed);
@@ -440,7 +440,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
       case 1:
         curr_casc = solve_numeric(curr_casc, tolerance, max_iter);
         break;
-    };
+    }
 
     if (prev_casc.l_t_per_feed < curr_casc.l_t_per_feed) {
       temp_casc = curr_casc;
@@ -452,7 +452,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
         case 1:
           temp_casc = solve_numeric(temp_casc, tolerance, max_iter);
           break;
-      };
+      }
 
       temp_m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
                            temp_casc.Mstar, temp_casc.l_t_per_feed);
@@ -460,7 +460,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
         prev_casc = curr_casc;
         curr_casc = temp_casc;
         break;
-      };
+      }
 
       temp_m_sign = temp_m / fabs(temp_m);
       if (m_sign != temp_m_sign) {
@@ -475,7 +475,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
           case 1:
             temp_casc = solve_numeric(temp_casc, tolerance, max_iter);
             break;
-        };
+        }
         temp_m = pyne::slope(prev_casc.Mstar, prev_casc.l_t_per_feed, \
                              temp_casc.Mstar, temp_casc.l_t_per_feed);
 
@@ -483,15 +483,15 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
           prev_casc = curr_casc;
           curr_casc = temp_casc;
           break;
-        };
+        }
 
         m_sign = temp_m / fabs(temp_m);
         m = temp_m;
         prev_casc = curr_casc;
         curr_casc = temp_casc;
-      };
-    };
-  };
+      }
+    }
+  }
 
   return curr_casc;
-};
+}

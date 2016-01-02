@@ -1483,7 +1483,7 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
     MW[i] = pyne::atomic_mass(nuc);
     xF[i] = (*ci).second;
     i++;
-  };
+  }
 
   switch (ncomp)
   {
@@ -34853,7 +34853,7 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
       xT[39] = g172*g212*g434;
       break;
  
-  };
+  }
 
   i = 2;
   casc.mat_prod.comp[j] = xP[0];
@@ -34868,7 +34868,7 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
     casc.mat_prod.comp[nuc] = xP[i];
     casc.mat_tail.comp[nuc] = xT[i];
     i++;
-  };
+  }
   // must renormalize to eliminate numerical error
   casc.mat_prod.norm_comp();
   casc.mat_tail.norm_comp();
@@ -34887,4 +34887,4 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
   delete [] xT;
 
   return casc;
-};
+}
