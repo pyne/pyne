@@ -96,6 +96,7 @@ def bricc(inputdict_unchecked):
         bricc_output : data printed to command line.  Useful for interactive use.
     NOTE:
         All the various ouptput files bricc can generate are found in the
+
         'output_file_directory' path.  '<CR>' must be appended to 'input_line' for this
         to work properly.
     """
@@ -114,13 +115,13 @@ def bricc(inputdict_unchecked):
     
     input_line = inputdict_unchecked['input_line']
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    proc.stdin.write(input_line)
-    casdfads = proc.communicate()[0]
+    proc.stdin.write(input_line + '\n' + 'exit' + '\n')
+    bricc_output = proc.communicate()[0]
     proc.stdin.close()
 
     output_dict = inputdict_unchecked
     output_dict['output_file_directory'] = exe_dir
-    output_dict['bricc_output'] = casdfads
+    output_dict['bricc_output'] = bricc_output
     return output_dict
 
     

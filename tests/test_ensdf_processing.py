@@ -24,17 +24,15 @@ def test_delta():
     			 [3,  232], [3, 236], [3, 243], [3, 318], [3, 355], [3, 458]]
     d_ouptut = file_comp(input_dict['output_file'],'ensdf_processing/delta/ref_delta.rpt', exceptions)
 
-'''
 def test_bricc():
     input_dict = {}
-    input_dict['input_line'] = '238'
+    input_dict['input_line'] = '44'
     output_dict = ensdf_processing.bricc(input_dict)
     bricc_out_tmp = 'ensdf_processing/bricc/tmp_bricc_out.out'
     bricc_out_ref = 'ensdf_processing/bricc/ref_bricc_44.out'
     bricc_outfile = open('ensdf_processing/bricc/tmp_bricc_out.out', 'w+')
     bricc_outfile.write(output_dict['bricc_output'])
     file_comp(bricc_out_tmp, bricc_out_ref,[])
-'''
 
 # Tests gabs output for 80Br sample input.  Date and file names are expected to be different
 # in the test output and reference file sets.
@@ -221,13 +219,13 @@ def file_comp(file_out, file_ref, exceptions):
 	              			if map(bin,bytearray(line_ref[len(line_ref)-1])) == map(bin,bytearray(line_out[len(line_out)-1])):
         	      				ignore = True
             if not ignore:
-            	#raise Exception('ENSDF Processing: Incorrect output generated, file: ' + file_ref)
-            	print 'difference found %i', line_num
-            	print '     line_out is: ' + line_out
-            	print '     line_ref is: ' + line_ref
-            	print len(line_out)
-            	print len(line_ref)
-            	diff_lines = numpy.append(diff_lines, line_num)
+            	raise Exception('ENSDF Processing: Incorrect output generated, file: ' + file_ref)
+            	#print 'difference found %i', line_num
+            	#print '     line_out is: ' + line_out
+            	#print '     line_ref is: ' + line_ref
+            	#print len(line_out)
+            	#print len(line_ref)
+            	#diff_lines = numpy.append(diff_lines, line_num)
         line_num = line_num + 1
     f_out.close()
     f_ref.close()
@@ -238,7 +236,7 @@ def file_comp(file_out, file_ref, exceptions):
 #  nose.runmodule()
 if __name__ == "__main__":
     alphad = test_alphad()
-    #bricc = test_bricc()
+    bricc = test_bricc()
     gabs = test_gabs()
     gtol = test_gtol()
     delta = test_delta()
