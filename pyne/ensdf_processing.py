@@ -448,10 +448,14 @@ def radd(inputdict_unchecked):
     # Create symlinks to the two binaries the radd executables uses.
     AK04_path = path_to_exe('98AK04.in')
     ELE_path = path_to_exe('ELE.in')
-    if not os.path.exists(AK04_path):
+    AK04_set = False
+    ELE_set = False
+    if not os.path.exists('98AK04.in'):
     	os.symlink(AK04_path, '98AK04.in')
-    if not os.path.exists(ELE_path):
-    	os.symlink(AK04_path, 'ELE.in')
+    	AK04_set = True
+    if not os.path.exists('ELE.in'):
+    	os.symlink(ELE_path, 'ELE.in')
+    	ELE_set = True
 
     exe_path = path_to_exe('radd')
     inp = atomic_number + '\n' + neutron_number + '\n' + 'NO' + '\n'
@@ -462,6 +466,11 @@ def radd(inputdict_unchecked):
     f = open(output_file, 'w')
     f.write(radd_output)
     f.close()
+
+    if AK04_set:
+     	os.remove('98AK04.in')
+    if ELE_set:
+    	os.remove('ELE.in')
     return inputdict_unchecked
 
 def radlist(inputdict_unchecked):
