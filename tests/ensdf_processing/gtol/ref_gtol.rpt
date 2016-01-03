@@ -1,0 +1,1945 @@
+
+*********************
+* GTOL Version 7.2h *
+*********************
+
+DATE:  06-Oct-2015
+TIME:  20:41:34
+
+(Double precision, localized)
+Max. number of levels=1000
+Max. number of gammas=4000
+Max. number of fixed levels=1000
+
+
+INPUT-FILE name: a228.ens
+
+Program GTOL Version 7.2h as of 24-May-2013 (Double precision, localized)
+
+         228TH    ADOPTED LEVELS, GAMMAS                                  97NDS    199709
+         228TH  L     0.0        0+             1.9116 Y  16                         A   
+         228TH  L    57.759 4    2+              0.405 NS 7                          A   
+         228TH  G    57.766 5  100         E2                   156                  L
+         228THB G BE2W=167 6
+         228TH  L   186.823 4    4+              0.164 NS 4                          A   
+         228TH  G   129.065 1  100         E2                   3.81                 L
+         228THB G BE2W=242 9
+         228TH  L   328.003 4   1-                                                   B   
+         228TH  G   270.245 2  100.0  16   E1                   0.0474               J
+         228TH3 G FLAG=L
+         228TH  G   328.000 6   89.3  21   E1                   0.0308               J
+         228TH3 G FLAG=L
+         228TH  L   378.179 10  6+                                                   A   
+         228TH  G   191.353 10 100         E2                   0.791                L
+         228TH  L   396.078 5   3-                                                   B   
+         228TH  G   209.253 6   34.5  6    E1                   0.086                L
+         228TH  G   338.320 3  100.0  17   E1                   0.0288               L
+         228TH  L   519.192 6    5-                                                  B   
+         228TH  G   141.01  2   10.1  6    E1                   0.220
+         228TH  G   332.370 4  100    5    E1                   0.0299               L
+         228TH  L   622.5   3   8+                                                   A   
+         228TH  G   244.4   3             E2                    0.332                G
+         228TH  L   695.6   3   7-                                                   B   
+         228TH  G   317.4   3            [E1]                   0.0331               G
+         228TH  L   831.823 10  0+                                                   C   
+         228TH  G   503.823 13 100    7   (E1)                  0.0125               L
+         228TH3 G FLAG=M
+         228TH  G   774.1   2   33    AP                                             L
+         228TH3 G FLAG=M
+         228TH  G   831                    E0                             0.04     2           +-  1.00 keV unc. assigned to energy
+         228TH  L   874.473 18  2+                                                   C   
+         228TH  G   478.40  6  100    5    E1                   0.0139
+         228TH  G   546.45  2   91    5
+         228TH  G   688.11  4   32    3                                              &
+         228TH3 G FL=186.823$  FLAG=N                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   816.62  10  12.3  20
+         228TH  G   874.45  7   23    3
+         228TH  L   911.8   4  10+                                                   A   
+         228TH  G   289.4   3                                                        G
+         228TH  L   920.8   3   9-                                                   B   
+         228TH  G   225.1   3  24.6   15                                             G
+         228TH3 G FLAG=H
+         228TH  G   298.3   3 100                                                    G
+         228TH3 G FLAG=H
+         228TH  L   938.58  7   0+                                                   D   
+         228TH  G   610.64  10 100    22                                             L
+         228TH3 G FLAG=M
+         228TH  G   880.76  10  27    8                                              L
+         228TH3 G FLAG=M
+         228TH  L   944.196 13  1,2+                                                     
+         228TH  G   616.20  3   91    11
+         228TH  G   944.196 14 100    8                                              L
+         228TH  L   968.369 17  3-                                                   F   
+         228TH  G   449.21  4   39    5
+         228TH  G   572.29  4  100    5
+         228TH  G   640.34  3   28    4
+         228TH  L   968.968 5   2+                                                   G   
+         228TH  G   782.142 5    1.89 6                                              L
+         228TH  G   911.204 4  100.0  16   E2+M1   +24    8     0.0121               L
+         228TH  G   968.971 17  61.1  11   E2                   0.0107               L
+         228TH  L   979.499 14  2+                                                   D   
+         228TH  G   583.41  5  123    11                                             R
+         228TH2 G FLAG=M
+         228TH  G   651.48  5  100    9                                              R
+         228TH2 G FLAG=M
+         228TH  G   792.8       89    AP                                             L         +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=M
+         228TH  G   921.98  10  18.6  LE                                             L         RI=DRI=RI/2 assumed
+         228TH3 G FLAG=BM
+         228TH  G   979.48  10  29    3                                              L
+         228TH3 G FLAG=M
+         228TH  L  1016.406 21  2+,3-,4+                                                 
+         228TH  G   620.33  6   28.4  14
+         228TH  G   688.11  4   24.0  15                                             &
+         228TH3 G FL=328.003$  FLAG=N                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   958.61  4  100    12
+         228TH  G  1016.44  15   6.8  11                                             &
+         228TH3 G FLAG=LM
+         228TH  L  1022.527 6  (3)+                                                  G   
+         228TH  G   835.710 6   32.4  11   E2                   0.0143               L
+         228TH  G   964.766 10 100.0  18   E2+M1   -7.2   10    0.0108               L
+         228TH  L  1059.93  3   4-                                                       
+         228TH  G   540.68  5   58    10
+         228TH  G   663.88  6   87    7  (M1+E2)                0.06   4
+         228TH  G   873.11  12 100    10
+         228TH  L  1091.017 8   4+                                                   G   
+         228TH  G   694.8   2    2.9  4                                              I
+         228TH3 G FLAG=K
+         228TH  G   713.1   3    1.8  4                                              I
+         228TH3 G FLAG=K
+         228TH  G   904.19  3  100    4   E2                    0.0123
+         228TH  G  1033.248 9   26.5  9   E2                                         L
+         228TH  L  1122.951 6    2-                                                  H   
+         228TH  G   100.41  3    2.2  3  (E1+M2)   0.23   AP    3.2    AP            L
+         228TH3 G FLAG=M
+         228TH  G   153.977 10  16.7  5   E1                    0.178                L
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   726.863 15  13.7  13 (E2)                   0.0189               L
+         228TH  G   794.947 5  100.0  16  E2+M1   -4.4    10    0.0182 15            L
+         228TH  G  1065.19  4    3.02 12
+         228TH  L  1153.467 10  2+               0.29 NS  2                          I   
+         228TH  G   173.964 13  15.5  22  M1+E2    1.2    +11-6 2.3    18            L
+         228THB G BM1W=4.E-5 +6-4$BE2W=0.6 +7-6
+         228TH  G   184.54  2   31    4   E0+M1                 63     8             M
+         228TH3 G FL=968.968$ FLAG=L                                                       FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THB G BM1W=1.2E-4 3
+         228TH  G   278.70  10  71    9  (M1+E2)                0.7    5             @
+         228TH3 G FL=874.473                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   321.646 8  100    5  [E2]                   0.140                L
+         228THB G BE2W=0.29 5
+         228TH  G  1095.679 20  55    4  [M1,E2]                0.018  10            L
+         228TH  G  1153.52  4   61    4  [E2]
+         228THB G BE2W=0.00030 6
+         228TH  L  1160     5                                                            
+         228TH  L  1168.375 5    3-                                                  H   
+         228TH  G    77.34  3    1.7  3                                              L
+         228TH3 G FLAG=M
+         228TH  G   145.849 10  10.4  4   E1                    0.203                L
+         228TH  G   199.407 10  20.8  8   E1                    0.096                L
+         228TH  G   649.03  13   2.7  3                                              &
+         228TH  G   772.291 5  100.0  20  E2+M1    -3.4   +8-27 0.021  3             L
+         228TH  G   840.377 7   61.9  21  E2                    0.0142               L
+         228TH  G   981.5   2    3.0  4                                              I
+         228TH3 G FLAG=K
+         228TH  G  1110.610 10  18.7  20  E1                                         @
+         228TH2 G FLAG=L
+         228TH  L  1174.508 18 (5+)                                                  G   
+         228TH  G   987.88  9
+         228TH  L  1175.39  5   2+                                                       
+         228TH  G   231.42  10  32    5                                              L
+         228TH3 G FLAG=M
+         228TH  G   988.63  20 100    17                                             L
+         228TH3 G FLAG=M
+         228TH  G  1117.63  10  70    10                                             L
+         228TH3 G FLAG=M
+         228TH  G  1175.31  10  31    4                                              L
+         228TH3 G FLAG=M
+         228TH  L  1189.8   4   11-                                                  B   
+         228TH  G   268.9   3   67    5                                              G
+         228TH3 G FLAG=H
+         228TH  G   278.0   3  100                                                   G
+         228TH3 G FLAG=H
+         228TH  L  1200.54  4  (3)+                                                  I   
+         228TH  G   178.14  7   22    LE (E0)                                        I         RI=DRI=RI/2 assumed
+         228TH3 G FLAG=K
+         228TH  G   231.50  5  100    5                                              I
+         228TH3 G FL=968.968$  FLAG=K                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1013.54  13  41    5                                              &
+         228TH3 G FLAG=IK
+         228TH  G  1142.78      11    3                                              I         +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=K
+         228TH  L  1226.565 7   (4)-                                                 H   
+         228TH  G   135.51  2    3.66 20  E1                    0.242
+         228TH  G   204.026 10  20.7  10  E1                    0.091                L
+         228TH  G   707.41  3   27.5  6  (E2)                   0.0200
+         228TH  G   830.486 8  100    4   E2(+M1)  -7.7   9     0.0152 2             L
+         228TH  G  1039.84  8    9.9  6
+         228TH  L  1239.4   4  12+                                                   A   
+         228TH  G   327.5   3                                                        G
+         228TH  L  1297.423 10 (5)-                                                  H   
+         228TH  G   601.7   3   11.1  19                                             &  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FLAG=IK
+         228TH  G   778.1   2  100    11                                             I
+         228TH3 G FLAG=K
+         228TH  G   901.26  13  74    11                                             K
+         228TH  G  1110.610 10  89    7  E1                                          @
+         228TH3 G FLAG=L
+         228TH  L  1344.078 11   3-                                                  J   
+         228TH  G   168.65  10   9    3                                              L
+         228TH3 G FLAG=M
+         228TH  G   824.934 23  47    5                                              L
+         228TH3 G FLAG=M
+         228TH  G   947.982 11 100    8                                              L
+         228TH3 G FLAG=M
+         228TH  G  1016.44  15  18    3                                              &
+         228TH3 G FLAG=LM
+         228TH  G  1157.14  15   6.6  12                                             L
+         228TH3 G FLAG=M
+         228TH  G  1286.27  20  47    9                                              L
+         228TH3 G FLAG=M
+         228TH  L  1416.11  6   2+,3-                                                    
+         228TH  G   471.76  15 100    10                                             L
+         228TH3 G FLAG=M
+         228TH  G  1019.86  10  64    12                                             L
+         228TH3 G FLAG=M
+         228TH  G  1088.18  15  18    4                                              L
+         228TH3 G FLAG=M
+         228TH  G  1229.40  15  23    7                                              L
+         228TH3 G FLAG=M
+         228TH  L  1431.979 6   4+                                                       
+         228TH  G   257.49  2    0.64 3  (M1)                   1.36
+         228TH  G   263.62  2    0.95 5   E1                    0.0502
+         228TH  G   278.70  10   0.70 11                                             @
+         228TH3 G FL=1153.467                                                              FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   340.98  2    8.8  4   E2+M1    -5.2   18    0.136  23
+         228TH  G   409.462 6   43.8  8   E2+M1    -5.4   8     0.082  4
+         228TH  G   452.51  5    0.45 4
+         228TH  G   463.004 6  100.0  16  E2                    0.0522               L
+         228TH  G  1245.16  6    2.47 12
+         228TH  G  1374.24  6    0.32 9                                              M
+         228TH  L  1450.394 10  4-                                                       
+         228TH  G    18.4      11.9   16 [E1]                   6.6                  K         +-  1.00 keV unc. assigned to energy
+         228TH  G   153.02  2    3.58 19  M1+E2   +0.60   8     4.8    2             I
+         228TH3 G FLAG=K
+         228TH  G   223.80  2   43.4  20  M1+E2    -0.18  5     1.97   3
+         228TH  G   275.85  4    2.65 23                                             I
+         228TH3 G FLAG=K
+         228TH  G   282.00  3   60    3   M1+E2    -0.51  12    0.88   7             K
+         228TH  G   327.45  4  100.0  10                                             I
+         228TH3 G FLAG=K
+         228TH  G   359.36  3    4.19 23                                             I
+         228TH3 G FLAG=K
+         228TH  G   390.45  5    3.58 19                                             I
+         228TH3 G FLAG=K
+         228TH  G   427.90  3    4.0  3                                              I
+         228TH3 G FLAG=K
+         228TH  G   434.01  3    5.6  3                                              I
+         228TH3 G FLAG=K
+         228TH  G   482.03  5    5.9  4                                              I
+         228TH3 G FL=968.369$  FLAG=K                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1054.22  6   10.9  10
+         228TH  L  1497.1   5   13-                                                  B   
+         228TH  G   257.7   3   52    4                                              G
+         228TH3 G FLAG=H
+         228TH  G   307.3   3  100                                                   G
+         228TH3 G FLAG=H
+         228TH  L  1531.474 6    3+                                                      
+         228TH  G    99.509 6  100    6   M1                    4.09                 L
+         228TH  G   356.94  10   1.35 14                                             L
+         228TH3 G FLAG=M
+         228TH  G   377.99  10   1.98 24                                             L
+         228TH3 G FLAG=M
+         228TH  G   440.44  5    9.6  6   M1                    0.314
+         228TH  G   508.959 17  40    10  E2(+M1)  1.1    GT    0.08   4             L
+         228TH  G   562.500 4   71    4   E2+M1    +1.6   6     0.07   3             L
+         228TH  G  1135.24  15   0.78 12                                             L
+         228TH3 G FLAG=M
+         228TH  G  1344.59  15   0.71 14                                             L
+         228TH3 G FLAG=M
+         228TH  L  1539.21  9    2,3,4                                                   
+         228TH  G   416.30  20  100   16                                             L
+         228TH2 G FLAG=M
+         228TH  G  1142.85  15   78   16                                             L
+         228TH2 G FLAG=M
+         228TH  L  1580.91  6  (2-)                                                      
+         228TH  G   354.2   2   43    7                                              &
+         228TH3 G FLAG=IK
+         228TH  G   601.7   3   44    7                                              &
+         228TH3 G FLAG=IK
+         228TH  G  1184.71  9   69    6  (M1+E2)                0.015  8             I
+         228TH3 G FLAG=K
+         228TH  G  1252.98  10 100    9  (M1+E2)                0.013  7             I
+         228TH3 G FLAG=K
+         228TH  G  1523.4   2   88    9                                              &
+         228TH3 G FLAG=IK
+         228TH  L  1588.335 14  4-                                                       
+         228TH  G    56.86  3  16.1   8   E1                    0.533                I
+         228TH3 G FLAG=K
+         228TH  G   137.95  2 100     3   M1                    7.89                 I
+         228TH3 G FLAG=K
+         228TH  G   156.34  2  20.6   11  E1                    0.172                I
+         228TH3 G FLAG=K
+         228TH  G   420.03  8  10.3   8                                              I
+         228TH3 G FLAG=K
+         228TH  L  1599.5   5   14+                                                  A   
+         228TH  G   360.1   3                                                        G
+         228TH  L  1617.78  7   2+,3,4+                                                  
+         228TH  G   649.03  13 114    11                                             &
+         228TH2 G FL=968.968$  FLAG=M                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1430.95  10 100    20                                             L
+         228TH3 G FLAG=M
+         228TH  G  1559.78  14  57    11                                             M
+         228TH  L  1638.284 9   2+                                                       
+         228TH  G   470.20  19   2.3  6
+         228TH  G   515.06  10   8.2  8                                              L
+         228TH3 G FLAG=M
+         228TH  G  1309.71  20   3.2  10                                             L
+         228TH3 G FLAG=M
+         228TH  G  1451.40  15   1.8  4                                              L
+         228TH3 G FLAG=M
+         228TH  G  1580.53  3  100    7  (M1,E2)
+         228TH  G  1638.281 10  85    7  (E2)                                        L
+         228TH  L  1643.125 15 (2-,3-)                                                   
+         228TH  G   474.79  11   4.6  7
+         228TH  G   520.151 16  11.8  10 (M1)                   0.201                L
+         228TH  G   627.23  20   2.8  6                                              L
+         228TH3 G FLAG=M
+         228TH  G   674.16      30    LE                                             Q         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   674.76      30    LE                                             Q         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FL=968.369                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   699.08  15   7.4  10                                             L
+         228TH3 G FLAG=M
+         228TH  G  1247.08  3  100    5  (M1)                   0.0201
+         228TH  G  1315.31  9    2.7  4
+         228TH  L  1645.954 12  3+                                                       
+         228TH  G   114.54  6    0.28 4
+         228TH  G   419.42  10   0.65 9                                              L
+         228TH3 G FLAG=M
+         228TH  G   492.30  8    0.74 5
+         228TH  G   523.131 16   3.5  3                                              B
+         228TH3 G FL=1122.951$  FLAG=L                                                     FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   555.07  16   1.40 14
+         228TH  G   623.27  20   0.34 9                                              L
+         228TH3 G FLAG=M
+         228TH  G   629.40  5    1.20 21
+         228TH  G   666.47  4    1.8  2                                              @
+         228TH  G   677.07  9    1.99 16
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1249.97  14   1.94 14
+         228TH  G  1459.138 15  23.7  12  E2                                         L
+         228TH  G  1588.19  3  100.0  25  E2
+         228TH  L  1682.81  3  2+,3(+),4+                                                
+         228TH  G   660.1   3    0.6  AP                                             L
+         228TH3 G FLAG=M
+         228TH  G  1495.93  7  100    5  (E2)
+         228TH  G  1625.06  5   29.1  19
+         228TH  L  1683.82  5  (4-)                                                      
+         228TH  G   457.35  7   19.2  19
+         228TH  G   623.7   2   26    LE                                             I         RI=DRI=RI/2 assumed
+         228TH3 G FLAG=K
+         228TH  G  1164.55  7   83    4  (M1+E2)                0.016  9
+         228TH  G  1287.78  12 100    7  (M1+E2)                0.012  7
+         228TH  L  1688.394 11   2+,3+                                                   
+         228TH  G    42.46  5    0.60 20                                             L
+         228TH3 G FLAG=M
+         228TH  G   672.00  15   1.7  5                                              L
+         228TH3 G FLAG=M
+         228TH  G   813.77  15   0.46 11                                             L
+         228TH3 G FLAG=M
+         228TH  G  1501.57  5   29.4  15
+         228TH  G  1630.627 10 100    3  (M1,E2)                                     L
+         228TH  L  1724.283 6   2+                                                       
+         228TH  G   548.73  15   2.3  3                                              L
+         228TH2 G FLAG=M
+         228TH  G   570.88  4   17.1  9  (M1)                   0.156
+         228TH  G   701.747 14  18.2  10 (M1)                   0.091                L
+         228TH  G   755.315 4  100    3   M1                    0.0747               L
+         228TH  G  1537.87  9    4.2  5                                              B
+         228TH3 G FL=186.823                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1666.523 13  17.3  8   M1                                         L
+         228TH  G  1724.20  4    2.7  3
+         228TH  L  1735.450 25 (4+)                                                      
+         228TH  G  1217.03  10  39    6                                              B  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FL=519.192$ FLAG=LM                                                      FINAL LEVEL FOUND
+         228TH  G  1357.78  15  37    7                                              B  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FL=378.179$  FLAG=LM                                                     FINAL LEVEL FOUND
+         228TH  G  1548.65  4   70    7                                              L
+         228TH3 G FLAG=M
+         228TH  G  1677.67  3  100    9                                              L
+         228TH3 G FLAG=M
+         228TH  L  1743.89  3   4+                                                       
+         228TH  G   399.62  10  16.3  17                                             L
+         228TH3 G FLAG=MP
+         228TH  G   590.65  11   9.3  11                                             I  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FLAG=K
+         228TH  G   684.0   3   10.4  23                                             I  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FLAG=K
+         228TH  G  1365.71  9    8.8  8
+         228TH  G  1557.10  4  100    5  (E2+M1)   +1.2   2
+         228TH  G  1686.12  5   53.8  23 (E2)
+         228TH  L  1758.24  12  2+,3,4+                                                  
+         228TH  G   326.04  20 100    15                                             L
+         228TH3 G FLAG=M
+         228TH  G  1571.52  20  17    5                                              L
+         228TH3 G FLAG=M
+         228TH  G  1700.59  20  31    7                                              L
+         228TH3 G FLAG=M
+         228TH  L  1760.218 24 2+,3(+)                                                   
+         228TH  G   584.7   3   12    4                                              &
+         228TH3 G FLAG=IK
+         228TH  G   737.72  5   73    7
+         228TH  G   791.44  9   21    6                                              @
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1573.26  5   65    4  (E2)
+         228TH  G  1702.44  5  100    7
+         228TH  L  1795.90  10  3-,4+                                                    
+         228TH  G  1276.69  10  78    17                                             L
+         228TH3 G FLAG=M
+         228TH  G  1738.22  25 100    22                                             L
+         228TH3 G FLAG=M
+         228TH  L  1797.65  8   2+                                                       
+         228TH  G  1401.49  10  60    15                                             L
+         228TH3 G FLAG=M
+         228TH  G  1469.71  15 100    20                                             L
+         228TH3 G FLAG=M
+         228TH  G  1740.4   3   55    15                                             L
+         228TH3 G FLAG=M
+         228TH  G  1797.5   5   11    4                                              L
+         228TH3 G FLAG=M
+         228TH  L  1804.689 23  4+                                                       
+         228TH  G   116.26  5  12.8   16                                             I
+         228TH3 G FLAG=K
+         228TH  G   121.18  7  15.2   24                                             I  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FL=1683.82$  FLAG=KB                                                     FINAL LEVEL FOUND
+         228TH  G   121.87  3  26.4   24                                             I
+         228TH3 G FLAG=K
+         228TH  G   158.74  3  100    6   M1+E2     0.55  15                         I
+         228TH3 G FLAG=K
+         228TH  G   354.2   2   23    4                                              &
+         228TH3 G FLAG=IK
+         228TH  G   372.60  3  126    6                                              I  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FL=1431.979$   FLAG=KB                                                   FINAL LEVEL FOUND
+         228TH  G   651.5   2   27    4                                              I
+         228TH3 G FLAG=K
+         228TH  G  1426.5   2   38    5                                              I
+         228TH3 G FLAG=K
+         228TH  G  1618.0   1   72    5  (M1,E2)                                     I
+         228TH3 G FLAG=K
+         228TH  L  1817.432 23  4-                                                       
+         228TH  G   367.04  2  100    5   M1                     0.512               I
+         228TH3 G FLAG=K
+         228TH  G  1298.3   2   18.4  16 (M1+E2)                                     I
+         228TH3 G FLAG=K
+         228TH  G  1421.1   2   57    3   E2+M1    +2.0   5                          I
+         228TH3 G FLAG=K
+         228TH  L  1838.3   5   15-                                                  B   
+         228TH  G   341.2   3                                                        G
+         228TH  L  1892.996 17  3+                                                       
+         228TH  G   477.1   3    4.4  13                                             I
+         228TH3 G FLAG=KP
+         228TH  G   666.47  4   11    2                                              @
+         228TH  G   692.47  7   12.6  9 (M1+E2+E0)              0.24   3             I
+         228TH3 G FLAG=K
+         228TH  G   724.42  11   4.8  6                                              &
+         228TH3 G FLAG=IK
+         228TH  G   739.2   2    3.6  6                                              I
+         228TH3 G FLAG=K
+         228TH  G   770.2   2   14.3  9                                              I
+         228TH3 G FLAG=K
+         228TH  G   870.45  2  100    5   M1
+         228TH  G   924.3   2   17.0  13                                             I
+         228TH3 G FLAG=K
+         228TH  G  1706.17  7   18.1  8   M1+E2    +0.42  4
+         228TH  G  1835.29  5   64    8   E2+M1    +2.9   3
+         228TH  L  1899.95  4   2+                                                       
+         228TH  G   877.39  7   41    4
+         228TH  G   883.6   3    6.6  18                                             I
+         228TH3 G FLAG=K
+         228TH  G   920.8   3   17    4                                              I
+         228TH3 G FLAG=K
+         228TH  G   931.02  7   43    4                                              I
+         228TH3 G FLAG=K
+         228TH  G  1503.7   2   31    3                                              I
+         228TH3 G FLAG=K
+         228TH  G  1842.14  8  100    5   M1+E2    -0.86  14
+         228TH  G  1900.14  17   9    3
+         228TH  L  1901.93  8   3-,4                                                     
+         228TH  G  1383.2   2  100    9                                              I
+         228TH3 G FLAG=K
+         228TH  G  1505.9   2  100    9                                              I
+         228TH3 G FLAG=K
+         228TH  G  1523.4   2  109    11                                             &
+         228TH3 G FLAG=IK
+         228TH  G  1715.06  10  91    6                                              I
+         228TH3 G FLAG=K
+         228TH  L  1906.64  10 (2+)                                                      
+         228TH  G   490.33  15  93    19                                             L
+         228TH3 G FLAG=M
+         228TH  G  1074.71  15  84    25                                             L
+         228TH3 G FLAG=M
+         228TH  G  1907.18  20 100    8                                              L
+         228TH3 G FLAG=M
+         228TH  L  1925.22  4   3+,4+                                                    
+         228TH  G   724.42  11   7.9  9                                              &
+         228TH3 G FLAG=IK
+         228TH  G   750.10  10   7.0  8                                              I
+         228TH3 G FLAG=K
+         228TH  G   865.15  13   5.2  7                                              I
+         228TH3 G FLAG=K
+         228TH  G   956.8   2   26    5                                              I
+         228TH3 G FL=968.369$   FLAG=K                                                     FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1529.02  6   27.2  14                                             I
+         228TH3 G FLAG=K
+         228TH  G  1738.48  5  100    5   M1+E2                                      I
+         228TH3 G FLAG=K
+         228TH  L  1928.57  6   3+                                                       
+         228TH  G   168.42  9   12    3                                              I
+         228TH3 G FLAG=K
+         228TH  G   389.12  15  42    6                                              L
+         228TH3 G FLAG=M
+         228TH  G   584.7   3   30    10                                             &
+         228TH3 G FLAG=IKP
+         228TH  G  1741.74  21  43    12
+         228TH  G  1870.81  9  100    6  (M1+E2)
+         228TH  L  1937.16  9   2+,3,4+                                                  
+         228TH  G   397.94  10 100    11                                             L
+         228TH3 G FLAG=M
+         228TH  G  1062.55  15  37    11                                             L
+         228TH3 G FLAG=M
+         228TH  G  1750.54  20  30    3                                              L
+         228TH3 G FLAG=M
+         228TH  G  1879.6   3    4.8  18                                             L
+         228TH3 G FLAG=M
+         228TH  L  1944.895 11  3+                                                       
+         228TH  G   184.61  5    1.7  2  (M1)                    3.45                I
+         228TH3 G FLAG=K
+         228TH  G   220.61  2    5.2  3  (M1)                    2.10                I
+         228TH3 G FLAG=K
+         228TH  G   299.10  10   1.79 21  M1                     0.90                I
+         228TH3 G FLAG=K
+         228TH  G   306.61  2    8.3  4   M1                     0.84                I
+         228TH3 G FLAG=K
+         228TH  G   512.79  11   5.5  6                                              I
+         228TH3 G FLAG=K
+         228TH  G   718.31  2   26.2  17 (E1)
+         228TH  G   776.52  3   32    3
+         228TH  G   791.44  9   15    2  (M1)                   0.0661               @
+         228TH  G   853.97  8    3.4  3                                              I
+         228TH3 G FLAG=K
+         228TH  G   922.5   2    9.4  5                                              I
+         228TH3 G FLAG=K
+         228TH  G   928.4   2    3.7  3                                              I
+         228TH3 G FLAG=K
+         228TH  G   975.98  5   56    3   M1                    0.0381
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1070.40  7    5.0  3                                              I
+         228TH3 G FLAG=K
+         228TH  G  1549.3   2    5.0  8                                              I
+         228TH3 G FLAG=K
+         228TH  G  1758.11  5   37.7  20  E2+M1    -9     1
+         228TH  G  1887.12  5  100    5   E2+M1    -9.1   9
+         228TH  L  1958.72  22  2+                                                       
+         228TH  G  1772.2   3  100    28                                             L
+         228TH3 G FLAG=M
+         228TH  G  1958.4   3   83    28                                             L
+         228TH3 G FLAG=M
+         228TH  L  1964.98  7   2+,3,4+                                                  
+         228TH  G   548.74  11  46    LT                                             I         RI=DRI=RI/2 assumed
+         228TH3 G FLAG=K
+         228TH  G  1778.0   6    6    2                                              I
+         228TH3 G FLAG=K
+         228TH  G  1907.13  11 100    9                                              I
+         228TH3 G FLAG=K
+         228TH  G  1965.22  12  43    4                                              &
+         228TH3 G FLAG=K
+         228TH  L  1974.20  11  3-,4+                                                    
+         228TH  G  1455.0   2   87    5                                              I
+         228TH3 G FLAG=K
+         228TH  G  1578.2   2  100    10                                             I
+         228TH3 G FLAG=K
+         228TH  G  1787.2   2   28    3                                              I
+         228TH3 G FLAG=K
+         228TH  G  1916.6   3   11.3  23                                             I
+         228TH3 G FLAG=K
+         228TH  L  1981.97  6   2+,3,4+                                                  
+         228TH  G  1013.54  13   32   4                                              &
+         228TH3 G FLAG=IK
+         228TH  G  1795.15  6   100   6                                              I
+         228TH3 G FLAG=K
+         228TH  G  1924.2   2    15.1 17                                             I
+         228TH3 G FLAG=K
+         228TH  L  1987.46  10  4+                                                       
+         228TH  G  1017.92  20  29    7                                              L
+         228TH3 G FL=968.968$  FLAG=M                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1609.41  15  39    8                                              L
+         228TH3 G FLAG=M
+         228TH  G  1800.86  20  22    4                                              L
+         228TH3 G FLAG=M
+         228TH  G  1929.78  20 100    11                                             L
+         228TH3 G FLAG=M
+         228TH  L  1988.1   6   16+                                                  A   
+         228TH  G   388.6   3                                                        G
+         228TH  L  2010.11  5   2+,3,(4+)                                                
+         228TH  G   214.85  10  49    7                                              L  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FL=1795.90$  FLAG=M                                                      FINAL LEVEL FOUND
+         228TH  G   372.57  20  11    3                                              L  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FL=1638.284$  FLAG=MB                                                    FINAL LEVEL FOUND
+         228TH  G   887.33  10  46    5                                              L
+         228TH3 G FLAG=M
+         228TH  G   919.01  13  47    6
+         228TH  G  1040.92  15  75    15                                             L
+         228TH3 G FLAG=M
+         228TH  G  1823.21  10  65    6
+         228TH  G  1952.37  10 100    7
+         228TH  L  2013.6   3   2+,3,4+                                                  
+         228TH  G  1826.7   3  100    38                                             L
+         228TH3 G FLAG=M
+         228TH  G  1955.9   5   38    14                                             L
+         228TH3 G FLAG=M
+         228TH  L  2016.76  10 (2-,3-,4-)                                                
+         228TH  G  1620.67  10 100       (M1+E2)                                     I
+         228TH3 G FLAG=K
+         228TH  L  2022.84  8                                                            
+         228TH  G  1053.09  20 220    68                                             L  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FL=968.968$  FLAG=MB                                                     FINAL LEVEL FOUND
+         228TH  G  1148.16  14 100    20
+         228TH  G  1965.22  12 143    14                                             &
+         228TH3 G FLAG=M
+         228TH  L  2029.84  16  1,2+                                                     
+         228TH  G   939.87  15 200    70                                             L  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FL=1091.017$  FLAG=MB                                                    FINAL LEVEL FOUND
+         228TH  G  1013.58  20 100    28                                             L
+         228TH3 G FLAG=M
+         228TH  G  1971.9   3   78    17                                             L
+         228TH3 G FLAG=M
+         228TH  G  2029.4   5   39    11                                             L
+         228TH3 G FLAG=M
+         228TH  L  2036.99  17 2+,3,4+                                                   
+         228TH  G  1850.13  20 100    18                                             L
+         228TH3 G FLAG=M
+         228TH  G  1979.3   3   41    11                                             L
+         228TH3 G FLAG=M
+         228TH  L  2123.1   3  (2+)                                                      
+         228TH  G  1795.1   5  100    38                                             L
+         228TH3 G FLAG=M
+         228TH  G  1936.3   3  100    24                                             L
+         228TH3 G FLAG=M
+         228TH  L  2209.7   6  17-                                                   B   
+         228TH  G   371.4   3            [E2]                                        G
+         228TH  L  2407.9   7  18+                                                   A   
+         228TH  G   419.8   3            [E2]                                        G
+         228THF G FL=1988.1                                                                FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+                                                                                         
+
+
+MASS NUMBER= 228
+
+OPTIONS: RECOIL= T   ALL= T
+        DEG=1 keV
+        DCC(theory)= 0.000
+
+Program GTOL Version 7.2h as of 24-May-2013 (Double precision, localized)
+
+         228TH    228AC B- DECAY                1987DA28                  97NDS    199704
+         228TH  G    56.96  5  0.019  4                                                        UNPLACED GAMMA IGNORED
+         228TH  G   137.91  5  0.024  5   M1                    7.90                           UNPLACED GAMMA IGNORED
+         228TH  G   466.40  10 0.029  3                                                        UNPLACED GAMMA IGNORED
+         228TH  G   634.18  10 0.0106 21                                                       UNPLACED GAMMA IGNORED
+         228TH  G   853.17  10 0.0088 18                                             U         UNPLACED GAMMA IGNORED
+         228TH  G  1337.33  20 0.0049 15                                                       UNPLACED GAMMA IGNORED
+         228TH  G  1378.23  10 0.0059 18                                                       UNPLACED GAMMA IGNORED
+         228TH  G  1385.39  10 0.0106 21                                                       UNPLACED GAMMA IGNORED
+         228TH  G  1434.22  15 0.0080 23                                                       UNPLACED GAMMA IGNORED
+         228TH  G  1438.01  10 0.0059 15                                                       UNPLACED GAMMA IGNORED
+         228TH  G  1480.37  15 0.016  3                                                        UNPLACED GAMMA IGNORED
+         228TH  G  1529.05  10 0.057  6                                                        UNPLACED GAMMA IGNORED
+         228TH  G  1671.64  15 0.0041 13                                                       UNPLACED GAMMA IGNORED
+         228TH  G  1684.01  20 0.015  5                                                        UNPLACED GAMMA IGNORED
+         228TH  G  1721.4   3  0.0057 21                                                       UNPLACED GAMMA IGNORED
+         228TH  G  1745.28  20 0.0065 8                                                        UNPLACED GAMMA IGNORED
+         228TH  G  1784.4   3  0.0059 10                                                       UNPLACED GAMMA IGNORED
+         228TH  G  1787.3   5  0.0013 5                                                        UNPLACED GAMMA IGNORED
+         228TH  G  1915.9   4  0.0008 3                                                        UNPLACED GAMMA IGNORED
+         228TH  G  1919.5   3  0.0021 5                                                        UNPLACED GAMMA IGNORED
+         228TH  G  1944.20  20 0.0021 5                                                        UNPLACED GAMMA IGNORED
+         228TH  G  2000.9   5  0.0010 3                                                        UNPLACED GAMMA IGNORED
+         228TH  L     0.0        0+                                                  A   
+         228TH  L    57.759 4    2+                                                  A   
+         228TH  G    57.766 5  0.47   3    E2                   156                  A
+         228TH3 G FLAG=H
+         228THS G LC=114$  MC=31.1$  NC+=11.4
+         228TH  L   186.823 4    4+                                                  A   
+         228TH  G   129.065 1  2.42   9    E2                   3.81                 A
+         228TH3 G FLAG=E
+         228THS G KC=0.269$  LC=2.58$  MC=0.707$  NC+=0.263
+         228TH  L   328.003 4   1-                                                   B   
+         228TH  G   270.245 2   3.46  6    E1                   0.0474               A
+         228TH3 G FLAG=E
+         228THS G KC=0.0379$  LC=0.00721$  MC=0.00173$  NC+=0.00061
+         228TH  G   328.000 6  2.95   12   E1                   0.0308               H
+         228THS G KC=0.0247$  LC=0.00458$  MC=0.00110$  NC+=0.00039
+         228TH  L   378.179 10  6+                                                   A   
+         228TH  G   191.353 10 0.123  8    E2                   0.791                H
+         228THS G KC=0.174$  LC=0.450$  MC=0.123$  NC+=0.0454
+         228TH  L   396.078 5   3-                                                   B   
+         228TH  G   209.253 6  3.89   7    E1                   0.086                E
+         228THS G KC=0.0678$  LC=0.0135$  MC=0.00323$  NC+=0.00114
+         228TH  G   338.320 3  11.27  19   E1                   0.0288               A
+         228TH3 G FLAG=D
+         228THS G KC=0.0231$  LC=0.00426$  MC=0.00102$  NC+=0.00036
+         228TH  L   519.192 6    5-                                                  B   
+         228TH  G   141.02  3  0.050  8    E1                   0.220                J
+         228THS G KC=0.171$  LC=0.0366$  MC=0.0088$  NC+=0.00313
+         228TH  G   332.370 4  0.40   4    E1                   0.0299               A
+         228TH3 G FLAG=EJ
+         228THS G KC=0.0240$  LC=0.00444$  MC=0.00106$  NC+=0.00038
+         228TH  L   831.823 10  0+                                                   C   
+         228TH  G   503.823 13 0.182  12  (E1)                  0.0125               A
+         228TH3 G FLAG=G
+         228THS G KC=0.0101$  LC=0.00178
+         228TH  G   774.1   2  0.06   AP  [E2]                  0.0167
+         228THS G KC=0.0122$  LC=0.00339
+         228TH  L   874.473 18  2+                                                   C   
+         228TH  G   478.33  5  0.209  15   E1                   0.0139
+         228THS G KC=0.0112$  LC=0.00199$  MC=0.00047$  NC+=0.00017
+         228TH  G   546.47  5  0.201  13  [E1]                  0.0106
+         228THS G KC=0.0086$  LC=0.00151
+         228TH  G   688.10  5  0.067  5   [E2]                  0.0212               &
+         228TH2 G FL=186.823$  FLAG=B                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.0151$  LC=0.00464
+         228TH  G   816.71  10 0.030  3   [M1,E2]               0.038  23
+         228THS G KC=0.030 19$  LC=0.006 3
+         228TH  G   874.44  7  0.047  10  [E2]                  0.0131               A
+         228THS G KC=0.0098$  LC=0.00249
+         228TH  L   938.58  7   0+                                                   D   
+         228TH  G   610.64  10 0.023  5   [E1]
+         228TH  G   880.76  10 0.0062 18  [E2]                  0.0129
+         228THS G KC=0.0096$  LC=0.00244
+         228TH  L   944.196 13  1,2+                                                     
+         228TH  G   616.22  3  0.080  5                                              A
+         228TH  G   944.196 14 0.095  8                                              A
+         228TH  L   968.369 20  3-                                                   D   
+         228TH  G   449.15  5  0.048  5   [E2]                  0.0563               A
+         228THS G KC=0.0335$  LC=0.0168$  MC=0.00439$  NC+=0.00162
+         228TH  G   572.14  8  0.150  16  [M1,E2]               0.09   7             A
+         228THS G KC=0.07 6$  LC=0.016 8
+         228TH  G   640.34  3  0.054  5   [E2]                  0.0247               A
+         228THS G KC=0.0172$  LC=0.00567
+         228TH  L   968.968 5   2+                                                   E   
+         228TH  G   782.142 5  0.485  19  [E2]                  0.0163               A
+         228TH3 G FLAG=E
+         228THS G KC=0.0119$  LC=0.00330
+         228TH  G   911.204 4  25.8   4    E2                   0.0121               A
+         228TH3 G FLAG=D
+         228THS G KC=0.0091$  LC=0.00225
+         228TH  G   968.971 17 15.8   3    E2                   0.0107               A
+         228TH3 G FLAG=D
+         228THS G KC=0.00815$  LC=0.00194
+         228TH  L   979.499 14  2+                                                       
+         228TH  G   583.41  5  0.111  10  [E1]                  0.0094
+         228THS G KC=0.00761$  LC=0.00132
+         228TH  G   651.51  3  0.090  8   [E1]                  0.0076               A
+         228THS G KC=0.00617$  LC=0.00106
+         228TH  G   792.8      0.08   AP  [E2]                  0.0159                         +-  1.00 keV unc. assigned to energy
+         228THS G KC=0.0116$  LC=0.00319
+         228TH  G   921.98  10 0.0147 21  [M1,E2]               0.028  17            &
+         228THS G KC=0.022 14$  LC=0.0044 22
+         228TH  G   979.48  10 0.026  3   [E2]                  0.0105
+         228THS G KC=0.00799$  LC=0.00189
+         228TH  L  1016.406 21  2+,3-,4+                                                 
+         228TH  G   620.38  5  0.080  5
+         228TH  G   688.10  5  0.067  5                                              &
+         228TH2 G FL=328.003                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   958.61  4  0.28   4                                              A
+         228TH3 G FLAG=H
+         228TH  G  1016.44  15 0.019  3                                              &
+         228TH  L  1022.527 6  (3)+                                                  E   
+         228TH  G   835.710 6  1.61   6    E2                   0.0143               A
+         228TH3 G FLAG=EJ
+         228THS G KC=0.0106$  LC=0.00279
+         228TH  G   964.766 10 4.99   9    E2+M1    -7.2  10    0.0108               A
+         228TH3 G FLAG=E
+         228THS G KC=0.00821$  LC=0.00196
+         228TH  L  1059.93  3   4-                                                       
+         228TH  G   540.76  10 0.026  3  [M1,E2]                0.11   8
+         228THS G KC=0.08 6$  LC=0.018 9
+         228TH  G   663.82  10 0.028  6  (M1+E2)                0.06   4             J
+         228THS G KC=0.05 4$  LC=0.010 6
+         228TH  G   873.17  15 0.031  6  [E1]                   0.00441
+         228THS G KC=0.00361$  LC=0.00060
+         228TH  L  1091.017 8   4+                                                   E   
+         228TH  G   904.20  4  0.77   3   E2                    0.0123               A
+         228TH3 G FLAG=FJ
+         228THS G KC=0.0092$  LC=0.00229
+         228TH  G  1033.248 9  0.201  13  E2                    0.0095               A
+         228TH3 G FLAG=J
+         228THS G KC=0.00727$  LC=0.00167
+         228TH  L  1122.951 6    2-                                                  F   
+         228TH  G   100.41  3  0.093  13 (E1+M2)    0.23  AP    3.2    AP
+         228THS G LC=2.4$ MC=0.64$ NC+=0.25
+         228TH  G   153.977 10 0.722  21  E1                    0.178                E
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.139$  LC=0.0292$  MC=0.00703$  NC+=0.00250
+         228TH  G   726.863 15 0.62   8  (E2)                   0.0189
+         228THS G KC=0.0136$  LC=0.00400
+         228TH  G   794.947 5  4.25   7   E2+M1    -4.4   10    0.0182 15            A
+         228TH3 G FLAG=DK
+         228THS G KC=0.0136 13$  LC=0.00349 20
+         228TH  G  1065.18  4  0.132  10                                             A
+         228TH  L  1153.467 10  2+               0.29 NS  2                              
+         228TH  G   173.964 13 0.035  5   M1+E2    1.2    +11-6  2.3   18            A
+         228THS G KC=1.5 10$  LC=0.66 4$  MC=0.171 22$  NC+=0.063 5
+         228TH  G   184.54  2  0.070  8   E0+M1                 63     8  4.5      8
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=53 7$  LC=10.2 13$  MC=0.126$  NC+=0.0462
+         228TH  G   278.95  5  0.160  21 (M1,E2)                0.7    5             @
+         228TH3 G FL=874.473$  FLAG=N                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.48 39$  LC=0.130 35$  MC=0.033 7$  NC+=0.0119 24
+         228TH  G   321.646 8  0.226  11 [E2]                   0.140                A
+         228TH3 G FLAG=D
+         228THS G KC=0.0643$  LC=0.0550$  MC=0.0147$  NC+=0.00544
+         228TH  G  1095.679 20 0.129  10 [M1,E2]                0.018  10            A
+         228TH  G  1153.52  4  0.139  10                                             A
+         228TH  L  1168.375 5    3-                                                  F   
+         228TH  G    77.34  3  0.026  5  [E1]                   0.235
+         228THS G LC=0.177$  MC=0.0431$  NC+=0.0150
+         228TH  G   145.849 10 0.158  8   E1                    0.203                H
+         228TH3 G FLAG=J
+         228THS G KC=0.158$  LC=0.0336$  MC=0.00809$  NC+=0.00287
+         228TH  G   199.407 10 0.315  5   E1                    0.096                H
+         228TH3 G FLAG=J
+         228THS G KC=0.0758$  LC=0.0152$  MC=0.00365$  NC+=0.00129
+         228TH  G   648.84  10 0.040  4  [E2]                   0.0240               &
+         228TH2 G FL=519.192                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.0168$  LC=0.00546
+         228TH  G   772.291 5  1.49   3   E2+M1    -3.4   +8-27 0.021  3             A
+         228TH3 G FLAG=EK
+         228THS G KC=0.0157 24$  LC=0.0040 4
+         228TH  G   840.377 7  0.91   4   E2                    0.0142               A
+         228TH3 G FLAG=EJ
+         228THS G KC=0.0105$  LC=0.00275
+         228TH  G  1110.610 10 0.285  23  E1                                         @
+         228TH3 G FLAG=AJN
+         228TH  L  1174.508 18 (5+)                                                  E   
+         228TH  G   987.71  20 0.077  13 [M1,E2]                0.024  14
+         228THS G KC=0.019 11$  LC=0.0037 18
+         228TH  L  1175.39  5   2+                                                       
+         228TH  G   231.42  10 0.025  4  [D,E2]                 1.0    9
+         228TH  G   988.63  20 0.077  13 [E2]                   0.0103
+         228TH  G  1117.63  10 0.054  8
+         228TH  G  1175.31  10 0.024  3
+         228TH  L  1226.565 7   (4)-                                                 F   
+         228TH  G   135.54  5  0.018  4   E1                    0.242                J
+         228THS G KC=0.188$  LC=0.0406$  MC=0.0098$  NC+=0.00348
+         228TH  G   204.026 10 0.112  15  E1                    0.091                H
+         228THS G KC=0.0719$  LC=0.0143$  MC=0.00344$  NC+=0.00122
+         228TH  G   707.41  5  0.155  15 (E2)                   0.0200               H
+         228TH3 G FLAG=J
+         228THS G KC=0.0143$  LC=0.00711
+         228TH  G   830.486 8  0.540  21  E2(+M1)  -7.7   9     0.0152 2             A
+         228TH3 G FLAG=FJK
+         228THS G KC=0.0113 2 $  LC=0.00293 3
+         228TH  G  1039.65  15 0.044  9
+         228TH  L  1297.423 10 (5)-                                                  F   
+         228TH  G   778.23     0.022  6  [M1,E2]                0.04   3                S      +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=T
+         228THS G KC=0.034 22$  LC=0.007 4
+         228TH  G   901.23  15 0.016  3  [E2]                   0.0123
+         228THS G KC=0.00926$  LC=0.00231
+         228TH  G  1110.610 10 0.019  10  E1                                         @
+         228TH3 G FLAG=JN
+         228TH  L  1344.078 11   3-                                                      
+         228TH  G   168.65  10 0.010  3  [E1]                   0.143                @
+         228TH2 G FLAG=Q
+         228THS G KC=0.112$  LC=0.0232$  MC=0.00557$  NC+=0.00197
+         228TH  G   824.934 23 0.050  5  [E2]                   0.0147               A
+         228THS G KC=0.0108$  LC=0.00288
+         228TH  G   947.982 11 0.106  8  [M1,E2]                0.026  15            A
+         228THS G KC=0.021 12$  LC=0.0041 20
+         228TH  G  1016.44  15 0.019  3                                              &
+         228TH  G  1157.14  15 0.0070 13
+         228TH  G  1286.27  20 0.050  10
+         228TH  L  1416.11  6   2+,3-                                                    
+         228TH  G   471.76  15 0.033  3  [D,E2]                 0.14   12
+         228TH  G  1019.86  10 0.021  4
+         228TH  G  1088.18  15 0.0059 13
+         228TH  G  1229.40  15 0.0075 23
+         228TH  L  1431.979 6    4+                                                      
+         228TH  G   257.52  10 0.030  3  (M1)                   1.36                 J
+         228THS G KC=1.09$  LC=0.205$  MC=0.0495$  NC+=0.0180
+         228TH  G   263.58  10 0.040  4   E1                    0.0502               J
+         228THS G KC=0.0400$  LC=0.00766$  MC=0.00184$ NC+=0.00065
+         228TH  G   278.95  5  0.031  5  [E2]                   0.216                @
+         228TH3 G FL=1153.467$  FLAG=N                                                     FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.086$  LC=0.096$  MC=0.0257$ NC+=0.0095
+         228TH  G   340.96  5  0.369  21  E2+M1    -5.2   18    0.136  23            E
+         228TH3 G FLAG=JK
+         228THS G KC=0.073 20$  LC=0.046 2$  MC=0.0122 5$  NC+=0.00450 17
+         228TH  G   409.462 6  1.92   4   E2+M1    -5.4   8     0.082  4             A
+         228TH3 G FLAG=EK
+         228THS G KC=0.049 4$  LC=0.0242 5$  MC=0.00631 10$  NC+=0.00233 4
+         228TH  G   452.47  10 0.015  5  [E2]                   0.0553
+         228THS G KC=0.0330$  LC=0.0164$  MC=0.00429$  NC+=0.00158
+         228TH  G   463.004 6  4.40   7   E2                    0.0522               A
+         228TH3 G FLAG=E
+         228THS G KC=0.0316$  LC=0.0152$  MC=0.00397$  NC+=0.00146
+         228TH  G  1103.41  10 0.0150 23 [E3]                                        B  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH2 G FL=328.003$  FLAG=P                                                      FINAL LEVEL FOUND
+         228TH  G  1245.05  20 0.095  18 [M1,E2]                0.013  7             L
+         228TH  G  1374.19  10 0.014  4
+         228TH  L  1450.394 10  4-                                                       
+         228TH  G    18.4      0.014  4  [E1]                   6.6       0.11     3    S      +-  1.00 keV unc. assigned to energy
+         228TH  G   223.85  10 0.054  5   M1+E2    -0.18  5     1.97   3             J
+         228TH3 G FLAG=K
+         228THS G KC=1.56 3$  LC=0.302 1$  MC=0.0729 2$  NC+=0.0266 1
+         228TH  G   282.00  3  0.072  19  M1+E2    -0.51  12    0.88   7             A
+         228TH3 G FLAG=HJK
+         228THS G KC=0.69 6$  LC=0.145 6$  MC=0.0355 11$  NC+=0.0129 4
+         228TH  G   327.44     0.12   4  [E2]                   0.132                   S      +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=T
+         228THS G KC=0.0621$  LC=0.0515$  MC=0.0137$  NC+=0.00508
+         228TH  G   480.94  20 0.023  5  [M2]                                        P
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   930.93  10 0.0124 18                                             &
+         228TH  G  1054.11  20 0.018  5
+         228TH  L  1531.474 6    3+                                                      
+         228TH  G    99.509 6  1.26   7   M1                    4.09                 A
+         228TH2 G FLAG=H
+         228THS G LC=3.07$  MC=0.741$  NC+=0.273
+         228TH  G   356.94  10 0.0170 18 [E2]                   0.103
+         228THS G KC=0.0523$  LC=0.0374$  MC=0.0099$  NC+=0.00368
+         228TH  G   377.99  10 0.025  3  [M1,E2]                0.28   19
+         228THS G KC=0.21 17$  LC=0.051 20$  MC=0.013 5$  NC+=0.0046 16
+         228TH  G   440.44  5  0.121  8   M1                    0.314
+         228THS G KC=0.252$ LC=0.0471$  MC=0.0113$  NC+=0.00410
+         228TH  G   508.959 17 0.45   5   E2(+M1)  1.1    GT    0.08   4             A
+         228THS G KC=0.06 3$  LC=0.016 5
+         228TH  G   562.500 4  0.87   3   E2+M1    +1.6   6     0.07   3             A
+         228TH3 G FLAG=EK
+         228THS G KC=0.051 23$  LC=0.013 4
+         228TH  G  1135.24  15 0.0098 15
+         228TH  G  1344.59  15 0.0090 18
+         228TH  L  1539.21  9   2,3,4                                                    
+         228TH  G   416.30  20 0.0132 21 [E1]                   0.0185
+         228THS G KC=0.0149$  LC=0.00268$  MC=0.000640$  NC+=0.000228
+         228TH  G  1142.85  15 0.0103 21
+         228TH  L  1617.78  7   2+,3,4+                                                  
+         228TH  G   648.84  10 0.040  4                                              &
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1430.95  10 0.035  7
+         228TH  G  1559.85  20 0.020  4
+         228TH  L  1638.284 9   2+                                                   G   
+         228TH  G   470.25  20 0.013  3  [E1]                   0.0144
+         228THS G KC=0.0116$  LC=0.00206$  MC=0.00049$  NC+=0.00018
+         228TH  G   515.06  10 0.049  5  [E1]                   0.0120
+         228THS G KC=0.0097$  LC=0.00170
+         228TH  G  1309.71  20 0.019  6
+         228TH  G  1451.40  15 0.0106 21
+         228TH  G  1580.53  3  0.60   4  (M1,E2)                                     A
+         228TH3 G FLAG=I
+         228TH  G  1638.281 10 0.47   3  (E2)                                        A
+         228TH3 G FLAG=IJ
+         228TH  L  1643.125 15 (2-,3-)                                                   
+         228TH  G   474.75  10 0.022  3  [M1,E2]                0.15   11
+         228THS G KC=0.12 9$  LC=0.026 13$  MC=0.006 3$   NC+=0.0023 10
+         228TH  G   520.151 16 0.067  5  (M1)                   0.201                A
+         228THS G KC=0.161$  LC=0.0301
+         228TH  G   627.23  20 0.014  3
+         228TH  G   674.16     0.109  LE [E1]                                        R         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   674.75     0.109  LE [M1,E2]                0.06   4             R         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FL=968.369                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.048 32$  LC=0.010 5
+         228TH  G   699.08  15 0.037  5  [D,E2]                 0.05   4
+         228TH  G  1247.08  4  0.50   3  (M1)                   0.0201               A
+         228TH3 G FLAG=IL
+         228TH  G  1315.34  10 0.015  3  [M1,E2]                0.012  6
+         228TH  L  1645.954 12  3+                                                       
+         228TH  G   114.56  7  0.0098 21 [M1,E2]                10     4
+         228THS G KC=5.5 52$  LC=3.2 12$  MC=0.9 4$  NC+=0.32 14
+         228TH  G   419.42  10 0.021  3  [E1]                   0.0182
+         228THS G KC=0.0147$  LC=0.00264$  MC=0.00063$  NC+=0.000225
+         228TH  G   492.37  10 0.0235 23 [M1,E2]                0.14   10
+         228THS G KC=0.11 8$  LC=0.024 12$  MC=0.006 3$  NC+=0.0021 10
+         228TH  G   523.131 16 0.103  8  [E1]                   0.0116               A
+         228TH3 G FL=1122.951$  FLAG=B                                                     FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.00942$  LC=0.000165
+         228TH  G   555.12  10 0.046  5  [M1,E2]                0.10   7
+         228THS G KC=0.08 6$  LC=0.017 9
+         228TH  G   623.27  20 0.011  3  [M1,E2]                0.08   5
+         228THS G KC=0.06 4$  LC=0.012 6
+         228TH  G   629.40  5  0.045  5  [D,E2]                 0.06   6
+         228TH  G   666.45  10 0.057  6  [M1,E2]                0.06   4             @
+         228TH3 G FLAG=N
+         228THS G KC=0.05 3$  LC=0.010 5
+         228TH  G   677.11  10 0.062  5  [M1,E2]                0.06   4
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.05 3$  LC=0.010 5
+         228TH  G  1250.04  10 0.062  5                                              A
+         228TH  G  1459.138 15 0.83   8   E2                                         A
+         228TH3 G FLAG=IJ
+         228TH  G  1588.20  3  3.22   8   E2                                         A
+         228TH3 G FLAG=IJ
+         228TH  L  1682.81  3   2+,3(+),4+                                               
+         228TH  G   660.1   3  0.005  AP [M1,E2]                0.06   4
+         228THS G KC=0.05 3$  LC=0.010 5
+         228TH  G  1495.910 20 0.86   4  (E2)                                        A
+         228TH3 G FLAG=IJ
+         228TH  G  1625.06  5  0.255  18                                             A
+         228TH  L  1683.82  5  (4-)                                                      
+         228TH  G   457.17  15 0.0150 23 [M1,E2]                0.17   12
+         228THS G KC=0.13 10$  LC=0.029 14$  MC=0.007 3$  NC+=0.0026 11
+         228TH  G  1164.50  8  0.065  5  (M1+E2)                0.016  9             J
+         228TH  G  1287.68  20 0.080  15 (M1+E2)                0.012  7             J
+         228TH  L  1688.394 11  2+,3+                                                G   
+         228TH  G    42.46  5  0.009  3  [M1]                   49
+         228TH  G   672.00  15 0.026  8
+         228TH  G   813.77  15 0.0070 16 [M1,E2]                0.038  23
+         228THS G KC=0.030 19$  LC=0.006 3
+         228TH  G  1501.57  5  0.46   3                                              G
+         228TH  G  1630.627 10 1.51   4  (M1,E2)                                     A
+         228TH2 G FLAG=I
+         228TH  L  1724.283 6   2+                                                       
+         228TH  G   497.49  15 0.0059 18 [M2]                   0.608                P
+         228THS G KC=0.457$  LC=0.113$  MC=0.0282$  NC+=0.0104
+         228TH  G   548.73  15 0.023  3  [M1,E2]                0.10   7
+         228THS G KC=0.08 6$  LC=0.017 9
+         228TH  G   570.91  10 0.182  24 (M1)                   0.156                G
+         228THS G KC=0.125$  LC=0.0234
+         228TH  G   701.747 14 0.173  10 (M1)                   0.091                A
+         228TH3 G FLAG=J
+         228THS G KC=0.0726$  LC=0.0135
+         228TH  G   755.315 4  1.00   3   M1                    0.0747               A
+         228TH3 G FLAG=DJ
+         228THS G KC=0.0599$  LC=0.0111
+         228TH  G  1537.89  10 0.047  5                                              B
+         228TH2 G FL=186.823                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1666.523 13 0.178  13  M1                                         A
+         228TH3 G FLAG=J
+         228TH  G  1724.21  4  0.029  3                                              A
+         228TH  L  1735.450 25 (4+)                                                      
+         228TH  G  1217.03  10 0.021  3                                              B
+         228TH2 G FL=519.192                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1357.78  15 0.020  4                                              B
+         228TH2 G FL=378.179                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1548.65  4  0.038  4                                              A
+         228TH  G  1677.67  3  0.054  5                                              A
+         228TH  L  1743.89  3   4+                                                       
+         228TH  G   399.62  10 0.029  3  [E1]                   0.0212
+         228THS G KC=0.0162$  LC=0.00293$  MC=0.000701$  NC+=0.000250
+         228TH  G   590.4      0.017  3  [E2]                   0.0295                  S      +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=T
+         228THS G KC=0.0200$  LC=0.00716
+         228TH  G   684.0      0.019  5  [E1]                                           S      +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=T
+         228TH  G  1347.50  15 0.015  3
+         228TH  G  1365.70  15 0.014  3                                              M
+         228TH  G  1415.66  10 0.021  4  [E3]                                        P
+         228TH3 G FL=328.003                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1557.11  4  0.178  13 (E2+M1)   +1.2   2                          A
+         228TH3 G FLAG=JK
+         228TH  G  1686.09  7  0.095  8  (E2)                                        A
+         228TH3 G FLAG=J
+         228TH  L  1758.24  12  2+,3,4+                                                  
+         228TH  G   326.04  20 0.033  5  [D,E2]                 0.4    3
+         228TH  G  1571.52  20 0.0057 16
+         228TH  G  1700.59  20 0.0101 23
+         228TH  L  1760.218 24  2+,3(+)                                              G   
+         228TH  G   737.72  5  0.037  4  [M1,E2]                0.05   3
+         228TH  G   791.49  25 0.010  3  [M1,E2]                0.04   3             @
+         228TH3 G FL=968.968$  FLAG=N                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.032 21$  LC=0.007 4
+         228TH  G  1573.26  5  0.033  3  (E2)                                        A
+         228TH3 G FLAG=J
+         228TH  G  1702.43  5  0.048  5                                              A
+         228TH  L  1795.90  10  3-,4+                                                    
+         228TH  G  1276.69  10 0.014  3
+         228TH  G  1738.22  25 0.018  4
+         228TH  L  1797.65  8   2+                                                       
+         228TH  G  1401.49  10 0.012  3
+         228TH  G  1469.71  15 0.020  4
+         228TH  G  1740.4   3  0.011  3
+         228TH  G  1797.5   5  0.0021 8
+         228TH  L  1892.996 17  3+                                                       
+         228TH  G   666.45  10 0.005  2  [E1]                                        @
+         228TH3 G FLAG=N
+         228TH  G   692.5      0.0056 7 (M1+E2+E0)              0.24   3                S      +-  1.00 keV unc. assigned to energy
+***** GAMMA=   692.5    CANNOT BE PLACED FROM LEVEL   1892.996 WITHIN +- 10.0 keV
+         228TH3 G FLAG=T
+         228TH  G   770.04     0.0063 8  [E1]                                           S      +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=T
+         228TH  G   870.46  4  0.044  4   M1                    0.0515               A
+         228TH3 G FLAG=J
+         228THS G KC=0.0414$  LC=0.00762
+         228TH  G   924.03     0.0075 10 [M1,E2]                                        S      +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=T
+         228TH  G  1706.19  10 0.0085 10  M1+E2    +0.42  4                          J
+         228TH3 G FLAG=K
+         228TH  G  1835.43  10 0.038  4   E2+M1    +2.9   3                          J
+         228TH3 G FLAG=K
+         228TH  L  1899.95  4   2+                                                   G   
+         228TH  G   877.46  10 0.014  3  [M1,E2]                0.032  19
+         228THS G KC=0.025 15$  LC=0.005 3
+         228TH  G   930.93  10 0.0124 18                                             &
+         228TH  G  1713.47  20 0.0054 10
+         228TH  G  1842.13  10 0.042  4   M1+E2    -0.86  14                         J
+         228TH3 G FLAG=K
+         228TH  G  1900.07  20 0.0028 5
+         228TH  L  1906.64  10 (2+)                                                      
+         228TH  G   490.33  15 0.0111 23 [D,E2]                 0.12   11
+         228TH  G  1074.71  15 0.010  3
+         228TH  G  1907.18  20 0.0119 10
+         228TH  L  1928.57  6  3+                                                        
+         228TH  G   168.65  10 0.0030 7  [M1,E2]                2.9    16            @
+         228TH2 G FLAG=Q
+         228THS G KC=1.9 17$  LC=0.73 6$  MC=0.19 3$  NC+=0.070 10
+         228TH  G   389.12  15 0.0103 15 [M1,E2]                0.26   18
+         228TH  G  1742.0   3  0.0080 23
+         228TH  G  1870.83  10 0.0243 23 (M1+E2)                                     J
+         228TH  L  1937.16  9   2+,3,4+                                                  
+         228TH  G   397.94  10 0.027  3
+         228TH  G  1062.55  15 0.010  3
+         228TH  G  1750.54  20 0.0080 8
+         228TH  G  1879.6   3  0.0013 5
+         228TH  L  1944.895 11  3+                                                   G   
+         228TH  G   718.48  15 0.019  4  (E1)                                        J
+         228TH  G   776.56  10 0.019  6
+         228TH  G   791.49  25 0.013  3  (M1)                   0.0661               @
+         228TH3 G FLAG=N
+         228THS G KC=0.0530$  LC=0.0098
+         228TH  G   853.17  10 0.0031 4  [M1,E2]                0.034  20            B
+         228TH2 G FL=1091.017$  FLAG=U                                                     FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.027 17$  LC=0.005 3
+         228TH  G   921.98  10 0.0147 21                                             &
+         228TH  G   975.96  5  0.050  5   M1                    0.0381               J
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.0306$  LC=0.00563
+         228TH  G  1000.69  15 0.005
+         228TH  G  1758.11  10 0.035  4   E2+M1    -9     1                          J
+         228TH3 G FLAG=K
+         228TH  G  1887.10  5  0.090  8   E2+M1    -9.1   1                          J
+         228TH3 G FLAG=K
+         228TH  L  1958.72  22  2+                                                       
+         228TH  G  1772.2   3  0.0018 5
+         228TH  G  1958.4   3  0.0015 5
+         228TH  L  1987.46  10  4+                                                       
+         228TH  G  1017.92  20 0.0057 13
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1609.41  15 0.0077 15
+         228TH  G  1800.86  20 0.0044 8
+         228TH  G  1929.78  20 0.0199 21
+         228TH  L  2010.11  5   2+,3,(4+)                                                
+         228TH  G   214.85  10 0.029  4  [D,E2]                 1.2    11
+         228TH  G   372.57  20 0.0067 15 [D,E2]                 0.26   24
+         228TH3 G FL=1638.284                                                              FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G   887.33  10 0.027  3
+         228TH  G   918.97  10 0.027  3
+         228TH  G  1040.92  15 0.044  9
+         228TH  G  1823.22  10 0.044  4
+         228TH  G  1952.33  15 0.059  5
+         228TH  L  2013.6   3   2+,3,4+                                                  
+         228TH  G  1826.7   3  0.0021 8
+         228TH  G  1955.9   5  0.0008 3
+         228TH  L  2022.84  10                                                           
+         228TH  G   384.63  20 0.0067 15 [D,E2]                 0.24   22
+         228TH  G  1053.09  20 0.013  4                                              B
+         228TH3 G FL=968.968                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1148.12  15 0.0059 13
+         228TH  G  1190.81  20 0.0062 16
+         228TH  G  1965.24  20 0.0204 18
+         228TH  L  2029.84  16  1,2+                                                     
+         228TH  G   939.87  15 0.009  3                                              B
+         228TH3 G FL=1091.017$                                                             FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  1013.58  20 0.0046 13
+         228TH  G  1971.9   3  0.0036 8
+         228TH  G  2029.4   5  0.0018 5
+         228TH  L  2036.99  17  2+,3,4+                                                  
+         228TH  G  1850.13  20 0.0044 8
+         228TH  G  1979.3   3  0.0018 5
+         228TH  L  2123.1   3  (2+)                                                      
+         228TH  G  1795.1   5  0.0021 8
+         228TH  G  1936.3   3  0.0021 5
+                                                                                         
+
+
+MASS NUMBER= 228
+
+OPTIONS: RECOIL= T   ALL= T
+        DEG=1 keV
+        DCC(theory)= 0.000
+
+Program GTOL Version 7.2h as of 24-May-2013 (Double precision, localized)
+
+         228TH    228PA EC DECAY                1995BA42                  97NDS    199704
+         228TH  G  141.9    1   0.21  3                                                        UNPLACED GAMMA IGNORED
+         228TH  G  206.30   5   0.50  7                                                        UNPLACED GAMMA IGNORED
+         228TH  G  216.1    1   1.1   3                                                        UNPLACED GAMMA IGNORED
+         228TH  G  357.3    1   0.37  4                                                        UNPLACED GAMMA IGNORED
+         228TH  G  425.4    1   0.41  5                                                        UNPLACED GAMMA IGNORED
+         228TH  G  443.8    1   0.62  7                                                        UNPLACED GAMMA IGNORED
+         228TH  G  471.7    2   0.37  9                                                        UNPLACED GAMMA IGNORED
+         228TH  G  490.7    1   0.82  4                                              G         UNPLACED GAMMA IGNORED
+         228TH  G  555.7    1   1.5   2                                                        UNPLACED GAMMA IGNORED
+         228TH  G  621.6    3   1.0   2                                              G         UNPLACED GAMMA IGNORED
+         228TH  G  796      1   2.0   AP                                             J         UNPLACED GAMMA IGNORED
+         228TH  G  801.2    1   0.46  5                                                        UNPLACED GAMMA IGNORED
+         228TH  G  895.9    1   1.41  7                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1017.2    2   0.82  12                                             G         UNPLACED GAMMA IGNORED
+         228TH  G 1018.9    2   1.3   2                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1024.4    2   0.43  6                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1058.5    1   0.66  7                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1062.4    1   0.57  6                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1074.7    3   0.42  5                                              G         UNPLACED GAMMA IGNORED
+         228TH  G 1077.5    3   0.36  5                                              G         UNPLACED GAMMA IGNORED
+         228TH  G 1103.4    1   0.44  4                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1175.6    2   0.24  4                                              G         UNPLACED GAMMA IGNORED
+         228TH  G 1281.7    2   0.29  3                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1286.3    3   0.39  9                                              G         UNPLACED GAMMA IGNORED
+         228TH  G 1310.8    1   0.48  5                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1358.0    2   0.34  5                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1432      1   1.3   LE                                             @         UNPLACED GAMMA IGNORED
+         228TH2 G FLAG=P
+         228TH  G 1480.4    3   0.77  10                                             G         UNPLACED GAMMA IGNORED
+         228TH  G 1483.2    3   0.52  7                                              G         UNPLACED GAMMA IGNORED
+         228TH  G 1486.3    3   0.27  7                                              G         UNPLACED GAMMA IGNORED
+         228TH  G 1542.8    2   0.28  5                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1547.2    3   0.54  11                                             G         UNPLACED GAMMA IGNORED
+         228TH  G 1609.6    1   0.92  7  (M1)                                                  UNPLACED GAMMA IGNORED
+         228TH  G 1677.9    1   0.65  5                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1746.2    2   0.34  4                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1752.1    2   0.37  4                                              G         UNPLACED GAMMA IGNORED
+         228TH  G 1784.4    2   0.62  5                                              G         UNPLACED GAMMA IGNORED
+         228TH  G 1807.2    1   0.60  5                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1865.1    1   0.80  4                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1919.4    2   0.26  3                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1936.0    2   0.20  3                                                        UNPLACED GAMMA IGNORED
+         228TH  G 1958.1    2   0.29  3                                                        UNPLACED GAMMA IGNORED
+         228TH  L 0.0         0+                                                     A   
+         228TH  L 57.76       2+                                                     A   
+         228TH  G 57.76     2   5.5   3 E2                      156
+         228THS G  LC=  114$  MC=   31.1$ N+=  11.5
+         228TH  L 186.82      4+                                                     A   
+         228TH  G 129.06    2  45.7   23  E2                    3.81
+         228THS G KC=  0.269   $LC=   2.58$  MC=  0.707$  N+=  0.263
+         228TH  L 328.00      1-                                                     B   
+         228TH  G 270.25    2  33.9   17  E1                    0.0474
+         228THS G KC= 0.0379   $LC=0.00721$  MC=0.00173   $N+=0.00061   $
+         228TH  G 328.03    4   30    3   E1                    0.0308               G
+         228THS G KC=0.0247$  LC=0.00458$  MC=0.00110   $N+=0.00039   $
+         228TH  L 378.18        6+                                                   A   
+         228TH  G 191.35    2   4.60  23  E2                    0.791                A
+         228THS G KC=0.174$  LC=0.450$  MC=0.123$  NC+=0.0454
+         228TH  L 396.08      3-                                                     B   
+         228TH  G  68.08       0.04   LE  [E2]                  70.2                 N         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228THS G LC=51.0$  MC=14.0$  NC+=5.16
+         228TH  G 209.26    2  26.3   13  E1                    0.086
+         228THS G KC=0.0678$  LC=0.0135$  MC=0.00323$ NC+=0.00114
+         228TH  G 338.32    2  82     4   E1                    0.0288
+         228THS G KC=0.0231$  LC=0.00426$  MC=0.00102$  NC+=0.00036
+         228TH  L 519.19        5-                                                   B   
+         228TH  G 141.00    2  2.08   10  E1                    0.220                K
+         228THS G KC=0.171$  LC=0.0366$  MC=0.0088$  NC+=0.00313
+         228TH  G 332.37    2  21.0   11  E1                    0.0299               K
+         228THS G KC=0.0240$  LC=0.00444$  MC=0.00106$  NC+=0.00038
+         228TH  L  695.6         7-                                                     ?
+         228TH  L 831.82        0+                                                   C   
+         228TH  G  503.7    2   0.78  8  (E1)                   0.0125               A
+         228THS G KC=0.0101$  LC=0.00178
+         228TH  G  774.06       0.26  AP [E2]                   0.0167               N         +-  1.00 keV unc. assigned to energy
+         228THS G KC=0.0122$  LC=0.00339
+         228TH  L 874.47        2+                                                   C   
+         228TH  G 478.45    4   3.17  17  E1                    0.0139               K
+         228THS G KC=0.0112$ LC=0.00199$  MC=0.00047$  NC+=0.00017
+         228TH  G 546.45    2   2.80  14 [E1]                   0.0107
+         228THS G KC=0.00864$  LC=0.00151
+         228TH  G  688.14   8   1.21  14 [E2]                   0.0212               &
+         228TH3 G FL=186.82                                                                FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.0151$  LC=0.00464
+         228TH  G  816.50   12  0.33  4  [M1,E2]                0.038  23
+         228THS G KC=0.030 19$  LC=0.006 3
+         228TH  G  874.5    2   0.77  12 [E2]                   0.0131               G
+         228THS G KC=0.0098$  LC=0.00249
+         228TH  L  944.20       1,2+                                                     
+         228TH  G  616.15   5   1.07  8
+         228TH  G  944.31   6   0.98  8
+         228TH  L 968.37        3-                                                   F   
+         228TH  G 449.23    3  2.45   13 [E2]                   0.0563
+         228THS G KC=0.0335$  LC=0.0168$  MC=0.00439$  NC+=0.00162
+         228TH  G  572.30   2  5.8    3  [M1,E2]                0.09   7
+         228THS G KC=0.07 6$  LC=0.016 8
+         228TH  G  640.33   5  1.53   10 [E2]                   0.0247
+         228THS G KC=0.0172$  LC=0.00567
+         228TH  L 968.97      2+                                                     G   
+         228TH  G 782.08    3   4.70  23 [E2]                   0.0163
+         228THS G KC=0.0119$  LC=0.00330
+         228TH  G 911.20    2  247    12  E2+M1    +24    8     0.0121
+         228THS G KC=0.0091$  LC=0.00225
+         228TH  G 968.98    2  149    8   E2                    0.0107
+         228THS G KC=0.00815$  LC=0.00194
+         228TH  L  979.50       2+                                                   D   
+         228TH  G  583.4    1   3.6   3  [E1]                   0.0094               I
+         228THS G KC=0.00761$ LC=0.00132
+         228TH  G  651.40   5   1.59  10 [E1]
+         228TH3 G FLAG=G
+         228THS G CC=0.00758$  KC=0.00617$  LC=0.00106
+         228TH  G  792.68       1.4   AP [E2]                   0.0159               G         +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=N
+         228THS G KC=0.0116$  LC=0.00319
+         228TH  G  921.74       0.30  LT [M1,E2]                0.028  17            G         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FLAG=N
+         228THS G KC=0.022 14$  LC=0.0044 22
+         228TH  G  979.4    4   0.5   AP [E2]                   0.0105               G
+         228THS G KC=0.00799$  LC=0.00180
+         228TH  L 1016.41       2+,3-,4+                                                 
+         228TH  G 620.27    5   1.41  10                                             G
+         228TH  G  688.14   8   1.21  14                                             &
+         228TH3 G FL=328.00                                                                FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G  958.69   11  5.0   6                                              G
+         228TH  G  1016.41      0.34  6                                              G         +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=N
+         228TH  L 1022.53      (3)+                                                  G   
+         228TH  G 835.65    2  42.7   22  E2                    0.0143
+         228THS G KC=0.0106$  LC=0.00279
+         228TH  G 964.80    2  122    6   E2+M1    -7.2   10    0.0108
+         228THS G KC=0.00821$  LC=0.00196
+         228TH  L 1059.93       4-                                                       
+         228TH  G  540.66   5   0.89  6  [M1,E2]                0.11   8
+         228THS G KC=0.08 6$  LC=0.018 9$
+         228TH  G  663.92   8   1.44  11 (M1+E2)                0.06   4
+         228THS G KC=0.05 4$  LC=0.010 6
+         228TH  G  873.0    2   1.66  17 [E1]                   0.00441              G
+         228THS G KC=0.00361$  LC=0.00060
+         228TH  L 1091.02       4+                                                   G   
+         228TH  G  694.8    2   0.76  10  [E1]                  0.00671              G
+         228THS G KC=0.00547$  LC=0.00093
+         228TH  G  713.1    3   0.48  11  [E2]                  0.0197               I
+         228THS G KC=0.0141$  LC=0.00421
+         228TH  G 904.19    3  26.5   13  E2                    0.0123
+         228THS G KC=0.0092$  LC=0.00229
+         228TH  G 1033.27   7   7.6   4   E2                    0.0095
+         228TH  L 1122.95       2-                                                   H   
+         228TH  G 100.42        0.5   LT (E1+M2)  0.23    AP    3.2    AP            A         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FLAG=EN
+         228THS G LC=2.4$  MC=0.64$  NC+=0.25
+         228TH  G 153.95    2   5.5   3   E1                    0.178                K
+         228THS G KC=0.139$  LC=0.0292$  MC=0.00703$  NC+=0.00250
+         228TH  G 726.90    10  4.4   6  (E2)                   0.0189               A
+         228THS G KC=0.0136$  LC=0.00400
+         228TH  G 794.97    2  34.4   17  E2+M1    -4.4   10    0.0182 15
+         228THS G KC=0.0136 13$  LC=0.00349 20
+         228TH  G 1065.21   7   1.03  7  [E1]                   0.00311
+         228THS G KC=0.00255$  LC=0.00042
+         228TH  L 1153.47       2+                                                   I   
+         228TH  G  174.02   4   0.30  3   M1+E2     1.2   +11-6 2.23   18            A
+         228TH2 G FLAG=E
+         228THS G KC=1.5 10$  LC=0.66 4$  MC=0.171 22$  NC+=0.063 5
+         228TH  G 184.61    5   0.21  3   E0+M1                 63     8             @
+         228TH3 G FL=968.97$   FLAG=M                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G 278.66    2   0.44  6  (M1+E2)                0.7    5             @
+         228TH3 G FL=874.47$   FLAG=AM                                                     FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.5 4$  LC=0.13 4$  MC=0.033 7$  NC+=0.0120 25
+         228TH  G  321.71   3   0.67  4  [E2]                   0.140
+         228THS G KC=0.0643$  LC=0.0550$  MC=0.0147$  NC+=0.00544
+         228TH  G  966.64       0.5   LE [E2]                   0.0108               I         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FLAG=N
+         228TH  G 1095.74   14  0.32  6  [M1,E2]                0.018  10
+         228TH  G 1153.6    3   0.37  8
+         228TH  L 1168.38       3-                                                   H   
+         228TH  G   77.36       0.44  9  [E1]                   0.235                N         +-  1.00 keV unc. assigned to energy
+         228THS G LC=0.177$  MC=0.0431$  NC+=0.0150
+         228TH  G 145.82    2   2.57  13  E1                    0.203                K
+         228THS G KC=0.158$  LC=0.0336$  MC=0.00809$  NC+=0.00287
+         228TH  G 199.40    2   4.65  23  E1                    0.096                K
+         228THS G KC=0.0758$  LC=0.0152$  MC=0.00365$  NC+=0.00129
+         228TH  G  649.12   7   0.97  9  [E2]                   0.0240               &
+         228THS G KC=0.0168$  LC=0.00546
+         228TH  G 772.28    2  25.2   13  E2+M1    -3.4   +8-27 0.021  3
+         228THS G KC=0.0157 24$  LC=0.0040 4
+         228TH  G 840.36    4  15.9   8   E2                    0.0142
+         228THS G KC=0.0105$  LC=0.00275
+         228TH  G  981.5    2   0.76  10 [E1]                                        I
+         228THS G CC=0.00358$  KC=0.00294$  LC=0.00049
+         228TH  G 1110.55   5   4.7   5   E1                                         @
+         228THS G CC=0.00289$  KC=0.00237$  LC=0.00039
+         228TH  L 1174.51      (5+)                                                  G   
+         228TH  G 987.92    10  4.31  22 [M1,E2]                0.024  14
+         228THS G KC=0.019 11$  LC=0.0037 18
+         228TH  L 1175.4        2+                                                      ?
+         228TH  L 1200.5       (3)+                                                  I   
+         228TH  G 178.14    7   0.2   LE  E0                              1.2                  RI=DRI=RI/2 assumed
+         228TH  G  231.50   5   0.92  5  [M1,E2]                1.1    8
+         228THS G KC=0.8 7$  LC=0.24 4$  MC=0.061 6$  NC+=0.0223 20
+         228TH  G 1013.54   13  0.38  5  [M1,E2]                0.022  13            &
+         228THS G KC=0.018 11$  LC=0.0034 17
+         228TH  G 1142.78       0.10  3  [M1,E2]                0.017  9                       +-  1.00 keV unc. assigned to energy
+         228THS G KC=0.013 8$  LC=0.0025 12
+         228TH  L 1226.57      (4)-                                                  H   
+         228TH  G 135.51    2   1.04  6   E1                    0.242                K
+         228THS G KC=0.188$  LC=0.0406$  MC=0.0098$  NC+=0.00348
+         228TH  G 204.05    2   6.0   3   E1                    0.091                K
+         228THS G KC=0.0719$ LC=0.0143$  MC=0.00344$  NC+=0.00122
+         228TH  G 707.40    3   7.9   4  (E2)                   0.0200
+         228THS G KC=0.0143  $  LC=0.00431
+         228TH  G 830.48    3  29.0   15  E2(+M1)  -7.7   9     0.0152 2
+         228THS G KC=0.0113 2 $  LC=0.00293 3
+         228TH  G 1039.87   6   2.92  15
+         228TH  L 1297.42      (5)-                                                  H   
+         228TH  G 601.7     3   0.30  5  [E2]                   0.0283               &  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G  778.1    2   2.7   3  [M1,E2]                0.04   3             G
+         228THS G KC=0.034 22$  LC=0.007 4
+         228TH  G  901.4    3   2.0   3  [E2]                   0.0123               G
+         228THS G KC=0.0093$  LC=0.00231
+         228TH  G 1110.55   5   2.4   2   E1                                         @
+         228TH3 G FLAG=I
+         228TH  L 1344.08       3-                                                   J  ?
+         228TH  G  948           0.2  AP                                                       +-  1.00 keV unc. assigned to energy
+         228TH  L 1416.1        2+,3-                                                   ?
+         228TH  L 1431.98       4+                                                       
+         228TH  G  257.49   2   1.40  7  (M1)                   1.36                 K
+         228THS G KC=1.09$  LC=0.205$  MC=0.0495$  NC+=0.0180
+         228TH  G 263.62    2   2.17  11  E1                    0.0502               K
+         228THS G KC=0.0400$  LC=0.00766$  MC=0.00184$  NC+=0.00065
+         228TH  G  278.66   2   1.61  21 [E2]                   0.216                @
+         228TH3 G FL=1153.47$  FLAG=M                                                      FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.086$  LC=0.095$  MC=0.0257$  NC+=0.0095
+         228TH  G 340.98    2  20.5   10  E2+M1    -5.2   18    0.136  23
+         228THS G KC=0.073 20$ LC=0.046 2$  MC=0.0122 5$  NC+=0.00450 17
+         228TH  G 409.45    2  100    5   E2+M1    -5.4   8     0.082  4
+         228THS G KC= 0.049 4$  LC=0.0242 5$  MC=0.00631 10$ N+=0.00233 4
+         228TH  G  452.52   6   1.02  8  [E2]                   0.0553
+         228THS G KC=0.0330$  LC=0.0164$  MC=0.00429$  NC+=0.00158
+         228TH  G 463.02    2  224    11  E2                    0.0522
+         228THS G KC= 0.0316   $LC=0.0152   $MC=0.00397   $N+=0.00146   $
+         228TH  G 1053.80       0.5   AP                                             I         +-  1.00 keV unc. assigned to energy
+         228TH  G 1245.17   6   5.6   3  [M1,E2]                0.013  7             G
+         228THS G KC=0.011 6$  LC=0.0020 10
+         228TH  G 1374.26   7   1.0   AP
+         228TH  L 1450.39       4-                                                       
+         228TH  G   18.41       3.7   5  [E1]                   6.6       28       3           +-  1.00 keV unc. assigned to energy
+         228THS G L/T=0.59$  M/T=0.31
+         228TH  G  153.02   2   1.11  6   M1+E2   0.60    8     4.8    2
+         228THS G KC=3.5 2$  LC=0.97 2$  MC=0.245 6$  NC+=0.090 2
+         228TH  G 223.80    2  13.3   7   M1+E2    -0.18  5     1.97   3
+         228THS G KC=  1.56 3$  LC=  0.302 1$  MC= 0.0729 2$  N+= 0.0266 1$
+         228TH  G  275.85   4   0.82  7  [E1]                   0.0453
+         228THS G KC=0.0362$  LC=0.00687$  MC=0.00165$  NC+=0.00058
+         228TH  G 282.01    2  18.6   9   M1+E2    -0.51  12    0.88   7
+         228THS G KC=0.69 6$  LC= 0.145 6$  MC=0.0355 11$  N+=0.0129 4
+         228TH  G 327.45    4  31     3  [E2]                   0.132                G
+         228THS G KC=0.0621$  LC=0.0515$  MC=0.0137$  NC+=0.00508
+         228TH  G  359.36   3   1.30  7  [E1]                   0.0252
+         228THS G KC=0.0203$  LC=0.00372$  MC=0.00089$  NC+=0.00032
+         228TH  G  390.45   5   1.11  6  [M1,E2]                0.26   18
+         228THS G KC=0.20 16$  LC=0.046 19$  MC=0.011 5$  NC+=0.0042 16
+         228TH  G  427.90   3   1.24  8  [E1]                   0.0174
+         228THS G KC=0.0141$  LC=0.00252$  MC=0.00060$  NC+=0.00022
+         228TH  G  434.01   3   1.73  10 [D,E2]                 0.14   13
+         228TH  G 482.03    5   1.84  13 [M1,E2]                0.15   10
+         228THS G KC=0.11 9$  LC=0.025 12$  MC=0.006 3$  NC+=0.0022 10
+         228TH  G 1054.23   6   3.3   3  [M1,E2]                0.020  11
+         228THS G KC=0.016 9$  LC=0.0031 15
+         228TH  L 1531.47       3+                                                       
+         228TH  G 99.47     6   1.8   3   M1                    4.09
+         228THS G LC=3.07$  MC=0.741$  NC+=0.273
+         228TH  G  356.96       0.024 5  [E2]                   0.103                N         +-  1.00 keV unc. assigned to energy
+         228TH  G  378.01       0.036 7  [M1,E2]                0.28   19            N         +-  1.00 keV unc. assigned to energy
+         228THS G KC=0.21 17$  LC=0.051 20$  MC=0.013 5$  NC+=0.0046 16
+         228TH  G  440.4    4   0.15  7   M1                    0.314                A
+         228THS G KC=0.252$  LC=0.0471$  MC=0.0113$  NC+=0.00410
+         228TH  G  509.13   8   1.2   2   E2(+M1)   1.1   GT    0.08   4             A
+         228TH3 G FLAG=EG
+         228THS G KC=0.06 3$  LC=0.016 5
+         228TH  G 562.50    4   1.44  9   E2+M1    +1.6   6     0.07   3
+         228THS G KC=0.051 24$  LC=0.013 4
+         228TH  G 1135.39       0.014 4                                              N         +-  1.00 keV unc. assigned to energy
+         228TH  G 1344.65       0.013 4                                              N         +-  1.00 keV unc. assigned to energy
+         228TH  L 1539.2        2,3,4                                                    
+         228TH  L 1580.9       (2-)                                                      
+         228TH  G  354.2    2   0.29  5  [E2]                   0.106                &
+         228THS G KC=0.0531$  LC=0.0385$  MC=0.0102$  NC+=0.00378
+         228TH  G  601.7    3   0.30  5  [E1]                   0.0088               &
+         228THS G KC=0.00718$  LC=0.00124
+         228TH  G 1184.71   9   0.47  4  (M1+E2)                0.015  8
+         228THS G KC=0.012 7$  LC=0.0023 11
+         228TH  G 1252.98   10  0.68  6  (M1+E2)                0.013  7
+         228THS G KC=0.011 6$  LC=0.0020 10
+         228TH  G 1523.4    2   0.60  6                                              &
+         228THS G CC=0.00139$  KC=0.00139
+         228TH  L 1588.3        4-                                                       
+         228TH  G   56.86   3   1.06  5   E1                    0.533                K
+         228THS G LC=0.400$  MC=0.098$  NC+=0.0339
+         228TH  G  137.95   2   6.6   3   M1                    7.89
+         228THS G KC=6.30$  LC=1.20$  MC=0.289$  NC+=0.106
+         228TH  G  156.34   2   1.36  7   E1                    0.172                K
+         228THS G KC=0.134$  LC=0.0281$  MC=0.00676$  NC+=0.00240
+         228TH  G  420.03   8   0.68  5  [M1,E2]                0.21   15
+         228THS G KC=0.16 13$  LC=0.037 17$  MC=0.009 4$  NC+=0.0034 14
+         228TH  L 1617.8        2+,3,4+                                                  
+         228TH  G  649.12   7   0.97  9                                              &
+         228TH3 G FL=968.97$  FLAG=G                                                       FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  G 1432      1   0.60  14                                             @
+         228TH2 G FLAG=P
+         228TH  G 1559.7    2   0.34  5                                              G
+         228TH  L 1638.3        2+                                                       
+         228TH  G  469.9    5   0.14  8  [E1]                   0.0144
+         228THS G KC=0.0116$  LC=0.00206$  MC=0.00049$  NC+=0.00018
+         228TH  G  515.20   11  0.62  9  [E1]                   0.0120                  ?      UNCERTAIN GAMMA IS IGNORED
+         228THS G KC=0.0097$  LC=0.00170
+         228TH  G 1310.26       0.07  3                                              G         +-  1.00 keV unc. assigned to energy
+         228TH  G 1451.45       0.039 9  [E2]                                        N         +-  1.00 keV unc. assigned to energy
+         228TH  G 1580.5    3   2.18  14 (M1,E2)                                     G
+         228TH  G 1638.30   7   1.98  10 (E2)
+         228TH  L 1643.1       (2-,3-)                                                   
+         228TH  G  475.1    3   0.7   2  [M1,E2]                0.15   11
+         228THS G KC=0.12 9$  LC=0.026 13$  MC=0.006 3$  NC+=0.0023 10
+         228TH  G  520.17   8   0.92  10 (M1)                   0.201                A
+         228THS G KC=0.161$  LC=0.0301
+         228TH  G  626.72       0.23  5                                              G         +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=N
+         228TH  G  674.16       2.82  LE [E1]                                        G         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FLAG=R
+         228TH  G  674.75       2.82  LE [M1,E2]                0.06   4             G         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH3 G FLAG=R
+         228TH  G  698.93       0.61  9  [D,E2]                 0.05   4             G         +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=N
+         228TH  G 1247.07   5   8.2   4  (M1)                   0.0201               G
+         228TH2 G FLAG=A
+         228THS G KC=0.0162
+         228TH  G 1315.2    2   0.20  5  [M1,E2]                0.012  6
+         228THS G KC=0.009 5$  LC=0.0018 8
+         228TH  L 1646.0        3+                                                       
+         228TH  G  114.49   10  0.10  2  [M1,E2]                10     4
+         228THS G KC=5.5 52$  LC=3.2 12$  MC=0.9 4$  NC+=0.32 14
+         228TH  G  419.39       0.24  3  [E1]                   0.0182               N         +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=G
+         228THS G KC=0.0147$  LC=0.00264$  MC=0.00063$  NC+=0.000225
+         228TH  G  492.22   10  0.28  3  [M1,E2]                0.14   10
+         228THS G KC=0.11 8$  LC=0.024 12$  MC=0.006 3$  NC+=0.0021 10
+         228TH  G  523.16   11  1.40  10 [E1]                   0.0116
+         228TH2 G FL=1122.95                                                               FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.0094$  LC=0.00165
+         228TH  G  554.6    3   0.48  11 [M1,E2]                0.10   7             G
+         228THS G KC=0.08 6$  LC=0.017 9
+         228TH  G 623.7     2   0.36  6  [M1,E2]                0.08   5             &
+         228TH2 G FLAG=GQ
+         228THS G KC=0.06 4$  LC=0.012 6
+         228TH  G  629.4    2   0.37  6  [D,E2]                 0.06    6
+         228TH  G  666.47   4   0.66  7  [M1,E2]                0.06    4            @
+         228TH2 G FLAG=M
+         228THS G KC=0.05 3$  LC=0.010 5
+         228TH  G 676.9     2   0.89  15 [M1,E2]                0.06   4             G
+         228THS G KC=0.05 3$  LC=0.010 5
+         228TH  G 1249.7    2   0.73  10                                             G
+         228TH  G 1459.2    2   8.6   5   E2                                         G
+         228TH2 G FLAG=I
+         228TH  G 1588.15   5  37.2   19  E2
+         228TH  L 1682.8        2+,3(+),4+                                               
+         228TH  G  660.28       0.02  AP [M1,E2]                0.06   4             N         +-  1.00 keV unc. assigned to energy
+         228THS G KC=0.05 3$  LC=0.010 5
+         228TH  G 1496.15   6   2.74  14 (E2)
+         228TH  G 1625.0    2   0.70  14
+         228TH  L 1683.8       (4-)                                                      
+         228TH  G  457.38   6   0.30  3  [M1,E2]                0.17   12
+         228THS G KC=0.13 10$  LC=0.029 14$  MC=0.007 3$  NC+=0.0026 11
+         228TH  G  623.7    2   0.36  6  [M1,E2]                0.07   5             &
+         228TH2 G FLAG=GQ
+         228THS G KC=0.06 4$  LC=0.012 7
+         228TH  G 1164.58   7   1.32  7  (M1+E2)                0.016  9
+         228THS G KC=0.013 7$  LC=0.0024 12
+         228TH  G 1287.79   8   1.56  11 (M1+E2)                0.012  7             G
+         228THS G KC=0.010 5$  LC=0.0019 9
+         228TH  L 1688.4        2+,3+                                                    
+         228TH  G   42.44       0.016 6  [M1]                   49                   N         +-  1.00 keV unc. assigned to energy
+         228THS G LC=37.1$  MC=8.95
+         228TH  G  671.99       0.045 14                                             N         +-  1.00 keV unc. assigned to energy
+         228TH  G  813.94      0.012  3  [M1,E2]                0.038  23            N         +-  1.00 keV unc. assigned to energy
+         228THS G KC=0.030 19$  LC=0.006 3
+         228TH  G 1501.5    2   0.74  6                                              G
+         228TH  G 1630.63   6   2.65  13 (M1,E2)                                     A
+         228TH  L 1724.3        2+                                                       
+         228TH  G  497.72       0.1   LE [M2]                                        N  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G  548.74   11  0.41  5  [M1,E2]                0.10   7             &  ?      UNCERTAIN GAMMA IS IGNORED
+         228THS G KC=0.08 6$  LC=0.017 9
+         228TH  G  570.88   4   3.33  17 (M1)                   0.156                G
+         228TH3 G FLAG=A
+         228THS G KC=0.125$  LC=0.0234
+         228TH  G 701.72    4   3.76  21 (M1)                   0.091
+         228THS G KC=0.0726$  LC=0.0135
+         228TH  G 755.32    2  19.6   10  M1                    0.0747
+         228THS G KC=0.0599$  LC=0.0111
+         228TH  G 1537.8    2   0.73  10 [E2]
+         228TH  G 1666.53   6   3.35  17  M1
+         228TH  G 1724.0    2   0.50  5
+         228TH  L 1743.9        4+                                                       
+         228TH  G  399.94   7   0.35  4  [E1]                   0.0212                  ?      UNCERTAIN GAMMA IS IGNORED
+         228THS G KC=0.0162$  LC=0.00293$  MC=0.00070$  NC+=0.00025
+         228TH  G 590.65    11  0.41  5  [E2]                   0.0295
+         228THS G KC=0.0200$  LC=0.00716
+         228TH  G  684.0    3   0.46  10 [E1]
+         228THS G CC=0.00691$  KC=0.00563$  LC=0.00096
+         228TH  G 1347.84       0.1   LE                                             N  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G 1365.72   12  0.40  4
+         228TH  G 1415.42   10  0.97  6  [E3]                                           ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G 1557.06   6   4.42  22 (E2+M1)   +1.2   2
+         228TH  G 1686.15   7   2.39  12 (E2)
+         228TH  L 1760.2       2+,3(+)                                                   
+         228TH  G  415.91   8   0.49  5  [E1]                   0.0185                  ?      UNCERTAIN GAMMA IS IGNORED
+         228THS G KC=0.0150$  LC=0.00269$  MC=0.00064$  NC+=0.00023
+         228TH  G  584.7    3   0.22  7  [M1,E2]                0.10   7             &  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FLAG=G
+         228THS G KC=0.08 6$  LC=0.017 9
+         228TH  G  737.8    2   0.74  13 [M1,E2]                0.05   3             G
+         228THS G KC=0.04 3$  LC=0.008 4
+         228TH  G  791.43   9   0.24  9  [M1,E2]                0.04   3             @
+         228TH3 G FLAG=M
+         228THS G KC=0.032 21$  LC=0.007 4
+         228TH  G 1573.3    3   0.70  7  (E2)
+         228TH  G 1702.6    3   1.15  11                                             G
+         228TH  L 1804.7        4+                                                       
+         228TH  G  116.26   5   0.16  2  [M1,E2]                9      4
+         228THS G KC=5 5$  LC=3.1 11$  MC=0.8 4$  NC+=0.30 13
+         228TH  G  121.18   7   0.19  3  [E1]                   0.316
+         228TH2 G FL=1683.8                                                                FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228THS G KC=0.244$  LC=0.0542$  MC=0.0131$  NC+=0.00465
+         228TH  G  121.87   3   0.33  3  [M1,E2]                8      4
+         228THS G KC=5 5$  LC=2.5 9$  MC=0.7 3$  NC+=0.25 10
+         228TH  G  158.74   3   1.25  7  M1+E2      0.55  15    4.4    4
+         228THS G KC=3.3 4$  LC=0.85 2$  MC=0.213 9$  NC+=0.079 4
+         228TH  G  354.2    2   0.29  5  [E1]                   0.0260               &
+         228THS G KC=0.0209$  LC=0.00384$  MC=0.00092$  NC+=0.00033
+         228TH  G  372.60   3   1.57  8  [M1,E2]                0.29   20
+         228THS G KC=0.22 18$  LC=0.053 21$  MC=0.013 5$  NC+=0.0048 7
+         228TH  G  651.5    2   0.34  5  [E2]                   0.0238               I
+         228THS G KC=0.0166$  LC=0.00540
+         228TH  G 1426.5    2   0.48  6  [E2]
+         228TH  G 1618.0    1   0.90  6  (M1,E2)                                     G
+         228TH  L 1817.4        4-                                                       
+         228TH  G  367.04   2   2.45  12  M1                    0.512
+         228THS G KC=0.411$  LC=0.0773$  MC=0.0185$  NC+=0.00674
+         228TH  G 1298.3    2   0.45  4  (M1+E2)                0.012  6
+         228TH  G 1421.1    2   1.40  7   E2+M1    +2.0   5
+         228TH  L 1893.0        3+                                                       
+         228TH  G  477.1    3   0.7   2                                              G  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G  666.47   4   1.81  15 [E1]                                        @
+         228TH2 G FLAG=M
+         228TH  G 692.47    7   2.01  15(M1+E2+E0)              0.24   3
+         228TH  G  724.42   11  0.76  9  [E1]                                        &
+         228TH  G 739.2     2   0.57  9  [M1,E2]                0.0790               I
+         228TH  G  770.2    2  2.28   15 [E1]                                        G
+         228TH  G 870.45    2  15.9   8   M1                    0.0515
+         228THS G KC=0.0414$  LC=0.00762
+         228TH  G  924.3    2   2.7   2  [M1,E2]                0.028  17            G
+         228THS G KC=0.022 14$  LC=0.0043 22
+         228TH  G 1706.16   7   2.84  14  M1+E2    +0.42  4
+         228TH  G 1835.26   5   9.8   5   E2+M1    +2.9   3
+         228TH  L 1900.0        2+                                                       
+         228TH  G  877.35   7   0.97  8  [M1,E2]                0.032  19
+         228THS G KC=0.025 16$  LC=0.005 3
+         228TH  G  883.6    3   0.15  4                                              G
+         228TH  G  920.8    3   0.38  10 [M1,E2]                0.028  17            G
+         228THS G KC=0.022 14$  LC=0.0044 22
+         228TH  G  931.02   7   0.99  8  [M1,E2]                0.027  17
+         228TH  G 1503.7    2   0.72  6  [E1]                                        G
+         228TH  G 1713.16       0.1   LE                                                ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G 1842.15   8   2.29  12  M1+E2    -0.86  14
+         228TH  G 1900.3    3   0.34  5
+         228TH  L 1901.9        3-,4                                                     
+         228TH  G 1383.2    2   0.55  5
+         228TH  G 1505.9    2   0.55  5                                              G
+         228TH  G 1523.4    2   0.60  6                                              &
+         228TH  G 1715.06   10  0.50  3
+         228TH  L 1925.2        3+,4+                                                    
+         228TH  G  724.42   11  0.76  9  [M1,E2]                0.05   4             &
+         228THS G KC=0.04 3$  LC=0.008 5
+         228TH  G 750.10    10  0.67  8  [M1,E2]                0.05   3                ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G  865.15   13  0.50  7
+         228TH  G  956.8    2   2.5   5                                              G
+         228TH  G 1529.02   6   2.61  13 [E1]
+         228TH  G 1738.48   5   9.6   5   M1+E2
+         228TH  L 1928.6        3+                                                       
+         228TH  G  168.42   9   0.09  2  [M1,E2]                2.9    16
+         228THS G KC=1.9 17$  LC=0.73 6$  MC=0.19 3$  NC+=0.070 10
+         228TH  G  389.36       0.31  5  [M1,E2]                0.26   18            N  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G  584.7    3   0.22  7  [E1]                                        &  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH3 G FLAG=G
+         228TH  G 1741.6    2   0.42  8                                              G
+         228TH  G 1870.80   9   0.73  4  (M1+E2)
+         228TH  L 1944.9        3+                                                       
+         228TH  G  184.61   5   0.41  5  (M1)                   3.45                 @
+         228TH3 G FLAG=M
+         228THS G KC=2.76$  LC=0.525$  MC=0.125$   NC+=0.0461
+         228TH  G 220.61    2   1.24  6  (M1)                   2.10
+         228THS G KC=1.68$  LC=0.317$  MC=0.0763$  NC+=0.0278
+         228TH  G  299.10   10  0.43  5   M1                    0.90
+         228THS G KC=0.719$  LC=0.135$  MC=0.0326$  NC+=0.0118
+         228TH  G  306.61   2   2.00  10  M1                    0.84
+         228THS G KC=0.672$  LC=0.126$  MC=0.0304$  NC+=0.0111
+         228TH  G  512.79   11  1.33  13 [M1,E2]                0.12   9             G
+         228THS G KC=0.10 7$  LC=0.021 11
+         228TH  G 718.31    2   6.4   3  (E1)
+         228THS G CC=0.00631$  KC=0.00514$  LC=0.00087
+         228TH  G 776.52    3   7.9   4  [E1]
+         228THS G CC=0.00546$ KC=0.00446$  LC=0.00075
+         228TH  G 791.43    9   3.6   4  (M1)                   0.0661               @
+         228TH2 G FLAG=M
+         228THS G KC=0.0530$  LC=0.0098
+         228TH  G 853.97    8   0.82  7  [M1,E2]                0.034  21
+         228THS G KC=0.027 17$  LC=0.005 3
+         228TH  G 922.5     2   2.25  12 [M1,E2]                0.028  16            G
+         228THS G KC=0.022 13$  LC=0.0044 22
+         228TH  G  928.4    2   0.89  8                                              G
+         228TH  G 976.00    5  13.4   7   M1                    0.0381
+         228THS G KC=0.0306$  LC=0.00563
+         228TH  G 1000.70       0.5   LE                                             N         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH  G 1070.40   7   1.20  8
+         228TH  G 1549.3    2   1.2   2                                              G
+         228TH  G 1758.11   5   9.0   5   E2+M1    -9     1
+         228TH  G 1887.13   5  24.0   12  E2+M1    -9.1   9
+         228TH  L 1965.0        2+,3,4+                                                  
+         228TH  G  548.74   11  0.41  5  [M1,E2]                0.10   7             &  ?      UNCERTAIN GAMMA IS IGNORED
+         228THS G KC=0.08 6$  LC=0.017 9
+         228TH  G 1778.0    6   0.06  2
+         228TH  G 1907.13   11  0.99  5
+         228TH  G 1965.22   12  0.43  4                                              &
+         228TH  L 1974.2        3-,4+                                                    
+         228TH  G 1455.0    2   1.16  7                                              G
+         228TH  G 1578.2    2   1.33  13                                             G
+         228TH  G 1787.2    2   0.37  4                                              G
+         228TH  G 1916.6    3   0.15  3                                              G
+         228TH  L 1982.0        2+,3,4+                                                  
+         228TH  G 1013.54   13  0.38  5                                              &
+         228TH  G 1795.15   6   1.19  7
+         228TH  G 1924.2    2   0.18  2
+         228TH  L 2010.1       2+,3,4(+)                                                 
+         228TH  G  371.83       0.84  23                                             G         +-  1.00 keV unc. assigned to energy
+         228TH3 G FLAG=N
+         228TH  G  887.16       0.35  5                                              N         +-  1.00 keV unc. assigned to energy
+         228TH  G  919.4    3   0.6   2                                              I
+         228TH  G 1041.14       0.3   LE                                             N         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH  G 1823.19   10  0.47  3
+         228TH  G 1952.39   10  0.76  5
+         228TH  L 2016.8       (2-,3-,4-)                                                
+         228TH  G 1620.67   10  4.9   3  (M1+E2)
+         228TH  L 2022.8                                                                 
+         228TH  G  384.53       0.1   LE [M1,E2]                0.27   18            N  ?      UNCERTAIN GAMMA IS IGNORED
+         228TH  G 1148.20   14  0.30  4
+         228TH  G 1190.98       0.1   LE                                             N         +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH  G 1965.22   12  0.43  4                                              &
+                                                                                         
+
+
+MASS NUMBER= 228
+
+OPTIONS: RECOIL= T   ALL= T
+        DEG=1 keV
+        DCC(theory)= 0.000
+
+Program GTOL Version 7.2h as of 24-May-2013 (Double precision, localized)
+
+         228TH    232U A DECAY                  1977KU15,1986LOZT         97NDS    199704
+         228TH  L 0.0         0+                                                         
+         228TH  L 57.762    5 2+                 0.406 NS 7                              
+         228TH  G 57.78     5 77.2    7  E2                       156                A
+         228THS G               LC=  114   $MC=   31.1   $NC+=  11.4   $
+         228TH  L 186.828   5 4+                 0.164 NS 4                              
+         228TH  G 129.08    5  26.33  15 E2                        3.81              A
+         228THS G KC=  0.269   $LC=   2.57   $MC=  0.706   $NC+=  0.263   $
+         228TH  L 328.003   5  1-                                                        
+         228TH  G 270.2     2  1.220  19 E1                      0.0474              A
+         228THS G KC= 0.0379   $LC=0.00722   $MC=0.00173   $NC+=0.00061   $
+         228TH  G 327.9     2  1.093  23 E1                      0.0308              A
+         228THS G KC=0.02472   $LC=0.00458   $MC=0.00110   $NC+=0.00039   $
+         228TH  L 378.178   11 6+                                                        
+         228TH  G 191.0     2  0.012  1  E2                       0.791
+         228THS G KC= 0.1741   $LC=  0.453   $MC= 0.1237   $NC+= 0.0457   $
+         228TH  L 396.085   5  3-                                                        
+         228TH  G 209.5     5  0.0041 10 E1                      0.0856
+         228THS G KC= 0.0676   $LC=0.01341   $MC=0.00323   $NC+=0.00114   $
+         228TH  G 338.1     2  0.0143 5  E1                      0.0288
+         228THS G KC=0.02314   $LC=0.00427   $MC=0.00102   $NC+=0.00036   $
+         228TH  L 519.199   6  5-                                                        
+         228TH  G 141.0     5  0.0012 5  (E1)                    0.220
+         228THS G KC= 0.1711   $LC= 0.0367   $MC=0.00883   $NC+=0.00313   $
+         228TH  G 332.3     3  0.019  1  (E1)                    0.0299
+         228THS G KC=0.02402   $LC=0.00444   $MC=0.00106   $NC+=0.00038   $
+         228TH  L 831.832   11 0+                                                        
+         228TH  G 503.6     3  0.0056 3  (E1)                   0.0125
+         228THS G KC=0.01015   $LC=0.00179   $
+         228TH  G 773.4     5  0.0018 3  [E2]                   0.0167
+         228THS G KC=0.01218   $LC=0.00340   $
+         228TH  G 831          0.0003 LT E0                               8E-4     4           +-  1.00 keV unc. assigned to energy
+                                                                                               RI=DRI=RI/2 assumed
+         228TH  L 874.48    3  2+                                                        
+         228TH  G 478       1 0.00055 21 [E1]                   0.0139
+         228THS G KC=0.01127   $LC=0.00199   $MC=0.00047   $NC+=0.00017   $
+         228TH  G 547       1 0.00039 24 [E1]                   0.0106
+         228THS G KC=0.00863   $LC=0.00150   $
+         228TH  G 817       1 0.0003  AP [M1+E2]                0.038  23            D
+                                                                                         
+
+
+MASS NUMBER= 228
+
+OPTIONS: RECOIL= T   ALL= T
+        DEG=1 keV
+        DCC(theory)= 0.000
+
+Program GTOL Version 7.2h as of 24-May-2013 (Double precision, localized)
+
+         228TH    226RA(A,2NG)                  1993AC02,1986SC18         97NDS    199704
+         228TH  L     0.0        0+                                                  D   
+         228TH  L    57.76       2+                                                  A   
+         228TH  L   186.83       4+                                                  A   
+         228TH  L   378.18       6+                                                  A   
+         228TH  G   191.4   3
+         228TH  L   519.20       5-                                                  A   
+         228TH  G   332.4   3
+         228TH  L   622.5   3    8+                                                  D   
+         228TH  G   244.4   3
+         228TH  L   695.6   3    7-                                                  E   
+         228TH  G   317.4   3
+         228TH  L   911.8   4   10+                                                  D   
+         228TH  G   289.4   3
+         228TH  L   920.8   3    9-                                                  E   
+         228TH  G   225.1   3   1.00
+         228TH  G   298.3   3   4.07  24
+         228TH  L  1189.8   4   11-                                                  E   
+         228TH  G   268.9   3   1.00
+         228TH  G   278.0   3   1.50  10
+         228TH  L  1239.4   4   12+                                                  D   
+         228TH  G   327.5   3
+         228TH  L  1497.1   5   13-                                                  E   
+         228TH  G   257.7   3   0.52  4
+         228TH  G   307.3   3   1.00
+         228TH  L  1599.5   5   14+                                                  B   
+         228TH  G   360.1   3
+         228TH  L  1838.3   5   15-                                                  B   
+         228TH  G   341.2   3
+         228TH  L  1988.1   6   16+                                                  B   
+         228TH  G   388.6   3
+         228TH  L  2209.7   6   17-                                                  B   
+         228TH  G   371.4   3
+         228TH  L  2407.9   7   18+                                                  B   
+         228TH  G   419.8   3
+         228THF G FL=1988.1                                                                FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+                                                                                         
+
+
+MASS NUMBER= 228
+
+OPTIONS: RECOIL= T   ALL= T
+        DEG=1 keV
+        DCC(theory)= 0.000
+
+Program GTOL Version 7.2h as of 24-May-2013 (Double precision, localized)
+
+         228TH    230TH(P,T)                    1972MA15                  97NDS    199704
+  No gammas expected. Data set will not be reported on.
+                                                                                         
+
+Program GTOL Version 7.2h as of 24-May-2013 (Double precision, localized)
+
+         228TH    230TH(A,A'2NG)                1984HA21                  97NDS    199704
+         228TH  L 0             0+                                                       
+         228TH  L 57.8          2+                                                       
+         228TH  G 57.8                                                                  S      +-  1.00 keV unc. assigned to energy
+         228TH  L 187           4+                                                       
+         228TH  G 129.0      2            E2
+         228TH  L 378           6+                                                       
+         228TH  G 191.0      1            E2
+         228TH  L 519           5-                                                       
+         228TH  G 332.0      4
+         228TH  L 622           8+                                                       
+         228TH  G 244.3      1            E2
+         228TH3 G FL=378                                                                   FINAL LEVEL FOUND
+ ***** No differences introduced due to continuation record
+         228TH  L 695           7-                                                       
+         228TH  G 317.2      2
+         228TH  L 911           10+                                                      
+         228TH  G 289.3      2
+         228TH  L 921           9-                                                       
+         228TH  G 298.7      2
+         228TH  L 1190          11-                                                      
+         228TH  G 268.9      5
+         228TH  G 278.4      3
+         228TH  L 1239          12+                                                      
+         228TH  G 327.2      4
+         228TH  L 1497          (13-)                                                    
+         228TH  G 257.3      5
+         228TH  G 306.6      5
+         228TH  L 1596         (14+)                                                    ?
+         228TH  G 357.2      5
+                                                                                         
+
+
+MASS NUMBER= 228
+
+OPTIONS: RECOIL= T   ALL= T
+        DEG=1 keV
+        DCC(theory)= 0.000

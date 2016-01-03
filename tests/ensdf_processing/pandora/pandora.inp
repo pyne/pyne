@@ -1,0 +1,1080 @@
+185W     ADOPTED LEVELS, GAMMAS                                  95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  D  MODIFIED BY E. BROWNE (SEPT. 1993).                                    
+185W  C  Other reactions:                                                       
+185W  C  184W(P,PI+) (1988Ab05).                                                
+185W  C  186W(N,2N) (1989Pe04).                                                 
+185W   Q 433.0     9 5753.7  3 7837    261600    3     1993AU05                 
+185W  CL           See 1972Ca01 and 1969Da01 for discussions and calculations of
+185W 2CL CORIOLIS mixing between rotational bands based on N=5 single-particle  
+185W 3CL NILSSON orbitals.                                                      
+185W  CL J         NILSSON orbital assignments are based on the comparison of   
+185W 2CL experimental (D,P) and (D,T) cross sections with values calculated     
+185W 3CL using the DWBA approximation and NILSSON's model, and on the energy    
+185W 4CL systematics of NILSSON orbitals in ODD-A tungsten nuclei.              
+185W 5CL JPI assignments are based on rotational structure, on G-ray            
+185W 6CL multipolarities and decay patterns. Average                            
+185W 7CL resonance capture in 184W(N,G) E=2,24 KEV is expected                  
+185W 8CL to populate all low-lying states with JPI=1/2- or 3/2-, and therefore  
+185W 9CL is also used as argument for JPI assignment.                           
+185W ACL Assignments from (D,T),(D,P), and (3HE,A)                              
+185W BCL reactions are based on measured L-value transfers, and on the          
+185W CCL comparison of experimental cross sections with values calculated using 
+185W DCL the DWBA approximation and NILSSON model. See 186W(D,T), 184W(D,P)     
+185W ECL for uncertainties of L-value transfers.                                
+185W  CL E(A)      From 185W IT DECAY (1.67 MIN).                               
+185W  CL E(B)      From 185TA B- decay.                                         
+185W  CL E(D)$From 184W(N,G) E=thermal.                                         
+185W  CG E(A),RI(A)$From 185W IT DECAY (1.67 MIN).                              
+185W  CG E(B),RI(B)$From 185TA B- decay.                                        
+185W  CG E(D),RI(D)$From 184W(N,G) E=thermal. DRI=10-15% for strong lines, and  
+185W 2CG up to 100% for weak lines.                                             
+185W  CL BAND(E)   3/2(512) ROTATIONAL BAND.                                    
+185W 2CL Rotational parameters: A=14.6, B=-10.8. Spin members of the band used  
+185W 3CL in the fit: 3/2, 7/2, 7/2.                                             
+185W  CL BAND(F)   1/2(510) ROTATIONAL BAND.                                    
+185W 2CL Rotational parameters: A=21.1, A=0.103. Spin members of the            
+185W 3CL band used in the fit: 1/2, 3/2, 5/2.                                   
+185W  CL BAND(G)   11/2(615) CORIOLIS-MIXED ROTATIONAL BAND.                    
+185W  CL BAND(H)   7/2(503) ROTATIONAL BAND.                                    
+185W 2CL Rotational parameters: A=16.4, B=-4.7. Spin members of the band used   
+185W 3CL in the fit: 7/2, 9/2, 11/2.                                            
+185W  CL BAND(I)   9/2(624) CORIOLIS-MIXED ROTATIONAL BAND.                     
+185W  CL BAND(J)   9/2(505) ROTATIONAL BAND.                                    
+185W  CL BAND(K)   5/2(512) ROTATIONAL BAND.                                    
+185W 2CL Rotational parameters: A=13.3, B=47.0. Spin members of the band used   
+185W 3CL in the fit: 5/2, 7/2, 9/2.                                             
+185W  CL BAND(L)   1/2(521) ROTATIONAL BAND.                                    
+185W 2CL Rotational parameters: A=17.7, A=0.865. Spin members of the            
+185W 3CL band used in the fit: 1/2, 3/2, 5/2.                                   
+185W  CL BAND(M)   7/2(514) ROTATIONAL BAND.                                    
+185W 2CL Rotational parameters: a AP 18. Spin members of the band used in the   
+185W 3CL fit: 7/2 and 9/2.                                                      
+185W  CL BAND(N)   K=1/2- GS G-VIBRATIONAL BAND.                                
+185W  CG M,MR      From 185TA B- decay and 185W IT DECAY (1.67 MIN).            
+185W   XA185TA B- DECAY                                                         
+185W   XB185W IT DECAY (1.67 M)                                                 
+185W   XC184W(N,G) E=THERMAL                                                    
+185W   XD184W(N,G) E=2,24 KEV RES: AV                                           
+185W   XE184W(N,G) E=184,311,425 EV                                             
+185W   XF186W(D,T),184W(D,P)                                                    
+185W   XG186W(3HE,A),(D,T)                                                      
+185W   XH186W(P,D) E=18.0 MEV                                                   
+185W   XI184W(POL D,P)                                                          
+185W   L        0.0  3/2-              75.1 D    3                          E   
+185W X L XREF=ABCDEFGH                                                          
+185W  CL J         J=3/2, atomic beam (1963Do13); PI=- from (N,G) E=2,24 KEV    
+185W 2CL res: av.                                                               
+185W  CL T         from 1972Em01. Other values: 74.5 D 15 (1940Fa01), 73.2 D 5  
+185W 2CL (1948Sa18), 74.5 D (1955Kr22), 70.0 D 9 (1957Th11), 75.1 D 6           
+185W 3CL (1964An02), 76.4 D 7 (1968Pi02). Others: 1940Mi05, 1961Go38.           
+185W 2 L %B-=100                                                                
+185W   L      23.56 4(1/2)-                                                 F   
+185W X L XREF=ABCDFH                                                            
+185W  CL J         JPI=1/2-,3/2- from (N,G) E=2,24 KEV res: av.                 
+185W 3 L FLAG=A                                                                 
+185W   G    23.54  5    100    (M1+E2)   0.10    3     93     23            A   
+185W   L      65.88 45/2-                                                   A   
+185W X L XREF=ABCDFHI                                                           
+185W  CL J         J=5/2 from (N,G) E=2,24 KEV res: av. 65.9G M1+E2 to 3/2-.    
+185W 3 L FLAG=E                                                                 
+185W   G      42.29 5     1.3 4E2                      189                  A   
+185W   G    65.86   3     100 5M1+E2     1.1     3     13     3             A   
+185W   L      93.31 6(3/2)-                                                 F   
+185W X L XREF=ABCDEFHI                                                          
+185W  CL J         JPI=1/2-,3/2- from (N,G) E=2,24 KEV res: av.                 
+185W 3 L FLAG=A                                                                 
+185W   G      69.7  3                                           1.84E+3   26A   
+185W  CG TI        from 185W IT DECAY (1.67 MIN).                               
+185W   G      93.30 5 100    34                                             A   
+185W   L     173.74 57/2-              1.5 NS    LT                         E   
+185W X L XREF=ABCF                                                              
+185W  CL J$107.8G M1+E2 to 5/2-, not populated in (N,G) E=2,24 KEV res: av.     
+185W  CL T         from 1969Ku07.                                               
+185W 3 L FLAG=A                                                                 
+185W   G   107.85   2    12.4 9M1+E2     1.2     +6-3  3.36   10            A   
+185W B G BM1W GE 0.00012$BE2W GE 8.4                                            
+185W   G   173.68   2  100   3 E2                      0.504                A   
+185W B G BE2W GE 18                                                             
+185W   L     187.90 3(5/2-)                                                 F   
+185W X L XREF=ABCFH                                                             
+185W  CL J         (D,T),(D,P); 164.3G to (1/2)-.                               
+185W 3 L FLAG=A                                                                 
+185W   G      94.59 4    12.9 9                                             A   
+185W   G   122.05   7    12.5 9                                             A   
+185W   G   164.33   2      72 3                                             A   
+185W   G   187.88   2     100 4                                             A   
+185W   L     197.43 511/2+             1.67 M    3                          AM  
+185W X L XREF=B                                                                 
+185W  CL J         131.6G E3 to 5/2-, 23.54G to 7/2-; RUL.                      
+185W  CL T         weighted average of 1.67 MIN 8 (1969Da01), 1.68 MIN 5        
+185W 2CL (1970Gu02), and 1.65 MIN 5 (1970Pa32). Others: 1950Du54, 1955Po26,     
+185W xCL 1962Ma24.                                                              
+185W 2 L %IT=100                                                                
+185W 3 L FLAG=G                                                                 
+185W   G 9.53      6           [E3]                    4.0E7    75        5    S
+185W  CG TI        from 185W IT DECAY (1.67 MIN).                               
+185W B G BE3W=0.00066 5                                                         
+185W   G      23.54 5   0.018 6[M2]                    8.7E3                A   
+185W B G BM2W=1.0E-8 4                                                          
+185W   G   131.55   2     100 3E3                      19.8                 A   
+185W B G BE3W=0.00038 3                                                         
+185W   L      243.7 1(7/2)-            19.3 NS   5                          H   
+185W X L XREF=AFI                                                               
+185W  CL J         177.6G M1+E2 to 5/2-, 69.7G M1+E2 to 7/2-; (D,T),(D,P).      
+185W  CL T         from 1969Ku07.                                               
+185W 3 L FLAG=B                                                                 
+185W   G      69.7  3    7.8 10M1+E2     0.27    6     14.3   3             B   
+185W B G BM1W=7.4E-5 12$BE2W=0.46 21                                            
+185W   G     150.3  2   0.48 12[E2]                    0.844                B   
+185W B G BE2W=0.0089 23                                                         
+185W   G    177.59  8  100.0 14M1(+E2)   0.3     +4-3  0.92   9             B   
+185W B G BM1W=5.7E-5 14$BE2W LE 0.27                                            
+185W   G     243.7  3   14.6 11[E2]                    0.163                B   
+185W B G BE2W=0.0242 24                                                         
+185W   L        302 6(9/2-)                                                 E   
+185W X L XREF=FH                                                                
+185W  CL J         (D,T),(D,P).                                                 
+185W   L        334 6(7/2-)                                                 F   
+185W X L XREF=FHI                                                               
+185W  CL J         (D,T),(D,P).                                                 
+185W   L        384 6(13/2+)                                                G   
+185W X L XREF=FGI                                                               
+185W  CL J         (3HE,A).                                                     
+185W   L      391.0 2(9/2-)                                                 H   
+185W X L XREF=ACF(391)                                                          
+185W  CL J         147.3G (M1+E2) to (7/2)-.                                    
+185W 3 L FLAG=B                                                                 
+185W   G    147.3   1   100    (M1+E2)   0.8     6     1.34   19            B   
+185W   L        478AP(11/2-)                                                E   
+185W X L XREF=F                                                                 
+185W   L        492AP(9/2-)                                                 F   
+185W X L XREF=F                                                                 
+185W   L        570AP(11/2-)                                                H   
+185W X L XREF=F                                                                 
+185W   L      663.6 3 3/2-                                                  D   
+185W X L XREF=CDEFI                                                             
+185W  CL J$JPI=1/2-,3/2- from (N,G) E=2,24 KEV res: av.                         
+185W 2CL JPI not 1/2- from 184W(POL D,P).                                       
+185W   G    570.1   3      45                                               D   
+185W   G    640.1   4     80                                                D   
+185W   G    664.2   4    100                                                D   
+185W   L        706 6(11/2-)                                                F   
+185W X L XREF=F                                                                 
+185W  CL J         (D,T),(D,P).                                                 
+185W   L        716 6(9/2+)                                                 I   
+185W X L XREF=FG                                                                
+185W  CL J         (D,T),(D,P).                                                 
+185W   L      730.0 51/2(-),3/2(-)                                          D   
+185W X L XREF=CDFI                                                              
+185W  CL J$JPI=1/2,3/2 from (N,G) E=2,24 KEV res: av.; (D,T),(D,P).             
+185W   G      636.6 4   100                                                 D   
+185W   L     768.39251/2-,3/2-                                              D   
+185W X L XREF=CDE                                                               
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   G    580.5   3     69                                                &   
+185W 3 G FLAG=D                                                                 
+185W   G    675.2   4     62                                                D   
+185W   G    744.7   4    100                                                D   
+185W   G    768.3   4     51                                                D   
+185W   L        774 11/2,3/2,5/2+                                           D   
+185W X L XREF=C                                                                 
+185W  CL J         populated by primary transitions in 184W(N,G) E=thermal.     
+185W   L      785.4 4(9/2-)                                                 J   
+185W X L XREF=AFI(789)                                                          
+185W  CL J         (D,T),(D,P); 394.4G to (9/2-), 541.7G to (7/2)-.             
+185W 3 L FLAG=B                                                                 
+185W   G      394.4 5    100 33                                             B   
+185W   G      541.7 5    100 33                                             B   
+185W   L 801       AP                                                           
+185W X L XREF=FI                                                                
+185W   L     822.77241/2-,3/2-                                              D   
+185W X L XREF=CDE                                                               
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   G      580.5 3      31                                               &  ?
+185W 2 G FL=243.7                                                               
+185W 3 G FLAG=D                                                                 
+185W   G      757.5 4     71                                                D   
+185W   G      822.5 3    100                                                D   
+185W   L      827.5 51/2-,3/2-                                                  
+185W X L XREF=DEF                                                               
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L      842.0 95/2                                                        
+185W X L XREF=D                                                                 
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L      888.6 5(5/2-)                                                 K   
+185W X L XREF=DF                                                                
+185W  CL J         (D,T),(D,P).                                                 
+185W   L 904       6                                                            
+185W X L XREF=F                                                                 
+185W   L      917.6 71/2,3/2                                                    
+185W X L XREF=D                                                                 
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L        921 6                                                           
+185W X L XREF=F                                                                 
+185W   L        986 6(7/2-)                                                 K   
+185W X L XREF=FI                                                                
+185W  CL J         (D,T),(D,P).                                                 
+185W   L     1006.8 4(1/2)-                                                 L   
+185W X L XREF=CDEF(1008)                                                        
+185W  CL J         JPI=1/2-,3/2- from (N,G) E=2,24 KEV res: av.                 
+185W 3 L FLAG=D                                                                 
+185W   G      912.6 4    100                                                D   
+185W   G     1007.4 6      29                                               D   
+185W   L       1013 6(1/2-)                                                 N   
+185W X L XREF=F                                                                 
+185W  CL J         (D,T),(D,P).                                                 
+185W   L       1020 6(13/2+)                                                I   
+185W X L XREF=FG                                                                
+185W  CL J         (3HE,A).                                                     
+185W   L     1036.0 4(3/2)-                                                 N   
+185W X L XREF=DF                                                                
+185W  CL J         JPI=1/2-,3/2- from (N,G) E=2,24 KEV res: av.                 
+185W   L       1059 2(7/2-)                                                 M   
+185W X L XREF=AF(1058)I                                                         
+185W  CL J         LOGFT=7.6 from 185TA (JPI=7/2+) B- decay, (D,T),(D,P).       
+185W 3 L FLAG=B                                                                 
+185W   G     965    3     39 12                                             B   
+185W   G     993    3    100 33                                             B   
+185W   G    1059    3    100 33                                             B   
+185W   L     1062.5 4(5/2+)                                                 D   
+185W X L XREF=CI                                                                
+185W  CL J$not populated (N,G) E=2,24 KEV res: av., populated by primary        
+185W 2CL transitions in 184W(N,G) E=thermal, 888.8G to 7/2-.                    
+185W   G      239.5 9    5.3                                                D   
+185W   G      888.8 4    100                                                D   
+185W   L     1068.1 41/2-,3/2-                                                  
+185W X L XREF=D                                                                 
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L       1073 6(5/2-)                                                 N   
+185W X L XREF=F                                                                 
+185W  CL J         (D,T),(D,P).                                                 
+185W   L     1101.7 41/2-,3/2-                                                  
+185W X L XREF=DE                                                                
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L       1106 6(3/2-)                                                 L   
+185W X L XREF=F                                                                 
+185W  CL J         (D,T),(D,P).                                                 
+185W   L       1107 6                                                           
+185W X L XREF=F                                                                 
+185W   L       1118 6(5/2-)                                                 L   
+185W X L XREF=FI                                                                
+185W  CL J         (D,T),(D,P).                                                 
+185W   L       1118AP(9/2-)                                                 K   
+185W X L XREF=F(1118)I                                                          
+185W  CL J         (D,T),(D,P).                                                 
+185W   L       1120 6                                                           
+185W X L XREF=F                                                                 
+185W   L     1145.5 41/2-,3/2-                                                  
+185W X L XREF=DEF(1149)I                                                        
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L       1154 6(7/2-)                                                 N   
+185W X L XREF=F                                                                 
+185W  CL J         (D,T),(D,P).                                                 
+185W   L    1181.54241/2-                                                   D   
+185W X L XREF=CDFI                                                              
+185W  CL J$av res cap; JPI not 3/2- from 184W(POL D,P).                         
+185W   G      517.313      21                                               D   
+185W   G    993.0   6    8.5                                                D   
+185W   G   1158.4   4      32                                               D   
+185W   G   1181.6   3    100                                                D   
+185W   L       1219AP (9/2-)                                                M   
+185W X L XREF=F                                                                 
+185W  CL J         (D,T),(D,P).                                                 
+185W   L     1219.1 3 3/2-                                                  D   
+185W X L XREF=CDEF(1222)I                                                       
+185W  CL J$JPI=1/2-,3/2- from (N,G) E=2,24 KEV res: av.                         
+185W 2CL JPI not 1/2- from 184W(POL D,P).                                       
+185W   G    975.7   6      35                                               D   
+185W   G   1031.9   6     66                                                D   
+185W   G   1126.4   5    100                                                D   
+185W   G   1153.3   5      24                                               D   
+185W   G   1195.7   3     68                                                D   
+185W   L       1246 1                                                       D   
+185W X L XREF=C                                                                 
+185W   L       1279AP                                                           
+185W X L XREF=F                                                                 
+185W   L     1285.5 73/2-                                                   D   
+185W X L XREF=CDF(1290)I                                                        
+185W  CL J$JPI=1/2-,3/2- from (N,G) E=2,24 KEV res: av.; 1110.0G to 7/2-.       
+185W   G     1098.010    100                                                D   
+185W   G     1110.010    100                                                D   
+185W   L       1317 6                                                           
+185W X L XREF=FI                                                                
+185W  CL           Doublet observed in (D,P) and (D,T).                         
+185W   L       1335 6(7/2-)                                                 L   
+185W X L XREF=F                                                                 
+185W  CL J         (D,T),(D,P).                                                 
+185W   L       1343 6                                                           
+185W X L XREF=F                                                                 
+185W   L       1346 6                                                           
+185W X L XREF=F                                                                 
+185W   L     1359.210                                                       D   
+185W X L XREF=C                                                                 
+185W   L       1361 6(9/2-)                                                 L   
+185W X L XREF=F                                                                 
+185W  CL J         (D,T),(D,P).                                                 
+185W   L     1365.6 61/2-,3/2-                                                  
+185W X L XREF=D                                                                 
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L       1382 6                                                           
+185W X L XREF=F(1382)                                                           
+185W   L       1402AP                                                           
+185W X L XREF=F(1402)                                                           
+185W   L       1410AP                                                           
+185W X L XREF=F(1410)                                                           
+185W   L     1424.5 55/2                                                        
+185W X L XREF=D                                                                 
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L       1428 6                                                           
+185W X L XREF=F                                                                 
+185W   L     1441.2 91/2-,3/2-                                              D   
+185W X L XREF=CD                                                                
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   G    1345.6 20   100                                                 &   
+185W 3 G FLAG=D                                                                 
+185W   L       1445 6                                                           
+185W X L XREF=F                                                                 
+185W   L       1448 6                                                           
+185W X L XREF=F                                                                 
+185W   L     1496.3 41/2-,3/2-                                                  
+185W X L XREF=DEF(1501)                                                         
+185W  CL J         (N,G) E=2,24 KEV res: av.                                    
+185W   L     1503.5 5                                                       D   
+185W X L XREF=CF(1503)                                                          
+185W   G      840.0 5      47                                               D   
+185W   G     1330.419    100                                                D   
+185W   G     1408.020     88                                                D   
+185W   L     1535.4 9                                                       D   
+185W X L XREF=CF                                                                
+185W   G    1345.6 20   100                                                 &   
+185W 3 G FLAG=D                                                                 
+185W   L       1561 6(13/2+)                                                    
+185W X L XREF=FG                                                                
+185W  CL J         (3HE,A).                                                     
+185W   L       1561 6                                                           
+185W X L XREF=E                                                                 
+185W   L     1572.310                                                       D   
+185W X L XREF=C                                                                 
+185W   L       1603 6                                                           
+185W X L XREF=F(1603)                                                           
+185W   L       1623 6                                                           
+185W X L XREF=F(1623)                                                           
+185W   L       162710                                                           
+185W X L XREF=F                                                                 
+185W   L       164610                                                           
+185W X L XREF=F                                                                 
+185W   L       1657 1                                                       D   
+185W X L XREF=C                                                                 
+185W   L       1663 6                                                           
+185W X L XREF=F                                                                 
+185W   L       1666 6(9/2+)                                                     
+185W X L XREF=FG                                                                
+185W  CL J         (D,T),(D,P).                                                 
+185W   L       1677 6                                                           
+185W X L XREF=F                                                                 
+185W   L       1683AP                                                           
+185W X L XREF=F                                                                 
+185W   L       1699 6                                                           
+185W X L XREF=F                                                                 
+185W   L       170110                                                           
+185W X L XREF=F                                                                 
+185W   L       1722 6                                                           
+185W X L XREF=F                                                                 
+185W   L       172810                                                           
+185W X L XREF=F                                                                 
+185W   L       1745 6                                                           
+185W X L XREF=F                                                                 
+185W   L       1800 6                                                           
+185W X L XREF=F                                                                 
+185W   L       1830AP                                                           
+185W X L XREF=F                                                                 
+185W   L       184510                                                           
+185W X L XREF=EF                                                                
+185W   L       184610(13/2+)                                                    
+185W X L XREF=FG                                                                
+185W  CL J         (3HE,A).                                                     
+185W   L       186010                                                           
+185W X L XREF=F                                                                 
+185W   L       187410                                                           
+185W X L XREF=F                                                                 
+185W   L     1880.812                                                           
+185W X L XREF=C                                                                 
+185W   L       188610                                                           
+185W X L XREF=F                                                                 
+185W   L       190110                                                           
+185W X L XREF=F                                                                 
+185W   L       191510                                                           
+185W X L XREF=F                                                                 
+185W   L       193710                                                           
+185W X L XREF=F                                                                 
+185W   L       195210                                                           
+185W X L XREF=F                                                                 
+185W   L       195910                                                           
+185W X L XREF=F                                                                 
+185W   L       198610                                                           
+185W X L XREF=F                                                                 
+185W   L       203110                                                           
+185W X L XREF=F                                                                 
+185W   L       2038AP                                                           
+185W X L XREF=F                                                                 
+                                                                                
+185W     185TA B- DECAY                1970MA60,1969KU07         95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  D  MODIFIED BY E. BROWNE (SEPTEMBER 1993).                                
+185W  C  Others: 1955Po26, 1960Mo04.                                            
+185W  CL E         From a least-squares fit to G-ray energies of                
+185W 2CL 1970Ma60 and 1969Ku07, unless otherwise specified.                     
+185W  CL J         From adopted levels.                                         
+185W  CG E         Weighted average, with CHI**2 minimization, from 1970Ma60 and
+185W 2CG 1969Ku07, unless otherwise specified. Values for EG GT 300 KEV are     
+185W 3CG from 1969Ku07.                                                         
+185W  CG RI        From a statistical analysis of G-ray intensities from        
+185W 2CG 1970Ma60 and 1969Ku07, unless otherwise specified. Values for EG GT    
+185W 3CG 300 KEV are from 1969Ku07.                                             
+185W  CG M         From CE data of 1969Ku07. Transitions from 203TL, 170YB,     
+185W 2CG 57FE, and 180W were used for normalizing CE and photon intensities.    
+185W  CG E(P)      G ray not observed. EG is from 185W IT DECAY (1.67 MIN).     
+185W  CG TI(Q)     From intensity balance at 93.3 level, and                    
+185W 2CG TI(69.7G)/TI(93.3G)=2.8 10 deduced from intensity balance at 93.3 level
+185W 3CG in 185W IT DECAY (1.67 MIN).                                           
+185W  CG E(B,F),RI(B)$From 1969Ku07.                                            
+185W  CG E(D,E),RI(D)$From 1970Ma60.                                            
+185W  CG E(K)      Multiply placed; however, RI component from 93.30 level      
+185W 2CG (deduced from TI) is negligible.                                       
+185W  CL T(H)      From 1969Ku07.                                               
+185W  CL E(I)      From 185W IT DECAY (1.67 MIN).                               
+185TA  P 0.0         (7/2+)            49 M      2              1992      14    
+185W   N    0.257   90.257         1.00   1.00                                  
+185W  PN                                                                     3  
+185W  CN NR$from decay scheme if SUMOF TI to GS and passing through the first   
+185W 2CN three excited states                                                   
+185W 3CN equals 100%, thus neglecting possible B- populations to these levels.  
+185W 4CN The same value of the B- endpoint energy observed from a singles B-    
+185W 5CN spectrum, and from a B- spectrum in coincidence with 173.9G + 177.6G   
+185W 6CN indicates negligible B- population to these states (1969Ku07).         
+185W 7CN This justifies the normalization procedure used.                       
+185W 8CN %RI(173.9G + 177.6G)=0.60 25 (1960Mo04).                               
+185W   G 580.5     102.1     7                                                  
+185W   G 588.7     103.1     10                                                 
+185W   G 913       3 0.47    14                                                 
+185W   G 1122      3 0.008   3                                                  
+185W   G 1138      3 0.03    1                                                  
+185W   G 1147      3 0.03     1                                                 
+185W   L        0.0  3/2-               75.1 D   3                              
+185W  CL T         from adopted levels.                                         
+185W   L     23.6   2(1/2)-                                                     
+185W   G       23.6 20.50    15(M1+E2)    0.10   3      93    23            B   
+185W S G                LC=       71 13$MC=        17 3                         
+185W  CG RI        RI=0.4 2 from intensity balance at 23.6 level,               
+185W 2CG and ALPHA=92 20 deduced in 185W IT DECAY (1.67 MIN).                   
+185W  CG MR        from ALPHA=92 20 deduced in 185W IT DECAY (1.67 MIN).        
+185W   L      66.1 1 5/2-                                                       
+185W   G       42.5 70.20     6E2                          189              F   
+185W S G                LC=       142  $MC=      35.4                           
+185W  CG RI        from RI(66.1G)=15 3, and RI(42.5G)/RI(66.1G)=0.013 3         
+185W 2CG measured in 185W IT DECAY (1.67 MIN).                                  
+185W  CG M         from 185W IT DECAY (1.67 MIN).                               
+185W   G       66.1 3      15 3M1+E2     1.1     3          13 3                
+185W S G                LC=     10.0 17$MC=       2.5 4$NC+=        0.72 15     
+185W  CG MR        from ELC=10.3 16 (weighted average of 11.0 28 and 10 2, from 
+185W 2CG 185W IT DECAY (1.67 MIN) (1969Ku07)). EMC=3.5 17 (1969Ku07).           
+185W   L      93.30 5(3/2)-                                                 I   
+185W   G 69.7      3                                            1.21      22*   
+185W 3 G FLAG=FKQ                                                               
+185W   G      93.30 5  0.076 25[M1,E2]                   5.6  4 0.50      16P   
+185W  CG RI        from TI and CC                                               
+185W 3 G FLAG=Q                                                                 
+185W   L     173.91 57/2-              1.5 NS    LT                         H   
+185W   B                  27 11              6.9 2                              
+185W S B EAV=     669 6                                                         
+185W   G    107.80 10    10.7 6M1+E2     1.2     +6-3    3.36 10                
+185W S G KC=    1.80 25$LC=     1.18 12$MC=      0.29 3$NC+=        0.086 9     
+185W  CG MR        deduced by 1981El11 from ELC=1.8 6, EMC=1.0 4 (1969Ku07).    
+185W   G     173.91 5   88   6 E2                       0.504                   
+185W  CG M         from EKC=0.24 7, ELC=0.16 5, and EMC=0.05 2 (1969Ku07).      
+185W S G KC=    0.248  $LC=     0.194  $MC=   0.0482   $NC+=       0.0141       
+185W   L    188.3  2 (5/2-)                                                     
+185W   B                 0.55 9              8.6  1                             
+185W S B EAV=     663 6                                                         
+185W   G 94.6        0.062   12[M1,E2]                     5.4 4            E  ?
+185W S G KC=     2.9 19$LC=      1.9 10$MC=       0.5 3$NC+=         0.14 8     
+185W  CG RI        from RI(188G)=0.48 8, and RI(94.6G)/RI(188G)=0.129 10        
+185W 2CG measured in 185W IT DECAY (1.67 MIN). Other value: LT 0.3 (1970Ma60).  
+185W   G 122.05    7 0.060   11[M1,E2]                     2.3 5            P   
+185W S G KC=      1.4 9$LC=       0.6 3$MC=      0.16 8$NC+=       0.047 22     
+185W  CG RI        from RI(188G)=0.48 8, and RI(122G)/RI(188G)=0.125 11 measured
+185W 2CG in 185W IT DECAY (1.67 MIN).                                           
+185W   G      164.9 3   0.48 18[E2]                     0.607               D   
+185W S G KC=    0.285  $LC=     0.243  $MC=   0.0607   $NC+=       0.0178       
+185W   G    188.2  2     0.48 8[M1,E2]                   0.60 22                
+185W S G KC=    0.44 24$LC=      0.12 5$MC=    0.029 13$NC+=      0.0087 14     
+185W   L    243.7   1(7/2)-            19.3 NS   5                          H   
+185W   B                  68 11              6.5  1                             
+185W S B EAV=     639 6                                                         
+185W  CB E         measured by 1969Ku07 in coincidence with 173.9G + 177.6G.    
+185W 2CB Other value: 1720, from a singles spectrum (1955Po26). Others:         
+185W 3CB 1950Du54, 1951Mo47, 1960Mo04.                                          
+185W   G       69.7 3    7.8 10M1+E2     0.27    6        8.3 50            @   
+185W 3 G FLAG=K                                                                 
+185W  CG CC$EG=69.7 KEV is very close to the K-binding energy (=69.525 KEV).    
+185W 2CG The value for KC used here covers the range from EG LT 69.5 KEV (KC=0),
+185W 3CG to EG=70.0 KEV (KC=10.4 for MR=0.27).                                  
+185W S G LC=       2.6 3$MC=      0.61 7$NC+=       0.181 24                    
+185W 3 G FLAG=F                                                                 
+185W  CG MR        deduced by 1981El11 from ELC=2.9 13, EMC=0.8 3 (1969Ku07).   
+185W   G 150.3     2 0.48    12[E2]                     0.844               D  ?
+185W S G KC=    0.361  $LC=     0.365  $MC=   0.0913   $NC+=       0.0268       
+185W   G     177.59 8  100.0 14M1(+E2)   0.3     +4-3     0.88 8                
+185W S G KC=    0.75 10$LC=    0.130 24$MC=     0.030 6$NC+=       0.0090 8     
+185W  CG MR        deduced by 1981El11 from EKC=0.74 14, ELC=0.10 3, EMC=0.05 2 
+185W 2CG (1969Ku07).                                                            
+185W   G      243.7 3   14.6 11[E2]                      0.163                  
+185W S G KC=  0.1002   $LC=   0.0480   $MC=    0.0118  $NC+=      0.00342       
+185W   L    391.0  2 (9/2-)                                                     
+185W   B                  1.9 5              7.9  1                             
+185W S B EAV=     577 6                                                         
+185W   G    147.3  1    4.6  5 (M1+E2)   0.8     6       1.34 19                
+185W S G KC=      1.0 3$LC=      0.29 8$MC=    0.068 19$NC+=        0.020 4     
+185W  CG MR        derived by 1981El11 from EKC=0.95 32 (1969Ku07).             
+185W   L      785.4 4(9/2-)                                                     
+185W   B                  1.7 4              7.5  1                             
+185W S B EAV=     415 6                                                         
+185W   G      394.4 5     3.010[M1]                      0.109                  
+185W S G KC=  0.0904   $LC=    0.0141  $MC=   0.00317  $NC+=    0.000938        
+185W   G      541.7 5     3.010[M1]                    0.0475                   
+185W S G KC=  0.0395   $LC=  0.00606                                            
+185W   L    1059   2 (7/2-)                                                     
+185W   B                0.56 11              7.5 1                              
+185W S B EAV=     307 5                                                         
+185W   G 965       3 0.35    11[E2]                    0.00489                  
+185W S G KC= 0.00398   $LC= 0.000678                                            
+185W   G 993       3 0.9     3 [M1]                     0.0102                  
+185W S G KC= 0.00852   $LC=   0.00128                                           
+185W   G 1059      3 0.9     3 [E2]                    0.00406                  
+185W S G KC=  0.00332  $LC= 0.000550                                            
+                                                                                
+185W     185W IT DECAY (1.67 M)        1970GU02,1970MA60,1969KU0795NDS    199503
+185W   H TYP=FMT$AUT=J. TULI$DAT=22-JUL-1999$COM=ADDED P RECORD$                
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W   P     197.43 511/2+             1.67 M    3                              
+185W  C  Others: 1955Po26, 1960Mo04, 1966Kr03, 1967Ch37.                        
+185W  CL E         From a least-squares fit to G-ray energies.                  
+185W  CG RI$Weighted average, with CHI**2 minimization, from 1970Gu02,          
+185W 2CG 1969Ku07, 1970Ma60, 1970Pa32, and 1969Da01. 12% uncertainty assigned by
+185W 3CG evaluator to RI(65.9G) from 1969Da01, 1970Gu02, and 1970Pa32; 7% to    
+185W 4CG RI(131.6G) from 1969Ku07 and 1970Ma60, for calculating weighted        
+185W xCG averages.                                                              
+185W  CG E         From 1970Gu02.                                               
+185W  CG M         From CE data of 1969Ku07. Transitions from 203TL, 170YB,     
+185W 2CG 57FE, and 180W were used for normalizing CE and photon intensities.    
+185W  CL J         From adopted levels.                                         
+185W   N   0.0433  160.0433        1.00                                         
+185W  PN                                                                     3  
+185W  CN NR$from decay scheme if SUMOF TI (G rays populating or passing through 
+185W 2CN the 93 level)=100%.                                                    
+185W  TG                                                                        
+185W 2TG           X-RAY intensities relative to 100 for 131G                   
+185W 3TG                                                                        
+185W 4tG       x-ray            Intensity           Reference                   
+185W 5TG       -----            ---------           ---------                   
+185W 6TG      XL             285 50              1970Gu02                       
+185W 7TG      XKA            150 14              1969Da01                       
+185W 8TG      XKA            131 7               1970Gu02                       
+185W 9TG      XK           AP 310                 1970Ma60                      
+185W ATG      XKA            140 28              1970Pa32                       
+185W BTG                                                                        
+185W   L        0.0  3/2-              75.1 D    3                              
+185W  CL T         from adopted levels.                                         
+185W   L      23.56 4(1/2)-                                                     
+185W   G      23.54 5     3.9 6(M1+E2)   0.10    3         93 23            @   
+185W  CG RI        from 1970Gu02. Other value: 2.2 6 (1969Ku07).                
+185W S G                LC=       71 13$MC=        17 3                         
+185W  CG RI$G ray placed twice in level scheme. RI for component from 197.4     
+185W 2CG level is negligible.                                                   
+185W  CG MR        from ECC=92 20, deduced from intensity balance at 23.5 level 
+185W 2CG and RI=3.9 6.                                                          
+185W   L      65.88 45/2-                                                       
+185W   G      42.29 5     1.7 5E2                          194                  
+185W S G                LC=       145  $MC=      36.3                           
+185W   G      65.86 3     134 7M1+E2     1.1     3       13.0 26                
+185W S G                LC=     10.2 13$MC=       2.5 3$NC+=        0.73 12     
+185W  CG MR        from ELC=10.3 16 (weighted average of 10 2 and 11.0 28,      
+185W 2CG from 185TA B- decay (1969Ku07)). EMC=3.5 15 (1969Ku07).                
+185W   L      93.31 6(3/2)-                                                     
+185W   G 69.7      3                                            11.5      21    
+185W  CG TI        transition was not observed. TI was calculated from intensity
+185W 2CG balance at 93.3 level.                                                 
+185W   G      93.30 5   0.62 21 [M1,E2]                5.6    4                 
+185W  CG E         reported only by 1970Gu02.                                   
+185W   L     173.74 57/2-                                                       
+185W   G     107.85 2     9.4 7M1+E2     1.2     +6-3    3.34 16                
+185W S G KC=    1.80 25$LC=     1.18 12$MC=      0.29 3$NC+=        0.086 9     
+185W  CG MR        from 185TA B- decay.                                         
+185W   G     173.68 2   75.4 21E2                       0.506                   
+185W S G KC=    0.248  $LC=     0.195  $MC=   0.0485   $NC+=       0.0142       
+185W  CG M         from EKC=0.27 15 and ELC=0.23 10 (1969Ku07).                 
+185W   L     187.90 3(5/2-)                                                     
+185W   G      94.59 4   2.43 17[M1,E2]                     5.4 4                
+185W S G KC=     2.9 19$LC=      1.9 10$MC=       0.5 3$NC+=         0.14 8     
+185W   G     122.05 7   2.35 17[M1,E2]                     2.3 5                
+185W S G KC=      1.4 9$LC=       0.6 3$MC=      0.16 8$NC+=       0.047 22     
+185W   G     164.33 2    13.6 6[E2]                     0.614                   
+185W S G KC=    0.287  $LC=     0.247  $MC=   0.0617   $NC+=       0.0180       
+185W   G     187.88 2    18.8 8[M1,E2]                   0.60 22                
+185W S G KC=    0.44 24$LC=      0.12 5$MC=    0.029 13$NC+=      0.0087 14     
+185W   L     197.43 511/2+             1.67 M    3                           M  
+185W  CL T         see adopted levels for half-life measurements.               
+185W   G 9.53                  [E3]                    4.0E7    75        5    S
+185W S G                                MC=  3.04E+7                            
+185W  CG TI        from intensity balance at 187.9 level.                       
+185W   G 23.54     5 0.018   6 [M2]                    8.7E3    155       5 @   
+185W S G                LC= 6.44E3     $MC=     1692                            
+185W  CG TI        from intensity balance at 173.6 level.                       
+185W  CG RI        from TI=155 5 and ALPHA(M2)=8700.                            
+185W   G     131.55 2     100 3E3                         19.8                  
+185W  CG $%RI=4.33 11                                                           
+185W S G KC=     1.41  $LC=      13.6  $MC=      3.62  $NC+=         1.08       
+185W  CG M         from EKC=1.3 7, ELC=13 2, and EMC=4.4 10 (1969Ku07).         
+                                                                                
+185W     184W(N,G) E=THERMAL           1973PRYV                  95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  D  MODIFIED BY E. BROWNE (SEPTEMBER 1993).                                
+185W  CG           Measured EG, RI. Detector: GE(LI). Others: 1953Ki45,         
+185W 2CG 1962Tr04, 1987Kn08, 1988Ho06.                                          
+185W  CG RI        Primary and secondary G-ray intensities are relative to 100  
+185W 2CG for 5092G and 664.2G, respectively. DRI=10-15% for strong lines, and   
+185W 3CG up to 100% for weak lines.                                             
+185W  CL E         Deduced by evaluator from a least-squares fit to G-ray       
+185W 2CL energies.                                                              
+185W  CL J         From adopted levels.                                         
+185W   N                                                                        
+185W  PN                                                                    C5  
+185W 2PN           PRIMARY AND SECONDARY RI ARE RELATIVE TO 100 FOR 5092G AND   
+185W 3PN 664.2G, RESPECTIVELY.                                                  
+185W   G      110.4 5     4.0                                                   
+185W   G      151.0 7     1.5                                                   
+185W   G      221.2 9     1.9                                                   
+185W   G      248.010     1.0                                                   
+185W   G      265.6 3    11.0                                                   
+185W   G      272.8 3    13.7                                                   
+185W   G      294.0 8     2.0                                                   
+185W   G      312.0 8     1.5                                                   
+185W   G      316.0 8     2.0                                                   
+185W   G      416.9 5    18.1                                                   
+185W   G      418.4 4    23.7                                                   
+185W   G      450.7 3    31.3                                                   
+185W   G      463.8 3     8.0                                                   
+185W   G      482.613     4.2                                                   
+185W   G      715.4 5    11.5                                                   
+185W   G      734.0 4    24.6                                                   
+185W   G      788.1 3    35.0                                                   
+185W   G      804.0 3    23.1                                                   
+185W   G      894.6 4    52.9                                                   
+185W   G      903.3 4    63.8                                                   
+185W   G      944.3 5    31.0                                                   
+185W   G      949.1 7    11.5                                                   
+185W   G     1027.8 6    40.0                                                   
+185W   G     1048.010    10.0                                                   
+185W   G     1075.010    10.0                                                   
+185W   G     1104.010    10.0                                                   
+185W   G     1122.6 5    34.0                                                   
+185W   G     1165.1 3    80.0                                                   
+185W   G     1173.7 3    31.4                                                   
+185W   G     1452.020    37.0                                                   
+185W   G     1458.320    35.0                                                   
+185W   L        0.0   3/2-                                                      
+185W   L       23.4 3 (1/2)-                                                    
+185W   L       65.5 4 5/2-                                                      
+185W   L       93.5 3 (3/2)-                                                    
+185W   L      173.7 4 7/2-                                                      
+185W   G      107.8 9     1.9                                                   
+185W   G      173.5 5    13.3                                                   
+185W   L      187.9 3 (5/2-)                                                    
+185W   G      164.9 9     1.7                                                   
+185W   G      188.4 8     4.0                                                   
+185W   L      242.5 3 (7/2)-                                                    
+185W   G      177.010    20.2                                                   
+185W   G      244.010     1.0                                                   
+185W   L     390.3 10 (9/2-)                                                    
+185W   G      147.8 9     1.3                                                   
+185W   L      663.6 3  3/2-                                                     
+185W   G      570.1 3    44.7                                                   
+185W   G      640.1 4    80.2                                                   
+185W   G      664.2 4   100.0                                                   
+185W   L      730.0 5 (1/2-,3/2-)                                               
+185W   G      636.6 4    64.4                                                   
+185W   L    768.39 25  1/2-,3/2-                                                
+185W   G      580.5 3    31.0                                               &   
+185W   G      675.2 4    28.4                                                   
+185W   G      744.7 4    44.5                                                   
+185W   G      768.3 4    22.7                                                   
+185W   L        774 1 1/2,3/2,5/2                                               
+185W   L    822.77 24   1/2-,3/2-                                               
+185W   G      580.5 3    31.0                                               &  ?
+185W   G      757.5 4    70.6                                                   
+185W   G      822.5 3   100.1                                                   
+185W   L     1006.8 4(1/2)-                                                     
+185W   G      912.6 4   112.0                                                   
+185W   G     1007.4 6    32.7                                                   
+185W   L     1062.5 4 (5/2+)                                                    
+185W   G      239.5 9     2.0                                                   
+185W   G      888.8 4    37.8                                                   
+185W   L   1181.54 24 1/2-                                                      
+185W   G      517.313    24.0                                                   
+185W   G      993.0 6    10.0                                                   
+185W   G     1158.4 4    37.1                                                   
+185W   G     1181.6 3   117.0                                                   
+185W   L     1219.1 3  3/2-                                                     
+185W   G      975.7 6    23.9                                                   
+185W   G     1031.9 6    45.0                                                   
+185W   G     1126.4 5    68.2                                                   
+185W   G     1153.3 5    15.5                                                   
+185W   G     1195.7 3    46.1                                                   
+185W   L       1246 1                                                           
+185W   L     1285.5 7 3/2-                                                      
+185W   G     1098.010    10.0                                                   
+185W   G     1110.010    10.0                                                   
+185W   L    1359.2 10                                                           
+185W   L     1441.2 9     1/2-,3/2-                                             
+185W   G     1345.620    30.0                                               &   
+185W   L     1503.5 5                                                           
+185W   G      840.0 5    20.0                                                   
+185W   G     1330.419    43.0                                                   
+185W   G     1408.020    37.6                                                   
+185W   L     1535.4 9                                                           
+185W   G     1345.620    30.0                                               &   
+185W   L    1572.3 10                                                           
+185W   L       1657 1                                                           
+185W   L    1881.2 10                                                           
+185W   L     5754.6 3 1/2+                                                      
+185W  CL           Neutron capture state.                                       
+185W   G     3873.310    11.0                                                   
+185W   G     4097.510     6.1                                                   
+185W   G     4182.210     9.5                                                   
+185W   G     4218.710    50.0                                                   
+185W   G     4312.810    43.0                                                   
+185W   G     4395.310    12.2                                                   
+185W   G     4468.710    33.0                                                   
+185W   G     4508.510     6.0                                                   
+185W   G     4535.8 5   111.4                                                   
+185W   G     4573.610   153.0                                                   
+185W   G     4691.7 6    11.3                                                   
+185W   G     4746.310    86.0                                                   
+185W   G     4932.0 5    43.5                                                   
+185W   G     4980.510    24.4                                                   
+185W   G     4986.810    27.8                                                   
+185W   G     5025.310     9.6                                                   
+185W   G     5091.7 5   100.0                                                   
+185W   G     5659.010     2.6                                                   
+185W   G     5730.010     5.2                                                   
+185W   G     5754.1 5    56.5                                                   
+                                                                                
+185W     184W(N,G) E=184,311,425 EV    1969MUZQ                  95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  CG           Measured EG, RI of primary G rays. Other: 1969Sa01.          
+185W  CG RI$Primary G-ray intensities per 100 neutron captures at 184-EV        
+185W 2CG resonance. See 1969MuZQ and 1974El08 for intensities from 311- and     
+185W 3CG 425-EV resonances.                                                     
+185W  CL J         From adopted levels.                                         
+185W   N 1.0                                                                    
+185W  PN                                                                    C4  
+185W 2PN           RI PER 100 NEUTRON CAPTURES                                  
+185W   L 0           3/2-                                                       
+185W   L 93          (3/2)-                                                     
+185W   L 663          3/2-                                                      
+185W   L 767          1/2-,3/2-                                                 
+185W   L 825             1/2-,3/2-                                              
+185W   L 971                                                                    
+185W   L 1005        (1/2)-                                                     
+185W   L 1102          1/2-,3/2-                                                
+185W   L 1147          1/2-,3/2-                                                
+185W   L 1219         3/2-                                                      
+185W   L 1499           1/2-,3/2-                                               
+185W   L 1537                                                                   
+185W   L 1841                                                                   
+185W   L 5755                                                                   
+185W  CL E         neutron resonance.                                           
+185W   G 3914         3.6    5                                                  
+185W   G 4218         1.4    4                                                  
+185W   G 4256         1.2    4                                                  
+185W   G 4536         3.3    4                                                  
+185W   G 4608         3.1    4                                                  
+185W   G 4653         7.3    4                                                  
+185W   G 4750         0.5    3                                                  
+185W   G 4784         1.3    3                                                  
+185W   G 4930         6.7    5                                                  
+185W   G 4988         0.5    3                                                  
+185W   G 5092         1.4    3                                                  
+185W   G 5662         0.5    2                                                  
+185W   G 5755         11.8   3                                                  
+                                                                                
+185W     184W(N,G) E=2,24 KEV RES: AV  1987BR05                  95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  C  Target: 94.3% enriched 184W. Detector: GE(LI) pair spectrometer.       
+185W 2C  Others: 1987Ko37.                                                      
+185W  CL           All states with JPI=1/2- or 3/2- are expected to be populated
+185W 2CL from the rather small number ( AP 9) of 2-KEV S-WAVE neutron           
+185W 3CL resonances.                                                            
+185W  CL J$From reduced intensities of primary G-rays in average resonance      
+185W 2CL capture. Parities were determined from ratios between reduced G-ray    
+185W 3CL intensities for the 2-KEV and 24-KEV resonances.                       
+185W  CL E(A)      Populated from 24-KEV resonance only.                        
+185W  CG RI$Reduced intensity from 2-KEV resonance, relative to 100 for 5755.6G.
+185W  CG MR$Reduced intensity from 24-KEV resonance, relative to 100            
+185W 2CG for 5755.6G.                                                           
+185W  CG RI$LABEL=RI/EG**5 (2-KEV)                                              
+185W  CG MR$LABEL=RI/EG**5 (24-KEV)                                             
+185W  CG E         From 2-KEV resonance, unless otherwise specified.            
+185W  CG E(B)      From 24-KEV resonance.                                       
+185W   N                                                                        
+185W  PN                                                                    C5  
+185W 2PN           INTENSITIES: RELATIVE RI/EG**5                               
+185W   L 0.0         1/2-,3/2-                                                  
+185W   L 23.8      4 1/2-,3/2-                                                  
+185W   L 63.8      4 5/2                                                    A   
+185W   L 93.4      3 1/2-,3/2-                                                  
+185W   L 663.1     4 1/2-,3/2-                                                  
+185W   L 729.8     5 1/2,3/2                                                    
+185W   L 768.1     3 1/2-,3/2-                                                  
+185W   L 823.3     6 1/2-,3/2-                                                  
+185W   L 827.5     5 1/2-,3/2-                                                  
+185W   L 842.0     9 5/2                                                    A   
+185W   L 888.6     5 5/2                                                    A   
+185W   L 917.6     7 1/2,3/2                                                    
+185W   L 1005.7    4 1/2-,3/2-                                                  
+185W   L 1036.0    4 1/2-,3/2-                                                  
+185W   L 1068.1    4 1/2-,3/2-                                                  
+185W   L 1101.7    4 1/2-,3/2-                                                  
+185W   L 1145.5    4 1/2-,3/2-                                                  
+185W   L 1181.7    4 1/2-,3/2-                                                  
+185W   L 1218.9    4 1/2-,3/2-                                                  
+185W   L 1286.9    4 1/2-,3/2-                                                  
+185W   L 1365.7    6 1/2-,3/2-                                                  
+185W   L 1424.5    5 5/2                                                    A   
+185W   L 1441.8    4 1/2-,3/2-                                                  
+185W   L 1496.3    4 1/2-,3/2-                                                  
+185W   L SN+2                                                                   
+185W  CL           SN=5754.2 KEV 9.                                             
+185W  CL J         JPI=1/2+ for S-WAVE neutron capture.                         
+185W   G 4259.3    2 262     28          142     18                             
+185W   G 4313.8    2 194     20          106     14                             
+185W   G 4389.9    4 78      15          51      12                             
+185W   G 4468.7    2 339     27          135     14                             
+185W   G 4536.7    2 150     16          88      11                             
+185W   G 4573.9    2 170     16          82      12                             
+185W   G 4610.1    2 152     15          92      12                             
+185W   G 4653.9    2 109     56          59      21                             
+185W   G 4687.5    2 179     22          20      36                             
+185W   G 4719.6    2 163     14          114     13                             
+185W   G 4749.9    2 231     18          134     14                             
+185W   G 4838.0    5 34      8           103     11                             
+185W   G 4928.1    2 379     36          86      19                             
+185W   G 4932.3    4 123     17          183     18                             
+185W   G 4987.5    1 254     18          81      9                              
+185W   G 5025.8    3 67      7           104     10                             
+185W   G 5092.5    2 119     10          82      9                              
+185W   G 5662.2    1 219     15          172     16                             
+185W   G 5731.8    2 168     12          138     12                             
+185W   G 5755.6    2 100     8           100     9                              
+185W   L SN+24                                                                  
+185W  CL           SN=5754.2 KEV 9.                                             
+185W  CL J         JPI=1/2+ for S-WAVE neutron capture;                         
+185W 2CL JPI=1/2-,3/2- for p-wave neutron capture.                              
+185W   G 4353.4    5                     71      13                         B   
+185W   G 4889.3    5                     42      8                          B   
+185W   G 4935.9    9                     21      9                          B   
+185W   G 5714.1    4                     11      4                          B   
+                                                                                
+185W     184W(POL D,P)                 1973CA09                  95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  C  E(D)=12.08, 15.0 MEV. Data were taken at about seven angles in the     
+185W 2C  range 30 DEG-125 DEG.                                                  
+185W  CL J         From vector-analyzing-power angular distributions, using     
+185W 2CL values for states of known JPI as standards.                           
+185W  CL E         From 1972Ca01.                                               
+185W  CL J(A)      Not 1/2-                                                     
+185W  CL J(B)      Not 3/2-                                                     
+185W   L 66                                                                     
+185W   L 94                                                                     
+185W   L 244                                                                    
+185W   L 334                                                                    
+185W   L 384                                                                    
+185W   L 666         (3/2-,5/2+)                                            A   
+185W   L 733                                                                    
+185W   L 789                                                                    
+185W   L 801                                                                    
+185W   L 986                                                                    
+185W   L 1061                                                                   
+185W   L 1118                                                                   
+185W   L 1149                                                                   
+185W   L 1184        1/2-,(1/2+,3/2+)                                       B   
+185W   L 1222         3/2-                                                  A   
+185W   L 1290        (3/2-,5/2+)                                                
+185W   L 1317                                                                   
+                                                                                
+185W     186W(P,D) E=18.0 MEV          1974AS05                  95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  C  Angular distribution data taken by one of the authors (1973KiZK,       
+185W 2C  unpublished) were used to study the reaction mechanism.                
+                                                                                
+185W     186W(D,T),184W(D,P)           1972CA01                  95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  C  E=12.08 MEV                                                            
+185W  C  Q(d,p)=3533 10, Q(d,T)=-939 10.                                        
+185W  C  Target: GT 95% enriched 184W and 186W. Measured scattered protons and  
+185W 2C  tritons at THETA=60 DEG, 90 DEG, and 125 DEG. Detector: magnetic       
+185W 3C  spectrograph, FWHM(p)=10-12 KEV, FWHM(T)=7-8 KEV at THETA=125 DEG.     
+185W  CL E         Observed in (D,P) and (D,T), unless otherwise specified.     
+185W  CL E$Uncertainties are 6 KEV per MEV of excitation energy for well        
+185W 2CL resolved peaks. Energies for the 24-, 66-, 94-, 174-, 188-, 244-, 391- 
+185W 3CL 1058-KEV levels are from G-ray measurements.                           
+185W  CL L         From SIGMA(D,P)/SIGMA(D,T) cross-section ratios at           
+185W 2CL THETA=60 DEG, 90 DEG, and 125 DEG. Uncertainty on L is 1.              
+185W  CL J         Spin/parity and NILSSON orbital assignments are based on     
+185W 2CL measured L-value transfers and SIGMA(D,P)/SIGMA(D,T) cross-section     
+185W 3CL ratios, on the comparison of experimental cross-sections with values   
+185W 4CL calculated using the DWBA approximation and NILSSON's model, and on the
+185W 5CL energy systematics of NILSSON orbitals in ODD-A tungsten nuclei.       
+185W  CL J(A)      3/2[512] rotational band.                                    
+185W  CL J(B)      1/2[510] rotational band.                                    
+185W  CL J(K)      11/2[615] rotational band.                                   
+185W  CL J(C)      7/2[503] rotational band.                                    
+185W  CL J(E)      9/2[624] rotational band.                                    
+185W  CL J(F)      (9/2[505]) rotational band.                                  
+185W  CL J(G)      5/2[512] rotational band.                                    
+185W  CL J(H)      1/2[521] rotational band.                                    
+185W  CL J(I)      K=1/2, (3/2[512],G) G-vibrational band.                      
+185W  CL J(J)      7/2[514] rotational band.                                    
+185W  CL J(L)      N=6 (i13/2) CORIOLIS-mixed state.                            
+185W  CL E(X)      Observed only in (D,T).                                      
+185W  CL E(Y)      Observed only in (D,P).                                      
+185W  CL E(D)      L=1 for 1008+1013 levels.                                    
+185W  CL E(K)      Probable doublet: 5/2-,1/2[521] and 9/2-,5/2[512].           
+185W   L 0.0          3/2-                                                  A   
+185W   L 24           1/2-                                                  B   
+185W   L 66           5/2-                              3                   A   
+185W   L 94           3/2-                              1                   B   
+185W   L 174          7/2-                                                  A   
+185W   L 188          5/2-                              3                   B   
+185W   L 244          7/2-                              3                   C   
+185W   L 302          9/2-                              GE 5                A   
+185W   L 334          7/2-                              3                   B   
+185W   L 384          13/2+                                                 K   
+185W   L 391          9/2-                                                  C   
+185W 3 L FLAG=X                                                                 
+185W   L 478       AP(11/2-)                                                A   
+185W 3 L FLAG=X                                                                 
+185W   L 492       AP(9/2-)                                                 B   
+185W 3 L FLAG=X                                                                 
+185W   L 570       AP(11/2-)                            GE 5                C   
+185W   L 666                                            1                       
+185W   L 706         (11/2-)                           GE 5,3               B   
+185W   L 716         (9/2+)                            3, GE 5              E   
+185W   L 733                                            1,(3)                   
+185W   L 789       AP(9/2-)                            GE 5,3               F   
+185W   L 801       AP                                                           
+185W   L 833                                           (1)                      
+185W   L 888          5/2-                              3                   G   
+185W   L 904                                                                    
+185W   L 921                                            3                   X   
+185W   L 986          7/2-                              3                   G   
+185W   L 1008         1/2-                                                  H   
+185W 3 L FLAG=X                                                                 
+185W   L 1013        (1/2-)                                                 I   
+185W 3 L FLAG=D                                                                 
+185W   L 1020         13/2+                                                 E   
+185W 3 L FLAG=X                                                                 
+185W   L 1040        (3/2-)                             1                   I   
+185W   L 1058         7/2-                              3                   J   
+185W   L 1073        (5/2-)                             3,1                 I   
+185W 3 L FLAG=X                                                                 
+185W   L 1106        (3/2-)                             1,3                 H   
+185W 3 L FLAG=X                                                                 
+185W   L 1107                                           1,3                 Y   
+185W   L 1118      AP(5/2-)AND (9/2-)                   3                   X   
+185W   L 1120                                          3,1                      
+185W   L 1149                                           1                   Y   
+185W   L 1154        (7/2-)                             3,1                 I   
+185W 3 L FLAG=X                                                                 
+185W   L 1185                                           1                       
+185W   L 1219      AP(9/2-)                            ( GE 5)              J   
+185W 3 L FLAG=X                                                                 
+185W   L 1222                                           1                       
+185W   L 1279      AP                                  (3)                  Y   
+185W   L 1290                                           1                       
+185W   L 1317                                                               X   
+185W   L 1317                                          3                    Y   
+185W   L 1335        (7/2-)                                                 H   
+185W 3 L FLAG=X                                                                 
+185W   L 1343                                           3                   Y   
+185W   L 1346                                                               X   
+185W   L 1361        (9/2-)                                                 H   
+185W 3 L FLAG=X                                                                 
+185W   L 1382                                           1,3                 X   
+185W   L 1402      AP                                   GE 5,3              X   
+185W   L 1410      AP                                                       X   
+185W   L 1428                                           1                       
+185W   L 1445                                          (3)                  Y   
+185W   L 1448                                          3,1                  X   
+185W   L 1501                                          1,3                  Y   
+185W   L 1503                                          3,1                  X   
+185W   L 1542                                           1                       
+185W   L 1561         13/2+                                                 L   
+185W 3 L FLAG=X                                                                 
+185W   L 1561                                          (3)                  Y   
+185W   L 1603                                                               Y   
+185W   L 1623                                          3, GE 5              Y   
+185W   L 1627                                                               X   
+185W   L 1646                                                               X   
+185W   L 1663                                          1,3                  Y   
+185W   L 1666        (9/2+)                            1,3                  L   
+185W 3 L FLAG=X                                                                 
+185W   L 1677                                           3                   Y   
+185W   L 1683      AP                                                       X   
+185W   L 1699                                                               Y   
+185W   L 1701                                           3                   X   
+185W   L 1722                                           1                   Y   
+185W   L 1728                                          1,3                  X   
+185W   L 1745                                           1                   Y   
+185W   L 1800                                           1                   Y   
+185W   L 1830      AP                                   1                   Y   
+185W   L 1845                                                               Y   
+185W   L 1846         13/2+                                                 L   
+185W 3 L FLAG=X                                                                 
+185W   L 1860                                                               X   
+185W   L 1874                                                               X   
+185W   L 1886                                           1                   Y   
+185W   L 1904                                                               Y   
+185W   L 1915                                                               X   
+185W   L 1937                                           3                   X   
+185W   L 1952                                          3,1                  X   
+185W   L 1959                                                               Y   
+185W   L 1986                                           1                   X   
+185W   L 2031                                           1                   Y   
+185W   L 2038      AP                                                       X   
+                                                                                
+185W     186W(3HE,A),(D,T)             1973KL07                  95NDS    199503
+185W   H TYP=FUL$AUT=E. BROWNE$CIT=NDS 74,165 (1995)$CUT=1-Jul-1993$            
+185W  C  Target: GT 94% enriched 186W. Projectiles: 3HE and deuterons,          
+185W 2C  E=12.1 MEV. Measured scattered ALPHAS and 3HE. Detector: magnetic      
+185W 3C  spectrograph, FWHM(A) AP 30 KEV, FWHM(T) AP 8 KEV.                     
+185W  CL E         From 1972Ca01.                                               
+185W  CL L         Deduced from SIGMA(3HE,A)/SIGMA(D,T) measured cross-section  
+185W 2CL ratios.                                                                
+185W  CL E(A)      N=6 (i13/2) strongly CORIOLIS-mixed state.                   
+185W  CL E(B)      11/2[615].                                                   
+185W  CL E(D)      9/2[624].                                                    
+185W  CL J         Spin/parity and NILSSON orbital assignments are based on     
+185W 2CL measured L-value transfers, on the comparison of experimental          
+185W 3CL cross-sections with values calculated with the DWBA approximation and  
+185W 4CL NILSSON's model (including an hexadecapole deformation), and on the    
+185W 5CL energy systematics of NILSSON orbitals in ODD-A tungsten nuclei.       
+185W   L 0                                                                     S
+185W   L 384          13/2+                            6                    B   
+185W   L 716         (9/2+)                                                 D   
+185W   L 1020         13/2+                            6                    A   
+185W   L 1561         13/2+                            6                    A   
+185W   L 1666         (9/2+)                                                A   
+185W   L 1846         13/2+                             6                   A   
+                                                                                

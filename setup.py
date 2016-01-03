@@ -175,6 +175,49 @@ def download_decay():
     durl.close()
     return True
 
+ALPHAD_H = os.path.join('build', 'src/alphad')
+DELTA_H = os.path.join('build', 'src/delta')
+GTOL_H = os.path.join('build', 'src/gtol')
+BLDHST_H = os.path.join('build', 'src/bldhst')
+HSICC_H = os.path.join('build', 'src/hsicc')
+HSMRG_H = os.path.join('build', 'src/hsmrg')
+SEQHST_H = os.path.join('build', 'src/seqhst')
+LOGFT_H = os.path.join('build', 'src/logft')
+PANDORA_H = os.path.join('build', 'src/pandora')
+RADD_H = os.path.join('build', 'src/radd')
+RADD_98AK04_H = os.path.join('src', 'ensdf_processing/RADD/98AK04.in')
+RADD_ELE_H = os.path.join('src', 'ensdf_processing/RADD/ELE.in')
+RULER_H = os.path.join('build', 'src/ruler')
+
+def copy_ensdf_executables(pynepath):
+    print('Copying ENSDF Executables to install directory')
+    ALPHAD_DEST = os.path.join(pynepath, 'alphad')
+    DELTA_DEST = os.path.join(pynepath, 'delta')
+    GTOL_DEST = os.path.join(pynepath, 'gtol')
+    BLDHST_DEST = os.path.join(pynepath, 'bldhst')
+    HSICC_DEST = os.path.join(pynepath, 'hsicc')
+    HSMRG_DEST = os.path.join(pynepath, 'hsmrg')
+    SEQHST_DEST = os.path.join(pynepath, 'seqhst')
+    LOGFT_DEST = os.path.join(pynepath, 'logft')
+    PANDORA_DEST = os.path.join(pynepath, 'pandora')
+    RADD_DEST = os.path.join(pynepath, 'radd')
+    RADD_98AK04_DEST = os.path.join(pynepath, '98AK04.in')
+    RADD_ELE_DEST = os.path.join(pynepath, 'ELE.in')
+    RULER_DEST = os.path.join(pynepath, 'ruler')
+
+    shutil.copy(ALPHAD_H, ALPHAD_DEST)
+    shutil.copy(DELTA_H, DELTA_DEST)
+    shutil.copy(GTOL_H, GTOL_DEST)
+    shutil.copy(BLDHST_H, BLDHST_DEST)
+    shutil.copy(HSICC_H, HSICC_DEST)
+    shutil.copy(HSMRG_H, HSMRG_DEST)
+    shutil.copy(SEQHST_H, SEQHST_DEST)
+    shutil.copy(LOGFT_H, LOGFT_DEST)
+    shutil.copy(PANDORA_H, PANDORA_DEST)
+    shutil.copy(RADD_H, RADD_DEST)
+    shutil.copy(RADD_98AK04_H, RADD_98AK04_DEST)
+    shutil.copy(RADD_ELE_H, RADD_ELE_DEST)
+    shutil.copy(RULER_H, RULER_DEST)
 
 def generate_decay():
     with indir('src'):
@@ -431,6 +474,7 @@ def main():
         _, pynepath, _ = imp.find_module('pyne', pypath)
     except ImportError:
         pynepath = "${HOME}/.local/python2.7/site-packages"
+    copy_ensdf_executables(pynepath)
     libpath = abspath(joinpath(pynepath, '..', '..', '..'))
     binpath = abspath(joinpath(libpath, '..', 'bin'))
     msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
