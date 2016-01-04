@@ -73,7 +73,8 @@ ELSE()
         "jsoncustomwriter.cpp"
         "material.cpp"
         "nucname.cpp"
-        "particle.cpp"
+        "particleadd_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f  
++                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f).cpp"
         "rxname.cpp"
         "tally.cpp"
         "utils.cpp"
@@ -101,6 +102,9 @@ endif (MOAB_FOUND)
 
 set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
     "-O0")
+
+add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f  
+                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
