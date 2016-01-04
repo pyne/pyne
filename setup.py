@@ -175,6 +175,11 @@ def download_decay():
     durl.close()
     return True
 
+ALPHAD_H = os.path.join('build', 'src/alphad')
+def copy_ensdf_executables(pynepath):
+    print('Copying ENSDF Executables to install directory')
+    ALPHAD_DEST = os.path.join(pynepath, 'alphad')
+    shutil.copy(ALPHAD_H, ALPHAD_DEST)
 
 def generate_decay():
     with indir('src'):
@@ -431,6 +436,7 @@ def main():
         _, pynepath, _ = imp.find_module('pyne', pypath)
     except ImportError:
         pynepath = "${HOME}/.local/python2.7/site-packages"
+        copy_ensdf_executables(pynepath)
     libpath = abspath(joinpath(pynepath, '..', '..', '..'))
     binpath = abspath(joinpath(libpath, '..', 'bin'))
     msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
