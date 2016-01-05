@@ -73,7 +73,7 @@ ELSE()
         "jsoncustomwriter.cpp"
         "material.cpp"
         "nucname.cpp"
-        "particle.cpp
+        "particle.cpp"
         "rxname.cpp"
         "tally.cpp"
         "utils.cpp"
