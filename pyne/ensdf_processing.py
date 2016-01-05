@@ -14,7 +14,7 @@ if sys.version_info[0] > 2:
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-def path_to_exe(exe_name ):
+def path_to_exe(exe_name):
     exe_path_abs, dp = os.path.split(os.path.abspath(__file__))
     exe_path_abs = os.path.join(exe_path_abs, exe_name)
     exe_path_abs = os.path.join('./',exe_path_abs)
