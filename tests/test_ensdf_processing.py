@@ -18,18 +18,6 @@ def test_alphad():
     file_comp(input_dict['report_file'],'ensdf_processing/alphad/ref_a228.ens.alphad.rpt', exceptions)
     cleanup_tmp()
 
-def test_bricc():
-    create_tmp()
-    input_dict = {}
-    input_dict['input_line'] = '44'
-    output_dict = ensdf_processing.bricc(input_dict)
-    bricc_out_tmp = tmp_path + '/tmp_bricc_out.out'
-    bricc_out_ref = 'ensdf_processing/bricc/ref_bricc_44.out'
-    bricc_outfile = open(tmp_path + '/tmp_bricc_out.out', 'w+')
-    bricc_outfile.write(output_dict['bricc_output'])
-    file_comp(bricc_out_tmp, bricc_out_ref,[])
-    cleanup_tmp()
-
 def create_tmp():
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
