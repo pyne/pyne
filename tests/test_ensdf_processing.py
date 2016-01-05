@@ -1,9 +1,9 @@
-import os, filecmp, numpy, shutil
-import nose
-from nose.plugins.skip import Skip, SkipTest
-import pyne
+import filecmp, numpy, os, shutil
 from pyne import ensdf_processing
 
+import nose
+
+# path to folder for temporary test files.
 tmp_path = 'ensdf_processing/tmp'
 
 def test_alphad():

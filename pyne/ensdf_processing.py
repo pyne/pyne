@@ -1,7 +1,6 @@
 '''This module accesses various ensdf processing tools'''
 
 import sys, os, shutil, subprocess, tarfile
-import numpy as np
 from warnings import warn
 from pyne.utils import QAWarning
 
