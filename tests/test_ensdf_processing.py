@@ -80,5 +80,4 @@ def file_comp(file_out, file_ref, exceptions):
 #  nose.runmodule()
 if __name__ == "__main__":
     alphad = test_alphad()
-    bricc = test_bricc()
 
