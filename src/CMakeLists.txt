@@ -73,8 +73,7 @@ ELSE()
         "jsoncustomwriter.cpp"
         "material.cpp"
         "nucname.cpp"
-        "particleadd_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f  
-+                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f).cpp"
+        "particle.cpp
         "rxname.cpp"
         "tally.cpp"
         "utils.cpp"
