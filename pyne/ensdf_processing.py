@@ -76,3 +76,33 @@ def alphad(inputdict_unchecked):
     proc.communicate()[0]
     proc.stdin.close()
     return inputdict_unchecked
+
+def gabs(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        dataset_file : dataset file to be used
+        output file : file for output to be written to (doesn't have to exist)
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if GABS completes successfully.
+    """
+    exe_path = path_to_exe('gabs') 
+
+    gabs_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/gabs/unx/gabs"
+    verify_download_exe(exe_path, gabs_url, dl_size = 8704)
+    
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    dataset_file = inputdict_unchecked['dataset_file']
+    output_file = inputdict_unchecked['output_file'] #report file << CHANGE BACK TO REPORT..
+
+    #add option to not get new dataset (currently new dataset is hardprogrammed to yes)
+    exe_path = path_to_exe('gabs')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file)
+    proc.communicate()[0]
+    proc.stdin.close()
+

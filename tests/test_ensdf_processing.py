@@ -18,6 +18,24 @@ def test_alphad():
     file_comp(input_dict['report_file'],'ensdf_processing/alphad/ref_a228.ens.alphad.rpt', exceptions)
     cleanup_tmp()
 
+# Tests gabs output for 80Br sample input.  Date and file names are expected to be different
+# in the test output and reference file sets.
+def test_gabs():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_file'] = 'ensdf_processing/gabs/ref_gabs_80Br.in'
+    input_dict['output_file'] = tmp_path + '/tmp_gabs_80Br.rpt'
+    input_dict['dataset_file'] = tmp_path + '/tmp_gabs_80Br.new'
+    output_dict = ensdf_processing.gabs(input_dict)
+    exceptions_output = [[4,0],[1, '  * * * GABS Version 11 '], 
+    					 [1, '        Current date: '],
+    					 [1, '        ENSDF input file: '],
+    					 [1, '        new ENSDF file:']]
+    exceptions_dataset = [[4,0]]
+    d_report1 = file_comp(input_dict['output_file'],'ensdf_processing/gabs/ref_gabs_80Br.rpt',exceptions_output)
+    d_report2 = file_comp(input_dict['dataset_file'],'ensdf_processing/gabs/ref_gabs_80Br.new',exceptions_dataset)
+    cleanup_tmp()
+
 def create_tmp():
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
@@ -80,4 +98,5 @@ def file_comp(file_out, file_ref, exceptions):
 #  nose.runmodule()
 if __name__ == "__main__":
     alphad = test_alphad()
+    gabs = test_gabs()
 
