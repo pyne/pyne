@@ -436,7 +436,7 @@ def main():
         _, pynepath, _ = imp.find_module('pyne', pypath)
     except ImportError:
         pynepath = "${HOME}/.local/python2.7/site-packages"
-        copy_ensdf_executables(pynepath)
+    copy_ensdf_executables(pynepath)
     libpath = abspath(joinpath(pynepath, '..', '..', '..'))
     binpath = abspath(joinpath(libpath, '..', 'bin'))
     msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
