@@ -5,7 +5,6 @@
   
 void pyne::_load_atomic_mass_map_memory() { 
   // header version of atomic weight table data 
-  
   //see if the data table is already loaded
   if(!atomic_mass_map.empty()) {
     return;
