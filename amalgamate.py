@@ -29,6 +29,8 @@ DEFAULT_FILES = [
     'src/nucname.cpp',
     'src/rxname.h',
     'src/rxname.cpp',
+    'src/atomic_data.h',
+    'src/atomic_data.cpp',
     'src/data.h',
     'src/data.cpp',
     #'src/dagmc_bridge.cpp',
