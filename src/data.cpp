@@ -50,6 +50,7 @@ void pyne::_load_atomic_mass_map() {
   //Check to see if the file is in HDF5 format.
   if (!pyne::file_exists(pyne::NUC_DATA_PATH)) {
     pyne::_load_atomic_mass_map_memory();
+    return;
   }
 
   bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
