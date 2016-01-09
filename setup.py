@@ -179,6 +179,7 @@ ALPHAD_H = os.path.join('build', 'src/alphad')
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
     if exe_dest[-4:] != 'pyne':
+        exe_dest = exe_dest + '/pyne-' + VERSION + '-py2.7.egg'
         exe_dest = exe_dest + '/pyne'
     ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
     shutil.copy(ALPHAD_H, ALPHAD_DEST)
@@ -441,8 +442,6 @@ def main():
     libpath = abspath(joinpath(pynepath, '..', '..', '..'))
     binpath = abspath(joinpath(libpath, '..', 'bin'))
     copy_ensdf_executables(pynepath)
-    print(pynepath)
-    print(libpath)
     msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
            "LD_LIBRARY_PATH (or DYLD_FALLBACK_LIBRARY_PATH on Mac OSX) has been "
            "appropriately set to the install prefix of pyne. For this install of "
