@@ -69,7 +69,7 @@ def alphad(inputdict_unchecked):
         inp = inp + 'Y' + '\n' + output_file
     else:
         inp = inp + 'N' + '\n'
-    proc.stdin.write(inp)
+    proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
     proc.stdin.close()
     return inputdict_unchecked
