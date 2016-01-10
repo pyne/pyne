@@ -32,6 +32,7 @@ from __future__ import print_function
 
 import io
 import os
+import re
 import sys
 import imp
 import shutil
@@ -182,7 +183,9 @@ def copy_ensdf_executables(exe_dest):
     # been added to the python path.
     if exe_dest[-4:] != 'pyne':
         exe_dest = sysconfig.get_python_lib()
-        exe_dest = exe_dest + '/pyne-' + VERSION.replace('-','_') + '-py2.7.egg'
+        for f in os.listdir(sysconfig.get_python_lib()):
+            if re.match('pyne', f):
+                exe_dest = exe_dest + '/' + f
         exe_dest = exe_dest + '/pyne'
     ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
     shutil.copy(ALPHAD_H, ALPHAD_DEST)
