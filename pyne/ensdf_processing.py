@@ -22,7 +22,7 @@ def path_to_exe(exe_name):
 
 def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_size = 0):
     if not os.path.exists(exe_path):
-        print 'fetching executable'
+        print('fetching executable')
         response = urllib2.urlopen(exe_url)
         prog = 0
         CHUNK = 32 * 1024
@@ -30,8 +30,6 @@ def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_
         while True:
             chunk = response.read(CHUNK)
             prog = prog + (256)
-            #if dl_size != 0:
-            #    print 'Download progress: %d/100' % (100.0 * (float(prog) / float(dl_size)))
             if not chunk: break
             f.write(chunk)
         f.close()
