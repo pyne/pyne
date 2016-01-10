@@ -41,7 +41,7 @@ import platform
 import warnings
 import subprocess
 from glob import glob
-from distutils import core, dir_util
+from distutils import core, dir_util, sysconfig
 from contextlib import contextmanager
 if sys.version_info[0] < 3:
     from urllib import urlopen
@@ -178,8 +178,11 @@ def download_decay():
 ALPHAD_H = os.path.join('build', 'src/alphad')
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
+    # Hack for copying the executables the first time PyNE is instealled, before pyne has 
+    # been added to the python path.
     if exe_dest[-4:] != 'pyne':
-        exe_dest = exe_dest + '/pyne-' + VERSION + '-py2.7.egg'
+        exe_dest = sysconfig.get_python_lib()
+        exe_dest = exe_dest + '/pyne-' + VERSION.replace('-','_') + '-py2.7.egg'
         exe_dest = exe_dest + '/pyne'
     ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
     shutil.copy(ALPHAD_H, ALPHAD_DEST)
