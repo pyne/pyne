@@ -99,7 +99,8 @@ def gabs(inputdict_unchecked):
     #add option to not get new dataset (currently new dataset is hardprogrammed to yes)
     exe_path = path_to_exe('gabs')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    proc.stdin.write(input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file)
+    inp = input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file
+    proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
     proc.stdin.close()
 
