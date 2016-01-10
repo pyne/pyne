@@ -28,9 +28,9 @@ def test_gabs():
     input_dict['dataset_file'] = tmp_path + '/tmp_gabs_80Br.new'
     output_dict = ensdf_processing.gabs(input_dict)
     exceptions_output = [[4,0],[1, '  * * * GABS Version 11 '], 
-    					 [1, '        Current date: '],
-    					 [1, '        ENSDF input file: '],
-    					 [1, '        new ENSDF file:']]
+                         [1, '        Current date: '],
+                         [1, '        ENSDF input file: '],
+                         [1, '        new ENSDF file:']]
     exceptions_dataset = [[4,0]]
     d_report1 = file_comp(input_dict['output_file'],
                           'ensdf_processing/gabs/ref_gabs_80Br.rpt', exceptions_output)
@@ -67,25 +67,25 @@ def file_comp(file_out, file_ref, exceptions):
             ignore = False
             for i in range(0, len(exceptions)):
                 if exceptions[i][0] == 1:
-                	if line_out[0:len(exceptions[i][1])] == exceptions[i][1]:
-              			ignore = True
-              	elif exceptions[i][0] == 2:
-              		if exceptions[i][1] in line_out:
-              			ignore = True
-              	elif exceptions[i][0] == 3:
-              		# ignores select lines to allow for tolerable differences in output precision
-              		if exceptions[i][1] == line_num:
-              			ignore = True
-              	elif exceptions[i][0] == 4:
-              		if len(line_ref[:-1]) == len(line_out):
-               		# special exception for lines with possible carriage return instead of standard 
+                    if line_out[0:len(exceptions[i][1])] == exceptions[i][1]:
+                        ignore = True
+                elif exceptions[i][0] == 2:
+                    if exceptions[i][1] in line_out:
+                          ignore = True
+                elif exceptions[i][0] == 3:
+                    # ignores select lines to allow for tolerable differences in output precision
+                    if exceptions[i][1] == line_num:
+                        ignore = True
+                elif exceptions[i][0] == 4:
+                    if len(line_ref[:-1]) == len(line_out):
+                    # special exception for lines with possible carriage return instead of standard 
                     #line feed return
-              			if line_ref[:-2] == line_out[:-1]:
-	              			if map(bin,bytearray(line_ref[len(line_ref)-1])) \
-                               == map(bin,bytearray(line_out[len(line_out)-1])):
-        	      				ignore = True
+                        if line_ref[:-2] == line_out[:-1]:
+                            if map(bin,bytearray(line_ref[len(line_ref)-1])) \
+                            == map(bin,bytearray(line_out[len(line_out)-1])):
+                                ignore = True
             if not ignore:
-            	raise Exception('ENSDF Processing: Incorrect output generated, file: ' + file_ref)
+                raise Exception('ENSDF Processing: Incorrect output generated, file: ' + file_ref)
         line_num = line_num + 1
     f_out.close()
     f_ref.close()
