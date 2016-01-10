@@ -179,8 +179,8 @@ def download_decay():
 ALPHAD_H = os.path.join('build', 'src/alphad')
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
-    # Hack for copying the executables the first time PyNE is instealled, before pyne has 
-    # been added to the python path.
+    # Hack for copying the executables the first time PyNE is instealled, before 
+    # pyne has been added to the python path.
     if exe_dest[-4:] != 'pyne':
         exe_dest = sysconfig.get_python_lib()
         for f in os.listdir(sysconfig.get_python_lib()):
@@ -188,7 +188,11 @@ def copy_ensdf_executables(exe_dest):
                 exe_dest = exe_dest + '/' + f
         exe_dest = exe_dest + '/pyne'
     ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
-    shutil.copy(ALPHAD_H, ALPHAD_DEST)
+    try:
+        shutil.copy(ALPHAD_H, ALPHAD_DEST)
+    except Exception:
+        print('Some ENSDF processing executables were unable to be copied to the \
+              install directory.')
 
 def generate_decay():
     with indir('src'):
