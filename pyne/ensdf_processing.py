@@ -44,7 +44,7 @@ def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_
 def alphad(inputdict_unchecked):
     """
     This function calculates the alpha hinderance factors and theoretical half 
-    lives for even even ground state transitions.
+    lives for even even ground state transitions. (alphad readme)
 
     Input Dictionary Required Key Pair Value:
         ensdf_input_file : input file
@@ -78,7 +78,7 @@ def alphad(inputdict_unchecked):
 
 def gabs(inputdict_unchecked):
     """
-    This function ...
+    This program calculates Gamma-ray absolute intensity and normalization (GABS readme)
 
     Input Dictionary Required Key Pair Value:
         input_file : input ensdf file
