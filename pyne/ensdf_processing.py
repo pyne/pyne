@@ -34,7 +34,7 @@ def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_
             f.write(chunk)
         f.close()
         # set proper permissions on newly downloaded file
-        os.chmod(exe_path, 0744)
+        os.chmod(exe_path, 744)
         if compressed:
             tfile = tarfile.open(exe_path, 'r:gz')
             tfile.extractall(decomp_path)
