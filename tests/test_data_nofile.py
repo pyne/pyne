@@ -21,7 +21,7 @@ if utils.use_warnings():
     utils.toggle_warnings()
 
 def test_atomic_mass():
-    pyne_conf.NUC_DATA_PATH = "bobbobhonkeytonk"
+    pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
     o16 = [15.99491461957, 16.0]
     u235 = [235.043930131, 235.0]
     am242m = [242.059549364, 242.0]
@@ -33,7 +33,7 @@ def test_atomic_mass():
 
 
 def test_natural_abund_excited_state():
-    pyne_conf.NUC_DATA_PATH = "bobbobhonkeytonk"
+    pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
     # initialize natural_abund_map
     gnd = 902320000
     excited = gnd + 1
