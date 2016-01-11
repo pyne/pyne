@@ -21,6 +21,7 @@ if utils.use_warnings():
     utils.toggle_warnings()
 
 def test_atomic_mass():
+    # set the datapath to nonsense so we call, the cpp data version
     pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
     o16 = [15.99491461957, 16.0]
     u235 = [235.043930131, 235.0]
@@ -33,6 +34,7 @@ def test_atomic_mass():
 
 
 def test_natural_abund_excited_state():
+    # set the datapath to nonsense so we call, the cpp data version
     pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
     # initialize natural_abund_map
     gnd = 902320000
