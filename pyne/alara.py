@@ -27,7 +27,7 @@ from pyne.mesh import Mesh, MeshError
 from pyne.material import Material, from_atom_frac
 from pyne import nucname
 from pyne.nucname import serpent, alara, znum, anum
-from pyne.data import N_A, decay_const, decay_children
+from pyne.data import N_A, decay_const, decay_children, branch_ratio
 from pyne.xs.data_source import SimpleDataSource
 
 
@@ -543,7 +543,10 @@ def _build_matrix(N):
     # convert N to id form
     N_id = []
     for i in xrange(len(N)):
-        ID = nucname.id(N[i])
+        if isinstance(N[i], str):
+            ID = nucname.id(N[i])
+        else:
+            ID = N[i]
         N_id.append(ID)
 
     sds = SimpleDataSource()
@@ -555,7 +558,7 @@ def _build_matrix(N):
         # Find decay parents
         for k in xrange(len(N)):
             if N_id[i] in decay_children(N_id[k]):
-                A[i, k] += data.branch_ratio(N_id[k], N_id[i])*decay_const(N_id[k])
+                A[i, k] += branch_ratio(N_id[k], N_id[i])*decay_const(N_id[k])
     return A
 
 def _rat_apprx_14(A, t, n_0):
@@ -673,3 +676,4 @@ def cram(N, t, n_0, order):
         msg = 'Rational approximation of degree {0} is not supported.'.format(order)
         raise ValueError(msg)
 
+# !!!!
