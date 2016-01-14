@@ -676,4 +676,3 @@ def cram(N, t, n_0, order):
         msg = 'Rational approximation of degree {0} is not supported.'.format(order)
         raise ValueError(msg)
 
-# !!!!
