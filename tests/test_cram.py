@@ -13,7 +13,6 @@ def test_cram14():
         children = data.decay_children(species)
         children = list(children)
         while children:
-            print nuclides
             nuclides += children
             parent = children[0]
             children = data.decay_children(parent)
