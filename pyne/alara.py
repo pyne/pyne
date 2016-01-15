@@ -542,7 +542,7 @@ def _build_matrix(N):
 
     # convert N to id form
     N_id = []
-    for i in xrange(len(N)):
+    for i in range(len(N)):
         if isinstance(N[i], str):
             ID = nucname.id(N[i])
         else:
@@ -552,11 +552,11 @@ def _build_matrix(N):
     sds = SimpleDataSource()
 
     # Decay
-    for i in xrange(len(N)):
+    for i in range(len(N)):
         A[i, i] -= decay_const(N_id[i])
 
         # Find decay parents
-        for k in xrange(len(N)):
+        for k in range(len(N)):
             if N_id[i] in decay_children(N_id[k]):
                 A[i, k] += branch_ratio(N_id[k], N_id[i])*decay_const(N_id[k])
     return A
