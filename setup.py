@@ -57,6 +57,9 @@ except ImportError:
 
 import numpy as np
 
+# import src into pythonpath - needed to actually run decaygen/atomicgen
+sys.path.append(os.getcwd()+'/src')
+
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
 # for ASCII art inspiriation
