@@ -37,6 +37,7 @@ def print_header_file(filename):
     
     f = open(filename,'w')
     f.write(header_file)
+    f.close()
 
 # print the masses map
 def print_atomic_mass_errors():
@@ -123,6 +124,7 @@ def print_cpp_file(filename):
 
     f = open(filename,'w')
     f.write(cpp_file)
+    f.close()
 
 print_cpp_file("atomic_data.cpp")
 print_header_file("atomic_data.h")
