@@ -31,7 +31,7 @@ def test_cram14():
         # Compute PyNE decay solution
         initial = material.Material({species: 1.0})
         final = initial.decay(half_life)
-        pdecay = float(final.values())
+        pdecay = list(final.values())
         error_14 = np.abs(cram14 - pdecay)*2 / (cram14 + pdecay)
         error14.append(np.mean(error_14))
 
@@ -64,7 +64,7 @@ def test_cram16():
         # Compute PyNE decay solution
         initial = material.Material({species: 1.0})
         final = initial.decay(half_life)
-        pdecay = float(final.values())
+        pdecay = list(final.values())
 
         error_16 = np.abs(cram16 - pdecay)*2 / (cram16 + pdecay)
         error16.append(np.mean(error_16))
