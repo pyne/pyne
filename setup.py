@@ -206,17 +206,16 @@ def generate_decay():
             return False
     return True
 
-
 def ensure_decay():
     mb = 1024**2
     if os.path.isfile(DECAY_H) and os.path.isfile(DECAY_CPP) and \
        os.stat(DECAY_CPP).st_size > mb:
         return
-    downloaded = download_decay()
-    if downloaded:
-        return
     generated = generate_decay()
     if generated:
+        return
+    downloaded = download_decay()
+    if downloaded:
         return
     print('!'*42)
     print('Decay files could not be downloaded or generated, using surrogates instead.')
@@ -225,6 +224,29 @@ def ensure_decay():
     shutil.copy(DECAY_H_REP, DECAY_H)
     shutil.copy(DECAY_CPP_REP, DECAY_CPP)
 
+ATOMIC_H = os.path.join('src', 'atomic_data.h')
+ATOMIC_CPP = os.path.join('src', 'atomic_data.cpp')
+
+def generate_atomic():
+    with indir('src'):
+        try:
+            import atomicgen
+        except ImportError:
+            return False
+        try:
+            atomicgen.build()
+        except Exception:
+            return False
+    return True
+
+def ensure_atomic():
+    mb = 1024**2
+    if os.path.isfile(ATOMIC_H) and os.path.isfile(ATOMIC_CPP) and \
+       os.stat(ATOMIC_CPP).st_size > mb:
+        return
+    generated = generate_atomic()
+    if generated:
+        return
 
 def ensure_nuc_data():
     import tempfile
@@ -403,6 +425,7 @@ def cmake_cli(cmake_args):
 def main_body(cmake_args, make_args):
     assert_dep_versions()
     ensure_decay()
+    ensure_atomic()
     if not os.path.exists('build'):
         os.mkdir('build')
     cmake_cmd = cmake_cli(cmake_args)
