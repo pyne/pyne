@@ -235,7 +235,7 @@ def ensure_atomic():
     if generated:
         return
     # last resort
-    if !os.path.isfile(ATOMIC_H) and !os.path.isfile(ATOMIC_CPP):
+    if not os.path.isfile(ATOMIC_H) and not os.path.isfile(ATOMIC_CPP):
         shutil.copy(ATOMIC_H_UNDER, ATOMIC_H)
         shutil.copy(ATOMIC_CPP_UNDER, ATOMIC_CPP)
 
