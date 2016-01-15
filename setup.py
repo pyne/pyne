@@ -229,6 +229,8 @@ def ensure_decay():
 
 ATOMIC_H = os.path.join('src', 'atomic_data.h')
 ATOMIC_CPP = os.path.join('src', 'atomic_data.cpp')
+ATOMIC_H_UNDER = os.path.join('src', 'atomic_data.h')
+ATOMIC_CPP_UNDER = os.path.join('src', 'atomic_data.cpp')
 
 def generate_atomic():
     with indir('src'):
@@ -250,6 +252,10 @@ def ensure_atomic():
     generated = generate_atomic()
     if generated:
         return
+    # last resort
+    if !os.path.isfile(ATOMIC_H) and !os.path.isfile(ATOMIC_CPP):
+        shutil.copy(ATOMIC_H_UNDER, ATOMIC_H)
+        shutil.copy(ATOMIC_CPP_UNDER, ATOMIC_CPP)
 
 def ensure_nuc_data():
     import tempfile
