@@ -597,7 +597,7 @@ def _rat_apprx_14(A, t, n_0):
     n = 0*n_0
 
     for j in range(7):
-        n += np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]), alpha[j]*n_0)
+        n = n + np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]), alpha[j]*n_0)
 
     n = 2*n.real
     n = n + alpha_0*n_0
@@ -642,7 +642,7 @@ def _rat_apprx_16(A, t, n_0):
     n = 0*n_0
 
     for j in range(8):
-        n += np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]), alpha[j]*n_0)
+        n = n + np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]), alpha[j]*n_0)
 
     n = 2*n.real
     n = n + alpha_0*n_0
