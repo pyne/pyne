@@ -212,8 +212,8 @@ def ensure_decay():
 
 ATOMIC_H = os.path.join('src', 'atomic_data.h')
 ATOMIC_CPP = os.path.join('src', 'atomic_data.cpp')
-ATOMIC_H_UNDER = os.path.join('src', 'atomic_data.h')
-ATOMIC_CPP_UNDER = os.path.join('src', 'atomic_data.cpp')
+ATOMIC_H_UNDER = os.path.join('src', '_atomic_data.h')
+ATOMIC_CPP_UNDER = os.path.join('src', '_atomic_data.cpp')
 
 def generate_atomic():
     with indir('src'):
@@ -229,16 +229,22 @@ def generate_atomic():
 
 def ensure_atomic():
     mb = 1024**2
+    # if the file exists then we're done!
     if os.path.isfile(ATOMIC_H) and os.path.isfile(ATOMIC_CPP) and \
        os.stat(ATOMIC_CPP).st_size > mb:
         return
+    # generate the data
     generated = generate_atomic()
     if generated:
         return
-    # last resort
+    # last resort - if generate atomic failed, use the backup
     if not os.path.isfile(ATOMIC_H) and not os.path.isfile(ATOMIC_CPP):
         shutil.copy(ATOMIC_H_UNDER, ATOMIC_H)
         shutil.copy(ATOMIC_CPP_UNDER, ATOMIC_CPP)
+    else:
+        # copy the freshly generated file to the last resort for consistency
+        shutil.copy(ATOMIC_H, ATOMIC_H_UNDER)
+        shutil.copy(ATOMIC_CPP, ATOMIC_CPP_UNDER)
 
 def ensure_nuc_data():
     import tempfile
