@@ -9,6 +9,7 @@ essential aspects of using PyNE to do nuclear engineering.
 .. toctree::
     :maxdepth: 1
 
+    data
     nucname
     particle
     material
