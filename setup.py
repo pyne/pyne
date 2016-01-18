@@ -32,6 +32,7 @@ from __future__ import print_function
 
 import io
 import os
+import re
 import sys
 import imp
 import shutil
@@ -41,7 +42,7 @@ import platform
 import warnings
 import subprocess
 from glob import glob
-from distutils import core, dir_util
+from distutils import core, dir_util, sysconfig
 from contextlib import contextmanager
 if sys.version_info[0] < 3:
     from urllib import urlopen
@@ -175,6 +176,23 @@ def download_decay():
     durl.close()
     return True
 
+ALPHAD_H = os.path.join('build', 'src/alphad')
+def copy_ensdf_executables(exe_dest):
+    print('Copying ENSDF Executables to install directory')
+    # Hack for copying the executables the first time PyNE is instealled, before 
+    # pyne has been added to the python path.
+    if exe_dest[-4:] != 'pyne':
+        exe_dest = sysconfig.get_python_lib()
+        for f in os.listdir(sysconfig.get_python_lib()):
+            if re.match('pyne', f):
+                exe_dest = exe_dest + '/' + f
+        exe_dest = exe_dest + '/pyne'
+    ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
+    try:
+        shutil.copy(ALPHAD_H, ALPHAD_DEST)
+    except Exception:
+        print('Some ENSDF processing executables were unable to be copied to the \
+              install directory.')
 
 def generate_decay():
     with indir('src'):
@@ -433,6 +451,7 @@ def main():
         pynepath = "${HOME}/.local/python2.7/site-packages"
     libpath = abspath(joinpath(pynepath, '..', '..', '..'))
     binpath = abspath(joinpath(libpath, '..', 'bin'))
+    copy_ensdf_executables(pynepath)
     msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
            "LD_LIBRARY_PATH (or DYLD_FALLBACK_LIBRARY_PATH on Mac OSX) has been "
            "appropriately set to the install prefix of pyne. For this install of "
