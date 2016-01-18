@@ -116,7 +116,9 @@ After installing anaconda or miniconda from
 `the Continuum downloads page <http://continuum.io/downloads>`_,
 in a new terminal run the following conda install command::
 
-    conda install -c https://conda.binstar.org/pyne pyne
+    conda install -c cyclus -c pyne pyne=VERSION
+
+where VERSION should be replaced with the version number to be installed.
 
 If you have any issues, please let us know.
 
