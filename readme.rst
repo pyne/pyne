@@ -55,10 +55,12 @@ Most of the dependencies are readily available through package managers.
 ------
 Binary
 ------
-Binary distributions of the latest release (0.4) for mac and linux (64-bit) 
+Binary distributions of the latest release for mac and linux (64-bit) 
 using the conda package manager can be installed by running the command::
 
-    conda install -c https://conda.binstar.org/pyne pyne
+    conda install -c cyclus -c pyne pyne=VERSION
+
+where VERSION should be replaced with the version number to be installed.
 
 A windows 32-bit binary is also available on conda via the same command but
 it is highly experimental and likely broken. Conda binaries do not have 
@@ -114,7 +116,9 @@ After installing anaconda or miniconda from
 `the Continuum downloads page <http://continuum.io/downloads>`_,
 in a new terminal run the following conda install command::
 
-    conda install -c https://conda.binstar.org/pyne pyne
+    conda install -c cyclus -c pyne pyne=VERSION
+
+where VERSION should be replaced with the version number to be installed.
 
 If you have any issues, please let us know.
 
