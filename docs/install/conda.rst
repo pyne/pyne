@@ -14,7 +14,7 @@ option when installing conda.
 --------------------------
 Binary Package (For Users)
 --------------------------
-Binary distributions of thelatest release for mac and linux (64-bit) 
+Binary distributions of the latest release for mac and linux (64-bit) 
 using the conda package manager can be installed by running the command::
 
     conda install -c cyclus -c pyne pyne=VERSION
