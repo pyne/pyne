@@ -130,8 +130,10 @@ def gabs(inputdict_unchecked):
 
 def gtol(inputdict_unchecked):
     """
-    This function ...
-
+    GTOL uses gamma-ray energies to derive a set of least-squares adjusted level energies.  The
+    net feeding at each level is calculated from the input gamma intensities and conversion 
+    coefficients. (GTOL readme)
+    
     Input Dictionary Required Key Pair Value:
         input_file : input ensdf file.
         report_file : desired gtol report file path.
