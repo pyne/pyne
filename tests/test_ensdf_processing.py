@@ -66,6 +66,61 @@ def test_gtol():
     d_report = file_comp(input_dict['report_file'], ref_output_report, exceptions)
     cleanup_tmp()
 
+def test_bldhst():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_file'] = 'ensdf_processing/bldhst/ref_bldhst_iccseq.dat'
+    input_dict['output_table_file'] = tmp_path + '/tmp_bldhst_icctbl.dat'
+    input_dict['output_index_file'] = tmp_path + '/tmp_bldhst_iccndx.dat'
+    output_dict = ensdf_processing.bldhst(input_dict)
+    ref_table = 'ensdf_processing/bldhst/ref_icctbl.dat'
+    ref_index = 'ensdf_processing/bldhst/ref_iccndx.dat'
+    d_table = file_comp(input_dict['output_table_file'], ref_table, [])
+    d_index = file_comp(input_dict['output_index_file'], ref_index, [])
+    cleanup_tmp()
+
+def test_hsicc():
+    create_tmp()
+    input_dict = {}
+    input_dict['data_deck'] = 'ensdf_processing/hsicc/ref_hsicc_data.tst'
+    input_dict['icc_index'] = 'ensdf_processing/hsicc/ref_hsicc_iccndx.dat'
+    input_dict['icc_table'] = 'ensdf_processing/hsicc/ref_hsicc_icctbl.dat'
+    input_dict['complete_report'] = tmp_path + '/tmp_out_hsicc_hscalc.lst'
+    input_dict['new_card_deck'] = tmp_path + '/tmp_out_hsicc_cards.new'
+    input_dict['comparison_report'] = tmp_path + '/tmp_out_hsicc_compar.lst'
+    input_dict['is_multipol_known'] = 'Y'
+    output_dict = ensdf_processing.hsicc(input_dict)
+    ref_report = 'ensdf_processing/hsicc/ref_hscalc.lst'
+    ref_card_deck = 'ensdf_processing/hsicc/ref_cards.new'
+    ref_comparison_report = 'ensdf_processing/hsicc/ref_compar.lst'
+
+    exceptions = [[3, 55], [3, 70], [3, 83], [3, 107], [3, 131], [3, 151]]
+    d_report = file_comp(input_dict['complete_report'], ref_report, exceptions)
+    d_card_deck = file_comp(input_dict['new_card_deck'], ref_card_deck, [])
+    d_comparison_report = file_comp(input_dict['comparison_report'], ref_comparison_report, [])
+    cleanup_tmp()
+
+def test_hsmrg():
+    create_tmp()
+    input_dict = {}
+    input_dict['data_deck'] = 'ensdf_processing/hsmrg/ref_hsmrg_data.tst'
+    input_dict['card_deck'] = 'ensdf_processing/hsmrg/ref_hsmrg_cards.new'
+    input_dict['merged_data_deck'] = tmp_path + '/tmp_out_cards.mrg'
+    output_dict = ensdf_processing.hsmrg(input_dict)
+    ref_deck = 'ensdf_processing/hsmrg/ref_cards.mrg'
+    d_report = file_comp(input_dict['merged_data_deck'], ref_deck, [])
+    cleanup_tmp()
+
+def test_seqhst():
+    create_tmp()
+    input_dict = {}
+    input_dict['binary_table_input_file'] = 'ensdf_processing/seqhst/ref_seqhst_icctbl.dat'
+    input_dict['sequential_output_file'] = tmp_path + '/tmp_out_iccseq.dat'
+    output_dict = ensdf_processing.seqhst(input_dict)
+    ref_sequence = 'ensdf_processing/seqhst/ref_iccseq.dat'
+    d_report = file_comp(input_dict['sequential_output_file'], ref_sequence, [])
+    cleanup_tmp()
+
 def create_tmp():
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
@@ -127,3 +182,7 @@ if __name__ == "__main__":
     gabs = test_gabs()
     delta = test_delta()
     gtol = test_gtol()
+    bldhst = test_bldhst()
+    hsicc = test_hsicc()
+    hsmrg = test_hsmrg()
+    seqhst = test_seqhst()
