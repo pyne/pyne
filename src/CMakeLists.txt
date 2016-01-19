@@ -107,6 +107,13 @@ add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
 add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
 add_executable(gtol ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f 
                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(bldhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/bldhst.for)
+add_executable(hsicc ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for 
+                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

@@ -179,6 +179,10 @@ def download_decay():
 ALPHAD_H = os.path.join('build', 'src/alphad')
 DELTA_H = os.path.join('build', 'src/delta')
 GTOL_H = os.path.join('build', 'src/gtol')
+BLDHST_H = os.path.join('build', 'src/bldhst')
+HSICC_H = os.path.join('build', 'src/hsicc')
+HSMRG_H = os.path.join('build', 'src/hsmrg')
+SEQHST_H = os.path.join('build', 'src/seqhst')
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
@@ -193,10 +197,18 @@ def copy_ensdf_executables(exe_dest):
     ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
     DELTA_DEST = os.path.join(exe_dest, 'delta')
     GTOL_DEST = os.path.join(exe_dest, 'gtol')
+    BLDHST_DEST = os.path.join(exe_dest, 'bldhst')
+    HSICC_DEST = os.path.join(exe_dest, 'hsicc')
+    HSMRG_DEST = os.path.join(exe_dest, 'hsmrg')
+    SEQHST_DEST = os.path.join(exe_dest, 'seqhst')
     try:
         shutil.copy(ALPHAD_H, ALPHAD_DEST)
         shutil.copy(DELTA_H, DELTA_DEST)
         shutil.copy(GTOL_H, GTOL_DEST)
+        shutil.copy(BLDHST_H, BLDHST_DEST)
+        shutil.copy(HSICC_H, HSICC_DEST)
+        shutil.copy(HSMRG_H, HSMRG_DEST)
+        shutil.copy(SEQHST_H, SEQHST_DEST)
     except Exception:
         print('Some ENSDF processing executables were unable to be copied to the \
               install directory.')
