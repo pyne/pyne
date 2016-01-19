@@ -133,7 +133,7 @@ def gtol(inputdict_unchecked):
     GTOL uses gamma-ray energies to derive a set of least-squares adjusted level energies.  The
     net feeding at each level is calculated from the input gamma intensities and conversion 
     coefficients. (GTOL readme)
-    
+
     Input Dictionary Required Key Pair Value:
         input_file : input ensdf file.
         report_file : desired gtol report file path.
@@ -170,7 +170,7 @@ def gtol(inputdict_unchecked):
     if(supress_ic):
         inp = inp + 'Y' + '\n'
     else:
-        inp = inp + 'N' + '\n' + `dcc_theory` + '\n'
+        inp = inp + 'N' + '\n' + dcc_theory + '\n'
     proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
     proc.stdin.close()
