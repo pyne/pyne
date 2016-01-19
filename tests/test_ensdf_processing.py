@@ -18,6 +18,18 @@ def test_alphad():
     file_comp(input_dict['report_file'],'ensdf_processing/alphad/ref_a228.ens.alphad.rpt', exceptions)
     cleanup_tmp()
 
+def test_delta():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_file'] = 'ensdf_processing/delta/ref_inp.dat'
+    input_dict['output_file'] = tmp_path + '/tmp_delta.dat'
+    output_dict = ensdf_processing.delta(input_dict)
+    # exceptions contain lines in the ouptut that can have a tolerable precision difference
+    exceptions = [[3, 82], [3, 89], [3, 119], [3, 202], [3, 209], [3, 213],[3,  217],[3,  229], \
+                 [3,  232], [3, 236], [3, 243], [3, 318], [3, 355], [3, 458]]
+    d_ouptut = file_comp(input_dict['output_file'],'ensdf_processing/delta/ref_delta.rpt', exceptions)
+    cleanup_tmp()
+
 # Tests gabs output for 80Br sample input.  Date and file names are expected to be different
 # in the test output and reference file sets.
 def test_gabs():
@@ -97,4 +109,4 @@ def file_comp(file_out, file_ref, exceptions):
 if __name__ == "__main__":
     alphad = test_alphad()
     gabs = test_gabs()
-
+    delta = test_delta()

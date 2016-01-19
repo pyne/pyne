@@ -181,6 +181,8 @@ def download_decay():
     return True
 
 ALPHAD_H = os.path.join('build', 'src/alphad')
+DELTA_H = os.path.join('build', 'src/delta')
+
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
     # Hack for copying the executables the first time PyNE is instealled, before 
@@ -192,8 +194,10 @@ def copy_ensdf_executables(exe_dest):
                 exe_dest = exe_dest + '/' + f
         exe_dest = exe_dest + '/pyne'
     ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
+    DELTA_DEST = os.path.join(exe_dest, 'delta')
     try:
         shutil.copy(ALPHAD_H, ALPHAD_DEST)
+        shutil.copy(DELTA_H, DELTA_DEST)
     except Exception:
         print('Some ENSDF processing executables were unable to be copied to the \
               install directory.')

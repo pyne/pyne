@@ -74,6 +74,30 @@ def alphad(inputdict_unchecked):
     proc.stdin.close()
     return inputdict_unchecked
 
+def delta(inputdict_unchecked):
+    """
+    This function calculates the best values of mixing ratios based of its analysis of
+    the angular correlation and conversion coefficient data.
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file
+        output_file : file for output to be written to (doesn't have to exist)
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if DELTA completes successfully.
+    """
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    output_file = inputdict_unchecked['output_file']
+
+    exe_path = path_to_exe('delta')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_file + '\n' + output_file + '\n'
+    proc.stdin.write(inp.encode('utf-8'))
+    proc.communicate()[0]
+    proc.stdin.close()
+    return inputdict_unchecked
+
 def gabs(inputdict_unchecked):
     """
     This program calculates Gamma-ray absolute intensity and normalization (GABS readme)
