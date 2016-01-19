@@ -50,6 +50,22 @@ def test_gabs():
                           'ensdf_processing/gabs/ref_gabs_80Br.new', exceptions_dataset)
     cleanup_tmp()
 
+def test_gtol():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_file'] = 'ensdf_processing/gtol/ref_gtol.inp'
+    input_dict['report_file'] = tmp_path + '/tmp_gtol.rpt'
+    input_dict['new_ensdf_file_with_results'] = 0
+    input_dict['output_file'] = tmp_path + '/tmp_gtol.out'
+    input_dict['supress_gamma_comparison'] = 1
+    input_dict['supress_intensity_comparison'] = 1
+    input_dict['dcc_theory_percent'] = 1.4
+    output_dict = ensdf_processing.gtol(input_dict)
+    ref_output_report = 'ensdf_processing/gtol/ref_gtol.rpt'
+    exceptions = [[1, 'DATE:'], [1, 'INPUT-FILE name:'], [1, 'TIME:']]
+    d_report = file_comp(input_dict['report_file'], ref_output_report, exceptions)
+    cleanup_tmp()
+
 def create_tmp():
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
@@ -110,3 +126,4 @@ if __name__ == "__main__":
     alphad = test_alphad()
     gabs = test_gabs()
     delta = test_delta()
+    gtol = test_gtol()

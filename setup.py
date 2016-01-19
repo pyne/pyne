@@ -182,6 +182,7 @@ def download_decay():
 
 ALPHAD_H = os.path.join('build', 'src/alphad')
 DELTA_H = os.path.join('build', 'src/delta')
+GTOL_H = os.path.join('build', 'src/gtol')
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
@@ -195,9 +196,11 @@ def copy_ensdf_executables(exe_dest):
         exe_dest = exe_dest + '/pyne'
     ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
     DELTA_DEST = os.path.join(exe_dest, 'delta')
+    GTOL_DEST = os.path.join(exe_dest, 'gtol')
     try:
         shutil.copy(ALPHAD_H, ALPHAD_DEST)
         shutil.copy(DELTA_H, DELTA_DEST)
+        shutil.copy(GTOL_H, GTOL_DEST)
     except Exception:
         print('Some ENSDF processing executables were unable to be copied to the \
               install directory.')

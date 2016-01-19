@@ -128,3 +128,48 @@ def gabs(inputdict_unchecked):
     proc.communicate()[0]
     proc.stdin.close()
 
+def gtol(inputdict_unchecked):
+    """
+    This function ...
+
+    Input Dictionary Required Key Pair Value:
+        input_file : input ensdf file.
+        report_file : desired gtol report file path.
+        new_ensdf_file_with_results : boolean, if true then a new ensdf file with results
+                                      will be created.
+        output_file : desired gtol output file path.
+        supress_gamma_comparison : boolean, if true the gamma comparison will be suppressed.
+        dcc_theory_percent : double, specifies the dcc theory percentage to be used.
+
+
+    Output Dictionary Values:
+        Everything in input dictionary is returned if GTOL completes successfully.
+    """
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    report_file = inputdict_unchecked['report_file']
+    new_out = inputdict_unchecked['new_ensdf_file_with_results']
+    output_file = inputdict_unchecked['output_file'] #output file if report = yes
+    supress_g = inputdict_unchecked['supress_gamma_comparison']
+    supress_ic = inputdict_unchecked['supress_intensity_comparison']
+    dcc_theory = inputdict_unchecked['dcc_theory_percent']
+
+    exe_path = path_to_exe('gtol')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_file + '\n' + report_file + '\n'
+    if (new_out):
+        inp = inp + 'Y' + '\n' + output_file + '\n'
+    else:
+        inp = inp + 'N' + '\n'
+    if (supress_g):
+        inp = inp + 'Y' + '\n'
+    else:
+        inp = inp + 'N' + '\n'
+    if(supress_ic):
+        inp = inp + 'Y' + '\n'
+    else:
+        inp = inp + 'N' + '\n' + `dcc_theory` + '\n'
+    proc.stdin.write(inp.encode('utf-8'))
+    proc.communicate()[0]
+    proc.stdin.close()
+    return inputdict_unchecked
