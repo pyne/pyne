@@ -38,7 +38,8 @@ To compile & link against your installed version of PyNE
 		
    g++ test.cpp -I$HOME/.local/include/pyne -I<path to hdf5>/include -L$HOME/.local/lib/ -L<path to hdf5>/lib -lhdf5 -lpyne -o test
 
-Running this example gives
+Running this example gives.
+
 .. code-block:: bash
 		
    ./test
