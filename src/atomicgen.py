@@ -7,12 +7,12 @@ def print_header_file(filename):
     header_file += "/// \/file atomic_nuclear_data.h\n"
     header_file += "/// \/author Andrew Davis (andrew.davis@wisc.edu)\n"
     header_file += "///\n"
-    header_file += "/// \/brief Impliments all the fundamental atomic & nuclear data data\n"
+    header_file += "/// \/brief Implements all the fundamental atomic & nuclear data data\n"
     header_file += "#include <map>\n"
     header_file += "\n"
     header_file += "namespace pyne\n"
     header_file += "{\n"
-    header_file += "  /// main function to be called when you whish to load the nuclide data \n"
+    header_file += "  /// main function to be called when you wish to load the nuclide data \n"
     header_file += "  /// into memory \n"
     header_file += "  void _load_atomic_mass_map_memory();\n"
     header_file += "  /// function to create mapping from nuclides in id form\n" 
@@ -53,7 +53,7 @@ def print_atomic_mass_errors():
         nuc = (10000000 * int(m.group(1))) + (10000 * int(m.group(2)))
         error = 1E-6 * float(m.group(5).strip().replace('#', ''))
         atomic_mass_error = "  atomic_mass_error["+str(nuc)+"] = "+str(error)+";\n"
-
+    file.close()
     return atomic_mass_error
 
 # print the masses map
@@ -69,7 +69,7 @@ def print_atomic_mass():
         nuc = (10000000 * int(m.group(1))) + (10000 * int(m.group(2)))
         mass = float(m.group(3)) + 1E-6 * float(m.group(4).strip().replace('#',''))
         atomic_mass += "  atomic_mass_map["+str(nuc)+"] = "+str(mass)+";\n"
-
+    file.close()
     return atomic_mass
 
 # print the abundances map
@@ -126,5 +126,6 @@ def print_cpp_file(filename):
     f.write(cpp_file)
     f.close()
 
-print_cpp_file("atomic_data.cpp")
-print_header_file("atomic_data.h")
+if __name__ == '__main__':
+    print_cpp_file("atomic_data.cpp")
+    print_header_file("atomic_data.h")
