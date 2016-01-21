@@ -35,10 +35,12 @@ The main use of this feature is to allow C++ users to be able to call the abunda
 To compile & link against your installed version of PyNE
 
 .. code-block:: bash
+		
    g++ test.cpp -I$HOME/.local/include/pyne -I<path to hdf5>/include -L$HOME/.local/lib/ -L<path to hdf5>/lib -lhdf5 -lpyne -o test
 
 Running this example gives
 .. code-block:: bash
+		
    ./test
    Atomic mass of deuterium is 2.0141018
    
