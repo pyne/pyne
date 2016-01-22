@@ -46,6 +46,7 @@ ENDIF()
 # setup source files
 IF(BUILD_SPATIAL_SOLVER)
     set(PYNE_SRCS
+        "atomic_data.cpp"
         "data.cpp"
         "decay.cpp"
         "enrichment.cpp"
@@ -64,6 +65,7 @@ IF(BUILD_SPATIAL_SOLVER)
         )
 ELSE()
     set(PYNE_SRCS
+        "atomic_data.cpp"
         "data.cpp"
         "decay.cpp"
         "enrichment.cpp"
