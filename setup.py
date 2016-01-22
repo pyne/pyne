@@ -177,6 +177,12 @@ def download_decay():
     return True
 
 ALPHAD_H = os.path.join('build', 'src/alphad')
+LOGFT_H = os.path.join('build', 'src/logft')
+RADD_H = os.path.join('build', 'src/radd')
+RADD_98AK04_H = os.path.join('src', 'ensdf_processing/RADD/98AK04.in')
+RADD_ELE_H = os.path.join('src', 'ensdf_processing/RADD/ELE.in')
+RULER_H = os.path.join('build', 'src/ruler')
+
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
     # Hack for copying the executables the first time PyNE is instealled, before 
@@ -188,8 +194,18 @@ def copy_ensdf_executables(exe_dest):
                 exe_dest = exe_dest + '/' + f
         exe_dest = exe_dest + '/pyne'
     ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
+    LOGFT_DEST = os.path.join(exe_dest, 'logft')
+    RADD_DEST = os.path.join(exe_dest, 'radd')
+    RADD_98AK04_DEST = os.path.join(exe_dest, '98AK04.in')
+    RADD_ELE_DEST = os.path.join(exe_dest, 'ELE.in')
+    RULER_DEST = os.path.join(exe_dest, 'ruler')
     try:
         shutil.copy(ALPHAD_H, ALPHAD_DEST)
+        shutil.copy(LOGFT_H, LOGFT_DEST)
+        shutil.copy(RADD_H, RADD_DEST)
+        shutil.copy(RADD_98AK04_H, RADD_98AK04_DEST)
+        shutil.copy(RADD_ELE_H, RADD_ELE_DEST)
+        shutil.copy(RULER_H, RULER_DEST)
     except Exception:
         print('Some ENSDF processing executables were unable to be copied to the \
               install directory.')

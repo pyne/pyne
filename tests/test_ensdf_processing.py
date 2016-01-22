@@ -38,6 +38,66 @@ def test_gabs():
                           'ensdf_processing/gabs/ref_gabs_80Br.new', exceptions_dataset)
     cleanup_tmp()
 
+
+def test_logft():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_data_set'] = 'ensdf_processing/logft/ref_logft.inp'
+    input_dict['output_report'] = tmp_path + '/tmp_logft.rpt'
+    input_dict['data_table'] = 'ensdf_processing/logft/ref_logft.dat'
+    input_dict['output_data_set'] = tmp_path + '/tmp_logft.new'
+    output_dict = ensdf_processing.logft(input_dict)
+    ref_output_data_set = 'ensdf_processing/logft/ref_logft.new'
+    d_data = file_comp(input_dict['output_data_set'], ref_output_data_set, [])
+    cleanup_tmp()
+
+def test_radd():
+    create_tmp()
+    input_dict = {}
+    input_dict['atomic_number'] = '86'
+    input_dict['neutron_number'] = '113'
+    input_dict['output_file'] = tmp_path + '/tmp_output.out'
+    ensdf_processing.radd(input_dict)
+    ref_output = 'ensdf_processing/radd/ref_output.out'
+    d_report = file_comp(input_dict['output_file'], ref_output, [])
+    cleanup_tmp()
+
+def test_radlist():
+    create_tmp()
+    input_dict = {}
+    input_dict['output_radiation_listing'] = 'Y'
+    input_dict['output_ensdf_like_file'] = 'N'
+    input_dict['output_file_for_nudat'] = 'N'
+    input_dict['output_mird_listing'] = 'N'
+    input_dict['calculate_continua'] = 'N'
+    input_dict['input_file'] = 'ensdf_processing/radlst/ref_radlst.inp'
+    input_dict['output_radlst_file'] = tmp_path + '/tmp_radlst.rpt'
+    input_dict['input_radlst_data_table'] = 'ensdf_processing/radlst/ref_mednew.dat'
+    input_dict['output_ensdf_file'] = tmp_path + '/tmp_ensdf.rpt'
+    output_dict = ensdf_processing.radlist(input_dict)
+    ref_output_radlst_file = 'ensdf_processing/radlst/ref_radlst.rpt'
+    ref_output_ensdf_file = 'ensdf_processing/radlst/ref_ensdf.rpt'
+    # exceptions contain lines in the ouptut that can have a tolerable precision difference
+    radlst_exceptions = [[1, '1PROGRAM RADLST 5.5 [ 5-OCT-88].  RUN ON'], [3, 66], [3, 135], [3, 713], [3, 714], [3, 760],[3,  944]]
+    ensdf_exceptions = [[3, 341], [3, 351], [3, 357]]
+    d_radlst = file_comp(input_dict['output_radlst_file'], ref_output_radlst_file, radlst_exceptions)
+    d_ensdf = file_comp(input_dict['output_ensdf_file'], ref_output_ensdf_file, ensdf_exceptions)
+    cleanup_tmp()
+    os.remove('atomic.dat')
+
+def test_ruler():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_file'] = 'ensdf_processing/ruler/ref_ruler.inp'
+    input_dict['output_report_file'] = tmp_path + '/tmp_ruler.rpt'
+    input_dict['mode_of_operation'] = 'R'
+    input_dict['assumed_dcc_theory'] = '1.4'
+    output_dict = ensdf_processing.ruler(input_dict)
+    ref_output = 'ensdf_processing/ruler/ref_ruler.rpt'
+    exceptions = [[1, '         INPUT FILE:'], [1, 'RULER Version 3.2d [20-Jan-2009]']]
+    d_report = file_comp(input_dict['output_report_file'], ref_output, exceptions)
+    cleanup_tmp()
+
 def create_tmp():
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
