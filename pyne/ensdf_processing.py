@@ -128,6 +128,7 @@ def gabs(inputdict_unchecked):
     proc.communicate()[0]
     proc.stdin.close()
 
+<<<<<<< 65c46cdb7aa26efcc3c8440364d1f2d9a7c4093d
 <<<<<<< 5227eb46c01be6dff2a90dd6c68cf5b79c837753
 def gtol(inputdict_unchecked):
     """
@@ -199,8 +200,6 @@ def bldhst(inputdict_unchecked):
     exe_path = path_to_exe('bldhst')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + output_table_file + '\n' + output_index_file
-=======
-
 
 def logft(inputdict_unchecked):
     #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
@@ -437,4 +436,7 @@ def ruler(inputdict_unchecked):
     ruler_output.communicate()[0]
     ruler_output.stdin.close()
     return inputdict_unchecked
+<<<<<<< 65c46cdb7aa26efcc3c8440364d1f2d9a7c4093d
     
+=======
+>>>>>>> Removed extra newlines
