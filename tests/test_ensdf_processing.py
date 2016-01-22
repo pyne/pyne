@@ -1,4 +1,4 @@
-import filecmp, numpy, os, shutil
+import filecmp, numpy, os, shutil, codecs
 from pyne import ensdf_processing
 
 import nose
@@ -140,8 +140,8 @@ def file_comp(file_out, file_ref, exceptions):
         type 4: carriage return vs. non standard return type.
             options: line number of return.
     '''
-    f_out = open(file_out, 'r')
-    f_ref = open(file_ref, 'r')
+    f_out = codecs.open(file_out, 'r', 'ascii')
+    f_ref = codecs.open(file_ref, 'r', 'ascii')
     diff_lines = numpy.array([])
     line_num = 0
     for line_out in f_out:
