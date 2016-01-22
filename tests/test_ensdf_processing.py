@@ -246,3 +246,7 @@ if __name__ == "__main__":
     hsicc = test_hsicc()
     hsmrg = test_hsmrg()
     seqhst = test_seqhst()
+    logft = test_logft()
+    radd = test_radd()
+    radlst = test_radlist()
+    ruler = test_ruler()
