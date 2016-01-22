@@ -257,3 +257,4 @@ def ruler(inputdict_unchecked):
     ruler_output.communicate()[0]
     ruler_output.stdin.close()
     return inputdict_unchecked
+    
