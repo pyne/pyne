@@ -1,4 +1,4 @@
-import filecmp, numpy, os, shutil
+import filecmp, numpy, os, shutil, codecs
 from pyne import ensdf_processing
 
 import nose
@@ -116,8 +116,8 @@ def file_comp(file_out, file_ref, exceptions):
         type 4: carriage return vs. non standard return type.
             options: line number of return.
     '''
-    f_out = open(file_out, 'r')
-    f_ref = open(file_ref, 'r')
+    f_out = codecs.open(file_out, 'r', 'ascii')
+    f_ref = codecs.open(file_ref, 'r', 'ascii')
     diff_lines = numpy.array([])
     line_num = 0
     for line_out in f_out:
@@ -140,9 +140,7 @@ def file_comp(file_out, file_ref, exceptions):
                     # special exception for lines with possible carriage return instead of standard 
                     #line feed return
                         if line_ref[:-2] == line_out[:-1]:
-                            if map(bin,bytearray(line_ref[len(line_ref)-1])) \
-                            == map(bin,bytearray(line_out[len(line_out)-1])):
-                                ignore = True
+                            ignore = True
             if not ignore:
                 raise Exception('ENSDF Processing: Incorrect output generated, file: ' + file_ref)
         line_num = line_num + 1
