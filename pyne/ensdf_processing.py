@@ -173,7 +173,7 @@ def radd(inputdict_unchecked):
     radd_output = proc.communicate()[0]
     proc.stdin.close()
     f = open(output_file, 'w')
-    f.write(radd_output)
+    f.write(radd_output.decode("utf-8"))
     f.close()
 
     if AK04_set:
