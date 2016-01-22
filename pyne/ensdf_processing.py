@@ -104,8 +104,6 @@ def gabs(inputdict_unchecked):
     proc.communicate()[0]
     proc.stdin.close()
 
-
-
 def logft(inputdict_unchecked):
     #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
     """
@@ -257,4 +255,3 @@ def ruler(inputdict_unchecked):
     ruler_output.communicate()[0]
     ruler_output.stdin.close()
     return inputdict_unchecked
-    

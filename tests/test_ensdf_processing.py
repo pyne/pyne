@@ -38,7 +38,6 @@ def test_gabs():
                           'ensdf_processing/gabs/ref_gabs_80Br.new', exceptions_dataset)
     cleanup_tmp()
 
-
 def test_logft():
     create_tmp()
     input_dict = {}
