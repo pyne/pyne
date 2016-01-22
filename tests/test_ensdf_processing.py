@@ -157,4 +157,7 @@ def file_comp(file_out, file_ref, exceptions):
 if __name__ == "__main__":
     alphad = test_alphad()
     gabs = test_gabs()
-
+    logft = test_logft()
+    radd = test_radd()
+    radlst = test_radlist()
+    ruler = test_ruler()

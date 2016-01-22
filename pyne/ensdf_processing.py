@@ -206,7 +206,6 @@ def radlist(inputdict_unchecked):
     """
     exe_path = path_to_exe('radlist')
     radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
-    print exe_path
     verify_download_exe(exe_path, radlist_url, dl_size = 8704)
     
     inputdict = {}
