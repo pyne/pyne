@@ -130,7 +130,7 @@ def cleanup_tmp():
 
 def file_comp(file_out, file_ref, exceptions):
     '''
-    xceptions format: [type, options]
+    Exceptions format: [type, options]
         type 1: prefix of length n.
             options: 'prefix'.
         type 2: general line ignore.
@@ -186,4 +186,3 @@ if __name__ == "__main__":
     hsicc = test_hsicc()
     hsmrg = test_hsmrg()
     seqhst = test_seqhst()
-    
