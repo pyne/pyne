@@ -49,7 +49,7 @@ Running this example gives.
 Python example Use of Data Class
 ***************************
 
-A Python example for loading data is shown below.OA
+A Python example for loading data is shown below.
 
 .. code-block:: ipython
 
