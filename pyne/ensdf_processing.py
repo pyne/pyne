@@ -178,58 +178,6 @@ def gtol(inputdict_unchecked):
     proc.stdin.close()
     return inputdict_unchecked
 
-def bldhst(inputdict_unchecked):
-    """
-    This program builds a direct access file of the internal conversion coefficient 
-    table. (BLDHST readme)
-
-    Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file.
-        output_table_file : desired output table file path.
-        output_index_file : desired output index file path.
-
-
-    Output Dictionary Values:
-        Everything in input dictionary is returned if BLDHST completes successfully.
-    """
-    inputdict = {}
-    input_file = inputdict_unchecked['input_file']
-    output_table_file = inputdict_unchecked['output_table_file']
-    output_index_file = inputdict_unchecked['output_index_file']
-
-    exe_path = path_to_exe('bldhst')
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    inp = input_file + '\n' + output_table_file + '\n' + output_index_file
-
-def logft(inputdict_unchecked):
-    #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
-    """
-    This program calculates log ft values for beta and electron-capture decay, average beta energies, 
-    and capture fractions.  (LOGFT readme)
-
-    Input Dictionary Required Key Pair Value:
-        input_data_set : path to input data file.
-        output_report : desired path to output report file.
-        data_table : path to data table.
-        output_data_set : desired path to output data set.
-
-    Output Dictionary Values:
-        Everything in input dictionary is returned if LOGFT completes successfully.
-    """
-    inputdict = {}
-    input_data_set = inputdict_unchecked['input_data_set']
-    output_report = inputdict_unchecked['output_report']
-    data_table = inputdict_unchecked['data_table']
-    output_data_set = inputdict_unchecked['output_data_set']
-
-    exe_path = path_to_exe('logft')
-    inp = input_data_set + '\n' + output_report + '\n' + data_table + '\n' + output_data_set + '\n'
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    proc.stdin.write(inp.encode('utf-8'))
-    proc.communicate()[0]
-    proc.stdin.close()
-    return inputdict_unchecked
-
 def hsicc(inputdict_unchecked):
     """
     This program calculates internal conversion coefficients. (HSICC readme)
@@ -387,7 +335,3 @@ def ruler(inputdict_unchecked):
     ruler_output.communicate()[0]
     ruler_output.stdin.close()
     return inputdict_unchecked
-<<<<<<< 65c46cdb7aa26efcc3c8440364d1f2d9a7c4093d
-    
-=======
->>>>>>> Removed extra newlines
