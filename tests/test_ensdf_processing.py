@@ -66,19 +66,6 @@ def test_gtol():
     d_report = file_comp(input_dict['report_file'], ref_output_report, exceptions)
     cleanup_tmp()
 
-def test_bldhst():
-    create_tmp()
-    input_dict = {}
-    input_dict['input_file'] = 'ensdf_processing/bldhst/ref_bldhst_iccseq.dat'
-    input_dict['output_table_file'] = tmp_path + '/tmp_bldhst_icctbl.dat'
-    input_dict['output_index_file'] = tmp_path + '/tmp_bldhst_iccndx.dat'
-    output_dict = ensdf_processing.bldhst(input_dict)
-    ref_table = 'ensdf_processing/bldhst/ref_icctbl.dat'
-    ref_index = 'ensdf_processing/bldhst/ref_iccndx.dat'
-    d_table = file_comp(input_dict['output_table_file'], ref_table, [])
-    d_index = file_comp(input_dict['output_index_file'], ref_index, [])
-    cleanup_tmp()
-
 def test_hsicc():
     create_tmp()
     input_dict = {}
@@ -182,7 +169,6 @@ if __name__ == "__main__":
     gabs = test_gabs()
     delta = test_delta()
     gtol = test_gtol()
-    bldhst = test_bldhst()
     hsicc = test_hsicc()
     hsmrg = test_hsmrg()
     seqhst = test_seqhst()

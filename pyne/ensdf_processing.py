@@ -176,33 +176,6 @@ def gtol(inputdict_unchecked):
     proc.stdin.close()
     return inputdict_unchecked
 
-def bldhst(inputdict_unchecked):
-    """
-    This program builds a direct access file of the internal conversion coefficient 
-    table. (BLDHST readme)
-
-    Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file.
-        output_table_file : desired output table file path.
-        output_index_file : desired output index file path.
-
-
-    Output Dictionary Values:
-        Everything in input dictionary is returned if BLDHST completes successfully.
-    """
-    inputdict = {}
-    input_file = inputdict_unchecked['input_file']
-    output_table_file = inputdict_unchecked['output_table_file']
-    output_index_file = inputdict_unchecked['output_index_file']
-
-    exe_path = path_to_exe('bldhst')
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    inp = input_file + '\n' + output_table_file + '\n' + output_index_file
-    proc.stdin.write(inp.encode('utf-8'))
-    proc.communicate()[0]
-    proc.stdin.close()
-    return inputdict_unchecked
-
 def hsicc(inputdict_unchecked):
     """
     This program calculates internal conversion coefficients. (HSICC readme)
