@@ -182,55 +182,6 @@ def radd(inputdict_unchecked):
         os.remove('ELE.in')
     return inputdict_unchecked
 
-def radlist(inputdict_unchecked):
-    """
-    This program calculates atomic & nuclear radiations and checks energy balance.  
-    (RADLIST readme)
-    
-    Input Dictionary Required Key Pair Value:
-        output_radiation_listing : String, 'Y' if output radiation listing is desired, else 'N'.
-        output_ensdf_like_file : String, 'Y' if output ensdf like file is desired, else 'N'.     
-        output_file_for_nudat : String, 'Y' if output file for nudat is desired, else 'N'.
-        output_mird_listing : String, 'Y' if output mird listing is desired, else 'N'.
-        calculate_continua : String, 'Y' if calculate continua is desired, else 'N'.
-        input_file : input ensdf file.
-        output_radlst_file : path to desired output radlst file.
-        input_radlst_data_table : path to input radlst data table (mednew.dat location).
-        input_masses_data_table : (optional) path to input masses data table.
-        output_ensdf_file : path to desired output ensdf file.
-
-    Output Dictionary Values:
-        Everything in input dictionary is returned if RADLIST completes successfully.
-    """
-    exe_path = path_to_exe('radlist')
-    radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
-    verify_download_exe(exe_path, radlist_url, dl_size = 8704)
-    
-    inputdict = {}
-    output_rad_listing = inputdict_unchecked['output_radiation_listing']
-    output_endf_like_file = inputdict_unchecked['output_ensdf_like_file']
-    output_file_for_nudat = inputdict_unchecked['output_file_for_nudat']
-    output_mird_listing = inputdict_unchecked['output_mird_listing']
-    calculate_continua = inputdict_unchecked['calculate_continua']
-    input_file = inputdict_unchecked['input_file']
-    output_radlst_file = inputdict_unchecked['output_radlst_file']
-    input_radlst_data_table = inputdict_unchecked['input_radlst_data_table']
-    if 'input_masses_data_table' in inputdict_unchecked:
-        input_masses_data_table = inputdict_unchecked['input_masses_data_table']
-    else:
-        input_masses_data_table = ''
-    output_ensdf_file = inputdict_unchecked['output_ensdf_file']
-
-    inp = output_rad_listing + '\n' + output_endf_like_file + '\n' + output_file_for_nudat +\
-          '\n' + output_mird_listing + '\n' + calculate_continua + '\n' + input_file +\
-          '\n' + output_radlst_file + '\n' + input_radlst_data_table + '\n' + input_masses_data_table +\
-          '\n' + output_ensdf_file
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    proc.stdin.write(inp.encode('utf-8'))
-    radd_output = proc.communicate()[0]
-    proc.stdin.close()
-    return inputdict_unchecked
-
 def ruler(inputdict_unchecked):
     """
     This program calculates reduced transition probabilities. (RULER readme)
