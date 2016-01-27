@@ -191,6 +191,9 @@ RADD_H = os.path.join('build', 'src/radd')
 RADD_98AK04_H = os.path.join('src', 'ensdf_processing/RADD/98AK04.in')
 RADD_ELE_H = os.path.join('src', 'ensdf_processing/RADD/ELE.in')
 RULER_H = os.path.join('build', 'src/ruler')
+local_ensdf_evaluators = ['alphad', 'logft', 'radd', 'ruler']
+local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'], 
+                     ['ensdf_processing/RADD/ELE.in', 'ELE.in']]
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
@@ -202,34 +205,23 @@ def copy_ensdf_executables(exe_dest):
             if re.match('pyne', f):
                 exe_dest = exe_dest + '/' + f
         exe_dest = exe_dest + '/pyne'
-    ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
-    DELTA_DEST = os.path.join(exe_dest, 'delta')
-    GTOL_DEST = os.path.join(exe_dest, 'gtol')
-    HSICC_DEST = os.path.join(exe_dest, 'hsicc')
-    HSMRG_DEST = os.path.join(exe_dest, 'hsmrg')
-    SEQHST_DEST = os.path.join(exe_dest, 'seqhst')
-    try:
-        shutil.copy(ALPHAD_H, ALPHAD_DEST)
-        shutil.copy(DELTA_H, DELTA_DEST)
-        shutil.copy(GTOL_H, GTOL_DEST)
-        shutil.copy(HSICC_H, HSICC_DEST)
-        shutil.copy(HSMRG_H, HSMRG_DEST)
-        shutil.copy(SEQHST_H, SEQHST_DEST)
-    LOGFT_DEST = os.path.join(exe_dest, 'logft')
-    RADD_DEST = os.path.join(exe_dest, 'radd')
-    RADD_98AK04_DEST = os.path.join(exe_dest, '98AK04.in')
-    RADD_ELE_DEST = os.path.join(exe_dest, 'ELE.in')
-    RULER_DEST = os.path.join(exe_dest, 'ruler')
-    try:
-        shutil.copy(ALPHAD_H, ALPHAD_DEST)
-        shutil.copy(LOGFT_H, LOGFT_DEST)
-        shutil.copy(RADD_H, RADD_DEST)
-        shutil.copy(RADD_98AK04_H, RADD_98AK04_DEST)
-        shutil.copy(RADD_ELE_H, RADD_ELE_DEST)
-        shutil.copy(RULER_H, RULER_DEST)
-    except Exception:
-        print('Some ENSDF processing executables were unable to be copied to the \
-              install directory.')
+    for tool in local_ensdf_evaluators:
+        try:
+            local_path = os.path.join('build',os.path.join('src',tool))
+            dest_path = os.path.join(exe_dest, tool)
+            shutil.copy(local_path, dest_path)
+        except Exception:
+            print('Some ENSDF processing executables were unable to be copied to the \
+                   install directory.')
+
+    for tool in local_ensdf_tools:
+        try:
+            local_path = os.path.join('src', tool[0])
+            dest_path = os.path.join(exe_dest, tool[1])
+            shutil.copy(local_path, dest_path)
+        except Exception:
+            print('Some ENSDF processing executables were unable to be copied to the \
+                   install directory.')
 
 def generate_decay():
     with indir('src'):

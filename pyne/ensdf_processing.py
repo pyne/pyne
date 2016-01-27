@@ -44,12 +44,16 @@ def alphad(inputdict_unchecked):
     This function calculates the alpha hinderance factors and theoretical half 
     lives for even even ground state transitions. (alphad readme)
 
-    Input Dictionary Required Key Pair Value:
-        ensdf_input_file : input file
-        output_file : file for output to be written to (doesn't have to exist)
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            ensdf_input_file : input file
+            output_file : file for output to be written to (doesn't have to exist)
 
-    Output Dictionary Values:
-        Everything in input dictionary is returned if ALPHAD completes successfully.
+    Notes
+    -----
+    Everything in input dictionary is returned if ALPHAD completes successfully.
 
     Full documentation explaining the details of the functionality and physics
     behind ALPHAD can be found at:
@@ -102,13 +106,17 @@ def gabs(inputdict_unchecked):
     """
     This program calculates Gamma-ray absolute intensity and normalization (GABS readme)
 
-    Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        dataset_file : dataset file to be used
-        output file : file for output to be written to (doesn't have to exist)
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : input ensdf file
+            dataset_file : dataset file to be used
+            output file : file for output to be written to (doesn't have to exist)
 
-    Output Dictionary Values:
-        Everything in input dictionary is returned if GABS completes successfully.
+    Notes
+    -----
+    Everything in input dictionary is returned if GABS completes successfully.
     """
     exe_path = path_to_exe('gabs') 
 
@@ -217,13 +225,18 @@ def hsmrg(inputdict_unchecked):
     This program merges new gamma records created by HSICC with the original input 
     data.  (HSICC readme)
 
-    Input Dictionary Required Key Pair Value:
-        data_deck : data deck file path for hsmrg to use.
-        card_deck : card deck file path for hsmrg to use.
-        merged_data_deck : desired merged data deck file path created by hsmrg.
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            input_data_set : path to input data file.
+            output_report : desired path to output report file.
+            data_table : path to data table.
+            output_data_set : desired path to output data set.
 
-    Output Dictionary Values:
-        Everything in input dictionary is returned if HSMRG completes successfully.
+    Notes
+    -----
+    Everything in input dictionary is returned if LOGFT completes successfully.
     """
     inputdict = {}
     data_deck = inputdict_unchecked['data_deck']
@@ -265,18 +278,23 @@ def seqhst(inputdict_unchecked):
 def radd(inputdict_unchecked):
     """
     This code (RadD.FOR) deduces the radius parameter (r 0 ) for odd-odd and odd-A nuclei 
-    using the even-even radii [1] as input parameters. These radii deduced for odd-A and 
-    odd-odd nuclides can be used in the calculation of alpha hindrance factors. In this 
-    procedure, it is assumed that radius parameter ( r 0 Z , N ) for odd-Z and odd-N 
-    nuclides lies midway between the radius parameters of adjacent even-even neighbors 
-    calculates reduced transition probabilities. (RADD readme)
+    using the even-even radii [1] as input parameters. 
 
-    Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+    These radii deduced for odd-A and odd-odd nuclides can be used in the calculation of 
+    alpha hindrance factors. In this procedure, it is assumed that radius parameter 
+    ( r 0 Z , N ) for odd-Z and odd-N nuclides lies midway between the radius parameters of 
+    adjacent even-even neighbors calculates reduced transition probabilities. (RADD readme)
 
-    Output Dictionary Values:
-        Everything in input dictionary is returned if RADD completes successfully.
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : input ensdf file
+            output file : file for output to be written to (doesn't have to exist)
+
+    Notes
+    -----
+    Everything in input dictionary is returned if RADD completes successfully.
     """
     inputdict = {}
     atomic_number = inputdict_unchecked['atomic_number']
@@ -315,12 +333,16 @@ def ruler(inputdict_unchecked):
     """
     This program calculates reduced transition probabilities. (RULER readme)
 
-    Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output file : file for output to be written to (doesn't have to exist)
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : input ensdf file
+            output file : file for output to be written to (doesn't have to exist)
 
-    Output Dictionary Values:
-        Everything in input dictionary is returned if RULER completes successfully.
+    Notes
+    -----
+    Everything in input dictionary is returned if RULER completes successfully.
     """
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
