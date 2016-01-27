@@ -302,16 +302,16 @@ def radd(inputdict_unchecked):
     output_file = inputdict_unchecked['output_file']
 
     # Create symlinks to the two binaries the radd executables uses.
-    AK04_path = path_to_exe('98AK04.in')
-    ELE_path = path_to_exe('ELE.in')
-    AK04_set = False
-    ELE_set = False
+    ak04_path = path_to_exe('98AK04.in')
+    ele_path = path_to_exe('ELE.in')
+    ak04_set = False
+    ele_set = False
     if not os.path.exists('98AK04.in'):
-        os.symlink(AK04_path, '98AK04.in')
-        AK04_set = True
+        os.symlink(ak04_path, '98AK04.in')
+        ak04_set = True
     if not os.path.exists('ELE.in'):
-        os.symlink(ELE_path, 'ELE.in')
-        ELE_set = True
+        os.symlink(ele_path, 'ELE.in')
+        ele_set = True
 
     exe_path = path_to_exe('radd')
     inp = atomic_number + '\n' + neutron_number + '\n' + 'NO' + '\n'
@@ -319,13 +319,12 @@ def radd(inputdict_unchecked):
     proc.stdin.write(inp.encode('utf-8'))
     radd_output = proc.communicate()[0]
     proc.stdin.close()
-    f = open(output_file, 'w')
-    f.write(radd_output.decode("utf-8"))
-    f.close()
+    with open(output_file, 'w') as f:
+        f.write(radd_output.decode("utf-8"))
 
-    if AK04_set:
+    if ak04_set:
         os.remove('98AK04.in')
-    if ELE_set:
+    if ele_set:
         os.remove('ELE.in')
     return inputdict_unchecked
 
