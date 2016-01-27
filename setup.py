@@ -176,12 +176,7 @@ def download_decay():
     durl.close()
     return True
 
-ALPHAD_H = os.path.join('build', 'src/alphad')
-DELTA_H = os.path.join('build', 'src/delta')
-GTOL_H = os.path.join('build', 'src/gtol')
-HSICC_H = os.path.join('build', 'src/hsicc')
-HSMRG_H = os.path.join('build', 'src/hsmrg')
-SEQHST_H = os.path.join('build', 'src/seqhst')
+local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'hsicc', 'hsmrg', 'seqhst']
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
@@ -193,22 +188,14 @@ def copy_ensdf_executables(exe_dest):
             if re.match('pyne', f):
                 exe_dest = exe_dest + '/' + f
         exe_dest = exe_dest + '/pyne'
-    ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
-    DELTA_DEST = os.path.join(exe_dest, 'delta')
-    GTOL_DEST = os.path.join(exe_dest, 'gtol')
-    HSICC_DEST = os.path.join(exe_dest, 'hsicc')
-    HSMRG_DEST = os.path.join(exe_dest, 'hsmrg')
-    SEQHST_DEST = os.path.join(exe_dest, 'seqhst')
-    try:
-        shutil.copy(ALPHAD_H, ALPHAD_DEST)
-        shutil.copy(DELTA_H, DELTA_DEST)
-        shutil.copy(GTOL_H, GTOL_DEST)
-        shutil.copy(HSICC_H, HSICC_DEST)
-        shutil.copy(HSMRG_H, HSMRG_DEST)
-        shutil.copy(SEQHST_H, SEQHST_DEST)
-    except Exception:
-        print('Some ENSDF processing executables were unable to be copied to the \
-              install directory.')
+    for tool in local_ensdf_evaluators:
+        try:
+            local_path = os.path.join('build',os.path.join('src',tool))
+            dest_path = os.path.join(exe_dest, tool)
+            shutil.copy(local_path, dest_path)
+        except Exception:
+            print('Some ENSDF processing executables were unable to be copied to the \
+                   install directory.')
 
 def generate_decay():
     with indir('src'):
