@@ -79,10 +79,15 @@ def delta(inputdict_unchecked):
     This function calculates the best values of mixing ratios based of its analysis of
     the angular correlation and conversion coefficient data.
 
-    Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        output_file : file for output to be written to (doesn't have to exist)
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : input ensdf file
+            output_file : file for output to be written to (doesn't have to exist)
 
+    Notes
+    -----
     Output Dictionary Values:
         Everything in input dictionary is returned if DELTA completes successfully.
     """
@@ -102,11 +107,16 @@ def gabs(inputdict_unchecked):
     """
     This program calculates Gamma-ray absolute intensity and normalization (GABS readme)
 
-    Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file
-        dataset_file : dataset file to be used
-        output file : file for output to be written to (doesn't have to exist)
-
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : input ensdf file
+            dataset_file : dataset file to be used
+            output file : file for output to be written to (doesn't have to exist)
+    
+    Notes
+    -----
     Output Dictionary Values:
         Everything in input dictionary is returned if GABS completes successfully.
     """
@@ -130,20 +140,25 @@ def gabs(inputdict_unchecked):
 
 def gtol(inputdict_unchecked):
     """
-    GTOL uses gamma-ray energies to derive a set of least-squares adjusted level energies.  The
-    net feeding at each level is calculated from the input gamma intensities and conversion 
+    GTOL uses gamma-ray energies to derive a set of least-squares adjusted level energies.  
+
+    The net feeding at each level is calculated from the input gamma intensities and conversion 
     coefficients. (GTOL readme)
 
-    Input Dictionary Required Key Pair Value:
-        input_file : input ensdf file.
-        report_file : desired gtol report file path.
-        new_ensdf_file_with_results : boolean, if true then a new ensdf file with results
-                                      will be created.
-        output_file : desired gtol output file path.
-        supress_gamma_comparison : boolean, if true the gamma comparison will be suppressed.
-        dcc_theory_percent : double, specifies the dcc theory percentage to be used.
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : input ensdf file.
+            report_file : desired gtol report file path.
+            new_ensdf_file_with_results : boolean, if true then a new ensdf file with results
+                                          will be created.
+            output_file : desired gtol output file path.
+            supress_gamma_comparison : boolean, if true the gamma comparison will be suppressed.
+            dcc_theory_percent : double, specifies the dcc theory percentage to be used.
 
-
+    Notes
+    -----
     Output Dictionary Values:
         Everything in input dictionary is returned if GTOL completes successfully.
     """
@@ -180,15 +195,20 @@ def hsicc(inputdict_unchecked):
     """
     This program calculates internal conversion coefficients. (HSICC readme)
 
-    Input Dictionary Required Key Pair Value:
-        data_deck : data deck to be used for hsicc program.
-        icc_index : icc index to be used for hsicc program.
-        icc_table : icc table to be used for the hsicc program.
-        complete_report : desired report file path for hsicc program.
-        new_card_deck : desired new card deck file path for hsicc program.
-        comparison_report : desired comparison report path for hsicc program.
-        is_multipol_known : 1 if multipol is known, 0 otherwise.
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            data_deck : data deck to be used for hsicc program.
+            icc_index : icc index to be used for hsicc program.
+            icc_table : icc table to be used for the hsicc program.
+            complete_report : desired report file path for hsicc program.
+            new_card_deck : desired new card deck file path for hsicc program.
+            comparison_report : desired comparison report path for hsicc program.
+            is_multipol_known : 1 if multipol is known, 0 otherwise.
 
+    Notes
+    -----
     Output Dictionary Values:
         Everything in input dictionary is returned if HSICC completes successfully.
     """
@@ -215,11 +235,16 @@ def hsmrg(inputdict_unchecked):
     This program merges new gamma records created by HSICC with the original input 
     data.  (HSICC readme)
 
-    Input Dictionary Required Key Pair Value:
-        data_deck : data deck file path for hsmrg to use.
-        card_deck : card deck file path for hsmrg to use.
-        merged_data_deck : desired merged data deck file path created by hsmrg.
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            data_deck : data deck file path for hsmrg to use.
+            card_deck : card deck file path for hsmrg to use.
+            merged_data_deck : desired merged data deck file path created by hsmrg.
 
+    Notes
+    -----
     Output Dictionary Values:
         Everything in input dictionary is returned if HSMRG completes successfully.
     """
@@ -241,10 +266,15 @@ def seqhst(inputdict_unchecked):
     This program recreates a sequential file of the internal conversion table from the 
     direct access file.  (HSICC readme)
 
-    Input Dictionary Required Key Pair Value:
-        binary_table_input_file : binary table input file path.
-        sequential_output_file : desired path of sequential output file.
+    Parameters
+    ----------
+    Input_dictionary : dictionary
+        dictionary that must have the following key-pair values:
+            binary_table_input_file : binary table input file path.
+            sequential_output_file : desired path of sequential output file.
 
+    Notes
+    -----
     Output Dictionary Values:
         Everything in input dictionary is returned if SEQHST completes successfully.
     """
