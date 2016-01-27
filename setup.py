@@ -180,20 +180,7 @@ def download_decay():
     durl.close()
     return True
 
-ALPHAD_H = os.path.join('build', 'src/alphad')
-DELTA_H = os.path.join('build', 'src/delta')
-GTOL_H = os.path.join('build', 'src/gtol')
-HSICC_H = os.path.join('build', 'src/hsicc')
-HSMRG_H = os.path.join('build', 'src/hsmrg')
-SEQHST_H = os.path.join('build', 'src/seqhst')
-LOGFT_H = os.path.join('build', 'src/logft')
-RADD_H = os.path.join('build', 'src/radd')
-RADD_98AK04_H = os.path.join('src', 'ensdf_processing/RADD/98AK04.in')
-RADD_ELE_H = os.path.join('src', 'ensdf_processing/RADD/ELE.in')
-RULER_H = os.path.join('build', 'src/ruler')
-local_ensdf_evaluators = ['alphad', 'logft', 'radd', 'ruler']
-local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'], 
-                     ['ensdf_processing/RADD/ELE.in', 'ELE.in']]
+local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'hsicc', 'hsmrg', 'seqhst']
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
@@ -209,15 +196,6 @@ def copy_ensdf_executables(exe_dest):
         try:
             local_path = os.path.join('build',os.path.join('src',tool))
             dest_path = os.path.join(exe_dest, tool)
-            shutil.copy(local_path, dest_path)
-        except Exception:
-            print('Some ENSDF processing executables were unable to be copied to the \
-                   install directory.')
-
-    for tool in local_ensdf_tools:
-        try:
-            local_path = os.path.join('src', tool[0])
-            dest_path = os.path.join(exe_dest, tool[1])
             shutil.copy(local_path, dest_path)
         except Exception:
             print('Some ENSDF processing executables were unable to be copied to the \
