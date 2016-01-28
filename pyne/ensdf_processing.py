@@ -46,14 +46,15 @@ def alphad(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            ensdf_input_file : input file
-            output_file : file for output to be written to (doesn't have to exist)
+            ensdf_input_file : string, input file
+            output_file : string, file for output to be written to (doesn't have to exist)
 
-    Notes
-    -----
-    Everything in input dictionary is returned if ALPHAD completes successfully.
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if ALPHAD completes successfully.
 
     Full documentation explaining the details of the functionality and physics
     behind ALPHAD can be found at:
@@ -118,7 +119,7 @@ def gabs(inputdict_unchecked):
             input_file : string, input ensdf file
             dataset_file : string, dataset file to be used
             output file : string, file for output to be written to (doesn't have to exist)
-    
+
     Returns
     -------
     rtn : dictionary
@@ -153,13 +154,10 @@ def gtol(inputdict_unchecked):
     ----------
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : string, input ensdf file.
-            report_file : string, desired gtol report file path.
-            new_ensdf_file_with_results : boolean, if true then a new ensdf file with results
-                                          will be created.
-            output_file : string, desired gtol output file path.
-            supress_gamma_comparison : boolean, if true the gamma comparison will be suppressed.
-            dcc_theory_percent : double, specifies the dcc theory percentage to be used.
+            input_data_set : string, path to input data file.
+            output_report : string, desired path to output report file.
+            data_table : string, path to data table.
+            output_data_set : string, desired path to output data set.
 
     Returns
     -------
@@ -251,6 +249,9 @@ def hsmrg(inputdict_unchecked):
     -------
     rtn : dictionary
         Everything in input dictionary is returned if HSMRG completes successfully.
+=======
+        Everything in input dictionary is returned if LOGFT completes successfully.
+>>>>>>> Fixed styling issues with documentation
     """
     inputdict = {}
     data_deck = inputdict_unchecked['data_deck']
@@ -306,14 +307,15 @@ def radd(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : input ensdf file
-            output file : file for output to be written to (doesn't have to exist)
+            input_file : string, input ensdf file
+            output file : string, file for output to be written to (doesn't have to exist)
 
-    Notes
-    -----
-    Everything in input dictionary is returned if RADD completes successfully.
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if RADD completes successfully.
     """
     inputdict = {}
     atomic_number = inputdict_unchecked['atomic_number']
@@ -353,14 +355,15 @@ def ruler(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : input ensdf file
-            output file : file for output to be written to (doesn't have to exist)
+            input_file : string, input ensdf file
+            output file : string, file for output to be written to (doesn't have to exist)
 
-    Notes
-    -----
-    Everything in input dictionary is returned if RULER completes successfully.
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if RULER completes successfully.
     """
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
