@@ -180,7 +180,11 @@ def download_decay():
     durl.close()
     return True
 
-ALPHAD_H = os.path.join('build', 'src/alphad')
+local_ensdf_evaluators = ['alphad', 'logft', 'radd', 'ruler']
+local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'], 
+                     ['ensdf_processing/RADD/ELE.in', 'ELE.in']]
+
+
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
     # Hack for copying the executables the first time PyNE is instealled, before 
@@ -191,12 +195,23 @@ def copy_ensdf_executables(exe_dest):
             if re.match('pyne', f):
                 exe_dest = exe_dest + '/' + f
         exe_dest = exe_dest + '/pyne'
-    ALPHAD_DEST = os.path.join(exe_dest, 'alphad')
-    try:
-        shutil.copy(ALPHAD_H, ALPHAD_DEST)
-    except Exception:
-        print('Some ENSDF processing executables were unable to be copied to the \
-              install directory.')
+    for tool in local_ensdf_evaluators:
+        try:
+            local_path = os.path.join('build',os.path.join('src',tool))
+            dest_path = os.path.join(exe_dest, tool)
+            shutil.copy(local_path, dest_path)
+        except Exception:
+            print('Some ENSDF processing executables were unable to be copied to the \
+                   install directory.')
+
+    for tool in local_ensdf_tools:
+        try:
+            local_path = os.path.join('src', tool[0])
+            dest_path = os.path.join(exe_dest, tool[1])
+            shutil.copy(local_path, dest_path)
+        except Exception:
+            print('Some ENSDF processing executables were unable to be copied to the \
+                   install directory.')
 
 def generate_decay():
     with indir('src'):
