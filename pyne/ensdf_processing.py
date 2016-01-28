@@ -85,14 +85,14 @@ def delta(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : input ensdf file
-            output_file : file for output to be written to (doesn't have to exist)
+            input_file : string, path to input ensdf file.
+            output_file : string, path to file for output write (doesn't have to exist).
 
-    Notes
-    -----
-    Output Dictionary Values:
+    Returns
+    -------
+    rtn : dictionary
         Everything in input dictionary is returned if DELTA completes successfully.
     """
     inputdict = {}
@@ -113,15 +113,15 @@ def gabs(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : input ensdf file
-            dataset_file : dataset file to be used
-            output file : file for output to be written to (doesn't have to exist)
+            input_file : string, input ensdf file
+            dataset_file : string, dataset file to be used
+            output file : string, file for output to be written to (doesn't have to exist)
     
-    Notes
-    -----
-    Output Dictionary Values:
+    Returns
+    -------
+    rtn : dictionary
         Everything in input dictionary is returned if GABS completes successfully.
     """
     exe_path = path_to_exe('gabs') 
@@ -151,19 +151,19 @@ def gtol(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : input ensdf file.
-            report_file : desired gtol report file path.
+            input_file : string, input ensdf file.
+            report_file : string, desired gtol report file path.
             new_ensdf_file_with_results : boolean, if true then a new ensdf file with results
                                           will be created.
-            output_file : desired gtol output file path.
+            output_file : string, desired gtol output file path.
             supress_gamma_comparison : boolean, if true the gamma comparison will be suppressed.
             dcc_theory_percent : double, specifies the dcc theory percentage to be used.
 
-    Notes
-    -----
-    Output Dictionary Values:
+    Returns
+    -------
+    rtn : dictionary
         Everything in input dictionary is returned if GTOL completes successfully.
     """
     inputdict = {}
@@ -201,19 +201,19 @@ def hsicc(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            data_deck : data deck to be used for hsicc program.
-            icc_index : icc index to be used for hsicc program.
-            icc_table : icc table to be used for the hsicc program.
-            complete_report : desired report file path for hsicc program.
-            new_card_deck : desired new card deck file path for hsicc program.
-            comparison_report : desired comparison report path for hsicc program.
-            is_multipol_known : 1 if multipol is known, 0 otherwise.
+            data_deck : string, data deck to be used for hsicc program.
+            icc_index : string, icc index to be used for hsicc program.
+            icc_table : string, icc table to be used for the hsicc program.
+            complete_report : string, desired report file path for hsicc program.
+            new_card_deck : string, desired new card deck file path for hsicc program.
+            comparison_report : string, desired comparison report path for hsicc program.
+            is_multipol_known : int, 1 if multipol is known, 0 otherwise.
 
-    Notes
-    -----
-    Output Dictionary Values:
+    Returns
+    -------
+    rtn : dictionary
         Everything in input dictionary is returned if HSICC completes successfully.
     """
     inputdict = {}
@@ -241,15 +241,15 @@ def hsmrg(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            data_deck : data deck file path for hsmrg to use.
-            card_deck : card deck file path for hsmrg to use.
-            merged_data_deck : desired merged data deck file path created by hsmrg.
+            data_deck : string, data deck file path for hsmrg to use.
+            card_deck : string, card deck file path for hsmrg to use.
+            merged_data_deck : string, desired merged data deck file path created by hsmrg.
 
-    Notes
-    -----
-    Output Dictionary Values:
+    Returns
+    -------
+    rtn : dictionary
         Everything in input dictionary is returned if HSMRG completes successfully.
     """
     inputdict = {}
@@ -272,14 +272,14 @@ def seqhst(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            binary_table_input_file : binary table input file path.
-            sequential_output_file : desired path of sequential output file.
+            binary_table_input_file : string, binary table input file path.
+            sequential_output_file : string, desired path of sequential output file.
 
-    Notes
-    -----
-    Output Dictionary Values:
+    Returns
+    -------
+    rtn : dictionary
         Everything in input dictionary is returned if SEQHST completes successfully.
     """
     #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
