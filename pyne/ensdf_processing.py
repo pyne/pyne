@@ -46,14 +46,15 @@ def alphad(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            ensdf_input_file : input file
-            output_file : file for output to be written to (doesn't have to exist)
+            ensdf_input_file : string, input file
+            output_file : string, file for output to be written to (doesn't have to exist)
 
-    Notes
-    -----
-    Everything in input dictionary is returned if ALPHAD completes successfully.
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if ALPHAD completes successfully.
 
     Full documentation explaining the details of the functionality and physics
     behind ALPHAD can be found at:
@@ -84,15 +85,16 @@ def gabs(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : input ensdf file
-            dataset_file : dataset file to be used
-            output file : file for output to be written to (doesn't have to exist)
+            input_file : string, input ensdf file
+            dataset_file : string, dataset file to be used
+            output file : string, file for output to be written to (doesn't have to exist)
 
-    Notes
-    -----
-    Everything in input dictionary is returned if GABS completes successfully.
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if GABS completes successfully.
     """
     exe_path = path_to_exe('gabs') 
 
@@ -120,16 +122,17 @@ def logft(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_data_set : path to input data file.
-            output_report : desired path to output report file.
-            data_table : path to data table.
-            output_data_set : desired path to output data set.
+            input_data_set : string, path to input data file.
+            output_report : string, desired path to output report file.
+            data_table : string, path to data table.
+            output_data_set : string, desired path to output data set.
 
-    Notes
-    -----
-    Everything in input dictionary is returned if LOGFT completes successfully.
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if LOGFT completes successfully.
     """
     inputdict = {}
     input_data_set = inputdict_unchecked['input_data_set']
@@ -157,14 +160,15 @@ def radd(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : input ensdf file
-            output file : file for output to be written to (doesn't have to exist)
+            input_file : string, input ensdf file
+            output file : string, file for output to be written to (doesn't have to exist)
 
-    Notes
-    -----
-    Everything in input dictionary is returned if RADD completes successfully.
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if RADD completes successfully.
     """
     inputdict = {}
     atomic_number = inputdict_unchecked['atomic_number']
@@ -204,14 +208,15 @@ def ruler(inputdict_unchecked):
 
     Parameters
     ----------
-    Input_dictionary : dictionary
+    inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            input_file : input ensdf file
-            output file : file for output to be written to (doesn't have to exist)
+            input_file : string, input ensdf file
+            output file : string, file for output to be written to (doesn't have to exist)
 
-    Notes
-    -----
-    Everything in input dictionary is returned if RULER completes successfully.
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if RULER completes successfully.
     """
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
