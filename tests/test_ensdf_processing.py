@@ -108,6 +108,42 @@ def test_seqhst():
     d_report = file_comp(input_dict['sequential_output_file'], ref_sequence, [])
     cleanup_tmp()
 
+def test_logft():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_data_set'] = 'ensdf_processing/logft/ref_logft.inp'
+    input_dict['output_report'] = tmp_path + '/tmp_logft.rpt'
+    input_dict['data_table'] = 'ensdf_processing/logft/ref_logft.dat'
+    input_dict['output_data_set'] = tmp_path + '/tmp_logft.new'
+    output_dict = ensdf_processing.logft(input_dict)
+    ref_output_data_set = 'ensdf_processing/logft/ref_logft.new'
+    d_data = file_comp(input_dict['output_data_set'], ref_output_data_set, [])
+    cleanup_tmp()
+
+def test_radd():
+    create_tmp()
+    input_dict = {}
+    input_dict['atomic_number'] = '86'
+    input_dict['neutron_number'] = '113'
+    input_dict['output_file'] = tmp_path + '/tmp_output.out'
+    ensdf_processing.radd(input_dict)
+    ref_output = 'ensdf_processing/radd/ref_output.out'
+    d_report = file_comp(input_dict['output_file'], ref_output, [])
+    cleanup_tmp()
+
+def test_ruler():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_file'] = 'ensdf_processing/ruler/ref_ruler.inp'
+    input_dict['output_report_file'] = tmp_path + '/tmp_ruler.rpt'
+    input_dict['mode_of_operation'] = 'R'
+    input_dict['assumed_dcc_theory'] = '1.4'
+    output_dict = ensdf_processing.ruler(input_dict)
+    ref_output = 'ensdf_processing/ruler/ref_ruler.rpt'
+    exceptions = [[1, '         INPUT FILE:'], [1, 'RULER Version 3.2d [20-Jan-2009]']]
+    d_report = file_comp(input_dict['output_report_file'], ref_output, exceptions)
+    cleanup_tmp()
+
 def create_tmp():
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
@@ -151,9 +187,7 @@ def file_comp(file_out, file_ref, exceptions):
                     # special exception for lines with possible carriage return instead of standard 
                     #line feed return
                         if line_ref[:-2] == line_out[:-1]:
-                            if map(bin,bytearray(line_ref[len(line_ref)-1])) \
-                            == map(bin,bytearray(line_out[len(line_out)-1])):
-                                ignore = True
+                            ignore = True
             if not ignore:
                 raise Exception('ENSDF Processing: Incorrect output generated, file: ' + file_ref)
         line_num = line_num + 1
@@ -172,3 +206,6 @@ if __name__ == "__main__":
     hsicc = test_hsicc()
     hsmrg = test_hsmrg()
     seqhst = test_seqhst()
+    logft = test_logft()
+    radd = test_radd()
+    ruler = test_ruler()

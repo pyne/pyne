@@ -1,6 +1,7 @@
 // Implements basic nuclear data functions.
 #ifndef PYNE_IS_AMALGAMATED
 #include "data.h"
+#include "atomic_data.h"
 #endif
 
 //
@@ -47,8 +48,10 @@ void pyne::_load_atomic_mass_map() {
   // Loads the important parts of atomic_wight table into atomic_mass_map
 
   //Check to see if the file is in HDF5 format.
-  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
-    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH)) {
+    pyne::_load_atomic_mass_map_memory();
+    return;
+  }
 
   bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
   if (!ish5)

@@ -57,6 +57,10 @@ except ImportError:
 
 import numpy as np
 
+# import src into pythonpath - needed to actually run decaygen/atomicgen
+if '.' not in sys.path:
+    sys.path.append(os.getcwd()+'/src')
+
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
 # for ASCII art inspiriation
@@ -176,7 +180,10 @@ def download_decay():
     durl.close()
     return True
 
-local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'hsicc', 'hsmrg', 'seqhst']
+local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'hsicc', 'hsmrg', 'seqhst',
+                          'logft', 'radd', 'ruler']
+local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'], 
+                     ['ensdf_processing/RADD/ELE.in', 'ELE.in']]
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
@@ -196,6 +203,14 @@ def copy_ensdf_executables(exe_dest):
         except Exception:
             print('Some ENSDF processing executables were unable to be copied to the \
                    install directory.')
+    for tool in local_ensdf_tools:
+        try:
+            local_path = os.path.join('src', tool[0])
+            dest_path = os.path.join(exe_dest, tool[1])
+            shutil.copy(local_path, dest_path)
+        except Exception:
+            print('Some ENSDF processing executables were unable to be copied to the \
+                   install directory.')
 
 def generate_decay():
     with indir('src'):
@@ -209,17 +224,16 @@ def generate_decay():
             return False
     return True
 
-
 def ensure_decay():
     mb = 1024**2
     if os.path.isfile(DECAY_H) and os.path.isfile(DECAY_CPP) and \
        os.stat(DECAY_CPP).st_size > mb:
         return
-    downloaded = download_decay()
-    if downloaded:
-        return
     generated = generate_decay()
     if generated:
+        return
+    downloaded = download_decay()
+    if downloaded:
         return
     print('!'*42)
     print('Decay files could not be downloaded or generated, using surrogates instead.')
@@ -228,6 +242,41 @@ def ensure_decay():
     shutil.copy(DECAY_H_REP, DECAY_H)
     shutil.copy(DECAY_CPP_REP, DECAY_CPP)
 
+ATOMIC_H = os.path.join('src', 'atomic_data.h')
+ATOMIC_CPP = os.path.join('src', 'atomic_data.cpp')
+ATOMIC_H_UNDER = os.path.join('src', '_atomic_data.h')
+ATOMIC_CPP_UNDER = os.path.join('src', '_atomic_data.cpp')
+
+def generate_atomic():
+    with indir('src'):
+        try:
+            import atomicgen
+        except ImportError:
+            return False
+        try:
+            atomicgen.build()
+        except Exception:
+            return False
+    return True
+
+def ensure_atomic():
+    mb = 1024**2
+    # if the file exists then we're done!
+    if os.path.isfile(ATOMIC_H) and os.path.isfile(ATOMIC_CPP) and \
+       os.stat(ATOMIC_CPP).st_size > mb:
+        return
+    # generate the data
+    generated = generate_atomic()
+    if generated:
+        return
+    # last resort - if generate atomic failed, use the backup
+    if not os.path.isfile(ATOMIC_H) and not os.path.isfile(ATOMIC_CPP):
+        shutil.copy(ATOMIC_H_UNDER, ATOMIC_H)
+        shutil.copy(ATOMIC_CPP_UNDER, ATOMIC_CPP)
+    else:
+        # copy the freshly generated file to the last resort for consistency
+        shutil.copy(ATOMIC_H, ATOMIC_H_UNDER)
+        shutil.copy(ATOMIC_CPP, ATOMIC_CPP_UNDER)
 
 def ensure_nuc_data():
     import tempfile
@@ -406,6 +455,7 @@ def cmake_cli(cmake_args):
 def main_body(cmake_args, make_args):
     assert_dep_versions()
     ensure_decay()
+    ensure_atomic()
     if not os.path.exists('build'):
         os.mkdir('build')
     cmake_cmd = cmake_cli(cmake_args)

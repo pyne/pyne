@@ -46,6 +46,7 @@ ENDIF()
 # setup source files
 IF(BUILD_SPATIAL_SOLVER)
     set(PYNE_SRCS
+        "atomic_data.cpp"
         "data.cpp"
         "decay.cpp"
         "enrichment.cpp"
@@ -64,6 +65,7 @@ IF(BUILD_SPATIAL_SOLVER)
         )
 ELSE()
     set(PYNE_SRCS
+        "atomic_data.cpp"
         "data.cpp"
         "decay.cpp"
         "enrichment.cpp"
@@ -113,6 +115,11 @@ add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for
                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for 
                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(logft ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(radd ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for)
+add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
