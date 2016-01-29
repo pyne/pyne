@@ -180,7 +180,10 @@ def download_decay():
     durl.close()
     return True
 
-local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'hsicc', 'hsmrg', 'seqhst']
+local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'bldhst', 'hsicc', 'hsmrg', 'seqhst',
+                          'logft', 'radd', 'ruler']
+local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'], 
+                     ['ensdf_processing/RADD/ELE.in', 'ELE.in']]
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')

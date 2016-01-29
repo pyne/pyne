@@ -36,6 +36,7 @@ def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_
         # set proper permissions on newly downloaded file
         os.chmod(exe_path, 744)
         if compressed:
+            os.chmod(exe_path, 777)
             tfile = tarfile.open(exe_path, 'r:gz')
             tfile.extractall(decomp_path)
 
@@ -74,6 +75,97 @@ def alphad(inputdict_unchecked):
         inp = inp + 'Y' + '\n' + output_file
     else:
         inp = inp + 'N' + '\n'
+    proc.stdin.write(inp.encode('utf-8'))
+    proc.communicate()[0]
+    proc.stdin.close()
+    return inputdict_unchecked
+
+def bricc(inputdict_unchecked):
+    """
+    This function calculates the conversion electron, electron-positron pair conversion
+    coefficients, and the E0 electron factors.
+
+    Parameters
+    ----------
+    inputdict_unchecked : dictionary
+        dictionary that must have the following key-pair values:
+            xx
+            xx
+
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if BRICC completes successfully.
+        Additional dictionary entries including:
+            output_file_directory : string, the directory all produced bricc output files will be
+                                    located.
+            bricc_output : string, Only for interactive use: data printed to command line.
+    NOTE:
+        All the various ouptput files bricc can generate are found in the output_file_directory
+
+    """
+    exe_path = path_to_exe('bricc')
+    exe_dir = path_to_exe('')
+    compressed_exe_path = exe_path + '.tar.gz'
+
+    bricc_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/BrIcc/Linux/BriccV23-Linux.tgz"
+    decomp_exe_path = path_to_exe('')
+    decomp_options = ['bricc', '.tgz', True]
+    verify_download_exe(compressed_exe_path, bricc_url, compressed = True, decomp_path = decomp_exe_path, dl_size = 127232)
+
+    # check if BriIccHome environment variable has been set (needed by BRICC executable)
+    if not os.environ.get('BrIccHome'):
+        os.environ['BrIccHome'] = str(exe_dir)
+
+    input_type = inputdict_unchecked['input_type']
+    output_dict = inputdict_unchecked
+
+    if(input_type == 'interactive'):
+        input_element = inputdict_unchecked['element']
+        inp = input_element + '\n' + 'exit' + '\n'
+        proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+        proc.stdin.write(inp.encode('utf-8'))
+        output_dict['bricc_output'] = proc.communicate()[0]
+        proc.stdin.close()
+    elif(input_type == 'evaluation'):
+        input_file = inputdict_unchecked['input_file']
+        briccnh = inputdict_unchecked['BrIccNH']
+        if(briccnh):
+            proc = subprocess.Popen([exe_path, input_file, 'BrIccNH'],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            proc.stdin.close()
+        else:
+            proc = subprocess.Popen([exe_path, input_file],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            proc.stdin.close()
+
+    output_dict['output_file_directory'] = exe_dir
+    return output_dict
+
+def bldhst(inputdict_unchecked):
+    """
+    This program builds a direct access file of the internal conversion coefficient
+    table. (BLDHST readme)
+
+    Parameters
+    ----------
+    inputdict_unchecked : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : string, input ensdf file.
+            output_table_file : string, desired output table file path.
+            output_index_file : string, desired output index file path.
+
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if DELTA completes successfully.
+    """
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    output_table_file = inputdict_unchecked['output_table_file']
+    output_index_file = inputdict_unchecked['output_index_file']
+
+    exe_path = path_to_exe('bldhst')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_file + '\n' + output_table_file + '\n' + output_index_file
     proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
     proc.stdin.close()
@@ -347,6 +439,61 @@ def radd(inputdict_unchecked):
         os.remove('98AK04.in')
     if ele_set:
         os.remove('ELE.in')
+    return inputdict_unchecked
+
+def radlist(inputdict_unchecked):
+    """
+    This program calculates atomic & nuclear radiations and checks energy balance.
+    (RADLIST readme)
+
+    Parameters
+    ----------
+    inputdict_unchecked : dictionary
+        dictionary that must have the following key-pair values:
+            output_radiation_listing : string, 'Y' if output radiation listing is desired, else 'N'.
+            output_ensdf_like_file : string, 'Y' if output ensdf like file is desired, else 'N'.
+            output_file_for_nudat : string, 'Y' if output file for nudat is desired, else 'N'.
+            output_mird_listing : string, 'Y' if output mird listing is desired, else 'N'.
+            calculate_continua : string, 'Y' if calculate continua is desired, else 'N'.
+            input_file : string, input ensdf file.
+            output_radlst_file : string, path to desired output radlst file.
+            input_radlst_data_table : string, path to input radlst data table (mednew.dat location).
+            input_masses_data_table : string, (optional) path to input masses data table.
+            output_ensdf_file : string, path to desired output ensdf file.
+
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if RADLIST completes successfully.
+    """
+    exe_path = path_to_exe('radlist')
+    radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
+    print exe_path
+    verify_download_exe(exe_path, radlist_url, dl_size = 8704)
+
+    inputdict = {}
+    output_rad_listing = inputdict_unchecked['output_radiation_listing']
+    output_endf_like_file = inputdict_unchecked['output_ensdf_like_file']
+    output_file_for_nudat = inputdict_unchecked['output_file_for_nudat']
+    output_mird_listing = inputdict_unchecked['output_mird_listing']
+    calculate_continua = inputdict_unchecked['calculate_continua']
+    input_file = inputdict_unchecked['input_file']
+    output_radlst_file = inputdict_unchecked['output_radlst_file']
+    input_radlst_data_table = inputdict_unchecked['input_radlst_data_table']
+    if 'input_masses_data_table' in inputdict_unchecked:
+        input_masses_data_table = inputdict_unchecked['input_masses_data_table']
+    else:
+        input_masses_data_table = ''
+    output_ensdf_file = inputdict_unchecked['output_ensdf_file']
+
+    inp = output_rad_listing + '\n' + output_endf_like_file + '\n' + output_file_for_nudat +\
+          '\n' + output_mird_listing + '\n' + calculate_continua + '\n' + input_file +\
+          '\n' + output_radlst_file + '\n' + input_radlst_data_table + '\n' + input_masses_data_table +\
+          '\n' + output_ensdf_file
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc.stdin.write(inp.encode('utf-8'))
+    radd_output = proc.communicate()[0]
+    proc.stdin.close()
     return inputdict_unchecked
 
 def ruler(inputdict_unchecked):
