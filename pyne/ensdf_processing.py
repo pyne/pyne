@@ -79,6 +79,35 @@ def alphad(inputdict_unchecked):
     proc.stdin.close()
     return inputdict_unchecked
 
+def delta(inputdict_unchecked):
+    """
+    This function calculates the best values of mixing ratios based of its analysis of
+    the angular correlation and conversion coefficient data.
+
+    Parameters
+    ----------
+    inputdict_unchecked : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : string, path to input ensdf file.
+            output_file : string, path to file for output write (doesn't have to exist).
+
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if DELTA completes successfully.
+    """
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    output_file = inputdict_unchecked['output_file']
+
+    exe_path = path_to_exe('delta')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_file + '\n' + output_file + '\n'
+    proc.stdin.write(inp.encode('utf-8'))
+    proc.communicate()[0]
+    proc.stdin.close()
+    return inputdict_unchecked
+
 def gabs(inputdict_unchecked):
     """
     This program calculates Gamma-ray absolute intensity and normalization (GABS readme)
@@ -90,7 +119,7 @@ def gabs(inputdict_unchecked):
             input_file : string, input ensdf file
             dataset_file : string, dataset file to be used
             output file : string, file for output to be written to (doesn't have to exist)
-
+    
     Returns
     -------
     rtn : dictionary
@@ -114,6 +143,159 @@ def gabs(inputdict_unchecked):
     proc.communicate()[0]
     proc.stdin.close()
 
+def gtol(inputdict_unchecked):
+    """
+    GTOL uses gamma-ray energies to derive a set of least-squares adjusted level energies.  
+
+    The net feeding at each level is calculated from the input gamma intensities and conversion 
+    coefficients. (GTOL readme)
+
+    Parameters
+    ----------
+    inputdict_unchecked : dictionary
+        dictionary that must have the following key-pair values:
+            input_file : string, input ensdf file.
+            report_file : string, desired gtol report file path.
+            new_ensdf_file_with_results : boolean, if true then a new ensdf file with results
+                                          will be created.
+            output_file : string, desired gtol output file path.
+            supress_gamma_comparison : boolean, if true the gamma comparison will be suppressed.
+            dcc_theory_percent : double, specifies the dcc theory percentage to be used.
+
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if GTOL completes successfully.
+    """
+    inputdict = {}
+    input_file = inputdict_unchecked['input_file']
+    report_file = inputdict_unchecked['report_file']
+    new_out = inputdict_unchecked['new_ensdf_file_with_results']
+    output_file = inputdict_unchecked['output_file'] #output file if report = yes
+    supress_g = inputdict_unchecked['supress_gamma_comparison']
+    supress_ic = inputdict_unchecked['supress_intensity_comparison']
+    dcc_theory = inputdict_unchecked['dcc_theory_percent']
+
+    exe_path = path_to_exe('gtol')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_file + '\n' + report_file + '\n'
+    if (new_out):
+        inp = inp + 'Y' + '\n' + output_file + '\n'
+    else:
+        inp = inp + 'N' + '\n'
+    if (supress_g):
+        inp = inp + 'Y' + '\n'
+    else:
+        inp = inp + 'N' + '\n'
+    if(supress_ic):
+        inp = inp + 'Y' + '\n'
+    else:
+        inp = inp + 'N' + '\n' + dcc_theory + '\n'
+    proc.stdin.write(inp.encode('utf-8'))
+    proc.communicate()[0]
+    proc.stdin.close()
+    return inputdict_unchecked
+
+def hsicc(inputdict_unchecked):
+    """
+    This program calculates internal conversion coefficients. (HSICC readme)
+
+    Parameters
+    ----------
+    inputdict_unchecked : dictionary
+        dictionary that must have the following key-pair values:
+            data_deck : string, data deck to be used for hsicc program.
+            icc_index : string, icc index to be used for hsicc program.
+            icc_table : string, icc table to be used for the hsicc program.
+            complete_report : string, desired report file path for hsicc program.
+            new_card_deck : string, desired new card deck file path for hsicc program.
+            comparison_report : string, desired comparison report path for hsicc program.
+            is_multipol_known : int, 1 if multipol is known, 0 otherwise.
+
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if HSICC completes successfully.
+    """
+    inputdict = {}
+    data_deck = inputdict_unchecked['data_deck']
+    icc_index = inputdict_unchecked['icc_index']
+    icc_table = inputdict_unchecked['icc_table']
+    complete_report = inputdict_unchecked['complete_report']
+    new_card_deck = inputdict_unchecked['new_card_deck']
+    comparison_report = inputdict_unchecked['comparison_report']
+    multipol_known = inputdict_unchecked['is_multipol_known'] #'Y or CR'
+
+    exe_path = path_to_exe('hsicc')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = data_deck + '\n' + icc_index + '\n' + icc_table + '\n' + \
+        complete_report + '\n' + new_card_deck + '\n' + comparison_report + '\n' + multipol_known
+    proc.stdin.write(inp.encode('utf-8'))
+    proc.communicate()[0]
+    proc.stdin.close()
+    return inputdict_unchecked
+
+def hsmrg(inputdict_unchecked):
+    """
+    This program merges new gamma records created by HSICC with the original input 
+    data.  (HSICC readme)
+
+    Parameters
+    ----------
+    inputdict_unchecked : dictionary
+        dictionary that must have the following key-pair values:
+            data_deck : string, data deck file path for hsmrg to use.
+            card_deck : string, card deck file path for hsmrg to use.
+            merged_data_deck : string, desired merged data deck file path created by hsmrg.
+
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if HSMRG completes successfully.
+    """
+    inputdict = {}
+    data_deck = inputdict_unchecked['data_deck']
+    card_deck = inputdict_unchecked['card_deck']
+    merged_data_deck = inputdict_unchecked['merged_data_deck']
+
+    exe_path = path_to_exe('hsmrg')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = data_deck + '\n' + card_deck + '\n' + merged_data_deck
+    proc.stdin.write(inp.encode('utf-8'))
+    proc.communicate()[0]
+    proc.stdin.close()
+    return inputdict_unchecked
+
+def seqhst(inputdict_unchecked):
+    """
+    This program recreates a sequential file of the internal conversion table from the 
+    direct access file.  (HSICC readme)
+
+    Parameters
+    ----------
+    inputdict_unchecked : dictionary
+        dictionary that must have the following key-pair values:
+            binary_table_input_file : string, binary table input file path.
+            sequential_output_file : string, desired path of sequential output file.
+
+    Returns
+    -------
+    rtn : dictionary
+        Everything in input dictionary is returned if SEQHST completes successfully.
+    """
+    #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
+    inputdict = {}
+    input_file = inputdict_unchecked['binary_table_input_file']
+    output_file = inputdict_unchecked['sequential_output_file']
+
+    exe_path = path_to_exe('seqhst')
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_file + '\n' + output_file
+    proc.stdin.write(inp.encode('utf-8'))
+    proc.communicate()[0]
+    proc.stdin.close()
+    return inputdict_unchecked
+    
 def logft(inputdict_unchecked):
     #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
     """

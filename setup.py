@@ -180,10 +180,10 @@ def download_decay():
     durl.close()
     return True
 
-local_ensdf_evaluators = ['alphad', 'logft', 'radd', 'ruler']
+local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'hsicc', 'hsmrg', 'seqhst',
+                          'logft', 'radd', 'ruler']
 local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'], 
                      ['ensdf_processing/RADD/ELE.in', 'ELE.in']]
-
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
@@ -203,7 +203,6 @@ def copy_ensdf_executables(exe_dest):
         except Exception:
             print('Some ENSDF processing executables were unable to be copied to the \
                    install directory.')
-
     for tool in local_ensdf_tools:
         try:
             local_path = os.path.join('src', tool[0])

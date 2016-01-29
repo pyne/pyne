@@ -106,6 +106,15 @@ set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS
 
 add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f  
                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
+add_executable(gtol ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f 
+                    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(hsicc ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for 
+                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for 
+                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(logft ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for 
                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(radd ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for)
