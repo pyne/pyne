@@ -1,4 +1,4 @@
-!     NNDCLIB          FORTRAN UTILITY SUBROUTINE PACKAGE
+! 1    ;4002                          !     NNDCLIB          FORTRAN UTILITY SUBROUTINE PACKAGE
 !
 !          C.L.DUNFORD          January 23, 2004
 !
@@ -2651,7 +2651,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: INDEX, LEN, LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: IVLSTR, TYPSTR
 !
@@ -3163,10 +3162,6 @@
       INTEGER(KIND=4), DIMENSION(*) :: Keys
       INTEGER(KIND=4) :: Iunit, Iacc, Iform, Mrec, Mkey, Mbuf, Ierr
 !
-!     Functions used
-!
-      CHARACTER(LEN=*), INTRINSIC :: REPEAT
-!
 !     Local variables.
 !
       INTEGER(KIND=4) :: iend
@@ -3653,7 +3648,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: REPEAT
       INTEGER(KIND=4), INTRINSIC :: LEN
 !
 !     Local variables
