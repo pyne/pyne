@@ -18,6 +18,46 @@ def test_alphad():
     file_comp(input_dict['report_file'],'ensdf_processing/alphad/ref_a228.ens.alphad.rpt', exceptions)
     cleanup_tmp()
 
+def test_bricc_interactive():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_type'] = 'interactive'
+    input_dict['element'] = '44'
+    output_dict = ensdf_processing.bricc(input_dict)
+    bricc_out_tmp = tmp_path + '/tmp_bricc_out.out'
+    bricc_out_ref = 'ensdf_processing/bricc/ref_bricc_44.out'
+    bricc_outfile = open(tmp_path + '/tmp_bricc_out.out', 'w+')
+    bricc_outfile.write(output_dict['bricc_output'])
+    file_comp(bricc_out_tmp, bricc_out_ref,[])
+    cleanup_tmp()
+
+def test_bricc_evaluation():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_type'] = 'evaluation'
+    input_dict['input_file'] = 'ensdf_processing/bricc/ref_a228.ens'
+    input_dict['BrIccNH'] = 0
+    output_dict = ensdf_processing.bricc(input_dict)
+    #bricc_out_tmp = tmp_path + '/tmp_bricc_out.out'
+    #bricc_out_ref = 'ensdf_processing/bricc/ref_bricc_44.out'
+    #bricc_outfile = open(tmp_path + '/tmp_bricc_out.out', 'w+')
+    #bricc_outfile.write(output_dict['bricc_output'])
+    #file_comp(bricc_out_tmp, bricc_out_ref,[])
+    cleanup_tmp()
+
+def test_bldhst():
+    create_tmp()
+    input_dict = {}
+    input_dict['input_file'] = 'ensdf_processing/bldhst/ref_bldhst_iccseq.dat'
+    input_dict['output_table_file'] = tmp_path + '/tmp_bldhst_icctbl.dat'
+    input_dict['output_index_file'] = tmp_path + '/tmp_bldhst_iccndx.dat'
+    output_dict = ensdf_processing.bldhst(input_dict)
+    ref_table = 'ensdf_processing/bldhst/ref_icctbl.dat'
+    ref_index = 'ensdf_processing/bldhst/ref_iccndx.dat'
+    d_table = file_comp(input_dict['output_table_file'], ref_table, [])
+    d_index = file_comp(input_dict['output_index_file'], ref_index, [])
+    cleanup_tmp()
+
 def test_delta():
     create_tmp()
     input_dict = {}
@@ -131,6 +171,29 @@ def test_radd():
     d_report = file_comp(input_dict['output_file'], ref_output, [])
     cleanup_tmp()
 
+def test_radlist():
+    create_tmp()
+    input_dict = {}
+    input_dict['output_radiation_listing'] = 'Y'
+    input_dict['output_ensdf_like_file'] = 'N'
+    input_dict['output_file_for_nudat'] = 'N'
+    input_dict['output_mird_listing'] = 'N'
+    input_dict['calculate_continua'] = 'N'
+    input_dict['input_file'] = 'ensdf_processing/radlst/ref_radlst.inp'
+    input_dict['output_radlst_file'] = tmp_path + '/tmp_radlst.rpt'
+    input_dict['input_radlst_data_table'] = 'ensdf_processing/radlst/ref_mednew.dat'
+    input_dict['output_ensdf_file'] = tmp_path + '/tmp_ensdf.rpt'
+    output_dict = ensdf_processing.radlist(input_dict)
+    ref_output_radlst_file = 'ensdf_processing/radlst/ref_radlst.rpt'
+    ref_output_ensdf_file = 'ensdf_processing/radlst/ref_ensdf.rpt'
+    # exceptions contain lines in the ouptut that can have a tolerable precision difference
+    radlst_exceptions = [[1, '1PROGRAM RADLST 5.5 [ 5-OCT-88].  RUN ON'], [3, 66], [3, 135], [3, 713], [3, 714], [3, 760],[3,  944]]
+    ensdf_exceptions = [[3, 341], [3, 351], [3, 357]]
+    d_radlst = file_comp(input_dict['output_radlst_file'], ref_output_radlst_file, radlst_exceptions)
+    d_ensdf = file_comp(input_dict['output_ensdf_file'], ref_output_ensdf_file, ensdf_exceptions)
+    cleanup_tmp()
+    os.remove('atomic.dat')
+
 def test_ruler():
     create_tmp()
     input_dict = {}
@@ -201,6 +264,9 @@ def file_comp(file_out, file_ref, exceptions):
 if __name__ == "__main__":
     alphad = test_alphad()
     gabs = test_gabs()
+    bricc_1 = test_bricc_interactive()
+    bricc_2 = test_bricc_evaluation()
+    bldhst = test_bldhst()
     delta = test_delta()
     gtol = test_gtol()
     hsicc = test_hsicc()
@@ -208,4 +274,5 @@ if __name__ == "__main__":
     seqhst = test_seqhst()
     logft = test_logft()
     radd = test_radd()
+    radlist = test_radlist()
     ruler = test_ruler()
