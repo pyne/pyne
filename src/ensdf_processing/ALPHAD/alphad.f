@@ -174,7 +174,6 @@
 !
 !     FUNCTIONS USED
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM, REPEAT
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       CHARACTER(LEN=1), EXTERNAL :: LOCASE
       INTEGER(KIND=4), INTRINSIC :: INDEX, INT, LEN, MIN0, NINT,        &       
@@ -1221,7 +1220,6 @@
 !
 !     FUNCTIONS USED
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), EXTERNAL :: LOCASE
 !
 !     Local variables
@@ -1699,7 +1697,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       Integer(KIND=4), EXTERNAL :: Lenstr
 !
       IF(.NOT.Iecho) WRITE(irpt,'(/A)') Card

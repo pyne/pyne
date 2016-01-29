@@ -452,7 +452,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), EXTERNAL :: LOCASE
       REAL(KIND=4), EXTERNAL :: VALSTR
 !
@@ -712,7 +711,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=0), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
       INTEGER(KIND=4), INTRINSIC :: INDEX, LEN, MAX0, MIN0
       INTEGER(KIND=4), EXTERNAL :: INDEXF, TYPSTR
@@ -1541,7 +1539,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=8), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, LEN, MAX0
       INTEGER(KIND=4), EXTERNAL :: INDEXF
       REAL(KIND=8), INTRINSIC :: DABS, DSQRT
@@ -1949,7 +1946,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
 !
 !     Local variables
@@ -2043,7 +2039,6 @@
       INTEGER(KIND=4), INTRINSIC :: INDEX
       INTEGER(KIND=4), EXTERNAL :: INDEXF
       REAL(KIND=4) :: ABS,SQRT
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
 !     Local variables
 !
@@ -2359,7 +2354,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
       REAL(KIND=8), INTRINSIC :: DBLE, DLOG10, DSQRT
 !
@@ -2679,7 +2673,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: INDEXF, TYPSTR
       REAL(KIND=4), INTRINSIC :: FLOAT
@@ -2933,7 +2926,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       CHARACTER(LEN=1), INTRINSIC :: CHAR
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, ICHAR, INDEX, MAX0
       INTEGER(KIND=4), EXTERNAL :: INDEXF
@@ -3288,7 +3280,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX
       INTEGER(KIND=4), EXTERNAL :: INDEXF, IVLSTR
       REAL(KIND=8), INTRINSIC :: DMAX1, DMIN1
@@ -3567,7 +3558,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, MAX0
       INTEGER(KIND=4), EXTERNAL :: INDEXF
 !
@@ -4494,7 +4484,6 @@
       INTEGER(KIND=4), INTRINSIC :: INDEX,LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: INDEXF,IVLSTR,TYPSTR
       REAL (KIND=8), INTRINSIC :: DSQRT
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
 !     Local variables
 !
@@ -4718,7 +4707,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=8), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, LEN, MAX0
       INTEGER(KIND=4), EXTERNAL :: INDEXF,IVLSTR
       REAL(KIND=8), INTRINSIC :: DABS, DSQRT
@@ -4897,7 +4885,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
       INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, IABS
       INTEGER(KIND=4), EXTERNAL :: IVLSTR
 !
@@ -5196,7 +5183,6 @@
       INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: INDEXF
       CHARACTER(LEN=1), INTRINSIC :: CHAR
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
 !     Local variables
 !
@@ -5366,7 +5352,6 @@
 !
       INTEGER(KIND=4), INTRINSIC :: INT,LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: IVLSTR
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
 !     Local variables
 !
@@ -5436,10 +5421,6 @@
       IMPLICIT NONE
 !
 !     Outputs problems to new summary file
-!
-!     Functions used
-!
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
 !
 !     Local variables
 !
