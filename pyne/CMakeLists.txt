@@ -93,10 +93,10 @@ cython_add_module(ace ace.pyx)
 target_link_libraries(ace pyne)
 
 # enrichment
-set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/enrichment.pyx"
-                            PROPERTIES CYTHON_IS_CXX TRUE)
-cython_add_module(enrichment enrichment.pyx)
-target_link_libraries(enrichment pyne)
+#set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/enrichment.pyx"
+#                            PROPERTIES CYTHON_IS_CXX TRUE)
+#cython_add_module(enrichment enrichment.pyx)
+#target_link_libraries(enrichment pyne)
 
 # tally
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/tally.pyx"

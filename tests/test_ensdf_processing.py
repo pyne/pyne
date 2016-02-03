@@ -27,7 +27,7 @@ def test_bricc_interactive():
     bricc_out_tmp = tmp_path + '/tmp_bricc_out.out'
     bricc_out_ref = 'ensdf_processing/bricc/ref_bricc_44.out'
     bricc_outfile = open(tmp_path + '/tmp_bricc_out.out', 'w+')
-    bricc_outfile.write(output_dict['bricc_output'])
+    bricc_outfile.write(output_dict['bricc_output'].decode('utf-8'))
     file_comp(bricc_out_tmp, bricc_out_ref,[])
     cleanup_tmp()
 
@@ -227,8 +227,8 @@ def file_comp(file_out, file_ref, exceptions):
         type 4: carriage return vs. non standard return type.
             options: line number of return.
     '''
-    f_out = open(file_out, 'r')
-    f_ref = open(file_ref, 'r')
+    f_out = open(file_out, 'r',encoding="latin-1")
+    f_ref = open(file_ref, 'r',encoding="latin-1")
     diff_lines = numpy.array([])
     line_num = 0
     for line_out in f_out:
@@ -263,10 +263,12 @@ def file_comp(file_out, file_ref, exceptions):
 
 #  nose.runmodule()
 if __name__ == "__main__":
+    '''
     alphad = test_alphad()
     gabs = test_gabs()
     bricc_1 = test_bricc_interactive()
     bricc_2 = test_bricc_evaluation()
+    '''
     bldhst = test_bldhst()
     delta = test_delta()
     gtol = test_gtol()
