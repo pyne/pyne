@@ -110,7 +110,58 @@ def ascii_to_binary(ascii_file, binary_file):
     # Close binary file
     binary.close()
 
-
+def _interpolation_tab1(xin, x, y, interp_NBT = None, interp_INT = None):
+    """
+     INTERPOLATE_TAB1 interpolates a function between two points based on
+     particular interpolation scheme. The data needs to be organized as a ENDF TAB1
+     type function containing the interpolation regions, break points, and
+     tabulated x's and y's.
+    """
+    
+    cdef int i, interp  
+    if xin <= x[0]:
+        return y[0]
+    else if xin >= x[-1]:
+        return y[-1]
+    else:
+        I = np.searchsorted(x, xin) - 1
+    
+    # Determine interpolation scheme 
+    if interp_NBT == None:
+        interp == 2 # linear-linear  
+    else:
+        if len(interp_NBT) == 1:
+            interp = int(interp_INT[0])
+        else if len(interp_NBT) > 1:
+            for i in range(len(interp_NBT)):
+                if I < interp_NBT[i]:
+                    interp = int(interp_INT[i])
+                    break
+    
+    # handle special case of histogram interpolation 
+    if interp == 1:
+        return y[I]
+    
+    # determine bounding values 
+    x0 = x[I]
+    x1 = x[I + 1]
+    y0 = y[I]
+    y1 = y[I + 1]
+    
+    # determine interpolation factor and interpolated value
+    if interp == 2: # linear-linear  
+        r = (x - x0) / (x1 - x0)
+        return y0 + r * (y1 - y0)
+    else if interp == 3: # linear _log  
+        r = np.log(x / x0) / np.log(x1 / x0)
+        return y0 + r * (y1 - y0)
+    else if interp == 4: # log-linear
+        r = (x - x0) / (x1 - x0)
+        return y0 * np.exp(r * np.log(y1 / y0))
+    else if interp == 5: # log-log
+        r = np.log(x/x0) / np.log(x1/x0)
+        return y0 * np.exp(r * np.log(y1 / y0))
+    
 class Library(object):
     """
     A Library objects represents an ACE-formatted file which may contain
@@ -567,16 +618,16 @@ class NeutronTable(AceTable):
             # Polynomial function form of nu
             if LNU == 1:
                 self.nu_t_type = "polynomial"
-                NC = int(self.xss[KNU+1])
-                coeffs = self.xss[KNU+2 : KNU+2+NC]
+                self.nu_t_NC = int(self.xss[KNU+1])
+                self.nu_t_coeffs = self.xss[KNU+2 : KNU+2+NC]
 
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_t_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_t_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
+                    self.nu_t_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
                 NE = int(self.xss[KNU+2+2*NR])
                 self.nu_t_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_t_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
@@ -588,16 +639,16 @@ class NeutronTable(AceTable):
             # Polynomial function form of nu
             if LNU == 1:
                 self.nu_p_type = "polynomial"
-                NC = int(self.xss[KNU+1])
-                coeffs = self.xss[KNU+2 : KNU+2+NC]
+                self.nu_p_NC = int(self.xss[KNU+1])
+                self.nu_p_coeffs = self.xss[KNU+2 : KNU+2+NC]
 
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_p_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_p_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
+                    self.nu_p_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
                 NE = int(self.xss[KNU+2+2*NR])
                 self.nu_p_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_p_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
@@ -608,16 +659,16 @@ class NeutronTable(AceTable):
             # Polynomial function form of nu
             if LNU == 1:
                 self.nu_t_type = "polynomial"
-                NC = int(self.xss[KNU+1])
-                coeffs = self.xss[KNU+2 : KNU+2+NC]
+                self.nu_t_NC = int(self.xss[KNU+1])
+                self.nu_t_coeffs = self.xss[KNU+2 : KNU+2+NC]
 
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_t_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_t_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
+                    self.nu_t_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
                 NE = int(self.xss[KNU+2+2*NR])
                 self.nu_t_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_t_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
@@ -627,8 +678,8 @@ class NeutronTable(AceTable):
             KNU = self.jxs[24]
             NR = int(self.xss[KNU+1])
             if NR > 0:
-                interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                self.nu_d_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
+                self.nu_d_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
             NE = int(self.xss[KNU+2+2*NR])
             self.nu_d_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
             self.nu_d_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
@@ -659,7 +710,56 @@ class NeutronTable(AceTable):
                     location_start, delayed_n=True)
                 self.nu_d_energy_dist.append(energy_dist)
 
-
+    def sample_nu(self, e):
+        """
+        Sample nu based on incident neutron energy e, 
+        return a list of length-3, format of [nu_total, nu_prompt, nu_delay].
+        If no nu data is presented for the corresponding nu, return None instead
+        """
+        cdef int i 
+        # No nu data
+        if self.jxs[2] == 0:
+            return [None, None, None]
+        
+        # total nu always exists
+        if self.nu_t_type == "polynomial":
+            nu_t = 0.0
+            for i in range(self.nu_t_NC):
+                nu_t += self.nu_t_coeffs[i] * e ** i  
+        else if self.nu_t_type == "tabular":
+            if hasattr(self, 'nu_t_interp_NBT'):
+                nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value, \\
+                                           self.nu_t_interp_NBT, self.nu_t_interp_INT)
+            else:
+                nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value)
+        # Prompt nu
+        if hasattr(self, 'nu_p_type'):
+            if self.nu_p_type == "polynomial":
+                nu_p == 0.0 
+                for i in range(self.nu_p_NC):
+                    nu_p += self.nu_p_coeffs[i] * e ** i  
+            else if self.nu_p_type == 'tabular':
+                if hasattr(self, 'nu_p_interp_NBT'):
+                    nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value, \\
+                                               self.nu_p_interp_NBT, self.nu_p_interp_INT)
+                else:
+                    nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value)
+        else:
+            nu_p = None  
+        # Delay nu
+        if hasattr(self, 'nu_d_energy'):
+            if hasattr(self, 'nu_d_interp_NBT'):
+                nu_d = _interpolation_tab1(e, self.nu_d_energy, self.nu_d_value, \\ 
+                                           self.nu_d_interp_NBT, self.nu_d_interp_INT)
+            else:
+                nu_d = _interpolation_tab1(e, self.nu_d_energy, self.nu_d_value) 
+        else:
+            nu_d = None  
+        return [nu_t, nu_p, nu_d]
+        
+        
+        
+        
     def _read_angular_distributions(self):
         """Find the angular distribution for each reaction MT
         """
