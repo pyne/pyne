@@ -25,6 +25,7 @@ from collections import OrderedDict
 
 cimport numpy as np
 import numpy as np
+rand = np.random.rand  
 from bisect import bisect_right
 
 from pyne cimport nucname
@@ -764,7 +765,7 @@ class NeutronTable(AceTable):
         """Find the angular distribution for each reaction MT
         """
         cdef int ind, i, j, n_reactions, n_energies, n_bins
-        cdef dict ang_cos, ang_pdf, ang_cdf
+        cdef dict ang_cos, ang_pdf, ang_cdf, JJ
 
         # Number of reactions with secondary neutrons (including elastic
         # scattering)
@@ -778,11 +779,13 @@ class NeutronTable(AceTable):
             if loc == -1:
                 # Angular distribution data are specified through LAWi
                 # = 44 in the DLW block
+                reaction.aflag = 'in_edist'
                 continue
             elif loc == 0:
                 # No angular distribution data are given for this
                 # reaction, isotropic scattering is asssumed (in CM if
                 # TY < 0 and in LAB if TY > 0)
+                reaction.aflag = 'iso'
                 continue
 
             ind = self.jxs[9] + loc
@@ -796,11 +799,13 @@ class NeutronTable(AceTable):
 
             # Read locations for angular distributions
             locations = np.asarray(self.xss[ind:ind + n_energies], dtype=int)
+			reaction.ang_locations = locations
             ind += n_energies
 
             ang_cos = {}
             ang_pdf = {}
             ang_cdf = {}
+            JJ = {}
             for j, location in enumerate(locations):
                 if location > 0:
                     # Equiprobable 32 bin distribution
@@ -809,7 +814,7 @@ class NeutronTable(AceTable):
                     ind += 33
                 elif location < 0:
                     # Tabular angular distribution
-                    JJ = int(self.xss[ind])
+                    JJ[j] = int(self.xss[ind])
                     n_bins = int(self.xss[ind + 1])
                     ind += 2
                     ang_dat = self.xss[ind:ind + 3*n_bins]
@@ -825,7 +830,8 @@ class NeutronTable(AceTable):
             reaction.ang_cos = ang_cos
             reaction.ang_pdf = ang_pdf
             reaction.ang_cdf = ang_cdf
-
+            reaction.JJ = JJ
+    
     def _read_energy_distributions(self):
         """Determine the energy distribution for secondary neutrons for
         each reaction MT
@@ -1673,8 +1679,319 @@ class Reaction(object):
         else:
             rep = "<ACE Reaction: Unknown MT={0}>".format(self.MT)
         return rep
-
-
+    
+    def sample(self, e):
+        """
+        Sample out-going mu and e_out based on incoming neutron energy e, return [mu, e_out] 
+        """
+        # 1. sample energy
+        edist = self.energy_dist
+        if edist.law == 3:
+            # Inelastic level scattering
+            A = self.table.awr 
+            Q = self.Q
+            e_out = (A / (A + 1.0)) ** 2 * (e - (A + 1.0) / A * Q)
+            
+        elif edist.law == 4:
+            #Continuous Tabular Distribution 
+            if hasattr(edist, 'INT'):
+                histogram_interp = (edist.INT == 1)
+            else:
+                histogram_interp = False
+            # Find energy bin and calculate interpolation factor -- if the energy is
+            # outside the range of the tabulated energies, choose the first or last bins 
+            if e <= edist.energy_in[0]:
+                i = 0
+                f = 0.0  
+            elif e >= edist.energy_in[-1]:
+                i = len(edist.energy_in) -2 
+                f = 1.0  
+            else:
+                i = np.searchsorted(edist.energy_in, e) - 1
+                f = (e - edist.energy_in[i]) / (edist.energy_in[i+1] - edist.energy_in[i])
+            
+            # Sample between the ith and (i+1)th bin
+            if (histogram_interp):
+                if e >= edist.energy_in[-1]:
+                    l = i + 1  
+                else:
+                    l = i 
+            else:
+                if (f > rand()):
+                    l = i + 1 
+                else:
+                    l = i 
+                    
+            # Interpolation for energy E1 and EK
+            E_i_1 = edist.energy_out[i][0]
+            E_i_K = edist.energy_out[i][-1]
+            
+            E_i1_1 = edist.energy_out[i+1][0]
+            E_i1_K = edist.energy_out[i+1][-1]
+            
+            E_1 = E_i_1 + f*(E_i1_1 - E_i_1)
+            E_K = E_i_K + f*(E_i1_K - E_i_K)
+            
+            # Determine outgoing energy bin 
+            r1 = rand() 
+            cdf = edist.cdf[l]
+            k = np.searchsorted(cdf, r1) - 1
+            
+            # Check to make sure k is <= len(cdf) - 2 
+            k = min(k, len(cdf) - 2)
+            
+            E_l_k = edist.energy_out[l][k]
+            p_l_k = edist.pdf[l][k]
+            
+            if edist.intt[l] == 1:
+                # Histogram interpolation
+                if(p_l_k > 0):
+                    e_out = E_l_k + (r1 - c_k) / p_l_k 
+                else:
+                    e_out = E_l_k  
+                    
+            elif edist.intt[l] == 2:
+                # Linear-Linear interpolation  
+                E_l_k1 = edist.energy_out[l][k+1]
+                p_l_k1 = edist.pdf[l][k+1]
+                
+                frac = (p_l_k1 - p_l_k) / (E_l_k1 - E_l_k)
+                if (frac == 0.0):
+                    E_out = E_l_k + (r1 - cdf[k]) / p_l_k  
+                else:
+                    E_out = E_l_k + (max(0.0, p_l_k ** 2 + \\
+                                         2.0 * frac * (r1 - cdf[k])) ** 0.5 - p_l_k) / frac  
+                                         
+            # Interpolate between incident energy bins i and i + 1
+            if not histogram_interp:
+                if (l == i):
+                    E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
+                else:
+                    E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
+                    
+        elif edist.law == 44:
+            # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
+            # Interpolation scheme
+            
+            # Find energy bin and calculate interpolation factor -- if the energy is
+            # outside the range of the tabulated energies, choose the first or last bins
+            if (e <= edist.energy_in[0]):
+                i = 0
+                f = 0.0 
+            elif (e >= edist.energy_in[-1]):
+                i = len(edist.energy_in) - 2 
+                f = 1.0  
+            else:
+                i = np.searchsorted(edist.energy_in, e) - 1 
+                f = (e - edist.energy_in[i]) / (edist.energy_in[i+1] - edist.energy_in[i])
+                
+            # Sample between the ith and (i+1)th bin
+            if (f > rand()):
+              l = i + 1
+            else
+              l = i
+              
+            # Interpolation for energy E1 and EK
+            n_energy_out = size(this%table(i)%e_out)
+            E_i_1 = edist.energy_out[i][0]
+            E_i_K = edist.energy_out[i][-1]
+        
+            E_i1_1 = edist.energy_out[i+1][0]
+            E_i1_K = edist.energy_out[i+1][-1]
+        
+            E_1 = E_i_1 + f*(E_i1_1 - E_i_1)
+            E_K = E_i_K + f*(E_i1_K - E_i_K)
+            
+            # determine outgoing energy bin
+            r1 = rand()  
+            cdf = edist.cdf[l]
+            k = np.searchsorted(cdf, r1) - 1
+            c_k = cdf[k]
+            
+            # Check to make sure k <= len(cdf) - 2
+            k = min(k, len(cdf) - 2)
+            
+            E_l_k = edist.energy_out[l][k]
+            p_l_k = edist.pdf[l][k]
+            if (edist.intt[l] == 1):
+                # Histogram interpolation 
+                if (p_l_k > 0.0):
+                    E_out = E_l_k + (r1 - c_k) / p_l_k 
+                else:
+                    E_out = E_l_k
+                
+                km_r = edist.frac[l][k]  
+                km_a = edist.ang[l][k]
+                
+            elif (edist.intt[l] == 2):
+                # Linear-linear interpolation 
+                E_l_k1 = edist.energy_out[l][k+1]
+                p_l_k1 = edist.pdf[l][k+1]
+                
+                frac = (p_l_k1 - p_l_k) / (E_l_k1 - E_l_k) 
+                if (frac == 0.0):
+                    E_out = E_l_k + (r1 - c_k) / p_l_k 
+                else:
+                    E_out = E_l_k + (max(0.0, p_l_k ** 2 + \\
+                                         2.0 * frac * (r1-c_k)) ** 0.5 - p_l_k) / frac 
+                
+                # Determine Kalbach-Mann parameters
+                km_r = edist.frac[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \\
+                       (edist.frac[l][k+1] - edist.frac[l][k])
+                km_a = edist.ang[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \\
+                       (edist.ang[l][k+1] - edist.ang[l][k])
+                
+            # Now interpolate between incident energy bins i and i + 1
+            if (l == i):
+              E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
+            else:
+              E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
+              
+            # Sampled correlated angle from Kalbach-Mann parameters
+            if (rand() > km_r) then:
+                T = (2.0*rand() - 1.0) * np.sinh(km_a)
+                mu = np.log(T + (T*T + 1.0)**0.5)/km_a
+            else:
+                r1 = rand()
+                mu = np.log(r1*np.exp(km_a) + (1.0 - r1)*np.exp(-km_a))/km_a
+                
+            return [mu, E_out]
+        
+        elif edist.law == 61:
+            # Like 44, but tabular distribution instead of Kalbach-87
+            # Interpolation scheme
+            
+            # find energy bin and calculate interpolation factor -- if the energy is
+            # outside the range of the tabulated energies, choose the first or last bins
+            if (e <= edist.energy_in[0]):
+                i = 0
+                r = 0.0  
+            elif (e >= edist.energy_in[-1]):
+                i = len(edist.energy_in) - 2
+                r = 1.0  
+            else:
+                i = np.searchsorted(edist.energy_in, e) - 1
+                r = (e - edist.energy_in[i]) / (edist.energy_in[i+1] - edist.energy_in[i])
+                
+            # Sample between the ith and (i+1)th bin
+            if (r > rand()):
+                l = i+1 
+            else:
+                l = i 
+            
+            # interpolation for energy E1 and EK
+            E_i_1 = edist.energy_out[i][0]
+            E_i_K = edist.energy_out[i][-1]
+        
+            E_i1_1 = edist.energy_out[i+1][0]
+            E_i1_K = edist.energy_out[i+1][-1]
+        
+            E_1 = E_i_1 + r*(E_i1_1 - E_i_1)
+            E_K = E_i_K + r*(E_i1_K - E_i_K)
+            
+            # Determine outgoing energy bin
+            r1 = rand() 
+            cdf = edist.cdf  
+            k = np.searchsorted(cdf, r1) - 1
+            c_k = cdf[k]
+            
+            # makesure k <= len(cdf) - 2
+            k = min(k, len(cdf) - 2)
+            
+            E_l_k = edist.energy_out[l][k]
+            p_l_k = edist.pdf[l][k]
+            if (edist.intt[l][k] == 1):
+                # Histogram interpolation 
+                if(p_l_k > 0.0):
+                    E_out = E_l_k + (r1 - c_k) / p_l_k 
+                else:
+                    E_out = E_l_k  
+            elif(edist.intt[l][k] == 2):
+                E_l_k1 = edist.energy_out[l][k+1]
+                p_l_k1 = edist.pdf[l][k+1]
+                
+                frac = (p_l_k1 - p_l_k)/(E_l_k1 - E_l_k)
+                if (frac == 0.0):
+                    E_out = E_l_k + (r1 - c_k)/p_l_k
+                else:
+                    E_out = E_l_k + (max(0.0, p_l_k**2 + 2.0*frac*(r1-c_k))**0.5 - p_l_k)/frac 
+            
+            # Now interpolate between incident energy bins i and i + 1
+            if (l == i):
+                E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
+            else:
+                E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
+              
+            # Find correlated angular distribution for closest outgoing energy bin 
+            if(r1 - c_k < cdf[k+1] - r1):
+                intt = edist.a_dist_intt[l][k]
+                mu_out = edist.a_dist_mu_out[l][k]
+                pdf = edist.a.dist_pdf[l][k]
+                cdf = edist.a.dist.cdf[l][k]
+                #mu = 
+            
+                
+            
+                
+            
+                    
+            
+            
+            
+            
+            
+        if hasattr(self, 'aflag'):
+            if self.aflag == 'iso':
+                mu = 2.0 * rand() - 1.0  
+            elif self.aflag == 'in_edist':
+                # TO DO ...
+        else:
+            energy = self.ang_energy_in  
+            locations = self.ang_locations 
+            if (e <= energy[0]):
+                i = 0
+                r = 0.0
+            elif (e >= energy[-1]):
+                i = len(energy) - 2
+                r = 1.0  
+            else:
+                i = np.searchsorted(energy, e) - 1
+                r = (e - energy[i]) / (energy[i + 1] - energy[i])
+            
+            if (r > rand()):
+                i = i + 1  
+                
+            loc = locations[i]
+            if loc == 0: # isotropic 
+                return 2.0 * rand() - 1.0 
+            elif loc > 0: # 32 equip bin 
+                r1 = rand()
+                ii = 1 + int(32 * r1)
+                mui = self.ang_cos[ii - 1]
+                mui1 = self.ang_cos[ii]
+                mu = mui + (32 * r1 - ii) * (mui1 - mui)
+            else: # tabular 
+                cos = self.ang_cos[i]
+                pdf = self.ang_pdf[i]
+                cdf = self.ang_cdf[i]
+                JJ = self.JJ[i]
+                r1 = rand()
+                j = np.searchsorted(CDF, r1) - 1 
+                
+                if JJ == 1: # histogram
+                    if pdf[j] > 0.0:
+                        mu = cos[j] + (r1 - cdf[j]) / pdf[j] 
+                    else:
+                        mu = cos[j]
+                elif JJ == 2: #linear-linear
+                    m = (pdf[j + 1] - pdf[j]) / (cos[j + 1] - cos[j])
+                    if m == 0.0:
+                        mu = cos[j] + (r1 - cdf[j]) / pdf[j]
+                    else:
+                        _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
+                        mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
+            
+             
 class DosimetryTable(AceTable):
 
     def __init__(self, name, awr, temp):
