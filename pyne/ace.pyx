@@ -1777,7 +1777,7 @@ class Reaction(object):
                 if (frac == 0.0):
                     E_out = E_l_k + (r1 - cdf[k]) / p_l_k  
                 else:
-                    E_out = E_l_k + (max(0.0, p_l_k ** 2 + \\
+                    E_out = E_l_k + (max(0.0, p_l_k ** 2 + \
                                          2.0 * frac * (r1 - cdf[k])) ** 0.5 - p_l_k) / frac  
                                          
             # Interpolate between incident energy bins i and i + 1
@@ -1856,13 +1856,13 @@ class Reaction(object):
                 if (frac == 0.0):
                     E_out = E_l_k + (r1 - c_k) / p_l_k 
                 else:
-                    E_out = E_l_k + (max(0.0, p_l_k ** 2 + \\
+                    E_out = E_l_k + (max(0.0, p_l_k ** 2 + \
                                          2.0 * frac * (r1-c_k)) ** 0.5 - p_l_k) / frac 
                 
                 # Determine Kalbach-Mann parameters
-                km_r = edist.frac[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \\
+                km_r = edist.frac[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \
                        (edist.frac[l][k+1] - edist.frac[l][k])
-                km_a = edist.ang[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \\
+                km_a = edist.ang[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \
                        (edist.ang[l][k+1] - edist.ang[l][k])
                 
             # Now interpolate between incident energy bins i and i + 1
