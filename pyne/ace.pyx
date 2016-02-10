@@ -774,15 +774,13 @@ class NeutronTable(AceTable):
         # Angular distribution for all reactions with secondary neutrons
         for i, reaction in enumerate(list(self.reactions.values())[:n_reactions]):
             loc = int(self.xss[self.jxs[8] + i])
-
-            
             if loc == 0:
                 # No angular distribution data are given for this
                 # reaction, isotropic scattering is asssumed (in CM if
                 # TY < 0 and in LAB if TY > 0)
                 reaction.aflag = 'iso'
                 continue
-
+            
             ind = self.jxs[9] + loc
 
             # Number of energies at which angular distributions are tabulated
@@ -927,6 +925,9 @@ class NeutronTable(AceTable):
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
                 ind += 2 * n_regions
+            
+            assert n_regions <= 1, 'Multiple interpolation regions not yet supported' \
+                                   'for continuous tabular energy distributions.'
 
             # Number of outgoing energies in each E_out table
             NE = int(self.xss[ind])
@@ -948,8 +949,10 @@ class NeutronTable(AceTable):
                     INTT = INTTp
                     ND = 0
                 edist.intt.append(INTT)
-                #if ND > 0:
-                #    print [reaction, ND, INTT]
+                
+                # check for discrete lines present
+                assert ND == 0, 'Discrete lines in continuous tabular' \
+                                'distribution not yet supported.'
 
                 NP = int(self.xss[ind+1])
                 nps.append(NP)
@@ -1197,14 +1200,13 @@ class NeutronTable(AceTable):
             edist.cdf = []         # Cumulative dist for " " "
 			edist.LC = []          # Use LC to determine ang. data exist or not
 
-            # Consider not all incoming E i, outgoing E j has ang data 
-            edist.a_dist_intt = {}
-            edist.a_dist_mu_out = {} # Cosine scattering angular grid
-            edist.a_dist_pdf = {}    # Probability dist function
-            edist.a_dist_cdf = {}
+            npas = []
+            edist.a_dist_intt = []
+            edist.a_dist_mu_out = [] # Cosine scattering angular grid
+            edist.a_dist_pdf = []    # Probability dist function
+            edist.a_dist_cdf = []
             for i in range(NE): # for a specific incoming energy i
                 INTTp = int(self.xss[ind])
-                
                 # No matter INTTp > 10 or not, we can get the data 
                 # At sample stage, use nd to determine if there is 
                 # discrete lines error
@@ -1213,7 +1215,6 @@ class NeutronTable(AceTable):
                 
                 # check for discrete lines present
                 if INTTp / 10 != 0:
-                    #location_start = int(self.xss[self.jxs[10] + i])
                     mts = self.xss[self.jxs[3]:self.jxs[3] + self.nxs[4]]
                     locc = self.xss[self.jxs[10] : self.jxs[10] + self.nxs[5]]
                     _ = locc.index(location_start)
@@ -1234,30 +1235,44 @@ class NeutronTable(AceTable):
 				edist.LC.append(np.asarray(dat[3], dtype=int))
                 ind += 2 + 4*NPE
 
+                # Secondary angular distribution
+                edist.a_dist_intt.append([])
+                edist.a_dist_mu_out.append([])
+                edist.a_dist_pdf.append([])
+                edist.a_dist_cdf.append([])
                 for j in range(NPE): # for a specific outgoing energy j
                     if edist.LC[i][j] > 0:
-                        # There is ang data in i, j
-                        edist.a_dist_intt[i] = {}
-                        edist.a_dist_mu_out[i] = {}
-                        edist.a_dist_pdf[i] = {}
-                        edist.a_dist_cdf[i] = {}
-                        
-                        edist.a_dist_intt[i][j] = int(self.xss[ind])
+                        edist.a_dist_intt[-1].append(int(self.xss[ind]))
                         NPA = int(self.xss[ind+1])
+                        npas.append(NPA)
                         dat = self.xss[ind+2:ind+2+3*NPA]
                         dat.shape = (3, NPA)
-                        edist.a_dist_mu_out[i][j] = dat[0]
-                        edist.a_dist_pdf[i][j] = dat[1]
-                        edist.a_dist_cdf[i][j] = dat[2])
+                        edist.a_dist_mu_out[-1].append(dat[0])
+                        edist.a_dist_pdf[-1].append(dat[1])
+                        edist.a_dist_cdf[-1].append(dat[2])
                         ind += 2 + 3*NPA
+                    elif edistLC[i][j] == 0:
+                        # Insert None for correct access
+                        edis.a_dist_intt[-1].append(None)
+                        edist.a_dist_mu_out[-1].append(None)
+                        edist.a.dist_pdf[-1].append(None)
+                        edist.a_dist_cdf[-1].append(None)
                         
 
-            # convert to arrays if possible
+           # convert to arrays if possible
             edist.intt = np.array(edist.intt)
+            npes = np.array(npes)
+            npas = np.array(npas)
             if all((npes[1:] - npes[:-1]) == 0):
                 edist.energy_out = np.array(edist.energy_out)
                 edist.pdf = np.array(edist.pdf)
                 edist.cdf = np.array(edist.cdf)
+
+                edist.a_dist_intt = np.array(edist.a_dist_intt)
+                if all((npas[1:] - npas[:-1]) == 0):
+                    edist.a_dist_mu_out = np.array(edist.a_dist_mu_out)
+                    edist.a_dist_pdf = np.array(edist.a_dist_pdf)
+                    edist.a_dist_cdf = np.array(edist.a_dist_cdf)
 
         elif law == 66:
             # N-body phase space distribution (ENDF File 6 Law 6)
@@ -1793,7 +1808,6 @@ class Reaction(object):
         elif edist.law == 44:
             # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
             # Interpolation scheme
-            
             assert !hasattr(edist, NBT), 'Multiple interpolation regions not yet supported' \
              'for Kalbach-Mann energy distributions in isotope ' + self.table.name
              
@@ -1878,7 +1892,10 @@ class Reaction(object):
             else:
                 r1 = rand()
                 mu = np.log(r1*np.exp(km_a) + (1.0 - r1)*np.exp(-km_a))/km_a
-                
+            
+            # Make sure mu is in range [-1,1]
+            if (abs(mu) > 1):
+                 mu = np.sign(mu)
             return [mu, E_out]
         
         elif edist.law == 61:
@@ -1973,6 +1990,9 @@ class Reaction(object):
                         else:
                             _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
                             mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
+                    # Make sure mu is in range [-1,1]
+                    if (abs(mu) > 1):
+                        mu = np.sign(mu)
                     return [mu, E_out]
             else:
                 k = k+1 
@@ -1998,6 +2018,9 @@ class Reaction(object):
                         else:
                             _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
                             mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
+                    # Make sure mu is in range [-1,1]
+                    if (abs(mu) > 1):
+                        mu = np.sign(mu)
                     return [mu, E_out]
                 
     def sample_mu(self,e):                
@@ -2029,6 +2052,9 @@ class Reaction(object):
                 mui = self.ang_cos[ii - 1]
                 mui1 = self.ang_cos[ii]
                 mu = mui + (32 * r1 - ii) * (mui1 - mui)
+                # Make sure mu is in range [-1,1]
+                if (abs(mu) > 1):
+                     mu = np.sign(mu)
                 return mu
             else: # tabular 
                 cos = self.ang_cos[i]
@@ -2053,6 +2079,9 @@ class Reaction(object):
                     else:
                         _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
                         mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
+                # Make sure mu is in range [-1,1]
+                if (abs(mu) > 1):
+                     mu = np.sign(mu)
                 return mu
             
              
