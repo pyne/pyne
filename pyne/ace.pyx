@@ -284,7 +284,6 @@ class Library(object):
                     lines.pop(0)
                     lines.append(f.readline())
             else:
-                name_old = False
                 words = lines[0].split()
                 name = words[0]
                 awr = float(words[1])
@@ -333,7 +332,11 @@ class Library(object):
                 temp_in_K = round(temp * 1e6 / 8.617342e-5)
                 print("Loading nuclide {0} at {1} K".format(name, temp_in_K))
             self.tables[name] = table
-            if name_old:
+            try: 
+                name_old
+            except:
+                pass
+            else:
                 self.tables[name_old] = table
 
             # Read comment
@@ -705,6 +708,7 @@ class NeutronTable(AceTable):
             ang_cos = {}
             ang_pdf = {}
             ang_cdf = {}
+            ang_intt= {}
             for j, location in enumerate(locations):
                 if location > 0:
                     # Equiprobable 32 bin distribution
@@ -719,16 +723,20 @@ class NeutronTable(AceTable):
                     ang_dat = self.xss[ind:ind + 3*n_bins]
                     ang_dat.shape = (3, n_bins)
                     ang_cos[j], ang_pdf[j], ang_cdf[j] = ang_dat
+                    ang_intt[j] = JJ
                     ind += 3 * n_bins
+
                 else:
                     # Isotropic angular distribution
                     ang_cos = np.array([-1., 0., 1.])
                     ang_pdf = np.array([0.5, 0.5, 0.5])
                     ang_cdf = np.array([0., 0.5, 1.])
+                    ang_intt= np.array([0])
 
             reaction.ang_cos = ang_cos
             reaction.ang_pdf = ang_pdf
             reaction.ang_cdf = ang_cdf
+            reaction.ang_intt= ang_intt
 
     def _read_energy_distributions(self):
         """Determine the energy distribution for secondary neutrons for
