@@ -729,7 +729,7 @@ class NeutronTable(AceTable):
                 nu_t += self.nu_t_coeffs[i] * e ** i  
         else if self.nu_t_type == "tabular":
             if hasattr(self, 'nu_t_interp_NBT'):
-                nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value, \\
+                nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value, \
                                            self.nu_t_interp_NBT, self.nu_t_interp_INT)
             else:
                 nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value)
@@ -741,7 +741,7 @@ class NeutronTable(AceTable):
                     nu_p += self.nu_p_coeffs[i] * e ** i  
             else if self.nu_p_type == 'tabular':
                 if hasattr(self, 'nu_p_interp_NBT'):
-                    nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value, \\
+                    nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value, \
                                                self.nu_p_interp_NBT, self.nu_p_interp_INT)
                 else:
                     nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value)
@@ -750,7 +750,7 @@ class NeutronTable(AceTable):
         # Delay nu
         if hasattr(self, 'nu_d_energy'):
             if hasattr(self, 'nu_d_interp_NBT'):
-                nu_d = _interpolation_tab1(e, self.nu_d_energy, self.nu_d_value, \\ 
+                nu_d = _interpolation_tab1(e, self.nu_d_energy, self.nu_d_value, \
                                            self.nu_d_interp_NBT, self.nu_d_interp_INT)
             else:
                 nu_d = _interpolation_tab1(e, self.nu_d_energy, self.nu_d_value) 
@@ -1999,6 +1999,7 @@ class Reaction(object):
                             _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
                             mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
                     return [mu, E_out]
+                
     def sample_mu(self,e):                
         # Sample the independent mu
         if hasattr(self, 'iso'):
