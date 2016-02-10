@@ -129,7 +129,7 @@ def _interpolation_tab1(xin, x, y, interp_NBT = None, interp_INT = None):
     
     # Determine interpolation scheme 
     if interp_NBT == None:
-        interp == 2 # linear-linear  
+        interp = 2 # linear-linear  
     else:
         if len(interp_NBT) == 1:
             interp = int(interp_INT[0])
@@ -620,7 +620,7 @@ class NeutronTable(AceTable):
             if LNU == 1:
                 self.nu_t_type = "polynomial"
                 self.nu_t_NC = int(self.xss[KNU+1])
-                self.nu_t_coeffs = self.xss[KNU+2 : KNU+2+NC]
+                self.nu_t_coeffs = self.xss[KNU+2 : KNU+2+self.nu_t_NC]
 
             # Tabular data form of nu
             elif LNU == 2:
@@ -641,7 +641,7 @@ class NeutronTable(AceTable):
             if LNU == 1:
                 self.nu_p_type = "polynomial"
                 self.nu_p_NC = int(self.xss[KNU+1])
-                self.nu_p_coeffs = self.xss[KNU+2 : KNU+2+NC]
+                self.nu_p_coeffs = self.xss[KNU+2 : KNU+2+self.nu_p_NC]
 
             # Tabular data form of nu
             elif LNU == 2:
@@ -661,7 +661,7 @@ class NeutronTable(AceTable):
             if LNU == 1:
                 self.nu_t_type = "polynomial"
                 self.nu_t_NC = int(self.xss[KNU+1])
-                self.nu_t_coeffs = self.xss[KNU+2 : KNU+2+NC]
+                self.nu_t_coeffs = self.xss[KNU+2 : KNU+2+self.nu_t_NC]
 
             # Tabular data form of nu
             elif LNU == 2:
@@ -727,7 +727,7 @@ class NeutronTable(AceTable):
             nu_t = 0.0
             for i in range(self.nu_t_NC):
                 nu_t += self.nu_t_coeffs[i] * e ** i  
-        else if self.nu_t_type == "tabular":
+        elif self.nu_t_type == "tabular":
             if hasattr(self, 'nu_t_interp_NBT'):
                 nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value, \
                                            self.nu_t_interp_NBT, self.nu_t_interp_INT)
@@ -736,10 +736,10 @@ class NeutronTable(AceTable):
         # Prompt nu
         if hasattr(self, 'nu_p_type'):
             if self.nu_p_type == "polynomial":
-                nu_p == 0.0 
+                nu_p = 0.0 
                 for i in range(self.nu_p_NC):
                     nu_p += self.nu_p_coeffs[i] * e ** i  
-            else if self.nu_p_type == 'tabular':
+            elif self.nu_p_type == 'tabular':
                 if hasattr(self, 'nu_p_interp_NBT'):
                     nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value, \
                                                self.nu_p_interp_NBT, self.nu_p_interp_INT)
@@ -1251,9 +1251,9 @@ class NeutronTable(AceTable):
                         edist.a_dist_pdf[-1].append(dat[1])
                         edist.a_dist_cdf[-1].append(dat[2])
                         ind += 2 + 3*NPA
-                    elif edistLC[i][j] == 0:
+                    elif edist.LC[i][j] == 0:
                         # Insert None for correct access
-                        edis.a_dist_intt[-1].append(None)
+                        edist.a_dist_intt[-1].append(None)
                         edist.a_dist_mu_out[-1].append(None)
                         edist.a.dist_pdf[-1].append(None)
                         edist.a_dist_cdf[-1].append(None)
@@ -1722,7 +1722,7 @@ class Reaction(object):
             A = self.table.awr 
             Q = self.Q
             E_out = (A / (A + 1.0)) ** 2 * (e - (A + 1.0) / A * Q)
-            mu = sample_mu(e)
+            mu = self.sample_mu(e)
             return[mu, E_out]
             
         elif edist.law == 4:
@@ -1779,7 +1779,7 @@ class Reaction(object):
             if edist.intt[l] == 1:
                 # Histogram interpolation
                 if(p_l_k > 0):
-                    e_out = E_l_k + (r1 - c_k) / p_l_k 
+                    e_out = E_l_k + (r1 - cdf[k]) / p_l_k 
                 else:
                     e_out = E_l_k  
                     
@@ -1802,13 +1802,13 @@ class Reaction(object):
                 else:
                     E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
                     
-            mu = sample_mu(e)
+            mu = self.sample_mu(e)
             return [mu, E_out]
                     
         elif edist.law == 44:
             # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
             # Interpolation scheme
-            assert !hasattr(edist, NBT), 'Multiple interpolation regions not yet supported' \
+            assert not hasattr(edist, 'NBT'), 'Multiple interpolation regions not yet supported' \
              'for Kalbach-Mann energy distributions in isotope ' + self.table.name
              
             # Find energy bin and calculate interpolation factor -- if the energy is
@@ -1826,11 +1826,10 @@ class Reaction(object):
             # Sample between the ith and (i+1)th bin
             if (f > rand()):
               l = i + 1
-            else
+            else:
               l = i
               
             # Interpolation for energy E1 and EK
-            n_energy_out = size(this%table(i)%e_out)
             E_i_1 = edist.energy_out[i][0]
             E_i_K = edist.energy_out[i][-1]
         
@@ -1886,7 +1885,7 @@ class Reaction(object):
               E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
               
             # Sampled correlated angle from Kalbach-Mann parameters
-            if (rand() > km_r) then:
+            if (rand() > km_r):
                 T = (2.0*rand() - 1.0) * np.sinh(km_a)
                 mu = np.log(T + (T*T + 1.0)**0.5)/km_a
             else:
@@ -1898,7 +1897,7 @@ class Reaction(object):
             # Like 44, but tabular distribution instead of Kalbach-87
             # Interpolation scheme
             
-            assert !hasattr(edist, 'NBT'), 'Multiple interpolation regions not yet supported' \
+            assert hasattr(edist, 'NBT') == False, 'Multiple interpolation regions not yet supported' \
              'for correlated angle-energy distributions in isotope ' + self.table.name
             
             # find energy bin and calculate interpolation factor -- if the energy is
@@ -2019,7 +2018,7 @@ class Reaction(object):
                         mu = np.sign(mu)
                     return [mu, E_out]
                 
-    def sample_mu(self,e):                
+    def sample_mu(self, e):                
         # Sample the independent mu
         if hasattr(self, 'iso'):
             mu = 2.0 * rand() - 1.0  
@@ -2058,10 +2057,10 @@ class Reaction(object):
                 cdf = self.ang_cdf[i]
                 JJ = self.JJ[i]
                 r1 = rand()
-                j = np.searchsorted(CDF, r1) - 1 
+                j = np.searchsorted(cdf, r1) - 1 
                 
-                # Check to make sure k is <= len(cdf) - 2 
-                j = min(k, len(cdf) - 2)
+                # Check to make sure j is <= len(cdf) - 2 
+                j = min(j, len(cdf) - 2)
                 
                 if JJ == 1: # histogram
                     if pdf[j] > 0.0:
@@ -2073,11 +2072,11 @@ class Reaction(object):
                     if m == 0.0:
                         mu = cos[j] + (r1 - cdf[j]) / pdf[j]
                     else:
-                        _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
-                        mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
+                        _ = max(0, (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j]))) ** 0.5 
+                        mu = cos[j] + (_ - pdf[j]) / m 
                 # Make sure mu is in range [-1,1]
                 if (abs(mu) > 1):
-                     mu = np.sign(mu)
+                    mu = np.sign(mu)
                 return mu
             
              
