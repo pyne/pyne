@@ -122,7 +122,7 @@ def _interpolation_tab1(xin, x, y, interp_NBT = None, interp_INT = None):
     cdef int i, interp  
     if xin <= x[0]:
         return y[0]
-    else if xin >= x[-1]:
+    elif xin >= x[-1]:
         return y[-1]
     else:
         I = np.searchsorted(x, xin) - 1
@@ -133,7 +133,7 @@ def _interpolation_tab1(xin, x, y, interp_NBT = None, interp_INT = None):
     else:
         if len(interp_NBT) == 1:
             interp = int(interp_INT[0])
-        else if len(interp_NBT) > 1:
+        elif len(interp_NBT) > 1:
             for i in range(len(interp_NBT)):
                 if I < interp_NBT[i]:
                     interp = int(interp_INT[i])
@@ -153,13 +153,13 @@ def _interpolation_tab1(xin, x, y, interp_NBT = None, interp_INT = None):
     if interp == 2: # linear-linear  
         r = (x - x0) / (x1 - x0)
         return y0 + r * (y1 - y0)
-    else if interp == 3: # linear _log  
+    elif interp == 3: # linear _log  
         r = np.log(x / x0) / np.log(x1 / x0)
         return y0 + r * (y1 - y0)
-    else if interp == 4: # log-linear
+    elif interp == 4: # log-linear
         r = (x - x0) / (x1 - x0)
         return y0 * np.exp(r * np.log(y1 / y0))
-    else if interp == 5: # log-log
+    elif interp == 5: # log-log
         r = np.log(x/x0) / np.log(x1/x0)
         return y0 * np.exp(r * np.log(y1 / y0))
     
@@ -1892,10 +1892,6 @@ class Reaction(object):
             else:
                 r1 = rand()
                 mu = np.log(r1*np.exp(km_a) + (1.0 - r1)*np.exp(-km_a))/km_a
-            
-            # Make sure mu is in range [-1,1]
-            if (abs(mu) > 1):
-                 mu = np.sign(mu)
             return [mu, E_out]
         
         elif edist.law == 61:
