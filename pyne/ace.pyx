@@ -775,13 +775,8 @@ class NeutronTable(AceTable):
         for i, reaction in enumerate(list(self.reactions.values())[:n_reactions]):
             loc = int(self.xss[self.jxs[8] + i])
 
-            # Check if angular distribution data exist
-            if loc == -1:
-                # Angular distribution data are specified through LAWi
-                # = 44 in the DLW block
-                reaction.aflag = 'in_edist'
-                continue
-            elif loc == 0:
+            
+            if loc == 0:
                 # No angular distribution data are given for this
                 # reaction, isotropic scattering is asssumed (in CM if
                 # TY < 0 and in LAB if TY > 0)
@@ -1138,12 +1133,24 @@ class NeutronTable(AceTable):
             edist.ang = []         # Angular distribution slope for " " "
             for i in range(NE):
                 INTTp = int(self.xss[ind])
-                if INTTp > 10:
-                    INTT = INTTp % 10
-                    ND = (INTTp - INTT)/10
-                else:
-                    INTT = INTTp
-                edist.intt.append(INTT)
+                
+                # No matter INTTp > 10 or not, we can get the data 
+                # At sample stage, use nd to determine if there is 
+                # discrete lines error
+                edist.intt.append(INTTp % 10)
+                edist.nd.append(INTTp / 10)
+                
+                # check for discrete lines present
+                if INTTp / 10 != 0:
+                    #location_start = int(self.xss[self.jxs[10] + i])
+                    mts = self.xss[self.jxs[3]:self.jxs[3] + self.nxs[4]]
+                    locc = self.xss[self.jxs[10] : self.jxs[10] + self.nxs[5]]
+                    _ = locc.index(location_start)
+                    mt = int(mts[_])
+                    assert INTTp / 10 == 0, 'Discrete lines in Kalbach-Mann distribution not'\
+                                        'yet supported, isotope = ' + self.name +\
+                                        'reaction mt = ' + str(mt) + 'E_in index = ' + str(i)
+                    
 
                 NP = int(self.xss[ind+1])
                 nps.append(NP)
@@ -1176,73 +1183,82 @@ class NeutronTable(AceTable):
                 edist.NBT, edist.INT = dat
                 ind += 2 * n_regions
 
-            # Number of outgoing energies in each E_out table
+            # Number of incoming energies
             NE = int(self.xss[ind])
             edist.energy_in = self.xss[ind+1:ind+1+NE]
             L = np.asarray(self.xss[ind+1+NE:ind+1+2*NE], dtype=int)
             ind += 1 + 2*NE
-
+            
             npes = []
             edist.intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
+            edist.nd = []
             edist.energy_out = []  # Outgoing E grid for each incoming E
             edist.pdf = []         # Probability dist for " " "
             edist.cdf = []         # Cumulative dist for " " "
+			edist.LC = []          # Use LC to determine ang. data exist or not
 
-            npas = []
-            edist.a_dist_intt = []
-            edist.a_dist_mu_out = [] # Cosine scattering angular grid
-            edist.a_dist_pdf = []    # Probability dist function
-            edist.a_dist_cdf = []
-            for i in range(NE):
+            # Consider not all incoming E i, outgoing E j has ang data 
+            edist.a_dist_intt = {}
+            edist.a_dist_mu_out = {} # Cosine scattering angular grid
+            edist.a_dist_pdf = {}    # Probability dist function
+            edist.a_dist_cdf = {}
+            for i in range(NE): # for a specific incoming energy i
                 INTTp = int(self.xss[ind])
-                if INTTp > 10:
-                    INTT = INTTp % 10
-                    ND = (INTTp - INTT)/10
-                else:
-                    INTT = INTTp
-                edist.intt.append(INTT)
+                
+                # No matter INTTp > 10 or not, we can get the data 
+                # At sample stage, use nd to determine if there is 
+                # discrete lines error
+                edist.intt.append(INTTp % 10)
+                edist.nd.append(INTTp / 10)
+                
+                # check for discrete lines present
+                if INTTp / 10 != 0:
+                    #location_start = int(self.xss[self.jxs[10] + i])
+                    mts = self.xss[self.jxs[3]:self.jxs[3] + self.nxs[4]]
+                    locc = self.xss[self.jxs[10] : self.jxs[10] + self.nxs[5]]
+                    _ = locc.index(location_start)
+                    mt = int(mts[_])
+                    assert INTTp / 10 == 0, 'Discrete lines in correlated angle-energy distribution not'\
+                                        'yet supported, isotope = ' + self.name +\
+                                        'reaction mt = ' + str(mt) + 'E_in index = ' + str(i)
 
                 # Secondary energy distribution
                 NPE = int(self.xss[ind+1])
-                npes.append(NPE)
+                npes.append(NPE) 
                 dat = self.xss[ind+2:ind+2+4*NPE]
                 dat.shape = (4, NPE)
                 edist.energy_out.append(dat[0])
                 edist.pdf.append(dat[1])
                 edist.cdf.append(dat[2])
-                LC = np.asarray(dat[3], dtype=int)
+				# For case of LC[e_out] = 0
+				edist.LC.append(np.asarray(dat[3], dtype=int))
                 ind += 2 + 4*NPE
 
-                # Secondary angular distribution
-                edist.a_dist_intt.append([])
-                edist.a_dist_mu_out.append([])
-                edist.a_dist_pdf.append([])
-                edist.a_dist_cdf.append([])
-                for j in range(NPE):
-                    edist.a_dist_intt[-1].append(int(self.xss[ind]))
-                    NPA = int(self.xss[ind+1])
-                    npas.append(NPA)
-                    dat = self.xss[ind+2:ind+2+3*NPA]
-                    dat.shape = (3, NPA)
-                    edist.a_dist_mu_out[-1].append(dat[0])
-                    edist.a_dist_pdf[-1].append(dat[1])
-                    edist.a_dist_cdf[-1].append(dat[2])
-                    ind += 2 + 3*NPA
+                for j in range(NPE): # for a specific outgoing energy j
+                    if edist.LC[i][j] > 0:
+                        # There is ang data in i, j
+                        edist.a_dist_intt[i] = {}
+                        edist.a_dist_mu_out[i] = {}
+                        edist.a_dist_pdf[i] = {}
+                        edist.a_dist_cdf[i] = {}
+                        
+                        edist.a_dist_intt[i][j] = int(self.xss[ind])
+                        NPA = int(self.xss[ind+1])
+                        dat = self.xss[ind+2:ind+2+3*NPA]
+                        dat.shape = (3, NPA)
+                        edist.a_dist_mu_out[i][j] = dat[0]
+                        edist.a_dist_pdf[i][j] = dat[1]
+                        edist.a_dist_cdf[i][j] = dat[2])
+                        ind += 2 + 3*NPA
+                        
 
             # convert to arrays if possible
             edist.intt = np.array(edist.intt)
-            npes = np.array(npes)
-            npas = np.array(npas)
             if all((npes[1:] - npes[:-1]) == 0):
                 edist.energy_out = np.array(edist.energy_out)
                 edist.pdf = np.array(edist.pdf)
                 edist.cdf = np.array(edist.cdf)
 
-                edist.a_dist_intt = np.array(edist.a_dist_intt)
-                if all((npas[1:] - npas[:-1]) == 0):
-                    edist.a_dist_mu_out = np.array(edist.a_dist_mu_out)
-                    edist.a_dist_pdf = np.array(edist.a_dist_pdf)
-                    edist.a_dist_cdf = np.array(edist.a_dist_cdf)
         elif law == 66:
             # N-body phase space distribution (ENDF File 6 Law 6)
             edist.nbodies = int(self.xss[ind])
@@ -1690,7 +1706,9 @@ class Reaction(object):
             # Inelastic level scattering
             A = self.table.awr 
             Q = self.Q
-            e_out = (A / (A + 1.0)) ** 2 * (e - (A + 1.0) / A * Q)
+            E_out = (A / (A + 1.0)) ** 2 * (e - (A + 1.0) / A * Q)
+            mu = sample_mu(e)
+            return[mu, E_out]
             
         elif edist.law == 4:
             #Continuous Tabular Distribution 
@@ -1769,10 +1787,16 @@ class Reaction(object):
                 else:
                     E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
                     
+            mu = sample_mu(e)
+            return [mu, E_out]
+                    
         elif edist.law == 44:
             # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
             # Interpolation scheme
             
+            assert !hasattr(edist, NBT), 'Multiple interpolation regions not yet supported' \
+             'for Kalbach-Mann energy distributions in isotope ' + self.table.name
+             
             # Find energy bin and calculate interpolation factor -- if the energy is
             # outside the range of the tabulated energies, choose the first or last bins
             if (e <= edist.energy_in[0]):
@@ -1861,6 +1885,9 @@ class Reaction(object):
             # Like 44, but tabular distribution instead of Kalbach-87
             # Interpolation scheme
             
+            assert !hasattr(edist, 'NBT'), 'Multiple interpolation regions not yet supported' \
+             'for correlated angle-energy distributions in isotope ' + self.table.name
+            
             # find energy bin and calculate interpolation factor -- if the energy is
             # outside the range of the tabulated energies, choose the first or last bins
             if (e <= edist.energy_in[0]):
@@ -1891,7 +1918,7 @@ class Reaction(object):
             
             # Determine outgoing energy bin
             r1 = rand() 
-            cdf = edist.cdf  
+            cdf = edist.cdf[l]
             k = np.searchsorted(cdf, r1) - 1
             c_k = cdf[k]
             
@@ -1921,33 +1948,64 @@ class Reaction(object):
                 E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
             else:
                 E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
-              
+                
             # Find correlated angular distribution for closest outgoing energy bin 
             if(r1 - c_k < cdf[k+1] - r1):
-                intt = edist.a_dist_intt[l][k]
-                mu_out = edist.a_dist_mu_out[l][k]
-                pdf = edist.a.dist_pdf[l][k]
-                cdf = edist.a.dist.cdf[l][k]
-                #mu = 
-            
-                
-            
-                
-            
-                    
-            
-            
-            
-            
-            
-        if hasattr(self, 'aflag'):
-            if self.aflag == 'iso':
-                mu = 2.0 * rand() - 1.0  
-            elif self.aflag == 'in_edist':
-                # TO DO ...
+                if edist.LC[l][k] == 0:
+                    mu = 2.0 * rand() - 1
+                    return [mu, E_out]
+                else:
+                    JJ = edist.a_dist_intt[l][k]
+                    cos = edist.a_dist_mu_out[l][k]
+                    pdf = edist.a.dist_pdf[l][k]
+                    cdf = edist.a.dist.cdf[l][k]
+                    r1 = rand()
+                    j = np.searchsorted(cdf, r1) - 1 
+                    if JJ == 1: # histogram
+                        if pdf[j] > 0.0:
+                            mu = cos[j] + (r1 - cdf[j]) / pdf[j] 
+                        else:
+                            mu = cos[j]
+                    elif JJ == 2: #linear-linear
+                        m = (pdf[j + 1] - pdf[j]) / (cos[j + 1] - cos[j])
+                        if m == 0.0:
+                            mu = cos[j] + (r1 - cdf[j]) / pdf[j]
+                        else:
+                            _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
+                            mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
+                    return [mu, E_out]
+            else:
+                k = k+1 
+                if edist.LC[l][k] == 0:
+                    mu = 2.0 * rand() - 1
+                    return [mu, E_out]
+                else:
+                    JJ = edist.a_dist_intt[l][k]
+                    cos = edist.a_dist_mu_out[l][k]
+                    pdf = edist.a.dist_pdf[l][k]
+                    cdf = edist.a.dist.cdf[l][k]
+                    r1 = rand()
+                    j = np.searchsorted(cdf, r1) - 1 
+                    if JJ == 1: # histogram
+                        if pdf[j] > 0.0:
+                            mu = cos[j] + (r1 - cdf[j]) / pdf[j] 
+                        else:
+                            mu = cos[j]
+                    elif JJ == 2: #linear-linear
+                        m = (pdf[j + 1] - pdf[j]) / (cos[j + 1] - cos[j])
+                        if m == 0.0:
+                            mu = cos[j] + (r1 - cdf[j]) / pdf[j]
+                        else:
+                            _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
+                            mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
+                    return [mu, E_out]
+    def sample_mu(self,e):                
+        # Sample the independent mu
+        if hasattr(self, 'iso'):
+            mu = 2.0 * rand() - 1.0  
+            return mu
         else:
             energy = self.ang_energy_in  
-            locations = self.ang_locations 
             if (e <= energy[0]):
                 i = 0
                 r = 0.0
@@ -1961,7 +2019,7 @@ class Reaction(object):
             if (r > rand()):
                 i = i + 1  
                 
-            loc = locations[i]
+            loc = self.ang_locations[i]
             if loc == 0: # isotropic 
                 return 2.0 * rand() - 1.0 
             elif loc > 0: # 32 equip bin 
@@ -1970,6 +2028,7 @@ class Reaction(object):
                 mui = self.ang_cos[ii - 1]
                 mui1 = self.ang_cos[ii]
                 mu = mui + (32 * r1 - ii) * (mui1 - mui)
+                return mu
             else: # tabular 
                 cos = self.ang_cos[i]
                 pdf = self.ang_pdf[i]
@@ -1977,6 +2036,9 @@ class Reaction(object):
                 JJ = self.JJ[i]
                 r1 = rand()
                 j = np.searchsorted(CDF, r1) - 1 
+                
+                # Check to make sure k is <= len(cdf) - 2 
+                j = min(k, len(cdf) - 2)
                 
                 if JJ == 1: # histogram
                     if pdf[j] > 0.0:
@@ -1990,6 +2052,7 @@ class Reaction(object):
                     else:
                         _ = (pdf[j] ** 2 + 2.0 * m * (r1 - cdf[j])) ** 0.5 
                         mu = cos[j] + (max(0.0, _) - pdf[j]) / m 
+                return mu
             
              
 class DosimetryTable(AceTable):
