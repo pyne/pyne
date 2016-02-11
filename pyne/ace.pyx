@@ -582,8 +582,10 @@ class NeutronTable(AceTable):
                 self.nu_t_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_t_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
+                    self.nu_t_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                else:
+                    self.nu_t_interp_INT = 2
                 NE = int(self.xss[KNU+2+2*NR])
                 self.nu_t_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_t_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
@@ -603,8 +605,10 @@ class NeutronTable(AceTable):
                 self.nu_p_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_p_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
+                    self.nu_p_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                else:
+                    self.nu_p_interp_INT = 2
                 NE = int(self.xss[KNU+2+2*NR])
                 self.nu_p_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_p_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
@@ -623,8 +627,10 @@ class NeutronTable(AceTable):
                 self.nu_t_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_t_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
+                    self.nu_t_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                else:
+                    self.nu_t_interp_INT = 2
                 NE = int(self.xss[KNU+2+2*NR])
                 self.nu_t_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
                 self.nu_t_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
@@ -634,8 +640,8 @@ class NeutronTable(AceTable):
             KNU = self.jxs[24]
             NR = int(self.xss[KNU+1])
             if NR > 0:
-                interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                self.nu_d_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
+                self.nu_d_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
             NE = int(self.xss[KNU+2+2*NR])
             self.nu_d_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
             self.nu_d_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
@@ -650,8 +656,10 @@ class NeutronTable(AceTable):
                 self.nu_d_precursor_const[group] = self.xss[i]
                 NR = int(self.xss[i+1])
                 if NR > 0:
-                    interp_NBT = self.xss[i+2    : i+2+NR]
-                    interp_INT = self.xss[i+2+NR : i+2+2*NR]
+                    self.nu_d_precursor_interp_NBT = self.xss[i+2    : i+2+NR]
+                    self.nu_d_precursor_interp_INT = self.xss[i+2+NR : i+2+2*NR]
+                else:
+                    self.nu_d_precursor_interp_INT = 2
                 NE = int(self.xss[i+2+2*NR])
                 self.nu_d_precursor_energy[group] = self.xss[i+3+2*NR    : i+3+2*NR+NE  ]
                 self.nu_d_precursor_prob[group]   = self.xss[i+3+2*NR+NE : i+3+2*NR+2*NE]
