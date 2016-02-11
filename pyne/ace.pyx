@@ -1209,7 +1209,7 @@ class NeutronTable(AceTable):
             edist.energy_out = []  # Outgoing E grid for each incoming E
             edist.pdf = []         # Probability dist for " " "
             edist.cdf = []         # Cumulative dist for " " "
-			edist.LC = []          # Use LC to determine ang. data exist or not
+            edist.LC = []          # Use LC to determine ang. data exist or not
 
             npas = []
             edist.a_dist_intt = []
@@ -1232,8 +1232,8 @@ class NeutronTable(AceTable):
                 edist.energy_out.append(dat[0])
                 edist.pdf.append(dat[1])
                 edist.cdf.append(dat[2])
-				# For case of LC[e_out] = 0
-				edist.LC.append(np.asarray(dat[3], dtype=int))
+                # For case of LC[e_out] = 0
+                edist.LC.append(np.asarray(dat[3], dtype=int))
                 ind += 2 + 4*NPE
 
                 # Secondary angular distribution
