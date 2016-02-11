@@ -819,7 +819,7 @@ class NeutronTable(AceTable):
 
             # Read locations for angular distributions
             locations = np.asarray(self.xss[ind:ind + n_energies], dtype=int)
-			reaction.ang_locations = locations
+            reaction.ang_locations = locations
             ind += n_energies
 
             ang_cos = {}
@@ -1260,7 +1260,7 @@ class NeutronTable(AceTable):
                         edist.a_dist_cdf[-1].append(None)
                         
 
-           # convert to arrays if possible
+            # convert to arrays if possible
             edist.intt = np.array(edist.intt)
             npes = np.array(npes)
             npas = np.array(npas)
@@ -1807,9 +1807,9 @@ class Reaction(object):
                 
             # Sample between the ith and (i+1)th bin
             if (f > rand()):
-              l = i + 1
+                l = i + 1
             else:
-              l = i
+                l = i
               
             assert edist.nd[l] == 0, 'Discrete lines in Kalbach-Mann distribution not '\
                                      'yet supported.\n' \
@@ -1867,9 +1867,9 @@ class Reaction(object):
                 
             # Now interpolate between incident energy bins i and i + 1
             if (l == i):
-              E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
+                E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
             else:
-              E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
+                E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
               
             # Sampled correlated angle from Kalbach-Mann parameters
             if (rand() > km_r):
@@ -2015,7 +2015,7 @@ class Reaction(object):
                 mu = mui + (32 * r1 - ii) * (mui1 - mui)
                 # Make sure mu is in range [-1,1]
                 if (abs(mu) > 1):
-                     mu = np.sign(mu)
+                    mu = np.sign(mu)
                 return mu
             else: # tabular 
                 cos = self.ang_cos[i]
