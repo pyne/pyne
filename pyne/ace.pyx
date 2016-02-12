@@ -1748,7 +1748,7 @@ class Reaction(object):
             # Continuous Tabular Distribution 
             if hasattr(edist, 'int'):
                 if len(edist.int) > 1:
-                    raise NotImplementedError('Multiple interpolation regions not yet supported'\
+                    raise NotImplementedError('Multiple interpolation regions not yet supported'
                                               ' for continuous tabular energy distributions.')
                 histogram_interp = (edist.int[0] == 1)
             else:
@@ -1772,7 +1772,7 @@ class Reaction(object):
                     
             # check for discrete lines present
             if edist.nd[l] != 0:
-                raise NotImplementedError('Discrete lines in continuous tabular '\
+                raise NotImplementedError('Discrete lines in continuous tabular '
                                           'distribution not yet supported.')
             
             # Interpolation for energy E1 and EK
@@ -1851,7 +1851,7 @@ class Reaction(object):
         edist = self.energy_dist
         # Interpolation scheme
         if hasattr(edist, 'nbt'):
-            raise NotImplementedError('Multiple interpolation regions not yet supported '\
+            raise NotImplementedError('Multiple interpolation regions not yet supported '
                                       'for Kalbach-Mann energy distributions')
          
         # Find energy bin and calculate interpolation factor -- if the energy is
@@ -1865,7 +1865,7 @@ class Reaction(object):
             l = i
             
         if edist.nd[l] != 0:
-            raise NotImplementedError('Discrete lines in Kalbach-Mann '\
+            raise NotImplementedError('Discrete lines in Kalbach-Mann '
                                       'distribution not yet supported.')
           
         # Interpolation for energy E1 and EK
@@ -1939,7 +1939,7 @@ class Reaction(object):
         
         # Interpolation scheme
         if hasattr(edist, 'nbt'):
-            raise NotImplementedError('Multiple interpolation regions not yet supported'\
+            raise NotImplementedError('Multiple interpolation regions not yet supported'
                                       ' for correlated angle-energy distributions.')
             
         # find energy bin and calculate interpolation factor -- if the energy is
@@ -1954,7 +1954,7 @@ class Reaction(object):
             
         # check for discrete lines present
         if edist.nd[l] != 0:
-            raise NotImplementedError('Discrete lines in correlated angle-energy'\ 
+            raise NotImplementedError('Discrete lines in correlated angle-energy'
                                       ' distribution not yet supported.')
         
         # interpolation for energy E1 and EK
