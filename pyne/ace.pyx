@@ -125,69 +125,75 @@ def _interpolation_tab1(x_in, x, y, interp_NBT = None, interp_INT = None):
     elif x_in >= x[-1]:
         return y[-1]
     else:
-        I = np.searchsorted(x, x_in) - 1
+        index = np.searchsorted(x, x_in) - 1
     
     # Determine interpolation scheme 
     if interp_NBT is None:
-        interp = 2 # linear-linear  
+        #Linear-linear
+        interp = 2
     else:
         if len(interp_NBT) == 1:
             interp = int(interp_INT[0])
         elif len(interp_NBT) > 1:
             for i in range(len(interp_NBT)):
-                if I < interp_NBT[i]:
+                if index < interp_NBT[i]:
                     interp = int(interp_INT[i])
                     break
     
-    # handle special case of histogram interpolation 
+    # Handle special case of histogram interpolation 
     if interp == 1:
-        return y[I]
+        return y[index]
     
-    # determine bounding values 
-    x0 = x[I]
-    x1 = x[I + 1]
-    y0 = y[I]
-    y1 = y[I + 1]
+    # Determine bounding values 
+    x0 = x[index]
+    x1 = x[index + 1]
+    y0 = y[index]
+    y1 = y[index + 1]
     
-    # determine interpolation factor and interpolated value
-    if interp == 2: # linear-linear  
+    # Determine interpolation factor and interpolated value
+    if interp == 2:  # linear-linear  
         r = (x_in - x0) / (x1 - x0)
         return y0 + r * (y1 - y0)
-    elif interp == 3: # linear _log  
+    elif interp == 3:  # linear _log  
         r = np.log(x_in / x0) / np.log(x1 / x0)
         return y0 + r * (y1 - y0)
-    elif interp == 4: # log-linear
+    elif interp == 4:  # log-linear
         r = (x_in - x0) / (x1 - x0)
         return y0 * np.exp(r * np.log(y1 / y0))
-    elif interp == 5: # log-log
+    elif interp == 5:  # log-log
         r = np.log(x_in / x0) / np.log(x1/x0)
         return y0 * np.exp(r * np.log(y1 / y0))
     
 def tabular_sample(inter_flag, out, pdf, cdf):
     """
     Sample variable based on inter_flag, which is a common format 
-    in secondary angle and energy  sampling.
+    in secondary angle and energy sampling.
     """
+    
+    cdef int i
     r = rand()
+    
     # Sample from cdf 
-    i = np.searchsorted(cdf, r) - 1 
+    i = np.searchsorted(cdf, r) - 1
     
     # Check to make sure j is <= len(cdf) - 2 
     i = min(i, len(cdf) - 2)
     
-    if inter_flag == 1: # histogram
+    if inter_flag == 1: 
+        # Histogram
         if pdf[i] > 0.0:
             ans = out[i] + (r - cdf[i]) / pdf[i] 
         else:
             ans = out[i]
-    elif inter_flag == 2: #linear-linear
+    elif inter_flag == 2: 
+        # Linear-linear
         frac = (pdf[i + 1] - pdf[i]) / (out[i + 1] - out[i])
         if frac == 0.0:
             ans = out[i] + (r - cdf[i]) / pdf[i]
         else:
             tmp = max(0, pdf[i] ** 2 + 2.0 * frac * (r - cdf[i])) ** 0.5 
             ans = out[i] + (tmp - pdf[i]) / frac
-    return ans   
+    return ans
 
 def find_index(value, array):
     """
@@ -778,6 +784,7 @@ class NeutronTable(AceTable):
                                            self.nu_t_interp_nbt, self.nu_t_interp_int)
             else:
                 nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value)
+        
         # Prompt nu
         if hasattr(self, 'nu_p_type'):
             if self.nu_p_type == "polynomial":
@@ -791,7 +798,8 @@ class NeutronTable(AceTable):
                 else:
                     nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value)
         else:
-            nu_p = None  
+            nu_p = None
+        
         # Delay nu
         if hasattr(self, 'nu_d_energy'):
             if hasattr(self, 'nu_d_interp_nbt'):
@@ -1237,9 +1245,8 @@ class NeutronTable(AceTable):
             edist.a_dist_cdf = []
             for i in range(NE):
                 INTTp = int(self.xss[ind])
-                # No matter INTTp > 10 or not, we can get the data 
                 # At sample stage, use nd to determine if there is 
-                # discrete lines error
+                # discrete lines present
                 edist.intt.append(INTTp % 10)
                 edist.nd.append(INTTp / 10)
                 
@@ -1819,7 +1826,7 @@ class Reaction(object):
                 
             loc = self.ang_locations[i]
             if loc == 0:
-                # isotropic 
+                # Isotropic 
                 return 2.0 * rand() - 1.0 
             elif loc > 0: 
                 # 32 equip bin 
@@ -1925,8 +1932,8 @@ class Reaction(object):
         
         # Sampled correlated angle from Kalbach-Mann parameters
         if (rand() > km_r):
-            T = (2.0*rand() - 1.0) * np.sinh(km_a)
-            mu = np.log(T + (T*T + 1.0)**0.5)/km_a
+            t = (2.0*rand() - 1.0) * np.sinh(km_a)
+            mu = np.log(t + (t*t + 1.0)**0.5)/km_a
         else:
             r1 = rand()
             mu = np.log(r1*np.exp(km_a) + (1.0 - r1)*np.exp(-km_a))/km_a
@@ -1945,7 +1952,7 @@ class Reaction(object):
         # find energy bin and calculate interpolation factor -- if the energy is
         # outside the range of the tabulated energies, choose the first or last bins
         i, r = find_index(e, edist.energy_in)
-            
+        
         # Sample between the ith and (i+1)th bin
         if (r > rand()):
             l = i+1 
@@ -1993,7 +2000,8 @@ class Reaction(object):
             if (frac == 0.0):
                 E_out = E_l_k + (r1 - c_k)/p_l_k
             else:
-                E_out = E_l_k + (max(0.0, p_l_k**2 + 2.0*frac*(r1-c_k))**0.5 - p_l_k)/frac 
+                E_out = E_l_k + (max(0.0, p_l_k**2 + 2.0*frac*(r1-c_k))**0.5 -\
+                                  p_l_k)/frac 
         
         # Now interpolate between incident energy bins i and i + 1
         if (l == i):
@@ -2015,7 +2023,7 @@ class Reaction(object):
                 # Make sure mu is in range [-1,1]
                 if (abs(mu) > 1):
                     mu = np.sign(mu)
-            return [mu, E_out]
+            return (mu, E_out)
         else:
             if edist.lc[l][k+1] == 0:
                 mu = 2.0 * rand() - 1
