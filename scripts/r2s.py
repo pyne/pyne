@@ -5,8 +5,10 @@ from os.path import isfile
 
 from pyne.mesh import Mesh
 from pyne.dagmc import cell_materials, load
-from pyne.r2s import irradiation_setup, photon_sampling_setup
-from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh
+from pyne.r2s import irradiation_setup, photon_sampling_setup,\
+                       total_photon_source_intensity
+from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
+                       phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
 
 config_filename = 'config.ini'
@@ -69,6 +71,7 @@ end
 
 output zone
        integrate_energy
+       # Energy group upper bounds. The lower bound is always zero.
        photon_source  fendl3bin  phtn_src 24 1.00E4 2.00E4 5.00E4 1.00E5
        2.00E5 3.00E5 4.00E5 6.00E5 8.00E5 1.00E6 1.22E6 1.44E6 1.66E6
        2.00E6 2.50E6 3.00E6 4.00E6 5.00E6 6.50E6 8.00E6 1.00E7 1.20E7
@@ -158,11 +161,18 @@ def step2():
         tags = {('TOTAL', dc): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags)
         mesh.mesh.save('{0}_{1}.h5m'.format(output, i+1))
-        intensity = total_photon_source_intensity(m, tag_name)
-        intensities += "{0}: {1}".format(dc, intensity)
+        intensity = total_photon_source_intensity(mesh, tag_name)
+        intensities += "{0}: {1}\n".format(dc, intensity)
 
-    with open(tot_phtn_src_intensities, 'r') as f:
+    with open(tot_phtn_src_intensities, 'w') as f:
         f.write(intensities)
+
+    e_bounds = phtn_src_energy_bounds(alara_geom)
+    e_bounds_str = ""
+    for e in e_bounds:
+        e_bounds_str += "{0}\n".format(e)
+    with open("e_bounds", 'r') as f:
+        f.write(e_bounds_str)
 
     print('R2S step2 complete.')
 
