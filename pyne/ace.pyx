@@ -111,24 +111,24 @@ def ascii_to_binary(ascii_file, binary_file):
     # Close binary file
     binary.close()
 
-def _interpolation_tab1(xin, x, y, interp_NBT = None, interp_INT = None):
+def _interpolation_tab1(x_in, x, y, interp_NBT = None, interp_INT = None):
     """
-     INTERPOLATE_TAB1 interpolates a function between two points based on
-     particular interpolation scheme. The data needs to be organized as a ENDF TAB1
-     type function containing the interpolation regions, break points, and
-     tabulated x's and y's.
+    INTERPOLATE_TAB1 interpolates a function between two points based on
+    particular interpolation scheme. The data needs to be organized as a ENDF TAB1
+    type function containing the interpolation regions, break points, and
+    tabulated x's and y's.
     """
     
     cdef int i, interp  
-    if xin <= x[0]:
+    if x_in <= x[0]:
         return y[0]
-    elif xin >= x[-1]:
+    elif x_in >= x[-1]:
         return y[-1]
     else:
-        I = np.searchsorted(x, xin) - 1
+        I = np.searchsorted(x, x_in) - 1
     
     # Determine interpolation scheme 
-    if interp_NBT == None:
+    if interp_NBT is None:
         interp = 2 # linear-linear  
     else:
         if len(interp_NBT) == 1:
@@ -151,19 +151,23 @@ def _interpolation_tab1(xin, x, y, interp_NBT = None, interp_INT = None):
     
     # determine interpolation factor and interpolated value
     if interp == 2: # linear-linear  
-        r = (xin - x0) / (x1 - x0)
+        r = (x_in - x0) / (x1 - x0)
         return y0 + r * (y1 - y0)
     elif interp == 3: # linear _log  
-        r = np.log(xin / x0) / np.log(x1 / x0)
+        r = np.log(x_in / x0) / np.log(x1 / x0)
         return y0 + r * (y1 - y0)
     elif interp == 4: # log-linear
-        r = (xin - x0) / (x1 - x0)
+        r = (x_in - x0) / (x1 - x0)
         return y0 * np.exp(r * np.log(y1 / y0))
     elif interp == 5: # log-log
-        r = np.log(xin / x0) / np.log(x1/x0)
+        r = np.log(x_in / x0) / np.log(x1/x0)
         return y0 * np.exp(r * np.log(y1 / y0))
     
 def tabular_sample(inter_flag, out, pdf, cdf):
+    """
+    Sample variable based on inter_flag, which is a common format 
+    in secondary angle and energy  sampling.
+    """
     r = rand()
     # Sample from cdf 
     i = np.searchsorted(cdf, r) - 1 
@@ -181,10 +185,27 @@ def tabular_sample(inter_flag, out, pdf, cdf):
         if frac == 0.0:
             ans = out[i] + (r - cdf[i]) / pdf[i]
         else:
-            _ = max(0, pdf[i] ** 2 + 2.0 * frac * (r - cdf[i])) ** 0.5 
-            ans = out[i] + (_ - pdf[i]) / frac
+            tmp = max(0, pdf[i] ** 2 + 2.0 * frac * (r - cdf[i])) ** 0.5 
+            ans = out[i] + (tmp - pdf[i]) / frac
     return ans   
 
+def find_index(value, array):
+    """
+    Find bin of array containing value and calculate interpolation factor.
+    If the value is outside the range of array, choose the first or last bin.
+    """
+    
+    if (value <= array[0]):
+        i = 0
+        frac = 0.0 
+    elif (value >= array[-1]):
+        i = len(array) - 2
+        frac = 1.0
+    else:
+        i = np.searchsorted(array, value) - 1
+        frac = (value - array[i]) / (array[i+1] - array[i])
+    return i, frac
+        
 class Library(object):
     """
     A Library objects represents an ACE-formatted file which may contain
@@ -622,7 +643,8 @@ class NeutronTable(AceTable):
                                           self.jxs[7] + loc + 1 + n_energies]
 
     def _read_nu(self):
-        """Read the NU block -- this contains information on the prompt
+        """
+        Read the NU block -- this contains information on the prompt
         and delayed neutron precursor yields, decay constants, etc
         """
         cdef int ind, i, jxs2, KNU, LNU, NR, NE, NC
@@ -641,19 +663,19 @@ class NeutronTable(AceTable):
             # Polynomial function form of nu
             if LNU == 1:
                 self.nu_t_type = "polynomial"
-                self.nu_t_NC = int(self.xss[KNU+1])
-                self.nu_t_coeffs = self.xss[KNU+2 : KNU+2+self.nu_t_NC]
+                nc = int(self.xss[KNU+1])
+                self.nu_t_coeffs = self.xss[KNU+2:KNU+2+nc]
 
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_t_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    self.nu_t_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    self.nu_t_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_t_interp_nbt = self.xss[KNU+2:KNU+2+NR]
+                    self.nu_t_interp_int = self.xss[KNU+2+NR:KNU+2+2*NR]
                 NE = int(self.xss[KNU+2+2*NR])
-                self.nu_t_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
-                self.nu_t_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
+                self.nu_t_energy = self.xss[KNU+3+2*NR:KNU+3+2*NR+NE]
+                self.nu_t_value  = self.xss[KNU+3+2*NR+NE:KNU+3+2*NR+2*NE]
         # Both prompt nu and total nu
         elif self.xss[jxs2] < 0:
             KNU = jxs2 + 1
@@ -662,19 +684,19 @@ class NeutronTable(AceTable):
             # Polynomial function form of nu
             if LNU == 1:
                 self.nu_p_type = "polynomial"
-                self.nu_p_NC = int(self.xss[KNU+1])
-                self.nu_p_coeffs = self.xss[KNU+2 : KNU+2+self.nu_p_NC]
+                nc = int(self.xss[KNU+1])
+                self.nu_p_coeffs = self.xss[KNU+2:nc]
 
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_p_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    self.nu_p_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    self.nu_p_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_p_interp_nbt = self.xss[KNU+2:KNU+2+NR]
+                    self.nu_p_interp_int = self.xss[KNU+2+NR:KNU+2+2*NR]
                 NE = int(self.xss[KNU+2+2*NR])
-                self.nu_p_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
-                self.nu_p_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
+                self.nu_p_energy = self.xss[KNU+3+2*NR:KNU+3+2*NR+NE]
+                self.nu_p_value  = self.xss[KNU+3+2*NR+NE:KNU+3+2*NR+2*NE]
 
             KNU = jxs2 + int(abs(self.xss[jxs2])) + 1
             LNU = int(self.xss[KNU])
@@ -682,30 +704,30 @@ class NeutronTable(AceTable):
             # Polynomial function form of nu
             if LNU == 1:
                 self.nu_t_type = "polynomial"
-                self.nu_t_NC = int(self.xss[KNU+1])
-                self.nu_t_coeffs = self.xss[KNU+2 : KNU+2+self.nu_t_NC]
+                nc = int(self.xss[KNU+1])
+                self.nu_t_coeffs = self.xss[KNU+2:KNU+2+nc]
 
             # Tabular data form of nu
             elif LNU == 2:
                 self.nu_t_type = "tabular"
                 NR = int(self.xss[KNU+1])
                 if NR > 0:
-                    self.nu_t_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                    self.nu_t_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                    self.nu_t_interp_nbt = self.xss[KNU+2:KNU+2+NR]
+                    self.nu_t_interp_int = self.xss[KNU+2+NR:KNU+2+2*NR]
                 NE = int(self.xss[KNU+2+2*NR])
-                self.nu_t_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
-                self.nu_t_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
+                self.nu_t_energy = self.xss[KNU+3+2*NR:KNU+3+2*NR+NE]
+                self.nu_t_value  = self.xss[KNU+3+2*NR+NE:KNU+3+2*NR+2*NE]
 
         # Check for delayed nu data
         if self.jxs[24] > 0:
             KNU = self.jxs[24]
             NR = int(self.xss[KNU+1])
             if NR > 0:
-                self.nu_d_interp_NBT = self.xss[KNU+2    : KNU+2+NR  ]
-                self.nu_d_interp_INT = self.xss[KNU+2+NR : KNU+2+2*NR]
+                self.nu_d_interp_nbt = self.xss[KNU+2:KNU+2+NR]
+                self.nu_d_interp_int = self.xss[KNU+2+NR:KNU+2+2*NR]
             NE = int(self.xss[KNU+2+2*NR])
-            self.nu_d_energy = self.xss[KNU+3+2*NR    : KNU+3+2*NR+NE  ]
-            self.nu_d_value  = self.xss[KNU+3+2*NR+NE : KNU+3+2*NR+2*NE]
+            self.nu_d_energy = self.xss[KNU+3+2*NR:KNU+3+2*NR+NE]
+            self.nu_d_value  = self.xss[KNU+3+2*NR+NE:KNU+3+2*NR+2*NE]
 
             # Delayed neutron precursor distribution
             self.nu_d_precursor_const = {}
@@ -717,11 +739,11 @@ class NeutronTable(AceTable):
                 self.nu_d_precursor_const[group] = self.xss[i]
                 NR = int(self.xss[i+1])
                 if NR > 0:
-                    interp_NBT = self.xss[i+2    : i+2+NR]
-                    interp_INT = self.xss[i+2+NR : i+2+2*NR]
+                    interp_NBT = self.xss[i+2:i+2+NR]
+                    interp_INT = self.xss[i+2+NR:i+2+2*NR]
                 NE = int(self.xss[i+2+2*NR])
-                self.nu_d_precursor_energy[group] = self.xss[i+3+2*NR    : i+3+2*NR+NE  ]
-                self.nu_d_precursor_prob[group]   = self.xss[i+3+2*NR+NE : i+3+2*NR+2*NE]
+                self.nu_d_precursor_energy[group] = self.xss[i+3+2*NR:i+3+2*NR+NE  ]
+                self.nu_d_precursor_prob[group]   = self.xss[i+3+2*NR+NE:i+3+2*NR+2*NE]
                 i = i+3+2*NR+2*NE
 
             # Energy distribution for delayed fission neutrons
@@ -736,58 +758,56 @@ class NeutronTable(AceTable):
     def sample_nu(self, e):
         """
         Sample nu based on incident neutron energy e, 
-        return a list of length-3, format of [nu_total, nu_prompt, nu_delay].
+        return a tuple of length-3, format of [nu_total, nu_prompt, nu_delay].
         If no nu data is presented for the corresponding nu, return None instead
         """
+        
         cdef int i 
         # No nu data
         if self.jxs[2] == 0:
-            return [None, None, None]
+            return (None, None, None)
         
         # total nu always exists
         if self.nu_t_type == "polynomial":
             nu_t = 0.0
-            for i in range(self.nu_t_NC):
+            for i in range(len(self.nu_t_coeffs)):
                 nu_t += self.nu_t_coeffs[i] * e ** i  
         elif self.nu_t_type == "tabular":
-            if hasattr(self, 'nu_t_interp_NBT'):
+            if hasattr(self, 'nu_t_interp_nbt'):
                 nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value, \
-                                           self.nu_t_interp_NBT, self.nu_t_interp_INT)
+                                           self.nu_t_interp_nbt, self.nu_t_interp_int)
             else:
                 nu_t = _interpolation_tab1(e, self.nu_t_energy, self.nu_t_value)
         # Prompt nu
         if hasattr(self, 'nu_p_type'):
             if self.nu_p_type == "polynomial":
                 nu_p = 0.0 
-                for i in range(self.nu_p_NC):
+                for i in range(len(self.nu_p_coeffs)):
                     nu_p += self.nu_p_coeffs[i] * e ** i  
             elif self.nu_p_type == 'tabular':
-                if hasattr(self, 'nu_p_interp_NBT'):
+                if hasattr(self, 'nu_p_interp_nbt'):
                     nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value, \
-                                               self.nu_p_interp_NBT, self.nu_p_interp_INT)
+                                               self.nu_p_interp_nbt, self.nu_p_interp_int)
                 else:
                     nu_p = _interpolation_tab1(e, self.nu_p_energy, self.nu_p_value)
         else:
             nu_p = None  
         # Delay nu
         if hasattr(self, 'nu_d_energy'):
-            if hasattr(self, 'nu_d_interp_NBT'):
+            if hasattr(self, 'nu_d_interp_nbt'):
                 nu_d = _interpolation_tab1(e, self.nu_d_energy, self.nu_d_value, \
-                                           self.nu_d_interp_NBT, self.nu_d_interp_INT)
+                                           self.nu_d_interp_nbt, self.nu_d_interp_int)
             else:
                 nu_d = _interpolation_tab1(e, self.nu_d_energy, self.nu_d_value) 
         else:
             nu_d = None  
-        return [nu_t, nu_p, nu_d]
-        
-        
-        
+        return (nu_t, nu_p, nu_d)
         
     def _read_angular_distributions(self):
         """Find the angular distribution for each reaction MT
         """
         cdef int ind, i, j, n_reactions, n_energies, n_bins
-        cdef dict ang_cos, ang_pdf, ang_cdf, JJ
+        cdef dict ang_cos, ang_pdf, ang_cdf, jj
 
         # Number of reactions with secondary neutrons (including elastic
         # scattering)
@@ -807,7 +827,6 @@ class NeutronTable(AceTable):
                 # TY < 0 and in LAB if TY > 0)
                 reaction.aflag = 'iso'
                 continue
-            
             ind = self.jxs[9] + loc
 
             # Number of energies at which angular distributions are tabulated
@@ -825,7 +844,7 @@ class NeutronTable(AceTable):
             ang_cos = {}
             ang_pdf = {}
             ang_cdf = {}
-            JJ = {}
+            jj = {}
             for j, location in enumerate(locations):
                 if location > 0:
                     # Equiprobable 32 bin distribution
@@ -834,7 +853,7 @@ class NeutronTable(AceTable):
                     ind += 33
                 elif location < 0:
                     # Tabular angular distribution
-                    JJ[j] = int(self.xss[ind])
+                    jj[j] = int(self.xss[ind])
                     n_bins = int(self.xss[ind + 1])
                     ind += 2
                     ang_dat = self.xss[ind:ind + 3*n_bins]
@@ -850,7 +869,7 @@ class NeutronTable(AceTable):
             reaction.ang_cos = ang_cos
             reaction.ang_pdf = ang_pdf
             reaction.ang_cdf = ang_cdf
-            reaction.JJ = JJ
+            reaction.jj = jj
     
     def _read_energy_distributions(self):
         """Determine the energy distribution for secondary neutrons for
@@ -950,7 +969,7 @@ class NeutronTable(AceTable):
             if n_regions > 0:
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
-                edist.NBT, edist.INT = dat
+                edist.nbt, edist.int = dat
                 ind += 2 * n_regions
 
             # Number of outgoing energies in each E_out table
@@ -1140,7 +1159,7 @@ class NeutronTable(AceTable):
             if n_regions > 0:
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
-                edist.NBT, edist.INT = dat
+                edist.nbt, edist.int = dat
                 ind += 2 * n_regions
 
             # Number of outgoing energies in each E_out table
@@ -1194,7 +1213,7 @@ class NeutronTable(AceTable):
             if n_regions > 0:
                 dat = np.asarray(self.xss[ind:ind+2*n_regions], dtype=int)
                 dat.shape = (2, n_regions)
-                edist.NBT, edist.INT = dat
+                edist.nbt, edist.int = dat
                 ind += 2 * n_regions
 
             # Number of incoming energies
@@ -1209,14 +1228,14 @@ class NeutronTable(AceTable):
             edist.energy_out = []  # Outgoing E grid for each incoming E
             edist.pdf = []         # Probability dist for " " "
             edist.cdf = []         # Cumulative dist for " " "
-            edist.LC = []          # Use LC to determine ang. data exist or not
+            edist.lc = []          # Use lc to determine ang. data exist or not
 
             npas = []
             edist.a_dist_intt = []
             edist.a_dist_mu_out = [] # Cosine scattering angular grid
             edist.a_dist_pdf = []    # Probability dist function
             edist.a_dist_cdf = []
-            for i in range(NE): # for a specific incoming energy i
+            for i in range(NE):
                 INTTp = int(self.xss[ind])
                 # No matter INTTp > 10 or not, we can get the data 
                 # At sample stage, use nd to determine if there is 
@@ -1232,8 +1251,8 @@ class NeutronTable(AceTable):
                 edist.energy_out.append(dat[0])
                 edist.pdf.append(dat[1])
                 edist.cdf.append(dat[2])
-                # For case of LC[e_out] = 0
-                edist.LC.append(np.asarray(dat[3], dtype=int))
+                # For case of lc[e_out] = 0
+                edist.lc.append(np.asarray(dat[3], dtype=int))
                 ind += 2 + 4*NPE
 
                 # Secondary angular distribution
@@ -1241,8 +1260,8 @@ class NeutronTable(AceTable):
                 edist.a_dist_mu_out.append([])
                 edist.a_dist_pdf.append([])
                 edist.a_dist_cdf.append([])
-                for j in range(NPE): # for a specific outgoing energy j
-                    if edist.LC[i][j] > 0:
+                for j in range(NPE):
+                    if edist.lc[i][j] > 0:
                         edist.a_dist_intt[-1].append(int(self.xss[ind]))
                         NPA = int(self.xss[ind+1])
                         npas.append(NPA)
@@ -1252,7 +1271,7 @@ class NeutronTable(AceTable):
                         edist.a_dist_pdf[-1].append(dat[1])
                         edist.a_dist_cdf[-1].append(dat[2])
                         ind += 2 + 3*NPA
-                    elif edist.LC[i][j] == 0:
+                    elif edist.lc[i][j] == 0:
                         # Insert None for correct access
                         edist.a_dist_intt[-1].append(None)
                         edist.a_dist_mu_out[-1].append(None)
@@ -1300,7 +1319,6 @@ class NeutronTable(AceTable):
         # TODO: Read rest of data
 
         return edist
-
 
     def _read_gpd(self):
         """Read total photon production cross section.
@@ -1714,38 +1732,31 @@ class Reaction(object):
     
     def sample(self, e):
         """
-        Sample out-going mu and e_out based on incoming neutron energy e, return [mu, e_out] 
+        Sample out-going mu and e_out based on incoming neutron energy e, return (mu, e_out).
         """
-        # 1. sample energy
+        
         edist = self.energy_dist
         if edist.law == 3:
             # Inelastic level scattering
-            A = self.table.awr 
+            a = self.table.awr 
             Q = self.Q
-            E_out = (A / (A + 1.0)) ** 2 * (e - (A + 1.0) / A * Q)
-            mu = self.sample_mu(e)
-            return[mu, E_out]
+            E_out = (a / (a + 1.0)) ** 2 * (e - (a + 1.0) / a * Q)
+            mu = self._sample_mu(e)
+            return(mu, E_out)
             
         elif edist.law == 4:
-            #Continuous Tabular Distribution 
-            if hasattr(edist, 'INT'):
-                assert len(edist.INT) == 1, 'Multiple interpolation regions not yet supported ' \
-                                            'for continuous tabular energy distributions.'
-                histogram_interp = (edist.INT[0] == 1)
+            # Continuous Tabular Distribution 
+            if hasattr(edist, 'int'):
+                if len(edist.int) > 1:
+                    raise NotImplementedError('Multiple interpolation regions not yet supported'\
+                                              ' for continuous tabular energy distributions.')
+                histogram_interp = (edist.int[0] == 1)
             else:
                 histogram_interp = False
                 
             # Find energy bin and calculate interpolation factor -- if the energy is
             # outside the range of the tabulated energies, choose the first or last bins 
-            if e <= edist.energy_in[0]:
-                i = 0
-                f = 0.0  
-            elif e >= edist.energy_in[-1]:
-                i = len(edist.energy_in) -2 
-                f = 1.0  
-            else:
-                i = np.searchsorted(edist.energy_in, e) - 1
-                f = (e - edist.energy_in[i]) / (edist.energy_in[i+1] - edist.energy_in[i])
+            i, f = find_index(e, edist.energy_in)
             
             # Sample between the ith and (i+1)th bin
             if (histogram_interp):
@@ -1760,9 +1771,10 @@ class Reaction(object):
                     l = i 
                     
             # check for discrete lines present
-            assert edist.nd[l] == 0, 'Discrete lines in continuous tabular ' \
-                                     'distribution not yet supported.'
-                                     
+            if edist.nd[l] != 0:
+                raise NotImplementedError('Discrete lines in continuous tabular '\
+                                          'distribution not yet supported.')
+            
             # Interpolation for energy E1 and EK
             E_i_1 = edist.energy_out[i][0]
             E_i_K = edist.energy_out[i][-1]
@@ -1784,251 +1796,241 @@ class Reaction(object):
                     E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
                     
             # Sample mu 
-            mu = self.sample_mu(e)
-            return [mu, E_out]
+            mu = self._sample_mu(e)
+            return (mu, E_out)
                     
         elif edist.law == 44:
-            # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
-            # Interpolation scheme
-            assert not hasattr(edist, 'NBT'), 'Multiple interpolation regions not yet supported' \
-             'for Kalbach-Mann energy distributions in isotope ' + self.table.name
-             
-            # Find energy bin and calculate interpolation factor -- if the energy is
-            # outside the range of the tabulated energies, choose the first or last bins
-            if (e <= edist.energy_in[0]):
-                i = 0
-                f = 0.0 
-            elif (e >= edist.energy_in[-1]):
-                i = len(edist.energy_in) - 2 
-                f = 1.0  
-            else:
-                i = np.searchsorted(edist.energy_in, e) - 1 
-                f = (e - edist.energy_in[i]) / (edist.energy_in[i+1] - edist.energy_in[i])
-                
-            # Sample between the ith and (i+1)th bin
-            if (f > rand()):
-                l = i + 1
-            else:
-                l = i
-              
-            assert edist.nd[l] == 0, 'Discrete lines in Kalbach-Mann distribution not '\
-                                     'yet supported.\n' \
-                                     'isotope = ' + self.table.name + \
-                                     '\nreaction mt = ' + str(self.MT)
-              
-            # Interpolation for energy E1 and EK
-            E_i_1 = edist.energy_out[i][0]
-            E_i_K = edist.energy_out[i][-1]
-        
-            E_i1_1 = edist.energy_out[i+1][0]
-            E_i1_K = edist.energy_out[i+1][-1]
-        
-            E_1 = E_i_1 + f*(E_i1_1 - E_i_1)
-            E_K = E_i_K + f*(E_i1_K - E_i_K)
-            
-            # determine outgoing energy bin
-            r1 = rand()  
-            cdf = edist.cdf[l]
-            k = np.searchsorted(cdf, r1) - 1
-            c_k = cdf[k]
-            
-            # Check to make sure k <= len(cdf) - 2
-            k = min(k, len(cdf) - 2)
-            
-            E_l_k = edist.energy_out[l][k]
-            p_l_k = edist.pdf[l][k]
-            if (edist.intt[l] == 1):
-                # Histogram interpolation 
-                if (p_l_k > 0.0):
-                    E_out = E_l_k + (r1 - c_k) / p_l_k 
-                else:
-                    E_out = E_l_k
-                
-                km_r = edist.frac[l][k]  
-                km_a = edist.ang[l][k]
-                
-            elif (edist.intt[l] == 2):
-                # Linear-linear interpolation 
-                E_l_k1 = edist.energy_out[l][k+1]
-                p_l_k1 = edist.pdf[l][k+1]
-                
-                frac = (p_l_k1 - p_l_k) / (E_l_k1 - E_l_k) 
-                if (frac == 0.0):
-                    E_out = E_l_k + (r1 - c_k) / p_l_k 
-                else:
-                    E_out = E_l_k + (max(0.0, p_l_k ** 2 + \
-                                         2.0 * frac * (r1-c_k)) ** 0.5 - p_l_k) / frac 
-                
-                # Determine Kalbach-Mann parameters
-                km_r = edist.frac[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \
-                       (edist.frac[l][k+1] - edist.frac[l][k])
-                km_a = edist.ang[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \
-                       (edist.ang[l][k+1] - edist.ang[l][k])
-                
-            # Now interpolate between incident energy bins i and i + 1
-            if (l == i):
-                E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
-            else:
-                E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
-              
-            # Sampled correlated angle from Kalbach-Mann parameters
-            if (rand() > km_r):
-                T = (2.0*rand() - 1.0) * np.sinh(km_a)
-                mu = np.log(T + (T*T + 1.0)**0.5)/km_a
-            else:
-                r1 = rand()
-                mu = np.log(r1*np.exp(km_a) + (1.0 - r1)*np.exp(-km_a))/km_a
-            return [mu, E_out]
+            return self._sample_law44(e)
         
         elif edist.law == 61:
-            # Like 44, but tabular distribution instead of Kalbach-87
-            # Interpolation scheme
-            
-            assert hasattr(edist, 'NBT') == False, 'Multiple interpolation regions not yet supported' \
-             'for correlated angle-energy distributions in isotope ' + self.table.name
-            
-            # find energy bin and calculate interpolation factor -- if the energy is
-            # outside the range of the tabulated energies, choose the first or last bins
-            if (e <= edist.energy_in[0]):
-                i = 0
-                r = 0.0  
-            elif (e >= edist.energy_in[-1]):
-                i = len(edist.energy_in) - 2
-                r = 1.0  
-            else:
-                i = np.searchsorted(edist.energy_in, e) - 1
-                r = (e - edist.energy_in[i]) / (edist.energy_in[i+1] - edist.energy_in[i])
+            return self._sample_law61(e)
                 
-            # Sample between the ith and (i+1)th bin
-            if (r > rand()):
-                l = i+1 
-            else:
-                l = i 
-                
-            # check for discrete lines present
-            assert edist.nd[l] == 0, 'Discrete lines in correlated angle-energy distribution not'\
-                                     'yet supported.\n' \
-                                     'isotope = ' + self.table.name + \
-                                     'reaction mt = ' + str(self.MT)
-            
-            # interpolation for energy E1 and EK
-            E_i_1 = edist.energy_out[i][0]
-            E_i_K = edist.energy_out[i][-1]
-        
-            E_i1_1 = edist.energy_out[i+1][0]
-            E_i1_K = edist.energy_out[i+1][-1]
-        
-            E_1 = E_i_1 + r*(E_i1_1 - E_i_1)
-            E_K = E_i_K + r*(E_i1_K - E_i_K)
-            
-            # Determine outgoing energy bin
-            r1 = rand() 
-            cdf = edist.cdf[l]
-            k = np.searchsorted(cdf, r1) - 1
-            c_k = cdf[k]
-            
-            # makesure k <= len(cdf) - 2
-            k = min(k, len(cdf) - 2)
-            
-            E_l_k = edist.energy_out[l][k]
-            p_l_k = edist.pdf[l][k]
-            if (edist.intt[l][k] == 1):
-                # Histogram interpolation 
-                if(p_l_k > 0.0):
-                    E_out = E_l_k + (r1 - c_k) / p_l_k 
-                else:
-                    E_out = E_l_k  
-            elif(edist.intt[l][k] == 2):
-                E_l_k1 = edist.energy_out[l][k+1]
-                p_l_k1 = edist.pdf[l][k+1]
-                
-                frac = (p_l_k1 - p_l_k)/(E_l_k1 - E_l_k)
-                if (frac == 0.0):
-                    E_out = E_l_k + (r1 - c_k)/p_l_k
-                else:
-                    E_out = E_l_k + (max(0.0, p_l_k**2 + 2.0*frac*(r1-c_k))**0.5 - p_l_k)/frac 
-            
-            # Now interpolate between incident energy bins i and i + 1
-            if (l == i):
-                E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
-            else:
-                E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
-                
-            # Find correlated angular distribution for closest outgoing energy bin 
-            if(r1 - c_k < cdf[k+1] - r1):
-                if edist.LC[l][k] == 0:
-                    mu = 2.0 * rand() - 1
-                else:
-                    JJ = edist.a_dist_intt[l][k]
-                    cos = edist.a_dist_mu_out[l][k]
-                    pdf = edist.a.dist_pdf[l][k]
-                    cdf = edist.a.dist.cdf[l][k]
-                    mu = tabular_sample(JJ, cos, pdf, cdf)
-                    
-                    # Make sure mu is in range [-1,1]
-                    if (abs(mu) > 1):
-                        mu = np.sign(mu)
-                return [mu, E_out]
-            else:
-                if edist.LC[l][k+1] == 0:
-                    mu = 2.0 * rand() - 1
-                else:
-                    JJ = edist.a_dist_intt[l][k+1]
-                    cos = edist.a_dist_mu_out[l][k+1]
-                    pdf = edist.a.dist_pdf[l][k+1]
-                    cdf = edist.a.dist.cdf[l][k+1]
-                    mu = tabular_sample(JJ, cos, pdf, cdf)
-                    
-                    # Make sure mu is in range [-1,1]
-                    if (abs(mu) > 1):
-                        mu = np.sign(mu)
-                return [mu, E_out]
-                
-    def sample_mu(self, e):                
+    def _sample_mu(self, e):                
         # Sample the independent mu
         if hasattr(self, 'aflag'):
             mu = 2.0 * rand() - 1.0  
             return mu
         else:
-            energy = self.ang_energy_in  
-            if (e <= energy[0]):
-                i = 0
-                r = 0.0
-            elif (e >= energy[-1]):
-                i = len(energy) - 2
-                r = 1.0  
-            else:
-                i = np.searchsorted(energy, e) - 1
-                r = (e - energy[i]) / (energy[i + 1] - energy[i])
+            # Compute index and interpolation frac 
+            i, r = find_index(e, self.ang_energy_in)
             
             if (r > rand()):
                 i = i + 1  
                 
             loc = self.ang_locations[i]
-            if loc == 0: # isotropic 
+            if loc == 0:
+                # isotropic 
                 return 2.0 * rand() - 1.0 
-            elif loc > 0: # 32 equip bin 
+            elif loc > 0: 
+                # 32 equip bin 
                 r1 = rand()
                 ii = 1 + int(32 * r1)
                 mui = self.ang_cos[ii - 1]
                 mui1 = self.ang_cos[ii]
                 mu = mui + (32 * r1 - ii) * (mui1 - mui)
+                
                 # Make sure mu is in range [-1,1]
                 if (abs(mu) > 1):
                     mu = np.sign(mu)
                 return mu
-            else: # tabular 
+            else: 
+                # tabular 
                 cos = self.ang_cos[i]
                 pdf = self.ang_pdf[i]
                 cdf = self.ang_cdf[i]
-                JJ = self.JJ[i]
-                mu = tabular_sample(JJ, cos, pdf, cdf)
+                jj = self.jj[i]
+                mu = tabular_sample(jj, cos, pdf, cdf)
                 
                 # Make sure mu is in range [-1,1]
                 if (abs(mu) > 1):
                     mu = np.sign(mu)
                 return mu
             
+    def _sample_law44(self, e):
+        # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
+        edist = self.energy_dist
+        # Interpolation scheme
+        if hasattr(edist, 'nbt'):
+            raise NotImplementedError('Multiple interpolation regions not yet supported '\
+                                      'for Kalbach-Mann energy distributions')
+         
+        # Find energy bin and calculate interpolation factor -- if the energy is
+        # outside the range of the tabulated energies, choose the first or last bins
+        i, f = find_index(e, edist.energy_in)
+            
+        # Sample between the ith and (i+1)th bin
+        if (f > rand()):
+            l = i + 1
+        else:
+            l = i
+            
+        if edist.nd[l] != 0:
+            raise NotImplementedError('Discrete lines in Kalbach-Mann '\
+                                      'distribution not yet supported.')
+          
+        # Interpolation for energy E1 and EK
+        E_i_1 = edist.energy_out[i][0]
+        E_i_K = edist.energy_out[i][-1]
+    
+        E_i1_1 = edist.energy_out[i+1][0]
+        E_i1_K = edist.energy_out[i+1][-1]
+    
+        E_1 = E_i_1 + f*(E_i1_1 - E_i_1)
+        E_K = E_i_K + f*(E_i1_K - E_i_K)
+        
+        # determine outgoing energy bin
+        r1 = rand()
+        cdf = edist.cdf[l]
+        k = np.searchsorted(cdf, r1) - 1
+        c_k = cdf[k]
+        
+        # Check to make sure k <= len(cdf) - 2
+        k = min(k, len(cdf) - 2)
+        
+        E_l_k = edist.energy_out[l][k]
+        p_l_k = edist.pdf[l][k]
+        if (edist.intt[l] == 1):
+            # Histogram interpolation 
+            if (p_l_k > 0.0):
+                E_out = E_l_k + (r1 - c_k) / p_l_k 
+            else:
+                E_out = E_l_k
+            
+            km_r = edist.frac[l][k]  
+            km_a = edist.ang[l][k]
+            
+        elif (edist.intt[l] == 2):
+            # Linear-linear interpolation 
+            E_l_k1 = edist.energy_out[l][k+1]
+            p_l_k1 = edist.pdf[l][k+1]
+            
+            frac = (p_l_k1 - p_l_k) / (E_l_k1 - E_l_k) 
+            if (frac == 0.0):
+                E_out = E_l_k + (r1 - c_k) / p_l_k 
+            else:
+                E_out = E_l_k + (max(0.0, p_l_k ** 2 + \
+                                     2.0 * frac * (r1-c_k)) ** 0.5 - p_l_k) / frac 
+            
+            # Determine Kalbach-Mann parameters
+            km_r = edist.frac[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \
+                   (edist.frac[l][k+1] - edist.frac[l][k])
+            km_a = edist.ang[l][k] + (E_out - E_l_k) / (E_l_k1 - E_l_k) * \
+                   (edist.ang[l][k+1] - edist.ang[l][k])
+            
+        # Now interpolate between incident energy bins i and i + 1
+        if (l == i):
+            E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
+        else:
+            E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
+        
+        # Sampled correlated angle from Kalbach-Mann parameters
+        if (rand() > km_r):
+            T = (2.0*rand() - 1.0) * np.sinh(km_a)
+            mu = np.log(T + (T*T + 1.0)**0.5)/km_a
+        else:
+            r1 = rand()
+            mu = np.log(r1*np.exp(km_a) + (1.0 - r1)*np.exp(-km_a))/km_a
+        return (mu, E_out)
+    
+    def _sample_law61(self, e):
+        # Like 44, but tabular distribution instead of Kalbach-87
+        
+        edist = self.energy_dist
+        
+        # Interpolation scheme
+        if hasattr(edist, 'nbt'):
+            raise NotImplementedError('Multiple interpolation regions not yet supported'\
+                                      ' for correlated angle-energy distributions.')
+            
+        # find energy bin and calculate interpolation factor -- if the energy is
+        # outside the range of the tabulated energies, choose the first or last bins
+        i, r = find_index(e, edist.energy_in)
+            
+        # Sample between the ith and (i+1)th bin
+        if (r > rand()):
+            l = i+1 
+        else:
+            l = i 
+            
+        # check for discrete lines present
+        if edist.nd[l] != 0:
+            raise NotImplementedError('Discrete lines in correlated angle-energy'\ 
+                                      ' distribution not yet supported.')
+        
+        # interpolation for energy E1 and EK
+        E_i_1 = edist.energy_out[i][0]
+        E_i_K = edist.energy_out[i][-1]
+    
+        E_i1_1 = edist.energy_out[i+1][0]
+        E_i1_K = edist.energy_out[i+1][-1]
+    
+        E_1 = E_i_1 + r*(E_i1_1 - E_i_1)
+        E_K = E_i_K + r*(E_i1_K - E_i_K)
+        
+        # Determine outgoing energy bin
+        r1 = rand() 
+        cdf = edist.cdf[l]
+        k = np.searchsorted(cdf, r1) - 1
+        c_k = cdf[k]
+        
+        # Make sure k <= len(cdf) - 2
+        k = min(k, len(cdf) - 2)
+        
+        E_l_k = edist.energy_out[l][k]
+        p_l_k = edist.pdf[l][k]
+        if (edist.intt[l][k] == 1):
+            # Histogram interpolation 
+            if(p_l_k > 0.0):
+                E_out = E_l_k + (r1 - c_k) / p_l_k 
+            else:
+                E_out = E_l_k  
+        elif(edist.intt[l][k] == 2):
+            # Linear-Linear interpolation
+            E_l_k1 = edist.energy_out[l][k+1]
+            p_l_k1 = edist.pdf[l][k+1]
+            
+            frac = (p_l_k1 - p_l_k)/(E_l_k1 - E_l_k)
+            if (frac == 0.0):
+                E_out = E_l_k + (r1 - c_k)/p_l_k
+            else:
+                E_out = E_l_k + (max(0.0, p_l_k**2 + 2.0*frac*(r1-c_k))**0.5 - p_l_k)/frac 
+        
+        # Now interpolate between incident energy bins i and i + 1
+        if (l == i):
+            E_out = E_1 + (E_out - E_i_1)*(E_K - E_1)/(E_i_K - E_i_1)
+        else:
+            E_out = E_1 + (E_out - E_i1_1)*(E_K - E_1)/(E_i1_K - E_i1_1)
+            
+        # Find correlated angular distribution for closest outgoing energy bin 
+        if(r1 - c_k < cdf[k+1] - r1):
+            if edist.lc[l][k] == 0:
+                mu = 2.0 * rand() - 1
+            else:
+                jj = edist.a_dist_intt[l][k]
+                cos = edist.a_dist_mu_out[l][k]
+                pdf = edist.a.dist_pdf[l][k]
+                cdf = edist.a.dist.cdf[l][k]
+                mu = tabular_sample(jj, cos, pdf, cdf)
+                
+                # Make sure mu is in range [-1,1]
+                if (abs(mu) > 1):
+                    mu = np.sign(mu)
+            return [mu, E_out]
+        else:
+            if edist.lc[l][k+1] == 0:
+                mu = 2.0 * rand() - 1
+            else:
+                jj = edist.a_dist_intt[l][k+1]
+                cos = edist.a_dist_mu_out[l][k+1]
+                pdf = edist.a.dist_pdf[l][k+1]
+                cdf = edist.a.dist.cdf[l][k+1]
+                mu = tabular_sample(jj, cos, pdf, cdf)
+                
+                # Make sure mu is in range [-1,1]
+                if (abs(mu) > 1):
+                    mu = np.sign(mu)
+            return (mu, E_out)
+        
 class DosimetryTable(AceTable):
 
     def __init__(self, name, awr, temp):
