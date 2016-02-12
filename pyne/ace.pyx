@@ -26,7 +26,6 @@ from collections import OrderedDict
 cimport numpy as np
 import numpy as np
 from np.random import rand
-rand = np.random.rand  
 from bisect import bisect_right
 
 from pyne cimport nucname
