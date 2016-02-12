@@ -167,11 +167,11 @@ def step2():
     with open(tot_phtn_src_intensities, 'w') as f:
         f.write(intensities)
 
-    e_bounds = phtn_src_energy_bounds(alara_geom)
+    e_bounds = phtn_src_energy_bounds("alara_geom")
     e_bounds_str = ""
     for e in e_bounds:
         e_bounds_str += "{0}\n".format(e)
-    with open("e_bounds", 'r') as f:
+    with open("e_bounds", 'w') as f:
         f.write(e_bounds_str)
 
     print('R2S step2 complete.')
