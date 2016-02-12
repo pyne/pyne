@@ -1,6 +1,7 @@
 from os.path import isfile
 from warnings import warn
 from pyne.utils import QAWarning
+import numpy as np
 
 from pyne.mesh import Mesh
 from pyne.mcnp import Meshtal
@@ -138,3 +139,29 @@ def photon_sampling_setup(mesh, phtn_src, tags):
     photon_source_to_hdf5(phtn_src)
     h5_file = phtn_src + ".h5"
     photon_source_hdf5_to_mesh(mesh, h5_file, tags)
+
+
+def total_photon_source_intensity(m, tag_name):
+    """This function reads mesh tagged with photon source densities and returns
+    the total photon emission desinty.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+       The mesh-based photon emission density distribution in p/cm3/s.
+    tag_name : str
+       The name of the tag on the mesh with the photon emission density information.
+
+    Returns
+    -------
+    intensity : float
+        The total photon emission density across the entire mesh (p/s).
+    """
+
+    sd_tag = m.mesh.getTagHandle(tag_name)
+    intensity = 0.
+    for idx, _, ve in m:
+        vol = m.elem_volume(ve)
+        ve_data = sd_tag[ve]
+        intensity += vol*np.sum(ve_data)
+    return intensity

@@ -51,6 +51,9 @@ decay_times:1E3 s,12 h,3.0 d
 # The prefix of the .h5m files containing the source density distributations for
 # each decay time.
 output: source
+# The name of the output files containing the total photon source intensities for
+# each decay time
+tot_phtn_src_intensities : total_photon_source_intensites.txt
 """
 
 alara_params =\
@@ -66,7 +69,7 @@ end
 
 output zone
        integrate_energy
-       photon_source  fendl3bin  phtn_src1 24 1.00E4 2.00E4 5.00E4 1.00E5
+       photon_source  fendl3bin  phtn_src 24 1.00E4 2.00E4 5.00E4 1.00E5
        2.00E5 3.00E5 4.00E5 6.00E5 8.00E5 1.00E6 1.22E6 1.44E6 1.66E6
        2.00E6 2.50E6 3.00E6 4.00E6 5.00E6 6.50E6 8.00E6 1.00E7 1.20E7
        1.40E7 2.00E7
@@ -142,16 +145,25 @@ def step2():
     structured = config.getboolean('general', 'structured')
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
+    tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
+    tag_name = "source_density"
 
     h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
         photon_source_to_hdf5('phtn_src')
+    intensities = "Total photon source intensities (p/s)\n"
     for i, dc in enumerate(decay_times):
         print('Writing source for decay time: {0}'.format(dc))
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
-        tags = {('TOTAL', dc): 'source_density'}
+        tags = {('TOTAL', dc): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags)
         mesh.mesh.save('{0}_{1}.h5m'.format(output, i+1))
+        intensity = total_photon_source_intensity(m, tag_name)
+        intensities += "{0}: {1}".format(dc, intensity)
+
+    with open(tot_phtn_src_intensities, 'r') as f:
+        f.write(intensities)
+
     print('R2S step2 complete.')
 
 def main():
