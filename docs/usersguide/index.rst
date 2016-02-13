@@ -22,4 +22,5 @@ essential aspects of using PyNE to do nuclear engineering.
     stlcontainers
     jsoncpp
     spatialsolver
+    r2s
     source_sampling

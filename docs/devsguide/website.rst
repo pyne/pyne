@@ -12,6 +12,8 @@ Building the website/documentation requires the following:
    #. `sphinxcontrib-bibtex <https://pypi.python.org/pypi/sphinxcontrib-bibtex/>`_
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
    #. `Cloud Sphinx Theme <https://pythonhosted.org/cloud_sptheme/cloud_theme.html>`_
+   #. `jupyter <http://jupyter.org/>`_
+
 
 -----------------------------------
 Procedure for modifying the website
