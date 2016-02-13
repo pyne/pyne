@@ -49,6 +49,7 @@ Additionally, building the documentation requires the following:
    #. `sphinxcontrib-bibtex <https://pypi.python.org/pypi/sphinxcontrib-bibtex/>`_
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
    #. `numpydoc <https://pypi.python.org/pypi/numpydoc>`_
+   #. `jupyter <http://jupyter.org/>`_
 
 Most of the dependencies are readily available through package managers. 
 
