@@ -20,7 +20,7 @@ except ImportError:
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-from pyne.r2s import irradiation_setup, photon_sampling_setup
+from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
 from pyne.material import Material
 from pyne.mesh import Mesh, IMeshTag
 from pyne.mcnp import Meshtal
@@ -275,3 +275,14 @@ def test_photon_sampling_setup_unstructured():
     for i, mat, ve in m:
         assert_array_equal(m.tag1[i], exp_tag1[i])
         assert_array_equal(m.tag2[i], exp_tag2[i])
+
+
+def test_total_photon_source_intensity():
+
+    m = Mesh(structured = True, structured_coords=[[0, 1, 2],[0, 1, 3], [0, 1]])
+    m.source_density = IMeshTag(2, float)
+    m.source_density[:] = [[1., 2.], [3., 4.], [5., 6.], [7., 8.]]
+
+    intensity = total_photon_source_intensity(m, "source_density")
+    assert_equal(intensity, 58)
+

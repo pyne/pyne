@@ -27,7 +27,7 @@ from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.material import Material
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
-    irradiation_blocks, record_to_geom
+    irradiation_blocks, record_to_geom, phtn_src_energy_bounds
 
 thisdir = os.path.dirname(__file__)
 
@@ -429,3 +429,14 @@ def test_irradiation_blocks():
 
     assert_equal(act, exp)
 
+def test_phtn_src_energy_bounds():
+
+    input_file = os.path.join(thisdir, "files_test_alara", 
+                              "alara_other_blocks.txt")
+    e_bounds = phtn_src_energy_bounds(input_file)
+    expected_e_bounds = [0, 1.00E4, 2.00E4, 5.00E4, 1.00E5, 2.00E5, 3.00E5, 
+                         4.00E5, 6.00E5, 8.00E5, 1.00E6, 1.22E6, 1.44E6, 1.66E6, 
+                         2.00E6, 2.50E6, 3.00E6, 4.00E6, 5.00E6, 6.50E6, 8.00E6, 
+                         1.00E7, 1.20E7, 1.40E7, 2.00E7]
+
+    assert_array_equal(e_bounds, expected_e_bounds)

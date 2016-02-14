@@ -534,6 +534,34 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
 
     return s
 
+def phtn_src_energy_bounds(input_file):
+    """Reads an ALARA input file and extracts the energy bounds from the 
+    photon_source block.
+
+    Parameters
+    ----------
+    input_file : str
+         The ALARA input file name, which must contain a photon_source block.
+    
+    Returns
+    -------
+    e_bounds : list of floats
+        The lower and upper energy bounds for the photon_source discretization.
+    """
+    phtn_src_lines = ""
+    with open(input_file, 'r') as f:
+        line = f.readline()
+        while not (' photon_source ' in line and line.strip()[0] != "#"):
+            line = f.readline()
+        num_groups = float(line.split()[3])
+        upper_bounds = [float(x) for x in line.split()[4:]]
+        while len(upper_bounds) < num_groups:
+            line = f.readline()
+            upper_bounds += [float(x) for x in line.split("#")[0].split('end')[0].split()]
+    e_bounds = [0.] + upper_bounds
+    return e_bounds
+
+
 def _build_matrix(N):
     """ This function  builds burnup matrix, A. Decay only.
     """
