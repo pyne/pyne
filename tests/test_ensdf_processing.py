@@ -35,7 +35,7 @@ def test_bricc_evaluation():
     create_tmp()
     input_dict = {}
     input_dict['input_type'] = 'evaluation'
-    input_dict['input_file'] = 'ensdf_processing/bricc/ref_a228.ens'
+    input_dict['input_file'] = 'ensdf_processing/bricc/ref_235PU'
     input_dict['BrIccNH'] = 0
     output_dict = ensdf_processing.bricc(input_dict)
     #bricc_out_tmp = tmp_path + '/tmp_bricc_out.out'
@@ -263,12 +263,10 @@ def file_comp(file_out, file_ref, exceptions):
 
 #  nose.runmodule()
 if __name__ == "__main__":
-    '''
     alphad = test_alphad()
     gabs = test_gabs()
     bricc_1 = test_bricc_interactive()
     bricc_2 = test_bricc_evaluation()
-    '''
     bldhst = test_bldhst()
     delta = test_delta()
     gtol = test_gtol()
