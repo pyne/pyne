@@ -765,8 +765,7 @@ class NeutronTable(AceTable):
         """
         Sample nu based on incident neutron energy e, 
         return a tuple of length-3, format of [nu_total, nu_prompt, nu_delay].
-        If no nu data is presented for the corresponding nu, return None instead.
-        This implementation was inspired by the ACE parser in OpenMC v0.7.1.
+        If no nu data is presented for the corresponding nu, return None instead
         """
         
         cdef int i 
@@ -1741,7 +1740,6 @@ class Reaction(object):
     def sample(self, e):
         """
         Sample out-going mu and e_out based on incoming neutron energy e, return (mu, e_out).
-        This implementation was inspired by the ACE parser in OpenMC v0.7.1.
         """
         
         edist = self.energy_dist
@@ -1814,12 +1812,8 @@ class Reaction(object):
         elif edist.law == 61:
             return self._sample_law61(e)
                 
-    def _sample_mu(self, e):
-        """
-        Sample the secondary angle independently, e.g., ACE law 4.
-        This implementation was inspired by the ACE parser in OpenMC v0.7.1.
-        """             
-           
+    def _sample_mu(self, e):                
+        # Sample the independent mu
         if hasattr(self, 'aflag'):
             mu = 2.0 * rand() - 1.0  
             return mu
@@ -1860,10 +1854,7 @@ class Reaction(object):
                 return mu
             
     def _sample_law44(self, e):
-        """
-        Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
-        This implementation was inspired by the ACE parser in OpenMC v0.7.1.
-        """
+        # Kalbach-87 Formalism (ENDF File 6 Law 1, LANG=2)
         edist = self.energy_dist
         # Interpolation scheme
         if hasattr(edist, 'nbt'):
@@ -1949,10 +1940,7 @@ class Reaction(object):
         return (mu, E_out)
     
     def _sample_law61(self, e):
-        """
-        Like 44, but tabular distribution instead of Kalbach-87
-        This implementation was inspired by the ACE parser in OpenMC v0.7.1.
-        """
+        # Like 44, but tabular distribution instead of Kalbach-87
         
         edist = self.energy_dist
         
