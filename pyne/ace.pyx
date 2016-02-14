@@ -1818,8 +1818,8 @@ class Reaction(object):
         """
         Sample the secondary angle independently, e.g., ACE law 4.
         This implementation was inspired by the ACE parser in OpenMC v0.7.1.
-        """             
-           
+        """
+        
         if hasattr(self, 'aflag'):
             mu = 2.0 * rand() - 1.0  
             return mu
@@ -1866,6 +1866,7 @@ class Reaction(object):
         """
         
         edist = self.energy_dist
+        
         # Interpolation scheme
         if hasattr(edist, 'nbt'):
             raise NotImplementedError('Multiple interpolation regions not yet supported '
