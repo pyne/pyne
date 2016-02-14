@@ -207,7 +207,7 @@ Once those lines have been added, run the following command before running
 
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-Ubuntu 14.04 Build script
+Ubuntu Build Scripts
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Scripts for installing PyNE and all its dependencies from scratch on Ubuntu
