@@ -210,9 +210,9 @@ Once those lines have been added, run the following command before running
 Ubuntu 14.04 Build script
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A script for installing PyNE and all its dependencies from scratch on Ubuntu
-15.04 is found `here
-<https://github.com/pyne/install_scripts/blob/master/ubuntu_15.04.sh>`_
+Scripts for installing PyNE and all its dependencies from scratch on Ubuntu
+14.04 - 15.04 are found `here
+<https://github.com/pyne/install_scripts/>`_.
 
 .. install-end
 
