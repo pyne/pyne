@@ -75,6 +75,7 @@ def read_dollar_spe_file(spec_file_path):
     # descriptive variables
     spectrum.file_name = spec_file_path
     spectrum.spec_name = file_split[file_split.index("$SPEC_ID:") + 1]
+    spectrum.spec_name=spectrum.spec_name.strip()
     tmp = file_split[file_split.index("$SPEC_REM:") + 1]
     tmp = tmp.split(" ")
     spectrum.det_id = tmp[1]
@@ -93,11 +94,14 @@ def read_dollar_spe_file(spec_file_path):
     # pulse height
     tmp = file_split[file_split.index("$DATA:") + 1]
     tmp = tmp.split(" ")
-    spectrum.start_chan_num = tmp[0]
-    spectrum.num_channels = int(tmp[1])
-    spectrum.counts = file_split[file_split.index("$DATA:") + 2:
+    spectrum.start_chan_num = int(tmp[0])
+    spectrum.num_channels = int(tmp[1])+1
+    tmp = file_split[file_split.index("$DATA:") + 2:
                                  file_split.index("$DATA:") + 2
-                                 + int(spectrum.num_channels) + 1]
+                                 + int(spectrum.num_channels) ]
+    for c in tmp:
+        val=c.strip()
+        spectrum.counts.append(float(val))
 
     tmp = file_split[file_split.index("$MCA_CAL:") + 2]
     tmp = tmp.split(" ")
@@ -158,6 +162,7 @@ def read_spe_file(spec_file_path):
 
         if (line[0] == "Spectrum name"):
             spectrum.spec_name = line[1]
+            spectrum.spec_name=spectrum.spec_name.strip()
         elif (line[0] == "Detector ID"):
             spectrum.det_id = line[1].strip()
         elif (line[0] == "Detector description"):
@@ -170,6 +175,7 @@ def read_spe_file(spec_file_path):
             spectrum.start_date = line[1].strip()
         elif (line[0] == "Acquisition start time"):
             spectrum.start_time = line[1].strip() + ":" + line[2] + ":" + line[3]
+            spectrum.start_time=spectrum.start_time.strip()
         elif (line[0] == "Starting channel number"):
             spectrum.start_chan_num = int(line[1].strip())
         elif (line[0] == "Number of channels"):
