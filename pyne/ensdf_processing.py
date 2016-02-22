@@ -66,12 +66,12 @@ def alphad(inputdict_unchecked):
     report_file = inputdict_unchecked['report_file']
     rewrite_hinderance = inputdict_unchecked['rewrite_input_with_hinderance_factor']
     output_file = 'alphad.out'
-    if(rewrite_hinderance == 1):    
+    if rewrite_hinderance == 1:
         output_file = inputdict_unchecked['output_file'] #output file if report = yes
     exe_path = path_to_exe('alphad')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + report_file + '\n' + 'Y' + '\n'
-    if (rewrite_hinderance == 1):
+    if rewrite_hinderance == 1:
         inp = inp + 'Y' + '\n' + output_file
     else:
         inp = inp + 'N' + '\n'
@@ -100,7 +100,9 @@ def bricc(inputdict_unchecked):
             output_file_directory : string, the directory all produced bricc output files will be
                                     located.
             bricc_output : string, Only for interactive use: data printed to command line.
-    NOTE:
+
+    Notes
+    -----
         All the various ouptput files bricc can generate are found in the output_file_directory
 
     """
@@ -120,17 +122,17 @@ def bricc(inputdict_unchecked):
     input_type = inputdict_unchecked['input_type']
     output_dict = inputdict_unchecked
 
-    if(input_type == 'interactive'):
+    if input_type == 'interactive':
         input_element = inputdict_unchecked['element']
         inp = input_element + '\n' + 'exit' + '\n'
         proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
         proc.stdin.write(inp.encode('utf-8'))
         output_dict['bricc_output'] = proc.communicate()[0]
         proc.stdin.close()
-    elif(input_type == 'evaluation'):
+    elif input_type == 'evaluation':
         input_file = inputdict_unchecked['input_file']
         briccnh = inputdict_unchecked['BrIccNH']
-        if(briccnh):
+        if briccnh:
             proc = subprocess.Popen([exe_path, input_file, 'BrIccNH'],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
             proc.stdin.close()
         else:
@@ -271,15 +273,15 @@ def gtol(inputdict_unchecked):
     exe_path = path_to_exe('gtol')
     proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     inp = input_file + '\n' + report_file + '\n'
-    if (new_out):
+    if new_out:
         inp = inp + 'Y' + '\n' + output_file + '\n'
     else:
         inp = inp + 'N' + '\n'
-    if (supress_g):
+    if supress_g:
         inp = inp + 'Y' + '\n'
     else:
         inp = inp + 'N' + '\n'
-    if(supress_ic):
+    if supress_ic:
         inp = inp + 'Y' + '\n'
     else:
         inp = inp + 'N' + '\n' + dcc_theory + '\n'
