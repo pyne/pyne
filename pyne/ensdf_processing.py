@@ -108,7 +108,7 @@ def bricc(inputdict_unchecked):
 
     """
     exe_path = path_to_exe('bricc')
-    exe_dir = path_to_exe('')
+    exe_dir = path_to_exe('')[:-1]
     compressed_exe_path = exe_path + '.tar.gz'
 
     bricc_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/BrIcc/Linux/BriccV23-Linux.tgz"
@@ -122,6 +122,20 @@ def bricc(inputdict_unchecked):
 
     input_type = inputdict_unchecked['input_type']
     output_dict = inputdict_unchecked
+    inp = (inputdict_unchecked['calculation_report'] if
+                inputdict_unchecked.has_key('calculation_report') else '') + '\n' + \
+          (inputdict_unchecked['G_SG_records'] if
+                inputdict_unchecked.has_key('G_SG_records') else '') + '\n' + \
+          (inputdict_unchecked['comparison_report'] if
+                inputdict_unchecked.has_key('comparison_report') else '') + '\n' + \
+          (inputdict_unchecked['conversion_coefficients'] if
+                inputdict_unchecked.has_key('conversion_coefficients') else '') + '\n' + \
+          (inputdict_unchecked['calculate_conversion_coefficients'] if
+                inputdict_unchecked.has_key('calculate_conversion_coefficients') else '') + '\n' + \
+          (inputdict_unchecked['lowest_cc_value'] if
+                inputdict_unchecked.has_key('lowest_cc_value') else '') + '\n' + \
+          (inputdict_unchecked['assumed_mr_value'] if
+                inputdict_unchecked.has_key('assumed_mr_value') else '') + '\n\r\n'
 
     if input_type == 'interactive':
         input_element = inputdict_unchecked['element']
@@ -134,10 +148,14 @@ def bricc(inputdict_unchecked):
         input_file = inputdict_unchecked['input_file']
         briccnh = inputdict_unchecked['BrIccNH']
         if briccnh:
-            proc = subprocess.Popen([exe_path, input_file, 'BrIccNH'],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            proc = subprocess.Popen(exe_path,[input_file, 'BrIccNH'],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            proc.stdin.write(inp.encode('utf-8'))
+            proc.communicate()[0]
             proc.stdin.close()
         else:
             proc = subprocess.Popen([exe_path, input_file],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            proc.stdin.write(inp.encode('utf-8'))
+            proc.communicate()[0]
             proc.stdin.close()
 
     output_dict['output_file_directory'] = exe_dir
