@@ -5,9 +5,10 @@ from warnings import warn
 from pyne.utils import QAWarning
 
 try:
-    import urllib.request as urllib2
+    import urllib.request as urllib
 except ImportError:
-    import urllib2
+    import urllib2 as urllib
+
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -22,17 +23,17 @@ def path_to_exe(exe_name):
 
 def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_size = 0):
     if not os.path.exists(exe_path):
-        print('fetching executable')
-        response = urllib2.urlopen(exe_url)
-        prog = 0
-        CHUNK = 32 * 1024
-        f = open(exe_path, 'wb')
-        while True:
-            chunk = response.read(CHUNK)
-            prog = prog + (256)
-            if not chunk: break
-            f.write(chunk)
-        f.close()
+        msg = 'Downloading {0!r} to {1!r}'.format(exe_url, exe_path)
+        print(msg)
+        req = urllib.Request(exe_url, headers={'User-Agent': 'Mozilla/5.0'})
+        f = urllib.urlopen(req, timeout=30.0)
+        try:
+            html = f.read()
+        finally:
+            f.close()
+        with open(exe_path, 'wb') as f:
+            f.write(html)
+
         # set proper permissions on newly downloaded file
         os.chmod(exe_path, 744)
         if compressed:
