@@ -35,9 +35,13 @@ def test_bricc_evaluation():
     create_tmp()
     input_dict = {}
     input_dict['input_type'] = 'evaluation'
-    input_dict['input_file'] = 'ensdf_processing/bricc/ref_235PU'
+    input_dict['input_file'] = 'ensdf_processing/bricc/ref_a228.ens'
     input_dict['BrIccNH'] = 0
+    input_dict['calculation_report'] = tmp_path + '/tmp_bricc_calculation_report'
+    input_dict['comparison_report'] = tmp_path + '/tmp_bricc_comparison_report'
     output_dict = ensdf_processing.bricc(input_dict)
+    bricc_comparison_ref = 'ensdf_processing/bricc/ref_a228_comparison_report'
+    file_comp(input_dict['comparison_report'], bricc_comparison_ref, [])
     cleanup_tmp()
 
 def test_bldhst():
