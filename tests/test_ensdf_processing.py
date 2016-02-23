@@ -38,11 +38,6 @@ def test_bricc_evaluation():
     input_dict['input_file'] = 'ensdf_processing/bricc/ref_235PU'
     input_dict['BrIccNH'] = 0
     output_dict = ensdf_processing.bricc(input_dict)
-    #bricc_out_tmp = tmp_path + '/tmp_bricc_out.out'
-    #bricc_out_ref = 'ensdf_processing/bricc/ref_bricc_44.out'
-    #bricc_outfile = open(tmp_path + '/tmp_bricc_out.out', 'w+')
-    #bricc_outfile.write(output_dict['bricc_output'])
-    #file_comp(bricc_out_tmp, bricc_out_ref,[])
     cleanup_tmp()
 
 def test_bldhst():
