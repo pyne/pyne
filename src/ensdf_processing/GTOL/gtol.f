@@ -4093,7 +4093,8 @@ c         END IF
 !
 !     FUNCTIONS USED
 !
-      REAL(KIND=8), INTRINSIC :: DBLE, REAL
+      REAL(KIND=4), INTRINSIC :: REAL
+      REAL(KIND=8), INTRINSIC :: DBLE
 !
 !     Local variables
 !
