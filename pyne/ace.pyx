@@ -211,6 +211,12 @@ def find_index(value, array):
         i = np.searchsorted(array, value) - 1
         frac = (value - array[i]) / (array[i+1] - array[i])
     return i, frac
+
+def set_seed(seed):
+    """
+    Set numpy random seed for deterministic testing.
+    """
+    np.random.seed(seed)
         
 class Library(object):
     """
