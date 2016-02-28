@@ -766,6 +766,7 @@ class NeutronTable(AceTable):
         Sample nu based on incident neutron energy e, 
         return a tuple of length-3, format of [nu_total, nu_prompt, nu_delay].
         If no nu data is presented for the corresponding nu, return None instead
+        This implementation was inspired by the nu sampler in OpenMC v0.7.1.
         """
         
         cdef int i 
@@ -1740,6 +1741,8 @@ class Reaction(object):
     def sample(self, e):
         """
         Sample out-going mu and e_out based on incoming neutron energy e, return (mu, e_out).
+        This implementation (together with the subfunctions used) were inspired by the 
+        second-neutron-distribution sampler in OpenMC v0.7.1.
         """
         
         edist = self.energy_dist
