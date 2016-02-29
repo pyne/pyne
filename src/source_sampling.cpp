@@ -79,7 +79,7 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   int ve_idx = pdf_idx/num_e_groups;
   int e_idx = pdf_idx % num_e_groups;
 
-  // Sample uniformly within the selected mesh volume elemenet and energy
+  // Sample uniformly within the selected mesh volume element and energy
   // group.
   std::vector<double> samp;
   std::vector<double> xyz_rands;
@@ -212,8 +212,9 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
     int i, j;
     moab::ErrorCode rval;
     if (mode == UNIFORM) {
-      // In unform sampling, the biased PDF is just the volume of the mesh
-      // volume element
+      // Uniform sampling: uniform in space, analog in energy. Biased PDF is
+      // found by normalizing the total photon emission density to 1 in each
+      // mesh volume element and multiplying by the volume of the element.
       double q_in_group;
       for (i=0; i<num_ves; ++i) {
         q_in_group = 0;
