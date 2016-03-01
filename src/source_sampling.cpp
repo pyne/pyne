@@ -230,7 +230,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
           }
         } else {
           for (j=0; j<num_e_groups; ++j) {
-            bias_pdf[i*num_e_groups + j] = 0.0;
+            bias_pdf[i*num_e_groups + j] = pdf[i*num_e_groups + j];
           }
         }
       }
