@@ -6,16 +6,16 @@
 static pyne::Sampler* sampler = NULL;
 
 // Fortran API
-void pyne::sampling_setup_(int* mode) {
+void pyne::sampling_setup_(int* mode, double* threshold) {
   if (sampler == NULL) {
     std::string filename ("source.h5m");
     std::string src_tag_name ("source_density");
     std::string e_bounds_file ("e_bounds");
     std::vector<double> e_bounds = read_e_bounds(e_bounds_file);
     if (*mode == 0) {
-      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, false);
+      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, false, 0);
     } else if (*mode == 1) {
-      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, true);
+      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, true, *threshold);
     } else if (*mode == 2) {
       std::string bias_tag_name ("biased_source_density");
       sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
@@ -54,8 +54,9 @@ std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
 pyne::Sampler::Sampler(std::string filename, 
                  std::string src_tag_name, 
                  std::vector<double> e_bounds, 
-                 bool uniform)
-  : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds) {
+                 bool uniform,
+                 double threshold)
+  : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds), threshold(threshold) {
   mode = (uniform) ? UNIFORM : ANALOG;
   setup();
 }
@@ -67,7 +68,8 @@ pyne::Sampler::Sampler(std::string filename,
   : filename(filename), 
     src_tag_name(src_tag_name), 
     e_bounds(e_bounds), 
-    bias_tag_name(bias_tag_name) {
+    bias_tag_name(bias_tag_name),
+    threshold(0) {
   mode = USER;
   setup();
 }
@@ -221,7 +223,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         for (j=0; j<num_e_groups; ++j){
           q_in_group += pdf[i*num_e_groups + j];
         }
-        if (q_in_group > 0) {
+        if (q_in_group > threshold) {
           for (j=0; j<num_e_groups; ++j) {
             bias_pdf[i*num_e_groups + j] =
                 volumes[i]*pdf[i*num_e_groups + j]/q_in_group;

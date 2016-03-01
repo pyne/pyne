@@ -47,7 +47,8 @@ namespace pyne {
 
   /// MCNP interface for source sampling setup
   /// \param mode The sampling mode: 1 = analog, 2 = uniform, 3 = user-specified
-  void sampling_setup_(int* mode);
+  /// \param threshold The threshold below which a voxel will not be adjusted for uniform sampling
+  void sampling_setup_(int* mode, double* threshold=0);
   /// MCNP interface to sample particle birth parameters after sampling setup
   /// \param rands Six pseudo-random numbers supplied from the Fortran side.
   /// \param x The sampled x position returned by this function
@@ -142,6 +143,7 @@ namespace pyne {
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
     Mode mode; ///< Problem mode: analog, uniform, user
+    double threshold;
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.
