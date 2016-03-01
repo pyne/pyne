@@ -107,7 +107,8 @@ namespace pyne {
     Sampler(std::string filename, 
             std::string src_tag_name, 
             std::vector<double> e_bounds, 
-            bool uniform);
+            bool uniform,
+            double threshold=0);
     /// Constuctor for analog and uniform sampling
     /// \param filename The path to the MOAB mesh (.h5m) file
     /// \param src_tag_name The name of the tag with the unbiased source density
