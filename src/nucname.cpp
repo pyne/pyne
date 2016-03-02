@@ -632,7 +632,7 @@ bool pyne::nucname::iselement(int nuc) {
     return false;
   }
  
-  if (n <= 10000000)
+  if (n < 10000000)
     return false;
   int zzz = znum(n);
   int aaa = anum(n);
