@@ -9,6 +9,8 @@ from nose.plugins.skip import SkipTest
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_almost_equal, assert_true, assert_false, assert_in
 
+from pyne.pyne_config import pyne_conf
+
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne import nuc_data
@@ -269,6 +271,33 @@ def test_expand_elements2():
     afrac = expmat.to_atom_frac()
     assert_almost_equal(data.natural_abund(60120000), afrac[60120000])
     assert_almost_equal(data.natural_abund(60130000), afrac[60130000])
+
+def test_expand_elements1_nonucdata():
+    old_nuc_path = pyne_conf.NUC_DATA_PATH
+    pyne_conf.NUC_DATA_PATH = b'obviously no nuc_data.h5m'
+
+    natmat = Material({'C': 1.0, 902320000: 0.5, 'PU': 4.0, 'U': 3.0},
+                       metadata={'y': 1.0})
+    expmat = natmat.expand_elements()
+    assert_true(60120000 in expmat.comp)
+    assert_false(60000000 in expmat.comp)
+    assert_true(natmat.metadata == expmat.metadata)
+    assert_false(natmat.metadata is expmat.metadata)
+
+    pyne_conf.NUC_DATA_PATH = old_nuc_path
+
+def test_expand_elements2_nonucdata():
+    old_nuc_path = pyne_conf.NUC_DATA_PATH
+    pyne_conf.NUC_DATA_PATH = b'obviously no nuc_data.h5m'
+
+    """Inspired by #86"""
+    natmat = Material({'C': 1.0})
+    expmat = natmat.expand_elements()
+    afrac = expmat.to_atom_frac()
+    assert_almost_equal(data.natural_abund(60120000), afrac[60120000])
+    assert_almost_equal(data.natural_abund(60130000), afrac[60130000])
+
+    pyne_conf.NUC_DATA_PATH = old_nuc_path
 
 def test_collapse_elements1():
     """ Very simple test to combine nucids"""

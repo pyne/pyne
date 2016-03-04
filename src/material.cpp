@@ -1159,47 +1159,57 @@ double pyne::Material::molecular_mass(double apm) {
   return atsperm / inverseA;
 }
 
-
+// Expands a PyNE material object, such that all elements are expanded into
+// their isotopic form
 pyne::Material pyne::Material::expand_elements() {
-  // Expands the natural elements of a material and returns a new material note
-  // that this implementation relies on the fact that maps of ints are stored in
-  // a sorted manner in C++.
+  // Expands the natural elements of a material and returns a new material 
   int n, nabund, znuc, zabund;
   comp_map newcomp;
-  std::map<int, double>::iterator abund_itr, abund_end;
+  std::map<int, double>::iterator abund_itr;
+
+  // if not loaded, load the atomic data
   if (pyne::natural_abund_map.empty())
     pyne::_load_atomic_mass_map();
-  abund_itr = pyne::natural_abund_map.begin();
-  abund_end = pyne::natural_abund_map.end();
-  zabund = nucname::znum((*abund_itr).first);
-  for (comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++) {
-    if(abund_itr == abund_end)
-      newcomp.insert(*nuc);
-    else if(0 == nucname::anum((*nuc).first)) {
-      n = (*nuc).first;
-      znuc = nucname::znum(n);
-      if (znuc < zabund) {
-        newcomp.insert(*nuc);
-        continue;
+
+  int z_check; // atomic number of the nuclide from the abundance map
+  int znum; // atomic number of the element we are testing
+  int nucid; // the new nuclide to insert
+  double fraction; // the new mass fraction of the nuclide
+  // loop over the component nuclides (or elements)
+  for (comp_iter nuc = comp.begin(); nuc != comp.end(); ++nuc) {
+    // check to see if we are already an nuclide rather than an element
+    znum = nucname::znum(nuc->first); // get the atomic number of the element
+    // no elements more than z 92 - to avoid having atomic_mass(nuc) = 0.0
+    if( pyne::nucname::iselement(nuc->first) && znum <= 92) {
+      // we are an element
+      // loop over all possible natural abundances
+      for ( abund_itr  = pyne::natural_abund_map.begin() ;
+            abund_itr != pyne::natural_abund_map.end() ;
+            ++abund_itr) {
+	     // atomic number of the nuclide in the iterator
+     	     z_check = nucname::znum(abund_itr->first);
+	     // if the atomic number of the isotope matches
+	     // the element atomic number and make sure not an element
+	     if(znum == z_check && !(pyne::nucname::iselement(abund_itr->first))) {
+	       // insert the new isotope with abundance * original fraction
+	       // make sure that we dont insert empty isotopes
+	       if(nuc->second != 0.0 && abund_itr->second != 0.0 ) {
+		 nucid = abund_itr->first; // nuc id of the isotope of nuc
+		 // the new fraction is the mass fraction from the element
+		 // times by the abundance mass fraction
+		 fraction = (nuc->second)*(abund_itr->second)*atomic_mass(nucid);
+		 // add the nuclide into the comp map
+		 newcomp[nucid] = fraction;
+	       }
+	     }
       }
-      while(zabund <= znuc) {
-        nabund = (*abund_itr).first;
-        if (zabund == znuc && 0 != nucname::anum(nabund) && 0.0 != (*abund_itr).second)
-          newcomp[nabund] = (*abund_itr).second * (*nuc).second * \
-                            atomic_mass(nabund) / atomic_mass(n);
-        else if (n == nabund && 0.0 == (*abund_itr).second)
-          newcomp.insert(*nuc);
-        abund_itr++;
-        if (abund_itr == abund_end) {
-          zabund = INT_MAX;
-          break;
-        }
-        zabund = nucname::znum(nabund);
-      }
-    } else
+    } else {
+      // already expanded or unexpandable, just insert into map
       newcomp.insert(*nuc);
+    }
   }
-  return Material(newcomp, mass, density, atoms_per_molecule, metadata);
+  pyne::Material newmat = pyne::Material(newcomp, mass, density, atoms_per_molecule, metadata);
+  return newmat;
 }
 
 pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
