@@ -1181,15 +1181,15 @@ def test_alara():
                 '# comments: this is a long comment that will definitly go over the 80 character\n'
                 '#  limit, for science\n'
                 'LEU 19.1 2\n'
-                '     u:235 4.0000E-02 92\n'
-                '     u:238 9.6000E-01 92\n'
+                '     u:235 4.0000E+00 92\n'
+                '     u:238 9.6000E+01 92\n'
                 '# mat number: 2\n'
                 'mat2_rho-19.1 19.1 2\n'
-                '     u:235 4.0000E-02 92\n'
-                '     u:238 9.6000E-01 92\n'
+                '     u:235 4.0000E+00 92\n'
+                '     u:238 9.6000E+01 92\n'
                 'mat<mat_num>_rho-<rho> <rho> 2\n'
-                '     u:235 4.0000E-02 92\n'
-                '     u:238 9.6000E-01 92\n')
+                '     u:235 4.0000E+00 92\n'
+                '     u:238 9.6000E+01 92\n')
     assert_equal(written, expected)
 
 def test_write_mcnp():
@@ -1343,15 +1343,15 @@ def test_write_alara():
                 '# comments: this is a long comment that will definitly go over the 80 character\n'
                 '#  limit, for science\n'
                 'LEU 19.1 2\n'
-                '     u:235 4.0000E-02 92\n'
-                '     u:238 9.6000E-01 92\n'
+                '     u:235 4.0000E+00 92\n'
+                '     u:238 9.6000E+01 92\n'
                 '# mat number: 2\n'
                 'mat2_rho-19.1 19.1 2\n'
-                '     u:235 4.0000E-02 92\n'
-                '     u:238 9.6000E-01 92\n'
+                '     u:235 4.0000E+00 92\n'
+                '     u:238 9.6000E+01 92\n'
                 'mat<mat_num>_rho-<rho> <rho> 2\n'
-                '     u:235 4.0000E-02 92\n'
-                '     u:238 9.6000E-01 92\n')
+                '     u:235 4.0000E+00 92\n'
+                '     u:238 9.6000E+01 92\n')
     assert_equal(written, expected)
     os.remove('alara.txt')
 

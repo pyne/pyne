@@ -1615,9 +1615,10 @@ class Material(_Material, collections.MutableMapping):
         s += '{0} {1} {2}\n'\
                     .format(mat_name, density, len(self.comp))
 
+        # Multiply frac by 100 because ALARA uses mass percent for matlib files
         for iso, frac in self.comp.items():
             s += '     {0} {1:.4E} {2}\n'.format(nucname.alara(iso),
-                                                 frac, str(nucname.znum(iso)))
+                                                 frac*100, str(nucname.znum(iso)))
 
         return s
 
