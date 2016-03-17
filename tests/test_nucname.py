@@ -508,9 +508,17 @@ def test_isnuclide():
     for nuc in arent:
         yield assert_false, nucname.isnuclide(nuc)
 
-def test_iselement():
+def test_iselement_U235():
     are = [92, 'U']
     arent = [922350, 'U235']
+    for nuc in are:
+        yield assert_true, nucname.iselement(nuc)
+    for nuc in arent:
+        yield assert_false, nucname.iselement(nuc)
+
+def test_iselement_H1():
+    are = [1, 'H']
+    arent = [1001, 'H1']
     for nuc in are:
         yield assert_true, nucname.iselement(nuc)
     for nuc in arent:
