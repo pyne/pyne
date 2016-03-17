@@ -1,54 +1,41 @@
+sudo: required
 language: python
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "2.7"
-  - "3.4"
-  - "3.5"
+#  - "3.4"
+#  - "3.5"
+services:
+  - docker
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y gfortran
+  - sudo docker pull pynedist/pyne-ubuntu
 install:
-  # You may want to periodically update this, although the conda update
-  # conda line below will keep everything up-to-date.  We do this
-  # conditionally because it saves us some downloading if the version is
-  # the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no 
-  - conda config --add channels pyne
-  - conda config --add channels cyclus
-  - conda update -q conda
-  - conda install conda-build jinja2 setuptools binstar patchelf nose
-  # Useful for debugging any issues with conda
-  - conda info -a
-  
-  # download CI repo
-  - wget https://github.com/pyne/pyne-ci/archive/master.zip -O pyne-ci.zip
-  - unzip -j pyne-ci.zip "*/pyne/*" -d conda-recipe
-  
-  # Replace dep1 dep2 ... with your dependencies
-  #- conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION dep1 dep2 ...
-  #- source activate test-environment
-  - conda build --no-test conda-recipe
-  - conda install pyne --use-local
-
+# copy the git repo being tested into the docker instance
+   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /root/opt/"
+   - commit_id=`sudo docker ps -l | tail -n1 | awk '{print $1}'`
+   - sudo docker cp ../pyne $commit_id:/root/opt/pyne
+#   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /root/opt/ ; git clone https://github.com/pyne/pyne"
+   - commit_id=`sudo docker ps -l | tail -n1 | awk '{print $1}'`
+   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /root/opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/root/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/root/opt/moab/include"
+   - commit_id=`sudo docker ps -l | tail -n1 | awk '{print $1}'`
+   - sudo docker commit $commit_id pynedist/pyne-ubuntu
 script:
-  - cd tests
-  #- nosetests
-  - ./travis-run-tests.sh
-
-  # Build the pyne-amalgamation test program 
-  - git clone https://github.com/pyne/pyne-amalgamation.git
-  - cd ..
-  - python amalgamate.py
-  - mv pyne.h pyne.cpp tests/pyne-amalgamation
-  - cd tests
-  - BASE=/home/travis/miniconda make -C pyne-amalgamation
-
-
+   - sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/" pynedist/pyne-ubuntu /bin/bash -c "cd /root/opt/pyne ; /root/.local/bin/nuc_data_make" 
+   - commit_id=`sudo docker ps -l | tail -n1 | awk '{print $1}'`
+   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   - sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/:/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/:/root/opt/moab/lib" -e PYTHONPATH="/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/" pynedist/pyne-ubuntu /bin/bash -c "cd /root/opt/pyne/tests ; ./travis-run-tests.sh"
+   - sudo docker run pynedist/pyne-ubuntu /bin/bash -c "cd /root/opt/pyne/tests ; git clone https://github.com/pyne/pyne-amalgamation.git"
+   - commit_id=`sudo docker ps -l | tail -n1 | awk '{print $1}'`
+   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   - sudo docker run pynedist/pyne-ubuntu /bin/bash -c "cd /root/opt/pyne/ ; python amalgamate.py"
+   - commit_id=`sudo docker ps -l | tail -n1 | awk '{print $1}'`
+   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   - sudo docker run pynedist/pyne-ubuntu /bin/bash -c "cd /root/opt/pyne/ ; mv pyne.h pyne.cpp tests/pyne-amalgamation"
+   - commit_id=`sudo docker ps -l | tail -n1 | awk '{print $1}'`
+   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+# need to add amalgamate test
+   - sudo docker run -e LIBS="/root/opt/moab/lib:/root/.local/lib" pynedist/pyne-ubuntu /bin/bash -c "cd /root/opt/pyne/tests/pyne-amalgamation ; make BASE=$LIBS all"
+   - commit_id=`sudo docker ps -l | tail -n1 | awk '{print $1}'`
+   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   
