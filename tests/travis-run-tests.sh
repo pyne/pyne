@@ -5,7 +5,7 @@ for x in $(ls test*.py */test*.py); do
   echo "Testing $x:" 
   echo 
   if [ $x=="ensdf_processing.py" ]; then
-    travis_wait nosetests ltime_test_ensdf_processing.py --process-timeout=120
+    nosetests test_ensdf_processing.py --process-timeout=120
   else
     nosetests "$x"
   fi
