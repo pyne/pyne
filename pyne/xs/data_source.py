@@ -934,14 +934,15 @@ class OpenMCDataSource(DataSource):
         ace_tables = self._rank_ace_tables(nuc, temp=temp)
         lib = ntab = None
         for atab in ace_tables: 
-            if atab not in self.libs:
-                lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
-                lib.read(atab.name)
-            lib = self.libs[atab]
-            ntab = lib.tables[atab.name]
-            if mt in ntab.reactions or rx == totrx or rx == absrx:
-                break
-            lib = ntab = None
+            if os.path.isfile(atab.abspath or atab.path):
+                if atab not in self.libs:
+                    lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
+                    lib.read(atab.name)
+                lib = self.libs[atab]
+                ntab = lib.tables[atab.name]
+                if mt in ntab.reactions or rx == totrx or rx == absrx:
+                    break
+                lib = ntab = None
         if lib is None:
             return None  # no reaction available
         E_g = self.src_group_struct
@@ -990,5 +991,6 @@ class OpenMCDataSource(DataSource):
 
         """
         for atab in self.cross_sections.ace_tables:
-            lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
-            lib.read(atab.name)
+            if os.path.isfile(atab.abspath or atab.path):
+                lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
+                lib.read(atab.name)
