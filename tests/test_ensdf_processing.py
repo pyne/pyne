@@ -18,7 +18,7 @@ def test_alphad():
     file_comp(input_dict['report_file'],'ensdf_processing/alphad/ref_a228.ens.alphad.rpt', exceptions)
     cleanup_tmp()
 
-def test_bricc_interactive():
+def optional_t_bricc_interactive():
     create_tmp()
     input_dict = {}
     input_dict['input_type'] = 'interactive'
@@ -31,7 +31,7 @@ def test_bricc_interactive():
     file_comp(bricc_out_tmp, bricc_out_ref,[])
     cleanup_tmp()
 
-def test_bricc_evaluation():
+def optional_t_bricc_evaluation():
     create_tmp()
     input_dict = {}
     input_dict['input_type'] = 'evaluation'
@@ -71,7 +71,7 @@ def test_delta():
 
 # Tests gabs output for 80Br sample input.  Date and file names are expected to be different
 # in the test output and reference file sets.
-def test_gabs():
+def optional_t_gabs():
     create_tmp()
     input_dict = {}
     input_dict['input_file'] = 'ensdf_processing/gabs/ref_gabs_80Br.in'
@@ -171,7 +171,7 @@ def test_radd():
     d_report = file_comp(input_dict['output_file'], ref_output, [])
     cleanup_tmp()
 
-def test_radlist():
+def optional_radlist():
     create_tmp()
     input_dict = {}
     input_dict['output_radiation_listing'] = 'Y'
@@ -263,9 +263,6 @@ def file_comp(file_out, file_ref, exceptions):
 #  nose.runmodule()
 if __name__ == "__main__":
     alphad = test_alphad()
-    gabs = test_gabs()
-    bricc_1 = test_bricc_interactive()
-    bricc_2 = test_bricc_evaluation()
     bldhst = test_bldhst()
     delta = test_delta()
     gtol = test_gtol()
@@ -274,5 +271,13 @@ if __name__ == "__main__":
     seqhst = test_seqhst()
     logft = test_logft()
     radd = test_radd()
-    radlist = test_radlist()
     ruler = test_ruler()
+
+    ### The following code runs the additional setup code and runs tests
+    ### for each.  They are not included in the main test suit because
+    ### downloading the additional execuables can take upwards of 120 seconds.
+    #ensdf_processing.setup_additional_downloads()
+    #gabs = test_gabs()
+    #bricc_1 = optional_t_bricc_interactive()
+    #bricc_2 = optional_t_bricc_evaluation()
+    #radlist = optional_t_radlist()

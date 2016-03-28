@@ -9,11 +9,19 @@ try:
 except ImportError:
     import urllib2 as urllib
 
-
 if sys.version_info[0] > 2:
     basestring = str
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+class SetupIncompleteError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+            return "This ensdf analysis module requires additional setup.  Run \
+                    pyne.ensdf_processing.setup_additional_downloads to download the \
+                    additional executables and complete this modules instalation. \
+                    (following executable not yet installed/downloaded: " + repr(self.value)
 
 def path_to_exe(exe_name):
     exe_path_abs, dp = os.path.split(os.path.abspath(__file__))
@@ -21,7 +29,7 @@ def path_to_exe(exe_name):
     exe_path_abs = os.path.join('./',exe_path_abs)
     return exe_path_abs
 
-def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_size = 0):
+def download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_size = 0):
     if not os.path.exists(exe_path):
         msg = 'Downloading {0!r} to {1!r}'.format(exe_url, exe_path)
         print(msg)
@@ -40,6 +48,38 @@ def verify_download_exe(exe_path, exe_url, compressed = 0, decomp_path = '', dl_
             os.chmod(exe_path, 777)
             tfile = tarfile.open(exe_path, 'r:gz')
             tfile.extractall(decomp_path)
+
+def setup_additional_downloads():
+    print("Downloading BRICC executable")
+    setup_bricc()
+    print("Downloading GABS executable")
+    setup_gabs()
+    print("Downloading RADLIST executable")
+    setup_radlist()
+
+def setup_bricc():
+    exe_path = path_to_exe('bricc')
+    exe_dir = path_to_exe('')[:-1]
+    compressed_exe_path = exe_path + '.tar.gz'
+
+    bricc_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/BrIcc/Linux/BriccV23-Linux.tgz"
+    decomp_exe_path = path_to_exe('')
+    decomp_options = ['bricc', '.tgz', True]
+    download_exe(compressed_exe_path, bricc_url, compressed = True, decomp_path = decomp_exe_path, dl_size = 127232)
+
+def setup_gabs():
+    exe_path = path_to_exe('gabs')
+    gabs_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/gabs/unx/gabs"
+    download_exe(exe_path, gabs_url, dl_size = 8704)
+
+def setup_radlist():
+    exe_path = path_to_exe('radlist')
+    radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
+    download_exe(exe_path, radlist_url, dl_size = 8704)
+
+def verify_download_exe(exe_path):
+    if not os.path.exists(exe_path):
+        raise SetupIncompleteError(exe_path)
 
 def alphad(inputdict_unchecked):
     """
@@ -111,11 +151,7 @@ def bricc(inputdict_unchecked):
     exe_dir = path_to_exe('')[:-1]
     compressed_exe_path = exe_path + '.tar.gz'
 
-    bricc_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/BrIcc/Linux/BriccV23-Linux.tgz"
-    decomp_exe_path = path_to_exe('')
-    decomp_options = ['bricc', '.tgz', True]
-    verify_download_exe(compressed_exe_path, bricc_url, compressed = True, decomp_path = decomp_exe_path, dl_size = 127232)
-
+    verify_download_exe(compressed_exe_path)
     # check if BriIccHome environment variable has been set (needed by BRICC executable)
     if not os.environ.get('BrIccHome'):
         os.environ['BrIccHome'] = str(exe_dir)
@@ -239,10 +275,8 @@ def gabs(inputdict_unchecked):
         Everything in input dictionary is returned if GABS completes successfully.
     """
     exe_path = path_to_exe('gabs') 
+    verify_download_exe(exe_path)
 
-    gabs_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/gabs/unx/gabs"
-    verify_download_exe(exe_path, gabs_url, dl_size = 8704)
-    
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     dataset_file = inputdict_unchecked['dataset_file']
@@ -488,9 +522,8 @@ def radlist(inputdict_unchecked):
         Everything in input dictionary is returned if RADLIST completes successfully.
     """
     exe_path = path_to_exe('radlist')
-    radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
     print(exe_path)
-    verify_download_exe(exe_path, radlist_url, dl_size = 8704)
+    verify_download_exe(exe_path)
 
     inputdict = {}
     output_rad_listing = inputdict_unchecked['output_radiation_listing']
