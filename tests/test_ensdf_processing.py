@@ -15,7 +15,9 @@ def test_alphad():
     input_dict['output_file'] = tmp_path + '/tmp_alphad.out'
     output_dict = ensdf_processing.alphad(input_dict)
     exceptions = [[2, 'DATE RUN']]
-    file_comp(input_dict['report_file'],'ensdf_processing/alphad/ref_a228.ens.alphad.rpt', exceptions)
+    file_comp(input_dict['report_file'],
+              'ensdf_processing/alphad/ref_a228.ens.alphad.rpt',
+              exceptions)
     cleanup_tmp()
 
 def optional_t_bricc_interactive():
@@ -63,14 +65,18 @@ def test_delta():
     input_dict['input_file'] = 'ensdf_processing/delta/ref_inp.dat'
     input_dict['output_file'] = tmp_path + '/tmp_delta.dat'
     output_dict = ensdf_processing.delta(input_dict)
-    # exceptions contain lines in the ouptut that can have a tolerable precision difference
-    exceptions = [[3, 82], [3, 89], [3, 119], [3, 202], [3, 209], [3, 213],[3,  217],[3,  229], \
-                 [3,  232], [3, 236], [3, 243], [3, 318], [3, 355], [3, 458]]
-    d_ouptut = file_comp(input_dict['output_file'],'ensdf_processing/delta/ref_delta.rpt', exceptions)
+    # exceptions contain lines in the ouptut that can have a tolerable
+    # precision difference
+    exceptions = [[3, 82], [3, 89], [3, 119], [3, 202], [3, 209], [3, 213], \
+                  [3,  217],[3,  229], [3,  232], [3, 236], [3, 243], \
+                  [3, 318], [3, 355], [3, 458]]
+    d_ouptut = file_comp(
+               input_dict['output_file'],'ensdf_processing/delta/ref_delta.rpt',
+               exceptions)
     cleanup_tmp()
 
-# Tests gabs output for 80Br sample input.  Date and file names are expected to be different
-# in the test output and reference file sets.
+# Tests gabs output for 80Br sample input.  Date and file names are expected to
+# be different in the test output and reference file sets.
 def optional_t_gabs():
     create_tmp()
     input_dict = {}
@@ -84,9 +90,11 @@ def optional_t_gabs():
                          [1, '        new ENSDF file:']]
     exceptions_dataset = [[4,0]]
     d_report1 = file_comp(input_dict['output_file'],
-                          'ensdf_processing/gabs/ref_gabs_80Br.rpt', exceptions_output)
+                          'ensdf_processing/gabs/ref_gabs_80Br.rpt',
+                          exceptions_output)
     d_report2 = file_comp(input_dict['dataset_file'],
-                          'ensdf_processing/gabs/ref_gabs_80Br.new', exceptions_dataset)
+                          'ensdf_processing/gabs/ref_gabs_80Br.new',
+                          exceptions_dataset)
     cleanup_tmp()
 
 <<<<<<< 65c46cdb7aa26efcc3c8440364d1f2d9a7c4093d
@@ -104,7 +112,8 @@ def test_gtol():
     output_dict = ensdf_processing.gtol(input_dict)
     ref_output_report = 'ensdf_processing/gtol/ref_gtol.rpt'
     exceptions = [[1, 'DATE:'], [1, 'INPUT-FILE name:'], [1, 'TIME:']]
-    d_report = file_comp(input_dict['report_file'], ref_output_report, exceptions)
+    d_report = file_comp(input_dict['report_file'], ref_output_report,
+                         exceptions)
     cleanup_tmp()
 
 def test_hsicc():
@@ -125,7 +134,8 @@ def test_hsicc():
     exceptions = [[3, 55], [3, 70], [3, 83], [3, 107], [3, 131], [3, 151]]
     d_report = file_comp(input_dict['complete_report'], ref_report, exceptions)
     d_card_deck = file_comp(input_dict['new_card_deck'], ref_card_deck, [])
-    d_comparison_report = file_comp(input_dict['comparison_report'], ref_comparison_report, [])
+    d_comparison_report = file_comp(input_dict['comparison_report'],
+                                    ref_comparison_report, [])
     cleanup_tmp()
 
 def test_hsmrg():
@@ -142,7 +152,8 @@ def test_hsmrg():
 def test_seqhst():
     create_tmp()
     input_dict = {}
-    input_dict['binary_table_input_file'] = 'ensdf_processing/seqhst/ref_seqhst_icctbl.dat'
+    input_dict['binary_table_input_file'] = \
+                'ensdf_processing/seqhst/ref_seqhst_icctbl.dat'
     input_dict['sequential_output_file'] = tmp_path + '/tmp_out_iccseq.dat'
     output_dict = ensdf_processing.seqhst(input_dict)
     ref_sequence = 'ensdf_processing/seqhst/ref_iccseq.dat'
@@ -181,16 +192,21 @@ def optional_t_radlist():
     input_dict['calculate_continua'] = 'N'
     input_dict['input_file'] = 'ensdf_processing/radlst/ref_radlst.inp'
     input_dict['output_radlst_file'] = tmp_path + '/tmp_radlst.rpt'
-    input_dict['input_radlst_data_table'] = 'ensdf_processing/radlst/ref_mednew.dat'
+    input_dict['input_radlst_data_table'] = \
+                                        'ensdf_processing/radlst/ref_mednew.dat'
     input_dict['output_ensdf_file'] = tmp_path + '/tmp_ensdf.rpt'
     output_dict = ensdf_processing.radlist(input_dict)
     ref_output_radlst_file = 'ensdf_processing/radlst/ref_radlst.rpt'
     ref_output_ensdf_file = 'ensdf_processing/radlst/ref_ensdf.rpt'
     # exceptions contain lines in the ouptut that can have a tolerable precision difference
-    radlst_exceptions = [[1, '1PROGRAM RADLST 5.5 [ 5-OCT-88].  RUN ON'], [3, 66], [3, 135], [3, 713], [3, 714], [3, 760],[3,  944]]
+    radlst_exceptions = [[1, '1PROGRAM RADLST 5.5 [ 5-OCT-88].  RUN ON'], \
+                        [3, 66], [3, 135], [3, 713], [3, 714], [3, 760], \
+                        [3,  944]]
     ensdf_exceptions = [[3, 341], [3, 351], [3, 357]]
-    d_radlst = file_comp(input_dict['output_radlst_file'], ref_output_radlst_file, radlst_exceptions)
-    d_ensdf = file_comp(input_dict['output_ensdf_file'], ref_output_ensdf_file, ensdf_exceptions)
+    d_radlst = file_comp(input_dict['output_radlst_file'],
+                         ref_output_radlst_file, radlst_exceptions)
+    d_ensdf = file_comp(input_dict['output_ensdf_file'], ref_output_ensdf_file,
+                        ensdf_exceptions)
     cleanup_tmp()
     os.remove('atomic.dat')
 
@@ -203,8 +219,10 @@ def test_ruler():
     input_dict['assumed_dcc_theory'] = '1.4'
     output_dict = ensdf_processing.ruler(input_dict)
     ref_output = 'ensdf_processing/ruler/ref_ruler.rpt'
-    exceptions = [[1, '         INPUT FILE:'], [1, 'RULER Version 3.2d [20-Jan-2009]']]
-    d_report = file_comp(input_dict['output_report_file'], ref_output, exceptions)
+    exceptions = [[1, '         INPUT FILE:'],\
+                 [1, 'RULER Version 3.2d [20-Jan-2009]']]
+    d_report = file_comp(input_dict['output_report_file'], ref_output,
+                         exceptions)
     cleanup_tmp()
 
 def create_tmp():
@@ -242,17 +260,20 @@ def file_comp(file_out, file_ref, exceptions):
                     if exceptions[i][1] in line_out:
                           ignore = True
                 elif exceptions[i][0] == 3:
-                    # ignores select lines to allow for tolerable differences in output precision
+                    # ignores select lines to allow for tolerable differences 
+                    # in output precision
                     if exceptions[i][1] == line_num:
                         ignore = True
                 elif exceptions[i][0] == 4:
                     if len(line_ref[:-1]) == len(line_out):
-                    # special exception for lines with possible carriage return instead of standard 
-                    #line feed return
+                    # special exception for lines with possible carriage return
+                    # instead of standard line feed return
                         if line_ref[:-2] == line_out[:-1]:
                             ignore = True
             if not ignore:
-                raise Exception('ENSDF Processing: Incorrect output generated, file: ' + file_ref)
+                raise Exception(
+                        'ENSDF Processing: Incorrect output generated, file: '+\
+                        file_ref)
         line_num = line_num + 1
     f_out.close()
     f_ref.close()
@@ -274,10 +295,10 @@ if __name__ == "__main__":
     ruler = test_ruler()
 
     ### The following code runs the additional setup code and runs tests
-    ### for each.  They are not included in the main test suit because
+    ### for each.  They are not included in the main test suite because
     ### downloading the additional execuables can take upwards of 120 seconds.
-    ensdf_processing.setup_additional_downloads()
-    gabs = optional_t_gabs()
-    bricc_1 = optional_t_bricc_interactive()
-    bricc_2 = optional_t_bricc_evaluation()
-    radlist = optional_t_radlist()
+    #ensdf_processing.setup_additional_downloads()
+    #gabs = optional_t_gabs()
+    #bricc_1 = optional_t_bricc_interactive()
+    #bricc_2 = optional_t_bricc_evaluation()
+    #radlist = optional_t_radlist()

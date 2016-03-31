@@ -143,17 +143,17 @@ def bricc(inputdict_unchecked):
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if BRICC completes 
+        Everything in input dictionary is returned if BRICC completes
         successfully.
         Additional dictionary entries including:
-            output_file_directory : string, the directory all produced bricc 
+            output_file_directory : string, the directory all produced bricc
                                     output files will be located.
-            bricc_output : string, Only for interactive use: data printed to 
+            bricc_output : string, Only for interactive use: data printed to
                            command line.
 
     Notes
     -----
-        All the various ouptput files bricc can generate are found in the 
+        All the various ouptput files bricc can generate are found in the
         output_file_directory
 
     """
@@ -251,13 +251,13 @@ def delta(inputdict_unchecked):
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
             input_file : string, path to input ensdf file.
-            output_file : string, path to file for output write (doesn't have to 
+            output_file : string, path to file for output write (doesn't have to
                           exist).
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if DELTA completes 
+        Everything in input dictionary is returned if DELTA completes
         successfully.
     """
     inputdict = {}
@@ -274,7 +274,7 @@ def delta(inputdict_unchecked):
 
 def gabs(inputdict_unchecked):
     """
-    This program calculates Gamma-ray absolute intensity and normalization 
+    This program calculates Gamma-ray absolute intensity and normalization
     (GABS readme)
 
     Parameters
@@ -283,13 +283,13 @@ def gabs(inputdict_unchecked):
         dictionary that must have the following key-pair values:
             input_file : string, input ensdf file
             dataset_file : string, dataset file to be used
-            output file : string, file for output to be written to 
+            output file : string, file for output to be written to
                           (doesn't have to exist)
     
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if GABS completes 
+        Everything in input dictionary is returned if GABS completes
         successfully.
     """
     exe_path = path_to_exe('gabs') 
@@ -311,7 +311,7 @@ def gabs(inputdict_unchecked):
 def gtol(inputdict_unchecked):
     """
     GTOL uses gamma-ray energies to derive a set of least-squares adjusted level
-    energies.  
+    energies.
 
     The net feeding at each level is calculated from the input gamma intensities
     and conversion coefficients. (GTOL readme)
@@ -322,12 +322,12 @@ def gtol(inputdict_unchecked):
         dictionary that must have the following key-pair values:
             input_file : string, input ensdf file.
             report_file : string, desired gtol report file path.
-            new_ensdf_file_with_results : boolean, if true then a new ensdf file 
+            new_ensdf_file_with_results : boolean, if true then a new ensdf file
                                           with results will be created.
             output_file : string, desired gtol output file path.
             supress_gamma_comparison : boolean, if true the gamma comparison will
                                        be suppressed.
-            dcc_theory_percent : double, specifies the dcc theory percentage to 
+            dcc_theory_percent : double, specifies the dcc theory percentage to
                                  be used.
 
     Returns
@@ -377,16 +377,16 @@ def hsicc(inputdict_unchecked):
             icc_table : string, icc table to be used for the hsicc program.
             complete_report : string, desired report file path for hsicc 
                               program.
-            new_card_deck : string, desired new card deck file path for hsicc 
+            new_card_deck : string, desired new card deck file path for hsicc
                             program.
-            comparison_report : string, desired comparison report path for 
+            comparison_report : string, desired comparison report path for
                                 hsicc program.
             is_multipol_known : int, 1 if multipol is known, 0 otherwise.
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if HSICC completes 
+        Everything in input dictionary is returned if HSICC completes
         successfully.
     """
     inputdict = {}
@@ -411,7 +411,7 @@ def hsicc(inputdict_unchecked):
 
 def hsmrg(inputdict_unchecked):
     """
-    This program merges new gamma records created by HSICC with the original 
+    This program merges new gamma records created by HSICC with the original
     input data.  (HSICC readme)
 
     Parameters
@@ -420,14 +420,13 @@ def hsmrg(inputdict_unchecked):
         dictionary that must have the following key-pair values:
             data_deck : string, data deck file path for hsmrg to use.
             card_deck : string, card deck file path for hsmrg to use.
-            merged_data_deck : string, desired merged data deck file path 
+            merged_data_deck : string, desired merged data deck file path
                                created by hsmrg.
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if LOGFT completes successfully.
-        Everything in input dictionary is returned if HSMRG completes 
+        Everything in input dictionary is returned if HSMRG completes
         successfully.
     """
     inputdict = {}
@@ -446,7 +445,7 @@ def hsmrg(inputdict_unchecked):
 
 def seqhst(inputdict_unchecked):
     """
-    This program recreates a sequential file of the internal conversion table 
+    This program recreates a sequential file of the internal conversion table
     from the direct access file.  (HSICC readme)
 
     Parameters
@@ -460,10 +459,10 @@ def seqhst(inputdict_unchecked):
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if SEQHST completes 
+        Everything in input dictionary is returned if SEQHST completes
         successfully.
     """
-    #NOTE: changed input file line length to 90 to support longer file paths 
+    #NOTE: changed input file line length to 90 to support longer file paths
     #      in fortran source.
     inputdict = {}
     input_file = inputdict_unchecked['binary_table_input_file']
@@ -479,7 +478,7 @@ def seqhst(inputdict_unchecked):
     return inputdict_unchecked
     
 def logft(inputdict_unchecked):
-    #NOTE: changed input file line length to 90 to support longer file paths 
+    #NOTE: changed input file line length to 90 to support longer file paths
     #      in fortran source.
     """
     This program calculates log ft values for beta and electron-capture decay,
@@ -497,7 +496,7 @@ def logft(inputdict_unchecked):
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if LOGFT completes 
+        Everything in input dictionary is returned if LOGFT completes
         successfully.
     """
     inputdict = {}
@@ -518,13 +517,13 @@ def logft(inputdict_unchecked):
 
 def radd(inputdict_unchecked):
     """
-    This code (RadD.FOR) deduces the radius parameter (r 0 ) for odd-odd and 
-    odd-A nuclei using the even-even radii [1] as input parameters. 
+    This code (RadD.FOR) deduces the radius parameter (r 0 ) for odd-odd and
+    odd-A nuclei using the even-even radii [1] as input parameters.
 
-    These radii deduced for odd-A and odd-odd nuclides can be used in the 
-    calculation of alpha hindrance factors. In this procedure, it is assumed 
+    These radii deduced for odd-A and odd-odd nuclides can be used in the
+    calculation of alpha hindrance factors. In this procedure, it is assumed
     that radius parameter ( r 0 Z , N ) for odd-Z and odd-N nuclides lies midway
-    between the radius parameters of adjacent even-even neighbors calculates 
+    between the radius parameters of adjacent even-even neighbors calculates
     reduced transition probabilities. (RADD readme)
 
     Parameters
@@ -532,13 +531,13 @@ def radd(inputdict_unchecked):
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
             input_file : string, input ensdf file
-            output file : string, file for output to be written to (doesn't 
+            output file : string, file for output to be written to (doesn't
                           have to exist)
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if RADD completes 
+        Everything in input dictionary is returned if RADD completes
         successfully.
     """
     inputdict = {}
@@ -576,7 +575,7 @@ def radd(inputdict_unchecked):
 
 def radlist(inputdict_unchecked):
     """
-    This program calculates atomic & nuclear radiations and checks energy 
+    This program calculates atomic & nuclear radiations and checks energy
     balance. (RADLIST readme)
 
     Parameters
@@ -646,7 +645,7 @@ def ruler(inputdict_unchecked):
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
             input_file : string, input ensdf file
-            output file : string, file for output to be written to (doesn't 
+            output file : string, file for output to be written to (doesn't
                           have to exist)
 
     Returns
