@@ -62,19 +62,23 @@ def setup_bricc():
     exe_dir = path_to_exe('')[:-1]
     compressed_exe_path = exe_path + '.tar.gz'
 
-    bricc_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/BrIcc/Linux/BriccV23-Linux.tgz"
+    bricc_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/" + \
+                "BrIcc/Linux/BriccV23-Linux.tgz"
     decomp_exe_path = path_to_exe('')
     decomp_options = ['bricc', '.tgz', True]
-    download_exe(compressed_exe_path, bricc_url, compressed = True, decomp_path = decomp_exe_path, dl_size = 127232)
+    download_exe(compressed_exe_path, bricc_url, compressed = True,
+                 decomp_path = decomp_exe_path, dl_size = 127232)
 
 def setup_gabs():
     exe_path = path_to_exe('gabs')
-    gabs_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/gabs/unx/gabs"
+    gabs_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/" + \
+               "gabs/unx/gabs"
     download_exe(exe_path, gabs_url, dl_size = 8704)
 
 def setup_radlist():
     exe_path = path_to_exe('radlist')
-    radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/unx/radlist"
+    radlist_url = "http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/" + \
+                  "radlst/unx/radlist"
     download_exe(exe_path, radlist_url, dl_size = 8704)
 
 def verify_download_exe(exe_path):
@@ -91,16 +95,18 @@ def alphad(inputdict_unchecked):
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
             ensdf_input_file : string, input file
-            output_file : string, file for output to be written to (doesn't have to exist)
+            output_file : string, file for output to be written to (doesn't
+                          have to exist)
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if ALPHAD completes successfully.
+        Everything in input dictionary is returned if ALPHAD completes
+        successfully.
 
     Full documentation explaining the details of the functionality and physics
     behind ALPHAD can be found at:
-        http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/alphad/readme-alphad.pdf
+    http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/alphad/readme-alphad.pdf
     """
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
@@ -110,7 +116,8 @@ def alphad(inputdict_unchecked):
     if rewrite_hinderance == 1:
         output_file = inputdict_unchecked['output_file'] #output file if report = yes
     exe_path = path_to_exe('alphad')
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                            stdin=subprocess.PIPE)
     inp = input_file + '\n' + report_file + '\n' + 'Y' + '\n'
     if rewrite_hinderance == 1:
         inp = inp + 'Y' + '\n' + output_file
@@ -136,15 +143,18 @@ def bricc(inputdict_unchecked):
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if BRICC completes successfully.
+        Everything in input dictionary is returned if BRICC completes 
+        successfully.
         Additional dictionary entries including:
-            output_file_directory : string, the directory all produced bricc output files will be
-                                    located.
-            bricc_output : string, Only for interactive use: data printed to command line.
+            output_file_directory : string, the directory all produced bricc 
+                                    output files will be located.
+            bricc_output : string, Only for interactive use: data printed to 
+                           command line.
 
     Notes
     -----
-        All the various ouptput files bricc can generate are found in the output_file_directory
+        All the various ouptput files bricc can generate are found in the 
+        output_file_directory
 
     """
     exe_path = path_to_exe('bricc')
@@ -159,19 +169,20 @@ def bricc(inputdict_unchecked):
     input_type = inputdict_unchecked['input_type']
     output_dict = inputdict_unchecked
     inp = (inputdict_unchecked['calculation_report'] if
-                inputdict_unchecked.has_key('calculation_report') else '') + '\n' + \
+            inputdict_unchecked.has_key('calculation_report') else '') + '\n' + \
           (inputdict_unchecked['G_SG_records'] if
-                inputdict_unchecked.has_key('G_SG_records') else '') + '\n' + \
+            inputdict_unchecked.has_key('G_SG_records') else '') + '\n' + \
           (inputdict_unchecked['comparison_report'] if
-                inputdict_unchecked.has_key('comparison_report') else '') + '\n' + \
+            inputdict_unchecked.has_key('comparison_report') else '') + '\n' + \
           (inputdict_unchecked['conversion_coefficients'] if
-                inputdict_unchecked.has_key('conversion_coefficients') else '') + '\n' + \
+            inputdict_unchecked.has_key('conversion_coefficients') else '') + '\n' + \
           (inputdict_unchecked['calculate_conversion_coefficients'] if
-                inputdict_unchecked.has_key('calculate_conversion_coefficients') else '') + '\n' + \
+            inputdict_unchecked.has_key('calculate_conversion_coefficients') else '') + \
+            '\n' + \
           (inputdict_unchecked['lowest_cc_value'] if
-                inputdict_unchecked.has_key('lowest_cc_value') else '') + '\n' + \
+            inputdict_unchecked.has_key('lowest_cc_value') else '') + '\n' + \
           (inputdict_unchecked['assumed_mr_value'] if
-                inputdict_unchecked.has_key('assumed_mr_value') else '') + '\n\r\n'
+            inputdict_unchecked.has_key('assumed_mr_value') else '') + '\n\r\n'
 
     if input_type == 'interactive':
         input_element = inputdict_unchecked['element']
@@ -184,12 +195,14 @@ def bricc(inputdict_unchecked):
         input_file = inputdict_unchecked['input_file']
         briccnh = inputdict_unchecked['BrIccNH']
         if briccnh:
-            proc = subprocess.Popen(exe_path,[input_file, 'BrIccNH'],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            proc = subprocess.Popen(exe_path,[input_file, 'BrIccNH'],
+                   stdout=subprocess.PIPE,stdin=subprocess.PIPE)
             proc.stdin.write(inp.encode('utf-8'))
             proc.communicate()[0]
             proc.stdin.close()
         else:
-            proc = subprocess.Popen([exe_path, input_file],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+            proc = subprocess.Popen([exe_path, input_file],
+                   stdout=subprocess.PIPE,stdin=subprocess.PIPE)
             proc.stdin.write(inp.encode('utf-8'))
             proc.communicate()[0]
             proc.stdin.close()
@@ -199,8 +212,8 @@ def bricc(inputdict_unchecked):
 
 def bldhst(inputdict_unchecked):
     """
-    This program builds a direct access file of the internal conversion coefficient
-    table. (BLDHST readme)
+    This program builds a direct access file of the internal conversion
+    coefficient table. (BLDHST readme)
 
     Parameters
     ----------
@@ -230,20 +243,22 @@ def bldhst(inputdict_unchecked):
 
 def delta(inputdict_unchecked):
     """
-    This function calculates the best values of mixing ratios based of its analysis of
-    the angular correlation and conversion coefficient data.
+    This function calculates the best values of mixing ratios based of its
+    analysis of the angular correlation and conversion coefficient data.
 
     Parameters
     ----------
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
             input_file : string, path to input ensdf file.
-            output_file : string, path to file for output write (doesn't have to exist).
+            output_file : string, path to file for output write (doesn't have to 
+                          exist).
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if DELTA completes successfully.
+        Everything in input dictionary is returned if DELTA completes 
+        successfully.
     """
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
@@ -259,7 +274,8 @@ def delta(inputdict_unchecked):
 
 def gabs(inputdict_unchecked):
     """
-    This program calculates Gamma-ray absolute intensity and normalization (GABS readme)
+    This program calculates Gamma-ray absolute intensity and normalization 
+    (GABS readme)
 
     Parameters
     ----------
@@ -267,12 +283,14 @@ def gabs(inputdict_unchecked):
         dictionary that must have the following key-pair values:
             input_file : string, input ensdf file
             dataset_file : string, dataset file to be used
-            output file : string, file for output to be written to (doesn't have to exist)
+            output file : string, file for output to be written to 
+                          (doesn't have to exist)
     
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if GABS completes successfully.
+        Everything in input dictionary is returned if GABS completes 
+        successfully.
     """
     exe_path = path_to_exe('gabs') 
     verify_download_exe(exe_path)
@@ -280,11 +298,11 @@ def gabs(inputdict_unchecked):
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
     dataset_file = inputdict_unchecked['dataset_file']
-    output_file = inputdict_unchecked['output_file'] #report file << CHANGE BACK TO REPORT..
+    output_file = inputdict_unchecked['output_file']
 
-    #add option to not get new dataset (currently new dataset is hardprogrammed to yes)
     exe_path = path_to_exe('gabs')
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                            stdin=subprocess.PIPE)
     inp = input_file + '\n' + output_file + '\n' + 'Y' + '\n' + dataset_file
     proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
@@ -292,10 +310,11 @@ def gabs(inputdict_unchecked):
 
 def gtol(inputdict_unchecked):
     """
-    GTOL uses gamma-ray energies to derive a set of least-squares adjusted level energies.  
+    GTOL uses gamma-ray energies to derive a set of least-squares adjusted level
+    energies.  
 
-    The net feeding at each level is calculated from the input gamma intensities and conversion 
-    coefficients. (GTOL readme)
+    The net feeding at each level is calculated from the input gamma intensities
+    and conversion coefficients. (GTOL readme)
 
     Parameters
     ----------
@@ -303,11 +322,13 @@ def gtol(inputdict_unchecked):
         dictionary that must have the following key-pair values:
             input_file : string, input ensdf file.
             report_file : string, desired gtol report file path.
-            new_ensdf_file_with_results : boolean, if true then a new ensdf file with results
-                                          will be created.
+            new_ensdf_file_with_results : boolean, if true then a new ensdf file 
+                                          with results will be created.
             output_file : string, desired gtol output file path.
-            supress_gamma_comparison : boolean, if true the gamma comparison will be suppressed.
-            dcc_theory_percent : double, specifies the dcc theory percentage to be used.
+            supress_gamma_comparison : boolean, if true the gamma comparison will
+                                       be suppressed.
+            dcc_theory_percent : double, specifies the dcc theory percentage to 
+                                 be used.
 
     Returns
     -------
@@ -354,15 +375,19 @@ def hsicc(inputdict_unchecked):
             data_deck : string, data deck to be used for hsicc program.
             icc_index : string, icc index to be used for hsicc program.
             icc_table : string, icc table to be used for the hsicc program.
-            complete_report : string, desired report file path for hsicc program.
-            new_card_deck : string, desired new card deck file path for hsicc program.
-            comparison_report : string, desired comparison report path for hsicc program.
+            complete_report : string, desired report file path for hsicc 
+                              program.
+            new_card_deck : string, desired new card deck file path for hsicc 
+                            program.
+            comparison_report : string, desired comparison report path for 
+                                hsicc program.
             is_multipol_known : int, 1 if multipol is known, 0 otherwise.
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if HSICC completes successfully.
+        Everything in input dictionary is returned if HSICC completes 
+        successfully.
     """
     inputdict = {}
     data_deck = inputdict_unchecked['data_deck']
@@ -374,9 +399,11 @@ def hsicc(inputdict_unchecked):
     multipol_known = inputdict_unchecked['is_multipol_known'] #'Y or CR'
 
     exe_path = path_to_exe('hsicc')
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                            stdin=subprocess.PIPE)
     inp = data_deck + '\n' + icc_index + '\n' + icc_table + '\n' + \
-        complete_report + '\n' + new_card_deck + '\n' + comparison_report + '\n' + multipol_known
+        complete_report + '\n' + new_card_deck + '\n' + comparison_report + \
+        '\n' + multipol_known
     proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
     proc.stdin.close()
@@ -384,8 +411,8 @@ def hsicc(inputdict_unchecked):
 
 def hsmrg(inputdict_unchecked):
     """
-    This program merges new gamma records created by HSICC with the original input 
-    data.  (HSICC readme)
+    This program merges new gamma records created by HSICC with the original 
+    input data.  (HSICC readme)
 
     Parameters
     ----------
@@ -393,12 +420,14 @@ def hsmrg(inputdict_unchecked):
         dictionary that must have the following key-pair values:
             data_deck : string, data deck file path for hsmrg to use.
             card_deck : string, card deck file path for hsmrg to use.
-            merged_data_deck : string, desired merged data deck file path created by hsmrg.
+            merged_data_deck : string, desired merged data deck file path 
+                               created by hsmrg.
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if HSMRG completes successfully.
+        Everything in input dictionary is returned if HSMRG completes 
+        successfully.
     """
     inputdict = {}
     data_deck = inputdict_unchecked['data_deck']
@@ -406,7 +435,8 @@ def hsmrg(inputdict_unchecked):
     merged_data_deck = inputdict_unchecked['merged_data_deck']
 
     exe_path = path_to_exe('hsmrg')
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                            stdin=subprocess.PIPE)
     inp = data_deck + '\n' + card_deck + '\n' + merged_data_deck
     proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
@@ -415,28 +445,32 @@ def hsmrg(inputdict_unchecked):
 
 def seqhst(inputdict_unchecked):
     """
-    This program recreates a sequential file of the internal conversion table from the 
-    direct access file.  (HSICC readme)
+    This program recreates a sequential file of the internal conversion table 
+    from the direct access file.  (HSICC readme)
 
     Parameters
     ----------
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
             binary_table_input_file : string, binary table input file path.
-            sequential_output_file : string, desired path of sequential output file.
+            sequential_output_file : string, desired path of sequential output 
+                                     file.
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if SEQHST completes successfully.
+        Everything in input dictionary is returned if SEQHST completes 
+        successfully.
     """
-    #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
+    #NOTE: changed input file line length to 90 to support longer file paths 
+    #      in fortran source.
     inputdict = {}
     input_file = inputdict_unchecked['binary_table_input_file']
     output_file = inputdict_unchecked['sequential_output_file']
 
     exe_path = path_to_exe('seqhst')
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                            stdin=subprocess.PIPE)
     inp = input_file + '\n' + output_file
     proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
@@ -444,10 +478,11 @@ def seqhst(inputdict_unchecked):
     return inputdict_unchecked
     
 def logft(inputdict_unchecked):
-    #NOTE: changed input file line length to 90 to support longer file paths in fortran source.
+    #NOTE: changed input file line length to 90 to support longer file paths 
+    #      in fortran source.
     """
-    This program calculates log ft values for beta and electron-capture decay, average beta energies, 
-    and capture fractions.  (LOGFT readme)
+    This program calculates log ft values for beta and electron-capture decay,
+    average beta energies, and capture fractions.  (LOGFT readme)
 
     Parameters
     ----------
@@ -461,7 +496,8 @@ def logft(inputdict_unchecked):
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if LOGFT completes successfully.
+        Everything in input dictionary is returned if LOGFT completes 
+        successfully.
     """
     inputdict = {}
     input_data_set = inputdict_unchecked['input_data_set']
@@ -470,8 +506,10 @@ def logft(inputdict_unchecked):
     output_data_set = inputdict_unchecked['output_data_set']
 
     exe_path = path_to_exe('logft')
-    inp = input_data_set + '\n' + output_report + '\n' + data_table + '\n' + output_data_set + '\n'
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    inp = input_data_set + '\n' + output_report + '\n' + data_table + '\n' + \
+          output_data_set + '\n'
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                            stdin=subprocess.PIPE)
     proc.stdin.write(inp.encode('utf-8'))
     proc.communicate()[0]
     proc.stdin.close()
@@ -479,25 +517,28 @@ def logft(inputdict_unchecked):
 
 def radd(inputdict_unchecked):
     """
-    This code (RadD.FOR) deduces the radius parameter (r 0 ) for odd-odd and odd-A nuclei 
-    using the even-even radii [1] as input parameters. 
+    This code (RadD.FOR) deduces the radius parameter (r 0 ) for odd-odd and 
+    odd-A nuclei using the even-even radii [1] as input parameters. 
 
-    These radii deduced for odd-A and odd-odd nuclides can be used in the calculation of 
-    alpha hindrance factors. In this procedure, it is assumed that radius parameter 
-    ( r 0 Z , N ) for odd-Z and odd-N nuclides lies midway between the radius parameters of 
-    adjacent even-even neighbors calculates reduced transition probabilities. (RADD readme)
+    These radii deduced for odd-A and odd-odd nuclides can be used in the 
+    calculation of alpha hindrance factors. In this procedure, it is assumed 
+    that radius parameter ( r 0 Z , N ) for odd-Z and odd-N nuclides lies midway
+    between the radius parameters of adjacent even-even neighbors calculates 
+    reduced transition probabilities. (RADD readme)
 
     Parameters
     ----------
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
             input_file : string, input ensdf file
-            output file : string, file for output to be written to (doesn't have to exist)
+            output file : string, file for output to be written to (doesn't 
+                          have to exist)
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if RADD completes successfully.
+        Everything in input dictionary is returned if RADD completes 
+        successfully.
     """
     inputdict = {}
     atomic_number = inputdict_unchecked['atomic_number']
@@ -518,7 +559,8 @@ def radd(inputdict_unchecked):
 
     exe_path = path_to_exe('radd')
     inp = atomic_number + '\n' + neutron_number + '\n' + 'NO' + '\n'
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                            stdin=subprocess.PIPE)
     proc.stdin.write(inp.encode('utf-8'))
     radd_output = proc.communicate()[0]
     proc.stdin.close()
@@ -533,28 +575,36 @@ def radd(inputdict_unchecked):
 
 def radlist(inputdict_unchecked):
     """
-    This program calculates atomic & nuclear radiations and checks energy balance.
-    (RADLIST readme)
+    This program calculates atomic & nuclear radiations and checks energy 
+    balance. (RADLIST readme)
 
     Parameters
     ----------
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
-            output_radiation_listing : string, 'Y' if output radiation listing is desired, else 'N'.
-            output_ensdf_like_file : string, 'Y' if output ensdf like file is desired, else 'N'.
-            output_file_for_nudat : string, 'Y' if output file for nudat is desired, else 'N'.
-            output_mird_listing : string, 'Y' if output mird listing is desired, else 'N'.
-            calculate_continua : string, 'Y' if calculate continua is desired, else 'N'.
+            output_radiation_listing : string, 'Y' if output radiation listing
+                                       is desired, else 'N'.
+            output_ensdf_like_file : string, 'Y' if output ensdf like file is
+                                     desired, else 'N'.
+            output_file_for_nudat : string, 'Y' if output file for nudat is desired,
+                                    else 'N'.
+            output_mird_listing : string, 'Y' if output mird listing is desired,
+                                  else 'N'.
+            calculate_continua : string, 'Y' if calculate continua is desired,
+                                 else 'N'.
             input_file : string, input ensdf file.
             output_radlst_file : string, path to desired output radlst file.
-            input_radlst_data_table : string, path to input radlst data table (mednew.dat location).
-            input_masses_data_table : string, (optional) path to input masses data table.
+            input_radlst_data_table : string, path to input radlst data table
+                                      (mednew.dat location).
+            input_masses_data_table : string, (optional) path to input masses
+                                      data table.
             output_ensdf_file : string, path to desired output ensdf file.
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if RADLIST completes successfully.
+        Everything in input dictionary is returned if RADLIST completes
+        successfully.
     """
     exe_path = path_to_exe('radlist')
     print(exe_path)
@@ -574,12 +624,13 @@ def radlist(inputdict_unchecked):
     else:
         input_masses_data_table = ''
     output_ensdf_file = inputdict_unchecked['output_ensdf_file']
-
-    inp = output_rad_listing + '\n' + output_endf_like_file + '\n' + output_file_for_nudat +\
-          '\n' + output_mird_listing + '\n' + calculate_continua + '\n' + input_file +\
-          '\n' + output_radlst_file + '\n' + input_radlst_data_table + '\n' + input_masses_data_table +\
+    inp = output_rad_listing + '\n' + output_endf_like_file + '\n' + \
+          output_file_for_nudat + '\n' + output_mird_listing + '\n' + \
+          calculate_continua + '\n' + input_file + '\n' + output_radlst_file + \
+          '\n' + input_radlst_data_table + '\n' + input_masses_data_table +\
           '\n' + output_ensdf_file
-    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    proc = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                            stdin=subprocess.PIPE)
     proc.stdin.write(inp.encode('utf-8'))
     radd_output = proc.communicate()[0]
     proc.stdin.close()
@@ -594,12 +645,14 @@ def ruler(inputdict_unchecked):
     inputdict_unchecked : dictionary
         dictionary that must have the following key-pair values:
             input_file : string, input ensdf file
-            output file : string, file for output to be written to (doesn't have to exist)
+            output file : string, file for output to be written to (doesn't 
+                          have to exist)
 
     Returns
     -------
     rtn : dictionary
-        Everything in input dictionary is returned if RULER completes successfully.
+        Everything in input dictionary is returned if RULER completes
+        successfully.
     """
     inputdict = {}
     input_file = inputdict_unchecked['input_file']
@@ -608,8 +661,10 @@ def ruler(inputdict_unchecked):
     assumed_dcc_theory = inputdict_unchecked['assumed_dcc_theory']
     
     exe_path = path_to_exe('ruler')
-    ruler_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
-    inp = input_file + '\n' + output_report_file + '\n' + mode_of_operation + '\n' + assumed_dcc_theory
+    ruler_output = subprocess.Popen([exe_path],stdout=subprocess.PIPE,
+                                    stdin=subprocess.PIPE)
+    inp = input_file + '\n' + output_report_file + '\n' + mode_of_operation + \
+          '\n' + assumed_dcc_theory
     ruler_output.stdin.write(inp.encode('utf-8'))
     ruler_output.communicate()[0]
     ruler_output.stdin.close()

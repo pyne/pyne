@@ -170,7 +170,7 @@ def test_radd():
     d_report = file_comp(input_dict['output_file'], ref_output, [])
     cleanup_tmp()
 
-def optional_radlist():
+def optional_t_radlist():
     create_tmp()
     input_dict = {}
     input_dict['output_radiation_listing'] = 'Y'
@@ -275,8 +275,8 @@ if __name__ == "__main__":
     ### The following code runs the additional setup code and runs tests
     ### for each.  They are not included in the main test suit because
     ### downloading the additional execuables can take upwards of 120 seconds.
-    #ensdf_processing.setup_additional_downloads()
-    #gabs = test_gabs()
-    #bricc_1 = optional_t_bricc_interactive()
-    #bricc_2 = optional_t_bricc_evaluation()
-    #radlist = optional_t_radlist()
+    ensdf_processing.setup_additional_downloads()
+    gabs = optional_t_gabs()
+    bricc_1 = optional_t_bricc_interactive()
+    bricc_2 = optional_t_bricc_evaluation()
+    radlist = optional_t_radlist()
