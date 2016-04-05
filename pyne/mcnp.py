@@ -457,6 +457,7 @@ class SurfSrc(_BinaryReader):
             track_data.record = track_info.get_double(abs(self.ncrd))
             track_data.nps = track_data.record[0]
             track_data.bitarray = track_data.record[1]
+            track_data.cell = abs(track_data.bitarray) // 8 % 100000000
             track_data.wgt = track_data.record[2]
             track_data.erg = track_data.record[3]
             track_data.tme = track_data.record[4]

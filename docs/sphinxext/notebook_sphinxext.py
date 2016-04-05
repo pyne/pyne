@@ -12,11 +12,7 @@ from docutils.parsers.rst import directives, roles, states
 from docutils.parsers.rst.roles import set_classes
 from docutils.transforms import misc
 
-try:
-    from IPython.nbconver.exporters import html
-except ImportError:
-    from IPython.nbconvert import html
-
+from nbconvert import HTMLExporter
 
 class Notebook(Directive):
     """Use nbconvert to insert a notebook into the environment.
@@ -47,7 +43,7 @@ class Notebook(Directive):
         nb_path = utils.relative_path(None, nb_path)
 
         # convert notebook to html
-        exporter = html.HTMLExporter(template_file='full')
+        exporter = HTMLExporter(template_file='full')
         output, resources = exporter.from_filename(nb_path)
         header = output.split('<head>', 1)[1].split('</head>',1)[0]
         body = output.split('<body>', 1)[1].split('</body>',1)[0]

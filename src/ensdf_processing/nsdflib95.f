@@ -2457,7 +2457,7 @@
 !
 !     Local variables
 !
-      REAL(KIND=4),INTRINSIC :: AIMAG,ALOG,REAL
+      REAL(KIND=4),INTRINSIC :: AIMAG,REAL
       COMPLEX(KIND=4) :: c,xt,xtmp,z1,z2
       COMPLEX(KIND=4),INTRINSIC :: CMPLX
       REAL(KIND=4) :: f1n,fn,pi,s,t
@@ -2488,7 +2488,7 @@
             z1 = z1*z2
          END DO
          s = (fn**(REAL(X)-0.5))/(pi**m)
-         t = AIMAG(X)*ALOG(fn)
+         t = AIMAG(X)*LOG(fn)
          c = s*CMPLX(COS(t),SIN(t))
          GAMZ = c*z1
       END IF
@@ -2600,7 +2600,6 @@
 !     Local variables
 !
       COMPLEX(KIND=4) :: apn,bpn,fn,t,test
-      REAL(KIND=4),INTRINSIC :: CABS
       INTEGER(KIND=4) :: n
       REAL(KIND=4),PARAMETER :: PREC = 1.0E-6
 !
@@ -2622,7 +2621,7 @@
          bpn = bpn + 1.0
          test = t/HYPERG
          HYPERG = HYPERG + t
-         IF(CABS(test).LT.PREC)RETURN
+         IF(ABS(test).LT.PREC)RETURN
       END DO
       WRITE(6,1010) A,B,X,HYPERG,n
  1010 FORMAT(' ERROR IN HYPERG'/4(5X,'(',E20.10,',',E20.10,')'/),I10)

@@ -179,7 +179,6 @@
       INTEGER(KIND=4), INTRINSIC :: INDEX, INT, LEN, MIN0, NINT,        &       
      &                              LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: INDEXF, IVLSTR, TYPSTR
-      REAL(KIND=4), INTRINSIC :: ALOG10
       REAL(KIND=4), EXTERNAL :: VALSTR
       REAL(KIND=8), INTRINSIC :: DABS, DBLE, DMOD, DSQRT
       REAL(KIND=8), EXTERNAL :: DVALST
@@ -931,7 +930,7 @@
      &                  ' HF for alpha to', enxit(l), ' not saved.'
                   ihf = ihf - 1
                ELSE
-                  sigdig = INT(ALOG10(hf(l)))
+                  sigdig = INT(LOG10(hf(l)))
                   IF(sigdig.GT.0) THEN
                      sigdig = sigdig + 1
                   ELSE IF(sigdig.LE.0) THEN

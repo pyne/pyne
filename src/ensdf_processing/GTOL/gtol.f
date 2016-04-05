@@ -3944,7 +3944,7 @@ c         END IF
 !
 !     Functions used
 !
-      REAL(KIND=4), INTRINSIC :: ABS
+      REAL(KIND=4), INTRINSIC :: ABS, REAL
 !
 !     Dummy arguments
 !
@@ -3959,12 +3959,12 @@ c         END IF
       SIGma = Dx
       b2 = MU + 1.28*SIGma
       high = MU + 10.0*SIGma
-      CALL QROMB(0.0,high,denom)
+      CALL QROMB(REAL(0.0,4),high,denom)
       low = MU + 1.28*SIGma
       IF(low.LE.0.0) low = 5.0*SIGma
       counts = 1
       DO WHILE (.TRUE.)
-         CALL QROMB(0.0,low,area)
+         CALL QROMB(REAL(0.0,4),low,area)
          prob = area/denom
          IF((prob.GE.0.899.AND.prob.LE.0.901).OR.counts.GT.100) THEN
             b1 = low
@@ -4039,7 +4039,7 @@ c         END IF
 !     Functions used
 !
       INTEGER(KIND=4), INTRINSIC :: INT
-      REAL(KIND=4), INTRINSIC :: ABS, ALOG10
+      REAL(KIND=4), INTRINSIC :: ABS, ALOG10, REAL
       REAL(KIND=8), INTRINSIC :: DABS, DBLE
 !
 !     Local variables
@@ -4059,7 +4059,7 @@ c         END IF
          jj = j
          CALL TRAPZD(A,B,s(j),jj)
          IF(j.GE.k) THEN
-            CALL POLINT(h(j-km),s(j-km),k,0.,Ss,dss)
+            CALL POLINT(h(j-km),s(j-km),k,REAL(0.,4),Ss,dss)
 !           Add check for when integral is zero
             IF(Ss.EQ.0..AND.dss.EQ.0.) RETURN
 !           IF(ABS(DSS) .LE. EPS*ABS(SS))RETURN
@@ -4110,7 +4110,7 @@ c         END IF
          x = A + 0.5D+0*del
          dsum = 0.D+0
          DO j = 1, it
-            dsum = dsum + DBLE(NORMFUNC(REAL(x)))
+            dsum = dsum + DBLE(NORMFUNC(REAL(x,4)))
             x = x + del
          END DO
          S = 0.5D+0*(S+(DBLE(B)-DBLE(A))*dsum/tnm)
@@ -4140,7 +4140,7 @@ c         END IF
 !     Functions used
 !
       INTEGER(KIND=4), INTRINSIC :: INT
-      REAL(KIND=4), INTRINSIC :: ABS, ALOG10, AMAX1, AMIN1
+      REAL(KIND=4), INTRINSIC :: ABS, AMAX1, AMIN1
 !
 !     Local variables
 !
@@ -4169,8 +4169,8 @@ c         END IF
          c(i) = Ya(i)
          d(i) = Ya(i)
          IF(Ya(i).NE.0.) THEN
-            maxyval = AMAX1(maxyval,ALOG10(ABS(Ya(i))))
-            minyval = AMIN1(minyval,ALOG10(ABS(Ya(i))))
+            maxyval = AMAX1(maxyval,LOG10(ABS(Ya(i))))
+            minyval = AMIN1(minyval,LOG10(ABS(Ya(i))))
          END IF
       END DO
       Y = Ya(ns)
