@@ -1457,8 +1457,7 @@ def _compute_xslib(nuc, key, lib, xscache):
         elif field == 'title':
             continue
         data[key] = _xslib_computers[field](nuc, xscache)
-
-
+        
 def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
     """Generates a TAPE9 dictionary of cross section & fission product yield data
     for a set of nuclides.
@@ -1491,7 +1490,6 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
     else:
         xscache['E_g'] = [old_group_struct[0], old_group_struct[-1]]
     nucs = sorted(nucs)
-
     # setup tape9
     t9 = {nlb[0]: {'_type': 'xsfpy', '_subtype': 'activation_products',
                    'title': 'PyNE Cross Section Data for Activation Products'},
@@ -1509,7 +1507,6 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
         t9[nlb[1]][field] = {}
     for field in FISSION_PRODUCT_FIELDS:
         t9[nlb[2]][field] = {}
-
     # fill with data
     for nuc in nucs:
         if verbose:
@@ -1575,7 +1572,6 @@ def make_tape9(nucs, xscache=None, nlb=(201, 202, 203)):
     # build decay decks
     decay_file = StringIO(decay_tape9.decay_tape9)
     decay = parse_tape9(decay_file)
-
     if xscache is None:
         xscache = cache.XSCache()
     nucs = {nucname.id(nuc) for nuc in nucs}
