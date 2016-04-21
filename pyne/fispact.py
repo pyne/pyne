@@ -162,9 +162,9 @@ def read_time_step(lines, i):
         ts.appm_h1 = float(lines[ind+4][23:33])
 
         ts.dom_data = parse_dominant(lines)
-        #ts.composition = parse_composition(data)
-        #ts.gspec = parse_spectra(data)
-    #ts.inventory = parse_inventory(data)
+        ts.composition = parse_composition(data)
+        ts.gspec = parse_spectra(data)
+    ts.inventory = parse_inventory(data)
 
     return ts
 
@@ -229,7 +229,7 @@ def read_summary_data(data):
             if l[1] == "-":
                 to = time_yrs[-1] 
             else:
-                print l
+                
                 time_yrs.append(float(l[24:32]) + to)
                 act.append(l[35:43])
                 dr.append(l[58:66])
@@ -271,7 +271,7 @@ def read_summary_data(data):
     return sum_data
 
 def parse_dominant(data):
-
+    """parse dominant nuclides section and return a list of lists """
     p1_ind = find_ind(data, "DOMINANT NUCLIDES")
     data = data[p1_ind:]
     d1_ind = find_ind(data, "(Bq) ")
@@ -280,41 +280,93 @@ def parse_dominant(data):
     topset = np.array(topset)
     lowerset = data[d2_ind+3:]
 
-    actnuc = []
+    act_nuc = []
     act = []
     act_percent = []
-    """
-    heat_nuc=[]
-    heat=[]
-    heat_percent=[]
-    dr_nuc=[]
-    dr=[]
-    dr_percent=[]
-    gheat_nuc=[]
-    gheat=[]
-    gheat_percent=[]
-    bheat_nuc=[]
-    bheat=[]
-    bheat_percent=[]
-    """
-    """"
+    heat_nuc = []
+    heat = []
+    heat_percent = []
+    dr_nuc = []
+    dr = []
+    dr_percent = []
+    gheat_nuc = []
+    gheat = []
+    gheat_percent = []
+    bheat_nuc = []
+    bheat = []
+    bheat_percent = []    
 
     for l in topset:
-        actnuc.append(l[7:13])
+        act_nuc.append(l[7:13])
         act.append(l[15:25])
         act_percent.append(l[27:36])
-        #TODO add other variables
+        heat_nuc.append(l[38:44])
+        heat.append(l[46:56])
+        heat_percent.append(l[58:67])
+        dr_nuc.append(l[69:75])
+        dr.append(l[77:87])
+        dr_percent.append(l[89:98])
 
-    #TODO add loop over lower set for even more variables
+    for l in lowerset:
+        gheat_nuc.append(l[7:13])
+        gheat.append(l[15:25])
+        gheat_percent.append(l[27:36])
+        bheat_nuc.append(l[38:44])
+        bheat.append(l[46:56])
+        bheat_percent.append(l[58:67])
+
     dom_data = []
-    dom_data.append(actnuc)
+    dom_data.append(act_nuc)
     dom_data.append(act)
     dom_data.append(act_percent)
-    """
+    dom_data.append(heat_nuc)
+    dom_data.append(heat)
+    dom_data.append(heat_percent)
+    dom_data.append(dr_nuc)
+    dom_data.append(dr)
+    dom_data.append(dr_percent)
+    dom_data.append(gheat_nuc)
+    dom_data.append(gheat)
+    dom_data.append(gheat_percent)
+    dom_data.append(bheat_nuc)
+    dom_data.append(bheat)
+    dom_data.append(bheat_percent)
 
-    return topset
+    return dom_data
+
+def parse_composition(data):
+    """ parse compostions section """
+    p1 = find_ind(data, "COMPOSITION  OF  MATERIAL  BY  ELEMENT")
+    p2 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
+    data = data[p1:p2-2]
+    ele_list = []
+    atoms = []
+
+    for l in data:
+        ele_list.append(l[12:14])
+        atoms.append(float(l[20:30]))
+
+    composition = []
+    composition.append(ele_list)
+    composition.append(atoms)
+
+    return composition 
+
+def parse_spectra(data):
+    """ """
+    p1 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
+    data = data[p1:p1+32]
+    spectra = []
+    return spectra
+
+def parse_inventory(data):
+    """ """
+    inv = []
+    return inv
+
 
 def find_ind(data, sub):
+    """ """
     for i, s in enumerate(data):
         if sub in s:
             ind = i
