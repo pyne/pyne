@@ -1520,17 +1520,9 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
             if nuc in FISSION_PRODUCT_NUCS:
                 _compute_xslib(nuc, key, t9[nlb[2]], xscache)
         except KeyError:
-            print('Key Error with ', key, ' in a computing cross sections')
+            if verbose:
+                print('Key Error with ', key, ' in a computing cross sections')
             continue 
-        #if verbose:
-        #    print('computing {0}'.format(nucname.name(nuc)))
-        #key = nucname.zzaaam(nuc)
-        #if nuc in ACTIVATION_PRODUCT_NUCS:
-        #    _compute_xslib(nuc, key, t9[nlb[0]], xscache)
-        #if nuc in ACTINIDE_AND_DAUGHTER_NUCS:
-        #    _compute_xslib(nuc, key, t9[nlb[1]], xscache)
-        #if nuc in FISSION_PRODUCT_NUCS:
-        #    _compute_xslib(nuc, key, t9[nlb[2]], xscache)
     xscache['E_g'] = old_group_struct
     xscache['phi_g'] = old_flux
     return t9
