@@ -1512,27 +1512,27 @@ def xslibs(nucs=NUCS, xscache=None, nlb=(201, 202, 203), verbose=False):
         if verbose:
             print('computing {0}'.format(nucname.name(nuc)))
         key = nucname.zzaaam(nuc)
-        try:
-            if nuc in ACTIVATION_PRODUCT_NUCS:
+        if nuc in ACTIVATION_PRODUCT_NUCS: 
+            try:
                 _compute_xslib(nuc, key, t9[nlb[0]], xscache)
-        except KeyError:
-            if verbose:
-                print('Key Error with ', key, ' in a computing activation product cross sections')
-            continue 
-        try:
-            if nuc in ACTINIDE_AND_DAUGHTER_NUCS:
+            except KeyError:
+                if verbose:
+                    print('Key Error with ', key, ' in a computing activation product cross sections')
+                continue 
+        if nuc in ACTINIDE_AND_DAUGHTER_NUCS:
+            try:
                 _compute_xslib(nuc, key, t9[nlb[1]], xscache)
-        except KeyError:
-            if verbose:
-                print('Key Error with ', key, ' in a computing actinide and daughter cross sections')
-            continue 
-        try:
-            if nuc in FISSION_PRODUCT_NUCS:
+            except KeyError:
+                if verbose:
+                    print('Key Error with ', key, ' in a computing actinide and daughter cross sections')
+                continue 
+        if nuc in FISSION_PRODUCT_NUCS:
+            try:
                 _compute_xslib(nuc, key, t9[nlb[2]], xscache)
-        except KeyError:
-            if verbose:
-                print('Key Error with ', key, ' in a computing fission product cross sections')
-            continue 
+            except KeyError:
+                if verbose:
+                    print('Key Error with ', key, ' in a computing fission product cross sections')
+                continue 
     xscache['E_g'] = old_group_struct
     xscache['phi_g'] = old_flux
     return t9
