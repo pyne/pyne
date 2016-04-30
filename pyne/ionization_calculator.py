@@ -592,8 +592,6 @@ Lw = (4.312, 14.00, 21.36, 42.78, 70.16, 90.13, 107.2, 124.3, 141.3, 165.8, 193.
 
 def function(element,charge):
 
-Cf = [null]
-Es = [null]
 return elements[index][charge]
 
 
