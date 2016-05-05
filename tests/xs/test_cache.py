@@ -71,7 +71,7 @@ def test_xs_cache_set_E_g():
     assert_true(xs_cache['phi_g'] is None)
     assert_false((10010, 'fiss') in xs_cache)
 
-    # Assert that KeyError is raised if (nuclide, reaction, temp) key does not exist. 
+def text_xs_get_reaction():
     xs_cache.clear()
     assert_raises(KeyError, xs_cache[10010, 1089, 300])
     
