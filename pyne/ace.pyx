@@ -26,6 +26,9 @@ from collections import OrderedDict
 cimport numpy as np
 import numpy as np
 from numpy.random import rand
+from scipy.constants import physical_constants
+# Complementary error function used in doppler broadening
+from scipy.special import erfc
 from bisect import bisect_right
 
 from pyne cimport nucname
@@ -114,8 +117,8 @@ def ascii_to_binary(ascii_file, binary_file):
 def _interpolation_tab1(x_in, x, y, interp_NBT = None, interp_INT = None):
     """
     INTERPOLATE_TAB1 interpolates a function between two points based on
-    particular interpolation scheme. The data needs to be organized as a ENDF TAB1
-    type function containing the interpolation regions, break points, and
+    particular interpolation scheme. The data needs to be organized as a ENDF 
+    TAB1 type function containing the interpolation regions, break points, and
     tabulated x's and y's.
     """
     
@@ -164,7 +167,7 @@ def _interpolation_tab1(x_in, x, y, interp_NBT = None, interp_INT = None):
         r = np.log(x_in / x0) / np.log(x1/x0)
         return y0 * np.exp(r * np.log(y1 / y0))
     
-def tabular_sample(inter_flag, out, pdf, cdf):
+def _tabular_sample(inter_flag, out, pdf, cdf):
     """
     Sample variable based on inter_flag, which is a common format 
     in secondary angle and energy sampling.
@@ -195,7 +198,7 @@ def tabular_sample(inter_flag, out, pdf, cdf):
             ans = out[i] + (tmp - pdf[i]) / frac
     return ans
 
-def find_index(value, array):
+def _find_index(value, array):
     """
     Find bin of array containing value and calculate interpolation factor.
     If the value is outside the range of array, choose the first or last bin.
@@ -205,11 +208,11 @@ def find_index(value, array):
         i = 0
         frac = 0.0 
     elif (value >= array[-1]):
-        i = len(array) - 2
+        i = -2
         frac = 1.0
     else:
         i = np.searchsorted(array, value) - 1
-        frac = (value - array[i]) / (array[i+1] - array[i])
+        frac = (value - array[i]) / (array[i + 1] - array[i])
     return i, frac
 
 def set_seed(seed):
@@ -624,10 +627,12 @@ class NeutronTable(AceTable):
         self.reactions[2] = elastic_scatter
 
         # Create all other reactions with MT values
-        mts = np.asarray(self.xss[self.jxs[3]:self.jxs[3] + n_reactions], dtype=int)
-        qvalues = np.asarray(self.xss[self.jxs[4]:self.jxs[4] +
-                                      n_reactions], dtype=float)
-        tys = np.asarray(self.xss[self.jxs[5]:self.jxs[5] + n_reactions], dtype=int)
+        mts = np.asarray(self.xss[self.jxs[3]:self.jxs[3] + n_reactions], 
+                         dtype=int)
+        qvalues = np.asarray(self.xss[self.jxs[4]:self.jxs[4] + n_reactions], 
+                             dtype=float)
+        tys = np.asarray(self.xss[self.jxs[5]:self.jxs[5] + n_reactions], 
+                         dtype=int)
 
         # Create all reactions other than elastic scatter
         reactions = [(mt, Reaction(mt, self)) for mt in mts]
@@ -833,13 +838,13 @@ class NeutronTable(AceTable):
             loc = int(self.xss[self.jxs[8] + i])
             # Check if angular distribution data exist
             if loc == -1:
-                # Angular distribution data are specified through LAWi
-                # = 44 in the DLW block
+                # Angular distribution data are specified through ACE law, 
+                # e.g., law 44 and law 61, in the DLW block
                 continue
             elif loc == 0:
-                # No angular distribution data are given for this
-                # reaction, isotropic scattering is asssumed (in CM if
-                # TY < 0 and in LAB if TY > 0)
+                # No angular distribution data are given for this reaction, 
+                # isotropic scattering is asssumed (in CM if TY < 0 and in LAB 
+                # if TY > 0)
                 reaction.aflag = 'iso'
                 continue
             ind = self.jxs[9] + loc
@@ -863,7 +868,6 @@ class NeutronTable(AceTable):
             for j, location in enumerate(locations):
                 if location > 0:
                     # Equiprobable 32 bin distribution
-                    # print([reaction,'equiprobable'])
                     ang_cos[j] = self.xss[ind:ind + 33]
                     ind += 33
                 elif location < 0:
@@ -909,7 +913,8 @@ class NeutronTable(AceTable):
         location_start.
         """
 
-        cdef int ind, i, n_reactions, NE, n_regions, location_next_law, law, location_data, NPE, NPA
+        cdef int ind, i, n_reactions, NE, n_regions, location_next_law, law, \
+        location_data, NPE, NPA
 
         # Create EnergyDistribution object
         edist = EnergyDistribution()
@@ -955,6 +960,9 @@ class NeutronTable(AceTable):
                 dat.shape = (2, n_regions)
                 edist.NBT, edist.INT = dat
                 ind += 2 * n_regions
+                raise NotImplementedError('Multiple interpolation regions ' + \
+                                          'not yet supported for tabular ' + \
+                                          'equiprobable energy distributions.')
 
             # Number of outgoing energies in each E_out table
             NE = int(self.xss[ind])
@@ -963,11 +971,13 @@ class NeutronTable(AceTable):
 
             # Read E_out tables
             NET = int(self.xss[ind])
-            dat = self.xss[ind+1:ind+1+3*NET]
-            dat.shape = (3, NET)
-            self.e_dist_energy_out1, self.e_dist_energy_out2, \
-                                     self.e_dist_energy_outNE = dat
-            ind += 1 + 3 * NET
+            # Each incident energy has a corresponding outgoing energy array,
+            # not just 3. The index in the instruction is from incoming energy
+            # bin 1, 2, ..., NE, not just 1, 2, NE
+            dat = self.xss[ind + 1 : ind + 1 + NE * NET]
+            dat.shape = (NE, NET)
+            edist.energy_out = dat
+            ind += 1 + NE * NET
         elif law == 2:
             # Discrete photon energy
             self.e_dist_LP = int(self.xss[ind])
@@ -1725,9 +1735,122 @@ class Reaction(object):
         self.TY = None     # Neutron release
         self.IE = 0        # Energy grid index
         self.sigma = []    # Cross section values
+        self.sqrt_pi_inv = 1. / np.sqrt(np.pi)
 
-    def broaden(self, T_high):
-        pass
+    def broaden(self, t_high):
+        """Doppler broaden cross section using SIGMA1 or piecewise-linear exact 
+        integration method (see "Exact Doppler Broadening of Tabulated Cross
+        Sections," Nucl. Sci. Eng. 60, 199-229 (1976) && "Comparison of 
+        algorithms for Doppler broadening pointwise tabulated cross sections", 
+        Annals of Nuclear Energy 75 (2015) 358-364). The code implementation is 
+        inspired by the doppler module in OpenMC v0.7.1.
+        
+        Parameter
+        ----------
+        t_high : float
+            Broadened-to temperature in K
+        
+        Result
+        ----------
+        Attribute sigmaNew : np array
+            Broadened cross sections
+        """
+        
+        # Broadened cross sections
+        self.sigmaNew = np.zeros(len(self.sigma))
+        # temperature difference in K
+        t = t_high - self.table.temp
+        k = physical_constants['Boltzmann constant in eV/K'] * 1e-6
+        alpha = self.table.awr / (k * t)
+        xs = self.sigma
+        energy = self.table.energy[self.IE : self.IE + len(xs)]
+        x = np.sqrt(alpha * energy)
+        fa = np.zeros(5)
+        fb = np.zeros(5)
+        for i in range(len(xs)):
+            sigma = 0
+            y = x[i]
+            y_sq = y * y
+            y_inv = 1. / y
+            y_inv_sq = y_inv / y
+            
+            # Evaluate sigma*(y, T) from x[k] - y = 0 to -4
+            k = i
+            a = 0
+            self._calculate_f(fa, a)
+            while (a >= -4 and k > 0):
+                # Move to next point
+                fb = fa
+                k -= 1
+                a = x[k] - y
+                self._calculate_f(fa, a)
+                h = fa - fb
+                # Calculate a[k], b[k], and slope terms
+                ak = y_inv_sq * h[2] + 2 * y_inv * h[1] + h[0]
+                bk = y_inv_sq * h[4] + 4 * y_inv * h[3] + 6 * h[2] + \
+                     4 * y * h[1] + y_sq * h[0]
+                slope = (xs[k + 1] - xs[k]) / (x[k + 1] ** 2 - x[k] ** 2)
+                # Add contribution to broadened cross section
+                sigma += ak * (xs[k] - slope * x[k] ** 2) + slope * bk
+            # Extend cross section to 0 assuming 1/v shape
+            if (k == 0 and a >= -4):
+                fb = fa
+                a = -y
+                self._calculate_f(fa, a)
+                h = fa - fb
+                sigma += xs[k] * x[k] * (y_inv_sq * h[1] + y_inv * h[0])
+            # Evaluate sigma*(y, T) from x[k] - y = 0 to 4
+            k = i
+            b = 0
+            self._calculate_f(fb, b)
+            while (b <= 4 and k < len(xs) - 1):
+                # Move to next point
+                fa = fb
+                k += 1
+                b = x[k] - y
+                # Calculate f and h functions
+                self._calculate_f(fb, b)
+                h = fa - fb
+                ak = y_inv_sq * h[2] + 2 * y_inv * h[1] + h[0]
+                bk = y_inv_sq * h[4] + 4 * y_inv * h[3] + 6 * h[2] + \
+                     4 * y * h[1] + y_sq * h[0]
+                slope = (xs[k] - xs[k - 1]) / (x[k] ** 2 - x[k - 1] ** 2)
+                sigma += ak * (xs[k] - slope * x[k] ** 2) + slope * bk
+            # Extend cross section to infinity assuming constant shape
+            if (k == len(xs) - 1 and b <= 4):
+                a = x[k] - y
+                self._calculate_f(fa, a)
+                sigma += xs[k] * (y_inv_sq * fa[2] + 2 * y_inv * fa[1] + fa[0])
+                
+            # Evaluate second term from x[k] + y = 0 to 4
+            if (y <= 4):
+                # swip signs on y
+                y = -y
+                y_inv = -y_inv
+                k = 0
+                # Calculate a and b based on 0 and x[0]
+                a = -y
+                b = x[k] - y
+                self._calculate_f(fa, a)
+                self._calculate_f(fb, b)
+                h = fa - fb
+                sigma -= xs[k] * x[k] * (y_inv_sq * h[1] + y_inv * h[0])
+                while (b <= 4):
+                    fa = fb
+                    k += 1
+                    b = x[k] - y
+                    self._calculate_f(fb, b)
+                    h = fa - fb
+                    ak = y_inv_sq * h[2] + 2 * y_inv * h[1] + h[0]
+                    bk = y_inv_sq * h[4] + 4 * y_inv * h[3] + 6 * h[2] + \
+                         4 * y * h[1] + y_sq * h[0]
+                    slope = (xs[k] - xs[k - 1]) / (x[k] ** 2 - x[k - 1] ** 2)
+                    sigma -= ak * (xs[k] - slope * x[k] ** 2) - slope * bk
+            self.sigmaNew[i] = sigma
+        
+        
+        
+        
 
     def threshold(self):
         """threshold()
@@ -1745,20 +1868,63 @@ class Reaction(object):
         return rep
     
     def sample(self, e):
+        """Sample outgoing angle and energy based on incident neutron energy. 
+        This implementation (together with the subfunctions used) were inspired 
+        by the second-neutron-distribution sampler in OpenMC v0.7.1.
+        
+        Parameters
+        ----------
+        e : float
+            incident neutron energy
+            
+        Results
+        ----------
+        (mu, e_out) : tuple
+            secondary neutron's angle, mu, and energy, e_out
         """
-        Sample out-going mu and e_out based on incoming neutron energy e, return (mu, e_out).
-        This implementation (together with the subfunctions used) were inspired by the 
-        second-neutron-distribution sampler in OpenMC v0.7.1.
-        """
+        if self.MT == 2:
+            # Isotropic scattering
+            mu = self._sample_mu(e)
+            return (mu, e)
         
         edist = self.energy_dist
-        if edist.law == 3:
-            # Inelastic level scattering
-            a = self.table.awr 
-            Q = self.Q
-            E_out = (a / (a + 1.0)) ** 2 * (e - (a + 1.0) / a * Q)
+        if edist.law == 1:
+            # Tabular equiprobable energy sample
+            i, frac = _find_index(e, edist.energy_in)
+            net = len(edist.energy_out[0])
+            # Sample outgoing energy bin
+            k = int(net * rand())
+            # Determine min and max of outgoing energy
+            ei1 = edist.energy_out[i, 0]
+            eik = edist.energy_out[i, -1]
+            ei11 = edist.energy_out[i + 1, 0]
+            ei1k = edist.energy_out[i + 1, -1]
+            e1 = ei1 + frac * (ei11 - ei1)
+            ek = eik + frac * (ei1k - eik)
+            # Select incident energy bin
+            if (rand() < frac):
+                l = i + 1
+            else:
+                l = i
+            # Determine elk and elk1
+            elk = edist.energy_out[l, k]
+            elk1 = edist.energy_out[l, k + 1]
+            # Compute unbounded outgoing energy
+            e_out = elk + rand() * (elk1 - elk)
+            # Interpolate between incident energy bins i and i + 1
+            if l == i:
+                e_out = e1 + (e_out - ei1) * (ek - e1) / (eik - ei1)
+            else:
+                e_out = e1 + (e_out - ei11) * (ek - e1) / (ei1k - ei11)
             mu = self._sample_mu(e)
-            return(mu, E_out)
+            return (mu, e_out)
+            
+        elif edist.law == 3:
+            # Inelastic level scattering
+            # Note the sampled outgoing energy is in CM system
+            e_out = edist.data[1] * (e - edist.data[0])
+            mu = self._sample_mu(e)
+            return(mu, e_out)
             
         elif edist.law == 4:
             # Continuous Tabular Distribution 
@@ -1772,7 +1938,7 @@ class Reaction(object):
                 
             # Find energy bin and calculate interpolation factor -- if the energy is
             # outside the range of the tabulated energies, choose the first or last bins 
-            i, f = find_index(e, edist.energy_in)
+            i, f = _find_index(e, edist.energy_in)
             
             # Sample between the ith and (i+1)th bin
             if (histogram_interp):
@@ -1801,7 +1967,7 @@ class Reaction(object):
             E_1 = E_i_1 + f*(E_i1_1 - E_i_1)
             E_K = E_i_K + f*(E_i1_K - E_i_K)
             
-            E_out = tabular_sample(edist.intt[l], edist.energy_out[l], \
+            E_out = _tabular_sample(edist.intt[l], edist.energy_out[l], \
                                    edist.pdf[l], edist.cdf[l])
             
             # Interpolate between incident energy bins i and i + 1
@@ -1814,21 +1980,101 @@ class Reaction(object):
             # Sample mu 
             mu = self._sample_mu(e)
             return (mu, E_out)
+        
+        elif edist.law == 7:
+            # Simple Maxwell fission spectrum
+            if hasattr(edist, 'NBT'):
+                t = _interpolation_tab1(e, edist.energy_in, edist.T, 
+                                         edist.NBT, edist.INT)
+            else:
+                t = _interpolation_tab1(e, edist.energy_in, edist.T)
+            e_out = self._maxwell_spectrum(t)
+            while e_out > e - edist.U:
+                e_out = self._maxwell_spectrum(t)
+            mu = self._sample_mu(e)
+            return (mu, e_out)
+        
+        elif edist.law == 9:
+            # Evaporation spectrum
+            if hasattr(edist, 'NBT'):
+                t = _interpolation_tab1(e, edist.energy_in, edist.T, 
+                                         edist.NBT, edist.INT)
+            else:
+                t = _interpolation_tab1(e, edist.energy_in, edist.T)
+            w = (e - edist.U) / t
+            g = 1 - np.exp(-w)
+            e_out = -np.log((1 - g * rand()) * (1 - g * rand()))
+            while e_out > w:
+                e_out = -np.log((1 - g * rand()) * (1 - g * rand()))
+            e_out *= t
+            mu = self._sample_mu(e)
+            return (mu, e_out)
+        
+        elif edist.law == 11:
+            # Energy dependent Watt spectrum
+            if hasattr(edist, 'NBTa'):
+                a = _interpolation_tab1(e, edist.energya_in, edist.a, 
+                                        edist.NBTa, edist.INTa)
+            else:
+                a = _interpolation_tab1(e, edist.energya_in, edist.a)
+            if hasattr(edist, 'NBTb'):
+                b = _interpolation_tab1(e, edist.energyb_in, edist.b,
+                                        edist.NBTb, edist.INTb)
+            else:
+                b = _interpolation_tab1(e, edist.energyb_in, edist.b)
+            e_out = self._watt_spectrum(a, b)
+            while e_out > e - edist.U:
+                e_out = self._watt_spectrum(a, b)
+            mu = self._sample_mu(e)
+            return (mu, e_out)
+        
+        elif edist.law == 66:
+            # N-body phase space distribution
+            e_max = (edist.massratio - 1) / edist.massratio * \
+                    (self.table.awr * e / (self.table.awr + 1) + self.Q)
+            x = self._maxwell_spectrum(1.)
+            if edist.nbodies == 3:
+                y = self._maxwell_spectrum(1.)
+            elif edist.nbodies == 4:
+                r1 = rand()
+                r2 = rand()
+                r3 = rand()
+                y = -np.log(r1 * r2 * r3)
+            elif edist.nbodies == 5:
+                r1 = rand()
+                r2 = rand()
+                r3 = rand()
+                r4 = rand()
+                r5 = rand()
+                r6 = rand()
+                y = -np.log(r1 * r2 * r3 * r4) - np.log(r5) * \
+                    np.cos(.5 * np.pi * r6) ** 2
+            v = x / (x + y)
+            e_out = e_max * v
+            mu = self._sample_mu(e)
+            return (mu, e_out)
                     
         elif edist.law == 44:
+            # Kalbach-87 Formalism
             return self._sample_law44(e)
         
         elif edist.law == 61:
+            # Correlated energy and angle sample
             return self._sample_law61(e)
                 
-    def _sample_mu(self, e):                
-        # Sample the independent mu
+    def _sample_mu(self, e):
+        """Sample the uncorrected outgoing angle
+        Parameters
+        ----------
+        e: incident neutron energy
+        """              
+        
         if hasattr(self, 'aflag'):
             mu = 2.0 * rand() - 1.0  
             return mu
         else:
             # Compute index and interpolation frac 
-            i, r = find_index(e, self.ang_energy_in)
+            i, r = _find_index(e, self.ang_energy_in)
             
             if (r > rand()):
                 i = i + 1  
@@ -1855,7 +2101,7 @@ class Reaction(object):
                 pdf = self.ang_pdf[i]
                 cdf = self.ang_cdf[i]
                 jj = self.jj[i]
-                mu = tabular_sample(jj, cos, pdf, cdf)
+                mu = _tabular_sample(jj, cos, pdf, cdf)
                 
                 # Make sure mu is in range [-1,1]
                 if (abs(mu) > 1):
@@ -1872,7 +2118,7 @@ class Reaction(object):
          
         # Find energy bin and calculate interpolation factor -- if the energy is
         # outside the range of the tabulated energies, choose the first or last bins
-        i, f = find_index(e, edist.energy_in)
+        i, f = _find_index(e, edist.energy_in)
             
         # Sample between the ith and (i+1)th bin
         if (f > rand()):
@@ -1960,7 +2206,7 @@ class Reaction(object):
             
         # find energy bin and calculate interpolation factor -- if the energy is
         # outside the range of the tabulated energies, choose the first or last bins
-        i, r = find_index(e, edist.energy_in)
+        i, r = _find_index(e, edist.energy_in)
         
         # Sample between the ith and (i+1)th bin
         if (r > rand()):
@@ -2027,7 +2273,7 @@ class Reaction(object):
                 cos = edist.a_dist_mu_out[l][k]
                 pdf = edist.a.dist_pdf[l][k]
                 cdf = edist.a.dist.cdf[l][k]
-                mu = tabular_sample(jj, cos, pdf, cdf)
+                mu = _tabular_sample(jj, cos, pdf, cdf)
                 
                 # Make sure mu is in range [-1,1]
                 if (abs(mu) > 1):
@@ -2041,12 +2287,35 @@ class Reaction(object):
                 cos = edist.a_dist_mu_out[l][k+1]
                 pdf = edist.a.dist_pdf[l][k+1]
                 cdf = edist.a.dist.cdf[l][k+1]
-                mu = tabular_sample(jj, cos, pdf, cdf)
+                mu = _tabular_sample(jj, cos, pdf, cdf)
                 
                 # Make sure mu is in range [-1,1]
                 if (abs(mu) > 1):
                     mu = np.sign(mu)
             return (mu, E_out)
+        
+    def _maxwell_spectrum(self, t):
+        r1 = rand()
+        r2 = rand()
+        r3 = rand()
+        c = np.cos(.5 * np.pi * r3)
+        e_out = -t * (np.log(r1) + np.log(r2) * c * c)
+        return e_out
+    
+    def _watt_spectrum(self, a, b):
+        w = self._maxwell_spectrum(a)
+        e_out = w + .25 * a ** 2 * b + (2 * rand() - 1) * \
+                np.sqrt(a ** 2 * b * w)
+        return e_out
+    
+    def _calculate_f(self, f, a):
+        """Working hourse function used in Doppler broadening
+        """
+        f[0] = .5 * erfc(a)
+        f[1] = .5 * self.sqrt_pi_inv * np.exp(-a * a)
+        f[2] = .5 * f[0] + a * f[1]
+        f[3] = f[1] * (1 + a * a)
+        f[4] = .75 * f[0] + f[1] * a * (1.5 + a * a)
         
 class DosimetryTable(AceTable):
 
