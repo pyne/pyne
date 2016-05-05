@@ -1758,9 +1758,10 @@ class Reaction(object):
         
         # Broadened cross sections
         self.sigmaNew = np.zeros(len(self.sigma))
-        # temperature difference in K
-        t = t_high - self.table.temp
-        k = physical_constants['Boltzmann constant in eV/K'] * 1e-6
+        k = physical_constants['Boltzmann constant in eV/K'][0] * 1e-6
+        # temperature difference in K, note the temp in neutron table is
+        # in MeV, using boltzmann constant to convert to K
+        t = t_high - self.table.temp / k
         alpha = self.table.awr / (k * t)
         xs = self.sigma
         energy = self.table.energy[self.IE : self.IE + len(xs)]
@@ -1780,7 +1781,7 @@ class Reaction(object):
             self._calculate_f(fa, a)
             while (a >= -4 and k > 0):
                 # Move to next point
-                fb = fa
+                fb = fa.copy()
                 k -= 1
                 a = x[k] - y
                 self._calculate_f(fa, a)
@@ -1794,7 +1795,7 @@ class Reaction(object):
                 sigma += ak * (xs[k] - slope * x[k] ** 2) + slope * bk
             # Extend cross section to 0 assuming 1/v shape
             if (k == 0 and a >= -4):
-                fb = fa
+                fb = fa.copy()
                 a = -y
                 self._calculate_f(fa, a)
                 h = fa - fb
@@ -1805,7 +1806,7 @@ class Reaction(object):
             self._calculate_f(fb, b)
             while (b <= 4 and k < len(xs) - 1):
                 # Move to next point
-                fa = fb
+                fa = fb.copy()
                 k += 1
                 b = x[k] - y
                 # Calculate f and h functions
@@ -1834,9 +1835,9 @@ class Reaction(object):
                 self._calculate_f(fa, a)
                 self._calculate_f(fb, b)
                 h = fa - fb
-                sigma -= xs[k] * x[k] * (y_inv_sq * h[1] + y_inv * h[0])
+                sigma = sigma - xs[k] * x[k] * (y_inv_sq * h[1] + y_inv * h[0])
                 while (b <= 4):
-                    fa = fb
+                    fa = fb.copy()
                     k += 1
                     b = x[k] - y
                     self._calculate_f(fb, b)
@@ -1845,13 +1846,10 @@ class Reaction(object):
                     bk = y_inv_sq * h[4] + 4 * y_inv * h[3] + 6 * h[2] + \
                          4 * y * h[1] + y_sq * h[0]
                     slope = (xs[k] - xs[k - 1]) / (x[k] ** 2 - x[k - 1] ** 2)
-                    sigma -= ak * (xs[k] - slope * x[k] ** 2) - slope * bk
+                    sigma = sigma - ak * (xs[k] - slope * x[k] ** 2) - \
+                            slope * bk
             self.sigmaNew[i] = sigma
         
-        
-        
-        
-
     def threshold(self):
         """threshold()
 
