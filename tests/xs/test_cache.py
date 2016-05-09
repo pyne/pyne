@@ -70,6 +70,10 @@ def test_xs_cache_set_E_g():
     xs_cache['E_g'] = [10.0, 8.0, 2.0, 1.0]
     assert_true(xs_cache['phi_g'] is None)
     assert_false((10010, 'fiss') in xs_cache)
+
+def text_xs_get_reaction():
+    xs_cache.clear()
+    assert_raises(KeyError, xs_cache[10010, 1089, 300])
     
 
 def test_xs_cache_get_phi_g():
