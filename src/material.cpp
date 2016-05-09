@@ -545,7 +545,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
       ss.str("");
       ss << pyne::nucname::mcnp(i->first);
       nucmcnp = ss.str();
-      
+
       int mcnp_id;
       mcnp_id = pyne::nucname::mcnp(i->first);
       // Spaces are important for tests
@@ -567,8 +567,8 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 }
 
 ///---------------------------------------------------------------------------//
-/// Create a set out of the static string array. 
-std::set<std::string> fluka_builtin(pyne::fluka_mat_strings, 
+/// Create a set out of the static string array.
+std::set<std::string> fluka_builtin(pyne::fluka_mat_strings,
                                     pyne::fluka_mat_strings+pyne::FLUKA_MAT_NUM);
 
 ///---------------------------------------------------------------------------//
@@ -606,7 +606,7 @@ std::string pyne::Material::fluka(int id, std::string frac_type) {
 /// Requirement:  the material upon which this function is called has
 ///               exactly one nucid component, i.e. it is elemental
 /// Do not assume fluka_name is defined in the metadata.  This function
-/// may be called from a user-defined material, i.e. on that is not 
+/// may be called from a user-defined material, i.e. on that is not
 /// read out of a UW^2-tagged geometry file, and thus does not have
 /// certain metadata.
 std::string pyne::Material::fluka_material_str(int id) {
@@ -614,7 +614,7 @@ std::string pyne::Material::fluka_material_str(int id) {
   std::string fluka_name; // needed to determine if built-in
 
   int nucid = comp.begin()->first;
-   
+
   // NOTE:  first part of 'if' may never be called
   if (metadata.isMember("fluka_name")) {
     fluka_name = metadata["fluka_name"].asString();
@@ -627,32 +627,32 @@ std::string pyne::Material::fluka_material_str(int id) {
     fluka_name = nucname::fluka(nucid);
   }
 
-  if (not_fluka_builtin(fluka_name)) {  
+  if (not_fluka_builtin(fluka_name)) {
     ms << fluka_material_component(id, nucid, fluka_name);
   }
 
   // could be empty
   return ms.str();
 }
-    
+
 ///---------------------------------------------------------------------------//
 /// fluka_material_component
 ///---------------------------------------------------------------------------//
-/// Material has only one component, 
+/// Material has only one component,
 /// Density is either object density or it is ignored ==> use object density
-/// This function is not called for a compound, but it is called on the 
+/// This function is not called for a compound, but it is called on the
 /// material-ized components of compounds
-std::string pyne::Material::fluka_material_component(int fid, int nucid, 
+std::string pyne::Material::fluka_material_component(int fid, int nucid,
                                                std::string fluka_name) {
   int znum = pyne::nucname::znum(nucid);
 
   double atomic_mass;
-  if (0 != pyne::NUC_DATA_PATH.length()) { 
+  if (0 != pyne::NUC_DATA_PATH.length()) {
     // for compounds (i.e., unrecognized nucids), this will be 0
     atomic_mass = pyne::atomic_mass(nucid);
   } else {
-    atomic_mass = 1.0; 
-  }  
+    atomic_mass = 1.0;
+  }
 
   return fluka_material_line(znum, atomic_mass, fid, fluka_name);
 }
@@ -661,7 +661,7 @@ std::string pyne::Material::fluka_material_component(int fid, int nucid,
 /// fluka_material_line
 ///---------------------------------------------------------------------------//
 /// Given all the info, return the Material string
-std::string pyne::Material::fluka_material_line(int znum, double atomic_mass, 
+std::string pyne::Material::fluka_material_line(int znum, double atomic_mass,
                                           int fid, std::string fluka_name) {
   std::stringstream ls;
 
@@ -672,7 +672,7 @@ std::string pyne::Material::fluka_material_line(int znum, double atomic_mass,
   }
   ls << std::setw(10) << std::left << "MATERIAL";
   ls << std::setprecision(0) << std::fixed << std::showpoint <<
-        std::setw(10) << std::right << (float)znum; 
+        std::setw(10) << std::right << (float)znum;
 
   ls << fluka_format_field(atomic_mass);
   // Note this is the current object density, and may or may not be meaningful
@@ -700,7 +700,7 @@ std::string pyne::Material::fluka_format_field(float field) {
   double intpart;
   modf (field, &intpart);
   if (field == intpart) {
-    ls << std::setprecision(0) << std::fixed << std::showpoint 
+    ls << std::setprecision(0) << std::fixed << std::showpoint
        << std::setw(10) << std::right << field;
   } else {
   // This will print however many digits after the decimal, up to a max of six
@@ -708,7 +708,7 @@ std::string pyne::Material::fluka_format_field(float field) {
     ls.unsetf(std::ios::floatfield);
     ls.precision(6);
     ls << std::setw(10) << std::right << field;
-  }  
+  }
 
   return ls.str();
 }
@@ -735,9 +735,9 @@ std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
   } else {
     std::cerr << "Error:  metadata \"fluka_name\" expected." << std::endl;
     compound_name = "NotFound";
-  }  
+  }
   ss << fluka_material_line(znum, atomic_mass, id, compound_name);
-  
+
   std::string frac_sign;
   if ("atom" == frac_type) {
     frac_sign = "";
@@ -788,7 +788,7 @@ std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
     ss << std::setw(10) << std::right << nucname::fluka(nuc->first);
     nuc++;
     temp_s.str("");
-    
+
     if  (nuc != comp.end()) {
       temp_s << frac_sign << nuc->second;
       ss << std::setw(10) << std::right << temp_s.str();
@@ -796,12 +796,12 @@ std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
       nuc++;
       temp_s.str("");
     } else {
-      ss << std::setw(10) << std::right << ""; 
-      ss << std::setw(10) << std::right << ""; 
+      ss << std::setw(10) << std::right << "";
+      ss << std::setw(10) << std::right << "";
     }
 
-    ss << std::setw(10) << std::right << ""; 
-    ss << std::setw(10) << std::right << ""; 
+    ss << std::setw(10) << std::right << "";
+    ss << std::setw(10) << std::right << "";
     ss << std::setw(10) << std::left << compound_name;
     ss << std::endl;
     }
@@ -843,7 +843,8 @@ void pyne::Material::from_text(std::string filename) {
     } else if (keystr == "APerM") {
       f >> valstr;
       atoms_per_molecule = pyne::to_dbl(valstr);
-    } else if (pyne::nucname::isnuclide(keystr)) {
+    } else if (pyne::nucname::isnuclide(keystr) ||
+               pyne::nucname::iselement(keystr)) {
       f >> valstr;
        comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
     } else {
@@ -1088,7 +1089,7 @@ pyne::comp_map pyne::Material::activity() {
                     atomic_mass(i->first);
   }
   return act;
-}	
+}
 
 
 pyne::comp_map pyne::Material::decay_heat() {
@@ -1104,7 +1105,7 @@ pyne::comp_map pyne::Material::decay_heat() {
 
 
 pyne::comp_map pyne::Material::dose_per_g(std::string dose_type, int source) {
-  pyne::comp_map dose; 
+  pyne::comp_map dose;
   const double pCi_per_Bq = 27.027027;
   if (dose_type == "ext_air") {
     for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
@@ -1134,7 +1135,7 @@ pyne::comp_map pyne::Material::dose_per_g(std::string dose_type, int source) {
     throw std::invalid_argument("Dose type must be one of: ext_air, ext_soil, ingest, inhale.");
   }
   return dose;
-}	
+}
 
 
 double pyne::Material::molecular_mass(double apm) {
@@ -1205,31 +1206,31 @@ pyne::Material pyne::Material::expand_elements() {
 pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   ////////////////////////////////////////////////////////////////////////
   // Assumptions
-  //    - list passed in is of nucid's formed from the znum-anum of 
-  //      Fluka-named isotopes, since we want to preserve the full 
+  //    - list passed in is of nucid's formed from the znum-anum of
+  //      Fluka-named isotopes, since we want to preserve the full
   //      nucid of any such material in the problem
   // Algorithm
-  // for each component listed in this material that has a nonzero frac or 
-  //    weight amount, look at its 'stripped' nucid, that is, the last four 
+  // for each component listed in this material that has a nonzero frac or
+  //    weight amount, look at its 'stripped' nucid, that is, the last four
   //    places replaced by zeros.
   //    if it's on the exception list, copy the component
-  //    else it is to be collapsed 
+  //    else it is to be collapsed
   //       => add its frac to the component of the znum
-  //  
-  // * When from_hdf5 reads from a file the comp iterator will produce a 
+  //
+  // * When from_hdf5 reads from a file the comp iterator will produce a
   //   hit for EVERY nucid in EVERY material in the file.  Only the nucids
   //   belonging to the CURRENT material have a nonzero fraction/mass amount
-  ///////////////////////////////////////////////////////////////////////// 
+  /////////////////////////////////////////////////////////////////////////
   pyne::comp_map cm;
-  
+
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
       if (0 < ptr->second) {
-        // There is a nonzero amount of this nucid in the current material, 
-        // check if znum and anum are in the exception list, 
-        int cur_stripped_id = nucname::znum(ptr->first)*10000000 
+        // There is a nonzero amount of this nucid in the current material,
+        // check if znum and anum are in the exception list,
+        int cur_stripped_id = nucname::znum(ptr->first)*10000000
                         + nucname::anum(ptr->first)*10000;
         if (0 < exception_ids.count(cur_stripped_id)) {
-        // The znum/anum combination identify the current material as a 
+        // The znum/anum combination identify the current material as a
         // fluka-named exception list => copy, don't collapse
           cm[ptr->first] = (ptr->second) * mass;
         } else {
@@ -1239,8 +1240,8 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
         }
       }
   }
-  // Copy 
-  pyne::Material collapsed = pyne::Material(cm, mass, density, 
+  // Copy
+  pyne::Material collapsed = pyne::Material(cm, mass, density,
                                             atoms_per_molecule, metadata);
   return collapsed;
 }
