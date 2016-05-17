@@ -25,6 +25,7 @@ from collections import OrderedDict
 
 cimport numpy as np
 import numpy as np
+import math
 from numpy.random import rand
 from scipy.constants import physical_constants
 # Complementary error function used in doppler broadening
@@ -40,6 +41,10 @@ from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+# Constants
+sqrt_pi_inv = 1. / math.sqrt(math.pi)
+kb = physical_constants['Boltzmann constant in eV/K'][0] * 1e-6
 
 def ascii_to_binary(ascii_file, binary_file):
     """Convert an ACE file in ASCII format (type 1) to binary format (type 2).
@@ -158,14 +163,14 @@ def _interpolation_tab1(x_in, x, y, interp_NBT = None, interp_INT = None):
         r = (x_in - x0) / (x1 - x0)
         return y0 + r * (y1 - y0)
     elif interp == 3:  # linear _log  
-        r = np.log(x_in / x0) / np.log(x1 / x0)
+        r = math.log(x_in / x0) / math.log(x1 / x0)
         return y0 + r * (y1 - y0)
     elif interp == 4:  # log-linear
         r = (x_in - x0) / (x1 - x0)
-        return y0 * np.exp(r * np.log(y1 / y0))
+        return y0 * math.exp(r * math.log(y1 / y0))
     elif interp == 5:  # log-log
-        r = np.log(x_in / x0) / np.log(x1/x0)
-        return y0 * np.exp(r * np.log(y1 / y0))
+        r = math.log(x_in / x0) / math.log(x1 / x0)
+        return y0 * math.exp(r * math.log(y1 / y0))
     
 def _tabular_sample(inter_flag, out, pdf, cdf):
     """
@@ -1005,7 +1010,7 @@ class NeutronTable(AceTable):
 
             nps = []
             edist.intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
-            edist.nd   = []
+            edist.nd   = []        # Number of discrete lines
             edist.energy_out = []  # Outgoing E grid for each incoming E
             edist.pdf = []         # Probability dist for " " "
             edist.cdf = []         # Cumulative dist for " " "
@@ -1195,7 +1200,7 @@ class NeutronTable(AceTable):
 
             nps = []
             edist.intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
-            edist.nd   = []
+            edist.nd   = []        # Number of discrete lines
             edist.energy_out = []  # Outgoing E grid for each incoming E
             edist.pdf = []         # Probability dist for " " "
             edist.cdf = []         # Cumulative dist for " " "
@@ -1203,12 +1208,11 @@ class NeutronTable(AceTable):
             edist.ang = []         # Angular distribution slope for " " "
             for i in range(NE):
                 INTTp = int(self.xss[ind])
-                
                 # No matter INTTp > 10 or not, we can get the data 
                 # At sample stage, use nd to determine if there is 
                 # discrete lines error
                 edist.intt.append(INTTp % 10)
-                edist.nd.append(INTTp / 10)
+                edist.nd.append(INTTp // 10)
 
                 NP = int(self.xss[ind+1])
                 nps.append(NP)
@@ -1221,7 +1225,7 @@ class NeutronTable(AceTable):
                 edist.cdf.append(dat[2])
                 edist.frac.append(dat[3])
                 edist.ang.append(dat[4])
-                ind += 5*NP
+                ind += 5 * NP
 
             # convert to arrays if possible
             edist.intt = np.array(edist.intt)
@@ -1249,7 +1253,7 @@ class NeutronTable(AceTable):
             
             npes = []
             edist.intt = []        # Interpolation scheme (1=hist, 2=lin-lin)
-            edist.nd = []
+            edist.nd = []          # Number of discrete lines
             edist.energy_out = []  # Outgoing E grid for each incoming E
             edist.pdf = []         # Probability dist for " " "
             edist.cdf = []         # Cumulative dist for " " "
@@ -1265,7 +1269,7 @@ class NeutronTable(AceTable):
                 # At sample stage, use nd to determine if there is 
                 # discrete lines present
                 edist.intt.append(INTTp % 10)
-                edist.nd.append(INTTp / 10)
+                edist.nd.append(INTTp // 10)
                 
                 # Secondary energy distribution
                 NPE = int(self.xss[ind+1])
@@ -1735,7 +1739,6 @@ class Reaction(object):
         self.TY = None     # Neutron release
         self.IE = 0        # Energy grid index
         self.sigma = []    # Cross section values
-        self.sqrt_pi_inv = 1. / np.sqrt(np.pi)
 
     def broaden(self, t_high):
         """Doppler broaden cross section using SIGMA1 or piecewise-linear exact 
@@ -1752,24 +1755,25 @@ class Reaction(object):
         
         Result
         ----------
-        Attribute sigmaNew : np array
+        sigmaNew : np array
             Broadened cross sections
         """
-        
+        cdef int i, k
+        cdef double y, y_sq, y_inv, y_inv_sq, a, b, sigma, ak, bk, slope
         # Broadened cross sections
-        self.sigmaNew = np.zeros(len(self.sigma))
-        k = physical_constants['Boltzmann constant in eV/K'][0] * 1e-6
+        sigmaNew = np.zeros(len(self.sigma))
         # temperature difference in K, note the temp in neutron table is
         # in MeV, using boltzmann constant to convert to K
-        t = t_high - self.table.temp / k
-        alpha = self.table.awr / (k * t)
+        t = t_high - self.table.temp / kb
+        alpha = self.table.awr / (kb * t)
         xs = self.sigma
         energy = self.table.energy[self.IE : self.IE + len(xs)]
         x = np.sqrt(alpha * energy)
         fa = np.zeros(5)
         fb = np.zeros(5)
+        
         for i in range(len(xs)):
-            sigma = 0
+            sigma = 0.0
             y = x[i]
             y_sq = y * y
             y_inv = 1. / y
@@ -1777,11 +1781,11 @@ class Reaction(object):
             
             # Evaluate sigma*(y, T) from x[k] - y = 0 to -4
             k = i
-            a = 0
+            a = 0.0
             self._calculate_f(fa, a)
-            while (a >= -4 and k > 0):
+            while (a >= -4.0 and k > 0):
                 # Move to next point
-                fb = fa.copy()
+                fb[:] = fa
                 k -= 1
                 a = x[k] - y
                 self._calculate_f(fa, a)
@@ -1794,19 +1798,19 @@ class Reaction(object):
                 # Add contribution to broadened cross section
                 sigma += ak * (xs[k] - slope * x[k] ** 2) + slope * bk
             # Extend cross section to 0 assuming 1/v shape
-            if (k == 0 and a >= -4):
-                fb = fa.copy()
+            if (k == 0 and a >= -4.0):
+                fb[:] = fa
                 a = -y
                 self._calculate_f(fa, a)
                 h = fa - fb
                 sigma += xs[k] * x[k] * (y_inv_sq * h[1] + y_inv * h[0])
             # Evaluate sigma*(y, T) from x[k] - y = 0 to 4
             k = i
-            b = 0
+            b = 0.0
             self._calculate_f(fb, b)
-            while (b <= 4 and k < len(xs) - 1):
+            while (b <= 4.0 and k < len(xs) - 1):
                 # Move to next point
-                fa = fb.copy()
+                fa[:] = fb
                 k += 1
                 b = x[k] - y
                 # Calculate f and h functions
@@ -1818,13 +1822,13 @@ class Reaction(object):
                 slope = (xs[k] - xs[k - 1]) / (x[k] ** 2 - x[k - 1] ** 2)
                 sigma += ak * (xs[k] - slope * x[k] ** 2) + slope * bk
             # Extend cross section to infinity assuming constant shape
-            if (k == len(xs) - 1 and b <= 4):
+            if (k == len(xs) - 1 and b <= 4.0):
                 a = x[k] - y
                 self._calculate_f(fa, a)
                 sigma += xs[k] * (y_inv_sq * fa[2] + 2 * y_inv * fa[1] + fa[0])
                 
             # Evaluate second term from x[k] + y = 0 to 4
-            if (y <= 4):
+            if (y <= 4.0):
                 # swip signs on y
                 y = -y
                 y_inv = -y_inv
@@ -1836,8 +1840,8 @@ class Reaction(object):
                 self._calculate_f(fb, b)
                 h = fa - fb
                 sigma = sigma - xs[k] * x[k] * (y_inv_sq * h[1] + y_inv * h[0])
-                while (b <= 4):
-                    fa = fb.copy()
+                while (b <= 4.0):
+                    fa[:] = fb
                     k += 1
                     b = x[k] - y
                     self._calculate_f(fb, b)
@@ -1848,7 +1852,8 @@ class Reaction(object):
                     slope = (xs[k] - xs[k - 1]) / (x[k] ** 2 - x[k - 1] ** 2)
                     sigma = sigma - ak * (xs[k] - slope * x[k] ** 2) - \
                             slope * bk
-            self.sigmaNew[i] = sigma
+            sigmaNew[i] = sigma
+        return sigmaNew
         
     def threshold(self):
         """threshold()
@@ -2000,10 +2005,10 @@ class Reaction(object):
             else:
                 t = _interpolation_tab1(e, edist.energy_in, edist.T)
             w = (e - edist.U) / t
-            g = 1 - np.exp(-w)
-            e_out = -np.log((1 - g * rand()) * (1 - g * rand()))
+            g = 1 - math.exp(-w)
+            e_out = -math.log((1 - g * rand()) * (1 - g * rand()))
             while e_out > w:
-                e_out = -np.log((1 - g * rand()) * (1 - g * rand()))
+                e_out = -math.log((1 - g * rand()) * (1 - g * rand()))
             e_out *= t
             mu = self._sample_mu(e)
             return (mu, e_out)
@@ -2037,7 +2042,7 @@ class Reaction(object):
                 r1 = rand()
                 r2 = rand()
                 r3 = rand()
-                y = -np.log(r1 * r2 * r3)
+                y = -math.log(r1 * r2 * r3)
             elif edist.nbodies == 5:
                 r1 = rand()
                 r2 = rand()
@@ -2045,8 +2050,8 @@ class Reaction(object):
                 r4 = rand()
                 r5 = rand()
                 r6 = rand()
-                y = -np.log(r1 * r2 * r3 * r4) - np.log(r5) * \
-                    np.cos(.5 * np.pi * r6) ** 2
+                y = -math.log(r1 * r2 * r3 * r4) - math.log(r5) * \
+                    math.cos(.5 * math.pi * r6) ** 2
             v = x / (x + y)
             e_out = e_max * v
             mu = self._sample_mu(e)
@@ -2185,11 +2190,11 @@ class Reaction(object):
         
         # Sampled correlated angle from Kalbach-Mann parameters
         if (rand() > km_r):
-            t = (2.0*rand() - 1.0) * np.sinh(km_a)
-            mu = np.log(t + (t*t + 1.0)**0.5)/km_a
+            t = (2.0 * rand() - 1.0) * math.sinh(km_a)
+            mu = math.log(t + (t * t + 1.0)**0.5) / km_a
         else:
             r1 = rand()
-            mu = np.log(r1*np.exp(km_a) + (1.0 - r1)*np.exp(-km_a))/km_a
+            mu = math.log(r1 * math.exp(km_a) + (1.0 - r1) * math.exp(-km_a))/km_a
         return (mu, E_out)
     
     def _sample_law61(self, e):
@@ -2296,21 +2301,21 @@ class Reaction(object):
         r1 = rand()
         r2 = rand()
         r3 = rand()
-        c = np.cos(.5 * np.pi * r3)
-        e_out = -t * (np.log(r1) + np.log(r2) * c * c)
+        c = math.cos(0.5 * math.pi * r3)
+        e_out = -t * (math.log(r1) + math.log(r2) * c * c)
         return e_out
     
     def _watt_spectrum(self, a, b):
         w = self._maxwell_spectrum(a)
         e_out = w + .25 * a ** 2 * b + (2 * rand() - 1) * \
-                np.sqrt(a ** 2 * b * w)
+                math.sqrt(a ** 2 * b * w)
         return e_out
     
     def _calculate_f(self, f, a):
         """Working hourse function used in Doppler broadening
         """
         f[0] = .5 * erfc(a)
-        f[1] = .5 * self.sqrt_pi_inv * np.exp(-a * a)
+        f[1] = .5 * sqrt_pi_inv * math.exp(-a * a)
         f[2] = .5 * f[0] + a * f[1]
         f[3] = f[1] * (1 + a * a)
         f[4] = .75 * f[0] + f[1] * a * (1.5 + a * a)
