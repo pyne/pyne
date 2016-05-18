@@ -111,7 +111,7 @@ class UWUW
    * \param[in] filename of the h5m file
    * \return std::map of material name vs Material object
    */
-public:
+ public:
   std::map<std::string, pyne::Material> load_pyne_materials(std::string filename, std::string datapath = "/materials");
 
   /**

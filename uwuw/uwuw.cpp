@@ -81,7 +81,7 @@ bool UWUW::check_file_exists(std::string filename)
 
 // loads all materials into map
 
-std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string filename, std::string datapath) 
+std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string filename, std::string datapath)
 {
   std::map<std::string, pyne::Material> library; // material library
 
@@ -105,7 +105,7 @@ std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string file
 }
 
 // loads all tallies into map
-std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename, std::string datapath) 
+std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename, std::string datapath)
 {
   std::map<std::string, pyne::Tally> library; // material library
 
