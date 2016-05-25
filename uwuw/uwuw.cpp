@@ -94,8 +94,7 @@ std::map<std::string, pyne::Material> UWUW::load_pyne_materials(std::string file
 
   for ( int i = 0 ; i < num_materials ; i++ ) {
     pyne::Material mat; // from file
-
-    mat.from_hdf5(filename,"/materials",i);
+    mat.from_hdf5(filename,datapath,i);
     // renumber material number by position in the library
     mat.metadata["mat_number"]=i+1;
     library[mat.metadata["name"].asString()]=mat;
@@ -116,7 +115,7 @@ std::map<std::string, pyne::Tally> UWUW::load_pyne_tallies(std::string filename,
 
   for ( int i = 0 ; i < num_tallies ; i++) {
     pyne::Tally tally; // from file
-    tally.from_hdf5(filename,"/tally",i);
+    tally.from_hdf5(filename,datapath,i);
     library[tally.tally_name]=tally;
   }
   return library;
