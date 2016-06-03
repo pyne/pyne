@@ -160,8 +160,31 @@ def phi_g(E_g, E_n, phi_n):
     phi_g = np.dot(pem, phi_n)
     return phi_g
 
+def number_density(mat, density, a_mass):
+    """Builds the weights used during the self shielding calculations. 
 
-def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None):
+    Parameters
+    ----------
+    mat : dictionary of isotope to concentation  
+        The mass based isotopic composition of the material for which self
+        shielding is being calculated. 
+    density : float
+        the density of the material
+    a_mass : float
+        the atomic mass of the material
+    
+    Returns
+    -------
+    num_den : dictionary
+        dictionary of isotope to number density
+    """
+    num_den_mat = 6.0221409E23 * density / a_mass
+    num_den = {}
+    for iso in mat:
+        num_den[iso] = mat[iso] * num_den_mat[0]
+    return num_den
+
+def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None, wgts=None):
     """Calculates the group cross-sections for a nuclide for a new, lower resolution
     group structure using a higher fidelity flux.  Note that g indexes G, n indexes N, 
     and G < N.  
@@ -174,7 +197,7 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
 
     Parameters
     ----------
-    sigma_n : array-like of floats)
+    sigma_n : array-like of floats
         A high-fidelity cross-section.
     phi_n : array-like of floats
         The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section 
@@ -201,16 +224,25 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
         pem = partial_energies
     elif (phi_g is None) and (partial_energies is not None):
         pem = partial_energies
-        phi_g = np.dot(pem, phi_n)
+        if wgts == None:
+           phi_g = np.dot(pem, phi_n)
+        else:
+           phi_g = np.dot(pem, phi_n * wgts[::-1])
     elif (E_g is not None) and (E_n is not None):
         pem =  partial_energy_matrix(E_g, E_n)
-        phi_g = np.dot(pem, phi_n)
+        if wgts == None:
+           phi_g = np.dot(pem, phi_n)
+        else:
+           phi_g = np.dot(pem, phi_n * wgts[::-1])
     else:
         msg = "Either partial_energies or E_g and E_n must both not be None."
         raise ValueError(msg)
 
     # Calulate partial group collapse
-    sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    if wgts == None:
+        sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    else:
+        sigma_g = np.dot(pem, sigma_n * phi_n * wgts[::-1]) / phi_g
     sigma_g[np.isnan(sigma_g)] = 0.0  # handle zero flux that causes NaNs later.
     return sigma_g
 

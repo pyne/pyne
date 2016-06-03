@@ -117,6 +117,7 @@ class DataSource(object):
         self.dst_group_struct = dst_group_struct
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
                             else np.asarray(src_phi_g)
+        self.slf_shld_wgts = {}
 
 
     @property
@@ -213,8 +214,28 @@ class DataSource(object):
         src_sigma = self.reaction(nuc, rx, temp)
         dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
                                                         src_phi_g, dst_phi_g,
-                                                        self._src_to_dst_matrix)
+                                                        self._src_to_dst_matrix, wgts=self.slf_shld_wgts[nuc])
         return dst_sigma
+
+    def shield_weights(self, mat, temp):
+        """Builds the weights used during the self shielding calculations. 
+        Parameters
+        ----------
+        mat : array of floats.  
+            A map of the number densities of each of the nuclides of the material for 
+            which self-shielding is being calculated. 
+        data_source: pyne data_source
+            Contains the cross section information for the isotopes in the material 
+            that is experiencing the self shielding. 
+        """
+        weight = {}
+        for iso in mat:
+            weight[iso] = 0.
+            for iso_2 in mat:
+                if iso_2 != iso:
+                    weight[iso] += mat[iso_2]*self.reaction(iso_2, 1,temp)
+            weight[iso] = 1/(weight[iso]/mat[iso] + self.reaction(iso, 1,temp))
+        self.slf_shld_wgts = weight
 
     # Mix-in methods to implement
     @property
@@ -362,7 +383,6 @@ class SimpleDataSource(DataSource):
             Temperature [K] of material, defaults to 300.0.
         src_phi_g : array-like, optional
             IGNORED!!!  Included for API compatability
-        dst_phi_g : array-like, optional
             Group fluxes for the destiniation structure, length dst_ngroups.
 
         Returns
