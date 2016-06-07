@@ -230,11 +230,17 @@ class DataSource(object):
             that is experiencing the self shielding. 
         """
         weights = {}
+        reactions = {}
+        for i in num_dens:
+            if self.reaction(j, 'total', temp) is None:
+                continue
+            else:
+                reactions[i] = num_dens[i]*self.reaction(j, 'total', temp)
         for i in num_dens:
             weights[i] = 0.0
-            for j in num_dens:
+            for j in reactions:
                 if j != i:
-                    weights[i] += num_dens[j]*self.reaction(j, 'total', temp)
+                    weights[i] += reactions[j]
             weights[i] = 1.0/(weights[i]/num_dens[i] + self.reaction(i, 'total', temp))
         self.slf_shld_wgts = weights
         print(weights)
