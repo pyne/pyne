@@ -214,7 +214,8 @@ class DataSource(object):
         src_sigma = self.reaction(nuc, rx, temp)
         dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
                                                         src_phi_g, dst_phi_g,
-                                                        self._src_to_dst_matrix, wgts=self.slf_shld_wgts[nuc])
+                                                        self._src_to_dst_matrix, 
+                                                        weights=self.slf_shld_wgts[nuc])
         return dst_sigma
 
     def shield_weights(self, num_dens, temp):
@@ -235,8 +236,8 @@ class DataSource(object):
                 if j != i:
                     weights[i] += num_dens[j]*self.reaction(j, 'total', temp)
             weights[i] = 1.0/(weights[i]/num_dens[i] + self.reaction(i, 'total', temp))
-        print(weights)
         self.slf_shld_wgts = weights
+        print(weights)
 
     # Mix-in methods to implement
     @property

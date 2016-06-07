@@ -206,13 +206,13 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None,
         if weights is None:
            phi_g = np.dot(pem, phi_n)
         else:
-           phi_g = np.dot(pem, phi_n * weights[::-1])
+           phi_g = np.dot(pem, phi_n * weights)
     elif (E_g is not None) and (E_n is not None):
         pem =  partial_energy_matrix(E_g, E_n)
         if weights is None:
            phi_g = np.dot(pem, phi_n)
         else:
-           phi_g = np.dot(pem, phi_n * weights[::-1])
+           phi_g = np.dot(pem, phi_n * weights)
     else:
         msg = "Either partial_energies or E_g and E_n must both not be None."
         raise ValueError(msg)
@@ -221,7 +221,7 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None,
     if weights is None:
         sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
     else:
-        sigma_g = np.dot(pem, sigma_n * phi_n * weights[::-1]) / phi_g
+        sigma_g = np.dot(pem, sigma_n * phi_n * weights) / phi_g
     sigma_g[np.isnan(sigma_g)] = 0.0  # handle zero flux that causes NaNs later.
     return sigma_g
 
