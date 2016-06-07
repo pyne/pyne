@@ -229,21 +229,18 @@ class DataSource(object):
             Contains the cross section information for the isotopes in the material 
             that is experiencing the self shielding. 
         """
-        weights = {}
         reactions = {}
         for i in num_dens:
-            if self.reaction(j, 'total', temp) is None:
-                continue
-            else:
-                reactions[i] = num_dens[i]*self.reaction(j, 'total', temp)
+            rx = self.reaction(i, 'total', temp)
+            reactions[i] = 0.0 if rx is None else rx
+        weights = {}
         for i in num_dens:
             weights[i] = 0.0
             for j in reactions:
                 if j != i:
-                    weights[i] += reactions[j]
-            weights[i] = 1.0/(weights[i]/num_dens[i] + self.reaction(i, 'total', temp))
+                    weights[i] += num_dens[j]*reactions[j]
+            weights[i] = 1.0/(weights[i]/num_dens[i] + reactions[i])
         self.slf_shld_wgts = weights
-        print(weights)
 
     # Mix-in methods to implement
     @property
