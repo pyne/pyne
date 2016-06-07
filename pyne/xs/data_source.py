@@ -217,7 +217,7 @@ class DataSource(object):
                                                         self._src_to_dst_matrix, wgts=self.slf_shld_wgts[nuc])
         return dst_sigma
 
-    def shield_weights(self, mat, temp):
+    def shield_weights(self, num_dens, temp):
         """Builds the weights used during the self shielding calculations. 
         Parameters
         ----------
@@ -228,14 +228,15 @@ class DataSource(object):
             Contains the cross section information for the isotopes in the material 
             that is experiencing the self shielding. 
         """
-        weight = {}
-        for iso in mat:
-            weight[iso] = 0.
-            for iso_2 in mat:
-                if iso_2 != iso:
-                    weight[iso] += mat[iso_2]*self.reaction(iso_2, 1,temp)
-            weight[iso] = 1/(weight[iso]/mat[iso] + self.reaction(iso, 1,temp))
-        self.slf_shld_wgts = weight
+        weights = {}
+        for i in num_dens:
+            weights[i] = 0.0
+            for j in num_dens:
+                if j != i:
+                    weights[i] += num_dens[j]*self.reaction(j, 'total', temp)
+            weights[i] = 1.0/(weights[i]/num_dens[i] + self.reaction(i, 'total', temp))
+        print(weights)
+        self.slf_shld_wgts = weights
 
     # Mix-in methods to implement
     @property
@@ -383,7 +384,9 @@ class SimpleDataSource(DataSource):
             Temperature [K] of material, defaults to 300.0.
         src_phi_g : array-like, optional
             IGNORED!!!  Included for API compatability
+        dst_phi_g : array-like, optional
             Group fluxes for the destiniation structure, length dst_ngroups.
+
 
         Returns
         -------
