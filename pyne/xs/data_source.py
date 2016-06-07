@@ -1021,3 +1021,70 @@ class OpenMCDataSource(DataSource):
             if os.path.isfile(atab.abspath or atab.path):
                 lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
                 lib.read(atab.name)
+
+class StatepointDataSource(DataSource):
+    """Data source for a Statepoint file from OpenMC. The cross sections for
+       this data source are built from the reaction rates determined in an 
+       openMC statepoint.  
+    """
+
+    def __init__(self, state_point, **kwargs):
+        """Parameters
+        ----------
+        cross_sections : openmc.CrossSections or string or file-like, optional
+            Path or file to OpenMC cross_sections.xml
+        src_group_struct : array-like, optional
+            The group structure to discretize the ACE data to, defaults to 
+            ``np.logspace(1, -9, 101)``.
+        kwargs : optional
+            Keyword arguments to be sent to DataSource base class.
+
+        """
+        sp = statepoint.StatePoint(state_point)
+        self.cross_sections = # function to read in reaction rates
+        self._src_group_struct = _load_group_structure(sp)
+        super(OpenMCDataSource, self).__init__(**kwargs)
+
+    @property
+    def exists(self):
+        if self._exists is None:
+            
+        return self._exists
+
+    def _load_group_structure(self, state_point):
+        if self._src_group_struct is None:
+            self._src_group_struct = state_point.tallies[3]
+        self.src_group_struct = self._src_group_struct
+ 
+    def _load_cross_sections():
+        
+
+    def _load_reaction(self, nuc, rx, temp=300.0):
+        """Loads reaction data from ACE files indexed by OpenMC.
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide id.
+        rx : int
+            Reaction id.
+        temp : float, optional
+            The nuclide temperature in [K].
+
+        """
+
+
+    def load(self, temp=300.0):
+        """Loads the entire data source into memory. This can be expensive for 
+        lots of ACE data.
+
+        Parameters
+        ----------
+        temp : float, optional
+            Temperature [K] of material, defaults to 300.0.
+
+        """
+        for atab in self.cross_sections.ace_tables:
+            if os.path.isfile(atab.abspath or atab.path):
+                lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
+                lib.read(atab.name)
