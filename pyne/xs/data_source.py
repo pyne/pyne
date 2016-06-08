@@ -985,8 +985,11 @@ class OpenMCDataSource(DataSource):
             The nuclide temperature in [K].
 
         """
+        rtn = self.pointwise(nuc, rx, temp=temp)
+        if rtn is None:
+            return
+        E_points, rawdata = rtn
         E_g = self.src_group_struct
-        E_points, rawdata = self.pointwise(nuc, rx, temp=temp)
         rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
         return rxdata
 
