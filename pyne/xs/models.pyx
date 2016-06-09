@@ -628,4 +628,9 @@ def sigma_s(E, b=1.0, M_A=1.0, T=300.0):
 #        p = 0.0
 #
 #    return p
-    
+
+def same_arr_or_none(a, b): 
+    if a is None or b is None:
+        return a is b
+    else:
+        return (len(a) == len(b)) and (a == b).all()
