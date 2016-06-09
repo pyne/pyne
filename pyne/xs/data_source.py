@@ -117,7 +117,7 @@ class DataSource(object):
         self.dst_group_struct = dst_group_struct
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
                             else np.asarray(src_phi_g)
-
+        self.atom_dens = {}
 
     @property
     def src_group_struct(self):
@@ -881,6 +881,8 @@ class OpenMCDataSource(DataSource):
     stucture when the reactions are loaded in. Reseting this source group
     structure will clear the reaction cache.
     """
+    
+    self_shield_reactions = {rxname.id('fission'), rxname.id('gamma'), rxname.id('total')}
 
     def __init__(self, cross_sections=None, src_group_struct=None, **kwargs):
         """Parameters
@@ -992,8 +994,42 @@ class OpenMCDataSource(DataSource):
             return
         E_points, rawdata = rtn
         E_g = self.src_group_struct
-        rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
+        if self.atom_dens.get(nuc, 0.0) < 1.0E19 and rx not in self.self_shield_reactions:
+            rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
+        else:
+            rxdata = self.self_shield(nuc, rx, temp, E_points, rawdata)
         return rxdata
+
+    def self_shield(self, nuc, rx, temp, E_points, xs_points):
+        """
+        """
+        sigb = self.bkg_xs(nuc, temp=temp)
+        e_n = self.src_group_struct
+        sig_b = np.ones(len(e_f), 'f8')
+        for n in range(len(sigb)):
+            sig_b[(e_n[n] <= E_points) & (E_points <= e_n[n+1])] = sigb[n]
+        rtn = self.pointwise(nuc, 'total', temp)
+        if rtn is None: 
+            sig_t = 0.0
+        else:
+            sig_t = rtn[1]
+        numer = bins.pointwise_linear_collapse(self.src_group_struct, E_points, xs_points/(E_points*(sig_b + sig_t)))         
+        denom = bins.pointwise_linear_collapse(self.src_group_struct, E_points, 1.0/(E_points*(sig_b + sig_t)))
+        return numer/denom
+                
+    def bkg_xs(self, nuc, temp=300):
+        """
+        """
+        e_n = self.src_group_struct
+        sig_b = np.zeros(self.src_ngroups, float)
+        for i, a in self.atom_dens.items():
+            if i == nuc:
+                continue
+            rtn = self.pointwise(i, 'total', temp)
+            if rtn is None:
+                continue
+            sig_b += a*bins.pointwise_linear_collapse(e_n, rtn[0], rtn[1])
+        return sig_b / self.atom_dens.get(nuc, 0.0)
 
     def _rank_ace_tables(self, nuc, temp=300.0):
         """Filters and sorts the potential ACE tables based on nucliude and
