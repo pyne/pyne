@@ -865,7 +865,7 @@ class ENDFDataSource(DataSource):
         Returns
         -------
         sigma * dE : float
-            Non-normalized integral. 
+            Non-normalized integral.
 
         """
         dE = high - low
@@ -874,10 +874,10 @@ class ENDFDataSource(DataSource):
 
 
 class OpenMCDataSource(DataSource):
-    """Data source for ACE data that is listed in an OpenMC cross_sections.xml 
+    """Data source for ACE data that is listed in an OpenMC cross_sections.xml
     file. This data source discretizes the reactions to a given group
     stucture when the reactions are loaded in. Reseting this source group
-    structure will clear the reaction cache. 
+    structure will clear the reaction cache.
     """
 
     def __init__(self, cross_sections=None, src_group_struct=None, **kwargs):
@@ -886,7 +886,7 @@ class OpenMCDataSource(DataSource):
         cross_sections : openmc.CrossSections or string or file-like, optional
             Path or file to OpenMC cross_sections.xml
         src_group_struct : array-like, optional
-            The group structure to discretize the ACE data to, defaults to 
+            The group structure to discretize the ACE data to, defaults to
             ``np.logspace(1, -9, 101)``.
         kwargs : optional
             Keyword arguments to be sent to DataSource base class.
@@ -908,11 +908,11 @@ class OpenMCDataSource(DataSource):
 
     def _load_group_structure(self):
         if self._src_group_struct is None:
-            self._src_group_struct = np.logspace(1, -9, 101) 
+            self._src_group_struct = np.logspace(1, -9, 101)
         self.src_group_struct = self._src_group_struct
 
-    def _load_reaction(self, nuc, rx, temp=300.0):
-        """Loads reaction data from ACE files indexed by OpenMC.
+    def pointwise(self, nuc, rx, temp=300.0):
+        """Returns pointwise reaction data from ACE files indexed by OpenMC.
 
         Parameters
         ----------
@@ -923,7 +923,14 @@ class OpenMCDataSource(DataSource):
         temp : float, optional
             The nuclide temperature in [K].
 
+        Returns
+        -------
+        E_points : array-like
+            The array or energy points that the reaction is evaluated at.
+        rawdata : array-like
+            Raw pointwise reaction data.
         """
+        nuc = nucname.id(nuc)
         rx = rxname.id(rx)
         try:
             mt = rxname.mt(rx)
@@ -933,7 +940,7 @@ class OpenMCDataSource(DataSource):
         absrx = rxname.id('absorption')
         ace_tables = self._rank_ace_tables(nuc, temp=temp)
         lib = ntab = None
-        for atab in ace_tables: 
+        for atab in ace_tables:
             if os.path.isfile(atab.abspath or atab.path):
                 if atab not in self.libs:
                     lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
@@ -952,7 +959,7 @@ class OpenMCDataSource(DataSource):
         elif rx == absrx:
             rawdata = ntab.sigma_a
         else:
-            ntabrx = ntab.reactions[mt] 
+            ntabrx = ntab.reactions[mt]
             if ntabrx.IE is None or ntabrx.IE == 0:
                 rawdata = ntabrx.sigma
             else:
@@ -963,7 +970,27 @@ class OpenMCDataSource(DataSource):
            (E_g[0] >= E_g[-1] and E_points[-1] >= E_points[0]):
             E_points = E_points[::-1]
             rawdata = rawdata[::-1]
-        rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata) 
+        return E_points, rawdata
+
+    def _load_reaction(self, nuc, rx, temp=300.0):
+        """Loads reaction data from ACE files indexed by OpenMC.
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide id.
+        rx : int
+            Reaction id.
+        temp : float, optional
+            The nuclide temperature in [K].
+
+        """
+        rtn = self.pointwise(nuc, rx, temp=temp)
+        if rtn is None:
+            return
+        E_points, rawdata = rtn
+        E_g = self.src_group_struct
+        rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
         return rxdata
 
     def _rank_ace_tables(self, nuc, temp=300.0):
@@ -981,7 +1008,7 @@ class OpenMCDataSource(DataSource):
         return tabs
 
     def load(self, temp=300.0):
-        """Loads the entire data source into memory. This can be expensive for 
+        """Loads the entire data source into memory. This can be expensive for
         lots of ACE data.
 
         Parameters
