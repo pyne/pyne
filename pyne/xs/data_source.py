@@ -987,25 +987,44 @@ class OpenMCDataSource(DataSource):
             Reaction id.
         temp : float, optional
             The nuclide temperature in [K].
-
         """
         rtn = self.pointwise(nuc, rx, temp=temp)
         if rtn is None:
             return
         E_points, rawdata = rtn
         E_g = self.src_group_struct
-        if self.atom_dens.get(nuc, 0.0) < 1.0E19 and rx not in self.self_shield_reactions:
-            rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
+        if self.atom_dens.get(nuc, 0.0) > 1.0E19 and rx in self.self_shield_reactions:
+            rxdata = self.self_shield(nuc, rx, temp, E_points, rawdata)    
         else:
-            rxdata = self.self_shield(nuc, rx, temp, E_points, rawdata)
+            rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
         return rxdata
 
     def self_shield(self, nuc, rx, temp, E_points, xs_points):
-        """
+        """Calculates the self shielded cross section for a given nuclide
+        and reaction. This calculation uses the Bonderanko method. 
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide id.
+        rx : int
+            Reaction id.
+        temp : float, optional
+            The nuclide temperature in [K].
+        E_points : array like
+            The point wise energies.
+        xs_points : array like
+            Point wise cross sections
+        
+        Returns
+        -------
+        rxdata : array like
+            collapsed self shielded cross section for nuclide nuc and reaction
+            rx
         """
         sigb = self.bkg_xs(nuc, temp=temp)
         e_n = self.src_group_struct
-        sig_b = np.ones(len(e_f), 'f8')
+        sig_b = np.ones(len(E_points), 'f8')
         for n in range(len(sigb)):
             sig_b[(e_n[n] <= E_points) & (E_points <= e_n[n+1])] = sigb[n]
         rtn = self.pointwise(nuc, 'total', temp)
@@ -1018,7 +1037,19 @@ class OpenMCDataSource(DataSource):
         return numer/denom
                 
     def bkg_xs(self, nuc, temp=300):
-        """
+        """Calculates the background cross section for a nuclide (nuc)
+           
+        Parameters
+        ----------
+        nuc : int
+            Nuclide id.
+        temp : float, optional
+            The nuclide temperature in [K].  
+
+        Returns
+        -------
+        sig_b : array like
+            Group wise background cross sections.              
         """
         e_n = self.src_group_struct
         sig_b = np.zeros(self.src_ngroups, float)
