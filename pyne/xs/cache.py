@@ -68,7 +68,7 @@ class XSCache(MutableMapping):
                 ds = ds(dst_group_struct=group_struct)
             if ds.exists:
                 self.data_sources.append(ds)
-        self._cache['E_g'] = _valid_group_struct(group_struct) 
+        self._cache['E_g'] = _valid_group_struct(group_struct)
         self._cache['phi_g'] = None
 
     #
@@ -108,7 +108,9 @@ class XSCache(MutableMapping):
                     xsdata = ds.discretize(**kw)
                     if xsdata is not None:
                         self._cache[key] = xsdata
-                        break            
+                        break        
+                else:
+                    raise KeyError
         # Return the value requested
         return self._cache[key]
 
