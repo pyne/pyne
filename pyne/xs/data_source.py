@@ -1032,8 +1032,10 @@ class OpenMCDataSource(DataSource):
             sig_t = 0.0
         else:
             sig_t = rtn[1]
-        numer = bins.pointwise_linear_collapse(self.src_group_struct, E_points, xs_points/(E_points*(sig_b + sig_t)))         
-        denom = bins.pointwise_linear_collapse(self.src_group_struct, E_points, 1.0/(E_points*(sig_b + sig_t)))
+        numer = bins.pointwise_linear_collapse(self.src_group_struct, 
+            E_points, xs_points/(E_points*(sig_b + sig_t)))         
+        denom = bins.pointwise_linear_collapse(self.src_group_struct, 
+            E_points, 1.0/(E_points*(sig_b + sig_t)))
         return numer/denom
                 
     def bkg_xs(self, nuc, temp=300):
