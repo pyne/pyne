@@ -45,7 +45,14 @@ def test_natural_abund_excited_state():
     nabund = data.natural_abund(excited)
     assert_equal(nabund, data.natural_abund_map.get(excited))
 
-
+def test_elements():
+    # set the datapath to nonsense so we call, the cpp data version
+    pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
+    # initialize natural_abund_map
+    # test a series of elements
+    assert_equal(data.atomic_mass('H'),1.0079407540557774)
+    assert_equal(data.atomic_mass('Li'),6.9400366029079965)
+    assert_equal(data.atomic_mass('U'),238.02891048471406)
 
 if __name__ == "__main__":
     nose.runmodule()
