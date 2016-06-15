@@ -3,6 +3,7 @@
 ///
 /// \/brief Impliments all the fundamental atomic & nuclear data data
 #include <map>
+#include "nucname.h"
 
 namespace pyne
 {
