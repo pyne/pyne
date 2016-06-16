@@ -96,6 +96,7 @@ def print_cpp_file(filename):
     cpp_file += "// Implements basic nuclear data functions.\n"
     cpp_file += "#ifndef PYNE_IS_AMALGAMATED\n"
     cpp_file += "#include \"atomic_data.h\"\n"
+    cpp_file += "#include \"nucname.h\"\n"
     cpp_file += "#endif\n"
     cpp_file += "  \n"
     cpp_file += "void pyne::_load_atomic_mass_map_memory() { \n"
