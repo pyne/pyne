@@ -20,8 +20,6 @@ class fispact_output():
         self.file_name = ""
         self.sumdat = []
         self.timestep_data = []
-        self.pathway_data = []
-        self.pathway_targets = []
         self.num_cool_step = 0   # number of steps after zero keyword
         self.num_irrad_step = 0  # number of steps with flux > 0
         self.version = ""
@@ -83,8 +81,6 @@ def read_fis_out(path):
     fo.version = check_fisp_version(lines)
     fo.isFisII = isFisII(lines)
     fo.sumdat = read_summary_data(lines)
-    #fo.pathway_data = read_pathways(lines)
-    #fo.pathway_targets = read_pathway_targets(lines)
     
     fo.ave_flux = read_parameter(lines, "Mean flux")
     fo.tot_irrad_time = read_parameter(lines, "Total irradiation time")
@@ -239,11 +235,7 @@ def read_summary_data(data):
                 ing.append(l[104:112])
                 inhal.append(l[127:135])
                 trit.append(l[150:158])
-                # act_un.append(l[])
-                # dr_un.append(l[])
-                # heat_un.append(l[])
-                # ing_un.append(l[])
-                # inhal_un.append(l[])
+
         else:
             time_yrs.append(l[20:28])
             act.append(l[31:39])
@@ -252,11 +244,7 @@ def read_summary_data(data):
             ing.append(l[100:108])
             inhal.append(l[123:131])
             trit.append(l[146:154])
-            # act_un.append(l[])
-            # dr_un.append(l[])
-            # heat_un.append(l[])
-            # ing_un.append(l[])
-            # inhal_un.append(l[])
+
     sum_data.append(time_yrs)
     sum_data.append(act)
     sum_data.append(dr)
@@ -339,7 +327,10 @@ def parse_dominant(data):
 
 
 def parse_composition(data):
-    """ parse compostions section """
+    """ parse compostions section 
+        returns a list of 2 lists, one with name of element, 
+        one with the number of atoms 
+    """
     p1 = find_ind(data, "COMPOSITION  OF  MATERIAL  BY  ELEMENT")
     p2 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
     data = data[p1+5:p2-3]
@@ -371,9 +362,28 @@ def parse_spectra(data):
 
 
 def parse_inventory(data):
-    """ """
+    """ parse inventory data
+        returns a list of lists with all data from the inventory 
+        section of the times step in order:
+        nuclide name, 
+        # of atoms, 
+        mass in grams, 
+        activity in bq,
+        beta energy in kw
+        alpha energy in kw
+        gamma energy in kw
+        dose rate in Sv/hr
+    """
     inv = []
-    return inv
+    p2 = find_ind(data, "0  TOTAL NUMBER OF NUCLIDES PRINTED IN INVENTORY")
+    data = data[4:p2]
+    for nuc in data:
+        nuc_data=[nuc[2:8], float(nuc[14:25]), float(nuc[28:37]), 
+                  float(nuc[40:49]), float(nuc[52:61]), float(nuc[64:72]),
+                  float(nuc[75:84]), float(nuc[87:96]) ]
+        inv.append(nuc_data)
+
+    return np.array(inv)
 
 
 def find_ind(data, sub):
