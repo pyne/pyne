@@ -101,8 +101,8 @@ def read_fis_out(path):
             if line[0:7] == "1 * * *":
                 time_step_inds.append(lines.index(line))
 
-    # parse all time steps
-    i = 0
+    # parse all time steps except setup step
+    i = 1
     while i < len(time_step_inds)-1:
         data = lines[time_step_inds[i]:time_step_inds[i+1]]
         fo.timestep_data.append(read_time_step(data, i))
@@ -144,7 +144,12 @@ def read_time_step(lines, i):
     ts.total_heat_no_trit = float(lines[ind + 3][90:101])
     ts.total_mass = float(lines[ind + 4][40:51])
     ts.neutron_flux = float(lines[ind + 5][40:51])
-    ts.num_fissions = float(lines[ind + 6][40:51])
+
+    ts.num_fissions = lines[ind + 6][39:51]
+    # added check for E as if <=1E-100 the E is dropped
+    if "E" in ts.num_fissions:
+        ts.num_fissions = float(ts.num_fissions)
+
     ts.actinide_burn = float(lines[ind + 6][90:101])
 
     ind = find_ind(lines, "DENSITY")
