@@ -24,7 +24,7 @@ def test_read_fis_out():
     assert_equal(fo.num_irrad_step, 1)
 
 def test_read_time_step():
-    """test reading time steps """
+    """test reading time steps for fispact-II"""
     ts1 = fo.timestep_data[1]
     ts2 = fo.timestep_data[5]
     ts3 = fo.timestep_data[-1]
@@ -57,3 +57,62 @@ def test_read_time_step():
     assert_equal(ts3.appm_he4, 1.0894E-08)
 
 
+def test_read_spectra():
+    """test read of spectra data each time step for fispact-II """
+    ts1 = fo.timestep_data[1]
+    ts2 = fo.timestep_data[5]
+    ts3 = fo.timestep_data[-1]
+    assert_equal(ts3.gspec[0], 1.13205E+01)
+    assert_equal(len(ts3.gspec), 24)
+
+
+
+
+def test_read_dominant():
+    """test read of dominant data each time step for fispact-II"""
+    ts1 = fo.timestep_data[1]
+    ts2 = fo.timestep_data[5]
+    ts3 = fo.timestep_data[-1]
+
+    assert_equal(len(ts1.dom_data[0]), 1)
+    assert_equal(len(ts2.dom_data[0]), 1)
+    assert_equal(len(ts3.dom_data[0]), 1)
+
+    assert_equal(len(ts1.dom_data[0]), len(ts1.dom_data[1]))
+    assert_equal(len(ts1.dom_data[1]), len(ts1.dom_data[2]))
+
+    assert_equal(ts1.dom_data[0][0], " ")
+    assert_equal(ts1.dom_data[1][0], 1)
+    assert_equal(ts1.dom_data[2][0], 1)
+    assert_equal(ts1.dom_data[3][0], " ")
+    assert_equal(ts1.dom_data[4][0], 1)
+    assert_equal(ts1.dom_data[5][0], 1)
+    assert_equal(ts1.dom_data[6][0], " ")
+    assert_equal(ts1.dom_data[7][0], 1)
+    assert_equal(ts1.dom_data[8][0], 1)
+    assert_equal(ts1.dom_data[9][0], " ")
+    assert_equal(ts1.dom_data[10][0], 1)
+    assert_equal(ts1.dom_data[11][0], 1)
+    assert_equal(ts1.dom_data[12][0], " ")
+    assert_equal(ts1.dom_data[13][0], 1)
+    assert_equal(ts1.dom_data[14][0], 1)
+
+    assert_equal(ts1.dom_data[0][-1], "rest")
+    assert_equal(ts2.dom_data[0][-1], "rest")
+    assert_equal(ts3.dom_data[0][-1], "rest")
+
+def test_read_composition():
+    """test read of composition data each time step for fispact-II"""
+    ts1 = fo.timestep_data[1]
+    ts2 = fo.timestep_data[5]
+    ts3 = fo.timestep_data[-1]
+
+    assert_equal(len(ts1.composition[0]), 1)
+    assert_equal(len(ts2.composition[0]), 1)
+    assert_equal(len(ts3.composition[0]), 1)
+
+def test_read_inv():
+    """test read of inventory data for each time step for fispact-II """
+    ts1 = fo.timestep_data[1]
+    ts2 = fo.timestep_data[5]
+    ts3 = fo.timestep_data[-1]

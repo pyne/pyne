@@ -160,11 +160,12 @@ def read_time_step(lines, i):
         ts.appm_h3 = float(lines[ind+2][23:33])
         ts.appm_h2 = float(lines[ind+3][23:33])
         ts.appm_h1 = float(lines[ind+4][23:33])
+        ind=1
 
         ts.dom_data = parse_dominant(lines)
-        ts.composition = parse_composition(data)
-        ts.gspec = parse_spectra(data)
-    ts.inventory = parse_inventory(data)
+        ts.composition = parse_composition(lines)
+        ts.gspec = parse_spectra(lines)
+    ts.inventory = parse_inventory(lines)
 
     return ts
 
@@ -209,7 +210,7 @@ def read_summary_data(data):
     start_ind = data.index(cool_str)
     end_ind = [i for i, line in enumerate(data) if "0 Mass" in line]
     sum_lines = data[start_ind+1:end_ind[0]]
-    sum_data=[]
+    sum_data = []
     time_yrs = []
     act = []
     act_un = []
@@ -222,7 +223,7 @@ def read_summary_data(data):
     inhal = []
     inhal_un = []
     trit = []
-    to=0
+    to = 0
 
     for l in sum_lines:
         if isFisII(data):
@@ -338,7 +339,7 @@ def parse_composition(data):
     """ parse compostions section """
     p1 = find_ind(data, "COMPOSITION  OF  MATERIAL  BY  ELEMENT")
     p2 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
-    data = data[p1:p2-2]
+    data = data[p1+5:p2-3]
     ele_list = []
     atoms = []
 
@@ -355,8 +356,11 @@ def parse_composition(data):
 def parse_spectra(data):
     """ """
     p1 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
-    data = data[p1:p1+32]
+    data = data[p1+7:p1+31]
     spectra = []
+    for l in data:
+        spectra.append(float(l[130:141]))
+    print spectra
     return spectra
 
 def parse_inventory(data):
