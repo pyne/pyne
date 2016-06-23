@@ -1,17 +1,18 @@
 """
 Module for parsing FISPACT output data
-FISPACT and FISPACT-II are bateman equation solvers for transmutation 
+FISPACT and FISPACT-II are bateman equation solvers for transmutation
 and fission product yield calculations.  FISPACT-II is developed and maintained
- by the UKAEA. 
+by the UKAEA.
 it supports not only neutron irradiaiton but gamma, proton, deuteron and triton
-irradiation. it has support for self shielding and can read endf format nuclear 
+irradiation. it has support for self shielding and can read endf format nuclear
 data
 
-this module has methods for parsing the fispact output file, 
+this module has methods for parsing the fispact output file,
 extracting data, processing the data
 """
 
 import numpy as np
+
 
 class fispact_output():
     """ fispact output data"""
@@ -39,28 +40,28 @@ class fispact_timestep():
         self.flux_amp = 0
         self.is_cooling = False
         self.num_nuclides = 0
-        self.alpha_act = 0 # bq
-        self.beta_act = 0  # bq
-        self.gamma_act = 0 # bq
-        self.total_act = 0 # bq
-        self.total_act_no_trit = 0 # bq
-        self.alpha_heat = 0 # kw
-        self.beta_heat = 0  # kw
-        self.gamma_heat = 0 # kw
-        self.total_heat = 0 # kw
-        self.total_heat_no_trit = 0 # kw
+        self.alpha_act = 0     # bq
+        self.beta_act = 0      # bq
+        self.gamma_act = 0     # bq
+        self.total_act = 0     # bq
+        self.total_act_no_trit = 0   # bq
+        self.alpha_heat = 0    # kw
+        self.beta_heat = 0     # kw
+        self.gamma_heat = 0    # kw
+        self.total_heat = 0    # kw
+        self.total_heat_no_trit = 0   # kw
         self.num_fissions = 0
-        self.neutron_flux = 0 # n/cm**2/s
-        self.initial_mass = 0 # kg
-        self.total_mass = 0   # kg
-        self.density = 0      # g/cc
-        self.actinide_burn = 0 # %
-        self.appm_h1 = 0 
+        self.neutron_flux = 0   # n/cm**2/s
+        self.initial_mass = 0   # kg
+        self.total_mass = 0     # kg
+        self.density = 0        # g/cc
+        self.actinide_burn = 0   # %
+        self.appm_h1 = 0
         self.appm_h2 = 0
         self.appm_h3 = 0
         self.appm_he3 = 0
         self.appm_he4 = 0
-        
+
         self.dom_data = []
         self.inventory = []
         self.gspec = []
@@ -81,25 +82,25 @@ def read_fis_out(path):
     fo.version = check_fisp_version(lines)
     fo.isFisII = isFisII(lines)
     fo.sumdat = read_summary_data(lines)
-    
+
     fo.ave_flux = read_parameter(lines, "Mean flux")
     fo.tot_irrad_time = read_parameter(lines, "Total irradiation time")
     fo.tot_fluence = read_parameter(lines, "Total fluence")
     fo.num_irrad_step = read_parameter(lines, "Number of on-times")
-    
+
     if isFisII:
         search_string = "fispact run time"
     else:
         search_string = "CPU Time used for case"
     fo.cpu_time = read_parameter(lines, search_string)
-    
+
     # find where each time step starts
     time_step_inds = []
     for line in lines:
         if len(line) > 0:
             if line[0:7] == "1 * * *":
                 time_step_inds.append(lines.index(line))
-    
+
     # parse all time steps
     i = 0
     while i < len(time_step_inds)-1:
@@ -109,7 +110,7 @@ def read_fis_out(path):
     # final timestep
     data = lines[time_step_inds[-1]:]
     fo.timestep_data.append(read_time_step(data, i))
-       
+
     return fo
 
 
@@ -117,10 +118,9 @@ def read_time_step(lines, i):
     """ reads a particular time step """
     ts = fispact_timestep()
     ts.step_num = i + 1
-    
+
     ts.step_length = float(lines[0][50:60])
 
-    
     ind = find_ind(lines, "TOTAL NUMBER OF NUCLIDES PRINTED IN INVENTORY")
     ts.num_nuclides = int(lines[ind][50:])
 
@@ -128,9 +128,9 @@ def read_time_step(lines, i):
     ts.alpha_act = float(lines[ind][22:34])
     ts.beta_act = float(lines[ind][54:66])
     ts.gamma_act = float(lines[ind][87:99])
-    
+
     ind = find_ind(lines, "TOTAL ACTIVITY FOR ALL MATERIALS ")
-    ts.total_act = float(lines[ind][40:51])    
+    ts.total_act = float(lines[ind][40:51])
 
     ind = find_ind(lines, "TOTAL ACTIVITY EXCLUDING TRITIUM ")
     ts.total_act_no_trit = float(lines[ind][40:51])
@@ -157,7 +157,7 @@ def read_time_step(lines, i):
         ts.appm_h3 = float(lines[ind+2][23:33])
         ts.appm_h2 = float(lines[ind+3][23:33])
         ts.appm_h1 = float(lines[ind+4][23:33])
-        ind=1
+        ind = 1
 
         ts.dom_data = parse_dominant(lines)
         ts.composition = parse_composition(lines)
@@ -225,9 +225,8 @@ def read_summary_data(data):
     for l in sum_lines:
         if isFisII(data):
             if l[1] == "-":
-                to = time_yrs[-1] 
+                to = time_yrs[-1]
             else:
-                
                 time_yrs.append(float(l[24:32]) + to)
                 act.append(l[35:43])
                 dr.append(l[58:66])
@@ -285,7 +284,7 @@ def parse_dominant(data):
     gheat_percent = []
     bheat_nuc = []
     bheat = []
-    bheat_percent = []    
+    bheat_percent = []
 
     for l in topset:
         act_nuc.append(l[7:13])
@@ -327,9 +326,9 @@ def parse_dominant(data):
 
 
 def parse_composition(data):
-    """ parse compostions section 
-        returns a list of 2 lists, one with name of element, 
-        one with the number of atoms 
+    """ parse compostions section
+        returns a list of 2 lists, one with name of element,
+        one with the number of atoms
     """
     p1 = find_ind(data, "COMPOSITION  OF  MATERIAL  BY  ELEMENT")
     p2 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
@@ -345,7 +344,7 @@ def parse_composition(data):
     composition.append(ele_list)
     composition.append(atoms)
 
-    return composition 
+    return composition
 
 
 def parse_spectra(data):
@@ -363,11 +362,11 @@ def parse_spectra(data):
 
 def parse_inventory(data):
     """ parse inventory data
-        returns a list of lists with all data from the inventory 
+        returns a list of lists with all data from the inventory
         section of the times step in order:
-        nuclide name, 
-        # of atoms, 
-        mass in grams, 
+        nuclide name,
+        # of atoms,
+        mass in grams,
         activity in bq,
         beta energy in kw
         alpha energy in kw
@@ -378,9 +377,9 @@ def parse_inventory(data):
     p2 = find_ind(data, "0  TOTAL NUMBER OF NUCLIDES PRINTED IN INVENTORY")
     data = data[4:p2]
     for nuc in data:
-        nuc_data=[nuc[2:8], float(nuc[14:25]), float(nuc[28:37]), 
-                  float(nuc[40:49]), float(nuc[52:61]), float(nuc[64:72]),
-                  float(nuc[75:84]), float(nuc[87:96]) ]
+        nuc_data = [nuc[2:8], float(nuc[14:25]), float(nuc[28:37]),
+                    float(nuc[40:49]), float(nuc[52:61]), float(nuc[64:72]),
+                    float(nuc[75:84]), float(nuc[87:96])]
         inv.append(nuc_data)
 
     return np.array(inv)
@@ -396,12 +395,11 @@ def find_ind(data, sub):
 
 def read_parameter(data, sub):
     """ """
-    ind=find_ind(data, sub)
+    ind = find_ind(data, sub)
     line = data[ind]
     line = line.split("=")
     line = line[1].strip()
-    line=line.split(" ")
-    param=float(line[0])
+    line = line.split(" ")
+    param = float(line[0])
     return param
-
 
