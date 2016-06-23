@@ -14,7 +14,7 @@ extracting data, processing the data
 import numpy as np
 
 
-class fispact_output():
+class FispactOutput():
     """ fispact output data"""
     def __init__(self):
         """ define data"""
@@ -32,7 +32,7 @@ class fispact_output():
         self.time_days = []
 
 
-class fispact_timestep():
+class FispactTimeStep():
     """ data for an individual time step can be heating or cooling """
     def __init__(self):
         self.step_num = 1
@@ -73,11 +73,10 @@ def read_fis_out(path):
         returns fo, a fispact output object
     """
 
-    fo = fispact_output()
+    fo = FispactOutput()
     fo.file_name = path
     with open(path) as f:
         lines = f.read().splitlines()
-    f.close()
 
     fo.version = check_fisp_version(lines)
     fo.isFisII = isFisII(lines)
@@ -116,7 +115,7 @@ def read_fis_out(path):
 
 def read_time_step(lines, i):
     """ reads a particular time step """
-    ts = fispact_timestep()
+    ts = FispactTimeStep()
     ts.step_num = i + 1
 
     ts.step_length = float(lines[0][50:60])
