@@ -68,6 +68,7 @@ class fispact_timestep():
         self.gspec = []
         self.composition = []
 
+
 def read_fis_out(path):
     """ parse a fispact output file
         returns fo, a fispact output object
@@ -110,7 +111,7 @@ def read_fis_out(path):
         fo.timestep_data.append(read_time_step(data, i))
         i = i + 1
     # final timestep
-    data=lines[time_step_inds[-1]:]
+    data = lines[time_step_inds[-1]:]
     fo.timestep_data.append(read_time_step(data, i))
        
     return fo
@@ -170,7 +171,6 @@ def read_time_step(lines, i):
     return ts
 
 
-
 def check_fisp_version(data):
     """ Checks which version of fispact was used to produced data
 
@@ -198,6 +198,7 @@ def isFisII(data):
         return True
     else:
         return False
+
 
 def read_summary_data(data):
     """ Processes the summary block at the end of the file"""
@@ -271,6 +272,7 @@ def read_summary_data(data):
 
     return sum_data
 
+
 def parse_dominant(data):
     """parse dominant nuclides section and return a list of lists """
     p1_ind = find_ind(data, "DOMINANT NUCLIDES")
@@ -335,6 +337,7 @@ def parse_dominant(data):
 
     return dom_data
 
+
 def parse_composition(data):
     """ parse compostions section """
     p1 = find_ind(data, "COMPOSITION  OF  MATERIAL  BY  ELEMENT")
@@ -353,15 +356,19 @@ def parse_composition(data):
 
     return composition 
 
+
 def parse_spectra(data):
-    """ """
+    """ reads gamma spectra data for each timestep
+        returns list of length 24 corresponding to 24 gamma energy groups
+        data is in gamma/s/cc
+    """
     p1 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
     data = data[p1+7:p1+31]
     spectra = []
     for l in data:
         spectra.append(float(l[130:141]))
-    print spectra
     return spectra
+
 
 def parse_inventory(data):
     """ """
@@ -375,6 +382,7 @@ def find_ind(data, sub):
         if sub in s:
             ind = i
     return ind
+
 
 def read_parameter(data, sub):
     """ """
