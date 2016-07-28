@@ -367,6 +367,26 @@ def one_over_gamma_squared(E):
     return inv_g2
 
 
+def thermspect(E, T=573, lower=0.155e-6):
+    k = 8.52e-5
+    phi = np.empty(len(E), 'f8')
+    mask = (E < lower)
+    phi[mask] = 2*np.pi*np.sqrt(E[mask]*1e6) * np.exp(-E[mask]*1e6/(k*T)) / (np.pi * k * T)**1.5
+    mask = (E > lower)
+    phi[mask] = 1/((2*E[mask]*1e6)**0.5)
+    phi[mask] += 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
+    phi /= phi.sum()
+    return phi
+
+def fastspect(E, T=783, lower=1.0e-3):
+    k = 8.52e-5
+    phi = np.empty(len(E), 'f8')
+    mask = (E < lower)
+    phi[mask] = 1/((2*E[mask]*1e6)**0.5)
+    mask = (E > lower)
+    phi[mask] += 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
+    phi /= phi.sum()
+    return phi
 #
 # This needs more thought, much like all of the scattering models
 #
