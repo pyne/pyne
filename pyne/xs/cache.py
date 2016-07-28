@@ -60,7 +60,8 @@ class XSCache(MutableMapping):
                                data_source.OpenMCDataSource,
                                data_source.SimpleDataSource,
                                data_source.EAFDataSource,
-                               data_source.NullDataSource,)):
+                               data_source.NullDataSource,),
+                 scalars=None):
         self._cache = {}
         self.data_sources = []
         for ds in data_sources:
@@ -70,7 +71,7 @@ class XSCache(MutableMapping):
                 self.data_sources.append(ds)
         self._cache['E_g'] = _valid_group_struct(group_struct)
         self._cache['phi_g'] = None
-        self._xs_scalers = {}
+        self._scalars = {} if scalars is None else scalars
 
     #
     # Mutable mapping pass-through interface
@@ -95,6 +96,7 @@ class XSCache(MutableMapping):
     def __getitem__(self, key):
         """Key lookup by via custom loading from the nuc_data database file."""
         kw = dict(zip(['nuc', 'rx', 'temp'], key))
+        scalar = self._scalars.get(kw['nuc'], None)
         if (key not in self._cache) and not isinstance(key, basestring):
             E_g = self._cache['E_g']
             if E_g is None:
@@ -113,8 +115,10 @@ class XSCache(MutableMapping):
                 else:
                     raise KeyError
         # Return the value requested
-        scaler = self._xs_scalers.get(kw['nuc'], 1)
-        return self._cache[key] * scaler
+        if scalar is None:
+            return self._cache[key]
+        else:
+            return self._cache[key] * scalar
 
 
     def __setitem__(self, key, value):
