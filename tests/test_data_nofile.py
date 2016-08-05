@@ -21,7 +21,7 @@ if utils.use_warnings():
     utils.toggle_warnings()
 
 def test_atomic_mass():
-    # set the datapath to nonsense so we call, the cpp data version
+    # set the datapath to nonsense so we call  the cpp data version
     pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
     o16 = [15.99491461957, 16.0]
     u235 = [235.043930131, 235.0]
@@ -50,9 +50,15 @@ def test_elements():
     pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
     # initialize natural_abund_map
     # test a series of elements
-    assert_equal(data.atomic_mass('H'),1.0079407540557774)
-    assert_equal(data.atomic_mass('Li'),6.9400366029079965)
-    assert_equal(data.atomic_mass('U'),238.02891048471406)
+    assert_equal(data.atomic_mass('H'), 1.0079407540557774)
+    assert_equal(data.atomic_mass('Li'), 6.9400366029079965)
+    assert_equal(data.atomic_mass('U'), 238.02891048471406)
+    # NB any elements beyond z = 92 are not natural
+    # and therefore have 0.0 atomic mass
+    assert_equal(data.atomic_mass('Pu'), 0.0)
+    # note if you use the nuc_data.h5 file it
+    # has the same behaviour
+    
 
 if __name__ == "__main__":
     nose.runmodule()
