@@ -22,7 +22,7 @@ void pyne::_load_atomic_mass_map_memory() {
   // calculate the atomic_masses of the elements
   std::map<int,double> :: iterator it;
 
-  for (int z=1; i<= 92; i++) {
+  for (int z=1; z<= 92; z++) {
     // loop through the natural abundance map
     double element_atomic_weight = 0.0;
     for (it = natural_abund_map.begin(); it != natural_abund_map.end(); ++it){
