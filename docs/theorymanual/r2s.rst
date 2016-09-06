@@ -7,7 +7,7 @@ Rigorous Two Step
 .. currentmodule:: pyne.r2s
 
 This page presents a detailed explanation of how :py:mod:`R2S` works, including
-underlying theory, any assocaited assumptions, and information about correct and
+underlying theory, any associated assumptions, and information about correct and
 appropriate use of this physics. 
 
 
