@@ -40,8 +40,8 @@ PyNE has the following dependencies:
    #. `Jinja2 <http://jinja.pocoo.org/>`_
 
 Optional Depenendencies:
-   #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
-   #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
+   #. `MOAB <https://bitbucket.org/fathomteam/moab>`_  (>= 4.9.2)
+   #. `PyTAPS <https://bitbucket.org/fathomteam/pytaps>`_
 
 Additionally, building the documentation requires the following:
 
