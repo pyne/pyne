@@ -16,6 +16,8 @@ using moab::EntityHandle;
 #define CHECKERR(err) \
     if((err) != moab::MB_SUCCESS) return err;
 
+DagMC *dag = new DagMC();
+
 namespace pyne {
 
 float dag_version(void) {
@@ -48,17 +50,15 @@ const int* geom_id_list(int dimension, int* number_of_items) {
 }
 
 EntityHandle handle_from_id(int dimension, int id) {
-    return DagMC::instance()->entity_by_id(dimension, id);
+    return dag->entity_by_id(dimension, id);
 }
 
 int id_from_handle(EntityHandle eh) {
-    return DagMC::instance()->get_entity_id(eh);
+    return dag->get_entity_id(eh);
 }
 
 ErrorCode dag_load(const char* filename){
     ErrorCode err;
-
-    DagMC* dag = DagMC::instance();
 
     err = dag->load_file(filename);
     CHECKERR(err);
@@ -107,8 +107,6 @@ ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir,
                         void* history, double distance_limit) {
     ErrorCode err;
 
-    DagMC*  dag = DagMC::instance();
-
     err = dag->ray_fire(vol, ray_start, ray_dir, *next_surf_ent, *next_surf_dist, 
                          static_cast<DagMC::RayHistory*>(history), distance_limit);
     CHECKERR(err);
@@ -133,7 +131,6 @@ ErrorCode dag_ray_follow(EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
 
     ray_buffers* buf = new ray_buffers;
     ErrorCode err;
-    DagMC* dag = DagMC::instance();
 
     EntityHandle vol = firstvol;
     double dlimit = distance_limit;
@@ -182,8 +179,6 @@ ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, const 
     
     ErrorCode err;
 
-    DagMC* dag = DagMC::instance();
-    
     err = dag->point_in_volume(vol, pt, *result, dir, static_cast<const DagMC::RayHistory*>(history));
 
     return err;
@@ -192,27 +187,24 @@ ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, const 
 ErrorCode dag_next_vol(EntityHandle surface, EntityHandle volume, EntityHandle* next_vol) {
 
     ErrorCode err;
-    DagMC* dag = DagMC::instance();
-
     err = dag->next_vol(surface, volume, *next_vol);
 
     return err;
 }
 
 int vol_is_graveyard(EntityHandle vol) {
-    return DagMC::instance()->has_prop(vol, "graveyard");
+    return dag->has_prop(vol, "graveyard");
 }
 
 /* int surf_is_spec_refl(EntityHandle surf); */
 /* int surf_is_white_refl(EntityHandle surf); */
 
 int vol_is_implicit_complement(EntityHandle vol){
-    return DagMC::instance()->is_implicit_complement(vol);
+    return dag->is_implicit_complement(vol);
 }
 
 ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, double* importance) {
     ErrorCode err;
-    DagMC* dag = DagMC::instance();
 
     // the defaults from DagMC's old get_volume_metadata: mat = 0, rho = 0, imp = 1
     int mat_id = 0;
@@ -253,7 +245,7 @@ ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, 
 }
 
 ErrorCode get_volume_boundary(EntityHandle vol, vec3 minPt, vec3 maxPt) {
-    return DagMC::instance()->getobb(vol, minPt, maxPt);
+    return dag->getobb(vol, minPt, maxPt);
 }
 
 } // namespace pyne
