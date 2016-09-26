@@ -20,8 +20,9 @@
 # HDF5_USE_STATIC_LIBRARIES variable is set before the call to find_package.
 #
 # To provide the module with a hint about where to find your HDF5 installation,
-# you can set the environment variable HDF5_ROOT.  The Find module will then
-# look in this path when searching for HDF5 executables, paths, and libraries.
+# you can set the CMAKE variable -OR- environment variable HDF5_ROOT.  The Find
+# module will then look in this path when searching for HDF5 executables, paths,
+# and libraries.
 #
 # In addition to finding the includes and libraries required to compile an HDF5
 # client application, this module also makes an effort to find tools that come
@@ -68,21 +69,21 @@ set( HDF5_VALID_COMPONENTS
 # try to find the HDF5 wrapper compilers
 find_program( HDF5_C_COMPILER_EXECUTABLE
     NAMES h5cc h5pcc
-    HINTS ENV HDF5_ROOT
+    HINTS "${HDF5_ROOT}" ENV HDF5_ROOT
     PATH_SUFFIXES bin Bin
     DOC "HDF5 Wrapper compiler.  Used only to detect HDF5 compile flags." )
 mark_as_advanced( HDF5_C_COMPILER_EXECUTABLE )
 
 find_program( HDF5_CXX_COMPILER_EXECUTABLE
     NAMES h5c++ h5pc++
-    HINTS ENV HDF5_ROOT
+    HINTS "${HDF5_ROOT}" ENV HDF5_ROOT
     PATH_SUFFIXES bin Bin
     DOC "HDF5 C++ Wrapper compiler.  Used only to detect HDF5 compile flags." )
 mark_as_advanced( HDF5_CXX_COMPILER_EXECUTABLE )
 
 find_program( HDF5_DIFF_EXECUTABLE 
     NAMES h5diff
-    HINTS ENV HDF5_ROOT
+    HINTS "${HDF5_ROOT}" ENV HDF5_ROOT
     PATH_SUFFIXES bin Bin 
     DOC "HDF5 file differencing tool." )
 mark_as_advanced( HDF5_DIFF_EXECUTABLE )
@@ -200,6 +201,7 @@ else()
         # find the HDF5 include directories
         find_path( HDF5_${LANGUAGE}_INCLUDE_DIR hdf5.h
             HINTS
+	        "${HDF5_ROOT}"
                 ${HDF5_${LANGUAGE}_INCLUDE_FLAGS}
                 ENV
                     HDF5_ROOT
@@ -232,12 +234,12 @@ else()
             endif()
             find_library( HDF5_${LIB}_LIBRARY_DEBUG 
                 NAMES ${THIS_LIBRARY_SEARCH_DEBUG} 
-                HINTS ${HDF5_${LANGUAGE}_LIBRARY_DIRS} 
+                HINTS "${HDF5_ROOT}" ${HDF5_${LANGUAGE}_LIBRARY_DIRS} 
                 ENV HDF5_ROOT 
                 PATH_SUFFIXES lib Lib )
             find_library( HDF5_${LIB}_LIBRARY_RELEASE
                 NAMES ${THIS_LIBRARY_SEARCH_RELEASE} 
-                HINTS ${HDF5_${LANGUAGE}_LIBRARY_DIRS} 
+                HINTS "${HDF5_ROOT}" ${HDF5_${LANGUAGE}_LIBRARY_DIRS} 
                 ENV HDF5_ROOT 
                 PATH_SUFFIXES lib Lib )
             select_library_configurations( HDF5_${LIB} )
