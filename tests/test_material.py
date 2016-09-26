@@ -96,6 +96,11 @@ def test_from_text():
     assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
     assert_equal(mat.metadata['units'], 'kg')
 
+def test_from_textdup():
+    mat = Material(metadata={'units': 'kg'})
+    mat.from_text("matdup.txt")
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
+    assert_equal(mat.metadata['units'], 'kg')
 
 def test_from_textelem():
     mat = Material(metadata={'units': 'kg'})

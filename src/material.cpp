@@ -846,7 +846,11 @@ void pyne::Material::from_text(std::string filename) {
     } else if (pyne::nucname::isnuclide(keystr) ||
                pyne::nucname::iselement(keystr)) {
       f >> valstr;
-       comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
+      if comp.exists(pyne::nucname::id(keystr)) {
+        comp[pyne::nucname::id(keystr)] += pyne::to_dbl(valstr);
+      } else {
+        comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
+      }
     } else {
       getline(f, valstr);
       valstr= valstr.substr(0, valstr.length()-1);
