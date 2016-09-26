@@ -828,8 +828,8 @@ void pyne::Material::from_text(std::string filename) {
   comp.clear();
   std::string keystr, valstr;
 
+  f >> keystr;
   while ( !f.eof() ) {
-    f >> keystr;
 
     if (0 == keystr.length())
       continue;
@@ -855,8 +855,9 @@ void pyne::Material::from_text(std::string filename) {
       getline(f, valstr);
       valstr= valstr.substr(0, valstr.length()-1);
       metadata[keystr]= valstr;
-      continue;
-   }
+
+    }
+    f >> keystr;
    }
 
    f.close();
