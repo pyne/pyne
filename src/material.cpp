@@ -846,7 +846,7 @@ void pyne::Material::from_text(std::string filename) {
     } else if (pyne::nucname::isnuclide(keystr) ||
                pyne::nucname::iselement(keystr)) {
       f >> valstr;
-      if comp.exists(pyne::nucname::id(keystr)) {
+      if (comp.count(pyne::nucname::id(keystr))>0) {
         comp[pyne::nucname::id(keystr)] += pyne::to_dbl(valstr);
       } else {
         comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
