@@ -143,6 +143,7 @@ if(BUILD_SPATIAL_SOLVER)
     else(APPLE)
         set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -Wl,-rpath,\\\\\\\$${CMAKE_INSTALL_RPATH}\"")
     endif(APPLE)
+    set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8\"")
 
     # I don't know which method is better...
     #add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
@@ -158,5 +159,5 @@ if(BUILD_SPATIAL_SOLVER)
                     #-lpyne --debug-capi
         DEPENDS pyne
         )
-    target_link_libraries(transport_spatial_methods pyne)
+    #target_link_libraries(transport_spatial_methods pyne)
 endif()
