@@ -828,8 +828,8 @@ void pyne::Material::from_text(std::string filename) {
   comp.clear();
   std::string keystr, valstr;
 
+  f >> keystr;
   while ( !f.eof() ) {
-    f >> keystr;
 
     if (0 == keystr.length())
       continue;
@@ -846,13 +846,18 @@ void pyne::Material::from_text(std::string filename) {
     } else if (pyne::nucname::isnuclide(keystr) ||
                pyne::nucname::iselement(keystr)) {
       f >> valstr;
-       comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
+      if (comp.count(pyne::nucname::id(keystr))>0) {
+        comp[pyne::nucname::id(keystr)] += pyne::to_dbl(valstr);
+      } else {
+        comp[pyne::nucname::id(keystr)] = pyne::to_dbl(valstr);
+      }
     } else {
       getline(f, valstr);
       valstr= valstr.substr(0, valstr.length()-1);
       metadata[keystr]= valstr;
-      continue;
-   }
+
+    }
+    f >> keystr;
    }
 
    f.close();
