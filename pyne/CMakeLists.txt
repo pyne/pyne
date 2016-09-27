@@ -143,7 +143,7 @@ if(BUILD_SPATIAL_SOLVER)
     else(APPLE)
         set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -Wl,-rpath,\\\\\\\$${CMAKE_INSTALL_RPATH}\"")
     endif(APPLE)
-    set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8\"")
+    set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -c\"")
 
     # I don't know which method is better...
     #add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
@@ -153,6 +153,7 @@ if(BUILD_SPATIAL_SOLVER)
         COMMAND ${F2PY_C} -c -m transport_spatial_methods
                     -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
                     ${F2PY_F90FLAGS}
+                    --f77flags="-c"
                     -lpyne
                     ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90
                     #--debug --debug-capi
