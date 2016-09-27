@@ -139,9 +139,9 @@ endif(${PYTHON_VERSION_MAJOR} GREATER 2)
 if(BUILD_SPATIAL_SOLVER)
     # TRANSPORT_SPATIAL_METHODS wrapper
     if(APPLE)
-        set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -rpath ${CMAKE_INSTALL_RPATH}\"")
+        set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -c -rpath ${CMAKE_INSTALL_RPATH}\"")
     else(APPLE)
-        set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -Wl,-rpath,\\\\\\\$${CMAKE_INSTALL_RPATH}\"")
+        set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -c -Wl,-rpath,\\\\\\\$${CMAKE_INSTALL_RPATH}\"")
     endif(APPLE)
 
     # I don't know which method is better...
