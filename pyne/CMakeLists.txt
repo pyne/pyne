@@ -138,14 +138,19 @@ endif(${PYTHON_VERSION_MAJOR} GREATER 2)
 
 if(BUILD_SPATIAL_SOLVER)
     # TRANSPORT_SPATIAL_METHODS wrapper
+    if(APPLE)
+        set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -rpath ${CMAKE_INSTALL_RPATH}\"")
+    else(APPLE)
+        set(F2PY_F90FLAGS "--f90flags=\"-fdefault-real-8 -Wl,-rpath,\\\\\\\$${CMAKE_INSTALL_RPATH}\"")
+    endif(APPLE)
+
     # I don't know which method is better...
-    #                --f90flags="-fdefault-real-8 ${CMAKE_INSTALL_RPATH}"
     #add_custom_target(transport_spatial_methods ALL DEPENDS ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
     #add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pyne/transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}
     add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
     add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}
         COMMAND ${F2PY_C} -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
-                    --f90flags="-fdefault-real-8"
+                    ${F2PY_F90FLAGS}
                     -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90
                     -lpyne
                     #--debug --debug-capi
