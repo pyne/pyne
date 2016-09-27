@@ -123,10 +123,10 @@ def make_fpy_table(nuc_data, build_dir=""):
         Directory the html files in.
     """
     yields = parse_fpy(build_dir)
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
     if not hasattr(db.root, 'neutron'):
-        neutron_group = db.createGroup('/', 'neutron', 'Neutron Data')
-    fpy_table = db.createTable('/neutron/', 'wimsd_fission_products', yields, 
+        neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
+    fpy_table = db.create_table('/neutron/', 'wimsd_fission_products', yields, 
                                'WIMSD Fission Product Yields, fractions [unitless]')
     fpy_table.flush()
     db.close()
@@ -137,7 +137,7 @@ def make_fpy(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     # Check that the table exists
-    with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
+    with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 
                                                   'wimsd_fission_products'):
             print('skipping WIMSD fission product yield table creation; '

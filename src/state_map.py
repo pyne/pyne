@@ -8,7 +8,7 @@ from pyne import nuc_data
 
 
 def generate_state_id_map(nuc_data):
-    f = tb.openFile(nuc_data)
+    f = tb.open_file(nuc_data)
 
     with open('state_map.cpp','w') as sm:
         sm.write('//Mapping file for state ids to nuc ids\n')

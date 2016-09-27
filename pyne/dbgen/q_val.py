@@ -122,14 +122,14 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
     q_value_array = np.array(distinct_all_q_values, dtype=qv_dtype)
 
     # Open the hdf5 file
-    nuc_file = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    nuc_file = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make the group if it's not there
     if not hasattr(nuc_file.root, 'decay'):
-        nuc_file.createGroup('/', 'decay', 'ENSDF Decay data')
+        nuc_file.create_group('/', 'decay', 'ENSDF Decay data')
 
     # Make a new table
-    q_value_table = nuc_file.createTable('/decay', 'q_values', q_value_array, 'Nuclide, Q_value [MeV per disintegration], Fraction of Q that comes from gammas')
+    q_value_table = nuc_file.create_table('/decay', 'q_values', q_value_array, 'Nuclide, Q_value [MeV per disintegration], Fraction of Q that comes from gammas')
 
     # Ensure that data was written to table
     q_value_table.flush()
@@ -141,7 +141,7 @@ def make_q_value(args):
     """Controller function for adding q-values"""
     nuc_data, build_dir = args.nuc_data, args.build_dir
     if os.path.exists(nuc_data):
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             if '/decay/q_values' in f:
                 print("skipping q_value table creation; already exists.")
                 return

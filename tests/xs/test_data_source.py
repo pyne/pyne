@@ -43,7 +43,7 @@ eafds = data_source.EAFDataSource()
 def test_cinder_E_g():
     if not cinderds.exists:
         return
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         E_g = np.array(f.root.neutron.cinder_xs.E_g)
     assert_array_equal(E_g, cinderds.src_group_struct)
 
@@ -51,7 +51,7 @@ def test_cinder_E_g():
 def test_cinder_sigma_f():
     if not cinderds.exists:
         return
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]['xs'])
     obs = cinderds.reaction('U235', 'fission')
     assert_array_equal(sigma_f_n_U235, obs)
@@ -62,7 +62,7 @@ def test_cinder_sigma_f():
 def test_cinder_sigma_a():
     if not cinderds.exists:
         return
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]['xs'])
     obs = cinderds.reaction(10010, 'absorption')
     assert_array_equal(sigma_a_n_H1, obs)
@@ -335,7 +335,7 @@ def test_simple_discretize_weights1():
 def test_eaf_E_g():
     if not eafds.exists:
         return
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         E_g = np.array(f.root.neutron.eaf_xs.E_g)
     assert_array_equal(E_g, eafds.src_group_struct)
 
