@@ -154,11 +154,12 @@ if(BUILD_SPATIAL_SOLVER)
                     -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
                     ${F2PY_F90FLAGS}
                     --f77flags="-c"
+                    --no-wrap-functions
                     -lpyne
                     ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90
                     #--debug --debug-capi
                     #-lpyne --debug-capi
         DEPENDS pyne
         )
-    #target_link_libraries(transport_spatial_methods pyne)
+    target_link_libraries(transport_spatial_methods pyne)
 endif()
