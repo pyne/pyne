@@ -144,7 +144,7 @@ if(BUILD_SPATIAL_SOLVER)
     add_custom_target(transport_spatial_methods ALL DEPENDS transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX})
     add_custom_command(OUTPUT transport_spatial_methods${CMAKE_SHARED_LIBRARY_SUFFIX}
         COMMAND ${F2PY_C} -m transport_spatial_methods -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
-                    --f90flags="-fdefault-real-8"
+                    --f90flags="-fdefault-real-8 ${CMAKE_INSTALL_RPATH}"
                     -c ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90
                     -lpyne
                     #--debug --debug-capi
