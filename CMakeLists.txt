@@ -15,45 +15,45 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 ENDIF()
 
 IF(BUILD_SPATIAL_SOLVER)
-  # languages
-  enable_language(Fortran)
+# languages
+enable_language(Fortran)
 
-  # Augment the Fortran implicit link libraries
+# Augment the Fortran implicit link libraries
+message(STATUS
+  "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES = ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
+if (APPLE)
   message(STATUS
-    "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES = ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
-  if (APPLE)
-    message(STATUS
-      "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
-    set(LIBGCC_S)
-    # The previous method found the gcc_s library by version,
+    "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+  set(LIBGCC_S)
+# The previous method found the gcc_s library by version,
     # find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
-    # but this always found the library regardless of version, and then
-    # the name as set was different from what was found.  This new way
-    # ensures that the name is consistent with what was found.
-    set(LIBGCC_S_PATH)
-    foreach (gcc_s_ver 3 2 1)
-      find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
-        PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
-        NODEFAULTPATH
-      )
-      if (LIBGCC_S_PATH)
-        break()
-      endif ()
-    endforeach ()
-    message(STATUS "LIBGCC_S_PATH = ${LIBGCC_S_PATH}.")
+# but this always found the library regardless of version, and then
+# the name as set was different from what was found.  This new way
+# ensures that the name is consistent with what was found.
+  set(LIBGCC_S_PATH)
+  foreach (gcc_s_ver 3 2 1)
+    find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
+      PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
+      NODEFAULTPATH
+    )
     if (LIBGCC_S_PATH)
-      get_filename_component(LIBGCC_S ${LIBGCC_S_PATH} NAME)
-      # Pull off leading lib and trailing .dylib.
-      string(REGEX REPLACE "^lib" "" LIBGCC_S ${LIBGCC_S})
-      string(REGEX REPLACE "\\.dylib$" "" LIBGCC_S ${LIBGCC_S})
+      break()
     endif ()
-    message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
-    if (LIBGCC_S)
-      set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
-    endif ()
+  endforeach ()
+  message(STATUS "LIBGCC_S_PATH = ${LIBGCC_S_PATH}.")
+  if (LIBGCC_S_PATH)
+    get_filename_component(LIBGCC_S ${LIBGCC_S_PATH} NAME)
+# Pull off leading lib and trailing .dylib.
+    string(REGEX REPLACE "^lib" "" LIBGCC_S ${LIBGCC_S})
+    string(REGEX REPLACE "\\.dylib$" "" LIBGCC_S ${LIBGCC_S})
   endif ()
-  message(STATUS
-    "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+  message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
+  if (LIBGCC_S)
+    set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
+  endif ()
+endif ()
+message(STATUS
+  "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
 ENDIF(BUILD_SPATIAL_SOLVER)
 
 # Make the scripts available in the 'cmake' directory available for the
@@ -76,33 +76,24 @@ IF(NOT ${BUILD_TYPE} STREQUAL "release")
 ENDIF()
 
 # Include the HDF5 library and c++ headers
-#find_package( HDF5 COMPONENTS C REQUIRED)
-#include_directories(${HDF5_INCLUDE_DIRS})
-#if(WIN32)
-#    # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
-#    get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
-#    list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/bin")
-#    list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
-#elseif(NOT HDF5_LIBRARY_DIRS)
-#  list(GET HDF5_LIBRARIES 0 _hdf5lib)
-#  if (${_hdf5lib} STREQUAL debug)
-#    list(GET HDF5_LIBRARIES 1 _hdf5lib)
-#  endif ()
-#  get_filename_component(HDF5_LIBRARY_DIRS ${_hdf5lib} PATH)
-#endif(WIN32)
-#link_directories(${HDF5_LIBRARY_DIRS})
-#add_definitions(${HDF5_DEFINITIONS})
-#set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
-#message("-- HDF5_LIBRARY_DIRS = ${HDF5_LIBRARY_DIRS}")
-
-# Find HDF5
-FIND_PACKAGE(HDF5 REQUIRED)
-ADD_DEFINITIONS(${HDF5_DEFINITIONS})
-set(LIBS ${LIBS} ${HDF5_LIBRARIES})
-MESSAGE("--    HDF5 Root: ${HDF5_ROOT}")
-MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIR}")
-MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
-MESSAGE("--    HDF5 Libraries: ${HDF5_LIBRARIES}")
+find_package( HDF5 COMPONENTS C REQUIRED)
+include_directories(${HDF5_INCLUDE_DIRS})
+if(WIN32)
+    # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
+    get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
+    list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/bin")
+	list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
+elseif(NOT HDF5_LIBRARY_DIRS)
+  list(GET HDF5_LIBRARIES 0 _hdf5lib)
+  if (${_hdf5lib} STREQUAL debug)
+    list(GET HDF5_LIBRARIES 1 _hdf5lib)
+  endif ()
+  get_filename_component(HDF5_LIBRARY_DIRS ${_hdf5lib} PATH)
+endif(WIN32)
+link_directories(${HDF5_LIBRARY_DIRS})
+add_definitions(${HDF5_DEFINITIONS})
+set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
+message("-- HDF5_LIBRARY_DIRS = ${HDF5_LIBRARY_DIRS}")
 
 # Use new Python library finder
 find_package(PythonInterp REQUIRED)
@@ -143,24 +134,45 @@ set(BUILD_SHARED_LIBS true)
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
 # RPATH Settings
-set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-if(APPLE)
-    set(CMAKE_MACOSX_RPATH 1)
-    if(HAVE_SETUPTOOLS)
-      set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
-    else(HAVE_SETUPTOOLS)
-      set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
-    endif(HAVE_SETUPTOOLS)
-else(APPLE)
-    # For linux
-    if(HAVE_SETUPTOOLS)
-      set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
-    else(HAVE_SETUPTOOLS)
-      set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
-    endif(HAVE_SETUPTOOLS)
-endif(APPLE)
+#set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+#set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+#if(APPLE)
+#    set(CMAKE_MACOSX_RPATH 1)
+#    if(HAVE_SETUPTOOLS)
+#      set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
+#    else(HAVE_SETUPTOOLS)
+#      set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
+#    endif(HAVE_SETUPTOOLS)
+#else(APPLE)
+#    # For linux
+#    if(HAVE_SETUPTOOLS)
+#      set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
+#    else(HAVE_SETUPTOOLS)
+#      set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
+#    endif(HAVE_SETUPTOOLS)
+#endif(APPLE)
+
+
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/cyclus")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# the RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/cyclus")
+ENDIF("${isSystemDir}" STREQUAL "-1")
+
 message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
 
 # find numpy and include the numpy headers
