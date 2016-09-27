@@ -226,19 +226,19 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
     simple_xs_tables = parse_simple_xs(build_dir)
 
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Create neutron group
     if not hasattr(db.root, 'neutron'):
-        neutron_group = db.createGroup('/', 'neutron', 'Neutron Interaction Data')
+        neutron_group = db.create_group('/', 'neutron', 'Neutron Interaction Data')
 
     # Create simple_xs Group
     if not hasattr(db.root.neutron, 'simple_xs'):
-        simple_xs_group = db.createGroup("/neutron", "simple_xs", "Simple Neutron Cross Section Data")
+        simple_xs_group = db.create_group("/neutron", "simple_xs", "Simple Neutron Cross Section Data")
 
     # Create tables for every energy 
     for eng, eng_flag in simple_xs_energy.items():
-        simple_xs_table = db.createTable(simple_xs_group, eng, 
+        simple_xs_table = db.create_table(simple_xs_group, eng, 
                                          np.empty(0, dtype=simple_xs_dtype), 
                                          "{0} [barns]".format(eng_flag.capitalize()), 
                                          expectedrows=len(simple_xs_tables[eng]))
@@ -255,7 +255,7 @@ def make_simple_xs(args):
     """Controller function for adding basic cross section data."""
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
-    with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
+    with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
             print("skipping simple XS data table creation; already exists.")
             return 

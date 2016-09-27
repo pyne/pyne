@@ -24,7 +24,7 @@ def test_xs_cache_sigma_f_n():
     if not cinderds.exists:
         return
 
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]['xs'])
     from_cache = xs_cache[922350, 'fiss']
 
@@ -38,7 +38,7 @@ def test_xs_cache_sigma_a_n():
     if not cinderds.exists:
         return
 
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]['xs'])
     from_cache = xs_cache[10010, 'abs']
 

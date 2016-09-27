@@ -327,13 +327,13 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
     """
     xrd = parse_atomic_data(build_dir)
 
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
     if not hasattr(db.root, 'decay'):
-        db.createGroup('/', 'decay', 'ENSDF Decay data')
+        db.create_group('/', 'decay', 'ENSDF Decay data')
 
-    atomic_table = db.createTable('/decay/', 'atomic', xrd,
+    atomic_table = db.create_table('/decay/', 'atomic', xrd,
                               'z'
                               'k_shell_fluor'
                               'k_shell_fluor_error'
@@ -379,13 +379,13 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     level_list = parse_level_data(build_dir)
 
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
     if not hasattr(db.root, 'decay'):
-        db.createGroup('/', 'decay', 'ENSDF Decay data')
+        db.create_group('/', 'decay', 'ENSDF Decay data')
 
-    ll_table = db.createTable('/decay/', 'level_list', level_list,
+    ll_table = db.create_table('/decay/', 'level_list', level_list,
                               'nuclide [nuc_id], level [keV], half life [s],'
                               'metastable [int]', expectedrows=len(level_list))
     ll_table.flush()
@@ -393,7 +393,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     # now that the level data is in nuc_data we can build the decay data fast
     decay, gammas, alphas, betas, ecbp = parse_decay_data(build_dir)
 
-    decay_table = db.createTable('/decay/', 'decays', decay,
+    decay_table = db.create_table('/decay/', 'decays', decay,
                                  'parent nuclide [nuc_id], daughter nuclide '
                                  '[nuc_id], decay [string], half life [s],'
                                  'half life error [s], branch ratio [frac],'
@@ -405,7 +405,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                                  expectedrows=len(decay))
     decay_table.flush()
 
-    gamma_table = db.createTable('/decay/', 'gammas', gammas,
+    gamma_table = db.create_table('/decay/', 'gammas', gammas,
                                  'from_nuc [int], to_nuc [int], primary parent'
                                  'nuc_id [int], child nuc_id [int]'
                                  'Energy [keV], Energy error [keV], '
@@ -423,13 +423,13 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
 
     gamma_table.flush()
 
-    alphas_table = db.createTable('/decay/', 'alphas', alphas,
+    alphas_table = db.create_table('/decay/', 'alphas', alphas,
                                   'from_nuc [int], to_nuc [int]'
                                   'Energy [keV], Intensity [ratio],',
                                   expectedrows=len(alphas))
     alphas_table.flush()
 
-    betas_table = db.createTable('/decay/', 'betas', betas,
+    betas_table = db.create_table('/decay/', 'betas', betas,
                                  'from_nuc [int], to_nuc [int],'
                                  'Endpoint Energy [keV], Average Energy [keV],'
                                  'Intensity [ratio]',
@@ -437,7 +437,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
 
     betas_table.flush()
 
-    ecbp_table = db.createTable('/decay/', 'ecbp', ecbp,
+    ecbp_table = db.create_table('/decay/', 'ecbp', ecbp,
                                 'from_nuc [int], to_nuc [int],'
                                 'Endpoint Energy [keV], Average Energy [keV],'
                                 'B+ Intensity [ratio], '
@@ -457,7 +457,7 @@ def make_decay(args):
     """Controller function for adding decay data."""
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         if hasattr(f.root, 'decay') and hasattr(f.root.decay, 'ecbp'):
             print("skipping ENSDF decay data table creation; already exists.")
             return

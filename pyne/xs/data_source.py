@@ -314,7 +314,7 @@ class SimpleDataSource(DataSource):
     @property
     def exists(self):
         if self._exists is None:
-            with tb.openFile(nuc_data, 'r') as f:
+            with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/simple_xs' in f)
         return self._exists
 
@@ -329,7 +329,7 @@ class SimpleDataSource(DataSource):
             return None
         cond = "nuc == {0}".format(nuc)
         sig = 'sigma_' + self._rx_avail[rx]
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             simple_xs = f.root.neutron.simple_xs
             fteen = [row[sig] for row in simple_xs.fourteen_MeV.where(cond)]
             fissn = [row[sig] for row in simple_xs.fission_spectrum_ave.where(cond)]
@@ -467,14 +467,14 @@ class CinderDataSource(DataSource):
 
     def _load_group_structure(self):
         """Loads the cinder energy bounds array, E_g, from nuc_data."""
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.cinder_xs.E_g)
         self.src_group_struct = E_g
 
     @property
     def exists(self):
         if self._exists is None:
-            with tb.openFile(nuc_data, 'r') as f:
+            with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/cinder_xs' in f)
         return self._exists
 
@@ -497,7 +497,7 @@ class CinderDataSource(DataSource):
             return None
 
         # read & collapse data
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.cinder_xs.fission if rx == fissrx else \
                    f.root.neutron.cinder_xs.absorption
             rows = [np.array(row['xs']) for row in node.where(cond)]
@@ -596,14 +596,14 @@ class EAFDataSource(DataSource):
 
     def _load_group_structure(self):
         """Loads the EAF energy bounds array, E_g, from nuc_data."""
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.eaf_xs.E_g)
         self.src_group_struct = E_g
 
     @property
     def exists(self):
         if self._exists is None:
-            with tb.openFile(nuc_data, 'r') as f:
+            with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/eaf_xs' in f)
         return self._exists
 
@@ -638,9 +638,9 @@ class EAFDataSource(DataSource):
             return None
 
         # Grab data
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = node.readWhere(cond)
+            rows = node.read_where(cond)
             #rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
@@ -672,7 +672,7 @@ class EAFDataSource(DataSource):
         rxcache = self.rxcache
         avail_rx = self._avail_rx
         absrx = rxname.id('absorption')
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
             for row in node:
                 nuc = row['nuc_zz']

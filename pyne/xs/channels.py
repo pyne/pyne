@@ -427,7 +427,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
 
     # Get the the set of nuclides we know we need chi for.  
     if 'fissionable_nucs' not in xs_cache:
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             if '/neutron/cinder_xs/fission' in f:
                 fn = set(f.root.neutron.cinder_xs.fission.cols.nuc)
             else:
