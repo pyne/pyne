@@ -1,7 +1,7 @@
 set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS} PARENT_SCOPE)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
- 
+
 # setup source files
 set(TRANSPORT_SPATIAL_METHODS_SRCS
     "transport_spatial_methods/3d/ahotn_kernel_module.f90"
@@ -10,7 +10,7 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
     "transport_spatial_methods/3d/dgfem_kernel.f90"
     "transport_spatial_methods/3d/echo.f90"
     "transport_spatial_methods/3d/geompack.f90"
-    "transport_spatial_methods/3d/igeompack.f90"   
+    "transport_spatial_methods/3d/igeompack.f90"
     "transport_spatial_methods/3d/inner.f90"
     "transport_spatial_methods/3d/invar.f90"
     "transport_spatial_methods/3d/output.f90"
@@ -101,25 +101,24 @@ if (MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
 endif (MOAB_FOUND)
 
-set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS 
-    "-O0")
+set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS "-O0")
 
-add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f  
+add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
-add_executable(gtol ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f 
+add_executable(gtol ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f
                     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(bldhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/bldhst.for)
-add_executable(hsicc ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for 
+add_executable(hsicc ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for
                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for 
+add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for
                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for 
+add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for
                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-add_executable(logft ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for 
+add_executable(logft ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for
                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 add_executable(radd ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for)
-add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f 
+add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f
                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
 
 # Print include dir

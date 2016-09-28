@@ -204,7 +204,7 @@ get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 message("-- Copying C/C++ header files.")
-file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/cpp/" DESTINATION
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/src/" DESTINATION
     "${CMAKE_BINARY_DIR}/pyne/include/" FILES_MATCHING PATTERN "*.h")
 
 message("-- Copying Cython header files.")
