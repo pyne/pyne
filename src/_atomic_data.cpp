@@ -1,7 +1,6 @@
 // Implements basic nuclear data functions.
 #ifndef PYNE_IS_AMALGAMATED
-  #include "atomic_data.h"
-  #include "nucname.h"
+#include "atomic_data.h"
 #endif
   
 void pyne::_load_atomic_mass_map_memory() { 
@@ -17,25 +16,6 @@ void pyne::_load_atomic_mass_map_memory() {
     return;
   } else { 
     _insert_abund_map();
-  }
-
-  // calculate the atomic_masses of the elements
-  std::map<int,double> :: iterator it;
-
-  for (int z=1; z<= 92; z++) {
-    // loop through the natural abundance map
-    double element_atomic_weight = 0.0;
-    for (it = natural_abund_map.begin(); it != natural_abund_map.end(); ++it){
-      // if the atomic number of the abudance matches the
-      // that of index
-      if(pyne::nucname::znum(it->first) == z) {
-	// take atomic abundance and multiply by mass
-	// to get the mass of that nuclide / 100 since abundance is in %
-	element_atomic_weight += (it->second*atomic_mass_map[it->first]/100.0);
-      }
-    }
-    // insert the abundance of the element into the list
-    atomic_mass_map[z*10000000] = element_atomic_weight;
   }
 }
 

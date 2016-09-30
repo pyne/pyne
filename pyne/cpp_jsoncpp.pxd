@@ -7,13 +7,13 @@ cdef extern from "json.h" namespace "Json":
 
     cdef enum ValueType:
         nullValue,
-        intValue,      
-        uintValue,     
-        realValue,     
-        stringValue,   
-        booleanValue,  
-        arrayValue,    
-        objectValue 
+        intValue,
+        uintValue,
+        realValue,
+        stringValue,
+        booleanValue,
+        arrayValue,
+        objectValue
 
     cdef cppclass Value:
         Value null
@@ -52,9 +52,9 @@ cdef extern from "json.h" namespace "Json":
 
         Value get(int, Value) except +
         Value get(std_string, Value) except +
-        Value & operator[](int) except +
-        Value & operator[](std_string) except +
-        Value & operator[](const_char *) except +
+        Value & operator[](int)
+        Value & operator[](std_string)
+        Value & operator[](const_char *)
         void swap(Value &) except +
         #Value & operator=(Value &) except +
         Value removeMember(std_string) except +
@@ -100,11 +100,11 @@ cdef extern from "jsoncustomwriter.h" namespace "Json":
         CustomWriter(std_string, std_string, std_string) except +
         CustomWriter(std_string, std_string, std_string, std_string) except +
         CustomWriter(std_string, std_string, std_string, std_string, std_string) except +
-        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+        CustomWriter(std_string, std_string, std_string, std_string, std_string,
                      std_string) except +
-        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+        CustomWriter(std_string, std_string, std_string, std_string, std_string,
                      std_string, std_string) except +
-        CustomWriter(std_string, std_string, std_string, std_string, std_string, 
+        CustomWriter(std_string, std_string, std_string, std_string, std_string,
                      std_string, std_string, int) except +
         std_string write(Value &)
 

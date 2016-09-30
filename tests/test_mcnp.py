@@ -662,8 +662,8 @@ def test_write_to_hdf5():
 
     for test_file in test_files:
         p = mcnp.PtracReader(test_file)
-        h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5", "w")
-        tab = h5file.createTable("/", "t", mcnp.PtracEvent, "test")
+        h5file = tables.open_file("mcnp_ptrac_hdf5_file.h5", "w")
+        tab = h5file.create_table("/", "t", mcnp.PtracEvent, "test")
         p.write_to_hdf5_table(tab)
         tab.flush()
         h5file.close()
@@ -673,8 +673,8 @@ def test_write_to_hdf5():
 
         # now check if the data was correctly written.
         # there should be 5 events of type 1000 (src)
-        h5file = tables.openFile("mcnp_ptrac_hdf5_file.h5")
-        tab = h5file.getNode("/t")
+        h5file = tables.open_file("mcnp_ptrac_hdf5_file.h5")
+        tab = h5file.get_node("/t")
         selected = [1 for x in tab.iterrows() if x["event_type"] == 1000]
         assert_equal(len(selected), 5)
         h5file.close()

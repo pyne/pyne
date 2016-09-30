@@ -126,8 +126,8 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
         ])
 
     filters = tb.Filters(complevel=1, complib='zlib')
-    h5f = tb.openFile(filename + '.h5', 'w', filters=filters)
-    tab = h5f.createTable('/', 'data', dt, chunkshape=chunkshape)
+    h5f = tb.open_file(filename + '.h5', 'w', filters=filters)
+    tab = h5f.create_table('/', 'data', dt, chunkshape=chunkshape)
 
     chunksize = chunkshape[0]
     rows = np.empty(chunksize, dtype=dt)
@@ -184,7 +184,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
         tags = {('U-235', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
     """
     # find number of energy groups
-    with tb.openFile(filename) as h5f:
+    with tb.open_file(filename) as h5f:
         num_e_groups = len(h5f.root.data[0][3])
 
     # create a dict of tag handles for all keys of the tags dict
@@ -195,7 +195,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
 
     # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
-        with tb.openFile(filename) as h5f:
+        with tb.open_file(filename) as h5f:
             # Convert nuclide to the form found in the ALARA phtn_src
             # file, which is similar to the Serpent form. Note this form is
             # different from the ALARA input nuclide form found in nucname.
@@ -204,7 +204,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
             else:
                 nuc = "TOTAL"
             # create of array of rows that match the nuclide/decay criteria
-            matched_data = h5f.root.data.readWhere(
+            matched_data = h5f.root.data.read_where(
                 "(nuc == '{0}') & (time == '{1}')".format(nuc, cond[1]))
 
         idx = 0

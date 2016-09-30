@@ -123,7 +123,7 @@ def test_photon_source_to_hdf5():
     photon_source_to_hdf5(filename, chunkshape=(10,))
     assert_true(os.path.exists(filename + '.h5'))
 
-    with tb.openFile(filename + '.h5') as h5f:
+    with tb.open_file(filename + '.h5') as h5f:
         obs = h5f.root.data[:]
 
     with open(filename, 'r') as f:

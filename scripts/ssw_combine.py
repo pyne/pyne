@@ -16,7 +16,7 @@ from pyne.mcnp import SurfSrc
 def combine_multiple_ss_files(newssrname, ssrnames):
     """Method reads headers from ssr1name and ssr2name binary files
     and checks if the headers are 'similar.'  If not, it returns False.
-    
+
     Parameters
     ----------
     newssrname : str
@@ -31,7 +31,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
 
     """
     ssrfiles = [SurfSrc(ssrname, 'rb') for ssrname in ssrnames]
-    
+
     # read first surface source file's header
     ssrfiles[0].read_header()
     # then compare it with the headers from other files.
@@ -42,24 +42,24 @@ def combine_multiple_ss_files(newssrname, ssrnames):
             print("Headers do not match for all files.\nFile #{0} does not "
                     "match 1st file.".format(ssrnames[cnt]))
             return False
-        
+
     # calculate list of offsets for offsetting each track's nps value.
     trackoffsets = [sum(ssrfile.np1 for ssrfile in ssrfiles[:x])
                     for x in xrange(len(ssrfiles))]
-    
+
     ######################
     # Create new ssr file's header primarily from first ssr file's header
     newssr = SurfSrc(newssrname, "wb")
 
     # header
-    newssr.kod = ssrfiles[0].kod   
-    newssr.ver = ssrfiles[0].ver   
+    newssr.kod = ssrfiles[0].kod
+    newssr.ver = ssrfiles[0].ver
     newssr.loddat = ssrfiles[0].loddat
-    newssr.idtm = ssrfiles[0].idtm  
+    newssr.idtm = ssrfiles[0].idtm
     newssr.probid = ssrfiles[0].probid
-    newssr.aid = ssrfiles[0].aid   
+    newssr.aid = ssrfiles[0].aid
     newssr.knod = ssrfiles[0].knod
-    
+
     # table 1
     newssr.np1 = sum(x.orignp1 for x in ssrfiles) # note orignp1 vs np1
     newssr.nrss = sum(x.nrss for x in ssrfiles)
@@ -67,7 +67,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
     newssr.njsw = ssrfiles[0].njsw
     newssr.niss = ssrfiles[0].niss
     newssr.table1extra = ssrfiles[0].table1extra
-    
+
     # table 2
     newssr.niwr = ssrfiles[0].niwr
     newssr.mipts = ssrfiles[0].mipts
@@ -76,11 +76,11 @@ def combine_multiple_ss_files(newssrname, ssrnames):
 
     # surfaces list
     newssr.surflist = ssrfiles[0].surflist
-    
+
     # whatever the range from njsw to njsw+niwr is...
     for j in range(ssrfiles[0].njsw,ssrfiles[0].njsw+ssrfiles[0].niwr):
         print("unsupported entries; needs mcnp.py additions")
-    
+
     # copy summary info/table
     newssr.summary_table = ssrfiles[0].summary_table
     newssr.summary_extra = ssrfiles[0].summary_extra
@@ -106,7 +106,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
     print("Finished writing to new surface source file '{0}'"
             "".format(newssrname))
     newssr.close()
-    
+
     return True
 
 
@@ -165,11 +165,11 @@ def _compare_compatible(first, other):
                 first.surflist[surf].surf_params:
             # surf_params doesn't match
             return cmp(other.surflist[surf].surf_params,
-                       first.surflist[surf].surf_params) 
+                       first.surflist[surf].surf_params)
     return 0
 
 
 if __name__ == "__main__":
     import sys
-    print sys.argv
+    print(sys.argv)
     combine_multiple_ss_files('newssr', sys.argv[1:])

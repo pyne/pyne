@@ -170,15 +170,15 @@ def make_dose_tables(genii, epa, doe, nuc_data, build_dir=""):
     doe_array = np.array(doe, dtype=dose_dtype)
 
     # Open the hdf5 file
-    nuc_file = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    nuc_file = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Create a group for the tables
-    dose_group = nuc_file.createGroup("/", "dose_factors", "Dose Rate Factors")
+    dose_group = nuc_file.create_group("/", "dose_factors", "Dose Rate Factors")
 
     # Make three new tables
-    genii_table = nuc_file.createTable(dose_group, 'GENII', genii_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')
-    epa_table = nuc_file.createTable(dose_group, 'EPA', epa_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')    
-    doe_table = nuc_file.createTable(dose_group, 'DOE', doe_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')
+    genii_table = nuc_file.create_table(dose_group, 'GENII', genii_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')
+    epa_table = nuc_file.create_table(dose_group, 'EPA', epa_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')    
+    doe_table = nuc_file.create_table(dose_group, 'DOE', doe_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')
 
     # Ensure that data was written to table
     genii_table.flush()
@@ -193,7 +193,7 @@ def make_dose_factors(args):
 
     nuc_data, build_dir = args.nuc_data, args.build_dir
     if os.path.exists(nuc_data):
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             if '/dose_factors' in f:
                 print("skipping creation of dose factor tables; already exists.")
                 return

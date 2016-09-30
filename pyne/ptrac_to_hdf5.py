@@ -35,12 +35,12 @@ def main():
     ptrac = mcnp.PtracReader(ptrac_filename)
 
     # open HDF5 file and create table if it doesn't exist yet
-    h5file = tables.openFile(hdf5_filename, mode="a", title=ptrac.problem_title)
+    h5file = tables.open_file(hdf5_filename, mode="a", title=ptrac.problem_title)
     table_path = "/" + table_name
     if table_path in h5file:
-        table = h5file.getNode(table_path)
+        table = h5file.get_node(table_path)
     else:
-        table = h5file.createTable("/", table_name, mcnp.PtracEvent, table_title)
+        table = h5file.create_table("/", table_name, mcnp.PtracEvent, table_title)
 
     ptrac.write_to_hdf5_table(table, print_progress=print_progress)
 
