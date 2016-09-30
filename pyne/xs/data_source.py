@@ -15,7 +15,11 @@ except ImportError:
 
 import numpy as np
 import tables as tb
-from openmc import statepoint
+try:
+    from openmc import statepoint
+except ImportError:
+    statepoint = None
+
 from pyne import nuc_data
 from pyne import nucname
 from pyne import openmc
@@ -144,7 +148,7 @@ class DataSource(object):
             self._dst_ngroups = 0
             self._src_to_dst_matrix = None
         elif same_arr_or_none(dst_group_struct, self._dst_group_struct):
-            return 
+            return
         else:
             self._dst_group_struct = np.asarray(dst_group_struct)
             self._dst_ngroups = len(dst_group_struct) - 1
@@ -881,7 +885,7 @@ class OpenMCDataSource(DataSource):
     stucture when the reactions are loaded in. Reseting this source group
     structure will clear the reaction cache.
     """
-    
+
     self_shield_reactions = {rxname.id('fission'), rxname.id('gamma'), rxname.id('total')}
 
     def __init__(self, cross_sections=None, src_group_struct=None, **kwargs):
@@ -994,14 +998,14 @@ class OpenMCDataSource(DataSource):
         E_points, rawdata = rtn
         E_g = self.src_group_struct
         if self.atom_dens.get(nuc, 0.0) > 1.0E19 and rx in self.self_shield_reactions:
-            rxdata = self.self_shield(nuc, rx, temp, E_points, rawdata)    
+            rxdata = self.self_shield(nuc, rx, temp, E_points, rawdata)
         else:
             rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
         return rxdata
 
     def self_shield(self, nuc, rx, temp, E_points, xs_points):
         """Calculates the self shielded cross section for a given nuclide
-        and reaction. This calculation uses the Bonderanko method. 
+        and reaction. This calculation uses the Bonderanko method.
 
         Parameters
         ----------
@@ -1015,7 +1019,7 @@ class OpenMCDataSource(DataSource):
             The point wise energies.
         xs_points : array like
             Point wise cross sections
-        
+
         Returns
         -------
         rxdata : array like
@@ -1028,30 +1032,30 @@ class OpenMCDataSource(DataSource):
         for n in range(len(sigb)):
             sig_b[(e_n[n] <= E_points) & (E_points <= e_n[n+1])] = sigb[n]
         rtn = self.pointwise(nuc, 'total', temp)
-        if rtn is None: 
+        if rtn is None:
             sig_t = 0.0
         else:
             sig_t = rtn[1]
-        numer = bins.pointwise_linear_collapse(self.src_group_struct, 
-            E_points, xs_points/(E_points*(sig_b + sig_t)))         
-        denom = bins.pointwise_linear_collapse(self.src_group_struct, 
+        numer = bins.pointwise_linear_collapse(self.src_group_struct,
+            E_points, xs_points/(E_points*(sig_b + sig_t)))
+        denom = bins.pointwise_linear_collapse(self.src_group_struct,
             E_points, 1.0/(E_points*(sig_b + sig_t)))
         return numer/denom
-                
+
     def bkg_xs(self, nuc, temp=300):
         """Calculates the background cross section for a nuclide (nuc)
-           
+
         Parameters
         ----------
         nuc : int
             Nuclide id.
         temp : float, optional
-            The nuclide temperature in [K].  
+            The nuclide temperature in [K].
 
         Returns
         -------
         sig_b : array like
-            Group wise background cross sections.              
+            Group wise background cross sections.
         """
         e_n = self.src_group_struct
         sig_b = np.zeros(self.src_ngroups, float)
@@ -1103,18 +1107,18 @@ class StatePointDataSource(DataSource):
         state_point : string
             Path to the openmc statepoint file to be used to build the data_source
         tallies : array-like
-            The tally id's used to pull the cross sections from. 
+            The tally id's used to pull the cross sections from.
         num_dens: map of int to float
             A map containing the number densities of the nuclides in the
-            material used in the statepoint. 
-        phi_tot: array of floats 
+            material used in the statepoint.
+        phi_tot: array of floats
             The total flux within the reactor
         kwargs : optional
             Keyword arguments to be sent to DataSource base class.
 
         """
         self.state_point = state_point
-        self.tallies = tallies  
+        self.tallies = tallies
         self.particles = state_point.n_particles
         self.reactions = {}
         self._load_reactions(num_den, phi_tot)
@@ -1125,26 +1129,26 @@ class StatePointDataSource(DataSource):
         return True
 
     def _load_group_structure(self):
-        """Loads the group structure from a tally in openMC. It is 
+        """Loads the group structure from a tally in openMC. It is
         assumed that all tallies have the same group structure
         """
         self._src_group_struct = self.state_point.tallies[self.tallies[0]].filters[0].bins[::-1]
         self.src_group_struct = self._src_group_struct
 
     def _load_reactions(self, num_dens, phi_tot):
-        """Loads the group structure from a tally in openMC. It is 
+        """Loads the group structure from a tally in openMC. It is
         assumed that all tallies have the same group structure
-   
+
         Parameters
         ----------
         state_point: openMC statepoint file
             The statepoint file that will be used to load the reaction
-            rates to determine the microscopic cross sections for the 
+            rates to determine the microscopic cross sections for the
             statepoint.
         num_dens: map of int to float
             A map containing the number densities of the nuclides in the
-            material used in the statepoint. 
-        phi_tot: array of floats 
+            material used in the statepoint.
+        phi_tot: array of floats
             The total flux within the reactor
         """
         for tally in self.tallies:
@@ -1168,9 +1172,9 @@ class StatePointDataSource(DataSource):
         Return
         ------
         Array containing the cross sections for the reaction
-        requested. 
+        requested.
         """
-        rxkey = (nuc, rx) 
+        rxkey = (nuc, rx)
         if rxkey not in self.reactions:
             return None
         else:
