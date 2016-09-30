@@ -1,6 +1,7 @@
 // Implements basic nuclear data functions.
 #ifndef PYNE_IS_AMALGAMATED
-#include "atomic_data.h"
+  #include "atomic_data.h"
+  #include "nucname.h"
 #endif
 
 void pyne::_load_atomic_mass_map_memory() {
