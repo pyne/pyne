@@ -16,6 +16,7 @@ except ImportError:
 import numpy as np
 import tables as tb
 try:
+    # openmc is not a hard dependency of pyne
     from openmc import statepoint
 except ImportError:
     statepoint = None
