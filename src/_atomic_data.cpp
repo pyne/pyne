@@ -1,25 +1,45 @@
 // Implements basic nuclear data functions.
 #ifndef PYNE_IS_AMALGAMATED
-#include "atomic_data.h"
+  #include "atomic_data.h"
+  #include "nucname.h"
 #endif
-  
-void pyne::_load_atomic_mass_map_memory() { 
-  // header version of atomic weight table data 
+
+void pyne::_load_atomic_mass_map_memory() {
+  // header version of atomic weight table data
   //see if the data table is already loaded
   if(!atomic_mass_map.empty()) {
     return;
-  } else { 
+  } else {
     _insert_atomic_mass_map();
   }
   //see if the data table is already loaded
   if(!natural_abund_map.empty()) {
     return;
-  } else { 
+  } else {
     _insert_abund_map();
+  }
+
+  // calculate the atomic_masses of the elements
+  std::map<int,double> :: iterator it;
+
+  for (int z=1; z<= 92; z++) {
+    // loop through the natural abundance map
+    double element_atomic_weight = 0.0;
+    for (it = natural_abund_map.begin(); it != natural_abund_map.end(); ++it){
+      // if the atomic number of the abudance matches the
+      // that of index
+      if(pyne::nucname::znum(it->first) == z) {
+  // take atomic abundance and multiply by mass
+  // to get the mass of that nuclide / 100 since abundance is in %
+  element_atomic_weight += (it->second*atomic_mass_map[it->first]/100.0);
+      }
+    }
+    // insert the abundance of the element into the list
+    atomic_mass_map[z*10000000] = element_atomic_weight;
   }
 }
 
-void pyne::_insert_atomic_mass_map() { 
+void pyne::_insert_atomic_mass_map() {
   atomic_mass_map[10010000] = 1.00782503223;
   atomic_mass_map[10020000] = 2.01410177812;
   atomic_mass_map[10030000] = 3.01604927791;
@@ -3374,7 +3394,7 @@ void pyne::_insert_atomic_mass_map() {
   atomic_mass_map[1182950000] = 295.21624;
 }
 
-void pyne::_insert_abund_map() { 
+void pyne::_insert_abund_map() {
   natural_abund_map[10010000] = 99.9885;
   natural_abund_map[10020000] = 0.0115;
   natural_abund_map[20030000] = 0.000134;
