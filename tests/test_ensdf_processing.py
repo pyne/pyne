@@ -16,7 +16,7 @@ def test_alphad():
     input_dict['output_file'] = tmp_path + '/tmp_alphad.out'
     try:
         output_dict = ensdf_processing.alphad(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     exceptions = [[2, 'DATE RUN']]
     file_comp(input_dict['report_file'],
@@ -31,7 +31,7 @@ def optional_t_bricc_interactive():
     input_dict['element'] = '44'
     try:
         output_dict = ensdf_processing.bricc(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     bricc_out_tmp = tmp_path + '/tmp_bricc_out.out'
     bricc_out_ref = 'ensdf_processing/bricc/ref_bricc_44.out'
@@ -50,7 +50,7 @@ def optional_t_bricc_evaluation():
     input_dict['comparison_report'] = tmp_path + '/tmp_bricc_comparison_report'
     try:
         output_dict = ensdf_processing.bricc(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     bricc_comparison_ref = 'ensdf_processing/bricc/ref_a228_comparison_report'
     file_comp(input_dict['comparison_report'], bricc_comparison_ref, [])
@@ -64,7 +64,7 @@ def test_bldhst():
     input_dict['output_index_file'] = tmp_path + '/tmp_bldhst_iccndx.dat'
     try:
         output_dict = ensdf_processing.bldhst(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     ref_table = 'ensdf_processing/bldhst/ref_icctbl.dat'
     ref_index = 'ensdf_processing/bldhst/ref_iccndx.dat'
@@ -79,7 +79,7 @@ def test_delta():
     input_dict['output_file'] = tmp_path + '/tmp_delta.dat'
     try:
         output_dict = ensdf_processing.delta(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     # exceptions contain lines in the ouptut that can have a tolerable
     # precision difference
@@ -127,7 +127,7 @@ def test_gtol():
     input_dict['dcc_theory_percent'] = 1.4
     try:
         output_dict = ensdf_processing.gtol(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     ref_output_report = 'ensdf_processing/gtol/ref_gtol.rpt'
     exceptions = [[1, 'DATE:'], [1, 'INPUT-FILE name:'], [1, 'TIME:']]
@@ -147,7 +147,7 @@ def test_hsicc():
     input_dict['is_multipol_known'] = 'Y'
     try:
         output_dict = ensdf_processing.hsicc(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     ref_report = 'ensdf_processing/hsicc/ref_hscalc.lst'
     ref_card_deck = 'ensdf_processing/hsicc/ref_cards.new'
@@ -168,7 +168,7 @@ def test_hsmrg():
     input_dict['merged_data_deck'] = tmp_path + '/tmp_out_cards.mrg'
     try:
         output_dict = ensdf_processing.hsmrg(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     ref_deck = 'ensdf_processing/hsmrg/ref_cards.mrg'
     d_report = file_comp(input_dict['merged_data_deck'], ref_deck, [])
@@ -182,7 +182,7 @@ def test_seqhst():
     input_dict['sequential_output_file'] = tmp_path + '/tmp_out_iccseq.dat'
     try:
         output_dict = ensdf_processing.seqhst(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     ref_sequence = 'ensdf_processing/seqhst/ref_iccseq.dat'
     d_report = file_comp(input_dict['sequential_output_file'], ref_sequence, [])
@@ -196,7 +196,7 @@ def test_logft():
     input_dict['output_data_set'] = tmp_path + '/tmp_logft.new'
     try:
         output_dict = ensdf_processing.logft(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     ref_output_data_set = 'ensdf_processing/logft/ref_logft.new'
     d_data = file_comp(input_dict['output_data_set'], ref_output_data_set, [])
@@ -210,7 +210,7 @@ def test_radd():
     input_dict['output_file'] = tmp_path + '/tmp_output.out'
     try:
         ensdf_processing.radd(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     ref_output = 'ensdf_processing/radd/ref_output.out'
     d_report = file_comp(input_dict['output_file'], ref_output, [])
@@ -253,7 +253,7 @@ def test_ruler():
     input_dict['assumed_dcc_theory'] = '1.4'
     try:
         output_dict = ensdf_processing.ruler(input_dict)
-    except FileNotFoundError:
+    except OSError:
         raise SkipTest
     ref_output = 'ensdf_processing/ruler/ref_ruler.rpt'
     exceptions = [[1, '         INPUT FILE:'],\
