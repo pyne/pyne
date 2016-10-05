@@ -40,6 +40,10 @@ tests/Ni59.txt
 tests/Mo.txt
 tests/Xe.txt
 tests/Zn.txt
+tests/98AK04.in
+tests/ELE.in
+tests/alara.txt
+tests/mcnp_mass_fracs.txt
 tutorial/Ni59.txt
 docs/rxname_listing
 .ipynb_checkpoints

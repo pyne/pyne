@@ -59,11 +59,11 @@ def make_mat_txt():
 
 def make_mat_h5():
     """Helper for mat.h5"""
-    f = tb.openFile("mat.h5", "w")
-    f.createGroup("/", "mat", "Mass Material Test")
-    f.createArray("/mat", "Mass",  np.array([1.0, 0.5,  0.0]), "Mass Test")
-    f.createArray("/mat", "U235",  np.array([1.0, 0.75, 0.0]), "U235 Test")
-    f.createArray("/mat", "PU239", np.array([0.0, 0.25, 0.0]), "PU239 Test")
+    f = tb.open_file("mat.h5", "w")
+    f.create_group("/", "mat", "Mass Material Test")
+    f.create_array("/mat", "Mass",  np.array([1.0, 0.5,  0.0]), "Mass Test")
+    f.create_array("/mat", "U235",  np.array([1.0, 0.75, 0.0]), "U235 Test")
+    f.create_array("/mat", "PU239", np.array([0.0, 0.25, 0.0]), "PU239 Test")
     f.close()
 
 
@@ -96,6 +96,11 @@ def test_from_text():
     assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
     assert_equal(mat.metadata['units'], 'kg')
 
+def test_from_textdup():
+    mat = Material(metadata={'units': 'kg'})
+    mat.from_text("matdup.txt")
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
+    assert_equal(mat.metadata['units'], 'kg')
 
 def test_from_textelem():
     mat = Material(metadata={'units': 'kg'})

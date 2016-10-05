@@ -15,7 +15,12 @@ except ImportError:
 
 import numpy as np
 import tables as tb
-from openmc import statepoint
+try:
+    # openmc is not a hard dependency of pyne
+    from openmc import statepoint
+except ImportError:
+    statepoint = None
+
 from pyne import nuc_data
 from pyne import nucname
 from pyne import openmc
@@ -24,7 +29,7 @@ from pyne import endf
 from pyne import bins
 from pyne import ace
 from pyne.data import MeV_per_K
-from pyne.xs.models import partial_energy_matrix, group_collapse, same_arr_or_none, thermspect
+from pyne.xs.models import partial_energy_matrix, group_collapse, same_arr_or_none
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -144,7 +149,7 @@ class DataSource(object):
             self._dst_ngroups = 0
             self._src_to_dst_matrix = None
         elif same_arr_or_none(dst_group_struct, self._dst_group_struct):
-            return 
+            return
         else:
             self._dst_group_struct = np.asarray(dst_group_struct)
             self._dst_ngroups = len(dst_group_struct) - 1
@@ -314,7 +319,7 @@ class SimpleDataSource(DataSource):
     @property
     def exists(self):
         if self._exists is None:
-            with tb.openFile(nuc_data, 'r') as f:
+            with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/simple_xs' in f)
         return self._exists
 
@@ -329,7 +334,7 @@ class SimpleDataSource(DataSource):
             return None
         cond = "nuc == {0}".format(nuc)
         sig = 'sigma_' + self._rx_avail[rx]
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             simple_xs = f.root.neutron.simple_xs
             fteen = [row[sig] for row in simple_xs.fourteen_MeV.where(cond)]
             fissn = [row[sig] for row in simple_xs.fission_spectrum_ave.where(cond)]
@@ -467,14 +472,14 @@ class CinderDataSource(DataSource):
 
     def _load_group_structure(self):
         """Loads the cinder energy bounds array, E_g, from nuc_data."""
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.cinder_xs.E_g)
         self.src_group_struct = E_g
 
     @property
     def exists(self):
         if self._exists is None:
-            with tb.openFile(nuc_data, 'r') as f:
+            with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/cinder_xs' in f)
         return self._exists
 
@@ -497,7 +502,7 @@ class CinderDataSource(DataSource):
             return None
 
         # read & collapse data
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.cinder_xs.fission if rx == fissrx else \
                    f.root.neutron.cinder_xs.absorption
             rows = [np.array(row['xs']) for row in node.where(cond)]
@@ -596,14 +601,14 @@ class EAFDataSource(DataSource):
 
     def _load_group_structure(self):
         """Loads the EAF energy bounds array, E_g, from nuc_data."""
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.eaf_xs.E_g)
         self.src_group_struct = E_g
 
     @property
     def exists(self):
         if self._exists is None:
-            with tb.openFile(nuc_data, 'r') as f:
+            with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/eaf_xs' in f)
         return self._exists
 
@@ -638,9 +643,9 @@ class EAFDataSource(DataSource):
             return None
 
         # Grab data
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = node.readWhere(cond)
+            rows = node.read_where(cond)
             #rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
@@ -672,7 +677,7 @@ class EAFDataSource(DataSource):
         rxcache = self.rxcache
         avail_rx = self._avail_rx
         absrx = rxname.id('absorption')
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
             for row in node:
                 nuc = row['nuc_zz']
@@ -1025,7 +1030,6 @@ class OpenMCDataSource(DataSource):
         sigb = self.bkg_xs(nuc, temp=temp)
         e_n = self.src_group_struct
         sig_b = np.ones(len(E_points), 'f8')
-        flux = thermspect(E_points)
         for n in range(len(sigb)):
             sig_b[(e_n[n] <= E_points) & (E_points <= e_n[n+1])] = sigb[n]
         rtn = self.pointwise(nuc, 'total', temp)
@@ -1033,10 +1037,10 @@ class OpenMCDataSource(DataSource):
             sig_t = 0.0
         else:
             sig_t = rtn[1]
-        numer = bins.pointwise_linear_collapse(self.src_group_struct, 
-            E_points, (xs_points*flux)/((sig_b + sig_t)))         
-        denom = bins.pointwise_linear_collapse(self.src_group_struct, 
-            E_points, flux/((sig_b + sig_t)))
+        numer = bins.pointwise_linear_collapse(self.src_group_struct,
+            E_points, xs_points/(E_points*(sig_b + sig_t)))
+        denom = bins.pointwise_linear_collapse(self.src_group_struct,
+            E_points, 1.0/(E_points*(sig_b + sig_t)))
         return numer/denom
                 
     def bkg_xs(self, nuc, temp=300):

@@ -706,7 +706,7 @@ class Mesh(object):
         # sets mats
         mats_in_mesh_file = False
         if isinstance(mesh, basestring) and len(mats) == 0:
-            with tb.openFile(mesh) as h5f:
+            with tb.open_file(mesh) as h5f:
                 if '/materials' in h5f:
                     mats_in_mesh_file = True
             if mats_in_mesh_file:
