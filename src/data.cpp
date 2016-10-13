@@ -14,7 +14,7 @@ const double pyne::barns_per_cm2 = 1e24;
 const double pyne::cm2_per_barn = 1e-24;
 const double pyne::sec_per_day = 24.0 * 3600.0;
 const double pyne::MeV_per_K = 8.617343e-11;
-const double pyne::MeV_per_MJ = 1.60217657e-19;
+const double pyne::MeV_per_MJ = 6.2415096471204E+18;
 const double pyne::Bq_per_Ci = 3.7e10;
 const double pyne::Ci_per_Bq = 2.7027027e-11;
 
