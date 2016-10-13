@@ -234,7 +234,7 @@ namespace pyne
     comp_map activity();
     /// Calculates the decay heat of a material based on the composition and
     /// each nuclide's mass, q_val, decay_const, and atomic_mass. This assumes
-    /// input mass of grams. Return values is in mega joules. 
+    /// input mass of grams. Return values is in megawatts. 
     comp_map decay_heat();
     /// Caclulates the dose per gram using the composition of the the
     /// material, the dose type desired, and the source for dose factors
