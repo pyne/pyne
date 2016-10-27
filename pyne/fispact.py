@@ -174,13 +174,10 @@ def read_time_step(lines, i):
 def check_fisp_version(data):
     """ Checks which version of fispact was used to produced data
 
-        Parameters
-        ---------
-        data: list with each element being a line from the fispact output file
+        requires a list with each element being a line from the fispact output file
 
-        Returns
-        ------
-        v: a string of the version name"""
+        returns a string of the version name
+    """
 
     sub = "FISPACT VERSION 07.0/0"
     data = data[:50]
@@ -390,7 +387,7 @@ def parse_inventory(data):
 
 
 def find_ind(data, sub):
-    """ """
+    """ finds index in data whic contains sub string """
     for i, s in enumerate(data):
         if sub in s:
             ind = i
@@ -398,7 +395,7 @@ def find_ind(data, sub):
 
 
 def read_parameter(data, sub):
-    """ """
+    """ finds and cleans integral values in each timestep"""
     ind = find_ind(data, sub)
     line = data[ind]
     line = line.split("=")
