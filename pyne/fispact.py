@@ -155,12 +155,23 @@ def read_time_step(lines, i):
     ts.density = float(lines[ind][78:86])
 
     if ts.total_act > 0.0:
+        # added check for E as if <=1E-100 the E is dropped
         ind = find_ind(lines, "APPM OF He  4 ")
-        ts.appm_he4 = float(lines[ind][23:33])
-        ts.appm_he3 = float(lines[ind+1][23:33])
-        ts.appm_h3 = float(lines[ind+2][23:33])
-        ts.appm_h2 = float(lines[ind+3][23:33])
-        ts.appm_h1 = float(lines[ind+4][23:33])
+        ts.appm_he4 = lines[ind][23:33]
+        if "E" in ts.appm_he4:
+            ts.appm_he4= float(ts.appm_he4)        
+        ts.appm_he3 = lines[ind+1][23:33]
+        if "E" in ts.appm_he3:
+            ts.appm_he3 = float(ts.appm_he3)
+        ts.appm_h3 = lines[ind+2][23:33]
+        if "E" in ts.appm_h3:
+            ts.appm_h3 = float(ts.appm_h3)
+        ts.appm_h2 = lines[ind+3][23:33]
+        if "E" in ts.appm_h2:
+            ts.appm_h2 = float(ts.appm_h2)
+        ts.appm_h1 = lines[ind+4][23:33]
+        if "E" in ts.appm_h1:
+            ts.appm_h1 = float(ts.appm_h1)
         ind = 1
 
         ts.dom_data = parse_dominant(lines)
