@@ -299,21 +299,21 @@ def parse_dominant(data):
     bheat_percent = []
 
     for l in topset:
-        act_nuc.append(l[7:13])
+        act_nuc.append(l[7:13].replace(" ", ""))
         act.append(l[15:25])
         act_percent.append(l[27:36])
-        heat_nuc.append(l[38:44])
+        heat_nuc.append(l[38:44].replace(" ", ""))
         heat.append(l[46:56])
         heat_percent.append(l[58:67])
-        dr_nuc.append(l[69:75])
+        dr_nuc.append(l[69:75].replace(" ", ""))
         dr.append(l[77:87])
         dr_percent.append(l[89:98])
 
     for l in lowerset:
-        gheat_nuc.append(l[7:13])
+        gheat_nuc.append(l[7:13].replace(" ", ""))
         gheat.append(l[15:25])
         gheat_percent.append(l[27:36])
-        bheat_nuc.append(l[38:44])
+        bheat_nuc.append(l[38:44].replace(" ", ""))
         bheat.append(l[46:56])
         bheat_percent.append(l[58:67])
 
@@ -389,8 +389,9 @@ def parse_inventory(data):
     p2 = find_ind(data, "0  TOTAL NUMBER OF NUCLIDES PRINTED IN INVENTORY")
     data = data[4:p2]
     for nuc in data:
-        nuc_data = [nuc[2:8], float(nuc[14:25]), float(nuc[28:37]),
-                    float(nuc[40:49]), float(nuc[52:61]), float(nuc[64:72]),
+        nuc_data = [nuc[2:8].replace(" ", ""), float(nuc[14:25]), 
+                    float(nuc[28:37]), float(nuc[40:49]), 
+                    float(nuc[52:61]), float(nuc[64:72]),
                     float(nuc[75:84]), float(nuc[87:96])]
         inv.append(nuc_data)
 
