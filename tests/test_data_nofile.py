@@ -44,7 +44,7 @@ def test_natural_abund_excited_state():
     excited = gnd + 1
     data.natural_abund(gnd)
     # excited state should not be in the map yet
-    assert_equal(data.natural_abund_map.get(excited), 1)
+    assert_equal(data.natural_abund_map.get(excited), None)
     nabund = data.natural_abund(excited)
     assert_equal(nabund, data.natural_abund_map.get(excited))
     pyne_conf.NUC_DATA_PATH = orig
