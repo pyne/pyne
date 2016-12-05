@@ -744,7 +744,7 @@ def test_evaluation_neutron():
 
 
 def test_evaluation_decay():
-    download_file('https://t2.lanl.gov/nis/data/endf/decayVII.1/092_U_233',
+    download_file('http://t2.lanl.gov/nis/data/endf/decayVII.1/092_U_233',
                   'U233.txt', '3db23dc650bae28eabb92942dd7d0de5')
     u233 = Evaluation('U233.txt', verbose=False)
     u233.read()
@@ -811,7 +811,7 @@ def test_evaluation_photoatomic():
 
 
 def test_evaluation_electroatomic():
-    download_file('https://t2.lanl.gov/nis/data/data/ENDFB-VII-electroatomic/Mo/nat',
+    download_file('http://t2.lanl.gov/nis/data/data/ENDFB-VII-electroatomic/Mo/nat',
                   'Mo.txt', '2139a23258c517ae3bfa5f2cc346da4c')
     mo = Evaluation('Mo.txt', verbose=False)
     mo.read()
@@ -844,7 +844,7 @@ def test_evaluation_electroatomic():
 
 
 def test_evaluation_relaxation():
-    download_file('https://t2.lanl.gov/nis/data/endf/relaxation/Xe-relax',
+    download_file('http://t2.lanl.gov/nis/data/endf/relaxation/Xe-relax',
                   'Xe.txt', '40ecb69da6a45f992918a98da4d98ba0')
     xe = Evaluation('Xe.txt', verbose=False)
     xe.read()
