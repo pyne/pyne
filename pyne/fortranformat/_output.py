@@ -10,7 +10,7 @@ if IS_PYTHON3:
 else:
     exec('from _edit_descriptors import *')
     exec('from _misc import expand_edit_descriptors, has_next_iterator')
-    exec('import fortranformat.config as config')
+    exec('import config as config')
 
 
 PROC_SIGN_ZERO = config.PROC_SIGN_ZERO
