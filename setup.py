@@ -383,7 +383,7 @@ def setup():
                                      or (os.name != 'nt' and
                                          not s.endswith('.bat'))]
     packages = ['pyne', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs',
-                'pyne.transmute', 'pyne.gui', 'pyne.cli']
+                'pyne.transmute', 'pyne.gui', 'pyne.cli', 'pyne.fortranformat']
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
@@ -392,6 +392,7 @@ def setup():
         'pyne.dbgen': 'pyne/dbgen',
         'pyne.apigen': 'pyne/apigen',
         'pyne.transmute': 'pyne/transmute',
+	'pyne.fortranformat': 'pyne/fortranformat'
         }
     extpttn = ['*.dll', '*.so', '*.dylib', '*.pyd', '*.pyo']
     pack_data = {
