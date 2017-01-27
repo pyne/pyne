@@ -106,7 +106,7 @@ push-latest:
 	rm -r latest/* && \
 	cp -r ../html/* latest/ && \
 	git add latest/ && \
-	git commit -am "Pushed latest docs at $(date)" && \
+	git commit -am "Pushed latest docs at $$(date)" && \
 	git push
 
 push-release:
@@ -118,7 +118,7 @@ push-release:
 	rm -r $(RELEASE)/* && \
 	cp -r ../html/* $(RELEASE)/ && \
 	git add $(RELEASE)/ && \
-	git commit -am "Pushed $(RELEASE) docs at $(date)" && \
+	git commit -am "Pushed $(RELEASE) docs at $$(date)" && \
 	git push
 
 push-root:
@@ -129,5 +129,5 @@ push-root:
 	rm -rf libref previous _sources _static *.html *.js *.inv  && \
 	cp -r ../html/* . && \
 	git add . && \
-	git commit -am "Pushed root-level docs at $(date)" && \
+	git commit -am "Pushed root-level docs at $$(date)" && \
 	git push
