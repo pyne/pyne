@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
-RELEASE = v0.2
+RELEASE       = v0.5
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -14,7 +14,7 @@ PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
 DOCREPONAME = pyne.github.com
-DOCREPOURL  = git@github.com:pyne/pyne.github.com.git
+DOCREPOURL  = https://github.com/pyne/pyne.github.com
 
 .PHONY: help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest
 
@@ -41,6 +41,8 @@ html:
 	doxygen Doxyfile
 	find _build/html/tutorial/ -type f -exec sed -i -e 's/container{width:[0-9]*px}/container{width:95%}/g' {} \;
 	find _build/html/examples/ -type f -exec sed -i -e 's/container{width:[0-9]*px}/container{width:95%}/g' {} \;
+	echo "pyne.io" > $(BUILDDIR)/html/CNAME
+	touch $(BUILDDIR)/html/.nojekyll
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
@@ -102,11 +104,11 @@ push-latest:
 	test -d $(DOCREPONAME) || git clone $(DOCREPOURL) $(DOCREPONAME) && \
 	cd $(DOCREPONAME) && \
 	git pull origin master && \
-	test -d latest || mkdir latest && touch latest/_ && \
-	rm -r latest/* && \
+	rm -rf latest && \
+	mkdir latest && touch latest/_ && \
 	cp -r ../html/* latest/ && \
 	git add latest/ && \
-	git commit -am "Pushed latest docs at $(date)" && \
+	git commit -am "Pushed latest docs at $$(date)" && \
 	git push
 
 push-release:
@@ -114,20 +116,21 @@ push-release:
 	test -d $(DOCREPONAME) || git clone $(DOCREPOURL) $(DOCREPONAME) && \
 	cd $(DOCREPONAME) && \
 	git pull origin master && \
-	test -d $(RELEASE) || mkdir $(RELEASE) && touch $(RELEASE)/_ && \
-	rm -r $(RELEASE)/* && \
+	rm -rf $(RELEASE) && \
+	mkdir $(RELEASE) && touch $(RELEASE)/_ && \
 	cp -r ../html/* $(RELEASE)/ && \
 	git add $(RELEASE)/ && \
-	git commit -am "Pushed $(RELEASE) docs at $(date)" && \
+	git commit -am "Pushed $(RELEASE) docs at $$(date)" && \
 	git push
 
+# USE THIS ONE!!!
 push-root:
 	cd $(BUILDDIR) && \
 	test -d $(DOCREPONAME) || git clone $(DOCREPOURL) $(DOCREPONAME) && \
 	cd $(DOCREPONAME) && \
 	git pull origin master && \
-	rm -rf libref previous _sources _static *.html *.js *.inv  && \
+	rm -rf * && \
 	cp -r ../html/* . && \
 	git add . && \
-	git commit -am "Pushed root-level docs at $(date)" && \
+	git commit -am "Pushed root-level docs at $$(date)" && \
 	git push
