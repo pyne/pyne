@@ -182,6 +182,61 @@ def test_uniform():
 
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_uniform_threshold():
+    """This test tests that the uniform biasing scheme, when used with a threshold:
+    1. Samples space uniformly for mesh elements above the threshold. 
+       This is checked using the same method  described in test_analog_single_hex().
+    2. Adjusts weights accordingly. Sample calculations are provided in Case 3
+       in the Theory Manual.
+    """
+    seed(1953)
+    m = Mesh(structured=True, 
+             structured_coords=[[0, 3, 3.5, 4.5], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = [[2.0, 1.0], [9.0, 3.0], [0.001, 0.005]]
+    e_bounds = np.array([0, 0.5, 1.0])
+    m.mesh.save("sampling_mesh.h5m")
+    sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, True, 0.01)
+
+    num_samples = 10000
+    score = 1.0/num_samples
+    num_divs = 2
+    num_e = 2
+    spatial_tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    e_tally = np.zeros(shape=(4)) # number of phase space groups
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        if s[0] < 3.0:
+            assert_almost_equal(s[4], 0.7) # hand calcs
+        else:
+            assert_almost_equal(s[4], 2.8) # hand calcs
+
+        spatial_tally[int(s[0]*num_divs/3.5), 
+                      int(s[1]*num_divs/1.0), 
+                      int(s[2]*num_divs/1.0)]  += score
+
+        if s[0] < 3 and s[3] < 0.5:
+            e_tally[0] += score
+        elif s[0] < 3 and s[3] > 0.5:
+            e_tally[1] += score
+        if s[0] > 3 and s[3] < 0.5:
+            e_tally[2] += score
+        if s[0] > 3 and s[3] > 0.5:
+            e_tally[3] += score
+
+    for i in range(0, 3):
+        for j in range(0, 2):
+            halfspace_sum = np.sum(np.rollaxis(spatial_tally, i)[j,:,:])
+            assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
+
+    expected_e_tally = [4./7, 2./7, 3./28, 1./28] # hand calcs
+    for i in range(4):
+        assert(abs(e_tally[i] - expected_e_tally[i]) \
+               /expected_e_tally[i] < 0.1)
+
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_bias():
     """This test tests that a user-specified biasing scheme:
     1. Samples space uniformly according to the scheme.

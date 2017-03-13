@@ -311,7 +311,7 @@ cdef class Sampler:
         self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, std_string(<char *> bias_tag_name_bytes))
     
     
-    def _sampler_sampler_1(self, filename, src_tag_name, e_bounds, uniform):
+    def _sampler_sampler_1(self, filename, src_tag_name, e_bounds, uniform, threshold=0):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
          This method was overloaded in the C-based source. To overcome
         this we ill put the relevant docstring for each version below.
@@ -344,6 +344,8 @@ cdef class Sampler:
         src_tag_name : std::string
         
         uniform : bool
+
+        threshold : double
         
         filename : std::string
         
@@ -371,7 +373,7 @@ cdef class Sampler:
             e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
             for ie_bounds in range(e_bounds_size):
                 e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
-        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, <bint> uniform)
+        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, <bint> uniform, threshold)
     
     
     _sampler_sampler_0_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, str), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("bias_tag_name", str)))

@@ -67,7 +67,10 @@ uniform and user-specified sampling modes, an alias table is created from
 the uniform sampling mode, :math:`\hat{q}` is created by assigning a total
 source density of 1 to each mesh volume element, so that all space is sampled
 equally. Within each mesh volume element, a normalized PDF is created on the
-basis of source densities at each energy.
+basis of source densities at each energy.  An optional threshold can be provided
+such that all mesh volume elements with a total source below that threshold will
+remain unbiased under the uniform sampling mode.  The default threshold is 0 so
+that all mesh elements are biased.  
 
 The method for uniformly sampling within a mesh volume element of Cartesian mesh
 is straightforward. A vertex of the hexahedron (:math:`O`) is chosen and three
@@ -99,21 +102,26 @@ Sample Calculations
 This section provides the sample calculations to justify the results in the
 nosetests: test_uniform, test_bias, test_bias_spatial.
 
-Consider a mesh with two mesh volume elements with volumes (3, 0.5). The
+Consider a mesh with three mesh volume elements with volumes (3, 0.5, 2). The
 source on the mesh has two energy groups. The source density distribution is:
 
 .. math::
-     q' = ((2, 1), (9, 3))
+     q' = ((2000, 1000), (9000, 3000), (1, 2))
 
 The source intensity is found by multiplying by the volumes:
 
 .. math::
-     q = ((6, 3), (4.5, 1.5))
+     q = ((6000, 3000), (4500, 1500), (2, 4))
 
 Normalizing yields the analog PDF:
 
 .. math::
-     p = ((0.4, 0.2), (0.3, 0.1)
+     p = ((1000/2501, 500/2501), (750/2501, 250/2501) (1/7503, 2/7503) )
+
+or approximately:
+
+.. math::
+     p = ((0.39984, 0.199920), (0.29988, 0.09996), (0.0001333, 0.0002666) )
 
 Case 1: Uniform Sampling
 ------------------------
@@ -122,25 +130,61 @@ For uniform sampling the biased source density distribution is created by
 normalizing the source density to 1 within each mesh volume element:
 
 .. math::
-     \hat{q}' = ((2/3, 1/3), (3/4, 1/4))
+     \hat{q}' = ((2/3, 1/3), (3/4, 1/4), (1/3, 2/3))
 
 The biased source intensity is found by multiplying by the volumes:
 
 .. math::
-     \hat{q} = ((2, 1), (3/8, 1/8))
+     \hat{q} = ((2, 1), (3/8, 1/8), (2/3, 4/3))
 
 Normalizing yields the biased PDF:
 
 .. math::
-     \hat{p} = ((4/7, 2/7), (3/28, 1/28))
+     \hat{p} = ((4/11, 2/11), (3/44, 1/44), (4/33, 8/33) )
+
+or appoximately:
+
+.. math::
+     \hat{p} = ((0.363636, 0.181818), (0.0681818, 0.0227272), (0.121212, 0.242424) )
 
 The weights of particle born from these phase space bins should then be the
 ratio of the unbiased to biased PDF values:
 
 .. math::
-     w = ((0.7, 0.7), (2.8, 2.8))
+     w = ((1.09956, 1.09956), (4.3982, 4.3982), (0.0010996, 0.0010996))
 
-Case 2: User-Specified Biasing
+Case 2: Uniform Sampling with Threshold
+---------------------------------------
+
+If a threshold of 5 is added to uniform sampling, the biased source density
+distribution is created by normalizing the source density to 1 within each
+mesh volume element that has a total strength above that threshold:
+
+.. math::
+     \hat{q}' = ((2/3, 1/3), (3/4, 1/4), (1 , 2))  hmmmm
+
+The biased source intensity is found by multiplying by the volumes:
+
+.. math::
+     \hat{q} = ((2, 1), (3/8, 1/8), (2, 4))
+
+Normalizing yields the biased PDF:
+
+.. math::
+     \hat{p} = ((4/11, 2/11), (3/44, 1/44), (4/33, 8/33) )
+
+or appoximately:
+
+.. math::
+     \hat{p} = ((0.363636, 0.181818), (0.0681818, 0.0227272), (0.121212, 0.242424) )
+
+The weights of particle born from these phase space bins should then be the
+ratio of the unbiased to biased PDF values:
+
+.. math::
+     w = ((1.09956, 1.09956), (4.3982, 4.3982), (0.0010996, 0.0010996))
+
+Case 3: User-Specified Biasing
 ------------------------------
 Now consider some user-specified bias source density distribution:
 
@@ -162,6 +206,9 @@ ratio of the unbiased to biased PDF values:
 
 .. math::
      w = ((1.6, 0.4), (2.4, 0.8))
+
+
+
 
 **********
 References

@@ -57,7 +57,7 @@ subroutine source
     integer :: tries
   
     if (first_run .eqv. .true.) then
-        call sampling_setup(idum(1))
+        call sampling_setup(idum(1),rdum(1))
         first_run = .false.
     endif
  
