@@ -199,7 +199,7 @@ The simplest way to compile MCNP5 with the source subroutine is as follows:
      d. pyne/src/measure.h
 
   #. Remove the pre-existing empty source.F90 file.
-  #. Soft-link pyne/src/source.F90.
+  #. Soft-link pyne/share/source.F90.
   #. Open the file MCNP/Source/src/FILE.list.
   #. Edit line 78 to include the additional source files. It should look like "CXX_SRC := measure.cpp source_sampling.cpp".
   #. Compile MCNP5 using the standard build method.
