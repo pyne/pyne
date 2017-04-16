@@ -323,7 +323,13 @@ def load(filename):
 
 def get_surface_list():
     """return a list of valid surface IDs"""
-    return list(surf_id_to_handle.keys())
+    import sys
+    print("list(surf_id_to_handle.keys()):", file=sys.stderr)
+    print(list(surf_id_to_handle.keys()), file=sys.stderr)
+    print("[k for k in surf_id_to_handle.keys()]:", file=sys.stderr)
+    print([k for k in surf_id_to_handle.keys()], file=sys.stderr)
+    #return list(surf_id_to_handle.keys())
+    return [k for k in surf_id_to_handle.keys()]
 
 def get_volume_list():
     """return a list of valid volume IDs"""
