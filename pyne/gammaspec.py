@@ -58,6 +58,70 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
         return print_string
 
 
+def read_dollar_spe_file(spec_file_path):
+    """Reads a .spe file with the $format
+    """
+
+    with open(spec_file_path, "r") as spec_file:
+        full_file_text = spec_file.read()
+    file_split = full_file_text.splitlines()
+    spec_file.close()
+
+    # check version of .spe file matches this functions format
+    if (file_split[0] != '$SPEC_ID:'):
+        raise RuntimeError('spe file format not supported by this function')
+
+    spectrum = GammaSpectrum()
+    # descriptive variables
+    spectrum.file_name = spec_file_path
+    spectrum.spec_name = file_split[file_split.index("$SPEC_ID:") + 1]
+    spectrum.spec_name=spectrum.spec_name.strip()
+    tmp = file_split[file_split.index("$SPEC_REM:") + 1]
+    tmp = tmp.split(" ")
+    spectrum.det_id = tmp[1]
+    tmp = file_split[file_split.index("$SPEC_REM:") + 2]
+    tmp = tmp.split(" ")
+    spectrum.det_descp = tmp[1]
+    # time variables
+    tmp = file_split[file_split.index("$DATE_MEA:") + 1]
+    tmp = tmp.split(" ")
+    spectrum.start_date = tmp[0]
+    spectrum.start_time = tmp[1]
+    tmp = file_split[file_split.index("$MEAS_TIM:") + 1]
+    tmp = tmp.split(" ")
+    spectrum.real_time = float(tmp[1])
+    spectrum.live_time = float(tmp[0])
+    # pulse height
+    tmp = file_split[file_split.index("$DATA:") + 1]
+    tmp = tmp.split(" ")
+    spectrum.start_chan_num = int(tmp[0])
+    spectrum.num_channels = int(tmp[1])+1
+    tmp = file_split[file_split.index("$DATA:") + 2:
+                                 file_split.index("$DATA:") + 2
+                                 + int(spectrum.num_channels) ]
+    for c in tmp:
+        val=c.strip()
+        spectrum.counts.append(float(val))
+
+    tmp = file_split[file_split.index("$MCA_CAL:") + 2]
+    tmp = tmp.split(" ")
+    spectrum.calib_e_fit.append(float(tmp[0]))
+    spectrum.calib_e_fit.append(float(tmp[1]))
+    spectrum.calib_e_fit.append(float(tmp[2]))
+
+    tmp = file_split[file_split.index("$SHAPE_CAL:") + 2]
+    tmp = tmp.split(" ")
+    spectrum.calib_fwhm_fit.append(float(tmp[0]))
+    spectrum.calib_fwhm_fit.append(float(tmp[1]))
+    spectrum.calib_fwhm_fit.append(float(tmp[2]))
+
+    # calculate additional parameters based on .spe file
+    spectrum.dead_time = spectrum.real_time - spectrum.live_time
+    spectrum.channels = np.arange(0, len(spectrum.counts))
+    spectrum.calc_ebins()
+
+    return spectrum
+
 def read_spe_file(spec_file_path):
     """Reads a .spe file
 
@@ -76,7 +140,7 @@ def read_spe_file(spec_file_path):
     spectrum = GammaSpectrum()
     spectrum.file_name = spec_file_path
 
-    with open(spec_file_path, 'r') as spec_file:
+    with open(spec_file_path, "r") as spec_file:
         full_file_text = spec_file.read()
     file_split = full_file_text.splitlines()
     spec_file.close()
@@ -84,10 +148,10 @@ def read_spe_file(spec_file_path):
 
     # check version of .spe file matches currently supported version
     if (file_split[0] == '$SPEC_ID:'):
-        raise RuntimeError('This type of spe file is not supported')
+        raise RuntimeError('Spe file format is not supported by this function')
 
     for item in file_split:
-        line = item.split(':')
+        line = item.split(":")
         # processes the spectrum into 2 lists 1 for channel numbers
         # the other for counts
         if (inspec):
@@ -96,37 +160,39 @@ def read_spe_file(spec_file_path):
                 temp = line[1].strip()
                 spectrum.counts.append(float(temp))
 
-        if (line[0] == 'Spectrum name'):
+        if (line[0] == "Spectrum name"):
             spectrum.spec_name = line[1]
-        elif (line[0] == 'Detector ID'):
+            spectrum.spec_name=spectrum.spec_name.strip()
+        elif (line[0] == "Detector ID"):
             spectrum.det_id = line[1].strip()
-        elif (line[0] == 'Detector description'):
+        elif (line[0] == "Detector description"):
             spectrum.det_descp = line[1].strip()
-        elif (line[0] == 'Real Time'):
+        elif (line[0] == "Real Time"):
             spectrum.real_time = float(line[1])
-        elif (line[0] == 'Live Time'):
+        elif (line[0] == "Live Time"):
             spectrum.live_time = float(line[1])
-        elif (line[0] == 'Acquisition start date'):
+        elif (line[0] == "Acquisition start date"):
             spectrum.start_date = line[1].strip()
-        elif (line[0] == 'Acquisition start time'):
-            spectrum.start_time = line[1].strip() + ':' + line[2] + ':' + line[3]
-        elif (line[0] == 'Starting channel number'):
+        elif (line[0] == "Acquisition start time"):
+            spectrum.start_time = line[1].strip() + ":" + line[2] + ":" + line[3]
+            spectrum.start_time=spectrum.start_time.strip()
+        elif (line[0] == "Starting channel number"):
             spectrum.start_chan_num = int(line[1].strip())
-        elif (line[0] == 'Number of channels'):
+        elif (line[0] == "Number of channels"):
             spectrum.num_channels = int(line[1].strip())
-        elif (line[0] == 'Energy Fit'):
+        elif (line[0] == "Energy Fit"):
             temp = line[1].strip()
-            temp = temp.split(' ')
+            temp = temp.split(" ")
             spectrum.calib_e_fit.append(float(temp[0]))
             spectrum.calib_e_fit.append(float(temp[2]))
             spectrum.calib_e_fit.append(float(temp[4]))
-        elif (line[0] == 'FWHM Fit'):
+        elif (line[0] == "FWHM Fit"):
             temp = line[1].strip()
-            temp = temp.split(' ')
+            temp = temp.split(" ")
             spectrum.calib_fwhm_fit.append(float(temp[0]))
             spectrum.calib_fwhm_fit.append(float(temp[2]))
             spectrum.calib_fwhm_fit.append(float(temp[4]))
-        elif (line[0] == 'SPECTRUM'):
+        elif (line[0] == "SPECTRUM"):
             inspec = True
 
     spectrum.counts = np.array(spectrum.counts)
@@ -182,3 +248,4 @@ def calc_e_eff(energy, eff_coeff, eff_fit=1):
         eff = 0
 
     return eff
+

@@ -145,10 +145,10 @@ def make_fpy_table(nuc_data, build_dir=""):
     for i in range(1, 31, 5):
         alldata.append(readtable(i, spdat))
     alldata = numpy.lib.recfunctions.stack_arrays(alldata, asrecarray=True)
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
     if not hasattr(db.root, 'neutron'):
-        neutron_group = db.createGroup('/', 'neutron', 'Neutron Data')
-    fpy_table = db.createTable('/neutron/', 'nds_fission_products', alldata,
+        neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
+    fpy_table = db.create_table('/neutron/', 'nds_fission_products', alldata,
                                'NDS Fission Product Yields, percent [unitless]')
     fpy_table.flush()
     db.close()
@@ -173,7 +173,7 @@ def make_fpy(args):
     """Controller function for NDS fission products."""
     nuc_data, build_dir = args.nuc_data, args.build_dir
     # Check that the table exists
-    with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
+    with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron,
                                                   'nds_fission_products'):
             print('skipping NDS fission product yield table creation; '

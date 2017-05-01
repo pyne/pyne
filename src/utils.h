@@ -24,14 +24,12 @@
 #include <vector>
 #include <algorithm>
 
-#if defined __APPLE__ || defined __WIN_GNUC__
 #if (__GNUC__ >= 4)
   #include <cmath>
   #define isnan(x) std::isnan(x)
 #else
   #include <math.h>
   #define isnan(x) __isnand((double)x)
-#endif
 #endif
 
 #ifdef __WIN_MSVC__

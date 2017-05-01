@@ -2282,9 +2282,9 @@ cdef class _MaterialLibrary(object):
         cdef set nucids = set()
         for mat in _lib.values():
             nucids.update(mat.comp.keys())
-        with tb.openFile(filename, 'a') as f:
+        with tb.open_file(filename, 'a') as f:
             nucgrp, nucdsname = os.path.split(nucpath)
-            f.createArray(nucgrp, nucdsname, np.array(sorted(nucids)),
+            f.create_array(nucgrp, nucdsname, np.array(sorted(nucids)),
                           createparents=True)
         for key, mat in _lib.items():
             if "name" not in mat.metadata:

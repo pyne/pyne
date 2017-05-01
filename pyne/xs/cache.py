@@ -12,7 +12,7 @@ import tables as tb
 
 from pyne import nucname
 from pyne.pyne_config import pyne_conf
-from pyne.xs.models import partial_energy_matrix, phi_g
+from pyne.xs.models import partial_energy_matrix, phi_g, same_arr_or_none
 from pyne.xs import data_source
 from pyne.utils import QAWarning
 
@@ -20,12 +20,6 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 if sys.version_info[0] > 2:
   basestring = str
-
-def _same_arr_or_none(a, b): 
-    if a is None or b is None:
-        return a is b
-    else:
-        return (len(a) == len(b)) and (a == b).all()
 
 def _valid_group_struct(E_g):
     if E_g is None:
@@ -127,8 +121,6 @@ class XSCache(MutableMapping):
         if (key == 'E_g'):
             value = _valid_group_struct(value)
             cache_value = self._cache['E_g']
-            if _same_arr_or_none(value, cache_value):
-                return
             self.clear()
             self._cache['phi_g'] = None
             for ds in self.data_sources:
@@ -136,7 +128,7 @@ class XSCache(MutableMapping):
         elif (key == 'phi_g'):
             value = value if value is None else np.asarray(value, dtype='f8')
             cache_value = self._cache['phi_g']
-            if _same_arr_or_none(value, cache_value):
+            if same_arr_or_none(value, cache_value):
                 return
             E_g = self._cache['E_g']
             if len(value) + 1 == len(E_g):

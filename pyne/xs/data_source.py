@@ -15,6 +15,11 @@ except ImportError:
 
 import numpy as np
 import tables as tb
+try:
+    # openmc is not a hard dependency of pyne
+    from openmc import statepoint
+except ImportError:
+    statepoint = None
 
 from pyne import nuc_data
 from pyne import nucname
@@ -144,6 +149,8 @@ class DataSource(object):
             self._dst_group_struct = None
             self._dst_ngroups = 0
             self._src_to_dst_matrix = None
+        elif same_arr_or_none(dst_group_struct, self._dst_group_struct):
+            return
         else:
             self._dst_group_struct = np.asarray(dst_group_struct)
             self._dst_ngroups = len(dst_group_struct) - 1
@@ -390,7 +397,6 @@ class SimpleDataSource(DataSource):
             IGNORED!!!  Included for API compatability
         dst_phi_g : array-like, optional
             Group fluxes for the destiniation structure, length dst_ngroups.
-
 
         Returns
         -------
@@ -907,6 +913,8 @@ class OpenMCDataSource(DataSource):
     structure will clear the reaction cache. 
     """
 
+    self_shield_reactions = {rxname.id('fission'), rxname.id('gamma'), rxname.id('total')}
+
     def __init__(self, cross_sections=None, src_group_struct=None, **kwargs):
         """Parameters
         ----------
@@ -950,7 +958,14 @@ class OpenMCDataSource(DataSource):
         temp : float, optional
             The nuclide temperature in [K].
 
+        Returns
+        -------
+        E_points : array-like
+            The array or energy points that the reaction is evaluated at.
+        rawdata : array-like
+            Raw pointwise reaction data.
         """
+        nuc = nucname.id(nuc)
         rx = rxname.id(rx)
         try:
             mt = rxname.mt(rx)
@@ -979,7 +994,7 @@ class OpenMCDataSource(DataSource):
         elif rx == absrx:
             rawdata = ntab.sigma_a
         else:
-            ntabrx = ntab.reactions[mt] 
+            ntabrx = ntab.reactions[mt]
             if ntabrx.IE is None or ntabrx.IE == 0:
                 rawdata = ntabrx.sigma
             else:
@@ -1013,78 +1028,100 @@ class OpenMCDataSource(DataSource):
 
         Parameters
         ----------
+        nuc : int
+            Nuclide id.
+        rx : int
+            Reaction id.
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
 
+        Returns
+        -------
+        rxdata : array like
+            collapsed self shielded cross section for nuclide nuc and reaction
+            rx
         """
         for atab in self.cross_sections.ace_tables:
             if os.path.isfile(atab.abspath or atab.path):
                 lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
                 lib.read(atab.name)
 
-class StatepointDataSource(DataSource):
-    """Data source for a Statepoint file from OpenMC. The cross sections for
-       this data source are built from the reaction rates determined in an 
-       openMC statepoint.  
+class StatePointDataSource(DataSource):
+    """Data source for reactions coming from openmc state points
     """
 
-    def __init__(self, state_point, **kwargs):
+    def __init__(self, state_point, tallies, num_den, phi_tot, **kwargs):
         """Parameters
         ----------
-        cross_sections : openmc.CrossSections or string or file-like, optional
-            Path or file to OpenMC cross_sections.xml
-        src_group_struct : array-like, optional
-            The group structure to discretize the ACE data to, defaults to 
-            ``np.logspace(1, -9, 101)``.
+        state_point : string
+            Path to the openmc statepoint file to be used to build the data_source
+        tallies : array-like
+            The tally id's used to pull the cross sections from.
+        num_dens: map of int to float
+            A map containing the number densities of the nuclides in the
+            material used in the statepoint.
+        phi_tot: array of floats
+            The total flux within the reactor
         kwargs : optional
             Keyword arguments to be sent to DataSource base class.
-
         """
-        sp = statepoint.StatePoint(state_point)
-        self.cross_sections = # function to read in reaction rates
-        self._src_group_struct = _load_group_structure(sp)
-        super(OpenMCDataSource, self).__init__(**kwargs)
+        self.state_point = state_point
+        self.tallies = tallies
+        self.particles = state_point.n_particles
+        self.reactions = {}
+        self._load_reactions(num_den, phi_tot)
+        super(StatePointDataSource, self).__init__(**kwargs)
 
     @property
     def exists(self):
-        if self._exists is None:
-            
-        return self._exists
+        return True
 
-    def _load_group_structure(self, state_point):
-        if self._src_group_struct is None:
-            self._src_group_struct = state_point.tallies[3]
+    def _load_group_structure(self):
+        """Loads the group structure from a tally in openMC. It is
+        assumed that all tallies have the same group structure
+        """
+        self._src_group_struct = self.state_point.tallies[self.tallies[0]].filters[0].bins[::-1]
         self.src_group_struct = self._src_group_struct
- 
-    def _load_cross_sections():
-        
 
-    def _load_reaction(self, nuc, rx, temp=300.0):
+    def _load_reactions(self, num_dens, phi_tot):
+        """Loads the group structure from a tally in openMC. It is
+        assumed that all tallies have the same group structure
+        Parameters
+        ----------
+        state_point: openMC statepoint file
+            The statepoint file that will be used to load the reaction
+            rates to determine the microscopic cross sections for the
+            statepoint.
+        num_dens: map of int to float
+            A map containing the number densities of the nuclides in the
+            material used in the statepoint.
+        phi_tot: array of floats
+            The total flux within the reactor
+        """
+        for tally in self.tallies:
+            sp = self.state_point.tallies[tally]
+            for nuclide in sp.nuclides:
+                for score in sp.scores:
+                   self.reactions[nucname.id(nuclide.name), score] = sp.get_values(
+                       [score], [], [], [nuclide.name]).flatten() * self.particles
+                   weight = 1.0E24/abs(phi_tot*num_dens[nucname.id(nuclide.name)])
+                   self.reactions[nucname.id(nuclide.name), score] *= weight
+
+    def reaction(self, nuc, rx, temp):
         """Loads reaction data from ACE files indexed by OpenMC.
-
         Parameters
         ----------
         nuc : int
             Nuclide id.
         rx : int
             Reaction id.
-        temp : float, optional
-            The nuclide temperature in [K].
-
+        Return
+        ------
+        Array containing the cross sections for the reaction
+        requested.
         """
-
-
-    def load(self, temp=300.0):
-        """Loads the entire data source into memory. This can be expensive for 
-        lots of ACE data.
-
-        Parameters
-        ----------
-        temp : float, optional
-            Temperature [K] of material, defaults to 300.0.
-
-        """
-        for atab in self.cross_sections.ace_tables:
-            if os.path.isfile(atab.abspath or atab.path):
-                lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
-                lib.read(atab.name)
+        rxkey = (nuc, rx)
+        if rxkey not in self.reactions:
+            return None
+        else:
+            return self.reactions[rxkey]

@@ -68,31 +68,31 @@ def _init_cinder(db):
 
     # Create neutron and photon groups
     if not hasattr(db.root, 'neutron'):
-        neutron_group = db.createGroup('/', 'neutron',
+        neutron_group = db.create_group('/', 'neutron',
                                        'Neutron Interaction Data')
 
     if not hasattr(db.root, 'photon'):
-        photon_group = db.createGroup('/', 'photon', 'Photon Interaction Data')
+        photon_group = db.create_group('/', 'photon', 'Photon Interaction Data')
 
     # Create xs group
     if not hasattr(db.root.neutron, 'cinder_xs'):
-        nxs_mg_group = db.createGroup("/neutron", "cinder_xs",
+        nxs_mg_group = db.create_group("/neutron", "cinder_xs",
                                       "CINDER Multi-Group Neutron Cross "
                                       "Section Data")
 
     # Create source groups
     if not hasattr(db.root.photon, 'cinder_source'):
-        gxs_mg_group = db.createGroup("/photon", "cinder_source",
+        gxs_mg_group = db.create_group("/photon", "cinder_source",
                                       "CINDER Multi-Group Photon Source Data")
 
     # Create fission_yield groups
     if not hasattr(db.root.neutron, 'cinder_fission_products'):
-        nxs_mg_group = db.createGroup("/neutron", "cinder_fission_products",
+        nxs_mg_group = db.create_group("/neutron", "cinder_fission_products",
                                       "CINDER Neutron Fission Product "
                                       "Yield Data")
 
     if not hasattr(db.root.photon, 'cinder_fission_products'):
-        nxs_mg_group = db.createGroup("/photon", "cinder_fission_products",
+        nxs_mg_group = db.create_group("/photon", "cinder_fission_products",
                                       "CINDER Photofission Product Yield Data")
 
 
@@ -153,7 +153,7 @@ def make_mg_group_structure(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -172,14 +172,14 @@ def make_mg_group_structure(nuc_data, build_dir=""):
     m = re.search(n_E_g_pattern, raw_data)
     g = m.groups()
     n_E_g = np.array(g[::-1], dtype=float)
-    db.createArray('/neutron/cinder_xs', 'E_g', n_E_g, 'Neutron energy group bounds [MeV]')
+    db.create_array('/neutron/cinder_xs', 'E_g', n_E_g, 'Neutron energy group bounds [MeV]')
 
     # Find & write photon group structure
     g_E_g_pattern = "Gamma structure, MeV" + ("\s+("+cinder_float+")")*(G_g + 1)
     m = re.search(g_E_g_pattern, raw_data)
     g = m.groups()
     g_E_g = np.array(g[::-1], dtype=float)
-    db.createArray('/photon/cinder_source', 'E_g', g_E_g, 'Photon energy group bounds [MeV]')
+    db.create_array('/photon/cinder_source', 'E_g', g_E_g, 'Photon energy group bounds [MeV]')
 
     # Close the hdf5 file
     db.close()
@@ -208,7 +208,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -224,7 +224,7 @@ def make_mg_absorption(nuc_data, build_dir=""):
 
     # Init the neutron absorption table
     absorption_dtype = np.dtype(absorption_dtype_tuple + [('xs', float, G_n)])
-    absorption_table = db.createTable('/neutron/cinder_xs/', 'absorption',
+    absorption_table = db.create_table('/neutron/cinder_xs/', 'absorption',
                                       np.empty(0, dtype=absorption_dtype),
                                       'Neutron absorption reaction cross sections [barns]')
     abrow = absorption_table.row
@@ -298,7 +298,7 @@ def make_mg_fission(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -314,7 +314,7 @@ def make_mg_fission(nuc_data, build_dir=""):
 
     # Init the neutron absorption table
     fission_dtype = np.dtype(fission_dtype_tuple + [('xs', float, G_n)])
-    fission_table = db.createTable('/neutron/cinder_xs/', 'fission',
+    fission_table = db.create_table('/neutron/cinder_xs/', 'fission',
                                    np.empty(0, dtype=fission_dtype),
                                    'Neutron fission reaction cross sections [barns]')
     frow = fission_table.row
@@ -387,7 +387,7 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -403,7 +403,7 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
 
     # Init the gamma absorption table
     gamma_decay_dtype = np.dtype(gamma_decay_dtype_tuple + [('spectrum', float, G_g)])
-    gamma_decay_table = db.createTable('/photon/cinder_source/', 'decay_spectra',
+    gamma_decay_table = db.create_table('/photon/cinder_source/', 'decay_spectra',
                                        np.empty(0, dtype=gamma_decay_dtype),
                                        'Gamma decay spectrum [MeV]')
     gdrow = gamma_decay_table.row
@@ -563,7 +563,7 @@ def make_neutron_fp_info(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -578,7 +578,7 @@ def make_neutron_fp_info(nuc_data, build_dir=""):
     info_table = parse_neutron_fp_info(raw_data)
 
     # Init the neutron fission product info table
-    nfp_table = db.createTable('/neutron/cinder_fission_products/', 'info',
+    nfp_table = db.create_table('/neutron/cinder_fission_products/', 'info',
                                np.empty(0, dtype=fp_info_dtype),
                                'CINDER Neutron Fission Product Yield Information')
 
@@ -655,7 +655,7 @@ def make_photon_fp_info(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -670,7 +670,7 @@ def make_photon_fp_info(nuc_data, build_dir=""):
     info_table = grab_photon_fp_info(raw_data)
 
     # Init the neutron fission product info table
-    gfp_table = db.createTable('/photon/cinder_fission_products/', 'info',
+    gfp_table = db.create_table('/photon/cinder_fission_products/', 'info',
                                np.empty(0, dtype=fp_info_dtype),
                                'CINDER Photofission Product Yield Information')
     gfp_table.append(info_table)
@@ -704,7 +704,7 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -726,7 +726,7 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
     nfp_yields_raw = m_yields.group(0)
 
     # Init the neutron fission product info table
-    nfp_table = db.createTable('/neutron/cinder_fission_products/', 'yields',
+    nfp_table = db.create_table('/neutron/cinder_fission_products/', 'yields',
                                np.empty(0, dtype=fp_yields_dtype),
                                'CINDER Neutron Fission Product Yields')
     nfprow = nfp_table.row
@@ -775,7 +775,7 @@ def make_photon_fp_yields(nuc_data, build_dir):
         Directory with cinder.dat file.
     """
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     _init_cinder(db)
@@ -797,7 +797,7 @@ def make_photon_fp_yields(nuc_data, build_dir):
     gfp_yields_raw = m_yields.group(0)
 
     # Init the neutron fission product info table
-    gfp_table = db.createTable('/photon/cinder_fission_products/', 'yields',
+    gfp_table = db.create_table('/photon/cinder_fission_products/', 'yields',
                                np.empty(0, dtype=fp_yields_dtype),
                                'CINDER Photofission Product Yields')
     gfprow = gfp_table.row
@@ -836,7 +836,7 @@ def make_cinder(args):
     """Controller function for adding cinder data."""
     nuc_data, build_dir, datapath = args.nuc_data, args.build_dir, args.datapath
 
-    with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
+    with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'cinder_xs') and hasattr(f.root.neutron, 'cinder_fission_products'):
             print("skipping Cinder XS data table creation; already exists.")
             return

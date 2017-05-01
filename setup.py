@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 """Welcome to PyNE's setup.py script. This is a little non-standard because pyne
-is a multilanguage projects.  Still this script follows a predicatable ordering:
+is a multilanguage project.  Still this script follows a predictable ordering:
 
 1. Parse command line arguments,
 2. Call cmake from the 'build' directory
 3. Call make from the 'build' directory
-4. Use distuitls/setuptools from the 'build' directory
+4. Use distutils/setuptools from the 'build' directory
 
 This gives us the best of both worlds. Compiled code is installed with cmake/make
 and Cython/Python code is installed with normal Python tools. The only trick here is
 how the various command line arguments are handed off to the three sub-processes.
 
-To acomplish this we use argparser groups to group command line arguments based on
+To accomplish this we use argparser groups to group command line arguments based on
 whether they go to:
 
 1. the setup() function,
@@ -21,11 +21,11 @@ whether they go to:
    modify the environment in some way.
 
 To add a new command line argument, first add it to the appropriate group in the
-``parse_args()`` function.  Then, modify the logic in the cooresponding
+``parse_args()`` function.  Then, modify the logic in the corresponding
 ``parse_setup()``, ``parse_cmake()``, ``parse_make()``, or ``parse_others()``
 functions to consume your new command line argument.  It is OK for more than
-one of the parser functions to comsume the argument. Where appropriate,
-ensure the that argument is appended to the argument list that is returned by these
+one of the parser functions to consume the argument. Where appropriate,
+ensure that the argument is appended to the argument list that is returned by these
 functions.
 """
 from __future__ import print_function
@@ -63,7 +63,7 @@ if '.' not in sys.path:
 
 # Thanks to http://patorjk.com/software/taag/
 # and http://www.chris.com/ascii/index.php?art=creatures/dragons
-# for ASCII art inspiriation
+# for ASCII art inspiration
 
 pyne_logo = """\
 
@@ -180,14 +180,14 @@ def download_decay():
     durl.close()
     return True
 
-local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'hsicc', 'hsmrg', 'seqhst',
+local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'bldhst', 'hsicc', 'hsmrg', 'seqhst',
                           'logft', 'radd', 'ruler']
 local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'], 
                      ['ensdf_processing/RADD/ELE.in', 'ELE.in']]
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
-    # Hack for copying the executables the first time PyNE is instealled, before 
+    # Hack for copying the executables the first time PyNE is installed, before 
     # pyne has been added to the python path.
     if exe_dest[-4:] != 'pyne':
         exe_dest = sysconfig.get_python_lib()
@@ -352,7 +352,7 @@ def parse_args():
 
     cmake = parser.add_argument_group('cmake', 'Group for CMake arguments.')
     cmake.add_argument('-D', metavar='VAR', action='append',
-                       help='Set enviornment variable.')
+                       help='Set environment variable.')
     cmake.add_argument('--build-type', metavar='BT',
                        help='Set build type via CMAKE_BUILD_TYPE, '
                             'e.g. Release or Debug.')
@@ -383,7 +383,7 @@ def setup():
                                      or (os.name != 'nt' and
                                          not s.endswith('.bat'))]
     packages = ['pyne', 'pyne.dbgen', 'pyne.apigen', 'pyne.xs',
-                'pyne.transmute', 'pyne.gui', 'pyne.cli']
+                'pyne.transmute', 'pyne.gui', 'pyne.cli', 'pyne.fortranformat']
     pack_dir = {
         'pyne': 'pyne',
         'pyne.xs': 'pyne/xs',
@@ -392,6 +392,7 @@ def setup():
         'pyne.dbgen': 'pyne/dbgen',
         'pyne.apigen': 'pyne/apigen',
         'pyne.transmute': 'pyne/transmute',
+	'pyne.fortranformat': 'pyne/fortranformat'
         }
     extpttn = ['*.dll', '*.so', '*.dylib', '*.pyd', '*.pyo']
     pack_data = {

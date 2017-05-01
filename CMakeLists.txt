@@ -1,59 +1,59 @@
 # Defines the CMake commands/policies
-cmake_minimum_required( VERSION 2.8.5 )
+cmake_minimum_required(VERSION 2.8.5)
 
 # Set the project name
-project( pyne Fortran CXX)
-
+project( pyne Fortran C CXX)
 
 #determine if spatial solver module should be built
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND NOT APPLE)
+  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND NOT APPLE AND NOT "$ENV{CONDA_BUILD}")
     SET(BUILD_SPATIAL_SOLVER true)
   ELSE()
     SET(BUILD_SPATIAL_SOLVER false)
   ENDIF()
 ENDIF()
 
-IF(BUILD_SPATIAL_SOLVER)
-# languages
-enable_language(Fortran)
 
-# Augment the Fortran implicit link libraries
-message(STATUS
-  "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES = ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
-if (APPLE)
+IF(BUILD_SPATIAL_SOLVER)
+  # languages
+  enable_language(Fortran)
+
+  # Augment the Fortran implicit link libraries
   message(STATUS
-    "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
-  set(LIBGCC_S)
-# The previous method found the gcc_s library by version,
+    "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES = ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
+  if (APPLE)
+    message(STATUS
+      "Before fix: CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+    set(LIBGCC_S)
+    # The previous method found the gcc_s library by version,
     # find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
-# but this always found the library regardless of version, and then
-# the name as set was different from what was found.  This new way
-# ensures that the name is consistent with what was found.
-  set(LIBGCC_S_PATH)
-  foreach (gcc_s_ver 3 2 1)
-    find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
-      PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
-      NODEFAULTPATH
-    )
+    # but this always found the library regardless of version, and then
+    # the name as set was different from what was found.  This new way
+    # ensures that the name is consistent with what was found.
+    set(LIBGCC_S_PATH)
+    foreach (gcc_s_ver 3 2 1)
+      find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
+        PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
+        NODEFAULTPATH
+      )
+      if (LIBGCC_S_PATH)
+        break()
+      endif ()
+    endforeach ()
+    message(STATUS "LIBGCC_S_PATH = ${LIBGCC_S_PATH}.")
     if (LIBGCC_S_PATH)
-      break()
+      get_filename_component(LIBGCC_S ${LIBGCC_S_PATH} NAME)
+      # Pull off leading lib and trailing .dylib.
+      string(REGEX REPLACE "^lib" "" LIBGCC_S ${LIBGCC_S})
+      string(REGEX REPLACE "\\.dylib$" "" LIBGCC_S ${LIBGCC_S})
     endif ()
-  endforeach ()
-  message(STATUS "LIBGCC_S_PATH = ${LIBGCC_S_PATH}.")
-  if (LIBGCC_S_PATH)
-    get_filename_component(LIBGCC_S ${LIBGCC_S_PATH} NAME)
-# Pull off leading lib and trailing .dylib.
-    string(REGEX REPLACE "^lib" "" LIBGCC_S ${LIBGCC_S})
-    string(REGEX REPLACE "\\.dylib$" "" LIBGCC_S ${LIBGCC_S})
+    message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
+    if (LIBGCC_S)
+      set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
+    endif ()
   endif ()
-  message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
-  if (LIBGCC_S)
-    set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
-  endif ()
-endif ()
-message(STATUS
-  "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
+  message(STATUS
+    "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES = ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
 ENDIF(BUILD_SPATIAL_SOLVER)
 
 # Make the scripts available in the 'cmake' directory available for the
@@ -152,6 +152,27 @@ else(APPLE)
       set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
     endif(HAVE_SETUPTOOLS)
 endif(APPLE)
+
+
+# use, i.e. don't skip the full RPATH for the build tree
+#SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+#SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+#SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/cyclus")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# the RPATH to be used when installing, but only if it's not a system directory
+#LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+#IF("${isSystemDir}" STREQUAL "-1")
+#    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/cyclus")
+#ENDIF("${isSystemDir}" STREQUAL "-1")
+
 message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
 
 # find numpy and include the numpy headers
@@ -183,7 +204,7 @@ get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 message("-- Copying C/C++ header files.")
-file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/cpp/" DESTINATION
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/src/" DESTINATION
     "${CMAKE_BINARY_DIR}/pyne/include/" FILES_MATCHING PATTERN "*.h")
 
 message("-- Copying Cython header files.")

@@ -59,11 +59,11 @@ def make_mat_txt():
 
 def make_mat_h5():
     """Helper for mat.h5"""
-    f = tb.openFile("mat.h5", "w")
-    f.createGroup("/", "mat", "Mass Material Test")
-    f.createArray("/mat", "Mass",  np.array([1.0, 0.5,  0.0]), "Mass Test")
-    f.createArray("/mat", "U235",  np.array([1.0, 0.75, 0.0]), "U235 Test")
-    f.createArray("/mat", "PU239", np.array([0.0, 0.25, 0.0]), "PU239 Test")
+    f = tb.open_file("mat.h5", "w")
+    f.create_group("/", "mat", "Mass Material Test")
+    f.create_array("/mat", "Mass",  np.array([1.0, 0.5,  0.0]), "Mass Test")
+    f.create_array("/mat", "U235",  np.array([1.0, 0.75, 0.0]), "U235 Test")
+    f.create_array("/mat", "PU239", np.array([0.0, 0.25, 0.0]), "PU239 Test")
     f.close()
 
 
@@ -94,6 +94,18 @@ def test_from_text():
     mat = Material(metadata={'units': 'kg'})
     mat.from_text("mat.txt")
     assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
+    assert_equal(mat.metadata['units'], 'kg')
+
+def test_from_textdup():
+    mat = Material(metadata={'units': 'kg'})
+    mat.from_text("matdup.txt")
+    assert_equal(mat.comp, {922350000: 0.05, 922380000: 0.95})
+    assert_equal(mat.metadata['units'], 'kg')
+
+def test_from_textelem():
+    mat = Material(metadata={'units': 'kg'})
+    mat.from_text("matelem.txt")
+    assert_equal(mat.comp, {10000000: 0.1, 80000000: 0.9})
     assert_equal(mat.metadata['units'], 'kg')
 
 
@@ -204,7 +216,7 @@ class TestMaterialMethods(TestCase):
     def test_activity(self):
         mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
         obs = mat.activity()
-        exp = {922350000: 59953.15101810882, 922380000: 177216.65112976026}       
+        exp = {922350000: 59953.15101810882, 922380000: 177216.65112976026}
         assert_equal(set(obs), set(exp))
         assert_equal(set(obs.values()), set(exp.values()))
 
@@ -595,7 +607,7 @@ def test_to_atom_dens():
     ad = mat.to_atom_dens()
     assert_almost_equal(ad[10010000]/(10.**22), 6.68734335169385)
     assert_almost_equal(ad[80160000]/(10.**22), 3.34367167584692)
-    
+
 #
 # Test mapping functions
 #
@@ -1310,13 +1322,13 @@ def test_fluka_scientific():
     mat.density=1.0
     mat.metadata['fluka_name'] = 'ORGPOLYM'
     written = mat.fluka(25)
-    
+
     exp =  'MATERIAL          1.        1.        1.       25.                    ORGPOLYM  \n'
     exp += 'COMPOUND  -1.000e-02  HYDROGEN-1.900e-01    CARBON-8.000e-01    OXYGENORGPOLYM  \n'
     assert_equal(exp,written)
 
 
-    
+
 
 def test_write_alara():
     if 'alara.txt' in os.listdir('.'):
@@ -1656,14 +1668,14 @@ def test_decay_u235_h3():
         # full decay is not installed
         raise SkipTest
     exp = Material({10030000: 0.472645829730143, 20030000: 0.027354079574566214,
-                    812070000: 9.08083992078195e-22, 
+                    812070000: 9.08083992078195e-22,
                     822090000: 5.318134090224469e-29,
-                    822110000: 1.2900842350157843e-20, 
-                    832110000: 8.383482900183342e-22, 
-                    832150000: 4.5950843264546854e-27, 
-                    842110000: 6.3727159025095244e-27, 
-                    842150000: 1.086256809210682e-26, 
-                    852190000: 4.0236546470124826e-28, 
+                    822110000: 1.2900842350157843e-20,
+                    832110000: 8.383482900183342e-22,
+                    832150000: 4.5950843264546854e-27,
+                    842110000: 6.3727159025095244e-27,
+                    842150000: 1.086256809210682e-26,
+                    852190000: 4.0236546470124826e-28,
                     862190000: 3.37645671770566e-24,
                     872230000: 1.5415521899415466e-22,
                     882230000: 4.443454725452303e-18,

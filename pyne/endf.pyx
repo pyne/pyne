@@ -2020,7 +2020,7 @@ class Evaluation(object):
 
     def _read_independent_yield(self):
         self._print_info(8, 454)
-        iyield = self.fission['yielf_independent']
+        iyield = self.fission['yield_independent']
 
         # Initialize energies and yield dictionary
         iyield['energies'] = []

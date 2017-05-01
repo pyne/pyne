@@ -43,7 +43,7 @@ eafds = data_source.EAFDataSource()
 def test_cinder_E_g():
     if not cinderds.exists:
         return
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         E_g = np.array(f.root.neutron.cinder_xs.E_g)
     assert_array_equal(E_g, cinderds.src_group_struct)
 
@@ -51,7 +51,7 @@ def test_cinder_E_g():
 def test_cinder_sigma_f():
     if not cinderds.exists:
         return
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]['xs'])
     obs = cinderds.reaction('U235', 'fission')
     assert_array_equal(sigma_f_n_U235, obs)
@@ -62,7 +62,7 @@ def test_cinder_sigma_f():
 def test_cinder_sigma_a():
     if not cinderds.exists:
         return
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]['xs'])
     obs = cinderds.reaction(10010, 'absorption')
     assert_array_equal(sigma_a_n_H1, obs)
@@ -339,7 +339,7 @@ def test_shield_weights1():
 def test_eaf_E_g():
     if not eafds.exists:
         return
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         E_g = np.array(f.root.neutron.eaf_xs.E_g)
     assert_array_equal(E_g, eafds.src_group_struct)
 
@@ -398,11 +398,13 @@ sample_xs_openmc = StringIO("""<?xml version="1.0" ?>
 <cross_sections>
   <filetype>ascii</filetype>
   <ace_table alias="W-180.21c" awr="178.401" location="1" name="74180.21c" path="W180.ace" temperature="2.585e-08" zaid="74180"/>
+  <ace_table alias="C-12.00c" awr="11.896900"location="1" name="6000.00c"  path="C012-n.ace" temperature="2.5263e-08" zaid="6000"/>
 </cross_sections>
 """)
 
 def test_openmc():
-    ods = data_source.OpenMCDataSource(cross_sections=sample_xs_openmc, 
+    sample_xs_openmc.seek(0)
+    ods = data_source.OpenMCDataSource(cross_sections=sample_xs_openmc,
                                        src_group_struct=np.logspace(1, -9, 11))
     obs = ods.reaction('W180', 2)
     assert_equal(10, len(obs))
@@ -417,3 +419,60 @@ def test_openmc():
     obs = ods.reaction('W180', 'z_3n')
     assert_equal(10, len(obs))
     assert_true(np.all(obs >= 0.0))
+
+def test_openmc_bkg_none():
+    C_12 = 60120000
+    W_180 = 741800000
+    sample_xs_openmc.seek(0)
+    ods = data_source.OpenMCDataSource(cross_sections=sample_xs_openmc,
+        src_group_struct=np.logspace(1, -9, 11))
+    expected = ods.reaction(C_12, 'total', 300)
+    atom_dens = {C_12: 1.E22, W_180: 1.E22}
+    ods.atom_dens = atom_dens
+
+    observed = ods.bkg_xs(W_180, 300)
+    assert_array_almost_equal(0.0, observed)
+
+def test_openmc_bkg():
+    C = 60000000
+    W_180 = 741800000
+    sample_xs_openmc.seek(0)
+    ods = data_source.OpenMCDataSource(cross_sections=sample_xs_openmc,
+        src_group_struct=np.logspace(1, -9, 11))
+    expected = ods.reaction(C, 'total', 300)
+    atom_dens = {C: 1.E22, W_180: 1.E22}
+    ods.atom_dens = atom_dens
+
+    observed = ods.bkg_xs(W_180, 300)
+    if expected is not None and observed is not None:
+        assert_array_almost_equal(expected, observed)
+
+def test_openmc_self_shielding1():
+    C = 60000000
+    W_180 = 741800000
+    sample_xs_openmc.seek(0)
+    ods = data_source.OpenMCDataSource(cross_sections=sample_xs_openmc,
+        src_group_struct=np.logspace(1, -9, 11))
+    non_ss = ods.reaction(W_180, 'gamma', 300)
+    atom_dens = {C: 1.E22, W_180: 1.E22}
+    ods.atom_dens = atom_dens
+
+    observed = ods.reaction(W_180, 'gamma', 300)
+    assert_true(np.all(observed <= non_ss))
+
+def test_open_self_shielding2():
+    C = 60000000
+    W_180 = 741800000
+    sample_xs_openmc.seek(0)
+    ods = data_source.OpenMCDataSource(cross_sections=sample_xs_openmc,
+        src_group_struct=np.logspace(1, -9, 11))
+    non_ss = ods.reaction(W_180, 'gamma', 300)
+    atom_dens = {C: 1.E22, W_180: 1.E2}
+    ods.atom_dens = atom_dens
+
+    observed = ods.reaction(W_180, 'gamma', 300)
+    assert_array_almost_equal(observed, non_ss)
+
+
+
+
