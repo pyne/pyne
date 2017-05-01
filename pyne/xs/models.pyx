@@ -371,7 +371,8 @@ def thermspect(E, T=573, lower=0.155e-6):
     k = 8.52e-5
     phi = np.empty(len(E), 'f8')
     mask = (E < lower)
-    phi[mask] = 2*np.pi*np.sqrt(E[mask]*1e6) * np.exp(-E[mask]*1e6/(k*T)) / (np.pi * k * T)**1.5
+    phi[mask] = np.sqrt(2*E[mask]*1e6) * 2 * np.pi * np.sqrt(E[mask]*1e6) 
+    phi[mask] *= np.exp(-E[mask]*1e6/(k*T)) / (np.pi * k * T)**1.5
     mask = (E > lower)
     phi[mask] = 1/((2*E[mask]*1e6)**0.5)
     phi[mask] += 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
@@ -384,7 +385,7 @@ def fastspect(E, T=783, lower=1.0e-3):
     mask = (E < lower)
     phi[mask] = 1/((2*E[mask]*1e6)**0.5)
     mask = (E > lower)
-    phi[mask] += 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
+    phi[mask] += np.sqrt(2*E[mask]*1e6) * 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
     phi /= phi.sum()
     return phi
 #
