@@ -92,7 +92,7 @@ pyne_logo = """\
                                      `
 """
 
-VERSION = '0.5.0-rc1'
+VERSION = '0.5.2'
 IS_NT = os.name == 'nt'
 
 CMAKE_BUILD_TYPES = {
@@ -182,12 +182,12 @@ def download_decay():
 
 local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'bldhst', 'hsicc', 'hsmrg', 'seqhst',
                           'logft', 'radd', 'ruler']
-local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'], 
+local_ensdf_tools = [['ensdf_processing/RADD/98AK04.in', '98AK04.in'],
                      ['ensdf_processing/RADD/ELE.in', 'ELE.in']]
 
 def copy_ensdf_executables(exe_dest):
     print('Copying ENSDF Executables to install directory')
-    # Hack for copying the executables the first time PyNE is installed, before 
+    # Hack for copying the executables the first time PyNE is installed, before
     # pyne has been added to the python path.
     if exe_dest[-4:] != 'pyne':
         exe_dest = sysconfig.get_python_lib()
@@ -356,7 +356,7 @@ def parse_args():
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
     other.add_argument('--moab', help='Path to MOAB root directory.')
     other.add_argument('--prefix', help='Prefix for install location.')
-    other.add_argument('--bootstrap', default=False, action='store_true', 
+    other.add_argument('--bootstrap', default=False, action='store_true',
                        help='Bootstraps the PyNE installation, including '
                             'nuc_data_make and possibly decaygen.')
 
