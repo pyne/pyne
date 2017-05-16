@@ -31,30 +31,30 @@ def rect_smooth(spectrum, m):
     """Rectangular smoothing function.
 
     Parameters
-    ---------- 
-    spectrum: str 
-    a spectrum object,
-    m : int 
-    the smoothing width, must be an odd integer more than 3
-    
+    ----------
+    spectrum: str
+        a spectrum object
+    m : int
+        the smoothing width, must be an odd integer more than 3
+
     Returns
     -------
     smooth_spect: a spectrum object
 
     """
-   
+
     if(m < 3):
         raise ValueError('Error:Smoothing width less than 3')
     if(m % 2 == 0):
         raise ValueError('Error:Smoothing width not odd')
- 
+
     smooth_spec = copy.deepcopy(spectrum)
     smooth_spec.counts = [] #reset counts
 
-    ext = (m - 1.0) / 2.0
-    
+    ext = int((m - 1.0) / 2.0)
+
     i = 0
-    # 3 stages of loops a small one at start and end to deal 
+    # 3 stages of loops a small one at start and end to deal
     # with end cases and a main one for bulk of spectrum
     while i < ext:
         smooth_spec.counts.append(spectrum.counts[i])
@@ -71,7 +71,7 @@ def rect_smooth(spectrum, m):
     while i < (len(spectrum.counts)):
         smooth_spec.counts.append(spectrum.counts[i])
         i = i + 1
-	
+
     smooth_spec.spec_name = spectrum.spec_name + ' smoothed'
     return smooth_spec
 
@@ -109,7 +109,7 @@ def five_point_smooth(spec):
 
 def calc_bg(spec, c1, c2, m):
     """Returns background under a peak"""
-    
+
     if c1 > c2:
        raise ValueError('c1 must be less than c2')
     if c1 < 0:
@@ -123,12 +123,12 @@ def calc_bg(spec, c1, c2, m):
         bg = (low_sum + high_sum) * ((c2 - c1 + 1) / 6)
     else:
         raise ValueError('m is not set to a valud method id')
- 
+
     return bg
 
 def gross_count(spec, c1, c2):
     """Returns total number of counts in a spectrum between two channels"""
-    
+
     if c1 > c2:
        raise ValueError('c1 must be less than c2')
     if c1 < 0:
@@ -146,7 +146,7 @@ def net_counts(spec, c1, c2, m):
     nc = gc - bg
     return nc
 
-   
+
 
 
 
