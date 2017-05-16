@@ -92,7 +92,7 @@ pyne_logo = """\
                                      `
 """
 
-VERSION = '0.5.2'
+VERSION = '0.5.3'
 IS_NT = os.name == 'nt'
 
 CMAKE_BUILD_TYPES = {
