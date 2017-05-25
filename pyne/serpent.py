@@ -43,7 +43,7 @@ _detector_pattern = r"(DET\w+)\s*=\s*np.array\("
 
 _detector_pattern_all = r"(DET\w+)\s*=\s*"
 
-_imaterial_line_pattern = r"(i\w+)\s*=\s*\d*;"
+_imaterial_line_pattern = r"(i[a-zA-Z]\w+)\s*=\s*\d*;"
 
 def _delete_imaterial(s):
     """"Remove imaterial information from the top of Serpent2 *_dep.m file started from 'i' with nothing."""
