@@ -5,6 +5,8 @@ q_value, and the percent of q coming from gammas. This data is from
 'ORIGEN-S DECAY DATA LIBRARY AND HALF-LIFE UNCERTAINTIES'
 (http://web.ornl.gov/~webworks/cppr/y2001/rpt/97914.pdf)
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from __future__ import print_function
 import csv
 import os
@@ -129,7 +131,9 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
         nuc_file.create_group('/', 'decay', 'ENSDF Decay data')
 
     # Make a new table
-    q_value_table = nuc_file.create_table('/decay', 'q_values', q_value_array, 'Nuclide, Q_value [MeV per disintegration], Fraction of Q that comes from gammas')
+    q_value_table = nuc_file.create_table('/decay', 'q_values',
+        q_value_array, 'Nuclide, Q_value [MeV per disintegration], ' \
+                       'Fraction of Q that comes from gammas')
 
     # Ensure that data was written to table
     q_value_table.flush()

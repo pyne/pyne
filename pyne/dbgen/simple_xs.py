@@ -1,4 +1,8 @@
-"""This module provides a way to grab and store simple cross sections from KAERI."""
+"""This module provides a way to grab and store simple cross sections from
+KAERI."""
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=bad-whitespace
 from __future__ import print_function
 import os
 from warnings import warn
@@ -21,7 +25,7 @@ from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def grab_kaeri_simple_xs(build_dir=""):
-    """Grabs the KAERI files needed for the simple cross sections table, 
+    """Grabs the KAERI files needed for the simple cross sections table,
     if not already present.
 
     Parameters
@@ -57,8 +61,8 @@ def grab_kaeri_simple_xs(build_dir=""):
         htmlfile = element.upper() + '.html'
         if htmlfile not in already_grabbed:
             grab_kaeri_nuclide(element.upper(), build_dir)
-        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
-                                                                          htmlfile))
+        all_nuclides = all_nuclides | parse_for_all_isotopes(
+                           os.path.join(build_dir, htmlfile))
 
     # Grab nuclide XS summary files
     for nuc in sorted(all_nuclides):
@@ -123,10 +127,10 @@ def get_xs_from_file(filename, eng, chan):
     filename : str
         Local path to a KAERI neutron cross section summary html file.
     eng : str
-        Energy flag to find this cross section for.  (Must be key 
+        Energy flag to find this cross section for.  (Must be key
         of simple_xs_energy dictionary).
     chan : str
-        Cross section (interaction channel) to find.  (Must be key 
+        Cross section (interaction channel) to find.  (Must be key
         of simple_xs_channels dict).
 
     Returns
@@ -168,10 +172,11 @@ def parse_simple_xs(build_dir=""):
     all_nuclides = set()
     for element in nucname.name_zz.keys():
         htmlfile = element.upper() + '.html'
-        all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
-                                                                          htmlfile))
+        all_nuclides = all_nuclides | parse_for_all_isotopes(
+                           os.path.join(build_dir, htmlfile))
     all_nuclides = sorted([nucname.id(nuc) for nuc in all_nuclides])
-    energy_tables = dict([(eng, np.zeros(len(all_nuclides), dtype=simple_xs_dtype)) \
+    energy_tables = dict([(eng, np.zeros(len(all_nuclides),
+                          dtype=simple_xs_dtype)) \
                           for eng in simple_xs_energy.keys()])
 
     # Loop through species
@@ -185,16 +190,19 @@ def parse_simple_xs(build_dir=""):
 
             # Loop trhough reactions
             for chan in simple_xs_channels:
-                energy_tables[eng][chan][i] = get_xs_from_file(filename, eng, chan)
+                energy_tables[eng][chan][i] = \
+                    get_xs_from_file(filename, eng, chan)
 
     for eng in simple_xs_energy:
         # Store only non-trivial entries
         channels_list = list(simple_xs_channels.keys())
-        mask = (energy_tables[eng][channels_list] != np.zeros(1, dtype=simple_xs_dtype)[channels_list])
+        mask = (energy_tables[eng][channels_list] != \
+                np.zeros(1, dtype=simple_xs_dtype)[channels_list])
         energy_tables[eng] = energy_tables[eng][mask]
 
         # Calculate some xs
-        energy_tables[eng]['sigma_s'] = energy_tables[eng]['sigma_e'] + energy_tables[eng]['sigma_i']
+        energy_tables[eng]['sigma_s'] = energy_tables[eng]['sigma_e'] \
+                                      + energy_tables[eng]['sigma_i']
 
         energy_tables[eng]['sigma_a'] = energy_tables[eng]['sigma_gamma'] + \
                                         energy_tables[eng]['sigma_f'] + \
@@ -230,18 +238,20 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
     # Create neutron group
     if not hasattr(db.root, 'neutron'):
-        neutron_group = db.create_group('/', 'neutron', 'Neutron Interaction Data')
+        neutron_group = db.create_group('/', 'neutron',
+                                        'Neutron Interaction Data')
 
     # Create simple_xs Group
     if not hasattr(db.root.neutron, 'simple_xs'):
-        simple_xs_group = db.create_group("/neutron", "simple_xs", "Simple Neutron Cross Section Data")
+        simple_xs_group = db.create_group("/neutron", "simple_xs",
+                                          "Simple Neutron Cross Section Data")
 
-    # Create tables for every energy 
+    # Create tables for every energy
     for eng, eng_flag in simple_xs_energy.items():
-        simple_xs_table = db.create_table(simple_xs_group, eng, 
-                                         np.empty(0, dtype=simple_xs_dtype), 
-                                         "{0} [barns]".format(eng_flag.capitalize()), 
-                                         expectedrows=len(simple_xs_tables[eng]))
+        simple_xs_table = db.create_table(simple_xs_group, eng,
+            np.empty(0, dtype=simple_xs_dtype),
+            "{0} [barns]".format(eng_flag.capitalize()),
+            expectedrows=len(simple_xs_tables[eng]))
         simple_xs_table.append(simple_xs_tables[eng])
         simple_xs_table.flush()
 
@@ -258,7 +268,7 @@ def make_simple_xs(args):
     with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'simple_xs'):
             print("skipping simple XS data table creation; already exists.")
-            return 
+            return
 
     # First grab the atomic abundance data
     print("Grabbing neutron summary files from KAERI")

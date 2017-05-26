@@ -1,4 +1,8 @@
-"""This module provides a way to grab and store raw data for radioactive decay."""
+"""This module provides a way to grab and store raw data for radioactive
+decay."""
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=too-many-locals
 from __future__ import print_function, division
 import os
 import glob
@@ -21,12 +25,14 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
 def _readpoint(line, dstart, dlen):
+    """ TBD """
     data = ensdf._getvalue(line[dstart:dstart + dlen])
     error = ensdf._getvalue(line[dstart + dlen:dstart + dlen + 2])
     return data, error
 
 
 def _read_variablepoint(line, dstart, dlen):
+    """ TBD """
     sub = line[dstart:dstart + dlen + 2].split()
     data = None
     error = None
@@ -37,6 +43,7 @@ def _read_variablepoint(line, dstart, dlen):
 
 
 def grab_atomic_data(build_dir=""):
+    """ TBD """
     medfile = os.path.join(build_dir, 'mednew.dat')
     if not os.path.isfile(medfile):
         urllib.urlretrieve('http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/'
@@ -44,6 +51,7 @@ def grab_atomic_data(build_dir=""):
 
 
 def parse_atomic_data(build_dir=""):
+    """ TBD """
     i = 0
     j = 0
     medfile = os.path.join(build_dir, 'mednew.dat')

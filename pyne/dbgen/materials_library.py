@@ -1,9 +1,10 @@
-"""Module handles the construction of a reference materials library in nuc_data.h5.
-This currently consists to natural element materials and those coming from PNNL's
-`Materials Compendium`_.
+"""Module handles the construction of a reference materials library in
+nuc_data.h5.  This currently consists to natural element materials and those
+coming from PNNL's `Materials Compendium`_.
 
 .. _Materials Compendium: http://www.pnnl.gov/main/publications/external/technical_reports/PNNL-15870Rev1.pdf
 """
+# pylint: disable=invalid-name
 
 from __future__ import print_function
 import re
@@ -36,7 +37,8 @@ def make_elements():
     abunds_no_trivial = [abund for abund in natural_abund_map.items() if
                          nucname.anum(abund[0]) != 0 and abund[1] != 0]
     sorted_abunds = sorted(abunds_no_trivial)
-    grouped_abunds = groupby(sorted_abunds, lambda abund: nucname.znum(abund[0]))
+    grouped_abunds = groupby(sorted_abunds,
+                             lambda abund: nucname.znum(abund[0]))
     # filter out 111, 113, 115, 117, 118 - the ones with no names
     elts = (Material(dict(abunds), metadata={"name": nucname.name(zz)})
             for zz, abunds in grouped_abunds if zz in nucname.zz_name.keys())
@@ -111,8 +113,8 @@ def parse_materials(mats, lines):
     """
     if len(lines) == 0:
         return mats
-    material_lines = list(takewhile(lambda l: first_line_re.match(l[0]) is None,
-                                    lines[2:]))
+    material_lines = list(takewhile(
+        lambda l: first_line_re.match(l[0]) is None, lines[2:]))
     material_length = len(material_lines) + 2
     mat = sum((Material({l[0]: float(l[3])}) for l in material_lines))
     mat.density = float(lines[1][2])
@@ -158,7 +160,8 @@ def make_materials_library(args):
     if os.path.exists(nuc_data):
         with tb.open_file(nuc_data, 'r') as f:
             if '/material_library' in f:
-                print("skipping materials library data table creation; already exists.")
+                print("skipping materials library data table creation; "
+                      "already exists.")
                 return
 
     print("Making materials library...")

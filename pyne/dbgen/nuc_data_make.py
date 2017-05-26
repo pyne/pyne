@@ -1,3 +1,7 @@
+""" TBD """
+# py lint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=anomalous-backslash-in-string
 from __future__ import print_function
 import os
 import argparse
@@ -62,6 +66,7 @@ pyne_logo = """\
 
 
 def _fetch_prebuilt(args):
+    """ Retrieve prebuilt nuclear database (HDF5) """
     nuc_data, build_dir = args.nuc_data, args.build_dir
     prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
     prebuilt_nuc_data_url = "http://data.pyne.io/prebuilt_nuc_data.h5"
@@ -93,26 +98,42 @@ def main(args=None):
                   ('nds_fpy', ndsfpy.make_fpy)
                   ]
     make_map = dict(make_funcs)
-    make_open = set(['atomic_mass', 'scattering_lengths', 'simple_xs', 'materials',
-                     'wimsd_fpy', 'nds_fpy', 'q_values', 'dose_factors'])
+    make_open = set([
+        'atomic_mass',
+        'scattering_lengths',
+        'simple_xs',
+        'materials',
+        'wimsd_fpy',
+        'nds_fpy',
+        'q_values',
+        'dose_factors'])
 
     # Parse the command line arguments
-    parser = argparse.ArgumentParser(description='Make a nuclear data library.')
-    parser.add_argument('-o', dest='nuc_data', action='store', default=nuc_data,
+    parser = argparse.ArgumentParser(
+                 description='Make a nuclear data library.')
+    parser.add_argument('-o', dest='nuc_data', action='store',
+                        default=nuc_data,
                         help='path to the output database file.')
-    parser.add_argument('-b', dest='build_dir', action='store', default=build_dir,
+    parser.add_argument('-b', dest='build_dir', action='store',
+                        default=build_dir,
                         help='path to the build directory.')
-    parser.add_argument('--datapath', dest='datapath', action='store', default="",
+    parser.add_argument('--datapath', dest='datapath', action='store',
+                        default="",
                         help='MCNP DATAPATH.')
-    parser.add_argument('--fetch-prebuilt', dest='fetch_prebuilt', action='store',
+    parser.add_argument('--fetch-prebuilt', dest='fetch_prebuilt',
+                        action='store',
                         type=lambda s: 't' in s.lower() or 'y' in s.lower(),
-                        default=True, help='grab partially assembled file [y/n].')
-    parser.add_argument('--make-open-only', dest='make_open_only', action='store',
+                        default=True,
+                        help='grab partially assembled file [y/n].')
+    parser.add_argument('--make-open-only', dest='make_open_only',
+                        action='store',
                         type=lambda s: 't' in s.lower() or 'y' in s.lower(),
-                        default=False, help='only add open data to file [y/n].')
+                        default=False,
+                        help='only add open data to file [y/n].')
     parser.add_argument('-m', dest='make', action='store', default='all',
-                        help='comma-separated parts of nuc_data to make: ' +
-                        ", ".join([mf[0] for mf in make_funcs]) + ', all, and none.')
+                        help='comma-separated parts of nuc_data to make: '
+                        + ", ".join([mf[0] for mf in make_funcs])
+                        + ', all, and none.')
     parser.add_argument('--check', dest='hash_check', action='store_true',
                         help='check hashes against built-in ones')
     parser.add_argument('--clean', dest='clean', type=int, default=0,

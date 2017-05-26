@@ -1,5 +1,9 @@
 """This module provides a way to locate, parse, and store CINDER cross
 sections."""
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=too-many-locals
+# pylint: disable=bad-whitespace
 from __future__ import print_function
 import os
 import io
@@ -54,7 +58,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
     return rtn
 
 # These read in cinder.dat
-cinder_float = "[\d.+-Ee]+"
+cinder_float = r"[\d.+-Ee]+"
 
 
 def _init_cinder(db):
@@ -116,8 +120,8 @@ def get_group_sizes(raw_data):
         The number of photon energy groups in the dataset
     """
     # Search for the group pattern
-    G_pattern = ("(\d+) nuclides,\s+(\d+) neutron groups,\s+(\d+) proton "
-                 "groups,\s+(\d+) photon groups")
+    G_pattern = (r"(\d+) nuclides,\s+(\d+) neutron groups,\s+(\d+) proton "
+                 r"groups,\s+(\d+) photon groups")
     m = re.search(G_pattern, raw_data)
     g = m.groups()
 
@@ -168,26 +172,32 @@ def make_mg_group_structure(nuc_data, build_dir=""):
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
 
     # Find & write neutron group structure
-    n_E_g_pattern = "Neutron group .*, MeV" + ("\s+("+cinder_float+")")*(G_n + 1)
+    n_E_g_pattern = "Neutron group .*, MeV" \
+                  + (r"\s+("+cinder_float+")")*(G_n + 1)
     m = re.search(n_E_g_pattern, raw_data)
     g = m.groups()
     n_E_g = np.array(g[::-1], dtype=float)
-    db.create_array('/neutron/cinder_xs', 'E_g', n_E_g, 'Neutron energy group bounds [MeV]')
+    db.create_array('/neutron/cinder_xs', 'E_g', n_E_g,
+                    'Neutron energy group bounds [MeV]')
 
     # Find & write photon group structure
-    g_E_g_pattern = "Gamma structure, MeV" + ("\s+("+cinder_float+")")*(G_g + 1)
+    g_E_g_pattern = "Gamma structure, MeV" \
+                  + (r"\s+("+cinder_float+")")*(G_g + 1)
     m = re.search(g_E_g_pattern, raw_data)
     g = m.groups()
     g_E_g = np.array(g[::-1], dtype=float)
-    db.create_array('/photon/cinder_source', 'E_g', g_E_g, 'Photon energy group bounds [MeV]')
+    db.create_array('/photon/cinder_source', 'E_g', g_E_g,
+                    'Photon energy group bounds [MeV]')
 
     # Close the hdf5 file
     db.close()
 
 
 # Helpful patterns
-from_nuc_pattern = "\n#[\s\d]{4}:\s+(\d+).*?\n(_______________________| [\w/-]+ Fission Yield Data)"
-to_nuc_base = "#[\s\d]{4}:\s+(\d+) produced by the following C-X  \((.{4})\) REF:.*?\n"
+from_nuc_pattern = r"\n#[\s\d]{4}:\s+(\d+).*?\n(_______________________| " \
+                   r"[\w/-]+ Fission Yield Data)"
+to_nuc_base = r"#[\s\d]{4}:\s+(\d+) produced by the following C-X  " \
+              r"\((.{4})\) REF:.*?\n"
 
 absorption_dtype_tuple = [
     ('from_nuc', int),
@@ -225,12 +235,13 @@ def make_mg_absorption(nuc_data, build_dir=""):
     # Init the neutron absorption table
     absorption_dtype = np.dtype(absorption_dtype_tuple + [('xs', float, G_n)])
     absorption_table = db.create_table('/neutron/cinder_xs/', 'absorption',
-                                      np.empty(0, dtype=absorption_dtype),
-                                      'Neutron absorption reaction cross sections [barns]')
+                                       np.empty(0, dtype=absorption_dtype),
+                                      'Neutron absorption reaction '
+                                      'cross sections [barns]')
     abrow = absorption_table.row
 
     # Init to_nuc_pattern
-    to_nuc_pattern = to_nuc_base + ("\s+("+cinder_float+")")*G_n
+    to_nuc_pattern = to_nuc_base + (r"\s+("+cinder_float+")")*G_n
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
@@ -276,7 +287,8 @@ def make_mg_absorption(nuc_data, build_dir=""):
     db.close()
 
 
-fission_base = "\n([\s\d]+),([\s\d]+),([\s\d]+)=\(n,f\) yield sets\. If > 0,[\s\d]{4}-gp fisn CX follows\..*?\n"
+fission_base = r"\n([\s\d]+),([\s\d]+),([\s\d]+)=\(n,f\) yield sets\. " \
+               r"If > 0,[\s\d]{4}-gp fisn CX follows\..*?\n"
 
 fission_dtype_tuple = [
     ('nuc', int),
@@ -314,13 +326,14 @@ def make_mg_fission(nuc_data, build_dir=""):
 
     # Init the neutron absorption table
     fission_dtype = np.dtype(fission_dtype_tuple + [('xs', float, G_n)])
-    fission_table = db.create_table('/neutron/cinder_xs/', 'fission',
-                                   np.empty(0, dtype=fission_dtype),
-                                   'Neutron fission reaction cross sections [barns]')
+    fission_table = db.create_table(
+        '/neutron/cinder_xs/', 'fission',
+        np.empty(0, dtype=fission_dtype),
+        'Neutron fission reaction cross sections [barns]')
     frow = fission_table.row
 
     # Init to_nuc_pattern
-    fission_pattern = fission_base + ("\s+("+cinder_float+")")*G_n
+    fission_pattern = fission_base + (r"\s+("+cinder_float+")")*G_n
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
@@ -365,14 +378,15 @@ def make_mg_fission(nuc_data, build_dir=""):
     db.close()
 
 
-gamma_decay_base = "gamma spectra from .{3} multiplied by\s+(" + cinder_float + ")\s+to agree w/ Eg=\s*(" +\
-                   cinder_float + ")\n"
+gamma_decay_base = r"gamma spectra from .{3} multiplied by\s+(" \
+    + cinder_float + r")\s+to agree w/ Eg=\s*(" + cinder_float + ")\n"
 
 gamma_decay_dtype_tuple = [
     ('nuc', int),
     ('energy', float),
     ('scaling_factor', float),
-    # Extra 'spectrum' entry should be appended with value ('spectrum', float, G_g)
+    # Extra 'spectrum' entry should be appended with value
+    # ('spectrum', float, G_g)
     ]
 
 
@@ -402,14 +416,16 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
     nuclides, G_n, G_p, G_g = get_group_sizes(raw_data)
 
     # Init the gamma absorption table
-    gamma_decay_dtype = np.dtype(gamma_decay_dtype_tuple + [('spectrum', float, G_g)])
-    gamma_decay_table = db.create_table('/photon/cinder_source/', 'decay_spectra',
-                                       np.empty(0, dtype=gamma_decay_dtype),
-                                       'Gamma decay spectrum [MeV]')
+    gamma_decay_dtype = np.dtype(gamma_decay_dtype_tuple
+                      + [('spectrum', float, G_g)])
+    gamma_decay_table = db.create_table(
+        '/photon/cinder_source/', 'decay_spectra',
+        np.empty(0, dtype=gamma_decay_dtype),
+        'Gamma decay spectrum [MeV]')
     gdrow = gamma_decay_table.row
 
     # Init to_nuc_pattern
-    gamma_decay_pattern = gamma_decay_base + ("\s+("+cinder_float+")")*G_g
+    gamma_decay_pattern = gamma_decay_base + (r"\s+("+cinder_float+")")*G_g
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
@@ -468,12 +484,12 @@ def get_fp_sizes(raw_data):
         The number of photon fission product yield datasets in the file.
     """
     # Search for the neutron pattern
-    N_n_pattern = "Fission Yield Data.*?\n\s*(\d+)\s+yield sets"
+    N_n_pattern = r"Fission Yield Data.*?\n\s*(\d+)\s+yield sets"
     m_n = re.search(N_n_pattern, raw_data)
     N_n = int(m_n.group(1))
 
     # Search for the photon pattern
-    N_g_pattern = "Photofission Yield Data.*?\n\s*(\d+)\s+yield sets"
+    N_g_pattern = r"Photofission Yield Data.*?\n\s*(\d+)\s+yield sets"
     m_g = re.search(N_g_pattern, raw_data)
     N_g = int(m_g.group(1))
 
@@ -494,8 +510,8 @@ fp_type_flag = {
     's': 'spontaneous',
     }
 
-iit_pattern = "(\d{1,3})\s+\d{2,3}-\s?([A-Z]{1,2}-[ Mm\d]{3})([tfhs])"
-mass_pattern = "\d{1,3}\.\d{1,4}"
+iit_pattern = r"(\d{1,3})\s+\d{2,3}-\s?([A-Z]{1,2}-[ Mm\d]{3})([tfhs])"
+mass_pattern = r"\d{1,3}\.\d{1,4}"
 
 nfp_info_pattern = "Fission Yield Data.*?fission products"
 
@@ -578,9 +594,10 @@ def make_neutron_fp_info(nuc_data, build_dir=""):
     info_table = parse_neutron_fp_info(raw_data)
 
     # Init the neutron fission product info table
-    nfp_table = db.create_table('/neutron/cinder_fission_products/', 'info',
-                               np.empty(0, dtype=fp_info_dtype),
-                               'CINDER Neutron Fission Product Yield Information')
+    nfp_table = db.create_table(
+        '/neutron/cinder_fission_products/', 'info',
+        np.empty(0, dtype=fp_info_dtype),
+        'CINDER Neutron Fission Product Yield Information')
 
     # Append Rows
     nfp_table.append(info_table)
@@ -687,8 +704,8 @@ fp_yields_dtype = np.dtype([
     ])
 
 
-fp_to_nuc_insert = "\s{1,3}" + cinder_float
-fp_to_nuc_base = "  ([ \d]{4}) ([ \d]{7})\n("
+fp_to_nuc_insert = r"\s{1,3}" + cinder_float
+fp_to_nuc_base = r"  ([ \d]{4}) ([ \d]{7})\n("
 
 nfp_yields_pattern = "Fission Yield Data.*Photofission Yield Data"
 
@@ -834,10 +851,14 @@ def make_photon_fp_yields(nuc_data, build_dir):
 
 def make_cinder(args):
     """Controller function for adding cinder data."""
-    nuc_data, build_dir, datapath = args.nuc_data, args.build_dir, args.datapath
+    nuc_data = args.nuc_data
+    build_dir = args.build_dir
+    datapath = args.datapath
 
     with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
-        if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'cinder_xs') and hasattr(f.root.neutron, 'cinder_fission_products'):
+        if hasattr(f.root, 'neutron') \
+            and hasattr(f.root.neutron, 'cinder_xs') \
+            and hasattr(f.root.neutron, 'cinder_fission_products'):
             print("skipping Cinder XS data table creation; already exists.")
             return
 

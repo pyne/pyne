@@ -1,22 +1,25 @@
-"""This module provides a way to grab and store raw data for fission product yeilds
-from the NDS library at the IAEA. For more information, please visit their website:
+"""This module provides a way to grab and store raw data for fission product
+yeilds from the NDS library at the IAEA. For more information, please visit
+their website:
 https://www-nds.iaea.org/sgnucdat/index.htm or
 https://www-nds.iaea.org/sgnucdat/c2.htm. Please contact the NDS at
 online@iaeand.iaea.org with questions about the data itself.
 
-The copyright for the data parsed here is held by the IAEA and is made available
-under the following conditions:
+The copyright for the data parsed here is held by the IAEA and is made
+available under the following conditions:
 
 **Disclaimer:** Distributed data products contain consensus values of physical
 constants. However, neither the network centre nor the IAEA guarantees the
 accuracy of such data products or their suitability for particular applied
 scientific purposes.
 
-**Copyright:**  One may use or reproduce data and information from this site with
-an appropriate acknowledgement to the source of data. One may not charge any
-subsequent fee for these data.
+**Copyright:**  One may use or reproduce data and information from this site
+with an appropriate acknowledgement to the source of data. One may not charge
+any subsequent fee for these data.
 
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from __future__ import print_function, division
 import os
 import shutil
@@ -149,7 +152,7 @@ def make_fpy_table(nuc_data, build_dir=""):
     if not hasattr(db.root, 'neutron'):
         neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
     fpy_table = db.create_table('/neutron/', 'nds_fission_products', alldata,
-                               'NDS Fission Product Yields, percent [unitless]')
+                    'NDS Fission Product Yields, percent [unitless]')
     fpy_table.flush()
     db.close()
 

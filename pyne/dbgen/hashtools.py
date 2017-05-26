@@ -1,6 +1,9 @@
 """
 Tools to generate, set and check the hashes of datasets in pyne.
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+from __future__ import print_function
 import hashlib
 from warnings import warn
 from pyne.utils import QAWarning
@@ -13,10 +16,15 @@ from .. import data
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # list of nodes from distinct data sets
-nodelist = ['/atomic_mass', '/material_library',
-            '/neutron/eaf_xs', '/neutron/scattering_lengths',
-            '/neutron/simple_xs', '/decay', '/dose_factors']
-
+nodelist = [
+    '/atomic_mass',
+    '/material_library',
+    '/neutron/eaf_xs',
+    '/neutron/scattering_lengths',
+    '/neutron/simple_xs',
+    '/decay',
+    '/dose_factors'
+    ]
 
 def check_hashes(nuc_data):
     """

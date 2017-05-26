@@ -1,4 +1,8 @@
 """This module provides a way to grab and store raw data for atomic mass."""
+# pylint: disable=no-member
+# pylint: disable=bad-whitespace
+# pylint: disable=invalid-name
+# pylint: disable=too-many-locals
 from __future__ import print_function
 import os
 import re
@@ -15,8 +19,8 @@ from pyne.dbgen.isotopic_abundance import get_isotopic_abundances
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-# Note that since ground state and meta-stable isotopes are of the same atomic mass,
-# the meta-stables have been discluded from the following data sets.
+# Note that since ground state and meta-stable isotopes are of the same atomic
+# mass, the meta-stables have been discluded from the following data sets.
 
 MASS_FILE = 'mass.mas12'
 
@@ -35,8 +39,12 @@ def copy_atomic_mass_adjustment(build_dir=""):
 
 
 # Note, this regex specifically leaves our free neutrons
-# amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
-amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{5,12}) ([ #.\d]+)[ ]*?$')
+# amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? '
+#                         '.*? (\d{1,3}) ([ #.\d]{10,11}) '
+#                         '([ #.\d]{1,10})[ ]*?$')
+amdc_regex = re.compile(r'[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) '
+                        r'[A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{5,12}) '
+                        r'([ #.\d]+)[ ]*?$')
 
 
 def parse_atomic_mass_adjustment(build_dir=""):
@@ -52,8 +60,9 @@ def parse_atomic_mass_adjustment(build_dir=""):
             continue
 
         nuc = (10000000 * int(m.group(1))) + (10000 * int(m.group(2)))
-        mass = float(m.group(3)) + 1E-6 * float(m.group(4).strip().replace('#', ''))
-        error = 1E-6 * float(m.group(5).strip().replace('#', ''))
+        mass = float(m.group(3)) \
+             + 1.0E-6 * float(m.group(4).strip().replace('#', ''))
+        error = 1.0E-6 * float(m.group(5).strip().replace('#', ''))
 
         atomic_masses.append((nuc, mass, error))
 
@@ -114,7 +123,8 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
         elem_zz, elem_mass, _error, _abund = A[element_zz]
 
         new_elem_mass = elem_mass + (nuc_mass * abund)
-        A[element_zz] = element_zz, new_elem_mass, 0.0, float(0.0 < new_elem_mass)
+        A[element_zz] = element_zz, new_elem_mass, 0.0, \
+                        float(0.0 < new_elem_mass)
 
     A = sorted(A.values(), key=lambda x: x[0])
 
@@ -140,7 +150,8 @@ def make_atomic_mass(args):
     if os.path.exists(nuc_data):
         with tb.open_file(nuc_data, 'r') as f:
             if hasattr(f.root, 'atomic_mass'):
-                print("skipping atomic mass data table creation; already exists.")
+                print("skipping atomic mass data table creation; "
+                      "already exists.")
                 return
 
     # Then grab mass data

@@ -1,22 +1,25 @@
-"""This module provides a way to grab and store raw data for fission product yeilds
-from the WIMSD library at the IAEA. For more information, please visit their website:
-https://www-nds.iaea.org/wimsd/index.html or 
-https://www-nds.iaea.org/wimsd/fpyield.htm. Please contact the NDS at  
+"""This module provides a way to grab and store raw data for fission product
+yeilds from the WIMSD library at the IAEA. For more information, please visit
+their website:
+https://www-nds.iaea.org/wimsd/index.html or
+https://www-nds.iaea.org/wimsd/fpyield.htm. Please contact the NDS at
 nds.contact-point@iaea.org with questions about the data itself.
 
-The copyright for the data parsed here is held by the IAEA and is made available 
-under the following conditions:
+The copyright for the data parsed here is held by the IAEA and is made
+available under the following conditions:
 
-**Disclaimer:** Distributed data products contain consensus values of physical 
-constants. However, neither the network centre nor the IAEA guarantees the 
-accuracy of such data products or their suitability for particular applied 
+**Disclaimer:** Distributed data products contain consensus values of physical
+constants. However, neither the network centre nor the IAEA guarantees the
+accuracy of such data products or their suitability for particular applied
 scientific purposes.
 
-**Copyright:**  One may use or reproduce data and information from this site with 
-an appropriate acknowledgement to the source of data. One may not charge any 
-subsequent fee for these data.
+**Copyright:**  One may use or reproduce data and information from this site
+with an appropriate acknowledgement to the source of data. One may not charge
+any subsequent fee for these data.
 
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from __future__ import print_function
 import os
 import re
@@ -50,7 +53,7 @@ def grab_fpy(build_dir="", file_out='wimsd-fpyield.html'):
 
     if os.path.exists(local_filename):
         shutil.copy(local_filename, build_filename)
-        return 
+        return
 
     nist = urllib2.urlopen('https://www-nds.iaea.org/wimsd/fpyield.htm')
     with open(build_filename, 'w') as f:
@@ -59,14 +62,14 @@ def grab_fpy(build_dir="", file_out='wimsd-fpyield.html'):
 
 class Parser(HTMLParser):
     """Parser for WIMSD fission product yield files."""
-    
+
     def __init__(self, *args, **kwargs):
         # HTMLParser is not a new style class, no super()
         HTMLParser.__init__(self, *args, **kwargs)
         self._currrow = []
         self._fromnucs = None
         self.fission_product_yields = []
-    
+
     def handle_starttag(self, tag, attrs):
         if tag == 'tr':
             self._currrow = []
@@ -83,7 +86,7 @@ class Parser(HTMLParser):
             if row[0].endswith('FP'):
                 return
             tonuc = nucname.id(row[0].split('-', 1)[1])
-            self.fission_product_yields += zip(self._fromnucs, [tonuc]*4, 
+            self.fission_product_yields += zip(self._fromnucs, [tonuc]*4,
                                                map(float, row[-4:]))
 
     def handle_data(self, data):
@@ -126,8 +129,8 @@ def make_fpy_table(nuc_data, build_dir=""):
     db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
     if not hasattr(db.root, 'neutron'):
         neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
-    fpy_table = db.create_table('/neutron/', 'wimsd_fission_products', yields, 
-                               'WIMSD Fission Product Yields, fractions [unitless]')
+    fpy_table = db.create_table('/neutron/', 'wimsd_fission_products', yields,
+        'WIMSD Fission Product Yields, fractions [unitless]')
     fpy_table.flush()
     db.close()
 
@@ -138,7 +141,7 @@ def make_fpy(args):
 
     # Check that the table exists
     with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
-        if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 
+        if hasattr(f.root, 'neutron') and hasattr(f.root.neutron,
                                                   'wimsd_fission_products'):
             print('skipping WIMSD fission product yield table creation; '
                   'already exists.')

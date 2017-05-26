@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+""" Creates a dictionary of isotopic abundances """
+# pylint: disable=invalid-name
 from __future__ import print_function
 import pkgutil
 from warnings import warn
@@ -23,7 +25,8 @@ def get_isotopic_abundances():
         isotope relative to all atoms of that element.
     """
 
-    abundance_file = pkgutil.get_data('pyne.dbgen', 'abundances.txt').decode().split('\n')
+    abundance_file = pkgutil.get_data('pyne.dbgen', 'abundances.txt') \
+        .decode().split('\n')
 
     # Create dictionary
     abundance = {}
@@ -48,7 +51,7 @@ def get_isotopic_abundances():
         abundance_by_Z[Z].append((name, val))
 
     # Check data
-    approx_equal = lambda a, b: abs(a - b) < 1e-8
+    approx_equal = lambda a, b: abs(a - b) < 1.0E-8
     for Z in abundance_by_Z:
         total = 0.0
 

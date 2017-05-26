@@ -1,7 +1,10 @@
 """Module handles parsing EAF formatted cross section files and adding
 the data to PyNE's HDF5 storage.  The data here is autonatically grabbed from
-the IAEA. 
+the IAEA.
 """
+# pylint: disable=no-member
+# pylint: disable=bad-whitespace
+# pylint: disable=invalid-name
 from __future__ import print_function
 import re
 import os
@@ -40,8 +43,10 @@ def grab_eaf_data(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    # This link was taken from 'http://www-nds.iaea.org/fendl/fen-activation.htm'
-    iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/libout/fendlg-2.0_175-gz'
+    # This link was taken from
+    # 'http://www-nds.iaea.org/fendl/fen-activation.htm'
+    iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/' \
+        'libout/fendlg-2.0_175-gz'
     cf_base_url = 'http://data.pyne.io/'
     eaf_gzip = 'fendlg-2.0_175-gz'
 
@@ -53,14 +58,15 @@ def grab_eaf_data(build_dir=""):
         except (OSError, IOError):
             open(fpath, 'a').close()  # touch the file
 
-        if os.path.getsize(fpath) < 3215713: 
-            print("  could not get {0} from IAEA; trying S3 mirror".format(eaf_gzip))
+        if os.path.getsize(fpath) < 3215713:
+            print("  could not get {0} from IAEA; trying S3 mirror"
+                  .format(eaf_gzip))
             os.remove(fpath)
             try:
                 urllib.urlretrieve(cf_base_url + eaf_gzip, fpath)
             except (OSError, IOError):
                 open(fpath, 'a').close()  # touch the file
-            if os.path.getsize(fpath) < 3215713: 
+            if os.path.getsize(fpath) < 3215713:
                 print("  could not get {0} from S3 mirror".format(eaf_gzip))
                 return False
 
@@ -73,7 +79,7 @@ def grab_eaf_data(build_dir=""):
                 fw.write(line.decode("us-ascii"))
     finally:
         gf.close()
-        
+
     return True
 
 
@@ -89,14 +95,14 @@ eaf_dtype = np.dtype([
 # Regular expression for parsing an individual set of EAF data.
 # Includes some groupnames that are currently unused.
 eaf_info_pattern = \
-    "(?P<iso>\d{5,7})\s*" + \
-    "(?P<rxnum>\d{2,4})\s*" + \
-    "(?P<ngrps>\d{1,3})\s*" + \
-    "(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" + \
-    "(?P<rxstr>\(N,[\w\s]{3}\))" + \
-    "(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3}[MG]{0,1}\d{0,1})" + \
+    r"(?P<iso>\d{5,7})\s*" + \
+    r"(?P<rxnum>\d{2,4})\s*" + \
+    r"(?P<ngrps>\d{1,3})\s*" + \
+    r"(?P<parent>[a-zA-Z]{1,2}\s{0,3}\d{1,3}[M ][12 ])" + \
+    r"(?P<rxstr>\(N,[\w\s]{3}\))" + \
+    r"(?P<daugh>[a-zA-Z.]{1,2}\s{0,3}\d{1,3}[MG]{0,1}\d{0,1})" + \
     "(.*?)"
-eaf_bin_pattern = "(?P<xs>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
+eaf_bin_pattern = r"(?P<xs>(\d\.\d{5}E[-+]\d{2}\s*){1,175})"
 
 def parse_eaf_xs(build_file):
     """Create numpy array by parsing EAF data
@@ -106,7 +112,7 @@ def parse_eaf_xs(build_file):
     ----------
     build_file : str
         Path where EAF data is stored.
-    
+
     Returns
     -------
     eaf_array : numpy array
@@ -114,12 +120,12 @@ def parse_eaf_xs(build_file):
         found in the EAF data.
 
     """
-    
+
     with open(build_file, 'r') as f:
         raw_data = f.read()
 
     eaf_data = list()
-    eaf_pattern = eaf_info_pattern + eaf_bin_pattern 
+    eaf_pattern = eaf_info_pattern + eaf_bin_pattern
 
     # Iterate over all iso/rx combinations in file
     for m in re.finditer(eaf_pattern, raw_data, re.DOTALL):
@@ -136,7 +142,7 @@ def parse_eaf_xs(build_file):
                   md['daugh'],
                   xs_list
                   )
-        
+
         eaf_data.append(eafrow)
 
     eaf_array = np.array(eaf_data, dtype=eaf_dtype)
@@ -155,7 +161,7 @@ def make_eaf_table(nuc_data, build_path=""):
         Path to nuclide data file.
     build_path : str
         Directory where EAF data is located.
-    
+
     """
 
     print("Grabbing the EAF activation data.")
@@ -188,7 +194,7 @@ def make_eaf_table(nuc_data, build_path=""):
     # Add group structure by calling placeholder function to get boundaries
     db.create_array('/neutron/eaf_xs', 'E_g', _get_eaf_groups(), \
             'Neutron energy group bounds [MeV]')
-    
+
     # Close the HDF5 file
     db.close()
 
@@ -206,7 +212,7 @@ def _get_eaf_groups():
     ----------
     eaf_E_g_array : 1D list
         List of energy group boundaries from high to low.
-    
+
     """
 
     eaf_E_g_array = [0.0,
@@ -247,7 +253,7 @@ def _get_eaf_groups():
             1.5683E+01, 1.6487E+01, 1.6905E+01, 1.7333E+01, 1.9640E+01]
 
     eaf_E_g_array.reverse()
-    
+
     return eaf_E_g_array
 
 
@@ -259,7 +265,8 @@ def make_eaf(args):
     # Check if the table already exists
     with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'eaf_xs'):
-            print("skipping EAF activation data table creation; already exists.")
+            print("skipping EAF activation data table creation; "
+                  "already exists.")
             return
 
     # grab the EAF data
