@@ -1,5 +1,8 @@
 """This module implements an ORIGEN v2.2 transmutation solver.
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=bad-whitespace
 from __future__ import print_function, division
 
 import os
@@ -27,14 +30,14 @@ class Transmuter(object):
     """A class for transmuting materials using ORIGEN v2.2."""
 
     def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, cwd='',
-                 base_tape9=origen22.BASE_TAPE9, xscache=None, 
+                 base_tape9=origen22.BASE_TAPE9, xscache=None,
                  o2exe='o2_therm_linux.exe', *args, **kwargs):
         """Parameters
         ----------
         t : float
             Transmutations time [sec].
         phi : float or array of floats
-            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
+            Neutron flux vector [n/cm^2/sec].  Currently this must either be
             a scalar or match the group structure of EAF.
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
@@ -43,9 +46,10 @@ class Transmuter(object):
         cwd : str, optional
             Current working directory for origen runs. Defaults to this dir.
         base_tape9 : str or dict, optional
-            A base TAPE9.INP file.  If this is a str it is interpreted as a path 
-            to a file, which is then read in and parsed.  If this is a dict, it is
-            assumed to be in the format described in the main origen22 module.
+            A base TAPE9.INP file.  If this is a str it is interpreted as a
+            path to a file, which is then read in and parsed.  If this is a
+            dict, it is assumed to be in the format described in the main
+            origen22 module.
         xscache : XSCache, optional
             A cross section cache to generate cross sections with.
         o2exe : str, optional
@@ -53,7 +57,8 @@ class Transmuter(object):
         args : tuple, optional
             Other arguments ignored for compatibility with other Transmuters.
         kwargs : dict, optional
-            Other keyword arguments ignored for compatibility with other Transmuters.
+            Other keyword arguments ignored for compatibility with other
+            Transmuters.
         """
         if not isinstance(base_tape9, Mapping):
             base_tape9 = origen22.parse_tape9(tape9=base_tape9)
@@ -62,10 +67,12 @@ class Transmuter(object):
         if xscache is None:
             eafds = EAFDataSource()
             eafds.load(temp=temp)
-            gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
+            gs = np.array([eafds.src_group_struct[0],
+                           eafds.src_group_struct[-1]])
             eafds.dst_group_struct = gs
-            xscache = XSCache(group_struct=gs, data_source_classes=[SimpleDataSource, 
-                                                                    NullDataSource])
+            xscache = XSCache(group_struct=gs,
+                              data_source_classes=[SimpleDataSource,
+                                                   NullDataSource])
             xscache.load(temp=temp)
             xscache.data_sources.insert(0, eafds)
         self.xscache = xscache
@@ -101,7 +108,7 @@ class Transmuter(object):
         self.xscache['phi_g'] = np.array([flux.sum()])
         self._phi = flux
 
-    def transmute(self, x, t=None, phi=None, tol=None, cwd=None, xscache=None, 
+    def transmute(self, x, t=None, phi=None, tol=None, cwd=None, xscache=None,
                   o2exe=None, *args, **kwargs):
         """Transmutes a material into its daughters.
 
@@ -112,7 +119,7 @@ class Transmuter(object):
         t : float
             Transmutations time [sec].
         phi : float or array of floats
-            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
+            Neutron flux vector [n/cm^2/sec].  Currently this must either be
             a scalar or match the group structure of EAF.
         tol : float
             Tolerance level for chain truncation.
@@ -148,20 +155,23 @@ class Transmuter(object):
         nucs = set(x.comp.keys())
         base_tape9 = self.base_tape9
         decay_nlb, xsfpy_nlb = origen22.nlbs(base_tape9)
-        new_tape9 = origen22.xslibs(nucs=nucs, xscache=self.xscache, nlb=xsfpy_nlb)
+        new_tape9 = origen22.xslibs(nucs=nucs, xscache=self.xscache,
+                                    nlb=xsfpy_nlb)
         t9 = origen22.merge_tape9([new_tape9, base_tape9])
 
         # write out files
         origen22.write_tape4(x, outfile=os.path.join(self.cwd, 'TAPE4.INP'))
-        origen22.write_tape5_irradiation('IRF', self.t/86400.0, self.xscache['phi_g'][0], 
-            outfile=os.path.join(self.cwd, 'TAPE5.INP'), decay_nlb=decay_nlb, 
+        origen22.write_tape5_irradiation('IRF', self.t/86400.0,
+                                         self.xscache['phi_g'][0],
+            outfile=os.path.join(self.cwd, 'TAPE5.INP'), decay_nlb=decay_nlb,
             xsfpy_nlb=xsfpy_nlb, cut_off=self.tol)
         origen22.write_tape9(t9, outfile=os.path.join(self.cwd, 'TAPE9.INP'))
 
         # run origen & get results
         f = tempfile.NamedTemporaryFile()
         try:
-            subprocess.check_call([self.o2exe], cwd=self.cwd, stdout=f, stderr=f)
+            subprocess.check_call([self.o2exe], cwd=self.cwd,
+                                  stdout=f, stderr=f)
         except subprocess.CalledProcessError:
             f.seek(0)
             print("ORIGEN output:\n\n{0}".format(f.read()))

@@ -1,8 +1,11 @@
 """This module implements an ALARA[1]-like chain-based transmutation solver.
 
-   [1] Wilson, P. P. H. "ALARA: Analytic Laplacian Adaptive Radioactivity 
+   [1] Wilson, P. P. H. "ALARA: Analytic Laplacian Adaptive Radioactivity
    Analysis," a Ph.D. Dissertation, University of Wisconsin, Madison, WI, 1999.
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=bad-whitespace
 from __future__ import division
 from warnings import warn
 from pyne.utils import QAWarning
@@ -26,36 +29,38 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
 
-    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None, log=None, 
-                 *args, **kwargs):
+    def __init__(self, t=0.0, phi=0.0, temp=300.0, tol=1e-7, rxs=None,
+                 log=None, *args, **kwargs):
         """Parameters
         ----------
         t : float
             Transmutations time [sec].
         phi : float or array of floats
-            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
+            Neutron flux vector [n/cm^2/sec].  Currently this must either be
             a scalar or match the group structure of EAF.
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
         tol : float
             Tolerance level for chain truncation.
         rxs : set of ints or strs
-            Reaction ids or names to use in transmutation that produce well-defined 
-            children.  This set should thus not include fission.  If None, then the 
-            reactions from EAF are used.
+            Reaction ids or names to use in transmutation that produce
+            well-defined children.  This set should thus not include fission.
+            If None, then the reactions from EAF are used.
         log : file-like or None
-            The log file object should be written. A None imples the log is 
+            The log file object should be written. A None imples the log is
             not desired.
         args : tuple, optional
             Other arguments ignored for compatibility with other Transmuters.
         kwargs : dict, optional
-            Other keyword arguments ignored for compatibility with other Transmuters.
+            Other keyword arguments ignored for compatibility with other
+            Transmuters.
         """
         eafds = EAFDataSource()
         eafds.load(temp=temp)
         gs = np.array([eafds.src_group_struct[0], eafds.src_group_struct[-1]])
         eafds.dst_group_struct = gs
-        self.xscache = XSCache(group_struct=gs, data_sources=(eafds, NullDataSource,))
+        self.xscache = XSCache(group_struct=gs,
+                               data_sources=(eafds, NullDataSource,))
 
         self.t = t
         self._phi = None
@@ -64,13 +69,14 @@ class Transmuter(object):
         self.log = log
         self.tol = tol
         if rxs is None:
-            rxs = ['gamma', 'gamma_1', 'gamma_2', 'p', 'p_1', 'p_2', 'd', 'd_1', 
-                   'd_2', 't', 't_1', 't_2', 'He3', 'He3_1', 'He3_2', 'a', 'a_1', 
-                   'a_2', 'z_2a', 'z_2p', 'z_2p_1', 'z_2p_2', 'z_2n', 'z_2n_1', 
-                   'z_2n_2', 'z_3n', 'z_3n_1', 'z_3n_2', 'na', 'na_1', 'na_2', 
-                   'z_2na', 'np', 'np_1', 'np_2', 'n2a', 'nd', 'nd_1', 'nd_2', 
-                   'nt', 'nt_1', 'nt_2', 'nHe3', 'nHe3_1', 'nHe3_2','z_4n', 
-                   'z_4n_1', 'n', 'n_1', 'n_2', 'z_3np']
+            rxs = ['gamma', 'gamma_1', 'gamma_2', 'p', 'p_1', 'p_2', 'd',
+                   'd_1', 'd_2', 't', 't_1', 't_2', 'He3', 'He3_1', 'He3_2',
+                   'a', 'a_1', 'a_2', 'z_2a', 'z_2p', 'z_2p_1', 'z_2p_2',
+                   'z_2n', 'z_2n_1', 'z_2n_2', 'z_3n', 'z_3n_1', 'z_3n_2',
+                   'na', 'na_1', 'na_2', 'z_2na', 'np', 'np_1', 'np_2', 'n2a',
+                   'nd', 'nd_1', 'nd_2', 'nt', 'nt_1', 'nt_2', 'nHe3',
+                   'nHe3_1', 'nHe3_2','z_4n', 'z_4n_1', 'n', 'n_1', 'n_2',
+                   'z_3np']
         rxs = set([rxname.id(rx) for rx in rxs])
         rxs.discard(rxname.id('fission'))
         self.rxs = rxs
@@ -98,7 +104,8 @@ class Transmuter(object):
         self.xscache['phi_g'] = np.array([flux.sum()])
         self._phi = flux
 
-    def transmute(self, x, t=None, phi=None, tol=None, log=None, *args, **kwargs):
+    def transmute(self, x, t=None, phi=None, tol=None, log=None, *args,
+                  **kwargs):
         """Transmutes a material into its daughters.
 
         Parameters
@@ -108,12 +115,12 @@ class Transmuter(object):
         t : float
             Transmutations time [sec].
         phi : float or array of floats
-            Neutron flux vector [n/cm^2/sec].  Currently this must either be 
+            Neutron flux vector [n/cm^2/sec].  Currently this must either be
             a scalar or match the group structure of EAF.
         tol : float
             Tolerance level for chain truncation.
         log : file-like or None
-            The log file object should be written. A None imples the log is 
+            The log file object should be written. A None imples the log is
             not desired.
 
         Returns
@@ -136,16 +143,17 @@ class Transmuter(object):
         x_atoms = x.to_atom_frac()
         y_atoms = {}
         for nuc, adens in x_atoms.items():
-            # Find output for root of unit density and scale all output by 
+            # Find output for root of unit density and scale all output by
             # actual nuclide density and add to final output.
             partial = self._transmute_partial(nuc)
             for part_nuc, part_adens in partial.items():
-                y_atoms[part_nuc] = part_adens * adens + y_atoms.get(part_nuc, 0.0)
+                y_atoms[part_nuc] = part_adens * adens \
+                                  + y_atoms.get(part_nuc, 0.0)
         mw_x = x.molecular_mass()
         y = from_atom_frac(y_atoms, atoms_per_molecule=x.atoms_per_molecule)
         # even though it doesn't look like it, the following line is actually
         #   mass_y = MW_y * mass_x / MW_x
-        y.mass *= x.mass / mw_x 
+        y.mass *= x.mass / mw_x
         return y
 
     def _transmute_partial(self, nuc):
@@ -154,14 +162,14 @@ class Transmuter(object):
 
         Parameters
         ----------
-        nuc : int 
+        nuc : int
             Nuclide id to be transmuted.
 
         Returns
         -------
         partial : dict
             A dictionary containing number densities for each nuclide after
-            the transmutation is carried out for the input nuclide. Keys are 
+            the transmutation is carried out for the input nuclide. Keys are
             nuclide ids and values are float number densities for the coupled
             # what is the coupled?.
         """
@@ -184,7 +192,8 @@ class Transmuter(object):
             Name of the nuclide in question
         decay : bool
             True if the decay constant should be added to the returned value.
-            False if only destruction from neutron reactions should be considered.
+            False if only destruction from neutron reactions should be
+            considered.
 
         Returns
         -------
@@ -196,7 +205,7 @@ class Transmuter(object):
         sig_a = sigma_a(nuc, xs_cache=xscache)
         d = utils.from_barns(sig_a[0], 'cm2') * xscache['phi_g'][0]
         if decay and not np.isnan(data.decay_const(nuc)):
-            d += data.decay_const(nuc) 
+            d += data.decay_const(nuc)
         return d
 
     def _grow_matrix(self, A, prod, dest):
@@ -230,7 +239,7 @@ class Transmuter(object):
         B[n,n] = -dest
         # SPARSE
         #B = sparse.bmat([[A, None], [None, [[-dest]]]]).tocsr()
-        #B[n,n-1] = prod        
+        #B[n,n-1] = prod
         return B
 
     def _traversal(self, nuc, A, out, depth=0):
@@ -247,12 +256,13 @@ class Transmuter(object):
         A : NumPy 2-dimensional array
             Current state of the coupled equation matrix.
         out : dict
-            A dictionary containing the final recorded number densities for each
-            nuclide. Keys are nuclide names in integer id form. Values are
-            number densities for the coupled nuclide in float format.  This is 
+            A dictionary containing the final recorded number densities for
+            each nuclide. Keys are nuclide names in integer id form. Values are
+            number densities for the coupled nuclide in float format.  This is
             modified in place.
         depth : int
-            Current depth of traversal (root at 0). Should never be provided by user.
+            Current depth of traversal (root at 0). Should never be provided by
+            user.
 
         """
         t = self.t
@@ -319,9 +329,10 @@ class Transmuter(object):
         if numdens == 0.0:
             return
         space = '   |'
-        entry = "{spacing}--> {name} {numdens}\n".format(spacing=depth*space, 
-                                                         numdens=numdens,
-                                                         name=nucname.name(nuc))
+        entry = "{spacing}--> {name} {numdens}\n" \
+                .format(spacing=depth*space,
+                        numdens=numdens,
+                        name=nucname.name(nuc))
         self.log.write(entry)
         self.log.flush()
 
