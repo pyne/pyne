@@ -13,8 +13,8 @@ def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
     ccode = ""
     ws = " " * indent
 
-    rtn_pattern = re.compile('\s*?return (.*)')
-    equ_pattern = re.compile('\s*?([\w\[\]]+)\s*?=\s*?(\S.*)')
+    rtn_pattern = re.compile(r'\s*?return (.*)')
+    equ_pattern = re.compile(r'\s*?([\w\[\]]+)\s*?=\s*?(\S.*)')
     repline_template = '{ind}{name} = {expr}\n'
     redline_template = '{ind}{name} = {expr}\n'
     redrtnline_template = '{ind}return {expr}\n'
@@ -24,7 +24,8 @@ def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
     for repsym, repexpr in replacements:
         repname = str(repsym)
         repnames.add(repname)
-        gencode = codegen((repname, repexpr), "C", repname, header=False, empty=False)
+        gencode = codegen((repname, repexpr), "C", repname, header=False,
+                          empty=False)
         genexpr = gencode[0][1]
         if repexpr.is_Equality:
             genexpr = equ_pattern.search(genexpr).group(2)
@@ -36,13 +37,15 @@ def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
             ccode += debug_template.format(repname)
 
     for redexpr in reduced_exprs:
-        gencode = codegen(("redname", redexpr), "C", "temp", header=False, empty=False)
+        gencode = codegen(("redname", redexpr), "C", "temp", header=False,
+                          empty=False)
         genexpr = gencode[0][1]
         if redexpr.is_Equality:
             m = equ_pattern.search(genexpr)
             genname = m.group(1)
             genexpr = m.group(2)
-            genline = redline_template.format(ind=ws, name=genname, expr=genexpr)
+            genline = redline_template \
+                    .format(ind=ws, name=genname, expr=genexpr)
             if debug:
                 genline += debug_template.format(genname)
         else:
