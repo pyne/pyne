@@ -6,6 +6,7 @@ from pyne.utils import QAWarning
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def main():
     """ Generates PyNE API """
     parser = argparse.ArgumentParser("Generates PyNE API")
@@ -21,6 +22,7 @@ def main():
             header_filename="cpp/enrichment_symbolic.h",
             max_ncomp=15,
             debug=ns.debug)
+
 
 if __name__ == '__main__':
     main()

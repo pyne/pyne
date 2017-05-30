@@ -7,6 +7,7 @@ from sympy.utilities.codegen import codegen
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
     """Converts the return value sympy.cse() to a single C code snippet.
     """
@@ -45,7 +46,7 @@ def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
             genname = m.group(1)
             genexpr = m.group(2)
             genline = redline_template \
-                    .format(ind=ws, name=genname, expr=genexpr)
+                .format(ind=ws, name=genname, expr=genexpr)
             if debug:
                 genline += debug_template.format(genname)
         else:

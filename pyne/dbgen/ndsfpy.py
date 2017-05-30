@@ -40,6 +40,7 @@ from pyne.dbgen.api import BASIC_FILTERS
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def readtable(i, spdat):
     """
     Reads in a set of 5 html tables and returns corresponding yield data
@@ -51,8 +52,7 @@ def readtable(i, spdat):
     dt = np.dtype([('from_nuc', 'i4'), ('to_nuc', 'i4'),
                    ('yield_thermal', float), ('yield_thermal_err', float),
                    ('yield_fast', float), ('yield_fast_err', float),
-                   ('yield_14MeV', float), ('yield_14MeV_err', float)
-                  ])
+                   ('yield_14MeV', float), ('yield_14MeV_err', float)])
     dfinal = np.zeros((len(fpdata),), dtype=dt)
     for index, item in enumerate(fpdata):
         dfinal[index]['from_nuc'] = pid
@@ -151,8 +151,11 @@ def make_fpy_table(nuc_data, build_dir=""):
     db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
     if not hasattr(db.root, 'neutron'):
         neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
-    fpy_table = db.create_table('/neutron/', 'nds_fission_products', alldata,
-                    'NDS Fission Product Yields, percent [unitless]')
+    fpy_table = db.create_table(
+        '/neutron/',
+        'nds_fission_products',
+        alldata,
+        'NDS Fission Product Yields, percent [unitless]')
     fpy_table.flush()
     db.close()
 

@@ -24,6 +24,7 @@ from pyne.dbgen.decay import grab_ensdf_decay
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def parse_ensdf(files):
     """Parses a list of ENSDF files for ORIGEN."""
     decays = []
@@ -36,19 +37,23 @@ def parse_ensdf(files):
     branches = [x for x in branches if x[0] is not None]
     return decays, branches
 
+
 def _is_metastable_beta_decay_0(item, metastable_cutoff):
     """ TBD """
     return (item[3] is not None) and (item[3] > metastable_cutoff) and \
            (item[4] > 0) and (item[3] != np.inf) and (item[2] == 0)
+
 
 def _is_metastable_beta_decay_x(item, metastable_cutoff):
     """ TBD """
     return (item[3] is not None) and (item[3] > metastable_cutoff) and \
            (item[4] > 0) and (item[3] != np.inf) and (item[2] > 0)
 
+
 def _plus_eq_lib(lib, field, key, val):
     """ TBD """
     lib[field][key] = lib[field].get(key, 0.0) + val
+
 
 def _plus_eq_decay_t9(t9, field, nuc, key, val):
     """ TBD """
@@ -68,6 +73,7 @@ def _plus_eq_decay_t9(t9, field, nuc, key, val):
             # default to activation product
             _plus_eq_lib(t9[1], field, key, val)
 
+
 def _eq_decay_t9(t9, field, nuc, key, val):
     """ TBD """
     if nuc in origen22.ACTIVATION_PRODUCT_NUCS:
@@ -86,6 +92,7 @@ def _eq_decay_t9(t9, field, nuc, key, val):
             # default to activation product
             t9[1][field][key] = val
 
+
 def _set_branch_item(t9, nuc, key, item):
     """ TBD """
     _eq_decay_t9(t9, 'half_life', nuc, key, item[2] or 0.0)
@@ -101,13 +108,13 @@ def _set_branch_item(t9, nuc, key, item):
     if "%EC+%B+" in item[3] and item[3]["%EC+%B+"] != '?':
         _plus_eq_decay_t9(t9, 'frac_beta_plus_or_electron_capture', nuc, key,
                           float(item[3]["%EC+%B+"] or 0.0)/100.0)
-    if "%B-N" in item[3]  and item[3]["%B-N"] != '?':
+    if "%B-N" in item[3] and item[3]["%B-N"] != '?':
         _eq_decay_t9(t9, 'frac_beta_n', nuc, key,
                      float(item[3]["%B-N"] or 0.0)/100.0)
-    if "%A" in item[3]  and item[3]["%A"] != '?':
+    if "%A" in item[3] and item[3]["%A"] != '?':
         _eq_decay_t9(t9, 'frac_alpha', nuc, key,
                      float(item[3]["%A"] or 0.0)/100.0)
-    if "%IT" in item[3]  and item[3]["%IT"] != '?':
+    if "%IT" in item[3] and item[3]["%IT"] != '?':
         _eq_decay_t9(t9, 'frac_isomeric_transition', nuc, key,
                      float(item[3]["%IT"] or 0.0)/100.0)
 
@@ -165,23 +172,23 @@ def gendecay(decays, branches, metastable_cutoff=1.0):
                 if 'B-' in item[5]:
                     _plus_eq_decay_t9(t9, 'frac_beta_minus_x', nuc, key,
                                       item[6]/100.0)
-                                      #item[6]*item[8]/100.0)
+                                      # item[6]*item[8]/100.0)
                 if 'B+' in item[5] or "EC" in item[5]:
                     _plus_eq_decay_t9(t9,
                                       'frac_beta_plus_or_electron_capture_x',
                                       nuc, key, item[6]/100.0)
-                                      #key, item[6]*item[8]/100.0)
+                                      # key, item[6]*item[8]/100.0)
             elif item[1] > longest2[key]:
                 longest2[key] = item[1]
                 if 'B-' in item[5]:
-                    #_eq_decay_t9(t9, 'frac_beta_minus_x', nuc, key,
+                    # _eq_decay_t9(t9, 'frac_beta_minus_x', nuc, key,
                     # item[6]*item[8]/100.0)
                     _eq_decay_t9(t9, 'frac_beta_minus_x', nuc, key,
                                  item[6]/100.0)
                 if 'B+' in item[5] or "EC" in item[5]:
                     _eq_decay_t9(t9, 'frac_beta_plus_or_electron_capture_x',
                                  nuc, key, item[6]/100.0)
-                                      #key, item[6]*item[8]/100.0)
+                                 # key, item[6]*item[8]/100.0)
     for item in branches:
         nuc = nucname.id(item[0])
         key = nucname.zzaaam(nuc)
@@ -225,9 +232,11 @@ def main_gen(ns):
     t9 = origen22.merge_tape9([t9decay, t9xsfpy])
     origen22.write_tape9(t9, outfile=ns.filename)
 
+
 _cmd_mains = {
     'gen': main_gen,
     }
+
 
 def main():
     """ Main program to manipulate ORIGEN v2.2 TAPE9.INP files """
@@ -242,7 +251,7 @@ def main():
                                 help='Creates a TAPE9 file based only on '
                                      'open data.')
     gen.add_argument('-o', dest='filename', default='TAPE9.INP',
-                      help='output filename')
+                     help='output filename')
     gen.add_argument('-b', dest='build_dir', action='store',
                      default=build_dir,
                      help='path to the build directory.')
@@ -255,6 +264,7 @@ def main():
         sys.exit('command {0!r} could not be found'.format(ns.cmd))
     _cmd_mains[ns.cmd](ns)
     sys.exit()
+
 
 if __name__ == '__main__':
     main()

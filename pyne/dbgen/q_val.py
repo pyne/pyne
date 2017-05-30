@@ -22,6 +22,7 @@ from pyne.dbgen.api import BASIC_FILTERS
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 # Parses data from .csv
 def grab_q_values(fname):
     """Parses data from three q_val csv files.
@@ -43,6 +44,7 @@ def grab_q_values(fname):
             all_q_values.append(entry)
 
     return all_q_values
+
 
 # Grabs data row by row
 def read_row(row):
@@ -73,6 +75,7 @@ def read_row(row):
 
     return entry
 
+
 # Sorts and filters list of q_values
 def format_q_values(all_q_values):
     """Filters the q_value data for multiple entries then sorts the nuclides.
@@ -95,6 +98,7 @@ def format_q_values(all_q_values):
     distinct_all_q_values.sort(key=lambda nucid: nucid[0])
 
     return distinct_all_q_values
+
 
 # Write q_value table to file
 def make_q_value_table(all_q_values, nuc_data, build_dir=""):
@@ -131,15 +135,19 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
         nuc_file.create_group('/', 'decay', 'ENSDF Decay data')
 
     # Make a new table
-    q_value_table = nuc_file.create_table('/decay', 'q_values',
-        q_value_array, 'Nuclide, Q_value [MeV per disintegration], ' \
-                       'Fraction of Q that comes from gammas')
+    q_value_table = nuc_file.create_table(
+        '/decay',
+        'q_values',
+        q_value_array,
+        'Nuclide, Q_value [MeV per disintegration], Fraction of Q that '
+        'comes from gammas')
 
     # Ensure that data was written to table
     q_value_table.flush()
 
     # Close the hdf5 file
     nuc_file.close()
+
 
 def make_q_value(args):
     """Controller function for adding q-values"""

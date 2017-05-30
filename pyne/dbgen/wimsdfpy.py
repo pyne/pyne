@@ -22,20 +22,11 @@ any subsequent fee for these data.
 # pylint: disable=invalid-name
 from __future__ import print_function
 import os
-import re
+# import re
 import sys
 import shutil
 from warnings import warn
 from pyne.utils import QAWarning
-
-try:
-    import urllib.request as urllib2
-except ImportError:
-    import urllib2
-if sys.version_info[0] >= 3:
-    from html.parser import HTMLParser
-else:
-    from HTMLParser import HTMLParser
 
 import numpy as np
 import tables as tb
@@ -43,7 +34,18 @@ import tables as tb
 from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
 
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
+
+if sys.version_info[0] >= 3:
+    from html.parser import HTMLParser
+else:
+    from HTMLParser import HTMLParser
+
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
 
 def grab_fpy(build_dir="", file_out='wimsd-fpyield.html'):
     """Grabs the WIMS fission product yields from the IAEA website
@@ -64,6 +66,7 @@ class Parser(HTMLParser):
     """Parser for WIMSD fission product yield files."""
 
     def __init__(self, *args, **kwargs):
+        """ TBD"""
         # HTMLParser is not a new style class, no super()
         HTMLParser.__init__(self, *args, **kwargs)
         self._currrow = []
@@ -71,10 +74,12 @@ class Parser(HTMLParser):
         self.fission_product_yields = []
 
     def handle_starttag(self, tag, attrs):
+        """ TBD"""
         if tag == 'tr':
             self._currrow = []
 
     def handle_endtag(self, tag):
+        """ TBD"""
         if tag == 'tr':
             row = self._currrow
             self._currrow = []
@@ -90,6 +95,7 @@ class Parser(HTMLParser):
                                                map(float, row[-4:]))
 
     def handle_data(self, data):
+        """ TBD"""
         data = ''.join(data.split())
         if len(data) == 0:
             return
@@ -129,7 +135,8 @@ def make_fpy_table(nuc_data, build_dir=""):
     db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
     if not hasattr(db.root, 'neutron'):
         neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
-    fpy_table = db.create_table('/neutron/', 'wimsd_fission_products', yields,
+    fpy_table = db.create_table(
+        '/neutron/', 'wimsd_fission_products', yields,
         'WIMSD Fission Product Yields, fractions [unitless]')
     fpy_table.flush()
     db.close()
@@ -154,4 +161,3 @@ def make_fpy(args):
     # Make scatering table once we have the data
     print('Making WIMSD fission product yield table.')
     make_fpy_table(nuc_data, build_dir)
-

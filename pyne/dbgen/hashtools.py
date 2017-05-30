@@ -26,6 +26,7 @@ nodelist = [
     '/dose_factors'
     ]
 
+
 def check_hashes(nuc_data):
     """
     This function checks the hash of all the nodes in nodelist against the

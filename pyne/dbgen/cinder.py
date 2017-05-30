@@ -57,6 +57,7 @@ def grab_cinder_dat(build_dir="", datapath=''):
         rtn = False
     return rtn
 
+
 # These read in cinder.dat
 cinder_float = r"[\d.+-Ee]+"
 
@@ -73,31 +74,34 @@ def _init_cinder(db):
     # Create neutron and photon groups
     if not hasattr(db.root, 'neutron'):
         neutron_group = db.create_group('/', 'neutron',
-                                       'Neutron Interaction Data')
+                                        'Neutron Interaction Data')
 
     if not hasattr(db.root, 'photon'):
-        photon_group = db.create_group('/', 'photon', 'Photon Interaction Data')
+        photon_group = db.create_group('/', 'photon',
+                                       'Photon Interaction Data')
 
     # Create xs group
     if not hasattr(db.root.neutron, 'cinder_xs'):
         nxs_mg_group = db.create_group("/neutron", "cinder_xs",
-                                      "CINDER Multi-Group Neutron Cross "
-                                      "Section Data")
+                                       "CINDER Multi-Group Neutron Cross "
+                                       "Section Data")
 
     # Create source groups
     if not hasattr(db.root.photon, 'cinder_source'):
         gxs_mg_group = db.create_group("/photon", "cinder_source",
-                                      "CINDER Multi-Group Photon Source Data")
+                                       "CINDER Multi-Group Photon Source "
+                                       "Data")
 
     # Create fission_yield groups
     if not hasattr(db.root.neutron, 'cinder_fission_products'):
         nxs_mg_group = db.create_group("/neutron", "cinder_fission_products",
-                                      "CINDER Neutron Fission Product "
-                                      "Yield Data")
+                                       "CINDER Neutron Fission Product "
+                                       "Yield Data")
 
     if not hasattr(db.root.photon, 'cinder_fission_products'):
         nxs_mg_group = db.create_group("/photon", "cinder_fission_products",
-                                      "CINDER Photofission Product Yield Data")
+                                       "CINDER Photofission Product Yield "
+                                       "Data")
 
 
 def get_group_sizes(raw_data):
@@ -173,7 +177,7 @@ def make_mg_group_structure(nuc_data, build_dir=""):
 
     # Find & write neutron group structure
     n_E_g_pattern = "Neutron group .*, MeV" \
-                  + (r"\s+("+cinder_float+")")*(G_n + 1)
+        + (r"\s+("+cinder_float+")")*(G_n + 1)
     m = re.search(n_E_g_pattern, raw_data)
     g = m.groups()
     n_E_g = np.array(g[::-1], dtype=float)
@@ -182,7 +186,7 @@ def make_mg_group_structure(nuc_data, build_dir=""):
 
     # Find & write photon group structure
     g_E_g_pattern = "Gamma structure, MeV" \
-                  + (r"\s+("+cinder_float+")")*(G_g + 1)
+        + (r"\s+("+cinder_float+")")*(G_g + 1)
     m = re.search(g_E_g_pattern, raw_data)
     g = m.groups()
     g_E_g = np.array(g[::-1], dtype=float)
@@ -236,12 +240,12 @@ def make_mg_absorption(nuc_data, build_dir=""):
     absorption_dtype = np.dtype(absorption_dtype_tuple + [('xs', float, G_n)])
     absorption_table = db.create_table('/neutron/cinder_xs/', 'absorption',
                                        np.empty(0, dtype=absorption_dtype),
-                                      'Neutron absorption reaction '
-                                      'cross sections [barns]')
+                                       'Neutron absorption reaction '
+                                       'cross sections [barns]')
     abrow = absorption_table.row
 
     # Init to_nuc_pattern
-    to_nuc_pattern = to_nuc_base + (r"\s+("+cinder_float+")")*G_n
+    to_nuc_pattern = to_nuc_base + (r"\s+("+cinder_float+")") * G_n
 
     # Iterate through all from nuctopes.
     for m_from in re.finditer(from_nuc_pattern, raw_data, re.DOTALL):
@@ -417,7 +421,7 @@ def make_mg_gamma_decay(nuc_data, build_dir=""):
 
     # Init the gamma absorption table
     gamma_decay_dtype = np.dtype(gamma_decay_dtype_tuple
-                      + [('spectrum', float, G_g)])
+                                 + [('spectrum', float, G_g)])
     gamma_decay_table = db.create_table(
         '/photon/cinder_source/', 'decay_spectra',
         np.empty(0, dtype=gamma_decay_dtype),
@@ -688,8 +692,9 @@ def make_photon_fp_info(nuc_data, build_dir=""):
 
     # Init the neutron fission product info table
     gfp_table = db.create_table('/photon/cinder_fission_products/', 'info',
-                               np.empty(0, dtype=fp_info_dtype),
-                               'CINDER Photofission Product Yield Information')
+                                np.empty(0, dtype=fp_info_dtype),
+                                'CINDER Photofission Product Yield '
+                                'Information')
     gfp_table.append(info_table)
 
     # Close the hdf5 file
@@ -744,8 +749,8 @@ def make_neutron_fp_yields(nuc_data, build_dir=""):
 
     # Init the neutron fission product info table
     nfp_table = db.create_table('/neutron/cinder_fission_products/', 'yields',
-                               np.empty(0, dtype=fp_yields_dtype),
-                               'CINDER Neutron Fission Product Yields')
+                                np.empty(0, dtype=fp_yields_dtype),
+                                'CINDER Neutron Fission Product Yields')
     nfprow = nfp_table.row
 
     # Iterate over all to-nucs
@@ -815,8 +820,8 @@ def make_photon_fp_yields(nuc_data, build_dir):
 
     # Init the neutron fission product info table
     gfp_table = db.create_table('/photon/cinder_fission_products/', 'yields',
-                               np.empty(0, dtype=fp_yields_dtype),
-                               'CINDER Photofission Product Yields')
+                                np.empty(0, dtype=fp_yields_dtype),
+                                'CINDER Photofission Product Yields')
     gfprow = gfp_table.row
 
     # Iterate over all to-nucs

@@ -79,12 +79,12 @@ def parse_atomic_data(build_dir=""):
             Kb_X_ray_en = ensdf._getvalue(line[65:69])
             L_X_ray_en = ensdf._getvalue(line[70:76])
             dat[j] = Z, k_shell_fluor, k_shell_fluor_error, l_shell_fluor, \
-                     l_shell_fluor_error, prob, k_shell_be, k_shell_be_err, \
-                     li_shell_be, li_shell_be_err, mi_shell_be, \
-                     mi_shell_be_err, ni_shell_be, ni_shell_be_err, \
-                     Kb_to_Ka, Kb_to_Ka_err, Ka2_to_Ka1, Ka2_to_Ka1_err, \
-                     L_auger, K_auger, Ka1_X_ray_en, Ka1_X_ray_en_err, \
-                     Ka2_X_ray_en, Ka2_X_ray_en_err, Kb_X_ray_en, L_X_ray_en
+                l_shell_fluor_error, prob, k_shell_be, k_shell_be_err, \
+                li_shell_be, li_shell_be_err, mi_shell_be, \
+                mi_shell_be_err, ni_shell_be, ni_shell_be_err, \
+                Kb_to_Ka, Kb_to_Ka_err, Ka2_to_Ka1, Ka2_to_Ka1_err, \
+                L_auger, K_auger, Ka1_X_ray_en, Ka1_X_ray_en_err, \
+                Ka2_X_ray_en, Ka2_X_ray_en_err, Kb_X_ray_en, L_X_ray_en
             j += 1
         i += 1
     return dat
@@ -108,7 +108,8 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist14/'
+    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions' \
+        '/dist14/'
 
     cf_base_url = 'http://data.pyne.io/'
     ensdf_zip = ['ensdf_141022_099.zip', 'ensdf_141022_199.zip',
@@ -320,7 +321,7 @@ def parse_decay_data(build_dir=""):
     all_ecbp_array = np.array(all_ecbp, dtype=ecbp_dtype)
 
     return all_decay_array, all_gammas_array, all_alphas_array, \
-           all_betas_array, all_ecbp_array
+        all_betas_array, all_ecbp_array
 
 
 def make_atomic_decay_table(nuc_data, build_dir=""):
@@ -342,33 +343,33 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
         db.create_group('/', 'decay', 'ENSDF Decay data')
 
     atomic_table = db.create_table('/decay/', 'atomic', xrd,
-                              'z'
-                              'k_shell_fluor'
-                              'k_shell_fluor_error'
-                              'l_shell_fluor'
-                              'l_shell_fluor_error'
-                              'prob'
-                              'k_shell_be'
-                              'k_shell_be_err'
-                              'li_shell_be'
-                              'li_shell_be_err'
-                              'mi_shell_be'
-                              'mi_shell_be_err'
-                              'ni_shell_be'
-                              'ni_shell_be_err'
-                              'kb_to_ka'
-                              'kb_to_ka_err'
-                              'ka2_to_ka1'
-                              'ka2_to_ka1_err'
-                              'k_auger'
-                              'k_auger'
-                              'ka1_x_ray_en'
-                              'ka1_x_ray_en_err'
-                              'ka2_x_ray_en'
-                              'ka2_x_ray_en_err'
-                              'kb_x_ray_en'
-                              'l_x_ray_en',
-                              expectedrows=103)
+                                   'z'
+                                   'k_shell_fluor'
+                                   'k_shell_fluor_error'
+                                   'l_shell_fluor'
+                                   'l_shell_fluor_error'
+                                   'prob'
+                                   'k_shell_be'
+                                   'k_shell_be_err'
+                                   'li_shell_be'
+                                   'li_shell_be_err'
+                                   'mi_shell_be'
+                                   'mi_shell_be_err'
+                                   'ni_shell_be'
+                                   'ni_shell_be_err'
+                                   'kb_to_ka'
+                                   'kb_to_ka_err'
+                                   'ka2_to_ka1'
+                                   'ka2_to_ka1_err'
+                                   'k_auger'
+                                   'k_auger'
+                                   'ka1_x_ray_en'
+                                   'ka1_x_ray_en_err'
+                                   'ka2_x_ray_en'
+                                   'ka2_x_ray_en_err'
+                                   'kb_x_ray_en'
+                                   'l_x_ray_en',
+                                   expectedrows=103)
     atomic_table.flush()
     db.close()
 
@@ -394,67 +395,69 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
         db.create_group('/', 'decay', 'ENSDF Decay data')
 
     ll_table = db.create_table('/decay/', 'level_list', level_list,
-                              'nuclide [nuc_id], level [keV], half life [s],'
-                              'metastable [int]', expectedrows=len(level_list))
+                               'nuclide [nuc_id], level [keV], half life [s],'
+                               'metastable [int]',
+                               expectedrows=len(level_list))
     ll_table.flush()
 
     # now that the level data is in nuc_data we can build the decay data fast
     decay, gammas, alphas, betas, ecbp = parse_decay_data(build_dir)
 
     decay_table = db.create_table('/decay/', 'decays', decay,
-                                 'parent nuclide [nuc_id], daughter nuclide '
-                                 '[nuc_id], decay [string], half life [s],'
-                                 'half life error [s], branch ratio [frac],'
-                                 'branch ratio error [frac],'
-                                 'photon branch ratio [ratio],'
-                                 'photon branch ratio error [ratio],'
-                                 'beta branch ratio [ratio],'
-                                 'beta branch ratio error [ratio]',
-                                 expectedrows=len(decay))
+                                  'parent nuclide [nuc_id], daughter nuclide '
+                                  '[nuc_id], decay [string], half life [s],'
+                                  'half life error [s], branch ratio [frac],'
+                                  'branch ratio error [frac],'
+                                  'photon branch ratio [ratio],'
+                                  'photon branch ratio error [ratio],'
+                                  'beta branch ratio [ratio],'
+                                  'beta branch ratio error [ratio]',
+                                  expectedrows=len(decay))
     decay_table.flush()
 
     gamma_table = db.create_table('/decay/', 'gammas', gammas,
-                                 'from_nuc [int], to_nuc [int], primary parent'
-                                 'nuc_id [int], child nuc_id [int]'
-                                 'Energy [keV], Energy error [keV], '
-                                 'photon intensity [ratio], '
-                                 'photon intensity error [ratio],'
-                                 'conversion e intensity [ratio],'
-                                 'conversion e intensity error [ratio],'
-                                 'total intensity [ratio],'
-                                 'total intensity error [ratio], '
-                                 'K conversion electron'
-                                 'intensity [ratio], L conversion electron'
-                                 'intensity [ratio], M conversion electron'
-                                 'intensity [ratio]',
-                                 expectedrows=len(gammas))
+                                  'from_nuc [int], to_nuc [int], primary '
+                                  'parent nuc_id [int], child nuc_id [int]'
+                                  'Energy [keV], Energy error [keV], '
+                                  'photon intensity [ratio], '
+                                  'photon intensity error [ratio],'
+                                  'conversion e intensity [ratio],'
+                                  'conversion e intensity error [ratio],'
+                                  'total intensity [ratio],'
+                                  'total intensity error [ratio], '
+                                  'K conversion electron'
+                                  'intensity [ratio], L conversion electron'
+                                  'intensity [ratio], M conversion electron'
+                                  'intensity [ratio]',
+                                  expectedrows=len(gammas))
 
     gamma_table.flush()
 
     alphas_table = db.create_table('/decay/', 'alphas', alphas,
-                                  'from_nuc [int], to_nuc [int]'
-                                  'Energy [keV], Intensity [ratio],',
-                                  expectedrows=len(alphas))
+                                   'from_nuc [int], to_nuc [int]'
+                                   'Energy [keV], Intensity [ratio],',
+                                   expectedrows=len(alphas))
     alphas_table.flush()
 
     betas_table = db.create_table('/decay/', 'betas', betas,
-                                 'from_nuc [int], to_nuc [int],'
-                                 'Endpoint Energy [keV], Average Energy [keV],'
-                                 'Intensity [ratio]',
-                                 expectedrows=len(betas))
+                                  'from_nuc [int], to_nuc [int],'
+                                  'Endpoint Energy [keV], '
+                                  'Average Energy [keV],'
+                                  'Intensity [ratio]',
+                                  expectedrows=len(betas))
 
     betas_table.flush()
 
     ecbp_table = db.create_table('/decay/', 'ecbp', ecbp,
-                                'from_nuc [int], to_nuc [int],'
-                                'Endpoint Energy [keV], Average Energy [keV],'
-                                'B+ Intensity [ratio], '
-                                'Electron Capture Intensity [ratio],'
-                                'K conversion'
-                                'electron intensity [ratio], L conversion'
-                                'electron intensity [ratio], M conversion'
-                                'electron intensity [ratio]',
-                                expectedrows=len(ecbp))
+                                 'from_nuc [int], to_nuc [int],'
+                                 'Endpoint Energy [keV], Average Energy [keV],'
+                                 'B+ Intensity [ratio], '
+                                 'Electron Capture Intensity [ratio],'
+                                 'K conversion'
+                                 'electron intensity [ratio], L conversion'
+                                 'electron intensity [ratio], M conversion'
+                                 'electron intensity [ratio]',
+                                 expectedrows=len(ecbp))
     ecbp_table.flush()
 
     # Close the hdf5 file

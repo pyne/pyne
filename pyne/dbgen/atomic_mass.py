@@ -61,7 +61,7 @@ def parse_atomic_mass_adjustment(build_dir=""):
 
         nuc = (10000000 * int(m.group(1))) + (10000 * int(m.group(2)))
         mass = float(m.group(3)) \
-             + 1.0E-6 * float(m.group(4).strip().replace('#', ''))
+            + 1.0E-6 * float(m.group(4).strip().replace('#', ''))
         error = 1.0E-6 * float(m.group(5).strip().replace('#', ''))
 
         atomic_masses.append((nuc, mass, error))
@@ -124,7 +124,7 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
 
         new_elem_mass = elem_mass + (nuc_mass * abund)
         A[element_zz] = element_zz, new_elem_mass, 0.0, \
-                        float(0.0 < new_elem_mass)
+            float(0.0 < new_elem_mass)
 
     A = sorted(A.values(), key=lambda x: x[0])
 
@@ -133,7 +133,7 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
 
     # Make a new the table
     Atable = kdb.create_table("/", "atomic_mass", atomic_mass_desc,
-                             "Atomic Mass Data [amu]", expectedrows=len(A))
+                              "Atomic Mass Data [amu]", expectedrows=len(A))
     Atable.append(A)
 
     # Ensure that data was written to table

@@ -21,6 +21,7 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 if sys.version_info[0] > 2:
     basestring = str
 
+
 def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     """Grabs a nuclide file from KAERI from the web and places
     it a {nuc}.html file in the build directory.
@@ -43,8 +44,8 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
         kaeri_url = 'http://atom.kaeri.re.kr/cgi-bin/nuclide?nuc={0}' \
             .format(nuc)
     else:
-        filename = os.path.join(build_dir, '{nuc}_{n}.html' \
-            .format(nuc=nuc, n=n))
+        filename = os.path.join(build_dir,
+                                '{nuc}_{n}.html'.format(nuc=nuc, n=n))
         kaeri_url = 'http://atom.kaeri.re.kr/cgi-bin/nuclide?nuc={0}&n={n}' \
             .format(nuc, n=n)
     print("    getting {0} and placing in {1}".format(nuc, filename))
@@ -64,15 +65,17 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
             hdl.close()
             i += 1
             print("    getting {0} and placing in {1}, attempt {2}"
-                    .format(nuc, filename, i))
+                  .format(nuc, filename, i))
             hdl = urllib2.urlopen(req, timeout=30.0)
 
     # Write out to the file
     with open(filename, 'w') as f:
         f.write(kaeri_html)
 
+
 nat_iso_regex = re.compile(
     r'.*?/cgi-bin/nuclide[?]nuc=([A-Za-z]{1,2}\d{1,3}).*?[(].*?[)]')
+
 
 def parse_for_natural_isotopes(htmlfile):
     """Parses an elemental html file, returning a set of naturally occuring
@@ -89,6 +92,7 @@ def parse_for_natural_isotopes(htmlfile):
 all_iso_regex = re.compile(
     r'.*?/cgi-bin/nuclide[?]nuc=([A-Za-z]{1,2}\d{1,3})')
 
+
 def parse_for_all_isotopes(htmlfile):
     """Parses an elemental html file, returning a set of all occuring
     isotopes."""
@@ -99,4 +103,3 @@ def parse_for_all_isotopes(htmlfile):
             if m is not None:
                 isos.add(nucname.id(m.group(1)))
     return isos
-

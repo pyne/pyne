@@ -25,6 +25,7 @@ from .api import BASIC_FILTERS
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html'):
     """Grabs the scattering cross-section lengths for neutrons from the NIST
     website or locally from this module."""
@@ -39,8 +40,6 @@ def grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html'):
             "http://www.ncnr.nist.gov/resources/n-lengths/list.html")
     with open(build_filename, 'w') as f:
         f.write(nist.read())
-
-
 
 
 def nist_num(nist_data):
@@ -90,6 +89,7 @@ scat_len_pattern = r"<td>{space}(?P<iso>[A-Za-z\d]+){space}<td>{space}" \
                    r"{data}){space}<tr>" \
                    .format(data=scat_len_data, space=scat_len_space)
 
+
 def parse_scattering_lengths(build_dir):
     """Converts to scattering lenth data to a numpy array."""
     build_filename = os.path.join(build_dir, "scattering_lengths.html")
@@ -117,7 +117,6 @@ def parse_scattering_lengths(build_dir):
     return sl_array
 
 
-
 def make_scattering_lengths_table(nuc_data, build_dir=""):
     """Adds the neutron sacttering lengths to the nuc_data library.
 
@@ -139,10 +138,12 @@ def make_scattering_lengths_table(nuc_data, build_dir=""):
         neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
 
     # Init the neutron fission product info table
-    sl_table = db.create_table('/neutron/', 'scattering_lengths',
-                   np.empty(0, dtype=sl_dtype),
-                   'Neutron Scattering Lengths, b [cm], sigma [barns]',
-                   expectedrows=len(sl_array))
+    sl_table = db.create_table(
+        '/neutron/',
+        'scattering_lengths',
+        np.empty(0, dtype=sl_dtype),
+        'Neutron Scattering Lengths, b [cm], sigma [barns]',
+        expectedrows=len(sl_array))
     sl_table.append(sl_array)
 
     # Write the table
@@ -150,7 +151,6 @@ def make_scattering_lengths_table(nuc_data, build_dir=""):
 
     # Close the hdf5 file
     db.close()
-
 
 
 def make_scattering_lengths(args):
@@ -172,4 +172,3 @@ def make_scattering_lengths(args):
     # Make scatering table once we have the data
     print("Making neutron scattering length table.")
     make_scattering_lengths_table(nuc_data, build_dir)
-

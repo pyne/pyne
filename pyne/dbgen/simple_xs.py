@@ -24,6 +24,7 @@ from .kaeri import grab_kaeri_nuclide, parse_for_all_isotopes
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 def grab_kaeri_simple_xs(build_dir=""):
     """Grabs the KAERI files needed for the simple cross sections table,
     if not already present.
@@ -72,8 +73,6 @@ def grab_kaeri_simple_xs(build_dir=""):
             grab_kaeri_nuclide(nuc.upper(), build_dir, 2)
 
 
-
-
 simple_xs_channels = {
     "sigma_t":      "Total Cross Section",
     "sigma_e":      "Elastic Scattering Cross Section",
@@ -116,7 +115,6 @@ simple_xs_dtype = np.dtype([
     ('sigma_3n', float),
     ('sigma_4n', float),
     ])
-
 
 
 def get_xs_from_file(filename, eng, chan):
@@ -162,8 +160,6 @@ def get_xs_from_file(filename, eng, chan):
     return 0.0
 
 
-
-
 def parse_simple_xs(build_dir=""):
     """Builds and returns a dictionary from cross-section types to nuclides."""
     build_dir = os.path.join(build_dir, 'KAERI')
@@ -176,7 +172,7 @@ def parse_simple_xs(build_dir=""):
                            os.path.join(build_dir, htmlfile))
     all_nuclides = sorted([nucname.id(nuc) for nuc in all_nuclides])
     energy_tables = dict([(eng, np.zeros(len(all_nuclides),
-                          dtype=simple_xs_dtype)) \
+                          dtype=simple_xs_dtype))
                           for eng in simple_xs_energy.keys()])
 
     # Loop through species
@@ -196,28 +192,26 @@ def parse_simple_xs(build_dir=""):
     for eng in simple_xs_energy:
         # Store only non-trivial entries
         channels_list = list(simple_xs_channels.keys())
-        mask = (energy_tables[eng][channels_list] != \
+        mask = (energy_tables[eng][channels_list] !=
                 np.zeros(1, dtype=simple_xs_dtype)[channels_list])
         energy_tables[eng] = energy_tables[eng][mask]
 
         # Calculate some xs
-        energy_tables[eng]['sigma_s'] = energy_tables[eng]['sigma_e'] \
-                                      + energy_tables[eng]['sigma_i']
+        energy_tables[eng]['sigma_s'] = \
+            energy_tables[eng]['sigma_e'] + energy_tables[eng]['sigma_i']
 
-        energy_tables[eng]['sigma_a'] = energy_tables[eng]['sigma_gamma'] + \
-                                        energy_tables[eng]['sigma_f'] + \
-                                        energy_tables[eng]['sigma_alpha'] + \
-                                        energy_tables[eng]['sigma_proton'] + \
-                                        energy_tables[eng]['sigma_deut'] + \
-                                        energy_tables[eng]['sigma_trit'] + \
-                                        energy_tables[eng]['sigma_2n'] + \
-                                        energy_tables[eng]['sigma_3n'] + \
-                                        energy_tables[eng]['sigma_4n']
+        energy_tables[eng]['sigma_a'] = \
+            energy_tables[eng]['sigma_gamma'] \
+            + energy_tables[eng]['sigma_f'] \
+            + energy_tables[eng]['sigma_alpha'] \
+            + energy_tables[eng]['sigma_proton'] \
+            + energy_tables[eng]['sigma_deut'] \
+            + energy_tables[eng]['sigma_trit'] \
+            + energy_tables[eng]['sigma_2n'] \
+            + energy_tables[eng]['sigma_3n'] \
+            + energy_tables[eng]['sigma_4n']
+
     return energy_tables
-
-
-
-
 
 
 def make_simple_xs_tables(nuc_data, build_dir=""):
@@ -238,17 +232,19 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
     # Create neutron group
     if not hasattr(db.root, 'neutron'):
-        neutron_group = db.create_group('/', 'neutron',
-                                        'Neutron Interaction Data')
+        neutron_group = db.create_group(
+            '/', 'neutron', 'Neutron Interaction Data')
 
     # Create simple_xs Group
     if not hasattr(db.root.neutron, 'simple_xs'):
-        simple_xs_group = db.create_group("/neutron", "simple_xs",
-                                          "Simple Neutron Cross Section Data")
+        simple_xs_group = db.create_group(
+            "/neutron", "simple_xs", "Simple Neutron Cross Section Data")
 
     # Create tables for every energy
     for eng, eng_flag in simple_xs_energy.items():
-        simple_xs_table = db.create_table(simple_xs_group, eng,
+        simple_xs_table = db.create_table(
+            simple_xs_group,
+            eng,
             np.empty(0, dtype=simple_xs_dtype),
             "{0} [barns]".format(eng_flag.capitalize()),
             expectedrows=len(simple_xs_tables[eng]))
@@ -257,8 +253,6 @@ def make_simple_xs_tables(nuc_data, build_dir=""):
 
     # Close the hdf5 file
     db.close()
-
-
 
 
 def make_simple_xs(args):
@@ -277,4 +271,3 @@ def make_simple_xs(args):
     # Make simple table once we have the array
     print("Making simple cross section data tables")
     make_simple_xs_tables(nuc_data, build_dir)
-
