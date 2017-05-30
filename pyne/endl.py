@@ -13,6 +13,8 @@ https://www.oecd-nea.org/dbdata/data/manual-endf/nds_eval_eedl.pdf
 
 For more information, contact Davide Mancusi <davide.mancusi@cea.fr>.
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from __future__ import print_function, division, unicode_literals
 
 import re
@@ -61,6 +63,7 @@ class Library(rxdata.RxLib):
                 }
 
     def __init__(self, fh):
+        """ TBD """
         self.structure = defaultdict(Library._structure_dict_entry)
         self.intdict = {
                 0: self._linlin,
@@ -142,6 +145,7 @@ class Library(rxdata.RxLib):
             fh.close()
 
     def _linlin(self, e_int, xs, low, high):
+        """ TBD """
         if low is not None or high is not None:
             interp = interp1d(e_int, xs)
             if low in e_int:
@@ -162,6 +166,7 @@ class Library(rxdata.RxLib):
         return np.nansum((e_int[1:]-e_int[:-1]) * (xs[1:]+xs[:-1])/2./de_int)
 
     def _linlog(self, e_int, xs, low, high):
+        """ TBD """
         if low is not None or high is not None:
             interp = interp1d(np.log(e_int), xs)
             if low in e_int:
@@ -190,6 +195,7 @@ class Library(rxdata.RxLib):
                             x1*np.log(x1)-x2+x1) + B*(x2-x1))/de_int
 
     def _loglin(self, e_int, xs, low, high):
+        """ TBD """
         if low is not None or high is not None:
             interp = interp1d(e_int, np.log(xs))
             if low in e_int:
@@ -217,6 +223,7 @@ class Library(rxdata.RxLib):
         return np.nansum((y2-y1)/A)/de_int
 
     def _loglog(self, e_int, xs, low, high):
+        """ TBD """
         if low is not None or high is not None:
             interp = interp1d(np.log(e_int), np.log(xs))
             if low in e_int:
@@ -315,6 +322,7 @@ class Library(rxdata.RxLib):
         # Select the first data_tuple matching x1 and yo, if they are provided
         # (i.e. not None)
         def match_x1_yo_to_data_tuple(x, y, d):
+            """ TBD """
             return (x is None or d.x1 == x) and (y is None or d.yo == y)
         try:
             index, data_tuple = next((i, d) for i, d in enumerate(data_tuples)

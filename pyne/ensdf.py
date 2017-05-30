@@ -1,3 +1,6 @@
+""" TBD """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from __future__ import division
 import re
 import sys
@@ -15,41 +18,42 @@ if sys.version_info[0] > 2:
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-_valexp = re.compile('([0-9.]*)([Ee][+-]?\d*)')
-_val = re.compile('(\d*)[.](\d*)')
-_specialval = re.compile("([0-9. ]*)[+]([A-Z])")
-_specialval2 = re.compile("([A-Z]*)[+]([0-9.]*)")
-_errpm = re.compile('[+](\d*)[-](\d*)')
-_err = re.compile('[ ]*(\d*)')
-_base = '([ \d]{3}[ A-Za-z]{2})'
-_ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
-_g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})(.{10})'
-                + '(.{2})')
-_gc = re.compile(_base + '[0-9A-Za-z] [GE] (.{70})')
-_beta = re.compile(_base + '  B (.{10})(.{2})(.{8})(.{2}).{10}(.{8})(.{6})')
-_betac = re.compile(_base + '[0-9A-Za-z] ([BE]) (.{70})')
-_ec = re.compile(_base + '  E (.{10})(.{2})(.{8})(.{2})'
-                 + '(.{8})(.{2})(.{8})(.{6})(.{10})(.{2})')
-_p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})'
-                + '(.{6}).{9}(.{10})(.{2})(.{4})')
-_norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})'
+_valexp = re.compile(r'([0-9.]*)([Ee][+-]?\d*)')
+_val = re.compile(r'(\d*)[.](\d*)')
+_specialval = re.compile(r"([0-9. ]*)[+]([A-Z])")
+_specialval2 = re.compile(r"([A-Z]*)[+]([0-9.]*)")
+_errpm = re.compile(r'[+](\d*)[-](\d*)')
+_err = re.compile(r'[ ]*(\d*)')
+_base = r'([ \d]{3}[ A-Za-z]{2})'
+_ident = re.compile(_base + r'    (.{30})(.{26})(.{7})(.{6})')
+_g = re.compile(_base + r'  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})'
+                + r'(.{10})(.{2})')
+_gc = re.compile(_base + r'[0-9A-Za-z] [GE] (.{70})')
+_beta = re.compile(_base + r'  B (.{10})(.{2})(.{8})(.{2}).{10}(.{8})(.{6})')
+_betac = re.compile(_base + r'[0-9A-Za-z] ([BE]) (.{70})')
+_ec = re.compile(_base + r'  E (.{10})(.{2})(.{8})(.{2})'
+                 + r'(.{8})(.{2})(.{8})(.{6})(.{10})(.{2})')
+_p = re.compile(_base + r'  P (.{10})(.{2})(.{18})(.{10})'
+                + r'(.{6}).{9}(.{10})(.{2})(.{4})')
+_norm = re.compile(_base + r'  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})'
                    + '(.{6})(.{7})(.{2})')
 _normp = re.compile(_base +
-                    ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
-_q = re.compile(_base + '  Q (.{10})(.{2})(.{8})(.{2})'
-                + '(.{8})(.{2})(.{8})(.{6})')
-_alpha = re.compile(_base + '  A (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})')
-_dp = re.compile(_base + '  D(.{1})(.{10})(.{2})(.{8})(.{2})(.{8})(.{10})'
-                 + '(.{6})')
+                    r' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
+_q = re.compile(_base + r'  Q (.{10})(.{2})(.{8})(.{2})'
+                + r'(.{8})(.{2})(.{8})(.{6})')
+_alpha = re.compile(_base + r'  A (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})')
+_dp = re.compile(_base + r'  D(.{1})(.{10})(.{2})(.{8})(.{2})(.{8})(.{10})'
+                 + r'(.{6})')
 _decays = ['B-', 'B+A', 'EC', 'B-A', 'B+', 'B+P', 'B-N', 'ECP', 'EC2P', 'N',
            '2N', 'IT', 'B+2P', 'B-2N', 'B+3P', 'ECA', 'P', '2P', '2B-', 'SF',
            'A', '2B+', '2EC', '14C']
-_level_regex = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})'
+_level_regex = re.compile(_base + r'  L (.{10})(.{2})(.{18})(.{10})(.{6})'
                           + '(.{9})(.{10})(.{2})(.{1})([ M])([ 1-9])')
-_level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
+_level_cont_regex = re.compile(r'([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
 
 
 def _getvalue(obj, fn=float, rn=None):
+    """ TBD """
     x = obj.strip()
     x = x.replace('$', '')
     x = x.replace('?', '')
@@ -60,6 +64,7 @@ def _getvalue(obj, fn=float, rn=None):
 
 
 def _to_id(nuc):
+    """ TBD """
     if 'NN' not in nuc:
         nucid = nucname.ensdf_to_id(nuc.strip())
     else:
@@ -69,6 +74,7 @@ def _to_id(nuc):
 
 
 def _to_time(tstr, errstr):
+    """ TBD """
     t = tstr.strip()
     # This accepts questionable levels
     t = t.replace('?', '')
@@ -92,6 +98,7 @@ def _to_time(tstr, errstr):
 
 
 def _get_val_err(valstr, errstr):
+    """ TBD """
     pm = _errpm.match(errstr)
     err = _err.match(errstr)
     if pm is None and err.group(1) == '':
@@ -121,6 +128,7 @@ def _get_val_err(valstr, errstr):
 
 
 def _get_err(plen, errstr, valexp):
+    """ TBD """
     errp = list((errstr.strip()).zfill(plen))
     errp.insert(-plen, '.')
     return _getvalue(''.join(errp) + valexp)
@@ -638,8 +646,8 @@ def _parse_decay_dataset(lines, decay_s):
     for line in lines:
         level_l = _level_regex.match(line)
         if level_l is not None:
-            level, half_lifev, from_nuc, \
-            state, special = _parse_level_record(level_l)
+            level, half_lifev, from_nuc, state, special = \
+                _parse_level_record(level_l)
             continue
         b_rec = _beta.match(line)
         if b_rec is not None:
@@ -660,8 +668,8 @@ def _parse_decay_dataset(lines, decay_s):
                 else:
                     ecbp[-1][3] = bcdat[0]
                     bggc = _gc.match(line)
-                    conv = _parse_gamma_continuation_record(bggc, dat[2],
-                                                            dat[8])
+                    conv = \
+                        _parse_gamma_continuation_record(bggc, dat[2], dat[8])
                     if 'K' in conv:
                         ecbp[-1][-3] = conv['K'][0]
                     if 'L' in conv:
@@ -754,9 +762,9 @@ def _parse_decay_dataset(lines, decay_s):
             multi = False
             if parent2 is not None:
                 multi = True
-                pfinal = [parent2,]
-                tfinal = [t,]
-                tfinalerr = [terr,]
+                pfinal = [parent2, ]
+                tfinal = [t, ]
+                tfinalerr = [terr, ]
             parent2, t, terr, e, e_err, special = _parse_parent_record(p_rec)
             parent2 = data.id_from_level(_to_id(parent2), e, special)
             if terr is not None and not isinstance(terr, float):
@@ -770,15 +778,15 @@ def _parse_decay_dataset(lines, decay_s):
                 tfinalerr = terr
                 pfinal = parent2
             continue
-    if len(gammarays) > 0 or len(alphas) > 0 or len(betas) > 0 or len(ecbp) > 0:
+    if len(gammarays) > 0 or len(alphas) > 0 \
+        or len(betas) > 0 or len(ecbp) > 0:
         if len(parents) > 1 and parent2 is None:
             pfinal = []
             for item in parents:
                 pfinal.append(_to_id(item))
         return pfinal, daughter_id, rxname.id(decay_s.strip().lower()), \
-               tfinal, tfinalerr, \
-               br, br_err, nrbr, nrbr_err, nbbr, nbbr_err, gammarays, alphas, \
-               betas, ecbp
+            tfinal, tfinalerr, br, br_err, nrbr, nrbr_err, nbbr, nbbr_err, \
+            gammarays, alphas, betas, ecbp
     return None
 
 
@@ -1057,7 +1065,7 @@ def _dlist_gen(f):
         ident = re.match(_ident, lines[0])
         if ident is not None:
             if 'DECAY' in ident.group(2):
-                #print ident.group(2)
+                # print ident.group(2)
                 fin = ident.group(2).split()[1]
                 if fin not in decaylist:
                     decaylist.append(fin)
@@ -1090,7 +1098,7 @@ def _level_dlist_gen(f, keys):
         ident = re.match(_ident, lines[0])
         if ident is not None:
             if 'ADOPTED LEVELS' in ident.group(2):
-                #print ident.group(2)
+                # print ident.group(2)
                 for line in lines:
                     levelc = _level_cont_regex.match(line)
                     if levelc is None:

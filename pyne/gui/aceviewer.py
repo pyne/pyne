@@ -12,8 +12,10 @@ from pyne.utils import QAWarning
 
 import numpy as np
 import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg \
+    as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg \
+    as NavigationToolbar
 from matplotlib.figure import Figure
 
 # For the time being we're using PyQt4 since matplotlib-support for PySide is
@@ -27,20 +29,24 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 matplotlib.use('Qt4Agg')
 
+
 class AceViewer(QMainWindow):
+    """ TBD """
 
     def __init__(self, parent=None):
+        """ TBD """
         super(AceViewer, self).__init__(parent)
 
         # Create GUI elements
         self._create_gui()
-        
+
         # Initial data structures
         self.tables = []
 
         self.populate_reactions()
-        
+
     def _create_gui(self):
+        """ TBD """
         # Set title of window
         self.setWindowTitle("ACE Data Viewer")
 
@@ -57,7 +63,7 @@ class AceViewer(QMainWindow):
         self.reactionTree.setContextMenuPolicy(Qt.DefaultContextMenu)
 
         # Create canvas
-        self.fig = Figure(dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
+        self.fig = Figure(dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
         self.canvas = FigureCanvas(self.fig)
 
         # Create toolbar
@@ -97,7 +103,7 @@ class AceViewer(QMainWindow):
         self.connect(self.reactionTree, SIGNAL("itemSelectionChanged()"),
                      self.draw_plot)
 
-    def open_library(self): 
+    def open_library(self):
         """Select and open an ACE file and store data in memory."""
 
         filename = QFileDialog.getOpenFileName(self, "Load ACE Library", "./",
@@ -153,6 +159,7 @@ class AceViewer(QMainWindow):
         self.populate_reactions()
 
     def populate_reactions(self):
+        """ TBD """
         self.reactionTree.clear()
 
         for table in self.tables:
@@ -175,6 +182,7 @@ class AceViewer(QMainWindow):
         self.draw_plot()
 
     def draw_plot(self):
+        """ TBD """
         # Clears the current figure
         self.fig.clear()
 
@@ -205,10 +213,10 @@ class AceViewer(QMainWindow):
 
                 # Get reference to NeutronTable containing Reaction
                 table = reaction.table
-                
+
                 # Plot reaction cross section
                 self.axes.loglog(table.energy[reaction.IE:], reaction.sigma)
-            
+
             # Customize plot
             self.axes.grid(True)
             self.axes.set_xlabel('Energy (MeV)')
@@ -219,22 +227,28 @@ class AceViewer(QMainWindow):
 
 
 class MyTreeWidget(QTreeWidget):
+    """ TBD """
 
     def __init__(self):
+        """ TBD """
         super(MyTreeWidget, self).__init__()
 
     def mousePressEvent(self, event):
+        """ TBD """
         if event.button() == Qt.RightButton:
-            self.temporaryPos = self.viewport().mapFromGlobal(event.globalPos())
+            self.temporaryPos = \
+                self.viewport().mapFromGlobal(event.globalPos())
             menu = QMenu()
             menu.addAction("Plot Angle Distribution", self.create_angle)
-            menu.addAction("Plot Angle Distribution (Polar)", self.create_angle_polar)
+            menu.addAction("Plot Angle Distribution (Polar)",
+                           self.create_angle_polar)
             menu.addAction("Plot Energy Distribution", self.create_energy)
             menu.exec_(event.globalPos())
         else:
             super(MyTreeWidget, self).mousePressEvent(event)
 
     def create_angle(self, polar=False):
+        """ TBD """
         # Get QTreeWidgetItem that was right-clicked
         item = self.itemAt(self.temporaryPos)
 
@@ -259,9 +273,11 @@ class MyTreeWidget(QTreeWidget):
                 anglePlot.show()
 
     def create_angle_polar(self):
+        """ TBD """
         self.create_angle(polar=True)
 
     def create_energy(self):
+        """ TBD """
         # Get QTreeWidgetItem that was right-clicked
         item = self.itemAt(self.temporaryPos)
 
@@ -285,10 +301,13 @@ class MyTreeWidget(QTreeWidget):
                     reaction, energies, energydist=True, parent=self.parent())
                 anglePlot.show()
 
+
 class DistributionPlot(QMainWindow):
+    """ TBD """
 
     def __init__(self, reaction, energies, polar=False, energydist=False,
                  parent=None):
+        """ TBD """
         super(DistributionPlot, self).__init__(parent)
 
         # Initialize data
@@ -304,6 +323,7 @@ class DistributionPlot(QMainWindow):
         self._draw_plot()
 
     def _create_gui(self):
+        """ TBD """
         # Set title of window
         if self.energydist:
             self.setWindowTitle("Energy Distribution")
@@ -315,7 +335,7 @@ class DistributionPlot(QMainWindow):
         self.setCentralWidget(self.main)
 
         # Create canvas
-        self.fig = Figure(dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
+        self.fig = Figure(dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
         self.canvas = FigureCanvas(self.fig)
 
         # Create toolbar
@@ -330,6 +350,7 @@ class DistributionPlot(QMainWindow):
         self.main.setLayout(layout)
 
     def _draw_plot(self):
+        """ TBD """
         # Create instance of Axes on the Figure
         if self.polar:
             self.axes = self.fig.add_subplot(111, polar=True)
@@ -350,6 +371,7 @@ class DistributionPlot(QMainWindow):
         self.axes.legend()
 
     def _plot_angle_dist(self, E_in):
+        """ TBD """
 
         # determine index for incoming energy
         index = bisect_right(self.reaction.ang_energy_in, E_in)
@@ -375,8 +397,8 @@ class DistributionPlot(QMainWindow):
         theta = np.linspace(0, np.pi, 100)
         r = np.interp(theta, angles, pdf)
 
-        theta = np.concatenate((theta,theta + np.pi))
-        r = np.concatenate((r,r[::-1]))
+        theta = np.concatenate((theta, theta + np.pi))
+        r = np.concatenate((r, r[::-1]))
 
         # plot angle distribution
         self.axes.plot(theta, r, label='E = {0} MeV'.format(E_in))
@@ -403,11 +425,13 @@ class DistributionPlot(QMainWindow):
 
 
 def main():
+    """ TBD """
     app = QApplication(sys.argv)
     window = AceViewer()
     window.show()
     app.exec_()
     sys.exit()
+
 
 if __name__ == '__main__':
     main()

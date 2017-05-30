@@ -11,18 +11,24 @@ this module has methods for parsing the fispact output file,
 extracting data, processing the data
 """
 
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=bad-whitespace
+
 import numpy as np
 
 
-class FispactOutput():
+class FispactOutput(object):
     """ fispact output data"""
     def __init__(self):
         """ define data"""
         self.file_name = ""
         self.sumdat = []
         self.timestep_data = []
-        self.num_cool_step = 0   # number of steps after zero keyword
-        self.num_irrad_step = 0  # number of steps with flux > 0
+        # number of steps after zero keyword
+        self.num_cool_step = 0
+        # number of steps with flux > 0
+        self.num_irrad_step = 0
         self.version = ""
         self.isFisII = False
         self.cpu_time = 0.0
@@ -32,7 +38,7 @@ class FispactOutput():
         self.time_days = []
 
 
-class FispactTimeStep():
+class FispactTimeStep(object):
     """ data for an individual time step can be heating or cooling """
     def __init__(self):
         self.step_num = 1
@@ -159,7 +165,7 @@ def read_time_step(lines, i):
         ind = find_ind(lines, "APPM OF He  4 ")
         ts.appm_he4 = lines[ind][23:33]
         if "E" in ts.appm_he4:
-            ts.appm_he4= float(ts.appm_he4)        
+            ts.appm_he4 = float(ts.appm_he4)
         ts.appm_he3 = lines[ind+1][23:33]
         if "E" in ts.appm_he3:
             ts.appm_he3 = float(ts.appm_he3)
@@ -185,7 +191,8 @@ def read_time_step(lines, i):
 def check_fisp_version(data):
     """ Checks which version of fispact was used to produced data
 
-        requires a list with each element being a line from the fispact output file
+        requires a list with each element being a line from the fispact output
+        file
 
         returns a string of the version name
     """
@@ -389,8 +396,8 @@ def parse_inventory(data):
     p2 = find_ind(data, "0  TOTAL NUMBER OF NUCLIDES PRINTED IN INVENTORY")
     data = data[4:p2]
     for nuc in data:
-        nuc_data = [nuc[2:8].replace(" ", ""), float(nuc[14:25]), 
-                    float(nuc[28:37]), float(nuc[40:49]), 
+        nuc_data = [nuc[2:8].replace(" ", ""), float(nuc[14:25]),
+                    float(nuc[28:37]), float(nuc[40:49]),
                     float(nuc[52:61]), float(nuc[64:72]),
                     float(nuc[75:84]), float(nuc[87:96])]
         inv.append(nuc_data)
@@ -415,4 +422,3 @@ def read_parameter(data, sub):
     line = line.split(" ")
     param = float(line[0])
     return param
-

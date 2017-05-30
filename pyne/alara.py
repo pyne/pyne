@@ -1,5 +1,11 @@
-"""This module contains functions relevant to the ALARA activation code and the Chebyshev Rational Approximation Method
+"""This module contains functions relevant to the ALARA activation code and the
+Chebyshev Rational Approximation Method
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=bad-whitespace
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments
 from __future__ import print_function
 import os
 import collections
@@ -9,26 +15,26 @@ from pyne.utils import QAWarning
 import numpy as np
 import tables as tb
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
-
-try:
-    basestring
-except NameError:
-    basestring = str
-
-try:
-    from itaps import iMesh, iBase, iMeshExtensions
-except ImportError:
-    warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of the alara module may be incomplete.",
-                  QAWarning)
-
 from pyne.mesh import Mesh, MeshError
 from pyne.material import Material, from_atom_frac
 from pyne import nucname
 from pyne.nucname import serpent, alara, znum, anum
 from pyne.data import N_A, decay_const, decay_children, branch_ratio
 from pyne.xs.data_source import SimpleDataSource
+
+try:
+    from itaps import iMesh, iBase, iMeshExtensions
+except ImportError:
+    warn("the PyTAPS optional dependency could not be imported. "
+         "Some aspects of the alara module may be incomplete.",
+         QAWarning)
+
+warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
@@ -91,13 +97,14 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     """Converts a plaintext photon source file to an HDF5 version for
     quick later use.
 
-    This function produces a single HDF5 file named <filename>.h5 containing the
-    table headings:
+    This function produces a single HDF5 file named <filename>.h5 containing
+    the table headings:
 
         idx : int
             The volume element index assuming the volume elements appear in xyz
-            order (z changing fastest) within the photon source file in the case of
-            a structured mesh or imesh.iterate() order for an unstructured mesh.
+            order (z changing fastest) within the photon source file in the
+            case of a structured mesh or imesh.iterate() order for an
+            unstructured mesh.
         nuc : str
             The nuclide name as it appears in the photon source file.
         time : str
@@ -167,7 +174,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
     Parameters
     ----------
     mesh : PyNE Mesh
-       The object containing the imesh instance to be tagged.
+        The object containing the imesh instance to be tagged.
     filename : str
         The path of the hdf5 version of the photon source file.
     tags: dict
@@ -215,6 +222,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
             else:
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
+
 def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
                    sig_figs=6):
     """This function preforms the same task as alara.mesh_to_geom, except the
@@ -259,9 +267,15 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
 
     # Create three strings in order to create all ALARA input blocks in a
     # single mesh iteration.
-    volume = 'volume\n' # volume input block
-    mat_loading = 'mat_loading\n' # material loading input block
-    mixture = '' # mixture blocks
+
+    # volume input block
+    volume = 'volume\n'
+
+    # material loading input block
+    mat_loading = 'mat_loading\n'
+
+    # mixture blocks
+    mixture = ''
 
     unique_mixtures = []
     for i, mat, ve in mesh:
@@ -287,8 +301,8 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
 
             mixture += 'end\n\n'
 
-        mat_loading += '    zone_{0}    mix_{1}\n'.format(i,
-                        unique_mixtures.index(ve_mixture))
+        mat_loading += '    zone_{0}    mix_{1}\n' \
+            .format(i, unique_mixtures.index(ve_mixture))
 
     volume += 'end\n\n'
     mat_loading += 'end\n\n'
@@ -296,7 +310,8 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
     with open(geom_file, 'w') as f:
         f.write(geometry + volume + mat_loading + mixture)
 
-    matlib = '' # ALARA material library string
+    # ALARA material library string
+    matlib = ''
 
     printed_mats = []
     print_void = False
@@ -307,24 +322,26 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
             continue
         if name not in printed_mats:
             printed_mats.append(name)
-            matlib += '{0}    {1: 1.6E}    {2}\n'.format(name, mat.density,
-                                                         len(mat.comp))
+            matlib += '{0}    {1: 1.6E}    {2}\n' \
+                .format(name, mat.density, len(mat.comp))
             for nuc, comp in mat.comp.iteritems():
-                matlib += '{0}    {1: 1.6E}    {2}\n'.format(alara(nuc),
-                                                      comp*100.0, znum(nuc))
+                matlib += '{0}    {1: 1.6E}    {2}\n' \
+                    .format(alara(nuc), comp*100.0, znum(nuc))
             matlib += '\n'
 
     if print_void:
-       matlib += '# void material\nmat_void 0.0 1\nhe 1 2\n'
+        matlib += '# void material\nmat_void 0.0 1\nhe 1 2\n'
 
     with open(matlib_file, 'w') as f:
         f.write(matlib)
+
 
 def _is_void(name):
     """Private function for determining if a material name specifies void.
     """
     lname = name.lower()
     return 'vacuum' in lname or 'void' in lname or 'graveyard' in lname
+
 
 def mesh_to_geom(mesh, geom_file, matlib_file):
     """This function reads the materials of a PyNE mesh object and prints the
@@ -349,22 +366,30 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
 
     # Create three strings in order to create all ALARA input blocks in a
     # single mesh iteration.
-    volume = "volume\n" # volume input block
-    mat_loading = "mat_loading\n" # material loading input block
-    mixture = "" # mixture blocks
-    matlib = "" # ALARA material library string
+
+    # volume input block
+    volume = "volume\n"
+
+    # material loading input block
+    mat_loading = "mat_loading\n"
+
+    # mixture blocks
+    mixture = ""
+
+    # ALARA material library string
+    matlib = ""
 
     for i, mat, ve in mesh:
         volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
         mat_loading += "    zone_{0}    mix_{0}\n".format(i)
-        matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(i, mesh.density[i],
-                                                         len(mesh.comp[i]))
+        matlib += "mat_{0}    {1: 1.6E}    {2}\n" \
+            .format(i, mesh.density[i], len(mesh.comp[i]))
         mixture += ("mixture mix_{0}\n"
                     "    material mat_{0} 1 1\nend\n\n".format(i))
 
         for nuc, comp in mesh.comp[i].iteritems():
-            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0,
-                                                         znum(nuc))
+            matlib += "{0}    {1: 1.6E}    {2}\n" \
+                .format(alara(nuc), comp*100.0, znum(nuc))
         matlib += "\n"
 
     volume += "end\n\n"
@@ -376,12 +401,13 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     with open(matlib_file, 'w') as f:
         f.write(matlib)
 
+
 def num_density_to_mesh(lines, time, m):
     """num_density_to_mesh(lines, time, m)
     This function reads ALARA output containing number density information and
-    creates material objects which are then added to a supplied PyNE Mesh object.
-    The volumes within ALARA are assummed to appear in the same order as the
-    idx on the Mesh object.
+    creates material objects which are then added to a supplied PyNE Mesh
+    object.  The volumes within ALARA are assummed to appear in the same order
+    as the idx on the Mesh object.
 
     Parameters
     ----------
@@ -389,7 +415,8 @@ def num_density_to_mesh(lines, time, m):
         ALARA output from ALARA run with 'number_density' in the 'output' block
         of the input file. Lines can either be a filename or the equivalent to
         calling readlines() on an ALARA output file. If reading in ALARA output
-        from stdout, call split('\n') before passing it in as the lines parameter.
+        from stdout, call split('\n') before passing it in as the lines
+        parameter.
     time : str
         The decay time for which number densities are requested (e.g. '1 h',
         'shutdown', etc.)
@@ -419,7 +446,7 @@ def num_density_to_mesh(lines, time, m):
     # Read through file until enough material objects are create to fill mesh.
     while count != len(m):
         # Pop lines to the start of the next material.
-        while (lines.pop(0) + " " )[0] != '=':
+        while (lines.pop(0) + " ")[0] != '=':
             pass
 
         # Create a new material object and add to mats dict.
@@ -443,20 +470,20 @@ def num_density_to_mesh(lines, time, m):
 
 
 def irradiation_blocks(material_lib, element_lib, data_library, cooling,
-                       flux_file, irr_time, output = "number_density",
-                       truncation=1E-12, impurity = (5E-6, 1E-3),
-                       dump_file = "dump_file"):
+                       flux_file, irr_time, output="number_density",
+                       truncation=1.0E-12, impurity=(5.0E-6, 1.0E-3),
+                       dump_file="dump_file"):
     """irradiation_blocks(material_lib, element_lib, data_library, cooling,
-                       flux_file, irr_time, output = "number_density",
-                       truncation=1E-12, impurity = (5E-6, 1E-3),
-                       dump_file = "dump_file")
+                       flux_file, irr_time, output="number_density",
+                       truncation=1.0E-12, impurity=(5.0E-6, 1.0E-3),
+                       dump_file="dump_file")
 
     This function returns a string of the irradation-related input blocks. This
     function is meant to be used with files created by the mesh_to_geom
     function, in order to append the remaining input blocks to form a complete
     ALARA input file. Only the simplest irradiation schedule is supported: a
-    single pulse of time <irr_time>. The notation in this function is consistent
-    with the ALARA users' guide, found at:
+    single pulse of time <irr_time>. The notation in this function is
+    consistent with the ALARA users' guide, found at:
 
     http://alara.engr.wisc.edu/users.guide.html/
 
@@ -481,9 +508,9 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
     truncation : float, optional
         The chain truncation value (see ALARA users' guide).
     impurity : tuple of two floats, optional
-       The impurity parameters (see ALARA users' guide).
+        The impurity parameters (see ALARA users' guide).
     dump_file: str, optional
-       Path to the dump file.
+        Path to the dump file.
 
     Returns
     -------
@@ -500,7 +527,8 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
 
     # Cooling times
     s += "cooling\n"
-    if isinstance(cooling, collections.Iterable) and not isinstance(cooling, basestring):
+    if isinstance(cooling, collections.Iterable) \
+        and not isinstance(cooling, basestring):
         for c in cooling:
             s += "    {0}\n".format(c)
     else:
@@ -513,13 +541,14 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
 
     # Flux schedule
     s += ("schedule simple_schedule\n"
-         "    {0} flux_1 pulse_once 0 s\nend\n\n".format(irr_time))
+          "    {0} flux_1 pulse_once 0 s\nend\n\n".format(irr_time))
 
     s += "pulsehistory pulse_once\n    1 0.0 s\nend\n\n"
 
     # Output block
     s += "output zone\n    units Ci cm3\n"
-    if isinstance(output, collections.Iterable) and not isinstance(output, basestring):
+    if isinstance(output, collections.Iterable) \
+        and not isinstance(output, basestring):
         for out in output:
             s += "    {0}\n".format(out)
     else:
@@ -534,15 +563,16 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
 
     return s
 
+
 def phtn_src_energy_bounds(input_file):
-    """Reads an ALARA input file and extracts the energy bounds from the 
+    """Reads an ALARA input file and extracts the energy bounds from the
     photon_source block.
 
     Parameters
     ----------
     input_file : str
          The ALARA input file name, which must contain a photon_source block.
-    
+
     Returns
     -------
     e_bounds : list of floats
@@ -557,7 +587,8 @@ def phtn_src_energy_bounds(input_file):
         upper_bounds = [float(x) for x in line.split()[4:]]
         while len(upper_bounds) < num_groups:
             line = f.readline()
-            upper_bounds += [float(x) for x in line.split("#")[0].split('end')[0].split()]
+            upper_bounds += [float(x)
+                for x in line.split("#")[0].split('end')[0].split()]
     e_bounds = [0.] + upper_bounds
     return e_bounds
 
@@ -589,34 +620,35 @@ def _build_matrix(N):
                 A[i, k] += branch_ratio(N_id[k], N_id[i])*decay_const(N_id[k])
     return A
 
+
 def _rat_apprx_14(A, t, n_0):
     """ CRAM of order 14
 
     Parameters
     ---------
     A : numpy array
-	Burnup matrix
+        Burnup matrix
     t : float
-	Time step
+        Time step
     n_0: numpy array
-	Inital composition vector
+        Inital composition vector
     """
 
-    theta = np.array([ -8.8977731864688888199 + 16.630982619902085304j,
-                   -3.7032750494234480603 + 13.656371871483268171j,
-                   -.2087586382501301251 + 10.991260561901260913j,
-                   3.9933697105785685194 + 6.0048316422350373178j,
-                   5.0893450605806245066 + 3.5888240290270065102j,
-                   5.6231425727459771248 + 1.1940690463439669766j,
-                   2.2697838292311127097 + 8.4617379730402214019j])
+    theta = np.array([-8.8977731864688888199 + 16.630982619902085304j,
+                      -3.7032750494234480603 + 13.656371871483268171j,
+                      -.2087586382501301251 + 10.991260561901260913j,
+                      3.9933697105785685194 + 6.0048316422350373178j,
+                      5.0893450605806245066 + 3.5888240290270065102j,
+                      5.6231425727459771248 + 1.1940690463439669766j,
+                      2.2697838292311127097 + 8.4617379730402214019j])
 
     alpha = np.array([-.000071542880635890672853 + .00014361043349541300111j,
-                   .0094390253107361688779 - .01784791958483017511j,
-                   -.37636003878226968717 + .33518347029450104214j,
-                   -23.498232091082701191 - 5.8083591297142074004j,
-                   46.933274488831293047 + 45.643649768827760791j,
-                   -27.875161940145646468 - 102.14733999056451434j,
-                   4.8071120988325088907 - 1.3209793837428723881j])
+                      .0094390253107361688779 - .01784791958483017511j,
+                      -.37636003878226968717 + .33518347029450104214j,
+                      -23.498232091082701191 - 5.8083591297142074004j,
+                      46.933274488831293047 + 45.643649768827760791j,
+                      -27.875161940145646468 - 102.14733999056451434j,
+                      4.8071120988325088907 - 1.3209793837428723881j])
 
     alpha_0 = np.array([1.8321743782540412751e-14])
 
@@ -625,12 +657,14 @@ def _rat_apprx_14(A, t, n_0):
     n = 0*n_0
 
     for j in range(7):
-        n = n + np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]), alpha[j]*n_0)
+        n = n + np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]),
+                                alpha[j]*n_0)
 
     n = 2*n.real
     n = n + alpha_0*n_0
 
     return n
+
 
 def _rat_apprx_16(A, t, n_0):
     """ CRAM of order 16
@@ -644,16 +678,16 @@ def _rat_apprx_16(A, t, n_0):
     n_0: numpy array
         Inital composition vector
     """
-    theta = np.array([ -10.843917078696988026 + 19.277446167181652284j,
-                   -5.2649713434426468895 + 16.220221473167927305j,
-                   5.9481522689511774808 + 3.5874573620183222829j,
-                   3.5091036084149180974 + 8.4361989858843750826j,
-                   6.4161776990994341923 + 1.1941223933701386874j,
-                   1.4193758971856659786 + 10.925363484496722585j,
-                   4.9931747377179963991 + 5.9968817136039422260j,
-                   -1.4139284624888862114 + 13.497725698892745389j])
+    theta = np.array([-10.843917078696988026 + 19.277446167181652284j,
+                      -5.2649713434426468895 + 16.220221473167927305j,
+                      5.9481522689511774808 + 3.5874573620183222829j,
+                      3.5091036084149180974 + 8.4361989858843750826j,
+                      6.4161776990994341923 + 1.1941223933701386874j,
+                      1.4193758971856659786 + 10.925363484496722585j,
+                      4.9931747377179963991 + 5.9968817136039422260j,
+                      -1.4139284624888862114 + 13.497725698892745389j])
 
-    alpha = np.array([ -.0000005090152186522491565 - .00002422001765285228797j,
+    alpha = np.array([-.0000005090152186522491565 - .00002422001765285228797j,
                       .00021151742182466030907 + .0043892969647380673918j,
                       113.39775178483930527 + 101.9472170421585645j,
                       15.059585270023467528 - 5.7514052776421819979j,
@@ -664,31 +698,33 @@ def _rat_apprx_16(A, t, n_0):
 
     alpha_0 = np.array([2.1248537104952237488e-16])
 
-
     s = 8
     A = A*t
     n = 0*n_0
 
     for j in range(8):
-        n = n + np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]), alpha[j]*n_0)
+        n = n + np.linalg.solve(A - theta[j] * np.identity(np.shape(A)[0]),
+                                alpha[j]*n_0)
 
     n = 2*n.real
     n = n + alpha_0*n_0
     return n
 
+
 def cram(N, t, n_0, order):
-    """ This function returns matrix exponential solution n using CRAM14 or CRAM16
+    """ This function returns matrix exponential solution n using CRAM14 or
+    CRAM16
 
     Parameters
     ----------
     N : list or array
-	Array of nuclides under consideration
+        Array of nuclides under consideration
     t : float
-	Time step
+        Time step
     n_0 : list or array
-	Nuclide concentration vector
+        Nuclide concentration vector
     order : int
-	Order of method. Only 14 and 16 are supported.
+        Order of method. Only 14 and 16 are supported.
     """
 
     n_0 = np.array(n_0)
@@ -701,6 +737,6 @@ def cram(N, t, n_0, order):
         return _rat_apprx_16(A, t, n_0)
 
     else:
-        msg = 'Rational approximation of degree {0} is not supported.'.format(order)
+        msg = 'Rational approximation of degree {0} is not supported.' \
+              .format(order)
         raise ValueError(msg)
-

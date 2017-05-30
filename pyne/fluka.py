@@ -12,6 +12,7 @@ If PyTAPS is not installed, then Usrbin and UsrbinTally will not be
 available to use.
 
 """
+# pylint: disable=invalid-name
 
 from warnings import warn
 from pyne.utils import QAWarning
@@ -22,8 +23,8 @@ try:
     HAVE_PYTAPS = True
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of the mcnp module may be incomplete.",
-                  QAWarning)
+         "Some aspects of the mcnp module may be incomplete.",
+         QAWarning)
     HAVE_PYTAPS = False
 
 from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
@@ -65,7 +66,7 @@ class Usrbin(object):
         """
         line = fh.readline()
 
-        while (line != "" and line[0] == '1'):
+        while line != "" and line[0] == '1':
             new_tally = UsrbinTally(fh)
             self.tally[new_tally.name] = new_tally
             line = fh.readline()
@@ -125,7 +126,8 @@ class UsrbinTally(Mesh):
         self.particle = self.particle.split()[-1]
 
         if self.coord_sys != 'Cartesian':
-            raise ValueError("Only cartesian coordinate system currently supported")
+            raise ValueError("Only cartesian coordinate system currently "
+                             "supported")
 
         [x_info, y_info, z_info] = self._read_usrbin_head(fh)
 
@@ -184,7 +186,7 @@ class UsrbinTally(Mesh):
         """
         tokens = line.split()
         return float(tokens[3]), float(tokens[5]), int(tokens[7]), \
-               float(tokens[10])
+            float(tokens[10])
 
     def _generate_bounds(self, dim_info):
         """This takes in the dimension information (min, max, bins, and width)
@@ -207,8 +209,10 @@ class UsrbinTally(Mesh):
                                           structured_ordering='zyx',
                                           mats=None)
         self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self,
-                                  name="part_data_{0}".format(self.particle))
+                                      name="part_data_{0}"
+                                           .format(self.particle))
         self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self,
-                                  name="error_data_{0}".format(self.particle))
+                                       name="error_data_{0}"
+                                            .format(self.particle))
         self.part_data_tag[:] = part_data
         self.error_data_tag[:] = error_data

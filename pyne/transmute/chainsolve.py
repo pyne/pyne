@@ -12,7 +12,7 @@ from pyne.utils import QAWarning
 
 import numpy as np
 from scipy import linalg
-#from scipy import sparse  # <-- SPARSE
+# from scipy import sparse  # <-- SPARSE
 
 from pyne import utils
 from pyne import data
@@ -25,6 +25,7 @@ from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""
@@ -75,7 +76,7 @@ class Transmuter(object):
                    'z_2n', 'z_2n_1', 'z_2n_2', 'z_3n', 'z_3n_1', 'z_3n_2',
                    'na', 'na_1', 'na_2', 'z_2na', 'np', 'np_1', 'np_2', 'n2a',
                    'nd', 'nd_1', 'nd_2', 'nt', 'nt_1', 'nt_2', 'nHe3',
-                   'nHe3_1', 'nHe3_2','z_4n', 'z_4n_1', 'n', 'n_1', 'n_2',
+                   'nHe3_1', 'nHe3_2', 'z_4n', 'z_4n_1', 'n', 'n_1', 'n_2',
                    'z_3np']
         rxs = set([rxname.id(rx) for rx in rxs])
         rxs.discard(rxname.id('fission'))
@@ -175,9 +176,9 @@ class Transmuter(object):
         """
         dest = self._get_destruction(nuc)
         # DENSE
-        A = np.empty((1,1), float)
+        A = np.empty((1, 1), float)
         A[0, 0] = -dest
-        #A = sparse.csr_matrix([[-dest]])  # <-- SPARSE
+        # A = sparse.csr_matrix([[-dest]])  # <-- SPARSE
         rootval = np.exp(-dest * self.t)
         partial = {nuc: rootval}
         self._traversal(nuc, A, partial)
@@ -231,15 +232,15 @@ class Transmuter(object):
         # DENSE
         # Add row and column to current matrix
         B = np.empty((n+1, n+1), dtype=float)
-        B[:n,:n] = A
-        B[n,:n-1] = 0
-        B[:n,n] = 0
+        B[:n, :n] = A
+        B[n, :n-1] = 0
+        B[:n, n] = 0
         # Update new matrix with provided data
-        B[n,n-1] = prod
-        B[n,n] = -dest
+        B[n, n-1] = prod
+        B[n, n] = -dest
         # SPARSE
-        #B = sparse.bmat([[A, None], [None, [[-dest]]]]).tocsr()
-        #B[n,n-1] = prod
+        # B = sparse.bmat([[A, None], [None, [[-dest]]]]).tocsr()
+        # B[n,n-1] = prod
         return B
 
     def _traversal(self, nuc, A, out, depth=0):
@@ -299,14 +300,14 @@ class Transmuter(object):
             # Compute matrix exponential and dot with density vector
             eB = linalg.expm(B * t)
             N_final = np.dot(eB, N0)  # <-- DENSE
-            #N_final = eB.dot(N0)  # <-- SPARSE
+            # N_final = eB.dot(N0)  # <-- SPARSE
             if self.log is not None:
                 self._log_tree(depth+1, child, N_final[-1])
             # Check against tolerance and continue traversal
             if N_final[-1] > tol:
                 self._traversal(child, B, out, depth=depth+1)
             # On recursion exit or truncation, write data from this nuclide
-            outval = N_final[-1,0] + out.get(child, 0.0)
+            outval = N_final[-1, 0] + out.get(child, 0.0)
             if 0.0 < outval:
                 out[child] = outval
 

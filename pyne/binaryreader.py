@@ -4,12 +4,18 @@
 Fortran formatted records.
 
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# py lint: disable=bad-whitespace
+# py lint: disable=too-many-locals
+# py lint: disable=too-many-arguments
 import struct
 from collections import Iterable
 from warnings import warn
 from pyne.utils import QAWarning
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
 
 class _FortranRecord(object):
     """A single Fortran formatted record.
@@ -27,6 +33,7 @@ class _FortranRecord(object):
         """Initialize instance of Record object."""
         if isinstance(data, str):
             data = data.encode()
+        self.pos = 0
         self.data = data
         self.num_bytes = num_bytes
 
@@ -133,9 +140,11 @@ class _FortranRecord(object):
         self.put_data(data, '{0}s'.format(length), length)
 
     def reset(self):
+        """ TBD """
         self.pos = 0
 
     def __repr__(self):
+        """ TBD """
         return "<Record: {0} bytes>".format(self.num_bytes)
 
 
@@ -147,18 +156,22 @@ class _BinaryReader(object):
     """
 
     def __init__(self, filename, mode='rb'):
+        """ TBD """
         self.int_size = struct.calcsize('i')
         self.long_size = struct.calcsize('q')
         self.f = open(filename, mode)
 
     def close(self):
+        """ TBD """
         self.f.close()
 
     def get_int(self):
+        """ TBD """
         (i, ) = struct.unpack('i', self.f.read(self.int_size))
         return i
 
     def put_int(self, data):
+        """ TBD """
         self.f.write(struct.pack('i', data))
 
     def put_fortran_record(self, record):

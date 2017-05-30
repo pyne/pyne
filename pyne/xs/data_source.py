@@ -29,7 +29,11 @@ from pyne import endf
 from pyne import bins
 from pyne import ace
 from pyne.data import MeV_per_K
-from pyne.xs.models import partial_energy_matrix, group_collapse, same_arr_or_none
+from pyne.xs.models import partial_energy_matrix, group_collapse, \
+    same_arr_or_none
+
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -40,22 +44,24 @@ if sys.version_info[0] > 2:
     basestring = str
     py3k = True
 
+
 class DataSource(object):
     """Base cross section data source.
 
-    This is an abstract class which provides default functionality when subclassed
-    and certain methods are overridden.  A data source should know how to find cross
-    section information for a given nuclide, reaction type, and temperature, if
-    available.  If such data is not present for this source, then the source should
-    return None.
+    This is an abstract class which provides default functionality when
+    subclassed and certain methods are overridden.  A data source should know
+    how to find cross section information for a given nuclide, reaction type,
+    and temperature, if available.  If such data is not present for this
+    source, then the source should return None.
 
-    Furthermore, a data source must be able to declare whether the data is present
-    on the users system.
+    Furthermore, a data source must be able to declare whether the data is
+    present on the users system.
 
-    Finally, data sources distinguish between group structure information coming
-    from or for the source itself (src) and optional user-defined destination (dst)
-    group structure information.  This allows the data source to define how it wishes
-    to discretize its data to the custom destination form.
+    Finally, data sources distinguish between group structure information
+    coming from or for the source itself (src) and optional user-defined
+    destination (dst) group structure information.  This allows the data source
+    to define how it wishes to discretize its data to the custom destination
+    form.
 
     The following methods must be overridden in all DataSource subclasses:
 
@@ -78,8 +84,8 @@ class DataSource(object):
             ...
             return rxdata (ndarray of floats, length self.src_ngroups, or None)
 
-    The following methods may be overridden in DataSource subclasses as a potential
-    optimization:
+    The following methods may be overridden in DataSource subclasses as a
+    potential optimization:
 
     .. code-block:: python
 
@@ -96,8 +102,8 @@ class DataSource(object):
         _USES_TEMP = True
 
     Note that non-multigroup data sources should also override the discretize()
-    method.  Other methods and properties may also need to be overriden depending
-    on the data source at hand.
+    method.  Other methods and properties may also need to be overriden
+    depending on the data source at hand.
 
     All data sources may be used independently or in conjunction with a cross
     section cache instance.
@@ -113,6 +119,7 @@ class DataSource(object):
     """
 
     def __init__(self, src_phi_g=None, dst_group_struct=None, **kwargs):
+        """ TBD """
         self._exists = None
         if not self.exists:
             return
@@ -120,30 +127,35 @@ class DataSource(object):
         self.fullyloaded = False
         self._load_group_structure()
         self.dst_group_struct = dst_group_struct
-        self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
-                            else np.asarray(src_phi_g)
+        self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') \
+            if src_phi_g is None else np.asarray(src_phi_g)
         self.atom_dens = {}
 
     @property
     def src_group_struct(self):
+        """ TBD """
         return self._src_group_struct
 
     @src_group_struct.setter
     def src_group_struct(self, src_group_struct):
+        """ TBD """
         self._src_group_struct = np.asarray(src_group_struct, dtype='f8')
         self._src_ngroups = len(src_group_struct) - 1
         self.rxcache.clear()
 
     @property
     def src_ngroups(self):
+        """ TBD """
         return self._src_ngroups
 
     @property
     def dst_group_struct(self):
+        """ TBD """
         return self._dst_group_struct
 
     @dst_group_struct.setter
     def dst_group_struct(self, dst_group_struct):
+        """ TBD """
         if dst_group_struct is None:
             self._dst_group_struct = None
             self._dst_ngroups = 0
@@ -153,20 +165,22 @@ class DataSource(object):
         else:
             self._dst_group_struct = np.asarray(dst_group_struct)
             self._dst_ngroups = len(dst_group_struct) - 1
-            self._src_to_dst_matrix = partial_energy_matrix(dst_group_struct,
-                                                            self._src_group_struct)
+            self._src_to_dst_matrix = \
+                partial_energy_matrix(dst_group_struct, self._src_group_struct)
 
     @property
     def dst_ngroups(self):
+        """ TBD """
         return self._dst_ngroups
 
     @property
     def src_to_dst_matrix(self):
+        """ TBD """
         return self._src_to_dst_matrix
 
     def reaction(self, nuc, rx, temp=300.0):
-        """Gets the cross section data for this reaction channel either directly
-        from the data source or from the rxcache.
+        """Gets the cross section data for this reaction channel either
+        directly from the data source or from the rxcache.
 
         Parameters
         ----------
@@ -192,10 +206,10 @@ class DataSource(object):
         return self.rxcache[rxkey]
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
-        """Discretizes the reaction channel from the source group structure to that
-        of the destination weighted by the group fluxes.  This implemenation is only
-        valid for multi-group data sources.  Non-multigroup data source should also
-        override this method.
+        """Discretizes the reaction channel from the source group structure to
+        that of the destination weighted by the group fluxes.  This
+        implemenation is only valid for multi-group data sources.
+        Non-multigroup data source should also override this method.
 
         Parameters
         ----------
@@ -216,22 +230,27 @@ class DataSource(object):
             Destination cross section data, length dst_ngroups.
 
         """
-        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g)
+        src_phi_g = self.src_phi_g \
+            if src_phi_g is None else np.asarray(src_phi_g)
         src_sigma = self.reaction(nuc, rx, temp)
-        dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
-                                                        src_phi_g, dst_phi_g,
-                                                        self._src_to_dst_matrix)
+        dst_sigma = None \
+            if src_sigma is None else group_collapse(src_sigma,
+                                                     src_phi_g, dst_phi_g,
+                                                     self._src_to_dst_matrix)
         return dst_sigma
 
     # Mix-in methods to implement
     @property
     def exists(self):
+        """ TBD """
         raise NotImplementedError
 
     def _load_group_structure(self):
+        """ TBD """
         raise NotImplementedError
 
     def _load_reaction(self, nuc, rx, temp=300.0):
+        """ TBD """
         raise NotImplementedError
 
     # Optional mix-in methods to implement
@@ -240,6 +259,7 @@ class DataSource(object):
         pass
 
     _USES_TEMP = True
+
 
 class NullDataSource(DataSource):
     """Cross section data source that always exists and always returns zeros.
@@ -289,8 +309,8 @@ class NullDataSource(DataSource):
 
 
 class SimpleDataSource(DataSource):
-    """Simple cross section data source based off of KAERI data.  This data source
-    does not use material temperature information.
+    """Simple cross section data source based off of KAERI data.  This data
+    source does not use material temperature information.
 
     Parameters
     ----------
@@ -314,10 +334,12 @@ class SimpleDataSource(DataSource):
                  rxname.id('z_4n'): '4n'}
 
     def __init__(self, **kwargs):
+        """ TBD """
         super(SimpleDataSource, self).__init__(**kwargs)
 
     @property
     def exists(self):
+        """ TBD """
         if self._exists is None:
             with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/simple_xs' in f)
@@ -327,9 +349,11 @@ class SimpleDataSource(DataSource):
 
     def _load_group_structure(self):
         """Sets the simple energy bounds array, E_g."""
-        self.src_group_struct = np.array([14.0, 1.0, 2.53E-8, 0.0], dtype='float64')
+        self.src_group_struct = \
+            np.array([14.0, 1.0, 2.53E-8, 0.0], dtype='float64')
 
     def _load_reaction(self, nuc, rx, temp=300.0):
+        """ TBD """
         if rx not in self._rx_avail:
             return None
         cond = "nuc == {0}".format(nuc)
@@ -337,21 +361,24 @@ class SimpleDataSource(DataSource):
         with tb.open_file(nuc_data, 'r') as f:
             simple_xs = f.root.neutron.simple_xs
             fteen = [row[sig] for row in simple_xs.fourteen_MeV.where(cond)]
-            fissn = [row[sig] for row in simple_xs.fission_spectrum_ave.where(cond)]
+            fissn = [row[sig]
+                     for row in simple_xs.fission_spectrum_ave.where(cond)]
             therm = [row[sig] for row in simple_xs.thermal.where(cond)]
             if 0 == len(therm):
-                therm = [row[sig] for row in simple_xs.thermal_maxwell_ave.where(cond)]
+                therm = [row[sig]
+                         for row in simple_xs.thermal_maxwell_ave.where(cond)]
             if 0 == len(fteen) and 0 == len(fissn) and 0 == len(therm):
                 rxdata = None
             else:
-                rxdata = np.array([fteen[0], fissn[0], therm[0]], dtype='float64')
+                rxdata = \
+                    np.array([fteen[0], fissn[0], therm[0]], dtype='float64')
         return rxdata
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
         """Discretizes the reaction channel from simple group structure to that
         of the destination weighted by the group fluxes.  Since the simple data
-        source consists of only thermal (2.53E-8 MeV), fission (1 MeV), and 14 MeV
-        data points, the following piecewise functional form is assumed:
+        source consists of only thermal (2.53E-8 MeV), fission (1 MeV), and 14
+        MeV data points, the following piecewise functional form is assumed:
 
         .. math::
 
@@ -378,15 +405,16 @@ class SimpleDataSource(DataSource):
             Destination cross section data, length dst_ngroups.
 
         """
-        src_phi_g = self.src_phi_g if src_phi_g is None else np.asarray(src_phi_g)
+        src_phi_g = self.src_phi_g \
+            if src_phi_g is None else np.asarray(src_phi_g)
         src_sigma = self.reaction(nuc, rx, temp)
         if src_sigma is None:
             return None
         # not the most efficient, but data sizes should be smallish
         center_g = self._dst_centers
         dst_sigma = (src_sigma[2] * np.sqrt(2.53E-8)) / np.sqrt(center_g)
-        dst_fissn = ((src_sigma[0] - src_sigma[1])/13.0) * (center_g - 1.0) + \
-                                                                        src_sigma[1]
+        dst_fissn = ((src_sigma[0] - src_sigma[1]) / 13.0) \
+            * (center_g - 1.0) + src_sigma[1]
         mask = (dst_sigma < dst_fissn)
         dst_sigma[mask] = dst_fissn[mask]
         if dst_phi_g is not None:
@@ -395,10 +423,12 @@ class SimpleDataSource(DataSource):
 
     @property
     def dst_group_struct(self):
+        """ TBD """
         return self._dst_group_struct
 
     @dst_group_struct.setter
     def dst_group_struct(self, dst_group_struct):
+        """ TBD """
         if dst_group_struct is None:
             self._dst_group_struct = None
             self._dst_centers = None
@@ -412,9 +442,9 @@ class SimpleDataSource(DataSource):
 
 
 class CinderDataSource(DataSource):
-    """Cinder cross section data source. The relevant cinder cross section data must
-    be present in the nuc_data for this data source to exist.  This data source does
-    not use material temperature information.
+    """Cinder cross section data source. The relevant cinder cross section data
+    must be present in the nuc_data for this data source to exist.  This data
+    source does not use material temperature information.
 
     Parameters
     ----------
@@ -458,16 +488,17 @@ class CinderDataSource(DataSource):
                  rxname.id('nHe3_1'): 'nh *',
                  rxname.id('p_1'): 'p  *',
                  # not real or unique absorption reactions
-                 #rxname.id(''): "",
-                 #rxname.id(''): 'x',
-                 #rxname.id(''): 'x  *',
-                 #rxname.id(''): 'c',
-                 #rxname.id('fission'): 'f',
+                 # rxname.id(''): "",
+                 # rxname.id(''): 'x',
+                 # rxname.id(''): 'x  *',
+                 # rxname.id(''): 'c',
+                 # rxname.id('fission'): 'f',
                  }
 
     _USES_TEMP = False
 
     def __init__(self, **kwargs):
+        """ TBD """
         super(CinderDataSource, self).__init__(**kwargs)
 
     def _load_group_structure(self):
@@ -478,12 +509,14 @@ class CinderDataSource(DataSource):
 
     @property
     def exists(self):
+        """ TBD """
         if self._exists is None:
             with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/cinder_xs' in f)
         return self._exists
 
     def _load_reaction(self, nuc, rx, temp=300.0):
+        """ TBD """
         fissrx = rxname.id('fission')
         absrx = rxname.id('absorption')
 
@@ -521,6 +554,7 @@ class CinderDataSource(DataSource):
             if fdata is not None:
                 rxdata = fdata if rxdata is None else rxdata + fdata
         return rxdata
+
 
 class EAFDataSource(DataSource):
     """European Activation File cross section data source.  The relevant EAF
@@ -597,6 +631,7 @@ class EAFDataSource(DataSource):
     _USES_TEMP = False
 
     def __init__(self, **kwargs):
+        """ TBD """
         super(EAFDataSource, self).__init__(**kwargs)
 
     def _load_group_structure(self):
@@ -607,6 +642,7 @@ class EAFDataSource(DataSource):
 
     @property
     def exists(self):
+        """ TBD """
         if self._exists is None:
             with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/eaf_xs' in f)
@@ -646,7 +682,7 @@ class EAFDataSource(DataSource):
         with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
             rows = node.read_where(cond)
-            #rows = [np.array(row['xs']) for row in node.where(cond)]
+            # rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
             rxdata = None
@@ -688,6 +724,7 @@ class EAFDataSource(DataSource):
                 rxcache[abskey] = xs + rxcache.get(abskey, 0.0)
         self.fullyloaded = True
 
+
 class ENDFDataSource(DataSource):
     """Evaluated Nuclear Data File cross section data source.  The ENDF file
     must exist for this data source to exist.
@@ -704,6 +741,7 @@ class ENDFDataSource(DataSource):
     """
 
     def __init__(self, fh, src_phi_g=None, dst_group_struct=None, **kwargs):
+        """ TBD """
         self.fh = fh
         self._exists = None
         if not self.exists:
@@ -716,6 +754,7 @@ class ENDFDataSource(DataSource):
 
     @property
     def exists(self):
+        """ TBD """
         if self._exists is None:
             if isinstance(self.fh, basestring):
                 self._exists = os.path.isfile(self.fh)
@@ -729,7 +768,7 @@ class ENDFDataSource(DataSource):
         mt = rxname.mt(rx)
         rxdata = self.rxcache[nuc, rx, nuc_i]
         xsdata = self.library.get_xs(nuc, rx, nuc_i)[0]
-        intpoints = xsdata['intpoints']#[::-1]
+        intpoints = xsdata['intpoints']  # [::-1]
         e_int = xsdata["e_int"]
         src_group_struct = [e_int[intpoint-1] for intpoint in intpoints[::-1]]
         rxdata['src_group_struct'] = src_group_struct
@@ -766,7 +805,7 @@ class ENDFDataSource(DataSource):
         self._load_group_structure(nuc, rx, nuc_i)
         return rxdict
 
-    def reaction(self, nuc, rx, nuc_i = None):
+    def reaction(self, nuc, rx, nuc_i=None):
         """Get reaction data.
 
         Parameters
@@ -795,8 +834,8 @@ class ENDFDataSource(DataSource):
         return self.rxcache[nuc, rx, nuc_i]
 
     def discretize(self, nuc, rx, temp=300.0, src_phi_g=None, dst_phi_g=None):
-        """Discretizes the reaction channel from the source group structure to that
-        of the destination weighted by the group fluxes.
+        """Discretizes the reaction channel from the source group structure to
+        that of the destination weighted by the group fluxes.
 
         Parameters
         ----------
@@ -819,7 +858,7 @@ class ENDFDataSource(DataSource):
         nuc = nucname.id(nuc)
         nuc_i = nucname.id(nuc)
         rx = rxname.mt(rx)
-        rxdata = self.reaction(nuc, rx, nuc_i = nuc_i)
+        rxdata = self.reaction(nuc, rx, nuc_i=nuc_i)
         xs = rxdata['xs']
         dst_group_struct = rxdata['dst_group_struct']
         intpoints = [intpt for intpt in rxdata['intpoints'][::-1]]
@@ -829,17 +868,20 @@ class ENDFDataSource(DataSource):
         src_bounds = [e_int[intpoint-1] for intpoint in intpoints]
         src_dict = dict(zip(src_bounds, intschemes))
         dst_bounds = zip(dst_group_struct[1:], dst_group_struct[:-1])
-        dst_sigma = [self.integrate_dst_group(dst_bound, src_bounds, src_dict, e_int, xs)
+        dst_sigma = [self.integrate_dst_group(dst_bound, src_bounds,
+                                              src_dict, e_int, xs)
                      for dst_bound in dst_bounds]
         return dst_sigma
 
     def integrate_dst_group(self, dst_bounds, src_bounds, src_dict, e_int, xs):
+        """ TBD """
         dst_low, dst_high = dst_bounds
         src_bounds = np.array(src_bounds)
 
         # We're going to have to integrate over each zone bounded by the edges
         # of a destination bin or by the edges of a source bin
-        internal_src_bounds = [bd for bd in src_bounds if dst_low < bd < dst_high]
+        internal_src_bounds = [bd for bd in src_bounds
+                               if dst_low < bd < dst_high]
         integration_bounds = [dst_low, dst_high]
         integration_bounds[1:1] = internal_src_bounds
         integration_bounds = list(zip(integration_bounds[:-1],
@@ -876,7 +918,7 @@ class ENDFDataSource(DataSource):
 
         """
         dE = high - low
-        sigma = self.library.integrate_tab_range(scheme,e_int, xs, low, high)
+        sigma = self.library.integrate_tab_range(scheme, e_int, xs, low, high)
         return sigma * dE
 
 
@@ -887,7 +929,11 @@ class OpenMCDataSource(DataSource):
     structure will clear the reaction cache.
     """
 
-    self_shield_reactions = {rxname.id('fission'), rxname.id('gamma'), rxname.id('total')}
+    self_shield_reactions = {
+        rxname.id('fission'),
+        rxname.id('gamma'),
+        rxname.id('total')
+    }
 
     def __init__(self, cross_sections=None, src_group_struct=None, **kwargs):
         """Parameters
@@ -911,11 +957,13 @@ class OpenMCDataSource(DataSource):
 
     @property
     def exists(self):
+        """ TBD """
         if self._exists is None:
             self._exists = len(self.cross_sections.ace_tables) > 0
         return self._exists
 
     def _load_group_structure(self):
+        """ TBD """
         if self._src_group_struct is None:
             self._src_group_struct = np.logspace(1, -9, 101)
         self.src_group_struct = self._src_group_struct
@@ -952,7 +1000,8 @@ class OpenMCDataSource(DataSource):
         for atab in ace_tables:
             if os.path.isfile(atab.abspath or atab.path):
                 if atab not in self.libs:
-                    lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
+                    lib = self.libs[atab] \
+                        = ace.Library(atab.abspath or atab.path)
                     lib.read(atab.name)
                 lib = self.libs[atab]
                 ntab = lib.tables[atab.name]
@@ -998,7 +1047,8 @@ class OpenMCDataSource(DataSource):
             return
         E_points, rawdata = rtn
         E_g = self.src_group_struct
-        if self.atom_dens.get(nuc, 0.0) > 1.0E19 and rx in self.self_shield_reactions:
+        if self.atom_dens.get(nuc, 0.0) > 1.0E19 \
+            and rx in self.self_shield_reactions:
             rxdata = self.self_shield(nuc, rx, temp, E_points, rawdata)
         else:
             rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
@@ -1037,10 +1087,12 @@ class OpenMCDataSource(DataSource):
             sig_t = 0.0
         else:
             sig_t = rtn[1]
-        numer = bins.pointwise_linear_collapse(self.src_group_struct,
-            E_points, xs_points/(E_points*(sig_b + sig_t)))
-        denom = bins.pointwise_linear_collapse(self.src_group_struct,
-            E_points, 1.0/(E_points*(sig_b + sig_t)))
+        numer = bins.pointwise_linear_collapse(
+            self.src_group_struct,
+            E_points, xs_points / (E_points*(sig_b + sig_t)))
+        denom = bins.pointwise_linear_collapse(
+            self.src_group_struct,
+            E_points, 1.0 / (E_points*(sig_b + sig_t)))
         return numer/denom
 
     def bkg_xs(self, nuc, temp=300):
@@ -1098,6 +1150,7 @@ class OpenMCDataSource(DataSource):
                 lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
                 lib.read(atab.name)
 
+
 class StatePointDataSource(DataSource):
     """Data source for reactions coming from openmc state points
     """
@@ -1106,7 +1159,8 @@ class StatePointDataSource(DataSource):
         """Parameters
         ----------
         state_point : string
-            Path to the openmc statepoint file to be used to build the data_source
+            Path to the openmc statepoint file to be used to build the
+            data_source
         tallies : array-like
             The tally id's used to pull the cross sections from.
         num_dens: map of int to float
@@ -1127,13 +1181,15 @@ class StatePointDataSource(DataSource):
 
     @property
     def exists(self):
+        """ TBD """
         return True
 
     def _load_group_structure(self):
         """Loads the group structure from a tally in openMC. It is
         assumed that all tallies have the same group structure
         """
-        self._src_group_struct = self.state_point.tallies[self.tallies[0]].filters[0].bins[::-1]
+        self._src_group_struct = self.state_point.tallies[self.tallies[0]] \
+                                     .filters[0].bins[::-1]
         self.src_group_struct = self._src_group_struct
 
     def _load_reactions(self, num_dens, phi_tot):
@@ -1156,10 +1212,12 @@ class StatePointDataSource(DataSource):
             sp = self.state_point.tallies[tally]
             for nuclide in sp.nuclides:
                 for score in sp.scores:
-                   self.reactions[nucname.id(nuclide.name), score] = sp.get_values(
-                       [score], [], [], [nuclide.name]).flatten() * self.particles
-                   weight = 1.0E24/abs(phi_tot*num_dens[nucname.id(nuclide.name)])
-                   self.reactions[nucname.id(nuclide.name), score] *= weight
+                    self.reactions[nucname.id(nuclide.name), score] = \
+                        sp.get_values([score], [], [], [nuclide.name]) \
+                        .flatten() * self.particles
+                    weight = 1.0E24 / abs(phi_tot
+                                          * num_dens[nucname.id(nuclide.name)])
+                    self.reactions[nucname.id(nuclide.name), score] *= weight
 
     def reaction(self, nuc, rx, temp):
         """Loads reaction data from ACE files indexed by OpenMC.

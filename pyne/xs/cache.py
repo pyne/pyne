@@ -1,5 +1,6 @@
-"""This module provides a cross section cache which automatically extracts 
+"""This module provides a cross section cache which automatically extracts
 cross-sections from provided nuclear data sets."""
+# pylint: disable=invalid-name
 import sys
 import inspect
 from warnings import warn
@@ -19,9 +20,11 @@ from pyne.utils import QAWarning
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 if sys.version_info[0] > 2:
-  basestring = str
+    basestring = str
+
 
 def _valid_group_struct(E_g):
+    """ TBD """
     if E_g is None:
         return None
     E_g = np.asarray(E_g, dtype='f8')
@@ -35,32 +38,34 @@ def _valid_group_struct(E_g):
 ###############################################################################
 
 class XSCache(MutableMapping):
-    """A lightweight multigroup cross section cache based off of python 
+    """A lightweight multigroup cross section cache based off of python
     dictionaries. This relies on a list of cross section data source from which
-    discretized group constants may be computed from raw, underlying data.  
+    discretized group constants may be computed from raw, underlying data.
     Normally this requires that some cross section data be built into nuc_data.
     A default instance of this class is provided (pyne.xs.cache.xs_cache).
 
     Parameters
     ----------
     group_struct : array-like of floats, optional
-        Energy group structure E_g [MeV] from highest-to-lowest energy, length G+1.
-        If the group structure is not present in the cache or is None, all cross 
-        sections pulled from the sources will not be discretized or collapsed.
+        Energy group structure E_g [MeV] from highest-to-lowest energy, length
+        G+1. If the group structure is not present in the cache or is None,
+        all cross sections pulled from the sources will not be discretized or
+        collapsed.
     data_sources : list of DataSources and DataSource classes, optional
-        Sequence of DataSource obejects or classes from which to grab cross 
+        Sequence of DataSource obejects or classes from which to grab cross
         section data. Data from a source earlier in the sequence (eg, index 1)
         will take precednce over data later in the sequence (eg, index 5).
         If a class is given rather than an object, the class is instantiated.
 
     """
 
-    def __init__(self, group_struct=None, 
+    def __init__(self, group_struct=None,
                  data_sources=(data_source.CinderDataSource,
                                data_source.OpenMCDataSource,
                                data_source.SimpleDataSource,
                                data_source.EAFDataSource,
                                data_source.NullDataSource,)):
+        """ TBD """
         self._cache = {}
         self.data_sources = []
         for ds in data_sources:
@@ -76,15 +81,19 @@ class XSCache(MutableMapping):
     #
 
     def __len__(self):
+        """ TBD """
         return len(self._cache)
 
     def __iter__(self):
+        """ TBD """
         return iter(self._cache)
 
     def __contains__(self, key):
-        return (key in self._cache)
+        """ TBD """
+        return key in self._cache
 
     def __delitem__(self, key):
+        """ TBD """
         del self._cache[key]
 
     #
@@ -108,24 +117,23 @@ class XSCache(MutableMapping):
                     xsdata = ds.discretize(**kw)
                     if xsdata is not None:
                         self._cache[key] = xsdata
-                        break        
+                        break
                 else:
                     raise KeyError
         # Return the value requested
         return self._cache[key]
 
-
     def __setitem__(self, key, value):
         """Key setting via custom cache functionality."""
         # Set the E_g
-        if (key == 'E_g'):
+        if key == 'E_g':
             value = _valid_group_struct(value)
             cache_value = self._cache['E_g']
             self.clear()
             self._cache['phi_g'] = None
             for ds in self.data_sources:
                 ds.dst_group_struct = value
-        elif (key == 'phi_g'):
+        elif key == 'phi_g':
             value = value if value is None else np.asarray(value, dtype='f8')
             cache_value = self._cache['phi_g']
             if same_arr_or_none(value, cache_value):
@@ -134,23 +142,22 @@ class XSCache(MutableMapping):
             if len(value) + 1 == len(E_g):
                 self.clear()
             else:
-                raise ValueError("phi_g does not match existing group structure E_g!")
+                raise ValueError("phi_g does not match existing group "
+                                 "structure E_g!")
         # Set the value normally
         self._cache[key] = value
 
     def clear(self):
         """Clears the cache, retaining E_g and phi_g."""
-        E_g, phi_g = self._cache['E_g'], self._cache['phi_g'] 
+        E_g, phi_g = self._cache['E_g'], self._cache['phi_g']
         self._cache.clear()
         self._cache['E_g'], self._cache['phi_g'] = E_g, phi_g
-
 
     def load(self, temp=300.0):
         """Loads the cross sections from all data sources."""
         for ds in self.data_sources:
             ds.load(temp=temp)
 
+
 # Make a singleton of the cross-section cache
 xs_cache = XSCache()
-
-

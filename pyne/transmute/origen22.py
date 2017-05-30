@@ -26,6 +26,7 @@ from pyne.xs.cache import XSCache
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+
 class Transmuter(object):
     """A class for transmuting materials using ORIGEN v2.2."""
 
@@ -161,10 +162,14 @@ class Transmuter(object):
 
         # write out files
         origen22.write_tape4(x, outfile=os.path.join(self.cwd, 'TAPE4.INP'))
-        origen22.write_tape5_irradiation('IRF', self.t/86400.0,
-                                         self.xscache['phi_g'][0],
-            outfile=os.path.join(self.cwd, 'TAPE5.INP'), decay_nlb=decay_nlb,
-            xsfpy_nlb=xsfpy_nlb, cut_off=self.tol)
+        origen22.write_tape5_irradiation(
+            'IRF',
+            self.t/86400.0,
+            self.xscache['phi_g'][0],
+            outfile=os.path.join(self.cwd, 'TAPE5.INP'),
+            decay_nlb=decay_nlb,
+            xsfpy_nlb=xsfpy_nlb,
+            cut_off=self.tol)
         origen22.write_tape9(t9, outfile=os.path.join(self.cwd, 'TAPE9.INP'))
 
         # run origen & get results
@@ -181,4 +186,3 @@ class Transmuter(object):
         t6 = origen22.parse_tape6(tape6=os.path.join(self.cwd, 'TAPE6.OUT'))
         y = t6['materials'][-1]
         return y
-
