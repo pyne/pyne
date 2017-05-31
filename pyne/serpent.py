@@ -1,13 +1,16 @@
+""" TBD """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 import re
 import sys
 from warnings import warn
 from pyne.utils import QAWarning
- 
+
 import numpy as np
 
 if sys.version_info[0] > 2:
     basestring = str
-    
+
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 _if_idx_str_serpent1 = (
@@ -142,8 +145,8 @@ def parse_res(resfile, write_py=False):
         else:
             dt = "int"
 
-        zero_line = "{0} = np.zeros([{1}, {2}], dtype={3})\n".format(vs[0],
-                     IDX, vs_shape, dt)
+        zero_line = "{0} = np.zeros([{1}, {2}], dtype={3})\n" \
+            .format(vs[0], IDX, vs_shape, dt)
         header = header + zero_line
 
     # Add IDx to file
@@ -154,7 +157,8 @@ def parse_res(resfile, write_py=False):
     f = header + f
 
     # Replace variable overrides
-    vars = np.array(list(set(re.findall("(" + _lhs_variable_pattern + ")", f))))
+    vars = np.array(
+        list(set(re.findall("(" + _lhs_variable_pattern + ")", f))))
     for v in vars:
         f = f.replace(v[0], "{0}[idx] ".format(v[1]))
 
@@ -179,8 +183,8 @@ def parse_res(resfile, write_py=False):
 
 
 def parse_dep(depfile, write_py=False, make_mats=True):
-    """Converts a serpent depletion ``*_dep.m`` output file to a dictionary (and
-    optionally to a ``*_dep.py`` file).
+    """Converts a serpent depletion ``*_dep.m`` output file to a dictionary
+    (and optionally to a ``*_dep.py`` file).
 
     Parameters
     ----------
@@ -251,14 +255,17 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     # Add materials
     footer = ""
     if make_mats:
-        mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
+        mat_gen_line = "{name}MATERIAL = [{name}VOLUME " \
+            "* Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) " \
+            "for col in cols]\n"
         footer += ('\n\n# Construct materials\n'
                    'zai = list(map(int, ZAI))\n'
                    'cols = list(range(len(DAYS)))\n')
-        base_names = re.findall('(MAT_\w*_)MDENS = ', f)
+        base_names = re.findall(r'(MAT_\w*_)MDENS = ', f)
         for base_name in base_names:
             footer += mat_gen_line.format(name=base_name)
-        footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
+        footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], " \
+            "TOT_MASS[:-2, col]))) for col in cols]\n"
         footer += "del zai, cols\n"
 
     # Add header & footer to file
@@ -328,12 +335,12 @@ def parse_det(detfile, write_py=False):
             if dn + 'E' in det_names:
                 f += '{name}.shape = ({name}_VALS, 13)\n'.format(name=dn)
             else:
-                f += '{name}.shape = ({name_min_E}_EBINS, 3)\n'.format(name=dn,
-                                                            name_min_E=dn[:-1])
+                f += '{name}.shape = ({name_min_E}_EBINS, 3)\n' \
+                    .format(name=dn, name_min_E=dn[:-1])
         else:
-            if (dn + 'T' in det_names):
+            if dn + 'T' in det_names:
                 f += '{name}.shape = (len({name})//13, 13)\n'.format(name=dn)
-            elif (dn + 'E' in det_names):
+            elif dn + 'E' in det_names:
                 f += '{name}.shape = (len({name})//12, 12)\n'.format(name=dn)
             else:
                 f += '{name}.shape = (len({name})//3, 3)\n'.format(name=dn)

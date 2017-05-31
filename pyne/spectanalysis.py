@@ -4,12 +4,12 @@
   will have functions for general spectrum processing
 
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from warnings import warn
 from pyne.utils import QAWarning
 
-
 import copy
-
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -27,6 +27,7 @@ class PhSpectrum(object):
         self.start_chan_num = start_chan_num
         self.num_channels = num_channels
 
+
 def rect_smooth(spectrum, m):
     """Rectangular smoothing function.
 
@@ -43,13 +44,14 @@ def rect_smooth(spectrum, m):
 
     """
 
-    if(m < 3):
+    if m < 3:
         raise ValueError('Error:Smoothing width less than 3')
-    if(m % 2 == 0):
+    if m % 2 == 0:
         raise ValueError('Error:Smoothing width not odd')
 
     smooth_spec = copy.deepcopy(spectrum)
-    smooth_spec.counts = [] #reset counts
+    # reset counts
+    smooth_spec.counts = []
 
     ext = int((m - 1.0) / 2.0)
 
@@ -74,6 +76,7 @@ def rect_smooth(spectrum, m):
 
     smooth_spec.spec_name = spectrum.spec_name + ' smoothed'
     return smooth_spec
+
 
 def five_point_smooth(spec):
     """5 point smoothing function.
@@ -107,15 +110,16 @@ def five_point_smooth(spec):
     smooth_spec.spec_name = spec.spec_name + ' smoothed'
     return smooth_spec
 
+
 def calc_bg(spec, c1, c2, m):
     """Returns background under a peak"""
 
     if c1 > c2:
-       raise ValueError('c1 must be less than c2')
+        raise ValueError('c1 must be less than c2')
     if c1 < 0:
-       raise ValueError('c1 must be positive number above 0')
+        raise ValueError('c1 must be positive number above 0')
     if c2 > max(spec.channels):
-       raise ValueError('c2 must be less than max number of channels')
+        raise ValueError('c2 must be less than max number of channels')
 
     if m == 1:
         low_sum = sum(spec.counts[c1 - 2:c1])
@@ -126,18 +130,20 @@ def calc_bg(spec, c1, c2, m):
 
     return bg
 
+
 def gross_count(spec, c1, c2):
     """Returns total number of counts in a spectrum between two channels"""
 
     if c1 > c2:
-       raise ValueError('c1 must be less than c2')
+        raise ValueError('c1 must be less than c2')
     if c1 < 0:
-       raise ValueError('c1 must be positive number above 0')
+        raise ValueError('c1 must be positive number above 0')
     if c2 > max(spec.channels):
-       raise ValueError('c2 must be less than max number of channels')
+        raise ValueError('c2 must be less than max number of channels')
 
-    gc=sum(spec.counts[c1:c2])
+    gc = sum(spec.counts[c1:c2])
     return gc
+
 
 def net_counts(spec, c1, c2, m):
     """Calculates net counts between two channels"""
@@ -145,9 +151,3 @@ def net_counts(spec, c1, c2, m):
     gc = gross_count(spec, c1, c2)
     nc = gc - bg
     return nc
-
-
-
-
-
-

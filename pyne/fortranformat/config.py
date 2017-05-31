@@ -1,5 +1,6 @@
+""" TBD """
 import sys
-import os
+# import os
 
 # Should all edit descriptor values be returned even if they were not
 # written to?
@@ -22,7 +23,7 @@ if sys.version_info[0] >= 3:
 else:
     PROC_MAXINT = sys.maxint
 # Processor dependant default for including leading plus or not
-PROC_INCL_PLUS = False 
+PROC_INCL_PLUS = False
 # Option to allow signed binary, octal and hex on input (not a FORTRAN feature)
 PROC_ALLOW_NEG_BOZ = False
 # Prcessor dependant padding character
@@ -38,12 +39,14 @@ PROC_NO_LEADING_BLANK = False
 # The default value if BN, BZ edit descriptors are not specified
 PROC_BLANKS_AS_ZEROS = False
 
+
 def reset():
+    """ TBD """
     global RET_WRITTEN_VARS_ONLY, RET_UNWRITTEN_VARS_NONE, PROC_INCL_PLUS, \
         PROC_ALLOW_NEG_BOZ, PROC_PAD_CHAR, PROC_NEG_AS_ZERO, PROC_SIGN_ZERO, \
         PROC_MIN_FIELD_WIDTH, PROC_DECIMAL_CHAR, G0_NO_BLANKS, \
-        PROC_NO_LEADING_BLANK, PROC_BLANKS_AS_ZEROS, PROC_MAXINT, G_INPUT_TRIAL_EDS, \
-        ALLOW_ZERO_WIDTH_EDS
+        PROC_NO_LEADING_BLANK, PROC_BLANKS_AS_ZEROS, PROC_MAXINT, \
+        G_INPUT_TRIAL_EDS, ALLOW_ZERO_WIDTH_EDS
     G_INPUT_TRIAL_EDS = ['F', 'L', 'A']
     if sys.version_info[0] >= 3:
         PROC_MAXINT = sys.maxsize

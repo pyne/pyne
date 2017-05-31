@@ -1,3 +1,6 @@
+""" TBD """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from os.path import isfile
 from warnings import warn
 from pyne.utils import QAWarning
@@ -73,8 +76,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         m = flux_mesh
     #  flux_mesh is unstructured mesh file
     elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
-         and flux_mesh.endswith(".h5m"):
-            m = Mesh(structured=False, mesh=flux_mesh)
+        and flux_mesh.endswith(".h5m"):
+        m = Mesh(structured=False, mesh=flux_mesh)
     #  flux_mesh is Meshtal or meshtal file
     else:
         #  flux_mesh is meshtal file
@@ -150,7 +153,8 @@ def total_photon_source_intensity(m, tag_name):
     m : PyNE Mesh
        The mesh-based photon emission density distribution in p/cm3/s.
     tag_name : str
-       The name of the tag on the mesh with the photon emission density information.
+       The name of the tag on the mesh with the photon emission density
+       information.
 
     Returns
     -------
