@@ -1,5 +1,7 @@
 """Utilities for handling OpenMC.
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from __future__ import print_function
 import os
 import io
@@ -7,13 +9,13 @@ import sys
 from warnings import warn
 from collections import namedtuple
 
+from pyne import nucname
+from pyne.utils import QAWarning
+
 if sys.version_info[0] == 2:
     from HTMLParser import HTMLParser
 else:
     from html.parser import HTMLParser
-
-from pyne import nucname
-from pyne.utils import QAWarning
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -21,14 +23,16 @@ if sys.version_info[0] > 2:
     basestring = str
 
 
-class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable',
-                                        'name', 'path', 'temperature', 'zaid'])):
+class AceTable(namedtuple('_AceTable',
+               ['alias', 'awr', 'location', 'metastable', 'name', 'path',
+                'temperature', 'zaid'])):
     """A simple data structure reprsenenting an <ace_table /> tag in a
     cross_sections.xml file.
     """
     def __new__(cls, alias=None, awr=None, location=None, metastable=None,
                 name=None, path=None, temperature=None, zaid=None,
                 cross_sections_path=None):
+        """ TBD """
         return super(AceTable, cls).__new__(cls, alias=alias, awr=awr,
                                             location=location,
                                             metastable=metastable, name=name,
@@ -58,8 +62,8 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
             ace_table attribute. If set or non-zero then the nucid attribute
             will be set.
         cross_sections_path : str, optional
-            If this and path are both present then the abspath attribute will be
-            set.
+            If this and path are both present then the abspath attribute will
+            be set.
         """
         super(AceTable, self).__init__()
         nuc = None
@@ -68,7 +72,8 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
             nuc = nucname.zzaaam_to_id(zaid + meta)
             if nuc == 0:
                 pass
-            elif not nucname.isnuclide(nuc):  # then it's in MCNP metastable form
+            elif not nucname.isnuclide(nuc):
+                # then it's in MCNP metastable form
                 nuc = nucname.mcnp_to_id(zaid)
         self.nucid = nuc
         abspath = None
@@ -84,8 +89,9 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
         """Creates an XML representation of the ACE Table.
         """
         s = '<ace_table '
-        s += " ".join(['{0}="{1}"'.format(f, getattr(self, f)) for f in self._fields
-                       if getattr(self, f) is not None])
+        s += " ".join(['{0}="{1}"'.format(f, getattr(self, f))
+                      for f in self._fields
+                      if getattr(self, f) is not None])
         s += '/>'
         return s
 
@@ -124,24 +130,29 @@ class CrossSections(HTMLParser):
             f.close()
 
     def handle_starttag(self, tag, attrs):
+        """ TBD """
         self._tag = tag
         if tag == 'ace_table':
             self.handle_ace_table(attrs)
 
     def handle_endtag(self, tag):
+        """ TBD """
         self._tag = None
 
     def handle_startendtag(self, tag, attrs):
+        """ TBD """
         if tag == 'ace_table':
             self.handle_ace_table(attrs)
 
     def handle_data(self, data):
+        """ TBD """
         if self._tag == 'filetype':
             self.filetype = data
         elif self._tag == 'directory':
             self.path = data.strip()
 
     def handle_ace_table(self, attrs):
+        """ TBD """
         ace_table = AceTable(cross_sections_path=self.path, **dict(attrs))
         self.ace_tables.append(ace_table)
 

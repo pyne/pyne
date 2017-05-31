@@ -1,3 +1,4 @@
+""" TBD """
 import collections
 from warnings import warn
 from pyne.utils import QAWarning
@@ -11,41 +12,52 @@ class RxLib(object):
     filetypes.
     """
     def __init__(self, data):
+        """ TBD """
         self.data = data
 
     def write(self, filename, file_type_out):
+        """ TBD """
         pass
 
 
 class DoubleSpinDict(collections.MutableMapping):
-    """Sanitizes input, avoiding errors arising from half-integer values of spin.
+    """Sanitizes input, avoiding errors arising from half-integer values of
+    spin.
 
     Parameters
     ----------
     spin_dict: a dictionary where the keys are (spi, [L], [j]) tuples.
     """
     def __init__(self, spin_dict):
+        """ TBD """
         self.dict = spin_dict
 
     def __len__(self):
+        """ TBD """
         return len(self.dict)
 
     def __iter__(self):
+        """ TBD """
         return self.dict.iterkeys()
 
     def __contains__(self, key):
+        """ TBD """
         return self.double_spin(key) in self.dict
 
     def __getitem__(self, key):
+        """ TBD """
         return self.dict.get(self.double_spin(key))
 
     def __setitem__(self, key, value):
+        """ TBD """
         self.dict[self.double_spin(key)] = value
 
     def __delitem__(self, key):
+        """ TBD """
         del self.dict[self.double_spin(key)]
 
     def double_spin(self, key):
+        """ TBD """
         try:
             if len(key) == 1:
                 return int(round(2.0*key[0]))
