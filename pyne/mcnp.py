@@ -11,6 +11,8 @@ If PyTAPS is not installed, then Wwinp, Meshtal, and Meshtally will not be
 available to use.
 
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from __future__ import print_function, division
 import sys
 import struct
@@ -28,6 +30,7 @@ from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
+from pyne.mesh import Mesh, StatMesh, IMeshTag
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -37,18 +40,19 @@ try:
     HAVE_PYTAPS = True
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of the mcnp module may be incomplete.",
-                  QAWarning)
+         "Some aspects of the mcnp module may be incomplete.",
+         QAWarning)
     HAVE_PYTAPS = False
-
-from pyne.mesh import Mesh, StatMesh, IMeshTag
 
 if sys.version_info[0] > 2:
     def cmp(a, b):
         return (a > b) - (a < b)
 
+
 class Mctal(object):
+    """ TBD """
     def __init__(self):
+        """ TBD """
         pass
 
     def read(self, filename):
@@ -140,6 +144,7 @@ class Mctal(object):
 
 
 def get_words(f, lines=1):
+    """ TBD """
     words = []
     for i in range(lines):
         local_words = f.readline().split()
@@ -148,12 +153,16 @@ def get_words(f, lines=1):
 
 
 class SourceSurf(object):
+    """ TBD """
     def __init__(self):
+        """ TBD """
         pass
 
 
 class TrackData(object):
+    """ TBD """
     def __init__(self):
+        """ TBD """
         pass
 
 
@@ -176,9 +185,11 @@ class SurfSrc(_BinaryReader):
     """
 
     def __init__(self, filename, mode="rb"):
+        """ TBD """
         super(SurfSrc, self).__init__(filename, mode)
 
     def __str__(self):
+        """ TBD """
         return self.print_header()
 
     def print_header(self):
@@ -255,6 +266,7 @@ class SurfSrc(_BinaryReader):
         return track_data
 
     def __eq__(self, other):
+        """ TBD """
         rtn = self.__cmp__(other)
         return rtn == 0
 
@@ -631,9 +643,11 @@ class Srctp(_BinaryReader):
     """
 
     def __init__(self, filename):
+        """ TBD """
         super(Srctp, self).__init__(filename)
 
     def read(self):
+        """ TBD """
         # read header block
         header = self.get_fortran_record()
 
@@ -660,6 +674,7 @@ class Srctp(_BinaryReader):
             self.sites.append(site)
 
     def remaining_sites(self):
+        """ TBD """
         index = self.loc_next - 1
         if (self.loc_next + self.n_run) >= self.n_source:
             return (self.sites[index:] +
@@ -668,24 +683,31 @@ class Srctp(_BinaryReader):
             return self.sites[index: index + self.n_run]
 
     def __repr__(self):
+        """ TBD """
         return "<Srctp: {0}>".format(self.f.name)
 
 
 class SourceSite(object):
+    """ TBD """
 
     def __init__(self):
+        """ TBD """
         pass
 
     def __repr__(self):
+        """ TBD """
         return "<SourceSite: ({0.x},{0.y},{0.z})>".format(self)
 
 
 class Runtpe(_BinaryReader):
+    """ TBD """
 
     def __init__(self, filename):
+        """ TBD """
         super(Runtpe, self).__init__(filename)
 
     def read(self, filename):
+        """ TBD """
         # read identification block
         header = self.get_fortran_record()
 
@@ -707,6 +729,7 @@ class Runtpe(_BinaryReader):
             self.tables.append(self.get_fortran_record())
 
     def __repr__(self):
+        """ TBD """
         return "<Runtpe: {0}>".format(self.f.name)
 
 
@@ -854,6 +877,7 @@ class Xsdir(object):
         xsdata.close()
 
     def __iter__(self):
+        """ TBD """
         for table in self.tables:
             yield table
 
@@ -910,6 +934,7 @@ class XsdirTable(object):
     """
 
     def __init__(self):
+        """ TBD """
         self.name = None
         self.awr = None
         self.filename = None
@@ -992,6 +1017,7 @@ class XsdirTable(object):
             directory + self.filename)
 
     def __repr__(self):
+        """ TBD """
         return "<XsDirTable: {0}>".format(self.name)
 
 
@@ -1294,16 +1320,19 @@ class PtracReader(object):
                 if print_progress > 0 and counter % print_progress == 0:
                     print("processing event {0}".format(counter))
 
+
 def _is_cell_line(line):
+    """ TBD """
     is_cell = False
     if len(line.split()) > 3:
         if line.split()[0].isdigit() and \
-           line.split()[1].isdigit() and \
-           not line.split()[2][0].isalpha() and \
-           line[0:5] != '     ' and \
-           line.split()[1] != '0':
-               is_cell = True
+            line.split()[1].isdigit() and \
+            not line.split()[2][0].isalpha() and \
+            line[0:5] != '     ' and \
+            line.split()[1] != '0':
+            is_cell = True
     return is_cell
+
 
 def mats_from_inp(inp):
     """This function reads an MCNP inp file and returns a mapping of material
@@ -1317,9 +1346,9 @@ def mats_from_inp(inp):
     Returns
     --------
     materials : dict
-       Keys are MCNP material numbers and values are PyNE material objects (for 
-       single density materials) and MultiMaterial objects (for multiple density 
-       materials). 
+       Keys are MCNP material numbers and values are PyNE material objects (for
+       single density materials) and MultiMaterial objects (for multiple
+       density materials).
     """
 
     mat_lines = []  # line of lines that begin material cards
@@ -1336,20 +1365,20 @@ def mats_from_inp(inp):
         # information is stored in a dictionary where:
         # key = material number, value = list of densities
         if _is_cell_line(line):
-           mat_num = int(line.split()[1])
-           den = float(line.split()[2])
+            mat_num = int(line.split()[1])
+            den = float(line.split()[2])
 
-           if mat_num not in densities.keys():
-               densities[mat_num] = [den]
+            if mat_num not in densities.keys():
+                densities[mat_num] = [den]
 
-           else:
-               same_bool = False
-               for j in range(0, len(densities[mat_num])):
-                   if abs((den - densities[mat_num][j])/den) < 1E-4:
-                       same_bool = True
+            else:
+                same_bool = False
+                for j in range(0, len(densities[mat_num])):
+                    if abs((den - densities[mat_num][j])/den) < 1E-4:
+                        same_bool = True
 
-               if same_bool is False:
-                   densities[mat_num].append(den)
+                if same_bool is False:
+                    densities[mat_num].append(den)
 
         # check line to see if it contain a material card, in the form
         # m* where * is a digit. If so store the line num. and material number
@@ -1364,8 +1393,8 @@ def mats_from_inp(inp):
 
     for i in range(0, len(mat_nums)):
         if mat_nums[i] in densities.keys():
-            materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i],
-                                                   densities[mat_nums[i]])
+            materials[mat_nums[i]] = \
+                mat_from_inp_line(inp, mat_lines[i], densities[mat_nums[i]])
         else:
             materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i])
     return materials
@@ -1375,7 +1404,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     """ This function reads an MCNP material card from a file and returns a
     Material or Multimaterial object for the material described by the card.
     This function is used by :func:`mats_from_inp`.
-    
+
     Parameters
     ----------
     filename : str
@@ -1396,15 +1425,17 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
-    # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
-    while len(line.split()) > 0 and (line[0:5] == '     ' or line[0].lower() == 'c'):
+    # people sometimes put comments in materials and then this loop breaks
+    # so we need to keep reading if we encounter comments
+    while len(line.split()) > 0 \
+        and (line[0:5] == '     ' or line[0].lower() == 'c'):
         # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
             data_string += line.split('$')[0]
             line_index += 1
             line = linecache.getline(filename, mat_line + line_index)
         # otherwise this not a line we care about, move on and
-        # skip lines that start with c or C                                                                                                                  
+        # skip lines that start with c or C
         else:
             line_index += 1
             line = linecache.getline(filename, mat_line + line_index)
@@ -1417,7 +1448,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
             zzzaaam = str(nucname.zzaaam(
                 nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
 
-            # this allows us to read nuclides that are repeated                                                                                              
+            # this allows us to read nuclides that are repeated
             if zzzaaam in nucvec.keys():
                 nucvec[zzzaaam] += float(data_string.split()[i+1])
             else:
@@ -1470,7 +1501,8 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
                     comment_line = linecache.getline(
                         filename, mat_line - line_index + comment_index)
                     while comment_line.split()[0] in ['c', 'C']:
-                        if comment_line.split()[1].split(':')[0].lower() in mds:
+                        if comment_line.split()[1].split(':')[0].lower() \
+                            in mds:
                             break
                         comments_string += ' ' + ' '.join(
                             comment_line.split()[1:])
@@ -1530,7 +1562,8 @@ class Wwinp(Mesh):
     Attributes
     ----------
     ni : number of integers on card 2.
-        ni = 1 for neutron WWINPs, ni = 2 for photon WWINPs or neutron + photon WWINPs.
+        ni = 1 for neutron WWINPs, ni = 2 for photon WWINPs or neutron + photon
+        WWINPs.
     nr : int
         10 for rectangular, 16 for cylindrical.
     ne : list of number of energy groups for neutrons and photons.
@@ -1572,6 +1605,7 @@ class Wwinp(Mesh):
     """
 
     def __init__(self):
+        """ TBD """
         if not HAVE_PYTAPS:
             raise RuntimeError("PyTAPS is not available, "
                                "unable to create Wwinp Mesh.")
@@ -1586,6 +1620,7 @@ class Wwinp(Mesh):
             self._read_block3(f)
 
     def _read_block1(self, f):
+        """ TBD """
         # Retrieves all of the information from block 1 of a wwinp file.
 
         line_1 = f.readline()
@@ -1609,6 +1644,7 @@ class Wwinp(Mesh):
             raise ValueError('Cylindrical WWINP not currently supported')
 
     def _read_block2(self, f):
+        """ TBD """
         # Retrieves all of the information from block 2 of a wwinp file.
 
         self.bounds = [[], [], []]
@@ -1643,6 +1679,7 @@ class Wwinp(Mesh):
                             * k / removed_values[j] + removed_values[j-1])
 
     def _read_block3(self, f):
+        """ TBD """
         # Retrives all the information of the block 3 of a wwinp file.
 
         self.e = [[]]
@@ -1660,6 +1697,7 @@ class Wwinp(Mesh):
             self._read_wwlb('p', f)
 
     def _read_wwlb(self, particle, f):
+        """ TBD """
         # Reads the weight window lower bounds from block 3 and returns a
         # mesh.
 
@@ -1713,6 +1751,7 @@ class Wwinp(Mesh):
             self._write_block3(f)
 
     def _write_block1(self, f):
+        """ TBD """
         # Writes the all block 1 data to WWINP file
 
         block1 = ''
@@ -1747,6 +1786,7 @@ class Wwinp(Mesh):
         f.write(block1)
 
     def _write_block2(self, f):
+        """ TBD """
         # Writes the all block 2 data to WWINP file
 
         # Create an array of values to be print in block 2.
@@ -1773,6 +1813,7 @@ class Wwinp(Mesh):
         f.write(block2)
 
     def _write_block3(self, f):
+        """ TBD """
         # Writes the all block 3 data to WWINP file
 
         if self.ne[0] != 0:
@@ -1782,6 +1823,7 @@ class Wwinp(Mesh):
             self._write_block3_single('p', f)
 
     def _write_block3_single(self, particle, f):
+        """ TBD """
         # Write all of block 3 a single time (e.g. for WWINP with only n or
         #   p). This function is called twice in the case of the WWINP having
         #   both n and p.
@@ -1994,12 +2036,13 @@ class Meshtal(object):
             if line.split()[0:3] == ['Mesh', 'Tally', 'Number']:
                 tally_num = int(line.split()[3])
                 if self.tags is not None and tally_num in self.tags.keys():
-                    self.tally[tally_num] = MeshTally(f, tally_num,
-                                                      self.tags[tally_num],
-                                          mesh_has_mats=self._meshes_have_mats)
+                    self.tally[tally_num] = \
+                        MeshTally(f, tally_num, self.tags[tally_num],
+                                  mesh_has_mats=self._meshes_have_mats)
                 else:
-                    self.tally[tally_num] = MeshTally(f, tally_num,
-                                          mesh_has_mats=self._meshes_have_mats)
+                    self.tally[tally_num] = \
+                        MeshTally(f, tally_num,
+                                  mesh_has_mats=self._meshes_have_mats)
 
             line = f.readline()
 
@@ -2043,9 +2086,9 @@ class MeshTally(StatMesh):
     """
 
     def __init__(self, f, tally_number, tag_names=None, mesh_has_mats=False):
-        """Create MeshTally object from a filestream open to the second
-        line of a mesh tally header (the neutron/photon line). MeshTally objects
-        should be instantiated only through the Meshtal class.
+        """Create MeshTally object from a filestream open to the second line of
+        a mesh tally header (the neutron/photon line). MeshTally objects should
+        be instantiated only through the Meshtal class.
 
         Parameters
         ----------
@@ -2071,10 +2114,11 @@ class MeshTally(StatMesh):
         self._read_column_order(f)
 
         if tag_names is None:
-            self.tag_names = ("{0}_result".format(self.particle),
-                              "{0}_result_rel_error".format(self.particle),
-                              "{0}_result_total".format(self.particle),
-                              "{0}_result_total_rel_error".format(self.particle))
+            self.tag_names = (
+                "{0}_result".format(self.particle),
+                "{0}_result_rel_error".format(self.particle),
+                "{0}_result_total".format(self.particle),
+                "{0}_result_total_rel_error".format(self.particle))
         else:
             self.tag_names = tag_names
 
@@ -2085,12 +2129,13 @@ class MeshTally(StatMesh):
         not flux-to-dose conversion factors are being used.
         """
         line = f.readline()
-        if ('neutron' in line):
+        if 'neutron' in line:
             self.particle = 'neutron'
-        elif ('photon' in line):
+        elif 'photon' in line:
             self.particle = 'photon'
 
-        # determine if meshtally flux-to-dose conversion factors are being used.
+        # determine if meshtally flux-to-dose conversion factors are being
+        # used.
         line = f.readline()
         dr_str = 'This mesh tally is modified by a dose response function.'
         if line.strip() == dr_str:
@@ -2183,7 +2228,8 @@ class MeshTally(StatMesh):
             rel_err_tot_tag[:] = rel_error
 
 
-def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
+def mesh_to_geom(mesh, frac_type='mass',
+                 title_card="Generated from PyNE Mesh"):
     """This function reads a structured Mesh object and returns the geometry
     portion of an MCNP input file (cells, surfaces, materials), prepended by a
     title card. The mesh must be axis aligned. Surfaces and cells are written

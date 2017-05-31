@@ -1,7 +1,7 @@
 """Purpose:
 
   Automatic generation of Njoy input data, including dragr data.
-  Generation of DRAGLIB and ACELIB.  Please see the tutorial at 
+  Generation of DRAGLIB and ACELIB.  Please see the tutorial at
   http://www.polymtl.ca/merlin/downloads/IGE305.pdf for more information.
 
 Copyright:
@@ -9,7 +9,7 @@ Copyright:
   This code was originally distirbuted under the LGPL license (below).
   However, we have been given written permission from the author Alain
   Herbert to redistribute it under PyNE's BSD license.
-  
+
 Original Copyright:
 
   Copyright (C) 2003 Ecole Polytechnique de Montreal
@@ -22,6 +22,9 @@ Original Copyright:
 .. moduleauthor:: A. Hebert, R. Karthikeyan
 
 """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
+# pylint: disable=too-many-locals
 
 from __future__ import print_function
 import os
@@ -29,18 +32,21 @@ import time
 from warnings import warn
 from pyne.utils import QAWarning
 
-warn("the NJOY module is untested and considered experimental", 
-              RuntimeWarning)
+warn("the NJOY module is untested and considered experimental",
+     RuntimeWarning)
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
 
 class PyNjoyError(Exception):
     """Exception indicating an error in PyNjoy."""
     pass
 
+
 class Njoy99(object):
     """The NJOY99 wrapper class."""
 
     def __init__(self):
+        """ TBD """
         self.iwt = 4
         self.legendre = 1
         self.legendregg = 6
@@ -70,7 +76,7 @@ class Njoy99(object):
         mycwd = os.getcwd()
         mynjoy = mycwd + '/' + self.execdir + "/xnjoy<file_data"
         if not os.path.isfile(os.path.expandvars(self.evaluation_file)):
-            raise PyNjoyError("evaluation file " + self.evaluation_file + 
+            raise PyNjoyError("evaluation file " + self.evaluation_file +
                               " not found")
         if not os.path.isdir(self.evaluation_name):
             os.mkdir(self.evaluation_name)
@@ -113,7 +119,7 @@ class Njoy99(object):
                 elasopt = 1
                 matsab_inc = 231
             elif self.scattering_mat == 27:
-                # Beryllium in BeO 
+                # Beryllium in BeO
                 nbatoms = 2
                 elasopt = 1
                 matsab_inc = 233
@@ -146,7 +152,7 @@ class Njoy99(object):
             elasopt = 0
         htime = time.ctime(time.time())
         self.__dict__.update({"textdil": textdil, "nbdil": nbdil,
-                              "texttmp": texttmp, "nbtmp": nbtmp,  
+                              "texttmp": texttmp, "nbtmp": nbtmp,
                               "unitlaw": unitlaw, "matlaw": matlaw,
                               "typelaw": typelaw, "nbatoms": nbatoms,
                               "elasopt": elasopt, "htime": htime,
@@ -163,34 +169,34 @@ class Njoy99(object):
             "broadr\n-21 -22 -23\n%(mat)d %(nbtmp)d/\n0.001/\n"
             "%(texttmp)s/\n0/\n" % self.__dict__)
         if self.dilutions and self.purr:
-            text_data +=  (
+            text_data += (
                 "purr\n-21 -23 -24\n%(mat)d %(nbtmp)d %(nbdil)d 20 32/\n"
                 "%(texttmp)s/\n%(textdil)s/\n0/\n" % self.__dict__)
         elif self.dilutions:
-            text_data +=  (
+            text_data += (
                 "unresr\n-21 -23 -24\n%(mat)d %(nbtmp)d %(nbdil)d 1/\n"
                 "%(texttmp)s/\n%(textdil)s/\n0/\n" % self.__dict__)
         if self.dilutions:
-            text_data +=  (
+            text_data += (
                 "thermr\n0 -24 -35\n0 %(mat)d 16 %(nbtmp)d %(typelaw)d 0 "
                 "%(nbatoms)d 221 0\n%(texttmp)s/\n0.001 4.0\nmoder\n-35 29\n"
                 "stop\n" % self.__dict__)
         else:
             if self.scattering_law:
-                text_data +=  (
+                text_data += (
                     "thermr\n%(unitlaw)d -23 -35\n%(matlaw)d %(mat)d 16 "
                     "%(nbtmp)d %(typelaw)d %(elasopt)d %(nbatoms)d "
                     "%(matsab_inc)d 0/\n%(texttmp)s/\n0.001 4.0\n"
                     "moder\n-35 29\nstop\n" % self.__dict__)
             elif eaf == 0:
-                text_data +=  (
+                text_data += (
                     "thermr\n0 -23 -35\n0 %(mat)d 16 %(nbtmp)d "
                     "%(typelaw)d 0 %(nbatoms)d 221 0\n%(texttmp)s/\n"
                     "0.001 4.0\nmoder\n-35 29\nstop\n" % self.__dict__)
             else:
-                text_data +=  (
+                text_data += (
                     "moder\n-23 29\nstop\n" % self.__dict__)
-        file_data = open("file_data",'w')
+        file_data = open("file_data", 'w')
         file_data.write(text_data)
         file_data.close()
         os.system("ln -s " + self.evaluation_file + " tape20")
@@ -229,8 +235,8 @@ class Njoy99(object):
             if self.scattering_mat == 1:
                 matsab_inc = 222
             elif self.scattering_mat == 7:
-                matsab_inc = 225        
-                matsab_coh = 226        
+                matsab_inc = 225
+                matsab_coh = 226
             elif self.scattering_mat == 11:
                 matsab_inc = 228
             elif self.scattering_mat == 26:
@@ -248,8 +254,8 @@ class Njoy99(object):
             elif self.scattering_mat == 40:
                 matsab_inc = 227
             elif self.scattering_mat == 58:
-                matsab_inc = 235             
-                matsab_coh = 236             
+                matsab_inc = 235
+                matsab_coh = 236
         if self.iwt:
             newiwt = self.iwt
         else:
@@ -303,7 +309,7 @@ class Njoy99(object):
                 else:
                     text_data += "3/\n3 %(matsab_inc)d /\n" % self.__dict__
             else:
-              text_data += "3/\n"
+                text_data += "3/\n"
             if self.fission:
                 text_data += "3 452 /\n"
             if self.fission == 2:
@@ -315,11 +321,12 @@ class Njoy99(object):
                     text_data += ("6 /\n6 %(matsab_inc)d /\n6 "
                                   "%(matsab_coh)d /\n0/\n" % self.__dict__)
                 else:
-                    text_data += "6 /\n6 %(matsab_inc)d /\n0/\n" % self.__dict__
+                    text_data += \
+                        "6 /\n6 %(matsab_inc)d /\n0/\n" % self.__dict__
             else:
                 text_data += "6 /\n0/\n"
         text_data += "0/\nmoder\n-26 30\nstop"
-        file_data = open("file_data",'w')
+        file_data = open("file_data", 'w')
         file_data.write(text_data)
         file_data.close()
         os.system("ln -s " + self.evaluation_file + " tape20")
@@ -343,8 +350,8 @@ class Njoy99(object):
         mycwd = os.getcwd()
         mynjoy = mycwd + '/' + self.execdir + "/xnjoy<file_data"
         if not os.path.isfile(os.path.expandvars(self.evaluation_file)):
-          raise PyNjoyError("evaluation file " + self.evaluation_file +
-                            " not found")
+            raise PyNjoyError("evaluation file {0:s} not found"
+                              .format(self.evaluation_file))
         if not os.path.isdir(self.evaluation_name):
             os.mkdir(self.evaluation_name)
         os.chdir(self.evaluation_name)
@@ -357,7 +364,7 @@ class Njoy99(object):
                      "%(evaluation_name)s at %(htime)s' /\n0/\ngaminr\n"
                      "-41 -42 0 -43\n%(matgg)d %(gstr)d 3 %(legendregg)d 1\n"
                      "'%(hmatgg)s (gamma) from %(evaluation_name)s at "
-                     "%(htime)s' /\n-1 /\n0 /\nmoder\n-43 44\nstop\n" 
+                     "%(htime)s' /\n-1 /\n0 /\nmoder\n-43 44\nstop\n"
                      % self.__dict__)
         file_data = open("file_data", 'w')
         file_data.write(text_data)
@@ -369,8 +376,8 @@ class Njoy99(object):
         os.system("mv output out_gamma_" + self.hmatgg)
         os.system("chmod 644 out_gamma_" + self.hmatgg)
         for file_name in os.listdir(os.getcwd()):
-          if file_name[:4] == 'tape':
-              os.remove(file_name)
+            if file_name[:4] == 'tape':
+                os.remove(file_name)
         os.chdir(mycwd)
 
     def draglib(self, fp=0):
@@ -388,11 +395,12 @@ class Njoy99(object):
         mycwd = os.getcwd()
         mynjoy = mycwd + '/' + self.execdir + "/xnjoy<file_data"
         if not os.path.isfile(os.path.expandvars(self.evaluation_file)):
-          raise PyNjoyError("evaluation file " + self.evaluation_file +
-                            " not found")
+            raise PyNjoyError("evaluation file {0:s} not found"
+                              .format(self.evaluation_file))
         evaluation_name_base = os.path.basename(self.evaluation_name)
         if self.oldlib:
-            os.system("mv ../" + self.oldlib + " draglib" + evaluation_name_base)
+            os.system("mv ../" + self.oldlib + " draglib"
+                      + evaluation_name_base)
         os.chdir(self.evaluation_name)
         if os.path.isfile("drag"):
             os.remove("drag")
@@ -417,7 +425,8 @@ class Njoy99(object):
                     else:
                         os.remove(name2)
             os.system("mv draglib" + evaluation_name_base + " tape29")
-            print(" append data for " + self.hmat + " to existing draglib file")
+            print(" append data for {0:s} to existing draglib file"
+                  .format(self.hmat))
         else:
             iold = 0
             print(" create a new draglib file for " + self.hmat)
@@ -433,26 +442,28 @@ class Njoy99(object):
                                   "auto2": self.autolib[2],
                                   "fp"   : fp})
             text_data = ("moder\n20 -21\nmoder\n22 -23\nmoder\n24 -25\n"
-                         "dragr\n-21 -23 -25 0 0 %(iold)d 30 %(fp)d/\n" 
+                         "dragr\n-21 -23 -25 0 0 %(iold)d 30 %(fp)d/\n"
                          % self.__dict__)
             if iold == 0:
                 text_data += ("'draglib from %(evaluation_name)s at "
                               "%(htime)s'/\n" % self.__dict__)
             text_data += ("%(mat)d %(hmat)s /\n'%(hmat)s from "
                           "%(evaluation_name)s (%(mat)d) at %(htime)s' /\n"
-                          "%(ss0)E %(ss1)E /\n%(auto0)E %(auto1)E %(auto2)E /\n"
+                          "%(ss0)E %(ss1)E /\n"
+                          "%(auto0)E %(auto1)E %(auto2)E /\n"
                           "0/\nstop\n" % self.__dict__)
         else:
             self.__dict__.update({"htime": htime, "iold": iold, "fp": fp})
             text_data = ("moder\n20 -21\nmoder\n24 -25\ndragr\n-21 0 -25 0 0 "
                          "%(iold)d 30 %(fp)d/\n" % self.__dict__)
             if iold == 0:
-                text_data += ("'draglib from %(evaluation_name)s at %(htime)s'/\n"
+                text_data += ("'draglib from %(evaluation_name)s at "
+                              "%(htime)s'/\n"
                               % self.__dict__)
             text_data += ("%(mat)d %(hmat)s /\n'%(hmat)s from "
                           "%(evaluation_name)s (%(mat)d) at %(htime)s' /\n"
                           "0.1 1.0E10 /\n0/\nstop\n" % self.__dict__)
-        file_data = open("file_data",'w')
+        file_data = open("file_data", 'w')
         file_data.write(text_data)
         file_data.close()
         os.system("ln -s " + self.evaluation_file + " tape20")
@@ -461,17 +472,19 @@ class Njoy99(object):
         os.system("ln -s gendf" + self.hmat + " tape24")
         os.system(mynjoy)
         os.system("mv file_data file_data_dendf" + self.hmat)
-        stats = os.stat("tape30") # get the stats of the file
-        size = stats[6] # extract the file size in bytes from the stats list
-        if size > 8 :
+        # get the stats of the file
+        stats = os.stat("tape30")
+        # extract the file size in bytes from the stats list
+        size = stats[6]
+        if size > 8:
             os.system("mv tape30 draglib" + evaluation_name_base)
         else:
             os.system("mv tape29 draglib" + evaluation_name_base)
             raise PyNjoyError("draglib file for " + self.hmat + " not created")
-        file_in = open('output','r')
-        file_out = open("out_draglib_" + self.hmat,'w')
+        file_in = open('output', 'r')
+        file_out = open("out_draglib_" + self.hmat, 'w')
         while 1:
-            line=file_in.readline()
+            line = file_in.readline()
             if not line:
                 break
             ind = line.find('???????????')
@@ -483,21 +496,21 @@ class Njoy99(object):
             if self.branching_ng:
                 ind = line.find(' ng ')
                 if ind != -1:
-                  jnd = line[ind+3:].find(' 0.000 ')
-                  if jnd == -1:
-                      raise PyNjoyError("unable to set the isomeric ng "
-                                        "branching ratio")
-                  line = line[:ind+jnd+4] + "%5.3f" % self.branching_ng \
-                      + line[ind+jnd+9:]
-                  self.branching_ng = None
+                    jnd = line[ind+3:].find(' 0.000 ')
+                    if jnd == -1:
+                        raise PyNjoyError("unable to set the isomeric ng "
+                                          "branching ratio")
+                    line = line[:ind+jnd+4] + "%5.3f" % self.branching_ng \
+                        + line[ind+jnd+9:]
+                    self.branching_ng = None
             if self.branching_n2n:
-                ind=line.find(' n2n ')
+                ind = line.find(' n2n ')
                 if ind != -1:
                     jnd = line[ind+4:].find(' 0.000 ')
                     if jnd == -1:
                         raise PyNjoyError("unable to set the isomeric n2n "
                                           "branching ratio")
-                    line = line[:ind+jnd+5] + "%5.3f"%self.branching_n2n \
+                    line = line[:ind+jnd+5] + "%5.3f" % self.branching_n2n \
                         + line[ind+jnd+10:]
                     self.branching_n2n = None
             file_out.writelines(line)
@@ -535,8 +548,9 @@ class Njoy99(object):
                          "1 '%(hmat)s coupled-set from %(evaluation_name)s "
                          "(%(mat)d+%(matgg)d) at %(htime)s'/\n2 3 1 1\n"
                          "'neutron-gamma library'/\n'n' 'g'\n%(nbGro)d "
-                         "%(nbGro2)d\n'nscat' 'ng' 'gscat' 'ntherm'/\n1 1 2 1\n"
-                         "1 2 2 1\n%(hmat)s %(mat)d %(matgg)d/\nstop\n" 
+                         "%(nbGro2)d\n'nscat' 'ng' 'gscat' 'ntherm'/\n"
+                         "1 1 2 1\n1 2 2 1\n%(hmat)s %(mat)d %(matgg)d/\n"
+                         "stop\n"
                          % self.__dict__)
             os.system("ln -s gamma" + self.hmatgg + " tape26")
         file_data = open("file_data", 'w')
@@ -577,15 +591,15 @@ class Njoy99(object):
 
     def burnup(self):
         """Process burnup data for the complete library. This requires a file
-        whose name starts with chain, e.g. chaincandu, that contains information
-        about the energy from all isotopes generated using single DRAGR
-        runs. The 'chain' file is generated automatically.
+        whose name starts with chain, e.g. chaincandu, that contains
+        information about the energy from all isotopes generated using single
+        DRAGR runs. The 'chain' file is generated automatically.
 
         """
 
         mycwd = os.getcwd()
         mynjoy = mycwd + '/' + self.execdir + "/xnjoy<tempFile"
-        evaluation_name_base =  os.path.basename(self.evaluation_name)
+        evaluation_name_base = os.path.basename(self.evaluation_name)
         os.chdir(self.evaluation_name)
         if os.path.isfile("drag"):
             os.remove("drag")
@@ -616,14 +630,14 @@ class Njoy99(object):
         self.__dict__.update({"iold": iold, "htime": htime})
         text_data = "dragr\n0 0 0 23 24 %(iold)d 30/\n" % self.__dict__
         if iold == 0:
-          text_data += ("'draglib from %(evaluation_name)s at "
-                        "%(htime)s'/\n" % self.__dict__)
+            text_data += ("'draglib from %(evaluation_name)s at "
+                          "%(htime)s'/\n" % self.__dict__)
         file_data = open("file_data", 'w')
         file_data.write(text_data)
         file_data.close()
         yield_file = os.path.expandvars(self.fissionFile)
         if os.path.isdir(yield_file):
-            tape23 = open("tape23",'w')
+            tape23 = open("tape23", 'w')
             tape23.write("LIBRARY, DUMMY TAPE HEADER\n")
             for file_name in os.listdir(yield_file):
                 file = open(yield_file + file_name, 'r')
@@ -639,18 +653,19 @@ class Njoy99(object):
         chain_file_name = 'chain' + evaluation_name_base
         list_files = os.listdir(os.getcwd())
         if chain_file_name not in list_files:
-            print("Make the burnup chain file named {0}".format(chain_file_name))
+            print("Make the burnup chain file named {0}"
+                  .format(chain_file_name))
             data_dict = {}
             mat_dict = {}
             for file_name in list_files:
                 if file_name[:11] == 'out_draglib':
-                    file = open(file_name,'r')
+                    file = open(file_name, 'r')
                     while True:
                         line = file.readline()
                         if not line:
                             break
-                        if (line[:41] == 
-                            ' isotopic specification line for material'):
+                        if line[:41] == \
+                            ' isotopic specification line for material':
                             mat = line[42:49]
                             line = file.readline()
                             line = file.readline()
@@ -677,7 +692,8 @@ class Njoy99(object):
             chain_file.write("stop\n")
             chain_file.close()
         else:
-            print("Use existing burnup chain file named {0}".format(chain_file_name))
+            print("Use existing burnup chain file named {0}"
+                  .format(chain_file_name))
         os.system("cat file_data " + chain_file_name + " > tempFile")
         os.system(mynjoy)
         os.system("mv tape30 draglib" + evaluation_name_base)
@@ -707,9 +723,10 @@ class Njoy99(object):
         os.chdir(self.evaluation_name)
         self.__dict__.update({"texttmp": texttmp})
         text_data = ("moder\n20 -21\nmoder\n29 -25\nacer\n-21 -25 0 38 39\n"
-                     "1 0 1 %(suff)f/\n'pendf tape from %(evaluation_name)s'/\n"
+                     "1 0 1 %(suff)f/\n"
+                     "'pendf tape from %(evaluation_name)s'/\n"
                      "%(mat)d  %(texttmp)s /\n1 1/\n0.001/\nacer / "
-                     "Check ACE files\n0 38 0 40 41\n7 1 1 -1/\n/\n" 
+                     "Check ACE files\n0 38 0 40 41\n7 1 1 -1/\n/\n"
                      % self.__dict__)
         if self.scattering_law:
             matsab_inc = 221
@@ -781,28 +798,28 @@ class Njoy99(object):
         os.system("ln -s pendf" + self.hmat + " tape29")
         os.system(mynjoy)
         if os.path.isfile("tape48"):
-            inp = open("tape48","r")
-            outp = open("acecandu",'a')
+            inp = open("tape48", "r")
+            outp = open("acecandu", 'a')
             line = inp.readlines()
             outp.writelines(line)
-            inp1 = open("tape49","r")
-            outp1 = open("acexsdir",'a')
+            inp1 = open("tape49", "r")
+            outp1 = open("acexsdir", 'a')
             line = inp1.readlines()
             outp1.writelines(line)
         if os.path.isfile("tape38"):
-            inp = open("tape38","r")
-            outp = open("acecandu",'a')
+            inp = open("tape38", "r")
+            outp = open("acecandu", 'a')
             line = inp.readlines()
             outp.writelines(line)
-            inp1 = open("tape39","r")
-            outp1 = open("acexsdir",'a')
+            inp1 = open("tape39", "r")
+            outp1 = open("acexsdir", 'a')
             line = inp1.readlines()
             outp1.writelines(line)
             print(" ace file for" + self.hmat + "created")
             if not os.path.isdir(self.dirname):
                 os.mkdir(self.dirname)
-            os.system("mv tape38 " + '   ' + self.dirname + "/" + self.hmat + 
-                      '_' + str(int(self.tempace[0])) + ".ace")
+            os.system("mv tape38 " + '   ' + self.dirname + "/" + self.hmat
+                      + '_' + str(int(self.tempace[0])) + ".ace")
         else:
             raise PyNjoyError("ace file for " + self.hmat + " not created")
 

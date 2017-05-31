@@ -1,3 +1,6 @@
+""" TBD """
+# pylint: disable=no-member
+# pylint: disable=invalid-name
 from __future__ import print_function, division
 import sys
 import copy
@@ -5,6 +8,7 @@ import itertools
 from collections import Iterable, Sequence
 from warnings import warn
 from pyne.utils import QAWarning
+from pyne.material import Material, MaterialLibrary, MultiMaterial
 
 import numpy as np
 import tables as tb
@@ -16,8 +20,6 @@ try:
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", QAWarning)
-
-from pyne.material import Material, MaterialLibrary, MultiMaterial
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -73,16 +75,20 @@ class Tag(object):
             del self._lazy_args
 
     def __str__(self):
+        """ TBD """
         return "{0}: {1}".format(self.__class__.__name__, self.name)
 
     def __repr__(self):
-        return "{0}(name={1!r}, doc={2!r})".format(self.__class__.__name__, self.name,
-                                                   self.__doc__)
+        """ TBD """
+        return "{0}(name={1!r}, doc={2!r})" \
+            .format(self.__class__.__name__, self.name, self.__doc__)
 
     def __get__(self, mesh, objtype=None):
+        """ TBD """
         return self
 
     def __set__(self, mesh, value):
+        """ TBD """
         if not isinstance(value, Tag):
             raise AttributeError("can't set tag from non-tag objects, "
                                  "got {0}".format(type(value)))
@@ -92,13 +98,14 @@ class Tag(object):
         self[:] = value[:]
 
     def __delete__(self, mesh):
+        """ TBD """
         del self[:]
 
 
 class MaterialPropertyTag(Tag):
     """A mesh tag which looks itself up as a material property (attribute).
-    This makes the following expressions equivalent for a given material property
-    name::
+    This makes the following expressions equivalent for a given material
+    property name::
 
         mesh.name[i] == mesh.mats[i].name
 
@@ -107,6 +114,7 @@ class MaterialPropertyTag(Tag):
     """
 
     def __getitem__(self, key):
+        """ TBD """
         name = self.name
         mats = self.mesh.mats
         if mats is None:
@@ -119,7 +127,8 @@ class MaterialPropertyTag(Tag):
                             for i in range(*key.indices(size))])
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
-                raise KeyError("boolean mask must match the length of the mesh.")
+                raise KeyError("boolean mask must match the length of "
+                               "the mesh.")
             return np.array([getattr(mats[i], name) for i, b in enumerate(key)
                             if b])
         elif isinstance(key, Iterable):
@@ -129,6 +138,7 @@ class MaterialPropertyTag(Tag):
                             "or fancy index.".format(key))
 
     def __setitem__(self, key, value):
+        """ TBD """
         name = self.name
         mats = self.mesh.mats
         if mats is None:
@@ -167,15 +177,16 @@ class MaterialPropertyTag(Tag):
                             "or fancy index.".format(key))
 
     def __delitem__(self, key):
+        """ TBD """
         msg = ("the material property tag {0!r} may "
                "not be deleted").format(self.name)
         raise AttributeError(msg)
 
 
 class MaterialMethodTag(Tag):
-    """A mesh tag which looks itself up by calling a material method which takes
-    no arguments.  This makes the following expressions equivalent for a given
-    material method name::
+    """A mesh tag which looks itself up by calling a material method which
+    takes no arguments.  This makes the following expressions equivalent for a
+    given material method name::
 
         mesh.name[i] == mesh.mats[i].name()
 
@@ -184,6 +195,7 @@ class MaterialMethodTag(Tag):
     """
 
     def __getitem__(self, key):
+        """ TBD """
         name = self.name
         mats = self.mesh.mats
         if mats is None:
@@ -207,10 +219,12 @@ class MaterialMethodTag(Tag):
                             "or fancy index.".format(key))
 
     def __setitem__(self, key, value):
+        """ TBD """
         msg = "the material method tag {0!r} may not be set".format(self.name)
         raise AttributeError(msg)
 
     def __delitem__(self, key):
+        """ TBD """
         msg = ("the material method tag {0!r} may not be "
                "deleted").format(self.name)
         raise AttributeError(msg)
@@ -231,6 +245,7 @@ class MetadataTag(Tag):
     """
 
     def __getitem__(self, key):
+        """ TBD """
         name = self.name
         mats = self.mesh.mats
         if mats is None:
@@ -252,6 +267,7 @@ class MetadataTag(Tag):
                             "or fancy index.".format(key))
 
     def __setitem__(self, key, value):
+        """ TBD """
         name = self.name
         mats = self.mesh.mats
         if mats is None:
@@ -290,6 +306,7 @@ class MetadataTag(Tag):
                             "or fancy index.".format(key))
 
     def __delitem__(self, key):
+        """ TBD """
         name = self.name
         mats = self.mesh.mats
         if mats is None:
@@ -364,10 +381,12 @@ class IMeshTag(Tag):
                 self[:] = default
 
     def __delete__(self, mesh):
+        """ TBD """
         super(IMeshTag, self).__delete__(mesh)
         self.mesh.mesh.destroyTag(self.name, force=True)
 
     def __getitem__(self, key):
+        """ TBD """
         m = self.mesh.mesh
         size = len(self.mesh)
         mtag = self.tag
@@ -394,6 +413,7 @@ class IMeshTag(Tag):
                             "or fancy index.".format(key))
 
     def __setitem__(self, key, value):
+        """ TBD """
         # get value into canonical form
         tsize = self.size
         value = np.asarray(value, self.tag.type)
@@ -437,6 +457,7 @@ class IMeshTag(Tag):
                             "or fancy index.".format(key))
 
     def __delitem__(self, key):
+        """ TBD """
         m = self.mesh.mesh
         size = len(self.mesh)
         mtag = self.tag
@@ -480,8 +501,8 @@ class IMeshTag(Tag):
 
 
 class ComputedTag(Tag):
-    '''A mesh tag which looks itself up by calling a function (or other callable)
-    with the following signature::
+    '''A mesh tag which looks itself up by calling a function (or other
+    callable) with the following signature::
 
         def f(mesh, i):
             """mesh is a pyne.mesh.Mesh() object and i is the volume element
@@ -527,6 +548,7 @@ class ComputedTag(Tag):
         self.f = f
 
     def __getitem__(self, key):
+        """ TBD """
         m = self.mesh
         f = self.f
         size = len(m)
@@ -549,23 +571,26 @@ class ComputedTag(Tag):
                             "or fancy index.".format(key))
 
     def __setitem__(self, key, value):
+        """ TBD """
         msg = "the computed tag {0!r} may not be set".format(self.name)
         raise AttributeError(msg)
 
     def __delitem__(self, key):
+        """ TBD """
         msg = "the computed tag {0!r} may not be deleted".format(self.name)
         raise AttributeError(msg)
 
 
 class MeshError(Exception):
-    """Errors related to instantiating mesh objects and utilizing their methods.
+    """Errors related to instantiating mesh objects and utilizing their
+    methods.
     """
     pass
 
 
 class Mesh(object):
-    """This class houses an iMesh instance and contains methods for various mesh
-    operations. Special methods exploit the properties of structured mesh.
+    """This class houses an iMesh instance and contains methods for various
+    mesh operations. Special methods exploit the properties of structured mesh.
 
     Attributes
     ----------
@@ -689,9 +714,9 @@ class Mesh(object):
                                 "D. Structured entity set AND iMesh instance")
 
             self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
-            self.vertex_dims = list(self.dims[0:3]) \
-                               + [x + 1 for x in self.dims[3:6]]
- 
+            self.vertex_dims = \
+                list(self.dims[0:3]) + [x + 1 for x in self.dims[3:6]]
+
             if self.structured_coords is None:
                 self.structured_coords = [self.structured_get_divisions("x"),
                                           self.structured_get_divisions("y"),
@@ -753,29 +778,42 @@ class Mesh(object):
             setattr(self, name, IMeshTag(mesh=self, name=name))
         if mats is not None:
             # Material property tags
-            self.atoms_per_molecule = MaterialPropertyTag(mesh=self,
-                                      name='atoms_per_molecule',
-                                      doc='Number of atoms per molecule')
-            self.metadata = MaterialPropertyTag(mesh=self, name='metadata',
-                            doc='metadata attributes, stored on the material')
-            self.comp = MaterialPropertyTag(mesh=self, name='comp',
-                        doc='normalized composition mapping from nuclides to '
-                            'mass fractions')
+            self.atoms_per_molecule = MaterialPropertyTag(
+                mesh=self,
+                name='atoms_per_molecule',
+                doc='Number of atoms per molecule')
+            self.metadata = MaterialPropertyTag(
+                mesh=self, name='metadata',
+                doc='metadata attributes, stored on the material')
+            self.comp = MaterialPropertyTag(
+                mesh=self,
+                name='comp',
+                doc='normalized composition mapping from nuclides to '
+                    'mass fractions')
             self.mass = MaterialPropertyTag(mesh=self, name='mass',
                                             doc='the mass of the material')
             self.density = MaterialPropertyTag(mesh=self, name='density',
                                                doc='the density [g/cc]')
             # Material method tags
-            methtagnames = ('expand_elements', 'mass_density',
-                            'molecular_mass', 'mult_by_mass',
-                            'number_density', 'sub_act', 'sub_fp',
-                            'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
+            methtagnames = (
+                'expand_elements',
+                'mass_density',
+                'molecular_mass',
+                'mult_by_mass',
+                'number_density',
+                'sub_act',
+                'sub_fp',
+                'sub_lan',
+                'sub_ma',
+                'sub_tru',
+                'to_atom_frac')
             for name in methtagnames:
                 doc = "see Material.{0}() for more information".format(name)
                 setattr(self, name, MaterialMethodTag(mesh=self, name=name,
                         doc=doc))
 
     def __len__(self):
+        """ TBD """
         return self._len
 
     def __iter__(self):
@@ -799,9 +837,11 @@ class Mesh(object):
             return self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
 
     def __contains__(self, i):
+        """ TBD """
         return i < len(self)
 
     def __setattr__(self, name, value):
+        """ TBD """
         if isinstance(value, Tag) and hasattr(value, '_lazy_args'):
             # some 1337 1Azy 3\/a1
             kwargs = value._lazy_args
@@ -830,8 +870,8 @@ class Mesh(object):
         size : int, optional
             The size of the tag. This only applies to IMeshTags.
         dtype : numpy dtype, optional
-            The data type of the tag. This only applies to IMeshTags. See PyTAPS
-            for more details.
+            The data type of the tag. This only applies to IMeshTags. See
+            PyTAPS for more details.
 
         """
         if name in self.tags:
@@ -942,6 +982,7 @@ class Mesh(object):
         return intersect
 
     def __copy__(self):
+        """ TBD """
         # first copy full imesh instance
         imesh_copy = iMesh.Mesh()
 
@@ -1075,9 +1116,12 @@ class Mesh(object):
                                                iMesh.Topology.hexahedron)
 
         indices, ordmap = _structured_iter_setup(self.dims, order, **kw)
-        return _structured_iter(indices, ordmap, self.dims,
-                self.structured_set.iterate(iBase.Type.region,
-                                            iMesh.Topology.hexahedron))
+        return _structured_iter(
+            indices,
+            ordmap,
+            self.dims,
+            self.structured_set.iterate(iBase.Type.region,
+                                        iMesh.Topology.hexahedron))
 
     def structured_iterate_vertex(self, order="zyx", **kw):
         """Get an iterator over the vertices of the mesh
@@ -1092,9 +1136,12 @@ class Mesh(object):
                                                iMesh.Topology.point)
 
         indices, ordmap = _structured_iter_setup(self.vertex_dims, order, **kw)
-        return _structured_iter(indices, ordmap, self.vertex_dims,
-                self.structured_set.iterate(iBase.Type.vertex,
-                                            iMesh.Topology.point))
+        return _structured_iter(
+            indices,
+            ordmap,
+            self.vertex_dims,
+            self.structured_set.iterate(iBase.Type.vertex,
+                                        iMesh.Topology.point))
 
     def structured_iterate_hex_volumes(self, order="zyx", **kw):
         """Get an iterator over the volumes of the mesh hexahedra
@@ -1152,7 +1199,7 @@ class Mesh(object):
 
     def _structured_check(self):
         if not self.structured:
-            raise MeshError("Structured mesh methods cannot be called from "\
+            raise MeshError("Structured mesh methods cannot be called from "
                             "unstructured mesh instances.")
 
     def write_hdf5(self, filename):
@@ -1208,7 +1255,7 @@ def _structured_find_idx(dims, ijk):
     """
     dim0 = [0] * 3
     for i in xrange(0, 3):
-        if (dims[i] > ijk[i] or dims[i + 3] <= ijk[i]):
+        if dims[i] > ijk[i] or dims[i + 3] <= ijk[i]:
             raise MeshError(str(ijk) + " is out of bounds")
         dim0[i] = ijk[i] - dims[i]
     i0, j0, k0 = dim0
@@ -1288,13 +1335,17 @@ def _structured_iter(indices, ordmap, dims, it):
 
 
 class StatMesh(Mesh):
+    """ TBD """
     def __init__(self, mesh=None, structured=False,
                  structured_coords=None, structured_set=None, mats=()):
+        """ TBD """
 
-        super(StatMesh, self).__init__(mesh=mesh,
-                                       structured=structured,
-                                       structured_coords=structured_coords,
-                                       structured_set=structured_set, mats=mats)
+        super(StatMesh, self).__init__(
+            mesh=mesh,
+            structured=structured,
+            structured_coords=structured_coords,
+            structured_set=structured_set,
+            mats=mats)
 
     def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /. Called by operater
@@ -1319,11 +1370,13 @@ class StatMesh(Mesh):
                     zip(iter(other.mesh.iterate(iBase.Type.region,
                                                 iMesh.Topology.all)))):
 
-                mesh_1.mesh.getTagHandle(tag + error_suffix)[ve_1] = err__ops[op](
-                    mesh_1.mesh.getTagHandle(tag)[ve_1],
-                    other.mesh.getTagHandle(tag)[ve_2],
-                    mesh_1.mesh.getTagHandle(tag + error_suffix)[ve_1],
-                    other.mesh.getTagHandle(tag + error_suffix)[ve_2])
+                mesh_1.mesh.getTagHandle(tag + error_suffix)[ve_1] = \
+                    err__ops[op](
+                        mesh_1.mesh.getTagHandle(tag)[ve_1],
+                        other.mesh.getTagHandle(tag)[ve_2],
+                        mesh_1.mesh.getTagHandle(tag + error_suffix)[ve_1],
+                        other.mesh.getTagHandle(tag + error_suffix)[ve_2]
+                    )
 
                 mesh_1.mesh.getTagHandle(tag)[ve_1] = \
                     _ops[op](mesh_1.mesh.getTagHandle(tag)[ve_1],
