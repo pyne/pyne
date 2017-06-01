@@ -1,3 +1,4 @@
+""" TBD """
 import sys
 IS_PYTHON3 = sys.version_info[0] >= 3
 
@@ -9,6 +10,7 @@ else:
     exec('from _output import output as _output')
     exec('from _lexer import lexer as _lexer')
     exec('from _parser import parser as _parser')
+
 
 class FortranRecordWriter(object):
     '''
@@ -25,16 +27,17 @@ class FortranRecordWriter(object):
     >>> line.write([1.1, 0.1, 0.6])
     '          1.100          0.100          0.600'
 
-    Note: it is best to create a new object for each format, changing the format
-    causes the parser to reevalute the format string which is costly in terms of
-    performance
-    '''
+    Note: it is best to create a new object for each format, changing the
+    format causes the parser to reevalute the format string which is costly in
+    terms of performance '''
     def __init__(self, format):
+        """ TBD """
         self._eds = []
         self._rev_eds = []
         self.format = format
 
     def __eq__(self, other):
+        """ TBD """
         if isinstance(other, FortranRecordWriter):
             return self.format == other.format
         else:
@@ -48,19 +51,21 @@ class FortranRecordWriter(object):
         return _output(self._eds, self._rev_eds, values)
 
     def get_format(self):
+        """ TBD """
         return self._format
 
     def set_format(self, format):
+        """ TBD """
         self._format = format
         self._parse_format()
 
     format = property(get_format, set_format)
 
     def _parse_format(self):
+        """ TBD """
         self._eds, self._rev_eds = _parser(_lexer(self.format))
 
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-

@@ -1,3 +1,4 @@
+""" TBD """
 __version__ = '0.2.5'
 
 import sys
@@ -11,5 +12,3 @@ else:
     exec('from FortranRecordReader import FortranRecordReader')
     exec('from FortranRecordWriter import FortranRecordWriter')
     exec('import config')
-
-

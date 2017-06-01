@@ -1,3 +1,5 @@
+""" TBD """
+# pylint: disable=invalid-name
 import sys
 IS_PYTHON3 = sys.version_info[0] >= 3
 
@@ -12,19 +14,23 @@ else:
     exec('from _exceptions import *')
     exec('import config')
 
+
 def parser(tokens, version=None):
+    """ TBD """
     # Parse the full edit descriptors
     eds = _parse_tokens(tokens, reversion=False, version=None)
-    # Parse the edit descriptors used for the reversion of format control 
+    # Parse the edit descriptors used for the reversion of format control
     # (F95 format 12.2.2)
     reversion_eds = _parse_tokens(tokens, reversion=True, version=None)
     return eds, reversion_eds
 
+
 def _parse_tokens(tokens, reversion=False, version=None):
+    """ TBD """
     # Remove outer parens is there are any
     tokens = _remove_outer_parens(tokens)
     # Get only the reversion tokens
-    if reversion == True:
+    if reversion is True:
         tokens = _get_reversion_tokens(tokens)
     # First expand the parentheses
     tokens = _expand_parens(tokens)
@@ -43,7 +49,8 @@ def _parse_tokens(tokens, reversion=False, version=None):
         ed_type = None
         ed_value = None
         for token in token_set:
-            if token.type in ['ED1', 'ED2', 'ED3', 'ED4', 'ED5', 'ED6', 'ED7', 'ED8', 'ED9', 'ED10', 'QUOTED_STRING']:
+            if token.type in ['ED1', 'ED2', 'ED3', 'ED4', 'ED5', 'ED6', 'ED7',
+                              'ED8', 'ED9', 'ED10', 'QUOTED_STRING']:
                 ed_type = token.type
                 ed_value = token.value
                 break
@@ -52,9 +59,12 @@ def _parse_tokens(tokens, reversion=False, version=None):
             continue
         # If repeatable and first token is repeat number then cache
         repeat = None
-        if ed_value in REPEATABLE_EDS and (token_set[0].type in ['NZUINT', 'UINT']):
-            repeat = token_set[0].value
-            token_set = token_set[1:]
+        # pylint: disable=bad-indentation
+        if ed_value in REPEATABLE_EDS \
+            and token_set[0].type in ['NZUINT', 'UINT']:
+                repeat = token_set[0].value
+                token_set = token_set[1:]
+        # pylint: enable=bad-indentation
         # Process the edit descriptor
         if ed_type == 'QUOTED_STRING':
             ed = _read_quoted_string(token_set)
@@ -79,7 +89,8 @@ def _parse_tokens(tokens, reversion=False, version=None):
         elif ed_type == 'ED10':
             ed = _read_ed10(token_set)
         else:
-            raise InvalidFormat('Could not identify edit descriptor in sequence $s' % str(token_set))
+            raise InvalidFormat('Could not identify edit descriptor '
+                                'in sequence $s' % str(token_set))
         # If there is a repeat number cached, then apply
         if repeat is not None:
             ed.repeat = repeat
@@ -90,7 +101,9 @@ def _parse_tokens(tokens, reversion=False, version=None):
 
 # Functions that group the tokens into sets
 
+
 def _expand_parens(tokens):
+    """ TBD """
     new_tokens = []
     get_tokens = iter(tokens)
     for t0 in get_tokens:
@@ -116,17 +129,23 @@ def _expand_parens(tokens):
             # Remove last right paren
             paren_tokens = paren_tokens[:-1]
             # If repeated, then repeat the tokens accordingly
-            if (len(new_tokens) > 0) and (new_tokens[-1].type in ['NZUINT', 'UINT']):
-                repeat = new_tokens[-1].value
-                # Remove the repeat NZUINT, UINT
-                new_tokens = new_tokens[:-1]
-                new_tokens.extend(repeat * (_expand_parens(paren_tokens) + [Token('COMMA', None)]))
+
+            # pylint: disable=bad-indentation
+            if len(new_tokens) > 0 \
+                and new_tokens[-1].type in ['NZUINT', 'UINT']:
+                    repeat = new_tokens[-1].value
+                    # Remove the repeat NZUINT, UINT
+                    new_tokens = new_tokens[:-1]
+                    new_tokens.extend(repeat * (_expand_parens(paren_tokens)
+                                                + [Token('COMMA', None)]))
             else:
                 new_tokens.extend(_expand_parens(paren_tokens))
+            # pylint: enable=bad-indentation
     return new_tokens
 
 
 def _split_on_commas(tokens):
+    """ TBD """
     token_sets = []
     set_buff = []
     for t0 in tokens:
@@ -165,7 +184,9 @@ def _split_on_ed10(token_sets):
     new_token_sets = []
     for token_set in token_sets:
         # May have a repeat on the slash if preceded by a comma
-        if (len(token_set) > 2) and ((token_set[0].type in ['UINT', 'NZUINT']) and (token_set[1].type == 'ED10')):
+        if len(token_set) > 2 \
+            and (token_set[0].type in ['UINT', 'NZUINT']
+                 and token_set[1].type == 'ED10'):
             new_token_sets.append(token_set[:2])
             token_set = token_set[2:]
         buff = []
@@ -186,20 +207,25 @@ def _split_on_ed8(token_sets):
     '''Splits on ED8 (i.e. P edit descriptors)'''
     new_token_sets = []
     for token_set in token_sets:
+# pylint: disable=bad-indentation
         # Append to new list if no ED8
         if 'ED8' not in [t.type for t in token_set]:
             new_token_sets.append(token_set)
         # Otherwise split string on ED9
-        elif (token_set[0].type in ['INT', 'UINT', 'NZUINT']) and (token_set[1].type == 'ED8'):
-            new_token_sets.append(token_set[:2])
-            new_token_sets.append(token_set[2:])
+        elif token_set[0].type in ['INT', 'UINT', 'NZUINT'] \
+            and token_set[1].type == 'ED8':
+                new_token_sets.append(token_set[:2])
+                new_token_sets.append(token_set[2:])
         else:
             raise InvalidFormat('P edit descriptor in invalid position')
+# pylint: enable=bad-indentation
     return new_token_sets
 
 # Function to extract only the tokens for the reversion of control
 
+
 def _get_reversion_tokens(tokens):
+    """ TBD """
     reversion_tokens = []
     # Easier to work backwards
     nesting = None
@@ -228,37 +254,49 @@ def _get_reversion_tokens(tokens):
 
 # The functions that read particular edit descriptors sequences
 
+
 def _read_quoted_string(tokens):
+    """ TBD """
     # Of form X only
     type_string = ",".join([t.type for t in tokens])
     if type_string != "QUOTED_STRING":
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
-    ed = QuotedString()  
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
+    ed = QuotedString()
     ed.char_string = tokens[0].value
     return ed
 
+
 def _read_ed1(tokens):
+    """ TBD """
     # Of form X only
     type_string = ",".join([t.type for t in tokens])
     if type_string != "ED1":
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
-    ed = get_edit_descriptor_obj(tokens[0].value)   
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
+    ed = get_edit_descriptor_obj(tokens[0].value)
     return ed
 
+
 def _read_ed2(tokens):
+    """ TBD """
     # Of form nX only
     type_string = ",".join([t.type for t in tokens])
     if type_string != "NZUINT,ED2":
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
     ed = get_edit_descriptor_obj(tokens[1].value)
     ed.num_chars = tokens[0].value
     return ed
 
+
 def _read_ed3(tokens):
+    """ TBD """
     # Of form Xn only
     type_string = ",".join([t.type for t in tokens])
     if type_string != "ED3,NZUINT":
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
     ed = get_edit_descriptor_obj(tokens[0].value)
     # L edit descriptor has a width rather than num_chars
     if hasattr(ed, 'width'):
@@ -267,7 +305,9 @@ def _read_ed3(tokens):
         ed.num_chars = tokens[1].value
     return ed
 
+
 def _read_ed4(tokens):
+    """ TBD """
     # Of form X or Xn
     type_string = ",".join([t.type for t in tokens])
     if type_string in ["ED4", "ED4,NZUINT"] or \
@@ -276,72 +316,93 @@ def _read_ed4(tokens):
         if len(tokens) > 1:
             ed.width = tokens[1].value
     else:
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
     return ed
+
 
 def _read_ed5(tokens):
+    """ TBD """
     # Of form Xn.m only
     type_string = ",".join([t.type for t in tokens])
-    if type_string in ["ED5,NZUINT,DOT,UINT", "ED5,NZUINT,DOT,NZUINT"] or \
-      (config.ALLOW_ZERO_WIDTH_EDS and (type_string in \
-      ["ED5,UINT,DOT,UINT", "ED5,UINT,DOT,NZUINT"])):
-        ed = get_edit_descriptor_obj(tokens[0].value)
-        ed.width = tokens[1].value
-        ed.decimal_places = tokens[3].value
+    # pylint: disable=bad-indentation
+    if type_string in ["ED5,NZUINT,DOT,UINT", "ED5,NZUINT,DOT,NZUINT"] \
+        or (config.ALLOW_ZERO_WIDTH_EDS
+            and (type_string in ["ED5,UINT,DOT,UINT", "ED5,UINT,DOT,NZUINT"])):
+                ed = get_edit_descriptor_obj(tokens[0].value)
+                ed.width = tokens[1].value
+                ed.decimal_places = tokens[3].value
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
+    # pylint: enable=bad-indentation
+
     return ed
+
 
 def _read_ed6(tokens):
+    """ TBD """
     # Of form Xn or Xn.m
     type_string = ",".join([t.type for t in tokens])
-    if type_string == "ED6,NZUINT" or \
-        (config.ALLOW_ZERO_WIDTH_EDS and (type_string == "ED6,UINT")):
-        ed = get_edit_descriptor_obj(tokens[0].value)
-        ed.width = tokens[1].value
-        ed.min_digits = None
-    elif type_string in ["ED6,NZUINT,DOT,UINT", "ED6,NZUINT,DOT,NZUINT"] or \
-      (config.ALLOW_ZERO_WIDTH_EDS and (type_string in \
-      ["ED6,UINT,DOT,UINT", "ED6,UINT,DOT,NZUINT"])):
-        ed = get_edit_descriptor_obj(tokens[0].value)
-        ed.width = tokens[1].value
-        ed.min_digits = tokens[3].value
+    # pylint: disable=bad-indentation
+    if type_string == "ED6,NZUINT" \
+        or (config.ALLOW_ZERO_WIDTH_EDS and type_string == "ED6,UINT"):
+            ed = get_edit_descriptor_obj(tokens[0].value)
+            ed.width = tokens[1].value
+            ed.min_digits = None
+    elif type_string in ["ED6,NZUINT,DOT,UINT", "ED6,NZUINT,DOT,NZUINT"] \
+        or (config.ALLOW_ZERO_WIDTH_EDS
+            and (type_string in ["ED6,UINT,DOT,UINT", "ED6,UINT,DOT,NZUINT"])):
+                ed = get_edit_descriptor_obj(tokens[0].value)
+                ed.width = tokens[1].value
+                ed.min_digits = tokens[3].value
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
+    # pylint: enable=bad-indentation
     return ed
 
+
 def _read_ed7(tokens):
+    """ TBD """
     # Of form Xn.m or Xn.mEe
     type_string = ",".join([t.type for t in tokens])
-    if type_string in ["ED7,NZUINT,DOT,UINT", "ED7,NZUINT,DOT,NZUINT"] or \
-      (config.ALLOW_ZERO_WIDTH_EDS and (type_string in \
-      ["ED7,UINT,DOT,UINT", "ED7,UINT,DOT,NZUINT"])):
+    # pylint: disable=bad-indentation
+    if type_string in ["ED7,NZUINT,DOT,UINT", "ED7,NZUINT,DOT,NZUINT"] \
+        or (config.ALLOW_ZERO_WIDTH_EDS
+            and (type_string in ["ED7,UINT,DOT,UINT", "ED7,UINT,DOT,NZUINT"])):
         ed = get_edit_descriptor_obj(tokens[0].value)
         ed.width = tokens[1].value
         ed.decimal_places = tokens[3].value
         ed.exponent = None
-    elif type_string in ['ED7,NZUINT,DOT,NZUINT,ED7,NZUINT', \
-            'ED7,NZUINT,DOT,NZUINT,ED7,UINT', \
-            'ED7,NZUINT,DOT,NZUINT,ED7,INT', \
-            'ED7,NZUINT,DOT,UINT,ED7,NZUINT', \
-            'ED7,NZUINT,DOT,UINT,ED7,UINT', \
-            'ED7,NZUINT,DOT,UINT,ED7,INT'] or \
-        (config.ALLOW_ZERO_WIDTH_EDS and (type_string in \
-            ['ED7,UINT,DOT,NZUINT,ED7,NZUINT', \
-            'ED7,UINT,DOT,NZUINT,ED7,UINT', \
-            'ED7,UINT,DOT,NZUINT,ED7,INT', \
-            'ED7,UINT,DOT,UINT,ED7,NZUINT', \
-            'ED7,UINT,DOT,UINT,ED7,UINT', \
-            'ED7,UINT,DOT,UINT,ED7,INT'])):
+    elif type_string in [
+        'ED7,NZUINT,DOT,NZUINT,ED7,NZUINT',
+        'ED7,NZUINT,DOT,NZUINT,ED7,UINT',
+        'ED7,NZUINT,DOT,NZUINT,ED7,INT',
+        'ED7,NZUINT,DOT,UINT,ED7,NZUINT',
+        'ED7,NZUINT,DOT,UINT,ED7,UINT',
+        'ED7,NZUINT,DOT,UINT,ED7,INT'] \
+        or (config.ALLOW_ZERO_WIDTH_EDS
+            and (type_string in [
+                'ED7,UINT,DOT,NZUINT,ED7,NZUINT',
+                'ED7,UINT,DOT,NZUINT,ED7,UINT',
+                'ED7,UINT,DOT,NZUINT,ED7,INT',
+                'ED7,UINT,DOT,UINT,ED7,NZUINT',
+                'ED7,UINT,DOT,UINT,ED7,UINT',
+                'ED7,UINT,DOT,UINT,ED7,INT'])):
         ed = get_edit_descriptor_obj(tokens[0].value)
         ed.width = tokens[1].value
         ed.decimal_places = tokens[3].value
         ed.exponent = tokens[5].value
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
+    # pylint: enable=bad-indentation
     return ed
 
+
 def _read_ed8(tokens):
+    """ TBD """
     # Of form kX only, where k is a signed integer, may omit comma if followed
     # by Type 5 or 7 edit descriptor
     type_string = ",".join([t.type for t in tokens])
@@ -349,45 +410,58 @@ def _read_ed8(tokens):
         ed = get_edit_descriptor_obj(tokens[1].value)
         ed.scale = tokens[0].value
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
     return ed
 
+
 def _read_ed9(tokens):
+    """ TBD """
     # Of form X only, may omit comma either side
     type_string = ",".join([t.type for t in tokens])
     if type_string == "ED9":
         ed = get_edit_descriptor_obj(tokens[0].value)
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
     return ed
 
+
 def _read_ed10(tokens):
+    """ TBD """
     # Of form X only, may omit following comma and leading comma if no repeat
     type_string = ",".join([t.type for t in tokens])
     if type_string == "ED10":
         ed = get_edit_descriptor_obj(tokens[0].value)
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'
+                            .format(tokens[0]))
     return ed
 
 
 # Functions that pre-process the token list
 
+
 def _remove_outer_parens(tokens):
+    """ TBD """
     # Finally, remove outer parens is there are any
-    if (tokens[0].type == 'LEFT_PARENS') and (tokens[-1].type == 'RIGHT_PARENS'):
-        tokens = tokens[1:-1]
+    # pylint: disable=bad-indentation
+    if tokens[0].type == 'LEFT_PARENS' \
+        and tokens[-1].type == 'RIGHT_PARENS':
+            tokens = tokens[1:-1]
+    # pylint: enable=bad-indentation
+
     return tokens
 
 
 # Run some tests if run as a script
 
-#if __name__ == '__main__':
-#    import doctest
-#    import os
-#    from _lexer import lexer
-#    globs = {'lexer' : lexer, 'parser' : parser}
-#    # Need to normalize whitespace since pasting into VIM converts tabs to
-#    # spaces
-#    doctest.testfile(os.path.join('tests', 'parser_test.txt'), \
-#        globs=globs, optionflags=doctest.NORMALIZE_WHITESPACE)
+# if __name__ == '__main__':
+#     import doctest
+#     import os
+#     from _lexer import lexer
+#     globs = {'lexer' : lexer, 'parser' : parser}
+#     # Need to normalize whitespace since pasting into VIM converts tabs to
+#     # spaces
+#     doctest.testfile(os.path.join('tests', 'parser_test.txt'), \
+#         globs=globs, optionflags=doctest.NORMALIZE_WHITESPACE)

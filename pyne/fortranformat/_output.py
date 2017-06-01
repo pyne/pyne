@@ -1,5 +1,7 @@
+""" TBD """
+# pylint: disable=invalid-name
 import math
-import itertools
+# import itertools
 import sys
 IS_PYTHON3 = sys.version_info[0] >= 3
 
@@ -19,18 +21,19 @@ PROC_DECIMAL_CHAR = config.PROC_DECIMAL_CHAR
 G0_NO_BLANKS = config.G0_NO_BLANKS
 PROC_NO_LEADING_BLANK = config.PROC_NO_LEADING_BLANK
 
+
 def output(eds, reversion_eds, values):
     '''
-    a function to take a list of valid f77 edit descriptors and respective values
-    and output the corresponding string
+    a function to take a list of valid f77 edit descriptors and respective
+    values and output the corresponding string
     '''
     record = ''
     state = {
-        'position' : 0,
-        'scale' : 0,
-        'incl_plus' : False,
-        'blanks_as_zeros' : False,
-        'halt_if_no_vals' : False,
+        'position': 0,
+        'scale': 0,
+        'incl_plus': False,
+        'blanks_as_zeros': False,
+        'halt_if_no_vals': False,
     }
 
     # if format is empty with no values specified, then output blank record -
@@ -51,8 +54,9 @@ def output(eds, reversion_eds, values):
     tmp_reversion_eds = []
     # continue until out of edit descriptors or values
     while True:
-        # no more edit descriptors, no more values, stop output, 
-        # todo: this will cut short a reversion edit descriptor section - is this right?
+        # no more edit descriptors, no more values, stop output,
+        # todo: this will cut short a reversion edit descriptor section - is
+        # this right?
         if not get_ed.has_next() and not get_value.has_next():
             break
         # take a edit descriptor off the queue if there is any
@@ -62,7 +66,7 @@ def output(eds, reversion_eds, values):
             else:
                 ed = get_ed.next()
         else:
-            if reversion_contains_output_ed == True:
+            if reversion_contains_output_ed is True:
                 # take from reversion edit descriptors if there is a value
                 # requiring output still
                 while True:
@@ -91,9 +95,12 @@ def output(eds, reversion_eds, values):
             else:
                 # is a edit descriptor that requires a value but no value
                 # todo: does it stop gracefully or raise error?
-                break   
+                break
             if isinstance(ed, I):
-                sub_string = _compose_i_string(ed.width, ed.min_digits, state, val)
+                sub_string = _compose_i_string(ed.width,
+                                               ed.min_digits,
+                                               state,
+                                               val)
             elif isinstance(ed, B):
                 w = ed.width
                 m = ed.min_digits
@@ -140,7 +147,9 @@ def output(eds, reversion_eds, values):
                 sub_string = _compose_l_string(ed.width, state, val)
             elif isinstance(ed, A):
                 sub_string = _compose_a_string(ed.width, state, val)
-            state['position'], record = _write_string(record, sub_string, state['position'])
+            state['position'], record = _write_string(record,
+                                                      sub_string,
+                                                      state['position'])
         else:
             # token does not require a value
             if isinstance(ed, (S, SS)):
@@ -157,7 +166,10 @@ def output(eds, reversion_eds, values):
             elif isinstance(ed, Colon):
                 state['halt_if_no_vals'] = True
             elif isinstance(ed, Slash):
-                state['position'], record = _write_string(record, config.RECORD_SEPARATOR, state['position'])
+                state['position'], record = \
+                    _write_string(record,
+                                  config.RECORD_SEPARATOR,
+                                  state['position'])
             elif isinstance(ed, (X, TR)):
                 state['position'] = state['position'] + ed.num_chars
             elif isinstance(ed, TL):
@@ -166,22 +178,28 @@ def output(eds, reversion_eds, values):
                 state['position'] = ed.num_chars - 1
             elif isinstance(ed, QuotedString):
                 sub_string = ed.char_string
-                state['position'], record = _write_string(record, sub_string, state['position'])
+                state['position'], record = \
+                    _write_string(record, sub_string, state['position'])
     # output the final record
     return record
 
+
 def _compose_nan_string(w, ftype):
+    """ TBD """
     if ftype in ['B', 'O', 'Z']:
         return ''
     else:
         # Allow at least 'NaN' to be printed
         if w == 0:
-            w = 4 # n.b. this is what is set in Gfortran 4.4.0
+            # n.b. this is what is set in Gfortran 4.4.0
+            w = 4
         if w < 3:
             return '*' * w
     return 'NaN'.rjust(w)
 
+
 def _compose_inf_string(w, ftype, sign_bit):
+    """ TBD """
     if ftype in ['B', 'O', 'Z']:
         return ''
     else:
@@ -206,7 +224,7 @@ def _compose_inf_string(w, ftype, sign_bit):
         # Should only output short version with no sign if positive
         else:
             return 'Inf'
-                
+
 
 def _compose_float_string(w, e, d, state, val, ftype):
     '''
@@ -223,13 +241,15 @@ def _compose_float_string(w, e, d, state, val, ftype):
     if w is not None:
         w = int(round(w))
     # ==== write_float ==== (function)
-    edigits = 4 # Largest number of exponent digits expected
+    # Largest number of exponent digits expected
+    edigits = 4
     if (ftype in ['F', 'EN', 'G']) or \
         ((ftype in ['D', 'E']) and (state['scale'] != 0)):
         # Convert with full possible precision
         ndigits = PROC_MIN_FIELD_WIDTH - 4 - edigits
     else:
-        # Otherwise convert knowing what the required precision is (i.e. knowing d)
+        # Otherwise convert knowing what the required precision is
+        # (i.e. knowing d)
         if ftype == 'ES':
             ndigits = d + 1
         else:
@@ -243,7 +263,7 @@ def _compose_float_string(w, e, d, state, val, ftype):
     else:
         sign_bit = val < 0
     # handle the nan and inf cases
-    if type(val) is float and val != val :
+    if type(val) is float and val != val:
         return _compose_nan_string(w, ed)
     Infinity = 1e1000000
     if val in (-Infinity, Infinity):
@@ -256,7 +276,8 @@ def _compose_float_string(w, e, d, state, val, ftype):
     zero_flag = (tmp == 0)
     # === DTOA === (macro)
     # write the tmp value to the string buffer
-    # sprintf seems to allow negative number of decimal places, need to correct for this
+    # sprintf seems to allow negative number of decimal places, need to correct
+    # for this
     if ndigits <= 0:
         fmt = '%+-#' + str(PROC_MIN_FIELD_WIDTH) + 'e'
     else:
@@ -264,14 +285,15 @@ def _compose_float_string(w, e, d, state, val, ftype):
     buff = fmt % tmp
     # === WRITE_FLOAT === (macro)
     if ftype != 'G':
-        return  _output_float(w, d, e, state, ftype, buff, sign_bit, zero_flag, ndigits, edigits)
+        return  _output_float(w, d, e, state, ftype, buff, sign_bit, zero_flag,
+                              ndigits, edigits)
     else:
         # Perform different actions for G edit descriptors depending on value
         #
         # Generate corresponding I/O format for FMT_G and output.
         # The rules to translate FMT_G to FMT_E or FMT_F from DEC fortran
         # LRM (table 11-2, Chapter 11, "I/O Formatting", P11-25) is:
-        # 
+        #
         # Data Magnitude                              Equivalent Conversion
         # 0< m < 0.1-0.5*10**(-d-1)                   Ew.d[Ee]
         # m = 0                                       F(w-n).(d-1), n' '
@@ -281,7 +303,7 @@ def _compose_float_string(w, e, d, state, val, ftype):
         # ................                           ..........
         # 10**(d-1)-0.5*10**(-1)<= m <10**d-0.5       F(w-n).0,n(' ')
         # m >= 10**d-0.5                              Ew.d[Ee]
-        # 
+        #
         # notes: for Gw.d ,  n' ' means 4 blanks
         #        for Gw.dEe, n' ' means e+2 blanks
         nb = 0
@@ -292,13 +314,13 @@ def _compose_float_string(w, e, d, state, val, ftype):
             ftype = 'E'
         else:
             mag = int(abs(round(math.log10(tmp))))
-            low = lambda mag, d : 10 ** (mag - 1) - 5 * 10 ** (-d - 1 + mag) 
-            high = lambda mag, d : 10 ** mag - 0.5 * 10 ** (-d + mag)
+            low = lambda mag, d: 10 ** (mag - 1) - 5 * 10 ** (-d - 1 + mag)
+            high = lambda mag, d: 10 ** mag - 0.5 * 10 ** (-d + mag)
             while tmp < low(mag, d):
                 mag = mag - 1
             while tmp >= high(mag, d):
                 mag = mag + 1
-            assert(low(mag, d) <= tmp < high(mag, d))
+            assert low(mag, d) <= tmp < high(mag, d)
             if e < 0:
                 nb = 4
             else:
@@ -311,7 +333,8 @@ def _compose_float_string(w, e, d, state, val, ftype):
                 d = d - mag
                 # d = -(mid - d - 1)
             state['scale'] = 0
-        out = _output_float(w, d, e, state, ftype, buff, sign_bit, zero_flag, ndigits, edigits)
+        out = _output_float(w, d, e, state, ftype, buff, sign_bit, zero_flag,
+                            ndigits, edigits)
         state['scale'] = save_scale_factor
         # TODO: this may not be right ...
         if nb > 0:
@@ -322,14 +345,16 @@ def _compose_float_string(w, e, d, state, val, ftype):
         if len(out) > (w + nb):
             out = '*' * (w + nb)
         return out
-        
 
-def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigits):
 
+def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits,
+                  edigits):
+    """ TBD """
     # nbefore - number of digits before the decimal point
     # nzero - number of zeros after the decimal point
     # nafter - number of digits after the decimal point
-    # nzero_real - number of zeros after the decimal point regardles of the precision
+    # nzero_real - number of zeros after the decimal point regardles of the
+    #              precision
 
     # Some hacks to change None to -1 (C convention)
     if w is None:
@@ -340,8 +365,8 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
     sign = _calculate_sign(state, sign_bit)
     # Some debug
     if d != 0:
-        assert(buff[2] in ['.', ','])
-        assert(buff[ndigits + 2] == 'e')
+        assert buff[2] in ['.', ',']
+        assert buff[ndigits + 2] == 'e'
     # Read in the exponent
     ex = int(buff[ndigits + 3:]) + 1
     # Handle zero case
@@ -357,9 +382,11 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
         # This case does not include a decimal point
         if (w == 1) and (ft == 'F'):
             if state['incl_plus']:
-                return '*' # This is ifort behaviour
+                # This is ifort behaviour
+                return '*'
             else:
-                return '.' # CHANGED: Was '0'
+                # CHANGED: Was '0'
+                return '.'
     # Get rid of the decimal and the initial sign i.e. normalise the digits
     digits = buff[1] + buff[3:]
     # Find out where to place the decimal point
@@ -379,14 +406,16 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
     elif ft in ['E', 'D']:
         i = state['scale']
         if (d <= 0) and (i == 0):
-            raise InvalidFormat("Precision not greater than zero in format specifier 'E' or 'D'")
+            raise InvalidFormat("Precision not greater than zero in "
+                                "format specifier 'E' or 'D'")
         if (i <= -d) or (i >= (d + 2)):
-            raise InvalidFormat("Scale factor out of range in format specifier 'E' or 'D'")
+            raise InvalidFormat("Scale factor out of range in "
+                                "format specifier 'E' or 'D'")
         if not zero_flag:
             ex = ex - i
         if i < 0:
             nbefore = 0
-            nzero = -i;
+            nzero = -i
             nafter = d + i
         elif i > 0:
             nbefore = i
@@ -422,7 +451,8 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
     # Round the value
     if (nbefore + nafter) == 0:
         ndigits = 0
-        if (nzero_real == d) and (int(digits[0]) >= 5): # n.b. character comparison not very pythonic!
+        # n.b. character comparison not very pythonic!
+        if (nzero_real == d) and (int(digits[0]) >= 5):
             # We rounded to zero but shouldn't have
             nzero = nzero - 1
             nafter = 1
@@ -473,7 +503,7 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
                 if (ex > 99) or (ex < -99):
                     expchar = ' '
         else:
-            assert(isinstance(ex, int))
+            assert isinstance(ex, int)
             edigits = len(str(abs(ex)))
             # Exponenet width specified, check it is wide enough
             if edigits > e:
@@ -482,7 +512,8 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
                 edigits = e + 2
     else:
         edigits = 0
-    # Zero values always output as positive, even if the value was egative before rounding
+    # Zero values always output as positive, even if the value was egative
+    # before rounding
     i = 0
     while i < ndigits:
         if digits[i] != '0':
@@ -502,11 +533,12 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
     if sign != '':
         nblanks = nblanks - 1
     # TODO: Find out what this is
-    if G0_NO_BLANKS: # dtp->u.p.g0_no_blanks
+    # dtp->u.p.g0_no_blanks
+    if G0_NO_BLANKS:
         w = w - nblanks
         nblanks = 0
     # Check value fits in specified width
-    if (nblanks < 0) or (edigits == -1): 
+    if (nblanks < 0) or (edigits == -1):
         return '*' * w
     # See if we have space for a zero before the decimal point
     if (nbefore == 0) and (nblanks > 0):
@@ -516,7 +548,8 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
         leadzero = False
     out = ''
     # Pad to full field width
-    if (nblanks > 0) and not PROC_NO_LEADING_BLANK: # dtp->u.p.no_leading_blank
+    # dtp->u.p.no_leading_blank
+    if (nblanks > 0) and not PROC_NO_LEADING_BLANK:
         out = out + ' ' * nblanks
     # Attach the sign
     out = out + sign
@@ -564,6 +597,7 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
 
 
 def _calculate_sign(state, negative_flag):
+    """ TBD """
     s = ''
     if negative_flag:
         s = '-'
@@ -573,6 +607,7 @@ def _calculate_sign(state, negative_flag):
         s = ''
     return s
 
+
 def _swapchar(s, ind, newch):
     '''
     Helper function to make chars in a string mutableish
@@ -580,9 +615,10 @@ def _swapchar(s, ind, newch):
     if 0 < ind >= len(s):
         raise IndexError('index out of range')
     return s[:ind] + newch + s[ind+1:]
-    
+
 
 def _compose_a_string(w, state, val):
+    """ TBD """
     # f77 spec 13.5.11 covers a editing
     val = str(val)
     if w is None:
@@ -595,6 +631,7 @@ def _compose_a_string(w, state, val):
 
 
 def _compose_l_string(w, state, val):
+    """ TBD """
     # f77 spec 13.5.10 covers l editing
     try:
         val = bool(val)
@@ -611,7 +648,8 @@ def _compose_l_string(w, state, val):
 
 
 def _compose_i_string(w, m, state, val):
-    # f77 spec 13.5.9.1 covers integer editing 
+    """ TBD """
+    # f77 spec 13.5.9.1 covers integer editing
     null_field = False
     # be pythonic in what values to accept, if it looks like an integer, then
     # so be it
@@ -624,7 +662,8 @@ def _compose_i_string(w, m, state, val):
     # pad if necessary
     if m is not None:
         int_string = left_pad(int_string, m, '0')
-        # weird case where if zero width specified and is zero, can have zero space
+        # weird case where if zero width specified and is zero, can have zero
+        # space
         if (val == 0) and (m == 0):
             int_string = ''
     # prepend the sign
@@ -638,7 +677,9 @@ def _compose_i_string(w, m, state, val):
         int_string = int_string.rjust(w)
     return int_string
 
+
 def _get_sign(val, incl_plus):
+    """ TBD """
     if val >= 0:
         if incl_plus == True:
             return '+'
@@ -647,7 +688,9 @@ def _get_sign(val, incl_plus):
     else:
         return '-'
 
+
 def _compose_boz_string(w, m, state, val, ftype):
+    """ TBD """
     try:
         val = int(val)
     except ValueError:
@@ -700,6 +743,7 @@ def _compose_boz_string(w, m, state, val, ftype):
     else:
         return s
 
+
 def _write_string(record, sub_string, pos):
     '''Function that actually writes the generated strings to a 'stream'''''
     new_pos = pos + len(sub_string)
@@ -707,7 +751,7 @@ def _write_string(record, sub_string, pos):
     # f77 format sec. 13.5.3
     if pos > len(record):
         record = record.ljust(pos)
-        out =  record + sub_string
+        out = record + sub_string
     elif pos == len(record):
         out = record + sub_string
     elif pos < len(record):
@@ -716,7 +760,7 @@ def _write_string(record, sub_string, pos):
 
 
 def left_pad(sub_string, width, pad_char):
+    """ TBD """
     # Python 2.3 does not have the character argument to rjust
     padding = pad_char * (width - len(sub_string))
     return padding + sub_string
-
