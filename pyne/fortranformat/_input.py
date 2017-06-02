@@ -274,7 +274,7 @@ def read_integer(ed, state, record):
     substr, state = _get_substr(ed.width, record, state)
 # pylint: disable=bad-indentation
     if '-' in substr \
-        and not config.PROC_ALLOW_NEG_BOZ \
+        and (not config.PROC_ALLOW_NEG_BOZ) \
             and isinstance(ed, (Z, O, B)):
                 if state['exception_on_fail']:
                     raise ValueError('Negative numbers not permitted for '
@@ -328,8 +328,8 @@ def read_logical(ed, state, record):
     substr, state = _get_substr(ed.width, record, state)
     # Deal with case where there is no more input to read from
     if substr == '' \
-        and config.RET_UNWRITTEN_VARS_NONE \
-            or config.RET_WRITTEN_VARS_ONLY:
+        and (config.RET_UNWRITTEN_VARS_NONE
+            or config.RET_WRITTEN_VARS_ONLY):
                 # pylint: disable=bad-indentation
                 return (None, state)
                 # pylint: enable=bad-indentation
