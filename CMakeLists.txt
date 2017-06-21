@@ -113,6 +113,15 @@ if(${MOAB_FOUND})
     endif(APPLE)
 endif(${MOAB_FOUND})
 
+# check for DAGMC
+find_package(DAGMC)
+message("-- DAGMC Found: ${DAGMC_FOUND}")
+if(${DAGMC_FOUND})
+  include_directories(${DAGMC_INCLUDE_DIR})
+  get_filename_component(DAGMC_LIBRARY_DIRS ${DAGMC_LIBRARY} PATH)
+  link_directories(${DAGMC_LIBRARY_DIRS})
+endif(${DAGMC_FOUND})
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include( UseCython )
