@@ -455,9 +455,11 @@ def parse_coe(coefile, grabB1=True):
             thisCoe = coe[BUi][uni]
             # delve through the branches, reassigning the thisCoe reference
             # at each successive level
-            for branch in theseBranches:
+            for i,branch in enumerate(theseBranches):
                 if branch not in thisCoe.keys():
                     thisCoe[branch] = {}
+                if i==len(theseBranches)-1:
+                    break
                 thisCoe = thisCoe[branch]
 
             names = []
@@ -479,14 +481,11 @@ def parse_coe(coefile, grabB1=True):
                 else:
                     values.append([float(item) for item in value])
 
-            thisCoe = coe[BUi][uni]
-            for branch in theseBranches:
-                thisCoe = thisCoe[branch]
-            thisCoe=dict(zip(names,values))
+            thisCoe[branch]=dict(zip(names,values))
 
     return coe
 
-def print_coe(coedict,lvl=0):
+def print_coe(coedict,lvl=0,short=True):
     """ Pretty prints a dictionary returned
     by parse_coe. Use this to visualize its
     nested structure.
@@ -495,19 +494,27 @@ def print_coe(coedict,lvl=0):
     -----------
     coedict: dict
         particularly, one returned by parse_coe,
-        although it will work on any nested dict."
+        although it will work on any nested dict.
+    short:   bool
+        short print, only prints first few params
+        found. Set to false for a full STDOUT.
         
     Returns:
     --------
     None
     """
+    # blah blah, recursive functions aren't fast
     # print header:
     #if lvl==0:
     #    print("BU i| uni\# | branches ...")
-    if type(coedict) == dict:
-        for k in coedict.keys():
+    keys = list(coedict.keys())
+    if isinstance(coedict[keys[0]],dict):
+        for k in keys:
             print(str('    '*lvl) + str(k))
             print_coe(coedict[k],lvl=lvl+1)
     else:
-        print(coedict)
+        if short:
+            keys = keys[:5]
+        for k in keys:
+            print(str('    '*lvl) + str(k) + ' : ' + str(coedict[k]))
     return None

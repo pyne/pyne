@@ -85,3 +85,25 @@ def test_parse_det2():
 
 def test_parse_coe1():
     coe = serpent.parse_coe('serp2.coe')
+
+    # test some vales. Not all, of course.
+    # check BU step 1, universe 2, fuel0+rod0 branch
+    # P0 scattering matrix for 4 group MSRE
+    assert_array_equal(coe[1]["2"]["fuel0"]["rod0"]["INF_S0"],
+            [3.19826E-01, 5.83480E-03, 6.21411E-09, 0.00000E+00,
+             0.00000E+00, 2.73182E-01, 5.47793E-03, 0.00000E+00, 
+             0.00000E+00, 0.00000E+00, 2.59886E-01, 1.05679E-02,
+             0.00000E+00, 0.00000E+00, 7.47597E-04, 2.73214E-01])
+    assert(coe[1]["2"]["fuel0"]["rod0"]["INF_KINF"]== 1.61559E+00)
+
+    # check that all branches are present
+    # in all universes
+    fuelBranches = ["fuel"+str(i) for i in range(15)]
+    rodBranches  = ["rod"+str(i) for i in  range(5) ]
+    # only fuel=2 and moder=3 universes have GCs here
+    for uni in ["2","3"]:
+        for fuelBr in fuelBranches:
+            assert fuelBr in coe[1][uni]
+        for rodBr  in rodBranches:
+            for thisFuel in fuelBranches:
+                assert rodBr in coe[1][uni][thisFuel]
