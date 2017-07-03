@@ -378,6 +378,19 @@ def parse_coe(coefile, grabB1=True):
     See the serpent wiki at:
     http://serpent.vtt.fi/mediawiki/index.php/Automated_burnup_sequence
 
+    Example:
+        say that you apply this to a serpent output with fuel temperature changes
+        named fuel0 through fuel14. Then, control rod positions were altered with
+        branches rod0 through rod4. In total, this would make 75 sets of different
+        group constants since all combinations are covered. To access INF_KINF with
+        (ie k_infinity with no B1 corrections) in universe 2
+        fuel0, rod0 at day 0 of burnup, you'd use:
+
+        coe[1]         ["2"]     ["fuel0"]["rod0"]["INF_KINF"]
+        #   ^ dep step  ^ uni ID  ^branches       ^ parameter name
+        
+        all parameters serpent gives are available by default
+
     Parameters
     ----------
     coefile : str or file-like object
