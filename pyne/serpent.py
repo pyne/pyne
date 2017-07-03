@@ -370,3 +370,144 @@ def parse_det(detfile, write_py=False):
     exec(f, {}, det)
 
     return det
+
+def parse_coe(coefile, grabB1=True):
+    """ Used to parse output from serpent 2's ability to branch problem variables
+    in order to generate group constants at several states. 
+    
+    See the serpent wiki at:
+    http://serpent.vtt.fi/mediawiki/index.php/Automated_burnup_sequence
+
+    Parameters
+    ----------
+    coefile : str or file-like object
+        Path to *.coe file or a *.coe file handle.
+
+    grabB1 : bool
+        whether to include results from the B1 corrected spectrum
+        if group constants were generated on full-core, set this to false
+        to save memory.
+
+    Returns
+    -------
+    coe : dict
+        Nested dictionary of the parsed coe file. First dimension key is burnup index (1-indexed). Next
+        is the universe group constants were generated in. Then, branch names represent
+        the keys, in the order that serpent printed them. On the final dimension, the parameters returned by serpent
+        make up the remaining keys. 
+
+        note: B1 is used for leakage-corrected group constants generated on an infinite
+        lattice. Don't use these values otherwise.
+
+    """
+    if isinstance(coefile, basestring):
+        f = open(coefile, 'r')
+    else:
+        f = coefile
+
+    coe = {}
+    universes = [] # universes GCs were made in
+    layers = None
+
+    while 1:
+
+        # this line describes branch and coe indices
+        try:
+            l = next(f).split()
+        except StopIteration:
+            break
+        _,numbranch,coeIndex,nTot,nUni = tuple([int(item) for item in l])
+
+        # this line describes what branch you're on
+        l = next(f).split()
+        # init list to hold branch names if it is still None
+        if layers == None:
+            layers = [ [] for i in range(int(l[0]))]
+        for i,branch in enumerate(l[1:]):
+            # append if not seen before
+            if branch not in layers[i]:
+                layers[i].append(branch)
+        theseBranches=l[1:]
+
+        next(f)
+        l = next(f).split()
+        nBU = int(l[2]) # number of burnup steps
+        BUi = int(l[1]) # index of BU step
+        BU  = float(l[0]) # burnup value
+        if BUi not in coe.keys():
+            coe[BUi] = {}
+
+        #coe[BUi]['burnDays'] = BU
+        # the above may be nice to have, but it goes against
+        # the paradigm here of having only nested dicts
+        # until the bottom level with data.
+
+        # ok, should be at a totally new set of data now,
+        # so, let's gather all params.
+        for iUni in range(nUni):
+
+            l = next(f).split()
+            uni = l[0]
+            if uni not in coe[BUi].keys():
+                coe[BUi][uni] = {}
+            nPara = int(l[1]) # num of params to follow
+
+            thisCoe = coe[BUi][uni]
+            # delve through the branches, reassigning the thisCoe reference
+            # at each successive level
+            for branch in theseBranches:
+                if branch not in thisCoe.keys():
+                    thisCoe[branch] = {}
+                thisCoe = thisCoe[branch]
+
+            names = []
+            values = [] # should all be numeric in nature
+            for i in range(nPara):
+                # build from lists to avoid frequently rehashing dicts
+                l = next(f).split()
+                name = l[0]
+                # check if B1
+                # also, yeah 'and' could be used, but bool checking
+                # is faster than string comparison, so that's why to nest
+                if not grabB1:
+                    if name[0:2] == 'B1':
+                        continue
+                value = l[2:]
+                names.append(name)
+                if len(values) ==1:
+                    values.append(float(value[0]))
+                else:
+                    values.append([float(item) for item in value])
+
+            thisCoe = coe[BUi][uni]
+            for branch in theseBranches:
+                thisCoe = thisCoe[branch]
+            thisCoe=dict(zip(names,values))
+
+    return coe
+
+def print_coe(coedict,lvl=0):
+    """ Pretty prints a dictionary returned
+    by parse_coe. Use this to visualize its
+    nested structure.
+    
+    Parameters:
+    -----------
+    coedict: dict
+        particularly, one returned by parse_coe,
+        although it will work on any nested dict."
+        
+    Returns:
+    --------
+    None
+    """
+    # print header:
+    #if lvl==0:
+    #    print("BU i| uni\# | branches ...")
+    if type(coedict) == dict:
+        for k in coedict.keys():
+            print(str('    '*lvl) + str(k))
+            print_coe(coedict[k],lvl=lvl+1)
+    else:
+        print(coedict)
+    return None

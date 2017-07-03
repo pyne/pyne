@@ -82,3 +82,6 @@ def test_parse_det2():
     assert_array_equal(det['DET1'][4], 
         [5, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5.11865E+05, 0.00417])
     assert_array_equal(det['DET1E'][-3], [5.25306E-05, 3.80731E-03, 1.92992E-03])
+
+def test_parse_coe1():
+    coe = serpent.parse_coe('serp2.coe')
