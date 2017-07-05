@@ -17,7 +17,10 @@ install:
 #   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /root/opt/ ; git clone https://github.com/pyne/pyne"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id pynedist/pyne-ubuntu
-   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /root/opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/root/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/root/opt/moab/include"
+   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /root/opt/ ; git clone https://github.com/svalinn/dagmc ; cd dagmc ; mkdir bld ; cd bld ; cmake .. -DCMAKE_INSTALL_PREFIX=.. ; make ; make install"
+   - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
+   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /root/opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/root/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/root/opt/moab/include -DDAGMC_LIBRARY=/root/opt/dagmc/lib/libdagmc.so -DDAGMC_INCLUDE_DIR=/root/opt/dagmc/include/"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id pynedist/pyne-ubuntu
 script:
