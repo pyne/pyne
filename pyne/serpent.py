@@ -508,8 +508,8 @@ def print_coe(coedict, lvl=0, short=True):
     by parse_coe. Use this to visualize its
     nested structure.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     coedict : dict
         particularly, one returned by parse_coe,
         although it will work on any nested dict.
@@ -517,8 +517,8 @@ def print_coe(coedict, lvl=0, short=True):
         short print, only prints first few params
         found. Set to false for a full STDOUT.
 
-    Returns:
-    --------
+    Returns
+    -------
     None
     """
     keys = list(coedict.keys())
