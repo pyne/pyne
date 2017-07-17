@@ -15,7 +15,7 @@ install:
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker cp ../pyne $commit_id:/opt/pyne
 #   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /opt/ ; git clone https://github.com/pyne/pyne"
-   - commit_id=$(sudo docker ps -l | taixl -n1 | awk '{print $1}')
+   - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id pynedist/pyne-ubuntu
    - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /opt/ ; git clone https://github.com/svalinn/dagmc ; cd dagmc ; mkdir bld ; cd bld ; cmake .. -DMOAB_ROOT=/opt/moab/ -DCMAKE_INSTALL_PREFIX=.. ; make ; make install"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
