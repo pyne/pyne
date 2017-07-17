@@ -10,6 +10,20 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
+# DAGMC Specific Imports
+try:
+    from pyne import dagmc
+    HAVE_DAGMC = True
+except ImportError:
+    warn("The DAGMC optional dependency could not be imported. "
+        " All aspects of the partisn module are not imported/.",
+         QAWarning)
+    HAVE_DAGMC = False
+
+if HAVE_DAGMC:
+  #rom pyne.dagmc import load, discretize_geom
+    from pyne import dagmc
+
 
 def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       geom=None, num_rays=10, grid=False, flux_tag="n_flux",
@@ -64,7 +78,6 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         If true, output mesh will have materials as determined by
         dagmc.discretize_geom()
     """
-    from pyne.dagmc import load, discretize_geom
     if geom is not None and isfile(geom):
         load(geom)
 

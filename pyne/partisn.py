@@ -46,8 +46,20 @@ except ImportError:
                   QAWarning)
     HAVE_PYTAPS = False
 
+# DAGMC Specific Imports
+try:
+    from pyne import dagmc
+    HAVE_DAGMC = True
+except ImportError:
+    warn("The DAGMC optional dependency could not be imported. "
+        " All aspects of the partisn module are not imported/.",
+         QAWarning)
+    HAVE_DAGMC = False
+
+
 if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
+if HAVE_DAGMC:
     from pyne import dagmc
 
 def write_partisn_input(mesh, hdf5, ngroup, **kwargs):

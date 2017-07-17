@@ -27,6 +27,18 @@ from pyne.mcnp import Meshtal
 
 thisdir = os.path.dirname(__file__)
 
+try:
+    from pyne import dagmc
+    HAVE_DAGMC = True
+except ImportError:
+    HAVE_DAGMC = False
+    from nose.plugins.skip import SkipTest
+    raise SkipTest
+
+if HAVE_DAGMC:
+    from pyne import dagmc
+
+
 def irradiation_setup_structured():
 
     meshtal = os.path.join(thisdir, "files_test_r2s", "meshtal_2x2x1")

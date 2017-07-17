@@ -22,6 +22,16 @@ except ImportError:
 
 if HAVE_PYTAPS:
     from pyne.mesh import Mesh, IMeshTag
+
+try:
+    from pyne import dagmc
+    HAVE_DAGMC = True
+except ImportError:
+    HAVE_DAGMC = False
+    from nose.plugins.skip import SkipTest
+    raise SkipTest
+
+if HAVE_DAGMC:
     from pyne import dagmc
 
 warnings.simplefilter("ignore", QAWarning)

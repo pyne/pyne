@@ -85,11 +85,14 @@ ENDIF()
 
 if (MOAB_FOUND)
     set(PYNE_SRCS "${PYNE_SRCS}"
-        "dagmc_bridge.cpp"
         "measure.cpp"
         "source_sampling.cpp"
         )
 endif (MOAB_FOUND)
+
+if (DAGMC_FOUND) 
+   list(APPEND ${PYNE_SRCS} "dagmc_bridge.cpp")
+endif (DAGMC_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
@@ -98,8 +101,11 @@ IF(BUILD_SPATIAL_SOLVER)
     target_link_libraries(pyne hdf5 blas lapack)
 ENDIF(BUILD_SPATIAL_SOLVER)
 if (MOAB_FOUND)
-    target_link_libraries(pyne dagmc MOAB)
+    target_link_libraries(pyne MOAB)
 endif (MOAB_FOUND)
+if (DAGMC_FOUND)
+   target_link_libraries(dagmc)
+endif(DAGMC_FOUND)
 
 set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS "-O0")
 
