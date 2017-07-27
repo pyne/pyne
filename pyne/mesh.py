@@ -10,13 +10,12 @@ try:
 except ImportError:
     from collections import Iterable, Sequence
 from warnings import warn
-from pyne.utils import QAWarning, check_iterable
+from pyne.utils import QA_warn, check_iterable
 
 import numpy as np
 import tables as tb
 
-
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 try:
     from pymoab import core as mb_core, hcoord, scd, types

@@ -7,8 +7,7 @@ import re
 import sys
 import shutil
 from glob import glob
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 import tables as tb
@@ -20,7 +19,7 @@ from .api import BASIC_FILTERS
 if sys.version_info[0] > 2:
     basestring = str
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 def grab_cinder_dat(build_dir="", datapath=''):

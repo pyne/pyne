@@ -4,7 +4,7 @@ from __future__ import print_function, division, unicode_literals
 import sys
 from contextlib import contextmanager
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 cimport numpy as np
 import numpy as np
@@ -17,7 +17,7 @@ from pyne.material_library import MaterialLibrary
 
 np.import_array()
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 if sys.version_info[0] >= 3:
     unichr = chr

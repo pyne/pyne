@@ -4,14 +4,13 @@
   will have functions for general spectrum processing
 
 """
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 
 import copy
 
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 class PhSpectrum(object):

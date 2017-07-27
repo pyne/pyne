@@ -7,8 +7,7 @@ module.
 """
 import sys
 from bisect import bisect_right
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 import matplotlib
@@ -23,7 +22,7 @@ from PyQt4.QtGui import *
 
 from pyne import ace
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 matplotlib.use('Qt4Agg')
 

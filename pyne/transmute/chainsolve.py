@@ -4,8 +4,7 @@
    Analysis," a Ph.D. Dissertation, University of Wisconsin, Madison, WI, 1999.
 """
 from __future__ import division
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 from scipy import linalg
@@ -21,7 +20,7 @@ from pyne.xs.data_source import NullDataSource, EAFDataSource
 from pyne.xs.cache import XSCache
 from pyne.xs.channels import sigma_a
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 class Transmuter(object):
     """A class for transmuting materials using an ALARA-like chain solver."""

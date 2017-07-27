@@ -21,7 +21,7 @@ import linecache
 import datetime
 from textwrap import wrap
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 import itertools
 
 import numpy as np
@@ -34,7 +34,7 @@ from pyne.material_library import MaterialLibrary
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Mesh specific imports
 
