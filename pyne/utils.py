@@ -1,6 +1,8 @@
 from __future__ import division
 import os
 
+from warnings import warn
+
 from distutils.dir_util import remove_tree
 import filecmp
 from io import open
@@ -9,9 +11,12 @@ from pyne._utils import fromstring_split, fromstring_token, endftod,\
                         use_fast_endftod, fromendf_tok, toggle_warnings,\
                         use_warnings, fromendl_tok
 
-
 class QAWarning(UserWarning):
     pass
+
+def QA_warn(module_name):
+    warn(module_name + " is not yet QA compliant.", QAWarning)
+
 
 time_conv_dict = {'as': 1e-18,
                   'attosec': 1e-18,

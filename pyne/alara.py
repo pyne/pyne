@@ -14,18 +14,17 @@ try:
 except AttributeError:
     collectionsAbc = collections
 from warnings import warn
-from pyne.utils import QAWarning, to_sec, str_to_unicode
+from pyne.utils import QA_warn, to_sec, str_to_unicode
 import numpy as np
 import tables as tb
 from io import open
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 try:
     basestring
 except NameError:
     basestring = str
-
 
 if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
