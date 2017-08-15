@@ -128,7 +128,8 @@ def step1():
     load(geom)
     cell_mats = cell_materials(geom)
     irradiation_setup(meshtal, cell_mats, alara_params_filename, tally_num,
-                      num_rays=num_rays, grid=grid, reverse=reverse)
+                      num_rays=num_rays, grid=grid, reverse=reverse,
+                      flux_tag=flux_tag)
 
     # create a blank mesh for step 2:
     mesh = meshtal.tally[tally_num]
