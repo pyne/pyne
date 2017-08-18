@@ -114,6 +114,7 @@ def step1():
     meshtal = config.get('step1', 'meshtal')
     tally_num = config.getint('step1', 'tally_num')
     flux_tag = config.get('step1', 'flux_tag')
+    
     if structured:
         meshtal = Meshtal(meshtal,
                         {tally_num: (flux_tag, flux_tag + '_err',
@@ -132,7 +133,11 @@ def step1():
                       flux_tag=flux_tag)
 
     # create a blank mesh for step 2:
-    mesh = meshtal.tally[tally_num]
+    if structured:
+        mesh = meshtal.tally[tally_num]
+    else:
+        mesh = Mesh(structured=False, mesh=meshtal)
+        
     ves = list(mesh.iter_ve())
     for tag in mesh.mesh.getAllTags(ves[0]):
         mesh.mesh.destroyTag(tag, True)

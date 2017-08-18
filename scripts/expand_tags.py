@@ -18,7 +18,11 @@ def main():
                               "be seperated by commas without spaces.\n"))
     args = parser.parse_args()
 
-    m = Mesh(structured=True, mesh=args.mesh_file)
+    try:
+        m = Mesh(structured=True, mesh=args.mesh_file)
+    except:
+        print ("Structured mesh not found, trying unstructured mesh")
+        m = Mesh(structured=False, mesh=args.mesh_file)
 
     if args.tags is not None:
         tags = args.tags.split(',')
