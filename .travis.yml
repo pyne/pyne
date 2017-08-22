@@ -16,9 +16,9 @@ install:
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id $DOCKER_IMAGE
    - if [ $PYTHON == "2.7" ] ; then 
-     sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/opt/moab/include"
-     else
-     sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user"
+     sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/opt/moab/include" ;
+     else ;
+     sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user" ;
      fi
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id $DOCKER_IMAGE
