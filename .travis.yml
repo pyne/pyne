@@ -16,9 +16,9 @@ install:
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id $DOCKER_IMAGE
    - if [ $PYTHON == "2.7" ] ; then 
-       sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/opt/moab/include"
+     sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/opt/moab/include"
      else
-       sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user"
+     sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user"
      fi
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id $DOCKER_IMAGE
@@ -27,9 +27,9 @@ script:
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id $DOCKER_IMAGE
    - if [ $PYTHON == "2.7" ] ; then
-       sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/:/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/:/opt/moab/lib" -e PYTHONPATH="/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests ; ./travis-run-tests.sh"
+     sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/:/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/:/opt/moab/lib" -e PYTHONPATH="/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests ; ./travis-run-tests.sh"
      else
-       sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/:/opt/moab/lib" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests ; ./travis-run-tests.sh"
+     sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/:/opt/moab/lib" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests ; ./travis-run-tests.sh"
      fi
    - sudo docker run $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests ; git clone https://github.com/pyne/pyne-amalgamation.git"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
