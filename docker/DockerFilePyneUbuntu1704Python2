@@ -39,10 +39,12 @@ RUN \
     rm -rf bld moab
 RUN \
     echo "export LD_LIBRARY_PATH=/opt/moab/lib" >> /opt/env.sh && \
-    echo 'export PATH=$PATH:/opt/moab/bin' >> /opt/env.sh 
+    echo 'export PATH=$PATH:/opt/moab/bin' >> /opt/env.sh
+RUN \
+    pip install numpy && \
+    pip install cython
 RUN \
     cd /opt/ && \
-    pip install numpy && \
     wget https://pypi.python.org/packages/7a/51/c5915ca128da8ab178c3f2a52eae9abcb70ac9b9f5e0d9dd917007730dc8/PyTAPS-1.4.tar.gz && \
     tar -zxf PyTAPS-1.4.tar.gz && \
     mv PyTAPS-1.4 pytaps && \

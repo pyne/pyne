@@ -39,7 +39,10 @@ RUN \
     rm -rf bld moab
 RUN \
     echo "export LD_LIBRARY_PATH=/opt/moab/lib" >> /opt/env.sh && \
-    echo 'export PATH=$PATH:/opt/moab/bin' >> /opt/env.sh 
+    echo 'export PATH=$PATH:/opt/moab/bin' >> /opt/env.sh
+RUN \
+    pip3 install numpy && \
+    pip3 install cython 
 # source the env file to get right path & ldpath
 RUN touch /root/.bashrc
 RUN echo 'source /opt/env.sh' >> /root/.bashrc
