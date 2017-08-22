@@ -1,41 +1,47 @@
 sudo: required
 language: python
-python:
-  # We don't actually use the Travis Python, but this keeps it organized.
-  - "2.7"
-#  - "3.4"
-#  - "3.5"
+env:
+  matrix:
+    - PYTHON="2.7" DOCKER_IMAGE="pynedist/pyneci-python27-ubuntu1704"
+    - PYTHON="3.5" DOCKER_IMAGE="pynedist/pyneci-python35-ubuntu1704"
 services:
   - docker
 before_install:
-  - sudo docker pull pynedist/pyne-ubuntu
+  - sudo docker pull $DOCKER_IMAGE
 install:
 # copy the git repo being tested into the docker instance
-   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /opt/"
+   - sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt" 
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker cp ../pyne $commit_id:/opt/pyne
-#   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /opt/ ; git clone https://github.com/pyne/pyne"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
-   - sudo docker commit $commit_id pynedist/pyne-ubuntu
-   - sudo docker run pynedist/pyne-ubuntu /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/opt/moab/include"
+   - sudo docker commit $commit_id $DOCKER_IMAGE
+   - if [ $PYTHON == "2.7" ] ; then 
+       sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user -- -DMOAB_LIBRARY=/opt/moab/lib/libMOAB.so -DMOAB_INCLUDE_DIR=/opt/moab/include"
+     else
+       sudo docker run $DOCKER_IMAGE /bin/sh -c "cd /opt/pyne/ ; python setup.py install --user"
+     fi
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
-   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   - sudo docker commit $commit_id $DOCKER_IMAGE
 script:
-   - sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/" pynedist/pyne-ubuntu /bin/bash -c "cd /opt/pyne ; /root/.local/bin/nuc_data_make" 
+   - sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne ; /root/.local/bin/nuc_data_make" 
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
-   - sudo docker commit $commit_id pynedist/pyne-ubuntu
-   - sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/:/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/:/opt/moab/lib" -e PYTHONPATH="/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/" pynedist/pyne-ubuntu /bin/bash -c "cd /opt/pyne/tests ; ./travis-run-tests.sh"
-   - sudo docker run pynedist/pyne-ubuntu /bin/bash -c "cd /opt/pyne/tests ; git clone https://github.com/pyne/pyne-amalgamation.git"
+   - sudo docker commit $commit_id $DOCKER_IMAGE
+   - if [ $PYTHON == "2.7" ] ; then
+       sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/:/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/:/opt/moab/lib" -e PYTHONPATH="/root/.local/lib/python2.7/site-packages/PyTAPS-1.4-py2.7-linux-x86_64.egg/" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests ; ./travis-run-tests.sh"
+     else
+       sudo docker run -e LD_LIBRARY_PATH="/root/.local/lib/:/opt/moab/lib" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests ; ./travis-run-tests.sh"
+     fi
+   - sudo docker run $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests ; git clone https://github.com/pyne/pyne-amalgamation.git"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
-   - sudo docker commit $commit_id pynedist/pyne-ubuntu
-   - sudo docker run pynedist/pyne-ubuntu /bin/bash -c "cd /opt/pyne/ ; python amalgamate.py"
+   - sudo docker commit $commit_id $DOCKER_IMAGE
+   - sudo docker run $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/ ; python amalgamate.py"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
-   - sudo docker commit $commit_id pynedist/pyne-ubuntu
-   - sudo docker run pynedist/pyne-ubuntu /bin/bash -c "cd /opt/pyne/ ; mv pyne.h pyne.cpp tests/pyne-amalgamation"
+   - sudo docker commit $commit_id $DOCKER_IMAGE
+   - sudo docker run $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/ ; mv pyne.h pyne.cpp tests/pyne-amalgamation"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
-   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   - sudo docker commit $commit_id $DOCKER_IMAGE
 # need to add amalgamate test
-   - sudo docker run -e LIBS="/opt/moab/lib:/root/.local/lib" pynedist/pyne-ubuntu /bin/bash -c "cd /opt/pyne/tests/pyne-amalgamation ; make BASE=$LIBS all"
+   - sudo docker run -e LIBS="/opt/moab/lib:/root/.local/lib" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests/pyne-amalgamation ; make BASE=$LIBS all"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
-   - sudo docker commit $commit_id pynedist/pyne-ubuntu
+   - sudo docker commit $commit_id $DOCKER_IMAGE
    

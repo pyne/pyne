@@ -1,0 +1,53 @@
+#
+# Ubuntu Dockerfile
+#
+# https://github.com/dockerfile/ubuntu
+#
+
+# pull the base image
+FROM ubuntu:17.04
+
+# install
+RUN \
+    apt-get -y update && \ 
+    apt-get -y install gcc g++ make openssl
+RUN \
+    apt-get -y install cmake curl git htop man unzip vim wget emacs
+RUN \ 
+    apt-get -y install libhdf5-dev libhdf5-100 gfortran && \
+    apt-get -y install expat libtool autoconf && \
+    apt-get -y install patch texinfo && \
+    apt-get -y install dejagnu bison flex && \
+    apt-get -y install python3 && \
+    apt-get -y install subversion python3-dev python3-pip
+# install moab
+RUN \
+    echo "#!/bin/bash" > /opt/env.sh && \
+    cd /opt && \
+    mkdir moab && \
+    git clone https://bitbucket.org/fathomteam/moab && \
+    cd moab && \
+    git checkout 4.9.2 && \
+    autoreconf -fi && \
+    mkdir bld && \
+    cd bld && \
+    ../configure --enable-optimize --enable-shared --enable-dagmc --with-hdf5=/usr/lib/x86_64-linux-gnu/hdf5/serial/ --prefix=/opt/moab/ && \
+    make -j4 && \ 
+    make check && \ 
+    make install && \
+    cd .. && \ 
+    rm -rf bld moab
+RUN \
+    echo "export LD_LIBRARY_PATH=/opt/moab/lib" >> /opt/env.sh && \
+    echo 'export PATH=$PATH:/opt/moab/bin' >> /opt/env.sh 
+# source the env file to get right path & ldpath
+RUN touch /root/.bashrc
+RUN echo 'source /opt/env.sh' >> /root/.bashrc
+# Set environment variables.
+ENV HOME /root
+# Define working directory.
+WORKDIR /root
+
+# Define default command.
+CMD ["bash"]
+    
