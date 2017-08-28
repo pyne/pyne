@@ -161,7 +161,7 @@ DECAY_H = os.path.join('src', 'decay.h')
 DECAY_CPP = os.path.join('src', 'decay.cpp')
 DECAY_H_REP = os.path.join('src', '_decay.h')
 DECAY_CPP_REP = os.path.join('src', '_decay.cpp')
-DECAY_URL = 'https://github.com/makeclean/data/blob/update_data/decay.tar.gz'
+DECAY_URL = 'https://raw.githubusercontent.com/makeclean/data/blob/update_data/decay.tar.gz'
 
 
 def download_decay():
