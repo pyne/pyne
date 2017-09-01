@@ -39,7 +39,7 @@ script:
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id $DOCKER_IMAGE
 # need to add amalgamate test
-   - sudo docker run -e LIBS="/opt/moab/lib:/root/.local/lib" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests/pyne-amalgamation ; make BASE=$LIBS all"
+   - sudo docker run -e LIBS="/usr/lib/x86_64-linux-gnu/hdf5/serial/" $DOCKER_IMAGE /bin/bash -c "cd /opt/pyne/tests/pyne-amalgamation ; make BASE=$LIBS all"
    - commit_id=$(sudo docker ps -l | tail -n1 | awk '{print $1}')
    - sudo docker commit $commit_id $DOCKER_IMAGE
    

@@ -37,13 +37,17 @@ RUN \
     make check && \ 
     make install && \
     cd .. && \ 
-    rm -rf bld moab
+    rm -rf bld 
 RUN \
     echo "export LD_LIBRARY_PATH=/opt/moab/lib" >> /opt/env.sh && \
     echo 'export PATH=$PATH:/opt/moab/bin' >> /opt/env.sh
 RUN \
     pip3 install numpy && \
-    pip3 install cython 
+    pip3 install cython && \
+    pip3 install tables && \
+    pip3 install nose && \
+    pip3 install scipy && \
+    pip3 install jinja2 
 # source the env file to get right path & ldpath
 RUN touch /root/.bashrc
 RUN echo 'source /opt/env.sh' >> /root/.bashrc

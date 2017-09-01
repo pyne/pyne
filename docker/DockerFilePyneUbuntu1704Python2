@@ -37,13 +37,17 @@ RUN \
     make check && \ 
     make install && \
     cd .. && \ 
-    rm -rf bld moab
+    rm -rf bld 
 RUN \
     echo "export LD_LIBRARY_PATH=/opt/moab/lib" >> /opt/env.sh && \
     echo 'export PATH=$PATH:/opt/moab/bin' >> /opt/env.sh
 RUN \
     pip install numpy && \
-    pip install cython
+    pip install cython && \
+    pip install tables && \
+    pip install nose && \
+    pip install scipy && \
+    pip install jinja2 
 RUN \
     cd /opt/ && \
     wget https://pypi.python.org/packages/7a/51/c5915ca128da8ab178c3f2a52eae9abcb70ac9b9f5e0d9dd917007730dc8/PyTAPS-1.4.tar.gz && \
