@@ -75,8 +75,27 @@ IF(NOT ${BUILD_TYPE} STREQUAL "release")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
 ENDIF()
 
+
+#
+# Allow for dependnecies to exist in non-install location
+#
+if (NOT DEPS_ROOT_DIR)
+  get_filename_component(compdir ${CMAKE_CXX_COMPILER} DIRECTORY)
+  get_filename_component(DEPS_ROOT_DIR ${compdir} DIRECTORY)
+endif (NOT DEPS_ROOT_DIR)
+SET(DEPS_HINTS HINTS "${DEPS_ROOT_DIR}")
+SET(DEPS_BIN_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/bin")
+SET(DEPS_LIB_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/lib")
+SET(DEPS_INCLUDE_HINTS HINTS "${DEPS_ROOT_DIR}/include")
+MESSAGE("-- Dependency Root Dir (DEPS_ROOT_DIR): ${DEPS_ROOT_DIR}")
+MESSAGE("-- Dependency Hints (DEPS_HINTS): ${DEPS_HINTS}")
+MESSAGE("-- Dependency Binary Hints (DEPS_BIN_HINTS): ${DEPS_BIN_HINTS}")
+MESSAGE("-- Dependency Library Hints (DEPS_LIB_HINTS): ${DEPS_LIB_HINTS}")
+MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}")
+
+
 # Include the HDF5 library and c++ headers
-find_package( HDF5 COMPONENTS C REQUIRED)
+find_package(HDF5 COMPONENTS C REQUIRED)
 include_directories(${HDF5_INCLUDE_DIRS})
 if(WIN32)
     # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!

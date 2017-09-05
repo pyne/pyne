@@ -120,19 +120,24 @@ cython_add_module(bins bins.pyx)
 target_link_libraries(bins pyne)
 
 # figure out which f2py to use
-find_program(F2PY_C f2py)
-if(${PYTHON_VERSION_MAJOR} GREATER 2)
-  find_program(F2PY_C2 f2py3)
-  if(F2PY_C2)
-    set(F2PY_C ${F2PY_C2})
-  endif(F2PY_C2)
-elseif(${PYTHON_VERSION_MAJOR} LESS 3)
-  #because arch is dumb
-  find_program(F2PY_C2 f2py2)
-  if(F2PY_C2)
-    set(F2PY_C ${F2PY_C2})
-  endif(F2PY_C2)
-endif(${PYTHON_VERSION_MAJOR} GREATER 2)
+find_program(F2PY_C f2py ${DEPS_BIN_HINTS})
+if(NOT F2PY_C)
+  if(${PYTHON_VERSION_MAJOR} GREATER 2)
+    find_program(F2PY_C2 f2py3 ${DEPS_BIN_HINTS})
+    if(F2PY_C2)
+      set(F2PY_C ${F2PY_C2})
+    endif(F2PY_C2)
+  elseif(${PYTHON_VERSION_MAJOR} LESS 3)
+    # because arch is dumb
+    find_program(F2PY_C2 f2py2 ${DEPS_BIN_HINTS})
+    if(F2PY_C2)
+      set(F2PY_C ${F2PY_C2})
+    endif(F2PY_C2)
+  endif(${PYTHON_VERSION_MAJOR} GREATER 2)
+endif(NOT F2PY_C)
+
+message("-- F2PY Executable: ${F2PY_C}")
+message("-- F2PY F90 FLAGS: ${F2PY_F90FLAGS}")
 
 
 
