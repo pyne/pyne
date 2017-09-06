@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.8.5)
 
 # Set the project name
-project( pyne Fortran C CXX)
+project(pyne)
 
 #determine if spatial solver module should be built
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
