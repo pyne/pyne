@@ -389,7 +389,7 @@ def main_body(ns):
     rtn = subprocess.check_call(cmake_cmd, cwd=ns.build_dir, shell=IS_NT)
     rtn = subprocess.check_call(['make'] + ns.make_args, cwd=ns.build_dir)
     if ns.cmd == 'install':
-        rtn = subprocess.check_call(['make', 'install'], cwd=build_dir)
+        rtn = subprocess.check_call(['make', 'install'], cwd=ns.build_dir)
 
 
 def final_message(success=True):
