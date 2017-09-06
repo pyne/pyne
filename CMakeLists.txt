@@ -113,21 +113,3 @@ add_custom_target(ReplicatePythonSourceTree ALL "${CMAKE_COMMAND}" -P
 add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
-
-# Print include dir
-get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
-
-message("-- Copying C/C++ header files.")
-file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/src/" DESTINATION
-    "${CMAKE_BINARY_DIR}/pyne/include/" FILES_MATCHING PATTERN "*.h")
-
-message("-- Copying Cython header files.")
-file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/pyne/"
-    DESTINATION "${CMAKE_BINARY_DIR}/pyne/"
-    FILES_MATCHING PATTERN "*.pxd"
-                   PATTERN "lib" EXCLUDE
-                   PATTERN "include" EXCLUDE)
-
-#message("-- Copying scripts.")
-#file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" DESTINATION "${CMAKE_BINARY_DIR}")
