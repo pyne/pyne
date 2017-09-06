@@ -428,14 +428,12 @@ def main():
     libpath = abspath(joinpath(pynepath, '..', '..', '..'))
     binpath = abspath(joinpath(libpath, '..', 'bin'))
     copy_ensdf_executables(pynepath)
-    msg = ("\nNOTE: If you have not done so already, please be sure that your PATH and "
-           "LD_LIBRARY_PATH (or DYLD_FALLBACK_LIBRARY_PATH on Mac OSX) has been "
-           "appropriately set to the install prefix of pyne. For this install of "
-           "pyne you may add the following lines to your '~/.bashrc' file or "
-           "equivalent:\n\n"
-           "# PyNE Environment Settings\n"
-           'export PATH="{binpath}:${{PATH}}"\n'
-           'export LD_LIBRARY_PATH="{libpath}:${{LD_LIBRARY_PATH}}"'
+    msg = ("\nNOTE: If you have not done so already, please be sure that your "
+           "PATH has been appropriately set to the install prefix of pyne. "
+           "For this install of pyne you may add the following lines to your "
+           "'~/.bashrc' file or equivalent:\n\n"
+           "  # PyNE Environment Settings\n"
+           '  export PATH="{binpath}:${{PATH}}"'
            ).format(binpath=binpath, libpath=libpath)
     print(msg, file=sys.stderr)
 
