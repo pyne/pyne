@@ -119,24 +119,6 @@ set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/bins.pyx"
 cython_add_module(bins bins.pyx)
 target_link_libraries(bins pyne)
 
-# figure out which f2py to use
-find_program(F2PY_C f2py ${DEPS_BIN_HINTS})
-if(NOT F2PY_C)
-  if(${PYTHON_VERSION_MAJOR} GREATER 2)
-    find_program(F2PY_C2 f2py3 ${DEPS_BIN_HINTS})
-    if(F2PY_C2)
-      set(F2PY_C ${F2PY_C2})
-    endif(F2PY_C2)
-  elseif(${PYTHON_VERSION_MAJOR} LESS 3)
-    # because arch is dumb
-    find_program(F2PY_C2 f2py2 ${DEPS_BIN_HINTS})
-    if(F2PY_C2)
-      set(F2PY_C ${F2PY_C2})
-    endif(F2PY_C2)
-  endif(${PYTHON_VERSION_MAJOR} GREATER 2)
-endif(NOT F2PY_C)
-
-message("-- F2PY Executable: ${F2PY_C}")
 message("-- F2PY F90 FLAGS: ${F2PY_F90FLAGS}")
 
 
@@ -145,7 +127,7 @@ if(BUILD_SPATIAL_SOLVER)
   add_custom_target(transport_spatial_methods ALL
                     DEPENDS transport_spatial_methods_so pyne)
   add_custom_command(OUTPUT transport_spatial_methods_so
-    COMMAND ${F2PY_C} -c -m transport_spatial_methods
+    COMMAND ${F2PY_EXECUTABLE} -c -m transport_spatial_methods
             -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
             ${F2PY_F90FLAGS}
             --f90flags="-fdefault-real-8"
