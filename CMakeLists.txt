@@ -14,6 +14,10 @@ pyne_set_build_spatial_solver()
 pyne_set_build_type()
 pyne_configure_rpath()
 
+# This makes all the libraries build as SHARED
+set(BUILD_SHARED_LIBS true)
+message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+
 
 #
 # Allow for dependnecies to exist in non-install location
@@ -88,13 +92,13 @@ ENDIF(BUILD_SPATIAL_SOLVER)
 include(UseCython)
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
 
-
-# This makes all the libraries build as SHARED
-set(BUILD_SHARED_LIBS true)
-message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
-
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
+
+
+#
+#
+#
 
 # With CMake, a clean separation can be made between the source tree and the
 # build tree.  When all source is compiled, as with pure C/C++, the source is
@@ -125,5 +129,5 @@ file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/pyne/"
                    PATTERN "lib" EXCLUDE
                    PATTERN "include" EXCLUDE)
 
-message("-- Copying scripts.")
-file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" DESTINATION "${CMAKE_BINARY_DIR}")
+#message("-- Copying scripts.")
+#file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/scripts" DESTINATION "${CMAKE_BINARY_DIR}")
