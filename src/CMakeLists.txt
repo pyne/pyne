@@ -124,3 +124,18 @@ add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+
+
+#
+# Install header files
+#
+FILE(GLOB h_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+FILE(GLOB hpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
+SET(h_files ${h_files} ${hpp_files})
+INSTALL(FILES ${h_files} DESTINATION include/pyne COMPONENT headers)
+
+
+#
+# Install libpyne
+#
+INSTALL(TARGETS pyne LIBRARY DESTINATION lib COMPONENT pyne)
