@@ -81,7 +81,7 @@ message("-- HDF5_LIBRARY_DIRS = ${HDF5_LIBRARY_DIRS}")
 
 # Use new Python library finder
 find_package(PythonInterp REQUIRED)
-find_package(PythonLibsNew REQUIRED)
+find_package(PythonLibs REQUIRED)
 message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 
 # Check for MOAB library
