@@ -69,8 +69,13 @@ endif(${MOAB_FOUND})
 # Find Python
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c
+                        "import site; print(site.getsitepackages(['${CMAKE_INSTALL_PREFIX}'])[0])"
+                OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(LIBS ${LIBS} ${PYTHON_LIBRARIES})
 message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
+message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
 
 # Find NumPy
@@ -97,7 +102,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
 
 
 #
-#
+# Build and install!
 #
 
 # With CMake, a clean separation can be made between the source tree and the
@@ -110,6 +115,12 @@ add_custom_target(ReplicatePythonSourceTree ALL "${CMAKE_COMMAND}" -P
   "${CMAKE_CURRENT_BINARY_DIR}"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
+# add sub dirs
 add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
+
+# install python package
+set(pyinstallscript "${CMAKE_CURRENT_BINARY_DIR}/cmake/SetupSubPyInstall.cmake")
+configure_file(cmake/SetupSubPyInstall.cmake.in ${pyinstallscript} @ONLY)
+install(SCRIPT ${pyinstallscript})
