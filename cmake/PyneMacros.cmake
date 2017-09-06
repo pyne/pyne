@@ -106,3 +106,34 @@ macro(pyne_print_logo)
                   OUTPUT_VARIABLE variable)
   message("${variable}")
 endmacro()
+
+
+# determine if spatial solver module should be built
+macro(pyne_set_build_spatial_solver)
+  IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
+       NOT APPLE AND NOT "$ENV{CONDA_BUILD}")
+      SET(BUILD_SPATIAL_SOLVER true)
+    ELSE()
+      SET(BUILD_SPATIAL_SOLVER false)
+    ENDIF()
+  ENDIF()
+endmacro()
+
+
+# set build type
+macro(pyne_set_build_type)
+  # Default to release build type
+  if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type" FORCE)
+  endif(NOT CMAKE_BUILD_TYPE)
+
+  # quiets fortify_source warnings when not compiling with optimizations
+  # in linux distros where compilers were compiled with fortify_source enabled by
+  # default (e.g. Arch linux).
+  STRING(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+  IF(NOT ${BUILD_TYPE} STREQUAL "release")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
+  ENDIF()
+  MESSAGE("-- Build type: ${CMAKE_BUILD_TYPE}")
+endmacro()

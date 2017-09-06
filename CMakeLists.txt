@@ -10,38 +10,8 @@ project(pyne)
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
-
-# determine if spatial solver module should be built
-IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND NOT APPLE AND NOT "$ENV{CONDA_BUILD}")
-    SET(BUILD_SPATIAL_SOLVER true)
-  ELSE()
-    SET(BUILD_SPATIAL_SOLVER false)
-  ENDIF()
-ENDIF()
-
-
-IF(BUILD_SPATIAL_SOLVER)
-  pyne_setup_fortran()
-  find_package(F2py REQUIRED)
-  message("-- F2PY Executable: ${F2PY_EXECUTABLE}")
-  message("-- F2PY Version: ${F2PY_VERSION}")
-ENDIF(BUILD_SPATIAL_SOLVER)
-
-# Default to release build type
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "The build type" FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
-
-
-# quiets fortify_source warnings when not compiling with optimizations
-# in linux distros where compilers were compiled with fortify_source enabled by
-# default (e.g. Arch linux).
-MESSAGE("-- Build type: ${CMAKE_BUILD_TYPE}")
-STRING(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
-IF(NOT ${BUILD_TYPE} STREQUAL "release")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
-ENDIF()
+pyne_set_build_spatial_solver()
+pyne_set_build_type()
 
 
 #
@@ -62,52 +32,60 @@ MESSAGE("-- Dependency Library Hints (DEPS_LIB_HINTS): ${DEPS_LIB_HINTS}")
 MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}")
 
 
-# Include the HDF5 library and c++ headers
-find_package(HDF5 COMPONENTS C REQUIRED)
-include_directories(${HDF5_INCLUDE_DIRS})
-if(WIN32)
-    # FindHDF5 finds the includes but not the libraries on Windows (MSYS).  Annoying!
-    get_filename_component(_hdf5libdir ${HDF5_INCLUDE_DIRS} PATH)
-    list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/bin")
-	list(APPEND HDF5_LIBRARY_DIRS "${_hdf5libdir}/lib")
-elseif(NOT HDF5_LIBRARY_DIRS)
-  list(GET HDF5_LIBRARIES 0 _hdf5lib)
-  if (${_hdf5lib} STREQUAL debug)
-    list(GET HDF5_LIBRARIES 1 _hdf5lib)
-  endif ()
-  get_filename_component(HDF5_LIBRARY_DIRS ${_hdf5lib} PATH)
-endif(WIN32)
-link_directories(${HDF5_LIBRARY_DIRS})
-add_definitions(${HDF5_DEFINITIONS})
-set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
-message("-- HDF5_LIBRARY_DIRS = ${HDF5_LIBRARY_DIRS}")
+#
+# Find Libraries
+#
 
-# Use new Python library finder
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
-message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
+# Find HDF5
+FIND_PACKAGE(HDF5 REQUIRED COMPONENTS HL)
+ADD_DEFINITIONS(${HDF5_DEFINITIONS})
+set(LIBS ${LIBS} ${HDF5_C_LIBRARIES} ${HDF5_C_HL_LIBRARIES})
+MESSAGE("--    HDF5 Root: ${HDF5_ROOT}")
+MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIR}")
+MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
+MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
+MESSAGE("--    HDF5 High Level Libraries: ${HDF5_C_HL_LIBRARIES}")
 
-# Check for MOAB library
+
+# Find MOAB library
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
-    include_directories(${MOAB_INCLUDE_DIR})
-    get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
-    if(APPLE)
-      link_directories(${MOAB_LIBRARY_DIRS}/lib)
-    else(APPLE)
-      link_directories(${MOAB_LIBRARY_DIRS})
-    endif(APPLE)
+  include_directories(${MOAB_INCLUDE_DIR})
+  get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
+  if(APPLE)
+    link_directories(${MOAB_LIBRARY_DIRS}/lib)
+  else(APPLE)
+    link_directories(${MOAB_LIBRARY_DIRS})
+  endif(APPLE)
 endif(${MOAB_FOUND})
+
+
+# Find Python
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
+set(LIBS ${LIBS} ${PYTHON_LIBRARIES})
+message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
+
+
+# Find NumPy
+find_package(Numpy REQUIRED)
+include_directories("${NUMPY_INCLUDE_DIR}")
+
+
+# Find f2py, if building spatial solver
+IF(BUILD_SPATIAL_SOLVER)
+  pyne_setup_fortran()
+  find_package(F2py REQUIRED)
+  message("-- F2PY Executable: ${F2PY_EXECUTABLE}")
+  message("-- F2PY Version: ${F2PY_VERSION}")
+ENDIF(BUILD_SPATIAL_SOLVER)
+
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
-include( UseCython )
-
-execute_process(COMMAND "${CYTHON_EXECUTABLE}" "-V"
-    ERROR_VARIABLE CYTHON_VERSION
-    ERROR_STRIP_TRAILING_WHITESPACE)
-message( STATUS "Cython Version: " ${CYTHON_VERSION} )
+include(UseCython)
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
 
 
 # This makes all the libraries build as SHARED
@@ -115,7 +93,7 @@ set(BUILD_SHARED_LIBS true)
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
 # RPATH Settings
-set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
@@ -134,31 +112,7 @@ else(APPLE)
     endif(HAVE_SETUPTOOLS)
 endif(APPLE)
 
-
-# use, i.e. don't skip the full RPATH for the build tree
-#SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-#SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-#SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/cyclus")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# the RPATH to be used when installing, but only if it's not a system directory
-#LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-#IF("${isSystemDir}" STREQUAL "-1")
-#    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/cyclus")
-#ENDIF("${isSystemDir}" STREQUAL "-1")
-
 message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
-
-# find numpy and include the numpy headers
-find_package(Numpy REQUIRED)
-include_directories("${NUMPY_INCLUDE_DIR}")
 
 #compiler warnings
 # add_definitions ("-Wpedantic")
