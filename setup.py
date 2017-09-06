@@ -288,7 +288,7 @@ def update_cmake_args(ns):
         bt = CMAKE_BUILD_TYPES[ns.build_type.lower()]
         ns.cmake_args.append('-DCMAKE_BUILD_TYPE=' + bt)
     if ns.hdf5 is not None:
-        h5root = absexpanduser(ns.hdf5_root)
+        h5root = absexpanduser(ns.hdf5)
         ns.cmake_args += [
             '-DHDF5_ROOT=' + h5root,
             '-DHDF5_LIBRARIES={0}/lib/libhdf5{1};{0}/lib/libhdf5_hl{1}'.format(h5root, LIBEXT),
