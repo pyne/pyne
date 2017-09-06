@@ -23,7 +23,7 @@ if(NOT F2PY_EXECUTABLE)
     find_program(F2PY_EXECUTABLE3 f2py3 ${DEPS_BIN_HINTS})
     if(F2PY_EXECUTABLE3)
       set(F2PY_EXECUTABLE ${F2PY_EXECUTABLE3})
-    endif(F2PY_EXECUTABLE)
+    endif(F2PY_EXECUTABLE3)
   elseif(${PYTHON_VERSION_MAJOR} LESS 3)
     # because arch is dumb
     find_program(F2PY_EXECUTABLE2 f2py2 ${DEPS_BIN_HINTS})
