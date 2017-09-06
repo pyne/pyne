@@ -12,6 +12,7 @@ pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
+pyne_configure_rpath()
 
 
 #
@@ -91,31 +92,6 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
-
-# RPATH Settings
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-if(APPLE)
-    set(CMAKE_MACOSX_RPATH 1)
-    if(HAVE_SETUPTOOLS)
-      set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
-    else(HAVE_SETUPTOOLS)
-      set(CMAKE_INSTALL_RPATH "@loader_path/../../..")
-    endif(HAVE_SETUPTOOLS)
-else(APPLE)
-    # For linux
-    if(HAVE_SETUPTOOLS)
-      set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
-    else(HAVE_SETUPTOOLS)
-      set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib")
-    endif(HAVE_SETUPTOOLS)
-endif(APPLE)
-
-message("-- RPATH: ${CMAKE_INSTALL_RPATH}")
-
-#compiler warnings
-# add_definitions ("-Wpedantic")
 
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
