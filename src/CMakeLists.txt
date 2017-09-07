@@ -93,7 +93,7 @@ endif (MOAB_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
-target_link_libraries(pyne hdf5)
+target_link_libraries(pyne ${LIBS})
 IF(BUILD_SPATIAL_SOLVER)
     target_link_libraries(pyne hdf5 blas lapack)
 ENDIF(BUILD_SPATIAL_SOLVER)
