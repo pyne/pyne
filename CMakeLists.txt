@@ -44,9 +44,10 @@ MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}
 # Find HDF5
 FIND_PACKAGE(HDF5 REQUIRED COMPONENTS HL)
 ADD_DEFINITIONS(${HDF5_DEFINITIONS})
+include_directories("${HDF5_INCLUDE_DIRS}")
 set(LIBS ${LIBS} ${HDF5_C_LIBRARIES} ${HDF5_C_HL_LIBRARIES})
 MESSAGE("--    HDF5 Root: ${HDF5_ROOT}")
-MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIR}")
+MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
 MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
 MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
 MESSAGE("--    HDF5 High Level Libraries: ${HDF5_C_HL_LIBRARIES}")
