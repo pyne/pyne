@@ -19,6 +19,7 @@ set(PYNE_SRCS
   "particle.cpp"
   "rxname.cpp"
   "tally.cpp"
+  "transmuters.cpp"
   "utils.cpp"
   "endftod.f90"
   )
