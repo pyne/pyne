@@ -9,6 +9,7 @@
 extern "C" {
 #include "cram.h"
 }
+#include "transmuters.h"
 #include "data.h"
 #include "decay.h"
 #include "enrichment_cascade.h"
