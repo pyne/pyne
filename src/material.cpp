@@ -9,6 +9,7 @@
 #include <stdexcept>
 
 #ifndef PYNE_IS_AMALGAMATED
+#include "transmuters.h"
 #include "material.h"
 #endif
 
@@ -1611,6 +1612,14 @@ pyne::Material pyne::Material::decay(double t) {
   return rtn;
 }
 
+
+pyne::Material pyne::Material::cram(std::vector<double> A,
+                                    const int order) {
+  Material rtn;
+  rtn.from_atom_frac(pyne::transmuters::cram(A, to_atom_frac(), order));
+  rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
+  return rtn;
+}
 
 pyne::Material pyne::Material::operator+ (double y) {
   // Overloads x + y

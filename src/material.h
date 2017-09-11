@@ -342,6 +342,12 @@ namespace pyne
     /// Decays this material for a given amount of time in seconds
     Material decay(double t);
 
+    /// Transmutes the material via the CRAM method.
+    /// \param A The transmutation matrix [unitless]
+    /// \param order The CRAM approximation order (default 14).
+    /// \return A new material which has been transmuted.
+    Material cram(std::vector<double> A, const int order=14);
+
     // Overloaded Operators
     /// Adds mass to a material instance.
     Material operator+ (double);
