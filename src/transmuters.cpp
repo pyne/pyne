@@ -1,5 +1,5 @@
 extern "C" {
-#include "cram.h"
+#include "cram.hpp"
 }
 #include "utils.h"
 #include "transmuters.h"

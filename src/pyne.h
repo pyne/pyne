@@ -7,7 +7,7 @@
 #include "json.h"
 //#include "dagmc_bridge.h"  // figure this out later...
 extern "C" {
-#include "cram.h"
+#include "cram.hpp"
 }
 #include "transmuters.h"
 #include "data.h"
