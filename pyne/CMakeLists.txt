@@ -35,6 +35,7 @@ foreach(cymod ${PYNE_CYTHON_MODULES})
   set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/${cymod}.pyx"
                               PROPERTIES CYTHON_IS_CXX TRUE)
   cython_add_module(${cymod} ${cymod}.pyx)
+  target_link_libraries(${cymod} pyne)
   install(TARGETS ${cymod} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 endforeach()
 
@@ -42,6 +43,7 @@ endforeach()
 # Cram is actually a C, not C++ file
 #
 cython_add_module(cram cram.pyx)
+target_link_libraries(cram pyne)
 install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 
 #
