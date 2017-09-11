@@ -96,7 +96,7 @@ install(TARGETS data LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/material.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(material material.pyx)
-target_link_libraries(material pyne hdf5)
+target_link_libraries(material pyne ${LIBS_HDF5})
 install(TARGETS material LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 
 # ace
