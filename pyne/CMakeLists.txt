@@ -22,6 +22,7 @@ set(PYNE_CYTHON_MODULES
     rxname
     stlcontainers
     tally
+    transmuters
     _utils
     )
 if(MOAB_FOUND)
