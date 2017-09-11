@@ -56,7 +56,7 @@ std::map<int, double> pyne::transmuters::cram(std::vector<double>& A,
   map<int, double> n1;
   for (i=0; i < pyne_cram_transmute_info.n; ++i) {
     if (x[i] > 0.0) {
-      n1[(pyne_cram_transmute_info.nucids)[i]] = n1[i];
+      n1[(pyne_cram_transmute_info.nucids)[i]] = x[i];
     }
   }
   return n1;
