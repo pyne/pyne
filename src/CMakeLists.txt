@@ -93,13 +93,13 @@ endif (MOAB_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
-target_link_libraries(pyne hdf5)
+target_link_libraries(pyne ${LIBS_HDF5})
 IF(BUILD_SPATIAL_SOLVER)
-    target_link_libraries(pyne hdf5 blas lapack)
+    target_link_libraries(pyne ${LIBS_HDF5} blas lapack)
 ENDIF(BUILD_SPATIAL_SOLVER)
-if (MOAB_FOUND)
+if(MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
-endif (MOAB_FOUND)
+endif(MOAB_FOUND)
 
 set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS "-O0")
 
