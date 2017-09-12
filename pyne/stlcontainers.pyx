@@ -24,11 +24,11 @@ import numpy as np
 
 np.import_array()
 
-cimport extra_types
+from pyne cimport extra_types
 
 # Cython Imports For Types
 cimport dtypes
-cimport extra_types
+from pyne cimport extra_types
 from libcpp.vector cimport vector as cpp_vector
 cimport numpy as np
 from libcpp.string cimport string as std_string

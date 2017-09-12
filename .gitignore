@@ -5,6 +5,8 @@ build-*
 *egg-info/
 build_nuc_data/
 pyne/include/
+src/atomic_data.cpp
+src/atomic_data.h
 
 # Ignore temp files
 *.pyc

@@ -361,7 +361,7 @@ class Library(rxdata.RxLib):
         meta_len = (nr*2-1)//6 + 1
         data_len = (np_*2-1)//6 + 1
         intmeta = dict(zip(('intpoints', 'intschemes'),
-                           (lines[1:1+meta_len].flat[:nr*2:2],
+                           (np.asarray(lines[1:1+meta_len].flat[:nr*2:2], dtype=int),
                             lines[1:1+meta_len].flat[1:nr*2:2])))
         intdata = dict(zip(xykeys,
             (lines[1+meta_len:1+meta_len+data_len].flat[:np_*2:2],

@@ -14,7 +14,7 @@ jobs:
           name: Building PyNE
           command: |
             python3 setup.py install --user -j 3 \
-                -DMOAB_LIBRARY=$HOME/opt/moab/lib
+                -DMOAB_LIBRARY=$HOME/opt/moab/lib \
                 -DMOAB_INCLUDE_DIR=$HOME/opt/moab/include
             cd ~
             nuc_data_make
