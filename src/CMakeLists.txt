@@ -79,7 +79,7 @@ endif(MOAB_FOUND)
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
-if(LIBS_HDF5 STREQUAL "")
+if("${LIBS_HDF5}" STREQUAL "")
   target_link_libraries(pyne hdf5)
 else()
   target_link_libraries(pyne ${LIBS_HDF5})
