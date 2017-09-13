@@ -175,6 +175,37 @@ namespace pyne {
     std::string filename; ///< unfindable filename.
   };
 
+  /// Exception representing value errors of all kinds
+  class ValueError : public std::exception
+  {
+  public:
+
+    /// default constructor
+    ValueError () {};
+
+    /// default destructor
+    ~ValueError () throw () {};
+
+    /// constructor with the filename \a fname.
+    ValueError(std::string msg)
+    {
+      message = msg;
+    };
+
+    /// Creates a helpful error message.
+    virtual const char* what() const throw()
+    {
+      std::string msgstr ("ValueError: ");
+      if (!message.empty())
+        msgstr += message;
+
+      return (const char *) msgstr.c_str();
+    };
+
+  private:
+    std::string message; ///< extra message for the user.
+  };
+
 
 // End PyNE namespace
 }
