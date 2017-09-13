@@ -1243,6 +1243,31 @@ cdef class _Material:
         pymat.mat_pointer[0] = self.mat_pointer.decay(t)
         return pymat
 
+    def cram(self, A, int order=14):
+        """Transmutes the material via the CRAM method.
+
+        Parameters
+        ----------
+        A : 1D array-like
+            The transmutation matrix [unitless]
+        order : int, optional
+            The CRAM approximation order (default 14).
+
+        Returns
+        -------
+        A new material which has been transmuted.
+        """
+        A = np.asarray(A, dtype=np.float64)
+        cdef int Alen = len(A)
+        cdef double* Aptr = <double*> np.PyArray_DATA(A)
+        cdef cpp_vector[double] cpp_A = cpp_vector[double]()
+        cpp_A.reserve(Alen)
+        cpp_A.assign(Aptr, Aptr + Alen)
+        # transmute and return
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.cram(cpp_A, order)
+        return pymat
+
 
     #
     # Operator Overloads

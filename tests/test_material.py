@@ -18,6 +18,7 @@ from pyne import jsoncpp
 from pyne import data
 from pyne import nucname
 from pyne import utils
+from pyne import cram
 import numpy as np
 from numpy.testing import assert_array_equal
 import tables as tb
@@ -1687,6 +1688,17 @@ def test_decay_u235_h3():
                     922350000: 0.5000000898212907},
                     1.9999996387457337, -1.0, 1.000000000011328, {})
     assert_mat_almost_equal(exp, obs)
+
+
+def test_cram_h3():
+    mat = Material({'H3': 1.0})
+    A = -cram.DECAY_MATRIX * data.half_life('H3')
+    obs = mat.cram(A, order=16)
+    obs = obs.to_atom_frac()
+    assert_equal(2, len(obs))
+    assert_almost_equal(0.5, obs[nucname.id('H3')])
+    assert_almost_equal(0.5, obs[nucname.id('He3')])
+
 
 # Run as script
 #

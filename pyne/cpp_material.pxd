@@ -98,7 +98,7 @@ cdef extern from "material.h" namespace "pyne":
         # Atom frac member functions
         map[int, double] to_atom_frac() except +
         void from_atom_frac(map[int, double]) except +
-        
+
         map[int, double] to_atom_dens() except +
 
 
@@ -107,6 +107,8 @@ cdef extern from "material.h" namespace "pyne":
         vector[pair[double, double]] photons(bool) except +
 
         Material decay(double) except +
+        Material cram(vector[double]) except +
+        Material cram(vector[double], int) except +
 
         # Operator Overloads
         Material operator+(double) except +
