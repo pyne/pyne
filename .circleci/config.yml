@@ -43,7 +43,7 @@ jobs:
                 -DMOAB_LIBRARY=$HOME/opt/moab/lib \
                 -DMOAB_INCLUDE_DIR=$HOME/opt/moab/include
             cd ~
-            ~/HOME/.local/bin/nuc_data_make
+            ~/.local/bin/nuc_data_make
 
       # Test!
       - run:
