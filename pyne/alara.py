@@ -52,7 +52,9 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
 
     # find number of e_groups
-    e_groups = flux_mesh.mesh.getTagHandle(flux_tag)[list(flux_mesh.mesh.iterate(iBase.Type.region,iMesh.Topology.all))[0]]
+    e_groups = flux_mesh.mesh.getTagHandle(flux_tag)[list(
+        flux_mesh.mesh.iterate(iBase.Type.region,
+                               iMesh.Topology.all))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
     
