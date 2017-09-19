@@ -146,19 +146,20 @@ def test_photon_sampling_setup_structured():
         assert_array_equal(m.tag2[i], exp_tag2[i])
 
 
-def irradiation_setup_unstructured(flux_tag = "n_flux", meshtal_filename = "meshtal_2x2x1"):
-    meshtal_file = os.path.join(thisdir, "files_test_r2s", meshtal_filename
-    )
-    if flux_tag is "n_flux":
-        meshtal = Meshtal(meshtal_file, {4: (flux_tag, flux_tag + "_err",
-                                             flux_tag + "_total",
-                                             flux_tag + "_err_total")})
-        #  Explicitly make this mesh unstructured, it will now iterate in yxz
-        #  order which is MOAB structured mesh creation order.
-        meshtal = Mesh(structured=False, mesh=meshtal.tally[4].mesh)
-        meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
-        meshtal.mesh.save(meshtal_mesh_file)
-    else:
+def irradiation_setup_unstructured(flux_tag = "n_flux"):
+    meshtal_filename = "meshtal_2x2x1"
+    meshtal_file = os.path.join(thisdir, "files_test_r2s", meshtal_filename)
+
+    meshtal = Meshtal(meshtal_file, {4: (flux_tag, flux_tag + "_err",
+                                         flux_tag + "_total",
+                                         flux_tag + "_err_total")})
+    #  Explicitly make this mesh unstructured, it will now iterate in yxz
+    #  order which is MOAB structured mesh creation order.
+    meshtal = Mesh(structured=False, mesh=meshtal.tally[4].mesh)
+    meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
+    meshtal.mesh.save(meshtal_mesh_file)
+
+    if flux_tag != "n_flux":
         # if not using n_flux makes a mesh containing n_flux tag, and then
         # makes a new tag called flux_tag, to use later in the test
         flux_tag_name = "n_flux"
@@ -170,9 +171,10 @@ def irradiation_setup_unstructured(flux_tag = "n_flux", meshtal_filename = "mesh
         meshtal = Mesh(structured=False, mesh=meshtal.tally[4].mesh)
         meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
         meshtal.mesh.save(meshtal_mesh_file)
-        new_mesh = Mesh(structured=False, mesh="meshtal.h5m")
+        new_mesh = Mesh(structured=False, mesh=meshtal_mesh_file)
         new_mesh.TALLY_TAG = IMeshTag(2,float) # 2 egroups
         new_mesh.TALLY_TAG = meshtal.n_flux[:]
+        
         # overwrite the mesh file
         new_mesh.mesh.save(meshtal_mesh_file) 
 
@@ -187,7 +189,7 @@ def irradiation_setup_unstructured(flux_tag = "n_flux", meshtal_filename = "mesh
     alara_matlib= os.path.join(os.getcwd(), "alara_matlib")
     output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
     output_material = True
- 
+    
     irradiation_setup(flux_mesh=meshtal_mesh_file, cell_mats=cell_mats, 
                       alara_params=alara_params, geom=geom, flux_tag=flux_tag, 
                       fluxin=fluxin, reverse=reverse, alara_inp=alara_inp,
@@ -308,11 +310,11 @@ def test_total_photon_source_intensity():
 
 def test_irradiation_setup_unstructured_nondef_tag():
     p = multiprocessing.Pool()
-    r = p.apply_async(irradiation_setup_unstructured(flux_tag="TALLY_TAG"))
+    r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
     p.close()
     p.join()
     results = r.get()
-    
+
     # unpack return values
     f1 = results[1]
     f2 = results[2]
@@ -332,23 +334,10 @@ def test_irradiation_setup_unstructured_nondef_tag():
     # test r2s step 1 output mesh
     fluxes = [[6.93088E-07, 1.04838E-06], [6.36368E-07, 9.78475E-07], 
               [5.16309E-07, 9.86586E-07], [6.36887E-07, 9.29879E-07]]
-    tot_fluxes = [1.74147E-06, 1.61484E-06, 1.50290E-06, 1.56677E-06] 
- 
+    tot_fluxes = [1.74147E-06, 1.61484E-06, 1.50290E-06, 1.56677E-06]  
     
     i = 0
-    for nf, nfe, nft, nfte, comp, density in izip(n_flux, n_flux_err, 
-                                                n_flux_total, n_flux_err_total, 
-                                                comps, densities):
-        assert_almost_equal(density, 2.0)
-        assert_equal(len(comp), 2)
-        assert_almost_equal(comp[30060000], 0.6)
-        assert_almost_equal(comp[30070000], 0.4)
+    for nf, nft in izip(n_flux, n_flux_total):
         assert_array_equal(nf, fluxes[i])
         i+=1
     
-    # test that files match
-    assert(f1 == True)
-    assert(f2 == True)
-    assert(f3 == True)
-    
-    # load a file without the default tag
