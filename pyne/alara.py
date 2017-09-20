@@ -57,7 +57,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                                iMesh.Topology.all))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
-
+    
     # Establish for loop bounds based on if forward or backward printing
     # is requested
     if not reverse:

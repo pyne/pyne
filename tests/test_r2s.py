@@ -27,9 +27,9 @@ from pyne.mcnp import Meshtal
 
 thisdir = os.path.dirname(__file__)
 
-def irradiation_setup_structured():
+def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x2x1"):
 
-    meshtal = os.path.join(thisdir, "files_test_r2s", "meshtal_2x2x1")
+    meshtal = os.path.join(thisdir, "files_test_r2s", meshtal_file)
     tally_num = 4
     cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name': 'mat_11'}),
                  3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name': 'mat_12'})}
@@ -37,7 +37,6 @@ def irradiation_setup_structured():
     geom = os.path.join(thisdir, "unitbox.h5m")
     num_rays = 9
     grid = True
-    flux_tag = "n_flux"
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
     reverse = True
     alara_inp = os.path.join(os.getcwd(), "alara_inp")
@@ -147,10 +146,10 @@ def test_photon_sampling_setup_structured():
         assert_array_equal(m.tag2[i], exp_tag2[i])
 
 
-def irradiation_setup_unstructured():
+def irradiation_setup_unstructured(flux_tag = "n_flux"):
+    meshtal_filename = "meshtal_2x2x1"
+    meshtal_file = os.path.join(thisdir, "files_test_r2s", meshtal_filename)
 
-    flux_tag = "n_flux"
-    meshtal_file = os.path.join(thisdir, "files_test_r2s", "meshtal_2x2x1")
     meshtal = Meshtal(meshtal_file, {4: (flux_tag, flux_tag + "_err",
                                          flux_tag + "_total",
                                          flux_tag + "_err_total")})
@@ -160,18 +159,37 @@ def irradiation_setup_unstructured():
     meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
     meshtal.mesh.save(meshtal_mesh_file)
 
+    if flux_tag != "n_flux":
+        # if not using n_flux makes a mesh containing n_flux tag, and then
+        # makes a new tag called flux_tag, to use later in the test
+        flux_tag_name = "n_flux"
+        meshtal = Meshtal(meshtal_file, {4: (flux_tag_name, flux_tag_name + "_err",
+                                             flux_tag_name + "_total",
+                                             flux_tag_name + "_err_total")})
+        #  Explicitly make this mesh unstructured, it will now iterate in yxz
+        #  order which is MOAB structured mesh creation order.
+        meshtal = Mesh(structured=False, mesh=meshtal.tally[4].mesh)
+        meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
+        meshtal.mesh.save(meshtal_mesh_file)
+        new_mesh = Mesh(structured=False, mesh=meshtal_mesh_file)
+        new_mesh.TALLY_TAG = IMeshTag(2,float) # 2 egroups
+        new_mesh.TALLY_TAG = meshtal.n_flux[:]
+        
+        # overwrite the mesh file
+        new_mesh.mesh.save(meshtal_mesh_file) 
+
+        
     cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name':'mat_11'}),
                  3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name':'mat_12'})}
     alara_params = "Bogus line for testing\n" 
     geom = os.path.join(thisdir, "unitbox.h5m")
-    flux_tag = "n_flux"
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
     reverse = True
     alara_inp = os.path.join(os.getcwd(), "alara_inp")
     alara_matlib= os.path.join(os.getcwd(), "alara_matlib")
     output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
     output_material = True
- 
+    
     irradiation_setup(flux_mesh=meshtal_mesh_file, cell_mats=cell_mats, 
                       alara_params=alara_params, geom=geom, flux_tag=flux_tag, 
                       fluxin=fluxin, reverse=reverse, alara_inp=alara_inp,
@@ -202,9 +220,13 @@ def irradiation_setup_unstructured():
     os.remove(output_mesh)
     
     return [m_out, f1, f2, f3]
+
     
 
 def test_irradiation_setup_unstructured():
+
+    # make new file with non default tag
+    
     p = multiprocessing.Pool()
     r = p.apply_async(irradiation_setup_unstructured)
     p.close()
@@ -286,3 +308,36 @@ def test_total_photon_source_intensity():
     intensity = total_photon_source_intensity(m, "source_density")
     assert_equal(intensity, 58)
 
+def test_irradiation_setup_unstructured_nondef_tag():
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
+    p.close()
+    p.join()
+    results = r.get()
+
+    # unpack return values
+    f1 = results[1]
+    f2 = results[2]
+    f3 = results[3]
+    
+    out = results[0]
+    n_flux = out[0]
+    n_flux_total = out[2]
+    densities = out[5]
+    
+    comps = np.zeros(shape=(len(out[4])), dtype=dict)
+    for i, comp in enumerate(out[4]):
+        comps[i] = {}
+        for nucid in comp:
+            comps[i][nucid[0]] = nucid[1]
+    
+    # test r2s step 1 output mesh
+    fluxes = [[6.93088E-07, 1.04838E-06], [6.36368E-07, 9.78475E-07], 
+              [5.16309E-07, 9.86586E-07], [6.36887E-07, 9.29879E-07]]
+    tot_fluxes = [1.74147E-06, 1.61484E-06, 1.50290E-06, 1.56677E-06]  
+    
+    i = 0
+    for nf, nft in izip(n_flux, n_flux_total):
+        assert_array_equal(nf, fluxes[i])
+        i+=1
+    
