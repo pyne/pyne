@@ -327,23 +327,12 @@ def load_default_nucs():
 
 
 
-def upload(ns):
+def build_tarfile(ns):
     import tarfile
-    import pyrax
-    pyrax.set_setting('identity_type', 'rackspace')
-    pyrax.set_setting('region', 'ORD')
-    pyrax.set_credential_file(ns.cred)
-    cf = pyrax.cloudfiles
-    f = io.BytesIO()
-    tar = tarfile.open(fileobj=f, mode='w:gz', name='decay.tar.gz')
-    tar.add(ns.hdr)
-    tar.add(ns.src)
-    tar.close()
-    f.seek(0)
-    fdata = f.read()
-    obj = cf.store_object('pyne-data', 'decay.tar.gz', fdata)
-    cont = cf.get_container("pyne-data")
-    cont.purge_cdn_object('decay.tar.gz')
+    with tarfile.open('decay.tar.gz', 'w:gz') as tar:
+        tar.add(ns.hdr)
+        tar.add(ns.src)
+
 
 def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False,
           dummy=False):
@@ -372,9 +361,8 @@ def main():
     parser.add_argument('--spontaneous-fission', default=False, action='store_true',
                         dest='sf', help='Includes spontaneous fission decay chains, '
                                         'default False.')
-    parser.add_argument('--upload', action='store_true', default=False,
-                        help='Uploads decay.tar.gz file to http://data.pyne.io, '
-                             'must have local credentials file.')
+    parser.add_argument('--tar', action='store_true', default=False,
+                        help='Builds decay.tar.gz')
     parser.add_argument('--cred', default='../rs.cred',
                         help='Path to credentials file.')
     parser.add_argument('--no-build', dest='build', default=True, action='store_false',
@@ -383,9 +371,9 @@ def main():
     if ns.build:
         build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf,
               dummy=ns.dummy)
-    if ns.upload:
-        print("uploading to rackspace...")
-        upload(ns)
+    if ns.tar:
+        print("building decay.tar.gz ...")
+        build_tarfile(ns)
 
 
 if __name__ == '__main__':
