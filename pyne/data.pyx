@@ -944,10 +944,8 @@ def branch_ratio(from_nuc, to_nuc, use_metastable=True):
         from_nuc = pyne.nucname.id(from_nuc)
         to_nuc = pyne.nucname.id(to_nuc)
         ms = from_nuc % 10000
-        from_nuc = (from_nuc // 10000) * 10000
         from_nuc = metastable_id(from_nuc, ms)
         ms = to_nuc % 10000
-        to_nuc = (to_nuc // 10000) * 10000
         to_nuc = metastable_id(to_nuc, ms)
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
@@ -1077,7 +1075,7 @@ def all_branch_ratio(from_nuc, to_nuc):
     br : float
         Branch ratio of this nuclide pair [fraction].
     """
-    br1 = branch_ratio(from_nuc, to_nuc, use_metastable=False)   
+    br1 = branch_ratio(from_nuc, to_nuc, use_metastable=False)
     br2 = decay_branch_ratio(from_nuc, to_nuc)[0]
     if np.isnan(br1) and not np.isnan(br2):
         return br2

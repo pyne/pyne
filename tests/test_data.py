@@ -143,6 +143,11 @@ def test_branch_ratio():
         obs = data.branch_ratio('U235', child)
         assert_true(obs >= 0.0 and obs <= 1.0)
 
+    # There was a bug with metastable ids being dropped prematurely,
+    # which would then lead to the branch ratio for the ground state being reported
+    # Obviously, this was bad, so here is a test.
+    assert_equal(data.branch_ratio('Se86', 'Br86M'), 0.0)
+
 
 def test_state_energy():
     assert_equal(data.state_energy('H1'), 0.0)
@@ -235,7 +240,7 @@ def test_gamma_energy():
 
 
 def test_gamma_energy_byen():
-    npt.assert_equal(data.gamma_energy_byen(103.5, .05), 
+    npt.assert_equal(data.gamma_energy_byen(103.5, .05),
                      [(103.5, 0.4),
                       (103.5, np.nan),
                       (103.5, 0.1),
@@ -263,11 +268,11 @@ def test_gamma_parent_child():
      (671700000, 681700000)])
 
 def test_gamma_child_byen():
-    assert_equal(data.gamma_child_byen(103.5,.1),[391020000, 521320000, 
-                 731720000, 791870000, 791870000, 832120000, 832120000, 
+    assert_equal(data.gamma_child_byen(103.5,.1),[391020000, 521320000,
+                 731720000, 791870000, 791870000, 832120000, 832120000,
                  922380000, 982500000, 801910000, 370780000, 691520000,
-                 771860000, 882210000, 922380000, 521320000, 521320000, 
-                 521320000, 741800000, 681700000, 591330000, 591330000, 
+                 771860000, 882210000, 922380000, 521320000, 521320000,
+                 521320000, 741800000, 681700000, 591330000, 591330000,
                  741800000, 792000000, 872210000, 611560000, 1002560000])
 
 def test_gamma_child_byparent():
@@ -509,7 +514,7 @@ def test_special_children():
     special_children = {451040000: set([441040000, 461040000]),
                         521270000: set([531270000])}
     for item in special_children:
-        assert_equal(set(data.decay_data_children(nucname.id_to_state_id(item))), 
+        assert_equal(set(data.decay_data_children(nucname.id_to_state_id(item))),
                      special_children[item])
 
 if __name__ == "__main__":
