@@ -866,7 +866,6 @@ def half_life(nuc, use_metastable=True):
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
-        nuc = (nuc // 10000) * 10000
         nuc = metastable_id(nuc, ms)
     if isinstance(nuc, int):
         hl = cpp_data.half_life(<int> nuc)
@@ -904,7 +903,6 @@ def decay_const(nuc, use_metastable=True):
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
-        nuc = (nuc // 10000) * 10000
         nuc = metastable_id(nuc, ms)
     if isinstance(nuc, int):
         dc = cpp_data.decay_const(<int> nuc)
@@ -990,7 +988,6 @@ def state_energy(nuc, use_metastable=True):
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
-        nuc = (nuc // 10000) * 10000
         nuc = metastable_id(nuc, ms)
     if isinstance(nuc, int):
         se = cpp_data.state_energy(<int> nuc)
@@ -1026,7 +1023,6 @@ def decay_children(nuc, use_metastable=True):
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
-        nuc = (nuc // 10000) * 10000
         nuc = metastable_id(nuc, ms)
     cdef conv._SetInt dc = conv.SetInt()
 
