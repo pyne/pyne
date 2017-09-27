@@ -17,7 +17,7 @@ jobs:
                 -DMOAB_LIBRARY=$HOME/opt/moab/lib \
                 -DMOAB_INCLUDE_DIR=$HOME/opt/moab/include
             cd ~
-            nuc_data_make
+            nuc_data_make --clean 2
 
       # Test!
       - run:
