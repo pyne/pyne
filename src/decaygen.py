@@ -82,7 +82,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   int i = 0;
   double out [{{ nucs|length }}] = {};  // init to zero
   map<int, double> outcomp;
-  
+
   // body
   map<int, double>::const_iterator it = comp.begin();
   for (; it != comp.end(); ++it) {
@@ -93,7 +93,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
         break;
     }
   }
-  
+
   // cleanup
   for (i = 0; i < {{ nucs|length }}; ++i)
     if (out[i] > 0.0)
@@ -130,11 +130,11 @@ void decay_{{ elem|lower }}(double t, std::map<int, double>::const_iterator &it,
 BREAK = '  break;'
 CHAIN_STMT = '  out[{0}] += {1};'
 CHAIN_EXPR = '(it->second) * ({0})'
-EXP_EXPR = 'exp2({a:e}*t)'
-KEXP_EXPR = '{k:e}*' + EXP_EXPR
+EXP_EXPR = 'exp2({a:.17e}*t)'
+KEXP_EXPR = '{k:.17e}*' + EXP_EXPR
 B_STMT = 'double b{b} = {exp};'
 B_EXPR = 'b{b}'
-KB_EXPR = '{k:e}*' + B_EXPR
+KB_EXPR = '{k:.17e}*' + B_EXPR
 
 
 def genfiles(nucs, short=1e-8, sf=False, dummy=False):
@@ -167,7 +167,7 @@ def genchains(chains, sf=False):
 def k_a(chain, short=1e-8):
     # gather data
     hl = np.array([half_life(n, False) for n in chain])
-    a = -1.0 / hl 
+    a = -1.0 / hl
     dc = np.array(list(map(lambda nuc: decay_const(nuc, False), chain)))
     if np.isnan(dc).any():
         # NaNs are bad, mmmkay.  Nones mean we should skip
@@ -194,7 +194,7 @@ def k_a(chain, short=1e-8):
     if gamma == 0.0 or np.isnan(gamma):
         return None, None
     k *= gamma
-    # half-life  filter, makes compiling faster by pre-ignoring negligible species 
+    # half-life  filter, makes compiling faster by pre-ignoring negligible species
     # in this chain. They'll still be picked up in their own chains.
     if ends_stable:
         mask = (hl[:-1] / hl[:-1].sum()) > short
@@ -234,7 +234,7 @@ def chainexpr(chain, cse, b, bt, short=1e-8):
         k, a = k_a(chain, short=short)
         if k is None:
             return None, b, bt
-        terms = [] 
+        terms = []
         for k_i, a_i in zip(k, a):
             if k_i == 1.0 and a_i == 0.0:
                 term = str(1.0 - bt)  # a slight optimization
@@ -243,10 +243,10 @@ def chainexpr(chain, cse, b, bt, short=1e-8):
                 if not np.isnan(k_i):
                     if bt < 1:
                         if k_i + bt < 1:
-                            term = '{0:e}'.format(k_i)  # another slight optimization 
+                            term = '{0:.17e}'.format(k_i)  # another slight optimization
                             bt += k_i
                         else:
-                            term = '{0:e}'.format(1.0 - bt)
+                            term = '{0:.17e}'.format(1.0 - bt)
                             bt = 1.0
                     else:
                         term = '0'
@@ -280,7 +280,7 @@ def gencase(nuc, idx, b, short=1e-8, sf=False):
             case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
         bstmts = ['  ' + B_STMT.format(exp=exp, b=bval) for exp, bval in \
                   sorted(cse.items(), key=lambda x: x[1])]
-        case = case[:1] + bstmts + case[1:] 
+        case = case[:1] + bstmts + case[1:]
     case.append(BREAK)
     return case, b
 
@@ -292,8 +292,8 @@ def elems(nucs):
 def gencases(nucs):
     switches = []
     for i in elems(nucs):
-        c = ['case {0}:'.format(i), 
-             '  decay_{0}(t, it, outcomp, out);'.format(nucname.name(i).lower()), 
+        c = ['case {0}:'.format(i),
+             '  decay_{0}(t, it, outcomp, out);'.format(nucname.name(i).lower()),
              '  break;']
         switches.append('\n'.join(c))
     return '\n'.join(switches)
@@ -319,33 +319,22 @@ def load_default_nucs():
         ll = f.root.decay.level_list
         stable = ll.read_where('(nuc_id%10000 == 0) & (nuc_id != 0)')
         metastable = ll.read_where('metastable > 0')
-    nucs = set(int(nuc) for nuc in stable['nuc_id']) 
-    nucs |= set(int(nuc) for nuc in metastable['nuc_id']) 
+    nucs = set(int(nuc) for nuc in stable['nuc_id'])
+    nucs |= set(int(nuc) for nuc in metastable['nuc_id'])
     nucs = sorted(nuc for nuc in nucs if not np.isnan(decay_const(nuc, False)))
     return nucs
 
 
 
 
-def upload(ns):
+def build_tarfile(ns):
     import tarfile
-    import pyrax
-    pyrax.set_setting('identity_type', 'rackspace')
-    pyrax.set_setting('region', 'ORD')
-    pyrax.set_credential_file(ns.cred)
-    cf = pyrax.cloudfiles
-    f = io.BytesIO()
-    tar = tarfile.open(fileobj=f, mode='w:gz', name='decay.tar.gz')
-    tar.add(ns.hdr)
-    tar.add(ns.src)
-    tar.close()
-    f.seek(0)
-    fdata = f.read()
-    obj = cf.store_object('pyne-data', 'decay.tar.gz', fdata)
-    cont = cf.get_container("pyne-data")
-    cont.purge_cdn_object('decay.tar.gz')
+    with tarfile.open('decay.tar.gz', 'w:gz') as tar:
+        tar.add(ns.hdr)
+        tar.add(ns.src)
 
-def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False, 
+
+def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False,
           dummy=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
     h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
@@ -359,33 +348,32 @@ def main():
     parser = ArgumentParser('decay-gen')
     parser.add_argument('--hdr', default='decay.h', help='The header file name.')
     parser.add_argument('--src', default='decay.cpp', help='The source file name.')
-    parser.add_argument('--nucs', nargs='+', default=None, 
+    parser.add_argument('--nucs', nargs='+', default=None,
                         help='Nuclides to generate for.')
     parser.add_argument('--dummy', action='store_true', default=False,
                         dest='dummy', help='Makes dummy versions as '
                         'compile-time fallbacks.')
-    parser.add_argument('--no-dummy', action='store_false', default=False, 
+    parser.add_argument('--no-dummy', action='store_false', default=False,
                         dest='dummy', help='Makes regular files.')
     parser.add_argument('--filter-short', default=1e-8, type=float, dest='short',
                         help='Fraction of sum of all half-lives below which a '
                              'nuclide is filtered from a decay chain, default 1e-8.')
-    parser.add_argument('--spontaneous-fission', default=False, action='store_true', 
+    parser.add_argument('--spontaneous-fission', default=False, action='store_true',
                         dest='sf', help='Includes spontaneous fission decay chains, '
                                         'default False.')
-    parser.add_argument('--upload', action='store_true', default=False, 
-                        help='Uploads decay.tar.gz file to http://data.pyne.io, '
-                             'must have local credentials file.')
-    parser.add_argument('--cred', default='../rs.cred', 
+    parser.add_argument('--tar', action='store_true', default=False,
+                        help='Builds decay.tar.gz')
+    parser.add_argument('--cred', default='../rs.cred',
                         help='Path to credentials file.')
     parser.add_argument('--no-build', dest='build', default=True, action='store_false',
                        help='Does not build the source code.')
     ns = parser.parse_args()
     if ns.build:
-        build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf, 
+        build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf,
               dummy=ns.dummy)
-    if ns.upload:
-        print("uploading to rackspace...")
-        upload(ns)
+    if ns.tar:
+        print("building decay.tar.gz ...")
+        build_tarfile(ns)
 
 
 if __name__ == '__main__':
