@@ -1507,7 +1507,7 @@ std::set<int> pyne::decay_children(int nuc) {
   for (; it != part.end(); ++it) {
     switch (*it) {
       case 36125: {
-        // internal conversion, rx == 'it'
+        // internal transition, rx == 'it'
         result.insert((nuc /10000) * 10000);
         break;
       }
@@ -1639,8 +1639,8 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
     if ((part1[i] == 36125) &&
         (groundstate(from_to.first) == groundstate(from_to.second)) &&
         (from_to.second % 10000 == 0)) {
-      // internal conversion, rx == 'it'
-      result = 1.0;
+      // internal transition, rx == 'it', 36125
+      result = part2[i] * 0.01;
       break;
     } else if (part1[i] == 36565 || part1[i] == 1794828612) {
       // spontaneous fission, rx == 'sf', 36565

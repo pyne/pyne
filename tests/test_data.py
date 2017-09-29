@@ -148,6 +148,9 @@ def test_branch_ratio():
     # Obviously, this was bad, so here is a test.
     assert_equal(data.branch_ratio('Se86', 'Br86M'), 0.0)
 
+    # Not all isomeric transitions have a 100% branch ratio
+    assert_equal(data.branch_ratio(932400001, 932400000), 0.0012)
+
 
 def test_state_energy():
     assert_equal(data.state_energy('H1'), 0.0)
