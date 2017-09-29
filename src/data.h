@@ -416,7 +416,8 @@ namespace pyne
   /// \brief Returns the nuc_id of a metastable state
   ///
   /// This function looks through the level map for a given input nuc_id to find the
-  /// nuc_id corresponding to the level
+  /// nuc_id corresponding to the level, -1 is returned if a metastable state is not
+  /// found.
   int metastable_id(int nuc, int m);
   /// Assumes the first metastable state is the desired one
   int metastable_id(int nuc);
