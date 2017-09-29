@@ -583,7 +583,8 @@ namespace nucname
   /// \name State Map functions
   /// \{
   /// These convert from/to decay state ids (used in decay data)
-  /// to metastable ids (the PyNE default)
+  /// to metastable ids (the PyNE default). If the cooresponding value cannot
+  /// be found, -1 is returned.
   void _load_state_map();
   int state_id_to_id(int state);
   int id_to_state_id(int nuc_id);
