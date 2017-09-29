@@ -1476,14 +1476,14 @@ int pyne::metastable_id(int nuc, int m) {
 
   nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0.0));
   nuc_upper = level_data_lvl_map.upper_bound(std::make_pair(nostate+9999,
-  DBL_MAX));
+                                                            DBL_MAX));
   for (std::map<std::pair<int, double>, level_data>::iterator it=nuc_lower;
   it!=nuc_upper; ++it) {
     if (it->second.metastable == m)
         return it->second.nuc_id;
   }
 
-  return nuc;
+  return -1;
 }
 
 int pyne::metastable_id(int nuc) {
