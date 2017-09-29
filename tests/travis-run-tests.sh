@@ -14,9 +14,9 @@ for x in $(ls test*.py */test*.py); do
   echo "Testing $x:" 
   echo 
   if [ $x == "ensdf_processing.py" ]; then
-    test_command test_ensdf_processing.py --process-timeout=120
+    $test_command test_ensdf_processing.py --process-timeout=120
   else
-    test_command "$x"
+    $test_command "$x"
   fi
   status=$?
   if [ $status -ne 0 ]; then 
