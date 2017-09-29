@@ -24,7 +24,7 @@ jobs:
           name: Running PyNE Tests
           command: |
             cd ~/repo/tests
-            nosetests3
+            travis-run-tests.sh python3
 
   build_py2:
     docker:
@@ -50,7 +50,7 @@ jobs:
           name: Running PyNE Tests
           command: |
             cd ~/repo/tests
-            nosetests
+            travis-run-tests.sh python2
 
 
 workflows:
