@@ -1,11 +1,11 @@
 #!/bin/bash
 
 if [ $1 == "python2" ] ; then
-    test_command = "nosetests"
+    test_command="nosetests"
 elif [ $1 == "python3" ] ; then
-    test_command = "nosetests3"
+    test_command="nosetests3"
 else 
-    test_command = "no_test_command"
+    test_command="no_test_command"
 fi
      
 for x in $(ls test*.py */test*.py); do 
