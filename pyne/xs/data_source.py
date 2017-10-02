@@ -123,6 +123,7 @@ class DataSource(object):
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
                             else np.asarray(src_phi_g)
         self.atom_dens = {}
+        self.slf_shld_wgts = {}
 
     @property
     def src_group_struct(self):
@@ -222,6 +223,32 @@ class DataSource(object):
                                                         src_phi_g, dst_phi_g,
                                                         self._src_to_dst_matrix)
         return dst_sigma
+
+
+    def shield_weights(self, num_dens, temp):
+        """Builds the weights used during the self shielding calculations. 
+        Parameters
+        ----------
+        mat : array of floats.  
+            A map of the number densities of each of the nuclides of the material for 
+            which self-shielding is being calculated. 
+        data_source: pyne data_source
+            Contains the cross section information for the isotopes in the material 
+            that is experiencing the self shielding. 
+        """
+        reactions = {}
+        for i in num_dens:
+            rx = self.reaction(i, 'total', temp)
+            reactions[i] = 0.0 if rx is None else rx
+        weights = {}
+        for i in num_dens:
+            weights[i] = 0.0
+            for j in reactions:
+                if j != i:
+                    weights[i] += num_dens[j]*reactions[j]
+            weights[i] = 1.0/(weights[i]/num_dens[i] + reactions[i])
+        self.slf_shld_wgts = weights
+
 
     # Mix-in methods to implement
     @property
