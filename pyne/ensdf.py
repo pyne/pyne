@@ -799,22 +799,22 @@ def _adjust_ge100_branches(levellist):
     """
     n = len(levellist)
     brsum = defaultdict(float)
-    bridx = {}
+    bridx = defaultdict(lambda: (-1, -1.0))
     baddies = []
     for i, (nuc, rx, hl, lvl, br, ms, sp) in enumerate(levellist):
         if rx == 0:
             continue
-        if br >= 100.0:
+        if br >= bridx[nuc][1]:
             bridx[nuc] = (i, br)
-        else:
-            brsum[nuc] += br
+        brsum[nuc] += br
         nucrx = (nuc, rx)
         if nucrx in _BAD_RX:
             baddies.append(i)
     # adjust branch ratios
     for nuc, (i, br) in bridx.items():
         row = levellist[i]
-        new_br = br - brsum[nuc]
+        # this line ensures that all branches sum to 100.0 within floating point
+        new_br = 100.0 - brsum[nuc] + br
         new_row = row[:4] + (new_br,) + row[5:]
         levellist[i] = new_row
     # remove bad reaction rows
