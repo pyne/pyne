@@ -161,7 +161,7 @@ def phi_g(E_g, E_n, phi_n):
     return phi_g
 
 
-def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None):
+def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None, weights=None):
     """Calculates the group cross-sections for a nuclide for a new, lower resolution
     group structure using a higher fidelity flux.  Note that g indexes G, n indexes N, 
     and G < N.  
@@ -200,17 +200,26 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
     if (phi_g is not None) and (partial_energies is not None):
         pem = partial_energies
     elif (phi_g is None) and (partial_energies is not None):
-        pem = partial_energies
-        phi_g = np.dot(pem, phi_n)
+        pem = partial_energies        
+        if weights is None:
+           phi_g = np.dot(pem, phi_n)
+        else:
+           phi_g = np.dot(pem, phi_n * weights)
     elif (E_g is not None) and (E_n is not None):
         pem =  partial_energy_matrix(E_g, E_n)
-        phi_g = np.dot(pem, phi_n)
+        if weights is None:
+           phi_g = np.dot(pem, phi_n)
+        else:
+           phi_g = np.dot(pem, phi_n * weights)
     else:
         msg = "Either partial_energies or E_g and E_n must both not be None."
         raise ValueError(msg)
 
     # Calulate partial group collapse
-    sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    if weights is None:
+        sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    else:
+        sigma_g = np.dot(pem, sigma_n * phi_n * weights) / phi_g
     sigma_g[np.isnan(sigma_g)] = 0.0  # handle zero flux that causes NaNs later.
     return sigma_g
 

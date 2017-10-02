@@ -307,6 +307,12 @@ def test_phi_g7():
     # Floating point error here requires 'alomst' equal
     assert_array_almost_equal(observed, expected)
 
+def test_number_density1():
+    mat = {922350:0.5, 922380: 0.5)
+    density = 1.0
+    a_mass = 6.0221409
+    U238D = number_density(mat, density, a_mass)[922380]
+    assert_array_almost_equal(5.E22, U238D)
 
 def test_group_collapse1():
     E_g = np.array([0.0, 4.0, 8.0])
@@ -330,7 +336,17 @@ def test_group_collapse1():
     # bad call
     assert_raises(ValueError, group_collapse, sigma_n, phi_n)
 
+def test_wgt_group_collapse1():
+    E_g = np.array([0.0, 4.0, 8.0])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
 
+    phi_n = np.array([0.0, 2.0, 1.0, 0.5])
+    sigma_n = np.array([1.0, 2.0, 3.0, 4.0])
+    wgts = np.arrray([0.00001, 0.00001, 0.00001, 0.00001])
+    
+    observed = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n, wgts=wgts)
+    expected = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n)
+    assert_array_almost_equal(observed, expected)
 
 #
 # Test physical models
