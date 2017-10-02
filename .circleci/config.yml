@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: pyne/pyne_ubuntu_17.04:latest
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Build!
+      - run:
+          name: Building PyNE
+          command: |
+            python3 setup.py install --user \
+                -DMOAB_LIBRARY=$HOME/opt/moab/lib \
+                -DMOAB_INCLUDE_DIR=$HOME/opt/moab/include
+            cd ~
+            nuc_data_make
+
+      # Test!
+      - run:
+          name: Running PyNE Tests
+          command: |
+            cd ~/repo/tests
+            nosetests3
+

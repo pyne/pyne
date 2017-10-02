@@ -1,0 +1,18 @@
+#
+# Runs setup.py install
+#
+set(PYTHON_EXECUTABLE @PYTHON_EXECUTABLE@)
+message("############### Begin Python Install ###############")
+message("-- Python installer:")
+message("  PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
+message("  CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+message("  CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+execute_process(COMMAND ${PYTHON_EXECUTABLE} setup_sub.py install
+                        "--prefix=${CMAKE_INSTALL_PREFIX}"
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                RESULT_VARIABLE res_var)
+if(NOT "${res_var}" STREQUAL "0")
+  message(FATAL_ERROR "Process setup_sub.py install failed, "
+                      "res_var = '${res_var}'")
+endif()
+message("###############  End Python Install  ###############")

@@ -44,14 +44,14 @@ namespace pyne
   #endif
 
 
-  // These 37 strings are predefined FLUKA materials. 
-  // Materials not on this list requires a MATERIAL card. 
+  // These 37 strings are predefined FLUKA materials.
+  // Materials not on this list requires a MATERIAL card.
   static std::string fluka_mat_strings[] = {
-   "BLCKHOLE", "VACUUM",   "HYDROGEN", "HELIUM",   "BERYLLIU", "CARBON", 
-   "NITROGEN", "OXYGEN",   "MAGNESIU", "ALUMINUM", "IRON",     "COPPER", 
-   "SILVER",   "SILICON",  "GOLD",     "MERCURY",  "LEAD",     "TANTALUM", 
-   "SODIUM",   "ARGON",    "CALCIUM",  "TIN",      "TUNGSTEN", "TITANIUM", 
-   "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP", 
+   "BLCKHOLE", "VACUUM",   "HYDROGEN", "HELIUM",   "BERYLLIU", "CARBON",
+   "NITROGEN", "OXYGEN",   "MAGNESIU", "ALUMINUM", "IRON",     "COPPER",
+   "SILVER",   "SILICON",  "GOLD",     "MERCURY",  "LEAD",     "TANTALUM",
+   "SODIUM",   "ARGON",    "CALCIUM",  "TIN",      "TUNGSTEN", "TITANIUM",
+   "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP",
    "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON", "POLYETHY", "AIR"
   };
 
@@ -167,7 +167,7 @@ namespace pyne
 
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
-    /// 
+    ///
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id, std::string frac_type = "mass");
     /// Convenience function to tell whether a given name needs a material card
@@ -175,10 +175,10 @@ namespace pyne
     /// High level call to get details and call material_component(..)
     std::string fluka_material_str(int id);
     /// Intermediate level call to prepare final info and call material_line(..)
-    std::string fluka_material_component(int fid, int nucid, 
+    std::string fluka_material_component(int fid, int nucid,
                                          std::string fluka_name);
     /// Format information into a FLUKA material card
-    std::string fluka_material_line(int znum, double atomic_mass, 
+    std::string fluka_material_line(int znum, double atomic_mass,
                               int fid, std::string fluka_name);
     /// Convenience function to format a single fluka field
     std::string fluka_format_field(float field);
@@ -230,11 +230,11 @@ namespace pyne
     /// guess value calculated from the normailized composition is used here.
     double molecular_mass(double apm=-1.0);
     /// Calculates the activity of a material based on the composition and each
-    /// nuclide's mass, decay_const, and atmoic_mass. 
+    /// nuclide's mass, decay_const, and atmoic_mass.
     comp_map activity();
     /// Calculates the decay heat of a material based on the composition and
     /// each nuclide's mass, q_val, decay_const, and atomic_mass. This assumes
-    /// input mass of grams. Return values is in megawatts. 
+    /// input mass of grams. Return values is in megawatts.
     comp_map decay_heat();
     /// Caclulates the dose per gram using the composition of the the
     /// material, the dose type desired, and the source for dose factors
@@ -243,7 +243,7 @@ namespace pyne
     ///     ext_soil -- returns mrem/h per g per m^2
     ///     ingest -- returns mrem per g
     ///     inhale -- returns mrem per g
-    ///   source is: 
+    ///   source is:
     ///     {EPA=0, DOE=1, GENII=2}, default is EPA
     comp_map dose_per_g(std::string dose_type, int source=0);
     /// Returns a copy of the current material where all natural elements in the
@@ -319,7 +319,7 @@ namespace pyne
     /// Sets the composition, mass, and atoms_per_molecule of this material to those
     /// calculated from \a atom_fracs, a mapping of nuclides to atom fractions values.
     void from_atom_frac(std::map<int, double> atom_fracs);
-    
+
     /// Returns a mapping of the nuclides in this material to their atom densities.
     /// This calculation is based off of the material's density.
     std::map<int, double> to_atom_dens();
@@ -341,6 +341,12 @@ namespace pyne
 
     /// Decays this material for a given amount of time in seconds
     Material decay(double t);
+
+    /// Transmutes the material via the CRAM method.
+    /// \param A The transmutation matrix [unitless]
+    /// \param order The CRAM approximation order (default 14).
+    /// \return A new material which has been transmuted.
+    Material cram(std::vector<double> A, const int order=14);
 
     // Overloaded Operators
     /// Adds mass to a material instance.

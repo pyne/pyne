@@ -1,73 +1,74 @@
-import nose
+"""CRAM Tests"""
 import numpy as np
-from nose.plugins.skip import Skip, SkipTest
-from numpy.testing import assert_almost_equal
-from pyne import nucname, alara, data, material
+import scipy.sparse as sp
+import scipy.sparse.linalg as spla
 
-def test_cram14():
-    test_nuclides = ['H3', 'C14', 'V50', 'Rb87', 'In115', 'Sr90', 'Te123', 'Te130', 'I131', 'Cs137', 'La138', 'Nd144', 'Sm147', 'Lu176', 'Re187', 'Os186']
-    error14 = []
-    for species in test_nuclides:
-        nuclides = [nucname.id(species)]
+from nose.tools import assert_true
 
-        children = data.decay_children(species)
-        children = list(children)
-        while children:
-            nuclides += children
-            parent = children[0]
-            children = data.decay_children(parent)
-            children = list(children)
+from pyne import cram
 
-        nuclides = sorted(nuclides)
-        half_life = data.half_life(species) # Half life of species
+DTYPES = ['f8', np.complex128]
 
-        n_0 = np.zeros(len(nuclides))
-        position = nuclides.index(nucname.id(species))
-        n_0[position] = 1 # Set initial amount of material
 
-        # Compute CRAM 14 Solution
-        cram14 = alara.cram(nuclides, half_life, n_0, 14)
+def test_solve_identity_ones():
+    for dtype in DTYPES:
+        b = np.ones(cram.N, dtype=dtype)
+        mat = sp.eye(cram.N, format='csr', dtype=dtype)
+        obs = cram.solve(mat, b)
+        exp = spla.spsolve(mat, b)
+        yield assert_true, np.allclose(exp, obs)
 
-        # Compute PyNE decay solution
-        initial = material.Material({species: 1.0})
-        final = initial.decay(half_life)
-        pdecay = list(final.values())
-        error_14 = np.abs(cram14 - pdecay)*2 / (cram14 + pdecay)
-        error14.append(np.mean(error_14))
 
-    assert_almost_equal(np.mean(error14), 0, 2)
+def test_solve_identity_range():
+    for dtype in DTYPES:
+        b = np.arange(cram.N, dtype=dtype)
+        mat = sp.eye(cram.N, format='csr', dtype=dtype)
+        obs = cram.solve(mat, b)
+        exp = spla.spsolve(mat, b)
+        yield assert_true, np.allclose(exp, obs)
 
-def test_cram16():
-    test_nuclides = ['H3', 'C14', 'V50', 'Rb87', 'In115', 'Sr90', 'Te123', 'Te130', 'I131', 'Cs137', 'La138', 'Nd144', 'Sm147', 'Lu176', 'Re187', 'Os186']
-    error16 = []
-    for species in test_nuclides:
-        nuclides = [nucname.id(species)]
 
-        children = data.decay_children(species)
-        children = list(children)
-        while children:
-            nuclides += children
-            parent = children[0]
-            children = data.decay_children(parent)
-            children = list(children)
+def test_solve_ones_ones():
+    for dtype in DTYPES:
+        b = np.ones(cram.N, dtype=dtype)
+        mat = cram.ones(dtype=dtype) + 9*sp.eye(cram.N, format='csr', dtype=dtype)
+        obs = cram.solve(mat, b)
+        exp = spla.spsolve(mat, b)
+        yield assert_true, np.allclose(exp, obs)
 
-        nuclides = sorted(nuclides)
-        half_life = data.half_life(species) # Half life of species
 
-        n_0 = np.zeros(len(nuclides))
-        position = nuclides.index(nucname.id(species))
-        n_0[position] = 1 # Set initial amount of material
+def test_solve_ones_range():
+    for dtype in DTYPES:
+        b = np.arange(cram.N, dtype=dtype)
+        mat = cram.ones(dtype=dtype) + 9*sp.eye(cram.N, format='csr', dtype=dtype)
+        obs = cram.solve(mat, b)
+        exp = spla.spsolve(mat, b)
+        yield assert_true, np.allclose(exp, obs)
 
-        # Compute CRAM 16 Solution
-        cram16 = alara.cram(nuclides, half_life, n_0, 14)
 
-        # Compute PyNE decay solution
-        initial = material.Material({species: 1.0})
-        final = initial.decay(half_life)
-        pdecay = list(final.values())
+def test_solve_range_range():
+    for dtype in DTYPES:
+        b = np.arange(cram.N, dtype=dtype)
+        mat = cram.ones(dtype=dtype) + sp.diags([b], offsets=[0], shape=(cram.N, cram.N),
+                                                format='csr', dtype=dtype)
+        obs = cram.solve(mat, b)
+        exp = spla.spsolve(mat, b)
+        yield assert_true, np.allclose(exp, obs)
 
-        error_16 = np.abs(cram16 - pdecay)*2 / (cram16 + pdecay)
-        error16.append(np.mean(error_16))
 
-    assert_almost_equal(np.mean(error16), 0, 2)
+def test_diag_add():
+    for dtype in DTYPES:
+        mat = cram.ones(dtype=dtype)
+        res = mat + 9*sp.eye(cram.N, format='csr', dtype=dtype)
+        exp = cram.flatten_sparse_matrix(res)
+        obs = cram.diag_add(mat, 9.0)
+        yield assert_true, np.allclose(exp, obs)
 
+
+def test_dot():
+    for dtype in DTYPES:
+        x = np.arange(cram.N, dtype=dtype)
+        mat = cram.ones(dtype=dtype) + 9*sp.eye(cram.N, format='csr', dtype=dtype)
+        exp = mat.dot(x)
+        obs = cram.dot(mat, x)
+        yield assert_true, np.allclose(exp, obs)

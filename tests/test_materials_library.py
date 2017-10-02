@@ -56,7 +56,7 @@ def test_grab_materials_compendium():
 def test_against_nuc_data():
     nuc_data = pyne_conf.NUC_DATA_PATH
     if not os.path.isfile(nuc_data):
-        raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
+        raise RuntimeError("Tests require nuc_data.h5. Please run nuc_data_make.")
     obs_matslib = MaterialLibrary(nuc_data,
                                   datapath="/material_library/materials",
                                   nucpath="/material_library/nucid")

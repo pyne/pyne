@@ -33,8 +33,8 @@ cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
 cimport cpp_jsoncpp
-cimport jsoncpp
-import jsoncpp
+cimport pyne.jsoncpp as jsoncpp
+import pyne.jsoncpp as jsoncpp
 
 cimport pyne.nucname as nucname
 import pyne.nucname as nucname
@@ -351,7 +351,7 @@ cdef class _Material:
         Return a fluka material record if there is only one component,
         otherwise return the compound material record and the fluka
         compound record
-        Parameters 
+        Parameters
         ----------
  	   The sequential material id starting from 26 unless predefined
         """
@@ -362,19 +362,19 @@ cdef class _Material:
     def not_fluka_builtin(self, fluka_name):
         """not_fluka_builtin()
         Return whether a string is in the fluka built-in list
-        Parameters 
+        Parameters
         ----------
  	   A string representing a FLUKA material name
         """
         cdef cpp_bool card
         card = self.mat_pointer.not_fluka_builtin(fluka_name)
         return card
-        
+
     def fluka_material_str(self, id):
         """fluka_material_str()
-        Return the FLUKA MATERIAL record with the given id. 
+        Return the FLUKA MATERIAL record with the given id.
         A single-component material is expected
-        Parameters 
+        Parameters
         ----------
  	   The sequential material id starting from 26 unless predefined
         """
@@ -384,10 +384,10 @@ cdef class _Material:
 
     def fluka_material_component(self, id, nucid, fluka_name):
         """fluka_material_component()
-        Return the FLUKA MATERIAL record with the given id, nucid and name. 
-        Parameters 
+        Return the FLUKA MATERIAL record with the given id, nucid and name.
+        Parameters
         ----------
- 	   The sequential material id, the (single) nucid, and the fluka name 
+ 	   The sequential material id, the (single) nucid, and the fluka name
         """
         cdef std_string card
         card = self.mat_pointer.fluka_material_component(id, nucid, fluka_name)
@@ -395,11 +395,11 @@ cdef class _Material:
 
     def fluka_material_line(self, znum, mass, id, name):
         """fluka_material_line()
-        Return the FLUKA MATERIAL record with the given znum, atomic mass, id, 
+        Return the FLUKA MATERIAL record with the given znum, atomic mass, id,
         and fluka name
-        Parameters 
+        Parameters
         ----------
- 	   The znum, atomic mass, material id, and the fluka name 
+ 	   The znum, atomic mass, material id, and the fluka name
         """
         cdef std_string card
         card = self.mat_pointer.fluka_material_line(znum, mass, id, name)
@@ -408,7 +408,7 @@ cdef class _Material:
     def fluka_format_field(self, field):
         """fluka_format_field()
         Return a string for a single field in the FLUKA MATERIAL record
-        Parameters 
+        Parameters
         ----------
  	   The field value
         """
@@ -418,9 +418,9 @@ cdef class _Material:
 
     def fluka_compound_str(self, id, frac_type='mass'):
         """fluka_compound_str()
-        Return the FLUKA MATERIAL record for the compound, and the 
+        Return the FLUKA MATERIAL record for the compound, and the
 	FLUKA COMPOUND record for the components
-        Parameters 
+        Parameters
         ----------
  	   The sequential compound id starting from 26 unless predefined
         """
@@ -687,7 +687,7 @@ cdef class _Material:
 
     def collapse_elements(self, nucset):
         """collapse_elements(self, nucset)
-        Collapses the elements in the material, excluding the nucids in 
+        Collapses the elements in the material, excluding the nucids in
 	the set nucset. This function returns a copy of the material.
 
         Returns
@@ -1186,8 +1186,8 @@ cdef class _Material:
         cdef conv._MapIntDouble comp_proxy = conv.MapIntDouble()
         comp_proxy.map_ptr = new cpp_map[int, double](self.mat_pointer.to_atom_dens())
         return comp_proxy
-        
-        
+
+
     #
     # Radioactive Properties
     #
@@ -1243,7 +1243,32 @@ cdef class _Material:
         pymat.mat_pointer[0] = self.mat_pointer.decay(t)
         return pymat
 
-    
+    def cram(self, A, int order=14):
+        """Transmutes the material via the CRAM method.
+
+        Parameters
+        ----------
+        A : 1D array-like
+            The transmutation matrix [unitless]
+        order : int, optional
+            The CRAM approximation order (default 14).
+
+        Returns
+        -------
+        A new material which has been transmuted.
+        """
+        A = np.asarray(A, dtype=np.float64)
+        cdef int Alen = len(A)
+        cdef double* Aptr = <double*> np.PyArray_DATA(A)
+        cdef cpp_vector[double] cpp_A = cpp_vector[double]()
+        cpp_A.reserve(Alen)
+        cpp_A.assign(Aptr, Aptr + Alen)
+        # transmute and return
+        cdef _Material pymat = Material()
+        pymat.mat_pointer[0] = self.mat_pointer.cram(cpp_A, order)
+        return pymat
+
+
     #
     # Operator Overloads
     #

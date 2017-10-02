@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import sys
 
 from pyne.mesh import Mesh, IMeshTag
 
@@ -18,7 +19,18 @@ def main():
                               "be seperated by commas without spaces.\n"))
     args = parser.parse_args()
 
-    m = Mesh(structured=True, mesh=args.mesh_file)
+    try:
+        from itaps import iMesh, iBase, iMeshExtensions
+    except ImportError:
+        warn("the PyTAPS optional dependency could not be imported. "
+             "Some aspects of the mesh module may be incomplete.", QAWarning)
+    
+    try:
+        m = Mesh(structured=True, mesh=args.mesh_file)
+    except iBase.TagNotFoundError:
+        sys.stderr.write('Structured mesh not found\n \
+                          trying unstructured mesh \n')
+        m = Mesh(structured=False, mesh=args.mesh_file)
 
     if args.tags is not None:
         tags = args.tags.split(',')
@@ -30,7 +42,14 @@ def main():
 
     for tag in tags:
        m.tag = IMeshTag(name=tag)
-       m.tag.size = len(m.tag[0])
+       # there may be vector tags
+       try:
+           # this line fails if the tag is a scalar tag
+           m.tag.size = len(m.tag[0])
+       except TypeError:
+           sys.stderr.write('Vector tag not found, assuming scalar tag \n')
+           m.tag.size = 1
+           
        if m.tag.size > 1:
            print("Expanding tag: {}".format(tag))
            m.tag.expand()
