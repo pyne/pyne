@@ -43,6 +43,13 @@ _detector_pattern = r"(DET\w+)\s*=\s*np.array\("
 
 _detector_pattern_all = r"(DET\w+)\s*=\s*"
 
+_imaterial_line_pattern = r"(i[a-zA-Z]\w+)\s*=\s*\d*;"
+
+def _delete_imaterial(s):
+    """"Remove imaterial information from the top of Serpent2 *_dep.m file started from 'i' with nothing."""
+    s = re.sub(_imaterial_line_pattern,
+               '', s)
+    return s
 
 def _replace_comments(s):
     """Replaces matlab comments with python arrays in string s."""
@@ -206,12 +213,15 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     else:
         f = depfile.read()
 
+    # Remove imaterial information from the top of Serpent2 *_dep.m file
+    f = _delete_imaterial(f)
+    
     # Keep comments around
     f = _replace_comments(f)
 
     # Replace matlab Arrays
     f = _replace_arrays(f)
-
+    
     # Now to find and convert arrays that have comments in them
     comment_arrays = re.findall("(" + _comment_array_pattern + ")", f)
     for ca in comment_arrays:

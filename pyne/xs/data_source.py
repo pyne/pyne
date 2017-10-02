@@ -29,7 +29,7 @@ from pyne import endf
 from pyne import bins
 from pyne import ace
 from pyne.data import MeV_per_K
-from pyne.xs.models import partial_energy_matrix, group_collapse
+from pyne.xs.models import partial_energy_matrix, group_collapse, same_arr_or_none
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -221,8 +221,7 @@ class DataSource(object):
         src_sigma = self.reaction(nuc, rx, temp)
         dst_sigma = None if src_sigma is None else group_collapse(src_sigma,
                                                         src_phi_g, dst_phi_g,
-                                                        self._src_to_dst_matrix, 
-                                                        weights=self.slf_shld_wgts[nuc])
+                                                        self._src_to_dst_matrix)
         return dst_sigma
 
     def shield_weights(self, num_dens, temp):
@@ -498,14 +497,14 @@ class CinderDataSource(DataSource):
 
     def _load_group_structure(self):
         """Loads the cinder energy bounds array, E_g, from nuc_data."""
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.cinder_xs.E_g)
         self.src_group_struct = E_g
 
     @property
     def exists(self):
         if self._exists is None:
-            with tb.openFile(nuc_data, 'r') as f:
+            with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/cinder_xs' in f)
         return self._exists
 
@@ -528,7 +527,7 @@ class CinderDataSource(DataSource):
             return None
 
         # read & collapse data
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.cinder_xs.fission if rx == fissrx else \
                    f.root.neutron.cinder_xs.absorption
             rows = [np.array(row['xs']) for row in node.where(cond)]
@@ -627,14 +626,14 @@ class EAFDataSource(DataSource):
 
     def _load_group_structure(self):
         """Loads the EAF energy bounds array, E_g, from nuc_data."""
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             E_g = np.array(f.root.neutron.eaf_xs.E_g)
         self.src_group_struct = E_g
 
     @property
     def exists(self):
         if self._exists is None:
-            with tb.openFile(nuc_data, 'r') as f:
+            with tb.open_file(nuc_data, 'r') as f:
                 self._exists = ('/neutron/eaf_xs' in f)
         return self._exists
 
@@ -669,9 +668,9 @@ class EAFDataSource(DataSource):
             return None
 
         # Grab data
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
-            rows = node.readWhere(cond)
+            rows = node.read_where(cond)
             #rows = [np.array(row['xs']) for row in node.where(cond)]
 
         if len(rows) == 0:
@@ -703,7 +702,7 @@ class EAFDataSource(DataSource):
         rxcache = self.rxcache
         avail_rx = self._avail_rx
         absrx = rxname.id('absorption')
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             node = f.root.neutron.eaf_xs.eaf_xs
             for row in node:
                 nuc = row['nuc_zz']
@@ -898,7 +897,7 @@ class ENDFDataSource(DataSource):
         Returns
         -------
         sigma * dE : float
-            Non-normalized integral. 
+            Non-normalized integral.
 
         """
         dE = high - low
@@ -907,10 +906,10 @@ class ENDFDataSource(DataSource):
 
 
 class OpenMCDataSource(DataSource):
-    """Data source for ACE data that is listed in an OpenMC cross_sections.xml 
+    """Data source for ACE data that is listed in an OpenMC cross_sections.xml
     file. This data source discretizes the reactions to a given group
     stucture when the reactions are loaded in. Reseting this source group
-    structure will clear the reaction cache. 
+    structure will clear the reaction cache.
     """
 
     self_shield_reactions = {rxname.id('fission'), rxname.id('gamma'), rxname.id('total')}
@@ -921,7 +920,7 @@ class OpenMCDataSource(DataSource):
         cross_sections : openmc.CrossSections or string or file-like, optional
             Path or file to OpenMC cross_sections.xml
         src_group_struct : array-like, optional
-            The group structure to discretize the ACE data to, defaults to 
+            The group structure to discretize the ACE data to, defaults to
             ``np.logspace(1, -9, 101)``.
         kwargs : optional
             Keyword arguments to be sent to DataSource base class.
@@ -943,11 +942,11 @@ class OpenMCDataSource(DataSource):
 
     def _load_group_structure(self):
         if self._src_group_struct is None:
-            self._src_group_struct = np.logspace(1, -9, 101) 
+            self._src_group_struct = np.logspace(1, -9, 101)
         self.src_group_struct = self._src_group_struct
 
-    def _load_reaction(self, nuc, rx, temp=300.0):
-        """Loads reaction data from ACE files indexed by OpenMC.
+    def pointwise(self, nuc, rx, temp=300.0):
+        """Returns pointwise reaction data from ACE files indexed by OpenMC.
 
         Parameters
         ----------
@@ -975,7 +974,7 @@ class OpenMCDataSource(DataSource):
         absrx = rxname.id('absorption')
         ace_tables = self._rank_ace_tables(nuc, temp=temp)
         lib = ntab = None
-        for atab in ace_tables: 
+        for atab in ace_tables:
             if os.path.isfile(atab.abspath or atab.path):
                 if atab not in self.libs:
                     lib = self.libs[atab] = ace.Library(atab.abspath or atab.path)
@@ -1005,8 +1004,95 @@ class OpenMCDataSource(DataSource):
            (E_g[0] >= E_g[-1] and E_points[-1] >= E_points[0]):
             E_points = E_points[::-1]
             rawdata = rawdata[::-1]
-        rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata) 
+        return E_points, rawdata
+
+    def _load_reaction(self, nuc, rx, temp=300.0):
+        """Loads reaction data from ACE files indexed by OpenMC.
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide id.
+        rx : int
+            Reaction id.
+        temp : float, optional
+            The nuclide temperature in [K].
+        """
+        rtn = self.pointwise(nuc, rx, temp=temp)
+        if rtn is None:
+            return
+        E_points, rawdata = rtn
+        E_g = self.src_group_struct
+        if self.atom_dens.get(nuc, 0.0) > 1.0E19 and rx in self.self_shield_reactions:
+            rxdata = self.self_shield(nuc, rx, temp, E_points, rawdata)
+        else:
+            rxdata = bins.pointwise_linear_collapse(E_g, E_points, rawdata)
         return rxdata
+
+    def self_shield(self, nuc, rx, temp, E_points, xs_points):
+        """Calculates the self shielded cross section for a given nuclide
+        and reaction. This calculation uses the Bonderanko method.
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide id.
+        rx : int
+            Reaction id.
+        temp : float, optional
+            The nuclide temperature in [K].
+        E_points : array like
+            The point wise energies.
+        xs_points : array like
+            Point wise cross sections
+
+        Returns
+        -------
+        rxdata : array like
+            collapsed self shielded cross section for nuclide nuc and reaction
+            rx
+        """
+        sigb = self.bkg_xs(nuc, temp=temp)
+        e_n = self.src_group_struct
+        sig_b = np.ones(len(E_points), 'f8')
+        for n in range(len(sigb)):
+            sig_b[(e_n[n] <= E_points) & (E_points <= e_n[n+1])] = sigb[n]
+        rtn = self.pointwise(nuc, 'total', temp)
+        if rtn is None:
+            sig_t = 0.0
+        else:
+            sig_t = rtn[1]
+        numer = bins.pointwise_linear_collapse(self.src_group_struct,
+            E_points, xs_points/(E_points*(sig_b + sig_t)))
+        denom = bins.pointwise_linear_collapse(self.src_group_struct,
+            E_points, 1.0/(E_points*(sig_b + sig_t)))
+        return numer/denom
+
+    def bkg_xs(self, nuc, temp=300):
+        """Calculates the background cross section for a nuclide (nuc)
+
+        Parameters
+        ----------
+        nuc : int
+            Nuclide id.
+        temp : float, optional
+            The nuclide temperature in [K].
+
+        Returns
+        -------
+        sig_b : array like
+            Group wise background cross sections.
+        """
+        e_n = self.src_group_struct
+        sig_b = np.zeros(self.src_ngroups, float)
+        for i, a in self.atom_dens.items():
+            if i == nuc:
+                continue
+            rtn = self.pointwise(i, 'total', temp)
+            if rtn is None:
+                continue
+            sig_b += a*bins.pointwise_linear_collapse(e_n, rtn[0], rtn[1])
+        return sig_b / self.atom_dens.get(nuc, 0.0)
 
     def _rank_ace_tables(self, nuc, temp=300.0):
         """Filters and sorts the potential ACE tables based on nucliude and
@@ -1023,7 +1109,7 @@ class OpenMCDataSource(DataSource):
         return tabs
 
     def load(self, temp=300.0):
-        """Loads the entire data source into memory. This can be expensive for 
+        """Loads the entire data source into memory. This can be expensive for
         lots of ACE data.
 
         Parameters
@@ -1064,6 +1150,7 @@ class StatePointDataSource(DataSource):
             The total flux within the reactor
         kwargs : optional
             Keyword arguments to be sent to DataSource base class.
+
         """
         self.state_point = state_point
         self.tallies = tallies
@@ -1086,6 +1173,7 @@ class StatePointDataSource(DataSource):
     def _load_reactions(self, num_dens, phi_tot):
         """Loads the group structure from a tally in openMC. It is
         assumed that all tallies have the same group structure
+
         Parameters
         ----------
         state_point: openMC statepoint file
@@ -1109,6 +1197,7 @@ class StatePointDataSource(DataSource):
 
     def reaction(self, nuc, rx, temp):
         """Loads reaction data from ACE files indexed by OpenMC.
+
         Parameters
         ----------
         nuc : int
