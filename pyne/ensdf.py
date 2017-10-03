@@ -2,6 +2,7 @@ from __future__ import division
 import re
 import sys
 import copy
+from collections import defaultdict
 from warnings import warn
 from pyne.utils import QAWarning
 
@@ -782,6 +783,45 @@ def _parse_decay_dataset(lines, decay_s):
     return None
 
 
+_BAD_RX = frozenset([
+    # Be-6 doesn't really alpha decay (leaving He-2), rather it emits 2p
+    (40060000, 1089),
+    # Li-8 -> He-4 + beta- + alpha is really a shortcut for
+    # Li-8 -> Be-8 + beta- -> He-4 + alpha
+    (30080000, 1355894000),
+    ])
+
+
+def _adjust_ge100_branches(levellist):
+    """This adjust branches that are greater than or equal to 100% to be
+    100% - sum(other branches).  This helps prevent unphysical errors
+    downstream.
+    """
+    n = len(levellist)
+    brsum = defaultdict(float)
+    bridx = defaultdict(lambda: (-1, -1.0))
+    baddies = []
+    for i, (nuc, rx, hl, lvl, br, ms, sp) in enumerate(levellist):
+        if rx == 0:
+            continue
+        if br >= bridx[nuc][1]:
+            bridx[nuc] = (i, br)
+        brsum[nuc] += br
+        nucrx = (nuc, rx)
+        if nucrx in _BAD_RX:
+            baddies.append(i)
+    # adjust branch ratios
+    for nuc, (i, br) in bridx.items():
+        row = levellist[i]
+        # this line ensures that all branches sum to 100.0 within floating point
+        new_br = 100.0 - brsum[nuc] + br
+        new_row = row[:4] + (new_br,) + row[5:]
+        levellist[i] = new_row
+    # remove bad reaction rows
+    for i in baddies[::-1]:
+        del levellist[i]
+
+
 def levels(filename, levellist=None):
     """
     This takes an ENSDF filename or file object and parses the ADOPTED LEVELS
@@ -853,8 +893,9 @@ def levels(filename, levellist=None):
                                     goodkey = False
                             if goodkey is True:
                                 rx = rxname.id(keystrip)
+                                branch_percent = float(val.split("(")[0])
                                 levellist.append((nuc_id, rx, half_lifev,
-                                                  level, val.split("(")[0],
+                                                  level, branch_percent,
                                                   state, special))
                     if level_found is True:
                         levellist.append((nuc_id, 0, half_lifev, level, 0.0,
@@ -882,11 +923,13 @@ def levels(filename, levellist=None):
                             goodkey = False
                     if goodkey is True:
                         rx = rxname.id(keystrip)
+                        branch_percent = float(val.split("(")[0])
                         levellist.append((nuc_id, rx, half_lifev, level,
-                                          val.split("(")[0], state, special))
+                                          branch_percent, state, special))
             if level_found is True:
                 levellist.append((nuc_id, 0, half_lifev, level, 0.0, state,
                                   special))
+    _adjust_ge100_branches(levellist)
     return levellist
 
 
