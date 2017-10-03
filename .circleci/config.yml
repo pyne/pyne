@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  build_py3:
     docker:
       - image: pyne/pyne_ubuntu_17.04:latest
 
@@ -24,5 +24,38 @@ jobs:
           name: Running PyNE Tests
           command: |
             cd ~/repo/tests
-            nosetests3
+            ./travis-run-tests.sh python3
 
+  build_py2:
+    docker:
+      - image: pyne/pyne_ubuntu_16.04:latest
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Build!
+      - run:
+          name: Building PyNE
+          command: |
+            python setup.py install --user \
+                -DMOAB_LIBRARY=$HOME/opt/moab/lib \
+                -DMOAB_INCLUDE_DIR=$HOME/opt/moab/include
+            cd ~
+            ~/.local/bin/nuc_data_make
+
+      # Test!
+      - run:
+          name: Running PyNE Tests
+          command: |
+            cd ~/repo/tests
+            ./travis-run-tests.sh python2
+
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build_py2
+      - build_py3
