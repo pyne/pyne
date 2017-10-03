@@ -376,7 +376,24 @@ def one_over_gamma_squared(E):
     return inv_g2
 
 
-def thermspect(E, T=573, lower=0.155e-6):
+def thermspect(E, T=573.0, lower=0.155e-6):
+    """This function produces a rough estimate thermal spectrum for an average
+    thermal reactor.
+    Parameters
+    ----------
+    E : array
+        Array representing the energy groups of interest.
+    T : float
+        The temperature of the reactor.
+    lower: float
+        The point at which the shape of the flux switches
+        from high energy to low energy. 
+    Returns
+    -------
+    phi : array
+        flux values for the reactor
+    """
+
     k = 8.52e-5
     phi = np.empty(len(E), 'f8')
     mask = (E < lower)
@@ -388,7 +405,23 @@ def thermspect(E, T=573, lower=0.155e-6):
     phi /= phi.sum()
     return phi
 
-def fastspect(E, T=783, lower=1.0e-3):
+
+def fastspect(E, T=783.0, lower=1.0e-3):
+    """This function produces a rough estimate fast neutron spectrum.
+    Parameters
+    ----------
+    E : array
+        Array representing the energy groups of interest.
+    T : float
+        The temperature of the reactor.
+    lower: float
+        The point at which the shape of the flux switches
+        from high energy to low energy. 
+    Returns
+    -------
+    phi : array
+        flux values for the reactor
+    """
     k = 8.52e-5
     phi = np.empty(len(E), 'f8')
     mask = (E < lower)
