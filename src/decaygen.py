@@ -4,6 +4,7 @@ It is suppossed to be fast.
 """
 import os
 import io
+import sys
 import warnings
 from argparse import ArgumentParser, Namespace
 
@@ -40,6 +41,9 @@ HEADER = ENV.from_string("""
 
 {{ autogenwarn }}
 
+// This file was generated with the following command:
+// {{ args }}
+
 #include <map>
 //#include <cmath>
 
@@ -65,6 +69,9 @@ std::map<int, double> decay(std::map<int, double> comp, double t);
 SOURCE = ENV.from_string("""
 #{{ dummy_ifdef }} PYNE_DECAY_IS_DUMMY
 {{ autogenwarn }}
+
+// This file was generated with the following command:
+// {{ args }}
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "decay.h"
@@ -143,6 +150,7 @@ def genfiles(nucs, short=1e-8, sf=False, dummy=False):
         nucs=nucs,
         autogenwarn=autogenwarn,
         dummy_ifdef=('ifdef' if dummy else 'ifndef'),
+        args=' '.join(sys.argv)
         )
     ctx.cases = gencases(nucs)
     ctx.funcs = genelemfuncs(nucs, short=short, sf=sf)
