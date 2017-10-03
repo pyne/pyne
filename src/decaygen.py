@@ -2,6 +2,7 @@
 """This file generates a static C++ decayer function for use with PyNE.
 It is suppossed to be fast.
 """
+import os
 import io
 import warnings
 from argparse import ArgumentParser, Namespace
@@ -334,14 +335,25 @@ def build_tarfile(ns):
         tar.add(ns.src)
 
 
+def write_if_diff(filename, contents):
+    """Only writes the file if it is different. This prevents touching the file needlessly."""
+    if not os.path.isfile(filename):
+        existing = None
+    else:
+        with io.open(filename, 'r') as f:
+            existing = f.read()
+    if contents == existing:
+        return
+    with io.open(filename, 'w') as f:
+        f.write(contents)
+
+
 def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False,
           dummy=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
     h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
-    with io.open(hdr, 'w') as f:
-        f.write(h)
-    with io.open(src, 'w') as f:
-        f.write(s)
+    write_if_diff(hdr, h)
+    write_if_diff(src, s)
 
 
 def main():
