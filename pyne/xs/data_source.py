@@ -122,7 +122,8 @@ class DataSource(object):
         self.dst_group_struct = dst_group_struct
         self.src_phi_g = np.ones(self._src_ngroups, dtype='f8') if src_phi_g is None \
                             else np.asarray(src_phi_g)
-        self.atom_dens = {}
+        self.slf_shld_wgts = {}
+
 
     @property
     def src_group_struct(self):
@@ -223,6 +224,30 @@ class DataSource(object):
                                                         self._src_to_dst_matrix)
         return dst_sigma
 
+    def shield_weights(self, num_dens, temp):
+        """Builds the weights used during the self shielding calculations. 
+        Parameters
+        ----------
+        mat : array of floats.  
+            A map of the number densities of each of the nuclides of the material for 
+            which self-shielding is being calculated. 
+        data_source: pyne data_source
+            Contains the cross section information for the isotopes in the material 
+            that is experiencing the self shielding. 
+        """
+        reactions = {}
+        for i in num_dens:
+            rx = self.reaction(i, 'total', temp)
+            reactions[i] = 0.0 if rx is None else rx
+        weights = {}
+        for i in num_dens:
+            weights[i] = 0.0
+            for j in reactions:
+                if j != i:
+                    weights[i] += num_dens[j]*reactions[j]
+            weights[i] = 1.0/(weights[i]/num_dens[i] + reactions[i])
+        self.slf_shld_wgts = weights
+
     # Mix-in methods to implement
     @property
     def exists(self):
@@ -319,7 +344,7 @@ class SimpleDataSource(DataSource):
     @property
     def exists(self):
         if self._exists is None:
-            with tb.open_file(nuc_data, 'r') as f:
+            with tb.openFile(nuc_data, 'r') as f:
                 self._exists = ('/neutron/simple_xs' in f)
         return self._exists
 
@@ -334,7 +359,7 @@ class SimpleDataSource(DataSource):
             return None
         cond = "nuc == {0}".format(nuc)
         sig = 'sigma_' + self._rx_avail[rx]
-        with tb.open_file(nuc_data, 'r') as f:
+        with tb.openFile(nuc_data, 'r') as f:
             simple_xs = f.root.neutron.simple_xs
             fteen = [row[sig] for row in simple_xs.fourteen_MeV.where(cond)]
             fissn = [row[sig] for row in simple_xs.fission_spectrum_ave.where(cond)]
@@ -1089,9 +1114,18 @@ class OpenMCDataSource(DataSource):
 
         Parameters
         ----------
+        nuc : int
+            Nuclide id.
+        rx : int
+            Reaction id.
         temp : float, optional
             Temperature [K] of material, defaults to 300.0.
 
+        Returns
+        -------
+        rxdata : array like
+            collapsed self shielded cross section for nuclide nuc and reaction
+            rx
         """
         for atab in self.cross_sections.ace_tables:
             if os.path.isfile(atab.abspath or atab.path):

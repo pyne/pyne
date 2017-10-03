@@ -300,8 +300,8 @@ class Library(object):
             tables_seen.add(name)
 
             # verify that we are suppossed to read this table in
-            if (table_names is not None) and (name not in table_names):
                 cur = f.tell()
+            if (table_names is not None) and (name not in table_names):
                 f.seek(cur + n_bytes)
                 f.readline()
                 lines = [f.readline() for i in range(13)]

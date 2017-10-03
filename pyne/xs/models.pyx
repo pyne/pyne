@@ -160,8 +160,8 @@ def phi_g(E_g, E_n, phi_n):
     phi_g = np.dot(pem, phi_n)
     return phi_g
 
-
-def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, E_n=None):
+def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, 
+                   E_g=None, E_n=None, weights=None):
     """Calculates the group cross-sections for a nuclide for a new, lower resolution
     group structure using a higher fidelity flux.  Note that g indexes G, n indexes N, 
     and G < N.  
@@ -174,7 +174,7 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
 
     Parameters
     ----------
-    sigma_n : array-like of floats)
+    sigma_n : array-like of floats
         A high-fidelity cross-section.
     phi_n : array-like of floats
         The high-fidelity flux [n/cm^2/s] to collapse the fission cross-section 
@@ -191,6 +191,8 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
     E_n : array-like of floats, optional
         Higher resolution energy group structure [MeV] that is of length N+1. 
         If present, E_g is needed as well.
+    weights: dictionary of nuc to array of floats
+        A dictionary of nuclides to the weights used in self shielding.
 
     Returns
     -------
@@ -201,16 +203,25 @@ def group_collapse(sigma_n, phi_n, phi_g=None, partial_energies=None, E_g=None, 
         pem = partial_energies
     elif (phi_g is None) and (partial_energies is not None):
         pem = partial_energies
-        phi_g = np.dot(pem, phi_n)
+        if weights is None:
+           phi_g = np.dot(pem, phi_n)
+        else:
+           phi_g = np.dot(pem, phi_n * weights)
     elif (E_g is not None) and (E_n is not None):
         pem =  partial_energy_matrix(E_g, E_n)
-        phi_g = np.dot(pem, phi_n)
+        if weights is None:
+           phi_g = np.dot(pem, phi_n)
+        else:
+           phi_g = np.dot(pem, phi_n * weights)
     else:
         msg = "Either partial_energies or E_g and E_n must both not be None."
         raise ValueError(msg)
 
     # Calulate partial group collapse
-    sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    if weights is None:
+        sigma_g = np.dot(pem, sigma_n * phi_n) / phi_g
+    else:
+        sigma_g = np.dot(pem, sigma_n * phi_n * weights) / phi_g
     sigma_g[np.isnan(sigma_g)] = 0.0  # handle zero flux that causes NaNs later.
     return sigma_g
 
@@ -366,6 +377,27 @@ def one_over_gamma_squared(E):
     inv_g2 = 1.0 - (E / (465.73 * m_n))
     return inv_g2
 
+
+def thermspect(E, T=573, lower=0.155e-6):
+    k = 8.52e-5
+    phi = np.empty(len(E), 'f8')
+    mask = (E < lower)
+    phi[mask] = 2*np.pi*np.sqrt(E[mask]*1e6) * np.exp(-E[mask]*1e6/(k*T)) / (np.pi * k * T)**1.5
+    mask = (E > lower)
+    phi[mask] = 1/((2*E[mask]*1e6)**0.5)
+    phi[mask] += 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
+    phi /= phi.sum()
+    return phi
+
+def fastspect(E, T=783, lower=1.0e-3):
+    k = 8.52e-5
+    phi = np.empty(len(E), 'f8')
+    mask = (E < lower)
+    phi[mask] = 1/((2*E[mask]*1e6)**0.5)
+    mask = (E > lower)
+    phi[mask] += 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
+    phi /= phi.sum()
+    return phi
 
 #
 # This needs more thought, much like all of the scattering models
