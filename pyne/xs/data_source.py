@@ -1166,7 +1166,7 @@ class StatePointDataSource(DataSource):
     def _load_reactions(self, num_dens, phi_tot):
         """Loads the group structure from a tally in openMC. It is
         assumed that all tallies have the same group structure
-   
+
         Parameters
         ----------
         state_point: openMC statepoint file
