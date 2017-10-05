@@ -145,7 +145,7 @@ B_EXPR = 'b{b}'
 KB_EXPR = '{k:.17e}*' + B_EXPR
 
 
-def genfiles(nucs, short=1e-8, sf=False, dummy=False):
+def genfiles(nucs, short=1e-16, sf=False, dummy=False):
     ctx = Namespace(
         nucs=nucs,
         autogenwarn=autogenwarn,
@@ -173,15 +173,15 @@ def genchains(chains, sf=False):
     return chains
 
 
-def k_a(chain, short=1e-8):
+def k_a(chain, short=1e-16):
     # gather data
     hl = np.array([half_life(n, False) for n in chain])
     a = -1.0 / hl
     dc = np.array(list(map(lambda nuc: decay_const(nuc, False), chain)))
     if np.isnan(dc).any():
-        # NaNs are bad, mmmkay.  Nones mean we should skip
+        # NaNs are bad, mmmkay. Nones mean we should skip
         return None, None
-    ends_stable = (dc[-1] < 1e-16)  # check if last nuclide is a stable species
+    ends_stable = (dc[-1] == 0.0)  # check if last nuclide is a stable species
     # compute cij -> ci in prep for k
     cij = dc[:, np.newaxis] / (dc[:, np.newaxis] - dc)
     if ends_stable:
@@ -233,7 +233,7 @@ def b_from_a(cse, a_i):
     bkey = EXP_EXPR.format(a=a_i)
     return cse[bkey]
 
-def chainexpr(chain, cse, b, bt, short=1e-8):
+def chainexpr(chain, cse, b, bt, short=1e-16):
     child = chain[-1]
     if len(chain) == 1:
         a_i = -1.0 / half_life(child, False)
@@ -269,7 +269,7 @@ def chainexpr(chain, cse, b, bt, short=1e-8):
     return CHAIN_EXPR.format(terms), b, bt
 
 
-def gencase(nuc, idx, b, short=1e-8, sf=False):
+def gencase(nuc, idx, b, short=1e-16, sf=False):
     case = ['}} case {0}: {{'.format(nuc)]
     dc = decay_const(nuc, False)
     if dc == 0.0:
@@ -308,7 +308,7 @@ def gencases(nucs):
     return '\n'.join(switches)
 
 
-def genelemfuncs(nucs, short=1e-8, sf=False):
+def genelemfuncs(nucs, short=1e-16, sf=False):
     idx = dict(zip(nucs, range(len(nucs))))
     cases = {i: [-1, []] for i in elems(nucs)}
     for nuc in nucs:
@@ -356,7 +356,7 @@ def write_if_diff(filename, contents):
         f.write(contents)
 
 
-def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False,
+def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, sf=False,
           dummy=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
     h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
