@@ -822,6 +822,27 @@ def _adjust_ge100_branches(levellist):
         del levellist[i]
 
 
+# State Id, Bad Metastable Number, Replacement Metastable Number
+_BAD_METASTABLES = {
+    # Rh-110 misreports its ground state as a first meta-stable and its first
+    # metastable as its second.
+    (451100000, 1): 0,
+    (451100001, 2): 1,
+    # Pm-154 misreports its ground state as a first metastable
+    (611540000, 1): 0,
+    }
+
+
+def _adjust_metastables(levellist):
+    """Adjusts misreported metastable states in place."""
+    for i in range(len(levellist)):
+        key = (levellist[i][0], levellist[i][5])
+        if key in _BAD_METASTABLES:
+            row = list(levellist[i])
+            row[5] = _BAD_METASTABLES[key]
+            levellist[i] = tuple(row)
+
+
 def levels(filename, levellist=None):
     """
     This takes an ENSDF filename or file object and parses the ADOPTED LEVELS
@@ -930,6 +951,7 @@ def levels(filename, levellist=None):
                 levellist.append((nuc_id, 0, half_lifev, level, 0.0, state,
                                   special))
     _adjust_ge100_branches(levellist)
+    _adjust_metastables(levellist)
     return levellist
 
 
@@ -1100,7 +1122,6 @@ def _dlist_gen(f):
         ident = re.match(_ident, lines[0])
         if ident is not None:
             if 'DECAY' in ident.group(2):
-                #print ident.group(2)
                 fin = ident.group(2).split()[1]
                 if fin not in decaylist:
                     decaylist.append(fin)
@@ -1133,7 +1154,6 @@ def _level_dlist_gen(f, keys):
         ident = re.match(_ident, lines[0])
         if ident is not None:
             if 'ADOPTED LEVELS' in ident.group(2):
-                #print ident.group(2)
                 for line in lines:
                     levelc = _level_cont_regex.match(line)
                     if levelc is None:

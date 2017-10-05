@@ -13,7 +13,10 @@ PRETTY_RX = {
     'a': 'α',
     'alpha': 'α',
     'bplus': 'β+',
+    'bplus_p': 'β+p',
+    'bplus_n': 'β+n',
     'bminus': 'β-',
+    'bminus_p': 'β-p',
     'bminus_n': 'β-n',
     }
 
