@@ -181,7 +181,7 @@ def k_a(chain, short=1e-16):
     if np.isnan(dc).any():
         # NaNs are bad, mmmkay. Nones mean we should skip
         return None, None
-    ends_stable = (dc[-1] == 0.0)  # check if last nuclide is a stable species
+    ends_stable = (dc[-1] < 1e-16)  # check if last nuclide is a stable species
     # compute cij -> ci in prep for k
     cij = dc[:, np.newaxis] / (dc[:, np.newaxis] - dc)
     if ends_stable:
