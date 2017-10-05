@@ -19,7 +19,7 @@ toggle_warnings()
 from pyne import nuc_data
 from pyne import nucname
 from pyne.data import branch_ratio, half_life, decay_const, \
-    all_children, fpyield, all_branch_ratio
+    all_children, fpyield
 
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
@@ -199,7 +199,7 @@ def k_a(chain, short=1e-8):
         # if this happens then something wen very wrong, skip
         return None, None
     # compute and apply branch ratios
-    gamma = np.prod([all_branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
+    gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
         return None, None
     k *= gamma
