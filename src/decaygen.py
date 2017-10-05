@@ -19,7 +19,7 @@ toggle_warnings()
 from pyne import nuc_data
 from pyne import nucname
 from pyne.data import branch_ratio, half_life, decay_const, \
-    all_children, fpyield
+    decay_children, fpyield
 
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
@@ -161,7 +161,7 @@ def genfiles(nucs, short=1e-8, sf=False, dummy=False):
 
 def genchains(chains, sf=False):
     chain = chains[-1]
-    children = all_children(chain[-1])
+    children = decay_children(chain[-1])
     # filters spontaneous fission
     if not sf:
         children = {c for c in children if (0.0 == fpyield(chain[-1], c)) and (c not in chain) }
@@ -375,9 +375,9 @@ def main():
                         'compile-time fallbacks.')
     parser.add_argument('--no-dummy', action='store_false', default=False,
                         dest='dummy', help='Makes regular files.')
-    parser.add_argument('--filter-short', default=1e-8, type=float, dest='short',
+    parser.add_argument('--filter-short', default=1e-16, type=float, dest='short',
                         help='Fraction of sum of all half-lives below which a '
-                             'nuclide is filtered from a decay chain, default 1e-8.')
+                             'nuclide is filtered from a decay chain, default 1e-16.')
     parser.add_argument('--spontaneous-fission', default=False, action='store_true',
                         dest='sf', help='Includes spontaneous fission decay chains, '
                                         'default False.')
