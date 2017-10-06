@@ -11,7 +11,7 @@ import pyne
 from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, \
                            alpha, k, m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, \
                            one_over_gamma_squared, E_prime_min, sigma_s_const, \
-                           sigma_s, phi_g, group_collapse, thermspec, fastspec 
+                           sigma_s, phi_g, group_collapse, thermspect, fastspect 
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
