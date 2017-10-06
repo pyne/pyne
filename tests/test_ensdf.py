@@ -4,10 +4,12 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
+from itertools import groupby
 
 import nose
 
-from nose.tools import assert_equal, assert_almost_equal
+from nose.tools import assert_equal, assert_almost_equal, assert_less_equal
+import numpy as np
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
