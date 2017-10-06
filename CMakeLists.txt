@@ -88,9 +88,10 @@ find_package(Numpy REQUIRED)
 include_directories("${NUMPY_INCLUDE_DIR}")
 
 
+pyne_setup_fortran()
+
 # Find f2py, if building spatial solver
 IF(BUILD_SPATIAL_SOLVER)
-  pyne_setup_fortran()
   find_package(F2py REQUIRED)
   message("-- F2PY Executable: ${F2PY_EXECUTABLE}")
   message("-- F2PY Version: ${F2PY_VERSION}")
