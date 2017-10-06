@@ -308,7 +308,7 @@ def test_phi_g7():
     assert_array_almost_equal(observed, expected)
 
 def test_number_density1():
-    mat = {922350:0.5, 922380: 0.5)
+    mat = {922350:0.5, 922380: 0.5}
     density = 1.0
     a_mass = 6.0221409
     U238D = number_density(mat, density, a_mass)[922380]
