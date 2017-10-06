@@ -438,32 +438,32 @@ def test_sigma_s():
     assert_true((0.0 <= sig_s).all())
     assert_true((sig_s[1:] <= sig_s[:-1]).all())
 
-def test_thermspec():
+def test_thermspect():
     e1 = [1.e-6]
     e2 = [1.]
     e3 = [0.9375e3, 1.5e4]
-    assert_array_equal(np.asarray([1.]), thermspec(np.asarray(e1)))
-    assert_array_equal(np.asarray([1.]), thermspec(np.asarray(e2)))
+    assert_array_equal(np.asarray([1.]), thermspect(np.asarray(e1)))
+    assert_array_equal(np.asarray([1.]), thermspect(np.asarray(e2)))
     assert_array_equal(np.asarray([0.8, 0.2]), thermspec(np.asarray(e3)))
 
-def test_thermspec2():
+def test_thermspect2():
     e1 = [0.9375e3, 1.5e4]
     phi = thermspect(np.asarray(e1), T=400., lower=1.e4)
     assert_array_equal(np.asarray([0.0, 1.0]), phi)
 
-def test_fastspec():
+def test_fastspect():
     e1 = np.asarray([1.e-6])
     e2 = np.asarray([1.])
     e3 = np.asarray([1.291e-5, 1e5])
     uno = np.asarray([1.])
-    assert_array_equal(uno, fastspec(e1))
-    assert_array_equal(uno, fastspec(e2))
+    assert_array_equal(uno, fastspect(e1))
+    assert_array_equal(uno, fastspect(e2))
     v1 = np.asarray([1.96798157e-06,   9.99998032e-01])
-    assert_array_almost_equal(v1, fastspec(e3))
+    assert_array_almost_equal(v1, fastspect(e3))
 
 def test_fastspec2():
     e1 = np.asarray([1.291e-5, 1e5])
     phi1 = fastspect(e1, T=1000., lower=1.e-5)
-    v1 = np.asarray([1.25285615e-07,   9.99999875e-01])
+    v1 = np.asarray([0.012361,  0.987639])
     assert_array_almost_equal(v1, phi1)
     
