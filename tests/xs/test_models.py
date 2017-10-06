@@ -454,16 +454,16 @@ def test_thermspect2():
 def test_fastspect():
     e1 = np.asarray([1.e-6])
     e2 = np.asarray([1.])
-    e3 = np.asarray([1.291e-5, 1e5])
+    e3 = np.asarray([1.291e-5, 10])
     uno = np.asarray([1.])
     assert_array_equal(uno, fastspect(e1))
     assert_array_equal(uno, fastspect(e2))
-    v1 = np.asarray([1.96798157e-06,   9.99998032e-01])
+    v1 = np.asarray([0.04872966,  0.95127034])
     assert_array_almost_equal(v1, fastspect(e3))
 
 def test_fastspect2():
-    e1 = np.asarray([1.291e-5, 1e5])
+    e1 = np.asarray([1.291e-5, 10])
     phi1 = fastspect(e1, T=1000., lower=1.e-5)
-    v1 = np.asarray([0.012361,  0.987639])
+    v1 = np.asarray([0.0032472,  0.9967528])
     assert_array_almost_equal(v1, phi1)
     
