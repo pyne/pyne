@@ -11,7 +11,7 @@ import pyne
 from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, \
                            alpha, k, m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, \
                            one_over_gamma_squared, E_prime_min, sigma_s_const, \
-                           sigma_s, phi_g, group_collapse 
+                           sigma_s, phi_g, group_collapse, thermspec, fastspec 
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
@@ -306,13 +306,6 @@ def test_phi_g7():
 
     # Floating point error here requires 'alomst' equal
     assert_array_almost_equal(observed, expected)
-
-def test_number_density1():
-    mat = {922350:0.5, 922380: 0.5}
-    density = 1.0
-    a_mass = 6.0221409
-    U238D = number_density(mat, density, a_mass)[922380]
-    assert_array_almost_equal(5.E22, U238D)
 
 def test_group_collapse1():
     E_g = np.array([0.0, 4.0, 8.0])
