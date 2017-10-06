@@ -337,7 +337,7 @@ def test_wgt_group_collapse1():
     sigma_n = np.array([1.0, 2.0, 3.0, 4.0])
     wgts = np.array([0.00001, 0.00001, 0.00001, 0.00001])
     
-    observed = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n, wgts=wgts)
+    observed = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n, weights=wgts)
     expected = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n)
     assert_array_almost_equal(observed, expected)
 
@@ -442,28 +442,28 @@ def test_thermspec():
     e1 = [1.e-6]
     e2 = [1.]
     e3 = [0.9375e3, 1.5e4]
-    assert_equal(np.asarray([1.]), thermspec(np.asarray(e1)))
-    assert_equal(np.asarray([1.]), thermspec(np.asarray(e2)))
-    assert_equal(np.asarray([0.8, 0.2]), thermspec(np.asarray(e3)))
+    assert_array_equal(np.asarray([1.]), thermspec(np.asarray(e1)))
+    assert_array_equal(np.asarray([1.]), thermspec(np.asarray(e2)))
+    assert_array_equal(np.asarray([0.8, 0.2]), thermspec(np.asarray(e3)))
 
 def test_thermspec2():
     e1 = [0.9375e3, 1.5e4]
     phi = thermspect(np.asarray(e1), T=400., lower=1.e4)
-    assert_equal(np.asarray([0.0, 1.0]), phi)
+    assert_array_equal(np.asarray([0.0, 1.0]), phi)
 
 def test_fastspec():
     e1 = np.asarray([1.e-6])
     e2 = np.asarray([1.])
     e3 = np.asarray([1.291e-5, 1e5])
     uno = np.asarray([1.])
-    assert_equal(uno, fastspec(e1))
-    assert_equal(uno, fastspec(e2))
+    assert_array_equal(uno, fastspec(e1))
+    assert_array_equal(uno, fastspec(e2))
     v1 = np.asarray([1.96798157e-06,   9.99998032e-01])
-    assert_almost_equal(v1, fastspec(e3))
+    assert_array_almost_equal(v1, fastspec(e3))
 
 def test_fastspec2():
     e1 = np.asarray([1.291e-5, 1e5])
     phi1 = fastspect(e1, T=1000., lower=1.e-5)
     v1 = np.asarray([1.25285615e-07,   9.99999875e-01])
-    assert_almost_equal(v1, phi1)
+    assert_array_almost_equal(v1, phi1)
     
