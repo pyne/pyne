@@ -1476,14 +1476,14 @@ int pyne::metastable_id(int nuc, int m) {
 
   nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0.0));
   nuc_upper = level_data_lvl_map.upper_bound(std::make_pair(nostate+9999,
-  DBL_MAX));
+                                                            DBL_MAX));
   for (std::map<std::pair<int, double>, level_data>::iterator it=nuc_lower;
   it!=nuc_upper; ++it) {
     if (it->second.metastable == m)
         return it->second.nuc_id;
   }
 
-  return nuc;
+  return -1;
 }
 
 int pyne::metastable_id(int nuc) {
@@ -1507,12 +1507,15 @@ std::set<int> pyne::decay_children(int nuc) {
   for (; it != part.end(); ++it) {
     switch (*it) {
       case 36125: {
-        // internal conversion, rx == 'it'
+        // internal transition, rx == 'it'
         result.insert((nuc /10000) * 10000);
         break;
       }
-      case 36565: {
-        // spontaneous fission, rx == 'sf'
+      case 36565:
+      case 1794828612:
+      {
+        // spontaneous fission, rx == 'sf', 36565
+        // beta- & spontaneous fission, rx == 'b-sf', 1794828612
         std::map<std::pair<int, int>, double>::iterator sf = wimsdfpy_data.begin();
         for (; sf != wimsdfpy_data.end(); ++sf)
           if (sf->first.first == nuc)
@@ -1636,11 +1639,12 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
     if ((part1[i] == 36125) &&
         (groundstate(from_to.first) == groundstate(from_to.second)) &&
         (from_to.second % 10000 == 0)) {
-      // internal conversion, rx == 'it'
-      result = 1.0;
+      // internal transition, rx == 'it', 36125
+      result = part2[i] * 0.01;
       break;
-    } else if (part1[i] == 36565) {
-      // spontaneous fission, rx == 'sf'
+    } else if (part1[i] == 36565 || part1[i] == 1794828612) {
+      // spontaneous fission, rx == 'sf', 36565
+      // beta- & spontaneous fission, rx == 'b-sf', 1794828612
       result += part2[i] * 0.01 * wimsdfpy_data[from_to];
     } else if ((part1[i] != 0) && (groundstate(rxname::child(from_to.first,
                                    part1[i], "decay")) == from_to.second)) {

@@ -2,7 +2,9 @@
 """This file generates a static C++ decayer function for use with PyNE.
 It is suppossed to be fast.
 """
+import os
 import io
+import sys
 import warnings
 from argparse import ArgumentParser, Namespace
 
@@ -17,7 +19,7 @@ toggle_warnings()
 from pyne import nuc_data
 from pyne import nucname
 from pyne.data import branch_ratio, half_life, decay_const, \
-    all_children, fpyield, all_branch_ratio
+    decay_children, fpyield
 
 ENV = jinja2.Environment(undefined=jinja2.StrictUndefined)
 
@@ -38,6 +40,9 @@ HEADER = ENV.from_string("""
 #define PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
 
 {{ autogenwarn }}
+
+// This file was generated with the following command:
+// {{ args }}
 
 #include <map>
 //#include <cmath>
@@ -64,6 +69,9 @@ std::map<int, double> decay(std::map<int, double> comp, double t);
 SOURCE = ENV.from_string("""
 #{{ dummy_ifdef }} PYNE_DECAY_IS_DUMMY
 {{ autogenwarn }}
+
+// This file was generated with the following command:
+// {{ args }}
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "decay.h"
@@ -137,11 +145,12 @@ B_EXPR = 'b{b}'
 KB_EXPR = '{k:.17e}*' + B_EXPR
 
 
-def genfiles(nucs, short=1e-8, sf=False, dummy=False):
+def genfiles(nucs, short=1e-16, sf=False, dummy=False):
     ctx = Namespace(
         nucs=nucs,
         autogenwarn=autogenwarn,
         dummy_ifdef=('ifdef' if dummy else 'ifndef'),
+        args=' '.join(sys.argv)
         )
     ctx.cases = gencases(nucs)
     ctx.funcs = genelemfuncs(nucs, short=short, sf=sf)
@@ -152,7 +161,7 @@ def genfiles(nucs, short=1e-8, sf=False, dummy=False):
 
 def genchains(chains, sf=False):
     chain = chains[-1]
-    children = all_children(chain[-1])
+    children = decay_children(chain[-1])
     # filters spontaneous fission
     if not sf:
         children = {c for c in children if (0.0 == fpyield(chain[-1], c)) and (c not in chain) }
@@ -164,13 +173,13 @@ def genchains(chains, sf=False):
     return chains
 
 
-def k_a(chain, short=1e-8):
+def k_a(chain, short=1e-16):
     # gather data
     hl = np.array([half_life(n, False) for n in chain])
     a = -1.0 / hl
     dc = np.array(list(map(lambda nuc: decay_const(nuc, False), chain)))
     if np.isnan(dc).any():
-        # NaNs are bad, mmmkay.  Nones mean we should skip
+        # NaNs are bad, mmmkay. Nones mean we should skip
         return None, None
     ends_stable = (dc[-1] < 1e-16)  # check if last nuclide is a stable species
     # compute cij -> ci in prep for k
@@ -190,7 +199,7 @@ def k_a(chain, short=1e-8):
         # if this happens then something wen very wrong, skip
         return None, None
     # compute and apply branch ratios
-    gamma = np.prod([all_branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
+    gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
         return None, None
     k *= gamma
@@ -224,7 +233,7 @@ def b_from_a(cse, a_i):
     bkey = EXP_EXPR.format(a=a_i)
     return cse[bkey]
 
-def chainexpr(chain, cse, b, bt, short=1e-8):
+def chainexpr(chain, cse, b, bt, short=1e-16):
     child = chain[-1]
     if len(chain) == 1:
         a_i = -1.0 / half_life(child, False)
@@ -260,7 +269,7 @@ def chainexpr(chain, cse, b, bt, short=1e-8):
     return CHAIN_EXPR.format(terms), b, bt
 
 
-def gencase(nuc, idx, b, short=1e-8, sf=False):
+def gencase(nuc, idx, b, short=1e-16, sf=False):
     case = ['}} case {0}: {{'.format(nuc)]
     dc = decay_const(nuc, False)
     if dc == 0.0:
@@ -299,7 +308,7 @@ def gencases(nucs):
     return '\n'.join(switches)
 
 
-def genelemfuncs(nucs, short=1e-8, sf=False):
+def genelemfuncs(nucs, short=1e-16, sf=False):
     idx = dict(zip(nucs, range(len(nucs))))
     cases = {i: [-1, []] for i in elems(nucs)}
     for nuc in nucs:
@@ -334,14 +343,25 @@ def build_tarfile(ns):
         tar.add(ns.src)
 
 
-def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-8, sf=False,
+def write_if_diff(filename, contents):
+    """Only writes the file if it is different. This prevents touching the file needlessly."""
+    if not os.path.isfile(filename):
+        existing = None
+    else:
+        with io.open(filename, 'r') as f:
+            existing = f.read()
+    if contents == existing:
+        return
+    with io.open(filename, 'w') as f:
+        f.write(contents)
+
+
+def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, sf=False,
           dummy=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
     h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
-    with io.open(hdr, 'w') as f:
-        f.write(h)
-    with io.open(src, 'w') as f:
-        f.write(s)
+    write_if_diff(hdr, h)
+    write_if_diff(src, s)
 
 
 def main():
@@ -355,9 +375,9 @@ def main():
                         'compile-time fallbacks.')
     parser.add_argument('--no-dummy', action='store_false', default=False,
                         dest='dummy', help='Makes regular files.')
-    parser.add_argument('--filter-short', default=1e-8, type=float, dest='short',
+    parser.add_argument('--filter-short', default=1e-16, type=float, dest='short',
                         help='Fraction of sum of all half-lives below which a '
-                             'nuclide is filtered from a decay chain, default 1e-8.')
+                             'nuclide is filtered from a decay chain, default 1e-16.')
     parser.add_argument('--spontaneous-fission', default=False, action='store_true',
                         dest='sf', help='Includes spontaneous fission decay chains, '
                                         'default False.')

@@ -155,18 +155,18 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["BARIUM"]   = 560000000;
   fzd["BOHRIUM"]  = 1070000000;   // No fluka
   fzd["BISMUTH"]  = 830000000;
-  fzd["BERKELIU"] = 970000000;    // No fluka 
+  fzd["BERKELIU"] = 970000000;    // No fluka
   fzd["BROMINE"]  = 350000000;
   fzd["RUTHENIU"] = 440000000;    // No fluka
   fzd["RHENIUM"]  = 750000000;
-  fzd["RUTHERFO"] = 1040000000;   
+  fzd["RUTHERFO"] = 1040000000;
   fzd["ROENTGEN"] = 1110000000;
   fzd["RADIUM"]   = 880000000;    // No fluka
   fzd["RUBIDIUM"] = 370000000;    // No fluka
   fzd["RADON"]    = 860000000;    // no fluka
   fzd["RHODIUM"]  = 450000000;    // no fluka
   fzd["THULIUM"]  = 690000000;    // no fluka
-  fzd["HYDROGEN"] = 10000000;        
+  fzd["HYDROGEN"] = 10000000;
   fzd["PHOSPHO"]  = 150000000;
   fzd["GERMANIU"] = 320000000;
   fzd["GADOLINI"] = 640000000;
@@ -184,7 +184,7 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["LEAD"]     = 820000000;
   fzd["PROTACTI"] = 910000000;   // no fluka
   fzd["PALLADIU"] = 460000000;   // no fluka
-  fzd["POLONIUM"] = 840000000;   // no fluka 
+  fzd["POLONIUM"] = 840000000;   // no fluka
   fzd["PROMETHI"] = 610000000;   // no fluka
   fzd["CARBON"]   = 60000000;
   fzd["POTASSIU"] = 190000000;
@@ -264,10 +264,10 @@ pyne::nucname::name_zz_t pyne::nucname::get_fluka_zz() {
   fzd["XENON"]    = 540000000;
   fzd["COPERNIC"] = 1120000000;  // no fluka
   fzd["UNUNQUAD"] = 1140000000;  // no fluka:  UNUNQUADIUM,  "Flerovium"
-  fzd["UNUNHEXI"] = 1160000000;  // no fluka:  UNUNHEXIUM , "Livermorium" 
-  fzd["HYDROG-1"] = 10010000;        
-  fzd["DEUTERIU"] = 10020000;        
-  fzd["TRITIUM"]  = 10040000;        
+  fzd["UNUNHEXI"] = 1160000000;  // no fluka:  UNUNHEXIUM , "Livermorium"
+  fzd["HYDROG-1"] = 10010000;
+  fzd["DEUTERIU"] = 10020000;
+  fzd["TRITIUM"]  = 10040000;
   fzd["HELIUM-3"] = 20030000;
   fzd["HELIUM-4"] = 20040000;
   fzd["LITHIU-6"] = 30060000;
@@ -326,46 +326,46 @@ pyne::nucname::zz_group pyne::nucname::name_to_zz_group(pyne::nucname::name_grou
 }
 
 // Lanthanides
-pyne::nucname::name_t pyne::nucname::LAN_array[15] = {"La", "Ce", "Pr", "Nd", 
+pyne::nucname::name_t pyne::nucname::LAN_array[15] = {"La", "Ce", "Pr", "Nd",
   "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu"};
-pyne::nucname::name_group pyne::nucname::LAN (pyne::nucname::LAN_array, 
+pyne::nucname::name_group pyne::nucname::LAN (pyne::nucname::LAN_array,
                                               pyne::nucname::LAN_array+15);
 pyne::nucname::zz_group pyne::nucname::lan = \
   pyne::nucname::name_to_zz_group(pyne::nucname::LAN);
 
 // Actinides
-pyne::nucname::name_t pyne::nucname::ACT_array[15] = {"Ac", "Th", "Pa", "U", 
+pyne::nucname::name_t pyne::nucname::ACT_array[15] = {"Ac", "Th", "Pa", "U",
   "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr"};
 pyne::nucname::name_group pyne::nucname::ACT (pyne::nucname::ACT_array, pyne::nucname::ACT_array+15);
 pyne::nucname::zz_group pyne::nucname::act = pyne::nucname::name_to_zz_group(pyne::nucname::ACT);
 
 // Transuarnics
-pyne::nucname::name_t pyne::nucname::TRU_array[22] = {"Np", "Pu", "Am", "Cm", 
-  "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", 
+pyne::nucname::name_t pyne::nucname::TRU_array[22] = {"Np", "Pu", "Am", "Cm",
+  "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt",
   "Ds", "Rg", "Cn", "Fl", "Lv"};
-pyne::nucname::name_group pyne::nucname::TRU (pyne::nucname::TRU_array, 
+pyne::nucname::name_group pyne::nucname::TRU (pyne::nucname::TRU_array,
                                               pyne::nucname::TRU_array+22);
 pyne::nucname::zz_group pyne::nucname::tru = \
   pyne::nucname::name_to_zz_group(pyne::nucname::TRU);
 
 //Minor Actinides
-pyne::nucname::name_t pyne::nucname::MA_array[10] = {"Np", "Am", "Cm", "Bk", 
+pyne::nucname::name_t pyne::nucname::MA_array[10] = {"Np", "Am", "Cm", "Bk",
   "Cf", "Es", "Fm", "Md", "No", "Lr"};
-pyne::nucname::name_group pyne::nucname::MA (pyne::nucname::MA_array, 
+pyne::nucname::name_group pyne::nucname::MA (pyne::nucname::MA_array,
                                              pyne::nucname::MA_array+10);
 pyne::nucname::zz_group pyne::nucname::ma = \
   pyne::nucname::name_to_zz_group(pyne::nucname::MA);
 
 //Fission Products
-pyne::nucname::name_t pyne::nucname::FP_array[88] = {"Ag", "Al", "Ar", "As", 
+pyne::nucname::name_t pyne::nucname::FP_array[88] = {"Ag", "Al", "Ar", "As",
   "At", "Au", "B",  "Ba", "Be", "Bi", "Br", "C",  "Ca", "Cd", "Ce", "Cl", "Co",
-  "Cr", "Cs", "Cu", "Dy", "Er", "Eu", "F",  "Fe", "Fr", "Ga", "Gd", "Ge", "H",  
-  "He", "Hf", "Hg", "Ho", "I",  "In", "Ir", "K",  "Kr", "La", "Li", "Lu", "Mg", 
-  "Mn", "Mo", "N",  "Na", "Nb", "Nd", "Ne", "Ni", "O",  "Os", "P",  "Pb", "Pd", 
-  "Pm", "Po", "Pr", "Pt", "Ra", "Rb", "Re", "Rh", "Rn", "Ru", "S",  "Sb", "Sc", 
-  "Se", "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te", "Ti", "Tl", "Tm", "V",  
+  "Cr", "Cs", "Cu", "Dy", "Er", "Eu", "F",  "Fe", "Fr", "Ga", "Gd", "Ge", "H",
+  "He", "Hf", "Hg", "Ho", "I",  "In", "Ir", "K",  "Kr", "La", "Li", "Lu", "Mg",
+  "Mn", "Mo", "N",  "Na", "Nb", "Nd", "Ne", "Ni", "O",  "Os", "P",  "Pb", "Pd",
+  "Pm", "Po", "Pr", "Pt", "Ra", "Rb", "Re", "Rh", "Rn", "Ru", "S",  "Sb", "Sc",
+  "Se", "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te", "Ti", "Tl", "Tm", "V",
   "W",  "Xe", "Y",  "Yb", "Zn", "Zr"};
-pyne::nucname::name_group pyne::nucname::FP (pyne::nucname::FP_array, 
+pyne::nucname::name_group pyne::nucname::FP (pyne::nucname::FP_array,
                                              pyne::nucname::FP_array+88);
 pyne::nucname::zz_group pyne::nucname::fp = \
   pyne::nucname::name_to_zz_group(pyne::nucname::FP);
@@ -433,7 +433,7 @@ int pyne::nucname::id(int nuc) {
   if (0 < zzz && zzz <= aaa && aaa <= zzz * 7) {
     // Normal nuclide
     if (5 < ssss){
-    // Unphysical metastable state warning 
+    // Unphysical metastable state warning
      warning("You have indicated a metastable state of " + pyne::to_str(ssss) + ". Metastable state above 5, possibly unphysical. ");
     }
     return nuc;
@@ -448,7 +448,7 @@ int pyne::nucname::id(int nuc) {
   zzz = nuc / 10000;     // ZZZ ?
   aaassss = nuc % 10000; // AAA-SSSS ?
   aaa = aaassss / 10;    // AAA ?
-  ssss = nuc % 10;       // SSSS ?          
+  ssss = nuc % 10;       // SSSS ?
   if (zzz <= aaa && aaa <= zzz * 7) {
     // ZZZAAAM nuclide
     if (5 < ssss){
@@ -475,11 +475,11 @@ int pyne::nucname::id(int nuc) {
     throw IndeterminateNuclideForm(nuc, "");
   }
 
-  // Nuclide is not in zzaaam form, 
+  // Nuclide is not in zzaaam form,
   // Try MCNP form, ie zzaaa
   // This is the same form as SZA for the 0th state.
   zzz = nuc / 1000;
-  aaa = nuc % 1000; 
+  aaa = nuc % 1000;
   if (zzz <= aaa) {
     if (aaa - 400 < 0) {
       if (nuc == 95242)
@@ -500,8 +500,8 @@ int pyne::nucname::id(int nuc) {
     return zzz * 10000000;
   }
 
-  // Not a normal nuclide, might be a 
-  // Natural elemental nuclide.  
+  // Not a normal nuclide, might be a
+  // Natural elemental nuclide.
   // ie 92 for Uranium = 920000
   if (0 < zz_name.count(nuc))
     return nuc * 10000000;
@@ -519,13 +519,13 @@ int pyne::nucname::id(std::string nuc) {
     throw NotANuclide(nuc, "<empty>");
   int newnuc;
   std::string elem_name;
-  int dash1 = nuc.find("-"); 
+  int dash1 = nuc.find("-");
   int dash2;
   if (dash1 == npos)
     dash2 = npos;
   else
     dash2 = nuc.find("-", dash1+1);
-  
+
   // nuc must be at least 4 characters or greater if it is in ZZLLAAAM form.
   if (nuc.length() >= 5 && dash1 != npos && dash2 != npos) {
     // Nuclide most likely in ZZLLAAAM Form, only form that contains two "-"'s.
@@ -545,7 +545,7 @@ int pyne::nucname::id(std::string nuc) {
 
   if (pyne::contains_substring(pyne::digits, nucstr.substr(0, 1))) {
     if (pyne::contains_substring(pyne::digits, nucstr.substr(nuclen-1, nuclen))) {
-      // Nuclide must actually be an integer that 
+      // Nuclide must actually be an integer that
       // just happens to be living in string form.
       newnuc = pyne::to_int(nucstr);
       newnuc = id(newnuc);
@@ -569,16 +569,16 @@ int pyne::nucname::id(std::string nuc) {
 
     // natural element form, a la 'U' -> 920000000
     if (anum_str.empty()) {
-      elem_name = pyne::capitalize(nucstr);    
+      elem_name = pyne::capitalize(nucstr);
       if (0 < name_zz.count(elem_name))
-        return 10000000 * name_zz[elem_name]; 
+        return 10000000 * name_zz[elem_name];
     }
 
     int anum = pyne::to_int(anum_str);
 
     // bad form
     if (anum < 0)
-      throw NotANuclide(nucstr, anum); 
+      throw NotANuclide(nucstr, anum);
 
     // Figure out if we are meta-stable or not
     std::string end_char = pyne::last_char(nucstr);
@@ -600,7 +600,7 @@ int pyne::nucname::id(std::string nuc) {
     // Clearly not a nuclide
     throw NotANuclide(nuc, nucstr);
   }
-  return newnuc;  
+  return newnuc;
 }
 
 
@@ -631,7 +631,7 @@ bool pyne::nucname::iselement(int nuc) {
   catch(NotANuclide) {
     return false;
   }
- 
+
   if (n < 10000000)
     return false;
   int zzz = znum(n);
@@ -861,7 +861,7 @@ int pyne::nucname::zzllaaam_to_id(std::string nuc) {
   std::string nucstr = pyne::to_upper(nuc);
   // Removing first two characters (redundant), for 1 digit nuclides, such
   // as 2-He-4, the first slash will be removed, and the second attempt to
-  // remove the second slash will do nothing.  
+  // remove the second slash will do nothing.
   nucstr.erase(0,2);
   nucstr = pyne::remove_substring(nucstr, "-");
   // Does nothing if nuclide is short, otherwise removes the second "-" instance
@@ -873,9 +873,9 @@ int pyne::nucname::zzllaaam_to_id(std::string nuc) {
 
   // natural element form, a la 'U' -> 920000000
   if (anum_str.empty() || pyne::contains_substring(nucstr, "NAT")) {
-    elem_name = pyne::capitalize(pyne::remove_substring(nucstr, "NAT")); 
+    elem_name = pyne::capitalize(pyne::remove_substring(nucstr, "NAT"));
     if (0 < name_zz.count(elem_name))
-      return 10000000 * name_zz[elem_name]; 
+      return 10000000 * name_zz[elem_name];
   }
   int anum = pyne::to_int(anum_str);
 
@@ -911,7 +911,7 @@ int pyne::nucname::mcnp(int nuc) {
     ssss = (ssss + 1) % 2;
 
   // Handle the crazy MCNP meta-stable format
-  if (0 != ssss && ssss < 10) 
+  if (0 != ssss && ssss < 10)
     newnuc += 300 + (ssss * 100);
 
   return newnuc;
@@ -935,7 +935,7 @@ int pyne::nucname::mcnp(std::string nuc) {
 //
 int pyne::nucname::mcnp_to_id(int nuc) {
   int zzz = nuc / 1000;
-  int aaa = nuc % 1000; 
+  int aaa = nuc % 1000;
   if (zzz == 0)
     throw NotANuclide(nuc, "not in the MCNP format");
   else if (zzz <= aaa) {
@@ -1018,7 +1018,7 @@ std::string pyne::nucname::serpent(int nuc) {
   std::string lllower = pyne::to_lower(zz_name[zzz]);
   newnuc += llupper[0];
   for (int l = 1; l < lllower.size(); l++)
-    newnuc += lllower[l];  
+    newnuc += lllower[l];
 
   // Add required dash
   newnuc += "-";
@@ -1077,9 +1077,9 @@ int pyne::nucname::serpent_to_id(std::string nuc) {
 
   // natural element form, a la 'U' -> 920000000
   if (anum_str.empty() || pyne::contains_substring(nucstr, "NAT")) {
-    elem_name = pyne::capitalize(pyne::remove_substring(nucstr, "NAT")); 
+    elem_name = pyne::capitalize(pyne::remove_substring(nucstr, "NAT"));
     if (0 < name_zz.count(elem_name))
-      return 10000000 * name_zz[elem_name]; 
+      return 10000000 * name_zz[elem_name];
   }
   int anum = pyne::to_int(anum_str);
 
@@ -1128,10 +1128,10 @@ std::string pyne::nucname::nist(int nuc) {
   std::string name_lower = pyne::to_lower(zz_name[zzz]);
   newnuc += name_upper[0];
   for (int l = 1; l < name_lower.size(); l++)
-    newnuc += name_lower[l];  
+    newnuc += name_lower[l];
 
   // Add meta-stable flag
-  // No metastable flag for NIST, 
+  // No metastable flag for NIST,
   // but could add star, by uncommenting below
   //if (0 < mod_10)
   //  newnuc += "*";
@@ -1178,7 +1178,7 @@ int pyne::nucname::nist_to_id(std::string nuc) {
   if (anum_str.empty()) {
     elem_name = pyne::capitalize(nuc);
     if (0 < name_zz.count(elem_name))
-      return 10000000 * name_zz[elem_name]; 
+      return 10000000 * name_zz[elem_name];
   }
   nucid = pyne::to_int(anum_str) * 10000;
 
@@ -1320,7 +1320,7 @@ int pyne::nucname::alara_to_id(std::string nuc) {
   if (anum_str.empty()) {
     elem_name = pyne::capitalize(nuc);
     if (0 < name_zz.count(elem_name))
-      return 10000000 * name_zz[elem_name]; 
+      return 10000000 * name_zz[elem_name];
   }
   nucid = pyne::to_int(anum_str) * 10000;
 
@@ -1363,7 +1363,7 @@ int pyne::nucname::sza_to_id(int nuc) {
   int sss = nuc / 1000000;
   int zzzaaa = nuc % 1000000;
   if (5 < sss){
-  // Unphysical metastable state warning 
+  // Unphysical metastable state warning
    warning("You have indicated a metastable state of " + pyne::to_str(sss) + ". Metastable state above 5, possibly unphysical. ");
   }
   return zzzaaa * 10000 + sss;
@@ -1388,46 +1388,45 @@ void pyne::nucname::_load_state_map(){
 }
 
 int pyne::nucname::state_id_to_id(int state) {
-    int zzzaaa = (state / 10000) * 10000;
-    int state_number = state % 10000;
-    if (state_number == 0) return state;
-    std::map<int, int>::iterator nuc_iter, nuc_end;
+  int zzzaaa = (state / 10000) * 10000;
+  int state_number = state % 10000;
+  if (state_number == 0) return state;
+  std::map<int, int>::iterator nuc_iter, nuc_end;
 
-    nuc_iter = state_id_map.find(state);
-    nuc_end = state_id_map.end();
-    if (nuc_iter != nuc_end){ 
-     int m = (*nuc_iter).second;
-     return zzzaaa + m;
-    }        
+  nuc_iter = state_id_map.find(state);
+  nuc_end = state_id_map.end();
+  if (nuc_iter != nuc_end){
+    int m = (*nuc_iter).second;
+    return zzzaaa + m;
+  }
 
-    if (state_id_map.empty())  {
-      _load_state_map();
-      return state_id_to_id(state);
-    }
-    throw IndeterminateNuclideForm(state, "no matching metastable state");
+  if (state_id_map.empty())  {
+    _load_state_map();
+    return state_id_to_id(state);
+  }
+  return -1;
 }
 
 
 int pyne::nucname::id_to_state_id(int nuc_id) {
-    int zzzaaa = (nuc_id / 10000) * 10000;
-    int state = nuc_id % 10000;
-    if (state == 0) return nuc_id;
-    std::map<int, int>::iterator nuc_iter, nuc_end, it;
-    
-    nuc_iter = state_id_map.lower_bound(nuc_id);
-    nuc_end = state_id_map.upper_bound(nuc_id + 10000);
-    for (it = nuc_iter; it!= nuc_end; ++it){
-        if (state == it->second) {
-          return it->first;
-        }
+  int zzzaaa = (nuc_id / 10000) * 10000;
+  int state = nuc_id % 10000;
+  if (state == 0) return nuc_id;
+  std::map<int, int>::iterator nuc_iter, nuc_end, it;
+
+  nuc_iter = state_id_map.lower_bound(zzzaaa);
+  nuc_end = state_id_map.upper_bound(zzzaaa + 9999);
+  for (it = nuc_iter; it!= nuc_end; ++it){
+    if (state == it->second) {
+      return it->first;
     }
-    int m = (*nuc_iter).second;
-    
-    if (state_id_map.empty())  {
-      _load_state_map();
-      return id_to_state_id(nuc_id);
-    }
-    throw IndeterminateNuclideForm(state, "no matching state id");
+  }
+
+  if (state_id_map.empty())  {
+    _load_state_map();
+    return id_to_state_id(nuc_id);
+  }
+  return -1;
 }
 
 
@@ -1448,13 +1447,13 @@ int pyne::nucname::ensdf_to_id(std::string nuc) {
   } else if (std::isdigit(nuc[3])) {
     int aaa = to_int(nuc.substr(0, 3));
     int zzz;
-    std::string xx_str = nuc.substr(3,2); 
+    std::string xx_str = nuc.substr(3,2);
     zzz = to_int(xx_str) + 100;
     int nid = 10000 * aaa + 10000000 * zzz;
     return nid;
   } else {
     return nucname::id(nuc);
   }
-  
+
 }
 
