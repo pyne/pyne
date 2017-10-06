@@ -4,11 +4,10 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-from itertools import groupby
 
 import nose
-from nose.tools import assert_equal, assert_almost_equal, assert_less_equal
-import numpy as np
+
+from nose.tools import assert_equal, assert_almost_equal
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
@@ -364,6 +363,8 @@ ensdf_sample = """\
 152GDS G KC=0.00129$  LC=0.00018
 
 """
+ensdf_sample = '\n'.join([line + ' '*(80 - len(line))
+                          for line in ensdf_sample.splitlines()])
 
 
 def test_decays():
