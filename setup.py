@@ -51,6 +51,7 @@ else:
 
 import numpy as np
 
+
 # import src into pythonpath - needed to actually run decaygen/atomicgen
 if '.' not in sys.path:
     sys.path.append(os.getcwd() + '/src')
