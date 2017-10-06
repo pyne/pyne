@@ -335,7 +335,7 @@ def test_wgt_group_collapse1():
 
     phi_n = np.array([0.0, 2.0, 1.0, 0.5])
     sigma_n = np.array([1.0, 2.0, 3.0, 4.0])
-    wgts = np.arrray([0.00001, 0.00001, 0.00001, 0.00001])
+    wgts = np.array([0.00001, 0.00001, 0.00001, 0.00001])
     
     observed = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n, wgts=wgts)
     expected = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n)
