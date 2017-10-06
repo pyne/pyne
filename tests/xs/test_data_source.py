@@ -331,6 +331,10 @@ def test_simple_discretize_weights1():
     assert_true((obs[:-1] <= obs[1:]).all())
     simpleds.dst_group_struct = None
 
+def test_shield_weights1():
+    mat = {922350000: 0.5, 922380000: 0.5}
+    simpleds.shield_weights(mat, 300)
+    assert_array_equal(simpleds.slf_shld_wgts[922350000], simpleds.slf_shld_wgts[922380000])
 
 def test_eaf_E_g():
     if not eafds.exists:
