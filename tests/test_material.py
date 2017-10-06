@@ -332,7 +332,6 @@ def test_number_density():
     exp = 9.2825E22
     assert_almost_equal(obs / exp, 1.0, 4)
 
-
 def test_set_mat_int_1():
     mat = Material(nucvec, -1)
     mat1 = mat.set_mat([922350000, 922380000, 80160000], 2)

@@ -11,7 +11,7 @@ import pyne
 from pyne.xs.models import partial_energy_matrix, partial_energy_matrix_mono, chi, \
                            alpha, k, m_n, beta, alpha_at_theta_0, alpha_at_theta_pi, \
                            one_over_gamma_squared, E_prime_min, sigma_s_const, \
-                           sigma_s, phi_g, group_collapse 
+                           sigma_s, phi_g, group_collapse, thermspect, fastspect 
 from pyne.pyne_config import pyne_conf
 
 nuc_data = pyne_conf.NUC_DATA_PATH
@@ -307,7 +307,6 @@ def test_phi_g7():
     # Floating point error here requires 'alomst' equal
     assert_array_almost_equal(observed, expected)
 
-
 def test_group_collapse1():
     E_g = np.array([0.0, 4.0, 8.0])
     E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
@@ -330,7 +329,17 @@ def test_group_collapse1():
     # bad call
     assert_raises(ValueError, group_collapse, sigma_n, phi_n)
 
+def test_wgt_group_collapse1():
+    E_g = np.array([0.0, 4.0, 8.0])
+    E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0])
 
+    phi_n = np.array([0.0, 2.0, 1.0, 0.5])
+    sigma_n = np.array([1.0, 2.0, 3.0, 4.0])
+    wgts = np.array([0.00001, 0.00001, 0.00001, 0.00001])
+    
+    observed = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n, weights=wgts)
+    expected = group_collapse(sigma_n, phi_n, E_g=E_g, E_n=E_n)
+    assert_array_almost_equal(observed, expected)
 
 #
 # Test physical models
@@ -429,3 +438,32 @@ def test_sigma_s():
     assert_true((0.0 <= sig_s).all())
     assert_true((sig_s[1:] <= sig_s[:-1]).all())
 
+def test_thermspect():
+    e1 = [1.e-6]
+    e2 = [1.]
+    e3 = [0.9375e3, 1.5e4]
+    assert_array_equal(np.asarray([1.]), thermspect(np.asarray(e1)))
+    assert_array_equal(np.asarray([1.]), thermspect(np.asarray(e2)))
+    assert_array_equal(np.asarray([0.8, 0.2]), thermspect(np.asarray(e3)))
+
+def test_thermspect2():
+    e1 = [0.9375e3, 1.5e4]
+    phi = thermspect(np.asarray(e1), T=400., lower=1.e4)
+    assert_array_equal(np.asarray([0.0, 1.0]), phi)
+
+def test_fastspect():
+    e1 = np.asarray([1.e-6])
+    e2 = np.asarray([1.])
+    e3 = np.asarray([1.291e-5, 10])
+    uno = np.asarray([1.])
+    assert_array_equal(uno, fastspect(e1))
+    assert_array_equal(uno, fastspect(e2))
+    v1 = np.asarray([0.04872966,  0.95127034])
+    assert_array_almost_equal(v1, fastspect(e3))
+
+def test_fastspect2():
+    e1 = np.asarray([1.291e-5, 10])
+    phi1 = fastspect(e1, T=1000., lower=1.e-5)
+    v1 = np.asarray([0.0032472,  0.9967528])
+    assert_array_almost_equal(v1, phi1)
+    

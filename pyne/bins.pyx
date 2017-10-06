@@ -160,9 +160,11 @@ def pointwise_collapse(np.ndarray[np.float64_t, ndim=1] x_g,
     cdef np.ndarray[np.float64_t, ndim=1] y_g = np.empty(G, dtype='float64')
 
     # Ensure input is monotonically increasing/decreasing
-    for z in [x_g, x]:
-        if not (np.all(np.diff(z) > 0.) or np.all(np.diff(z) < 0)):
-            raise ValueError("x and x_g arrays must be monotonically"  
+    if not (np.all(np.diff(x) >= 0.) or np.all(np.diff(x) <= 0)):
+            raise ValueError("x must be monotonically "  
+                             "increasing/decreasing.")
+    if not (np.all(np.diff(x_g) >= 0.) or np.all(np.diff(x_g) <= 0)):
+            raise ValueError("x_g must be monotonically "  
                              "increasing/decreasing.")
 
     reversed = False
