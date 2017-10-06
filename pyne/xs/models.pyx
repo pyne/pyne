@@ -388,6 +388,7 @@ def thermspect(E, T=573.0, lower=0.155e-6):
     lower: float
         The point at which the shape of the flux switches
         from high energy to low energy. 
+    
     Returns
     -------
     phi : array
@@ -396,7 +397,7 @@ def thermspect(E, T=573.0, lower=0.155e-6):
 
     k = 8.52e-5
     phi = np.empty(len(E), 'f8')
-    mask = (E < lower)
+    mask = (E <= lower)
     phi[mask] = np.sqrt(2*E[mask]*1e6) * 2 * np.pi * np.sqrt(E[mask]*1e6) 
     phi[mask] *= np.exp(-E[mask]*1e6/(k*T)) / (np.pi * k * T)**1.5
     mask = (E > lower)
@@ -417,6 +418,7 @@ def fastspect(E, T=783.0, lower=1.0e-3):
     lower: float
         The point at which the shape of the flux switches
         from high energy to low energy. 
+
     Returns
     -------
     phi : array
@@ -426,8 +428,8 @@ def fastspect(E, T=783.0, lower=1.0e-3):
     phi = np.empty(len(E), 'f8')
     mask = (E < lower)
     phi[mask] = 1/((2*E[mask]*1e6)**0.5)
-    mask = (E > lower)
-    phi[mask] += np.sqrt(2*E[mask]*1e6) * 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
+    mask = (E >= lower)
+    phi[mask] = np.sqrt(2*E[mask]*1e6) * 0.453 * np.exp(-1.036 * E[mask]) * np.sinh(np.sqrt(2.29 * E[mask]))
     phi /= phi.sum()
     return phi
 #
