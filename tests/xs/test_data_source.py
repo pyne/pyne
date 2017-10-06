@@ -332,9 +332,9 @@ def test_simple_discretize_weights1():
     simpleds.dst_group_struct = None
 
 def test_shield_weights1():
-    mat = {922350: 0.5, 922380: 0.5}
+    mat = {922350000: 0.5, 922380000: 0.5}
     simpleds.shield_weights(mat, 300)
-    assert_array_equal(simpleds.slf_shld_wgts[92235000], simpleds.slf_shld_wgts[92238000])
+    assert_array_equal(simpleds.slf_shld_wgts[922350000], simpleds.slf_shld_wgts[922380000])
 
 def test_eaf_E_g():
     if not eafds.exists:

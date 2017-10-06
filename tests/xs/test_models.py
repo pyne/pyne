@@ -449,9 +449,9 @@ def test_thermspec():
     e1 = [1.e-6]
     e2 = [1.]
     e3 = [0.9375e3, 1.5e4]
-    assert_equal(np.asarray([1.]), thermspec(np.asarray(e1))
-    assert_equal(np.asarray([1.]), thermspec(np.asarray(e2))
-    assert_equal(np.asarray([0.8, 0.2]), thermspec(np.asarray(e3))
+    assert_equal(np.asarray([1.]), thermspec(np.asarray(e1)))
+    assert_equal(np.asarray([1.]), thermspec(np.asarray(e2)))
+    assert_equal(np.asarray([0.8, 0.2]), thermspec(np.asarray(e3)))
 
 def test_thermspec2():
     e1 = [0.9375e3, 1.5e4]
