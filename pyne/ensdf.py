@@ -830,6 +830,8 @@ _BAD_METASTABLES = {
     (451100001, 2): 1,
     # Pm-154 misreports its ground state as a first metastable
     (611540000, 1): 0,
+    # Ga-72M is not listed as metastable
+    (310720002, 0): 1,
     }
 
 
