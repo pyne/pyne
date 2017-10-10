@@ -2846,7 +2846,7 @@ int pyne::rxname::child(int nuc, unsigned int rx, std::string z) {
   std::pair<std::string, unsigned int> key = std::make_pair(z, rx);
   if (0 == id_offset.count(key))
     throw IndeterminateReactionForm("z=" + z + ", rx=" + pyne::to_str(rx), "???");
-  int to_nuc = nuc + id_offset[key];
+  int to_nuc = pyne::nucname::groundstate(nuc) + id_offset[key];
   if (!pyne::nucname::isnuclide(to_nuc))
     throw pyne::nucname::NotANuclide(nuc, to_nuc);
   return to_nuc;
