@@ -39,6 +39,7 @@ macro(pyne_setup_fortran)
       find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
         PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
         NODEFAULTPATH
+        ${DEPS_LIB_HINTS}
       )
       if (LIBGCC_S_PATH)
         break()
@@ -167,4 +168,3 @@ macro(pyne_configure_rpath)
   ENDIF("${isSystemDir}" STREQUAL "-1")
   MESSAGE("-- CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 endmacro()
-
