@@ -222,17 +222,17 @@ def k_from_hl_stable(hl, gamma):
     mask = np.ones(C-1, dtype=bool)
     outer[mask, mask] = 1.0
     # end nuclide is stable so ignore
-    import pdb; pdb.set_trace()
     # collapse by taking the product
     p = outer.prod(axis=0)
-
+    k = np.append(p, 1.0)
+    return k
 
 
 def k_from_hl_unstable(hl, gamma):
     outer = 1 / (hl - hl[:, np.newaxis])
     # identity is ignored, set to unity
     mask = np.ones(len(hl), dtype=bool)
-    cij[mask, mask] = 1.0
+    outer[mask, mask] = 1.0
     # collapse by taking the product
     p = outer.prod(axis=0)
     # get the other pieces
@@ -255,9 +255,6 @@ def k_a_from_hl(chain, short=1e-16):
         k = k_from_hl_stable(hl, gamma)
     else:
         k = k_from_hl_unstable(hl, gamma)
-    print(chain, k)
-    if np.isnan(k).any():
-        import pdb; pdb.set_trace()
     # half-life  filter, makes compiling faster by pre-ignoring negligible species
     # in this chain. They'll still be picked up in their own chains.
     if ends_stable:
