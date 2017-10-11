@@ -215,6 +215,63 @@ def k_a(chain, short=1e-16):
     return k[mask], a[mask]
 
 
+def k_from_hl_stable(hl, gamma):
+    C = len(hl)
+    outer = 1 / (hl[:C-1] - hl[:C-1, np.newaxis])
+    # identity is ignored, set to unity
+    mask = np.ones(C-1, dtype=bool)
+    outer[mask, mask] = 1.0
+    # end nuclide is stable so ignore
+    import pdb; pdb.set_trace()
+    # collapse by taking the product
+    p = outer.prod(axis=0)
+
+
+
+def k_from_hl_unstable(hl, gamma):
+    outer = 1 / (hl - hl[:, np.newaxis])
+    # identity is ignored, set to unity
+    mask = np.ones(len(hl), dtype=bool)
+    cij[mask, mask] = 1.0
+    # collapse by taking the product
+    p = outer.prod(axis=0)
+    # get the other pieces
+    C = len(hl)
+    T_C = hl[-1]
+    T_i_C = hl**(C - 1)
+    # compute k
+    k = (gamma * T_C) * T_i_C * p
+    return k
+
+
+def k_a_from_hl(chain, short=1e-16):
+    hl = np.array([half_life(n, False) for n in chain])
+    a = -1.0 / hl
+    gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
+    if gamma == 0.0 or np.isnan(gamma):
+        return None, None
+    ends_stable = np.isinf(hl[-1])
+    if ends_stable:
+        k = k_from_hl_stable(hl, gamma)
+    else:
+        k = k_from_hl_unstable(hl, gamma)
+    print(chain, k)
+    if np.isnan(k).any():
+        import pdb; pdb.set_trace()
+    # half-life  filter, makes compiling faster by pre-ignoring negligible species
+    # in this chain. They'll still be picked up in their own chains.
+    if ends_stable:
+        mask = (hl[:-1] / hl[:-1].sum()) > short
+        mask = np.append(mask, True)
+    else:
+        mask = (hl / hl.sum()) > short
+    if mask.sum() < 2:
+        mask = np.ones(len(chain), dtype=bool)
+    return k[mask], a[mask]
+
+
+
+
 def kbexpr(k, b):
     if k == 1.0:
         return B_EXPR.format(b=b)
@@ -233,6 +290,7 @@ def b_from_a(cse, a_i):
     bkey = EXP_EXPR.format(a=a_i)
     return cse[bkey]
 
+
 def chainexpr(chain, cse, b, bt, short=1e-16):
     child = chain[-1]
     if len(chain) == 1:
@@ -240,7 +298,7 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
         b = ensure_cse(a_i, b, cse)
         terms = B_EXPR.format(b=b_from_a(cse, a_i))
     else:
-        k, a = k_a(chain, short=short)
+        k, a = k_a_from_hl(chain, short=short)
         if k is None:
             return None, b, bt
         terms = []
