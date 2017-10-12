@@ -217,14 +217,15 @@ def k_a(chain, short=1e-16):
 
 def k_from_hl_stable(hl, gamma):
     C = len(hl)
-    outer = 1 / (hl[:C-1] - hl[:C-1, np.newaxis])
+    outer = 1 / (hl[:C-1, np.newaxis] - hl[:C-1])
     # identity is ignored, set to unity
     mask = np.ones(C-1, dtype=bool)
     outer[mask, mask] = 1.0
     # end nuclide is stable so ignore
     # collapse by taking the product
     p = outer.prod(axis=0)
-    k = np.append(p, 1.0)
+    k = gamma * p * hl[:-1]**(C-2)
+    k = np.append(k, 1.0)
     return k
 
 
@@ -238,7 +239,7 @@ def k_from_hl_unstable(hl, gamma):
     # get the other pieces
     C = len(hl)
     T_C = hl[-1]
-    T_i_C = hl**(C - 1)
+    T_i_C = hl**(C - 2)
     # compute k
     k = (gamma * T_C) * T_i_C * p
     return k
@@ -265,8 +266,6 @@ def k_a_from_hl(chain, short=1e-16):
     if mask.sum() < 2:
         mask = np.ones(len(chain), dtype=bool)
     return k[mask], a[mask]
-
-
 
 
 def kbexpr(k, b):
@@ -414,6 +413,7 @@ def write_if_diff(filename, contents):
 def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, sf=False,
           dummy=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
+    nucs = nucs[:20]
     h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
     write_if_diff(hdr, h)
     write_if_diff(src, s)
