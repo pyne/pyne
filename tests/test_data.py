@@ -197,6 +197,8 @@ def test_constants():
 
 def test_metastable_id():
     assert_equal(data.metastable_id(430990000, 1), 430990002)
+    assert_equal(data.metastable_id(310720000, 1), 310720002)
+    assert_equal(data.metastable_id(451080000, 1), 451080004)
 
 
 def test_decay_half_life():
