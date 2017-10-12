@@ -5,7 +5,9 @@ It is suppossed to be fast.
 import os
 import io
 import sys
+import pdb
 import warnings
+import traceback
 from argparse import ArgumentParser, Namespace
 
 import numpy as np
@@ -224,7 +226,7 @@ def k_from_hl_stable(hl, gamma):
     # end nuclide is stable so ignore
     # collapse by taking the product
     p = outer.prod(axis=0)
-    k = gamma * p * hl[:-1]**(C-2)
+    k = -gamma * p * hl[:-1]**(C-2)
     k = np.append(k, 1.0)
     return k
 
@@ -247,6 +249,7 @@ def k_from_hl_unstable(hl, gamma):
 
 def k_a_from_hl(chain, short=1e-16):
     hl = np.array([half_life(n, False) for n in chain])
+    hl = hl[~np.isnan(hl)]
     a = -1.0 / hl
     gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
@@ -264,7 +267,7 @@ def k_a_from_hl(chain, short=1e-16):
     else:
         mask = (hl / hl.sum()) > short
     if mask.sum() < 2:
-        mask = np.ones(len(chain), dtype=bool)
+        mask = np.ones(len(hl), dtype=bool)
     return k[mask], a[mask]
 
 
@@ -413,7 +416,7 @@ def write_if_diff(filename, contents):
 def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, sf=False,
           dummy=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
-    nucs = nucs[:20]
+    #nucs = nucs[:200]
     h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
     write_if_diff(hdr, h)
     write_if_diff(src, s)
@@ -444,8 +447,14 @@ def main():
                        help='Does not build the source code.')
     ns = parser.parse_args()
     if ns.build:
-        build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf,
-              dummy=ns.dummy)
+        try:
+            build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf,
+                  dummy=ns.dummy)
+        except Exception:
+            type, value, tb = sys.exc_info()
+            traceback.print_exc()
+            pdb.post_mortem(tb)
+
     if ns.tar:
         print("building decay.tar.gz ...")
         build_tarfile(ns)
