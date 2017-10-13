@@ -227,7 +227,7 @@ def k_from_hl_stable(hl, gamma):
     # collapse by taking the product
     p = outer.prod(axis=0)
     k = -gamma * p * hl[:-1]**(C-2)
-    k = np.append(k, 1.0)
+    k = np.append(k, gamma)
     return k
 
 
