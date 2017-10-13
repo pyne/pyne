@@ -219,7 +219,7 @@ def k_a(chain, short=1e-16):
 
 def k_from_hl_stable(hl, gamma):
     C = len(hl)
-    outer = 1 / (hl[:C-1, np.newaxis] - hl[:C-1])
+    outer = 1 / (hl[:C-1] - hl[:C-1, np.newaxis])
     # identity is ignored, set to unity
     mask = np.ones(C-1, dtype=bool)
     outer[mask, mask] = 1.0
@@ -324,19 +324,19 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
             if k_i == 1.0 and a_i == 0.0:
                 term = str(1.0 - bt)  # a slight optimization
                 bt = 1
-            elif a_i == 0.0:
-                if not np.isnan(k_i):
-                    if bt < 1:
-                        if k_i + bt < 1:
-                            term = '{0:.17e}'.format(k_i)  # another slight optimization
-                            bt += k_i
-                        else:
-                            term = '{0:.17e}'.format(1.0 - bt)
-                            bt = 1.0
-                    else:
-                        term = '0'
-                else:
-                    term = '0'
+            #elif a_i == 0.0:
+            #    if not np.isnan(k_i):
+            #        if bt < 1:
+            #            if k_i + bt < 1:
+            #                term = '{0:.17e}'.format(k_i)  # another slight optimization
+            #                bt += k_i
+            #            else:
+            #                term = '{0:.17e}'.format(1.0 - bt)
+            #                bt = 1.0
+            #        else:
+            #            term = '0'
+            #    else:
+            #        term = '0'
             else:
                 b = ensure_cse(a_i, b, cse)
                 term = kbexpr(k_i, b_from_a(cse, a_i))
