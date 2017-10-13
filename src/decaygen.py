@@ -175,48 +175,6 @@ def genchains(chains, sf=False):
     return chains
 
 
-def k_a(chain, short=1e-16):
-    # gather data
-    hl = np.array([half_life(n, False) for n in chain])
-    a = -1.0 / hl
-    dc = np.array(list(map(lambda nuc: decay_const(nuc, False), chain)))
-    if np.isnan(dc).any():
-        # NaNs are bad, mmmkay. Nones mean we should skip
-        return None, None
-    ends_stable = (dc[-1] < 1e-16)  # check if last nuclide is a stable species
-    # compute cij -> ci in prep for k
-    cij = dc[:, np.newaxis] / (dc[:, np.newaxis] - dc)
-    if ends_stable:
-        cij[-1] = -1.0 / dc  # adjustment for stable end nuclide
-    mask = np.ones(len(chain), dtype=bool)
-    cij[mask, mask] = 1.0  # identity is ignored, set to unity
-    ci = cij.prod(axis=0)
-    # compute k
-    if ends_stable:
-        k = dc * ci
-        k[-1] = 1.0
-    else:
-        k = (dc / dc[-1]) * ci
-    if np.isinf(k).any():
-        # if this happens then something wen very wrong, skip
-        return None, None
-    # compute and apply branch ratios
-    gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
-    if gamma == 0.0 or np.isnan(gamma):
-        return None, None
-    k *= gamma
-    # half-life  filter, makes compiling faster by pre-ignoring negligible species
-    # in this chain. They'll still be picked up in their own chains.
-    if ends_stable:
-        mask = (hl[:-1] / hl[:-1].sum()) > short
-        mask = np.append(mask, True)
-    else:
-        mask = (hl / hl.sum()) > short
-    if mask.sum() < 2:
-        mask = np.ones(len(chain), dtype=bool)
-    return k[mask], a[mask]
-
-
 def k_from_hl_stable(hl, gamma):
     C = len(hl)
     outer = 1 / (hl[:C-1] - hl[:C-1, np.newaxis])
@@ -351,7 +309,7 @@ def gencase(nuc, idx, b, short=1e-16, sf=False):
         case.append(CHAIN_STMT.format(idx[nuc], 'it->second'))
     else:
         chains = genchains([(nuc,)], sf=sf)
-        print(len(chains), len(set(chains)), nuc)
+        print('{} has {} chains'.format(nucname.name(nuc), len(set(chains))))
         cse = {}  # common sub-expression exponents to elimnate
         bt = 0
         for c in chains:
