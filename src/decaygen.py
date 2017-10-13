@@ -247,6 +247,27 @@ def k_from_hl_unstable(hl, gamma):
     return k
 
 
+def k_filter(k, short=1e-16):
+    k_not_inf_or_nan = np.bitwise_and(~np.isinf(k), ~np.isnan(k))
+    if k_not_inf_or_nan.sum() == 0:
+        return k_not_inf_or_nan
+    k_abs = np.abs(k)
+    k_max = k_abs[k_not_inf_or_nan].max()
+    k_filt = (k_abs / k_max) > short
+    k_filt = np.bitwise_and(k_filt, k_not_inf_or_nan)
+    return k_filt
+
+
+def hl_filter(hl, short=1e-16):
+    ends_stable = np.isinf(hl[-1])
+    if ends_stable:
+        hl_filt = (hl[:-1] / hl[:-1].sum()) > short
+        hl_filt = np.append(hl_filt, True)
+    else:
+        hl_filt = (hl / hl.sum()) > short
+    return hl_filt
+
+
 def k_a_from_hl(chain, short=1e-16):
     hl = np.array([half_life(n, False) for n in chain])
     hl = hl[~np.isnan(hl)]
@@ -259,15 +280,13 @@ def k_a_from_hl(chain, short=1e-16):
         k = k_from_hl_stable(hl, gamma)
     else:
         k = k_from_hl_unstable(hl, gamma)
-    # half-life  filter, makes compiling faster by pre-ignoring negligible species
+    # filtering makes compiling faster by pre-ignoring negligible species
     # in this chain. They'll still be picked up in their own chains.
-    if ends_stable:
-        mask = (hl[:-1] / hl[:-1].sum()) > short
-        mask = np.append(mask, True)
-    else:
-        mask = (hl / hl.sum()) > short
-    if mask.sum() < 2:
-        mask = np.ones(len(hl), dtype=bool)
+    k_filt = k_filter(k, short=short)
+    hl_filt = hl_filter(hl, short=short)
+    mask = np.bitwise_and(k_filt, hl_filt)
+    if mask.sum() == 0:
+        return None, None
     return k[mask], a[mask]
 
 
