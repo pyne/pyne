@@ -822,7 +822,7 @@ def _adjust_ge100_branches(levellist):
         del levellist[i]
 
 
-# State Id, Bad Metastable Number, Replacement Metastable Number
+# State Id, Bad Metastable Number, (Replacement State ID, optional) Replacement Metastable Number
 _BAD_METASTABLES = {
     # Rh-110 misreports its ground state as a first meta-stable and its first
     # metastable as its second.
@@ -834,6 +834,10 @@ _BAD_METASTABLES = {
     (310720002, 0): 1,
     # Rh-108M is not listed as metastable
     (451080004, 0): 1,
+    # Pm-136 mislabels two states as both metastable or ground.
+    # Replacing with what KAERI and NNDC report
+    (611360001, 2): (611360000, 0),
+    (611360000, 1): (611360001, 1),
     }
 
 
@@ -843,7 +847,10 @@ def _adjust_metastables(levellist):
         key = (levellist[i][0], levellist[i][5])
         if key in _BAD_METASTABLES:
             row = list(levellist[i])
-            row[5] = _BAD_METASTABLES[key]
+            new_id = _BAD_METASTABLES[key]
+            if not isinstance(new_id, int):
+                row[0], new_id = new_id
+            row[5] = new_id
             levellist[i] = tuple(row)
 
 
