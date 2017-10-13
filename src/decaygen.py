@@ -282,9 +282,7 @@ def k_a_from_hl(chain, short=1e-16):
         k = k_from_hl_unstable(hl, gamma)
     # filtering makes compiling faster by pre-ignoring negligible species
     # in this chain. They'll still be picked up in their own chains.
-    k_filt = k_filter(k, short=short)
-    hl_filt = hl_filter(hl, short=short)
-    mask = np.bitwise_and(k_filt, hl_filt)
+    mask = k_filter(k, short=short)
     if mask.sum() == 0:
         return None, None
     return k[mask], a[mask]
@@ -324,19 +322,19 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
             if k_i == 1.0 and a_i == 0.0:
                 term = str(1.0 - bt)  # a slight optimization
                 bt = 1
-            #elif a_i == 0.0:
-            #    if not np.isnan(k_i):
-            #        if bt < 1:
-            #            if k_i + bt < 1:
-            #                term = '{0:.17e}'.format(k_i)  # another slight optimization
-            #                bt += k_i
-            #            else:
-            #                term = '{0:.17e}'.format(1.0 - bt)
-            #                bt = 1.0
-            #        else:
-            #            term = '0'
-            #    else:
-            #        term = '0'
+            elif a_i == 0.0:
+                if not np.isnan(k_i):
+                    if bt < 1:
+                        if k_i + bt < 1:
+                            term = '{0:.17e}'.format(k_i)  # another slight optimization
+                            bt += k_i
+                        else:
+                            term = '{0:.17e}'.format(1.0 - bt)
+                            bt = 1.0
+                    else:
+                        term = '0'
+                else:
+                    term = '0'
             else:
                 b = ensure_cse(a_i, b, cse)
                 term = kbexpr(k_i, b_from_a(cse, a_i))
