@@ -235,7 +235,7 @@ def hl_degeneracy(hl, k, a, outerzeros):
     degen_k, k = k[degenerate][0], k[not_degenerate]
     k = np.append(k, degen_k * np.log(2) * degen_hl**-2)
     degen_a, a = a[degenerate][0], a[not_degenerate]
-    a.append(a, degen_a)
+    a = np.append(a, degen_a)
     t_term = np.zeros(len(k), dtype=bool)
     t_term[-1] = True
     return k, a, t_term
@@ -249,7 +249,7 @@ def k_a_from_hl(chain, short=1e-16):
     a = -1.0 / hl
     gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
-        return None, None
+        return None, None, None
     ends_stable = np.isinf(hl[-1])
     k = k_from_hl_stable(hl, gamma, outerdiff, outerzeros) if ends_stable else \
         k_from_hl_unstable(hl, gamma, outerdiff, outerzeros)
@@ -258,7 +258,7 @@ def k_a_from_hl(chain, short=1e-16):
     # in this chain. They'll still be picked up in their own chains.
     mask = k_filter(k, short=short)
     if mask.sum() == 0:
-        return None, None
+        return None, None, None
     return k[mask], a[mask], t_term[mask]
 
 
@@ -288,11 +288,11 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
         b = ensure_cse(a_i, b, cse)
         terms = B_EXPR.format(b=b_from_a(cse, a_i))
     else:
-        k, a = k_a_from_hl(chain, short=short)
+        k, a, t_term = k_a_from_hl(chain, short=short)
         if k is None:
             return None, b, bt
         terms = []
-        for k_i, a_i in zip(k, a):
+        for k_i, a_i, t_term_i in zip(k, a, t_term):
             if k_i == 1.0 and a_i == 0.0:
                 term = str(1.0 - bt)  # a slight optimization
                 bt = 1
@@ -312,6 +312,9 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
             else:
                 b = ensure_cse(a_i, b, cse)
                 term = kbexpr(k_i, b_from_a(cse, a_i))
+            # multiply by t if needed
+            if t_term_i:
+                term += '*t'
             terms.append(term)
         terms = ' + '.join(terms)
     return CHAIN_EXPR.format(terms), b, bt
