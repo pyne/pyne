@@ -175,12 +175,10 @@ def genchains(chains, sf=False):
     return chains
 
 
-def k_from_hl_stable(hl, gamma):
+def k_from_hl_stable(hl, gamma, outerdiff, outerzeros):
     C = len(hl)
-    outer = 1 / (hl[:C-1] - hl[:C-1, np.newaxis])
-    # identity is ignored, set to unity
-    mask = np.ones(C-1, dtype=bool)
-    outer[mask, mask] = 1.0
+    outer = 1 / outerdiff[:C-1,:C-1]
+    outer[outerzeros[:C-1,:C-1]] = 1.0
     # end nuclide is stable so ignore
     # collapse by taking the product
     p = outer.prod(axis=0)
@@ -189,15 +187,13 @@ def k_from_hl_stable(hl, gamma):
     return k
 
 
-def k_from_hl_unstable(hl, gamma):
-    outer = 1 / (hl - hl[:, np.newaxis])
-    # identity is ignored, set to unity
-    mask = np.ones(len(hl), dtype=bool)
-    outer[mask, mask] = 1.0
+def k_from_hl_unstable(hl, gamma, outerdiff, outerzeros):
+    C = len(hl)
+    outer = 1 / outerdiff
+    outer[outerzeros] = 1.0
     # collapse by taking the product
     p = outer.prod(axis=0)
     # get the other pieces
-    C = len(hl)
     T_C = hl[-1]
     T_i_C = hl**(C - 2)
     # compute k
@@ -226,24 +222,44 @@ def hl_filter(hl, short=1e-16):
     return hl_filt
 
 
+def hl_degeneracy(hl, k, a, outerzeros):
+    """Handles degeneracys in half-lives."""
+    degenerate = (outerzeros.sum(axis=0) > 1)
+    not_degenerate = ~degenerate
+    if np.all(not_degenerate):
+        t_term = np.zeros(len(k), dtype=bool)
+        return k, a, t_term
+    # have an actual degeneracy
+    assert degenerate.sum() == 2
+    degen_hl = hl[degenerate][0]
+    degen_k, k = k[degenerate][0], k[not_degenerate]
+    k = np.append(k, degen_k * np.log(2) * degen_hl**-2)
+    degen_a, a = a[degenerate][0], a[not_degenerate]
+    a.append(a, degen_a)
+    t_term = np.zeros(len(k), dtype=bool)
+    t_term[-1] = True
+    return k, a, t_term
+
+
 def k_a_from_hl(chain, short=1e-16):
     hl = np.array([half_life(n, False) for n in chain])
     hl = hl[~np.isnan(hl)]
+    outerdiff = hl - hl[:, np.newaxis]
+    outerzeros = (outerdiff == 0.0)
     a = -1.0 / hl
     gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
         return None, None
     ends_stable = np.isinf(hl[-1])
-    if ends_stable:
-        k = k_from_hl_stable(hl, gamma)
-    else:
-        k = k_from_hl_unstable(hl, gamma)
+    k = k_from_hl_stable(hl, gamma, outerdiff, outerzeros) if ends_stable else \
+        k_from_hl_unstable(hl, gamma, outerdiff, outerzeros)
+    k, a, t_term = hl_degeneracy(hl, k, a, outerzeros)
     # filtering makes compiling faster by pre-ignoring negligible species
     # in this chain. They'll still be picked up in their own chains.
     mask = k_filter(k, short=short)
     if mask.sum() == 0:
         return None, None
-    return k[mask], a[mask]
+    return k[mask], a[mask], t_term[mask]
 
 
 def kbexpr(k, b):
