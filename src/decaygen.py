@@ -147,15 +147,15 @@ B_EXPR = 'b{b}'
 KB_EXPR = '{k:.17e}*' + B_EXPR
 
 
-def genfiles(nucs, short=1e-16, sf=False, dummy=False):
+def genfiles(nucs, short=1e-16, sf=False, dummy=False, debug=False):
     ctx = Namespace(
         nucs=nucs,
         autogenwarn=autogenwarn,
         dummy_ifdef=('ifdef' if dummy else 'ifndef'),
         args=' '.join(sys.argv)
         )
-    ctx.cases = gencases(nucs)
-    ctx.funcs = genelemfuncs(nucs, short=short, sf=sf)
+    ctx.cases = gencases(nucs, debug=debug)
+    ctx.funcs = genelemfuncs(nucs, short=short, sf=sf, debug=debug)
     hdr = HEADER.render(ctx.__dict__)
     src = SOURCE.render(ctx.__dict__)
     return hdr, src
@@ -320,7 +320,7 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
     return CHAIN_EXPR.format(terms), b, bt
 
 
-def gencase(nuc, idx, b, short=1e-16, sf=False):
+def gencase(nuc, idx, b, short=1e-16, sf=False, debug=False):
     case = ['}} case {0}: {{'.format(nuc)]
     dc = decay_const(nuc, False)
     if dc == 0.0:
@@ -337,6 +337,8 @@ def gencase(nuc, idx, b, short=1e-16, sf=False):
             cexpr, b, bt = chainexpr(c, cse, b, bt, short=short)
             if cexpr is None:
                 continue
+            if debug:
+                case.append('  // ' + ' -> '.join(map(nucname.name, c)))
             case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
         bstmts = ['  ' + B_STMT.format(exp=exp, b=bval) for exp, bval in \
                   sorted(cse.items(), key=lambda x: x[1])]
@@ -349,7 +351,7 @@ def elems(nucs):
     return sorted(set(map(nucname.znum, nucs)))
 
 
-def gencases(nucs):
+def gencases(nucs, debug=False):
     switches = []
     for i in elems(nucs):
         c = ['case {0}:'.format(i),
@@ -359,12 +361,13 @@ def gencases(nucs):
     return '\n'.join(switches)
 
 
-def genelemfuncs(nucs, short=1e-16, sf=False):
+def genelemfuncs(nucs, short=1e-16, sf=False, debug=False):
     idx = dict(zip(nucs, range(len(nucs))))
     cases = {i: [-1, []] for i in elems(nucs)}
     for nuc in nucs:
         z = nucname.znum(nuc)
-        case, cases[z][0] = gencase(nuc, idx, cases[z][0], short=short, sf=sf)
+        case, cases[z][0] = gencase(nuc, idx, cases[z][0], short=short, sf=sf,
+                                    debug=debug)
         cases[z][1] += case
     funcs = []
     for i, (b, kases) in cases.items():
@@ -408,10 +411,10 @@ def write_if_diff(filename, contents):
 
 
 def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, sf=False,
-          dummy=False):
+          dummy=False, debug=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
     #nucs = nucs[:200]
-    h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
+    h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy, debug=debug)
     write_if_diff(hdr, h)
     write_if_diff(src, s)
 
@@ -439,11 +442,13 @@ def main():
                         help='Path to credentials file.')
     parser.add_argument('--no-build', dest='build', default=True, action='store_false',
                        help='Does not build the source code.')
+    parser.add_argument('--debug', dest='debug', default=False, action='store_true',
+                        help='Adds more information to the output.')
     ns = parser.parse_args()
     if ns.build:
         try:
             build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf,
-                  dummy=ns.dummy)
+                  dummy=ns.dummy, debug=ns.debug)
         except Exception:
             type, value, tb = sys.exc_info()
             traceback.print_exc()
