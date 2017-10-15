@@ -5,7 +5,9 @@ It is suppossed to be fast.
 import os
 import io
 import sys
+import pdb
 import warnings
+import traceback
 from argparse import ArgumentParser, Namespace
 
 import numpy as np
@@ -145,15 +147,15 @@ B_EXPR = 'b{b}'
 KB_EXPR = '{k:.17e}*' + B_EXPR
 
 
-def genfiles(nucs, short=1e-16, sf=False, dummy=False):
+def genfiles(nucs, short=1e-16, sf=False, dummy=False, debug=False):
     ctx = Namespace(
         nucs=nucs,
         autogenwarn=autogenwarn,
         dummy_ifdef=('ifdef' if dummy else 'ifndef'),
         args=' '.join(sys.argv)
         )
-    ctx.cases = gencases(nucs)
-    ctx.funcs = genelemfuncs(nucs, short=short, sf=sf)
+    ctx.cases = gencases(nucs, debug=debug)
+    ctx.funcs = genelemfuncs(nucs, short=short, sf=sf, debug=debug)
     hdr = HEADER.render(ctx.__dict__)
     src = SOURCE.render(ctx.__dict__)
     return hdr, src
@@ -173,46 +175,91 @@ def genchains(chains, sf=False):
     return chains
 
 
-def k_a(chain, short=1e-16):
-    # gather data
-    hl = np.array([half_life(n, False) for n in chain])
-    a = -1.0 / hl
-    dc = np.array(list(map(lambda nuc: decay_const(nuc, False), chain)))
-    if np.isnan(dc).any():
-        # NaNs are bad, mmmkay. Nones mean we should skip
-        return None, None
-    ends_stable = (dc[-1] < 1e-16)  # check if last nuclide is a stable species
-    # compute cij -> ci in prep for k
-    cij = dc[:, np.newaxis] / (dc[:, np.newaxis] - dc)
-    if ends_stable:
-        cij[-1] = -1.0 / dc  # adjustment for stable end nuclide
-    mask = np.ones(len(chain), dtype=bool)
-    cij[mask, mask] = 1.0  # identity is ignored, set to unity
-    ci = cij.prod(axis=0)
+def k_from_hl_stable(hl, gamma, outerdiff, outerzeros):
+    C = len(hl)
+    outer = 1 / outerdiff[:C-1,:C-1]
+    outer[outerzeros[:C-1,:C-1]] = 1.0
+    # end nuclide is stable so ignore
+    # collapse by taking the product
+    p = outer.prod(axis=0)
+    k = -gamma * p * hl[:-1]**(C-2)
+    k = np.append(k, gamma)
+    return k
+
+
+def k_from_hl_unstable(hl, gamma, outerdiff, outerzeros):
+    C = len(hl)
+    outer = 1 / outerdiff
+    outer[outerzeros] = 1.0
+    # collapse by taking the product
+    p = outer.prod(axis=0)
+    # get the other pieces
+    T_C = hl[-1]
+    T_i_C = hl**(C - 2)
     # compute k
+    k = (gamma * T_C) * T_i_C * p
+    return k
+
+
+def k_filter(k, short=1e-16):
+    k_not_inf_or_nan = np.bitwise_and(~np.isinf(k), ~np.isnan(k))
+    if k_not_inf_or_nan.sum() == 0:
+        return k_not_inf_or_nan
+    k_abs = np.abs(k)
+    k_max = k_abs[k_not_inf_or_nan].max()
+    k_filt = (k_abs / k_max) > short
+    k_filt = np.bitwise_and(k_filt, k_not_inf_or_nan)
+    return k_filt
+
+
+def hl_filter(hl, short=1e-16):
+    ends_stable = np.isinf(hl[-1])
     if ends_stable:
-        k = dc * ci
-        k[-1] = 1.0
+        hl_filt = (hl[:-1] / hl[:-1].sum()) > short
+        hl_filt = np.append(hl_filt, True)
     else:
-        k = (dc / dc[-1]) * ci
-    if np.isinf(k).any():
-        # if this happens then something wen very wrong, skip
-        return None, None
-    # compute and apply branch ratios
+        hl_filt = (hl / hl.sum()) > short
+    return hl_filt
+
+
+def hl_degeneracy(hl, k, a, outerzeros):
+    """Handles degeneracys in half-lives."""
+    degenerate = (outerzeros.sum(axis=0) > 1)
+    not_degenerate = ~degenerate
+    if np.all(not_degenerate):
+        t_term = np.zeros(len(k), dtype=bool)
+        return k, a, t_term
+    # have an actual degeneracy
+    assert degenerate.sum() == 2
+    degen_hl = hl[degenerate][0]
+    degen_k, k = k[degenerate][0], k[not_degenerate]
+    k = np.append(k, degen_k * np.log(2) * degen_hl**-2)
+    degen_a, a = a[degenerate][0], a[not_degenerate]
+    a = np.append(a, degen_a)
+    t_term = np.zeros(len(k), dtype=bool)
+    t_term[-1] = True
+    return k, a, t_term
+
+
+def k_a_from_hl(chain, short=1e-16):
+    hl = np.array([half_life(n, False) for n in chain])
+    hl = hl[~np.isnan(hl)]
+    outerdiff = hl - hl[:, np.newaxis]
+    outerzeros = (outerdiff == 0.0)
+    a = -1.0 / hl
     gamma = np.prod([branch_ratio(p, c) for p, c in zip(chain[:-1], chain[1:])])
     if gamma == 0.0 or np.isnan(gamma):
-        return None, None
-    k *= gamma
-    # half-life  filter, makes compiling faster by pre-ignoring negligible species
+        return None, None, None
+    ends_stable = np.isinf(hl[-1])
+    k = k_from_hl_stable(hl, gamma, outerdiff, outerzeros) if ends_stable else \
+        k_from_hl_unstable(hl, gamma, outerdiff, outerzeros)
+    k, a, t_term = hl_degeneracy(hl, k, a, outerzeros)
+    # filtering makes compiling faster by pre-ignoring negligible species
     # in this chain. They'll still be picked up in their own chains.
-    if ends_stable:
-        mask = (hl[:-1] / hl[:-1].sum()) > short
-        mask = np.append(mask, True)
-    else:
-        mask = (hl / hl.sum()) > short
-    if mask.sum() < 2:
-        mask = np.ones(len(chain), dtype=bool)
-    return k[mask], a[mask]
+    mask = k_filter(k, short=short)
+    if mask.sum() == 0:
+        return None, None, None
+    return k[mask], a[mask], t_term[mask]
 
 
 def kbexpr(k, b):
@@ -233,6 +280,7 @@ def b_from_a(cse, a_i):
     bkey = EXP_EXPR.format(a=a_i)
     return cse[bkey]
 
+
 def chainexpr(chain, cse, b, bt, short=1e-16):
     child = chain[-1]
     if len(chain) == 1:
@@ -240,11 +288,11 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
         b = ensure_cse(a_i, b, cse)
         terms = B_EXPR.format(b=b_from_a(cse, a_i))
     else:
-        k, a = k_a(chain, short=short)
+        k, a, t_term = k_a_from_hl(chain, short=short)
         if k is None:
             return None, b, bt
         terms = []
-        for k_i, a_i in zip(k, a):
+        for k_i, a_i, t_term_i in zip(k, a, t_term):
             if k_i == 1.0 and a_i == 0.0:
                 term = str(1.0 - bt)  # a slight optimization
                 bt = 1
@@ -264,12 +312,15 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
             else:
                 b = ensure_cse(a_i, b, cse)
                 term = kbexpr(k_i, b_from_a(cse, a_i))
+            # multiply by t if needed
+            if t_term_i:
+                term += '*t'
             terms.append(term)
         terms = ' + '.join(terms)
     return CHAIN_EXPR.format(terms), b, bt
 
 
-def gencase(nuc, idx, b, short=1e-16, sf=False):
+def gencase(nuc, idx, b, short=1e-16, sf=False, debug=False):
     case = ['}} case {0}: {{'.format(nuc)]
     dc = decay_const(nuc, False)
     if dc == 0.0:
@@ -277,7 +328,7 @@ def gencase(nuc, idx, b, short=1e-16, sf=False):
         case.append(CHAIN_STMT.format(idx[nuc], 'it->second'))
     else:
         chains = genchains([(nuc,)], sf=sf)
-        print(len(chains), len(set(chains)), nuc)
+        print('{} has {} chains'.format(nucname.name(nuc), len(set(chains))))
         cse = {}  # common sub-expression exponents to elimnate
         bt = 0
         for c in chains:
@@ -286,6 +337,8 @@ def gencase(nuc, idx, b, short=1e-16, sf=False):
             cexpr, b, bt = chainexpr(c, cse, b, bt, short=short)
             if cexpr is None:
                 continue
+            if debug:
+                case.append('  // ' + ' -> '.join(map(nucname.name, c)))
             case.append(CHAIN_STMT.format(idx[c[-1]], cexpr))
         bstmts = ['  ' + B_STMT.format(exp=exp, b=bval) for exp, bval in \
                   sorted(cse.items(), key=lambda x: x[1])]
@@ -298,7 +351,7 @@ def elems(nucs):
     return sorted(set(map(nucname.znum, nucs)))
 
 
-def gencases(nucs):
+def gencases(nucs, debug=False):
     switches = []
     for i in elems(nucs):
         c = ['case {0}:'.format(i),
@@ -308,12 +361,13 @@ def gencases(nucs):
     return '\n'.join(switches)
 
 
-def genelemfuncs(nucs, short=1e-16, sf=False):
+def genelemfuncs(nucs, short=1e-16, sf=False, debug=False):
     idx = dict(zip(nucs, range(len(nucs))))
     cases = {i: [-1, []] for i in elems(nucs)}
     for nuc in nucs:
         z = nucname.znum(nuc)
-        case, cases[z][0] = gencase(nuc, idx, cases[z][0], short=short, sf=sf)
+        case, cases[z][0] = gencase(nuc, idx, cases[z][0], short=short, sf=sf,
+                                    debug=debug)
         cases[z][1] += case
     funcs = []
     for i, (b, kases) in cases.items():
@@ -357,9 +411,10 @@ def write_if_diff(filename, contents):
 
 
 def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, sf=False,
-          dummy=False):
+          dummy=False, debug=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
-    h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy)
+    #nucs = nucs[:200]
+    h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy, debug=debug)
     write_if_diff(hdr, h)
     write_if_diff(src, s)
 
@@ -387,10 +442,18 @@ def main():
                         help='Path to credentials file.')
     parser.add_argument('--no-build', dest='build', default=True, action='store_false',
                        help='Does not build the source code.')
+    parser.add_argument('--debug', dest='debug', default=False, action='store_true',
+                        help='Adds more information to the output.')
     ns = parser.parse_args()
     if ns.build:
-        build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf,
-              dummy=ns.dummy)
+        try:
+            build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf,
+                  dummy=ns.dummy, debug=ns.debug)
+        except Exception:
+            type, value, tb = sys.exc_info()
+            traceback.print_exc()
+            pdb.post_mortem(tb)
+
     if ns.tar:
         print("building decay.tar.gz ...")
         build_tarfile(ns)
