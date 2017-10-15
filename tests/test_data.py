@@ -125,6 +125,7 @@ def test_nds_fpyield():
 def test_half_life():
     assert_equal(data.half_life('H1'), np.inf)
     assert_equal(data.half_life(922350001), 1560.0)
+    assert_equal(data.half_life('Eu151'), np.inf)
 
 
 def test_decay_const():
