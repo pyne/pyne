@@ -175,6 +175,11 @@ def genchains(chains, sf=False):
     return chains
 
 
+def almost_stable(hl_i, k_i):
+    """Tells whether a nuclide is almost stable"""
+    return np.isnan(k_i) and hl_i > 1e16
+
+
 def k_from_hl_stable(hl, gamma, outerdiff, outerzeros):
     C = len(hl)
     outer = 1 / outerdiff[:C-1,:C-1]
@@ -184,6 +189,10 @@ def k_from_hl_stable(hl, gamma, outerdiff, outerzeros):
     p = outer.prod(axis=0)
     k = -gamma * p * hl[:-1]**(C-2)
     k = np.append(k, gamma)
+    if almost_stable(hl[-2], k[-2]):
+        # Handles case where the second to last nuclide is almost stable,
+        # but isn't.
+        k[-2] = -gamma
     return k
 
 
@@ -198,6 +207,10 @@ def k_from_hl_unstable(hl, gamma, outerdiff, outerzeros):
     T_i_C = hl**(C - 2)
     # compute k
     k = (gamma * T_C) * T_i_C * p
+    if almost_stable(hl[-1], k[-1]):
+        # handle case when ending nuclide is effectively stable and
+        # we obtained an overflow through the normal method
+        k = k_from_hl_stable(hl, gamma, outerdiff, outerzeros)
     return k
 
 
