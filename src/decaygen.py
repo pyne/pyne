@@ -177,7 +177,7 @@ def genchains(chains, sf=False):
 
 def almost_stable(hl_i, k_i):
     """Tells whether a nuclide is almost stable"""
-    return np.isnan(k_i) and hl_i > 1e16
+    return hl_i > 1e16 and (np.isnan(k_i) or np.isinf(k_i))
 
 
 def k_from_hl_stable(hl, gamma, outerdiff, outerzeros):
