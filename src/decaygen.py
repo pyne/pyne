@@ -180,6 +180,14 @@ def almost_stable(hl_i, k_i):
     return hl_i > 1e16 and (np.isnan(k_i) or np.isinf(k_i))
 
 
+def almost_stable_mask(hl, k):
+    """ELementwise mask for whether a nuclide is almost stable"""
+    return np.bitwise_and((hl > 1e16),
+                          np.bitwise_or(np.isnan(k), np.isinf(k))
+                          )
+
+
+
 def k_from_hl_stable(hl, gamma, outerdiff, outerzeros):
     C = len(hl)
     outer = 1 / outerdiff[:C-1,:C-1]
@@ -188,11 +196,18 @@ def k_from_hl_stable(hl, gamma, outerdiff, outerzeros):
     # collapse by taking the product
     p = outer.prod(axis=0)
     k = -gamma * p * hl[:-1]**(C-2)
-    k = np.append(k, gamma)
-    if almost_stable(hl[-2], k[-2]):
-        # Handles case where the second to last nuclide is almost stable,
+    asmask = almost_stable_mask(hl[:-1], k)
+    if np.any(asmask):
+        # Handles case where non-terminal nuclides are almost stable,
         # but isn't.
-        k[-2] = -gamma
+        if asmask[-1]:
+            k[-1] = -gamma
+        else:
+            if asmask.sum()%2 == 0:
+                k[asmask][-1] = -gamma
+            else:
+                k[asmask] = -gamma
+    k = np.append(k, gamma)
     return k
 
 
@@ -269,10 +284,11 @@ def k_a_from_hl(chain, short=1e-16):
     k, a, t_term = hl_degeneracy(hl, k, a, outerzeros)
     # filtering makes compiling faster by pre-ignoring negligible species
     # in this chain. They'll still be picked up in their own chains.
-    mask = k_filter(k, short=short)
-    if mask.sum() == 0:
-        return None, None, None
-    return k[mask], a[mask], t_term[mask]
+    #mask = k_filter(k, short=short)
+    #if mask.sum() == 0:
+    #    return None, None, None
+    #return k[mask], a[mask], t_term[mask]
+    return k, a, t_term
 
 
 def kbexpr(k, b):
