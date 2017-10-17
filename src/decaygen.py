@@ -202,16 +202,17 @@ def k_from_hl_stable(hl, gamma, outerdiff, outerzeros):
 
 def k_almost_stable(hl, a, gamma, asmask):
     C = len(hl)
-    not_asmask = ~asmask
-    outerdiff = (hl[:-1] - hl[:-1, np.newaxis])
+    hl = hl[:-1]
+    a = a[:-1]
+    asmask = asmask[:-1]
+    outerdiff = (hl - hl[:, np.newaxis])
     outerzeros = (outerdiff == 0.0)
     outer = 1 / outerdiff
     outer[outerzeros] = 1.0
     p = outer.prod(axis=0)
     k = -gamma * p
     k[asmask] = gamma * np.log(2) / hl[asmask]
-    a = a[:-1]
-    return k, a, asmask[:-1]
+    return k, a, asmask
 
 
 
@@ -242,10 +243,10 @@ def k_almost_unstable(hl, a, gamma, asmask):
     T_i_C = hl**(C - 2)
     coef = gamma * T_C / T_p
     # compute k
-    k_reg = (-gamma * T_C / T_p) * T_i_C * p
+    k_reg = (-gamma * T_C / T_p) * T_i_C[not_asmask] * p
     k_as = gamma * T_C / hl[asmask]
     k = np.concatenate([k_reg, k_as])
-    a = np.concatenate([a[not_asmask, a[asmask]]])
+    a = np.concatenate([a[not_asmask], a[asmask]])
     return k, a, np.zeros(len(k), dtype=bool)
 
 
@@ -276,7 +277,7 @@ def hl_degeneracy(hl, k, a, outerzeros):
     degenerate = (outerzeros.sum(axis=0) > 1)
     not_degenerate = ~degenerate
     if np.all(not_degenerate):
-        t_term = np.zeros(len(k), dtype=bool)
+        t_term = np.zeros(len(hl), dtype=bool)
         return k, a, t_term
     # have an actual degeneracy
     assert degenerate.sum() == 2
@@ -300,14 +301,14 @@ def k_a_from_hl(chain, short=1e-16):
     if gamma == 0.0 or np.isnan(gamma):
         return None, None, None
     ends_stable = np.isinf(hl[-1])
-    k, a = k_from_hl_stable(hl, a, gamma, outerdiff, outerzeros) if ends_stable else \
-           k_from_hl_unstable(hl, a, gamma, outerdiff, outerzeros)
+    k = k_from_hl_stable(hl, gamma, outerdiff, outerzeros) if ends_stable else \
+        k_from_hl_unstable(hl, gamma, outerdiff, outerzeros)
     t_term = np.zeros(len(k), dtype=bool)
     asmask = almost_stable_mask(hl, k)
     if np.any(asmask):
         # handle case some nuclide is effectively stable and
         # we obtained an overflow through the normal method
-        k, a, t_term = k_almost_stable(hl, a gamma, asmask) if ends_stable else \
+        k, a, t_term = k_almost_stable(hl, a, gamma, asmask) if ends_stable else \
                        k_almost_unstable(hl, a, gamma, asmask)
     else:
         k, a, t_term = hl_degeneracy(hl, k, a, outerzeros)
