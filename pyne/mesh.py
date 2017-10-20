@@ -691,7 +691,7 @@ class Mesh(object):
             self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
- 
+
             if self.structured_coords is None:
                 self.structured_coords = [self.structured_get_divisions("x"),
                                           self.structured_get_divisions("y"),
@@ -1240,8 +1240,8 @@ class Mesh(object):
                                        name='cell_fracs_tag')
 
         # fill the data
-        voxel_cell_number = np.empty(shape=(max_cell_number, num_vol_elements))
-        voxel_cell_fracs = np.empty(shape=(max_cell_number, num_vol_elements))
+        voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number))
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number))
         for i in range(num_vol_elements):
             number_list_now = []
             fracs_list_now = []
