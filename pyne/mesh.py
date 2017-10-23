@@ -1238,8 +1238,8 @@ class Mesh(object):
         voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number))
         voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number))
         for ve in range(num_vol_elements):
-            voxel_cell_number[ve] = [int(-1)] * max_cell_number
-            voxel_cell_fracs[ve] = [float(0.0)] * max_cell_number
+            voxel_cell_number[ve] = [-1] * max_cell_number
+            voxel_cell_fracs[ve] = [0.0] * max_cell_number
             for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == ve]):
                 voxel_cell_number[ve, cell] = row['cell']
                 voxel_cell_fracs[ve, cell] = row['vol_frac']
