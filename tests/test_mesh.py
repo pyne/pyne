@@ -799,10 +799,10 @@ def test_tag_cell_fracs():
     m.tag_cell_fracs(cell_fracs)
 
     #  Expected tags:
-    exp_cell_number_tag[:] = [[11, 12, -1], [11, 12, 13], [11, -1, -1],
+    exp_cell_number_tag = [[11, 12, -1], [11, 12, 13], [11, -1, -1],
                               [12, -1, -1]]
-    exp_cell_fracs_tag[:] = [[0.55, 0.45, 0.0], [0.2, 0.3, 0.5],
-                             [1.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
+    exp_cell_fracs_tag = [[0.55, 0.45, 0.0], [0.2, 0.3, 0.5],
+                             [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
 
     for i in range(len(m)):
         assert_array_equal(m.cell_number_tag[i], exp_cell_number_tag[i])
