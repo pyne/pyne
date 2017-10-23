@@ -1224,40 +1224,40 @@ class Mesh(object):
 
         """
 
-    num_vol_elements = len(self)
-    # Find the maximum cell number in a voxel
-    max_cell_number = -1
-    for i in range(num_vol_elements):
-        cell_number_now = 0
-        # count the cell number in ith voxel
-        for row in cell_fracs[cell_fracs['idx'] == i]:
-            cell_number_now += 1
-        if cell_number_now >= max_cell_number:
-            max_cell_number = cell_number_now
-    # set the cell_number_tag & cell_fracs_tag
-    self.cell_number_tag = IMeshTag(max_cell_number, int, mesh=self, name='cell_number_tag')
-    self.cell_fracs_tag = IMeshTag(max_cell_number, float, mesh=self,
-                                   name='cell_fracs_tag')
+        num_vol_elements = len(self)
+        # Find the maximum cell number in a voxel
+        max_cell_number = -1
+        for i in range(num_vol_elements):
+            cell_number_now = 0
+            # count the cell number in ith voxel
+            for row in cell_fracs[cell_fracs['idx'] == i]:
+                cell_number_now += 1
+            if cell_number_now >= max_cell_number:
+                max_cell_number = cell_number_now
+        # set the cell_number_tag & cell_fracs_tag
+        self.cell_number_tag = IMeshTag(max_cell_number, int, mesh=self, name='cell_number_tag')
+        self.cell_fracs_tag = IMeshTag(max_cell_number, float, mesh=self,
+                                       name='cell_fracs_tag')
 
-    # fill the data
-    voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number))
-    voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number))
-    for i in range(num_vol_elements):
-        number_list_now = []
-        fracs_list_now = []
-        for row in cell_fracs[cell_fracs['idx'] == i]:
-            number_list_now.append(row['cell'])
-            fracs_list_now.append(row['vol_frac'])
-        # fill the vacancy with default value
-        if len(number_list_now) < max_cell_number:
-            for j in range(max_cell_number - len(number_list_now)):
-                number_list_now.append(int(-1))
-                fracs_list_now.append(float(0.0))
-        # set the numpy
-        voxel_cell_number[i] = number_list_now
-        voxel_cell_fracs[i] = fracs_list_now
-    self.cell_number_tag[:] = voxel_cell_number
-    self.cell_fracs_tag[:] = voxel_cell_fracs
+        # fill the data
+        voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number))
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number))
+        for i in range(num_vol_elements):
+            number_list_now = []
+            fracs_list_now = []
+            for row in cell_fracs[cell_fracs['idx'] == i]:
+                number_list_now.append(row['cell'])
+                fracs_list_now.append(row['vol_frac'])
+            # fill the vacancy with default value
+            if len(number_list_now) < max_cell_number:
+                for j in range(max_cell_number - len(number_list_now)):
+                    number_list_now.append(int(-1))
+                    fracs_list_now.append(float(0.0))
+            # set the numpy
+            voxel_cell_number[i] = number_list_now
+            voxel_cell_fracs[i] = fracs_list_now
+        self.cell_number_tag[:] = voxel_cell_number
+        self.cell_fracs_tag[:] = voxel_cell_fracs
 
 
 ######################################################
