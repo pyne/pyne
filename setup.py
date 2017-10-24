@@ -409,25 +409,14 @@ def main():
     if ns.bootstrap:
         ensure_nuc_data()
         main_safe(ns)
-    # trick to get install path
-    abspath = os.path.abspath
-    joinpath = os.path.join
-    cwd = abspath(os.getcwd())
-    pypath = [p for p in sys.path if len(p) > 0 and cwd != abspath(p)]
-    try:
-        _, pynepath, _ = imp.find_module('pyne', pypath)
-    except ImportError:
-        pynepath = "${HOME}/.local/python2.7/site-packages"
-    libpath = abspath(joinpath(pynepath, '..', '..', '..'))
-    binpath = abspath(joinpath(libpath, '..', 'bin'))
-    copy_ensdf_executables(pynepath)
+    binpath = ns.prefix + '/bin'
     msg = ("\nNOTE: If you have not done so already, please be sure that your "
            "PATH has been appropriately set to the install prefix of pyne. "
            "For this install of pyne you may add the following lines to your "
            "'~/.bashrc' file or equivalent:\n\n"
-           "  # PyNE Environment Settings\n"
+           "  # PyNE Environment Settings\n\n"
            '  export PATH="{binpath}:${{PATH}}"'
-           ).format(binpath=binpath, libpath=libpath)
+           ).format(binpath=binpath)
     print(msg, file=sys.stderr)
 
 
