@@ -289,15 +289,9 @@ def update_cmake_args(ns):
         bt = CMAKE_BUILD_TYPES[ns.build_type.lower()]
         ns.cmake_args.append('-DCMAKE_BUILD_TYPE=' + bt)
     if ns.hdf5 is not None:
-        h5root = absexpanduser(ns.hdf5)
-        ns.cmake_args += [
-            '-DHDF5_ROOT=' + h5root,
-            '-DHDF5_LIBRARIES={0}/lib/libhdf5{1};{0}/lib/libhdf5_hl{1}'.format(h5root, LIBEXT),
-            '-DHDF5_LIBRARY_DIRS=' + h5root + '/lib',
-            '-DHDF5_INCLUDE_DIRS=' + h5root + '/include',
-            ]
+        ns.cmake_args.append('-DHDF5_ROOT=' + absexpanduser(ns.hdf5))
     if ns.moab is not None:
-        ns.cmake_args.append('-DMOAB_ROOT=' + ns.moab)
+        ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
     if ns.deps_root:
         ns.cmake_args.append('-DDEPS_ROOT_DIR=' + absexpanduser(ns.deps_root))
 
