@@ -778,6 +778,10 @@ class Mesh(object):
         # add a property: cell_cell_fracs_tag and set it to None
         self.cell_number_tag = None
         self.cell_fracs_tag = None
+        self.mat_name_tag = None
+        self.mat_fracs_tag = None
+        self.cell_largest_frac_number_tag = None
+        self.cell_largest_frac_tag = None
 
     def __len__(self):
         return self._len
@@ -1228,9 +1232,11 @@ class Mesh(object):
         # Find the maximum cell number in a voxel
         max_cell_number = -1
         for ve in range(num_vol_elements):
-            max_cell_number = max(max_cell_number, len(cell_fracs[cell_fracs['idx'] == ve]))
+            max_cell_number = max(max_cell_number,
+                                  len(cell_fracs[cell_fracs['idx'] == ve]))
         # set the cell_number_tag & cell_fracs_tag
-        self.cell_number_tag = IMeshTag(max_cell_number, int, mesh=self, name='cell_number_tag')
+        self.cell_number_tag = IMeshTag(max_cell_number, int, mesh=self,
+                                        name='cell_number_tag')
         self.cell_fracs_tag = IMeshTag(max_cell_number, float, mesh=self,
                                        name='cell_fracs_tag')
 
@@ -1245,6 +1251,9 @@ class Mesh(object):
                 voxel_cell_fracs[ve, cell] = row['vol_frac']
         self.cell_number_tag[:] = voxel_cell_number
         self.cell_fracs_tag[:] = voxel_cell_fracs
+
+        
+
 
 
 ######################################################
