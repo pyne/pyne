@@ -803,10 +803,16 @@ def test_tag_cell_fracs():
                               [12, -1, -1]]
     exp_cell_fracs_tag = [[0.55, 0.45, 0.0], [0.2, 0.3, 0.5],
                              [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+    exp_cell_largest_frac_number_tag = [11, 13, 11, 12]
+    exp_cell_largest_frac_tag = [0.55, 0.5, 1.0, 1.0]
 
     for i in range(len(m)):
         assert_array_equal(m.cell_number_tag[i], exp_cell_number_tag[i])
         assert_array_equal(m.cell_fracs_tag[i], exp_cell_fracs_tag[i])
+        assert_equal(m.cell_largest_frac_number_tag[i],
+                           exp_cell_largest_frac_number_tag[i])
+        assert_equal(m.cell_largest_frac_tag[i],
+                           exp_cell_largest_frac_tag[i])
 
 
 def test_no_mats():
