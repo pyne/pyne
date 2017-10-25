@@ -59,9 +59,9 @@ MESSAGE("--    HDF5 High Level Libraries: ${HDF5_C_HL_LIBRARIES}")
 
 # Find MOAB library
 find_package(MOAB)
-if(${MOAB_FOUND})
+if(MOAB_FOUND)
   include_directories(${MOAB_INCLUDE_DIRS})
-endif(${MOAB_FOUND})
+endif(MOAB_FOUND)
 
 
 # Find Python
