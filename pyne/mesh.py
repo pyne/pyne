@@ -1259,7 +1259,8 @@ class Mesh(object):
             cell_largest_frac[ve] = max(voxel_cell_fracs[ve, :])
             largest_index = \
                 list(voxel_cell_fracs[ve, :]).index(cell_largest_frac[ve])
-            cell_largest_frac_number[ve] = voxel_cell_number[ve, largest_index]
+            cell_largest_frac_number[ve] = \
+                int(voxel_cell_number[ve, largest_index])
         self.cell_number_tag[:] = voxel_cell_number
         self.cell_fracs_tag[:] = voxel_cell_fracs
         self.cell_largest_frac_number_tag = cell_largest_frac_number
