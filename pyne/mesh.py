@@ -1239,6 +1239,12 @@ class Mesh(object):
                                         name='cell_number_tag')
         self.cell_fracs_tag = IMeshTag(max_cell_number, float, mesh=self,
                                        name='cell_fracs_tag')
+        self.cell_largest_frac_number_tag = \
+            IMeshTag(1, int, mesh=self, name='cell_largest_frac_number')
+        self.cell_largest_frac_tag = IMeshTag(1, float, mesh=self,
+                                              name='cell_largest_frac')
+        cell_largest_frac_number = [-1] * num_vol_elements
+        cell_largest_frac = [0.0] * num_vol_elements
 
         # fill the data
         voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number))
@@ -1249,10 +1255,18 @@ class Mesh(object):
             for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == ve]):
                 voxel_cell_number[ve, cell] = row['cell']
                 voxel_cell_fracs[ve, cell] = row['vol_frac']
+            # cell_largest_frac_tag
+            cell_largest_frac[ve] = max(voxel_cell_fracs[ve, :])
+            largest_index = \
+                list(voxel_cell_fracs[ve, :]).index(cell_largest_frac[ve])
+            cell_largest_frac_number[ve] = voxel_cell_number[ve, largest_index]
         self.cell_number_tag[:] = voxel_cell_number
         self.cell_fracs_tag[:] = voxel_cell_fracs
+        self.cell_largest_frac_number_tag = cell_largest_frac_number
+        self.cell_largest_frac_tag = cell_largest_frac
 
-        
+
+
 
 
 
