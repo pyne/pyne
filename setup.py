@@ -289,15 +289,9 @@ def update_cmake_args(ns):
         bt = CMAKE_BUILD_TYPES[ns.build_type.lower()]
         ns.cmake_args.append('-DCMAKE_BUILD_TYPE=' + bt)
     if ns.hdf5 is not None:
-        h5root = absexpanduser(ns.hdf5)
-        ns.cmake_args += [
-            '-DHDF5_ROOT=' + h5root,
-            '-DHDF5_LIBRARIES={0}/lib/libhdf5{1};{0}/lib/libhdf5_hl{1}'.format(h5root, LIBEXT),
-            '-DHDF5_LIBRARY_DIRS=' + h5root + '/lib',
-            '-DHDF5_INCLUDE_DIRS=' + h5root + '/include',
-            ]
+        ns.cmake_args.append('-DHDF5_ROOT=' + absexpanduser(ns.hdf5))
     if ns.moab is not None:
-        ns.cmake_args.append('-DMOAB_ROOT=' + ns.moab)
+        ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
     if ns.deps_root:
         ns.cmake_args.append('-DDEPS_ROOT_DIR=' + absexpanduser(ns.deps_root))
 
@@ -409,25 +403,14 @@ def main():
     if ns.bootstrap:
         ensure_nuc_data()
         main_safe(ns)
-    # trick to get install path
-    abspath = os.path.abspath
-    joinpath = os.path.join
-    cwd = abspath(os.getcwd())
-    pypath = [p for p in sys.path if len(p) > 0 and cwd != abspath(p)]
-    try:
-        _, pynepath, _ = imp.find_module('pyne', pypath)
-    except ImportError:
-        pynepath = "${HOME}/.local/python2.7/site-packages"
-    libpath = abspath(joinpath(pynepath, '..', '..', '..'))
-    binpath = abspath(joinpath(libpath, '..', 'bin'))
-    copy_ensdf_executables(pynepath)
+    binpath = ns.prefix + '/bin'
     msg = ("\nNOTE: If you have not done so already, please be sure that your "
            "PATH has been appropriately set to the install prefix of pyne. "
            "For this install of pyne you may add the following lines to your "
            "'~/.bashrc' file or equivalent:\n\n"
-           "  # PyNE Environment Settings\n"
+           "  # PyNE Environment Settings\n\n"
            '  export PATH="{binpath}:${{PATH}}"'
-           ).format(binpath=binpath, libpath=libpath)
+           ).format(binpath=binpath)
     print(msg, file=sys.stderr)
 
 

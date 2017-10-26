@@ -88,7 +88,7 @@ IF(BUILD_SPATIAL_SOLVER)
     target_link_libraries(pyne ${LIBS_HDF5} blas lapack)
 ENDIF(BUILD_SPATIAL_SOLVER)
 if(MOAB_FOUND)
-    target_link_libraries(pyne dagmc MOAB)
+    target_link_libraries(pyne MOAB dagmc)
 endif(MOAB_FOUND)
 
 # Set symbolic decay properties.

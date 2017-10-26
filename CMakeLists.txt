@@ -42,7 +42,7 @@ MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}
 #
 
 # Find HDF5
-FIND_PACKAGE(HDF5 REQUIRED COMPONENTS HL)
+FIND_PACKAGE(HDF5 REQUIRED)
 ADD_DEFINITIONS(${HDF5_DEFINITIONS})
 include_directories("${HDF5_INCLUDE_DIRS}")
 if(NOT HDF5_LIBRARY_DIRS STREQUAL "")
@@ -59,16 +59,10 @@ MESSAGE("--    HDF5 High Level Libraries: ${HDF5_C_HL_LIBRARIES}")
 
 # Find MOAB library
 find_package(MOAB)
-message("-- MOAB Found: ${MOAB_FOUND}")
-if(${MOAB_FOUND})
-  include_directories(${MOAB_INCLUDE_DIR})
-  get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
-  if(APPLE)
-    link_directories(${MOAB_LIBRARY_DIRS}/lib)
-  else(APPLE)
-    link_directories(${MOAB_LIBRARY_DIRS})
-  endif(APPLE)
-endif(${MOAB_FOUND})
+if(MOAB_FOUND)
+  include_directories(${MOAB_INCLUDE_DIRS})
+  link_directories(${MOAB_LIBRARY_DIRS})
+endif(MOAB_FOUND)
 
 
 # Find Python
