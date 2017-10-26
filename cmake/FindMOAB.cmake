@@ -17,7 +17,7 @@ if (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
   # in cache already
   set(MOAB_FOUND TRUE)
 else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
-  find_path(MOAB_INCLUDE_DIR NAMES MBCore.hpp
+  find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
     HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS}
     PATHS $ENV{HOME}/.local/include
     PATH_SUFFIXES include Include
@@ -25,7 +25,7 @@ else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
     ENV MOAB_ROOT
     NO_DEFAULT_PATH
     )
-  find_path(MOAB_INCLUDE_DIR NAMES MBCore.hpp
+  find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
             HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS})
 
   find_library(MOAB_LIBRARY NAMES MOAB
