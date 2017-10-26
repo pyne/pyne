@@ -778,8 +778,6 @@ class Mesh(object):
         # add a property: cell_cell_fracs_tag and set it to None
         self.cell_number_tag = None
         self.cell_fracs_tag = None
-        self.mat_name_tag = None
-        self.mat_fracs_tag = None
         self.cell_largest_frac_number_tag = None
         self.cell_largest_frac_tag = None
 
