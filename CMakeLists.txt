@@ -61,6 +61,10 @@ MESSAGE("--    HDF5 High Level Libraries: ${HDF5_C_HL_LIBRARIES}")
 
 
 # Find MOAB library
+if(NOT MOAB_ROOT)
+  set(MOAB_ROOT "${DEPS_ROOT_DIR}")
+endif()
+MESSAGE("-- MOAB Root: ${MOAB_ROOT}")
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
