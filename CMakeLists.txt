@@ -81,8 +81,14 @@ endif(${MOAB_FOUND})
 # Find Python
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c
-                        "import site; print(site.getsitepackages(['${CMAKE_INSTALL_PREFIX}'])[0])"
+if(PYTHON_VERSION_MAJOR EQUAL 2)
+  set(SITE_PACKAGES_CODE
+      "import site; print site.getusersitepackages().replace(site.USER_BASE, '${CMAKE_INSTALL_PREFIX}', 1)")
+else(PYTHON_VERSION_MAJOR EQUAL 2)
+  set(SITE_PACKAGES_CODE
+      "import site; print(site.getsitepackages(['${CMAKE_INSTALL_PREFIX}'])[0])")
+endif(PYTHON_VERSION_MAJOR EQUAL 2)
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "${SITE_PACKAGES_CODE}"
                 OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
 set(LIBS ${LIBS} ${PYTHON_LIBRARIES})
