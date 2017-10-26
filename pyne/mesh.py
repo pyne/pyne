@@ -691,7 +691,7 @@ class Mesh(object):
             self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
- 
+
             if self.structured_coords is None:
                 self.structured_coords = [self.structured_get_divisions("x"),
                                           self.structured_get_divisions("y"),
@@ -774,6 +774,14 @@ class Mesh(object):
                 doc = "see Material.{0}() for more information".format(name)
                 setattr(self, name, MaterialMethodTag(mesh=self, name=name,
                         doc=doc))
+
+        # add a property: cell_cell_fracs_tag and set it to None
+        self.cell_number_tag = None
+        self.cell_fracs_tag = None
+        self.mat_name_tag = None
+        self.mat_fracs_tag = None
+        self.cell_largest_frac_number_tag = None
+        self.cell_largest_frac_tag = None
 
     def __len__(self):
         return self._len
@@ -1195,6 +1203,72 @@ class Mesh(object):
 
             mixed = MultiMaterial(mat_col)
             self.mats[i] = mixed.mix_by_volume()
+
+    def tag_cell_fracs(self, cell_fracs):
+        """This function uses the output from dagmc.discretize_geom() and
+        a mapping of geometry cells to set the cell_fracs_tag.
+
+        Parameters
+        ----------
+        cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A sorted, one dimensional
+            array, each entry containing the following fields:
+
+                :idx: int
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+
+            The array must be sorted with respect to both idx and cell, with
+            cell changing fastest.
+
+        """
+
+        num_vol_elements = len(self)
+        # Find the maximum cell number in a voxel
+        max_cell_number = -1
+        for ve in range(num_vol_elements):
+            max_cell_number = max(max_cell_number,
+                                  len(cell_fracs[cell_fracs['idx'] == ve]))
+        # set the cell_number_tag & cell_fracs_tag
+        self.cell_number_tag = IMeshTag(max_cell_number, int, mesh=self,
+                                        name='cell_number_tag')
+        self.cell_fracs_tag = IMeshTag(max_cell_number, float, mesh=self,
+                                       name='cell_fracs_tag')
+        self.cell_largest_frac_number_tag = \
+            IMeshTag(1, int, mesh=self, name='cell_largest_frac_number')
+        self.cell_largest_frac_tag = IMeshTag(1, float, mesh=self,
+                                              name='cell_largest_frac')
+        cell_largest_frac_number = [-1] * num_vol_elements
+        cell_largest_frac = [0.0] * num_vol_elements
+
+        # fill the data
+        voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number))
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number))
+        for ve in range(num_vol_elements):
+            voxel_cell_number[ve] = [-1] * max_cell_number
+            voxel_cell_fracs[ve] = [0.0] * max_cell_number
+            for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == ve]):
+                voxel_cell_number[ve, cell] = row['cell']
+                voxel_cell_fracs[ve, cell] = row['vol_frac']
+            # cell_largest_frac_tag
+            cell_largest_frac[ve] = max(voxel_cell_fracs[ve, :])
+            largest_index = \
+                list(voxel_cell_fracs[ve, :]).index(cell_largest_frac[ve])
+            cell_largest_frac_number[ve] = \
+                int(voxel_cell_number[ve, largest_index])
+        self.cell_number_tag[:] = voxel_cell_number
+        self.cell_fracs_tag[:] = voxel_cell_fracs
+        self.cell_largest_frac_number_tag = cell_largest_frac_number
+        self.cell_largest_frac_tag = cell_largest_frac
+
+
+
+
 
 
 ######################################################
