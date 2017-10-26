@@ -61,6 +61,7 @@ MESSAGE("--    HDF5 High Level Libraries: ${HDF5_C_HL_LIBRARIES}")
 find_package(MOAB)
 if(MOAB_FOUND)
   include_directories(${MOAB_INCLUDE_DIRS})
+  link_directories(${MOAB_LIBRARY_DIRS})
 endif(MOAB_FOUND)
 
 
