@@ -182,16 +182,48 @@ where the coefficients :math:`k_i` are defined as:
 
 .. math::
 
-    k_i = \frac{\gamma}{\lambda_C} \lambda_i c_i
+    k_i = \frac{\gamma}{\lambda_C} \lambda_i \prod_{j\ne i}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
 
 
 **Last Nuclide Stable:**
 
 .. math::
 
-    k_i = -\gamma \prod_{j=1,i\ne j}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}
+    k_{i\ne C} = -\gamma \prod_{j=1,i\ne j}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}
 
     k_C = \gamma
+
+
+**Last Nuclide Unstable and pth Almost Stable:**
+
+.. math::
+
+    k_{i\ne p} = -\frac{\gamma\lambda_p}{\lambda_C} \prod_{j\n i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
+
+    k_p = \frac{\gamma\lambda_p}{\lambda_C}
+
+
+**Last Nuclide Stable and pth Almost Stable:**
+
+.. math::
+
+    k_{i\ne p,C} = -\gamma \prod_{j\n i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}
+
+    k_p = -\gamma
+
+    k_C = \gamma
+
+
+**Half-life Degeneracy Between pth and qth:**
+
+.. math::
+
+    k_i = \frac{\gamma}{\lambda_C} \lambda_i \prod_{j\ne i}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
+
+    k_p = \frac{\gamma\lambda_p^2}{\lambda_C} t \prod_{j\ne p,q}^C \frac{\lambda_j}{\lambda_j - \lambda_p}
+
+    k_q = 0
+
 
 
 If :math:`k_i` are computed at run time then the this expression results in much more
