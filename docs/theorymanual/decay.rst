@@ -134,6 +134,24 @@ the summation and handled separately. As previously, then take :math:`\lambda_C 
                            -\gamma e^{-\lambda_p t} + \gamma
 
 
+Lastly, we must handle the degenerate case where two nuclides in a chain  have the same exact half-lives.
+This unfortunate situation arrises out of the fundemental nuclear data. Let's call these the pth and qth
+species. To prevent underflow, overflow, and NaNs, we must separate these nuclides out of the summation
+and then take the limit as :math:`\lambda_q \to \lambda_p`.
+
+.. math::
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p,q}^{C} \left[\lambda_i \left(\prod_{j\ne i}^{C} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \frac{\lambda_q}{\lambda_q - \lambda_p} \left(\prod_{j\ne p,q}^{C} \frac{\lambda_j}{\lambda_j - \lambda_p} \right) e^{-\lambda_p t}
+                           + \frac{\gamma}{\lambda_C} \lambda_q \frac{\lambda_p}{\lambda_p - \lambda_q} \left(\prod_{j\ne p,q}^{C} \frac{\lambda_j}{\lambda_j - \lambda_q} \right) e^{-\lambda_q t}
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p,q}^{C} \left[\lambda_i \left(\prod_{j\ne i}^{C} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p^2}{\lambda_C} \left(\prod_{j\ne p,q}^{C} \frac{\lambda_j}{\lambda_j - \lambda_p} \right)
+                             \lim_{\lambda_q\to\lambda_p}\frac{e^{-\lambda_p t} - e^{-\lambda_q t}}{\lambda_q - \lambda_p}
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p,q}^{C} \left[\lambda_i \left(\prod_{j\ne i}^{C} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p^2}{\lambda_C} \left(\prod_{j\ne p,q}^{C} \frac{\lambda_j}{\lambda_j - \lambda_p} \right) t e^{-\lambda_p t}
+
 
 *********************************************
 Binary Reformulation of Bateman Equations
