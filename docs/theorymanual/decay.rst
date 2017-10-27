@@ -198,7 +198,7 @@ where the coefficients :math:`k_i` are defined as:
 
 .. math::
 
-    k_{i\ne p} = -\frac{\gamma\lambda_p}{\lambda_C} \prod_{j\n i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
+    k_{i\ne p} = -\frac{\gamma\lambda_p}{\lambda_C} \prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
 
     k_p = \frac{\gamma\lambda_p}{\lambda_C}
 
@@ -207,7 +207,7 @@ where the coefficients :math:`k_i` are defined as:
 
 .. math::
 
-    k_{i\ne p,C} = -\gamma \prod_{j\n i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}
+    k_{i\ne p,C} = -\gamma \prod_{j\ne i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}
 
     k_p = -\gamma
 
