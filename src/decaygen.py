@@ -147,7 +147,7 @@ B_EXPR = 'b{b}'
 KB_EXPR = '{k:.17e}*' + B_EXPR
 
 
-def genfiles(nucs, short=1e-16, sf=False, dummy=False, debug=False):
+def genfiles(nucs, short=1e-16, small=1e-16, sf=False, dummy=False, debug=False):
     ctx = Namespace(
         nucs=nucs,
         autogenwarn=autogenwarn,
@@ -155,7 +155,7 @@ def genfiles(nucs, short=1e-16, sf=False, dummy=False, debug=False):
         args=' '.join(sys.argv)
         )
     ctx.cases = gencases(nucs, debug=debug)
-    ctx.funcs = genelemfuncs(nucs, short=short, sf=sf, debug=debug)
+    ctx.funcs = genelemfuncs(nucs, short=short, small=small, sf=sf, debug=debug)
     hdr = HEADER.render(ctx.__dict__)
     src = SOURCE.render(ctx.__dict__)
     return hdr, src
@@ -214,12 +214,11 @@ def k_almost_stable(hl, a, gamma, asmask):
     # get k for most elements of chain
     k = -gamma * p
     # replace k for the almost-stable nuclide
-    k[asmask] = gamma * np.log(2) / hl[asmask]
-    # add terms for last element of chain.
-    k = np.concatenate([k, [-gamma]*n_almost_stable, [gamma]])
-    a = np.concatenate([a, a[asmask], [0.0]])
-    asmask = np.concatenate([asmask, [False]*(n_almost_stable + 1)])
-    return k, a, asmask
+    k[asmask] = -gamma
+    # add for last stable element of chain.
+    k = np.append(k, gamma)
+    a = np.append(a, 0.0)
+    return k, a, np.zeros(len(k), dtype=bool)
 
 
 
@@ -258,14 +257,15 @@ def k_almost_unstable(hl, a, gamma, asmask):
 
 
 
-def k_filter(k, short=1e-16):
+def k_filter(k, t_term, small=1e-16):
     k_not_inf_or_nan = np.bitwise_and(~np.isinf(k), ~np.isnan(k))
     if k_not_inf_or_nan.sum() == 0:
         return k_not_inf_or_nan
     k_abs = np.abs(k)
     k_max = k_abs[k_not_inf_or_nan].max()
-    k_filt = (k_abs / k_max) > short
+    k_filt = (k_abs / k_max) > small
     k_filt = np.bitwise_and(k_filt, k_not_inf_or_nan)
+    k_filt = np.bitwise_and(k_filt, ~t_term)
     return k_filt
 
 
@@ -298,7 +298,7 @@ def hl_degeneracy(hl, k, a, outerzeros):
     return k, a, t_term
 
 
-def k_a_from_hl(chain, short=1e-16):
+def k_a_from_hl(chain, short=1e-16, small=1e-16):
     hl = np.array([half_life(n, False) for n in chain])
     hl = hl[~np.isnan(hl)]
     outerdiff = hl - hl[:, np.newaxis]
@@ -321,11 +321,10 @@ def k_a_from_hl(chain, short=1e-16):
         k, a, t_term = hl_degeneracy(hl, k, a, outerzeros)
     # filtering makes compiling faster by pre-ignoring negligible species
     # in this chain. They'll still be picked up in their own chains.
-    #mask = k_filter(k, short=short)
-    #if mask.sum() == 0:
-    #    return None, None, None
-    #return k[mask], a[mask], t_term[mask]
-    return k, a, t_term
+    mask = k_filter(k, t_term, small=small)
+    if mask.sum() == 0:
+        return None, None, None
+    return k[mask], a[mask], t_term[mask]
 
 
 def kbexpr(k, b):
@@ -347,14 +346,14 @@ def b_from_a(cse, a_i):
     return cse[bkey]
 
 
-def chainexpr(chain, cse, b, bt, short=1e-16):
+def chainexpr(chain, cse, b, bt, short=1e-16, small=1e-16):
     child = chain[-1]
     if len(chain) == 1:
         a_i = -1.0 / half_life(child, False)
         b = ensure_cse(a_i, b, cse)
         terms = B_EXPR.format(b=b_from_a(cse, a_i))
     else:
-        k, a, t_term = k_a_from_hl(chain, short=short)
+        k, a, t_term = k_a_from_hl(chain, short=short, small=small)
         if k is None:
             return None, b, bt
         terms = []
@@ -386,7 +385,7 @@ def chainexpr(chain, cse, b, bt, short=1e-16):
     return CHAIN_EXPR.format(terms), b, bt
 
 
-def gencase(nuc, idx, b, short=1e-16, sf=False, debug=False):
+def gencase(nuc, idx, b, short=1e-16, small=1e-16, sf=False, debug=False):
     case = ['}} case {0}: {{'.format(nuc)]
     dc = decay_const(nuc, False)
     if dc == 0.0:
@@ -400,7 +399,7 @@ def gencase(nuc, idx, b, short=1e-16, sf=False, debug=False):
         for c in chains:
             if c[-1] not in idx:
                 continue
-            cexpr, b, bt = chainexpr(c, cse, b, bt, short=short)
+            cexpr, b, bt = chainexpr(c, cse, b, bt, short=short, small=small)
             if cexpr is None:
                 continue
             if debug:
@@ -427,13 +426,13 @@ def gencases(nucs, debug=False):
     return '\n'.join(switches)
 
 
-def genelemfuncs(nucs, short=1e-16, sf=False, debug=False):
+def genelemfuncs(nucs, short=1e-16, small=1e-16, sf=False, debug=False,):
     idx = dict(zip(nucs, range(len(nucs))))
     cases = {i: [-1, []] for i in elems(nucs)}
     for nuc in nucs:
         z = nucname.znum(nuc)
         case, cases[z][0] = gencase(nuc, idx, cases[z][0], short=short, sf=sf,
-                                    debug=debug)
+                                    debug=debug, small=small)
         cases[z][1] += case
     funcs = []
     for i, (b, kases) in cases.items():
@@ -476,11 +475,10 @@ def write_if_diff(filename, contents):
         f.write(contents)
 
 
-def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, sf=False,
-          dummy=False, debug=False):
+def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, small=1e-16,
+          sf=False, dummy=False, debug=False):
     nucs = load_default_nucs() if nucs is None else list(map(nucname.id, nucs))
-    #nucs = nucs[:200]
-    h, s = genfiles(nucs, short=short, sf=sf, dummy=dummy, debug=debug)
+    h, s = genfiles(nucs, short=short, small=small, sf=sf, dummy=dummy, debug=debug)
     write_if_diff(hdr, h)
     write_if_diff(src, s)
 
@@ -496,9 +494,14 @@ def main():
                         'compile-time fallbacks.')
     parser.add_argument('--no-dummy', action='store_false', default=False,
                         dest='dummy', help='Makes regular files.')
-    parser.add_argument('--filter-short', default=1e-16, type=float, dest='short',
+    parser.add_argument('--small', '--filter-small', default=1e-16, type=float, dest='small',
+                        help='Fraction of k coeficient for which nuclide term is'
+                             'filtered from a decay chain, default 1e-16.'
+                             'Set to -1 (or other <= 0.0 value) to disable')
+    parser.add_argument('--short', '--filter-short', default=1e-16, type=float, dest='short',
                         help='Fraction of sum of all half-lives below which a '
-                             'nuclide is filtered from a decay chain, default 1e-16.')
+                             'nuclide is filtered from a decay chain, default 1e-16.'
+                             '[deprecated]')
     parser.add_argument('--spontaneous-fission', default=False, action='store_true',
                         dest='sf', help='Includes spontaneous fission decay chains, '
                                         'default False.')
@@ -514,7 +517,7 @@ def main():
     if ns.build:
         try:
             build(hdr=ns.hdr, src=ns.src, nucs=ns.nucs, short=ns.short, sf=ns.sf,
-                  dummy=ns.dummy, debug=ns.debug)
+                  dummy=ns.dummy, debug=ns.debug, small=ns.small)
         except Exception:
             type, value, tb = sys.exc_info()
             traceback.print_exc()
