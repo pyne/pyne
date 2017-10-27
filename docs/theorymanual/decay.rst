@@ -64,7 +64,7 @@ equations can be reduced to simply:
 
 For stable species, the appropriate equation is derived by taking the limit
 of when the decay constant of the stable nuclide (:math:`\lambda_C`) goes to
-zero.  Also notice that every :math:`c_i` contains exactly one :math:`\lambda_C`
+zero. Also notice that every :math:`c_i` contains exactly one :math:`\lambda_C`
 in the numerator which cancels with the :math:`\lambda_C` in the denominator
 in front of the summation:
 
@@ -73,6 +73,37 @@ in front of the summation:
     \lim_{\lambda_C \to 0} N_C(t) = N_1(0)  \gamma \left[e^{-0t} + \sum_{i=1}^{C-1} \lambda_i \left(\frac{1}{0 - \lambda_i} \prod_{j=1,i\ne j}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i} \right) e^{-\lambda_i t} \right]
 
     N_C(t) = N_1(0)  \gamma \left[1.0 - \sum_{i=1}^{C-1} \left(\prod_{j=1,i\ne j}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i} \right) e^{-\lambda_i t} \right]
+
+Now, certain chains have intermeadiate nuclides that are *almost* stable. For example, decaying
+from Es-254 to Po-210 goes through U-238, which is very close to stable relative to all of the
+other nuclides in the chain. This can trigger floating point precision issues, where certain
+terms will underflow or overflow or generate NaNs. Obviously this is a situation to be avoided,
+if at all possible. To handle this sitiuation, let's call :math:`p` the index of the nuclide
+that is almost stable. We can then take the limit of the Bateman equations where
+:math:`\lambda_p \to 0` after we separate out the p-term from the summation:
+
+.. math::
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \left[\lambda_i \frac{\lambda_p}{\lambda_p - \lambda_i}
+                                                        \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j - \lambda_p} \right) e^{-\lambda_p t}
+
+   \lim_{\lambda_p\to 0}\frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \lim_{\lambda_p\to 0} \left[\lambda_i \frac{\lambda_p}{\lambda_p - \lambda_i}
+                                                        \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \lim_{\lambda_p\to 0} \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j - \lambda_p}\right) e^{-\lambda_p t}
+
+   \lim_{\lambda_p\to 0}\frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \left[\lambda_i \frac{\lambda_p}{- \lambda_i}
+                                                        \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j}\right) e^{-\lambda_p t}
+
+   \lim_{\lambda_p\to 0}\frac{N_C(t)}{N_1(0)} = \frac{-\gamma\lambda_p}{\lambda_C}\sum_{i\ne p}^C \left[
+                                                        \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p}{\lambda_C} e^{-\lambda_p t}
+
 
 
 *********************************************
