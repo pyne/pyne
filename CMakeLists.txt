@@ -42,22 +42,35 @@ MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}
 #
 
 # Find HDF5
-FIND_PACKAGE(HDF5 REQUIRED COMPONENTS HL)
+MESSAGE("-- HDF5 Root: ${HDF5_ROOT}")
+if(HDF5_ROOT)
+  FIND_PACKAGE(HDF5 REQUIRED)
+else()
+  FIND_PACKAGE(HDF5)
+endif()
+if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
+  MESSAGE("--    HDF5 not found on empty HDF5_ROOT, "
+          "setting to DEPS_ROOT_DIR: ${DEPS_ROOT_DIR}")
+  set(HDF5_ROOT "${DEPS_ROOT_DIR}")
+  FIND_PACKAGE(HDF5 REQUIRED)
+endif()
 ADD_DEFINITIONS(${HDF5_DEFINITIONS})
 include_directories("${HDF5_INCLUDE_DIRS}")
 if(NOT HDF5_LIBRARY_DIRS STREQUAL "")
   link_directories(${HDF5_LIBRARY_DIRS})
 endif()
-set(LIBS_HDF5 ${HDF5_C_LIBRARIES} ${HDF5_C_HL_LIBRARIES})
-set(LIBS ${LIBS} ${HDF5_C_LIBRARIES} ${HDF5_C_HL_LIBRARIES})
-MESSAGE("--    HDF5 Root: ${HDF5_ROOT}")
+set(LIBS_HDF5 ${HDF5_C_LIBRARIES})
+set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
 MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
 MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
 MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
-MESSAGE("--    HDF5 High Level Libraries: ${HDF5_C_HL_LIBRARIES}")
 
 
 # Find MOAB library
+if(NOT MOAB_ROOT)
+  set(MOAB_ROOT "${DEPS_ROOT_DIR}")
+endif()
+MESSAGE("-- MOAB Root: ${MOAB_ROOT}")
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
