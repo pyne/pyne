@@ -104,6 +104,35 @@ that is almost stable. We can then take the limit of the Bateman equations where
                                                         e^{-\lambda_i t}\right]
                            + \frac{\gamma\lambda_p}{\lambda_C} e^{-\lambda_p t}
 
+The above expression for intermediate nuclides that are almost stable is valid when the last
+nuclide in the chain is unstable.  When the last nuclide is stable, both the pth
+(almost stable nuclide )and the Cth (last and stable nuclide) must be removed can be split off from
+the summation and handled separately. As previously, then take :math:`\lambda_C \to 0` and :math:`\lambda_p \to 0`.
+
+.. math::
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^{C-1} \left[\lambda_i \frac{\lambda_C}{\lambda_C - \lambda_i} \frac{\lambda_p}{\lambda_p - \lambda_i}
+                                                        \left(\prod_{j\ne i,p}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \frac{\lambda_C}{\lambda_C - \lambda_p} \left(\prod_{j\ne p}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_p} \right) e^{-\lambda_p t}
+                           + \frac{\gamma}{\lambda_C} \lambda_C \frac{\lambda_p}{\lambda_p - \lambda_C} \left(\prod_{j\ne p}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_C} \right) e^{-\lambda_C t}
+
+   \frac{N_C(t)}{N_1(0)} = \gamma\sum_{i\ne p}^{C-1} \left[\frac{\lambda_i \lambda_p}{(\lambda_C - \lambda_i)(\lambda_p - \lambda_i)}
+                                                        \left(\prod_{j\ne i,p}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p}{\lambda_C - \lambda_p} \left(\prod_{j\ne p}^{C-1} \frac{\lambda_j}{\lambda_j} \right) e^{-\lambda_p t}
+                           + \frac{\gamma\lambda_p}{\lambda_p - \lambda_C} \left(\prod_{j\ne p}^{C-1} \frac{\lambda_j}{\lambda_j} \right) e^{-\lambda_C t}
+
+   \frac{N_C(t)}{N_1(0)} = -\gamma\sum_{i\ne p}^{C-1} \left[\left(\prod_{j\ne i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p}{\lambda_C - \lambda_p} e^{-\lambda_p t}
+                           + \frac{\gamma\lambda_p}{\lambda_p - \lambda_C} e^{-\lambda_C t}
+
+   \frac{N_C(t)}{N_1(0)} = -\gamma\sum_{i\ne p}^{C-1} \left[\left(\prod_{j\ne i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p}{\lambda_C - \lambda_p} \left(e^{-\lambda_p t} - e^{-\lambda_C t}\right)
+
+   \frac{N_C(t)}{N_1(0)} = -\gamma\sum_{i\ne p}^{C-1} \left[\left(\prod_{j\ne i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           -\gamma e^{-\lambda_p t} + \gamma
+
 
 
 *********************************************
