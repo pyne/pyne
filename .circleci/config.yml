@@ -18,7 +18,7 @@ jobs:
             cd ~
             nuc_data_make --clean 1
             cd ~/repo/src
-            ./decaygen.py
+            python3 decaygen.py
             cd ~/repo
             python3 setup.py install --user \
                 --moab $HOME/opt/moab
@@ -48,7 +48,7 @@ jobs:
             cd ~
             ~/.local/bin/nuc_data_make --clean 1
             cd ~/repo/src
-            ./decaygen.py
+            python decaygen.py
             cd ~/repo
             python setup.py install --user \
                 --moab $HOME/opt/moab
