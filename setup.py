@@ -297,7 +297,7 @@ def update_cmake_args(ns):
             '-DHDF5_INCLUDE_DIRS=' + h5root + '/include',
             ]
     if ns.moab is not None:
-        ns.cmake_args.append('-DMOAB_ROOT=' + ns.moab)
+        ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
     if ns.deps_root:
         ns.cmake_args.append('-DDEPS_ROOT_DIR=' + absexpanduser(ns.deps_root))
 

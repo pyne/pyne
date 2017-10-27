@@ -94,6 +94,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
 
     if m.structured:
         cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+        # tag cell fracs
+        m.tag_cell_fracs(cell_fracs)
     else:
         cell_fracs = discretize_geom(m)
 

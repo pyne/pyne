@@ -17,26 +17,30 @@ if (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
   # in cache already
   set(MOAB_FOUND TRUE)
 else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
-  find_path(MOAB_INCLUDE_DIR NAMES MBCore.hpp
-    PATHS $ENV{HOME}/.local/include 
-        PATH_SUFFIXES include Include
+  find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
+    HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS}
+    PATHS $ENV{HOME}/.local/include
+    PATH_SUFFIXES include Include
     PATHS "${BASE_DIR}/include" "${BASE_DIR}/../install/include"
     ENV MOAB_ROOT
     NO_DEFAULT_PATH
     )
-  find_path(MOAB_INCLUDE_DIR NAMES MBCore.hpp)
+  find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
+            HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS})
 
-  find_library(MOAB_LIBRARY NAMES MOAB 
-    PATHS $ENV{HOME}/.local/lib 
+  find_library(MOAB_LIBRARY NAMES MOAB
+    HINTS ${MOAB_ROOT}/lib ${DEPS_LIB_HINTS}
+    PATHS $ENV{HOME}/.local/lib
         PATH_SUFFIXES lib Lib
     PATHS "${BASE_DIR_LIB}" "${BASE_DIR_LIB}/../../install/lib"
     ENV MOAB_ROOT
     NO_DEFAULT_PATH
     )
-  find_library(MOAB_LIBRARY NAMES MOAB)
+  find_library(MOAB_LIBRARY NAMES MOAB
+               HINTS ${MOAB_ROOT}/lib ${DEPS_LIB_HINTS})
 
   set(MOAB_INCLUDE_DIRS
-    ${MOAB_INCLUDE_DIR} CACHE PATH "Path to MOAB headers")
+      ${MOAB_INCLUDE_DIR} CACHE PATH "Path to MOAB headers")
 
   set(MOAB_LIBRARIES
       ${MOAB_LIBRARY} CACHE STRING "Directories to be linked to use MOAB")
@@ -45,7 +49,7 @@ else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
   # handle the QUIETLY and REQUIRED arguments and set MOAB_FOUND to TRUE
   # if all listed variables are TRUE
   find_package_handle_standard_args(MOAB  DEFAULT_MSG
-                                  MOAB_LIBRARY MOAB_INCLUDE_DIR)
+                                    MOAB_LIBRARY MOAB_INCLUDE_DIR)
   if (MOAB_FOUND)
     message(STATUS "MOAB header files: ${MOAB_INCLUDE_DIR}")
     message(STATUS "MOAB library: ${MOAB_LIBRARY}")
