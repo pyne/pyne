@@ -205,13 +205,20 @@ def k_almost_stable(hl, a, gamma, asmask):
     hl = hl[:-1]
     a = a[:-1]
     asmask = asmask[:-1]
+    n_almost_stable = asmask.sum()
     outerdiff = (hl - hl[:, np.newaxis])
     outerzeros = (outerdiff == 0.0)
     outer = 1 / outerdiff
     outer[outerzeros] = 1.0
     p = outer.prod(axis=0)
+    # get k for most elements of chain
     k = -gamma * p
+    # replace k for the almost-stable nuclide
     k[asmask] = gamma * np.log(2) / hl[asmask]
+    # add terms for last element of chain.
+    k = np.concatenate([k, [-gamma]*n_almost_stable, [gamma]])
+    a = np.concatenate([a, a[asmask], [0.0]])
+    asmask = np.concatenate([asmask, [False]*(n_almost_stable + 1)])
     return k, a, asmask
 
 
