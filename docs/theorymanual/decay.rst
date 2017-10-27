@@ -292,17 +292,47 @@ as:
 
 .. math::
 
-    k_i = \gamma t_{1/2,i}^{C-2} t_{1/2,C} \prod_{j=1,i\ne j}^{C} \frac{1}{t_{1/2,i} - t_{1/2,j}}
+    k_i = \gamma t_{1/2,i}^{C-2} t_{1/2,C} \prod_{j\ne i}^{C} \frac{1}{t_{1/2,i} - t_{1/2,j}}
 
 
 **Last Nuclide Stable:**
 
 .. math::
 
-    k_i = -\gamma t_{1/2,i}^{C-2} \prod_{j=1,i\ne j}^{C-1} \frac{1}{t_{1/2,i} - t_{1/2,j}}
+    k_i = -\gamma t_{1/2,i}^{C-2} \prod_{j\ne i}^{C-1} \frac{1}{t_{1/2,i} - t_{1/2,j}}
 
     k_C = \gamma
 
+
+**Last Nuclide Unstable and pth Almost Stable:**
+
+.. math::
+
+    k_{i\ne p} = -\frac{\gamma t_{1/2,C}}{t_{1/2,p}} t_{1/2,i}^{C-2} \prod_{j\ne i,p}^C \frac{1}{t_{1/2,i} - t_{1/2,j}}
+
+    k_p = \frac{\gamma t_{1/2,C}}{t_{1/2,p}}
+
+
+**Last Nuclide Stable and pth Almost Stable:**
+
+.. math::
+
+    k_{i\ne p,C} = -\gamma t_{1/2,i}^{C-2} \prod_{j\ne i}^{C-1} \frac{1}{t_{1/2,i} - t_{1/2,j}}
+
+    k_p = -\gamma
+
+    k_C = \gamma
+
+
+**Half-life Degeneracy Between pth and qth:**
+
+.. math::
+
+    k_i = \gamma t_{1/2,i}^{C-2} t_{1/2,C} \prod_{j\ne i}^{C} \frac{1}{t_{1/2,i} - t_{1/2,j}}
+
+    k_p = \gamma\ln(2) t_{1/2,p}^{C-4} t_{1/2,C}  t \prod_{j\ne p,q}^C \frac{1}{t_{1/2,p} - t_{1/2,j}}
+
+    k_q = 0
 
 With completely precomputed :math:`k`, :math:`a`, and the ``exp2()`` function, this
 formulation minimizes the number of floating point operations while completely
@@ -333,12 +363,6 @@ that are calculated.
    many operations. Note that we may filter only on the :math:`k_i` because
    :math:`2^{a_i t} \le 1`.  That is, the exponentional component can only
    reduce the magnitude of a term, not increase it.
-4. If a :math:`k_i` is ``NaN``, that term's contribution to the chain is set to zero.
-   This happens for nuclides whose half lives are not known, but assumed to be exceedingly
-   short.
-5. If a :math:`k_i` is infinite, that term's contribution to the chain is set to zero.
-   This happens for nuclides whose half lives are not known, but assumed to be exceedingly
-   short
 
 In principle, each of these statements is reasonable. However, they
 may preclude desired behavior by users. In such a situation, these
