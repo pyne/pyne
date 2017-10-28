@@ -79,8 +79,9 @@ from Es-254 to Po-210 goes through U-238, which is very close to stable relative
 other nuclides in the chain. This can trigger floating point precision issues, where certain
 terms will underflow or overflow or generate NaNs. Obviously this is a situation to be avoided,
 if at all possible. To handle this sitiuation, let's call :math:`p` the index of the nuclide
-that is almost stable. We can then take the limit of the Bateman equations where
-:math:`\lambda_p \to 0` after we separate out the p-term from the summation:
+that is almost stable. We can then note that the Bateman equations can be reduced by the
+observation that :math:`\lambda_p \ll \lambda_{i\ne p}` after we separate out the p-term
+from the summation:
 
 .. math::
 
@@ -89,25 +90,25 @@ that is almost stable. We can then take the limit of the Bateman equations where
                                                         e^{-\lambda_i t}\right]
                            + \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j - \lambda_p} \right) e^{-\lambda_p t}
 
-   \lim_{\lambda_p\to 0}\frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \lim_{\lambda_p\to 0} \left[\lambda_i \frac{\lambda_p}{\lambda_p - \lambda_i}
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \left[\lambda_i \frac{\lambda_p}{\lambda_p - \lambda_i}
                                                         \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
                                                         e^{-\lambda_i t}\right]
-                           + \lim_{\lambda_p\to 0} \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j - \lambda_p}\right) e^{-\lambda_p t}
+                           + \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j - \lambda_p}\right) e^{-\lambda_p t}
 
-   \lim_{\lambda_p\to 0}\frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \left[\lambda_i \frac{\lambda_p}{- \lambda_i}
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \left[\lambda_i \frac{\lambda_p}{- \lambda_i}
                                                         \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
                                                         e^{-\lambda_i t}\right]
                            + \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j}\right) e^{-\lambda_p t}
 
-   \lim_{\lambda_p\to 0}\frac{N_C(t)}{N_1(0)} = \frac{-\gamma\lambda_p}{\lambda_C}\sum_{i\ne p}^C \left[
+   \frac{N_C(t)}{N_1(0)} = \frac{-\gamma\lambda_p}{\lambda_C}\sum_{i\ne p}^C \left[
                                                         \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
                                                         e^{-\lambda_i t}\right]
                            + \frac{\gamma\lambda_p}{\lambda_C} e^{-\lambda_p t}
 
 The above expression for intermediate nuclides that are almost stable is valid when the last
-nuclide in the chain is unstable.  When the last nuclide is stable, both the pth
-(almost stable nuclide )and the Cth (last and stable nuclide) must be removed can be split off from
-the summation and handled separately. As previously, then take :math:`\lambda_C \to 0` and :math:`\lambda_p \to 0`.
+nuclide in the chain is unstable. When the last nuclide is stable, both the pth
+(almost stable nuclide) and the Cth (last and stable nuclide) must be removed can be split off from
+the summation and handled separately. As previously, then take :math:`\lambda_C \to 0` and :math:`\lambda_p \ll \lambda_{i\ne p,C}`.
 
 .. math::
 
