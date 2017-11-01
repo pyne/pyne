@@ -26,7 +26,7 @@ def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
 
 def gen_mesh(mats=()):
-    mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True, 
+    mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True,
                   structured_ordering='zyx', mats=mats)
     volumes1 = list(mesh_1.structured_iterate_hex("xyz"))
     flux_tag = mesh_1.mesh.createTag("flux", 1, float)
@@ -44,7 +44,7 @@ def test_unstructured_mesh_from_file():
     sm = Mesh(mesh=filename)
 
 def test_unstructured_mesh_from_instance():
-    filename = os.path.join(os.path.dirname(__file__), 
+    filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/unstr.h5m")
     mesh = iMesh.Mesh()
     mesh.load(filename)
@@ -93,13 +93,13 @@ def test_structured_mesh_from_coords():
 
 def test_create_by_set():
     mesh = iMesh.Mesh()
-    a = mesh.createStructuredMesh([0,0,0,1,1,1], i=[1,2], j=[1,2], k=[1,2], 
+    a = mesh.createStructuredMesh([0,0,0,1,1,1], i=[1,2], j=[1,2], k=[1,2],
                                  create_set=True)
     sm = Mesh(mesh=mesh, structured_set=a, structured=True)
     assert_true(all(sm.dims == [0, 0, 0, 1, 1, 1]))
 
 def test_create_by_file():
-    filename = os.path.join(os.path.dirname(__file__), 
+    filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/grid543.h5m")
     sm = Mesh(mesh=filename, structured=True)
     assert_true(all(sm.dims == [1, 11, -5, 5, 14, -3]))
@@ -115,16 +115,16 @@ def test_create_by_file():
     assert_equal(sm.structured_coords[1], [1.0, 5.0, 10.0, 15.0] )
     assert_equal(sm.structured_coords[2], [-10.0, 2.0, 12.0] )
 
-    # loading a test file without structured mesh metadata should raise an 
+    # loading a test file without structured mesh metadata should raise an
     # error
-    filename2 = os.path.join(os.path.dirname(__file__), 
+    filename2 = os.path.join(os.path.dirname(__file__),
                              "files_mesh_test/no_str_mesh.h5m")
-    assert_raises(iBase.TagNotFoundError, Mesh, mesh=filename2, 
+    assert_raises(iBase.TagNotFoundError, Mesh, mesh=filename2,
                        structured=True)
 
 def test_structured_get_hex():
     # mesh with valid i values 0-4, j values 0-3, k values 0-2
-    sm = Mesh(structured_coords = [range(11,16), range(21,25), range(31,34)], 
+    sm = Mesh(structured_coords = [range(11,16), range(21,25), range(31,34)],
               structured=True)
     def check(e):
         assert_true(isinstance(e, iBase.Entity))
@@ -140,7 +140,7 @@ def test_structured_get_hex():
 
 def test_structured_hex_volume():
 
-    sm = Mesh(structured_coords = [[0,1,3], [-3,-2,0], [12,13,15]], 
+    sm = Mesh(structured_coords = [[0,1,3], [-3,-2,0], [12,13,15]],
               structured=True)
     assert_equal(sm.structured_hex_volume(0,0,0), 1)
     assert_equal(sm.structured_hex_volume(1,0,0), 2)
@@ -150,7 +150,7 @@ def test_structured_hex_volume():
 
     ijk_all = itertools.product(*([[0,1]]*3))
 
-    for V, ijk in itertools.izip_longest(sm.structured_iterate_hex_volumes(), 
+    for V, ijk in itertools.izip_longest(sm.structured_iterate_hex_volumes(),
                                          ijk_all):
         assert_equal(V, sm.structured_hex_volume(*ijk))
 
@@ -201,15 +201,15 @@ class TestArithmetic():
         volumes2 = list(self.mesh_1.structured_iterate_hex("xyz"))
         flux_tag = self.mesh_1.mesh.createTag("flux", 1, float)
         flux_data = [1.0, 2.0, 3.0, 4.0]
-        flux_tag[volumes1] = flux_data    
-    
+        flux_tag[volumes1] = flux_data
+
         self.mesh_2 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
         volumes1 = list(self.mesh_2.structured_iterate_hex("xyz"))
         volumes2 = list(self.mesh_2.structured_iterate_hex("xyz"))
         flux_tag = self.mesh_2.mesh.createTag("flux", 1, float)
         flux_data = [1.1, 2.2, 3.3, 4.4]
         flux_tag[volumes1] = flux_data
-    
+
     def arithmetic_statmesh_setup(self):
         self.statmesh_1 = StatMesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
         volumes1 = list(self.statmesh_1.structured_iterate_hex("xyz"))
@@ -220,7 +220,7 @@ class TestArithmetic():
         error_data = [0.1, 0.2, 0.3, 0.4]
         flux_tag[volumes1] = flux_data
         error_tag[volumes2] = error_data
-    
+
         self.statmesh_2 = StatMesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
         volumes1 = list(self.statmesh_2.structured_iterate_hex("xyz"))
         volumes2 = list(self.statmesh_2.structured_iterate_hex("xyz"))
@@ -230,12 +230,12 @@ class TestArithmetic():
         error_data = [0.1, 0.2, 0.3, 0.4]
         flux_tag[volumes1] = flux_data
         error_tag[volumes2] = error_data
-    
+
     def test_add_mesh(self):
         self.arithmetic_mesh_setup()
         self.mesh_1 += self.mesh_2
         exp_res = [2.1, 4.2, 6.3, 8.4]
-        obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
+        obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
 
@@ -243,75 +243,75 @@ class TestArithmetic():
         self.arithmetic_mesh_setup()
         self.mesh_1 -= self.mesh_2
         exp_res = [-0.1, -0.2, -0.3, -0.4]
-        obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
+        obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
-    
+
     def test_multiply_mesh(self):
         self.arithmetic_mesh_setup()
         self.mesh_1 *= self.mesh_2
         exp_res = [1.1, 4.4, 9.9, 17.6]
-        obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
+        obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
-    
+
     def test_divide_mesh(self):
         self.arithmetic_mesh_setup()
         self.mesh_1 /= self.mesh_2
         exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
-        obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol] 
+        obs_res = [self.mesh_1.mesh.getTagHandle("flux")[vol]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
-    
+
     def test_add_statmesh(self):
         self.arithmetic_statmesh_setup()
         self.statmesh_1 += self.statmesh_2
         exp_res = [2.1, 4.2, 6.3, 8.4]
-        exp_err = [0.070790803558659549, 0.1415816071173191, 
+        exp_err = [0.070790803558659549, 0.1415816071173191,
                    0.21237241067597862, 0.28316321423463819]
-        obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
+        obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol] 
+        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
-    
+
     def test_subtract_statmesh(self):
         self.arithmetic_statmesh_setup()
         self.statmesh_1 -= self.statmesh_2
         exp_res = [-0.1, -0.2, -0.3, -0.4]
         exp_err = [-1.4866068747, -2.9732137495, -4.4598206242, -5.9464274989]
-        obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
+        obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol] 
+        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
-    
+
     def test_multiply_statmesh(self):
         self.arithmetic_statmesh_setup()
         self.statmesh_1 *= self.statmesh_2
         exp_res = [1.1, 4.4, 9.9, 17.6]
         exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249,]
-        obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
+        obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol] 
+        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
-    
+
     def test_divide_statmesh(self):
         self.arithmetic_statmesh_setup()
         self.statmesh_1 /= self.statmesh_2
         exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
         exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249]
-        obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol] 
+        obs_res = [self.statmesh_1.mesh.getTagHandle("flux")[vol]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol] 
+        obs_err = [self.statmesh_1.mesh.getTagHandle("flux_rel_error")[vol]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
-    
+
 #############################################
 #Test Structured mesh iteration functionality
 #############################################
@@ -326,7 +326,7 @@ def test_bad_iterates():
     assert_raises(MeshError, sm.structured_iterate_hex, "yyx")
     assert_raises(MeshError, sm.structured_iterate_hex, "xyz", z=[0,1,2])
 
-def test_iterate_3d():        
+def test_iterate_3d():
     # use izip_longest in the lockstep iterations below; this will catch any
     # situations where one iterator turns out to be longer than expected.
     sm = Mesh(structured=True,
@@ -336,7 +336,7 @@ def test_iterate_3d():
     K = range(0,2)
     izip = itertools.izip_longest
 
-    it = sm.structured_set.iterate(iBase.Type.region, 
+    it = sm.structured_set.iterate(iBase.Type.region,
                                  iMesh.Topology.hexahedron)
 
     # Test the zyx order, which is default; it should be equivalent
@@ -348,14 +348,14 @@ def test_iterate_3d():
 
     all_indices_zyx = itertools.product(I, J, K)
     # Test the xyz order, the default from original mmGridGen
-    for ijk_index, sm_x in izip(all_indices_zyx, 
+    for ijk_index, sm_x in izip(all_indices_zyx,
                                  sm.structured_iterate_hex("xyz")):
         assert_equal(sm.structured_get_hex(*ijk_index), sm_x )
 
     def _tuple_sort(collection, indices ):
         # sorting function for order test
         def t(tup):
-            # sort this 3-tuple according to the order of x, y, and z in 
+            # sort this 3-tuple according to the order of x, y, and z in
             #indices
             return (tup["xyz".find(indices[0])]*100 +
                     tup["xyz".find(indices[1])]*10 +
@@ -387,13 +387,13 @@ def test_iterate_2d():
         for i1, i2 in itertools.izip_longest(iter1, iter2):
             assert_equal(i1, i2)
 
-    test_order(sm.structured_iterate_hex("yx"), 
+    test_order(sm.structured_iterate_hex("yx"),
                sm.structured_iterate_hex("zyx", z=[0]))
-    test_order(sm.structured_iterate_hex("yx",z=1), 
+    test_order(sm.structured_iterate_hex("yx",z=1),
                sm.structured_iterate_hex("zyx",z=[1]))
-    test_order(sm.structured_iterate_hex("yx",z=1), 
+    test_order(sm.structured_iterate_hex("yx",z=1),
                sm.structured_iterate_hex("yzx",z=[1]))
-    test_order(sm.structured_iterate_hex("zy",x=[3]), 
+    test_order(sm.structured_iterate_hex("zy",x=[3]),
                sm.structured_iterate_hex("zxy",x=3))
 
     # Cannot iterate over multiple z's without specifing z order
@@ -402,20 +402,20 @@ def test_iterate_2d():
 def test_iterate_1d():
     sm = Mesh(structured=True,
              structured_coords =[range(10,15), range(21,25), range(31,34)])
-    
+
     def test_equal(ijk_list, miter):
         for ijk, i in itertools.izip_longest(ijk_list, miter):
             assert_equal(sm.structured_get_hex(*ijk), i)
 
-    test_equal([[0,0,0],[0,0,1]], 
+    test_equal([[0,0,0],[0,0,1]],
                 sm.structured_iterate_hex("z"))
 
     test_equal([[0,1,1],[0,2,1]],
                 sm.structured_iterate_hex("y", y=[1,2], z=1))
 
     test_equal([[2,0,0],[2,1,0],[2,2,0]],
-                sm.structured_iterate_hex("y", x=2)) 
-    test_equal([[0,0,0],[1,0,0],[2,0,0]], 
+                sm.structured_iterate_hex("y", x=2))
+    test_equal([[0,0,0],[1,0,0],[2,0,0]],
         sm.structured_iterate_hex("x", x=[0,1,2]))
 
 def test_vtx_iterator():
@@ -427,11 +427,11 @@ def test_vtx_iterator():
     it = sm.structured_set.iterate(iBase.Type.vertex, iMesh.Topology.point)
 
     # test the default order
-    for (it_x, sm_x) in itertools.izip_longest(it, 
+    for (it_x, sm_x) in itertools.izip_longest(it,
                                            sm.structured_iterate_vertex("zyx")):
         assert_equal(it_x,sm_x)
 
-    # Do the same again, but use an arbitrary kwarg to structured_iterate_vertex 
+    # Do the same again, but use an arbitrary kwarg to structured_iterate_vertex
     # to prevent optimization from kicking in
     it.reset()
     for (it_x, sm_x) in itertools.izip_longest(it,
@@ -439,7 +439,7 @@ def test_vtx_iterator():
         assert_equal(it_x,sm_x)
 
     it.reset()
-    for (it_x, sm_x) in izip(it, 
+    for (it_x, sm_x) in izip(it,
                                sm.structured_iterate_vertex("yx",z=sm.dims[2])):
         assert_equal(it_x,sm_x)
 
@@ -451,7 +451,7 @@ def test_vtx_iterator():
 def test_large_iterator():
     #Test performance with large mesh
     print "building large mesh"
-    big = Mesh(structured_coords=[range(1,100), range(101,200), range(201,300)], 
+    big = Mesh(structured_coords=[range(1,100), range(101,200), range(201,300)],
                structured = True)
     print "iterating (1)"
     for i in big.structured_iterate_hex():
@@ -466,10 +466,10 @@ def test_large_iterator():
 @with_setup(None, try_rm_file('test_matlib2.h5m'))
 def test_matlib():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=2.2), 
-        2: Material({'He4': 42.0}, density=3.3), 
-        3: Material({'Tm171': 171.0}, density=4.4), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=2.2),
+        2: Material({'He4': 42.0}, density=3.3),
+        3: Material({'Tm171': 171.0}, density=4.4),
         }
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all)):
@@ -490,13 +490,13 @@ def test_matlib():
 def test_no_matlib():
     m = gen_mesh(mats=None)
     m.write_hdf5('test_no_matlib.h5m')
-    
+
 def test_matproptag():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
-        2: Material({'He4': 42.0}, density=44.0), 
-        3: Material({'Tm171': 171.0}, density=45.0), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
 
@@ -527,10 +527,10 @@ def test_matproptag():
 
 def test_matmethtag():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
-        2: Material({'He4': 42.0}, density=44.0), 
-        3: Material({'Tm171': 171.0}, density=45.0), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
 
@@ -545,10 +545,10 @@ def test_matmethtag():
 
 def test_metadatatag():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
-        2: Material({'He4': 42.0}, density=44.0), 
-        3: Material({'Tm171': 171.0}, density=45.0), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
     m.doc = MetadataTag(m, 'doc', doc="extra documentaion")
@@ -584,14 +584,14 @@ def test_metadatatag():
 
 def test_imeshtag():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
-        2: Material({'He4': 42.0}, density=44.0), 
-        3: Material({'Tm171': 171.0}, density=45.0), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
     m.f = IMeshTag(mesh=m, name='f')
-    m.f[:] = [1.0, 2.0, 3.0, 4.0]                                                                
+    m.f[:] = [1.0, 2.0, 3.0, 4.0]
 
     # Getting tags
     assert_equal(m.f[0], 1.0)
@@ -623,7 +623,7 @@ def test_imeshtag():
 
 def test_imeshtag_fancy_indexing():
     m = gen_mesh()
-    
+
     #  tags of length 1
     m.horse = IMeshTag(1, float)
     #  test fancy indexing
@@ -678,10 +678,10 @@ def test_imeshtag_expand():
 
 def test_comptag():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
-        2: Material({'He4': 42.0}, density=44.0), 
-        3: Material({'Tm171': 171.0}, density=45.0), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
     def d2(mesh, i):
@@ -698,10 +698,10 @@ def test_comptag():
 
 def test_addtag():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
-        2: Material({'He4': 42.0}, density=44.0), 
-        3: Material({'Tm171': 171.0}, density=45.0), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
     m.tag('meaning', value=42.0)
@@ -727,10 +727,10 @@ def test_issue360():
 
 def test_iter():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
-        2: Material({'He4': 42.0}, density=44.0), 
-        3: Material({'Tm171': 171.0}, density=45.0), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
     j = 0
@@ -743,15 +743,15 @@ def test_iter():
 
 def test_iter_ve():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0), 
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0), 
-        2: Material({'He4': 42.0}, density=44.0), 
-        3: Material({'Tm171': 171.0}, density=45.0), 
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
+        2: Material({'He4': 42.0}, density=44.0),
+        3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
     ves1 = set(ve for _, _, ve in m)
     ves2 = set(m.iter_ve())
-        
+
 
 def test_contains():
     m = gen_mesh()
@@ -769,8 +769,8 @@ def test_cell_fracs_to_mats():
                  13: Material({'Li': 1.0}, density = 1.0),
                  14: Material({'Be': 1.0}, density = 1.0)}
 
-    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0), 
-                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 1.0, 0.0), 
+    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0),
+                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 1.0, 0.0),
                      (3, 12, 1.0, 0.0)]
 
     m.cell_fracs_to_mats(cell_fracs, cell_mats)
@@ -783,6 +783,37 @@ def test_cell_fracs_to_mats():
     for i, mat, _ in m:
         assert_equal(mat.comp, exp_comps[i])
         assert_equal(mat.density, 1.0)
+
+
+def test_tag_cell_fracs():
+    m = gen_mesh()
+    cell_fracs = np.zeros(7, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+
+    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0),
+                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 1.0, 0.0),
+                     (3, 12, 1.0, 0.0)]
+
+    m.tag_cell_fracs(cell_fracs)
+
+    #  Expected tags:
+    exp_cell_number_tag = [[11, 12, -1], [11, 12, 13], [11, -1, -1],
+                              [12, -1, -1]]
+    exp_cell_fracs_tag = [[0.55, 0.45, 0.0], [0.2, 0.3, 0.5],
+                             [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+    exp_cell_largest_frac_number_tag = [11, 13, 11, 12]
+    exp_cell_largest_frac_tag = [0.55, 0.5, 1.0, 1.0]
+
+    for i in range(len(m)):
+        assert_array_equal(m.cell_number_tag[i], exp_cell_number_tag[i])
+        assert_array_equal(m.cell_fracs_tag[i], exp_cell_fracs_tag[i])
+        assert_equal(m.cell_largest_frac_number_tag[i],
+                           exp_cell_largest_frac_number_tag[i])
+        assert_equal(m.cell_largest_frac_tag[i],
+                           exp_cell_largest_frac_tag[i])
+
 
 def test_no_mats():
     mesh = gen_mesh(mats=None)
