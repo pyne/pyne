@@ -64,7 +64,7 @@ equations can be reduced to simply:
 
 For stable species, the appropriate equation is derived by taking the limit
 of when the decay constant of the stable nuclide (:math:`\lambda_C`) goes to
-zero.  Also notice that every :math:`c_i` contains exactly one :math:`\lambda_C`
+zero. Also notice that every :math:`c_i` contains exactly one :math:`\lambda_C`
 in the numerator which cancels with the :math:`\lambda_C` in the denominator
 in front of the summation:
 
@@ -73,6 +73,85 @@ in front of the summation:
     \lim_{\lambda_C \to 0} N_C(t) = N_1(0)  \gamma \left[e^{-0t} + \sum_{i=1}^{C-1} \lambda_i \left(\frac{1}{0 - \lambda_i} \prod_{j=1,i\ne j}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i} \right) e^{-\lambda_i t} \right]
 
     N_C(t) = N_1(0)  \gamma \left[1.0 - \sum_{i=1}^{C-1} \left(\prod_{j=1,i\ne j}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i} \right) e^{-\lambda_i t} \right]
+
+Now, certain chains have intermeadiate nuclides that are *almost* stable. For example, decaying
+from Es-254 to Po-210 goes through U-238, which is very close to stable relative to all of the
+other nuclides in the chain. This can trigger floating point precision issues, where certain
+terms will underflow or overflow or generate NaNs. Obviously this is a situation to be avoided,
+if at all possible. To handle this sitiuation, let's call :math:`p` the index of the nuclide
+that is almost stable. We can then note that the Bateman equations can be reduced by the
+observation that :math:`\lambda_p \ll \lambda_{i\ne p}` after we separate out the p-term
+from the summation:
+
+.. math::
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \left[\lambda_i \frac{\lambda_p}{\lambda_p - \lambda_i}
+                                                        \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j - \lambda_p} \right) e^{-\lambda_p t}
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \left[\lambda_i \frac{\lambda_p}{\lambda_p - \lambda_i}
+                                                        \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j - \lambda_p}\right) e^{-\lambda_p t}
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^C \left[\lambda_i \frac{\lambda_p}{- \lambda_i}
+                                                        \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \left(\prod_{j\ne p}^C \frac{\lambda_j}{\lambda_j}\right) e^{-\lambda_p t}
+
+   \frac{N_C(t)}{N_1(0)} = \frac{-\gamma\lambda_p}{\lambda_C}\sum_{i\ne p}^C \left[
+                                                        \left(\prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p}{\lambda_C} e^{-\lambda_p t}
+
+The above expression for intermediate nuclides that are almost stable is valid when the last
+nuclide in the chain is unstable. When the last nuclide is stable, both the pth
+(almost stable nuclide) and the Cth (last and stable nuclide) must be removed can be split off from
+the summation and handled separately. As previously, then take :math:`\lambda_C \to 0` and :math:`\lambda_p \ll \lambda_{i\ne p,C}`.
+
+.. math::
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p}^{C-1} \left[\lambda_i \frac{\lambda_C}{\lambda_C - \lambda_i} \frac{\lambda_p}{\lambda_p - \lambda_i}
+                                                        \left(\prod_{j\ne i,p}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \frac{\lambda_C}{\lambda_C - \lambda_p} \left(\prod_{j\ne p}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_p} \right) e^{-\lambda_p t}
+                           + \frac{\gamma}{\lambda_C} \lambda_C \frac{\lambda_p}{\lambda_p - \lambda_C} \left(\prod_{j\ne p}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_C} \right) e^{-\lambda_C t}
+
+   \frac{N_C(t)}{N_1(0)} = \gamma\sum_{i\ne p}^{C-1} \left[\frac{\lambda_i \lambda_p}{(\lambda_C - \lambda_i)(\lambda_p - \lambda_i)}
+                                                        \left(\prod_{j\ne i,p}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right)
+                                                        e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p}{\lambda_C - \lambda_p} \left(\prod_{j\ne p}^{C-1} \frac{\lambda_j}{\lambda_j} \right) e^{-\lambda_p t}
+                           + \frac{\gamma\lambda_p}{\lambda_p - \lambda_C} \left(\prod_{j\ne p}^{C-1} \frac{\lambda_j}{\lambda_j} \right) e^{-\lambda_C t}
+
+   \frac{N_C(t)}{N_1(0)} = -\gamma\sum_{i\ne p}^{C-1} \left[\left(\prod_{j\ne i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p}{\lambda_C - \lambda_p} e^{-\lambda_p t}
+                           + \frac{\gamma\lambda_p}{\lambda_p - \lambda_C} e^{-\lambda_C t}
+
+   \frac{N_C(t)}{N_1(0)} = -\gamma\sum_{i\ne p}^{C-1} \left[\left(\prod_{j\ne i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p}{\lambda_C - \lambda_p} \left(e^{-\lambda_p t} - e^{-\lambda_C t}\right)
+
+   \frac{N_C(t)}{N_1(0)} = -\gamma\sum_{i\ne p}^{C-1} \left[\left(\prod_{j\ne i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           -\gamma e^{-\lambda_p t} + \gamma
+
+
+Lastly, we must handle the degenerate case where two nuclides in a chain  have the same exact half-lives.
+This unfortunate situation arrises out of the fundemental nuclear data. Let's call these the pth and qth
+species. To prevent underflow, overflow, and NaNs, we must separate these nuclides out of the summation
+and then take the limit as :math:`\lambda_q \to \lambda_p`.
+
+.. math::
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p,q}^{C} \left[\lambda_i \left(\prod_{j\ne i}^{C} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma}{\lambda_C} \lambda_p \frac{\lambda_q}{\lambda_q - \lambda_p} \left(\prod_{j\ne p,q}^{C} \frac{\lambda_j}{\lambda_j - \lambda_p} \right) e^{-\lambda_p t}
+                           + \frac{\gamma}{\lambda_C} \lambda_q \frac{\lambda_p}{\lambda_p - \lambda_q} \left(\prod_{j\ne p,q}^{C} \frac{\lambda_j}{\lambda_j - \lambda_q} \right) e^{-\lambda_q t}
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p,q}^{C} \left[\lambda_i \left(\prod_{j\ne i}^{C} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p^2}{\lambda_C} \left(\prod_{j\ne p,q}^{C} \frac{\lambda_j}{\lambda_j - \lambda_p} \right)
+                             \lim_{\lambda_q\to\lambda_p}\frac{e^{-\lambda_p t} - e^{-\lambda_q t}}{\lambda_q - \lambda_p}
+
+   \frac{N_C(t)}{N_1(0)} = \frac{\gamma}{\lambda_C}\sum_{i\ne p,q}^{C} \left[\lambda_i \left(\prod_{j\ne i}^{C} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) e^{-\lambda_i t}\right]
+                           + \frac{\gamma\lambda_p^2}{\lambda_C} \left(\prod_{j\ne p,q}^{C} \frac{\lambda_j}{\lambda_j - \lambda_p} \right) t e^{-\lambda_p t}
 
 
 *********************************************
@@ -104,16 +183,48 @@ where the coefficients :math:`k_i` are defined as:
 
 .. math::
 
-    k_i = \frac{\gamma}{\lambda_C} \lambda_i c_i
+    k_i = \frac{\gamma}{\lambda_C} \lambda_i \prod_{j\ne i}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
 
 
 **Last Nuclide Stable:**
 
 .. math::
 
-    k_i = -\gamma \prod_{j=1,i\ne j}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}
+    k_{i\ne C} = -\gamma \prod_{j=1,i\ne j}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}
 
     k_C = \gamma
+
+
+**Last Nuclide Unstable and pth Almost Stable:**
+
+.. math::
+
+    k_{i\ne p} = -\frac{\gamma\lambda_p}{\lambda_C} \prod_{j\ne i,p}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
+
+    k_p = \frac{\gamma\lambda_p}{\lambda_C}
+
+
+**Last Nuclide Stable and pth Almost Stable:**
+
+.. math::
+
+    k_{i\ne p,C} = -\gamma \prod_{j\ne i}^{C-1} \frac{\lambda_j}{\lambda_j - \lambda_i}
+
+    k_p = -\gamma
+
+    k_C = \gamma
+
+
+**Half-life Degeneracy Between pth and qth:**
+
+.. math::
+
+    k_i = \frac{\gamma}{\lambda_C} \lambda_i \prod_{j\ne i}^C \frac{\lambda_j}{\lambda_j - \lambda_i}
+
+    k_p = \frac{\gamma\lambda_p^2}{\lambda_C} t \prod_{j\ne p,q}^C \frac{\lambda_j}{\lambda_j - \lambda_p}
+
+    k_q = 0
+
 
 
 If :math:`k_i` are computed at run time then the this expression results in much more
@@ -182,17 +293,47 @@ as:
 
 .. math::
 
-    k_i = \gamma t_{1/2,i}^{C-2} t_{1/2,C} \prod_{j=1,i\ne j}^{C} \frac{1}{t_{1/2,i} - t_{1/2,j}}
+    k_i = \gamma t_{1/2,i}^{C-2} t_{1/2,C} \prod_{j\ne i}^{C} \frac{1}{t_{1/2,i} - t_{1/2,j}}
 
 
 **Last Nuclide Stable:**
 
 .. math::
 
-    k_i = -\gamma t_{1/2,i}^{C-2} \prod_{j=1,i\ne j}^{C-1} \frac{1}{t_{1/2,i} - t_{1/2,j}}
+    k_i = -\gamma t_{1/2,i}^{C-2} \prod_{j\ne i}^{C-1} \frac{1}{t_{1/2,i} - t_{1/2,j}}
 
     k_C = \gamma
 
+
+**Last Nuclide Unstable and pth Almost Stable:**
+
+.. math::
+
+    k_{i\ne p} = -\frac{\gamma t_{1/2,C}}{t_{1/2,p}} t_{1/2,i}^{C-2} \prod_{j\ne i,p}^C \frac{1}{t_{1/2,i} - t_{1/2,j}}
+
+    k_p = \frac{\gamma t_{1/2,C}}{t_{1/2,p}}
+
+
+**Last Nuclide Stable and pth Almost Stable:**
+
+.. math::
+
+    k_{i\ne p,C} = -\gamma t_{1/2,i}^{C-2} \prod_{j\ne i}^{C-1} \frac{1}{t_{1/2,i} - t_{1/2,j}}
+
+    k_p = -\gamma
+
+    k_C = \gamma
+
+
+**Half-life Degeneracy Between pth and qth:**
+
+.. math::
+
+    k_i = \gamma t_{1/2,i}^{C-2} t_{1/2,C} \prod_{j\ne i}^{C} \frac{1}{t_{1/2,i} - t_{1/2,j}}
+
+    k_p = \gamma\ln(2) t_{1/2,p}^{C-4} t_{1/2,C}  t \prod_{j\ne p,q}^C \frac{1}{t_{1/2,p} - t_{1/2,j}}
+
+    k_q = 0
 
 With completely precomputed :math:`k`, :math:`a`, and the ``exp2()`` function, this
 formulation minimizes the number of floating point operations while completely
@@ -223,12 +364,6 @@ that are calculated.
    many operations. Note that we may filter only on the :math:`k_i` because
    :math:`2^{a_i t} \le 1`.  That is, the exponentional component can only
    reduce the magnitude of a term, not increase it.
-4. If a :math:`k_i` is ``NaN``, that term's contribution to the chain is set to zero.
-   This happens for nuclides whose half lives are not known, but assumed to be exceedingly
-   short.
-5. If a :math:`k_i` is infinite, that term's contribution to the chain is set to zero.
-   This happens for nuclides whose half lives are not known, but assumed to be exceedingly
-   short
 
 In principle, each of these statements is reasonable. However, they
 may preclude desired behavior by users. In such a situation, these
