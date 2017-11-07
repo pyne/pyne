@@ -854,6 +854,25 @@ def _adjust_metastables(levellist):
             levellist[i] = tuple(row)
 
 
+# State Id, Rx Id : New Half-lives
+_BAD_HALF_LIVES = {
+    # Eu-151 lists a very long half-life (5.364792e+25) even though it
+    # lists no reaction, and thus no children, and no branch ratio.
+    # set to infinity for consistency.
+    (631510000, 0): float('inf'),
+    }
+
+
+def _adjust_half_lives(levellist):
+    """Resets misbehaving half-lives to new value."""
+    for i in range(len(levellist)):
+        key = levellist[i][:2]
+        if key in _BAD_HALF_LIVES:
+            row = list(levellist[i])
+            row[2] = _BAD_HALF_LIVES[key]
+            levellist[i] = tuple(row)
+
+
 def levels(filename, levellist=None):
     """
     This takes an ENSDF filename or file object and parses the ADOPTED LEVELS
@@ -963,6 +982,7 @@ def levels(filename, levellist=None):
                                   special))
     _adjust_ge100_branches(levellist)
     _adjust_metastables(levellist)
+    _adjust_half_lives(levellist)
     return levellist
 
 
