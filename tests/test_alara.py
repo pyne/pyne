@@ -131,23 +131,30 @@ def test_write_fluxin_multiple_subvoxel():
     output = os.path.join(os.getcwd(), output_name)
 
     flux_mesh = Mesh(structured=True,
-                     structured_coords=[[0, 1, 2], [0, 1], [0, 1]])
+                     structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
     tag_flux = flux_mesh.mesh.createTag("flux", 7, float)
-    flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14]]
+    flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14],
+                 [15, 16, 17, 18, 19, 20, 21],
+                 [22, 23, 24, 25, 26, 27, 28]]
     ves = flux_mesh.structured_iterate_hex("xyz")
     for i, ve in enumerate(ves):
         tag_flux[ve] = flux_data[i]
 
-    cell_fracs = np.zeros(3, dtype=[('idx', np.int64),
+    cell_fracs = np.zeros(6, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
 
-    cell_fracs[:] = [(0, 11, 1, 0.0), (1, 11, 0.2, 0.0),
-                     (1, 12, 0.8, 0.0)]
+    cell_fracs[:] = [(0, 11, 1, 0.0), (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
+                     (2, 11, 0.5, 0.0), (2, 13, 0.5, 0.0), (3, 13, 1, 0.0)]
+
+    cell_mats = {11: Material({'H': 1.0}, density=1.0),
+                 12: Material({'He': 1.0}, density=1.0),
+                 13: Material({}, density=0.0, metadata={'name': 'void'})}
 
     # test forward writting
-    mesh_to_fluxin(flux_mesh, "flux", output_name, False, True, cell_fracs)
+    mesh_to_fluxin(flux_mesh, "flux", output_name, False, True, cell_fracs,
+                   cell_mats)
 
     with open(output) as f:
         written = f.readlines()
@@ -160,7 +167,8 @@ def test_write_fluxin_multiple_subvoxel():
         os.remove(output)
 
     # test reverse writting
-    mesh_to_fluxin(flux_mesh, "flux", output_name, True, True, cell_fracs)
+    mesh_to_fluxin(flux_mesh, "flux", output_name, True, True, cell_fracs,
+                   cell_mats)
 
     with open(output) as f:
         written = f.readlines()

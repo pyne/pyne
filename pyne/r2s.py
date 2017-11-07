@@ -105,7 +105,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)
 
-    mesh_to_fluxin(m, flux_tag, fluxin, reverse,sub_voxel,cell_fracs)
+    mesh_to_fluxin(m, flux_tag, fluxin, reverse,
+                   sub_voxel, cell_fracs, cell_mats)
     record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib)
 
     if isfile(alara_params):
