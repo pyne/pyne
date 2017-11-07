@@ -18,6 +18,8 @@ config = \
 """[general]
 # Specify whether this problem uses structured or unstructured mesh
 structured: True
+# Specify whether this problem uses sub-voxel r2s
+sub_voxel: False
 
 [step1]
 # Path to MCNP MESHTAL file containing neutron fluxes or a DAG-MCNP5
@@ -45,8 +47,8 @@ num_rays: 10
 grid: False
 
 [step2]
-# List of decays times, seperated by commas. These strings much match exactly 
-# with their counterparts in the phtn_src file produced in step1. No spaces 
+# List of decays times, seperated by commas. These strings much match exactly
+# with their counterparts in the phtn_src file produced in step1. No spaces
 # should appear in this line except the space between the time and the time unit
 # for each entry.
 decay_times:1E3 s,12 h,3.0 d
@@ -102,8 +104,8 @@ def setup():
         f.write(config)
     with open(alara_params_filename, 'w') as f:
         f.write(alara_params)
-    print('File "{}" has been written'.format(config_filename))  
-    print('File "{}" has been written'.format(alara_params_filename))  
+    print('File "{}" has been written'.format(config_filename))
+    print('File "{}" has been written'.format(alara_params_filename))
     print('Fill out the fields in these filse then run ">> r2s.py step1"')
 
 def step1():
@@ -111,10 +113,11 @@ def step1():
     config.read(config_filename)
 
     structured = config.getboolean('general', 'structured')
+    sub_voxel = config.getboolean('general','sub_voxel')
     meshtal = config.get('step1', 'meshtal')
     tally_num = config.getint('step1', 'tally_num')
     flux_tag = config.get('step1', 'flux_tag')
-    
+
     if structured:
         meshtal = Meshtal(meshtal,
                         {tally_num: (flux_tag, flux_tag + '_err',
@@ -130,21 +133,21 @@ def step1():
     cell_mats = cell_materials(geom)
     irradiation_setup(meshtal, cell_mats, alara_params_filename, tally_num,
                       num_rays=num_rays, grid=grid, reverse=reverse,
-                      flux_tag=flux_tag)
+                      flux_tag=flux_tag,sub_voxel=sub_voxel)
 
     # create a blank mesh for step 2:
     if structured:
         mesh = meshtal.tally[tally_num]
     else:
         mesh = Mesh(structured=False, mesh=meshtal)
-        
+
     ves = list(mesh.iter_ve())
     for tag in mesh.mesh.getAllTags(ves[0]):
         mesh.mesh.destroyTag(tag, True)
     mesh.mesh.save('blank_mesh.h5m')
     print('The file blank_mesh.h5m has been saved to disk.')
     print('Do not delete this file; it is needed by r2s.py step2.\n')
-        
+
     print('R2S step1 complete, run ALARA with the command:')
     print('>> alara alara_inp > output.txt')
 
@@ -152,6 +155,7 @@ def step2():
     config = ConfigParser.ConfigParser()
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
+    sub_voxel = config.getboolean('general','sub_voxel')
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
