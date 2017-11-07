@@ -106,18 +106,20 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
             output += "\n\n"
 
     if sub_voxel:
-        for (cell, row) in enumerate(cell_fracs):
-            # print flux data to file
-            count = 0
-            flux_data = np.atleast_1d(tag_flux[row['idx']])
-            for i in range(start, stop, direction):
-                output += "{:.6E} ".format(flux_data[i])
-                # fluxin formatting: create a new line after every 6th entry
-                count += 1
-                if count % 6 == 0:
-                    output += "\n"
+        for row in cell_fracs:
+            for i, mat, ve in flux_mesh:
+                if i == row['idx']:
+                    count = 0
+                    flux_data = np.atleast_1d(tag_flux[ve])
+                    for i in range(start, stop, direction):
+                        output += "{:.6E} ".format(flux_data[i])
+                        # fluxin formatting: create a new line
+                        # after every 6th entry
+                        count += 1
+                        if count % 6 == 0:
+                            output += "\n"
 
-            output += "\n\n"
+                    output += "\n\n"
 
     with open(fluxin, "w") as f:
         f.write(output)
