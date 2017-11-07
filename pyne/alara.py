@@ -32,7 +32,8 @@ from pyne.xs.data_source import SimpleDataSource
 
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
-                   reverse=False,sub_voxel=False,cell_fracs=None):
+                   reverse=False, sub_voxel=False, cell_fracs=None,
+                   cell_mats=None):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Fluxes are printed in the order of the flux_mesh.__iter__().
 
@@ -66,8 +67,11 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
 
         The array must be sorted with respect to both idx and cell, with
         cell changing fastest.
-        The cell_fracs is required only when sub_voxel=True.
-        If sub_voxel=False, cell_fracs will not be used.
+    cell_mats : dict
+        Maps geometry cell numbers to PyNE Material objects.
+
+        The cell_fracs and cell_mats are used only when sub_voxel=True.
+        If sub_voxel=False, neither cell_fracs nor cell_mats will be used.
 
     """
     tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
@@ -108,7 +112,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     if sub_voxel:
         for row in cell_fracs:
             for i, mat, ve in flux_mesh:
-                if i == row['idx']:
+                if i == row['idx'] and len(cell_mats[row['cell']].comp) != 0:
                     count = 0
                     flux_data = np.atleast_1d(tag_flux[ve])
                     for i in range(start, stop, direction):
