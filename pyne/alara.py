@@ -98,32 +98,13 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     if not sub_voxel:
         for i, mat, ve in flux_mesh:
             # print flux data to file
-            count = 0
-            flux_data = np.atleast_1d(tag_flux[ve])
-            for i in range(start, stop, direction):
-                output += "{:.6E} ".format(flux_data[i])
-                # fluxin formatting: create a new line after every 6th entry
-                count += 1
-                if count % 6 == 0:
-                    output += "\n"
-
-            output += "\n\n"
-
+            output = _output_flux(ve, tag_flux, output, start, stop, direction)
     else:
         for row in cell_fracs:
             for i, mat, ve in flux_mesh:
                 if i == row['idx'] and len(cell_mats[row['cell']].comp) != 0:
-                    count = 0
-                    flux_data = np.atleast_1d(tag_flux[ve])
-                    for i in range(start, stop, direction):
-                        output += "{:.6E} ".format(flux_data[i])
-                        # fluxin formatting: create a new line
-                        # after every 6th entry
-                        count += 1
-                        if count % 6 == 0:
-                            output += "\n"
-
-                    output += "\n\n"
+                    output = _output_flux(ve, tag_flux, output, start, stop,
+                                          direction)
 
     with open(fluxin, "w") as f:
         f.write(output)
@@ -746,3 +727,24 @@ def cram(N, t, n_0, order):
         msg = 'Rational approximation of degree {0} is not supported.'.format(order)
         raise ValueError(msg)
 
+def _output_flux(ve, tag_flux,output,start,stop,direction):
+    """
+    This function is used to write netron flux into fluxin
+    :param ve: entity
+    :param tag_flux:
+    :param output: string
+    :return: string
+    """
+
+    count = 0
+    flux_data = np.atleast_1d(tag_flux[ve])
+    for i in range(start, stop, direction):
+        output += "{:.6E} ".format(flux_data[i])
+        # fluxin formatting: create a new line
+        # after every 6th entry
+        count += 1
+        if count % 6 == 0:
+            output += "\n"
+
+    output += "\n\n"
+    return output
