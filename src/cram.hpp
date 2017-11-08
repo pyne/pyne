@@ -6,8 +6,6 @@
 #define PYNE_CRAM_SOLVE_CPP
 
 
-#include <complex.h>
-
 typedef struct pyne_cram_transmute_info_tag {
   int n;
   int nnz;
