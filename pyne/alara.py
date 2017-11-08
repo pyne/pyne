@@ -52,7 +52,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     sub_voxel: bool, optional
         If true, sub-voxel r2s work flow will be sued. Flux of a voxel will
         be duplicated c times. Where c is the cell numbers of that voxel.
-    cell_fracs : structured array
+    cell_fracs : structured array, optional
         The output from dagmc.discretize_geom(). A sorted, one dimensional
         array, each entry containing the following fields:
 
@@ -67,7 +67,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
 
         The array must be sorted with respect to both idx and cell, with
         cell changing fastest.
-    cell_mats : dict
+    cell_mats : dict, optional
         Maps geometry cell numbers to PyNE Material objects.
 
         The cell_fracs and cell_mats are used only when sub_voxel=True.
@@ -109,7 +109,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
 
             output += "\n\n"
 
-    if sub_voxel:
+    else:
         for row in cell_fracs:
             for i, mat, ve in flux_mesh:
                 if i == row['idx'] and len(cell_mats[row['cell']].comp) != 0:
