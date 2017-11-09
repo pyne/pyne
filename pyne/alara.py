@@ -239,7 +239,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
                 tag_handles[tags[cond]][ve] = [0] * num_e_groups
 
 def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
-                   sig_figs=6):
+                   sig_figs=6, sub_voxel=False):
     """This function preforms the same task as alara.mesh_to_geom, except the
     geometry is on the basis of the stuctured array output of
     dagmc.discretize_geom rather than a PyNE material object with materials.
@@ -251,7 +251,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
     ----------
     mesh : PyNE Mesh object
         The Mesh object for which the geometry is discretized.
-     cell_fracs : structured array
+    cell_fracs : structured array
         The output from dagmc.discretize_geom(). A sorted, one dimensional
         array, each entry containing the following fields:
 
@@ -274,6 +274,8 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
     sig_figs : int
         The number of significant figures that two mixtures must have in common
         to be treated as the same mixture within ALARA.
+    sub_voxel : bool
+        If sub_voxel is True, the sub-voxel r2s will be used.
     """
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
@@ -287,31 +289,51 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
     mixture = '' # mixture blocks
 
     unique_mixtures = []
-    for i, mat, ve in mesh:
-        volume += '    {0: 1.6E}    zone_{1}\n'.format(mesh.elem_volume(ve), i)
+    if not sub_voxel:
+        for i, mat, ve in mesh:
+            volume += '    {0: 1.6E}    zone_{1}\n'.format(
+                mesh.elem_volume(ve), i)
 
-        ve_mixture = {}
-        for row in cell_fracs[cell_fracs['idx'] == i]:
-            cell_mat = cell_mats[row['cell']]
-            name = cell_mat.metadata['name']
-            if _is_void(name):
-                name = 'mat_void'
-            if name not in ve_mixture.keys():
-                ve_mixture[name] = np.round(row['vol_frac'], sig_figs)
-            else:
-                ve_mixture[name] += np.round(row['vol_frac'], sig_figs)
+            ve_mixture = {}
+            for row in cell_fracs[cell_fracs['idx'] == i]:
+                cell_mat = cell_mats[row['cell']]
+                name = cell_mat.metadata['name']
+                if _is_void(name):
+                    name = 'mat_void'
+                if name not in ve_mixture.keys():
+                    ve_mixture[name] = np.round(row['vol_frac'], sig_figs)
+                else:
+                    ve_mixture[name] += np.round(row['vol_frac'], sig_figs)
 
-        if ve_mixture not in unique_mixtures:
-            unique_mixtures.append(ve_mixture)
-            mixture += 'mixture mix_{0}\n'.format(
-                                           unique_mixtures.index(ve_mixture))
-            for key, value in ve_mixture.items():
-                mixture += '    material {0} 1 {1}\n'.format(key, value)
+            if ve_mixture not in unique_mixtures:
+                unique_mixtures.append(ve_mixture)
+                mixture += 'mixture mix_{0}\n'.format(
+                                            unique_mixtures.index(ve_mixture))
+                for key, value in ve_mixture.items():
+                    mixture += '    material {0} 1 {1}\n'.format(key, value)
 
-            mixture += 'end\n\n'
+                mixture += 'end\n\n'
 
-        mat_loading += '    zone_{0}    mix_{1}\n'.format(i,
-                        unique_mixtures.index(ve_mixture))
+            mat_loading += '    zone_{0}    mix_{1}\n'.format(i,
+                            unique_mixtures.index(ve_mixture))
+    else:
+        sve_count = 0
+        for row in cell_fracs:
+            for i, mat, ve in mesh:
+                if row['idx'] == i and len(cell_mats[row['cell']].comp) != 0:
+                    volume += '    {0: 1.6E}    zone_{1}\n'.format(
+                        mesh.elem_volume(ve) * row['vol_frac'], sve_count)
+                    cell_mat = cell_mats[row['cell']]
+                    name = cell_mat.metadata['name']
+                    if name not in unique_mixtures:
+                        unique_mixtures.append(name)
+                        mixture += 'mixture {0}\n'.format(name)
+                        mixture += '    material {0} 1 1\n'.format(name)
+                        mixture += 'end\n\n'
+                    mat_loading += '    zone_{0}    {1}\n'.format(
+                        sve_count, name)
+                    sve_count += 1
+
 
     volume += 'end\n\n'
     mat_loading += 'end\n\n'

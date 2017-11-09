@@ -1,0 +1,38 @@
+geometry rectangular
+
+volume
+     5.500000E-01    zone_0
+     4.500000E-01    zone_1
+     2.000000E-01    zone_2
+     3.000000E-01    zone_3
+     5.000000E-01    zone_4
+     1.500000E-01    zone_5
+     8.000000E-01    zone_6
+     5.500000E-01    zone_7
+     4.500000E-01    zone_8
+end
+
+mat_loading
+    zone_0    fake_mat
+    zone_1    water
+    zone_2    fake_mat
+    zone_3    water
+    zone_4    helium
+    zone_5    fake_mat
+    zone_6    fake_mat
+    zone_7    fake_mat
+    zone_8    water
+end
+
+mixture fake_mat
+    material fake_mat 1 1
+end
+
+mixture water
+    material water 1 1
+end
+
+mixture helium
+    material helium 1 1
+end
+

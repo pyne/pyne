@@ -98,7 +98,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     if m.structured:
         cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
         # tag cell fracs
-        m.tag_cell_fracs(cell_fracs)
+        if sub_voxel:
+            m.tag_cell_fracs(cell_fracs)
     else:
         cell_fracs = discretize_geom(m)
 
@@ -107,7 +108,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
 
     mesh_to_fluxin(m, flux_tag, fluxin, reverse,
                    sub_voxel, cell_fracs, cell_mats)
-    record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib)
+    record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib,
+                   sub_voxel=sub_voxel)
 
     if isfile(alara_params):
         with open(alara_params, 'r') as f:
