@@ -729,11 +729,16 @@ def cram(N, t, n_0, order):
 
 def _output_flux(ve, tag_flux,output,start,stop,direction):
     """
-    This function is used to write netron flux into fluxin
-    :param ve: entity
-    :param tag_flux:
-    :param output: string
-    :return: string
+    This function is used to get neutron flux for fluxin
+
+    Parameters
+    ----------
+    ve : entity, a mesh sub-voxel
+    tag_flux : array, neutron flux of the sub-voxel
+    output : string
+    start : int
+    stop : int
+    direction: int
     """
 
     count = 0
