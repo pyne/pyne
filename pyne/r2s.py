@@ -15,7 +15,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       geom=None, num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_geom", alara_matlib="alara_matlib",
-                      output_mesh="r2s_step1.h5m", output_material=False):
+                      output_mesh="r2s_step1.h5m", output_material=False,
+                      sub_voxel=False):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
 
@@ -63,6 +64,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     output_material : bool, optional
         If true, output mesh will have materials as determined by
         dagmc.discretize_geom()
+    sub_voxel : bool, optional
+        If true, sub-voxel r2s work flow  will be used.
     """
     from pyne.dagmc import load, discretize_geom
     if geom is not None and isfile(geom):
@@ -102,7 +105,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)
 
-    mesh_to_fluxin(m, flux_tag, fluxin, reverse)
+    mesh_to_fluxin(m, flux_tag, fluxin, reverse,
+                   sub_voxel, cell_fracs, cell_mats)
     record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib)
 
     if isfile(alara_params):

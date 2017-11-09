@@ -32,7 +32,8 @@ from pyne.xs.data_source import SimpleDataSource
 
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
-                   reverse=False):
+                   reverse=False, sub_voxel=False, cell_fracs=None,
+                   cell_mats=None):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Fluxes are printed in the order of the flux_mesh.__iter__().
 
@@ -48,6 +49,30 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     reverse : bool
         If true, fluxes will be printed in the reverse order as they appear in
         the flux vector tagged on the mesh.
+    sub_voxel: bool, optional
+        If true, sub-voxel r2s work flow will be sued. Flux of a voxel will
+        be duplicated c times. Where c is the cell numbers of that voxel.
+    cell_fracs : structured array, optional
+        The output from dagmc.discretize_geom(). A sorted, one dimensional
+        array, each entry containing the following fields:
+
+            :idx: int
+                The volume element index.
+            :cell: int
+                The geometry cell number.
+            :vol_frac: float
+                The volume fraction of the cell withing the mesh ve.
+            :rel_error: float
+                The relative error associated with the volume fraction.
+
+        The array must be sorted with respect to both idx and cell, with
+        cell changing fastest.
+    cell_mats : dict, optional
+        Maps geometry cell numbers to PyNE Material objects.
+
+        The cell_fracs and cell_mats are used only when sub_voxel=True.
+        If sub_voxel=False, neither cell_fracs nor cell_mats will be used.
+
     """
     tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
 
@@ -57,7 +82,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                                iMesh.Topology.all))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
-    
+
     # Establish for loop bounds based on if forward or backward printing
     # is requested
     if not reverse:
@@ -70,18 +95,16 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         direction = -1
 
     output = ""
-    for i, mat, ve in flux_mesh:
-        # print flux data to file
-        count = 0
-        flux_data = np.atleast_1d(tag_flux[ve])
-        for i in range(start, stop, direction):
-            output += "{:.6E} ".format(flux_data[i])
-            # fluxin formatting: create a new line after every 6th entry
-            count += 1
-            if count % 6 == 0:
-                output += "\n"
-
-        output += "\n\n"
+    if not sub_voxel:
+        for i, mat, ve in flux_mesh:
+            # print flux data to file
+            output = _output_flux(ve, tag_flux, output, start, stop, direction)
+    else:
+        for row in cell_fracs:
+            for i, mat, ve in flux_mesh:
+                if i == row['idx'] and len(cell_mats[row['cell']].comp) != 0:
+                    output = _output_flux(ve, tag_flux, output, start, stop,
+                                          direction)
 
     with open(fluxin, "w") as f:
         f.write(output)
@@ -535,14 +558,14 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
     return s
 
 def phtn_src_energy_bounds(input_file):
-    """Reads an ALARA input file and extracts the energy bounds from the 
+    """Reads an ALARA input file and extracts the energy bounds from the
     photon_source block.
 
     Parameters
     ----------
     input_file : str
          The ALARA input file name, which must contain a photon_source block.
-    
+
     Returns
     -------
     e_bounds : list of floats
@@ -704,3 +727,29 @@ def cram(N, t, n_0, order):
         msg = 'Rational approximation of degree {0} is not supported.'.format(order)
         raise ValueError(msg)
 
+def _output_flux(ve, tag_flux,output,start,stop,direction):
+    """
+    This function is used to get neutron flux for fluxin
+
+    Parameters
+    ----------
+    ve : entity, a mesh sub-voxel
+    tag_flux : array, neutron flux of the sub-voxel
+    output : string
+    start : int
+    stop : int
+    direction: int
+    """
+
+    count = 0
+    flux_data = np.atleast_1d(tag_flux[ve])
+    for i in range(start, stop, direction):
+        output += "{:.6E} ".format(flux_data[i])
+        # fluxin formatting: create a new line
+        # after every 6th entry
+        count += 1
+        if count % 6 == 0:
+            output += "\n"
+
+    output += "\n\n"
+    return output
