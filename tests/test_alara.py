@@ -285,6 +285,51 @@ def test_record_to_geom():
     if os.path.isfile(matlib):
         os.remove(matlib)
 
+def test_record_to_geom_subvoxel():
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
+    expected_geom = os.path.join(thisdir, "files_test_alara",
+                                 "alara_record_geom_subvoxel.txt")
+    expected_matlib = os.path.join(thisdir, "files_test_alara",
+                                   "alara_record_matlib_subvoxel.txt")
+    geom = os.path.join(os.getcwd(), "alara_record_geom")
+    matlib = os.path.join(os.getcwd(), "alara_record_matlib")
+    cell_fracs = np.zeros(11, dtype=[('idx', np.int64),
+                                        ('cell', np.int64),
+                                        ('vol_frac', np.float64),
+                                        ('rel_error', np.float64)])
+
+    cell_mats = {11: Material({'H1': 1.0, 'K39': 1.0}, density=1.1,
+                              metadata={'name': 'fake_mat'}),
+                 12: Material({'H1': 0.1, 'O16': 1.0}, density=1.2,
+                              metadata={'name': 'water'}),
+                 13: Material({'He4': 42.0}, density=1.3,
+                              metadata={'name': 'helium'}),
+                 14: Material({}, density=0.0, metadata={'name': 'void'}),
+                 15: Material({}, density=0.0, metadata={'name': 'void'}),
+                 16: Material({'H1': 1.0, 'K39': 1.0}, density=1.1,
+                              metadata={'name': 'fake_mat'})}
+
+    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0),
+                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 0.15, 0.0),
+                     (2, 14, 0.01, 0.0), (2, 15, 0.04, 0.0), (2, 16, 0.8, 0.0),
+                     (3, 11, 0.55, 0.0), (3, 12, 0.45, 0.0)]
+
+    m = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
+             structured=True, mats=None)
+
+    record_to_geom(m, cell_fracs, cell_mats, geom, matlib,sub_voxel=True)
+
+    assert(filecmp.cmp(geom, expected_geom))
+    if os.path.isfile(geom):
+        os.remove(geom)
+
+    assert(filecmp.cmp(matlib, expected_matlib))
+    if os.path.isfile(matlib):
+        os.remove(matlib)
+
 def test_mesh_to_geom():
 
     if not HAVE_PYTAPS:
