@@ -320,7 +320,7 @@ def test_record_to_geom_subvoxel():
     m = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
              structured=True, mats=None)
 
-    record_to_geom(m, cell_fracs, cell_mats, geom, matlib, sub_voxel=True)
+    record_to_geom(m, cell_fracs, cell_mats, geom, matlib,sub_voxel=True)
 
     assert(filecmp.cmp(geom, expected_geom))
     if os.path.isfile(geom):
