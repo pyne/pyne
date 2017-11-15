@@ -12,6 +12,7 @@ extern "C" double endftod_(char *str, int len);
 
 std::string pyne::PYNE_DATA = "";
 std::string pyne::NUC_DATA_PATH = "";
+std::string pyne::VERSION = "0.5.3";
 
 void pyne::pyne_start() {
 #if defined __WIN_MSVC__
@@ -337,7 +338,7 @@ bool pyne::file_exists(std::string strfilename) {
 }
 
 // Message Helpers
- 
+
 bool pyne::USE_WARNINGS = true;
 
 bool pyne::toggle_warnings(){
@@ -348,8 +349,8 @@ bool pyne::toggle_warnings(){
 void pyne::warning(std::string s){
   // Prints a warning message
   if (USE_WARNINGS){
-    std::cout << "\033[1;33m WARNING: \033[0m" << s << "\n"; 
-  }  
+    std::cout << "\033[1;33m WARNING: \033[0m" << s << "\n";
+  }
 }
 
 
