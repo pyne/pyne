@@ -1250,7 +1250,7 @@ class Mesh(object):
         # creat the tags
         self.tag(name='cell_number_tag', value=voxel_cell_number,
                  doc='cell numbers of the voxel, -1 used to fill vacancy',
-                 tagtype=IMeshTag, size=max_cell_number, dtype = int)
+                 tagtype=IMeshTag, size=max_cell_number, dtype=int)
         self.tag(name='cell_fracs_tag', value=voxel_cell_fracs,
                  tagtype=IMeshTag, doc='volume fractions of each cell in the '
                                        'voxel, 0.0 used to fill vacancy',
