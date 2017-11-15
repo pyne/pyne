@@ -48,6 +48,7 @@ namespace pyne {
   /// Path to the directory containing the PyNE data.
   extern std::string PYNE_DATA;
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
+  extern std::string VERSION; ///< PyNE version number
 
   // String Transformations
   /// string of digit characters

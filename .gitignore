@@ -7,6 +7,7 @@ build_nuc_data/
 pyne/include/
 src/atomic_data.cpp
 src/atomic_data.h
+src/decay.tar.gz
 
 # Ignore temp files
 *.pyc
