@@ -1226,26 +1226,28 @@ class Mesh(object):
         max_cell_number = -1
         for i in range(num_vol_elements):
             max_cell_number = max(max_cell_number,
-                                  len(cell_fracs[cell_fracs['idx'] == ve]))
+                                  len(cell_fracs[cell_fracs['idx'] == i]))
 
         # creat tag frame with default value
         cell_largest_frac_number = [-1] * num_vol_elements
         cell_largest_frac = [0.0] * num_vol_elements
-        voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number))
-        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number))
+        voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number),
+                                     dtype=int)
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number),
+                                    dtype=float)
+        voxel_cell_number.fill(-1)
+        voxel_cell_fracs.fill(0.0)
         # set the data
-        for ve in range(num_vol_elements):
-            voxel_cell_number[ve] = [-1] * max_cell_number
-            voxel_cell_fracs[ve] = [0.0] * max_cell_number
-            for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == ve]):
-                voxel_cell_number[ve, cell] = row['cell']
-                voxel_cell_fracs[ve, cell] = row['vol_frac']
+        for i in range(num_vol_elements):
+            for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == i]):
+                voxel_cell_number[i, cell] = row['cell']
+                voxel_cell_fracs[i, cell] = row['vol_frac']
             # cell_largest_frac_tag
             cell_largest_frac[i] = max(voxel_cell_fracs[i, :])
             largest_index = \
-                list(voxel_cell_fracs[ve, :]).index(cell_largest_frac[ve])
-            cell_largest_frac_number[ve] = \
-                int(voxel_cell_number[ve, largest_index])
+                list(voxel_cell_fracs[i, :]).index(cell_largest_frac[i])
+            cell_largest_frac_number[i] = \
+                int(voxel_cell_number[i, largest_index])
 
         # creat the tags
         self.tag(name='cell_number_tag', value=voxel_cell_number,
