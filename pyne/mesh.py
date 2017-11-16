@@ -1250,18 +1250,18 @@ class Mesh(object):
                 int(voxel_cell_number[i, largest_index])
 
         # creat the tags
-        self.tag(name='cell_number_tag', value=voxel_cell_number,
+        self.tag(name='cell_number', value=voxel_cell_number,
                  doc='cell numbers of the voxel, -1 used to fill vacancy',
                  tagtype=IMeshTag, size=max_cell_number, dtype=int)
-        self.tag(name='cell_fracs_tag', value=voxel_cell_fracs,
+        self.tag(name='cell_fracs', value=voxel_cell_fracs,
                  tagtype=IMeshTag, doc='volume fractions of each cell in the '
                                        'voxel, 0.0 used to fill vacancy',
                  size=max_cell_number, dtype=float)
-        self.tag(name='cell_largest_frac_number_tag',
+        self.tag(name='cell_largest_frac_number',
                  value=cell_largest_frac_number, tagtype=IMeshTag,
                  doc='cell number of the cell with largest volume fraction in '
                      'the voxel', size=1, dtype=int)
-        self.tag(name='cell_largest_frac_tag', value=cell_largest_frac,
+        self.tag(name='cell_largest_frac', value=cell_largest_frac,
                  tagtype=IMeshTag, doc='cell fraction of the cell with largest'
                                        'cell volume fraction',
                  size=1, dtype=float)
