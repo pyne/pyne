@@ -23,7 +23,7 @@ $DOCKER_CONDA_DEPS = ['cmake', 'pkg-config', 'setuptools', 'gcc',
     'python', 'blas', 'openblas', 'boost-cpp',
     'hdf5', 'bzip2', 'xz', 'moab', 'cython', 'numpy', 'pytables',
     'jinja2', 'nose', 'sphinx', 'numpydoc', 'cloud_sptheme',
-    'sphinxcontrib-bibtex', 'prettytable',
+    'sphinxcontrib-bibtex', 'prettytable','nbconvert'
     ]
 $DOCKER_INSTALL_COMMAND = ('rm -rf build && ./setup.py install && '
                            'cd $HOME && nuc_data_make')
