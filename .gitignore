@@ -57,3 +57,6 @@ tests/fort.8
 tests/endftape.100
 tests/test_fluka_data.h5m
 tests/epdl97_eedl_Pb
+
+# Rever
+rever/
