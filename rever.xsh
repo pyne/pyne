@@ -1,7 +1,8 @@
 $PROJECT = $GITHUB_ORG = $GITHUB_REPO = 'pyne'
 $ACTIVITIES = [#'version_bump', 'changelog',
                'nose',
-               #'sphinx', 'tag', 'conda_forge', 'ghpages', 'ghrelease'
+               'sphinx',
+               #'tag', 'conda_forge', 'ghpages', 'ghrelease'
                ]
 
 $VERSION_BUMP_PATTERNS = [
@@ -17,12 +18,12 @@ $CHANGELOG_LATEST = 'docs/previous/$VERSION-release-notes.rst'
 $CHANGELOG_TEMPLATE = 'TEMPLATE.rst'
 
 $DOCKER_APT_DEPS = ['libc6', 'libc6-i386', 'libc6-dev', 'libc-dev', 'gcc']
-$DOCKER_CONDA_DEPS = ['-v', 'cmake', 'pkg-config', 'setuptools', 'gcc',
-    'libgcc', 'libgfortran', 'make',
+$DOCKER_CONDA_DEPS = ['cmake', 'pkg-config', 'setuptools', 'gcc',
+    'libgcc', 'libgfortran', 'make', 'scipy',
     'python', 'blas', 'openblas', 'boost-cpp',
     'hdf5', 'bzip2', 'xz', 'moab', 'cython', 'numpy', 'pytables',
     'jinja2', 'nose', 'sphinx', 'numpydoc', 'cloud_sptheme',
-    'sphinxcontrib-bibtex',
+    'sphinxcontrib-bibtex', 'prettytable',
     ]
 $DOCKER_INSTALL_COMMAND = ('rm -rf build && ./setup.py install && '
                            'cd $HOME && nuc_data_make')
