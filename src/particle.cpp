@@ -248,6 +248,7 @@ void * pyne::particle::_fill_maps() {
   part_to_geant4["Anti Sigma+"]="anti_sigma+";
   part_to_geant4["Sigma"]="sigma0";
   part_to_geant4["AntiSigmaZero"]="anti_sigma0";
+  return NULL;
 }
 
 void * pyne::particle::filler = pyne::particle::_fill_maps();
