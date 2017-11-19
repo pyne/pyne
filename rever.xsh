@@ -1,5 +1,6 @@
 $PROJECT = $GITHUB_ORG = $GITHUB_REPO = 'pyne'
-$ACTIVITIES = [#'version_bump', 'changelog',
+$ACTIVITIES = ['version_bump',
+               #'changelog',
                'nose',
                'sphinx',
                #'tag', 'conda_forge', 'ghpages', 'ghrelease'
