@@ -8,7 +8,7 @@ $VERSION_BUMP_PATTERNS = [
     ('setup_sub.py', "VERSION\s*=.*", "VERSION = '$VERSION'"),
     ('pyne/__init__.py', "__version__\s*=.*", "__version__ = '$VERSION'"),
     ('src/utils.cpp', "std::string pyne::VERSION\s*=.*",
-     'std::string pyne::VERSION = "$VERSION"'),
+     'std::string pyne::VERSION = "$VERSION";'),
 ]
 
 $CHANGELOG_FILENAME = 'CHANGELOG.rst'
