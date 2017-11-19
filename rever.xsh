@@ -1,4 +1,4 @@
-$PROJECT = 'pyne'
+$PROJECT = $GITHUB_ORG = $GITHUB_REPO = 'pyne'
 $ACTIVITIES = [#'version_bump', 'changelog',
                'nose',
                #'sphinx', 'tag', 'conda_forge', 'ghpages', 'ghrelease'
@@ -16,14 +16,20 @@ $CHANGELOG_FILENAME = 'CHANGELOG.rst'
 $CHANGELOG_LATEST = 'docs/previous/$VERSION-release-notes.rst'
 $CHANGELOG_TEMPLATE = 'TEMPLATE.rst'
 
-$DOCKER_CONDA_DEPS = ['cmake', 'pkg-config', 'setuptools', 'gcc',
-    'libgcc', 'libgfortran', 'python', 'blas', 'openblas', 'boost-cpp',
+$DOCKER_APT_DEPS = ['libc6', 'libc6-i386', 'libc6-dev', 'libc-dev', 'gcc']
+$DOCKER_CONDA_DEPS = ['-v', 'cmake', 'pkg-config', 'setuptools', 'gcc',
+    'libgcc', 'libgfortran', 'make',
+    'python', 'blas', 'openblas', 'boost-cpp',
     'hdf5', 'bzip2', 'xz', 'moab', 'cython', 'numpy', 'pytables',
     'jinja2', 'nose', 'sphinx', 'numpydoc', 'cloud_sptheme',
     'sphinxcontrib-bibtex',
     ]
-$DOCKER_INSTALL_COMMAND = './setup.py install && nuc_data_make'
+$DOCKER_INSTALL_COMMAND = ('rm -rf build && ./setup.py install && '
+                           'cd $HOME && nuc_data_make')
 $DOCKER_GIT_NAME = 'pyne'
 $DOCKER_GIT_EMAIL = 'pyne@pyne.io'
 
 $NOSE_ARGS = ['-w', 'tests']
+
+$TAG_REMOTE = 'git@github.com:pyne/pyne.git'
+$GHPAGES_REPO = 'git@github.com:pyne/pyne.github.com.git'
