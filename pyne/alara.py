@@ -100,11 +100,11 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
             # print flux data to file
             output = _output_flux(ve, tag_flux, output, start, stop, direction)
     else:
+        ves = list(flux_mesh.iter_ve())
         for row in cell_fracs:
-            for i, mat, ve in flux_mesh:
-                if i == row['idx'] and len(cell_mats[row['cell']].comp) != 0:
-                    output = _output_flux(ve, tag_flux, output, start, stop,
-                                          direction)
+            if len(cell_mats[row['cell']].comp) != 0:
+                output = _output_flux(ves[row['idx']], tag_flux, output, start,
+                                      stop, direction)
 
     with open(fluxin, "w") as f:
         f.write(output)
