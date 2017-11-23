@@ -334,7 +334,6 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
                     sve_count, name)
                 sve_count += 1
 
-
     volume += 'end\n\n'
     mat_loading += 'end\n\n'
 
