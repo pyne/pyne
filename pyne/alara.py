@@ -317,22 +317,22 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
             mat_loading += '    zone_{0}    mix_{1}\n'.format(i,
                             unique_mixtures.index(ve_mixture))
     else:
+        ves = list(mesh.iter_ve())
         sve_count = 0
         for row in cell_fracs:
-            for i, mat, ve in mesh:
-                if row['idx'] == i and len(cell_mats[row['cell']].comp) != 0:
-                    volume += '    {0: 1.6E}    zone_{1}\n'.format(
-                        mesh.elem_volume(ve) * row['vol_frac'], sve_count)
-                    cell_mat = cell_mats[row['cell']]
-                    name = cell_mat.metadata['name']
-                    if name not in unique_mixtures:
-                        unique_mixtures.append(name)
-                        mixture += 'mixture {0}\n'.format(name)
-                        mixture += '    material {0} 1 1\n'.format(name)
-                        mixture += 'end\n\n'
-                    mat_loading += '    zone_{0}    {1}\n'.format(
-                        sve_count, name)
-                    sve_count += 1
+            if len(cell_mats[row['cell']].comp) != 0:
+                volume += '    {0: 1.6E}    zone_{1}\n'.format(
+                mesh.elem_volume(ves[row['idx']]) * row['vol_frac'], sve_count)
+                cell_mat = cell_mats[row['cell']]
+                name = cell_mat.metadata['name']
+                if name not in unique_mixtures:
+                    unique_mixtures.append(name)
+                    mixture += 'mixture {0}\n'.format(name)
+                    mixture += '    material {0} 1 1\n'.format(name)
+                    mixture += 'end\n\n'
+                mat_loading += '    zone_{0}    {1}\n'.format(
+                    sve_count, name)
+                sve_count += 1
 
 
     volume += 'end\n\n'
