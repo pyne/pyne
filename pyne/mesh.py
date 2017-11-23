@@ -1231,9 +1231,9 @@ class Mesh(object):
         # creat tag frame with default value
         cell_largest_frac_number = [-1] * num_vol_elements
         cell_largest_frac = [0.0] * num_vol_elements
-        voxel_cell_number = np.empty(shape=(num_vol_elements,max_num_cells),
+        voxel_cell_number = np.empty(shape=(num_vol_elements, max_num_cells),
                                      dtype=int)
-        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_num_cells),
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements, max_num_cells),
                                     dtype=float)
         voxel_cell_number.fill(-1)
         voxel_cell_fracs.fill(0.0)

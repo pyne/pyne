@@ -264,7 +264,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
             :rel_error: float
                 The relative error associated with the volume fraction.
 
-     cell_mats : dict
+    cell_mats : dict
         Maps geometry cell numbers to PyNE Material objects. Each PyNE material
         object must have 'name' specified in Material.metadata.
     geom_file : str
