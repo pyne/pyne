@@ -799,20 +799,20 @@ def test_tag_cell_fracs():
     m.tag_cell_fracs(cell_fracs)
 
     #  Expected tags:
-    exp_cell_number_tag = [[11, 12, -1], [11, 12, 13], [11, -1, -1],
+    exp_cell_number = [[11, 12, -1], [11, 12, 13], [11, -1, -1],
                               [12, -1, -1]]
-    exp_cell_fracs_tag = [[0.55, 0.45, 0.0], [0.2, 0.3, 0.5],
+    exp_cell_fracs = [[0.55, 0.45, 0.0], [0.2, 0.3, 0.5],
                              [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
-    exp_cell_largest_frac_number_tag = [11, 13, 11, 12]
-    exp_cell_largest_frac_tag = [0.55, 0.5, 1.0, 1.0]
+    exp_cell_largest_frac_number = [11, 13, 11, 12]
+    exp_cell_largest_frac = [0.55, 0.5, 1.0, 1.0]
 
     for i in range(len(m)):
-        assert_array_equal(m.cell_number_tag[i], exp_cell_number_tag[i])
-        assert_array_equal(m.cell_fracs_tag[i], exp_cell_fracs_tag[i])
-        assert_equal(m.cell_largest_frac_number_tag[i],
-                           exp_cell_largest_frac_number_tag[i])
-        assert_equal(m.cell_largest_frac_tag[i],
-                           exp_cell_largest_frac_tag[i])
+        assert_array_equal(m.cell_number[i], exp_cell_number[i])
+        assert_array_equal(m.cell_fracs[i], exp_cell_fracs[i])
+        assert_equal(m.cell_largest_frac_number[i],
+                           exp_cell_largest_frac_number[i])
+        assert_equal(m.cell_largest_frac[i],
+                           exp_cell_largest_frac[i])
 
 
 def test_no_mats():
