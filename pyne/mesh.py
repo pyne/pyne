@@ -1223,17 +1223,17 @@ class Mesh(object):
 
         num_vol_elements = len(self)
         # Find the maximum cell number in a voxel
-        max_cell_number = -1
+        max_num_cells = -1
         for i in range(num_vol_elements):
-            max_cell_number = max(max_cell_number,
+            max_num_cells = max(max_num_cells,
                                   len(cell_fracs[cell_fracs['idx'] == i]))
 
         # creat tag frame with default value
         cell_largest_frac_number = [-1] * num_vol_elements
         cell_largest_frac = [0.0] * num_vol_elements
-        voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number),
+        voxel_cell_number = np.empty(shape=(num_vol_elements,max_num_cells),
                                      dtype=int)
-        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number),
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_num_cells),
                                     dtype=float)
         voxel_cell_number.fill(-1)
         voxel_cell_fracs.fill(0.0)
@@ -1252,11 +1252,11 @@ class Mesh(object):
         # creat the tags
         self.tag(name='cell_number', value=voxel_cell_number,
                  doc='cell numbers of the voxel, -1 used to fill vacancy',
-                 tagtype=IMeshTag, size=max_cell_number, dtype=int)
+                 tagtype=IMeshTag, size=max_num_cells, dtype=int)
         self.tag(name='cell_fracs', value=voxel_cell_fracs,
                  tagtype=IMeshTag, doc='volume fractions of each cell in the '
                                        'voxel, 0.0 used to fill vacancy',
-                 size=max_cell_number, dtype=float)
+                 size=max_num_cells, dtype=float)
         self.tag(name='cell_largest_frac_number',
                  value=cell_largest_frac_number, tagtype=IMeshTag,
                  doc='cell number of the cell with largest volume fraction in '
