@@ -775,11 +775,6 @@ class Mesh(object):
                 setattr(self, name, MaterialMethodTag(mesh=self, name=name,
                         doc=doc))
 
-        # add a property: cell_cell_fracs_tag and set it to None
-        self.cell_number_tag = None
-        self.cell_fracs_tag = None
-        self.cell_largest_frac_number_tag = None
-        self.cell_largest_frac_tag = None
 
     def __len__(self):
         return self._len
@@ -1228,45 +1223,48 @@ class Mesh(object):
 
         num_vol_elements = len(self)
         # Find the maximum cell number in a voxel
-        max_cell_number = -1
-        for ve in range(num_vol_elements):
-            max_cell_number = max(max_cell_number,
-                                  len(cell_fracs[cell_fracs['idx'] == ve]))
-        # set the cell_number_tag & cell_fracs_tag
-        self.cell_number_tag = IMeshTag(max_cell_number, int, mesh=self,
-                                        name='cell_number_tag')
-        self.cell_fracs_tag = IMeshTag(max_cell_number, float, mesh=self,
-                                       name='cell_fracs_tag')
-        self.cell_largest_frac_number_tag = \
-            IMeshTag(1, int, mesh=self, name='cell_largest_frac_number')
-        self.cell_largest_frac_tag = IMeshTag(1, float, mesh=self,
-                                              name='cell_largest_frac')
+        max_num_cells = -1
+        for i in range(num_vol_elements):
+            max_num_cells = max(max_num_cells,
+                                  len(cell_fracs[cell_fracs['idx'] == i]))
+
+        # creat tag frame with default value
         cell_largest_frac_number = [-1] * num_vol_elements
         cell_largest_frac = [0.0] * num_vol_elements
-
-        # fill the data
-        voxel_cell_number = np.empty(shape=(num_vol_elements,max_cell_number))
-        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_cell_number))
-        for ve in range(num_vol_elements):
-            voxel_cell_number[ve] = [-1] * max_cell_number
-            voxel_cell_fracs[ve] = [0.0] * max_cell_number
-            for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == ve]):
-                voxel_cell_number[ve, cell] = row['cell']
-                voxel_cell_fracs[ve, cell] = row['vol_frac']
+        voxel_cell_number = np.empty(shape=(num_vol_elements,max_num_cells),
+                                     dtype=int)
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_num_cells),
+                                    dtype=float)
+        voxel_cell_number.fill(-1)
+        voxel_cell_fracs.fill(0.0)
+        # set the data
+        for i in range(num_vol_elements):
+            for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == i]):
+                voxel_cell_number[i, cell] = row['cell']
+                voxel_cell_fracs[i, cell] = row['vol_frac']
             # cell_largest_frac_tag
-            cell_largest_frac[ve] = max(voxel_cell_fracs[ve, :])
+            cell_largest_frac[i] = max(voxel_cell_fracs[i, :])
             largest_index = \
-                list(voxel_cell_fracs[ve, :]).index(cell_largest_frac[ve])
-            cell_largest_frac_number[ve] = \
-                int(voxel_cell_number[ve, largest_index])
-        self.cell_number_tag[:] = voxel_cell_number
-        self.cell_fracs_tag[:] = voxel_cell_fracs
-        self.cell_largest_frac_number_tag = cell_largest_frac_number
-        self.cell_largest_frac_tag = cell_largest_frac
+                list(voxel_cell_fracs[i, :]).index(cell_largest_frac[i])
+            cell_largest_frac_number[i] = \
+                int(voxel_cell_number[i, largest_index])
 
-
-
-
+        # creat the tags
+        self.tag(name='cell_number', value=voxel_cell_number,
+                 doc='cell numbers of the voxel, -1 used to fill vacancy',
+                 tagtype=IMeshTag, size=max_num_cells, dtype=int)
+        self.tag(name='cell_fracs', value=voxel_cell_fracs,
+                 tagtype=IMeshTag, doc='volume fractions of each cell in the '
+                                       'voxel, 0.0 used to fill vacancy',
+                 size=max_num_cells, dtype=float)
+        self.tag(name='cell_largest_frac_number',
+                 value=cell_largest_frac_number, tagtype=IMeshTag,
+                 doc='cell number of the cell with largest volume fraction in '
+                     'the voxel', size=1, dtype=int)
+        self.tag(name='cell_largest_frac', value=cell_largest_frac,
+                 tagtype=IMeshTag, doc='cell fraction of the cell with largest'
+                                       'cell volume fraction',
+                 size=1, dtype=float)
 
 
 ######################################################
