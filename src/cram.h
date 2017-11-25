@@ -1,5 +1,5 @@
 /* This file was generated automatically with transmutagen version 1.0.1. */
-/* The command used to generate this file was: python -m transmutagen.gensolve --py-solve --namespace=pyne_cram --outfile=cram.c --degrees 14 16*/
+/* The command used to generate this file was: python -m transmutagen.gensolve --py-solve --namespace=pyne_cram --outfile=cram.c --degrees 14*/
 #ifndef PYNE_CRAM_SOLVE_C
 #define PYNE_CRAM_SOLVE_C
 
@@ -34,5 +34,4 @@ void pyne_cram_dot_complex(double complex* A, double complex* x, double complex*
 void pyne_cram_scalar_times_vector_complex(double complex, double complex*);
 
 void pyne_cram_expm_multiply14(double* A, double* b, double* x);
-void pyne_cram_expm_multiply16(double* A, double* b, double* x);
 #endif

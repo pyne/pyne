@@ -42,10 +42,10 @@ std::map<int, double> pyne::transmuters::cram(std::vector<double>& A,
     case 14:
       pyne_cram_expm_multiply14(A.data(), b.data(), x.data());
       break;
+    /*
     case 16:
       pyne_cram_expm_multiply16(A.data(), b.data(), x.data());
       break;
-    /*
     case 18:
       pyne_cram_expm_multiply18(A.data(), b.data(), x.data());
       break;

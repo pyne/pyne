@@ -27,5 +27,5 @@ cdef extern from "cram.h":
     #void pyne_cram_expm_multiply10(double*, double*, double*)
     #void pyne_cram_expm_multiply12(double*, double*, double*)
     void pyne_cram_expm_multiply14(double*, double*, double*)
-    void pyne_cram_expm_multiply16(double*, double*, double*)
+    #void pyne_cram_expm_multiply16(double*, double*, double*)
     #void pyne_cram_expm_multiply18(double*, double*, double*)

@@ -206,6 +206,7 @@ def expm_multiply14(A, b):
     return x
 
 
+"""
 def expm_multiply16(A, b):
     A = np.asarray(A, dtype=np.float64)
     b = np.asarray(b, dtype=np.float64)
@@ -218,7 +219,6 @@ def expm_multiply16(A, b):
     x.shape = b.shape
     return x
 
-"""
 def expm_multiply18(A, b):
     A = np.asarray(A, dtype=np.float64)
     b = np.asarray(b, dtype=np.float64)

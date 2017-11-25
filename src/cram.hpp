@@ -38,6 +38,6 @@ void pyne_cram_expm_multiply10(double* A, double* b, double* x);
 void pyne_cram_expm_multiply12(double* A, double* b, double* x);
 */
 void pyne_cram_expm_multiply14(double* A, double* b, double* x);
-void pyne_cram_expm_multiply16(double* A, double* b, double* x);
+//void pyne_cram_expm_multiply16(double* A, double* b, double* x);
 //void pyne_cram_expm_multiply18(double* A, double* b, double* x);
 #endif // PYNE_CRAM_SOLVE_CPP

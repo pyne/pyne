@@ -9,7 +9,7 @@ from pyne import transmuters
 def test_transmuters_cram():
     n0 = {'H3': 1.0}
     A = -cram.DECAY_MATRIX * data.half_life('H3')
-    n1 = transmuters.cram(A, n0, order=16)
+    n1 = transmuters.cram(A, n0, order=14)
     assert_equal(2, len(n1))
     assert_almost_equal(0.5, n1[nucname.id('H3')])
     assert_almost_equal(0.5, n1[nucname.id('He3')])

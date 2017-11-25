@@ -1791,7 +1791,7 @@ def test_decay_u235_h3():
 def test_cram_h3():
     mat = Material({'H3': 1.0})
     A = -cram.DECAY_MATRIX * data.half_life('H3')
-    obs = mat.cram(A, order=16)
+    obs = mat.cram(A, order=14)
     obs = obs.to_atom_frac()
     assert_equal(2, len(obs))
     assert_almost_equal(0.5, obs[nucname.id('H3')])
