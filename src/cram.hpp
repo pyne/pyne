@@ -31,11 +31,13 @@ void pyne_cram_scalar_times_vector_double(double, double*);
 // double complex types are not allowed in the C++ type convention,
 // which extern "C" forced us into.
 
+/*
 void pyne_cram_expm_multiply6(double* A, double* b, double* x);
 void pyne_cram_expm_multiply8(double* A, double* b, double* x);
 void pyne_cram_expm_multiply10(double* A, double* b, double* x);
 void pyne_cram_expm_multiply12(double* A, double* b, double* x);
+*/
 void pyne_cram_expm_multiply14(double* A, double* b, double* x);
 void pyne_cram_expm_multiply16(double* A, double* b, double* x);
-void pyne_cram_expm_multiply18(double* A, double* b, double* x);
+//void pyne_cram_expm_multiply18(double* A, double* b, double* x);
 #endif // PYNE_CRAM_SOLVE_CPP

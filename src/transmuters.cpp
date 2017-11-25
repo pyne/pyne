@@ -25,6 +25,7 @@ std::map<int, double> pyne::transmuters::cram(std::vector<double>& A,
   // perform decay
   vector<double> x (pyne_cram_transmute_info.n);
   switch(order) {
+    /*
     case 6:
       pyne_cram_expm_multiply6(A.data(), b.data(), x.data());
       break;
@@ -37,15 +38,18 @@ std::map<int, double> pyne::transmuters::cram(std::vector<double>& A,
     case 12:
       pyne_cram_expm_multiply12(A.data(), b.data(), x.data());
       break;
+    */
     case 14:
       pyne_cram_expm_multiply14(A.data(), b.data(), x.data());
       break;
     case 16:
       pyne_cram_expm_multiply16(A.data(), b.data(), x.data());
       break;
+    /*
     case 18:
       pyne_cram_expm_multiply18(A.data(), b.data(), x.data());
       break;
+    */
     default:
       throw pyne::ValueError("Order selected not available for CRAM, please use"
                              " order 6, 8, 10, 12, 14, 16, or 18.");
