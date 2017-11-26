@@ -1,4 +1,4 @@
-/* This file was generated automatically with transmutagen version 1.0.1. */
+/* This file was generated automatically with transmutagen version 1.0.1+332.g146bea6. */
 /* The command used to generate this file was: python -m transmutagen.gensolve --py-solve --namespace=pyne_cram --outfile=cram.c --degrees 14*/
 #ifndef PYNE_CRAM_SOLVE_C
 #define PYNE_CRAM_SOLVE_C
