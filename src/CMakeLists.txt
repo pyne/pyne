@@ -103,8 +103,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
   message("-- Compiler to for CRAM set to GNU.")
   set_source_files_properties(cram.c PROPERTIES COMPILE_FLAGS
-    "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
+    "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter"
     )
+    #"-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
 else()
   # undetermined
   message("!!! Could not determine compiler type for CRAM, using generic settings...")
