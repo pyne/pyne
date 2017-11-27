@@ -114,6 +114,11 @@ IF(BUILD_SPATIAL_SOLVER)
   find_package(F2py REQUIRED)
   message("-- F2PY Executable: ${F2PY_EXECUTABLE}")
   message("-- F2PY Version: ${F2PY_VERSION}")
+
+  FIND_PACKAGE(LAPACK REQUIRED)
+  MESSAGE("-- Found LAPACK Linker Flags: ${LAPACK_LINKER_FLAGS}")
+  MESSAGE("-- Found LAPACK Libraries: ${LAPACK_LIBRARIES}")
+  MESSAGE("-- Found BLAS Libraries: ${BLAS_LIBRARIES}")
 ENDIF(BUILD_SPATIAL_SOLVER)
 
 
