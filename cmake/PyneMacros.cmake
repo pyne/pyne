@@ -170,6 +170,14 @@ macro(pyne_configure_rpath)
 endmacro()
 
 
+macro(pyne_set_fast_compile)
+  if(NOT DEFINED PYNE_FAST_COMPILE)
+    set(PYNE_FAST_COMPILE TRUE)
+  endif()
+  message(STATUS "PyNE Fast Compile: ${PYNE_FAST_COMPILE}")
+endmacro()
+
+
 # fast compile with assembly, if available.
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
   get_filename_component(_base _srcname NAME_WE)  # get the base name, without the extension
