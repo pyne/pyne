@@ -180,7 +180,7 @@ endmacro()
 
 # fast compile with assembly, if available.
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
-  get_filename_component(_base _srcname NAME_WE)  # get the base name, without the extension
+  get_filename_component(_base "${_srcname}" NAME_WE)  # get the base name, without the extension
   # get the assembly file name
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(_asmname "${_base}-clang.s")
