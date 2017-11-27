@@ -8,7 +8,6 @@ set(PYNE_SRCS
   "atomic_data.cpp"
   "cram.c"
   "data.cpp"
-  "decay.cpp"
   "enrichment.cpp"
   "enrichment_cascade.cpp"
   "enrichment_symbolic.cpp"
@@ -92,7 +91,7 @@ if(MOAB_FOUND)
 endif(MOAB_FOUND)
 
 # Set symbolic decay properties.
-set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS "-O0")
+fast_compile(decay.cpp "-O0" "-O0" "-O0")
 
 # Set CRAM solver compiler options
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
