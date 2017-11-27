@@ -6,8 +6,10 @@ import os
 import io
 import sys
 import pdb
+import time
 import warnings
 import traceback
+import subprocess
 from argparse import ArgumentParser, Namespace
 
 import numpy as np
@@ -457,9 +459,15 @@ def load_default_nucs():
 
 def build_tarfile(ns):
     import tarfile
+    files = [ns.hdr, ns.src]
+    if ns.gnu_asm:
+        files.append(ns.gnu_asm_file)
+    if ns.clang_asm:
+        files.append(ns.clang_asm_file)
     with tarfile.open('decay.tar.gz', 'w:gz') as tar:
-        tar.add(ns.hdr)
-        tar.add(ns.src)
+        for f in files:
+            print('  compressing ' + f)
+            tar.add(f)
 
 
 def write_if_diff(filename, contents):
@@ -481,6 +489,21 @@ def build(hdr='decay.h', src='decay.cpp', nucs=None, short=1e-16, small=1e-16,
     h, s = genfiles(nucs, short=short, small=small, sf=sf, dummy=dummy, debug=debug)
     write_if_diff(hdr, h)
     write_if_diff(src, s)
+
+
+def assemble(ns, compiler, toolchain):
+    """Assembles the solver. Returns the filename that was generated."""
+    print('Assembling ' + toolchain)
+    base, _ = os.path.splitext(ns.src)
+    asmfile = base + '-' + toolchain.lower() + '.s'
+    cmd = [compiler, '-O0']
+    cmd.extend(['-S', '-o', asmfile, '-c', ns.src])
+    print('Running command:\n  $ ' + ' '.join(cmd))
+    t0 = time.time()
+    subprocess.check_call(cmd)
+    t1 = time.time()
+    print('{0} assembled in {1:.3} seconds'.format(toolchain, t1 - t0))
+    return asmfile
 
 
 def main():
@@ -513,6 +536,12 @@ def main():
                        help='Does not build the source code.')
     parser.add_argument('--debug', dest='debug', default=False, action='store_true',
                         help='Adds more information to the output.')
+    parser.add_argument("--gcc-asm", "--gnu-asm", action='store_true', default=False, dest='gnu_asm',
+                        help="Creates GCC assembly, so that users don't have to go "
+                             "through full compile.")
+    parser.add_argument("--clang-asm", action='store_true', default=False, dest='clang_asm',
+                        help="Creates Clang assembly, so that users don't have to go "
+                             "through full compile.")
     ns = parser.parse_args()
     if ns.build:
         try:
@@ -522,6 +551,10 @@ def main():
             type, value, tb = sys.exc_info()
             traceback.print_exc()
             pdb.post_mortem(tb)
+        if ns.gnu_asm:
+            ns.gnu_asm_file = assemble(ns, 'gcc', 'GNU')
+        if ns.clang_asm:
+            ns.clang_asm_file = assemble(ns, 'clang', 'Clang')
 
     if ns.tar:
         print("building decay.tar.gz ...")
