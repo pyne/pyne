@@ -52,10 +52,19 @@ time_conv_dict = {'as': 1e-18,
                   'y': 86400.0*365.25,
                   'year': 86400.0*365.25,
                   'years': 86400.0*365.25,
-                  'ev': 1e-9 * 7.6e-8 / 6.03,
-                  'kev': 1e-12 * 7.6e-8 / 6.03,
-                  'mev': 1e-15 * 7.6e-8 / 6.03,
                   }
+
+
+# Energy to half-life conversion:  T1/2= ln(2) × (h/2 pi) / energy
+# See http://www.nndc.bnl.gov/nudat2/help/glossary.jsp#halflife
+# NIST CODATA https://physics.nist.gov/cgi-bin/cuu/Value?hbar
+#    h-bar = 1.054 571 800(13) x 1e-34 J 
+#    1 J = 6.241 509 126(38) x 1e18 eV
+HBAR_LN2 = 4.5623775832376968e-16  # h-bar ln(2) in eV s
+energy_conv_dict = {'ev': HBAR_LN2,
+                    'kev': 1e-3 * HBAR_LN2,
+                    'mev': 1e-6 * HBAR_LN2,
+                    }
 
 
 def to_sec(input_time, units):
@@ -74,7 +83,11 @@ def to_sec(input_time, units):
         Time value in [sec].
 
     """
-    sec_time = input_time * time_conv_dict[units.lower()]
+    units = units.lower()
+    try:
+        sec_time = time_conv_dict[units] * input_time
+    except KeyError:
+        sec_time = energy_conv_dict[units] / input_time
     return sec_time
 
 
