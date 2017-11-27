@@ -168,3 +168,39 @@ macro(pyne_configure_rpath)
   ENDIF("${isSystemDir}" STREQUAL "-1")
   MESSAGE("-- CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 endmacro()
+
+
+# fast compile with assembly, if available.
+macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
+  get_filename_component(_base _srcname NAME_WE)  # get the base name, without the extension
+  # get the assembly file name
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(_asmname "${_base}-clang.s")
+  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(_asmname "${_base}-gnu.s")
+  else()
+    set(_asmname "${_base}-NOTFOUND")
+  endif()
+
+  # pick the filename to compile, either source or assembly
+  if(NOT PYNE_FAST_COMPILE)
+    message(STATUS "Not compiling ${_srcname} fast since PyNE fast compile is disabled.")
+    set(_filename "${_srcname}")
+  elseif(NOT EXISTS "${_asmname}")
+    message(STATUS "Not compiling ${_srcname} fast since ${_asmname} does not exist.")
+    set(_filename "${_srcname}")
+  else()
+    message(STATUS "Compiling ${_srcname} fast from assembly ${_asmname}")
+    set(_filename "${_asmname}")
+  endif()
+  set(PYNE_SRCS "${PYNE_SRCS}" "${_filename}")
+
+  # set some compile flags for the selected file
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_clangflags}")
+  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_gnuflags}")
+  else()
+    set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_otherflags}")
+  endif()
+endmacro()
