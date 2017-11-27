@@ -14,6 +14,9 @@ pyne_set_build_spatial_solver()
 pyne_set_build_type()
 pyne_configure_rpath()
 
+# enable assembly
+enable_language(ASM)
+
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
