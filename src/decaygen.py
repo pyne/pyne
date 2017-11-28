@@ -496,7 +496,7 @@ def assemble(ns, compiler, toolchain):
     print('Assembling ' + toolchain)
     base, _ = os.path.splitext(ns.src)
     asmfile = base + '-' + toolchain.lower() + '.s'
-    cmd = [compiler, '-O0']
+    cmd = [compiler, '-fPIC', '-O0']
     cmd.extend(['-S', '-o', asmfile, '-c', ns.src])
     print('Running command:\n  $ ' + ' '.join(cmd))
     t0 = time.time()
