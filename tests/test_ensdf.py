@@ -456,7 +456,7 @@ def test_no_branches_gt100_levels():
                           msg="Branch ratios failed for " + str(nuc))
 
 def test_time():
-    assert_equal((120.0, None), ensdf._to_sec(2, None, 'M'))
+    assert_equal((120.0, None), ensdf._halflife_to_seconds(2, None, 'M'))
     assert_equal((120.0, None), ensdf._to_time("2 M", ""))
     assert_equal((150.0, 6.0), ensdf._to_time("2.50 M", "10"))
     assert_equal((150.0, (6.0, 12.0)), ensdf._to_time("2.50 M", "+10-20"))

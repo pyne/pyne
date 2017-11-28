@@ -11,6 +11,69 @@ from pyne._utils import fromstring_split, fromstring_token, endftod,\
 class QAWarning(UserWarning):
     pass
 
+time_conv_dict = {'as': 1e-18,
+                  'attosec': 1e-18,
+                  'attosecond': 1e-18,
+                  'attoseconds': 1e-18,
+                  'fs': 1e-15,
+                  'femtosec': 1e-15,
+                  'femtosecond': 1e-15,
+                  'femtoseconds': 1e-15,
+                  'ps': 1e-12,
+                  'picosec': 1e-12,
+                  'picosecond': 1e-12,
+                  'picoseconds': 1e-12,
+                  'ns': 1e-9,
+                  'nanosec': 1e-9,
+                  'nanosecond': 1e-9,
+                  'nanoseconds': 1e-9,
+                  'us': 1e-6,
+                  'microsec': 1e-6,
+                  'microsecond': 1e-6,
+                  'microseconds': 1e-6,
+                  'ms': 1e-3,
+                  'millisec': 1e-3,
+                  'millisecond': 1e-3,
+                  'milliseconds': 1e-3,
+                  's': 1.0,
+                  'sec': 1.0,
+                  'second': 1.0,
+                  'seconds': 1.0,
+                  'm': 60.0,
+                  'min': 60.0,
+                  'minute': 60.0,
+                  'minutes': 60.0,
+                  'h': 3600.0,
+                  'hour': 3600.0,
+                  'hours': 3600.0,
+                  'd': 86400.0,
+                  'day': 86400.0,
+                  'days': 86400.0,
+                  'y': 86400.0*365.25,
+                  'year': 86400.0*365.25,
+                  'years': 86400.0*365.25,
+                  }
+
+
+def to_sec(input_time, units):
+    """Converts a time with units to seconds.
+
+    Parameters
+    ----------
+    input_time : number
+        Time value in [units].
+    units : str
+        Units flag, eg 'min', 'ms', 'days'
+
+    Returns
+    -------
+    sec_time : float
+        Time value in [sec].
+
+    """
+    sec_time = input_time * time_conv_dict[units.lower()]
+    return sec_time
+
 
 barn_conv_dict = {
     'mb': 1E-3,
