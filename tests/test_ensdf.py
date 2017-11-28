@@ -9,6 +9,7 @@ from itertools import groupby
 import nose
 
 from nose.tools import assert_equal, assert_almost_equal, assert_less_equal
+from numpy.testing import assert_allclose
 import numpy as np
 
 from pyne.utils import QAWarning
@@ -456,9 +457,9 @@ def test_no_branches_gt100_levels():
 
 def test_time():
     assert_equal((120.0, None), ensdf._to_sec(2, None, 'M'))
-    assert_equal((120.0, None), ensdf._to_time("2 M", None))
-    assert_equal((180.0, 6.0), ensdf._to_time("2.30 M", "10"))
-    assert_equal((180.0, (6.0, 12.0)), ensdf._to_time("2.30 M", "+10-20"))
+    assert_equal((120.0, None), ensdf._to_time("2 M", ""))
+    assert_equal((150.0, 6.0), ensdf._to_time("2.50 M", "10"))
+    assert_equal((150.0, (6.0, 12.0)), ensdf._to_time("2.50 M", "+10-20"))
     t, err = ensdf._to_time("2.30 MS", "+10-20")
     assert_equal((0.0023, (0.0001, 0.0002)), (t, err))
     t, err = ensdf._to_time("2.30E-3 S", "+10-20")
@@ -466,8 +467,9 @@ def test_time():
     t, err = ensdf._to_time("2.5 KEV", "2")
     v = ensdf.HBAR_LN2 / 2.5e3
     vplus = ensdf.HBAR_LN2 / (2.3e3) - v
-    vminus = v - ensdf.HBAR_LN2 / (2.5e3)
-    assert_equal((t, err), (v, (vplus, vminus)))
+    vminus = v - ensdf.HBAR_LN2 / (2.7e3)
+    assert_allclose(t, v, rtol=1e-14)
+    assert_allclose(err, (vplus, vminus), rtol=1e-14)
 
 if __name__ == "__main__":
     nose.runmodule()
