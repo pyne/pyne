@@ -136,15 +136,37 @@ def download_decay():
     try:
         durl = urlopen(DECAY_URL)
         d = durl.read()
-        durl.close()
     except IOError:
         print('...failed!')
         return False
+    finally:
+        durl.close()
     f = io.BytesIO(d)
     tar = tarfile.open(fileobj=f, mode='r:gz')
     tar.extractall('src')
     tar.close()
-    durl.close()
+    return True
+
+
+CRAM_H = os.path.join('src', 'decay.h')
+CRAM_C = os.path.join('src', 'decay.c')
+CRAM_URL = 'https://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
+
+
+def download_cram():
+    print('Downloading ' + CRAM_URL)
+    try:
+        durl = urlopen(CRAM_URL)
+        d = durl.read()
+    except IOError:
+        print('...failed!')
+        return False
+    finally:
+        durl.close()
+    f = io.BytesIO(d)
+    tar = tarfile.open(fileobj=f, mode='r:gz')
+    tar.extractall('src')
+    tar.close()
     return True
 
 
@@ -206,6 +228,37 @@ def ensure_decay():
     shutil.copy(DECAY_CPP_REP, DECAY_CPP)
 
 
+def generate_cram():
+    with indir('src'):
+        try:
+            from transmutagen import gensolve
+        except ImportError:
+            return False
+        try:
+            gensolve.generate(py_solve=True, namespace='pyne_cram',
+                              outfile='cram.c')
+        except Exception:
+            return False
+    return True
+
+
+def ensure_cram():
+    mb = 1024**2
+    if os.path.isfile(CRAM_H) and os.path.isfile(CRAM_C) and \
+       os.stat(CRAM_C).st_size > mb:
+        return
+    downloaded = download_cram()
+    if downloaded:
+        return
+    generated = generate_cram()
+    if generated:
+        return
+    print('!'*42)
+    print('CRAM files could not be downloaded or generated')
+    print('!'*42 + '\n')
+    raise RuntimeError
+
+
 ATOMIC_H = os.path.join('src', 'atomic_data.h')
 ATOMIC_CPP = os.path.join('src', 'atomic_data.cpp')
 ATOMIC_H_UNDER = os.path.join('src', '_atomic_data.h')
@@ -255,22 +308,21 @@ def update_setup_args(ns):
     else:
         ns.prefix = sys.prefix
 
+    files = [DECAY_H, DECAY_CPP, CRAM_H, CRAM_C]
     if ns.cmd == 'clean':
         if os.path.exists(ns.build_dir):
             dir_util.remove_tree(ns.build_dir)
+        for f in files:
+            if os.path.isfile(f):
+                os.remove(f)
         print('build directory cleaned ... exiting')
-        if os.path.isfile(DECAY_H):
-            os.remove(DECAY_H)
-        if os.path.isfile(DECAY_CPP):
-            os.remove(DECAY_CPP)
         sys.exit()
     if ns.clean:
         if os.path.exists(ns.build_dir):
             dir_util.remove_tree(ns.build_dir)
-        if os.path.isfile(DECAY_H):
-            os.remove(DECAY_H)
-        if os.path.isfile(DECAY_CPP):
-            os.remove(DECAY_CPP)
+        for f in files:
+            if os.path.isfile(f):
+                os.remove(f)
 
 
 def update_cmake_args(ns):
@@ -377,6 +429,7 @@ def cmake_cli(cmake_args):
 
 def main_body(ns):
     assert_dep_versions()
+    ensure_cram()
     ensure_decay()
     ensure_atomic()
     if not os.path.exists(ns.build_dir):
