@@ -175,8 +175,8 @@ def _to_time(tstr, errstr):
     tobj = [s.strip(' ()') for s in t.split()]
     if len(tobj) == 2:
         t, t_unit = tobj
-        t, terr = _get_val_err(t, errstr)
-        tfinal, tfinalerr = _to_sec(t, terr, t_unit)
+        value, err = _get_val_err(t, errstr)
+        tfinal, tfinalerr = _to_sec(value, err, t_unit)
     elif 'STABLE' in t:
         tfinal = np.inf
         tfinalerr = None
