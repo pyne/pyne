@@ -1,7 +1,7 @@
 """PyNE utility tests"""
 import os
 
-import nose
+import nose 
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
                        assert_in, assert_true
@@ -10,6 +10,10 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne import utils
 import numpy as np
+
+
+def test_to_sec():
+    assert_equal(120.0, utils.to_sec(2, 'M'))
 
 
 def test_to_barns():
@@ -55,7 +59,7 @@ def test_remove():
     utils.remove('rawr')
     assert_true('rawr' not in os.listdir('.'))
 
-    # Test pass through on non-existant
+    # Test pass through on non-existant 
     assert_true('Medic!' not in os.listdir('.'))
     utils.remove('Medic!')
 

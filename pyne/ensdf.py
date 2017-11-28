@@ -5,6 +5,7 @@ import copy
 from collections import defaultdict
 from warnings import warn
 from pyne.utils import QAWarning
+from pyne.utils import time_conv_dict
 
 import numpy as np
 
@@ -67,49 +68,6 @@ def _to_id(nuc):
         return 0
     return nucid
 
-time_conv_dict = {'as': 1e-18,
-                  'attosec': 1e-18,
-                  'attosecond': 1e-18,
-                  'attoseconds': 1e-18,
-                  'fs': 1e-15,
-                  'femtosec': 1e-15,
-                  'femtosecond': 1e-15,
-                  'femtoseconds': 1e-15,
-                  'ps': 1e-12,
-                  'picosec': 1e-12,
-                  'picosecond': 1e-12,
-                  'picoseconds': 1e-12,
-                  'ns': 1e-9,
-                  'nanosec': 1e-9,
-                  'nanosecond': 1e-9,
-                  'nanoseconds': 1e-9,
-                  'us': 1e-6,
-                  'microsec': 1e-6,
-                  'microsecond': 1e-6,
-                  'microseconds': 1e-6,
-                  'ms': 1e-3,
-                  'millisec': 1e-3,
-                  'millisecond': 1e-3,
-                  'milliseconds': 1e-3,
-                  's': 1.0,
-                  'sec': 1.0,
-                  'second': 1.0,
-                  'seconds': 1.0,
-                  'm': 60.0,
-                  'min': 60.0,
-                  'minute': 60.0,
-                  'minutes': 60.0,
-                  'h': 3600.0,
-                  'hour': 3600.0,
-                  'hours': 3600.0,
-                  'd': 86400.0,
-                  'day': 86400.0,
-                  'days': 86400.0,
-                  'y': 86400.0*365.25,
-                  'year': 86400.0*365.25,
-                  'years': 86400.0*365.25,
-                  }
-
 
 # Energy to half-life conversion:  T1/2= ln(2) × (h/2 pi) / energy
 # See http://www.nndc.bnl.gov/nudat2/help/glossary.jsp#halflife
@@ -123,8 +81,8 @@ energy_conv_dict = {'ev': HBAR_LN2,
                     }
 
 
-def _to_sec(value, err, units):
-    """Converts a time with err and units to seconds.
+def _halflife_to_seconds(value, err, units):
+    """Converts a halflife with err and units to seconds.
 
     Parameters
     ----------
@@ -176,7 +134,7 @@ def _to_time(tstr, errstr):
     if len(tobj) == 2:
         t, t_unit = tobj
         value, err = _get_val_err(t, errstr)
-        tfinal, tfinalerr = _to_sec(value, err, t_unit)
+        tfinal, tfinalerr = _halflife_to_seconds(value, err, t_unit)
     elif 'STABLE' in t:
         tfinal = np.inf
         tfinalerr = None
