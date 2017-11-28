@@ -13,6 +13,7 @@ jobs:
       - run:
           name: Building PyNE
           command: |
+            export VERBOSE=1
             python3 setup.py install --user \
                 --moab $HOME/opt/moab
 
@@ -36,6 +37,7 @@ jobs:
       - run:
           name: Building PyNE
           command: |
+            export VERBOSE=1
             python setup.py install --user \
                 --moab $HOME/opt/moab
 

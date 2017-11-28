@@ -6,7 +6,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 # setup source files
 set(PYNE_SRCS
   "atomic_data.cpp"
-  "cram.c"
+  "cram.s"
   "data.cpp"
   "decay.cpp"
   "enrichment.cpp"
@@ -97,12 +97,18 @@ set_source_files_properties(decay.cpp PROPERTIES COMPILE_FLAGS "-O0")
 # Set CRAM solver compiler options
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # using Clang
+  message("-- Compiler to for CRAM set to Clang.")
   set_source_files_properties(cram.c PROPERTIES COMPILE_FLAGS "-O0 -ffast-math")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
-  set_source_files_properties(cram.c PROPERTIES COMPILE_FLAGS
+  message("-- Compiler to for CRAM set to GNU.")
+  set_source_files_properties(cram.s PROPERTIES COMPILE_FLAGS
     "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
     )
+else()
+  # undetermined
+  message("!!! Could not determine compiler type for CRAM, using generic settings...")
+  set_source_files_properties(cram.c PROPERTIES COMPILE_FLAGS "-O0")
 endif()
 
 add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
