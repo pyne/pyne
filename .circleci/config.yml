@@ -14,7 +14,7 @@ jobs:
           name: Building PyNE
           command: |
             python3 setup.py install --user \
-                --moab $HOME/opt/moab
+                --moab $HOME/opt/moab --clean
 
       # Test!
       - run:
@@ -37,7 +37,7 @@ jobs:
           name: Building PyNE
           command: |
             python setup.py install --user \
-                --moab $HOME/opt/moab
+                --moab $HOME/opt/moab --clean
 
       # Test!
       - run:

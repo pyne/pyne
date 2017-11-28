@@ -322,6 +322,7 @@ def update_setup_args(ns):
             dir_util.remove_tree(ns.build_dir)
         for f in files:
             if os.path.isfile(f):
+                print('deleting ' + f)
                 os.remove(f)
         print('build directory cleaned ... exiting')
         sys.exit()
@@ -330,6 +331,7 @@ def update_setup_args(ns):
             dir_util.remove_tree(ns.build_dir)
         for f in files:
             if os.path.isfile(f):
+                print('deleting ' + f)
                 os.remove(f)
 
 
