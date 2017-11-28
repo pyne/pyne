@@ -192,10 +192,10 @@ macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
 
   # pick the filename to compile, either source or assembly
   if(NOT PYNE_FAST_COMPILE)
-    message(STATUS "Not compiling ${_srcname} fast since PyNE fast compile is disabled.")
+    message(STATUS "Not fast compiling ${_srcname} since PyNE fast compile is disabled.")
     set(_filename "${_srcname}")
-  elseif(NOT EXISTS "${_asmname}")
-    message(STATUS "Not compiling ${_srcname} fast since ${_asmname} does not exist.")
+  elseif(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_asmname}")
+    message(STATUS "Not fast compiling ${_srcname} since ${CMAKE_CURRENT_SOURCE_DIR}/${_asmname} does not exist.")
     set(_filename "${_srcname}")
   else()
     message(STATUS "Compiling ${_srcname} fast from assembly ${_asmname}")

@@ -76,6 +76,9 @@ if(MOAB_FOUND)
   set(PYNE_SRCS "${PYNE_SRCS}" "${MOAB_SRCS}")
 endif(MOAB_FOUND)
 
+# Fast compile decay.cpp
+fast_compile(decay.cpp "-O0" "-O0" "-O0")
+
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
 if("${LIBS_HDF5}" STREQUAL "")
@@ -89,9 +92,6 @@ ENDIF(BUILD_SPATIAL_SOLVER)
 if(MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
 endif(MOAB_FOUND)
-
-# Set symbolic decay properties.
-fast_compile(decay.cpp "-O0" "-O0" "-O0")
 
 # Set CRAM solver compiler options
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
