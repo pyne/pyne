@@ -6,7 +6,6 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 # setup source files
 set(PYNE_SRCS
   "atomic_data.cpp"
-  "cram.c"
   "data.cpp"
   "enrichment.cpp"
   "enrichment_cascade.cpp"
@@ -76,8 +75,12 @@ if(MOAB_FOUND)
   set(PYNE_SRCS "${PYNE_SRCS}" "${MOAB_SRCS}")
 endif(MOAB_FOUND)
 
-# Fast compile decay.cpp
+# Fast compile decay and cram
 fast_compile(decay.cpp "-O0" "-O0" "-O0")
+fast_compile(cram.c
+  "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
+  "-O0 -ffast-math"
+  "-O0")
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
@@ -92,17 +95,6 @@ ENDIF(BUILD_SPATIAL_SOLVER)
 if(MOAB_FOUND)
     target_link_libraries(pyne dagmc MOAB)
 endif(MOAB_FOUND)
-
-# Set CRAM solver compiler options
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  # using Clang
-  set_source_files_properties(cram.c PROPERTIES COMPILE_FLAGS "-O0 -ffast-math")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  # using GCC
-  set_source_files_properties(cram.c PROPERTIES COMPILE_FLAGS
-    "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
-    )
-endif()
 
 add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
