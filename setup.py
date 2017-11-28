@@ -300,6 +300,9 @@ def update_cmake_args(ns):
         ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
     if ns.deps_root:
         ns.cmake_args.append('-DDEPS_ROOT_DIR=' + absexpanduser(ns.deps_root))
+    if ns.fast is not None:
+        fast = 'TRUE' if ns.fast else 'FALSE'
+        ns.cmake_args.append('-DPYNE_FAST_COMPILE=' + fast)
 
 
 def update_make_args(ns):
@@ -337,6 +340,14 @@ def parse_args():
     cmake.add_argument('--deps-root', default=None, dest='deps_root',
                        help="the path to the directory containing "
                             "all dependencies")
+    cmake.add_argument('--fast', default=None, dest='fast',
+                       action='store_true', help="Will try to compile "
+                       "from assembly, if possible. This is faster than "
+                       "compiling from source (default).")
+    cmake.add_argument('--slow', dest='fast',
+                       action='store_false', help="Will NOT try to compile "
+                       "from assembly, if possible. This is slower as it "
+                       "must compile from source.")
 
     make = parser.add_argument_group('make', 'Make arguments.')
     make.add_argument('-j', help='Degree of parallelism for build.')
