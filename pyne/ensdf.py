@@ -9,7 +9,6 @@ from pyne.utils import QAWarning
 import numpy as np
 
 from pyne import nucname, rxname, data
-from pyne.utils import to_sec
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -68,6 +67,106 @@ def _to_id(nuc):
         return 0
     return nucid
 
+time_conv_dict = {'as': 1e-18,
+                  'attosec': 1e-18,
+                  'attosecond': 1e-18,
+                  'attoseconds': 1e-18,
+                  'fs': 1e-15,
+                  'femtosec': 1e-15,
+                  'femtosecond': 1e-15,
+                  'femtoseconds': 1e-15,
+                  'ps': 1e-12,
+                  'picosec': 1e-12,
+                  'picosecond': 1e-12,
+                  'picoseconds': 1e-12,
+                  'ns': 1e-9,
+                  'nanosec': 1e-9,
+                  'nanosecond': 1e-9,
+                  'nanoseconds': 1e-9,
+                  'us': 1e-6,
+                  'microsec': 1e-6,
+                  'microsecond': 1e-6,
+                  'microseconds': 1e-6,
+                  'ms': 1e-3,
+                  'millisec': 1e-3,
+                  'millisecond': 1e-3,
+                  'milliseconds': 1e-3,
+                  's': 1.0,
+                  'sec': 1.0,
+                  'second': 1.0,
+                  'seconds': 1.0,
+                  'm': 60.0,
+                  'min': 60.0,
+                  'minute': 60.0,
+                  'minutes': 60.0,
+                  'h': 3600.0,
+                  'hour': 3600.0,
+                  'hours': 3600.0,
+                  'd': 86400.0,
+                  'day': 86400.0,
+                  'days': 86400.0,
+                  'y': 86400.0*365.25,
+                  'year': 86400.0*365.25,
+                  'years': 86400.0*365.25,
+                  }
+
+
+# Energy to half-life conversion:  T1/2= ln(2) × (h/2 pi) / energy
+# See http://www.nndc.bnl.gov/nudat2/help/glossary.jsp#halflife
+# NIST CODATA https://physics.nist.gov/cgi-bin/cuu/Value?hbar
+#    h-bar = 1.054 571 800(13) x 1e-34 J
+#    1 J = 6.241 509 126(38) x 1e18 eV
+HBAR_LN2 = 4.5623775832376968e-16  # h-bar ln(2) in eV s
+energy_conv_dict = {'ev': HBAR_LN2,
+                    'kev': 1e-3 * HBAR_LN2,
+                    'mev': 1e-6 * HBAR_LN2,
+                    }
+
+
+def _to_sec(value, err, units):
+    """Converts a time with err and units to seconds.
+
+    Parameters
+    ----------
+    value: number
+        Time or energy, depending on units.
+    err : number or (number, number)
+        Uncertainty, or (plus, minus) uncertainty in [units].
+    units : str
+        Units flag, eg 'min', 'ms', 'days', or even 'MeV'.
+
+    Returns
+    -------
+    sec_time : float
+        Time value in [sec].
+    sec_err : None or float or (float, float) in [sec].
+        Time uncertainty in [sec], or (plus, minus) if asymmetric uncertainty.
+    """
+    if err is None:
+        plus, minus = 0, 0
+    elif isinstance(err, float):
+        plus, minus = err, err
+    else:
+        plus, minus = err
+
+    units = units.lower()
+    scale = time_conv_dict.get(units, None)
+    if scale is not None:
+        sec_time = scale * value
+        sec_err = (scale * plus, scale * minus)
+    else:
+        scale = energy_conv_dict[units]
+        sec_time = scale / value
+        sec_err = (scale / (value - minus) - sec_time,
+                   sec_time - scale / (value + plus))
+
+    if err is None:
+        return sec_time, None
+    elif sec_err[0] == sec_err[1]:
+        return sec_time, sec_err[0]
+    else:
+        return sec_time, sec_err
+
 
 def _to_time(tstr, errstr):
     t = tstr.strip()
@@ -77,12 +176,7 @@ def _to_time(tstr, errstr):
     if len(tobj) == 2:
         t, t_unit = tobj
         t, terr = _get_val_err(t, errstr)
-        tfinal = to_sec(t, t_unit)
-        tfinalerr = None
-        if type(terr) == float:
-            tfinalerr = to_sec(terr, t_unit)
-        elif terr is not None:
-            tfinalerr = to_sec(terr[0], t_unit), to_sec(terr[1], t_unit)
+        tfinal, tfinalerr = _to_sec(t, terr, t_unit)
     elif 'STABLE' in t:
         tfinal = np.inf
         tfinalerr = None

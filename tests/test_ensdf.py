@@ -454,6 +454,20 @@ def test_no_branches_gt100_levels():
         assert_less_equal(total_br, 100.0 + 1e-14,
                           msg="Branch ratios failed for " + str(nuc))
 
+def test_time():
+    assert_equal((120.0, None), ensdf._to_sec(2, None, 'M'))
+    assert_equal((120.0, None), ensdf._to_time("2 M", None))
+    assert_equal((180.0, 6.0), ensdf._to_time("2.30 M", "10"))
+    assert_equal((180.0, (6.0, 12.0)), ensdf._to_time("2.30 M", "+10-20"))
+    t, err = ensdf._to_time("2.30 MS", "+10-20")
+    assert_equal((0.0023, (0.0001, 0.0002)), (t, err))
+    t, err = ensdf._to_time("2.30E-3 S", "+10-20")
+    assert_equal((0.0023, (0.0001, 0.0002)), (t, err))
+    t, err = ensdf._to_time("2.5 KEV", "2")
+    v = ensdf.HBAR_LN2 / 2.5e3
+    vplus = ensdf.HBAR_LN2 / (2.3e3) - v
+    vminus = v - ensdf.HBAR_LN2 / (2.5e3)
+    assert_equal((t, err), (v, (vplus, vminus)))
 
 if __name__ == "__main__":
     nose.runmodule()
