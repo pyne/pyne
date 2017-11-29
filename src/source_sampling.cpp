@@ -10,6 +10,8 @@ void pyne::sampling_setup_(int* mode) {
   if (sampler == NULL) {
     std::string filename ("source.h5m");
     std::string src_tag_name ("source_density");
+    std::string cell_num_tag_name ("cell_num");
+    std::string cell_fracs_tag_name ("cell_fracs");
     std::string e_bounds_file ("e_bounds");
     std::vector<double> e_bounds = read_e_bounds(e_bounds_file);
     if (*mode == 0) {
@@ -19,6 +21,8 @@ void pyne::sampling_setup_(int* mode) {
     } else if (*mode == 2) {
       std::string bias_tag_name ("biased_source_density");
       sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
+    } else if (*mode == 3) {
+      sampler = new pyne::Sampler(filename, src_tag_name, cell_num_tag_name, cell_fracs_tag_name, e_bounds, false);
     }
   }
 }
@@ -51,22 +55,33 @@ std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
 
 
 // C++ API
-pyne::Sampler::Sampler(std::string filename, 
-                 std::string src_tag_name, 
-                 std::vector<double> e_bounds, 
+pyne::Sampler::Sampler(std::string filename,
+                 std::string src_tag_name,
+                 std::vector<double> e_bounds,
                  bool uniform)
   : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds) {
   mode = (uniform) ? UNIFORM : ANALOG;
   setup();
 }
 
-pyne::Sampler::Sampler(std::string filename,  
-                 std::string src_tag_name, 
-                 std::vector<double> e_bounds, 
+pyne::Sampler::Sampler(std::string filename,
+                 std::string src_tag_name,
+                 std::string cell_num_tag_name,
+                 std::string cell_fracs_tag_name,
+                 std::vector<double> e_bounds,
+                 bool uniform)
+  : filename(filename), src_tag_name(src_tag_name), cell_num_tag_name(cell_num_tag_name), cell_fracs_tag_name(cell_fracs_tag_name), e_bounds(e_bounds) {
+  mode = SUBVOXEL_ANALOG;
+  setup();
+}
+
+pyne::Sampler::Sampler(std::string filename,
+                 std::string src_tag_name,
+                 std::vector<double> e_bounds,
                  std::string bias_tag_name)
-  : filename(filename), 
-    src_tag_name(src_tag_name), 
-    e_bounds(e_bounds), 
+  : filename(filename),
+    src_tag_name(src_tag_name),
+    e_bounds(e_bounds),
     bias_tag_name(bias_tag_name) {
   mode = USER;
   setup();
@@ -87,9 +102,9 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
   moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
-  samp.push_back(pos[0]); 
-  samp.push_back(pos[1]); 
-  samp.push_back(pos[2]); 
+  samp.push_back(pos[0]);
+  samp.push_back(pos[1]);
+  samp.push_back(pos[2]);
   samp.push_back(sample_e(e_idx, rands[5]));
   samp.push_back(sample_w(pdf_idx));
   return samp;
@@ -105,7 +120,7 @@ void pyne::Sampler::setup() {
   if (rval != moab::MB_SUCCESS)
     throw std::invalid_argument("Could not load mesh file.");
 
-  // Get mesh volume elemebts 
+  // Get mesh volume elemebts
   moab::Range ves;
   rval = mesh->get_entities_by_dimension(loaded_file_set, 3, ves);
   if (rval != moab::MB_SUCCESS)
@@ -138,7 +153,7 @@ void pyne::Sampler::mesh_geom_data(moab::Range ves, std::vector<double> &volumes
     throw std::runtime_error("Problem getting mesh connectivity.");
 
   // Grab the coordinates that define 4 connected points within a mesh volume
-  // element and setup a data structure to allow uniform sampling with each 
+  // element and setup a data structure to allow uniform sampling with each
   // mesh volume element.
   double coords[verts_per_ve*3];
   int i;
@@ -165,18 +180,18 @@ void pyne::Sampler::mesh_geom_data(moab::Range ves, std::vector<double> &volumes
   }
 }
 
-void pyne::Sampler::mesh_tag_data(moab::Range ves, 
+void pyne::Sampler::mesh_tag_data(moab::Range ves,
                                   const std::vector<double> volumes) {
   moab::ErrorCode rval;
   moab::Tag src_tag;
   rval = mesh->tag_get_handle(src_tag_name.c_str(),
-                              moab::MB_TAG_VARLEN, 
-                              moab::MB_TYPE_DOUBLE, 
+                              moab::MB_TAG_VARLEN,
+                              moab::MB_TYPE_DOUBLE,
                               src_tag);
   // THIS rval FAILS because we do not know number of energy groups a priori.
   // That's okay. That's what the next line is all about:
   num_e_groups = num_groups(src_tag);
-  std::vector<double> pdf(num_ves*num_e_groups); 
+  std::vector<double> pdf(num_ves*num_e_groups);
   rval = mesh->tag_get_data(src_tag, ves, &pdf[0]);
   if (rval != moab::MB_SUCCESS)
     throw std::runtime_error("Problem getting source tag data.");
@@ -205,7 +220,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   }
 }
 
-std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves, 
+std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
                                                  std::vector<double> volumes,
                                                  std::vector<double> pdf) {
     std::vector<double> bias_pdf(num_ves*num_e_groups);
@@ -235,9 +250,9 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
     } else if (mode == USER) {
       // Get the biased PDF from the mesh
       moab::Tag bias_tag;
-      rval = mesh->tag_get_handle(bias_tag_name.c_str(), 
-                                  moab::MB_TAG_VARLEN, 
-                                  moab::MB_TYPE_DOUBLE, 
+      rval = mesh->tag_get_handle(bias_tag_name.c_str(),
+                                  moab::MB_TAG_VARLEN,
+                                  moab::MB_TYPE_DOUBLE,
                                   bias_tag);
       num_bias_groups = num_groups(bias_tag);
 
@@ -253,7 +268,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         // Spatial biasing only: the supplied bias PDF values are applied
         // to all energy groups within a mesh volume element, which are
         // sampled in analog.
-        std::vector<double> spatial_pdf(num_ves); 
+        std::vector<double> spatial_pdf(num_ves);
         rval = mesh->tag_get_data(bias_tag, ves, &spatial_pdf[0]);
         if (rval != moab::MB_SUCCESS)
           throw std::runtime_error("Problem getting bias tag data.");
@@ -265,7 +280,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
           }
           if (q_in_group > 0){
             for (j=0; j<num_e_groups; ++j){
-              bias_pdf[i*num_e_groups + j] = 
+              bias_pdf[i*num_e_groups + j] =
                 spatial_pdf[i]*volumes[i]*pdf[i*num_e_groups + j]/q_in_group;
             }
           } else {
@@ -287,7 +302,7 @@ moab::CartVect pyne::Sampler::sample_xyz(int ve_idx, std::vector<double> rands) 
   double u = rands[2];
 
   // Transform s, t, u to uniformly sample a tetrahedron. See:
-  // C. Rocchini and P. Cignoni, “Generating Random Points in a Tetrahedron,” 
+  // C. Rocchini and P. Cignoni, “Generating Random Points in a Tetrahedron,”
   //  Journal of Graphics Tools, 5, 200–202 (2001).
   if (ve_type == moab::MBTET) {
     if (s + t > 1) {
@@ -355,7 +370,7 @@ pyne::AliasTable::AliasTable(std::vector<double> p) {
   std::vector<double> large(n);
   int i, a, g;
 
-  for (i=0; i<n; ++i) 
+  for (i=0; i<n; ++i)
     p[i] *= n;
 
   // Set separate index lists for small and large probabilities:
