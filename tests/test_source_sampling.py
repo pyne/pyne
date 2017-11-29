@@ -162,6 +162,8 @@ def test_analog_multiple_hex_subvoxel():
         assert_equal(s[4], 1.0)
         assert_equal(int(s[5], 4*int[s[0]]+2*int[s[1]]+int[s[3]]))
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
+=======
+>>>>>>> add test_analog_single_hex_subvoxel in tests/test_source_sampling.py
               int(s[3]*num_divs)] += score
 
     for i in range(0, 4):
