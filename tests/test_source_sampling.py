@@ -25,14 +25,14 @@ def try_rm_file(filename):
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex():
-    """This test tests that particles of sampled evenly within the phase-space 
+    """This test tests that particles of sampled evenly within the phase-space
     of a single mesh volume element with one energy group in an analog sampling
-    scheme. This done by dividing each dimension (x, y, z, E) in half, then 
+    scheme. This done by dividing each dimension (x, y, z, E) in half, then
     sampling particles and tallying on the basis of which of the 2^4 = 8 regions
-    of phase space the particle is born into. 
+    of phase space the particle is born into.
     """
     seed(1953)
-    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]], 
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(1, float)
     m.src[0] = 1.0
@@ -47,7 +47,47 @@ def test_analog_single_hex():
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
         assert_equal(s[4], 1.0) # analog: all weights must be one
-        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
+        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
+              int(s[3]*num_divs)] += score
+
+    # Test that each half-space of phase space (e.g. x > 0.5) is sampled about
+    # half the time.
+    for i in range(0, 4):
+        for j in range(0, 2):
+            assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_analog_single_hex_subvoxel():
+    """This test tests that particles of sampled evenly within the phase-space
+    of a single mesh volume element with one energy group in an analog sampling
+    scheme. This done by dividing each dimension (x, y, z, E) in half, then
+    sampling particles and tallying on the basis of which of the 2^4 = 8 regions
+    of phase space the particle is born into.
+    """
+    seed(1953)
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(1, float)
+    m.src[0] = 1.0
+    cell_fracs = np.zeros(1, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save("sampling_mesh.h5m")
+    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), False)
+
+    num_samples = 5000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
+
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        assert_equal(s[4], 1.0) # analog: all weights must be one
+        assert_equal(int(s[5]), 11) # analog: the cell number
+        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
               int(s[3]*num_divs)] += score
 
     # Test that each half-space of phase space (e.g. x > 0.5) is sampled about
@@ -63,8 +103,8 @@ def test_analog_multiple_hex():
     using the exact same method ass test_analog_multiple_hex.
     """
     seed(1953)
-    m = Mesh(structured=True, 
-             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]], 
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
@@ -78,9 +118,9 @@ def test_analog_multiple_hex():
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         assert_equal(s[4], 1.0)
-        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
+        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
               int(s[3]*num_divs)] += score
-    
+
     for i in range(0, 4):
         for j in range(0, 2):
             halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:,:])
@@ -106,9 +146,9 @@ def test_analog_single_tet():
     m.mesh.save("tet.h5m")
     center = m.ve_center(list(m.iter_ve())[0])
 
-    subtets = [[center, v1, v2, v3], 
-               [center, v1, v2, v4], 
-               [center, v1, v3, v4], 
+    subtets = [[center, v1, v2, v3],
+               [center, v1, v2, v4],
+               [center, v1, v3, v4],
                [center, v2, v3, v4]]
 
     sampler = Sampler("tet.h5m", "src", np.array([0, 1]), False)
@@ -122,7 +162,7 @@ def test_analog_single_tet():
             if point_in_tet(tet, [s[0], s[1], s[2]]):
                 tally[i] += score
                 break
-    
+
     for t in tally:
         assert(abs(t - 0.25)/0.25 < 0.2)
 
@@ -135,7 +175,7 @@ def test_uniform():
        in the Theory Manual.
     """
     seed(1953)
-    m = Mesh(structured=True, 
+    m = Mesh(structured=True,
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
@@ -157,8 +197,8 @@ def test_uniform():
         else:
             assert_almost_equal(s[4], 2.8) # hand calcs
 
-        spatial_tally[int(s[0]*num_divs/3.5), 
-                      int(s[1]*num_divs/1.0), 
+        spatial_tally[int(s[0]*num_divs/3.5),
+                      int(s[1]*num_divs/1.0),
                       int(s[2]*num_divs/1.0)]  += score
 
         if s[0] < 3 and s[3] < 0.5:
@@ -189,8 +229,8 @@ def test_bias():
        in the Theory Manual.
     """
     seed(1953)
-    m = Mesh(structured=True, 
-             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]], 
+    m = Mesh(structured=True,
+             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
@@ -228,14 +268,14 @@ def test_bias():
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_bias_spatial():
     """This test tests a user-specified biasing scheme for which the only 1
-    bias group is supplied for a source distribution containing two energy 
+    bias group is supplied for a source distribution containing two energy
     groups. This bias group is applied to both energy groups. In this test,
-    the user-supplied bias distribution that was choosen, correspondes to 
+    the user-supplied bias distribution that was choosen, correspondes to
     uniform sampling, so that results can be checked against Case 1 in the
     theory manual.
     """
     seed(1953)
-    m = Mesh(structured=True, 
+    m = Mesh(structured=True,
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
@@ -259,8 +299,8 @@ def test_bias_spatial():
         else:
             assert_almost_equal(s[4], 2.8) # hand calcs
 
-        spatial_tally[int(s[0]*num_divs/3.5), 
-                      int(s[1]*num_divs/1.0), 
+        spatial_tally[int(s[0]*num_divs/3.5),
+                      int(s[1]*num_divs/1.0),
                       int(s[2]*num_divs/1.0)]  += score
 
         if s[0] < 3 and s[3] < 0.5:
