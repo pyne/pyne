@@ -137,7 +137,7 @@ def download_decay():
         durl = urlopen(DECAY_URL)
         d = durl.read()
     except IOError:
-        print('...failed!')
+        print('...failed to download!')
         return False
     finally:
         durl.close()
@@ -159,7 +159,7 @@ def download_cram():
         durl = urlopen(CRAM_URL)
         d = durl.read()
     except IOError:
-        print('...failed!')
+        print('...failed to download!')
         return False
     finally:
         durl.close()
