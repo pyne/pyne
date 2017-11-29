@@ -55,6 +55,7 @@ subroutine source
     integer :: icl_tmp ! temporary cell variable
     integer :: find_cell
     integer :: tries
+    integer :: cell_num
   
     if (first_run .eqv. .true.) then
         call sampling_setup(idum(1))
