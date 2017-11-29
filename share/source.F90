@@ -72,7 +72,7 @@ subroutine source
    rands(4) = rang() ! sample y
    rands(5) = rang() ! sample z
  
-   call particle_birth(rands, xxx, yyy, zzz, erg, wgt)
+   call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_num)
    icl_tmp = find_cell()
    if (mat(icl_tmp).eq.0 .and. tries < idum(2)) then
        tries = tries + 1

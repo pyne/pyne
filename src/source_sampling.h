@@ -60,7 +60,8 @@ namespace pyne {
                             double* y,
                             double* z,
                             double* e,
-                            double* w);
+                            double* w,
+                            double* c);
   /// Helper function for MCNP interface that reads energy boudaries from a file
   /// \param e_bounds_file A file containing the energy group boundaries.
   std::vector<double> read_e_bounds(std::string e_bounds_file);

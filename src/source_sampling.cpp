@@ -32,7 +32,8 @@ void pyne::particle_birth_(double* rands,
                            double* y,
                            double* z,
                            double* e,
-                           double* w) {
+                           double* w,
+                           double* c) {
     std::vector<double> rands2(rands, rands + 6);
     std::vector<double> samp = sampler->particle_birth(rands2);
     *x = samp[0];
@@ -40,6 +41,7 @@ void pyne::particle_birth_(double* rands,
     *z = samp[2];
     *e = samp[3];
     *w = samp[4];
+    *c = samp[5];
 }
 
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
@@ -91,8 +93,18 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   //
   int pdf_idx =at->sample_pdf(rands[0], rands[1]);
-  int ve_idx = pdf_idx/num_e_groups;
-  int e_idx = pdf_idx % num_e_groups;
+  int ve_idx;
+  int c_idx;
+  int e_idx;
+  if (mode == USER || mode == UNIFORM || mode == ANALOG) {
+    ve_idx = pdf_idx/num_e_groups;
+    e_idx = pdf_idx % num_e_groups;
+  }
+  if (mode == SUBVOXEL_USER || mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_ANALOG) {
+    ve_idx = -1;
+    e_idx = -1;
+    c_idx = -1;
+  }
 
   // Sample uniformly within the selected mesh volume element and energy
   // group.
@@ -107,6 +119,12 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   samp.push_back(pos[2]);
   samp.push_back(sample_e(e_idx, rands[5]));
   samp.push_back(sample_w(pdf_idx));
+  if (mode == USER || mode == UNIFORM || mode == ANALOG) {
+    samp.push_back(-1.0);
+  }
+  if (mode == SUBVOXEL_USER || mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_ANALOG) {
+    samp.push_back(1.0);
+  }
   return samp;
 }
 
@@ -213,7 +231,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
     normalize_pdf(bias_pdf);
     //  Create alias table based off biased pdf and calculate birth weights.
     biased_weights.resize(num_ves*num_e_groups);
-    for (i=0; i<num_ves*num_e_groups; ++i) {
+    for (i=0; i<biased_weights.size(); ++i) {
       biased_weights[i] = pdf[i]/bias_pdf[i];
     }
     at = new AliasTable(bias_pdf);
@@ -335,15 +353,15 @@ double pyne::Sampler::sample_e(int e_idx, double rand) {
 }
 
 double pyne::Sampler::sample_w(int pdf_idx) {
-  return (mode == ANALOG) ? 1.0 : biased_weights[pdf_idx];
+  return (mode == ANALOG || mode == SUBVOXEL_ANALOG) ? 1.0 : biased_weights[pdf_idx];
 }
 
 void pyne::Sampler::normalize_pdf(std::vector<double> & pdf) {
   double sum = 0;
   int i;
-  for (i=0; i<num_ves*num_e_groups; ++i)
+  for (i=0; i<pdf.size(); ++i)
     sum += pdf[i];
-  for (i=0; i<num_ves*num_e_groups; ++i)
+  for (i=0; i<pdf.size(); ++i)
     pdf[i] /= sum;
 }
 
