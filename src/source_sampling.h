@@ -160,6 +160,7 @@ namespace pyne {
     std::vector<double> e_bounds;  ///< Energy boundaries
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
+    int max_num_cells; ///< Max numbers of cells in voxels
     Mode mode; ///< Problem mode: analog, uniform, user
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
@@ -169,6 +170,7 @@ namespace pyne {
     // sampling
     std::vector<edge_points> all_edge_points; ///< Four connected points on a VE.
     std::vector<double> biased_weights; ///< Birth weights for biased sampling.
+    std::vector<int> cell_number; ///< Tag cell_number
     AliasTable* at; ///< Alias table used for sampling.
 
   // member functions

@@ -76,7 +76,7 @@ def test_analog_single_hex_subvoxel():
     cell_fracs[:] = [(0, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), False)
+    sampler = Sampler("sampling_mesh.h5m", "src", "cell_number", "cell_fracs", np.array([0, 1]), False)
 
     num_samples = 5000
     score = 1.0/num_samples

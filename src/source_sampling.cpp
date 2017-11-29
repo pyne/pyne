@@ -92,19 +92,10 @@ pyne::Sampler::Sampler(std::string filename,
 std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   //
-  int pdf_idx =at->sample_pdf(rands[0], rands[1]);
-  int ve_idx;
-  int c_idx;
-  int e_idx;
-  if (mode == USER || mode == UNIFORM || mode == ANALOG) {
-    ve_idx = pdf_idx/num_e_groups;
-    e_idx = pdf_idx % num_e_groups;
-  }
-  if (mode == SUBVOXEL_USER || mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_ANALOG) {
-    ve_idx = -1;
-    e_idx = -1;
-    c_idx = -1;
-  }
+  int pdf_idx = at->sample_pdf(rands[0], rands[1]);
+  int ve_idx = pdf_idx/num_e_groups/max_num_cells;
+  int c_idx = (pdf_idx/num_e_groups)%max_num_cells;
+  int e_idx = pdf_idx % num_e_groups;
 
   // Sample uniformly within the selected mesh volume element and energy
   // group.
@@ -123,7 +114,7 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
     samp.push_back(-1.0);
   }
   if (mode == SUBVOXEL_USER || mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_ANALOG) {
-    samp.push_back(1.0);
+    samp.push_back(double(cell_number[ve_idx*max_num_cells + c_idx]));
   }
   return samp;
 }
@@ -202,6 +193,8 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
                                   const std::vector<double> volumes) {
   moab::ErrorCode rval;
   moab::Tag src_tag;
+  moab::Tag cell_number_tag;
+  moab::Tag cell_fracs_tag;
   rval = mesh->tag_get_handle(src_tag_name.c_str(),
                               moab::MB_TAG_VARLEN,
                               moab::MB_TYPE_DOUBLE,
@@ -209,39 +202,79 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   // THIS rval FAILS because we do not know number of energy groups a priori.
   // That's okay. That's what the next line is all about:
   num_e_groups = num_groups(src_tag);
-  std::vector<double> pdf(num_ves*num_e_groups);
+  // Set the default value of max_num_cells to 1, so that the normal r2s and sub-voxel
+  // r2s can use the same form of pdf size description
+  max_num_cells = 1;
+  std::vector<double> cell_fracs;
+  if (mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_ANALOG ||
+          mode == SUBVOXEL_USER) {
+      // Read the cell_number tag and cell_fracs tag
+      rval = mesh->tag_get_handle(cell_num_tag_name.c_str(),
+                                  cell_number_tag);
+      rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
+                                  cell_fracs_tag);
+      max_num_cells = num_groups(cell_fracs_tag);
+      num_e_groups /= max_num_cells;
+      cell_fracs.resize(num_ves*max_num_cells);
+      rval = mesh->tag_get_data(cell_fracs_tag, ves, &cell_fracs[0]);
+      cell_number.resize(num_ves*max_num_cells);
+      rval = mesh->tag_get_data(cell_number_tag, ves, &cell_number[0]);
+      }
+  }
+
+  std::vector<double> pdf(num_ves*num_e_groups*max_num_cells);
   rval = mesh->tag_get_data(src_tag, ves, &pdf[0]);
   if (rval != moab::MB_SUCCESS)
     throw std::runtime_error("Problem getting source tag data.");
 
-  // Multiply the source densities by the VE volumes
-  int i, j;
-  for (i=0; i<num_ves; ++i) {
-    for (j=0; j<num_e_groups; ++j) {
-       pdf[i*num_e_groups + j] *= volumes[i];
+  if (mode == ANALOG || mode == UNIFORM || mode == USER) {
+    // Multiply the source densities by the VE volumes
+    int i, j;
+    for (i=0; i<num_ves; ++i) {
+      for (j=0; j<num_e_groups; ++j) {
+         pdf[i*num_e_groups + j] *= volumes[i];
+      }
     }
   }
+
+  if (mode == SUBVOXEL_ANALOG || mode == SUBVOXEL_UNIFORM ||
+          mode == SUBVOXEL_USER) {
+    // Multiply the source densities by the sub-voxel volumes
+    int v, c, e;
+    for (v=0; v<num_ves; ++v) {
+        for (c=0; c<max_num_cells; ++c) {
+            for (e=0; e<num_e_groups; ++e) {
+                pdf[v*max_num_cells*num_e_groups+c*num_e_groups+e] *=
+                    volumes[v]*cell_fracs[v*max_num_cells+c];
+            }
+        }
+    }
+  }
+
   normalize_pdf(pdf);
 
   // Setup alias table based off PDF or biased PDF
-  if (mode == ANALOG) {
+  if (mode == ANALOG || mode == SUBVOXEL_ANALOG) {
     at = new AliasTable(pdf);
-  } else {
+  } else if (mode == UNIFORM || mode == USER){
     std::vector<double> bias_pdf = read_bias_pdf(ves, volumes, pdf);
     normalize_pdf(bias_pdf);
     //  Create alias table based off biased pdf and calculate birth weights.
-    biased_weights.resize(num_ves*num_e_groups);
-    for (i=0; i<biased_weights.size(); ++i) {
+    biased_weights.resize(num_ves*num_e_groups*max_num_cells);
+    int i;
+    for (i=0; i<num_ves*num_e_groups*max_num_cells; ++i) {
       biased_weights[i] = pdf[i]/bias_pdf[i];
     }
     at = new AliasTable(bias_pdf);
+  } else if (mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_USER) {
+      std::cout<< "error! this code not filled yet"<<std::endl;
   }
 }
 
 std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
                                                  std::vector<double> volumes,
                                                  std::vector<double> pdf) {
-    std::vector<double> bias_pdf(num_ves*num_e_groups);
+    std::vector<double> bias_pdf(num_ves*num_e_groups*max_num_cells);
     int i, j;
     moab::ErrorCode rval;
     if (mode == UNIFORM) {
@@ -310,6 +343,8 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         throw std::length_error("Length of bias tag must equal length of the"
                                 "  source tag, or 1.");
       }
+    } else {
+        throw std::length_error("This part of code has not finished yet, fill it");
     }
 return bias_pdf;
 }
