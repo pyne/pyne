@@ -219,7 +219,6 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
       rval = mesh->tag_get_data(cell_fracs_tag, ves, &cell_fracs[0]);
       cell_number.resize(num_ves*max_num_cells);
       rval = mesh->tag_get_data(cell_number_tag, ves, &cell_number[0]);
-      }
   }
 
   std::vector<double> pdf(num_ves*num_e_groups*max_num_cells);

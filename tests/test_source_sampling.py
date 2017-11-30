@@ -76,7 +76,8 @@ def test_analog_single_hex_subvoxel():
     cell_fracs[:] = [(0, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", "cell_number", "cell_fracs", np.array([0, 1]), False)
+    sampler = Sampler("sampling_mesh.h5m", "src", "cell_number", "cell_fracs",
+                      np.array([0, 1]), False)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -125,6 +126,49 @@ def test_analog_multiple_hex():
         for j in range(0, 2):
             halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:,:])
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_analog_multiple_hex_subvoxel():
+    """This test tests that particle are sampled uniformly from a uniform source
+    defined on eight mesh volume elements in two energy groups. This is done
+    using the exact same method ass test_analog_multiple_hex_subvoxel.
+    """
+    seed(1953)
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
+             mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = np.ones(shape=(8,2))
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+
+    cell_fracs[:] = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0), (2, 3, 1.0, 0.0),
+                     (3, 4, 1.0, 0.0), (4, 5, 1.0, 0.0), (5, 6, 1.0, 0.0),
+                     (6, 7, 1.0, 0.0), (7, 8, 1.0, 0.0)]
+
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save("sampling_mesh.h5m")
+    sampler = Sampler("sampling_mesh.h5m", "src", "cell_number", "cell_fracs",
+                      np.array([0, 0.5, 1]), False)
+
+    num_samples = 5000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
+    for i in range(num_samples):
+        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        assert_equal(s[4], 1.0)
+        assert_equal(int(s[5], 4*int[s[0]]+2*int[s[1]]+int[s[3]]))
+        tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
+              int(s[3]*num_divs)] += score
+
+    for i in range(0, 4):
+        for j in range(0, 2):
+            halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:,:])
+            assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
+
 
 @with_setup(None, try_rm_file('tet.h5m'))
 def test_analog_single_tet():
