@@ -875,6 +875,8 @@ def test_tag_cell_fracs_subvoxel_equal_voxel():
                            exp_cell_largest_frac[i])
 
 >>>>>>> clean up source_sampling.cpp
+=======
+>>>>>>> move the test function from this branch to branch tag_cell_fracs_update_numpyshape
 def test_no_mats():
     mesh = gen_mesh(mats=None)
     assert_true(mesh.mats is None)
