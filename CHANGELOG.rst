@@ -4,6 +4,16 @@ pyne Change Log
 
 .. current developments
 
+v0.5.8
+====================
+
+**Changed:**
+
+* Downloading data now uses HTTP, rather than HTTPS.
+
+
+
+
 v0.5.7
 ====================
 
