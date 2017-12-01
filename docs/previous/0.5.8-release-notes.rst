@@ -1,0 +1,5 @@
+**Changed:**
+
+* Downloading data now uses HTTP, rather than HTTPS.
+
+

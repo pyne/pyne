@@ -2,7 +2,7 @@ import os
 from warnings import warn
 
 
-__version__ = '0.5.8'
+__version__ = '0.5.9'
 
 if os.name == 'nt':
     p = os.environ['PATH'].split(';')
