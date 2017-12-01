@@ -35,6 +35,7 @@ import os
 import re
 import sys
 import imp
+import ssl
 import shutil
 import tarfile
 import argparse
@@ -57,7 +58,7 @@ if '.' not in sys.path:
     sys.path.append(os.getcwd() + '/src')
 
 absexpanduser = lambda x: os.path.abspath(os.path.expanduser(x))
-VERSION = '0.5.8'
+VERSION = '0.5.9'
 IS_NT = os.name == 'nt'
 LOCALDIR = absexpanduser('~/.local')
 CMAKE_BUILD_TYPES = {
@@ -133,7 +134,8 @@ DECAY_URL = 'http://raw.githubusercontent.com/pyne/data/master/decay.tar.gz'
 
 def download_decay():
     print('Downloading ' + DECAY_URL)
-    durl = urlopen(DECAY_URL)
+    ctx = ssl.SSLContext()
+    durl = urlopen(DECAY_URL, context=ctx)
     try:
         d = durl.read()
     except IOError:
@@ -155,7 +157,8 @@ CRAM_URL = 'http://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
 
 def download_cram():
     print('Downloading ' + CRAM_URL)
-    durl = urlopen(CRAM_URL)
+    ctx = ssl.SSLContext()
+    durl = urlopen(CRAM_URL, context=ctx)
     try:
         d = durl.read()
     except IOError:
