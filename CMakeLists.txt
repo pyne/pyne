@@ -12,7 +12,11 @@ pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
+pyne_set_fast_compile()
 pyne_configure_rpath()
+
+# enable assembly
+enable_language(ASM)
 
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)

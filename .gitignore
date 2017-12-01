@@ -7,7 +7,8 @@ build_nuc_data/
 pyne/include/
 src/atomic_data.cpp
 src/atomic_data.h
-src/decay.tar.gz
+src/*.tar.gz
+*.s
 
 # Ignore temp files
 *.pyc
@@ -51,6 +52,8 @@ tutorial/Ni59.txt
 docs/rxname_listing
 .ipynb_checkpoints
 rs.cred
+src/cram.h
+src/cram.c
 src/decay.h
 src/decay.cpp
 tests/fort.8
