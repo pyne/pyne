@@ -128,7 +128,7 @@ DECAY_H = os.path.join('src', 'decay.h')
 DECAY_CPP = os.path.join('src', 'decay.cpp')
 DECAY_H_REP = os.path.join('src', '_decay.h')
 DECAY_CPP_REP = os.path.join('src', '_decay.cpp')
-DECAY_URL = 'https://raw.githubusercontent.com/pyne/data/master/decay.tar.gz'
+DECAY_URL = 'http://raw.githubusercontent.com/pyne/data/master/decay.tar.gz'
 
 
 def download_decay():
@@ -150,7 +150,7 @@ def download_decay():
 
 CRAM_H = os.path.join('src', 'decay.h')
 CRAM_C = os.path.join('src', 'decay.c')
-CRAM_URL = 'https://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
+CRAM_URL = 'http://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
 
 
 def download_cram():
