@@ -23,7 +23,7 @@ $DOCKER_CONDA_DEPS = ['cmake', 'pkg-config', 'setuptools', 'gcc',
     'jinja2', 'nose', 'sphinx', 'numpydoc', 'cloud_sptheme',
     'sphinxcontrib-bibtex', 'prettytable','nbconvert'
     ]
-$DOCKER_INSTALL_COMMAND = ('rm -rf build && ./setup.py install && '
+$DOCKER_INSTALL_COMMAND = ('rm -rf build && ./setup.py install --clean && '
                            'cd $HOME && nuc_data_make')
 $DOCKER_GIT_NAME = 'pyne'
 $DOCKER_GIT_EMAIL = 'pyne@pyne.io'
