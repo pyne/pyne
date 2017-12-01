@@ -133,8 +133,8 @@ DECAY_URL = 'https://raw.githubusercontent.com/pyne/data/master/decay.tar.gz'
 
 def download_decay():
     print('Downloading ' + DECAY_URL)
+    durl = urlopen(DECAY_URL)
     try:
-        durl = urlopen(DECAY_URL)
         d = durl.read()
     except IOError:
         print('...failed to download!')
@@ -155,8 +155,8 @@ CRAM_URL = 'https://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
 
 def download_cram():
     print('Downloading ' + CRAM_URL)
+    durl = urlopen(CRAM_URL)
     try:
-        durl = urlopen(CRAM_URL)
         d = durl.read()
     except IOError:
         print('...failed to download!')
