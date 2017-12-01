@@ -23,7 +23,7 @@ else:
 from distutils.core import setup
 
 
-VERSION = '0.5.3'
+VERSION = '0.5.5'
 IS_NT = os.name == 'nt'
 
 
