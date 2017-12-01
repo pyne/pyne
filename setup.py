@@ -57,7 +57,7 @@ if '.' not in sys.path:
     sys.path.append(os.getcwd() + '/src')
 
 absexpanduser = lambda x: os.path.abspath(os.path.expanduser(x))
-VERSION = '0.5.5'
+VERSION = '0.5.6'
 IS_NT = os.name == 'nt'
 LOCALDIR = absexpanduser('~/.local')
 CMAKE_BUILD_TYPES = {
