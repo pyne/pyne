@@ -48,6 +48,7 @@ def test_loadfile():
     obs_rprop = testlib.structure[pb_nuclide]['rprop']
     assert_array_equal(sorted(exp_rprop), sorted(obs_rprop))
 
+
 def test_elastic_cross_section():
     testlib = Library('files_test_endl/testfile')
     # elastic-scattering cross section (2 columns)
