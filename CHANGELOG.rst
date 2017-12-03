@@ -4,6 +4,16 @@ pyne Change Log
 
 .. current developments
 
+v0.5.10
+====================
+
+**Fixed:**
+
+* Made SSL context creation Python 2 & 3 Compatible.
+
+
+
+
 v0.5.9
 ====================
 
