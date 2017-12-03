@@ -125,6 +125,15 @@ def assert_dep_versions():
     assert_ipython_version()
 
 
+def ssl_context():
+    # this is compitble for both Python 2 & 3
+    # on Python 3, you can do just ssl.SSLContext()
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return ctx
+
+
 DECAY_H = os.path.join('src', 'decay.h')
 DECAY_CPP = os.path.join('src', 'decay.cpp')
 DECAY_H_REP = os.path.join('src', '_decay.h')
@@ -134,8 +143,7 @@ DECAY_URL = 'http://raw.githubusercontent.com/pyne/data/master/decay.tar.gz'
 
 def download_decay():
     print('Downloading ' + DECAY_URL)
-    ctx = ssl.SSLContext()
-    durl = urlopen(DECAY_URL, context=ctx)
+    durl = urlopen(DECAY_URL, context=ssl_context())
     try:
         d = durl.read()
     except IOError:
@@ -157,8 +165,7 @@ CRAM_URL = 'http://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
 
 def download_cram():
     print('Downloading ' + CRAM_URL)
-    ctx = ssl.SSLContext()
-    durl = urlopen(CRAM_URL, context=ctx)
+    durl = urlopen(CRAM_URL, context=ssl_context())
     try:
         d = durl.read()
     except IOError:
