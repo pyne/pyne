@@ -1,0 +1,5 @@
+**Fixed:**
+
+* Made SSL context creation Python 2 & 3 Compatible.
+
+
