@@ -181,7 +181,8 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     f.close()
 
 
-def photon_source_hdf5_to_mesh(mesh, filename, tags):
+def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
+                               cell_mats=None):
     """This function reads in an hdf5 file produced by photon_source_to_hdf5
     and tags the requested data to the mesh of a PyNE Mesh object. Any
     combinations of nuclides and decay times are allowed. The photon source
@@ -205,16 +206,33 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
         dictionary could be:
 
         tags = {('U-235', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
+    sub_voxel: bool, optional
+        If the sub_voxel is True, then the sub-voxel r2s will be used.
+        Then the photon_source will be interpreted as sub-voxel photon source.
+    cell_mats : dict, optional
+        cell_mats is required when sub_voxel is True.
+        Maps geometry cell numbers to PyNE Material objects.
     """
+
     # find number of energy groups
     with tb.open_file(filename) as h5f:
         num_e_groups = len(h5f.root.data[0][3])
+    max_num_cells = -1
+    ves = list(mesh.iter_ve())
+    if sub_voxel:
+        num_vol_elements = len(mesh)
+        subvoxel_array = _get_subvoxel_array(mesh, cell_mats)
+        max_num_cells = \
+                len(mesh.mesh.getTagHandle('cell_number')[ves[0]])
+    else:
+        max_num_cells = 1
 
     # create a dict of tag handles for all keys of the tags dict
     tag_handles = {}
     for tag_name in tags.values():
         tag_handles[tag_name] = \
-            mesh.mesh.createTag(tag_name, num_e_groups, float)
+                mesh.mesh.createTag(tag_name, num_e_groups * max_num_cells,
+                                    float)
 
     # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
@@ -230,13 +248,27 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags):
             matched_data = h5f.root.data.read_where(
                 "(nuc == '{0}') & (time == '{1}')".format(nuc, cond[1]))
 
-        idx = 0
-        for i, _, ve in mesh:
-            if matched_data[idx][0] == i:
-                tag_handles[tags[cond]][ve] = matched_data[idx][3]
-                idx += 1
-            else:
-                tag_handles[tags[cond]][ve] = [0] * num_e_groups
+        if not sub_voxel:
+            idx = 0
+            for i, _, ve in mesh:
+                if matched_data[idx][0] == i:
+                    tag_handles[tags[cond]][ve] = matched_data[idx][3]
+                    idx += 1
+                else:
+                    tag_handles[tags[cond]][ve] = [0] * num_e_groups
+        else:
+            temp_mesh_data = np.empty(
+                shape=(num_vol_elements, num_e_groups * max_num_cells))
+            for i in range(num_vol_elements):
+                temp_mesh_data[i] = [0.0] * num_e_groups * max_num_cells
+            for sve, row in enumerate(subvoxel_array):
+                    # start index of data
+                    d_s = row['scid'] * num_e_groups
+                    # end index of data
+                    d_e = (row['scid'] + 1) * num_e_groups
+                    temp_mesh_data[row['idx'],d_s:d_e] = matched_data[sve][3][:]
+            for i, _, ve in mesh:
+                tag_handles[tags[cond]][ve] = temp_mesh_data[i,:]
 
 def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
                    sig_figs=6, sub_voxel=False):
@@ -264,7 +296,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
             :rel_error: float
                 The relative error associated with the volume fraction.
 
-     cell_mats : dict
+    cell_mats : dict
         Maps geometry cell numbers to PyNE Material objects. Each PyNE material
         object must have 'name' specified in Material.metadata.
     geom_file : str
@@ -775,3 +807,43 @@ def _output_flux(ve, tag_flux,output,start,stop,direction):
 
     output += "\n\n"
     return output
+
+def _get_subvoxel_array(mesh, cell_mats):
+    """
+    This function returns an array of subvoxels.
+    Parameters
+    ----------
+    mesh : PyNE Mesh object
+        The Mesh object for which the geometry is discretized.
+
+    return : subvoxel_array: structured array
+        A sorted, one dimensional array, each entry containing the following
+        fields:
+
+            :svid: int
+                The index of non-void subvoxel id
+            :idx: int
+                The idx of the voxel
+            :scid: int
+                The cell index of the cell in that voxel
+
+    """
+    cell_number_tag = mesh.mesh.getTagHandle('cell_number')
+    subvoxel_array = np.zeros(0, dtype=[(b'svid', np.int64),
+                                                      (b'idx', np.int64),
+                                                      (b'scid', np.int64)])
+    temp_subvoxel = np.zeros(1, dtype=[(b'svid', np.int64),
+                                                      (b'idx', np.int64),
+                                                      (b'scid', np.int64)])
+    # calculate the total number of non-void sub-voxel
+    non_void_sv_num = 0
+    for i, _, ve in mesh:
+        for c, cell in enumerate(cell_number_tag[ve]):
+            if cell > 0:
+                if len(cell_mats[cell].comp):
+                    temp_subvoxel[0] = (non_void_sv_num, i, c)
+                    subvoxel_array = np.append(subvoxel_array, temp_subvoxel)
+                    non_void_sv_num += 1
+
+    return subvoxel_array
+
