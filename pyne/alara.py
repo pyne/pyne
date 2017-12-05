@@ -218,12 +218,12 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     with tb.open_file(filename) as h5f:
         num_e_groups = len(h5f.root.data[0][3])
     max_num_cells = -1
-    ves = list(mesh.iter_ve())
+    ve0 = next(mesh.iter_ve())
     if sub_voxel:
         num_vol_elements = len(mesh)
         subvoxel_array = _get_subvoxel_array(mesh, cell_mats)
         max_num_cells = \
-                len(mesh.mesh.getTagHandle('cell_number')[ves[0]])
+                len(mesh.mesh.getTagHandle('cell_number')[ve0])
     else:
         max_num_cells = 1
 
