@@ -158,8 +158,8 @@ def download_decay():
     return True
 
 
-CRAM_H = os.path.join('src', 'decay.h')
-CRAM_C = os.path.join('src', 'decay.c')
+CRAM_H = os.path.join('src', 'cram.h')
+CRAM_C = os.path.join('src', 'cram.c')
 CRAM_URL = 'http://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
 
 
