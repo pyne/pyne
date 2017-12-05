@@ -191,9 +191,9 @@ def test_analog_multiple_hex_subvoxel():
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
 
-    cell_fracs[:] = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0), (2, 3, 1.0, 0.0),
-                     (3, 4, 1.0, 0.0), (4, 5, 1.0, 0.0), (5, 6, 1.0, 0.0),
-                     (6, 7, 1.0, 0.0), (7, 8, 1.0, 0.0)]
+    cell_fracs[:] = [(0, 0, 1.0, 0.0), (1, 1, 1.0, 0.0), (2, 2, 1.0, 0.0),
+                     (3, 3, 1.0, 0.0), (4, 4, 1.0, 0.0), (5, 5, 1.0, 0.0),
+                     (6, 6, 1.0, 0.0), (7, 7, 1.0, 0.0)]
 
     m.tag_cell_fracs(cell_fracs)
     m.mesh.save("sampling_mesh.h5m")
@@ -207,7 +207,8 @@ def test_analog_multiple_hex_subvoxel():
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         assert_equal(s[4], 1.0)
-        assert_equal(int(s[5], 4*int[s[0]]+2*int[s[1]]+int[s[3]]))
+        assert_equal(int(s[5]), 4*int(s[0]*num_divs) + 2*int(s[1]*num_divs)
+                     + int(s[2]*num_divs))
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
               int(s[3]*num_divs)] += score
 
@@ -215,7 +216,6 @@ def test_analog_multiple_hex_subvoxel():
         for j in range(0, 2):
             halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:,:])
             assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
-
 
 @with_setup(None, try_rm_file('tet.h5m'))
 def test_analog_single_tet():
