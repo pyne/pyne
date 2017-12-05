@@ -50,12 +50,6 @@ HEADER = ENV.from_string("""
 // {{ args }}
 
 #include <map>
-//#include <cmath>
-
-#ifndef PYNE_IS_AMALGAMATED
-#include "data.h"
-#include "nucname.h"
-#endif
 
 namespace pyne {
 namespace decayers {
@@ -78,8 +72,12 @@ SOURCE = ENV.from_string("""
 // This file was generated with the following command:
 // {{ args }}
 
-#ifndef PYNE_IS_AMALGAMATED
+#include <cmath>
 #include "decay.h"
+
+#ifdef PYNE_IS_AMALGAMATED
+#include "pyne.h"
+#else
 #include "nucname.h"
 #endif
 
