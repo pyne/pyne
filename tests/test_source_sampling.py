@@ -98,6 +98,53 @@ def test_analog_single_hex_subvoxel():
             assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_analog_single_hex_multiple_subvoxel():
+    """This test tests that particles of sampled evenly within the phase-space
+    of a single mesh volume element with one energy group in an analog sampling
+    scheme. This done by dividing each dimension (x, y, z, E) in half, then
+    sampling particles and tallying on the basis of which of the 2^4 = 8 regions
+    of phase space the particle is born into.
+    """
+    seed(1953)
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(3, float)
+    m.src[:] = np.empty(shape=(1, 3))
+    m.src[0] = [0, 0.2, 0.8]
+
+    cell_fracs = np.zeros(3, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.4, 0.0), (0, 13, 0.4, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+
+    m.mesh.save("sampling_mesh.h5m")
+    sampler = Sampler("sampling_mesh.h5m", "src", "cell_number", "cell_fracs",
+                      np.array([0, 1]), False)
+
+    num_samples = 5000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = [0.0] * 3
+
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        assert_equal(s[4], 1.0) # analog: all weights must be one
+        if int(s[5]) == 11:
+            tally[0] += score
+        if int(s[5]) == 12:
+            tally[1] += score
+        if int(s[5]) == 13:
+            tally[2] += score
+
+    # Test that each source particle in each cell has right frequency
+    print tally
+    assert_equal(tally[0], 0.0)
+    assert(abs(tally[1] - 0.2) < 0.05)
+    assert(abs(tally[2] - 0.8) < 0.05)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_multiple_hex():
     """This test tests that particle are sampled uniformly from a uniform source
     defined on eight mesh volume elements in two energy groups. This is done
