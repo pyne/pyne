@@ -7,6 +7,7 @@ import io
 import sys
 import pdb
 import time
+import shutil
 import warnings
 import traceback
 import subprocess
@@ -496,7 +497,9 @@ def assemble(ns, compiler, toolchain):
     print('Assembling ' + toolchain)
     base, _ = os.path.splitext(ns.src)
     asmfile = base + '-' + toolchain.lower() + '.s'
-    cmd = [compiler, '-fPIC', '-O0']
+    prefix = os.path.dirname(os.path.dirname(shutil.which(compiler)))
+    include = os.path.join(prefix, 'include')
+    cmd = [compiler, '-I' + include, '-fPIC', '-O0']
     cmd.extend(['-S', '-o', asmfile, '-c', ns.src])
     print('Running command:\n  $ ' + ' '.join(cmd))
     t0 = time.time()
@@ -554,7 +557,7 @@ def main():
         if ns.gnu_asm:
             ns.gnu_asm_file = assemble(ns, 'gcc', 'GNU')
         if ns.clang_asm:
-            ns.clang_asm_file = assemble(ns, 'clang', 'Clang')
+            ns.clang_asm_file = assemble(ns, 'clang++', 'Clang')
 
     if ns.tar:
         print("building decay.tar.gz ...")
