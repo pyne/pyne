@@ -102,7 +102,7 @@ def _halflife_to_seconds(value, err, units):
     """
     if err is None:
         plus, minus = 0, 0
-    elif isinstance(err, float):
+    elif np.isscalar(err):
         plus, minus = err, err
     else:
         plus, minus = err
