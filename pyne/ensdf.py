@@ -5,11 +5,11 @@ import copy
 from collections import defaultdict
 from warnings import warn
 from pyne.utils import QAWarning
+from pyne.utils import time_conv_dict
 
 import numpy as np
 
 from pyne import nucname, rxname, data
-from pyne.utils import to_sec
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -69,6 +69,63 @@ def _to_id(nuc):
     return nucid
 
 
+# Energy to half-life conversion:  T1/2= ln(2) × (h/2 pi) / energy
+# See http://www.nndc.bnl.gov/nudat2/help/glossary.jsp#halflife
+# NIST CODATA https://physics.nist.gov/cgi-bin/cuu/Value?hbar
+#    h-bar = 1.054 571 800(13) x 1e-34 J
+#    1 J = 6.241 509 126(38) x 1e18 eV
+HBAR_LN2 = 4.5623775832376968e-16  # h-bar ln(2) in eV s
+energy_conv_dict = {'ev': HBAR_LN2,
+                    'kev': 1e-3 * HBAR_LN2,
+                    'mev': 1e-6 * HBAR_LN2,
+                    }
+
+
+def _halflife_to_seconds(value, err, units):
+    """Converts a halflife with err and units to seconds.
+
+    Parameters
+    ----------
+    value: number
+        Time or energy, depending on units.
+    err : number or (number, number)
+        Uncertainty, or (plus, minus) uncertainty in [units].
+    units : str
+        Units flag, eg 'min', 'ms', 'days', or even 'MeV'.
+
+    Returns
+    -------
+    sec_time : float
+        Time value in [sec].
+    sec_err : None or float or (float, float) in [sec].
+        Time uncertainty in [sec], or (plus, minus) if asymmetric uncertainty.
+    """
+    if err is None:
+        plus, minus = 0, 0
+    elif np.isscalar(err):
+        plus, minus = err, err
+    else:
+        plus, minus = err
+
+    units = units.lower()
+    scale = time_conv_dict.get(units, None)
+    if scale is not None:
+        sec_time = scale * value
+        sec_err = (scale * plus, scale * minus)
+    else:
+        scale = energy_conv_dict[units]
+        sec_time = scale / value
+        sec_err = (scale / (value - minus) - sec_time,
+                   sec_time - scale / (value + plus))
+
+    if err is None:
+        return sec_time, None
+    elif sec_err[0] == sec_err[1]:
+        return sec_time, sec_err[0]
+    else:
+        return sec_time, sec_err
+
+
 def _to_time(tstr, errstr):
     t = tstr.strip()
     # This accepts questionable levels
@@ -76,13 +133,8 @@ def _to_time(tstr, errstr):
     tobj = [s.strip(' ()') for s in t.split()]
     if len(tobj) == 2:
         t, t_unit = tobj
-        t, terr = _get_val_err(t, errstr)
-        tfinal = to_sec(t, t_unit)
-        tfinalerr = None
-        if type(terr) == float:
-            tfinalerr = to_sec(terr, t_unit)
-        elif terr is not None:
-            tfinalerr = to_sec(terr[0], t_unit), to_sec(terr[1], t_unit)
+        value, err = _get_val_err(t, errstr)
+        tfinal, tfinalerr = _halflife_to_seconds(value, err, t_unit)
     elif 'STABLE' in t:
         tfinal = np.inf
         tfinalerr = None
