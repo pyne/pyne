@@ -412,10 +412,13 @@ class IMeshTag(Tag):
             mtag[i_ve[1]] = value if tsize == 1 else value[0]
         elif isinstance(key, slice):
             key = list(miter)[key]
+            v = np.empty((len(key), tsize), self.tag.type)
             if tsize == 1 and len(value.shape) == 1:
-                v = np.empty(len(key), self.tag.type)
-            else:
-                v = np.empty((len(key), tsize), self.tag.type)
+                v.shape = (len(key), )
+            #if tsize == 1 and len(value.shape) == 1:
+            #    v = np.empty(len(key), self.tag.type)
+            #else:
+            #    v = np.empty((len(key), tsize), self.tag.type)
             v[...] = value
             mtag[key] = v
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
@@ -423,10 +426,13 @@ class IMeshTag(Tag):
                 raise KeyError("boolean mask must match the length "
                                "of the mesh.")
             key = [ve for b, ve in zip(key, miter) if b]
+            v = np.empty((len(key), tsize), self.tag.type)
             if tsize == 1 and len(value.shape) == 1:
-                v = np.empty(len(key), self.tag.type)
-            else:
-                v = np.empty((len(key), tsize), self.tag.type)
+                v.shape = (len(key), )
+            #if tsize == 1 and len(value.shape) == 1:
+            #    v = np.empty(len(key), self.tag.type)
+            #else:
+            #    v = np.empty((len(key), tsize), self.tag.type)
             v[...] = value
             mtag[key] = v
         elif isinstance(key, Iterable):
