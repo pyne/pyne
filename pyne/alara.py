@@ -261,12 +261,12 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                 shape=(num_vol_elements, num_e_groups * max_num_cells),
                 dtype=float)
             temp_mesh_data.fill(0.0)
-            for sve, row in enumerate(subvoxel_array):
+            for sve, subvoxel in enumerate(subvoxel_array):
                     # start index of data
-                    d_s = row['scid'] * num_e_groups
+                    d_s = subvoxel['scid'] * num_e_groups
                     # end index of data
-                    d_e = (row['scid'] + 1) * num_e_groups
-                    temp_mesh_data[row['idx'],d_s:d_e] = matched_data[sve][3][:]
+                    d_e = (subvoxel['scid'] + 1) * num_e_groups
+                    temp_mesh_data[subvoxel['idx'],d_s:d_e] = matched_data[sve][3][:]
             for i, _, ve in mesh:
                 tag_handles[tags[cond]][ve] = temp_mesh_data[i,:]
 
