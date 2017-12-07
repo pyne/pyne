@@ -258,8 +258,8 @@ def test_photon_source_hdf5_to_mesh_subvoxel():
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
 
-    cell_fracs[:] = [(0, 11, 1, 0.0), (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
-                     (2, 11, 0.5, 0.0), (2, 13, 0.5, 0.0), (3, 13, 1, 0.0)]
+    cell_fracs[:] = [(0, 11, 1.0, 0.0), (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
+                     (2, 11, 0.5, 0.0), (2, 13, 0.5, 0.0), (3, 13, 1.0, 0.0)]
 
     cell_mats = {11: Material({'H': 1.0}, density=1.0),
                  12: Material({'He': 1.0}, density=1.0),
@@ -271,14 +271,14 @@ def test_photon_source_hdf5_to_mesh_subvoxel():
                                sub_voxel=sub_voxel, cell_mats=cell_mats)
 
     # create lists of lists of expected results
-    tag1_answers = [[1] + [0] * 41 + [0] * 42,
-                    [2] + [0] * 41 + [3] + [0] * 41,
-                    [4] + [0] * 41 + [0] * 42,
-                    [0] * 42 * 2]
-    tag2_answers = [[5] + [0] * 41 + [0] * 42,
-                    [6] + [0] * 41 + [7] + [0] * 41,
-                    [8] + [0] * 41 + [0] * 42,
-                    [0] * 42 * 2]
+    tag1_answers = [[1.0] + [0.0] * 41 + [0.0] * 42,
+                    [2.0] + [0.0] * 41 + [3.0] + [0.0] * 41,
+                    [4.0] + [0.0] * 41 + [0.0] * 42,
+                    [0.0] * 42 * 2]
+    tag2_answers = [[5.0] + [0.0] * 41 + [0.0] * 42,
+                    [6.0] + [0.0] * 41 + [7.0] + [0.0] * 41,
+                    [8.0] + [0.0] * 41 + [0.0] * 42,
+                    [0.0] * 42 * 2]
 
     for i, _, ve in mesh:
         assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])

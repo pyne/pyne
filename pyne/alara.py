@@ -258,9 +258,9 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                     tag_handles[tags[cond]][ve] = [0] * num_e_groups
         else:
             temp_mesh_data = np.empty(
-                shape=(num_vol_elements, num_e_groups * max_num_cells))
-            for i in range(num_vol_elements):
-                temp_mesh_data[i] = [0.0] * num_e_groups * max_num_cells
+                shape=(num_vol_elements, num_e_groups * max_num_cells),
+                dtype=float)
+            temp_mesh_data.fill(0.0)
             for sve, row in enumerate(subvoxel_array):
                     # start index of data
                     d_s = row['scid'] * num_e_groups
