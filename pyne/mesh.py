@@ -415,10 +415,6 @@ class IMeshTag(Tag):
             v = np.empty((len(key), tsize), self.tag.type)
             if tsize == 1 and len(value.shape) == 1:
                 v.shape = (len(key), )
-            #if tsize == 1 and len(value.shape) == 1:
-            #    v = np.empty(len(key), self.tag.type)
-            #else:
-            #    v = np.empty((len(key), tsize), self.tag.type)
             v[...] = value
             mtag[key] = v
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
@@ -429,10 +425,6 @@ class IMeshTag(Tag):
             v = np.empty((len(key), tsize), self.tag.type)
             if tsize == 1 and len(value.shape) == 1:
                 v.shape = (len(key), )
-            #if tsize == 1 and len(value.shape) == 1:
-            #    v = np.empty(len(key), self.tag.type)
-            #else:
-            #    v = np.empty((len(key), tsize), self.tag.type)
             v[...] = value
             mtag[key] = v
         elif isinstance(key, Iterable):
