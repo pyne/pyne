@@ -40,7 +40,7 @@ def test_write_fluxin_single():
         raise SkipTest
 
     output_name = "fluxin.out"
-    forward_fluxin = os.path.join(thisdir, "files_test_alara", 
+    forward_fluxin = os.path.join(thisdir, "files_test_alara",
                                   "fluxin_single_forward.txt")
     output = os.path.join(os.getcwd(), output_name)
 
@@ -75,9 +75,9 @@ def test_write_fluxin_multiple():
         raise SkipTest
 
     output_name = "fluxin.out"
-    forward_fluxin = os.path.join(thisdir, "files_test_alara", 
+    forward_fluxin = os.path.join(thisdir, "files_test_alara",
                                   "fluxin_multiple_forward.txt")
-    reverse_fluxin = os.path.join(thisdir, "files_test_alara", 
+    reverse_fluxin = os.path.join(thisdir, "files_test_alara",
                                   "fluxin_multiple_reverse.txt")
     output = os.path.join(os.getcwd(), output_name)
 
@@ -240,14 +240,61 @@ def test_photon_source_hdf5_to_mesh():
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
 
+def test_photon_source_hdf5_to_mesh_subvoxel():
+    """Tests the function photon source_h5_to_mesh
+    under sub-voxel r2s condition."""
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
+    filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
+    photon_source_to_hdf5(filename, chunkshape=(10,))
+    assert_true(os.path.exists(filename + '.h5'))
+    sub_voxel = True
+    mesh = Mesh(structured=True,
+                structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
+    cell_fracs = np.zeros(6, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+
+    cell_fracs[:] = [(0, 11, 1.0, 0.0), (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
+                     (2, 11, 0.5, 0.0), (2, 13, 0.5, 0.0), (3, 13, 1.0, 0.0)]
+
+    cell_mats = {11: Material({'H': 1.0}, density=1.0),
+                 12: Material({'He': 1.0}, density=1.0),
+                 13: Material({}, density=0.0, metadata={'name': 'void'})}
+    mesh.tag_cell_fracs(cell_fracs)
+    tags = {('1001', 'shutdown'): 'tag1', ('TOTAL', '1 h'): 'tag2'}
+
+    photon_source_hdf5_to_mesh(mesh, filename + '.h5', tags,
+                               sub_voxel=sub_voxel, cell_mats=cell_mats)
+
+    # create lists of lists of expected results
+    tag1_answers = [[1.0] + [0.0] * 41 + [0.0] * 42,
+                    [2.0] + [0.0] * 41 + [3.0] + [0.0] * 41,
+                    [4.0] + [0.0] * 41 + [0.0] * 42,
+                    [0.0] * 42 * 2]
+    tag2_answers = [[5.0] + [0.0] * 41 + [0.0] * 42,
+                    [6.0] + [0.0] * 41 + [7.0] + [0.0] * 41,
+                    [8.0] + [0.0] * 41 + [0.0] * 42,
+                    [0.0] * 42 * 2]
+
+    for i, _, ve in mesh:
+        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
+        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+
+    if os.path.isfile(filename + '.h5'):
+        os.remove(filename + '.h5')
+
 def test_record_to_geom():
 
     if not HAVE_PYTAPS:
         raise SkipTest
 
-    expected_geom = os.path.join(thisdir, "files_test_alara", 
+    expected_geom = os.path.join(thisdir, "files_test_alara",
                                  "alara_record_geom.txt")
-    expected_matlib = os.path.join(thisdir, "files_test_alara", 
+    expected_matlib = os.path.join(thisdir, "files_test_alara",
                                    "alara_record_matlib.txt")
     geom = os.path.join(os.getcwd(), "alara_record_geom")
     matlib = os.path.join(os.getcwd(), "alara_record_matlib")
@@ -256,23 +303,23 @@ def test_record_to_geom():
                                         ('vol_frac', np.float64),
                                         ('rel_error', np.float64)])
 
-    cell_mats = {11: Material({'H1': 1.0, 'K39': 1.0}, density=1.1, 
+    cell_mats = {11: Material({'H1': 1.0, 'K39': 1.0}, density=1.1,
                               metadata={'name': 'fake_mat'}),
-                 12: Material({'H1': 0.1, 'O16': 1.0}, density=1.2, 
+                 12: Material({'H1': 0.1, 'O16': 1.0}, density=1.2,
                               metadata={'name': 'water'}),
-                 13: Material({'He4': 42.0}, density=1.3, 
+                 13: Material({'He4': 42.0}, density=1.3,
                               metadata={'name': 'helium'}),
                  14: Material({}, density=0.0, metadata={'name': 'void'}),
                  15: Material({}, density=0.0, metadata={'name': 'void'}),
-                 16: Material({'H1': 1.0, 'K39': 1.0}, density=1.1, 
+                 16: Material({'H1': 1.0, 'K39': 1.0}, density=1.1,
                               metadata={'name': 'fake_mat'})}
 
-    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0), 
-                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 0.15, 0.0), 
+    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0),
+                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 0.15, 0.0),
                      (2, 14, 0.01, 0.0), (2, 15, 0.04, 0.0), (2, 16, 0.8, 0.0),
                      (3, 11, 0.55, 0.0), (3, 12, 0.45, 0.0)]
 
-    m = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]], 
+    m = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
              structured=True, mats=None)
 
     record_to_geom(m, cell_fracs, cell_mats, geom, matlib)
@@ -336,7 +383,7 @@ def test_mesh_to_geom():
         raise SkipTest
 
     expected_geom = os.path.join(thisdir, "files_test_alara", "alara_geom.txt")
-    expected_matlib = os.path.join(thisdir, "files_test_alara", 
+    expected_matlib = os.path.join(thisdir, "files_test_alara",
                                    "alara_matlib.txt")
     geom = os.path.join(os.getcwd(), "alara_geom")
     matlib = os.path.join(os.getcwd(), "alara_matlib")
@@ -378,7 +425,7 @@ def test_num_den_to_mesh_shutdown():
     if not HAVE_PYTAPS:
         raise SkipTest
 
-    filename = os.path.join(thisdir, "files_test_alara", 
+    filename = os.path.join(thisdir, "files_test_alara",
                             "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
     with open(filename) as f:
@@ -393,8 +440,8 @@ def test_num_den_to_mesh_shutdown():
                   20040000:7.1632e+02}
     exp_comp_1 = {10010000:4.1240e+13,
                   10020000:4.7443e+11,
-                  10030000:2.6627e+13, 
-                  20030000:8.3547e+10, 
+                  10030000:2.6627e+13,
+                  20030000:8.3547e+10,
                   20040000:2.6877e+19}
 
     # actual composition results
@@ -421,7 +468,7 @@ def test_num_den_to_mesh_stdout():
     if not HAVE_PYTAPS:
         raise SkipTest
 
-    filename = os.path.join(thisdir, "files_test_alara", 
+    filename = os.path.join(thisdir, "files_test_alara",
                             "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
 
@@ -438,8 +485,8 @@ def test_num_den_to_mesh_stdout():
                   20040000:7.1632e+02}
     exp_comp_1 = {10010000:4.1240e+13,
                   10020000:4.7443e+11,
-                  10030000:2.6627e+13, 
-                  20030000:8.3547e+10, 
+                  10030000:2.6627e+13,
+                  20030000:8.3547e+10,
                   20040000:2.6877e+19}
 
     # actual composition results
@@ -466,7 +513,7 @@ def test_num_den_to_mesh_1_y():
     if not HAVE_PYTAPS:
         raise SkipTest
 
-    filename = os.path.join(thisdir, "files_test_alara", 
+    filename = os.path.join(thisdir, "files_test_alara",
                             "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
     num_density_to_mesh(filename, '1 y', m)
@@ -479,8 +526,8 @@ def test_num_den_to_mesh_1_y():
                   20040000:7.1632e+02}
     exp_comp_1 = {10010000:4.1240e+13,
                   10020000:4.7443e+11,
-                  10030000:2.5176e+13, 
-                  20030000:1.5343e+12, 
+                  10030000:2.5176e+13,
+                  20030000:1.5343e+12,
                   20040000:2.6877e+19}
 
     # actual results
@@ -502,11 +549,11 @@ def test_num_den_to_mesh_1_y():
     assert_almost_equal(exp_density_1, m.mats[1].density)
 
 def test_irradiation_blocks():
- 
+
     # actual results
-    act = irradiation_blocks("matlib", "isolib", 
-                             "FEINDlib CINDER CINDER90 THERMAL", 
-                             ["1 h", "0.5 y"], "fluxin.out", "1 y", 
+    act = irradiation_blocks("matlib", "isolib",
+                             "FEINDlib CINDER CINDER90 THERMAL",
+                             ["1 h", "0.5 y"], "fluxin.out", "1 y",
                              output = "number_density")
 
     exp = ("material_lib matlib\n"
@@ -540,12 +587,12 @@ def test_irradiation_blocks():
 
 def test_phtn_src_energy_bounds():
 
-    input_file = os.path.join(thisdir, "files_test_alara", 
+    input_file = os.path.join(thisdir, "files_test_alara",
                               "alara_other_blocks.txt")
     e_bounds = phtn_src_energy_bounds(input_file)
-    expected_e_bounds = [0, 1.00E4, 2.00E4, 5.00E4, 1.00E5, 2.00E5, 3.00E5, 
-                         4.00E5, 6.00E5, 8.00E5, 1.00E6, 1.22E6, 1.44E6, 1.66E6, 
-                         2.00E6, 2.50E6, 3.00E6, 4.00E6, 5.00E6, 6.50E6, 8.00E6, 
+    expected_e_bounds = [0, 1.00E4, 2.00E4, 5.00E4, 1.00E5, 2.00E5, 3.00E5,
+                         4.00E5, 6.00E5, 8.00E5, 1.00E6, 1.22E6, 1.44E6, 1.66E6,
+                         2.00E6, 2.50E6, 3.00E6, 4.00E6, 5.00E6, 6.50E6, 8.00E6,
                          1.00E7, 1.20E7, 1.40E7, 2.00E7]
 
     assert_array_equal(e_bounds, expected_e_bounds)
