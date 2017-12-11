@@ -45,8 +45,6 @@ cdef extern from "source_sampling.h" namespace "pyne":
         Sampler(std_string, std_string, std_string, std_string, cpp_vector[double], cpp_bool) except +
 
         # attributes
-        cpp_vector[int] cell_number
-        int max_num_cells
 
         # methods
         cpp_vector[double] particle_birth() except +

@@ -28,7 +28,7 @@ def test_analog_single_hex():
     """This test tests that particles of sampled evenly within the phase-space
     of a single mesh volume element with one energy group in an analog sampling
     scheme. This done by dividing each dimension (x, y, z, E) in half, then
-    sampling particles and tallying on the basis of which of the 2^4 = 8 regions
+    sampling particles and tallying on the basis of which of the 2^4 = 16 regions
     of phase space the particle is born into.
     """
     seed(1953)
@@ -59,10 +59,10 @@ def test_analog_single_hex():
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex_subvoxel():
     """This test tests that particles of sampled evenly within the phase-space
-    of a single mesh volume element with one energy group in an analog sampling
-    scheme. This done by dividing each dimension (x, y, z, E) in half, then
-    sampling particles and tallying on the basis of which of the 2^4 = 8 regions
-    of phase space the particle is born into.
+    of a single mesh volume element (also a sub-voxel) with one energy group
+    in an analog sampling scheme. This done by dividing each dimension
+    (x, y, z, E) in half, then sampling particles and tallying on the basis of
+    which of the 2^4 = 16 regions of phase space the particle is born into.
     """
     seed(1953)
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
@@ -99,11 +99,11 @@ def test_analog_single_hex_subvoxel():
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex_multiple_subvoxel():
-    """This test tests that particles of sampled evenly within the phase-space
-    of a single mesh volume element with one energy group in an analog sampling
-    scheme. This done by dividing each dimension (x, y, z, E) in half, then
-    sampling particles and tallying on the basis of which of the 2^4 = 8 regions
-    of phase space the particle is born into.
+    """This test tests that particles of sampled analog within the phase-space
+    of a single mesh volume element but multiple sub-voxels with one energy
+    group in an analog sampling scheme. Then sampling particles and tallying
+    the particles and check the probability of particles born in each
+    sub-voxel and the cell_number.
     """
     seed(1953)
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
@@ -139,7 +139,6 @@ def test_analog_single_hex_multiple_subvoxel():
             tally[2] += score
 
     # Test that each source particle in each cell has right frequency
-    print tally
     assert_equal(tally[0], 0.0)
     assert(abs(tally[1] - 0.2) < 0.05)
     assert(abs(tally[2] - 0.8) < 0.05)
@@ -176,9 +175,9 @@ def test_analog_multiple_hex():
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_multiple_hex_subvoxel():
-    """This test tests that particle are sampled uniformly from a uniform source
+    """This test tests that particle are sampled analog from a uniform source
     defined on eight mesh volume elements in two energy groups. This is done
-    using the exact same method ass test_analog_multiple_hex_subvoxel.
+    using the exact same method as test_analog_multiple_hex_subvoxel.
     """
     seed(1953)
     m = Mesh(structured=True,
@@ -191,9 +190,9 @@ def test_analog_multiple_hex_subvoxel():
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
 
-    cell_fracs[:] = [(0, 0, 1.0, 0.0), (1, 1, 1.0, 0.0), (2, 2, 1.0, 0.0),
-                     (3, 3, 1.0, 0.0), (4, 4, 1.0, 0.0), (5, 5, 1.0, 0.0),
-                     (6, 6, 1.0, 0.0), (7, 7, 1.0, 0.0)]
+    cell_fracs[:] = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0), (2, 3, 1.0, 0.0),
+                     (3, 4, 1.0, 0.0), (4, 5, 1.0, 0.0), (5, 6, 1.0, 0.0),
+                     (6, 7, 1.0, 0.0), (7, 8, 1.0, 0.0)]
 
     m.tag_cell_fracs(cell_fracs)
     m.mesh.save("sampling_mesh.h5m")
@@ -208,7 +207,7 @@ def test_analog_multiple_hex_subvoxel():
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         assert_equal(s[4], 1.0)
         assert_equal(int(s[5]), 4*int(s[0]*num_divs) + 2*int(s[1]*num_divs)
-                     + int(s[2]*num_divs))
+                     + int(s[2]*num_divs) + 1)
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
               int(s[3]*num_divs)] += score
 
