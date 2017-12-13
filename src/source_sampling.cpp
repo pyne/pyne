@@ -63,6 +63,7 @@ pyne::Sampler::Sampler(std::string filename,
                  bool uniform)
   : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds) {
   mode = (uniform) ? UNIFORM : ANALOG;
+  submode = DEFAULT;
   setup();
 }
 
@@ -73,7 +74,8 @@ pyne::Sampler::Sampler(std::string filename,
                  std::vector<double> e_bounds,
                  bool uniform)
   : filename(filename), src_tag_name(src_tag_name), cell_num_tag_name(cell_num_tag_name), cell_fracs_tag_name(cell_fracs_tag_name), e_bounds(e_bounds) {
-  mode = SUBVOXEL_ANALOG;
+  mode = ANALOG;
+  submode = SUBVOXEL;
   setup();
 }
 
@@ -86,12 +88,15 @@ pyne::Sampler::Sampler(std::string filename,
     e_bounds(e_bounds),
     bias_tag_name(bias_tag_name) {
   mode = USER;
+  submode = DEFAULT;
   setup();
 }
 
 std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
-  //
+  // In DEFAULT mode, pdf_idx contains num_ves*num_e_groups elements,
+  // the max_num_cells=1; While, in SUBVOXEL mode, pdf_idx contains
+  // num_ves*max_num_cells*num_e_groups elements
   int pdf_idx = at->sample_pdf(rands[0], rands[1]);
   int ve_idx = pdf_idx/num_e_groups/max_num_cells;
   int c_idx = (pdf_idx/num_e_groups)%max_num_cells;
@@ -110,11 +115,10 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   samp.push_back(pos[2]);
   samp.push_back(sample_e(e_idx, rands[5]));
   samp.push_back(sample_w(pdf_idx));
-  if (mode == USER || mode == UNIFORM || mode == ANALOG) {
-    samp.push_back(-1.0);
-  }
-  if (mode == SUBVOXEL_USER || mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_ANALOG) {
+  if (submode == SUBVOXEL) {
     samp.push_back(double(cell_number[ve_idx*max_num_cells + c_idx]));
+  } else {
+    samp.push_back(-1.0);
   }
   return samp;
 }
@@ -206,8 +210,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   // r2s can use the same form of pdf size description
   max_num_cells = 1;
   std::vector<double> cell_fracs;
-  if (mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_ANALOG ||
-          mode == SUBVOXEL_USER) {
+  if (submode == SUBVOXEL) {
       // Read the cell_number tag and cell_fracs tag
       rval = mesh->tag_get_handle(cell_num_tag_name.c_str(),
                                   cell_number_tag);
@@ -226,18 +229,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   if (rval != moab::MB_SUCCESS)
     throw std::runtime_error("Problem getting source tag data.");
 
-  if (mode == ANALOG || mode == UNIFORM || mode == USER) {
-    // Multiply the source densities by the VE volumes
-    int i, j;
-    for (i=0; i<num_ves; ++i) {
-      for (j=0; j<num_e_groups; ++j) {
-         pdf[i*num_e_groups + j] *= volumes[i];
-      }
-    }
-  }
-
-  if (mode == SUBVOXEL_ANALOG || mode == SUBVOXEL_UNIFORM ||
-          mode == SUBVOXEL_USER) {
+  if (submode == SUBVOXEL) {
     // Multiply the source densities by the sub-voxel volumes
     int v, c, e;
     for (v=0; v<num_ves; ++v) {
@@ -248,14 +240,22 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
             }
         }
     }
+  } else {
+    // Multiply the source densities by the VE volumes
+    int i, j;
+    for (i=0; i<num_ves; ++i) {
+      for (j=0; j<num_e_groups; ++j) {
+         pdf[i*num_e_groups + j] *= volumes[i];
+      }
+    }
   }
 
   normalize_pdf(pdf);
 
   // Setup alias table based off PDF or biased PDF
-  if (mode == ANALOG || mode == SUBVOXEL_ANALOG) {
+  if (mode == ANALOG) {
     at = new AliasTable(pdf);
-  } else if (mode == UNIFORM || mode == USER){
+  } else {
     std::vector<double> bias_pdf = read_bias_pdf(ves, volumes, pdf);
     normalize_pdf(bias_pdf);
     //  Create alias table based off biased pdf and calculate birth weights.
@@ -265,8 +265,6 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
       biased_weights[i] = pdf[i]/bias_pdf[i];
     }
     at = new AliasTable(bias_pdf);
-  } else if (mode == SUBVOXEL_UNIFORM || mode == SUBVOXEL_USER) {
-      std::cout<< "error! this code not filled yet"<<std::endl;
   }
 }
 
@@ -276,7 +274,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
     std::vector<double> bias_pdf(num_ves*num_e_groups*max_num_cells);
     int i, j;
     moab::ErrorCode rval;
-    if (mode == UNIFORM) {
+    if (submode == DEFAULT && mode == UNIFORM) {
       // Uniform sampling: uniform in space, analog in energy. Biased PDF is
       // found by normalizing the total photon emission density to 1 in each
       // mesh volume element and multiplying by the volume of the element.
@@ -297,7 +295,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
           }
         }
       }
-    } else if (mode == USER) {
+    } else if (submode == DEFAULT && mode == USER) {
       // Get the biased PDF from the mesh
       moab::Tag bias_tag;
       rval = mesh->tag_get_handle(bias_tag_name.c_str(),
@@ -387,7 +385,7 @@ double pyne::Sampler::sample_e(int e_idx, double rand) {
 }
 
 double pyne::Sampler::sample_w(int pdf_idx) {
-  return (mode == ANALOG || mode == SUBVOXEL_ANALOG) ? 1.0 : biased_weights[pdf_idx];
+  return (mode == ANALOG) ? 1.0 : biased_weights[pdf_idx];
 }
 
 void pyne::Sampler::normalize_pdf(std::vector<double> & pdf) {

@@ -92,6 +92,7 @@ namespace pyne {
 
   /// Problem modes
   enum Mode {USER, ANALOG, UNIFORM, SUBVOXEL_ANALOG, SUBVOXEL_UNIFORM, SUBVOXEL_USER};
+  enum SubMode {DEFAULT, SUBVOXEL};
 
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
@@ -162,6 +163,7 @@ namespace pyne {
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
     int max_num_cells; ///< Max numbers of cells in voxels
     Mode mode; ///< Problem mode: analog, uniform, user
+    SubMode submode; ///< Sub-voxel mode: use sub-voxel r2s when SUBVOXEL
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.
