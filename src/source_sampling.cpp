@@ -98,7 +98,7 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   // the max_num_cells=1; While, in SUBVOXEL mode, pdf_idx contains
   // num_ves*max_num_cells*num_e_groups elements
   int pdf_idx = at->sample_pdf(rands[0], rands[1]);
-  int ve_idx = pdf_idx/num_e_groups/max_num_cells;
+  int ve_idx = pdf_idx/max_num_cells/num_e_groups;
   int c_idx = (pdf_idx/num_e_groups)%max_num_cells;
   int e_idx = pdf_idx % num_e_groups;
 
