@@ -373,9 +373,84 @@ cdef class Sampler:
                 e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
         self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, <bint> uniform)
     
+    def _sampler_sampler_2(self, filename, src_tag_name, cell_num_tag_name, cell_fracs_tag_name, e_bounds, uniform):
+        """Sampler(self, filename, src_tag_name, cell_num_tag_name, cell_fracs_tag_name, e_bounds, uniform)
+         This method was overloaded in the C-based source. To overcome
+        this we will put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+        
+        Constuctor for analog and uniform sampling
+        
+        Parameters
+        ----------
+        e_bounds : std::vector< double >
+        
+        src_tag_name : std::string
+
+        cell_num_tag_name : std::string
+
+        cell_fracs_tag_name : std::string
+        
+        bias_tag_name : std::string
+        
+        filename : std::string
+        
+        Returns
+        -------
+        None
+        
+        ################################################################
+        
+        Constuctor for analog and uniform sampling
+        
+        Parameters
+        ----------
+        e_bounds : std::vector< double >
+        
+        src_tag_name : std::string
+
+        cell_num_tag_name : std::string
+
+        cell_fracs_tag_name : std::string
+        
+        uniform : bool
+        
+        filename : std::string
+        
+        Returns
+        -------
+        None
+        
+        """
+        cdef char * filename_proxy
+        cdef char * src_tag_name_proxy
+        cdef char * cell_num_tag_name_proxy
+        cdef char * cell_fracs_tag_name_proxy
+        cdef cpp_vector[double] e_bounds_proxy
+        cdef int ie_bounds
+        cdef int e_bounds_size
+        cdef double * e_bounds_data
+        filename_bytes = filename.encode()
+        src_tag_name_bytes = src_tag_name.encode()
+        cell_num_tag_name_bytes = cell_num_tag_name.encode()
+        cell_fracs_tag_name_bytes = cell_fracs_tag_name.encode()
+        # e_bounds is a ('vector', 'float64', 0)
+        e_bounds_size = len(e_bounds)
+        if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
+            e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
+            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
+            for ie_bounds in range(e_bounds_size):
+                e_bounds_proxy[ie_bounds] = e_bounds_data[ie_bounds]
+        else:
+            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
+            for ie_bounds in range(e_bounds_size):
+                e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
+        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), std_string(<char *> cell_num_tag_name_bytes), std_string(<char *> cell_fracs_tag_name_bytes), e_bounds_proxy, <bint> uniform)
     
+
     _sampler_sampler_0_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, str), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("bias_tag_name", str)))
     _sampler_sampler_1_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, bool), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("uniform", bool)))
+    _sampler_sampler_2_argtypes = frozenset(((0, str), (1, str), (2, str), (3, str), (4, np.ndarray), (5, bool), ("filename", str), ("src_tag_name", str), ("cell_num_tag_name", str), ("cell_fracs_tag_name", str), ("e_bounds", np.ndarray), ("uniform", bool)))
     
     def __init__(self, *args, **kwargs):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
@@ -427,6 +502,9 @@ cdef class Sampler:
         if types <= self._sampler_sampler_1_argtypes:
             self._sampler_sampler_1(*args, **kwargs)
             return
+        if types <= self._sampler_sampler_2_argtypes:
+            self._sampler_sampler_2(*args, **kwargs)
+            return
         # duck-typed dispatch based on whatever works!
         try:
             self._sampler_sampler_0(*args, **kwargs)
@@ -435,6 +513,11 @@ cdef class Sampler:
             pass
         try:
             self._sampler_sampler_1(*args, **kwargs)
+            return
+        except (RuntimeError, TypeError, NameError):
+            pass
+        try:
+            self._sampler_sampler_2(*args, **kwargs)
             return
         except (RuntimeError, TypeError, NameError):
             pass
