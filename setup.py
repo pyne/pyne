@@ -87,7 +87,7 @@ try:
 except Exception:
     compiler = ''
 compiler = compiler.lower()
-if 'gcc' in compiler:
+if 'gcc' in compiler or 'gnu' in compiler or 'free software foundation' in compiler:
     PYNE_PLATFORM += '-gnu'
 elif 'clang' in compiler:
     PYNE_PLATFORM += '-clang'
@@ -163,12 +163,16 @@ def download_and_extract(url, target_dir='.'):
     try:
         d = durl.read()
     except IOError:
-        print('...failed to download!')
+        print('...failed to download!', file=sys.stderr)
         return False
     finally:
         durl.close()
     f = io.BytesIO(d)
-    tar = tarfile.open(fileobj=f, mode='r:gz')
+    try:
+        tar = tarfile.open(fileobj=f, mode='r:gz')
+    except tarfile.ReadError:
+        print('...failed to extract!', file=sys.stderr)
+        return False
     tar.extractall(target_dir)
     tar.close()
     return True
