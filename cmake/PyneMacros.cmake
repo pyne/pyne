@@ -220,7 +220,7 @@ macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
     message(STATUS "Compiling ${_srcname} fast from assembly ${_asmname}")
     set(_filename "${_asmname}")
   endif()
-  set(PYNE_SRCS "${PYNE_SRCS}" "${_filename}")
+  set(PYNE_SRCS "${_filename}" "${PYNE_SRCS}")
 
   # set some compile flags for the selected file
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
