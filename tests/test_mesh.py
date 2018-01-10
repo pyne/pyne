@@ -814,6 +814,34 @@ def test_tag_cell_fracs():
         assert_equal(m.cell_largest_frac[i],
                            exp_cell_largest_frac[i])
 
+def test_tag_cell_fracs_subvoxel_equal_voxel():
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
+             mats = None)
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+
+    cell_fracs[:] = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0), (2, 3, 1.0, 0.0),
+                     (3, 4, 1.0, 0.0), (4, 5, 1.0, 0.0), (5, 6, 1.0, 0.0),
+                     (6, 7, 1.0, 0.0), (7, 8, 1.0, 0.0)]
+
+    m.tag_cell_fracs(cell_fracs)
+
+    #  Expected tags:
+    exp_cell_number = [[1], [2], [3], [4], [5], [6], [7], [8]]
+    exp_cell_fracs = [[1.0], [1.0], [1.0], [1.0], [1.0], [1.0], [1.0], [1.0]]
+    exp_cell_largest_frac_number = [1, 2, 3, 4, 5, 6, 7, 8]
+    exp_cell_largest_frac = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+    for i in range(len(m)):
+        assert_array_equal(m.cell_number[i], exp_cell_number[i])
+        assert_array_equal(m.cell_fracs[i], exp_cell_fracs[i])
+        assert_equal(m.cell_largest_frac_number[i],
+                           exp_cell_largest_frac_number[i])
+        assert_equal(m.cell_largest_frac[i],
+                           exp_cell_largest_frac[i])
 
 def test_no_mats():
     mesh = gen_mesh(mats=None)
