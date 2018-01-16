@@ -18,6 +18,7 @@ users and developers find convenient.
 
 1. Discretize geometry for deterministic transport
 1. Prepare for adjoint photon transport
+
     1. combine discretized geom with adjoint source definition
     1. write PARTISN input file
 
