@@ -2,14 +2,14 @@ GT-CADIS
 ========
 
 This workflow was initially developed as part of the PhD research of Elliott
-Biondo. The theory and background can be found in the dissertation_ produced as
+Biondo. The theory and background can be found in the dissertation [1] produced as
 part of that work.
 
 Development plan
 ----------------
 
 The current development plan is outlined below.  Much of the capability
-described here is available in some form or approximation in the archive_ made
+described here is available in some form or approximation in the archive [2] made
 available by Biondo on Figshare.
 
 The following steps describe a complete GT-CADIS workflow.  It is designed to
@@ -99,6 +99,6 @@ Generated
 * weight window lower bounds (WWINP, H5M/VTK) [viz]
 
 
-.. _dissertation: http://depot.library.wisc.edu/repository/fedora/1711.dl:ITANHEGGRPM338Z/datastreams/REF/content
+[1]: http://depot.library.wisc.edu/repository/fedora/1711.dl:ITANHEGGRPM338Z/datastreams/REF/content
 
-.. _archive: https://figshare.com/articles/Supporting_files_for_Transmutation_Approximations_for_the_Application_of_Hybrid_Monte_Carlo_Deterministic_Neutron_Transport_to_Shutdown_Dose_Rate_Analysis_/3546432
+[2]: https://figshare.com/articles/Supporting_files_for_Transmutation_Approximations_for_the_Application_of_Hybrid_Monte_Carlo_Deterministic_Neutron_Transport_to_Shutdown_Dose_Rate_Analysis_/3546432
