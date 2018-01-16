@@ -87,6 +87,7 @@ Inputs
 
 Generated
 ---------------
+* discretized geometry
 * T matrices - one per material (format:???) [viz]
 * SNILB eta results - N per material - output to screen? can be saved by user?
 * Partisn input file for adjoint photon transport
