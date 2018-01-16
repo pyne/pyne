@@ -16,11 +16,11 @@ The following steps describe a complete GT-CADIS workflow.  It is designed to
 be highly modular with the potential to combine pieces into larger scripts as
 users and developers find convenient.
 
-#. Discretize geometry for deterministic transport
-#. Prepare for adjoint photon transport
+1. Discretize geometry for deterministic transport
+1. Prepare for adjoint photon transport
 
-    #. combine discretized geom with adjoint source definition
-    #. write PARTISN input file
+    1. combine discretized geom with adjoint source definition
+    1. write PARTISN input file
 
 1. Run PARTISN
 
