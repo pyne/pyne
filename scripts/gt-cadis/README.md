@@ -2,15 +2,15 @@ GT-CADIS
 ========
 
 This workflow was initially developed as part of the PhD research of Elliott
-Biondo. The theory and background can be found in the dissertation [1] produced as
+Biondo. The theory and background can be found in the [dissertation][1] produced as
 part of that work.
 
 Development plan
 ----------------
 
 The current development plan is outlined below.  Much of the capability
-described here is available in some form or approximation in the archive [2] made
-available by Biondo on Figshare.
+described here is available in some form or approximation in [the archive made
+available by Biondo on Figshare][2].
 
 The following steps describe a complete GT-CADIS workflow.  It is designed to
 be highly modular with the potential to combine pieces into larger scripts as
