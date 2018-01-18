@@ -71,6 +71,29 @@ CMAKE_BUILD_TYPES = {
 ON_DARWIN = platform.system() == 'Darwin'
 LIBEXT = '.dylib' if ON_DARWIN else '.so'
 
+# Set the platform string
+if ON_DARWIN:
+    PYNE_PLATFORM = 'apple'
+elif sys.platform.startswith('linux'):
+    PYNE_PLATFORM = 'linux'
+elif sys.platform.startswith('win'):
+    PYNE_PLATFORM = 'win'
+else:
+    PYNE_PLATFORM = 'UNKNOWN-OS'
+cc = os.environ.get('CC', 'cc')
+try:
+    compiler = subprocess.check_output([cc, '--version'],
+                                       universal_newlines=True)
+except Exception:
+    compiler = ''
+compiler = compiler.lower()
+if 'gcc' in compiler or 'gnu' in compiler or 'free software foundation' in compiler:
+    PYNE_PLATFORM += '-gnu'
+elif 'clang' in compiler:
+    PYNE_PLATFORM += '-clang'
+else:
+    PYNE_PLATFORM += '-UNKNOWN-COMPILER'
+
 
 @contextmanager
 def indir(path):
@@ -134,6 +157,42 @@ def ssl_context():
     return ctx
 
 
+def download_and_extract(url, target_dir='.'):
+    print('Downloading ' + url)
+    durl = urlopen(url, context=ssl_context())
+    try:
+        d = durl.read()
+    except IOError:
+        print('...failed to download!', file=sys.stderr)
+        return False
+    finally:
+        durl.close()
+    f = io.BytesIO(d)
+    try:
+        tar = tarfile.open(fileobj=f, mode='r:gz')
+    except tarfile.ReadError:
+        print('...failed to extract!', file=sys.stderr)
+        return False
+    tar.extractall(target_dir)
+    tar.close()
+    return True
+
+
+def download_platform(base_url, base_name, target_dir='.'):
+    # download base package
+    url = base_url + '/' + base_name + '.tar.gz'
+    status = download_and_extract(url, target_dir)
+    if not status:
+        return False
+    # download platform-specific package
+    url = base_url + '/' + base_name + '-' + PYNE_PLATFORM + '.tar.gz'
+    status = download_and_extract(url, target_dir)
+    if not status:
+        return False
+    return True
+
+
+DATA_URL = 'http://raw.githubusercontent.com/pyne/data/master'
 DECAY_H = os.path.join('src', 'decay.h')
 DECAY_CPP = os.path.join('src', 'decay.cpp')
 DECAY_H_REP = os.path.join('src', '_decay.h')
@@ -142,20 +201,7 @@ DECAY_URL = 'http://raw.githubusercontent.com/pyne/data/master/decay.tar.gz'
 
 
 def download_decay():
-    print('Downloading ' + DECAY_URL)
-    durl = urlopen(DECAY_URL, context=ssl_context())
-    try:
-        d = durl.read()
-    except IOError:
-        print('...failed to download!')
-        return False
-    finally:
-        durl.close()
-    f = io.BytesIO(d)
-    tar = tarfile.open(fileobj=f, mode='r:gz')
-    tar.extractall('src')
-    tar.close()
-    return True
+    return download_platform(DATA_URL, 'decay', 'src')
 
 
 CRAM_H = os.path.join('src', 'decay.h')
@@ -164,20 +210,7 @@ CRAM_URL = 'http://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
 
 
 def download_cram():
-    print('Downloading ' + CRAM_URL)
-    durl = urlopen(CRAM_URL, context=ssl_context())
-    try:
-        d = durl.read()
-    except IOError:
-        print('...failed to download!')
-        return False
-    finally:
-        durl.close()
-    f = io.BytesIO(d)
-    tar = tarfile.open(fileobj=f, mode='r:gz')
-    tar.extractall('src')
-    tar.close()
-    return True
+    return download_platform(DATA_URL, 'cram', 'src')
 
 
 local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'bldhst', 'hsicc', 'hsmrg',
