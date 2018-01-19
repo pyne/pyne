@@ -126,6 +126,10 @@ IF(BUILD_SPATIAL_SOLVER)
 ENDIF(BUILD_SPATIAL_SOLVER)
 
 
+if(WIN32)
+  find_package(Threads REQUIRED)
+endif()
+
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
 include(UseCython)
