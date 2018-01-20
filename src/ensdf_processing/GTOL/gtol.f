@@ -477,8 +477,8 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
-      CHARACTER(LEN=1), INTRINSIC :: CHAR
+
+
 !
 !     Local variables
 !
@@ -745,10 +745,10 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM,REPEAT
+
       CHARACTER(LEN=1), EXTERNAL :: UPCASE
       REAL(KIND=4), EXTERNAL :: VALSTR
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
+
 !
 !     Local variables
 !
@@ -1099,9 +1099,9 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
-      INTEGER(KIND=4), INTRINSIC :: INDEX
-      REAL(KIND=8), INTRINSIC :: DBLE
+
+
+
       INTEGER(KIND=4), EXTERNAL :: RLSCN
       INTEGER(KIND=4), EXTERNAL :: LENSTR
 !
@@ -1281,9 +1281,9 @@
       INTEGER(KIND=4) :: Ig, Il, Ilfix
 !
 !     Functions used
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
+
       INTEGER(KIND=4), EXTERNAL :: INDEXF
-      REAL(KIND=8), INTRINSIC :: DABS, DSQRT
+
 !
 !     Local variables
 !
@@ -1424,7 +1424,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
+
 !
 !     Local variables
 !
@@ -1497,7 +1497,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
+
       INTEGER(KIND=4), EXTERNAL :: TYPSTR
 !
 !     Local variables
@@ -1588,9 +1588,9 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, MIN0, LEN_TRIM
+
       INTEGER(KIND=4), EXTERNAL :: INDEXF
-      REAL(KIND=8), INTRINSIC :: DABS
+
 !
 !     Local variables
 !
@@ -2025,7 +2025,7 @@ c         END IF
 !
 !     Functions used
 !
-      REAL(KIND=8), INTRINSIC :: DABS, DLOG10, DBLE
+
 !
 !     Local variables
 !
@@ -2122,7 +2122,7 @@ c         END IF
 !
 !     Functions used
 !
-      REAL(KIND=8), INTRINSIC :: DSQRT
+
 !
 !     Local variables
 !
@@ -2168,7 +2168,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
+
 !
 !     Local variables
 !
@@ -2237,10 +2237,10 @@ c         END IF
 !
 !     Functions used
 !
-      CHARACTER(LEN=1), INTRINSIC :: CHAR
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
+
+
       INTEGER(KIND=4), EXTERNAL :: SPAN, TYPSTR
-      REAL(KIND=8), INTRINSIC :: DABS, DSQRT
+
 !
 !     Local variables
 !
@@ -2447,9 +2447,8 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
-      REAL(KIND=4), INTRINSIC :: ALOG10, REAL
-      REAL(KIND=8) :: DABS, DSQRT
+
+
 !
 !     Local variables
 !
@@ -2458,7 +2457,6 @@ c         END IF
       CHARACTER(LEN=10) :: frnt
       CHARACTER(LEN=2) :: frntd
       INTEGER(KIND=4) :: i, j, k
-      INTEGER(KIND=4) :: INDEX
       REAL(KIND=4) :: tnrff, dtnrff
       REAL(KIND=8) :: dtnrf, tnrf
       REAL(KIND=8) :: dgsfee, gsfee
@@ -2636,10 +2634,10 @@ c         END IF
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
-      CHARACTER(LEN=1), INTRINSIC :: CHAR
+
+
       CHARACTER(LEN=80), EXTERNAL :: UPCASE
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
+
       INTEGER(KIND=4), EXTERNAL :: INDEXF
 !
 !     Local variables
@@ -2869,9 +2867,9 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, MAX0, LEN_TRIM
+
       INTEGER(KIND=4), EXTERNAL :: TYPSTR
-      REAL(KIND=8), INTRINSIC :: DABS
+
 !
 !     Local variables
 !
@@ -3069,7 +3067,7 @@ c         END IF
 !
 !     Local variables
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
+
 !
       ISIGNI = INDEX(Str,'E')
       IF(ISIGNI.EQ.0) ISIGNI = LEN_TRIM(Str)
@@ -3094,8 +3092,8 @@ c         END IF
 !
 !     Functions used
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
-      INTEGER(KIND=4), INTRINSIC :: INDEX
+
+
       INTEGER(KIND=4), EXTERNAL :: INDEXF, TYPSTR
 !
 !     Local variables
@@ -3458,11 +3456,11 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX
+
       INTEGER(KIND=4), EXTERNAL :: TYPSTR
       INTEGER(KIND=4), EXTERNAL :: INDEXF
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
-      REAL(KIND=8), INTRINSIC :: DBLE, DFLOAT
+
+
 !
 !     Local variables
 !
@@ -3730,7 +3728,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX
+
 !
 !     Local variables
 !
@@ -3803,7 +3801,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX
+
 !
 !     Decodes the PN record
 !
@@ -3838,7 +3836,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX
+
 !
 !     Local variables
 !
@@ -3898,7 +3896,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: MIN0, LEN_TRIM
+
       INTEGER(KIND=4), EXTERNAL :: IVLSTR, TYPSTR
 !
 !     Local variables
@@ -3944,7 +3942,7 @@ c         END IF
 !
 !     Functions used
 !
-      REAL(KIND=4), INTRINSIC :: ABS, REAL
+
 !
 !     Dummy arguments
 !
@@ -4003,7 +4001,7 @@ c         END IF
 !
 !     Functions used
 !
-      REAL(KIND=8), INTRINSIC :: DEXP, DSQRT
+
 !
 !     Local variables
 !
@@ -4038,9 +4036,9 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INT
-      REAL(KIND=4), INTRINSIC :: ABS, ALOG10, REAL
-      REAL(KIND=8), INTRINSIC :: DABS, DBLE
+
+
+
 !
 !     Local variables
 !
@@ -4093,8 +4091,8 @@ c         END IF
 !
 !     FUNCTIONS USED
 !
-      REAL(KIND=4), INTRINSIC :: REAL
-      REAL(KIND=8), INTRINSIC :: DBLE
+
+
 !
 !     Local variables
 !
@@ -4139,8 +4137,8 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INT
-      REAL(KIND=4), INTRINSIC :: ABS, AMAX1, AMIN1
+
+
 !
 !     Local variables
 !
@@ -4274,7 +4272,7 @@ c         END IF
 !
 !     Functions required
 !
-      REAL(KIND=4), INTRINSIC :: SQRT
+
 !
 !     Local variables
 !
@@ -4481,8 +4479,8 @@ c         END IF
 !
 !     Functions required
 !
-      CHARACTER(LEN=*), INTRINSIC :: TRIM
-      INTEGER(KIND=4), INTRINSIC :: INDEX
+
+
       INTEGER(KIND=4), EXTERNAL :: LENSTR
 !
 !     Local variables
@@ -4546,7 +4544,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
+
 !
 !     Local variables
 !
@@ -4637,7 +4635,7 @@ c         END IF
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
+
 !
 !     Local variables
       LOGICAL(KIND=4), DIMENSION(nle) :: isufix
