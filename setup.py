@@ -426,6 +426,9 @@ def parse_args():
     other.add_argument('--bootstrap', default=False, action='store_true',
                        help='Bootstraps the PyNE installation, including '
                             'nuc_data_make and possibly decaygen.')
+    other.add_argument('--download-only', default=False, dest='only_download',
+                       action='store_true',
+                       help='Downloads files required to build only.')
 
     ns = parser.parse_args(argv)
     update_setup_args(ns)
@@ -452,6 +455,8 @@ def main_body(ns):
     ensure_cram()
     ensure_decay()
     ensure_atomic()
+    if ns.only_download:
+        return
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
     cmake_cmd = cmake_cli(ns.cmake_args)
