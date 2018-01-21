@@ -19,10 +19,13 @@ pyne_configure_rpath()
 enable_language(ASM)
 
 # This makes all the libraries build as SHARED
-set(BUILD_SHARED_LIBS true)
+IF(WIN32)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+else()
+  set(BUILD_SHARED_LIBS true)
+endif()
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 #
 # Allow for dependnecies to exist in non-install location
 #
