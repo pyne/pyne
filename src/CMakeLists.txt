@@ -20,6 +20,7 @@ set(PYNE_SRCS
   "transmuters.cpp"
   "utils.cpp"
   "endftod.f90"
+  "_complex_lib.c"
   )
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"

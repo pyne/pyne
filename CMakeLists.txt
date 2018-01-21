@@ -22,7 +22,7 @@ enable_language(ASM)
 set(BUILD_SHARED_LIBS true)
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
-
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 #
 # Allow for dependnecies to exist in non-install location
 #
