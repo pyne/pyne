@@ -20,6 +20,7 @@ set(PYNE_SRCS
   "transmuters.cpp"
   "utils.cpp"
   "endftod.f90"
+  "complex_windows.cpp"
   )
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"
@@ -131,4 +132,8 @@ INSTALL(FILES ${h_files} DESTINATION include/pyne COMPONENT headers)
 #
 # Install libpyne
 #
-INSTALL(TARGETS pyne LIBRARY DESTINATION lib COMPONENT pyne)
+INSTALL(TARGETS pyne
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    COMPONENT pyne
+)
