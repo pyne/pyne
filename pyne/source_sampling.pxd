@@ -32,6 +32,9 @@ cdef class AliasTable:
     pass
 
 
-
+cdef class SourceParticle:
+    cdef void * _inst
+    cdef public _free_inst
+    pass
 
 {'cpppxd_footer': '', 'pyx_header': '', 'pxd_header': '', 'pxd_footer': '', 'cpppxd_header': '', 'pyx_footer': ''}
