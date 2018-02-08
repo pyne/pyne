@@ -32,6 +32,9 @@ cdef class AliasTable:
     pass
 
 
-
+cdef class PySourceParticle:
+    cdef cpp_source_sampling.SourceParticle c_src
+    cdef public int c
+    pass
 
 {'cpppxd_footer': '', 'pyx_header': '', 'pxd_header': '', 'pxd_footer': '', 'cpppxd_header': '', 'pyx_footer': ''}
