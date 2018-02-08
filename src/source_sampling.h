@@ -96,6 +96,7 @@ namespace pyne {
   // class Source particle
   class SourceParticle {
     public:
+    SourceParticle();
     /// Constructor for source particle
     /// \param x The x coordinate of the source particle
     /// \param y The y coordinate of the source particle
@@ -109,8 +110,7 @@ namespace pyne {
                    double e,
                    double w,
                    int c);
-
-    ~SourceParticle() {};
+    ~SourceParticle();
 
     double x; // x coordinate
     double y; // y coordinate
@@ -118,7 +118,8 @@ namespace pyne {
     double e; // energy
     double w; // weight
     int c; // cell number
-
+    std::vector<double> get_src_xyzew();
+    int get_src_c();
   };
 
   /// Problem modes
@@ -199,18 +200,11 @@ namespace pyne {
     /// \param rands Six pseudo-random numbers in range [0, 1].
     /// \return A vector containing the x position, y, position, z, point, energy
     ///         and weight of a particle (in that order).
-    void particle_birth(std::vector<double> rands);
-    int get_src_c();
-    double get_src_x();
-    double get_src_y();
-    double get_src_z();
-    double get_src_e();
-    double get_src_w();
-    std::vector<double> get_src_xyzew();
+    pyne::SourceParticle particle_birth(std::vector<double> rands);
+    
     ~Sampler() {
       delete mesh;
       delete at;
-      delete source_particle;
     };
 
   // member variables
@@ -238,7 +232,6 @@ namespace pyne {
     std::vector<int> cell_number; ///< Tag cell_number
     std::vector<double> cell_fracs; ///< Tag cell_fracs
     AliasTable* at; ///< Alias table used for sampling.
-    SourceParticle* source_particle; ///< source particle generated
 
   // member functions
   private:

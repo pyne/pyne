@@ -18,7 +18,7 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
 from pyne.mesh import Mesh, IMeshTag
-from pyne.source_sampling import Sampler, AliasTable, SourceParticle
+from pyne.source_sampling import Sampler, AliasTable, PySourceParticle
 
 def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
@@ -45,9 +45,9 @@ def test_analog_single_hex():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
 
     for i in range(num_samples):
-        sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        s = sampler.get_src_xyzew()
-        c = sampler.get_src_c()
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
+        c = src.get_src_c()
         assert_equal(s[4], 1.0) # analog: all weights must be one
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
               int(s[3]*num_divs)] += score
@@ -87,9 +87,9 @@ def test_analog_single_hex_subvoxel_analog():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
 
     for i in range(num_samples):
-        sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         assert_equal(s[4], 1.0) # analog: all weights must be one
         assert_equal(cell_number, 11) # analog: the cell number
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
@@ -130,9 +130,9 @@ def test_single_hex_subvoxel_uniform():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
 
     for i in range(num_samples):
-        sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         assert_equal(s[4], 1.0) # analog: all weights must be one
         assert_equal(cell_number, 11) # analog: the cell number
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
@@ -176,9 +176,9 @@ def test_analog_single_hex_multiple_subvoxel():
     tally = [0.0] * 3
 
     for i in range(num_samples):
-        sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         assert_equal(s[4], 1.0) # analog: all weights must be one
         if int(cell_number) == 11:
             tally[0] += score
@@ -224,9 +224,9 @@ def test_analog_single_hex_multiple_subvoxel_uniform():
     tally = [0.0] * 3
 
     for i in range(num_samples):
-        sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         if int(cell_number) == 11:
             tally[0] += score
         if int(cell_number) == 12:
@@ -261,9 +261,9 @@ def test_analog_multiple_hex():
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
     for i in range(num_samples):
-        sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         assert_equal(s[4], 1.0)
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs),
               int(s[3]*num_divs)] += score
@@ -304,9 +304,9 @@ def test_analog_multiple_hex_subvoxel():
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
     for i in range(num_samples):
-        sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         assert_equal(s[4], 1.0)
         assert_equal(cell_number, 4*int(s[0]*num_divs) + 2*int(s[1]*num_divs)
                      + int(s[2]*num_divs) + 1)
@@ -352,9 +352,9 @@ def test_analog_multiple_hex_subvoxel_uniform():
     num_divs = 2
     tally = [0.0] * 8
     for i in range(num_samples):
-        sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         # check the cell_number
         assert_equal(cell_number, 4*int(s[0]*num_divs) + 2*int(s[1]*num_divs)
                      + int(s[2]*num_divs))
@@ -412,9 +412,9 @@ def test_subvoxel_multiple_hex_bias_1():
     # tally shape (v, c, e)
     tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     for i in range(num_samples):
-        sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         vid = cell_number/10 - 1
         cid = cell_number%10 - 1
         eid = 0 if s[3] < 0.5 else 1;
@@ -487,9 +487,9 @@ def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
     exp_wgt = np.zeros(shape=(num_divs, num_divs, num_divs))
     exp_wgt[:] = [[[1.0, 1.0], [1.25, 0.83]], [[1.25, 1.25], [0.83, 0.83]]]
     for i in range(num_samples):
-        sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         vid = cell_number/10 - 1
         cid = cell_number%10 - 1
         eid = 0 if s[3] < 0.5 else 1;
@@ -554,9 +554,9 @@ def test_subvoxel_multiple_hex_bias_e_groups():
     # tally shape (v, c, e)
     tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     for i in range(num_samples):
-        sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        s = sampler.get_src_xyzew()
-        cell_number = sampler.get_src_c()
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
+        cell_number = src.get_src_c()
         vid = cell_number/10 - 1
         cid = cell_number%10 - 1
         eid = 0 if s[3] < 0.5 else 1;
@@ -619,8 +619,8 @@ def test_analog_single_tet():
     score = 1.0/num_samples
     tally = np.zeros(shape=(4))
     for i in range(num_samples):
-        sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        s = sampler.get_src_xyzew()
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
         assert_equal(s[4], 1.0)
         for i, tet in enumerate(subtets):
             if point_in_tet(tet, [s[0], s[1], s[2]]):
@@ -655,8 +655,8 @@ def test_uniform():
     spatial_tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     e_tally = np.zeros(shape=(4)) # number of phase space groups
     for i in range(num_samples):
-        sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        s = sampler.get_src_xyzew()
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
         if s[0] < 3.0:
             assert_almost_equal(s[4], 0.7) # hand calcs
         else:
@@ -710,8 +710,8 @@ def test_bias():
     num_divs = 2
     tally = np.zeros(shape=(4))
     for i in range(num_samples):
-        sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        s = sampler.get_src_xyzew()
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
         if s[0] < 3:
             if s[3] < 0.5:
               assert_almost_equal(s[4], 1.6) # hand calcs
@@ -759,8 +759,8 @@ def test_bias_spatial():
     spatial_tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     e_tally = np.zeros(shape=(4)) # number of phase space groups
     for i in range(num_samples):
-        sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
-        s = sampler.get_src_xyzew()
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
         if s[0] < 3.0:
             assert_almost_equal(s[4], 0.7) # hand calcs
         else:

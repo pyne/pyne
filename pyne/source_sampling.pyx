@@ -230,14 +230,7 @@ cdef class Sampler:
     sample_w
     sample_xyz
     setup
-    get_src_x
-    get_src_y
-    get_src_z
-    get_src_e
-    get_src_w
-    get_src_c
-    get_src_xyzew
-    
+        
     Notes
     -----
     This class was defined in source_sampling.h
@@ -652,110 +645,41 @@ cdef class Sampler:
             rands_proxy = cpp_vector[double](<size_t> rands_size)
             for irands in range(rands_size):
                 rands_proxy[irands] = <double> rands[irands]
-        (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
+        cdef cpp_source_sampling.SourceParticle c_src = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
+        return PySourceParticle(c_src.x, c_src.y, c_src.z, c_src.e, c_src.w, c_src.c)
     
-    def get_src_c(self):
-        """get_src_c(self)
-        Get the source particle cell number
-        
-        Parameters
-        ----------
-        None 
 
-        Returns
-        -------
-        cell_number : int
-        
-        """
-        cdef int cell_number
-        cell_number = (<cpp_source_sampling.Sampler *> self._inst).get_src_c()
-        return cell_number
+cdef class PySourceParticle:
+    """Constructor for class PySourceParticle
+    
+    Attributes
+    ----------
+    x (double) : The x coordinate of the source particle
+    y (double) : The y coordinate of the source particle
+    z (double) : The z coordinate of the source particle
+    e (double) : The energy of the source particle
+    w (double) : The weight of the source particle
+    c (int) : The cell number of the source particle
+    
+    Methods
+    -------
+    SourceParticle
+    ~SourceParticle
+    get_src_xyzew
+    get_src_c
+    
+    Notes
+    -----
+    This class was defined in source_sampling.h
+    
+    The class is found in the "pyne" namespace"""
 
-    def get_src_x(self):
-        """get_src_x(self)
-        Get the source particle x coordinate
-        
-        Parameters
-        ----------
-        None 
 
-        Returns
-        -------
-        x : double
-        
-        """
-        cdef double x
-        x = (<cpp_source_sampling.Sampler *> self._inst).get_src_x()
-        return x
 
-    def get_src_y(self):
-        """get_src_y(self)
-        Get the source particle y coordinate
-        
-        Parameters
-        ----------
-        None 
-
-        Returns
-        -------
-        y : double
-        
-        """
-        cdef double y
-        y = (<cpp_source_sampling.Sampler *> self._inst).get_src_y()
-        return y
-
-    def get_src_z(self):
-        """get_src_z(self)
-        Get the source particle z coordinate
-        
-        Parameters
-        ----------
-        None 
-
-        Returns
-        -------
-        z : double
-        
-        """
-        cdef double z
-        z = (<cpp_source_sampling.Sampler *> self._inst).get_src_z()
-        return z
-   
-    def get_src_e(self):
-        """get_src_e(self)
-        Get the source particle energy
-        
-        Parameters
-        ----------
-        None 
-
-        Returns
-        -------
-        e : double
-        
-        """
-        cdef double e
-        e = (<cpp_source_sampling.Sampler *> self._inst).get_src_e()
-        return e
-   
-    def get_src_w(self):
-        """get_src_w(self)
-        Get the source particle weight
-        
-        Parameters
-        ----------
-        None 
-
-        Returns
-        -------
-        w : double
-        
-        """
-        cdef double w
-        w = (<cpp_source_sampling.Sampler *> self._inst).get_src_w()
-        return w
-   
+    # constuctors
+    def __cinit__(self, double x, double y, double z, double e, double w, int c):
+        self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, c)
+    
     def get_src_xyzew(self):
         """get_src_xyzew(self)
         Get source particle x, y, z, e and w
@@ -771,68 +695,27 @@ cdef class Sampler:
         """
         cdef cpp_vector[double] rtnval
         cdef np.npy_intp rtnval_proxy_shape[1]
-        rtnval = (<cpp_source_sampling.Sampler *> self._inst).get_src_xyzew()
+        rtnval = self.c_src.get_src_xyzew()
         rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
         rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
         rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
         return rtnval_proxy
-    
 
-cdef class SourceParticle:
-    """Constructor for class SourceParticle
-    
-    Attributes
-    ----------
-    x (double) : The x coordinate of the source particle
-    y (double) : The y coordinate of the source particle
-    z (double) : The z coordinate of the source particle
-    e (double) : The energy of the source particle
-    w (double) : The weight of the source particle
-    c (int) : The cell number of the source particle
-    
-    Methods
-    -------
-    SourceParticle
-    ~SourceParticle
-    
-    Notes
-    -----
-    This class was defined in source_sampling.h
-    
-    The class is found in the "pyne" namespace"""
-
-
-
-    # constuctors
-    def __cinit__(self, *args, **kwargs):
-        self._inst = NULL
-        self._free_inst = True
-
-    def __init__(self, x, y, z, e, w, c):
-        """SourceParticle(self, x, y, z, e, w, c)
-        Constructor
+    def get_src_c(self):
+        """get_src_c(self)
+        Get source particle c
         
         Parameters
         ----------
-        x : double
-        y : double
-        z : double
-        e : double
-        w : double
-        c : int
+        None
         
         Returns
         -------
-        None
+        res1 : int
         
         """
-        self._inst = new cpp_source_sampling.SourceParticle(x, y, z, e, w, c)
-    
-    def __dealloc__(self):
-        if self._free_inst and self._inst is not NULL:
-            free(self._inst)
-
-
+        cdef int c = self.c_src.get_src_c()
+        return c
 
     pass
 

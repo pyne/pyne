@@ -39,8 +39,11 @@ cdef extern from "source_sampling.h" namespace "pyne":
         SourceParticle(double, double, double, double, double, int) except +
 
         # attributes
-
+        double x, y, z, e, w
+        int c
         # methods
+        cpp_vector[double] get_src_xyzew() except +
+        int get_src_c() except +
         pass
     
 
@@ -60,15 +63,9 @@ cdef extern from "source_sampling.h" namespace "pyne":
         # attributes
 
         # methods
-        void particle_birth() except +
-        void particle_birth(cpp_vector[double]) except +
-        int get_src_c() except +
-        double get_src_x() except +
-        double get_src_y() except +
-        double get_src_z() except +
-        double get_src_e() except +
-        double get_src_w() except +
-        cpp_vector [double] get_src_xyzew() except +
+        SourceParticle particle_birth() except +
+        SourceParticle particle_birth(cpp_vector[double]) except +
+        
         pass
 
 

@@ -40,13 +40,13 @@ void pyne::particle_birth_(double* rands,
                            double* w,
                            int* c) {
     std::vector<double> rands2(rands, rands + 6);
-    sampler->particle_birth(rands2);
-    *x = sampler->get_src_x();
-    *y = sampler->get_src_y();
-    *z = sampler->get_src_z();
-    *e = sampler->get_src_e();
-    *w = sampler->get_src_w();
-    *c = sampler->get_src_c();
+    pyne::SourceParticle src = sampler->particle_birth(rands2);
+    *x = src.x;
+    *y = src.y;
+    *z = src.z;
+    *e = src.e;
+    *w = src.w;
+    *c = src.c;
 }
 
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
@@ -114,7 +114,7 @@ pyne::Sampler::Sampler(std::string filename,
   setup();
 }
 
-void pyne::Sampler::particle_birth(std::vector<double> rands) {
+pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   // In DEFAULT mode, pdf_idx contains num_ves*num_e_groups elements,
   // the max_num_cells=1; While, in SUBVOXEL mode, pdf_idx contains
@@ -142,8 +142,9 @@ void pyne::Sampler::particle_birth(std::vector<double> rands) {
   } else {
     samp.push_back(-1.0);
   }
-  //return samp;
-  source_particle = new SourceParticle(samp[0], samp[1], samp[2], samp[3], samp[4], int(samp[5]));
+  //return a source particle
+  pyne::SourceParticle src = SourceParticle(samp[0], samp[1], samp[2], samp[3], samp[4], int(samp[5]));
+  return src;
 }
 
 void pyne::Sampler::setup() {
@@ -584,6 +585,15 @@ int pyne::AliasTable::sample_pdf(double rand1, double rand2) {
   return rand2 < prob[i] ? i : alias[i];
 }
 
+pyne::SourceParticle::SourceParticle() {
+    this->x = -1.0;
+    this->y = -1.0;
+    this->z = -1.0;
+    this->e = -1.0;
+    this->w = -1.0;
+    this->c = -1;
+}
+
 pyne::SourceParticle::SourceParticle(double x, double y, double z,
                                      double e, double w, int c) {
     this->x = x;
@@ -594,36 +604,18 @@ pyne::SourceParticle::SourceParticle(double x, double y, double z,
     this->c = c;
 }
 
-int pyne::Sampler::get_src_c(){
-    return source_particle->c;
-}
+pyne::SourceParticle::~SourceParticle() {};
 
-double pyne::Sampler::get_src_x() {
-    return source_particle->x;
-}
-
-double pyne::Sampler::get_src_y() {
-    return source_particle->y;
-}
-
-double pyne::Sampler::get_src_z() {
-    return source_particle->z;
-}
-
-double pyne::Sampler::get_src_e() {
-    return source_particle->e;
-}
-
-double pyne::Sampler::get_src_w() {
-    return source_particle->w;
-}
-
-std::vector<double> pyne::Sampler::get_src_xyzew() {
+std::vector<double> pyne::SourceParticle::get_src_xyzew() {
     std::vector<double> xyzew;
-    xyzew.push_back(source_particle->x);
-    xyzew.push_back(source_particle->y);
-    xyzew.push_back(source_particle->z);
-    xyzew.push_back(source_particle->e);
-    xyzew.push_back(source_particle->w);
+    xyzew.push_back(this->x);
+    xyzew.push_back(this->y);
+    xyzew.push_back(this->z);
+    xyzew.push_back(this->e);
+    xyzew.push_back(this->w);
     return xyzew;
+}
+
+int pyne::SourceParticle::get_src_c() {
+    return this->c;
 }
