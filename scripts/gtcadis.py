@@ -51,12 +51,15 @@ def step1():
     config.read(config_filename)
 
     hdf5 = config.get('step1', 'geom_file') 
-    cell = config.get('step1', 'src_cell')
+    cells = [config.get('step1', 'src_cell')]
+    print ('cells', len(cells))
     xmesh = config.get('step1', 'xmesh').split(',')
     ymesh = config.get('step1', 'ymesh').split(',')
     zmesh = config.get('step1', 'zmesh').split(',')
-    intensities = config.get('step1', 'intensities')
-    src_vol = config.getfloat('step1', 'src_vol')
+    #intensities = [config.get('step1', 'intensities')]
+    #print (len(intensities))
+    src_vol = [config.getfloat('step1', 'src_vol')]
+    print ('src vol', len(src_vol))
     
     names = ['h1', 'd', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
     'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mgnat', 'al27', 'si28', 'si29',
@@ -103,6 +106,7 @@ def step1():
     # anything below 0.01 MeV should be assigned the DF value of 0.01 MeV
     photon_spectrum[0] = df[0]
     spectra = [np.append(photon_spectrum, np.zeros(175))]
+    print('spectra', len(spectra))
     # The spectrum is normalized by PyNE, so we need to mutliply by the sum of intensities in the spectrum.
     # Additionally, we divide by the volume of the source cell in order to get source density.
     intensities = [np.sum(spectra)/src_vol]
