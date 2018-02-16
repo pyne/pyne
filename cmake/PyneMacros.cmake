@@ -214,7 +214,8 @@ macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
   # next set compiler
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(_plat "${_plat}-gnu")
-  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
     set(_plat "${_plat}-clang")
   else()
     set(_plat "${_plat}-NOTFOUND")
