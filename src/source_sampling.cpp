@@ -258,7 +258,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         if (rval != moab::MB_SUCCESS)
           throw std::runtime_error("Problem getting bias tag data.");
         double q_in_group;
-        for (v=0; i<num_ves; ++v) {
+        for (v=0; v<num_ves; ++v) {
           q_in_group = 0;
           for (e=0; e<num_e_groups; ++e){
             q_in_group += pdf[v*num_e_groups + e];
@@ -326,7 +326,7 @@ double pyne::Sampler::sample_w(int pdf_idx) {
 void pyne::Sampler::normalize_pdf(std::vector<double> & pdf) {
   double sum = 0;
   int v;
-  for (v=0; i<num_ves*num_e_groups; ++v)
+  for (v=0; v<num_ves*num_e_groups; ++v)
     sum += pdf[v];
   for (v=0; v<num_ves*num_e_groups; ++v)
     pdf[v] /= sum;
