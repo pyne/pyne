@@ -1,3 +1,5 @@
+INCLUDE(DownloadAndExtract)
+
 # set platform preprocessor macro
 macro(pyne_set_platform)
   set(PYNE_PLATFORM "__${CMAKE_SYSTEM_NAME}__")
