@@ -441,8 +441,8 @@ def cmake_cli(cmake_args):
 
 def main_body(ns):
     assert_dep_versions()
-    ensure_cram()
-    ensure_decay()
+#    ensure_cram()
+#    ensure_decay()
     ensure_atomic()
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
