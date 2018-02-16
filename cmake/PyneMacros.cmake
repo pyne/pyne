@@ -169,6 +169,15 @@ macro(pyne_configure_rpath)
   MESSAGE("-- CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 endmacro()
 
+macro(pyne_download_platform)
+  # Download bateman solver from PyNE data
+  download_platform("https://raw.githubusercontent.com/pyne/data/master" "decay"
+                      ".cpp" ".s")
+
+  # Download CRAM solver from PyNE data
+  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
+                         ".c" ".s")
+endmacro()
 
 macro(pyne_set_fast_compile)
   if(NOT DEFINED PYNE_FAST_COMPILE)
@@ -180,15 +189,26 @@ endmacro()
 
 # fast compile with assembly, if available.
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
+  # first set OS
+  if (WIN32)
+    set(_plat "win")
+  elseif(APPLE)
+    set(_plat "apple")
+  else()
+    set(_plat "linux")
+  endif()
+  # next set compiler
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(_plat "${_plat}-gnu")
+  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(_plat "${_plat}-clang")
+  else()
+    set(_plat "${_plat}-NOTFOUND")
+  endif()
+  
   get_filename_component(_base "${_srcname}" NAME_WE)  # get the base name, without the extension
   # get the assembly file name
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(_asmname "${_base}-clang.s")
-  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(_asmname "${_base}-gnu.s")
-  else()
-    set(_asmname "${_base}-NOTFOUND")
-  endif()
+  set(_asmname "${_base}-${_plat}.s")
 
   # pick the filename to compile, either source or assembly
   if(NOT PYNE_FAST_COMPILE)
