@@ -57,7 +57,10 @@ import numpy as np
 if '.' not in sys.path:
     sys.path.append(os.getcwd() + '/src')
 
-absexpanduser = lambda x: os.path.abspath(os.path.expanduser(x))
+
+def absexpanduser(x): return os.path.abspath(os.path.expanduser(x))
+
+
 VERSION = '0.5.10'
 IS_NT = os.name == 'nt'
 LOCALDIR = absexpanduser('~/.local')
@@ -67,7 +70,7 @@ CMAKE_BUILD_TYPES = {
     'release': 'Release',
     'relwithdebinfo': 'RelWithDebInfo',
     'minsizerel': 'MinSizeRel',
-    }
+}
 ON_DARWIN = platform.system() == 'Darwin'
 LIBEXT = '.dylib' if ON_DARWIN else '.so'
 
@@ -136,48 +139,16 @@ def ssl_context():
 
 DECAY_H = os.path.join('src', 'decay.h')
 DECAY_CPP = os.path.join('src', 'decay.cpp')
+DECAY_S = glob('src/decay*.s')
 DECAY_H_REP = os.path.join('src', '_decay.h')
 DECAY_CPP_REP = os.path.join('src', '_decay.cpp')
 DECAY_URL = 'http://raw.githubusercontent.com/pyne/data/master/decay.tar.gz'
 
 
-def download_decay():
-    print('Downloading ' + DECAY_URL)
-    durl = urlopen(DECAY_URL, context=ssl_context())
-    try:
-        d = durl.read()
-    except IOError:
-        print('...failed to download!')
-        return False
-    finally:
-        durl.close()
-    f = io.BytesIO(d)
-    tar = tarfile.open(fileobj=f, mode='r:gz')
-    tar.extractall('src')
-    tar.close()
-    return True
-
-
 CRAM_H = os.path.join('src', 'cram.h')
 CRAM_C = os.path.join('src', 'cram.c')
+CRAM_S = glob('src/cram*.s')
 CRAM_URL = 'http://raw.githubusercontent.com/pyne/data/master/cram.tar.gz'
-
-
-def download_cram():
-    print('Downloading ' + CRAM_URL)
-    durl = urlopen(CRAM_URL, context=ssl_context())
-    try:
-        d = durl.read()
-    except IOError:
-        print('...failed to download!')
-        return False
-    finally:
-        durl.close()
-    f = io.BytesIO(d)
-    tar = tarfile.open(fileobj=f, mode='r:gz')
-    tar.extractall('src')
-    tar.close()
-    return True
 
 
 local_ensdf_evaluators = ['alphad', 'delta', 'gtol', 'bldhst', 'hsicc', 'hsmrg',
@@ -198,7 +169,7 @@ def copy_ensdf_executables(exe_dest):
         exe_dest = exe_dest + '/pyne'
     for tool in local_ensdf_evaluators:
         try:
-            local_path = os.path.join('build',os.path.join('src',tool))
+            local_path = os.path.join('build', os.path.join('src', tool))
             dest_path = os.path.join(exe_dest, tool)
             shutil.copy(local_path, dest_path)
         except Exception:
@@ -212,69 +183,6 @@ def copy_ensdf_executables(exe_dest):
         except Exception:
             print('Some ENSDF processing executables were unable to be copied to the \
                    install directory.')
-
-
-def generate_decay():
-    with indir('src'):
-        try:
-            import decaygen
-        except ImportError:
-            return False
-        try:
-            decaygen.build()
-        except Exception:
-            return False
-    return True
-
-
-def ensure_decay():
-    mb = 1024**2
-    if os.path.isfile(DECAY_H) and os.path.isfile(DECAY_CPP) and \
-       os.stat(DECAY_CPP).st_size > mb:
-        return
-    generated = generate_decay()
-    if generated:
-        return
-    downloaded = download_decay()
-    if downloaded:
-        return
-    print('!'*42)
-    print('Decay files could not be downloaded or generated, using surrogates instead.')
-    print('Please consider using the --bootstrap command line argument.')
-    print('!'*42 + '\n')
-    shutil.copy(DECAY_H_REP, DECAY_H)
-    shutil.copy(DECAY_CPP_REP, DECAY_CPP)
-
-
-def generate_cram():
-    with indir('src'):
-        try:
-            from transmutagen import gensolve
-        except ImportError:
-            return False
-        try:
-            gensolve.generate(py_solve=True, namespace='pyne_cram',
-                              outfile='cram.c')
-        except Exception:
-            return False
-    return True
-
-
-def ensure_cram():
-    mb = 1024**2
-    if os.path.isfile(CRAM_H) and os.path.isfile(CRAM_C) and \
-       os.stat(CRAM_C).st_size > mb:
-        return
-    downloaded = download_cram()
-    if downloaded:
-        return
-    generated = generate_cram()
-    if generated:
-        return
-    print('!'*42)
-    print('CRAM files could not be downloaded or generated')
-    print('!'*42 + '\n')
-    raise RuntimeError
 
 
 ATOMIC_H = os.path.join('src', 'atomic_data.h')
@@ -326,7 +234,7 @@ def update_setup_args(ns):
     else:
         ns.prefix = sys.prefix
 
-    files = [DECAY_H, DECAY_CPP, CRAM_H, CRAM_C]
+    files = [DECAY_H, DECAY_CPP, CRAM_H, CRAM_C] + DECAY_S + CRAM_S
     if ns.cmd == 'clean':
         if os.path.exists(ns.build_dir):
             dir_util.remove_tree(ns.build_dir)
@@ -356,10 +264,11 @@ def update_cmake_args(ns):
         h5root = absexpanduser(ns.hdf5)
         ns.cmake_args += [
             '-DHDF5_ROOT=' + h5root,
-            '-DHDF5_LIBRARIES={0}/lib/libhdf5{1};{0}/lib/libhdf5_hl{1}'.format(h5root, LIBEXT),
+            '-DHDF5_LIBRARIES={0}/lib/libhdf5{1};{0}/lib/libhdf5_hl{1}'.format(
+                h5root, LIBEXT),
             '-DHDF5_LIBRARY_DIRS=' + h5root + '/lib',
             '-DHDF5_INCLUDE_DIRS=' + h5root + '/include',
-            ]
+        ]
     if ns.moab is not None:
         ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
     if ns.deps_root:
@@ -383,7 +292,8 @@ def update_other_args(ns):
 
 
 def parse_args():
-    argv = [a for a in sys.argv[1:] if a != '--']  # needed for backwards compat.
+    # needed for backwards compat.
+    argv = [a for a in sys.argv[1:] if a != '--']
     parser = argparse.ArgumentParser()
     parser.add_argument('--clean', nargs='?', const=True, default=False,
                         help='removes the build directory before continuing.')
@@ -442,15 +352,14 @@ def cmake_cli(cmake_args):
             sys.exit('CMake is not installed, aborting PyNE build.')
     cmake_cmd = ['cmake', '..'] + cmake_args
     cmake_cmd += ['-DPYTHON_EXECUTABLE=' + sys.executable]
-    cmake_cmdstr = cmake_cmd if isinstance(cmake_cmd, str) else ' '.join(cmake_cmd)
+    cmake_cmdstr = cmake_cmd if isinstance(
+        cmake_cmd, str) else ' '.join(cmake_cmd)
     print("CMake command is\n", cmake_cmdstr, sep="")
     return cmake_cmd
 
 
 def main_body(ns):
     assert_dep_versions()
-#    ensure_cram()
-#    ensure_decay()
     ensure_atomic()
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
@@ -467,7 +376,7 @@ def final_message(success=True):
     msg = ("\n\nIf you are having issues building pyne, please report your problem "
            "to pyne-dev@googlegroups.com or look for help at http://pyne.io\n\n"
            )
-    print('\n' + '-'*20 + msg + '-'*20)
+    print('\n' + '-' * 20 + msg + '-' * 20)
 
 
 def main_safe(ns):
