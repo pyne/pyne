@@ -30,6 +30,28 @@ macro(pyne_setup_cxx)
   ENDIF()
 endmacro()
 
+macro(pyne_set_asm_platform)
+  # first set OS
+  if (WIN32)
+    set(_plat "win")
+  elseif(APPLE)
+    set(_plat "apple")
+  else()
+    set(_plat "linux")
+  endif()
+  # next set compiler
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(_plat "${_plat}-gnu")
+  elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+    set(_plat "${_plat}-clang")
+  else()
+    set(_plat "${_plat}-NOTFOUND")
+  endif()
+  set(PYNE_ASM_PLATFORM "${_plat}")
+endmacro()
+
+
 # Fortran settings
 # FFLAGS depend on the compiler
 macro(pyne_setup_fortran)
@@ -203,27 +225,13 @@ endmacro()
 
 # fast compile with assembly, if available.
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
-  # first set OS
-  if (WIN32)
-    set(_plat "win")
-  elseif(APPLE)
-    set(_plat "apple")
-  else()
-    set(_plat "linux")
-  endif()
-  # next set compiler
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(_plat "${_plat}-gnu")
-  elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
-    set(_plat "${_plat}-clang")
-  else()
-    set(_plat "${_plat}-NOTFOUND")
-  endif()
-  
   get_filename_component(_base "${_srcname}" NAME_WE)  # get the base name, without the extension
   # get the assembly file name
-  set(_asmname "${_base}-${_plat}.s")
+  if (PYNE_ASM_PLATFORM)
+    set(_asmname "${_base}-${PYNE_ASM_PLATFORM}.s")
+  else()
+    set(_asmname "${_base}-NOTFOUND")
+  endif()
 
   # pick the filename to compile, either source or assembly
   if(NOT PYNE_FAST_COMPILE)
