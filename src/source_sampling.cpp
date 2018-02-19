@@ -28,14 +28,16 @@ void pyne::particle_birth_(double* rands,
                            double* y,
                            double* z,
                            double* e,
-                           double* w) {
+                           double* w,
+                           int* c) {
     std::vector<double> rands2(rands, rands + 6);
-    std::vector<double> samp = sampler->particle_birth(rands2);
-    *x = samp[0];
-    *y = samp[1];
-    *z = samp[2];
-    *e = samp[3];
-    *w = samp[4];
+    pyne::SourceParticle src = sampler->particle_birth(rands2);
+    *x = src.x;
+    *y = src.y;
+    *z = src.z;
+    *e = src.e;
+    *w = src.w;
+    *c = src.c;
 }
 
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
@@ -72,7 +74,7 @@ pyne::Sampler::Sampler(std::string filename,
   setup();
 }
 
-std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
+pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   //
   int pdf_idx =at->sample_pdf(rands[0], rands[1]);
@@ -92,7 +94,10 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
   samp.push_back(pos[2]); 
   samp.push_back(sample_e(e_idx, rands[5]));
   samp.push_back(sample_w(pdf_idx));
-  return samp;
+  samp.push_back(-1.0);
+  pyne::SourceParticle src = SourceParticle(samp[0], samp[1], samp[2], samp[3],
+      samp[4], int(samp[5]));
+  return src;
 }
 
 void pyne::Sampler::setup() {
@@ -394,3 +399,39 @@ int pyne::AliasTable::sample_pdf(double rand1, double rand2) {
   int i = (int) n * rand1;
   return rand2 < prob[i] ? i : alias[i];
 }
+
+pyne::SourceParticle::SourceParticle() {
+    this->x = -1.0;
+    this->y = -1.0;
+    this->z = -1.0;
+    this->e = -1.0;
+    this->w = -1.0;
+    this->c = -1;
+}
+
+pyne::SourceParticle::SourceParticle(double x, double y, double z,
+                                     double e, double w, int c) {
+    this->x = x;
+    this->y = y;
+    this->z = z;
+    this->e = e;
+    this->w = w;
+    this->c = c;
+}
+
+pyne::SourceParticle::~SourceParticle() {};
+
+std::vector<double> pyne::SourceParticle::get_src_xyzew() {
+    std::vector<double> xyzew;
+    xyzew.push_back(this->x);
+    xyzew.push_back(this->y);
+    xyzew.push_back(this->z);
+    xyzew.push_back(this->e);
+    xyzew.push_back(this->w);
+    return xyzew;
+}
+
+int pyne::SourceParticle::get_src_c() {
+    return this->c;
+}
+

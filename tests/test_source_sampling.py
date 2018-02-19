@@ -45,7 +45,8 @@ def test_analog_single_hex():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
 
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
         assert_equal(s[4], 1.0) # analog: all weights must be one
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
               int(s[3]*num_divs)] += score
@@ -76,7 +77,8 @@ def test_analog_multiple_hex():
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
     for i in range(num_samples):
-        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
         assert_equal(s[4], 1.0)
         tally[int(s[0]*num_divs), int(s[1]*num_divs), int(s[2]*num_divs), 
               int(s[3]*num_divs)] += score
@@ -116,7 +118,8 @@ def test_analog_single_tet():
     score = 1.0/num_samples
     tally = np.zeros(shape=(4))
     for i in range(num_samples):
-        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        src = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = src.get_src_xyzew()
         assert_equal(s[4], 1.0)
         for i, tet in enumerate(subtets):
             if point_in_tet(tet, [s[0], s[1], s[2]]):
@@ -151,7 +154,8 @@ def test_uniform():
     spatial_tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     e_tally = np.zeros(shape=(4)) # number of phase space groups
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
         if s[0] < 3.0:
             assert_almost_equal(s[4], 0.7) # hand calcs
         else:
@@ -205,7 +209,8 @@ def test_bias():
     num_divs = 2
     tally = np.zeros(shape=(4))
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
         if s[0] < 3:
             if s[3] < 0.5:
               assert_almost_equal(s[4], 1.6) # hand calcs
@@ -253,7 +258,8 @@ def test_bias_spatial():
     spatial_tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     e_tally = np.zeros(shape=(4)) # number of phase space groups
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        src = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = src.get_src_xyzew()
         if s[0] < 3.0:
             assert_almost_equal(s[4], 0.7) # hand calcs
         else:
