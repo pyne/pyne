@@ -33,6 +33,7 @@
 #include <stdexcept> 
 #include <sstream>
 #include <string>
+#include <map>
 
 #include "moab/Range.hpp"
 #include "moab/Core.hpp"
