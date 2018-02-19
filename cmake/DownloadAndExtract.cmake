@@ -26,31 +26,13 @@ endmacro()
 
 
 macro(download_platform _base_url _base_name _ext_src _ext_plat)
-  # first set OS
-  if (WIN32)
-    set(_plat "win")
-  elseif(APPLE)
-    set(_plat "apple")
-  else()
-    set(_plat "linux")
-  endif()
-  # next set compiler
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(_plat "${_plat}-gnu")
-  elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
-    set(_plat "${_plat}-clang")
-  else()
-    set(_plat "${_plat}-NOTFOUND")
-  endif()
-  
   # first download the src file
   set(_url "${_base_url}/${_base_name}.tar.gz")
   set(_checkfile "${_base_name}${_ext_src}")
   download_and_extract("${_url}" "${_checkfile}")
   # now download the platform specific file
-  set(_url "${_base_url}/${_base_name}-${_plat}.tar.gz")
-  set(_checkfile "${_base_name}-${_plat}${_ext_plat}")
+  set(_url "${_base_url}/${_base_name}-${PYNE_ASM_PLATFORM}.tar.gz")
+  set(_checkfile "${_base_name}-${PYNE_ASM_PLATFORM}${_ext_plat}")
   download_and_extract("${_url}" "${_checkfile}")
 endmacro()
 
