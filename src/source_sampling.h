@@ -46,7 +46,7 @@ extern "C" {
 namespace pyne {
 
   /// MCNP interface for source sampling setup
-  /// \param mode The sampling mode: 1 = analog, 2 = uniform, 3 = user-specified
+  /// \param mode The sampling mode: 0 = analog, 1 = uniform, 2 = user-specified
   void sampling_setup_(int* mode);
   /// MCNP interface to sample particle birth parameters after sampling setup
   /// \param rands Six pseudo-random numbers supplied from the Fortran side.
