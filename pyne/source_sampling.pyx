@@ -457,14 +457,13 @@ cdef class Sampler:
         
         Returns
         -------
-        res1 : std::vector< double >
+        res1 : pyne::SourceParticle
         
         """
         cdef cpp_vector[double] rands_proxy
         cdef int irands
         cdef int rands_size
         cdef double * rands_data
-        cdef cpp_vector[double] rtnval
         
         cdef np.npy_intp rtnval_proxy_shape[1]
         # rands is a ('vector', 'float64', 0)
@@ -478,14 +477,78 @@ cdef class Sampler:
             rands_proxy = cpp_vector[double](<size_t> rands_size)
             for irands in range(rands_size):
                 rands_proxy[irands] = <double> rands[irands]
-        rtnval = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
+        cdef cpp_source_sampling.SourceParticle c_src = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
+        return PySourceParticle(c_src.x, c_src.y, c_src.z, c_src.e, c_src.w, c_src.c)
+
+
+
+cdef class PySourceParticle:
+    """Constructor for class PySourceParticle
+    
+    Attributes
+    ----------
+    x (double) : The x coordinate of the source particle
+    y (double) : The y coordinate of the source particle
+    z (double) : The z coordinate of the source particle
+    e (double) : The energy of the source particle
+    w (double) : The weight of the source particle
+    c (int) : The cell number of the source particle
+    
+    Methods
+    -------
+    SourceParticle
+    ~SourceParticle
+    get_src_xyzew
+    get_src_c
+    
+    Notes
+    -----
+    This class was defined in source_sampling.h
+    
+    The class is found in the "pyne" namespace"""
+
+
+
+    # constuctors
+    def __cinit__(self, double x, double y, double z, double e, double w, int c):
+        self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, c)
+    
+    def get_src_xyzew(self):
+        """get_src_xyzew(self)
+        Get source particle x, y, z, e and w
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : std::vector< double >
+        
+        """
+        cdef cpp_vector[double] rtnval
+        cdef np.npy_intp rtnval_proxy_shape[1]
+        rtnval = self.c_src.get_src_xyzew()
         rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
         rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
         rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
         return rtnval_proxy
-    
-    
-    
+
+    def get_src_c(self):
+        """get_src_c(self)
+        Get source particle c
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : int
+        
+        """
+        cdef int c = self.c_src.get_src_c()
+        return c
 
     pass
 
