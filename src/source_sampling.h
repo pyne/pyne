@@ -110,13 +110,13 @@ namespace pyne {
                    int c);
     ~SourceParticle();
 
-    std::vector<double> get_src_xyzew();
-    double get_src_x() {return x;};
-    double get_src_y() {return y;};
-    double get_src_z() {return z;};
-    double get_src_e() {return e;};
-    double get_src_w() {return w;};
-    int get_src_c() {return c;};
+    std::vector<double> get_xyzew();
+    double get_x() {return x;};
+    double get_y() {return y;};
+    double get_z() {return z;};
+    double get_e() {return e;};
+    double get_w() {return w;};
+    int get_c() {return c;};
     private:
     double x; // x coordinate
     double y; // y coordinate

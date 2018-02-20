@@ -478,7 +478,7 @@ cdef class Sampler:
             for irands in range(rands_size):
                 rands_proxy[irands] = <double> rands[irands]
         cdef cpp_source_sampling.SourceParticle c_src = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
-        return PySourceParticle(c_src.get_src_x(), c_src.get_src_y(), c_src.get_src_z(), c_src.get_src_e(), c_src.get_src_w(), c_src.get_src_c())
+        return PySourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), c_src.get_e(), c_src.get_w(), c_src.get_c())
 
 
 
@@ -498,8 +498,8 @@ cdef class PySourceParticle:
     -------
     SourceParticle
     ~SourceParticle
-    get_src_xyzew
-    get_src_c
+    get_xyzew
+    get_c
     
     Notes
     -----
@@ -513,8 +513,8 @@ cdef class PySourceParticle:
     def __cinit__(self, double x, double y, double z, double e, double w, int c):
         self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, c)
     
-    def get_src_xyzew(self):
-        """get_src_xyzew(self)
+    def get_xyzew(self):
+        """get_xyzew(self)
         Get source particle x, y, z, e and w
         
         Parameters
@@ -528,14 +528,14 @@ cdef class PySourceParticle:
         """
         cdef cpp_vector[double] rtnval
         cdef np.npy_intp rtnval_proxy_shape[1]
-        rtnval = self.c_src.get_src_xyzew()
+        rtnval = self.c_src.get_xyzew()
         rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
         rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
         rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
         return rtnval_proxy
 
-    def get_src_x(self):
-        """get_src_x(self)
+    def get_x(self):
+        """get_x(self)
         Get source particle x
         
         Parameters
@@ -547,11 +547,11 @@ cdef class PySourceParticle:
         res1 : double
         
         """
-        cdef double x = self.c_src.get_src_x()
+        cdef double x = self.c_src.get_x()
         return x
 
-    def get_src_y(self):
-        """get_src_y(self)
+    def get_y(self):
+        """get_y(self)
         Get source particle y
         
         Parameters
@@ -563,11 +563,11 @@ cdef class PySourceParticle:
         res1 : double
         
         """
-        cdef double y = self.c_src.get_src_y()
+        cdef double y = self.c_src.get_y()
         return y
     
-    def get_src_z(self):
-        """get_src_z(self)
+    def get_z(self):
+        """get_z(self)
         Get source particle z
         
         Parameters
@@ -579,11 +579,11 @@ cdef class PySourceParticle:
         res1 : double
         
         """
-        cdef double z = self.c_src.get_src_z()
+        cdef double z = self.c_src.get_z()
         return z
 
-    def get_src_e(self):
-        """get_src_e(self)
+    def get_e(self):
+        """get_e(self)
         Get source particle e
         
         Parameters
@@ -595,11 +595,11 @@ cdef class PySourceParticle:
         res1 : double
         
         """
-        cdef double e = self.c_src.get_src_e()
+        cdef double e = self.c_src.get_e()
         return e
 
-    def get_src_w(self):
-        """get_src_w(self)
+    def get_w(self):
+        """get_w(self)
         Get source particle w
         
         Parameters
@@ -611,11 +611,11 @@ cdef class PySourceParticle:
         res1 : double
         
         """
-        cdef double w = self.c_src.get_src_w()
+        cdef double w = self.c_src.get_w()
         return w
 
-    def get_src_c(self):
-        """get_src_c(self)
+    def get_c(self):
+        """get_c(self)
         Get source particle c
         
         Parameters
@@ -627,7 +627,7 @@ cdef class PySourceParticle:
         res1 : int
         
         """
-        cdef int c = self.c_src.get_src_c()
+        cdef int c = self.c_src.get_c()
         return c
 
     pass
