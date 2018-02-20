@@ -56,7 +56,7 @@ pyne::Sampler::Sampler(std::string filename,
                  std::vector<double> e_bounds, 
                  bool uniform)
   : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds) {
-  mode = (uniform) ? UNIFORM : ANALOG;
+  bias_mode = (uniform) ? UNIFORM : ANALOG;
   setup();
 }
 
@@ -68,7 +68,7 @@ pyne::Sampler::Sampler(std::string filename,
     src_tag_name(src_tag_name), 
     e_bounds(e_bounds), 
     bias_tag_name(bias_tag_name) {
-  mode = USER;
+  bias_mode = USER;
   setup();
 }
 
@@ -141,12 +141,12 @@ void pyne::Sampler::mesh_geom_data(moab::Range ves, std::vector<double> &volumes
   // element and setup a data structure to allow uniform sampling with each 
   // mesh volume element.
   double coords[verts_per_ve*3];
-  int i;
-  for (i=0; i<num_ves; ++i) {
-    rval = mesh->get_coords(&connect[verts_per_ve*i], verts_per_ve, &coords[0]);
+  int v;
+  for (v=0; v<num_ves; ++v) {
+    rval = mesh->get_coords(&connect[verts_per_ve*v], verts_per_ve, &coords[0]);
     if (rval != moab::MB_SUCCESS)
       throw std::runtime_error("Problem vertex coordinates.");
-    volumes[i] = measure(ve_type, verts_per_ve, &coords[0]);
+    volumes[v] = measure(ve_type, verts_per_ve, &coords[0]);
     if (ve_type == moab::MBHEX) {
       moab::CartVect o(coords[0], coords[1], coords[2]);
       moab::CartVect x(coords[3], coords[4], coords[5]);
@@ -182,24 +182,24 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
     throw std::runtime_error("Problem getting source tag data.");
 
   // Multiply the source densities by the VE volumes
-  int i, j;
-  for (i=0; i<num_ves; ++i) {
-    for (j=0; j<num_e_groups; ++j) {
-       pdf[i*num_e_groups + j] *= volumes[i];
+  int v, e;
+  for (v=0; v<num_ves; ++v) {
+    for (e=0; e<num_e_groups; ++e) {
+       pdf[v*num_e_groups + e] *= volumes[v];
     }
   }
   normalize_pdf(pdf);
 
   // Setup alias table based off PDF or biased PDF
-  if (mode == ANALOG) {
+  if (bias_mode == ANALOG) {
     at = new AliasTable(pdf);
   } else {
     std::vector<double> bias_pdf = read_bias_pdf(ves, volumes, pdf);
     normalize_pdf(bias_pdf);
     //  Create alias table based off biased pdf and calculate birth weights.
     biased_weights.resize(num_ves*num_e_groups);
-    for (i=0; i<num_ves*num_e_groups; ++i) {
-      biased_weights[i] = pdf[i]/bias_pdf[i];
+    for (v=0; v<num_ves*num_e_groups; ++v) {
+      biased_weights[v] = pdf[v]/bias_pdf[v];
     }
     at = new AliasTable(bias_pdf);
   }
@@ -209,30 +209,30 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
                                                  std::vector<double> volumes,
                                                  std::vector<double> pdf) {
     std::vector<double> bias_pdf(num_ves*num_e_groups);
-    int i, j;
+    int v, e;
     moab::ErrorCode rval;
-    if (mode == UNIFORM) {
+    if (bias_mode == UNIFORM) {
       // Uniform sampling: uniform in space, analog in energy. Biased PDF is
       // found by normalizing the total photon emission density to 1 in each
       // mesh volume element and multiplying by the volume of the element.
       double q_in_group;
-      for (i=0; i<num_ves; ++i) {
+      for (v=0; v<num_ves; ++v) {
         q_in_group = 0;
-        for (j=0; j<num_e_groups; ++j){
-          q_in_group += pdf[i*num_e_groups + j];
+        for (e=0; e<num_e_groups; ++e){
+          q_in_group += pdf[v*num_e_groups + e];
         }
         if (q_in_group > 0) {
-          for (j=0; j<num_e_groups; ++j) {
-            bias_pdf[i*num_e_groups + j] =
-                volumes[i]*pdf[i*num_e_groups + j]/q_in_group;
+          for (e=0; e<num_e_groups; ++e) {
+            bias_pdf[v*num_e_groups + e] =
+                volumes[v]*pdf[v*num_e_groups + e]/q_in_group;
           }
         } else {
-          for (j=0; j<num_e_groups; ++j) {
-            bias_pdf[i*num_e_groups + j] = 0.0;
+          for (e=0; e<num_e_groups; ++e) {
+            bias_pdf[v*num_e_groups + e] = 0.0;
           }
         }
       }
-    } else if (mode == USER) {
+    } else if (bias_mode == USER) {
       // Get the biased PDF from the mesh
       moab::Tag bias_tag;
       rval = mesh->tag_get_handle(bias_tag_name.c_str(), 
@@ -245,9 +245,9 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         rval = mesh->tag_get_data(bias_tag, ves, &bias_pdf[0]);
         if (rval != moab::MB_SUCCESS)
           throw std::runtime_error("Problem getting bias tag data.");
-        for (i=0; i<num_ves; ++i) {
-          for (j=0; j<num_e_groups; ++j)
-             bias_pdf[i*num_e_groups + j] *=  volumes[i];
+        for (v=0; v<num_ves; ++v) {
+          for (e=0; e<num_e_groups; ++e)
+             bias_pdf[v*num_e_groups + e] *=  volumes[v];
         }
       } else if (num_bias_groups == 1) {
         // Spatial biasing only: the supplied bias PDF values are applied
@@ -258,19 +258,19 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         if (rval != moab::MB_SUCCESS)
           throw std::runtime_error("Problem getting bias tag data.");
         double q_in_group;
-        for (i=0; i<num_ves; ++i) {
+        for (v=0; v<num_ves; ++v) {
           q_in_group = 0;
-          for (j=0; j<num_e_groups; ++j){
-            q_in_group += pdf[i*num_e_groups + j];
+          for (e=0; e<num_e_groups; ++e){
+            q_in_group += pdf[v*num_e_groups + e];
           }
           if (q_in_group > 0){
-            for (j=0; j<num_e_groups; ++j){
-              bias_pdf[i*num_e_groups + j] = 
-                spatial_pdf[i]*volumes[i]*pdf[i*num_e_groups + j]/q_in_group;
+            for (e=0; e<num_e_groups; ++e){
+              bias_pdf[v*num_e_groups + e] = 
+                spatial_pdf[v]*volumes[v]*pdf[v*num_e_groups + e]/q_in_group;
             }
           } else {
-            for (j=0; j<num_e_groups; ++j)
-              bias_pdf[i*num_e_groups + j] =  0;
+            for (e=0; e<num_e_groups; ++e)
+              bias_pdf[v*num_e_groups + e] =  0;
           }
         }
       } else {
@@ -320,16 +320,16 @@ double pyne::Sampler::sample_e(int e_idx, double rand) {
 }
 
 double pyne::Sampler::sample_w(int pdf_idx) {
-  return (mode == ANALOG) ? 1.0 : biased_weights[pdf_idx];
+  return (bias_mode == ANALOG) ? 1.0 : biased_weights[pdf_idx];
 }
 
 void pyne::Sampler::normalize_pdf(std::vector<double> & pdf) {
   double sum = 0;
-  int i;
-  for (i=0; i<num_ves*num_e_groups; ++i)
-    sum += pdf[i];
-  for (i=0; i<num_ves*num_e_groups; ++i)
-    pdf[i] /= sum;
+  int v;
+  for (v=0; v<num_ves*num_e_groups; ++v)
+    sum += pdf[v];
+  for (v=0; v<num_ves*num_e_groups; ++v)
+    pdf[v] /= sum;
 }
 
 int pyne::Sampler::num_groups(moab::Tag tag) {

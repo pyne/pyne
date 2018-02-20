@@ -90,7 +90,7 @@ namespace pyne {
   };
   
   /// Problem modes
-  enum Mode {USER, ANALOG, UNIFORM};
+  enum BiasMode {USER, ANALOG, UNIFORM};
   
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
@@ -141,7 +141,7 @@ namespace pyne {
     std::vector<double> e_bounds;  ///< Energy boundaries
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
-    Mode mode; ///< Problem mode: analog, uniform, user
+    BiasMode bias_mode; ///< Problem mode: analog, uniform, user
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.
