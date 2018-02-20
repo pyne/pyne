@@ -117,7 +117,7 @@ namespace pyne {
     double w; // weight
     int c; // cell number
     std::vector<double> get_src_xyzew();
-    int get_src_c();
+    int get_src_c() {return c;};
   };
   
   /// Problem modes

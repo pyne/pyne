@@ -394,37 +394,35 @@ int pyne::AliasTable::sample_pdf(double rand1, double rand2) {
 }
 
 pyne::SourceParticle::SourceParticle() {
-    this->x = -1.0;
-    this->y = -1.0;
-    this->z = -1.0;
-    this->e = -1.0;
-    this->w = -1.0;
-    this->c = -1;
+    x = -1.0;
+    y = -1.0;
+    z = -1.0;
+    e = -1.0;
+    w = -1.0;
+    c = -1;
 }
 
-pyne::SourceParticle::SourceParticle(double x, double y, double z,
-                                     double e, double w, int c) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->e = e;
-    this->w = w;
-    this->c = c;
+pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
+                                     double _e, double _w, int _c) {
+    x = _x;
+    y = _y;
+    z = _z;
+    e = _e;
+    w = _w;
+    c = _c;
 }
 
 pyne::SourceParticle::~SourceParticle() {};
 
 std::vector<double> pyne::SourceParticle::get_src_xyzew() {
     std::vector<double> xyzew;
-    xyzew.push_back(this->x);
-    xyzew.push_back(this->y);
-    xyzew.push_back(this->z);
-    xyzew.push_back(this->e);
-    xyzew.push_back(this->w);
+    xyzew.push_back(x);
+    xyzew.push_back(y);
+    xyzew.push_back(z);
+    xyzew.push_back(e);
+    xyzew.push_back(w);
     return xyzew;
 }
 
-int pyne::SourceParticle::get_src_c() {
-    return this->c;
-}
+
 
