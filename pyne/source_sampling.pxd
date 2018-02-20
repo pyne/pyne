@@ -33,7 +33,6 @@ cdef class AliasTable:
 
 cdef class PySourceParticle:
     cdef cpp_source_sampling.SourceParticle c_src
-    cdef public int c
     pass
 
 
