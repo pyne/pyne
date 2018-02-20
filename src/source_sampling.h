@@ -110,14 +110,20 @@ namespace pyne {
                    int c);
     ~SourceParticle();
 
+    std::vector<double> get_src_xyzew();
+    double get_src_x() {return x;};
+    double get_src_y() {return y;};
+    double get_src_z() {return z;};
+    double get_src_e() {return e;};
+    double get_src_w() {return w;};
+    int get_src_c() {return c;};
+    private:
     double x; // x coordinate
     double y; // y coordinate
     double z; // z coordinate
     double e; // energy
     double w; // weight
     int c; // cell number
-    std::vector<double> get_src_xyzew();
-    int get_src_c() {return c;};
   };
   
   /// Problem modes

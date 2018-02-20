@@ -478,7 +478,7 @@ cdef class Sampler:
             for irands in range(rands_size):
                 rands_proxy[irands] = <double> rands[irands]
         cdef cpp_source_sampling.SourceParticle c_src = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
-        return PySourceParticle(c_src.x, c_src.y, c_src.z, c_src.e, c_src.w, c_src.c)
+        return PySourceParticle(c_src.get_src_x(), c_src.get_src_y(), c_src.get_src_z(), c_src.get_src_e(), c_src.get_src_w(), c_src.get_src_c())
 
 
 
@@ -533,6 +533,86 @@ cdef class PySourceParticle:
         rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
         rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
         return rtnval_proxy
+
+    def get_src_x(self):
+        """get_src_x(self)
+        Get source particle x
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : double
+        
+        """
+        cdef double x = self.c_src.get_src_x()
+        return x
+
+    def get_src_y(self):
+        """get_src_y(self)
+        Get source particle y
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : double
+        
+        """
+        cdef double y = self.c_src.get_src_y()
+        return y
+    
+    def get_src_z(self):
+        """get_src_z(self)
+        Get source particle z
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : double
+        
+        """
+        cdef double z = self.c_src.get_src_z()
+        return z
+
+    def get_src_e(self):
+        """get_src_e(self)
+        Get source particle e
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : double
+        
+        """
+        cdef double e = self.c_src.get_src_e()
+        return e
+
+    def get_src_w(self):
+        """get_src_w(self)
+        Get source particle w
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        res1 : double
+        
+        """
+        cdef double w = self.c_src.get_src_w()
+        return w
 
     def get_src_c(self):
         """get_src_c(self)
