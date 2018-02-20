@@ -32,12 +32,12 @@ void pyne::particle_birth_(double* rands,
                            int* c) {
     std::vector<double> rands2(rands, rands + 6);
     pyne::SourceParticle src = sampler->particle_birth(rands2);
-    *x = src.x;
-    *y = src.y;
-    *z = src.z;
-    *e = src.e;
-    *w = src.w;
-    *c = src.c;
+    *x = src.get_src_x();
+    *y = src.get_src_y();
+    *z = src.get_src_z();
+    *e = src.get_src_e();
+    *w = src.get_src_w();
+    *c = src.get_src_c();
 }
 
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
