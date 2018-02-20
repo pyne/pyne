@@ -498,8 +498,6 @@ cdef class SourceParticle:
     -------
     SourceParticle
     ~SourceParticle
-    get_xyzew
-    get_c
     
     Notes
     -----
