@@ -372,7 +372,61 @@ cdef class Sampler:
             for ie_bounds in range(e_bounds_size):
                 e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
         self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, <bint> uniform)
+
+    def _sampler_sampler_5(self, names, e_bounds, mode):
+        """Sampler(self, names, e_bounds, mode)
+        
+        Constuctor for overall Sampler
+        
+        Parameters
+        ----------
+        names : std::map<std::string, std::string>
+        
+        e_bounds : std::vector< double >
+        
+        Returns
+        -------
+        None
+        
+        ################################################################
+        
+        Parameters
+        ----------
+        e_bounds : std::vector< double >
+        
+        names : std::map<std::string, std::string>
+        
+        mode : int
+        
+        Returns
+        -------
+        None
+        
+        """
+        cdef char * filename_proxy
+        cdef char * src_tag_name_proxy
+        cdef cpp_vector[double] e_bounds_proxy
+        cdef int ie_bounds
+        cdef int e_bounds_size
+        cdef double * e_bounds_data
+        cdef char * bias_tag_name_proxy
+        filename_bytes = filename.encode()
+        src_tag_name_bytes = src_tag_name.encode()
+        # e_bounds is a ('vector', 'float64', 0)
+        e_bounds_size = len(e_bounds)
+        if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
+            e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
+            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
+            for ie_bounds in range(e_bounds_size):
+                e_bounds_proxy[ie_bounds] = e_bounds_data[ie_bounds]
+        else:
+            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
+            for ie_bounds in range(e_bounds_size):
+                e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
+        bias_tag_name_bytes = bias_tag_name.encode()
+        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, std_string(<char *> bias_tag_name_bytes))
     
+
     
     _sampler_sampler_0_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, str), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("bias_tag_name", str)))
     _sampler_sampler_1_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, bool), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("uniform", bool)))

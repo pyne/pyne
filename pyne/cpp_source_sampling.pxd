@@ -60,6 +60,7 @@ cdef extern from "source_sampling.h" namespace "pyne":
         Sampler(std_string, std_string, cpp_vector[double]) except +
         Sampler(std_string, std_string, cpp_vector[double], std_string) except +
         Sampler(std_string, std_string, cpp_vector[double], cpp_bool) except +
+        Sampler(cpp_map, cpp_vector, int) except +
 
         # attributes
 
