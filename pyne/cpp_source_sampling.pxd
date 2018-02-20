@@ -11,6 +11,7 @@
 from libcpp cimport bool as cpp_bool
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
+from libcpp.map cimport map as cpp_map
 
 cdef extern from "source_sampling.h" namespace "pyne":
 
