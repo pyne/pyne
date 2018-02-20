@@ -1,3 +1,5 @@
+INCLUDE(DownloadAndExtract)
+
 # set platform preprocessor macro
 macro(pyne_set_platform)
   set(PYNE_PLATFORM "__${CMAKE_SYSTEM_NAME}__")
@@ -15,6 +17,28 @@ macro(pyne_set_platform)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${PYNE_PLATFORM}")
   message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
 endmacro()
+
+macro(pyne_set_asm_platform)
+  # first set OS
+  if (WIN32)
+    set(_plat "win")
+  elseif(APPLE)
+    set(_plat "apple")
+  else()
+    set(_plat "linux")
+  endif()
+  # next set compiler
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(_plat "${_plat}-gnu")
+  elseif (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+    set(_plat "${_plat}-clang")
+  else()
+    set(_plat "${_plat}-NOTFOUND")
+  endif()
+  set(PYNE_ASM_PLATFORM "${_plat}")
+endmacro()
+
 
 # Fortran settings
 # FFLAGS depend on the compiler
@@ -169,6 +193,15 @@ macro(pyne_configure_rpath)
   MESSAGE("-- CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 endmacro()
 
+macro(pyne_download_platform)
+  # Download bateman solver from PyNE data
+  download_platform("https://raw.githubusercontent.com/pyne/data/master" "decay"
+                      ".cpp" ".s")
+
+  # Download CRAM solver from PyNE data
+  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
+                         ".c" ".s")
+endmacro()
 
 macro(pyne_set_fast_compile)
   if(NOT DEFINED PYNE_FAST_COMPILE)
@@ -182,10 +215,8 @@ endmacro()
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
   get_filename_component(_base "${_srcname}" NAME_WE)  # get the base name, without the extension
   # get the assembly file name
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(_asmname "${_base}-clang.s")
-  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(_asmname "${_base}-gnu.s")
+  if (PYNE_ASM_PLATFORM)
+    set(_asmname "${_base}-${PYNE_ASM_PLATFORM}.s")
   else()
     set(_asmname "${_base}-NOTFOUND")
   endif()
@@ -201,7 +232,7 @@ macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
     message(STATUS "Compiling ${_srcname} fast from assembly ${_asmname}")
     set(_filename "${_asmname}")
   endif()
-  set(PYNE_SRCS "${PYNE_SRCS}" "${_filename}")
+    set(PYNE_SRCS "${_filename}" "${PYNE_SRCS}")
 
   # set some compile flags for the selected file
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
