@@ -83,20 +83,13 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
 
   // Sample uniformly within the selected mesh volume element and energy
   // group.
-  std::vector<double> samp;
   std::vector<double> xyz_rands;
   xyz_rands.push_back(rands[2]);
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
   moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
-  samp.push_back(pos[0]); 
-  samp.push_back(pos[1]); 
-  samp.push_back(pos[2]); 
-  samp.push_back(sample_e(e_idx, rands[5]));
-  samp.push_back(sample_w(pdf_idx));
-  samp.push_back(-1.0);
-  pyne::SourceParticle src = SourceParticle(samp[0], samp[1], samp[2], samp[3],
-      samp[4], int(samp[5]));
+  pyne::SourceParticle src = SourceParticle(pos[0], pos[1], pos[2],
+      sample_e(e_idx, rands[5]), sample_w(pdf_idx), -1);
   return src;
 }
 
