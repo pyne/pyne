@@ -548,11 +548,8 @@ cdef class SourceParticle:
         cdef int c = self.c_src.get_c()
         return c
 
-    pass
+    property c:
+        """cell_number c"""
+        def __get__(self):
+            return self.c_src.get_c()
 
-
-
-
-
-
-{'cpppxd_footer': '', 'pyx_header': '', 'pxd_header': '', 'pxd_footer': '', 'cpppxd_header': '', 'pyx_footer': ''}
