@@ -52,9 +52,6 @@ time_conv_dict = {'as': 1e-18,
                   'y': 86400.0*365.25,
                   'year': 86400.0*365.25,
                   'years': 86400.0*365.25,
-                  'ev': 1e-9 * 7.6e-8 / 6.03,
-                  'kev': 1e-12 * 7.6e-8 / 6.03,
-                  'mev': 1e-15 * 7.6e-8 / 6.03,
                   }
 
 
@@ -66,7 +63,7 @@ def to_sec(input_time, units):
     input_time : number
         Time value in [units].
     units : str
-        Units flag, eg 'min', 'ms', 'days', or even 'MeV'.
+        Units flag, eg 'min', 'ms', 'days'
 
     Returns
     -------

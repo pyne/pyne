@@ -46,7 +46,7 @@ extern "C" {
 namespace pyne {
 
   /// MCNP interface for source sampling setup
-  /// \param mode The sampling mode: 1 = analog, 2 = uniform, 3 = user-specified
+  /// \param mode The sampling mode: 0 = analog, 1 = uniform, 2 = user-specified
   void sampling_setup_(int* mode);
   /// MCNP interface to sample particle birth parameters after sampling setup
   /// \param rands Six pseudo-random numbers supplied from the Fortran side.
@@ -90,7 +90,7 @@ namespace pyne {
   };
   
   /// Problem modes
-  enum Mode {USER, ANALOG, UNIFORM};
+  enum BiasMode {USER, ANALOG, UNIFORM};
   
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
@@ -141,7 +141,7 @@ namespace pyne {
     std::vector<double> e_bounds;  ///< Energy boundaries
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
-    Mode mode; ///< Problem mode: analog, uniform, user
+    BiasMode bias_mode; ///< Problem mode: analog, uniform, user
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.

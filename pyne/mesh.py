@@ -412,8 +412,9 @@ class IMeshTag(Tag):
             mtag[i_ve[1]] = value if tsize == 1 else value[0]
         elif isinstance(key, slice):
             key = list(miter)[key]
-            v = np.empty(len(key), self.tag.type) if tsize == 1 else \
-                np.empty((len(key), tsize), self.tag.type)
+            v = np.empty((len(key), tsize), self.tag.type)
+            if tsize == 1 and len(value.shape) == 1:
+                v.shape = (len(key), )
             v[...] = value
             mtag[key] = v
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
@@ -421,8 +422,9 @@ class IMeshTag(Tag):
                 raise KeyError("boolean mask must match the length "
                                "of the mesh.")
             key = [ve for b, ve in zip(key, miter) if b]
-            v = np.empty(len(key), self.tag.type) if tsize == 1 else \
-                np.empty((len(key), tsize), self.tag.type)
+            v = np.empty((len(key), tsize), self.tag.type)
+            if tsize == 1 and len(value.shape) == 1:
+                v.shape = (len(key), )
             v[...] = value
             mtag[key] = v
         elif isinstance(key, Iterable):
@@ -1226,17 +1228,18 @@ class Mesh(object):
         max_num_cells = -1
         for i in range(num_vol_elements):
             max_num_cells = max(max_num_cells,
-                                  len(cell_fracs[cell_fracs['idx'] == i]))
+                                len(cell_fracs[cell_fracs['idx'] == i]))
 
-        # creat tag frame with default value
+        # create tag frame with default value
         cell_largest_frac_number = [-1] * num_vol_elements
         cell_largest_frac = [0.0] * num_vol_elements
-        voxel_cell_number = np.empty(shape=(num_vol_elements,max_num_cells),
+        voxel_cell_number = np.empty(shape=(num_vol_elements, max_num_cells),
                                      dtype=int)
-        voxel_cell_fracs = np.empty(shape=(num_vol_elements,max_num_cells),
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements, max_num_cells),
                                     dtype=float)
         voxel_cell_number.fill(-1)
         voxel_cell_fracs.fill(0.0)
+
         # set the data
         for i in range(num_vol_elements):
             for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == i]):
@@ -1245,11 +1248,11 @@ class Mesh(object):
             # cell_largest_frac_tag
             cell_largest_frac[i] = max(voxel_cell_fracs[i, :])
             largest_index = \
-                list(voxel_cell_fracs[i, :]).index(cell_largest_frac[i])
+                    list(voxel_cell_fracs[i, :]).index(cell_largest_frac[i])
             cell_largest_frac_number[i] = \
-                int(voxel_cell_number[i, largest_index])
+                    int(voxel_cell_number[i, largest_index])
 
-        # creat the tags
+        # create the tags
         self.tag(name='cell_number', value=voxel_cell_number,
                  doc='cell numbers of the voxel, -1 used to fill vacancy',
                  tagtype=IMeshTag, size=max_num_cells, dtype=int)
