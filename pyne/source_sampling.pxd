@@ -26,6 +26,6 @@ cdef class AliasTable:
     cdef public np.ndarray _prob
 
 
-cdef class PySourceParticle:
+cdef class SourceParticle:
     cdef cpp_source_sampling.SourceParticle c_src
 

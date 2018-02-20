@@ -478,12 +478,12 @@ cdef class Sampler:
             for irands in range(rands_size):
                 rands_proxy[irands] = <double> rands[irands]
         cdef cpp_source_sampling.SourceParticle c_src = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
-        return PySourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), c_src.get_e(), c_src.get_w(), c_src.get_c())
+        return SourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), c_src.get_e(), c_src.get_w(), c_src.get_c())
 
 
 
-cdef class PySourceParticle:
-    """Constructor for class PySourceParticle
+cdef class SourceParticle:
+    """Constructor for class SourceParticle
     
     Attributes
     ----------
