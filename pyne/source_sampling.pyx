@@ -532,22 +532,6 @@ cdef class SourceParticle:
         rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
         return rtnval_proxy
 
-    def get_c(self):
-        """get_c(self)
-        Get source particle c
-        
-        Parameters
-        ----------
-        None
-        
-        Returns
-        -------
-        res1 : int
-        
-        """
-        cdef int c = self.c_src.get_c()
-        return c
-
     property c:
         """cell_number c"""
         def __get__(self):
