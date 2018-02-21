@@ -468,7 +468,8 @@ cdef class Sampler:
         cdef np.npy_intp rtnval_proxy_shape[1]
         # rands is a ('vector', 'float64', 0)
         rands_size = len(rands)
-        if isinstance(rands, np.ndarray) and (<np.ndarray> rands).descr.type_num == np.NPY_FLOAT64:
+        if isinstance(rands, np.ndarray) and \
+                (<np.ndarray> rands).descr.type_num == np.NPY_FLOAT64:
             rands_data = <double *> np.PyArray_DATA(<np.ndarray> rands)
             rands_proxy = cpp_vector[double](<size_t> rands_size)
             for irands in range(rands_size):
@@ -477,8 +478,11 @@ cdef class Sampler:
             rands_proxy = cpp_vector[double](<size_t> rands_size)
             for irands in range(rands_size):
                 rands_proxy[irands] = <double> rands[irands]
-        cdef cpp_source_sampling.SourceParticle c_src = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
-        return SourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), c_src.get_e(), c_src.get_w(), c_src.get_c())
+        cdef cpp_source_sampling.SourceParticle c_src = \
+                (<cpp_source_sampling.Sampler *> self._inst)\
+                .particle_birth(rands_proxy)
+        return SourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), \
+                c_src.get_e(), c_src.get_w(), c_src.get_c())
 
 
 
@@ -532,8 +536,7 @@ cdef class SourceParticle:
         rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
         return rtnval_proxy
 
-    property c:
-        """cell_number c"""
-        def __get__(self):
-            return self.c_src.get_c()
-
+    @property
+    def c(self):
+        return self.c_src.get_c()
+    
