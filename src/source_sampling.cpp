@@ -74,6 +74,26 @@ pyne::Sampler::Sampler(std::string filename,
   setup();
 }
 
+pyne::Sampler::Sampler(std::map<std::string, std::string> names, 
+                 std::vector<double> e_bounds, 
+                 int mode)
+  : e_bounds(e_bounds) {
+  // determine the bias_mode
+  if (mode == 0){
+    bias_mode = ANALOG; 
+  } else if (mode == 1) {
+    bias_mode = UNIFORM;
+  } else if (mode == 2) {
+    bias_mode = USER;
+  }
+
+  // find out the filename, src_tag_name and bias_tag_name
+  filename = names["filename"];
+  src_tag_name = names["src_tag_name"];
+  bias_tag_name = names["bias_tag_name"];
+  setup();
+}
+
 pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   //
