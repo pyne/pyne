@@ -14,6 +14,7 @@ from libc.stdlib cimport free
 from libcpp cimport bool as cpp_bool
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
+from libcpp.map cimport map as cpp_map
 
 import numpy as np
 
@@ -403,15 +404,15 @@ cdef class Sampler:
         None
         
         """
-        cdef char * filename_proxy
-        cdef char * src_tag_name_proxy
         cdef cpp_vector[double] e_bounds_proxy
         cdef int ie_bounds
         cdef int e_bounds_size
         cdef double * e_bounds_data
-        cdef char * bias_tag_name_proxy
-        filename_bytes = filename.encode()
-        src_tag_name_bytes = src_tag_name.encode()
+        # Convert names
+        cdef cpp_map[std_string, std_string] cpp_names = cpp_map[std_string, std_string]()
+        for key, value in names.items():
+            cpp_names[key] = value
+
         # e_bounds is a ('vector', 'float64', 0)
         e_bounds_size = len(e_bounds)
         if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
@@ -423,9 +424,7 @@ cdef class Sampler:
             e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
             for ie_bounds in range(e_bounds_size):
                 e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
-        bias_tag_name_bytes = bias_tag_name.encode()
-        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, std_string(<char *> bias_tag_name_bytes))
-    
+        self._inst = new cpp_source_sampling.Sampler(<cpp_map[std_string, std_string]> cpp_names, <cpp_vector[double]> e_bounds_proxy, <int> mode)
 
     
     _sampler_sampler_0_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, str), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("bias_tag_name", str)))
