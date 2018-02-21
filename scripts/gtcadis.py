@@ -15,7 +15,11 @@ config_filename = 'config.ini'
 
 config = \
 """
+# Optional step to assess all materials in geometry for compatibility with 
+SNILB criteria
+[step0]
 
+# Prepare PARTISN input file for adjoint photon transport
 [step1]
 # Path to hdf5 geometry file
 geom_file:
@@ -34,6 +38,19 @@ zmesh:
 intensities:
 # Volume of source cell
 src_vol:
+
+# Calculate T matrix for each material
+[step2]
+
+# Calculate adjoint neutron source
+[step3]
+
+# Prepare PARTISN input for adjoint neutron transport
+[step4]
+
+# Generate Monte Carlo variance reduction parameters 
+(biased source and weight windows)
+[step5]
 
 
 """
