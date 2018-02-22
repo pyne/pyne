@@ -37,7 +37,8 @@ def test_analog_single_hex():
     m.src = IMeshTag(1, float)
     m.src[0] = 1.0
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 1]), False)
+    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src"}
+    sampler = Sampler(names, np.array([0, 1]), 0)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -69,7 +70,8 @@ def test_analog_multiple_hex():
     m.src = IMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", np.array([0, 0.5, 1]), False)
+    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src"}
+    sampler = Sampler(names, np.array([0, 0.5, 1]), 0)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -111,48 +113,8 @@ def test_analog_single_tet():
                [center, v1, v3, v4], 
                [center, v2, v3, v4]]
 
-    sampler = Sampler("tet.h5m", "src", np.array([0, 1]), False)
-    num_samples = 5000
-    score = 1.0/num_samples
-    tally = np.zeros(shape=(4))
-    for i in range(num_samples):
-        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        assert_equal(s.w, 1.0)
-        for i, tet in enumerate(subtets):
-            if point_in_tet(tet, [s.x, s.y, s.z]):
-                tally[i] += score
-                break
-    
-    for t in tally:
-        assert(abs(t - 0.25)/0.25 < 0.2)
-
-@with_setup(None, try_rm_file('tet.h5m'))
-def test_analog_single_tet_map():
-    """This test tests uniform sampling within a single tetrahedron. This is
-    done by dividing the tetrahedron in 4 smaller tetrahedrons and ensuring
-    that each sub-tet is sampled equally.
-    """
-    seed(1953)
-    mesh = iMesh.Mesh()
-    v1 = [0, 0, 0]
-    v2 = [1, 0, 0]
-    v3 = [0, 1, 0]
-    v4 = [0, 0, 1]
-    verts = mesh.createVtx([v1, v2, v3, v4])
-    mesh.createEnt(iMesh.Topology.tetrahedron, verts)
-    m = Mesh(structured=False, mesh=mesh)
-    m.src = IMeshTag(1, float)
-    m.src[:] = np.array([1])
-    m.mesh.save("tet.h5m")
-    center = m.ve_center(list(m.iter_ve())[0])
-
-    subtets = [[center, v1, v2, v3], 
-               [center, v1, v2, v4], 
-               [center, v1, v3, v4], 
-               [center, v2, v3, v4]]
-
-    names = {"filename":"tet.h5m", "src_tag_name":"src"}
-    sampler = Sampler(names, np.array([0, 1]), False)
+    names = {"filename": "tet.h5m", "src_tag_name": "src"}
+    sampler = Sampler(names, np.array([0, 1]), 0)
     num_samples = 5000
     score = 1.0/num_samples
     tally = np.zeros(shape=(4))
@@ -183,7 +145,8 @@ def test_uniform():
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, True)
+    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src"}
+    sampler = Sampler(names, e_bounds, 1)
 
     num_samples = 10000
     score = 1.0/num_samples
@@ -239,7 +202,9 @@ def test_bias():
     m.bias = IMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, "bias")
+    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src",
+             "bias_tag_name": "bias"}
+    sampler = Sampler(names, e_bounds, 2)
 
     num_samples = 10000
     score = 1.0/num_samples
@@ -285,7 +250,9 @@ def test_bias_spatial():
     m.bias[:] = [1, 1]
     e_bounds = np.array([0, 0.5, 1.0])
     m.mesh.save("sampling_mesh.h5m")
-    sampler = Sampler("sampling_mesh.h5m", "src", e_bounds, "bias")
+    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src", 
+             "bias_tag_name": "bias"}
+    sampler = Sampler(names, e_bounds, 2)
 
     num_samples = 10000
     score = 1.0/num_samples
