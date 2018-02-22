@@ -860,10 +860,12 @@ def _convert_unit_to_s(dc):
     ----------
     dc : string. Contain a num and an unit. 
 
-    return: a float number 
+    Returns
+    -------
+    a float number
     """
     # get num and unit
-    [num, unit] = dc.split()    
+    num, unit = dc.split()
     if unit in ('s', 'second'):
         return float(num)
     if unit in ('m', 'minute'):
