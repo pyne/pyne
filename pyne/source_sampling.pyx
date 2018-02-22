@@ -485,7 +485,6 @@ cdef class Sampler:
                 c_src.get_e(), c_src.get_w(), c_src.get_c())
 
 
-
 cdef class SourceParticle:
     """Constructor for class SourceParticle
     
@@ -498,18 +497,11 @@ cdef class SourceParticle:
     w (double) : The weight of the source particle
     c (int) : The cell number of the source particle
     
-    Methods
-    -------
-    SourceParticle
-    ~SourceParticle
-    
     Notes
     -----
     This class was defined in source_sampling.h
     
     The class is found in the "pyne" namespace"""
-
-
 
     # constuctors
     def __cinit__(self, double x, double y, double z, double e, double w, int c):
