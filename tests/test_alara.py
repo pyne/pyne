@@ -223,7 +223,8 @@ def test_photon_source_hdf5_to_mesh():
     mesh = Mesh(structured=True,
                 structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
 
-    tags = {('1001', 'shutdown'): 'tag1', ('TOTAL', '1 h'): 'tag2'}
+    tags = {('1001', 'shutdown'): 'tag1', ('TOTAL', '1.0 h'): 'tag2'}
+    import pdb; pdb.set_trace()
     photon_source_hdf5_to_mesh(mesh, filename + '.h5', tags)
 
     # create lists of lists of expected results
