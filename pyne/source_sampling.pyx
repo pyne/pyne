@@ -531,4 +531,24 @@ cdef class SourceParticle:
     @property
     def c(self):
         return self.c_src.get_c()
-    
+
+    @property
+    def x(self):
+        return self.c_src.get_x()
+
+    @property
+    def y(self):
+        return self.c_src.get_y()
+
+    @property
+    def z(self):
+        return self.c_src.get_z()
+
+    @property
+    def e(self):
+        return self.c_src.get_e()
+
+    @property
+    def w(self):
+        return self.c_src.get_w()
+
