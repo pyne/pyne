@@ -711,11 +711,8 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN, MAX0, MIN0
       INTEGER(KIND=4), EXTERNAL :: INDEXF, TYPSTR
       REAL(KIND=8), EXTERNAL :: DVALST
-      REAL(KIND=8), INTRINSIC :: DABS
 !
 !     Local variables
 !
@@ -863,16 +860,8 @@
      &           '       Some records not modified - See report files'
             EndIf
             If(chkds2)Then
-               Write(idefo,'(A)')                                       &       
-     &     '     Warning - BELW or BMLW found but no MULT, DPI unknown,'&       
-               Write(idefo,'(2A)')'       or mixed MULT with no MR - ', &       
-     &           'See report files'
             EndIf
             If(chkds3)Then
-               Write(idefo,'(A)')                                       &       
-     &           '     Warning - Problem with asymmetric uncertainties' &       
-               Write(idefo,'(A)')                                       &       
-     &           '       - See report files'
             EndIf
             If(chkds4)Then
                Write(idefo,'(A)')                                       &       
@@ -1388,8 +1377,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, LEN, MAX0
-      REAL(KIND=8), INTRINSIC :: DSQRT
 !
 !     Local variables
 !
@@ -1539,9 +1526,7 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, LEN, MAX0
       INTEGER(KIND=4), EXTERNAL :: INDEXF
-      REAL(KIND=8), INTRINSIC :: DABS, DSQRT
 !
 !     Local variables
 !
@@ -1703,8 +1688,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX
-      REAL(KIND=8), INTRINSIC :: DABS, DSQRT
 !
 !     Local variables
 !
@@ -1893,7 +1876,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX
 !
 !     Local variables
 !
@@ -1924,7 +1906,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN
 !
 !     Local variables
 !
@@ -1946,7 +1927,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
 !
 !     Local variables
 !
@@ -2001,7 +1981,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
 !
 !     Local variables
 !
@@ -2036,9 +2015,7 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX
       INTEGER(KIND=4), EXTERNAL :: INDEXF
-      REAL(KIND=4) :: ABS,SQRT
 !
 !     Local variables
 !
@@ -2354,8 +2331,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
-      REAL(KIND=8), INTRINSIC :: DBLE, DLOG10, DSQRT
 !
 !     Local variables
 !
@@ -2673,9 +2648,7 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: INDEXF, TYPSTR
-      REAL(KIND=4), INTRINSIC :: FLOAT
 !
 !     Local variables
 !
@@ -2926,8 +2899,6 @@
 !
 !     Functions used
 !
-      CHARACTER(LEN=1), INTRINSIC :: CHAR
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, ICHAR, INDEX, MAX0
       INTEGER(KIND=4), EXTERNAL :: INDEXF
       REAL(KIND=4), EXTERNAL :: VALSTR
 !
@@ -2975,9 +2946,7 @@
     5    l1 = LEN_TRIM(LINe(j))
          WRITE(irpt,'(4X,2A)') 'OLD CARD:  ', LINe(j)(1:l1)
 !        If old card and new card are identical, keep old record
-*        Remove code between **JKT** (check for <, >, AP)
          GOTO 51
-*        **JKT**
          If(INDEX(nucard(10:l2),'>').GT.0 .OR.                          &       
      &     INDEX(nucard(10:l2),'<').GT.0 .OR.                           &       
      &     INDEX(nucard(10:l2),' AP ').GT.0)Then
@@ -3032,7 +3001,6 @@
                EndIf
 	    EndIf	
          EndIf
-*        **JKT**
 51       Continue 
 
          IF(INDEX(LINe(j)(10:l1),Nucard(10:l2)).NE.0) THEN
@@ -3223,8 +3191,6 @@
             END IF
             GO TO 15
          END DO
-*        Eliminate coding between **jkt2** (Accept new card)
-*         **JKT2**
          goto 14
          WRITE(iout,'(A)') LINe(j)
          WRITE(irpt,'(6X,A)')'***** OLD CARD KEPT *****'
@@ -3280,9 +3246,7 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX
       INTEGER(KIND=4), EXTERNAL :: INDEXF, IVLSTR
-      REAL(KIND=8), INTRINSIC :: DMAX1, DMIN1
 !
 !     Local variables
 !
@@ -3558,7 +3522,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, MAX0
       INTEGER(KIND=4), EXTERNAL :: INDEXF
 !
 !     Local variables
@@ -3771,7 +3734,6 @@
 !
 !     Functions used
 !
-      REAL(KIND=8), INTRINSIC :: DBLE, DLOG, DLOG10
 !
 !     Local variables
 !
@@ -3848,7 +3810,6 @@
 !
 !     Functions used
 !
-      REAL(KIND=8), INTRINSIC :: DBLE
 !
 !     Local variables
 !
@@ -3886,7 +3847,6 @@
 !
 !     Functions used
 !
-      REAL(KIND=8), INTRINSIC :: DBLE, DLOG
 !
 !     Local variables
 !
@@ -3923,8 +3883,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
-      REAL(KIND=8), INTRINSIC :: DSQRT
 !
 !     Local variables
 !
@@ -4048,7 +4006,6 @@
 !
 !     Functions used
 !
-      REAL(KIND=8), INTRINSIC :: DABS, DLOG10, DSQRT
 !
 !     Local variables
 !
@@ -4117,7 +4074,6 @@
 !     Local variables
 !
       REAL(KIND=8) :: a
-      REAL(KIND=8), INTRINSIC :: DSQRT
 !
       IF(W.NE.0..AND.Y.NE.0..AND.Z.NE.0.) THEN
          a = (Dw/W)**2 + (Dy/Y)**2 + (Dz/Z)**2
@@ -4217,7 +4173,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: IVLSTR, TYPSTR
 !
 !     Local variables
@@ -4271,8 +4226,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
-      REAL(KIND=8), INTRINSIC :: DBLE
 !
 !     Local variables
 !
@@ -4347,7 +4300,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN
       INTEGER(KIND=4), EXTERNAL :: INDEXF
 !
 !     Local variables
@@ -4410,7 +4362,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM
 !
 !     Local variables
 !
@@ -4450,7 +4401,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN
 !
 !     Local variables
 !
@@ -4481,9 +4431,7 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX,LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: INDEXF,IVLSTR,TYPSTR
-      REAL (KIND=8), INTRINSIC :: DSQRT
 !
 !     Local variables
 !
@@ -4568,8 +4516,6 @@
          Do i=1,nsav
             If(INDEX(savcont(i),TRIM(tcomp)//' '//TRIM(dtcomp)) .GT. 0) &       
      &        THEN
-               Write(irpt,'(/8A)')'     ***** ',TRIM(savcont(i)),       &       
-     &           ' equal to T1/2=',TRIM(tcomp),' ',TRIM(dtcomp),' *****'&       
                tcomp=' '
                GoTo 200
             EndIf
@@ -4707,9 +4653,7 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, LEN, MAX0
       INTEGER(KIND=4), EXTERNAL :: INDEXF,IVLSTR
-      REAL(KIND=8), INTRINSIC :: DABS, DSQRT
 !
 !     Local variables
 !
@@ -4848,7 +4792,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX
 !
 !     Local variables
 !
@@ -4885,7 +4828,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: LEN_TRIM, INDEX, IABS
       INTEGER(KIND=4), EXTERNAL :: IVLSTR
 !
 !     Local variables
@@ -5180,9 +5122,7 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INDEX, LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: INDEXF
-      CHARACTER(LEN=1), INTRINSIC :: CHAR
 !
 !     Local variables
 !
@@ -5350,7 +5290,6 @@
 !
 !     Functions used
 !
-      INTEGER(KIND=4), INTRINSIC :: INT,LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: IVLSTR
 !
 !     Local variables
