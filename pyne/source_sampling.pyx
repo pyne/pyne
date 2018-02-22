@@ -374,7 +374,7 @@ cdef class Sampler:
                 e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
         self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, <bint> uniform)
 
-    def _sampler_sampler_5(self, names, e_bounds, mode):
+    def _sampler_sampler_2(self, names, e_bounds, mode):
         """Sampler(self, names, e_bounds, mode)
         
         Constuctor for overall Sampler
@@ -429,6 +429,7 @@ cdef class Sampler:
     
     _sampler_sampler_0_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, str), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("bias_tag_name", str)))
     _sampler_sampler_1_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, bool), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("uniform", bool)))
+    _sampler_sampler_2_argtypes = frozenset(((0, dict), (1, np.ndarray), (3, int), ("names", dict), ("e_bounds",  np.ndarray), ("mode", int)))
     
     def __init__(self, *args, **kwargs):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
@@ -480,6 +481,9 @@ cdef class Sampler:
         if types <= self._sampler_sampler_1_argtypes:
             self._sampler_sampler_1(*args, **kwargs)
             return
+        if types <= self._sampler_sampler_2_argtypes:
+            self._sampler_sampler_2(*args, **kwargs)
+            return
         # duck-typed dispatch based on whatever works!
         try:
             self._sampler_sampler_0(*args, **kwargs)
@@ -492,6 +496,11 @@ cdef class Sampler:
         except (RuntimeError, TypeError, NameError):
             pass
         raise RuntimeError('method __init__() could not be dispatched')
+        try:
+            self._sampler_sampler_2(*args, **kwargs)
+            return
+        except (RuntimeError, TypeError, NameError):
+            pass
     
     def __dealloc__(self):
         if self._free_inst and self._inst is not NULL:
