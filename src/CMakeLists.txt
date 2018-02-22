@@ -23,6 +23,8 @@ set(PYNE_SRCS
   "endftod.f90"
   "complex_windows.cpp"
   )
+if(PYNE_PLATFORM STREQL "__WIN_MSVC__")
+endif()
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"
   "transport_spatial_methods/3d/angle.f90"
