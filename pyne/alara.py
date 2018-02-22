@@ -874,9 +874,9 @@ def _convert_unit_to_s(dc):
     if unit in ('w', 'week'):
         return float(num) * 60 * 60 * 24 * 7
     if unit in ('y', 'year'):
-        return float(num) * 60 * 60 * 24 * 7 * 52 
+        return float(num) * 60 * 60 * 24 * 365
     if unit in ('c', 'century'):
-        return float(num) * 60 * 60 * 24 * 7 * 52 * 100
+        return float(num) * 60 * 60 * 24 * 365 * 100
     raise ValueError('Invalid unit: {0}'.format(unit))
 
 def _find_phsrc_dc(idc, phtn_src_dc):
@@ -897,8 +897,6 @@ def _find_phsrc_dc(idc, phtn_src_dc):
         idc_s = _convert_unit_to_s(idc)
         phtn_src_dc_s = []
         for i, dc in enumerate(phtn_src_dc):
-            if dc == 'TOTAL':
-                continue
             dc_s = _convert_unit_to_s(dc)
             if (abs(idc_s - dc_s)/dc_s) < 1e-6:
                 return phtn_src_dc[i]
