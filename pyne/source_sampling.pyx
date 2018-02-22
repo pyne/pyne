@@ -490,12 +490,18 @@ cdef class SourceParticle:
     
     Attributes
     ----------
-    x (double) : The x coordinate of the source particle
-    y (double) : The y coordinate of the source particle
-    z (double) : The z coordinate of the source particle
-    e (double) : The energy of the source particle
-    w (double) : The weight of the source particle
-    c (int) : The cell number of the source particle
+    x : double
+        The x coordinate of the source particle
+    y : double
+        The y coordinate of the source particle
+    z : double
+        The z coordinate of the source particle
+    e : double
+        The energy of the source particle
+    w : double
+        The weight of the source particle
+    c : int
+        The cell number of the source particle
     
     Notes
     -----
