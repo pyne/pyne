@@ -495,12 +495,12 @@ cdef class Sampler:
             return
         except (RuntimeError, TypeError, NameError):
             pass
-        raise RuntimeError('method __init__() could not be dispatched')
         try:
             self._sampler_sampler_2(*args, **kwargs)
             return
         except (RuntimeError, TypeError, NameError):
             pass
+        raise RuntimeError('method __init__() could not be dispatched')
     
     def __dealloc__(self):
         if self._free_inst and self._inst is not NULL:
