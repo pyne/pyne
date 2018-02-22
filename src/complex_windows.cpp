@@ -1,10 +1,12 @@
 #include <complex>
 
+#include "complex_windows.h"
+
 
 struct _Dcomplex {
     double real;
     double imag;
-};  
+};
 
 
 extern "C" _Dcomplex
