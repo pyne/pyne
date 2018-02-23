@@ -80,7 +80,7 @@ endif(MOAB_FOUND)
 fast_compile(decay.cpp "-O0" "-O0" "-O0")
 
 # fast compile cram, which doesn't work on Windows due to a lack of C99 support
-if(NOT PYNE_ASM_PLATFORM STREQUAL "win")
+if(NOT WIN32)
   fast_compile(cram.c
     "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
     "-O0 -ffast-math"

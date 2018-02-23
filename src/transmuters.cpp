@@ -4,7 +4,7 @@ extern "C" {
 #include "utils.h"
 #include "transmuters.h"
 
-
+#ifndef _WIN32
 std::map<int, double> pyne::transmuters::cram(std::vector<double>& A,
                                               const std::map<int, double>& n0,
                                               const int order) {
@@ -61,3 +61,4 @@ std::map<int, double> pyne::transmuters::cram(std::vector<double>& A,
   }
   return n1;
 }
+#endif

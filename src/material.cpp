@@ -1612,7 +1612,7 @@ pyne::Material pyne::Material::decay(double t) {
   return rtn;
 }
 
-
+#ifndef _WIN32
 pyne::Material pyne::Material::cram(std::vector<double> A,
                                     const int order) {
   Material rtn;
@@ -1620,6 +1620,7 @@ pyne::Material pyne::Material::cram(std::vector<double> A,
   rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
   return rtn;
 }
+#endif
 
 pyne::Material pyne::Material::operator+ (double y) {
   // Overloads x + y
