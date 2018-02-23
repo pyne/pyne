@@ -15,25 +15,27 @@ import numpy as np
 np.import_array()
 np.import_ufunc()
 
-IF UNAME_SYSNAME != "Windows":
-    def cram(A, n0, int order=14):
-        """Basic CRAM solver that takes a (flat) A matrix and an inital nuclide
-        atom fraction composition map and returns the value.
+def cram(A, n0, int order=14):
+    """Basic CRAM solver that takes a (flat) A matrix and an inital nuclide
+    atom fraction composition map and returns the value.
 
-        Parameters
-        ----------
-        A : 1D array-like
-            The transmutation matrix [unitless]
-        n0 : Mapping
-            The initial compositions [atom fraction]
-        order : int, optional
-            The order of approximation, default 14.
+    Parameters
+    ----------
+    A : 1D array-like
+       The transmutation matrix [unitless]
+    n0 : Mapping
+       The initial compositions [atom fraction]
+    order : int, optional
+        The order of approximation, default 14.
 
-        Returns
-        -------
-        n1 : Mapping
-            The result of the transmutation [atom fraction]
-        """
+    Returns
+    -------
+    n1 : Mapping
+        The result of the transmutation [atom fraction]
+    """
+    IF UNAME_SYSNAME == "Windows":
+        raise RuntimeError("cram not yet supported on Windows.")
+    ELSE:
         # convert A
         A = np.asarray(A, dtype=np.float64)
         cdef int Alen = len(A)

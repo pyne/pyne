@@ -1243,21 +1243,23 @@ cdef class _Material:
         pymat.mat_pointer[0] = self.mat_pointer.decay(t)
         return pymat
 
-    IF UNAME_SYSNAME != "Windows":
-        def cram(self, A, int order=14):
-            """Transmutes the material via the CRAM method.
+    def cram(self, A, int order=14):
+        """Transmutes the material via the CRAM method.
 
-            Parameters
-            ----------
-            A : 1D array-like
-                The transmutation matrix [unitless]
-            order : int, optional
-                The CRAM approximation order (default 14).
+        Parameters
+        ----------
+        A : 1D array-like
+            The transmutation matrix [unitless]
+        order : int, optional
+            The CRAM approximation order (default 14).
 
-            Returns
-            -------
-            A new material which has been transmuted.
-            """
+        Returns
+        -------
+        A new material which has been transmuted.
+        """
+        IF UNAME_SYSNAME == "Windows":
+            raise RuntimeError("cram not yet supported on Windows")
+        ELSE:
             A = np.asarray(A, dtype=np.float64)
             cdef int Alen = len(A)
             cdef double* Aptr = <double*> np.PyArray_DATA(A)
@@ -1268,7 +1270,6 @@ cdef class _Material:
             cdef _Material pymat = Material()
             pymat.mat_pointer[0] = self.mat_pointer.cram(cpp_A, order)
             return pymat
-
 
     #
     # Operator Overloads

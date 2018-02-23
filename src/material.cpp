@@ -1612,15 +1612,17 @@ pyne::Material pyne::Material::decay(double t) {
   return rtn;
 }
 
-#ifndef _WIN32
 pyne::Material pyne::Material::cram(std::vector<double> A,
                                     const int order) {
+#ifdef _WIN32
+  throw std::runtime_error("cram not yet supported on Windows");
+#else
   Material rtn;
   rtn.from_atom_frac(pyne::transmuters::cram(A, to_atom_frac(), order));
   rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
   return rtn;
-}
 #endif
+}
 
 pyne::Material pyne::Material::operator+ (double y) {
   // Overloads x + y
