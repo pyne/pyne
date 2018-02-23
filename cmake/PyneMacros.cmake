@@ -200,9 +200,11 @@ macro(pyne_download_platform)
   download_platform("https://raw.githubusercontent.com/pyne/data/master" "decay"
                       ".cpp" ".s")
 
-  # Download CRAM solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
-                         ".c" ".s")
+  # Download CRAM solver from PyNE data, if not on windows
+  if(NOT PYNE_ASM_PLATFORM STREQUAL "win")
+    download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
+                      ".c" ".s")
+  endif()
 endmacro()
 
 macro(pyne_set_fast_compile)
