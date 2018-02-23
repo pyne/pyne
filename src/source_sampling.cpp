@@ -28,14 +28,16 @@ void pyne::particle_birth_(double* rands,
                            double* y,
                            double* z,
                            double* e,
-                           double* w) {
+                           double* w,
+                           int* c) {
     std::vector<double> rands2(rands, rands + 6);
-    std::vector<double> samp = sampler->particle_birth(rands2);
-    *x = samp[0];
-    *y = samp[1];
-    *z = samp[2];
-    *e = samp[3];
-    *w = samp[4];
+    pyne::SourceParticle src = sampler->particle_birth(rands2);
+    *x = src.get_x();
+    *y = src.get_y();
+    *z = src.get_z();
+    *e = src.get_e();
+    *w = src.get_w();
+    *c = src.get_c();
 }
 
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
@@ -72,7 +74,7 @@ pyne::Sampler::Sampler(std::string filename,
   setup();
 }
 
-std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
+pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   //
   int pdf_idx =at->sample_pdf(rands[0], rands[1]);
@@ -81,18 +83,14 @@ std::vector<double> pyne::Sampler::particle_birth(std::vector<double> rands) {
 
   // Sample uniformly within the selected mesh volume element and energy
   // group.
-  std::vector<double> samp;
   std::vector<double> xyz_rands;
   xyz_rands.push_back(rands[2]);
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
   moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
-  samp.push_back(pos[0]); 
-  samp.push_back(pos[1]); 
-  samp.push_back(pos[2]); 
-  samp.push_back(sample_e(e_idx, rands[5]));
-  samp.push_back(sample_w(pdf_idx));
-  return samp;
+  pyne::SourceParticle src = SourceParticle(pos[0], pos[1], pos[2],
+      sample_e(e_idx, rands[5]), sample_w(pdf_idx), -1);
+  return src;
 }
 
 void pyne::Sampler::setup() {
@@ -394,3 +392,37 @@ int pyne::AliasTable::sample_pdf(double rand1, double rand2) {
   int i = (int) n * rand1;
   return rand2 < prob[i] ? i : alias[i];
 }
+
+pyne::SourceParticle::SourceParticle() {
+    x = -1.0;
+    y = -1.0;
+    z = -1.0;
+    e = -1.0;
+    w = -1.0;
+    c = -1;
+}
+
+pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
+                                     double _e, double _w, int _c) {
+    x = _x;
+    y = _y;
+    z = _z;
+    e = _e;
+    w = _w;
+    c = _c;
+}
+
+pyne::SourceParticle::~SourceParticle() {};
+
+std::vector<double> pyne::SourceParticle::get_xyzew() {
+    std::vector<double> xyzew;
+    xyzew.push_back(x);
+    xyzew.push_back(y);
+    xyzew.push_back(z);
+    xyzew.push_back(e);
+    xyzew.push_back(w);
+    return xyzew;
+}
+
+
+

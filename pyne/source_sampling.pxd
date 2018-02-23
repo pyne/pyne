@@ -14,14 +14,9 @@ from libcpp.vector cimport vector as cpp_vector
 from pyne cimport cpp_source_sampling
 
 
-
 cdef class Sampler:
     cdef void * _inst
     cdef public bint _free_inst
-    pass
-
-
-
 
 
 cdef class AliasTable:
@@ -29,9 +24,8 @@ cdef class AliasTable:
     cdef public bint _free_inst
     cdef public np.ndarray _alias
     cdef public np.ndarray _prob
-    pass
 
 
+cdef class SourceParticle:
+    cdef cpp_source_sampling.SourceParticle c_src
 
-
-{'cpppxd_footer': '', 'pyx_header': '', 'pxd_header': '', 'pxd_footer': '', 'cpppxd_header': '', 'pyx_footer': ''}

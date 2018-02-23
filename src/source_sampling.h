@@ -55,12 +55,14 @@ namespace pyne {
   /// \param z The sampled z position returned by this function
   /// \param e The sampled energy returned by this function
   /// \param w The sampled y statistical weight returned by this function
+  /// \param c The sampled cell number
   void particle_birth_(double* rands,
                             double* x,
                             double* y,
                             double* z,
                             double* e,
-                            double* w);
+                            double* w,
+                            int* c);
   /// Helper function for MCNP interface that reads energy boudaries from a file
   /// \param e_bounds_file A file containing the energy group boundaries.
   std::vector<double> read_e_bounds(std::string e_bounds_file);
@@ -87,6 +89,41 @@ namespace pyne {
     int n; /// Number of bins in the PDF.
     std::vector<double> prob; /// Probabilities.
     std::vector<int> alias; /// Alias probabilities.
+  };
+
+  // class Source particle
+  class SourceParticle {
+    public:
+    SourceParticle();
+    /// Constructor for source particle
+    /// \param x The x coordinate of the source particle
+    /// \param y The y coordinate of the source particle
+    /// \param z The z coordinate of the source particle
+    /// \param e The energy of the source particle
+    /// \param w The weight of the source particle
+    /// \param c The cell number of the source particle
+    SourceParticle(double x,
+                   double y,
+                   double z,
+                   double e,
+                   double w,
+                   int c);
+    ~SourceParticle();
+
+    std::vector<double> get_xyzew();
+    double get_x() {return x;};
+    double get_y() {return y;};
+    double get_z() {return z;};
+    double get_e() {return e;};
+    double get_w() {return w;};
+    int get_c() {return c;};
+    private:
+    double x; // x coordinate
+    double y; // y coordinate
+    double z; // z coordinate
+    double e; // energy
+    double w; // weight
+    int c; // cell number
   };
   
   /// Problem modes
@@ -124,9 +161,10 @@ namespace pyne {
             std::string bias_tag_name);
     /// Samples particle birth parameters
     /// \param rands Six pseudo-random numbers in range [0, 1].
-    /// \return A vector containing the x position, y, position, z, point, energy
-    ///         and weight of a particle (in that order).
-    std::vector<double> particle_birth(std::vector<double> rands);
+    /// \return A SourceParticle object containing the x position, y, position,
+    ///         z, position, e, energy and w, weight of a particle.
+    pyne::SourceParticle particle_birth(std::vector<double> rands);
+
     ~Sampler() {
       delete mesh;
       delete at;

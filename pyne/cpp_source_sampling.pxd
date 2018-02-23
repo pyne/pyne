@@ -28,8 +28,25 @@ cdef extern from "source_sampling.h" namespace "pyne":
         int sample_pdf() except +
         int sample_pdf(double) except +
         int sample_pdf(double, double) except +
-        pass
 
+
+cdef extern from "source_sampling.h" namespace "pyne":
+
+    cdef cppclass SourceParticle:
+        # constructors
+        SourceParticle() except +
+        SourceParticle(double, double, double, double, double, int) except +
+
+        # attributes
+
+        # methods
+        cpp_vector[double] get_xyzew() except +
+        double get_x() except +
+        double get_y() except +
+        double get_z() except +
+        double get_e() except +
+        double get_w() except +
+        int get_c() except +
 
 
 cdef extern from "source_sampling.h" namespace "pyne":
@@ -47,11 +64,6 @@ cdef extern from "source_sampling.h" namespace "pyne":
 
 
         # methods
-        cpp_vector[double] particle_birth() except +
-        cpp_vector[double] particle_birth(cpp_vector[double]) except +
-        pass
+        SourceParticle particle_birth() except +
+        SourceParticle particle_birth(cpp_vector[double]) except +
 
-
-
-
-{'cpppxd_footer': '', 'pyx_header': '', 'pxd_header': '', 'pxd_footer': '', 'cpppxd_header': '', 'pyx_footer': ''}
