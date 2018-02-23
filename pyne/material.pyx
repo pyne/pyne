@@ -610,7 +610,7 @@ cdef class _Material:
     def decay_heat(self):
         """This provides the decay heat using the comp of the the Material. It
         assumes that the composition of material is given in units of [grams]
-        and returns decay heat in units of [MW/material object total mass].  
+        and returns decay heat in units of [MW].  
 
         Returns
         -------
