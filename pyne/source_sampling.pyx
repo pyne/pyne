@@ -424,10 +424,10 @@ cdef class Sampler:
         if types <= self._sampler_sampler_0_argtypes:
             self._sampler_sampler_0(*args, **kwargs)
             return
-        if types <= self._sampler_sampler_1_argtypes:
+        elif types <= self._sampler_sampler_1_argtypes:
             self._sampler_sampler_1(*args, **kwargs)
             return
-        if types <= self._sampler_sampler_2_argtypes:
+        elif types <= self._sampler_sampler_2_argtypes:
             self._sampler_sampler_2(*args, **kwargs)
             return
         # duck-typed dispatch based on whatever works!
