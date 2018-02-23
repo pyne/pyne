@@ -11,6 +11,7 @@
 cimport dtypes
 cimport numpy as np
 from libc.stdlib cimport free
+from libc.string cimport memcpy
 from libcpp cimport bool as cpp_bool
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
@@ -188,6 +189,20 @@ cdef class AliasTable:
     pass
 
 
+def convert_e_bounds(e_bounds):
+    """
+    """
+    cdef cpp_vector[double] e_bounds_proxy
+    cdef int ie_bounds
+    cdef int e_bounds_size
+    cdef double * e_bounds_data
+    e_bounds = np.array(e_bounds, dtype=np.float64)
+    e_bounds_size = len(e_bounds)
+    e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
+    e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
+    memcpy(<void*> &e_bounds_proxy[0], e_bounds_data, sizeof(double) *  e_bounds_size)
+    return e_bounds_proxy
+
 
 
 
@@ -271,26 +286,18 @@ cdef class Sampler:
         """
         cdef char * filename_proxy
         cdef char * src_tag_name_proxy
-        cdef cpp_vector[double] e_bounds_proxy
-        cdef int ie_bounds
-        cdef int e_bounds_size
-        cdef double * e_bounds_data
         cdef char * bias_tag_name_proxy
         filename_bytes = filename.encode()
         src_tag_name_bytes = src_tag_name.encode()
-        # e_bounds is a ('vector', 'float64', 0)
-        e_bounds_size = len(e_bounds)
-        if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
-            e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = e_bounds_data[ie_bounds]
-        else:
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
         bias_tag_name_bytes = bias_tag_name.encode()
-        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, std_string(<char *> bias_tag_name_bytes))
+        # convert e_bounds
+        cdef cpp_vector[double] e_bounds_proxy = convert_e_bounds(e_bounds)
+        # construct sampler
+        self._inst = new cpp_source_sampling.Sampler(
+                std_string(<char *> filename_bytes),
+                std_string(<char *> src_tag_name_bytes),
+                e_bounds_proxy,
+                std_string(<char *> bias_tag_name_bytes))
     
     
     def _sampler_sampler_1(self, filename, src_tag_name, e_bounds, uniform):
@@ -317,24 +324,17 @@ cdef class Sampler:
         """
         cdef char * filename_proxy
         cdef char * src_tag_name_proxy
-        cdef cpp_vector[double] e_bounds_proxy
-        cdef int ie_bounds
-        cdef int e_bounds_size
-        cdef double * e_bounds_data
+        # convert filename
         filename_bytes = filename.encode()
         src_tag_name_bytes = src_tag_name.encode()
-        # e_bounds is a ('vector', 'float64', 0)
-        e_bounds_size = len(e_bounds)
-        if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
-            e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = e_bounds_data[ie_bounds]
-        else:
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
-        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, <bint> uniform)
+        # convert e_bounds
+        cdef cpp_vector[double] e_bounds_proxy = convert_e_bounds(e_bounds)
+        # construct sampler
+        self._inst = new cpp_source_sampling.Sampler(
+                std_string(<char *> filename_bytes),
+                std_string(<char *> src_tag_name_bytes),
+                e_bounds_proxy,
+                <bint> uniform)
 
     def _sampler_sampler_2(self, filename, tag_names, e_bounds, mode):
         """Sampler(self, filename, tag_names, e_bounds, mode)
@@ -353,29 +353,17 @@ cdef class Sampler:
         -------
         None
         """
-        cdef char * filename_proxy
-        cdef cpp_vector[double] e_bounds_proxy
-        cdef int ie_bounds
-        cdef int e_bounds_size
-        cdef double * e_bounds_data
         # convert filename
+        cdef char * filename_proxy
         filename_bytes = filename.encode()
         # Convert tag_names
-        cdef cpp_map[std_string, std_string] cpp_tag_names = cpp_map[std_string, std_string]()
+        cdef cpp_map[std_string, std_string] cpp_tag_names = \
+                cpp_map[std_string, std_string]()
         for key, value in tag_names.items():
             cpp_tag_names[key] = value
         # convert e_bounds
-        # e_bounds is a ('vector', 'float64', 0)
-        e_bounds_size = len(e_bounds)
-        if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
-            e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = e_bounds_data[ie_bounds]
-        else:
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
+        cdef cpp_vector[double] e_bounds_proxy = convert_e_bounds(e_bounds)
+        # construct sampler
         self._inst = new cpp_source_sampling.Sampler(
                 std_string(<char *> filename_bytes),
                 <cpp_map[std_string, std_string]> cpp_tag_names,
