@@ -180,6 +180,7 @@ def step2():
     e_bounds = phtn_src_energy_bounds("alara_geom")
     e_bounds_str = ""
     for e in e_bounds:
+        e = e/1e6 # convert unit to MeV
         e_bounds_str += "{0}\n".format(e)
     with open("e_bounds", 'w') as f:
         f.write(e_bounds_str)

@@ -1252,11 +1252,6 @@ class Mesh(object):
             cell_largest_frac_number[i] = \
                     int(voxel_cell_number[i, largest_index])
 
-        # reshape the array
-        if max_num_cells == 1:
-            voxel_cell_number.shape = (num_vol_elements, )
-            voxel_cell_fracs.shape = (num_vol_elements, )
-
         # create the tags
         self.tag(name='cell_number', value=voxel_cell_number,
                  doc='cell numbers of the voxel, -1 used to fill vacancy',
