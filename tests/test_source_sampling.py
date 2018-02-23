@@ -37,8 +37,9 @@ def test_analog_single_hex():
     m.src = IMeshTag(1, float)
     m.src[0] = 1.0
     m.mesh.save("sampling_mesh.h5m")
-    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src"}
-    sampler = Sampler(names, np.array([0, 1]), 0)
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src"}
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), 0)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -70,8 +71,9 @@ def test_analog_multiple_hex():
     m.src = IMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
     m.mesh.save("sampling_mesh.h5m")
-    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src"}
-    sampler = Sampler(names, np.array([0, 0.5, 1]), 0)
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src"}
+    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), 0)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -112,9 +114,9 @@ def test_analog_single_tet():
                [center, v1, v2, v4], 
                [center, v1, v3, v4], 
                [center, v2, v3, v4]]
-
-    names = {"filename": "tet.h5m", "src_tag_name": "src"}
-    sampler = Sampler(names, np.array([0, 1]), 0)
+    filename = "tet.h5m"
+    tag_names = {"src_tag_name": "src"}
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), 0)
     num_samples = 5000
     score = 1.0/num_samples
     tally = np.zeros(shape=(4))
@@ -145,8 +147,9 @@ def test_uniform():
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
     m.mesh.save("sampling_mesh.h5m")
-    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src"}
-    sampler = Sampler(names, e_bounds, 1)
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src"}
+    sampler = Sampler(filename, tag_names, e_bounds, 1)
 
     num_samples = 10000
     score = 1.0/num_samples
@@ -202,9 +205,10 @@ def test_bias():
     m.bias = IMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
     m.mesh.save("sampling_mesh.h5m")
-    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src",
-             "bias_tag_name": "bias"}
-    sampler = Sampler(names, e_bounds, 2)
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src",
+                 "bias_tag_name": "bias"}
+    sampler = Sampler(filename, tag_names, e_bounds, 2)
 
     num_samples = 10000
     score = 1.0/num_samples
@@ -250,9 +254,10 @@ def test_bias_spatial():
     m.bias[:] = [1, 1]
     e_bounds = np.array([0, 0.5, 1.0])
     m.mesh.save("sampling_mesh.h5m")
-    names = {"filename": "sampling_mesh.h5m", "src_tag_name": "src", 
-             "bias_tag_name": "bias"}
-    sampler = Sampler(names, e_bounds, 2)
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src",
+                 "bias_tag_name": "bias"}
+    sampler = Sampler(filename, tag_names, e_bounds, 2)
 
     num_samples = 10000
     score = 1.0/num_samples

@@ -336,14 +336,16 @@ cdef class Sampler:
                 e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
         self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, <bint> uniform)
 
-    def _sampler_sampler_2(self, names, e_bounds, mode):
-        """Sampler(self, names, e_bounds, mode)
+    def _sampler_sampler_2(self, filename, tag_names, e_bounds, mode):
+        """Sampler(self, filename, tag_names, e_bounds, mode)
         
         Constuctor for overall Sampler
         
         Parameters
         ----------
-        names : std::map<std::string, std::string>
+        filename : std::string
+        
+        tag_names : std::map<std::string, std::string>
         
         e_bounds : std::vector< double >
         
@@ -351,15 +353,18 @@ cdef class Sampler:
         -------
         None
         """
+        cdef char * filename_proxy
         cdef cpp_vector[double] e_bounds_proxy
         cdef int ie_bounds
         cdef int e_bounds_size
         cdef double * e_bounds_data
-        # Convert names
-        cdef cpp_map[std_string, std_string] cpp_names = cpp_map[std_string, std_string]()
-        for key, value in names.items():
-            cpp_names[key] = value
-
+        # convert filename
+        filename_bytes = filename.encode()
+        # Convert tag_names
+        cdef cpp_map[std_string, std_string] cpp_tag_names = cpp_map[std_string, std_string]()
+        for key, value in tag_names.items():
+            cpp_tag_names[key] = value
+        # convert e_bounds
         # e_bounds is a ('vector', 'float64', 0)
         e_bounds_size = len(e_bounds)
         if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
@@ -372,7 +377,8 @@ cdef class Sampler:
             for ie_bounds in range(e_bounds_size):
                 e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
         self._inst = new cpp_source_sampling.Sampler(
-                <cpp_map[std_string, std_string]> cpp_names,
+                std_string(<char *> filename_bytes),
+                <cpp_map[std_string, std_string]> cpp_tag_names,
                 <cpp_vector[double]> e_bounds_proxy,
                 <int> mode)
 
@@ -393,9 +399,11 @@ cdef class Sampler:
                                              ("src_tag_name", str),
                                              ("e_bounds", np.ndarray),
                                              ("uniform", bool)))
-    _sampler_sampler_2_argtypes = frozenset(((0, dict),
-                                             (1, np.ndarray),
+    _sampler_sampler_2_argtypes = frozenset(((0, str),
+                                             (1, dict),
+                                             (2, np.ndarray),
                                              (3, int),
+                                             ("filename", str),
                                              ("names", dict),
                                              ("e_bounds",  np.ndarray),
                                              ("mode", int)))

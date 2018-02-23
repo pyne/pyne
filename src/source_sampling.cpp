@@ -74,10 +74,12 @@ pyne::Sampler::Sampler(std::string filename,
   setup();
 }
 
-pyne::Sampler::Sampler(std::map<std::string, std::string> names, 
+pyne::Sampler::Sampler(std::string filename,
+                 std::map<std::string, std::string> tag_names,
                  std::vector<double> e_bounds, 
                  int mode)
-  : e_bounds(e_bounds) {
+  : filename(filename),
+    e_bounds(e_bounds) {
   // determine the bias_mode
   if (mode == 0){
     bias_mode = ANALOG; 
@@ -88,9 +90,8 @@ pyne::Sampler::Sampler(std::map<std::string, std::string> names,
   }
 
   // find out the filename, src_tag_name and bias_tag_name
-  filename = names["filename"];
-  src_tag_name = names["src_tag_name"];
-  bias_tag_name = names["bias_tag_name"];
+  src_tag_name = tag_names["src_tag_name"];
+  bias_tag_name = tag_names["bias_tag_name"];
   setup();
 }
 
