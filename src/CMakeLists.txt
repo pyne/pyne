@@ -21,9 +21,10 @@ set(PYNE_SRCS
   "transmuters.cpp"
   "utils.cpp"
   "endftod.f90"
-  "complex_windows.cpp"
   )
+# Add windows complex support
 if(PYNE_PLATFORM STREQL "__WIN_MSVC__")
+  set(PYNE_SRCS "${PYNE_SRCS}" "complex_windows.cpp")
 endif()
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"
