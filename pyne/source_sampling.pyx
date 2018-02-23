@@ -268,25 +268,6 @@ cdef class Sampler:
         Returns
         -------
         None
-        
-        ################################################################
-        
-        Constuctor for analog and uniform sampling
-        
-        Parameters
-        ----------
-        e_bounds : std::vector< double >
-        
-        src_tag_name : std::string
-        
-        uniform : bool
-        
-        filename : std::string
-        
-        Returns
-        -------
-        None
-        
         """
         cdef char * filename_proxy
         cdef char * src_tag_name_proxy
@@ -333,25 +314,6 @@ cdef class Sampler:
         Returns
         -------
         None
-        
-        ################################################################
-        
-        Constuctor for analog and uniform sampling
-        
-        Parameters
-        ----------
-        e_bounds : std::vector< double >
-        
-        src_tag_name : std::string
-        
-        uniform : bool
-        
-        filename : std::string
-        
-        Returns
-        -------
-        None
-        
         """
         cdef char * filename_proxy
         cdef char * src_tag_name_proxy
@@ -388,21 +350,6 @@ cdef class Sampler:
         Returns
         -------
         None
-        
-        ################################################################
-        
-        Parameters
-        ----------
-        e_bounds : std::vector< double >
-        
-        names : std::map<std::string, std::string>
-        
-        mode : int
-        
-        Returns
-        -------
-        None
-        
         """
         cdef cpp_vector[double] e_bounds_proxy
         cdef int ie_bounds
@@ -424,12 +371,34 @@ cdef class Sampler:
             e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
             for ie_bounds in range(e_bounds_size):
                 e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
-        self._inst = new cpp_source_sampling.Sampler(<cpp_map[std_string, std_string]> cpp_names, <cpp_vector[double]> e_bounds_proxy, <int> mode)
+        self._inst = new cpp_source_sampling.Sampler(
+                <cpp_map[std_string, std_string]> cpp_names,
+                <cpp_vector[double]> e_bounds_proxy,
+                <int> mode)
 
     
-    _sampler_sampler_0_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, str), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("bias_tag_name", str)))
-    _sampler_sampler_1_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, bool), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("uniform", bool)))
-    _sampler_sampler_2_argtypes = frozenset(((0, dict), (1, np.ndarray), (3, int), ("names", dict), ("e_bounds",  np.ndarray), ("mode", int)))
+    _sampler_sampler_0_argtypes = frozenset(((0, str),
+                                             (1, str),
+                                             (2, np.ndarray),
+                                             (3, str),
+                                             ("filename", str),
+                                             ("src_tag_name", str),
+                                             ("e_bounds", np.ndarray),
+                                             ("bias_tag_name", str)))
+    _sampler_sampler_1_argtypes = frozenset(((0, str),
+                                             (1, str),
+                                             (2, np.ndarray),
+                                             (3, bool),
+                                             ("filename", str),
+                                             ("src_tag_name", str),
+                                             ("e_bounds", np.ndarray),
+                                             ("uniform", bool)))
+    _sampler_sampler_2_argtypes = frozenset(((0, dict),
+                                             (1, np.ndarray),
+                                             (3, int),
+                                             ("names", dict),
+                                             ("e_bounds",  np.ndarray),
+                                             ("mode", int)))
     
     def __init__(self, *args, **kwargs):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
@@ -452,25 +421,6 @@ cdef class Sampler:
         Returns
         -------
         None
-        
-        ################################################################
-        
-        Constuctor for analog and uniform sampling
-        
-        Parameters
-        ----------
-        e_bounds : std::vector< double >
-        
-        src_tag_name : std::string
-        
-        uniform : bool
-        
-        filename : std::string
-        
-        Returns
-        -------
-        None
-        
         """
         types = set([(i, type(a)) for i, a in enumerate(args)])
         types.update([(k, type(v)) for k, v in kwargs.items()])
