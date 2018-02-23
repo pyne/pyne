@@ -196,12 +196,10 @@ macro(pyne_configure_rpath)
 endmacro()
 
 macro(pyne_download_platform)
-
-if(NOT WIN32)
   # Download bateman solver from PyNE data
   download_platform("https://raw.githubusercontent.com/pyne/data/master" "decay"
                       ".cpp" ".s")
-
+if(NOT WIN32)
   # Download CRAM solver from PyNE data
   download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
                          ".c" ".s")
