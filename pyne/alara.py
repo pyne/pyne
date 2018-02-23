@@ -852,6 +852,23 @@ def _get_subvoxel_array(mesh, cell_mats):
 
     return subvoxel_array
 
+_TO_SEC = {
+    's': 1,
+    'second': 1,
+    'm': 60,
+    'minute': 60,
+    'h': 60 * 60,
+    'hour': 60 * 60,
+    'd': 60 * 60 * 24,
+    'day': 60 * 60 * 24,
+    'w': 60 * 60 * 24 * 7,
+    'week': 60 * 60 * 24 * 7,
+    'y': 60 * 60 * 24 * 365,
+    'year': 60 * 60 * 24 * 365,
+    'c': 60 * 60 * 24 * 365 * 100,
+    'century': 60 * 60 * 24 * 365 * 100,
+}
+
 def _convert_unit_to_s(dc):
     """
     This function return a float number represent a time in unit of s.
@@ -865,21 +882,11 @@ def _convert_unit_to_s(dc):
     """
     # get num and unit
     num, unit = dc.split()
-    if unit in ('s', 'second'):
-        return float(num)
-    if unit in ('m', 'minute'):
-        return float(num) * 60
-    if unit in ('h', 'hour'):
-        return float(num) * 60 * 60
-    if unit in ('d', 'day'):
-        return float(num) * 60 * 60 * 24
-    if unit in ('w', 'week'):
-        return float(num) * 60 * 60 * 24 * 7
-    if unit in ('y', 'year'):
-        return float(num) * 60 * 60 * 24 * 365
-    if unit in ('c', 'century'):
-        return float(num) * 60 * 60 * 24 * 365 * 100
-    raise ValueError('Invalid unit: {0}'.format(unit))
+    conv = _TO_SEC[unit]
+    if conv:
+        return float(num) * _TO_SEC[unit]
+    else:
+        raise ValueError('Invalid unit: {0}'.format(unit))
 
 def _find_phsrc_dc(idc, phtn_src_dc):
     """
