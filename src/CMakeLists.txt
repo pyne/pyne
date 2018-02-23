@@ -22,10 +22,6 @@ set(PYNE_SRCS
   "utils.cpp"
   "endftod.f90"
   )
-# Add windows complex support
-if(PYNE_PLATFORM STREQUAL "__WIN_MSVC__")
-  set(PYNE_SRCS "${PYNE_SRCS}" "complex_windows.cpp")
-endif()
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"
   "transport_spatial_methods/3d/angle.f90"
