@@ -161,10 +161,11 @@ namespace pyne {
             std::vector<double> e_bounds, 
             std::string bias_tag_name);
     /// Constuctor for overall sampler
-    /// \param names The map of filename, src_tag_name and bias_tag_name
+    /// \param filename The filename of the h5m file
+    /// \param tag_names The map of src_tag_name and bias_tag_name
     /// \param e_bounds The energy boundaries, note there are N + 1 energy
     ///                 bounds for N energy groups
-    /// \param mode If mode number, 1, 2 or 3
+    /// \param mode The mode number, 0, 1 or 2
     Sampler(std::string filename,
             std::map<std::string, std::string> tag_names,
             std::vector<double> e_bounds,
