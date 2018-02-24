@@ -190,8 +190,19 @@ cdef class AliasTable:
 
 
 def convert_e_bounds(e_bounds):
+    """convert_e_bounds(rands)
+    Convert python np.ndarray into vector< double> 
+    
+    Parameters
+    ----------
+    e_bounds : np.ndarray
+    
+    Returns
+    -------
+    res1 : std::vector< double >
+    
     """
-    """
+
     cdef cpp_vector[double] e_bounds_proxy
     cdef int ie_bounds
     cdef int e_bounds_size
