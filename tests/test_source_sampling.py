@@ -217,6 +217,279 @@ def test_uniform():
         assert(abs(e_tally[i] - expected_e_tally[i]) \
                /expected_e_tally[i] < 0.1)
 
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_single_hex_single_subvoxel_analog():
+    """This test tests that particles of sampled evenly within the phase-space
+    of a single mesh volume element (also a sub-voxel) with one energy group
+    in an analog sampling scheme. This done by dividing each dimension
+    (x, y, z, E) in half, then sampling particles and tallying on the basis of
+    which of the 2^4 = 16 regions of phase space the particle is born into.
+    """
+    seed(1953)
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(1, float)
+    m.src[0] = 1.0
+    cell_fracs = np.zeros(1, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save("sampling_mesh.h5m")
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    sampler = Sampler(filename, tag_names,
+                      np.array([0, 1]), 3)
+
+    num_samples = 5000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
+
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        assert_equal(s.w, 1.0) # analog: all weights must be one
+        assert_equal(s.c, 11) # analog: the cell number
+        tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
+              int(s.e*num_divs)] += score
+
+    # Test that each half-space of phase space (e.g. x > 0.5) is sampled about
+    # half the time.
+    for i in range(0, 4):
+        for j in range(0, 2):
+            assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_single_hex_multiple_subvoxel_analog():
+    """This test tests that particles of sampled analog within the phase-space
+    of a single mesh volume element but multiple sub-voxels with one energy
+    group in an analog sampling scheme. Then sampling particles and tallying
+    the particles and check the probability of particles born in each
+    sub-voxel and the cell_number.
+    """
+    seed(1953)
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(3, float)
+    m.src[:] = np.empty(shape=(1, 3))
+    m.src[0] = [0, 0.2, 0.8]
+    cell_fracs = np.zeros(3, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.4, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save("sampling_mesh.h5m")
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), 3)
+    num_samples = 50000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = [0.0] * 3
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        assert_equal(s.w, 1.0) # analog: all weights must be one
+        if s.c == 11:
+            tally[0] += score
+        elif s.c == 12:
+            tally[1] += score
+        elif s.c == 13:
+            tally[2] += score
+
+    # Test that each source particle in each cell has right frequency
+    assert_equal(tally[0], 0.0)
+    assert(abs(tally[1] - 0.158)/0.158 < 0.05)
+    assert(abs(tally[2] - 0.842)/0.842 < 0.05)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_multiple_hex_multiple_subvoxel_analog():
+    """This test tests that particle are sampled analog from a uniform source
+    defined on eight mesh volume elements in two energy groups. This is done
+    using the exact same method as test_analog_multiple_hex_subvoxel.
+    """
+    seed(1953)
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
+             mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = np.ones(shape=(8,2))
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0), (2, 3, 1.0, 0.0),
+                     (3, 4, 1.0, 0.0), (4, 5, 1.0, 0.0), (5, 6, 1.0, 0.0),
+                     (6, 7, 1.0, 0.0), (7, 8, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save("sampling_mesh.h5m")
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), 3)
+    num_samples = 5000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
+    for i in range(num_samples):
+        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        assert_equal(s.w, 1.0)
+        assert_equal(s.c, 4*int(s.x*num_divs) + 2*int(s.y*num_divs)
+                     + int(s.z*num_divs) + 1)
+        tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
+              int(s.e*num_divs)] += score
+
+    for i in range(0, 4):
+        for j in range(0, 2):
+            halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:,:])
+            assert(abs(halfspace_sum - 0.5)/0.5 < 0.1)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_single_hex_subvoxel_uniform():
+    """This test tests that particles of sampled evenly within the phase-space
+    of a single mesh volume element with one energy group in an uniform sampling
+    scheme. This done by dividing each dimension (x, y, z, E) in half, then
+    sampling particles and tallying on the basis of which of the 2^4 = 8 regions
+    of phase space the particle is born into.
+    """
+    seed(1953)
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(1, float)
+    m.src[0] = 1.0
+    cell_fracs = np.zeros(1, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save("sampling_mesh.h5m")
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), 4)
+
+    num_samples = 5000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
+
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        assert_equal(s.w, 1.0) # analog: all weights must be one
+        assert_equal(s.c, 11) # analog: the cell number
+        tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
+               int(s.e*num_divs)] += score
+
+     # Test that each half-space of phase space (e.g. x > 0.5) is sampled about
+     # half the time.
+    for i in range(0, 4):
+        for j in range(0, 2):
+            assert(abs(np.sum(np.rollaxis(tally, i)[j,:,:,:]) - 0.5) < 0.05)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_single_hex_multiple_subvoxel_uniform():
+    """This test tests that particles of sampled evenly within the phase-space
+    of a single mesh volume element with one energy group in an uniform sampling
+    scheme. This done by dividing each dimension (x, y, z, E) in half, then
+    sampling particles and tallying on the basis of which of the 2^4 = 8 regions
+    of phase space the particle is born into.
+    """
+    seed(1953)
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(3, float)
+    m.src[:] = np.empty(shape=(1, 3))
+    m.src[0] = [0, 0.2, 0.8]
+    cell_fracs = np.zeros(3, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.4, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save("sampling_mesh.h5m")
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), 4)
+    num_samples = 5000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = [0.0] * 3
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        if s.c == 11:
+            tally[0] += score
+        if s.c == 12:
+            tally[1] += score
+            assert(abs(s.w - 0.369)/0.369 < 0.05) # analog: all weights must be one
+        if s.c == 13:
+            tally[2] += score
+            assert(abs(s.w - 1.475)/1.475 < 0.05)
+
+    # Test that each source particle in each cell has right frequency
+    assert_equal(tally[0], 0.0)
+    assert(abs(tally[1] - 0.428) < 0.05)
+    assert(abs(tally[2] - 0.572) < 0.05)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_multiple_hex_multiple_subvoxel_uniform():
+    """This test tests that particle are sampled uniformly from a uniform source
+    defined on eight mesh volume elements in two energy groups.
+    """
+    seed(1953)
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
+             mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = np.empty(shape=(8,2), dtype=float)
+    m.src[:] = [[0,0], [1,0], [0,0], [2,0],
+                [0,0], [3,0], [0,0], [4,0]]
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 0, 1.0, 0.0), (1, 1, 1.0, 0.0), (2, 2, 1.0, 0.0),
+                     (3, 3, 1.0, 0.0), (4, 4, 1.0, 0.0), (5, 5, 1.0, 0.0),
+                     (6, 6, 1.0, 0.0), (7, 7, 1.0, 0.0)]
+    empty_cells = [0, 2, 4, 6]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save("sampling_mesh.h5m")
+    filename = "sampling_mesh.h5m"
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), 4)
+    num_samples = 50000
+    score = 1.0/num_samples
+    num_divs = 2
+    tally = [0.0] * 8
+    for i in range(num_samples):
+        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        # check the cell_number
+        assert_equal(s.c, 4*int(s.x*num_divs) + 2*int(s.y*num_divs)
+                     + int(s.z*num_divs))
+        # check the weight of each subvoxel
+        if s.c not in empty_cells:
+            # weight for cell 1, 3, 5, 7 should be: 0.4, 0.8, 1.2, 1.6
+            exp_w = (s.c + 1) / 2 * 0.4
+            out_w = s.w
+            assert(abs(out_w - exp_w)/exp_w < 0.05) # hand calculate
+        # count the tally
+        tally[s.c] += score
+
+    # check the real sample rate
+    for i, item in enumerate(tally):
+        if i not in empty_cells:
+            assert(abs(item - 0.25)/0.25 < 0.05)
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_bias():

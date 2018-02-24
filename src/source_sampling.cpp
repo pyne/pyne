@@ -128,10 +128,12 @@ pyne::Sampler::Sampler(std::string filename,
 
 pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
-  //
+  // In DEFAULT mode, max_num_cells = 1
   int pdf_idx =at->sample_pdf(rands[0], rands[1]);
-  int ve_idx = pdf_idx/num_e_groups;
+  int ve_idx = pdf_idx/max_num_cells/num_e_groups;
+  int c_idx = (pdf_idx/num_e_groups)%max_num_cells;
   int e_idx = pdf_idx % num_e_groups;
+  int cell_id;
 
   // Sample uniformly within the selected mesh volume element and energy
   // group.
@@ -140,8 +142,14 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
   moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
+  // cell_number
+  if (sub_mode == SUBVOXEL) {
+     cell_id = cell_number[ve_idx*max_num_cells + c_idx];
+  } else {
+     cell_id = -1;
+  }
   pyne::SourceParticle src = SourceParticle(pos[0], pos[1], pos[2],
-      sample_e(e_idx, rands[5]), sample_w(pdf_idx), -1);
+      sample_e(e_idx, rands[5]), sample_w(pdf_idx), cell_id);
   return src;
 }
 
