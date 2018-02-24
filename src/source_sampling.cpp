@@ -59,6 +59,7 @@ pyne::Sampler::Sampler(std::string filename,
                  bool uniform)
   : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds) {
   bias_mode = (uniform) ? UNIFORM : ANALOG;
+  sub_mode = DEFAULT;
   setup();
 }
 
@@ -71,6 +72,7 @@ pyne::Sampler::Sampler(std::string filename,
     e_bounds(e_bounds), 
     bias_tag_name(bias_tag_name) {
   bias_mode = USER;
+  sub_mode = DEFAULT;
   setup();
 }
 
