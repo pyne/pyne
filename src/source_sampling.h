@@ -49,7 +49,7 @@ namespace pyne {
   /// MCNP interface for source sampling setup
   /// \param mode The sampling mode: 
   /// Voxel(DEFAULT) R2S: 0 = analog, 1 = uniform, 2 = user-specified
-  /// SubVoxel(SUB_VOXEL) R2S: 3 = analog, 4 = uniform, 5 = user-specified
+  /// SubVoxel(SUBVOXEL) R2S: 3 = analog, 4 = uniform, 5 = user-specified
   void sampling_setup_(int* mode);
   /// MCNP interface to sample particle birth parameters after sampling setup
   /// \param rands Six pseudo-random numbers supplied from the Fortran side.
@@ -130,7 +130,7 @@ namespace pyne {
   
   /// Problem modes
   enum BiasMode {USER, ANALOG, UNIFORM};
-  enum SubMode {DEFAULT, SUB_VOXEL};
+  enum SubMode {DEFAULT, SUBVOXEL};
   
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
@@ -167,7 +167,7 @@ namespace pyne {
     /// \param tag_names The map of src_tag_name and bias_tag_name
     /// \param e_bounds The energy boundaries, note there are N + 1 energy
     ///                 bounds for N energy groups
-    /// \param mode The mode number, 0, 1 or 2
+    /// \param mode The mode number, 0, 1, 2, 3, 4 or 5
     Sampler(std::string filename,
             std::map<std::string, std::string> tag_names,
             std::vector<double> e_bounds,
@@ -190,11 +190,14 @@ namespace pyne {
     std::string filename; ///< MOAB mesh file path
     std::string src_tag_name; ///< Unbiased source density distribution
     std::string bias_tag_name; ///< Biased source density distribution
+    std::string cell_number_tag_name; ///< Cell number tag
+    std::string cell_fracs_tag_name; ///< Cell volume fraction tag
     std::vector<double> e_bounds;  ///< Energy boundaries
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
+    int max_num_cells; /// Max number of cells in voxels
     BiasMode bias_mode; ///< Bias mode: ANALOG, UNIFORM, USER
-    SubMode sub_mode; ///< Subvoxel/Voxel mode: DEFAULT, SUB_VOXEL
+    SubMode sub_mode; ///< Subvoxel/Voxel mode: DEFAULT, SUBVOXEL
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.
@@ -203,6 +206,8 @@ namespace pyne {
     // sampling
     std::vector<edge_points> all_edge_points; ///< Four connected points on a VE.
     std::vector<double> biased_weights; ///< Birth weights for biased sampling.
+    std::vector<int> cell_number; ///< Tag cell_number
+    std::vector<double> cell_fracs; ///< Tag cell_fracs
     AliasTable* at; ///< Alias table used for sampling.
   
   // member functions
