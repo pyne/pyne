@@ -122,9 +122,9 @@ def test_analog_single_tet():
     tally = np.zeros(shape=(4))
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        assert_equal(s[4], 1.0)
+        assert_equal(s.w, 1.0)
         for i, tet in enumerate(subtets):
-            if point_in_tet(tet, [s[0], s[1], s[2]]):
+            if point_in_tet(tet, [s.x, s.y, s.z]):
                 tally[i] += score
                 break
     

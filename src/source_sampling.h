@@ -160,12 +160,6 @@ namespace pyne {
             std::string src_tag_name, 
             std::vector<double> e_bounds, 
             std::string bias_tag_name);
-    /// Samples particle birth parameters
-    /// \param rands Six pseudo-random numbers in range [0, 1].
-    /// \return A SourceParticle object containing the x position, y, position,
-    ///         z, position, e, energy and w, weight of a particle.
-    pyne::SourceParticle particle_birth(std::vector<double> rands);
-
     /// Constuctor for overall sampler
     /// \param names The map of filename, src_tag_name and bias_tag_name
     /// \param e_bounds The energy boundaries, note there are N + 1 energy
@@ -173,8 +167,14 @@ namespace pyne {
     /// \param mode If mode number, 1, 2 or 3
     Sampler(std::string filename,
             std::map<std::string, std::string> tag_names,
-            std::vector<double> e_bounds, 
+            std::vector<double> e_bounds,
             int mode);
+
+    /// Samples particle birth parameters
+    /// \param rands Six pseudo-random numbers in range [0, 1].
+    /// \return A SourceParticle object containing the x position, y, position,
+    ///         z, position, e, energy and w, weight of a particle.
+    pyne::SourceParticle particle_birth(std::vector<double> rands);
 
     ~Sampler() {
       delete mesh;

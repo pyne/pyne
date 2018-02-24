@@ -403,7 +403,7 @@ cdef class Sampler:
                                              (2, np.ndarray),
                                              (3, int),
                                              ("filename", str),
-                                             ("names", dict),
+                                             ("tag_names", dict),
                                              ("e_bounds",  np.ndarray),
                                              ("mode", int)))
     
