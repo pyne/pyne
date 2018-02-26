@@ -311,7 +311,9 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
             if (q_in_group > 0) {
                 for (e=0; e<num_e_groups; ++e) {
                     bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] =
-                        volumes[v]*cell_fracs[v*max_num_cells + c]*pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e]/q_in_group;
+                        volumes[v]*cell_fracs[v*max_num_cells + c]*
+                        pdf[v*max_num_cells*num_e_groups +
+                        c*num_e_groups + e]/q_in_group;
                 }
             } else {
                 for (e=0; e<num_e_groups; ++e) {
@@ -324,51 +326,91 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
     } else if (bias_mode == USER) {
       // Get the biased PDF from the mesh
       moab::Tag bias_tag;
-      rval = mesh->tag_get_handle(bias_tag_name.c_str(), 
-                                  moab::MB_TAG_VARLEN, 
-                                  moab::MB_TYPE_DOUBLE, 
+      rval = mesh->tag_get_handle(bias_tag_name.c_str(),
+                                  moab::MB_TAG_VARLEN,
+                                  moab::MB_TYPE_DOUBLE,
                                   bias_tag);
       num_bias_groups = num_groups(bias_tag);
-
-      if (num_bias_groups == num_e_groups) {
+      if (num_bias_groups == num_e_groups * max_num_cells) {
+        // Spatial, cell and energy biasing. The supplied bias PDF values are
+        // applied to each specific energy group and sub-voxels in a mesh
+        // volume element.
         rval = mesh->tag_get_data(bias_tag, ves, &bias_pdf[0]);
         if (rval != moab::MB_SUCCESS)
           throw std::runtime_error("Problem getting bias tag data.");
         for (v=0; v<num_ves; ++v) {
-          for (e=0; e<num_e_groups; ++e)
-             bias_pdf[v*num_e_groups + e] *=  volumes[v];
+            for (c=0; c<max_num_cells; c++) {
+                for (e=0; e<num_e_groups; ++e)
+                    bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] *=
+                       volumes[v]*cell_fracs[v*max_num_cells + c];
+            }
         }
       } else if (num_bias_groups == 1) {
         // Spatial biasing only: the supplied bias PDF values are applied
         // to all energy groups within a mesh volume element, which are
         // sampled in analog.
-        std::vector<double> spatial_pdf(num_ves); 
+        std::vector<double> spatial_pdf(num_ves);
         rval = mesh->tag_get_data(bias_tag, ves, &spatial_pdf[0]);
         if (rval != moab::MB_SUCCESS)
           throw std::runtime_error("Problem getting bias tag data.");
         double q_in_group;
         for (v=0; v<num_ves; ++v) {
           q_in_group = 0;
-          for (e=0; e<num_e_groups; ++e){
-            q_in_group += pdf[v*num_e_groups + e];
+          for (c=0; c<max_num_cells; ++c){
+              for (e=0; e<num_e_groups; ++e){
+                q_in_group += pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e];
+              }
           }
           if (q_in_group > 0){
-            for (e=0; e<num_e_groups; ++e){
-              bias_pdf[v*num_e_groups + e] = 
-                spatial_pdf[v]*volumes[v]*pdf[v*num_e_groups + e]/q_in_group;
+            for (c=0; c<max_num_cells; ++c){
+                for (e=0; e<num_e_groups; ++e){
+                    bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] =
+                        spatial_pdf[v]*volumes[v]*cell_fracs[v*max_num_cells + c]*
+                        pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e]/
+                        q_in_group;
+                }
             }
           } else {
-            for (e=0; e<num_e_groups; ++e)
-              bias_pdf[v*num_e_groups + e] =  0;
+            for (c=0; c<max_num_cells; ++c)
+                for (e=0; e<num_e_groups; ++e){
+                    bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] =  0;
+                }
           }
+        }
+      } else if (num_bias_groups == num_e_groups) {
+        // Voxel and energy biasing. Apply the energy bias to all the sub-voxel in the voxel
+        std::vector<double> spa_erg_pdf(num_ves*num_e_groups);
+        rval = mesh->tag_get_data(bias_tag, ves, &spa_erg_pdf[0]);
+        if (rval != moab::MB_SUCCESS)
+          throw std::runtime_error("Problem getting bias tag data.");
+        double q_in_group;
+        for (v=0; v<num_ves; ++v) {
+            for (e=0; e<num_e_groups; ++e) {
+                q_in_group = 0.0;
+                for (c=0; c<max_num_cells; ++c) {
+                    q_in_group += pdf[v*max_num_cells*num_e_groups + c*num_e_groups +e];
+                }
+                if (q_in_group >0) {
+                    for (c=0; c<max_num_cells; ++c) {
+                        bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups +e] =
+                            spa_erg_pdf[v*num_e_groups+e]*volumes[v]*cell_fracs[v*max_num_cells + c]*
+                            pdf[v*max_num_cells*num_e_groups + c*num_e_groups +e]/q_in_group;
+                    }
+                } else {
+                    for (c=0; c<max_num_cells; ++c) {
+                        bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] = 0.0;
+                    }
+                }
+            }
         }
       } else {
         throw std::length_error("Length of bias tag must equal length of the"
-                                "  source tag, or 1.");
+                                "  max_num_cells*num_e_group, num_e_groups, or 1.");
       }
-    }
-return bias_pdf;
+     }
+ return bias_pdf;
 }
+
 
 moab::CartVect pyne::Sampler::sample_xyz(int ve_idx, std::vector<double> rands) {
   double s = rands[0];

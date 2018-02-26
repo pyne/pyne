@@ -598,6 +598,226 @@ def test_bias_spatial():
         assert(abs(e_tally[i] - expected_e_tally[i])
                /expected_e_tally[i] < 0.1)
 
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_subvoxel_multiple_hex_bias_1():
+    """This test tests that particle are sampled from a biased source
+    defined on two voxels (2*2 = 4 sub-voxels) with the biased tag length of 1.
+    """
+    seed(1953)
+    # mesh contains two voxels. 2 * 1 * 1 = 2
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 1], [0, 1]],
+             mats = None)
+
+    # max_num_cells = 2. 4 sub-voxels
+    cell_fracs = np.zeros(4, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.5, 0.0), (0, 12, 0.5, 0.0),
+                     (1, 21, 0.5, 0.0), (1, 22, 0.5, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+
+    # the photon emitting rate of 4 sub-voxels is 0.1, 0.2, 0.3, 0.4
+    m.src = IMeshTag(4, float)
+    m.src[:] = np.empty(shape=(2, 4), dtype=float)
+    m.src[:] = [[0.05, 0.05, 0.10, 0.10],
+                [0.15, 0.15, 0.20, 0.20]]
+    e_bounds = np.array([0, 0.5, 1.0])
+    # bias, tag size = 1
+    m.bias = IMeshTag(1, float)
+    m.bias[:] = [[0.4], [0.6]]
+
+    filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
+                 "bias_tag_name": "bias"}
+    sampler = Sampler(filename, tag_names, e_bounds, 5)
+
+    num_samples = 50000
+    score = 1.0/num_samples
+    num_divs = 2
+    # tally shape (v, c, e)
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    for i in range(num_samples):
+        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        vid = s.c/10 - 1
+        cid = s.c%10 - 1
+        eid = 0 if s.e < 0.5 else 1;
+        # check the cell_number
+        if s.x < 0.5:
+            assert(s.c in [11, 12])
+        if s.x > 0.5:
+            assert(s.c in [21, 22])
+        # check the weight of each subvoxel
+        if vid == 0:
+            assert(abs(s.w - 0.746) / 0.746 < 0.05)
+        if vid == 1:
+            assert(abs(s.w - 1.163) / 1.163 < 0.05)
+        # count the tally
+        tally[vid, cid, eid] += score
+
+    # check the real sample rate
+    # exp_tally calculated by hand
+    exp_tally = np.zeros(shape=(2, 2, 2))
+    exp_tally[:] = [[[0.067, 0.067],
+                     [0.133, 0.133]],
+                    [[0.129, 0.129],
+                     [0.171, 0.171]]]
+    for v in range(2):
+        for c in range(2):
+            for e in range(2):
+                assert(abs(tally[v, c, e] - exp_tally[v, c, e]) / exp_tally[v, c, e] < 0.05)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
+    """This test tests that particle are sampled from a biased source
+    defined on two voxels (2*2 = 4 sub-voxels) with the biased tag length
+    of max_num_cells*num_e_group.
+    """
+    seed(1953)
+    # mesh contains two voxels. 2 * 1 * 1 = 2
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 1], [0, 1]],
+             mats = None)
+
+    # max_num_cells = 2. 4 sub-voxels
+    cell_fracs = np.zeros(4, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.5, 0.0), (0, 12, 0.5, 0.0),
+                     (1, 21, 0.5, 0.0), (1, 22, 0.5, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+
+    # the photon emitting rate of 4 sub-voxels is 0.1, 0.2, 0.3, 0.4
+    m.src = IMeshTag(4, float)
+    m.src[:] = np.empty(shape=(2,4), dtype=float)
+    m.src[:] = [[0.125, 0.125, 0.125, 0.125],
+                [0.125, 0.125, 0.125, 0.125]]
+    e_bounds = np.array([0, 0.5, 1.0])
+    # bias, tag size = 1
+    m.bias = IMeshTag(4, float)
+    m.bias[:] = [[0.125, 0.125, 0.1, 0.15], [0.1, 0.1, 0.15, 0.15]]
+
+    filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
+                 "bias_tag_name": "bias"}
+    sampler = Sampler(filename, tag_names, e_bounds, 5)
+
+    num_samples = 50000
+    score = 1.0/num_samples
+    num_divs = 2
+    # tally shape (v, c, e)
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    exp_wgt = np.zeros(shape=(num_divs, num_divs, num_divs))
+    exp_wgt[:] = [[[1.0, 1.0], [1.25, 0.83]], [[1.25, 1.25], [0.83, 0.83]]]
+    for i in range(num_samples):
+        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        vid = s.c/10 - 1
+        cid = s.c%10 - 1
+        eid = 0 if s.e < 0.5 else 1;
+        # check the cell_number
+        if s.x < 0.5:
+            assert(s.c in [11, 12])
+        if s.x > 0.5:
+            assert(s.c in [21, 22])
+        # check the weight of each subvoxel
+        assert(abs(s.w - exp_wgt[vid, cid, eid]) / exp_wgt[vid, cid, eid] < 0.05)
+        # count the tally
+        tally[vid, cid, eid] += score
+
+    # check the real sample rate
+    exp_tally = np.zeros(shape=(2, 2, 2))
+    exp_tally[:] = [[[0.125, 0.125], [0.100, 0.150]],
+                    [[0.100, 0.100], [0.150, 0.150]]]
+    for v in range(2):
+        for c in range(2):
+            for e in range(2):
+                assert(abs(tally[v, c, e] - exp_tally[v, c, e]) / exp_tally[v, c, e] < 0.05)
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
+def test_subvoxel_multiple_hex_bias_e_groups():
+    """This test tests that particle are sampled from a biased source
+    defined on two voxels (2*2 = 4 sub-voxels) with the biased tag length
+    of energy groups.
+    """
+    seed(1953)
+    # mesh contains two voxels. 2 * 1 * 1 = 2
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 1], [0, 1]],
+             mats = None)
+
+    # max_num_cells = 2. 4 sub-voxels
+    cell_fracs = np.zeros(4, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.5, 0.0), (0, 12, 0.5, 0.0),
+                     (1, 21, 0.5, 0.0), (1, 22, 0.5, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+
+    # the photon emitting rate of 4 sub-voxels is 0.1, 0.2, 0.3, 0.4
+    m.src = IMeshTag(4, float)
+    m.src[:] = np.empty(shape=(2,4), dtype=float)
+    m.src[:] = [[0.05, 0.05, 0.10, 0.10],
+                [0.15, 0.15, 0.20, 0.20]]
+    e_bounds = np.array([0, 0.5, 1.0])
+    # bias, tag size = 1
+    m.bias = IMeshTag(2, float)
+    m.bias[:] = [[0.1, 0.3], [0.2, 0.4]]
+
+    filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
+                 "bias_tag_name": "bias"}
+    sampler = Sampler(filename, tag_names, e_bounds, 5)
+
+    num_samples = 50000
+    score = 1.0/num_samples
+    num_divs = 2
+    # tally shape (v, c, e)
+    tally = np.zeros(shape=(num_divs, num_divs, num_divs))
+    for i in range(num_samples):
+        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        vid = s.c/10 - 1
+        cid = s.c%10 - 1
+        eid = 0 if s.e < 0.5 else 1;
+        # check the cell_number
+        if s.x < 0.5:
+            assert(s.c in [11, 12])
+        if s.x > 0.5:
+            assert(s.c in [21, 22])
+        # check the weight of each subvoxel
+        if vid == 0 and eid == 0:
+            assert(abs(s.w - 1.5)/1.5 < 0.05)
+        if vid == 0 and eid == 1:
+            assert(abs(s.w - 0.5)/0.5 < 0.05)
+        if vid == 1 and eid == 0:
+            assert(abs(s.w - 1.75)/1.75 < 0.05)
+        if vid == 1 and eid == 1:
+            assert(abs(s.w - 0.875)/0.875 < 0.05)
+        # count the tally
+        tally[vid, cid, eid] += score
+
+    # check the real sample rate
+    exp_tally = np.zeros(shape=(2, 2, 2))
+    exp_tally[:] = [[[0.0333, 0.1000],
+                     [0.0667, 0.2000]],
+                    [[0.0857, 0.1714],
+                     [0.1143, 0.2286]]]
+    for v in range(2):
+        for c in range(2):
+            for e in range(2):
+                assert(abs(tally[v, c, e] - exp_tally[v, c, e]) / exp_tally[v, c, e] < 0.05)
+
 def test_alias_table():
     """This tests that the AliasTable class produces samples in the ratios
     consistant with the supplied PDF.
