@@ -63,6 +63,52 @@ def setup():
     print('File "{}" has been written'.format(config_filename))
     print('Fill out the fields in these filse then run ">> gtcadis.py step1"')
 
+def _names_dict():
+    names = ['h1', 'd', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
+    'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mgnat', 'al27', 'si28', 'si29',
+    'si30', 'p31', 'snat', 'cl35', 'cl37', 'knat', 'canat', 'ti46', 'ti47', 'ti48',
+    'ti49', 'ti50', 'vnat', 'cr50', 'cr52', 'cr53', 'cr54', 'mn55', 'fe54', 'fe56',
+    'fe57', 'fe58', 'co59', 'ni58', 'ni60', 'ni61', 'ni62', 'ni64', 'cu63', 'cu65',
+    'ganat', 'zrnat', 'nb93', 'mo92', 'mo94', 'mo95', 'mo96', 'mo97', 'mo98',
+    'mo100', 'snnat', 'ta181', 'w182', 'w183', 'w184', 'w186', 'au197', 'pb206',
+    'pb207', 'pb208', 'bi209']
+
+    names_formatted = ['h1', 'h2', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
+    'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mg', 'al27', 'si28', 'si29',
+    'si30', 'p31', 's', 'cl35', 'cl37', 'k', 'ca', 'ti46', 'ti47', 'ti48',
+    'ti49', 'ti50', 'v', 'cr50', 'cr52', 'cr53', 'cr54', 'mn55', 'fe54', 'fe56',
+    'fe57', 'fe58', 'co59', 'ni58', 'ni60', 'ni61', 'ni62', 'ni64', 'cu63', 'cu65',
+    'ga', 'zr', 'nb93', 'mo92', 'mo94', 'mo95', 'mo96', 'mo97', 'mo98',
+    'mo100', 'sn', 'ta181', 'w182', 'w183', 'w184', 'w186', 'au197', 'pb206',
+    'pb207', 'pb208', 'bi209']
+
+    names_dict = {nucname.id(x):y for x, y in zip(names_formatted, names)}
+
+    return names_dict
+ 
+def _cards():
+    cards = {"block1": {"isn": 16,
+                        "maxscm": '3E8',
+                        "maxlcm": '6E8',
+                       },
+             "block3": {"lib": "xsf21-71", # name of cross section library
+                       "lng":175,
+                       "maxord": 5,
+                       "ihm": 227,
+                       "iht": 10,
+                       "ihs": 11,
+                       "ifido": 1,
+                       "ititl": 1,
+                       "i2lp1": 0,
+                       "savbxs": 0,
+                       "kwikrd": 0
+                       },
+            "block5": {"source": source,
+                       "ith":1,
+                       "isct":5}
+            }
+    return cards
+   
 def step1():
     config = ConfigParser.ConfigParser()
     config.read(config_filename)
@@ -78,25 +124,7 @@ def step1():
     src_vol = [config.getfloat('step1', 'src_vol')]
     print ('src vol', len(src_vol))
     
-    names = ['h1', 'd', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
-    'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mgnat', 'al27', 'si28', 'si29',
-    'si30', 'p31', 'snat', 'cl35', 'cl37', 'knat', 'canat', 'ti46', 'ti47', 'ti48',
-    'ti49', 'ti50', 'vnat', 'cr50', 'cr52', 'cr53', 'cr54', 'mn55', 'fe54', 'fe56',
-    'fe57', 'fe58', 'co59', 'ni58', 'ni60', 'ni61', 'ni62', 'ni64', 'cu63', 'cu65',
-    'ganat', 'zrnat', 'nb93', 'mo92', 'mo94', 'mo95', 'mo96', 'mo97', 'mo98',
-    'mo100', 'snnat', 'ta181', 'w182', 'w183', 'w184', 'w186', 'au197', 'pb206',
-    'pb207', 'pb208', 'bi209']
-    
-    names_formatted = ['h1', 'h2', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
-    'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mg', 'al27', 'si28', 'si29',
-    'si30', 'p31', 's', 'cl35', 'cl37', 'k', 'ca', 'ti46', 'ti47', 'ti48',
-    'ti49', 'ti50', 'v', 'cr50', 'cr52', 'cr53', 'cr54', 'mn55', 'fe54', 'fe56',
-    'fe57', 'fe58', 'co59', 'ni58', 'ni60', 'ni61', 'ni62', 'ni64', 'cu63', 'cu65',
-    'ga', 'zr', 'nb93', 'mo92', 'mo94', 'mo95', 'mo96', 'mo97', 'mo98',
-    'mo100', 'sn', 'ta181', 'w182', 'w183', 'w184', 'w186', 'au197', 'pb206',
-    'pb207', 'pb208', 'bi209']
-    
-    names_dict = {nucname.id(x):y for x, y in zip(names_formatted, names)}
+    names_dict = _names_dict()
     
     sc = [np.linspace(float(xmesh[0]), float(xmesh[1]), float(xmesh[2])),
           np.linspace(float(ymesh[0]), float(ymesh[1]), float(ymesh[2])),
@@ -132,26 +160,7 @@ def step1():
     source, dg = isotropic_vol_source(hdf5, mesh, cells, spectra, intensities)
     
     ngroup = 217
-    cards = {"block1": {"isn": 16,
-                        "maxscm": '3E8',
-                        "maxlcm": '6E8',
-                       },
-             "block3": {"lib": "xsf21-71", # name of cross section library
-                       "lng":175,
-                       "maxord": 5,
-                       "ihm": 227,
-                       "iht": 10,
-                       "ihs": 11,
-                       "ifido": 1,
-                       "ititl": 1,
-                       "i2lp1": 0,
-                       "savbxs": 0,
-                       "kwikrd": 0
-                       },
-            "block5": {"source": source,
-                       "ith":1,
-                       "isct":5}
-            }
+    cards = _cards()
     
     write_partisn_input(mesh, hdf5, ngroup, cards=cards, dg=dg, names_dict=names_dict, data_hdf5path="/materials", nuc_hdf5path="/nucid", fine_per_coarse=1)
 
