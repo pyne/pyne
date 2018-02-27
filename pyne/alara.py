@@ -883,9 +883,9 @@ def _convert_unit_to_s(dc):
     """
     # get num and unit
     num, unit = dc.split()
-    conv = _TO_SEC[unit]
+    conv = _TO_SEC.get(unit, None)
     if conv:
-        return float(num) * _TO_SEC[unit]
+        return float(num) * conv
     else:
         raise ValueError('Invalid unit: {0}'.format(unit))
 
