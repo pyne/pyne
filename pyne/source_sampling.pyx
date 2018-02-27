@@ -189,7 +189,7 @@ cdef class AliasTable:
     pass
 
 
-def convert_e_bounds(e_bounds):
+cdef cpp_vector[double] convert_e_bounds(e_bounds):
     """convert_e_bounds(rands)
     Convert python np.ndarray into cpp_vector[double]
     
