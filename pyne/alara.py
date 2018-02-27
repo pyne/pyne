@@ -233,6 +233,12 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
         tag_handles[tag_name] = \
                 mesh.mesh.createTag(tag_name, num_e_groups * max_num_cells,
                                     float)
+    # creat a list of decay times (strings) in the source file
+    phtn_src_dc = []
+    with tb.open_file(filename) as h5f:
+        for row in h5f.root.data:
+            phtn_src_dc.append(row[2])
+    phtn_src_dc = list(set(phtn_src_dc))
 
     # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
@@ -244,9 +250,12 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                 nuc = serpent(cond[0]).lower()
             else:
                 nuc = "TOTAL"
+
+            # time match, convert string mathch to float mathch
+            dc = _find_phsrc_dc(cond[1], phtn_src_dc)
             # create of array of rows that match the nuclide/decay criteria
             matched_data = h5f.root.data.read_where(
-                "(nuc == '{0}') & (time == '{1}')".format(nuc, cond[1]))
+                "(nuc == '{0}') & (time == '{1}')".format(nuc, dc))
 
         if not sub_voxel:
             idx = 0
@@ -669,11 +678,11 @@ def _rat_apprx_14(A, t, n_0):
     Parameters
     ---------
     A : numpy array
-	Burnup matrix
+        Burnup matrix
     t : float
-	Time step
+        Time step
     n_0: numpy array
-	Inital composition vector
+        Inital composition vector
     """
 
     theta = np.array([ -8.8977731864688888199 + 16.630982619902085304j,
@@ -756,13 +765,13 @@ def cram(N, t, n_0, order):
     Parameters
     ----------
     N : list or array
-	Array of nuclides under consideration
+        Array of nuclides under consideration
     t : float
-	Time step
+        Time step
     n_0 : list or array
-	Nuclide concentration vector
+        Nuclide concentration vector
     order : int
-	Order of method. Only 14 and 16 are supported.
+        Order of method. Only 14 and 16 are supported.
     """
 
     n_0 = np.array(n_0)
@@ -842,4 +851,65 @@ def _get_subvoxel_array(mesh, cell_mats):
                 non_void_sv_num += 1
 
     return subvoxel_array
+
+_TO_SEC = {
+    's': 1,
+    'second': 1,
+    'm': 60,
+    'minute': 60,
+    'h': 60 * 60,
+    'hour': 60 * 60,
+    'd': 60 * 60 * 24,
+    'day': 60 * 60 * 24,
+    'w': 60 * 60 * 24 * 7,
+    'week': 60 * 60 * 24 * 7,
+    'y': 60 * 60 * 24 * 365.25,
+    'year': 60 * 60 * 24 * 365.25,
+    'c': 60 * 60 * 24 * 365.25 * 100,
+    'century': 60 * 60 * 24 * 365.25 * 100,
+}
+
+def _convert_unit_to_s(dc):
+    """
+    This function return a float number represent a time in unit of s.
+    Parameters
+    ----------
+    dc : string. Contain a num and an unit. 
+
+    Returns
+    -------
+    a float number
+    """
+    # get num and unit
+    num, unit = dc.split()
+    conv = _TO_SEC.get(unit, None)
+    if conv:
+        return float(num) * conv
+    else:
+        raise ValueError('Invalid unit: {0}'.format(unit))
+
+def _find_phsrc_dc(idc, phtn_src_dc):
+    """
+    This function return a string representing a time in phsrc_dc.
+    Parameters
+    ----------
+    idc : string. Represent a time, input decay time
+    phtn_src_dc : list of string. Decay times in phtn_src file.
+
+    return : odc, string. output mathched decay time.
+    """ 
+    if idc in phtn_src_dc:
+        # if idc exist in phtn_src_dc, directly return idc
+        return idc
+    else:
+        # the idc doesn't exist in phtn_src_dc, convert the unit to `s`,
+        idc_s = _convert_unit_to_s(idc)
+        phtn_src_dc_s = []
+        for i, dc in enumerate(phtn_src_dc):
+            dc_s = _convert_unit_to_s(dc)
+            if (abs(idc_s - dc_s)/dc_s) < 1e-6:
+                return phtn_src_dc[i]
+        raise ValueError('Decay time {0} not found in phtn_src file'.format(idc)) 
+
+
 
