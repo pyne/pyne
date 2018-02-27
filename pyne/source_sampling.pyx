@@ -532,27 +532,6 @@ cdef class SourceParticle:
     def __cinit__(self, double x, double y, double z, double e, double w, int c):
         self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, c)
     
-    def get_xyzew(self):
-        """get_xyzew(self)
-        Get source particle x, y, z, e and w
-        
-        Parameters
-        ----------
-        None
-        
-        Returns
-        -------
-        res1 : std::vector< double >
-        
-        """
-        cdef cpp_vector[double] rtnval
-        cdef np.npy_intp rtnval_proxy_shape[1]
-        rtnval = self.c_src.get_xyzew()
-        rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
-        rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
-        rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
-        return rtnval_proxy
-
     @property
     def c(self):
         return self.c_src.get_c()

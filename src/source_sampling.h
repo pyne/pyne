@@ -111,7 +111,6 @@ namespace pyne {
                    int c);
     ~SourceParticle();
 
-    std::vector<double> get_xyzew();
     double get_x() {return x;};
     double get_y() {return y;};
     double get_z() {return z;};
