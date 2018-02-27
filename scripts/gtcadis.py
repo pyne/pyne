@@ -157,9 +157,9 @@ def step1():
     source, dg = isotropic_vol_source(geom, mesh, cells, spectra, intensities)
    
     # PARTISN input 
-    ngroup = 217
-    cards = _cards()
-    names_dict = _names_dict()
+    ngroup = 217 # total number of energy groups
+    cards = _cards() # block 1, 3, 5 input values
+    names_dict = _names_dict() # dictionary of isotopes (PyNE nucids to bxslib names)
     
     write_partisn_input(mesh, geom, ngroup, cards=cards, dg=dg, names_dict=names_dict, data_hdf5path="/materials", nuc_hdf5path="/nucid", fine_per_coarse=1)
 
