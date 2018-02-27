@@ -435,15 +435,3 @@ pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
 
 pyne::SourceParticle::~SourceParticle() {};
 
-std::vector<double> pyne::SourceParticle::get_xyzew() {
-    std::vector<double> xyzew;
-    xyzew.push_back(x);
-    xyzew.push_back(y);
-    xyzew.push_back(z);
-    xyzew.push_back(e);
-    xyzew.push_back(w);
-    return xyzew;
-}
-
-
-

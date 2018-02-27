@@ -41,7 +41,6 @@ cdef extern from "source_sampling.h" namespace "pyne":
         # attributes
 
         # methods
-        cpp_vector[double] get_xyzew() except +
         double get_x() except +
         double get_y() except +
         double get_z() except +
