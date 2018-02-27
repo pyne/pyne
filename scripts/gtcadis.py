@@ -83,7 +83,7 @@ def _names_dict():
 
     return names_dict
  
-def _cards():
+def _cards(source):
     cards = {"block1": {"isn": 16,
                         "maxscm": '3E8',
                         "maxlcm": '6E8',
@@ -158,7 +158,7 @@ def step1():
    
     # PARTISN input 
     ngroup = 217 # total number of energy groups
-    cards = _cards() # block 1, 3, 5 input values
+    cards = _cards(source) # block 1, 3, 5 input values
     names_dict = _names_dict() # dictionary of isotopes (PyNE nucids to bxslib names)
     
     write_partisn_input(mesh, geom, ngroup, cards=cards, dg=dg, names_dict=names_dict, data_hdf5path="/materials", nuc_hdf5path="/nucid", fine_per_coarse=1)
