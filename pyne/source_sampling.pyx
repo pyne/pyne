@@ -189,13 +189,13 @@ cdef class AliasTable:
     pass
 
 
-cdef cpp_vector[double] convert_e_bounds(e_bounds):
-    """convert_e_bounds(rands)
+cdef cpp_vector[double] convert_nparray_to_vector(array):
+    """convert_nparray_to_vector
     Convert python np.ndarray into cpp_vector[double]
     
     Parameters
     ----------
-    e_bounds : np.ndarray
+    array : np.ndarray
     
     Returns
     -------
@@ -203,16 +203,15 @@ cdef cpp_vector[double] convert_e_bounds(e_bounds):
     
     """
 
-    cdef cpp_vector[double] e_bounds_proxy
-    cdef int ie_bounds
-    cdef int e_bounds_size
-    cdef double * e_bounds_data
-    e_bounds = np.array(e_bounds, dtype=np.float64)
-    e_bounds_size = len(e_bounds)
-    e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
-    e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-    memcpy(<void*> &e_bounds_proxy[0], e_bounds_data, sizeof(double) *  e_bounds_size)
-    return e_bounds_proxy
+    cdef cpp_vector[double] array_proxy
+    cdef int array_size
+    cdef double * array_data
+    array = np.array(array, dtype=np.float64)
+    array_size = len(array)
+    array_data = <double *> np.PyArray_DATA(<np.ndarray> array)
+    array_proxy = cpp_vector[double](<size_t> array_size)
+    memcpy(<void*> &array_proxy[0], array_data, sizeof(double) *  array_size)
+    return array_proxy
 
 
 
@@ -302,7 +301,7 @@ cdef class Sampler:
         src_tag_name_bytes = src_tag_name.encode()
         bias_tag_name_bytes = bias_tag_name.encode()
         # convert e_bounds
-        cdef cpp_vector[double] e_bounds_proxy = convert_e_bounds(e_bounds)
+        cdef cpp_vector[double] e_bounds_proxy = convert_nparray_to_vector(e_bounds)
         # construct sampler
         self._inst = new cpp_source_sampling.Sampler(
                 std_string(<char *> filename_bytes),
@@ -339,7 +338,7 @@ cdef class Sampler:
         filename_bytes = filename.encode()
         src_tag_name_bytes = src_tag_name.encode()
         # convert e_bounds
-        cdef cpp_vector[double] e_bounds_proxy = convert_e_bounds(e_bounds)
+        cdef cpp_vector[double] e_bounds_proxy = convert_nparray_to_vector(e_bounds)
         # construct sampler
         self._inst = new cpp_source_sampling.Sampler(
                 std_string(<char *> filename_bytes),
@@ -373,7 +372,7 @@ cdef class Sampler:
         for key, value in tag_names.items():
             cpp_tag_names[key] = value
         # convert e_bounds
-        cdef cpp_vector[double] e_bounds_proxy = convert_e_bounds(e_bounds)
+        cdef cpp_vector[double] e_bounds_proxy = convert_nparray_to_vector(e_bounds)
         # construct sampler
         self._inst = new cpp_source_sampling.Sampler(
                 std_string(<char *> filename_bytes),
