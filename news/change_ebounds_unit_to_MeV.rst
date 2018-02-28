@@ -1,6 +1,8 @@
 **Added:** None
 
-**Changed:** Unit of e_bounds changed from eV to MeV
+**Changed:**
+
+* Unit of e_bounds changed from eV to MeV
 
 **Deprecated:** None
 
