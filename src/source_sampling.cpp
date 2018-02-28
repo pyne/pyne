@@ -90,8 +90,23 @@ pyne::Sampler::Sampler(std::string filename,
   }
 
   // find out the src_tag_name and bias_tag_name
-  src_tag_name = tag_names["src_tag_name"];
-  bias_tag_name = tag_names["bias_tag_name"];
+  if (tag_names.find("src_tag_name") == tag_names.end()) {
+    // src_tag_name not found
+    throw std::invalid_argument("src_tag_name not found");
+  } else {
+    // found src_tag_name
+    src_tag_name = tag_names["src_tag_name"];
+  }
+  if (bias_mode == USER) {
+    // bias_tag_name required
+    if (tag_names.find("bias_tag_name") == tag_names.end()) {
+      // bias_tag_name not found
+      throw std::invalid_argument("bias_tag_name not dound");
+    } else {
+      // found bias_tag_name
+      bias_tag_name = tag_names["bias_tag_name"];
+    }
+  }
   setup();
 }
 
