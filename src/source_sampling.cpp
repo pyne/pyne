@@ -89,7 +89,7 @@ pyne::Sampler::Sampler(std::string filename,
     bias_mode = USER;
   }
 
-  // find out the filename, src_tag_name and bias_tag_name
+  // find out the src_tag_name and bias_tag_name
   src_tag_name = tag_names["src_tag_name"];
   bias_tag_name = tag_names["bias_tag_name"];
   setup();
