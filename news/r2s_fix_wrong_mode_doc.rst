@@ -1,6 +1,7 @@
 **Added:** None
 
-**Changed:** 
+**Changed:**
+
 * Correct the wrong mode description comment in pyne/src/source_sampling.h
 
 **Deprecated:** None

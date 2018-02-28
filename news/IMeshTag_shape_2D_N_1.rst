@@ -1,6 +1,7 @@
 **Added:** None
 
-**Changed:** 
+**Changed:**
+
 * shape of IMeshTag when input value is a (N, 1) array
 * set tag as array rather than number
 
