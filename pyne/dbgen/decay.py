@@ -8,7 +8,8 @@ from pyne.utils import QAWarning
 try:
     import urllib.request as urllib
 except ImportError:
-    import urllib
+    import urllib2 as urllib
+
 from zipfile import ZipFile
 
 import numpy as np
@@ -16,8 +17,6 @@ import tables as tb
 
 from pyne import ensdf
 from pyne.dbgen.api import BASIC_FILTERS
-
-warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
 def _readpoint(line, dstart, dlen):
@@ -38,9 +37,14 @@ def _read_variablepoint(line, dstart, dlen):
 
 def grab_atomic_data(build_dir=""):
     medfile = os.path.join(build_dir, 'mednew.dat')
-    if not os.path.isfile(medfile):
-        urllib.urlretrieve('http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/'
-                           + 'analysis/radlst/mednew.dat', medfile)
+    if os.path.isfile(medfile):
+        return
+    # nndc url seems to be down
+    #url = 'http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/mednew.dat'
+    url = 'https://www-nds.iaea.org/workshops/smr1939/Codes/ENSDF_Codes/mswindows/radlst/mednew.dat'
+    conn = urllib.urlopen(url)
+    with open(medfile, 'wb') as f:
+        f.write(conn.read())
 
 
 def parse_atomic_data(build_dir=""):
@@ -111,12 +115,16 @@ def grab_ensdf_decay(build_dir=""):
         fpath = os.path.join(build_dir, f)
         if f not in os.listdir(build_dir):
             print("  grabbing {0} and placing it in {1}".format(f, fpath))
-            urllib.urlretrieve(iaea_base_url + f, fpath)
+            conn = urllib.urlopen(iaea_base_url + f)
+            with open(fpath, 'wb') as f:
+                f.write(conn.read())
 
             if os.path.getsize(fpath) < 1048576:
                 print("  could not get {0} from NNDC; trying mirror".format(f))
                 os.remove(fpath)
-                urllib.urlretrieve(cf_base_url + f, fpath)
+                conn = urllib.urlopen(cf_base_url + f)
+                with open(fpath, 'wb') as f:
+                    f.write(conn.read())
 
         # not using ZipFile context manager (with statement for Python 2.6)
         try:
@@ -471,7 +479,7 @@ def make_decay(args):
     print("Making decay data table.")
     make_decay_half_life_table(nuc_data, build_dir)
 
-    print("Grabbing Atomic data from NNDC")
+    print("Grabbing Atomic data")
     grab_atomic_data(build_dir)
 
     print("Making atomic decay data table")
