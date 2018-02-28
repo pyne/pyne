@@ -3,7 +3,7 @@ import warnings
 import itertools
 
 from operator import itemgetter
-from nose.tools import assert_equal, with_setup, assert_almost_equal
+from nose.tools import assert_equal, with_setup, assert_almost_equal, assert_raises
 from random import uniform, seed
 
 import numpy as np
@@ -22,6 +22,38 @@ from pyne.source_sampling import Sampler, AliasTable
 
 def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
+
+@with_setup(None, try_rm_file('tet.h5m'))
+def test_single_tet_tag_names_map():
+    """This test tests uniform sampling within a single tetrahedron. This is
+    done by dividing the tetrahedron in 4 smaller tetrahedrons and ensuring
+    that each sub-tet is sampled equally.
+    """
+    seed(1953)
+    m = Mesh(structured=True,
+             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
+    e_bounds = np.array([0, 0.5, 1.0])
+    m.bias = IMeshTag(2, float)
+    m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
+    m.mesh.save("sampling_mesh.h5m")
+    filename = "sampling_mesh.h5m"
+
+    # right condition
+    tag_names = {"src_tag_name": "src",
+                 "bias_tag_name": "bias"}
+    tag_names = {"src_tag_name": "src"}
+    e_bounds = np.array([0, 1])
+    sampler = Sampler(filename, tag_names, e_bounds, 0)
+    # src_tag_name not given
+    tag_names = {}
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 0)
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 1)
+    # bias_tag_name not given
+    tag_names = {"src_tag_name": "src"}
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 2)
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex():
