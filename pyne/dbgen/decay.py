@@ -2,15 +2,13 @@
 from __future__ import print_function, division
 import os
 import glob
-from warnings import warn
-from pyne.utils import QAWarning
-
+import shutil
+from zipfile import ZipFile
 try:
     import urllib.request as urllib
 except ImportError:
     import urllib2 as urllib
 
-from zipfile import ZipFile
 
 import numpy as np
 import tables as tb
@@ -37,14 +35,22 @@ def _read_variablepoint(line, dstart, dlen):
 
 def grab_atomic_data(build_dir=""):
     medfile = os.path.join(build_dir, 'mednew.dat')
+    local = os.path.join(os.path.dirname(__file__), 'mednew.dat')
     if os.path.isfile(medfile):
         return
+    # try to download first
     # nndc url seems to be down
     #url = 'http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/mednew.dat'
     url = 'https://www-nds.iaea.org/workshops/smr1939/Codes/ENSDF_Codes/mswindows/radlst/mednew.dat'
-    conn = urllib.urlopen(url)
-    with open(medfile, 'wb') as f:
-        f.write(conn.read())
+    try:
+        conn = urllib.urlopen(url)
+        with open(medfile, 'wb') as f:
+            f.write(conn.read())
+        return
+    except Exception:
+        pass
+    # use local copy if we can't download
+    shutil.copy(local, medfile)
 
 
 def parse_atomic_data(build_dir=""):
@@ -131,7 +137,7 @@ def grab_ensdf_decay(build_dir=""):
             zf = ZipFile(fpath)
             for name in zf.namelist():
                 if not os.path.exists(os.path.join(build_dir, name)):
-                    print("    extracting {0} from {1}".format(name, f))
+                    print("    extracting {0} from {1}".format(name, fpath))
                     zf.extract(name, build_dir)
         finally:
             zf.close()
