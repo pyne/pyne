@@ -18,6 +18,18 @@ macro(pyne_set_platform)
   message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
 endmacro()
 
+# C++ settings
+macro(pyne_setup_cxx)
+  INCLUDE(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  IF(COMPILER_SUPPORTS_CXX11)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  ELSE()
+    MESSAGE(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. "
+                        "Please use a different C++ compiler.")
+  ENDIF()
+endmacro()
+
 macro(pyne_set_asm_platform)
   # first set OS
   if (WIN32)
@@ -39,7 +51,6 @@ macro(pyne_set_asm_platform)
   set(PYNE_ASM_PLATFORM "${_plat}")
 endmacro()
 
-
 # Fortran settings
 # FFLAGS depend on the compiler
 macro(pyne_setup_fortran)
@@ -48,10 +59,10 @@ macro(pyne_setup_fortran)
 
   # Augment the Fortran implicit link libraries
   message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES: "
-          ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES})
+          "${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
   if (APPLE)
     message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES Before Fix: "
-            ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES})
+            "${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
     set(LIBGCC_S)
     # The previous method found the gcc_s library by version,
     # find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
@@ -83,7 +94,7 @@ macro(pyne_setup_fortran)
     endif()
   endif()
   message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES: "
-          ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES})
+          "${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
 
   get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 

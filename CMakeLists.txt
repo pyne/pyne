@@ -10,6 +10,7 @@ project(pyne)
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
+pyne_setup_cxx()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
