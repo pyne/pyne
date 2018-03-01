@@ -1,6 +1,6 @@
 $PROJECT = $GITHUB_ORG = $GITHUB_REPO = 'pyne'
 $ACTIVITIES = ['version_bump', 'changelog', 'nose', 'sphinx',
-               'tag', 'conda_forge', 'ghpages', 'ghrelease'
+               'tag', 'push_tag', 'conda_forge', 'ghpages', 'ghrelease'
                ]
 
 $VERSION_BUMP_PATTERNS = [
@@ -30,6 +30,6 @@ $DOCKER_GIT_EMAIL = 'pyne@pyne.io'
 
 $NOSE_ARGS = ['-w', 'tests']
 
-$TAG_REMOTE = 'git@github.com:pyne/pyne.git'
-$TAG_TARGET = 'master'
+$PUSH_TAG_REMOTE = 'git@github.com:pyne/pyne.git'
+$PUSH_TAG_TARGET = 'master'
 $GHPAGES_REPO = 'git@github.com:pyne/pyne.github.com.git'
