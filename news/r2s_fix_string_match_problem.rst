@@ -1,8 +1,10 @@
-**Added:** 
+**Added:**
+
 * Function to convert unit to s in pyne/alara.py
 * Function to do float match for decay times
 
-**Changed:** 
+**Changed:**
+
 * A parameter in test_alara.py, to test modified match method
 
 **Deprecated:** None

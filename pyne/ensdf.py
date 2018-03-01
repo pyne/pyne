@@ -115,9 +115,8 @@ def _halflife_to_seconds(value, err, units):
     else:
         scale = energy_conv_dict[units]
         sec_time = scale / value
-        sec_err = (scale / (value - minus) - sec_time,
+        sec_err = (scale / max(0.1*value, value - minus) - sec_time,
                    sec_time - scale / (value + plus))
-
     if err is None:
         return sec_time, None
     elif sec_err[0] == sec_err[1]:
