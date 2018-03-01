@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import ConfigParser
-from os.path import isfile
+import os
 
 import numpy as np
 from pyne.mesh import Mesh
@@ -126,7 +126,7 @@ def step1():
           np.linspace(float(ymesh[0]), float(ymesh[1]), float(ymesh[2]) + 1),
           np.linspace(float(zmesh[0]), float(zmesh[1]), float(zmesh[2]) + 1)]
     m = Mesh(structured=True, structured_coords=sc)
-    m.mesh.save("blank_mesh.h5m"
+    m.mesh.save("blank_mesh.h5m")
 
     # Generate 42 photon energy bins [eV]
     #  First bin has been replaced with 1 for log interpolation
@@ -159,7 +159,7 @@ def step1():
     # Load geometry into DAGMC
     load(geom)
     # Generate isotropic photon volume source
-    source, dg = isotropic_vol_source(geom, mesh, cells, spectra, intensities)
+    source, dg = isotropic_vol_source(geom, m, cells, spectra, intensities)
 
     # PARTISN input
     ngroup = 217  # total number of energy groups
@@ -167,7 +167,7 @@ def step1():
     names_dict = _names_dict()  # dictionary of isotopes (PyNE nucids to bxslib names)
 
     write_partisn_input(
-        mesh,
+        m,
         geom,
         ngroup,
         cards=cards,
