@@ -57,7 +57,7 @@ def setup():
     with open(config_filename, 'w') as f:
         f.write(config)
     print('File "{}" has been written'.format(config_filename))
-    print('Fill out the fields in these files then run ">> gtcadis.py step1"')
+    print('Fill out the fields in this file then run ">> gtcadis.py step1"')
 
 
 def _names_dict():
