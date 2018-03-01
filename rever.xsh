@@ -19,7 +19,7 @@ $DOCKER_APT_DEPS = ['libc6', 'libc6-i386', 'libc6-dev', 'libc-dev', 'gcc']
 $DOCKER_CONDA_DEPS = ['cmake', 'pkg-config', 'setuptools', 'gcc',
     'libgcc', 'libgfortran', 'make', 'scipy',
     'python', 'blas', 'openblas', 'boost-cpp',
-    'hdf5', 'bzip2', 'xz', 'moab', 'cython', 'numpy', 'pytables',
+    'hdf5', 'bzip2', 'xz', 'moab=4', 'cython', 'numpy', 'pytables',
     'jinja2', 'nose', 'sphinx', 'numpydoc', 'cloud_sptheme',
     'sphinxcontrib-bibtex', 'prettytable','nbconvert'
     ]
