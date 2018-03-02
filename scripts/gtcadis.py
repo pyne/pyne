@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import argparse
 import ConfigParser
-import os
 
 import numpy as np
 from pyne.mesh import Mesh
@@ -62,22 +61,24 @@ def setup():
 
 def _names_dict():
     names = ['h1', 'd', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
-             'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mgnat', 'al27', 'si28', 'si29',
-             'si30', 'p31', 'snat', 'cl35', 'cl37', 'knat', 'canat', 'ti46', 'ti47', 'ti48',
-             'ti49', 'ti50', 'vnat', 'cr50', 'cr52', 'cr53', 'cr54', 'mn55', 'fe54', 'fe56',
-             'fe57', 'fe58', 'co59', 'ni58', 'ni60', 'ni61', 'ni62', 'ni64', 'cu63', 'cu65',
-             'ganat', 'zrnat', 'nb93', 'mo92', 'mo94', 'mo95', 'mo96', 'mo97', 'mo98',
-             'mo100', 'snnat', 'ta181', 'w182', 'w183', 'w184', 'w186', 'au197', 'pb206',
-             'pb207', 'pb208', 'bi209']
+             'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mgnat', 'al27', 'si28',
+             'si29', 'si30', 'p31', 'snat', 'cl35', 'cl37', 'knat', 'canat',
+             'ti46', 'ti47', 'ti48', 'ti49', 'ti50', 'vnat', 'cr50', 'cr52',
+             'cr53', 'cr54', 'mn55', 'fe54', 'fe56', 'fe57', 'fe58', 'co59',
+             'ni58', 'ni60', 'ni61', 'ni62', 'ni64', 'cu63', 'cu65', 'ganat',
+             'zrnat', 'nb93', 'mo92', 'mo94', 'mo95', 'mo96', 'mo97', 'mo98',
+             'mo100', 'snnat', 'ta181', 'w182', 'w183', 'w184', 'w186', 'au197',
+             'pb206', 'pb207', 'pb208', 'bi209']
 
     names_formatted = ['h1', 'h2', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
-                       'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mg', 'al27', 'si28', 'si29',
-                       'si30', 'p31', 's', 'cl35', 'cl37', 'k', 'ca', 'ti46', 'ti47', 'ti48',
-                       'ti49', 'ti50', 'v', 'cr50', 'cr52', 'cr53', 'cr54', 'mn55', 'fe54', 'fe56',
-                       'fe57', 'fe58', 'co59', 'ni58', 'ni60', 'ni61', 'ni62', 'ni64', 'cu63', 'cu65',
-                       'ga', 'zr', 'nb93', 'mo92', 'mo94', 'mo95', 'mo96', 'mo97', 'mo98',
-                       'mo100', 'sn', 'ta181', 'w182', 'w183', 'w184', 'w186', 'au197', 'pb206',
-                       'pb207', 'pb208', 'bi209']
+                       'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mg', 'al27', 'si28',
+                       'si29', 'si30', 'p31', 's', 'cl35', 'cl37', 'k', 'ca', 'ti46',
+                       'ti47', 'ti48', 'ti49', 'ti50', 'v', 'cr50', 'cr52', 'cr53', 'cr54',
+                       'mn55', 'fe54', 'fe56', 'fe57', 'fe58', 'co59', 'ni58', 'ni60',
+                       'ni61', 'ni62', 'ni64', 'cu63', 'cu65', 'ga', 'zr', 'nb93', 'mo92',
+                       'mo94', 'mo95', 'mo96', 'mo97', 'mo98', 'mo100', 'sn', 'ta181',
+                       'w182', 'w183', 'w184', 'w186', 'au197', 'pb206', 'pb207', 'pb208',
+                       'bi209']
 
     names_dict = {nucname.id(x): y for x, y in zip(names_formatted, names)}
 
@@ -151,7 +152,8 @@ def step1():
     photon_spectrum[0] = df[0]
     # Total number of groups is 217 (42 photon + 175 neutron)
     spectra = [np.append(photon_spectrum, np.zeros(175))]
-    # The spectrum is normalized by PyNE, so we need to mutliply by the sum of intensities in the spectrum.
+    # The spectrum is normalized by PyNE, so we need to mutliply by the sum of
+    # intensities in the spectrum.
     # Additionally, we divide by the volume of the source cell in order to get
     # source density.
     intensities = [np.sum(spectra) / src_vol]
