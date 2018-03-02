@@ -42,8 +42,6 @@ def test_single_tet_tag_names_map():
     filename = "sampling_mesh.h5m"
 
     # right condition
-    tag_names = {"src_tag_name": "src",
-                 "bias_tag_name": "bias"}
     tag_names = {"src_tag_name": "src"}
     e_bounds = np.array([0, 1])
     sampler = Sampler(filename, tag_names, e_bounds, 0)
