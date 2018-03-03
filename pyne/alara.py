@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import collections
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, to_sec
 
 import numpy as np
 import tables as tb
@@ -853,23 +853,6 @@ def _get_subvoxel_array(mesh, cell_mats):
 
     return subvoxel_array
 
-_TO_SEC = {
-    's': 1,
-    'second': 1,
-    'm': 60,
-    'minute': 60,
-    'h': 60 * 60,
-    'hour': 60 * 60,
-    'd': 60 * 60 * 24,
-    'day': 60 * 60 * 24,
-    'w': 60 * 60 * 24 * 7,
-    'week': 60 * 60 * 24 * 7,
-    'y': 60 * 60 * 24 * 365.25,
-    'year': 60 * 60 * 24 * 365.25,
-    'c': 60 * 60 * 24 * 365.25 * 100,
-    'century': 60 * 60 * 24 * 365.25 * 100,
-}
-
 def _convert_unit_to_s(dc):
     """
     This function return a float number represent a time in unit of s.
@@ -883,11 +866,8 @@ def _convert_unit_to_s(dc):
     """
     # get num and unit
     num, unit = dc.split()
-    conv = _TO_SEC.get(unit, None)
-    if conv:
-        return float(num) * conv
-    else:
-        raise ValueError('Invalid unit: {0}'.format(unit))
+    return to_sec(float(num), unit)
+        
 
 def _find_phsrc_dc(idc, phtn_src_dc):
     """

@@ -49,9 +49,15 @@ time_conv_dict = {'as': 1e-18,
                   'd': 86400.0,
                   'day': 86400.0,
                   'days': 86400.0,
+                  'w': 86400.0*7.0,
+                  'week': 86400.0*7.0,
+                  'weeks': 86400.0*7.0,
                   'y': 86400.0*365.25,
                   'year': 86400.0*365.25,
                   'years': 86400.0*365.25,
+                  'c': 86400.0*365.25*100,
+                  'century': 86400.0*365.25*100,
+                  'centuries': 86400.0*365.25*100,
                   }
 
 
@@ -71,9 +77,12 @@ def to_sec(input_time, units):
         Time value in [sec].
 
     """
-    sec_time = input_time * time_conv_dict[units.lower()]
-    return sec_time
-
+    conv = time_conv_dict.get(units.lower(), None)
+    if conv:
+        sec_time = input_time * conv
+        return sec_time
+    else:
+        raise ValueError('Invalid units: {0}'.format(units))
 
 barn_conv_dict = {
     'mb': 1E-3,
