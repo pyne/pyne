@@ -143,7 +143,9 @@ def step1():
 
     ves = list(mesh.iter_ve())
     for tag in mesh.mesh.getAllTags(ves[0]):
-        mesh.mesh.destroyTag(tag, True)
+        if tag.name not in ("cell_number", "cell_fracs",\
+                            "cell_largest_frac_number", "cell_largest_frac"):
+            mesh.mesh.destroyTag(tag, True)
     mesh.mesh.save('blank_mesh.h5m')
     print('The file blank_mesh.h5m has been saved to disk.')
     print('Do not delete this file; it is needed by r2s.py step2.\n')
