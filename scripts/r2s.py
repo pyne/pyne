@@ -163,6 +163,10 @@ def step2():
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
     tag_name = "source_density"
 
+    if sub_voxel:
+        geom = config.get('step1', 'geom')
+        load(geom)
+        cell_mats = cell_materials(geom)
     h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
         photon_source_to_hdf5('phtn_src')
