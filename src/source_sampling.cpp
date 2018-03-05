@@ -121,8 +121,24 @@ pyne::Sampler::Sampler(std::string filename,
       bias_tag_name = tag_names["bias_tag_name"];
     }
   }
-  cell_number_tag_name = tag_names["cell_number_tag_name"];
-  cell_fracs_tag_name = tag_names["cell_fracs_tag_name"];
+  if (sub_mode == SUBVOXEL) {
+    // cell_number_tag
+    if (tag_names.find("cell_number_tag_name") == tag_names.end()) {
+      // cell_number_tag_name not found
+      throw std::invalid_argument("cell_number_tag_name not dound");
+    } else {
+      // found cell_number_tag_name
+      cell_number_tag_name = tag_names["cell_number_tag_name"];
+    }
+    // cell_fracs_tag
+    if (tag_names.find("cell_fracs_tag_name") == tag_names.end()) {
+      // cell_fracs_tag_name not found
+      throw std::invalid_argument("cell_fracs_tag_name not dound");
+    } else {
+      // found cell_fracs_tag_name
+      cell_fracs_tag_name = tag_names["cell_fracs_tag_name"];
+    }
+  }
   setup();
 }
 

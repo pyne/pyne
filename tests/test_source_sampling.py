@@ -310,8 +310,7 @@ def test_single_hex_multiple_subvoxel_analog():
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_multiple_hex_multiple_subvoxel_analog():
     """This test tests that particle are sampled analog from a uniform source
-    defined on eight mesh volume elements in two energy groups. This is done
-    using the exact same method as test_analog_multiple_hex_subvoxel.
+    defined on eight mesh volume elements in two energy groups.
     """
     seed(1953)
     m = Mesh(structured=True,
