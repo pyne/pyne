@@ -11,6 +11,7 @@
 from libcpp cimport bool as cpp_bool
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
+from libcpp.map cimport map as cpp_map
 
 cdef extern from "source_sampling.h" namespace "pyne":
 
@@ -40,7 +41,6 @@ cdef extern from "source_sampling.h" namespace "pyne":
         # attributes
 
         # methods
-        cpp_vector[double] get_xyzew() except +
         double get_x() except +
         double get_y() except +
         double get_z() except +
@@ -59,6 +59,7 @@ cdef extern from "source_sampling.h" namespace "pyne":
         Sampler(std_string, std_string, cpp_vector[double]) except +
         Sampler(std_string, std_string, cpp_vector[double], std_string) except +
         Sampler(std_string, std_string, cpp_vector[double], cpp_bool) except +
+        Sampler(std_string, cpp_map[std_string, std_string], cpp_vector[double], int) except +
 
         # attributes
 

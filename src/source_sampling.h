@@ -33,6 +33,7 @@
 #include <stdexcept> 
 #include <sstream>
 #include <string>
+#include <map>
 
 #include "moab/Range.hpp"
 #include "moab/Core.hpp"
@@ -110,7 +111,6 @@ namespace pyne {
                    int c);
     ~SourceParticle();
 
-    std::vector<double> get_xyzew();
     double get_x() {return x;};
     double get_y() {return y;};
     double get_z() {return z;};
@@ -159,6 +159,17 @@ namespace pyne {
             std::string src_tag_name, 
             std::vector<double> e_bounds, 
             std::string bias_tag_name);
+    /// Constuctor for overall sampler
+    /// \param filename The filename of the h5m file
+    /// \param tag_names The map of src_tag_name and bias_tag_name
+    /// \param e_bounds The energy boundaries, note there are N + 1 energy
+    ///                 bounds for N energy groups
+    /// \param mode The mode number, 0, 1 or 2
+    Sampler(std::string filename,
+            std::map<std::string, std::string> tag_names,
+            std::vector<double> e_bounds,
+            int mode);
+
     /// Samples particle birth parameters
     /// \param rands Six pseudo-random numbers in range [0, 1].
     /// \return A SourceParticle object containing the x position, y, position,

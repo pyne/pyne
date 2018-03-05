@@ -74,6 +74,42 @@ pyne::Sampler::Sampler(std::string filename,
   setup();
 }
 
+pyne::Sampler::Sampler(std::string filename,
+                 std::map<std::string, std::string> tag_names,
+                 std::vector<double> e_bounds, 
+                 int mode)
+  : filename(filename),
+    e_bounds(e_bounds) {
+  // determine the bias_mode
+  if (mode == 0){
+    bias_mode = ANALOG; 
+  } else if (mode == 1) {
+    bias_mode = UNIFORM;
+  } else if (mode == 2) {
+    bias_mode = USER;
+  }
+
+  // find out the src_tag_name and bias_tag_name
+  if (tag_names.find("src_tag_name") == tag_names.end()) {
+    // src_tag_name not found
+    throw std::invalid_argument("src_tag_name not found");
+  } else {
+    // found src_tag_name
+    src_tag_name = tag_names["src_tag_name"];
+  }
+  if (bias_mode == USER) {
+    // bias_tag_name required
+    if (tag_names.find("bias_tag_name") == tag_names.end()) {
+      // bias_tag_name not found
+      throw std::invalid_argument("bias_tag_name not dound");
+    } else {
+      // found bias_tag_name
+      bias_tag_name = tag_names["bias_tag_name"];
+    }
+  }
+  setup();
+}
+
 pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   //
@@ -413,16 +449,4 @@ pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
 }
 
 pyne::SourceParticle::~SourceParticle() {};
-
-std::vector<double> pyne::SourceParticle::get_xyzew() {
-    std::vector<double> xyzew;
-    xyzew.push_back(x);
-    xyzew.push_back(y);
-    xyzew.push_back(z);
-    xyzew.push_back(e);
-    xyzew.push_back(w);
-    return xyzew;
-}
-
-
 
