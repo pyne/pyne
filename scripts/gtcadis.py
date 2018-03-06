@@ -113,18 +113,11 @@ def step1(cfg):
 
     # Get user-input from config file
     geom = cfg['step1']['geom_file']
-    cells= cfg['step1']['src_cell']
-    src_vol = cfg['step1']['src_vol']
+    cells= [cfg['step1']['src_cell']]
+    src_vol = [float(cfg['step1']['src_vol'])]
     xmesh = cfg['step1']['xmesh'].split(',')
     ymesh = cfg['step1']['ymesh'].split(',')
     zmesh = cfg['step1']['zmesh'].split(',')
-
-    # geom = config.get('step1', 'geom_file')
-    # cells = [config.getint('step1', 'src_cell')]
-    # src_vol = [config.getfloat('step1', 'src_vol')]
-    # xmesh = config.get('step1', 'xmesh').split(',')
-    # ymesh = config.get('step1', 'ymesh').split(',')
-    # zmesh = config.get('step1', 'zmesh').split(',')
 
     # Create structured mesh
     sc = [np.linspace(float(xmesh[0]), float(xmesh[1]), float(xmesh[2]) + 1),
@@ -148,7 +141,8 @@ def step1(cfg):
                    0.7523, 1.0041, 1.5083, 1.9958, 2.4657, 2.9082, 3.7269, 4.4834, 7.4896,
                    12.0153, 15.9873, 19.9191, 23.76])
     # Convert to Sv/s per photon FLUX (not fluence)
-    df = np.array([x * 1E-12 for x in df])
+    flux_magnitude = 1E12
+    df = df*flux_magnitude
     # Convert pointwise data to group data for log interpolation
     photon_spectrum = pointwise_collapse(
         photon_bins, de, df, logx=True, logy=True)
