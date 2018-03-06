@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-import ConfigParser
+import yaml
 
 import numpy as np
 from pyne.mesh import Mesh
@@ -10,43 +10,43 @@ from pyne import nucname
 from pyne.bins import pointwise_collapse
 
 
-config_filename = 'config.ini'
+config_filename = 'config.yml'
 
 config = \
     """
 # Optional step to assess all materials in geometry for compatibility with
 # SNILB criteria
-[step0]
+step0:
 
 # Prepare PARTISN input file for adjoint photon transport
-[step1]
-# Path to hdf5 geometry file for photon transport
-geom_file:
-# Volume ID of adjoint photon source cell on
-# DAGMC input [Trelis/Cubit .sat file]
-src_cell:
-# Volume [cm^3] of source cell (detector)
-src_vol:
-# Define mesh that covers entire geometry:
-# xmin, xmax, number of intervals
-xmesh:
-# ymin, ymax, number of intervals
-ymesh:
-# zmin, zmax, number of intervals
-zmesh:
+step1:
+    # Path to hdf5 geometry file for photon transport
+    geom_file:
+    # Volume ID of adjoint photon source cell on
+    # DAGMC input [Trelis/Cubit .sat file]
+    src_cell:
+    # Volume [cm^3] of source cell (detector)
+    src_vol:
+    # Define mesh that covers entire geometry:
+    # xmin, xmax, number of intervals
+    xmesh:
+    # ymin, ymax, number of intervals
+    ymesh:
+    # zmin, zmax, number of intervals
+    zmesh:
 
 # Calculate T matrix for each material
-[step2]
+step2:
 
 # Calculate adjoint neutron source
-[step3]
+step3:
 
 # Prepare PARTISN input for adjoint neutron transport
-[step4]
+step4:
 
 # Generate Monte Carlo variance reduction parameters
 # (biased source and weight windows)
-[step5]
+step5:
 
 
 """
@@ -109,18 +109,22 @@ def _cards(source):
     return cards
 
 
-def step1():
-    # Parse config file
-    config = ConfigParser.ConfigParser()
-    config.read(config_filename)
+def step1(cfg):
 
     # Get user-input from config file
-    geom = config.get('step1', 'geom_file')
-    cells = [config.getint('step1', 'src_cell')]
-    src_vol = [config.getfloat('step1', 'src_vol')]
-    xmesh = config.get('step1', 'xmesh').split(',')
-    ymesh = config.get('step1', 'ymesh').split(',')
-    zmesh = config.get('step1', 'zmesh').split(',')
+    geom = cfg['step1']['geom_file']
+    cells= cfg['step1']['src_cell']
+    src_vol = cfg['step1']['src_vol']
+    xmesh = cfg['step1']['xmesh'].split(',')
+    ymesh = cfg['step1']['ymesh'].split(',')
+    zmesh = cfg['step1']['zmesh'].split(',')
+
+    # geom = config.get('step1', 'geom_file')
+    # cells = [config.getint('step1', 'src_cell')]
+    # src_vol = [config.getfloat('step1', 'src_vol')]
+    # xmesh = config.get('step1', 'xmesh').split(',')
+    # ymesh = config.get('step1', 'ymesh').split(',')
+    # zmesh = config.get('step1', 'zmesh').split(',')
 
     # Create structured mesh
     sc = [np.linspace(float(xmesh[0]), float(xmesh[1]), float(xmesh[2]) + 1),
@@ -182,6 +186,12 @@ def step1():
 
 def main():
 
+    # Print blank config file
+    data = yaml.load(config)
+    config_file = yaml.dump(data, default_flow_style=False)
+    with open(config_filename, 'r') as f:
+        cfg = yaml.load(f)
+
     gtcadis_help = ('This script automates the GT-CADIS process of \n'
                     'producing variance reduction parameters to optimize the\n'
                     'neutron transport step of the Rigorous 2-Step (R2S) method.\n')
@@ -198,7 +208,7 @@ def main():
     if args.command == 'setup':
         setup()
     elif args.command == 'step1':
-        step1()
+        step1(cfg)
 
 
 if __name__ == '__main__':
