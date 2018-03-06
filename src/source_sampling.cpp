@@ -115,7 +115,7 @@ pyne::Sampler::Sampler(std::string filename,
     // bias_tag_name required
     if (tag_names.find("bias_tag_name") == tag_names.end()) {
       // bias_tag_name not found
-      throw std::invalid_argument("bias_tag_name not dound");
+      throw std::invalid_argument("bias_tag_name not found");
     } else {
       // found bias_tag_name
       bias_tag_name = tag_names["bias_tag_name"];
@@ -125,7 +125,7 @@ pyne::Sampler::Sampler(std::string filename,
     // cell_number_tag
     if (tag_names.find("cell_number_tag_name") == tag_names.end()) {
       // cell_number_tag_name not found
-      throw std::invalid_argument("cell_number_tag_name not dound");
+      throw std::invalid_argument("cell_number_tag_name not found");
     } else {
       // found cell_number_tag_name
       cell_number_tag_name = tag_names["cell_number_tag_name"];
@@ -133,7 +133,7 @@ pyne::Sampler::Sampler(std::string filename,
     // cell_fracs_tag
     if (tag_names.find("cell_fracs_tag_name") == tag_names.end()) {
       // cell_fracs_tag_name not found
-      throw std::invalid_argument("cell_fracs_tag_name not dound");
+      throw std::invalid_argument("cell_fracs_tag_name not found");
     } else {
       // found cell_fracs_tag_name
       cell_fracs_tag_name = tag_names["cell_fracs_tag_name"];
