@@ -175,7 +175,8 @@ def step2():
         print('Writing source for decay time: {0}'.format(dc))
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
         tags = {('TOTAL', dc): tag_name}
-        photon_source_hdf5_to_mesh(mesh, h5_file, tags)
+        photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
+                                   cell_mats=cell_mats)
         mesh.mesh.save('{0}_{1}.h5m'.format(output, i+1))
         intensity = total_photon_source_intensity(mesh, tag_name)
         intensities += "{0}: {1}\n".format(dc, intensity)
