@@ -222,7 +222,12 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     if sub_voxel:
         num_vol_elements = len(mesh)
         subvoxel_array = _get_subvoxel_array(mesh, cell_mats)
-        max_num_cells = \
+        # get max_num_cells
+        ve0_cell_number_tag = mesh.mesh.getTagHandle('cell_number')[ve0]
+        if type(ve0_cell_number_tag) in (int, np.int32, np.int64):
+            max_num_cells = 1
+        else:
+            max_num_cells = \
                 len(mesh.mesh.getTagHandle('cell_number')[ve0])
     else:
         max_num_cells = 1
@@ -844,7 +849,10 @@ def _get_subvoxel_array(mesh, cell_mats):
     # calculate the total number of non-void sub-voxel
     non_void_sv_num = 0
     for i, _, ve in mesh:
-        for c, cell in enumerate(cell_number_tag[ve]):
+        cell_numbers = cell_number_tag[ve]
+        if type(cell_numbers) in (int, np.int32, np.int64):
+            cell_numbers = [cell_numbers]
+        for c, cell in enumerate(cell_numbers):
             if cell > 0 and len(cell_mats[cell].comp): #non-void cell
                 temp_subvoxel[0] = (non_void_sv_num, i, c)
                 subvoxel_array = np.append(subvoxel_array, temp_subvoxel)
