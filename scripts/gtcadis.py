@@ -60,28 +60,32 @@ def setup():
 
 
 def _names_dict():
-    names = ['h1', 'd', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
-             'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mgnat', 'al27', 'si28',
-             'si29', 'si30', 'p31', 'snat', 'cl35', 'cl37', 'knat', 'canat',
-             'ti46', 'ti47', 'ti48', 'ti49', 'ti50', 'vnat', 'cr50', 'cr52',
-             'cr53', 'cr54', 'mn55', 'fe54', 'fe56', 'fe57', 'fe58', 'co59',
-             'ni58', 'ni60', 'ni61', 'ni62', 'ni64', 'cu63', 'cu65', 'ganat',
-             'zrnat', 'nb93', 'mo92', 'mo94', 'mo95', 'mo96', 'mo97', 'mo98',
-             'mo100', 'snnat', 'ta181', 'w182', 'w183', 'w184', 'w186', 'au197',
-             'pb206', 'pb207', 'pb208', 'bi209']
+    names = {'h1': 'h1', 'd': 'h2', 'h3': 'h3', 'he3': 'he3',
+             'he4': 'he4', 'li6': 'li6', 'li7': 'li7',
+             'be9': 'be9', 'b10': 'b10', 'b11': 'b11',
+             'c12': 'c12', 'n14': 'n14', 'n15': 'n15',
+             'o16': 'o16', 'f19': 'f19', 'na23': 'na23',
+             'mgnat': 'mg', 'al27': 'al27', 'si28': 'si28',
+             'si29': 'si29', 'si30': 'si30', 'p31': 'p31',
+             'snat': 's', 'cl35': 'cl35', 'cl37': 'cl37',
+             'knat': 'k', 'canat': 'ca', 'ti46': 'ti46',
+             'ti47': 'ti47', 'ti48': 'ti48', 'ti49': 'ti49',
+             'ti50': 'ti50', 'vnat': 'v', 'cr50': 'cr50',
+             'cr52': 'cr52', 'cr53': 'cr53', 'cr54': 'cr54',
+             'mn55': 'mn55', 'fe54': 'fe54', 'fe56': 'fe56',
+             'fe57': 'fe57', 'fe58': 'fe58', 'co59': 'co59',
+             'ni58': 'ni58', 'ni60': 'ni60', 'ni61': 'ni61',
+             'ni62': 'ni62', 'ni64': 'ni64', 'cu63': 'cu63',
+             'cu65': 'cu65', 'ganat': 'ga', 'zrnat': 'zr',
+             'nb93': 'nb93', 'mo92': 'mo92', 'mo94': 'mo94',
+             'mo95': 'mo95', 'mo96': 'mo96', 'mo97': 'mo97',
+             'mo98': 'mo98', 'mo100': 'mo100', 'snnat': 'sn',
+             'ta181': 'ta181', 'w182': 'w182', 'w183': 'w183',
+             'w184': 'w184', 'w186': 'w186', 'au197': 'au197',
+             'pb206': 'pb206', 'pb207': 'pb207', 'pb208': 'pb208',
+             'bi209': 'bi209'}
 
-    names_formatted = ['h1', 'h2', 'h3', 'he3', 'he4', 'li6', 'li7', 'be9', 'b10', 'b11',
-                       'c12', 'n14', 'n15', 'o16', 'f19', 'na23', 'mg', 'al27', 'si28',
-                       'si29', 'si30', 'p31', 's', 'cl35', 'cl37', 'k', 'ca', 'ti46',
-                       'ti47', 'ti48', 'ti49', 'ti50', 'v', 'cr50', 'cr52', 'cr53', 'cr54',
-                       'mn55', 'fe54', 'fe56', 'fe57', 'fe58', 'co59', 'ni58', 'ni60',
-                       'ni61', 'ni62', 'ni64', 'cu63', 'cu65', 'ga', 'zr', 'nb93', 'mo92',
-                       'mo94', 'mo95', 'mo96', 'mo97', 'mo98', 'mo100', 'sn', 'ta181',
-                       'w182', 'w183', 'w184', 'w186', 'au197', 'pb206', 'pb207', 'pb208',
-                       'bi209']
-
-    names_dict = {nucname.id(x): y for x, y in zip(names_formatted, names)}
-
+    names_dict = {nucname.id(value): key for key, value in names.iteritems()}
     return names_dict
 
 
@@ -113,7 +117,7 @@ def step1(cfg):
 
     # Get user-input from config file
     geom = cfg['step1']['geom_file']
-    cells= [cfg['step1']['src_cell']]
+    cells = [cfg['step1']['src_cell']]
     src_vol = [float(cfg['step1']['src_vol'])]
     xmesh = cfg['step1']['xmesh'].split(',')
     ymesh = cfg['step1']['ymesh'].split(',')
@@ -128,12 +132,11 @@ def step1(cfg):
 
     # Generate 42 photon energy bins [eV]
     #  First bin has been replaced with 1 for log interpolation
-    photon_bins = [1, 1e4, 2e4, 3e4, 4.5e4, 6e4, 7e4, 7.5e4, 1e5, 1.5e5, 2e5, 3e5, 4e5,
-                   4.5e5, 5.1e5, 5.12e5, 6e5, 7e5, 8e5, 1e6, 1.33e6, 1.34e6, 1.5e6, 1.66e6, 2e6,
-                   2.5e6, 3e6, 3.5e6, 4e6, 4.5e6, 5e6, 5.5e6, 6e6, 6.5e6, 7e6, 7.5e6, 8e6, 1e7,
-                   1.2e7, 1.4e7, 2e7, 3e7, 5e7]
-    # Convert to MEV
-    photon_bins = np.array([x / 1E6 for x in photon_bins])
+
+    photon_bins = np.array([1e-6, 0.01, 0.02, 0.03, 0.045, 0.06, 0.07, 0.075, 0.1, 0.15,
+                            0.2, 0.3, 0.4, 0.45, 0.51, 0.512, 0.6, 0.7, 0.8, 1, 1.33, 1.34,
+                            1.5, 1.66, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 10,
+                            12, 14, 20, 30, 50])
     # ICRP 74 flux-to-dose conversion factors
     de = np.array([0.01, 0.015, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.1, 0.15, 0.2, 0.3,
                    0.4, 0.5, 0.6, 0.8, 1, 2, 4, 6, 8, 10])
@@ -142,7 +145,7 @@ def step1(cfg):
                    12.0153, 15.9873, 19.9191, 23.76])
     # Convert to Sv/s per photon FLUX (not fluence)
     flux_magnitude = 1E12
-    df = df*flux_magnitude
+    df = df * flux_magnitude
     # Convert pointwise data to group data for log interpolation
     photon_spectrum = pointwise_collapse(
         photon_bins, de, df, logx=True, logy=True)
