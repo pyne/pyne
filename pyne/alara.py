@@ -844,8 +844,7 @@ def _get_subvoxel_array(mesh, cell_mats):
     # calculate the total number of non-void sub-voxel
     non_void_sv_num = 0
     for i, _, ve in mesh:
-        cell_numbers = cell_number_tag[ve]
-        for c, cell in enumerate(np.atleast_1d(cell_numbers)):
+        for c, cell in enumerate(np.atleast_1d(cell_number_tag[ve])):
             if cell > 0 and len(cell_mats[cell].comp): #non-void cell
                 temp_subvoxel[0] = (non_void_sv_num, i, c)
                 subvoxel_array = np.append(subvoxel_array, temp_subvoxel)
