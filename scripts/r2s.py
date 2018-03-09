@@ -142,9 +142,10 @@ def step1():
         mesh = Mesh(structured=False, mesh=meshtal)
 
     ves = list(mesh.iter_ve())
+    tags_keep = ("cell_number", "cell_fracs",
+                 "cell_largest_frac_number", "cell_largest_frac")
     for tag in mesh.mesh.getAllTags(ves[0]):
-        if tag.name not in ("cell_number", "cell_fracs",\
-                            "cell_largest_frac_number", "cell_largest_frac"):
+        if tag.name not in tags_keep:
             mesh.mesh.destroyTag(tag, True)
     mesh.mesh.save('blank_mesh.h5m')
     print('The file blank_mesh.h5m has been saved to disk.')
