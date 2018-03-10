@@ -287,6 +287,54 @@ def test_photon_source_hdf5_to_mesh_subvoxel():
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
 
+def test_photon_source_hdf5_to_mesh_subvoxel_size1():
+    """Tests the function photon source_h5_to_mesh
+    under sub-voxel r2s condition."""
+
+    if not HAVE_PYTAPS:
+        raise SkipTest
+
+    filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
+    photon_source_to_hdf5(filename, chunkshape=(10,))
+    assert_true(os.path.exists(filename + '.h5'))
+    sub_voxel = True
+    mesh = Mesh(structured=True,
+                structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
+    cell_fracs = np.zeros(4, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+
+    cell_fracs[:] = [(0, 11, 1.0, 0.0), (1, 12, 1.0, 0.0),
+                     (2, 13, 1.0, 0.0), (3, 14, 1.0, 0.0)]
+
+    cell_mats = {11: Material({'H': 1.0}, density=1.0),
+                 12: Material({'He': 1.0}, density=1.0),
+                 13: Material({'He': 1.0}, density=1.0),
+                 14: Material({}, density=0.0, metadata={'name': 'void'})}
+    mesh.tag_cell_fracs(cell_fracs)
+    tags = {('1001', 'shutdown'): 'tag1', ('TOTAL', '1 h'): 'tag2'}
+
+    photon_source_hdf5_to_mesh(mesh, filename + '.h5', tags,
+                               sub_voxel=sub_voxel, cell_mats=cell_mats)
+
+    # create lists of lists of expected results
+    tag1_answers = [[1.0] + [0.0] * 41,
+                    [2.0] + [0.0] * 41,
+                    [3.0] + [0.0] * 41,
+                    [0.0] * 42]
+    tag2_answers = [[5.0] + [0.0] * 41,
+                    [6.0] + [0.0] * 41,
+                    [7.0] + [0.0] * 41,
+                    [0.0] * 42]
+
+    for i, _, ve in mesh:
+        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
+        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+
+    if os.path.isfile(filename + '.h5'):
+        os.remove(filename + '.h5')
+
 def test_record_to_geom():
 
     if not HAVE_PYTAPS:

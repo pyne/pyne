@@ -217,15 +217,14 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     # find number of energy groups
     with tb.open_file(filename) as h5f:
         num_e_groups = len(h5f.root.data[0][3])
-    max_num_cells = -1
+    max_num_cells = 1
     ve0 = next(mesh.iter_ve())
     if sub_voxel:
         num_vol_elements = len(mesh)
         subvoxel_array = _get_subvoxel_array(mesh, cell_mats)
-        max_num_cells = \
-                len(mesh.mesh.getTagHandle('cell_number')[ve0])
-    else:
-        max_num_cells = 1
+        # get max_num_cells
+        max_num_cells = len(np.atleast_1d(mesh.mesh.getTagHandle(
+            'cell_number')[ve0]))
 
     # create a dict of tag handles for all keys of the tags dict
     tag_handles = {}
@@ -844,7 +843,7 @@ def _get_subvoxel_array(mesh, cell_mats):
     # calculate the total number of non-void sub-voxel
     non_void_sv_num = 0
     for i, _, ve in mesh:
-        for c, cell in enumerate(cell_number_tag[ve]):
+        for c, cell in enumerate(np.atleast_1d(cell_number_tag[ve])):
             if cell > 0 and len(cell_mats[cell].comp): #non-void cell
                 temp_subvoxel[0] = (non_void_sv_num, i, c)
                 subvoxel_array = np.append(subvoxel_array, temp_subvoxel)
