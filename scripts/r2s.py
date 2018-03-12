@@ -168,6 +168,8 @@ def step2():
         geom = config.get('step1', 'geom')
         load(geom)
         cell_mats = cell_materials(geom)
+    else:
+        cell_mats = None
     h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
         photon_source_to_hdf5('phtn_src')
