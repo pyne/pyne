@@ -28,11 +28,11 @@ step1:
     # Volume [cm^3] of source cell (detector)
     src_vol:
     # Define uniformly spaced, rectagular mesh that covers entire geometry:
-    # Define origin of the mesh
+    # Define origin of the mesh (three entries, one per spatial dimension)
     # Define locations of the coarse meshes in each direction
     # and the number of fine meshes within corresponding coarse meshes
-    # FIX ME!!! (Number of entries in coarse mesh list must match number of entries
-    # in fine mesh list.)
+    # Supported: Only one entry per _mesh and _ints for a uniformly 
+    # spaced mesh
     # Separate values with blank space.
     origin:
     xmesh:
@@ -205,7 +205,7 @@ def step1(cfg):
 
 
 def main():
-    """ This function manages the steps for the GT-CADIS workflow.
+    """ This function manages the setup and steps 1-5 for the GT-CADIS workflow.
     """
 
     # Print blank config file
