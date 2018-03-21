@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import yaml
+import io
 
 import numpy as np
 from pyne.mesh import Mesh
@@ -208,12 +209,11 @@ def main():
     """ This function manages the setup and steps 1-5 for the GT-CADIS workflow.
     """
 
-    # Print blank config file
-    data = yaml.load(config)
-    config_file = yaml.dump(data, default_flow_style=False)
+    # Write blank config file
+    yaml.dump(yaml.load(config), default_flow_style=False)
+
     with open(config_filename, 'r') as f:
         cfg = yaml.load(f)
-
     gtcadis_help = ('This script automates the GT-CADIS process of \n'
                     'producing variance reduction parameters to optimize the\n'
                     'neutron transport step of the Rigorous 2-Step (R2S) method.\n')
@@ -230,8 +230,8 @@ def main():
     if args.command == 'setup':
         setup()
     elif args.command == 'step1':
+        print(type(step1(cfg['step1'])))
         step1(cfg['step1'])
-
 
 if __name__ == '__main__':
     main()
