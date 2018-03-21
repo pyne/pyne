@@ -59,7 +59,7 @@ Binary
 Binary distributions of the latest release for mac and linux (64-bit) 
 using the conda package manager can be installed by running the command::
 
-    conda install -c cyclus -c pyne pyne=VERSION
+    conda install -c conda-forge -c pyne pyne=VERSION
 
 where VERSION should be replaced with the version number to be installed.
 
@@ -117,7 +117,7 @@ After installing anaconda or miniconda from
 `the Continuum downloads page <http://continuum.io/downloads>`_,
 in a new terminal run the following conda install command::
 
-    conda install -c cyclus -c pyne pyne=VERSION
+    conda install -c conda-forge -c pyne pyne=VERSION
 
 where VERSION should be replaced with the version number to be installed.
 
