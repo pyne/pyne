@@ -38,8 +38,8 @@ def test_single_tet_tag_names_map():
     e_bounds = np.array([0, 0.5, 1.0])
     m.bias = IMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
 
     # right condition
     tag_names = {"src_tag_name": "src"}
@@ -66,8 +66,8 @@ def test_analog_single_hex():
              mats = None)
     m.src = IMeshTag(1, float)
     m.src[0] = 1.0
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src"}
     sampler = Sampler(filename, tag_names, np.array([0, 1]), 0)
 
@@ -100,8 +100,8 @@ def test_analog_multiple_hex():
              mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src"}
     sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), 0)
 
@@ -137,14 +137,14 @@ def test_analog_single_tet():
     m = Mesh(structured=False, mesh=mesh)
     m.src = IMeshTag(1, float)
     m.src[:] = np.array([1])
-    m.mesh.save("tet.h5m")
+    filename = "tet.h5m"
+    m.mesh.save(filename)
     center = m.ve_center(list(m.iter_ve())[0])
 
     subtets = [[center, v1, v2, v3], 
                [center, v1, v2, v4], 
                [center, v1, v3, v4], 
                [center, v2, v3, v4]]
-    filename = "tet.h5m"
     tag_names = {"src_tag_name": "src"}
     sampler = Sampler(filename, tag_names, np.array([0, 1]), 0)
     num_samples = 5000
@@ -176,8 +176,8 @@ def test_uniform():
     m.src = IMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src"}
     sampler = Sampler(filename, tag_names, e_bounds, 1)
 
@@ -236,8 +236,8 @@ def test_single_hex_single_subvoxel_analog():
                                     ('rel_error', np.float64)])
     cell_fracs[:] = [(0, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -282,8 +282,8 @@ def test_single_hex_multiple_subvoxel_analog():
                                     ('rel_error', np.float64)])
     cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.4, 0.0)]
     m.tag_cell_fracs(cell_fracs)
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -326,8 +326,8 @@ def test_multiple_hex_multiple_subvoxel_analog():
                      (3, 4, 1.0, 0.0), (4, 5, 1.0, 0.0), (5, 6, 1.0, 0.0),
                      (6, 7, 1.0, 0.0), (7, 8, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -368,8 +368,8 @@ def test_single_hex_subvoxel_uniform():
                                     ('rel_error', np.float64)])
     cell_fracs[:] = [(0, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -413,8 +413,8 @@ def test_single_hex_multiple_subvoxel_uniform():
                                     ('rel_error', np.float64)])
     cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.4, 0.0)]
     m.tag_cell_fracs(cell_fracs)
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -461,8 +461,8 @@ def test_multiple_hex_multiple_subvoxel_uniform():
                      (6, 6, 1.0, 0.0), (7, 7, 1.0, 0.0)]
     empty_cells = [0, 2, 4, 6]
     m.tag_cell_fracs(cell_fracs)
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -506,8 +506,8 @@ def test_bias():
     e_bounds = np.array([0, 0.5, 1.0])
     m.bias = IMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "bias_tag_name": "bias"}
     sampler = Sampler(filename, tag_names, e_bounds, 2)
@@ -555,8 +555,8 @@ def test_bias_spatial():
     m.bias = IMeshTag(1, float)
     m.bias[:] = [1, 1]
     e_bounds = np.array([0, 0.5, 1.0])
-    m.mesh.save("sampling_mesh.h5m")
     filename = "sampling_mesh.h5m"
+    m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "bias_tag_name": "bias"}
     sampler = Sampler(filename, tag_names, e_bounds, 2)
