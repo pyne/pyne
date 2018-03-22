@@ -53,6 +53,42 @@ def test_single_tet_tag_names_map():
     tag_names = {"src_tag_name": "src"}
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 2)
 
+@with_setup(None, try_rm_file('tet.h5m'))
+def test_single_tet_r2s_using_subvoxel_source():
+    """This test tests uniform sampling within a single tetrahedron. This is
+    done by dividing the tetrahedron in 4 smaller tetrahedrons and ensuring
+    that each sub-tet is sampled equally.
+    """
+    seed(1953)
+    m = Mesh(structured=True,
+             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
+             mats = None)
+    m.src = IMeshTag(2, float)
+    m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
+    e_bounds = np.array([0, 0.5, 1.0])
+    m.bias = IMeshTag(2, float)
+    m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
+    filename = "sampling_mesh.h5m"
+ 
+    # subvoxel r2s source.h5m used for r2s calculation
+    cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0), (1, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save(filename)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name":"cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 0)
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 1)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name":"cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
+                 "bias_tag_name": "bias"}
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 2)
+
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex():
     """This test tests that particles of sampled evenly within the phase-space 
