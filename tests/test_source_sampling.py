@@ -79,7 +79,7 @@ def test_single_tet_r2s_using_subvoxel_source():
     m.tag_cell_fracs(cell_fracs)
     m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
-                 "cell_number_tag_name":"cell_number",
+                 "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 0)
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 1)

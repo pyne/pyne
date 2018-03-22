@@ -278,7 +278,6 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
                                   cell_number_tag);
       rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
                                   cell_fracs_tag);
-      std::cout<<"sub_mode: "<<sub_mode<<" cell_fracs rval: "<<rval<<std::endl;
       max_num_cells = num_groups(cell_fracs_tag);
       num_e_groups /= max_num_cells;
       cell_fracs.resize(num_ves*max_num_cells);
@@ -288,24 +287,14 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   } else {
       // check the existance of tag "cell_number", if there is, report error
       // "cell_number" tag shouldn't be there if sub_mode is DEFAULT
-        try {
-              std::cout<<"check point 0"<<std::endl;
-              rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
-                                          cell_fracs_tag);
-              std::cout<<"check point 0.1, ravl = "<<rval<<std::endl;
-              max_num_cells = num_groups(cell_fracs_tag);
-              std::cout<<"check point 0.15"<<std::endl;
-              num_e_groups /= max_num_cells;
-              cell_fracs.resize(num_ves*max_num_cells);
-              rval = mesh->tag_get_data(cell_fracs_tag, ves, &cell_fracs[0]);
-              std::cout<<"check point 0.2, rval = "<<rval<<std::endl;
-              throw std::invalid_argument("The source.h5m contains cell_fracs tag. Wrong source.h5m file used.");
-
-        } 
-        catch (const std::runtime_error& error1) {
-           // do nothing
-          std::cout<<"check point 0.3"<<std::endl;
-        }
+      moab::Tag cell_fracs_tag_test;
+      std::string cell_fracs_tag_name_test = "cell_fracs";
+      rval = mesh->tag_get_handle(cell_fracs_tag_name_test.c_str(),
+                                  cell_fracs_tag_test);
+      if (rval != moab::MB_TAG_NOT_FOUND) {
+         throw std::invalid_argument(
+             "The source.h5m contains cell_fracs tag. Wrong source.h5m file used.");
+      }
   }
   std::vector<double> pdf(num_ves*num_e_groups*max_num_cells);
   rval = mesh->tag_get_data(src_tag, ves, &pdf[0]);
