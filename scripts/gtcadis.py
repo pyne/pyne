@@ -209,9 +209,6 @@ def main():
     """ This function manages the setup and steps 1-5 for the GT-CADIS workflow.
     """
 
-    # Write blank config file
-    yaml.dump(yaml.load(config), default_flow_style=False)
-
     with open(config_filename, 'r') as f:
         cfg = yaml.load(f)
     gtcadis_help = ('This script automates the GT-CADIS process of \n'
@@ -230,7 +227,6 @@ def main():
     if args.command == 'setup':
         setup()
     elif args.command == 'step1':
-        print(type(step1(cfg['step1'])))
         step1(cfg['step1'])
 
 if __name__ == '__main__':
