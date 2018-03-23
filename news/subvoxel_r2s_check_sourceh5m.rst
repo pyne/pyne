@@ -4,7 +4,9 @@
 
 * Add test case to check wrong use of source.h5m.
 
-**Changed:** None
+**Changed:**
+
+* Use mode names to change integers in the test_source_sampling.py
 
 **Deprecated:** None
 
