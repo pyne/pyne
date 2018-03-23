@@ -931,11 +931,11 @@ def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
     Under these assumptions:
         * Mesh could be derived from cell_fracs
         * e_bounds could be derived from src_tag
-        * required construct_paras contain:
+        * construct_paras contain:
             - mode
-            - cell_fracs
             - src_tag
-            - bias_tag (optional for USER mode)
+            - cell_fracs (optional, required for sub_mode == SUBVOXEL)
+            - bias_tag (optional, required for bias_mode == USER)
 
     Check items:
         * position for each particle, and distribution
@@ -951,10 +951,14 @@ def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
         raise ValueError("mode must be given")
     elif construct_paras["mode"] not in avail_mode:
         raise ValueError("mode must be in (0, 1, 2, 3, 4, 5)")
-    if construct_paras["cell_fracs"] == None:
-        raise ValueError("cell_fracs must be given")
     if construct_paras["src_tag"] == None:
         raise ValueError("src_tag must be given")
+    if mode in sub_mode_subvoxel:
+        if construct_paras["cell_fracs"] == None:
+            raise ValueError("cell_fracs must be given when mode is {0}".format(str(mode)))
+    if mode in (2, 5): # bias_mode == USER
+        if construct_paras["bias_tag"] == None:
+            raise ValueError("bias_tag must be given when mode is {0}".format(str(mode)))
     # set initial value for input parameters
     mode = construct_paras["mode"]
     cell_fracs_list = construct_paras["cell_fracs"]
@@ -967,18 +971,49 @@ def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
                                  ('vol_frac', np.float64),
                                  ('rel_error', np.float64)])
     cell_fracs[:] = cell_fracs_list
+
+    # set up e_bounds
+    num_e_groups = len(src_tag[0])
+    e_bounds = [1.0/num_e_groups * i for i in range(num_e_groups)] + [1.0]
+    e_bounds = np.array(e_bounds)
     # set up mesh
     if mode in sub_mode_r2s:
         # DEFAULT r2s
         num_ve = len(cell_fracs)
         m = _creat_mesh_via_num_ve(num_ve)
+        max_num_cells = 1
     else:
         # SUBVOXEL r2s
         num_sve = len(cell_fracs)
         num_ve = len(set(cell_fracs['idx']))
+        max_num_cells = num_sve/num_ve
         m = _creat_mesh_via_num_ve(num_ve)
-    # set up e_bounds
-    num_e_groups = len(src_tag[0])
+    # set up src tag
+    m.src = IMeshTag(max_num_cells*num_e_groups, float)
+    m.src[:] = src_tag
+    # set up cell_number and cell_fracs tag
+    if mode in sub_mode_subvoxel:
+        m.tag_cell_fracs(cell_fracs)
+    # set up bias tag
+    if mode in (2, 5):
+        bias_tag_lenght = len(bias_tag[0])
+        m.bias = IMeshTag(bias_tag_lenght, float)
+        m.bias[:] = bias_tag
+    # set up tag_names
+    tag_names = {"src_tag_name": "src"}
+    if mode in sub_mode_subvoxel:
+        tag_names["cell_number_tag_name"] = "cell_number"
+        tag_names["cell_fracs_tag_name"] = "cell_fracs"
+    if mode in (2, 5):
+        tag_names["bias_tag_name"] = "bias"
+    # save the mesh into h5m file
+    m.mesh.save(filename)
+
+    # construct Sampler
+    sampler = Sampler(filename, tag_names, e_bounds, mode)
+
+    # sampling and tally
+ 
 
 
 
