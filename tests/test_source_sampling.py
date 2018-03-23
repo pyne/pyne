@@ -893,24 +893,70 @@ def point_in_tet(t, p):
     determinates =[np.linalg.det(x) for x in matricies]
     return all(x >= 0 for x in determinates) or all(x < 0 for x in determinates)
 
+def test_template_example():
+    """
+    example of using source_sampling test template to do the test
+    """
+    cell_fracs_list = [(0, 1, 1.0, 0.0)]
+    src_tag = [[1.0]]
+    _source_sampling_test_template(mode=0, cell_fracs_list=cell_fracs_list, src_tag=src_tag)
+
 def _creat_mesh_via_num_ve(num_ve):
     """
-    This function used to creat mesh from number of voxels
+    This function creates mesh from number of voxels
     ----------
     num_ve : int. Number of voxels
 
     return : mesh. MOAB mesh.
     """
-    x_coords = [v*1.0/(num_ve) for v in range(num_ve)] + [1.0]
+    x_bounds = [v*1.0/(num_ve) for v in range(num_ve)] + [1.0]
     mesh = Mesh(structured=True,
-             structured_coords=[x_coords, [0, 1], [0, 1]],
+             structured_coords=[x_bounds, [0, 1], [0, 1]],
              mats = None)
     return mesh
 
-def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
+def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
+    """
+    This function calcualtes the exptected weight and cell_number 
+    for a given particle (according to it's x coordinate) 
+    ----------
+    s : SourceParticle, the given particle
+    mode : int. Mode of the source_sampling
+    cell_fracs : numpy array
+    src_tag : numpy array
+    bias_tag : numpy array
+
+    return : exp_w, exp_c
+    """
+    if mode in (0, 3):
+        exp_w = 1.0
+    num_sve = len(cell_fracs)
+    x_bounds = [v*1.0/(num_sve) for v in range(num_ve)] + [1.0]
+    
+  
+def _get_p_y_z_halfspace(particles):
+    """
+    This function calcualtes the probabilities of y and z half space 
+    for a given set of particles
+    ----------
+    particles : list of particle
+
+    return : p_y_halfspace, p_z_halfspace
+    """
+    y_count, z_count = 0, 0
+    for s in particles:
+        if s.y < 0.5:
+            y_count = y_count + 1
+        if s.z < 0.5:
+            z_count = z_count + 1
+    p_y_halfspace = float(y_count)/len(particles)
+    p_z_halfspace = float(z_count)/len(particles)
+    return p_y_halfspace, p_z_halfspace
+ 
+def _source_sampling_test_template(mode=None, cell_fracs_list=None, src_tag=None, bias_tag=None):
     """
     This function serve as a template for all source_sampling test cases.
-    It constrcut Sampler from construct_paras.
+    It constrcut Sampler from input parameters.
     And then perform a standardized sampling and tally,
     Finally, it compares tallied results with exp_answers.
 
@@ -919,6 +965,7 @@ def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
         * Use unit cube for all the meshes.
         * Use structured meshes for all the tests.
         * filename will always be: "sampling_mesh.h5m"
+        * distribution changes only on X direction, uniform in Y and Z directions
         * Energy have only two options:
             - [0.0, 1.0]
             - [0.0, 0.5, 1.0]
@@ -933,44 +980,40 @@ def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
         * e_bounds could be derived from src_tag
         * construct_paras contain:
             - mode
+            - cell_fracs
             - src_tag
-            - cell_fracs (optional, required for sub_mode == SUBVOXEL)
             - bias_tag (optional, required for bias_mode == USER)
 
     Check items:
-        * position for each particle, and distribution
-        * energy for each particle, and distribution
-        * weight for each particle, and distribution
-        * cell_number for each particle, and distribution
+        * weight for each particle
+        * cell_number for each particle
+        * position distribution 
+        * energy distribution 
     """
     sub_mode_r2s = (0, 1, 2)
     sub_mode_subvoxel = (3, 4, 5)
     avail_mode = (0, 1, 2, 3, 4, 5)
     # input check
-    if construct_paras["mode"] == None:
+    # check mode
+    if mode == None:
         raise ValueError("mode must be given")
-    elif construct_paras["mode"] not in avail_mode:
+    elif mode not in avail_mode:
         raise ValueError("mode must be in (0, 1, 2, 3, 4, 5)")
-    if construct_paras["src_tag"] == None:
-        raise ValueError("src_tag must be given")
-    if mode in sub_mode_subvoxel:
-        if construct_paras["cell_fracs"] == None:
-            raise ValueError("cell_fracs must be given when mode is {0}".format(str(mode)))
-    if mode in (2, 5): # bias_mode == USER
-        if construct_paras["bias_tag"] == None:
-            raise ValueError("bias_tag must be given when mode is {0}".format(str(mode)))
-    # set initial value for input parameters
-    mode = construct_paras["mode"]
-    cell_fracs_list = construct_paras["cell_fracs"]
-    src_tag = construct_paras["src_tag"]
-    bias_tag = construct_paras["bias_tag"]
-    # set up cell_fracs
+    # check cell_fracs_list
+    if cell_fracs_list == None:
+        raise ValueError("cell_fracs must be given when mode is {0}".format(str(mode)))
     cell_fracs = np.zeros(len(cell_fracs_list),
                           dtype=[('idx', np.int64),
                                  ('cell', np.int64),
                                  ('vol_frac', np.float64),
                                  ('rel_error', np.float64)])
     cell_fracs[:] = cell_fracs_list
+    # check src_tag
+    if src_tag == None:
+        raise ValueError("src_tag must be given")
+    # check bias_tag
+    if mode in (2, 5) and bias_tag == None: # bias_mode == USER
+            raise ValueError("bias_tag must be given when mode is {0}".format(str(mode)))
 
     # set up e_bounds
     num_e_groups = len(src_tag[0])
@@ -980,8 +1023,9 @@ def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
     if mode in sub_mode_r2s:
         # DEFAULT r2s
         num_ve = len(cell_fracs)
-        m = _creat_mesh_via_num_ve(num_ve)
+        num_sve = num_ve
         max_num_cells = 1
+        m = _creat_mesh_via_num_ve(num_ve)
     else:
         # SUBVOXEL r2s
         num_sve = len(cell_fracs)
@@ -1007,13 +1051,38 @@ def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
     if mode in (2, 5):
         tag_names["bias_tag_name"] = "bias"
     # save the mesh into h5m file
+    filename = "sampling_mesh.h5m"
     m.mesh.save(filename)
 
     # construct Sampler
     sampler = Sampler(filename, tag_names, e_bounds, mode)
 
-    # sampling and tally
- 
+    # sampling and tally, tally should be defined by the mesh cell_fracs
+    num_samples = 5000
+    particles = []
+
+    seed(1953)
+    for i in range(num_samples):
+        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        # check w, and c for each particle
+        # calculate the expected weight and cell_number
+        exp_w, exp_c = _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag) 
+        assert_equal(s.w, exp_w)
+        assert_equal(s.c, exp_c)
+        # store all the particles for the convinent of distribution check
+        particles.append(s)
+
+    # check position distribution
+    # X direction follow specified distribution
+    # uniform in Y and Z directions
+    p_y_halfspace, p_z_halfspace = _get_p_y_z_halfspace(particles)
+    assert(abs(p_y_halfspace - 0.5) < 0.05)
+    assert(abs(p_z_halfspace - 0.5) < 0.05)
+
+    # check energy distribution
+
+
+
 
 
 
