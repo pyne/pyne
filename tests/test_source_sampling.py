@@ -20,6 +20,14 @@ warnings.simplefilter("ignore", QAWarning)
 from pyne.mesh import Mesh, IMeshTag
 from pyne.source_sampling import Sampler, AliasTable
 
+# Define modes
+DEFAULT_ANALOG = 0
+DEFAULT_UNIFORM = 1
+DEFAULT_USER = 2
+SUBVOXEL_ANALOG = 3
+SUBVOXEL_UNIFORM = 4
+SUBVOXEL_USER = 5
+
 def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
 
@@ -44,14 +52,35 @@ def test_single_tet_tag_names_map():
     # right condition
     tag_names = {"src_tag_name": "src"}
     e_bounds = np.array([0, 1])
-    sampler = Sampler(filename, tag_names, e_bounds, 0)
+    sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_ANALOG)
+
     # src_tag_name not given
     tag_names = {}
-    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 0)
-    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 1)
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_ANALOG)
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_UNIFORM)
+
     # bias_tag_name not given
     tag_names = {"src_tag_name": "src"}
-    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, 2)
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_USER)
+
+    # subvoxel r2s source.h5m used for r2s calculation
+    cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0), (1, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.mesh.save(filename)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_ANALOG)
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_UNIFORM)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name":"cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
+                 "bias_tag_name": "bias"}
+    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_USER)
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex():
@@ -69,7 +98,7 @@ def test_analog_single_hex():
     filename = "sampling_mesh.h5m"
     m.mesh.save(filename)
     tag_names = {"src_tag_name": "src"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), 0)
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), DEFAULT_ANALOG)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -103,7 +132,7 @@ def test_analog_multiple_hex():
     filename = "sampling_mesh.h5m"
     m.mesh.save(filename)
     tag_names = {"src_tag_name": "src"}
-    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), 0)
+    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), DEFAULT_ANALOG)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -146,7 +175,7 @@ def test_analog_single_tet():
                [center, v1, v3, v4], 
                [center, v2, v3, v4]]
     tag_names = {"src_tag_name": "src"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), 0)
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), DEFAULT_ANALOG)
     num_samples = 5000
     score = 1.0/num_samples
     tally = np.zeros(shape=(4))
@@ -179,7 +208,7 @@ def test_uniform():
     filename = "sampling_mesh.h5m"
     m.mesh.save(filename)
     tag_names = {"src_tag_name": "src"}
-    sampler = Sampler(filename, tag_names, e_bounds, 1)
+    sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_UNIFORM)
 
     num_samples = 10000
     score = 1.0/num_samples
@@ -241,8 +270,7 @@ def test_single_hex_single_subvoxel_analog():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names,
-                      np.array([0, 1]), 3)
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), SUBVOXEL_ANALOG)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -287,7 +315,7 @@ def test_single_hex_multiple_subvoxel_analog():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), 3)
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), SUBVOXEL_ANALOG)
     num_samples = 50000
     score = 1.0/num_samples
     num_divs = 2
@@ -331,7 +359,7 @@ def test_multiple_hex_multiple_subvoxel_analog():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), 3)
+    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), SUBVOXEL_ANALOG)
     num_samples = 5000
     score = 1.0/num_samples
     num_divs = 2
@@ -373,7 +401,7 @@ def test_single_hex_subvoxel_uniform():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), 4)
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), SUBVOXEL_UNIFORM)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -418,7 +446,7 @@ def test_single_hex_multiple_subvoxel_uniform():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), 4)
+    sampler = Sampler(filename, tag_names, np.array([0, 1]), SUBVOXEL_UNIFORM)
     num_samples = 5000
     score = 1.0/num_samples
     num_divs = 2
@@ -466,7 +494,7 @@ def test_multiple_hex_multiple_subvoxel_uniform():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), 4)
+    sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), SUBVOXEL_UNIFORM)
     num_samples = 50000
     score = 1.0/num_samples
     num_divs = 2
@@ -510,7 +538,7 @@ def test_bias():
     m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "bias_tag_name": "bias"}
-    sampler = Sampler(filename, tag_names, e_bounds, 2)
+    sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_USER)
 
     num_samples = 10000
     score = 1.0/num_samples
@@ -559,7 +587,7 @@ def test_bias_spatial():
     m.mesh.save(filename)
     tag_names = {"src_tag_name": "src",
                  "bias_tag_name": "bias"}
-    sampler = Sampler(filename, tag_names, e_bounds, 2)
+    sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_USER)
 
     num_samples = 10000
     score = 1.0/num_samples
@@ -633,7 +661,7 @@ def test_subvoxel_multiple_hex_bias_1():
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs",
                  "bias_tag_name": "bias"}
-    sampler = Sampler(filename, tag_names, e_bounds, 5)
+    sampler = Sampler(filename, tag_names, e_bounds, SUBVOXEL_USER)
 
     num_samples = 50000
     score = 1.0/num_samples
@@ -707,7 +735,7 @@ def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs",
                  "bias_tag_name": "bias"}
-    sampler = Sampler(filename, tag_names, e_bounds, 5)
+    sampler = Sampler(filename, tag_names, e_bounds, SUBVOXEL_USER)
 
     num_samples = 50000
     score = 1.0/num_samples
@@ -777,7 +805,7 @@ def test_subvoxel_multiple_hex_bias_e_groups():
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs",
                  "bias_tag_name": "bias"}
-    sampler = Sampler(filename, tag_names, e_bounds, 5)
+    sampler = Sampler(filename, tag_names, e_bounds, SUBVOXEL_USER)
 
     num_samples = 50000
     score = 1.0/num_samples
