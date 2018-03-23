@@ -893,3 +893,93 @@ def point_in_tet(t, p):
     determinates =[np.linalg.det(x) for x in matricies]
     return all(x >= 0 for x in determinates) or all(x < 0 for x in determinates)
 
+def _creat_mesh_via_num_ve(num_ve):
+    """
+    This function used to creat mesh from number of voxels
+    ----------
+    num_ve : int. Number of voxels
+
+    return : mesh. MOAB mesh.
+    """
+    x_coords = [v*1.0/(num_ve) for v in range(num_ve)] + [1.0]
+    mesh = Mesh(structured=True,
+             structured_coords=[x_coords, [0, 1], [0, 1]],
+             mats = None)
+    return mesh
+
+def source_sampling_test_template(constrcut_paras=None, exp_answers=None):
+    """
+    This function serve as a template for all source_sampling test cases.
+    It constrcut Sampler from construct_paras.
+    And then perform a standardized sampling and tally,
+    Finally, it compares tallied results with exp_answers.
+
+    Assumptions:
+        * Construct_paras and exp_answers are two maps.
+        * Use unit cube for all the meshes.
+        * Use structured meshes for all the tests.
+        * filename will always be: "sampling_mesh.h5m"
+        * Energy have only two options:
+            - [0.0, 1.0]
+            - [0.0, 0.5, 1.0]
+        * Voxel number of meshes could be:
+            - 1 voxel 1 subvoxel -> Single voxel single subvoxel
+            - 1 voxel 2 subvoxel -> Single voxel multiple subvoxel
+            - 2 voxel 2 subvoxel -> Multiple voxel multiple subvoxel (subvoxel == voxel)
+            - 2 voxel 4 subvoxel -> Multiple voxel multiple subvoxel (subvoxel != voxel)
+    
+    Under these assumptions:
+        * Mesh could be derived from cell_fracs
+        * e_bounds could be derived from src_tag
+        * required construct_paras contain:
+            - mode
+            - cell_fracs
+            - src_tag
+            - bias_tag (optional for USER mode)
+
+    Check items:
+        * position for each particle, and distribution
+        * energy for each particle, and distribution
+        * weight for each particle, and distribution
+        * cell_number for each particle, and distribution
+    """
+    sub_mode_r2s = (0, 1, 2)
+    sub_mode_subvoxel = (3, 4, 5)
+    avail_mode = (0, 1, 2, 3, 4, 5)
+    # input check
+    if construct_paras["mode"] == None:
+        raise ValueError("mode must be given")
+    elif construct_paras["mode"] not in avail_mode:
+        raise ValueError("mode must be in (0, 1, 2, 3, 4, 5)")
+    if construct_paras["cell_fracs"] == None:
+        raise ValueError("cell_fracs must be given")
+    if construct_paras["src_tag"] == None:
+        raise ValueError("src_tag must be given")
+    # set initial value for input parameters
+    mode = construct_paras["mode"]
+    cell_fracs_list = construct_paras["cell_fracs"]
+    src_tag = construct_paras["src_tag"]
+    bias_tag = construct_paras["bias_tag"]
+    # set up cell_fracs
+    cell_fracs = np.zeros(len(cell_fracs_list),
+                          dtype=[('idx', np.int64),
+                                 ('cell', np.int64),
+                                 ('vol_frac', np.float64),
+                                 ('rel_error', np.float64)])
+    cell_fracs[:] = cell_fracs_list
+    # set up mesh
+    if mode in sub_mode_r2s:
+        # DEFAULT r2s
+        num_ve = len(cell_fracs)
+        m = _creat_mesh_via_num_ve(num_ve)
+    else:
+        # SUBVOXEL r2s
+        num_sve = len(cell_fracs)
+        num_ve = len(set(cell_fracs['idx']))
+        m = _creat_mesh_via_num_ve(num_ve)
+    # set up e_bounds
+    num_e_groups = len(src_tag[0])
+
+
+
+
