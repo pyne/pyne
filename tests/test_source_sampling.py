@@ -105,12 +105,12 @@ def test_analog_single_hex():
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
 
-    particles = []
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
         assert_equal(s.w, 1.0) # analog: all weights must be one
         tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs), 
               int(s.e*num_divs)] += score
+
     # Test that each half-space of phase space (e.g. x > 0.5) is sampled about
     # half the time.
     for i in range(0, 4):
