@@ -105,12 +105,12 @@ def test_analog_single_hex():
     num_divs = 2
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
 
+    particles = []
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
         assert_equal(s.w, 1.0) # analog: all weights must be one
         tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs), 
               int(s.e*num_divs)] += score
-
     # Test that each half-space of phase space (e.g. x > 0.5) is sampled about
     # half the time.
     for i in range(0, 4):
@@ -893,36 +893,76 @@ def point_in_tet(t, p):
     determinates =[np.linalg.det(x) for x in matricies]
     return all(x >= 0 for x in determinates) or all(x < 0 for x in determinates)
 
-def test_template_example():
+def test_template_examples():
     """
     An example of using source_sampling test template to do the test
     """
-    # DEFAULT_ANALOG
-    for mode in (0, 1, 3, 4):
+    # DEFAULT
+    for mode in (DEFAULT_ANALOG, DEFAULT_UNIFORM, DEFAULT_USER):
         for num_e_groups in (1, 2):
-            # test case: 1 voxel, 1 subvoxel, DEFAULT_ANALOG, single energy group
+            # num_bias_groups could be:
+            # 1, num_e_groups, and max_num_cells*num_e_groups
+            # test case: 1 voxel, 1 subvoxel
             cell_fracs_list = [(0, 1, 1.0, 0.0)]
             src_tag = [[1.0]*num_e_groups]
-            _source_sampling_test_template(mode, cell_fracs_list, src_tag)
-            # test case: 1 voxel, 2 subvoxels, DEFAULT_ANALOG, single energy group
-            cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0)]
-            src_tag = [[1.0, 1.0]*num_e_groups]
-            _source_sampling_test_template(mode, cell_fracs_list, src_tag)
-            # test case: 2 voxel, 2 subvoxels, DEFAULT_ANALOG, single energy group
+            if mode == DEFAULT_USER:
+                for num_bias_groups in (1, num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups]
+                    _source_sampling_test_template(mode, cell_fracs_list, src_tag, bias_tag)
+            else:
+                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+           # test case: 2 voxel, 2 subvoxels
             cell_fracs_list = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0)]
             src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
-            _source_sampling_test_template(mode, cell_fracs_list, src_tag)
-            # test case: 2 voxel, 4 subvoxels, DEFAULT_ANALOG, single energy group
+            if mode == DEFAULT_USER:
+                for num_bias_groups in (1, num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
+                    _source_sampling_test_template(mode, cell_fracs_list, src_tag, bias_tag)
+            else:
+                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+ 
+    # SUBVOXEL
+    for mode in (SUBVOXEL_ANALOG, SUBVOXEL_UNIFORM, SUBVOXEL_USER):
+        for num_e_groups in (1, 2):
+            # num_bias_groups could be:
+            # 1, num_e_groups, and max_num_cells*num_e_groups
+            # test case: 1 voxel, 1 subvoxel
+            cell_fracs_list = [(0, 1, 1.0, 0.0)]
+            src_tag = [[1.0]*num_e_groups]
+            if mode == SUBVOXEL_USER:
+                for num_bias_groups in (1, num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups]
+                    _source_sampling_test_template(mode, cell_fracs_list, src_tag, bias_tag)
+            else:
+                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+            # test case: 1 voxel, 2 subvoxels
+            cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0)]
+            src_tag = [[1.0, 1.0]*num_e_groups]
+            if mode == SUBVOXEL_USER:
+                for num_bias_groups in (1, num_e_groups, 2*num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups]
+                    _source_sampling_test_template(mode, cell_fracs_list, src_tag, bias_tag)
+            else:
+                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+            # test case: 2 voxel, 2 subvoxels
+            cell_fracs_list = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0)]
+            src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
+            if mode == SUBVOXEL_USER:
+                for num_bias_groups in (1, num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
+                    _source_sampling_test_template(mode, cell_fracs_list, src_tag, bias_tag)
+            else:
+                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+            # test case: 2 voxel, 4 subvoxels
             cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0),
                                (1, 3, 0.5, 0.0), (1, 4, 0.5, 0.0)]
             src_tag = [[1.0, 1.0]*num_e_groups, [1.0, 1.0]*num_e_groups]
-            _source_sampling_test_template(mode, cell_fracs_list, src_tag)
-
-    # DEFAULT_ANALOG, multiple energy group
-    #cell_fracs_list = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0)]
-    #src_tag = [[1.0, 1.0], [1.0, 1.0]]
-    #_source_sampling_test_template(DEFAULT_ANALOG, cell_fracs_list, src_tag)
- 
+            if mode == SUBVOXEL_USER:
+                for num_bias_groups in (1, num_e_groups, 2*num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
+                    _source_sampling_test_template(mode, cell_fracs_list, src_tag, bias_tag)
+            else:
+                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
 
 def _get_num_ve_sve_and_max_num_cells(cell_fracs):
     """
@@ -960,7 +1000,7 @@ def _get_num_ve_sve_and_max_num_cells(cell_fracs):
                             len(cell_fracs[cell_fracs['idx'] == i]))
     return num_ve, num_sve, max_num_cells
 
-def _creat_mesh_via_num_ve(num_ve):
+def _create_mesh_via_num_ve(num_ve):
     """
     This function creates mesh from number of voxels
 
@@ -1029,7 +1069,7 @@ def _cal_pdf_and_biased_pdf(cell_fracs, src_tag, bias_tag=None):
     # set up bias_array to proper value
     if bias_tag == None:
         # UNIFORM mode, set default bias_group and bias_array
-       num_bias_group = 1 
+       num_bias_groups = 1 
        bias_array = np.empty(shape=(num_ve, max_num_cells, num_e_groups),
                               dtype=np.float64)
        for vid in range(num_ve):
@@ -1039,85 +1079,44 @@ def _cal_pdf_and_biased_pdf(cell_fracs, src_tag, bias_tag=None):
                        np.array(src_tag[vid]).sum()
     else:
         # USER mode, set bias_array according to bias_tag
-        num_bias_group = len(bias_tag[0])
+        num_bias_groups = len(bias_tag[0])
         bias_array = np.empty(shape=(num_ve, max_num_cells, num_e_groups),
                               dtype=np.float64)
         bias_array.fill(0.0)
         for vid in range(num_ve):
             for svid in range(max_num_cells):
                 for eid in range(num_e_groups):
-                    if num_bias_group == 1:
-                        bias_array[vid, svid, eid] = bias_tag[vid]
-                    elif num_bias_group == num_e_groups:
-                        bias_array[vid, svid, eid] = bias_tag[vid, eid]
-                    elif num_bias_group == max_num_cells*num_e_groups:
-                        bias_array[vid, svid, eid] = bias_tag[vid, svid*num_e_groups + eid]
+                    if num_bias_groups == 1:
+                        bias_array[vid, svid, eid] = bias_tag[vid][0]
+                    elif num_bias_groups == num_e_groups:
+                        bias_array[vid, svid, eid] = bias_tag[vid][eid]
+                    elif num_bias_groups == max_num_cells*num_e_groups:
+                        bias_array[vid, svid, eid] = bias_tag[vid][svid*num_e_groups + eid]
                     else:
                         raise ValueError("Wrong bias_tag length")
     # calculate biased_pdf
-    if num_bias_group == 1:
-        for svid in range(num_sve):
-            if pdf[svid, :, :].sum() > 0:
-                biased_pdf[svid, :, :] = pdf[svid, :, :] * cell_fracs[svid]['vol_frac'] \
-                    / pdf[svid, :, :].sum() * bias_array[svid, :, :]
-            else:
-                biased_pdf[svid, :, :].fill(0.0)
-    elif num_bias_group == num_e_groups:
-        for svid in range(num_sve):
+    if num_bias_groups == 1:
+        for vid in range(num_ve):
+            for svid in range(max_num_cells):
+                current_ve = cell_fracs[cell_fracs['idx']==vid]
+                biased_pdf[vid, svid, :] = bias_array[vid, svid, :] \
+                    * current_ve[svid]['vol_frac']
+    elif num_bias_groups == num_e_groups:
+        for vid in range(num_ve):
             for eid in range(num_e_groups):
-                if pdf[svid, :, eid].sum() > 0:
-                    biased_pdf[svid, :, eid] = pdf[svid, :, eid] * cell_fracs[svid]['vol_frac'] \
-                        / pdf[svid, :, eid].sum() * bias_array[svid, :, eid]
-                else:
-                    biased_pdf[svid, :, eid].fill(0.0)
-    elif num_bias_group == max_num_cells*num_e_groups:
-        for svid in range(num_sve):
-            for cid in range(max_num_cells):
+                for svid in range(max_num_cells):
+                    current_ve = cell_fracs[cell_fracs['idx']==vid]
+                    biased_pdf[vid, svid, eid] = bias_array[vid, svid, eid] \
+                        * current_ve[svid]['vol_frac']
+    elif num_bias_groups == max_num_cells*num_e_groups:
+        for vid in range(num_ve):
+            for svid in range(max_num_cells):
                 for eid in range(num_e_groups):
-                    biased_pdf[svid, cid, eid] = cell_fracs[svid]['vol_frac'] * bias_array[svid, cid, eid]
+                    biased_pdf[vid, svid, eid] = bias_array[vid, svid, eid] \
+                        * cell_fracs[vid]['vol_frac']
+    # normalize biased_pdf
+    biased_pdf = np.divide(biased_pdf, biased_pdf.sum())
     return pdf, biased_pdf
-    #if num_bias_group == 1:
-    #    # apply bias to voxel
-    #    for svid in range(num_sve):
-    #        if pdf[svid, :, :].sum() > 0:
-    #            biased_pdf[svid, :, :] = pdf[svid, :, :] * cell_fracs[svid]['vol_frac'] \
-    #                / pdf[svid, :, :].sum() * bias_tag[svid]
-    #        else:
-    #            biased_pdf[svid, :, :].fill(0.0)
-    #elif num_bias_group == num_e_groups:
-    #    # apply bias to the energy group
-    #    bias_array = np.empty(shape=(num_ve, max_num_cells, num_e_groups),
-    #                          dtype=np.float64)
-    #    bias_array.fill(0.0)
-    #    for vid in range(num_ve):
-    #        for svid in range(max_num_cells):
-    #            for eid in range(num_e_groups):
-    #                bias_array[vid, svid, eid] = bias_tag[vid, eid]
-    #    for svid in range(num_sve):
-    #        if pdf[svid, :, :].sum() > 0:
-    #            biased_pdf[svid, :, :] = pdf[svid, :, :] * cell_fracs[svid]['vol_frac'] \
-    #                / pdf[svid, :, :].sum() * bias_tag[svid, :, :]
-    #        else:
-    #            biased_pdf[svid, :, :].fill(0.0)
-    #elif num_bias_group == max_num_cells*num_e_groups:
-    #    # apply bias to all the subvoxel and energy
-    #    bias_array = np.empty(shape=(num_ve, max_num_cells, num_e_groups),
-    #                          dtype=np.float64)
-    #    bias_array.fill(0.0)
-    #    for vid in range(num_ve):
-    #        for svid in range(max_num_cells):
-    #            for eid in range(num_e_groups):
-    #                bias_array[vid, svid, eid] = bias_tag[vid, svid*num_e_groups + eid]
-    #    for svid in range(num_sve):
-    #        if pdf[svid, :, :].sum() > 0:
-    #            biased_pdf[svid, :, :] = pdf[svid, :, :] * cell_fracs[svid]['vol_frac'] \
-    #                / pdf[svid, :, :].sum() * bias_tag[svid, :, :]
-    #        else:
-    #            biased_pdf[svid, :, :].fill(0.0)
-    #else:
-    #    pass
-    #    
-
 
 def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     """
@@ -1151,7 +1150,7 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     -------
     exp_w : float
         Expected weight of the source particle
-    exp_c : int
+    exp_c : set of available cell numbers
         Expected cell number of the source particle
     """
     num_ve, num_sve, max_num_cells = \
@@ -1160,7 +1159,7 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     x_bounds = [v*1.0/(num_ve) for v in range(num_ve+1)]
     vid = -1
     for i in range(num_ve):
-        if x_bounds[i] < s.x <= x_bounds[i+1]:
+        if x_bounds[i] <= s.x <= x_bounds[i+1]:
             vid = i
             break
     if vid == -1:
@@ -1178,24 +1177,24 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
             current_cell_fracs[svid]['vol_frac']
     svid = -1
     for i in range(num_cells):
-        if x_bounds[i] < s.x <= x_bounds[i+1]:
+        if x_bounds[i] <= s.x <= x_bounds[i+1]:
             svid = i
             break
     if svid == -1:
         raise ValueError("x coordinate not in the voxel, s.x = {0}"\
                          .format(str(s.x)))
     if mode in (3, 4, 5):
-        # cell_number always equal to index of sve + 1
-        exp_c = current_cell_fracs[svid]['cell'] + 1
+        # get the cell_number
+        exp_c = set(list(current_cell_fracs['cell']))
     else:
-        exp_c = -1
+        exp_c = set([-1])
 
     # calculate eid
     num_e_groups = len(src_tag[0])/max_num_cells
     e_bounds = np.array([i*1.0/num_e_groups for i in range(num_e_groups+1)])
     eid = -1
     for i in range(num_e_groups):
-        if e_bounds[i] < s.e <= e_bounds[i+1]:
+        if e_bounds[i] <= s.e <= e_bounds[i+1]:
             eid = i
             break
     if eid == -1:
@@ -1262,7 +1261,7 @@ def _get_x_dis(particles, num_ve):
     x_dis = np.array([0.0]*num_ve)
     for i in range(num_ve):
         for s in particles:
-            if x_bounds[i] < s.x <= x_bounds[i+1]:
+            if x_bounds[i] <= s.x <= x_bounds[i+1]:
                 x_dis[i] = x_dis[i] + 1
     x_dis = np.divide(x_dis, len(particles))
     return x_dis
@@ -1306,9 +1305,9 @@ def _get_x_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     if mode in (0, 3):
         # ANALOG, particles distribution according to the src_tag
         for vid in range(num_ve):
-            current_sve = cell_fracs[cell_fracs['idx']==vid]
-            for svid in range(len(current_sve)):
-                x_dis_exp[vid] += current_sve[svid]['vol_frac'] *\
+            current_ve = cell_fracs[cell_fracs['idx']==vid]
+            for svid in range(len(current_ve)):
+                x_dis_exp[vid] += current_ve[svid]['vol_frac'] *\
                     np.array(src_tag[vid][svid*num_e_groups:(svid+1)*num_e_groups]).sum()
     elif mode in (1, 4):
         # UNIFORM, particles distribution uniformly in x direction
@@ -1319,14 +1318,109 @@ def _get_x_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
                              .format(str(mode)))
         # USER, particles distribute accroding to the bias_tag
         for vid in range(num_ve):
-            current_sve = cell_fracs[cell_fracs['idx']==vid]
-            for svid in range(len(current_sve)):
-                x_dis_exp[vid] += current_sve[svid]['vol_frac'] *\
-                    bias_tag[vid][svid*num_e_groups:svid*(num_e_groups+1)].sum()
+            current_ve = cell_fracs[cell_fracs['idx']==vid]
+            for svid in range(len(current_ve)):
+                x_dis_exp[vid] += current_ve[svid]['vol_frac'] *\
+                    np.array(bias_tag[vid][svid*num_e_groups:(svid+1)*num_e_groups]).sum()
     # normalize x_dis_exp
     x_dis_exp = np.divide(x_dis_exp, x_dis_exp.sum())
     return x_dis_exp
 
+def _get_e_dis(particles, num_e_groups):
+    """
+    This function calcualtes the particle distribution along energy
+    for a given set of particles
+
+    Parameters
+    ----------
+    particles : list
+        List of SourceParticle
+    num_e_groups : int
+        Number of energy groups
+
+    Returns
+    -------
+    e_dis : one dimentional numpy array
+        The particle direction along energy
+    """
+    e_bounds = [e*1.0/(num_e_groups) for e in range(num_e_groups+1)]
+    e_dis = np.array([0.0]*num_e_groups)
+    for i in range(num_e_groups):
+        for s in particles:
+            if e_bounds[i] <= s.e <= e_bounds[i+1]:
+                e_dis[i] = e_dis[i] + 1
+    e_dis = np.divide(e_dis, len(particles))
+    return e_dis
+
+def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
+    """
+    This function calcualtes the exptected particle distribution along energy
+
+    Parameters
+    ----------
+    mode : int
+        Mode of the source_sampling
+    cell_fracs : structured array
+        A sorted, one dimensional array, 
+        each entry containing the following fields:
+
+            :idx: int
+                The volume element index.
+            :cell: int
+                The geometry cell number.
+            :vol_frac: float
+                The volume fraction of the cell withing the mesh ve.
+            :rel_error: float
+                The relative error associated with the volume fraction.
+    src_tag : numpy array
+        An one or two dimentional array contains data of the source tag.
+    bias_tag : numpy array, optional
+        An one or two dimentional array contains data of bias tag
+
+    Returns
+    -------
+    e_dis_exp : one dimentional numpy array
+        The expected particle direction along energy
+    """
+    # input check 
+    if mode in (2, 5) and bias_tag == None:
+            raise ValueError("bias_tag must be provided when mode is {0}"\
+                             .format(str(mode)))
+    num_ve, num_sve, max_num_cells = \
+        _get_num_ve_sve_and_max_num_cells(cell_fracs)
+    num_e_groups = len(src_tag[0])/max_num_cells
+    e_bounds = [e*1.0/(num_e_groups) for e in range(num_e_groups+1)]
+    e_dis_exp = np.array([0.0]*num_e_groups)
+    if mode in (0, 1, 3, 4) or (mode in (2, 5) and len(bias_tag[0]) == 1):
+        # when mode is ANALOG and UNIFORM, or mode is USER but num_bias_groups is 1
+        # particles distribution according to the src_tag
+        for vid in range(num_ve):
+            current_ve = cell_fracs[cell_fracs['idx']==vid]
+            for svid in range(len(current_ve)):
+                for eid in range(num_e_groups):
+                    e_dis_exp[eid] += current_ve[svid]['vol_frac'] *\
+                        src_tag[vid][svid*num_e_groups+eid]
+    elif mode == 2 or (mode == 5 and len(bias_tag[0]) == num_e_groups):
+        # Energy is biased according to the bias_tag
+        for vid in range(num_ve):
+            current_ve = cell_fracs[cell_fracs['idx']==vid]
+            for svid in range(len(current_ve)):
+                for eid in range(num_e_groups):
+                    e_dis_exp[eid] += current_ve[svid]['vol_frac'] *\
+                        bias_tag[vid][eid]
+    else:
+        # Energy is biased according to the bias_tag
+        for vid in range(num_ve):
+            current_ve = cell_fracs[cell_fracs['idx']==vid]
+            for svid in range(len(current_ve)):
+                for eid in range(num_e_groups):
+                    e_dis_exp[eid] += current_ve[svid]['vol_frac'] *\
+                        bias_tag[vid][svid*num_e_groups+eid]
+    # normalize x_dis_exp
+    e_dis_exp = np.divide(e_dis_exp, e_dis_exp.sum())
+    return e_dis_exp
+
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
                                    bias_tag=None):
     """
@@ -1420,10 +1514,10 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     num_ve, num_sve, max_num_cells = _get_num_ve_sve_and_max_num_cells(cell_fracs)
     # set up e_bounds
     num_e_groups = len(src_tag[0])/max_num_cells
-    e_bounds = [1.0/num_e_groups * i for i in range(num_e_groups)] + [1.0]
+    e_bounds = [i*1.0/num_e_groups for i in range(num_e_groups+1)]
     e_bounds = np.array(e_bounds)
     # set up mesh
-    m = _creat_mesh_via_num_ve(num_ve)
+    m = _create_mesh_via_num_ve(num_ve)
     # set up src tag
     m.src = IMeshTag(max_num_cells*num_e_groups, float)
     m.src[:] = src_tag
@@ -1460,7 +1554,9 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
         # calculate the expected weight and cell_number
         exp_w, exp_c = _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag) 
         assert_equal(s.w, exp_w)
-        assert_equal(s.c, exp_c)
+        # when mode in (0, 1, 2), the set exp_c is (-1), otherwise it contains
+        # several available cell number
+        assert(s.c in exp_c)
         # store all the particles for the convinent of distribution check
         particles.append(s)
 
@@ -1476,5 +1572,13 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     assert(abs(p_z_halfspace - 0.5) / 0.5 < 0.05)
 
     # check energy distribution
-
+    e_dis = _get_e_dis(particles, num_e_groups)
+    e_dis_exp = _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag)
+    for i in range(len(e_dis)):
+        if e_dis_exp[i] > 0:
+            assert(abs(e_dis[i] - e_dis_exp[i]) / e_dis_exp[i] < 0.05)
+        else:
+            assert_equal(e_dis[i], 0.0)
+    # remove the temporary file
+    os.remove(filename)
 
