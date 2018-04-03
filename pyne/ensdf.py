@@ -758,10 +758,10 @@ def _parse_decay_dataset(lines, decay_s):
                     gp2 = pfinal
                 else:
                     gp2 = parent2
-                dat.insert(0, daughter_id)
-                dat.insert(0, gp2)
-                dat.insert(0, gdaughter)
-                dat.insert(0, gparent)
+                dat.insert(0, abs(daughter_id))
+                dat.insert(0, abs(gp2))
+                dat.insert(0, abs(gdaughter))
+                dat.insert(0, abs(gparent))
                 for i in range(3):
                     dat.append(0)
                 gammarays.append(dat)
