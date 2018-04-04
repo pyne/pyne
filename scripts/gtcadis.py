@@ -224,8 +224,10 @@ def main():
     args, other = parser.parse_known_args()
     if args.command == 'setup':
         setup()
-    with open(config_filename, 'r') as f:
-        cfg = yaml.load(f)
+    else:
+        with open(config_filename, 'r') as f:
+            cfg = yaml.load(f)
+
     if args.command == 'step1':
         step1(cfg['step1'])
 
