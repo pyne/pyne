@@ -82,6 +82,20 @@ def test_single_tet_tag_names_map():
                  "bias_tag_name": "bias"}
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_USER)
 
+    # wrong bias_tag data (non-zero source_density biased to zero -> NAN weight)
+    m.src = IMeshTag(2, float)
+    m.src[:] = [[1.0, 1.0]]
+    m.bias = IMeshTag(2, float)
+    m.bias[:] = [[0.0, 0.0]]
+    m.mesh.save(filename)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name":"cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
+                 "bias_tag_name": "bias"}
+    assert_raises(RuntimeError, Sampler, filename, tag_names, e_bounds, SUBVOXEL_USER)
+
+
+
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex():
     """This test tests that particles of sampled evenly within the phase-space 

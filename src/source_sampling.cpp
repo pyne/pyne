@@ -446,6 +446,12 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
                                 "  max_num_cells*num_e_group, num_e_groups, or 1.");
       }
      }
+    double q_in_all = 0.0;
+    for (int i=0; i<bias_pdf.size(); i++)
+      q_in_all += bias_pdf[i];
+    if (q_in_all <= 0.0) {
+      throw std::runtime_error("Bias data are ALL ZERO!");
+    }
  return bias_pdf;
 }
 
