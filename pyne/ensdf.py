@@ -665,14 +665,14 @@ def _parse_decay_dataset(lines, decay_s):
     ecbp = []
     ident = _ident.match(lines[0])
     daughter = ident.group(1)
-    daughter_id = _to_id(daughter)
+    daughter_id = abs(_to_id(daughter))
     parent = ident.group(2).split()[0]
     parent = parent.split('(')[0]
     parents = parent.split(',')
     if len(parents) > 1:
-        pfinal = _to_id(parents[0])
+        pfinal = abs(_to_id(parents[0]))
     else:
-        pfinal = _to_id(parents[0][:5])
+        pfinal = abs(_to_id(parents[0][:5]))
     tfinal = None
     tfinalerr = None
     nrbr = None
@@ -758,7 +758,7 @@ def _parse_decay_dataset(lines, decay_s):
                     gp2 = pfinal
                 else:
                     gp2 = parent2
-                dat.insert(0, abs(daughter_id))
+                dat.insert(0, daughter_id)
                 dat.insert(0, abs(gp2))
                 dat.insert(0, abs(gdaughter))
                 dat.insert(0, abs(gparent))
