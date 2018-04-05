@@ -701,7 +701,7 @@ def _parse_decay_dataset(lines, decay_s):
             else:
                 bparent = parent2
             level = 0.0 if level is None else level
-            bdaughter = data.id_from_level(_to_id(daughter), level)
+            bdaughter = abs(data.id_from_level(_to_id(daughter), level))
             betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
         bc_rec = _betac.match(line)
         if bc_rec is not None:
@@ -728,7 +728,7 @@ def _parse_decay_dataset(lines, decay_s):
             else:
                 aparent = parent2
             level = 0.0 if level is None else level
-            adaughter = data.id_from_level(_to_id(daughter), level)
+            adaughter = abs(data.id_from_level(_to_id(daughter), level))
             alphas.append([aparent, adaughter, dat[0], dat[2]])
         ec_rec = _ec.match(line)
         if ec_rec is not None:
@@ -738,7 +738,7 @@ def _parse_decay_dataset(lines, decay_s):
             else:
                 ecparent = parent2
             level = 0.0 if level is None else level
-            ecdaughter = data.id_from_level(_to_id(daughter), level)
+            ecdaughter = abs(data.id_from_level(_to_id(daughter), level))
             ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
                          0, 0, 0])
             continue
@@ -749,19 +749,19 @@ def _parse_decay_dataset(lines, decay_s):
                 gparent = 0
                 gdaughter = 0
                 if level is not None:
-                    gparent = data.id_from_level(_to_id(daughter), level,
-                                                 special)
+                    gparent = abs(data.id_from_level(_to_id(daughter), level,
+                                                     special))
                     dlevel = level - dat[0]
-                    gdaughter = data.id_from_level(_to_id(daughter), dlevel,
-                                                   special)
+                    gdaughter = abs(data.id_from_level(_to_id(daughter), dlevel,
+                                                       special))
                 if parent2 is None:
                     gp2 = pfinal
                 else:
                     gp2 = parent2
                 dat.insert(0, daughter_id)
-                dat.insert(0, abs(gp2))
-                dat.insert(0, abs(gdaughter))
-                dat.insert(0, abs(gparent))
+                dat.insert(0, gp2)
+                dat.insert(0, gdaughter)
+                dat.insert(0, gparent)
                 for i in range(3):
                     dat.append(0)
                 gammarays.append(dat)
@@ -810,7 +810,7 @@ def _parse_decay_dataset(lines, decay_s):
                 tfinal = [t,]
                 tfinalerr = [terr,]
             parent2, t, terr, e, e_err, special = _parse_parent_record(p_rec)
-            parent2 = data.id_from_level(_to_id(parent2), e, special)
+            parent2 = abs(data.id_from_level(_to_id(parent2), e, special))
             if terr is not None and not isinstance(terr, float):
                 terr = (terr[0] + terr[1])/2.0
             if multi:
