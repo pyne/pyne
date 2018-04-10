@@ -75,8 +75,9 @@ subroutine source
    cell_num = -1
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_num)
    icl_tmp = find_cell()
-   if (idum(1) > 3) then
-       if (cell_num .ne. ncl(icl_tmp)) then
+   if (idum(1) > 2) then
+       if (cell_num .ne. ncl(icl_tmp) .and. tries < idum(2)) then
+           tries = tries + 1
            goto 200
        endif
    endif
