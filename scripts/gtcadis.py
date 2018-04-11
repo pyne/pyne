@@ -1,33 +1,42 @@
 #!/usr/bin/env python
-import argparse
-import yaml
-import io
 
+import io
+import yaml
+import argparse
 import numpy as np
-from pyne.mesh import Mesh
-from pyne.partisn import write_partisn_input, isotropic_vol_source
-from pyne.dagmc import discretize_geom, load
 from pyne import nucname
+from pyne.mesh import Mesh, IMeshTag
 from pyne.bins import pointwise_collapse
+from pyne.material import MaterialLibrary
+from pyne.partisn import write_partisn_input, isotropic_vol_source
+from pyne.dagmc import discretize_geom, load, cell_material_assignments
+from pyne.alara import calc_eta, calc_T
 
 
 config_filename = 'config.yml'
 
 config = \
-    """
+"""
+# If 'True' all intermediate files created while running the script will be 
+# deleted. Change to 'False' if you want to retain all intermediate files.
+clean: True
+
 # Optional step to assess all materials in geometry for compatibility with
-# SNILB criteria
-step0:
+# SNILB criteria.
+# step 0: Information for Step 0 calculation will be read from Step 2 input
 
 # Prepare PARTISN input file for adjoint photon transport
 step1:
+    # Number of photon energy groups. This should be compatible with the dose
+    # rate conversion library. (24 or 42), default is 42.
+    p_groups: 42
     # Path to hdf5 geometry file for photon transport
-    geom_file:
+    geom_file: 
     # Volume ID of adjoint photon source cell on
     # DAGMC input [Trelis/Cubit .sat file]
-    src_cell:
+    src_cell: 
     # Volume [cm^3] of source cell (detector)
-    src_vol:
+    src_vol: 
     # Define uniformly spaced, rectagular mesh that covers entire geometry:
     # Define origin of the mesh (three entries, one per spatial dimension)
     # Define locations of the coarse meshes in each direction
@@ -35,16 +44,25 @@ step1:
     # Supported: Only one entry per _mesh and _ints for a uniformly 
     # spaced mesh
     # Separate values with blank space.
-    origin:
-    xmesh:
-    xints:
-    ymesh:
-    yints:
-    zmesh:
-    zints:
+    origin: 
+    xmesh: 
+    xints: 
+    ymesh: 
+    yints: 
+    zmesh: 
+    zints: 
 
 # Calculate T matrix for each material
 step2:
+    # Path to material laden geometry (hdf5) file for adjoint neutron transport.
+    geom_file: 
+    # Path to processed nuclear data.
+    # (directory containing nuclib, fendl2.0bin.lib, fendl2.0bin.gam)
+    data_dir: 
+    # Single pulse irradiation time [s].
+    irr_time: 
+    # Single decay time of interest [s].
+    decay_time: 
 
 # Calculate adjoint neutron source
 step3:
@@ -56,9 +74,7 @@ step4:
 # (biased source and weight windows)
 step5:
 
-
 """
-
 
 def setup():
     """ This function generates a blank config.yml file for the user to 
@@ -67,8 +83,8 @@ def setup():
     with open(config_filename, 'w') as f:
         f.write(config)
     print('File "{}" has been written'.format(config_filename))
-    print('Fill out the fields in this file then run ">> gtcadis.py step1"')
-
+    print('Fill out the fields in this file then run ">> gtcadis.py step1 \n'
+           'or optional step0, first"')
 
 def _names_dict():
     names = {'h1': 'h1', 'h2': 'd', 'h3': 'h3', 'he3': 'he3',
@@ -122,19 +138,59 @@ def _cards(source):
              }
     return cards
 
-
-def step1(cfg):
-    """ This function writes the PARTISN input file for the adjoint photon 
-    transport   
+def step0(cfg1, cfg2, clean):
+    """
+    This function performs the SNILB criteria check.
+    
     Parameters
     ----------
-    cfg : dictionary
+    cfg1 : dictionary
+        User input for Step 1 from the config.yml file
+    cfg2 : dictionary
+        User input for Step 2 from the config.yml file    
+    clean: str
+        User input for condition on deleting the intermediate files
+    """
+    # Get user input from config file
+    geom = cfg2['geom_file']
+    data_dir = cfg2['data_dir']
+    irr_times = str(cfg2['irr_time']).split(' ')
+    decay_times = str(cfg2['decay_time']).split(' ')
+    num_p_groups = cfg1['p_groups']
+    
+    # Define a flat, 175 group neutron spectrum, with magnitude 1E12 [n/s]
+    neutron_spectrum = [1]*175  # will be normalized
+    flux_magnitudes = [1.75E14] # 1E12*175
+
+    # Get materials from geometry file
+    ml = MaterialLibrary(geom)
+    mats = list(ml.values())
+
+    # Perform SNILB check and calculate eta
+    eta = calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
+                   decay_times, num_p_groups, clean, run_dir='step0')
+    np.set_printoptions(threshold=np.nan)
+    
+    # Save numpy array
+    np.save('step0_eta.npy', eta)
+    # Write a list of material name and eta value to a text file
+    with open('step0_eta.txt', 'w') as f:
+        for m, mat in enumerate(ml.keys()):
+            f.write(mat.split(':')[1] + ', eta=' + str(eta[m][0]) + '\n')
+
+def step1(cfg1):
+    """ 
+    This function writes the PARTISN input file for the adjoint photon transport.   
+    
+    Parameters
+    ----------
+    cfg1 : dictionary
         User input for step 1 from the config.yml file
     """
     # Get user-input from config file
-    geom = cfg['geom_file']
-    cells = [cfg['src_cell']]
-    src_vol = [float(cfg['src_vol'])]
+    geom = cfg1['geom_file']
+    cells = [cfg1['src_cell']]
+    src_vol = [float(cfg1['src_vol'])]
     
     try: 
        origin_x, origin_y, origin_z = cfg['origin'].split(' ') 
@@ -204,21 +260,22 @@ def step1(cfg):
         nuc_hdf5path="/nucid",
         fine_per_coarse=1)
 
-
 def main():
-    """ This function manages the setup and steps 1-5 for the GT-CADIS workflow.
+    """ 
+    This function manages the setup and steps 1-5 for the GT-CADIS workflow.
     """
-
     gtcadis_help = ('This script automates the GT-CADIS process of \n'
                     'producing variance reduction parameters to optimize the\n'
                     'neutron transport step of the Rigorous 2-Step (R2S) method.\n')
     setup_help = ('Prints the file "config.yml" to be\n'
                   'filled in by the user.\n')
+    step0_help = 'Performs SNILB criteria check.'
     step1_help = 'Creates the PARTISN input file for adjoint photon transport.'
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help=gtcadis_help, dest='command')
 
     setup_parser = subparsers.add_parser('setup', help=setup_help)
+    step0_parser = subparsers.add_parser('step0', help=step0_help)
     step1_parser = subparsers.add_parser('step1', help=step1_help)
 
     args, other = parser.parse_known_args()
@@ -227,10 +284,13 @@ def main():
     else:
         with open(config_filename, 'r') as f:
             cfg = yaml.load(f)
+            clean = cfg['clean']
+            
+    if args.command == 'step0':
+        step0(cfg['step1'], cfg['step2'], clean)
 
-    if args.command == 'step1':
+    elif args.command == 'step1':
         step1(cfg['step1'])
-
 
 if __name__ == '__main__':
     main()
