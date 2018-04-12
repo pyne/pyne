@@ -168,8 +168,9 @@ def step0(cfg1, cfg2, clean):
     mats = list(ml.values())
 
     # Perform SNILB check and calculate eta
+    run_dir = 'step0'
     eta = calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
-                   decay_times, num_p_groups, clean, run_dir='step0')
+                   decay_times, num_p_groups, run_dir, clean)
     np.set_printoptions(threshold=np.nan)
     
     # Save numpy array
