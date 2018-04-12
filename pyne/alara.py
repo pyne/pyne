@@ -1040,7 +1040,7 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
                # tot = background and sup != background, eta = inf >> ste = 1e6
                eta[m, dt] = 1E6
                
-    if clean == 'True':
+    if clean:
         shutil.rmtree(run_dir)  
     return eta
 
@@ -1097,6 +1097,6 @@ def calc_T(data_dir, mats, neutron_spectrum, irr_times,
                 T[m, dt, n, :] = [
                     float(x) / (neutron_spectrum[n] * flux_magnitudes[0]) for x in l[3:]]
                 i += 1
-    if clean == 'True':
+    if clean:
         shutil.rmtree(run_dir)
     return T
