@@ -285,7 +285,7 @@ def main():
     else:
         with open(config_filename, 'r') as f:
             cfg = yaml.load(f)
-            clean = cfg['clean']
+            clean = str(cfg['clean'])
             
     if args.command == 'step0':
         step0(cfg['step1'], cfg['step2'], clean)
