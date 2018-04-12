@@ -77,7 +77,8 @@ step5:
 """
 
 def setup():
-    """ This function generates a blank config.yml file for the user to 
+    """
+    This function generates a blank config.yml file for the user to 
     fill in with problem specific values. 
     """
     with open(config_filename, 'w') as f:
