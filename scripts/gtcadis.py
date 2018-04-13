@@ -2,7 +2,9 @@
 
 import io
 import yaml
+import shutil
 import argparse
+import subprocess
 import numpy as np
 from pyne import nucname
 from pyne.mesh import Mesh, IMeshTag
@@ -10,7 +12,7 @@ from pyne.bins import pointwise_collapse
 from pyne.material import MaterialLibrary
 from pyne.partisn import write_partisn_input, isotropic_vol_source
 from pyne.dagmc import discretize_geom, load, cell_material_assignments
-from pyne.alara import calc_eta, calc_T
+from pyne.alara import calc_eta
 
 
 config_filename = 'config.yml'
