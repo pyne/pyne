@@ -217,16 +217,17 @@ def step1(cfg1):
 
     # Generate 42 photon energy bins [eV]
     #  First bin has been replaced with 1 for log interpolation
-    photon_bins = np.array([1e-6, 0.01, 0.02, 0.03, 0.045, 0.06, 0.07, 0.075, 0.1, 0.15,
-                            0.2, 0.3, 0.4, 0.45, 0.51, 0.512, 0.6, 0.7, 0.8, 1, 1.33, 1.34,
-                            1.5, 1.66, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 10,
-                            12, 14, 20, 30, 50])
+    photon_bins = np.array([1e-6, 0.01, 0.02, 0.03, 0.045, 0.06, 0.07, 0.075,
+                            0.1, 0.15, 0.2, 0.3, 0.4, 0.45, 0.51, 0.512, 0.6,
+                            0.7, 0.8, 1, 1.33, 1.34, 1.5, 1.66, 2, 2.5, 3, 3.5,
+                            4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 10, 12, 14, 20,
+                            30, 50])
     # ICRP 74 flux-to-dose conversion factors in pico-Sv/s per photon flux
-    de = np.array([0.01, 0.015, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.1, 0.15, 0.2, 0.3,
-                   0.4, 0.5, 0.6, 0.8, 1, 2, 4, 6, 8, 10])
-    df = np.array([0.0485, 0.1254, 0.205, 0.2999, 0.3381, 0.3572, 0.378, 0.4066, 0.4399, 0.5172,
-                   0.7523, 1.0041, 1.5083, 1.9958, 2.4657, 2.9082, 3.7269, 4.4834, 7.4896,
-                   12.0153, 15.9873, 19.9191, 23.76])
+    de = np.array([0.01, 0.015, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.1,
+                   0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 2, 4, 6, 8, 10])
+    df = np.array([0.0485, 0.1254, 0.205, 0.2999, 0.3381, 0.3572, 0.378, 0.4066,
+                   0.4399, 0.5172, 0.7523, 1.0041, 1.5083, 1.9958, 2.4657, 2.9082,
+                   3.7269, 4.4834, 7.4896, 12.0153, 15.9873, 19.9191, 23.76])
     # Convert to Sv/s per photon FLUX 
     pico = 1.0e-12 
     df = df * pico 
@@ -268,9 +269,9 @@ def main():
     """ 
     This function manages the setup and steps 1-5 for the GT-CADIS workflow.
     """
-    gtcadis_help = ('This script automates the GT-CADIS process of \n'
-                    'producing variance reduction parameters to optimize the\n'
-                    'neutron transport step of the Rigorous 2-Step (R2S) method.\n')
+    gtcadis_help = ('This script automates the GT-CADIS process of producing \n'
+                    'variance reduction parameters to optimize the neutron \n'
+                    'transport step of the Rigorous 2-Step (R2S) method.\n')
     setup_help = ('Prints the file "config.yml" to be\n'
                   'filled in by the user.\n')
     step0_help = 'Performs SNILB criteria check.'
