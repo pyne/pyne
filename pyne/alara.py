@@ -1037,15 +1037,14 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     input_file = os.path.join(run_dir, "inp")
     phtn_src_file = os.path.join(run_dir, "phtn_src")
     # Two extra zones are needed; one for the whole spectrum
-    # and one for the zero spectrum. number of zones = num_n_group+2
+    # and one for the zero spectrum. Total number of zones = num_n_group + 2
     num_n_groups += 2
     _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes, 
                   irr_times, decay_times, input_file, matlib_file,
                   fluxin_file, phtn_src_file, num_p_groups)
 
     # Run ALARA
-    sub = subprocess.Popen(['alara',input_file],
-                           stderr=subprocess.STDOUT,
+    sub = subprocess.Popen(['alara',input_file], stderr=subprocess.STDOUT,
                            stdout=subprocess.PIPE).communicate()[0]
     return phtn_src_file
 
