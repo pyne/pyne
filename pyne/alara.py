@@ -928,7 +928,6 @@ def _gt_write_fluxin(fluxes, fluxin_file):
     with open(fluxin_file, 'w') as f:
         f.write(s)
 
-
 def _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes,
                   irr_times, decay_times, input_file, matlib_file,
                   fluxin_file, phtn_src_file, num_p_groups):
