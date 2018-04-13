@@ -1029,8 +1029,8 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
         for n in range(num_n_groups):
             fluxes.append([neutron_spectrum[n] if x ==
                            n else 0 for x in range(num_n_groups)])
-            fluxes.append(neutron_spectrum) # total spectrum
-            fluxes.append([0]*175) # blank spectrum
+        fluxes.append(neutron_spectrum) # total spectrum
+        fluxes.append([0]*175) # blank spectrum
     _gt_write_fluxin(fluxes, fluxin_file)
 
     # Write geom file
