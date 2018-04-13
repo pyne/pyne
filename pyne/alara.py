@@ -984,7 +984,7 @@ def _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes,
         f.write(s)
 
 def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times, 
-              decay_times, num_p_groups, run_type, run_dir):
+              decay_times, num_p_groups, run_dir):
     """
     Function that prepares necessary input files and runs ALARA
     
@@ -1004,9 +1004,6 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
         Decay times [s]
     num_p_groups : int
         Number of photon energy groups for ALARA calculation
-    run_type : str
-        Type of run > calc_eta or calc_T
-        Proper flux will be written to alara fluxin file accordingly
     run_dir : str
         Directory to store ALARA run input and output files
 
@@ -1032,8 +1029,6 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
         for n in range(num_n_groups):
             fluxes.append([neutron_spectrum[n] if x ==
                            n else 0 for x in range(num_n_groups)])
-        if run_type == 'eta':
-            warn("Updating flux for eta calculation")
             fluxes.append(neutron_spectrum) # total spectrum
             fluxes.append([0]*175) # blank spectrum
     _gt_write_fluxin(fluxes, fluxin_file)
@@ -1041,14 +1036,12 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     # Write geom file
     input_file = os.path.join(run_dir, "inp")
     phtn_src_file = os.path.join(run_dir, "phtn_src")
-    if run_type == 'eta':
-        warn("Updating number of n groups for eta calculation")
-        # For eta calculation two extra zones are needed; one for
-        # the whole spectrum and one for the zero spectrum
-        num_n_groups += 2
+    # Two extra zones are needed; one for the whole spectrum
+    # and one for the zero spectrum. number of zones = num_n_group+2
+    num_n_groups += 2
     _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes, 
-               irr_times, decay_times, input_file, matlib_file,
-               fluxin_file, phtn_src_file, num_p_groups)
+                  irr_times, decay_times, input_file, matlib_file,
+                  fluxin_file, phtn_src_file, num_p_groups)
 
     # Run ALARA
     sub = subprocess.Popen(['alara',input_file],
@@ -1095,10 +1088,9 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     
     # Run ALARA
     if not os.path.exists(run_dir):
-        os.makedirs(run_dir)
-    run_type = 'eta'    
+        os.makedirs(run_dir)    
     phtn_src_file = _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, 
-                              irr_times, decay_times, num_p_groups, run_type, run_dir)
+                              irr_times, decay_times, num_p_groups, run_dir)
     # Parse ALARA output
     sup = np.zeros(shape=(num_mats, num_decay_times))
     tot = np.zeros(shape=(num_mats, num_decay_times))
