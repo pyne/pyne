@@ -2,9 +2,7 @@
 
 import io
 import yaml
-import shutil
 import argparse
-import subprocess
 import numpy as np
 from pyne import nucname
 from pyne.mesh import Mesh, IMeshTag
