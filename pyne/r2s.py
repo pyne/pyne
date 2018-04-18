@@ -14,7 +14,7 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       geom=None, num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False,
-                      alara_inp="alara_geom", alara_matlib="alara_matlib",
+                      alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
                       sub_voxel=False):
     """This function is used to setup the irradiation inputs after the first
