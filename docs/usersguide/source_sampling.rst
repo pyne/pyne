@@ -135,7 +135,7 @@ with python.nose. It can be used in the same manner as the C++ class:
  from random import uniform
  from pyne.source_sampling import Sampler, SourceParticle
  
- tag_names = {"src_tag_name", "source_density"}
+ tag_names = {"src_tag_name": "source_density"}
  sampler = Sampler("source.h5m", tag_names, np.array([0, 1]), 0)
  s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
  
