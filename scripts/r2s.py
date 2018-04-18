@@ -65,12 +65,6 @@ alara_params =\
 element_lib nuclib
 data_library alaralib fendl3bin
 
-cooling
-    1E3 s
-    12 h
-    3.0 d
-end
-
 output zone
        integrate_energy
        # Energy group upper bounds. The lower bound is always zero.
