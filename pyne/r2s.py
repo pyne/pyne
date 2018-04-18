@@ -64,7 +64,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     output_material : bool, optional
         If true, output mesh will have materials as determined by
         dagmc.discretize_geom()
-    decay_times: list 
+    decay_times: list
         List of the decay times.
     sub_voxel : bool, optional
         If true, sub-voxel r2s work flow  will be used.
@@ -119,7 +119,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         decay_str = ''.join([decay_str,'    ', dc, '\n'])
     decay_str = ''.join([decay_str, 'end\n'])
     with open(alara_inp, 'a') as f:
-        f.write(+ decay_str)
+        f.write(decay_str)
 
     if isfile(alara_params):
         with open(alara_params, 'r') as f:
