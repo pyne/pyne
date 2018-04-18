@@ -90,7 +90,7 @@ named "source.h5m" with a tag named "source_density" of length 1.
   int main(){
   
     std::string filename("source.h5m");
-    std:;map<std::string, std::string> tag_names;
+    std::map<std::string, std::string> tag_names;
     tag_names.insert(std::pair<std::string, std::string>  ("src_tag_name",
     "source_density"));
     std::vector<double> e_bounds;
@@ -103,14 +103,14 @@ named "source.h5m" with a tag named "source_density" of length 1.
     int i;
     for(i=0; i<6; i++) rands.push_back((double)rand()/RAND_MAX);
   
-    SourceParticle s = sampler.particle_birth(rands);
+    pyne::SourceParticle s = sampler.particle_birth(rands);
   
-    std::cout<<"x: "<<s.x<<std::endl;
-    std::cout<<"y: "<<s.y<<std::endl;
-    std::cout<<"z: "<<s.z<<std::endl;
-    std::cout<<"e: "<<s.e<<std::endl;
-    std::cout<<"w: "<<s.w<<std::endl;
-    std::cout<<"c: "<<s.c<<std::endl;
+    std::cout<<"x: "<<s.get_x()<<std::endl;
+    std::cout<<"y: "<<s.get_y()<<std::endl;
+    std::cout<<"z: "<<s.get_z()<<std::endl;
+    std::cout<<"e: "<<s.get_e()<<std::endl;
+    std::cout<<"w: "<<s.get_w()<<std::endl;
+    std::cout<<"c: "<<s.get_c()<<std::endl;
   
    return 0;
   } 
@@ -119,7 +119,7 @@ This program can be complied with:
 
 .. code-block:: bash
 
-  g++ test.cpp -o test -lMOAB -lpyne
+  g++ test.cpp pyne/source_sampling.cpp pyne/measure.cpp -o test -lMOAB -lpyne
 
 
 ****************
