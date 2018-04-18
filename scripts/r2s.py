@@ -111,6 +111,7 @@ def step1():
     meshtal = config.get('step1', 'meshtal')
     tally_num = config.getint('step1', 'tally_num')
     flux_tag = config.get('step1', 'flux_tag')
+    decay_times = config.get('step2', 'decay_times').split(',')
 
     if structured:
         meshtal = Meshtal(meshtal,
@@ -127,7 +128,8 @@ def step1():
     cell_mats = cell_materials(geom)
     irradiation_setup(meshtal, cell_mats, alara_params_filename, tally_num,
                       num_rays=num_rays, grid=grid, reverse=reverse,
-                      flux_tag=flux_tag,sub_voxel=sub_voxel)
+                      flux_tag=flux_tag, decay_times=decay_times,
+                      sub_voxel=sub_voxel)
 
     # create a blank mesh for step 2:
     if structured:
@@ -181,7 +183,7 @@ def step2():
     with open(tot_phtn_src_intensities, 'w') as f:
         f.write(intensities)
 
-    e_bounds = phtn_src_energy_bounds("alara_geom")
+    e_bounds = phtn_src_energy_bounds("alara_inp")
     e_bounds_str = ""
     for e in e_bounds:
         e = e/1e6 # convert unit to MeV

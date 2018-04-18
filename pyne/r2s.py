@@ -16,7 +16,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                       fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
-                      sub_voxel=False):
+                      decay_times=['1 s'], sub_voxel=False):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
 
@@ -64,6 +64,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
     output_material : bool, optional
         If true, output mesh will have materials as determined by
         dagmc.discretize_geom()
+    decay_times: list 
+        List of the decay times.
     sub_voxel : bool, optional
         If true, sub-voxel r2s work flow  will be used.
     """
@@ -110,6 +112,14 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                    sub_voxel, cell_fracs, cell_mats)
     record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib,
                    sub_voxel=sub_voxel)
+
+    # write decay times into alara_inp
+    decay_str = 'cooling\n'
+    for dc in decay_times:
+        decay_str = ''.join([decay_str,'    ', dc, '\n'])
+    decay_str = ''.join([decay_str, 'end\n'])
+    with open(alara_inp, 'a') as f:
+        f.write(+ decay_str)
 
     if isfile(alara_params):
         with open(alara_params, 'r') as f:

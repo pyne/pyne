@@ -90,7 +90,7 @@ command:
 
 .. code-block:: bash
 
-   >> alara alara_geom > out.txt
+   >> alara alara_inp > out.txt
 
 For large problems (i.e large meshes, many decay times), this process may take
 a large amount of processor time and RAM. Once this process is complete,
