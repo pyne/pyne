@@ -900,7 +900,7 @@ def _gt_normalize(neutron_spectrum):
     tol = 1E-8
     total = float(np.sum(neutron_spectrum))
     if abs(total - 1.0) > tol:
-        warn("Normalizing neutron spectrum")
+        # Normalizing neutron spectrum
         neutron_spectrum = [x / total for x in neutron_spectrum]
     return neutron_spectrum
 
@@ -1044,8 +1044,7 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
                   fluxin_file, phtn_src_file, num_p_groups)
 
     # Run ALARA
-    sub = subprocess.Popen(['alara',input_file], stderr=subprocess.STDOUT,
-                           stdout=subprocess.PIPE).communicate()[0]
+    sub = subprocess.check_output(['alara', input_file], stderr=subprocess.STDOUT)
     return phtn_src_file
 
 def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
@@ -1127,8 +1126,8 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
                eta[m, dt] = 1E6
 
     # Copy  phtn_src file to main directory to be used for Step 2           
-    os.system('cp ' + phtn_src_file + ' step0_phtn_src')
+    shutil.copy(phtn_src_file, 'step0_phtn_src')
     if clean:
-        warn("Deleting intermediate files for Step 0")
+        print("Deleting intermediate files for Step 0")
         shutil.rmtree(run_dir)  
     return eta
