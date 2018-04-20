@@ -897,10 +897,9 @@ def _gt_normalize(neutron_spectrum):
     """
     Function that normalizes the neutron spectrum for ALARA fluxin file
     """
-    tol = 1E-8
     total = float(np.sum(neutron_spectrum))
-    if abs(total - 1.0) > tol:
-        # Normalizing neutron spectrum
+    if total > 0:
+        # Normalize neutron spectrum
         neutron_spectrum = [x / total for x in neutron_spectrum]
     return neutron_spectrum
 
@@ -909,7 +908,7 @@ def _gt_write_matlib(mats, filename):
     Function that writes matlib file for ALARA run
     """
     s = ""
-    for m, mat in enumerate(mats):
+    for mat in mats:
         s += mat.alara()
         s += "\n"
     with open(filename, 'w') as f:
@@ -1094,11 +1093,14 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     tot = np.zeros(shape=(num_mats, num_decay_times))
     zero = np.zeros(shape=(num_mats, num_decay_times))
     with open(phtn_src_file, 'r') as f:
+        # Initiate a block number
         i = 0
         for line in f.readlines():
             l = line.split()
             if l[0] == "TOTAL" and l[1] != "shutdown":
+                # Calculate the sum over all photon energy groups
                 row_sum = np.sum([float(x) for x in l[3:]])
+                # Material index will change every (num_n_groups+2)*num_decay_times) blocks
                 m = int(np.floor(float(i)/((num_n_groups+2)*num_decay_times)))
                 dt = i % num_decay_times
                 n = int(np.floor(i/float(num_decay_times))) % (num_n_groups + 2)
@@ -1112,8 +1114,8 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
                 
     # Claculate eta
     eta = np.zeros(shape=(num_mats, num_decay_times))
-    for dt, decay_time in enumerate(decay_times):
-       for m, mat in enumerate(mats):
+    for dt in range(len(decay_times)):
+       for m in range(len(mats)):
            if np.isclose(tot[m, dt] - zero[m, dt], 0.0, rtol=1E-5) and \
               np.isclose(sup[m, dt] - zero[m, dt]*175, 0.0, rtol=1E-5):
                # tot = background and sup = background, eta = NaN >> set = 1.0
