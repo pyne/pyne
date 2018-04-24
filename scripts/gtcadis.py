@@ -160,8 +160,10 @@ def step0(cfg1, cfg2, clean):
     num_p_groups = cfg1['p_groups']
     
     # Define a flat, 175 group neutron spectrum, with magnitude 1E12 [n/s]
-    neutron_spectrum = [1]*175  # will be normalized
-    flux_magnitudes = [1.75E14] # 1E12*175
+    num_n_groups = 175
+    neutron_spectrum = [1]*num_n_groups # will be normalized
+    flux_magnitude = 1.0E12
+    flux_magnitudes = [flux_magnitude * num_n_groups] # 1E12*175
 
     # Get materials from geometry file
     ml = MaterialLibrary(geom)
