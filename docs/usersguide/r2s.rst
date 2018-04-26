@@ -60,15 +60,15 @@ and navigate to a new folder by executing the commands:
 
 .. code-block:: bash
 
-   >> mkdir my_r2s_folder
-   >> cd my_r2s_folder
+   $ mkdir my_r2s_folder
+   $ cd my_r2s_folder
 
 Then run the following command. Note that once PyNE is installed, r2s.py will
 already be on $PATH.
 
 .. code-block:: bash
 
-   >> r2s.py setup
+   $ r2s.py setup
 
 This command prints two new files. The first file is the configuration file 
 "config.ini". Fill out this file with the appropriate information. The second
@@ -81,7 +81,7 @@ of these files are filled out, run the command:
 
 .. code-block:: bash
 
-   >> r2s.py step1
+   $ r2s.py step1
 
 This command will generate the necessary input for running ALARA. The only
 remaining files necessary will be the ALARA data file (.lib, .gam) and an
@@ -90,7 +90,7 @@ command:
 
 .. code-block:: bash
 
-   >> alara alara_inp > out.txt
+   $ alara alara_geom > out.txt
 
 For large problems (i.e large meshes, many decay times), this process may take
 a large amount of processor time and RAM. Once this process is complete,
@@ -98,7 +98,7 @@ execute the final command:
 
 .. code-block:: bash
 
-   >> r2s.py step2
+   $ r2s.py step2
 
 This command will generate photon source density distribution meshes, one per
 decay time. These files will be named like:
@@ -113,9 +113,9 @@ that can utilize these mesh-based sources is found in the PyNE user's guide entr
 Note that each of these source files must be renamed to "source.h5m" for this purpose.
 By using these sources for photon transport, the shutdown dose rate can be obtained. Tally results will have to be normalized by the total photon source intentity. This information is found in the "total_photon_source_intensites.txt" file printed out by r2s.py step2.
 
-***************
+****************
 PyNE R2S example
-***************
+****************
 
 Using a simple geometry as a example, here is how we perform R2S calculation.
 Example problem description.
@@ -141,15 +141,15 @@ Prepare material library, build material library. The material lib is then gener
 
 .. code-block:: bash
 
-   >> python make_example_material.py 
+   $ python make_example_material.py 
 
 Combine the geometry file and the material library, using  the following command:
 
 .. code-block:: bash
 
-   >> cp geom_without_material.h5m geom.h5m
+   $ cp geom_without_material.h5m geom.h5m
 
-   >> uwuw_preproc geom.h5m -v -l example_material_lib.h5 
+   $ uwuw_preproc geom.h5m -v -l example_material_lib.h5 
 
 Prepare input file, define source, tally and other data cards. Example input file could be seen in r2s_example/neutron_transport/input.
 
@@ -157,21 +157,21 @@ Neutron transport calculation. A meshtal will be generated.
 
 .. code-block:: bash
 
-   >> cp neutron_transport
+   $ cp neutron_transport
 
-   >> ln -sf ../geom.h5m .
+   $ ln -sf ../geom.h5m .
 
-   >> mcnp5.mpi i=input g=geom.h5m
+   $ mcnp5.mpi i=input g=geom.h5m
 
 Perform R2S setup. The 'alara_params.txt' and 'config.ini' will be generated in this step.
 
 .. code-block:: bash
 
-   >> cp r2s_run
+   $ cp r2s_run
 
-   >> ln -sf ../neutron_transport/meshtal .
+   $ ln -sf ../neutron_transport/meshtal .
 
-   >> r2s.py setup
+   $ r2s.py setup
 
 Modify important parameters in the 'alara_params.txt' and 'config.ini' according to the problem. Examples could see 'alara_params_example.txt' and 'config_example.ini' in 'r2s_example/r2s_run'.
 Prepare alara nuclide library, copy preinstalled data library from ALARA repository. Example nuclide library could be seen in 'r2s_example/r2s_run/data'
@@ -179,27 +179,27 @@ Perform R2S step1. ALARA input file and neutron flux file will be generated in t
 
 .. code-block:: bash
 
-   >> r2s.py step1
+   $ r2s.py step1
 
 Perform R2S step2. Several photon source file and a e_bounds file will be generated in this step.
 
 .. code-block:: bash
 
-   >> r2s.py step2
+   $ r2s.py step2
 
 Perform Photon transport calculation. Example input file could be seen in r2s_example/photon_transport/input.
 
 .. code-block:: bash
   
-   >> cd photon_transport
+   $ cd photon_transport
 
-   >> ln -sf ../geom.h5m .
+   $ ln -sf ../geom.h5m .
 
-   >> ln -sf ../r2s_run/source_1.h5m source.h5m
+   $ ln -sf ../r2s_run/source_1.h5m source.h5m
 
-   >> ln -sf ../r2s_run/e_bounds .
+   $ ln -sf ../r2s_run/e_bounds .
 
-   >> mcnp5.mpi i=input g=geom.h5m
+   $ mcnp5.mpi i=input g=geom.h5m
 
 **********
 References
