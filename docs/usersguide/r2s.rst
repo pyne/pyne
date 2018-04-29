@@ -118,11 +118,13 @@ PyNE R2S example
 ****************
 
 Using a simple geometry as a example, here is how we perform R2S calculation.
-Example problem description.
-The geometry composed of four cubes of size 10x10x10 cm3. Cubes (in green) at bottom left and up right are water. Bottom right cube (in red) is made of steel, and up left cube (in white) is void.
+The example geometry composed of four cubes of size 10x10x10 cm3. Cubes (in green) at bottom left and up right are water. Bottom right cube (in red) is made of steel, and up left cube (in white) is void.
 There is a isotropic single energy (14 MeV) neutron point source in the middle of the bottom right cube.
 The cubes are irradiated by the source with a single 3.5 day pulse, the neutron intensity is 1e10 n/s.
 The following content demonstrates the process of caculate the shutdown dose rate of these cubes at the time of 1 hour after shutdown.
+Example files could be found in `r2s_example <https://github.com/pyne/data/blob/master/r2s_example.tar.gz>`_.
+>`_.
+
 
 .. figure:: r2s_example_geometry.png
     :align: center
@@ -141,7 +143,7 @@ Prepare material library, build material library. The material lib is then gener
 
 .. code-block:: bash
 
-   $ python make_example_material.py 
+   $ python make_example_material.py
 
 Combine the geometry file and the material library, using  the following command:
 
@@ -149,11 +151,11 @@ Combine the geometry file and the material library, using  the following command
 
    $ cp geom_without_material.h5m geom.h5m
 
-   $ uwuw_preproc geom.h5m -v -l example_material_lib.h5 
+   $ uwuw_preproc geom.h5m -v -l example_material_lib.h5
 
 Prepare input file, define source, tally and other data cards. Example input file could be seen in r2s_example/neutron_transport/input.
 
-Neutron transport calculation. A meshtal will be generated.
+Neutron transport calculation. A meshtal will be generated in this step.
 
 .. code-block:: bash
 
@@ -190,7 +192,7 @@ Perform R2S step2. Several photon source file and a e_bounds file will be genera
 Perform Photon transport calculation. Example input file could be seen in r2s_example/photon_transport/input.
 
 .. code-block:: bash
-  
+
    $ cd photon_transport
 
    $ ln -sf ../geom.h5m .
