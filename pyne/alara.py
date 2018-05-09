@@ -7,6 +7,7 @@ import os
 import collections
 from warnings import warn
 from pyne.utils import QAWarning, to_sec
+from string import Template
 
 import numpy as np
 import tables as tb
@@ -935,50 +936,62 @@ def _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes,
     Function that writes ALARA input file
     """
     num_zones = len(mats) * (num_n_groups)
-    s = "geometry rectangular\n\nvolume\n"
+    inp = Template('geometry rectangular\n\n
+                    volume\n 
+                    $zone
+                    end\n\n
+                    mat_loading\n
+                    $zone_mat
+                    end\n\n 
+                    $mix
+                    material_lib $matlib_file\n
+                    element_lib $data_dir/nuclib\n
+                    data_library alaralib $data_dir/fendl2.0bin\n
+                    truncation 1e-7\n
+                    impurity 5e-6 1e-3\n
+                    dump_file $run_dir/dump_file\n
+                    $flux 
+                    output zone\n
+                    integrate_energy\n
+                    $p_groups
+                    pulsehistory my_schedule\n
+                        1 0.0 s\n
+                    end\n
+                    schedule total\n
+                    $irr 
+                    end\n
+                    cooling\n
+                    $dt
+                    end\n')
     for z in range(num_zones):
-        s += "    1.0 zone_{0}\n".format(z)
-    s += 'end\n\nmat_loading\n'
+        zone += "    1.0 zone_{0}\n".format(z)
     for z in range(num_zones):
-        s += "    zone_{0} mix_{1}\n".format(z,int(np.floor(z / float(num_n_groups))))
-    s += 'end\n\n'
+        zone_mat += "    zone_{0} mix_{1}\n".format(z,int(np.floor(z / float(num_n_groups))))
     for m, mat in enumerate(mats):
-        s += "mixture mix_{0}\n".format(m)
-        s += "    material {0} 1 1\nend\n\n".format(mat.metadata["name"])
-    s += "material_lib {0}\n".format(matlib_file)
-    s += "element_lib {0}/nuclib\n".format(data_dir)
-    s += "data_library alaralib {0}/fendl2.0bin\n".format(data_dir)
-    s += "truncation 1e-7\n"
-    s += "impurity 5e-6 1e-3\n"
-    s += "dump_file {0}\n".format(os.path.join(run_dir, "dump_file"))
+        mix += "mixture mix_{0}\n".format(m)
+        mix += "    material {0} 1 1\nend\n\n".format(mat.metadata["name"])
     for i, flux_magnitude in enumerate(flux_magnitudes):
-        s += "flux flux_{0} {1} {2} 0 default\n".format(i, fluxin_file, flux_magnitude)
-    s += "output zone\n"
-    s += "integrate_energy\n"
+        flux += "flux flux_{0} {1} {2} 0 default\n".format(i, fluxin_file, flux_magnitude)
     # Photon energy bin structure
     # 24 bin structure
     if num_p_groups == 24:
-        s += "    photon_source {0}/fendl2.0bin {1} 24 1.00E4 2.00E4 5.00E4 1.00E5\n".format(data_dir, phtn_src_file)
-        s += "    2.00E5 3.00E5 4.00E5 6.00E5 8.00E5 1.00E6 1.22E6 1.44E6 1.66E6\n"
-        s += "    2.00E6 2.50E6 3.00E6 4.00E6 5.00E6 6.50E6 8.00E6 1.00E7 1.20E7\n"
-        s += "    1.40E7 2.00E7\nend\n"
+        p_groups += "    photon_source {0}/fendl2.0bin {1} 24 1.00E4 2.00E4 5.00E4 1.00E5\n".format(data_dir, phtn_src_file)
+        p_groups += "    2.00E5 3.00E5 4.00E5 6.00E5 8.00E5 1.00E6 1.22E6 1.44E6 1.66E6\n"
+        p_groups += "    2.00E6 2.50E6 3.00E6 4.00E6 5.00E6 6.50E6 8.00E6 1.00E7 1.20E7\n"
+        p_groups += "    1.40E7 2.00E7\nend\n"
     # 42 bin structure
     elif num_p_groups == 42:
-        s += "    photon_source {0}/fendl2.0bin {1} 42\n".format(data_dir, phtn_src_file)
-        s += "     1e4 2e4 3e4 4.5e4 6e4 7e4 7.5e4 1e5 1.5e5 2e5 3e5 4e5\n"
-        s += "     4.5e5 5.1e5 5.12e5 6e5 7e5 8e5 1e6 1.33e6 1.34e6 1.5e6 1.66e6 2e6\n"
-        s += "     2.5e6 3e6 3.5e6 4e6 4.5e6 5e6 5.5e6 6e6 6.5e6 7e6 7.5e6 8e6 1e7\n"
-        s += "     1.2e7 1.4e7 2e7 3e7 5e7\nend\n"
-    s += "pulsehistory my_schedule\n"
-    s += "    1 0.0 s\nend\n"
-    s += "schedule total\n"
+        p_groups += "    photon_source {0}/fendl2.0bin {1} 42\n".format(data_dir, phtn_src_file)
+        p_groups += "     1e4 2e4 3e4 4.5e4 6e4 7e4 7.5e4 1e5 1.5e5 2e5 3e5 4e5\n"
+        p_groups += "     4.5e5 5.1e5 5.12e5 6e5 7e5 8e5 1e6 1.33e6 1.34e6 1.5e6 1.66e6 2e6\n"
+        p_groups += "     2.5e6 3e6 3.5e6 4e6 4.5e6 5e6 5.5e6 6e6 6.5e6 7e6 7.5e6 8e6 1e7\n"
+        p_groups += "     1.2e7 1.4e7 2e7 3e7 5e7\nend\n"
     for i, irr_time in enumerate(irr_times):
-        s += "    {0} s flux_{1} my_schedule 0 s\n".format(irr_time, i)
-    s += "end\n"
-    s += "cooling\n"
+        irr += "    {0} s flux_{1} my_schedule 0 s\n".format(irr_time, i)
     for d in decay_times:
-        s += "    {0} s\n".format(d)
-    s += "end\n"
+        dt += "    {0} s\n".format(d)
+    
+    s = inp.substitute(zone=zone, zone_mat=zone_mat, mix=mix, matlib_file=matlib_file, data_dir=data_dir, run_dir=run_dir, flux=flux, $p_groups=p_groups irr=irr, dt=dt)
     with open(input_file, 'w') as f:
         f.write(s)
 
