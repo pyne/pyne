@@ -187,23 +187,24 @@ def step0(cfg1, cfg2, clean):
     
     # Perform SNILB check and calculate eta
     run_dir = 'step0'
-    eta = calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
-                   decay_times, num_p_groups, run_dir, clean)
+    eta, eta_sum = calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes,
+                            irr_times, decay_times, num_p_groups, run_dir, clean)
     np.set_printoptions(threshold=np.nan)
     
-    # Save numpy array
+    # Save eta arrays to numpy arrays
     np.save('step0_eta.npy', eta)
-    # Write a list of material name and eta value to a text file
+    np.save('step0_eta_sum.npy', eta_sum)
+    # Write a list of material names and eta values to a text file
     with open('step0_eta.txt', 'w') as f:
         for m, mat in enumerate(ml.keys()):
-            f.write('{0}, eta={1} \n'.format(mat.split(':')[1], eta[m][0]))
+            f.write('{0}, eta={1} \n'.format(mat.split(':')[1], eta_sum[m, :]))
         # Write eta value per element in the material library
         if eta_elements:
-            f.write('---- \nEta value per element: \n---- \n')
+            f.write('------ \nTotal eta value per element: \n------ \n')
             mat_count = len(ml.keys())
             for m, mat in enumerate(elements):
-                f.write('{0}, eta={1} \n'.format(nucname.name(mat), eta[m +
-                        mat_count][0]))
+                f.write('{0}, eta={1} \n'.format(nucname.name(mat), eta_sum[m +
+                                                 mat_count, :]))
             
 def step1(cfg1):
     """ 
