@@ -935,7 +935,9 @@ def _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes,
     """
     Function that writes ALARA input file
     """
-    num_zones = len(mats) * (num_n_groups)
+    # Two extra zones are added per material; one for the whole spectrum
+    # and one for the zero spectrum. 
+    num_zones = len(mats) * (num_n_groups + 2)
     inp = Template('geometry rectangular \n\n' \
                    'volume \n' \
                    '$zone \n' \
@@ -967,10 +969,11 @@ def _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes,
     zone = ""
     for z in range(num_zones):
         zone += "    1.0 zone_{0}\n".format(z)
-    # ZOnes material assignment
+    # Zones material assignment
     zone_mat = ""
     for z in range(num_zones):
-        zone_mat += "    zone_{0} mix_{1}\n".format(z,int(np.floor(z / float(num_n_groups))))
+        zone_mat += "    zone_{0} mix_{1}\n".format(z, int(np.floor(z /
+                                                    float(num_n_groups + 2))))
     # Material mixtures input
     mix = ""
     for m, mat in enumerate(mats):
@@ -1058,15 +1061,12 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
             fluxes.append([neutron_spectrum[n] if x ==
                            n else 0 for x in range(num_n_groups)])
         fluxes.append(neutron_spectrum) # total spectrum
-        fluxes.append([0]*175) # blank spectrum
+        fluxes.append([0]*num_n_groups) # blank spectrum
     _gt_write_fluxin(fluxes, fluxin_file)
 
     # Write geom file
     input_file = os.path.join(run_dir, "inp")
     phtn_src_file = os.path.join(run_dir, "phtn_src")
-    # Two extra zones are needed; one for the whole spectrum
-    # and one for the zero spectrum. Total number of zones = num_n_group + 2
-    num_n_groups += 2
     _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes, 
                   irr_times, decay_times, input_file, matlib_file,
                   fluxin_file, phtn_src_file, num_p_groups)
@@ -1105,8 +1105,11 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     Returns
     ----------
     eta : numpy.ndarray
-        eta value for each material listed.  This is a 2D array
-        [mat, decay_time]
+        eta value per photon group for each material listed.  
+        This is a 3D array [mat, decay_time, num_p_groups]
+    eta_sum : numpy.ndarray
+        Total eta value for each material listed.  
+        This is a 2D array [mat, decay_time]
     """
     num_n_groups = len(neutron_spectrum)
     num_mats = len(mats)
@@ -1118,47 +1121,69 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     phtn_src_file = _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, 
                               irr_times, decay_times, num_p_groups, run_dir)
     # Parse ALARA output
-    sup = np.zeros(shape=(num_mats, num_decay_times))
-    tot = np.zeros(shape=(num_mats, num_decay_times))
-    zero = np.zeros(shape=(num_mats, num_decay_times))
+    sup = np.zeros(shape=(num_mats, num_decay_times, num_p_groups + 1))
+    tot = np.zeros(shape=(num_mats, num_decay_times, num_p_groups + 1))
+    zero = np.zeros(shape=(num_mats, num_decay_times, num_p_groups + 1))
     with open(phtn_src_file, 'r') as f:
         # Initiate a block number
         i = 0
         for line in f.readlines():
             l = line.split()
             if l[0] == "TOTAL" and l[1] != "shutdown":
-                # Calculate the sum over all photon energy groups
-                row_sum = np.sum([float(x) for x in l[3:]])
-                # Material index will change every (num_n_groups+2)*num_decay_times) blocks
+                row = [float(x) for x in l[3:]]
+                row_sum = np.sum(row)
+                # Material index will change every (num_n_groups+2)*num_decay_times)
                 m = int(np.floor(float(i)/((num_n_groups+2)*num_decay_times)))
                 dt = i % num_decay_times
                 n = int(np.floor(i/float(num_decay_times))) % (num_n_groups + 2)
                 if n == num_n_groups:
-                    tot[m, dt] = row_sum
+                    tot[m, dt, -1] = row_sum
+                    tot[m, dt, :-1] = row
                 elif n == num_n_groups + 1:
-                    zero[m, dt] = row_sum
+                    zero[m, dt, -1] = row_sum
+                    zero[m, dt, :-1] = row
                 else:
-                    sup[m, dt] += row_sum
+                    sup[m, dt, -1] += row_sum
+                    sup[m, dt, :-1] += row
                 i += 1
                 
     # Claculate eta
-    eta = np.zeros(shape=(num_mats, num_decay_times))
+    eta = np.zeros(shape=(num_mats, num_decay_times, num_p_groups))
+    eta_sum = np.zeros(shape=(num_mats, num_decay_times))
     for dt in range(len(decay_times)):
        for m in range(len(mats)):
-           if np.isclose(tot[m, dt] - zero[m, dt], 0.0, rtol=1E-5) and \
-              np.isclose(sup[m, dt] - zero[m, dt]*175, 0.0, rtol=1E-5):
+           # Populate eta_sum array
+           if np.isclose(tot[m, dt, -1] - zero[m, dt, -1], 0.0, rtol=1E-5) and \
+              np.isclose(sup[m, dt, -1] - zero[m, dt, -1]*num_n_groups, 0.0, \
+                         rtol=1E-5):
                # tot = background and sup = background, eta = NaN >> set = 1.0
-               eta[m, dt] = 1.0
-           elif tot[m, dt] > zero[m, dt]:
+               eta_sum[m, dt] = 1.0
+           elif tot[m, dt, -1] > zero[m, dt, -1]:
                # tot and sup > background, eta > 0
-               eta[m, dt] = (sup[m, dt] - zero[m, dt]*175)/(tot[m, dt] - zero[m, dt])
+               eta_sum[m, dt] = (sup[m, dt, -1] - zero[m, dt, -1]*num_n_groups)/ \
+                                 (tot[m, dt, -1] - zero[m, dt, -1])
            else:
                # tot = background and sup != background, eta = inf >> ste = 1e6
-               eta[m, dt] = 1E6
+               eta_sum[m, dt] = 1E6
+
+           # Populate eta array
+           for p in range(num_p_groups):
+               if np.isclose(tot[m, dt, p] - zero[m, dt, p], 0.0, rtol=1E-5) and \
+                   np.isclose(sup[m, dt, p] - zero[m, dt, p]*num_n_groups, 0.0, \
+                   rtol=1E-5):
+                   # tot = background and sup = background, eta = NaN >> set = 1.0
+                   eta[m, dt, p] = 1.0
+               elif tot[m, dt, p] > zero[m, dt, p]:
+                   # tot and sup > background, eta > 0
+                   eta[m, dt, p] = (sup[m, dt, p] - zero[m, dt, p]*num_n_groups)/ \
+                                    (tot[m, dt, p] - zero[m, dt, p])
+               else:
+                   # tot = background and sup != background, eta = inf >> ste = 1e6
+                   eta[m, dt, p] = 1E6
 
     # Copy  phtn_src file to main directory to be used for Step 2           
     shutil.copy(phtn_src_file, 'step0_phtn_src')
     if clean:
         print("Deleting intermediate files for Step 0")
         shutil.rmtree(run_dir)  
-    return eta
+    return eta, eta_sum
