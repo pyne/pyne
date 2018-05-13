@@ -196,12 +196,14 @@ def step0(cfg1, cfg2, clean):
     # Write a list of material name and eta value to a text file
     with open('step0_eta.txt', 'w') as f:
         for m, mat in enumerate(ml.keys()):
-            f.write(mat.split(':')[1] + ', eta=' + str(eta[m][0]) + '\n')
+            f.write('{0}, eta={1} \n'.format(mat.split(':')[1], eta[m][0]))
         # Write eta value per element in the material library
         if eta_elements:
+            f.write('---- \nEta value per element: \n---- \n')
             mat_count = len(ml.keys())
             for m, mat in enumerate(elements):
-                f.write(nucname.name(mat) + ', eta=' + str(eta[m+mat_count][0]) + '\n')
+                f.write('{0}, eta={1} \n'.format(nucname.name(mat), eta[m +
+                        mat_count][0]))
             
 def step1(cfg1):
     """ 
