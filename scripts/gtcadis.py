@@ -7,7 +7,7 @@ import numpy as np
 from pyne import nucname
 from pyne.mesh import Mesh, IMeshTag
 from pyne.bins import pointwise_collapse
-from pyne.material import MaterialLibrary
+from pyne.material import Material, MaterialLibrary
 from pyne.partisn import write_partisn_input, isotropic_vol_source
 from pyne.dagmc import discretize_geom, load, cell_material_assignments
 from pyne.alara import calc_eta
@@ -181,7 +181,7 @@ def step0(cfg1, cfg2, clean):
                 if not element in elements:
                     elements.append(element)
                     mat_element = Material({element: 1.0})
-                    mat_element.name = 'mat:%s' %nucname.name(element)
+                    mat_element.metadata['name'] = 'mat:%s' %nucname.name(element)
                     mat_element.density = 1.0
                     mats.append(mat_element)
     
