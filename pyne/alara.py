@@ -1049,19 +1049,17 @@ dump_file $run_dir/dump_file""")
     # Photon energy bin structure
     # 24 bin structure
     if num_p_groups == 24:
-        p_groups_24 = np.array([1.00E4, 2.00E4, 5.00E4, 1.00E5, 2.00E5, 3.00E5, 4.00E5, 6.00E5,
-                                8.00E5, 1.00E6, 1.22E6, 1.44E6, 1.66E6, 2.00E6, 2.50E6, 3.00E6,
-                                4.00E6, 5.00E6, 6.50E6, 8.00E6, 1.00E7, 1.20E7, 1.40E7, 2.00E7])
-        p_groups = "    photon_source {0}/fendl2.0bin {1} 24\n    {2}\n".format(data_dir, phtn_src_file,
-                                                                                _gt_format_p_groups(p_groups_24))
+        p_E_group = np.array([1.00E4, 2.00E4, 5.00E4, 1.00E5, 2.00E5, 3.00E5, 4.00E5, 6.00E5,
+                              8.00E5, 1.00E6, 1.22E6, 1.44E6, 1.66E6, 2.00E6, 2.50E6, 3.00E6,
+                              4.00E6, 5.00E6, 6.50E6, 8.00E6, 1.00E7, 1.20E7, 1.40E7, 2.00E7])
     # 42 bin structure
-    if num_p_groups == 42:
-        p_groups_42 = np.array([1e4, 2e4, 3e4, 4.5e4, 6e4, 7e4, 7.5e4, 1e5, 1.5e5, 2e5, 3e5, 4e5,
-                                4.5e5, 5.1e5, 5.12e5, 6e5, 7e5, 8e5, 1e6, 1.33e6, 1.34e6, 1.5e6,
-                                1.66e6, 2e6, 2.5e6, 3e6, 3.5e6, 4e6, 4.5e6, 5e6, 5.5e6, 6e6, 6.5e6,
-                                7e6, 7.5e6, 8e6, 1e7, 1.2e7, 1.4e7, 2e7, 3e7, 5e7])
-        p_groups = "    photon_source {0}/fendl2.0bin {1} 42\n    {2}\n".format(data_dir, phtn_src_file,
-                                                                                _gt_format_p_groups(p_groups_42))
+    elif num_p_groups == 42:
+        p_E_group = np.array([1e4, 2e4, 3e4, 4.5e4, 6e4, 7e4, 7.5e4, 1e5, 1.5e5, 2e5, 3e5, 4e5,
+                              4.5e5, 5.1e5, 5.12e5, 6e5, 7e5, 8e5, 1e6, 1.33e6, 1.34e6, 1.5e6,
+                              1.66e6, 2e6, 2.5e6, 3e6, 3.5e6, 4e6, 4.5e6, 5e6, 5.5e6, 6e6, 6.5e6,
+                              7e6, 7.5e6, 8e6, 1e7, 1.2e7, 1.4e7, 2e7, 3e7, 5e7])
+    p_groups = "    photon_source {0}/fendl2.0bin {1} {2}\n    {3}\n".format(data_dir, phtn_src_file, num_p_groups,
+                                                                             _gt_format_p_groups(p_E_group))
     # Irradiation schedule input
     irr = ""
     for i, irr_time in enumerate(irr_times):
@@ -1097,7 +1095,7 @@ def _gt_format_p_groups(p_groups):
         p_string += "{0:.2E} ".format(p)
         if (i + 1) % 8 == 0:
             p_string += '\n    '
-     return p_string
+    return p_string
 
 def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times, 
               decay_times, num_p_groups, run_dir):
@@ -1110,7 +1108,7 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
         Path to nuclib and fendl files
     mats : list
         List of PyNE material objects of materials in the geometry
-    neutron_spectrum : list
+    neutron_spectrum : numpy array
         Neutron spectrum (length is equal to number of n energy groups)
     flux_magnitudes : list
         Magnitude of flux in each neutron energy group
@@ -1172,7 +1170,7 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
         Path to directory containing nuclib and fendl files
     mats : list
         List of PyNE material objects of materials in the geometry
-    neutron_spectrum : list
+    neutron_spectrum : numpy array
         Neutron spectrum (length is equal to number of n energy groups)
     flux_magnitudes : list
         Magnitude of flux in each neutron energy group

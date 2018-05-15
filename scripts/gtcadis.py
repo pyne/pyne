@@ -31,7 +31,7 @@ step1:
     # rate conversion library. (24 or 42), default is 42.
     p_groups: 42
     # Path to hdf5 geometry file for photon transport
-    geom_file: 
+    p_geom_file: 
     # Volume ID of adjoint photon source cell on
     # DAGMC input [Trelis/Cubit .sat file]
     src_cell: 
@@ -55,7 +55,10 @@ step1:
 # Calculate T matrix for each material
 step2:
     # Path to material laden geometry (hdf5) file for adjoint neutron transport.
-    geom_file: 
+    n_geom_file: 
+    # Number of neutron energy groups to create spectrum to be used in ALARA.
+    # Default is 175.
+    n_groups: 175
     # Path to processed nuclear data.
     # (directory containing nuclib, fendl2.0bin.lib, fendl2.0bin.gam)
     data_dir: 
@@ -153,15 +156,15 @@ def step0(cfg1, cfg2, clean):
         User input for condition on deleting the intermediate files
     """
     # Get user input from config file
-    geom = cfg2['geom_file']
+    geom = cfg2['n_geom_file']
+    num_n_groups = cfg2['n_groups']
     data_dir = cfg2['data_dir']
     irr_times = str(cfg2['irr_time']).split(' ')
     decay_times = str(cfg2['decay_time']).split(' ')
     num_p_groups = cfg1['p_groups']
     
     # Define a flat, 175 group neutron spectrum, with magnitude 1E12 [n/s]
-    num_n_groups = 175
-    neutron_spectrum = [1]*num_n_groups # will be normalized
+    neutron_spectrum = np.ones((num_n_groups)) # will be normalized
     flux_magnitude = 1.0E12
     flux_magnitudes = [flux_magnitude * num_n_groups] # 1E12*175
 
@@ -216,7 +219,7 @@ def step1(cfg1):
         User input for step 1 from the config.yml file
     """
     # Get user-input from config file
-    geom = cfg1['geom_file']
+    geom = cfg1['p_geom_file']
     cells = [cfg1['src_cell']]
     src_vol = [float(cfg1['src_vol'])]
     
