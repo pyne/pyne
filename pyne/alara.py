@@ -1044,7 +1044,7 @@ dump_file $run_dir/dump_file
     # Zones material assignment
     zone_mat = ""
     for z in range(num_zones):
-        mix_num = int(np.floor(z / float(num_n_groups + 2))
+        mix_num = int(np.floor(z / float(num_n_groups + 2)))
         zone_mat += "    zone_{0} mix_{1}\n".format(z, mix_num)
     # Material mixtures input
     mix = ""
