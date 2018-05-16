@@ -961,7 +961,7 @@ def _gt_write_fluxin(fluxes, num_zones, fluxin_file):
 
 def _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes,
                   irr_times, decay_times, input_file, matlib_file,
-                  fluxin_file, phtn_src_file, num_p_groups):
+                  fluxin_file, phtn_src_file, num_p_groups, p_bins):
     """
     Function that writes ALARA input file
 
@@ -991,6 +991,8 @@ def _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes,
         Path to write ALARA output photon source
     num_p_groups : int
         The number of photon energy groups for ALARA calculation
+    p_bins: numpy array
+        Photon energy bin bounds
     """
     # Two extra zones are added per material; one for the whole spectrum
     # and one for the zero spectrum. 
@@ -1042,8 +1044,8 @@ dump_file $run_dir/dump_file
     # Zones material assignment
     zone_mat = ""
     for z in range(num_zones):
-        zone_mat += "    zone_{0} mix_{1}\n".format(z, int(np.floor(z /
-                                                           float(num_n_groups + 2))))
+        mix_num = int(np.floor(z / float(num_n_groups + 2))
+        zone_mat += "    zone_{0} mix_{1}\n".format(z, mix_num)
     # Material mixtures input
     mix = ""
     for m, mat in enumerate(mats):
@@ -1054,21 +1056,8 @@ dump_file $run_dir/dump_file
     for i, flux_magnitude in enumerate(flux_magnitudes):
         flux += "flux flux_{0} {1} {2} 0 default\n".format(i, fluxin_file, flux_magnitude)
     # Photon energy bin structure
-    # 24 bin structure
-    if num_p_groups == 24:
-        p_E_group = np.array([1.00E4, 2.00E4, 5.00E4, 1.00E5, 2.00E5, 3.00E5, 4.00E5, 6.00E5,
-                              8.00E5, 1.00E6, 1.22E6, 1.44E6, 1.66E6, 2.00E6, 2.50E6, 3.00E6,
-                              4.00E6, 5.00E6, 6.50E6, 8.00E6, 1.00E7, 1.20E7, 1.40E7, 2.00E7])
-    # 42 bin structure
-    elif num_p_groups == 42:
-        p_E_group = np.array([1.00E4, 2.00E4, 3.00E4, 4.50E4, 6.00E4, 7.00E4, 7.50E4, 1.00E5,
-                              1.50E5, 2.00E5, 3.00E5, 4.00E5, 4.50E5, 5.10E5, 5.12E5, 6.00E5,
-                              7.00E5, 8.00E5, 1.00E6, 1.33E6, 1.34E6, 1.50E6, 1.66E6, 2.00E6,
-                              2.50E6, 3.00E6, 3.50E6, 4.00E6, 4.50E6, 5.00E6, 5.50E6, 6.00E6,
-                              6.50E6, 7.00E6, 7.50E6, 8.00E6, 1.00E7, 1.20E7, 1.40E7, 2.00E7,
-                              3.00E7, 5.00E7])
     p_groups = "    photon_source {0}/fendl2.0bin {1} {2}\n    {3}\n".format(data_dir, phtn_src_file,
-                                                        num_p_groups, _gt_format_p_groups(p_E_group))
+                                                        num_p_groups, _gt_format_p_groups(p_bins))
     # Irradiation schedule input
     irr = ""
     for i, irr_time in enumerate(irr_times):
@@ -1106,7 +1095,7 @@ def _gt_format_p_groups(p_groups):
     return p_string
 
 def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times, 
-              decay_times, num_p_groups, run_dir):
+              decay_times, num_p_groups, p_bins, run_dir):
     """
     Function that prepares necessary input files and runs ALARA
     
@@ -1126,6 +1115,8 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
         Decay times [s]
     num_p_groups : int
         Number of photon energy groups for ALARA calculation
+    p_bins: numpy array
+        Photon energy bin bounds
     run_dir : str
         Path to write ALARA input and output files
 
@@ -1164,14 +1155,14 @@ def _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     phtn_src_file = os.path.join(run_dir, "phtn_src")
     _gt_write_inp(run_dir, data_dir, mats, num_n_groups, flux_magnitudes, 
                   irr_times, decay_times, input_file, matlib_file,
-                  fluxin_file, phtn_src_file, num_p_groups)
+                  fluxin_file, phtn_src_file, num_p_groups, p_bins)
 
     # Run ALARA
     sub = subprocess.check_output(['alara', input_file], stderr=subprocess.STDOUT)
     return phtn_src_file
 
 def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
-             decay_times, num_p_groups, run_dir, clean):
+             decay_times, num_p_groups, p_bins, run_dir, clean):
     """
     Function that returns eta values (SNILB check result) for each material 
     and each decay time
@@ -1192,6 +1183,8 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
         Decay times [s]
     num_p_groups : int
         The number of photon energy groups for ALARA calculation
+    p_bins: numpy array
+       Photon energy bin bounds
     run_dir: str
         Path to write ALARA input and output files    
     clean : bool
@@ -1201,10 +1194,7 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     ----------
     eta : numpy array
         eta value per photon group for each material listed.  
-        This is a 3D array [mat, decay_time, num_p_groups]
-    eta_sum : numpy array
-        Total eta value for each material listed.  
-        This is a 2D array [mat, decay_time]
+        This is a 3D array [mat, decay_time, num_p_groups + 1]
     """
     num_n_groups = len(neutron_spectrum)
     num_mats = len(mats)
@@ -1214,7 +1204,7 @@ def calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
     if not os.path.exists(run_dir):
         os.makedirs(run_dir)    
     phtn_src_file = _gt_alara(data_dir, mats, neutron_spectrum, flux_magnitudes, 
-                              irr_times, decay_times, num_p_groups, run_dir)
+                              irr_times, decay_times, num_p_groups, p_bins, run_dir)
     # Parse ALARA output
     sup = np.zeros(shape=(num_mats, num_decay_times, num_p_groups + 1))
     tot = np.zeros(shape=(num_mats, num_decay_times, num_p_groups + 1))

@@ -4,6 +4,7 @@ import io
 import yaml
 import argparse
 import numpy as np
+from sets import Set
 from pyne import nucname
 from pyne.mesh import Mesh, IMeshTag
 from pyne.bins import pointwise_collapse
@@ -17,9 +18,14 @@ config_filename = 'config.yml'
 
 config = \
 """
-# If 'True' all intermediate files created while running the script will be 
-# deleted. Change to 'False' if you want to retain all intermediate files.
-clean: True
+general:
+    # If 'True' all intermediate files created while running the script will be 
+    # deleted. Change to 'False' if you want to retain all intermediate files.
+    clean: True
+    # Number of photon energy groups (24 or 42), default is 42.
+    p_groups: 42
+    # Number of neutron energy groups. Default is 175.
+    n_groups: 175 
 
 # Optional step to assess all materials in geometry for compatibility with
 # SNILB criteria.
@@ -27,9 +33,6 @@ clean: True
 
 # Prepare PARTISN input file for adjoint photon transport
 step1:
-    # Number of photon energy groups. This should be compatible with the dose
-    # rate conversion library. (24 or 42), default is 42.
-    p_groups: 42
     # Path to hdf5 geometry file for photon transport
     p_geom_file: 
     # Volume ID of adjoint photon source cell on
@@ -56,9 +59,6 @@ step1:
 step2:
     # Path to material laden geometry (hdf5) file for adjoint neutron transport.
     n_geom_file: 
-    # Number of neutron energy groups to create spectrum to be used in ALARA.
-    # Default is 175.
-    n_groups: 175
     # Path to processed nuclear data.
     # (directory containing nuclib, fendl2.0bin.lib, fendl2.0bin.gam)
     data_dir: 
@@ -142,26 +142,55 @@ def _cards(source):
              }
     return cards
 
-def step0(cfg1, cfg2, clean):
+def _get_p_bins(num_p_groups):
+    """
+    Function that returns a photon energy bin structure based on the number 
+    of photon groups in the problem.
+
+    Parameters
+    ----------
+    num_p_groups: int
+        Number of photon energy groups
+
+    Returns
+    -------
+    p_E_groups: numpy array
+        Array of photon energy bin structure
+    """
+    # 24 bin structure [eV]
+    if num_p_groups == 24:
+        p_E_group = np.array([1.00E4, 2.00E4, 5.00E4, 1.00E5, 2.00E5, 3.00E5, 4.00E5, 6.00E5,
+                              8.00E5, 1.00E6, 1.22E6, 1.44E6, 1.66E6, 2.00E6, 2.50E6, 3.00E6,
+                              4.00E6, 5.00E6, 6.50E6, 8.00E6, 1.00E7, 1.20E7, 1.40E7, 2.00E7])
+    # 42 bin structure [eV]
+    elif num_p_groups == 42:
+        p_E_group = np.array([1.00E4, 2.00E4, 3.00E4, 4.50E4, 6.00E4, 7.00E4, 7.50E4, 1.00E5,
+                              1.50E5, 2.00E5, 3.00E5, 4.00E5, 4.50E5, 5.10E5, 5.12E5, 6.00E5,
+                              7.00E5, 8.00E5, 1.00E6, 1.33E6, 1.34E6, 1.50E6, 1.66E6, 2.00E6,
+                              2.50E6, 3.00E6, 3.50E6, 4.00E6, 4.50E6, 5.00E6, 5.50E6, 6.00E6,
+                              6.50E6, 7.00E6, 7.50E6, 8.00E6, 1.00E7, 1.20E7, 1.40E7, 2.00E7,
+                              3.00E7, 5.00E7])
+    return p_E_group
+        
+def step0(cfg, cfg2):
     """
     This function performs the SNILB criteria check.
     
     Parameters
     ----------
-    cfg1 : dictionary
-        User input for Step 1 from the config.yml file
+    cfg : dictionary
+        User input for 'general' from the config.yml file
     cfg2 : dictionary
         User input for Step 2 from the config.yml file    
-    clean: str
-        User input for condition on deleting the intermediate files
     """
     # Get user input from config file
+    clean = cfg['clean']
+    num_n_groups = cfg['n_groups']
+    num_p_groups = cfg['p_groups']
     geom = cfg2['n_geom_file']
-    num_n_groups = cfg2['n_groups']
     data_dir = cfg2['data_dir']
     irr_times = str(cfg2['irr_time']).split(' ')
     decay_times = str(cfg2['decay_time']).split(' ')
-    num_p_groups = cfg1['p_groups']
     
     # Define a flat, 175 group neutron spectrum, with magnitude 1E12 [n/s]
     neutron_spectrum = np.ones(num_n_groups) # will be normalized
@@ -175,23 +204,25 @@ def step0(cfg1, cfg2, clean):
     eta_elements = True
     if eta_elements:
         # Calculate eta for each element in the material library
-        elements = []
+        elements = Set([ ])
         for m, mat in enumerate(mat_lib.keys()):
             # Collapse elements in the material
             mat_collapsed = mats[m].collapse_elements([])
             element_list = mat_collapsed.comp.keys()
-            for element in element_list:
-                if not element in elements:
-                    elements.append(element)
-                    mat_element = Material({element: 1.0})
-                    mat_element.metadata['name'] = 'mat:%s' %nucname.name(element)
-                    mat_element.density = 1.0
-                    mats.append(mat_element)
+            elements.update(element_list)
+        # Create PyNE material object per elements    
+        for element in elements:
+            mat_element = Material({element: 1.0})
+            mat_element.metadata['name'] = 'mat:%s' %nucname.name(element)
+            mat_element.density = 1.0
+            mats.append(mat_element)
     
     # Perform SNILB check and calculate eta
     run_dir = 'step0'
+    # Get the photon energy bin structure
+    p_bins = _get_p_bins(num_p_groups)
     eta = calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
-                   decay_times, num_p_groups, run_dir, clean)
+                   decay_times, num_p_groups, p_bins, run_dir, clean)
     np.set_printoptions(threshold=np.nan)
     
     # Save eta arrays to numpy arrays
@@ -208,16 +239,20 @@ def step0(cfg1, cfg2, clean):
                 f.write('{0}, eta={1} \n'.format(nucname.name(mat), eta[m + mat_count,
                                                                         :, -1]))
             
-def step1(cfg1):
+def step1(cfg, cfg1):
     """ 
     This function writes the PARTISN input file for the adjoint photon transport.   
     
     Parameters
     ----------
+    cfg : dictionary
+        User input for 'general' from the config.yml file
     cfg1 : dictionary
         User input for step 1 from the config.yml file
     """
     # Get user-input from config file
+    num_n_groups = cfg['n_groups']
+    num_p_groups = cfg['p_groups']
     geom = cfg1['p_geom_file']
     cells = [cfg1['src_cell']]
     src_vol = [float(cfg1['src_vol'])]
@@ -241,14 +276,12 @@ def step1(cfg1):
     m = Mesh(structured=True, structured_coords=sc)
     m.mesh.save("blank_mesh.h5m")
 
-    # Generate 42 photon energy bins [eV]
-    #  First bin has been replaced with 1 for log interpolation
-    ### comment >> same as used in alara.py >> should be moved to a shared list!!
-    photon_bins = np.array([1e-6, 0.01, 0.02, 0.03, 0.045, 0.06, 0.07, 0.075,
-                            0.1, 0.15, 0.2, 0.3, 0.4, 0.45, 0.51, 0.512, 0.6,
-                            0.7, 0.8, 1, 1.33, 1.34, 1.5, 1.66, 2, 2.5, 3, 3.5,
-                            4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 10, 12, 14, 20,
-                            30, 50])
+    # Get the photon energy bin structure [Mev] that matches the number of photon
+    # energy groups in the problem
+    convert_to_MeV = 1.0E-6
+    photon_bins = convert_to_MeV * _get_p_bins(num_p_groups)
+    #  Add an additional bin to the beginning of the array with value of 1 for log interpolation
+    photon_bins = np.hstack([1.0E-6, photon_bins])
     # ICRP 74 flux-to-dose conversion factors in pico-Sv/s per photon flux
     de = np.array([0.01, 0.015, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.1,
                    0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 2, 4, 6, 8, 10])
@@ -256,15 +289,14 @@ def step1(cfg1):
                    0.4399, 0.5172, 0.7523, 1.0041, 1.5083, 1.9958, 2.4657, 2.9082,
                    3.7269, 4.4834, 7.4896, 12.0153, 15.9873, 19.9191, 23.76])
     # Convert to Sv/s per photon FLUX 
-    pico = 1.0e-12 
-    df = df * pico 
+    convert_to_pico = 1.0e-12 
+    df = df * convert_to_pico 
     # Convert pointwise data to group data for log interpolation
     photon_spectrum = pointwise_collapse(photon_bins, de, df, logx=True, logy=True)
     #  Anything below 0.01 MeV should be assigned the DF value of 0.01 MeV
     photon_spectrum[0] = df[0]
     # Total number of groups is 217 (42 photon + 175 neutron)
-    ### comment >> 175 is num_n_groups?, 42 is num_p_groups?
-    spectra = [np.append(photon_spectrum, np.zeros(175))]
+    spectra = [np.append(photon_spectrum, np.zeros(num_n_groups))]
     # The spectrum is normalized by PyNE, so we need to mutliply by the sum of
     # intensities in the spectrum.
     # Additionally, we divide by the volume of the source cell in order to get
@@ -277,8 +309,7 @@ def step1(cfg1):
     source, dg = isotropic_vol_source(geom, m, cells, spectra, intensities)
 
     # PARTISN input
-    ### comment >> ngroup should be num_n_groups + num_p_groups?
-    ngroup = 217  # total number of energy groups
+    ngroup = num_n_groups + num_p_groups  # total number of energy groups
     cards = _cards(source)  # block 1, 3, 5 input values
     names_dict = _names_dict()  # dictionary of isotopes (PyNE nucids to bxslib names)
 
@@ -317,14 +348,12 @@ def main():
     else:
         with open(config_filename, 'r') as f:
             cfg = yaml.load(f)
-            clean = cfg['clean']
             
     if args.command == 'step0':
-        step0(cfg['step1'], cfg['step2'], clean)
+        step0(cfg['general'], cfg['step2'])
 
     elif args.command == 'step1':
-        ### comment >> should pass also cfg2 for num_n_groups?
-        step1(cfg['step1'])
+        step1(cfg['general'], cfg['step1'])
 
 if __name__ == '__main__':
     main()
