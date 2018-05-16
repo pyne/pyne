@@ -164,19 +164,19 @@ def step0(cfg1, cfg2, clean):
     num_p_groups = cfg1['p_groups']
     
     # Define a flat, 175 group neutron spectrum, with magnitude 1E12 [n/s]
-    neutron_spectrum = np.ones((num_n_groups)) # will be normalized
+    neutron_spectrum = np.ones(num_n_groups) # will be normalized
     flux_magnitude = 1.0E12
-    flux_magnitudes = [flux_magnitude * num_n_groups] # 1E12*175
+    flux_magnitudes = np.array([flux_magnitude * num_n_groups]) # 1E12*175
 
     # Get materials from geometry file
-    ml = MaterialLibrary(geom)
-    mats = list(ml.values())
+    mat_lib = MaterialLibrary(geom)
+    mats = list(mat_lib.values())
 
     eta_elements = True
     if eta_elements:
         # Calculate eta for each element in the material library
         elements = []
-        for m, mat in enumerate(ml.keys()):
+        for m, mat in enumerate(mat_lib.keys()):
             # Collapse elements in the material
             mat_collapsed = mats[m].collapse_elements([])
             element_list = mat_collapsed.comp.keys()
@@ -190,24 +190,23 @@ def step0(cfg1, cfg2, clean):
     
     # Perform SNILB check and calculate eta
     run_dir = 'step0'
-    eta, eta_sum = calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes,
-                            irr_times, decay_times, num_p_groups, run_dir, clean)
+    eta = calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
+                   decay_times, num_p_groups, run_dir, clean)
     np.set_printoptions(threshold=np.nan)
     
     # Save eta arrays to numpy arrays
     np.save('step0_eta.npy', eta)
-    np.save('step0_eta_sum.npy', eta_sum)
     # Write a list of material names and eta values to a text file
     with open('step0_eta.txt', 'w') as f:
-        for m, mat in enumerate(ml.keys()):
-            f.write('{0}, eta={1} \n'.format(mat.split(':')[1], eta_sum[m, :]))
+        for m, mat in enumerate(mat_lib.keys()):
+            f.write('{0}, eta={1} \n'.format(mat.split(':')[1], eta[m, :, -1]))
         # Write eta value per element in the material library
         if eta_elements:
             f.write('------ \nTotal eta value per element: \n------ \n')
-            mat_count = len(ml.keys())
+            mat_count = len(mat_lib.keys())
             for m, mat in enumerate(elements):
-                f.write('{0}, eta={1} \n'.format(nucname.name(mat), eta_sum[m +
-                                                 mat_count, :]))
+                f.write('{0}, eta={1} \n'.format(nucname.name(mat), eta[m + mat_count,
+                                                                        :, -1]))
             
 def step1(cfg1):
     """ 
@@ -244,6 +243,7 @@ def step1(cfg1):
 
     # Generate 42 photon energy bins [eV]
     #  First bin has been replaced with 1 for log interpolation
+    ### comment >> same as used in alara.py >> should be moved to a shared list!!
     photon_bins = np.array([1e-6, 0.01, 0.02, 0.03, 0.045, 0.06, 0.07, 0.075,
                             0.1, 0.15, 0.2, 0.3, 0.4, 0.45, 0.51, 0.512, 0.6,
                             0.7, 0.8, 1, 1.33, 1.34, 1.5, 1.66, 2, 2.5, 3, 3.5,
@@ -259,11 +259,11 @@ def step1(cfg1):
     pico = 1.0e-12 
     df = df * pico 
     # Convert pointwise data to group data for log interpolation
-    photon_spectrum = pointwise_collapse(
-        photon_bins, de, df, logx=True, logy=True)
+    photon_spectrum = pointwise_collapse(photon_bins, de, df, logx=True, logy=True)
     #  Anything below 0.01 MeV should be assigned the DF value of 0.01 MeV
     photon_spectrum[0] = df[0]
     # Total number of groups is 217 (42 photon + 175 neutron)
+    ### comment >> 175 is num_n_groups?, 42 is num_p_groups?
     spectra = [np.append(photon_spectrum, np.zeros(175))]
     # The spectrum is normalized by PyNE, so we need to mutliply by the sum of
     # intensities in the spectrum.
@@ -277,6 +277,7 @@ def step1(cfg1):
     source, dg = isotropic_vol_source(geom, m, cells, spectra, intensities)
 
     # PARTISN input
+    ### comment >> ngroup should be num_n_groups + num_p_groups?
     ngroup = 217  # total number of energy groups
     cards = _cards(source)  # block 1, 3, 5 input values
     names_dict = _names_dict()  # dictionary of isotopes (PyNE nucids to bxslib names)
@@ -322,6 +323,7 @@ def main():
         step0(cfg['step1'], cfg['step2'], clean)
 
     elif args.command == 'step1':
+        ### comment >> should pass also cfg2 for num_n_groups?
         step1(cfg['step1'])
 
 if __name__ == '__main__':
