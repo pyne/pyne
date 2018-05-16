@@ -258,16 +258,16 @@ def step1(cfg, cfg1):
     src_vol = [float(cfg1['src_vol'])]
     
     try: 
-       origin_x, origin_y, origin_z = cfg['origin'].split(' ') 
+       origin_x, origin_y, origin_z = cfg1['origin'].split(' ') 
     except: 
        print("Too few entries in origin location")
 
-    xmesh = cfg['xmesh']
-    xints = cfg['xints']
-    ymesh = cfg['ymesh']
-    yints = cfg['yints']
-    zmesh = cfg['zmesh']
-    zints = cfg['zints']
+    xmesh = cfg1['xmesh']
+    xints = cfg1['xints']
+    ymesh = cfg1['ymesh']
+    yints = cfg1['yints']
+    zmesh = cfg1['zmesh']
+    zints = cfg1['zints']
 
     # Create structured mesh
     sc = [np.linspace(float(origin_x), float(xmesh), float(xints) + 1),
