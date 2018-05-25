@@ -122,8 +122,8 @@ The example geometry composed of four cubes of size 10x10x10 cm3. Cubes (in gree
 There is a isotropic single energy (14 MeV) neutron point source in the middle of the bottom right cube.
 The cubes are irradiated by the source with a single 3.5 day pulse, the neutron intensity is 1e10 n/s.
 The following content demonstrates the process of caculate the shutdown dose rate of these cubes at the time of 1 hour after shutdown.
-Example files could be found in `r2s_example <https://github.com/pyne/data/blob/master/r2s_example.tar.gz>`_.
->`_.
+Example files could be found in 
+`r2s_example <https://github.com/pyne/data/blob/master/r2s_example.tar.gz>`_.
 
 
 .. figure:: r2s_example_geometry.png
@@ -131,7 +131,7 @@ Example files could be found in `r2s_example <https://github.com/pyne/data/blob/
 
     **Figure 1:** *Geometry of R2S example (X-Y cross section).*
 
-Build the model using trelis as following figure. Set material group and export to "geom_without_material.h5m".
+Build the model using trelis as following figure. Set material group and export to `geom_without_material.h5m`.
 
 .. figure:: r2s_example_trelis_geometry.png
     :align: center
@@ -175,8 +175,11 @@ Perform R2S setup. The 'alara_params.txt' and 'config.ini' will be generated in 
 
    $ r2s.py setup
 
-Modify important parameters in the 'alara_params.txt' and 'config.ini' according to the problem. Examples could see 'alara_params_example.txt' and 'config_example.ini' in 'r2s_example/r2s_run'.
-Prepare alara nuclide library, copy preinstalled data library from ALARA repository. Example nuclide library could be seen in 'r2s_example/r2s_run/data'
+Modify important parameters in the 'alara_params.txt' and 'config.ini' according to the problem.
+Examples could be seen 'alara_params_example.txt' and 'config_example.ini' in 'r2s_example/r2s_run'.
+Prepare alara nuclide library, copy preinstalled data library from
+`ALARA/data <`r2s_example <https://github.com/svalinn/ALARA/tree/master/data.>`_.
+Example nuclide library could be seen in 'r2s_example/r2s_run/data'
 Perform R2S step1. ALARA input file and neutron flux file will be generated in this step.
 
 .. code-block:: bash
