@@ -199,7 +199,8 @@ def remove(path):
 
 class Point(object):
     """
-    Class point.
+    Point class represents x, y and z coordinates.
+    Coordinate of a dimension could be any float, including 'inf' and '-inf'.
     """
     def __init__(self, x=0.0, y=0.0, z=0.0):
         self.x = x
@@ -208,7 +209,7 @@ class Point(object):
 
     def __str__(self):
         """
-        Print point according to the coordinate.
+        Return a string with readable information of the coordinate.
         """
         return ''.join(['(',str(self.x), ', ',
                         str(self.y), ', ',
@@ -258,7 +259,7 @@ def _is_point_in_mesh(bounds, point):
     else:
         return False
 
-def _find_voxel_idx_1D(bound, cor, v_1D):
+def _find_voxel_idx_1d(bound, cor, v_1d):
     """
     Find the voxel id (in a given dimension).
 
@@ -268,7 +269,7 @@ def _find_voxel_idx_1D(bound, cor, v_1D):
         Boundary of the mesh in a given direction.
     cor : float
         Coordinate of the point in the given direction.
-    v_1D : float
+    v_1d : float
         Vector attribute in the given direction.
 
     Return:
@@ -279,7 +280,7 @@ def _find_voxel_idx_1D(bound, cor, v_1D):
     ----------
     """
     idx = -1
-    if v_1D > 0:
+    if v_1d > 0:
         for i in range(len(bound)-1):
             if bound[i] <= cor < bound[i+1]:
                 idx = i
@@ -318,7 +319,7 @@ def _cal_dir_v(start, end):
     v_z = d_z / dist
     return [v_x, v_y, v_z]
 
-def _find_next_grid_1D(cor, v_1D, bound):
+def _find_next_grid_1d(cor, v_1d, bound):
     """
     Find the next grid coordinate of a direction.
 
@@ -326,7 +327,7 @@ def _find_next_grid_1D(cor, v_1D, bound):
     -----------
     cor : float
         Coordinate of current point in the direction.
-    v_1D : float
+    v_1d : float
         Direction value.
     bound : list of float
         Boundary values of current direction.
@@ -338,7 +339,7 @@ def _find_next_grid_1D(cor, v_1D, bound):
     """
     n_grid = 0.0
     flag = False
-    if v_1D > 0:
+    if v_1d > 0:
         for i in range(len(bound)):
             if cor < bound[i]:
                 n_grid = bound[i]
@@ -354,7 +355,7 @@ def _find_next_grid_1D(cor, v_1D, bound):
         return n_grid
     else:
         # point goes out of the mesh
-        return v_1D * float('inf')
+        return v_1d * float('inf')
 
 
 def _cal_max_travel_length_in_current_voxel(tp, end, v, bounds):
@@ -380,8 +381,8 @@ def _cal_max_travel_length_in_current_voxel(tp, end, v, bounds):
         [t_max_x, t_max_y, t_max_z]. These value could be both positive and
         negtive. And could be 'inf' or '-inf'.
     """
-    n_x_grid = _find_next_grid_1D(tp.x, v[0], bounds[0])
-    n_y_grid = _find_next_grid_1D(tp.y, v[1], bounds[1])
+    n_x_grid = _find_next_grid_1d(tp.x, v[0], bounds[0])
+    n_y_grid = _find_next_grid_1d(tp.y, v[1], bounds[1])
     if v[0] == 0.0:
         t_max_x = float('inf')
     else:
@@ -500,9 +501,9 @@ def _ray_voxel_traverse(bounds, start, end):
         if _is_point_in_mesh(bounds, tp):
             # the point is in the mesh
             # calculate the voxel id
-            x_idx = _find_voxel_idx_1D(bounds[0], tp.x, v[0])
-            y_idx = _find_voxel_idx_1D(bounds[1], tp.y, v[1])
-            z_idx = _find_voxel_idx_1D(bounds[2], tp.z, v[2])
+            x_idx = _find_voxel_idx_1d(bounds[0], tp.x, v[0])
+            y_idx = _find_voxel_idx_1d(bounds[1], tp.y, v[1])
+            z_idx = _find_voxel_idx_1d(bounds[2], tp.z, v[2])
             if -1 in (x_idx, y_idx, z_idx):
                 # point outside the mesh
                 return voxel_list
