@@ -250,7 +250,7 @@ def calc_e_eff(energy, eff_coeff, eff_fit=1):
     return eff
 #
 
-def read_SPEC_ID_file(spec_file_path):
+def read_spec_id_file(spec_file_path):
     """Reads a .spe file with the $SPEC_ID format
     """
     with open(spec_file_path, "r") as spec_file:
@@ -307,3 +307,4 @@ def read_SPEC_ID_file(spec_file_path):
     spectrum.calc_ebins()
     
     return spectrum
+
