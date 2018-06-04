@@ -12,6 +12,7 @@ from pyne import spectanalysis as sa
 
 gspec1 = gammaspec.read_spe_file('test.spe')
 gspec2 = gammaspec.read_dollar_spe_file("gv_format_spect.spe")
+gspec3 = gammaspec.read_spec_id_file("gv_format_spect.spe")
 eff_coeff = [-2.818615042612040000, -0.727352820018942000, -0.039579888648190400,
              -0.059230525466409600, 0.023772637347443000, 0.032530647507267100]
 
@@ -92,20 +93,20 @@ def test_net_count():
     nc=sa.net_counts(gspec1, 475, 484, 1)
 
 def test_read_spec_id_file():
-    assert_equal(gspec2.spec_name, "No sample description was entered.")
-    assert_equal(gspec2.file_name, "gv_format_spect.spe")
-    assert_equal(gspec2.real_time, 209)
-    assert_equal(gspec2.live_time, 199)
-    assert_equal(gspec2.start_time, "11:43:41")
-    assert_equal(gspec2.start_date, "08/01/2014")
-    assert_equal(gspec2.dead_time, 10.0)
-    assert_equal(gspec2.det_id, "2")
-    assert_equal(gspec2.det_descp, "DSPEC1")
-    assert_equal(gspec2.start_chan_num, 0)
-    assert_equal(gspec2.num_channels, 1024)
-    assert_equal(len(gspec2.channels), 1024)
-    assert_equal(len(gspec2.counts), 1024)
-    assert_equal(len(gspec2.ebin), 1024)
+    assert_equal(gspec3.spec_name, "No sample description was entered.")
+    assert_equal(gspec3.file_name, "gv_format_spect.spe")
+    assert_equal(gspec3.real_time, 209)
+    assert_equal(gspec3.live_time, 199)
+    assert_equal(gspec3.start_time, "11:43:41")
+    assert_equal(gspec3.start_date, "08/01/2014")
+    assert_equal(gspec3.dead_time, 10.0)
+    assert_equal(gspec3.det_id, "2")
+    assert_equal(gspec3.det_descp, "DSPEC1")
+    assert_equal(gspec3.start_chan_num, 0)
+    assert_equal(gspec3.num_channels, 1024)
+    assert_equal(len(gspec3.channels), 1024)
+    assert_equal(len(gspec3.counts), 1024)
+    assert_equal(len(gspec3.ebin), 1024)
 
 
 if __name__ == "__main__":
