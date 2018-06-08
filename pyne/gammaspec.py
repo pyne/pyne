@@ -7,7 +7,7 @@ from warnings import warn
 from pyne.utils import QAWarning
 
 import numpy as np
-
+import csv
 from pyne import spectanalysis
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
@@ -42,9 +42,10 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
     def write_csv(self,output_filename):
         """Writes energy, counts, and channel to csv file."""
         with open(output_filename, 'w') as f:
-            print('Energy (keV),Counts,Channel', file=f)
+            w = csv.writer(f)
+            w.writerow(['Energy (keV)','Counts','Channel'])
             for n, e, d in zip(self.energy_channel_fit,self.counts, self.channels):
-                print('{:},{:},{:}'.format(n, e, d) , file=f)
+                w.writerow([n,e,d])
                 
     def calc_energy_channel(self,max_energy_measured=1500):
         """Calculate the energy value for each channel as some .spe files 
