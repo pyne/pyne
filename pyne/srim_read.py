@@ -9,7 +9,7 @@ import numpy as np
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
-class srim():
+class srim(object):
     """srim class includes srim specific variables"""
 
     def __init__(self, ion='', ion_mass=0, target_density=0,
