@@ -32,6 +32,7 @@ def test_read_dollar_spe():
     assert_equal(len(gspec2.channels), 1024)
     assert_equal(len(gspec2.counts), 1024)
     assert_equal(len(gspec2.ebin), 1024)
+    assert_equal(len(gspec2.energy_channel_fit), 1024)
     
 def test_read_spe():
     assert_equal(gspec1.spec_name, "1K_MIX~1.SPC")
@@ -48,6 +49,7 @@ def test_read_spe():
     assert_equal(len(gspec1.channels), 1024)
     assert_equal(len(gspec1.counts), 1024)
     assert_equal(len(gspec1.ebin), 1024)
+    assert_equal(len(gspec1.energy_channel_fit), 1024)
     assert_equal(gspec1.counts[100], gspec2.counts[100])
 
     
@@ -107,7 +109,7 @@ def test_read_spec_id_file():
     assert_equal(len(gspec3.channels), 1024)
     assert_equal(len(gspec3.counts), 1024)
     assert_equal(len(gspec3.ebin), 1024)
-
+    assert_equal(len(gspec3.energy_channel_fit), 1024)
 
 if __name__ == "__main__":
     nose.runmodule()

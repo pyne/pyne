@@ -39,6 +39,20 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
         self.ebin = self.calib_e_fit[0] + (self.calib_e_fit[1] * channels) + \
                     (self.calib_e_fit[2] * channels ** 2)
 
+    def write_csv(self,output_filename):
+        """Writes energy, counts, and channel to csv file."""
+        with open(output_filename, 'w') as f:
+            print('Energy (keV),Counts,Channel', file=f)
+            for n, e, d in zip(self.energy_channel_fit,self.counts, self.channels):
+                print('{:},{:},{:}'.format(n, e, d) , file=f)
+                
+    def calc_energy_channel(self,max_energy_measured=1500):
+        """Calculate the energy value for each channel as some .spe files 
+            do not have proper calib_e_fit information.
+        """
+        channels = self.channels = np.asarray(self.channels, float)
+        self.energy_channel_fit = (max_energy_measured/len(channels))*channels
+        
     def __str__(self):
         """Print debug information"""
         print_string = ('Debug print of all header variables\n'
@@ -119,7 +133,7 @@ def read_dollar_spe_file(spec_file_path):
     spectrum.dead_time = spectrum.real_time - spectrum.live_time
     spectrum.channels = np.arange(0, len(spectrum.counts))
     spectrum.calc_ebins()
-
+    spectrum.calc_energy_channel()
     return spectrum
 
 def read_spe_file(spec_file_path):
@@ -200,6 +214,7 @@ def read_spe_file(spec_file_path):
     # calculate additional parameters based on .spe file
     spectrum.dead_time = spectrum.real_time - spectrum.live_time
     spectrum.calc_ebins()
+    spectrum.calc_energy_channel()
     return spectrum
 
 
@@ -305,6 +320,6 @@ def read_spec_id_file(spec_file_path):
     spectrum.dead_time = spectrum.real_time - spectrum.live_time
     spectrum.channels = np.arange(0, len(spectrum.counts))
     spectrum.calc_ebins()
-    
+    spectrum.calc_energy_channel()
     return spectrum
 
