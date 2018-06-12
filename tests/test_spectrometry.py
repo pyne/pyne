@@ -7,9 +7,9 @@ import warnings
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
-from pyne import gammaspec
+#from pyne import gammaspec
 from pyne import spectanalysis as sa
-
+from pyne import gammaspec
 gspec1 = gammaspec.read_spe_file('test.spe')
 gspec2 = gammaspec.read_dollar_spe_file("gv_format_spect.spe")
 gspec3 = gammaspec.read_spec_id_file("gv_format_spect.spe")
@@ -93,6 +93,14 @@ def test_gross_counts():
 
 def test_net_count():
     nc=sa.net_counts(gspec1, 475, 484, 1)
+
+def test_net_area():
+    nc=sa.net_area(gspec1, 475, 484)
+    assert_equal(nc, 20454.5)
+
+def test_end_point_average_area():
+    nc = sa.end_point_average_area(gspec1,475,484,var=5)
+    assert_equal(nc,20355.5) 
 
 def test_read_spec_id_file():
     assert_equal(gspec3.spec_name, "No sample description was entered.")

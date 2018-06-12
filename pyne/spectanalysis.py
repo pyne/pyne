@@ -146,8 +146,64 @@ def net_counts(spec, c1, c2, m):
     nc = gc - bg
     return nc
 
+def net_area(spec,c1,c2):
+    """Calcualtes the net area under a peak by subtracting background from total
+    counts under the peak. 
+    
+    Parameters
+    ----------
+    spec : a spectrum object
 
+    c1 : int
+        First channel of the peak
+    c2 : int
+        Second channel of the peak
+    Returns
+    -------
+    net_area: float
+        net area under the peak that is not background
+    Notes
+    ----
+    Counts list has to be iterated by the channel number, i.e. counts[300] is
+    counts at the 300th channel.
+    """
+    p = sum(spec.counts[c1:c2])
+    n = c2 - c1
+    count1 = spec.counts[c1]
+    count2 = spec.counts[c2]
+    net_area = p - ((n/2)*(count1+count2))
+    return net_area
 
-
-
+def end_point_average_area(spec,c1,c2,var=5):
+    """Calcualtes the net area under a peak by end point averaging the 
+    background counts and subtracting the background from total
+    counts under the peak. 
+    
+    Parameters
+    ----------
+    spec : a spectrum object
+     
+    c1 : int
+        First channel of the peak
+    c2 : int
+        Second channel of the peak
+    var : int
+        amount of channels to collect intial and final count averages from.
+    -------
+    end_point_average : float
+        net area under the peak that is not background counts
+    Notes
+    ----
+    Counts list has to be iterated by the channel number, i.e. counts[300] is
+    counts at the 300th channel.
+    var is preset to 5
+    """
+    p = sum(spec.counts[c1:c2])
+    n = c2 - c1
+    n1 = var
+    n2 = var
+    count1 = sum(spec.counts[c1-var:c1])
+    count2 = sum(spec.counts[c2:c2+var])
+    end_point_average = p - ((n/2)*((count1/n1)+(count2/n2)))
+    return end_point_average
 
