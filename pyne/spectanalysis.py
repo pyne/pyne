@@ -9,7 +9,11 @@ from pyne.utils import QAWarning
 
 
 import copy
-
+import numpy as np
+import pylab as plb
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from scipy import asarray as ar,exp
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 

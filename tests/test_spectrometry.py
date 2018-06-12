@@ -2,7 +2,6 @@
 import nose 
 from nose.tools import assert_equal, assert_true, assert_almost_equal, assert_raises
 
-import numpy as np
 import warnings
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
