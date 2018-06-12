@@ -207,3 +207,43 @@ def end_point_average_area(spec,c1,c2,var=5):
     end_point_average = p - ((n/2)*((count1/n1)+(count2/n2)))
     return end_point_average
 
+def gaussian_fit(spec,c1,c2):
+    """Plots the gaussian fit to the raw data. 
+    
+    Parameters
+    ----------
+    spec : a spectrum object
+     
+    c1 : int
+        First channel of the peak
+    c2 : int
+        Second channel of the peak
+    
+    Returns
+    -------
+    gaussian fit : plot or figure
+        Gaussian fit of channels versus counts data
+    
+    """   
+    x = spec.channels[c1:c2]
+    y = spec.counts[c1:c2]
+    n = len(x)
+    mean = sum(x*y)/n                   
+    sigma = np.sqrt(sum(y*(x-mean)**2)/n)
+    amp = max(y)
+    x_center = x.mean()
+    x_peak = x[list(y).index(max(y))]
+    def gauss(x,amp,x_center,sigma):
+        return amp*exp(-(x-x_center)**2/(2*sigma**2))
+    
+    popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2])
+    #po = # for [amp, cen, wid]
+    
+    plt.plot(x,y,'b*:',label='data')
+    plt.plot(x,gauss(x,*popt),'ro:',label='fit')
+    plt.legend()
+    plt.title('Gaussian fit' )
+    plt.xlabel('Channels')
+    plt.ylabel('Counts')
+    plt.show()
+
