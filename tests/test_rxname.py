@@ -148,11 +148,15 @@ def test_child():
     assert_equal(rxname.child(922350000, "absorption"), 922360000)
     assert_equal(rxname.child("Co58M", "gamma"), 270590000)
     assert_equal(rxname.child("Co58M", "gamma_1"), 270590001)
+    assert_equal(rxname.child("Co58M", "gamma_1", 'n'), 270590001)
+    assert_equal(rxname.child("Co58M", "gamma_1", b'n'), 270590001)
 
 
 def test_parent():
     assert_equal(rxname.parent("U235", "absorption"), 922340000)
     assert_equal(rxname.parent(922350000, "absorption"), 922340000)
+    assert_equal(rxname.parent(922350000, "absorption", 'n'), 922340000)
+    assert_equal(rxname.parent(922350000, "absorption", b'n'), 922340000)
 
 
 
