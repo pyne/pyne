@@ -240,7 +240,7 @@ def gaussian_fit(spec,c1,c2):
     x_center = x.mean()
     x_peak = x[list(y).index(max(y))]
     def gauss(x,amp,x_center,sigma):
-        return amp*exp(-(x-x_center)**2/(2*sigma**2))
+        return amp*np.exp(-(x-x_center)**2/(2*sigma**2))
     
     popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2])
     #po = # for [amp, cen, wid]
@@ -278,7 +278,7 @@ def fwhm(spec,c1,c2,k=3):
     amp = max(y)
     x_center = x.mean()
     def gauss(x,amp,x_center,sigma):
-        return amp*exp(-(x-x_center)**2/(2*sigma**2))  
+        return amp*np.exp(-(x-x_center)**2/(2*sigma**2))  
     popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2])
     #po = # for [amp, cen, wid]
     half_max = max(gauss(x,*popt))/2
