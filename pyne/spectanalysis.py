@@ -10,10 +10,10 @@ from pyne.utils import QAWarning
 
 import copy
 import numpy as np
-import pylab as plb
+import matplotlib
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from scipy import asarray as ar,exp
+from scipy.interpolate import splrep, sproot
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -193,6 +193,8 @@ def end_point_average_area(spec,c1,c2,var=5):
         Second channel of the peak
     var : int
         amount of channels to collect intial and final count averages from.
+    
+    Returns
     -------
     end_point_average : float
         net area under the peak that is not background counts
@@ -250,4 +252,38 @@ def gaussian_fit(spec,c1,c2):
     plt.xlabel('Channels')
     plt.ylabel('Counts')
     plt.show()
+    
+def fwhm(spec,c1,c2,k=3):
+    """Gives FWHM of a peak. 
+    
+    Parameters
+    ----------
+    spec : a spectrum object
+     
+    c1 : int
+        First channel of the peak
+    c2 : int
+        Second channel of the peak
+    k : int
+	The order of the spline fit 
+    Returns
+    -------
+    fwhm : int or float
+        FWHM of a peak.
+    
+    """   
+    x = np.array(spec.channels[c1:c2])
+    y = np.array(spec.counts[c1:c2])
+    n = len(x)                          #the number of data
+    amp = max(y)
+    x_center = x.mean()
+    def gauss(x,amp,x_center,sigma):
+        return amp*exp(-(x-x_center)**2/(2*sigma**2))  
+    popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2])
+    #po = # for [amp, cen, wid]
+    half_max = max(gauss(x,*popt))/2
+    s = splrep(x, y - half_max, k=k)
+    roots = sproot(s)
+    fwhm = roots[-1] - roots[0]
+    return fwhm
 

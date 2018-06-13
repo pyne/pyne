@@ -101,8 +101,8 @@ def test_end_point_average_area():
     nc = sa.end_point_average_area(gspec1,475,484,var=5)
     #assert_equal(nc,20355.5) 
 
-def test_gaussian_fit():
-    nc = sa.gaussian_fit(gspec1,475,484)
+def test_fwhm():
+    nc = sa.fwhm(gspec1,475,484,3)
 
 def test_read_spec_id_file():
     assert_equal(gspec3.spec_name, "No sample description was entered.")
