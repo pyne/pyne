@@ -94,11 +94,11 @@ def test_net_count():
 
 def test_net_area():
     nc=sa.net_area(gspec1, 475, 484)
-    assert_almost_equals(nc, 20454.5)
+    assert_almost_equal(nc, 20454.5)
 
 def test_end_point_average_area():
     nc = sa.end_point_average_area(gspec1,475,484,var=5)
-    assert_almost_equals(nc,20355.5) 
+    assert_almost_equal(nc,20355.5) 
 
 def test_fwhm():
     nc = sa.fwhm(gspec1,475,484,3)
