@@ -119,8 +119,6 @@ in a new terminal run the following conda install command::
 
     conda install -c conda-forge pyne
 
-where VERSION should be replaced with the version number to be installed.
-
 If you have any issues, please let us know.
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -9,8 +9,14 @@ import numpy as np
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
-class srim(object):
-    """srim class includes srim specific variables"""
+class Srim(object):
+    """Srim class includes varibles found in TRIM output files called srim files.
+    These variable include the ion tested, ion's mass, target density of the 
+    material tested, date of the test, bragg correction, file name, a list of 
+    ion energies, respective electric and nuclear stopping powers, 
+    projected ranges, units of the projected ranges, and lateral and 
+    longitudinal straggling.
+    """
 
     def __init__(self, ion='', ion_mass=0, target_density=0,
                  target_comp=None, date='', bragg_corr=0,
@@ -18,8 +24,41 @@ class srim(object):
                  ion_units=None,proj_ranges=None,proj_range_units=None,
                  long_straggs=None,long_stragg_units=None,lat_straggs=None,
                  lat_stragg_units=None):
-        """Define srim specific variables """
-        super(srim, self).__init__()
+        """Srim specific variables:  
+        ion: str
+            Name of the ion used in the trim/srim simulation
+        ion_mass: float
+            The ion's mass used in the trim/srim simulation
+        target_density: float
+            Density of the target in the trim/srim simulation
+        date: str
+            Date of the simulation
+        bragg_corr: float
+            Bragg correction written in the srim output file
+        filename: str
+            Path to the filename of the srim output file
+        ions: list of floats
+            List of the ion energies in the srim/trim simulation
+        stop_pow_electric: list  of floats
+            List of electric stopping powers 
+        stop_pow_nuclear: list  of floats
+            List of nuclear stopping powers
+        ion_units: list of str
+            List of the units of the ion's energies,varies per simulation
+        proj_ranges: list of floats
+            List of projected ranges for the ions
+        proj_range_units: list of str
+            Units of the ion's projected ranges 
+        long_straggs: list of floats
+            List of longitudinal straggling 
+        long_stragg_units: list of str
+            List of longitudinal straggling units 
+        lat_straggs: list of floats
+            List of lateral straggling 
+        lat_stragg_units: list of str
+            List of the lateral straggling units
+        """
+        super(Srim, self).__init__()
         self.ion = ion
         self.ion_mass = ion_mass
         self.target_density = target_density
@@ -61,7 +100,6 @@ class srim(object):
         return print_string
 
 def read_srim_output(filepath):
-    #def read_srim_output(file_path):
     """Reads a srim file 
     
     Parameters
@@ -81,7 +119,7 @@ def read_srim_output(filepath):
     file_split = full_file_text.splitlines()
     srim_file.close()
     
-    info = srim()
+    info = Srim()
     
     for item in file_split:
         if "Disk" in item:

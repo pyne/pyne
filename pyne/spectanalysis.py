@@ -151,7 +151,7 @@ def net_counts(spec, c1, c2, m):
     return nc
 
 def net_area(spec,c1,c2):
-    """Calcualtes the net area under a peak by subtracting background from total
+    """Calculates the net area under a peak by subtracting background from total
     counts under the peak. 
     
     Parameters
@@ -179,7 +179,7 @@ def net_area(spec,c1,c2):
     return net_area
 
 def end_point_average_area(spec,c1,c2,var=5):
-    """Calcualtes the net area under a peak by end point averaging the 
+    """Calculates the net area under a peak by end point averaging the 
     background counts and subtracting the background from total
     counts under the peak. 
     

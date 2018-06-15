@@ -6,7 +6,6 @@ import warnings
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
-#from pyne import gammaspec
 from pyne import spectanalysis as sa
 from pyne import gammaspec
 gspec1 = gammaspec.read_spe_file('test.spe')
@@ -95,11 +94,11 @@ def test_net_count():
 
 def test_net_area():
     nc=sa.net_area(gspec1, 475, 484)
-    #assert_equal(nc, 20454.5)
+    assert_almost_equals(nc, 20454.5)
 
 def test_end_point_average_area():
     nc = sa.end_point_average_area(gspec1,475,484,var=5)
-    #assert_equal(nc,20355.5) 
+    assert_almost_equals(nc,20355.5) 
 
 def test_fwhm():
     nc = sa.fwhm(gspec1,475,484,3)
