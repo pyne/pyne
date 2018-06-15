@@ -175,7 +175,7 @@ def net_area(spec,c1,c2):
     n = c2 - c1
     count1 = spec.counts[c1]
     count2 = spec.counts[c2]
-    net_area = p - ((n/2)*(count1+count2))
+    net_area = p - ((n/2.0)*(count1+count2))
     return net_area
 
 def end_point_average_area(spec,c1,c2,var=5):
@@ -210,7 +210,7 @@ def end_point_average_area(spec,c1,c2,var=5):
     n2 = var
     count1 = sum(spec.counts[c1-var:c1])
     count2 = sum(spec.counts[c2:c2+var])
-    end_point_average = p - ((n/2)*((count1/n1)+(count2/n2)))
+    end_point_average = p - ((n/2.0)*((count1/n1)+(count2/n2)))
     return end_point_average
 
 def gaussian_fit(spec,c1,c2):
