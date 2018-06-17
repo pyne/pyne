@@ -195,33 +195,33 @@ def step0(cfg, cfg2):
     # Define a flat, 175 group, neutron spectrum with magnitude 1E12 [n/cm^2.s]
     group_flux_magnitude = 1.0E12
     neutron_spectrum = group_flux_magnitude * np.ones(num_n_groups)
-    flux_magnitudes = np.array([np.sum(neutron_spectrum)])
 
     # Get materials from geometry file
     mat_lib = MaterialLibrary(geom)
-    mats = list(mat_lib.values())
-
-    eta_elements = True
-    if eta_elements:
-        # Calculate eta for each element in the material library
-        elements = Set([ ])
-        for m, mat in enumerate(mat_lib.keys()):
-            # Collapse elements in the material
-            mat_collapsed = mats[m].collapse_elements([])
-            element_list = mat_collapsed.comp.keys()
-            elements.update(element_list)
-        # Create PyNE material object per elements    
-        for element in elements:
-            mat_element = Material({element: 1.0})
-            mat_element.metadata['name'] = 'mat:%s' %nucname.name(element)
-            mat_element.density = 1.0
-            mats.append(mat_element)
+    num_mats = len(mat_lib.keys())
+    
+    # Calculate eta for each element in the material library
+    elements = Set([ ])
+    for mat in list(mat_lib.keys()):
+        # Collapse elements in the material
+        mat_collapsed = mat_lib[mat].collapse_elements([])
+        element_list = mat_collapsed.comp.keys()
+        elements.update(element_list)
+    # Create PyNE material library of elements
+    element_lib = MaterialLibrary()
+    for element in elements:
+        mat_element = Material({element: 1.0})
+        mat_element_name = "mat:{}".format(nucname.name(element))
+        mat_element.metadata['name'] = mat_element_name
+        mat_element.density = 1.0
+        # Add element to the material library
+        element_lib[mat_element_name] = mat_element
     
     # Perform SNILB check and calculate eta
     run_dir = 'step0'
     # Get the photon energy bin structure
     p_bins = _get_p_bins(num_p_groups)
-    eta = calc_eta(data_dir, mats, neutron_spectrum, flux_magnitudes, irr_times,
+    eta = calc_eta(data_dir, mat_lib, element_lib, neutron_spectrum, irr_times,
                    decay_times, num_p_groups, p_bins, run_dir, clean)
     np.set_printoptions(threshold=np.nan)
     
@@ -232,12 +232,9 @@ def step0(cfg, cfg2):
         for m, mat in enumerate(mat_lib.keys()):
             f.write('{0}, eta={1} \n'.format(mat.split(':')[1], eta[m, :, -1]))
         # Write eta value per element in the material library
-        if eta_elements:
-            f.write('------ \nTotal eta value per element: \n------ \n')
-            mat_count = len(mat_lib.keys())
-            for m, mat in enumerate(elements):
-                f.write('{0}, eta={1} \n'.format(nucname.name(mat), eta[m + mat_count,
-                                                                        :, -1]))
+        f.write('------ \nTotal eta value per element: \n------ \n')
+        for m, mat in enumerate(element_lib.keys()):
+            f.write('{0}, eta={1} \n'.format(mat.split(':')[1], eta[m + num_mats, :, -1]))
             
 def step1(cfg, cfg1):
     """ 
