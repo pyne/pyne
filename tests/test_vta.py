@@ -8,8 +8,8 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne import vta
 import numpy as np
+from pyne import vta
 
 
 def test_ray_voxel_traverse():

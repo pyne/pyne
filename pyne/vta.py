@@ -1,3 +1,19 @@
+"""Purpose:
+
+This module provides a modified ray traverse method, which is modifed based on
+http://www.cse.yorku.ca/~amana/research/grid.pdf, to calculate the voxels
+intersect with a given ray (line segment).
+Several rays are used to calculate the voxels that intersect with the facet.
+A series of rays are constructed based on both the facet and the mesh grid to
+make sure all the wanted voxels will be found. Combining all the found voxels
+for each ray, we get the voxels intersect with the facet.
+
+These voxels will be used to construct the bounding volume for source sampling.
+But currently these functions are separate from MOAB. Interface of MOAB with
+PyNE is still in need.
+
+.. moduleauthor:: X. Zhang
+"""
 from __future__ import division
 import math
 
