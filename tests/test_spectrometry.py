@@ -126,7 +126,7 @@ def test_calc_energy_poly():
     c1,c2,c3 = 860,250,50
     e1,e2,e3 = 662,200,40 
     gspec4.calc_energy_poly(c1,c2,c3,e1,e2,e3)
-    assert_equal(gspec4.epoly[2], 0.973600485731636)
+    assert_almost_equal(gspec4.epoly[2], 0.973600485731636)
     
 if __name__ == "__main__":
     nose.runmodule()
