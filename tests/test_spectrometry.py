@@ -11,6 +11,7 @@ from pyne import gammaspec
 gspec1 = gammaspec.read_spe_file('test.spe')
 gspec2 = gammaspec.read_dollar_spe_file("gv_format_spect.spe")
 gspec3 = gammaspec.read_spec_id_file("gv_format_spect.spe")
+gspec4 = gammaspec.read_spec_id_file("gv_format_spect2.spe")
 eff_coeff = [-2.818615042612040000, -0.727352820018942000, -0.039579888648190400,
              -0.059230525466409600, 0.023772637347443000, 0.032530647507267100]
 
@@ -101,7 +102,8 @@ def test_end_point_average_area():
     assert_almost_equal(nc,20355.5) 
 
 def test_fwhm():
-    nc = sa.fwhm(gspec1,475,484,3)
+    nc = sa.fwhm(gspec4,750,950,3)
+    assert_almost_equal(nc, 72.6131488820804)
 
 def test_read_spec_id_file():
     assert_equal(gspec3.spec_name, "No sample description was entered.")
@@ -120,5 +122,11 @@ def test_read_spec_id_file():
     assert_equal(len(gspec3.ebin), 1024)
     assert_equal(len(gspec3.energy_channel_fit), 1024)
 
+def test_calc_energy_poly():
+    c1,c2,c3 = 860,250,50
+    e1,e2,e3 = 662,200,40 
+    gspec4.calc_energy_poly(c1,c2,c3,e1,e2,e3)
+    assert_equal(gspec4.epoly[2], 0.973600485731636)
+    
 if __name__ == "__main__":
     nose.runmodule()

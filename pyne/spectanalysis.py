@@ -1,8 +1,6 @@
 """Purpose:
-
-  This module is for spectrometry analysis
-  will have functions for general spectrum processing
-
+This module is for spectrometry analysis
+will have functions for general spectrum processing
 """
 from warnings import warn
 from pyne.utils import QAWarning
@@ -244,7 +242,6 @@ def gaussian_fit(spec,c1,c2):
     
     popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2])
     #po = # for [amp, cen, wid]
-    
     plt.plot(x,y,'b*:',label='data')
     plt.plot(x,gauss(x,*popt),'ro:',label='fit')
     plt.legend()
@@ -274,14 +271,13 @@ def fwhm(spec,c1,c2,k=3):
     """   
     x = np.array(spec.channels[c1:c2])
     y = np.array(spec.counts[c1:c2])
-    n = len(x)                          #the number of data
+    n = len(x)                          
     amp = max(y)
     x_center = x.mean()
     def gauss(x,amp,x_center,sigma):
-        return amp*np.exp(-(x-x_center)**2/(2*sigma**2))  
-    popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2])
-    #po = # for [amp, cen, wid]
-    half_max = max(gauss(x,*popt))/2
+        return amp*np.exp(-(x-x_center)**2/(2.0*sigma**2))  
+    popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2.0])
+    half_max = max(gauss(x,*popt))/2.0
     s = splrep(x, y - half_max, k=k)
     roots = sproot(s)
     fwhm = roots[-1] - roots[0]

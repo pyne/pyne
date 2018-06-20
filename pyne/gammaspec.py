@@ -54,6 +54,21 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
         channels = self.channels = np.asarray(self.channels, float)
         self.energy_channel_fit = (max_energy_measured/len(channels))*channels
         
+    def calc_energy_poly(self,c1,c2,c3,e1,e2,e3):
+        """Calculate the energy values from channels by solving linear equation 
+            relationship between three channels and their respective energy
+            value."""
+        channels = self.channels = np.asarray(self.channels, float)
+        mat = np.array(
+                [[c1**2,c1,1,e1],
+                 [c2**2,c2,1,e2],
+                 [c3**2,c3,1,e3]])
+        A = mat[0:3,:-1]
+        b = mat[0:3, -1]
+        x = np.linalg.solve(A, b)
+        print(str(x[0]) +'x^2' +' '+ str(x[1])+'x' +' '+ str(x[2]))        
+        self.epoly = (x[0] * (channels ** 2 )) +(x[1] * channels) + x[2]
+        
     def __str__(self):
         """Print debug information"""
         print_string = ('Debug print of all header variables\n'
