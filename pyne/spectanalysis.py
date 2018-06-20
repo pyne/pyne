@@ -283,3 +283,19 @@ def fwhm(spec,c1,c2,k=3):
     fwhm = roots[-1] - roots[0]
     return fwhm
 
+def resolution(fwhm,e_0):
+    """Gives resolution of a peak. 
+    
+    Parameters
+    ----------
+    fwhm : float
+        Full Width Half Maximum of peak
+     e_0 : int
+        Peak centroid energyt 
+    Returns
+    -------
+    res : float
+        Resolution of a peak.
+    """   
+    res = fwhm/float(e_0)
+    return(res)

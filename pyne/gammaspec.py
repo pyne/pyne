@@ -66,6 +66,7 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
         A = mat[0:3,:-1]
         b = mat[0:3, -1]
         x = np.linalg.solve(A, b)
+        self.epoly_fit = [x[0],x[1],x[2]]
         self.epoly_eq =  (str(x[0]) +'x^2' +' + ' + str(x[1])+'x' +' + ' + str(x[2]))        
         self.epoly = (x[0] * (channels ** 2 )) +(x[1] * channels) + x[2]
         
