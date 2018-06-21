@@ -234,8 +234,8 @@ def step0(cfg, cfg2):
             f.write('{0}, eta={1} \n'.format(mat[0].split(':')[1], eta[m, :, -1]))
         # Write eta value per element in the material library
         f.write('------ \nTotal eta value per element: \n------ \n')
-        for m, element in enumerate(elements):
-            f.write('{0}, eta={1} \n'.format(element[0].split(':')[1], eta[m + num_mats, :, -1]))
+        for e, element in enumerate(elements):
+            f.write('{0}, eta={1} \n'.format(element[0].split(':')[1], eta[e + num_mats, :, -1]))
             
 def step1(cfg, cfg1):
     """ 
