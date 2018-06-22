@@ -198,13 +198,12 @@ def step0(cfg, cfg2):
     # Get materials from geometry file
     mat_lib = MaterialLibrary(geom)
     mats = mat_lib.items()
-    num_mats = len(mats)
     
     # Calculate eta for each element in the material library
     elements = Set([ ])
-    for name, value in mats:
+    for mat in mats:
         # Collapse elements in the material
-        mat_collapsed = value.collapse_elements([])
+        mat_collapsed = mat[1].collapse_elements([])
         element_list = mat_collapsed.comp.keys()
         elements.update(element_list)
     # Create PyNE material library of elements
@@ -216,14 +215,16 @@ def step0(cfg, cfg2):
         mat_element.density = 1.0
         # Add element to the material library
         element_lib[mat_element_name] = mat_element
-        
-    elements = element_lib.items()
+    # Add elements to mats    
+    mats.extend(element_lib.items())
+    num_mats = len(mats)
+    
     # Perform SNILB check and calculate eta
     run_dir = 'step0'
     # Get the photon energy bin structure
     p_bins = _get_p_bins(num_p_groups)
-    eta = calc_eta(data_dir, mats, num_mats, elements, neutron_spectrum, num_n_groups, irr_time,
-                   decay_times, p_bins, num_p_groups, run_dir, clean)
+    eta = calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time, decay_times,
+                   p_bins, num_p_groups, run_dir, clean)
     np.set_printoptions(threshold=np.nan)
     
     # Save eta arrays to numpy arrays
@@ -232,11 +233,7 @@ def step0(cfg, cfg2):
     with open('step0_eta.txt', 'w') as f:
         for m, mat in enumerate(mats):
             f.write('{0}, eta={1} \n'.format(mat[0].split(':')[1], eta[m, :, -1]))
-        # Write eta value per element in the material library
-        f.write('------ \nTotal eta value per element: \n------ \n')
-        for e, element in enumerate(elements):
-            f.write('{0}, eta={1} \n'.format(element[0].split(':')[1], eta[e + num_mats, :, -1]))
-            
+
 def step1(cfg, cfg1):
     """ 
     This function writes the PARTISN input file for the adjoint photon transport.   
