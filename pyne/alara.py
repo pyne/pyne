@@ -931,13 +931,13 @@ def _gt_write_fluxin(fluxes, num_n_groups, num_mats):
         Formatted ALARA fluxin
     """
     # Order flux groups from high to low for ALARA fluxin inp
-    fluxes = np.fliplr(fluxes[:,:])
+    fluxes_reversed = np.fliplr(fluxes[:,:])
     fluxin = ""
     for m in range(num_mats):
         for n in range(num_n_groups + 2):
             num_decimals = 6
             num_entries_per_line = 7
-            fluxin += _gt_format(fluxes[n,:], num_decimals, num_entries_per_line)            
+            fluxin += _gt_format(fluxes_reversed[n,:], num_decimals, num_entries_per_line)            
             fluxin += '\n'
     return fluxin
 
