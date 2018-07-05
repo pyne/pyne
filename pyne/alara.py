@@ -1217,4 +1217,3 @@ def calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
     
     return eta, phtn_src_file
     
-

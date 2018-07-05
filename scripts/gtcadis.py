@@ -233,6 +233,13 @@ def step0(cfg, cfg2):
     elements = element_lib.items()
     num_elements = len(elements)
     
+    # Perform SNILB check and calculate eta
+    run_dir = 'step0'
+    # Get the photon energy bin structure
+    p_bins = _get_p_bins(num_p_groups)
+    eta = calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time, decay_times,
+                   p_bins, num_p_groups, run_dir, clean)
+    
     # Perform SNILB check and calculate eta for unique elements in the geometry
     run_dir = 'step0/elements'
     if not os.path.exists(run_dir):
