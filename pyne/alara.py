@@ -1145,7 +1145,7 @@ def _gt_alara(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time
     return phtn_src_file
 
 def calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time, decay_times, p_bins,
-             num_p_groups, run_dir, clean):
+             num_p_groups, run_dir):
     """
     Function that returns eta values (SNILB check result) for each material/element and each decay time
     
@@ -1156,7 +1156,7 @@ def calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
     mats: list
         List of tuples, (<mat name>, <PyNE material object>)
     num_mats: int
-        Number of materials in mat_lib
+        Number of materials in mats
     neutron_spectrum : numpy array
         Neutron energy spectrum (length is equal to number of num_n_groups)
     num_n_groups: int
@@ -1171,27 +1171,27 @@ def calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
         Number of photon energy groups for ALARA calculation
     run_dir: str
         Path to write ALARA input and output files    
-    clean : bool
-        If True, remove run_dir
         
     Returns
     ----------
-    eta : numpy array
+    eta: numpy array
         eta value per photon group for each material listed.  
         This is a 3D array [mat, decay_time, num_p_groups + 1]
+    phtn_src_file: str
+        Path to ALARA produced photon source file
     """
     num_decay_times = len(decay_times)
     
     # Run ALARA
-    if not os.path.exists(run_dir):
-        os.makedirs(run_dir)    
     phtn_src_file = _gt_alara(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
                               decay_times, num_decay_times, p_bins, num_p_groups, run_dir)
     # Parse ALARA output
     # Create an array to store results from photn_src file
-    num_rows = num_mats * (num_n_groups + 2) * num_decay_times
+    entries_per_material = (num_n_groups + 2) * num_decay_times
+    num_rows = num_mats * entries_per_material
+    # one for each group and last column for a total
     num_columns = num_p_groups + 1
-    p_sources = np.zeros((num_rows, num_columns))
+    p_sources = np.zeros(shape=(num_rows, num_columns))
     with open(phtn_src_file, 'r') as f:
         # Initiate a block number
         i = 0
@@ -1200,6 +1200,7 @@ def calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
             if l[0] == "TOTAL" and l[1] != "shutdown":
                 row = np.array([float(x) for x in l[3:]])
                 p_sources[i, :-1] = row[:]
+                # Total emission intensity over all groups
                 p_sources[i, -1] = np.sum(row)
                 i += 1
                 
@@ -1215,9 +1216,4 @@ def calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
     eta[np.isnan(eta)] = 1.0
     eta[np.isinf(eta)] = 1.0E10
     
-    # Copy phtn_src file to main directory to be used for Step 2           
-    shutil.copy(phtn_src_file, 'step0_phtn_src')
-    if clean:
-        print("Deleting intermediate files for Step 0")
-        shutil.rmtree(run_dir)  
-    return eta
+    return eta, phtn_src_file

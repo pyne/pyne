@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import io
+import os
 import yaml
+import shutil
 import argparse
 import numpy as np
 from sets import Set
@@ -25,7 +27,7 @@ general:
     # Number of photon energy groups (24 or 42), default is 42.
     p_groups: 42
     # Number of neutron energy groups. Default is 175.
-    n_groups: 175 
+    n_groups: 175
 
 # Optional step to assess all materials in geometry for compatibility with
 # SNILB criteria.
@@ -198,8 +200,20 @@ def step0(cfg, cfg2):
     # Get materials from geometry file
     mat_lib = MaterialLibrary(geom)
     mats = mat_lib.items()
-    
-    # Calculate eta for each element in the material library
+    num_mats = len(mats)
+
+    # Perform SNILB check and calculate eta for each material in the geometry
+    run_dir = 'step0/mats'
+    if not os.path.exists(run_dir):
+        os.makedirs(run_dir)                    
+    # Get the photon energy bin structure
+    p_bins = _get_p_bins(num_p_groups)
+    eta, psrc_file = calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
+                              decay_times, p_bins, num_p_groups, run_dir)
+    # Copy phtn_src file to main directory to be used for Step 2
+    shutil.copy(psrc_file, 'step0_phtn_src')
+
+    # Perform SNILB check and calculate eta for each element in the material library
     elements = Set([ ])
     for mat in mats:
         # Collapse elements in the material
@@ -214,26 +228,34 @@ def step0(cfg, cfg2):
         mat_element.metadata['name'] = mat_element_name
         mat_element.density = 1.0
         # Add element to the material library
-        element_lib[mat_element_name] = mat_element
+        element_lib[mat_element_name] = mat_element.expand_elements()
     # Add elements to mats    
-    mats.extend(element_lib.items())
-    num_mats = len(mats)
+    elements = element_lib.items()
+    num_elements = len(elements)
     
-    # Perform SNILB check and calculate eta
-    run_dir = 'step0'
-    # Get the photon energy bin structure
-    p_bins = _get_p_bins(num_p_groups)
-    eta = calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time, decay_times,
-                   p_bins, num_p_groups, run_dir, clean)
+    # Perform SNILB check and calculate eta for unique elements in the geometry
+    run_dir = 'step0/elements'
+    if not os.path.exists(run_dir):
+        os.makedirs(run_dir)             
+    eta_element, psrc_file = calc_eta(data_dir, elements, num_elements, neutron_spectrum, num_n_groups,
+                                      irr_time, decay_times, p_bins, num_p_groups, run_dir)
     np.set_printoptions(threshold=np.nan)
-    
+
     # Save eta arrays to numpy arrays
     np.save('step0_eta.npy', eta)
+    np.save('step0_eta_element.npy', eta_element)
     # Write a list of material names and eta values to a text file
     with open('step0_eta.txt', 'w') as f:
         for m, mat in enumerate(mats):
             f.write('{0}, eta={1} \n'.format(mat[0].split(':')[1], eta[m, :, -1]))
+        f.write('------ \nTotal eta value per unique element: \n------ \n')
+        for e, element in enumerate(elements):
+            f.write('{0}, eta={1} \n'.format(element[0].split(':')[1], eta_element[e, :, -1]))
 
+    if clean:
+        print("Deleting intermediate files for Step 0")
+        shutil.rmtree(run_dir)
+            
 def step1(cfg, cfg1):
     """ 
     This function writes the PARTISN input file for the adjoint photon transport.   
@@ -318,7 +340,7 @@ def step1(cfg, cfg1):
         data_hdf5path="/materials",
         nuc_hdf5path="/nucid",
         fine_per_coarse=1)
-
+               
 def main():
     """ 
     This function manages the setup and steps 1-5 for the GT-CADIS workflow.
@@ -329,9 +351,9 @@ def main():
     setup_help = ('Prints the file "config.yml" to be filled in by the user.\n')
     step0_help = ('Performs SNILB criteria check.')
     step1_help = ('Creates the PARTISN input file for adjoint photon transport.')
+    
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help=gtcadis_help, dest='command')
-
     setup_parser = subparsers.add_parser('setup', help=setup_help)
     step0_parser = subparsers.add_parser('step0', help=step0_help)
     step1_parser = subparsers.add_parser('step1', help=step1_help)
@@ -345,9 +367,8 @@ def main():
             
     if args.command == 'step0':
         step0(cfg['general'], cfg['step2'])
-
     elif args.command == 'step1':
-        step1(cfg['general'], cfg['step1'])
+        step1(cfg['general'], cfg['step1'])   
 
 if __name__ == '__main__':
     main()
