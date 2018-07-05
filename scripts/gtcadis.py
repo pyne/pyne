@@ -213,7 +213,7 @@ def step0(cfg, cfg2):
     # Copy phtn_src file to main directory to be used for Step 2
     shutil.copy(psrc_file, 'step0_phtn_src')
 
-    # Perform SNILB check and calculate eta for each element in the material library
+    # Create a list of unique elements in the geometry
     elements = Set([ ])
     for mat in mats:
         # Collapse elements in the material
@@ -232,13 +232,6 @@ def step0(cfg, cfg2):
     # Add elements to mats    
     elements = element_lib.items()
     num_elements = len(elements)
-    
-    # Perform SNILB check and calculate eta
-    run_dir = 'step0'
-    # Get the photon energy bin structure
-    p_bins = _get_p_bins(num_p_groups)
-    eta = calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time, decay_times,
-                   p_bins, num_p_groups, run_dir, clean)
     
     # Perform SNILB check and calculate eta for unique elements in the geometry
     run_dir = 'step0/elements'
