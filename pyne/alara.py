@@ -924,8 +924,7 @@ def _gt_write_fluxin(fluxes, num_n_groups, num_mats):
     num_n_groups: int
         Number of neutron energy groups
     num_mats: int
-        Number of materials in ALARA input = number of materials + number of unique elements
-        in the problem geometry
+        Number of materials in ALARA input = number of materials in the problem geometry
 
     Returns:
     fluxin: str
@@ -936,11 +935,13 @@ def _gt_write_fluxin(fluxes, num_n_groups, num_mats):
     fluxin = ""
     for m in range(num_mats):
         for n in range(num_n_groups + 2):
-            fluxin += _gt_format(fluxes[n,:], 6)            
+            num_decimals = 6
+            num_entries_per_line = 7
+            fluxin += _gt_format(fluxes[n,:], num_decimals, num_entries_per_line)            
             fluxin += '\n'
     return fluxin
 
-def _gt_format(vector, decimals):
+def _gt_format(vector, decimals, columns):
     """
     Function that formats a vector of elements into a string for ALARA input file
     
@@ -950,6 +951,8 @@ def _gt_format(vector, decimals):
         1D array of values to be formatted into a string
     decimals: int
         Number of decimal points in the formatted numbers
+    columns: int
+        Number of elements per line
 
     Returns
     -------
@@ -959,7 +962,7 @@ def _gt_format(vector, decimals):
     string = ""
     for i, v in enumerate(vector):
         string += "{0:.{1}E} ".format(v, decimals)
-        if (i + 1) % 7 == 0:
+        if (i + 1) % columns == 0:
             string += '\n'
     return string
             
@@ -1058,8 +1061,11 @@ dump_file $run_dir/dump_file
     # Flux input
     flux = "flux flux_inp {0} {1} 0 default".format(fluxin_file, flux_norm)
     # Photon energy bin structure
+    # Precisoin and number of values per line of the photon groups
+    decimals = 2
+    entries_per_line = 8
     p_groups = "photon_source {0}/fendl2.0bin {1} {2}\n{3}".format(data_dir, phtn_src_file, num_p_groups,
-                                                                   _gt_format(p_bins, 2))
+                                                                   _gt_format(p_bins, decimals, entries_per_line))
     # Irradiation schedule input
     irr = "    {0} s flux_inp my_schedule 0 s".format(irr_time)
     # Decay times input
@@ -1110,7 +1116,7 @@ def _gt_alara(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time
     flux_norm = np.linalg.norm(neutron_spectrum, ord=1)
     if flux_norm > 0:
         # Normalize neutron spectrum
-        neutron_spectrum /= flux_norm
+        n_spectrum = neutron_spectrum[:] / flux_norm
 
     # Write matlib file
     matlib_file = os.path.join(run_dir, "matlib")
@@ -1122,9 +1128,9 @@ def _gt_alara(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time
     fluxin_file = os.path.join(run_dir, "fluxin")
     fluxes = np.zeros((num_n_groups + 2, num_n_groups))
     for n in range(num_n_groups):
-        fluxes[n, n] = neutron_spectrum[n]
+        fluxes[n, n] = n_spectrum[n]
     # Add total spectrum. Leave last row all zeros, blank "zero" spectrum    
-    fluxes[num_n_groups, :] = neutron_spectrum[:]
+    fluxes[num_n_groups, :] = n_spectrum[:]
     # Total number of materials in ALARA input file
     with open(fluxin_file, 'w') as f:
         alara_fluxin = _gt_write_fluxin(fluxes, num_n_groups, num_mats)

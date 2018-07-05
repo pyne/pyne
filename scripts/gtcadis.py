@@ -213,7 +213,7 @@ def step0(cfg, cfg2):
     # Copy phtn_src file to main directory to be used for Step 2
     shutil.copy(psrc_file, 'step0_phtn_src')
 
-    # Perform SNILB check and calculate eta for each element in the material library
+    # Create a list of unique elements in the geometry
     elements = Set([ ])
     for mat in mats:
         # Collapse elements in the material
