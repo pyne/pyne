@@ -869,25 +869,39 @@ def _convert_unit_to_s(dc):
 
 def _find_phsrc_dc(idc, phtn_src_dc):
     """
-    This function return a string representing a time in phsrc_dc.
+    This function returns a string representing a time in phsrc_dc.
+
     Parameters
     ----------
-    idc : string. Represent a time, input decay time
-    phtn_src_dc : list of string. Decay times in phtn_src file.
+    idc : string
+        Represents a time, input decay time
+    phtn_src_dc : list of strings
+        Decay times in phtn_src file
 
-    return : odc, string. output mathched decay time.
-    """ 
+    Returns
+    -------
+    string from phtn_src_dc list that mathches idc
+    """
+    # Check the existence of idc in phtn_src_dc list.
     if idc in phtn_src_dc:
-        # if idc exist in phtn_src_dc, directly return idc
         return idc
+    # Direct matching cannot be found. Convert units to [s] and compare.
     else:
-        # the idc doesn't exist in phtn_src_dc, convert the unit to `s`,
+        # convert idc to [s]
         idc_s = _convert_unit_to_s(idc)
-        phtn_src_dc_s = []
-        for i, dc in enumerate(phtn_src_dc):
+        # Loop over decay times in phtn_src_dc list and compare to idc_s.
+        for dc in phtn_src_dc:
+            # Skip "shutdown" string in list.
+            if dc == 'shutdown':
+                continue
+            # Convert to [s].
             dc_s = _convert_unit_to_s(dc)
-            if (abs(idc_s - dc_s)/dc_s) < 1e-6:
-                return phtn_src_dc[i]
+            if idc_s == dc_s:
+                # idc_s matches dc_s. return original string, dc.
+                return dc
+            elif dc_s != 0.0 and (abs(idc_s - dc_s)/dc_s) < 1e-6:
+                return dc
+        # if idc doesn't match any string in phtn_src_dc list, raise an error.    
         raise ValueError('Decay time {0} not found in phtn_src file'.format(idc)) 
 
 
