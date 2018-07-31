@@ -16,7 +16,11 @@ try:
 except NameError:
     basestring = str
 
-from pyne.mesh import Mesh, MeshError
+from pyne.mesh import Mesh, MeshError, HAVE_PYTAPS
+
+if HAVE_PYTAPS:
+    from pyne.mesh import iBase, iMesh, iMeshExtensions
+    
 from pyne.material import Material, from_atom_frac
 from pyne import nucname
 from pyne.nucname import serpent, alara, znum, anum
