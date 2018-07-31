@@ -37,18 +37,15 @@ from pyne.binaryreader import _BinaryReader, _FortranRecord
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
-try:
-    from itaps import iMesh
-    HAVE_PYTAPS = True
-except ImportError:
-    warn("the PyTAPS optional dependency could not be imported. "
-                  "All aspects of the partisn module are not imported.",
-                  QAWarning)
-    HAVE_PYTAPS = False
+from pyne.mesh import HAVE_PYTAPS
 
 if HAVE_PYTAPS:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
     from pyne import dagmc
+else:
+    warn("the PyTAPS optional dependency could not be imported. "
+         "All aspects of the partisn module are not imported.",
+         QAWarning)
 
 def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     """This function reads a material-laden geometry file and a pre-made PyNE 

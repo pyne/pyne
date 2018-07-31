@@ -13,9 +13,11 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
     from itaps import iMesh, iBase, iMeshExtensions
+    HAVE_PYTAPS = True
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", QAWarning)
+    HAVE_PYTAPS = False
 
 from pyne.material import Material, MaterialLibrary, MultiMaterial
 
