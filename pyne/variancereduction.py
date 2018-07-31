@@ -13,7 +13,9 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 from pyne.mesh import HAVE_PYTAPS
 
 
-if not HAVE_PYTAPS:
+if HAVE_PYTAPS:
+    from pyne.mesh import iBase, iMesh, iMeshExtensions
+else:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the variance reduction module may be incomplete.",
          QAWarning)
