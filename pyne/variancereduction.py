@@ -10,9 +10,9 @@ import numpy as np
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-try:
-    from itaps import iMesh, iBase, iMeshExtensions
-except ImportError:
+from pyne.mesh import HAVE_PYTAPS
+
+if not HAVE_PYTAPS:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the variance reduction module may be incomplete.",
          QAWarning)

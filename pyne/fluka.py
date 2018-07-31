@@ -17,17 +17,14 @@ from warnings import warn
 from pyne.utils import QAWarning
 
 # Mesh specific imports
-try:
-    from itaps import iMesh
-    HAVE_PYTAPS = True
-except ImportError:
+from pyne.mesh import HAVE_PYTAPS
+
+if HAVE_PYTAPS:
+    from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
+else:
     warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of the mcnp module may be incomplete.",
-                  QAWarning)
-    HAVE_PYTAPS = False
-
-from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
-
+         "Some aspects of the fluka module may be incomplete.",
+         QAWarning)
 
 class Usrbin(object):
     """This class is the wrapper class for UsrbinTally. This class stores

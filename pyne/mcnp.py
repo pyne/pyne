@@ -32,16 +32,13 @@ from pyne.binaryreader import _BinaryReader, _FortranRecord
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
-try:
-    from itaps import iMesh
-    HAVE_PYTAPS = True
-except ImportError:
+from pyne.mesh import HAVE_PYTAPS
+if HAVE_PYTAPS:
+    from pyne.mesh import Mesh, StatMesh, IMeshTag
+else:
     warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of the mcnp module may be incomplete.",
-                  QAWarning)
-    HAVE_PYTAPS = False
-
-from pyne.mesh import Mesh, StatMesh, IMeshTag
+         "Some aspects of the mcnp module may be incomplete.",
+         QAWarning)
 
 if sys.version_info[0] > 2:
     def cmp(a, b):

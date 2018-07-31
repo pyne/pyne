@@ -16,13 +16,6 @@ try:
 except NameError:
     basestring = str
 
-try:
-    from itaps import iMesh, iBase, iMeshExtensions
-except ImportError:
-    warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of the alara module may be incomplete.",
-                  QAWarning)
-
 from pyne.mesh import Mesh, MeshError
 from pyne.material import Material, from_atom_frac
 from pyne import nucname
