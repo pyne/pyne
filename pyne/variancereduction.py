@@ -14,7 +14,7 @@ from pyne.mesh import HAVE_PYTAPS
 
 
 if HAVE_PYTAPS:
-    from pyne.mesh import iBase, iMesh, iMeshExtensions
+    from pyne.mesh import iBase, iMesh, iMeshExtensions, iterate_wrapper
 else:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the variance reduction module may be incomplete.",
@@ -66,16 +66,12 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     """
 
     # find number of energy groups
-    e_groups = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[list(
-                adj_flux_mesh.mesh.iterate(iBase.Type.region,
-                                           iMesh.Topology.all))[0]]
+    e_groups = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[list(iterate_wrapper(adj_flux_mesh.mesh))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
 
     # verify source (q) mesh has the same number of energy groups
-    q_e_groups = q_mesh.mesh.getTagHandle(q_tag)[list(
-                  q_mesh.mesh.iterate(iBase.Type.region,
-                                      iMesh.Topology.all))[0]]
+    q_e_groups = q_mesh.mesh.getTagHandle(q_tag)[list(iterate_wrapper(q_mesh.mesh))[0]]
     q_e_groups = np.atleast_1d(q_e_groups)
     num_q_e_groups = len(q_e_groups)
 
@@ -86,8 +82,8 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
                                                                q_mesh, q_tag))
 
     # create volume element (ve) iterators
-    adj_ves = adj_flux_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
-    q_ves = q_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+    adj_ves = iterate_wrapper(adj_flux_mesh.mesh)
+    q_ves = iterate_wrapper(q_mesh.mesh)
 
     # calculate total source strength
     q_tot = 0
@@ -111,9 +107,9 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
 
     # generate weight windows and biased source densities using R
     tag_ww = ww_mesh.mesh.createTag(ww_tag, num_e_groups, float)
-    ww_ves = ww_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+    ww_ves = iterate_wrapper(ww_mesh.mesh)
     tag_q_bias = q_bias_mesh.mesh.createTag(q_bias_tag, num_e_groups, float)
-    q_bias_ves = q_bias_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+    q_bias_ves = iterate_wrapper(q_bias_mesh.mesh)
     # reset previously created iterators
     q_ves.reset()
     adj_ves.reset()
