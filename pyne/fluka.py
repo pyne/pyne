@@ -17,10 +17,11 @@ from warnings import warn
 from pyne.utils import QAWarning
 
 # Mesh specific imports
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import Mesh, StatMesh, MeshError
 
+from pyne.mesh import HAVE_PYTAPS
 if HAVE_PYTAPS:
-    from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
+    from pyne.mesh import IMeshTag
 else:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the fluka module may be incomplete.",
