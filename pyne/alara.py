@@ -407,7 +407,7 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     """This function reads the materials of a PyNE mesh object and prints the
     geometry and materials portion of an ALARA input file, as well as a
     corresponding matlib file. If the mesh is structured, xyz ordering is used
-    (z changing fastest). If the mesh is unstructured iMesh.iterate order is
+    (z changing fastest). If the mesh is unstructured the mesh_iterate order is
     used.
 
     Parameters
