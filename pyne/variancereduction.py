@@ -14,7 +14,7 @@ from pyne.mesh import HAVE_PYTAPS
 
 
 if HAVE_PYTAPS:
-    from pyne.mesh import iBase, iMesh, iMeshExtensions, iterate_wrapper
+    from pyne.mesh import iterate_wrapper
 else:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the variance reduction module may be incomplete.",
