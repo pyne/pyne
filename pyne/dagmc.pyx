@@ -22,7 +22,9 @@ if sys.version_info[0] >= 3:
 
 # Mesh specific imports
 from pyne.mesh import HAVE_PYTAPS
-if not HAVE_PYTAPS:
+if HAVE_PYTAPS:
+    from pyne.mesh import iMesh
+else:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of dagmc module may be incomplete",
          QAWarning)
