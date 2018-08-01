@@ -1408,5 +1408,6 @@ class StatMesh(Mesh):
         return mesh_1
 
 if HAVE_PYTAPS:
-    def mesh_iterate(mesh, mesh_type = iBase.Type.region, topo_type = iMesh.Topology.all):
+    def mesh_iterate(mesh, mesh_type = iBase.Type.region,
+                     topo_type = iMesh.Topology.all):
         return mesh.iterate(mesh_type, topo_type)    
