@@ -45,7 +45,7 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         rays. If true, a grid of sqrt(num_rays) x sqrt(num_rays) rays is used
         for each mesh row.
     flux_tag : str, optional
-        The iMesh tag for the neutron flux.
+        The mesh tag for the neutron flux.
     fluxin : str, optional
         The name of the ALARA fluxin file to be created.
     reverse : bool, optional
@@ -141,7 +141,7 @@ def photon_sampling_setup(mesh, phtn_src, tags):
     Parameters
     ----------
     mesh : PyNE Mesh
-       The object containing the iMesh instance to be tagged.
+       The object containing the mesh instance to be tagged.
     phtn_src : str
         The path of the ALARA phtn_file.
     tags: dict
