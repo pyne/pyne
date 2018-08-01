@@ -21,12 +21,11 @@ if sys.version_info[0] >= 3:
     unichr = chr
 
 # Mesh specific imports
-try:
-    from itaps import iMesh
-except ImportError:
+from pyne.mesh import HAVE_PYTAPS
+if not HAVE_PYTAPS:
     warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of dagmc module may be incomplete",
-                  QAWarning)
+         "Some aspects of dagmc module may be incomplete",
+         QAWarning)
 
 # Globals
 VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid
