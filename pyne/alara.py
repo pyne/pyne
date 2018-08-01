@@ -19,7 +19,7 @@ except NameError:
 from pyne.mesh import Mesh, MeshError, HAVE_PYTAPS
 
 if HAVE_PYTAPS:
-    from pyne.mesh import iBase, iMesh, iMeshExtensions, iterate_wrapper
+    from pyne.mesh import iterate_wrapper
     
 from pyne.material import Material, from_atom_frac
 from pyne import nucname
