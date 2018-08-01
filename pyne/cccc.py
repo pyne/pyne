@@ -651,17 +651,13 @@ class Rtflux(object):
              The tag name to use to tag the fluxes onto the mesh.
         """
 
-        try:
-            from itaps import iMesh
-            HAVE_PYTAPS = True
-        except ImportError:
-            warn("the PyTAPS optional dependency could not be imported. "
-                          "All aspects of the partisn module are not imported.",
-                          QAWarning)
-            HAVE_PYTAPS = False
-        
+        from pyne.mesh import HAVE_PYTAPS
         if HAVE_PYTAPS:
             from pyne.mesh import Mesh, IMeshTag
+        else:
+            warn("the PyTAPS optional dependency could not be imported. "
+                 "All aspects of the partisn module are not imported.",
+                 QAWarning)
 
         if not m.structured:
             raise ValueError("Only structured mesh is supported.")
