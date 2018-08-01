@@ -14,6 +14,7 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 try:
     from itaps import iMesh, iBase, iMeshExtensions
     HAVE_PYTAPS = True
+
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", QAWarning)
@@ -1405,3 +1406,7 @@ class StatMesh(Mesh):
                              other.mesh.getTagHandle(tag)[ve_2])
 
         return mesh_1
+
+if HAVE_PYTAPS:
+    def iterate_wrapper(mesh, mesh_type = iBase.Type.region, topo_type = iMesh.Topology.all):
+        return mesh.iterate(mesh_type, topo_type)    
