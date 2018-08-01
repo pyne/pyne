@@ -19,7 +19,7 @@ except NameError:
 from pyne.mesh import Mesh, MeshError, HAVE_PYTAPS
 
 if HAVE_PYTAPS:
-    from pyne.mesh import iBase, iMesh, iMeshExtensions
+    from pyne.mesh import iBase, iMesh, iMeshExtensions, iterate_wrapper
     
 from pyne.material import Material, from_atom_frac
 from pyne import nucname
@@ -74,9 +74,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
 
     # find number of e_groups
-    e_groups = flux_mesh.mesh.getTagHandle(flux_tag)[list(
-        flux_mesh.mesh.iterate(iBase.Type.region,
-                               iMesh.Topology.all))[0]]
+    e_groups = flux_mesh.mesh.getTagHandle(flux_tag)[list(iterate_wrapper(flux_mesh.mesh))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
 
