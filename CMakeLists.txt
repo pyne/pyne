@@ -80,7 +80,8 @@ MESSAGE("-- MOAB Root: ${MOAB_ROOT}")
 find_package(MOAB)
 message("-- MOAB Found: ${MOAB_FOUND}")
 if(${MOAB_FOUND})
-  include_directories(${MOAB_INCLUDE_DIR})
+  include_directories(${MOAB_INCLUDE_DIRS})
+#  include_directories("/usr/include/eigen3/")
   get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
   if(APPLE)
     link_directories(${MOAB_LIBRARY_DIRS}/lib)
@@ -88,6 +89,19 @@ if(${MOAB_FOUND})
     link_directories(${MOAB_LIBRARY_DIRS})
   endif(APPLE)
 endif(${MOAB_FOUND})
+
+
+# Find DAGMC library
+if(NOT DAGMC_ROOT)
+  set(DAGMC_ROOT "${DEPS_ROOT_DIR}")
+endif()
+MESSAGE("-- DAGMC Root: ${DAGMC_ROOT}")
+find_package(DAGMC)
+message("-- DAGMC Found: ${DAGMC_FOUND}")
+if(${DAGMC_FOUND})
+  include_directories(${DAGMC_INCLUDE_DIRS})
+  link_directories(${DAGMC_LIBRARY_DIRS})
+endif(${DAGMC_FOUND})
 
 
 # Find Python

@@ -48,21 +48,19 @@ const int* geom_id_list(int dimension, int* number_of_items) {
 }
 
 EntityHandle handle_from_id(int dimension, int id) {
-    return DagMC::instance()->entity_by_id(dimension, id);
+    return DAG->entity_by_id(dimension, id);
 }
 
 int id_from_handle(EntityHandle eh) {
-    return DagMC::instance()->get_entity_id(eh);
+    return DAG->get_entity_id(eh);
 }
 
 ErrorCode dag_load(const char* filename){
     ErrorCode err;
 
-    DagMC* dag = DagMC::instance();
-
-    err = dag->load_file(filename);
+    err = DAG->load_file(filename);
     CHECKERR(err);
-    err = dag->init_OBBTree();
+    err = DAG->init_OBBTree();
     CHECKERR(err);
 
     std::vector<std::string> metadata_keys;
@@ -75,19 +73,19 @@ ErrorCode dag_load(const char* filename){
     metadata_synonyms["rest.of.world"] = "graveyard";
     metadata_synonyms["outside.world"] = "graveyard";
 
-    err = dag->parse_properties(metadata_keys, metadata_synonyms);
+    err = DAG->parse_properties(metadata_keys, metadata_synonyms);
     CHECKERR(err);
 
-    int num_surfs = dag->num_entities(2);
+    int num_surfs = DAG->num_entities(2);
     surfList.reserve(num_surfs);
     for(int i = 1; i <= num_surfs; ++i) {
-        surfList.push_back(dag->id_by_index(2, i));
+        surfList.push_back(DAG->id_by_index(2, i));
     }
 
-    int num_vols = dag->num_entities(3);
+    int num_vols = DAG->num_entities(3);
     volList.reserve(num_vols);
     for(int i = 1; i <= num_vols; ++i) {
-        volList.push_back(dag->id_by_index(3, i));
+        volList.push_back(DAG->id_by_index(3, i));
     }
 
     return err;
@@ -107,7 +105,7 @@ ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir,
                         void* history, double distance_limit) {
     ErrorCode err;
 
-    DagMC*  dag = DagMC::instance();
+    DagMC*  dag = DAG;
 
     err = dag->ray_fire(vol, ray_start, ray_dir, *next_surf_ent, *next_surf_dist, 
                          static_cast<DagMC::RayHistory*>(history), distance_limit);
@@ -133,7 +131,7 @@ ErrorCode dag_ray_follow(EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
 
     ray_buffers* buf = new ray_buffers;
     ErrorCode err;
-    DagMC* dag = DagMC::instance();
+    DagMC* dag = DAG;
 
     EntityHandle vol = firstvol;
     double dlimit = distance_limit;
@@ -182,7 +180,7 @@ ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, const 
     
     ErrorCode err;
 
-    DagMC* dag = DagMC::instance();
+    DagMC* dag = DAG;
     
     err = dag->point_in_volume(vol, pt, *result, dir, static_cast<const DagMC::RayHistory*>(history));
 
@@ -192,7 +190,7 @@ ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, const 
 ErrorCode dag_next_vol(EntityHandle surface, EntityHandle volume, EntityHandle* next_vol) {
 
     ErrorCode err;
-    DagMC* dag = DagMC::instance();
+    DagMC* dag = DAG;
 
     err = dag->next_vol(surface, volume, *next_vol);
 
@@ -200,19 +198,19 @@ ErrorCode dag_next_vol(EntityHandle surface, EntityHandle volume, EntityHandle* 
 }
 
 int vol_is_graveyard(EntityHandle vol) {
-    return DagMC::instance()->has_prop(vol, "graveyard");
+    return DAG->has_prop(vol, "graveyard");
 }
 
 /* int surf_is_spec_refl(EntityHandle surf); */
 /* int surf_is_white_refl(EntityHandle surf); */
 
 int vol_is_implicit_complement(EntityHandle vol){
-    return DagMC::instance()->is_implicit_complement(vol);
+    return DAG->is_implicit_complement(vol);
 }
 
 ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, double* importance) {
     ErrorCode err;
-    DagMC* dag = DagMC::instance();
+    DagMC* dag = DAG;
 
     // the defaults from DagMC's old get_volume_metadata: mat = 0, rho = 0, imp = 1
     int mat_id = 0;
@@ -253,7 +251,7 @@ ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, 
 }
 
 ErrorCode get_volume_boundary(EntityHandle vol, vec3 minPt, vec3 maxPt) {
-    return DagMC::instance()->getobb(vol, minPt, maxPt);
+    return DAG->getobb(vol, minPt, maxPt);
 }
 
 } // namespace pyne
