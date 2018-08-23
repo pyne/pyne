@@ -12,7 +12,7 @@ import tables as tb
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
-    from itaps import iMesh, iBase, iMeshExtensions
+#    from itaps import iMesh, iBase, iMeshExtensions
     HAVE_PYTAPS = True
 
 except ImportError:
@@ -20,7 +20,13 @@ except ImportError:
          "Some aspects of the mesh module may be incomplete.", QAWarning)
     HAVE_PYTAPS = False
 
-from pyne.material import Material, MaterialLibrary, MultiMaterial
+#from pyne.material import Material, MaterialLibrary, MultiMaterial
+
+from pymoab import core, hcoord, scd, types
+from pymoab.rng import subtract
+from pymoab.tag import Tag
+
+_BOX_DIMS_TAG_NAME = "BOX_DIMS"
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -567,7 +573,6 @@ class MeshError(Exception):
     """
     pass
 
-
 class Mesh(object):
     """This class houses an iMesh instance and contains methods for various mesh
     operations. Special methods exploit the properties of structured mesh.
@@ -632,31 +637,40 @@ class Mesh(object):
 
         """
         if mesh is None:
-            self.mesh = iMesh.Mesh()
+            self.mesh = core.Core()
         elif isinstance(mesh, basestring):
-            self.mesh = iMesh.Mesh()
-            self.mesh.load(mesh)
+            self.mesh = core.Core()
+            self.mesh.load_file(mesh)
         else:
             self.mesh = mesh
 
         self.structured = structured
 
         if self.structured:
+            self.scd = scd.ScdInterface(self.mesh)
             self.structured_coords = structured_coords
             self.structured_ordering = structured_ordering
+            # if a MOAB mesh instance exists and no structured coords
+            # or structured set is provided, search for a single
+            # structured set
+
+            ##### TO-DO: SHOULD BE REPLACED WITH scd.find_boxes AT SOME POINT #####
             if (mesh is not None) and not structured_coords \
                and not structured_set:
+                # check for the structured box tag on the instance
                 try:
-                    self.mesh.getTagHandle("BOX_DIMS")
-                except iBase.TagNotFoundError as e:
-                    print("BOX_DIMS not found on iMesh instance")
+                    box_tag = self.mesh.tag_get_handle(_BOX_DIMS_TAG_NAME)
+                except types.MB_TAG_NOT_FOUND as e:
+                    print("BOX_DIMS not found on MOAB mesh instance")
                     raise e
 
+                # find all entity sets with the structured box tag
                 count = 0
-                for ent_set in self.mesh.rootSet.getEntSets():
+                root_set = self.mesh.get_root_set()
+                for ent_set in self.mesh.get_entities_by_type(root_set, types.MBENTITYSET):
                     try:
-                        self.mesh.getTagHandle("BOX_DIMS")[ent_set]
-                    except iBase.TagNotFoundError:
+                        self.mesh.tag_get_data(box_tag, ent_set)
+                    except:
                         pass
                     else:
                         self.structured_set = ent_set
@@ -669,18 +683,35 @@ class Mesh(object):
                     raise MeshError("Found {0} structured meshes."
                                     " Instantiate individually using"
                                     " from_ent_set()".format(count))
+
             # from coordinates
             elif (mesh is None) and structured_coords and not structured_set:
                 extents = [0, 0, 0] + [len(x) - 1 for x in structured_coords]
-                self.structured_set = self.mesh.createStructuredMesh(
-                     extents, i=structured_coords[0], j=structured_coords[1],
-                     k=structured_coords[2], create_set=True)
+                low = hcoord.HomCoord([0,0,0])
+                high = hcoord.HomCoord([len(x) - 1 for x in structured_coords])
+                ### TO-DO: generation of explicit vertex coords could be more efficient ###
+                coords = []
+                for z in range(low[2], high[2]+1):
+                    for y in range(low[1], high[1]+1):
+                        for x in range(low[0], high[0]+1):
+                           coords.append(structured_coords[0][x])
+                           coords.append(structured_coords[1][y])
+                           coords.append(structured_coords[2][z])
+                scd_box = self.scd.construct_box(low, high, coords)
+                self.structured_set = scd_box.box_set()
 
-            # From mesh and structured_set:
+            # from mesh and structured_set:
             elif not structured_coords and structured_set:
+                # check for the structured box tag on the instance
                 try:
-                    self.mesh.getTagHandle("BOX_DIMS")[structured_set]
-                except iBase.TagNotFoundError as e:
+                    box_tag = self.mesh.tag_get_handle(_BOX_DIMS_TAG_NAME)
+                except types.MB_TAG_NOT_FOUND as e:
+                    print("BOX_DIMS not found on MOAB mesh instance")
+                    raise e
+
+                try:
+                    self.mesh.tag_get_data(box_tag, structured_set)
+                except:
                     print("Supplied entity set does not contain BOX_DIMS tag")
                     raise e
 
@@ -688,12 +719,14 @@ class Mesh(object):
             else:
                 raise MeshError("For structured mesh instantiation, need to"
                                 "supply exactly one of the following:\n"
-                                "A. iMesh instance\n"
+                                "A. PyMOAB instance\n"
                                 "B. Mesh file\n"
                                 "C. Mesh coordinates\n"
-                                "D. Structured entity set AND iMesh instance")
+                                "D. Structured entity set AND PyMOAB instance")
 
-            self.dims = self.mesh.getTagHandle("BOX_DIMS")[self.structured_set]
+            self.dims = list(self.mesh.tag_get_data(self.mesh.tag_get_handle("BOX_DIMS"),
+                                                    self.structured_set, flat = True))
+
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
 
@@ -719,66 +752,26 @@ class Mesh(object):
 
         if mats is None:
             pass
-        elif len(mats) == 0 and not mats_in_mesh_file:
-            mats = MaterialLibrary()
-        elif not isinstance(mats, MaterialLibrary):
-            mats = MaterialLibrary(mats)
+        # elif len(mats) == 0 and not mats_in_mesh_file:
+        #     mats = MaterialLibrary()
+        # elif not isinstance(mats, MaterialLibrary):
+        #     mats = MaterialLibrary(mats)
 
-        self.mats = mats
+        self.mats = None
 
         # tag with volume id and ensure mats exist.
         ves = list(self.iter_ve())
-        tags = self.mesh.getAllTags(ves[0])
-        tags = set(tag.name for tag in tags)
-        if 'idx' in tags:
-            tag_idx = self.mesh.getTagHandle('idx')
-        else:
-            tag_idx = self.mesh.createTag('idx', 1, int)
-        for i, ve in enumerate(ves):
-            tag_idx[ve] = i
-            if mats is not None and i not in mats:
-                mats[i] = Material()
-        self._len = i + 1
+        tags = self.mesh.tag_get_tags_on_entity(ves[0])
+        tag_idx = self.mesh.tag_get_handle('idx', 1,
+                                           types.MB_TYPE_INTEGER,
+                                           types.MB_TAG_DENSE,
+                                           create_if_missing = True)
 
-        # Default tags
-        self.tags = {}
-        if mats is not None:
-            # metadata tags, these should come first so they don't accidentally
-            # overwite hard coded tag names.
-            metatagnames = set()
-            for mat in mats.values():
-                metatagnames.update(mat.metadata.keys())
-            for name in metatagnames:
-                setattr(self, name, MetadataTag(mesh=self, name=name))
-        # iMesh.Mesh() tags
-        tagnames = set()
-        for ve in ves:
-            tagnames.update(t.name for t in self.mesh.getAllTags(ve))
-        for name in tagnames:
-            setattr(self, name, IMeshTag(mesh=self, name=name))
-        if mats is not None:
-            # Material property tags
-            self.atoms_per_molecule = MaterialPropertyTag(mesh=self,
-                                      name='atoms_per_molecule',
-                                      doc='Number of atoms per molecule')
-            self.metadata = MaterialPropertyTag(mesh=self, name='metadata',
-                            doc='metadata attributes, stored on the material')
-            self.comp = MaterialPropertyTag(mesh=self, name='comp',
-                        doc='normalized composition mapping from nuclides to '
-                            'mass fractions')
-            self.mass = MaterialPropertyTag(mesh=self, name='mass',
-                                            doc='the mass of the material')
-            self.density = MaterialPropertyTag(mesh=self, name='density',
-                                               doc='the density [g/cc]')
-            # Material method tags
-            methtagnames = ('expand_elements', 'mass_density',
-                            'molecular_mass', 'mult_by_mass',
-                            'number_density', 'sub_act', 'sub_fp',
-                            'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
-            for name in methtagnames:
-                doc = "see Material.{0}() for more information".format(name)
-                setattr(self, name, MaterialMethodTag(mesh=self, name=name,
-                        doc=doc))
+        for i, ve in enumerate(ves):
+            self.mesh.tag_set_data(tag_idx, ve, i)
+            # if mats is not None and i not in mats:
+            #     mats[i] = Material()
+        self._len = i + 1
 
 
     def __len__(self):
@@ -797,15 +790,13 @@ class Mesh(object):
                 yield i, mats[i], ve
 
     def iter_ve(self):
-        """Returns an iterator that yields on the volume elements.
-        """
         if self.structured:
-            return self.structured_iterate_hex(self.structured_ordering)
+            return meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBHEX)
         else:
-            return self.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+            return self.mesh.get_entities_by_dimension(self.mesh.get_root_set(), 3, True)                
 
     def __contains__(self, i):
-        return i < len(self)
+        return 1 < len(self)
 
     def __setattr__(self, name, value):
         if isinstance(value, Tag) and hasattr(value, '_lazy_args'):
@@ -815,74 +806,6 @@ class Mesh(object):
             kwargs['name'] = name if kwargs['name'] is None else kwargs['name']
             value = type(value)(**kwargs)
         super(Mesh, self).__setattr__(name, value)
-
-    def tag(self, name, value=None, tagtype=None, doc=None, size=None,
-            dtype=None):
-        """Adds a new tag to the mesh, guessing the approriate place to store
-        the data.
-
-        Parameters
-        ----------
-        name : str
-            The tag name
-        value : optional
-            The value to initialize the tag with, skipped if None.
-        tagtype : Tag or str, optional
-            The type of tag this should be any of the following classes or
-            strings are accepted: IMeshTag, MetadataTag, ComputedTag, 'imesh',
-            'metadata', or 'computed'.
-        doc : str, optional
-            The tag documentation string.
-        size : int, optional
-            The size of the tag. This only applies to IMeshTags.
-        dtype : numpy dtype, optional
-            The data type of the tag. This only applies to IMeshTags. See PyTAPS
-            for more details.
-
-        """
-        if name in self.tags:
-            raise KeyError('{0} tag already exists on the mesh'.format(name))
-        if tagtype is None:
-            if callable(value):
-                tagtype = ComputedTag
-            elif size is None and dtype is not None:
-                size = 1
-                tagtype = IMeshTag
-            elif size is not None and dtype is None:
-                dtype = 'f8'
-                tagtype = IMeshTag
-            elif value is None:
-                size = 1
-                value = 0.0
-                dtype = 'f8'
-                tagtype = IMeshTag
-            elif isinstance(value, float):
-                size = 1
-                dtype = 'f8'
-                tagtype = IMeshTag
-            elif isinstance(value, int):
-                size = 1
-                dtype = 'i'
-                tagtype = IMeshTag
-            elif isinstance(value, str):
-                tagtype = MetadataTag
-            elif isinstance(value, _SEQUENCE_TYPES):
-                raise ValueError('ambiguous tag {0!r} creation when value is a'
-                                 ' sequence, please set tagtype, size, '
-                                 'or dtype'.format(name))
-            else:
-                tagtype = MetadataTag
-        if tagtype is IMeshTag or tagtype.lower() == 'imesh':
-            t = IMeshTag(size=size, dtype=dtype, mesh=self, name=name, doc=doc)
-        elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
-            t = MetadataTag(mesh=self, name=name, doc=doc)
-        elif tagtype is ComputedTag or tagtype.lower() == 'computed':
-            t = ComputedTag(f=value, mesh=self, name=name, doc=doc)
-        else:
-            raise ValueError('tagtype {0} not valid'.format(tagtype))
-        if value is not None and tagtype is not ComputedTag:
-            t[:] = value
-        setattr(self, name, t)
 
     def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
@@ -919,40 +842,37 @@ class Mesh(object):
             mesh_1 = self
         else:
             mesh_1 = copy.copy(self)
-
         for tag in tags:
             for ve_1, ve_2 in \
-                zip(zip(iter(mesh_1.mesh.iterate(iBase.Type.region,
-                    iMesh.Topology.all))),
-                    zip(iter(other.mesh.iterate(iBase.Type.region,
-                        iMesh.Topology.all)))):
-                self.mesh.getTagHandle(tag)[ve_1] = \
-                    _ops[op](mesh_1.mesh.getTagHandle(tag)[ve_1],
-                             other.mesh.getTagHandle(tag)[ve_2])
+                zip(zip(iter(meshset_iterate(mesh_1.mesh, mesh_1.structured_set, types.MBMAXTYPE, dim = 3))),
+                    zip(iter(meshset_iterate( other.mesh,  other.structured_set, types.MBMAXTYPE, dim = 3)))):
+                mesh_1_tag = mesh_1.mesh.tag_get_handle(tag)
+                other_tag  = other.mesh.tag_get_handle(tag)
+                val = _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat = True)[0],
+                         other.mesh.tag_get_data(other_tag,   ve_2, flat = True)[0])
+                mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1,
+                    _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat = True)[0],
+                             other.mesh.tag_get_data(other_tag,   ve_2, flat = True)[0]))
 
         return mesh_1
-
+    
     def common_ve_tags(self, other):
         """Returns the volume element tags in common between self and other.
         """
-        self_tags = self.mesh.getAllTags(list(self.mesh.iterate(
-                                         iBase.Type.region,
-                                         iMesh.Topology.all))[0])
-        other_tags = other.mesh.getAllTags(list(other.mesh.iterate(
-                                           iBase.Type.region,
-                                           iMesh.Topology.all))[0])
-        self_tags = set(x.name for x in self_tags)
-        other_tags = set(x.name for x in other_tags)
+        self_tags = self.mesh.tag_get_tags_on_entity(list(meshset_iterate(self.mesh, self.structured_set, types.MBMAXTYPE, dim = 3))[0])
+        other_tags = other.mesh.tag_get_tags_on_entity(list(meshset_iterate(other.mesh, other.structured_set, types.MBMAXTYPE, dim = 3))[0])
+        self_tags = set(x.get_name() for x in self_tags)
+        other_tags = set(x.get_name() for x in other_tags)
         intersect = self_tags & other_tags
         intersect.discard('idx')
         return intersect
-
+        
     def __copy__(self):
         # first copy full imesh instance
-        imesh_copy = iMesh.Mesh()
+        pymb_copy = core.Core()
 
         # now create Mesh objected from copied iMesh instance
-        mesh_copy = Mesh(mesh=imesh_copy,
+        mesh_copy = Mesh(mesh=pymb_copy,
                          structured=copy.copy(self.structured))
         return mesh_copy
 
@@ -972,11 +892,12 @@ class Mesh(object):
         .. : float
             Element's volume. Returns None if volume is not a hex or tet.
         """
-        coord = self.mesh.getVtxCoords(
-                self.mesh.getEntAdj(ve, iBase.Type.vertex))
-        if len(coord) == 4:
+        coord = self.mesh.get_coords(self.mesh.get_connectivity(ve)).reshape(-1,3)
+        num_coords = coord.shape[0]
+
+        if num_coords == 4:
             return abs(np.linalg.det(coord[:-1] - coord[1:])) / 6.0
-        elif len(coord) == 8:
+        elif num_coords == 8:
             b = coord[np.array([[0, 1, 3, 4], [7, 3, 6, 4], [4, 5, 1, 6],
                                 [1, 6, 3, 4], [2, 6, 3, 1]])]
             return np.sum(np.abs(np.linalg.det(b[:, :-1] - b[:, 1:]))) / 6.0
@@ -997,8 +918,7 @@ class Mesh(object):
         center : tuple
            The (x, y, z) coordinates of the center of the mesh volume element.
         """
-        coords = self.mesh.getVtxCoords(
-                  self.mesh.getEntAdj(ve, iBase.Type.vertex))
+        coords = self.mesh.get_coords(self.mesh.get_connectivity(ve)).reshape(-1,3)
         center = tuple([np.mean(coords[:, x]) for x in range(3)])
         return center
 
@@ -1008,16 +928,14 @@ class Mesh(object):
         self._structured_check()
         n = _structured_find_idx(self.vertex_dims, (i, j, k))
         return _structured_step_iter(
-            self.structured_set.iterate(iBase.Type.vertex,
-                                        iMesh.Topology.point), n)
+            meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBVERTEX), n)
 
     def structured_get_hex(self, i, j, k):
         """Return the handle for the (i,j,k)'th hexahedron in the mesh"""
         self._structured_check()
         n = _structured_find_idx(self.dims, (i, j, k))
         return _structured_step_iter(
-            self.structured_set.iterate(iBase.Type.region,
-                                        iMesh.Topology.hexahedron), n)
+            meshset_iterate(self.mesh, self.structured_set, types.MBHEX, 3), n)
 
     def structured_hex_volume(self, i, j, k):
         """Return the volume of the (i,j,k)'th hexahedron in the mesh"""
@@ -1025,10 +943,14 @@ class Mesh(object):
         v = list(self.structured_iterate_vertex(x=[i, i + 1],
                                                 y=[j, j + 1],
                                                 z=[k, k + 1]))
-        coord = self.mesh.getVtxCoords(v)
-        dx = coord[1][0] - coord[0][0]
-        dy = coord[2][1] - coord[0][1]
-        dz = coord[4][2] - coord[0][2]
+        handle = self.structured_get_hex(i,j,k)
+        h = self.mesh.get_connectivity([handle,])
+        coord = self.mesh.get_coords(list(h))
+        coord = coord.reshape(8,3)
+        # assumes a "well-behaved" hex element
+        dx = max(coord[:,0]) - min(coord[:,0])
+        dy = max(coord[:,1]) - min(coord[:,1])
+        dz = max(coord[:,2]) - min(coord[:,2])
         return dx * dy * dz
 
     def structured_iterate_hex(self, order="zyx", **kw):
@@ -1077,13 +999,14 @@ class Mesh(object):
         # so we can save time by simply returning a pytaps iterator
         # if no kwargs were specified
         if order == "zyx" and not kw:
-            return self.structured_set.iterate(iBase.Type.region,
-                                               iMesh.Topology.hexahedron)
+            return meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBHEX, dim = 3)
 
         indices, ordmap = _structured_iter_setup(self.dims, order, **kw)
         return _structured_iter(indices, ordmap, self.dims,
-                self.structured_set.iterate(iBase.Type.region,
-                                            iMesh.Topology.hexahedron))
+                                meshset_iterate(self.mesh,
+                                                self.structured_set,
+                                                entity_type = types.MBHEX,
+                                                dim = 3))
 
     def structured_iterate_vertex(self, order="zyx", **kw):
         """Get an iterator over the vertices of the mesh
@@ -1094,13 +1017,11 @@ class Mesh(object):
         self._structured_check()
         # special case: zyx order without kw is equivalent to pytaps iterator
         if order == "zyx" and not kw:
-            return self.structured_set.iterate(iBase.Type.vertex,
-                                               iMesh.Topology.point)
+            return meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBVERTEX)
 
         indices, ordmap = _structured_iter_setup(self.vertex_dims, order, **kw)
         return _structured_iter(indices, ordmap, self.vertex_dims,
-                self.structured_set.iterate(iBase.Type.vertex,
-                                            iMesh.Topology.point))
+                                meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBVERTEX))
 
     def structured_iterate_hex_volumes(self, order="zyx", **kw):
         """Get an iterator over the volumes of the mesh hexahedra
@@ -1120,7 +1041,7 @@ class Mesh(object):
             ordmap = [order.find(L) for L in "xyz"]
             ijk = [A[ordmap[x]] for x in range(3)]
             yield self.structured_hex_volume(*ijk)
-
+    
     def iter_structured_idx(self, order=None):
         """Return an iterater object of volume element indexes (idx) for any
         iteration order. Note that idx is assigned upon instantiation in the
@@ -1138,10 +1059,10 @@ class Mesh(object):
             order = self.structured_ordering
 
         ves = self.structured_iterate_hex(order)
-        tag = self.mesh.getTagHandle('idx')
-        for ve in ves:
-            yield tag[ve]
-
+        tag = self.mesh.tag_get_handle('idx')
+        for val in self.mesh.tag_get_data(tag, ves, flat = True):
+            yield val
+            
     def structured_get_divisions(self, dim):
         """Get the mesh divisions on a given dimension
 
@@ -1149,13 +1070,14 @@ class Mesh(object):
         along that dimension.
         """
         self._structured_check()
+        
         if len(dim) == 1 and dim in "xyz":
             idx = "xyz".find(dim)
-            return [self.mesh.getVtxCoords(i)[idx]
-                    for i in self.structured_iterate_vertex(dim)]
+            return [self.mesh.get_coords(v)[idx] for v in self.structured_iterate_vertex(dim)]
+        
         else:
             raise MeshError("Invalid dimension: {0}".format(str(dim)))
-
+           
     def _structured_check(self):
         if not self.structured:
             raise MeshError("Structured mesh methods cannot be called from "\
@@ -1163,115 +1085,58 @@ class Mesh(object):
 
     def write_hdf5(self, filename):
         """Writes the mesh to an hdf5 file."""
-        self.mesh.save(filename)
+        self.mesh.write_file(filename)
         if self.mats is not None:
             self.mats.write_hdf5(filename)
 
-    def cell_fracs_to_mats(self, cell_fracs, cell_mats):
-        """This function uses the output from dagmc.discretize_geom() and
-        a mapping of geometry cells to Materials to assign materials
-        to each mesh volume element.
 
-        Parameters
-        ----------
-        cell_fracs : structured array
-            The output from dagmc.discretize_geom(). A sorted, one dimensional
-            array, each entry containing the following fields:
+class StatMesh(Mesh):
+    def __init__(self, mesh=None, structured=False,
+                 structured_coords=None, structured_set=None, mats=()):
 
-                :idx: int
-                    The volume element index.
-                :cell: int
-                    The geometry cell number.
-                :vol_frac: float
-                    The volume fraction of the cell withing the mesh ve.
-                :rel_error: float
-                    The relative error associated with the volume fraction.
+        super(StatMesh, self).__init__(mesh=mesh,
+                                       structured=structured,
+                                       structured_coords=structured_coords,
+                                       structured_set=structured_set, mats=mats)
 
-            The array must be sorted with respect to both idx and cell, with
-            cell changing fastest.
-        cell_mats : dict
-            Maps geometry cell numbers to Material objects that represent what
-            material each cell is made of.
-
+    def _do_op(self, other, tags, op, in_place=True):
+        """Private function to do mesh +, -, *, /. Called by operater
+        overloading functions.
         """
-        for i in range(len(self)):
-            mat_col = {}  # Collection of materials in the ith ve.
-            for row in cell_fracs[cell_fracs['idx'] == i]:
-                mat_col[cell_mats[row['cell']]] = row['vol_frac']
+        # Exclude error tags because result and error tags are treated
+        # simultaneously so there is not need to include both in the tag
+        # list to iterate through.
+        error_suffix = "_rel_error"
 
-            mixed = MultiMaterial(mat_col)
-            self.mats[i] = mixed.mix_by_volume()
+        tags = set(tag for tag in tags if not tag.endswith(error_suffix))
 
-    def tag_cell_fracs(self, cell_fracs):
-        """This function uses the output from dagmc.discretize_geom() and
-        a mapping of geometry cells to set the cell_fracs_tag.
+        if in_place:
+            mesh_1 = self
+        else:
+            mesh_1 = copy.copy(self)
 
-        Parameters
-        ----------
-        cell_fracs : structured array
-            The output from dagmc.discretize_geom(). A sorted, one dimensional
-            array, each entry containing the following fields:
+        for tag in tags:
+            for ve_1, ve_2 in \
+                zip(zip(iter(meshset_iterate(mesh_1.mesh, mesh_1.structured_set, types.MBMAXTYPE, dim = 3))),
+                    zip(iter(meshset_iterate(other.mesh,  other.structured_set,  types.MBMAXTYPE, dim = 3)))):
 
-                :idx: int
-                    The volume element index.
-                :cell: int
-                    The geometry cell number.
-                :vol_frac: float
-                    The volume fraction of the cell withing the mesh ve.
-                :rel_error: float
-                    The relative error associated with the volume fraction.
+                mesh_1_err_tag = mesh_1.mesh.tag_get_handle(tag + error_suffix)
+                other_err_tag  =  other.mesh.tag_get_handle(tag +  error_suffix)
+                mesh_1_tag = mesh_1.mesh.tag_get_handle(tag)
+                other_tag = other.mesh.tag_get_handle(tag)
 
-            The array must be sorted with respect to both idx and cell, with
-            cell changing fastest.
+                mesh_1_val = mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat = True)[0]
+                other_val  =  other.mesh.tag_get_data(other_tag,  ve_2, flat = True)[0]
+                mesh_1_err = mesh_1.mesh.tag_get_data(mesh_1_err_tag, ve_1, flat = True)[0]
+                other_err  =  other.mesh.tag_get_data(other_err_tag,  ve_2, flat = True)[0]
 
-        """
+                new_err_val = err__ops[op](mesh_1_val, other_val, mesh_1_err, other_err)
+                mesh_1.mesh.tag_set_data(mesh_1_err_tag, ve_1, new_err_val)
 
-        num_vol_elements = len(self)
-        # Find the maximum cell number in a voxel
-        max_num_cells = -1
-        for i in range(num_vol_elements):
-            max_num_cells = max(max_num_cells,
-                                len(cell_fracs[cell_fracs['idx'] == i]))
-
-        # create tag frame with default value
-        cell_largest_frac_number = [-1] * num_vol_elements
-        cell_largest_frac = [0.0] * num_vol_elements
-        voxel_cell_number = np.empty(shape=(num_vol_elements, max_num_cells),
-                                     dtype=int)
-        voxel_cell_fracs = np.empty(shape=(num_vol_elements, max_num_cells),
-                                    dtype=float)
-        voxel_cell_number.fill(-1)
-        voxel_cell_fracs.fill(0.0)
-
-        # set the data
-        for i in range(num_vol_elements):
-            for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == i]):
-                voxel_cell_number[i, cell] = row['cell']
-                voxel_cell_fracs[i, cell] = row['vol_frac']
-            # cell_largest_frac_tag
-            cell_largest_frac[i] = max(voxel_cell_fracs[i, :])
-            largest_index = \
-                    list(voxel_cell_fracs[i, :]).index(cell_largest_frac[i])
-            cell_largest_frac_number[i] = \
-                    int(voxel_cell_number[i, largest_index])
-
-        # create the tags
-        self.tag(name='cell_number', value=voxel_cell_number,
-                 doc='cell numbers of the voxel, -1 used to fill vacancy',
-                 tagtype=IMeshTag, size=max_num_cells, dtype=int)
-        self.tag(name='cell_fracs', value=voxel_cell_fracs,
-                 tagtype=IMeshTag, doc='volume fractions of each cell in the '
-                                       'voxel, 0.0 used to fill vacancy',
-                 size=max_num_cells, dtype=float)
-        self.tag(name='cell_largest_frac_number',
-                 value=cell_largest_frac_number, tagtype=IMeshTag,
-                 doc='cell number of the cell with largest volume fraction in '
-                     'the voxel', size=1, dtype=int)
-        self.tag(name='cell_largest_frac', value=cell_largest_frac,
-                 tagtype=IMeshTag, doc='cell fraction of the cell with largest'
-                                       'cell volume fraction',
-                 size=1, dtype=float)
-
+                new_val = _ops[op](mesh_1_val, other_val)
+                mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1, new_val)
+                
+        return mesh_1
 
 ######################################################
 # private helper functions for structured mesh methods
@@ -1363,51 +1228,59 @@ def _structured_iter(indices, ordmap, dims, it):
         yield _structured_step_iter(it, (ioff + joff + koff))
 
 
-class StatMesh(Mesh):
-    def __init__(self, mesh=None, structured=False,
-                 structured_coords=None, structured_set=None, mats=()):
-
-        super(StatMesh, self).__init__(mesh=mesh,
-                                       structured=structured,
-                                       structured_coords=structured_coords,
-                                       structured_set=structured_set, mats=mats)
-
-    def _do_op(self, other, tags, op, in_place=True):
-        """Private function to do mesh +, -, *, /. Called by operater
-        overloading functions.
-        """
-        # Exclude error tags because result and error tags are treated
-        # simultaneously so there is not need to include both in the tag
-        # list to iterate through.
-        error_suffix = "_rel_error"
-
-        tags = set(tag for tag in tags if not tag.endswith(error_suffix))
-
-        if in_place:
-            mesh_1 = self
-        else:
-            mesh_1 = copy.copy(self)
-
-        for tag in tags:
-            for ve_1, ve_2 in \
-                zip(zip(iter(mesh_1.mesh.iterate(iBase.Type.region,
-                                                 iMesh.Topology.all))),
-                    zip(iter(other.mesh.iterate(iBase.Type.region,
-                                                iMesh.Topology.all)))):
-
-                mesh_1.mesh.getTagHandle(tag + error_suffix)[ve_1] = err__ops[op](
-                    mesh_1.mesh.getTagHandle(tag)[ve_1],
-                    other.mesh.getTagHandle(tag)[ve_2],
-                    mesh_1.mesh.getTagHandle(tag + error_suffix)[ve_1],
-                    other.mesh.getTagHandle(tag + error_suffix)[ve_2])
-
-                mesh_1.mesh.getTagHandle(tag)[ve_1] = \
-                    _ops[op](mesh_1.mesh.getTagHandle(tag)[ve_1],
-                             other.mesh.getTagHandle(tag)[ve_2])
-
-        return mesh_1
-
 if HAVE_PYTAPS:
     def mesh_iterate(mesh, mesh_type = iBase.Type.region,
                      topo_type = iMesh.Topology.all):
-        return mesh.iterate(mesh_type, topo_type)    
+        return meshset_iterate(mesh, 0, types.MBMAXTYPE, dim = 3, recursive = True)
+
+
+    
+def meshset_iterate(pymb, meshset = 0, entity_type = types.MBMAXTYPE, dim = -1, arr_size = 1, recursive = False):
+
+    return MeshSetIterator(pymb, meshset, entity_type, dim, arr_size, recursive)
+
+class MeshSetIterator(object):
+
+    def __init__(self, inst, meshset, entity_type, dim = -1, arr_size = 1, recursive = False):
+        self.pymb = inst
+        self.meshset = meshset
+        self.ent_type = entity_type
+        self.dimension = dim
+        self.arr_size = arr_size
+        self.recur = recursive
+        self.reset()
+        
+    def reset(self):        
+
+        # if a specific dimension is requested, filter get only that dimension
+        if(self.ent_type != types.MBMAXTYPE):
+            ents = self.pymb.get_entities_by_type(self.meshset, self.ent_type, self.recur)
+        # if a specific type is requested, return only that type
+        elif(self.dimension != -1):
+            ents = self.pymb.get_entities_by_dimension(self.meshset, self.dimension, self.recur)
+        # otherwise return everything
+        else:
+            ents = self.pymb.get_entities_by_handle(self.meshset, self.recur)
+
+        self.pos = 0
+        self.size = len(ents)
+        self.entities = ents
+
+    def __iter__(self):
+        for i in range(0, self.size):
+            yield self.entities[i]
+        
+    def next(self):
+        if self.pos >= self.size:
+            raise StopIteration
+        else:
+            return self.entities[self.pos]
+            self.pos += 1
+        
+    def step(self, num_steps):
+        self.pos += num_steps
+        at_end = False
+        if self.pos >= self.size:
+            self.pos = self.size -1
+            at_end = True
+        return at_end
