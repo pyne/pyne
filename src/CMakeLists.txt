@@ -56,7 +56,7 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
   #"transport_spatial_methods/3d/main.f90"
   )
 set(MOAB_SRCS
-    "dagmc_bridge.cpp"
+#    "dagmc_bridge.cpp"
     "measure.cpp"
     "source_sampling.cpp"
     )
