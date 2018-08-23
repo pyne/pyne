@@ -12,7 +12,8 @@ from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate
+from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
+from pyne.mesh import IMeshTag, ComputedTag, MetadataTag
 from pyne.material import Material
 
 from pymoab import core, hcoord, scd, types
@@ -474,9 +475,9 @@ def test_matlib():
         3: Material({'Tm171': 171.0}, density=4.4),
         }
     m = gen_mesh(mats=mats)
-    for i, ve in enumerate(m.mesh.iterate(iBase.Type.region, iMesh.Topology.all)):
+    for i, ve in enumerate(mesh_iterate(m.mesh)):
         assert_is(m.mats[i], mats[i])
-        assert_equal(m.mesh.getTagHandle('idx')[ve], i)
+        assert_equal(m.mesh.tag_get_data(m.mesh.tag_get_handle('idx'),ve, flat = True)[0], i)
 
     m.write_hdf5('test_matlib.h5m')
     shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
@@ -736,11 +737,11 @@ def test_iter():
         }
     m = gen_mesh(mats=mats)
     j = 0
-    idx_tag = m.mesh.getTagHandle('idx')
+    idx_tag = m.mesh.tag_get_handle('idx')
     for i, mat, ve in m:
         assert_equal(j, i)
         assert_is(mats[i], mat)
-        assert_equal(j, idx_tag[ve])
+        assert_equal(j, m.mesh.tag_get_data(idx_tag, ve, flat = True)[0])
         j += 1
 
 def test_iter_ve():
