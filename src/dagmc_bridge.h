@@ -3,13 +3,17 @@
 
 /* Types.hpp may be validly included from C code */
 #include <moab/Types.hpp>
+#include <DagMC.hpp>
 
 #ifdef __cplusplus
 using moab::ErrorCode;
 using moab::EntityHandle;
+using moab::DagMC;
 
 namespace pyne {
 
+static DagMC* DAG = new DagMC();
+  
 extern "C" {
 #endif
 /* Notice to future maintainers:

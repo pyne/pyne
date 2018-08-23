@@ -271,6 +271,8 @@ def update_cmake_args(ns):
         ]
     if ns.moab is not None:
         ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
+    if ns.dagmc is not None:
+        ns.cmake_args.append('-DDAGMC_ROOT=' + absexpanduser(ns.dagmc))        
     if ns.deps_root:
         ns.cmake_args.append('-DDEPS_ROOT_DIR=' + absexpanduser(ns.deps_root))
     if ns.fast is not None:
@@ -289,6 +291,8 @@ def update_other_args(ns):
         os.environ['HDF5_ROOT'] = ns.hdf5
     if ns.moab is not None:
         os.environ['MOAB_ROOT'] = ns.moab
+    if ns.dagmc is not None:
+        os.environ['DAGMC_ROOT'] = ns.dagmc
 
 
 def parse_args():
@@ -329,6 +333,7 @@ def parse_args():
     other = parser.add_argument_group('other', 'Miscellaneous arguments.')
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
     other.add_argument('--moab', help='Path to MOAB root directory.')
+    other.add_argument('--dagmc',help='Path to DAGMC root directory.')
     other.add_argument('--prefix', help='Prefix for install location.',
                        default=None)
     other.add_argument('--build-dir', default='build', dest="build_dir",
