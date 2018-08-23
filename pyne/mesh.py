@@ -20,7 +20,7 @@ except ImportError:
          "Some aspects of the mesh module may be incomplete.", QAWarning)
     HAVE_PYTAPS = False
 
-#from pyne.material import Material, MaterialLibrary, MultiMaterial
+from pyne.material import Material, MaterialLibrary, MultiMaterial
 
 from pymoab import core, hcoord, scd, types
 from pymoab.rng import subtract
@@ -366,15 +366,15 @@ class IMeshTag(Tag):
         self.dtype = dtype
         self.default = default
         try:
-            self.tag = self.mesh.mesh.getTagHandle(self.name)
-        except iBase.TagNotFoundError:
-            self.tag = self.mesh.mesh.createTag(self.name, size, dtype)
+            self.tag = self.mesh.mesh.tag_get_handle(self.name)
+        except RuntimeError:
+            self.tag = self.mesh.mesh.tag_get_handle(self.name, size, dtype, types.MB_TAG_DENSE, create_if_missing = True, default_value = default)
             if default is not None:
                 self[:] = default
 
     def __delete__(self, mesh):
         super(IMeshTag, self).__delete__(mesh)
-        self.mesh.mesh.destroyTag(self.name, force=True)
+        self.mesh.mesh.tag_delete(self.name)
 
     def __getitem__(self, key):
         m = self.mesh.mesh
@@ -387,17 +387,17 @@ class IMeshTag(Tag):
                                  "mesh {1}".format(key, size))
             for i_ve in zip(range(key+1), miter):
                 pass
-            return mtag[i_ve[1]]
+            return self.mesh.mesh.tag_get_data(self.tag, i_ve[1], flat = True)[0]
         elif isinstance(key, slice):
-            return mtag[list(miter)[key]]
+            return self.mesh.mesh.tag_get_data(self.tag, list(miter), flat = True)[key]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length "
                                "of the mesh.")
-            return mtag[[ve for b, ve in zip(key, miter) if b]]
+            return self.mesh.mesh.tag_get_data(self.tag, [ve for b, ve in zip(key, miter) if b], flat = True)
         elif isinstance(key, Iterable):
             ves = list(miter)
-            return mtag[[ves[i] for i in key]]
+            return self.mesh.mesh.tag_get_data(self.tag, [ves[i] for i in key], flat = True)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -418,7 +418,7 @@ class IMeshTag(Tag):
                                  "mesh {1}".format(key, msize))
             for i_ve in zip(range(key+1), miter):
                 pass
-            mtag[i_ve[1]] = value if tsize == 1 else value[0]
+            self.mesh.mesh.tag_set_data(self.tag, i_ve[1], value if tsize == 1 else value[0])
         elif isinstance(key, slice):
             key = list(miter)[key]
             v = np.empty((len(key), tsize), self.tag.type)
@@ -435,14 +435,14 @@ class IMeshTag(Tag):
             if tsize == 1 and len(value.shape) == 1:
                 v.shape = (len(key), )
             v[...] = value
-            mtag[key] = v
+            self.mesh.mesh.tag_set_data(mtag, key, v)
         elif isinstance(key, Iterable):
             ves = list(miter)
             if tsize != 1 and len(value) != len(key):
                 v = np.empty((len(key), tsize), self.tag.type)
                 v[...] = value
                 value = v
-            mtag[[ves[i] for i in key]] = value
+            self.mesh.mesh.tag_set_data(mtag, [ves[i] for i in key], value)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -485,9 +485,9 @@ class IMeshTag(Tag):
             raise TypeError("Cannot expand a tag that is already a scalar.")
         for j in range(self.size):
             data = [x[j] for x in self[:]]
-            tag = self.mesh.mesh.createTag("{0}_{1:03d}".format(self.name, j),
-                                           1, self.dtype)
-            tag[list(self.mesh.iter_ve())] = data
+            tag = self.mesh.mesh.tag_get_handle("{0}_{1:03d}".format(self.name, j),
+                                                1, self.dtype, create_if_missing = True)
+            self.mesh.mesh(tag, list(self.mesh.iter_ve()), data)
 
 
 class ComputedTag(Tag):
@@ -752,12 +752,12 @@ class Mesh(object):
 
         if mats is None:
             pass
-        # elif len(mats) == 0 and not mats_in_mesh_file:
-        #     mats = MaterialLibrary()
-        # elif not isinstance(mats, MaterialLibrary):
-        #     mats = MaterialLibrary(mats)
+        elif len(mats) == 0 and not mats_in_mesh_file:
+            mats = MaterialLibrary()
+        elif not isinstance(mats, MaterialLibrary):
+            mats = MaterialLibrary(mats)
 
-        self.mats = None
+        self.mats = mats
 
         # tag with volume id and ensure mats exist.
         ves = list(self.iter_ve())
@@ -767,13 +767,61 @@ class Mesh(object):
                                            types.MB_TAG_DENSE,
                                            create_if_missing = True)
 
+        # tag with volume id and ensure mats exist.
+        ves = list(self.iter_ve())
+        tags = self.mesh.tag_get_tags_on_entity(ves[0])
+        tags = set(tag.get_name() for tag in tags)
+        if 'idx' in tags:
+            tag_idx = self.mesh.tag_get_handle('idx')
+        else:
+            tag_idx = self.mesh.tag_get_handle('idx', 1, types.MB_TYPE_INTEGER, types.MB_TAG_DENSE, create_if_missing = True)
         for i, ve in enumerate(ves):
             self.mesh.tag_set_data(tag_idx, ve, i)
-            # if mats is not None and i not in mats:
-            #     mats[i] = Material()
+            if mats is not None and i not in mats:
+                mats[i] = Material()
         self._len = i + 1
 
-
+        # Default tags
+        self.tags = {}
+        if mats is not None:
+            # metadata tags, these should come first so they don't accidentally
+            # overwite hard coded tag names.
+            metatagnames = set()
+            for mat in mats.values():
+                metatagnames.update(mat.metadata.keys())
+            for name in metatagnames:
+                setattr(self, name, MetadataTag(mesh=self, name=name))
+        # iMesh.Mesh() tags
+        tagnames = set()
+        for ve in ves:
+            tagnames.update(t.get_name() for t in self.mesh.tag_get_tags_on_entity(ve))
+        for name in tagnames:
+            setattr(self, name, IMeshTag(mesh=self, name=name))
+            
+        if mats is not None:
+            # Material property tags
+            self.atoms_per_molecule = MaterialPropertyTag(mesh=self,
+                                                          name='atoms_per_molecule',
+                                                          doc='Number of atoms per molecule')
+            self.metadata = MaterialPropertyTag(mesh=self, name='metadata',
+                                                doc='metadata attributes, stored on the material')
+            self.comp = MaterialPropertyTag(mesh=self, name='comp',
+                                            doc='normalized composition mapping from nuclides to '
+                                            'mass fractions')
+            self.mass = MaterialPropertyTag(mesh=self, name='mass',
+                                            doc='the mass of the material')
+            self.density = MaterialPropertyTag(mesh=self, name='density',
+                                               doc='the density [g/cc]')
+            # Material method tags
+            methtagnames = ('expand_elements', 'mass_density',
+                            'molecular_mass', 'mult_by_mass',
+                            'number_density', 'sub_act', 'sub_fp',
+                            'sub_lan', 'sub_ma', 'sub_tru', 'to_atom_frac')
+            for name in methtagnames:
+                doc = "see Material.{0}() for more information".format(name)
+                setattr(self, name, MaterialMethodTag(mesh=self, name=name,
+                                                      doc=doc))
+            
     def __len__(self):
         return self._len
 
@@ -807,6 +855,74 @@ class Mesh(object):
             value = type(value)(**kwargs)
         super(Mesh, self).__setattr__(name, value)
 
+    def tag(self, name, value=None, tagtype=None, doc=None, size=None,
+            dtype=None):
+        """Adds a new tag to the mesh, guessing the approriate place to store
+        the data.
+
+        Parameters
+        ----------
+        name : str
+            The tag name
+        value : optional
+            The value to initialize the tag with, skipped if None.
+        tagtype : Tag or str, optional
+            The type of tag this should be any of the following classes or
+            strings are accepted: IMeshTag, MetadataTag, ComputedTag, 'imesh',
+            'metadata', or 'computed'.
+        doc : str, optional
+            The tag documentation string.
+        size : int, optional
+            The size of the tag. This only applies to IMeshTags.
+        dtype : numpy dtype, optional
+            The data type of the tag. This only applies to IMeshTags. See PyTAPS
+            for more details.
+
+        """
+        if name in self.tags:
+            raise KeyError('{0} tag already exists on the mesh'.format(name))
+        if tagtype is None:
+            if callable(value):
+                tagtype = ComputedTag
+            elif size is None and dtype is not None:
+                size = 1
+                tagtype = IMeshTag
+            elif size is not None and dtype is None:
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif value is None:
+                size = 1
+                value = 0.0
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif isinstance(value, float):
+                size = 1
+                dtype = 'f8'
+                tagtype = IMeshTag
+            elif isinstance(value, int):
+                size = 1
+                dtype = 'i'
+                tagtype = IMeshTag
+            elif isinstance(value, str):
+                tagtype = MetadataTag
+            elif isinstance(value, _SEQUENCE_TYPES):
+                raise ValueError('ambiguous tag {0!r} creation when value is a'
+                                 ' sequence, please set tagtype, size, '
+                                 'or dtype'.format(name))
+            else:
+                tagtype = MetadataTag
+        if tagtype is IMeshTag or tagtype.lower() == 'imesh':
+            t = IMeshTag(size=size, dtype=dtype, mesh=self, name=name, doc=doc)
+        elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
+            t = MetadataTag(mesh=self, name=name, doc=doc)
+        elif tagtype is ComputedTag or tagtype.lower() == 'computed':
+            t = ComputedTag(f=value, mesh=self, name=name, doc=doc)
+        else:
+            raise ValueError('tagtype {0} not valid'.format(tagtype))
+        if value is not None and tagtype is not ComputedTag:
+            t[:] = value
+        setattr(self, name, t)
+        
     def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
         """
@@ -1229,9 +1345,9 @@ def _structured_iter(indices, ordmap, dims, it):
 
 
 if HAVE_PYTAPS:
-    def mesh_iterate(mesh, mesh_type = iBase.Type.region,
-                     topo_type = iMesh.Topology.all):
-        return meshset_iterate(mesh, 0, types.MBMAXTYPE, dim = 3, recursive = True)
+    def mesh_iterate(mesh, mesh_type = 3,
+                     topo_type = types.MBMAXTYPE):
+        return meshset_iterate(mesh, 0, topo_type, mesh_type, recursive = True)
 
 
     
