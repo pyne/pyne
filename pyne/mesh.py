@@ -1213,6 +1213,110 @@ class Mesh(object):
         if self.mats is not None:
             self.mats.write_hdf5(filename)
 
+    def cell_fracs_to_mats(self, cell_fracs, cell_mats):
+        """This function uses the output from dagmc.discretize_geom() and
+        a mapping of geometry cells to Materials to assign materials
+        to each mesh volume element.
+
+        Parameters
+        ----------
+        cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A sorted, one dimensional
+            array, each entry containing the following fields:
+
+                :idx: int
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+
+            The array must be sorted with respect to both idx and cell, with
+            cell changing fastest.
+        cell_mats : dict
+            Maps geometry cell numbers to Material objects that represent what
+            material each cell is made of.
+
+        """
+        for i in range(len(self)):
+            mat_col = {}  # Collection of materials in the ith ve.
+            for row in cell_fracs[cell_fracs['idx'] == i]:
+                mat_col[cell_mats[row['cell']]] = row['vol_frac']
+
+            mixed = MultiMaterial(mat_col)
+            self.mats[i] = mixed.mix_by_volume()
+            
+    def tag_cell_fracs(self, cell_fracs):
+        """This function uses the output from dagmc.discretize_geom() and
+        a mapping of geometry cells to set the cell_fracs_tag.
+
+        Parameters
+        ----------
+        cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A sorted, one dimensional
+            array, each entry containing the following fields:
+
+                :idx: int
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+
+            The array must be sorted with respect to both idx and cell, with
+            cell changing fastest.
+
+        """
+
+        num_vol_elements = len(self)
+        # Find the maximum cell number in a voxel
+        max_num_cells = -1
+        for i in range(num_vol_elements):
+            max_num_cells = max(max_num_cells,
+                                len(cell_fracs[cell_fracs['idx'] == i]))
+
+        # create tag frame with default value
+        cell_largest_frac_number = [-1] * num_vol_elements
+        cell_largest_frac = [0.0] * num_vol_elements
+        voxel_cell_number = np.empty(shape=(num_vol_elements, max_num_cells),
+                                     dtype=int)
+        voxel_cell_fracs = np.empty(shape=(num_vol_elements, max_num_cells),
+                                    dtype=float)
+        voxel_cell_number.fill(-1)
+        voxel_cell_fracs.fill(0.0)
+
+        # set the data
+        for i in range(num_vol_elements):
+            for (cell, row) in enumerate(cell_fracs[cell_fracs['idx'] == i]):
+                voxel_cell_number[i, cell] = row['cell']
+                voxel_cell_fracs[i, cell] = row['vol_frac']
+            # cell_largest_frac_tag
+            cell_largest_frac[i] = max(voxel_cell_fracs[i, :])
+            largest_index = \
+                    list(voxel_cell_fracs[i, :]).index(cell_largest_frac[i])
+            cell_largest_frac_number[i] = \
+                    int(voxel_cell_number[i, largest_index])
+
+        # create the tags
+        self.tag(name='cell_number', value=voxel_cell_number,
+                 doc='cell numbers of the voxel, -1 used to fill vacancy',
+                 tagtype=IMeshTag, size=max_num_cells, dtype=int)
+        self.tag(name='cell_fracs', value=voxel_cell_fracs,
+                 tagtype=IMeshTag, doc='volume fractions of each cell in the '
+                                       'voxel, 0.0 used to fill vacancy',
+                 size=max_num_cells, dtype=float)
+        self.tag(name='cell_largest_frac_number',
+                 value=cell_largest_frac_number, tagtype=IMeshTag,
+                 doc='cell number of the cell with largest volume fraction in '
+                     'the voxel', size=1, dtype=int)
+        self.tag(name='cell_largest_frac', value=cell_largest_frac,
+                 tagtype=IMeshTag, doc='cell fraction of the cell with largest'
+                                       'cell volume fraction',
+                 size=1, dtype=float)
 
 class StatMesh(Mesh):
     def __init__(self, mesh=None, structured=False,
