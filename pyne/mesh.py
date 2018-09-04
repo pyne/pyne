@@ -336,7 +336,7 @@ class IMeshTag(Tag):
     features to this process.
     """
 
-    def __init__(self, size=1, dtype='f8', default=0.0, mesh=None, name=None,
+    def __init__(self, size = 1, dtype = 'f8', default = 0.0, mesh = None, name = None,
                  doc=None):
         """Parameters
         ----------
@@ -356,6 +356,7 @@ class IMeshTag(Tag):
             Documentation string for the tag.
 
         """
+
         super(IMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
         if mesh is None or name is None:
             self._lazy_args['size'] = size
@@ -364,11 +365,12 @@ class IMeshTag(Tag):
             return
         self.size = size
         self.dtype = dtype
+        self.pymbtype = types.pymoab_data_type(self.dtype)
         self.default = default
         try:
             self.tag = self.mesh.mesh.tag_get_handle(self.name)
         except RuntimeError:
-            self.tag = self.mesh.mesh.tag_get_handle(self.name, size, dtype, types.MB_TAG_DENSE, create_if_missing = True, default_value = default)
+            self.tag = self.mesh.mesh.tag_get_handle(self.name, size, self.pymbtype, types.MB_TAG_DENSE, create_if_missing = True, default_value = default)
             if default is not None:
                 self[:] = default
 
@@ -387,9 +389,10 @@ class IMeshTag(Tag):
                                  "mesh {1}".format(key, size))
             for i_ve in zip(range(key+1), miter):
                 pass
-            return self.mesh.mesh.tag_get_data(self.tag, i_ve[1], flat = True)[0]
+            return self.mesh.mesh.tag_get_data(self.tag, i_ve[1], flat = True)
         elif isinstance(key, slice):
-            return self.mesh.mesh.tag_get_data(self.tag, list(miter), flat = True)[key]
+            flat = True if self.size == 1 else False
+            return self.mesh.mesh.tag_get_data(self.tag, list(miter), flat = flat)[key]
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length "
@@ -405,7 +408,7 @@ class IMeshTag(Tag):
     def __setitem__(self, key, value):
         # get value into canonical form
         tsize = self.size
-        value = np.asarray(value, self.tag.type)
+        value = np.asarray(value, self.tag.get_dtype())
         value = np.atleast_1d(value) if tsize == 1 else np.atleast_2d(value)
         # set up mesh to be iterated over
         m = self.mesh.mesh
@@ -421,17 +424,17 @@ class IMeshTag(Tag):
             self.mesh.mesh.tag_set_data(self.tag, i_ve[1], value if tsize == 1 else value[0])
         elif isinstance(key, slice):
             key = list(miter)[key]
-            v = np.empty((len(key), tsize), self.tag.type)
+            v = np.empty((len(key), tsize), self.tag.get_dtype())
             if tsize == 1 and len(value.shape) == 1:
                 v.shape = (len(key), )
             v[...] = value
-            mtag[key] = v
+            self.mesh.mesh.tag_set_data(mtag,key,v)
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != msize:
                 raise KeyError("boolean mask must match the length "
                                "of the mesh.")
             key = [ve for b, ve in zip(key, miter) if b]
-            v = np.empty((len(key), tsize), self.tag.type)
+            v = np.empty((len(key), tsize), self.tag.get_dtype())
             if tsize == 1 and len(value.shape) == 1:
                 v.shape = (len(key), )
             v[...] = value
@@ -439,7 +442,7 @@ class IMeshTag(Tag):
         elif isinstance(key, Iterable):
             ves = list(miter)
             if tsize != 1 and len(value) != len(key):
-                v = np.empty((len(key), tsize), self.tag.type)
+                v = np.empty((len(key), tsize), self.tag.get_dtype())
                 v[...] = value
                 value = v
             self.mesh.mesh.tag_set_data(mtag, [ves[i] for i in key], value)
@@ -458,17 +461,17 @@ class IMeshTag(Tag):
                                  "mesh {1}".format(key, size))
             for i_ve in zip(range(key+1), miter):
                 pass
-            del mtag[i_ve[1]]
+            self.mesh.mesh.tag_delete_data(mtag, i_ve[1])
         elif isinstance(key, slice):
-            del mtag[list(miter)[key]]
+            self.mesh.mesh.tag_delete_data(mtag, list(miter)[key])
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the "
                                "length of the mesh.")
-            del mtag[[ve for b, ve in zip(key, miter) if b]]
+            self.mesh.mesh.tag_delete_data(mtag,[ve for b, ve in zip(key, miter) if b])
         elif isinstance(key, Iterable):
             ves = list(miter)
-            del mtag[[ves[i] for i in key]]
+            self.mesh.mesh.tag_delete_data(mtag,[ves[i] for i in key])
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -486,8 +489,8 @@ class IMeshTag(Tag):
         for j in range(self.size):
             data = [x[j] for x in self[:]]
             tag = self.mesh.mesh.tag_get_handle("{0}_{1:03d}".format(self.name, j),
-                                                1, self.dtype, create_if_missing = True)
-            self.mesh.mesh(tag, list(self.mesh.iter_ve()), data)
+                                                1, self.pymbtype, storage_type = types.MB_TAG_DENSE, create_if_missing = True)
+            self.mesh.mesh.tag_set_data(tag, list(self.mesh.iter_ve()), data)
 
 
 class ComputedTag(Tag):
@@ -686,6 +689,7 @@ class Mesh(object):
 
             # from coordinates
             elif (mesh is None) and structured_coords and not structured_set:
+                # check for single vertex coordinates here? it seems we only support volumetric mesh -PCS
                 extents = [0, 0, 0] + [len(x) - 1 for x in structured_coords]
                 low = hcoord.HomCoord([0,0,0])
                 high = hcoord.HomCoord([len(x) - 1 for x in structured_coords])
@@ -697,9 +701,13 @@ class Mesh(object):
                            coords.append(structured_coords[0][x])
                            coords.append(structured_coords[1][y])
                            coords.append(structured_coords[2][z])
+
                 scd_box = self.scd.construct_box(low, high, coords)
                 self.structured_set = scd_box.box_set()
-
+                print(coords)
+                print(len(coords)/3)
+                print(len(list(self.iter_ve())))
+                
             # from mesh and structured_set:
             elif not structured_coords and structured_set:
                 # check for the structured box tag on the instance
@@ -844,7 +852,7 @@ class Mesh(object):
             return self.mesh.get_entities_by_dimension(self.mesh.get_root_set(), 3, True)                
 
     def __contains__(self, i):
-        return 1 < len(self)
+        return i < len(self)
 
     def __setattr__(self, name, value):
         if isinstance(value, Tag) and hasattr(value, '_lazy_args'):
