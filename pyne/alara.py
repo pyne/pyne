@@ -16,7 +16,7 @@ try:
 except NameError:
     basestring = str
 
-from pyne.mesh import Mesh, MeshError, IMeshTag, HAVE_PYTAPS
+from pyne.mesh import Mesh, MeshError, HAVE_PYTAPS
 
 if HAVE_PYTAPS:
     from pyne.mesh import mesh_iterate
@@ -225,7 +225,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     float_tag_size = num_e_groups * max_num_cells
     for tag_name in tags.values():
         
-        mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), IMeshTag, size = float_tag_size, dtype = float)
+        mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), 'imesh', size = float_tag_size, dtype = float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
     # creat a list of decay times (strings) in the source file
