@@ -23,7 +23,7 @@ except ImportError:
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
 from pyne.material import Material
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
@@ -46,11 +46,11 @@ def test_write_fluxin_single():
 
     flux_mesh = Mesh(structured=True,
                      structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
-    tag_flux = flux_mesh.mesh.createTag("flux", 1, float)
+    tag_flux = flux_mesh.tag(name = "flux", size = 1, dtype = float)
     flux_data = [1, 2, 3, 4]
     ves = flux_mesh.structured_iterate_hex("xyz")
     for i, ve in enumerate(ves):
-        tag_flux[ve] = flux_data[i]
+        flux_mesh.flux[i] = flux_data[i]
 
     # test forward writting
     mesh_to_fluxin(flux_mesh, "flux", output_name, False)
@@ -83,11 +83,8 @@ def test_write_fluxin_multiple():
 
     flux_mesh = Mesh(structured=True,
                      structured_coords=[[0, 1, 2], [0, 1], [0, 1]])
-    tag_flux = flux_mesh.mesh.createTag("flux", 7, float)
     flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14]]
-    ves = flux_mesh.structured_iterate_hex("xyz")
-    for i, ve in enumerate(ves):
-        tag_flux[ve] = flux_data[i]
+    flux_mesh.tag("flux", flux_data, IMeshTag, size = 7, dtype = float)
 
     # test forward writting
     mesh_to_fluxin(flux_mesh, "flux", output_name, False)
@@ -132,13 +129,10 @@ def test_write_fluxin_multiple_subvoxel():
 
     flux_mesh = Mesh(structured=True,
                      structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
-    tag_flux = flux_mesh.mesh.createTag("flux", 7, float)
     flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14],
                  [15, 16, 17, 18, 19, 20, 21],
                  [22, 23, 24, 25, 26, 27, 28]]
-    ves = flux_mesh.structured_iterate_hex("xyz")
-    for i, ve in enumerate(ves):
-        tag_flux[ve] = flux_data[i]
+    flux_mesh.tag("flux", flux_data, IMeshTag, size = 7, dtype = float)
 
     cell_fracs = np.zeros(6, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
@@ -234,8 +228,8 @@ def test_photon_source_hdf5_to_mesh():
 
     ves = list(mesh.structured_iterate_hex("xyz"))
     for i, ve in enumerate(ves):
-        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
-        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+        assert_array_equal(mesh.tag1[ve], tag1_answers[i])
+        assert_array_equal(mesh.tag2[ve], tag2_answers[i])
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
@@ -281,8 +275,8 @@ def test_photon_source_hdf5_to_mesh_subvoxel():
                     [0.0] * 42 * 2]
 
     for i, _, ve in mesh:
-        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
-        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+        assert_array_equal(mesh.tag1[ve], tag1_answers[i])
+        assert_array_equal(mesh.tag2[ve], tag2_answers[i])
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
@@ -329,8 +323,8 @@ def test_photon_source_hdf5_to_mesh_subvoxel_size1():
                     [0.0] * 42]
 
     for i, _, ve in mesh:
-        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
-        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+        assert_array_equal(mesh.tag1[ve], tag1_answers[i])
+        assert_array_equal(mesh.tag2[ve], tag2_answers[i])
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
