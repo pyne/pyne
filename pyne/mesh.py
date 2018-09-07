@@ -704,9 +704,6 @@ class Mesh(object):
 
                 scd_box = self.scd.construct_box(low, high, coords)
                 self.structured_set = scd_box.box_set()
-                print(coords)
-                print(len(coords)/3)
-                print(len(list(self.iter_ve())))
                 
             # from mesh and structured_set:
             elif not structured_coords and structured_set:
@@ -847,7 +844,7 @@ class Mesh(object):
 
     def iter_ve(self):
         if self.structured:
-            return meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBHEX)
+            return self.structured_iterate_hex(self.structured_ordering)
         else:
             return self.mesh.get_entities_by_dimension(self.mesh.get_root_set(), 3, True)                
 
@@ -1206,6 +1203,9 @@ class Mesh(object):
         if not self.structured:
             raise MeshError("Structured mesh methods cannot be called from "\
                             "unstructured mesh instances.")
+
+    def save(self, filename):
+        self.write_hdf5(filename)
 
     def write_hdf5(self, filename):
         """Writes the mesh to an hdf5 file."""
