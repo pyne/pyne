@@ -383,7 +383,9 @@ class IMeshTag(Tag):
         size = len(self.mesh)
         mtag = self.tag
         miter = self.mesh.iter_ve()
-        if isinstance(key, _INTEGRAL_TYPES):
+        if isinstance(key, long):
+            return self.mesh.mesh.tag_get_data(self.tag, key, flat = True)
+        elif isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
                                  "mesh {1}".format(key, size))
@@ -400,7 +402,18 @@ class IMeshTag(Tag):
             return self.mesh.mesh.tag_get_data(self.tag, [ve for b, ve in zip(key, miter) if b], flat = True)
         elif isinstance(key, Iterable):
             ves = list(miter)
-            return self.mesh.mesh.tag_get_data(self.tag, [ves[i] for i in key], flat = True)
+            ves_to_get = []
+            # support either indexes or entityhandles
+            for k in key:
+                if isinstance(int):
+                    ves_to_get.append(ves[k])
+                elif isinstance(long):
+                    ves_to_get.append(k)
+                else:
+                    raise TypeError("{0} contains invalid element references "
+                                    "(non-ints, non-handles)".format(key))
+            return self.mesh.mesh.tag_get_data(self.tag, ves_to_get, flat = True)
+
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -415,7 +428,9 @@ class IMeshTag(Tag):
         msize = len(self.mesh)
         mtag = self.tag
         miter = self.mesh.iter_ve()
-        if isinstance(key, _INTEGRAL_TYPES):
+        if isinstance(key, long):
+            self.mesh.mesh.tag_set_data(self.tag, key, value)
+        elif isinstance(key, _INTEGRAL_TYPES):
             if key >= msize:
                 raise IndexError("key index {0} greater than the size of the "
                                  "mesh {1}".format(key, msize))
@@ -445,7 +460,17 @@ class IMeshTag(Tag):
                 v = np.empty((len(key), tsize), self.tag.get_dtype())
                 v[...] = value
                 value = v
-            self.mesh.mesh.tag_set_data(mtag, [ves[i] for i in key], value)
+            ves_to_tag = []
+            # support either indexes or entityhandles
+            for k in key:
+                if isinstance(int):
+                    ves_to_tag.append(ves[k])
+                elif isinstance(long):
+                    ves_to_tag.append(k)
+                else:
+                    raise TypeError("{0} contains invalid element references "
+                                    "(non-ints, non-handles)".format(key))
+            self.mesh.mesh.tag_set_data(mtag, ves_to_, value)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -471,7 +496,17 @@ class IMeshTag(Tag):
             self.mesh.mesh.tag_delete_data(mtag,[ve for b, ve in zip(key, miter) if b])
         elif isinstance(key, Iterable):
             ves = list(miter)
-            self.mesh.mesh.tag_delete_data(mtag,[ves[i] for i in key])
+            ves_to_delt = []
+            # support either indexes or entityhandles
+            for k in key:
+                if isinstance(int):
+                    ves_to_del.append(ves[k])
+                elif isinstance(long):
+                    ves_to_del.append(k)
+                else:
+                    raise TypeError("{0} contains invalid element references "
+                                    "(non-ints, non-handles)".format(key))
+            self.mesh.mesh.tag_delete_data(mtag,ves_to_del)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -704,7 +739,7 @@ class Mesh(object):
 
                 scd_box = self.scd.construct_box(low, high, coords)
                 self.structured_set = scd_box.box_set()
-                
+
             # from mesh and structured_set:
             elif not structured_coords and structured_set:
                 # check for the structured box tag on the instance
@@ -802,7 +837,7 @@ class Mesh(object):
             tagnames.update(t.get_name() for t in self.mesh.tag_get_tags_on_entity(ve))
         for name in tagnames:
             setattr(self, name, IMeshTag(mesh=self, name=name))
-            
+
         if mats is not None:
             # Material property tags
             self.atoms_per_molecule = MaterialPropertyTag(mesh=self,
@@ -826,7 +861,7 @@ class Mesh(object):
                 doc = "see Material.{0}() for more information".format(name)
                 setattr(self, name, MaterialMethodTag(mesh=self, name=name,
                                                       doc=doc))
-            
+
     def __len__(self):
         return self._len
 
@@ -846,7 +881,7 @@ class Mesh(object):
         if self.structured:
             return self.structured_iterate_hex(self.structured_ordering)
         else:
-            return self.mesh.get_entities_by_dimension(self.mesh.get_root_set(), 3, True)                
+            return self.mesh.get_entities_by_dimension(self.mesh.get_root_set(), 3, True)
 
     def __contains__(self, i):
         return i < len(self)
@@ -901,11 +936,9 @@ class Mesh(object):
                 dtype = 'f8'
                 tagtype = IMeshTag
             elif isinstance(value, float):
-                size = 1
                 dtype = 'f8'
                 tagtype = IMeshTag
             elif isinstance(value, int):
-                size = 1
                 dtype = 'i'
                 tagtype = IMeshTag
             elif isinstance(value, str):
@@ -927,7 +960,12 @@ class Mesh(object):
         if value is not None and tagtype is not ComputedTag:
             t[:] = value
         setattr(self, name, t)
-        
+
+
+    def get_tag(self, tag_name):
+        return getattr(self, tag_name)
+
+
     def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
         """
@@ -976,7 +1014,7 @@ class Mesh(object):
                              other.mesh.tag_get_data(other_tag,   ve_2, flat = True)[0]))
 
         return mesh_1
-    
+
     def common_ve_tags(self, other):
         """Returns the volume element tags in common between self and other.
         """
@@ -987,7 +1025,7 @@ class Mesh(object):
         intersect = self_tags & other_tags
         intersect.discard('idx')
         return intersect
-        
+
     def __copy__(self):
         # first copy full imesh instance
         pymb_copy = core.Core()
@@ -1162,7 +1200,7 @@ class Mesh(object):
             ordmap = [order.find(L) for L in "xyz"]
             ijk = [A[ordmap[x]] for x in range(3)]
             yield self.structured_hex_volume(*ijk)
-    
+
     def iter_structured_idx(self, order=None):
         """Return an iterater object of volume element indexes (idx) for any
         iteration order. Note that idx is assigned upon instantiation in the
@@ -1183,7 +1221,7 @@ class Mesh(object):
         tag = self.mesh.tag_get_handle('idx')
         for val in self.mesh.tag_get_data(tag, ves, flat = True):
             yield val
-            
+
     def structured_get_divisions(self, dim):
         """Get the mesh divisions on a given dimension
 
@@ -1191,14 +1229,14 @@ class Mesh(object):
         along that dimension.
         """
         self._structured_check()
-        
+
         if len(dim) == 1 and dim in "xyz":
             idx = "xyz".find(dim)
             return [self.mesh.get_coords(v)[idx] for v in self.structured_iterate_vertex(dim)]
-        
+
         else:
             raise MeshError("Invalid dimension: {0}".format(str(dim)))
-           
+
     def _structured_check(self):
         if not self.structured:
             raise MeshError("Structured mesh methods cannot be called from "\
@@ -1247,7 +1285,7 @@ class Mesh(object):
 
             mixed = MultiMaterial(mat_col)
             self.mats[i] = mixed.mix_by_volume()
-            
+
     def tag_cell_fracs(self, cell_fracs):
         """This function uses the output from dagmc.discretize_geom() and
         a mapping of geometry cells to set the cell_fracs_tag.
@@ -1363,7 +1401,7 @@ class StatMesh(Mesh):
 
                 new_val = _ops[op](mesh_1_val, other_val)
                 mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1, new_val)
-                
+
         return mesh_1
 
 ######################################################
@@ -1462,7 +1500,7 @@ if HAVE_PYTAPS:
         return meshset_iterate(mesh, 0, topo_type, mesh_type, recursive = True)
 
 
-    
+
 def meshset_iterate(pymb, meshset = 0, entity_type = types.MBMAXTYPE, dim = -1, arr_size = 1, recursive = False):
 
     return MeshSetIterator(pymb, meshset, entity_type, dim, arr_size, recursive)
@@ -1477,8 +1515,8 @@ class MeshSetIterator(object):
         self.arr_size = arr_size
         self.recur = recursive
         self.reset()
-        
-    def reset(self):        
+
+    def reset(self):
 
         # if a specific dimension is requested, filter get only that dimension
         if(self.ent_type != types.MBMAXTYPE):
@@ -1497,14 +1535,14 @@ class MeshSetIterator(object):
     def __iter__(self):
         for i in range(0, self.size):
             yield self.entities[i]
-        
+
     def next(self):
         if self.pos >= self.size:
             raise StopIteration
         else:
             return self.entities[self.pos]
             self.pos += 1
-        
+
     def step(self, num_steps):
         self.pos += num_steps
         at_end = False
