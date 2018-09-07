@@ -16,7 +16,7 @@ try:
 except NameError:
     basestring = str
 
-from pyne.mesh import Mesh, MeshError, HAVE_PYTAPS
+from pyne.mesh import Mesh, MeshError, IMeshTag, HAVE_PYTAPS
 
 if HAVE_PYTAPS:
     from pyne.mesh import mesh_iterate
@@ -71,11 +71,10 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         If sub_voxel=False, neither cell_fracs nor cell_mats will be used.
 
     """
-    tag_flux = flux_mesh.mesh.getTagHandle(flux_tag)
+    tag_flux = flux_mesh.get_tag(flux_tag)
 
     # find number of e_groups
-    e_groups = flux_mesh.mesh.getTagHandle(flux_tag)[list(
-        mesh_iterate(flux_mesh.mesh))[0]]
+    e_groups = tag_flux[list(mesh_iterate(flux_mesh.mesh))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
 
@@ -219,15 +218,16 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
         num_vol_elements = len(mesh)
         subvoxel_array = _get_subvoxel_array(mesh, cell_mats)
         # get max_num_cells
-        max_num_cells = len(np.atleast_1d(mesh.mesh.getTagHandle(
-            'cell_number')[ve0]))
+        max_num_cells = len(np.atleast_1d(mesh.cell_number[ve0]))
 
     # create a dict of tag handles for all keys of the tags dict
     tag_handles = {}
+    float_tag_size = num_e_groups * max_num_cells
     for tag_name in tags.values():
-        tag_handles[tag_name] = \
-                mesh.mesh.createTag(tag_name, num_e_groups * max_num_cells,
-                                    float)
+        
+        mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), IMeshTag, size = float_tag_size, dtype = float)
+        tag_handles[tag_name] = mesh.get_tag(tag_name)
+
     # creat a list of decay times (strings) in the source file
     phtn_src_dc = []
     with tb.open_file(filename) as h5f:
@@ -829,7 +829,7 @@ def _get_subvoxel_array(mesh, cell_mats):
                 The cell index of the cell in that voxel
 
     """
-    cell_number_tag = mesh.mesh.getTagHandle('cell_number')
+    cell_number_tag = mesh.cell_number
     subvoxel_array = np.zeros(0, dtype=[(b'svid', np.int64),
                                         (b'idx', np.int64),
                                         (b'scid', np.int64)])
