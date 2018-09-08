@@ -8,14 +8,10 @@ from nose.plugins.skip import SkipTest
 from nose.tools import assert_equal
 
 # Mesh specific imports
-try:
-    from itaps import iMesh
+from pyne.mesh import HAVE_PYTAPS
 
-    HAVE_PYTAPS = True
-except ImportError:
+if not HAVE_PYTAPS:
     from nose.plugins.skip import SkipTest
-
-    HAVE_PYTAPS = False
 
 from pyne.mesh import Mesh, StatMesh, MeshError
 
