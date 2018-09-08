@@ -11,12 +11,10 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne.cccc import Isotxs, Rtflux, Atflux
 
-try:
-    from itaps import iMesh
-    HAVE_PYTAPS = True
-except ImportError:
+from pyne.mesh import HAVE_PYTAPS
+
+if not HAVE_PYTAPS:
     from nose.plugins.skip import SkipTest
-    HAVE_PYTAPS = False
 
 class TestIsotxs(TestCase):
     def setUp(self):

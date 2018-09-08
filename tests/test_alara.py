@@ -12,13 +12,10 @@ import warnings
 import filecmp
 
 # mesh specific imports
-try:
-    from itaps import iMesh
-    HAVE_PYTAPS = True
-except ImportError:
+from pyne.mesh import HAVE_PYTAPS
+
+if not HAVE_PYTAPS:
     from nose.plugins.skip import SkipTest
-    HAVE_PYTAPS = False
-    pass
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)

@@ -3,11 +3,13 @@ Tests for PyNE variance_reduction module.
 """
 import warnings
 
-try:
-    from itaps import iBase, iMesh, iMeshExtensions
-except ImportError:
+
+from pyne.mesh import HAVE_PYTAPS
+
+if not HAVE_PYTAPS:
     from nose.plugins.skip import SkipTest
     raise SkipTest
+
 from nose.tools import assert_almost_equal
 from numpy.testing import assert_array_almost_equal
 

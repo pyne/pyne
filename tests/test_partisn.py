@@ -12,11 +12,10 @@ from pyne.utils import QAWarning
 import multiprocessing
 import unittest
 
-try:
-    from itaps import iBase, iMesh, iMeshExtensions
-    HAVE_PYTAPS = True
-except ImportError:
-    HAVE_PYTAPS = False
+
+from pyne.mesh import HAVE_PYTAPS
+
+if not HAVE_PYTAPS:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
