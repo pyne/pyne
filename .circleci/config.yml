@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_py3:
     docker:
-      - image: pyne/pyne_ubuntu_17.04:latest
+      - image: pshriwise/pshriwise:ubuntu_17.04_pymoab_pyne
 
     working_directory: ~/repo
 
@@ -14,7 +14,7 @@ jobs:
           name: Building PyNE
           command: |
             python3 setup.py install --user \
-                --moab $HOME/opt/moab --clean
+                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --clean
 
       # Test!
       - run:
@@ -25,7 +25,7 @@ jobs:
 
   build_py2:
     docker:
-      - image: pyne/pyne_ubuntu_16.04:latest
+      - image: pshriwise/pshriwise:ubuntu_16.04_pymoab_pyne
 
     working_directory: ~/repo
 
@@ -37,7 +37,7 @@ jobs:
           name: Building PyNE
           command: |
             python setup.py install --user \
-                --moab $HOME/opt/moab --clean
+                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc--clean
 
       # Test!
       - run:
