@@ -37,7 +37,7 @@ jobs:
           name: Building PyNE
           command: |
             python setup.py install --user \
-                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc--clean
+                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --clean
 
       # Test!
       - run:
