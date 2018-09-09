@@ -1221,8 +1221,8 @@ class Mesh(object):
 
         ves = self.structured_iterate_hex(order)
         tag = self.mesh.tag_get_handle('idx')
-        for val in self.mesh.tag_get_data(tag, ves, flat = True):
-            yield val
+        for ve in ves:
+            yield self.mesh.tag_get_data(tag, ve, flat = True)[0]
 
     def structured_get_divisions(self, dim):
         """Get the mesh divisions on a given dimension
