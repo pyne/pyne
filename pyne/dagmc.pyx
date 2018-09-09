@@ -22,9 +22,9 @@ if sys.version_info[0] >= 3:
 
 # Mesh specific imports
 from pyne.mesh import HAVE_PYTAPS
-if HAVE_PYTAPS:
-    from pyne.mesh import iMesh
-else:
+from pymoab import core, types
+
+if not HAVE_PYTAPS:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of dagmc module may be incomplete",
          QAWarning)
@@ -619,16 +619,16 @@ def cell_material_assignments(hdf5):
         Dictionary of the cell to material assignments. Keys are cell 
         numbers and values are material names
     """
-    # Load the geometry as an iMesh instance
-    dag_geom = iMesh.Mesh()
-    dag_geom.load(hdf5)
-    dag_geom.getEntities()
-    mesh_sets = dag_geom.getEntSets()
+    # Load the geometry as a pymoab instance
+    dag_geom = core.Core()
+    dag_geom.load_file(hdf5)
+#    dag_geom.getEntities()
+    mesh_sets = dag_geom.get_entities_by_type(0, types.MBENTITYSET)
 
     # Get tag handle
-    cat_tag = dag_geom.getTagHandle('CATEGORY')
-    id_tag = dag_geom.getTagHandle('GLOBAL_ID')
-    name_tag = dag_geom.getTagHandle('NAME')
+    cat_tag = dag_geom.tag_get_handle('CATEGORY')
+    id_tag = dag_geom.tag_get_handle('GLOBAL_ID')
+    name_tag = dag_geom.tag_get_handle('NAME')
 
     # Get list of materials and list of cells
     mat_assigns={}
@@ -638,25 +638,22 @@ def cell_material_assignments(hdf5):
     # is no material already assigned to the implicit complement volume.
     implicit_vol = find_implicit_complement()
     mat_assigns[implicit_vol] = "mat:Vacuum"
-    
+
+    group_meshsets = dag_geom.get_entities_by_type_and_tag(0, types.MBENTITYSET, [cat_tag,], ["Group",])
+
     # loop over all mesh_sets in model
-    for mesh_set in mesh_sets:
-        tags = dag_geom.getAllTags(mesh_set)
-            
-        # check for mesh_sets that are groups
-        if name_tag in tags and cat_tag in tags \
-                and _tag_to_string(cat_tag[mesh_set]) == 'Group':
-            child_sets = mesh_set.getEntSets()
-            name = _tag_to_string(name_tag[mesh_set])
-            
-            # if mesh_set is a group with a material name_tag, loop over child
-            # mesh_sets and assign name to cell
-            if 'mat:' in name:
-                for child_set in child_sets:
-                    child_tags = dag_geom.getAllTags(child_set)
-                    if id_tag in child_tags:
-                        cell = id_tag[child_set]
-                        mat_assigns[cell] = name
+    for mesh_set in group_meshsets:
+        child_sets = dag_geom.get_entities_by_handle(mesh_set)
+        name = dag_geom.tag_get_data(name_tag, mesh_set, flat = True)[0]
+        # if mesh_set is a group with a material name_tag, loop over child
+        # mesh_sets and assign name to cell
+        if 'mat:' in str(name):
+            for child_set in child_sets:
+                try:
+                    cell = dag_geom.tag_get_data(id_tag, child_set, flat = True)[0]
+                    mat_assigns[cell] = name
+                except:
+                    pass
                         
     return mat_assigns
 
@@ -904,7 +901,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
                 elif di == 2:
                     ves = mesh.structured_iterate_hex('z', x=a, y=b)
 
-                idx_tag = mesh.mesh.getTagHandle('idx')
+                idx_tag = mesh.idx
                 idx = []
                 for ve in ves:
                     idx.append(idx_tag[ve])
