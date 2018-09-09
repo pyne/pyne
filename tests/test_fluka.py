@@ -58,13 +58,15 @@ def test_single_usrbin():
                                                        
     for i, v_e in enumerate(
         usrbin_object.tally['single_n'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['single_n'].mesh.getTagHandle('part_data_8')[v_e]
+        read = usrbin_object.tally['single_n'].part_data_tag[v_e]
+        assert usrbin_object.tally['single_n'].part_data_tag.name == 'part_data_8'
         expected = expected_part_data[i]
         assert_equal(read, expected)
 
     for i, v_e in enumerate(
-        usrbin_object.tally['single_n'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['single_n'].mesh.getTagHandle('error_data_8')[v_e]
+        usrbin_object.tally['single_n'].structured_iterate_hex("zyx")):        
+        read = usrbin_object.tally['single_n'].error_data_tag[v_e]
+        assert usrbin_object.tally['single_n'].error_data_tag.name == 'error_data_8'        
         expected = expected_error_data[i]
         assert_equal(read, expected)
 
@@ -110,13 +112,15 @@ def test_multiple_usrbin():
                                                        
     for i, v_e in enumerate(
         usrbin_object.tally['multi_p'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['multi_p'].mesh.getTagHandle('part_data_7')[v_e]
+        read = usrbin_object.tally['multi_p'].part_data_tag[v_e]
+        assert usrbin_object.tally['multi_p'].part_data_tag.name == 'part_data_7'
         expected = expected_part_data[i]
         assert_equal(read, expected)
 
     for i, v_e in enumerate(
         usrbin_object.tally['multi_p'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['multi_p'].mesh.getTagHandle('error_data_7')[v_e]
+        read = usrbin_object.tally['multi_p'].error_data_tag[v_e]
+        assert usrbin_object.tally['multi_p'].error_data_tag.name == 'error_data_7'
         expected = expected_error_data[i]
         assert_equal(read, expected)
 
@@ -150,13 +154,15 @@ def test_multiple_usrbin():
                                                        
     for i, v_e in enumerate(
         usrbin_object.tally['multi_n'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['multi_n'].mesh.getTagHandle('part_data_8')[v_e]
+        read = usrbin_object.tally['multi_n'].part_data_tag[v_e]        
+        assert usrbin_object.tally['multi_n'].part_data_tag.name == 'part_data_8'
         expected = expected_part_data[i]
         assert_equal(read, expected)
 
     for i, v_e in enumerate(
         usrbin_object.tally['multi_n'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['multi_n'].mesh.getTagHandle('error_data_8')[v_e]
+        read = usrbin_object.tally['multi_n'].error_data_tag[v_e]
+        assert usrbin_object.tally['multi_n'].error_data_tag.name == 'error_data_8'
         expected = expected_error_data[i]
         assert_equal(read, expected)
 
@@ -197,13 +203,15 @@ def test_degenerate_usrbin():
                                                        
     for i, v_e in enumerate(
         usrbin_object.tally['degen1'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['degen1'].mesh.getTagHandle('part_data_8')[v_e]
+        read = usrbin_object.tally['degen1'].part_data_tag[v_e]
+        assert usrbin_object.tally['degen1'].part_data_tag.name == 'part_data_8'
         expected = expected_part_data[i]
         assert_equal(read, expected)
 
     for i, v_e in enumerate(
         usrbin_object.tally['degen1'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['degen1'].mesh.getTagHandle('error_data_8')[v_e]
+        read = usrbin_object.tally['degen1'].error_data_tag[v_e]
+        assert usrbin_object.tally['degen1'].error_data_tag.name == 'error_data_8'
         expected = expected_error_data[i]
         assert_equal(read, expected)
 
@@ -231,13 +239,15 @@ def test_degenerate_usrbin():
 
     for i, v_e in enumerate(
         usrbin_object.tally['degen2'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['degen2'].mesh.getTagHandle('part_data_8')[v_e]
+        read = usrbin_object.tally['degen2'].part_data_tag[v_e]
+        assert usrbin_object.tally['degen2'].part_data_tag.name == 'part_data_8'
         expected = expected_part_data[i]
         assert_equal(read, expected)
 
     for i, v_e in enumerate(
         usrbin_object.tally['degen2'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['degen2'].mesh.getTagHandle('error_data_8')[v_e]
+        read = usrbin_object.tally['degen2'].error_data_tag[v_e]
+        assert usrbin_object.tally['degen2'].error_data_tag.name == 'error_data_8'
         expected = expected_error_data[i]
         assert_equal(read, expected)
 
@@ -265,13 +275,15 @@ def test_degenerate_usrbin():
 
     for i, v_e in enumerate(
         usrbin_object.tally['degen3'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['degen3'].mesh.getTagHandle('part_data_8')[v_e]
+        read = usrbin_object.tally['degen3'].part_data_tag[v_e]
+        assert usrbin_object.tally['degen3'].part_data_tag.name == 'part_data_8'
         expected = expected_part_data[i]
         assert_equal(read, expected)
 
     for i, v_e in enumerate(
         usrbin_object.tally['degen3'].structured_iterate_hex("zyx")):
-        read = usrbin_object.tally['degen3'].mesh.getTagHandle('error_data_8')[v_e]
+        read = usrbin_object.tally['degen3'].error_data_tag[v_e]
+        assert usrbin_object.tally['degen3'].error_data_tag.name == 'error_data_8'
         expected = expected_error_data[i]
         assert_equal(read, expected)
 
