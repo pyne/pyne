@@ -1690,18 +1690,22 @@ class Wwinp(Mesh):
             ww_data[i] = ww_row
 
         # create vector tags for data
-        tag_ww = self.mesh.createTag(
-            "ww_{0}".format(particle), self.ne[particle_index], float)
+        ww_tag_name = "ww_{0}".format(particle)
+        self.tag(ww_tag_name, size = self.ne[particle_index], dtype = float, tagtype = 'imesh')
+        tag_ww = self.get_tag(ww_tag_name)
 
         # tag vector data to mesh
         for i, volume_element in enumerate(volume_elements):
             tag_ww[volume_element] = ww_data[:, i]
 
         # Save energy upper bounds to rootset.
-        tag_e_bounds = \
-            self.mesh.createTag('{0}_e_upper_bounds'.format(particle),
-                                len(self.e[particle_index]), float)
-        tag_e_bounds[self.mesh.rootSet] = self.e[particle_index]
+        e_bounds_tag_name = '{0}_e_upper_bounds'.format(particle)
+        self.tag(e_bounds_tag_name,
+                 size = len(self.e[particle_index]),
+                 dtype = float, tagtype = 'imesh')
+        tag_e_bounds = self.get_tag(e_bounds_tag_name)
+        
+        tag_e_bounds[self.mesh.get_root_set()] = self.e[particle_index]
 
     def write_wwinp(self, filename):
         """This method writes a complete WWINP file to <filename>.
