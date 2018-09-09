@@ -936,9 +936,11 @@ class Mesh(object):
                 dtype = 'f8'
                 tagtype = IMeshTag
             elif isinstance(value, float):
+                size = 1
                 dtype = 'f8'
                 tagtype = IMeshTag
             elif isinstance(value, int):
+                size = 1
                 dtype = 'i'
                 tagtype = IMeshTag
             elif isinstance(value, str):
