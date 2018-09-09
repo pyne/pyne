@@ -1813,8 +1813,7 @@ class Wwinp(Mesh):
         ww_data = np.empty(shape=(self.nft, self.ne[particle_index]))
         volume_elements = list(self.structured_iterate_hex('zyx'))
         for i, volume_element in enumerate(volume_elements):
-            ww_data[i] = self.mesh.getTagHandle(
-                "ww_{0}".format(particle))[volume_element]
+            ww_data[i] = self.get_tag("ww_{0}".format(particle))[volume_element]
 
         for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
@@ -1848,11 +1847,10 @@ class Wwinp(Mesh):
         # Set energy related attributes.
         self.e = []
         self.ne = []
-        all_tags = [x.name for x in self.mesh.getAllTags(self.mesh.rootSet)]
+        all_tags = [x.get_name() for x in self.mesh.tag_get_tags_on_entity(self.mesh.get_root_set())]
 
         if 'n_e_upper_bounds' in all_tags:
-            n_e_upper_bounds = self.mesh.getTagHandle(
-                'n_e_upper_bounds')[self.mesh.rootSet]
+            n_e_upper_bounds = self.n_e_upper_bounds[self.mesh.get_root_set()]
             # In the single energy group case, the "E_upper_bounds" tag
             # returns a non-iterable float. If this is the case, put this
             # float into an array so that it can be iterated over
@@ -1867,8 +1865,7 @@ class Wwinp(Mesh):
             self.ne.append(0)
 
         if 'p_e_upper_bounds' in all_tags:
-            p_e_upper_bounds = self.mesh.getTagHandle(
-                'p_e_upper_bounds')[self.mesh.rootSet]
+            p_e_upper_bounds = self.p_e_upper_bounds[self.mesh.get_root_set()]
             if isinstance(p_e_upper_bounds, float):
                 p_e_upper_bounds = [p_e_upper_bounds]
 
@@ -2157,10 +2154,14 @@ class MeshTally(StatMesh):
             rel_error[i] = rel_error_row
 
         # Tag results and error vector to mesh
-        res_tag = IMeshTag(num_e_groups, float, mesh=self,
-                           name=self.tag_names[0])
-        rel_err_tag = IMeshTag(num_e_groups, float, mesh=self,
-                               name=self.tag_names[1])
+        self.tag(self.tag_names[0], tagtype = 'imesh', size = num_e_groups, dtype = float)
+        res_tag = self.get_tag(self.tag_names[0])
+        # IMeshTag(num_e_groups, float, mesh=self,
+        #                    name=self.tag_names[0])
+        self.tag(self.tag_names[1], tagtype = 'imesh', size = num_e_groups, dtype = float)
+        rel_err_tag = self.get_tag(self.tag_names[1])
+        # IMeshTag(num_e_groups, float, mesh=self,
+        #                        name=self.tag_names[1])
         if num_e_groups == 1:
             res_tag[:] = result[0]
             rel_err_tag[:] = rel_error[0]
@@ -2179,9 +2180,12 @@ class MeshTally(StatMesh):
                 rel_error.append(
                     float(line[self._column_idx["Rel_Error"]]))
 
-            res_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[2])
-            rel_err_tot_tag = IMeshTag(1, float, mesh=self,
-                                       name=self.tag_names[3])
+            self.tag(self.tag_names[2], size = 1, dtype = float, tagtype = 'imesh')
+            res_tot_tag = self.get_tag(self.tag_names[2])
+#           IMeshTag(1, float, mesh=self, name=self.tag_names[2])
+            self.tag(self.tag_names[3], size = 1, dtype = float, tagtype = 'imesh')
+            rel_err_tot_tag = self.get_tag(self.tag_names[3])
+            # IMeshTag(1, float, mesh=self, name=self.tag_names[3])
             res_tot_tag[:] = result
             rel_err_tot_tag[:] = rel_error
 
@@ -2246,6 +2250,7 @@ def _mesh_to_cell_cards(mesh, divs):
                 cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
                               i, i + 1, j + x_max, j + x_max + 1,
                               k + y_max, k + y_max + 1)
+                print(cell_cards)
                 count += 1
 
     # Append graveyard.
