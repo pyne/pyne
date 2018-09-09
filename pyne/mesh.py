@@ -405,9 +405,9 @@ class IMeshTag(Tag):
             ves_to_get = []
             # support either indexes or entityhandles
             for k in key:
-                if isinstance(int):
+                if isinstance(k, int):
                     ves_to_get.append(ves[k])
-                elif isinstance(long):
+                elif isinstance(k, long):
                     ves_to_get.append(k)
                 else:
                     raise TypeError("{0} contains invalid element references "
@@ -463,14 +463,14 @@ class IMeshTag(Tag):
             ves_to_tag = []
             # support either indexes or entityhandles
             for k in key:
-                if isinstance(int):
+                if isinstance(k, int):
                     ves_to_tag.append(ves[k])
-                elif isinstance(long):
+                elif isinstance(k, long):
                     ves_to_tag.append(k)
                 else:
                     raise TypeError("{0} contains invalid element references "
                                     "(non-ints, non-handles)".format(key))
-            self.mesh.mesh.tag_set_data(mtag, ves_to_, value)
+            self.mesh.mesh.tag_set_data(mtag, ves_to_tag, value)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -499,9 +499,9 @@ class IMeshTag(Tag):
             ves_to_delt = []
             # support either indexes or entityhandles
             for k in key:
-                if isinstance(int):
+                if isinstance(k, int):
                     ves_to_del.append(ves[k])
-                elif isinstance(long):
+                elif isinstance(k, long):
                     ves_to_del.append(k)
                 else:
                     raise TypeError("{0} contains invalid element references "
