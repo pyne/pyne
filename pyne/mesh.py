@@ -383,6 +383,10 @@ class IMeshTag(Tag):
         size = len(self.mesh)
         mtag = self.tag
         miter = self.mesh.iter_ve()
+        if key == self.mesh: #special case, get data on mesh's root set
+            return self.mesh.mesh.tag_get_data(self.tag,
+                                               self.mesh.mesh.get_root_set(),
+                                               flat = True)
         if isinstance(key, long):
             return self.mesh.mesh.tag_get_data(self.tag, key, flat = True)
         elif isinstance(key, _INTEGRAL_TYPES):
@@ -417,7 +421,7 @@ class IMeshTag(Tag):
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
-
+        
     def __setitem__(self, key, value):
         # get value into canonical form
         tsize = self.size
@@ -428,7 +432,9 @@ class IMeshTag(Tag):
         msize = len(self.mesh)
         mtag = self.tag
         miter = self.mesh.iter_ve()
-        if isinstance(key, long):
+        if key == self.mesh: # special case: tag the mesh's root set
+            self.mesh.mesh.tag_set_data(self.tag, self.mesh.mesh.get_root_set(), value)
+        elif isinstance(key, long):
             self.mesh.mesh.tag_set_data(self.tag, key, value)
         elif isinstance(key, _INTEGRAL_TYPES):
             if key >= msize:
@@ -480,7 +486,12 @@ class IMeshTag(Tag):
         size = len(self.mesh)
         mtag = self.tag
         miter = self.mesh.iter_ve()
-        if isinstance(key, _INTEGRAL_TYPES):
+        if key == self.mesh: # special case, look up mesh's root set
+            self.mesh.mesh.tag_delete_data(mtag,
+                                           self.mesh.mesh.get_root_set())
+        elif isinstance(key, long):
+            self.mesh.mesh.tag_delete_data(mtag, key)
+        elif isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
                                  "mesh {1}".format(key, size))
@@ -862,6 +873,9 @@ class Mesh(object):
                 setattr(self, name, MaterialMethodTag(mesh=self, name=name,
                                                       doc=doc))
 
+    def get_all_tags(self):
+        return [getattr(self,t) for t in dir(self) if isinstance(getattr(self,t), Tag)]
+                
     def __len__(self):
         return self._len
 
