@@ -356,8 +356,8 @@ class IMeshTag(Tag):
             Documentation string for the tag.
 
         """
-
         super(IMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
+                
         if mesh is None or name is None:
             self._lazy_args['size'] = size
             self._lazy_args['dtype'] = dtype
@@ -367,10 +367,16 @@ class IMeshTag(Tag):
         self.dtype = dtype
         self.pymbtype = types.pymoab_data_type(self.dtype)
         self.default = default
+        # if the tag already exists, pick up its properties
         try:
             self.tag = self.mesh.mesh.tag_get_handle(self.name)
+            self.size = self.tag.get_length()
+            self.dtype = self.tag.get_dtype()
+            self.pymbtype = types.pymoab_data_type(self.dtype)
+            self.default = self.tag.get_default_value()
         except RuntimeError:
-            self.tag = self.mesh.mesh.tag_get_handle(self.name, size, self.pymbtype, types.MB_TAG_DENSE, create_if_missing = True, default_value = default)
+            print("Creating tag with size:", size)
+            self.tag = self.mesh.mesh.tag_get_handle(self.name, self.size, self.pymbtype, types.MB_TAG_DENSE, create_if_missing = True, default_value = default)
             if default is not None:
                 self[:] = default
 
@@ -383,11 +389,11 @@ class IMeshTag(Tag):
         size = len(self.mesh)
         mtag = self.tag
         miter = self.mesh.iter_ve()
-        if key == self.mesh: #special case, get data on mesh's root set
+        if isinstance(key, Mesh) and key == self.mesh: #special case, get data on mesh's root set
             return self.mesh.mesh.tag_get_data(self.tag,
                                                self.mesh.mesh.get_root_set(),
                                                flat = True)
-        if isinstance(key, long):
+        elif isinstance(key, long):
             return self.mesh.mesh.tag_get_data(self.tag, key, flat = True)
         elif isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
@@ -398,7 +404,9 @@ class IMeshTag(Tag):
             return self.mesh.mesh.tag_get_data(self.tag, i_ve[1], flat = True)
         elif isinstance(key, slice):
             flat = True if self.size == 1 else False
-            return self.mesh.mesh.tag_get_data(self.tag, list(miter), flat = flat)[key]
+            ents = list(miter)[key]
+            data = self.mesh.mesh.tag_get_data(self.tag, ents, flat = flat)
+            return data
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length "
@@ -432,7 +440,7 @@ class IMeshTag(Tag):
         msize = len(self.mesh)
         mtag = self.tag
         miter = self.mesh.iter_ve()
-        if key == self.mesh: # special case: tag the mesh's root set
+        if isinstance(key, Mesh) and key == self.mesh: # special case: tag the mesh's root set
             self.mesh.mesh.tag_set_data(self.tag, self.mesh.mesh.get_root_set(), value)
         elif isinstance(key, long):
             self.mesh.mesh.tag_set_data(self.tag, key, value)
@@ -486,7 +494,7 @@ class IMeshTag(Tag):
         size = len(self.mesh)
         mtag = self.tag
         miter = self.mesh.iter_ve()
-        if key == self.mesh: # special case, look up mesh's root set
+        if isinstance(key, Mesh) and key == self.mesh: # special case, look up mesh's root set
             self.mesh.mesh.tag_delete_data(mtag,
                                            self.mesh.mesh.get_root_set())
         elif isinstance(key, long):
@@ -895,7 +903,7 @@ class Mesh(object):
         if self.structured:
             return self.structured_iterate_hex(self.structured_ordering)
         else:
-            return self.mesh.get_entities_by_dimension(self.mesh.get_root_set(), 3, True)
+            return iter(list(self.mesh.get_entities_by_dimension(self.mesh.get_root_set(), 3, True)))
 
     def __contains__(self, i):
         return i < len(self)
