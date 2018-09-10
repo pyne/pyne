@@ -1705,7 +1705,7 @@ class Wwinp(Mesh):
                  dtype = float, tagtype = 'imesh')
         tag_e_bounds = self.get_tag(e_bounds_tag_name)
         
-        tag_e_bounds[self.mesh.get_root_set()] = self.e[particle_index]
+        tag_e_bounds[self] = self.e[particle_index]
 
     def write_wwinp(self, filename):
         """This method writes a complete WWINP file to <filename>.
@@ -1847,10 +1847,11 @@ class Wwinp(Mesh):
         # Set energy related attributes.
         self.e = []
         self.ne = []
-        all_tags = [x.get_name() for x in self.mesh.tag_get_tags_on_entity(self.mesh.get_root_set())]
+        all_tags = [x.name for x in self.get_all_tags()]
+        print(all_tags)
 
         if 'n_e_upper_bounds' in all_tags:
-            n_e_upper_bounds = self.n_e_upper_bounds[self.mesh.get_root_set()]
+            n_e_upper_bounds = self.n_e_upper_bounds[self]
             # In the single energy group case, the "E_upper_bounds" tag
             # returns a non-iterable float. If this is the case, put this
             # float into an array so that it can be iterated over
@@ -1865,7 +1866,7 @@ class Wwinp(Mesh):
             self.ne.append(0)
 
         if 'p_e_upper_bounds' in all_tags:
-            p_e_upper_bounds = self.p_e_upper_bounds[self.mesh.get_root_set()]
+            p_e_upper_bounds = self.p_e_upper_bounds[self]
             if isinstance(p_e_upper_bounds, float):
                 p_e_upper_bounds = [p_e_upper_bounds]
 
