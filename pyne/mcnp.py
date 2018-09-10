@@ -1704,7 +1704,6 @@ class Wwinp(Mesh):
                  size = len(self.e[particle_index]),
                  dtype = float, tagtype = 'imesh')
         tag_e_bounds = self.get_tag(e_bounds_tag_name)
-        
         tag_e_bounds[self] = self.e[particle_index]
 
     def write_wwinp(self, filename):
@@ -1848,7 +1847,6 @@ class Wwinp(Mesh):
         self.e = []
         self.ne = []
         all_tags = [x.name for x in self.get_all_tags()]
-        print(all_tags)
 
         if 'n_e_upper_bounds' in all_tags:
             n_e_upper_bounds = self.n_e_upper_bounds[self]
@@ -2251,7 +2249,6 @@ def _mesh_to_cell_cards(mesh, divs):
                 cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
                               i, i + 1, j + x_max, j + x_max + 1,
                               k + y_max, k + y_max + 1)
-                print(cell_cards)
                 count += 1
 
     # Append graveyard.
