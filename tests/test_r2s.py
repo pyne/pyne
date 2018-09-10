@@ -157,7 +157,7 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
     #  order which is MOAB structured mesh creation order.
     meshtal = Mesh(structured=False, mesh=meshtal.tally[4].mesh)
     meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
-    meshtal.mesh.save(meshtal_mesh_file)
+    meshtal.save(meshtal_mesh_file)
 
     if flux_tag != "n_flux":
         # if not using n_flux makes a mesh containing n_flux tag, and then
@@ -170,13 +170,13 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
         #  order which is MOAB structured mesh creation order.
         meshtal = Mesh(structured=False, mesh=meshtal.tally[4].mesh)
         meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
-        meshtal.mesh.save(meshtal_mesh_file)
+        meshtal.save(meshtal_mesh_file)
         new_mesh = Mesh(structured=False, mesh=meshtal_mesh_file)
         new_mesh.TALLY_TAG = IMeshTag(2,float) # 2 egroups
         new_mesh.TALLY_TAG = meshtal.n_flux[:]
         
         # overwrite the mesh file
-        new_mesh.mesh.save(meshtal_mesh_file) 
+        new_mesh.save(meshtal_mesh_file) 
 
         
     cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name':'mat_11'}),
