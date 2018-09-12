@@ -38,6 +38,7 @@ cdef extern from "material.h" namespace "pyne":
 
         # Methods
         void norm_comp() except +
+        std_string openmc(std_string) except +
         std_string mcnp(std_string) except +
         std_string fluka(int, std_string) except +
         bool not_fluka_builtin(std_string) except +

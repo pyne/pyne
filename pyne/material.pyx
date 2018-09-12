@@ -346,6 +346,14 @@ cdef class _Material:
         card = self.mat_pointer.mcnp(frac_type.encode())
         return card.decode()
 
+    def openmc(self, frac_type='mass'):
+        """openmc(frac_type)
+        Return an openmc xml element for the material
+        """
+        cdef std_string mat
+        mat = self.mat_pointer.openmc(frac_type)
+        return mat.decode()
+    
     def fluka(self, fid, frac_type='mass'):
         """fluka()
         Return a fluka material record if there is only one component,
