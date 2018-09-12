@@ -476,6 +476,77 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 }
 
+std::string pyne::Material::openmc(std::string frac_type) {
+  std::ostringstream oss;
+
+  // vars for consistency
+  std::string new_quote = "\"";
+  std::string end_quote = "\" ";
+  std::string indent = "  ";
+  
+  // open the material element
+  oss << "<material id=" ;
+
+  // add the mat number
+  if(metadata.isMember("mat_number")) {
+    int mat_num = metadata["mat_number"].asInt();
+    oss << new_quote << mat_num << end_quote;
+  }
+  // mat numbers are required for openmc
+  else {
+    oss << new_quote << "?" << end_quote;
+  }
+  // close the material tag
+  oss << ">";
+  // new line
+  oss << std::endl;
+
+  //indent
+  oss << indent;
+
+  // specify density
+  oss << "<density ";
+  oss << "value=" << std::setprecision(2) << std::fixed << new_quote << density << end_quote;
+  oss << "units=" << new_quote << "g/cc" << end_quote << "/>";
+  // new line
+  oss << std::endl;
+
+  std::map<int, double> fracs;
+  fracs = to_atom_frac();
+  
+  // add nuclides
+  comp_map::iterator f;
+  for(f = fracs.begin(); f != fracs.end(); f++) {
+    //indent
+    oss << "  ";
+    // start a new nuclide element
+    oss << "<nuclide name=";
+    oss << new_quote << pyne::nucname::name(f->first) << end_quote;
+    oss << "ao=";
+    oss << std::setprecision(4) << std::scientific << new_quote << f->second << end_quote;
+    oss << "/>";
+    // new line
+    oss << std::endl;
+  }
+
+
+  if(metadata.isMember("sab")) {
+    oss << indent;
+    oss << "<sab name=";
+    oss << new_quote << metadata["sab"] << end_quote;
+    oss << "/>";
+    oss << std::endl;
+  }
+
+  // close the material node
+
+  oss << "</material>" << std::endl;
+
+  return oss.str();
+  
+}
+
+
 std::string pyne::Material::mcnp(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
