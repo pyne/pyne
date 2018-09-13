@@ -1174,7 +1174,7 @@ def test_openmc_mat0():
     mass_exp = ('<material id="2" >\n'
                 '  <density value="19.10" units="g/cc" />\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
-                '  <nuclide name="U236" wo="0.0000e-02" />\n'
+                '  <nuclide name="U236" wo="0.0000e+00" />\n'
                 '  <nuclide name="U238" wo="9.6000e-01" />\n'
                 '</material>\n')
     # mass_exp = ('C name: leu\n'
