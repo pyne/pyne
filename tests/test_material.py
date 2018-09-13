@@ -1128,9 +1128,9 @@ def test_openmc():
 
     mass = leu.openmc()
     mass_exp = ('<material id="2" >\n'
-                '  <density value="19.1" units="g/cc"/>\n'
+                '  <density value="19.10" units="g/cc"/>\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
-                '  <nuclide name="U238" wo="6.0000e-01" />\n'
+                '  <nuclide name="U238" wo="9.6000e-01" />\n'
                 '</material>\n')
     # mass_exp = ('C name: leu\n'
     #             'C density = 19.1\n'
@@ -1144,7 +1144,7 @@ def test_openmc():
 
     atom = leu.openmc(frac_type='atom')
     atom_exp = ('<material id="2" >\n'
-                '  <density value="19.1" units="g/cc" />\n'
+                '  <density value="19.10" units="g/cc" />\n'
                 '  <nuclide name="U235" ao="4.0491e-02" />\n'
                 '  <nuclide name="U238" ao="9.5951e-01" />\n'
                 '</material>\n')
@@ -1172,9 +1172,10 @@ def test_openmc_mat0():
 
     mass = leu.openmc()
     mass_exp = ('<material id="2" >\n'
-                '  <density value="19.1" units="g/cc" />\n'
+                '  <density value="19.10" units="g/cc" />\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
-                '  <nuclide name="U238" wo="6.0000e-01" />\n'
+                '  <nuclide name="U236" wo="0.0000e-02" />\n'
+                '  <nuclide name="U238" wo="9.6000e-01" />\n'
                 '</material>\n')
     # mass_exp = ('C name: leu\n'
     #             'C density = 19.1\n'
@@ -1301,12 +1302,12 @@ def test_write_openmc():
     with open('openmc_mass_fracs.txt') as f:
         written = f.read()
     expected = ('<material id="2" >\n'
-                '  <density value="19.1" units="g/cc" />\n'
+                '  <density value="19.10" units="g/cc" />\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
-                '  <nuclide name="U238" wo="6.0000e-01" />\n'
+                '  <nuclide name="U238" wo="9.6000e-01" />\n'
                 '</material>\n'
                 '<material id="2" >\n'
-                '  <density value="19.1" units="g/cc" />\n'
+                '  <density value="19.10" units="g/cc" />\n'
                 '  <nuclide name="U235" ao="4.0491e-02" />\n'
                 '  <nuclide name="U238" ao="9.5951e-01" />\n'
                 '</material>\n')
