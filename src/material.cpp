@@ -541,7 +541,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
     oss << std::endl;
   }
 
-
+  // other OpenMC material properties
   if(metadata.isMember("sab")) {
     oss << indent;
     oss << "<sab name=";
@@ -550,6 +550,30 @@ std::string pyne::Material::openmc(std::string frac_type) {
     oss << std::endl;
   }
 
+  if(metadata.isMember("temperature")) {
+    oss << indent;
+    oss << "<temperature>";
+    oss << new_quote << metadata["temperature"] << end_quote;
+    oss << "</temperature>";
+    oss << std::endl;
+  }
+
+  if(metadata.isMember("macroscopic")) {
+    oss << indent;
+    oss << "<macroscopic name=";
+    oss << new_quote << metadata["macroscropic"] << end_quote;
+    oss << "/>";
+    oss << std::endl;
+  }
+
+  if(metadata.isMember("isotropic")) {
+    oss << indent;
+    oss << "<isotropic>";
+    oss << new_quote << metadata["isotropic"] << end_quote;
+    oss << "</isotropic>";
+    oss << std::endl;
+  }
+  
   // close the material node
   oss << "</material>" << std::endl;
 
