@@ -1127,7 +1127,7 @@ def test_openmc():
                    density=19.1)
 
     mass = leu.openmc()
-    mass_exp = ('<material id="2">\n'
+    mass_exp = ('<material id="2" >\n'
                 '  <density value="19.1" units="g/cc"/>\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
                 '  <nuclide name="U238" wo="6.0000e-01" />\n'
@@ -1143,8 +1143,8 @@ def test_openmc():
     assert_equal(mass, mass_exp)
 
     atom = leu.openmc(frac_type='atom')
-    atom_exp = ('<material id="2">\n'
-                '  <density value="19.1" units="g/cc"/>\n'
+    atom_exp = ('<material id="2" >\n'
+                '  <density value="19.1" units="g/cc" />\n'
                 '  <nuclide name="U235" ao="4.0491e-02" />\n'
                 '  <nuclide name="U238" ao="9.5951e-01" />\n'
                 '</material>\n')
@@ -1171,8 +1171,8 @@ def test_openmc_mat0():
                    density=19.1)
 
     mass = leu.openmc()
-    mass_exp = ('<material id="2">\n'
-                '  <density value="19.1" units="g/cc"/>\n'
+    mass_exp = ('<material id="2" >\n'
+                '  <density value="19.1" units="g/cc" />\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
                 '  <nuclide name="U238" wo="6.0000e-01" />\n'
                 '</material>\n')
@@ -1300,13 +1300,13 @@ def test_write_openmc():
     
     with open('openmc_mass_fracs.txt') as f:
         written = f.read()
-    expected = ('<material id="2">\n'
-                '  <density value="19.1" units="g/cc"/>\n'
+    expected = ('<material id="2" >\n'
+                '  <density value="19.1" units="g/cc" />\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
                 '  <nuclide name="U238" wo="6.0000e-01" />\n'
                 '</material>\n'
-                '<material id="2">\n'
-                '  <density value="19.1" units="g/cc"/>\n'
+                '<material id="2" >\n'
+                '  <density value="19.1" units="g/cc" />\n'
                 '  <nuclide name="U235" ao="4.0491e-02" />\n'
                 '  <nuclide name="U238" ao="9.5951e-01" />\n'
                 '</material>\n')
