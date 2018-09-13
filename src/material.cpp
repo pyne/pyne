@@ -506,13 +506,25 @@ std::string pyne::Material::openmc(std::string frac_type) {
 
   // specify density
   oss << "<density ";
+    // if density is negtaive, report to user
+  if (density < 0.0) {
+    std::cout << "Warning: A density < 0.0 was found. This is not valid for use in OpenMC." << std::endl;
+  }
   oss << "value=" << std::setprecision(2) << std::fixed << new_quote << density << end_quote;
   oss << "units=" << new_quote << "g/cc" << end_quote << "/>";
   // new line
   oss << std::endl;
 
   std::map<int, double> fracs;
-  fracs = to_atom_frac();
+  std::string frac_attrib;
+  if(frac_type == "atom") {
+    fracs = to_atom_frac();
+    frac_attrib = "ao=";
+  }
+  else {
+    fracs = comp;
+    frac_attrib = "wo=";
+  }
   
   // add nuclides
   comp_map::iterator f;
@@ -522,7 +534,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
     // start a new nuclide element
     oss << "<nuclide name=";
     oss << new_quote << pyne::nucname::name(f->first) << end_quote;
-    oss << "ao=";
+    oss << frac_attrib;
     oss << std::setprecision(4) << std::scientific << new_quote << f->second << end_quote;
     oss << "/>";
     // new line
@@ -539,13 +551,10 @@ std::string pyne::Material::openmc(std::string frac_type) {
   }
 
   // close the material node
-
   oss << "</material>" << std::endl;
 
   return oss.str();
-  
 }
-
 
 std::string pyne::Material::mcnp(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////

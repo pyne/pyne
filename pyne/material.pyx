@@ -1607,6 +1607,22 @@ class Material(_Material, collections.MutableMapping):
         with open(filename, 'a') as f:
             f.write(self.mcnp(frac_type))
 
+    def write_openmc(self, filename, frac_type='mass'):
+        """write_openmc(self, filename, frac_type='mass')
+        The method appends an OpenMC mass fraction definition, with
+        attributes to the file with the supplied filename.
+
+        Parameters
+        ----------
+        filename : str
+            The file to append the material definition to.
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition.
+        """
+        with open(filename, 'a') as f:
+            f.write(self.openmc(frac_type))
+            
     def alara(self):
         """alara(self)
         This method returns an ALARA material in string form, with relevant
