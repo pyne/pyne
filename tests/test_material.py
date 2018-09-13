@@ -1132,14 +1132,6 @@ def test_openmc():
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
                 '  <nuclide name="U238" wo="9.6000e-01" />\n'
                 '</material>\n')
-    # mass_exp = ('C name: leu\n'
-    #             'C density = 19.1\n'
-    #             'C source: Some URL\n'
-    #             'C comments: this is a long comment that will definitly go over the 80 character\n'
-    #             'C  limit, for science\n'
-    #             'm2\n'
-    #             '     92235.15c -4.0000e-02\n'
-    #             '     92238.25c -9.6000e-01\n')
     assert_equal(mass, mass_exp)
 
     atom = leu.openmc(frac_type='atom')
@@ -1148,14 +1140,6 @@ def test_openmc():
                 '  <nuclide name="U235" ao="4.0491e-02" />\n'
                 '  <nuclide name="U238" ao="9.5951e-01" />\n'
                 '</material>\n')
-    # atom_exp = ('C name: leu\n'
-    #             'C density = 19.1\n'
-    #             'C source: Some URL\n'
-    #             'C comments: this is a long comment that will definitly go over the 80 character\n'
-    #             'C  limit, for science\n'
-    #             'm2\n'
-    #             '     92235.15c 4.0491e-02\n'
-    #             '     92238.25c 9.5951e-01\n')
     assert_equal(atom, atom_exp)
 
 def test_openmc_mat0():
@@ -1177,14 +1161,6 @@ def test_openmc_mat0():
                 '  <nuclide name="U236" wo="0.0000e+00" />\n'
                 '  <nuclide name="U238" wo="9.6000e-01" />\n'
                 '</material>\n')
-    # mass_exp = ('C name: leu\n'
-    #             'C density = 19.1\n'
-    #             'C source: Some URL\n'
-    #             'C comments: this is a long comment that will definitly go over the 80 character\n'
-    #             'C  limit, for science\n'
-    #             'm2\n'
-    #             '     92235.15c -4.0000e-02\n'
-    #             '     92238.25c -9.6000e-01\n')
     assert_equal(mass, mass_exp)
     
 def test_mcnp():
