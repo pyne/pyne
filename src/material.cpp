@@ -479,6 +479,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 std::string pyne::Material::openmc(std::string frac_type) {
   std::ostringstream oss;
 
+  pyne::Material temp_mat = this->expand_elements();
+  
   // vars for consistency
   std::string new_quote = "\"";
   std::string end_quote = "\" ";
@@ -488,8 +490,8 @@ std::string pyne::Material::openmc(std::string frac_type) {
   oss << "<material id=" ;
 
   // add the mat number
-  if(metadata.isMember("mat_number")) {
-    int mat_num = metadata["mat_number"].asInt();
+  if(temp_mat.metadata.isMember("mat_number")) {
+    int mat_num = temp_mat.metadata["mat_number"].asInt();
     oss << new_quote << mat_num << end_quote;
   }
   // mat numbers are required for openmc
@@ -507,10 +509,10 @@ std::string pyne::Material::openmc(std::string frac_type) {
   // specify density
   oss << "<density ";
     // if density is negtaive, report to user
-  if (density < 0.0) {
+  if (temp_mat.density < 0.0) {
     std::cout << "Warning: A density < 0.0 was found. This is not valid for use in OpenMC." << std::endl;
   }
-  oss << "value=" << std::setprecision(2) << std::fixed << new_quote << density << end_quote;
+  oss << "value=" << std::setprecision(2) << std::fixed << new_quote << temp_mat.density << end_quote;
   oss << "units=" << new_quote << "g/cc" << end_quote << "/>";
   // new line
   oss << std::endl;
@@ -518,11 +520,11 @@ std::string pyne::Material::openmc(std::string frac_type) {
   std::map<int, double> fracs;
   std::string frac_attrib;
   if(frac_type == "atom") {
-    fracs = to_atom_frac();
+    fracs = temp_mat.to_atom_frac();
     frac_attrib = "ao=";
   }
   else {
-    fracs = comp;
+    fracs = temp_mat.comp;
     frac_attrib = "wo=";
   }
   
@@ -542,34 +544,34 @@ std::string pyne::Material::openmc(std::string frac_type) {
   }
 
   // other OpenMC material properties
-  if(metadata.isMember("sab")) {
+  if(temp_mat.metadata.isMember("sab")) {
     oss << indent;
     oss << "<sab name=";
-    oss << new_quote << metadata["sab"] << end_quote;
+    oss << new_quote << temp_mat.metadata["sab"] << end_quote;
     oss << "/>";
     oss << std::endl;
   }
 
-  if(metadata.isMember("temperature")) {
+  if(temp_mat.metadata.isMember("temperature")) {
     oss << indent;
     oss << "<temperature>";
-    oss << new_quote << metadata["temperature"] << end_quote;
+    oss << new_quote << temp_mat.metadata["temperature"] << end_quote;
     oss << "</temperature>";
     oss << std::endl;
   }
 
-  if(metadata.isMember("macroscopic")) {
+  if(temp_mat.metadata.isMember("macroscopic")) {
     oss << indent;
     oss << "<macroscopic name=";
-    oss << new_quote << metadata["macroscropic"] << end_quote;
+    oss << new_quote << temp_mat.metadata["macroscropic"] << end_quote;
     oss << "/>";
     oss << std::endl;
   }
 
-  if(metadata.isMember("isotropic")) {
+  if(temp_mat.metadata.isMember("isotropic")) {
     oss << indent;
     oss << "<isotropic>";
-    oss << new_quote << metadata["isotropic"] << end_quote;
+    oss << new_quote << temp_mat.metadata["isotropic"] << end_quote;
     oss << "</isotropic>";
     oss << std::endl;
   }
