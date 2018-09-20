@@ -37,7 +37,7 @@ ssrname_onetrack = os.path.join(thisdir, "mcnp_surfsrc_onetrack.w")
 
 # mesh specific imports
 try:
-    from itaps import iMesh
+    from pyne.mesh import HAVE_PYTAPS
 
     HAVE_PYTAPS = True
 except ImportError:
