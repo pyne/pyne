@@ -99,6 +99,26 @@ def test_ray_voxel_traverse_3D():
     exp_ans = set()
     assert_equal(exp_ans, results)
 
+def test_ray_voxel_traverse_3D():
+    """
+    This unit test uses a cubit with the size of 2 * 2 * 2.
+    Start point: (0.3, 0.4, 0.5), end point: (2, 2, 2).
+    Direction: [0.62, 0.58, 0.54]
+    Ray traverse history:
+    Point: (0.3, 0.4, 0.5) -> (0.88, 0.94, 1) -> (0.94, 1, 1.06) -> (1, 1.06, 1.11)
+    Voxel: [0, 0, 0]       -> [0, 0, 1]       -> [0, 1, 1]       -> [1, 1, 1]
+    """
+    x_bound = [0, 1, 2]
+    y_bound = [0, 1, 2]
+    z_bound = [0, 1, 2]
+    bounds = [x_bound, y_bound, z_bound]
+    A = vta.Point(0.3, 0.4, 0.5)
+    B = vta.Point(2, 2, 2)
+    results = vta._ray_voxel_traverse(bounds, A, B)
+    exp_ans = [[0, 0, 0], [0, 0, 1], [0, 1, 1], [1, 1, 1]]
+    for i in range(len(exp_ans)):
+        assert_array_equal(results[i], exp_ans[i])
+
 def test_facet_voxel_rraverse():
     x_bound = [0, 1, 2, 3, 4, 5, 6]
     y_bound = [0, 1, 2, 3, 4, 5, 6]
