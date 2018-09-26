@@ -1,12 +1,12 @@
 """Purpose:
 
 This module provides a modified ray traverse method, which is modifed based on
-http://www.cse.yorku.ca/~amana/research/grid.pdf, to calculate the voxels
+http://www.cse.yorku.ca/~amana/research/grid.pdf, to calculate which voxels
 intersect with a given ray (line segment).
 Several rays are used to calculate the voxels that intersect with the facet.
 A series of rays are constructed based on both the facet and the mesh grid to
 make sure all the wanted voxels will be found. Combining all the found voxels
-for each ray, we get the voxels intersect with the facet.
+for each ray, we get the voxels intersecting with the facet.
 
 These voxels will be used to construct the bounding volume for source sampling.
 But currently these functions are separate from MOAB. Interface of MOAB with
@@ -69,7 +69,10 @@ def _is_point_in_mesh(bounds, point):
     Parameters:
     -----------
     bounds : list
-        Boundaries. List of the boundaries along x, y, and z directions.
+        Boundaries. Nested list of the boundaries along x, y, and z directions.
+        Expected format: [[x_min, ..., x_max],
+                          [y_min, ..., y_max],
+                          [z_min, ..., z_max]]
     point : Point
         The point to be checked.
 
@@ -199,6 +202,9 @@ def _cal_max_travel_length_in_current_voxel(tp, end, v, bounds):
         Direction vector from start to end: [v_x, v_y, v_z].
     bounds : list
         Boundaries of the mesh grid.
+        Expected format: [[x_min, ..., x_max],
+                          [y_min, ..., y_max],
+                          [z_min, ..., z_max]]
 
     Return:
     -------
@@ -209,15 +215,23 @@ def _cal_max_travel_length_in_current_voxel(tp, end, v, bounds):
     """
     n_x_grid = _find_next_grid_1d(tp.x, v[0], bounds[0])
     n_y_grid = _find_next_grid_1d(tp.y, v[1], bounds[1])
+    n_z_grid = _find_next_grid_1d(tp.z, v[2], bounds[2])
     if v[0] == 0.0:
         t_max_x = float('inf')
     else:
         t_max_x = (n_x_grid - tp.x) / v[0]
+
     if v[1] == 0.0:
         t_max_y = float('inf')
     else:
         t_max_y = (n_y_grid - tp.y) / v[1]
-    return [t_max_x, t_max_y]
+
+    if v[2] == 0.0:
+        t_max_z = float('inf')
+    else:
+        t_max_z = (n_z_grid - tp.z) / v[2]
+
+    return [t_max_x, t_max_y, t_max_z]
 
 def _move_to_next_voxel(x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v):
     """
@@ -251,7 +265,7 @@ def _move_to_next_voxel(x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v):
     tp : Point
         Point after moving along the direction of v.
     t_temp : float
-        Modifed travel length from the start.
+        Updated travel length. Distance from the start point to updated point.
     """
     t_min = min(t_maxs)
     if t_maxs[0] == t_min:
@@ -268,7 +282,7 @@ def _move_to_next_voxel(x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v):
 
 def _move_to_boundary(tp, t_min, v):
     """
-    Move the point to the nearest boundary when Initialize the problem.
+    Move the point to the nearest boundary when initializing the problem.
 
     Parameters:
     -----------
@@ -294,6 +308,7 @@ def _move_to_boundary(tp, t_min, v):
     # calculate the new coordinate
     tp.x += t_min * v[0]
     tp.y += t_min * v[1]
+    tp.z += t_min * v[2]
     return tp
 
 def _ray_voxel_traverse(bounds, start, end):
