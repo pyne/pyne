@@ -516,3 +516,11 @@ def _facet_voxel_traverse(A, B, C, bounds):
         voxels = voxels.union(temp_voxels)
     return voxels
 
+if __name__ == '__main__':
+    my_list = [[1, 1], [2, 2]]
+    a = np.array([1, 1])
+    if any((a == x).all() for x in my_list): 
+#    if a in my_list:
+        print 'yes'
+    else:
+        print 'no'

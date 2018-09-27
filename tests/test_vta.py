@@ -105,17 +105,17 @@ def test_ray_voxel_traverse_3D():
     Start point: (0.3, 0.4, 0.5), end point: (2, 2, 2).
     Direction: [0.62, 0.58, 0.54]
     Ray traverse history:
-    Point: (0.3, 0.4, 0.5) -> (0.88, 0.94, 1) -> (0.94, 1, 1.06) -> (1, 1.06, 1.11)
-    Voxel: [0, 0, 0]       -> [0, 0, 1]       -> [0, 1, 1]       -> [1, 1, 1]
+    Point: [0.3, 0.4, 0.5] -> [0.88, 0.94, 1] -> [0.94, 1, 1.06] -> [1, 1.06, 1.11]
+    Voxel: (0, 0, 0)       -> (0, 0, 1)       -> (0, 1, 1)       -> (1, 1, 1)
     """
     x_bound = [0, 1, 2]
     y_bound = [0, 1, 2]
     z_bound = [0, 1, 2]
     bounds = [x_bound, y_bound, z_bound]
-    A = vta.Point(0.3, 0.4, 0.5)
-    B = vta.Point(2, 2, 2)
+    A = np.array([0.3, 0.4, 0.5])
+    B = np.array([2, 2, 2])
     results = vta._ray_voxel_traverse(bounds, A, B)
-    exp_ans = [[0, 0, 0], [0, 0, 1], [0, 1, 1], [1, 1, 1]]
+    exp_ans = [(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 1, 1)]
     for i in range(len(exp_ans)):
         assert_array_equal(results[i], exp_ans[i])
 
