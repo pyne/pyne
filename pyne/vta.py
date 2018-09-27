@@ -296,7 +296,7 @@ def _ray_voxel_traverse(bounds, start, end):
     # Find the voxel that start point in
     tp = np.copy(start)
     x_idx, y_idx, z_idx = -1, -1, -1
-    voxel_list = []
+    voxels = set()
     v = _cal_dir_v(start, end)
     t_end = _distance(start, end)
     t_temp = 0.0
@@ -309,9 +309,9 @@ def _ray_voxel_traverse(bounds, start, end):
             z_idx = _find_voxel_idx_1d(bounds[2], tp[2], v[2])
             if -1 in (x_idx, y_idx, z_idx):
                 # point outside the mesh
-                return voxel_list
+                return voxels
             # add current voxel
-            voxel_list.append((x_idx, y_idx, z_idx))
+            voxels.add((x_idx, y_idx, z_idx))
             t_maxs = _cal_max_travel_length_in_current_voxel(tp, end, v, bounds)
             x_idx, y_idx, z_idx, tp, t_temp = _move_to_next_voxel(
                 x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v)
@@ -345,14 +345,14 @@ def _ray_voxel_traverse(bounds, start, end):
 
             if all(t_maxs) < 0:
                 # current point outside the mesh, not any intersection
-                return voxel_list
+                return voxels
             else:
                 t_min = min(i for i in t_maxs if i > 0)
                 t_temp += t_min
                 # Move the point to the boundary
                 # calculate the new coordinate
                 tp += t_min * v
-    return voxel_list
+    return voxels
  
 def _cal_min_grid_step(bounds):
     """
@@ -471,28 +471,28 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
         rays = _create_rays_from_points(C, insert_points)
     return rays
 
-def _merge_voxel_list(old_list, new_list):
-    """
-    Merge two voxel lists.
-
-    Parameters:
-    -----------
-    old_list : list
-        Old list of voxels.
-    new_list : list
-        New list of the voxels.
-
-    Return:
-    -------
-    old_list : list
-        Merged list.
-    """
-    for v in new_list:
+#def _merge_voxel_list(old_list, new_list):
+#    """
+#    Merge two voxel lists.
+#
+#    Parameters:
+#    -----------
+#    old_list : list
+#        Old list of voxels.
+#    new_list : list
+#        New list of the voxels.
+#
+#    Return:
+#    -------
+#    old_list : list
+#        Merged list.
+#    """
+#    for v in new_list:
+##        if v not in old_list:
+##        if not any((end == x).all() for x in insert_points):
 #        if v not in old_list:
-#        if not any((end == x).all() for x in insert_points):
-        if v not in old_list:
-            old_list.append(v)
-    return old_list
+#            old_list.append(v)
+#    return old_list
 
 def _facet_voxel_traverse(A, B, C, bounds):
     """
@@ -513,17 +513,18 @@ def _facet_voxel_traverse(A, B, C, bounds):
 
     Return:
     -------
-    voxel_list: list
-        List of voxels that intersect with the facet.
+    voxel_list: set
+        Set of voxels that intersect with the facet.
     """
     min_step = _cal_min_grid_step(bounds)
     rays = _create_rays_from_triangle_facet(A, B, C, min_step)
-    voxel_list = []
+    voxels = set()
     for ray in rays:
-        temp_voxel_list = _ray_voxel_traverse(bounds, ray[0], ray[1])
+        temp_voxels = _ray_voxel_traverse(bounds, ray[0], ray[1])
         # merge two lists
-        voxel_list = _merge_voxel_list(voxel_list, temp_voxel_list)
-    return voxel_list
+        voxels = voxels.union(temp_voxels)
+#        voxel_list = _merge_voxel_list(voxel_list, temp_voxel_list)
+    return voxels
 
 if __name__ == '__main__':
     my_list = [[1, 1], [2, 2]]

@@ -20,10 +20,11 @@ def test_ray_voxel_traverse_2D():
     A = np.array([3, 5.5, 0.5])
     B = np.array([0.5, 0.5, 0.5])
     results = vta._ray_voxel_traverse(bounds, A, B)
-    exp_ans = [(2, 5, 0), (2, 4, 0), (2, 3, 0), (1, 3, 0),
-               (1, 2, 0), (1, 1, 0), (0, 1, 0), (0, 0, 0)]
-    for i in range(len(exp_ans)):
-        assert_array_equal(results[i], exp_ans[i])
+    exp_ans = set([(2, 5, 0), (2, 4, 0), (2, 3, 0), (1, 3, 0),
+               (1, 2, 0), (1, 1, 0), (0, 1, 0), (0, 0, 0)])
+#    for i in range(len(exp_ans)):
+#        assert_array_equal(results[i], exp_ans[i])
+    assert_equal(exp_ans, results)
 
 def test_ray_voxel_traverse_3D():
     """
@@ -41,9 +42,10 @@ def test_ray_voxel_traverse_3D():
     A = np.array([0.3, 0.4, 0.5])
     B = np.array([2, 2, 2])
     results = vta._ray_voxel_traverse(bounds, A, B)
-    exp_ans = [(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 1, 1)]
-    for i in range(len(exp_ans)):
-        assert_array_equal(results[i], exp_ans[i])
+    exp_ans = set([(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 1, 1)])
+#    for i in range(len(exp_ans)):
+#        assert_array_equal(results[i], exp_ans[i])
+    assert_equal(exp_ans, results)
 
 def test_facet_voxel_rraverse():
     x_bound = [0, 1, 2, 3, 4, 5, 6]
@@ -55,14 +57,15 @@ def test_facet_voxel_rraverse():
     C = np.array([3, 5.5, 0.5])
 #    import pdb; pdb.set_trace()
     results = vta._facet_voxel_traverse(A, B, C, bounds)
-    exp_ans = [(2, 5, 0), (2, 4, 0), (2, 3, 0), (1, 3, 0),
+    exp_ans = set([(2, 5, 0), (2, 4, 0), (2, 3, 0), (1, 3, 0),
                (1, 2, 0), (1, 1, 0), (0, 1, 0), (0, 0, 0),
                (2, 2, 0), (1, 0, 0), (2, 1, 0), (2, 0, 0),
                (3, 5, 0), (3, 4, 0), (3, 3, 0), (3, 2, 0),
                (3, 1, 0), (3, 0, 0), (4, 2, 0), (4, 1, 0),
-               (4, 0, 0), (4, 3, 0), (5, 1, 0), (5, 0, 0)]
-    for i in range(len(exp_ans)):
-        assert_array_equal(results[i], exp_ans[i])
+               (4, 0, 0), (4, 3, 0), (5, 1, 0), (5, 0, 0)])
+#    for i in range(len(exp_ans)):
+#        assert_array_equal(results[i], exp_ans[i])
+    assert_equal(exp_ans, results)
 
 
 if __name__ == "__main__":
