@@ -322,27 +322,9 @@ def _ray_voxel_traverse(bounds, start, end):
             # choose the minimum length and move the point to that position.
             # left, right, back, front, down, up
             t_maxs = [0.0] * 6
-            if v[0] == 0.0:
-                t_maxs[0] = float('inf')
-                t_maxs[1] = float('inf')
-            else:
-                t_maxs[0] = (bounds[0][0] - tp[0]) / v[0]
-                t_maxs[1] = (bounds[0][-1] - tp[0]) / v[0]
-
-            if v[1] == 0.0:
-                t_maxs[2] = float('inf')
-                t_maxs[3] = float('inf')
-            else:
-                t_maxs[2] = (bounds[1][0] - tp[1]) / v[1]
-                t_maxs[3] = (bounds[1][-1] - tp[1]) / v[1]
-
-            if v[2] == 0.0:
-                t_maxs[4] = float('inf')
-                t_maxs[5] = float('inf')
-            else:
-                t_maxs[4] = (bounds[2][0] - tp[1]) / v[2]
-                t_maxs[5] = (bounds[2][-1] - tp[1]) / v[2]
-
+            for dr in [0, 1, 2]:
+                t_max[dr*2] = np.divide(bounds[dr][0] - tp[dr], v[dr])
+                t_max[dr*2+1] = np.divide(bounds[dr][-1] - tp[dr], v[dr])
             if all(t_maxs) < 0:
                 # current point outside the mesh, not any intersection
                 return voxels
