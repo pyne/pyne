@@ -458,17 +458,29 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
     c = _distance(A, B)
     min_edge = min([a, b, c])
     if a == min_edge:
-        # divide BC
-        insert_points = _divide_edge(B, C, min_step)
-        rays = _create_rays_from_points(A, insert_points)
+        target = A
+        source = (B, C)
     elif b == min_edge:
-        # divide AC
-        insert_points = _divide_edge(A, C, min_step)
-        rays = _create_rays_from_points(B, insert_points)
+        target = B
+        source = (A, C)
     else:
-        # divide AB
-        insert_points = _divide_edge(A, B, min_step)
-        rays = _create_rays_from_points(C, insert_points)
+        target = C
+        source = (A, B)
+
+    insert_points = _divide_edge(source[0], source[1], min_step)
+    rays = _create_rays_from_points(target, insert_points)
+#    if a == min_edge:
+#        # divide BC
+#        insert_points = _divide_edge(B, C, min_step)
+#        rays = _create_rays_from_points(A, insert_points)
+#    elif b == min_edge:
+#        # divide AC
+#        insert_points = _divide_edge(A, C, min_step)
+#        rays = _create_rays_from_points(B, insert_points)
+#    else:
+#        # divide AB
+#        insert_points = _divide_edge(A, B, min_step)
+#        rays = _create_rays_from_points(C, insert_points)
     return rays
 
 #def _merge_voxel_list(old_list, new_list):
