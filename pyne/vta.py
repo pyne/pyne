@@ -369,11 +369,10 @@ def _cal_min_grid_step(bounds):
         The minimum grid step.
     """
     min_step = float('inf')
-    for i in range(len(bounds)):
-        for j in range(len(bounds[i])-1):
-            step = bounds[i][j+1] - bounds[i][j]
-            if min_step > step:
-                min_step = step
+    for bound_list in bounds:
+        for bound_idx in range(len(bound_list)-1):
+            min_step = min(min_step,
+                           bound_list[bound_idx+1] - bound_list[bound_idx])
     return min_step
 
 def _divide_edge(start, end, step):
