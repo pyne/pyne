@@ -16,6 +16,7 @@ PyNE is still in need.
 """
 from __future__ import division
 import math
+import numpy as np
 
 
 ##################################
@@ -23,43 +24,25 @@ import math
 ##################################
 
 
-class Point(object):
-    """
-    Point class represents x, y and z coordinates.
-    Coordinate of a dimension could be any float, including 'inf' and '-inf'.
-    """
-    def __init__(self, x=0.0, y=0.0, z=0.0):
-        self.x = x
-        self.y = y
-        self.z = z
-
-    def __str__(self):
-        """
-        Return a string with readable information of the coordinate.
-        """
-        return ''.join(['(',str(self.x), ', ',
-                        str(self.y), ', ',
-                        str(self.z), ')'])
-
 def _distance(start, end):
     """
     Calculate the distance between two points.
 
     Parameters:
     -----------
-    start : Point
-        The start point of the line segment.
-    end : Point
-        The end point of the line segment.
+    start : numpy array 
+        An array of size 3, represents the start point of  the line segment
+    end : numpy array
+        An array of size 3, represents the end point of  the line segment
 
     Return:
     -------
     dist : float
         The distance between the start point and the end point.
     """
-    dist = math.sqrt(math.pow(end.x - start.x, 2) +
-                      math.pow(end.y - start.y, 2) +
-                      math.pow(end.z - start.z, 2))
+    dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) +
+                     (end[1] - start[1]) * (end[1] - start[1]) +
+                     (end[2] - start[2]) * (end[2] - start[2]))
     return dist
 
 def _is_point_in_mesh(bounds, point):
@@ -73,17 +56,17 @@ def _is_point_in_mesh(bounds, point):
         Expected format: [[x_min, ..., x_max],
                           [y_min, ..., y_max],
                           [z_min, ..., z_max]]
-    point : Point
-        The point to be checked.
+    point : numpy array
+        An array with size of 3, represents the point to be checked.
 
     Return:
     -------
     True : when point in the mesh.
     False : when point outside the mesh.
     """
-    if bounds[0][0] <= point.x <= bounds[0][-1] and \
-       bounds[1][0] <= point.y <= bounds[1][-1] and \
-       bounds[2][0] <= point.z <= bounds[2][-1]:
+    if bounds[0][0] <= point[0] <= bounds[0][-1] and \
+       bounds[1][0] <= point[1] <= bounds[1][-1] and \
+       bounds[2][0] <= point[2] <= bounds[2][-1]:
         return True
     else:
         return False
@@ -128,25 +111,20 @@ def _cal_dir_v(start, end):
     
     Parameters:
     -----------
-    start : Point
-        Start point.
+    start : numpy array
+        An array of size 3. The start point.
     end :
-        End point.
+        An array of size 3. The end point.
 
     Return:
     -------
-    v : list
-        direction from start to end, an unit vector.
+    v : numpy array
+        Direction from start to end, an unit vector.
     """
-    v_x, v_y, v_z = 0.0, 0.0, 0.0
-    d_x = end.x - start.x
-    d_y = end.y - start.y
-    d_z = end.z - start.z
-    dist = math.sqrt(d_x * d_x + d_y * d_y + d_z * d_z)
-    v_x = d_x / dist
-    v_y = d_y / dist
-    v_z = d_z / dist
-    return [v_x, v_y, v_z]
+    v = end - start
+    dist = math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
+    v = np.divide(v, dist)
+    return v
 
 def _find_next_grid_1d(cor, v_1d, bound):
     """
@@ -194,11 +172,11 @@ def _cal_max_travel_length_in_current_voxel(tp, end, v, bounds):
     
     Parameters:
     -----------
-    tp : Point
-        Temporary point position.
-    end : Point
-        End point
-    v : list
+    tp : numpy array
+        An array of size 3. Temporary point position.
+    end : numpy array
+        An array of size 3. End point
+    v : numpy array
         Direction vector from start to end: [v_x, v_y, v_z].
     bounds : list
         Boundaries of the mesh grid.
@@ -208,30 +186,18 @@ def _cal_max_travel_length_in_current_voxel(tp, end, v, bounds):
 
     Return:
     -------
-    t_maxs : list
+    t_maxs : numpy array
         The maximum travel lenght in current voxel for 3 directions. Format: 
         [t_max_x, t_max_y, t_max_z]. These value could be both positive and
         negtive. And could be 'inf' or '-inf'.
     """
-    n_x_grid = _find_next_grid_1d(tp.x, v[0], bounds[0])
-    n_y_grid = _find_next_grid_1d(tp.y, v[1], bounds[1])
-    n_z_grid = _find_next_grid_1d(tp.z, v[2], bounds[2])
-    if v[0] == 0.0:
-        t_max_x = float('inf')
-    else:
-        t_max_x = (n_x_grid - tp.x) / v[0]
-
-    if v[1] == 0.0:
-        t_max_y = float('inf')
-    else:
-        t_max_y = (n_y_grid - tp.y) / v[1]
-
-    if v[2] == 0.0:
-        t_max_z = float('inf')
-    else:
-        t_max_z = (n_z_grid - tp.z) / v[2]
-
-    return [t_max_x, t_max_y, t_max_z]
+    n_x_grid = _find_next_grid_1d(tp[0], v[0], bounds[0])
+    n_y_grid = _find_next_grid_1d(tp[1], v[1], bounds[1])
+    n_z_grid = _find_next_grid_1d(tp[2], v[2], bounds[2])
+    t_max_x = np.divide(n_x_grid - tp[0], v[0])
+    t_max_y = np.divide(n_y_grid - tp[1], v[1])
+    t_max_z = np.divide(n_z_grid - tp[2], v[2])
+    return np.array([t_max_x, t_max_y, t_max_z])
 
 def _move_to_next_voxel(x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v):
     """
@@ -245,13 +211,13 @@ def _move_to_next_voxel(x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v):
         Mesh idx in y direction.
     z_idx : int
         Mesh idx in z direction.
-    tp : Point
-        Temporary point position.
+    tp : numpy array
+        An array of size 3. Temporary point position.
     t_temp: float
         Temporary travel lenght from the start.
-    t_maxs: list
+    t_maxs: numpy array
         The maximum travel length in current voxel for 3 directions.
-    v : list
+    v : numpy array
         Direction vector from start to end.
 
     Returns:
@@ -262,21 +228,20 @@ def _move_to_next_voxel(x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v):
         Modified y_idx.
     z_idx : int
         Modified z_idx.
-    tp : Point
-        Point after moving along the direction of v.
+    tp : numpy array
+        An array of size 3. Point after moving along the direction of v.
     t_temp : float
         Updated travel length. Distance from the start point to updated point.
     """
-    t_min = min(t_maxs)
+    #t_min = min(t_maxs)
+    t_min = min(i for i in t_maxs if i > 0)
     if t_maxs[0] == t_min:
         x_idx += 1
     elif t_maxs[1] == t_min:
         y_idx += 1
     elif t_maxs[2] == t_min:
         z_idx += 1
-    tp.x += t_min * v[0]
-    tp.y += t_min * v[1]
-    tp.z += t_min * v[2]
+    tp += t_min * v
     t_temp += t_min
     return x_idx, y_idx, z_idx, tp, t_temp
 
@@ -286,29 +251,26 @@ def _move_to_boundary(tp, t_min, v):
 
     Parameters:
     -----------
-    tp : Point
-        Temporary point. Actually, it is also the start point.
+    tp : numpy array
+        An array of size 3. Temporary point. Actually, it is also the start point.
     t_min : float
         Distance to the nearest (positive) boundary. For a 3D mesh, there are 6
         outside boundaries. Therefore there are 6 value of the distance from the
         start to the boundaries. This t_min is the smallest one among the
         positive distance. (The distance is negtive when the direction is
         negtive.)
-    v : list
+    v : numpy array
         Direction vector.
 
     Return:
     -------
-    tp : Point
+    tp : numpy array
         Modified point. This point lies on the nearest boundary. Therefore, we
         moved point from outside the mesh to the mesh boundary (or the extension
         of the boundary, which still outside the mesh).
     """
 
-    # calculate the new coordinate
-    tp.x += t_min * v[0]
-    tp.y += t_min * v[1]
-    tp.z += t_min * v[2]
+    tp += t_min * v
     return tp
 
 def _ray_voxel_traverse(bounds, start, end):
@@ -320,19 +282,19 @@ def _ray_voxel_traverse(bounds, start, end):
     -----------
     bounds : list
         Boundaries of the mesh grid.
-    start : Point
+    start : numpy array
         Start point.
-    end : Point
+    end : numpy array
         End point.
 
     Return:
     -------
-    voxles : list
+    voxles : list of tuples
         List of voxel indices. These voxels intersect with the line segment.
     """
     # Initialization
     # Find the voxel that start point in
-    tp = Point(start.x, start.y, start.z)
+    tp = np.copy(start)
     x_idx, y_idx, z_idx = -1, -1, -1
     voxel_list = []
     v = _cal_dir_v(start, end)
@@ -342,14 +304,14 @@ def _ray_voxel_traverse(bounds, start, end):
         if _is_point_in_mesh(bounds, tp):
             # the point is in the mesh
             # calculate the voxel id
-            x_idx = _find_voxel_idx_1d(bounds[0], tp.x, v[0])
-            y_idx = _find_voxel_idx_1d(bounds[1], tp.y, v[1])
-            z_idx = _find_voxel_idx_1d(bounds[2], tp.z, v[2])
+            x_idx = _find_voxel_idx_1d(bounds[0], tp[0], v[0])
+            y_idx = _find_voxel_idx_1d(bounds[1], tp[1], v[1])
+            z_idx = _find_voxel_idx_1d(bounds[2], tp[2], v[2])
             if -1 in (x_idx, y_idx, z_idx):
                 # point outside the mesh
                 return voxel_list
             # add current voxel
-            voxel_list.append([x_idx, y_idx, z_idx])
+            voxel_list.append((x_idx, y_idx, z_idx))
             t_maxs = _cal_max_travel_length_in_current_voxel(tp, end, v, bounds)
             x_idx, y_idx, z_idx, tp, t_temp = _move_to_next_voxel(
                 x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v)
@@ -359,27 +321,27 @@ def _ray_voxel_traverse(bounds, start, end):
             # length are negtive, then there is no intersection, return. Ohterwise,
             # choose the minimum length and move the point to that position.
             # left, right, back, front, down, up
-            t_maxs = [0.0] * 4
+            t_maxs = [0.0] * 6
             if v[0] == 0.0:
                 t_maxs[0] = float('inf')
                 t_maxs[1] = float('inf')
             else:
-                t_maxs[0] = (bounds[0][0] - tp.x) / v[0]
-                t_maxs[1] = (bounds[0][-1] - tp.x) / v[0]
+                t_maxs[0] = (bounds[0][0] - tp[0]) / v[0]
+                t_maxs[1] = (bounds[0][-1] - tp[0]) / v[0]
 
             if v[1] == 0.0:
                 t_maxs[2] = float('inf')
                 t_maxs[3] = float('inf')
             else:
-                t_maxs[2] = (bounds[1][0] - tp.y) / v[1]
-                t_maxs[3] = (bounds[1][-1] - tp.y) / v[1]
+                t_maxs[2] = (bounds[1][0] - tp[1]) / v[1]
+                t_maxs[3] = (bounds[1][-1] - tp[1]) / v[1]
 
             if v[2] == 0.0:
                 t_maxs[4] = float('inf')
                 t_maxs[5] = float('inf')
             else:
-                t_maxs[4] = (bounds[2][0] - tp.z) / v[2]
-                t_maxs[5] = (bounds[2][-1] - tp.z) / v[2]
+                t_maxs[4] = (bounds[2][0] - tp[1]) / v[2]
+                t_maxs[5] = (bounds[2][-1] - tp[1]) / v[2]
 
             if all(t_maxs) < 0:
                 # current point outside the mesh, not any intersection
@@ -389,9 +351,7 @@ def _ray_voxel_traverse(bounds, start, end):
                 t_temp += t_min
                 # Move the point to the boundary
                 # calculate the new coordinate
-                tp.x += t_min * v[0]
-                tp.y += t_min * v[1]
-                tp.z += t_min * v[2]
+                tp += t_min * v
     return voxel_list
  
 def _cal_min_grid_step(bounds):
@@ -422,10 +382,10 @@ def _divide_edge(start, end, step):
 
     Parameters:
     -----------
-    start : Point
-        Start point.
-    end : Point
-        End point.
+    start : numpy array
+        An array of size 3, represents the start point.
+    end : numpy array
+        An array of size 3, represents the start point.
     step : float
         The minimum grid step. Divider used to divide the line segment.
 
@@ -438,15 +398,13 @@ def _divide_edge(start, end, step):
     dist = _distance(start, end)
     v = _cal_dir_v(start, end)
     t_temp = 0.0
-    tp = Point(start.x, start.y, start.z)
+    tp = np.copy(start)
     insert_points = [start]
     while t_temp < dist:
-        tp.x += step * v[0]
-        tp.y += step * v[1]
-        tp.z += step * v[2]
-        insert_points.append(Point(tp.x, tp.y, tp.z))
+        tp += step * v
+        insert_points.append(np.copy(tp))
         t_temp += step
-    if end not in insert_points:
+    if not any((end == x).all() for x in insert_points):
         insert_points.append(end)
     return insert_points
 
@@ -457,9 +415,9 @@ def _create_rays_from_points(start, insert_points):
 
     Parameters:
     -----------
-    start : Point
-        Start point for all the rays (line segments).
-    insert_points : list of points
+    start : numpy array
+        An array of size 3, represents the start point.
+    insert_points : list of arrays
         List of points.
 
     Return:
@@ -479,12 +437,12 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
 
     Parameters:
     -----------
-    A : Point
-        Vertex of the triangle
-    B : Point
-        Vertex of the triangle
-    C : Point
-        Vertex of the triangle
+    A : numpy array
+        An array of size 3, represents a vertex of the triangle
+    B : numpy array
+        An array of size 3, represents a vertex of the triangle
+    C : numpy array
+        An array of size 3, represents a vertex of the triangle
     min_step: float
         The minimum step of the mesh grid. Used to divide the shortest edge
         of the facet triangle. Use this value could make sure that every voxel
@@ -530,6 +488,8 @@ def _merge_voxel_list(old_list, new_list):
         Merged list.
     """
     for v in new_list:
+#        if v not in old_list:
+#        if not any((end == x).all() for x in insert_points):
         if v not in old_list:
             old_list.append(v)
     return old_list
@@ -541,12 +501,13 @@ def _facet_voxel_traverse(A, B, C, bounds):
 
     Parameters:
     -----------
-    A : Point
+    A : numpy array
+        An array of size 3, represents a vertex of the triangle.
         Vertex of the triangle facet
-    B : Point
-        Vertex of the triangle facet
-    C : Point
-        Vertex of the triangle facet
+    B : numpy array
+        An array of size 3, represents a vertex of the triangle.
+    C : numpy array
+        An array of size 3, represents a vertex of the triangle.
     bounds : list
         Boundaries of the mesh grid.
 
@@ -564,3 +525,11 @@ def _facet_voxel_traverse(A, B, C, bounds):
         voxel_list = _merge_voxel_list(voxel_list, temp_voxel_list)
     return voxel_list
 
+if __name__ == '__main__':
+    my_list = [[1, 1], [2, 2]]
+    a = np.array([1, 1])
+    if any((a == x).all() for x in my_list): 
+#    if a in my_list:
+        print 'yes'
+    else:
+        print 'no'
