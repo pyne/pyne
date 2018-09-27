@@ -398,14 +398,14 @@ def _divide_edge(start, end, step):
     dist = _distance(start, end)
     v = _cal_dir_v(start, end)
     t_temp = 0.0
-    tp = np.copy(start)
-    insert_points = [start]
-    while t_temp < dist:
-        tp += step * v
-        insert_points.append(np.copy(tp))
-        t_temp += step
-    if not any((end == x).all() for x in insert_points):
-        insert_points.append(end)
+    insert_points = []
+    # +2 here to make sure it's a conservative result
+    num_segment = math.floor(dist/step) + 2
+    x_list = np.linspace(start[0], end[0], num_segment)
+    y_list = np.linspace(start[1], end[1], num_segment)
+    z_list = np.linspace(start[2], end[2], num_segment)
+    for (x, y, z) in zip(x_list, y_list, z_list):
+        insert_points.append([x, y, z])
     return insert_points
 
 def _create_rays_from_points(start, insert_points):
