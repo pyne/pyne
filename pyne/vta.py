@@ -205,12 +205,8 @@ def _move_to_next_voxel(idxs, tp, t_temp, t_maxs, v):
 
     Parameters:
     -----------
-    x_idx : int
-        Mesh idx in x direction.
-    y_idx : int
-        Mesh idx in y direction.
-    z_idx : int
-        Mesh idx in z direction.
+    idxs: list
+        List of indexes, format: [x_idx, y_idx, z_idx]
     tp : numpy array
         An array of size 3. Temporary point position.
     t_temp: float
@@ -222,29 +218,18 @@ def _move_to_next_voxel(idxs, tp, t_temp, t_maxs, v):
 
     Returns:
     --------
-    x_idx : int
-        Modified x_idx.
-    y_idx : int
-        Modified y_idx.
-    z_idx : int
-        Modified z_idx.
+    idxs: list
+        Updated indexes.
     tp : numpy array
         An array of size 3. Point after moving along the direction of v.
     t_temp : float
         Updated travel length. Distance from the start point to updated point.
     """
-    #t_min = min(t_maxs)
     t_min = min(i for i in t_maxs if i > 0)
     update_dir = list(t_maxs).index(t_min)
     update_idx = [0, 0, 0]
     update_idx[update_dir] = 1
     idxs = [x + y for x, y in zip(idxs, update_idx)] 
-    #if t_maxs[0] == t_min:
-    #    x_idx += 1
-    #elif t_maxs[1] == t_min:
-    #    y_idx += 1
-    #elif t_maxs[2] == t_min:
-    #    z_idx += 1
     tp += t_min * v
     t_temp += t_min
     return idxs, tp, t_temp
@@ -299,7 +284,6 @@ def _ray_voxel_traverse(bounds, start, end):
     # Initialization
     # Find the voxel that start point in
     tp = np.copy(start)
-    #x_idx, y_idx, z_idx = -1, -1, -1
     idxs = [-1, -1, -1]
     voxels = set()
     v = _cal_dir_v(start, end)
@@ -311,19 +295,12 @@ def _ray_voxel_traverse(bounds, start, end):
             # calculate the voxel id
             for dr in range(len(idxs)):
                 idxs[dr] = _find_voxel_idx_1d(bounds[dr], tp[dr], v[dr])
-            #x_idx = _find_voxel_idx_1d(bounds[0], tp[0], v[0])
-            #y_idx = _find_voxel_idx_1d(bounds[1], tp[1], v[1])
-            #z_idx = _find_voxel_idx_1d(bounds[2], tp[2], v[2])
-            #if -1 in (x_idx, y_idx, z_idx):
             if -1 in idxs:
                 # point outside the mesh
                 return voxels
             # add current voxel
-            #voxels.add((x_idx, y_idx, z_idx))
             voxels.add((idxs[0], idxs[1], idxs[2]))
             t_maxs = _cal_max_travel_length_in_current_voxel(tp, end, v, bounds)
-            #x_idx, y_idx, z_idx, tp, t_temp = _move_to_next_voxel(
-            #    x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v)
             idxs, tp, t_temp = _move_to_next_voxel(idxs, tp, t_temp, t_maxs, v)
         else:
             # Check whether the ray intersecs the mesh. Calculate the maxinum travel
@@ -460,42 +437,8 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
 
     insert_points = _divide_edge(source[0], source[1], min_step)
     rays = _create_rays_from_points(target, insert_points)
-#    if a == min_edge:
-#        # divide BC
-#        insert_points = _divide_edge(B, C, min_step)
-#        rays = _create_rays_from_points(A, insert_points)
-#    elif b == min_edge:
-#        # divide AC
-#        insert_points = _divide_edge(A, C, min_step)
-#        rays = _create_rays_from_points(B, insert_points)
-#    else:
-#        # divide AB
-#        insert_points = _divide_edge(A, B, min_step)
-#        rays = _create_rays_from_points(C, insert_points)
     return rays
 
-#def _merge_voxel_list(old_list, new_list):
-#    """
-#    Merge two voxel lists.
-#
-#    Parameters:
-#    -----------
-#    old_list : list
-#        Old list of voxels.
-#    new_list : list
-#        New list of the voxels.
-#
-#    Return:
-#    -------
-#    old_list : list
-#        Merged list.
-#    """
-#    for v in new_list:
-##        if v not in old_list:
-##        if not any((end == x).all() for x in insert_points):
-#        if v not in old_list:
-#            old_list.append(v)
-#    return old_list
 
 def _facet_voxel_traverse(A, B, C, bounds):
     """
@@ -526,7 +469,6 @@ def _facet_voxel_traverse(A, B, C, bounds):
         temp_voxels = _ray_voxel_traverse(bounds, ray[0], ray[1])
         # merge two lists
         voxels = voxels.union(temp_voxels)
-#        voxel_list = _merge_voxel_list(voxel_list, temp_voxel_list)
     return voxels
 
 if __name__ == '__main__':
