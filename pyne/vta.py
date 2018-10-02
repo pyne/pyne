@@ -147,9 +147,9 @@ def _find_next_grid_1d(cor, v_1d, bound):
     n_grid = 0.0
     flag = False
     if v_1d > 0:
-        for i in range(len(bound)):
-            if cor < bound[i]:
-                n_grid = bound[i]
+        for bnd_pos in bound:
+            if cor < bnd_pos:
+                n_grid = bnd_pos
                 flag = True
                 break
     else:
