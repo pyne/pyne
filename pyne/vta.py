@@ -199,7 +199,7 @@ def _cal_max_travel_length_in_current_voxel(tp, end, v, bounds):
     t_max_z = np.divide(n_z_grid - tp[2], v[2])
     return np.array([t_max_x, t_max_y, t_max_z])
 
-def _move_to_next_voxel(x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v):
+def _move_to_next_voxel(idxs, tp, t_temp, t_maxs, v):
     """
     Move the point to next voxel.
 
@@ -235,15 +235,19 @@ def _move_to_next_voxel(x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v):
     """
     #t_min = min(t_maxs)
     t_min = min(i for i in t_maxs if i > 0)
-    if t_maxs[0] == t_min:
-        x_idx += 1
-    elif t_maxs[1] == t_min:
-        y_idx += 1
-    elif t_maxs[2] == t_min:
-        z_idx += 1
+    update_dir = list(t_maxs).index(t_min)
+    update_idx = [0, 0, 0]
+    update_idx[update_dir] = 1
+    idxs = [x + y for x, y in zip(idxs, update_idx)] 
+    #if t_maxs[0] == t_min:
+    #    x_idx += 1
+    #elif t_maxs[1] == t_min:
+    #    y_idx += 1
+    #elif t_maxs[2] == t_min:
+    #    z_idx += 1
     tp += t_min * v
     t_temp += t_min
-    return x_idx, y_idx, z_idx, tp, t_temp
+    return idxs, tp, t_temp
 
 def _move_to_boundary(tp, t_min, v):
     """
@@ -295,7 +299,8 @@ def _ray_voxel_traverse(bounds, start, end):
     # Initialization
     # Find the voxel that start point in
     tp = np.copy(start)
-    x_idx, y_idx, z_idx = -1, -1, -1
+    #x_idx, y_idx, z_idx = -1, -1, -1
+    idxs = [-1, -1, -1]
     voxels = set()
     v = _cal_dir_v(start, end)
     t_end = _distance(start, end)
@@ -304,17 +309,22 @@ def _ray_voxel_traverse(bounds, start, end):
         if _is_point_in_mesh(bounds, tp):
             # the point is in the mesh
             # calculate the voxel id
-            x_idx = _find_voxel_idx_1d(bounds[0], tp[0], v[0])
-            y_idx = _find_voxel_idx_1d(bounds[1], tp[1], v[1])
-            z_idx = _find_voxel_idx_1d(bounds[2], tp[2], v[2])
-            if -1 in (x_idx, y_idx, z_idx):
+            for dr in range(len(idxs)):
+                idxs[dr] = _find_voxel_idx_1d(bounds[dr], tp[dr], v[dr])
+            #x_idx = _find_voxel_idx_1d(bounds[0], tp[0], v[0])
+            #y_idx = _find_voxel_idx_1d(bounds[1], tp[1], v[1])
+            #z_idx = _find_voxel_idx_1d(bounds[2], tp[2], v[2])
+            #if -1 in (x_idx, y_idx, z_idx):
+            if -1 in idxs:
                 # point outside the mesh
                 return voxels
             # add current voxel
-            voxels.add((x_idx, y_idx, z_idx))
+            #voxels.add((x_idx, y_idx, z_idx))
+            voxels.add((idxs[0], idxs[1], idxs[2]))
             t_maxs = _cal_max_travel_length_in_current_voxel(tp, end, v, bounds)
-            x_idx, y_idx, z_idx, tp, t_temp = _move_to_next_voxel(
-                x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v)
+            #x_idx, y_idx, z_idx, tp, t_temp = _move_to_next_voxel(
+            #    x_idx, y_idx, z_idx, tp, t_temp, t_maxs, v)
+            idxs, tp, t_temp = _move_to_next_voxel(idxs, tp, t_temp, t_maxs, v)
         else:
             # Check whether the ray intersecs the mesh. Calculate the maxinum travel
             # length of the ray to the outside boundaries of the mesh. If all the
