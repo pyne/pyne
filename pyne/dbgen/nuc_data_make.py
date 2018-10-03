@@ -64,7 +64,7 @@ pyne_logo = """\
 def _fetch_prebuilt(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
     prebuilt_nuc_data = os.path.join(build_dir, 'prebuilt_nuc_data.h5')
-    prebuilt_nuc_data_url = "https://github.com/pyne/data/raw/move_data/prebuilt_nuc_data.h5"
+    prebuilt_nuc_data_url = "https://github.com/pyne/data/raw/e192adbcb95d11f49eebe6f943e4a188e73befd7/prebuilt_nuc_data.h5"
 
     if not os.path.exists(prebuilt_nuc_data):
         print("Fetching pre-built nuc_data.h5 from " + prebuilt_nuc_data_url)

@@ -42,7 +42,7 @@ O2HLS = None  # Origen Half-lives
 
 def setup():
     global MATS, O2HLS
-    o2benchurl = 'http://data.pyne.io/' + H5NAME
+    o2benchurl = 'https://github.com/pyne/data/raw/e3f20d8fc0823a6fe87879859b5c6f6eabde7252/' + H5NAME
     if not os.path.exists(H5NAME):
         sys.stderr.write("\nDownloading " + o2benchurl + ": ")
         sys.stderr.flush()
