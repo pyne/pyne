@@ -320,14 +320,15 @@ def _ray_voxel_traverse(bounds, start, end):
                                             vec[dr])
                 dist_maxs[dr*2+1] = np.divide(bounds[dr][-1] - point[dr],
                                               vec[dr])
-            if not any((x > 0).all() for x in dist_maxs):
-                # current point outside the mesh, not any intersection
-                return voxels
-            else:
-                # current point outside the mesh, will intersects to the the mesh
+            if any((x > 0).all() for x in dist_maxs):
+                # current point outside the mesh
+                # there maybe intersects to the mesh
                 dist_min = min(i for i in dist_maxs if i > 0)
                 # Move the point to the boundary, calculate the new coordinate
-                point = np.add(point, dist_min * vec)
+                point = _move_to_boundary(point, dist_min, vec)
+            else:
+                # current point outside the mesh, not any intersection
+                return voxels
     return voxels
  
 def _calc_min_grid_step(bounds):
