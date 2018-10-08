@@ -22,8 +22,6 @@ def test_ray_voxel_traverse_2D():
     results = vta._ray_voxel_traverse(bounds, A, B)
     exp_ans = set([(2, 5, 0), (2, 4, 0), (2, 3, 0), (1, 3, 0),
                (1, 2, 0), (1, 1, 0), (0, 1, 0), (0, 0, 0)])
-#    for i in range(len(exp_ans)):
-#        assert_array_equal(results[i], exp_ans[i])
     assert_equal(exp_ans, results)
 
 def test_ray_voxel_traverse_3D():
@@ -82,8 +80,6 @@ def test_facet_voxel_rraverse():
                (3, 5, 0), (3, 4, 0), (3, 3, 0), (3, 2, 0),
                (3, 1, 0), (3, 0, 0), (4, 2, 0), (4, 1, 0),
                (4, 0, 0), (4, 3, 0), (5, 1, 0), (5, 0, 0)])
-#    for i in range(len(exp_ans)):
-#        assert_array_equal(results[i], exp_ans[i])
     assert_equal(exp_ans, results)
 
 

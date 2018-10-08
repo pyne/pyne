@@ -188,8 +188,8 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
     -------
     dist_maxs : numpy array
         The maximum travel lenght in current voxel for 3 directions. Format: 
-        [dist_max_x, dist_max_y, dist_max_z]. These value could be both positive and
-        negtive. And could be 'inf' or '-inf'.
+        [dist_max_x, dist_max_y, dist_max_z]. These value could be both
+        positive and negtive. And could be 'inf' or '-inf'.
     """
     n_x_grid = _find_next_grid_1d(point[0], vec[0], bounds[0])
     n_y_grid = _find_next_grid_1d(point[1], vec[1], bounds[1])
@@ -201,7 +201,7 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
 
 def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     """
-    Move the point to next voxel.
+    Move the point to next voxel boundary.
 
     Parameters:
     -----------
@@ -268,7 +268,7 @@ def _move_to_boundary(point, dist_min, vec):
 
 def _ray_voxel_traverse(bounds, start, end):
     """
-    Voxel traversal algorithm.
+    Ray (line segment) traversal in structured mesh.
     Return the voxels that intersect with the line segment.
 
     Parameters:
@@ -304,8 +304,10 @@ def _ray_voxel_traverse(bounds, start, end):
                 return voxels
             # add current voxel
             voxels.add((idxs[0], idxs[1], idxs[2]))
-            dist_maxs = _calc_max_travel_length_in_current_voxel(point, end, vec, bounds)
-            idxs, point, dist_temp = _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec)
+            dist_maxs = _calc_max_travel_length_in_current_voxel(
+                point, end, vec, bounds)
+            idxs, point, dist_temp = _move_to_next_voxel(
+                idxs, point, dist_temp, dist_maxs, vec)
         else:
             # Check whether the ray intersecs the mesh. Calculate the maximum travel
             # length of the ray to the outside boundaries of the mesh. If all the
@@ -314,8 +316,10 @@ def _ray_voxel_traverse(bounds, start, end):
             # left, right, back, front, down, up
             dist_maxs = [0.0] * 6
             for dr in [0, 1, 2]:
-                dist_maxs[dr*2] = np.divide(bounds[dr][0] - point[dr], vec[dr])
-                dist_maxs[dr*2+1] = np.divide(bounds[dr][-1] - point[dr], vec[dr])
+                dist_maxs[dr*2] = np.divide(bounds[dr][0] - point[dr],
+                                            vec[dr])
+                dist_maxs[dr*2+1] = np.divide(bounds[dr][-1] - point[dr],
+                                              vec[dr])
             if not any((x > 0).all() for x in dist_maxs):
                 # current point outside the mesh, not any intersection
                 return voxels
@@ -328,7 +332,7 @@ def _ray_voxel_traverse(bounds, start, end):
  
 def _calc_min_grid_step(bounds):
     """
-    Calculate the minimum grid step. Used for scan.
+    Calculate the minimum grid step of the given mesh.
 
     Parameters:
     -----------
@@ -347,9 +351,10 @@ def _calc_min_grid_step(bounds):
                            bound_list[bound_idx+1] - bound_list[bound_idx])
     return min_step
 
-def _divide_edge(start, end, step):
+def _divide_tri_edge(start, end, step):
     """
-    Divide the edge into several parts. Return the divide points.
+    Divide the shortest triangel edge into several parts uniformly. Return the
+    insert points.
 
     Parameters:
     -----------
@@ -358,12 +363,13 @@ def _divide_edge(start, end, step):
     end : numpy array
         An array of size 3, represents the start point.
     step : float
-        The minimum grid step. Divider used to divide the line segment.
+        The minimum grid step. Used to create the divisor of the shortest edge.
 
     Return:
     -------
-    intert_points : list of points
-        List of points. These points are located on the line segment from start
+    intert_points : list
+        List of the ray end points. These points are located on the line
+        segment from start
         to end.
     """
     dist = _distance(start, end)
@@ -381,8 +387,9 @@ def _divide_edge(start, end, step):
 
 def _create_rays_from_points(start, insert_points):
     """
-    Create rays from points. In which, 'start' is the start point of all the
-    rays, and the point in the `insert_points' are the end points.
+    Create rays (a pair of two points) from given point list. In which, 'start'
+    is the start point of all the rays, and the point in the `insert_points'
+    are the end points.
 
     Parameters:
     -----------
@@ -403,7 +410,7 @@ def _create_rays_from_points(start, insert_points):
 
 def _create_rays_from_triangle_facet(A, B, C, min_step):
     """
-    Create rays form triangle for scanning.
+    Create rays from triangle facet for traversing.
     Divide the shortest edge of the triangle with the min_step.
 
     Parameters:
@@ -416,8 +423,7 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
         An array of size 3, represents a vertex of the triangle
     min_step: float
         The minimum step of the mesh grid. Used to divide the shortest edge
-        of the facet triangle. Use this value could make sure that every voxel
-        that intersect with the facet has intersection with some of the rays.
+        of the facet triangle.
 
     Return:
     -------
@@ -438,15 +444,15 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
         target = C
         source = (A, B)
 
-    insert_points = _divide_edge(source[0], source[1], min_step)
+    insert_points = _divide_tri_edge(source[0], source[1], min_step)
     rays = _create_rays_from_points(target, insert_points)
     return rays
 
 
 def _facet_voxel_traverse(A, B, C, bounds):
     """
-    Facet voxel traverse. Calculate all the voxles that intersect with the
-    facet. Facet is represented with 3 triangle verteice.
+    Calculate all the voxles that intersect with the
+    facet. Facet is represented with 3 triangle vertices.
 
     Parameters:
     -----------
@@ -474,11 +480,3 @@ def _facet_voxel_traverse(A, B, C, bounds):
         voxels = voxels.union(temp_voxels)
     return voxels
 
-if __name__ == '__main__':
-    my_list = [[1, 1], [2, 2]]
-    a = np.array([1, 1])
-    if any((a == x).all() for x in my_list): 
-#    if a in my_list:
-        print 'yes'
-    else:
-        print 'no'
