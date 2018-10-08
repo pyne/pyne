@@ -210,7 +210,7 @@ def _move_to_next_voxel(idxs, tp, t_temp, t_maxs, v):
     tp : numpy array
         An array of size 3. Temporary point position.
     t_temp: float
-        Temporary travel lenght from the start.
+        Temporary travel length from the start.
     t_maxs: numpy array
         The maximum travel length in current voxel for 3 directions.
     v : numpy array
@@ -228,9 +228,13 @@ def _move_to_next_voxel(idxs, tp, t_temp, t_maxs, v):
     t_min = min(i for i in t_maxs if i > 0)
     update_dir = list(t_maxs).index(t_min)
     update_idx = [0, 0, 0]
-    update_idx[update_dir] = 1
+    # v[update_dir] will not be 0
+    if v[update_dir] > 0:
+        update_idx[update_dir] = 1
+    elif v[update_dir] < 0:
+        update_idx[update_dir] = -1
     idxs = [x + y for x, y in zip(idxs, update_idx)] 
-    tp += t_min * v
+    tp = np.add(tp, t_min * v)
     t_temp += t_min
     return idxs, tp, t_temp
 
