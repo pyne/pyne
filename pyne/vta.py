@@ -71,17 +71,17 @@ def _is_point_in_mesh(bounds, point):
     else:
         return False
 
-def _find_voxel_idx_1d(bound, cor, v_1d):
+def _find_voxel_idx_1d(bounds_1d, cor, vec_1d):
     """
     Find the voxel id (in a given dimension).
 
     Parameters:
     -----------
-    bound : list
+    bounds_1d : list
         Boundary of the mesh in a given direction.
     cor : float
         Coordinate of the point in the given direction.
-    v_1d : float
+    vec_1d : float
         Vector attribute in the given direction.
 
     Return:
@@ -92,14 +92,14 @@ def _find_voxel_idx_1d(bound, cor, v_1d):
     ----------
     """
     idx = -1
-    if v_1d > 0:
-        for i in range(len(bound)-1):
-            if bound[i] <= cor < bound[i+1]:
+    if vec_1d > 0:
+        for i in range(len(bounds_1d)-1):
+            if bounds_1d[i] <= cor < bounds_1d[i+1]:
                 idx = i
                 break
     else:
-        for i in range(len(bound)-1, -1, -1):
-            if bound[i] < cor <= bound[i+1]:
+        for i in range(len(bounds_1d)-1, -1, -1):
+            if bounds_1d[i] < cor <= bounds_1d[i+1]:
                 idx = i
                 break
     # idx could be -1, that means point outside the mesh
@@ -126,7 +126,7 @@ def _calc_vec_dir(start, end):
     vec = np.divide(vec, dist)
     return vec
 
-def _find_next_grid_1d(cor, v_1d, bound):
+def _find_next_grid_1d(cor, vec_1d, bounds_1d):
     """
     Find the next grid coordinate of a direction.
 
@@ -134,9 +134,9 @@ def _find_next_grid_1d(cor, v_1d, bound):
     -----------
     cor : float
         Coordinate of current point in the direction.
-    v_1d : float
+    vec_1d : float
         Direction value.
-    bound : list of float
+    bounds_1d : list of float
         Boundary values of current direction.
 
     Return:
@@ -146,23 +146,23 @@ def _find_next_grid_1d(cor, v_1d, bound):
     """
     n_grid = 0.0
     flag = False
-    if v_1d > 0:
-        for bnd_pos in bound:
+    if vec_1d > 0:
+        for bnd_pos in bounds_1d:
             if cor < bnd_pos:
                 n_grid = bnd_pos
                 flag = True
                 break
     else:
-        for i in range(len(bound)-1, -1, -1):
-            if cor > bound[i]:
-                n_grid = bound[i]
+        for i in range(len(bounds_1d)-1, -1, -1):
+            if cor > bounds_1d[i]:
+                n_grid = bounds_1d[i]
                 flag = True
                 break
     if flag:
         return n_grid
     else:
         # point goes out of the mesh
-        return v_1d * float('inf')
+        return vec_1d * float('inf')
 
 
 def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
