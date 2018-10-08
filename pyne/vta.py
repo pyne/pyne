@@ -105,7 +105,7 @@ def _find_voxel_idx_1d(bound, cor, v_1d):
     # idx could be -1, that means point outside the mesh
     return idx
 
-def _cal_dir_v(start, end):
+def _calc_vec_dir(start, end):
     """
     Calculate the direction from start to end (start -> end).
     
@@ -165,7 +165,7 @@ def _find_next_grid_1d(cor, v_1d, bound):
         return v_1d * float('inf')
 
 
-def _cal_max_travel_length_in_current_voxel(tp, end, v, bounds):
+def _calc_max_travel_length_in_current_voxel(tp, end, v, bounds):
     """
     Calculate the maximum travel length in current voxel before reach next
     boundary.
@@ -286,7 +286,7 @@ def _ray_voxel_traverse(bounds, start, end):
     tp = np.copy(start)
     idxs = [-1, -1, -1]
     voxels = set()
-    v = _cal_dir_v(start, end)
+    v = _calc_vec_dir(start, end)
     t_end = _distance(start, end)
     t_temp = 0.0
     while t_temp < t_end:
@@ -300,7 +300,7 @@ def _ray_voxel_traverse(bounds, start, end):
                 return voxels
             # add current voxel
             voxels.add((idxs[0], idxs[1], idxs[2]))
-            t_maxs = _cal_max_travel_length_in_current_voxel(tp, end, v, bounds)
+            t_maxs = _calc_max_travel_length_in_current_voxel(tp, end, v, bounds)
             idxs, tp, t_temp = _move_to_next_voxel(idxs, tp, t_temp, t_maxs, v)
         else:
             # Check whether the ray intersecs the mesh. Calculate the maxinum travel
@@ -323,7 +323,7 @@ def _ray_voxel_traverse(bounds, start, end):
                 tp += t_min * v
     return voxels
  
-def _cal_min_grid_step(bounds):
+def _calc_min_grid_step(bounds):
     """
     Calculate the minimum grid step. Used for scan.
 
@@ -364,7 +364,7 @@ def _divide_edge(start, end, step):
         to end.
     """
     dist = _distance(start, end)
-    v = _cal_dir_v(start, end)
+    v = _calc_vec_dir(start, end)
     t_temp = 0.0
     insert_points = []
     # +2 here to make sure it's a conservative result
@@ -462,7 +462,7 @@ def _facet_voxel_traverse(A, B, C, bounds):
     voxel_list: set
         Set of voxels that intersect with the facet.
     """
-    min_step = _cal_min_grid_step(bounds)
+    min_step = _calc_min_grid_step(bounds)
     rays = _create_rays_from_triangle_facet(A, B, C, min_step)
     voxels = set()
     for ray in rays:
