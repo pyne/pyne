@@ -316,14 +316,13 @@ def _ray_voxel_traverse(bounds, start, end):
             for dr in [0, 1, 2]:
                 dist_maxs[dr*2] = np.divide(bounds[dr][0] - point[dr], vec[dr])
                 dist_maxs[dr*2+1] = np.divide(bounds[dr][-1] - point[dr], vec[dr])
-            if all(dist_maxs) < 0:
+            if not any((x > 0).all() for x in dist_maxs):
                 # current point outside the mesh, not any intersection
                 return voxels
             else:
+                # current point outside the mesh, will intersects to the the mesh
                 dist_min = min(i for i in dist_maxs if i > 0)
-                dist_temp += dist_min
-                # Move the point to the boundary
-                # calculate the new coordinate
+                # Move the point to the boundary, calculate the new coordinate
                 point = np.add(point, dist_min * vec)
     return voxels
  
