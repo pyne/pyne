@@ -165,7 +165,11 @@ def _find_next_grid_1d(cor, vec_1d, bounds_1d):
         return vec_1d * float('inf')
 
 
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
 def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
+=======
+def _calc_max_travel_length_in_current_voxel(tp, end, vec, bounds):
+>>>>>>> rename t_min  to dist_min, v to vec
     """
     Calculate the maximum travel length in current voxel before reach next
     boundary.
@@ -191,6 +195,7 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
         [dist_max_x, dist_max_y, dist_max_z]. These value could be both
         positive and negtive. And could be 'inf' or '-inf'.
     """
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
     n_x_grid = _find_next_grid_1d(point[0], vec[0], bounds[0])
     n_y_grid = _find_next_grid_1d(point[1], vec[1], bounds[1])
     n_z_grid = _find_next_grid_1d(point[2], vec[2], bounds[2])
@@ -200,6 +205,17 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
     return np.array([dist_max_x, dist_max_y, dist_max_z])
 
 def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
+=======
+    n_x_grid = _find_next_grid_1d(tp[0], vec[0], bounds[0])
+    n_y_grid = _find_next_grid_1d(tp[1], vec[1], bounds[1])
+    n_z_grid = _find_next_grid_1d(tp[2], vec[2], bounds[2])
+    t_max_x = np.divide(n_x_grid - tp[0], vec[0])
+    t_max_y = np.divide(n_y_grid - tp[1], vec[1])
+    t_max_z = np.divide(n_z_grid - tp[2], vec[2])
+    return np.array([t_max_x, t_max_y, t_max_z])
+
+def _move_to_next_voxel(idxs, tp, t_temp, t_maxs, vec):
+>>>>>>> rename t_min  to dist_min, v to vec
     """
     Move the point to next voxel boundary.
 
@@ -220,6 +236,7 @@ def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     --------
     idxs: list
         Updated indexes.
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
     updated_point : numpy array
         An array of size 3. Updated point positon.
     dist_temp : float
@@ -227,6 +244,15 @@ def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
 
     dist_min = min(i for i in dist_maxs if i > 0)
     update_dir = list(dist_maxs).index(dist_min)
+=======
+    tp : numpy array
+        An array of size 3. Point after moving along the direction of v.
+    t_temp : float
+        Updated travel length. Distance from the start point to updated point.
+    """
+    dist_min = min(i for i in t_maxs if i > 0)
+    update_dir = list(t_maxs).index(dist_min)
+>>>>>>> rename t_min  to dist_min, v to vec
     update_idx = [0, 0, 0]
     # vec[update_dir] will not be 0
     if vec[update_dir] > 0:
@@ -234,17 +260,29 @@ def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     elif vec[update_dir] < 0:
         update_idx[update_dir] = -1
     idxs = [x + y for x, y in zip(idxs, update_idx)] 
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
     updated_point = np.add(point, dist_min * vec)
     dist_temp += dist_min
     return idxs, updated_point, dist_temp
 
 def _move_to_boundary(point, dist_min, vec):
+=======
+    tp = np.add(tp, dist_min * vec)
+    t_temp += dist_min
+    return idxs, tp, t_temp
+
+def _move_to_boundary(tp, dist_min, vec):
+>>>>>>> rename t_min  to dist_min, v to vec
     """
     Move the point to the nearest boundary when initializing the problem.
 
     Parameters:
     -----------
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
     point : numpy array
+=======
+    tp : numpy array
+>>>>>>> rename t_min  to dist_min, v to vec
         An array of size 3. Point.
     dist_min : float
         Distance to the nearest (positive) boundary. For a 3D mesh, there are 6
@@ -263,6 +301,7 @@ def _move_to_boundary(point, dist_min, vec):
         of the boundary, which still outside the mesh).
     """
 
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
     updated_point = np.add(point, dist_min * vec)
     return updated_point
 
@@ -297,6 +336,10 @@ def _is_ray_on_boundary(start, vec, bounds):
         return False
     else:
         return False
+=======
+    tp = np.add(tp, dist_min * vec)
+    return tp
+>>>>>>> rename t_min  to dist_min, v to vec
 
 def _ray_voxel_traverse(bounds, start, end):
     """
@@ -323,6 +366,7 @@ def _ray_voxel_traverse(bounds, start, end):
     idxs = [-1, -1, -1]
     voxels = set()
     vec = _calc_vec_dir(start, end)
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
     # if the ray on a boundary, then return empty set
     if _is_ray_on_boundary(start, vec, bounds):
         return set()
@@ -334,15 +378,30 @@ def _ray_voxel_traverse(bounds, start, end):
             # calculate the voxel id
             for dr in range(len(idxs)):
                 idxs[dr] = _find_voxel_idx_1d(bounds[dr], point[dr], vec[dr])
+=======
+    t_end = _distance(start, end)
+    t_temp = 0.0
+    while t_temp < t_end:
+        if _is_point_in_mesh(bounds, tp):
+            # the point is in the mesh
+            # calculate the voxel id
+            for dr in range(len(idxs)):
+                idxs[dr] = _find_voxel_idx_1d(bounds[dr], tp[dr], vec[dr])
+>>>>>>> rename t_min  to dist_min, v to vec
             if -1 in idxs:
                 # point on mesh boundary with direction toward outside the mesh
                 return voxels
             # add current voxel
             voxels.add((idxs[0], idxs[1], idxs[2]))
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
             dist_maxs = _calc_max_travel_length_in_current_voxel(
                 point, end, vec, bounds)
             idxs, point, dist_temp = _move_to_next_voxel(
                 idxs, point, dist_temp, dist_maxs, vec)
+=======
+            t_maxs = _calc_max_travel_length_in_current_voxel(tp, end, vec, bounds)
+            idxs, tp, t_temp = _move_to_next_voxel(idxs, tp, t_temp, t_maxs, vec)
+>>>>>>> rename t_min  to dist_min, v to vec
         else:
             # Check whether the ray intersecs the mesh. Calculate the maximum travel
             # length of the ray to the outside boundaries of the mesh. If all the
@@ -351,6 +410,7 @@ def _ray_voxel_traverse(bounds, start, end):
             # left, right, back, front, down, up
             dist_maxs = [0.0] * 6
             for dr in [0, 1, 2]:
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
                 dist_maxs[dr*2] = np.divide(bounds[dr][0] - point[dr],
                                             vec[dr])
                 dist_maxs[dr*2+1] = np.divide(bounds[dr][-1] - point[dr],
@@ -364,6 +424,19 @@ def _ray_voxel_traverse(bounds, start, end):
             else:
                 # current point outside the mesh, not any intersection
                 return voxels
+=======
+                t_max[dr*2] = np.divide(bounds[dr][0] - tp[dr], vec[dr])
+                t_max[dr*2+1] = np.divide(bounds[dr][-1] - tp[dr], vec[dr])
+            if all(t_maxs) < 0:
+                # current point outside the mesh, not any intersection
+                return voxels
+            else:
+                dist_min = min(i for i in t_maxs if i > 0)
+                t_temp += dist_min
+                # Move the point to the boundary
+                # calculate the new coordinate
+                tp += dist_min * v
+>>>>>>> rename t_min  to dist_min, v to vec
     return voxels
  
 def _calc_min_grid_step(bounds):
@@ -410,7 +483,11 @@ def _divide_tri_edge(start, end, step):
     """
     dist = _distance(start, end)
     vec = _calc_vec_dir(start, end)
+<<<<<<< f02904f56343889df329ca1d9b0b5b33d9450690
     dist_temp = 0.0
+=======
+    t_temp = 0.0
+>>>>>>> rename t_min  to dist_min, v to vec
     insert_points = []
     # +2 here to make sure it's a conservative result
     num_segment = math.floor(dist/step) + 2
