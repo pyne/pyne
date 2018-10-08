@@ -52,6 +52,19 @@ def test_ray_voxel_traverse_3D():
     exp_ans = set([(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 1, 1)])
     assert_equal(exp_ans, results)
 
+    # set start and end outside the mesh
+    A = np.array([-0.32, -0.18, -0.04])
+    B = np.array([2.62, 2.58, 2.54])
+    results = vta._ray_voxel_traverse(bounds, A, B)
+    exp_ans = set([(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 1, 1)])
+    assert_equal(exp_ans, results)
+
+    # ray has no intersection with the mesh
+    A = np.array([-1.0, -1.0, -1.0])
+    B = np.array([3.0, -1.0, -1.0])
+    results = vta._ray_voxel_traverse(bounds, A, B)
+    exp_ans = set()
+    assert_equal(exp_ans, results)
 
 def test_facet_voxel_rraverse():
     x_bound = [0, 1, 2, 3, 4, 5, 6]
