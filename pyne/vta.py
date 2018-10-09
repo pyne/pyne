@@ -266,6 +266,38 @@ def _move_to_boundary(point, dist_min, vec):
     updated_point = np.add(point, dist_min * vec)
     return updated_point
 
+def _is_ray_on_boundary(start, vec, bounds):
+    """
+    Check whether the ray on a boundary surface.
+
+    Parameters:
+    -----------
+    start : numpy array
+        Start point coordinate.
+    vec : numpy array
+        Direction vector.
+    bounds : list
+        Boundaries of the mesh grid.
+
+    Return:
+    -------
+    True : bool
+        Ray is on a boundary surface
+    False : bool
+        Ray is not on a boundary surface
+    """
+    if any((x == 1.0).all() for x in vec):
+        # this is a axis aligned ray
+        for i in range(len(vec)):
+            if vec[i] == 1.0:
+                continue
+            else:
+               if any((x == start[i]).all() for x in bounds[i]):
+                   return True
+        return False
+    else:
+        return False
+
 def _ray_voxel_traverse(bounds, start, end):
     """
     Ray (line segment) traversal in structured mesh.
@@ -291,6 +323,9 @@ def _ray_voxel_traverse(bounds, start, end):
     idxs = [-1, -1, -1]
     voxels = set()
     vec = _calc_vec_dir(start, end)
+    # if the ray on a boundary, then return empty set
+    if _is_ray_on_boundary(start, vec, bounds):
+        return set()
     dist_end = _distance(start, end)
     dist_temp = 0.0
     while dist_temp < dist_end:
