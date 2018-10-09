@@ -351,7 +351,7 @@ cdef class _Material:
         Return an openmc xml element for the material
         """
         cdef std_string mat
-        mat = self.mat_pointer.openmc(frac_type)
+        mat = self.mat_pointer.openmc(frac_type.encode())
         return mat.decode()
     
     def fluka(self, fid, frac_type='mass'):
