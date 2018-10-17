@@ -237,17 +237,11 @@ def _is_ray_on_boundary(start, vec, bounds):
     False : bool
         Ray is not on a boundary surface
     """
-    if any((x == 1.0).all() for x in vec):
-        # this is a axis aligned ray
-        for i in range(len(vec)):
-            if vec[i] == 1.0:
-                continue
-            else:
-               if any((x == start[i]).all() for x in bounds[i]):
-                   return True
-        return False
-    else:
-        return False
+    if 1.0 in vec:
+        for idx in np.argwhere(vec!=1.0):
+            if start[idx] in bounds[idx]:
+                return True
+    return False
 
 def _ray_voxel_traverse(bounds, start, end):
     """
@@ -334,9 +328,8 @@ def _calc_min_grid_step(bounds):
     """
     min_step = float('inf')
     for bound_list in bounds:
-        for bound_idx in range(len(bound_list)-1):
-            min_step = min(min_step,
-                           bound_list[bound_idx+1] - bound_list[bound_idx])
+        min_step = min(min_step, min(np.array(bound_list[1:]) -
+                                     np.array(bound_list[:-1])))
     return min_step
 
 def _divide_tri_edge(start, end, step):
@@ -372,29 +365,6 @@ def _divide_tri_edge(start, end, step):
     for (x, y, z) in zip(x_list, y_list, z_list):
         insert_points.append(np.array([x, y, z]))
     return insert_points
-
-def _create_rays_from_points(start, insert_points):
-    """
-    Create rays (a pair of two points) from given point list. In which, 'start'
-    is the start point of all the rays, and the point in the `insert_points'
-    are the end points.
-
-    Parameters:
-    -----------
-    start : numpy array
-        An array of size 3, represents the start point.
-    insert_points : list of arrays
-        List of points.
-
-    Return:
-    -------
-    rays: list
-        List of rays (line segments).
-    """
-    rays = []
-    for point in insert_points:
-        rays.append([start, point])
-    return rays
 
 def _create_rays_from_triangle_facet(A, B, C, min_step):
     """
@@ -433,7 +403,7 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
         source = (A, B)
 
     insert_points = _divide_tri_edge(source[0], source[1], min_step)
-    rays = _create_rays_from_points(target, insert_points)
+    rays = [(target, point) for point in insert_points ]
     return rays
 
 
