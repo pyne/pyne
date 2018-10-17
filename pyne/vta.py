@@ -24,27 +24,6 @@ import numpy as np
 ##################################
 
 
-def _distance(start, end):
-    """
-    Calculate the distance between two points.
-
-    Parameters:
-    -----------
-    start : numpy array 
-        An array of size 3, represents the start point of  the line segment
-    end : numpy array
-        An array of size 3, represents the end point of  the line segment
-
-    Return:
-    -------
-    dist : float
-        The distance between the start point and the end point.
-    """
-    dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) +
-                     (end[1] - start[1]) * (end[1] - start[1]) +
-                     (end[2] - start[2]) * (end[2] - start[2]))
-    return dist
-
 def _is_point_in_mesh(bounds, point):
     """
     Check whether a point is in the mesh.
@@ -82,7 +61,8 @@ def _find_voxel_idx_1d(bounds_1d, cor, vec_1d):
     cor : float
         Coordinate of the point in the given direction.
     vec_1d : float
-        Vector attribute in the given direction.
+        Vector attribute in the given direction. Used for determining the
+        search direction.
 
     Return:
     -------
@@ -121,10 +101,7 @@ def _calc_vec_dir(start, end):
     vec : numpy array
         Direction from start to end, an unit vector.
     """
-    vec = end - start
-    dist = math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2])
-    vec = np.divide(vec, dist)
-    return vec
+    return np.divide(end-start, np.linalg.norm(end-start))
 
 def _find_next_grid_1d(cor, vec_1d, bounds_1d):
     """
@@ -326,7 +303,7 @@ def _ray_voxel_traverse(bounds, start, end):
     # if the ray on a boundary, then return empty set
     if _is_ray_on_boundary(start, vec, bounds):
         return set()
-    dist_end = _distance(start, end)
+    dist_end = np.linalg.norm(end-start)
     dist_temp = 0.0
     while dist_temp < dist_end:
         if _is_point_in_mesh(bounds, point):
@@ -409,7 +386,7 @@ def _divide_tri_edge(start, end, step):
         segment from start
         to end.
     """
-    dist = _distance(start, end)
+    dist = np.linalg.norm(end-start)
     vec = _calc_vec_dir(start, end)
     dist_temp = 0.0
     insert_points = []
@@ -467,9 +444,9 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
     rays : list of rays, [start, end] pairs
         List of the created rays. Used to represent the facet.
     """
-    a = _distance(B, C)
-    b = _distance(A, C)
-    c = _distance(A, B)
+    a = np.linalg.norm(B-C)
+    b = np.linalg.norm(C-A)
+    c = np.linalg.norm(A-B)
     min_edge = min([a, b, c])
     if a == min_edge:
         target = A
