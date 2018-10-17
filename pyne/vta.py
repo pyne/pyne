@@ -171,10 +171,12 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
     n_x_grid = _find_next_grid_1d(point[0], vec[0], bounds[0])
     n_y_grid = _find_next_grid_1d(point[1], vec[1], bounds[1])
     n_z_grid = _find_next_grid_1d(point[2], vec[2], bounds[2])
-    dist_max_x = np.divide(n_x_grid - point[0], vec[0])
-    dist_max_y = np.divide(n_y_grid - point[1], vec[1])
-    dist_max_z = np.divide(n_z_grid - point[2], vec[2])
-    return np.array([dist_max_x, dist_max_y, dist_max_z])
+    next_grid = np.array([n_x_grid, n_y_grid, n_z_grid])
+    return np.divide(next_grid - point, vec)
+    #dist_max_x = np.divide(n_x_grid - point[0], vec[0])
+    #dist_max_y = np.divide(n_y_grid - point[1], vec[1])
+    #dist_max_z = np.divide(n_z_grid - point[2], vec[2])
+    #return np.array([dist_max_x, dist_max_y, dist_max_z])
 
 def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     """
@@ -202,7 +204,7 @@ def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     dist_temp : float
         Updated travel length since the beginning of the ray."""
 
-    dist_min = min(i for i in dist_maxs if i > 0)
+    dist_min = min(dist_maxs[dist_maxs>0])
     update_dir = list(dist_maxs).index(dist_min)
     update_idx = [0, 0, 0]
     # vec[update_dir] will not be 0
@@ -214,34 +216,6 @@ def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     updated_point = np.add(point, dist_min * vec)
     dist_temp += dist_min
     return idxs, updated_point, dist_temp
-
-def _move_to_boundary(point, dist_min, vec):
-    """
-    Move the point to the nearest boundary when initializing the problem.
-
-    Parameters:
-    -----------
-    point : numpy array
-        An array of size 3. Point.
-    dist_min : float
-        Distance to the nearest (positive) boundary. For a 3D mesh, there are 6
-        outside boundaries. Therefore there are 6 value of the distance from the
-        start to the boundaries. This dist_min is the smallest one among the
-        positive distance. (The distance is negtive when the direction is
-        negtive.)
-    vec : numpy array
-        Direction vector.
-
-    Return:
-    -------
-    updated_point : numpy array
-        Modified point. This point lies on the nearest boundary. Therefore, we
-        moved point from outside the mesh to the mesh boundary (or the extension
-        of the boundary, which still outside the mesh).
-    """
-
-    updated_point = np.add(point, dist_min * vec)
-    return updated_point
 
 def _is_ray_on_boundary(start, vec, bounds):
     """
@@ -338,7 +312,7 @@ def _ray_voxel_traverse(bounds, start, end):
                 # there maybe intersects to the mesh
                 dist_min = min(i for i in dist_maxs if i > 0)
                 # Move the point to the boundary, calculate the new coordinate
-                point = _move_to_boundary(point, dist_min, vec)
+                point = np.add(point, dist_min * vec)
             else:
                 # current point outside the mesh, not any intersection
                 return voxels
