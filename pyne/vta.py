@@ -418,7 +418,7 @@ def _divide_tri_edge(start, end, step):
     y_list = np.linspace(start[1], end[1], num_segment)
     z_list = np.linspace(start[2], end[2], num_segment)
     for (x, y, z) in zip(x_list, y_list, z_list):
-        insert_points.append([x, y, z])
+        insert_points.append(np.array([x, y, z]))
     return insert_points
 
 def _create_rays_from_points(start, insert_points):
