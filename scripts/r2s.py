@@ -57,7 +57,7 @@ decay_times:1E3 s,12 h,3.0 d
 output: source
 # The name of the output files containing the total photon source intensities for
 # each decay time
-tot_phtn_src_intensities : total_photon_source_intensites.txt
+tot_phtn_src_intensities : total_photon_source_intensities.txt
 """
 
 alara_params =\
