@@ -159,10 +159,6 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
     n_z_grid = _find_next_grid_1d(point[2], vec[2], bounds[2])
     next_grid = np.array([n_x_grid, n_y_grid, n_z_grid])
     return np.divide(next_grid - point, vec)
-    #dist_max_x = np.divide(n_x_grid - point[0], vec[0])
-    #dist_max_y = np.divide(n_y_grid - point[1], vec[1])
-    #dist_max_z = np.divide(n_z_grid - point[2], vec[2])
-    #return np.array([dist_max_x, dist_max_y, dist_max_z])
 
 def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     """
