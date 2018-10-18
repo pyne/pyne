@@ -72,18 +72,16 @@ def _find_voxel_idx_1d(bounds_1d, cor, vec_1d):
     ----------
     """
     idx = -1
+    bounds_1d = np.array(bounds_1d)
     if vec_1d > 0:
-        for i in range(len(bounds_1d)-1):
-            if bounds_1d[i] <= cor < bounds_1d[i+1]:
-                idx = i
-                break
+        idx = np.searchsorted(bounds_1d, cor, side='right')
     else:
-        for i in range(len(bounds_1d)-1, -1, -1):
-            if bounds_1d[i] < cor <= bounds_1d[i+1]:
-                idx = i
-                break
+        idx = np.searchsorted(bounds_1d, cor, side='left')
+    if idx == 0 or idx == len(bounds_1d):
     # idx could be -1, that means point outside the mesh
-    return idx
+        return -1
+    else:
+        return idx - 1
 
 def _calc_vec_dir(start, end):
     """
@@ -121,26 +119,14 @@ def _find_next_grid_1d(cor, vec_1d, bounds_1d):
     n_grid : float
         The coordinate value of next mesh grid.
     """
-    n_grid = 0.0
-    flag = False
-    if vec_1d > 0:
-        for bnd_pos in bounds_1d:
-            if cor < bnd_pos:
-                n_grid = bnd_pos
-                flag = True
-                break
-    else:
-        for i in range(len(bounds_1d)-1, -1, -1):
-            if cor > bounds_1d[i]:
-                n_grid = bounds_1d[i]
-                flag = True
-                break
-    if flag:
-        return n_grid
-    else:
-        # point goes out of the mesh
+    voxel_idx = _find_voxel_idx_1d(bounds_1d, cor, vec_1d)
+    if voxel_idx == -1:
         return vec_1d * float('inf')
-
+    else:
+        if vec_1d > 0:
+            return bounds_1d[voxel_idx+1]
+        else:
+            return bounds_1d[voxel_idx]
 
 def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
     """

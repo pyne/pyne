@@ -11,6 +11,47 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 import numpy as np
 from pyne import vta
 
+def test_find_voxel_idx_1d():
+    bounds_1d = [1.0, 2.0, 3.0]
+
+    # tests for right dir
+    vec_1d = 0.5
+    # left boundary right dir
+    cor = 1.0
+    exp_ans = 0
+    result = vta._find_voxel_idx_1d(bounds_1d, cor, vec_1d)
+    assert_equal(exp_ans, result)
+
+    # middle, right dir
+    cor = 1.5
+    exp_ans = 0
+    result = vta._find_voxel_idx_1d(bounds_1d, cor, vec_1d)
+    assert_equal(exp_ans, result)
+
+    # right boundary, right dir
+    cor = 3.0
+    exp_ans = -1
+    result = vta._find_voxel_idx_1d(bounds_1d, cor, vec_1d)
+    assert_equal(exp_ans, result)
+
+    # tests for left dir
+    vec_1d = -0.5
+    # left boundary, left dir
+    cor = 1.0
+    exp_ans = -1
+    result = vta._find_voxel_idx_1d(bounds_1d, cor, vec_1d)
+    assert_equal(exp_ans, result)
+    # right boundary, left dir
+    cor = 3.0
+    exp_ans = 1
+    result = vta._find_voxel_idx_1d(bounds_1d, cor, vec_1d)
+    assert_equal(exp_ans, result)
+    # middle, left dir
+    cor = 1.5
+    exp_ans = 0
+    result = vta._find_voxel_idx_1d(bounds_1d, cor, vec_1d)
+    assert_equal(exp_ans, result)
+
 
 def test_ray_voxel_traverse_2D():
     x_bound = [0, 1, 2, 3, 4, 5, 6]
