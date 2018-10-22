@@ -220,7 +220,7 @@ def _is_ray_on_boundary(start, vec, bounds):
         Ray is not on a boundary surface
     """
     if 1.0 in vec:
-        for idx in np.argwhere(vec!=1.0):
+        for idx in np.argwhere(vec!=1.0).flatten():
             if start[idx] in bounds[idx]:
                 return True
     return False
