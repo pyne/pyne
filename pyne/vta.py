@@ -420,3 +420,96 @@ def _facet_voxel_traverse(A, B, C, bounds):
         voxels = voxels.union(temp_voxels)
     return voxels
 
+def _is_tri_intersects_box(triangle, box_center, box_extents):
+    """
+    Check whether the triangle intersects with the axis aligned bounding box.
+
+    Based on the "Fast 3D Triangle-Box Overlap Test" by Tomas Akenine-Moller.
+    Related paper could see:
+    https://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/pubs/tribox.pdf.
+
+
+    Background about separate axis theorem (SAT) could see:
+    http://www.jkh.me/files/tutorials/Separating%20Axis%20Theorem%20for%20Oriented%20Bounding%20Boxes.pdf
+
+    This function is basically converted from the two codes below:
+    http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox3.txt
+    https://gist.github.com/zvonicek/fe73ba9903f49d57314cf7e8e0f05dcf
+
+    Parameters:
+    -----------
+    triangle : numpy array
+        A numpy array with shape of (3, 3), represents the vertices of the
+        triangle. Format: [[v0x, v0y, v0z], [v1x, v1y, v1z], [v2x, v2y, v2z]].
+    box_center : numpy array
+        An array of size 3, represents center of the box.
+    box_extents : numpy array
+        An array of size 3, represents format: [width, length, height]
+
+    Return:
+    -------
+    True : bool
+        The triangle intersects with the box.
+    False : bool
+        The triangle does not intersect with the box.
+    """
+
+    # variables names used in the code
+    # e, unit vector of axis. e0=(1, 0, 0), e1=(0, 1, 0), e2=(0, 0, 1).
+    # v, vertices of the triangles. v0, v1, and v2.
+    # f, edge vector of the triangle.  f0=v1-v0, f1=v2-v1, f2=v0-v2
+    # a, axis for test in bullet 3. aij = ei x fj, i.e., a00 = e0 x f0
+
+    # define bais axis
+    e = np.zeros(shape=(3, 3))
+    e[0] = np.array([1, 0, 0])
+    e[1] = np.array([0, 1, 0])
+    e[2] = np.array([0, 0, 1])
+    # Translate triangle as conceptually moving AABB to origin
+    v = np.zeros(shape=(3, 3))
+    v[0] = triangle[0] - box_center
+    v[1] = triangle[1] - box_center
+    v[2] = triangle[2] - box_center
+    # Compute edge vectors for triangle
+    f = np.zeros(shape=(3, 3))
+    f[0] = triangle[1] - triangle[0]
+    f[1] = triangle[2] - triangle[1]
+    f[2] = triangle[0] - triangle[2]
+
+    ## region Test axes a00..a22 (category 3)
+    for i in range(0, 3):
+        for j in range(0, 3):
+            a = np.cross(e[i], f[j])
+            p0 = np.dot(v[0], a)
+            p1 = np.dot(v[1], a)
+            p2 = np.dot(v[2], a)
+            r = np.dot(box_extents, np.absolute(a))
+            if min(p0, p1, p2) > r or max(p0, p1, p2) < -r:
+                return False
+    ## endregion
+
+    ## region Test the three axes corresponding to the face normals of AABB b (category 1)
+    # Exit if...
+    # x direction
+    if max(v[:, 0]) < -box_extents[0] or min(v[:, 0]) > box_extents[0]:
+        return False
+    # y direction
+    if max(v[:, 1]) < -box_extents[1] or min(v[:, 1]) > box_extents[1]:
+        return False
+    # z direction
+    if max(v[:, 2]) < -box_extents[2] or min(v[:, 2]) > box_extents[2]:
+        return False
+    ## endregion
+
+    ## region Test separating axis corresponding to triangle face normal (category 2)
+    plane_normal = np.cross(f[0], f[1])
+    plane_distance = np.dot(plane_normal, v[0])
+    # Compute the projection interval radius of b onto L(t) = b.c + t * p.n
+    r = np.dot(box_extents, np.absolute(plane_normal))
+    # Intersection occurs when plane distance falls within [-r,+r] interval
+    if plane_distance > r:
+        return False
+    ## endregion
+
+    return True
+

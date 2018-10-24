@@ -194,6 +194,41 @@ def test_facet_voxel_rraverse():
                (4, 0, 0), (4, 3, 0), (5, 1, 0), (5, 0, 0)])
     assert_equal(exp_ans, results)
 
+def test_is_tri_aabb_intersects():
+    box_center = np.array([0.0, 0.0, 0.0])
+    box_extends = np.array([1.0, 1.0, 1.0])
+
+    # triangle with all points inside the cube
+    triangle = np.array([[0.0, 0.0, 0.0],
+                         [0.5, 0.2, 0.3],
+                         [0.3, 0.2, 0.4]])
+    exp_ans = True
+    result = vta._is_tri_intersects_box(triangle, box_center, box_extends)
+    assert_equal(exp_ans, result)
+
+    # triangle with one point inside the cube
+    triangle = np.array([[0.0, 0.0, 0.0],
+                         [2.0, 0.0, 0.0],
+                         [2.0, 3.0, 0.0]])
+    exp_ans = True
+    result = vta._is_tri_intersects_box(triangle, box_center, box_extends)
+    assert_equal(exp_ans, result)
+
+    # triangle with all points outside the cube, but intersects with cube
+    triangle = np.array([[-2.0, -2.0, -2.0],
+                         [2.0, 2.0, 2.0],
+                         [2.0, 2.0, 0.0]])
+    exp_ans = True
+    result = vta._is_tri_intersects_box(triangle, box_center, box_extends)
+    assert_equal(exp_ans, result)
+
+    # triangle with points outside the cube, but does not intersect with cube
+    triangle = np.array([[2.0, 0.0, 0.0],
+                         [2.0, 2.0, 0.0],
+                         [3.0, 0.0, 0.0]])
+    exp_ans = False
+    result = vta._is_tri_intersects_box(triangle, box_center, box_extends)
+    assert_equal(exp_ans, result)
 
 if __name__ == "__main__":
     nose.runmodule()
