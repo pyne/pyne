@@ -461,15 +461,9 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     # a, axis for test in bullet 3. aij = ei x fj, i.e., a00 = e0 x f0
 
     # define bais axis
-    e = np.zeros(shape=(3, 3))
-    e[0] = np.array([1, 0, 0])
-    e[1] = np.array([0, 1, 0])
-    e[2] = np.array([0, 0, 1])
+    e = np.eye(3, 3)
     # Translate triangle as conceptually moving AABB to origin
-    v = np.zeros(shape=(3, 3))
-    v[0] = triangle[0] - box_center
-    v[1] = triangle[1] - box_center
-    v[2] = triangle[2] - box_center
+    v = triangle - box_center
     # Compute edge vectors for triangle
     f = np.zeros(shape=(3, 3))
     f[0] = triangle[1] - triangle[0]
@@ -480,25 +474,17 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     for i in range(0, 3):
         for j in range(0, 3):
             a = np.cross(e[i], f[j])
-            p0 = np.dot(v[0], a)
-            p1 = np.dot(v[1], a)
-            p2 = np.dot(v[2], a)
+            p = np.dot(v, a)
             r = np.dot(box_extents, np.absolute(a))
-            if min(p0, p1, p2) > r or max(p0, p1, p2) < -r:
+            if min(p) > r or max(p) < -r:
                 return False
     ## endregion
 
     ## region Test the three axes corresponding to the face normals of AABB b (category 1)
     # Exit if...
-    # x direction
-    if max(v[:, 0]) < -box_extents[0] or min(v[:, 0]) > box_extents[0]:
-        return False
-    # y direction
-    if max(v[:, 1]) < -box_extents[1] or min(v[:, 1]) > box_extents[1]:
-        return False
-    # z direction
-    if max(v[:, 2]) < -box_extents[2] or min(v[:, 2]) > box_extents[2]:
-        return False
+    for i in range(3):
+        if max(v[:, i]) < -box_extents[i] or min(v[:, i]) > box_extents[i]:
+            return False
     ## endregion
 
     ## region Test separating axis corresponding to triangle face normal (category 2)
