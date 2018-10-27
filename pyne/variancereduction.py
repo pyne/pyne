@@ -66,13 +66,13 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     """
 
     # find number of energy groups
-    e_groups = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[list(
+    e_groups = adj_flux_mesh.get_tag(adj_flux_tag)[list(
         mesh_iterate(adj_flux_mesh.mesh))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
 
     # verify source (q) mesh has the same number of energy groups
-    q_e_groups = q_mesh.mesh.getTagHandle(q_tag)[list(
+    q_e_groups = q_mesh.get_tag(q_tag)[list(
         mesh_iterate(q_mesh.mesh))[0]]
     q_e_groups = np.atleast_1d(q_e_groups)
     num_q_e_groups = len(q_e_groups)
@@ -90,7 +90,7 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     # calculate total source strength
     q_tot = 0
     for q_ve in q_ves:
-        q_tot += np.sum(q_mesh.mesh.getTagHandle(q_tag)[q_ve]) \
+        q_tot += np.sum(q_mesh.get_tag(q_tag)[q_ve]) \
                  * q_mesh.elem_volume(q_ve)
 
     q_ves.reset()
@@ -98,9 +98,9 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     # calculate the total response per source particle (R)
     R = 0
     for adj_ve, q_ve in zip(adj_ves, q_ves):
-        adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
+        adj_flux = adj_flux_mesh.get_tag(adj_flux_tag)[adj_ve]
         adj_flux = np.atleast_1d(adj_flux)
-        q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
+        q = q_mesh.get_tag(q_tag)[q_ve]
         q = np.atleast_1d(q)
 
         vol = adj_flux_mesh.elem_volume(adj_ve)
@@ -108,9 +108,11 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
             R += adj_flux[i]*q[i]*vol/q_tot
 
     # generate weight windows and biased source densities using R
-    tag_ww = ww_mesh.mesh.createTag(ww_tag, num_e_groups, float)
+    ww_mesh.tag(ww_tag, np.zeros(num_e_groups, dtype=float), 'imesh', size=num_e_groups, dtype=float)
+    tag_ww = ww_mesh.get_tag(ww_tag)
     ww_ves = mesh_iterate(ww_mesh.mesh)
-    tag_q_bias = q_bias_mesh.mesh.createTag(q_bias_tag, num_e_groups, float)
+    q_bias_mesh.tag(q_bias_tag, np.zeros(num_e_groups, dtype=float), 'imesh', size=num_e_groups, dtype=float)
+    tag_q_bias = q_bias_mesh.get_tag(q_bias_tag)
     q_bias_ves = mesh_iterate(q_bias_mesh.mesh)
     # reset previously created iterators
     q_ves.reset()
@@ -118,9 +120,9 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
 
     for adj_ve, q_ve, ww_ve, q_bias_ve in izip(adj_ves, q_ves,
                                                ww_ves, q_bias_ves):
-        adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
+        adj_flux = adj_flux_mesh.get_tag(adj_flux_tag)[adj_ve]
         adj_flux = np.atleast_1d(adj_flux)
-        q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
+        q = q_mesh.get_tag(q_tag)[q_ve]
         q = np.atleast_1d(q)
 
         tag_q_bias[q_bias_ve] = [adj_flux[i]*q[i]/q_tot/R
@@ -169,10 +171,8 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     tag_size = meshtally.vals[0].size
     meshtally.ww_x = IMeshTag(tag_size, float, 
                               name="ww_{0}".format(meshtally.particle))
-    root_tag = meshtally.mesh.createTag(
-                        "{0}_e_upper_bounds".format(meshtally.particle), 
-                        tag_size, float)
-                        
+    meshtally.tag("{0}_e_upper_bounds".format(meshtally.particle), np.zeros(tag_size, dtype=float), 'imesh', size=tag_size, dtype=float)
+    root_tag = meshtally.get_tag("{0}_e_upper_bounds".format(meshtally.particle))
     # Determine if total energy or single energy bin or multiple energy bins
     if tag_size == 1 and len(meshtally.e_bounds) > 1:
         total = True
@@ -183,7 +183,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     
     # Reassign arrays for total and not total case
     if total:
-        root_tag[meshtally.mesh.rootSet] = np.max(meshtally.e_bounds[:])
+        root_tag[meshtally] = np.max(meshtally.e_bounds[:])
         max_val = np.max(meshtally.vals[:])
         
         vals = []
@@ -196,7 +196,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         errors = np.array(errors)
         
     else:
-        root_tag[meshtally.mesh.rootSet] = meshtally.e_bounds[1:]
+        root_tag[meshtally] = meshtally.e_bounds[1:]
         vals = meshtally.vals[:]
         errors = meshtally.errors[:]
     
