@@ -904,7 +904,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
                 idx_tag = mesh.idx
                 idx = []
                 for ve in ves:
-                    idx.append(idx_tag[ve])
+                    idx.append(idx_tag[ve][0])
 
                 #  Fire rays.
                 row_sums = mesh_row._evaluate_row()
