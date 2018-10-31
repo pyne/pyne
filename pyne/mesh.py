@@ -25,6 +25,7 @@ from pyne.material import Material, MaterialLibrary, MultiMaterial
 from pymoab import core, hcoord, scd, types
 from pymoab.rng import subtract
 from pymoab.tag import Tag
+from pymoab.types import _eh_py_type, _TAG_TYPE_STRS
 
 _BOX_DIMS_TAG_NAME = "BOX_DIMS"
 
@@ -375,7 +376,6 @@ class IMeshTag(Tag):
             self.pymbtype = types.pymoab_data_type(self.dtype)
             self.default = self.tag.get_default_value()
         except RuntimeError:
-            print("Creating tag with size:", size)
             self.tag = self.mesh.mesh.tag_get_handle(self.name, self.size, self.pymbtype, types.MB_TAG_DENSE, create_if_missing = True, default_value = default)
             if default is not None:
                 self[:] = default
@@ -393,7 +393,7 @@ class IMeshTag(Tag):
             return self.mesh.mesh.tag_get_data(self.tag,
                                                self.mesh.mesh.get_root_set(),
                                                flat = True)
-        elif isinstance(key, long):
+        elif isinstance(key, _eh_py_type):
             return self.mesh.mesh.tag_get_data(self.tag, key, flat = True)
         elif isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
@@ -419,7 +419,7 @@ class IMeshTag(Tag):
             for k in key:
                 if isinstance(k, int):
                     ves_to_get.append(ves[k])
-                elif isinstance(k, long):
+                elif isinstance(k, _eh_py_type):
                     ves_to_get.append(k)
                 else:
                     raise TypeError("{0} contains invalid element references "
@@ -442,7 +442,7 @@ class IMeshTag(Tag):
         miter = self.mesh.iter_ve()
         if isinstance(key, Mesh) and key == self.mesh: # special case: tag the mesh's root set
             self.mesh.mesh.tag_set_data(self.tag, self.mesh.mesh.get_root_set(), value)
-        elif isinstance(key, long):
+        elif isinstance(key, _eh_py_type):
             self.mesh.mesh.tag_set_data(self.tag, key, value)
         elif isinstance(key, _INTEGRAL_TYPES):
             if key >= msize:
@@ -479,7 +479,7 @@ class IMeshTag(Tag):
             for k in key:
                 if isinstance(k, int):
                     ves_to_tag.append(ves[k])
-                elif isinstance(k, long):
+                elif isinstance(k, _eh_py_type):
                     ves_to_tag.append(k)
                 else:
                     raise TypeError("{0} contains invalid element references "
@@ -497,7 +497,7 @@ class IMeshTag(Tag):
         if isinstance(key, Mesh) and key == self.mesh: # special case, look up mesh's root set
             self.mesh.mesh.tag_delete_data(mtag,
                                            self.mesh.mesh.get_root_set())
-        elif isinstance(key, long):
+        elif isinstance(key, _eh_py_type):
             self.mesh.mesh.tag_delete_data(mtag, key)
         elif isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
@@ -520,7 +520,7 @@ class IMeshTag(Tag):
             for k in key:
                 if isinstance(k, int):
                     ves_to_del.append(ves[k])
-                elif isinstance(k, long):
+                elif isinstance(k, _eh_py_type):
                     ves_to_del.append(k)
                 else:
                     raise TypeError("{0} contains invalid element references "
@@ -1101,7 +1101,8 @@ class Mesh(object):
         center : tuple
            The (x, y, z) coordinates of the center of the mesh volume element.
         """
-        coords = self.mesh.get_coords(self.mesh.get_connectivity(ve)).reshape(-1,3)
+        ve_handle = _eh_py_type(ve)
+        coords = self.mesh.get_coords(self.mesh.get_connectivity(ve_handle)).reshape(-1,3)
         center = tuple([np.mean(coords[:, x]) for x in range(3)])
         return center
 
@@ -1127,7 +1128,8 @@ class Mesh(object):
                                                 y=[j, j + 1],
                                                 z=[k, k + 1]))
         handle = self.structured_get_hex(i,j,k)
-        h = self.mesh.get_connectivity([handle,])
+        h = self.mesh.get_connectivity(handle)
+        print(h)
         coord = self.mesh.get_coords(list(h))
         coord = coord.reshape(8,3)
         # assumes a "well-behaved" hex element
@@ -1363,6 +1365,7 @@ class Mesh(object):
             cell_largest_frac_number[i] = \
                     int(voxel_cell_number[i, largest_index])
 
+            
         # create the tags
         self.tag(name='cell_number', value=voxel_cell_number,
                  doc='cell numbers of the voxel, -1 used to fill vacancy',
@@ -1438,7 +1441,7 @@ def _structured_find_idx(dims, ijk):
     For tuple (i,j,k), return the number N in the appropriate iterator.
     """
     dim0 = [0] * 3
-    for i in xrange(0, 3):
+    for i in range(0, 3):
         if (dims[i] > ijk[i] or dims[i + 3] <= ijk[i]):
             raise MeshError(str(ijk) + " is out of bounds")
         dim0[i] = ijk[i] - dims[i]
@@ -1497,7 +1500,7 @@ def _structured_iter_setup(dims, order, **kw):
     indices = []
     for L in order:
         idx = "xyz".find(L)
-        indices.append(spec.get(L, xrange(dims[idx], dims[idx + 3])))
+        indices.append(spec.get(L, range(dims[idx], dims[idx + 3])))
 
     ordmap = ["zyx".find(L) for L in order]
     return indices, ordmap
@@ -1568,7 +1571,7 @@ class MeshSetIterator(object):
             self.pos += 1
 
     def step(self, num_steps):
-        self.pos += num_steps
+        self.pos += int(num_steps)
         at_end = False
         if self.pos >= self.size:
             self.pos = self.size -1
