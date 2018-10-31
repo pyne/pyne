@@ -17,6 +17,7 @@ from pyne.mesh import IMeshTag, ComputedTag, MetadataTag
 from pyne.material import Material
 
 from pymoab import core, hcoord, scd, types
+from pymoab.types import _eh_py_type
 
 def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
@@ -117,7 +118,9 @@ def test_create_by_file():
     assert_equal(sm.structured_get_divisions("y"), [1.0, 5.0, 10.0, 15.0] )
     assert_equal(sm.structured_get_divisions("z"), [-10.0, 2.0, 12.0] )
 
-    assert_equal(sm.structured_coords[0], range(1,6))
+    assert_equal(len(sm.structured_coords[0]), len(np.linspace(1,5,num=5)))
+    for a,e in zip(sm.structured_coords[0], np.linspace(1,5,num=5)):
+        assert_equal(a,e)
     assert_equal(sm.structured_coords[1], [1.0, 5.0, 10.0, 15.0] )
     assert_equal(sm.structured_coords[2], [-10.0, 2.0, 12.0] )
 
@@ -133,7 +136,7 @@ def test_structured_get_hex():
     sm = Mesh(structured_coords = [range(11,16), range(21,25), range(31,34)],
               structured=True)
     def check(e):
-        assert_true(isinstance(e, long))
+        assert_true(isinstance(e, _eh_py_type))
     check(sm.structured_get_hex(0, 0, 0))
     check(sm.structured_get_hex(1, 1, 1))
     check(sm.structured_get_hex(3, 0, 0))
