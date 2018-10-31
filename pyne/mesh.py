@@ -1571,7 +1571,7 @@ class MeshSetIterator(object):
             self.pos += 1
 
     def step(self, num_steps):
-        self.pos += int(num_steps)
+        self.pos += int(num_steps) # protecting from Python 3 auto-promotion
         at_end = False
         if self.pos >= self.size:
             self.pos = self.size -1
