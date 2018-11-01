@@ -25,7 +25,7 @@ jobs:
 
   build_py2:
     docker:
-      - image: pshriwise/pshriwise:ubuntu_16.04_pymoab_pyne
+      - image: pshriwise/ubuntu_16.04_pymoab_pyne
 
     working_directory: ~/repo
 
