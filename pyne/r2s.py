@@ -161,7 +161,7 @@ def photon_sampling_setup(mesh, phtn_src, tags):
     photon_source_hdf5_to_mesh(mesh, h5_file, tags)
 
 
-def total_photon_source_intensity(m, tag_name):
+def total_photon_source_intensity(m, tag_name, sub_voxel=False):
     """This function reads mesh tagged with photon source densities and returns
     the total photon emission desinty.
 
@@ -171,7 +171,9 @@ def total_photon_source_intensity(m, tag_name):
        The mesh-based photon emission density distribution in p/cm3/s.
     tag_name : str
        The name of the tag on the mesh with the photon emission density information.
-
+    sub_voxel: bool, optional
+        If true, sub-voxel r2s work flow will be used.
+                         
     Returns
     -------
     intensity : float
@@ -180,8 +182,18 @@ def total_photon_source_intensity(m, tag_name):
 
     sd_tag = m.mesh.getTagHandle(tag_name)
     intensity = 0.
-    for idx, _, ve in m:
-        vol = m.elem_volume(ve)
-        ve_data = sd_tag[ve]
-        intensity += vol*np.sum(ve_data)
+    if sub_voxel:
+        max_num_cells = len(m.cell_fracs[:][0])
+        for idx, _, ve in m:
+            ve_data = sd_tag[ve]
+            num_e_groups = len(ve_data) / max_num_cells
+            for svid in range(max_num_cells):
+                vol = m.elem_volume(ve) * m.cell_fracs[idx][svid]
+                sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
+                intensity += vol * np.sum(sv_data)
+    else:
+        for idx, _, ve in m:
+            vol = m.elem_volume(ve)
+            ve_data = sd_tag[ve]
+            intensity += vol*np.sum(ve_data)
     return intensity
