@@ -308,6 +308,26 @@ def test_total_photon_source_intensity():
     intensity = total_photon_source_intensity(m, "source_density")
     assert_equal(intensity, 58)
 
+def test_total_photon_source_intensity_subvoxel():
+    m = Mesh(structured = True, structured_coords=[[0, 1, 2],[0, 1, 3], [0, 1]])
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                ('cell', np.int64),
+                                ('vol_frac', np.float64),
+                                ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.5, 0.0), (0, 12, 0.5, 0.0),
+                     (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
+                     (2, 13, 0.5, 0.0), (2, 11, 0.5, 0.0),
+                     (3, 12, 0.5, 0.0), (3, 13, 0.5, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    m.source_density = IMeshTag(4, float)
+    m.source_density[:] = [[0.0, 0.0, 1.0, 1.0],
+                           [2.0, 2.0, 3.0, 3.0],
+                           [4.0, 4.0, 5.0, 5.0],
+                           [6.0, 6.0, 7.0, 7.0]]
+    intensity = total_photon_source_intensity(m, "source_density", True)
+    assert_equal(intensity, 46.0)
+ 
+
 def test_irradiation_setup_unstructured_nondef_tag():
     p = multiprocessing.Pool()
     r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
