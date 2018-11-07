@@ -312,19 +312,20 @@ def test_total_photon_source_intensity_subvoxel():
     # In the calculation of the total photon source intensities under subvoxel
     # mode, the volume fractions of each subvoxel should be multiplied
 
-    # the volume of the four voxels are: 1, 2, 1, 2
+    # Set up 4 voxels with the volume of: 1, 2, 1, 2
     m = Mesh(structured=True, structured_coords=[[0, 1, 2],[0, 1, 3], [0, 1]])
+    # 4 voxels, each voxel contains two subvoxels -> 8 subvoxels
+    # The volume fraction of each subvoxel is 0.5
     cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
                                 ('cell', np.int64),
                                 ('vol_frac', np.float64),
                                 ('rel_error', np.float64)])
-    # 4 voxels, each voxel contains two subvoxels -> 8 subvoxels
     cell_fracs[:] = [(0, 11, 0.5, 0.0), (0, 12, 0.5, 0.0),
                      (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
                      (2, 13, 0.5, 0.0), (2, 11, 0.5, 0.0),
                      (3, 12, 0.5, 0.0), (3, 13, 0.5, 0.0)]
     m.tag_cell_fracs(cell_fracs)
-    # energy group number: 2
+    # Set up the source density with energy group number of 2
     m.source_density = IMeshTag(4, float)
     m.source_density[:] = [[0.0, 0.0, 1.0, 1.0],
                            [2.0, 2.0, 3.0, 3.0],
