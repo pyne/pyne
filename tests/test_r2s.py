@@ -309,7 +309,7 @@ def test_total_photon_source_intensity():
     assert_equal(intensity, 58)
 
 def test_total_photon_source_intensity_subvoxel():
-    m = Mesh(structured = True, structured_coords=[[0, 1, 2],[0, 1, 3], [0, 1]])
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2],[0, 1, 3], [0, 1]])
     cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
                                 ('cell', np.int64),
                                 ('vol_frac', np.float64),
