@@ -512,7 +512,10 @@ std::string pyne::Material::openmc(std::string frac_type) {
   if (temp_mat.density < 0.0) {
     std::cout << "Warning: A density < 0.0 was found. This is not valid for use in OpenMC." << std::endl;
   }
-  oss << "value=" <<  std::fixed << new_quote << temp_mat.density << end_quote;
+  std::string density_str = std::to_string(temp_mat.density);
+  // remove trailing zeros
+  density_str.erase( density_str.find_last_not_of('0') + 1, std::string::npos);
+  oss << "value=" <<  std::fixed << new_quote << density_str << end_quote;
   oss << "units=" << new_quote << "g/cc" << end_quote << "/>";
   // new line
   oss << std::endl;
@@ -534,7 +537,16 @@ std::string pyne::Material::openmc(std::string frac_type) {
     oss << "  ";
     // start a new nuclide element
     oss << "<nuclide name=";
-    oss << new_quote << pyne::nucname::name(f->first) << end_quote;
+    std::string nuclide_name_str = pyne::nucname::name(f->first);
+    // format metadata
+    if ('M' == nuclide_name_str.back()) {
+      nuclide_name_str.back() = '_';
+      nuclide_name_str.append("m");
+      int meta_id = pyne::nucname::snum(f->first);
+      std::string meta_str = std::to_string(meta_id);
+      nuclide_name_str.append(meta_str);
+    }
+    oss << new_quote << nuclide_name_str << end_quote;        
     oss << frac_attrib;
     oss << std::setprecision(4) << std::scientific << new_quote << f->second << end_quote;
     oss << "/>";
