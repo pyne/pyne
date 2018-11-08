@@ -512,7 +512,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   if (temp_mat.density < 0.0) {
     std::cout << "Warning: A density < 0.0 was found. This is not valid for use in OpenMC." << std::endl;
   }
-  oss << "value=" << std::setprecision(2) << std::fixed << new_quote << temp_mat.density << end_quote;
+  oss << "value=" <<  std::fixed << new_quote << temp_mat.density << end_quote;
   oss << "units=" << new_quote << "g/cc" << end_quote << "/>";
   // new line
   oss << std::endl;
@@ -529,8 +529,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   }
   
   // add nuclides
-  comp_map::iterator f;
-  for(f = fracs.begin(); f != fracs.end(); f++) {
+  for(comp_map::iterator f = fracs.begin(); f != fracs.end(); f++) {
     //indent
     oss << "  ";
     // start a new nuclide element
