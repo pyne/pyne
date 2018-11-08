@@ -496,6 +496,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   }
   // mat numbers are required for openmc
   else {
+    throw pyne::ValueError("No material number found in metadata. This is not valid for use in OpenMC.");
     oss << new_quote << "?" << end_quote;
   }
   // close the material tag
@@ -510,7 +511,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   oss << "<density ";
     // if density is negtaive, report to user
   if (temp_mat.density < 0.0) {
-    std::cout << "Warning: A density < 0.0 was found. This is not valid for use in OpenMC." << std::endl;
+    throw pyne::ValueError("A density < 0.0 was found. This is not valid for use in OpenMC.");
   }
   std::string density_str = std::to_string(temp_mat.density);
   // remove trailing zeros
