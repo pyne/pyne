@@ -449,7 +449,7 @@ def mcnp_to_id(nuc):
     return newnuc
 
 def openmc(nuc):
-    """Converts a nuclide to its OpenMC form (92636).
+    """Converts a nuclide to its OpenMC form (GND).
 
     Parameters
     ----------
@@ -471,7 +471,7 @@ def openmc(nuc):
         newnuc = cpp_nucname.openmc(<int> nuc)
     else:
         raise NucTypeError(nuc)
-    return newnuc
+    return newnuc.decode()
 
 def openmc_to_id(nuc):
     """Converts a nuclide directly from OpenMC form to
@@ -488,11 +488,8 @@ def openmc_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
-        nuc_bytes = nuc.encode()
-        newnuc = cpp_nucname.openmc_to_id(<char *> nuc_bytes)
-    else:
-        raise NucTypeError(nuc)
+    nuc_bytes = nuc.encode()
+    newnuc = cpp_nucname.openmc_to_id(<char *> nuc_bytes)
     return newnuc
 
 def fluka(nuc):
