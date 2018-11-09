@@ -328,9 +328,11 @@ def test_openmc():
     assert_equal(nucname.openmc(2360921), "U236_m1")
 
 def test_openmc_to_id():
-    vals = ["He4", "Cm244", "Pu239", "Am242", "Am242_m1"]
-    ids = [20040000, 962440000, 942390000, 952420000, 952420001]
-    for val, id in set(zip(vals, ids)):
+    vals = ["He4", "He4", "Cm244", "Pu239", "Am242_m1", "He4",
+            "Am242", "Am242_m1", "U236_m1", "Am242_m4", "Am242_m1",
+            "He0", "U0", "Np0", "He4", "Cm244", "Pu239", "Am242",
+            "He4", "Cm244_m1", "Pu239", "Am242", "U0"]
+    for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
         yield check_cases, nucname.openmc_to_id, val, id
