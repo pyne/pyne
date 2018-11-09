@@ -304,6 +304,22 @@ def test_mcnp_to_id():
     # tests for invalid inputs
     yield assert_raises, RuntimeError, nucname.mcnp_to_id, 92
 
+def test_openmc():
+    assert_equal(nucname.openmc(10010),  "H1")
+    assert_equal(nucname.openmc(952421), "Am242_m1")
+    assert_equal(nucname.openmc(952420), "Am242")
+    assert_equal(nucname.openmc(922361), "U236_m1")
+
+def test_openmc_to_id():
+    vals = ["He4", "Cm244", "Pu239", "Am242", "Am242_m1"]
+    ids = [20040000, 962440000, 942390000, 952420000, 952420001]
+    for val, id in set(zip(vals, ids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.openmc_to_id, val, id
+
+    # tests for invalid inputs
+    yield assert_raises, Exception, nucname.openmc_to_id, 92
 
 def test_fluka():
     assert_equal(nucname.fluka(  40000000), 'BERYLLIU')
