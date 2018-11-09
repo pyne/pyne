@@ -490,7 +490,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   oss << "<material id=" ;
 
   // add the mat number
-  if(temp_mat.metadata.isMember("mat_number")) {
+  if (temp_mat.metadata.isMember("mat_number")) {
     int mat_num = temp_mat.metadata["mat_number"].asInt();
     oss << new_quote << mat_num << end_quote;
   }
@@ -499,6 +499,12 @@ std::string pyne::Material::openmc(std::string frac_type) {
     throw pyne::ValueError("No material number found in metadata. This is not valid for use in OpenMC.");
     oss << new_quote << "?" << end_quote;
   }
+
+  // add name if specified
+  if (temp_mat.metadata.isMember("mat_name")) {
+    oss << "name=" << new_quote << temp_mat.metadata["mat_name"].asString() << end_quote;
+  }
+  
   // close the material tag
   oss << ">";
   // new line
