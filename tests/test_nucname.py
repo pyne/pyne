@@ -310,6 +310,23 @@ def test_openmc():
     assert_equal(nucname.openmc(952420), "Am242")
     assert_equal(nucname.openmc(922361), "U236_m1")
 
+    assert_equal(nucname.openmc("H1"), "H1")
+    assert_equal(nucname.openmc("AM242M"), "Am242_m1")
+    assert_equal(nucname.openmc("AM242"), "Am242")
+    assert_equal(nucname.openmc("U236M"), "U236_m1")    
+ 
+    assert_equal(nucname.openmc(1001),  "H1")
+    assert_equal(nucname.openmc(95642), "Am242")
+
+    assert_equal(nucname.openmc("Am-242"),  "Am242")
+    assert_equal(nucname.openmc("Am-242m"), "Am242_m1")
+    assert_equal(nucname.openmc("U-236m"),  "U236_m1")
+
+    assert_equal(nucname.openmc(10010),  "H1")
+    assert_equal(nucname.openmc(2420951), "Am242_m1")
+    assert_equal(nucname.openmc(2420950), "Am242")
+    assert_equal(nucname.openmc(2360921), "U236_m1")
+
 def test_openmc_to_id():
     vals = ["He4", "Cm244", "Pu239", "Am242", "Am242_m1"]
     ids = [20040000, 962440000, 942390000, 952420000, 952420001]
