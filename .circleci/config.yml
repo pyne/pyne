@@ -13,6 +13,7 @@ jobs:
       - run:
           name: Building PyNE
           command: |
+            pwd
             python3 setup.py install --user \
                 --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --clean
 
@@ -25,7 +26,7 @@ jobs:
 
   build_py2:
     docker:
-      - image: pshriwise/ubuntu_16.04_pymoab_pyne
+      - image: pshriwise/ubuntu_16.04_pymoab_pyne:latest
 
     working_directory: ~/repo
 
@@ -36,6 +37,7 @@ jobs:
       - run:
           name: Building PyNE
           command: |
+            pwd
             python setup.py install --user \
                 --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --clean
 
@@ -44,6 +46,8 @@ jobs:
           name: Running PyNE Tests
           command: |
             cd ~/repo/tests
+            ls ~/repo
+            git status
             echo $(env)
             ./travis-run-tests.sh python2
 
