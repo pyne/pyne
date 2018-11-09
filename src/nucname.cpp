@@ -975,16 +975,16 @@ int pyne::nucname::mcnp_to_id(std::string nuc) {
 std::string pyne::nucname::openmc(int nuc) {
 
   std::stringstream ss;
-  std::string nuclide_name_str = name(nuc);
+  std::string nucname = name(nuc);
   // format metadata
-  if ('M' == nuclide_name_str.back()) {
-    nuclide_name_str.back() = '_';
-    nuclide_name_str.append("m");
+  if ('M' == nucname.back()) {
+    nucname.back() = '_';
+    nucname.append("m");
     int meta_id = snum(nuc);
     std::string meta_str = std::to_string(meta_id);
-    nuclide_name_str.append(meta_str);
+    nucname.append(meta_str);
   }
- return ss.str();
+  return nucname;
 }
 
 std::string pyne::nucname::openmc(const char * nuc) {

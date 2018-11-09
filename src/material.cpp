@@ -543,17 +543,9 @@ std::string pyne::Material::openmc(std::string frac_type) {
     //indent
     oss << "  ";
     // start a new nuclide element
-    oss << "<nuclide name=";
-    std::string nuclide_name_str = pyne::nucname::name(f->first);
-    // format metadata
-    if ('M' == nuclide_name_str.back()) {
-      nuclide_name_str.back() = '_';
-      nuclide_name_str.append("m");
-      int meta_id = pyne::nucname::snum(f->first);
-      std::string meta_str = std::to_string(meta_id);
-      nuclide_name_str.append(meta_str);
-    }
-    oss << new_quote << nuclide_name_str << end_quote;        
+    oss << "<nuclide name=" << new_quote;
+    oss << pyne::nucname::openmc(f->first);
+    oss << end_quote;        
     oss << frac_attrib;
     oss << std::setprecision(4) << std::scientific << new_quote << f->second << end_quote;
     oss << "/>";

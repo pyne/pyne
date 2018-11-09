@@ -448,6 +448,58 @@ def mcnp_to_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
+def openmc(nuc):
+    """Converts a nuclide to its OpenMC form (92636).
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in OpenMC form.
+
+    Notes
+    -----
+    Most metastables in this form add 300 + 100*m where
+    m is the isomeric state (U-236m = 92636).  However,
+    OpenMC special cases Am-242 and Am-242m by switching
+    the meaning. Thus Am-242m = 95242 and Am-242 = 95642.
+
+    """
+
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.openmc(<char *> nuc_bytes)
+    elif isinstance(nuc, int):
+        newnuc = cpp_nucname.openmc(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
+
+def openmc_to_id(nuc):
+    """Converts a nuclide directly from OpenMC form (92636) to
+    the canonical identifier form.
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide in OpenMC form.
+
+    Returns
+    -------
+    newnuc : int
+        Output nuclide in identifier form.
+
+    """
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.openmc_to_id(<char *> nuc_bytes)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc
 
 def fluka(nuc):
     """Converts a nuclide to its FLUKA name.
