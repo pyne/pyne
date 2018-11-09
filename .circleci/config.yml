@@ -49,6 +49,7 @@ jobs:
             ls ~/repo
             git status
             echo $(env)
+            python -c "from pymoab.types import _eh_py_type"
             ./travis-run-tests.sh python2
 
   build_py2_again:
