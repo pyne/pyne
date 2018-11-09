@@ -44,6 +44,7 @@ jobs:
           name: Running PyNE Tests
           command: |
             cd ~/repo/tests
+            echo $(env)
             ./travis-run-tests.sh python2
 
   build_py2_again:
