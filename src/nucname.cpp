@@ -973,8 +973,6 @@ int pyne::nucname::mcnp_to_id(std::string nuc) {
 /*** openmc functions ***/
 /************************/
 std::string pyne::nucname::openmc(int nuc) {
-
-  std::stringstream ss;
   std::string nucname = name(nuc);
   // format metadata
   if ('M' == nucname.back()) {
@@ -1024,13 +1022,13 @@ int pyne::nucname::openmc_to_id(std::string nuc) {
   }
 
   // set aaa - stop on "-" if the character exists
-  std::string::iterator aaa_end = nuc.begin() + nuc.find("-");
+  std::string::iterator aaa_end = std::find(nuc.begin(), nuc.end(), '_');
   int aaa = pyne::to_int(nuc.substr(aaa_start - nuc.begin(), aaa_end - aaa_start));
 
   // check for metastable state
   int m = 0;
   if (aaa_end != nuc.end()) {
-    std::string::iterator m_start = aaa_end + 1; // move forward once to skip "m" character
+    std::string::iterator m_start = aaa_end + 2; // move forward once to skip "_m" characters
     m = pyne::to_int(nuc.substr(m_start - nuc.begin(), nuc.end() - m_start));
   }
 

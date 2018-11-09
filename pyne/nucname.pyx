@@ -458,15 +458,9 @@ def openmc(nuc):
 
     Returns
     -------
-    newnuc : int
+    newnuc : str
         Output nuclide in OpenMC form.
 
-    Notes
-    -----
-    Most metastables in this form add 300 + 100*m where
-    m is the isomeric state (U-236m = 92636).  However,
-    OpenMC special cases Am-242 and Am-242m by switching
-    the meaning. Thus Am-242m = 95242 and Am-242 = 95642.
 
     """
 
@@ -480,17 +474,17 @@ def openmc(nuc):
     return newnuc
 
 def openmc_to_id(nuc):
-    """Converts a nuclide directly from OpenMC form (92636) to
+    """Converts a nuclide directly from OpenMC form to
     the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str
+    nuc : str
         Input nuclide in OpenMC form.
 
     Returns
     -------
-    newnuc : int
+    newnuc : id
         Output nuclide in identifier form.
 
     """
