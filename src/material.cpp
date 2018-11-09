@@ -559,7 +559,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   if(temp_mat.metadata.isMember("sab")) {
     oss << indent;
     oss << "<sab name=";
-    oss << new_quote << temp_mat.metadata["sab"] << end_quote;
+    oss << new_quote << temp_mat.metadata["sab"].asString() << end_quote;
     oss << "/>";
     oss << std::endl;
   }
@@ -567,7 +567,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   if(temp_mat.metadata.isMember("temperature")) {
     oss << indent;
     oss << "<temperature>";
-    oss << new_quote << temp_mat.metadata["temperature"] << end_quote;
+    oss << new_quote << temp_mat.metadata["temperature"].asString() << end_quote;
     oss << "</temperature>";
     oss << std::endl;
   }
@@ -575,7 +575,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   if(temp_mat.metadata.isMember("macroscopic")) {
     oss << indent;
     oss << "<macroscopic name=";
-    oss << new_quote << temp_mat.metadata["macroscropic"] << end_quote;
+    oss << new_quote << temp_mat.metadata["macroscropic"].asString() << end_quote;
     oss << "/>";
     oss << std::endl;
   }
@@ -583,7 +583,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   if(temp_mat.metadata.isMember("isotropic")) {
     oss << indent;
     oss << "<isotropic>";
-    oss << new_quote << temp_mat.metadata["isotropic"] << end_quote;
+    oss << new_quote << temp_mat.metadata["isotropic"].asString() << end_quote;
     oss << "</isotropic>";
     oss << std::endl;
   }

@@ -1163,25 +1163,26 @@ def test_openmc_mat0():
                 '</material>\n')
     assert_equal(mass, mass_exp)
 
-def test_openmc_mat1():
+def test_openmc_sab():
 
-    leu = Material(nucvec={'U235': 0.04, 'U236': 0.0, 'U238': 0.96},
+    leu = Material(nucvec={'H1': 0.66, 'O16': 0.33},
                    metadata={'mat_number': 2,
-                          'table_ids': {'92235':'15c', '92236':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
-                          'source':'Some URL',
-                          'comments': ('this is a long comment that will definitly '
-                                       'go over the 80 character limit, for science'),
+                             'sab': 'c_H_in_H2O',
+                             'mat_name':'LEU',
+                             'source':'Some URL',
+                             'comments': ('this is a long comment that will definitly '
+                                          'go over the 80 character limit, for science'),
                           'name':'leu'},
-                   density=19.101)
+                   density=1.001)
 
     mass = leu.openmc()
     mass_exp = ('<material id="2" >\n'
-                '  <density value="19.101" units="g/cc" />\n'
-                '  <nuclide name="U235" wo="4.0000e-02" />\n'
-                '  <nuclide name="U236" wo="0.0000e+00" />\n'
-                '  <nuclide name="U238" wo="9.6000e-01" />\n'
+                '  <density value="1.001" units="g/cc" />\n'
+                '  <nuclide name="H1" wo="6.6667e-01" />\n'
+                '  <nuclide name="O16" wo="3.3333e-01" />\n'
+                '  <sab name="c_H_in_H2O" />\n'
                 '</material>\n')
+    print(mass_exp)
     assert_equal(mass, mass_exp)
 
 def test_mcnp():
