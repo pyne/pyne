@@ -327,6 +327,11 @@ def test_openmc():
     assert_equal(nucname.openmc(2420950), "Am242")
     assert_equal(nucname.openmc(2360921), "U236_m1")
 
+    # natural elements
+    assert_equal(nucname.openmc(20000000), "He0")
+    assert_equal(nucname.openmc(920000000), "U0")
+    assert_equal(nucname.openmc(930000000), "Np0")
+    
 def test_openmc_to_id():
     vals = ["He4", "He4", "Cm244", "Pu239", "Am242_m1", "He4",
             "Am242", "Am242_m1", "U236_m1", "Am242_m4", "Am242_m1",

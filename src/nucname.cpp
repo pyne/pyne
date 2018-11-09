@@ -974,6 +974,12 @@ int pyne::nucname::mcnp_to_id(std::string nuc) {
 /************************/
 std::string pyne::nucname::openmc(int nuc) {
   std::string nucname = name(nuc);
+
+  // check aaa value
+  int aaa = anum(nuc);
+  if (aaa == 0) {
+    nucname.append("0");
+  }
   // format metadata
   if ('M' == nucname.back()) {
     nucname.back() = '_';
@@ -1000,7 +1006,6 @@ std::string pyne::nucname::openmc(std::string nuc) {
 int pyne::nucname::openmc_to_id(const char * nuc) {
   return openmc_to_id(std::string(nuc));
 }
-
 
 int pyne::nucname::openmc_to_id(std::string nuc) {
   std::string nucname;
