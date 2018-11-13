@@ -42,6 +42,25 @@ def write_arb_p(file_name,path):
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
     tally.write_hdf5(file_name,path)
 
+# writes the photon tally to arb file and path
+def write_arb_n_tbr(file_name,path):
+    tally = Tally("TBR","Neutron",12,"Volume","Volume 12","Neutron TBR in Cell 12",35.0)
+    tally.write_hdf5(file_name,path)
+
+# writes the neutron tally to arb file and path
+def write_arb_n_dpa(file_name,path):
+    tally = Tally("DPA","Neutron",12,"Volume","Volume 12","Neutron DPA in Cell 12",35.0)
+    tally.write_hdf5(file_name,path)
+
+# writes the neutron tally to arb file and path
+def write_arb_n_heat(file_name,path):
+    tally = Tally("HEAT","Neutron",12,"Volume","Volume 12","Neutron HEAT in Cell 12",35.0)
+    tally.write_hdf5(file_name,path)   
+
+# writes the photon tally to arb file and path
+def write_arb_p_heat(file_name,path):
+    tally = Tally("HEAT","Neutron",12,"Volume","Volume 12","Neutron HEAT in Cell 12",35.0)
+    tally.write_hdf5(file_name,path)        
 
 ###############################################################################
 # tests the default constructor
@@ -142,7 +161,7 @@ def test_tally17():
     new_tally.from_hdf5("test_tally.h5","tally",0)
     assert_equal(tally.entity_type,new_tally.entity_type)
 
-7
+
 def test_tally18():
     clean(["test_tally.h5"])
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
