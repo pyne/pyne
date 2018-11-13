@@ -86,7 +86,7 @@ namespace pyne
     void write_hdf5(std::string filename, std::string datapath);
 
     // mcnp tally
-    std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5" );
+    std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5", pyne::Material *material = NULL);
     
     // fluka tally 
     std::string fluka(std::string unit_number = "-21");
