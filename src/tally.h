@@ -17,6 +17,7 @@
 #ifndef PYNE_IS_AMALGAMATED
   #include "h5wrap.h"
   #include "utils.h"
+  #include "material.h"
 #endif
 
 

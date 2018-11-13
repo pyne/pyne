@@ -8,7 +8,6 @@
 
 #ifndef PYNE_IS_AMALGAMATED
   #include "tally.h"
-  #include "material.h"
   #include "particle.h"
 #endif
 
