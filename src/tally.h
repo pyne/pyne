@@ -52,7 +52,7 @@ namespace pyne
     ~Tally (); /// default destructor
 
     // is the proposed name a valid tally name
-    bool is_valid(std::string s) 
+    bool is_valid(std::string s); 
 
     // Create hdf5 datatable for tallies
     hid_t create_dataspace(hid_t file, std::string datapath);
