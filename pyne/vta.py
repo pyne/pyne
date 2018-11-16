@@ -43,12 +43,12 @@ def _is_point_in_mesh(bounds, point):
     True : when point in the mesh.
     False : when point outside the mesh.
     """
-    if bounds[0][0] <= point[0] <= bounds[0][-1] and \
-       bounds[1][0] <= point[1] <= bounds[1][-1] and \
-       bounds[2][0] <= point[2] <= bounds[2][-1]:
-        return True
-    else:
+    if not (bounds[0][0] <= point[0] <= bounds[0][-1]) or \
+       not (bounds[1][0] <= point[1] <= bounds[1][-1]) or \
+       not (bounds[2][0] <= point[2] <= bounds[2][-1]):
         return False
+    else:
+        return True
 
 def _find_voxel_idx_1d(bounds_1d, cor, vec_1d):
     """
