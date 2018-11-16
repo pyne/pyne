@@ -12,7 +12,7 @@ import numpy as np
 from pyne import vta
 
 def test_find_voxel_idx_1d():
-    bounds_1d = [1.0, 2.0, 3.0]
+    bounds_1d = np.array([1.0, 2.0, 3.0])
 
     # tests for right dir
     vec_1d = 0.5
@@ -51,10 +51,9 @@ def test_find_voxel_idx_1d():
     assert_equal(exp_ans, result)
 
 def test_ray_voxel_traverse_2D():
-    x_bound = [0, 1, 2, 3, 4, 5, 6]
-    y_bound = [0, 1, 2, 3, 4, 5, 6]
-    z_bound = [0, 1]
-    bounds = [x_bound, y_bound, z_bound]
+    bounds = np.array([[0, 1, 2, 3, 4, 5, 6],
+                       [0, 1, 2, 3, 4, 5, 6],
+                       [0, 1]])
     A = np.array([3, 5.5, 0.5])
     B = np.array([0.5, 0.5, 0.5])
     results = vta._ray_voxel_traverse(bounds, A, B)
@@ -71,10 +70,9 @@ def test_ray_voxel_traverse_3D():
     Point: [0.3, 0.4, 0.5] -> [0.88, 0.94, 1] -> [0.94, 1, 1.06] -> [1, 1.06, 1.11]
     Voxel: (0, 0, 0)       -> (0, 0, 1)       -> (0, 1, 1)       -> (1, 1, 1)
     """
-    x_bound = [0, 1, 2]
-    y_bound = [0, 1, 2]
-    z_bound = [0, 1, 2]
-    bounds = [x_bound, y_bound, z_bound]
+    bounds = np.array([[0, 1, 2],
+                       [0, 1, 2],
+                       [0, 1, 2]])
     A = np.array([0.3, 0.4, 0.5])
     B = np.array([2, 2, 2])
     results = vta._ray_voxel_traverse(bounds, A, B)
@@ -178,10 +176,9 @@ def test_ray_voxel_traverse_3D():
     assert_equal(exp_ans, results)
 
 def test_facet_voxel_rraverse():
-    x_bound = [0, 1, 2, 3, 4, 5, 6]
-    y_bound = [0, 1, 2, 3, 4, 5, 6]
-    z_bound = [0, 1]
-    bounds = [x_bound, y_bound, z_bound]
+    bounds = np.array([[0, 1, 2, 3, 4, 5, 6],
+                       [0, 1, 2, 3, 4, 5, 6],
+                       [0, 1]])
     A = np.array([0.5, 0.5, 0.5])
     B = np.array([5.5, 0.5, 0.5])
     C = np.array([3, 5.5, 0.5])

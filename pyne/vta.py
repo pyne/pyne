@@ -30,8 +30,8 @@ def _is_point_in_mesh(bounds, point):
 
     Parameters:
     -----------
-    bounds : list
-        Boundaries. Nested list of the boundaries along x, y, and z directions.
+    bounds : numpy array
+        Boundaries. A 2D array of the boundaries along x, y, and z directions.
         Expected format: [[x_min, ..., x_max],
                           [y_min, ..., y_max],
                           [z_min, ..., z_max]]
@@ -56,7 +56,7 @@ def _find_voxel_idx_1d(bounds_1d, cor, vec_1d):
 
     Parameters:
     -----------
-    bounds_1d : list
+    bounds_1d : numpy array
         Boundary of the mesh in a given direction.
     cor : float
         Coordinate of the point in the given direction.
@@ -72,7 +72,7 @@ def _find_voxel_idx_1d(bounds_1d, cor, vec_1d):
     ----------
     """
     idx = -1
-    bounds_1d = np.array(bounds_1d)
+#    bounds_1d = np.array(bounds_1d)
     if vec_1d > 0:
         idx = np.searchsorted(bounds_1d, cor, side='right')
     else:
@@ -111,7 +111,7 @@ def _find_next_grid_1d(cor, vec_1d, bounds_1d):
         Coordinate of current point in the direction.
     vec_1d : float
         Direction value.
-    bounds_1d : list of float
+    bounds_1d : numpy array
         Boundary values of current direction.
 
     Return:
@@ -141,7 +141,7 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
         An array of size 3. End point
     vec : numpy array
         Direction vector from start to end: [v_x, v_y, v_z].
-    bounds : list
+    bounds : numpy array
         Boundaries of the mesh grid.
         Expected format: [[x_min, ..., x_max],
                           [y_min, ..., y_max],
@@ -209,7 +209,7 @@ def _is_ray_on_boundary(start, vec, bounds):
         Start point coordinate.
     vec : numpy array
         Direction vector.
-    bounds : list
+    bounds : numpy array
         Boundaries of the mesh grid.
 
     Return:
@@ -232,7 +232,7 @@ def _ray_voxel_traverse(bounds, start, end):
 
     Parameters:
     -----------
-    bounds : list
+    bounds : numpy array
         Boundaries of the mesh grid.
     start : numpy array
         Start point.
@@ -300,7 +300,7 @@ def _calc_min_grid_step(bounds):
 
     Parameters:
     -----------
-    bounds : list
+    bounds : numpy array
         Boundaries of mesh grid.
 
     Return:
@@ -403,7 +403,7 @@ def _facet_voxel_traverse(A, B, C, bounds):
         An array of size 3, represents a vertex of the triangle.
     C : numpy array
         An array of size 3, represents a vertex of the triangle.
-    bounds : list
+    bounds : numpy array
         Boundaries of the mesh grid.
 
     Return:
