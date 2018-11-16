@@ -21,7 +21,7 @@ config_filename = 'config.yml'
 config = \
 """
 general:
-    # If 'True' all intermediate files created while running the script will be 
+    # If 'True' all intermediate files created while running the script will be
     # deleted. Change to 'False' if you want to retain all intermediate files.
     clean: True
     # Number of photon energy groups (24 or 42), default is 42.
@@ -46,7 +46,7 @@ step1:
     # Define origin of the mesh (three entries, one per spatial dimension)
     # Define locations of the coarse meshes in each direction
     # and the number of fine meshes within corresponding coarse meshes
-    # Supported: Only one entry per _mesh and _ints for a uniformly 
+    # Supported: Only one entry per _mesh and _ints for a uniformly
     # spaced mesh
     # Separate values with blank space.
     origin: 
@@ -83,8 +83,8 @@ step5:
 
 def setup():
     """
-    This function generates a blank config.yml file for the user to 
-    fill in with problem specific values. 
+    This function generates a blank config.yml file for the user to
+    fill in with problem specific values.
     """
     with open(config_filename, 'w') as f:
         f.write(config)
@@ -145,7 +145,7 @@ def _cards(source):
 
 def _get_p_bins(num_p_groups):
     """
-    Function that returns a photon energy bin structure based on the number 
+    Function that returns a photon energy bin structure based on the number
     of photon groups in the problem.
 
     Parameters
@@ -182,7 +182,7 @@ def step0(cfg, cfg2):
     cfg : dictionary
         User input for 'general' from the config.yml file
     cfg2 : dictionary
-        User input for Step 2 from the config.yml file    
+        User input for Step 2 from the config.yml file
     """
     # Get user input from config file
     clean = cfg['clean']
@@ -205,7 +205,7 @@ def step0(cfg, cfg2):
     # Perform SNILB check and calculate eta for each material in the geometry
     run_dir = 'step0/mats'
     if not os.path.exists(run_dir):
-        os.makedirs(run_dir)                    
+        os.makedirs(run_dir)
     # Get the photon energy bin structure
     p_bins = _get_p_bins(num_p_groups)
     eta, psrc_file = calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
@@ -228,15 +228,15 @@ def step0(cfg, cfg2):
         mat_element.metadata['name'] = mat_element_name
         mat_element.density = 1.0
         # Add element to the material library
-        element_lib[mat_element_name] = mat_element.expand_elements()
-    # Add elements to mats    
+        element_lib[mat_element_name] = mat_element
+    # Add elements to mats
     elements = element_lib.items()
     num_elements = len(elements)
     
     # Perform SNILB check and calculate eta for unique elements in the geometry
     run_dir = 'step0/elements'
     if not os.path.exists(run_dir):
-        os.makedirs(run_dir)             
+        os.makedirs(run_dir)
     eta_element, psrc_file = calc_eta(data_dir, elements, num_elements, neutron_spectrum, num_n_groups,
                                       irr_time, decay_times, p_bins, num_p_groups, run_dir)
     np.set_printoptions(threshold=np.nan)
@@ -257,8 +257,8 @@ def step0(cfg, cfg2):
         shutil.rmtree(run_dir)
             
 def step1(cfg, cfg1):
-    """ 
-    This function writes the PARTISN input file for the adjoint photon transport.   
+    """
+    This function writes the PARTISN input file for the adjoint photon transport.
     
     Parameters
     ----------
@@ -274,9 +274,9 @@ def step1(cfg, cfg1):
     cells = [cfg1['src_cell']]
     src_vol = [float(cfg1['src_vol'])]
     
-    try: 
-       origin_x, origin_y, origin_z = cfg1['origin'].split(' ') 
-    except: 
+    try:
+       origin_x, origin_y, origin_z = cfg1['origin'].split(' ')
+    except:
        print("Too few entries in origin location")
 
     xmesh = cfg1['xmesh']
@@ -305,9 +305,9 @@ def step1(cfg, cfg1):
     df = np.array([0.0485, 0.1254, 0.205, 0.2999, 0.3381, 0.3572, 0.378, 0.4066,
                    0.4399, 0.5172, 0.7523, 1.0041, 1.5083, 1.9958, 2.4657, 2.9082,
                    3.7269, 4.4834, 7.4896, 12.0153, 15.9873, 19.9191, 23.76])
-    # Convert to Sv/s per photon FLUX 
-    convert_to_pico = 1.0e-12 
-    df = df * convert_to_pico 
+    # Convert to Sv/s per photon FLUX
+    convert_to_pico = 1.0e-12
+    df = df * convert_to_pico
     # Convert pointwise data to group data for log interpolation
     photon_spectrum = pointwise_collapse(photon_bins, de, df, logx=True, logy=True)
     #  Anything below 0.01 MeV should be assigned the DF value of 0.01 MeV
@@ -342,7 +342,7 @@ def step1(cfg, cfg1):
         fine_per_coarse=1)
                
 def main():
-    """ 
+    """
     This function manages the setup and steps 1-5 for the GT-CADIS workflow.
     """
     gtcadis_help = ('This script automates the GT-CADIS process of producing \n'
@@ -368,7 +368,7 @@ def main():
     if args.command == 'step0':
         step0(cfg['general'], cfg['step2'])
     elif args.command == 'step1':
-        step1(cfg['general'], cfg['step1'])   
+        step1(cfg['general'], cfg['step1'])
 
 if __name__ == '__main__':
     main()
