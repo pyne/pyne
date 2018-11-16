@@ -121,7 +121,7 @@ def _find_next_grid_1d(cor, vec_1d, bounds_1d):
     """
     voxel_idx = _find_voxel_idx_1d(bounds_1d, cor, vec_1d)
     if voxel_idx == -1:
-        return vec_1d * float('inf')
+        return vec_1d * np.inf
     else:
         if vec_1d > 0:
             return bounds_1d[voxel_idx+1]
@@ -308,7 +308,7 @@ def _calc_min_grid_step(bounds):
     min_step: float
         The minimum grid step.
     """
-    min_step = float('inf')
+    min_step = np.inf
     for bound_list in bounds:
         min_step = min(min_step, min(np.array(bound_list[1:]) -
                                      np.array(bound_list[:-1])))
