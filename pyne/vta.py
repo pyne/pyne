@@ -190,12 +190,6 @@ def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
 
     dist_min = min(dist_maxs[dist_maxs>0])
     update_dir = list(dist_maxs).index(dist_min)
-    update_idx = [0, 0, 0]
-    # vec[update_dir] will not be 0
-    if vec[update_dir] > 0:
-        update_idx[update_dir] = 1
-    elif vec[update_dir] < 0:
-        update_idx[update_dir] = -1
     # vec[update_dir] will not be 0
     if vec[update_dir] > 0:
         idxs[update_dir] += 1
