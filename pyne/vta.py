@@ -196,7 +196,11 @@ def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
         update_idx[update_dir] = 1
     elif vec[update_dir] < 0:
         update_idx[update_dir] = -1
-    idxs = [x + y for x, y in zip(idxs, update_idx)] 
+    # vec[update_dir] will not be 0
+    if vec[update_dir] > 0:
+        idxs[update_dir] += 1
+    elif vec[update_dir] < 0:
+        idxs[update_dir] -= 1 
     updated_point = np.add(point, dist_min * vec)
     dist_temp += dist_min
     return idxs, updated_point, dist_temp
