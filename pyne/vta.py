@@ -278,7 +278,7 @@ def _ray_voxel_traverse(bounds, start, end):
             # choose the minimum length and move the point to that position.
             # left, right, back, front, down, up
             dist_maxs = [0.0] * 6
-            for dr in [0, 1, 2]:
+            for dr in range(len(idxs):
                 dist_maxs[dr*2] = np.divide(bounds[dr][0] - point[dr],
                                             vec[dr])
                 dist_maxs[dr*2+1] = np.divide(bounds[dr][-1] - point[dr],
