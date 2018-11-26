@@ -252,7 +252,7 @@ def _ray_voxel_traverse(bounds, start, end):
     vec = _calc_vec_dir(start, end)
     # if the ray on a boundary, then return empty set
     if _is_ray_on_boundary(start, vec, bounds):
-        return set()
+        return voxels
     dist_end = np.linalg.norm(end-start)
     dist_temp = 0.0
     while dist_temp < dist_end:
