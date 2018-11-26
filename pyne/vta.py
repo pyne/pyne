@@ -277,8 +277,8 @@ def _ray_voxel_traverse(bounds, start, end):
             # lengths are negtive, then there is no intersection, return. Ohterwise,
             # choose the minimum length and move the point to that position.
             # left, right, back, front, down, up
-            dist_maxs = [0.0] * 6
-            for dr in range(len(idxs):
+            dist_maxs = np.zeros(6)
+            for dr in range(len(idxs)):
                 dist_maxs[dr*2] = np.divide(bounds[dr][0] - point[dr],
                                             vec[dr])
                 dist_maxs[dr*2+1] = np.divide(bounds[dr][-1] - point[dr],
@@ -455,12 +455,15 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     """
 
     # variables names used in the code
-    # e, unit vector of axis. e0=(1, 0, 0), e1=(0, 1, 0), e2=(0, 0, 1).
-    # v, vertices of the triangles. v0, v1, and v2.
-    # f, edge vector of the triangle.  f0=v1-v0, f1=v2-v1, f2=v0-v2
-    # a, axis for test in bullet 3. aij = ei x fj, i.e., a00 = e0 x f0
+    # e, unit vector of axis. e[0]=(1, 0, 0), e[1]=(0, 1, 0), e[2]=(0, 0, 1).
+    # v, vertices of the triangles. v[0], v[1], and v[2].
+    # f, edge vector of the triangle. f[0]=v[1]-v[0],
+    #                                 f[1]=v[2]-v[1],
+    #                                 f[2]=v[0]-v[2].
+    # a, axis for test in bullet 3. a[i][j] = e[i] x f[j], 
+    # i.e., a[0][0] = e[0] x f[0]
 
-    # define bais axis
+    # define basis axis
     e = np.eye(3, 3)
     # Translate triangle as conceptually moving AABB to origin
     v = triangle - box_center
@@ -471,11 +474,15 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     f[2] = triangle[0] - triangle[2]
 
     ## region Test axes a00..a22 (category 3)
-    for i in range(0, 3):
+    for i in range(3):
         for j in range(0, 3):
+            # calculate the mormal to the edge-axis plane
             a = np.cross(e[i], f[j])
+            # project the triangle vertices onto axis a
             p = np.dot(v, a)
+            # project the box onto the axis a.
             r = np.dot(box_extents, np.absolute(a))
+            # check whether the box there is overlap of projection on the axis a
             if min(p) > r or max(p) < -r:
                 return False
     ## endregion
