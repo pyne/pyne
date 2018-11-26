@@ -286,7 +286,7 @@ def _ray_voxel_traverse(bounds, start, end):
             if any((x > 0).all() for x in dist_maxs):
                 # current point outside the mesh
                 # there maybe intersects to the mesh
-                dist_min = min(i for i in dist_maxs if i > 0)
+                dist_min = min(dist_maxs[dist_maxs > 0])
                 # Move the point to the boundary, calculate the new coordinate
                 point = np.add(point, dist_min * vec)
             else:
