@@ -165,6 +165,9 @@ namespace pyne
     void write_hdf5(std::string filename, std::string datapath="/material",
                     std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
+    /// Return an openmc xml material element as a string
+    std::string openmc(std::string fact_type = "mass");
+    
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
     ///
