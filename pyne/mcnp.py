@@ -1652,7 +1652,7 @@ class Wwinp(Mesh):
 
             self._read_wwlb('n', f)
 
-        if len(self.ne) == 2:
+        if len(self.ne) == 2 and self.ne[1] != 0:
             self.e.append([])
             while len(self.e[-1]) < self.ne[1]:
                 self.e[-1] += [float(x) for x in f.readline().split()]

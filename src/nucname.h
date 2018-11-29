@@ -424,6 +424,29 @@ namespace nucname
   int mcnp_to_id(std::string nuc);
   /// \}
 
+  /// \name OPENMC Form Functions
+  /// \{
+  /// This is the naming convention used by the OpenMC code.
+  /// The OpenMC format for entering nuclides uses a GND format.
+  /// For information on how metastable isotopes are named, please consult the
+  /// OpenMC documentation for more information.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  std::string openmc(int nuc);
+  std::string openmc(const char * nuc);
+  std::string openmc(std::string nuc);
+  /// \}
+
+  /// \name OPENMC Form to Identifier Form Functions
+  /// \{
+  /// This converts from the OPENMC nuclide naming convention
+  /// to the id canonical form  for nuclides in PyNE.
+  /// \param nuc a nuclide in OPENMC form.
+  /// \return an integer id nuclide identifier.
+  int openmc_to_id(const char * nuc);
+  int openmc_to_id(std::string nuc);
+  /// \}
+  
   /// \name FLUKA Form Functions
   /// \{
   /// This is the naming convention used by the FLUKA suite of codes.

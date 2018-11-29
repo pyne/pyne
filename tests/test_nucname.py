@@ -304,6 +304,46 @@ def test_mcnp_to_id():
     # tests for invalid inputs
     yield assert_raises, RuntimeError, nucname.mcnp_to_id, 92
 
+def test_openmc():
+    assert_equal(nucname.openmc(10010),  "H1")
+    assert_equal(nucname.openmc(952421), "Am242_m1")
+    assert_equal(nucname.openmc(952420), "Am242")
+    assert_equal(nucname.openmc(922361), "U236_m1")
+
+    assert_equal(nucname.openmc("H1"), "H1")
+    assert_equal(nucname.openmc("AM242M"), "Am242_m1")
+    assert_equal(nucname.openmc("AM242"), "Am242")
+    assert_equal(nucname.openmc("U236M"), "U236_m1")    
+ 
+    assert_equal(nucname.openmc(1001),  "H1")
+    assert_equal(nucname.openmc(95642), "Am242")
+
+    assert_equal(nucname.openmc("Am-242"),  "Am242")
+    assert_equal(nucname.openmc("Am-242m"), "Am242_m1")
+    assert_equal(nucname.openmc("U-236m"),  "U236_m1")
+
+    assert_equal(nucname.openmc(10010),  "H1")
+    assert_equal(nucname.openmc(2420951), "Am242_m1")
+    assert_equal(nucname.openmc(2420950), "Am242")
+    assert_equal(nucname.openmc(2360921), "U236_m1")
+
+    # natural elements
+    assert_equal(nucname.openmc(20000000), "He0")
+    assert_equal(nucname.openmc(920000000), "U0")
+    assert_equal(nucname.openmc(930000000), "Np0")
+    
+def test_openmc_to_id():
+    vals = ["He4", "He4", "Cm244", "Pu239", "Am242_m1", "He4",
+            "Am242", "Am242_m1", "U236_m1", "Am242_m4", "Am242_m1",
+            "He0", "U0", "Np0", "He4", "Cm244", "Pu239", "Am242",
+            "He4", "Cm244_m1", "Pu239", "Am242", "U0"]
+    for val, id in set(zip(vals, caseids)):
+        if val is None:
+            continue
+        yield check_cases, nucname.openmc_to_id, val, id
+
+    # tests for invalid inputs
+    yield assert_raises, Exception, nucname.openmc_to_id, 92
 
 def test_fluka():
     assert_equal(nucname.fluka(  40000000), 'BERYLLIU')

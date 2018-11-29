@@ -476,6 +476,122 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   delete[] mat_data;
 }
 
+std::string pyne::Material::openmc(std::string frac_type) {
+  std::ostringstream oss;
+
+  pyne::Material temp_mat = this->expand_elements();
+  
+  // vars for consistency
+  std::string new_quote = "\"";
+  std::string end_quote = "\" ";
+  std::string indent = "  ";
+  
+  // open the material element
+  oss << "<material id=" ;
+
+  // add the mat number
+  if (temp_mat.metadata.isMember("mat_number")) {
+    int mat_num = temp_mat.metadata["mat_number"].asInt();
+    oss << new_quote << mat_num << end_quote;
+  }
+  // mat numbers are required for openmc
+  else {
+    throw pyne::ValueError("No material number found in metadata. This is not valid for use in OpenMC.");
+    oss << new_quote << "?" << end_quote;
+  }
+
+  // add name if specified
+  if (temp_mat.metadata.isMember("mat_name")) {
+    oss << "name=" << new_quote << temp_mat.metadata["mat_name"].asString() << end_quote;
+  }
+  
+  // close the material tag
+  oss << ">";
+  // new line
+  oss << std::endl;
+
+  //indent
+  oss << indent;
+
+  // specify density
+  oss << "<density ";
+    // if density is negtaive, report to user
+  if (temp_mat.density < 0.0) {
+    throw pyne::ValueError("A density < 0.0 was found. This is not valid for use in OpenMC.");
+  }
+  std::string density_str = std::to_string(temp_mat.density);
+  // remove trailing zeros
+  density_str.erase( density_str.find_last_not_of('0') + 1, std::string::npos);
+  oss << "value=" <<  std::fixed << new_quote << density_str << end_quote;
+  oss << "units=" << new_quote << "g/cc" << end_quote << "/>";
+  // new line
+  oss << std::endl;
+
+  std::map<int, double> fracs;
+  std::string frac_attrib;
+  if(frac_type == "atom") {
+    fracs = temp_mat.to_atom_frac();
+    frac_attrib = "ao=";
+  }
+  else {
+    fracs = temp_mat.comp;
+    frac_attrib = "wo=";
+  }
+  
+  // add nuclides
+  for(comp_map::iterator f = fracs.begin(); f != fracs.end(); f++) {
+    //indent
+    oss << "  ";
+    // start a new nuclide element
+    oss << "<nuclide name=" << new_quote;
+    oss << pyne::nucname::openmc(f->first);
+    oss << end_quote;        
+    oss << frac_attrib;
+    oss << std::setprecision(4) << std::scientific << new_quote << f->second << end_quote;
+    oss << "/>";
+    // new line
+    oss << std::endl;
+  }
+
+  // other OpenMC material properties
+  if(temp_mat.metadata.isMember("sab")) {
+    oss << indent;
+    oss << "<sab name=";
+    oss << new_quote << temp_mat.metadata["sab"].asString() << end_quote;
+    oss << "/>";
+    oss << std::endl;
+  }
+
+  if(temp_mat.metadata.isMember("temperature")) {
+    oss << indent;
+    oss << "<temperature>";
+    oss << new_quote << temp_mat.metadata["temperature"].asString() << end_quote;
+    oss << "</temperature>";
+    oss << std::endl;
+  }
+
+  if(temp_mat.metadata.isMember("macroscopic")) {
+    oss << indent;
+    oss << "<macroscopic name=";
+    oss << new_quote << temp_mat.metadata["macroscropic"].asString() << end_quote;
+    oss << "/>";
+    oss << std::endl;
+  }
+
+  if(temp_mat.metadata.isMember("isotropic")) {
+    oss << indent;
+    oss << "<isotropic>";
+    oss << new_quote << temp_mat.metadata["isotropic"].asString() << end_quote;
+    oss << "</isotropic>";
+    oss << std::endl;
+  }
+  
+  // close the material node
+  oss << "</material>" << std::endl;
+
+  return oss.str();
+}
+
 std::string pyne::Material::mcnp(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
