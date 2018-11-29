@@ -1,15 +1,13 @@
 # Defines the CMake commands/policies
 cmake_minimum_required(VERSION 3.0.0)
 
-# Make the scripts available in the 'cmake' directory available for the
-# 'include()' command, 'find_package()' command.
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Setup the project
 project(pyne)
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
+pyne_setup_cxx()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
@@ -106,6 +104,9 @@ set(LIBS ${LIBS} ${PYTHON_LIBRARIES})
 message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
+# Find NumPy
+find_package(Numpy REQUIRED)
+include_directories("${NUMPY_INCLUDE_DIR}")
 
 # Find NumPy
 find_package(Numpy REQUIRED)

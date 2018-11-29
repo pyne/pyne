@@ -29,7 +29,7 @@ from pyne import endf
 from pyne import bins
 from pyne import ace
 from pyne.data import MeV_per_K
-from pyne.xs.models import partial_energy_matrix, group_collapse, same_arr_or_none, thermspect
+from pyne.xs.models import partial_energy_matrix, group_collapse, same_arr_or_none
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -1057,7 +1057,6 @@ class OpenMCDataSource(DataSource):
         sigb = self.bkg_xs(nuc, temp=temp)
         e_n = self.src_group_struct
         sig_b = np.ones(len(E_points), 'f8')
-        flux = thermspect(E_points)
         for n in range(len(sigb)):
             sig_b[(e_n[n] <= E_points) & (E_points <= e_n[n+1])] = sigb[n]
         rtn = self.pointwise(nuc, 'total', temp)

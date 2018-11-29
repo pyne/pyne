@@ -113,8 +113,6 @@ def optional_t_gabs():
                           exceptions_dataset)
     cleanup_tmp()
 
-<<<<<<< 65c46cdb7aa26efcc3c8440364d1f2d9a7c4093d
-<<<<<<< 5227eb46c01be6dff2a90dd6c68cf5b79c837753
 def test_gtol():
     create_tmp()
     input_dict = {}
@@ -186,6 +184,7 @@ def test_seqhst():
         raise SkipTest
     ref_sequence = 'ensdf_processing/seqhst/ref_iccseq.dat'
     d_report = file_comp(input_dict['sequential_output_file'], ref_sequence, [])
+    cleanup_tmp()
 
 def test_logft():
     create_tmp()

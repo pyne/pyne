@@ -4,10 +4,9 @@ from nose.tools import assert_equal, assert_true, assert_almost_equal, assert_ra
 
 import numpy as np
 import warnings
-import numpy as np
-
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
+
 from pyne import gammaspec
 from pyne import spectanalysis as sa
 

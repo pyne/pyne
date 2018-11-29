@@ -175,7 +175,14 @@ def copy_ensdf_executables(exe_dest):
         except Exception:
             print('Some ENSDF processing executables were unable to be copied to the \
                    install directory.')
-
+    for tool in local_ensdf_tools:
+        try:
+            local_path = os.path.join('src', tool[0])
+            dest_path = os.path.join(exe_dest, tool[1])
+            shutil.copy(local_path, dest_path)
+        except Exception:
+            print('Some ENSDF processing executables were unable to be copied to the \
+                   install directory.')
 
 ATOMIC_H = os.path.join('src', 'atomic_data.h')
 ATOMIC_CPP = os.path.join('src', 'atomic_data.cpp')

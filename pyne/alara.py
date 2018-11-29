@@ -375,7 +375,6 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
                     sve_count, name)
                 sve_count += 1
 
-
     volume += 'end\n\n'
     mat_loading += 'end\n\n'
 
@@ -1223,3 +1222,4 @@ def calc_eta(data_dir, mats, num_mats, neutron_spectrum, num_n_groups, irr_time,
     eta[np.isinf(eta)] = 1.0E10
     
     return eta, phtn_src_file
+    

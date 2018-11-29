@@ -7,6 +7,10 @@
 from warnings import warn
 from pyne.utils import QAWarning
 
+
+import copy
+
+
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 import copy

@@ -51,7 +51,6 @@ macro(pyne_set_asm_platform)
   set(PYNE_ASM_PLATFORM "${_plat}")
 endmacro()
 
-
 # Fortran settings
 # FFLAGS depend on the compiler
 macro(pyne_setup_fortran)
