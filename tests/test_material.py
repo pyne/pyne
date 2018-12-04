@@ -1158,7 +1158,6 @@ def test_openmc_mat0():
     mass_exp = ('<material id="2" name="LEU" >\n'
                 '  <density value="19.1" units="g/cc" />\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
-                '  <nuclide name="U236" wo="0.0000e+00" />\n'
                 '  <nuclide name="U238_m1" wo="9.6000e-01" />\n'
                 '</material>\n')
     assert_equal(mass, mass_exp)
