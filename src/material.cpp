@@ -540,6 +540,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   
   // add nuclides
   for(comp_map::iterator f = fracs.begin(); f != fracs.end(); f++) {
+    if (f->second == 0.0) { continue; }
     //indent
     oss << "  ";
     // start a new nuclide element
