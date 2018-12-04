@@ -283,6 +283,13 @@ def test_expand_elements2():
     assert_almost_equal(data.natural_abund(60120000), afrac[60120000])
     assert_almost_equal(data.natural_abund(60130000), afrac[60130000])
 
+def test_expand_elements3():
+    natmat = Material({'C': 1.0})
+    exception_ids = {nucname.id("C")}
+    expmat = natmat.expand_elements(exception_ids)
+    afrac = expmat.to_atom_frac()
+    assert_almost_equal(natmat[60000000], afrac[60000000])
+    
 def test_collapse_elements1():
     """ Very simple test to combine nucids"""
     nucvec = {10010000:  1.0,
@@ -1195,6 +1202,25 @@ def test_openmc_sab():
                 '</material>\n')
     assert_equal(mass, mass_exp)
 
+def test_openmc_c():
+
+    csi = Material()
+    csi.from_atom_frac({'C': 0.5, 'Si': 0.5})
+    csi.metadata= {'mat_number': 2,
+                   'mat_name':'silicon carbide',
+                   'name':'leu'}
+    csi.density = 3.16
+
+    atom = csi.openmc(frac_type='atom')
+    atom_exp = ('<material id="2" name="silicon carbide" >\n'
+                '  <density value="3.16" units="g/cc" />\n'
+                '  <nuclide name="C0" ao="5.0000e-01" />\n'                
+                '  <nuclide name="Si28" ao="4.6112e-01" />\n'
+                '  <nuclide name="Si29" ao="2.3425e-02" />\n'
+                '  <nuclide name="Si30" ao="1.5460e-02" />\n'
+                '</material>\n')
+    assert_equal(atom, atom_exp)
+    
 def test_mcnp():
 
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},

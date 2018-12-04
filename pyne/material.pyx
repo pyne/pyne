@@ -680,10 +680,12 @@ cdef class _Material:
         """
         return self.mat_pointer.molecular_mass(atoms_per_molecule)
 
-    def expand_elements(self):
+    def expand_elements(self, nucset = set()):
         """expand_elements(self)
-        Exapnds the elements ('U', 'C', etc) in the material by replacing them
-        with their natural isotopic distributions.  This function returns a copy.
+        Exapnds the elements ('U', 'C', etc) in the material by
+        replacing them with their natural isotopic distributions with
+        the exception of the ids in nucset. This function returns a
+        copy.
 
         Returns
         -------
@@ -692,7 +694,7 @@ cdef class _Material:
 
         """
         cdef _Material newmat = Material()
-        newmat.mat_pointer[0] = self.mat_pointer.expand_elements()
+        newmat.mat_pointer[0] = self.mat_pointer.expand_elements(nucset)
         return newmat
 
     def collapse_elements(self, nucset):

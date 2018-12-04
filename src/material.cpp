@@ -479,7 +479,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 std::string pyne::Material::openmc(std::string frac_type) {
   std::ostringstream oss;
 
-  pyne::Material temp_mat = this->expand_elements();
+  std::set<int> carbon_set; carbon_set.insert(nucname::id("C"));
+  pyne::Material temp_mat = this->expand_elements(carbon_set);
   
   // vars for consistency
   std::string new_quote = "\"";
@@ -1283,8 +1284,7 @@ double pyne::Material::molecular_mass(double apm) {
   return atsperm / inverseA;
 }
 
-
-pyne::Material pyne::Material::expand_elements() {
+pyne::Material pyne::Material::expand_elements(std::set<int> exception_ids) {
   // Expands the natural elements of a material and returns a new material note
   // that this implementation relies on the fact that maps of ints are stored in
   // a sorted manner in C++.
@@ -1297,6 +1297,12 @@ pyne::Material pyne::Material::expand_elements() {
   abund_end = pyne::natural_abund_map.end();
   zabund = nucname::znum((*abund_itr).first);
   for (comp_iter nuc = comp.begin(); nuc != comp.end(); nuc++) {
+    // keep element as-is if in exception list
+    if (0 < exception_ids.count(nuc->first)) {
+      newcomp.insert(*nuc);
+      continue;
+    }
+
     if(abund_itr == abund_end)
       newcomp.insert(*nuc);
     else if(0 == nucname::anum((*nuc).first)) {
@@ -1325,6 +1331,22 @@ pyne::Material pyne::Material::expand_elements() {
   }
   return Material(newcomp, mass, density, atoms_per_molecule, metadata);
 }
+
+// Wrapped version for calling from python
+pyne::Material pyne::Material::expand_elements(int** int_ptr_arry ) {
+    std::set<int> nucvec;
+    // Set first pointer to first int pointed to by arg
+    if (int_ptr_arry != NULL) {
+      int *int_ptr = *int_ptr_arry;
+      while (int_ptr != NULL)
+	{
+	  nucvec.insert(*int_ptr);
+	  int_ptr++;
+	}
+    }
+    return expand_elements(nucvec);
+}
+
 
 pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   ////////////////////////////////////////////////////////////////////////

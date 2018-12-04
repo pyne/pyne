@@ -71,7 +71,7 @@ cdef extern from "material.h" namespace "pyne":
         map[int, double] dose_per_g(std_string, int) except +
         double molecular_mass() except +
         double molecular_mass(double) except +
-        Material expand_elements() except +
+        Material expand_elements(std_set[int]) except +
         Material collapse_elements(std_set[int]) except +
         double mass_density() except +
         double mass_density(double) except +
