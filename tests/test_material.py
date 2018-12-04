@@ -1142,6 +1142,18 @@ def test_openmc():
                 '</material>\n')
     assert_equal(atom, atom_exp)
 
+    # check write/read consistency
+    leu.write_hdf5('leu.h5')
+
+    leu_read = Material()
+    leu_read.from_hdf5('leu.h5', '/material')
+
+    mass = leu.openmc()
+    assert_equal(mass, mass_exp)
+
+    atom = leu.openmc(frac_type='atom')
+    assert_equal(atom, atom_exp)
+
 def test_openmc_mat0():
 
     leu = Material(nucvec={'U235': 0.04, 'U236': 0.0, 'U238M': 0.96},
