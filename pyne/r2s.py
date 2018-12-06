@@ -184,17 +184,14 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
     intensity = 0.
     if sub_voxel:
         cell_fracs = m.cell_fracs[:]
-        max_num_cells = len(cell_fracs[0])
-        num_e_groups = len(sd_tag[list(m.iter_ve())[0]]) / max_num_cells
-        for idx, _, ve in m:
-            ve_data = sd_tag[ve]
-            for svid in range(max_num_cells):
-                vol = m.elem_volume(ve) * cell_fracs[idx][svid]
-                sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
-                intensity += vol * np.sum(sv_data)
     else:
-        for idx, _, ve in m:
-            vol = m.elem_volume(ve)
-            ve_data = sd_tag[ve]
-            intensity += vol*np.sum(ve_data)
+        cell_fracs = np.ones(shape=(len(m), 1), dtype=float)
+    max_num_cells = len(cell_fracs[0])
+    num_e_groups = len(sd_tag[list(m.iter_ve())[0]]) / max_num_cells
+    for idx, _, ve in m:
+        ve_data = sd_tag[ve]
+        for svid in range(max_num_cells):
+            vol = m.elem_volume(ve) * cell_fracs[idx][svid]
+            sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
+            intensity += vol * np.sum(sv_data)
     return intensity
