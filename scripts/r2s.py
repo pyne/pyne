@@ -177,7 +177,8 @@ def step2():
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
         mesh.mesh.save('{0}_{1}.h5m'.format(output, i+1))
-        intensity = total_photon_source_intensity(mesh, tag_name)
+        intensity = total_photon_source_intensity(mesh, tag_name,
+                                                  sub_voxel=sub_voxel)
         intensities += "{0}: {1}\n".format(dc, intensity)
 
     with open(tot_phtn_src_intensities, 'w') as f:
