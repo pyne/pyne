@@ -682,14 +682,14 @@ cdef class _Material:
 
     def expand_elements(self, nucset=set()):
         """expand_elements(self)
-        Exapnds the elements ('U', 'C', etc) in the material by
+        Expands the elements ('U', 'C', etc) in the material by
         replacing them with their natural isotopic distributions with
         the exception of the ids in nucset. This function returns a
         copy.
 
         Parameters
         ----------
-	nucset : set, optional
+        nucset : set, optional
             A set of integers representing nucids which should not
             be expanded.
 
@@ -710,7 +710,7 @@ cdef class _Material:
 
         Parameters
         ----------
-	nucset : set, optional
+        nucset : set, optional
             A set of integers representing nucids which should not
             be collapsed.
 
