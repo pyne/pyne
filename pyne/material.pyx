@@ -353,7 +353,7 @@ cdef class _Material:
         cdef std_string mat
         mat = self.mat_pointer.openmc(frac_type.encode())
         return mat.decode()
-    
+
     def fluka(self, fid, frac_type='mass'):
         """fluka()
         Return a fluka material record if there is only one component,
@@ -618,7 +618,7 @@ cdef class _Material:
     def decay_heat(self):
         """This provides the decay heat using the comp of the the Material. It
         assumes that the composition of material is given in units of [grams]
-        and returns decay heat in units of [MW].  
+        and returns decay heat in units of [MW].
 
         Returns
         -------
@@ -680,10 +680,18 @@ cdef class _Material:
         """
         return self.mat_pointer.molecular_mass(atoms_per_molecule)
 
-    def expand_elements(self):
+    def expand_elements(self, nucset=set()):
         """expand_elements(self)
-        Exapnds the elements ('U', 'C', etc) in the material by replacing them
-        with their natural isotopic distributions.  This function returns a copy.
+        Expands the elements ('U', 'C', etc) in the material by
+        replacing them with their natural isotopic distributions with
+        the exception of the ids in nucset. This function returns a
+        copy.
+
+        Parameters
+        ----------
+        nucset : set, optional
+            A set of integers representing nucids which should not
+            be expanded.
 
         Returns
         -------
@@ -692,13 +700,19 @@ cdef class _Material:
 
         """
         cdef _Material newmat = Material()
-        newmat.mat_pointer[0] = self.mat_pointer.expand_elements()
+        newmat.mat_pointer[0] = self.mat_pointer.expand_elements(nucset)
         return newmat
 
     def collapse_elements(self, nucset):
         """collapse_elements(self, nucset)
         Collapses the elements in the material, excluding the nucids in
 	the set nucset. This function returns a copy of the material.
+
+        Parameters
+        ----------
+        nucset : set, optional
+            A set of integers representing nucids which should not
+            be collapsed.
 
         Returns
         -------
@@ -1622,7 +1636,7 @@ class Material(_Material, collections.MutableMapping):
         """
         with open(filename, 'a') as f:
             f.write(self.openmc(frac_type))
-            
+
     def alara(self):
         """alara(self)
         This method returns an ALARA material in string form, with relevant
