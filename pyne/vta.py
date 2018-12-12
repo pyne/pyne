@@ -484,14 +484,14 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
             # check whether the box there is overlap of projection on the axis a
             if min(p) > r or max(p) < -r:
                 return False
-    ## endregion
+    ## endregion category 3
 
     ## region Test the three axes corresponding to the face normals of AABB b (category 1)
     # Exit if...
     for i in range(3):
         if max(v[:, i]) < -box_extents[i] or min(v[:, i]) > box_extents[i]:
             return False
-    ## endregion
+    ## endregion category 1
 
     ## region Test separating axis corresponding to triangle face normal (category 2)
     plane_normal = np.cross(f[0], f[1])
@@ -501,7 +501,7 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     # Intersection occurs when plane distance falls within [-r,+r] interval
     if plane_distance > r:
         return False
-    ## endregion
+    ## endregion category 2
 
     return True
 
