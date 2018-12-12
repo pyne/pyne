@@ -261,7 +261,6 @@ def _ray_voxel_traverse(bounds, start, end):
             # calculate the voxel id
             for dr in range(len(idxs)):
                 idxs[dr] = _find_voxel_idx_1d(bounds[dr], point[dr], vec[dr])
-                idxs[dr] = _find_voxel_idx_1d(bounds[dr], tp[dr], vec[dr])
             if -1 in idxs:
                 # point on mesh boundary with direction toward outside the mesh
                 return voxels
