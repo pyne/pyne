@@ -460,7 +460,7 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     #                                 f[1]=v[2]-v[1],
     #                                 f[2]=v[0]-v[2].
     # a, axis for test in bullet 3. a[i][j] = e[i] x f[j], 
-    #                         i.e., a[0][0] = e[0] x f[0]
+    #                         i.e., a[0][0] = e[0] x f[0].
 
     # define basis axis
     e = np.eye(3, 3)
