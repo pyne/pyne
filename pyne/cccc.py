@@ -651,8 +651,8 @@ class Rtflux(object):
              The tag name to use to tag the fluxes onto the mesh.
         """
 
-        from pyne.mesh import HAVE_PYTAPS
-        if HAVE_PYTAPS:
+        from pyne.mesh import HAVE_PYMOAB
+        if HAVE_PYMOAB:
             from pyne.mesh import Mesh, IMeshTag
         else:
             warn("the PyTAPS optional dependency could not be imported. "

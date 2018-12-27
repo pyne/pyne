@@ -10,10 +10,10 @@ import numpy as np
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
 
-if HAVE_PYTAPS:
+if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
 else:
     warn("the PyTAPS optional dependency could not be imported. "

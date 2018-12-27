@@ -37,9 +37,9 @@ from pyne.binaryreader import _BinaryReader, _FortranRecord
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
-if HAVE_PYTAPS:
+if HAVE_PYMOAB:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
     from pyne import dagmc
 else:

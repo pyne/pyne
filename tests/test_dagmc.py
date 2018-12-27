@@ -10,7 +10,7 @@ import imp
 import multiprocessing
 import numpy as np
 
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
@@ -465,7 +465,7 @@ def test_discretize_geom_rand():
     """The 14th (index 13) mesh volume element fully contains volume 2. Use
     random sampling.
     """
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     p = multiprocessing.Pool()
@@ -491,7 +491,7 @@ def test_discretize_geom_grid():
     """The 14th (index 13) mesh volume element fully contains volume 2. Use
     grid sampling.
     """
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     p = multiprocessing.Pool()
@@ -517,7 +517,7 @@ def test_discretize_geom_mix():
     """Single mesh volume element that is a 50:50 split of geometry volumes
     2 and 3.
     """
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     p = multiprocessing.Pool()
@@ -542,7 +542,7 @@ def test_descritize_non_square():
     """Test to make sure requesting a grid with a num_rays that is not a
     perfect square raises ValueError.
     """
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     p = multiprocessing.Pool()
@@ -553,7 +553,7 @@ def test_descritize_non_square():
 def test_discretize_geom_centers():
     """Test that unstructured mesh is sampled by mesh ve centers.
     """
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     p = multiprocessing.Pool()
@@ -575,7 +575,7 @@ def test_cells_at_ve_centers():
     """Test that a mesh with one ve in cell 2 and one ve in cell 3 produces
     correct results.
     """
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     p = multiprocessing.Pool()
@@ -601,7 +601,7 @@ def cell_material_assignments():
 def test_cell_material_assignments():
     """Test cell_material_assigments().
     """
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
     p = multiprocessing.Pool()
     r = p.apply_async(cell_material_assignments)
@@ -632,7 +632,7 @@ def cell_materials():
 def test_cell_materials():
     """Test cell_materials().
     """
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
     p = multiprocessing.Pool()
     r = p.apply_async(cell_materials)
