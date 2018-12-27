@@ -11,9 +11,9 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne.cccc import Isotxs, Rtflux, Atflux
 
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
-if not HAVE_PYTAPS:
+if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
 
 class TestIsotxs(TestCase):
@@ -78,7 +78,7 @@ def test_rtflux_basics():
 
 def test_rtflux_3D():
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
     from pyne.mesh import Mesh, IMeshTag
 
@@ -110,7 +110,7 @@ def test_rtflux_3D():
     assert(np.allclose(exp, flux[:,3]))
 
 def test_rtflux_2D():
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
     from pyne.mesh import Mesh, IMeshTag
 
@@ -133,7 +133,7 @@ def test_rtflux_2D():
     assert(np.allclose(exp, flux[:,3]))
     
 def test_rt_flux_1D():
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
     from pyne.mesh import Mesh, IMeshTag
 
@@ -154,7 +154,7 @@ def test_rt_flux_1D():
 
 
 def test_rtflux_raises():
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
     from pyne.mesh import Mesh, IMeshTag
 
@@ -170,7 +170,7 @@ def test_atflux_adjoint():
 
 def test_atflux_eng_order():
     """Ensure the energy order is read in reverse for atflux file."""
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
     from pyne.mesh import Mesh, IMeshTag
 

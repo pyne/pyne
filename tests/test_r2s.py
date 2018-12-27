@@ -12,9 +12,9 @@ if sys.version_info[0] > 2:
 else:
     from itertools import izip
 
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
-if not HAVE_PYTAPS:
+if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 

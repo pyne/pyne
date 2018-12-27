@@ -8,9 +8,9 @@ from nose.plugins.skip import SkipTest
 from nose.tools import assert_equal
 
 # Mesh specific imports
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
-if not HAVE_PYTAPS:
+if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
 
 from pyne.mesh import Mesh, StatMesh, MeshError
@@ -21,7 +21,7 @@ def test_single_usrbin():
     """Test a usrbin file containing a single tally.
     """
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
@@ -74,7 +74,7 @@ def test_multiple_usrbin():
     """Test a usrbin file containing multiple (two) tallies.
     """
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
@@ -171,7 +171,7 @@ def test_degenerate_usrbin():
     each direction.
     """
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
@@ -289,7 +289,7 @@ def test_degenerate_usrbin():
 
 # test file writing to catch upstream changes in mesh
 def test_mesh_write():
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
         
     thisdir = os.path.dirname(__file__)

@@ -9,11 +9,11 @@ from random import uniform, seed
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
 from pymoab import core, types
 
-if not HAVE_PYTAPS:
+if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 

@@ -4,9 +4,9 @@ Tests for PyNE variance_reduction module.
 import warnings
 
 
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
-if not HAVE_PYTAPS:
+if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 

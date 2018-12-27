@@ -19,8 +19,8 @@ from pyne.utils import QAWarning
 # Mesh specific imports
 from pyne.mesh import Mesh, StatMesh, MeshError
 
-from pyne.mesh import HAVE_PYTAPS
-if HAVE_PYTAPS:
+from pyne.mesh import HAVE_PYMOAB
+if HAVE_PYMOAB:
     from pyne.mesh import IMeshTag
 else:
     warn("the PyTAPS optional dependency could not be imported. "
@@ -49,7 +49,7 @@ class Usrbin(object):
             FLUKA USRBIN file
         """
 
-        if not HAVE_PYTAPS:
+        if not HAVE_PYMOAB:
             raise RuntimeError("PyTAPS is not available, "
                                "unable to create Meshtal.")
 
@@ -105,7 +105,7 @@ class UsrbinTally(Mesh):
             An open usrbin file
         """
 
-        if not HAVE_PYTAPS:
+        if not HAVE_PYMOAB:
             raise RuntimeError("PyTAPS is not available, "
                                "unable to create Meshtal.")
 
