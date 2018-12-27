@@ -16,9 +16,9 @@ try:
 except NameError:
     basestring = str
 
-from pyne.mesh import Mesh, MeshError, HAVE_PYTAPS
+from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 
-if HAVE_PYTAPS:
+if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
     
 from pyne.material import Material, from_atom_frac

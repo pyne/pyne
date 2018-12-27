@@ -34,8 +34,8 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 # Mesh specific imports
 from pyne.mesh import Mesh, StatMesh
 
-from pyne.mesh import HAVE_PYTAPS
-if HAVE_PYTAPS:
+from pyne.mesh import HAVE_PYMOAB
+if HAVE_PYMOAB:
     from pyne.mesh import IMeshTag
 else:
     warn("the PyTAPS optional dependency could not be imported. "
@@ -1571,7 +1571,7 @@ class Wwinp(Mesh):
     """
 
     def __init__(self):
-        if not HAVE_PYTAPS:
+        if not HAVE_PYMOAB:
             raise RuntimeError("PyTAPS is not available, "
                                "unable to create Wwinp Mesh.")
         pass
@@ -1954,7 +1954,7 @@ class Meshtal(object):
              material objects.
         """
 
-        if not HAVE_PYTAPS:
+        if not HAVE_PYMOAB:
             raise RuntimeError("PyTAPS is not available, "
                                "unable to create Meshtal.")
 
@@ -2061,7 +2061,7 @@ class MeshTally(StatMesh):
              objects.
         """
 
-        if not HAVE_PYTAPS:
+        if not HAVE_PYMOAB:
             raise RuntimeError("PyTAPS is not available, "
                                "unable to create Meshtally Mesh.")
 

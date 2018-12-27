@@ -13,13 +13,13 @@ import multiprocessing
 import unittest
 
 
-from pyne.mesh import HAVE_PYTAPS
+from pyne.mesh import HAVE_PYMOAB
 
-if not HAVE_PYTAPS:
+if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-if HAVE_PYTAPS:
+if HAVE_PYMOAB:
     from pyne.mesh import Mesh, IMeshTag
     from pyne import dagmc
 

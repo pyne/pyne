@@ -13,12 +13,12 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
 #    from itaps import iMesh, iBase, iMeshExtensions
-    HAVE_PYTAPS = True
+    HAVE_PYMOAB = True
 
 except ImportError:
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", QAWarning)
-    HAVE_PYTAPS = False
+    HAVE_PYMOAB = False
 
 from pyne.material import Material, MaterialLibrary, MultiMaterial
 
@@ -1521,7 +1521,7 @@ def _structured_iter(indices, ordmap, dims, it):
         yield _structured_step_iter(it, (ioff + joff + koff))
 
 
-if HAVE_PYTAPS:
+if HAVE_PYMOAB:
     def mesh_iterate(mesh, mesh_type = 3,
                      topo_type = types.MBMAXTYPE):
         return meshset_iterate(mesh, 0, topo_type, mesh_type, recursive = True)
