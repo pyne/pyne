@@ -11,11 +11,11 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.mesh import HAVE_PYMOAB
 
-from pymoab import core, types
-
 if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
     raise SkipTest
+
+from pymoab import core, types
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
@@ -101,14 +101,14 @@ def test_single_tet_tag_names_map():
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_analog_single_hex():
-    """This test tests that particles of sampled evenly within the phase-space 
+    """This test tests that particles of sampled evenly within the phase-space
     of a single mesh volume element with one energy group in an analog sampling
-    scheme. This done by dividing each dimension (x, y, z, E) in half, then 
+    scheme. This done by dividing each dimension (x, y, z, E) in half, then
     sampling particles and tallying on the basis of which of the 2^4 = 8 regions
-    of phase space the particle is born into. 
+    of phase space the particle is born into.
     """
     seed(1953)
-    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]], 
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(1, float)
     m.src[0] = 1.0
@@ -125,7 +125,7 @@ def test_analog_single_hex():
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
         assert_equal(s.w, 1.0) # analog: all weights must be one
-        tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs), 
+        tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
               int(s.e*num_divs)] += score
 
     # Test that each half-space of phase space (e.g. x > 0.5) is sampled about
@@ -141,8 +141,8 @@ def test_analog_multiple_hex():
     using the exact same method ass test_analog_multiple_hex.
     """
     seed(1953)
-    m = Mesh(structured=True, 
-             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]], 
+    m = Mesh(structured=True,
+             structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
@@ -158,9 +158,9 @@ def test_analog_multiple_hex():
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         assert_equal(s.w, 1.0)
-        tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs), 
+        tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
               int(s.e*num_divs)] += score
-    
+
     for i in range(0, 4):
         for j in range(0, 2):
             halfspace_sum = np.sum(np.rollaxis(tally, i)[j,:,:,:])
@@ -187,9 +187,9 @@ def test_analog_single_tet():
     m.save(filename)
     center = m.ve_center(list(m.iter_ve())[0])
 
-    subtets = [[center, v1, v2, v3], 
-               [center, v1, v2, v4], 
-               [center, v1, v3, v4], 
+    subtets = [[center, v1, v2, v3],
+               [center, v1, v2, v4],
+               [center, v1, v3, v4],
                [center, v2, v3, v4]]
     tag_names = {"src_tag_name": "src"}
     sampler = Sampler(filename, tag_names, np.array([0, 1]), DEFAULT_ANALOG)
@@ -203,7 +203,7 @@ def test_analog_single_tet():
             if point_in_tet(tet, [s.x, s.y, s.z]):
                 tally[i] += score
                 break
-    
+
     for t in tally:
         assert(abs(t - 0.25)/0.25 < 0.2)
 
@@ -216,7 +216,7 @@ def test_uniform():
        in the Theory Manual.
     """
     seed(1953)
-    m = Mesh(structured=True, 
+    m = Mesh(structured=True,
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
@@ -240,8 +240,8 @@ def test_uniform():
         else:
             assert_almost_equal(s.w, 2.8) # hand calcs
 
-        spatial_tally[int(s.x*num_divs/3.5), 
-                      int(s.y*num_divs/1.0), 
+        spatial_tally[int(s.x*num_divs/3.5),
+                      int(s.y*num_divs/1.0),
                       int(s.z*num_divs/1.0)]  += score
 
         if s.x < 3 and s.e < 0.5:
@@ -543,8 +543,8 @@ def test_bias():
        in the Theory Manual.
     """
     seed(1953)
-    m = Mesh(structured=True, 
-             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]], 
+    m = Mesh(structured=True,
+             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
@@ -585,14 +585,14 @@ def test_bias():
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_bias_spatial():
     """This test tests a user-specified biasing scheme for which the only 1
-    bias group is supplied for a source distribution containing two energy 
+    bias group is supplied for a source distribution containing two energy
     groups. This bias group is applied to both energy groups. In this test,
-    the user-supplied bias distribution that was choosen, correspondes to 
+    the user-supplied bias distribution that was choosen, correspondes to
     uniform sampling, so that results can be checked against Case 1 in the
     theory manual.
     """
     seed(1953)
-    m = Mesh(structured=True, 
+    m = Mesh(structured=True,
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
     m.src = IMeshTag(2, float)
@@ -619,8 +619,8 @@ def test_bias_spatial():
         else:
             assert_almost_equal(s.w, 2.8) # hand calcs
 
-        spatial_tally[int(s.x*num_divs/3.5), 
-                      int(s.y*num_divs/1.0), 
+        spatial_tally[int(s.x*num_divs/3.5),
+                      int(s.y*num_divs/1.0),
                       int(s.z*num_divs/1.0)]  += score
 
         if s.x < 3 and s.e < 0.5:
@@ -937,7 +937,7 @@ def test_template_examples():
                     _source_sampling_test_template(mode, cell_fracs_list, src_tag, bias_tag)
             else:
                 _source_sampling_test_template(mode, cell_fracs_list, src_tag)
- 
+
     # SUBVOXEL
     for mode in (SUBVOXEL_ANALOG, SUBVOXEL_UNIFORM, SUBVOXEL_USER):
         for num_e_groups in (1, 2):
@@ -988,7 +988,7 @@ def _get_num_ve_sve_and_max_num_cells(cell_fracs):
     Parameters
     ----------
     cell_fracs : structured array, optional
-        A sorted, one dimensional array, 
+        A sorted, one dimensional array,
         each entry containing the following fields:
 
             :idx: int
@@ -1043,7 +1043,7 @@ def _cal_pdf_and_biased_pdf(cell_fracs, src_tag, bias_tag=None):
     Parameters
     ----------
     cell_fracs : structured array
-        A sorted, one dimensional array, 
+        A sorted, one dimensional array,
         each entry containing the following fields:
 
             :idx: int
@@ -1059,7 +1059,7 @@ def _cal_pdf_and_biased_pdf(cell_fracs, src_tag, bias_tag=None):
     bias_tag : numpy array, optional
         An one or two dimentional array contains data of bias tag
 
-    Returns 
+    Returns
     -------
     pdf : numpy array
         A three dimentional numpy array, shape=(num_ve, num_sve, num_e_groups)
@@ -1086,7 +1086,7 @@ def _cal_pdf_and_biased_pdf(cell_fracs, src_tag, bias_tag=None):
     # set up bias_array to proper value
     if bias_tag == None:
         # UNIFORM mode, set default bias_group and bias_array
-       num_bias_groups = 1 
+       num_bias_groups = 1
        bias_array = np.empty(shape=(num_ve, max_num_cells, num_e_groups),
                               dtype=np.float64)
        for vid in range(num_ve):
@@ -1137,8 +1137,8 @@ def _cal_pdf_and_biased_pdf(cell_fracs, src_tag, bias_tag=None):
 
 def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     """
-    This function calcualtes the exptected weight and cell_number 
-    for a given particle (according to it's x coordinate) 
+    This function calcualtes the exptected weight and cell_number
+    for a given particle (according to it's x coordinate)
 
     Parameters
     ----------
@@ -1147,7 +1147,7 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     mode : int
         Mode of the source_sampling
     cell_fracs : structured array
-        A sorted, one dimensional array, 
+        A sorted, one dimensional array,
         each entry containing the following fields:
 
             :idx: int
@@ -1229,10 +1229,10 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
         pdf, biased_pdf = _cal_pdf_and_biased_pdf(cell_fracs, src_tag, bias_tag)
         exp_w = pdf[vid, svid, eid] / biased_pdf[vid, svid, eid]
     return exp_w, exp_c
-  
+
 def _get_p_y_z_halfspace(particles):
     """
-    This function calcualtes the probabilities of y and z half space 
+    This function calcualtes the probabilities of y and z half space
     for a given set of particles
 
     Parameters
@@ -1256,7 +1256,7 @@ def _get_p_y_z_halfspace(particles):
     p_y_halfspace = float(y_count)/len(particles)
     p_z_halfspace = float(z_count)/len(particles)
     return p_y_halfspace, p_z_halfspace
- 
+
 def _get_x_dis(particles, num_ve):
     """
     This function calcualtes the particle distribution along x direction
@@ -1285,7 +1285,7 @@ def _get_x_dis(particles, num_ve):
 
 def _get_x_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     """
-    This function calcualtes the exptected particle distribution along x 
+    This function calcualtes the exptected particle distribution along x
     direction.
 
     Parameters
@@ -1293,7 +1293,7 @@ def _get_x_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     mode : int
         Mode of the source_sampling
     cell_fracs : structured array
-        A sorted, one dimensional array, 
+        A sorted, one dimensional array,
         each entry containing the following fields:
 
             :idx: int
@@ -1378,7 +1378,7 @@ def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     mode : int
         Mode of the source_sampling
     cell_fracs : structured array
-        A sorted, one dimensional array, 
+        A sorted, one dimensional array,
         each entry containing the following fields:
 
             :idx: int
@@ -1399,7 +1399,7 @@ def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     e_dis_exp : one dimentional numpy array
         The expected particle direction along energy
     """
-    # input check 
+    # input check
     if mode in (2, 5) and bias_tag == None:
             raise ValueError("bias_tag must be provided when mode is {0}"\
                              .format(str(mode)))
@@ -1459,7 +1459,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
                       (0, 2, 0.6, 0.0),
                       (1, 3, 1.0, 0.0),
                       (2, 4, 1.0, 0.0), ...]
-        
+
         voxel idx           v0           v1           v2
                       |------------|------------|------------|---       y
                       |     |      |            |            |          ^  z
@@ -1477,7 +1477,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
             - 1 voxel 2 subvoxel -> Single voxel multiple subvoxel
             - 2 voxel 2 subvoxel -> Multiple voxel multiple subvoxel
             - 2 voxel 4 subvoxel -> Multiple voxel multiple subvoxel
-    
+
     Under these assumptions:
         * Mesh could be derived from cell_fracs
         * e_bounds could be derived from src_tag
@@ -1490,8 +1490,8 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     Check items:
         * weight for each particle
         * cell_number for each particle
-        * position distribution 
-        * energy distribution 
+        * position distribution
+        * energy distribution
 
     Parameters
     ----------
@@ -1569,7 +1569,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
         # check w, and c for each particle
         # calculate the expected weight and cell_number
-        exp_w, exp_c = _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag) 
+        exp_w, exp_c = _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag)
         assert_equal(s.w, exp_w)
         # when mode in (0, 1, 2), the set exp_c is (-1), otherwise it contains
         # several available cell number
@@ -1598,4 +1598,3 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
             assert_equal(e_dis[i], 0.0)
     # remove the temporary file
     os.remove(filename)
-
