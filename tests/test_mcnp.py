@@ -36,15 +36,10 @@ sswnames = [sswname1, sswname2, sswname3]
 ssrname_onetrack = os.path.join(thisdir, "mcnp_surfsrc_onetrack.w")
 
 # mesh specific imports
-try:
-    from pyne.mesh import HAVE_PYMOAB
+from pyne.mesh import HAVE_PYMOAB
 
-    HAVE_PYMOAB = True
-except ImportError:
+if False == HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
-
-    HAVE_PYMOAB = False
-    pass
 
 from pyne.mesh import Mesh, StatMesh, MeshError
 from numpy.testing import assert_array_equal
@@ -689,6 +684,7 @@ def test_write_to_hdf5():
 # Test Wwinp class. All three function are tested at once because their inputs
 # and ouputs are easily strung together.
 def test_wwinp_n():
+    print("HAVE_PYMOAB:", HAVE_PYMOAB)
     if not HAVE_PYMOAB:
         raise SkipTest
 
