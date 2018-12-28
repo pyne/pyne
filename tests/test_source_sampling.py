@@ -9,9 +9,14 @@ from random import uniform, seed
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.mesh import HAVE_PYMOAB
-
-if not HAVE_PYMOAB:
+try:
+    from pyne.Mesh import Mesh
+    # see if the source sampling module exists but do not import it
+    import imp
+    pyne_info = imp.find_module('pyne')
+    pyne_mod = imp.load_module('pyne', *pyne_info)
+    imp.find_module('source_sampling', pyne_mod.__path__)
+except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
