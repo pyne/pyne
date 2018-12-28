@@ -37,8 +37,8 @@ jobs:
       - run:
           name: Building PyNE w/o PyMOAB
           command: |
-          pwd
-          python setup.py install --user
+            pwd
+            python setup.py install --user
 
       # Test (no PyMOAB)
       - run:
