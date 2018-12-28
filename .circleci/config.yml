@@ -38,7 +38,7 @@ jobs:
           name: Building PyNE w/o PyMOAB
           command: |
             pwd
-            python setup.py install --user
+            python setup.py install --user --clean
 
       # Test (no PyMOAB)
       - run:
@@ -46,6 +46,15 @@ jobs:
           command: |
             cd ~/repo/tests
             ./travis-run-tests.sh python2
+
+  build_py2_pymoab:
+    docker:
+      - image: pshriwise/ubuntu_16.04_pymoab_pyne:latest
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
 
       # Build w/ PyMOAB
       - run:
@@ -62,34 +71,10 @@ jobs:
             cd ~/repo/tests
             ./travis-run-tests.sh python2
 
-  build_py2_again:
-    docker:
-      - image: pshriwise/ubuntu_16.04_pymoab_pyne
-
-    working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      # Build!
-      - run:
-          name: Building PyNE
-          command: |
-            python setup.py install --user \
-                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --clean
-
-      # Test!
-      - run:
-          name: Running PyNE Tests
-          command: |
-            cd ~/repo/tests
-            ./travis-run-tests.sh python2
-
-
 workflows:
   version: 2
   build_and_test:
     jobs:
       - build_py2
-      - build_py2_again
+      - build_py2_pymoab
       - build_py3
