@@ -14,8 +14,7 @@ jobs:
           name: Building PyNE
           command: |
             pwd
-            python3 setup.py install --user \
-                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --clean
+            python3 setup.py install --user
 
       # Test!
       - run:
