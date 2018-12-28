@@ -33,7 +33,21 @@ jobs:
     steps:
       - checkout
 
-      # Build!
+      # Build (no PyMOAB)
+      - run:
+          name: Building PyNE w/o PyMOAB
+          command: |
+          pwd
+          python setup.py install --user
+
+      # Test (no PyMOAB)
+      - run:
+          name: Running PyNE Tests w/o PyMOAB
+          command: |
+            cd ~/repo/tests
+            ./travis-run-tests.sh python2
+
+      # Build w/ PyMOAB
       - run:
           name: Building PyNE
           command: |
@@ -41,15 +55,11 @@ jobs:
             python setup.py install --user \
                 --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --clean
 
-      # Test!
+      # Test w/ PyMOAB
       - run:
           name: Running PyNE Tests
           command: |
             cd ~/repo/tests
-            ls ~/repo
-            git status
-            echo $(env)
-            python -c "from pymoab.types import _eh_py_type"
             ./travis-run-tests.sh python2
 
   build_py2_again:
