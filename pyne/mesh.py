@@ -12,20 +12,19 @@ import tables as tb
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
-#    from itaps import iMesh, iBase, iMeshExtensions
+    from pymoab import core, hcoord, scd, types
+    from pymoab.rng import subtract
+    from pymoab.tag import Tag
+    from pymoab.types import _eh_py_type, _TAG_TYPE_STRS
     HAVE_PYMOAB = True
 
 except ImportError:
+    HAVE_PYMOAB = False
     warn("the PyTAPS optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", QAWarning)
-    HAVE_PYMOAB = False
+
 
 from pyne.material import Material, MaterialLibrary, MultiMaterial
-
-from pymoab import core, hcoord, scd, types
-from pymoab.rng import subtract
-from pymoab.tag import Tag
-from pymoab.types import _eh_py_type, _TAG_TYPE_STRS
 
 _BOX_DIMS_TAG_NAME = "BOX_DIMS"
 
@@ -358,7 +357,7 @@ class IMeshTag(Tag):
 
         """
         super(IMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
-                
+
         if mesh is None or name is None:
             self._lazy_args['size'] = size
             self._lazy_args['dtype'] = dtype
@@ -429,7 +428,7 @@ class IMeshTag(Tag):
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
-        
+
     def __setitem__(self, key, value):
         # get value into canonical form
         tsize = self.size
@@ -883,7 +882,7 @@ class Mesh(object):
 
     def get_all_tags(self):
         return [getattr(self,t) for t in dir(self) if isinstance(getattr(self,t), Tag)]
-                
+
     def __len__(self):
         return self._len
 
@@ -1365,7 +1364,7 @@ class Mesh(object):
             cell_largest_frac_number[i] = \
                     int(voxel_cell_number[i, largest_index])
 
-            
+
         # create the tags
         self.tag(name='cell_number', value=voxel_cell_number,
                  doc='cell numbers of the voxel, -1 used to fill vacancy',
@@ -1527,10 +1526,9 @@ if HAVE_PYMOAB:
         return meshset_iterate(mesh, 0, topo_type, mesh_type, recursive = True)
 
 
+    def meshset_iterate(pymb, meshset = 0, entity_type = types.MBMAXTYPE, dim = -1, arr_size = 1, recursive = False):
 
-def meshset_iterate(pymb, meshset = 0, entity_type = types.MBMAXTYPE, dim = -1, arr_size = 1, recursive = False):
-
-    return MeshSetIterator(pymb, meshset, entity_type, dim, arr_size, recursive)
+        return MeshSetIterator(pymb, meshset, entity_type, dim, arr_size, recursive)
 
 class MeshSetIterator(object):
 

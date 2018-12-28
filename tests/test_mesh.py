@@ -12,6 +12,12 @@ from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
+from pyne.mesh import HAVE_PYMOAB
+
+if not HAVE_PYMOAB:
+    from nose.plugins.skip import SkipTest
+    raise SkipTest
+
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
 from pyne.mesh import IMeshTag, ComputedTag, MetadataTag
 from pyne.material import Material
@@ -100,11 +106,11 @@ def test_create_by_set():
                 coords.append(structured_coords[0][x])
                 coords.append(structured_coords[1][y])
                 coords.append(structured_coords[2][z])
-    a = scdi.construct_box(low, high, coords).box_set()   
+    a = scdi.construct_box(low, high, coords).box_set()
     sm = Mesh(mesh=mesh, structured_set=a, structured=True)
     assert_true(sm.dims == [0, 0, 0, 1, 1, 1])
 
-        
+
 def test_create_by_file():
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/")
@@ -245,7 +251,7 @@ class TestArithmetic():
         obs_res = [self.mesh_1.mesh.tag_get_data(self.mesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
- 
+
     def test_subtract_mesh(self):
         self.arithmetic_mesh_setup()
         self.mesh_1 -= self.mesh_2
