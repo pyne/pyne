@@ -11,7 +11,7 @@ def main():
            "data on mesh with programs that do not support vector tags.\n")
     parser = argparse.ArgumentParser(msg)
     parser.add_argument('mesh_file', help="The path the mesh file")
-    parser.add_argument('-o',  dest='output', default='expanded_tags.vtk', 
+    parser.add_argument('-o',  dest='output', default='expanded_tags.vtk',
                         help="The name of the output file")
     parser.add_argument("-t", "--tags", dest='tags', default=None,
                         help=("Instead of expanding all tags, only expand tags\n"
@@ -20,14 +20,14 @@ def main():
     args = parser.parse_args()
 
     try:
-        from itaps import iMesh, iBase, iMeshExtensions
+        from pymoab import types
     except ImportError:
-        warn("the PyTAPS optional dependency could not be imported. "
+        warn("the PyMOAB optional dependency could not be imported. "
              "Some aspects of the mesh module may be incomplete.", QAWarning)
-    
+
     try:
         m = Mesh(structured=True, mesh=args.mesh_file)
-    except iBase.TagNotFoundError:
+    except types.MB_TAG_NOT_FOUND:
         sys.stderr.write('Structured mesh not found\n \
                           trying unstructured mesh \n')
         m = Mesh(structured=False, mesh=args.mesh_file)
@@ -49,15 +49,14 @@ def main():
        except TypeError:
            sys.stderr.write('Vector tag not found, assuming scalar tag \n')
            m.tag.size = 1
-           
+
        if m.tag.size > 1:
            print("Expanding tag: {}".format(tag))
            m.tag.expand()
 
     print("Saving file {}".format(args.output))
-    m.mesh.save(args.output)
+    m.mesh.write_file(args.output)
     print("Complete")
 
 if __name__ == '__main__':
     main()
-
