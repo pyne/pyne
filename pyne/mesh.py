@@ -20,7 +20,7 @@ try:
 
 except ImportError:
     HAVE_PYMOAB = False
-    warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyMOAB optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", QAWarning)
 
 
@@ -54,7 +54,7 @@ _SEQUENCE_TYPES = (Sequence, np.ndarray)
 
 class Tag(object):
     """A mesh tag, which acts as a descriptor on the mesh.  This dispatches
-    access to intrinsic material properties, the iMesh.Mesh tags, and material
+    access to intrinsic material properties, PyMOAB tags, and material
     metadata attributes.
     """
 
@@ -343,7 +343,7 @@ class IMeshTag(Tag):
         size : int, optional
             The number of elements of type dtype that this tag stores.
         dtype : np.dtype or similar, optional
-            The data type of this tag from int, float, and byte. See PyTAPS
+            The data type of this tag from int, float, and byte. See PyMOAB
             tags for more details.
         default : dtype or None, optional
             The default value to fill this tag with upon creation. If None,
@@ -630,12 +630,12 @@ class MeshError(Exception):
     pass
 
 class Mesh(object):
-    """This class houses an iMesh instance and contains methods for various mesh
-    operations. Special methods exploit the properties of structured mesh.
+    """This class houses a PyMOAB core instance and contains methods for various
+    mesh operations. Special methods exploit the properties of structured mesh.
 
     Attributes
     ----------
-    mesh : iMesh instance
+    mesh : PyMOAB core instance
     structured : bool
         True for structured mesh.
     structured_coords : list of lists
@@ -651,17 +651,16 @@ class Mesh(object):
                  structured_ordering='xyz', mats=()):
         """Parameters
         ----------
-        mesh : iMesh instance or str, optional
-            Either an iMesh instance or a file name of file containing an
-            iMesh instance.
+        mesh : PyMOAB core instance or str, optional
+            Either a PyMOAB core instance or a file name of a PyMOAB mesh file.
         structured : bool, optional
             True for structured mesh.
         structured_coords : list of lists, optional
             A list containing lists of x_points, y_points and z_points
             that make up a structured mesh.
-        structured_set : iMesh entity set handle, optional
-            A preexisting structured entity set on an iMesh instance with a
-            "BOX_DIMS" tag.
+        structured_set : PyMOAB entity set handle, optional
+            A preexisting structured entity set on an PyMOAB core instance with
+            a "BOX_DIMS" tag.
         structured_ordering : str, optional
             A three character string denoting the iteration order of the mesh
             (e.g. 'xyz', meaning z changest fastest, then y, then x.)
@@ -670,22 +669,22 @@ class Mesh(object):
             If mats is None, then no empty materials are created for the mesh.
 
             Unstructured mesh instantiation:
-                 - From iMesh instance by specifying: <mesh>
+                 - From PyMOAB core instance by specifying: <mesh>
                  - From mesh file by specifying: <mesh_file>
 
             Structured mesh instantiation:
-                - From iMesh instance with exactly 1 entity set (with BOX_DIMS
-                  tag) by specifying <mesh> and structured = True.
+                - From PyMOAB core instance with exactly 1 entity set
+                  (with BOX_DIMS tag) by specifying <mesh> and structured = True.
                 - From mesh file with exactly 1 entity set (with BOX_DIMS tag)
                   by specifying <mesh_file> and structured = True.
                 - From an imesh instance with multiple entity sets by
                   specifying <mesh>, <structured_set>, structured=True.
                 - From coordinates by specifying <structured_coords>,
-                  structured=True, and optional preexisting iMesh instance
-                  <mesh>
+                  structured=True, and optional pre-existing PyMOAB core
+                  instance <mesh>
 
-            The "BOX_DIMS" tag on iMesh instances containing structured mesh is
-            a vector of floats it the following form:
+            The "BOX_DIMS" tag on PyMOAB core instances containing structured
+            mesh is a vector of floats it the following form:
             [i_min, j_min, k_min, i_max, j_max, k_max]
             where each value is a volume element index number. Typically volume
             elements should be indexed from 0. The "BOX_DIMS" information is
@@ -849,7 +848,7 @@ class Mesh(object):
                 metatagnames.update(mat.metadata.keys())
             for name in metatagnames:
                 setattr(self, name, MetadataTag(mesh=self, name=name))
-        # iMesh.Mesh() tags
+        # PyMOAB tags
         tagnames = set()
         for ve in ves:
             tagnames.update(t.get_name() for t in self.mesh.tag_get_tags_on_entity(ve))
@@ -936,7 +935,7 @@ class Mesh(object):
         size : int, optional
             The size of the tag. This only applies to IMeshTags.
         dtype : numpy dtype, optional
-            The data type of the tag. This only applies to IMeshTags. See PyTAPS
+            The data type of the tag. This only applies to IMeshTags. See PyMOAB
             for more details.
 
         """
@@ -1053,7 +1052,7 @@ class Mesh(object):
         # first copy full imesh instance
         pymb_copy = core.Core()
 
-        # now create Mesh objected from copied iMesh instance
+        # now create Mesh objected from copied PyMOAB instance
         mesh_copy = Mesh(mesh=pymb_copy,
                          structured=copy.copy(self.structured))
         return mesh_copy
@@ -1066,7 +1065,7 @@ class Mesh(object):
 
         Parameters
         ----------
-        ve : iMesh.Mesh.EntitySet
+        ve : PyMOAB EntitySet handle
             A volume element
 
         Returns
@@ -1092,7 +1091,7 @@ class Mesh(object):
 
         Parameters
         ----------
-        ve : iMesh entity handle
+        ve : PyMOAB EntitySet handle
            Any mesh volume element.
 
         Returns
@@ -1162,7 +1161,7 @@ class Mesh(object):
 
         Examples::
 
-          structured_iterate_hex(): equivalent to iMesh iterator over hexes
+          structured_iterate_hex(): equivalent to mehset_iterator over hexes
                                     in mesh
           structured_iterate_hex("xyz"): iterate over entire mesh, with
                                          k-coordinates changing fastest,
