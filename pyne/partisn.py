@@ -42,7 +42,7 @@ from pyne.mesh import HAVE_PYMOAB
 print(HAVE_PYMOAB)
 
 if HAVE_PYMOAB:
-    from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
+    from pyne.mesh import Mesh, StatMesh, MeshError, NativeMeshTag
     from pyne import dagmc
 else:
     warn("the PyMOAB optional dependency could not be imported. "
@@ -788,7 +788,7 @@ def mesh_to_isotropic_source(m, tag):
     # get data
     temp = m.structured_ordering
     m.structured_ordering = "zyx"
-    m.src = IMeshTag(name=tag)
+    m.src = NativeMeshTag(name=tag)
     data = m.src[:].transpose()[::-1]
     m.structured_ordering = temp
     ninti = len(m.structured_coords[0]) - 1
@@ -911,7 +911,7 @@ def isotropic_vol_source(geom, mesh, cells, spectra, intensities, **kwargs):
            data[row[0], :] += np.multiply(row[2]*intensities[row[1]],
                                           norm_spectra[row[1]])
 
-    mesh.tag = IMeshTag(len(spectra[0]), float, name=tag_name)
+    mesh.tag = NativeMeshTag(len(spectra[0]), float, name=tag_name)
     mesh.tag[:] = data
 
     output = mesh_to_isotropic_source(mesh, tag_name)

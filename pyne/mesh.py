@@ -324,13 +324,15 @@ class MetadataTag(Tag):
                             "or fancy index.".format(key))
 
 
-class IMeshTag(Tag):
-    """A mesh tag which looks itself up as a tag on the iMesh.Mesh instance.
+class NativeMeshTag(Tag):
+    """A mesh tag which looks itself up as a tag on a PyMOAB core instance.
     This makes the following expressions equivalent for a given iMesh.Mesh tag
     name::
 
-        mesh.name[i] == mesh.mesh.getTagHandle(name)[list(mesh.mesh.iterate(
-                                iBase.Type.region, iMesh.Topology.all))[i]]
+        mesh.name[i] == mesh.mesh.tag_get_data(mesh.mesh.tag_get_handle(name),
+                                               mesh.mesh.get_entities_by_type(
+                                               mesh.mesh.get_root_set(),
+                                               types.MBHEX))[i]
 
     It also adds slicing, fancy indexing, boolean masking, and broadcasting
     features to this process.
@@ -356,7 +358,7 @@ class IMeshTag(Tag):
             Documentation string for the tag.
 
         """
-        super(IMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
+        super(NativeMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
 
         if mesh is None or name is None:
             self._lazy_args['size'] = size
@@ -380,7 +382,7 @@ class IMeshTag(Tag):
                 self[:] = default
 
     def __delete__(self, mesh):
-        super(IMeshTag, self).__delete__(mesh)
+        super(NativeMeshTag, self).__delete__(mesh)
         self.mesh.mesh.tag_delete(self.name)
 
     def __getitem__(self, key):
@@ -853,7 +855,7 @@ class Mesh(object):
         for ve in ves:
             tagnames.update(t.get_name() for t in self.mesh.tag_get_tags_on_entity(ve))
         for name in tagnames:
-            setattr(self, name, IMeshTag(mesh=self, name=name))
+            setattr(self, name, NativeMeshTag(mesh=self, name=name))
 
         if mats is not None:
             # Material property tags
@@ -928,14 +930,14 @@ class Mesh(object):
             The value to initialize the tag with, skipped if None.
         tagtype : Tag or str, optional
             The type of tag this should be any of the following classes or
-            strings are accepted: IMeshTag, MetadataTag, ComputedTag, 'imesh',
+            strings are accepted: NativeMeshTag, MetadataTag, ComputedTag, 'imesh',
             'metadata', or 'computed'.
         doc : str, optional
             The tag documentation string.
         size : int, optional
-            The size of the tag. This only applies to IMeshTags.
+            The size of the tag. This only applies to NativeMeshTags.
         dtype : numpy dtype, optional
-            The data type of the tag. This only applies to IMeshTags. See PyMOAB
+            The data type of the tag. This only applies to NativeMeshTags. See PyMOAB
             for more details.
 
         """
@@ -946,23 +948,23 @@ class Mesh(object):
                 tagtype = ComputedTag
             elif size is None and dtype is not None:
                 size = 1
-                tagtype = IMeshTag
+                tagtype = NativeMeshTag
             elif size is not None and dtype is None:
                 dtype = 'f8'
-                tagtype = IMeshTag
+                tagtype = NativeMeshTag
             elif value is None:
                 size = 1
                 value = 0.0
                 dtype = 'f8'
-                tagtype = IMeshTag
+                tagtype = NativeMeshTag
             elif isinstance(value, float):
                 size = 1
                 dtype = 'f8'
-                tagtype = IMeshTag
+                tagtype = NativeMeshTag
             elif isinstance(value, int):
                 size = 1
                 dtype = 'i'
-                tagtype = IMeshTag
+                tagtype = NativeMeshTag
             elif isinstance(value, str):
                 tagtype = MetadataTag
             elif isinstance(value, _SEQUENCE_TYPES):
@@ -971,8 +973,8 @@ class Mesh(object):
                                  'or dtype'.format(name))
             else:
                 tagtype = MetadataTag
-        if tagtype is IMeshTag or tagtype.lower() == 'imesh':
-            t = IMeshTag(size=size, dtype=dtype, mesh=self, name=name, doc=doc)
+        if tagtype is NativeMeshTag or tagtype.lower() == 'imesh':
+            t = NativeMeshTag(size=size, dtype=dtype, mesh=self, name=name, doc=doc)
         elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
             t = MetadataTag(mesh=self, name=name, doc=doc)
         elif tagtype is ComputedTag or tagtype.lower() == 'computed':
@@ -1367,17 +1369,17 @@ class Mesh(object):
         # create the tags
         self.tag(name='cell_number', value=voxel_cell_number,
                  doc='cell numbers of the voxel, -1 used to fill vacancy',
-                 tagtype=IMeshTag, size=max_num_cells, dtype=int)
+                 tagtype=NativeMeshTag, size=max_num_cells, dtype=int)
         self.tag(name='cell_fracs', value=voxel_cell_fracs,
-                 tagtype=IMeshTag, doc='volume fractions of each cell in the '
+                 tagtype=NativeMeshTag, doc='volume fractions of each cell in the '
                                        'voxel, 0.0 used to fill vacancy',
                  size=max_num_cells, dtype=float)
         self.tag(name='cell_largest_frac_number',
-                 value=cell_largest_frac_number, tagtype=IMeshTag,
+                 value=cell_largest_frac_number, tagtype=NativeMeshTag,
                  doc='cell number of the cell with largest volume fraction in '
                      'the voxel', size=1, dtype=int)
         self.tag(name='cell_largest_frac', value=cell_largest_frac,
-                 tagtype=IMeshTag, doc='cell fraction of the cell with largest'
+                 tagtype=NativeMeshTag, doc='cell fraction of the cell with largest'
                                        'cell volume fraction',
                  size=1, dtype=float)
 
