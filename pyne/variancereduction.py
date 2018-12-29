@@ -22,7 +22,7 @@ else:
 
 from mesh import Mesh
 from mesh import MeshError
-from mesh import IMeshTag
+from mesh import NativeMeshTag
 from mcnp import Wwinp
 from pyne.particle import mcnp
 
@@ -163,12 +163,12 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         meshtally.particle = mcnp(particle).lower()
 
     # Create tags for values and errors
-    meshtally.vals = IMeshTag(mesh=meshtally, name=tag_name)
-    meshtally.errors = IMeshTag(mesh=meshtally, name=tag_name_error)
+    meshtally.vals = NativeMeshTag(mesh=meshtally, name=tag_name)
+    meshtally.errors = NativeMeshTag(mesh=meshtally, name=tag_name_error)
 
     # Create weight window tags
     tag_size = meshtally.vals[0].size
-    meshtally.ww_x = IMeshTag(tag_size, float,
+    meshtally.ww_x = NativeMeshTag(tag_size, float,
                               name="ww_{0}".format(meshtally.particle))
     meshtally.tag("{0}_e_upper_bounds".format(meshtally.particle),
                   np.zeros(tag_size, dtype=float), 'imesh', size=tag_size, dtype=float)

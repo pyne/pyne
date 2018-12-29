@@ -28,7 +28,7 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
 from pyne.material import Material
-from pyne.mesh import Mesh, IMeshTag
+from pyne.mesh import Mesh, NativeMeshTag
 from pyne.mcnp import Meshtal
 
 thisdir = os.path.dirname(__file__)
@@ -144,8 +144,8 @@ def test_photon_sampling_setup_structured():
     exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
     exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
 
-    m.tag1 = IMeshTag(2, float)
-    m.tag2 = IMeshTag(2, float)
+    m.tag1 = NativeMeshTag(2, float)
+    m.tag2 = NativeMeshTag(2, float)
 
     for i, mat, ve in m:
         assert_array_equal(m.tag1[i], exp_tag1[i])
@@ -178,7 +178,7 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
         meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
         meshtal.save(meshtal_mesh_file, write_mats=False)
         new_mesh = Mesh(structured=False, mesh=meshtal_mesh_file)
-        new_mesh.TALLY_TAG = IMeshTag(2,float) # 2 egroups
+        new_mesh.TALLY_TAG = NativeMeshTag(2,float) # 2 egroups
         new_mesh.TALLY_TAG = meshtal.n_flux[:]
 
         # overwrite the mesh file
@@ -297,8 +297,8 @@ def test_photon_sampling_setup_unstructured():
     exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
     exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
 
-    m.tag1 = IMeshTag(2, float)
-    m.tag2 = IMeshTag(2, float)
+    m.tag1 = NativeMeshTag(2, float)
+    m.tag2 = NativeMeshTag(2, float)
 
     for i, mat, ve in m:
         assert_array_equal(m.tag1[i], exp_tag1[i])
@@ -308,7 +308,7 @@ def test_photon_sampling_setup_unstructured():
 def test_total_photon_source_intensity():
 
     m = Mesh(structured = True, structured_coords=[[0, 1, 2],[0, 1, 3], [0, 1]])
-    m.source_density = IMeshTag(2, float)
+    m.source_density = NativeMeshTag(2, float)
     m.source_density[:] = [[1., 2.], [3., 4.], [5., 6.], [7., 8.]]
 
     intensity = total_photon_source_intensity(m, "source_density")
@@ -332,7 +332,7 @@ def test_total_photon_source_intensity_subvoxel():
                      (3, 12, 0.5, 0.0), (3, 13, 0.5, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     # Set up the source density with energy group number of 2
-    m.source_density = IMeshTag(4, float)
+    m.source_density = NativeMeshTag(4, float)
     m.source_density[:] = [[0.0, 0.0, 1.0, 1.0],
                            [2.0, 2.0, 3.0, 3.0],
                            [4.0, 4.0, 5.0, 5.0],

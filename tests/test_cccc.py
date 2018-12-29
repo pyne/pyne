@@ -80,7 +80,7 @@ def test_rtflux_3D():
 
     if not HAVE_PYMOAB:
         raise SkipTest
-    from pyne.mesh import Mesh, IMeshTag
+    from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_3D")
     structured_coords=[[0.0,  30.0, 40.0, 50.0, 70.0],
@@ -88,7 +88,7 @@ def test_rtflux_3D():
                        [0.0, 20.0, 75.0, 130.0, 150.0]]
     m = Mesh(structured=True, structured_coords=structured_coords)
     rt.to_mesh(m, "flux")
-    m.tag = IMeshTag(4, float, name="flux")
+    m.tag = NativeMeshTag(4, float, name="flux")
     flux = m.tag[:]
     # test energy ordering
     assert(np.allclose(flux[0], [2.66320088e-06, 7.48262958e-05, 
@@ -112,13 +112,13 @@ def test_rtflux_3D():
 def test_rtflux_2D():
     if not HAVE_PYMOAB:
         raise SkipTest
-    from pyne.mesh import Mesh, IMeshTag
+    from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_2D")
     structured_coords=[[10*x for x in range(8)], [0.0, 10, 20, 30, 40], [0.0, 1.0]]
     m = Mesh(structured=True, structured_coords=structured_coords)
     rt.to_mesh(m, "flux")
-    m.tag = IMeshTag(4, float, name="flux")
+    m.tag = NativeMeshTag(4, float, name="flux")
     flux = m.tag[:]
     # test energy ordering
     assert(np.allclose(flux[0], [1.66764798e-03, 4.59426961e-02, 
@@ -135,13 +135,13 @@ def test_rtflux_2D():
 def test_rt_flux_1D():
     if not HAVE_PYMOAB:
         raise SkipTest
-    from pyne.mesh import Mesh, IMeshTag
+    from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_1D")
     structured_coords=[[10*x for x in range(8)], [0.0, 1.0], [0.0, 1.0]]
     m = Mesh(structured=True, structured_coords=structured_coords)
     rt.to_mesh(m, "flux")
-    m.tag = IMeshTag(4, float, name="flux")
+    m.tag = NativeMeshTag(4, float, name="flux")
     flux = m.tag[:]
     exp = [[1.13102481e-03, 2.48423595e-02, 4.07499865e-02, 1.12382315e-02],
            [1.22305619e-03, 2.06497203e-02, 2.49217686e-02, 4.70910079e-03],
@@ -156,7 +156,7 @@ def test_rt_flux_1D():
 def test_rtflux_raises():
     if not HAVE_PYMOAB:
         raise SkipTest
-    from pyne.mesh import Mesh, IMeshTag
+    from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_1D")
     structured_coords=[[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]
@@ -172,7 +172,7 @@ def test_atflux_eng_order():
     """Ensure the energy order is read in reverse for atflux file."""
     if not HAVE_PYMOAB:
         raise SkipTest
-    from pyne.mesh import Mesh, IMeshTag
+    from pyne.mesh import Mesh, NativeMeshTag
 
     # This file is created with: source=1 174R 0 0 1 40R 0
     # So only the 2 highest energy photon groups and the 1 highest energy
@@ -183,7 +183,7 @@ def test_atflux_eng_order():
           np.linspace(0, 330, 5)]
     m = Mesh(structured=True, structured_coords=sc, mats=None)
     at.to_mesh(m, "flux")
-    m.flux = IMeshTag(217, float)
+    m.flux = NativeMeshTag(217, float)
     assert_array_almost_equal(m.flux[0], 
         np.array([0]*40 + [57.3204927667, 1.16690395827] + [0]*174 + [14.2312186922]))
     

@@ -25,7 +25,7 @@ from pymoab import core, types
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
-from pyne.mesh import Mesh, IMeshTag
+from pyne.mesh import Mesh, NativeMeshTag
 from pyne.source_sampling import Sampler, AliasTable
 
 # Define modes
@@ -49,10 +49,10 @@ def test_single_tet_tag_names_map():
     m = Mesh(structured=True,
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(2, float)
+    m.src = NativeMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
-    m.bias = IMeshTag(2, float)
+    m.bias = NativeMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
     filename = "sampling_mesh.h5m"
     m.save(filename)
@@ -91,9 +91,9 @@ def test_single_tet_tag_names_map():
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_USER)
 
     # wrong bias_tag data (non-zero source_density biased to zero -> NAN weight)
-    m.src = IMeshTag(2, float)
+    m.src = NativeMeshTag(2, float)
     m.src[:] = [[1.0, 1.0]]
-    m.bias = IMeshTag(2, float)
+    m.bias = NativeMeshTag(2, float)
     m.bias[:] = [[0.0, 0.0]]
     m.save(filename)
     tag_names = {"src_tag_name": "src",
@@ -115,7 +115,7 @@ def test_analog_single_hex():
     seed(1953)
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(1, float)
+    m.src = NativeMeshTag(1, float)
     m.src[0] = 1.0
     filename = "sampling_mesh.h5m"
     m.save(filename)
@@ -149,7 +149,7 @@ def test_analog_multiple_hex():
     m = Mesh(structured=True,
              structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
              mats = None)
-    m.src = IMeshTag(2, float)
+    m.src = NativeMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
     filename = "sampling_mesh.h5m"
     m.save(filename)
@@ -186,7 +186,7 @@ def test_analog_single_tet():
     verts = mesh.create_vertices([v1, v2, v3, v4])
     mesh.create_element(types.MBTET, verts)
     m = Mesh(structured=False, mesh=mesh)
-    m.src = IMeshTag(1, float)
+    m.src = NativeMeshTag(1, float)
     m.src[:] = np.array([1])
     filename = "tet.h5m"
     m.save(filename)
@@ -224,7 +224,7 @@ def test_uniform():
     m = Mesh(structured=True,
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(2, float)
+    m.src = NativeMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
     filename = "sampling_mesh.h5m"
@@ -279,7 +279,7 @@ def test_single_hex_single_subvoxel_analog():
     seed(1953)
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(1, float)
+    m.src = NativeMeshTag(1, float)
     m.src[0] = 1.0
     cell_fracs = np.zeros(1, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
@@ -323,7 +323,7 @@ def test_single_hex_multiple_subvoxel_analog():
     seed(1953)
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(3, float)
+    m.src = NativeMeshTag(3, float)
     m.src[:] = np.empty(shape=(1, 3))
     m.src[0] = [0, 0.2, 0.8]
     cell_fracs = np.zeros(3, dtype=[('idx', np.int64),
@@ -366,7 +366,7 @@ def test_multiple_hex_multiple_subvoxel_analog():
     m = Mesh(structured=True,
              structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
              mats = None)
-    m.src = IMeshTag(2, float)
+    m.src = NativeMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
     cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
@@ -410,7 +410,7 @@ def test_single_hex_subvoxel_uniform():
     seed(1953)
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(1, float)
+    m.src = NativeMeshTag(1, float)
     m.src[0] = 1.0
     cell_fracs = np.zeros(1, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
@@ -454,7 +454,7 @@ def test_single_hex_multiple_subvoxel_uniform():
     seed(1953)
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(3, float)
+    m.src = NativeMeshTag(3, float)
     m.src[:] = np.empty(shape=(1, 3))
     m.src[0] = [0, 0.2, 0.8]
     cell_fracs = np.zeros(3, dtype=[('idx', np.int64),
@@ -498,7 +498,7 @@ def test_multiple_hex_multiple_subvoxel_uniform():
     m = Mesh(structured=True,
              structured_coords=[[0, 0.5, 1], [0, 0.5, 1], [0, 0.5, 1]],
              mats = None)
-    m.src = IMeshTag(2, float)
+    m.src = NativeMeshTag(2, float)
     m.src[:] = np.empty(shape=(8,2), dtype=float)
     m.src[:] = [[0,0], [1,0], [0,0], [2,0],
                 [0,0], [3,0], [0,0], [4,0]]
@@ -551,10 +551,10 @@ def test_bias():
     m = Mesh(structured=True,
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(2, float)
+    m.src = NativeMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
-    m.bias = IMeshTag(2, float)
+    m.bias = NativeMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
     filename = "sampling_mesh.h5m"
     m.save(filename)
@@ -600,9 +600,9 @@ def test_bias_spatial():
     m = Mesh(structured=True,
              structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
              mats = None)
-    m.src = IMeshTag(2, float)
+    m.src = NativeMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
-    m.bias = IMeshTag(1, float)
+    m.bias = NativeMeshTag(1, float)
     m.bias[:] = [1, 1]
     e_bounds = np.array([0, 0.5, 1.0])
     filename = "sampling_mesh.h5m"
@@ -668,13 +668,13 @@ def test_subvoxel_multiple_hex_bias_1():
     m.tag_cell_fracs(cell_fracs)
 
     # the photon emitting rate of 4 sub-voxels is 0.1, 0.2, 0.3, 0.4
-    m.src = IMeshTag(4, float)
+    m.src = NativeMeshTag(4, float)
     m.src[:] = np.empty(shape=(2, 4), dtype=float)
     m.src[:] = [[0.05, 0.05, 0.10, 0.10],
                 [0.15, 0.15, 0.20, 0.20]]
     e_bounds = np.array([0, 0.5, 1.0])
     # bias, tag size = 1
-    m.bias = IMeshTag(1, float)
+    m.bias = NativeMeshTag(1, float)
     m.bias[:] = [[0.4], [0.6]]
 
     filename = "sampling_mesh.h5m"
@@ -742,13 +742,13 @@ def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
     m.tag_cell_fracs(cell_fracs)
 
     # the photon emitting rate of 4 sub-voxels is 0.1, 0.2, 0.3, 0.4
-    m.src = IMeshTag(4, float)
+    m.src = NativeMeshTag(4, float)
     m.src[:] = np.empty(shape=(2,4), dtype=float)
     m.src[:] = [[0.125, 0.125, 0.125, 0.125],
                 [0.125, 0.125, 0.125, 0.125]]
     e_bounds = np.array([0, 0.5, 1.0])
     # bias, tag size = 1
-    m.bias = IMeshTag(4, float)
+    m.bias = NativeMeshTag(4, float)
     m.bias[:] = [[0.125, 0.125, 0.1, 0.15], [0.1, 0.1, 0.15, 0.15]]
 
     filename = "sampling_mesh.h5m"
@@ -812,13 +812,13 @@ def test_subvoxel_multiple_hex_bias_e_groups():
     m.tag_cell_fracs(cell_fracs)
 
     # the photon emitting rate of 4 sub-voxels is 0.1, 0.2, 0.3, 0.4
-    m.src = IMeshTag(4, float)
+    m.src = NativeMeshTag(4, float)
     m.src[:] = np.empty(shape=(2,4), dtype=float)
     m.src[:] = [[0.05, 0.05, 0.10, 0.10],
                 [0.15, 0.15, 0.20, 0.20]]
     e_bounds = np.array([0, 0.5, 1.0])
     # bias, tag size = 1
-    m.bias = IMeshTag(2, float)
+    m.bias = NativeMeshTag(2, float)
     m.bias[:] = [[0.1, 0.3], [0.2, 0.4]]
 
     filename = "sampling_mesh.h5m"
@@ -1541,7 +1541,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     # set up mesh
     m = _create_mesh_via_num_ve(num_ve)
     # set up src tag
-    m.src = IMeshTag(max_num_cells*num_e_groups, float)
+    m.src = NativeMeshTag(max_num_cells*num_e_groups, float)
     m.src[:] = src_tag
     # set up cell_number and cell_fracs tag
     if mode in sub_mode_subvoxel:
@@ -1549,7 +1549,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     # set up bias tag
     if mode in (2, 5):
         bias_tag_lenght = len(bias_tag[0])
-        m.bias = IMeshTag(bias_tag_lenght, float)
+        m.bias = NativeMeshTag(bias_tag_lenght, float)
         m.bias[:] = bias_tag
     # set up tag_names
     tag_names = {"src_tag_name": "src"}

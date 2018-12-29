@@ -21,7 +21,7 @@ from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.mesh import HAVE_PYMOAB
 
 if HAVE_PYMOAB:
-    from pyne.mesh import IMeshTag
+    from pyne.mesh import NativeMeshTag
 else:
     warn("the PyMOAB optional dependency could not be imported. "
          "Some aspects of the fluka module may be incomplete.",
@@ -204,9 +204,9 @@ class UsrbinTally(Mesh):
                                           structured=True,
                                           structured_ordering='zyx',
                                           mats=None)
-        self.part_data_tag = IMeshTag(size=1, dtype=float, mesh=self,
+        self.part_data_tag = NativeMeshTag(size=1, dtype=float, mesh=self,
                                   name="part_data_{0}".format(self.particle))
-        self.error_data_tag = IMeshTag(size=1, dtype=float, mesh=self,
+        self.error_data_tag = NativeMeshTag(size=1, dtype=float, mesh=self,
                                   name="error_data_{0}".format(self.particle))
         self.part_data_tag[:] = part_data
         self.error_data_tag[:] = error_data
