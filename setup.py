@@ -271,14 +271,17 @@ def update_cmake_args(ns):
         ]
     if ns.moab is not None:
         ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
+        assert ns.dagmc is not None, "If the --moab option is present," \
+                                     " --dagmc must be as well"
     if ns.dagmc is not None:
-        ns.cmake_args.append('-DDAGMC_ROOT=' + absexpanduser(ns.dagmc))        
+        ns.cmake_args.append('-DDAGMC_ROOT=' + absexpanduser(ns.dagmc))
+        assert ns.moab is not None, "If the --dagmc option is present," \
+                                    " --moab must be as well"
     if ns.deps_root:
         ns.cmake_args.append('-DDEPS_ROOT_DIR=' + absexpanduser(ns.deps_root))
     if ns.fast is not None:
         fast = 'TRUE' if ns.fast else 'FALSE'
         ns.cmake_args.append('-DPYNE_FAST_COMPILE=' + fast)
-
 
 def update_make_args(ns):
     ns.make_args = []
@@ -333,7 +336,7 @@ def parse_args():
     other = parser.add_argument_group('other', 'Miscellaneous arguments.')
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
     other.add_argument('--moab', help='Path to MOAB root directory.')
-    other.add_argument('--dagmc',help='Path to DAGMC root directory.')
+    other.add_argument('--dagmc', help='Path to DAGMC root directory.')
     other.add_argument('--prefix', help='Prefix for install location.',
                        default=None)
     other.add_argument('--build-dir', default='build', dest="build_dir",

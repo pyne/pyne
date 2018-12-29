@@ -8,7 +8,7 @@ http://www.fluka.org/fluka.php
 
 Currently, only usrbin output files can be read.
 
-If PyTAPS is not installed, then Usrbin and UsrbinTally will not be
+If PyMOAB is not installed, then Usrbin and UsrbinTally will not be
 available to use.
 
 """
@@ -18,12 +18,12 @@ from pyne.utils import QAWarning
 
 # Mesh specific imports
 from pyne.mesh import Mesh, StatMesh, MeshError
-
 from pyne.mesh import HAVE_PYMOAB
+
 if HAVE_PYMOAB:
     from pyne.mesh import IMeshTag
 else:
-    warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyMOAB optional dependency could not be imported. "
          "Some aspects of the fluka module may be incomplete.",
          QAWarning)
 
@@ -50,7 +50,7 @@ class Usrbin(object):
         """
 
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyTAPS is not available, "
+            raise RuntimeError("PyMOAB is not available, "
                                "unable to create Meshtal.")
 
         self.tally = {}
@@ -106,7 +106,7 @@ class UsrbinTally(Mesh):
         """
 
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyTAPS is not available, "
+            raise RuntimeError("PyMOAB is not available, "
                                "unable to create Meshtal.")
 
         part_data = []
