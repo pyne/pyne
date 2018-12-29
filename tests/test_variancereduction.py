@@ -17,7 +17,7 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne.variancereduction import cadis, magic
 
-from pyne.mesh import Mesh, IMeshTag
+from pyne.mesh import Mesh, NativeMeshTag
 from pyne.mesh import MeshError
 from pyne import mcnp
 
@@ -36,8 +36,8 @@ def test_cadis_single_e():
     q_bias_mesh = Mesh(structured=True, structured_coords=coords)
     
     #add tags to meshes
-    adj_flux_mesh.adj_flux = IMeshTag(1, float)
-    q_mesh.q = IMeshTag(1, float)
+    adj_flux_mesh.adj_flux = NativeMeshTag(1, float)
+    q_mesh.q = NativeMeshTag(1, float)
 
     #create data for input meshes
     adj_flux_data = [1.1, 1.3, 1.5, 1.7]
@@ -54,8 +54,8 @@ def test_cadis_single_e():
     #checkout output meshes
     expected_ww = [0.3995338, 0.33806706, 0.29299145, 0.258521908]
     expected_q_bias = [0.04652859, 0.04929988, 0.052508751, 0.0545507858]
-    ww_mesh.ww = IMeshTag(1, float)
-    q_bias_mesh.q_bias = IMeshTag(1, float)
+    ww_mesh.ww = NativeMeshTag(1, float)
+    q_bias_mesh.q_bias = NativeMeshTag(1, float)
     
     assert_array_almost_equal(ww_mesh.ww[:], expected_ww[:])
 
@@ -78,8 +78,8 @@ def test_cadis_multiple_e():
     q_bias_mesh = Mesh(structured=True, structured_coords=coords)
     
     #add tags to input meshes
-    adj_flux_mesh.adj_flux = IMeshTag(2, float)
-    q_mesh.q = IMeshTag(2, float)
+    adj_flux_mesh.adj_flux = NativeMeshTag(2, float)
+    q_mesh.q = NativeMeshTag(2, float)
 
     #create data for input meshes
     adj_flux_data = [[1.1, 1.2], [1.3, 1.4], [0.0, 1.6], [1.7, 1.9]]
@@ -99,8 +99,8 @@ def test_cadis_multiple_e():
     expected_ww = [[0.3208302538, 0.2940943993], [0.2714717532, 0.2520809137],
                    [0.0, 0.2205707995], [0.2075960465, 0.1857438311]]
 
-    ww_mesh.ww = IMeshTag(2, float)
-    q_bias_mesh.q_bias = IMeshTag(2, float)
+    ww_mesh.ww = NativeMeshTag(2, float)
+    q_bias_mesh.q_bias = NativeMeshTag(2, float)
     
     assert_array_almost_equal(ww_mesh.ww[:], expected_ww[:])
     assert_array_almost_equal(q_bias_mesh.q_bias[:], expected_q_bias[:])
@@ -117,10 +117,10 @@ def test_magic_below_tolerance():
     
     tally.particle = "neutron"
     tally.e_bounds = [0.0, 0.5, 1.0]
-    tally.n_total_flux = IMeshTag(1, float)
+    tally.n_total_flux = NativeMeshTag(1, float)
     tally.n_total_flux[:] = flux_data
     
-    tally.n_rel_error = IMeshTag(1, float)
+    tally.n_rel_error = NativeMeshTag(1, float)
     tally.n_rel_error[:] = flux_error
     
     magic(tally, "n_total_flux", "n_rel_error")
@@ -141,10 +141,10 @@ def test_magic_multi_bins():
     
     tally.particle = "neutron"
     tally.e_bounds = [0.0, 0.5, 1.0]
-    tally.n_flux = IMeshTag(2, float)
+    tally.n_flux = NativeMeshTag(2, float)
     tally.n_flux[:] = flux_data
     
-    tally.n_rel_error = IMeshTag(2, float)
+    tally.n_rel_error = NativeMeshTag(2, float)
     tally.n_rel_error[:] = flux_error
     
     tolerance = 0.15
@@ -171,10 +171,10 @@ def test_magic_e_total():
     
     tally.particle = "neutron"
     tally.e_bounds = [0.0, 0.5, 1.0]
-    tally.n_total_flux = IMeshTag(1, float)
+    tally.n_total_flux = NativeMeshTag(1, float)
     tally.n_total_flux[:] = flux_data
     
-    tally.n_rel_error = IMeshTag(1, float)
+    tally.n_rel_error = NativeMeshTag(1, float)
     tally.n_rel_error[:] = flux_error
     
     tolerance = 0.15
@@ -198,10 +198,10 @@ def test_magic_single_e():
     
     tally.particle = "neutron"
     tally.e_bounds = [0.0, 1.0]
-    tally.n_flux = IMeshTag(1, float)
+    tally.n_flux = NativeMeshTag(1, float)
     tally.n_flux[:] = flux_data
     
-    tally.n_rel_error = IMeshTag(1, float)
+    tally.n_rel_error = NativeMeshTag(1, float)
     tally.n_rel_error[:] = flux_error
     
     tolerance = 0.15

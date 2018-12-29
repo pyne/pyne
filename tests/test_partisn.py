@@ -19,7 +19,7 @@ from pyne.mesh import HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
 
-from pyne.mesh import Mesh, IMeshTag
+from pyne.mesh import Mesh, NativeMeshTag
 
 try:
     from pyne import dagmc
@@ -603,7 +603,7 @@ def test_mesh_to_isotropic_source():
     """Test isotropic SOURCF generation.
     """
     m = Mesh(structured=True, structured_coords=[range(5), range(5), range(5)])
-    m.src = IMeshTag(4, float)
+    m.src = NativeMeshTag(4, float)
     # These source values were carefully choosen so that:
     # 1. The iteration order could be visually checked based on RTFLUX output using
     #    the resulting SOURCF card.
@@ -644,7 +644,7 @@ def test_isotropic_vol_source():
     dg, s = partisn.isotropic_vol_source("files_test_partisn/source_boxes.h5m",
                                           m, cells, spectra, intensities,
                                           num_rays=4, tag_name="src", grid=True)
-    m.src = IMeshTag(4, float)
+    m.src = NativeMeshTag(4, float)
     data = m.src[:]
 
     # setup expected result, confirmed by hand calcs and inspection

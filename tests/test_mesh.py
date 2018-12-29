@@ -19,7 +19,7 @@ if not HAVE_PYMOAB:
     raise SkipTest
 
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
-from pyne.mesh import IMeshTag, ComputedTag, MetadataTag
+from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
 from pyne.material import Material
 
 from pymoab import core, hcoord, scd, types
@@ -602,7 +602,7 @@ def test_imeshtag():
         3: Material({'Tm171': 171.0}, density=45.0),
         }
     m = gen_mesh(mats=mats)
-    m.f = IMeshTag(mesh=m, name='f')
+    m.f = NativeMeshTag(mesh=m, name='f')
     m.f[:] = [1.0, 2.0, 3.0, 4.0]
 
     # Getting tags
@@ -637,7 +637,7 @@ def test_imeshtag_fancy_indexing():
     m = gen_mesh()
 
     #  tags of length 1
-    m.horse = IMeshTag(1, float)
+    m.horse = NativeMeshTag(1, float)
     #  test fancy indexing
     m.horse[[2, 0]] = [3.0, 1.0]
     assert_array_equal(m.horse[:], [1.0, 0.0, 3.0, 0.0])
@@ -645,7 +645,7 @@ def test_imeshtag_fancy_indexing():
     assert_array_equal(m.horse[:], [1.0, 0.0, 7.0, 0.0])
 
     #  tags of length > 1
-    m.grape = IMeshTag(2, float)
+    m.grape = NativeMeshTag(2, float)
     #  test fancy indexing
     m.grape[[2, 0]] = [[3.0, 4.0], [5.0, 6.0]]
     assert_array_equal(m.grape[:], [[5.0, 6.0], [0.0, 0.0], [3.0, 4.0], [0.0, 0.0]])
@@ -658,34 +658,34 @@ def test_imeshtag_fancy_indexing():
 def test_imeshtag_broadcasting():
     m = gen_mesh()
     #  tags of length 1
-    m.horse = IMeshTag(1, float)
+    m.horse = NativeMeshTag(1, float)
     m.horse[:] = 2.0
     assert_array_equal(m.horse[:], [2.0]*4)
 
     #  tags of length > 1
-    m.grape = IMeshTag(2, float)
+    m.grape = NativeMeshTag(2, float)
     #  test broadcasing
     m.grape[[2, 0]] = [7.0, 8.0]
     assert_array_equal(m.grape[:], [[7.0, 8.0], [0.0, 0.0], [7.0, 8.0], [0.0, 0.0]])
 
 def test_imeshtag_expand():
     m = Mesh(structured=True, structured_coords=[[-1, 0, 1],[0, 1],[0, 1]])
-    m.clam = IMeshTag(2, float)
+    m.clam = NativeMeshTag(2, float)
     m.clam[:] = [[1.1, 2.2], [3.3, 4.4]]
     m.clam.expand()
-    m.clam_000 = IMeshTag(1, float)
+    m.clam_000 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_000[:], [1.1, 3.3])
-    m.clam_001 = IMeshTag(1, float)
+    m.clam_001 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_001[:], [2.2, 4.4])
 
     # corner case: mesh with a single volume element
     m = Mesh(structured=True, structured_coords=[[0, 1],[0, 1],[0, 1]])
-    m.clam = IMeshTag(2, float)
+    m.clam = NativeMeshTag(2, float)
     m.clam[:] = [[1.1, 2.2]]
     m.clam.expand()
-    m.clam_000 = IMeshTag(1, float)
+    m.clam_000 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_000[:], 1.1)
-    m.clam_001 = IMeshTag(1, float)
+    m.clam_001 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_001[:], 2.2)
 
 def test_comptag():
@@ -717,12 +717,12 @@ def test_addtag():
         }
     m = gen_mesh(mats=mats)
     m.tag('meaning', value=42.0)
-    assert_is_instance(m.meaning, IMeshTag)
+    assert_is_instance(m.meaning, NativeMeshTag)
     assert_array_equal(m.meaning[:], np.array([42.0]*len(m)))
 
 def test_lazytaginit():
     m = gen_mesh()
-    m.cactus = IMeshTag(3, 'i')
+    m.cactus = NativeMeshTag(3, 'i')
     m.cactus[:] = np.array([42, 43, 44])
     assert_in('cactus', m.tags)
     assert_array_equal(m.cactus[0], [42, 43, 44])
@@ -733,7 +733,7 @@ def test_lazytaginit():
 
 def test_issue360():
     a = Mesh(structured=True, structured_coords=[[0,1,2],[0,1],[0,1]])
-    a.cat = IMeshTag(3, float)
+    a.cat = NativeMeshTag(3, float)
     a.cat[:] = [[0.11, 0.22, 0.33],[0.44, 0.55, 0.66]]
     a.cat[:] = np.array([[0.11, 0.22, 0.33],[0.44, 0.55, 0.66]])
 

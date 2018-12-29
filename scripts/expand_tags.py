@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from pyne.mesh import Mesh, IMeshTag
+from pyne.mesh import Mesh, NativeMeshTag
 
 def main():
     msg = ("This script reads a mesh (.h5m) file and, for each vector tag of\n"
@@ -37,11 +37,11 @@ def main():
     else:
         tags = []
         for name, tag in m.tags.items():
-           if isinstance(tag, IMeshTag) and name != 'idx':
+           if isinstance(tag, NativeMeshTag) and name != 'idx':
                tags.append(name)
 
     for tag in tags:
-       m.tag = IMeshTag(name=tag)
+       m.tag = NativeMeshTag(name=tag)
        # there may be vector tags
        try:
            # this line fails if the tag is a scalar tag

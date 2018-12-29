@@ -653,7 +653,7 @@ class Rtflux(object):
 
         from pyne.mesh import HAVE_PYMOAB
         if HAVE_PYMOAB:
-            from pyne.mesh import Mesh, IMeshTag
+            from pyne.mesh import Mesh, NativeMeshTag
         else:
             warn("the PyMOAB optional dependency could not be imported. "
                  "All aspects of the partisn module are not imported.",
@@ -668,7 +668,7 @@ class Rtflux(object):
 
         temp = m.structured_ordering
         m.structured_ordering = 'zyx'
-        m.tag = IMeshTag(self.ngroup, float, name=tag_name)
+        m.tag = NativeMeshTag(self.ngroup, float, name=tag_name)
         m.tag[:] = self.flux
         m.structured_ordering = temp
 
