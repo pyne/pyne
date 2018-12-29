@@ -20,7 +20,7 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 
 if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
-    
+
 from pyne.material import Material, from_atom_frac
 from pyne import nucname
 from pyne.nucname import serpent, alara, znum, anum
@@ -224,8 +224,9 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     tag_handles = {}
     float_tag_size = num_e_groups * max_num_cells
     for tag_name in tags.values():
-        
-        mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), 'imesh', size = float_tag_size, dtype = float)
+
+        mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), 'imesh',
+                                    size = float_tag_size, dtype = float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
     # creat a list of decay times (strings) in the source file
@@ -852,7 +853,7 @@ def _convert_unit_to_s(dc):
     This function return a float number represent a time in unit of s.
     Parameters
     ----------
-    dc : string. Contain a num and an unit. 
+    dc : string. Contain a num and an unit.
 
     Returns
     -------
@@ -861,7 +862,7 @@ def _convert_unit_to_s(dc):
     # get num and unit
     num, unit = dc.split()
     return to_sec(float(num), unit)
-        
+
 
 def _find_phsrc_dc(idc, phtn_src_dc):
     """
@@ -897,8 +898,5 @@ def _find_phsrc_dc(idc, phtn_src_dc):
                 return dc
             elif dc_s != 0.0 and (abs(idc_s - dc_s)/dc_s) < 1e-6:
                 return dc
-        # if idc doesn't match any string in phtn_src_dc list, raise an error.    
-        raise ValueError('Decay time {0} not found in phtn_src file'.format(idc)) 
-
-
-
+        # if idc doesn't match any string in phtn_src_dc list, raise an error.
+        raise ValueError('Decay time {0} not found in phtn_src file'.format(idc))

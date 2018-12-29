@@ -7,7 +7,7 @@ Further information on MCNP can be obtained from http://mcnp.lanl.gov/
 Mctal and Runtpe classes still need work. Also should add Meshtal and Outp
 classes.
 
-If PyTAPS is not installed, then Wwinp, Meshtal, and Meshtally will not be
+If PyMOAB is not installed, then Wwinp, Meshtal, and Meshtally will not be
 available to use.
 
 """
@@ -38,7 +38,7 @@ from pyne.mesh import HAVE_PYMOAB
 if HAVE_PYMOAB:
     from pyne.mesh import IMeshTag
 else:
-    warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyMOAB optional dependency could not be imported. "
          "Some aspects of the mcnp module may be incomplete.",
          QAWarning)
 
@@ -1316,9 +1316,9 @@ def mats_from_inp(inp):
     Returns
     --------
     materials : dict
-       Keys are MCNP material numbers and values are PyNE material objects (for 
-       single density materials) and MultiMaterial objects (for multiple density 
-       materials). 
+       Keys are MCNP material numbers and values are PyNE material objects (for
+       single density materials) and MultiMaterial objects (for multiple density
+       materials).
     """
 
     mat_lines = []  # line of lines that begin material cards
@@ -1374,7 +1374,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     """ This function reads an MCNP material card from a file and returns a
     Material or Multimaterial object for the material described by the card.
     This function is used by :func:`mats_from_inp`.
-    
+
     Parameters
     ----------
     filename : str
@@ -1403,7 +1403,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
             line_index += 1
             line = linecache.getline(filename, mat_line + line_index)
         # otherwise this not a line we care about, move on and
-        # skip lines that start with c or C                                                                                                                  
+        # skip lines that start with c or C
         else:
             line_index += 1
             line = linecache.getline(filename, mat_line + line_index)
@@ -1416,7 +1416,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
             zzzaaam = str(nucname.zzaaam(
                 nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
 
-            # this allows us to read nuclides that are repeated                                                                                              
+            # this allows us to read nuclides that are repeated
             if zzzaaam in nucvec.keys():
                 nucvec[zzzaaam] += float(data_string.split()[i+1])
             else:
@@ -1572,7 +1572,7 @@ class Wwinp(Mesh):
 
     def __init__(self):
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyTAPS is not available, "
+            raise RuntimeError("PyMOAB is not available, "
                                "unable to create Wwinp Mesh.")
         pass
 
@@ -1691,7 +1691,8 @@ class Wwinp(Mesh):
 
         # create vector tags for data
         ww_tag_name = "ww_{0}".format(particle)
-        self.tag(ww_tag_name, size = self.ne[particle_index], dtype = float, tagtype = 'imesh')
+        self.tag(ww_tag_name, size = self.ne[particle_index],
+                 dtype = float, tagtype = 'imesh')
         tag_ww = self.get_tag(ww_tag_name)
 
         # tag vector data to mesh
@@ -1955,7 +1956,7 @@ class Meshtal(object):
         """
 
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyTAPS is not available, "
+            raise RuntimeError("PyMOAB is not available, "
                                "unable to create Meshtal.")
 
         self.tally = {}
@@ -2028,7 +2029,7 @@ class MeshTally(StatMesh):
     e_bounds : list of floats
         The minimum and maximum bounds for energy bins
     mesh :
-        An iMesh instance tagged with all results and
+        An PyMOAB core instance tagged with all results and
         relative errors
     tag_names : iterable
         Four strs that specify the tag names for the results, relative errors,
@@ -2062,7 +2063,7 @@ class MeshTally(StatMesh):
         """
 
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyTAPS is not available, "
+            raise RuntimeError("PyMOAB is not available, "
                                "unable to create Meshtally Mesh.")
 
         self.tally_number = tally_number
@@ -2124,7 +2125,7 @@ class MeshTally(StatMesh):
         self._column_idx = dict(zip(column_names, range(0, len(column_names))))
 
     def _create_mesh(self, f, mesh_has_mats):
-        """Instantiate a Mesh object and tag the iMesh instance
+        """Instantiate a Mesh object and tag the PyMOAB core instance
            with results and relative errors.
         """
 
@@ -2155,12 +2156,9 @@ class MeshTally(StatMesh):
         # Tag results and error vector to mesh
         self.tag(self.tag_names[0], tagtype = 'imesh', size = num_e_groups, dtype = float)
         res_tag = self.get_tag(self.tag_names[0])
-        # IMeshTag(num_e_groups, float, mesh=self,
-        #                    name=self.tag_names[0])
         self.tag(self.tag_names[1], tagtype = 'imesh', size = num_e_groups, dtype = float)
         rel_err_tag = self.get_tag(self.tag_names[1])
-        # IMeshTag(num_e_groups, float, mesh=self,
-        #                        name=self.tag_names[1])
+
         if num_e_groups == 1:
             res_tag[:] = result[0]
             rel_err_tag[:] = rel_error[0]
@@ -2181,10 +2179,10 @@ class MeshTally(StatMesh):
 
             self.tag(self.tag_names[2], size = 1, dtype = float, tagtype = 'imesh')
             res_tot_tag = self.get_tag(self.tag_names[2])
-#           IMeshTag(1, float, mesh=self, name=self.tag_names[2])
+
             self.tag(self.tag_names[3], size = 1, dtype = float, tagtype = 'imesh')
             rel_err_tot_tag = self.get_tag(self.tag_names[3])
-            # IMeshTag(1, float, mesh=self, name=self.tag_names[3])
+
             res_tot_tag[:] = result
             rel_err_tot_tag[:] = rel_error
 

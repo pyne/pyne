@@ -7,7 +7,7 @@ forward or time dependent problems can be run.
 
 Module is designed to work on 1D, 2D, or 3D Cartesian geometries.
 
-If PyTaps not installed then this module will not work.
+If PyMOAB not installed then this module will not work.
 """
 
 from __future__ import print_function, division
@@ -45,7 +45,7 @@ if HAVE_PYMOAB:
     from pyne.mesh import Mesh, StatMesh, MeshError, IMeshTag
     from pyne import dagmc
 else:
-    warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyMOAB optional dependency could not be imported. "
          "All aspects of the partisn module are not imported.",
          QAWarning)
 

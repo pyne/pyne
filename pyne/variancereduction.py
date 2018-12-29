@@ -16,7 +16,7 @@ from pyne.mesh import HAVE_PYMOAB
 if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
 else:
-    warn("the PyTAPS optional dependency could not be imported. "
+    warn("the PyMOAB optional dependency could not be imported. "
          "Some aspects of the variance reduction module may be incomplete.",
          QAWarning)
 
@@ -66,8 +66,7 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     """
 
     # find number of energy groups
-    e_groups = adj_flux_mesh.get_tag(adj_flux_tag)[list(
-        mesh_iterate(adj_flux_mesh.mesh))[0]]
+    e_groups = adj_flux_mesh.get_tag(adj_flux_tag)[list(mesh_iterate(adj_flux_mesh.mesh))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
 
@@ -134,7 +133,7 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
 
 
 def magic(meshtally, tag_name, tag_name_error, **kwargs):
-    """This function reads a PyNE mcnp.MeshTally object and preforms the MAGIC 
+    """This function reads a PyNE mcnp.MeshTally object and preforms the MAGIC
     algorithm and returns the resulting weight window mesh.
 
     Parameters:
@@ -146,32 +145,33 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         The meshtally tag_name for the error associated with provided tag_name.
         Example: n_rel_error
     tolerance : float, optional
-        The maximum relative error allowable for the MAGIC algorithm to create 
+        The maximum relative error allowable for the MAGIC algorithm to create
         a weight window lower bound for for a given mesh volume element for the
-        intial weight window lower bound generation, or overwrite preexisting 
-        weight window lower bounds for subsequent iterations. 
+        intial weight window lower bound generation, or overwrite preexisting
+        weight window lower bounds for subsequent iterations.
     null_value : float, optional
         The weight window lower bound value that is assigned to mesh volume
         elements where the relative error on flux exceeds the tolerance.
     """
-    
+
     tolerance = kwargs.get('tolerance',0.5)
     null_value = kwargs.get('null_value',0.0)
-    
+
     # Convert particle name to the recognized abbreviation
     particle = (meshtally.particle.capitalize())
     if  particle == ("Neutron" or "Photon" or "Electron"):
         meshtally.particle = mcnp(particle).lower()
-    
+
     # Create tags for values and errors
     meshtally.vals = IMeshTag(mesh=meshtally, name=tag_name)
     meshtally.errors = IMeshTag(mesh=meshtally, name=tag_name_error)
-    
+
     # Create weight window tags
     tag_size = meshtally.vals[0].size
-    meshtally.ww_x = IMeshTag(tag_size, float, 
+    meshtally.ww_x = IMeshTag(tag_size, float,
                               name="ww_{0}".format(meshtally.particle))
-    meshtally.tag("{0}_e_upper_bounds".format(meshtally.particle), np.zeros(tag_size, dtype=float), 'imesh', size=tag_size, dtype=float)
+    meshtally.tag("{0}_e_upper_bounds".format(meshtally.particle),
+                  np.zeros(tag_size, dtype=float), 'imesh', size=tag_size, dtype=float)
     root_tag = meshtally.get_tag("{0}_e_upper_bounds".format(meshtally.particle))
     # Determine if total energy or single energy bin or multiple energy bins
     if tag_size == 1 and len(meshtally.e_bounds) > 1:
@@ -180,12 +180,13 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         total = True
     elif tag_size > 1 and len(meshtally.e_bounds) > 1:
         total = False
-    
+
     # Reassign arrays for total and not total case
     if total:
+        # get value tagged on the mesh itself
         root_tag[meshtally] = np.max(meshtally.e_bounds[:])
         max_val = np.max(meshtally.vals[:])
-        
+
         vals = []
         errors = []
         for flux, error in zip(meshtally.vals[:], meshtally.errors[:]):
@@ -194,12 +195,12 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
 
         vals = np.array(vals)
         errors = np.array(errors)
-        
+
     else:
         root_tag[meshtally] = meshtally.e_bounds[1:]
         vals = meshtally.vals[:]
         errors = meshtally.errors[:]
-    
+
     # Determine the max values for each energy bin
     max_val = []
     for i in range(tag_size):
@@ -207,7 +208,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         for ve, flux in enumerate(vals[:]):
             vals_in_e.append(vals[ve][i])
         max_val.append(np.max(vals_in_e))
-    
+
     # Apply normalization to create weight windows
     ww = []
     for ve, flux_list in enumerate(vals[:]):
@@ -216,16 +217,16 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         for i, value in enumerate(flux_list):
             if tally_list[i] > tolerance:
                 flux.append(null_value)
-            else:    
+            else:
                 flux.append(value/(2.0*max_val[i]))
         ww.append(flux)
-    
+
     # Resassign weight windows to meshtally
     if total:
         meshtally.ww_x[:] = np.reshape(ww, len(ww))
     else:
         meshtally.ww_x[:] = ww
-    
+
     # Create wwinp mesh
     wwinp = Wwinp()
     wwinp.read_mesh(meshtally.mesh)
