@@ -338,7 +338,7 @@ class NativeMeshTag(Tag):
     features to this process.
     """
 
-    def __init__(self, size = 1, dtype = 'f8', default = 0.0, mesh = None, name = None,
+    def __init__(self, size=1, dtype='f8', default=0.0, mesh=None, name=None,
                  doc=None):
         """Parameters
         ----------
@@ -426,7 +426,6 @@ class NativeMeshTag(Tag):
                     raise TypeError("{0} contains invalid element references "
                                     "(non-ints, non-handles)".format(key))
             return self.mesh.mesh.tag_get_data(self.tag, ves_to_get, flat = True)
-
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -544,7 +543,9 @@ class NativeMeshTag(Tag):
         for j in range(self.size):
             data = [x[j] for x in self[:]]
             tag = self.mesh.mesh.tag_get_handle("{0}_{1:03d}".format(self.name, j),
-                                                1, self.pymbtype, storage_type = types.MB_TAG_DENSE, create_if_missing = True)
+                                                1, self.pymbtype,
+                                                storage_type=types.MB_TAG_DENSE,
+                                                create_if_missing=True)
             self.mesh.mesh.tag_set_data(tag, list(self.mesh.iter_ve()), data)
 
 
@@ -767,7 +768,7 @@ class Mesh(object):
                 except types.MB_TAG_NOT_FOUND as e:
                     print("BOX_DIMS not found on MOAB mesh instance")
                     raise e
-
+                # check that the structured_set found is tagged as a structured set
                 try:
                     self.mesh.tag_get_data(box_tag, structured_set)
                 except:
@@ -783,7 +784,7 @@ class Mesh(object):
                                 "C. Mesh coordinates\n"
                                 "D. Structured entity set AND PyMOAB instance")
 
-            self.dims = list(self.mesh.tag_get_data(self.mesh.tag_get_handle("BOX_DIMS"),
+            self.dims = list(self.mesh.tag_get_data(self.mesh.tag_get_handle(_BOX_DIMS_TAG_NAME),
                                                     self.structured_set, flat = True))
 
             self.vertex_dims = list(self.dims[0:3]) \
@@ -833,7 +834,11 @@ class Mesh(object):
         if 'idx' in tags:
             tag_idx = self.mesh.tag_get_handle('idx')
         else:
-            tag_idx = self.mesh.tag_get_handle('idx', 1, types.MB_TYPE_INTEGER, types.MB_TAG_DENSE, create_if_missing = True)
+            tag_idx = self.mesh.tag_get_handle('idx',
+                                               1,
+                                               types.MB_TYPE_INTEGER,
+                                               types.MB_TAG_DENSE,
+                                               create_if_missing=True)
         for i, ve in enumerate(ves):
             self.mesh.tag_set_data(tag_idx, ve, i)
             if mats is not None and i not in mats:
@@ -900,6 +905,8 @@ class Mesh(object):
                 yield i, mats[i], ve
 
     def iter_ve(self):
+        """Returns an iterator that yields on the volume elements.
+        """
         if self.structured:
             return self.structured_iterate_hex(self.structured_ordering)
         else:
@@ -1027,23 +1034,23 @@ class Mesh(object):
             mesh_1 = copy.copy(self)
         for tag in tags:
             for ve_1, ve_2 in \
-                zip(zip(iter(meshset_iterate(mesh_1.mesh, mesh_1.structured_set, types.MBMAXTYPE, dim = 3))),
-                    zip(iter(meshset_iterate( other.mesh,  other.structured_set, types.MBMAXTYPE, dim = 3)))):
+                zip(zip(iter(meshset_iterate(mesh_1.mesh, mesh_1.structured_set, types.MBMAXTYPE, dim=3))),
+                    zip(iter(meshset_iterate( other.mesh,  other.structured_set, types.MBMAXTYPE, dim=3)))):
                 mesh_1_tag = mesh_1.mesh.tag_get_handle(tag)
                 other_tag  = other.mesh.tag_get_handle(tag)
-                val = _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat = True)[0],
-                         other.mesh.tag_get_data(other_tag,   ve_2, flat = True)[0])
+                val = _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat=True)[0],
+                         other.mesh.tag_get_data(other_tag,   ve_2, flat=True)[0])
                 mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1,
-                    _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat = True)[0],
-                             other.mesh.tag_get_data(other_tag,   ve_2, flat = True)[0]))
+                    _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat=True)[0],
+                             other.mesh.tag_get_data(other_tag,   ve_2, flat=True)[0]))
 
         return mesh_1
 
     def common_ve_tags(self, other):
         """Returns the volume element tags in common between self and other.
         """
-        self_tags = self.mesh.tag_get_tags_on_entity(list(meshset_iterate(self.mesh, self.structured_set, types.MBMAXTYPE, dim = 3))[0])
-        other_tags = other.mesh.tag_get_tags_on_entity(list(meshset_iterate(other.mesh, other.structured_set, types.MBMAXTYPE, dim = 3))[0])
+        self_tags = self.mesh.tag_get_tags_on_entity(list(meshset_iterate(self.mesh, self.structured_set, types.MBMAXTYPE, dim=3))[0])
+        other_tags = other.mesh.tag_get_tags_on_entity(list(meshset_iterate(other.mesh, other.structured_set, types.MBMAXTYPE, dim=3))[0])
         self_tags = set(x.get_name() for x in self_tags)
         other_tags = set(x.get_name() for x in other_tags)
         intersect = self_tags & other_tags
@@ -1111,8 +1118,9 @@ class Mesh(object):
         """Return the handle for (i,j,k)'th vertex in the mesh"""
         self._structured_check()
         n = _structured_find_idx(self.vertex_dims, (i, j, k))
-        return _structured_step_iter(
-            meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBVERTEX), n)
+        return _structured_step_iter(meshset_iterate(self.mesh,
+                                                     self.structured_set,
+                                                     entity_type=types.MBVERTEX), n)
 
     def structured_get_hex(self, i, j, k):
         """Return the handle for the (i,j,k)'th hexahedron in the mesh"""
@@ -1184,14 +1192,17 @@ class Mesh(object):
         # so we can save time by simply returning a pytaps iterator
         # if no kwargs were specified
         if order == "zyx" and not kw:
-            return meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBHEX, dim = 3)
+            return meshset_iterate(self.mesh,
+                                   self.structured_set,
+                                   entity_type=types.MBHEX,
+                                   dim=3)
 
         indices, ordmap = _structured_iter_setup(self.dims, order, **kw)
         return _structured_iter(indices, ordmap, self.dims,
                                 meshset_iterate(self.mesh,
                                                 self.structured_set,
-                                                entity_type = types.MBHEX,
-                                                dim = 3))
+                                                entity_type=types.MBHEX,
+                                                dim=3))
 
     def structured_iterate_vertex(self, order="zyx", **kw):
         """Get an iterator over the vertices of the mesh
@@ -1202,11 +1213,15 @@ class Mesh(object):
         self._structured_check()
         # special case: zyx order without kw is equivalent to pytaps iterator
         if order == "zyx" and not kw:
-            return meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBVERTEX)
+            return meshset_iterate(self.mesh,
+                                   self.structured_set,
+                                   entity_type=types.MBVERTEX)
 
         indices, ordmap = _structured_iter_setup(self.vertex_dims, order, **kw)
         return _structured_iter(indices, ordmap, self.vertex_dims,
-                                meshset_iterate(self.mesh, self.structured_set, entity_type = types.MBVERTEX))
+                                meshset_iterate(self.mesh,
+                                                self.structured_set,
+                                                entity_type=types.MBVERTEX))
 
     def structured_iterate_hex_volumes(self, order="zyx", **kw):
         """Get an iterator over the volumes of the mesh hexahedra
@@ -1246,7 +1261,7 @@ class Mesh(object):
         ves = self.structured_iterate_hex(order)
         tag = self.mesh.tag_get_handle('idx')
         for ve in ves:
-            yield self.mesh.tag_get_data(tag, ve, flat = True)[0]
+            yield self.mesh.tag_get_data(tag, ve, flat=True)[0]
 
     def structured_get_divisions(self, dim):
         """Get the mesh divisions on a given dimension
@@ -1410,18 +1425,18 @@ class StatMesh(Mesh):
 
         for tag in tags:
             for ve_1, ve_2 in \
-                zip(zip(iter(meshset_iterate(mesh_1.mesh, mesh_1.structured_set, types.MBMAXTYPE, dim = 3))),
-                    zip(iter(meshset_iterate(other.mesh,  other.structured_set,  types.MBMAXTYPE, dim = 3)))):
+                zip(zip(iter(meshset_iterate(mesh_1.mesh, mesh_1.structured_set, types.MBMAXTYPE, dim=3))),
+                    zip(iter(meshset_iterate(other.mesh,  other.structured_set,  types.MBMAXTYPE, dim=3)))):
 
                 mesh_1_err_tag = mesh_1.mesh.tag_get_handle(tag + error_suffix)
                 other_err_tag  =  other.mesh.tag_get_handle(tag +  error_suffix)
                 mesh_1_tag = mesh_1.mesh.tag_get_handle(tag)
                 other_tag = other.mesh.tag_get_handle(tag)
 
-                mesh_1_val = mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat = True)[0]
-                other_val  =  other.mesh.tag_get_data(other_tag,  ve_2, flat = True)[0]
-                mesh_1_err = mesh_1.mesh.tag_get_data(mesh_1_err_tag, ve_1, flat = True)[0]
-                other_err  =  other.mesh.tag_get_data(other_err_tag,  ve_2, flat = True)[0]
+                mesh_1_val = mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat=True)[0]
+                other_val  =  other.mesh.tag_get_data(other_tag,  ve_2, flat=True)[0]
+                mesh_1_err = mesh_1.mesh.tag_get_data(mesh_1_err_tag, ve_1, flat=True)[0]
+                other_err  =  other.mesh.tag_get_data(other_err_tag,  ve_2, flat=True)[0]
 
                 new_err_val = err__ops[op](mesh_1_val, other_val, mesh_1_err, other_err)
                 mesh_1.mesh.tag_set_data(mesh_1_err_tag, ve_1, new_err_val)
@@ -1522,18 +1537,18 @@ def _structured_iter(indices, ordmap, dims, it):
 
 
 if HAVE_PYMOAB:
-    def mesh_iterate(mesh, mesh_type = 3,
-                     topo_type = types.MBMAXTYPE):
-        return meshset_iterate(mesh, 0, topo_type, mesh_type, recursive = True)
+    def mesh_iterate(mesh, mesh_type=3,
+                     topo_type=types.MBMAXTYPE):
+        return meshset_iterate(mesh, 0, topo_type, mesh_type, recursive=True)
 
 
-    def meshset_iterate(pymb, meshset = 0, entity_type = types.MBMAXTYPE, dim = -1, arr_size = 1, recursive = False):
+    def meshset_iterate(pymb, meshset=0, entity_type=types.MBMAXTYPE, dim=-1, arr_size=1, recursive=False):
 
         return MeshSetIterator(pymb, meshset, entity_type, dim, arr_size, recursive)
 
 class MeshSetIterator(object):
 
-    def __init__(self, inst, meshset, entity_type, dim = -1, arr_size = 1, recursive = False):
+    def __init__(self, inst, meshset, entity_type, dim=-1, arr_size=1, recursive=False):
         self.pymb = inst
         self.meshset = meshset
         self.ent_type = entity_type
