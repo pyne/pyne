@@ -377,7 +377,12 @@ class NativeMeshTag(Tag):
             self.pymbtype = types.pymoab_data_type(self.dtype)
             self.default = self.tag.get_default_value()
         except RuntimeError:
-            self.tag = self.mesh.mesh.tag_get_handle(self.name, self.size, self.pymbtype, types.MB_TAG_DENSE, create_if_missing = True, default_value = default)
+            self.tag = self.mesh.mesh.tag_get_handle(self.name,
+                                                     self.size,
+                                                     self.pymbtype,
+                                                     types.MB_TAG_DENSE,
+                                                     create_if_missing=True,
+                                                     default_value=default)
             if default is not None:
                 self[:] = default
 
