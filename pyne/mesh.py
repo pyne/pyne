@@ -758,7 +758,7 @@ class Mesh(object):
                 # generate array
                 coords = np.empty((xs.size * ys.size * zs.size * 3,), dtype = np.float64)
                 # set mesh values
-                coords[0::3] = np.tile(xs, ys.size * zs.size )
+                coords[0::3] = np.tile(xs, ys.size * zs.size)
                 coords[1::3] = np.tile(np.repeat(ys, xs.size,), zs.size)
                 coords[2::3] = np.repeat(zs, xs.size * ys.size)
                 # construct the structured mesh

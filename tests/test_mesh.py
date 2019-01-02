@@ -18,6 +18,9 @@ if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
+
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
 from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
 from pyne.material import Material
@@ -98,14 +101,11 @@ def test_create_by_set():
     scdi = scd.ScdInterface(mesh)
     low = hcoord.HomCoord([0,0,0])
     high = hcoord.HomCoord([1,1,1])
-    structured_coords = [[1,2],[1,2],[1,2]]
-    coords = []
-    for x in range(low[0], high[0]+1):
-        for y in range(low[1], high[1]+1):
-            for z in range(low[2], high[2]+1):
-                coords.append(structured_coords[0][x])
-                coords.append(structured_coords[1][y])
-                coords.append(structured_coords[2][z])
+    pnts = np.array([1., 2.])
+    coords = np.empty((pnts.size * pnts.size * pnts.size * 3,), dtype = np.float64)
+    coords[0::3] = np.tile(pnts, pnts.size * pnts.size)
+    coords[1::3] = np.tile(np.repeat(pnts, pnts.size,), pnts.size)
+    coords[2::3] = np.repeat(pnts, pnts.size * pnts.size)
     a = scdi.construct_box(low, high, coords).box_set()
     sm = Mesh(mesh=mesh, structured_set=a, structured=True)
     assert_true(sm.dims == [0, 0, 0, 1, 1, 1])
@@ -120,7 +120,7 @@ def test_create_by_file():
     # # This mesh is interesting because the i/j/k space is not numbered from
     # # zero. Check that divisions are correct
 
-    assert_equal(sm.structured_get_divisions("x"), [float(i) for i in range(1,6)])
+    assert_equal(sm.structured_get_divisions("x"), [1., 2., 3., 4., 5.])
     assert_equal(sm.structured_get_divisions("y"), [1.0, 5.0, 10.0, 15.0] )
     assert_equal(sm.structured_get_divisions("z"), [-10.0, 2.0, 12.0] )
 
@@ -134,8 +134,7 @@ def test_create_by_file():
     # error
     filename2 = os.path.join(os.path.dirname(__file__),
                               "files_mesh_test/no_str_mesh.h5m")
-    assert_raises(RuntimeError, Mesh, mesh=filename2,
-                        structured=True)
+    assert_raises(RuntimeError, Mesh, mesh=filename2, structured=True)
 
 def test_structured_get_hex():
     # mesh with valid i values 0-4, j values 0-3, k values 0-2
@@ -212,33 +211,59 @@ class TestArithmetic():
         self.mesh_1 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
         volumes1 = list(self.mesh_1.structured_iterate_hex("xyz"))
         volumes2 = list(self.mesh_1.structured_iterate_hex("xyz"))
-        flux_tag = self.mesh_1.mesh.tag_get_handle("flux", 1, types.MB_TYPE_DOUBLE, types.MB_TAG_DENSE, create_if_missing = True)
+        flux_tag = self.mesh_1.mesh.tag_get_handle("flux",
+                                                   1,
+                                                   types.MB_TYPE_DOUBLE,
+                                                   types.MB_TAG_DENSE,
+                                                   create_if_missing=True)
         flux_data = [1.0, 2.0, 3.0, 4.0]
         self.mesh_1.mesh.tag_set_data(flux_tag, volumes1, flux_data)
 
         self.mesh_2 = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
         volumes1 = list(self.mesh_2.structured_iterate_hex("xyz"))
         volumes2 = list(self.mesh_2.structured_iterate_hex("xyz"))
-        flux_tag = self.mesh_2.mesh.tag_get_handle("flux", 1, types.MB_TYPE_DOUBLE, types.MB_TAG_DENSE, create_if_missing = True)
+        flux_tag = self.mesh_2.mesh.tag_get_handle("flux",
+                                                   1,
+                                                   types.MB_TYPE_DOUBLE,
+                                                   types.MB_TAG_DENSE,
+                                                   create_if_missing=True)
         flux_data = [1.1, 2.2, 3.3, 4.4]
         self.mesh_2.mesh.tag_set_data(flux_tag, volumes1, flux_data)
 
     def arithmetic_statmesh_setup(self):
-        self.statmesh_1 = StatMesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
+        self.statmesh_1 = StatMesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]],
+                                   structured=True)
         volumes1 = list(self.statmesh_1.structured_iterate_hex("xyz"))
         volumes2 = list(self.statmesh_1.structured_iterate_hex("xyz"))
-        flux_tag = self.statmesh_1.mesh.tag_get_handle("flux", 1, types.MB_TYPE_DOUBLE, types.MB_TAG_DENSE, create_if_missing = True)
-        error_tag = self.statmesh_1.mesh.tag_get_handle("flux_rel_error", 1, types.MB_TYPE_DOUBLE, types.MB_TAG_DENSE, create_if_missing = True)
+        flux_tag = self.statmesh_1.mesh.tag_get_handle("flux",
+                                                       1,
+                                                       types.MB_TYPE_DOUBLE,
+                                                       types.MB_TAG_DENSE,
+                                                       create_if_missing=True)
+        error_tag = self.statmesh_1.mesh.tag_get_handle("flux_rel_error",
+                                                        1,
+                                                        types.MB_TYPE_DOUBLE,
+                                                        types.MB_TAG_DENSE,
+                                                        create_if_missing=True)
         flux_data = [1.0, 2.0, 3.0, 4.0]
         error_data = [0.1, 0.2, 0.3, 0.4]
         self.statmesh_1.mesh.tag_set_data(flux_tag, volumes1, flux_data)
         self.statmesh_1.mesh.tag_set_data(error_tag, volumes2, error_data)
 
-        self.statmesh_2 = StatMesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True)
+        self.statmesh_2 = StatMesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]],
+                                   structured=True)
         volumes1 = list(self.statmesh_2.structured_iterate_hex("xyz"))
         volumes2 = list(self.statmesh_2.structured_iterate_hex("xyz"))
-        flux_tag = self.statmesh_2.mesh.tag_get_handle("flux", 1, types.MB_TYPE_DOUBLE, types.MB_TAG_DENSE, create_if_missing = True)
-        error_tag = self.statmesh_2.mesh.tag_get_handle("flux_rel_error", 1, types.MB_TYPE_DOUBLE, types.MB_TAG_DENSE, create_if_missing = True)
+        flux_tag = self.statmesh_2.mesh.tag_get_handle("flux",
+                                                       1,
+                                                       types.MB_TYPE_DOUBLE,
+                                                       types.MB_TAG_DENSE,
+                                                       create_if_missing=True)
+        error_tag = self.statmesh_2.mesh.tag_get_handle("flux_rel_error",
+                                                        1,
+                                                        types.MB_TYPE_DOUBLE,
+                                                        types.MB_TAG_DENSE,
+                                                        create_if_missing=True)
         flux_data = [1.1, 2.2, 3.3, 4.4]
         error_data = [0.1, 0.2, 0.3, 0.4]
         self.statmesh_2.mesh.tag_set_data(flux_tag, volumes1, flux_data)
@@ -248,7 +273,8 @@ class TestArithmetic():
         self.arithmetic_mesh_setup()
         self.mesh_1 += self.mesh_2
         exp_res = [2.1, 4.2, 6.3, 8.4]
-        obs_res = [self.mesh_1.mesh.tag_get_data(self.mesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
+        flux_tag = self.mesh_1.mesh.tag_get_handle("flux")
+        obs_res = [self.mesh_1.mesh.tag_get_data(flux_tag, vol, flat=True)[0]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
 
@@ -256,7 +282,8 @@ class TestArithmetic():
         self.arithmetic_mesh_setup()
         self.mesh_1 -= self.mesh_2
         exp_res = [-0.1, -0.2, -0.3, -0.4]
-        obs_res = [self.mesh_1.mesh.tag_get_data(self.mesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
+        flux_tag = self.mesh_1.mesh.tag_get_handle("flux")
+        obs_res = [self.mesh_1.mesh.tag_get_data(flux_tag, vol, flat=True)[0]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
 
@@ -264,7 +291,8 @@ class TestArithmetic():
         self.arithmetic_mesh_setup()
         self.mesh_1 *= self.mesh_2
         exp_res = [1.1, 4.4, 9.9, 17.6]
-        obs_res = [self.mesh_1.mesh.tag_get_data(self.mesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
+        flux_tag = self.mesh_1.mesh.tag_get_handle("flux")
+        obs_res = [self.mesh_1.mesh.tag_get_data(flux_tag, vol, flat=True)[0]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
 
@@ -272,7 +300,8 @@ class TestArithmetic():
         self.arithmetic_mesh_setup()
         self.mesh_1 /= self.mesh_2
         exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
-        obs_res = [self.mesh_1.mesh.tag_get_data(self.mesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
+        flux_tag = self.mesh_1.mesh.tag_get_handle("flux")
+        obs_res = [self.mesh_1.mesh.tag_get_data(flux_tag, vol, flat=True)[0]
                    for vol in self.mesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
 
@@ -282,9 +311,11 @@ class TestArithmetic():
         exp_res = [2.1, 4.2, 6.3, 8.4]
         exp_err = [0.070790803558659549, 0.1415816071173191,
                    0.21237241067597862, 0.28316321423463819]
-        obs_res = [self.statmesh_1.mesh.tag_get_data(self.statmesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
+        flux_tag = self.statmesh_1.mesh.tag_get_handle("flux")
+        obs_res = [self.statmesh_1.mesh.tag_get_data(flux_tag, vol, flat=True)[0]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.tag_get_data(self.statmesh_1.mesh.tag_get_handle("flux_rel_error"), vol, flat = True)[0]
+        flux_err_tag = self.statmesh_1.mesh.tag_get_handle("flux_rel_error")
+        obs_err = [self.statmesh_1.mesh.tag_get_data(flux_err_tag, vol, flat=True)[0]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
@@ -294,9 +325,11 @@ class TestArithmetic():
         self.statmesh_1 -= self.statmesh_2
         exp_res = [-0.1, -0.2, -0.3, -0.4]
         exp_err = [-1.4866068747, -2.9732137495, -4.4598206242, -5.9464274989]
-        obs_res = [self.statmesh_1.mesh.tag_get_data(self.statmesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
+        flux_tag = self.statmesh_1.mesh.tag_get_handle("flux")
+        obs_res = [self.statmesh_1.mesh.tag_get_data(flux_tag, vol, flat=True)[0]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.tag_get_data(self.statmesh_1.mesh.tag_get_handle("flux_rel_error"), vol, flat = True)[0]
+        flux_err_tag = self.statmesh_1.mesh.tag_get_handle("flux_rel_error")
+        obs_err = [self.statmesh_1.mesh.tag_get_data(flux_err_tag, vol, flat=True)[0]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
@@ -306,9 +339,11 @@ class TestArithmetic():
         self.statmesh_1 *= self.statmesh_2
         exp_res = [1.1, 4.4, 9.9, 17.6]
         exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249,]
-        obs_res = [self.statmesh_1.mesh.tag_get_data(self.statmesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
+        flux_tag = self.statmesh_1.mesh.tag_get_handle("flux")
+        obs_res = [self.statmesh_1.mesh.tag_get_data(flux_tag, vol, flat=True)[0]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.tag_get_data(self.statmesh_1.mesh.tag_get_handle("flux_rel_error"), vol, flat = True)[0]
+        flux_err_tag = self.statmesh_1.mesh.tag_get_handle("flux_rel_error")
+        obs_err = [self.statmesh_1.mesh.tag_get_data(flux_err_tag, vol, flat=True)[0]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
@@ -318,9 +353,11 @@ class TestArithmetic():
         self.statmesh_1 /= self.statmesh_2
         exp_res = [0.9090909091, 0.9090909091, 0.9090909091, 0.9090909091]
         exp_err = [0.1414213562, 0.2828427125, 0.4242640687, 0.5656854249]
-        obs_res = [self.statmesh_1.mesh.tag_get_data(self.statmesh_1.mesh.tag_get_handle("flux"), vol, flat = True)[0]
+        flux_tag = self.statmesh_1.mesh.tag_get_handle("flux")
+        obs_res = [self.statmesh_1.mesh.tag_get_data(flux_tag, vol, flat=True)[0]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
-        obs_err = [self.statmesh_1.mesh.tag_get_data(self.statmesh_1.mesh.tag_get_handle("flux_rel_error"), vol, flat = True)[0]
+        flux_err_tag = self.statmesh_1.mesh.tag_get_handle("flux_rel_error")
+        obs_err = [self.statmesh_1.mesh.tag_get_data(flux_err_tag, vol, flat=True)[0]
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
@@ -750,7 +787,7 @@ def test_iter():
     for i, mat, ve in m:
         assert_equal(j, i)
         assert_is(mats[i], mat)
-        assert_equal(j, m.mesh.tag_get_data(idx_tag, ve, flat = True)[0])
+        assert_equal(j, m.mesh.tag_get_data(idx_tag, ve, flat=True)[0])
         j += 1
 
 def test_iter_ve():
