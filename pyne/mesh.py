@@ -753,15 +753,17 @@ class Mesh(object):
                 extents = [0, 0, 0] + [len(x) - 1 for x in structured_coords]
                 low = hcoord.HomCoord([0,0,0])
                 high = hcoord.HomCoord([len(x) - 1 for x in structured_coords])
-                ### TO-DO: generation of explicit vertex coords could be more efficient ###
-                coords = []
-                for z in range(low[2], high[2]+1):
-                    for y in range(low[1], high[1]+1):
-                        for x in range(low[0], high[0]+1):
-                           coords.append(structured_coords[0][x])
-                           coords.append(structured_coords[1][y])
-                           coords.append(structured_coords[2][z])
-
+                # get coordinates as array
+                xs = np.asarray(structured_coords[0])
+                ys = np.asarray(structured_coords[1])
+                zs = np.asarray(structured_coords[2])
+                # generate array
+                coords = np.empty((xs.size * ys.size * zs.size * 3,), dtype = np.float64)
+                # set mesh values
+                coords[0::3] = np.tile(xs, ys.size * zs.size )
+                coords[1::3] = np.tile(np.repeat(ys, xs.size,), zs.size)
+                coords[2::3] = np.repeat(zs, xs.size * ys.size)
+                # construct the structured mesh
                 scd_box = self.scd.construct_box(low, high, coords)
                 self.structured_set = scd_box.box_set()
 
