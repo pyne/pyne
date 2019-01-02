@@ -731,7 +731,7 @@ class Mesh(object):
                 for ent_set in self.mesh.get_entities_by_type(root_set, types.MBENTITYSET):
                     try:
                         self.mesh.tag_get_data(box_tag, ent_set)
-                    except:
+                    except RuntimeError:
                         pass
                     else:
                         self.structured_set = ent_set
@@ -827,14 +827,6 @@ class Mesh(object):
         # tag with volume id and ensure mats exist.
         ves = list(self.iter_ve())
         tags = self.mesh.tag_get_tags_on_entity(ves[0])
-        tag_idx = self.mesh.tag_get_handle('idx', 1,
-                                           types.MB_TYPE_INTEGER,
-                                           types.MB_TAG_DENSE,
-                                           create_if_missing = True)
-
-        # tag with volume id and ensure mats exist.
-        ves = list(self.iter_ve())
-        tags = self.mesh.tag_get_tags_on_entity(ves[0])
         tags = set(tag.get_name() for tag in tags)
         if 'idx' in tags:
             tag_idx = self.mesh.tag_get_handle('idx')
@@ -844,8 +836,11 @@ class Mesh(object):
                                                types.MB_TYPE_INTEGER,
                                                types.MB_TAG_DENSE,
                                                create_if_missing=True)
+        # tag elements with index
+        idxs = np.arange(0, len(ves))
+        self.mesh.tag_set_data(tag_idx, ves, idxs)
+        # check for and populate materials
         for i, ve in enumerate(ves):
-            self.mesh.tag_set_data(tag_idx, ve, i)
             if mats is not None and i not in mats:
                 mats[i] = Material()
         self._len = i + 1
@@ -997,10 +992,8 @@ class Mesh(object):
             t[:] = value
         setattr(self, name, t)
 
-
     def get_tag(self, tag_name):
         return getattr(self, tag_name)
-
 
     def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
@@ -1054,8 +1047,16 @@ class Mesh(object):
     def common_ve_tags(self, other):
         """Returns the volume element tags in common between self and other.
         """
-        self_tags = self.mesh.tag_get_tags_on_entity(list(meshset_iterate(self.mesh, self.structured_set, types.MBMAXTYPE, dim=3))[0])
-        other_tags = other.mesh.tag_get_tags_on_entity(list(meshset_iterate(other.mesh, other.structured_set, types.MBMAXTYPE, dim=3))[0])
+        self_it = MeshSetIterator(self.mesh,
+                                  self.structured_set,
+                                  types.MBMAXTYPE,
+                                  dim=3)
+        self_tags = self.mesh.tag_get_tags_on_entity(self_it.next())
+        other_it = MeshSetIterator(other.mesh,
+                                   other.structured_set,
+                                   types.MBMAXTYPE,
+                                   dim=3)
+        other_tags = other.mesh.tag_get_tags_on_entity(other_it.next())
         self_tags = set(x.get_name() for x in self_tags)
         other_tags = set(x.get_name() for x in other_tags)
         intersect = self_tags & other_tags
@@ -1142,7 +1143,6 @@ class Mesh(object):
                                                 z=[k, k + 1]))
         handle = self.structured_get_hex(i,j,k)
         h = self.mesh.get_connectivity(handle)
-        print(h)
         coord = self.mesh.get_coords(list(h))
         coord = coord.reshape(8,3)
         # assumes a "well-behaved" hex element
@@ -1548,7 +1548,6 @@ if HAVE_PYMOAB:
 
 
     def meshset_iterate(pymb, meshset=0, entity_type=types.MBMAXTYPE, dim=-1, arr_size=1, recursive=False):
-
         return MeshSetIterator(pymb, meshset, entity_type, dim, arr_size, recursive)
 
 class MeshSetIterator(object):
@@ -1563,8 +1562,7 @@ class MeshSetIterator(object):
         self.reset()
 
     def reset(self):
-
-        # if a specific dimension is requested, filter get only that dimension
+        # if a specific dimension is requested, return only that dimension
         if(self.ent_type != types.MBMAXTYPE):
             ents = self.pymb.get_entities_by_type(self.meshset, self.ent_type, self.recur)
         # if a specific type is requested, return only that type
