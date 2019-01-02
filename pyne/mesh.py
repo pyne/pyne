@@ -398,26 +398,26 @@ class NativeMeshTag(Tag):
         if isinstance(key, Mesh) and key == self.mesh: #special case, get data on mesh's root set
             return self.mesh.mesh.tag_get_data(self.tag,
                                                self.mesh.mesh.get_root_set(),
-                                               flat = True)
+                                               flat=True)
         elif isinstance(key, _eh_py_type):
-            return self.mesh.mesh.tag_get_data(self.tag, key, flat = True)
+            return self.mesh.mesh.tag_get_data(self.tag, key, flat=True)
         elif isinstance(key, _INTEGRAL_TYPES):
             if key >= size:
                 raise IndexError("key index {0} greater than the size of the "
                                  "mesh {1}".format(key, size))
             for i_ve in zip(range(key+1), miter):
                 pass
-            return self.mesh.mesh.tag_get_data(self.tag, i_ve[1], flat = True)
+            return self.mesh.mesh.tag_get_data(self.tag, i_ve[1], flat=True)
         elif isinstance(key, slice):
             flat = True if self.size == 1 else False
             ents = list(miter)[key]
-            data = self.mesh.mesh.tag_get_data(self.tag, ents, flat = flat)
+            data = self.mesh.mesh.tag_get_data(self.tag, ents, flat=flat)
             return data
         elif isinstance(key, np.ndarray) and key.dtype == np.bool:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length "
                                "of the mesh.")
-            return self.mesh.mesh.tag_get_data(self.tag, [ve for b, ve in zip(key, miter) if b], flat = True)
+            return self.mesh.mesh.tag_get_data(self.tag, [ve for b, ve in zip(key, miter) if b], flat=True)
         elif isinstance(key, Iterable):
             ves = list(miter)
             ves_to_get = []
@@ -430,7 +430,7 @@ class NativeMeshTag(Tag):
                 else:
                     raise TypeError("{0} contains invalid element references "
                                     "(non-ints, non-handles)".format(key))
-            return self.mesh.mesh.tag_get_data(self.tag, ves_to_get, flat = True)
+            return self.mesh.mesh.tag_get_data(self.tag, ves_to_get, flat=True)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
                             "or fancy index.".format(key))
@@ -792,7 +792,7 @@ class Mesh(object):
                                 "D. Structured entity set AND PyMOAB instance")
 
             self.dims = list(self.mesh.tag_get_data(self.mesh.tag_get_handle(_BOX_DIMS_TAG_NAME),
-                                                    self.structured_set, flat = True))
+                                                    self.structured_set, flat=True))
 
             self.vertex_dims = list(self.dims[0:3]) \
                                + [x + 1 for x in self.dims[3:6]]
