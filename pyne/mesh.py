@@ -716,8 +716,6 @@ class Mesh(object):
             # if a MOAB mesh instance exists and no structured coords
             # or structured set is provided, search for a single
             # structured set
-
-            ##### TO-DO: SHOULD BE REPLACED WITH scd.find_boxes AT SOME POINT #####
             if (mesh is not None) and not structured_coords \
                and not structured_set:
                 # check for the structured box tag on the instance
