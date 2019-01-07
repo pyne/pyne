@@ -389,7 +389,7 @@ def test_iterate_3d():
     it = meshset_iterate(sm.mesh, sm.structured_set, types.MBHEX)
 
     # Test the zyx order, which is default; it should be equivalent
-    # to the standard imesh iterator
+    # to the standard pyne.mesh iterator
     for it_x, sm_x in izip(it, sm.structured_iterate_hex()):
         assert_equal(it_x, sm_x)
 
@@ -631,7 +631,7 @@ def test_metadatatag():
     # deleting tag
     del m.doc[:]
 
-def test_imeshtag():
+def test_nativetag():
     mats = {
         0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
         1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
@@ -670,7 +670,7 @@ def test_imeshtag():
     # deleting tag
     del m.f[:]
 
-def test_imeshtag_fancy_indexing():
+def test_nativetag_fancy_indexing():
     m = gen_mesh()
 
     #  tags of length 1
@@ -692,7 +692,7 @@ def test_imeshtag_fancy_indexing():
     assert_array_equal(m.grape[:], [[5.0, 6.0], [23.0, 24.0], [13.0, 14.0], [0.0, 0.0]])
 
 
-def test_imeshtag_broadcasting():
+def test_naivetag_broadcasting():
     m = gen_mesh()
     #  tags of length 1
     m.horse = NativeMeshTag(1, float)
@@ -705,7 +705,7 @@ def test_imeshtag_broadcasting():
     m.grape[[2, 0]] = [7.0, 8.0]
     assert_array_equal(m.grape[:], [[7.0, 8.0], [0.0, 0.0], [7.0, 8.0], [0.0, 0.0]])
 
-def test_imeshtag_expand():
+def test_nativetag_expand():
     m = Mesh(structured=True, structured_coords=[[-1, 0, 1],[0, 1],[0, 1]])
     m.clam = NativeMeshTag(2, float)
     m.clam[:] = [[1.1, 2.2], [3.3, 4.4]]

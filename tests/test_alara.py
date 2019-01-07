@@ -81,7 +81,7 @@ def test_write_fluxin_multiple():
     flux_mesh = Mesh(structured=True,
                      structured_coords=[[0, 1, 2], [0, 1], [0, 1]])
     flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14]]
-    flux_mesh.tag("flux", flux_data, 'imesh', size=7, dtype=float)
+    flux_mesh.tag("flux", flux_data, 'nat_mesh', size=7, dtype=float)
 
     # test forward writting
     mesh_to_fluxin(flux_mesh, "flux", output_name, False)
@@ -129,7 +129,7 @@ def test_write_fluxin_multiple_subvoxel():
     flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14],
                  [15, 16, 17, 18, 19, 20, 21],
                  [22, 23, 24, 25, 26, 27, 28]]
-    flux_mesh.tag("flux", flux_data, 'imesh', size=7, dtype=float)
+    flux_mesh.tag("flux", flux_data, 'nat_mesh', size=7, dtype=float)
 
     cell_fracs = np.zeros(6, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
