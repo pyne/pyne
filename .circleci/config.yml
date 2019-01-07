@@ -6,6 +6,10 @@ jobs:
 
     working_directory: ~/repo
 
+    branches:
+        only:
+          - pymoab_cleanup
+
     steps:
       - checkout
 
@@ -28,6 +32,10 @@ jobs:
       - image: pyne/pyne_ubuntu_16.04:latest
 
     working_directory: ~/repo
+
+    branches:
+        only:
+          - pymoab_cleanup
 
     steps:
       - checkout
