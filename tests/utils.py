@@ -28,7 +28,7 @@ def download_file(url, localfile, md5_hash):
         msg = 'Downloading {0!r} to {1!r}'.format(url, localfile)
         print(msg, file=sys.stderr)
         req = urllib.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        f = urllib.urlopen(req, timeout=30.0, context=ssl_context())
+        f = urllib.urlopen(req, timeout=120.0, context=ssl_context())
         try:
             html = f.read()
         finally:
