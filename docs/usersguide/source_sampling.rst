@@ -216,10 +216,12 @@ The simplest way to compile MCNP5 with the source subroutine is as follows:
   #. Edit line 78 to include the additional source files. It should look like "CXX_SRC := measure.cpp source_sampling.cpp".
   #. Compile MCNP5 using the standard build method.
 
-Once MCNP5 is compiled, MCNP5 can be run normally. The file "source.h5m" must
-be present in the working directory that MCNP5 is run from. This file should
-contain source densities (on the "source_density" tag) and optionally biased
-source densities (the "biased_source_density" tag). An "idum" card must be used
+Once MCNP5 is compiled, MCNP5 can be run normally. The file "source.h5m" and
+"e_bounds" must be present in the working directory that MCNP5 is run from.
+The file "source.h5m" should contain source densities (on the "source_density"
+tag) and optionally biased source densities (the "biased_source_density" tag).
+The file "e_bounds" should contain the energy boundaries of the photon energy
+groups used in the activation calculations. An "idum" card must be used
 in the MCNP5 input file. This card should have three arguments. The first is the
 sampling mode (0: analog, 1: uniform, 2: user). The second is the resample
 limit for void rejection. For a given particle, if a source position is
