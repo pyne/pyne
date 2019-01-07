@@ -995,6 +995,12 @@ class Mesh(object):
     def get_tag(self, tag_name):
         return getattr(self, tag_name)
 
+    def delete_tag(self, tag_name):
+        # delete Tag object
+        # remove from list of tags
+        # delattr
+        pass
+    
     def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
         """
