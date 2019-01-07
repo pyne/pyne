@@ -153,7 +153,7 @@ def step1(cfg):
           np.linspace(float(origin_y), float(ymesh), float(yints) + 1),
           np.linspace(float(origin_z), float(zmesh), float(zints) + 1)]
     m = Mesh(structured=True, structured_coords=sc)
-    m.mesh.save("blank_mesh.h5m")
+    m.save("blank_mesh.h5m")
 
     # Generate 42 photon energy bins [eV]
     #  First bin has been replaced with 1 for log interpolation
