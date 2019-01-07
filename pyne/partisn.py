@@ -119,7 +119,12 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     dg : record array, optional, default = None
         The output of pyne.dagmc.discretize_geom(). Use this input option if
         discretize_geom() has already been run, to avoid duplicating this
-        expensive step.
+        expensive step. If HAVE_DAGMC=False, then this must be supplied.
+    mat_assigns : dict, optional, default = None
+        The output from pyne.cell_material_assignments().
+        Dictionary of the cell to material assignments. Keys are cell
+        numbers and values are material names. If HAVE_DAGMC=False, then
+        this must be supplied.
     fine_per_coarse : int, optional, default = 1
         The number of fine mesh intervals per coarse mesh interval.
     data_hdf5path : string, optional, default = /materials
@@ -333,7 +338,13 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names):
         voxel[idx]['vol_frac'].append(i[2])
 
     # get material to cell assignments
-    mat_assigns = dagmc.cell_material_assignments(hdf5)
+    if not mat_assigns:
+        if not HAVE_DAGMC:
+            raise RuntimeError("DAGMC is not available."
+                               "Unable to get cell material assignments.")
+        else:
+            mat_assigns = dagmc.cell_material_assignments(hdf5)
+
     # Replace the names in the material assignments with unique names
     temp = {}
     for i, name in mat_assigns.items():
