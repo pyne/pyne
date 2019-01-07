@@ -313,8 +313,12 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names):
 
     # Discretize the geometry and get cell fractions
     if dg is None:
-        dagmc.load(hdf5)
-        dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
+        if not HAVE_DAGMC:
+            raise RuntimeError("DAGMC is not available."
+                               "Unable to discretize the geometry.")
+        else:
+            dagmc.load(hdf5)
+            dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
 
     # Reorganize dictionary of each voxel's info with the key the voxel number
     # and values of cell and volume fraction
