@@ -41,9 +41,14 @@ from pyne.mesh import HAVE_PYMOAB
 
 print(HAVE_PYMOAB)
 
+try:
+    from pyne import dagmc
+    HAVE_DAGMC = True
+except:
+    HAVE_DAGMC = False
+
 if HAVE_PYMOAB:
     from pyne.mesh import Mesh, StatMesh, MeshError, NativeMeshTag
-    from pyne import dagmc
 else:
     warn("the PyMOAB optional dependency could not be imported. "
          "All aspects of the partisn module are not imported.",
@@ -711,7 +716,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
               header += " {},".format(mis)
            header += "\n"
     header += "/"
-	# Prepend header to begining of file
+    # Prepend header to begining of file
     partisn = header + partisn
 
     # Write to the file
