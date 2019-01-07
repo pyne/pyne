@@ -115,7 +115,7 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
         idx : int
             The volume element index assuming the volume elements appear in xyz
             order (z changing fastest) within the photon source file in the case of
-            a structured mesh or imesh.iterate() order for an unstructured mesh.
+            a structured mesh or mesh.mesh_iterate() order for an unstructured mesh.
         nuc : str
             The nuclide name as it appears in the photon source file.
         time : str
@@ -186,7 +186,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     Parameters
     ----------
     mesh : PyNE Mesh
-       The object containing the imesh instance to be tagged.
+       The object containing the PyMOAB instance to be tagged.
     filename : str
         The path of the hdf5 version of the photon source file.
     tags: dict
@@ -225,7 +225,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     float_tag_size = num_e_groups * max_num_cells
     for tag_name in tags.values():
 
-        mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), 'imesh',
+        mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), 'nat_mesh',
                                     size = float_tag_size, dtype = float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 

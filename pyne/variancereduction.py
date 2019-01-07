@@ -107,10 +107,10 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
             R += adj_flux[i]*q[i]*vol/q_tot
 
     # generate weight windows and biased source densities using R
-    ww_mesh.tag(ww_tag, np.zeros(num_e_groups, dtype=float), 'imesh', size=num_e_groups, dtype=float)
+    ww_mesh.tag(ww_tag, np.zeros(num_e_groups, dtype=float), 'nat_mesh', size=num_e_groups, dtype=float)
     tag_ww = ww_mesh.get_tag(ww_tag)
     ww_ves = mesh_iterate(ww_mesh.mesh)
-    q_bias_mesh.tag(q_bias_tag, np.zeros(num_e_groups, dtype=float), 'imesh', size=num_e_groups, dtype=float)
+    q_bias_mesh.tag(q_bias_tag, np.zeros(num_e_groups, dtype=float), 'nat_mesh', size=num_e_groups, dtype=float)
     tag_q_bias = q_bias_mesh.get_tag(q_bias_tag)
     q_bias_ves = mesh_iterate(q_bias_mesh.mesh)
     # reset previously created iterators
@@ -171,7 +171,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     meshtally.ww_x = NativeMeshTag(tag_size, float,
                               name="ww_{0}".format(meshtally.particle))
     meshtally.tag("{0}_e_upper_bounds".format(meshtally.particle),
-                  np.zeros(tag_size, dtype=float), 'imesh', size=tag_size, dtype=float)
+                  np.zeros(tag_size, dtype=float), 'nat_mesh', size=tag_size, dtype=float)
     root_tag = meshtally.get_tag("{0}_e_upper_bounds".format(meshtally.particle))
     # Determine if total energy or single energy bin or multiple energy bins
     if tag_size == 1 and len(meshtally.e_bounds) > 1:
