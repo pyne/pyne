@@ -1692,7 +1692,7 @@ class Wwinp(Mesh):
         # create vector tags for data
         ww_tag_name = "ww_{0}".format(particle)
         self.tag(ww_tag_name, size = self.ne[particle_index],
-                 dtype = float, tagtype = 'imesh')
+                 dtype = float, tagtype = 'nat_mesh')
         tag_ww = self.get_tag(ww_tag_name)
 
         # tag vector data to mesh
@@ -1703,7 +1703,7 @@ class Wwinp(Mesh):
         e_bounds_tag_name = '{0}_e_upper_bounds'.format(particle)
         self.tag(e_bounds_tag_name,
                  size = len(self.e[particle_index]),
-                 dtype = float, tagtype = 'imesh')
+                 dtype = float, tagtype = 'nat_mesh')
         tag_e_bounds = self.get_tag(e_bounds_tag_name)
         tag_e_bounds[self] = self.e[particle_index]
 
@@ -2154,9 +2154,9 @@ class MeshTally(StatMesh):
             rel_error[i] = rel_error_row
 
         # Tag results and error vector to mesh
-        self.tag(self.tag_names[0], tagtype = 'imesh', size = num_e_groups, dtype = float)
+        self.tag(self.tag_names[0], tagtype = 'nat_mesh', size = num_e_groups, dtype = float)
         res_tag = self.get_tag(self.tag_names[0])
-        self.tag(self.tag_names[1], tagtype = 'imesh', size = num_e_groups, dtype = float)
+        self.tag(self.tag_names[1], tagtype = 'nat_mesh', size = num_e_groups, dtype = float)
         rel_err_tag = self.get_tag(self.tag_names[1])
 
         if num_e_groups == 1:
@@ -2177,10 +2177,10 @@ class MeshTally(StatMesh):
                 rel_error.append(
                     float(line[self._column_idx["Rel_Error"]]))
 
-            self.tag(self.tag_names[2], size = 1, dtype = float, tagtype = 'imesh')
+            self.tag(self.tag_names[2], size = 1, dtype = float, tagtype = 'nat_mesh')
             res_tot_tag = self.get_tag(self.tag_names[2])
 
-            self.tag(self.tag_names[3], size = 1, dtype = float, tagtype = 'imesh')
+            self.tag(self.tag_names[3], size = 1, dtype = float, tagtype = 'nat_mesh')
             rel_err_tot_tag = self.get_tag(self.tag_names[3])
 
             res_tot_tag[:] = result

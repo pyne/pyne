@@ -326,10 +326,10 @@ class MetadataTag(Tag):
 
 class NativeMeshTag(Tag):
     """A mesh tag which looks itself up as a tag on a PyMOAB core instance.
-    This makes the following expressions equivalent for a given iMesh.Mesh tag
-    name::
+    This makes the following expressions equivalent for a given PyNE/PyNE Mesh
+    tag name::
 
-        mesh.name[i] == mesh.mesh.tag_get_data(mesh.mesh.tag_get_handle(name),
+        mesh.tag_name[i] == mesh.mesh.tag_get_data(mesh.mesh.tag_get_handle(name),
                                                mesh.mesh.get_entities_by_type(
                                                mesh.mesh.get_root_set(),
                                                types.MBHEX))[i]
@@ -685,7 +685,7 @@ class Mesh(object):
                   (with BOX_DIMS tag) by specifying <mesh> and structured = True.
                 - From mesh file with exactly 1 entity set (with BOX_DIMS tag)
                   by specifying <mesh_file> and structured = True.
-                - From an imesh instance with multiple entity sets by
+                - From an PyMOAB instance with multiple entity sets by
                   specifying <mesh>, <structured_set>, structured=True.
                 - From coordinates by specifying <structured_coords>,
                   structured=True, and optional pre-existing PyMOAB core
@@ -937,8 +937,8 @@ class Mesh(object):
             The value to initialize the tag with, skipped if None.
         tagtype : Tag or str, optional
             The type of tag this should be any of the following classes or
-            strings are accepted: NativeMeshTag, MetadataTag, ComputedTag, 'imesh',
-            'metadata', or 'computed'.
+            strings are accepted: NativeMeshTag, MetadataTag, ComputedTag,
+            'nat_mesh', 'metadata', or 'computed'.
         doc : str, optional
             The tag documentation string.
         size : int, optional
@@ -980,7 +980,7 @@ class Mesh(object):
                                  'or dtype'.format(name))
             else:
                 tagtype = MetadataTag
-        if tagtype is NativeMeshTag or tagtype.lower() == 'imesh':
+        if tagtype is NativeMeshTag or tagtype.lower() == 'nat_mesh':
             t = NativeMeshTag(size=size, dtype=dtype, mesh=self, name=name, doc=doc)
         elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
             t = MetadataTag(mesh=self, name=name, doc=doc)
@@ -1064,7 +1064,7 @@ class Mesh(object):
         return intersect
 
     def __copy__(self):
-        # first copy full imesh instance
+        # first copy full pymoab instance
         pymb_copy = core.Core()
 
         # now create Mesh objected from copied PyMOAB instance
