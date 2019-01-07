@@ -692,7 +692,7 @@ def test_nativetag_fancy_indexing():
     assert_array_equal(m.grape[:], [[5.0, 6.0], [23.0, 24.0], [13.0, 14.0], [0.0, 0.0]])
 
 
-def test_naivetag_broadcasting():
+def test_nativetag_broadcasting():
     m = gen_mesh()
     #  tags of length 1
     m.horse = NativeMeshTag(1, float)
