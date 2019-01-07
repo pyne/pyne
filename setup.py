@@ -271,8 +271,7 @@ def update_cmake_args(ns):
         ]
     if ns.moab is not None:
         ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
-        assert ns.dagmc is not None, "If the --moab option is present," \
-                                     " --dagmc must be as well"
+
     if ns.dagmc is not None:
         ns.cmake_args.append('-DDAGMC_ROOT=' + absexpanduser(ns.dagmc))
         assert ns.moab is not None, "If the --dagmc option is present," \
