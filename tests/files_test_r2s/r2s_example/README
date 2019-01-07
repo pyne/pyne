@@ -1,0 +1,80 @@
+EXAMPLE README:
+R2S usage example:
+
+These example files are used to demostrate PyNE R2S. Usage of these example
+files could be seen in docs/userguide/r2s.rst.
+
+Contents:
+
+- README: This file, content list of the r2s example
+
+- example_geom.cub: Trelis geometry file
+
+- example_geom.pdf: Geometry of the r2s example in pdf format
+
+- make_example_material.py: Python script used to create material lib
+
+- geom.h5m: Material ladden geometry file
+
+- neutron_transport: Folder used for neutron transport
+  
+    - input: Neutron transport input file
+
+    - geom.h5m: Material ladden geometry file. A link -> ../geom.h5m
+
+    - meshtal: Output of the mesh tally
+
+    - output: Output file of DAGMC neutron transport
+
+- r2s_run: Empty folder used for r2s process
+
+    - Input files for r2s:
+
+        - data: Folder contains nuclear lib data
+  
+           - nuclib
+    
+           - truncated_fendl2bin.* 
+
+        - config.ini: Modified configure file for voxel r2s
+
+        - alara_params.txt: Modified parameters file for voxel r2s
+
+        - geom.h5m: Material ladden geometry file. A link -> ../geom.h5m
+
+        - meshtal: Output of the mesh tally. A link ->
+        ../neutron_transport/meshtal
+
+    - Output files of r2s step1:
+
+        - alara_fluxin: Neutron flux for ALARA activation calculation  
+
+        - alara_inp: ALARA input file
+
+        - alara_matlib: ALARA material definition for activation calculation 
+
+        - blank_mesh.h5m & r2s_step1.h5m: R2S intermidiated output files 
+
+    - Output files of ALARA calculation:
+
+        - dump.file: Dump file of activation calculation
+
+        - output.txt: Output file of activation calculation
+
+        - phtn_src: Photon source information after activation calculation
+
+    - Output files of r2s step2:
+
+        - e_bounds: Energy boundaries of the photon source
+
+        - phtn_src.h5: Photon source information in h5 format 
+
+        - source_*: Photon source information in h5m format, used for photon
+        transport
+
+        - total_photon_source_intensities: Total photon source intensities of
+        different cooling times.
+
+- photon_transport: Folder used for photon transport
+
+    - input: Photon transport input file

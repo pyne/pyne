@@ -1,0 +1,320 @@
+          Thread Name & Version = MCNP5_RSICC, 1.40
+                                _                                      
+          ._ _    _  ._   ._   |_                                      
+          | | |  (_  | |  |_)   _)                                     
+                          |                                            
+ +--------------------------------------------------------------------+
+ |   This program was prepared by the Regents of the University of    |
+ |California at Los Alamos National Laboratory (the University) under |
+ |  contract number W-7405-ENG-36 with the U.S. Department of Energy  |
+ |(DoE).  The University has certain rights in the program pursuant to|
+ |  the contract and the program should not be copied or distributed  |
+ | outside your organization.  All rights in the program are reserved |
+ |by the DoE and the University.  Neither the U.S. Government nor the |
+ | University makes any warranty, express or implied, or assumes any  |
+ |     liability or responsibility for the use of this software.      |
+ +--------------------------------------------------------------------+
+  
+1mcnp     version 5.mpi ld=03/12/18                     03/23/18 11:38:14 
+ *************************************************************************                 probid =  03/23/18 11:38:14 
+ i=input g=geom.h5m                                                              
+
+ This problem is using DAGMC version    3.000 w/ DagMC r   0
+    1-       c neutron source: point source, 14 MeV                                          
+    2-       1 1 -7.8 imp:n=1                                                                
+    3-       2 2 -1 imp:n=1                                                                  
+    4-       3 1 -7.8 imp:n=1                                                                
+    5-       4 2 -1 imp:n=1                                                                  
+    6-       5 1 -7.8 imp:n=1                                                                
+    7-       8 0  imp:n=0  $ graveyard                                                       
+    8-       9 0  imp:n=1  $ implicit complement                                             
+    9-                                                                                       
+   10-       1                                                                               
+   11-       2                                                                               
+   12-       3                                                                               
+   13-       4                                                                               
+   14-       5                                                                               
+   15-       6                                                                               
+   16-       7                                                                               
+   17-       8                                                                               
+   18-       9                                                                               
+   19-       11                                                                              
+   20-       12                                                                              
+   21-       13                                                                              
+   22-       14                                                                              
+   23-       15                                                                              
+   24-       17                                                                              
+   25-       18                                                                              
+   26-       19                                                                              
+   27-       20                                                                              
+   28-       22                                                                              
+   29-       23                                                                              
+   30-       24                                                                              
+   31-       25                                                                              
+   32-       26                                                                              
+   33-       28                                                                              
+   34-       29                                                                              
+   35-       30                                                                              
+   36-       37                                                                              
+   37-       38                                                                              
+   38-       39                                                                              
+   39-       40                                                                              
+   40-       41                                                                              
+   41-       42                                                                              
+   42-       43                                                                              
+   43-       44                                                                              
+   44-       45                                                                              
+   45-       46                                                                              
+   46-       47                                                                              
+   47-       48                                                                              
+   48-                                                                                       
+   49-       C materials from library                                                        
+   50-       C name: mat:Steel/rho:7.8                                                       
+   51-       C density = 7.8                                                                 
+   52-       m1                                                                              
+   53-            14028 -9.1866e-03                                                          
+   54-            14029 -4.8336e-04                                                          
+   55-            14030 -3.2999e-04                                                          
+   56-            24050 -7.0953e-03                                                          
+   57-            24052 -1.4229e-01                                                          
+   58-            24053 -1.6445e-02                                                          
+   59-            24054 -4.1707e-03                                                          
+   60-            25055 -2.0000e-02                                                          
+   61-            26054 -3.6978e-02                                                          
+   62-            26056 -6.0196e-01                                                          
+   63-            26057 -1.4150e-02                                                          
+   64-            26058 -1.9162e-03                                                          
+   65-            28058 -8.0637e-02                                                          
+   66-            28060 -3.2131e-02                                                          
+   67-            28061 -1.4200e-03                                                          
+   68-            28062 -4.6019e-03                                                          
+   69-            28064 -1.2096e-03                                                          
+   70-            42092 -3.4791e-03                                                          
+   71-            42094 -2.2385e-03                                                          
+   72-            42095 -3.9165e-03                                                          
+   73-            42096 -4.1651e-03                                                          
+   74-            42097 -2.4237e-03                                                          
+   75-            42098 -6.2211e-03                                                          
+   76-            42100 -2.5560e-03                                                          
+   77-       C name: mat:Water/rho:1.0                                                       
+   78-       C density = 1.0                                                                 
+   79-       m2                                                                              
+   80-            1001 -1.1191e-01                                                           
+   81-            8016 -8.8809e-01                                                           
+   82-       sdef pos=15 5 5  erg=14                                                         
+   83-       C                                                                               
+   84-       nps 1e7                                                                         
+   85-       C Tally card                                                                    
+   86-       fmesh4:n geom=xyz origin= 0 0 0                                                 
+   87-                imesh=20 iints=2                                                       
+   88-                jmesh=20 jints=2                                                       
+   89-                kmesh=10 kints=1                                                       
+   90-                emesh                                                                  
+   91-             1.00001E-007 4.13994E-007 5.31579E-007 6.82560E-007 8.76425E-007          
+   92-             1.12535E-006 1.44498E-006 1.85539E-006 2.38237E-006 3.05902E-006          
+   93-             3.92786E-006 5.04348E-006 6.47595E-006 8.31529E-006 1.06770E-005          
+   94-             1.37096E-005 1.76035E-005 2.26033E-005 2.90232E-005 3.72665E-005          
+   95-             4.78512E-005 6.14421E-005 7.88932E-005 1.01301E-004 1.30073E-004          
+   96-             1.67017E-004 2.14454E-004 2.75364E-004 3.53575E-004 4.53999E-004          
+   97-             5.82947E-004 7.48518E-004 9.61117E-004 1.23410E-003 1.58461E-003          
+   98-             2.03468E-003 2.24867E-003 2.48517E-003 2.61259E-003 2.74654E-003          
+   99-             3.03539E-003 3.35463E-003 3.70744E-003 4.30742E-003 5.53084E-003          
+  100-             7.10174E-003 9.11882E-003 1.05946E-002 1.17088E-002 1.50344E-002          
+  101-             1.93045E-002 2.18749E-002 2.35786E-002 2.41755E-002 2.47875E-002          
+  102-             2.60584E-002 2.70001E-002 2.85011E-002 3.18278E-002 3.43067E-002          
+  103-             4.08677E-002 4.63092E-002 5.24752E-002 5.65622E-002 6.73795E-002          
+  104-             7.20245E-002 7.94987E-002 8.25034E-002 8.65170E-002 9.80365E-002          
+  105-             1.11090E-001 1.16786E-001 1.22773E-001 1.29068E-001 1.35686E-001          
+  106-             1.42642E-001 1.49956E-001 1.57644E-001 1.65727E-001 1.74224E-001          
+  107-             1.83156E-001 1.92547E-001 2.02419E-001 2.12797E-001 2.23708E-001          
+  108-             2.35177E-001 2.47235E-001 2.73237E-001 2.87246E-001 2.94518E-001          
+  109-             2.97211E-001 2.98491E-001 3.01974E-001 3.33733E-001 3.68832E-001          
+  110-             3.87742E-001 4.07622E-001 4.50492E-001 4.97871E-001 5.23397E-001          
+  111-             5.50232E-001 5.78443E-001 6.08101E-001 6.39279E-001 6.72055E-001          
+  112-             7.06512E-001 7.42736E-001 7.80817E-001 8.20850E-001 8.62936E-001          
+  113-             9.07180E-001 9.61672E-001 1.00259E+000 1.10803E+000 1.16484E+000          
+  114-             1.22456E+000 1.28735E+000 1.35335E+000 1.42274E+000 1.49569E+000          
+  115-             1.57237E+000 1.65299E+000 1.73774E+000 1.82684E+000 1.92050E+000          
+  116-             2.01897E+000 2.12248E+000 2.23130E+000 2.30693E+000 2.34570E+000          
+  117-             2.36533E+000 2.38513E+000 2.46597E+000 2.59240E+000 2.72532E+000          
+  118-             2.86505E+000 3.01194E+000 3.16637E+000 3.32871E+000 3.67879E+000          
+  119-             4.06570E+000 4.49329E+000 4.72367E+000 4.96585E+000 5.22046E+000          
+  120-             5.48812E+000 5.76950E+000 6.06531E+000 6.37628E+000 6.59241E+000          
+  121-             6.70320E+000 7.04688E+000 7.40818E+000 7.78801E+000 8.18731E+000          
+  122-             8.60708E+000 9.04837E+000 9.51229E+000 1.00000E+001 1.05127E+001          
+  123-             1.10517E+001 1.16183E+001 1.22140E+001 1.25232E+001 1.28403E+001          
+  124-             1.34986E+001 1.38403E+001 1.41907E+001 1.45499E+001 1.49182E+001          
+  125-             1.56831E+001 1.64872E+001 1.69046E+001 1.73325E+001 1.96403E+001          
+  126-                                                                                       
+1cells                                                                                                  print table 60
+
+                      atom        gram                                     neutron                                     
+        cell  mat    density     density     volume       mass     pieces importance                                   
+
+     1     1    1  8.46598E-02 7.80000E+00 5.00000E+02 3.90000E+03     0  1.0000E+00                                   
+     2     2    2  1.00306E-01 1.00000E+00 5.00000E+02 5.00000E+02     0  1.0000E+00                                   
+     3     3    1  8.46598E-02 7.80000E+00 1.00000E+03 7.80000E+03     0  1.0000E+00                                   
+     4     4    2  1.00306E-01 1.00000E+00 5.00000E+02 5.00000E+02     0  1.0000E+00                                   
+     5     5    1  8.46598E-02 7.80000E+00 5.00000E+02 3.90000E+03     0  1.0000E+00                                   
+     6     8    0  0.00000E+00 0.00000E+00 4.92100E+03 0.00000E+00     0  0.0000E+00                                   
+     7     9    0  0.00000E+00 0.00000E+00 1.00000E+00 0.00000E+00     0  1.0000E+00                                   
+
+ total                                     7.92200E+03 1.66000E+04
+
+    minimum source weight = 1.0000E+00    maximum source weight = 1.0000E+00
+
+ ***************************************************
+ * Random Number Generator  =                    1 *
+ * Random Number Seed       =       19073486328125 *
+ * Random Number Multiplier =       19073486328125 *
+ * Random Number Adder      =                    0 *
+ * Random Number Bits Used  =                   48 *
+ * Random Number Stride     =               152917 *
+ ***************************************************
+
+1cross-section tables                                                                                   print table 100
+
+     table    length
+
+                        tables from file actia                                                           
+
+   1001.62c    5202  1-h-1 at 293.6K from endf-vi.8 njoy99.50                                     mat 125      12/05/01
+   8016.62c  170541  8-o-16 at 293.6K from endf-vi.8 njoy99.50                                    mat 825      12/05/01
+  14028.62c  102446  14-si-28 at 293.6K from endf-vi.6 njoy99.50                                  mat1425      12/17/01
+  14029.62c   97180  14-si-29 at 293.6K from endf-vi.8 njoy99.50                                  mat1428      12/17/01
+  14030.62c   89305  14-si-30 at 293.6K from endf-vi.6 njoy99.50                                  mat1431      12/17/01
+  24050.62c  194445  24-cr-50 at 293.6K from endf-vi.8 njoy99.50                                  mat2425      12/20/01
+  24052.62c  174773  24-cr-52 at 293.6K from endf-vi.8 njoy99.50                                  mat2431      12/20/01
+  24053.62c  147286  24-cr-53 at 293.6K from endf-vi.8 njoy99.50                                  mat2434      12/20/01
+  24054.62c  132737  24-cr-54 at 293.6K from endf-vi.8 njoy99.50                                  mat2437      12/20/01
+  25055.62c  134565  25-mn-55 at 293.6K from endf/b-vi.8 njoy99.50                                mat2525      02/11/02
+  26054.62c  143370  26-fe-54 at 293.6K from endf-vi.8 njoy99.50                                  mat2625      12/20/01
+  26056.62c  230655  26-fe-56 at 293.6K from endf-vi.8 njoy99.50                                  mat2631      12/20/01
+  26057.62c  148842  26-fe-57 at 293.6K from endf-vi.8 njoy99.50                                  mat2634      12/20/01
+  26058.62c   87569  26-fe-58 at 293.6K from endf-vi.8 njoy99.50                                  mat2637      12/20/01
+  28058.62c  235403  28-ni-58 at 293.6K from endf-vi.8 njoy99.50                                  mat2825      12/20/01
+  28060.62c  158305  28-ni-60 at 293.6K from endf-vi.8 njoy99.50                                  mat2831      12/20/01
+  28061.62c  112032  28-ni-61 at 293.6K from endf-vi.8 njoy99.50                                  mat2834      12/20/01
+  28062.62c  104386  28-ni-62 at 293.6K from endf-vi.8 njoy99.50                                  mat2837      12/20/01
+  28064.62c   97689  28-ni-64 at 293.6K from endf-vi.8 njoy99.50                                  mat2843      12/20/01
+
+                        tables from file 42Mo092.ace                                                     
+
+  42092.30c  272931  42-Mo-92 for FENDL-3.0 from FENDL-3.0 with NJOY99.364+  on 20120430          mat4225      05/19/12
+                     probability tables used from 5.0000E-02 to 1.0000E+00 mev.
+                     temperature = 2.5850E-08 adjusted to 2.5300E-08
+
+                        tables from file 42Mo094.ace                                                     
+
+  42094.30c  245293  42-Mo-94 for FENDL-3.0 from FENDL-3.0 with NJOY99.364+  on 20120430          mat4231      05/19/12
+                     probability tables used from 2.0000E-02 to 1.0000E+00 mev.
+                     temperature = 2.5850E-08 adjusted to 2.5300E-08
+
+                        tables from file kidman                                                          
+
+  42095.50c   10893    njoy                                                                                    08/25/89
+
+                        tables from file 42Mo096.ace                                                     
+
+  42096.30c  283871  42-Mo-96 for FENDL-3.0 from FENDL-3.0 with NJOY99.364+  on 20120430          mat4237      05/19/12
+                     probability tables used from 1.9000E-02 to 1.0000E+00 mev.
+                     temperature = 2.5850E-08 adjusted to 2.5300E-08
+
+                        tables from file 42Mo097.ace                                                     
+
+  42097.30c  257442  42-Mo-97 for FENDL-3.0 from FENDL-3.0 with NJOY99.364+  on 20120430          mat4240      05/19/12
+                     probability tables used from 1.8000E-03 to 3.0000E-01 mev.
+                     temperature = 2.5850E-08 adjusted to 2.5300E-08
+
+                        tables from file 42Mo098.ace                                                     
+
+  42098.30c  347298  42-Mo-98 for FENDL-3.0 from FENDL-3.0 with NJOY99.364+  on 20120430          mat4243      05/19/12
+                     probability tables used from 3.2000E-02 to 1.0000E+00 mev.
+                     temperature = 2.5850E-08 adjusted to 2.5300E-08
+
+                        tables from file 42Mo100.ace                                                     
+
+  42100.30c  348575  42-Mo-100 for FENDL-3.0 from FENDL-3.0 with NJOY99.364+  on 20120430         mat4249      05/19/12
+                     probability tables used from 2.6000E-02 to 1.0000E+00 mev.
+                     temperature = 2.5850E-08 adjusted to 2.5300E-08
+
+  total     4333034
+ 
+ comment.    6 cross sections modified by free gas thermal treatment.
+
+ ***********************************************************************************************************************
+ dump no.    1 on file runtpe       nps =           0     coll =              0     ctm =        0.00   nrn =                 0
+
+ master starting       3 tasks with       1 threads each  03/23/18 11:38:21 
+ master set rendezvous nps =         200    03/23/18 11:38:22 
+ master set rendezvous nps =    10000000    03/23/18 11:38:22 
+1problem summary                                                                                                           
+
+      run terminated when    10000000  particle histories were done.
++                                                                                                    03/23/18 11:45:52 
+      c neutron source: point source, 14 MeV                                               probid =  03/23/18 11:38:14 
+0
+ neutron creation    tracks      weight        energy            neutron loss        tracks      weight        energy
+                                 (per source particle)                                           (per source particle)
+
+ source            10000000    1.0000E+00    1.4000E+01          escape            11398472    1.0325E+00    7.2549E+00
+                                                                 energy cutoff            0    0.            0.        
+                                                                 time cutoff              0    0.            0.        
+ weight window            0    0.            0.                  weight window            0    0.            0.        
+ cell importance          0    0.            0.                  cell importance          0    0.            0.        
+ weight cutoff            0    1.9537E-03    2.1689E-06          weight cutoff       111466    1.9565E-03    5.7628E-07
+ e or t importance        0    0.            0.                  e or t importance        0    0.            0.        
+ dxtran                   0    0.            0.                  dxtran                   0    0.            0.        
+ forced collisions        0    0.            0.                  forced collisions        0    0.            0.        
+ exp. transform           0    0.            0.                  exp. transform           0    0.            0.        
+ upscattering             0    0.            5.2202E-09          downscattering           0    0.            3.9253E+00
+ photonuclear             0    0.            0.                  capture                  0    1.0626E-01    1.1871E+00
+ (n,xn)             3019876    2.7751E-01    3.0340E-01          loss to (n,xn)     1509938    1.3875E-01    1.9361E+00
+ prompt fission           0    0.            0.                  loss to fission          0    0.            0.        
+ delayed fission          0    0.            0.                                                                        
+     total         13019876    1.2795E+00    1.4303E+01              total         13019876    1.2795E+00    1.4303E+01
+
+   number of neutrons banked                 1509938        average time of (shakes)              cutoffs
+   neutron tracks per source particle     1.3020E+00          escape            1.3541E+02          tco   1.0000E+33
+   neutron collisions per source particle 4.5526E+00          capture           5.5598E+02          eco   0.0000E+00
+   total neutron collisions                 45525778          capture or escape 1.7465E+02          wc1  -5.0000E-01
+   net multiplication              1.1388E+00 0.0001          any termination   1.6608E+02          wc2  -2.5000E-01
+
+ computer time so far in this run    28.95 minutes            maximum number ever in bank         1
+ computer time in mcrun              21.03 minutes            bank overflows to backup file       0
+ source particles per minute            4.7551E+05
+ random numbers generated                608887357            most random numbers used was        5547 in history     3377759
+
+ range of sampled source weights = 1.0000E+00 to 1.0000E+00
+
+ estimated system efficiency:  net = 98%  loss =  2% (locks) +  0% (comm.) +  0% (misc.)
+
+ number of histories processed by each task
+           0     3333332     3333334     3333334
+1neutron  activity in each cell                                                                         print table 126
+
+                 tracks     population   collisions   collisions     number        flux        average      average
+        cell    entering                               * weight     weighted     weighted   track weight   track mfp
+                                                    (per history)    energy       energy     (relative)      (cm)
+
+     1     1      672533       638165      1339446    1.0725E-01   7.4861E-03   4.9082E+00   8.5124E-01   3.5627E+00
+     2     2     2264163      1981591      8569882    6.9386E-01   2.6958E-03   4.7350E+00   8.7122E-01   4.4426E+00
+     3     3    10642961     11465562     25697316    2.3497E+00   1.4519E-01   7.8984E+00   9.3015E-01   4.2340E+00
+     4     4     2264637      1981961      8576166    6.9501E-01   2.6986E-03   4.7338E+00   8.7148E-01   4.4416E+00
+     5     5      673048       638491      1342968    1.0764E-01   7.5252E-03   4.9043E+00   8.5162E-01   3.5603E+00
+     7     9    11474295     11405166            0    0.0000E+00   2.8787E-02   6.8068E+00   9.0357E-01   0.0000E+00
+
+     total      27991637     28110936     45525778    3.9534E+00
+
+ Mesh tallies written to file meshtal .
+
+ ***********************************************************************************************************************
+ dump no.    2 on file runtpe       nps =    10000000     coll =       45525778     ctm =       21.03   nrn =         608887357
+
+
+
+ run terminated when    10000000  particle histories were done.
+
+ computer time =   28.95 minutes
+
+ mcnp     version 5.mpi 03/12/18                     03/23/18 11:45:52                     probid =  03/23/18 11:38:14 

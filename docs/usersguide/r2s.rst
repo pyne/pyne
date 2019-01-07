@@ -117,27 +117,21 @@ By using these sources for photon transport, the shutdown dose rate can be obtai
 PyNE R2S example
 ****************
 
-Using a simple geometry as a example, here is how we perform R2S calculation.
-The example geometry composed of four cubes of size 10x10x10 cm3. Cubes (in green) at bottom left and up right are water. Bottom right cube (in red) is made of steel, and up left cube (in white) is void.
-There is a isotropic single energy (14 MeV) neutron point source in the middle of the bottom right cube.
-The cubes are irradiated by the source with a single 3.5 day pulse, the neutron intensity is 1e10 n/s.
-The following content demonstrates the process of caculate the shutdown dose rate of these cubes at the time of 1 hour after shutdown.
+Using a simple geometry as a example, here is how we perform (voxel) R2S calculation.
+The example geometry composed of four cubes of size 10x10x10 cm3. It comsists of two different material, the water (in blue) and the steel (in red). The upper left cube (in white) is void.
+There is a isotropic single energy (14 MeV) neutron point source in the center of the bottom right cube.
+The model is irradiated by a neutron source with intensitiy of 1e10 n/s for 3.5 days.
+The following content demonstrates the process of caculate the shutdown dose rate of this model at the time of 1 hour after shutdown.
 Example files could be found in 
 `r2s_example <https://github.com/pyne/data/blob/master/r2s_example.tar.gz>`_.
 
 
-.. figure:: r2s_example_geometry.png
+.. figure:: r2s_example_geometry.pdf
     :align: center
 
     **Figure 1:** *Geometry of R2S example (X-Y cross section).*
 
-Build the model using trelis as following figure. Set material group and export to `geom_without_material.h5m`.
-
-.. figure:: r2s_example_trelis_geometry.png
-    :align: center
-
-    **Figure 1:** *Trelis model for the example.*
-
+Build the model using trelis and set material group and export to `geom_without_material.h5m`.
 
 Prepare material library, build material library. The material lib is then generated in file "example_material_lib.h5".
 
@@ -177,6 +171,7 @@ Perform R2S setup. The 'alara_params.txt' and 'config.ini' will be generated in 
 
 Modify important parameters in the 'alara_params.txt' and 'config.ini' according to the problem.
 Examples could be seen 'alara_params_example.txt' and 'config_example.ini' in 'r2s_example/r2s_run'.
+By setting the 'sub_voxel' to be 'True', the user can perform sub-voxel R2S without any other change.
 Prepare alara nuclide library, copy preinstalled data library from
 `ALARA/data <`r2s_example <https://github.com/svalinn/ALARA/tree/master/data.>`_.
 Example nuclide library could be seen in 'r2s_example/r2s_run/data'
