@@ -55,7 +55,7 @@ def main():
            m.tag.expand()
 
     print("Saving file {}".format(args.output))
-    m.mesh.write_file(args.output)
+    m.save(args.output)
     print("Complete")
 
 if __name__ == '__main__':
