@@ -19,6 +19,7 @@ jobs:
       # Test!
       - run:
           name: Running PyNE Tests
+          no_output_timeout: "20m"
           command: |
             cd ~/repo/tests
             ./travis-run-tests.sh python3
@@ -42,6 +43,7 @@ jobs:
       # Test (no PyMOAB)
       - run:
           name: Running PyNE Tests w/o PyMOAB
+          no_output_timeout: "20m"
           command: |
             cd ~/repo/tests
             ./travis-run-tests.sh python2
@@ -66,6 +68,7 @@ jobs:
       # Test w/ PyMOAB
       - run:
           name: Running PyNE Tests
+          no_output_timeout: "20m"
           command: |
             cd ~/repo/tests
             ./travis-run-tests.sh python2
