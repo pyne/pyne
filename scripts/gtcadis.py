@@ -228,7 +228,7 @@ def step0(cfg, cfg2):
         mat_element.metadata['name'] = mat_element_name
         mat_element.density = 1.0
         # Add element to the material library
-        element_lib[mat_element_name] = mat_element.expand_elements()
+        element_lib[mat_element_name] = mat_element
     # Add elements to mats    
     elements = element_lib.items()
     num_elements = len(elements)
