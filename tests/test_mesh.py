@@ -688,7 +688,7 @@ def test_del_nativetag():
 
     import sys
 
-    # make a new reference to the tag that can will not
+    # make a new reference to the tag that will not
     # be deleted
     tag_ref = m.f
 
@@ -701,13 +701,14 @@ def test_del_nativetag():
     #    reference created as the argument to getrefcount
     assert_equal(2,sys.getrefcount(tag_ref))
 
-    
+    assert_raises(RuntimeError,m.mesh.tag_get_handle,'f')
+
     # deleting tag by tag handle
     tag_ref = m.g
     m.delete_tag(m.g)
     assert_equal(2,sys.getrefcount(tag_ref))
     
-    
+    assert_raises(RuntimeError,m.mesh.tag_get_handle,'g')
     
 def test_nativetag_fancy_indexing():
     m = gen_mesh()
