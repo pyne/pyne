@@ -205,9 +205,10 @@ def get_zones_no_void():
     num_rays = 144
     grid = True
     dg = None
+    mat_assigns = None
 
     unique_names = {'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury':'MERCURY1'}
-    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names)
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names)
 
     voxel_zones_expected = np.array([[1, 1, 1, 1],
                                     [2, 2, 2, 2],
@@ -261,9 +262,10 @@ def get_zones_iteration_order():
     num_rays = 9
     grid = True
     dg = None
+    mat_assigns = None
     unique_names = {'mat:m1': 'M1', 'mat:m2': 'M2', 'mat:m3': 'M3', 'mat:m4':'M4'}
 
-    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names)
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names)
 
     voxel_zones_expected = np.array([[1, 2],
                                      [1, 4],
@@ -316,9 +318,10 @@ def get_zones_with_void():
     num_rays = 400
     grid = True
     dg = None
+    mat_assigns = None
 
     unique_names = {'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury':'MERCURY1'}
-    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names)
+    voxel_zones, zones = partisn._get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names)
 
     # expected results
     voxel_zones_expected = np.array([[1, 1, 1, 1],
