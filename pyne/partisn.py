@@ -143,7 +143,7 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     # Read optional inputs:
     cards = kwargs.get('cards', {})
     dg = kwargs.get('dg', None)
-    mat_assigns = kwargs.get('dg', None)
+    mat_assigns = kwargs.get('mat_assigns', None)
     num_rays = kwargs.get('num_rays', 10)
     grid = kwargs.get('grid', False)
     if dg is not None and ('num_rays' in kwargs or 'grid' in kwargs):
