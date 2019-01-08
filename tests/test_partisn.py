@@ -21,10 +21,6 @@ if not HAVE_PYMOAB:
 
 from pyne.mesh import Mesh, NativeMeshTag
 
-try:
-    from pyne import dagmc
-except:
-    raise SkipTest
 
 from pyne import partisn
 
@@ -183,6 +179,12 @@ def test_get_coord_sys_3D():
 def get_zones_no_void():
     """Test the _get_zones function if no void is in the meshed area.
     """
+
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -190,7 +192,6 @@ def get_zones_no_void():
     nuc_hdf5path = '/nucid'
 
     # Load dagmc geometry
-    from pyne import dagmc
     dagmc.load(hdf5)
 
     # mesh
@@ -235,9 +236,15 @@ def test_get_zones_no_void():
     p.join()
     assert(r.get() == [True, True])
 
+
 def get_zones_iteration_order():
     """Test that _get_zones function gives results in zyx order.
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/fractal_box.h5m'
@@ -245,7 +252,6 @@ def get_zones_iteration_order():
     nuc_hdf5path = '/nucid'
 
     # Load dagmc geometry
-    from pyne import dagmc
     dagmc.load(hdf5)
 
     bounds = [-5., 0., 5.]
@@ -286,13 +292,17 @@ def test_get_zones_iteration_order():
 def get_zones_with_void():
     """Test the _get_zones function if a void is present.
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
     nuc_hdf5path = '/nucid'
 
-    from pyne import dagmc
     dagmc.load(hdf5)
 
     # mesh
@@ -394,6 +404,11 @@ def write_partisn_input_1D():
 def test_write_partisn_input_1D():
     """Test full input file creation for 1D case
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_1D)
     p.close()
@@ -436,6 +451,11 @@ def write_partisn_input_2D():
 def test_write_partisn_input_2D():
     """Test full input file creation for 2D case
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_2D)
     p.close()
@@ -478,6 +498,11 @@ def write_partisn_input_3D():
 def test_write_partisn_input_3D():
     """Test full input file creation for 3D case
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_3D)
     p.close()
@@ -526,6 +551,11 @@ def write_partisn_input_with_names_dict():
 def test_write_partisn_input_with_names_dict():
     """Test full input file creation for 1D case with a names_dict provided
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_with_names_dict)
     p.close()
@@ -581,8 +611,13 @@ def write_partisn_input_options():
 
 
 def test_write_partisn_input_options():
-    """Test full input file creation for 1D case with lot of key work args
+    """Test full input file creation for 1D case with a lot of key work args
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_options)
     p.close()
@@ -634,6 +669,11 @@ def test_mesh_to_isotropic_source():
 def test_isotropic_vol_source():
     """Test isotropic volumetric source generation from DAGMC geometry.
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     sc = np.linspace(-25, 25, 6)
     m = Mesh(structured=True, structured_coords = [sc, sc, sc])
 
