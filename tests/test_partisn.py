@@ -701,10 +701,3 @@ def test_isotropic_vol_source():
     exp[88, :] = [0.075, 0.075, 0.075, 0.025]
 
     assert(np.allclose(data, exp))
-
-
-def test_pass_dg():
-    """Test for passing in a discretize_geom() argument.
-    """
-
-    pass
