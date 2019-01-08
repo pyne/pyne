@@ -677,6 +677,10 @@ def test_mesh_to_isotropic_source():
 def test_isotropic_vol_source():
     """Test isotropic volumetric source generation from DAGMC geometry.
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
 
     sc = np.linspace(-25, 25, 6)
     m = Mesh(structured=True, structured_coords = [sc, sc, sc])
