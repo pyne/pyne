@@ -18,11 +18,6 @@ if not HAVE_PYMOAB:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-try:
-    from pyne import dagmc
-except:
-    from nose.plugins.skip import SkipTest
-    raise SkipTest
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
@@ -35,12 +30,19 @@ thisdir = os.path.dirname(__file__)
 
 def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x2x1"):
 
+    try:
+        from pyne import dagmc
+    except:
+        from nose.plugins.skip import SkipTest
+        raise SkipTest
+
     meshtal = os.path.join(thisdir, "files_test_r2s", meshtal_file)
     tally_num = 4
     cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name': 'mat_11'}),
                  3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name': 'mat_12'})}
     alara_params = "Bogus line for testing\n"
     geom = os.path.join(thisdir, "unitbox.h5m")
+    dagmc.load(geom)
     num_rays = 9
     grid = True
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
@@ -50,8 +52,37 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
     output_mesh = os.path.join(os.getcwd(), "r2s_step1.h5m")
     output_material = True
 
-    irradiation_setup(meshtal, cell_mats, alara_params, tally_num, geom,
-                      num_rays, grid, flux_tag, fluxin, reverse, alara_inp,
+    flux_mesh = meshtal
+    #  flux_mesh is Mesh object
+    if isinstance(flux_mesh, Mesh):
+        m = flux_mesh
+    #  flux_mesh is unstructured mesh file
+    elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
+         and flux_mesh.endswith(".h5m"):
+            m = Mesh(structured=False, mesh=flux_mesh)
+    #  flux_mesh is Meshtal or meshtal file
+    else:
+        #  flux_mesh is meshtal file
+        if isinstance(flux_mesh, str) and isfile(flux_mesh):
+            flux_mesh = Meshtal(flux_mesh,
+                                {tally_num: (flux_tag, flux_tag + "_err",
+                                             flux_tag + "_total",
+                                             flux_tag + "_err_total")},
+                                meshes_have_mats=output_material)
+            m = flux_mesh.tally[tally_num]
+        #  flux_mesh is Meshtal object
+        elif isinstance(flux_mesh, Meshtal):
+            m = flux_mesh.tally[tally_num]
+        else:
+            raise ValueError("meshtal argument not a Mesh object, Meshtal"
+                             " object, MCNP meshtal file or meshtal.h5m file.")
+
+    if m.structured:
+        cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+    else:
+        cell_fracs = discretize_geom(m)
+    irradiation_setup(meshtal, cell_mats, alara_params, tally_num,
+                      num_rays, grid, cell_fracs, flux_tag, fluxin, reverse, alara_inp,
                       alara_matlib, output_mesh, output_material)
 
     #  expected output files
@@ -104,6 +135,7 @@ def test_irradiation_setup_structured():
         for nucid in comp:
             comps[i][nucid[0]] = nucid[1]
 
+
     # test r2s step 1 output mesh
     fluxes = [[6.93088E-07, 1.04838E-06], [6.36368E-07, 9.78475E-07],
               [5.16309E-07, 9.86586E-07], [6.36887E-07, 9.29879E-07]]
@@ -153,6 +185,13 @@ def test_photon_sampling_setup_structured():
 
 
 def irradiation_setup_unstructured(flux_tag = "n_flux"):
+
+    try:
+        from pyne import dagmc
+    except:
+        from nose.plugins.skip import SkipTest
+        raise SkipTest
+
     meshtal_filename = "meshtal_2x2x1"
     meshtal_file = os.path.join(thisdir, "files_test_r2s", meshtal_filename)
 
@@ -185,10 +224,12 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
         new_mesh.save(meshtal_mesh_file, write_mats=False)
 
 
+
     cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name':'mat_11'}),
                  3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name':'mat_12'})}
     alara_params = "Bogus line for testing\n"
     geom = os.path.join(thisdir, "unitbox.h5m")
+    dagmc.load(geom)
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
     reverse = True
     alara_inp = os.path.join(os.getcwd(), "alara_inp")
@@ -196,8 +237,34 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
     output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
     output_material = True
 
+    flux_mesh = meshtal_meshtal_mesh_file
+    #  flux_mesh is Mesh object
+    if isinstance(flux_mesh, Mesh):
+        m = flux_mesh
+    #  flux_mesh is unstructured mesh file
+    elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
+         and flux_mesh.endswith(".h5m"):
+            m = Mesh(structured=False, mesh=flux_mesh)
+    #  flux_mesh is Meshtal or meshtal file
+    else:
+        #  flux_mesh is meshtal file
+        if isinstance(flux_mesh, str) and isfile(flux_mesh):
+            flux_mesh = Meshtal(flux_mesh,
+                                {tally_num: (flux_tag, flux_tag + "_err",
+                                             flux_tag + "_total",
+                                             flux_tag + "_err_total")},
+                                meshes_have_mats=output_material)
+            m = flux_mesh.tally[tally_num]
+        #  flux_mesh is Meshtal object
+        elif isinstance(flux_mesh, Meshtal):
+            m = flux_mesh.tally[tally_num]
+
+    if m.structured:
+        cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+    else:
+        cell_fracs = discretize_geom(m)
     irradiation_setup(flux_mesh=meshtal_mesh_file, cell_mats=cell_mats,
-                      alara_params=alara_params, geom=geom, flux_tag=flux_tag,
+                      alara_params=alara_params, cell_fracs, flux_tag=flux_tag,
                       fluxin=fluxin, reverse=reverse, alara_inp=alara_inp,
                       alara_matlib=alara_matlib, output_mesh=output_mesh,
                       output_material=output_material)
