@@ -372,6 +372,11 @@ def test_check_fine_mesh_total_false():
 
 
 def write_partisn_input_1D():
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -407,11 +412,6 @@ def write_partisn_input_1D():
 def test_write_partisn_input_1D():
     """Test full input file creation for 1D case
     """
-    try:
-        from pyne import dagmc
-    except:
-        raise SkipTest
-
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_1D)
     p.close()
@@ -514,6 +514,11 @@ def test_write_partisn_input_3D():
 
 
 def write_partisn_input_with_names_dict():
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -554,11 +559,6 @@ def write_partisn_input_with_names_dict():
 def test_write_partisn_input_with_names_dict():
     """Test full input file creation for 1D case with a names_dict provided
     """
-    try:
-        from pyne import dagmc
-    except:
-        raise SkipTest
-
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_with_names_dict)
     p.close()
@@ -569,6 +569,11 @@ def test_write_partisn_input_with_names_dict():
 def write_partisn_input_options():
     """Test PARTISN input file creation with a slew of keyword arguments
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = os.path.join(THIS_DIR, 'files_test_partisn', 'partisn_test_geom.h5m')
     input_file = os.path.join(THIS_DIR, 'files_test_partisn', 'partisn_options.inp')
@@ -616,11 +621,6 @@ def write_partisn_input_options():
 def test_write_partisn_input_options():
     """Test full input file creation for 1D case with a lot of key work args
     """
-    try:
-        from pyne import dagmc
-    except:
-        raise SkipTest
-
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_options)
     p.close()
@@ -640,6 +640,11 @@ def test_format_repeated_vector():
 def test_mesh_to_isotropic_source():
     """Test isotropic SOURCF generation.
     """
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     m = Mesh(structured=True, structured_coords=[range(5), range(5), range(5)])
     m.src = NativeMeshTag(4, float)
     # These source values were carefully choosen so that:
@@ -672,10 +677,6 @@ def test_mesh_to_isotropic_source():
 def test_isotropic_vol_source():
     """Test isotropic volumetric source generation from DAGMC geometry.
     """
-    try:
-        from pyne import dagmc
-    except:
-        raise SkipTest
 
     sc = np.linspace(-25, 25, 6)
     m = Mesh(structured=True, structured_coords = [sc, sc, sc])
