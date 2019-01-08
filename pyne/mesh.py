@@ -9,6 +9,7 @@ from pyne.utils import QAWarning
 import numpy as np
 import tables as tb
 
+
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
@@ -104,7 +105,12 @@ class Tag(object):
         del self.mesh.tags[self.name]
         del self[:]
 
-
+    def delete(self, mesh=None):
+        if mesh == None:
+            mesh = self.mesh
+        del self[:]
+        del mesh.tags[self.name]
+        
 class MaterialPropertyTag(Tag):
     """A mesh tag which looks itself up as a material property (attribute).
     This makes the following expressions equivalent for a given material property
@@ -391,6 +397,13 @@ class NativeMeshTag(Tag):
         super(NativeMeshTag, self).__delete__(mesh)
         self.mesh.mesh.tag_delete(self.tag)
 
+    def delete(self,mesh=None):
+        if mesh == None:
+            mesh = self.mesh
+        super(NativeMeshTag, self).delete()
+        mesh.mesh.tag_delete(self.tag)
+
+        
     def __getitem__(self, key):
         m = self.mesh.mesh
         size = len(self.mesh)
@@ -999,15 +1012,16 @@ class Mesh(object):
     def delete_tag(self, tag):
         if isinstance(tag,Tag):
             tag_name = tag.name
+            tag_handle = tag
         elif isinstance(tag, str):
             tag_name = tag
+            tag_handle = self.tags[tag_name]
         else:
             raise ValueError('{0} is neither a Tag object nor a string'.format(tag))
 
+        tag_handle.delete()
+
         if hasattr(self, tag_name):
-            # must remove both references to the tag object for
-            # it to be deleted
-            del self.tags[tag_name]
             delattr(self, tag_name)
     
     def __iadd__(self, other):
