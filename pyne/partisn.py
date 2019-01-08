@@ -143,6 +143,7 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     # Read optional inputs:
     cards = kwargs.get('cards', {})
     dg = kwargs.get('dg', None)
+    mat_assigns = kwargs.get('dg', None)
     num_rays = kwargs.get('num_rays', 10)
     grid = kwargs.get('grid', False)
     if dg is not None and ('num_rays' in kwargs or 'grid' in kwargs):
@@ -175,7 +176,8 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     block01['ngroup'] = ngroup
     block01['mt'] = len(mat_lib)
 
-    block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names)
+    block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays,
+                                            grid, dg, mat_assigns, unique_names)
     block01['nzone'] = len(block04['assign'])
     block02['fine_per_coarse'] = fine_per_coarse
 
@@ -312,7 +314,7 @@ def _get_coord_sys(mesh):
     return igeom, bounds
 
 
-def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names):
+def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names):
     """Get the minimum zone definitions for the geometry.
     """
 
@@ -338,7 +340,7 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, unique_names):
         voxel[idx]['vol_frac'].append(i[2])
 
     # get material to cell assignments
-    if not mat_assigns:
+    if mat_assigns is None:
         if not HAVE_DAGMC:
             raise RuntimeError("DAGMC is not available."
                                "Unable to get cell material assignments.")
