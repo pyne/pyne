@@ -682,6 +682,8 @@ def test_del_nativetag():
     m.f = NativeMeshTag(mesh=m, name='f')
     m.f[:] = [1.0, 2.0, 3.0, 4.0]
 
+    assert_raises(ValueError, m.delete_tag,-12)
+
     import sys
 
     # make a new reference to the tag that can will not
@@ -696,6 +698,7 @@ def test_del_nativetag():
     # 2. is the one that automatically is the temporary
     #    reference created as the argument to getrefcount
     assert_equal(2,sys.getrefcount(tag_ref))
+    
 
 def test_nativetag_fancy_indexing():
     m = gen_mesh()

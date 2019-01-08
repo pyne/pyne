@@ -996,11 +996,19 @@ class Mesh(object):
     def get_tag(self, tag_name):
         return getattr(self, tag_name)
 
-    def delete_tag(self, tag_name):
-        # must remove both references to the tag object for
-        # it to be deleted
-        del self.tags[tag_name]
-        delattr(self, tag_name)
+    def delete_tag(self, tag):
+        if isinstance(tag,Tag):
+            tag_name = tag.name
+        elif isinstance(tag, str):
+            tag_name = tag
+        else:
+            raise ValueError('{0} is neither a Tag object nor a string'.format(tag))
+
+        if hasattr(self, tag_name):
+            # must remove both references to the tag object for
+            # it to be deleted
+            del self.tags[tag_name]
+            delattr(self, tag_name)
     
     def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
