@@ -681,6 +681,8 @@ def test_del_nativetag():
     m = gen_mesh(mats=mats)
     m.f = NativeMeshTag(mesh=m, name='f')
     m.f[:] = [1.0, 2.0, 3.0, 4.0]
+    m.g = NativeMeshTag(mesh=m, name='g')
+    m.g[:] = [1.0, 2.0, 3.0, 4.0]
 
     assert_raises(ValueError, m.delete_tag,-12)
 
@@ -690,7 +692,7 @@ def test_del_nativetag():
     # be deleted
     tag_ref = m.f
 
-    # deleting tag
+    # deleting tag by tag name
     m.delete_tag('f')
 
     # ensure that there are only 2 references to this tag
@@ -698,8 +700,15 @@ def test_del_nativetag():
     # 2. is the one that automatically is the temporary
     #    reference created as the argument to getrefcount
     assert_equal(2,sys.getrefcount(tag_ref))
-    
 
+    
+    # deleting tag by tag handle
+    tag_ref = m.g
+    m.delete_tag(m.g)
+    assert_equal(2,sys.getrefcount(tag_ref))
+    
+    
+    
 def test_nativetag_fancy_indexing():
     m = gen_mesh()
 
