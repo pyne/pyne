@@ -1,0 +1,13 @@
+**Added:** None
+
+**Changed:**
+
+* Add cell_fracs and cell_number tags for both default and subvoxel r2s modes
+
+**Deprecated:** None
+
+**Removed:** None
+
+**Fixed:** None
+
+**Security:** None
