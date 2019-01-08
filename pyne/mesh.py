@@ -101,6 +101,7 @@ class Tag(object):
         self[:] = value[:]
 
     def __delete__(self, mesh):
+        del self.mesh.tags[self.name]
         del self[:]
 
 
@@ -388,7 +389,7 @@ class NativeMeshTag(Tag):
 
     def __delete__(self, mesh):
         super(NativeMeshTag, self).__delete__(mesh)
-        self.mesh.mesh.tag_delete(self.name)
+        self.mesh.mesh.tag_delete(self.tag)
 
     def __getitem__(self, key):
         m = self.mesh.mesh
@@ -996,10 +997,10 @@ class Mesh(object):
         return getattr(self, tag_name)
 
     def delete_tag(self, tag_name):
-        # delete Tag object
-        # remove from list of tags
-        # delattr
-        pass
+        # must remove both references to the tag object for
+        # it to be deleted
+        del self.tags[tag_name]
+        delattr(self, tag_name)
     
     def __iadd__(self, other):
         """Adds the common tags of other to the mesh object.
