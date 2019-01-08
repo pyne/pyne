@@ -923,8 +923,12 @@ def isotropic_vol_source(geom, mesh, cells, spectra, intensities, **kwargs):
     intensities = {cell: inten for cell, inten in zip(cells, intensities)}
 
     # ray trace
-    dagmc.load(geom)
-    dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
+    if not HAVE_DAGMC:
+        raise RuntimeError("DAGMC is not available."
+                    "Cannot run isotropic_vol_source().")
+    else:
+        dagmc.load(geom)
+        dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
 
     # determine  source intensities
     data = np.zeros(shape=(len(mesh), len(spectra[0])))
