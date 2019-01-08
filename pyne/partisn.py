@@ -39,8 +39,6 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 # Mesh specific imports
 from pyne.mesh import HAVE_PYMOAB
 
-print(HAVE_PYMOAB)
-
 try:
     from pyne import dagmc
     HAVE_DAGMC = True
