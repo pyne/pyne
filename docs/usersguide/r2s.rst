@@ -123,7 +123,7 @@ There is a isotropic single energy (14 MeV) neutron point source in the center o
 The model is irradiated by a neutron source with intensitiy of 1e10 n/s for 3.5 days.
 The following content demonstrates the process of caculate the shutdown dose rate of this model at the time of 1 hour after shutdown.
 Example files could be found in 
-`r2s_example <https://github.com/pyne/data/blob/master/r2s_example.tar.gz>`_.
+`r2s_examples <https://github.com/pyne/data/blob/master/r2s_examples.tar.gz>`_.
 
 
 .. figure:: r2s_example_geometry.pdf
@@ -147,7 +147,7 @@ Combine the geometry file and the material library, using  the following command
 
    $ uwuw_preproc geom.h5m -v -l example_material_lib.h5
 
-Prepare input file, define source, tally and other data cards. Example input file could be seen in r2s_example/neutron_transport/input.
+Prepare input file, define source, tally and other data cards. Example input file could be seen in r2s_examples/neutron_transport/input.
 
 Neutron transport calculation. A meshtal will be generated in this step.
 
@@ -170,11 +170,11 @@ Perform R2S setup. The 'alara_params.txt' and 'config.ini' will be generated in 
    $ r2s.py setup
 
 Modify important parameters in the 'alara_params.txt' and 'config.ini' according to the problem.
-Examples could be seen 'alara_params_example.txt' and 'config_example.ini' in 'r2s_example/r2s_run'.
+Examples could be seen 'alara_params_example.txt' and 'config_example.ini' in 'r2s_examples/r2s_run'.
 By setting the 'sub_voxel' to be 'True', the user can perform sub-voxel R2S without any other change.
 Prepare alara nuclide library, copy preinstalled data library from
-`ALARA/data <`r2s_example <https://github.com/svalinn/ALARA/tree/master/data.>`_.
-Example nuclide library could be seen in 'r2s_example/r2s_run/data'
+`ALARA/data <`r2s_examples <https://github.com/svalinn/ALARA/tree/master/data.>`_.
+Example nuclide library could be seen in 'r2s_examples/r2s_run/data'
 Perform R2S step1. ALARA input file and neutron flux file will be generated in this step.
 
 .. code-block:: bash
@@ -187,7 +187,7 @@ Perform R2S step2. Several photon source file and a e_bounds file will be genera
 
    $ r2s.py step2
 
-Perform Photon transport calculation. Example input file could be seen in r2s_example/photon_transport/input.
+Perform Photon transport calculation. Example input file could be seen in r2s_examples/photon_transport/input.
 
 .. code-block:: bash
 
