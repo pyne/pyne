@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest',
+              'sphinx.ext.imgmath',
               'sphinx.ext.inheritance_diagram',
               'sphinx.ext.autosummary',  # autosummary doesn't work with numpydoc...
               'sphinx.ext.viewcode',
