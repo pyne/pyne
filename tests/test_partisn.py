@@ -569,10 +569,6 @@ def test_write_partisn_input_with_names_dict():
 def write_partisn_input_options():
     """Test PARTISN input file creation with a slew of keyword arguments
     """
-    try:
-        from pyne import dagmc
-    except:
-        raise SkipTest
 
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = os.path.join(THIS_DIR, 'files_test_partisn', 'partisn_test_geom.h5m')
@@ -583,8 +579,9 @@ def write_partisn_input_options():
     mesh=Mesh(structured_coords=sc, structured=True)
     ngroup = 66
 
-    dagmc.load(hdf5)
-    dg = dagmc.discretize_geom(mesh, num_rays=100, grid=True)
+    dg = [(0, 1, 1.0, 0.0), (1, 1, 0.5, 0.04714045207910317),
+          (1, 2, 0.5, 0.04714045207910317), (2, 2, 1.0, 0.0)]
+    mat_assigns = {1: 'mat:Helium, Natural', 2: 'mat:Mercury', 5: 'mat:Graveyard', 6: u'mat:Vacuum'}
 
     cards = {"block1": {"isn": 6,
                         "maxscm": 3000000,
@@ -609,8 +606,8 @@ def write_partisn_input_options():
 
     with warnings.catch_warnings(record=True) as w:
         partisn.write_partisn_input(mesh, hdf5, ngroup, input_file=input_file,
-                                    dg=dg, fine_per_coarse=3, cards=cards,
-                                    num_rays=9) # include num_rays to get warning
+                                    dg=dg, mat_assigns=mat_assigns, fine_per_coarse=3,
+                                    cards=cards, num_rays=9) # include num_rays to get warning
 
     out1 = len(w) == 1 # verify we get a warning from including num_rays and dg
     out2 = filecmp.cmp(input_file, file_expected)
@@ -704,3 +701,10 @@ def test_isotropic_vol_source():
     exp[88, :] = [0.075, 0.075, 0.075, 0.025]
 
     assert(np.allclose(data, exp))
+
+
+def test_pass_dg():
+    """Test for passing in a discretize_geom() argument.
+    """
+
+    pass
