@@ -174,7 +174,7 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
     """
 
     sd_tag = m.get_tag(tag_name)
-    intensity = 0.
+    intensity = 0.0
     if sub_voxel:
         cell_fracs = m.cell_fracs[:]
     else:
