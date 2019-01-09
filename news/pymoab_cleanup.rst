@@ -7,7 +7,7 @@
 
 * PyNE can be build with PyMOAB whitout DAGMC with limited capabilities
 
-* "--dagmc" added to build PyNE agaisnt DAGMC
+* "--dagmc" flag added to `setup.py` in order to build PyNE against DAGMC
 
 * Testing PyNE build with PyMOAB (and DAGMC) using Python 2
 
@@ -15,7 +15,8 @@
    - IMeshTag -> NativeMeshTag
    - mesh.destroyTag(self, boolean) -> mesh.delete_tag(self)
    - mesh.tag.type -> mesg.tag.get_dtype()
-   - write_hdf5(self, filename) -> write_hdf5(self, filename, wrtie_mats
+   - write_hdf5(self, filename) -> write_hdf5(self, filename, write_mats):w
+
    - new save(self, filename, write_mats) (alias for write hdf5)
    - new class MeshSetIterator()
    - those changes have been propagated in mcnp.py, alara.py, ccc.py, dagmc.pyx,
