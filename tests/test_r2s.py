@@ -1,5 +1,4 @@
 import os
-from os.path import isfile
 import warnings
 from nose.tools import assert_equal, assert_almost_equal
 import numpy as np
@@ -37,7 +36,6 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
                  3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name': 'mat_12'})}
     alara_params = "Bogus line for testing\n"
     geom = os.path.join(thisdir, "unitbox.h5m")
-    # dagmc.load(geom)
     num_rays = 9
     grid = True
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
@@ -58,7 +56,6 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
                      (2, 3, 0.9629629629629629, 0.010467904883688454),
                      (3, 2, 0.037037037037037035, 0.5443310539518174),
                      (3, 3, 0.9629629629629629, 0.010467904883688454)]
-    # print(cell_fracs)
     irradiation_setup(meshtal, cell_mats, cell_fracs, alara_params, tally_num,
                       num_rays, grid, flux_tag, fluxin, reverse, alara_inp,
                       alara_matlib, output_mesh, output_material)
@@ -113,7 +110,6 @@ def test_irradiation_setup_structured():
         for nucid in comp:
             comps[i][nucid[0]] = nucid[1]
 
-
     # test r2s step 1 output mesh
     fluxes = [[6.93088E-07, 1.04838E-06], [6.36368E-07, 9.78475E-07],
               [5.16309E-07, 9.86586E-07], [6.36887E-07, 9.29879E-07]]
@@ -163,7 +159,6 @@ def test_photon_sampling_setup_structured():
 
 
 def irradiation_setup_unstructured(flux_tag = "n_flux"):
-
     meshtal_filename = "meshtal_2x2x1"
     meshtal_file = os.path.join(thisdir, "files_test_r2s", meshtal_filename)
 
@@ -194,7 +189,6 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
 
         # overwrite the mesh file
         new_mesh.save(meshtal_mesh_file, write_mats=False)
-
 
 
     cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name':'mat_11'}),
