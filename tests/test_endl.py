@@ -23,9 +23,7 @@ else:
 from utils import download_file
 
 def test_loadfile():
-    download_file('https://www-nds.iaea.org/epdl97/data/endl/eedl/za082000',
-                  'epdl97_eedl_Pb', '502105669e0c0ad917301d219c649aaf')
-    testlib = Library('epdl97_eedl_Pb')
+    testlib = Library('za082000_dummy')
 
     # test the nuclides
     pb_nuclide = 820000000
@@ -39,12 +37,12 @@ def test_loadfile():
     assert_array_equal(sorted(exp_pin), sorted(obs_pin))
 
     # test the reaction properties
-    exp_rdesc = [7, 8, 10, 81, 82, 83]
+    exp_rdesc = [7, 9, 23, 77]
     obs_rdesc = testlib.structure[pb_nuclide]['rdesc']
     assert_array_equal(sorted(exp_rdesc), sorted(obs_rdesc))
 
     # test the reaction descriptors
-    exp_rprop = [0, 10, 11, 21, 22]
+    exp_rprop = [0, 11, 69, 21, 77]
     obs_rprop = testlib.structure[pb_nuclide]['rprop']
     assert_array_equal(sorted(exp_rprop), sorted(obs_rprop))
 
