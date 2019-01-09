@@ -9,7 +9,7 @@
 
 * "--dagmc" flag added to `setup.py` in order to build PyNE against DAGMC
 
-* Testing PyNE build with PyMOAB (and DAGMC) using Python 2
+* Add Test to check PyNE build with PyMOAB (and DAGMC) using Python 2
 
 * pyne.mesh now takes advantage of PyMOAB instead of PyTAPS:
    - IMeshTag -> NativeMeshTag
