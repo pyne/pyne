@@ -30,8 +30,7 @@
    - mesh.getAllTags(mesh.rootSet) -> mesh.get_all_tags()
    - mesh.getAllTags('idx') -> mesh.tag_get_handle('idx')
    - mesh.getAllTags(ve) -> mesh.tag_get_tags_on_entity(ve)
-   - mesh.createTag(tag_name, num_e_groups * max_num_cells, float) -> mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), 'nat_mesh',
-	                                                                   size = float_tag_size, dtype = float)
+   - mesh.createTag(tag_name, num_e_groups * max_num_cells, float) -> mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), 'nat_mesh', size = float_tag_size, dtype = float)
                                                                       mesh.get_tag(tag_name)
    - new save(self, filename, write_mats) (alias for write hdf5)
    - new class MeshSetIterator()
