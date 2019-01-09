@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import argparse
-import ConfigParser
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+
 from os.path import isfile
 
 from pyne.mesh import Mesh
