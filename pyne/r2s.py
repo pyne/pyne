@@ -29,7 +29,7 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params, tally_num=
     cell_mats : dict
         Maps geometry cell numbers to PyNE Material objects.
     cell_fracs : record array
-        The output of pyne.discretize_geom()
+        The output of dagmc.discretize_geom()
     alara_params : str
         The ALARA input blocks specifying everything except the geometry
         and materials. This can either be passed as string or as a file name.
