@@ -31,12 +31,6 @@ thisdir = os.path.dirname(__file__)
 
 def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x2x1"):
 
-    try:
-        from pyne import dagmc
-    except:
-        from nose.plugins.skip import SkipTest
-        raise SkipTest
-
     meshtal = os.path.join(thisdir, "files_test_r2s", meshtal_file)
     tally_num = 4
     cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name': 'mat_11'}),
@@ -95,12 +89,11 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
 
 
 def test_irradiation_setup_structured():
-    # p = multiprocessing.Pool()
-    # r = p.apply_async(irradiation_setup_structured)
-    # p.close()
-    # p.join()
-    # results = r.get()
-    results = irradiation_setup_structured()
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_structured)
+    p.close()
+    p.join()
+    results = r.get()
 
     # unpack return values
     f1 = results[1]
@@ -170,12 +163,6 @@ def test_photon_sampling_setup_structured():
 
 
 def irradiation_setup_unstructured(flux_tag = "n_flux"):
-
-    try:
-        from pyne import dagmc
-    except:
-        from nose.plugins.skip import SkipTest
-        raise SkipTest
 
     meshtal_filename = "meshtal_2x2x1"
     meshtal_file = os.path.join(thisdir, "files_test_r2s", meshtal_filename)
@@ -261,14 +248,12 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
 def test_irradiation_setup_unstructured():
 
     # make new file with non default tag
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_unstructured)
+    p.close()
+    p.join()
+    results = r.get()
 
-    #p = multiprocessing.Pool()
-    #r = p.apply_async(irradiation_setup_unstructured)
-    #p.close()
-    #p.join()
-    # results = r.get()
-    results = irradiation_setup_unstructured
-    print(results)
     # unpack return values
     f1 = results[1]
     f2 = results[2]
@@ -378,12 +363,11 @@ def test_total_photon_source_intensity_subvoxel():
 
 
 def test_irradiation_setup_unstructured_nondef_tag():
-    # p = multiprocessing.Pool()
-    # r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
-    # p.close()
-    # p.join()
-    # results = r.get()
-    results = irradiation_setup_unstructured, ("TALLY_TAG",)
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
+    p.close()
+    p.join()
+    results = r.get()
 
     # unpack return values
     f1 = results[1]
