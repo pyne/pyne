@@ -579,8 +579,12 @@ def write_partisn_input_options():
     mesh=Mesh(structured_coords=sc, structured=True)
     ngroup = 66
 
-    dg = [(0, 1, 1.0, 0.0), (1, 1, 0.5, 0.04714045207910317),
-          (1, 2, 0.5, 0.04714045207910317), (2, 2, 1.0, 0.0)]
+    dg = np.zeros(4, dtype=[('idx', np.int64),
+                                ('cell', np.int64),
+                                ('vol_frac', np.float64),
+                                ('rel_error', np.float64)])
+    dg[:] = [(0, 1, 1.0, 0.0), (1, 1, 0.5, 0.04714045207910317),
+             (1, 2, 0.5, 0.04714045207910317), (2, 2, 1.0, 0.0)]
     mat_assigns = {1: 'mat:Helium, Natural', 2: 'mat:Mercury', 5: 'mat:Graveyard', 6: u'mat:Vacuum'}
 
     cards = {"block1": {"isn": 6,
