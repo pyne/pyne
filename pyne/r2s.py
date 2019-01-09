@@ -11,9 +11,9 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
-def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
-                      num_rays=10, grid=False, cell_fracs, 
-                      flux_tag="n_flux", fluxin="alara_fluxin", reverse=False,
+def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params, tally_num=4,
+                      num_rays=10, grid=False, flux_tag="n_flux", 
+                      fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
                       decay_times=None, sub_voxel=False):
@@ -31,6 +31,8 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         meshtal file.
     cell_mats : dict
         Maps geometry cell numbers to PyNE Material objects.
+    cell_fracs : record array
+        The output of pyne.discretize_geom()
     alara_params : str
         The ALARA input blocks specifying everything except the geometry
         and materials. This can either be passed as string or as a file name.
@@ -41,8 +43,6 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         The if False, geometry discretization will be done with randomly fired
         rays. If true, a grid of sqrt(num_rays) x sqrt(num_rays) rays is used
         for each mesh row.
-    cell_fracs : record array
-        The output of pyne.discretize_geom()
     flux_tag : str, optional
         The mesh tag for the neutron flux.
     fluxin : str, optional
@@ -69,8 +69,10 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
         If true, sub-voxel r2s work flow  will be used.
     """
 
-
-    #  flux_mesh is Mesh object
+    #from pyne.dagmc import load, discretize_geom
+    #if geom is not None and isfile(geom):
+    #    load(geom)
+    # flux_mesh is Mesh object
     if isinstance(flux_mesh, Mesh):
         m = flux_mesh
     #  flux_mesh is unstructured mesh file
@@ -95,13 +97,14 @@ def irradiation_setup(flux_mesh, cell_mats, alara_params, tally_num=4,
                              " object, MCNP meshtal file or meshtal.h5m file.")
 
     if m.structured:
-     #   cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+        # cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
         # tag cell fracs
         if sub_voxel:
             m.tag_cell_fracs(cell_fracs)
     #else:
-    #    cell_fracs = discretize_geom(m)
+        #cell_fracs = discretize_geom(m)
 
+    print(cell_fracs)
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)
 
