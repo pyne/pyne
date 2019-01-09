@@ -23,7 +23,7 @@ where VERSION should be replaced with the version number to be installed.
 
 A windows 32-bit binary is also available on conda via the same command but
 it is highly experimental and likely broken. Conda binaries do not have 
-moab/pytaps/mesh support (yet).
+moab/pymoab/mesh support (yet).
 
 ----------------------------------
 Create a Package (For Developer)
