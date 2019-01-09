@@ -140,10 +140,10 @@ def step1():
     ves = list(mesh.iter_ve())
     tags_keep = ("cell_number", "cell_fracs",
                  "cell_largest_frac_number", "cell_largest_frac")
-    for tag in mesh.mesh.getAllTags(ves[0]):
+    for tag in mesh.get_all_tags():
         if tag.name not in tags_keep:
-            mesh.mesh.destroyTag(tag, True)
-    mesh.mesh.save('blank_mesh.h5m')
+            mesh.delete(tag)
+    mesh.write_hdf5('blank_mesh.h5m')
     print('The file blank_mesh.h5m has been saved to disk.')
     print('Do not delete this file; it is needed by r2s.py step2.\n')
 
@@ -176,7 +176,7 @@ def step2():
         tags = {('TOTAL', dc): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
-        mesh.mesh.save('{0}_{1}.h5m'.format(output, i+1))
+        mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
         intensities += "{0}: {1}\n".format(dc, intensity)
