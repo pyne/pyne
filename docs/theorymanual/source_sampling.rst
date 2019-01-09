@@ -13,19 +13,20 @@ Theory
 ******
 
 Meshes can be used to represent particle source distributions for Monte Carlo
-radiation transport. On a mesh, source intensity is discretized spatially (into
-mesh volume elements) and by energy (into energy bins). In order to randomly
-sample these distributions to select particle birth parameters (position,
-energy, statistical weight) a discrete probability density function (PDF) must be
+radiation transport. On a mesh, source intensity is discretized spatially into
+voxel (mesh volume elements) or sub-voxel (intersection of a voxel and a cell)
+and by energy (into energy bins). In order to randomly sample these
+distributions to select particle birth parameters (position, energy, statistical
+weight, cell number) a discrete probability density function (PDF) must be
 created, which can be sampled with pseudo-random variates. It is convenient to
 create a single PDF to describe all of phase space; in other words, each bin
 within the PDF represents the probability that a particle is born in a
-particular energy group within a particular mesh volume element. 
+particular energy group within a particular voxel or sub-voxel.
 
 In pyne, meshes define volumetric source density :math:`q'` with units of
 :math:`\frac{particles}{time \cdot volume}`. In order to find the source
 intensity of a single phase space bin (of index :math:`n`), the density must be
-multiplied by the volume of the mesh volume element:
+multiplied by the volume of the voxel/sub-voxel:
 
 .. math::
      q(n) = q'(n) \cdot V(n)
@@ -47,7 +48,7 @@ PDF requires that particles have a statistical weight:
      w(n) = \frac{p(n)}{\hat{p}(n)}
 
 Once a phase space bin is selected a position must be sampled uniformly within
-the selected mesh volume element to determine the (x, y, z) birth position, and
+the selected voxel/sub-voxel to determine the (x, y, z) birth position, and
 energy must be uniformly sampled uniformly within the selected energy bin.
 
 **************
@@ -69,7 +70,7 @@ source density of 1 to each mesh volume element, so that all space is sampled
 equally. Within each mesh volume element, a normalized PDF is created on the
 basis of source densities at each energy.
 
-The method for uniformly sampling within a mesh volume element of Cartesian mesh
+The method for uniformly sampling within a voxel/sub-voxel of Cartesian mesh
 is straightforward. A vertex of the hexahedron (:math:`O`) is chosen and three
 vectors are created: :math:`\vec{x}`, :math:`\vec{y}`, and :math:`\vec{z}`.
 Each vector points to an adjacent vertex (in the x, y, z, direction
@@ -90,7 +91,9 @@ Assumptions
 
 The Sampler class chooses the (x, y, z) position within a mesh volume element
 with no regard for what geometry cell it lies in. Cell rejection must be
-implemented within the physic-code-specific wrapper script. 
+implemented within the physic-code-specific wrapper script to make the source
+particle born in the correct cell (for sub-voxel R2S mode) or non-void cell
+(for voxel R2S mode).
 
 **********************
 Sample Calculations
