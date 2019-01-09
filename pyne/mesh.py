@@ -102,7 +102,7 @@ class Tag(object):
         self[:] = value[:]
 
     def __delete__(self, mesh):
-        del self.mesh.tags[self.name]
+        del mesh.tags[self.name]
         del self[:]
 
     def delete(self, mesh=None):
@@ -395,7 +395,7 @@ class NativeMeshTag(Tag):
 
     def __delete__(self, mesh):
         super(NativeMeshTag, self).__delete__(mesh)
-        self.mesh.mesh.tag_delete(self.tag)
+        mesh.mesh.tag_delete(self.tag)
 
     def delete(self,mesh=None):
         if mesh == None:
