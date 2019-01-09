@@ -222,11 +222,11 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
 
     # create a dict of tag handles for all keys of the tags dict
     tag_handles = {}
-    float_tag_size = num_e_groups * max_num_cells
+    tag_size = num_e_groups * max_num_cells
     for tag_name in tags.values():
 
-        mesh.tag(tag_name, np.zeros(float_tag_size, dtype = float), 'nat_mesh',
-                                    size = float_tag_size, dtype = float)
+        mesh.tag(tag_name, np.zeros(tag_size, dtype = float), 'nat_mesh',
+                                    size = tag_size, dtype = float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
     # creat a list of decay times (strings) in the source file
