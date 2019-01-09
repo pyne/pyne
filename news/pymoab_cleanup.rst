@@ -15,7 +15,7 @@
    - IMeshTag -> NativeMeshTag
    - 'imesh' -> 'nat_mesh'
    - mesh.destroyTag(self, boolean) -> mesh.delete_tag(self)
-   - mesh.tag.type -> mesg.tag.get_dtype()
+   - mesh.tag.type -> mesh.tag.get_dtype()
    - write_hdf5(self, filename) -> write_hdf5(self, filename, write_mats)
    - imesh.iterate() -> mesh.mesh_iterate()
    - iMesh.Mesh().load(hdf5) -> core.Core().load_file(hdf5)
@@ -26,6 +26,7 @@
    - iMesh.mesh.getTagHandle('cell_number') -> mesh.cell_number
    - mesh.mesh.getTagHandle('idx') -> mesh.idx
    - idx.append(mesh.mesh.getTagHandle('idx')[ve]) -> idx.append(mesh.idx[ve][0])
+   - del mtag[XXXX] -> mesh.mesh.tag_delete_data(mtag, XXXX)
    - mesh.getAllTags(mesh.rootSet) -> mesh.get_all_tags()
    - mesh.getAllTags('idx') -> mesh.tag_get_handle('idx')
    - mesh.getAllTags(ve) -> mesh.tag_get_tags_on_entity(ve)
