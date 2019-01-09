@@ -1,4 +1,5 @@
 import os
+from os.path import isfile
 import warnings
 from nose.tools import assert_equal, assert_almost_equal
 import numpy as np
@@ -42,7 +43,7 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
                  3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name': 'mat_12'})}
     alara_params = "Bogus line for testing\n"
     geom = os.path.join(thisdir, "unitbox.h5m")
-    dagmc.load(geom)
+    # dagmc.load(geom)
     num_rays = 9
     grid = True
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
@@ -51,38 +52,17 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
     alara_matlib = os.path.join(os.getcwd(), "alara_matlib")
     output_mesh = os.path.join(os.getcwd(), "r2s_step1.h5m")
     output_material = True
-
-    flux_mesh = meshtal
-    #  flux_mesh is Mesh object
-    if isinstance(flux_mesh, Mesh):
-        m = flux_mesh
-    #  flux_mesh is unstructured mesh file
-    elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
-         and flux_mesh.endswith(".h5m"):
-            m = Mesh(structured=False, mesh=flux_mesh)
-    #  flux_mesh is Meshtal or meshtal file
-    else:
-        #  flux_mesh is meshtal file
-        if isinstance(flux_mesh, str) and isfile(flux_mesh):
-            flux_mesh = Meshtal(flux_mesh,
-                                {tally_num: (flux_tag, flux_tag + "_err",
-                                             flux_tag + "_total",
-                                             flux_tag + "_err_total")},
-                                meshes_have_mats=output_material)
-            m = flux_mesh.tally[tally_num]
-        #  flux_mesh is Meshtal object
-        elif isinstance(flux_mesh, Meshtal):
-            m = flux_mesh.tally[tally_num]
-        else:
-            raise ValueError("meshtal argument not a Mesh object, Meshtal"
-                             " object, MCNP meshtal file or meshtal.h5m file.")
-
-    if m.structured:
-        cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
-    else:
-        cell_fracs = discretize_geom(m)
-    irradiation_setup(meshtal, cell_mats, alara_params, tally_num,
-                      num_rays, grid, cell_fracs, flux_tag, fluxin, reverse, alara_inp,
+    cell_fracs = [(0, 2, 0.037037037037037035, 0.5443310539518174),
+                  (0, 3, 0.9629629629629631, 0.010467904883688123),
+                  (1, 2, 0.037037037037037035, 0.5443310539518174),
+                  (1, 3, 0.9629629629629629, 0.010467904883688454),
+                  (2, 2, 0.037037037037037035, 0.5443310539518174),
+                  (2, 3, 0.9629629629629629, 0.010467904883688454),
+                  (3, 2, 0.037037037037037035, 0.5443310539518174),
+                  (3, 3, 0.9629629629629629, 0.010467904883688454)]
+    # print(cell_fracs)
+    irradiation_setup(meshtal, cell_mats, cell_fracs, alara_params, tally_num,
+                      num_rays, grid, flux_tag, fluxin, reverse, alara_inp,
                       alara_matlib, output_mesh, output_material)
 
     #  expected output files
@@ -111,11 +91,12 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
 
 
 def test_irradiation_setup_structured():
-    p = multiprocessing.Pool()
-    r = p.apply_async(irradiation_setup_structured)
-    p.close()
-    p.join()
-    results = r.get()
+    # p = multiprocessing.Pool()
+    # r = p.apply_async(irradiation_setup_structured)
+    # p.close()
+    # p.join()
+    # results = r.get()
+    results = irradiation_setup_structured()
 
     # unpack return values
     f1 = results[1]
@@ -229,42 +210,15 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
                  3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name':'mat_12'})}
     alara_params = "Bogus line for testing\n"
     geom = os.path.join(thisdir, "unitbox.h5m")
-    dagmc.load(geom)
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
     reverse = True
     alara_inp = os.path.join(os.getcwd(), "alara_inp")
     alara_matlib= os.path.join(os.getcwd(), "alara_matlib")
     output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
     output_material = True
-
-    flux_mesh = meshtal_meshtal_mesh_file
-    #  flux_mesh is Mesh object
-    if isinstance(flux_mesh, Mesh):
-        m = flux_mesh
-    #  flux_mesh is unstructured mesh file
-    elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
-         and flux_mesh.endswith(".h5m"):
-            m = Mesh(structured=False, mesh=flux_mesh)
-    #  flux_mesh is Meshtal or meshtal file
-    else:
-        #  flux_mesh is meshtal file
-        if isinstance(flux_mesh, str) and isfile(flux_mesh):
-            flux_mesh = Meshtal(flux_mesh,
-                                {tally_num: (flux_tag, flux_tag + "_err",
-                                             flux_tag + "_total",
-                                             flux_tag + "_err_total")},
-                                meshes_have_mats=output_material)
-            m = flux_mesh.tally[tally_num]
-        #  flux_mesh is Meshtal object
-        elif isinstance(flux_mesh, Meshtal):
-            m = flux_mesh.tally[tally_num]
-
-    if m.structured:
-        cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
-    else:
-        cell_fracs = discretize_geom(m)
-    irradiation_setup(flux_mesh=meshtal_mesh_file, cell_mats=cell_mats,
-                      alara_params=alara_params, cell_fracs, flux_tag=flux_tag,
+    cell_fracs = [(0, 3, 1.0, 1.0), (1, 3, 1.0, 1.0), (2, 3, 1.0, 1.0), (3, 3, 1.0, 1.0)]
+    irradiation_setup(flux_mesh=meshtal_mesh_file, cell_mats=cell_mats, cell_fracs=cell_fracs,
+                      alara_params=alara_params, flux_tag=flux_tag, 
                       fluxin=fluxin, reverse=reverse, alara_inp=alara_inp,
                       alara_matlib=alara_matlib, output_mesh=output_mesh,
                       output_material=output_material)
@@ -300,12 +254,13 @@ def test_irradiation_setup_unstructured():
 
     # make new file with non default tag
 
-    p = multiprocessing.Pool()
-    r = p.apply_async(irradiation_setup_unstructured)
-    p.close()
-    p.join()
-    results = r.get()
-
+    #p = multiprocessing.Pool()
+    #r = p.apply_async(irradiation_setup_unstructured)
+    #p.close()
+    #p.join()
+    # results = r.get()
+    results = irradiation_setup_unstructured
+    print(results)
     # unpack return values
     f1 = results[1]
     f2 = results[2]
@@ -415,11 +370,12 @@ def test_total_photon_source_intensity_subvoxel():
 
 
 def test_irradiation_setup_unstructured_nondef_tag():
-    p = multiprocessing.Pool()
-    r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
-    p.close()
-    p.join()
-    results = r.get()
+    # p = multiprocessing.Pool()
+    # r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
+    # p.close()
+    # p.join()
+    # results = r.get()
+    results = irradiation_setup_unstructured, ("TALLY_TAG",)
 
     # unpack return values
     f1 = results[1]
