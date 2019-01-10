@@ -32,7 +32,7 @@ particular mesh volume element.
 In pyne, meshes define volumetric source density :math:`q'` with units of
 :math:`\frac{particles}{time \cdot volume}`. In order to find the source
 intensity of a single phase space bin (of index :math:`n`), the density must be
-multiplied by the volume of the voxel/sub-voxel:
+multiplied by the volume of the mesh volume element:
 
 .. math::
      q(n) = q'(n) \cdot V(n)
