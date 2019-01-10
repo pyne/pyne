@@ -1428,8 +1428,8 @@ class Mesh(object):
                  doc='cell number of the cell with largest volume fraction in '
                      'the voxel', size=1, dtype=int)
         self.tag(name='cell_largest_frac', value=cell_largest_frac,
-                 tagtype=NativeMeshTag, doc='cell fraction of the cell with largest'
-                                       'cell volume fraction',
+                 tagtype=NativeMeshTag, doc='cell fraction of the cell with '
+                                            'largest cell volume fraction',
                  size=1, dtype=float)
 
 class StatMesh(Mesh):
