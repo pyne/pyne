@@ -240,7 +240,7 @@ def gaussian_fit(spec,c1,c2):
     def gauss(x,amp,x_center,sigma):
         return amp*np.exp(-(x-x_center)**2/(2*sigma**2))
     
-    popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2])
+    popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, sigma])
     #po = # for [amp, cen, wid]
     plt.plot(x,y,'b*:',label='data')
     plt.plot(x,gauss(x,*popt),'ro:',label='fit')
