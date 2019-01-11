@@ -14,7 +14,6 @@
 * pyne.mesh now takes advantage of PyMOAB instead of PyTAPS:
    - IMeshTag changed to NativeMeshTag, with according tagetype name change:
      from 'imesh' to 'nat_mesh'
-   - mesh.destroyTag(self, boolean) -> mesh.delete_tag(self)
    - write_hdf5(self, filename) -> write_hdf5(self, filename, write_mats)
    - imesh.iterate() -> mesh.mesh_iterate()
    - iMesh.Mesh().load(hdf5) -> core.Core().load_file(hdf5)
