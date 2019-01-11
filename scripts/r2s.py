@@ -116,7 +116,13 @@ def step1():
     tally_num = config.getint('step1', 'tally_num')
     flux_tag = config.get('step1', 'flux_tag')
     decay_times = config.get('step2', 'decay_times').split(',')
+    geom = config.get('step1', 'geom')
+    reverse = config.getboolean('step1', 'reverse')
+    num_rays = config.getint('step1', 'num_rays')
+    grid = config.getboolean('step1', 'grid')
 
+    load(geom)
+    # get meshtal info from meshtal file
     if structured:
         meshtal = Meshtal(meshtal,
                         {tally_num: (flux_tag, flux_tag + '_err',
@@ -125,13 +131,7 @@ def step1():
                         meshes_have_mats=False)
         m = meshtal.tally[tally_num]
 
-    geom = config.get('step1', 'geom')
-    reverse = config.getboolean('step1', 'reverse')
-    num_rays = config.getint('step1', 'num_rays')
-    grid = config.getboolean('step1', 'grid')
-
-    load(geom)
-
+    # create the cell_fracs array before irradiation_steup
     if m.structured:
         cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
         # tag cell fracs for both default and subvoxel r2s modes
