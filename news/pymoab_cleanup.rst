@@ -5,7 +5,7 @@
 
 **Changed:** 
 
-* PyNE can be build with PyMOAB whitout DAGMC with limited capabilities
+* PyNE can be built with PyMOAB whitout DAGMC with limited capabilities
 
 * "--dagmc" flag added to `setup.py` in order to build PyNE against DAGMC
 
