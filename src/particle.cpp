@@ -1,4 +1,6 @@
+#ifndef PYNE_IS_AMALGAMATED
 #include "particle.h"
+#endif
 
 std::string pyne::particle::_names[NUM_PARTICLES] = {
   // leptons
