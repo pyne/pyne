@@ -139,7 +139,7 @@ namespace pyne
     /// \param datapath Path to the the material in the file.
     /// \param row The index to read out, may be negative.
     /// \param protocol Flag for layout of material on disk.
-    void from_hdf5(std::string filename, std::string datapath="/material",
+    void from_hdf5(std::string filename, std::string datapath="/materials",
                                                           int row=-1, int protocol=1);
 
     /// Writes this material out to an HDF5 file.
@@ -162,7 +162,7 @@ namespace pyne
     ///            float.  A value of -0.0 indicates that the material should be
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
-    void write_hdf5(std::string filename, std::string datapath="/material",
+    void write_hdf5(std::string filename, std::string datapath="/materials",
                     std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
     /// Return an openmc xml material element as a string
