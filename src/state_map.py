@@ -30,7 +30,7 @@ def generate_state_id_map(nuc_data):
             if item['metastable'] > 0 and item['nuc_id'] != lastnuc:
                 lastnuc = item['nuc_id']
                 sm.write(str(item['nuc_id']) + ",\n")
-        sm.write('};')
+        sm.write('};\n')
         sm.write('int map_metastable [TOTAL_STATE_MAPS] = {')
         for item in f.root.decay.level_list:
             if item['metastable'] > 0 and item['nuc_id'] != lastnuc:

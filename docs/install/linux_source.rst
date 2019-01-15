@@ -22,7 +22,7 @@ PyNE has the following dependencies:
    #. `BLAS <http://www.netlib.org/blas/>`_
 
 Optional Depenendencies:
-   #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
+   #. `MOAB <https://press3.mcs.anl.gov/sigma/moab-library>`_
    #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
 
 Most of the dependencies are readily available through package managers.  Once
