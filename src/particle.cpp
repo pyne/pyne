@@ -1,4 +1,6 @@
+#ifndef PYNE_IS_AMALGAMATED
 #include "particle.h"
+#endif
 
 std::string pyne::particle::_names[NUM_PARTICLES] = {
   // leptons
@@ -165,14 +167,14 @@ void * pyne::particle::_fill_maps() {
   altnames["Gamma"] = name_id["Photon"];
   altnames["X-Ray"] = name_id["Photon"];
 
-  part_to_mcnp["Neutron"]="N";
-  part_to_mcnp["Photon"]="P";
-  part_to_mcnp["Electron"]="E";
+  part_to_mcnp["Neutron"]="n";
+  part_to_mcnp["Photon"]="p";
+  part_to_mcnp["Electron"]="e";
 
-  part_to_mcnp6["Neutron"]="N";
-  part_to_mcnp6["Photon"]="P";
-  part_to_mcnp6["Electron"]="E";
-  part_to_mcnp6["Proton"]="H";
+  part_to_mcnp6["Neutron"]="n";
+  part_to_mcnp6["Photon"]="p";
+  part_to_mcnp6["Electron"]="e";
+  part_to_mcnp6["Proton"]="h";
 
   part_to_fluka["Electron"]="ELECTRON";
   part_to_fluka["Positron"]="POSITRON";
@@ -181,7 +183,7 @@ void * pyne::particle::_fill_maps() {
   part_to_fluka["Muon"]="MUON+";
   part_to_fluka["AntiMuon"]="MUON-";
   part_to_fluka["MuonNeutrino"]="NEUTRIM";
-  part_to_fluka["MuonAntiNeutrino"]="ANEUTRIM",
+  part_to_fluka["MuonAntiNeutrino"]="ANEUTRIM";
   part_to_fluka["Tauon"]="TAU+";
   part_to_fluka["Anti Tauon"]="TAU-";
   part_to_fluka["TauNeutrino"]="NEUTRIT";
@@ -219,7 +221,7 @@ void * pyne::particle::_fill_maps() {
   part_to_geant4["Muon"]="mu+";
   part_to_geant4["AntiMuon"]="mu-";
   part_to_geant4["MuonNeutrino"]="nu_mu";
-  part_to_geant4["MuonAntiNeutrino"]="anti_nu_mu",
+  part_to_geant4["MuonAntiNeutrino"]="anti_nu_mu";
   part_to_geant4["Tauon"]="tau+";
   part_to_geant4["Anti Tauon"]="tau-";
   part_to_geant4["TauNeutrino"]="nu_tau";
