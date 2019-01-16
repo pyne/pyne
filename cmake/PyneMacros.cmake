@@ -206,7 +206,7 @@ endmacro()
 
 macro(pyne_download_platform)
   # Download bateman solver from PyNE data
-  download_platform("https://raw.githubusercontent.com/pyne/data/master" "decay"
+  download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
                       ".cpp" ".s")
 
   # Download CRAM solver from PyNE data
