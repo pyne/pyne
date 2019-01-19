@@ -6,7 +6,7 @@ import re
 CURR_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(CURR_DIR)
 PYNE_DIR = os.path.join(ROOT_DIR, 'pyne')
-MASS_FILE = os.path.join(PYNE_DIR, 'dbgen', 'mass.mas12')
+MASS_FILE = os.path.join(PYNE_DIR, 'dbgen', 'mass.mas16')
 ABUN_FILE = os.path.join(PYNE_DIR, 'dbgen', 'abundances.txt')
 
 
