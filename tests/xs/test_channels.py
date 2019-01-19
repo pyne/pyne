@@ -45,7 +45,7 @@ def test_atom_weight_channel1():
     assert_array_equal(obs, exp)
 
     # test material
-    h2o = Material({10010000: 0.11191487328808077, 80160000: 0.8880851267119192})
+    h2o = Material({10010000: 0.11191487328888054, 80160000: 0.8880851267111195})
     obs = _atom_mass_channel(chanfunc, h2o)
     exp = np.array([1.0, 33393333.333333336])
     assert_array_almost_equal(obs, exp)
@@ -66,7 +66,7 @@ def test_atom_weight_channel2():
     assert_array_equal(obs, exp)
 
     # test material
-    h2o = Material({10010000: 0.11191487328808077, 80160000: 0.8880851267119192})
+    h2o = Material({10010000: 0.11191487328888054, 80160000: 0.8880851267111195})
     obs = _atom_mass_channel(sigma_t, h2o)
     assert_array_almost_equal(obs, exp)
 

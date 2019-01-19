@@ -523,7 +523,7 @@ def test_read_mcnp():
 
     expected_multimaterial = MultiMaterial({
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0, 0.9, 3,
             {"comments":
                  (" Here are comments the comments "
@@ -533,9 +533,9 @@ def test_read_mcnp():
              "source": " internet",
              "table_ids": {'10000': "05c"}}): 1,
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0,
-            1.0021552889223864, 3,
+            1.0021552889251644, 3,
             {"comments":
                  (" Here are comments the comments "
                   "continue here are more even more"),
@@ -544,7 +544,7 @@ def test_read_mcnp():
              "source": " internet",
              "table_ids": {'10000': "05c"}}): 1,
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0, 1.1, 3,
             {"comments":
                  (" Here are comments the comments "

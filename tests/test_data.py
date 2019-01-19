@@ -26,9 +26,9 @@ if not os.path.isfile(pyne.nuc_data):
 
 
 def test_atomic_mass():
-    o16 = [15.99491461957, 16.0]
-    u235 = [235.043930131, 235.0]
-    am242m = [242.059549364, 242.0]
+    o16 = [15.9949146196, 16.0]
+    u235 = [235.04392819, 235.0]
+    am242m = [242.059547428, 242.0]
 
     # zzaam form
     assert_in(data.atomic_mass(80160), o16)
