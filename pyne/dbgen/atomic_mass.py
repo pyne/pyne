@@ -18,7 +18,7 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 # Note that since ground state and meta-stable isotopes are of the same atomic mass,
 # the meta-stables have been discluded from the following data sets.
 
-MASS_FILE = 'mass.mas12'
+MASS_FILE = 'mass.mas16'
 
 
 def copy_atomic_mass_adjustment(build_dir=""):
@@ -144,7 +144,7 @@ def make_atomic_mass(args):
                 return
 
     # Then grab mass data
-    print("Copying AME 2012 atomic mass data.")
+    print("Copying AME 2016 atomic mass data.")
     copy_atomic_mass_adjustment(build_dir)
 
     # Make atomic mass table once we have the array

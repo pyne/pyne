@@ -6,7 +6,7 @@ import re
 CURR_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(CURR_DIR)
 PYNE_DIR = os.path.join(ROOT_DIR, 'pyne')
-MASS_FILE = os.path.join(PYNE_DIR, 'dbgen', 'mass.mas12')
+MASS_FILE = os.path.join(PYNE_DIR, 'dbgen', 'mass.mas16')
 ABUN_FILE = os.path.join(PYNE_DIR, 'dbgen', 'abundances.txt')
 
 
@@ -79,7 +79,8 @@ def generate_header():
 def generate_atomic_mass_errors():
     """Generate the mass errors"""
     atomic_mass_error = ""
-    file = open('../pyne/dbgen/mass.mas12','r')
+    # This line seems obsolete.
+    # file = open('../pyne/dbgen/mass.mas12','r')
     amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? '
                             '(\\d{1,3}) ([ #.\d]{5,12}) ([ #.\d]+)[ ]*?$')
     with open(MASS_FILE, 'r') as f:
