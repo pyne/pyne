@@ -79,8 +79,6 @@ def generate_header():
 def generate_atomic_mass_errors():
     """Generate the mass errors"""
     atomic_mass_error = ""
-    # This line seems obsolete.
-    # file = open('../pyne/dbgen/mass.mas12','r')
     amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? '
                             '(\\d{1,3}) ([ #.\d]{5,12}) ([ #.\d]+)[ ]*?$')
     with open(MASS_FILE, 'r') as f:
