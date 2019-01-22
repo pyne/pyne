@@ -11,7 +11,6 @@ file(COPY setup.py setup_sub.py pyne DESTINATION "${CMAKE_ARGV3}"
                     PATTERN "*.pxi"
                     PATTERN "*.pyi"
                     PATTERN "*.pxd"
-                    PATTERN "*.mas12"
                     PATTERN "*.mas16"
                     PATTERN "*.dat"
                     )
