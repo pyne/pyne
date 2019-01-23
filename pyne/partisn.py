@@ -37,20 +37,20 @@ from pyne.binaryreader import _BinaryReader, _FortranRecord
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
+
 from pyne.mesh import HAVE_PYMOAB
+if HAVE_PYMOAB:
+    from pyne.mesh import Mesh, StatMesh, MeshError, NativeMeshTag
+else:
+    warn("The PyMOAB optional dependency could not be imported. "
+         "All aspects of the partisn module are not imported.",
+         QAWarning)
 
 try:
     from pyne import dagmc
     HAVE_DAGMC = True
 except:
     HAVE_DAGMC = False
-
-if HAVE_PYMOAB:
-    from pyne.mesh import Mesh, StatMesh, MeshError, NativeMeshTag
-else:
-    warn("the PyMOAB optional dependency could not be imported. "
-         "All aspects of the partisn module are not imported.",
-         QAWarning)
 
 def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     """This function reads a material-laden geometry file and a pre-made PyNE
