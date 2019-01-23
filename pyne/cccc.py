@@ -655,7 +655,7 @@ class Rtflux(object):
         if HAVE_PYMOAB:
             from pyne.mesh import Mesh, NativeMeshTag
         else:
-            warn("the PyMOAB optional dependency could not be imported. "
+            warn("The PyMOAB optional dependency could not be imported. "
                  "All aspects of the partisn module are not imported.",
                  QAWarning)
 

@@ -20,6 +20,9 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 
 if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
+else:
+    warn("The PyMOAB optional dependency could not be imported. "
+         "Some aspects of the mesh module may be incomplete.", QAWarning)
 
 from pyne.material import Material, from_atom_frac
 from pyne import nucname
