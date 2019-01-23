@@ -22,7 +22,7 @@ def main():
     try:
         from pymoab import types
     except ImportError:
-        warn("the PyMOAB optional dependency could not be imported. "
+        warn("The PyMOAB optional dependency could not be imported. "
              "Some aspects of the mesh module may be incomplete.", QAWarning)
 
     try:

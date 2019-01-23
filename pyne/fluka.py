@@ -23,7 +23,7 @@ from pyne.mesh import HAVE_PYMOAB
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
 else:
-    warn("the PyMOAB optional dependency could not be imported. "
+    warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the fluka module may be incomplete.",
          QAWarning)
 
