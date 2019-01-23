@@ -284,17 +284,6 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
       rval = mesh->tag_get_data(cell_fracs_tag, ves, &cell_fracs[0]);
       cell_number.resize(num_ves*max_num_cells);
       rval = mesh->tag_get_data(cell_number_tag, ves, &cell_number[0]);
-  } else {
-      // check the existance of tag "cell_number", if there is, report error
-      // "cell_number" tag shouldn't be there if sub_mode is DEFAULT
-      moab::Tag cell_fracs_tag_test;
-      std::string cell_fracs_tag_name_test = "cell_fracs";
-      rval = mesh->tag_get_handle(cell_fracs_tag_name_test.c_str(),
-                                  cell_fracs_tag_test);
-      if (rval != moab::MB_TAG_NOT_FOUND) {
-         throw std::invalid_argument(
-             "The source.h5m contains cell_fracs tag. Wrong source.h5m file used.");
-      }
   }
   std::vector<double> pdf(num_ves*num_e_groups*max_num_cells);
   rval = mesh->tag_get_data(src_tag, ves, &pdf[0]);
