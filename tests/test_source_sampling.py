@@ -63,25 +63,6 @@ def test_single_tet_tag_names_map():
     tag_names = {"src_tag_name": "src"}
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_USER)
 
-    # subvoxel r2s source.h5m used for r2s calculation
-    cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
-                                    ('cell', np.int64),
-                                    ('vol_frac', np.float64),
-                                    ('rel_error', np.float64)])
-    cell_fracs[:] = [(0, 11, 1.0, 0.0), (1, 11, 1.0, 0.0)]
-    m.tag_cell_fracs(cell_fracs)
-    m.mesh.save(filename)
-    tag_names = {"src_tag_name": "src",
-                 "cell_number_tag_name": "cell_number",
-                 "cell_fracs_tag_name": "cell_fracs"}
-    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_ANALOG)
-    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_UNIFORM)
-    tag_names = {"src_tag_name": "src",
-                 "cell_number_tag_name":"cell_number",
-                 "cell_fracs_tag_name": "cell_fracs",
-                 "bias_tag_name": "bias"}
-    assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_USER)
-
     # wrong bias_tag data (non-zero source_density biased to zero -> NAN weight)
     m.src = IMeshTag(2, float)
     m.src[:] = [[1.0, 1.0]]
