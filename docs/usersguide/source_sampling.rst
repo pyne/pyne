@@ -226,7 +226,7 @@ in the MCNP5 input file. This card should have three arguments. The first is the
 sampling mode (0: DEFAULT_ANALOG, 1: DEFAULT_UNIFORM, 2: DEFAULT_USER,
 3: SUBVOXEL_ANALOG, 4: SUBVOXEL_UNIFORM, 5: SUBVOXEL_USER). The second is the
 resample limit for void and cell rejections. For a given particle, if a source
-position is selected in void (MCNP materal 0) or in a cell that disagrees with the
+position is selected in void (MCNP material 0) or in a cell that disagrees with the
 cell number, the source position is resampled within the selected mesh volume
 element until either a correct position is found, or this user-specified limit
 is researched. The third argument should specify the particle type: 1 for

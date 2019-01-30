@@ -57,7 +57,7 @@ jobs:
     steps:
       - checkout
 
-      # Build w/ PyMOAB
+      # Build w/ PyMOAB and w/ DAGMC
       - run:
           name: Building PyNE
           command: |
