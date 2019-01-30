@@ -25,7 +25,7 @@ from pyne.mesh import HAVE_PYMOAB
 from pymoab import core, types
 
 if not HAVE_PYMOAB:
-    warn("the PyMOAB optional dependency could not be imported. "
+    warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of dagmc module may be incomplete",
          QAWarning)
 
