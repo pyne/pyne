@@ -9,7 +9,7 @@ from os.path import isfile
 
 from pyne.mesh import Mesh
 from pyne.dagmc import cell_materials, load, discretize_geom
-from pyne.r2s import irradiation_setup, photon_sampling_setup,\
+from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
                        total_photon_source_intensity
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
                        phtn_src_energy_bounds
@@ -122,42 +122,32 @@ def step1():
     grid = config.getboolean('step1', 'grid')
 
     load(geom)
+
     # get meshtal info from meshtal file
-    if structured:
-        meshtal = Meshtal(meshtal,
-                        {tally_num: (flux_tag, flux_tag + '_err',
-                                     flux_tag + '_total',
-                                     flux_tag + '_err_total')},
-                        meshes_have_mats=False)
-        m = meshtal.tally[tally_num]
+    flux_mesh = resolve_mesh(meshtal, tally_num)
 
     # create the cell_fracs array before irradiation_steup
-    if m.structured:
+    if flux_mesh.structured:
         cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
         # tag cell fracs for both default and subvoxel r2s modes
-        m.tag_cell_fracs(cell_fracs)
+        flux_mesh.tag_cell_fracs(cell_fracs)
     else:
-        cell_fracs = discretize_geom(m)
+        cell_fracs = discretize_geom(flux_mesh)
 
     cell_mats = cell_materials(geom)
-    irradiation_setup(meshtal, cell_mats, cell_fracs, alara_params_filename, tally_num,
+    irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename, tally_num,
                       num_rays=num_rays, grid=grid, reverse=reverse,
                       flux_tag=flux_tag, decay_times=decay_times,
                       sub_voxel=sub_voxel)
 
     # create a blank mesh for step 2:
-    if structured:
-        mesh = meshtal.tally[tally_num]
-    else:
-        mesh = Mesh(structured=False, mesh=meshtal)
-
-    ves = list(mesh.iter_ve())
+    ves = list(flux_mesh.iter_ve())
     tags_keep = ("cell_number", "cell_fracs",
                  "cell_largest_frac_number", "cell_largest_frac")
-    for tag in mesh.get_all_tags():
+    for tag in flux_mesh.get_all_tags():
         if tag.name not in tags_keep:
 	     tag.delete()
-    mesh.write_hdf5('blank_mesh.h5m')
+    flux_mesh.write_hdf5('blank_mesh.h5m')
     print('The file blank_mesh.h5m has been saved to disk.')
     print('Do not delete this file; it is needed by r2s.py step2.\n')
 
