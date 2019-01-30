@@ -271,14 +271,14 @@ def update_cmake_args(ns):
             '-DHDF5_INCLUDE_DIRS=' + h5root + '/include',
         ]
     if ns.moab is not SKIP_OPTION:
-        ns.cmake_args.append('-DWITH_MOAB')
+        ns.cmake_args.append('-DWITH_MOAB=ON')
         if ns.moab is not None:
             ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
 
     if ns.dagmc is not SKIP_OPTION:
         assert ns.moab is not SKIP_OPTION, "If the --dagmc option is present," \
                                            " --moab must be as well"
-        ns.cmake_args.append('-DWITH_DAGMC')
+        ns.cmake_args.append('-DWITH_DAGMC=ON')
         if ns.dagmc is not None:
             ns.cmake_args.append('-DDAGMC_ROOT=' + absexpanduser(ns.dagmc))
 
