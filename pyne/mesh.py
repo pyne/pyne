@@ -854,9 +854,10 @@ class Mesh(object):
         idxs = np.arange(0, len(ves))
         self.mesh.tag_set_data(tag_idx, ves, idxs)
         # check for and populate materials
-        for i, ve in enumerate(ves):
-            if mats is not None and i not in mats:
-                mats[i] = Material()
+        if mats is not None:
+            for i in range(len(ves)):
+                if i not in mats:
+                    mats[i] = Material()
         self._len = i + 1
 
         # Default tags
