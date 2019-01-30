@@ -1223,7 +1223,7 @@ class Mesh(object):
         self._structured_check()
 
         # special case: zyx order is the standard pytaps iteration order,
-        # so we can save time by simply returning a pytaps iterator
+        # so we can save time by simply returning an iterator
         # if no kwargs were specified
         if order == "zyx" and not kw:
             return meshset_iterate(self.mesh,
@@ -1245,7 +1245,7 @@ class Mesh(object):
         and the available keyword arguments.
         """
         self._structured_check()
-        # special case: zyx order without kw is equivalent to pytaps iterator
+        # special case: zyx order without kw is equivalent to an iterator
         if order == "zyx" and not kw:
             return meshset_iterate(self.mesh,
                                    self.structured_set,

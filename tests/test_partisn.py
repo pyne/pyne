@@ -21,7 +21,6 @@ if not HAVE_PYMOAB:
 
 from pyne.mesh import Mesh, NativeMeshTag
 
-
 from pyne import partisn
 
 warnings.simplefilter("ignore", QAWarning)
