@@ -639,6 +639,7 @@ def cell_material_assignments(hdf5):
     implicit_vol = find_implicit_complement()
     mat_assigns[implicit_vol] = "mat:Vacuum"
 
+   # Get all meshsets that topologically represent a "Group"
     group_meshsets = dag_geom.get_entities_by_type_and_tag(0, types.MBENTITYSET,
                                                            [cat_tag,], ["Group",])
 
