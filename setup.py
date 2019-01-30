@@ -74,6 +74,7 @@ CMAKE_BUILD_TYPES = {
 ON_DARWIN = platform.system() == 'Darwin'
 LIBEXT = '.dylib' if ON_DARWIN else '.so'
 
+SKIP_OPTION = "SKIP"
 
 @contextmanager
 def indir(path):
@@ -269,13 +270,18 @@ def update_cmake_args(ns):
             '-DHDF5_LIBRARY_DIRS=' + h5root + '/lib',
             '-DHDF5_INCLUDE_DIRS=' + h5root + '/include',
         ]
-    if ns.moab is not None:
-        ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
+    if ns.moab is not SKIP_OPTION:
+        ns.cmake_args.append('-DWITH_MOAB')
+        if ns.moab is not None:
+            ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
 
-    if ns.dagmc is not None:
-        ns.cmake_args.append('-DDAGMC_ROOT=' + absexpanduser(ns.dagmc))
-        assert ns.moab is not None, "If the --dagmc option is present," \
-                                    " --moab must be as well"
+    if ns.dagmc is not SKIP_OPTION:
+        assert ns.moab is not SKIP_OPTION, "If the --dagmc option is present," \
+                                           " --moab must be as well"
+        ns.cmake_args.append('-DWITH_DAGMC')
+        if ns.dagmc is not None:
+            ns.cmake_args.append('-DDAGMC_ROOT=' + absexpanduser(ns.dagmc))
+
     if ns.deps_root:
         ns.cmake_args.append('-DDEPS_ROOT_DIR=' + absexpanduser(ns.deps_root))
     if ns.fast is not None:
@@ -334,8 +340,10 @@ def parse_args():
 
     other = parser.add_argument_group('other', 'Miscellaneous arguments.')
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
-    other.add_argument('--moab', help='Path to MOAB root directory.')
-    other.add_argument('--dagmc', help='Path to DAGMC root directory.')
+    other.add_argument('--moab', help='Path to MOAB root directory.',
+                       nargs='?', default=SKIP_OPTION)
+    other.add_argument('--dagmc', help='Path to DAGMC root directory.',
+                       nargs='?', default=SKIP_OPTION)
     other.add_argument('--prefix', help='Prefix for install location.',
                        default=None)
     other.add_argument('--build-dir', default='build', dest="build_dir",
