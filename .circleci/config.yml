@@ -65,7 +65,7 @@ jobs:
             python setup.py install --user \
                 --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --clean
 
-      # Test w/ PyMOAB
+      # Test w/ PyMOAB and w/ DAGMC
       - run:
           name: Running PyNE Tests
           no_output_timeout: "20m"
