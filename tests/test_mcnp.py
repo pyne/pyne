@@ -684,7 +684,6 @@ def test_write_to_hdf5():
 # Test Wwinp class. All three function are tested at once because their inputs
 # and ouputs are easily strung together.
 def test_wwinp_n():
-    print("HAVE_PYMOAB:", HAVE_PYMOAB)
     if not HAVE_PYMOAB:
         raise SkipTest
 
