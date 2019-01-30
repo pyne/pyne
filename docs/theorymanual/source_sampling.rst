@@ -97,7 +97,7 @@ Assumptions
 
 The Sampler class chooses the (x, y, z) position within a mesh volume element
 with no regard for what geometry cell it lies in. Cell rejection must be
-implemented within the physic-code-specific wrapper script to make the source
+implemented within the physics-code-specific wrapper script to make the source
 particle born in the correct cell (for sub-voxel R2S mode) or any non-void cell.
 
 **********************
