@@ -645,14 +645,14 @@ def cell_material_assignments(hdf5):
 
     # loop over all mesh_sets in model
     for mesh_set in group_meshsets:
-        child_sets = dag_geom.get_entities_by_handle(mesh_set)
+        group_members = dag_geom.get_entities_by_handle(mesh_set)
         name = dag_geom.tag_get_data(name_tag, mesh_set, flat = True)[0]
         # if mesh_set is a group with a material name_tag, loop over child
         # mesh_sets and assign name to cell
         if 'mat:' in str(name):
-            for child_set in child_sets:
+            for group_member in group_members:
                 try:
-                    cell = dag_geom.tag_get_data(id_tag, child_set, flat = True)[0]
+                    cell = dag_geom.tag_get_data(id_tag, group_member, flat = True)[0]
                     mat_assigns[cell] = name
                 except:
                     pass
