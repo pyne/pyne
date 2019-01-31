@@ -858,7 +858,7 @@ class Mesh(object):
             for i in range(len(ves)):
                 if i not in mats:
                     mats[i] = Material()
-        self._len = len(ves) + 1
+        self._len = len(ves)
 
         # Default tags
         self.tags = {}
