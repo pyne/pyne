@@ -22,7 +22,7 @@ if sys.version_info[0] >= 3:
 
 # Mesh specific imports
 from pyne.mesh import HAVE_PYMOAB
-from pymoab import core, types
+from pymoab import mb_core, types
 
 if not HAVE_PYMOAB:
     warn("The PyMOAB optional dependency could not be imported. "
@@ -620,7 +620,7 @@ def cell_material_assignments(hdf5):
         numbers and values are material names
     """
     # Load the geometry as a pymoab instance
-    dag_geom = core.Core()
+    dag_geom = mb_core.Core()
     dag_geom.load_file(hdf5)
 
     # Get tag handle

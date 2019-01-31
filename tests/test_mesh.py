@@ -26,7 +26,7 @@ from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
 from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
 from pyne.material import Material
 
-from pymoab import core, hcoord, scd, types
+from pymoab import mb_core, hcoord, scd, types
 from pymoab.types import _eh_py_type
 
 def try_rm_file(filename):
@@ -53,7 +53,7 @@ def test_unstructured_mesh_from_file():
 def test_unstructured_mesh_from_instance():
     filename = os.path.join(os.path.dirname(__file__),
                             "files_mesh_test/unstr.h5m")
-    mesh = core.Core()
+    mesh = mb_core.Core()
     mesh.load_file(filename)
     sm = Mesh(mesh=mesh)
 
@@ -98,7 +98,7 @@ def test_structured_mesh_from_coords():
     assert_equal(sm.structured_ordering, 'xyz')
 
 def test_create_by_set():
-    mesh = core.Core()
+    mesh = mb_core.Core()
     scdi = scd.ScdInterface(mesh)
     low = hcoord.HomCoord([0,0,0])
     high = hcoord.HomCoord([1,1,1])
