@@ -54,14 +54,14 @@ def test_single_usrbin():
     for i, v_e in enumerate(
         usrbin_object.tally['single_n'].structured_iterate_hex("zyx")):
         read = usrbin_object.tally['single_n'].part_data_tag[v_e]
-        assert usrbin_object.tally['single_n'].part_data_tag.name == 'part_data_8'
+        assert_equal(usrbin_object.tally['single_n'].part_data_tag.name, 'part_data_8')
         expected = expected_part_data[i]
         assert_equal(read, expected)
 
     for i, v_e in enumerate(
         usrbin_object.tally['single_n'].structured_iterate_hex("zyx")):        
         read = usrbin_object.tally['single_n'].error_data_tag[v_e]
-        assert usrbin_object.tally['single_n'].error_data_tag.name == 'error_data_8'        
+        assert_equal(usrbin_object.tally['single_n'].error_data_tag.name, 'error_data_8')
         expected = expected_error_data[i]
         assert_equal(read, expected)
 
@@ -108,14 +108,14 @@ def test_multiple_usrbin():
     for i, v_e in enumerate(
         usrbin_object.tally['multi_p'].structured_iterate_hex("zyx")):
         read = usrbin_object.tally['multi_p'].part_data_tag[v_e]
-        assert usrbin_object.tally['multi_p'].part_data_tag.name == 'part_data_7'
+        assert_equal(usrbin_object.tally['multi_p'].part_data_tag.name, 'part_data_7')
         expected = expected_part_data[i]
         assert_equal(read, expected)
 
     for i, v_e in enumerate(
         usrbin_object.tally['multi_p'].structured_iterate_hex("zyx")):
         read = usrbin_object.tally['multi_p'].error_data_tag[v_e]
-        assert usrbin_object.tally['multi_p'].error_data_tag.name == 'error_data_7'
+        assert_equal(usrbin_object.tally['multi_p'].error_data_tag.name, 'error_data_7')
         expected = expected_error_data[i]
         assert_equal(read, expected)
 
