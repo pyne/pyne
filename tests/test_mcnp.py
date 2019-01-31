@@ -36,14 +36,8 @@ sswnames = [sswname1, sswname2, sswname3]
 ssrname_onetrack = os.path.join(thisdir, "mcnp_surfsrc_onetrack.w")
 
 # mesh specific imports
-from pyne.mesh import HAVE_PYMOAB
-
-if not HAVE_PYMOAB:
-    from nose.plugins.skip import SkipTest
-
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
 from numpy.testing import assert_array_equal
-
 
 # Test SurfSrc class
 def test_read_header_block():
