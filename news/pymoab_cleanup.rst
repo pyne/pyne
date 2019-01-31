@@ -18,6 +18,8 @@
    - new save(self, filename, write_mats) (alias for write hdf5)
    - new class MeshSetIterator()
    - new get_tag(self, tag_name) and delete_tag(self, tag_name) methods
+   - when tagging the root set of a mesh, a new syntax is available:
+         - `mymesh.mytag[mesh.mesh.getRootSet()] = val`  can now be written as `mymesh.mytag[mymesh] = val`
    - direct call to the mesh entities change accordingly for example:
       - getEntSets() -> get_entities_by_type( , )
       - getTagHandle('XXX') -> tag_get_handle(types.XXXXX)
