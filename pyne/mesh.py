@@ -1413,6 +1413,21 @@ class Mesh(object):
                  size=1, dtype=float)
 
 class StatMesh(Mesh):
+    """This class extends the basic Mesh class by modifying the standard
+    mathematical operations that are performed on multiple meshes.
+
+    A StatMesh assumes that each value being operated upon also has a
+    statistical error associaed with it, and forces operations on the
+    statistical error as well.  For any tag with name `tag_name` the StatMesh
+    assumes that there is also a tag with name `tag_name_rel_error`.
+
+    For example, when to quantities are added together, c = a + b, the
+    statistical error of c is found by combining the statistical errors of a
+    and b.
+
+    """
+
+    
     def __init__(self, mesh=None, structured=False,
                  structured_coords=None, structured_set=None, mats=()):
 
