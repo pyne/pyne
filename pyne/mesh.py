@@ -13,7 +13,7 @@ import tables as tb
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
-    from pymoab import mb_core, hcoord, scd, types
+    from pymoab import core as mb_core, hcoord, scd, types
     from pymoab.rng import subtract
     from pymoab.tag import Tag
     from pymoab.types import _eh_py_type, _TAG_TYPE_STRS

@@ -22,7 +22,7 @@ if sys.version_info[0] >= 3:
 
 # Mesh specific imports
 from pyne.mesh import HAVE_PYMOAB
-from pymoab import mb_core, types
+from pymoab import core as mb_core, types
 
 if not HAVE_PYMOAB:
     warn("The PyMOAB optional dependency could not be imported. "

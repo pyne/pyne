@@ -26,7 +26,7 @@ from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
 from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
 from pyne.material import Material
 
-from pymoab import mb_core, hcoord, scd, types
+from pymoab import core as mb_core, hcoord, scd, types
 from pymoab.types import _eh_py_type
 
 def try_rm_file(filename):

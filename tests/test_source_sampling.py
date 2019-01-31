@@ -20,7 +20,7 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-from pymoab import mb_core, types
+from pymoab import core as mb_core, types
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
