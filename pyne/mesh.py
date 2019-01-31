@@ -1151,9 +1151,6 @@ class Mesh(object):
     def structured_hex_volume(self, i, j, k):
         """Return the volume of the (i,j,k)'th hexahedron in the mesh"""
         self._structured_check()
-        v = list(self.structured_iterate_vertex(x=[i, i + 1],
-                                                y=[j, j + 1],
-                                                z=[k, k + 1]))
         handle = self.structured_get_hex(i,j,k)
         h = self.mesh.get_connectivity(handle)
         coord = self.mesh.get_coords(list(h))
