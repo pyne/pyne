@@ -403,7 +403,20 @@ class NativeMeshTag(Tag):
         super(NativeMeshTag, self).delete()
         mesh.mesh.tag_delete(self.tag)
 
-        
+    def _collect_iterables(key):
+        ves = list(miter)
+        list_of_ves = []
+        # support either indexes or entityhandles
+        for k in key:
+            if isinstance(k, _eh_py_type):
+                list_of_ves.append(k)
+            elif isinstance(k, _INTEGRAL_TYPES):
+                list_of_ves.append(ves[k])
+            else:
+                raise TypeError("{0} contains invalid element references "
+                                "(non-ints, non-handles)".format(key))
+        return list_of_ves
+    
     def __getitem__(self, key):
         m = self.mesh.mesh
         size = len(self.mesh)
@@ -433,17 +446,7 @@ class NativeMeshTag(Tag):
                                "of the mesh.")
             return self.mesh.mesh.tag_get_data(self.tag, [ve for b, ve in zip(key, miter) if b], flat=True)
         elif isinstance(key, Iterable):
-            ves = list(miter)
-            ves_to_get = []
-            # support either indexes or entityhandles
-            for k in key:
-                if isinstance(k, int):
-                    ves_to_get.append(ves[k])
-                elif isinstance(k, _eh_py_type):
-                    ves_to_get.append(k)
-                else:
-                    raise TypeError("{0} contains invalid element references "
-                                    "(non-ints, non-handles)".format(key))
+            ves_to_get = _collect_iterables(key)
             return self.mesh.mesh.tag_get_data(self.tag, ves_to_get, flat=True)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
@@ -488,21 +491,11 @@ class NativeMeshTag(Tag):
             v[...] = value
             self.mesh.mesh.tag_set_data(mtag, key, v)
         elif isinstance(key, Iterable):
-            ves = list(miter)
             if tsize != 1 and len(value) != len(key):
                 v = np.empty((len(key), tsize), self.tag.get_dtype())
                 v[...] = value
                 value = v
-            ves_to_tag = []
-            # support either indexes or entityhandles
-            for k in key:
-                if isinstance(k, int):
-                    ves_to_tag.append(ves[k])
-                elif isinstance(k, _eh_py_type):
-                    ves_to_tag.append(k)
-                else:
-                    raise TypeError("{0} contains invalid element references "
-                                    "(non-ints, non-handles)".format(key))
+            ves_to_tag = _collect_iterables(key)
             self.mesh.mesh.tag_set_data(mtag, ves_to_tag, value)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
@@ -533,17 +526,7 @@ class NativeMeshTag(Tag):
                                "length of the mesh.")
             self.mesh.mesh.tag_delete_data(mtag,[ve for b, ve in zip(key, miter) if b])
         elif isinstance(key, Iterable):
-            ves = list(miter)
-            ves_to_delt = []
-            # support either indexes or entityhandles
-            for k in key:
-                if isinstance(k, int):
-                    ves_to_del.append(ves[k])
-                elif isinstance(k, _eh_py_type):
-                    ves_to_del.append(k)
-                else:
-                    raise TypeError("{0} contains invalid element references "
-                                    "(non-ints, non-handles)".format(key))
+            ves_to_del = _collect_iterables(key)
             self.mesh.mesh.tag_delete_data(mtag,ves_to_del)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
