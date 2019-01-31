@@ -9,6 +9,7 @@ from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
     assert_is, assert_is_instance, assert_in, assert_not_in, assert_almost_equal, \
     assert_is_none, assert_is_not_none, assert_false
+from nose.plugins.skip import SkipTest
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
@@ -16,7 +17,6 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 from pyne.mesh import HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    from nose.plugins.skip import SkipTest
     raise SkipTest
 
 from pyne.utils import QAWarning

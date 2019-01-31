@@ -13,8 +13,6 @@ from pyne.cccc import Isotxs, Rtflux, Atflux
 
 from pyne.mesh import HAVE_PYMOAB
 
-if not HAVE_PYMOAB:
-    from nose.plugins.skip import SkipTest
 
 class TestIsotxs(TestCase):
     def setUp(self):
