@@ -13,7 +13,7 @@ import tables as tb
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
-    from pymoab import core, hcoord, scd, types
+    from pymoab import core as mb_core, hcoord, scd, types
     from pymoab.rng import subtract
     from pymoab.tag import Tag
     from pymoab.types import _eh_py_type, _TAG_TYPE_STRS
@@ -697,9 +697,9 @@ class Mesh(object):
 
         """
         if mesh is None:
-            self.mesh = core.Core()
+            self.mesh = mb_core.Core()
         elif isinstance(mesh, basestring):
-            self.mesh = core.Core()
+            self.mesh = mb_core.Core()
             self.mesh.load_file(mesh)
         else:
             self.mesh = mesh
@@ -1077,7 +1077,7 @@ class Mesh(object):
 
     def __copy__(self):
         # first copy full pymoab instance
-        pymb_copy = core.Core()
+        pymb_copy = mb_core.Core()
 
         # now create Mesh objected from copied PyMOAB instance
         mesh_copy = Mesh(mesh=pymb_copy,

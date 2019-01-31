@@ -20,7 +20,7 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
-from pymoab import core, types
+from pymoab import core as mb_core, types
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
@@ -178,7 +178,7 @@ def test_analog_single_tet():
     that each sub-tet is sampled equally.
     """
     seed(1953)
-    mesh = core.Core()
+    mesh = mb_core.Core()
     v1 = [0., 0., 0.]
     v2 = [1., 0., 0.]
     v3 = [0., 1., 0.]
