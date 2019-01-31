@@ -1438,7 +1438,8 @@ class StatMesh(Mesh):
 
     A StatMesh assumes that each value being operated upon also has a
     statistical error associaed with it, and forces operations on the
-    statistical error as well.
+    statistical error as well.  For any tag with name `tag_name` the StatMesh
+    assumes that there is also a tag with name `tag_name_rel_error`.
 
     For example, when to quantities are added together, c = a + b, the
     statistical error of c is found by combining the statistical errors of a
