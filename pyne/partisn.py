@@ -233,7 +233,7 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
         comp = mats_collapsed[mat_name]
         atom_dens_dict = comp.to_atom_dens()
         comp_list = {}
-        for nucid, dens in atom_dens_dict.iteritems():
+        for nucid, dens in atom_dens_dict.items():
             # convert from [at/cc] to [at/b-cm]
             comp_list[nucid] = dens*10.**-24
         mat_lib[mat_name] = comp_list
