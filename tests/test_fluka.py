@@ -8,12 +8,7 @@ from nose.plugins.skip import SkipTest
 from nose.tools import assert_equal
 
 # Mesh specific imports
-from pyne.mesh import HAVE_PYMOAB
-
-if not HAVE_PYMOAB:
-    from nose.plugins.skip import SkipTest
-
-from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
 
 # Test Usrbin and UsrbinTally classes
 

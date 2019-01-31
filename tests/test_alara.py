@@ -6,6 +6,7 @@ import subprocess
 from nose.tools import assert_almost_equal
 from nose.tools import assert_equal, assert_true, with_setup
 from numpy.testing import assert_array_equal
+from nose.plugins.skip import SkipTest
 import numpy as np
 import tables as tb
 import warnings
@@ -13,9 +14,6 @@ import filecmp
 
 # mesh specific imports
 from pyne.mesh import HAVE_PYMOAB
-
-if not HAVE_PYMOAB:
-    from nose.plugins.skip import SkipTest
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)

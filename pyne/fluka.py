@@ -17,8 +17,7 @@ from warnings import warn
 from pyne.utils import QAWarning
 
 # Mesh specific imports
-from pyne.mesh import Mesh, StatMesh, MeshError
-from pyne.mesh import HAVE_PYMOAB
+from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
 
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
