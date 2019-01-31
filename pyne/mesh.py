@@ -1301,9 +1301,6 @@ class Mesh(object):
             raise MeshError("Structured mesh methods cannot be called from "\
                             "unstructured mesh instances.")
 
-    def save(self, filename, write_mats=True):
-        self.write_hdf5(filename, write_mats)
-
     def write_hdf5(self, filename, write_mats=True):
         """Writes the mesh to an hdf5 file."""
         self.mesh.write_file(filename)
