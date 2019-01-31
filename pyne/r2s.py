@@ -11,7 +11,7 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
-def resolve_mesh(mesh_reference, tally_num = None, flux_tag = "n_flux"):
+def resolve_mesh(mesh_reference, tally_num = None, flux_tag = "n_flux", output_material=False):
 
     # mesh_reference is Mesh object
     if isinstance(mesh_reference, Mesh):
@@ -28,7 +28,7 @@ def resolve_mesh(mesh_reference, tally_num = None, flux_tag = "n_flux"):
                                 {tally_num: (flux_tag, flux_tag + "_err",
                                              flux_tag + "_total",
                                              flux_tag + "_err_total")},
-                                     meshes_have_mats=False)
+                                     meshes_have_mats=output_material)
             m = mesh_reference.tally[tally_num]
         #  mesh_reference is Meshtal object
         elif isinstance(mesh_reference, Meshtal):
@@ -100,7 +100,7 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params, tally_num=
         If true, sub-voxel r2s work flow  will be used.
     """
 
-    m = resolve_mesh(flux_mesh, tally_num, flux_tag)
+    m = resolve_mesh(flux_mesh, tally_num, flux_tag, output_material)
     
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)
