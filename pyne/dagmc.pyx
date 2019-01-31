@@ -622,8 +622,6 @@ def cell_material_assignments(hdf5):
     # Load the geometry as a pymoab instance
     dag_geom = core.Core()
     dag_geom.load_file(hdf5)
-#    dag_geom.getEntities()
-    mesh_sets = dag_geom.get_entities_by_type(0, types.MBENTITYSET)
 
     # Get tag handle
     cat_tag = dag_geom.tag_get_handle(types.CATEGORY_TAG_NAME)
@@ -643,12 +641,12 @@ def cell_material_assignments(hdf5):
     group_meshsets = dag_geom.get_entities_by_type_and_tag(0, types.MBENTITYSET,
                                                            [cat_tag,], ["Group",])
 
-    # loop over all mesh_sets in model
-    for mesh_set in group_meshsets:
-        group_members = dag_geom.get_entities_by_handle(mesh_set)
-        name = dag_geom.tag_get_data(name_tag, mesh_set, flat = True)[0]
-        # if mesh_set is a group with a material name_tag, loop over child
-        # mesh_sets and assign name to cell
+    # loop over all group_sets in model
+    for group_set in group_meshsets:
+        group_members = dag_geom.get_entities_by_handle(group_set)
+        name = dag_geom.tag_get_data(name_tag, group_set, flat = True)[0]
+        # if group_set is a group with a material name_tag, loop over group
+        # members and assign name to cell
         if 'mat:' in str(name):
             for group_member in group_members:
                 try:
