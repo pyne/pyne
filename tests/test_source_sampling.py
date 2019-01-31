@@ -10,7 +10,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 try:
-    from pyne.Mesh import Mesh
+    from pyne.mesh import Mesh
     # see if the source sampling module exists but do not import it
     import imp
     pyne_info = imp.find_module('pyne')
@@ -55,7 +55,7 @@ def test_single_tet_tag_names_map():
     m.bias = NativeMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
 
     # right condition
     tag_names = {"src_tag_name": "src"}
@@ -78,16 +78,14 @@ def test_single_tet_tag_names_map():
                                     ('rel_error', np.float64)])
     cell_fracs[:] = [(0, 11, 1.0, 0.0), (1, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
-    m.save(filename)
-    tag_names = {"src_tag_name": "src",
-                 "cell_number_tag_name": "cell_number",
+    m.write_hdf5(filename)
+    tag_names = {"cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_ANALOG)
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_UNIFORM)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name":"cell_number",
-                 "cell_fracs_tag_name": "cell_fracs",
-                 "bias_tag_name": "bias"}
+                 "cell_fracs_tag_name": "cell_fracs"}
     assert_raises(ValueError, Sampler, filename, tag_names, e_bounds, DEFAULT_USER)
 
     # wrong bias_tag data (non-zero source_density biased to zero -> NAN weight)
@@ -95,7 +93,7 @@ def test_single_tet_tag_names_map():
     m.src[:] = [[1.0, 1.0]]
     m.bias = NativeMeshTag(2, float)
     m.bias[:] = [[0.0, 0.0]]
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name":"cell_number",
                  "cell_fracs_tag_name": "cell_fracs",
@@ -118,7 +116,7 @@ def test_analog_single_hex():
     m.src = NativeMeshTag(1, float)
     m.src[0] = 1.0
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src"}
     sampler = Sampler(filename, tag_names, np.array([0, 1]), DEFAULT_ANALOG)
 
@@ -152,7 +150,7 @@ def test_analog_multiple_hex():
     m.src = NativeMeshTag(2, float)
     m.src[:] = np.ones(shape=(8,2))
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src"}
     sampler = Sampler(filename, tag_names, np.array([0, 0.5, 1]), DEFAULT_ANALOG)
 
@@ -189,7 +187,7 @@ def test_analog_single_tet():
     m.src = NativeMeshTag(1, float)
     m.src[:] = np.array([1])
     filename = "tet.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     center = m.ve_center(list(m.iter_ve())[0])
 
     subtets = [[center, v1, v2, v3],
@@ -228,7 +226,7 @@ def test_uniform():
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src"}
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_UNIFORM)
 
@@ -288,7 +286,7 @@ def test_single_hex_single_subvoxel_analog():
     cell_fracs[:] = [(0, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -333,7 +331,7 @@ def test_single_hex_multiple_subvoxel_analog():
     cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.4, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -377,7 +375,7 @@ def test_multiple_hex_multiple_subvoxel_analog():
                      (6, 7, 1.0, 0.0), (7, 8, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -419,7 +417,7 @@ def test_single_hex_subvoxel_uniform():
     cell_fracs[:] = [(0, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -464,7 +462,7 @@ def test_single_hex_multiple_subvoxel_uniform():
     cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.4, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -512,7 +510,7 @@ def test_multiple_hex_multiple_subvoxel_uniform():
     empty_cells = [0, 2, 4, 6]
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
@@ -557,7 +555,7 @@ def test_bias():
     m.bias = NativeMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "bias_tag_name": "bias"}
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_USER)
@@ -606,7 +604,7 @@ def test_bias_spatial():
     m.bias[:] = [1, 1]
     e_bounds = np.array([0, 0.5, 1.0])
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "bias_tag_name": "bias"}
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_USER)
@@ -678,7 +676,7 @@ def test_subvoxel_multiple_hex_bias_1():
     m.bias[:] = [[0.4], [0.6]]
 
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs",
@@ -752,7 +750,7 @@ def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
     m.bias[:] = [[0.125, 0.125, 0.1, 0.15], [0.1, 0.1, 0.15, 0.15]]
 
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs",
@@ -822,7 +820,7 @@ def test_subvoxel_multiple_hex_bias_e_groups():
     m.bias[:] = [[0.1, 0.3], [0.2, 0.4]]
 
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs",
@@ -1560,7 +1558,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
         tag_names["bias_tag_name"] = "bias"
     # save the mesh into h5m file
     filename = "sampling_mesh.h5m"
-    m.save(filename)
+    m.write_hdf5(filename)
 
     # construct Sampler
     sampler = Sampler(filename, tag_names, e_bounds, mode)
