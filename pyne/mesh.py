@@ -403,7 +403,7 @@ class NativeMeshTag(Tag):
         super(NativeMeshTag, self).delete()
         mesh.mesh.tag_delete(self.tag)
 
-    def _collect_iterables(key):
+    def _collect_iterables(self, key, miter):
         ves = list(miter)
         list_of_ves = []
         # support either indexes or entityhandles
@@ -446,7 +446,7 @@ class NativeMeshTag(Tag):
                                "of the mesh.")
             return self.mesh.mesh.tag_get_data(self.tag, [ve for b, ve in zip(key, miter) if b], flat=True)
         elif isinstance(key, Iterable):
-            ves_to_get = self._collect_iterables(key)
+            ves_to_get = self._collect_iterables(key, miter)
             return self.mesh.mesh.tag_get_data(self.tag, ves_to_get, flat=True)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
@@ -495,7 +495,7 @@ class NativeMeshTag(Tag):
                 v = np.empty((len(key), tsize), self.tag.get_dtype())
                 v[...] = value
                 value = v
-            ves_to_tag = self._collect_iterables(key)
+            ves_to_tag = self._collect_iterables(key, miter)
             self.mesh.mesh.tag_set_data(mtag, ves_to_tag, value)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
@@ -526,7 +526,7 @@ class NativeMeshTag(Tag):
                                "length of the mesh.")
             self.mesh.mesh.tag_delete_data(mtag,[ve for b, ve in zip(key, miter) if b])
         elif isinstance(key, Iterable):
-            ves_to_del = self._collect_iterables(key)
+            ves_to_del = self._collect_iterables(key, miter)
             self.mesh.mesh.tag_delete_data(mtag,ves_to_del)
         else:
             raise TypeError("{0} is not an int, slice, mask, "
