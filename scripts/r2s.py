@@ -124,7 +124,7 @@ def step1():
     load(geom)
 
     # get meshtal info from meshtal file
-    flux_mesh = resolve_mesh(meshtal, tally_num)
+    flux_mesh = resolve_mesh(meshtal, tally_num, flux_tag)
 
     # create the cell_fracs array before irradiation_steup
     if flux_mesh.structured:
