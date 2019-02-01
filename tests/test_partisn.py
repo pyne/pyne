@@ -693,6 +693,9 @@ def test_isotropic_vol_source():
     except:
         raise SkipTest
 
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     sc = np.linspace(-25, 25, 6)
     m = Mesh(structured=True, structured_coords = [sc, sc, sc])
 
