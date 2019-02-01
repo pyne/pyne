@@ -13,6 +13,32 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 def resolve_mesh(mesh_reference, tally_num = None, flux_tag = "n_flux", output_material=False):
 
+    """This function creates a method that will consume many mesh-like objects
+       (e.g. mesh, an h5m file, a meshtal file, etc) and returns a robust PyNE
+       mesh object accordingly.
+
+    Parameters
+    ----------
+    mesh_reference : Mesh object, unstructured mesh file, Meshtal, meshtal file,
+         or PyNE Meshtal object.
+        The source of the neutron flux information. This can be a PyNE Meshtal
+        object, a pyne Mesh object, or the filename an MCNP meshtal file, or
+        the filename of an unstructured mesh tagged with fluxes.
+    tally_num : int
+        The MCNP FMESH4 tally number of the neutron flux tally within the
+        meshtal file.
+    flux_tag : str, optional
+        The tag name for the neutron flux.
+    output_material : bool, optional
+        If true, output mesh will have materials as determined by
+        dagmc.discretize_geom().
+        
+    Returns
+    -------
+    m : PyNE mesh object
+        The PyNE mesh object of the flux data.
+    """
+
     # mesh_reference is Mesh object
     if isinstance(mesh_reference, Mesh):
         m = mesh_reference
