@@ -3,6 +3,7 @@ import warnings
 from nose.tools import assert_equal, assert_almost_equal
 import numpy as np
 from numpy.testing import assert_array_equal
+from nose.plugins.skip import SkipTest
 import multiprocessing
 import filecmp
 import sys
@@ -12,10 +13,9 @@ if sys.version_info[0] > 2:
 else:
     from itertools import izip
 
-from pyne.mesh import HAVE_PYMOAB
+from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    from nose.plugins.skip import SkipTest
     raise SkipTest
 
 
@@ -23,7 +23,6 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
 from pyne.material import Material
-from pyne.mesh import Mesh, NativeMeshTag
 from pyne.mcnp import Meshtal
 
 thisdir = os.path.dirname(__file__)

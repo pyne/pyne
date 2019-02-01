@@ -3,11 +3,11 @@ Tests for PyNE variance_reduction module.
 """
 import warnings
 
+from nose.plugins.skip import SkipTest
 
-from pyne.mesh import HAVE_PYMOAB
+from pyne.mesh import Mesh, NativeMeshTag, MeshError, HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    from nose.plugins.skip import SkipTest
     raise SkipTest
 
 from nose.tools import assert_almost_equal
@@ -17,8 +17,6 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne.variancereduction import cadis, magic
 
-from pyne.mesh import Mesh, NativeMeshTag
-from pyne.mesh import MeshError
 from pyne import mcnp
 
 def test_cadis_single_e():

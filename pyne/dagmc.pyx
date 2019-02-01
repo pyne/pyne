@@ -647,6 +647,8 @@ def cell_material_assignments(hdf5):
         name = dag_geom.tag_get_data(name_tag, group_set, flat = True)[0]
         # if group_set is a group with a material name_tag, loop over group
         # members and assign name to cell
+        # in general `name` may be a non-string or string-like type,
+        # so convert to str for safety
         if 'mat:' in str(name):
             for group_member in group_members:
                 try:

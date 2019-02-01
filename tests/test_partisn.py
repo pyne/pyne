@@ -14,12 +14,7 @@ import unittest
 
 from nose.plugins.skip import SkipTest
 
-from pyne.mesh import HAVE_PYMOAB
-
-if not HAVE_PYMOAB:
-    raise SkipTest
-
-from pyne.mesh import Mesh, NativeMeshTag
+from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 
 from pyne import partisn
 
@@ -120,6 +115,10 @@ def test_get_xs_names():
 def test_get_coord_sys_1D():
     """Test the _get_coord_sys function for a 1D mesh.
     """
+
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     # Create mesh
     xvals = [0.0, 2.0]
     yvals = [0.0, 3.0]
@@ -139,6 +138,10 @@ def test_get_coord_sys_1D():
 def test_get_coord_sys_2D():
     """Test the _get_coord_sys function for a 2D mesh.
     """
+
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     # Create mesh
     xvals = [-1.0, 0.0, 2.0]
     yvals = [-3.0, 3.0]
@@ -158,6 +161,10 @@ def test_get_coord_sys_2D():
 def test_get_coord_sys_3D():
     """Test the _get_coord_sys function for a 3D mesh.
     """
+
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     # Create mesh
     xvals = [-1.0, 0.0, 2.0]
     yvals = [-3.0, 0.0, 3.0]
@@ -419,6 +426,11 @@ def test_write_partisn_input_1D():
 
 
 def write_partisn_input_2D():
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -453,11 +465,6 @@ def write_partisn_input_2D():
 def test_write_partisn_input_2D():
     """Test full input file creation for 2D case
     """
-    try:
-        from pyne import dagmc
-    except:
-        raise SkipTest
-
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_2D)
     p.close()
@@ -466,6 +473,11 @@ def test_write_partisn_input_2D():
 
 
 def write_partisn_input_3D():
+    try:
+        from pyne import dagmc
+    except:
+        raise SkipTest
+
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -500,11 +512,6 @@ def write_partisn_input_3D():
 def test_write_partisn_input_3D():
     """Test full input file creation for 3D case
     """
-    try:
-        from pyne import dagmc
-    except:
-        raise SkipTest
-
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_3D)
     p.close()
@@ -566,6 +573,9 @@ def test_write_partisn_input_with_names_dict():
 
 
 def write_partisn_input_options():
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     """Test PARTISN input file creation with a slew of keyword arguments
     """
 
@@ -621,6 +631,7 @@ def write_partisn_input_options():
 def test_write_partisn_input_options():
     """Test full input file creation for 1D case with a lot of key work args
     """
+
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_options)
     p.close()
