@@ -11,6 +11,37 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
+def resolve_mesh(mesh_reference, tally_num = None, flux_tag = "n_flux", output_material=False):
+
+    # mesh_reference is Mesh object
+    if isinstance(mesh_reference, Mesh):
+        m = mesh_reference
+    #  mesh_reference is unstructured mesh file
+    elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
+         and mesh_reference.endswith(".h5m"):
+            m = Mesh(structured=False, mesh=mesh_reference)
+    #  mesh_reference is Meshtal or meshtal file
+    elif tally_num is not None:
+        #  mesh_reference is meshtal file
+        if isinstance(mesh_reference, str) and isfile(mesh_reference):
+            mesh_reference = Meshtal(mesh_reference,
+                                {tally_num: (flux_tag, flux_tag + "_err",
+                                             flux_tag + "_total",
+                                             flux_tag + "_err_total")},
+                                     meshes_have_mats=output_material)
+            m = mesh_reference.tally[tally_num]
+        #  mesh_reference is Meshtal object
+        elif isinstance(mesh_reference, Meshtal):
+            m = mesh_reference.tally[tally_num]
+        else:
+            raise ValueError("meshtal argument not a Mesh object, Meshtal"
+                             " object, MCNP meshtal file or meshtal.h5m file.")
+    # mesh_references is a Meshtal file but no tally_num provided
+    else:
+        raise ValueError("Need to provide a tally number when reading a Meshtal file")
+
+    return m
+
 def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params, tally_num=4,
                       num_rays=10, grid=False, flux_tag="n_flux", 
                       fluxin="alara_fluxin", reverse=False,
@@ -69,30 +100,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params, tally_num=
         If true, sub-voxel r2s work flow  will be used.
     """
 
-    # flux_mesh is Mesh object
-    if isinstance(flux_mesh, Mesh):
-        m = flux_mesh
-    #  flux_mesh is unstructured mesh file
-    elif isinstance(flux_mesh, str) and isfile(flux_mesh) \
-         and flux_mesh.endswith(".h5m"):
-            m = Mesh(structured=False, mesh=flux_mesh)
-    #  flux_mesh is Meshtal or meshtal file
-    else:
-        #  flux_mesh is meshtal file
-        if isinstance(flux_mesh, str) and isfile(flux_mesh):
-            flux_mesh = Meshtal(flux_mesh,
-                                {tally_num: (flux_tag, flux_tag + "_err",
-                                             flux_tag + "_total",
-                                             flux_tag + "_err_total")},
-                                meshes_have_mats=output_material)
-            m = flux_mesh.tally[tally_num]
-        #  flux_mesh is Meshtal object
-        elif isinstance(flux_mesh, Meshtal):
-            m = flux_mesh.tally[tally_num]
-        else:
-            raise ValueError("meshtal argument not a Mesh object, Meshtal"
-                             " object, MCNP meshtal file or meshtal.h5m file.")
-
+    m = resolve_mesh(flux_mesh, tally_num, flux_tag, output_material)
+    
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)
 
