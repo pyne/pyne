@@ -191,6 +191,9 @@ def get_zones_no_void():
     except:
         raise SkipTest
 
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -252,6 +255,9 @@ def get_zones_iteration_order():
     except:
         raise SkipTest
 
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/fractal_box.h5m'
@@ -303,6 +309,9 @@ def get_zones_with_void():
     try:
         from pyne import dagmc
     except:
+        raise SkipTest
+
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     # hdf5 test file
@@ -383,6 +392,9 @@ def write_partisn_input_1D():
     except:
         raise SkipTest
 
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -429,6 +441,9 @@ def write_partisn_input_2D():
     try:
         from pyne import dagmc
     except:
+        raise SkipTest
+
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     # Path to hdf5 test file
@@ -478,6 +493,9 @@ def write_partisn_input_3D():
     except:
         raise SkipTest
 
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
@@ -523,6 +541,9 @@ def write_partisn_input_with_names_dict():
     try:
         from pyne import dagmc
     except:
+        raise SkipTest
+
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     # Path to hdf5 test file
@@ -656,6 +677,9 @@ def test_mesh_to_isotropic_source():
     except:
         raise SkipTest
 
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
     m = Mesh(structured=True, structured_coords=[range(5), range(5), range(5)])
     m.src = NativeMeshTag(4, float)
     # These source values were carefully choosen so that:
@@ -691,6 +715,9 @@ def test_isotropic_vol_source():
     try:
         from pyne import dagmc
     except:
+        raise SkipTest
+
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     sc = np.linspace(-25, 25, 6)
