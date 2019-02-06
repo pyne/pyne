@@ -14,7 +14,9 @@ def absexpanduser(x): return os.path.abspath(os.path.expanduser(x))
 
 
 def consistancy_check(args):
-    args.moab = args.moab or args.dagmc or args.pymoab
+    args.moab = args.moab or args.dagmc or args.pymoab or args.all
+    args.pymoab = args.pymoab or args.all
+    args.dagmc = args.dagmc or args.all
 
     return args
 
@@ -59,7 +61,6 @@ def main():
     localdir = absexpanduser('~/.local')
     description = "Build a docker image for PyNE"
     parser = ap.ArgumentParser(description=description)
-
     moab = 'Build and install MOAB'
     parser.add_argument('--moab', help=moab,
                         action='store_true', default=False)
@@ -70,6 +71,10 @@ def main():
 
     pymoab = 'Enable pymoab'
     parser.add_argument('--pymoab', help=pymoab,
+                        action='store_true', default=False)
+    
+    all_deps = 'Add all dependencies'
+    parser.add_argument('--all', '-a', '-all', help=all_deps,
                         action='store_true', default=False)
 
     deps = 'Depdendencies only'
