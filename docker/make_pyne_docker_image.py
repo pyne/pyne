@@ -25,7 +25,7 @@ def build_name(args):
     if args.name != '':
         return args.name
 
-    name = 'ubuntu_18.04'
+    name = 'pyne/ubuntu_18.04'
 
     if args.moab and not args.dagmc and not args.pymoab:
         name += "_moab"
@@ -56,6 +56,10 @@ def build_docker(args):
         docker_args += ["--build-arg", "build_pyne=NO"]
 
     rtn = subprocess.check_call(["docker",  "build" ] + tag + dockerfile + docker_args + ["."], shell=(os.name == 'nt'))
+    
+    if args.push:
+        rtn = subprocess.check_call(["docker", "push", name], shell=(os.name == 'nt'))
+
 
 def main():
     localdir = absexpanduser('~/.local')
@@ -83,6 +87,10 @@ def main():
 
     name = "Set docker imgae name"
     parser.add_argument('--name', help=name, default='')
+    
+    push = 'Push docker imgae on dockerhub'
+    parser.add_argument('--push', '-p', '-push', help=push,
+                        action='store_true', default=False)
 
     args = parser.parse_args()
 
