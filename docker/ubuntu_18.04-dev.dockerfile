@@ -29,10 +29,12 @@ ARG build_moab=NO
 ARG enable_pymoab=NO
 ARG build_dagmc=NO
 ARG build_pyne=YES
-RUN echo "build_moab: ${build_moab}"
-RUN echo "enable_pymoab: ${enable_pymoab}"
-RUN echo "build_dagmc: ${build_dagmc}"
-RUN echo "build_pyne: ${build_pyne}"
+RUN echo "Configuration: \n" \
+         "MOAB: $build_moab\n" \
+         "pyMOAB: $enable_pymoab\n" \
+         "DAGMC: $build_dagmc\n" \
+         "PyNE: $build_pyne\n"
+
 
 # make starting directory
 RUN mkdir -p $HOME/opt
