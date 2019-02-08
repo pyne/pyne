@@ -1,62 +1,62 @@
 version: 2
 commands:
-    checkout_build:
-        description: "Checkout PyNE, build with the provided flag"
-        paramters:
-            python:
-                type: string
-                default: "python2"
-            flags:
-                type: string
-                default: ""
-        steps:
-          - checkout
-          # Build w/ PyMOAB and w/ DAGMC
-          - run:
-              name: Building PyNE
-              command: |
-                << parameters.python >> setup.py install --user --clean << paramters.flags >> 
-    save_state:
-        description: "Save the state of the Dock er container"
-        parameters:
-            build:
-                type: string
-                default: ""
-        steps:
-            - run:
-                  command: echo $CIRCLE_SHA1 > .<<parameters.build>>circle-sha
-            - save_cache:
-                key: v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
-                paths:
-                  - /repo
+  checkout_build:
+    description: "Checkout PyNE, build with the provided flag"
+    paramters:
+      python:
+        type: string
+        default: "python2"
+      flags:
+        type: string
+        default: ""
+    steps:
+      - checkout
+      # Build w/ PyMOAB and w/ DAGMC
+      - run:
+        name: Building PyNE
+        command: |
+        << parameters.python >> setup.py install --user --clean << paramters.flags >> 
+  save_state:
+    description: "Save the state of the Dock er container"
+    parameters:
+      build:
+        type: string
+        default: ""
+    steps:
+      - run:
+          command: echo $CIRCLE_SHA1 > .<<parameters.build>>circle-sha
+      - save_cache:
+        key: v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
+        paths:
+          - /repo
 
-    pull_state:
-        description: "Pull back a saved the state of the Dock er container"
-        parameters:
-            build:
-                type: string
-                default: ""
-        steps:
-            - run:
-                name: save SHA to a file
-                command: echo $CIRCLE_SHA1 > .<<paramters.build>>circle-sha
-            - restore_cache:
-                keys:
-                  - v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
+  pull_state:
+    description: "Pull back a saved the state of the Dock er container"
+    parameters:
+      build:
+        type: string
+        default: ""
+    steps:
+      - run:
+        name: save SHA to a file
+        command: echo $CIRCLE_SHA1 > .<<paramters.build>>circle-sha
+      - restore_cache:
+        keys:
+          - v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
 
 
-    run_test:
-        description: "Run tests"
-        parameters:
-            flags:
-                type: string
-                default: ""
-        steps:
-            - run:
-                no_output_timeout: "20m"
-                command: |
-                  cd ~/repo/tests
-                  ./travis-run-tests.sh << parameters.flag>>
+  run_test:
+    description: "Run tests"
+    parameters:
+      flags:
+        type: string
+        default: ""
+    steps:
+      - run:
+        no_output_timeout: "20m"
+        command: |
+          cd ~/repo/tests
+          ./travis-run-tests.sh << parameters.flag>>
 
 
 
