@@ -13,10 +13,12 @@ commands:
           default: "build"
     steps:
       - run: echo $CIRCLE_SHA1 > .<< parameters.build >>
+      - run: echo $CIRCLE_SHA1
       - save_cache:
           key: v1-repo-{{ checksum ".<< parameters.build >>" }}
           paths:
             - ~/
+
   # Pull Container change
   pull_container:
     description: "Load container state"
@@ -25,10 +27,11 @@ commands:
           type: string
           default: "build"
     steps:
-        - run: echo $CIRCLE_SHA1 > .<< parameters.build >>
-        - restore_cache:
-            keys:
-              - v1-repo-{{ checksum ".<< parameters.build >>" }}
+      - run: echo $CIRCLE_SHA1 > .<< parameters.build >>
+      - run: echo $CIRCLE_SHA1
+      - restore_cache:
+          keys:
+            - v1-repo-{{ checksum ".<< parameters.build >>" }}
 
   # Checkout and build PyNE  
   checkout_build:
