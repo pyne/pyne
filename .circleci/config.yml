@@ -1,5 +1,6 @@
 version: 2.1
 commands:
+  # Save Container change
   save_container:
     description: ""
     parameters:
@@ -9,10 +10,10 @@ commands:
     steps:
       - run: echo $CIRCLE_SHA1 > << parameters.build >>
       - save_cache:
-          key: v1-repo-{{ checksum << parameters.build >> }}
+          key: v1-repo-{{ checksum " << parameters.build >> " }}
           paths:
             - ~/repo
-
+  # Pull Container change
   pull_container:
     description: ""
     parameters:
@@ -24,7 +25,7 @@ commands:
         - restore_cache:
             keys:
               - v1-repo-{{ checksum << parameters.build >> }}
-    
+  # Checkout and build PyNE   
   checkout_build:
     description: "Checkout PyNE, build with the provided flags"
     parameters:
