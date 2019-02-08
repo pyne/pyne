@@ -12,6 +12,7 @@ commands:
     steps:
       - checkout
       - run: << parameters.python >> setup.py install --user --clean << parameters.flags >> 
+        -run: cd ../ && nuc_data_make ;
 
   run_test:
     description: "Run tests"
