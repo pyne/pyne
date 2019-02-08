@@ -24,7 +24,7 @@ commands:
         - run: echo $CIRCLE_SHA1 > << parameters.build >>
         - restore_cache:
             keys:
-              - v1-repo-{{ checksum << parameters.build >> }}
+              - v1-repo-{{ checksum " << parameters.build >> " }}
   # Checkout and build PyNE   
   checkout_build:
     description: "Checkout PyNE, build with the provided flags"
