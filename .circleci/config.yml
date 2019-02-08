@@ -2,13 +2,13 @@ version: 2.1
 commands:
   checkout_build:
     description: "Checkout PyNE, build with the provided flag"
-    paramters:
+    parameters:
       flags:
         type: string
-        default: "--clean"
+        default: ""
     steps:
       - checkout
-      - run: python setup.py install --user << paramters.flags >> 
+      - run: python setup.py install --user --clean << parameters.flags >> 
 
   run_test:
     description: "Run tests"
@@ -33,7 +33,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout_build:
-          flags: "--clean"
+          flags: ""
       - run_test:
           falgs: "python3"
 
@@ -45,7 +45,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout_build:
-          flags: "--clean"
+          flags: ""
       - run_test:
           falg: "python2"
 
@@ -57,7 +57,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout_build:
-          flags: "--clean --dagmc $HOME/opt/dagmc"
+          flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
       - run_test:
           falg: "python2"
 
@@ -69,7 +69,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout_build:
-          flags: "--clean --moab $HOME/opt/moab"
+          flags: "--moab $HOME/opt/moab"
       - run_test:
           falg: "python2"
   
@@ -80,7 +80,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout_build:
-          flags: "--clean --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
+          flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
       - run_test:
           falg: "python2"
 
