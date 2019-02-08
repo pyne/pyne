@@ -130,7 +130,7 @@ workflows:
     jobs:
       - py3_build
       - py3_test:
-          required:
+          requires:
               py3_build
     
       - py2_build
