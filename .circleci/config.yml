@@ -12,7 +12,7 @@ commands:
       - save_cache:
           key: v1-repo-{{ checksum ".<< parameters.build >>" }}
           paths:
-            - ~/repo
+            - ~/
   # Pull Container change
   pull_container:
     description: ""
