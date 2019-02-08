@@ -1,5 +1,21 @@
 version: 2
 commands:
+    checkout_build:
+        description: "Checkout PyNE, build with the provided flag"
+        paramters:
+            python:
+                type: string
+                default: "python2"
+            flags:
+                type: string
+                default: ""
+        steps:
+          - checkout
+          # Build w/ PyMOAB and w/ DAGMC
+          - run:
+              name: Building PyNE
+              command: |
+                << parameters.python >> setup.py install --user --clean << paramters.flags >> 
     save_state:
         description: "Save the state of the Dock er container"
         parameters:
@@ -28,22 +44,6 @@ commands:
                 keys:
                   - v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
 
-    checkout_build:
-        description: "Checkout PyNE, build with the provided flag"
-        paramters:
-            python:
-                type: string
-                default: "python2"
-            flags:
-                type: string
-                default: ""
-        steps:
-          - checkout
-          # Build w/ PyMOAB and w/ DAGMC
-          - run:
-              name: Building PyNE
-              command: |
-                << parameters.python >> setup.py install --user --clean << paramters.flags >> 
 
     run_test:
         description: "Run tests"
