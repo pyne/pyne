@@ -6,9 +6,12 @@ commands:
       flags:
         type: string
         default: ""
+      python:
+        type: string
+        default: "python2"
     steps:
       - checkout
-      - run: python setup.py install --user --clean << parameters.flags >> 
+      - run: << parameters.python >> setup.py install --user --clean << parameters.flags >> 
 
   run_test:
     description: "Run tests"
@@ -31,6 +34,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout_build:
+          python: "python3"
           flags: ""
       - run_test:
           flags: "python3"
