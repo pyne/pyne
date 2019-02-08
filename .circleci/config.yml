@@ -1,7 +1,7 @@
 version: 2.1
 commands:
   checkout_build:
-    description: "Checkout PyNE, build with the provided flag"
+    description: "Checkout PyNE, build with the provided flags"
     parameters:
       flags:
         type: string
@@ -21,7 +21,7 @@ commands:
         no_output_timeout: "20m"
         command: |
           cd ~/repo/tests
-          ./travis-run-tests.sh << parameters.flag >>
+          ./travis-run-tests.sh << parameters.flags >>
 
 
 
