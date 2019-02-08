@@ -7,7 +7,7 @@ except ImportError:
 
 from os.path import isfile
 
-from pyne.mesh import Mesh
+from pyne.mesh import Mesh, NativeMeshTag
 from pyne.dagmc import cell_materials, load, discretize_geom
 from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
                        total_photon_source_intensity
@@ -145,7 +145,7 @@ def step1():
     tags_keep = ("cell_number", "cell_fracs",
                  "cell_largest_frac_number", "cell_largest_frac")
     for tag in flux_mesh.get_all_tags():
-        if tag.name not in tags_keep:
+        if tag.name not in tags_keep and isinstance(tag, NativeMeshTag):
 	     tag.delete()
     flux_mesh.write_hdf5('blank_mesh.h5m')
     print('The file blank_mesh.h5m has been saved to disk.')
