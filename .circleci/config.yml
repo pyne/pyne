@@ -7,7 +7,7 @@ commands:
           type: string
           default: "build"
     steps:
-      -run: echo $CIRCLE_SHA1 > << parameters.build >>
+      - run: echo $CIRCLE_SHA1 > << parameters.build >>
       - save_cache:
           key: v1-repo-{{ checksum << parameters.build >> }}
           paths:
@@ -20,6 +20,7 @@ commands:
           type: string
           default: "build"
     steps:
+        - run: echo $CIRCLE_SHA1 > << parameters.build >>
         - restore_cache:
             keys:
               - v1-repo-{{ checksum << parameters.build >> }}
