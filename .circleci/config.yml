@@ -12,8 +12,6 @@ commands:
           type: string
           default: "build"
     steps:
-      - run: echo $CIRCLE_SHA1 > .<< parameters.build >>
-      - run: echo $CIRCLE_SHA1
       - save_cache:
           key: v1-repo-{{ "$CIRCLE_SHA1<< parameters.build >>" }}
           paths:
@@ -27,8 +25,6 @@ commands:
           type: string
           default: "build"
     steps:
-      - run: echo $CIRCLE_SHA1 > .<< parameters.build >>
-      - run: echo $CIRCLE_SHA1
       - restore_cache:
           keys:
           key: v1-repo-{{ "$CIRCLE_SHA1<< parameters.build >>" }}
@@ -71,7 +67,7 @@ commands:
           ./travis-run-tests.sh << parameters.flags >>
 
 # Jobs part: 
-# Define the different job that will be runned this separate building form
+# Define the different job that will be ran this separate building form
 # testing for each configuration allowing to get more information out of the CI
 jobs:
 # Python 3 jobs 
