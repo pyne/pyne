@@ -17,9 +17,7 @@ commands:
         type: string
         default: ""
     steps:
-      - run:
-        no_output_timeout: "20m"
-        command: |
+      - run: |
           cd ~/repo/tests
           ./travis-run-tests.sh << parameters.flags >>
 
