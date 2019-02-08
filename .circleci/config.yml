@@ -42,7 +42,7 @@ commands:
       - run: << parameters.python >> setup.py install --user --clean << parameters.flags >> 
       - run: cd ../ && nuc_data_make ;
       - save_container:
-          build: << parameter.build >>
+          build: << parameters.build >>
 
   run_test:
     description: "Run tests"
@@ -55,7 +55,7 @@ commands:
           default: "build"
     steps:
       - pull_container:
-          build: "build_type$CIRCLE_SHA1"
+          build: << parameters.build >>
       - run: |
           cd ~/repo/tests
           ./travis-run-tests.sh << parameters.flags >>
@@ -172,16 +172,23 @@ workflows:
             - py2_build
 
       - py2_dagmc_build
+          requires:
+            - py2_build
       - py2_dagmc_test:
           requires:
             - py2_dagmc_build
       
       - py2_pymoab_build
+          requires:
+            - py2_build
       - py2_pymoab_test:
           requires:
             - py2_pymoab_build
       
       - py2_dagmc_pymoab_build
+          requires:
+            - py2_dagmc_build
+            - py2_pymoab_build
       - py2_dagmc_pymoab_test:
           requires:
             - py2_dagmc_pymoab_build
