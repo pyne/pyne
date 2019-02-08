@@ -21,7 +21,7 @@ commands:
         no_output_timeout: "20m"
         command: |
           cd ~/repo/tests
-          ./travis-run-tests.sh << parameters.flag>>
+          ./travis-run-tests.sh << parameters.flag >>
 
 
 
