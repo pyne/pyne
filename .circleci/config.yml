@@ -7,8 +7,9 @@ commands:
           type: string
           default: "build"
     steps:
+      -run: echo $CIRCLE_SHA1 > << parameters.build >>
       - save_cache:
-          key: v1-repo-{{ checksum << parameters.build >>$CIRCLE_SHA1 }}
+          key: v1-repo-{{ checksum << parameters.build >> }}
           paths:
             - ~/repo
 
@@ -21,7 +22,7 @@ commands:
     steps:
         - restore_cache:
             keys:
-              - v1-repo-{{ checksum << parameters.build >>$CIRCLE_SAH1 }}
+              - v1-repo-{{ checksum << parameters.build >> }}
     
   checkout_build:
     description: "Checkout PyNE, build with the provided flags"
@@ -89,8 +90,15 @@ jobs:
     steps:
       - checkout_build:
           flags: ""
+          build: "python2"
+  py2_test:
+    docker:
+      - image: pyne/ubuntu_18.04_pyne-deps:latest
+    working_directory: ~/repo
+    steps:
       - run_test:
           flags: "python2"
+          build: "python2"
 
 
 
@@ -101,8 +109,15 @@ jobs:
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
+          build: "python2_dagmc"
+  py2_dagmc_test:
+    docker:
+      - image: pyne/ubuntu_18.04_dagmc_pyne-deps:latest
+    working_directory: ~/repo
+    steps:
       - run_test:
           flags: "python2"
+          build: "python2_dagmc"
 
 
 
@@ -113,8 +128,15 @@ jobs:
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab"
+          build: "python2_pymoab"
+  py2_pymoab_test:
+    docker:
+      - image: pyne/ubuntu_18.04_pymoab_pyne-deps:latest
+    working_directory: ~/repo
+    steps:
       - run_test:
           flags: "python2"
+          build: "python2_pymoab"
   
 
   py2_dagmc_pymoab_build:
@@ -124,8 +146,15 @@ jobs:
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
+          build: "python2_dagmc_pymoab"
+  py2_dagmc_pymoab_test:
+    docker:
+      - image: pyne/ubuntu_18.04_dagmc_pymoab_pyne-deps:latest
+    working_directory: ~/repo
+    steps:
       - run_test:
           flags: "python2"
+          build: "python2_dagmc_pymoab"
 
 workflows:
   version: 2
@@ -137,9 +166,21 @@ workflows:
             - py3_build
     
       - py2_build
+      - py2_test:
+          requires:
+            - py2_build
 
       - py2_dagmc_build
+      - py2_dagmc_test:
+          requires:
+            - py2_dagmc_build
       
       - py2_pymoab_build
+      - py2_pymoab_test:
+          requires:
+            - py2_pymoab_build
       
       - py2_dagmc_pymoab_build
+      - py2_dagmc_pymoab_test:
+          requires:
+            - py2_dagmc_pymoab_build
