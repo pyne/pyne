@@ -1,19 +1,19 @@
 #! /usr/bin/env python
 from __future__ import print_function, unicode_literals
 import os
-import sys
-import tarfile
-import platform
 import subprocess
-import shutil
-import io
 import argparse as ap
 
 
-def absexpanduser(x): return os.path.abspath(os.path.expanduser(x))
-
-
 def consistancy_check(args):
+    """Checkes arguments consistencies: for example, if DAGMC is request, MOAB
+    needs to be installed
+
+    Parameters
+    ----------
+    args : list of arguments 
+
+    """
     args.moab = args.moab or args.dagmc or args.pymoab or args.all
     args.pymoab = args.pymoab or args.all
     args.dagmc = args.dagmc or args.all
@@ -22,6 +22,14 @@ def consistancy_check(args):
 
 
 def build_name(args):
+    """Build the container name, if not specified by the user. Container name
+    will be "pyne/ubuntu_18.04{_moab/_dagmc,_pymoab}{_pyne_deps/}"
+
+    Parameters
+    ----------
+    args : list of arguments 
+
+    """
     if args.name != '':
         return args.name
 
@@ -41,10 +49,18 @@ def build_name(args):
 
 
 def build_docker(args):
+    """Forms the docker command line and executes it. IF the push flag is
+    provided also pushes it to DockerHub which requires PyNE admin right on
+    DockerHub(Docker login is assumed(...
 
+    Parameters
+    ----------
+    args : list of arguments 
+
+    """
     dockerfile = ['-f', 'ubuntu_18.04-dev.dockerfile']
 
-    tag = ['-t', build_name(args) ]
+    tag = ['-t', build_name(args)]
     docker_args = []
     if args.moab:
         docker_args += ["--build-arg", "build_moab=YES"]
@@ -55,13 +71,18 @@ def build_docker(args):
     if args.deps:
         docker_args += ["--build-arg", "build_pyne=NO"]
 
-    rtn = subprocess.check_call(["docker",  "build" ] + tag + dockerfile + docker_args + ["."], shell=(os.name == 'nt'))
-    
+    rtn = subprocess.check_call(
+        ["docker",  "build"] + tag + dockerfile + docker_args + ["."], shell=(os.name == 'nt'))
+
     if args.push:
-        rtn = subprocess.check_call(["docker", "push", name], shell=(os.name == 'nt'))
+        rtn = subprocess.check_call(
+            ["docker", "push", name], shell=(os.name == 'nt'))
 
 
 def main():
+    """Parse the different arguments and call the proper methods.
+
+    """
     localdir = absexpanduser('~/.local')
     description = "Build a docker image for PyNE"
     parser = ap.ArgumentParser(description=description)
@@ -76,7 +97,7 @@ def main():
     pymoab = 'Enable pymoab'
     parser.add_argument('--pymoab', help=pymoab,
                         action='store_true', default=False)
-    
+
     all_deps = 'Add all dependencies'
     parser.add_argument('--all', '-a', '-all', help=all_deps,
                         action='store_true', default=False)
@@ -87,7 +108,7 @@ def main():
 
     name = "Set docker imgae name"
     parser.add_argument('--name', help=name, default='')
-    
+
     push = 'Push docker imgae on dockerhub'
     parser.add_argument('--push', '-p', '-push', help=push,
                         action='store_true', default=False)
