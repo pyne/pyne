@@ -27,7 +27,7 @@ commands:
 jobs:
   py3_build:
     docker:
-      - image: pyne/pshriwise:ubuntu_17.04_pymoab_pyne
+      - image: pshriwise/pshriwise:ubuntu_17.04_pymoab_pyne
     working_directory: ~/repo
     steps:
       - checkout_build:
