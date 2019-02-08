@@ -59,8 +59,8 @@ def build_docker(args):
 
     """
     dockerfile = ['-f', 'ubuntu_18.04-dev.dockerfile']
-
-    tag = ['-t', build_name(args)]
+    tag = build_name(args)
+    tag_flag = ['-t', tag]
     docker_args = []
     if args.moab:
         docker_args += ["--build-arg", "build_moab=YES"]
@@ -72,11 +72,11 @@ def build_docker(args):
         docker_args += ["--build-arg", "build_pyne=NO"]
 
     rtn = subprocess.check_call(
-        ["docker",  "build"] + tag + dockerfile + docker_args + ["."], shell=(os.name == 'nt'))
+        ["docker",  "build"] + tag_flag + dockerfile + docker_args + ["."], shell=(os.name == 'nt'))
 
     if args.push:
         rtn = subprocess.check_call(
-            ["docker", "push", name], shell=(os.name == 'nt'))
+            ["docker", "push",  tag], shell=(os.name == 'nt'))
 
 
 def main():
