@@ -12,10 +12,7 @@ commands:
     steps:
       - checkout
       # Build w/ PyMOAB and w/ DAGMC
-      - run:
-        name: Building PyNE
-        command: |
-        << parameters.python >> setup.py install --user --clean << paramters.flags >> 
+      - run: << parameters.python >> setup.py install --user --clean << paramters.flags >> 
   save_state:
     description: "Save the state of the Dock er container"
     parameters:
@@ -23,8 +20,7 @@ commands:
         type: string
         default: ""
     steps:
-      - run:
-          command: echo $CIRCLE_SHA1 > .<<parameters.build>>circle-sha
+      - run: echo $CIRCLE_SHA1 > .<<parameters.build>>circle-sha
       - save_cache:
         key: v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
         paths:
@@ -37,9 +33,7 @@ commands:
         type: string
         default: ""
     steps:
-      - run:
-        name: save SHA to a file
-        command: echo $CIRCLE_SHA1 > .<<paramters.build>>circle-sha
+      - run: echo $CIRCLE_SHA1 > .<<paramters.build>>circle-sha
       - restore_cache:
         keys:
           - v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
