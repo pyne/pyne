@@ -60,16 +60,6 @@ jobs:
     steps:
       - checkout_build:
           flags: ""
-      - save_state:
-            build: "python3"
-
-  py3_test:
-    docker:
-      - image: pyne/pshriwise:ubuntu_17.04_pymoab_pyne
-    working_directory: ~/repo
-    steps:
-      - pull_state:
-          build: "python3"
       - run_test:
           falgs: "python3"
 
@@ -82,16 +72,6 @@ jobs:
     steps:
       - checkout_build:
           flags: ""
-      - save_state:
-            build: "python2"
-
-  py2_test:
-    docker:
-      - image: pyne/ubuntu_18.04_pyne-deps:latest
-    working_directory: ~/repo
-    steps:
-      - pull_state:
-         build: "python2"
       - run_test:
           falg: "python2"
 
@@ -104,16 +84,6 @@ jobs:
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
-      - save_state:
-            build: "python2_dagmc"
-
-  py2_dagmc_test:
-    docker:
-      - image: pyne/ubuntu_18.04_dagmc_pyne-deps:latest
-    working_directory: ~/repo
-    steps:
-      - pull_state:
-         build: "python2_dagmc"
       - run_test:
           falg: "python2"
 
@@ -126,16 +96,6 @@ jobs:
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab"
-      - save_state:
-            build: "python2_pymoab"
-
-  py2_pymoab_test:
-    docker:
-      - image: pyne/ubuntu_18.04_pymoab_pyne-deps:latest
-    working_directory: ~/repo
-    steps:
-      - pull_state:
-         build: "python2_pymoab"
       - run_test:
           falg: "python2"
   
@@ -147,16 +107,6 @@ jobs:
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
-      - save_state:
-            build: "python2_dagmc_pymoab"
-
-  py2_dagmc_pymoab_test:
-    docker:
-      - image: pyne/ubuntu_18.04_dagmc_pymoab_pyne-deps:latest
-    working_directory: ~/repo
-    steps:
-      - pull_state:
-         build: "python2_dagmc_pymoab"
       - run_test:
           falg: "python2"
 
@@ -165,26 +115,11 @@ workflows:
   build_and_test:
     jobs:
       - py3_build
-      - py3_test:
-          requires:
-             - py3_build
     
       - py2_build
-      - py2_test:
-          requires:
-             - py2_build
 
       - py2_dagmc_build
-      - py2_dagmc_test:
-          requires:
-             - py2_dagmc_build
       
       - py2_pymoab_build
-      - py2_pymoab_test:
-          requires:
-             - py2_pymoab_build
       
       - py2_dagmc_pymoab_build
-      - py2_dagmc_pymoab_test:
-          requires:
-             - py2_dagmc_pymoab_build
