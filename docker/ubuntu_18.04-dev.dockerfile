@@ -65,7 +65,6 @@ RUN if [ "$build_moab" = "YES" ] || [ "$build_dagmc" = "YES" ] || [ "$enable_pym
         && make install \
       # build/install static lib
         && cmake ../moab/ \
-              ${PYMOAB_FLAG} \
               -DCMAKE_INSTALL_PREFIX=$HOME/opt/moab \
               -DENABLE_HDF5=ON \
               -DBUILD_SHARED_LIBS=OFF \
