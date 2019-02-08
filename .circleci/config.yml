@@ -9,32 +9,6 @@ commands:
     steps:
       - checkout
       - run: python setup.py install --user --clean << paramters.flags >> 
-  
-  save_state:
-    description: "Save the state of the Dock er container"
-    parameters:
-      build:
-        type: string
-        default: ""
-    steps:
-      - run: echo $CIRCLE_SHA1 > .<<parameters.build>>circle-sha
-      - save_cache:
-        key: v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
-        paths:
-          - /repo
-
-  pull_state:
-    description: "Pull back a saved the state of the Dock er container"
-    parameters:
-      build:
-        type: string
-        default: ""
-    steps:
-      - run: echo $CIRCLE_SHA1 > .<<paramters.build>>circle-sha
-      - restore_cache:
-        keys:
-          - v1-repo-{{ checksum ".<<parameters.build>>circle-sha" }}
-
 
   run_test:
     description: "Run tests"
