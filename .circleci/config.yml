@@ -33,7 +33,7 @@ jobs:
       - checkout_build:
           flags: ""
       - run_test:
-          flagss: "python3"
+          flags: "python3"
 
 
 
