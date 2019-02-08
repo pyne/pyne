@@ -6,7 +6,7 @@ import argparse as ap
 
 
 def consistancy_check(args):
-    """Checkes arguments consistencies: for example, if DAGMC is request, MOAB
+    """Checks arguments consistencies: for example, if DAGMC is request, MOAB
     needs to be installed
 
     Parameters
