@@ -15,7 +15,7 @@ commands:
       - run: echo $CIRCLE_SHA1 > .<< parameters.build >>
       - run: echo $CIRCLE_SHA1
       - save_cache:
-          key: v1-repo-{{ checksum ".<< parameters.build >>" }}
+          key: v1-repo-{{ "$CIRCLE_SHA1<< parameters.build >>" }}
           paths:
             - ~/
 
@@ -31,7 +31,7 @@ commands:
       - run: echo $CIRCLE_SHA1
       - restore_cache:
           keys:
-            - v1-repo-{{ checksum ".<< parameters.build >>" }}
+          key: v1-repo-{{ "$CIRCLE_SHA1<< parameters.build >>" }}
 
   # Checkout and build PyNE  
   checkout_build:
