@@ -8,9 +8,9 @@ commands:
           type: string
           default: "build"
     steps:
-      - run: echo $CIRCLE_SHA1 > << parameters.build >>
+      - run: echo $CIRCLE_SHA1 > .<< parameters.build >>
       - save_cache:
-          key: v1-repo-{{ checksum " << parameters.build >> " }}
+          key: v1-repo-{{ checksum ".<< parameters.build >>" }}
           paths:
             - ~/repo
   # Pull Container change
@@ -21,10 +21,10 @@ commands:
           type: string
           default: "build"
     steps:
-        - run: echo $CIRCLE_SHA1 > << parameters.build >>
+        - run: echo $CIRCLE_SHA1 > .<< parameters.build >>
         - restore_cache:
             keys:
-              - v1-repo-{{ checksum " << parameters.build >> " }}
+              - v1-repo-{{ checksum ".<< parameters.build >>" }}
   # Checkout and build PyNE   
   checkout_build:
     description: "Checkout PyNE, build with the provided flags"
