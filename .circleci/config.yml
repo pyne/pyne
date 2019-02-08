@@ -35,7 +35,7 @@ jobs:
       - checkout_build:
           flags: ""
       - run_test:
-          falgs: "python3"
+          flagss: "python3"
 
 
 
@@ -47,7 +47,7 @@ jobs:
       - checkout_build:
           flags: ""
       - run_test:
-          falg: "python2"
+          flags: "python2"
 
 
 
@@ -59,7 +59,7 @@ jobs:
       - checkout_build:
           flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
       - run_test:
-          falg: "python2"
+          flags: "python2"
 
 
 
@@ -71,7 +71,7 @@ jobs:
       - checkout_build:
           flags: "--moab $HOME/opt/moab"
       - run_test:
-          falg: "python2"
+          flags: "python2"
   
 
   py2_dagmc_pymoab_build:
@@ -82,7 +82,7 @@ jobs:
       - checkout_build:
           flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
       - run_test:
-          falg: "python2"
+          flags: "python2"
 
 workflows:
   version: 2
