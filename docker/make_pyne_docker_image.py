@@ -83,7 +83,6 @@ def main():
     """Parse the different arguments and call the proper methods.
 
     """
-    localdir = absexpanduser('~/.local')
     description = "Build a docker image for PyNE"
     parser = ap.ArgumentParser(description=description)
     moab = 'Build and install MOAB'
