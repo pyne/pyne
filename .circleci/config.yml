@@ -131,7 +131,7 @@ workflows:
       - py3_build
       - py3_test:
           requires:
-              py3_build
+            - py3_build
     
       - py2_build
 
