@@ -48,6 +48,9 @@ commands:
       flags:
         type: string
         default: ""
+      build:
+          type: string
+          default: "build"
     steps:
       - pull_container:
           build: "build_type$CIRCLE_SHA1"
