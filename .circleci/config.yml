@@ -40,7 +40,7 @@ commands:
       - run: << parameters.python >> setup.py install --user --clean << parameters.flags >> 
       - run: cd ../ && nuc_data_make ;
       - save_container:
-          name: << parameter.build >>
+          build: << parameter.build >>
 
   run_test:
     description: "Run tests"
@@ -50,7 +50,7 @@ commands:
         default: ""
     steps:
       - pull_container:
-          name: "build_type$CIRCLE_SHA1"
+          build: "build_type$CIRCLE_SHA1"
       - run: |
           cd ~/repo/tests
           ./travis-run-tests.sh << parameters.flags >>
