@@ -1,4 +1,24 @@
 version: 2.1
+# Executors part:
+# Alias the environment on which run the different jobs
+executors:
+    py2:
+        docker:
+            - image: pyne/ubuntu_18.04_pyne-deps:latest
+    py2_dagmc:
+        docker:
+            - image: pyne/ubuntu_18.04_dagmc_pyne-deps:latest
+    py2_pymoab:
+        docker:
+            - image: pyne/ubuntu_18.04_pymoab_pyne-deps:latest
+    py2_dagmc_pymoab:
+        docker:
+            - image: pyne/ubuntu_18.04_dagmc_pymoab_pyne-deps:latest
+    py3:
+        docker:
+            - image: pshriwise/pshriwise:ubuntu_17.04_pymoab_pyne
+
+
 # Commands part:
 # Define macros that will be used to build and test PyNE.
 # Save_container/pull_container macros are used to avoid repeting building PyNE
@@ -72,8 +92,8 @@ commands:
 jobs:
 # Python 3 jobs 
   py3_build:
-    docker:
-      - image: pshriwise/pshriwise:ubuntu_17.04_pymoab_pyne
+    executor:
+      name: py3
     working_directory: ~/repo
     steps:
       - checkout_build:
@@ -81,8 +101,8 @@ jobs:
           flags: ""
           build: "python3"
   py3_test:
-    docker:
-      - image: pshriwise/pshriwise:ubuntu_17.04_pymoab_pyne
+    executor:
+      name: py3
     working_directory: ~/repo
     steps:
       - run_test:
@@ -93,16 +113,16 @@ jobs:
 # Python 2 jobs
 # without optional depedencies
   py2_build:
-    docker:
-      - image: pyne/ubuntu_18.04_pyne-deps:latest
+    executor:
+      name: py2
     working_directory: ~/repo
     steps:
       - checkout_build:
           flags: ""
           build: "python2"
   py2_test:
-    docker:
-      - image: pyne/ubuntu_18.04_pyne-deps:latest
+    executor:
+      name: py2
     working_directory: ~/repo
     steps:
       - run_test:
@@ -111,16 +131,16 @@ jobs:
 
 # With DAGMC
   py2_dagmc_build:
-    docker:
-      - image: pyne/ubuntu_18.04_dagmc_pyne-deps:latest
+    executor:
+      name: py2_dagmc
     working_directory: ~/repo
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
           build: "python2_dagmc"
   py2_dagmc_test:
-    docker:
-      - image: pyne/ubuntu_18.04_dagmc_pyne-deps:latest
+    executor:
+      name: py2_dagmc
     working_directory: ~/repo
     steps:
       - run_test:
@@ -129,16 +149,16 @@ jobs:
 
 # With PyMOAB
   py2_pymoab_build:
-    docker:
-      - image: pyne/ubuntu_18.04_pymoab_pyne-deps:latest
+    executor:
+      name: py2_pymoab
     working_directory: ~/repo
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab"
           build: "python2_pymoab"
   py2_pymoab_test:
-    docker:
-      - image: pyne/ubuntu_18.04_pymoab_pyne-deps:latest
+    executor:
+      name: py2_pymoab
     working_directory: ~/repo
     steps:
       - run_test:
@@ -147,16 +167,16 @@ jobs:
   
 # With PyMOAB & DAGMC
   py2_dagmc_pymoab_build:
-    docker:
-      - image: pyne/ubuntu_18.04_dagmc_pymoab_pyne-deps:latest
+    executor:
+      name: py2_dagmc_pymoab
     working_directory: ~/repo
     steps:
       - checkout_build:
           flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
           build: "python2_dagmc_pymoab"
   py2_dagmc_pymoab_test:
-    docker:
-      - image: pyne/ubuntu_18.04_dagmc_pymoab_pyne-deps:latest
+    executor:
+      name: py2_dagmc_pymoab
     working_directory: ~/repo
     steps:
       - run_test:
