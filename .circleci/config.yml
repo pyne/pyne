@@ -136,7 +136,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout_build:
-          flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
+          flags: "--dagmc $HOME/opt/dagmc"
           build: "python2_dagmc"
   py2_dagmc_test:
     executor:
