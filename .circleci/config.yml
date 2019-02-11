@@ -56,15 +56,12 @@ commands:
       flags:
         type: string
         default: ""
-      python:
-        type: string
-        default: "python2"
       build:
           type: string
           default: "build"
     steps:
       - checkout
-      - run: << parameters.python >> setup.py install --user --clean << parameters.flags >> 
+      - run: python setup.py install --user --clean << parameters.flags >> 
       - run: cd ../ && nuc_data_make ;
       - save_container:
           build: << parameters.build >>
@@ -97,7 +94,6 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout_build:
-          python: "python3"
           flags: ""
           build: "python3"
   py3_test:

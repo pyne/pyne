@@ -21,6 +21,11 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             python${PY_SUFIX}-setuptools \
             python${PY_SUFIX}-dev \
             libpython${PY_SUFIX}-dev \
+            python${PY_SUFIX}-nose \
+            python${PY_SUFIX}-matplotlib \
+            python${PY_SUFIX}-tables \
+            python${PY_SUFIX}-scipy \
+            python${PY_SUFIX}-jinja2 \
             gfortran \
             git \
             cmake \
@@ -42,28 +47,18 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
     pip install --force-reinstall \
             sphinx \
             cloud_sptheme \
-            tables \
-            matplotlib \
-            jinja2 \
             prettytable \
             sphinxcontrib_bibtex \
             numpydoc \
             nbconvert \
             numpy \
-            scipy \
+            nose \
             cython
-
-# Script conditional setup: Default PyNE alone
-ARG build_moab=NO
-ARG enable_pymoab=NO
-ARG build_dagmc=NO
-RUN echo "Configuration: \n" \
-         "MOAB: $build_moab\n" \
-         "pyMOAB: $enable_pymoab\n" \
-         "DAGMC: $build_dagmc\n" 
 
 
 # make starting directory
+ARG build_moab=NO
+ARG enable_pymoab=NO
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
@@ -109,6 +104,7 @@ ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
 ENV PYTHONPATH=$HOME/opt/moab/lib/python${py_version}/site-packages/
 
 # build/install DAGMC
+ARG build_dagmc=NO
 ENV INSTALL_PATH=$HOME/opt/dagmc
 RUN if [ "$build_dagmc" = "YES" ]; then \
         cd /root \
