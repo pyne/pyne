@@ -3,12 +3,12 @@ FROM ubuntu:18.04
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ARG PY_VERSION=2.7
+ARG py_version=2.7
 
 ENV HOME /root
-RUN if [ "${PY_VERSION%.?}" -eq 3 ] ; \
+RUN if [ "${py_version%.?}" -eq 3 ] ; \
     then \ 
-            export PY_SUFIX=${PY_VERSION%.?}; \
+            export PY_SUFIX=${py_version%.?}; \
     fi;\
     apt-get update \
     && apt-get install -y --fix-missing \
@@ -34,7 +34,7 @@ RUN if [ "${PY_VERSION%.?}" -eq 3 ] ; \
             libtool \
             doxygen \
     && apt-get clean -y; \
-    if [ "${PY_VERSION%.?}" -eq 3 ] ; \
+    if [ "${py_version%.?}" -eq 3 ] ; \
        then \ 
             update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
             update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
@@ -106,7 +106,7 @@ RUN if [ "$build_moab" = "YES" ] || [ "$build_dagmc" = "YES" ] || [ "$enable_pym
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
-ENV PYTHONPATH=$HOME/opt/moab/lib/python${PY_VERSION}/site-packages/
+ENV PYTHONPATH=$HOME/opt/moab/lib/python${py_version}/site-packages/
 
 # build/install DAGMC
 ENV INSTALL_PATH=$HOME/opt/dagmc
