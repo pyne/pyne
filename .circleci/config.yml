@@ -127,24 +127,6 @@ jobs:
           flags: "python2"
           build: "python2"
 
-# With DAGMC
-  py2_dagmc_build:
-    executor:
-      name: py2_dagmc
-    working_directory: ~/repo
-    steps:
-      - checkout_build:
-          flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
-          build: "python2_dagmc"
-  py2_dagmc_test:
-    executor:
-      name: py2_dagmc
-    working_directory: ~/repo
-    steps:
-      - run_test:
-          flags: "python2"
-          build: "python2_dagmc"
-
 # With PyMOAB
   py2_pymoab_build:
     executor:
