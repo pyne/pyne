@@ -32,7 +32,7 @@ commands:
           type: string
           default: "build"
     steps:
-      - run: echo $CIRCLE_SHA1 > .circle-sha<< parameters.build >>
+      - run: echo "$CIRCLE_SHA1<< parameters.build >>" > .circle-sha<< parameters.build >>
       - save_cache:
           key: v1-repo-{{ checksum ".circle-sha<< parameters.build >>" }}
           paths:
