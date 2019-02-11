@@ -3,37 +3,64 @@ FROM ubuntu:18.04
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ARG PY_VERSION=2.7
 
 ENV HOME /root
-RUN apt-get update \
+RUN if [ "${PY_VERSION%.?}" -eq 3 ] ; \
+    then \ 
+            export PY_SUFIX=${PY_VERSION%.?}; \
+    fi;\
+    apt-get update \
     && apt-get install -y --fix-missing \
-            software-properties-common wget g++ \
-            build-essential python-numpy python-scipy cython python-setuptools \
-            python-nose git cmake vim emacs gfortran libblas-dev \
-            liblapack-dev libhdf5-dev libhdf5-serial-dev gfortran python-tables \
-            python-matplotlib python-jinja2 python-dev libpython-dev \
-            autoconf libtool python-setuptools python-pip doxygen \
-    && apt-get clean -y \
-    && pip install --force-reinstall \
+            software-properties-common \
+            wget \
+            g++ \
+            build-essential \
+            python${PY_SUFIX}-setuptools \
+            python${PY_SUFIX}-pip \
+            python${PY_SUFIX}-setuptools \
+            python${PY_SUFIX}-dev \
+            libpython${PY_SUFIX}-dev \
+            gfortran \
+            git \
+            cmake \
+            gfortran \
+            vim emacs \
+            libblas-dev \
+            liblapack-dev \
+            libhdf5-dev \
+            libhdf5-serial-dev \
+            autoconf \
+            libtool \
+            doxygen \
+    && apt-get clean -y; \
+    if [ "${PY_VERSION%.?}" -eq 3 ] ; \
+       then \ 
+            update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
+            update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
+    fi;\
+    pip install --force-reinstall \
             sphinx \
             cloud_sptheme \
+            tables \
+            matplotlib \
+            jinja2 \
             prettytable \
             sphinxcontrib_bibtex \
             numpydoc \
             nbconvert \
             numpy \
+            scipy \
             cython
 
 # Script conditional setup: Default PyNE alone
 ARG build_moab=NO
 ARG enable_pymoab=NO
 ARG build_dagmc=NO
-ARG build_pyne=YES
 RUN echo "Configuration: \n" \
          "MOAB: $build_moab\n" \
          "pyMOAB: $enable_pymoab\n" \
-         "DAGMC: $build_dagmc\n" \
-         "PyNE: $build_pyne\n"
+         "DAGMC: $build_dagmc\n" 
 
 
 # make starting directory
@@ -79,7 +106,7 @@ RUN if [ "$build_moab" = "YES" ] || [ "$build_dagmc" = "YES" ] || [ "$enable_pym
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
-ENV PYTHONPATH=$HOME/opt/moab/lib/python2.7/site-packages/
+ENV PYTHONPATH=$HOME/opt/moab/lib/python${PY_VERSION}/site-packages/
 
 # build/install DAGMC
 ENV INSTALL_PATH=$HOME/opt/dagmc
@@ -96,6 +123,7 @@ RUN if [ "$build_dagmc" = "YES" ]; then \
         && make install ; \
     fi
 
+ARG build_pyne=YES
 # Build/Install PyNE
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME/opt \
