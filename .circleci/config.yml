@@ -33,7 +33,7 @@ commands:
           default: "build"
     steps:
       - save_cache:
-          key: v1-repo-{{ "$CIRCLE_SHA1<< parameters.build >>" }}
+          key: v1-repo-{{ ${CIRCLE_SHA1}"<< parameters.build >>" }}
           paths:
             - ~/
 
@@ -47,7 +47,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-          key: v1-repo-{{ "$CIRCLE_SHA1<< parameters.build >>" }}
+          key: v1-repo-{{ ${CIRCLE_SHA1}"<< parameters.build >>" }}
 
   # Checkout and build PyNE  
   checkout_build:
