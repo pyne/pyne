@@ -63,7 +63,7 @@ RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
 # build MOAB
-RUN if [ "$build_moab" = "YES" ] || [ "$build_dagmc" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
+RUN if [ "$build_moab" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
         if [ "$enable_pymoab" = "YES" ] ; \
         then \ 
             export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
