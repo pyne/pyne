@@ -1,6 +1,7 @@
 version: 2.1
-# Executors part:
+# Executors:
 # Alias the environment on which run the different jobs
+# i.e. in this case, docker image in which the jobs will be ran
 executors:
     py2:
         docker:
@@ -19,10 +20,19 @@ executors:
             - image: pyne/ubuntu_18.04_py3_pyne-deps:latest
 
 
-# Commands part:
+# Commands:
 # Define macros that will be used to build and test PyNE.
-# Save_container/pull_container macros are used to avoid repeting building PyNE
-# for the testing jobs, it will only pull the saved container state...
+# Save_container/pull_container: 
+#   used to avoid repeting building PyNE for the testing jobs, 
+#   it will only pull the saved container state...
+# 
+# checkout_build: 
+#   checkout the source code (usually the PR branch, and build
+#   PyNE, save the state of the container after the build
+#
+# run_test: 
+#   load the PyNE build (built in checkout_build macro
+#   run the nose test
 commands:
   # Save Container change
   save_container:
