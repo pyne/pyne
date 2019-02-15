@@ -12,7 +12,6 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
 def resolve_mesh(mesh_reference, tally_num = None, flux_tag = "n_flux", output_material=False):
-
     """This function creates a method that will consume many mesh-like objects
        (e.g. mesh, an h5m file, a meshtal file, etc) and returns a robust PyNE
        mesh object accordingly.
