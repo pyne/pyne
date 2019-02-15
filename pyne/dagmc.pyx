@@ -372,7 +372,6 @@ def point_in_volume(vol_id, xyz, uvw=[1,0,0]):
 
     If provided, uvw is used to determine the ray fire direction for the underlying
     query.  Otherwise, a random direction will be chosen.
-
     """
     xyz = np.array(xyz, dtype=np.float64)
     uvw = np.array(uvw, dtype=np.float64)
