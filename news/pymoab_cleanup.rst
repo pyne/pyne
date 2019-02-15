@@ -1,15 +1,15 @@
-**Added:** None
+**Added:** 
 
 * Testing PyNE build without PyMOAB using Python 2 & 3
+* Testing PyNE with PyMOAB (and DAGMC) using Python 2
 * Added FindDAGMC.cmake file
+* Dockerfile to build many variations of PyNE docker image, with python script CLI
 
 **Changed:** 
 
 * PyNE can be built with PyMOAB whitout DAGMC with limited capabilities
 
 * "--dagmc" flag added to `setup.py` in order to build PyNE against DAGMC
-
-* Add Test to check PyNE build with PyMOAB (and DAGMC) using Python 2
 
 * pyne.mesh now takes advantage of PyMOAB instead of PyTAPS:
    - IMeshTag changed to NativeMeshTag, with according tagetype name change:
@@ -37,6 +37,8 @@
 * dagmc_bridge: added a static DagMC instance
 
 * utils.py: updated the download timeout time to 120sec (from 30sec)
+
+* updated CI to use CircleCI 2.1 workflows: now build separately from tests with state saved between runs
 
 **Deprecated:** None
 
