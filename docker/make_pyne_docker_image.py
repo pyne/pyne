@@ -96,7 +96,7 @@ def main():
     parser = ap.ArgumentParser(description=description)
     
     py_version = 'Require a specific python version'
-    parser.add_argument('-py_version', type=int, help=py_version)
+    parser.add_argument('--py_version', type=int, help=py_version)
     
     moab = 'Build and install MOAB'
     parser.add_argument('--moab', help=moab,
