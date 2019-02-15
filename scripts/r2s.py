@@ -128,7 +128,7 @@ def step1():
 
     # create the cell_fracs array before irradiation_steup
     if flux_mesh.structured:
-        cell_fracs = discretize_geom(m, num_rays=num_rays, grid=grid)
+        cell_fracs = discretize_geom(flux_mesh, num_rays=num_rays, grid=grid)
         # tag cell fracs for both default and subvoxel r2s modes
         flux_mesh.tag_cell_fracs(cell_fracs)
     else:
