@@ -25,7 +25,9 @@
 
 #include <math.h>
 
+#ifndef PYNE_IS_AMALGAMATED
 #include "measure.h"
+#endif
 
 class CartVect {
   private:
