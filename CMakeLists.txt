@@ -72,7 +72,7 @@ MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
 MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
 
 
-# Look for MOAB is requested
+# Look for MOAB if requested
 if(WITH_MOAB)
   # user may have set a search path
   if(NOT MOAB_ROOT)

@@ -682,14 +682,14 @@ class Mesh(object):
                   (with BOX_DIMS tag) by specifying <mesh> and structured = True.
                 - From mesh file with exactly 1 entity set (with BOX_DIMS tag)
                   by specifying <mesh_file> and structured = True.
-                - From an PyMOAB instance with multiple entity sets by
+                - From a PyMOAB instance with multiple entity sets by
                   specifying <mesh>, <structured_set>, structured=True.
                 - From coordinates by specifying <structured_coords>,
                   structured=True, and optional pre-existing PyMOAB core
                   instance <mesh>
 
             The "BOX_DIMS" tag on PyMOAB core instances containing structured
-            mesh is a vector of floats it the following form:
+            mesh is a vector of floats in the following form:
             [i_min, j_min, k_min, i_max, j_max, k_max]
             where each value is a volume element index number. Typically volume
             elements should be indexed from 0. The "BOX_DIMS" information is
@@ -1422,7 +1422,6 @@ class StatMesh(Mesh):
     For example, when to quantities are added together, c = a + b, the
     statistical error of c is found by combining the statistical errors of a
     and b.
-
     """
 
     

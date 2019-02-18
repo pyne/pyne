@@ -51,7 +51,7 @@ def build_name(args):
 def build_docker(args):
     """Forms the docker command line and executes it. IF the push flag is
     provided also pushes it to DockerHub which requires PyNE admin right on
-    DockerHub(Docker login is assumed(...
+    DockerHub(Docker login is assumed...)
 
     Parameters
     ----------
@@ -90,9 +90,8 @@ def build_docker(args):
 
 def main():
     """Parse the different arguments and call the proper methods.
-
     """
-    description = "Build a docker image for PyNE"
+    description = 'Build a docker image for PyNE'
     parser = ap.ArgumentParser(description=description)
     
     py_version = 'Require a specific python version'
@@ -118,10 +117,10 @@ def main():
     parser.add_argument('--deps', help=deps,
                         action='store_true', default=False)
 
-    name = "Set docker imgae name"
+    name = 'Set docker image name'
     parser.add_argument('--name', help=name, default='')
 
-    push = 'Push docker imgae on dockerhub'
+    push = 'Push docker image on dockerhub'
     parser.add_argument('--push', '-p', '-push', help=push,
                         action='store_true', default=False)
 
