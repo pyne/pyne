@@ -38,7 +38,7 @@ function find_cell() result(icl_tmp)
 
     if(icl_tmp .le. 0) then
        write(*,*) 'Nonsense cell number: ', icl_tmp
-       write(*,*) 'Looking for cell at position: ', xxx, yyy, zzz
+       write(*,*) 'Looking for cell at position: ', xxx, yyy, zzz, ' for history ', nps
        write(*,*) 'Stopping'
       stop
     endif
