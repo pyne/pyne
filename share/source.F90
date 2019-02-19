@@ -37,7 +37,9 @@ function find_cell() result(icl_tmp)
     ! icl is now set
 
     if(icl_tmp .le. 0) then
-      write(*,*) 'Nonsense cell number stopping'
+       write(*,*) 'Nonsense cell number: ', icl_tmp
+       write(*,*) 'Looking for cell at position: ', xxx, yyy, zzz
+       write(*,*) 'Stopping'
       stop
     endif
     ! icl now set to be valid cell
