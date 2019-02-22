@@ -20,7 +20,7 @@ import numpy as np
 
 
 ##################################
-### Facet voxel traverse tools ###
+#   Facet voxel traverse tools   #
 ##################################
 
 
@@ -50,6 +50,7 @@ def _is_point_in_mesh(bounds, point):
     else:
         return True
 
+
 def _find_voxel_idx_1d(bounds_1d, cor, vec_1d):
     """
     Find the voxel id (in a given dimension).
@@ -78,15 +79,16 @@ def _find_voxel_idx_1d(bounds_1d, cor, vec_1d):
     else:
         idx = np.searchsorted(bounds_1d, cor, side='left')
     if idx == 0 or idx == len(bounds_1d):
-    # idx could be -1, that means point outside the mesh
+        # idx could be -1, that means point outside the mesh
         return -1
     else:
         return idx - 1
 
+
 def _calc_vec_dir(start, end):
     """
     Calculate the direction from start to end (start -> end).
-    
+
     Parameters:
     -----------
     start : numpy array
@@ -100,6 +102,7 @@ def _calc_vec_dir(start, end):
         Direction from start to end, an unit vector.
     """
     return np.divide(end-start, np.linalg.norm(end-start))
+
 
 def _find_next_grid_1d(cor, vec_1d, bounds_1d):
     """
@@ -128,11 +131,12 @@ def _find_next_grid_1d(cor, vec_1d, bounds_1d):
         else:
             return bounds_1d[voxel_idx]
 
+
 def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
     """
     Calculate the maximum travel length in current voxel before reach next
     boundary.
-    
+
     Parameters:
     -----------
     point : numpy array
@@ -150,7 +154,7 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
     Return:
     -------
     dist_maxs : numpy array
-        The maximum travel lenght in current voxel for 3 directions. Format: 
+        The maximum travel lenght in current voxel for 3 directions. Format:
         [dist_max_x, dist_max_y, dist_max_z]. These value could be both
         positive and negtive. And could be 'inf' or '-inf'.
     """
@@ -161,6 +165,7 @@ def _calc_max_travel_length_in_current_voxel(point, end, vec, bounds):
     # Divide by direction cosines to calculate the distance along vec
     dist_maxs = np.divide(next_grid - point, vec)
     return dist_maxs
+
 
 def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     """
@@ -188,16 +193,17 @@ def _move_to_next_voxel(idxs, point, dist_temp, dist_maxs, vec):
     dist_temp : float
         Updated travel length since the beginning of the ray."""
 
-    dist_min = min(dist_maxs[dist_maxs>0])
+    dist_min = min(dist_maxs[dist_maxs > 0])
     update_dir = list(dist_maxs).index(dist_min)
     # vec[update_dir] will not be 0
     if vec[update_dir] > 0:
         idxs[update_dir] += 1
     elif vec[update_dir] < 0:
-        idxs[update_dir] -= 1 
+        idxs[update_dir] -= 1
     updated_point = np.add(point, dist_min * vec)
     dist_temp += dist_min
     return idxs, updated_point, dist_temp
+
 
 def _is_ray_on_boundary(start, vec, bounds):
     """
@@ -220,10 +226,11 @@ def _is_ray_on_boundary(start, vec, bounds):
         Ray is not on a boundary surface
     """
     if 1.0 in vec:
-        for idx in np.argwhere(vec!=1.0).flatten():
+        for idx in np.argwhere(vec != 1.0).flatten():
             if start[idx] in bounds[idx]:
                 return True
     return False
+
 
 def _ray_voxel_traverse(bounds, start, end):
     """
@@ -271,10 +278,11 @@ def _ray_voxel_traverse(bounds, start, end):
             idxs, point, dist_temp = _move_to_next_voxel(
                 idxs, point, dist_temp, dist_maxs, vec)
         else:
-            # Check whether the ray intersecs the mesh. Calculate the maximum travel
-            # length of the ray to the outside boundaries of the mesh. If all the
-            # lengths are negtive, then there is no intersection, return. Ohterwise,
-            # choose the minimum length and move the point to that position.
+            # Check whether the ray intersecs the mesh.
+            # Calculate the maximum travel length of the ray to the outside
+            # boundaries of the mesh. If all the lengths are negtive, then
+            # there is no intersection, return. Ohterwise, choose the minimum
+            # length and move the point to that position.
             # left, right, back, front, down, up
             dist_maxs = np.zeros(6)
             for dr in range(len(idxs)):
@@ -292,7 +300,8 @@ def _ray_voxel_traverse(bounds, start, end):
                 # current point outside the mesh, not any intersection
                 return voxels
     return voxels
- 
+
+
 def _calc_min_grid_step(bounds):
     """
     Calculate the minimum grid step of the given mesh.
@@ -312,6 +321,7 @@ def _calc_min_grid_step(bounds):
         min_step = min(min_step, min(np.array(bound_list[1:]) -
                                      np.array(bound_list[:-1])))
     return min_step
+
 
 def _divide_tri_edge(start, end, step):
     """
@@ -346,6 +356,7 @@ def _divide_tri_edge(start, end, step):
     for (x, y, z) in zip(x_list, y_list, z_list):
         insert_points.append(np.array([x, y, z]))
     return insert_points
+
 
 def _create_rays_from_triangle_facet(A, B, C, min_step):
     """
@@ -384,7 +395,7 @@ def _create_rays_from_triangle_facet(A, B, C, min_step):
         source = (A, B)
 
     insert_points = _divide_tri_edge(source[0], source[1], min_step)
-    rays = [(target, point) for point in insert_points ]
+    rays = [(target, point) for point in insert_points]
     return rays
 
 
@@ -418,6 +429,7 @@ def _facet_voxel_traverse(A, B, C, bounds):
         # merge two lists
         voxels = voxels.union(temp_voxels)
     return voxels
+
 
 def _is_tri_intersects_box(triangle, box_center, box_extents):
     """
@@ -459,7 +471,7 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     # f, edge vector of the triangle. f[0]=v[1]-v[0],
     #                                 f[1]=v[2]-v[1],
     #                                 f[2]=v[0]-v[2].
-    # a, axis for test in bullet 3. a[i][j] = e[i] x f[j], 
+    # a, axis for test in bullet 3. a[i][j] = e[i] x f[j],
     #                         i.e., a[0][0] = e[0] x f[0]
 
     # define basis axis
@@ -472,7 +484,8 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     f[1] = triangle[2] - triangle[1]
     f[2] = triangle[0] - triangle[2]
 
-    ## region Test axes a00..a22 (category 3)
+    # region Test axes a00..a22
+    # start region category 3
     for i in range(3):
         for j in range(0, 3):
             # calculate the mormal to the edge-axis plane
@@ -481,19 +494,21 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
             p = np.dot(v, a)
             # project the box onto the axis a.
             r = np.dot(box_extents, np.absolute(a))
-            # check whether the box there is overlap of projection on the axis a
+            # check whether there is overlap of projection on the axis a
             if min(p) > r or max(p) < -r:
                 return False
-    ## endregion category 3
+    # end region category 3
 
-    ## region Test the three axes corresponding to the face normals of AABB b (category 1)
+    # region Test the three axes corresponding to the face normals of AABB b
+    # start region category 1
     # Exit if...
     for i in range(3):
         if max(v[:, i]) < -box_extents[i] or min(v[:, i]) > box_extents[i]:
             return False
-    ## endregion category 1
+    # end region category 1
 
-    ## region Test separating axis corresponding to triangle face normal (category 2)
+    # region Test separating axis corresponding to triangle face normal
+    # start region category 2
     plane_normal = np.cross(f[0], f[1])
     plane_distance = np.dot(plane_normal, v[0])
     # Compute the projection interval radius of b onto L(t) = b.c + t * p.n
@@ -501,7 +516,6 @@ def _is_tri_intersects_box(triangle, box_center, box_extents):
     # Intersection occurs when plane distance falls within [-r,+r] interval
     if plane_distance > r:
         return False
-    ## endregion category 2
+    # end region category 2
 
     return True
-
