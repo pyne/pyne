@@ -59,6 +59,9 @@ std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
     while (inputFile >> value)
       e_bounds.push_back(value);
   }
+  else {
+    throw std::runtime_error("File " + e_bounds_file + " not found or no read permission");
+  }
   return e_bounds;
 }
 
