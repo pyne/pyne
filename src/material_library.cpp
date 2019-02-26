@@ -56,9 +56,8 @@ bool MaterialLibrary::check_file_exists(std::string filename) {
   return infile.good();
 }
 
-// loads all materials into map
-
-std::map<std::string, pyne::Material> MaterialLibrary::load_pyne_materials(std::string filename, std::string datapath) {
+// Load Material library from hdf5 file
+void MaterialLibrary::from_hdf5(std::string filename, std::string datapath, int protocol) {
   std::map<std::string, pyne::Material> library; // material library
 
   const char* data_path = datapath.c_str();
@@ -70,14 +69,22 @@ std::map<std::string, pyne::Material> MaterialLibrary::load_pyne_materials(std::
 
   for (int i = 0 ; i < num_materials ; i++) {
     pyne::Material mat; // from file
-    mat.from_hdf5(filename, datapath, i);
+    mat.from_hdf5(filename, datapath, i, protocol);
     // renumber material number by position in the library
     mat.metadata["mat_number"] = i + 1;
     library[mat.metadata["name"].asString()] = mat;
   }
 
-  return library;
+  material_library = library;
 }
+
+void write_hdf5(std::string filename, std::string datapath="/materials",
+                    std::string nucpath="/nucid", int chunksize=100){
+
+}
+
+
+
 
 
 // see if path exists before we go on
