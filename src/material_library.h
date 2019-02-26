@@ -4,13 +4,17 @@
 #include <map>
 #include <string>
 #include <stdlib.h>
+#include "material.h"
 
 namespace pyne {
+  
+  
+  
 class MaterialLibrary() {
  protected:
   // The actual library
   std::map<std::string, pyne::Material> material_library;  // material library
-
+  std::set<int> nuclist;
  private:
   // turns the filename string into the full file path
   std::string get_full_filepath(char* filename);
@@ -53,6 +57,9 @@ class MaterialLibrary() {
     */
     void write_hdf5(std::string filename, std::string datapath="/materials",
                     std::string nucpath="/nucid", int chunksize=100);
+    
+    std::set<int> get_nuclist();
+    
   /**
    * \brief determines in that datapath exists in the hdf5 file
    * \param[in] filename of the h5m file
