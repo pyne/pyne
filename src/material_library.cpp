@@ -3,16 +3,16 @@
 
 
 #ifndef PYNE_IS_AMALGAMATED
-  #include "transmuters.h"
-  #include "material.h"
+  #include "material_library.h"
 #endif
 
+namespace pyne {
 // Empty Constructor
 MaterialLibrary::MaterialLibrary() {
 };
 
 // Default constructor
-MaterialLibrary::MaterialLibrary(string filei, string datapath) {
+MaterialLibrary::MaterialLibrary(std::string file, std::string datapath) {
 
   if (!check_file_exists(file)) {
     std::cerr << "The file " << file << " does not exist or is read protected" << std::endl;
@@ -24,7 +24,7 @@ MaterialLibrary::MaterialLibrary(string filei, string datapath) {
   }
 
   // load materials
-  material_library = from_hdf5(full_filepath);
+  from_hdf5(file);
 
 };
 
@@ -63,9 +63,9 @@ void MaterialLibrary::from_hdf5(std::string filename, std::string datapath, int 
   const char* data_path = datapath.c_str();
 
   if (!hdf5_path_exists(filename, data_path))
-    return library;
+    return;
 
-  num_materials = get_length_of_table(filename, datapath);
+  int num_materials = get_length_of_table(filename, datapath);
 
   for (int i = 0 ; i < num_materials ; i++) {
     pyne::Material mat; // from file
@@ -80,8 +80,8 @@ void MaterialLibrary::from_hdf5(std::string filename, std::string datapath, int 
   material_library = library;
 }
 
-void write_hdf5(std::string filename, std::string datapath="/materials",
-                    std::string nucpath="/nucid", int chunksize=100){
+void MaterialLibrary::write_hdf5(std::string filename, std::string datapath,
+                    std::string nucpath, int chunksize){
 
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -113,12 +113,12 @@ void write_hdf5(std::string filename, std::string datapath="/materials",
   } 
   
   std::set<int> merged_nuclist = nuclist;
-  for (auto i = 0; i < nuclides.size()l i++){
+  for (auto i = 0; i < nuclides.size(); i++){
    merged_nuclist.insert(nuclides[i]);
   }
   // clean existing nuclides
   nuclides.clear();
-  std::copy(merged_nuclist.begin(); merged_nuclist.end(), inserter(nuclides, nuclides.begin());
+  std::copy(merged_nuclist.begin(), merged_nuclist.end(), inserter(nuclides, nuclides.begin()));
 
 
   int nuc_size;
@@ -134,22 +134,6 @@ void write_hdf5(std::string filename, std::string datapath="/materials",
   }
   nuc_dims[0] = nuc_size;
 
-  // Turn off annoying HDF5 errors
-  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-  // Set file access properties so it closes cleanly
-  hid_t fapl;
-  fapl = H5Pcreate(H5P_FILE_ACCESS);
-  H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
-  // Create new/open datafile.
-  hid_t db;
-  if (pyne::file_exists(filename)) {
-    bool ish5 = H5Fis_hdf5(filename.c_str());
-    if (!ish5) throw h5wrap::FileNotHDF5(filename);
-    db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
-  } else {
-    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-  }
 
   // Write Nuclist in the hdf5 file
   // Not sure if thsi will work with an existing nuclist in the file
@@ -171,7 +155,7 @@ void write_hdf5(std::string filename, std::string datapath="/materials",
 }
 
 
-void append_to_nuclist(pyne::Material mat) {
+void MaterialLibrary::append_to_nuclist(pyne::Material mat) {
   pyne::comp_map mat_comp = mat.comp;
   for (auto it = mat_comp.begin(); it != mat_comp.end(); it++) {
     nuclist.insert(it->first);
@@ -232,3 +216,4 @@ int MaterialLibrary::get_length_of_table(std::string filename, std::string datap
 
   return arr_dims[0];
 }
+}  // end of pyne namespace
