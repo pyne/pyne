@@ -26,6 +26,26 @@ class MaterialLibrary {
   std::string get_full_filepath(std::string filename);
   // make sure the file, filename exists
   bool check_file_exists(std::string filename);
+  /**
+   * \brief Add the nuclide form the material to the list of nuclides 
+   * \param material from which add the nuclide to the list
+  */
+  void append_to_nuclist(pyne::Material mat);
+  /**
+   * \brief determines in that datapath exists in the hdf5 file
+   * \param[in] filename of the h5m file
+   * \param[in] the datapath of we would like to test
+   * \return true/false
+   */
+  bool hdf5_path_exists(std::string filename, std::string datapath);
+
+  /**
+   * \brief determines the length of an hdf5 data table
+   * \param[in] filename of the h5m file
+   * \param[in] the datapath of we would like to read
+   * \return the number of elements to the array
+   */
+  int get_length_of_table(std::string filename, std::string datapath);
 
  public:
   // materialLibrary constructor
@@ -42,8 +62,9 @@ class MaterialLibrary {
 
   /**
    * \brief loads the pyne materials in map of name vs Material
-   * \param[in] filename of the h5m file
-   * \return std::map of material name vs Material object
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the materials in the file.
+    /// \param protocol Flag for layout of material on disk.
   */
   void from_hdf5(std::string filename, std::string datapath = "/materials",
                  int protocol = 1);
@@ -63,29 +84,37 @@ class MaterialLibrary {
   void write_hdf5(std::string filename, std::string datapath = "/materials",
                   std::string nucpath = "/nucid", int chunksize = 100);
 
+  /**
+   * \brief Add a material to the library 
+   * \param mat material to add 
+  */
   void add_material(pyne::Material mat);
+  /**
+   * \brief remove a material of the Library
+   * \param mat material to remove
+  */
   void del_material(pyne::Material mat);
+  /**
+   * \brief remove a material of the Library by name
+   * \param mat_name name of the material to remove
+  */
   void del_material(std::string mat_name);
+  /**
+   * \brief Get a material of the Library by name
+   * \param mat_name name of the material to return
+  */
   pyne::Material get_material(std::string mat_name);
+  /**
+   * \brief Get the list of materials in the Library
+   * \return std::set<std::string> 
+  */
   inline std::set<std::string> get_matlist() { return matlist; }
+  /**
+   * \brief Get the list of nuclides in the Library
+   * \return std::set<int> 
+  */
   inline std::set<int> get_nuclist() { return nuclist; }
 
-  void append_to_nuclist(pyne::Material mat);
-  /**
-   * \brief determines in that datapath exists in the hdf5 file
-   * \param[in] filename of the h5m file
-   * \param[in] the datapath of we would like to test
-   * \return true/false
-   */
-  bool hdf5_path_exists(std::string filename, std::string datapath);
-
-  /**
-   * \brief determines the length of an hdf5 data table
-   * \param[in] filename of the h5m file
-   * \param[in] the datapath of we would like to read
-   * \return the number of elements to the array
-   */
-  int get_length_of_table(std::string filename, std::string datapath);
 
 };  // end MaterialLibrary class header
 }  // end of pyne namespace
