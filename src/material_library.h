@@ -8,10 +8,15 @@
 
 namespace pyne {
 
+typedef std::map<std::string, pyne::Material> mat_map;
+typedef mat_map::iterator mat_iter;
+
+
 class MaterialLibrary {
  protected:
   // The actual library
-  std::map<std::string, pyne::Material> material_library;  // material library
+  mat_map material_library;  // material library
+  std::set<std::string> matlist;
   std::set<int> nuclist;
 
  private:
@@ -58,7 +63,12 @@ class MaterialLibrary {
   void write_hdf5(std::string filename, std::string datapath = "/materials",
                   std::string nucpath = "/nucid", int chunksize = 100);
 
-  std::set<int> get_nuclist();
+  void add_material(pyne::Material mat);
+  void del_material(pyne::Material mat);
+  void del_material(std::string mat_name);
+  pyne::Material get_material(std::string mat_name);
+  inline std::set<std::string> get_matlist() { return matlist; }
+  inline std::set<int> get_nuclist() { return nuclist; }
 
   void append_to_nuclist(pyne::Material mat);
   /**
