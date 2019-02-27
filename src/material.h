@@ -170,6 +170,8 @@ namespace pyne
     
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
+    /// Return an phits input deck record as a string
+    std::string phits(std::string frac_type = "mass");
     ///
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id, std::string frac_type = "mass");
