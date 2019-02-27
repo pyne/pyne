@@ -170,6 +170,8 @@ namespace pyne
 
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
+    /// Return an phits input deck record as a string
+    std::string phits(std::string frac_type = "mass");
     ///
     /// Return an uwuw name
     std::string get_uwuw_name();
