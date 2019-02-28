@@ -763,7 +763,7 @@ std::string pyne::Material::phits(std::string frac_type) {
     frac_sign = "";
   } else {
     fracs = comp;
-    if (density 1= -1.0) {
+    if (density != -1.0) {
       for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
         ci.second *= density;
       }
