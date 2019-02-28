@@ -157,7 +157,7 @@ namespace pyne {
     ~FileNotFound () throw () {};
 
     /// constructor with the filename \a fname.
-    FileNotFound(std::string fname) : FNF_message("File not found")
+    FileNotFound(std::string fname) : FNF_message("File not found: ")
     {
       filename = fname;
     };
@@ -166,7 +166,7 @@ namespace pyne {
     virtual const char* what() const throw()
     {
       if (!filename.empty())
-        FNF_message += ": " + filename;
+        FNF_message += filename;
 
       return (const char *) FNF_message.c_str();
     };
