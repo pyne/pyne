@@ -121,7 +121,7 @@ void MaterialLibrary::write_hdf5(const std::string& filename, const std::string&
     db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
   pyne::mat_map material_library_tmp = material_library;
-  std::set<int> nuclist_tmp = nuclist;
+  pyne::nuc_set nuclist_tmp = nuclist;
   // We are using material_library and nuclist copy to allow adding exisitng
   // nuclide/materials from the file
 
@@ -130,25 +130,25 @@ void MaterialLibrary::write_hdf5(const std::string& filename, const std::string&
   std::copy(nuclist_tmp.begin(), nuclist_tmp.end(),
             inserter(nuclides, nuclides.begin()));
 
-  int nuc_size;
-  hsize_t nuc_dims[1];
-  nuc_size = nuclides.size();
+  int nuclide_size;
+  hsize_t nuclide_dims[1];
+  nuclide_size = nuclides.size();
 
   // Create the data if it doesn't exist
-  int nuc_data[nuc_size];
+  int nuclide_data[nuclide_size];
   int n = 0;
   for (auto nuclide : nuclides) {
-    nuc_data[n] = (*nuclide);
+    nuclide_data[n] = (*nuclide);
     n++;
   }
-  nuc_dims[0] = nuc_size;
+  nuclide_dims[0] = nuclide_size;
 
   // Write Nuclist in the hdf5 file
   // Not sure if thsi will work with an existing nuclist in the file
-  hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
-  hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space,
+  hid_t nuclide_space = H5Screate_simple(1, nuclide_dims, NULL);
+  hid_t nuclide_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuclide_space,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
+  H5Dwrite(nuclide_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuclide_data);
   H5Fflush(db, H5F_SCOPE_GLOBAL);
   // Close out the Dataset
   H5Tclose(db);

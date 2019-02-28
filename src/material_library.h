@@ -9,14 +9,15 @@
 namespace pyne {
 
 typedef std::map<std::string, pyne::Material> mat_map;
-
+typedef std::set<std::string> matname_set;
+typedef std::set<int> nuc_set;
 
 class MaterialLibrary {
  protected:
   // The actual library
   mat_map material_library;  // material library
-  std::set<std::string> matlist;
-  std::set<int> nuclist;
+  matname_set matlist;
+  nuc_set nuclist;
 
  private:
   // turns the filename string into the full file path
@@ -107,12 +108,12 @@ class MaterialLibrary {
    * \brief Get the list of materials in the Library
    * \return std::set<std::string> 
   */
-  std::set<std::string> get_matlist() { return matlist; }
+  pyne::matname_set get_matlist() { return matlist; }
   /**
    * \brief Get the list of nuclides in the Library
    * \return std::set<int> 
   */
-  std::set<int> get_nuclist() { return nuclist; }
+  pyne::nuc_set get_nuclist() { return nuclist; }
 
 
 };  // end MaterialLibrary class header
