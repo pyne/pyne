@@ -82,8 +82,10 @@ void MaterialLibrary::add_material(pyne::Material mat) {
 }
 
 void MaterialLibrary::del_material(pyne::Material mat) {
-  std::string mat_name = mat.metadata["name"].asString();
-  del_material(mat_name);
+  if (mat.metadata.isMember("name")) {
+    std::string mat_name = mat.metadata["name"].asString();
+    del_material(mat_name);
+  }
 }
 
 void MaterialLibrary::del_material(const std::string& mat_name) {
