@@ -12,14 +12,9 @@ MaterialLibrary::MaterialLibrary(){};
 // Default constructor
 MaterialLibrary::MaterialLibrary(const std::string& file, const std::string& datapath) {
   if (!check_file_exists(file)) {
-    std::cerr << "The file " << file << " does not exist or is read protected"
-              << std::endl;
-    exit(1);
-  }
+    throw std::runtime_error("File " + file + " not found or no read permission");
   if (!hdf5_path_exists(file, datapath)) {
-    std::cerr << "The datapath " << datapath << " in " << file << " empty."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error("The datapath, " + datapath + ", in " << file + " is empty.");
   }
 
   // load materials
@@ -104,6 +99,7 @@ pyne::Material MaterialLibrary::get_material(const std::string& mat_name) {
 
 void MaterialLibrary::write_hdf5(const std::string& filename, const std::string& datapath,
                                  const std::string& nucpath, int chunksize) {
+  // A large part of this is inspired/taken from by material.cpp...
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
