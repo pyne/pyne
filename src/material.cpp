@@ -481,12 +481,12 @@ std::string pyne::Material::openmc(std::string frac_type) {
 
   std::set<int> carbon_set; carbon_set.insert(nucname::id("C"));
   pyne::Material temp_mat = this->expand_elements(carbon_set);
-  
+
   // vars for consistency
   std::string new_quote = "\"";
   std::string end_quote = "\" ";
   std::string indent = "  ";
-  
+
   // open the material element
   oss << "<material id=" ;
 
@@ -505,7 +505,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   if (temp_mat.metadata.isMember("mat_name")) {
     oss << "name=" << new_quote << temp_mat.metadata["mat_name"].asString() << end_quote;
   }
-  
+
   // close the material tag
   oss << ">";
   // new line
@@ -538,7 +538,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
     fracs = temp_mat.comp;
     frac_attrib = "wo=";
   }
-  
+
   // add nuclides
   for(comp_map::iterator f = fracs.begin(); f != fracs.end(); f++) {
     if (f->second == 0.0) { continue; }
@@ -547,7 +547,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
     // start a new nuclide element
     oss << "<nuclide name=" << new_quote;
     oss << pyne::nucname::openmc(f->first);
-    oss << end_quote;        
+    oss << end_quote;
     oss << frac_attrib;
     oss << std::setprecision(4) << std::scientific << new_quote << f->second << end_quote;
     oss << "/>";
@@ -587,7 +587,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
     oss << "</isotropic>";
     oss << std::endl;
   }
-  
+
   // close the material node
   oss << "</material>" << std::endl;
 
@@ -670,14 +670,14 @@ std::string pyne::Material::mcnp(std::string frac_type) {
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if (!table_item.empty()) {
-	oss << "     " << mcnp_id << "." << table_item << " ";
+  oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
-	oss << "     " << mcnp_id << " ";
+  oss << "     " << mcnp_id << " ";
       }
       // The int needs a little formatting
       std::stringstream fs;
       fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
-	 << std::endl;
+   << std::endl;
       oss << fs.str();
     }
   }
@@ -691,7 +691,7 @@ std::string pyne::Material::phits(std::string frac_type) {
   std::ostringstream oss;
   // Material Card Header
   oss << "[ M a t e r i a l ]" << std::endl;
-  
+
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -789,14 +789,14 @@ std::string pyne::Material::phits(std::string frac_type) {
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if (!table_item.empty()) {
-	oss << "     " << mcnp_id << "." << table_item << " ";
+  oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
-	oss << "     " << mcnp_id << " ";
+  oss << "     " << mcnp_id << " ";
       }
       // The int needs a little formatting
       std::stringstream fs;
       fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
-	 << std::endl;
+   << std::endl;
       oss << fs.str();
     }
   }
@@ -1458,10 +1458,10 @@ pyne::Material pyne::Material::expand_elements(int** int_ptr_arry ) {
     if (int_ptr_arry != NULL) {
       int *int_ptr = *int_ptr_arry;
       while (int_ptr != NULL)
-	{
-	  nucvec.insert(*int_ptr);
-	  int_ptr++;
-	}
+  {
+    nucvec.insert(*int_ptr);
+    int_ptr++;
+  }
     }
     return expand_elements(nucvec);
 }
