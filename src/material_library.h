@@ -1,132 +1,43 @@
-#include "../pyne/pyne.h"
 #include <stdlib.h>
+#include <iostream>
 #include <map>
 #include <string>
+#include <string>
+#include <vector>
+#include "material.h"
 
-//===========================================================================//
-/**
- * \class UWUW
- * \brief Defines the UWUW interface
- *
- * UWUW is a base class that defines the variables and methods
- * needed to load University of Wisconsin Unified Workflow data from the filename
- * pointed to. It contains the following private functions,
- *
- *    std::string get_full_filepath(char *filename);
- *    std::string get_full_filepath(std::string filename);
- *    std::map<std::string, pyne::Material> load_pyne_materials(std::string filename);
- *    std::map<std::string, pyne::Material> load_pyne_tallies(std::string filename);
- *
- * Note there are two constructors, one that takes std::string filename as argument and
- * the other char *, so both forms of strings are handled.
- *
- * The filename must be marked up appropriately with the material objects that are to be
- * used in the workflow, currently that is performed using a Python script, uwuw_preproc
- * to insert these. We use the python write_hdf5 option, with the hdf5 filepath to be
- * "/materials", so when load_hdf5() is called in this class, it looks for material objects
- * in the "/materials" path.
- *
- * Tallies are saved to "/tally", so the load_hdf5() method also looks in that path "/tally"
- * otherwise it will return a map of 0 size.
- */
-//===========================================================================//
+namespace pyne {
 
-class UWUW {
- public:
-  /**
-   * \brief Constructor
-   * Empty constructor
-   */
-  UWUW(); // empty constructor
+typedef std::map<std::string, pyne::Material> mat_map;
+typedef mat_map::iterator mat_iter;
 
-  /**
-   * \brief Instantiates instance of the UWUW class, populates 3 member variables,
-   * full_filepath, tally_library and material_library.
-   *
-   * \param[in] filename, the filename containing pyne material & tally objects
-   *
-   * the get_full_filepath() method populates a string containing the filename passed in
-   * with the the path of the file appended to it.
-   * the load_pyne_materials() methods populates a map of material name vs Material object
-   * the load_pyne_tallies() methods populates a map of tally name vs tally object
-   */
-  UWUW(char* filename); // c style filename
 
-  /**
-   * \brief Instantiates instance of the UWUW class, populates 3 member variables,
-   * full_filepath, tally_library and material_library.
-   *
-   * \param[in] filename, the filename containing pyne material & tally objects
-   *
-   * the get_full_filepath() method populates a string containing the filename passed in
-   * with the the path of the file appended to it.
-   * the load_pyne_materials() methods populates a map of material name vs Material object
-   * the load_pyne_tallies() methods populates a map of tally name vs tally object
-   */
-  UWUW(std::string filename); // normal constructor
-
-  /**
-   * \brief Standard destructor
-   */
-  ~UWUW(); // destructor
-
-  // Member variables
-
-  /**
-   * \brief material_library is a std::map of <material name, Material object>
-   * iterate through this map to get its contents
-   */
-  std::map<std::string, pyne::Material> material_library; // material library
-  /**
-   * \brief tally_library is a std::map of <tally name, Tally object>
-   * iterate through this map to get its contents
-   */
-  std::map<std::string, pyne::Tally> tally_library; // tally library
-  /**
-   * \brief full filepath is variable set to /path/+filename
-   * This is needed to set the pyne::nucdata path
-   */
-  std::string full_filepath;
-  /**
-   * \brief the number of members in the tally library
-   */
-  int num_tallies;
-  /**
-   * \brief the number of members in the material libary
-   */
-  int num_materials;
-
+class MaterialLibrary {
+ protected:
+  // The actual library
+  mat_map material_library;  // material library
+  std::set<std::string> matlist;
+  std::set<int> nuclist;
 
  private:
   // turns the filename string into the full file path
   std::string get_full_filepath(char* filename);
   // turns the filename string into the full file path
-  std::string get_full_filepath(std::string filename);
+  std::string get_full_filepath(const std::string& filename);
   // make sure the file, filename exists
-  bool check_file_exists(std::string filename);
-
+  bool check_file_exists(const std::string& filename);
   /**
-   * \brief loads the pyne materials in map of name vs Material
-   * \param[in] filename of the h5m file
-   * \return std::map of material name vs Material object
-   */
- public:
-  std::map<std::string, pyne::Material> load_pyne_materials(std::string filename, std::string datapath = "/materials");
-
-  /**
-   * \brief loads the pyne tallies in map of name vs Material
-   * \param[in] filename of the h5m file
-   * \return std::map of tally name vs Tally object
-   */
-  std::map<std::string, pyne::Tally> load_pyne_tallies(std::string filename, std::string datapath = "/tally");
-
+   * \brief Add the nuclide form the material to the list of nuclides 
+   * \param material from which add the nuclide to the list
+  */
+  void append_to_nuclist(pyne::Material mat);
   /**
    * \brief determines in that datapath exists in the hdf5 file
    * \param[in] filename of the h5m file
    * \param[in] the datapath of we would like to test
    * \return true/false
    */
-  bool hdf5_path_exists(std::string filename, std::string datapath);
+  bool hdf5_path_exists(const std::string& filename, const std::string& datapath);
 
   /**
    * \brief determines the length of an hdf5 data table
@@ -134,6 +45,76 @@ class UWUW {
    * \param[in] the datapath of we would like to read
    * \return the number of elements to the array
    */
-  int get_length_of_table(std::string filename, std::string datapath);
+  int get_length_of_table(const std::string& filename, const std::string& datapath);
 
-};
+ public:
+  // materialLibrary constructor
+  MaterialLibrary();  //< empty constryctor
+
+  /**
+   * Constructor from file
+   * \param filename path to file on disk, this file may be either in plaintext
+   *                 or HDF5 format.
+  */
+  MaterialLibrary(const std::string& filename, const std::string& datapath = "/materials");
+
+  ~MaterialLibrary();  //< default destructor
+
+  /**
+   * \brief loads the pyne materials in map of name vs Material
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the materials in the file.
+    /// \param protocol Flag for layout of material on disk.
+  */
+  void from_hdf5(const std::string& filename, const std::string& datapath = "/materials",
+                 int protocol = 1);
+
+  /**
+   * Writes MaterialLibrary out to an HDF5 file.
+   *  This happens according to protocol 1.
+   *  \param filename Path on disk to the HDF5 file.
+   *  \param datapath Path to the the material in the file.
+   *  \param nucpath Path to the nuclides set in the file.
+   *  \param row The index to read out, may be negative. Also note that this is
+   * a
+   *             float.  A value of -0.0 indicates that the material should be
+   *             appended to the end of the dataset.
+   *  \param chunksize The chunksize for all material data on disk.
+  */
+  void write_hdf5(const std::string& filename, const std::string& datapath = "/materials",
+                  const std::string& nucpath = "/nucid", int chunksize = 100);
+
+  /**
+   * \brief Add a material to the library 
+   * \param mat material to add 
+  */
+  void add_material(pyne::Material mat);
+  /**
+   * \brief remove a material of the Library
+   * \param mat material to remove
+  */
+  void del_material(pyne::Material mat);
+  /**
+   * \brief remove a material of the Library by name
+   * \param mat_name name of the material to remove
+  */
+  void del_material(const std::string& mat_name);
+  /**
+   * \brief Get a material of the Library by name
+   * \param mat_name name of the material to return
+  */
+  pyne::Material get_material(const std::string& mat_name);
+  /**
+   * \brief Get the list of materials in the Library
+   * \return std::set<std::string> 
+  */
+  std::set<std::string> get_matlist() { return matlist; }
+  /**
+   * \brief Get the list of nuclides in the Library
+   * \return std::set<int> 
+  */
+  std::set<int> get_nuclist() { return nuclist; }
+
+
+};  // end MaterialLibrary class header
+}  // end of pyne namespace
