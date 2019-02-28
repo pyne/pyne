@@ -9,7 +9,6 @@
 namespace pyne {
 
 typedef std::map<std::string, pyne::Material> mat_map;
-typedef mat_map::iterator mat_iter;
 
 
 class MaterialLibrary {
