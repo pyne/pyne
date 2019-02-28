@@ -502,10 +502,9 @@ std::string pyne::Material::openmc(std::string frac_type) {
   }
 
   // add name if specified
-
   if (temp_mat.metadata.isMember("name")) {
     oss << "name=" << new_quote << temp_mat.metadata["name"].asString() << end_quote;
-  } 
+  }
   // close the material tag
   oss << ">";
   // new line
@@ -596,7 +595,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
 
 ///---------------------------------------------------------------------------//
 std::string pyne::Material::get_uwuw_name() {
-  // standard uwuw material name is : "mat:<Name of Material>/rho:<density>" 
+  // standard uwuw material name is : "mat:<Name of Material>/rho:<density>"
   if (! metadata.isMember("name")) {
     pyne::warning("The material has no name");
     return "";
@@ -711,7 +710,7 @@ std::string pyne::Material::phits(std::string frac_type) {
   std::ostringstream oss;
   // Material Card Header
   oss << "[ M a t e r i a l ]" << std::endl;
-  
+
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -809,14 +808,14 @@ std::string pyne::Material::phits(std::string frac_type) {
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if (!table_item.empty()) {
-	oss << "     " << mcnp_id << "." << table_item << " ";
+  oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
-	oss << "     " << mcnp_id << " ";
+  oss << "     " << mcnp_id << " ";
       }
       // The int needs a little formatting
       std::stringstream fs;
       fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
-	 << std::endl;
+   << std::endl;
       oss << fs.str();
     }
   }
