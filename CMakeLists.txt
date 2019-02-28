@@ -1,8 +1,6 @@
 # Defines the CMake commands/policies
 cmake_minimum_required(VERSION 3.0.0)
 
-
-
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
