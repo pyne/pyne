@@ -20,12 +20,6 @@ class MaterialLibrary {
   nuc_set nuclist;
 
  private:
-  // turns the filename string into the full file path
-  std::string get_full_filepath(char* filename);
-  // turns the filename string into the full file path
-  std::string get_full_filepath(const std::string& filename);
-  // make sure the file, filename exists
-  bool check_file_exists(const std::string& filename);
   /**
    * \brief Add the nuclide form the material to the list of nuclides 
    * \param material from which add the nuclide to the list

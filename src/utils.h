@@ -135,6 +135,11 @@ namespace pyne {
   // File Helpers
   /// Returns true if the file can be found.
   bool file_exists(std::string strfilename);
+  
+  // turns the filename string into the full file path
+  std::string get_full_filepath(char* filename);
+  // turns the filename string into the full file path
+  std::string get_full_filepath(std::string filename);
 
   // Message Helpers
   extern bool USE_WARNINGS;
