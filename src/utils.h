@@ -165,7 +165,7 @@ namespace pyne {
     /// Creates a helpful error message.
     virtual const char* what() const throw()
     {
-      std::string FNFstr ("File not found: ");
+      FNFstr = "File not found: ";
       if (!filename.empty())
         FNFstr += filename;
 
@@ -174,6 +174,7 @@ namespace pyne {
 
   private:
     std::string filename; ///< unfindable filename.
+    std::string FNFstr; /// Message for exception
   };
 
   /// Exception representing value errors of all kinds
