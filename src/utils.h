@@ -165,16 +165,16 @@ namespace pyne {
     /// Creates a helpful error message.
     virtual const char* what() const throw()
     {
-      FNFstr = "File not found: ";
+      FNF_message = "File not found: ";
       if (!filename.empty())
-        FNFstr += filename;
+        FNF_message += filename;
 
-      return (const char *) FNFstr.c_str();
+      return (const char *) FNF_message.c_str();
     };
 
   private:
     std::string filename; ///< unfindable filename.
-    std::string FNFstr; /// Message for exception
+    std::string FNF_message; /// Message for exception
   };
 
   /// Exception representing value errors of all kinds
