@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import numpy as np
 """Welcome to PyNE's setup.py script. This is a little non-standard because pyne
 is a multilanguage project.  Still this script follows a predictable ordering:
 
@@ -50,8 +51,6 @@ if sys.version_info[0] < 3:
 else:
     from urllib.request import urlopen
 
-import numpy as np
-
 
 # import src into pythonpath - needed to actually run decaygen/atomicgen
 if '.' not in sys.path:
@@ -75,6 +74,7 @@ ON_DARWIN = platform.system() == 'Darwin'
 LIBEXT = '.dylib' if ON_DARWIN else '.so'
 
 SKIP_OPTION = "SKIP"
+
 
 @contextmanager
 def indir(path):
@@ -287,6 +287,7 @@ def update_cmake_args(ns):
     if ns.fast is not None:
         fast = 'TRUE' if ns.fast else 'FALSE'
         ns.cmake_args.append('-DPYNE_FAST_COMPILE=' + fast)
+
 
 def update_make_args(ns):
     ns.make_args = []
