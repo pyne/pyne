@@ -1227,7 +1227,67 @@ def test_openmc_c():
                 '  <nuclide name="Si30" ao="1.5460e-02" />\n'
                 '</material>\n')
     assert_equal(atom, atom_exp)
+
+def test_phits():
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'mat_name':'LEU',
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'})
+
+    mass = leu.phits()
+    mass_exp = ('[ M a t e r i a l ]\n'
+                'C name: leu\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'M[ 2 ]\n'
+                '     92235.15c -4.0000e-02\n'
+                '     92238.25c -9.6000e-01\n')
+    assert_equal(mass, mass_exp)
     
+    atom = leu.phits(frac_type='atom')
+    atom_exp = ('[ M a t e r i a l ]\n'
+                'C name: leu\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'M[ 2 ]\n'
+                '     92235.15c 4.0491e-02\n'
+                '     92238.25c 9.5951e-01\n')
+    assert_equal(atom, atom_exp)
+
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'mat_name':'LEU',
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'},
+                   density=19.1)
+
+    mass = leu.phits()
+    mass_exp = ('[ M a t e r i a l ]\n'
+                'C name: leu\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'M[ 2 ]\n'
+                '     92235.15c -7.6400e-01\n'
+                '     92238.25c -1.8336e+01\n')
+    assert_equal(mass, mass_exp)
+    
+    atom = leu.phits(frac_type='atom')
+    atom_exp = ('[ M a t e r i a l ]\n'
+                'C name: leu\n'
+                'C comments: this is a long comment that will definitly go over the 80 character\n'
+                'C  limit, for science\n'
+                'M[ 2 ]\n'
+                '     92235.15c 1.9575e-03\n'
+                '     92238.25c 4.6386e-02\n')
+    assert_equal(atom, atom_exp)
+
 def test_mcnp():
 
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},

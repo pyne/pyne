@@ -776,6 +776,9 @@ std::string pyne::Material::phits(std::string frac_type) {
   if ("atom" == frac_type) {
     if (density != -1.0) {
       fracs = to_atom_dens();
+      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
+        ci->second *= pyne::cm2_per_barn; // unit requirememt is [10^24 atoms/cm3]
+      }
     } else {
       fracs = to_atom_frac();
     }
