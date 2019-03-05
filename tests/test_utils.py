@@ -1,10 +1,10 @@
 """PyNE utility tests"""
 import os
 
-import nose 
+import nose
 
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-                       assert_in, assert_true
+    assert_in, assert_true
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
@@ -76,6 +76,7 @@ def test_to_sec():
     # undifined unit trigs ValueError
     assert_raises(ValueError, utils.to_sec, 2, 'month')
 
+
 def test_to_barns():
     assert_equal(3E3, utils.to_barns(3, 'KB'))
 
@@ -96,6 +97,7 @@ def test_failure():
         assert_equal('\033[1;31mWorld\033[0m', utils.failure('World'))
     else:
         assert_equal('*** FAILURE ***: World', utils.failure('World'))
+
 
 def test_remove():
     # test file removal
@@ -119,7 +121,7 @@ def test_remove():
     utils.remove('rawr')
     assert_true('rawr' not in os.listdir('.'))
 
-    # Test pass through on non-existant 
+    # Test pass through on non-existant
     assert_true('Medic!' not in os.listdir('.'))
     utils.remove('Medic!')
 
@@ -179,16 +181,18 @@ def test_fromstring_token4():
     exp = np.array([1.0, 2.3, 4.0])
     assert_array_equal(obs, exp)
 
+
 def test_use_warnings():
     first = utils.use_warnings()
     second = utils.use_warnings()
     assert_equal(first, second)
+
 
 def test_toggle_warnings():
     state = utils.use_warnings()
     observed = utils.toggle_warnings()
     assert_equal(state, not observed)
 
+
 if __name__ == "__main__":
     nose.runmodule()
-

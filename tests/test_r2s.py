@@ -1,3 +1,8 @@
+from pyne.mcnp import Meshtal
+from pyne.material import Material
+from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
+from pyne.utils import QAWarning
+from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 import os
 import warnings
 from nose.tools import assert_equal, assert_almost_equal
@@ -13,21 +18,17 @@ if sys.version_info[0] > 2:
 else:
     from itertools import izip
 
-from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
     raise SkipTest
 
 
-from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
-from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
-from pyne.material import Material
-from pyne.mcnp import Meshtal
 
 thisdir = os.path.dirname(__file__)
 
-def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x2x1"):
+
+def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"):
 
     meshtal = os.path.join(thisdir, "files_test_r2s", meshtal_file)
     tally_num = 4
@@ -44,9 +45,9 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
     output_mesh = os.path.join(os.getcwd(), "r2s_step1.h5m")
     output_material = True
     cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
-                                ('cell', np.int64),
-                                ('vol_frac', np.float64),
-                                ('rel_error', np.float64)])
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
     cell_fracs[:] = [(0, 2, 0.037037037037037035, 0.5443310539518174),
                      (0, 3, 0.9629629629629631, 0.010467904883688123),
                      (1, 2, 0.037037037037037035, 0.5443310539518174),
@@ -74,8 +75,8 @@ def irradiation_setup_structured(flux_tag = "n_flux", meshtal_file = "meshtal_2x
     m = Mesh(structured=True, mesh=output_mesh, mats=output_mesh)
 
     m_out = [m.n_flux[:].tolist(), m.n_flux_err[:].tolist(),
-        m.n_flux_total[:].tolist(), m.n_flux_err_total[:].tolist(),
-        [x.comp.items() for y, x, z in m], [x.density for y, x, z in m]]
+             m.n_flux_total[:].tolist(), m.n_flux_err_total[:].tolist(),
+             [x.comp.items() for y, x, z in m], [x.density for y, x, z in m]]
 
     os.remove(alara_inp)
     os.remove(alara_matlib)
@@ -120,8 +121,8 @@ def test_irradiation_setup_structured():
 
     i = 0
     for nf, nfe, nft, nfte, comp, density in izip(n_flux, n_flux_err,
-                                                n_flux_total, n_flux_err_total,
-                                                comps, densities):
+                                                  n_flux_total, n_flux_err_total,
+                                                  comps, densities):
         assert_almost_equal(density, 1.962963E+00)
         assert_equal(len(comp), 3)
         assert_almost_equal(comp[20040000], 1.886792E-02)
@@ -131,7 +132,7 @@ def test_irradiation_setup_structured():
         assert_array_equal(nfe, errs[i])
         assert_almost_equal(nft, tot_fluxes[i])
         assert_almost_equal(nfte, tot_errs[i])
-        i+=1
+        i += 1
 
     # test that files match
     assert(f1 == True)
@@ -158,7 +159,7 @@ def test_photon_sampling_setup_structured():
         assert_array_equal(m.tag2[i], exp_tag2[i])
 
 
-def irradiation_setup_unstructured(flux_tag = "n_flux"):
+def irradiation_setup_unstructured(flux_tag="n_flux"):
     meshtal_filename = "meshtal_2x2x1"
     meshtal_file = os.path.join(thisdir, "files_test_r2s", meshtal_filename)
 
@@ -184,30 +185,30 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
         meshtal_mesh_file = os.path.join(thisdir, "meshtal.h5m")
         meshtal.write_hdf5(meshtal_mesh_file, write_mats=False)
         new_mesh = Mesh(structured=False, mesh=meshtal_mesh_file)
-        new_mesh.TALLY_TAG = NativeMeshTag(2,float) # 2 egroups
+        new_mesh.TALLY_TAG = NativeMeshTag(2, float)  # 2 egroups
         new_mesh.TALLY_TAG = meshtal.n_flux[:]
 
         # overwrite the mesh file
         new_mesh.write_hdf5(meshtal_mesh_file, write_mats=False)
 
-
-    cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name':'mat_11'}),
-                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name':'mat_12'})}
+    cell_mats = {2: Material({2004: 1.0}, density=1.0, metadata={'name': 'mat_11'}),
+                 3: Material({3007: 0.4, 3006: 0.6}, density=2.0, metadata={'name': 'mat_12'})}
     alara_params = "Bogus line for testing\n"
     geom = os.path.join(thisdir, "unitbox.h5m")
     fluxin = os.path.join(os.getcwd(), "alara_fluxin")
     reverse = True
     alara_inp = os.path.join(os.getcwd(), "alara_inp")
-    alara_matlib= os.path.join(os.getcwd(), "alara_matlib")
-    output_mesh= os.path.join(os.getcwd(), "r2s_step1.h5m")
+    alara_matlib = os.path.join(os.getcwd(), "alara_matlib")
+    output_mesh = os.path.join(os.getcwd(), "r2s_step1.h5m")
     output_material = True
     cell_fracs = np.zeros(4, dtype=[('idx', np.int64),
-                                ('cell', np.int64),
-                                ('vol_frac', np.float64),
-                                ('rel_error', np.float64)])
-    cell_fracs[:] = [(0, 3, 1.0, 1.0), (1, 3, 1.0, 1.0), (2, 3, 1.0, 1.0), (3, 3, 1.0, 1.0)]
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 3, 1.0, 1.0), (1, 3, 1.0, 1.0),
+                     (2, 3, 1.0, 1.0), (3, 3, 1.0, 1.0)]
     irradiation_setup(flux_mesh=meshtal_mesh_file, cell_mats=cell_mats, cell_fracs=cell_fracs,
-                      alara_params=alara_params, flux_tag=flux_tag, 
+                      alara_params=alara_params, flux_tag=flux_tag,
                       fluxin=fluxin, reverse=reverse, alara_inp=alara_inp,
                       alara_matlib=alara_matlib, output_mesh=output_mesh,
                       output_material=output_material)
@@ -226,8 +227,8 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
     m = Mesh(structured=True, mesh=output_mesh, mats=output_mesh)
 
     m_out = [m.n_flux[:].tolist(), m.n_flux_err[:].tolist(),
-        m.n_flux_total[:].tolist(), m.n_flux_err_total[:].tolist(),
-        [x.comp.items() for y, x, z in m], [x.density for y, x, z in m]]
+             m.n_flux_total[:].tolist(), m.n_flux_err_total[:].tolist(),
+             [x.comp.items() for y, x, z in m], [x.density for y, x, z in m]]
 
     os.remove(meshtal_mesh_file)
     os.remove(alara_inp)
@@ -236,7 +237,6 @@ def irradiation_setup_unstructured(flux_tag = "n_flux"):
     os.remove(output_mesh)
 
     return [m_out, f1, f2, f3]
-
 
 
 def test_irradiation_setup_unstructured():
@@ -276,8 +276,8 @@ def test_irradiation_setup_unstructured():
 
     i = 0
     for nf, nfe, nft, nfte, comp, density in izip(n_flux, n_flux_err,
-                                                n_flux_total, n_flux_err_total,
-                                                comps, densities):
+                                                  n_flux_total, n_flux_err_total,
+                                                  comps, densities):
         assert_almost_equal(density, 2.0)
         assert_equal(len(comp), 2)
         assert_almost_equal(comp[30060000], 0.6)
@@ -286,7 +286,7 @@ def test_irradiation_setup_unstructured():
         assert_array_equal(nfe, errs[i])
         assert_almost_equal(nft, tot_fluxes[i])
         assert_almost_equal(nfte, tot_errs[i])
-        i+=1
+        i += 1
 
     # test that files match
     assert(f1 == True)
@@ -316,25 +316,26 @@ def test_photon_sampling_setup_unstructured():
 
 def test_total_photon_source_intensity():
 
-    m = Mesh(structured = True, structured_coords=[[0, 1, 2],[0, 1, 3], [0, 1]])
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
     m.source_density = NativeMeshTag(2, float)
     m.source_density[:] = [[1., 2.], [3., 4.], [5., 6.], [7., 8.]]
 
     intensity = total_photon_source_intensity(m, "source_density")
     assert_equal(intensity, 58)
 
+
 def test_total_photon_source_intensity_subvoxel():
     # In the calculation of the total photon source intensities under subvoxel
     # mode, the volume fractions of each subvoxel should be multiplied
 
     # Set up 4 voxels with the volume of: 1, 2, 1, 2
-    m = Mesh(structured=True, structured_coords=[[0, 1, 2],[0, 1, 3], [0, 1]])
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
     # 4 voxels, each voxel contains two subvoxels -> 8 subvoxels
     # The volume fraction of each subvoxel is 0.5
     cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
-                                ('cell', np.int64),
-                                ('vol_frac', np.float64),
-                                ('rel_error', np.float64)])
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
     cell_fracs[:] = [(0, 11, 0.5, 0.0), (0, 12, 0.5, 0.0),
                      (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
                      (2, 13, 0.5, 0.0), (2, 11, 0.5, 0.0),
@@ -347,8 +348,8 @@ def test_total_photon_source_intensity_subvoxel():
                            [4.0, 4.0, 5.0, 5.0],
                            [6.0, 6.0, 7.0, 7.0]]
     intensity = total_photon_source_intensity(m, "source_density", True)
-    #expected intensity: each line represents a mesh voxel
-    #for each subvoxel: voxel_vol * cell_fracs * photon_intensity
+    # expected intensity: each line represents a mesh voxel
+    # for each subvoxel: voxel_vol * cell_fracs * photon_intensity
     expected_intensity = 1 * 0.5 * (0.0 + 0.0) + 1 * 0.5 * (1.0 + 1.0)
     expected_intensity += 2 * 0.5 * (2.0 + 2.0) + 2 * 0.5 * (3.0 + 3.0)
     expected_intensity += 1 * 0.5 * (4.0 + 4.0) + 1 * 0.5 * (5.0 + 5.0)
@@ -387,4 +388,4 @@ def test_irradiation_setup_unstructured_nondef_tag():
     i = 0
     for nf, nft in izip(n_flux, n_flux_total):
         assert_array_equal(nf, fluxes[i])
-        i+=1
+        i += 1

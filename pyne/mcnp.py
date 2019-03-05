@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from pyne.mesh import Mesh, StatMesh, HAVE_PYMOAB
 """Module for parsing MCNP output data. MCNP is a general-purpose Monte Carlo
 N-Particle code developed at Los Alamos National Laboratory that can be used
 for neutron, photon, electron, or coupled neutron/photon/electron transport.
@@ -32,7 +33,6 @@ from pyne.binaryreader import _BinaryReader, _FortranRecord
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
-from pyne.mesh import Mesh, StatMesh, HAVE_PYMOAB
 
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
@@ -44,6 +44,7 @@ else:
 if sys.version_info[0] > 2:
     def cmp(a, b):
         return (a > b) - (a < b)
+
 
 class Mctal(object):
     def __init__(self):
@@ -360,8 +361,8 @@ class SurfSrc(_BinaryReader):
                 self.nrss = tablelengths.get_long()[0]  # #tracks to surf src
 
             self.ncrd = tablelengths.get_int()[0]  # #values in surf src record
-                                                   # 6 for a spherical source
-                                                   # 11 otherwise
+            # 6 for a spherical source
+            # 11 otherwise
             self.njsw = tablelengths.get_int()[0]  # number of surfaces
             self.niss = tablelengths.get_int()[0]  # #histories to surf src
             self.table1extra = list()
@@ -1119,7 +1120,7 @@ class PtracReader(object):
 
             b = self.f.read(length + 4)
             tmp = struct.unpack(b"".join([self.endianness.encode(),
-                                (format*number).encode(), b'i']), b)
+                                          (format*number).encode(), b'i']), b)
             length2 = tmp[-1]
             tmp = tmp[:-1]
         else:
@@ -1292,6 +1293,7 @@ class PtracReader(object):
                 if print_progress > 0 and counter % print_progress == 0:
                     print("processing event {0}".format(counter))
 
+
 def _is_cell_line(line):
     is_cell = False
     if len(line.split()) > 3:
@@ -1300,8 +1302,9 @@ def _is_cell_line(line):
            not line.split()[2][0].isalpha() and \
            line[0:5] != '     ' and \
            line.split()[1] != '0':
-               is_cell = True
+            is_cell = True
     return is_cell
+
 
 def mats_from_inp(inp):
     """This function reads an MCNP inp file and returns a mapping of material
@@ -1334,20 +1337,20 @@ def mats_from_inp(inp):
         # information is stored in a dictionary where:
         # key = material number, value = list of densities
         if _is_cell_line(line):
-           mat_num = int(line.split()[1])
-           den = float(line.split()[2])
+            mat_num = int(line.split()[1])
+            den = float(line.split()[2])
 
-           if mat_num not in densities.keys():
-               densities[mat_num] = [den]
+            if mat_num not in densities.keys():
+                densities[mat_num] = [den]
 
-           else:
-               same_bool = False
-               for j in range(0, len(densities[mat_num])):
-                   if abs((den - densities[mat_num][j])/den) < 1E-4:
-                       same_bool = True
+            else:
+                same_bool = False
+                for j in range(0, len(densities[mat_num])):
+                    if abs((den - densities[mat_num][j])/den) < 1E-4:
+                        same_bool = True
 
-               if same_bool is False:
-                   densities[mat_num].append(den)
+                if same_bool is False:
+                    densities[mat_num].append(den)
 
         # check line to see if it contain a material card, in the form
         # m* where * is a digit. If so store the line num. and material number
@@ -1363,7 +1366,7 @@ def mats_from_inp(inp):
     for i in range(0, len(mat_nums)):
         if mat_nums[i] in densities.keys():
             materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i],
-                                                   densities[mat_nums[i]])
+                                                       densities[mat_nums[i]])
         else:
             materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i])
     return materials
@@ -1666,7 +1669,7 @@ class Wwinp(Mesh):
         # preexisting mesh.
         if not hasattr(self, 'mesh'):
             super(Wwinp, self).__init__(structured_coords=[self.bounds[0],
-                                        self.bounds[1], self.bounds[2]],
+                                                           self.bounds[1], self.bounds[2]],
                                         structured=True)
 
         volume_elements = list(self.structured_iterate_hex('zyx'))
@@ -1690,8 +1693,8 @@ class Wwinp(Mesh):
 
         # create vector tags for data
         ww_tag_name = "ww_{0}".format(particle)
-        self.tag(ww_tag_name, size = self.ne[particle_index],
-                 dtype = float, tagtype = 'nat_mesh')
+        self.tag(ww_tag_name, size=self.ne[particle_index],
+                 dtype=float, tagtype='nat_mesh')
         tag_ww = self.get_tag(ww_tag_name)
 
         # tag vector data to mesh
@@ -1701,8 +1704,8 @@ class Wwinp(Mesh):
         # Save energy upper bounds to rootset.
         e_bounds_tag_name = '{0}_e_upper_bounds'.format(particle)
         self.tag(e_bounds_tag_name,
-                 size = len(self.e[particle_index]),
-                 dtype = float, tagtype = 'nat_mesh')
+                 size=len(self.e[particle_index]),
+                 dtype=float, tagtype='nat_mesh')
         tag_e_bounds = self.get_tag(e_bounds_tag_name)
         tag_e_bounds[self] = self.e[particle_index]
 
@@ -1812,7 +1815,8 @@ class Wwinp(Mesh):
         ww_data = np.empty(shape=(self.nft, self.ne[particle_index]))
         volume_elements = list(self.structured_iterate_hex('zyx'))
         for i, volume_element in enumerate(volume_elements):
-            ww_data[i] = self.get_tag("ww_{0}".format(particle))[volume_element]
+            ww_data[i] = self.get_tag("ww_{0}".format(particle))[
+                volume_element]
 
         for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
@@ -1995,10 +1999,10 @@ class Meshtal(object):
                 if self.tags is not None and tally_num in self.tags.keys():
                     self.tally[tally_num] = MeshTally(f, tally_num,
                                                       self.tags[tally_num],
-                                          mesh_has_mats=self._meshes_have_mats)
+                                                      mesh_has_mats=self._meshes_have_mats)
                 else:
                     self.tally[tally_num] = MeshTally(f, tally_num,
-                                          mesh_has_mats=self._meshes_have_mats)
+                                                      mesh_has_mats=self._meshes_have_mats)
 
             line = f.readline()
 
@@ -2130,7 +2134,7 @@ class MeshTally(StatMesh):
 
         mats = () if mesh_has_mats is True else None
         super(MeshTally, self).__init__(structured_coords=[self.x_bounds,
-                                        self.y_bounds, self.z_bounds],
+                                                           self.y_bounds, self.z_bounds],
                                         structured=True, mats=mats)
 
         num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
@@ -2153,9 +2157,11 @@ class MeshTally(StatMesh):
             rel_error[i] = rel_error_row
 
         # Tag results and error vector to mesh
-        self.tag(self.tag_names[0], tagtype = 'nat_mesh', size = num_e_groups, dtype = float)
+        self.tag(self.tag_names[0], tagtype='nat_mesh',
+                 size=num_e_groups, dtype=float)
         res_tag = self.get_tag(self.tag_names[0])
-        self.tag(self.tag_names[1], tagtype = 'nat_mesh', size = num_e_groups, dtype = float)
+        self.tag(self.tag_names[1], tagtype='nat_mesh',
+                 size=num_e_groups, dtype=float)
         rel_err_tag = self.get_tag(self.tag_names[1])
 
         if num_e_groups == 1:
@@ -2176,10 +2182,12 @@ class MeshTally(StatMesh):
                 rel_error.append(
                     float(line[self._column_idx["Rel_Error"]]))
 
-            self.tag(self.tag_names[2], size = 1, dtype = float, tagtype = 'nat_mesh')
+            self.tag(self.tag_names[2], size=1,
+                     dtype=float, tagtype='nat_mesh')
             res_tot_tag = self.get_tag(self.tag_names[2])
 
-            self.tag(self.tag_names[3], size = 1, dtype = float, tagtype = 'nat_mesh')
+            self.tag(self.tag_names[3], size=1,
+                     dtype=float, tagtype='nat_mesh')
             rel_err_tot_tag = self.get_tag(self.tag_names[3])
 
             res_tot_tag[:] = result

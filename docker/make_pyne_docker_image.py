@@ -71,14 +71,13 @@ def build_docker(args):
     if args.deps:
         docker_args += ["--build-arg", "build_pyne=NO"]
     if args.py_version:
-        if args.py_version==2:
+        if args.py_version == 2:
             docker_args += ["--build-arg", "py_version=2.7"]
-        elif args.py_version==3:
+        elif args.py_version == 3:
             docker_args += ["--build-arg", "py_version=3.6"]
         else:
             print("Can only deal with python 2 or 3")
             return
-
 
     rtn = subprocess.check_call(
         ["docker",  "build"] + tag_flag + dockerfile + docker_args + ["."], shell=(os.name == 'nt'))
@@ -93,10 +92,10 @@ def main():
     """
     description = 'Build a docker image for PyNE'
     parser = ap.ArgumentParser(description=description)
-    
+
     py_version = 'Require a specific python version'
     parser.add_argument('--py_version', type=int, help=py_version)
-    
+
     moab = 'Build and install MOAB'
     parser.add_argument('--moab', help=moab,
                         action='store_true', default=False)

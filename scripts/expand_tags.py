@@ -5,6 +5,7 @@ import sys
 
 from pyne.mesh import Mesh, NativeMeshTag
 
+
 def main():
     msg = ("This script reads a mesh (.h5m) file and, for each vector tag of\n"
            "length N, creates N scalar tags. This is useful for visualizing\n"
@@ -37,26 +38,27 @@ def main():
     else:
         tags = []
         for name, tag in m.tags.items():
-           if isinstance(tag, NativeMeshTag) and name != 'idx':
-               tags.append(name)
+            if isinstance(tag, NativeMeshTag) and name != 'idx':
+                tags.append(name)
 
     for tag in tags:
-       m.tag = NativeMeshTag(name=tag)
-       # there may be vector tags
-       try:
-           # this line fails if the tag is a scalar tag
-           m.tag.size = len(m.tag[0])
-       except TypeError:
-           sys.stderr.write('Vector tag not found, assuming scalar tag \n')
-           m.tag.size = 1
+        m.tag = NativeMeshTag(name=tag)
+        # there may be vector tags
+        try:
+            # this line fails if the tag is a scalar tag
+            m.tag.size = len(m.tag[0])
+        except TypeError:
+            sys.stderr.write('Vector tag not found, assuming scalar tag \n')
+            m.tag.size = 1
 
-       if m.tag.size > 1:
-           print("Expanding tag: {}".format(tag))
-           m.tag.expand()
+        if m.tag.size > 1:
+            print("Expanding tag: {}".format(tag))
+            m.tag.expand()
 
     print("Saving file {}".format(args.output))
     m.write_hdf5(args.output)
     print("Complete")
+
 
 if __name__ == '__main__':
     main()
