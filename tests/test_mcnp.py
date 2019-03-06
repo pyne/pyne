@@ -551,6 +551,13 @@ def test_read_mcnp():
         list(expected_multimaterial._mats.keys())[0].comp,
         list(read_materials[2]._mats.keys())[0].comp)
     assert_equal(
+        list(expected_multimaterial._mats.keys())[0].comp.keys(),
+        list(read_materials[2]._mats.keys())[0].comp.keys())
+    for i in range(2):
+	assert_almost_equal(
+            list(expected_multimaterial._mats.keys())[0].comp.values()[i],
+            list(read_materials[2]._mats.keys())[0].comp.values()[i])
+    assert_almost_equal(
         list(expected_multimaterial._mats.keys())[0].mass,
         list(read_materials[2]._mats.keys())[0].mass)
     assert_almost_equal(
@@ -563,12 +570,16 @@ def test_read_mcnp():
         list(expected_multimaterial._mats.keys())[0].metadata,
         list(read_materials[2]._mats.keys())[0].metadata)
     assert_equal(
-        list(expected_multimaterial._mats.keys())[1].comp,
-        list(read_materials[2]._mats.keys())[1].comp)
+        list(expected_multimaterial._mats.keys())[1].comp.keys(),
+        list(read_materials[2]._mats.keys())[1].comp.keys())
+    for i in range(2):
+        assert_almost_equal(
+            list(expected_multimaterial._mats.keys())[1].comp.values()[i],
+            list(read_materials[2]._mats.keys())[1].comp.values()[i])
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].mass,
         list(read_materials[2]._mats.keys())[1].mass)
-    assert_equal(
+    assert_almost_equal(
         list(expected_multimaterial._mats.keys())[1].density,
         list(read_materials[2]._mats.keys())[1].density)
     assert_equal(

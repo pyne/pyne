@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from pyne.mesh import HAVE_PYMOAB
 """ Module for the production of PartiSn input decks. PartiSn is a discrete
 ordinates code produced by Los Almos National Laboratory (LANL). Can be used
 to produce neutron, photon, or coupled neutron photon prblems, adjoint or
@@ -12,6 +11,7 @@ If PyMOAB not installed then this module will not work.
 """
 
 from __future__ import print_function, division
+from pyne.mesh import HAVE_PYMOAB
 import sys
 import collections
 import string

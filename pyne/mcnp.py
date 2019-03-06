@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from pyne.mesh import Mesh, StatMesh, HAVE_PYMOAB
 """Module for parsing MCNP output data. MCNP is a general-purpose Monte Carlo
 N-Particle code developed at Los Alamos National Laboratory that can be used
 for neutron, photon, electron, or coupled neutron/photon/electron transport.
@@ -13,6 +12,7 @@ available to use.
 
 """
 from __future__ import print_function, division
+from pyne.mesh import Mesh, StatMesh, HAVE_PYMOAB
 import sys
 import struct
 import math
