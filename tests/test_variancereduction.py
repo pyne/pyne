@@ -6,14 +6,15 @@ from nose.tools import assert_almost_equal
 from nose.plugins.skip import SkipTest
 import warnings
 
-from pyne import mcnp
-from pyne.variancereduction import cadis, magic
-from pyne.utils import QAWarning
 from pyne.mesh import Mesh, NativeMeshTag, MeshError, HAVE_PYMOAB
-
 if not HAVE_PYMOAB:
     raise SkipTest
-
+try:
+    from pyne import mcnp
+except ImportError:
+    raise SkipTest
+from pyne.variancereduction import cadis, magic
+from pyne.utils import QAWarning
 
 warnings.simplefilter("ignore", QAWarning)
 
