@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import numpy as np
 """Welcome to PyNE's setup.py script. This is a little non-standard because pyne
 is a multilanguage project.  Still this script follows a predictable ordering:
@@ -29,7 +30,6 @@ one of the parser functions to consume the argument. Where appropriate,
 ensure that the argument is appended to the argument list that is returned by these
 functions.
 """
-from __future__ import print_function
 
 import io
 import os
