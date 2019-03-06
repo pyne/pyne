@@ -14,14 +14,14 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.material import Material
-from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
-from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
 from pyne.utils import QAWarning
 from pyne.mesh import HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
+from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
 from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
+from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
 
 warnings.simplefilter("ignore", QAWarning)
 
