@@ -1,17 +1,16 @@
+"""This module contains functions relevant to the ALARA activation code and the Chebyshev Rational Approximation Method
+"""
+from __future__ import print_function
 from pyne.xs.data_source import SimpleDataSource
 from pyne.data import N_A, decay_const, decay_children, branch_ratio
 from pyne.nucname import serpent, alara, znum, anum
 from pyne import nucname
 from pyne.material import Material, from_atom_frac
 from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
-"""This module contains functions relevant to the ALARA activation code and the Chebyshev Rational Approximation Method
-"""
-from __future__ import print_function
 import os
 import collections
 from warnings import warn
 from pyne.utils import QAWarning, to_sec
-
 import numpy as np
 import tables as tb
 

@@ -1,5 +1,5 @@
-from pyne.material import Material, MaterialLibrary, MultiMaterial
 from __future__ import print_function, division
+from pyne.material import Material, MaterialLibrary, MultiMaterial
 import sys
 import copy
 import itertools

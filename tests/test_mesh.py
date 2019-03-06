@@ -1,11 +1,10 @@
-
+from __future__ import print_function
 from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
 from pyne.material import Material
 from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
 from pyne.utils import QAWarning
-from __future__ import print_function
 import os
 import time
 import shutil

@@ -1,15 +1,13 @@
-from pyne.particle import mcnp
-from mcnp import Wwinp
-from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 """
 This module contains functions for mesh-based Monte Carlo variance reduction.
 """
-
+import numpy as np
+from pyne.particle import mcnp
+from mcnp import Wwinp
+from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 from itertools import izip
 from warnings import warn
 from pyne.utils import QAWarning
-
-import numpy as np
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
