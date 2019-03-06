@@ -9,9 +9,6 @@ from random import uniform, seed
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.source_sampling import Sampler, AliasTable
-from pyne.mesh import Mesh, NativeMeshTag
-
 try:
     from pyne.mesh import Mesh
     # see if the source sampling module exists but do not import it
@@ -23,6 +20,8 @@ except ImportError:
     from nose.plugins.skip import SkipTest
     raise SkipTest
 
+from pyne.source_sampling import Sampler, AliasTable
+from pyne.mesh import Mesh, NativeMeshTag
 from pymoab import core as mb_core, types
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
