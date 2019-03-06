@@ -554,8 +554,9 @@ def test_read_mcnp():
         list(read_materials[2]._mats.keys())[0].comp.keys())
     for i in range(2):
         assert_almost_equal(
-            list(expected_multimaterial._mats.keys())[0].comp.values()[i],
-            list(read_materials[2]._mats.keys())[0].comp.values()[i])
+            list(list(expected_multimaterial._mats.keys())
+                 [0].comp.values())[i],
+            list(list(read_materials[2]._mats.keys())[0].comp.values())[i])
     assert_almost_equal(
         list(expected_multimaterial._mats.keys())[0].mass,
         list(read_materials[2]._mats.keys())[0].mass)
@@ -573,8 +574,9 @@ def test_read_mcnp():
         list(read_materials[2]._mats.keys())[1].comp.keys())
     for i in range(2):
         assert_almost_equal(
-            list(expected_multimaterial._mats.keys())[1].comp.values()[i],
-            list(read_materials[2]._mats.keys())[1].comp.values()[i])
+            list(list(expected_multimaterial._mats.keys())
+                 [1].comp.values())[i],
+            list(list(read_materials[2]._mats.keys())[1].comp.values())[i])
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].mass,
         list(read_materials[2]._mats.keys())[1].mass)
