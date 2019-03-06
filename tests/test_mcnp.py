@@ -1,7 +1,3 @@
-from numpy.testing import assert_array_equal
-from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
-from pyne.material import MultiMaterial
-from pyne.material import Material
 """PyNE MCNP tools tests"""
 import os
 import unittest
@@ -15,7 +11,10 @@ from nose.tools import assert_almost_equal, assert_equal, assert_true, \
 from nose.plugins.skip import SkipTest
 
 import tables
+from numpy.testing import assert_array_equal
 
+from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
+from pyne.material import MultiMaterial, Material
 from pyne.utils import QAWarning
 
 warnings.simplefilter("ignore", QAWarning)

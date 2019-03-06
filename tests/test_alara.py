@@ -1,8 +1,3 @@
-from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
-    photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
-    irradiation_blocks, record_to_geom, phtn_src_energy_bounds
-from pyne.material import Material
-from pyne.mesh import Mesh, StatMesh, MeshError
 """alara module tests"""
 import os
 import nose
@@ -10,16 +5,20 @@ import subprocess
 
 from nose.tools import assert_almost_equal
 from nose.tools import assert_equal, assert_true, with_setup
-from numpy.testing import assert_array_equal
 from nose.plugins.skip import SkipTest
 import numpy as np
+from numpy.testing import assert_array_equal
 import tables as tb
 import warnings
 import filecmp
 
 # mesh specific imports
 from pyne.mesh import HAVE_PYMOAB
-
+from pyne.mesh import Mesh, StatMesh, MeshError
+from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
+    photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
+    irradiation_blocks, record_to_geom, phtn_src_energy_bounds
+from pyne.material import Material
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 

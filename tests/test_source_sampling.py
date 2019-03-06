@@ -1,5 +1,3 @@
-from pyne.source_sampling import Sampler, AliasTable
-from pyne.mesh import Mesh, NativeMeshTag
 import os
 import warnings
 import itertools
@@ -10,6 +8,9 @@ from random import uniform, seed
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
+
+from pyne.source_sampling import Sampler, AliasTable
+from pyne.mesh import Mesh, NativeMeshTag
 
 try:
     from pyne.mesh import Mesh
@@ -23,7 +24,6 @@ except ImportError:
     raise SkipTest
 
 from pymoab import core as mb_core, types
-
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
