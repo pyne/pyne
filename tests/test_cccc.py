@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-
-from pyne.mesh import HAVE_PYMOAB
-from pyne.cccc import Isotxs, Rtflux, Atflux
 from unittest import TestCase
 import warnings
 from nose.tools import assert_equal, assert_raises
@@ -9,6 +6,8 @@ from nose.plugins.skip import SkipTest
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
+from pyne.mesh import HAVE_PYMOAB
+from pyne.cccc import Isotxs, Rtflux, Atflux
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 

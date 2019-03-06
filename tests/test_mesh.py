@@ -1,10 +1,4 @@
 from __future__ import print_function
-from pymoab.types import _eh_py_type
-from pymoab import core as mb_core, hcoord, scd, types
-from pyne.material import Material
-from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
-from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
-from pyne.utils import QAWarning
 import os
 import time
 import shutil
@@ -19,10 +13,15 @@ from nose.plugins.skip import SkipTest
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
+from pyne.material import Material
+from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
+from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
+from pyne.utils import QAWarning
 from pyne.mesh import HAVE_PYMOAB
-
 if not HAVE_PYMOAB:
     raise SkipTest
+from pymoab.types import _eh_py_type
+from pymoab import core as mb_core, hcoord, scd, types
 
 warnings.simplefilter("ignore", QAWarning)
 

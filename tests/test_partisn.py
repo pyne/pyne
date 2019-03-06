@@ -4,18 +4,15 @@ Tests for PyNE partisn module.
 import warnings
 import os
 import numpy as np
+from numpy.testing import assert_array_almost_equal
 import filecmp
 from nose.tools import assert_almost_equal
-from numpy.testing import assert_array_almost_equal
-
-from pyne.utils import QAWarning
+from nose.plugins.skip import SkipTest
 import multiprocessing
 import unittest
 
-from nose.plugins.skip import SkipTest
-
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
-
+from pyne.utils import QAWarning
 from pyne import partisn
 
 warnings.simplefilter("ignore", QAWarning)

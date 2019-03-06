@@ -1,15 +1,14 @@
-from pyne import mcnp
-from pyne.variancereduction import cadis, magic
-from pyne.utils import QAWarning
-from numpy.testing import assert_array_almost_equal
-from nose.tools import assert_almost_equal
 """
 Tests for PyNE variance_reduction module.
 """
+from numpy.testing import assert_array_almost_equal
+from nose.tools import assert_almost_equal
+from nose.plugins.skip import SkipTest
 import warnings
 
-from nose.plugins.skip import SkipTest
-
+from pyne import mcnp
+from pyne.variancereduction import cadis, magic
+from pyne.utils import QAWarning
 from pyne.mesh import Mesh, NativeMeshTag, MeshError, HAVE_PYMOAB
 
 if not HAVE_PYMOAB:

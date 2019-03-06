@@ -1,12 +1,11 @@
 #!/usr/bin/python
 
 import os
-from pyne import fluka
-
 import nose.tools
 from nose.plugins.skip import SkipTest
 from nose.tools import assert_equal
 
+from pyne import fluka
 # Mesh specific imports
 from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
 
