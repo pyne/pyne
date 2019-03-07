@@ -117,7 +117,29 @@ cdef class MaterialLibrary:
             raise TypeError("the material must be a material or a stri but is a
                     {0}".format(type(mat)))
 
+    cdef cpp_material get_material(self, mat):
+        # Get the correct cpp_material
+        cdef cpp_material c_mat
+        if isinstance(mat, _Material):
+            c_mat = self._inst.get_material((<_Material> mat).mat_pointer)
+        elif isinstance(mat, basestring):
+            cdef std_string c_matname
+            c_matname = std_string(<char *> mat)
+            c_mat = self._inst.get_material(c_matname)
+        else:
+            raise TypeError("the material must be a material or a stri but is a
+                    {0}".format(type(mat)))
 
+        # build a PyNE Material object form the cpp_material
+        py_mat = Material()
+        py_mat.mat_pointer = c_mat
+        return py_mat
+
+    cdef std_set[std_string] get_matlist(self):
+        return self._inst.get_matlist()
+
+    cdef std_set[inst] get_nuclist(self):
+        return self._inst.get_nuclist()
 
 
 
