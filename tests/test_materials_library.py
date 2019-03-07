@@ -2,7 +2,8 @@ import os
 
 from nose.tools import assert_true, assert_false, assert_in, assert_equal
 from pyne.dbgen.materials_library import *
-from pyne.material import Material, MaterialLibrary
+from pyne.material import Material
+from pyne.material_library import MaterialLibrary
 from pyne.pyne_config import pyne_conf
 import pyne.nucname as nucname
 import tables as tb

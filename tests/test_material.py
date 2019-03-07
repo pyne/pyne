@@ -13,7 +13,7 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
-    MapStrMaterial, MultiMaterial, MaterialLibrary
+    MapStrMaterial, MultiMaterial
 from pyne import jsoncpp
 from pyne import data
 from pyne import nucname
