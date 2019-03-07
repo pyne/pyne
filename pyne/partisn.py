@@ -30,7 +30,7 @@ import tables
 
 from pyne.material import Material
 from pyne.material import MultiMaterial
-from pyne.material import MaterialLibrary
+from pyne.material_library import MaterialLibrary
 
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord

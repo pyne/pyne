@@ -36,5 +36,5 @@ cdef class _MapStrMaterial:
     cdef public bint _free_map
     cdef dict _cache
 
-cdef class _MaterialLibrary(object):
-    cdef dict _lib
+#cdef class _MaterialLibrary(object):
+#    cdef dict _lib

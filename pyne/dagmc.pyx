@@ -12,7 +12,9 @@ import numpy as np
 from pyne cimport cpp_dagmc_bridge
 from pyne.mesh import Mesh
 from numpy.linalg import norm
-from pyne.material import Material, MaterialLibrary
+from pyne.material import Material
+from pyne.material_library import MaterialLibrary
+
 np.import_array()
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
