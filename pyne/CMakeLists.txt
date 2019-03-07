@@ -16,6 +16,7 @@ set(PYNE_CYTHON_MODULES
     extra_types
     jsoncpp
     material
+    material_library
     nucname
     particle
     pyne_config
