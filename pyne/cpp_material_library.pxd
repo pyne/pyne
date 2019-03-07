@@ -17,7 +17,7 @@ cdef extern from "material_pyne.h" namespace "pyne":
         MaterialLibrary(std_string, std_string) except +
 
         # Attributes
-        map[std_string, cpp_material] materials
+        map[std_string, cpp_material.Material] materials
         std_set[std_string] material_name
         std_set[int] nuclides
 
@@ -32,13 +32,13 @@ cdef extern from "material_pyne.h" namespace "pyne":
         void write_hdf5(char *, char *, char *) except +
         void write_hdf5(char *, char *, char *, int) except +
         
-        void add_material(cpp_material) except +
+        void add_material(cpp_material.Material) except +
         
-        void del_material(cpp_material) except +
+        void del_material(cpp_material.Material) except +
         void del_material(std_string) except +
         
-        cpp_material get_material(cpp_material) except +
-        cpp_material get_material(std_string) except +
+        cpp_material.Material get_material(cpp_material.Material) except +
+        cpp_material.Material get_material(std_string) except +
         
         std_set[std_string] get_matlist() except +
         std_set[int] get_nuclist() except +
