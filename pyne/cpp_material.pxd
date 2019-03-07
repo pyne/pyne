@@ -1,4 +1,5 @@
 """C++ wrapper for material class."""
+from libcpp.set cimport set
 from libcpp.string cimport string as std_string
 from libcpp.set cimport set as std_set
 from libcpp.map cimport map
