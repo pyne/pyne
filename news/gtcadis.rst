@@ -3,7 +3,7 @@
 * added gtcadis.py script
 * first step for the GT-CADIS workflow, further steps to follow
 
-**Changed:** None
+**Changed:** alara.py
 
 **Deprecated:** None
 
