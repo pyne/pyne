@@ -21,16 +21,7 @@ void pyne::sampling_setup_(int* mode) {
           "cell_number"));
     tag_names.insert(std::pair<std::string, std::string> ("cell_fracs_tag_name",
           "cell_fracs"));
-    if (*mode == 0) {
-      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, false);
-    } else if (*mode == 1) {
-      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, true);
-    } else if (*mode == 2) {
-      std::string bias_tag_name ("biased_source_density");
-      sampler = new pyne::Sampler(filename, src_tag_name, e_bounds, bias_tag_name);
-    } else {
-      sampler = new pyne::Sampler(filename, tag_names, e_bounds, *mode);
-    }
+    sampler = new pyne::Sampler(filename, tag_names, e_bounds, *mode);
   }
 }
 
@@ -95,6 +86,7 @@ pyne::Sampler::Sampler(std::string filename,
                  std::vector<double> e_bounds, 
                  int mode)
   : filename(filename),
+    tag_names(tag_names),
     e_bounds(e_bounds) {
   // determine the bias_mode and sub_mode
   if (mode == 0){
@@ -135,24 +127,7 @@ pyne::Sampler::Sampler(std::string filename,
       bias_tag_name = tag_names["bias_tag_name"];
     }
   }
-  if (sub_mode == SUBVOXEL) {
-    // cell_number_tag
-    if (tag_names.find("cell_number_tag_name") == tag_names.end()) {
-      // cell_number_tag_name not found
-      throw std::invalid_argument("cell_number_tag_name not found");
-    } else {
-      // found cell_number_tag_name
-      cell_number_tag_name = tag_names["cell_number_tag_name"];
-    }
-    // cell_fracs_tag
-    if (tag_names.find("cell_fracs_tag_name") == tag_names.end()) {
-      // cell_fracs_tag_name not found
-      throw std::invalid_argument("cell_fracs_tag_name not found");
-    } else {
-      // found cell_fracs_tag_name
-      cell_fracs_tag_name = tag_names["cell_fracs_tag_name"];
-    }
-  }
+
   setup();
 }
 
@@ -183,6 +158,7 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   return src;
 }
 
+
 void pyne::Sampler::setup() {
   moab::ErrorCode rval;
   moab::EntityHandle loaded_file_set;
@@ -193,7 +169,7 @@ void pyne::Sampler::setup() {
   if (rval != moab::MB_SUCCESS)
     throw std::invalid_argument("Could not load mesh file.");
 
-  // Get mesh volume elemebts 
+  // Get mesh volume elements
   moab::Range ves;
   rval = mesh->get_entities_by_dimension(loaded_file_set, 3, ves);
   if (rval != moab::MB_SUCCESS)
@@ -210,6 +186,25 @@ void pyne::Sampler::setup() {
     verts_per_ve = 4;
   }
   else throw std::invalid_argument("Mesh file must contain only tets or hexes.");
+
+  if (ve_type == moab::MBHEX){
+      // cell_number_tag
+      if (tag_names.find("cell_number_tag_name") == tag_names.end()) {
+        // cell_number_tag_name not found
+        throw std::invalid_argument("cell_number_tag_name not found");
+      } else {
+        // found cell_number_tag_name
+        cell_number_tag_name = tag_names["cell_number_tag_name"];
+      }
+      // cell_fracs_tag
+      if (tag_names.find("cell_fracs_tag_name") == tag_names.end()) {
+        // cell_fracs_tag_name not found
+        throw std::invalid_argument("cell_fracs_tag_name not found");
+      } else {
+        // found cell_fracs_tag_name
+        cell_fracs_tag_name = tag_names["cell_fracs_tag_name"];
+      }
+  }
 
   // Process all the spatial and tag data and create an alias table.
   std::vector<double> volumes(num_ves);
@@ -275,7 +270,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   for(int i=0; i<cell_fracs.size(); i++){
     cell_fracs[i] = 1.0;
   }
-  if (sub_mode == SUBVOXEL) {
+  if (ve_type == moab::MBHEX) {
       // Read the cell_number tag and cell_fracs tag
       rval = mesh->tag_get_handle(cell_number_tag_name.c_str(),
                                   cell_number_tag);
@@ -581,4 +576,3 @@ pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
 }
 
 pyne::SourceParticle::~SourceParticle() {};
-
