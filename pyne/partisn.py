@@ -11,6 +11,7 @@ If PyMOAB not installed then this module will not work.
 """
 
 from __future__ import print_function, division
+from pyne.mesh import HAVE_PYMOAB
 import sys
 import collections
 import string
@@ -38,7 +39,6 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
 
-from pyne.mesh import HAVE_PYMOAB
 if HAVE_PYMOAB:
     from pyne.mesh import Mesh, StatMesh, MeshError, NativeMeshTag
 else:
@@ -51,6 +51,7 @@ try:
     HAVE_DAGMC = True
 except:
     HAVE_DAGMC = False
+
 
 def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     """This function reads a material-laden geometry file and a pre-made PyNE
@@ -157,10 +158,12 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     # provided.
     if 'names_dict' in kwargs:
         nuc_names = kwargs['names_dict']
-        mat_lib, unique_names= _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, nuc_names=nuc_names)
+        mat_lib, unique_names = _get_material_lib(
+            hdf5, data_hdf5path, nuc_hdf5path, nuc_names=nuc_names)
         mat_xs_names = _nucid_to_xs(mat_lib, nuc_names=nuc_names)
     else:
-        mat_lib, unique_names = _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path)
+        mat_lib, unique_names = _get_material_lib(
+            hdf5, data_hdf5path, nuc_hdf5path)
         mat_xs_names = _nucid_to_xs(mat_lib)
 
     # Set input variables
@@ -175,7 +178,7 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     block01['mt'] = len(mat_lib)
 
     block02['zones'], block04['assign'] = _get_zones(mesh, hdf5, bounds, num_rays,
-                                            grid, dg, mat_assigns, unique_names)
+                                                     grid, dg, mat_assigns, unique_names)
     block01['nzone'] = len(block04['assign'])
     block02['fine_per_coarse'] = fine_per_coarse
 
@@ -199,7 +202,8 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     _check_fine_mesh_total(block01)
 
     # call function to write to file
-    _write_input(title, block01, block02, block03, block04, block05, cards, input_file)
+    _write_input(title, block01, block02, block03,
+                 block04, block05, cards, input_file)
 
 
 def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
@@ -223,7 +227,8 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
         fluka_name = mats[mat_name].metadata['fluka_name']
         unique_names[mat_name] = fluka_name
         if collapse:
-            mats_collapsed[fluka_name] = mats[mat_name].collapse_elements(mat_except)
+            mats_collapsed[fluka_name] = mats[mat_name].collapse_elements(
+                mat_except)
         else:
             mats_collapsed[fluka_name] = mats[mat_name]
 
@@ -259,8 +264,10 @@ def _nucid_to_xs(mat_lib, **kwargs):
                     name = nuc_names[nucid]
                     mat_xs_names[mat][name] = mat_lib[mat][nucid]
                 else:
-                    warn("Nucid {0} does not exist in the provided nuc_names dictionary.".format(nucid))
-                    mat_xs_names[mat]["{0}".format(nucid)] = mat_lib[mat][nucid]
+                    warn(
+                        "Nucid {0} does not exist in the provided nuc_names dictionary.".format(nucid))
+                    mat_xs_names[mat]["{0}".format(
+                        nucid)] = mat_lib[mat][nucid]
             else:
                 mat_xs_names[mat][nucname.name(nucid)] = mat_lib[mat][nucid]
 
@@ -370,11 +377,13 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names
                 # update value that already exists with new volume fraction
                 for j, val in enumerate(zones[z]['mat']):
                     if mat_assigns[cell] == val:
-                        vol_frac = zones[z]['vol_frac'][j] + voxel[z]['vol_frac'][i]
+                        vol_frac = zones[z]['vol_frac'][j] + \
+                            voxel[z]['vol_frac'][i]
                         zones[z]['vol_frac'][j] = vol_frac
 
     # Remove vacuum or graveyard from material definition if not vol_frac of 1.0
-    skip_array = [['mat:Vacuum'], ['mat:vacuum'], ['mat:Graveyard'], ['mat:graveyard']]
+    skip_array = [['mat:Vacuum'], ['mat:vacuum'],
+                  ['mat:Graveyard'], ['mat:graveyard']]
     skip_list = ['mat:Vacuum', 'mat:vacuum', 'mat:Graveyard', 'mat:graveyard']
     zones_compressed = {}
     for z, info in zones.iteritems():
@@ -383,11 +392,12 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names
             zones_compressed[z] = info
         else:
             # check for partial void
-            zones_compressed[z] = {'mat':[], 'vol_frac':[]}
+            zones_compressed[z] = {'mat': [], 'vol_frac': []}
             for i, mat in enumerate(zones[z]['mat']):
                 if mat not in skip_list:
                     zones_compressed[z]['mat'].append(mat)
-                    zones_compressed[z]['vol_frac'].append(zones[z]['vol_frac'][i])
+                    zones_compressed[z]['vol_frac'].append(
+                        zones[z]['vol_frac'][i])
 
     # Eliminate duplicate zones and assign each voxel a zone number.
     # Assign zone = 0 if vacuum or graveyard and eliminate material definition.
@@ -404,8 +414,8 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names
             match_all.fill(False)
             for ii, mat in enumerate(vals['mat']):
                 for jj, mat_info in enumerate(info['mat']):
-                    if mat == mat_info and np.allclose(np.array(vals['vol_frac'][ii]), \
-                                np.array(info['vol_frac'][jj]), rtol=1e-5):
+                    if mat == mat_info and np.allclose(np.array(vals['vol_frac'][ii]),
+                                                       np.array(info['vol_frac'][jj]), rtol=1e-5):
                         match_all[ii] = True
                         break
             if match_all.all() == True:
@@ -433,11 +443,12 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names
     # Remove any instances of graveyard or vacuum in zone definitions
     zones_novoid = {}
     for z in zones_mats:
-        zones_novoid[z] = {'mat':[], 'vol_frac':[]}
+        zones_novoid[z] = {'mat': [], 'vol_frac': []}
         for i, mat in enumerate(zones_mats[z]['mat']):
             if mat not in skip_list:
                 zones_novoid[z]['mat'].append(mat)
-                zones_novoid[z]['vol_frac'].append(zones_mats[z]['vol_frac'][i])
+                zones_novoid[z]['vol_frac'].append(
+                    zones_mats[z]['vol_frac'][i])
 
     # Put zones into format for PARTISN input
     if 'x' in bounds:
@@ -504,7 +515,6 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
     partisn += "  mt={0}".format(block01['mt'])
     partisn += "  nzone={0}\n".format(block01['nzone'])
 
-
     if 'im' in block01:
         partisn += "im={0}".format(block01['im'])
         partisn += "  it={0}  ".format(block01['it'])
@@ -519,9 +529,9 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
 
     block1_cards = []
     if 'block1' in cards:
-      for card, value in cards['block1'].iteritems():
-          partisn += "{}={}\n".format(card, value)
-          block1_cards.append(card)
+        for card, value in cards['block1'].iteritems():
+            partisn += "{}={}\n".format(card, value)
+            block1_cards.append(card)
 
     missing_1 = set(['isn', 'maxscm', 'maxlcm']) - set(block1_cards)
     if len(missing_1) > 0:
@@ -548,7 +558,8 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
                     partisn += "\n       "
                 count = 0
         partisn += "\nxints= "
-        partisn += "{0}R {1}".format(len(block02['xmesh'])-1, block02['fine_per_coarse'])
+        partisn += "{0}R {1}".format(len(block02['xmesh'])-1,
+                                     block02['fine_per_coarse'])
         partisn += "\n"
 
     if 'ymesh' in block02:
@@ -562,7 +573,8 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
                     partisn += "\n       "
                 count = 0
         partisn += "\nyints= "
-        partisn += "{0}R {1}".format(len(block02['ymesh'])-1, block02['fine_per_coarse'])
+        partisn += "{0}R {1}".format(len(block02['ymesh'])-1,
+                                     block02['fine_per_coarse'])
         partisn += "\n"
 
     if 'zmesh' in block02:
@@ -576,7 +588,8 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
                     partisn += "\n       "
                 count = 0
         partisn += "\nzints= "
-        partisn += "{0}R {1}".format(len(block02['zmesh'])-1, block02['fine_per_coarse'])
+        partisn += "{0}R {1}".format(len(block02['zmesh'])-1,
+                                     block02['fine_per_coarse'])
         partisn += "\n"
 
     partisn += "zones= "
@@ -595,8 +608,8 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
             partisn += "\n"
 
     if 'block2' in cards:
-      for card, value in cards['block2'].iteritems():
-          partisn += "{}={}\n".format(card, value)
+        for card, value in cards['block2'].iteritems():
+            partisn += "{}={}\n".format(card, value)
 
     partisn += "t"
 
@@ -623,12 +636,12 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
 
     block3_cards = []
     if 'block3' in cards:
-      for card, value in cards['block3'].iteritems():
-          partisn += "{}={}\n".format(card, value)
-          block3_cards.append(card)
+        for card, value in cards['block3'].iteritems():
+            partisn += "{}={}\n".format(card, value)
+            block3_cards.append(card)
 
     missing_3 = set(['lib', 'lng', 'maxord', 'ihm', 'iht', 'ihs', 'ifido', 'ititl']) \
-              - set(block3_cards)
+        - set(block3_cards)
     if len(missing_3) > 0:
         partisn += "/ Please provide input for the following variables:\n"
         for mis in sorted(missing_3):
@@ -669,20 +682,23 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
         for j, mat in enumerate(block04['assign'][z]['mat']):
             if j != len(block04['assign'][z]['mat'])-1:
                 count += 1
-                partisn += "{} {:.4e}, ".format(mat, block04['assign'][z]['vol_frac'][j])
+                partisn += "{} {:.4e}, ".format(mat,
+                                                block04['assign'][z]['vol_frac'][j])
                 if count == 3:
                     if i != len(block04['assign'][z]['mat'])-1:
                         partisn += "\n          "
                     count = 0
             else:
                 if i == len(block04['assign']) - 1:
-                    partisn += "{} {:.4e};\n".format(mat, block04['assign'][z]['vol_frac'][j])
+                    partisn += "{} {:.4e};\n".format(mat,
+                                                     block04['assign'][z]['vol_frac'][j])
                 else:
-                    partisn += "{} {:.4e};\n        ".format(mat, block04['assign'][z]['vol_frac'][j])
+                    partisn += "{} {:.4e};\n        ".format(
+                        mat, block04['assign'][z]['vol_frac'][j])
 
     if 'block4' in cards:
-      for card, value in cards['block4'].iteritems():
-          partisn += "{}={}\n".format(card, value)
+        for card, value in cards['block4'].iteritems():
+            partisn += "{}={}\n".format(card, value)
 
     partisn += "t"
 
@@ -703,9 +719,9 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
         default_source = True
 
     if 'block5' in cards:
-      for card, value in cards['block5'].iteritems():
-          if card != 'source':
-              partisn += "{}={}\n".format(card, value)
+        for card, value in cards['block5'].iteritems():
+            if card != 'source':
+                partisn += "{}={}\n".format(card, value)
     partisn += "t\n"
 
     ###########################################
@@ -721,21 +737,22 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
         header += "/ NOTE: The follow commented out cards must be filled in for\n"
         header += "/       a complete PARTISN input file:\n"
         if len(missing_1) > 0:
-           header += '/       Block 1:'
-           for mis in sorted(missing_1):
-              header += " {},".format(mis)
-           header += "\n"
+            header += '/       Block 1:'
+            for mis in sorted(missing_1):
+                header += " {},".format(mis)
+            header += "\n"
         if len(missing_3) > 0:
-           header += '/       Block 3:'
-           for mis in sorted(missing_3):
-              header += " {},".format(mis)
-           header += "\n"
+            header += '/       Block 3:'
+            for mis in sorted(missing_3):
+                header += " {},".format(mis)
+            header += "\n"
     header += "/"
     # Prepend header to begining of file
     partisn = header + partisn
 
     # Write to the file
     f.write(partisn)
+
 
 def format_repeated_vector(vector):
     """Creates string out of a vector with the PARTISN format for repeated
@@ -778,7 +795,7 @@ def format_repeated_vector(vector):
     for pair in repeats:
         if pair[1] == 1:
             string += "{} ".format(pair[0])
-            n =+ 1
+            n = + 1
         else:
             string += "{0}R {1} ".format(pair[1], pair[0])
             n += 2
@@ -820,7 +837,7 @@ def mesh_to_isotropic_source(m, tag):
     for e_row in data:
         for src in e_row:
             if src == 0.0:
-               zero_count += 1
+                zero_count += 1
             else:
                 if zero_count != 0:
                     if zero_count == 1:
@@ -832,7 +849,7 @@ def mesh_to_isotropic_source(m, tag):
             if count % ninti == 0:
                 if zero_count != 0:
                     if zero_count == 1:
-                       s += " 0"
+                        s += " 0"
                     else:
                         s += " {}R 0".format(zero_count)
                     zero_count = 0
@@ -906,10 +923,10 @@ def isotropic_vol_source(geom, mesh, cells, spectra, intensities, **kwargs):
 
     # Check lengths of input
     if len(cells) != len(spectra) or len(cells) != len(intensities):
-       raise ValueError("Cells, spectra, intensities must be the same length")
+        raise ValueError("Cells, spectra, intensities must be the same length")
     lengths = [len(x) for x in spectra]
     if not all(lengths[0] == length for length in lengths):
-       raise ValueError("Spectra must all be the same length")
+        raise ValueError("Spectra must all be the same length")
 
     # Normalize spectra
     norm_spectra = []
@@ -923,7 +940,7 @@ def isotropic_vol_source(geom, mesh, cells, spectra, intensities, **kwargs):
     # ray trace
     if not HAVE_DAGMC:
         raise RuntimeError("DAGMC is not available."
-                    "Cannot run isotropic_vol_source().")
+                           "Cannot run isotropic_vol_source().")
     else:
         dagmc.load(geom)
         dg = dagmc.discretize_geom(mesh, num_rays=num_rays, grid=grid)
@@ -931,9 +948,9 @@ def isotropic_vol_source(geom, mesh, cells, spectra, intensities, **kwargs):
     # determine  source intensities
     data = np.zeros(shape=(len(mesh), len(spectra[0])))
     for row in dg:
-       if row[1] in cells:
-           data[row[0], :] += np.multiply(row[2]*intensities[row[1]],
-                                          norm_spectra[row[1]])
+        if row[1] in cells:
+            data[row[0], :] += np.multiply(row[2]*intensities[row[1]],
+                                           norm_spectra[row[1]])
 
     mesh.tag = NativeMeshTag(len(spectra[0]), float, name=tag_name)
     mesh.tag[:] = data

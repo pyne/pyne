@@ -26,6 +26,7 @@ else:
          "Some aspects of the fluka module may be incomplete.",
          QAWarning)
 
+
 class Usrbin(object):
     """This class is the wrapper class for UsrbinTally. This class stores
     all information for a single file that contains one or more usrbin
@@ -122,7 +123,8 @@ class UsrbinTally(Mesh):
         self.particle = self.particle.split()[-1]
 
         if self.coord_sys != 'Cartesian':
-            raise ValueError("Only cartesian coordinate system currently supported")
+            raise ValueError(
+                "Only cartesian coordinate system currently supported")
 
         [x_info, y_info, z_info] = self._read_usrbin_head(fh)
 
@@ -181,7 +183,7 @@ class UsrbinTally(Mesh):
         """
         tokens = line.split()
         return float(tokens[3]), float(tokens[5]), int(tokens[7]), \
-               float(tokens[10])
+            float(tokens[10])
 
     def _generate_bounds(self, dim_info):
         """This takes in the dimension information (min, max, bins, and width)
@@ -199,13 +201,13 @@ class UsrbinTally(Mesh):
         the error_data.
         """
         super(UsrbinTally, self).__init__(structured_coords=[self.x_bounds,
-                                          self.y_bounds, self.z_bounds],
+                                                             self.y_bounds, self.z_bounds],
                                           structured=True,
                                           structured_ordering='zyx',
                                           mats=None)
         self.part_data_tag = NativeMeshTag(size=1, dtype=float, mesh=self,
-                                  name="part_data_{0}".format(self.particle))
+                                           name="part_data_{0}".format(self.particle))
         self.error_data_tag = NativeMeshTag(size=1, dtype=float, mesh=self,
-                                  name="error_data_{0}".format(self.particle))
+                                            name="error_data_{0}".format(self.particle))
         self.part_data_tag[:] = part_data
         self.error_data_tag[:] = error_data

@@ -28,8 +28,9 @@ one of the parser functions to consume the argument. Where appropriate,
 ensure that the argument is appended to the argument list that is returned by these
 functions.
 """
-from __future__ import print_function
 
+from __future__ import print_function
+import numpy as np
 import io
 import os
 import re
@@ -49,8 +50,6 @@ if sys.version_info[0] < 3:
     from urllib import urlopen
 else:
     from urllib.request import urlopen
-
-import numpy as np
 
 
 # import src into pythonpath - needed to actually run decaygen/atomicgen
@@ -75,6 +74,7 @@ ON_DARWIN = platform.system() == 'Darwin'
 LIBEXT = '.dylib' if ON_DARWIN else '.so'
 
 SKIP_OPTION = "SKIP"
+
 
 @contextmanager
 def indir(path):
@@ -287,6 +287,7 @@ def update_cmake_args(ns):
     if ns.fast is not None:
         fast = 'TRUE' if ns.fast else 'FALSE'
         ns.cmake_args.append('-DPYNE_FAST_COMPILE=' + fast)
+
 
 def update_make_args(ns):
     ns.make_args = []
