@@ -41,10 +41,10 @@ def try_rm_file(filename):
 
 
 @with_setup(None, try_rm_file('tet.h5m'))
-def test_single_tet_tag_names_map():
-    """This test tests uniform sampling within a single tetrahedron. This is
-    done by dividing the tetrahedron in 4 smaller tetrahedrons and ensuring
-    that each sub-tet is sampled equally.
+def test_single_hex_tag_names_map():
+    """This test tests uniform sampling within a single hex volume element.
+    This is done by dividing the volume element in 4 smaller hex and ensuring
+    that each sub-hex is sampled equally.
     """
     seed(1953)
     m = Mesh(structured=True,
@@ -54,46 +54,79 @@ def test_single_tet_tag_names_map():
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
     m.bias = NativeMeshTag(2, float)
-    m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
-    filename = "sampling_mesh.h5m"
-    m.write_hdf5(filename)
-
-    # right condition
-    tag_names = {"src_tag_name": "src"}
-    e_bounds = np.array([0, 1])
-    sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_ANALOG)
-
-    # src_tag_name not given
-    tag_names = {}
-    assert_raises(ValueError, Sampler, filename,
-                  tag_names, e_bounds, DEFAULT_ANALOG)
-    assert_raises(ValueError, Sampler, filename,
-                  tag_names, e_bounds, DEFAULT_UNIFORM)
-
-    # bias_tag_name not given
-    tag_names = {"src_tag_name": "src"}
-    assert_raises(ValueError, Sampler, filename,
-                  tag_names, e_bounds, DEFAULT_USER)
-
-    # subvoxel r2s source.h5m used for r2s calculation
     cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
     cell_fracs[:] = [(0, 11, 1.0, 0.0), (1, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
+    m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
+    filename = "sampling_mesh.h5m"
     m.write_hdf5(filename)
+
+    # right condition
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    e_bounds = np.array([0, 1])
+    sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_ANALOG)
+
+    # src_tag_name not given
     tag_names = {"cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
     assert_raises(ValueError, Sampler, filename,
                   tag_names, e_bounds, DEFAULT_ANALOG)
     assert_raises(ValueError, Sampler, filename,
                   tag_names, e_bounds, DEFAULT_UNIFORM)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, DEFAULT_USER)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_ANALOG)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_UNIFORM)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_USER)
+
+    # bias_tag_name not given
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
     assert_raises(ValueError, Sampler, filename,
                   tag_names, e_bounds, DEFAULT_USER)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_USER)
+
+    # cell_number_tag_name not given
+    tag_names = {"src_tag_name": "src",
+                 "cell_fracs_tag_name": "cell_fracs"}
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, DEFAULT_ANALOG)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, DEFAULT_UNIFORM)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, DEFAULT_USER)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_ANALOG)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_UNIFORM)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_USER)
+
+    # cell_fracs_tag_name not given
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number"}
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, DEFAULT_ANALOG)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, DEFAULT_UNIFORM)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, DEFAULT_USER)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_ANALOG)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_UNIFORM)
+    assert_raises(ValueError, Sampler, filename,
+                  tag_names, e_bounds, SUBVOXEL_USER)
 
     # wrong bias_tag data (non-zero source_density biased to zero -> NAN weight)
     m.src = NativeMeshTag(2, float)
@@ -122,9 +155,18 @@ def test_analog_single_hex():
              mats=None)
     m.src = NativeMeshTag(1, float)
     m.src[0] = 1.0
+    cell_fracs = np.zeros(1, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+
     filename = "sampling_mesh.h5m"
     m.write_hdf5(filename)
-    tag_names = {"src_tag_name": "src"}
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
     sampler = Sampler(filename, tag_names, np.array([0, 1]), DEFAULT_ANALOG)
 
     num_samples = 5000
@@ -157,9 +199,24 @@ def test_analog_multiple_hex():
              mats=None)
     m.src = NativeMeshTag(2, float)
     m.src[:] = np.ones(shape=(8, 2))
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0),
+                     (1, 11, 1.0, 0.0),
+                     (2, 11, 1.0, 0.0),
+                     (3, 11, 1.0, 0.0),
+                     (4, 11, 1.0, 0.0),
+                     (5, 11, 1.0, 0.0),
+                     (6, 11, 1.0, 0.0),
+                     (7, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
     m.write_hdf5(filename)
-    tag_names = {"src_tag_name": "src"}
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
     sampler = Sampler(filename, tag_names, np.array(
         [0, 0.5, 1]), DEFAULT_ANALOG)
 
@@ -237,8 +294,17 @@ def test_uniform():
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
     filename = "sampling_mesh.h5m"
+    cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0),
+                     (1, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
     m.write_hdf5(filename)
-    tag_names = {"src_tag_name": "src"}
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_UNIFORM)
 
     num_samples = 10000
@@ -575,10 +641,19 @@ def test_bias():
     e_bounds = np.array([0, 0.5, 1.0])
     m.bias = NativeMeshTag(2, float)
     m.bias[:] = [[1.0, 2.0], [3.0, 3.0]]
+    cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0),
+                     (1, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
+                 "bias_tag_name": "bias"}
     filename = "sampling_mesh.h5m"
     m.write_hdf5(filename)
-    tag_names = {"src_tag_name": "src",
-                 "bias_tag_name": "bias"}
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_USER)
 
     num_samples = 10000
@@ -626,9 +701,19 @@ def test_bias_spatial():
     m.bias[:] = [1, 1]
     e_bounds = np.array([0, 0.5, 1.0])
     filename = "sampling_mesh.h5m"
-    m.write_hdf5(filename)
+    cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 1.0, 0.0),
+                     (1, 11, 1.0, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
     tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
                  "bias_tag_name": "bias"}
+
+    m.write_hdf5(filename)
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_USER)
 
     num_samples = 10000
@@ -950,40 +1035,41 @@ def test_template_examples():
     An example of using source_sampling test template to do the test
     """
     # DEFAULT
-    for mode in (DEFAULT_ANALOG, DEFAULT_UNIFORM, DEFAULT_USER):
+#    for mode in (DEFAULT_ANALOG, DEFAULT_UNIFORM, DEFAULT_USER):
+#        for num_e_groups in (1, 2):
+#            # num_bias_groups could be:
+#            # 1, num_e_groups, and max_num_cells*num_e_groups
+#            # test case: 1 voxel, 1 subvoxel
+#            cell_fracs_list = [(0, 1, 1.0, 0.0)]
+#            src_tag = [[1.0]*num_e_groups]
+#            if mode == DEFAULT_USER:
+#                for num_bias_groups in (1, num_e_groups):
+#                    bias_tag = [[1.0]*num_bias_groups]
+#                    _source_sampling_test_template(
+#                        mode, cell_fracs_list, src_tag, bias_tag)
+#            else:
+#                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+#           # test case: 2 voxel, 2 subvoxels
+#            cell_fracs_list = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0)]
+#            src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
+#            if mode == DEFAULT_USER:
+#                for num_bias_groups in (1, num_e_groups):
+#                    bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
+#                    _source_sampling_test_template(
+#                        mode, cell_fracs_list, src_tag, bias_tag)
+#            else:
+#                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+#
+    # DEFAULT and SUBVOXEL
+    for mode in (DEFAULT_ANALOG, DEFAULT_UNIFORM, DEFAULT_USER,
+                 SUBVOXEL_ANALOG, SUBVOXEL_UNIFORM, SUBVOXEL_USER):
         for num_e_groups in (1, 2):
             # num_bias_groups could be:
             # 1, num_e_groups, and max_num_cells*num_e_groups
             # test case: 1 voxel, 1 subvoxel
             cell_fracs_list = [(0, 1, 1.0, 0.0)]
             src_tag = [[1.0]*num_e_groups]
-            if mode == DEFAULT_USER:
-                for num_bias_groups in (1, num_e_groups):
-                    bias_tag = [[1.0]*num_bias_groups]
-                    _source_sampling_test_template(
-                        mode, cell_fracs_list, src_tag, bias_tag)
-            else:
-                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
-           # test case: 2 voxel, 2 subvoxels
-            cell_fracs_list = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0)]
-            src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
-            if mode == DEFAULT_USER:
-                for num_bias_groups in (1, num_e_groups):
-                    bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
-                    _source_sampling_test_template(
-                        mode, cell_fracs_list, src_tag, bias_tag)
-            else:
-                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
-
-    # SUBVOXEL
-    for mode in (SUBVOXEL_ANALOG, SUBVOXEL_UNIFORM, SUBVOXEL_USER):
-        for num_e_groups in (1, 2):
-            # num_bias_groups could be:
-            # 1, num_e_groups, and max_num_cells*num_e_groups
-            # test case: 1 voxel, 1 subvoxel
-            cell_fracs_list = [(0, 1, 1.0, 0.0)]
-            src_tag = [[1.0]*num_e_groups]
-            if mode == SUBVOXEL_USER:
+            if mode == DEFAULT_USER or mode == SUBVOXEL_USER:
                 for num_bias_groups in (1, num_e_groups):
                     bias_tag = [[1.0]*num_bias_groups]
                     _source_sampling_test_template(
@@ -993,7 +1079,7 @@ def test_template_examples():
             # test case: 1 voxel, 2 subvoxels
             cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0)]
             src_tag = [[1.0, 1.0]*num_e_groups]
-            if mode == SUBVOXEL_USER:
+            if mode == DEFAULT_USER or mode == SUBVOXEL_USER:
                 for num_bias_groups in (1, num_e_groups, 2*num_e_groups):
                     bias_tag = [[1.0]*num_bias_groups]
                     _source_sampling_test_template(
@@ -1003,7 +1089,7 @@ def test_template_examples():
             # test case: 2 voxel, 2 subvoxels
             cell_fracs_list = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0)]
             src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
-            if mode == SUBVOXEL_USER:
+            if mode == DEFAULT_USER or mode == SUBVOXEL_USER:
                 for num_bias_groups in (1, num_e_groups):
                     bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
                     _source_sampling_test_template(
@@ -1014,7 +1100,7 @@ def test_template_examples():
             cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0),
                                (1, 3, 0.5, 0.0), (1, 4, 0.5, 0.0)]
             src_tag = [[1.0, 1.0]*num_e_groups, [1.0, 1.0]*num_e_groups]
-            if mode == SUBVOXEL_USER:
+            if mode == DEFAULT_USER or mode == SUBVOXEL_USER:
                 for num_bias_groups in (1, num_e_groups, 2*num_e_groups):
                     bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
                     _source_sampling_test_template(
@@ -1598,18 +1684,16 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     m.src = NativeMeshTag(max_num_cells*num_e_groups, float)
     m.src[:] = src_tag
     # set up cell_number and cell_fracs tag
-    if mode in sub_mode_subvoxel:
-        m.tag_cell_fracs(cell_fracs)
+    m.tag_cell_fracs(cell_fracs)
     # set up bias tag
     if mode in (2, 5):
         bias_tag_lenght = len(bias_tag[0])
         m.bias = NativeMeshTag(bias_tag_lenght, float)
         m.bias[:] = bias_tag
     # set up tag_names
-    tag_names = {"src_tag_name": "src"}
-    if mode in sub_mode_subvoxel:
-        tag_names["cell_number_tag_name"] = "cell_number"
-        tag_names["cell_fracs_tag_name"] = "cell_fracs"
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs"}
     if mode in (2, 5):
         tag_names["bias_tag_name"] = "bias"
     # save the mesh into h5m file
