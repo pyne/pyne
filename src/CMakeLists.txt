@@ -14,6 +14,7 @@ set(PYNE_SRCS
   "jsoncpp.cpp"
   "jsoncustomwriter.cpp"
   "material.cpp"
+  "material_library.cpp"
   "nucname.cpp"
   "particle.cpp"
   "rxname.cpp"
