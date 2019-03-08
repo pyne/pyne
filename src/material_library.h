@@ -21,7 +21,7 @@ class MaterialLibrary {
 
  private:
   /**
-   * \brief Add the nuclide form the material to the list of nuclides 
+   * \brief Add the nuclide form the material to the list of nuclides
    * \param material from which add the nuclide to the list
   */
   void append_to_nuclist(pyne::Material mat);
@@ -31,7 +31,8 @@ class MaterialLibrary {
    * \param[in] the datapath of we would like to test
    * \return true/false
    */
-  bool hdf5_path_exists(const std::string& filename, const std::string& datapath);
+  bool hdf5_path_exists(const std::string& filename,
+                        const std::string& datapath);
 
   /**
    * \brief determines the length of an hdf5 data table
@@ -39,7 +40,8 @@ class MaterialLibrary {
    * \param[in] the datapath of we would like to read
    * \return the number of elements to the array
    */
-  int get_length_of_table(const std::string& filename, const std::string& datapath);
+  int get_length_of_table(const std::string& filename,
+                          const std::string& datapath);
 
  public:
   // materialLibrary constructor
@@ -50,7 +52,8 @@ class MaterialLibrary {
    * \param filename path to file on disk, this file may be either in plaintext
    *                 or HDF5 format.
   */
-  MaterialLibrary(const std::string& filename, const std::string& datapath = "/materials");
+  MaterialLibrary(const std::string& filename,
+                  const std::string& datapath = "/materials");
 
   ~MaterialLibrary();  //< default destructor
 
@@ -60,8 +63,8 @@ class MaterialLibrary {
     /// \param datapath Path to the materials in the file.
     /// \param protocol Flag for layout of material on disk.
   */
-  void from_hdf5(const std::string& filename, const std::string& datapath = "/materials",
-                 int protocol = 1);
+  void from_hdf5(const std::string& filename,
+                 const std::string& datapath = "/materials", int protocol = 1);
 
   /**
    * Writes MaterialLibrary out to an HDF5 file.
@@ -75,7 +78,7 @@ class MaterialLibrary {
    *             appended to the end of the dataset.
    *  \param chunksize The chunksize for all material data on disk.
   */
-  void write_hdf5( char * filename,  char * datapath, char * nucpath);
+  void write_hdf5(char* filename, char* datapath, char* nucpath, int chunksize=100);
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
@@ -88,12 +91,12 @@ class MaterialLibrary {
    *             appended to the end of the dataset.
    *  \param chunksize The chunksize for all material data on disk.
   */
-  void write_hdf5( std::string filename,  std::string datapath = "/materials",
-                   std::string nucpath = "/nucid");
+//  void write_hdf5(std::string filename, std::string datapath = "/materials",
+  //                std::string nucpath = "/nucid", int chunksize=100);
 
   /**
-   * \brief Add a material to the library 
-   * \param mat material to add 
+   * \brief Add a material to the library
+   * \param mat material to add
   */
   void add_material(pyne::Material mat);
   /**
@@ -113,15 +116,14 @@ class MaterialLibrary {
   pyne::Material get_material(const std::string& mat_name);
   /**
    * \brief Get the list of materials in the Library
-   * \return std::set<std::string> 
+   * \return std::set<std::string>
   */
   pyne::matname_set get_matlist() { return matlist; }
   /**
    * \brief Get the list of nuclides in the Library
-   * \return std::set<int> 
+   * \return std::set<int>
   */
   pyne::nuc_set get_nuclist() { return nuclist; }
-
 
 };  // end MaterialLibrary class header
 }  // end of pyne namespace
