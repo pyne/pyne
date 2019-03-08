@@ -23,14 +23,11 @@ cdef extern from "material_library.h" namespace "pyne":
 
 
         # Methods
-        void from_hdf5(char *) except +
-        void from_hdf5(char *, char *) except +
-        void from_hdf5(char *, char *, int) except +
+        void from_hdf5(std_string) except +
+        void from_hdf5(std_string, std_string) except +
+        void from_hdf5(std_string, std_string, int) except +
 
-        void write_hdf5(char *) except +
-        void write_hdf5(char *, char *) except +
         void write_hdf5(char *, char *, char *) except +
-        void write_hdf5(char *, char *, char *, int) except +
         
         void add_material(cpp_material.Material) except +
         

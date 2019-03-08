@@ -9,7 +9,7 @@ from libc.stdlib cimport malloc, free
 from libcpp.map cimport map as cpp_map
 from libcpp.vector cimport vector as cpp_vector
 from libcpp cimport bool as cpp_bool
-#from cython.operator cimport reference as ref
+# from cython.operator cimport reference as ref
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 
@@ -22,7 +22,7 @@ from pyne.utils import QAWarning
 import os
 import sys
 if sys.version_info[0] >= 3:
-    #Python2 basestring is now Python3 string
+    # Python2 basestring is now Python3 string
     basestring = str
 
 import tables as tb
@@ -57,7 +57,6 @@ DEF INT_MAX = 2147483647
 #  Material Library
 #
 
-
 cdef class MaterialLibrary:
     """This class allows the definitions of a set of material, stored by names
     """
@@ -71,8 +70,8 @@ cdef class MaterialLibrary:
         cdef std_string c_filename
         cdef std_string c_datapath
 
-        c_filename = std_string(<char *> filename)
-        c_datapath = std_string(<char *> datapath)
+        c_filename = std_string(< char * > filename)
+        c_datapath = std_string(< char * > datapath)
 
         self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
 
@@ -80,40 +79,44 @@ cdef class MaterialLibrary:
         """MaterialLibrary C++ destructor."""
         del self.__inst
 
-    def from_hdf5(self, filename, datapath = "/materials", protocol = 1):
+    def from_hdf5(self, filename, datapath="/materials", protocol=1):
         cdef std_string c_filename
         cdef std_string c_datapath
 
-        c_filename = std_string(<char *> filename)
-        c_datapath = std_string(<char *> datapath)
-        
-        self._inst.from_hdf5(filename, datapath, protocol)
-    
-    def write_hdf5(self, filename, datapath = "/materials", nucpath = "/nucid", chunksize = 100):
-        cdef std_string c_filename
-        cdef std_string c_datapath
+        c_filename = std_string(< char * > filename)
+        c_datapath = std_string(< char * > datapath)
 
-        c_filename = std_string(<char *> filename)
-        c_datapath = std_string(<char *> datapath)
-        self._inst.write_hdf5(filename, datapath, nucpath, chunksize)
-        
+        self._inst.from_hdf5(c_filename, c_datapath, protocol)
+
+    def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid"):
+        cdef char * c_filename
+        filename_bytes = filename.encode('UTF-8')
+        c_filename = filename_bytes
+        cdef char * c_datapath
+        datapath_bytes = datapath.encode('UTF-8')
+        c_datapath = datapath_bytes
+        cdef char * c_nucpath
+        nucpath_bytes = nucpath.encode('UTF-8')
+        c_nucpath = nucpath_bytes
+        self._inst.write_hdf5(c_filename, c_datapath, c_nucpath)
+
     def add_material(self, mat):
         cdef std_string c_matname
         if isinstance(mat, material._Material):
-            self._inst.add_material(<cpp_material.Material> (<material._Material> mat).mat_pointer[0])
+            self._inst.add_material( < cpp_material.Material > ( < material._Material > mat).mat_pointer[0])
         else:
             raise TypeError("the material must be a material or a stri but is a "
-                    "{0}".format(type(mat)))
+                            "{0}".format(type(mat)))
 
     def del_material(self, mat):
         cdef std_string c_matname
         if isinstance(mat, material._Material):
-            c_matname = std_string(<char *> mat).mat_pointer.metadata["name"] 
+            c_matname = std_string(< char * > mat).mat_pointer.metadata["name"] 
         elif isinstance(mat, basestring):
-            c_matname = std_string(<char *> mat)
+            c_matname = std_string(< char * > mat)
         else:
             raise TypeError("the material must be a material or a stri but is a "
-                    "{0}".format(type(mat)))
+                            "{0}".format(type(mat)))
         self._inst.del_material(c_matname)
 
     def get_material(self, mat):
@@ -121,18 +124,18 @@ cdef class MaterialLibrary:
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
         cdef jsoncpp.Value metadata
-        
-        c_matname = std_string(<char *> mat)
+
+        c_matname = std_string(< char * > mat)
         c_mat = self._inst.get_material(c_matname)
 
         # build a PyNE Material object form the cpp_material
         metadata = jsoncpp.Value(mat.metadata)
-        py_mat = material._Material( 
-                    c_mat.comp,
-                    c_mat.mass,
-                    c_mat.density,
-                    c_mat.atoms_per_molecule,
-                    metadata)
+        py_mat = material._Material(
+            c_mat.comp,
+            c_mat.mass,
+            c_mat.density,
+            c_mat.atoms_per_molecule,
+            metadata)
         return py_mat
 
     cdef cpp_set[std_string] get_matlist(self):
@@ -142,30 +145,7 @@ cdef class MaterialLibrary:
         return self._inst.get_nuclist()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#cdef class _OldMaterialLibrary(object):
+# cdef class _OldMaterialLibrary(object):
 #
 #    def __init__(self, lib=None, datapath="/materials", nucpath="/nucid"):
 #        """Parameters
@@ -350,7 +330,7 @@ cdef class MaterialLibrary:
 #                mat.metadata["name"] = key
 #            mat.write_hdf5(filename, datapath=datapath, nucpath=nucpath)
 #
-#class OldMaterialLibrary(_OldMaterialLibrary, collections.MutableMapping):
+# class OldMaterialLibrary(_OldMaterialLibrary, collections.MutableMapping):
 #    """The material library is a collection of unique keys mapped to
 #    Material objects.  This is useful for organization and declaring
 #    prefernces between several sources (multiple libraries).
