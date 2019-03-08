@@ -4,14 +4,14 @@ from __future__ import division, unicode_literals
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
 from libcpp.set cimport set as cpp_set
-#from cython.operator cimport reference as ref
-from cython.operator cimport dereference as deref
-from cython.operator cimport preincrement as inc
-from libc.stdlib cimport malloc, free
 from libcpp.string cimport string as std_string
+from libc.stdlib cimport malloc, free
 from libcpp.map cimport map as cpp_map
 from libcpp.vector cimport vector as cpp_vector
 from libcpp cimport bool as cpp_bool
+#from cython.operator cimport reference as ref
+from cython.operator cimport dereference as deref
+from cython.operator cimport preincrement as inc
 
 # Python imports
 import collections
@@ -45,6 +45,7 @@ import pyne.data as data
 
 cimport pyne.material as material
 import pyne.material as material
+
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -98,42 +99,40 @@ cdef class MaterialLibrary:
         
     def add_material(self, mat):
         cdef std_string c_matname
-        if isinstance(mat, material.Material):
-            self._inst.add_material((<Material> mat).mat_pointer)
-        elif isinstance(mat, basestring):
-            c_matname = std_string(<char *> mat)
-            self._inst.add_material(c_matname)
+        if isinstance(mat, material._Material):
+            self._inst.add_material(<cpp_material.Material> (<material._Material> mat).mat_pointer[0])
         else:
             raise TypeError("the material must be a material or a stri but is a "
                     "{0}".format(type(mat)))
 
     def del_material(self, mat):
         cdef std_string c_matname
-        if isinstance(mat, _Material):
-            self._inst.del_material((<_Material> mat).mat_pointer)
+        if isinstance(mat, material._Material):
+            c_matname = std_string(<char *> mat).mat_pointer.metadata["name"] 
         elif isinstance(mat, basestring):
             c_matname = std_string(<char *> mat)
-            self._inst.del_material(c_matname)
         else:
             raise TypeError("the material must be a material or a stri but is a "
                     "{0}".format(type(mat)))
+        self._inst.del_material(c_matname)
 
     def get_material(self, mat):
         # Get the correct cpp_material
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
-        if isinstance(mat, _Material):
-            c_mat = self._inst.get_material((<_Material> mat).mat_pointer)
-        elif isinstance(mat, basestring):
-            c_matname = std_string(<char *> mat)
-            c_mat = self._inst.get_material(c_matname)
-        else:
-            raise TypeError("the material must be a material or a stri but is a "
-                    "{0}".format(type(mat)))
+        cdef jsoncpp.Value metadata
+        
+        c_matname = std_string(<char *> mat)
+        c_mat = self._inst.get_material(c_matname)
 
         # build a PyNE Material object form the cpp_material
-        py_mat = Material()
-        py_mat.mat_pointer = c_mat
+        metadata = jsoncpp.Value(mat.metadata)
+        py_mat = material._Material( 
+                    c_mat.comp,
+                    c_mat.mass,
+                    c_mat.density,
+                    c_mat.atoms_per_molecule,
+                    metadata)
         return py_mat
 
     cdef cpp_set[std_string] get_matlist(self):

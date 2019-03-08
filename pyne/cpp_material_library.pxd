@@ -5,7 +5,7 @@ from libcpp.map cimport map
 
 from pyne cimport cpp_material 
 
-cdef extern from "material_pyne.h" namespace "pyne":
+cdef extern from "material_library.h" namespace "pyne":
     # Cython does not allow for typdef'ing tamplated types :(
     #ctypedef map[int, double] comp_map
     #ctypedef map[int, double].iterator comp_iter
@@ -37,7 +37,6 @@ cdef extern from "material_pyne.h" namespace "pyne":
         void del_material(cpp_material.Material) except +
         void del_material(std_string) except +
         
-        cpp_material.Material get_material(cpp_material.Material) except +
         cpp_material.Material get_material(std_string) except +
         
         std_set[std_string] get_matlist() except +
