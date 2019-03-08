@@ -24,7 +24,8 @@ warnings.simplefilter("ignore", QAWarning)
 from pyne import nucname
 from pyne import data
 from pyne import origen22
-from pyne.material import Material, MaterialLibrary
+from pyne.material import Material
+from pyne.material_library import MaterialLibrary
 
 # import decay gen
 srcdir = os.path.join(os.path.dirname(__file__), '..', 'src')

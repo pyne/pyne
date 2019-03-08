@@ -77,7 +77,7 @@ cdef class MaterialLibrary:
 
     def __dealloc__(self):
         """MaterialLibrary C++ destructor."""
-        del self.__inst
+        del self._inst
 
     def from_hdf5(self, filename, datapath="/materials", protocol=1):
         cdef std_string c_filename
