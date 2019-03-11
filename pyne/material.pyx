@@ -1880,36 +1880,6 @@ def from_text(filename, double mass=-1.0, double atoms_per_molecule=-1.0, metada
 ### Material Converters ###
 ###########################
 
-# <string, Material *>
-
-cdef cpp_map[std_string, matp] dict_to_map_str_matp(dict pydict):
-    cdef _Material pymat
-    cdef cpp_material.Material * cpp_matp
-    cdef cpp_map[std_string, matp] cppmap = cpp_map[std_string, matp]()
-    cdef cpp_pair[std_string, matp] item
-
-    for key, value in pydict.items():
-        pymat = value
-        cpp_matp = pymat.mat_pointer
-        #cppmap[std_string(key)] = cpp_matp
-        item = cpp_pair[std_string, matp](std_string(<char *> key), cpp_matp)
-        cppmap.insert(item)
-
-    return cppmap
-
-
-cdef dict map_to_dict_str_matp(cpp_map[std_string, matp] cppmap):
-    pydict = {}
-    cdef _Material pymat
-    cdef cpp_map[std_string, matp].iterator mapiter = cppmap.begin()
-
-    while mapiter != cppmap.end():
-        pymat = Material()
-        pymat.mat_pointer[0] = deref(deref(mapiter).second)
-        pydict[<char *> deref(mapiter).first.c_str()] = pymat
-        inc(mapiter)
-
-    return pydict
 
 
 
