@@ -69,12 +69,19 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   }
 }
 
+void pyne::MaterialLibrary::merge_material_library(pyne::MaterialLibrary mat_lib){
+
+  pyne::matname_set mats_to_add = mat_lib.get_matlist();
+  for (auto it = mats_to_add.begin(); it != mats_to_add.end(); it++){
+    (*this).add_material(*it);
+  }
+}
 
 void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   std::string mat_name = mat.metadata["name"].asString();
-  auto ins = material_library.insert(std::make_pair(mat_name, mat));
+  auto inst = material_library.insert(std::make_pair(mat_name, mat));
 
-  if (ins.second) {
+  if (inst.second) {
     append_to_nuclist(mat);
     matlist.insert(mat.metadata["name"].asString());
   }

@@ -95,8 +95,13 @@ class MaterialLibrary {
    *             appended to the end of the dataset.
    *  \param chunksize The chunksize for all material data on disk.
   */
-  //  void write_hdf5(std::string filename, std::string datapath = "/materials",
-  //                std::string nucpath = "/nucid", int chunksize=100);
+   void write_hdf5(std::string filename, std::string datapath = "/materials",
+                  std::string nucpath = "/nucid", int chunksize=100);
+  /**
+   * \brief Merge a material library into the current one
+   * \param mat_library pyne material library to merge
+  */
+  void merge_material_library(pyne::MaterialLibrary mat_lib);
 
   /**
    * \brief Add a material to the library
