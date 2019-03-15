@@ -70,8 +70,8 @@ cdef class MaterialLibrary:
         cdef std_string c_filename
         cdef std_string c_datapath
 
-        c_filename = std_string(< char * > filename)
-        c_datapath = std_string(< char * > datapath)
+        c_filename = std_string( < char * > filename)
+        c_datapath = std_string( < char * > datapath)
 
         self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
 
@@ -80,16 +80,17 @@ cdef class MaterialLibrary:
         del self._inst
 
     def from_hdf5(self, filename, datapath="/materials", protocol=1):
-        cdef std_string c_filename
-        cdef std_string c_datapath
-
-        c_filename = std_string(< char * > filename)
-        c_datapath = std_string(< char * > datapath)
+        cdef char * c_filename
+        filename_bytes = filename.encode('UTF-8')
+        c_filename = filename_bytes
+        cdef char * c_datapath
+        datapath_bytes = datapath.encode('UTF-8')
+        c_datapath = datapath_bytes
 
         self._inst.from_hdf5(c_filename, c_datapath, protocol)
 
     def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid",
-            chunksize=100):
+                   chunksize=100):
         cdef char * c_filename
         filename_bytes = filename.encode('UTF-8')
         c_filename = filename_bytes
@@ -104,7 +105,7 @@ cdef class MaterialLibrary:
     def add_material(self, mat):
         cdef std_string c_matname
         if isinstance(mat, material._Material):
-            self._inst.add_material( < cpp_material.Material > ( < material._Material > mat).mat_pointer[0])
+            self._inst.add_material(< cpp_material.Material > ( < material._Material > mat).mat_pointer[0])
         else:
             raise TypeError("the material must be a material or a stri but is a "
                             "{0}".format(type(mat)))
@@ -112,9 +113,9 @@ cdef class MaterialLibrary:
     def del_material(self, mat):
         cdef std_string c_matname
         if isinstance(mat, material._Material):
-            c_matname = std_string(< char * > mat).mat_pointer.metadata["name"] 
+            c_matname = std_string( < char * > mat).mat_pointer.metadata["name"] 
         elif isinstance(mat, basestring):
-            c_matname = std_string(< char * > mat)
+            c_matname = std_string( < char * > mat)
         else:
             raise TypeError("the material must be a material or a stri but is a "
                             "{0}".format(type(mat)))
@@ -126,7 +127,7 @@ cdef class MaterialLibrary:
         cdef std_string c_matname
         cdef jsoncpp.Value metadata
 
-        c_matname = std_string(< char * > mat)
+        c_matname = std_string( < char * > mat)
         c_mat = self._inst.get_material(c_matname)
 
         # build a PyNE Material object form the cpp_material
@@ -138,6 +139,13 @@ cdef class MaterialLibrary:
             c_mat.atoms_per_molecule,
             metadata)
         return py_mat
+
+    def merge(self, mat_library):
+        if isinstance(mat_library, MaterialLibrary):
+            self._inst.merge(mat_library._inst)
+        else:
+            raise TypeError("the material library must be a MaterialLibrary but is a "
+                            "{0}".format(type(mat_library)))
 
     cdef cpp_set[std_string] get_matlist(self):
         return self._inst.get_matlist()
@@ -158,7 +166,7 @@ cdef cpp_map[std_string, matp] dict_to_map_str_matp(dict pydict):
         pymat = value
         cpp_matp = pymat.mat_pointer
         #cppmap[std_string(key)] = cpp_matp
-        item = cpp_pair[std_string, matp](std_string(<char *> key), cpp_matp)
+        item = cpp_pair[std_string, matp](std_string( < char * > key), cpp_matp)
         cppmap.insert(item)
 
     return cppmap
@@ -172,7 +180,7 @@ cdef dict map_to_dict_str_matp(cpp_map[std_string, matp] cppmap):
     while mapiter != cppmap.end():
         pymat = material.Material()
         pymat.mat_pointer[0] = deref(deref(mapiter).second)
-        pydict[<char *> deref(mapiter).first.c_str()] = pymat
+        pydict[ < char * > deref(mapiter).first.c_str()] = pymat
         inc(mapiter)
 
     return pydict

@@ -27,6 +27,14 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
 // Destructor
 pyne::MaterialLibrary::~MaterialLibrary(){};
 
+void pyne::MaterialLibrary::from_hdf5(char* fname,
+                                      char* dpath,
+                                      int protocol){
+  std::string filename(fname);
+  std::string datapath(dpath);
+  from_hdf5(filename, datapath, protocol);
+
+}
 // Append Material to the library from hdf5 file
 void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
                                       const std::string& datapath,
@@ -115,7 +123,7 @@ void pyne::MaterialLibrary::write_hdf5(char* fname, char* dpath, char* npath,
   std::string filename(fname);
   std::string datapath(dpath);
   std::string nucpath(npath);
-  write_hdf5(fname, dpath, npath, chunksize);
+  write_hdf5(filename, datapath, nucpath, chunksize);
   
 }
   

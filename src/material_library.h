@@ -75,6 +75,14 @@ class MaterialLibrary {
   */
   void from_hdf5(const std::string& filename,
                  const std::string& datapath = "/materials", int protocol = 1);
+  /**
+   * \brief loads the pyne materials in map of name vs Material
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the materials in the file.
+    /// \param protocol Flag for layout of material on disk.
+  */
+  void from_hdf5(char* filename,
+                 char* datapath = "/materials", int protocol = 1);
 
   /**
    * Writes MaterialLibrary out to an HDF5 file.
