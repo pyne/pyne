@@ -1,3 +1,6 @@
+#ifndef PYNE_MATERIAL_LIBRARY
+#define PYNE_MATERIAL_LIBRARY
+
 #include <stdlib.h>
 #include <iostream>
 #include <map>
@@ -6,7 +9,7 @@
 #include <vector>
 
 #if !defined(JSON_IS_AMALGAMATION)
-  #define JSON_IS_AMALGAMATION
+#define JSON_IS_AMALGAMATION
 #endif
 
 #ifndef PYNE_IS_AMALGAMATED
@@ -73,16 +76,6 @@ class MaterialLibrary {
   void from_hdf5(const std::string& filename,
                  const std::string& datapath = "/materials", int protocol = 1);
 
-  ///Writes MaterialLibrary out to an HDF5 file.
-  /// This happens according to protocol 1.
-  /// \param filename Path on disk to the HDF5 file.
-  /// \param datapath Path to the the material in the file.
-  /// \param nucpath Path to the nuclides set in the file.
-  ///            float.  A value of -0.0 indicates that the material should be
-  ///            appended to the end of the dataset.
-  /// \param chunksize The chunksize for all material data on disk.
-  void write_hdf5(char* filename, char* datapath, char* nucpath,
-                  int chunksize=100);
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
@@ -95,13 +88,27 @@ class MaterialLibrary {
    *             appended to the end of the dataset.
    *  \param chunksize The chunksize for all material data on disk.
   */
-   void write_hdf5(std::string filename, std::string datapath = "/materials",
-                  std::string nucpath = "/nucid", int chunksize=100);
+  void write_hdf5(char* filename, char* datapath = "/materials",
+                  char* nucpath = "/nucid", int chunksize = 100);
+  /**
+   * Writes MaterialLibrary out to an HDF5 file.
+   *  This happens according to protocol 1.
+   *  \param filename Path on disk to the HDF5 file.
+   *  \param datapath Path to the the material in the file.
+   *  \param nucpath Path to the nuclides set in the file.
+   *  \param row The index to read out, may be negative. Also note that this is
+   * a
+   *             float.  A value of -0.0 indicates that the material should be
+   *             appended to the end of the dataset.
+   *  \param chunksize The chunksize for all material data on disk.
+  */
+  void write_hdf5(const std::string& filename, const std::string& datapath = "/materials",
+                  const std::string& nucpath = "/nucid", int chunksize = 100);
   /**
    * \brief Merge a material library into the current one
    * \param mat_library pyne material library to merge
   */
-  void merge_material_library(pyne::MaterialLibrary mat_lib);
+  void merge(pyne::MaterialLibrary mat_lib);
 
   /**
    * \brief Add a material to the library
@@ -136,3 +143,4 @@ class MaterialLibrary {
 
 };  // end MaterialLibrary class header
 }  // end of pyne namespace
+#endif  // PYNE_MATERIAL_LIBRARY

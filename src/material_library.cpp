@@ -10,14 +10,14 @@ pyne::MaterialLibrary::MaterialLibrary(){};
 
 // Default constructor
 pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
-                                 const std::string& datapath) {
+                                       const std::string& datapath) {
   if (!pyne::file_exists(file)) {
     throw std::runtime_error("File " + file +
                              " not found or no read permission");
   }
   if (!hdf5_path_exists(file, datapath)) {
-    throw std::runtime_error("The datapath, " + datapath + ", in "
-                             + file + " is empty.");
+    throw std::runtime_error("The datapath, " + datapath + ", in " + file +
+                             " is empty.");
   }
 
   // load materials
@@ -29,51 +29,52 @@ pyne::MaterialLibrary::~MaterialLibrary(){};
 
 // Append Material to the library from hdf5 file
 void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
-                                const std::string& datapath, int protocol) {
-  const char* data_path = datapath.c_str();
+                                      const std::string& datapath,
+                                      int protocol){
+const char* data_path = datapath.c_str();
 
-  if (!hdf5_path_exists(filename, data_path)) return;
+if (!hdf5_path_exists(filename, data_path)) return;
 
-  int file_num_materials = get_length_of_table(filename, datapath);
-  int library_length = material_library.size();
-  for (int i = 0; i < file_num_materials; i++) {
-    pyne::Material mat;  // from file
-    // read new mat
-    mat.from_hdf5(filename, datapath, i, protocol);
-    
-    // if exists, get the material name from metadata make one instead
-    std::string mat_name;
-    std::pair<pyne::matname_set::iterator, bool> mat_insert;
-    if (mat.metadata.isMember("name")) {
-      mat_name = mat.metadata["name"].asString();
-      mat_insert = matlist.insert(mat.metadata["name"].asString());
-    } else {
-      // form a mat name as 'mX'
-      int mat_number = library_length + i;
-      mat_name = "m" + std::to_string(mat_number);
+int file_num_materials = get_length_of_table(filename, datapath);
+int library_length = material_library.size();
+for (int i = 0; i < file_num_materials; i++) {
+  pyne::Material mat;  // from file
+  // read new mat
+  mat.from_hdf5(filename, datapath, i, protocol);
+
+  // if exists, get the material name from metadata make one instead
+  std::string mat_name;
+  std::pair<pyne::matname_set::iterator, bool> mat_insert;
+  if (mat.metadata.isMember("name")) {
+    mat_name = mat.metadata["name"].asString();
+    mat_insert = matlist.insert(mat.metadata["name"].asString());
+  } else {
+    // form a mat name as 'mX'
+    int mat_number = library_length + i;
+    mat_name = "m" + std::to_string(mat_number);
+    mat.metadata["name"] = mat_name;
+    mat_insert = matlist.insert(mat.metadata["name"].asString());
+
+    // if 'mX' name is already in the Library rename the material
+    while (!mat_insert.second) {
+      mat_number += file_num_materials;
+      mat_name = "m" + std::to_string(library_length + i);
       mat.metadata["name"] = mat_name;
       mat_insert = matlist.insert(mat.metadata["name"].asString());
-      
-      // if 'mX' name is already in the Library rename the material
-      while (!mat_insert.second) {
-        mat_number += file_num_materials;
-        mat_name = "m" + std::to_string(library_length + i);
-        mat.metadata["name"] = mat_name;
-        mat_insert = matlist.insert(mat.metadata["name"].asString());
-      }
-    }
-    if (mat_insert.second) {
-      append_to_nuclist(mat);
-      material_library[mat.metadata["name"].asString()] = mat;
     }
   }
+  if (mat_insert.second) {
+    append_to_nuclist(mat);
+    material_library[mat.metadata["name"].asString()] = mat;
+  }
+}
 }
 
-void pyne::MaterialLibrary::merge_material_library(pyne::MaterialLibrary mat_lib){
-
+void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
   pyne::matname_set mats_to_add = mat_lib.get_matlist();
-  for (auto it = mats_to_add.begin(); it != mats_to_add.end(); it++){
-    (*this).add_material(*it);
+  for (auto it = mats_to_add.begin(); it != mats_to_add.end(); it++) {
+    pyne::Material mat = mat_lib.get_material(*it);
+    (*this).add_material(mat);
   }
 }
 
@@ -99,7 +100,8 @@ void pyne::MaterialLibrary::del_material(const std::string& mat_name) {
   matlist.erase(mat_name);
 }
 
-pyne::Material pyne::MaterialLibrary::get_material(const std::string& mat_name) {
+pyne::Material pyne::MaterialLibrary::get_material(
+    const std::string& mat_name) {
   auto it = material_library.find(mat_name);
   if (it != material_library.end()) {
     return it->second;
@@ -108,20 +110,19 @@ pyne::Material pyne::MaterialLibrary::get_material(const std::string& mat_name) 
   }
 }
 
-void pyne::MaterialLibrary::write_hdf5(char * fname,
-                                 char * dpath,
-                                 char * npath, int chunksize) {
+void pyne::MaterialLibrary::write_hdf5(char* fname, char* dpath, char* npath,
+                                       int chunksize) {
   std::string filename(fname);
   std::string datapath(dpath);
   std::string nucpath(npath);
-//  write_hdf5(fname, dpath, npath, int chunksize);
-//
-//}
-//
-//void pyne::MaterialLibrary::write_hdf5(std::string filename,
-//                                 std::string datapath,
-//                                 std::string nucpath, int chunksize) {
-  // A large part of this is inspired/taken from by material.cpp...
+  write_hdf5(fname, dpath, npath, chunksize);
+  
+}
+  
+ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
+                                 const std::string& datapath,
+                                 const std::string& nucpath, int chunksize) {
+  // A large part of this is inspiwrite_hdf5red/taken from by material.cpp...
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
@@ -188,7 +189,7 @@ void pyne::MaterialLibrary::append_to_nuclist(pyne::Material mat) {
 
 // see if path exists before we go on
 bool pyne::MaterialLibrary::hdf5_path_exists(const std::string& filename,
-                                       const std::string& datapath) {
+                                             const std::string& datapath) {
   // Turn off annoying HDF5 errors
   herr_t status;
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -210,7 +211,7 @@ bool pyne::MaterialLibrary::hdf5_path_exists(const std::string& filename,
 }
 
 int pyne::MaterialLibrary::get_length_of_table(const std::string& filename,
-                                         const std::string& datapath) {
+                                               const std::string& datapath) {
   // Turn off annoying HDF5 errors
   herr_t status;
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
