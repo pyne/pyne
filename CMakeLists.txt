@@ -89,6 +89,14 @@ if(${MOAB_FOUND})
   endif(APPLE)
 endif(${MOAB_FOUND})
 
+# find DAGMC                                                                                                                        
+find_package(DAGMC)
+if(DAGMC_FOUND)
+  include_directories(${DAGMC_INCLUDE_DIRS})
+  set(LIBS ${LIBS} ${DAGMC_LIBRARIES})
+  link_directories(${DAGMC_LIBRARY_DIRS})
+
+endif(DAGMC_FOUND)
 
 # Find Python
 find_package(PythonInterp REQUIRED)
