@@ -124,6 +124,16 @@ class MaterialLibrary {
   */
   void add_material(pyne::Material mat);
   /**
+   * \brief Add a material to the library
+   * \param mat material to add
+  */
+  void add_material(pyne::Material mat, char* mat_name);
+  /**
+   * \brief Add a material to the library
+   * \param mat material to add
+  */
+  void add_material(pyne::Material mat, const std::string& mat_name);
+  /**
    * \brief remove a material of the Library
    * \param mat material to remove
   */

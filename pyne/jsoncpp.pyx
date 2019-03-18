@@ -94,6 +94,11 @@ cdef class Value(object):
     _value_type_names = ['null', 'int', 'uint', 'real', 'string', 'boolean',
                          'array', 'object']
 
+    cdef __set_instance__(self, cpp_jsoncpp.Value new_inst):
+        if self._inst:
+            del self._inst
+        self._inst = new cpp_jsoncpp.Value(new_inst)
+    
     def __cinit__(self, document=None, bint view=False):
         """Value C++ constuctor."""
         self._view = view
