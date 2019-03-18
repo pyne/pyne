@@ -2136,5 +2136,4 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
     tab += "\\end{tabular}\n"
     return tab
 
-
 ensure_material = lambda m: m if isinstance(m, Material) else Material(m)

@@ -64,16 +64,36 @@ cdef class MaterialLibrary:
     def __cinit(self, *args, **kwargs):
         """MaterialLibrary C++ default constructor."""
         self._inst = new cpp_material_library.MaterialLibrary()
+    def __init__(self, lib=None, datapath="/materials", nucpath="/nucid"):
+        """Parameters
+        ----------
+        lib : dict-like, str, or None, optional
+            The data to intialize the material library with.  If this is a
+            string, it is interpreted as a path to a file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
 
-    def __cinit(self, filename, datapath="/materials"):
-        """MaterialLibrary C++ constructor."""
-        cdef std_string c_filename
-        cdef std_string c_datapath
-
-        c_filename = std_string( < char * > filename)
-        c_datapath = std_string( < char * > datapath)
-
-        self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
+        """
+        if sys.version_info[0] >=3 and isinstance(lib, bytes):
+            lib = lib.decode()
+        cdef dict _lib = {}
+        if lib is None:
+            self._lib = _lib
+        elif isinstance(lib, collections.Mapping):
+            for key, mat in lib.items():
+                self.__setitem__(key, material.ensure_material(mat))
+        elif isinstance(lib, basestring):
+            c_filename = std_string( < char * > data)
+            c_datapath = std_string( < char * > datapath)
+            self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
+        elif isinstance(lib, collections.Sequence):
+            for key, mat in lib:
+                self.__setitem__(key, material.ensure_material(mat))
+        else:
+            msg = "Could not initialize library with lib type {0!r}"
+            raise TypeError(msg.format(type(lib)))
 
     def __dealloc__(self):
         """MaterialLibrary C++ destructor."""
@@ -104,8 +124,11 @@ cdef class MaterialLibrary:
 
     def add_material(self, mat):
         cdef std_string c_matname
+        cdef material._Material value_proxy
         if isinstance(mat, material._Material):
-            self._inst.add_material(< cpp_material.Material > ( < material._Material > mat).mat_pointer[0])
+            value_proxy = material.Material(mat, free_mat=not isinstance(mat, material._Material))
+            (<cpp_material_library.MaterialLibrary *> self._inst).add_material(
+                    value_proxy.mat_pointer[0])
         else:
             raise TypeError("the material must be a material or a stri but is a "
                             "{0}".format(type(mat)))
@@ -157,8 +180,13 @@ cdef class MaterialLibrary:
     cdef cpp_set[int] get_nuclist(self):
         return self._inst.get_nuclist()
 
-    def __setitem(self, key, value):
-        self._int.add_material(key.encode('utf-8'), value.mat_pointer)
+    def __setitem__(self, key, value):
+        value.metadata["name"] = key.encode('utf-8')
+        
+        cdef material._Material value_proxy
+        value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+        (<cpp_material_library.MaterialLibrary *> self._inst).add_material(
+                value_proxy.mat_pointer[0])
 
     def __getitem__(self, key):
         return self.get_material(key.encode('utf-8'))
