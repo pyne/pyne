@@ -23,7 +23,7 @@ def consistancy_check(args):
 
 def build_name(args):
     """Build the container name, if not specified by the user. Container name
-    will be "pyne/ubuntu_18.04{_moab/_dagmc,_pymoab}{_pyne-deps/}"
+    will be "pyne/ubuntu_18.04{_moab/_dagmc{_pymoab}}{_pyne-deps/}"
 
     Parameters
     ----------
