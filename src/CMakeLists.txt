@@ -56,7 +56,6 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
   #"transport_spatial_methods/3d/main.f90"
   )
 set(MOAB_SRCS
-    "dagmc_bridge.cpp"
     "measure.cpp"
     "source_sampling.cpp"
     )
@@ -94,8 +93,11 @@ IF(BUILD_SPATIAL_SOLVER)
     target_link_libraries(pyne ${LIBS_HDF5} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 ENDIF(BUILD_SPATIAL_SOLVER)
 if(MOAB_FOUND)
-    target_link_libraries(pyne dagmc MOAB)
+    target_link_libraries(pyne MOAB)
 endif(MOAB_FOUND)
+if(DAGMC_FOUND)
+    target_link_libraries(pyne dagmc MOAB)
+endif(DAGMC_FOUND)
 
 add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)

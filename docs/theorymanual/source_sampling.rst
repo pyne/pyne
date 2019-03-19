@@ -13,14 +13,21 @@ Theory
 ******
 
 Meshes can be used to represent particle source distributions for Monte Carlo
-radiation transport. On a mesh, source intensity is discretized spatially (into
-mesh volume elements) and by energy (into energy bins). In order to randomly
-sample these distributions to select particle birth parameters (position,
-energy, statistical weight) a discrete probability density function (PDF) must be
-created, which can be sampled with pseudo-random variates. It is convenient to
-create a single PDF to describe all of phase space; in other words, each bin
-within the PDF represents the probability that a particle is born in a
-particular energy group within a particular mesh volume element. 
+radiation transport. On a mesh, source intensity is discretized spatially into
+mesh volume elements and by energy (into energy bins). There are three types of
+mesh volume element under different conditions:
+- Voxel, the volume element of structured mesh, used in voxel R2S;
+- Sub-voxel, the intersection of a voxel (of structured mesh) and a cell, used
+  in sub-voxel R2S;
+- Mesh volume element of the tetrahedron mesh, used in R2S with tetrahedron
+  mesh.
+In order to randomly sample these distributions to select particle birth
+parameters (position, energy, statistical weight, cell number) a discrete
+probability density function (PDF) must be created, which can be sampled
+with pseudo-random variates. It is convenient to create a single PDF to
+describe all of phase space; in other words, each bin within the PDF represents
+the probability that a particle is born in a particular energy group within a
+particular mesh volume element.
 
 In pyne, meshes define volumetric source density :math:`q'` with units of
 :math:`\frac{particles}{time \cdot volume}`. In order to find the source
@@ -90,7 +97,8 @@ Assumptions
 
 The Sampler class chooses the (x, y, z) position within a mesh volume element
 with no regard for what geometry cell it lies in. Cell rejection must be
-implemented within the physic-code-specific wrapper script. 
+implemented within the physics-code-specific wrapper script to make the source
+particle born in the correct cell (for sub-voxel R2S mode) or any non-void cell.
 
 **********************
 Sample Calculations

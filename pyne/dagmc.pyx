@@ -21,12 +21,13 @@ if sys.version_info[0] >= 3:
     unichr = chr
 
 # Mesh specific imports
-try:
-    from itaps import iMesh
-except ImportError:
-    warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of dagmc module may be incomplete",
-                  QAWarning)
+from pyne.mesh import HAVE_PYMOAB
+from pymoab import core as mb_core, types
+
+if not HAVE_PYMOAB:
+    warn("The PyMOAB optional dependency could not be imported. "
+         "Some aspects of dagmc module may be incomplete",
+         QAWarning)
 
 # Globals
 VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid
@@ -108,7 +109,7 @@ cdef class RayHistory(object):
     cdef void * ptr
 
 
-def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt, 
+def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt,
                   np.ndarray[np.float64_t, ndim=1] dir, RayHistory history=None):
     cdef int result
     cdef cpp_dagmc_bridge.ErrorCode crtn
@@ -120,8 +121,8 @@ def dag_pt_in_vol(vol, np.ndarray[np.float64_t, ndim=1] pt,
         raise ValueError("dir must have shape=(3,)")
     if history is None:
         history = RayHistory()
-    crtn = cpp_dagmc_bridge.dag_pt_in_vol(<cpp_dagmc_bridge.EntityHandle> vol, 
-                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(pt), &result, 
+    crtn = cpp_dagmc_bridge.dag_pt_in_vol(<cpp_dagmc_bridge.EntityHandle> vol,
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(pt), &result,
                 <cpp_dagmc_bridge.vec3> np.PyArray_DATA(dir), history.ptr)
     return result
 
@@ -156,12 +157,12 @@ def _ray_history():
     dag_dealloc_ray_history(history)
 
 
-def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start, 
+def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start,
                  np.ndarray[np.float64_t, ndim=1] ray_dir,
                  RayHistory history=None, double distance_limit=0.0):
-    cdef cpp_dagmc_bridge.EntityHandle next_surf 
+    cdef cpp_dagmc_bridge.EntityHandle next_surf
     cdef cpp_dagmc_bridge.ErrorCode crtn
-    cdef double next_surf_dist = 0.0 
+    cdef double next_surf_dist = 0.0
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
     if ray_start.ndim != 1 and ray_start.shape[0] != 3:
@@ -170,8 +171,8 @@ def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start,
         raise ValueError("ray_dir must have shape=(3,)")
     if history is None:
         history = RayHistory()
-    crtn = cpp_dagmc_bridge.dag_ray_fire(<cpp_dagmc_bridge.EntityHandle> vol, 
-                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_start), 
+    crtn = cpp_dagmc_bridge.dag_ray_fire(<cpp_dagmc_bridge.EntityHandle> vol,
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_start),
                 <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_dir),
                 &next_surf, &next_surf_dist, history.ptr, distance_limit)
     if crtn != 0:
@@ -179,8 +180,8 @@ def dag_ray_fire(vol, np.ndarray[np.float64_t, ndim=1] ray_start,
     return EntityHandle(next_surf), next_surf_dist
 
 
-def dag_ray_follow(firstvol, np.ndarray[np.float64_t, ndim=1] ray_start, 
-                   np.ndarray[np.float64_t, ndim=1] ray_dir, double distance_limit, 
+def dag_ray_follow(firstvol, np.ndarray[np.float64_t, ndim=1] ray_start,
+                   np.ndarray[np.float64_t, ndim=1] ray_dir, double distance_limit,
                    RayBuffer data_buffers):
     cdef int i
     cdef cpp_dagmc_bridge.ErrorCode crtn
@@ -196,9 +197,9 @@ def dag_ray_follow(firstvol, np.ndarray[np.float64_t, ndim=1] ray_start,
         raise ValueError("ray_start must have shape=(3,)")
     if ray_dir.ndim != 1 and ray_dir.shape[0] != 3:
         raise ValueError("ray_dir must have shape=(3,)")
-    crtn = cpp_dagmc_bridge.dag_ray_follow(<cpp_dagmc_bridge.EntityHandle> firstvol, 
-                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_start), 
-                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_dir), distance_limit, 
+    crtn = cpp_dagmc_bridge.dag_ray_follow(<cpp_dagmc_bridge.EntityHandle> firstvol,
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_start),
+                <cpp_dagmc_bridge.vec3> np.PyArray_DATA(ray_dir), distance_limit,
                 &num_intersections, &surfs, &distances, &volumes, data_buffers.ptr)
     if crtn != 0:
         raise DagmcError("Error code " + str(crtn))
@@ -212,14 +213,14 @@ def dag_ray_follow(firstvol, np.ndarray[np.float64_t, ndim=1] ray_start,
     return num_intersections, pysurfs, pydistances, pyvolumes
 
 
-def  dag_next_vol(surface, volume): 
+def  dag_next_vol(surface, volume):
     cdef cpp_dagmc_bridge.ErrorCode crtn
     cdef cpp_dagmc_bridge.EntityHandle next_vol
     if not isinstance(surface, EntityHandle):
         surface = EntityHandle(surface)
     if not isinstance(volume, EntityHandle):
         volume = EntityHandle(volume)
-    crtn = cpp_dagmc_bridge.dag_next_vol(<cpp_dagmc_bridge.EntityHandle> surface, 
+    crtn = cpp_dagmc_bridge.dag_next_vol(<cpp_dagmc_bridge.EntityHandle> surface,
                                          <cpp_dagmc_bridge.EntityHandle> volume,
                                          &next_vol)
     if crtn != 0:
@@ -229,17 +230,17 @@ def  dag_next_vol(surface, volume):
 
 def vol_is_graveyard(vol):
     """True if the given volume id is a graveyard volume"""
-    cdef int crtn 
+    cdef int crtn
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
     crtn = cpp_dagmc_bridge.vol_is_graveyard(<cpp_dagmc_bridge.EntityHandle> vol)
     print(crtn)
     return bool(crtn)
-    
+
 
 def vol_is_implicit_complement(vol):
     """True if the given volume id is the implicit complement volume"""
-    cdef int crtn 
+    cdef int crtn
     if not isinstance(vol, EntityHandle):
         vol = EntityHandle(vol)
     crtn = cpp_dagmc_bridge.vol_is_implicit_complement(
@@ -264,8 +265,8 @@ def get_volume_metadata(vol):
 def get_volume_boundary(vol):
     cdef int i
     cdef cpp_dagmc_bridge.ErrorCode crtn
-    cdef cpp_dagmc_bridge.vec3 minpt  
-    cdef cpp_dagmc_bridge.vec3 maxpt 
+    cdef cpp_dagmc_bridge.vec3 minpt
+    cdef cpp_dagmc_bridge.vec3 maxpt
     cdef np.ndarray pyminpt = np.empty(3, dtype=np.float64)
     cdef np.ndarray pymaxpt = np.empty(3, dtype=np.float64)
     cdef np.npy_intp shape[1]
@@ -280,7 +281,7 @@ def get_volume_boundary(vol):
         pyminpt[i] = minpt[i]
         pymaxpt[i] = maxpt[i]
     return pyminpt, pymaxpt
-    
+
 
 
 ### end bridge
@@ -291,7 +292,7 @@ vol_id_to_handle = {}
 vol_handle_to_id = {}
 
 def versions():
-    """Return a (str, int) tuple: the version and SVN revision of the 
+    """Return a (str, int) tuple: the version and SVN revision of the
     active DagMC C++ library.
     """
     return ('{0:.4}'.format(dag_version()), int(dag_rev_version()))
@@ -357,8 +358,8 @@ def volume_metadata(vol_id):
 def volume_boundary(vol_id):
     """Get the lower and upper boundary of a volume in (x,y,z) coordinates.
 
-    Return the lower and upper coordinates of an axis-aligned bounding box for 
-    the given volume.  The returned box may or may not be the minimal bounding 
+    Return the lower and upper coordinates of an axis-aligned bounding box for
+    the given volume.  The returned box may or may not be the minimal bounding
     box for the volume. Return (xyz low) and (xyz high) as np arrays.
     """
     eh = vol_id_to_handle[vol_id]
@@ -368,10 +369,9 @@ def volume_boundary(vol_id):
 
 def point_in_volume(vol_id, xyz, uvw=[1,0,0]):
     """Determine whether the given point, xyz, is in the given volume.
-    
-    If provided, uvw is used to determine the ray fire direction for the underlying 
-    query.  Otherwise, a random direction will be chosen. 
-    
+
+    If provided, uvw is used to determine the ray fire direction for the underlying
+    query.  Otherwise, a random direction will be chosen.
     """
     xyz = np.array(xyz, dtype=np.float64)
     uvw = np.array(uvw, dtype=np.float64)
@@ -394,7 +394,7 @@ def find_volume(xyz, uvw=[1,0,0]):
     for eh, vol_id in vol_handle_to_id.iteritems():
         result = dag_pt_in_vol(eh, xyz, uvw)
         if result == 1:
-            return vol_id    
+            return vol_id
     raise DagmcError("The point {0} does not appear to be in any volume".format(xyz))
 
 
@@ -404,7 +404,7 @@ def fire_one_ray(vol_id, xyz, uvw):
     uvw must represent a unit vector.
 
     Only intersections that *exit* the volume will be detected.  Entrance intersections
-    are not detected.  In most cases, you should only 
+    are not detected.  In most cases, you should only
     call this function with arguments for which point_in_volume would return True.
 
     Returns a (surface id, distance) tuple, or None if no intersection detected.
@@ -426,13 +426,13 @@ def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
     """Return an iterator for a ray in a single direction.
 
     The iterator will yield a series of tuples (vol,dist,surf), indicating the next
-    volume intersected, the distance to the next intersection (from the last 
-    intersection), and the surface intersected.  Stops iterating when no further 
-    intersections are detected along the ray.  This is the only way to traverse 
+    volume intersected, the distance to the next intersection (from the last
+    intersection), and the surface intersected.  Stops iterating when no further
+    intersections are detected along the ray.  This is the only way to traverse
     volumes along a given ray.
 
     Keyword arguments:
-    yield_xyz: results will contain a fourth tuple element, being the xyz 
+    yield_xyz: results will contain a fourth tuple element, being the xyz
                position of the intersection
     dist_limit: distance at which to consider the ray ended
     """
@@ -460,10 +460,10 @@ def ray_iterator_slow(init_vol_id, startpoint, direction, **kw):
             newvol = vol_handle_to_id[eh]
             dist = dist_result
             newsurf = surf_handle_to_id[surf]
-            
+
             if kw.get('yield_xyz', False) :
                 yield (newvol, dist, newsurf, xyz)
-            else: 
+            else:
                 yield (newvol, dist, newsurf)
 
 
@@ -484,26 +484,26 @@ def ray_iterator(init_vol_id, startpoint, direction, **kw):
             yield (vol_id, dists[i], surf_id, xyz)
         else:
             yield (vol_id, dists[i], surf_id)
-    
+
     dag_dealloc_ray_buffer(buf)
 
 
 def tell_ray_story(startpoint, direction, output=sys.stdout, **kw):
     """Write a human-readable history of a ray in a given direction.
 
-    The history of the ray from startpoint in direction is written 
+    The history of the ray from startpoint in direction is written
     to the given output file.
-    The initial volume in which startpoint resides will be determined, and 
+    The initial volume in which startpoint resides will be determined, and
     the direction argument will be normalized to a unit vector.
 
     kw args are passed on to underlying call to ray_iterator
 
     """
     xyz = np.array(startpoint, dtype=np.float64)
-    uvw = np.array(direction, dtype=np.float64) 
+    uvw = np.array(direction, dtype=np.float64)
     uvw /= norm(uvw)
 
-    def pr(*args): 
+    def pr(*args):
         print(*args, file=output)
 
     def vol_notes(v):
@@ -514,19 +514,19 @@ def tell_ray_story(startpoint, direction, output=sys.stdout, **kw):
         else:
             notes.append('mat=' + str(md['material']))
             notes.append('rho=' + str(md['rho']))
-        if volume_is_graveyard(v): 
+        if volume_is_graveyard(v):
             notes.append('graveyard')
         if volume_is_implicit_complement(v):
             notes.append('implicit complement')
         return '({0})'.format(', '.join(notes))
 
     pr('Starting a ray at', xyz, 'in the direction', uvw)
-    
+
     if 'dist_limit' in kw:
         pr('with a dist_limit of', kw['dist_limit'])
 
     first_volume = find_volume(xyz, uvw)
-    
+
     pr('The ray starts in volume', first_volume, vol_notes(first_volume))
 
     kwargs = kw.copy()
@@ -545,24 +545,24 @@ def tell_ray_story(startpoint, direction, output=sys.stdout, **kw):
 def find_graveyard_inner_box():
     """Estimate the dimension of the inner wall of the graveyard, assuming box shape.
 
-    Return the the (low, high) xyz coordinates of the inner wall of the 
+    Return the the (low, high) xyz coordinates of the inner wall of the
     graveyard volume.
-    This assumes the graveyard volume is a box-shaped, axis-aligned shell.  
-    This function is slow and should not be called many times where performance 
+    This assumes the graveyard volume is a box-shaped, axis-aligned shell.
+    This function is slow and should not be called many times where performance
     is desirable.
     """
     cdef int i
     volumes = get_volume_list()
     graveyard = 0
     for v in volumes:
-        if volume_is_graveyard(v): 
+        if volume_is_graveyard(v):
             graveyard = v
             break
     if graveyard == 0:
         raise DagmcError('Could not find a graveyard volume')
 
     xyz_lo, xyz_hi = volume_boundary(graveyard)
-    xyz_mid = np.array([(hi + lo) / 2.0 for (hi, lo) in zip(xyz_hi, xyz_lo)], 
+    xyz_mid = np.array([(hi + lo) / 2.0 for (hi, lo) in zip(xyz_hi, xyz_lo)],
                        dtype=np.float64)
 
     result_lo = np.array([0] * 3, dtype=np.float64 )
@@ -580,13 +580,13 @@ def find_graveyard_inner_box():
         hi_mid[i] = xyz_hi[i]
         _, dist = fire_one_ray(graveyard, hi_mid, uvw)
         result_hi[i] = hi_mid[i] - dist
-   
+
     return result_lo, result_hi
 
 def get_material_set(**kw):
     """Return all material IDs used in the geometry as a set of integers
-    
-    If the keyword argument 'with_rho' is True, the set will contain (int, float) 
+
+    If the keyword argument 'with_rho' is True, the set will contain (int, float)
     tuples containing material ID and density
     """
     mat_ids = set()
@@ -606,64 +606,63 @@ def get_material_set(**kw):
 
 def cell_material_assignments(hdf5):
     """Get dictionary of cell to material assignments
-    
+
     Parameters:
     -----------
     hdf5 : string
         Path to hdf5 material-laden geometry
-    
+
     Returns:
     --------
     mat_assigns : dict
-        Dictionary of the cell to material assignments. Keys are cell 
+        Dictionary of the cell to material assignments. Keys are cell
         numbers and values are material names
     """
-    # Load the geometry as an iMesh instance
-    dag_geom = iMesh.Mesh()
-    dag_geom.load(hdf5)
-    dag_geom.getEntities()
-    mesh_sets = dag_geom.getEntSets()
+    # Load the geometry as a pymoab instance
+    dag_geom = mb_core.Core()
+    dag_geom.load_file(hdf5)
 
     # Get tag handle
-    cat_tag = dag_geom.getTagHandle('CATEGORY')
-    id_tag = dag_geom.getTagHandle('GLOBAL_ID')
-    name_tag = dag_geom.getTagHandle('NAME')
+    cat_tag = dag_geom.tag_get_handle(types.CATEGORY_TAG_NAME)
+    id_tag = dag_geom.tag_get_handle(types.GLOBAL_ID_TAG_NAME)
+    name_tag = dag_geom.tag_get_handle(types.NAME_TAG_NAME)
 
     # Get list of materials and list of cells
     mat_assigns={}
-    
+
     # Assign the implicit complement to vacuum
     # NOTE: This is a temporary work-around and it is just assumed that there
     # is no material already assigned to the implicit complement volume.
     implicit_vol = find_implicit_complement()
     mat_assigns[implicit_vol] = "mat:Vacuum"
-    
-    # loop over all mesh_sets in model
-    for mesh_set in mesh_sets:
-        tags = dag_geom.getAllTags(mesh_set)
-            
-        # check for mesh_sets that are groups
-        if name_tag in tags and cat_tag in tags \
-                and _tag_to_string(cat_tag[mesh_set]) == 'Group':
-            child_sets = mesh_set.getEntSets()
-            name = _tag_to_string(name_tag[mesh_set])
-            
-            # if mesh_set is a group with a material name_tag, loop over child
-            # mesh_sets and assign name to cell
-            if 'mat:' in name:
-                for child_set in child_sets:
-                    child_tags = dag_geom.getAllTags(child_set)
-                    if id_tag in child_tags:
-                        cell = id_tag[child_set]
-                        mat_assigns[cell] = name
-                        
+
+   # Get all meshsets that topologically represent a "Group"
+    group_meshsets = dag_geom.get_entities_by_type_and_tag(0, types.MBENTITYSET,
+                                                           [cat_tag,], ["Group",])
+
+    # loop over all group_sets in model
+    for group_set in group_meshsets:
+        group_members = dag_geom.get_entities_by_handle(group_set)
+        name = dag_geom.tag_get_data(name_tag, group_set, flat = True)[0]
+        # if group_set is a group with a material name_tag, loop over group
+        # members and assign name to cell
+        # in general `name` may be a non-string or string-like type,
+        # so convert to str for safety
+        if 'mat:' in str(name):
+            for group_member in group_members:
+                try:
+                    cell = dag_geom.tag_get_data(id_tag, group_member, flat = True)[0]
+                    mat_assigns[cell] = name
+                except:
+                    pass
+
     return mat_assigns
 
 def cell_materials(hdf5, **kwargs):
     """Obtain a material object for each cell in a DAGMC material-laden
     geometry, tagged in UWUW format [1], i.e. "mat:<name>/rho:<density>" or
     "mat:<name>".
-    
+
     Parameters:
     -----------
     hdf5 : string
@@ -672,11 +671,11 @@ def cell_materials(hdf5, **kwargs):
         The path in the heirarchy to the material data table in the HDF5 file.
     nucpath, str, optional, default='/nucid'
         The path in the heirarchy to the nuclide array in the HDF5 file.
-    
+
     Returns:
     --------
     cell_mats : dict
-        Dictionary that maps cells numbers to PyNE Material objects. 
+        Dictionary that maps cells numbers to PyNE Material objects.
 
     [1] http://svalinn.github.io/DAGMC/usersguide/uw2.html
     """
@@ -684,7 +683,7 @@ def cell_materials(hdf5, **kwargs):
     nucpath = kwargs.get('nucpath', '/nucid')
 
     # void material
-    void_mat = Material({}, density = 0.0, metadata={'name': 'void', 
+    void_mat = Material({}, density = 0.0, metadata={'name': 'void',
                                                       'mat_number': 0})
     # strings that specify that a region is void
     void_names = ['vacuum', 'graveyard', 'void']
@@ -695,7 +694,7 @@ def cell_materials(hdf5, **kwargs):
     cell_mats = {}
     for cell_num, mat_name in mat_assigns.items():
         if cell_num is None:
-            continue 
+            continue
         elif np.any([x in mat_name.lower() for x in void_names]):
             cell_mats[cell_num] = void_mat
         else:
@@ -711,8 +710,8 @@ def find_implicit_complement():
     for vol in volumes:
         if volume_is_implicit_complement(vol):
             return vol
-            
-            
+
+
 def _tag_to_string(tag):
     """Convert ascii to string
     """
@@ -725,33 +724,33 @@ def _tag_to_string(tag):
             a.append(str(unichr(part)))
             string = ''.join(a)
     return string
-    
+
 
 #### start util
 def discretize_geom(mesh, **kwargs):
     """discretize_geom(mesh, **kwargs)
     This function discretizes a geometry (by geometry cell) onto a superimposed
     mesh. If the mesh is structured, ray_discretize() is called and Monte Carlo
-    ray tracing is used to determine the volume fractions of each geometry cell 
-    within each mesh volume element of the mesh. If the mesh is not structured, 
-    cell_at_ve_centers is called and mesh volume elements are assigned a 
+    ray tracing is used to determine the volume fractions of each geometry cell
+    within each mesh volume element of the mesh. If the mesh is not structured,
+    cell_at_ve_centers is called and mesh volume elements are assigned a
     geometry cell based off of what geometry cell occupies the center of the
     mesh volume element. The output of cell_at_ve_centers is then put in the
     same structured array format used by ray_discretize(). Note that a DAGMC
     geometry must already be loaded into memory.
- 
+
     Parameters
     ----------
     mesh : PyNE Mesh
         A Cartesian, structured, axis-aligned Mesh that superimposed the
         geometry.
     num_rays : int, optional, default = 10
-        Structured mesh only. The number of rays to fire in each mesh row for 
+        Structured mesh only. The number of rays to fire in each mesh row for
         each direction.
     grid : boolean, optional, default = False
         Structured mesh only. If false, rays starting points are chosen randomly
         (on the boundary) for each mesh row. If true, a linearly spaced grid of
-        starting points is used, with dimension sqrt(num_rays) x sqrt(num_rays). 
+        starting points is used, with dimension sqrt(num_rays) x sqrt(num_rays).
         In this case, "num_rays" must be a perfect square.
 
     Returns
@@ -759,7 +758,7 @@ def discretize_geom(mesh, **kwargs):
     results : structured array
         Stores in a one dimensional array, each entry containing the following
         fields:
-        :idx: int 
+        :idx: int
             The volume element index.
         :cell: int
             The geometry cell number.
@@ -780,7 +779,7 @@ def discretize_geom(mesh, **kwargs):
        cells = cells_at_ve_centers(mesh)
        results = np.zeros(len(mesh), dtype=[(b'idx', np.int64),
                                             (b'cell', np.int64),
-                                            (b'vol_frac', np.float64), 
+                                            (b'vol_frac', np.float64),
                                             (b'rel_error', np.float64)])
        for i, cell in enumerate(cells):
            results[i] = (i, cells[i], 1.0, 1.0)
@@ -790,7 +789,7 @@ def discretize_geom(mesh, **kwargs):
 def cells_at_ve_centers(mesh):
     """cells_at_ve_centers(mesh)
     This function reads in any PyNE Mesh object and finds the geometry cell
-    at the point in the center of each mesh volume element. A DAGMC geometry 
+    at the point in the center of each mesh volume element. A DAGMC geometry
     must be loaded prior to using this function.
 
     Parameters
@@ -814,7 +813,7 @@ def cells_at_ve_centers(mesh):
 
 def ray_discretize(mesh, num_rays=10, grid=False):
     """ray_discretize(mesh, num_rays=10, grid=False)
-    This function discretizes a geometry (by geometry cell) onto a 
+    This function discretizes a geometry (by geometry cell) onto a
     superimposed, structured, axis-aligned mesh using the method described in
     [1]. Ray tracing is used to sample track lengths in geometry cells in mesh
     volume elements, and volume fractions are determined statiscally. Rays are
@@ -825,7 +824,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
     [1] Moule, D. and Wilson, P., Mesh Generation methods for Deterministic
     Radiation Transport Codes, Transacztions of the American Nuclear Society,
     104, 407--408, (2009).
- 
+
     Parameters
     ----------
     mesh : PyNE Mesh
@@ -844,7 +843,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
     results : structured array
         Stores in a one dimensional array, each entry containing the following
         fields:
-        :idx: int 
+        :idx: int
             The mesh volume element index.
         :cell: int
             The geometry cell number.
@@ -868,7 +867,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
     dis = [0, 1, 2]
     #  Iterate over all directions indicies
     for di in dis:
-        #  For each direction, the remaining two directions define the sampling 
+        #  For each direction, the remaining two directions define the sampling
         #  surface. These two directions are the values in s_dis (surface
         #  direction indices)
         s_dis = [0, 1, 2]
@@ -903,10 +902,10 @@ def ray_discretize(mesh, num_rays=10, grid=False):
                 elif di == 2:
                     ves = mesh.structured_iterate_hex('z', x=a, y=b)
 
-                idx_tag = mesh.mesh.getTagHandle('idx')
+                idx_tag = mesh.idx
                 idx = []
                 for ve in ves:
-                    idx.append(idx_tag[ve])
+                    idx.append(idx_tag[ve][0])
 
                 #  Fire rays.
                 row_sums = mesh_row._evaluate_row()
@@ -928,7 +927,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
     total_rays = num_rays*3 # three directions
     results = np.zeros(len_count, dtype=[(b'idx', np.int64),
                                          (b'cell', np.int64),
-                                         (b'vol_frac', np.float64), 
+                                         (b'vol_frac', np.float64),
                                          (b'rel_error', np.float64)])
 
     row_count = 0
@@ -936,7 +935,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
     for i, ve_sums in enumerate(mesh_sums):
        for vol in ve_sums.keys():
            vol_frac = ve_sums[vol][0]/total_rays
-           rel_error = np.sqrt((ve_sums[vol][1])/(ve_sums[vol][0])**2 
+           rel_error = np.sqrt((ve_sums[vol][1])/(ve_sums[vol][0])**2
                                 - 1.0/total_rays)
            results[row_count] = (i, vol, vol_frac, rel_error)
            row_count += 1
@@ -995,7 +994,7 @@ class _MeshRow():
                                                           self.s_max_1)
             self.start_points.append(start_point)
             ray_count += 1
-    
+
     def _grid_start(self):
         """Private function for generating a uniform grid of ray starting
         points to populate self.starting_points.
@@ -1006,14 +1005,14 @@ class _MeshRow():
                              "num_rays must be a perfect square.")
         else:
            square_dim = int(np.sqrt(self.num_rays))
-     
+
         step_1 = (self.s_max_0-self.s_min_0)/(float(square_dim) + 1)
         step_2 = (self.s_max_1 - self.s_min_1)/(float(square_dim) + 1)
         range_1 = np.linspace(self.s_min_0 + step_1, self.s_max_0, square_dim,
                               endpoint=False)
         range_2 = np.linspace(self.s_min_1 + step_2, self.s_max_1, square_dim,
                               endpoint=False)
-     
+
         self.start_points = []
         for point_1 in range_1:
             for point_2 in range_2:
@@ -1036,14 +1035,14 @@ class _MeshRow():
             all the samples and the second result is the sum of all the squares
             of all of the samples.
         """
-    
+
         # Number of volume elements in this mesh row.
         num_ve = len(self.divs) - 1
         direction = [0, 0, 0]
         direction[self.di] = 1
         row_sums = [{} for x in range(0, len(self.divs) - 1)]
         width = [self.divs[x] - self.divs[x - 1] for x in range(1, len(self.divs))]
-    
+
         #  Find the first volume the first point is located in.
         vol = find_volume(self.start_points[0], direction)
         #  Fire ray for each starting point.
@@ -1052,7 +1051,7 @@ class _MeshRow():
             #  last staring point to avoid expensive find_volume calls.
             if not point_in_volume(vol, point, direction):
                 vol = find_volume(point, direction)
-    
+
             mesh_dist = width[0]
             ve_count = 0
             complete = False
@@ -1066,12 +1065,12 @@ class _MeshRow():
                     #  Check to see if current volume has already by tallied
                     if vol not in row_sums[ve_count].keys():
                         row_sums[ve_count][vol] = [0, 0]
-    
+
                     sample = mesh_dist/width[ve_count]
                     row_sums[ve_count][vol][0] += sample
                     row_sums[ve_count][vol][1] += sample**2
                     distance -= mesh_dist
-    
+
                     #  If not on the last volume element, continue into the next
                     #  volume element.
                     if ve_count == num_ve - 1:
@@ -1080,19 +1079,19 @@ class _MeshRow():
                     else:
                         ve_count += 1
                         mesh_dist = width[ve_count]
-    
+
                 #  Volume does not extend past mesh volume.
                 if distance < mesh_dist and distance > VOL_FRAC_TOLERANCE \
                     and not complete:
                     #  Check to see if current volume has already by tallied
                     if vol not in row_sums[ve_count].keys():
                         row_sums[ve_count][vol] = [0, 0]
-    
+
                     sample = distance/width[ve_count]
                     row_sums[ve_count][vol][0] += sample
                     row_sums[ve_count][vol][1] += sample**2
                     mesh_dist -= distance
-                
+
                 vol = next_vol
-    
+
         return row_sums

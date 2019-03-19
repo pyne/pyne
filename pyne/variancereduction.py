@@ -1,27 +1,24 @@
 """
 This module contains functions for mesh-based Monte Carlo variance reduction.
 """
-
+import numpy as np
+from pyne.particle import mcnp
+from mcnp import Wwinp
+from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 from itertools import izip
 from warnings import warn
 from pyne.utils import QAWarning
 
-import numpy as np
-
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-try:
-    from itaps import iMesh, iBase, iMeshExtensions
-except ImportError:
-    warn("the PyTAPS optional dependency could not be imported. "
+
+if HAVE_PYMOAB:
+    from pyne.mesh import NativeMeshTag, mesh_iterate
+else:
+    warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the variance reduction module may be incomplete.",
          QAWarning)
 
-from mesh import Mesh
-from mesh import MeshError
-from mesh import IMeshTag
-from mcnp import Wwinp
-from pyne.particle import mcnp
 
 def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
           ww_mesh, ww_tag, q_bias_mesh, q_bias_tag, beta=5):
@@ -63,16 +60,14 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
     """
 
     # find number of energy groups
-    e_groups = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[list(
-                adj_flux_mesh.mesh.iterate(iBase.Type.region,
-                                           iMesh.Topology.all))[0]]
+    e_groups = adj_flux_mesh.get_tag(
+        adj_flux_tag)[list(mesh_iterate(adj_flux_mesh.mesh))[0]]
     e_groups = np.atleast_1d(e_groups)
     num_e_groups = len(e_groups)
 
     # verify source (q) mesh has the same number of energy groups
-    q_e_groups = q_mesh.mesh.getTagHandle(q_tag)[list(
-                  q_mesh.mesh.iterate(iBase.Type.region,
-                                      iMesh.Topology.all))[0]]
+    q_e_groups = q_mesh.get_tag(q_tag)[list(
+        mesh_iterate(q_mesh.mesh))[0]]
     q_e_groups = np.atleast_1d(q_e_groups)
     num_q_e_groups = len(q_e_groups)
 
@@ -83,23 +78,23 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
                                                                q_mesh, q_tag))
 
     # create volume element (ve) iterators
-    adj_ves = adj_flux_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
-    q_ves = q_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+    adj_ves = mesh_iterate(adj_flux_mesh.mesh)
+    q_ves = mesh_iterate(q_mesh.mesh)
 
     # calculate total source strength
     q_tot = 0
     for q_ve in q_ves:
-        q_tot += np.sum(q_mesh.mesh.getTagHandle(q_tag)[q_ve]) \
-                 * q_mesh.elem_volume(q_ve)
+        q_tot += np.sum(q_mesh.get_tag(q_tag)[q_ve]) \
+            * q_mesh.elem_volume(q_ve)
 
     q_ves.reset()
 
     # calculate the total response per source particle (R)
     R = 0
     for adj_ve, q_ve in zip(adj_ves, q_ves):
-        adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
+        adj_flux = adj_flux_mesh.get_tag(adj_flux_tag)[adj_ve]
         adj_flux = np.atleast_1d(adj_flux)
-        q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
+        q = q_mesh.get_tag(q_tag)[q_ve]
         q = np.atleast_1d(q)
 
         vol = adj_flux_mesh.elem_volume(adj_ve)
@@ -107,19 +102,23 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
             R += adj_flux[i]*q[i]*vol/q_tot
 
     # generate weight windows and biased source densities using R
-    tag_ww = ww_mesh.mesh.createTag(ww_tag, num_e_groups, float)
-    ww_ves = ww_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
-    tag_q_bias = q_bias_mesh.mesh.createTag(q_bias_tag, num_e_groups, float)
-    q_bias_ves = q_bias_mesh.mesh.iterate(iBase.Type.region, iMesh.Topology.all)
+    ww_mesh.tag(ww_tag, np.zeros(num_e_groups, dtype=float),
+                'nat_mesh', size=num_e_groups, dtype=float)
+    tag_ww = ww_mesh.get_tag(ww_tag)
+    ww_ves = mesh_iterate(ww_mesh.mesh)
+    q_bias_mesh.tag(q_bias_tag, np.zeros(num_e_groups, dtype=float),
+                    'nat_mesh', size=num_e_groups, dtype=float)
+    tag_q_bias = q_bias_mesh.get_tag(q_bias_tag)
+    q_bias_ves = mesh_iterate(q_bias_mesh.mesh)
     # reset previously created iterators
     q_ves.reset()
     adj_ves.reset()
 
     for adj_ve, q_ve, ww_ve, q_bias_ve in izip(adj_ves, q_ves,
                                                ww_ves, q_bias_ves):
-        adj_flux = adj_flux_mesh.mesh.getTagHandle(adj_flux_tag)[adj_ve]
+        adj_flux = adj_flux_mesh.get_tag(adj_flux_tag)[adj_ve]
         adj_flux = np.atleast_1d(adj_flux)
-        q = q_mesh.mesh.getTagHandle(q_tag)[q_ve]
+        q = q_mesh.get_tag(q_tag)[q_ve]
         q = np.atleast_1d(q)
 
         tag_q_bias[q_bias_ve] = [adj_flux[i]*q[i]/q_tot/R
@@ -131,7 +130,7 @@ def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
 
 
 def magic(meshtally, tag_name, tag_name_error, **kwargs):
-    """This function reads a PyNE mcnp.MeshTally object and preforms the MAGIC 
+    """This function reads a PyNE mcnp.MeshTally object and preforms the MAGIC
     algorithm and returns the resulting weight window mesh.
 
     Parameters:
@@ -143,35 +142,35 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         The meshtally tag_name for the error associated with provided tag_name.
         Example: n_rel_error
     tolerance : float, optional
-        The maximum relative error allowable for the MAGIC algorithm to create 
+        The maximum relative error allowable for the MAGIC algorithm to create
         a weight window lower bound for for a given mesh volume element for the
-        intial weight window lower bound generation, or overwrite preexisting 
-        weight window lower bounds for subsequent iterations. 
+        intial weight window lower bound generation, or overwrite preexisting
+        weight window lower bounds for subsequent iterations.
     null_value : float, optional
         The weight window lower bound value that is assigned to mesh volume
         elements where the relative error on flux exceeds the tolerance.
     """
-    
-    tolerance = kwargs.get('tolerance',0.5)
-    null_value = kwargs.get('null_value',0.0)
-    
+
+    tolerance = kwargs.get('tolerance', 0.5)
+    null_value = kwargs.get('null_value', 0.0)
+
     # Convert particle name to the recognized abbreviation
     particle = (meshtally.particle.capitalize())
-    if  particle == ("Neutron" or "Photon" or "Electron"):
+    if particle == ("Neutron" or "Photon" or "Electron"):
         meshtally.particle = mcnp(particle).lower()
-    
+
     # Create tags for values and errors
-    meshtally.vals = IMeshTag(mesh=meshtally, name=tag_name)
-    meshtally.errors = IMeshTag(mesh=meshtally, name=tag_name_error)
-    
+    meshtally.vals = NativeMeshTag(mesh=meshtally, name=tag_name)
+    meshtally.errors = NativeMeshTag(mesh=meshtally, name=tag_name_error)
+
     # Create weight window tags
     tag_size = meshtally.vals[0].size
-    meshtally.ww_x = IMeshTag(tag_size, float, 
-                              name="ww_{0}".format(meshtally.particle))
-    root_tag = meshtally.mesh.createTag(
-                        "{0}_e_upper_bounds".format(meshtally.particle), 
-                        tag_size, float)
-                        
+    meshtally.ww_x = NativeMeshTag(tag_size, float,
+                                   name="ww_{0}".format(meshtally.particle))
+    meshtally.tag("{0}_e_upper_bounds".format(meshtally.particle),
+                  np.zeros(tag_size, dtype=float), 'nat_mesh', size=tag_size, dtype=float)
+    root_tag = meshtally.get_tag(
+        "{0}_e_upper_bounds".format(meshtally.particle))
     # Determine if total energy or single energy bin or multiple energy bins
     if tag_size == 1 and len(meshtally.e_bounds) > 1:
         total = True
@@ -179,12 +178,13 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         total = True
     elif tag_size > 1 and len(meshtally.e_bounds) > 1:
         total = False
-    
+
     # Reassign arrays for total and not total case
     if total:
-        root_tag[meshtally.mesh.rootSet] = np.max(meshtally.e_bounds[:])
+        # get value tagged on the mesh itself
+        root_tag[meshtally] = np.max(meshtally.e_bounds[:])
         max_val = np.max(meshtally.vals[:])
-        
+
         vals = []
         errors = []
         for flux, error in zip(meshtally.vals[:], meshtally.errors[:]):
@@ -193,12 +193,12 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
 
         vals = np.array(vals)
         errors = np.array(errors)
-        
+
     else:
-        root_tag[meshtally.mesh.rootSet] = meshtally.e_bounds[1:]
+        root_tag[meshtally] = meshtally.e_bounds[1:]
         vals = meshtally.vals[:]
         errors = meshtally.errors[:]
-    
+
     # Determine the max values for each energy bin
     max_val = []
     for i in range(tag_size):
@@ -206,7 +206,7 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         for ve, flux in enumerate(vals[:]):
             vals_in_e.append(vals[ve][i])
         max_val.append(np.max(vals_in_e))
-    
+
     # Apply normalization to create weight windows
     ww = []
     for ve, flux_list in enumerate(vals[:]):
@@ -215,16 +215,16 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         for i, value in enumerate(flux_list):
             if tally_list[i] > tolerance:
                 flux.append(null_value)
-            else:    
+            else:
                 flux.append(value/(2.0*max_val[i]))
         ww.append(flux)
-    
+
     # Resassign weight windows to meshtally
     if total:
         meshtally.ww_x[:] = np.reshape(ww, len(ww))
     else:
         meshtally.ww_x[:] = ww
-    
+
     # Create wwinp mesh
     wwinp = Wwinp()
     wwinp.read_mesh(meshtally.mesh)

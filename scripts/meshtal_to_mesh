@@ -19,7 +19,7 @@ def main():
     m = Meshtal(args.filename)
     output = args.output if args.output is not None else args.filename
     for num, tal in m.tally.items():
-        tal.mesh.save("{0}_tally_{1}.h5m".format(output, num))
+        tal.write_hdf5("{0}_tally_{1}.h5m".format(output, num))
 
 if __name__ == '__main__':
     main()

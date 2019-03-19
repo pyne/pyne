@@ -5,38 +5,33 @@ import subprocess
 
 from nose.tools import assert_almost_equal
 from nose.tools import assert_equal, assert_true, with_setup
-from numpy.testing import assert_array_equal
+from nose.plugins.skip import SkipTest
 import numpy as np
+from numpy.testing import assert_array_equal
 import tables as tb
 import warnings
 import filecmp
 
 # mesh specific imports
-try:
-    from itaps import iMesh
-    HAVE_PYTAPS = True
-except ImportError:
-    from nose.plugins.skip import SkipTest
-    HAVE_PYTAPS = False
-    pass
-
-from pyne.utils import QAWarning
-warnings.simplefilter("ignore", QAWarning)
-
+from pyne.mesh import HAVE_PYMOAB
 from pyne.mesh import Mesh, StatMesh, MeshError
-from pyne.material import Material
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
     irradiation_blocks, record_to_geom, phtn_src_energy_bounds
+from pyne.material import Material
+from pyne.utils import QAWarning
+warnings.simplefilter("ignore", QAWarning)
+
 
 thisdir = os.path.dirname(__file__)
+
 
 def test_write_fluxin_single():
     """This function tests the flux_mesh_to_fluxin function for a single energy
     group case.
     """
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     output_name = "fluxin.out"
@@ -46,11 +41,11 @@ def test_write_fluxin_single():
 
     flux_mesh = Mesh(structured=True,
                      structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
-    tag_flux = flux_mesh.mesh.createTag("flux", 1, float)
+    tag_flux = flux_mesh.tag(name="flux", size=1, dtype=float)
     flux_data = [1, 2, 3, 4]
     ves = flux_mesh.structured_iterate_hex("xyz")
     for i, ve in enumerate(ves):
-        tag_flux[ve] = flux_data[i]
+        flux_mesh.flux[i] = flux_data[i]
 
     # test forward writting
     mesh_to_fluxin(flux_mesh, "flux", output_name, False)
@@ -71,7 +66,7 @@ def test_write_fluxin_multiple():
     energy group case.
     """
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     output_name = "fluxin.out"
@@ -83,11 +78,8 @@ def test_write_fluxin_multiple():
 
     flux_mesh = Mesh(structured=True,
                      structured_coords=[[0, 1, 2], [0, 1], [0, 1]])
-    tag_flux = flux_mesh.mesh.createTag("flux", 7, float)
     flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14]]
-    ves = flux_mesh.structured_iterate_hex("xyz")
-    for i, ve in enumerate(ves):
-        tag_flux[ve] = flux_data[i]
+    flux_mesh.tag("flux", flux_data, 'nat_mesh', size=7, dtype=float)
 
     # test forward writting
     mesh_to_fluxin(flux_mesh, "flux", output_name, False)
@@ -115,12 +107,13 @@ def test_write_fluxin_multiple():
     if os.path.isfile(output):
         os.remove(output)
 
+
 def test_write_fluxin_multiple_subvoxel():
     """This function tests the flux_mesh_to_fluxin function for a multiple
     energy group case under sub-voxel r2s.
     """
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     output_name = "fluxin_subvoxel.out"
@@ -132,13 +125,10 @@ def test_write_fluxin_multiple_subvoxel():
 
     flux_mesh = Mesh(structured=True,
                      structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
-    tag_flux = flux_mesh.mesh.createTag("flux", 7, float)
     flux_data = [[1, 2, 3, 4, 5, 6, 7], [8, 9, 10, 11, 12, 13, 14],
                  [15, 16, 17, 18, 19, 20, 21],
                  [22, 23, 24, 25, 26, 27, 28]]
-    ves = flux_mesh.structured_iterate_hex("xyz")
-    for i, ve in enumerate(ves):
-        tag_flux[ve] = flux_data[i]
+    flux_mesh.tag("flux", flux_data, 'nat_mesh', size=7, dtype=float)
 
     cell_fracs = np.zeros(6, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
@@ -180,6 +170,7 @@ def test_write_fluxin_multiple_subvoxel():
     if os.path.isfile(output):
         os.remove(output)
 
+
 def test_photon_source_to_hdf5():
     """Tests the function photon_source_to_hdf5.
     """
@@ -213,7 +204,7 @@ def test_photon_source_to_hdf5():
 def test_photon_source_hdf5_to_mesh():
     """Tests the function photon source_h5_to_mesh."""
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
@@ -234,17 +225,18 @@ def test_photon_source_hdf5_to_mesh():
 
     ves = list(mesh.structured_iterate_hex("xyz"))
     for i, ve in enumerate(ves):
-        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
-        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+        assert_array_equal(mesh.tag1[ve], tag1_answers[i])
+        assert_array_equal(mesh.tag2[ve], tag2_answers[i])
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
+
 
 def test_photon_source_hdf5_to_mesh_subvoxel():
     """Tests the function photon source_h5_to_mesh
     under sub-voxel r2s condition."""
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
@@ -281,17 +273,18 @@ def test_photon_source_hdf5_to_mesh_subvoxel():
                     [0.0] * 42 * 2]
 
     for i, _, ve in mesh:
-        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
-        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+        assert_array_equal(mesh.tag1[ve], tag1_answers[i])
+        assert_array_equal(mesh.tag2[ve], tag2_answers[i])
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
+
 
 def test_photon_source_hdf5_to_mesh_subvoxel_size1():
     """Tests the function photon source_h5_to_mesh
     under sub-voxel r2s condition."""
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
@@ -329,15 +322,16 @@ def test_photon_source_hdf5_to_mesh_subvoxel_size1():
                     [0.0] * 42]
 
     for i, _, ve in mesh:
-        assert_array_equal(mesh.mesh.getTagHandle("tag1")[ve], tag1_answers[i])
-        assert_array_equal(mesh.mesh.getTagHandle("tag2")[ve], tag2_answers[i])
+        assert_array_equal(mesh.tag1[ve], tag1_answers[i])
+        assert_array_equal(mesh.tag2[ve], tag2_answers[i])
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
 
+
 def test_record_to_geom():
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     expected_geom = os.path.join(thisdir, "files_test_alara",
@@ -347,9 +341,9 @@ def test_record_to_geom():
     geom = os.path.join(os.getcwd(), "alara_record_geom")
     matlib = os.path.join(os.getcwd(), "alara_record_matlib")
     cell_fracs = np.zeros(11, dtype=[('idx', np.int64),
-                                        ('cell', np.int64),
-                                        ('vol_frac', np.float64),
-                                        ('rel_error', np.float64)])
+                                     ('cell', np.int64),
+                                     ('vol_frac', np.float64),
+                                     ('rel_error', np.float64)])
 
     cell_mats = {11: Material({'H1': 1.0, 'K39': 1.0}, density=1.1,
                               metadata={'name': 'fake_mat'}),
@@ -380,9 +374,10 @@ def test_record_to_geom():
     if os.path.isfile(matlib):
         os.remove(matlib)
 
+
 def test_record_to_geom_subvoxel():
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     expected_geom = os.path.join(thisdir, "files_test_alara",
@@ -392,9 +387,9 @@ def test_record_to_geom_subvoxel():
     geom = os.path.join(os.getcwd(), "alara_record_geom")
     matlib = os.path.join(os.getcwd(), "alara_record_matlib")
     cell_fracs = np.zeros(11, dtype=[('idx', np.int64),
-                                        ('cell', np.int64),
-                                        ('vol_frac', np.float64),
-                                        ('rel_error', np.float64)])
+                                     ('cell', np.int64),
+                                     ('vol_frac', np.float64),
+                                     ('rel_error', np.float64)])
 
     cell_mats = {11: Material({'H1': 1.0, 'K39': 1.0}, density=1.1,
                               metadata={'name': 'fake_mat'}),
@@ -425,9 +420,10 @@ def test_record_to_geom_subvoxel():
     if os.path.isfile(matlib):
         os.remove(matlib)
 
+
 def test_mesh_to_geom():
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     expected_geom = os.path.join(thisdir, "files_test_alara", "alara_geom.txt")
@@ -437,13 +433,13 @@ def test_mesh_to_geom():
     matlib = os.path.join(os.getcwd(), "alara_matlib")
 
     mats = {
-           0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1),
-           1: Material({'H1': 0.1, 'O16': 1.0}, density=1.2),
-           2: Material({'He4': 42.0}, density=1.3),
-           3: Material({'Tm171': 171.0}, density=1.4),
-           }
-    m = Mesh(structured_coords=[[-1,0,1],[-1,0,1],[0,1]], structured=True,
-                  mats=mats)
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=1.2),
+        2: Material({'He4': 42.0}, density=1.3),
+        3: Material({'Tm171': 171.0}, density=1.4),
+    }
+    m = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]], structured=True,
+             mats=mats)
     mesh_to_geom(m, geom, matlib)
 
     with open(expected_geom) as f:
@@ -468,29 +464,30 @@ def test_mesh_to_geom():
     if os.path.isfile(matlib):
         os.remove(matlib)
 
+
 def test_num_den_to_mesh_shutdown():
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     filename = os.path.join(thisdir, "files_test_alara",
                             "num_density_output.txt")
-    m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
     with open(filename) as f:
         lines = f.readlines()
     num_density_to_mesh(lines, 'shutdown', m)
 
     # expected composition results:
-    exp_comp_0 = {10010000:5.3390e+19,
-                  10020000:3.0571e+17,
-                  10030000:1.2082e+12,
-                  20030000:7.4323e+09,
-                  20040000:7.1632e+02}
-    exp_comp_1 = {10010000:4.1240e+13,
-                  10020000:4.7443e+11,
-                  10030000:2.6627e+13,
-                  20030000:8.3547e+10,
-                  20040000:2.6877e+19}
+    exp_comp_0 = {10010000: 5.3390e+19,
+                  10020000: 3.0571e+17,
+                  10030000: 1.2082e+12,
+                  20030000: 7.4323e+09,
+                  20040000: 7.1632e+02}
+    exp_comp_1 = {10010000: 4.1240e+13,
+                  10020000: 4.7443e+11,
+                  10030000: 2.6627e+13,
+                  20030000: 8.3547e+10,
+                  20040000: 2.6877e+19}
 
     # actual composition results
     act_comp_0 = m.mats[0].to_atom_frac()
@@ -511,14 +508,15 @@ def test_num_den_to_mesh_shutdown():
     assert_almost_equal(exp_density_0, m.mats[0].density)
     assert_almost_equal(exp_density_1, m.mats[1].density)
 
+
 def test_num_den_to_mesh_stdout():
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     filename = os.path.join(thisdir, "files_test_alara",
                             "num_density_output.txt")
-    m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
 
     p = subprocess.Popen(["cat", filename], stdout=subprocess.PIPE)
     lines, err = p.communicate()
@@ -526,16 +524,16 @@ def test_num_den_to_mesh_stdout():
     num_density_to_mesh(lines.split('\n'), 'shutdown', m)
 
     # expected composition results:
-    exp_comp_0 = {10010000:5.3390e+19,
-                  10020000:3.0571e+17,
-                  10030000:1.2082e+12,
-                  20030000:7.4323e+09,
-                  20040000:7.1632e+02}
-    exp_comp_1 = {10010000:4.1240e+13,
-                  10020000:4.7443e+11,
-                  10030000:2.6627e+13,
-                  20030000:8.3547e+10,
-                  20040000:2.6877e+19}
+    exp_comp_0 = {10010000: 5.3390e+19,
+                  10020000: 3.0571e+17,
+                  10030000: 1.2082e+12,
+                  20030000: 7.4323e+09,
+                  20040000: 7.1632e+02}
+    exp_comp_1 = {10010000: 4.1240e+13,
+                  10020000: 4.7443e+11,
+                  10030000: 2.6627e+13,
+                  20030000: 8.3547e+10,
+                  20040000: 2.6877e+19}
 
     # actual composition results
     act_comp_0 = m.mats[0].to_atom_frac()
@@ -556,27 +554,28 @@ def test_num_den_to_mesh_stdout():
     assert_almost_equal(exp_density_0, m.mats[0].density)
     assert_almost_equal(exp_density_1, m.mats[1].density)
 
+
 def test_num_den_to_mesh_1_y():
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     filename = os.path.join(thisdir, "files_test_alara",
                             "num_density_output.txt")
-    m = Mesh(structured=True, structured_coords=[[0,1],[0,1],[0,1,2]])
+    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
     num_density_to_mesh(filename, '1 y', m)
 
     # expected results:
-    exp_comp_0 = {10010000:5.3390e+19,
-                  10020000:3.0571e+17,
-                  10030000:1.1424e+12,
-                  20030000:7.3260e+10,
-                  20040000:7.1632e+02}
-    exp_comp_1 = {10010000:4.1240e+13,
-                  10020000:4.7443e+11,
-                  10030000:2.5176e+13,
-                  20030000:1.5343e+12,
-                  20040000:2.6877e+19}
+    exp_comp_0 = {10010000: 5.3390e+19,
+                  10020000: 3.0571e+17,
+                  10030000: 1.1424e+12,
+                  20030000: 7.3260e+10,
+                  20040000: 7.1632e+02}
+    exp_comp_1 = {10010000: 4.1240e+13,
+                  10020000: 4.7443e+11,
+                  10030000: 2.5176e+13,
+                  20030000: 1.5343e+12,
+                  20040000: 2.6877e+19}
 
     # actual results
     act_comp_0 = m.mats[0].to_atom_frac()
@@ -596,42 +595,44 @@ def test_num_den_to_mesh_1_y():
     assert_almost_equal(exp_density_0, m.mats[0].density)
     assert_almost_equal(exp_density_1, m.mats[1].density)
 
+
 def test_irradiation_blocks():
 
     # actual results
     act = irradiation_blocks("matlib", "isolib",
                              "FEINDlib CINDER CINDER90 THERMAL",
                              ["1 h", "0.5 y"], "fluxin.out", "1 y",
-                             output = "number_density")
+                             output="number_density")
 
     exp = ("material_lib matlib\n"
-          "element_lib isolib\n"
-          "data_library FEINDlib CINDER CINDER90 THERMAL\n"
-          "\n"
-          "cooling\n"
-          "    1 h\n"
-          "    0.5 y\n"
-          "end\n"
-          "\n"
-          "flux flux_1 fluxin.out 1.0 0 default\n"
-          "schedule simple_schedule\n"
-          "    1 y flux_1 pulse_once 0 s\n"
-          "end\n"
-          "\n"
-          "pulsehistory pulse_once\n"
-          "    1 0.0 s\n"
-          "end\n"
-          "\n"
-          "output zone\n"
-          "    units Ci cm3\n"
-          "    number_density\n"
-          "end\n"
-          "\n"
-          "truncation 1e-12\n"
-          "impurity 5e-06 0.001\n"
-          "dump_file dump_file\n")
+           "element_lib isolib\n"
+           "data_library FEINDlib CINDER CINDER90 THERMAL\n"
+           "\n"
+           "cooling\n"
+           "    1 h\n"
+           "    0.5 y\n"
+           "end\n"
+           "\n"
+           "flux flux_1 fluxin.out 1.0 0 default\n"
+           "schedule simple_schedule\n"
+           "    1 y flux_1 pulse_once 0 s\n"
+           "end\n"
+           "\n"
+           "pulsehistory pulse_once\n"
+           "    1 0.0 s\n"
+           "end\n"
+           "\n"
+           "output zone\n"
+           "    units Ci cm3\n"
+           "    number_density\n"
+           "end\n"
+           "\n"
+           "truncation 1e-12\n"
+           "impurity 5e-06 0.001\n"
+           "dump_file dump_file\n")
 
     assert_equal(act, exp)
+
 
 def test_phtn_src_energy_bounds():
 

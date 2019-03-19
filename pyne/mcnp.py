@@ -7,11 +7,12 @@ Further information on MCNP can be obtained from http://mcnp.lanl.gov/
 Mctal and Runtpe classes still need work. Also should add Meshtal and Outp
 classes.
 
-If PyTAPS is not installed, then Wwinp, Meshtal, and Meshtally will not be
+If PyMOAB is not installed, then Wwinp, Meshtal, and Meshtally will not be
 available to use.
 
 """
 from __future__ import print_function, division
+from pyne.mesh import Mesh, StatMesh, HAVE_PYMOAB
 import sys
 import struct
 import math
@@ -32,20 +33,18 @@ from pyne.binaryreader import _BinaryReader, _FortranRecord
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 # Mesh specific imports
-try:
-    from itaps import iMesh
-    HAVE_PYTAPS = True
-except ImportError:
-    warn("the PyTAPS optional dependency could not be imported. "
-                  "Some aspects of the mcnp module may be incomplete.",
-                  QAWarning)
-    HAVE_PYTAPS = False
 
-from pyne.mesh import Mesh, StatMesh, IMeshTag
+if HAVE_PYMOAB:
+    from pyne.mesh import NativeMeshTag
+else:
+    warn("The PyMOAB optional dependency could not be imported. "
+         "Some aspects of the mcnp module may be incomplete.",
+         QAWarning)
 
 if sys.version_info[0] > 2:
     def cmp(a, b):
         return (a > b) - (a < b)
+
 
 class Mctal(object):
     def __init__(self):
@@ -361,9 +360,10 @@ class SurfSrc(_BinaryReader):
                 self.np1 = tablelengths.get_long()[0]   # hist used to gen. src
                 self.nrss = tablelengths.get_long()[0]  # #tracks to surf src
 
-            self.ncrd = tablelengths.get_int()[0]  # #values in surf src record
-                                                   # 6 for a spherical source
-                                                   # 11 otherwise
+	    # values in surf src record
+            # 6 for a spherical source
+            # 11 otherwise
+            self.ncrd = tablelengths.get_int()[0]
             self.njsw = tablelengths.get_int()[0]  # number of surfaces
             self.niss = tablelengths.get_int()[0]  # #histories to surf src
             self.table1extra = list()
@@ -1121,7 +1121,7 @@ class PtracReader(object):
 
             b = self.f.read(length + 4)
             tmp = struct.unpack(b"".join([self.endianness.encode(),
-                                (format*number).encode(), b'i']), b)
+                                          (format*number).encode(), b'i']), b)
             length2 = tmp[-1]
             tmp = tmp[:-1]
         else:
@@ -1294,6 +1294,7 @@ class PtracReader(object):
                 if print_progress > 0 and counter % print_progress == 0:
                     print("processing event {0}".format(counter))
 
+
 def _is_cell_line(line):
     is_cell = False
     if len(line.split()) > 3:
@@ -1302,8 +1303,9 @@ def _is_cell_line(line):
            not line.split()[2][0].isalpha() and \
            line[0:5] != '     ' and \
            line.split()[1] != '0':
-               is_cell = True
+            is_cell = True
     return is_cell
+
 
 def mats_from_inp(inp):
     """This function reads an MCNP inp file and returns a mapping of material
@@ -1317,9 +1319,9 @@ def mats_from_inp(inp):
     Returns
     --------
     materials : dict
-       Keys are MCNP material numbers and values are PyNE material objects (for 
-       single density materials) and MultiMaterial objects (for multiple density 
-       materials). 
+       Keys are MCNP material numbers and values are PyNE material objects (for
+       single density materials) and MultiMaterial objects (for multiple density
+       materials).
     """
 
     mat_lines = []  # line of lines that begin material cards
@@ -1336,20 +1338,20 @@ def mats_from_inp(inp):
         # information is stored in a dictionary where:
         # key = material number, value = list of densities
         if _is_cell_line(line):
-           mat_num = int(line.split()[1])
-           den = float(line.split()[2])
+            mat_num = int(line.split()[1])
+            den = float(line.split()[2])
 
-           if mat_num not in densities.keys():
-               densities[mat_num] = [den]
+            if mat_num not in densities.keys():
+                densities[mat_num] = [den]
 
-           else:
-               same_bool = False
-               for j in range(0, len(densities[mat_num])):
-                   if abs((den - densities[mat_num][j])/den) < 1E-4:
-                       same_bool = True
+            else:
+                same_bool = False
+                for j in range(0, len(densities[mat_num])):
+                    if abs((den - densities[mat_num][j])/den) < 1E-4:
+                        same_bool = True
 
-               if same_bool is False:
-                   densities[mat_num].append(den)
+                if same_bool is False:
+                    densities[mat_num].append(den)
 
         # check line to see if it contain a material card, in the form
         # m* where * is a digit. If so store the line num. and material number
@@ -1365,7 +1367,7 @@ def mats_from_inp(inp):
     for i in range(0, len(mat_nums)):
         if mat_nums[i] in densities.keys():
             materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i],
-                                                   densities[mat_nums[i]])
+                                                       densities[mat_nums[i]])
         else:
             materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i])
     return materials
@@ -1375,7 +1377,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     """ This function reads an MCNP material card from a file and returns a
     Material or Multimaterial object for the material described by the card.
     This function is used by :func:`mats_from_inp`.
-    
+
     Parameters
     ----------
     filename : str
@@ -1404,7 +1406,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
             line_index += 1
             line = linecache.getline(filename, mat_line + line_index)
         # otherwise this not a line we care about, move on and
-        # skip lines that start with c or C                                                                                                                  
+        # skip lines that start with c or C
         else:
             line_index += 1
             line = linecache.getline(filename, mat_line + line_index)
@@ -1417,7 +1419,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
             zzzaaam = str(nucname.zzaaam(
                 nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
 
-            # this allows us to read nuclides that are repeated                                                                                              
+            # this allows us to read nuclides that are repeated
             if zzzaaam in nucvec.keys():
                 nucvec[zzzaaam] += float(data_string.split()[i+1])
             else:
@@ -1572,8 +1574,8 @@ class Wwinp(Mesh):
     """
 
     def __init__(self):
-        if not HAVE_PYTAPS:
-            raise RuntimeError("PyTAPS is not available, "
+        if not HAVE_PYMOAB:
+            raise RuntimeError("PyMOAB is not available, "
                                "unable to create Wwinp Mesh.")
         pass
 
@@ -1668,7 +1670,7 @@ class Wwinp(Mesh):
         # preexisting mesh.
         if not hasattr(self, 'mesh'):
             super(Wwinp, self).__init__(structured_coords=[self.bounds[0],
-                                        self.bounds[1], self.bounds[2]],
+                                                           self.bounds[1], self.bounds[2]],
                                         structured=True)
 
         volume_elements = list(self.structured_iterate_hex('zyx'))
@@ -1691,18 +1693,22 @@ class Wwinp(Mesh):
             ww_data[i] = ww_row
 
         # create vector tags for data
-        tag_ww = self.mesh.createTag(
-            "ww_{0}".format(particle), self.ne[particle_index], float)
+        ww_tag_name = "ww_{0}".format(particle)
+        self.tag(ww_tag_name, size=self.ne[particle_index],
+                 dtype=float, tagtype='nat_mesh')
+        tag_ww = self.get_tag(ww_tag_name)
 
         # tag vector data to mesh
         for i, volume_element in enumerate(volume_elements):
             tag_ww[volume_element] = ww_data[:, i]
 
         # Save energy upper bounds to rootset.
-        tag_e_bounds = \
-            self.mesh.createTag('{0}_e_upper_bounds'.format(particle),
-                                len(self.e[particle_index]), float)
-        tag_e_bounds[self.mesh.rootSet] = self.e[particle_index]
+        e_bounds_tag_name = '{0}_e_upper_bounds'.format(particle)
+        self.tag(e_bounds_tag_name,
+                 size=len(self.e[particle_index]),
+                 dtype=float, tagtype='nat_mesh')
+        tag_e_bounds = self.get_tag(e_bounds_tag_name)
+        tag_e_bounds[self] = self.e[particle_index]
 
     def write_wwinp(self, filename):
         """This method writes a complete WWINP file to <filename>.
@@ -1810,8 +1816,8 @@ class Wwinp(Mesh):
         ww_data = np.empty(shape=(self.nft, self.ne[particle_index]))
         volume_elements = list(self.structured_iterate_hex('zyx'))
         for i, volume_element in enumerate(volume_elements):
-            ww_data[i] = self.mesh.getTagHandle(
-                "ww_{0}".format(particle))[volume_element]
+            ww_data[i] = self.get_tag("ww_{0}".format(particle))[
+                volume_element]
 
         for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
@@ -1845,11 +1851,10 @@ class Wwinp(Mesh):
         # Set energy related attributes.
         self.e = []
         self.ne = []
-        all_tags = [x.name for x in self.mesh.getAllTags(self.mesh.rootSet)]
+        all_tags = [x.name for x in self.get_all_tags()]
 
         if 'n_e_upper_bounds' in all_tags:
-            n_e_upper_bounds = self.mesh.getTagHandle(
-                'n_e_upper_bounds')[self.mesh.rootSet]
+            n_e_upper_bounds = self.n_e_upper_bounds[self]
             # In the single energy group case, the "E_upper_bounds" tag
             # returns a non-iterable float. If this is the case, put this
             # float into an array so that it can be iterated over
@@ -1864,8 +1869,7 @@ class Wwinp(Mesh):
             self.ne.append(0)
 
         if 'p_e_upper_bounds' in all_tags:
-            p_e_upper_bounds = self.mesh.getTagHandle(
-                'p_e_upper_bounds')[self.mesh.rootSet]
+            p_e_upper_bounds = self.p_e_upper_bounds[self]
             if isinstance(p_e_upper_bounds, float):
                 p_e_upper_bounds = [p_e_upper_bounds]
 
@@ -1955,8 +1959,8 @@ class Meshtal(object):
              material objects.
         """
 
-        if not HAVE_PYTAPS:
-            raise RuntimeError("PyTAPS is not available, "
+        if not HAVE_PYMOAB:
+            raise RuntimeError("PyMOAB is not available, "
                                "unable to create Meshtal.")
 
         self.tally = {}
@@ -1996,10 +2000,10 @@ class Meshtal(object):
                 if self.tags is not None and tally_num in self.tags.keys():
                     self.tally[tally_num] = MeshTally(f, tally_num,
                                                       self.tags[tally_num],
-                                          mesh_has_mats=self._meshes_have_mats)
+                                                      mesh_has_mats=self._meshes_have_mats)
                 else:
                     self.tally[tally_num] = MeshTally(f, tally_num,
-                                          mesh_has_mats=self._meshes_have_mats)
+                                                      mesh_has_mats=self._meshes_have_mats)
 
             line = f.readline()
 
@@ -2029,7 +2033,7 @@ class MeshTally(StatMesh):
     e_bounds : list of floats
         The minimum and maximum bounds for energy bins
     mesh :
-        An iMesh instance tagged with all results and
+        An PyMOAB core instance tagged with all results and
         relative errors
     tag_names : iterable
         Four strs that specify the tag names for the results, relative errors,
@@ -2062,8 +2066,8 @@ class MeshTally(StatMesh):
              objects.
         """
 
-        if not HAVE_PYTAPS:
-            raise RuntimeError("PyTAPS is not available, "
+        if not HAVE_PYMOAB:
+            raise RuntimeError("PyMOAB is not available, "
                                "unable to create Meshtally Mesh.")
 
         self.tally_number = tally_number
@@ -2125,13 +2129,13 @@ class MeshTally(StatMesh):
         self._column_idx = dict(zip(column_names, range(0, len(column_names))))
 
     def _create_mesh(self, f, mesh_has_mats):
-        """Instantiate a Mesh object and tag the iMesh instance
+        """Instantiate a Mesh object and tag the PyMOAB core instance
            with results and relative errors.
         """
 
         mats = () if mesh_has_mats is True else None
         super(MeshTally, self).__init__(structured_coords=[self.x_bounds,
-                                        self.y_bounds, self.z_bounds],
+                                                           self.y_bounds, self.z_bounds],
                                         structured=True, mats=mats)
 
         num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
@@ -2154,10 +2158,13 @@ class MeshTally(StatMesh):
             rel_error[i] = rel_error_row
 
         # Tag results and error vector to mesh
-        res_tag = IMeshTag(num_e_groups, float, mesh=self,
-                           name=self.tag_names[0])
-        rel_err_tag = IMeshTag(num_e_groups, float, mesh=self,
-                               name=self.tag_names[1])
+        self.tag(self.tag_names[0], tagtype='nat_mesh',
+                 size=num_e_groups, dtype=float)
+        res_tag = self.get_tag(self.tag_names[0])
+        self.tag(self.tag_names[1], tagtype='nat_mesh',
+                 size=num_e_groups, dtype=float)
+        rel_err_tag = self.get_tag(self.tag_names[1])
+
         if num_e_groups == 1:
             res_tag[:] = result[0]
             rel_err_tag[:] = rel_error[0]
@@ -2176,9 +2183,14 @@ class MeshTally(StatMesh):
                 rel_error.append(
                     float(line[self._column_idx["Rel_Error"]]))
 
-            res_tot_tag = IMeshTag(1, float, mesh=self, name=self.tag_names[2])
-            rel_err_tot_tag = IMeshTag(1, float, mesh=self,
-                                       name=self.tag_names[3])
+            self.tag(self.tag_names[2], size=1,
+                     dtype=float, tagtype='nat_mesh')
+            res_tot_tag = self.get_tag(self.tag_names[2])
+
+            self.tag(self.tag_names[3], size=1,
+                     dtype=float, tagtype='nat_mesh')
+            rel_err_tot_tag = self.get_tag(self.tag_names[3])
+
             res_tot_tag[:] = result
             rel_err_tot_tag[:] = rel_error
 

@@ -28,8 +28,9 @@ one of the parser functions to consume the argument. Where appropriate,
 ensure that the argument is appended to the argument list that is returned by these
 functions.
 """
-from __future__ import print_function
 
+from __future__ import print_function
+import numpy as np
 import io
 import os
 import re
@@ -49,8 +50,6 @@ if sys.version_info[0] < 3:
     from urllib import urlopen
 else:
     from urllib.request import urlopen
-
-import numpy as np
 
 
 # import src into pythonpath - needed to actually run decaygen/atomicgen
@@ -73,6 +72,8 @@ CMAKE_BUILD_TYPES = {
 }
 ON_DARWIN = platform.system() == 'Darwin'
 LIBEXT = '.dylib' if ON_DARWIN else '.so'
+
+SKIP_OPTION = "SKIP"
 
 
 @contextmanager
@@ -269,8 +270,18 @@ def update_cmake_args(ns):
             '-DHDF5_LIBRARY_DIRS=' + h5root + '/lib',
             '-DHDF5_INCLUDE_DIRS=' + h5root + '/include',
         ]
-    if ns.moab is not None:
-        ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
+    if ns.moab is not SKIP_OPTION:
+        ns.cmake_args.append('-DWITH_MOAB=ON')
+        if ns.moab is not None:
+            ns.cmake_args.append('-DMOAB_ROOT=' + absexpanduser(ns.moab))
+
+    if ns.dagmc is not SKIP_OPTION:
+        assert ns.moab is not SKIP_OPTION, "If the --dagmc option is present," \
+                                           " --moab must be as well"
+        ns.cmake_args.append('-DWITH_DAGMC=ON')
+        if ns.dagmc is not None:
+            ns.cmake_args.append('-DDAGMC_ROOT=' + absexpanduser(ns.dagmc))
+
     if ns.deps_root:
         ns.cmake_args.append('-DDEPS_ROOT_DIR=' + absexpanduser(ns.deps_root))
     if ns.fast is not None:
@@ -289,6 +300,8 @@ def update_other_args(ns):
         os.environ['HDF5_ROOT'] = ns.hdf5
     if ns.moab is not None:
         os.environ['MOAB_ROOT'] = ns.moab
+    if ns.dagmc is not None:
+        os.environ['DAGMC_ROOT'] = ns.dagmc
 
 
 def parse_args():
@@ -328,7 +341,10 @@ def parse_args():
 
     other = parser.add_argument_group('other', 'Miscellaneous arguments.')
     other.add_argument('--hdf5', help='Path to HDF5 root directory.')
-    other.add_argument('--moab', help='Path to MOAB root directory.')
+    other.add_argument('--moab', help='Path to MOAB root directory.',
+                       nargs='?', default=SKIP_OPTION)
+    other.add_argument('--dagmc', help='Path to DAGMC root directory.',
+                       nargs='?', default=SKIP_OPTION)
     other.add_argument('--prefix', help='Prefix for install location.',
                        default=None)
     other.add_argument('--build-dir', default='build', dest="build_dir",

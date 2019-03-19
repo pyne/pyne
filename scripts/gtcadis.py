@@ -99,6 +99,7 @@ def _names_dict():
     names_dict = {nucname.id(key): value for key, value in names.iteritems()}
     return names_dict
 
+
 def _cards(source):
     cards = {"block1": {"isn": 16,
                         "maxscm": '3E8',
@@ -135,11 +136,11 @@ def step1(cfg):
     geom = cfg['geom_file']
     cells = [cfg['src_cell']]
     src_vol = [float(cfg['src_vol'])]
-    
-    try: 
-       origin_x, origin_y, origin_z = cfg['origin'].split(' ') 
-    except: 
-       print("Too few entries in origin location")
+
+    try:
+        origin_x, origin_y, origin_z = cfg['origin'].split(' ')
+    except:
+        print("Too few entries in origin location")
 
     xmesh = cfg['xmesh']
     xints = cfg['xints']
@@ -153,7 +154,7 @@ def step1(cfg):
           np.linspace(float(origin_y), float(ymesh), float(yints) + 1),
           np.linspace(float(origin_z), float(zmesh), float(zints) + 1)]
     m = Mesh(structured=True, structured_coords=sc)
-    m.mesh.save("blank_mesh.h5m")
+    m.write_hdf5("blank_mesh.h5m")
 
     # Generate 42 photon energy bins [eV]
     #  First bin has been replaced with 1 for log interpolation
@@ -167,9 +168,9 @@ def step1(cfg):
     df = np.array([0.0485, 0.1254, 0.205, 0.2999, 0.3381, 0.3572, 0.378, 0.4066, 0.4399, 0.5172,
                    0.7523, 1.0041, 1.5083, 1.9958, 2.4657, 2.9082, 3.7269, 4.4834, 7.4896,
                    12.0153, 15.9873, 19.9191, 23.76])
-    # Convert to Sv/s per photon FLUX 
-    pico = 1.0e-12 
-    df = df * pico 
+    # Convert to Sv/s per photon FLUX
+    pico = 1.0e-12
+    df = df * pico
     # Convert pointwise data to group data for log interpolation
     photon_spectrum = pointwise_collapse(
         photon_bins, de, df, logx=True, logy=True)

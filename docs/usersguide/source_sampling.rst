@@ -13,10 +13,10 @@ Cartesian and tetrahedral) which can be used as a component within Monte Carlo
 radiation transport codes. A MOAB mesh tagged with energy-wise source densities
 (and optional biased source densities) is supplied by the user. The user
 can then supply six pseudorandom numbers in order to generate a random sample
-of the particle birth parameters (position, energy, statistical weight).  The
-source sampling module is written in C++ and has fully-supported C++, Fortran,
-and Python interfaces, which facilitates its use within physics codes. The
-source sampling module allows for six sampling modes:
+of the particle birth parameters (position, energy, statistical weight and cell
+number). The source sampling module is written in C++ and has fully-supported
+C++, Fortran, and Python interfaces, which facilitates its use within physics
+codes. The source sampling module allows for six sampling modes:
 
 :DEFAULT_ANALOG (mode 0):
   Particle birth parameters are sampled directly from a unmodified 
@@ -223,12 +223,14 @@ tag) and optionally biased source densities (the "biased_source_density" tag).
 The file "e_bounds" should contain the energy boundaries of the photon energy
 groups used in the activation calculations. An "idum" card must be used
 in the MCNP5 input file. This card should have three arguments. The first is the
-sampling mode (0: analog, 1: uniform, 2: user). The second is the resample
-limit for void rejection. For a given particle, if a source position is
-selected in void (MCNP materal 0) the source position is resampled within the
-selected mesh volume element until either a non-void position is found, or this
-user-specified limit is researched. The third argument should specify the
-particle type: 1 for neutrons, 2 for photons.
+sampling mode (0: DEFAULT_ANALOG, 1: DEFAULT_UNIFORM, 2: DEFAULT_USER,
+3: SUBVOXEL_ANALOG, 4: SUBVOXEL_UNIFORM, 5: SUBVOXEL_USER). The second is the
+resample limit for void and cell rejections. For a given particle, if a source
+position is selected in void (MCNP material 0) or in a cell that disagrees with the
+cell number, the source position is resampled within the selected mesh volume
+element until either a correct position is found, or this user-specified limit
+is researched. The third argument should specify the particle type: 1 for
+neutrons, 2 for photons.
 
 For example, this "idum" card specifies uniform sampling with a resample limit
 of 100 with source particles specified as photons:

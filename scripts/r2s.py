@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 import argparse
-import ConfigParser
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+
 from os.path import isfile
 
-from pyne.mesh import Mesh
-from pyne.dagmc import cell_materials, load
-from pyne.r2s import irradiation_setup, photon_sampling_setup,\
-                       total_photon_source_intensity
+from pyne.mesh import Mesh, NativeMeshTag
+from pyne.dagmc import cell_materials, load, discretize_geom
+from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
+    total_photon_source_intensity
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
-                       phtn_src_energy_bounds
+    phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
 
 config_filename = 'config.ini'
 alara_params_filename = 'alara_params.txt'
 
 config = \
-"""[general]
+    """[general]
 # Specify whether this problem uses structured or unstructured mesh
 structured: True
 # Specify whether this problem uses sub-voxel r2s
@@ -61,7 +65,7 @@ tot_phtn_src_intensities : total_photon_source_intensities.txt
 """
 
 alara_params =\
-"""material_lib alara_matlib
+    """material_lib alara_matlib
 element_lib nuclib
 data_library alaralib fendl3bin
 
@@ -93,6 +97,7 @@ impurity 5e-6 1e-3
 dump_file dump.file
 """
 
+
 def setup():
     with open(config_filename, 'w') as f:
         f.write(config)
@@ -102,59 +107,61 @@ def setup():
     print('File "{}" has been written'.format(alara_params_filename))
     print('Fill out the fields in these filse then run ">> r2s.py step1"')
 
+
 def step1():
     config = ConfigParser.ConfigParser()
     config.read(config_filename)
 
     structured = config.getboolean('general', 'structured')
-    sub_voxel = config.getboolean('general','sub_voxel')
+    sub_voxel = config.getboolean('general', 'sub_voxel')
     meshtal = config.get('step1', 'meshtal')
     tally_num = config.getint('step1', 'tally_num')
     flux_tag = config.get('step1', 'flux_tag')
     decay_times = config.get('step2', 'decay_times').split(',')
-
-    if structured:
-        meshtal = Meshtal(meshtal,
-                        {tally_num: (flux_tag, flux_tag + '_err',
-                                     flux_tag + '_total',
-                                     flux_tag + '_err_total')},
-                        meshes_have_mats=False)
     geom = config.get('step1', 'geom')
     reverse = config.getboolean('step1', 'reverse')
     num_rays = config.getint('step1', 'num_rays')
     grid = config.getboolean('step1', 'grid')
 
     load(geom)
+
+    # get meshtal info from meshtal file
+    flux_mesh = resolve_mesh(meshtal, tally_num, flux_tag)
+
+    # create the cell_fracs array before irradiation_steup
+    if flux_mesh.structured:
+        cell_fracs = discretize_geom(flux_mesh, num_rays=num_rays, grid=grid)
+        # tag cell fracs for both default and subvoxel r2s modes
+        flux_mesh.tag_cell_fracs(cell_fracs)
+    else:
+        cell_fracs = discretize_geom(flux_mesh)
+
     cell_mats = cell_materials(geom)
-    irradiation_setup(meshtal, cell_mats, alara_params_filename, tally_num,
+    irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename, tally_num,
                       num_rays=num_rays, grid=grid, reverse=reverse,
                       flux_tag=flux_tag, decay_times=decay_times,
                       sub_voxel=sub_voxel)
 
     # create a blank mesh for step 2:
-    if structured:
-        mesh = meshtal.tally[tally_num]
-    else:
-        mesh = Mesh(structured=False, mesh=meshtal)
-
-    ves = list(mesh.iter_ve())
+    ves = list(flux_mesh.iter_ve())
     tags_keep = ("cell_number", "cell_fracs",
                  "cell_largest_frac_number", "cell_largest_frac")
-    for tag in mesh.mesh.getAllTags(ves[0]):
-        if tag.name not in tags_keep:
-            mesh.mesh.destroyTag(tag, True)
-    mesh.mesh.save('blank_mesh.h5m')
+    for tag in flux_mesh.get_all_tags():
+        if tag.name not in tags_keep and isinstance(tag, NativeMeshTag):
+            tag.delete()
+    flux_mesh.write_hdf5('blank_mesh.h5m')
     print('The file blank_mesh.h5m has been saved to disk.')
     print('Do not delete this file; it is needed by r2s.py step2.\n')
 
     print('R2S step1 complete, run ALARA with the command:')
     print('>> alara alara_inp > output.txt')
 
+
 def step2():
     config = ConfigParser.ConfigParser()
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
-    sub_voxel = config.getboolean('general','sub_voxel')
+    sub_voxel = config.getboolean('general', 'sub_voxel')
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
@@ -176,7 +183,7 @@ def step2():
         tags = {('TOTAL', dc): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
-        mesh.mesh.save('{0}_{1}.h5m'.format(output, i+1))
+        mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
         intensities += "{0}: {1}\n".format(dc, intensity)
@@ -187,12 +194,13 @@ def step2():
     e_bounds = phtn_src_energy_bounds("alara_inp")
     e_bounds_str = ""
     for e in e_bounds:
-        e = e/1e6 # convert unit to MeV
+        e = e/1e6  # convert unit to MeV
         e_bounds_str += "{0}\n".format(e)
     with open("e_bounds", 'w') as f:
         f.write(e_bounds_str)
 
     print('R2S step2 complete.')
+
 
 def main():
 
@@ -219,6 +227,6 @@ def main():
     elif args.command == 'step2':
         step2()
 
+
 if __name__ == '__main__':
     main()
-

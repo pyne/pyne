@@ -11,7 +11,10 @@ from nose.tools import assert_almost_equal, assert_equal, assert_true, \
 from nose.plugins.skip import SkipTest
 
 import tables
+from numpy.testing import assert_array_equal
 
+from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
+from pyne.material import MultiMaterial, Material
 from pyne.utils import QAWarning
 
 warnings.simplefilter("ignore", QAWarning)
@@ -21,8 +24,6 @@ try:
 except ImportError:
     raise SkipTest
 
-from pyne.material import Material
-from pyne.material import MultiMaterial
 
 thisdir = os.path.dirname(__file__)
 ssrname1 = os.path.join(thisdir, "mcnp5_surfsrc.w")
@@ -36,21 +37,10 @@ sswnames = [sswname1, sswname2, sswname3]
 ssrname_onetrack = os.path.join(thisdir, "mcnp_surfsrc_onetrack.w")
 
 # mesh specific imports
-try:
-    from itaps import iMesh
-
-    HAVE_PYTAPS = True
-except ImportError:
-    from nose.plugins.skip import SkipTest
-
-    HAVE_PYTAPS = False
-    pass
-
-from pyne.mesh import Mesh, StatMesh, MeshError
-from numpy.testing import assert_array_equal
-
 
 # Test SurfSrc class
+
+
 def test_read_header_block():
     """Test the read_header() method in the SurfSrc class
     We compare the SurfSrc object variables with expected values from the
@@ -515,10 +505,10 @@ def test_read_mcnp():
                                      " first line of comments second line of "
                                      "comments third line of comments forth "
                                      "line of comments"),
-                                           "mat_number": "1",
-                                           "name": " leu",
-                                           "source": " Some http://URL.com",
-                                           "table_ids": {'922350': "15c"}})
+        "mat_number": "1",
+        "name": " leu",
+        "source": " Some http://URL.com",
+        "table_ids": {'922350': "15c"}})
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
 
     expected_multimaterial = MultiMaterial({
@@ -526,8 +516,8 @@ def test_read_mcnp():
             {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
             -1.0, 0.9, 3,
             {"comments":
-                 (" Here are comments the comments "
-                  "continue here are more even more"),
+             (" Here are comments the comments "
+              "continue here are more even more"),
              "mat_number": "2",
              "name": " water",
              "source": " internet",
@@ -537,8 +527,8 @@ def test_read_mcnp():
             -1.0,
             1.0021552889223864, 3,
             {"comments":
-                 (" Here are comments the comments "
-                  "continue here are more even more"),
+             (" Here are comments the comments "
+              "continue here are more even more"),
              "mat_number": "2",
              "name": " water",
              "source": " internet",
@@ -547,19 +537,24 @@ def test_read_mcnp():
             {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
             -1.0, 1.1, 3,
             {"comments":
-                 (" Here are comments the comments "
-                  "continue here are more even more"),
+             (" Here are comments the comments "
+              "continue here are more even more"),
              "mat_number": "2",
              "name": " water",
              "source": " internet",
              "table_ids": {'10000': "05c"}}): 1})
 
     read_materials = mats_from_inp('mcnp_inp.txt')
-    assert_equal(expected_material, read_materials[1])
+    assert_almost_equal(expected_material, read_materials[1])
     assert_equal(
-        list(expected_multimaterial._mats.keys())[0].comp,
-        list(read_materials[2]._mats.keys())[0].comp)
-    assert_equal(
+        list(expected_multimaterial._mats.keys())[0].comp.keys(),
+        list(read_materials[2]._mats.keys())[0].comp.keys())
+    for i in range(2):
+        assert_almost_equal(
+            list(list(expected_multimaterial._mats.keys())
+                 [0].comp.values())[i],
+            list(list(read_materials[2]._mats.keys())[0].comp.values())[i])
+    assert_almost_equal(
         list(expected_multimaterial._mats.keys())[0].mass,
         list(read_materials[2]._mats.keys())[0].mass)
     assert_almost_equal(
@@ -572,12 +567,17 @@ def test_read_mcnp():
         list(expected_multimaterial._mats.keys())[0].metadata,
         list(read_materials[2]._mats.keys())[0].metadata)
     assert_equal(
-        list(expected_multimaterial._mats.keys())[1].comp,
-        list(read_materials[2]._mats.keys())[1].comp)
+        list(expected_multimaterial._mats.keys())[1].comp.keys(),
+        list(read_materials[2]._mats.keys())[1].comp.keys())
+    for i in range(2):
+        assert_almost_equal(
+            list(list(expected_multimaterial._mats.keys())
+                 [1].comp.values())[i],
+            list(list(read_materials[2]._mats.keys())[1].comp.values())[i])
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].mass,
         list(read_materials[2]._mats.keys())[1].mass)
-    assert_equal(
+    assert_almost_equal(
         list(expected_multimaterial._mats.keys())[1].density,
         list(read_materials[2]._mats.keys())[1].density)
     assert_equal(
@@ -595,6 +595,8 @@ def test_read_mcnp():
 # m1  1001.21c 0.1
 #     1002.21c 0.3
 #     1001.21c 0.5
+
+
 def test_read_mcnp_wcomments():
     expected_material = Material(nucvec={922350000: 0.04, 922380000: 0.96},
                                  mass=-1.0,
@@ -603,16 +605,18 @@ def test_read_mcnp_wcomments():
                                      " first line of comments second line of "
                                      "comments third line of comments forth "
                                      "line of comments"),
-                                           "mat_number": "1",
-                                           "name": " leu",
-                                           "source": " Some http://URL.com",
-                                           "table_ids": {'922350': "15c"}})
+        "mat_number": "1",
+        "name": " leu",
+        "source": " Some http://URL.com",
+        "table_ids": {'922350': "15c"}})
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
 
     read_materials = mats_from_inp('mcnp_inp_comments.txt')
     assert_equal(expected_material, read_materials[1])
 
 # Test PtracReader class
+
+
 def test_read_headers():
     p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
     assert_equal(
@@ -689,7 +693,7 @@ def test_write_to_hdf5():
 # Test Wwinp class. All three function are tested at once because their inputs
 # and ouputs are easily strung together.
 def test_wwinp_n():
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
@@ -729,8 +733,8 @@ def test_wwinp_n():
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
     for expected_ve, written_ve in zip(expected_ves, written_ves):
-        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
-        written = ww1.mesh.getTagHandle("ww_n")[written_ve]
+        expected = expected_sm.ww_n[expected_ve]
+        written = ww1.ww_n[written_ve]
         assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
@@ -765,8 +769,8 @@ def test_wwinp_n():
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
     for expected_ve, written_ve in zip(expected_ves, written_ves):
-        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
-        written = ww2.mesh.getTagHandle("ww_n")[written_ve]
+        expected = expected_sm.ww_n[expected_ve]
+        written = ww2.ww_n[written_ve]
         assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
@@ -794,7 +798,7 @@ def test_wwinp_n():
 
 
 def test_wwinp_p():
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
@@ -829,8 +833,8 @@ def test_wwinp_p():
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
     for expected_ve, written_ve in zip(expected_ves, written_ves):
-        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
-        written = ww1.mesh.getTagHandle("ww_p")[written_ve]
+        expected = expected_sm.ww_p[expected_ve]
+        written = ww1.ww_p[written_ve]
         assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
@@ -860,8 +864,8 @@ def test_wwinp_p():
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
     for expected_ve, written_ve in zip(expected_ves, written_ves):
-        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
-        written = ww2.mesh.getTagHandle("ww_p")[written_ve]
+        expected = expected_sm.ww_p[expected_ve]
+        written = ww2.ww_p[written_ve]
         assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
@@ -888,7 +892,7 @@ def test_wwinp_p():
 
 
 def test_wwinp_np():
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
@@ -923,15 +927,15 @@ def test_wwinp_np():
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
     for expected_ve, written_ve in zip(expected_ves, written_ves):
-        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
-        written = ww1.mesh.getTagHandle("ww_n")[written_ve]
+        expected = expected_sm.ww_n[expected_ve]
+        written = ww1.ww_n[written_ve]
         assert_array_equal(written, expected)
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
     for expected_ve, written_ve in zip(expected_ves, written_ves):
-        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
-        written = ww1.mesh.getTagHandle("ww_p")[written_ve]
+        expected = expected_sm.ww_p[expected_ve]
+        written = ww1.ww_p[written_ve]
         assert_array_equal(written, expected)
 
     # Create an new object based off of only the mesh attribute of the first
@@ -961,15 +965,15 @@ def test_wwinp_np():
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
     for expected_ve, written_ve in zip(expected_ves, written_ves):
-        expected = expected_sm.mesh.getTagHandle("ww_n")[expected_ve]
-        written = ww2.mesh.getTagHandle("ww_n")[written_ve]
+        expected = expected_sm.ww_n[expected_ve]
+        written = ww2.ww_n[written_ve]
         assert_array_equal(written, expected)
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
     for expected_ve, written_ve in zip(expected_ves, written_ves):
-        expected = expected_sm.mesh.getTagHandle("ww_p")[expected_ve]
-        written = ww2.mesh.getTagHandle("ww_p")[written_ve]
+        expected = expected_sm.ww_p[expected_ve]
+        written = ww2.ww_p[written_ve]
         assert_array_equal(written, expected)
 
     # write a new wwinp file and verify that is same wwinp file used as an
@@ -1000,7 +1004,7 @@ def test_single_meshtally_meshtal():
     """Test a meshtal file containing a single mesh tally.
     """
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
@@ -1045,28 +1049,28 @@ def test_single_meshtally_meshtal():
     for v_e, expected_v_e in zip(
             meshtal_object.tally[4].structured_iterate_hex("xyz"),
             expected_sm.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[4].mesh.getTagHandle("n_result")[v_e]
-        expected = expected_sm.mesh.getTagHandle("n_result")[expected_v_e]
+        written = meshtal_object.tally[4].n_result[v_e]
+        expected = expected_sm.n_result[expected_v_e]
         assert_array_equal(written, expected)
     for v_e, expected_v_e in zip(
             meshtal_object.tally[4].structured_iterate_hex("xyz"),
             expected_sm.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[4].mesh.getTagHandle("n_rel_error")[v_e]
-        expected = expected_sm.mesh.getTagHandle("n_rel_error")[expected_v_e]
+        written = meshtal_object.tally[4].n_rel_error[v_e]
+        expected = expected_sm.n_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
     # test total tag
     for v_e, expected_v_e in zip(
             meshtal_object.tally[4].structured_iterate_hex("xyz"),
             expected_sm.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[4].mesh.getTagHandle("n_total_result")[v_e]
-        expected = expected_sm.mesh.getTagHandle("n_total_result")[expected_v_e]
+        written = meshtal_object.tally[4].n_total_result[v_e]
+        expected = expected_sm.n_total_result[expected_v_e]
         assert_equal(written, expected)
     for v_e, expected_v_e in zip(
             meshtal_object.tally[4].structured_iterate_hex("xyz"),
             expected_sm.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[4].mesh.getTagHandle("n_total_rel_error")[v_e]
-        expected = expected_sm.mesh.getTagHandle("n_total_rel_error")[expected_v_e]
+        written = meshtal_object.tally[4].n_total_rel_error[v_e]
+        expected = expected_sm.n_total_rel_error[expected_v_e]
         assert_equal(written, expected)
 
 
@@ -1075,7 +1079,7 @@ def test_multiple_meshtally_meshtal():
     photon, single energy group and multiple energy group.
     """
 
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
@@ -1109,93 +1113,93 @@ def test_multiple_meshtally_meshtal():
     for v_e, expected_v_e in zip(
             meshtal_object.tally[4].structured_iterate_hex("xyz"),
             expected_sm_4.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[4].mesh.getTagHandle("n_result")[v_e]
-        expected = expected_sm_4.mesh.getTagHandle("n_result")[expected_v_e]
+        written = meshtal_object.tally[4].n_result[v_e]
+        expected = expected_sm_4.n_result[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
             meshtal_object.tally[4].structured_iterate_hex("xyz"),
             expected_sm_4.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[4].mesh.getTagHandle("n_rel_error")[v_e]
-        expected = expected_sm_4.mesh.getTagHandle("n_rel_error")[expected_v_e]
+        written = meshtal_object.tally[4].n_rel_error[v_e]
+        expected = expected_sm_4.n_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
             meshtal_object.tally[4].structured_iterate_hex("xyz"),
             expected_sm_4.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[4].mesh.getTagHandle("n_total_result")[v_e]
-        expected = expected_sm_4.mesh.getTagHandle("n_total_result")[expected_v_e]
+        written = meshtal_object.tally[4].n_total_result[v_e]
+        expected = expected_sm_4.n_total_result[expected_v_e]
         assert_equal(written, expected)
 
     for v_e, expected_v_e in zip(
             meshtal_object.tally[4].structured_iterate_hex("xyz"),
             expected_sm_4.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[4].mesh.getTagHandle("n_total_rel_error")[v_e]
-        expected = expected_sm_4.mesh.getTagHandle("n_total_rel_error")[expected_v_e]
+        written = meshtal_object.tally[4].n_total_rel_error[v_e]
+        expected = expected_sm_4.n_total_rel_error[expected_v_e]
         assert_equal(written, expected)
 
     # test meshtally 14
     for v_e, expected_v_e in zip(
             meshtal_object.tally[14].structured_iterate_hex("xyz"),
             expected_sm_14.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[14].mesh.getTagHandle("n_result")[v_e]
-        expected = expected_sm_14.mesh.getTagHandle("n_result")[expected_v_e]
+        written = meshtal_object.tally[14].n_result[v_e]
+        expected = expected_sm_14.n_result[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
             meshtal_object.tally[14].structured_iterate_hex("xyz"),
             expected_sm_14.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[14].mesh.getTagHandle("n_rel_error")[v_e]
-        expected = expected_sm_14.mesh.getTagHandle("n_rel_error")[expected_v_e]
+        written = meshtal_object.tally[14].n_rel_error[v_e]
+        expected = expected_sm_14.n_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
     # test meshtally 24
     for v_e, expected_v_e in zip(
             meshtal_object.tally[24].structured_iterate_hex("xyz"),
             expected_sm_24.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[24].mesh.getTagHandle("p_result")[v_e]
-        expected = expected_sm_24.mesh.getTagHandle("p_result")[expected_v_e]
+        written = meshtal_object.tally[24].p_result[v_e]
+        expected = expected_sm_24.p_result[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
             meshtal_object.tally[24].structured_iterate_hex("xyz"),
             expected_sm_24.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[24].mesh.getTagHandle("p_rel_error")[v_e]
-        expected = expected_sm_24.mesh.getTagHandle("p_rel_error")[expected_v_e]
+        written = meshtal_object.tally[24].p_rel_error[v_e]
+        expected = expected_sm_24.p_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
             meshtal_object.tally[24].structured_iterate_hex("xyz"),
             expected_sm_24.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[24].mesh.getTagHandle("p_total_result")[v_e]
-        expected = expected_sm_24.mesh.getTagHandle("p_total_result")[expected_v_e]
+        written = meshtal_object.tally[24].p_total_result[v_e]
+        expected = expected_sm_24.p_total_result[expected_v_e]
         assert_equal(written, expected)
 
     for v_e, expected_v_e in zip(
             meshtal_object.tally[24].structured_iterate_hex("xyz"),
             expected_sm_24.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[24].mesh.getTagHandle("p_total_rel_error")[v_e]
-        expected = expected_sm_24.mesh.getTagHandle("p_total_rel_error")[expected_v_e]
+        written = meshtal_object.tally[24].p_total_rel_error[v_e]
+        expected = expected_sm_24.p_total_rel_error[expected_v_e]
         assert_equal(written, expected)
 
     # test meshtally 34
     for v_e, expected_v_e in zip(
             meshtal_object.tally[34].structured_iterate_hex("xyz"),
             expected_sm_34.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[34].mesh.getTagHandle("p_result")[v_e]
-        expected = expected_sm_34.mesh.getTagHandle("p_result")[expected_v_e]
+        written = meshtal_object.tally[34].p_result[v_e]
+        expected = expected_sm_34.p_result[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
             meshtal_object.tally[34].structured_iterate_hex("xyz"),
             expected_sm_34.structured_iterate_hex("xyz")):
-        written = meshtal_object.tally[34].mesh.getTagHandle("p_rel_error")[v_e]
-        expected = expected_sm_34.mesh.getTagHandle("p_rel_error")[expected_v_e]
+        written = meshtal_object.tally[34].p_rel_error[v_e]
+        expected = expected_sm_34.p_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
 
 def test_mesh_to_geom():
-    if not HAVE_PYTAPS:
+    if not HAVE_PYMOAB:
         raise SkipTest
 
     mats = {
