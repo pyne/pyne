@@ -126,18 +126,16 @@ pyne::Material pyne::MaterialLibrary::get_material(
   }
 }
 
-void pyne::MaterialLibrary::write_hdf5(char* fname, char* dpath, char* npath,
-                                       int chunksize) {
+void pyne::MaterialLibrary::write_hdf5(char* fname, char* dpath, char* npath){
   std::string filename(fname);
   std::string datapath(dpath);
   std::string nucpath(npath);
-  write_hdf5(filename, datapath, nucpath, chunksize);
+  write_hdf5(filename, datapath, nucpath);
 }
 
 void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
                                        const std::string& datapath,
-                                       const std::string& nucpath,
-                                       int chunksize) {
+                                       const std::string& nucpath) {
   // A large part of this is inspiwrite_hdf5red/taken from by material.cpp...
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -192,7 +190,7 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
 
   // Write the Materials in the file
   for (auto material : material_library_tmp) {
-    (material.second).write_hdf5(filename, datapath, nucpath, chunksize);
+    (material.second).write_hdf5(filename, datapath, nucpath);
   }
 }
 

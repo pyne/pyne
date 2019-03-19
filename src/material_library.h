@@ -97,7 +97,7 @@ class MaterialLibrary {
    *  \param chunksize The chunksize for all material data on disk.
   */
   void write_hdf5(char* filename, char* datapath = "/materials",
-                  char* nucpath = "/nucid", int chunksize = 100);
+                  char* nucpath = "/nucid");
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
@@ -111,7 +111,7 @@ class MaterialLibrary {
    *  \param chunksize The chunksize for all material data on disk.
   */
   void write_hdf5(const std::string& filename, const std::string& datapath = "/materials",
-                  const std::string& nucpath = "/nucid", int chunksize = 100);
+                  const std::string& nucpath = "/nucid");
   /**
    * \brief Merge a material library into the current one
    * \param mat_library pyne material library to merge
@@ -148,6 +148,11 @@ class MaterialLibrary {
    * \param mat_name name of the material to return
   */
   pyne::Material get_material(const std::string& mat_name);
+  /**
+   * \brief Get the material Library
+   * \return std::map<std::string, pyne::MaterialLibrary>
+  */
+  pyne::mat_map get_mat_library() { return material_library; }
   /**
    * \brief Get the list of materials in the Library
    * \return std::set<std::string>

@@ -109,8 +109,7 @@ cdef class MaterialLibrary:
 
         self._inst.from_hdf5(c_filename, c_datapath, protocol)
 
-    def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid",
-                   chunksize=100):
+    def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid"):
         cdef char * c_filename
         filename_bytes = filename.encode('UTF-8')
         c_filename = filename_bytes
@@ -120,7 +119,7 @@ cdef class MaterialLibrary:
         cdef char * c_nucpath
         nucpath_bytes = nucpath.encode('UTF-8')
         c_nucpath = nucpath_bytes
-        self._inst.write_hdf5(c_filename, c_datapath, c_nucpath, chunksize)
+        self._inst.write_hdf5(c_filename, c_datapath, c_nucpath)
 
     def add_material(self, mat):
         cdef std_string c_matname

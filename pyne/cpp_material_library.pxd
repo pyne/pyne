@@ -34,7 +34,6 @@ cdef extern from "material_library.h" namespace "pyne":
         void from_hdf5(char*, char*, int) except +
 
         void write_hdf5(char*, char*, char*) except +
-        void write_hdf5(char*, char*, char*, int) except +
         
         void add_material(cpp_material.Material) except +
         void add_material(char*, cpp_material.Material) except +
