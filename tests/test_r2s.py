@@ -7,6 +7,7 @@ from numpy.testing import assert_array_equal
 import multiprocessing
 import filecmp
 import sys
+from shutil import copyfile
 
 from pyne.mcnp import Meshtal
 from pyne.material import Material
@@ -133,9 +134,9 @@ def test_irradiation_setup_structured():
         i += 1
 
     # test that files match
-    assert(f1 == True)
-    assert(f2 == True)
-    assert(f3 == True)
+    assert(f1 is True)
+    assert(f2 is True)
+    assert(f3 is True)
 
 
 def test_photon_sampling_setup_structured():
@@ -287,9 +288,9 @@ def test_irradiation_setup_unstructured():
         i += 1
 
     # test that files match
-    assert(f1 == True)
-    assert(f2 == True)
-    assert(f3 == True)
+    assert(f1 is True)
+    assert(f2 is True)
+    assert(f3 is True)
 
 
 def test_photon_sampling_setup_unstructured():
@@ -387,3 +388,113 @@ def test_irradiation_setup_unstructured_nondef_tag():
     for nf, nft in izip(n_flux, n_flux_total):
         assert_array_equal(nf, fluxes[i])
         i += 1
+
+
+def _r2s_test_step1(r2s_run_dir):
+    os.chdir(thisdir)
+    # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
+    os.chdir("..")
+    folderpath = os.getcwd()
+    dst = os.path.join(r2s_run_dir, "r2s.py")
+    copyfile(os.path.join(folderpath, "scripts", "r2s.py"), dst)
+
+    # run r2s step1
+    os.chdir(r2s_run_dir)
+    os.system('python r2s.py step1')
+
+    # output files of r2s step1
+    alara_inp = os.path.join(r2s_run_dir, "alara_inp")
+    alara_matlib = os.path.join(r2s_run_dir, "alara_matlib")
+    alara_fluxin = os.path.join(r2s_run_dir, "alara_fluxin")
+    blank_mesh = os.path.join(r2s_run_dir, "blank_mesh.h5m")
+    step1_file = os.path.join(r2s_run_dir, "r2s_step1.h5m")
+
+    exp_alara_inp = os.path.join(r2s_run_dir, "exp_alara_inp")
+    exp_alara_matlib = os.path.join(r2s_run_dir, "exp_alara_matlib")
+    exp_alara_fluxin = os.path.join(r2s_run_dir, "exp_alara_fluxin")
+
+    # compare the output file of step1
+    f1 = filecmp.cmp(alara_inp, exp_alara_inp)
+    f2 = filecmp.cmp(alara_matlib, exp_alara_matlib)
+    f3 = filecmp.cmp(alara_fluxin, exp_alara_fluxin)
+
+    # remove test output files
+    os.remove(alara_inp)
+    os.remove(alara_fluxin)
+    os.remove(alara_matlib)
+    os.remove(blank_mesh)
+    os.remove(step1_file)
+    os.remove(dst)
+
+    assert_equal(f1, True)
+    assert_equal(f2, True)
+    assert_equal(f3, True)
+
+
+def _r2s_test_step2(r2s_run_dir):
+    os.chdir(thisdir)
+    # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
+    os.chdir("..")
+    folderpath = os.getcwd()
+    dst = os.path.join(r2s_run_dir, "r2s.py")
+    copyfile(os.path.join(folderpath, "scripts", "r2s.py"), dst)
+
+    # output files of r2s step1
+    alara_inp = os.path.join(r2s_run_dir, "alara_inp")
+    copyfile(os.path.join(r2s_run_dir, "exp_alara_inp"), alara_inp)
+    blank_mesh = os.path.join(r2s_run_dir, "blank_mesh.h5m")
+    copyfile(os.path.join(r2s_run_dir, "exp_blank_mesh.h5m"), blank_mesh)
+
+    # run r2s step2
+    os.chdir(r2s_run_dir)
+    os.system('python r2s.py step2')
+
+    # output files of r2s step2
+    e_bounds = os.path.join(r2s_run_dir, "e_bounds")
+    p_src = os.path.join(r2s_run_dir, "phtn_src.h5")
+    t_p_src = os.path.join(r2s_run_dir, "total_photon_source_intensities.txt")
+    src_c1 = os.path.join(r2s_run_dir, "source_1.h5m")
+
+    exp_e_bounds = os.path.join(r2s_run_dir, "exp_e_bounds")
+    exp_t_p_src = os.path.join(
+        r2s_run_dir, "exp_total_photon_source_intensities.txt")
+
+    # compare the results
+    f4 = filecmp.cmp(e_bounds, exp_e_bounds)
+    f5 = filecmp.cmp(t_p_src, exp_t_p_src)
+
+    # remove test generated files
+    os.remove(blank_mesh)
+    os.remove(alara_inp)
+    os.remove(e_bounds)
+    os.remove(p_src)
+    os.remove(t_p_src)
+    os.remove(src_c1)
+    os.remove(dst)
+
+    assert_equal(f4, True)
+    assert_equal(f5, True)
+
+
+def test_r2s_script():
+
+    # skip test without dagmc
+    try:
+        from pyne import dagmc
+    except ImportError:
+        raise SkipTest
+
+    r2s_run_dir = os.path.join(
+        thisdir, "files_test_r2s", "r2s_examples", "r2s_run")
+    _r2s_test_step1(r2s_run_dir)
+    _r2s_test_step2(r2s_run_dir)
+    # test sub-voxel r2s
+    r2s_run_dir = os.path.join(
+        thisdir, "files_test_r2s", "r2s_examples", "subvoxel_r2s_run")
+    _r2s_test_step1(r2s_run_dir)
+    _r2s_test_step2(r2s_run_dir)
+    # test unstructured r2s
+    r2s_run_dir = os.path.join(
+        thisdir, "files_test_r2s", "r2s_examples", "unstructured_r2s_run")
+    _r2s_test_step1(r2s_run_dir)
+    _r2s_test_step2(r2s_run_dir)
