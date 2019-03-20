@@ -132,7 +132,6 @@ namespace pyne {
   
   /// Problem modes
   enum BiasMode {USER, ANALOG, UNIFORM};
-  enum SubMode {DEFAULT, SUBVOXEL};
   
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
@@ -200,7 +199,6 @@ namespace pyne {
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
     int max_num_cells; /// Max number of cells in voxels
     BiasMode bias_mode; ///< Bias mode: ANALOG, UNIFORM, USER
-    SubMode sub_mode; ///< Subvoxel/Voxel mode: DEFAULT, SUBVOXEL
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.

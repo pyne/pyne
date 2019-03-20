@@ -64,7 +64,6 @@ pyne::Sampler::Sampler(std::string filename,
                  bool uniform)
   : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds) {
   bias_mode = (uniform) ? UNIFORM : ANALOG;
-  sub_mode = DEFAULT;
   setup();
 }
 
@@ -77,7 +76,6 @@ pyne::Sampler::Sampler(std::string filename,
     e_bounds(e_bounds), 
     bias_tag_name(bias_tag_name) {
   bias_mode = USER;
-  sub_mode = DEFAULT;
   setup();
 }
 
@@ -88,25 +86,19 @@ pyne::Sampler::Sampler(std::string filename,
   : filename(filename),
     tag_names(tag_names),
     e_bounds(e_bounds) {
-  // determine the bias_mode and sub_mode
+  // determine the bias_mode
   if (mode == 0){
     bias_mode = ANALOG; 
-    sub_mode = DEFAULT;
   } else if (mode == 1) {
     bias_mode = UNIFORM;
-    sub_mode = DEFAULT;
   } else if (mode == 2) {
     bias_mode = USER;
-    sub_mode = DEFAULT;
   } else if (mode == 3) {
     bias_mode = ANALOG;
-    sub_mode = SUBVOXEL;
   } else if (mode == 4) {
     bias_mode = UNIFORM;
-    sub_mode = SUBVOXEL;
   } else if (mode == 5) {
     bias_mode = USER;
-    sub_mode = SUBVOXEL;
   }
 
   // find out the src_tag_name and bias_tag_name
@@ -148,8 +140,8 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   xyz_rands.push_back(rands[4]);
   moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
   // cell_number
-  if (sub_mode == SUBVOXEL) {
-     cell_id = cell_number[ve_idx*max_num_cells + c_idx];
+  if (ve_type == moab::MBHEX) {
+  cell_id = cell_number[ve_idx*max_num_cells + c_idx];
   } else {
      cell_id = -1;
   }
