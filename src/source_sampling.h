@@ -132,7 +132,6 @@ namespace pyne {
   
   /// Problem modes
   enum BiasMode {USER, ANALOG, UNIFORM};
-  enum SubMode {DEFAULT, SUBVOXEL};
   
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
@@ -194,12 +193,12 @@ namespace pyne {
     std::string bias_tag_name; ///< Biased source density distribution
     std::string cell_number_tag_name; ///< Cell number tag
     std::string cell_fracs_tag_name; ///< Cell volume fraction tag
+    std::map<std::string, std::string> tag_names; /// < tag names
     std::vector<double> e_bounds;  ///< Energy boundaries
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
     int max_num_cells; /// Max number of cells in voxels
     BiasMode bias_mode; ///< Bias mode: ANALOG, UNIFORM, USER
-    SubMode sub_mode; ///< Subvoxel/Voxel mode: DEFAULT, SUBVOXEL
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.
