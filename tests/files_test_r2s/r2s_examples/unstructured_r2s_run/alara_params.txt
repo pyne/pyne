@@ -1,0 +1,34 @@
+material_lib alara_matlib
+element_lib data/nuclib
+data_library alaralib data/truncated_fendl2bin
+
+cooling
+    1 h
+end
+
+output zone
+       integrate_energy
+       # Energy group upper bounds. The lower bound is always zero.
+       photon_source  data/truncated_fendl2bin  phtn_src 24 1.00E4 2.00E4 5.00E4 1.00E5
+       2.00E5 3.00E5 4.00E5 6.00E5 8.00E5 1.00E6 1.22E6 1.44E6 1.66E6
+       2.00E6 2.50E6 3.00E6 4.00E6 5.00E6 6.50E6 8.00E6 1.00E7 1.20E7
+       1.40E7 2.00E7
+end
+
+#     flux name    fluxin file   norm   shift   unused
+flux  my_flux     alara_fluxin  1e10     0      default
+
+# Specify the irradiation schedule below.
+# Syntax is found in the ALARA user manual
+# This example is for a single 3.5 h pulse
+schedule    my_schedule
+    3.5 d my_flux my_pulse_history 0  s
+end
+pulsehistory  my_pulse_history
+    1    0.0    s
+end
+
+#other parameters
+truncation 1e-12
+impurity 5e-6 1e-3
+dump_file dump.file
