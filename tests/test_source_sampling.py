@@ -40,7 +40,7 @@ def try_rm_file(filename):
     return lambda: os.remove(filename) if os.path.exists(filename) else None
 
 
-@with_setup(None, try_rm_file('tet.h5m'))
+@with_setup(None, try_rm_file('sampling_mesh.h5m'))
 def test_single_hex_tag_names_map():
     """This test tests uniform sampling within a single hex volume element.
     This is done by dividing the volume element in 4 smaller hex and ensuring
