@@ -1034,32 +1034,6 @@ def test_template_examples():
     """
     An example of using source_sampling test template to do the test
     """
-    # DEFAULT
-#    for mode in (DEFAULT_ANALOG, DEFAULT_UNIFORM, DEFAULT_USER):
-#        for num_e_groups in (1, 2):
-#            # num_bias_groups could be:
-#            # 1, num_e_groups, and max_num_cells*num_e_groups
-#            # test case: 1 voxel, 1 subvoxel
-#            cell_fracs_list = [(0, 1, 1.0, 0.0)]
-#            src_tag = [[1.0]*num_e_groups]
-#            if mode == DEFAULT_USER:
-#                for num_bias_groups in (1, num_e_groups):
-#                    bias_tag = [[1.0]*num_bias_groups]
-#                    _source_sampling_test_template(
-#                        mode, cell_fracs_list, src_tag, bias_tag)
-#            else:
-#                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
-#           # test case: 2 voxel, 2 subvoxels
-#            cell_fracs_list = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0)]
-#            src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
-#            if mode == DEFAULT_USER:
-#                for num_bias_groups in (1, num_e_groups):
-#                    bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
-#                    _source_sampling_test_template(
-#                        mode, cell_fracs_list, src_tag, bias_tag)
-#            else:
-#                _source_sampling_test_template(mode, cell_fracs_list, src_tag)
-#
     # DEFAULT and SUBVOXEL
     for mode in (DEFAULT_ANALOG, DEFAULT_UNIFORM, DEFAULT_USER,
                  SUBVOXEL_ANALOG, SUBVOXEL_UNIFORM, SUBVOXEL_USER):
