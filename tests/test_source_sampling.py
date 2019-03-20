@@ -1333,11 +1333,8 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     if svid == -1:
         raise ValueError("x coordinate not in the voxel, s.x = {0}"
                          .format(str(s.x)))
-    if mode in (3, 4, 5):
-        # get the cell_number
-        exp_c = set(list(current_cell_fracs['cell']))
-    else:
-        exp_c = set([-1])
+    # get the cell_number
+    exp_c = set(list(current_cell_fracs['cell']))
 
     # calculate eid
     num_e_groups = len(src_tag[0])/max_num_cells
