@@ -88,7 +88,7 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
     cell_mats : dict
         Maps geometry cell numbers to PyNE Material objects.
     cell_fracs : record array
-        The output of dagmc.discretize_geom()
+        The output of dagmc.discretize_geom().
     alara_params : str
         The ALARA input blocks specifying everything except the geometry
         and materials. This can either be passed as string or as a file name.
@@ -102,8 +102,6 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
         The if False, geometry discretization will be done with randomly fired
         rays. If true, a grid of sqrt(num_rays) x sqrt(num_rays) rays is used
         for each mesh row.
-    cell_fracs : record array
-        The output of discretize_geom()
     flux_tag : str, optional
         The mesh tag for the neutron flux.
     fluxin : str, optional
