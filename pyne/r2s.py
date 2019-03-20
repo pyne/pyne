@@ -11,15 +11,16 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
-def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux", output_material=False):
+def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
+                 output_material=False):
     """This function creates a method that will consume many mesh-like objects
        (e.g. mesh, an h5m file, a meshtal file, etc) and returns a robust PyNE
        mesh object accordingly.
 
     Parameters
     ----------
-    mesh_reference : Mesh object, unstructured mesh file, Meshtal, meshtal file,
-         or PyNE Meshtal object.
+    mesh_reference : Mesh object, unstructured mesh file, Meshtal, meshtal
+         file, or PyNE Meshtal object.
         The source of the neutron flux information. This can be a PyNE Meshtal
         object, a pyne Mesh object, or the filename an MCNP meshtal file, or
         the filename of an unstructured mesh tagged with fluxes.
@@ -69,8 +70,8 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux", output_mater
     return m
 
 
-def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params, tally_num=4,
-                      num_rays=10, grid=False, flux_tag="n_flux",
+def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
+                      tally_num=4, num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
@@ -101,6 +102,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params, tally_num=
         The if False, geometry discretization will be done with randomly fired
         rays. If true, a grid of sqrt(num_rays) x sqrt(num_rays) rays is used
         for each mesh row.
+    cell_fracs : record array
+        The output of discretize_geom()
     flux_tag : str, optional
         The mesh tag for the neutron flux.
     fluxin : str, optional
@@ -138,7 +141,7 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params, tally_num=
                    sub_voxel=sub_voxel)
 
     # write decay times into alara_inp
-    if decay_times == None:
+    if decay_times is None:
         decay_times = ['1 s']
     decay_str = 'cooling\n'
     for dc in decay_times:
@@ -194,7 +197,8 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
     m : PyNE Mesh
        The mesh-based photon emission density distribution in p/cm3/s.
     tag_name : str
-       The name of the tag on the mesh with the photon emission density information.
+       The name of the tag on the mesh with the photon emission density
+       information.
     sub_voxel: bool, optional
         If true, sub-voxel r2s work flow will be used.
 
