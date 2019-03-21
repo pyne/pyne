@@ -6,7 +6,7 @@
 static pyne::Sampler* sampler = NULL;
 
 // Fortran API
-void pyne::sampling_setup_(int* mode) {
+void pyne::sampling_setup_(int* mode, int* m_n_c) {
   if (sampler == NULL) {
     std::string filename ("source.h5m");
     std::string src_tag_name ("source_density");
@@ -22,6 +22,7 @@ void pyne::sampling_setup_(int* mode) {
     tag_names.insert(std::pair<std::string, std::string> ("cell_fracs_tag_name",
           "cell_fracs"));
     sampler = new pyne::Sampler(filename, tag_names, e_bounds, *mode);
+    *m_n_c = sampler->get_max_num_cells();
   }
 }
 

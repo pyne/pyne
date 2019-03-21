@@ -56,9 +56,10 @@ subroutine source
     integer :: find_cell
     integer :: tries
     integer :: cell_num
+    integer, save :: max_num_cells = 1
   
     if (first_run .eqv. .true.) then
-        call sampling_setup(idum(1))
+        call sampling_setup(idum(1), max_num_cells)
         first_run = .false.
     endif
  

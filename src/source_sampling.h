@@ -52,7 +52,8 @@ namespace pyne {
   /// \param mode The sampling mode: 
   /// Voxel(DEFAULT) R2S: 0 = analog, 1 = uniform, 2 = user-specified
   /// SubVoxel(SUBVOXEL) R2S: 3 = analog, 4 = uniform, 5 = user-specified
-  void sampling_setup_(int* mode);
+  /// max_num_cells is the max number of cells in one voxel
+  void sampling_setup_(int* mode, int* max_num_cells);
   /// MCNP interface to sample particle birth parameters after sampling setup
   /// \param rands Six pseudo-random numbers supplied from the Fortran side.
   /// \param x The sampled x position returned by this function
@@ -180,6 +181,8 @@ namespace pyne {
     ///         z, position, e, energy and w, weight of a particle.
     pyne::SourceParticle particle_birth(std::vector<double> rands);
 
+    /// Return max_num_cells
+    double get_max_num_cells() {return max_num_cells;};
     ~Sampler() {
       delete mesh;
       delete at;
