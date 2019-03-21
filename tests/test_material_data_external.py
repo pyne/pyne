@@ -1,4 +1,4 @@
-#65;5403;1c"""PyNE Material expand elements test under the presence of data or no data tests"""
+"""PyNE Material expand elements test under the presence of data or no data tests"""
 import os
 import math
 import warnings
