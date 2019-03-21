@@ -14,15 +14,18 @@ from pyne.pyne_config import pyne_conf
 warnings.simplefilter("ignore", QAWarning)
 
 import pyne
+from pyne.material import Material
 from pyne import data, nucname
 from pyne import utils
+
+from pyne.nucname import id
 
 if utils.use_warnings():
     utils.toggle_warnings()
 
 nucvec = {'H':  1.0,
           'Fe': 60.0,
-          'Mn': 29.0
+          'Mn': 39.0
           }
 
 def test_with_no_data():
@@ -30,21 +33,28 @@ def test_with_no_data():
     pyne_conf.NUC_DATA_PATH = b'thisisanonsensedatapath'
 
     mat = Material(nucvec,density=7.8)
-    assert_equal(mat.comp.has_key('He3'),False)
-    assert_equal(mat.comp.has_key('Co58'),False)
-    assert_equal(mat.comp.has_key('H1'),True)
-    assert_equal(mat.comp.has_key('Mn55'),True)
-    assert_equal(mat.comp.has_key('Fe56'),True)
+    mat = mat.expand_elements()
+    assert_equal(id('He3') in mat.comp,False)
+    assert_equal(id('Co58') in mat.comp,False)
+    assert_equal(id('Ni58') in mat.comp,False)
 
+    assert_equal(id('H1') in mat.comp,True)
+    assert_equal(id('Fe56') in mat.comp,True)
+    assert_equal(id('Mn55') in mat.comp,True)
+    
     pyne_conf.NUC_DATA_PATH = orig
 
 def test_with_data():
     mat = Material(nucvec,density=7.8)
-    assert_equal(mat.comp.has_key('He3'),False)
-    assert_equal(mat.comp.has_key('Co58'),False)
-    assert_equal(mat.comp.has_key('H1'),True)
-    assert_equal(mat.comp.has_key('Mn55'),True)
-    assert_equal(mat.comp.has_key('Fe56'),True)
+    mat = mat.expand_elements()
+
+    assert_equal(id('He3') in mat.comp,False)
+    assert_equal(id('Co58') in mat.comp,False)
+    assert_equal(id('Ni58') in mat.comp,False)
+
+    assert_equal(id('H1') in mat.comp,True)
+    assert_equal(id('Fe56') in mat.comp,True)
+    assert_equal(id('Mn55') in mat.comp,True)
 
 # Run as script
 #
