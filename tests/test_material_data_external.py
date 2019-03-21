@@ -1,4 +1,4 @@
-"""PyNE Material expand elements test under the presence of data or no data tests"""
+#65;5403;1c"""PyNE Material expand elements test under the presence of data or no data tests"""
 import os
 import math
 import warnings
@@ -27,27 +27,11 @@ nucvec = {'H':  1.0,
           'Fe': 60.0,
           'Mn': 39.0
           }
-
-def test_with_no_data():
-    orig = pyne_conf.NUC_DATA_PATH
-    pyne_conf.NUC_DATA_PATH = b'thisisanonsensedatapath'
-
-    mat = Material(nucvec,density=7.8)
-    mat = mat.expand_elements()
-    assert_equal(id('He3') in mat.comp,False)
-    assert_equal(id('Co58') in mat.comp,False)
-    assert_equal(id('Ni58') in mat.comp,False)
-
-    assert_equal(id('H1') in mat.comp,True)
-    assert_equal(id('Fe56') in mat.comp,True)
-    assert_equal(id('Mn55') in mat.comp,True)
+def test_with_external_data():
     
-    pyne_conf.NUC_DATA_PATH = orig
-
-def test_with_data():
     mat = Material(nucvec,density=7.8)
     mat = mat.expand_elements()
-
+    
     assert_equal(id('He3') in mat.comp,False)
     assert_equal(id('Co58') in mat.comp,False)
     assert_equal(id('Ni58') in mat.comp,False)
@@ -55,6 +39,7 @@ def test_with_data():
     assert_equal(id('H1') in mat.comp,True)
     assert_equal(id('Fe56') in mat.comp,True)
     assert_equal(id('Mn55') in mat.comp,True)
+
 
 # Run as script
 #
