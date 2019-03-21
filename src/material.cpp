@@ -1314,6 +1314,8 @@ pyne::Material pyne::Material::expand_elements(std::set<int> exception_ids) {
       }
       while(zabund <= znuc) {
         nabund = (*abund_itr).first;
+        zabund = nucname::znum(nabund);
+
         if (zabund == znuc && 0 != nucname::anum(nabund) && 0.0 != (*abund_itr).second)
           newcomp[nabund] = (*abund_itr).second * (*nuc).second * \
                             atomic_mass(nabund) / atomic_mass(n);
@@ -1324,7 +1326,6 @@ pyne::Material pyne::Material::expand_elements(std::set<int> exception_ids) {
           zabund = INT_MAX;
           break;
         }
-        zabund = nucname::znum(nabund);
       }
     } else
       newcomp.insert(*nuc);
