@@ -55,14 +55,31 @@ subroutine source
     integer :: icl_tmp ! temporary cell variable
     integer :: find_cell
     integer :: tries
-    integer :: cell_num
+    integer, save :: cell_num = -1
+    integer, save :: max_cell_num = 0
     integer, save :: max_num_cells = 1
+    integer, dimension(:), allocatable, save :: cell_prob_num
   
     if (first_run .eqv. .true.) then
         call sampling_setup(idum(1), max_num_cells)
+        ! print *, 'The max_num_cells is ', max_num_cells 
+        ! allocate(cell_list(max_num_cells))
+        ! find out the maximum cell number
+        do i = 1, mxa
+           if (max_cell_num < ncl(i)) then
+               max_cell_num = ncl(i)
+           endif
+        enddo
+        allocate(cell_prob_num(max_cell_num))
+        do i = 1, max_cell_num
+            cell_prob_num(i) = -1
+        enddo
+        do i = 1, mxa
+           cell_prob_num(ncl(i)) = i
+        enddo
         first_run = .false.
     endif
- 
+    
 100 continue 
    tries = 0
    rands(1) = rang() ! sample alias table
@@ -73,24 +90,48 @@ subroutine source
    rands(4) = rang() ! sample y
    rands(5) = rang() ! sample z
  
-   cell_num = -1
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_num)
-   icl_tmp = find_cell()
-   if (idum(1) > 2) then
-       if (cell_num .ne. ncl(icl_tmp) .and. tries < idum(2)) then
-           tries = tries + 1
-           goto 200
-       endif
+   icl_tmp = cell_prob_num(cell_num)
+   ! print *, 'cell_num: ', cell_num, 'icl_tmp = ', icl_tmp
+   ! do i = 1, max_num_cells
+   !    print *, 'cell_list(', i, '): ', cell_list(i)
+   ! enddo
+   ! icl_tmp = find_cell()
+
+   ! check wether sampled src located in sampled cell_num
+   call chkcel(icl_tmp, 0, j)
+   if (j .eq. 0) then
+      ! sampled x, y, z in sampled cell_num
+      icl_tmp = icl_tmp
+   else
+      ! sampled x, y, z not in sampled cell_num, sample x, y, z again
+      tries = tries + 1
+      goto 300
    endif
-   if (mat(icl_tmp).eq.0 .and. tries < idum(2)) then
+   
+   ! if (idum(1) > 2) then
+   !     if (cell_num .ne. ncl(icl_tmp) .and. tries < idum(2)) then
+   !         tries = tries + 1
+   !         goto 200
+   !     endif
+   ! endif
+
+   ! check whether the material of sampled cell is void
+   if (mat(icl_tmp).eq.0) then
        tries = tries + 1
+       goto 300
+   else
+       goto 400
+   endif
+
+300 continue
+   if(tries < idum(2)) then
        goto 200
-   end if
-
-   if(tries.eq.idum(2)) then
+   else
        goto 100
-   end if
+   endif
 
+400 continue
    icl = icl_tmp
    tme = 0.0
    ipt = idum(3)
