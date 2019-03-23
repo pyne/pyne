@@ -12,38 +12,6 @@
 ! Full instructions on compiling and using MCNP5 with this subroutine are found
 ! in the PyNE user manual.
 
-function find_cell() result(icl_tmp)
-! This function to determines the current MCNP cell index location and exits if
-! no valid cell is found. This only works if there are no repeated geometries or
-! universes present in the model.
-
-    use mcnp_global
-    use mcnp_debug
-    ! xxx,yyy,zzz are global variables
-    ! mxa is global
-    integer :: i ! iterator variable
-    integer :: j ! tempory cell test
-    integer :: icl_tmp ! temporary cell variable
-    icl_tmp = -1
-
-    do i = 1, mxa
-      call chkcel(i, 0, j)
-      if (j .eq. 0) then
-         ! valid cel set
-         icl_tmp = i
-         exit
-      endif
-    enddo
-    ! icl is now set
-
-    if(icl_tmp .le. 0) then
-      write(*,*) 'Nonsense cell number stopping'
-      stop
-    endif
-    ! icl now set to be valid cell
-
-end function find_cell
-
 subroutine source
     ! This subroutine is called directly by MCNP to select particle birth
     ! parameters
@@ -62,8 +30,6 @@ subroutine source
   
     if (first_run .eqv. .true.) then
         call sampling_setup(idum(1), max_num_cells)
-        ! print *, 'The max_num_cells is ', max_num_cells 
-        ! allocate(cell_list(max_num_cells))
         ! find out the maximum cell number
         do i = 1, mxa
            if (max_cell_num < ncl(i)) then
@@ -92,11 +58,6 @@ subroutine source
  
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_num)
    icl_tmp = cell_prob_num(cell_num)
-   ! print *, 'cell_num: ', cell_num, 'icl_tmp = ', icl_tmp
-   ! do i = 1, max_num_cells
-   !    print *, 'cell_list(', i, '): ', cell_list(i)
-   ! enddo
-   ! icl_tmp = find_cell()
 
    ! check wether sampled src located in sampled cell_num
    call chkcel(icl_tmp, 0, j)
@@ -109,13 +70,6 @@ subroutine source
       goto 300
    endif
    
-   ! if (idum(1) > 2) then
-   !     if (cell_num .ne. ncl(icl_tmp) .and. tries < idum(2)) then
-   !         tries = tries + 1
-   !         goto 200
-   !     endif
-   ! endif
-
    ! check whether the material of sampled cell is void
    if (mat(icl_tmp).eq.0) then
        tries = tries + 1
