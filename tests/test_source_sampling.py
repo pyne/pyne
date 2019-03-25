@@ -1677,6 +1677,8 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
 
     # construct Sampler
     sampler = Sampler(filename, tag_names, e_bounds, mode)
+    # remove the temporary file
+    os.remove(filename)
 
     # sampling and tally, tally should be defined by the mesh cell_fracs
     num_samples = 5000
@@ -1714,5 +1716,3 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
             assert(abs(e_dis[i] - e_dis_exp[i]) / e_dis_exp[i] < 0.05)
         else:
             assert_equal(e_dis[i], 0.0)
-    # remove the temporary file
-    os.remove(filename)

@@ -293,13 +293,10 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
       rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
                                   cell_fracs_tag);
       max_num_cells = num_groups(cell_fracs_tag);
-      p_src_num_cells = max_num_cells;
-      if (mode == 0 or mode == 1 or mode == 2) {
-         p_src_num_cells = 1;
-      }
-      num_e_groups /= p_src_num_cells;
       if (mode == 3 or mode == 4 or mode == 5) {
-         cell_fracs.resize(num_ves*max_num_cells);
+         p_src_num_cells = max_num_cells;
+         num_e_groups /= p_src_num_cells;
+         cell_fracs.resize(num_ves*p_src_num_cells);
          rval = mesh->tag_get_data(cell_fracs_tag, ves, &cell_fracs[0]);
       }
       cell_number.resize(num_ves*max_num_cells);
