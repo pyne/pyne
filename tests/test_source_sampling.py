@@ -1543,7 +1543,6 @@ def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
                     e_dis_exp[eid] += current_ve[svid]['vol_frac'] *\
                         bias_tag[vid][eid]
     else:
-        # Energy is biased according to the bias_tag
         for vid in range(num_ve):
             current_ve = cell_fracs[cell_fracs['idx'] == vid]
             for svid in range(len(current_ve)):
