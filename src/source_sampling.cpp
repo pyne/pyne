@@ -6,7 +6,7 @@
 static pyne::Sampler* sampler = NULL;
 
 // Fortran API
-void pyne::sampling_setup_(int* mode, int* m_n_c) {
+void pyne::sampling_setup_(int* mode, int* cell_list_size) {
   if (sampler == NULL) {
     std::string filename ("source.h5m");
     std::string src_tag_name ("source_density");
@@ -22,7 +22,7 @@ void pyne::sampling_setup_(int* mode, int* m_n_c) {
     tag_names.insert(std::pair<std::string, std::string> ("cell_fracs_tag_name",
           "cell_fracs"));
     sampler = new pyne::Sampler(filename, tag_names, e_bounds, *mode);
-    *m_n_c = sampler->get_max_num_cells();
+    *cell_list_size = sampler->get_cell_list_size();
   }
 }
 
@@ -32,7 +32,7 @@ void pyne::particle_birth_(double* rands,
                            double* z,
                            double* e,
                            double* w,
-                           int* c) {
+                           std::vector<int>* cell_list) {
     std::vector<double> rands2(rands, rands + 6);
     pyne::SourceParticle src = sampler->particle_birth(rands2);
     *x = src.get_x();
@@ -40,7 +40,7 @@ void pyne::particle_birth_(double* rands,
     *z = src.get_z();
     *e = src.get_e();
     *w = src.get_w();
-    *c = src.get_c();
+    *cell_list = src.get_cell_list();
 }
 
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
@@ -86,7 +86,8 @@ pyne::Sampler::Sampler(std::string filename,
                  int mode)
   : filename(filename),
     tag_names(tag_names),
-    e_bounds(e_bounds) {
+    e_bounds(e_bounds),
+    mode(mode) {
   // determine the bias_mode
   if (mode == 0){
     bias_mode = ANALOG; 
@@ -120,18 +121,19 @@ pyne::Sampler::Sampler(std::string filename,
       bias_tag_name = tag_names["bias_tag_name"];
     }
   }
-
   setup();
 }
 
 pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
-  // In DEFAULT mode, max_num_cells = 1
+  // For Unstructured mesh, p_src_num_cells and max_num_cells are set to 1
+  // For Cartisian mesh, max_num_cells is obtained by read cell_fracs tag
   int pdf_idx =at->sample_pdf(rands[0], rands[1]);
-  int ve_idx = pdf_idx/max_num_cells/num_e_groups;
-  int c_idx = (pdf_idx/num_e_groups)%max_num_cells;
+  int ve_idx = pdf_idx/p_src_num_cells/num_e_groups;
+  int c_idx = (pdf_idx/num_e_groups)%p_src_num_cells;
   int e_idx = pdf_idx % num_e_groups;
-  int cell_id;
+  //int cell_id;
+  std::vector<int> cell_list;
 
   // Sample uniformly within the selected mesh volume element and energy
   // group.
@@ -140,14 +142,34 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   xyz_rands.push_back(rands[3]);
   xyz_rands.push_back(rands[4]);
   moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
-  // cell_number
-  if (ve_type == moab::MBHEX) {
-  cell_id = cell_number[ve_idx*max_num_cells + c_idx];
+  if (ve_type == moab::MBTET) {
+     cell_list.resize(0);
   } else {
-     cell_id = -1;
+     if (mode == 3 or mode == 4 or mode == 5) { // sub-voxel
+        cell_list.resize(1);
+        cell_list[0] = cell_number[ve_idx*max_num_cells + c_idx];
+     }
+     else { // mode in 0, 1, 2, voxel
+        cell_list.resize(max_num_cells);
+        for (int c=0; c<max_num_cells; c++) {
+           cell_list[c] = cell_number[ve_idx*max_num_cells + c];
+        }
+     }
   }
+  // cell_number
+//  if (ve_type == moab::MBHEX) {
+//     cell_id = cell_number[ve_idx*max_num_cells + c_idx];
+//     for (int c=0; c<max_num_cells; c++) {
+//        cell_list[c] = cell_number[ve_idx*max_num_cells + c];
+//     }
+//  } else {
+ //    cell_id = -1;
+//     for (int c=0; c< max_num_cells; c++) {
+//        cell_list[c] = -1;
+//     }
+//  }
   pyne::SourceParticle src = SourceParticle(pos[0], pos[1], pos[2],
-      sample_e(e_idx, rands[5]), sample_w(pdf_idx), cell_id);
+      sample_e(e_idx, rands[5]), sample_w(pdf_idx), cell_list);
   return src;
 }
 
@@ -255,11 +277,12 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   // That's okay. That's what the next line is all about:
   num_e_groups = num_groups(src_tag);
 
-  // Set the default value of max_num_cells to 1, so that the normal r2s and sub-voxel
-  // r2s can use the same form of pdf size description
+  // Set the default value of max_num_cells to 1, so that the structured mesh
+  // and unstructured mesh r2s can use the same form of pdf size description.
   max_num_cells = 1;
-  // set the default value of cell_fracs to 1.0
-  cell_fracs.resize(num_ves*max_num_cells);
+  p_src_num_cells = 1;
+  // set the default value of cell_fracs to 1.0 for unstructured mesh
+  cell_fracs.resize(num_ves*p_src_num_cells);
   for(int i=0; i<cell_fracs.size(); i++){
     cell_fracs[i] = 1.0;
   }
@@ -270,13 +293,19 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
       rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
                                   cell_fracs_tag);
       max_num_cells = num_groups(cell_fracs_tag);
-      num_e_groups /= max_num_cells;
-      cell_fracs.resize(num_ves*max_num_cells);
-      rval = mesh->tag_get_data(cell_fracs_tag, ves, &cell_fracs[0]);
+      p_src_num_cells = max_num_cells;
+      if (mode == 0 or mode == 1 or mode == 2) {
+         p_src_num_cells = 1;
+      }
+      num_e_groups /= p_src_num_cells;
+      if (mode == 3 or mode == 4 or mode == 5) {
+         cell_fracs.resize(num_ves*max_num_cells);
+         rval = mesh->tag_get_data(cell_fracs_tag, ves, &cell_fracs[0]);
+      }
       cell_number.resize(num_ves*max_num_cells);
       rval = mesh->tag_get_data(cell_number_tag, ves, &cell_number[0]);
   }
-  std::vector<double> pdf(num_ves*num_e_groups*max_num_cells);
+  std::vector<double> pdf(num_ves*num_e_groups*p_src_num_cells);
   rval = mesh->tag_get_data(src_tag, ves, &pdf[0]);
   if (rval != moab::MB_SUCCESS)
     throw std::runtime_error("Problem getting source tag data.");
@@ -284,10 +313,10 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   // Multiply the source densities by the VE volumes
   int v, c, e;
   for (v=0; v<num_ves; ++v) {
-      for (c=0; c<max_num_cells; ++c) {
+      for (c=0; c<p_src_num_cells; ++c) {
           for (e=0; e<num_e_groups; ++e) {
-              pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] *=
-                  volumes[v]*cell_fracs[v*max_num_cells + c];
+              pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e] *=
+                  volumes[v]*cell_fracs[v*p_src_num_cells + c];
           }
       }
   }
@@ -300,7 +329,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
     std::vector<double> bias_pdf = read_bias_pdf(ves, volumes, pdf);
     normalize_pdf(bias_pdf);
     //  Create alias table based off biased pdf and calculate birth weights.
-    biased_weights.resize(num_ves*num_e_groups*max_num_cells);
+    biased_weights.resize(num_ves*p_src_num_cells*num_e_groups);
     for (int i=0; i<biased_weights.size(); ++i) {
       biased_weights[i] = pdf[i]/bias_pdf[i];
     }
@@ -311,7 +340,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
 std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves, 
                                                  std::vector<double> volumes,
                                                  std::vector<double> pdf) {
-    std::vector<double> bias_pdf(num_ves*max_num_cells*num_e_groups);
+    std::vector<double> bias_pdf(num_ves*p_src_num_cells*num_e_groups);
     int v, c, e;
     moab::ErrorCode rval;
     if (bias_mode == UNIFORM) {
@@ -320,22 +349,22 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
       // mesh volume element and multiplying by the volume of the element.
       double q_in_group;
       for (v=0; v<num_ves; ++v) {
-        for (c=0; c<max_num_cells; ++c) {
+        for (c=0; c<p_src_num_cells; ++c) {
             q_in_group = 0.0;
             for (e=0; e<num_e_groups; ++e) {
-                q_in_group += pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e];
+                q_in_group += pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e];
             }
 
             if (q_in_group > 0) {
                 for (e=0; e<num_e_groups; ++e) {
-                    bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] =
-                        volumes[v]*cell_fracs[v*max_num_cells + c]*
-                        pdf[v*max_num_cells*num_e_groups +
+                    bias_pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e] =
+                        volumes[v]*cell_fracs[v*p_src_num_cells + c]*
+                        pdf[v*p_src_num_cells*num_e_groups +
                         c*num_e_groups + e]/q_in_group;
                 }
             } else {
                 for (e=0; e<num_e_groups; ++e) {
-                  bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] = 0.0;
+                  bias_pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e] = 0.0;
                 }
             }
 
@@ -349,7 +378,7 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
                                   moab::MB_TYPE_DOUBLE,
                                   bias_tag);
       num_bias_groups = num_groups(bias_tag);
-      if (num_bias_groups == num_e_groups * max_num_cells) {
+      if (num_bias_groups == num_e_groups * p_src_num_cells) {
         // Spatial, cell and energy biasing. The supplied bias PDF values are
         // applied to each specific energy group and sub-voxels in a mesh
         // volume element.
@@ -357,10 +386,10 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         if (rval != moab::MB_SUCCESS)
           throw std::runtime_error("Problem getting bias tag data.");
         for (v=0; v<num_ves; ++v) {
-            for (c=0; c<max_num_cells; c++) {
+            for (c=0; c<p_src_num_cells; c++) {
                 for (e=0; e<num_e_groups; ++e)
-                    bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] *=
-                       volumes[v]*cell_fracs[v*max_num_cells + c];
+                    bias_pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e] *=
+                       volumes[v]*cell_fracs[v*p_src_num_cells + c];
             }
         }
       } else if (num_bias_groups == 1) {
@@ -374,24 +403,24 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         double q_in_group;
         for (v=0; v<num_ves; ++v) {
           q_in_group = 0;
-          for (c=0; c<max_num_cells; ++c){
+          for (c=0; c<p_src_num_cells; ++c){
               for (e=0; e<num_e_groups; ++e){
-                q_in_group += pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e];
+                q_in_group += pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e];
               }
           }
           if (q_in_group > 0){
-            for (c=0; c<max_num_cells; ++c){
+            for (c=0; c<p_src_num_cells; ++c){
                 for (e=0; e<num_e_groups; ++e){
-                    bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] =
-                        spatial_pdf[v]*volumes[v]*cell_fracs[v*max_num_cells + c]*
-                        pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e]/
+                    bias_pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e] =
+                        spatial_pdf[v]*volumes[v]*cell_fracs[v*p_src_num_cells + c]*
+                        pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e]/
                         q_in_group;
                 }
             }
           } else {
-            for (c=0; c<max_num_cells; ++c)
+            for (c=0; c<p_src_num_cells; ++c)
                 for (e=0; e<num_e_groups; ++e){
-                    bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] =  0;
+                    bias_pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e] =  0;
                 }
           }
         }
@@ -405,25 +434,25 @@ std::vector<double> pyne::Sampler::read_bias_pdf(moab::Range ves,
         for (v=0; v<num_ves; ++v) {
             for (e=0; e<num_e_groups; ++e) {
                 q_in_group = 0.0;
-                for (c=0; c<max_num_cells; ++c) {
-                    q_in_group += pdf[v*max_num_cells*num_e_groups + c*num_e_groups +e];
+                for (c=0; c<p_src_num_cells; ++c) {
+                    q_in_group += pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups +e];
                 }
                 if (q_in_group >0) {
-                    for (c=0; c<max_num_cells; ++c) {
-                        bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups +e] =
-                            spa_erg_pdf[v*num_e_groups+e]*volumes[v]*cell_fracs[v*max_num_cells + c]*
-                            pdf[v*max_num_cells*num_e_groups + c*num_e_groups +e]/q_in_group;
+                    for (c=0; c<p_src_num_cells; ++c) {
+                        bias_pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups +e] =
+                            spa_erg_pdf[v*num_e_groups+e]*volumes[v]*cell_fracs[v*p_src_num_cells + c]*
+                            pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups +e]/q_in_group;
                     }
                 } else {
-                    for (c=0; c<max_num_cells; ++c) {
-                        bias_pdf[v*max_num_cells*num_e_groups + c*num_e_groups + e] = 0.0;
+                    for (c=0; c<p_src_num_cells; ++c) {
+                        bias_pdf[v*p_src_num_cells*num_e_groups + c*num_e_groups + e] = 0.0;
                     }
                 }
             }
         }
       } else {
         throw std::length_error("Length of bias tag must equal length of the"
-                                "  max_num_cells*num_e_group, num_e_groups, or 1.");
+                                "  p_src_num_cells*num_e_group, num_e_groups, or 1.");
       }
      }
     double q_in_all = 0.0;
@@ -495,6 +524,21 @@ int pyne::Sampler::num_groups(moab::Tag tag) {
   return tag_size/sizeof(double);
 }
 
+int pyne::Sampler::get_cell_list_size() {
+   // cell_list_size should be:
+   // 0: for unstructured mesh
+   // 1: for sub-voxel R2S
+   // max_num_cells: for voxel R2S
+   if (ve_type == moab::MBTET) {
+      return 0;
+   } else {
+      if (mode == 0 or mode == 1 or mode == 2) {
+         return max_num_cells;
+      } else {
+         return 1;
+      }
+   }
+}
 
 // Random-number sampling using the Walker-Vose alias method,
 // Copyright: Joachim Wuttke, Forschungszentrum Juelich GmbH (2013)
@@ -555,17 +599,16 @@ pyne::SourceParticle::SourceParticle() {
     z = -1.0;
     e = -1.0;
     w = -1.0;
-    c = -1;
 }
 
 pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
-                                     double _e, double _w, int _c) {
+                                     double _e, double _w, std::vector<int> _cell_list) {
     x = _x;
     y = _y;
     z = _z;
     e = _e;
     w = _w;
-    c = _c;
+    cell_list = _cell_list;
 }
 
 pyne::SourceParticle::~SourceParticle() {};

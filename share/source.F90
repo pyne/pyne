@@ -12,6 +12,40 @@
 ! Full instructions on compiling and using MCNP5 with this subroutine are found
 ! in the PyNE user manual.
 
+function find_cell(cell_list, cell_idx) result(icl_tmp)
+! This function to determines the current MCNP cell index location and exits if
+! no valid cell is found. This only works if there are no repeated geometries or
+! universes present in the model.
+
+    use mcnp_global
+    use mcnp_debug
+    ! xxx,yyy,zzz are global variables
+    ! mxa is global
+    integer :: i ! iterator variable
+    integer :: j ! tempory cell test
+    integer :: icl_tmp ! temporary cell variable
+    icl_tmp = -1
+
+    do i = 1, size(cell_list)
+      if (cell_list(i) > 0) then  ! some cell numbers may be -1, skip them
+          call chkcel(cell_idx(cell_list(i)), 0, j)
+          if (j .eq. 0) then
+             ! valid cel set
+             icl_tmp = cell_idx(cell_list(i))
+             exit
+          endif
+      endif
+    enddo
+    ! icl is now set
+
+    if(icl_tmp .le. 0) then
+      write(*,*) 'Nonsense cell number stopping'
+      stop
+    endif
+    ! icl now set to be valid cell
+
+end function find_cell
+
 subroutine source
     ! This subroutine is called directly by MCNP to select particle birth
     ! parameters
@@ -25,23 +59,32 @@ subroutine source
     integer :: tries
     integer, save :: cell_num = -1
     integer, save :: max_cell_num = 0
-    integer, save :: max_num_cells = 1
-    integer, dimension(:), allocatable, save :: cell_prob_num
+    integer, save :: cell_list_size = 0
+    integer, dimension(:), allocatable, save :: cell_idx
+    integer, dimension(:), allocatable, save :: cell_list
   
     if (first_run .eqv. .true.) then
-        call sampling_setup(idum(1), max_num_cells)
-        ! find out the maximum cell number
+        ! set up, and return cell_list_size to create a cell_list
+        call sampling_setup(idum(1), cell_list_size)
+        allocate(cell_list(cell_list_size)) 
+        if cell_list_size > 0 then
+           do i = 1, cell_list_size
+              cell_list(i) = -1
+           enddo
+        endif
+
+        ! find out the maximum cell number to create cell_idx
         do i = 1, mxa
            if (max_cell_num < ncl(i)) then
                max_cell_num = ncl(i)
            endif
         enddo
-        allocate(cell_prob_num(max_cell_num))
+        allocate(cell_idx(max_cell_num))
         do i = 1, max_cell_num
-            cell_prob_num(i) = -1
+            cell_idx(i) = -1
         enddo
         do i = 1, mxa
-           cell_prob_num(ncl(i)) = i
+           cell_idx(ncl(i)) = i
         enddo
         first_run = .false.
     endif
@@ -56,8 +99,8 @@ subroutine source
    rands(4) = rang() ! sample y
    rands(5) = rang() ! sample z
  
-   call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_num)
-   icl_tmp = cell_prob_num(cell_num)
+   call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_list)
+   icl_tmp = find_cell(cell_list, cell_idx)
 
    ! check wether sampled src located in sampled cell_num
    call chkcel(icl_tmp, 0, j)
