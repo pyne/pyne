@@ -132,6 +132,7 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   int ve_idx = pdf_idx/p_src_num_cells/num_e_groups;
   int c_idx = (pdf_idx/num_e_groups)%p_src_num_cells;
   int e_idx = pdf_idx % num_e_groups;
+//  std::cout<<"pdf_idx, ve_idx, c_idx, e_idx:"<<pdf_idx<<", "<<ve_idx<<", "<<c_idx<<", "<<e_idx<<std::endl;
   //int cell_id;
   std::vector<int> cell_list;
 
@@ -282,7 +283,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   max_num_cells = 1;
   p_src_num_cells = 1;
   // set the default value of cell_fracs to 1.0 for unstructured mesh
-  cell_fracs.resize(num_ves*p_src_num_cells);
+  cell_fracs.resize(num_ves);
   for(int i=0; i<cell_fracs.size(); i++){
     cell_fracs[i] = 1.0;
   }
@@ -318,6 +319,10 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
       }
   }
   normalize_pdf(pdf);
+//  std::cout<<"num_ves:"<<num_ves<<", num_e_groups:"<<num_e_groups<<", max_num_cells:"<<max_num_cells<<std::endl;
+//  for (int i=0; i<pdf.size(); i++){
+//     std::cout<<"pdf["<<i<<"]:"<<pdf[i]<<std::endl;
+//  }
 
   // Setup alias table based off PDF or biased PDF
   if (bias_mode == ANALOG) {

@@ -1053,9 +1053,20 @@ def test_template_examples():
                 _source_sampling_test_template(mode, cell_fracs_list, src_tag)
 
             # test case: 1 voxel, 2 subvoxels
-            cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0)]
-            src_tag = [[1.0, 1.0]*num_e_groups]
-            if mode == DEFAULT_USER or mode == SUBVOXEL_USER:
+            # create src and cell_fracs tag data
+            if mode in (0, 1, 2):
+                src_tag = [[1.0]*num_e_groups]
+                cell_fracs_list = [(0, 1, 1.0, 0.0)]
+            elif mode in (3, 4, 5):
+                src_tag = [[1.0, 1.0]*num_e_groups]
+                cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0)]
+
+            if mode == DEFAULT_USER:
+                for num_bias_groups in (1, num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups]
+                    _source_sampling_test_template(
+                        mode, cell_fracs_list, src_tag, bias_tag)
+            elif mode == SUBVOXEL_USER:
                 for num_bias_groups in (1, num_e_groups, 2*num_e_groups):
                     bias_tag = [[1.0]*num_bias_groups]
                     _source_sampling_test_template(
@@ -1075,10 +1086,22 @@ def test_template_examples():
                 _source_sampling_test_template(mode, cell_fracs_list, src_tag)
 
             # test case: 2 voxel, 4 subvoxels
-            cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0),
-                               (1, 3, 0.5, 0.0), (1, 4, 0.5, 0.0)]
-            src_tag = [[1.0, 1.0]*num_e_groups, [1.0, 1.0]*num_e_groups]
-            if mode == DEFAULT_USER or mode == SUBVOXEL_USER:
+            # create src and cell_fracs tag data
+            if mode in (0, 1, 2):
+                src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
+                cell_fracs_list = [(0, 1, 1.0, 0.0),
+                                   (1, 2, 1.0, 0.0)]
+            elif mode in (3, 4, 5):
+                src_tag = [[1.0, 1.0]*num_e_groups, [1.0, 1.0]*num_e_groups]
+                cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0),
+                                   (1, 3, 0.5, 0.0), (1, 4, 0.5, 0.0)]
+
+            if mode == DEFAULT_USER:
+                for num_bias_groups in (1, num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
+                    _source_sampling_test_template(
+                        mode, cell_fracs_list, src_tag, bias_tag)
+            elif mode == SUBVOXEL_USER:
                 for num_bias_groups in (1, num_e_groups, 2*num_e_groups):
                     bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
                     _source_sampling_test_template(
@@ -1315,7 +1338,10 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     exp_c = set(list(current_cell_fracs['cell']))
 
     # calculate eid
-    num_e_groups = len(src_tag[0])/max_num_cells
+    if mode in (0, 1, 2):
+        num_e_groups = len(src_tag[0])
+    elif mode in (3, 4, 5):
+        num_e_groups = len(src_tag[0])/max_num_cells
     e_bounds = np.array([i*1.0/num_e_groups for i in range(num_e_groups+1)])
     eid = -1
     for i in range(num_e_groups):
@@ -1429,7 +1455,10 @@ def _get_x_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     """
     num_ve, num_sve, max_num_cells = \
         _get_num_ve_sve_and_max_num_cells(cell_fracs)
-    num_e_groups = len(src_tag[0])/max_num_cells
+    if mode in (0, 1, 2):
+        num_e_groups = len(src_tag[0])
+    elif mode in (3, 4, 5):
+        num_e_groups = len(src_tag[0])/max_num_cells
     x_bounds = [v*1.0/(num_ve) for v in range(num_ve+1)]
     x_dis_exp = np.array([0.0]*num_ve)
     if mode in (0, 3):
@@ -1522,7 +1551,10 @@ def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
                          .format(str(mode)))
     num_ve, num_sve, max_num_cells = \
         _get_num_ve_sve_and_max_num_cells(cell_fracs)
-    num_e_groups = len(src_tag[0])/max_num_cells
+    if mode in (0, 1, 2):
+        num_e_groups = len(src_tag[0])
+    elif mode in (3, 4, 5):
+        num_e_groups = len(src_tag[0])/max_num_cells
     e_bounds = [e*1.0/(num_e_groups) for e in range(num_e_groups+1)]
     e_dis_exp = np.array([0.0]*num_e_groups)
     if mode in (0, 1, 3, 4) or (mode in (2, 5) and len(bias_tag[0]) == 1):
@@ -1649,13 +1681,19 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     num_ve, num_sve, max_num_cells = _get_num_ve_sve_and_max_num_cells(
         cell_fracs)
     # set up e_bounds
-    num_e_groups = len(src_tag[0])/max_num_cells
+    if mode in (0, 1, 2):
+        num_e_groups = len(src_tag[0])
+    elif mode in (3, 4, 5):
+        num_e_groups = len(src_tag[0])/max_num_cells
     e_bounds = [i*1.0/num_e_groups for i in range(num_e_groups+1)]
     e_bounds = np.array(e_bounds)
     # set up mesh
     m = _create_mesh_via_num_ve(num_ve)
     # set up src tag
-    m.src = NativeMeshTag(max_num_cells*num_e_groups, float)
+    if mode in (0, 1, 2):
+        m.src = NativeMeshTag(num_e_groups, float)
+    elif mode in (3, 4, 5):
+        m.src = NativeMeshTag(max_num_cells*num_e_groups, float)
     m.src[:] = src_tag
     # set up cell_number and cell_fracs tag
     m.tag_cell_fracs(cell_fracs)
@@ -1683,16 +1721,22 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     num_samples = 5000
     particles = []
 
+    print "new test"
     seed(1953)
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        rands = np.array([uniform(0, 1) for x in range(6)])
+        s = sampler.particle_birth(rands)
+        #print rands[5]
         # check w, and c for each particle
         # calculate the expected weight and cell_number
         exp_w, exp_c = _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag)
         assert_equal(s.w, exp_w)
         # when mode in (0, 1, 2), the set exp_c is (-1), otherwise it contains
         # several available cell number
-        assert(set(s.cell_list) == exp_c)
+        if mode in (0, 1, 2):
+            assert(set(s.cell_list) == exp_c)
+        elif mode in (3, 4, 5):
+            assert(set(s.cell_list).issubset(exp_c))
         # store all the particles for the convinent of distribution check
         particles.append(s)
 
