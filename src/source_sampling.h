@@ -53,7 +53,7 @@ namespace pyne {
   /// Voxel(DEFAULT) R2S: 0 = analog, 1 = uniform, 2 = user-specified
   /// SubVoxel(SUBVOXEL) R2S: 3 = analog, 4 = uniform, 5 = user-specified
   /// cell_list_size if the variable used for create the cell_list
-  /// cell_list_size could be 
+  /// cell_list_size could be
   ///      0: for unstructured mesh
   ///      1: for sub-voxel mode,
   ///      max_num_cells: for voxel mode
@@ -210,7 +210,7 @@ namespace pyne {
     // For voxel R2S, p_src_num_cells = 1
     // For sub-voxel R2S, p_src_num_cells = max_num_cells
     // For unstructured R2S, p_src_num_cells = 1.
-    int p_src_num_cells; 
+    int p_src_num_cells;
     int cell_list_size;
     BiasMode bias_mode; ///< Bias mode: ANALOG, UNIFORM, USER
     int mode; ///< Sampler mode, currently support 0, 1, 2, 3, 4, 5

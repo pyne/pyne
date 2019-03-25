@@ -132,7 +132,6 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   int ve_idx = pdf_idx/p_src_num_cells/num_e_groups;
   int c_idx = (pdf_idx/num_e_groups)%p_src_num_cells;
   int e_idx = pdf_idx % num_e_groups;
-//  std::cout<<"pdf_idx, ve_idx, c_idx, e_idx:"<<pdf_idx<<", "<<ve_idx<<", "<<c_idx<<", "<<e_idx<<std::endl;
   //int cell_id;
   std::vector<int> cell_list;
 
@@ -157,18 +156,6 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
         }
      }
   }
-  // cell_number
-//  if (ve_type == moab::MBHEX) {
-//     cell_id = cell_number[ve_idx*max_num_cells + c_idx];
-//     for (int c=0; c<max_num_cells; c++) {
-//        cell_list[c] = cell_number[ve_idx*max_num_cells + c];
-//     }
-//  } else {
- //    cell_id = -1;
-//     for (int c=0; c< max_num_cells; c++) {
-//        cell_list[c] = -1;
-//     }
-//  }
   pyne::SourceParticle src = SourceParticle(pos[0], pos[1], pos[2],
       sample_e(e_idx, rands[5]), sample_w(pdf_idx), cell_list);
   return src;
@@ -319,10 +306,6 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
       }
   }
   normalize_pdf(pdf);
-//  std::cout<<"num_ves:"<<num_ves<<", num_e_groups:"<<num_e_groups<<", max_num_cells:"<<max_num_cells<<std::endl;
-//  for (int i=0; i<pdf.size(); i++){
-//     std::cout<<"pdf["<<i<<"]:"<<pdf[i]<<std::endl;
-//  }
 
   // Setup alias table based off PDF or biased PDF
   if (bias_mode == ANALOG) {

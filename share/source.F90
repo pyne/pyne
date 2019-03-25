@@ -66,7 +66,7 @@ subroutine source
     if (first_run .eqv. .true.) then
         ! set up, and return cell_list_size to create a cell_list
         call sampling_setup(idum(1), cell_list_size)
-        allocate(cell_list(cell_list_size)) 
+        allocate(cell_list(cell_list_size))
         if cell_list_size > 0 then
            do i = 1, cell_list_size
               cell_list(i) = -1
@@ -88,7 +88,7 @@ subroutine source
         enddo
         first_run = .false.
     endif
-    
+
 100 continue 
    tries = 0
    rands(1) = rang() ! sample alias table
