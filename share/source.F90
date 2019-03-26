@@ -12,7 +12,7 @@
 ! Full instructions on compiling and using MCNP5 with this subroutine are found
 ! in the PyNE user manual.
 
-function find_cell(cell_list, cell_idx) result(icl_tmp)
+function find_cell(cell_list, cell_idx, cell_list_size) result(icl_tmp)
 ! This function to determines the current MCNP cell index location and exits if
 ! no valid cell is found. This only works if there are no repeated geometries or
 ! universes present in the model.
@@ -26,7 +26,7 @@ function find_cell(cell_list, cell_idx) result(icl_tmp)
     integer :: icl_tmp ! temporary cell variable
     icl_tmp = -1
 
-    do i = 1, size(cell_list)
+    do i = 1, cell_list_size
        call chkcel(cell_idx(cell_list(i)), 0, j)
        if (j .eq. 0) then
           ! valid cel set
@@ -65,7 +65,8 @@ subroutine source
         ! set up, and return cell_list_size to create a cell_list
         call sampling_setup(idum(1), cell_list_size)
         allocate(cell_list(cell_list_size))
-        if cell_list_size > 0 then
+
+        if (cell_list_size > 0) then
            do i = 1, cell_list_size
               cell_list(i) = -1
            enddo
@@ -77,10 +78,13 @@ subroutine source
                max_cell_num = ncl(i)
            endif
         enddo
+
         allocate(cell_idx(max_cell_num))
+
         do i = 1, max_cell_num
             cell_idx(i) = -1
         enddo
+
         do i = 1, mxa
            cell_idx(ncl(i)) = i
         enddo
@@ -100,10 +104,10 @@ subroutine source
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_list)
    ! In tet mesh, cell_list_size = 0, loop over entire cells to find icl_tmp
    if (cell_list_size == 0) then
-       icl_tmp = find_cell(ncl, cell_idx)
+       icl_tmp = find_cell(ncl, cell_idx, mxa)
    else
    ! In Cartisian mesh (voxel/sub-voxel), loop over cell_list to find icl_tmp
-       icl_tmp = find_cell(cell_list, cell_idx)
+       icl_tmp = find_cell(cell_list, cell_idx, cell_list_size)
    endif
 
    ! check wether sampled src located in sampled cell_num
