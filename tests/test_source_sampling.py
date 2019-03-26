@@ -1721,12 +1721,10 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     num_samples = 5000
     particles = []
 
-    print "new test"
     seed(1953)
     for i in range(num_samples):
         rands = np.array([uniform(0, 1) for x in range(6)])
         s = sampler.particle_birth(rands)
-        #print rands[5]
         # check w, and c for each particle
         # calculate the expected weight and cell_number
         exp_w, exp_c = _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag)
