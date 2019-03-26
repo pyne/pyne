@@ -27,14 +27,12 @@ function find_cell(cell_list, cell_idx) result(icl_tmp)
     icl_tmp = -1
 
     do i = 1, size(cell_list)
-      if (cell_list(i) > 0) then  ! some cell numbers may be -1, skip them
-          call chkcel(cell_idx(cell_list(i)), 0, j)
-          if (j .eq. 0) then
-             ! valid cel set
-             icl_tmp = cell_idx(cell_list(i))
-             exit
-          endif
-      endif
+       call chkcel(cell_idx(cell_list(i)), 0, j)
+       if (j .eq. 0) then
+          ! valid cel set
+          icl_tmp = cell_idx(cell_list(i))
+          exit
+       endif
     enddo
     ! icl is now set
 
@@ -57,7 +55,7 @@ subroutine source
     integer :: icl_tmp ! temporary cell variable
     integer :: find_cell
     integer :: tries
-    integer, save :: cell_num = -1
+!    integer, save :: cell_num = -1
     integer, save :: max_cell_num = 0
     integer, save :: cell_list_size = 0
     integer, dimension(:), allocatable, save :: cell_idx
@@ -100,7 +98,13 @@ subroutine source
    rands(5) = rang() ! sample z
  
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_list)
-   icl_tmp = find_cell(cell_list, cell_idx)
+   ! In tet mesh, cell_list_size = 0, loop over entire cells to find icl_tmp
+   if (cell_list_size == 0) then
+       icl_tmp = find_cell(ncl, cell_idx)
+   else
+   ! In Cartisian mesh (voxel/sub-voxel), loop over cell_list to find icl_tmp
+       icl_tmp = find_cell(cell_list, cell_idx)
+   endif
 
    ! check wether sampled src located in sampled cell_num
    call chkcel(icl_tmp, 0, j)
