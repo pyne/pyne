@@ -28,6 +28,7 @@ class MaterialLibrary {
   mat_map material_library;  // material library
   matname_set matlist;
   nuc_set nuclist;
+  int last_mat_number;
 
  private:
   /**

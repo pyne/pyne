@@ -6,7 +6,9 @@
 #endif
 
 // Empty Constructor
-pyne::MaterialLibrary::MaterialLibrary(){};
+pyne::MaterialLibrary::MaterialLibrary(){
+  last_mat_number = 0;
+};
 
 // Default constructor
 pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
@@ -19,7 +21,7 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
     throw std::runtime_error("The datapath, " + datapath + ", in " + file +
                              " is empty.");
   }
-
+  last_mat_number = 0;
   // load materials
   from_hdf5(file);
 };
@@ -71,6 +73,7 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
     if (mat_insert.second) {
       append_to_nuclist(mat);
       material_library[mat.metadata["name"].asString()] = mat;
+      material_library[mat.metadata["name"].asString()].metadata["mat_number"] = last_mat_number++;
     }
   }
 }
@@ -90,6 +93,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   if (inst.second) {
     append_to_nuclist(mat);
     matlist.insert(mat.metadata["name"].asString());
+    material_library[mat.metadata["name"].asString()].metadata["mat_number"] = last_mat_number++;
   }
 }
 
