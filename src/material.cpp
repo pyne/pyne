@@ -746,23 +746,11 @@ std::string pyne::Material::phits(std::string frac_type) {
   oss << " ]" << std::endl;
 
   // check for metadata
-  if (metadata.isMember("GAS")){
-    oss << "     GAS=" << metadata["GAS"].asInt() << std::endl;
-  }
-  if (metadata.isMember("ESTEP")){
-    oss << "     ESTEP=" << metadata["ESTEP"].asInt() << std::endl;
-  }
-  if (metadata.isMember("NLIB")){
-    oss << "     NLIB=" << metadata["NLIB"].asInt() << std::endl;
-  }
-  if (metadata.isMember("PLIB")){
-    oss << "     PLIB=" << metadata["PLIB"].asInt() << std::endl;
-  }
-  if (metadata.isMember("ELIB")){
-    oss << "     ELIB=" << metadata["ELIB"].asInt() << std::endl;
-  }
-  if (metadata.isMember("HLIB")){
-    oss << "     HLIB=" << metadata["HLIB"].asInt() << std::endl;
+  std::string keyworkds[6] = {"GAS", "ESTEP", "NLIB", "PLIB", "ELIB", "HLIB"};
+  for (auto keyword : keyworkds){
+    if (metadata.isMember(keyword)){
+      oss << "     "<< keyword << "=" << metadata[keyword].asInt() << std::endl;
+    }
   }
   // COND should be "<" or "=" or ">" if present
   if (metadata.isMember("COND")){
