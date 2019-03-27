@@ -173,6 +173,25 @@ jobs:
           flags: "python2"
           build: "python2_dagmc_pymoab"
 
+# Build and push the website
+  build_push_website:
+    executor:
+      name: py2_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - pull_container:
+          build: "python2_dagmc_pymoab" 
+      - run: cd ~/repo/pyne/docs
+      - run:
+          name: Build PyNE website
+          command: make html
+      - add_ssh_keys:
+          fingerprints:
+            - "bb:46:10:4a:68:67:f6:f7:c7:28:9d:1c:e2:01:dd:c3"
+      - run:
+          name: Deploy PyNE website
+          command: make push-root
+
 # Workflow part: 
 # This part defines the list of the jobs that will be ran and in which sequence.
 # The goal was to avoid running advanced configuration if PyNE does not work
@@ -204,3 +223,14 @@ workflows:
       - py2_dagmc_pymoab_test:
           requires:
             - py2_dagmc_pymoab_build
+
+      # only done on tags
+      - build_push_website:
+          requires:
+              - py2_dagmc_pymoab_test
+              - py3_test
+          filters:
+              branches:
+                  ignore: /.*/
+              tags:
+                  only: /.*/
