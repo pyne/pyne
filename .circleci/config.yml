@@ -99,7 +99,7 @@ commands:
   website_build_push:
     description: "build PyNE website and push it"
     parameters:
-      website_build:
+      push_option:
           type: string
           default: "push-test"
     steps:
@@ -114,7 +114,7 @@ commands:
             - "bb:46:10:4a:68:67:f6:f7:c7:28:9d:1c:e2:01:dd:c3"
       - run:
           name: Deploy PyNE website
-          command: make push-<< parameters.website_build >>
+          command: make push-<< parameters.push_option >>
 
 # Jobs part: 
 # Define the different job that will be ran this separate building form
