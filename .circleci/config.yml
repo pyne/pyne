@@ -95,6 +95,27 @@ commands:
           cd ~/repo/tests
           ./travis-run-tests.sh << parameters.flags >>
 
+  # Build and push PyNE website  
+  website_build_push:
+    description: "build PyNE website and push it"
+    parameters:
+      website_build:
+          type: string
+          default: "push-test"
+    steps:
+      - pull_container:
+          build: "python2_dagmc_pymoab" 
+      - run: cd ~/repo/pyne/docs
+      - run:
+          name: Build PyNE website
+          command: make html
+      - add_ssh_keys:
+          fingerprints:
+            - "bb:46:10:4a:68:67:f6:f7:c7:28:9d:1c:e2:01:dd:c3"
+      - run:
+          name: Deploy PyNE website
+          command: make push-<< parameters.website_build >>
+
 # Jobs part: 
 # Define the different job that will be ran this separate building form
 # testing for each configuration allowing to get more information out of the CI
@@ -174,23 +195,22 @@ jobs:
           build: "python2_dagmc_pymoab"
 
 # Build and push the website
-  build_push_website:
+  build_push_website_test:
     executor:
       name: py2_dagmc_pymoab
     working_directory: ~/repo
     steps:
-      - pull_container:
-          build: "python2_dagmc_pymoab" 
-      - run: cd ~/repo/pyne/docs
-      - run:
-          name: Build PyNE website
-          command: make html
-      - add_ssh_keys:
-          fingerprints:
-            - "bb:46:10:4a:68:67:f6:f7:c7:28:9d:1c:e2:01:dd:c3"
-      - run:
-          name: Deploy PyNE website
-          command: make push-root
+      - build_push_website:
+          push_option: "test"
+
+  build_push_website_deploy:
+    executor:
+      name: py2_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - build_push_website:
+          push_option: "root"
+
 
 # Workflow part: 
 # This part defines the list of the jobs that will be ran and in which sequence.
@@ -223,9 +243,14 @@ workflows:
       - py2_dagmc_pymoab_test:
           requires:
             - py2_dagmc_pymoab_build
+      - build_push_website_test:
+          requires:
+              - py2_dagmc_pymoab_test
+              - py3_test
+      
 
       # only done on tags
-      - build_push_website:
+      - build_push_website_deploy:
           requires:
               - py2_dagmc_pymoab_test
               - py3_test
