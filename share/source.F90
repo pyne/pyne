@@ -13,35 +13,40 @@
 ! in the PyNE user manual.
 
 function find_cell(cell_list, cell_list_size) result(icl_tmp)
-! This function to determines the current MCNP cell index location and exits if
-! no valid cell is found. This only works if there are no repeated geometries or
-! universes present in the model.
+! This function to determines the current MCNP cell index location.
+! Return a positive integer if a valid cell is found, otherwise it returns -1.
+! This only works if there are no repeated geometries or universes present in
+! the model.
 
     use mcnp_global
     use mcnp_debug
     ! xxx,yyy,zzz are global variables
     ! mxa is global
     integer :: i ! iterator variable
-    integer :: j ! tempory cell test
+    integer :: j ! temporary cell test
     integer :: icl_tmp ! temporary cell variable
+    integer, intent(in) :: cell_list_size
+    integer, dimension(cell_list_size), intent(in) :: cell_list
+    integer :: cid ! cell index
     icl_tmp = -1
 
-    do i = 1, cell_list_size
-       icl_tmp = namchg(cell_list(i))
-       call chkcel(icl_tmp, 0, j)
+    if (cell_list_size .eq. 1) then
+       cid = namchg(1, cell_list(1)) 
+       call chkcel(cid, 0, j)
        if (j .eq. 0) then
-          ! valid cel set
-          ! icl_tmp = cell_idx(cell_list(i))
-          exit
+           icl_tmp = cid
        endif
-    enddo
-    ! icl is now set
-
-    if(icl_tmp .le. 0) then
-      write(*,*) 'Nonsense cell number stopping'
-      stop
+    else
+       do i = 1, cell_list_size
+          cid = namchg(1, cell_list(i))
+          call chkcel(cid, 0, j)
+          if (j .eq. 0) then
+             ! valid cel set
+             icl_tmp = cid
+             exit
+          endif
+       enddo
     endif
-    ! icl now set to be valid cell
 
 end function find_cell
 
@@ -63,12 +68,6 @@ subroutine source
         ! set up, and return cell_list_size to create a cell_list
         call sampling_setup(idum(1), cell_list_size)
         allocate(cell_list(cell_list_size))
-
-        if (cell_list_size > 0) then
-           do i = 1, cell_list_size
-              cell_list(i) = -1
-           enddo
-        endif
         first_run = .false.
     endif
 
@@ -91,26 +90,20 @@ subroutine source
        icl_tmp = find_cell(cell_list, cell_list_size)
    endif
 
-   ! check wether sampled src located in sampled cell_num
-   call chkcel(icl_tmp, 0, j)
-   if (j .eq. 0) then
-      ! sampled x, y, z in sampled cell_num
-      icl_tmp = icl_tmp
-   else
-      ! sampled x, y, z not in sampled cell_num, sample x, y, z again
-      tries = tries + 1
+   ! check whether this is a valid cell
+   if (icl_tmp .le. 0) then
       goto 300
    endif
-   
+
    ! check whether the material of sampled cell is void
    if (mat(icl_tmp).eq.0) then
-       tries = tries + 1
        goto 300
    else
        goto 400
    endif
 
 300 continue
+   tries = tries + 1
    if(tries < idum(2)) then
        goto 200
    else

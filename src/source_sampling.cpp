@@ -32,7 +32,7 @@ void pyne::particle_birth_(double* rands,
                            double* z,
                            double* e,
                            double* w,
-                           std::vector<int>* cell_list) {
+                           int* cell_list) {
     std::vector<double> rands2(rands, rands + 6);
     pyne::SourceParticle src = sampler->particle_birth(rands2);
     *x = src.get_x();
@@ -40,7 +40,11 @@ void pyne::particle_birth_(double* rands,
     *z = src.get_z();
     *e = src.get_e();
     *w = src.get_w();
-    *cell_list = src.get_cell_list();
+    std::vector<int> c_list = src.get_cell_list();
+    int cell_list_size = sampler->get_cell_list_size();
+    for (int i=0; i<cell_list_size; i++){
+        cell_list[i] = c_list[i];
+    }
 }
 
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
