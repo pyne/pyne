@@ -105,7 +105,7 @@ commands:
     steps:
       - pull_container:
           build: "python2_dagmc_pymoab" 
-      - run: cd ~/repo/pyne/docs
+      - run: cd ~/repo/docs
       - run:
           name: Build PyNE website
           command: make html
