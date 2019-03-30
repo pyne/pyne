@@ -482,7 +482,6 @@ cdef class Sampler:
         cdef int irands
         cdef int rands_size
         cdef double * rands_data
-#        cdef cpp_vector[int] cell_list_proxy
         
         cdef np.npy_intp rtnval_proxy_shape[1]
         # rands is a ('vector', 'float64', 0)
@@ -500,12 +499,6 @@ cdef class Sampler:
         cdef cpp_source_sampling.SourceParticle c_src = \
                 (<cpp_source_sampling.Sampler *> self._inst)\
                 .particle_birth(rands_proxy)
-#        cell_list = c_src.get_cell_list()
-#        cell_list_size = len(cell_list)
-#        cell_list_data = <int *> np.PyArray_DATA(<np.ndarray> cell_list)
-#        cell_list_proxy = cpp_vector[int](<size_t> cell_list_size)
-#        for i in range(cell_list_size):
-#            cell_list_proxy[i] = cell_list_data[i]
         return SourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), \
                 c_src.get_e(), c_src.get_w(), c_src.get_cell_list())
 

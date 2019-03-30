@@ -17,6 +17,10 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
 ! Return a positive integer if a valid cell is found, otherwise it returns -1.
 ! This only works if there are no repeated geometries or universes present in
 ! the model.
+! Parameters:
+!     cell_list: array of integers. Contains cell numbers that the source
+!                particle possiblely located.
+!     cell_list_size: integer. Size of the cell_list.
 
     use mcnp_global
     use mcnp_debug
@@ -30,23 +34,23 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
     integer :: cid ! cell index
     icl_tmp = -1
 
-    if (cell_list_size .eq. 1) then
-       cid = namchg(1, cell_list(1)) 
-       call chkcel(cid, 0, j)
-       if (j .eq. 0) then
-           icl_tmp = cid
-       endif
-    else
+!    if (cell_list_size .eq. 1) then
+!       cid = namchg(1, cell_list(1)) 
+!       call chkcel(cid, 0, j)
+!       if (j .eq. 0) then
+!           icl_tmp = cid
+!       endif
+!    else
        do i = 1, cell_list_size
           cid = namchg(1, cell_list(i))
           call chkcel(cid, 0, j)
           if (j .eq. 0) then
-             ! valid cel set
+             ! valid cell set
              icl_tmp = cid
              exit
           endif
        enddo
-    endif
+!    endif
 
 end function find_cell
 
