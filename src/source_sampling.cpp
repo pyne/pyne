@@ -149,7 +149,7 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   if (ve_type == moab::MBTET) {
      cell_list.resize(0);
   } else {
-     if (mode == 3 or mode == 4 or mode == 5) { // sub-voxel
+     if (mesh_mode = SUBVOXEL) { // sub-voxel
         cell_list.resize(1);
         cell_list[0] = cell_number[ve_idx*max_num_cells + c_idx];
      }
@@ -193,6 +193,17 @@ void pyne::Sampler::setup() {
     verts_per_ve = 4;
   }
   else throw std::invalid_argument("Mesh file must contain only tets or hexes.");
+
+  // Assign MeshMode: VOXEL, SUBVOXEL, TET
+  if (ve_type == moab::MBHEX){
+     if (mode < 3){
+        mesh_mode = VOXEL;
+     } else {
+        mesh_mode = SUBVOXEL;
+     }
+  } else {
+     mesh_mode = TET;
+  }
 
   if (ve_type == moab::MBHEX){
       // cell_number_tag
@@ -285,7 +296,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
       rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
                                   cell_fracs_tag);
       max_num_cells = num_groups(cell_fracs_tag);
-      if (mode == 3 or mode == 4 or mode == 5) {
+      if (mesh_mode == SUBVOXEL) {
          p_src_num_cells = max_num_cells;
          num_e_groups /= p_src_num_cells;
          cell_fracs.resize(num_ves*p_src_num_cells);
@@ -521,7 +532,7 @@ int pyne::Sampler::get_cell_list_size() {
    if (ve_type == moab::MBTET) {
       return 0;
    } else {
-      if (mode == 0 or mode == 1 or mode == 2) {
+      if (mesh_mode == VOXEL) {
          return max_num_cells;
       } else {
          return 1;

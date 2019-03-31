@@ -138,6 +138,7 @@ namespace pyne {
   
   /// Problem modes
   enum BiasMode {USER, ANALOG, UNIFORM};
+  enum MeshMode {VOXEL, SUBVOXEL, TET};
   
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
@@ -213,6 +214,7 @@ namespace pyne {
     int p_src_num_cells;
     int cell_list_size;
     BiasMode bias_mode; ///< Bias mode: ANALOG, UNIFORM, USER
+    MeshMode mesh_mode; ///< Mesh mode: VOXEL, SUBVOXEL, TET
     int mode; ///< Sampler mode, currently support 0, 1, 2, 3, 4, 5
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
