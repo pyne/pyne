@@ -602,13 +602,8 @@ pyne::SourceParticle::SourceParticle() {
 }
 
 pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
-                                     double _e, double _w, std::vector<int> _cell_list) {
-    x = _x;
-    y = _y;
-    z = _z;
-    e = _e;
-    w = _w;
-    cell_list = _cell_list;
-}
+                                     double _e, double _w, std::vector<int> _cell_list)
+    : x(_x), y(_y), z(_z),
+      e(_e), w(_w), cell_list(_cell_list) {}
 
 pyne::SourceParticle::~SourceParticle() {};
