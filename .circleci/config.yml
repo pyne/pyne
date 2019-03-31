@@ -105,16 +105,15 @@ commands:
     steps:
       - pull_container:
           build: "python2_dagmc_pymoab" 
-      - run: cd ~/repo/docs
-      - run:
-          name: Build PyNE website
-          command: make html
       - add_ssh_keys:
           fingerprints:
             - "bb:46:10:4a:68:67:f6:f7:c7:28:9d:1c:e2:01:dd:c3"
       - run:
-          name: Deploy PyNE website
-          command: make push-<< parameters.push_option >>
+          name: Build PyNE website
+          command: |
+              cd ~repo/docs/
+              make html
+              make push-<< parameters.push_option >>
 
 # Jobs part: 
 # Define the different job that will be ran this separate building form
