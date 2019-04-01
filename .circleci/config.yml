@@ -111,6 +111,8 @@ commands:
       - run:
           name: Build PyNE website
           command: |
+              pwd 
+              ls -al
               cd ~repo/docs/
               make html
               make push-<< parameters.push_option >>
