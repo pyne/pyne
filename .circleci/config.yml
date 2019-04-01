@@ -109,6 +109,8 @@ commands:
           fingerprints:
             - "9e:40:df:c2:52:bb:47:f8:f2:19:20:5c:cc:3c:8e:96"
       - run:
+          command: ssh -vT git@github.com
+      - run:
           command: |
               git config --global user.email "ci@pyne.io"
               git config --global user.name "bam241"
