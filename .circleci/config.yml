@@ -240,9 +240,9 @@ workflows:
         #    requires:
         #      - py2_pymoab_build
         #
-        #- py2_dagmc_pymoab_build:
-        #    requires:
-        #      - py2_pymoab_build
+        - py2_dagmc_pymoab_build:
+            requires:
+              - py2_pymoab_build
         #- py2_dagmc_pymoab_test:
         #    requires:
         #      - py2_dagmc_pymoab_build
@@ -254,8 +254,8 @@ workflows:
 
       # only done on tags
       - build_push_website_deploy:
-          #   requires:
-          #       - py2_dagmc_pymoab_test
+             requires:
+                 - py2_dagmc_pymoab_build
           #       - py3_test
           filters:
               branches:
