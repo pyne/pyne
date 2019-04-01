@@ -42,9 +42,7 @@ void pyne::particle_birth_(double* rands,
     *w = src.get_w();
     std::vector<int> c_list = src.get_cell_list();
     int cell_list_size = sampler->get_cell_list_size();
-    for (int i=0; i<cell_list_size; i++){
-        cell_list[i] = c_list[i];
-    }
+    std::copy(c_list.begin(), c_list.end(), cell_list);
 }
 
 std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
