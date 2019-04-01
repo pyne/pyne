@@ -107,7 +107,7 @@ commands:
           build: "python2_dagmc_pymoab" 
       - add_ssh_keys:
           fingerprints:
-            - "bb:46:10:4a:68:67:f6:f7:c7:28:9d:1c:e2:01:dd:c3"
+            - "04:66:ee:c2:be:fb:8d:c8:ec:5d:03:ce:ab:40:88:2c"
       - run:
           command: |
               git config --global user.email "ci@pyne.io"
@@ -223,40 +223,40 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - py3_build
-      - py3_test:
-          requires:
-            - py3_build
+        #- py3_build
+        #- py3_test:
+        #    requires:
+        #      - py3_build
     
-      - py2_build
-      - py2_test:
-          requires:
-            - py2_build
-      
-      - py2_pymoab_build:
-          requires:
-            - py2_build
-      - py2_pymoab_test:
-          requires:
-            - py2_pymoab_build
-      
-      - py2_dagmc_pymoab_build:
-          requires:
-            - py2_pymoab_build
-      - py2_dagmc_pymoab_test:
-          requires:
-            - py2_dagmc_pymoab_build
-      - build_push_website_test:
-          requires:
-              - py2_dagmc_pymoab_test
-              - py3_test
+        #- py2_build
+        #- py2_test:
+        #    requires:
+        #      - py2_build
+        #
+        #- py2_pymoab_build:
+        #    requires:
+        #      - py2_build
+        #- py2_pymoab_test:
+        #    requires:
+        #      - py2_pymoab_build
+        #
+        #- py2_dagmc_pymoab_build:
+        #    requires:
+        #      - py2_pymoab_build
+        #- py2_dagmc_pymoab_test:
+        #    requires:
+        #      - py2_dagmc_pymoab_build
+        #- build_push_website_test:
+        #    requires:
+        #        - py2_dagmc_pymoab_test
+        #        - py3_test
       
 
       # only done on tags
       - build_push_website_deploy:
-          requires:
-              - py2_dagmc_pymoab_test
-              - py3_test
+          #   requires:
+          #       - py2_dagmc_pymoab_test
+          #       - py3_test
           filters:
               branches:
                   ignore: /.*/
