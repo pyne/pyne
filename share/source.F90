@@ -32,25 +32,17 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
     integer, intent(in) :: cell_list_size
     integer, dimension(cell_list_size), intent(in) :: cell_list
     integer :: cid ! cell index
-    icl_tmp = -1
 
-!    if (cell_list_size .eq. 1) then
-!       cid = namchg(1, cell_list(1)) 
-!       call chkcel(cid, 0, j)
-!       if (j .eq. 0) then
-!           icl_tmp = cid
-!       endif
-!    else
-       do i = 1, cell_list_size
-          cid = namchg(1, cell_list(i))
-          call chkcel(cid, 0, j)
-          if (j .eq. 0) then
-             ! valid cell set
-             icl_tmp = cid
-             exit
-          endif
-       enddo
-!    endif
+    icl_tmp = -1
+    do i = 1, cell_list_size
+       cid = namchg(1, cell_list(i))
+       call chkcel(cid, 0, j)
+       if (j .eq. 0) then
+          ! valid cell set
+          icl_tmp = cid
+          exit
+       endif
+    enddo
 
 end function find_cell
 
