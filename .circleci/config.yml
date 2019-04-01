@@ -109,6 +109,10 @@ commands:
           fingerprints:
             - "bb:46:10:4a:68:67:f6:f7:c7:28:9d:1c:e2:01:dd:c3"
       - run:
+          command: |
+              git config --global user.email "ci@pyne.io"
+              git config --global user.name "PyNE-CI"
+      - run:
           name: Build PyNE website
           command: |
               cd docs/
