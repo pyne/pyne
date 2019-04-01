@@ -35,24 +35,30 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
 
     icl_tmp = -1
     if (cell_list_size .eq. 0) then
+        ! TET mesh
         do i = 1, mxa
            call chkcel(i, 0, j)
            if (j .eq. 0) then
+              ! valid cell found
               icl_tmp = i
               exit
            endif
         enddo
+    else
+        ! HEX mesh. VOXLE/SUBVOXEL
+        do i = 1, cell_list_size
+           if (cell_list(i) .eq. -1) then
+               exit
+           endif
+           cid = namchg(1, cell_list(i))
+           call chkcel(cid, 0, j)
+           if (j .eq. 0) then
+              ! valid cell found
+              icl_tmp = cid
+              exit
+           endif
+        enddo
     endif
-
-    do i = 1, cell_list_size
-       cid = namchg(1, cell_list(i))
-       call chkcel(cid, 0, j)
-       if (j .eq. 0) then
-          ! valid cell set
-          icl_tmp = cid
-          exit
-       endif
-    enddo
 
 end function find_cell
 

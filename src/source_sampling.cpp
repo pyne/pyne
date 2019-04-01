@@ -145,7 +145,7 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   xyz_rands.push_back(rands[4]);
   moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
   if (ve_type == moab::MBHEX) {
-     if (mesh_mode = SUBVOXEL) {
+     if (mesh_mode == SUBVOXEL) {
          cell_list.emplace_back(cell_number[ve_idx*max_num_cells + c_idx]);
      }
      else { // Voxel
