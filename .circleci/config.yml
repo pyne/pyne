@@ -111,7 +111,7 @@ commands:
       - run:
           command: |
               git config --global user.email "ci@pyne.io"
-              git config --global user.name "PyNE-CI"
+              git config --global user.name "pyne"
       - run:
           name: Build PyNE website
           command: |
