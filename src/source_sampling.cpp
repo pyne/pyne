@@ -145,14 +145,12 @@ pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   xyz_rands.push_back(rands[4]);
   moab::CartVect pos = sample_xyz(ve_idx, xyz_rands);
   if (ve_type == moab::MBHEX) {
-     if (mesh_mode = SUBVOXEL) { // sub-voxel
-        cell_list.resize(1);
-        cell_list[0] = cell_number[ve_idx*max_num_cells + c_idx];
+     if (mesh_mode = SUBVOXEL) {
+         cell_list.emplace_back(cell_number[ve_idx*max_num_cells + c_idx]);
      }
-     else { // mode in 0, 1, 2, voxel
-        cell_list.resize(max_num_cells);
+     else { // Voxel
         for (int c=0; c<max_num_cells; c++) {
-           cell_list[c] = cell_number[ve_idx*max_num_cells + c];
+            cell_list.emplace_back(cell_number[ve_idx*max_num_cells + c]);
         }
      }
   }
@@ -280,11 +278,8 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   // and unstructured mesh r2s can use the same form of pdf size description.
   max_num_cells = 1;
   p_src_num_cells = 1;
-  // set the default value of cell_fracs to 1.0 for unstructured mesh
-  cell_fracs.resize(num_ves);
-  for(int i=0; i<cell_fracs.size(); i++){
-    cell_fracs[i] = 1.0;
-  }
+  // set the default value of cell_fracs to 1.0.
+  cell_fracs.resize(num_ves, 1.0);
   if (ve_type == moab::MBHEX) {
       // Read the cell_number tag and cell_fracs tag
       rval = mesh->tag_get_handle(cell_number_tag_name.c_str(),
