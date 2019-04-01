@@ -108,9 +108,6 @@ commands:
       - add_ssh_keys:
           fingerprints:
             - "04:66:ee:c2:be:fb:8d:c8:ec:5d:03:ce:ab:40:88:2c"
-
-      - run:
-          command: ssh -vT git@github.com
       - run:
           command: |
               git config --global user.email "ci@pyne.io"
