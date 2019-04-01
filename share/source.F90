@@ -88,13 +88,8 @@ subroutine source
    rands(5) = rang() ! sample z
  
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_list)
-   ! In tet mesh, cell_list_size = 0, loop over entire cells to find icl_tmp
-   ! if (cell_list_size == 0) then
-   !    icl_tmp = find_cell(ncl, mxa)
-   ! else
-   ! In Cartisian mesh (voxel/sub-voxel), loop over cell_list to find icl_tmp
+   ! Loop over cell_list to find icl_tmp
    icl_tmp = find_cell(cell_list, cell_list_size)
-   !endif
 
    ! check whether this is a valid cell
    if (icl_tmp .le. 0) then
