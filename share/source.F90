@@ -47,10 +47,15 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
     else
         ! HEX mesh. VOXLE/SUBVOXEL
         do i = 1, cell_list_size
-           if (cell_list(i) .eq. -1) then
+           if (cell_list(i) .le. 0) then
+               ! not a valid cell number (-1)
                exit
            endif
            cid = namchg(1, cell_list(i))
+           if (cid .eq. 0) then
+               ! cell index not found
+               exit
+           endif
            call chkcel(cid, 0, j)
            if (j .eq. 0) then
               ! valid cell found
