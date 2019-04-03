@@ -225,6 +225,7 @@ namespace pyne {
     std::vector<edge_points> all_edge_points; ///< Four connected points on a VE.
     std::vector<double> biased_weights; ///< Birth weights for biased sampling.
     std::vector<int> cell_number; ///< Tag cell_number
+    std::vector<int> cell_list; ///< Cell list passed to Fortran
     std::vector<double> cell_fracs; ///< Tag cell_fracs
     AliasTable* at; ///< Alias table used for sampling.
   
