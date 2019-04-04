@@ -45,7 +45,7 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
            endif
         enddo
     else
-        ! HEX mesh. VOXLE/SUBVOXEL
+        ! HEX mesh. VOXEL/SUBVOXEL
         do i = 1, cell_list_size
            if (cell_list(i) .le. 0) then
                ! not a valid cell number (-1)
