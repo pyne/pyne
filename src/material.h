@@ -270,6 +270,11 @@ namespace pyne
     /// current value of the density member variable.  You may also use / set the
     /// atoms per molecule (atoms_per_molecule) in this function using \a apm.
     double mass_density(double num_dens=-1.0, double apm=-1.0);
+    // void print_material( pyne::Material test_mat);
+    /// Computes, sets, and returns the mass density when the material density is
+    /// definied otherwise return fraction. Fraction density is returned per atom 
+    /// (default) in atom per barn cm or as a mass density.
+    std::map<int, double> get_density_frac(std::string frac_type="atom");
     /// Computes and returns the number density of the material using the
     /// mass density if \a mass_dens is greater than or equal to zero.  If
     /// \a mass_dens is negative, the denisty member variable is used instead.

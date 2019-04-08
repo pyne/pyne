@@ -646,14 +646,10 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   }
 
   // Set up atom or mass frac map
-  std::map<int, double> fracs;
-  std::string frac_sign;
+  std::map<int, double> fracs = get_density_frac(frac_type);
+  std::string frac_signi = "";
 
-  if ("atom" == frac_type) {
-    fracs = to_atom_frac();
-    frac_sign = "";
-  } else {
-    fracs = comp;
+  if ("atom" != frac_type) {
     frac_sign = "-";
   }
 
@@ -730,26 +726,10 @@ std::string pyne::Material::phits(std::string frac_type) {
   }
 
   // Set up atom or mass frac map
-  std::map<int, double> fracs;
-  std::string frac_sign;
+  std::map<int, double> fracs = get_density_frac(frac_type);
+  std::string frac_signi = "";
 
-  if ("atom" == frac_type) {
-    if (density != -1.0) {
-      fracs = to_atom_dens();
-      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
-        ci->second *= pyne::cm2_per_barn; // unit requirememt is [10^24 atoms/cm3] = [atoms/b.cm]
-      }
-    } else {
-      fracs = to_atom_frac();
-    }
-    frac_sign = "";
-  } else {
-    fracs = comp;
-    if (density != -1.0) {
-      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
-        ci->second *= density;
-      }
-    }
+  if ("atom" != frac_type) {
     frac_sign = "-";
   }
 
@@ -1508,7 +1488,7 @@ pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
 
   // Set up atom or mass frac map
 
-std::map<int, double> get_density_frac(std::string frac_type){
+std::map<int, double> pyne::Material::get_density_frac(std::string frac_type){
   std::map<int, double> fracs;
 
   if ("atom" == frac_type) {
