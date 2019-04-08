@@ -90,6 +90,7 @@ namespace pyne {
 
   /// Forms and returns the wrapped lines with a lenght up to line_lenght.
   std::ostringstream line_wrapping(std::ostringstream line, int line_lenght = 80);
+  std::ostringstream line_wrapping(std::string line, int line_lenght = 80);
 
   /// Finds and returns the first white-space delimited token of a line.
   /// \param line a character array to take the first token from.
