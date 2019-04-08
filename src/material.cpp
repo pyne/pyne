@@ -15,7 +15,7 @@
 
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);
-
+const int mcnp_line_lenght = 77;
 
 
 /***************************/
@@ -633,21 +633,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    // Include as is if short enough
-    if (comment_string.length() <= 77) {
-      oss << "C " << comment_string << std::endl;
-    }
-    else { // otherwise create a remainder string and iterate/update it
-      oss << "C " << comment_string.substr(0,77) << std::endl;
-      std::string remainder_string = comment_string.substr(77);
-      while (remainder_string.length() > 77) {
-        oss << "C " << remainder_string.substr(0,77) << std::endl;
-        remainder_string.erase(0,77);
-      }
-      if (remainder_string.length() > 0) {
-        oss << "C " << remainder_string << std::endl;
-      }
-    }
+    oss << pyne::line_wrapping(comment_string, mcnp_line_lenght);
   }
 
   // Metadata mat_num
@@ -689,20 +675,20 @@ std::string pyne::Material::mcnp(std::string frac_type) {
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if (!table_item.empty()) {
-  oss << "     " << mcnp_id << "." << table_item << " ";
+        oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
-  oss << "     " << mcnp_id << " ";
+        oss << "     " << mcnp_id << " ";
       }
       // The int needs a little formatting
       std::stringstream fs;
-      fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
-   << std::endl;
+      fs << std::setprecision(4) << std::scientific << frac_sign << i->second << std::endl;
       oss << fs.str();
     }
   }
 
   return oss.str();
 }
+
 
 ///---------------------------------------------------------------------------//
 std::string pyne::Material::phits(std::string frac_type) {
@@ -718,21 +704,7 @@ std::string pyne::Material::phits(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    // Include as is if short enough
-    if (comment_string.length() <= 77) {
-      oss << "C " << comment_string << std::endl;
-    }
-    else { // otherwise create a remainder string and iterate/update it
-      oss << "C " << comment_string.substr(0,77) << std::endl;
-      std::string remainder_string = comment_string.substr(77);
-      while (remainder_string.length() > 77) {
-        oss << "C " << remainder_string.substr(0,77) << std::endl;
-        remainder_string.erase(0,77);
-      }
-      if (remainder_string.length() > 0) {
-        oss << "C " << remainder_string << std::endl;
-      }
-    }
+    oss << pyne::line_wrapping(comment_string, mcnp_line_lenght);
   }
 
   // Metadata mat_num
@@ -1533,6 +1505,34 @@ pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
     }
     return collapse_elements(nucvec);
 }
+
+  // Set up atom or mass frac map
+
+std::map<int, double> get_density_frac(std::string frac_type){
+  std::map<int, double> fracs;
+
+  if ("atom" == frac_type) {
+    if (density != -1.0) {
+      fracs = to_atom_dens();
+      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
+        ci->second *= pyne::cm2_per_barn; // unit requirememt is [10^24 atoms/cm3] = [atoms/b.cm]
+      }
+    } else {
+      fracs = to_atom_frac();
+    }
+    frac_sign = "";
+  } else {
+    fracs = comp;
+    if (density != -1.0) {
+      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
+        ci->second *= density;
+      }
+    }
+  }
+  return fracs;
+}
+
+
 
 double pyne::Material::mass_density(double num_dens, double apm) {
   if (0.0 <= num_dens) {
