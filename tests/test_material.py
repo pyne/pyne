@@ -1306,8 +1306,8 @@ def test_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c -4.0000e-02\n'
-                '     92238.25c -9.6000e-01\n')
+                '     92235.15c -7.6400e-01\n'
+                '     92238.25c -1.8336e+01\n')
     assert_equal(mass, mass_exp)
 
     atom = leu.mcnp(frac_type='atom')
@@ -1317,8 +1317,8 @@ def test_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c 4.0491e-02\n'
-                '     92238.25c 9.5951e-01\n')
+                '     92235.15c 1.9575e-03\n'
+                '     92238.25c 4.6386e-02\n')
     assert_equal(atom, atom_exp)
     
 def test_mcnp_mat0():
@@ -1339,8 +1339,8 @@ def test_mcnp_mat0():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c -4.0000e-02\n'
-                '     92238.25c -9.6000e-01\n')
+                '     92235.15c -7.6400e-01\n'
+                '     92238.25c -1.8336e+01\n')
     assert_equal(mass, mass_exp)
 
 
@@ -1473,16 +1473,16 @@ def test_write_mcnp():
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c -4.0000e-02\n'
-                '     92238.25c -9.6000e-01\n'
+                '     92235.15c -7.6400e-01\n'
+                '     92238.25c -1.8336e+01\n'
                 'C name: leu\n'
                 'C density = 19.1\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
                 'm2\n'
-                '     92235.15c 4.0491e-02\n'
-                '     92238.25c 9.5951e-01\n')
+                '     92235.15c 1.9575e-03\n'
+                '     92238.25c 4.6386e-02\n')
     assert_equal(written, expected)
     os.remove('mcnp_mass_fracs.txt')
 
