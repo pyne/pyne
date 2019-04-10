@@ -233,8 +233,12 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     # creat a list of decay times (strings) in the source file
     phtn_src_dc = []
     with tb.open_file(filename) as h5f:
+#        import pdb; pdb.set_trace()
         for row in h5f.root.data:
-            phtn_src_dc.append(row[2])
+            if row[2] not in phtn_src_dc:
+                phtn_src_dc.append(row[2])
+            else:
+                break
     phtn_src_dc = list(set(phtn_src_dc))
 
     # iterate through each requested nuclide/dectay time
