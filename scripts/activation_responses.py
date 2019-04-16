@@ -48,6 +48,8 @@ num_rays: 10
 grid: False
 # Requested responses. Available options: 'decay_heat'
 responses: decay_heat
+# Units for each response
+units: W/m3
 
 [step2]
 # List of decays times, seperated by commas. These strings much match exactly
@@ -180,7 +182,7 @@ def main():
     step1_help = 'Creates the necessary files for running ALARA.'
     step2_help = 'Creates mesh-based activation responses data for visulization.'
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help=activation_reponses_help, dest='command')
+    subparsers = parser.add_subparsers(help=activation_responses_help, dest='command')
 
     setup_parser = subparsers.add_parser('setup', help=setup_help)
     step1_parser = subparsers.add_parser('step1', help=step1_help)

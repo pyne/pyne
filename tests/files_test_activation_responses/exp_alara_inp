@@ -1,0 +1,26 @@
+geometry rectangular
+
+volume
+     5.400000E+01    zone_0
+     5.400000E+01    zone_1
+     5.400000E+01    zone_2
+     5.400000E+01    zone_3
+end
+
+mat_loading
+    zone_0    mix_0
+    zone_1    mix_0
+    zone_2    mix_0
+    zone_3    mix_0
+end
+
+mixture mix_0
+    material mat_11 1 0.037037
+    material mat_12 1 0.962963
+end
+
+cooling
+    1 s
+end
+
+Bogus line for testing
