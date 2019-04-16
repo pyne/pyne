@@ -46,10 +46,10 @@ num_rays: 10
 # In this case <num_rays> must be a perfect square. If false, rays are fired
 # down mesh rows in random intervals.
 grid: False
-# Requested responses. Available options: 'decay_heat'
-responses: decay_heat
-# Units for each response
-units: W/m3
+# Requested response. Available options: 'decay_heat'
+response: decay_heat
+# Units for the response
+unit: W/m3
 
 [step2]
 # List of decays times, seperated by commas. These strings much match exactly
@@ -103,7 +103,7 @@ def setup():
         f.write(alara_params)
     print('File "{}" has been written'.format(config_filename))
     print('File "{}" has been written'.format(alara_params_filename))
-    print('Fill out the fields in these filse then run ">> activation_responses.py step1"')
+    print('Fill out the fields in these filse then run ">> activation_response.py step1"')
 
 
 def step1():
@@ -119,7 +119,8 @@ def step1():
     reverse = config.getboolean('step1', 'reverse')
     num_rays = config.getint('step1', 'num_rays')
     grid = config.getboolean('step1', 'grid')
-    reponses = config.getboolean('step1', 'responses')
+    reponse = config.get('step1', 'response')
+    unit = config.get('step1', 'units')
 
     load(geom)
 
@@ -136,7 +137,7 @@ def step1():
     irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename,
                       tally_num, num_rays=num_rays, grid=grid, reverse=reverse,
                       flux_tag=flux_tag, decay_times=decay_times,
-                      sub_voxel=False, responses=responses)
+                      sub_voxel=False, response=response, unit=unit)
 
     # create a blank mesh for step 2:
     ves = list(flux_mesh.iter_ve())
@@ -170,19 +171,19 @@ def step2():
                                    cell_mats=cell_mats)
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
 
-    print('Activation_responses step2 complete.')
+    print('Activation_response step2 complete.')
 
 
 def main():
 
-    activation_responses_help = ('This script automates the process of preforming\n'
+    activation_response_help = ('This script automates the process of preforming\n'
                 'activation analysis using DAG-MCNP5 and the ALARA activation code.\n')
     setup_help = ('Prints the files "config.ini" and "alara_params.txt, to be\n'
                   'filled in by the user.\n')
     step1_help = 'Creates the necessary files for running ALARA.'
-    step2_help = 'Creates mesh-based activation responses data for visulization.'
+    step2_help = 'Creates mesh-based activation response data for visulization.'
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help=activation_responses_help, dest='command')
+    subparsers = parser.add_subparsers(help=activation_response_help, dest='command')
 
     setup_parser = subparsers.add_parser('setup', help=setup_help)
     step1_parser = subparsers.add_parser('step1', help=step1_help)
