@@ -78,10 +78,7 @@ cdef class MaterialLibrary:
         """
         if sys.version_info[0] >=3 and isinstance(lib, bytes):
             lib = lib.decode()
-        cdef dict _lib = {}
-        if lib is None:
-            self._lib = _lib
-        elif isinstance(lib, collections.Mapping):
+        if isinstance(lib, collections.Mapping):
             for key, mat in lib.items():
                 self.__setitem__(key, material.ensure_material(mat))
         elif isinstance(lib, basestring):
