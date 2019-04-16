@@ -75,8 +75,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
                       fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
-                      decay_times=None, sub_voxel=False, responses=None,
-                      units=None):
+                      decay_times=None, sub_voxel=False, response=None,
+                      unit=None):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
 
@@ -127,7 +127,10 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
         List of the decay times. If no decay times given, use '1 s'.
     sub_voxel : bool, optional
         If true, sub-voxel r2s work flow  will be used.
-    responses : array
+    response : str, optional
+        The name of response requested.
+    unit : str, optional
+        The unit of the response.
     """
 
     m = resolve_mesh(flux_mesh, tally_num, flux_tag, output_material)
