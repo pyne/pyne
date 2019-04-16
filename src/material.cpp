@@ -516,7 +516,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
 
   // specify density
   oss << "<density ";
-    // if density is negtaive, report to user
+    // if density is negative, report to user
   if (temp_mat.density < 0.0) {
     throw pyne::ValueError("A density < 0.0 was found. This is not valid for use in OpenMC.");
   }
@@ -670,9 +670,9 @@ std::string pyne::Material::mcnp(std::string frac_type) {
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if (!table_item.empty()) {
-	oss << "     " << mcnp_id << "." << table_item << " ";
+	    oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
-	oss << "     " << mcnp_id << " ";
+	    oss << "     " << mcnp_id << " ";
       }
       // The int needs a little formatting
       std::stringstream fs;
@@ -689,8 +689,8 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 std::string pyne::Material::gdml(std::string frac_type) {
   std::stringstream oss;
   std::string mat_name = "mat"
-  // 'name'
-  if (metadata.isMember("name")) {
+      // 'name'
+      if (metadata.isMember("name")) {
     mat_name = metadata["name"].asString();
   }
 
@@ -698,42 +698,56 @@ std::string pyne::Material::gdml(std::string frac_type) {
 
   // 'Element list'
   std::map<int, double> fracs = comp;
-  std::map<int, std::pair<int, double>> elts_list;
-  // loop over the composition and group isotopes per element 
-  for (auto it : comp.end()){
+  std::map<int, std::pair<int, double>> elements_list;
+  std::map<std::string, double> element_comp;
+  // loop over the composition and group isotopes per element
+  for (auto it : comp.end()) {
     int z = nucname::xnum(it.first);
-    if (elts_list.find(z) == elts_list.end()){
-      vector<int> list;
-      list.push_back(it);
-      elts_list.insert( std::make_pair(z, list));
+    std::string element_name = nucname::name_element[nucname::zz_name[z]];
+    if (elements_list.find(z) == elements_list.end()) {
+      std::vector<std::pair<int, double>> list(*it);
+      elements_list.insert(std::make_pair(z, list));
+
+      // add fraction in the material composition
+      element_comp.insert( std::make_pair(element_name, *it.second);
     } else {
-      elts_list[z].push_back(it);
+      elements_list[z].push_back(it);
+      // add fraction in the material composition
+      element_comp[element_name] += *it.second;
     }
   }
-  
-  // create the material composition in term of chemical elements
-  // normalize the list of element
-  
-    
-    
+
   // loop over the different chemical elements
-  for (auto it : elts_list){
-    std::string elt_name = nucname::name_elt[nucname::zz_name[z]];
-    oss << "<element name=\"" << mat_name << "_" << elt_name << "\"" << std::endl;
-    // loop over all the isotopes of a chemical element
-    for (auto isotope : it.second){
-      oss << "<fraction ref=\"" << nucname::name(isotope.first) << "\"";
-      oss << " n=\"" << isotope.second << "\" />" << std::endl;
+  for (auto it : elements_list) {
+    std::string element_name = nucname::name_element[nucname::zz_name[z]];
+    oss << "<element name=\"" << mat_name << "_" << element_name << "\" >"
+        << std::endl;
+    double total_element_frac = element_comp[element_name];
+
+    // loop over all the isotopes of a chemical element (and normalize
+    // fraction)
+    for (auto isotope : it.second) {
+      oss << "  <fraction ref=\"" << nucname::name(isotope.first) << "\"";
+      oss << " n=\"" << isotope.second / total_element_frac << "\"  /\>"
+          << std::endl;
     }
-
-
-
+    oss << "</element>" << std::endl;
   }
 
-
+  // write material
+  oss << "<material name=\"" << mat_name << "\"";
+  oss << " formula=\"" << std::tolower(mat_name) << "\" >" << std::endl;
+  // if density is negative, report to user
+  if (temp_mat.density < 0.0) {
+    throw pyne::ValueError("A density < 0.0 was found. This is not valid in GDML.");
+  }
+  oss << "  <D value=" << density << "\" />" << std::endl;
+  for (auto it : element_comp) {
+    oss << "  <fraction n=\"" << it->second << "\" ref=\"" << it->first << "\" />"
+  }
+  oss << "</maerial>" << std::endl;
 
   return oss.str();
-
 }
 ///---------------------------------------------------------------------------//
 /// Create a set out of the static string array.
