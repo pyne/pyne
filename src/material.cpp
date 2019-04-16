@@ -685,6 +685,56 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   return oss.str();
 }
 
+
+std::string pyne::Material::gdml(std::string frac_type) {
+  std::stringstream oss;
+  std::string mat_name = "mat"
+  // 'name'
+  if (metadata.isMember("name")) {
+    mat_name = metadata["name"].asString();
+  }
+
+  // 'Isotope list'
+
+  // 'Element list'
+  std::map<int, double> fracs = comp;
+  std::map<int, std::pair<int, double>> elts_list;
+  // loop over the composition and group isotopes per element 
+  for (auto it : comp.end()){
+    int z = nucname::xnum(it.first);
+    if (elts_list.find(z) == elts_list.end()){
+      vector<int> list;
+      list.push_back(it);
+      elts_list.insert( std::make_pair(z, list));
+    } else {
+      elts_list[z].push_back(it);
+    }
+  }
+  
+  // create the material composition in term of chemical elements
+  // normalize the list of element
+  
+    
+    
+  // loop over the different chemical elements
+  for (auto it : elts_list){
+    std::string elt_name = nucname::name_elt[nucname::zz_name[z]];
+    oss << "<element name=\"" << mat_name << "_" << elt_name << "\"" << std::endl;
+    // loop over all the isotopes of a chemical element
+    for (auto isotope : it.second){
+      oss << "<fraction ref=\"" << nucname::name(isotope.first) << "\"";
+      oss << " n=\"" << isotope.second << "\" />" << std::endl;
+    }
+
+
+
+  }
+
+
+
+  return oss.str();
+
+}
 ///---------------------------------------------------------------------------//
 /// Create a set out of the static string array.
 std::set<std::string> fluka_builtin(pyne::fluka_mat_strings,
