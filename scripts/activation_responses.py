@@ -101,7 +101,7 @@ def setup():
         f.write(alara_params)
     print('File "{}" has been written'.format(config_filename))
     print('File "{}" has been written'.format(alara_params_filename))
-    print('Fill out the fields in these filse then run ">> decay_heat.py step1"')
+    print('Fill out the fields in these filse then run ">> activation_responses.py step1"')
 
 
 def step1():
