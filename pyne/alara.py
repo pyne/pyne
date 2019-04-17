@@ -943,3 +943,33 @@ def _find_phsrc_dc(idc, phtn_src_dc):
         # if idc doesn't match any string in phtn_src_dc list, raise an error.
         raise ValueError(
             'Decay time {0} not found in phtn_src file'.format(idc))
+
+
+def response_output_zone(response='decay_heat'):
+    """
+    This function returns a string representing the output zone of alara input
+    code block.
+
+    Parameters
+    ----------
+    response : string
+        A keyword represent the alara output zone. The following response is
+        supported:
+            - 'decay_heat'
+
+    Returns
+    -------
+    String represent the output zone block corresponding to the response.
+    """
+
+    # input check
+    if response not in ('decay_heat'):
+        raise ValueError('response {0} not supported.'.format(response))
+
+    start_str = "output zone\n"
+    end_str = "end"
+    # define code block for decay_heat
+    if response == 'decay_heat':
+        code_block = "      total_heat\n"
+
+    return ''.join([start_str, code_block, end_str])
