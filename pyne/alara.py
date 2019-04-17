@@ -198,6 +198,77 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     f.close()
 
 
+def decay_heat_to_hdf5(filename, chunkshape=(10000,)):
+    """Converts a plaintext output.txt file to an HDF5 version for
+    quick later use.
+
+    This function produces a single HDF5 file named <filename>.h5 containing the
+    table headings:
+
+        idx : int
+            The volume element index assuming the volume elements appear in xyz
+            order (z changing fastest) within the photon source file in the case of
+            a structured mesh or mesh.mesh_iterate() order for an unstructured mesh.
+        nuc : str
+            The nuclide name as it appears in the output file.
+        time : str
+            The decay time as it appears in the output file.
+        decay_heat : float
+            The decay heat density [W/cm3].
+
+    Parameters
+    ----------
+    filename : str
+        The path to the file
+    chunkshape : tuple of int
+        A 1D tuple of the HDF5 chunkshape.
+    """
+    f = open(filename, 'r')
+    f.seek(0)
+
+    dt = np.dtype([
+        ('idx', np.int64),
+        ('nuc', 'S6'),
+        ('time', 'S20'),
+        ('decay_heat', np.float64)])
+
+    filters = tb.Filters(complevel=1, complib='zlib')
+    h5f = tb.open_file(filename + '.h5', 'w', filters=filters)
+    tab = h5f.create_table('/', 'data', dt, chunkshape=chunkshape)
+
+    chunksize = chunkshape[0]
+    rows = np.empty(chunksize, dtype=dt)
+    idx = 0
+    old = ""
+    for i, line in enumerate(f, 1):
+        ls = line.strip().split('\t')
+
+        # skip the lines don't contain wanted data
+        if !_is_data(ls):
+            continue
+
+        # Keep track of the idx by delimiting by the last TOTAL line in a
+        # volume element.
+        if ls[0] != 'TOTAL' and old == 'TOTAL':
+            idx += 1
+
+        j = (i-1) % chunksize
+        rows[j] = (idx, ls[0].strip(), ls[1].strip(),
+                   np.array(ls[2:], dtype=np.float64))
+        # Save the nuclide in order to keep track of idx
+        old = ls[0]
+
+        if i % chunksize == 0:
+            tab.append(rows)
+            rows = np.empty(chunksize, dtype=dt)
+
+    if i % chunksize != 0:
+        tab.append(rows[:j+1])
+
+    h5f.close()
+    f.close()
+
+
 def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                                cell_mats=None):
     """This function reads in an hdf5 file produced by photon_source_to_hdf5
@@ -975,3 +1046,13 @@ def response_output_zone(response=None):
         code_block = "      total_heat\n"
 
     return ''.join([start_str, code_block, end_str])
+
+def _is_data(ls):
+    """
+    This function is used to check whether a line of alara output file contains
+    wanted data. The line contains data is conposed of:
+        - nuc : nuc name (total or TOTAL)
+        - data for each decay time (including 'shutdown': floats
+    """
+    return False
+    
