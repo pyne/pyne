@@ -968,7 +968,7 @@ def response_output_zone(response=None):
     if response not in ('decay_heat', 'photon_source'):
         raise ValueError('response {0} not supported.'.format(response))
 
-    start_str = "\noutput zone\n"
+    start_str = "output zone\n"
     end_str = "end"
     # define code block for decay_heat
     if response == 'decay_heat':
