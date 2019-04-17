@@ -84,7 +84,6 @@ end
 truncation 1e-12
 impurity 5e-6 1e-3
 dump_file dump.file
-
 """
 
 def setup():
@@ -110,8 +109,8 @@ def step1():
     reverse = config.getboolean('step1', 'reverse')
     num_rays = config.getint('step1', 'num_rays')
     grid = config.getboolean('step1', 'grid')
-    reponse = config.get('step1', 'response')
-    unit = config.get('step1', 'units')
+    response = config.get('step1', 'response')
+    unit = config.get('step1', 'unit')
 
     load(geom)
 
