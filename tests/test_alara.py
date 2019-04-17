@@ -655,8 +655,8 @@ def test_phtn_src_energy_bounds():
 def test_alara_response_output_zone():
     # test decay_heat
     response = 'decay_heat'
-    exp_response_code = \
-"""output zone
+    exp_response_code = """
+output zone
       total_heat
 end"""
     response_code = response_output_zone(response)
