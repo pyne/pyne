@@ -8,6 +8,145 @@
 #include "state_map.cpp"
 #endif
 
+/*** Constructs the LL to element name Dictionary ***/
+pyne::nucname::name_elt_t pyne::nucname::get_name_elt() {
+  pyne::nucname::name_elt_t lzd;
+
+  lzd["H"] = "Hydrogen";
+  lzd["He"] = "Helium";
+  lzd["Li"] = "Lithium";
+  lzd["Be"] = "Beryllium";
+  lzd["B"] = "Boron";
+  lzd["C"] = "Carbon";
+  lzd["N"] = "Nitrogen";
+  lzd["O"] = "Oxygen";
+  lzd["F"] = "Fluorine";
+  lzd["Ne"] = "Neon";
+  lzd["Na"] = "Sodium";
+  lzd["Mg"] = "Magnesium";
+  lzd["Al"] = "Aluminium";
+  lzd["Si"] = "Silicon";
+  lzd["P"] = "Phosphorus";
+  lzd["S"] = "Sulfur";
+  lzd["Cl"] = "Chlorine";
+  lzd["Ar"] = "Argon";
+  lzd["K"] = "Potassium";
+  lzd["Ca"] = "Calcium";
+  lzd["Sc"] = "Scandium";
+  lzd["Ti"] = "Titanium";
+  lzd["V"] = "Vanadium";
+  lzd["Cr"] = "Chromium";
+  lzd["Mn"] = "Manganese";
+  lzd["Fe"] = "Iron";
+  lzd["Co"] = "Cobalt";
+  lzd["Ni"] = "Nickel";
+  lzd["Cu"] = "Copper";
+  lzd["Zn"] = "Zinc";
+  lzd["Ga"] = "Gallium";
+  lzd["Ge"] = "Germanium";
+  lzd["As"] = "Arsenic";
+  lzd["Se"] = "Selenium";
+  lzd["Br"] = "Bromine";
+  lzd["Kr"] = "Krypton";
+  lzd["Rb"] = "Rubidium";
+  lzd["Sr"] = "Strontium";
+  lzd["Y"] = "Yttrium";
+  lzd["Zr"] = "Zirconium";
+  lzd["Nb"] = "Niobium";
+  lzd["Mo"] = "Molybdenum";
+  lzd["Tc"] = "Technetium";
+  lzd["Ru"] = "Ruthenium";
+  lzd["Rh"] = "Rhodium";
+  lzd["Pd"] = "Palladium";
+  lzd["Ag"] = "Silver";
+  lzd["Cd"] = "Cadmium";
+  lzd["In"] = "Indium";
+  lzd["Sn"] = "Tin";
+  lzd["Sb"] = "Antimony";
+  lzd["Te"] = "Tellurium";
+  lzd["I"] = "Iodine";
+  lzd["Xe"] = "Xenon";
+  lzd["Cs"] = "Caesium";
+  lzd["Ba"] = "Barium";
+  lzd["La"] = "Lanthanum";
+  lzd["Ce"] = "Cerium";
+  lzd["Pr"] = "Praseodymium";
+  lzd["Nd"] = "Neodymium";
+  lzd["Pm"] = "Promethium";
+  lzd["Sm"] = "Samarium";
+  lzd["Eu"] = "Europium";
+  lzd["Gd"] = "Gadolinium";
+  lzd["Tb"] = "Terbium";
+  lzd["Dy"] = "Dysprosium";
+  lzd["Ho"] = "Holmium";
+  lzd["Er"] = "Erbium";
+  lzd["Tm"] = "Thulium";
+  lzd["Yb"] = "Ytterbium";
+  lzd["Lu"] = "Lutetium";
+  lzd["Hf"] = "Hafnium";
+  lzd["Ta"] = "Tantalum";
+  lzd["W"] = "Tungsten";
+  lzd["Re"] = "Rhenium";
+  lzd["Os"] = "Osmium";
+  lzd["Ir"] = "Iridium";
+  lzd["Pt"] = "Platinum";
+  lzd["Au"] = "Gold";
+  lzd["Hg"] = "Mercury";
+  lzd["Tl"] = "Thallium";
+  lzd["Pb"] = "Lead";
+  lzd["Bi"] = "Bismuth";
+  lzd["Po"] = "Polonium";
+  lzd["At"] = "Astatine";
+  lzd["Rn"] = "Radon";
+  lzd["Fr"] = "Francium";
+  lzd["Ra"] = "Radium";
+  lzd["Ac"] = "Actinium";
+  lzd["Th"] = "Thorium";
+  lzd["Pa"] = "Protactinium";
+  lzd["U"] = "Uranium";
+  lzd["Np"] = "Neptunium";
+  lzd["Pu"] = "Plutonium";
+  lzd["Am"] = "Americium";
+  lzd["Cm"] = "Curium";
+  lzd["Bk"] = "Berkelium";
+  lzd["Cf"] = "Californium";
+  lzd["Es"] = "Einsteinium";
+  lzd["Fm"] = "Fermium";
+  lzd["Md"] = "Mendelevium";
+  lzd["No"] = "Nobelium";
+  lzd["Lr"] = "Lawrencium";
+  lzd["Rf"] = "Rutherfordium";
+  lzd["Db"] = "Dubnium";
+  lzd["Sg"] = "Seaborgium";
+  lzd["Bh"] = "Bohrium";
+  lzd["Hs"] = "Hassium";
+  lzd["Mt"] = "Meitnerium";
+  lzd["Ds"] = "Darmstadtium";
+  lzd["Rg"] = "Roentgenium";
+  lzd["Cn"] = "Copernicium";
+  lzd["Nh"] = "Nihonium";
+  lzd["Fl"] = "Flerovium";
+  lzd["Mc"] = "Moscovium";
+  lzd["Lv"] = "Livermorium";
+  lzd["Ts"] = "Tennessine";
+  lzd["Og"] = "Oganesson";
+  
+}  
+pyne::nucname::name_elt_t pyne::nucname::name_elt = pyne::nucname::get_name_elt();
+
+
+/*** Constructs element full name to symbolic Xy name dictionary **/
+pyne::nucname::elt_name_t pyne::nucname::get_elt_name()
+{
+  elt_name_t zld;
+  for (name_elt_iter i = name_elt.begin(); i != name_elt.end(); i++)
+  {
+    zld[i->second] = i->first;
+  }
+  return zld;
+}
+pyne::nucname::elt_name_t pyne::nucname::elt_name = pyne::nucname::get_elt_name();
+
 
 /*** Constructs the LL to zz Dictionary ***/
 pyne::nucname::name_zz_t pyne::nucname::get_name_zz() {

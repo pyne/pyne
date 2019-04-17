@@ -688,9 +688,9 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 
 std::string pyne::Material::gdml(std::string frac_type) {
   std::stringstream oss;
-  std::string mat_name = "mat"
-      // 'name'
-      if (metadata.isMember("name")) {
+  std::string mat_name = "mat";
+  // 'name'
+  if (metadata.isMember("name")) {
     mat_name = metadata["name"].asString();
   }
 
@@ -698,28 +698,30 @@ std::string pyne::Material::gdml(std::string frac_type) {
 
   // 'Element list'
   std::map<int, double> fracs = comp;
-  std::map<int, std::pair<int, double>> elements_list;
+  std::map<int, std::map<int, double>> elements_list;
   std::map<std::string, double> element_comp;
   // loop over the composition and group isotopes per element
-  for (auto it : comp.end()) {
-    int z = nucname::xnum(it.first);
-    std::string element_name = nucname::name_element[nucname::zz_name[z]];
+  for (auto it : comp) {
+    int z = nucname::znum(it.first);
+    std::string element_name = nucname::name_elt[nucname::zz_name[z]];
     if (elements_list.find(z) == elements_list.end()) {
-      std::vector<std::pair<int, double>> list(*it);
-      elements_list.insert(std::make_pair(z, list));
+      std::map<int, double> list;
+      list[it.first] = it.second;
+      elements_list.insert(std::pair<int, std::map<int, double>>(z, list));
 
       // add fraction in the material composition
-      element_comp.insert( std::make_pair(element_name, *it.second);
+      element_comp.insert( std::make_pair(element_name, it.second));
     } else {
-      elements_list[z].push_back(it);
+      elements_list[z][it.first] = it.second;
       // add fraction in the material composition
-      element_comp[element_name] += *it.second;
+      element_comp[element_name] += it.second;
     }
   }
 
   // loop over the different chemical elements
   for (auto it : elements_list) {
-    std::string element_name = nucname::name_element[nucname::zz_name[z]];
+    int z = nucname::znum(it.first);
+    std::string element_name = nucname::name_elt[nucname::zz_name[z]];
     oss << "<element name=\"" << mat_name << "_" << element_name << "\" >"
         << std::endl;
     double total_element_frac = element_comp[element_name];
@@ -728,7 +730,7 @@ std::string pyne::Material::gdml(std::string frac_type) {
     // fraction)
     for (auto isotope : it.second) {
       oss << "  <fraction ref=\"" << nucname::name(isotope.first) << "\"";
-      oss << " n=\"" << isotope.second / total_element_frac << "\"  /\>"
+      oss << " n=\"" << isotope.second / total_element_frac << "\"  />"
           << std::endl;
     }
     oss << "</element>" << std::endl;
@@ -736,19 +738,22 @@ std::string pyne::Material::gdml(std::string frac_type) {
 
   // write material
   oss << "<material name=\"" << mat_name << "\"";
-  oss << " formula=\"" << std::tolower(mat_name) << "\" >" << std::endl;
+  oss << " formula=\"" << mat_name << "\" >" << std::endl;
   // if density is negative, report to user
-  if (temp_mat.density < 0.0) {
-    throw pyne::ValueError("A density < 0.0 was found. This is not valid in GDML.");
+  if (density < 0.0) {
+    throw pyne::ValueError(
+        "A density < 0.0 was found. This is not valid in GDML.");
   }
   oss << "  <D value=" << density << "\" />" << std::endl;
   for (auto it : element_comp) {
-    oss << "  <fraction n=\"" << it->second << "\" ref=\"" << it->first << "\" />"
+    oss << "  <fraction n=\"" << it.second << "\" ref=\"" << it.first
+        << "\" />";
   }
   oss << "</maerial>" << std::endl;
 
   return oss.str();
 }
+
 ///---------------------------------------------------------------------------//
 /// Create a set out of the static string array.
 std::set<std::string> fluka_builtin(pyne::fluka_mat_strings,
