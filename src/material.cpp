@@ -703,7 +703,7 @@ std::string pyne::Material::gdml(std::string frac_type) {
   // loop over the composition and group isotopes per element
   for (auto it : comp) {
     int z = nucname::znum(it.first);
-    std::string element_name = nucname::name_elt[nucname::zz_name[z]];
+    std::string element_name = mat_name + "_" + nucname::name_elt[nucname::zz_name[z]];
     if (elements_list.find(z) == elements_list.end()) {
       std::map<int, double> list;
       list[it.first] = it.second;
@@ -721,8 +721,8 @@ std::string pyne::Material::gdml(std::string frac_type) {
   // loop over the different chemical elements
   for (auto it : elements_list) {
     int z = nucname::znum(it.first);
-    std::string element_name = nucname::name_elt[nucname::zz_name[z]];
-    oss << "<element name=\"" << mat_name << "_" << element_name << "\" >"
+    std::string element_name = mat_name + "_" + nucname::name_elt[nucname::zz_name[z]];
+    oss << "<element name=\"" << element_name << "\" >"
         << std::endl;
     double total_element_frac = element_comp[element_name];
 
@@ -730,8 +730,8 @@ std::string pyne::Material::gdml(std::string frac_type) {
     // fraction)
     for (auto isotope : it.second) {
       oss << "  <fraction ref=\"" << nucname::name(isotope.first) << "\"";
-      oss << " n=\"" << isotope.second / total_element_frac << "\"  />"
-          << std::endl;
+      oss << " n=\"" << isotope.second / total_element_frac << "\"  />";
+      oss << std::endl;
     }
     oss << "</element>" << std::endl;
   }
@@ -746,8 +746,8 @@ std::string pyne::Material::gdml(std::string frac_type) {
   }
   oss << "  <D value=" << density << "\" />" << std::endl;
   for (auto it : element_comp) {
-    oss << "  <fraction n=\"" << it.second << "\" ref=\"" << it.first
-        << "\" />";
+    oss << "  <fraction n=\"" << it.second << "\" ref=\"" << it.first << "\" />";
+    oss << std::endl;
   }
   oss << "</maerial>" << std::endl;
 
