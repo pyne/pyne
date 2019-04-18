@@ -79,13 +79,16 @@ cdef class MaterialLibrary:
         if sys.version_info[0] >=3 and isinstance(lib, bytes):
             lib = lib.decode()
         if isinstance(lib, collections.Mapping):
+            self._inst = new cpp_material_library.MaterialLibrary()
             for key, mat in lib.items():
+                print("here?", flush=True)
                 self.__setitem__(key, material.ensure_material(mat))
         elif isinstance(lib, basestring):
             c_filename = std_string( < char * > data)
             c_datapath = std_string( < char * > datapath)
             self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
         elif isinstance(lib, collections.Sequence):
+            self._inst = new cpp_material_library.MaterialLibrary()
             for key, mat in lib:
                 self.__setitem__(key, material.ensure_material(mat))
         else:
@@ -178,9 +181,11 @@ cdef class MaterialLibrary:
 
     def __setitem__(self, key, value):
         value.metadata["name"] = key.encode('utf-8')
-        
+        print("here1", flush=True) 
         cdef material._Material value_proxy
+        print("here2", flush=True) 
         value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+        print("here3", flush=True) 
         (<cpp_material_library.MaterialLibrary *> self._inst).add_material(
                 value_proxy.mat_pointer[0])
 

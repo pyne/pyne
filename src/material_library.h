@@ -84,6 +84,16 @@ class MaterialLibrary {
   */
   void from_hdf5(char* filename,
                  char* datapath = "/materials", int protocol = 1);
+  /**
+   * \brief loads the pyne materials in map of name vs Material
+    /// \param filename Path on disk to the json file.
+  */
+  void from_json(char* filename);
+  /**
+   * \brief loads the pyne materials in map of name vs Material
+    /// \param filename Path on disk to the json file.
+  */
+  void from_json(const std::string& filename);
 
   /**
    * Writes MaterialLibrary out to an HDF5 file.

@@ -85,16 +85,28 @@ void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
     (*this).add_material(mat);
   }
 }
+void pyne::MaterialLibrary::from_json(char* fname) {
+  std::string filename(fname);
+  from_json(filename);
+
+}
+void pyne::MaterialLibrary::from_json(const std::string& filename) {
+}
 
 void pyne::MaterialLibrary::add_material(pyne::Material mat) {
+  std::cout << __LINE__ << std::endl;
   std::string mat_name = mat.metadata["name"].asString();
-  auto inst = material_library.insert(std::make_pair(mat_name, mat));
+  std::cout << __LINE__ << std::endl;
+  material_library[mat_name] = mat;
+  std::cout << __LINE__ << std::endl;
 
-  if (inst.second) {
-    append_to_nuclist(mat);
-    matlist.insert(mat.metadata["name"].asString());
-    material_library[mat.metadata["name"].asString()].metadata["mat_number"] = last_mat_number++;
-  }
+  std::cout << __LINE__ << std::endl;
+  append_to_nuclist(mat);
+  std::cout << __LINE__ << std::endl;
+  matlist.insert(mat.metadata["name"].asString());
+  std::cout << __LINE__ << std::endl;
+  material_library[mat.metadata["name"].asString()].metadata["mat_number"] = last_mat_number++;
+  std::cout << __LINE__ << std::endl;
 }
 
 void pyne::MaterialLibrary::add_material(pyne::Material mat, char* mat_name) {
