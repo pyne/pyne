@@ -11,7 +11,7 @@ from pyne.mesh import Mesh, NativeMeshTag
 from pyne.dagmc import cell_materials, load, discretize_geom
 from pyne.r2s import resolve_mesh, irradiation_setup
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
-    phtn_src_energy_bounds
+    phtn_src_energy_bounds, response_to_hdf5, response_hdf5_to_mesh
 from pyne.mcnp import Meshtal
 
 config_filename = 'config.ini'
@@ -147,18 +147,14 @@ def step2():
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
     tag_name = "decay_heat_density"
+    response = config.get('step1', 'response')
 
-    cell_mats = None
-    h5_file = 'decay_heat.h5'
-    if not isfile(h5_file):
-#        photon_source_to_hdf5('phtn_src')
-        response_to_hdf5('response')
+    response_to_hdf5('output.txt', response)
     for i, dc in enumerate(decay_times):
         print('Writing decay heat for decay time: {0}'.format(dc))
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
         tags = {('TOTAL', dc): tag_name}
-        photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=False,
-                                   cell_mats=cell_mats)
+        response_hdf5_to_mesh(mesh, 'output.txt.h5', tags, response)
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
 
     print('Activation_response step2 complete.')

@@ -10,7 +10,7 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 import os
 import collections
 from warnings import warn
-from pyne.utils import QAWarning, to_sec
+from pyne.utils import QAWarning, to_sec, is_number
 import numpy as np
 import tables as tb
 from io import open
@@ -198,7 +198,7 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     f.close()
 
 
-def decay_heat_to_hdf5(filename, chunkshape=(10000,)):
+def response_to_hdf5(filename, response, chunkshape=(10000,)):
     """Converts a plaintext output.txt file to an HDF5 version for
     quick later use.
 
@@ -213,13 +213,16 @@ def decay_heat_to_hdf5(filename, chunkshape=(10000,)):
             The nuclide name as it appears in the output file.
         time : str
             The decay time as it appears in the output file.
-        decay_heat : float
-            The decay heat density [W/cm3].
+        response : float
+            Possible response:
+                - The decay heat density [W/cm3].
 
     Parameters
     ----------
     filename : str
-        The path to the file
+        The path to the file output.txt
+    response : str
+        Key word of the response
     chunkshape : tuple of int
         A 1D tuple of the HDF5 chunkshape.
     """
@@ -230,7 +233,7 @@ def decay_heat_to_hdf5(filename, chunkshape=(10000,)):
         ('idx', np.int64),
         ('nuc', 'S6'),
         ('time', 'S20'),
-        ('decay_heat', np.float64)])
+        (response, np.float64)])
 
     filters = tb.Filters(complevel=1, complib='zlib')
     h5f = tb.open_file(filename + '.h5', 'w', filters=filters)
@@ -239,32 +242,44 @@ def decay_heat_to_hdf5(filename, chunkshape=(10000,)):
     chunksize = chunkshape[0]
     rows = np.empty(chunksize, dtype=dt)
     idx = 0
-    old = ""
+    count = 1
+    decay_times = []
     for i, line in enumerate(f, 1):
-        ls = line.strip().split('\t')
-
-        # skip the lines don't contain wanted data
-        if !_is_data(ls):
+        # terminate condition
+        if 'Totals for all zones' in line:
+            break
+        ls = line.strip().split()
+        # get decay times
+        if 'isotope\t shutdown' in line:
+            ls = line.split()
+            if len(decay_times) == 0:
+                decay_times = _read_decay_times(ls)
             continue
-
-        # Keep track of the idx by delimiting by the last TOTAL line in a
-        # volume element.
-        if ls[0] != 'TOTAL' and old == 'TOTAL':
-            idx += 1
-
-        j = (i-1) % chunksize
-        rows[j] = (idx, ls[0].strip(), ls[1].strip(),
-                   np.array(ls[2:], dtype=np.float64))
-        # Save the nuclide in order to keep track of idx
-        old = ls[0]
-
-        if i % chunksize == 0:
-            tab.append(rows)
-            rows = np.empty(chunksize, dtype=dt)
-
-    if i % chunksize != 0:
+        # get idx
+        if 'Zone #' in line: 
+            idx = int(ls[-1].split('_')[-1])
+            continue
+        # skip the lines don't contain wanted data
+        if not _is_data(ls):
+            continue
+    
+        # put data into table
+        # format of each row: idx, nuc, time, decay_heat
+        for k, dc in enumerate(decay_times):
+            j = (count-1) % chunksize
+            nuc = ls[0].strip()
+            if nuc in ('total', 'Total'):
+                nuc = nuc.upper()
+            rows[j] = (idx, nuc, dc, float(ls[k+1]))
+            if count % chunksize == 0:
+                tab.append(rows)
+                rows = np.empty(chunksize, dtype=dt)
+            count += 1
+    
+    if count % chunksize != 0:
         tab.append(rows[:j+1])
 
+    # close the file
     h5f.close()
     f.close()
 
@@ -367,6 +382,77 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
             for i, _, ve in mesh:
                 tag_handles[tags[cond]][ve] = \
                     temp_mesh_data[i, :].reshape(max_num_cells * num_e_groups)
+
+
+def response_hdf5_to_mesh(mesh, filename, tags, response):
+    """This function reads in an hdf5 file produced by photon_source_to_hdf5
+    and tags the requested data to the mesh of a PyNE Mesh object. Any
+    combinations of nuclides and decay times are allowed. The photon source
+    file is assumed to be in mesh.__iter__() order
+
+    Parameters
+    ----------
+    mesh : PyNE Mesh
+       The object containing the PyMOAB instance to be tagged.
+    filename : str
+        The path of the hdf5 version of the photon source file.
+    tags: dict
+        A dictionary were the keys are tuples with two values. The first is a
+        string denoting an nuclide in any form that is understood by
+        pyne.nucname (e.g. '1001', 'U-235', '242Am') or 'TOTAL' for all
+        nuclides. The second is a string denoting the decay time as it appears
+        in the file (e.g. 'shutdown', '1 h' '3 d'). The values of the
+        dictionary are the requested tag names for the combination of nuclide
+        and decay time. For example if one wanted tags for the photon source
+        densities from U235 at shutdown and from all nuclides at 1 hour, the
+        dictionary could be:
+
+        tags = {('U-235', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
+    response : str
+        The keyword of the response. Eg. 'decay_heat'.
+    """
+
+    # create a dict of tag handles for all keys of the tags dict
+    tag_handles = {}
+    for tag_name in tags.values():
+
+        mesh.tag(tag_name, np.zeros(1, dtype=float), 'nat_mesh',
+                 size=1, dtype=float)
+        tag_handles[tag_name] = mesh.get_tag(tag_name)
+
+    # creat a list of decay times (strings) in the source file
+    phtn_src_dc = []
+    with tb.open_file(filename) as h5f:
+        for row in h5f.root.data:
+            if row[2] not in phtn_src_dc:
+                phtn_src_dc.append(row[2])
+            else:
+                break
+
+    # iterate through each requested nuclide/dectay time
+    for cond in tags.keys():
+        with tb.open_file(filename) as h5f:
+            # Convert nuclide to the form found in the ALARA phtn_src
+            # file, which is similar to the Serpent form. Note this form is
+            # different from the ALARA input nuclide form found in nucname.
+            if cond[0] != "TOTAL":
+                nuc = serpent(cond[0]).lower()
+            else:
+                nuc = "TOTAL"
+
+            # time match, convert string mathch to float mathch
+            dc = _find_phsrc_dc(cond[1], phtn_src_dc)
+            # create of array of rows that match the nuclide/decay criteria
+            matched_data = h5f.root.data.read_where(
+                "(nuc == '{0}') & (time == '{1}')".format(nuc, dc))
+
+        idx = 0
+        for i, _, ve in mesh:
+            if matched_data[idx][0] == i:
+                tag_handles[tags[cond]][ve] = matched_data[idx][3]
+                idx += 1
+            else:
+                tag_handles[tags[cond]][ve] = [0]
 
 
 def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
@@ -1054,5 +1140,22 @@ def _is_data(ls):
         - nuc : nuc name (total or TOTAL)
         - data for each decay time (including 'shutdown': floats
     """
-    return False
+    # check the list from the second value, if they are float, then return True
+    if len(ls) < 2:
+        return False
+    for i in range(1, len(ls)):
+        if not is_number(ls[i]):
+            return False
+    return True
+    
+
+def _read_decay_times(ls):
+    """
+    This function reads a line contian decay times information from alara
+    output file and return the decay times list.
+    """
+    decay_times = ['shutdown']
+    for i in range(2, len(ls), 2):
+        decay_times.append(''.join([ls[i], ' ', ls[i+1]]))
+    return decay_times
     

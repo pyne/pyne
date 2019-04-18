@@ -441,3 +441,5 @@ def file_block_almost_same(f1, f2, rel_tol=1e-9):
 
     # no difference found
     return True
+=======
+>>>>>>> decay_heat step2 output
