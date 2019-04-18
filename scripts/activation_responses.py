@@ -48,8 +48,6 @@ num_rays: 10
 grid: False
 # Requested response. Available options: 'decay_heat'
 response: decay_heat
-# Units for the response
-unit: W/m3
 
 [step2]
 # List of decays times, seperated by commas. These strings much match exactly
@@ -110,7 +108,6 @@ def step1():
     num_rays = config.getint('step1', 'num_rays')
     grid = config.getboolean('step1', 'grid')
     response = config.get('step1', 'response')
-    unit = config.get('step1', 'unit')
 
     load(geom)
 
@@ -127,7 +124,7 @@ def step1():
     irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename,
                       tally_num, num_rays=num_rays, grid=grid, reverse=reverse,
                       flux_tag=flux_tag, decay_times=decay_times,
-                      sub_voxel=False, response=response, unit=unit)
+                      sub_voxel=False, response=response)
 
     # create a blank mesh for step 2:
     ves = list(flux_mesh.iter_ve())
