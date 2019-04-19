@@ -239,6 +239,9 @@ cdef class _MaterialLibrary:
         self._inst.write_json(filename)
 
     def __setitem__(self, key, value):
+        if isinstance(key, int):
+            key = str(key)
+
         value.metadata["name"] = key.encode('utf-8')
         value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
         self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
@@ -246,6 +249,8 @@ cdef class _MaterialLibrary:
     def __getitem__(self, key):
         if isinstance(key, basestring):
             key = key.encode('UTF-8')
+        elif isinstance(key, int):
+            key = str(key).encode('UTF-8')
 
         return self.get_material(key)
     
