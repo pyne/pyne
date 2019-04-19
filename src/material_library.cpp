@@ -23,7 +23,7 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
   }
   last_mat_number = 0;
   // load materials
-  from_hdf5(file);
+  from_hdf5(file, datapath);
 };
 
 // Destructor
@@ -38,9 +38,7 @@ void pyne::MaterialLibrary::from_hdf5(char* fname, char* dpath, int protocol) {
 void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
                                       const std::string& datapath,
                                       int protocol) {
-  const char* data_path = datapath.c_str();
-
-  if (!hdf5_path_exists(filename, data_path)) return;
+  if (!hdf5_path_exists(filename, datapath)) return;
 
   int file_num_materials = get_length_of_table(filename, datapath);
   int library_length = material_library.size();
@@ -278,7 +276,6 @@ bool pyne::MaterialLibrary::hdf5_path_exists(const std::string& filename,
   hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
 
   bool datapath_exists = h5wrap::path_exists(db, datapath.c_str());
-
   status = H5Eclear(H5E_DEFAULT);
 
   // Close the database
