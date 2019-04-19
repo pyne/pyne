@@ -155,7 +155,7 @@ cdef class _MaterialLibrary:
         cdef std_string c_matname
 
 
-        c_matname = std_string(< char * > matname)
+        c_matname = matname
         c_mat = self._inst.get_material(c_matname)
 
         # build a PyNE Material object form the cpp_material
@@ -244,7 +244,7 @@ cdef class _MaterialLibrary:
         self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
 
     def __getitem__(self, key):
-        return self.get_material(key)
+        return self.get_material(key.encode('utf-8'))
     
     def __len__(self):
         return self.mat_library.size()
