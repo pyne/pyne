@@ -244,7 +244,7 @@ cdef class _MaterialLibrary:
         self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
 
     def __getitem__(self, key):
-        if isinstance(key, str):
+        if isinstance(key, basestring):
             key = key.encode('UTF-8')
 
         return self.get_material(key)
