@@ -84,8 +84,6 @@ cdef class _MaterialLibrary:
                     mat = lib[key]
                     self.__setitem__(key, material.ensure_material(mat))
             elif isinstance(lib, unicode):
-                print("should be here", flush=True)
-                print(lib, flush=True)
                 c_filename = lib.encode('utf-8')
                 c_datapath = datapath.encode('utf-8')
                 self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
