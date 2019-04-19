@@ -258,7 +258,11 @@ cdef class _MaterialLibrary:
         return self.mat_library.size()
 
     def __delitem__(self, key):
-        self.del_material(key.encode('utf-8'))
+        if isinstance(key, basestring):
+            key = key.encode('UTF-8')
+        elif isinstance(key, int):
+            key = str(key).encode('UTF-8')
+        self.del_material(key)
 
     def __iter__(self):
         mat_lib_dict = map_to_dict_str_mat(self._inst.get_mat_library())
