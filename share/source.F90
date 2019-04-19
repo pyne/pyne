@@ -101,14 +101,7 @@ subroutine source
  
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_list)
    ! Loop over cell_list to find icl_tmp
-   icl_tmp1 = find_cell(cell_list, cell_list_size)
-   icl_tmp2 = find_cell(cell_list, 0)
-   ! compare icl_tmp of two options
-   if (icl_tmp1 > 0 .and. icl_tmp1 /= icl_tmp2) then
-      write(*, *) "source particle: xxx, yyy, zzz = ",xxx,yyy,zzz
-      write(*, *) "icl_tmp1 =",icl_tmp1, " icl_tmp2 =",icl_tmp2
-   endif
-   icl_tmp = icl_tmp2
+   icl_tmp = find_cell(cell_list, cell_list_size)
 
    ! check whether this is a valid cell
    if (icl_tmp .le. 0) then
