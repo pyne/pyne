@@ -1576,7 +1576,7 @@ def test_matlib_json():
     assert_equal(set(wmatlib), set(rmatlib))
     for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
-    #os.remove(filename)
+    os.remove(filename)
 
 def test_matlib_hdf5_nuc_data():
     matlib = MaterialLibrary()

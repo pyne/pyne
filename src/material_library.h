@@ -68,6 +68,7 @@ class MaterialLibrary {
 
   ~MaterialLibrary();  //< default destructor
 
+  void renumber_mat();
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the HDF5 file.
@@ -94,7 +95,10 @@ class MaterialLibrary {
     /// \param filename Path on disk to the json file.
   */
   void from_json(const std::string& filename);
-
+  void load_json(Json::Value json);
+  Json::Value dump_json();
+  void write_json(const std::string& filename);
+  void write_json(char * filename);
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
