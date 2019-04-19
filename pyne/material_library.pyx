@@ -244,7 +244,10 @@ cdef class _MaterialLibrary:
         self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
 
     def __getitem__(self, key):
-        return self.get_material(key.encode('utf-8'))
+        if isinstance(key, str):
+            key = key.encode('UTF-8')
+
+        return self.get_material(key)
     
     def __len__(self):
         return self.mat_library.size()
