@@ -76,15 +76,16 @@ class MaterialLibrary {
     /// \param protocol Flag for layout of material on disk.
   */
   void from_hdf5(const std::string& filename,
-                 const std::string& datapath = "/materials", int protocol = 1);
+                 const std::string& datapath = "/materials",
+                 const std::string& nucpath = "", int protocol = 1);
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the materials in the file.
     /// \param protocol Flag for layout of material on disk.
   */
-  void from_hdf5(char* filename,
-                 char* datapath = "/materials", int protocol = 1);
+  void from_hdf5(char* filename, char* datapath = "/materials",
+                 char* nucpath = "", int protocol = 1);
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the json file.
@@ -98,7 +99,7 @@ class MaterialLibrary {
   void load_json(Json::Value json);
   Json::Value dump_json();
   void write_json(const std::string& filename);
-  void write_json(char * filename);
+  void write_json(char* filename);
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
@@ -125,7 +126,8 @@ class MaterialLibrary {
    *             appended to the end of the dataset.
    *  \param chunksize The chunksize for all material data on disk.
   */
-  void write_hdf5(const std::string& filename, const std::string& datapath = "/materials",
+  void write_hdf5(const std::string& filename,
+                  const std::string& datapath = "/materials",
                   const std::string& nucpath = "/nucid");
   /**
    * \brief Merge a material library into the current one

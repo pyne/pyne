@@ -91,15 +91,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   std::string nucpath;
   hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
 
-  hsize_t data_offset[1] = {static_cast<hsize_t>(row)};
-  if (row < 0) {
-    // Handle negative row indices
-    hid_t data_space = H5Dget_space(data_set);
-    hsize_t data_dims[1];
-    H5Sget_simple_extent_dims(data_space, data_dims, NULL);
-    data_offset[0] += data_dims[0];
-  }
-
   // Grab the nucpath
   hid_t nuc_attr = H5Aopen(data_set, "nucpath", H5P_DEFAULT);
   H5A_info_t nuc_info;
@@ -111,6 +102,21 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   H5Aread(nuc_attr, str_attr, nucpathbuf);
   nucpath = std::string(nucpathbuf, nuc_attr_len);
   delete[] nucpathbuf;
+  H5Tclose(str_attr);
+  _load_comp_protocol1(db, datapath, nucpath, row);
+}
+
+void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, std::string nucpath, int row) {
+  hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
+
+  hsize_t data_offset[1] = {static_cast<hsize_t>(row)};
+  if (row < 0) {
+    // Handle negative row indices
+    hid_t data_space = H5Dget_space(data_set);
+    hsize_t data_dims[1];
+    H5Sget_simple_extent_dims(data_space, data_dims, NULL);
+    data_offset[0] += data_dims[0];
+  }
 
   // Grab the nuclides
   std::vector<int> nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
@@ -151,8 +157,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
     comp[nuclides[i]] = (double) (*mat_data).comp[i];
 
   delete[] mat_data;
-  H5Tclose(str_attr);
-
   //
   // Get metadata from associated dataset, if available
   //
@@ -233,6 +237,59 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     _load_comp_protocol0(db, datapath, row);
   else if (protocol == 1)
     _load_comp_protocol1(db, datapath, row);
+  else
+    throw pyne::MaterialProtocolError();
+
+  // Close the database
+  status = H5Fclose(db);
+
+  // Renormalize the composition, just to be safe.
+  norm_comp();
+}
+
+void pyne::Material::from_hdf5(char * filename, char * datapath, char * nucpath, int row, int protocol) {
+  std::string fname (filename);
+  std::string dpath (datapath);
+  std::string npath (nucpath);
+  from_hdf5(fname, dpath, nucpath, row, protocol);
+}
+
+
+
+void pyne::Material::from_hdf5(std::string filename, std::string datapath, std::string nucpath, int row, int protocol) {
+  // Turn off annoying HDF5 errors
+  herr_t status;
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+  // Check that the file is there
+  std::string dpath (datapath);
+  if (!pyne::file_exists(filename))
+    throw pyne::FileNotFound(filename);
+
+  // Check to see if the file is in HDF5 format.
+  bool ish5 = H5Fis_hdf5(filename.c_str());
+  if (!ish5)
+    throw h5wrap::FileNotHDF5(filename);
+
+  //Set file access properties so it closes cleanly
+  hid_t fapl;
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fclose_degree(fapl,H5F_CLOSE_STRONG);
+  // Open the database
+  hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
+
+  bool datapath_exists = h5wrap::path_exists(db, datapath);
+  if (!datapath_exists)
+    throw h5wrap::PathNotFound(filename, datapath);
+
+  // Clear current content
+  comp.clear();
+
+  // Load via various protocols
+  if (protocol == 0)
+    _load_comp_protocol0(db, datapath, row);
+  else if (protocol == 1)
+    _load_comp_protocol1(db, datapath, nucpath, row);
   else
     throw pyne::MaterialProtocolError();
 

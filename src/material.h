@@ -126,6 +126,13 @@ namespace pyne
     /// \param datapath Path to the base node for the material in \a db.
     /// \param row The index to read out, may be negative.
     void _load_comp_protocol1(hid_t db, std::string datapath, int row);
+    
+    /// Loads the matrial composition from an HDF5 file according to the layout
+    /// defined by protocol 1.  This protocol should be used in favor of protocol 0.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the base node for the material in \a db.
+    /// \param row The index to read out, may be negative.
+    void _load_comp_protocol1(hid_t db, std::string datapath, std::string nucpath, int row);
 
     /// Loads a material from an HDF5 file into this object.
     /// \param filename Path on disk to the HDF5 file.
@@ -133,13 +140,30 @@ namespace pyne
     /// \param row The index to read out, may be negative.
     /// \param protocol Flag for layout of material on disk.
     void from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1);
-
+    
     /// Loads a material from an HDF5 file into this object.
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
     /// \param row The index to read out, may be negative.
     /// \param protocol Flag for layout of material on disk.
-    void from_hdf5(std::string filename, std::string datapath="/material",
+    void from_hdf5(std::string filename, std::string datapath="/material", 
+                                                          int row=-1, int protocol=1);
+
+    /// Loads a material from an HDF5 file into this object.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the the material in the file.
+    /// \param row The index to read out, may be negative.
+    /// \param protocol Flag for layout of material on disk.
+    void from_hdf5(char * filename, char * datapath, char* nucpath, int row=-1, int protocol=1);
+    
+    /// Loads a material from an HDF5 file into this object.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the the material in the file.
+    /// \param row The index to read out, may be negative.
+    /// \param protocol Flag for layout of material on disk.
+    void from_hdf5(std::string filename, std::string datapath, std::string nucpath,
                                                           int row=-1, int protocol=1);
 
     /// Writes this material out to an HDF5 file.

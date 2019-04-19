@@ -29,14 +29,16 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
 // Destructor
 pyne::MaterialLibrary::~MaterialLibrary(){};
 
-void pyne::MaterialLibrary::from_hdf5(char* fname, char* dpath, int protocol) {
+void pyne::MaterialLibrary::from_hdf5(char* fname, char* dpath, char* npath, int protocol) {
   std::string filename(fname);
   std::string datapath(dpath);
-  from_hdf5(filename, datapath, protocol);
+  std::string nucpath(npath);
+  from_hdf5(filename, datapath, npath, protocol);
 }
 // Append Material to the library from hdf5 file
 void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
                                       const std::string& datapath,
+                                      const std::string& nucpath,
                                       int protocol) {
   if (!hdf5_path_exists(filename, datapath)) return;
 
@@ -45,8 +47,12 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   for (int i = 0; i < file_num_materials; i++) {
     pyne::Material mat;  // from file
     // read new mat
-    mat.from_hdf5(filename, datapath, i, protocol);
-
+    if( nucpath == ""){
+      mat.from_hdf5(filename, datapath, i, protocol);
+    }  
+    else {
+       mat.from_hdf5(filename, datapath, nucpath, i, protocol);
+    }
     // if exists, get the material name from metadata make one instead
     std::string mat_name;
     std::pair<pyne::matname_set::iterator, bool> mat_insert;
