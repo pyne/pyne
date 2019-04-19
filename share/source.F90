@@ -80,7 +80,6 @@ subroutine source
     integer :: tries
     integer, save :: cell_list_size = 0
     integer, dimension(:), allocatable, save :: cell_list
-    integer :: icl_tmp1, icl_tmp2
   
     if (first_run .eqv. .true.) then
         ! set up, and return cell_list_size to create a cell_list
