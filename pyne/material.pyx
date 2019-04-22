@@ -345,6 +345,19 @@ cdef class _Material:
         cdef std_string card
         card = self.mat_pointer.mcnp(frac_type.encode())
         return card.decode()
+    
+    def gdml(self):
+        """gdml()
+        Return a gdml input deck
+        ""
+        Parameters
+        ----------
+ 	   int 0 means use "mass" as the frac_type
+        """
+
+        cdef std_string card
+        card = self.mat_pointer.gdml()
+        return card.decode()
 
     def openmc(self, frac_type='mass'):
         """openmc(frac_type)
