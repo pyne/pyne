@@ -686,7 +686,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 }
 
 
-std::string pyne::Material::gdml(std::string frac_type) {
+std::string pyne::Material::gdml() {
   std::stringstream oss;
   std::string mat_name = "mat";
   // 'name'
