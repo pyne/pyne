@@ -6,6 +6,7 @@
 #ifndef PYNE_IS_AMALGAMATED
 #include "nucname.h"
 #include "state_map.cpp"
+#include <iostream>
 #endif
 
 /*** Constructs the LL to element name Dictionary ***/
@@ -130,7 +131,7 @@ pyne::nucname::name_elt_t pyne::nucname::get_name_elt() {
   lname["Lv"] = "Livermorium";
   lname["Ts"] = "Tennessine";
   lname["Og"] = "Oganesson";
-  
+  return lname;
 }  
 pyne::nucname::name_elt_t pyne::nucname::name_elt = pyne::nucname::get_name_elt();
 
