@@ -690,9 +690,6 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 std::string pyne::Material::phits(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
-  // Material Card Header
-  oss << "[ M a t e r i a l ]" << std::endl;
-
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
