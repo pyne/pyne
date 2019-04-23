@@ -730,7 +730,7 @@ std::string pyne::Material::gdml() {
     // fraction)
     for (auto isotope : it.second) {
       oss << "  <fraction ref=\"" << nucname::name(isotope.first) << "\"";
-      oss << " n=\"" << isotope.second / total_element_frac << "\"  />";
+      oss << " n=\"" << isotope.second / total_element_frac << "\" />";
       oss << std::endl;
     }
     oss << "</element>" << std::endl;
@@ -749,7 +749,7 @@ std::string pyne::Material::gdml() {
     oss << "  <fraction n=\"" << it.second << "\" ref=\"" << it.first << "\" />";
     oss << std::endl;
   }
-  oss << "</maerial>" << std::endl;
+  oss << "</material>" << std::endl;
 
   return oss.str();
 }
