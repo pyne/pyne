@@ -742,10 +742,6 @@ std::string pyne::Material::gdml() {
   oss << "<material name=\"" << mat_name << "\"";
   oss << " formula=\"" << mat_name << "\" >" << std::endl;
   // if density is negative, report to user
-  if (density < 0.0) {
-    throw pyne::ValueError(
-        "A density < 0.0 was found. This is not valid in GDML.");
-  }
   oss << "  <D value=" << density << "\" />" << std::endl;
   for (auto it : element_comp) {
     if (it.second > 0) {
