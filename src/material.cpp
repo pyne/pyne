@@ -722,18 +722,20 @@ std::string pyne::Material::gdml() {
   for (auto it : elements_list) {
     int z = nucname::znum(it.first);
     std::string element_name = mat_name + "_" + nucname::name_elt[nucname::zz_name[z]];
-    oss << "<element name=\"" << element_name << "\" >"
-        << std::endl;
     double total_element_frac = element_comp[element_name];
+    if (total_element_frac > 0) {
+      oss << "<element name=\"" << element_name << "\" >"
+          << std::endl;
 
-    // loop over all the isotopes of a chemical element (and normalize
-    // fraction)
-    for (auto isotope : it.second) {
-      oss << "  <fraction ref=\"" << nucname::name(isotope.first) << "\"";
-      oss << " n=\"" << isotope.second / total_element_frac << "\" />";
-      oss << std::endl;
+      // loop over all the isotopes of a chemical element (and normalize
+      // fraction)
+      for (auto isotope : it.second) {
+        oss << "  <fraction ref=\"" << nucname::name(isotope.first) << "\"";
+        oss << " n=\"" << isotope.second / total_element_frac << "\" />";
+        oss << std::endl;
+      }
+      oss << "</element>" << std::endl;
     }
-    oss << "</element>" << std::endl;
   }
 
   // write material
@@ -746,8 +748,10 @@ std::string pyne::Material::gdml() {
   }
   oss << "  <D value=" << density << "\" />" << std::endl;
   for (auto it : element_comp) {
-    oss << "  <fraction n=\"" << it.second << "\" ref=\"" << it.first << "\" />";
-    oss << std::endl;
+    if (it.second > 0) {
+      oss << "  <fraction n=\"" << it.second << "\" ref=\"" << it.first << "\" />";
+      oss << std::endl;
+    }
   }
   oss << "</material>" << std::endl;
 
