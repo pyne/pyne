@@ -689,9 +689,14 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 std::string pyne::Material::gdml() {
   std::stringstream oss;
   std::string mat_name = "mat";
+  std::string mat_name_by_num = "mat";
+
   // 'name'
   if (metadata.isMember("name")) {
     mat_name = metadata["name"].asString();
+  }
+  if (metadata.isMember("mat_number")) {
+    mat_name_by_num += std::to_string(metadata["mat_number"].asInt());
   }
 
   // 'Isotope list'
@@ -703,7 +708,7 @@ std::string pyne::Material::gdml() {
   // loop over the composition and group isotopes per element
   for (auto it : comp) {
     int z = nucname::znum(it.first);
-    std::string element_name = mat_name + "_" + nucname::name_elt[nucname::zz_name[z]];
+    std::string element_name = mat_name_by_num + "_" + nucname::name_elt[nucname::zz_name[z]];
     if (elements_list.find(z) == elements_list.end()) {
       std::map<int, double> list;
       list[it.first] = it.second;
@@ -721,7 +726,7 @@ std::string pyne::Material::gdml() {
   // loop over the different chemical elements
   for (auto it : elements_list) {
     int z = nucname::znum(it.first);
-    std::string element_name = mat_name + "_" + nucname::name_elt[nucname::zz_name[z]];
+    std::string element_name = mat_name_by_num + "_" + nucname::name_elt[nucname::zz_name[z]];
     double total_element_frac = element_comp[element_name];
     if (total_element_frac > 0) {
       oss << "<element name=\"" << element_name << "\" >"
@@ -739,7 +744,7 @@ std::string pyne::Material::gdml() {
   }
 
   // write material
-  oss << "<material name=\"" << mat_name << "\"";
+  oss << "<material name=\"" << mat_name_by_num << "\"";
   oss << " formula=\"" << mat_name << "\" >" << std::endl;
   // if density is negative, report to user
   oss << "  <D value=" << density << "\" />" << std::endl;
