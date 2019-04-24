@@ -633,7 +633,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    oss << pyne::line_wrapping(comment_string, mcnp_line_lenght).str();
+    oss << pyne::line_wrapping(comment_string, mcnp_line_length).str();
   }
 
   // Metadata mat_num
@@ -653,34 +653,8 @@ std::string pyne::Material::mcnp(std::string frac_type) {
     frac_sign = "-";
   }
 
-  // iterate through frac map
-  // This is an awkward pre-C++11 way to put an int to a string
-  std::stringstream ss;
-  std::string nucmcnp;
-  std::string table_item;
-  for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
-    if (i->second > 0.0) {
-      // Clear first
-      ss.str(std::string());
-      ss.str("");
-      ss << pyne::nucname::mcnp(i->first);
-      nucmcnp = ss.str();
-
-      int mcnp_id;
-      mcnp_id = pyne::nucname::mcnp(i->first);
-      // Spaces are important for tests
-      table_item = metadata["table_ids"][nucmcnp].asString();
-      if (!table_item.empty()) {
-        oss << "     " << mcnp_id << "." << table_item << " ";
-      } else {
-        oss << "     " << mcnp_id << " ";
-      }
-      // The int needs a little formatting
-      std::stringstream fs;
-      fs << std::setprecision(4) << std::scientific << frac_sign << i->second << std::endl;
-      oss << fs.str();
-    }
-  }
+  // write the frac map
+  oss << mcnp_frac(fracs, frac_sign);
 
   return oss.str();
 }
@@ -697,7 +671,7 @@ std::string pyne::Material::phits(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    oss << pyne::line_wrapping(comment_string, mcnp_line_lenght).str();
+    oss << pyne::line_wrapping(comment_string, mcnp_line_length).str();
   }
 
   // Metadata mat_num
@@ -730,16 +704,23 @@ std::string pyne::Material::phits(std::string frac_type) {
     frac_sign = "-";
   }
 
+  // write the frac map
+  oss << mcnp_frac(fracs, frac_sign);
+
+  return oss.str();
+}
+
+std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string frac_sign){
+
   // iterate through frac map
   // This is an awkward pre-C++11 way to put an int to a string
-  std::stringstream ss;
-  std::string nucmcnp;
-  std::string table_item;
+  std::ostringstream oss;
   for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
     if (i->second > 0.0) {
       // Clear first
-      ss.str(std::string());
-      ss.str("");
+      std::stringstream ss;
+      std::string nucmcnp;
+      std::string table_item;
       ss << pyne::nucname::mcnp(i->first);
       nucmcnp = ss.str();
 
@@ -748,18 +729,16 @@ std::string pyne::Material::phits(std::string frac_type) {
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if (!table_item.empty()) {
-  oss << "     " << mcnp_id << "." << table_item << " ";
+        oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
-  oss << "     " << mcnp_id << " ";
+        oss << "     " << mcnp_id << " ";
       }
       // The int needs a little formatting
       std::stringstream fs;
-      fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
-   << std::endl;
+      fs << std::setprecision(4) << std::scientific << frac_sign << i->second << std::endl;
       oss << fs.str();
     }
   }
-
   return oss.str();
 }
 

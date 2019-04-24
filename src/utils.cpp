@@ -66,7 +66,9 @@ std::string pyne::to_str(bool t) {
 }
 
 
-int pyne::to_int(std::string s) { return atoi(s.c_str()); }
+int pyne::to_int(std::string s) { 
+  return atoi(s.c_str()); 
+}
 
 double pyne::to_dbl(std::string s) { return strtod(s.c_str(), NULL); }
 
