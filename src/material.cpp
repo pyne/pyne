@@ -15,7 +15,7 @@
 
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);
-const int mcnp_line_lenght = 77;
+const int mcnp_line_length = 77;
 
 
 /***************************/
