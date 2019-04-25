@@ -1,6 +1,6 @@
 import os
 import warnings
-from nose.tools import assert_equal, assert_almost_equal
+from nose.tools import assert_equal, assert_almost_equal, assert_true
 from nose.plugins.skip import SkipTest
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -13,7 +13,7 @@ import tables as tb
 from pyne.mcnp import Meshtal
 from pyne.material import Material
 from pyne.utils import QAWarning
-from pyne.alara import response_to_hdf5
+from pyne.alara import response_to_hdf5, response_hdf5_to_mesh
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
@@ -27,6 +27,8 @@ warnings.simplefilter("ignore", QAWarning)
 
 thisdir = os.path.dirname(__file__)
 
+if not HAVE_PYMOAB:
+        raise SkipTes
 
 def test_response_to_hdf5_decay_heat():
     """
@@ -77,3 +79,33 @@ def test_response_to_hdf5_decay_heat():
     # remove generated files
     os.remove(h5_filename)
     os.remove(exp_h5_filename)
+
+
+def test_response_hdf5_to_mesh():
+    """Tests the function photon source_h5_to_mesh."""
+
+    response = 'decay_heat'
+    # read  output.txt and write h5 file
+    filename = os.path.join(thisdir, "files_test_activation_responses", ''.join([response, '_output.txt']))
+    h5_filename = os.path.join(thisdir, "files_test_activation_responses", ''.join([response, '_output.txt.h5']))
+    response_to_hdf5(filename, response)
+    assert_true(os.path.exists(h5_filename))
+
+    mesh = Mesh(structured=True,
+                structured_coords=[[0, 1], [0, 1], [0, 1]])
+
+    tags = {('h-3', 'shutdown'): 'tag1', ('TOTAL', '12 h'): 'tag2'}
+    response_hdf5_to_mesh(mesh, h5_filename, tags, response)
+
+    # create lists of lists of expected results
+    tag1_answers = [9.5258e-18]
+    tag2_answers = [9.5251e-18]
+
+    ves = list(mesh.structured_iterate_hex("xyz"))
+    for i, ve in enumerate(ves):
+        assert_equal(mesh.tag1[ve], tag1_answers[i])
+        assert_equal(mesh.tag2[ve], tag2_answers[i])
+
+    if os.path.isfile(h5_filename):
+        os.remove(h5_filename)
+
