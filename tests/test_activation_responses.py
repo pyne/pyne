@@ -27,9 +27,6 @@ warnings.simplefilter("ignore", QAWarning)
 
 thisdir = os.path.dirname(__file__)
 
-if not HAVE_PYMOAB:
-        raise SkipTes
-
 def test_response_to_hdf5_decay_heat():
     """
     This function test alara.response_to_hdf5, with response of decay_heat.
