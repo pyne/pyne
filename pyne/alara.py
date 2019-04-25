@@ -251,9 +251,8 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         ls = line.strip().split()
         # get decay times
         if 'isotope\t shutdown' in line:
-            ls = line.split()
             if len(decay_times) == 0:
-                decay_times = _read_decay_times(ls)
+                decay_times = read_decay_times(line)
             continue
         # get idx
         if 'Zone #' in line: 
@@ -1150,11 +1149,12 @@ def _is_data(line):
     return True
     
 
-def _read_decay_times(ls):
+def read_decay_times(line):
     """
     This function reads a line contian decay times information from alara
     output file and return the decay times list.
     """
+    ls = line.strip().split()
     decay_times = ['shutdown']
     for i in range(2, len(ls), 2):
         decay_times.append(''.join([ls[i], ' ', ls[i+1]]))

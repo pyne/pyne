@@ -18,7 +18,7 @@ from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
     irradiation_blocks, record_to_geom, phtn_src_energy_bounds, \
-    response_output_zone, _is_data
+    response_output_zone, _is_data, read_decay_times
 from pyne.material import Material
 from pyne.utils import QAWarning, str_to_unicode, file_almost_same
 warnings.simplefilter("ignore", QAWarning)
@@ -666,7 +666,7 @@ end"""
 
 def test_is_data():
     """
-    This function test alara.is_data, which check whether a line in the output
+    This function tests alara.is_data, which check whether a line in the output
     file of ALARA output file output.txt contains data or not.
     """
     lines = ["ALARA 2.9.1rc",
@@ -681,3 +681,12 @@ def test_is_data():
     for line in lines:
         assert_equal(_is_data(line), True)
 
+
+def test_read_decay_times():
+    """
+    This function tests alara.read_decay_times(line).
+    """
+    line = "isotope  shutdown      1000 s        12 h         3 d"
+    exp_decay_times = ['shutdown', '1000 s', '12 h', '3 d']
+    decay_times = read_decay_times(line)
+    assert_array_equal(decay_times, exp_decay_times)
