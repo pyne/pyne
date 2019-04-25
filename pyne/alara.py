@@ -260,7 +260,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
             idx = int(ls[-1].split('_')[-1])
             continue
         # skip the lines don't contain wanted data
-        if not _is_data(ls):
+        if not _is_data(line):
             continue
     
         # put data into table
@@ -1133,7 +1133,7 @@ def response_output_zone(response=None):
 
     return ''.join([start_str, code_block, end_str])
 
-def _is_data(ls):
+def _is_data(line):
     """
     This function is used to check whether a line of alara output file contains
     wanted data. The line contains data is conposed of:
@@ -1141,6 +1141,7 @@ def _is_data(ls):
         - data for each decay time (including 'shutdown': floats
     """
     # check the list from the second value, if they are float, then return True
+    ls = line.strip().split()
     if len(ls) < 2:
         return False
     for i in range(1, len(ls)):
