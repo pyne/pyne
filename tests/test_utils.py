@@ -349,5 +349,6 @@ def test_file_block_almost_same():
     f2 = """block1\n\nblock3"""
     assert(utils.file_block_almost_same(f1, f2) == False)
 
+
 if __name__ == "__main__":
     nose.runmodule()
