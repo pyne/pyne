@@ -254,9 +254,9 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
             if len(decay_times) == 0:
                 decay_times = read_decay_times(line)
             continue
-        # get idx
+        # get zone idx
         if 'Zone #' in line: 
-            idx = int(ls[-1].split('_')[-1])
+            idx = _get_zone_idx(line)
             continue
         # skip the lines don't contain wanted data
         if not _is_data(line):
@@ -1138,6 +1138,16 @@ def _is_data(line):
     wanted data. The line contains data is conposed of:
         - nuc : nuc name (total or TOTAL)
         - data for each decay time (including 'shutdown': floats
+
+    Parameters
+    ----------
+    line : string
+        A line from ALARA output.txt
+
+    Returns
+    -------
+    True : if this line contains results data
+    False : if this line doesn't contain results data
     """
     # check the list from the second value, if they are float, then return True
     ls = line.strip().split()
@@ -1153,6 +1163,16 @@ def read_decay_times(line):
     """
     This function reads a line contian decay times information from alara
     output file and return the decay times list.
+
+    Parameters
+    ----------
+    line : string
+        A line from ALARA output.txt
+
+    Returns
+    -------
+    decay_times : array of string
+        Array of decay times.
     """
     ls = line.strip().split()
     decay_times = ['shutdown']
@@ -1160,3 +1180,19 @@ def read_decay_times(line):
         decay_times.append(''.join([ls[i], ' ', ls[i+1]]))
     return decay_times
     
+
+def _get_zone_idx(line):
+    """
+    This function is used to get the zone idx from a line of ALARA output.txt.
+
+    Parameters
+    ----------
+    line : string
+        A line from ALARA output.txt
+
+    Returns
+    -------
+    int, zone index
+    """
+    ls = line.strip().split()
+    return int(ls[-1].split('_')[-1])

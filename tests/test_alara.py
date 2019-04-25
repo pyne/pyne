@@ -18,7 +18,7 @@ from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
     irradiation_blocks, record_to_geom, phtn_src_energy_bounds, \
-    response_output_zone, _is_data, read_decay_times
+    response_output_zone, _is_data, read_decay_times, _get_zone_idx
 from pyne.material import Material
 from pyne.utils import QAWarning, str_to_unicode, file_almost_same
 warnings.simplefilter("ignore", QAWarning)
@@ -690,3 +690,8 @@ def test_read_decay_times():
     exp_decay_times = ['shutdown', '1000 s', '12 h', '3 d']
     decay_times = read_decay_times(line)
     assert_array_equal(decay_times, exp_decay_times)
+
+
+def test_get_zone_idx():
+    line = "Zone #1: zone_0"
+    assert_equal(_get_zone_idx(line), 0)
