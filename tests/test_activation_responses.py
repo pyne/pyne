@@ -27,13 +27,13 @@ warnings.simplefilter("ignore", QAWarning)
 
 thisdir = os.path.dirname(__file__)
 
-if not os.system('which h5diff'):
-    raise SkipTest
 
 def test_response_to_hdf5_decay_heat():
     """
     This function test alara.response_to_hdf5, with response of decay_heat.
     """
+    if not os.system('which h5diff'):
+        raise SkipTest
     response = 'decay_heat'
     # read  output.txt and write h5 file
     filename = os.path.join(thisdir, "files_test_activation_responses", ''.join([response, '_output.txt']))
