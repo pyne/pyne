@@ -5,6 +5,7 @@
 * Add support for decay heat
 * Add support for specific activity
 * Add support for alpha heat
+* Add support for beta heat
 
 **Changed:** None
 
