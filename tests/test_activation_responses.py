@@ -27,21 +27,20 @@ warnings.simplefilter("ignore", QAWarning)
 
 thisdir = os.path.dirname(__file__)
 
+responses = ['decay_heat', 'specific_activity', 'alpha_heat']
 
 def test_response_to_hdf5():
     """
     This function test alara.response_to_hdf5, with response of:
         - decay_heat
         - specific_activity
+        - alpha_heat
     """
     # skip test if h5diff not exist
     a = os.system('which h5diff')
     if a != 0:
         raise SkipTest
 
-    responses = ['decay_heat',
-                 'specific_activity',
-                ]
     for response in responses:
         # read  output.txt and write h5 file
         filename = os.path.join(thisdir, "files_test_activation_responses", ''.join([response, '_output.txt']))
@@ -92,7 +91,6 @@ def test_response_to_hdf5():
 def test_response_hdf5_to_mesh():
     """Tests the function photon source_h5_to_mesh."""
 
-    responses = ['decay_heat', 'specific_activity']
     for response in responses:
         # read  output.txt and write h5 file
         filename = os.path.join(thisdir, "files_test_activation_responses", ''.join([response, '_output.txt']))

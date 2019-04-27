@@ -214,9 +214,10 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         time : str
             The decay time as it appears in the output file.
         response : float
-            Possible response:
-                - decay heat [W/cm3]
-                - specific activity [Bq/cm3]
+            Supported response:
+                - decay_heat [W/cm3]
+                - specific_activity [Bq/cm3]
+                - alpha_heat [W/cm3]
 
     Parameters
     ----------
@@ -412,6 +413,7 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
         The keyword of the response. Supported responses:
             - decay_heat
             - specific_activity
+            - alpha_heat
     """
 
     # create a dict of tag handles for all keys of the tags dict
@@ -1114,7 +1116,9 @@ def response_output_zone(response=None):
     response : string
         A keyword represent the alara output zone. The following response is
         supported:
-            - 'decay_heat'
+            - decay_heat
+            - specific_activity
+            - alpha_heat
 
     Returns
     -------
@@ -1124,7 +1128,8 @@ def response_output_zone(response=None):
     # input check
     if response == None:
         return ''
-    if response not in ('decay_heat', 'photon_source', 'specific_activity'):
+    if response not in ('decay_heat', 'photon_source', 'specific_activity',
+                        'alpha_heat'):
         raise ValueError('response {0} not supported.'.format(response))
 
     start_str = "output zone\n"
@@ -1132,9 +1137,12 @@ def response_output_zone(response=None):
     # define code block for decay_heat
     if response == 'decay_heat':
         code_block = "      total_heat\n"
-    # define code block for specific activity
+    # define code block for specific_activity
     if response == 'specific_activity':
         code_block = "      specific_activity\n"
+    # define code block for alpha_heat
+    if response == 'alpha_heat':
+        code_block= "       alapha_heat\n"
 
     return ''.join([start_str, code_block, end_str])
 
