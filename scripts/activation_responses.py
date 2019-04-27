@@ -46,7 +46,7 @@ num_rays: 10
 # In this case <num_rays> must be a perfect square. If false, rays are fired
 # down mesh rows in random intervals.
 grid: False
-# Requested response. Available options: 'decay_heat'
+# Requested response. Available options: 'decay_heat', 'specific_activity'
 response: decay_heat
 
 [step2]

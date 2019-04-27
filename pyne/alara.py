@@ -215,7 +215,8 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
             The decay time as it appears in the output file.
         response : float
             Possible response:
-                - The decay heat density [W/cm3].
+                - decay heat [W/cm3]
+                - specific activity [Bq/cm3]
 
     Parameters
     ----------
@@ -408,7 +409,9 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
 
         tags = {('U-235', 'shutdown') : 'tag1', ('TOTAL', '1 h') : 'tag2'}
     response : str
-        The keyword of the response. Eg. 'decay_heat'.
+        The keyword of the response. Supported responses:
+            - decay_heat
+            - specific_activity
     """
 
     # create a dict of tag handles for all keys of the tags dict
@@ -1121,7 +1124,7 @@ def response_output_zone(response=None):
     # input check
     if response == None:
         return ''
-    if response not in ('decay_heat', 'photon_source'):
+    if response not in ('decay_heat', 'photon_source', 'specific_activity'):
         raise ValueError('response {0} not supported.'.format(response))
 
     start_str = "output zone\n"
@@ -1129,6 +1132,9 @@ def response_output_zone(response=None):
     # define code block for decay_heat
     if response == 'decay_heat':
         code_block = "      total_heat\n"
+    # define code block for specific activity
+    if response == 'specific_activity':
+        code_block = "      specific_activity\n"
 
     return ''.join([start_str, code_block, end_str])
 
