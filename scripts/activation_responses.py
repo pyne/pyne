@@ -47,8 +47,10 @@ num_rays: 10
 # down mesh rows in random intervals.
 grid: False
 # Requested response. Available options: 'decay_heat', 'specific_activity',
-# 'alpha_heat', 'beta_heat', 'gamma_heat'
+# 'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr'
 response: decay_heat
+# wdr file for response: wdr
+wdr_file: IAEA.clearance
 
 [step2]
 # List of decays times, seperated by commas. These strings much match exactly
@@ -58,7 +60,7 @@ response: decay_heat
 decay_times:1E3 s,12 h,3.0 d
 # The prefix of the .h5m files containing the source density distributations for
 # each decay time.
-output: decay_heat
+output:
 """
 
 alara_params =\
@@ -109,6 +111,7 @@ def step1():
     num_rays = config.getint('step1', 'num_rays')
     grid = config.getboolean('step1', 'grid')
     response = config.get('step1', 'response')
+    wdr_file = config.get('setp1', 'wdr_file')
 
     load(geom)
 
@@ -125,7 +128,7 @@ def step1():
     irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename,
                       tally_num, num_rays=num_rays, grid=grid, reverse=reverse,
                       flux_tag=flux_tag, decay_times=decay_times,
-                      sub_voxel=False, response=response)
+                      sub_voxel=False, response=response, wdr_file=wdr_file)
 
     # create a blank mesh for step 2:
     ves = list(flux_mesh.iter_ve())

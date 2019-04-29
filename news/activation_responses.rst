@@ -7,6 +7,7 @@
 * Add support for alpha heat
 * Add support for beta heat
 * Add support for gamma heat
+* Add support for wdr
 
 **Changed:** None
 
