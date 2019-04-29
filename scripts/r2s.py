@@ -5,6 +5,7 @@ try:
 except ImportError:
     import configparser as ConfigParser
 
+import  os
 from os.path import isfile
 
 from pyne.mesh import Mesh, NativeMeshTag
@@ -62,6 +63,8 @@ output: source
 # The name of the output files containing the total photon source intensities for
 # each decay time
 tot_phtn_src_intensities : total_photon_source_intensities.txt
+# Keep phtn_src file?
+keep_phtn_src: True
 """
 
 alara_params =\
@@ -166,6 +169,7 @@ def step2():
     output = config.get('step2', 'output')
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
     tag_name = "source_density"
+    keep_phtn_src = config.get('step2', 'keep_phtn_src')
 
     if sub_voxel:
         geom = config.get('step1', 'geom')
@@ -176,6 +180,8 @@ def step2():
     h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
         photon_source_to_hdf5('phtn_src')
+    if isfile('phtn_src') and keep_phtn_src == False:
+        os.remove('phtn_src')
     intensities = "Total photon source intensities (p/s)\n"
     for i, dc in enumerate(decay_times):
         print('Writing source for decay time: {0}'.format(dc))
