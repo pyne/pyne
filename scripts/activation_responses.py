@@ -49,7 +49,7 @@ grid: False
 # Requested response. Available options: 'decay_heat', 'specific_activity',
 # 'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr'
 response: decay_heat
-# wdr file for response: wdr
+# wdr file for response wdr.
 wdr_file: IAEA.clearance
 
 [step2]

@@ -1112,7 +1112,7 @@ def _find_phsrc_dc(idc, phtn_src_dc):
             'Decay time {0} not found in phtn_src file'.format(idc))
 
 
-def response_output_zone(response=None):
+def response_output_zone(response=None, wdr_file=None):
     """
     This function returns a string representing the output zone of alara input
     code block.
@@ -1128,6 +1128,8 @@ def response_output_zone(response=None):
             - beta_heat
             - gamma_heat
             - wdr
+    wdr_file : string
+        File name of the standard used to calculate wdr.
 
     Returns
     -------
@@ -1160,7 +1162,7 @@ def response_output_zone(response=None):
         code_block= "       gamma_heat\n"
     # define code block for wdr
     if response == 'wdr':
-        code_block= "       wdr\n"
+        code_block= ''.join(["       wdr", " ", wdr_file, "\n"])
 
     return ''.join([start_str, code_block, end_str])
 
