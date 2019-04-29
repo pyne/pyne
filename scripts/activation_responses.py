@@ -111,7 +111,7 @@ def step1():
     num_rays = config.getint('step1', 'num_rays')
     grid = config.getboolean('step1', 'grid')
     response = config.get('step1', 'response')
-    wdr_file = config.get('setp1', 'wdr_file')
+    wdr_file = config.get('step1', 'wdr_file')
 
     load(geom)
 
