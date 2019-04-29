@@ -169,7 +169,7 @@ def step2():
     output = config.get('step2', 'output')
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
     tag_name = "source_density"
-    keep_phtn_src = config.get('step2', 'keep_phtn_src')
+    keep_phtn_src = config.getboolean('step2', 'keep_phtn_src')
 
     if sub_voxel:
         geom = config.get('step1', 'geom')
@@ -180,7 +180,7 @@ def step2():
     h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
         photon_source_to_hdf5('phtn_src')
-    if isfile('phtn_src') and keep_phtn_src == False:
+    if isfile('phtn_src') and not keep_phtn_src:
         os.remove('phtn_src')
     intensities = "Total photon source intensities (p/s)\n"
     for i, dc in enumerate(decay_times):
