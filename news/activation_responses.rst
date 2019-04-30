@@ -8,6 +8,7 @@
 * Add support for beta heat
 * Add support for gamma heat
 * Add support for wdr
+* Add support for photon_source
 
 **Changed:** None
 
