@@ -221,6 +221,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
                 - beta_heat [W/cm3]
                 - gamma_heat [W/cm3]
                 - wdr
+                - photon_source
 
     Parameters
     ----------
@@ -420,6 +421,7 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
             - beta_heat
             - gamma_heat
             - wdr
+            - photon_source
     """
 
     # create a dict of tag handles for all keys of the tags dict
@@ -1112,7 +1114,7 @@ def _find_phsrc_dc(idc, phtn_src_dc):
             'Decay time {0} not found in phtn_src file'.format(idc))
 
 
-def response_output_zone(response=None, wdr_file=None):
+def response_output_zone(response=None, wdr_file=None, alara_params=None):
     """
     This function returns a string representing the output zone of alara input
     code block.
@@ -1128,8 +1130,11 @@ def response_output_zone(response=None, wdr_file=None):
             - beta_heat
             - gamma_heat
             - wdr
+            - photon_source
     wdr_file : string
         File name of the standard used to calculate wdr.
+    alara_params: string
+        Alara parameters
 
     Returns
     -------
@@ -1162,7 +1167,12 @@ def response_output_zone(response=None, wdr_file=None):
         code_block= "       gamma_heat\n"
     # define code block for wdr
     if response == 'wdr':
-        code_block= ''.join(["       wdr", " ", wdr_file, "\n"])
+        code_block= ''.join(["       wdr ", wdr_file, "\n"])
+    # define code block for photon_source
+    if response == 'photon_source':
+        alara_lib = get_alara_lib(alara_params)
+        code_block= ''.join(["       photon_source ", alara_lib,
+                             " phtn_src 1 2e7\n"])
 
     return ''.join([start_str, code_block, end_str])
 
@@ -1230,3 +1240,25 @@ def _get_zone_idx(line):
     """
     ls = line.strip().split()
     return int(ls[-1].split('_')[-1])
+
+
+def get_alara_lib(alara_params):
+    """
+    This function is used to get the alara_library from alara_params.
+
+    Parameters
+    ----------
+    alara_params: string
+        ALARA parameters.
+
+    Returns
+    -------
+    alara_lib: string
+        Path to ALARA library.
+    """
+    lines = alara_params.split('\n')
+    for line in lines:
+        if "data_library" in line:
+            alara_lib = line.strip().split()[-1]
+            return alara_lib
+    raise ValueError("alara_lib not found!")

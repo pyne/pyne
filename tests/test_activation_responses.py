@@ -28,7 +28,7 @@ warnings.simplefilter("ignore", QAWarning)
 thisdir = os.path.dirname(__file__)
 
 responses = ['decay_heat', 'specific_activity', 'alpha_heat', 'beta_heat',
-             'gamma_heat', 'wdr']
+             'gamma_heat', 'wdr', 'photon_source']
 
 def test_response_to_hdf5():
     """
@@ -39,6 +39,7 @@ def test_response_to_hdf5():
         - beta_heat
         - gamma_heat
         - wdr
+        - photon_source
     """
     # skip test if h5diff not exist
     a = os.system('which h5diff')

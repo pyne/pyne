@@ -47,7 +47,7 @@ num_rays: 10
 # down mesh rows in random intervals.
 grid: False
 # Requested response. Available options: 'decay_heat', 'specific_activity',
-# 'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr'
+# 'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr', 'photon_source'
 response: decay_heat
 # wdr file for response wdr.
 wdr_file: IAEA.clearance

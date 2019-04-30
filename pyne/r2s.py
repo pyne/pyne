@@ -162,7 +162,7 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
 
     # append response output zone
     with open(alara_inp, 'a') as f:
-        f.write(response_output_zone(response, wdr_file))
+        f.write(response_output_zone(response, wdr_file, alara_params))
 
     m.write_hdf5(output_mesh)
 

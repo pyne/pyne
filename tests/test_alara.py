@@ -18,7 +18,8 @@ from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
     irradiation_blocks, record_to_geom, phtn_src_energy_bounds, \
-    response_output_zone, _is_data, read_decay_times, _get_zone_idx
+    response_output_zone, _is_data, read_decay_times, _get_zone_idx, \
+    get_alara_lib
 from pyne.material import Material
 from pyne.utils import QAWarning, str_to_unicode, file_almost_same
 warnings.simplefilter("ignore", QAWarning)
@@ -695,3 +696,31 @@ def test_read_decay_times():
 def test_get_zone_idx():
     line = "Zone #1: zone_0"
     assert_equal(_get_zone_idx(line), 0)
+
+
+def test_get_alara_lib():
+    alara_params = \
+"""material_lib alara_matlib
+element_lib data/nuclib
+data_library alaralib data/fendl2.0bin
+
+#     flux name    fluxin file   norm   shift   unused
+flux  my_flux     alara_fluxin  1e10     0      default
+
+# Specify the irradiation schedule below.
+# Syntax is found in the ALARA user manual
+# This example is for a single 3.5 h pulse
+schedule    my_schedule
+    3.5 d my_flux my_pulse_history 0  s
+end
+pulsehistory  my_pulse_history
+    1    0.0    s
+end
+
+#other parameters
+truncation 1e-12
+impurity 5e-6 1e-3
+dump_file dump.file"""
+    alara_lib = get_alara_lib(alara_params)
+    exp_alara_lib = "data/fendl2.0bin"
+    assert_equal(alara_lib, exp_alara_lib)
