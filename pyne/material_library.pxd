@@ -21,5 +21,4 @@ cdef class _MaterialLibrary:
     cdef cpp_set[int] get_nuclist(self)
 
 cdef cpp_map[std_string, matp] dict_to_map_str_matp(dict)
-cdef dict map_to_dict_str_matp(cpp_map[std_string, matp])
-cdef dict map_to_dict_str_mat(cpp_map[std_string, cpp_material.Material])
+cdef dict map_to_dict_str_matp(cpp_map[std_string, cpp_material.Material *])

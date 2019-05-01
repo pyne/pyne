@@ -154,22 +154,15 @@ cdef class _MaterialLibrary:
 
     def get_material(self, matname):
         # Get the correct cpp_material
-        cdef cpp_material.Material c_mat
+        cdef cpp_material.Material* c_mat
         cdef std_string c_matname
-
-
         c_matname = matname
+        
         c_mat = self._inst.get_material(c_matname)
 
         # build a PyNE Material object form the cpp_material
-        cdef jsoncpp.Value metadata = jsoncpp.Value()
-        metadata.__set_instance__(c_mat.metadata)
-        py_mat = material.Material(
-            c_mat.comp,
-            c_mat.mass,
-            c_mat.density,
-            c_mat.atoms_per_molecule,
-            metadata)
+        py_mat = material.Material()
+        (< material._Material > py_mat).mat_pointer = c_mat
         return py_mat
 
     def merge(self, mat_library):
@@ -268,7 +261,7 @@ cdef class _MaterialLibrary:
         self.del_material(key)
 
     def __iter__(self):
-        mat_lib_dict = map_to_dict_str_mat(self._inst.get_mat_library())
+        mat_lib_dict = map_to_dict_str_matp(self._inst.get_mat_library())
         self._iter_mat_lib = mat_lib_dict
         mat_lib_iter = iter(mat_lib_dict)
         return mat_lib_iter
@@ -321,16 +314,3 @@ cdef dict map_to_dict_str_matp(cpp_map[std_string, matp] cppmap):
 
     return pydict
 
-
-cdef dict map_to_dict_str_mat(cpp_map[std_string, cpp_material.Material] cppmap):
-    pydict = {}
-    cdef material._Material pymat
-    cdef cpp_map[std_string, cpp_material.Material].iterator mapiter = cppmap.begin()
-
-    while mapiter != cppmap.end():
-        pymat = material.Material()
-        pymat.mat_pointer[0] = deref(mapiter).second
-        pydict[< char * > deref(mapiter).first.c_str()] = pymat
-        inc(mapiter)
-
-    return pydict
