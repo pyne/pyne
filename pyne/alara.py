@@ -1155,9 +1155,10 @@ def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
     String represent the output zone block corresponding to the response.
     """
 
-    # input check
+    # set default value for functions do not need response
     if responses == None:
-        raise ValueError('Responses not defined.')
+        return ''
+    # input check
     if responses not in ('decay_heat', 'photon_source', 'specific_activity',
                         'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr'):
         raise ValueError('response {0} not supported.'.format(response))
