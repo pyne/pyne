@@ -9,6 +9,7 @@
 * Add support for gamma heat
 * Add support for wdr
 * Add support for photon_source
+* Add support for multiple response in one output.txt file
 
 **Changed:** None
 

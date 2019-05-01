@@ -21,6 +21,12 @@ config = \
     """[general]
 # Specify whether this problem uses structured or unstructured mesh
 structured: True
+# List of requested response, seperated by commas.
+# Available options: 'decay_heat', 'specific_activity',
+# 'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr', 'photon_source'.
+responses: decay_heat
+# wdr file for response wdr.
+wdr_file: IAEA.clearance
 
 [step1]
 # Path to MCNP MESHTAL file containing neutron fluxes or a DAG-MCNP5
@@ -46,11 +52,6 @@ num_rays: 10
 # In this case <num_rays> must be a perfect square. If false, rays are fired
 # down mesh rows in random intervals.
 grid: False
-# Requested response. Available options: 'decay_heat', 'specific_activity',
-# 'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr', 'photon_source'
-response: decay_heat
-# wdr file for response wdr.
-wdr_file: IAEA.clearance
 
 [step2]
 # List of decays times, seperated by commas. These strings much match exactly
@@ -58,9 +59,6 @@ wdr_file: IAEA.clearance
 # should appear in this line except the space between the time and the time unit
 # for each entry.
 decay_times:1E3 s,12 h,3.0 d
-# The prefix of the .h5m files containing the source density distributations for
-# each decay time.
-output:
 """
 
 alara_params =\
@@ -110,8 +108,8 @@ def step1():
     reverse = config.getboolean('step1', 'reverse')
     num_rays = config.getint('step1', 'num_rays')
     grid = config.getboolean('step1', 'grid')
-    response = config.get('step1', 'response')
-    wdr_file = config.get('step1', 'wdr_file')
+    responses = config.get('general', 'responses').split(',')
+    wdr_file = config.get('general', 'wdr_file')
 
     load(geom)
 
@@ -128,7 +126,7 @@ def step1():
     irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename,
                       tally_num, num_rays=num_rays, grid=grid, reverse=reverse,
                       flux_tag=flux_tag, decay_times=decay_times,
-                      sub_voxel=False, response=response, wdr_file=wdr_file)
+                      sub_voxel=False, response=responses, wdr_file=wdr_file)
 
     # create a blank mesh for step 2:
     ves = list(flux_mesh.iter_ve())
@@ -147,16 +145,17 @@ def step2():
     structured = config.getboolean('general', 'structured')
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
-    tag_name = "decay_heat_density"
-    response = config.get('step1', 'response')
+    responses = config.get('general', 'responses')
 
-    response_to_hdf5('output.txt', response)
-    for i, dc in enumerate(decay_times):
-        print('Writing decay heat for decay time: {0}'.format(dc))
-        mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
-        tags = {('TOTAL', dc): tag_name}
-        response_hdf5_to_mesh(mesh, 'output.txt.h5', tags, response)
-        mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
+    for response in responses:
+        response_to_hdf5('output.txt', response)
+        tag_name = response
+        for i, dc in enumerate(decay_times):
+            print('Writing {0} for decay time: {1}'.format(response, dc))
+            mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
+            tags = {('TOTAL', dc): tag_name}
+            response_hdf5_to_mesh(mesh, 'output.txt.h5', tags, response)
+            mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
 
     print('Activation_response step2 complete.')
 

@@ -242,7 +242,8 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         (response, np.float64)])
 
     filters = tb.Filters(complevel=1, complib='zlib')
-    h5f = tb.open_file(filename + '.h5', 'w', filters=filters)
+    h5_filename = os.path.join(os.path.dirname(filename), ''.join([response, '.h5']))
+    h5f = tb.open_file(h5_filename, 'w', filters=filters)
     tab = h5f.create_table('/', 'data', dt, chunkshape=chunkshape)
 
     chunksize = chunkshape[0]
@@ -250,11 +251,16 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     idx = 0
     count = 1
     decay_times = []
+    zone_start = False
+    response_start = False
     for i, line in enumerate(f, 1):
         # terminate condition
-        if 'Totals for all zones' in line:
+        if 'Totals for all zones' in line and response_start:
             break
-        ls = line.strip().split()
+        # get response string
+        if zone_start and is_response_string(line, response):
+            response_start = True
+            continue
         # get decay times
         if 'isotope\t shutdown' in line:
             if len(decay_times) == 0:
@@ -263,11 +269,19 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         # get zone idx
         if 'Zone #' in line: 
             idx = _get_zone_idx(line)
+            if idx == 0:
+                ## new blocks, disable first response string
+                #response_start = False
+                zone_start = True
+            continue
+        # skip the lines does not contain specific response info
+        if not response_start:
             continue
         # skip the lines don't contain wanted data
         if not _is_data(line):
             continue
     
+        ls = line.strip().split()
         # put data into table
         # format of each row: idx, nuc, time, decay_heat
         for k, dc in enumerate(decay_times):
@@ -1114,15 +1128,15 @@ def _find_phsrc_dc(idc, phtn_src_dc):
             'Decay time {0} not found in phtn_src file'.format(idc))
 
 
-def response_output_zone(response=None, wdr_file=None, alara_params=None):
+def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
     """
     This function returns a string representing the output zone of alara input
     code block.
 
     Parameters
     ----------
-    response : string
-        A keyword represent the alara output zone. The following response is
+    responses : list of string
+        A keyword represent the alara output zone. The following responses are
         supported:
             - decay_heat
             - specific_activity
@@ -1142,38 +1156,38 @@ def response_output_zone(response=None, wdr_file=None, alara_params=None):
     """
 
     # input check
-    if response == None:
-        return ''
-    if response not in ('decay_heat', 'photon_source', 'specific_activity',
+    if responses == None:
+        raise ValueError('Responses not defined.')
+    if responses not in ('decay_heat', 'photon_source', 'specific_activity',
                         'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr'):
         raise ValueError('response {0} not supported.'.format(response))
 
     start_str = "output zone\n"
     end_str = "end"
+    code_block = ''
     # define code block for decay_heat
-    if response == 'decay_heat':
-        code_block = "      total_heat\n"
+    if 'decay_heat' in responses:
+        code_block = ''.join([code_block, "      total_heat\n"])
     # define code block for specific_activity
-    if response == 'specific_activity':
-        code_block = "      specific_activity\n"
+    if 'specific_activity' in responses:
+        code_block = ''.join([code_block, "      specific_activity\n"])
     # define code block for alpha_heat
-    if response == 'alpha_heat':
-        code_block= "       alapha_heat\n"
+    if 'alpha_heat' in responses:
+        code_block = ''.join([code_block, "       alapha_heat\n"])
     # define code block for beta_heat
-    if response == 'beta_heat':
-        code_block= "       beta_heat\n"
+    if 'beta_heat' in responses:
+        code_block = "       beta_heat\n"
     # define code block for gamma_heat
-    if response == 'gamma_heat':
-        code_block= "       gamma_heat\n"
+    if 'gamma_heat' in responses:
+        code_block = ''.join([code_block, "       gamma_heat\n"])
     # define code block for wdr
-    if response == 'wdr':
+    if 'wdr' in responses:
         code_block= ''.join(["       wdr ", wdr_file, "\n"])
     # define code block for photon_source
-    if response == 'photon_source':
+    if 'photon_source' in responses:
         alara_lib = get_alara_lib(alara_params)
-        code_block= ''.join(["       photon_source ", alara_lib,
+        code_block= ''.join([code_block, "       photon_source ", alara_lib,
                              " phtn_src 1 2e7\n"])
-
     return ''.join([start_str, code_block, end_str])
 
 def _is_data(line):
@@ -1262,3 +1276,35 @@ def get_alara_lib(alara_params):
             alara_lib = line.strip().split()[-1]
             return alara_lib
     raise ValueError("alara_lib not found!")
+
+
+def is_response_string(line, response):
+    """
+    This function is used to check whether this line ot ALARA output.txt
+    containing specific response string.
+
+    Parameters
+    ----------
+    line : string
+        A line from ALARA output.txt
+    response : string
+        The response.
+
+    Returns
+    -------
+    True : this line contains response string
+    False : this line does not contain response string
+    """
+
+    # response strings for different responses
+    response_strings = {'decay_heat': 'Total Decay Heat',
+                        'specific_activity': 'Specific Activity',
+                        'alpha_heat': 'Alpha Decay Heat',
+                        'beta_heat': 'Beta Decay Heat',
+                        'gamma_heat': 'Gamma Decay Heat',
+                        'wdr': 'WDR/Clearance index',
+                        'photon_source': 'Photon Source Distribution'}
+    if response_strings[response] in line:
+        return True
+    else:
+        return False

@@ -18,7 +18,7 @@ from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
     irradiation_blocks, record_to_geom, phtn_src_energy_bounds, \
-    response_output_zone, _is_data, read_decay_times, _get_zone_idx, \
+    responses_output_zone, _is_data, read_decay_times, _get_zone_idx, \
     get_alara_lib
 from pyne.material import Material
 from pyne.utils import QAWarning, str_to_unicode, file_almost_same
@@ -654,14 +654,14 @@ def test_phtn_src_energy_bounds():
     assert_array_equal(e_bounds, expected_e_bounds)
 
 
-def test_alara_response_output_zone():
+def test_alara_responses_output_zone():
     # test decay_heat
     response = 'decay_heat'
     exp_response_code = \
 """output zone
       total_heat
 end"""
-    response_code = response_output_zone(response)
+    response_code = responses_output_zone(response)
     assert_equal(response_code, exp_response_code)
 
 

@@ -75,7 +75,7 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
                       fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
-                      decay_times=None, sub_voxel=False, response=None,
+                      decay_times=None, sub_voxel=False, responses=None,
                       wdr_file=None):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
@@ -127,8 +127,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
         List of the decay times. If no decay times given, use '1 s'.
     sub_voxel : bool, optional
         If true, sub-voxel r2s work flow  will be used.
-    response : str, optional
-        The name of response requested.
+    responses : list of str, optional
+        The list of requested responses.
     wdr_file : str
         File name of the standard to calculate wdr.
     """
@@ -160,9 +160,9 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
     with open(alara_inp, 'a') as f:
         f.write("\n" + alara_params)
 
-    # append response output zone
+    # append responses output zone
     with open(alara_inp, 'a') as f:
-        f.write(response_output_zone(response, wdr_file, alara_params))
+        f.write(responses_output_zone(responses, wdr_file, alara_params))
 
     m.write_hdf5(output_mesh)
 
