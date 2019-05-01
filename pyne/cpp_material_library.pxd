@@ -33,6 +33,7 @@ cdef extern from "material_library.h" namespace "pyne":
         void from_hdf5(char*, char*) except +
         void from_hdf5(char*, char*, char*) except +
         void from_hdf5(char*, char*, char*, int) except +
+        void from_hdf5(char*, char*, int) except +
         
         void load_json(cpp_jsoncpp.Value) except +
         cpp_jsoncpp.Value dump_json() except +

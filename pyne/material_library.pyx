@@ -106,7 +106,7 @@ cdef class _MaterialLibrary:
         """MaterialLibrary C++ destructor."""
         del self._inst
 
-    def from_hdf5(self, filename, datapath="/materials", nucpath="/nucid", protocol=1):
+    def from_hdf5(self, filename, datapath="/materials", nucpath="", protocol=1):
         cdef char * c_filename
         filename_bytes = filename.encode('UTF-8')
         c_filename = filename_bytes
@@ -116,8 +116,8 @@ cdef class _MaterialLibrary:
         cdef char * c_nucpath
         nucpath_bytes = nucpath.encode('UTF-8')
         c_nucpath = nucpath_bytes
-
         self._inst.from_hdf5(c_filename, c_datapath, c_nucpath, protocol)
+
 
     def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid"):
         cdef char * c_filename
