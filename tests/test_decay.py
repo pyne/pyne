@@ -94,7 +94,11 @@ def pivot_mat_keys():
     """
     nuc_keys = {}
     for key in MATS.keys():
-        key = str(key, 'UTF-8')
+        if (sys.version_info > (3, 0)):
+            key = str(key, encoding='UTF-8')
+        else:
+            key = str(key).encode('UTF-8')
+
         _, nuc, t = key.split('_')
         nuc = int(nuc)
         if nuc in METASTABLE_BLACKLIST:
