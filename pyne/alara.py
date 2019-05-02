@@ -847,12 +847,12 @@ def _get_subvoxel_array(mesh, cell_mats):
 
     """
     cell_number_tag = mesh.cell_number
-    subvoxel_array = np.zeros(0, dtype=[(u'svid', np.int64),
-                                        (u'idx', np.int64),
-                                        (u'scid', np.int64)])
-    temp_subvoxel = np.zeros(1, dtype=[(u'svid', np.int64),
-                                       (u'idx', np.int64),
-                                       (u'scid', np.int64)])
+    subvoxel_array = np.zeros(0, dtype=[('svid', np.int64),
+                                        ('idx', np.int64),
+                                        ('scid', np.int64)])
+    temp_subvoxel = np.zeros(1, dtype=[('svid', np.int64),
+                                       ('idx', np.int64),
+                                       ('scid', np.int64)])
     # calculate the total number of non-void sub-voxel
     non_void_sv_num = 0
     for i, _, ve in mesh:
