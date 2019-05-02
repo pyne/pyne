@@ -235,7 +235,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     with tb.open_file(filename) as h5f:
         for row in h5f.root.data:
             if row[2] not in phtn_src_dc:
-                phtn_src_dc.append(row[2])
+                phtn_src_dc.append(row[2].decode())
             else:
                 break
 
@@ -877,7 +877,10 @@ def _convert_unit_to_s(dc):
     a float number
     """
     # get num and unit
-    num, unit = dc.split()
+    if dc == u'shutdown':
+        num, unit = u'0.0', u's'
+    else:
+        num, unit = dc.split()
     return to_sec(float(num), unit)
 
 
@@ -906,7 +909,7 @@ def _find_phsrc_dc(idc, phtn_src_dc):
         # Loop over decay times in phtn_src_dc list and compare to idc_s.
         for dc in phtn_src_dc:
             # Skip "shutdown" string in list.
-            if dc == 'shutdown':
+            if dc == u'shutdown':
                 continue
             # Convert to [s].
             dc_s = _convert_unit_to_s(dc)
