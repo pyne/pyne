@@ -125,6 +125,7 @@ def step1():
     cell_mats = cell_materials(geom)
     irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename,
                       tally_num, num_rays=num_rays, grid=grid, reverse=reverse,
+                      output_mesh="activation_responses_step1.h5m",
                       flux_tag=flux_tag, decay_times=decay_times,
                       sub_voxel=False, responses=responses, wdr_file=wdr_file)
 

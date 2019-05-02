@@ -172,28 +172,28 @@ def test_response_hdf5_to_mesh():
             os.remove(h5_filename)
 
 
-def _r2s_test_step1(r2s_run_dir):
+def _activation_responses_test_step1(activation_responses_run_dir):
     os.chdir(thisdir)
-    # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
+    # copy ../scripts/activation_responses.py to activation_responses_run_dir/activation_responses.py
     os.chdir("..")
     folderpath = os.getcwd()
-    dst = os.path.join(r2s_run_dir, "r2s.py")
-    copyfile(os.path.join(folderpath, "scripts", "r2s.py"), dst)
+    dst = os.path.join(activation_responses_run_dir, "activation_responses.py")
+    copyfile(os.path.join(folderpath, "scripts", "activation_responses.py"), dst)
 
-    # run r2s step1
-    os.chdir(r2s_run_dir)
-    os.system('python r2s.py step1')
+    # run activation_responses step1
+    os.chdir(activation_responses_run_dir)
+    os.system('python activation_responses.py step1')
 
-    # output files of r2s step1
-    alara_inp = os.path.join(r2s_run_dir, "alara_inp")
-    alara_matlib = os.path.join(r2s_run_dir, "alara_matlib")
-    alara_fluxin = os.path.join(r2s_run_dir, "alara_fluxin")
-    blank_mesh = os.path.join(r2s_run_dir, "blank_mesh.h5m")
-    step1_file = os.path.join(r2s_run_dir, "r2s_step1.h5m")
+    # output files of activation_responses step1
+    alara_inp = os.path.join(activation_responses_run_dir, "alara_inp")
+    alara_matlib = os.path.join(activation_responses_run_dir, "alara_matlib")
+    alara_fluxin = os.path.join(activation_responses_run_dir, "alara_fluxin")
+    blank_mesh = os.path.join(activation_responses_run_dir, "blank_mesh.h5m")
+    step1_file = os.path.join(activation_responses_run_dir, "activation_responses_step1.h5m")
 
-    exp_alara_inp = os.path.join(r2s_run_dir, "exp_alara_inp")
-    exp_alara_matlib = os.path.join(r2s_run_dir, "exp_alara_matlib")
-    exp_alara_fluxin = os.path.join(r2s_run_dir, "exp_alara_fluxin")
+    exp_alara_inp = os.path.join(activation_responses_run_dir, "exp_alara_inp")
+    exp_alara_matlib = os.path.join(activation_responses_run_dir, "exp_alara_matlib")
+    exp_alara_fluxin = os.path.join(activation_responses_run_dir, "exp_alara_fluxin")
 
     # compare the output file of step1
     f1 = filecmp.cmp(alara_inp, exp_alara_inp)
@@ -213,52 +213,56 @@ def _r2s_test_step1(r2s_run_dir):
     assert_equal(f3, True)
 
 
-def _r2s_test_step2(r2s_run_dir):
+def _activation_responses_test_step2(activation_responses_run_dir):
+    # skip test if h5diff not exist
+    is_h5diff = os.system('which h5diff')
+    if is_h5diff != 0:
+        raise SkipTest
+
     os.chdir(thisdir)
-    # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
+    # copy ../scripts/activation_responses.py to activation_responses_run_dir/activation_responses.py
     os.chdir("..")
     folderpath = os.getcwd()
-    dst = os.path.join(r2s_run_dir, "r2s.py")
-    copyfile(os.path.join(folderpath, "scripts", "r2s.py"), dst)
+    dst = os.path.join(activation_responses_run_dir, "activation_responses.py")
+    copyfile(os.path.join(folderpath, "scripts", "activation_responses.py"), dst)
 
-    # output files of r2s step1
-    alara_inp = os.path.join(r2s_run_dir, "alara_inp")
-    copyfile(os.path.join(r2s_run_dir, "exp_alara_inp"), alara_inp)
-    blank_mesh = os.path.join(r2s_run_dir, "blank_mesh.h5m")
-    copyfile(os.path.join(r2s_run_dir, "exp_blank_mesh.h5m"), blank_mesh)
+    # output files of activation_responses step1
+    alara_inp = os.path.join(activation_responses_run_dir, "alara_inp")
+    copyfile(os.path.join(activation_responses_run_dir, "exp_alara_inp"), alara_inp)
+    blank_mesh = os.path.join(activation_responses_run_dir, "blank_mesh.h5m")
+    copyfile(os.path.join(activation_responses_run_dir, "exp_blank_mesh.h5m"), blank_mesh)
 
-    # run r2s step2
-    os.chdir(r2s_run_dir)
-    os.system('python r2s.py step2')
+    # run activation_responses step2
+    os.chdir(activation_responses_run_dir)
+    os.system('python activation_responses.py step2')
 
-    # output files of r2s step2
-    e_bounds = os.path.join(r2s_run_dir, "e_bounds")
-    p_src = os.path.join(r2s_run_dir, "phtn_src.h5")
-    t_p_src = os.path.join(r2s_run_dir, "total_photon_source_intensities.txt")
-    src_c1 = os.path.join(r2s_run_dir, "source_1.h5m")
-
-    exp_e_bounds = os.path.join(r2s_run_dir, "exp_e_bounds")
-    exp_t_p_src = os.path.join(
-        r2s_run_dir, "exp_total_photon_source_intensities.txt")
+    # output files of activation_responses step2
+    h5_filename = os.path.join(activation_responses_run_dir, "decay_heat.h5")
+    exp_h5_filename = os.path.join(activation_responses_run_dir, "exp_decay_heat.h5")
+    h5m_filename = os.path.join(activation_responses_run_dir, "decay_heat_1.h5m")
+    exp_h5m_filename = os.path.join(activation_responses_run_dir, "exp_decay_heat_1.h5m")
 
     # compare the results
-    f4 = filecmp.cmp(e_bounds, exp_e_bounds)
-    f5 = filecmp.cmp(t_p_src, exp_t_p_src)
+    # compare two h5 files
+    command = ''.join(['h5diff ', h5_filename, ' ', exp_h5_filename])
+    diff_flag4 = os.system(command)
+    # compare two h5m files
+    command = ''.join(['h5diff ', h5m_filename, ' ', exp_h5m_filename, ' /tstt/tags /tstt/tags'])
+    diff_flag5 = os.system(command)
 
     # remove test generated files
     os.remove(blank_mesh)
     os.remove(alara_inp)
-    os.remove(e_bounds)
-    os.remove(p_src)
-    os.remove(t_p_src)
-    os.remove(src_c1)
+    os.remove(h5_filename)
+    os.remove(h5m_filename)
     os.remove(dst)
 
-    assert_equal(f4, True)
-    assert_equal(f5, True)
+    # return value 0 if no difference, 1 if differences found, 2 if error
+    assert_equal(diff_flag4, 0)
+    assert_equal(diff_flag5, 0)
 
 
-def test_r2s_script():
+def test_activation_responses_script():
 
     # skip test without dagmc
     try:
@@ -266,8 +270,8 @@ def test_r2s_script():
     except ImportError:
         raise SkipTest
 
-    r2s_run_dir = os.path.join(
-        thisdir, "files_test_r2s", "r2s_examples", "r2s_run")
-    _r2s_test_step1(r2s_run_dir)
-    _r2s_test_step2(r2s_run_dir)
+    activation_responses_run_dir = os.path.join(
+        thisdir, "files_test_activation_responses", "activation_responses_examples")
+    _activation_responses_test_step1(activation_responses_run_dir)
+    _activation_responses_test_step2(activation_responses_run_dir)
 
