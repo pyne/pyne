@@ -1159,9 +1159,10 @@ def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
     if responses == None:
         return ''
     # input check
-    if responses not in ('decay_heat', 'photon_source', 'specific_activity',
+    for response in responses:
+        if response not in ('decay_heat', 'photon_source', 'specific_activity',
                         'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr'):
-        raise ValueError('response {0} not supported.'.format(response))
+            raise ValueError('response {0} not supported.'.format(response))
 
     start_str = "output zone\n"
     end_str = "end"

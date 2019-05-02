@@ -126,7 +126,7 @@ def step1():
     irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename,
                       tally_num, num_rays=num_rays, grid=grid, reverse=reverse,
                       flux_tag=flux_tag, decay_times=decay_times,
-                      sub_voxel=False, response=responses, wdr_file=wdr_file)
+                      sub_voxel=False, responses=responses, wdr_file=wdr_file)
 
     # create a blank mesh for step 2:
     ves = list(flux_mesh.iter_ve())
@@ -144,8 +144,8 @@ def step2():
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
     decay_times = config.get('step2', 'decay_times').split(',')
-    output = config.get('step2', 'output')
-    responses = config.get('general', 'responses')
+    #output = config.get('step2', 'output')
+    responses = config.get('general', 'responses').split(',')
 
     for response in responses:
         response_to_hdf5('output.txt', response)
@@ -154,8 +154,8 @@ def step2():
             print('Writing {0} for decay time: {1}'.format(response, dc))
             mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
             tags = {('TOTAL', dc): tag_name}
-            response_hdf5_to_mesh(mesh, 'output.txt.h5', tags, response)
-            mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
+            response_hdf5_to_mesh(mesh, ''.join([response, '.h5']), tags, response)
+            mesh.write_hdf5('{0}_{1}.h5m'.format(response, i+1))
 
     print('Activation_response step2 complete.')
 
