@@ -392,7 +392,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
             printed_mats.append(name)
             matlib += '{0}    {1: 1.6E}    {2}\n'.format(name, mat.density,
                                                          len(mat.comp))
-            for nuc, comp in mat.comp.iteritems():
+            for nuc, comp in mat.comp.items():
                 matlib += '{0}    {1: 1.6E}    {2}\n'.format(alara(nuc),
                                                              comp*100.0, znum(nuc))
             matlib += '\n'
@@ -447,7 +447,7 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
         mixture += ("mixture mix_{0}\n"
                     "    material mat_{0} 1 1\nend\n\n".format(i))
 
-        for nuc, comp in mesh.comp[i].iteritems():
+        for nuc, comp in mesh.comp[i].items():
             matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0,
                                                          znum(nuc))
         matlib += "\n"
