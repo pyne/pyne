@@ -123,6 +123,7 @@ cdef class Value(object):
             print("ici1");
             pykey_bytes = pykey.encode()
             print("ici1a");
+            print(pykey_bytes)
             cvalue = &self._inst[0][<const_char *> pykey_bytes]
             print("ici1n");
         elif isinstance(pykey, bytes):
