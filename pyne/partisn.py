@@ -221,16 +221,23 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
 
     # collapse isotopes into elements (if required)
     mats = MaterialLibrary(hdf5, datapath=data_hdf5path, nucpath=nuc_hdf5path)
+    print(1)
     mats_collapsed = {}
+    print(2)
     unique_names = {}
+    print(3)
     for mat_name in mats:
-        fluka_name = mats[mat_name].metadata['fluka_name']
+        print(4)
+        name_utf = mat_name.decode('utf-8')
+        fluka_name = mats[name_utf].metadata['fluka_name']
         unique_names[mat_name] = fluka_name
+        print(5)
         if collapse:
             mats_collapsed[fluka_name] = mats[mat_name].collapse_elements(
                 mat_except)
         else:
             mats_collapsed[fluka_name] = mats[mat_name]
+    print(6)
 
     # convert mass fraction to atom density in units [at/b-cm]
     mat_lib = {}
@@ -242,6 +249,7 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
             # convert from [at/cc] to [at/b-cm]
             comp_list[nucid] = dens*10.**-24
         mat_lib[mat_name] = comp_list
+    print(7)
 
     return mat_lib, unique_names
 
