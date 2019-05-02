@@ -229,7 +229,13 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
     for mat_name in mats:
         print(4)
         name_utf = mat_name.decode('utf-8')
+        my_mat = mats[name_utf]
+        print(my_mat)
+        print('4a')
+        print(mats[name_utf].metadata['name'])
+        print('4a')
         fluka_name = mats[name_utf].metadata['fluka_name']
+        print('4b')
         unique_names[mat_name] = fluka_name
         print(5)
         if collapse:

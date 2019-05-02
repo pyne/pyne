@@ -10,7 +10,7 @@ cdef class Value:
     cdef cpp_jsoncpp.Value * _inst
     cdef public bint _view
 
-    cdef __set_instance__(self, cpp_jsoncpp.Value new_inst)
+#    cdef __set_instance__(self, cpp_jsoncpp.Value new_inst)
 
 cdef class Reader:
     cdef cpp_jsoncpp.Reader * _inst
