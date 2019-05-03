@@ -286,7 +286,7 @@ def line_almost_same(l1, l2, rel_tol=1e-9):
         else:
             # compare string elements of the line
             for i in range(len(ls1)):
-                if str_almost_same(ls1[i], ls[2], rel_tol):
+                if str_almost_same(ls1[i], ls2[i], rel_tol):
                     pass
                 else:
                     return False
@@ -305,10 +305,10 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
 
     Parameters:
     -----------
-    f1 : str
-        Path of file 1
+    f1 : str 
+        Filename of file 1 or lines
     f2 : str
-        Path of file 2
+        Filename of file 2 or lines
     rel_tol : float
         Reletive tolerance for float numbers
 
@@ -319,25 +319,39 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
     False : bool
         If the difference the two files are more than dicimal differences.
     """
-    if filecmp.cmp(f1, f2):
-        # precheck
-        return True
+    if os.path.isfile(f1) and os.path.isfile(f2):
+        if filecmp.cmp(f1, f2):
+            # precheck
+            return True
     else:
-        # read line by line and then compare
-        with open(f1, 'r') as f:
-            lines1 = f.readlines()
-            lines1 = str_to_unicode(lines1)
-        with open(f2, 'r') as f:
-            lines2 = f.readlines()
-            lines2 = str_to_unicode(lines2)
+        # read lines of f1 and f2, convert to unicode
+        if os.path.isfile(f1):
+            with open(f1, 'r') as f:
+                lines1 = f.readlines()
+                lines1 = str_to_unicode(lines1)
+        else:
+            lines1 = str_to_unicode(f1)
+        lines1 = lines1.strip().split(u'\n')
+
+        if os.path.isfile(f2):
+            with open(f2, 'r') as f:
+                lines2 = f.readlines()
+                lines2 = str_to_unicode(lines2)
+        else:
+            lines2 = str_to_unicode(f2)
+        lines2 = lines2.strip().split(u'\n')
+
+        # compare two files
         # check length of lines
         if len(lines1) != len(lines2):
             return False
         # check content line by line
         for i in range(len(lines1)):
-            if line_almost_same(lines1[i], lines1[i], rel_tol):
+            if line_almost_same(lines1[i], lines2[i], rel_tol):
                 pass
             else:
                 return False
+
+    # no difference found
     return True
 

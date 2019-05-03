@@ -260,5 +260,50 @@ def test_str_almost_same():
     assert(utils.str_almost_same(s1, s2) == False)
 
 
+def test_line_almost_same():
+    """
+    Test utils.line_almost_same.
+    """
+    # exactly the same lines, w/o numbers
+    l1 = u'test strings'
+    l2 = u'test strings'
+    assert(utils.line_almost_same(l1, l2))
+
+    # almost same lines, with numbers
+    l1 = u"test data 9.5"
+    l2 = u"test data 9.50000000001"
+    assert(utils.line_almost_same(l1, l2))
+
+    # different lines, w/o numbers
+    l1 = u"test1 strings"
+    l2 = u"test2 strings"
+    assert(utils.line_almost_same(l1, l2) == False)
+
+    # different lines, with numbers
+    l1 = u"test data 9.5"
+    l2 = u"test data 9.5001"
+    assert(utils.line_almost_same(l1, l2) == False)
+    
+
+def test_file_almost_same():
+    """
+    Test utils.file_almost_same.
+    """
+    # exactly the same, w/o numbers
+    f1 = """l1\nl2 string"""
+    f2 = """l1\nl2 string"""
+    assert(utils.file_almost_same(f1, f2))
+
+    # almost the same, with numbers
+    f1 = """l1\nl2 data 9.5"""
+    f2 = """l1\nl2 data 9.500000000001"""
+    assert(utils.file_almost_same(f1, f2))
+
+    # different contents
+    f1 = """l1\nl2 string1"""
+    f2 = """l1\nl2 string2"""
+    assert(utils.file_almost_same(f1, f2) == False)
+
+
 if __name__ == "__main__":
     nose.runmodule()
