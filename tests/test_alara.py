@@ -19,7 +19,7 @@ from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
     irradiation_blocks, record_to_geom, phtn_src_energy_bounds
 from pyne.material import Material
-from pyne.utils import QAWarning, str_to_unicode
+from pyne.utils import QAWarning, str_to_unicode, file_almost_same
 warnings.simplefilter("ignore", QAWarning)
 
 
@@ -367,9 +367,9 @@ def test_record_to_geom():
 #    import pdb; pdb.set_trace()
     record_to_geom(m, cell_fracs, cell_mats, geom, matlib)
 
-    assert(filecmp.cmp(geom, expected_geom))
-    #if os.path.isfile(geom):
-    #    os.remove(geom)
+    assert(file_almost_same(geom, expected_geom))
+    if os.path.isfile(geom):
+        os.remove(geom)
 
     assert(filecmp.cmp(matlib, expected_matlib))
     if os.path.isfile(matlib):
