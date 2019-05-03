@@ -190,3 +190,35 @@ def remove(path):
         remove_tree(path, verbose=False)
     else:
         pass
+
+
+def str_to_unicode(s):
+    """
+    This function convert a str from binary or unicode to str (unicode).
+    If it is a list of string, convert every element of the list.
+
+    Parameters:
+    -----------
+    s : str or list of str
+
+    Returns:
+    --------
+    s : text str or list of unicode str
+    """
+    if isinstance(s, str) or isinstance(s, bytes):
+        # it is a str, convert to text str
+        try:
+            s = s.decode('utf-8')
+        except:
+            pass
+        return s
+    else:
+        for i, item in enumerate(s):
+            try:
+                s[i] = item.decode('utf-8')
+            except:
+                pass
+        return s    
+
+
+

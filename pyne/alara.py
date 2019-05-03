@@ -13,6 +13,7 @@ from warnings import warn
 from pyne.utils import QAWarning, to_sec
 import numpy as np
 import tables as tb
+from io import open
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -468,6 +469,7 @@ def num_density_to_mesh(lines, time, m):
     creates material objects which are then added to a supplied PyNE Mesh object.
     The volumes within ALARA are assummed to appear in the same order as the
     idx on the Mesh object.
+    All the strings in this function is text (unicode).
 
     Parameters
     ----------

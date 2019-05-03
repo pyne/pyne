@@ -194,5 +194,36 @@ def test_toggle_warnings():
     assert_equal(state, not observed)
 
 
+def test_str_to_unicode():
+    """
+    Convert binary str to unicode str.
+    """
+    exp_answer = u'test'
+    # default str
+    s = 'test'
+    assert_equal(utils.str_to_unicode(s), exp_answer)
+    # binary str
+    s = b'test'
+    assert_equal(utils.str_to_unicode(s), exp_answer)
+    # unicode str
+    s = u'test'
+    assert_equal(utils.str_to_unicode(s), exp_answer)
+
+    # list of str
+    s = ['test1', u'test2', b'test3']
+    exp_answer = [u'test1', u'test2', u'test3']
+    assert_array_equal(utils.str_to_unicode(s), exp_answer)
+
+    # set of str
+    s = {'test1', u'test2', b'test3'}
+    exp_answer = {u'test1', u'test2', u'test3'}
+    assert(utils.str_to_unicode(s), exp_answer)
+
+    # tuple of str
+    s = ('test1', u'test2', b'test3')
+    exp_answer = (u'test1', u'test2', u'test3')
+    assert(utils.str_to_unicode(s), exp_answer)
+
+
 if __name__ == "__main__":
     nose.runmodule()
