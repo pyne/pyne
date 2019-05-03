@@ -117,24 +117,16 @@ cdef class Value(object):
     def __getitem__(self, pykey):
         cdef cpp_jsoncpp.Value * cvalue
         cdef Value pyvalue = Value(view=True)
-        print("ici");
         # convert key and get value
         if isinstance(pykey, basestring):
-            print("ici1");
             pykey_bytes = pykey.encode()
-            print("ici1a");
-            print(pykey_bytes)
             cvalue = &self._inst[0][<const_char *> pykey_bytes]
-            print("ici1n");
         elif isinstance(pykey, bytes):
-            print("ici2");
             cvalue = &self._inst[0][<const_char *> pykey]
         elif isinstance(pykey, int) and (self._inst.type() == cpp_jsoncpp.arrayValue):
-            print("ici3");
             pykey = toposindex(pykey, self._inst[0].size())
             cvalue = &self._inst[0][<int> pykey]
         elif isinstance(pykey, slice) and (self._inst.type() == cpp_jsoncpp.arrayValue):
-            print("ici4");
             pyvalue._view = False
             cvalue = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.arrayValue)
             curr_size = self._inst.size()
@@ -154,19 +146,14 @@ cdef class Value(object):
         if (cvalue.type() == cpp_jsoncpp.objectValue) or \
            (cvalue.type() == cpp_jsoncpp.arrayValue):
             pyvalue._inst = cvalue
-            print("la ?1")
             return pyvalue
         elif cvalue.isString():
-            print("la ?2")
             return bytes(<char *> cvalue.asCString()).decode()
         elif cvalue.isDouble():
-            print("la ?3")
             return cvalue.asDouble()
         elif cvalue.isBool():
-            print("la ?4")
             return cvalue.asBool()
         elif cvalue.isIntegral():
-            print("la ?5")
             return cvalue.asInt()
         elif cvalue.isNull():
             return None

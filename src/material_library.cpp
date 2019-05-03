@@ -27,7 +27,15 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
 };
 
 // Destructor
-pyne::MaterialLibrary::~MaterialLibrary(){};
+pyne::MaterialLibrary::~MaterialLibrary(){
+
+ // for (auto element : material_library) {
+ //   delete element.second;
+ //   material_library.erase(element.first);
+ // }
+
+
+};
 
 void pyne::MaterialLibrary::from_hdf5(char* fname, char* dpath, char* npath, int protocol) {
   std::string filename(fname);
@@ -85,8 +93,8 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
 void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
   pyne::matname_set mats_to_add = mat_lib.get_matlist();
   for (auto it = mats_to_add.begin(); it != mats_to_add.end(); it++) {
-    pyne::Material* mat = mat_lib.get_material(*it);
-    (*this).add_material(*mat);
+    pyne::Material mat = Material(mat_lib.get_material(*it));
+    (*this).add_material(mat);
   }
 }
 
@@ -97,9 +105,9 @@ void pyne::MaterialLibrary::load_json(Json::Value json) {
   Json::Value::Members::const_iterator ikey_end = keys.end();
   mat_map mat_lib_tmp; // required to maintain order in mat number
   for (; ikey != ikey_end; ++ikey) {
-    pyne::Material* mat = new pyne::Material();
-    mat->load_json(json[*ikey]);
-    mat_lib_tmp[mat->metadata["name"].asString()] = mat;
+    pyne::Material mat = pyne::Material();
+    mat.load_json(json[*ikey]);
+    mat_lib_tmp[mat.metadata["name"].asString()] = new Material(mat);
   }
   for (auto mat_element : mat_lib_tmp) {
     (*this).add_material(*mat_element.second);
@@ -184,13 +192,13 @@ void pyne::MaterialLibrary::del_material(const std::string& mat_name) {
   matlist.erase(mat_name);
 }
 
-pyne::Material* pyne::MaterialLibrary::get_material(
+pyne::Material pyne::MaterialLibrary::get_material(
     const std::string& mat_name) {
   auto it = material_library.find(mat_name);
   if (it != material_library.end()) {
-    return it->second;
+    return *(it->second);
   } else {
-    return new pyne::Material();
+    return pyne::Material();
   }
 }
 

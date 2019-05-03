@@ -154,13 +154,13 @@ cdef class _MaterialLibrary:
 
     def get_material(self, matname):
         # Get the correct cpp_material
-        cdef cpp_material.Material* c_mat
+        cdef cpp_material.Material c_mat
         cdef std_string c_matname
         c_matname = matname
-        c_mat = self._inst.get_material(c_matname)
+        c_mat = self._inst.get_material(c_matname);
         # build a PyNE Material object form the cpp_material
-        py_mat = material.Material()
-        (< material._Material > py_mat).mat_pointer = c_mat
+        py_mat = material.Material(free_mat = False)
+        (< material._Material > py_mat).mat_pointer = new cpp_material.Material(c_mat.comp, c_mat.mass, c_mat.density, c_mat.atoms_per_molecule, c_mat.metadata)        
         return py_mat
 
     def merge(self, mat_library):
@@ -246,7 +246,6 @@ cdef class _MaterialLibrary:
         elif isinstance(key, int):
             key = str(key).encode('UTF-8')
         py_mat = self.get_material(key)
-        print(py_mat)
         return py_mat
     
     def __len__(self):

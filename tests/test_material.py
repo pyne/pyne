@@ -323,12 +323,8 @@ def test_collapse_elements1():
 
     mat  = Material(nucvec)
 
-    print("Original")
-    print(mat)
 
     cmat = mat.collapse_elements(exception_ids)
-    print("Collapsed")
-    print(cmat)
 
     assert_equal(cmat.comp[80000000],  mat.comp[80160000] + mat.comp[80160001])
     assert_equal(cmat.comp[922350000], mat.comp[922350000])
@@ -1571,6 +1567,7 @@ def test_matlib_json():
     lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
     wmatlib = MaterialLibrary(lib)
     wmatlib.write_json(filename)
+    
     rmatlib = MaterialLibrary()
     rmatlib.from_json(filename)
     assert_equal(set(wmatlib), set(rmatlib))

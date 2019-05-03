@@ -49,7 +49,7 @@ cdef extern from "material_library.h" namespace "pyne":
         void del_material(std_string) except +
         void merge(std_string) except +
         
-        cpp_material.Material* get_material(std_string) except +
+        cpp_material.Material get_material(std_string) except +
         map[std_string, cpp_material.Material*] get_mat_library() except + 
         std_set[std_string] get_matlist() except +
         std_set[int] get_nuclist() except +
