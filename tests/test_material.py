@@ -1272,7 +1272,7 @@ def test_gdml():
                       '  <fraction ref="U235" n="0.04" />\n'
                       '  <fraction ref="U238" n="0.96" />\n'
                       '</element>\n'
-                      '<material name="mat2" formula="leu" >\n'
+                      '<material name="leu" formula="leu" >\n'
                       '  <D value=19.1" />\n'
                       '  <fraction n="1" ref="mat2_Uranium" />\n'
                       '</material>\n')
