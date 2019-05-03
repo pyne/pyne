@@ -744,10 +744,10 @@ std::string pyne::Material::gdml() {
   }
 
   // write material
-  oss << "<material name=\"" << mat_name_by_num << "\"";
+  oss << "<material name=\"" << mat_name << "\"";
   oss << " formula=\"" << mat_name << "\" >" << std::endl;
   // if density is negative, report to user
-  oss << "  <D value=" << density << "\" />" << std::endl;
+  oss << "  <D value=\"" << density << "\" />" << std::endl;
   for (auto it : element_comp) {
     if (it.second > 0) {
       oss << "  <fraction n=\"" << it.second << "\" ref=\"" << it.first << "\" />";
