@@ -225,5 +225,40 @@ def test_str_to_unicode():
     assert(utils.str_to_unicode(s), exp_answer)
 
 
+def test_str_almost_same(): 
+    """
+    Test utils.str_almost_same.
+    """
+    # exactly the same
+    s1 = u'test1'
+    s2 = u'test1'
+    assert(utils.str_almost_same(s1, s2))
+
+    # exactly the same, can be converted to floats
+    s1 = u'1.2e-3'
+    s2 = u'1.2e-3'
+    assert(utils.str_almost_same(s1, s2))
+    
+    # almost the same, with default rel_tol=1e-9
+    s1 = u'9.5'
+    s2 = u'9.500000000001' 
+    assert(utils.str_almost_same(s1, s2))
+
+    # almost the same, with big rel_tol=1e-6
+    s1 = u'1.2e-3'
+    s2 = u'1.20000005e-3'
+    assert(utils.str_almost_same(s1, s2, rel_tol=1e-6))
+
+    # different str, can be converted too floats
+    s1 = u'1.2e-3'
+    s2 = u'1.20000005e-3'
+    assert(utils.str_almost_same(s1, s2) == False)
+
+    # different str, can not be converted to floats
+    s1 = u'test1'
+    s2 = u'test2'
+    assert(utils.str_almost_same(s1, s2) == False)
+
+
 if __name__ == "__main__":
     nose.runmodule()
