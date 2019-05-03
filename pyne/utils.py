@@ -319,7 +319,7 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
     False : bool
         If the difference the two files are more than dicimal differences.
     """
-    if filecmp(f1, f2):
+    if filecmp.cmp(f1, f2):
         # precheck
         return True
     else:
