@@ -154,8 +154,9 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, std::s
   density = (*mat_data).density;
   atoms_per_molecule = (*mat_data).atoms_per_mol;
   for (int i = 0; i < nuc_size; i++)
-    comp[nuclides[i]] = (double) (*mat_data).comp[i];
-
+    if((double) (*mat_data).comp[i] != 0) {
+      comp[nuclides[i]] = (double) (*mat_data).comp[i];
+    }
   delete[] mat_data;
   //
   // Get metadata from associated dataset, if available

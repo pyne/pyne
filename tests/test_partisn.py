@@ -41,6 +41,7 @@ def test_get_material_lib_with_names():
                                       20030000: 4.4414858514189387e-11}}
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
+
     assert(unique_names == expected_unique_names)
     assert(mat_lib == mat_lib_expected)
 
@@ -57,17 +58,19 @@ def test_get_material_lib_no_names():
 
     mat_lib, unique_names = partisn._get_material_lib(
         hdf5, data_hdf5path, nuc_hdf5path)
-    mat_lib_expected = {'MERCURY1': {802020000: 1.2060451913893048e-02,
+    mat_lib_expected = {'HELIUMNA': {20040000: 2.4975599277878773e-05,
+                                     20030000: 4.4414858514189387e-11},
+                        'MERCURY1': {802020000: 1.2060451913893048e-02,
                                      802000000: 9.423512145483618e-03,
                                      802010000: 5.3498985962366465e-03,
                                      801960000: 6.24414427454006e-05,
                                      802040000: 2.7475463582858147e-03,
                                      801980000: 4.108325935058038e-03,
-                                     801990000: 6.916609590819954e-03},
-                        'HELIUMNA': {20040000: 2.4975599277878773e-05,
-                                     20030000: 4.4414858514189387e-11}}
+                                     801990000: 6.916609590819954e-03}}
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
+    print("unique ",  mat_lib)
+    print("exp_unique ",  mat_lib_expected)
     assert(unique_names == expected_unique_names)
     assert(mat_lib == mat_lib_expected)
 
