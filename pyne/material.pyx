@@ -352,7 +352,6 @@ cdef class _Material:
         ""
         Parameters
         ----------
- 	   int 0 means use "mass" as the frac_type
         """
 
         cdef std_string card
