@@ -477,7 +477,6 @@ def _r2s_test_step2(r2s_run_dir):
 
 
 def test_r2s_script():
-
     # skip test without dagmc
     try:
         from pyne import dagmc
@@ -488,13 +487,33 @@ def test_r2s_script():
         thisdir, "files_test_r2s", "r2s_examples", "r2s_run")
     _r2s_test_step1(r2s_run_dir)
     _r2s_test_step2(r2s_run_dir)
+    
+
+def test_r2s_script_subvoxel():
+    # skip test without dagmc
+    try:
+        from pyne import dagmc
+    except ImportError:
+        raise SkipTest
+
     # test sub-voxel r2s
     r2s_run_dir = os.path.join(
         thisdir, "files_test_r2s", "r2s_examples", "subvoxel_r2s_run")
     _r2s_test_step1(r2s_run_dir)
     _r2s_test_step2(r2s_run_dir)
+
+
+def test_r2s_script_unstructured():
+    # skip test without dagmc
+    try:
+        from pyne import dagmc
+    except ImportError:
+        raise SkipTest
+
     # test unstructured r2s
     r2s_run_dir = os.path.join(
         thisdir, "files_test_r2s", "r2s_examples", "unstructured_r2s_run")
     _r2s_test_step1(r2s_run_dir)
     _r2s_test_step2(r2s_run_dir)
+
+
