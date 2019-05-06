@@ -20,7 +20,7 @@ to build docker containers with a custom set of
       3.6)
 
 - A python script, `make_pyne_docker_image.py`, is also present to simplify the usage of the docker file. It
-  will allows maintainers to build, name and push the docker container into
+ allows maintainers to build, name, and push the docker container into
   DockerHub. The different option are:
     
     - "--py_version=X" with "X" = 2 or 3, specify the python version
