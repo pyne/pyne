@@ -19,7 +19,7 @@ to build docker containers with a custom set of
     - `py_version=X.Y` specify the python version to install (options are 2.7 or
       3.6)
 Note, if using multiple build arguments `--build-args` has to be repeted, i.e. :
-to request DAGM, dependenciesonly with Python 2.7, the docker build arguments will be: 
+to request DAGMC dependencies only with Python 2.7, the docker build arguments will be: 
 `--build-args build_dagmc=YES --build-args build_pyne=NO --build-args py_version=2.7` 
 
 - A python script, `make_pyne_docker_image.py`, is also present to simplify the usage of the docker file. It
