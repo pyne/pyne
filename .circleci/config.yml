@@ -230,7 +230,7 @@ workflows:
       - py3_pymoab_build:
           requires:
             - py3_build
-      - py_pymoab_test:
+      - py3_pymoab_test:
           requires:
             - py3_pymoab_build
 
