@@ -9,7 +9,7 @@ This folder contains:
 
 - A custom Dockerfile: "ubuntu_18.04-dev.dockerfile", allowing the user 
 to build docker containers with a custom set of
-  dependencies required by the CI, the configuration of the Docker containers
+  dependencies required by the CI. The configuration of the Docker containers
   can be specified using the "--build-args" flags. The different flags are:
     
     - "build_moab=YES" add MOAB in the docker container
