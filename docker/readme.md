@@ -30,7 +30,7 @@ This folder contains:
     - "--deps" don't install PyNE only install the selected optional PyNE dependencies (along with the required one)
     - "--push" push the docker container to DockerHub after building it
       (requires right to push on the PyNE DockerHub account)
-    - "-name=" manually set the docker container name (not recommended with used
+    - "--name=" manually set the docker container name (NOT recommended with used
       with the push option)
 
 
