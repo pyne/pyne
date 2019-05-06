@@ -26,7 +26,7 @@ to build docker containers with a custom set of
     - "--py_version=X" with "X" = 2 or 3, specify the python version
     - "--moab" install MOAB in the container
     - "--dagmc" install DAGMC in the container
-    - "--pymoab" install pyMOAB in the container (along with MOAB)
+    - `--pymoab` install pyMOAB in the container (along with MOAB)
     - "--all/-a/-all" install all the optional dependencies (MOAB/pyMOAB/DAGMC)
     - "--deps" don't install PyNE only install the selected optional PyNE dependencies (along with the required one)
     - "--push" push the docker container to DockerHub after building it
