@@ -13,7 +13,7 @@ to build docker containers with a custom set of
   can be specified using the "--build-args" flags. The different flags are:
     
     - `build_moab=YES` add MOAB in the docker container
-    - "build_pymoab=YES" install MOAB with pymoab
+    - `build_pymoab=YES` install MOAB with pymoab
     - "build_dagmc=YES" add DAGMC 
     - "build_pyne=NO" only add the PyNE dependencies to the container
     - "py_version=X.Y" specify the python version to install (option are 2.7 or
