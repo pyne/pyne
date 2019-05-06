@@ -1,6 +1,6 @@
 **Added:**
 
-* Add hdf5-tools as dependency for docker images used in CircleCI.
+* Add hdf5-tools and future as dependency for docker images used in CircleCI.
 
 **Changed:** None
 

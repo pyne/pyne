@@ -54,7 +54,8 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             nbconvert \
             numpy \
             nose \
-            cython
+            cython \
+            future
 
 
 # make starting directory
