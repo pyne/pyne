@@ -45,6 +45,6 @@ convention allowing the automatic CI to use the pushed docker image, One
 docker containers in the PyNE DockerHuB. 
 
 
-One recommends to maintainers to use the python script to generate and push the docker
+We recommend maintainers use the python script to generate and push the docker
 container in order to form container name correctly, and include the proper
 dependency tree.
