@@ -38,6 +38,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             autoconf \
             libtool \
             doxygen \
+            hdf5-tools \
     && apt-get clean -y; \
     if [ "${py_version%.?}" -eq 3 ] ; \
        then \ 
@@ -53,7 +54,8 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             nbconvert \
             numpy \
             nose \
-            cython
+            cython \
+            future
 
 
 # make starting directory
