@@ -39,7 +39,7 @@ working build: pyMOAB requires MOAB to be install (MOAB will be install if
 pyMOAB flag is provided, even if MOAB flag is not), DAGMC requires pyMOAB (and
 MOAB).
 
-The Python script will also also form the container name accordingly to some
+The Python script will also name container according to some
 convention allowing the automatic CI to use the pushed docker image, One
 **STRONGLY** advices against manually set the container name when updating the CI
 docker containers in the PyNE DockerHuB. 
