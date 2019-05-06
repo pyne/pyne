@@ -14,14 +14,14 @@ to build docker containers with a custom set of
     
     - `build_moab=YES` add MOAB in the docker container
     - `build_pymoab=YES` install MOAB with pymoab
-    - "build_dagmc=YES" add DAGMC 
+    - `build_dagmc=YES` add DAGMC 
     - `build_pyne=NO` do not build PyNE, only add the PyNE dependencies to the container
     - `py_version=X.Y` specify the python version to install (options are 2.7 or
       3.6)
 
 - A python script, `make_pyne_docker_image.py`, is also present to simplify the usage of the docker file. It
  allows maintainers to build, name, and push the docker container into
-  DockerHub. The different option are:
+  DockerHub. The available options are:
     
     - `--py_version=X` with "X" = major python version (e.g. 2 or 3)
     - `--moab` install MOAB in the container
