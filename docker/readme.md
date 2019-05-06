@@ -18,7 +18,7 @@ This folder contains:
     - "py_version=X.Y" specify the python version to install (option are 2.7 or
       3.6)
 
-- A python script is also present to simplify the usage of the docker file, it
+- A python script, "make_pyne_docker_image.py", is also present to simplify the usage of the docker file, it
   will allows maintainers to build, name and push the docker container into
   DockerHub. The different option are:
     
