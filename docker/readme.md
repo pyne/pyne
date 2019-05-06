@@ -10,7 +10,7 @@ This folder contains:
 - A custom Dockerfile: "ubuntu_18.04-dev.dockerfile", allowing the user 
 to build docker containers with a custom set of
   dependencies required by the CI. The configuration of the Docker containers
-  can be specified using the "--build-args" flags. The different flags are:
+  can be specified using the `--build-args <flag>` argument. The different flags are:
     
     - `build_moab=YES` add MOAB in the docker container
     - `build_pymoab=YES` install MOAB with pymoab
@@ -18,6 +18,9 @@ to build docker containers with a custom set of
     - `build_pyne=NO` do not build PyNE, only add the PyNE dependencies to the container
     - `py_version=X.Y` specify the python version to install (options are 2.7 or
       3.6)
+Note, if using multiple build arguments `--build-args` has to be repeted, i.e. :
+to request DAGMC and only dependencies with Python 2.7, the docker build arguments will be: 
+`--build-args build_dagmc=YES --build-args build_pyne=NO --build-args=py_version=2.7` 
 
 - A python script, `make_pyne_docker_image.py`, is also present to simplify the usage of the docker file. It
  allows maintainers to build, name, and push the docker container into
