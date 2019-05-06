@@ -31,7 +31,7 @@ to build docker containers with a custom set of
     - `--deps` don't install PyNE, only install the dependencies (both required and selected optional dependencies)
     - `--push` push the docker container to DockerHub after building it
       (requires right to push on the PyNE DockerHub account)
-    - "--name=" manually set the docker container name (NOT recommended with used
+    - `--name=` manually set the docker container name (NOT recommended to be used
       with the push option)
 
 
