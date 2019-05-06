@@ -1,6 +1,5 @@
-***************************
 Docker Script Documentation
-***************************
+===========================
 
 The files in this folder are intended to be mainly used by PyNE maintainers,
 they provide an "easy" mechanism to build and push the different containers
