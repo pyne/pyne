@@ -23,9 +23,9 @@ to build docker containers with a custom set of
  allows maintainers to build, name, and push the docker container into
   DockerHub. The different option are:
     
-    - "--py_version=X" with "X" = 2 or 3, specify the python version
-    - "--moab" install MOAB in the container
-    - "--dagmc" install DAGMC in the container
+    - `--py_version=X` with "X" = major python version (e.g. 2 or 3)
+    - `--moab` install MOAB in the container
+    - `--dagmc` install DAGMC in the container
     - `--pymoab` install pyMOAB in the container (along with MOAB)
     - `--all/-a/-all` install all the optional dependencies (MOAB/pyMOAB/DAGMC)
     - `--deps` don't install PyNE, only install the dependencies (both required and selected optional dependencies)
@@ -35,17 +35,17 @@ to build docker containers with a custom set of
       with the push option)
 
 
-The Python script will check consistency in the required dependency to ensure
-working build: pyMOAB requires MOAB to be install (MOAB will be install if
-pyMOAB flag is provided, even if MOAB flag is not), DAGMC requires pyMOAB (and
+The Python script will check for consistency among the required dependencies to ensure
+working build. For example, pyMOAB requires MOAB to be install (MOAB will be installed if
+the pyMOAB flag is provided, even if the MOAB flag is not), DAGMC requires pyMOAB (and
 MOAB).
 
-The Python script will also name container according to some
-convention allowing the automatic CI to use the pushed docker image, One
-**STRONGLY** advices against manually set the container name when updating the CI
+The Python script will also name the container according to the
+convention, allowing the automatic CI to use the pushed docker image. We
+**STRONGLY** advise against manually setting the container name when updating the CI
 docker containers in the PyNE DockerHuB. 
 
 
 We recommend maintainers use the python script to generate and push the docker
-container in order to form container name correctly, and include the proper
+container in order to form container name correctly and to include the proper
 dependency tree.
