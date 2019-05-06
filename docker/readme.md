@@ -28,7 +28,7 @@ to build docker containers with a custom set of
     - "--dagmc" install DAGMC in the container
     - `--pymoab` install pyMOAB in the container (along with MOAB)
     - `--all/-a/-all` install all the optional dependencies (MOAB/pyMOAB/DAGMC)
-    - "--deps" don't install PyNE only install the selected optional PyNE dependencies (along with the required one)
+    - `--deps` don't install PyNE, only install the dependencies (both required and selected optional dependencies)
     - "--push" push the docker container to DockerHub after building it
       (requires right to push on the PyNE DockerHub account)
     - "--name=" manually set the docker container name (NOT recommended with used
