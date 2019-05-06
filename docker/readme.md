@@ -16,7 +16,7 @@ to build docker containers with a custom set of
     - `build_pymoab=YES` install MOAB with pymoab
     - "build_dagmc=YES" add DAGMC 
     - `build_pyne=NO` do not build PyNE, only add the PyNE dependencies to the container
-    - "py_version=X.Y" specify the python version to install (option are 2.7 or
+    - `py_version=X.Y` specify the python version to install (options are 2.7 or
       3.6)
 
 - A python script, "make_pyne_docker_image.py", is also present to simplify the usage of the docker file, it
