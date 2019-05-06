@@ -12,7 +12,7 @@ to build docker containers with a custom set of
   dependencies required by the CI. The configuration of the Docker containers
   can be specified using the "--build-args" flags. The different flags are:
     
-    - "build_moab=YES" add MOAB in the docker container
+    - `build_moab=YES` add MOAB in the docker container
     - "build_pymoab=YES" install MOAB with pymoab
     - "build_dagmc=YES" add DAGMC 
     - "build_pyne=NO" only add the PyNE dependencies to the container
