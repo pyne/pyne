@@ -136,7 +136,7 @@ jobs:
   py3_dagmc_build:
     executor:
       name: py3_dagmc
-    workding_directory: ~/repo
+    working_directory: ~/repo
     steps:
       - checkout_build:
           flags: "--dagmc $HOME/opt/dagmc"
