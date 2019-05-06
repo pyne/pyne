@@ -31,16 +31,16 @@ function find_cell() result(icl_tmp)
       if (j .eq. 0) then
          ! valid cel set
          icl_tmp = i
+         ! icl now set to be valid cell
          exit
       endif
     enddo
-    ! icl is now set
 
+    ! icl now is -1
     if(icl_tmp .le. 0) then
-      write(*,*) 'Nonsense cell number stopping'
-      stop
+      write(*,*) 'history ', nps, 'at position ', xxx, yyy, zzz, ' no in any cell'
+      write(*,*) 'Skipping and resampling the source particle'
     endif
-    ! icl now set to be valid cell
 
 end function find_cell
 
@@ -75,6 +75,13 @@ subroutine source
    cell_num = -1
    call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_num)
    icl_tmp = find_cell()
+
+   ! update tries and resampling if icl_tmp == -1
+   if (icl_tmp .eq. -1) then
+      tries = tries + 1
+      goto 200
+   endif
+
    if (idum(1) > 2) then
        if (cell_num .ne. ncl(icl_tmp) .and. tries < idum(2)) then
            tries = tries + 1
