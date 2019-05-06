@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+from future.utils import implements_iterator
 from pyne.material import Material, MaterialLibrary, MultiMaterial
 import sys
 import copy
@@ -726,7 +727,7 @@ class Mesh(object):
                 # check for the structured box tag on the instance
                 try:
                     box_tag = self.mesh.tag_get_handle(_BOX_DIMS_TAG_NAME)
-                except types.MB_TAG_NOT_FOUND as e:
+                except Exception as e:
                     print("BOX_DIMS not found on MOAB mesh instance")
                     raise e
 
@@ -1044,6 +1045,12 @@ class Mesh(object):
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "/")
 
+    def __itruediv__(self, other):
+        """Divides the common tags of other to the mesh object.
+        """
+        tags = self.common_ve_tags(other)
+        return self._do_op(other, tags, "/")
+
     def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /.
         """
@@ -1076,12 +1083,12 @@ class Mesh(object):
                                   self.structured_set,
                                   types.MBMAXTYPE,
                                   dim=3)
-        self_tags = self.mesh.tag_get_tags_on_entity(self_it.next())
+        self_tags = self.mesh.tag_get_tags_on_entity(self_it.__next__())
         other_it = MeshSetIterator(other.mesh,
                                    other.structured_set,
                                    types.MBMAXTYPE,
                                    dim=3)
-        other_tags = other.mesh.tag_get_tags_on_entity(other_it.next())
+        other_tags = other.mesh.tag_get_tags_on_entity(other_it.__next__())
         self_tags = set(x.get_name() for x in self_tags)
         other_tags = set(x.get_name() for x in other_tags)
         intersect = self_tags & other_tags
@@ -1518,7 +1525,7 @@ def _structured_step_iter(it, n):
     Return the nth item in the iterator.
     """
     it.step(n)
-    r = it.next()
+    r = it.__next__()
     it.reset()
     return r
 
@@ -1622,7 +1629,7 @@ class MeshSetIterator(object):
         for i in range(0, self.size):
             yield self.entities[i]
 
-    def next(self):
+    def __next__(self):
         if self.pos >= self.size:
             raise StopIteration
         else:

@@ -14,7 +14,7 @@ executors:
             - image: pyne/ubuntu_18.04_py2_pymoab_pyne-deps:latest
     py2_dagmc_pymoab:
         docker:
-            - image: pyne/ubuntu_18.04_py2_dagmc_pymoab_pyne-deps:latest
+            - image: zxkjack123/ubuntu_18.04_py2_dagmc_pymoab_pyne-deps:latest
     py3:
         docker:
             - image: pyne/ubuntu_18.04_py3_pyne-deps:latest

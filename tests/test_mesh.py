@@ -4,6 +4,15 @@ import time
 import shutil
 import warnings
 import itertools
+try:
+    from itertools import izip as zip
+except:
+    pass
+try:
+    from itertools import izip_longest as zip_longest
+except:
+    from itertools import zip_longest
+
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
     assert_is, assert_is_instance, assert_in, assert_not_in, assert_almost_equal, \
@@ -175,7 +184,7 @@ def test_structured_hex_volume():
 
     ijk_all = itertools.product(*([[0, 1]]*3))
 
-    for V, ijk in itertools.izip_longest(sm.structured_iterate_hex_volumes(),
+    for V, ijk in zip_longest(sm.structured_iterate_hex_volumes(),
                                          ijk_all):
         assert_equal(V, sm.structured_hex_volume(*ijk))
 
@@ -396,27 +405,26 @@ def test_bad_iterates():
 
 
 def test_iterate_3d():
-    # use izip_longest in the lockstep iterations below; this will catch any
+    # use zip_longest in the lockstep iterations below; this will catch any
     # situations where one iterator turns out to be longer than expected.
     sm = Mesh(structured=True,
               structured_coords=[range(10, 15), range(21, 25), range(31, 34)])
     I = range(0, 4)
     J = range(0, 3)
     K = range(0, 2)
-    izip = itertools.izip_longest
 
     it = meshset_iterate(sm.mesh, sm.structured_set, types.MBHEX)
 
     # Test the zyx order, which is default; it should be equivalent
     # to the standard pyne.mesh iterator
-    for it_x, sm_x in izip(it, sm.structured_iterate_hex()):
+    for it_x, sm_x in zip_longest(it, sm.structured_iterate_hex()):
         assert_equal(it_x, sm_x)
 
     # testing xyz
 
     all_indices_zyx = itertools.product(I, J, K)
     # Test the xyz order, the default from original mmGridGen
-    for ijk_index, sm_x in izip(all_indices_zyx,
+    for ijk_index, sm_x in zip_longest(all_indices_zyx,
                                 sm.structured_iterate_hex("xyz")):
         assert_equal(sm.structured_get_hex(*ijk_index), sm_x)
 
@@ -432,7 +440,7 @@ def test_iterate_3d():
 
     def test_order(order, *args,  **kw):
         all_indices = itertools.product(*args)
-        for ijk_index, sm_x in izip(_tuple_sort(all_indices, order),
+        for ijk_index, sm_x in zip_longest(_tuple_sort(all_indices, order),
                                     sm.structured_iterate_hex(order, **kw)):
             assert_equal(sm.structured_get_hex(*ijk_index), sm_x)
 
@@ -454,7 +462,7 @@ def test_iterate_2d():
               structured_coords=[range(10, 15), range(21, 25), range(31, 34)])
 
     def test_order(iter1, iter2):
-        for i1, i2 in itertools.izip_longest(iter1, iter2):
+        for i1, i2 in zip_longest(iter1, iter2):
             assert_equal(i1, i2)
 
     test_order(sm.structured_iterate_hex("yx"),
@@ -475,7 +483,7 @@ def test_iterate_1d():
               structured_coords=[range(10, 15), range(21, 25), range(31, 34)])
 
     def test_equal(ijk_list, miter):
-        for ijk, i in itertools.izip_longest(ijk_list, miter):
+        for ijk, i in zip_longest(ijk_list, miter):
             assert_equal(sm.structured_get_hex(*ijk), i)
 
     test_equal([[0, 0, 0], [0, 0, 1]],
@@ -492,31 +500,30 @@ def test_iterate_1d():
 
 def test_vtx_iterator():
     # use vanilla izip as we"ll test using non-equal-length iterators
-    izip = itertools.izip
 
     sm = Mesh(structured=True,
               structured_coords=[range(10, 15), range(21, 25), range(31, 34)])
     it = meshset_iterate(sm.mesh, sm.structured_set, types.MBVERTEX)
 
     # test the default order
-    for (it_x, sm_x) in itertools.izip_longest(it,
+    for (it_x, sm_x) in zip(it,
                                                sm.structured_iterate_vertex("zyx")):
         assert_equal(it_x, sm_x)
 
     # Do the same again, but use an arbitrary kwarg to structured_iterate_vertex
     # to prevent optimization from kicking in
     it.reset()
-    for (it_x, sm_x) in itertools.izip_longest(it,
+    for (it_x, sm_x) in zip(it,
                                                sm.structured_iterate_vertex("zyx", no_opt=True)):
         assert_equal(it_x, sm_x)
 
     it.reset()
-    for (it_x, sm_x) in izip(it,
+    for (it_x, sm_x) in zip(it,
                              sm.structured_iterate_vertex("yx", z=sm.dims[2])):
         assert_equal(it_x, sm_x)
 
     it.reset()
-    for (it_x, sm_x) in izip(it, sm.structured_iterate_vertex("x")):
+    for (it_x, sm_x) in zip(it, sm.structured_iterate_vertex("x")):
         assert_equal(it_x, sm_x)
 
 
@@ -555,7 +562,7 @@ def test_matlib():
     m2 = Mesh(mesh='test_matlib2.h5m')  # MOAB fails to flush
     for i, mat, ve in m2:
         assert_equal(len(mat.comp), len(mats[i].comp))
-        for key in mats[i].iterkeys():
+        for key in mats[i]:
             assert_equal(mat.comp[key], mats[i].comp[key])
         assert_equal(mat.density, mats[i].density)
         assert_equal(m2.idx[i], i)
