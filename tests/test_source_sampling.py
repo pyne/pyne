@@ -262,12 +262,12 @@ def test_analog_single_tet():
                [center, v1, v3, v4],
                [center, v2, v3, v4]]
     tag_names = {"src_tag_name": "src"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), DEFAULT_ANALOG)
+    sampler = Sampler(filename, tag_names, np.array([0., 1.]), DEFAULT_ANALOG)
     num_samples = 5000
     score = 1.0/num_samples
     tally = np.zeros(shape=(4))
     for i in range(num_samples):
-        s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
+        s = sampler.particle_birth([uniform(0., 1.) for x in range(6)])
         assert_equal(s.w, 1.0)
         for i, tet in enumerate(subtets):
             if point_in_tet(tet, [s.x, s.y, s.z]):
@@ -288,11 +288,11 @@ def test_uniform():
     """
     seed(1953)
     m = Mesh(structured=True,
-             structured_coords=[[0, 3, 3.5], [0, 1], [0, 1]],
+             structured_coords=[[0, 3, 3.5], [0., 1.], [0., 1.]],
              mats=None)
     m.src = NativeMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
-    e_bounds = np.array([0, 0.5, 1.0])
+    e_bounds = np.array([0., 0.5, 1.0])
     filename = "sampling_mesh.h5m"
     cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
@@ -353,7 +353,7 @@ def test_single_hex_single_subvoxel_analog():
     which of the 2^4 = 16 regions of phase space the particle is born into.
     """
     seed(1953)
-    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+    m = Mesh(structured=True, structured_coords=[[0., 1.], [0., 1.], [0., 1.]],
              mats=None)
     m.src = NativeMeshTag(1, float)
     m.src[0] = 1.0
@@ -368,7 +368,7 @@ def test_single_hex_single_subvoxel_analog():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), SUBVOXEL_ANALOG)
+    sampler = Sampler(filename, tag_names, np.array([0., 1.]), SUBVOXEL_ANALOG)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -376,7 +376,7 @@ def test_single_hex_single_subvoxel_analog():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
 
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = sampler.particle_birth(np.array([uniform(0., 1.) for x in range(6)]))
         assert_equal(s.w, 1.0)  # analog: all weights must be one
         assert_equal(s.c, 11)  # analog: the cell number
         tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
@@ -398,7 +398,7 @@ def test_single_hex_multiple_subvoxel_analog():
     sub-voxel and the cell_number.
     """
     seed(1953)
-    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+    m = Mesh(structured=True, structured_coords=[[0., 1.], [0., 1.], [0., 1.]],
              mats=None)
     m.src = NativeMeshTag(3, float)
     m.src[:] = np.empty(shape=(1, 3))
@@ -488,7 +488,7 @@ def test_single_hex_subvoxel_uniform():
     of phase space the particle is born into.
     """
     seed(1953)
-    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+    m = Mesh(structured=True, structured_coords=[[0., 1.], [0., 1.], [0., 1.]],
              mats=None)
     m.src = NativeMeshTag(1, float)
     m.src[0] = 1.0
@@ -503,7 +503,7 @@ def test_single_hex_subvoxel_uniform():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), SUBVOXEL_UNIFORM)
+    sampler = Sampler(filename, tag_names, np.array([0., 1.]), SUBVOXEL_UNIFORM)
 
     num_samples = 5000
     score = 1.0/num_samples
@@ -511,7 +511,7 @@ def test_single_hex_subvoxel_uniform():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs, num_divs))
 
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = sampler.particle_birth(np.array([uniform(0., 1.) for x in range(6)]))
         assert_equal(s.w, 1.0)  # analog: all weights must be one
         assert_equal(s.c, 11)  # analog: the cell number
         tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
@@ -533,7 +533,7 @@ def test_single_hex_multiple_subvoxel_uniform():
     of phase space the particle is born into.
     """
     seed(1953)
-    m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]],
+    m = Mesh(structured=True, structured_coords=[[0., 1.], [0., 1.], [0., 1.]],
              mats=None)
     m.src = NativeMeshTag(3, float)
     m.src[:] = np.empty(shape=(1, 3))
@@ -549,13 +549,13 @@ def test_single_hex_multiple_subvoxel_uniform():
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs"}
-    sampler = Sampler(filename, tag_names, np.array([0, 1]), SUBVOXEL_UNIFORM)
+    sampler = Sampler(filename, tag_names, np.array([0., 1.]), SUBVOXEL_UNIFORM)
     num_samples = 5000
     score = 1.0/num_samples
     num_divs = 2
     tally = [0.0] * 3
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        s = sampler.particle_birth(np.array([uniform(0., 1.) for x in range(6)]))
         if s.c == 11:
             tally[0] += score
         if s.c == 12:
@@ -798,7 +798,7 @@ def test_subvoxel_multiple_hex_bias_1():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        vid = s.c/10 - 1
+        vid = s.c//10 - 1
         cid = s.c % 10 - 1
         eid = 0 if s.e < 0.5 else 1
         # check the cell_number
@@ -876,7 +876,7 @@ def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
     exp_wgt[:] = [[[1.0, 1.0], [1.25, 0.83]], [[1.25, 1.25], [0.83, 0.83]]]
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        vid = s.c/10 - 1
+        vid = s.c//10 - 1
         cid = s.c % 10 - 1
         eid = 0 if s.e < 0.5 else 1
         # check the cell_number
@@ -947,7 +947,7 @@ def test_subvoxel_multiple_hex_bias_e_groups():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        vid = s.c/10 - 1
+        vid = s.c//10 - 1
         cid = s.c % 10 - 1
         eid = 0 if s.e < 0.5 else 1
         # check the cell_number
@@ -1172,7 +1172,7 @@ def _cal_pdf_and_biased_pdf(cell_fracs, src_tag, bias_tag=None):
     """
     num_ve, num_sve, max_num_cells = _get_num_ve_sve_and_max_num_cells(
         cell_fracs)
-    num_e_groups = len(src_tag[0])/max_num_cells
+    num_e_groups = len(src_tag[0])//max_num_cells
     pdf = np.empty(shape=(num_ve, max_num_cells, num_e_groups),
                    dtype=np.float64)
     pdf.fill(0.0)
@@ -1311,7 +1311,7 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     exp_c = set(list(current_cell_fracs['cell']))
 
     # calculate eid
-    num_e_groups = len(src_tag[0])/max_num_cells
+    num_e_groups = len(src_tag[0])//max_num_cells
     e_bounds = np.array([i*1.0/num_e_groups for i in range(num_e_groups+1)])
     eid = -1
     for i in range(num_e_groups):
@@ -1425,7 +1425,7 @@ def _get_x_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     """
     num_ve, num_sve, max_num_cells = \
         _get_num_ve_sve_and_max_num_cells(cell_fracs)
-    num_e_groups = len(src_tag[0])/max_num_cells
+    num_e_groups = len(src_tag[0])//max_num_cells
     x_bounds = [v*1.0/(num_ve) for v in range(num_ve+1)]
     x_dis_exp = np.array([0.0]*num_ve)
     if mode in (0, 3):
@@ -1518,7 +1518,7 @@ def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
                          .format(str(mode)))
     num_ve, num_sve, max_num_cells = \
         _get_num_ve_sve_and_max_num_cells(cell_fracs)
-    num_e_groups = len(src_tag[0])/max_num_cells
+    num_e_groups = len(src_tag[0])//max_num_cells
     e_bounds = [e*1.0/(num_e_groups) for e in range(num_e_groups+1)]
     e_dis_exp = np.array([0.0]*num_e_groups)
     if mode in (0, 1, 3, 4) or (mode in (2, 5) and len(bias_tag[0]) == 1):
@@ -1646,7 +1646,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     num_ve, num_sve, max_num_cells = _get_num_ve_sve_and_max_num_cells(
         cell_fracs)
     # set up e_bounds
-    num_e_groups = len(src_tag[0])/max_num_cells
+    num_e_groups = len(src_tag[0])//max_num_cells
     e_bounds = [i*1.0/num_e_groups for i in range(num_e_groups+1)]
     e_bounds = np.array(e_bounds)
     # set up mesh

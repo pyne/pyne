@@ -370,6 +370,8 @@ cdef class Sampler:
         cdef cpp_map[std_string, std_string] cpp_tag_names = \
                 cpp_map[std_string, std_string]()
         for key, value in tag_names.items():
+            key = key.encode('utf-8')
+            value = value.encode('utf-8')
             cpp_tag_names[key] = value
         # convert e_bounds
         cdef cpp_vector[double] e_bounds_proxy = convert_nparray_to_vector(e_bounds)
