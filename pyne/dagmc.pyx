@@ -777,10 +777,10 @@ def discretize_geom(mesh, **kwargs):
        if kwargs:
            raise ValueError("No valid key word arguments for unstructed mesh.")
        cells = cells_at_ve_centers(mesh)
-       results = np.zeros(len(mesh), dtype=[('idx', np.int64),
-                                            ('cell', np.int64),
-                                            ('vol_frac', np.float64),
-                                            ('rel_error', np.float64)])
+       results = np.zeros(len(mesh), dtype=[(u'idx', np.int64),
+                                            (u'cell', np.int64),
+                                            (u'vol_frac', np.float64),
+                                            (u'rel_error', np.float64)])
        for i, cell in enumerate(cells):
            results[i] = (i, cells[i], 1.0, 1.0)
 
@@ -925,10 +925,10 @@ def ray_discretize(mesh, num_rays=10, grid=False):
 
     #  Create structured array
     total_rays = num_rays*3 # three directions
-    results = np.zeros(len_count, dtype=[('idx', np.int64),
-                                         ('cell', np.int64),
-                                         ('vol_frac', np.float64),
-                                         ('rel_error', np.float64)])
+    results = np.zeros(len_count, dtype=[(u'idx', np.int64),
+                                         (u'cell', np.int64),
+                                         (u'vol_frac', np.float64),
+                                         (u'rel_error', np.float64)])
 
     row_count = 0
     total_rays = num_rays*3
