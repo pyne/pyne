@@ -268,7 +268,7 @@ def line_almost_same(l1, l2, rel_tol=1e-9):
     l2 : str
         Line 2
     rel_tol : float
-        Reletive tolerance for float comparison
+        Relative tolerance for float comparison
 
     Returns:
     --------
