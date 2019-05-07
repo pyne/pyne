@@ -4,6 +4,7 @@ import time
 import shutil
 import warnings
 import itertools
+# default zip in python3 behaves as itertools.izip as python2
 try:
     from itertools import izip as zip
 except:
