@@ -328,17 +328,17 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
         if os.path.isfile(f1):
             with open(f1, 'r') as f:
                 lines1 = f.readlines()
-                lines1 = str_to_unicode(lines1)
         else:
-            lines1 = str_to_unicode(f1)
+            lines1 = f1
+        lines1 = str_to_unicode(f1)
         lines1 = lines1.strip().split(u'\n')
 
         if os.path.isfile(f2):
             with open(f2, 'r') as f:
                 lines2 = f.readlines()
-                lines2 = str_to_unicode(lines2)
         else:
-            lines2 = str_to_unicode(f2)
+            lines2 = f2
+        lines2 = str_to_unicode(f2)
         lines2 = lines2.strip().split(u'\n')
 
         # compare two files
