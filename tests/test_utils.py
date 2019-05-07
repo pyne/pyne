@@ -296,7 +296,7 @@ def test_file_almost_same():
 
     # almost the same, with numbers
     f1 = """l1\nl2 data 9.5"""
-    f2 = """l1\nl2 data 9.500000000001"""
+    f2 = """l1\nl2 data 9.5000000000001"""
     assert(utils.file_almost_same(f1, f2))
 
     # different contents
@@ -304,6 +304,50 @@ def test_file_almost_same():
     f2 = """l1\nl2 string2"""
     assert(utils.file_almost_same(f1, f2) == False)
 
+
+def test_block_in_blocks():
+    # exactly in
+    block1 = """test1"""
+    blocks2 = ["""test1""", """test2"""]
+    assert(utils.block_in_blocks(block1, blocks2))
+
+    # with float number tolerable difference
+    block1 = """test data  9.5"""
+    blocks2 = ["""test data 9.500000000001""",
+               """test2"""]
+    assert(utils.block_in_blocks(block1, blocks2))
+
+    # block not in blocks
+    block1 = """test1"""
+    blocks2 = ["""test2""", """test3"""]
+    assert(utils.block_in_blocks(block1, blocks2) == False)
+
+
+def test_file_block_almost_same():
+    # exactly same file
+    f1 = """block1\n\nblock2"""
+    f2 = """block1\n\nblock2"""
+    assert(utils.file_block_almost_same(f1, f2))
+
+    # same block, different sequence
+    f1 = """block1\n\nblock2"""
+    f2 = """block2\n\nblock1"""
+    assert(utils.file_block_almost_same(f1, f2))
+
+    # almost same block, same sequence
+    f1 = """test data 9.5\n\nblock2"""
+    f2 = """test data 9.500000000001\n\nblock2"""
+    assert(utils.file_block_almost_same(f1, f2))
+
+    # almost same block, different sequence
+    f1 = """test data 9.5\n\nblock2"""
+    f2 = """block2\n\ntest data 9.500000000001"""
+    assert(utils.file_block_almost_same(f1, f2))
+
+    # different block
+    f1 = """block1\n\nblock2"""
+    f2 = """block1\n\nblock3"""
+    assert(utils.file_block_almost_same(f1, f2) == False)
 
 if __name__ == "__main__":
     nose.runmodule()

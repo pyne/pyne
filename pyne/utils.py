@@ -355,3 +355,89 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
     # no difference found
     return True
 
+
+def block_in_blocks(block1, blocks2, rel_tol=1e-9):
+    """
+    Test whether a block of content in another file (represented as blocks2).
+
+    Parameters:
+    -----------
+    block1 : str
+        A block of file1.
+    blocks2 : list of str
+        Blocks of file2.
+    rel_tol : float
+        Tolerance for float comparision.
+
+    Returns:
+    --------
+    True : bool
+        If block1 in blocks2.
+    False : bool
+        If block1 not in blocks2.
+    """
+
+    for i in range(len(blocks2)):
+        if file_almost_same(block1, blocks2[i]):
+            return True
+    return False
+
+def file_block_almost_same(f1, f2, rel_tol=1e-9):
+    """
+    Some files are seperated into different blocks without specific sequence.
+    Such as the materials definition file: 'alara_matlib', the sequence of
+    the materils doesn't matter.
+    It is useful to compare whether their blocks are almost the same.
+
+    Parameters:
+    -----------
+    f1 : str
+        Filename of file 1 or lines
+    f2 : str
+        Filename of file 2 or lines
+    rel_tol : float
+        Reletive tolerance for float numbers
+
+    Returns:
+    True : bool
+        If two file are exactly the same, or almost the same with only dicimal
+        differences, or almost same as blocks.
+    False : bool
+        They have different blocks.
+    """
+    if os.path.isfile(f1) and os.path.isfile(f2):
+        if file_almost_same(f1, f2):
+            # precheck
+            return True
+    else:
+        # convert to different blocks and compare each block
+        # read lines of f1 and f2, convert to unicode
+        if os.path.isfile(f1):
+            with open(f1, 'r') as f:
+                lines1 = f.readlines()
+                lines1 = str_to_unicode(lines1)
+        else:
+            lines1 = str_to_unicode(f1)
+        blocks1 = lines1.strip().split(u'\n\n')
+
+        if os.path.isfile(f2):
+            with open(f2, 'r') as f:
+                lines2 = f.readlines()
+                lines2 = str_to_unicode(lines2)
+        else:
+            lines2 = str_to_unicode(f2)
+        blocks2 = lines2.strip().split(u'\n\n')
+
+        # compare two files
+        # check length of lines
+        if len(blocks1) != len(blocks2):
+            return False
+        # check content of blocks
+        for i in range(len(blocks1)):
+            if block_in_blocks(blocks1[i], blocks2, rel_tol):
+                pass
+            else:
+                return False
+
+    # no difference found
+    return True
