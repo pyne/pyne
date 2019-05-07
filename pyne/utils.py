@@ -314,7 +314,7 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
 
     Returns:
     True : bool
-        If two file are exactly the same, or almost the same with only dicimal
+        If two file are exactly the same, or almost the same with only decimal
         differences.
     False : bool
         If the difference the two files are more than dicimal differences.
