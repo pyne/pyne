@@ -12,7 +12,7 @@ from shutil import copyfile
 from pyne.mcnp import Meshtal
 from pyne.material import Material
 from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
-from pyne.utils import QAWarning, file_almost_same
+from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
@@ -391,14 +391,15 @@ def _r2s_test_step1(r2s_run_dir):
     step1_file = os.path.join(r2s_run_dir, "r2s_step1.h5m")
 
     exp_alara_inp = os.path.join(r2s_run_dir, "exp_alara_inp")
-    exp_alara_matlib2 = os.path.join(r2s_run_dir, "exp_alara_matlib2")
-    exp_alara_matlib3 = os.path.join(r2s_run_dir, "exp_alara_matlib3")
+    exp_alara_matlib = os.path.join(r2s_run_dir, "exp_alara_matlib")
+    #exp_alara_matlib3 = os.path.join(r2s_run_dir, "exp_alara_matlib3")
     exp_alara_fluxin = os.path.join(r2s_run_dir, "exp_alara_fluxin")
 
     # compare the output file of step1
     f1 = filecmp.cmp(alara_inp, exp_alara_inp)
-    f2 = filecmp.cmp(alara_matlib, exp_alara_matlib2) \
-            or filecmp.cmp(alara_matlib, exp_alara_matlib3)
+    #f2 = filecmp.cmp(alara_matlib, exp_alara_matlib2) \
+    #        or filecmp.cmp(alara_matlib, exp_alara_matlib3)
+    f2 = file_block_almost_same(alara_matlib, exp_alara_matlib)
     f3 = filecmp.cmp(alara_fluxin, exp_alara_fluxin)
 
     # remove test output files
