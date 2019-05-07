@@ -869,6 +869,8 @@ class Mesh(object):
             tagnames.update(t.get_name()
                             for t in self.mesh.tag_get_tags_on_entity(ve))
         for name in tagnames:
+            if name == 'TALLY_TAG':
+                import pdb; pdb.set_trace()
             setattr(self, name, NativeMeshTag(mesh=self, name=name))
 
         if mats is not None:
