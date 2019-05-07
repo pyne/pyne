@@ -317,7 +317,7 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
         If two file are exactly the same, or almost the same with only decimal
         differences.
     False : bool
-        If the difference the two files are more than dicimal differences.
+        If the strings of the two files are different and/or their numbers differences are greater than the tolerance
     """
     if os.path.isfile(f1) and os.path.isfile(f2):
         if filecmp.cmp(f1, f2):
