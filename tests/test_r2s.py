@@ -73,31 +73,10 @@ def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"
 
     m = Mesh(structured=True, mesh=output_mesh, mats=output_mesh)
 
-    m_out = [m.n_flux[:].tolist(), m.n_flux_err[:].tolist(),
+    out = [m.n_flux[:].tolist(), m.n_flux_err[:].tolist(),
              m.n_flux_total[:].tolist(), m.n_flux_err_total[:].tolist(),
              [x.comp.items() for y, x, z in m], [x.density for y, x, z in m]]
 
-    os.remove(alara_inp)
-    os.remove(alara_matlib)
-    os.remove(fluxin)
-    os.remove(output_mesh)
-
-    return [m_out, f1, f2, f3]
-
-
-def test_irradiation_setup_structured():
-    p = multiprocessing.Pool()
-    r = p.apply_async(irradiation_setup_structured)
-    p.close()
-    p.join()
-    results = r.get()
-
-    # unpack return values
-    f1 = results[1]
-    f2 = results[2]
-    f3 = results[3]
-
-    out = results[0]
     n_flux = out[0]
     n_flux_err = out[1]
     n_flux_total = out[2]
@@ -132,6 +111,26 @@ def test_irradiation_setup_structured():
         assert_almost_equal(nft, tot_fluxes[i])
         assert_almost_equal(nfte, tot_errs[i])
         i += 1
+
+    os.remove(alara_inp)
+    os.remove(alara_matlib)
+    os.remove(fluxin)
+    os.remove(output_mesh)
+
+    return [f1, f2, f3]
+
+
+def test_irradiation_setup_structured():
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_structured)
+    p.close()
+    p.join()
+    results = r.get()
+
+    # unpack return values
+    f1 = results[0]
+    f2 = results[1]
+    f3 = results[2]
 
     # test that files match
     assert(f1 is True)
@@ -225,34 +224,11 @@ def irradiation_setup_unstructured(flux_tag="n_flux"):
 
     m = Mesh(structured=True, mesh=output_mesh, mats=output_mesh)
 
-    m_out = [m.n_flux[:].tolist(), m.n_flux_err[:].tolist(),
+    out = [m.n_flux[:].tolist(), m.n_flux_err[:].tolist(),
              m.n_flux_total[:].tolist(), m.n_flux_err_total[:].tolist(),
              [x.comp.items() for y, x, z in m], [x.density for y, x, z in m]]
 
-    os.remove(meshtal_mesh_file)
-    os.remove(alara_inp)
-    os.remove(alara_matlib)
-    os.remove(fluxin)
-    os.remove(output_mesh)
 
-    return [m_out, f1, f2, f3]
-
-
-def test_irradiation_setup_unstructured():
-
-    # make new file with non default tag
-    p = multiprocessing.Pool()
-    r = p.apply_async(irradiation_setup_unstructured)
-    p.close()
-    p.join()
-    results = r.get()
-
-    # unpack return values
-    f1 = results[1]
-    f2 = results[2]
-    f3 = results[3]
-
-    out = results[0]
     n_flux = out[0]
     n_flux_err = out[1]
     n_flux_total = out[2]
@@ -287,6 +263,29 @@ def test_irradiation_setup_unstructured():
         assert_almost_equal(nfte, tot_errs[i])
         i += 1
 
+    os.remove(meshtal_mesh_file)
+    os.remove(alara_inp)
+    os.remove(alara_matlib)
+    os.remove(fluxin)
+    os.remove(output_mesh)
+
+    return [f1, f2, f3]
+
+
+def test_irradiation_setup_unstructured():
+
+    # make new file with non default tag
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_unstructured)
+    p.close()
+    p.join()
+    results = r.get()
+
+    # unpack return values
+    f1 = results[0]
+    f2 = results[1]
+    f3 = results[2]
+ 
     # test that files match
     assert(f1 is True)
     assert(f2 is True)
@@ -356,40 +355,22 @@ def test_total_photon_source_intensity_subvoxel():
     assert_equal(intensity, expected_intensity)
 
 
-def test_irradiation_setup_unstructured_nondef_tag():
-    p = multiprocessing.Pool()
-    r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
-    p.close()
-    p.join()
-    results = r.get()
-
-    # unpack return values
-    f1 = results[1]
-    f2 = results[2]
-    f3 = results[3]
-
-    out = results[0]
-    n_flux = out[0]
-    n_flux_total = out[2]
-    densities = out[5]
-
-    comps = np.zeros(shape=(len(out[4])), dtype=dict)
-    for i, comp in enumerate(out[4]):
-        comps[i] = {}
-        for nucid in comp:
-            comps[i][nucid[0]] = nucid[1]
-
-    # test r2s step 1 output mesh
-    fluxes = [[6.93088E-07, 1.04838E-06], [6.36368E-07, 9.78475E-07],
-              [5.16309E-07, 9.86586E-07], [6.36887E-07, 9.29879E-07]]
-    tot_fluxes = [1.74147E-06, 1.61484E-06, 1.50290E-06, 1.56677E-06]
-
-    i = 0
-    for nf, nft in izip(n_flux, n_flux_total):
-        assert_array_equal(nf, fluxes[i])
-        i += 1
-
-
+#def test_irradiation_setup_unstructured_nondef_tag():
+#    p = multiprocessing.Pool()
+#    r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
+#    p.close()
+#    p.join()
+#    results = r.get()
+#
+#    # unpack return values
+#    f1 = results[0]
+#    f2 = results[1]
+#    f3 = results[2]
+#
+#    assert(f1)
+#    assert(f2)
+#    assert(f3)
+#    
 def _r2s_test_step1(r2s_run_dir):
     os.chdir(thisdir)
     # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
@@ -421,7 +402,7 @@ def _r2s_test_step1(r2s_run_dir):
     # remove test output files
     os.remove(alara_inp)
     os.remove(alara_fluxin)
-    os.remove(alara_matlib)
+    #os.remove(alara_matlib)
     os.remove(blank_mesh)
     os.remove(step1_file)
     os.remove(dst)
@@ -503,17 +484,17 @@ def test_r2s_script_subvoxel():
     _r2s_test_step2(r2s_run_dir)
 
 
-def test_r2s_script_unstructured():
-    # skip test without dagmc
-    try:
-        from pyne import dagmc
-    except ImportError:
-        raise SkipTest
-
-    # test unstructured r2s
-    #r2s_run_dir = os.path.join(
-    #    thisdir, "files_test_r2s", "r2s_examples", "unstructured_r2s_run")
-    #_r2s_test_step1(r2s_run_dir)
-    #_r2s_test_step2(r2s_run_dir)
-
-
+#def test_r2s_script_unstructured():
+#    # skip test without dagmc
+#    try:
+#        from pyne import dagmc
+#    except ImportError:
+#        raise SkipTest
+#
+#    # test unstructured r2s
+#    #r2s_run_dir = os.path.join(
+#    #    thisdir, "files_test_r2s", "r2s_examples", "unstructured_r2s_run")
+#    #_r2s_test_step1(r2s_run_dir)
+#    #_r2s_test_step2(r2s_run_dir)
+#
+#
