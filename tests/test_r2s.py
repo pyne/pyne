@@ -392,13 +392,10 @@ def _r2s_test_step1(r2s_run_dir):
 
     exp_alara_inp = os.path.join(r2s_run_dir, "exp_alara_inp")
     exp_alara_matlib = os.path.join(r2s_run_dir, "exp_alara_matlib")
-    #exp_alara_matlib3 = os.path.join(r2s_run_dir, "exp_alara_matlib3")
     exp_alara_fluxin = os.path.join(r2s_run_dir, "exp_alara_fluxin")
 
     # compare the output file of step1
     f1 = filecmp.cmp(alara_inp, exp_alara_inp)
-    #f2 = filecmp.cmp(alara_matlib, exp_alara_matlib2) \
-    #        or filecmp.cmp(alara_matlib, exp_alara_matlib3)
     f2 = file_block_almost_same(alara_matlib, exp_alara_matlib)
     f3 = filecmp.cmp(alara_fluxin, exp_alara_fluxin)
 
