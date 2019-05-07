@@ -310,7 +310,7 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
     f2 : str
         Filename of file 2 or lines
     rel_tol : float
-        Reletive tolerance for float numbers
+        Relative tolerance for float numbers
 
     Returns:
     True : bool
