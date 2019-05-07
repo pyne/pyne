@@ -855,7 +855,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
         cell changing fastest.
     """
     mesh._structured_check()
-    divs = [mesh.structured_get_divisions(x) for x in 'xyz']
+    divs = [mesh.structured_get_divisions(x) for x in str('xyz')]
     num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)
     #  Stores a running tally of sums of x and sums of x^2 for each ve
     mesh_sums = [{} for x in range(0, num_ves)]

@@ -1307,9 +1307,9 @@ class Mesh(object):
         """
         self._structured_check()
 
-        # sometimes the dim is the ascii of the 'x', 'y', 'z'
-        if isinstance(dim, int):
-            dim = chr(dim)
+        ## sometimes the dim is the ascii of the 'x', 'y', 'z'
+        #if isinstance(dim, int):
+        #    dim = chr(dim)
         if len(dim) == 1 and dim in "xyz":
             idx = "xyz".find(dim)
             return [self.mesh.get_coords(v)[idx] for v in self.structured_iterate_vertex(dim)]
