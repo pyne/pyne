@@ -258,7 +258,7 @@ def str_almost_same(s1, s2, rel_tol=1e-9):
 def line_almost_same(l1, l2, rel_tol=1e-9):
     """
     This function is used to compare two lines (read from files). If they are
-    the same, or almost the same (with only silight different on float
+    the same, or almost the same (with only slight difference on float
     numbers), return True. Ohterwise, return False.
 
     Parameters:
