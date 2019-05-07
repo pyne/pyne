@@ -392,7 +392,7 @@ def _r2s_test_step1(r2s_run_dir):
 
     exp_alara_inp = os.path.join(r2s_run_dir, "exp_alara_inp")
     exp_alara_matlib2 = os.path.join(r2s_run_dir, "exp_alara_matlib2")
-    exp_alara_matlib2 = os.path.join(r2s_run_dir, "exp_alara_matlib3")
+    exp_alara_matlib3 = os.path.join(r2s_run_dir, "exp_alara_matlib3")
     exp_alara_fluxin = os.path.join(r2s_run_dir, "exp_alara_fluxin")
 
     # compare the output file of step1
