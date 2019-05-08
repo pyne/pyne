@@ -198,6 +198,26 @@ pyne::Material pyne::MaterialLibrary::get_material(
   }
 }
 
+pyne::Material pyne::MaterialLibrary::get_material(int num) {
+  if (num < name_order.size()) {
+    return material_library[name_order[num]];
+  } else {
+    return pyne::Material();
+  }
+}
+
+void pyne::MaterialLibrary::replace(int num, pyne::Material mat) {
+
+  if (!mat.metadata.isMember("name")) {
+    mat.metadata["name"] = name_order[num];
+  } else if (mat.metadata["name"] != name_order[num]) {
+    material_library.erase( name_order[num]);
+    name_order[num] = mat.metadata["name"].asString();
+  }
+  material_library[name_order[num]] = name_order[num];
+}
+
+
 void pyne::MaterialLibrary::write_hdf5(char* fname, char* dpath, char* npath){
   std::string filename(fname);
   std::string datapath(dpath);

@@ -26,7 +26,7 @@ cdef extern from "material_library.h" namespace "pyne":
         unordered_map[std_string, cpp_material.Material] material_library
         std_set[std_string] material_name
         std_set[int] nuclides
-
+        vector[std_string] name_order
 
         # Methods
         void from_hdf5(char*) except +
@@ -48,8 +48,11 @@ cdef extern from "material_library.h" namespace "pyne":
         void del_material(cpp_material.Material) except +
         void del_material(std_string) except +
         void merge(std_string) except +
-        
+        void replace(int, cpp_material.Material) except +
+
         cpp_material.Material get_material(std_string) except +
+        cpp_material.Material get_material(int) except +
+        
         unordered_map[std_string, cpp_material.Material] get_mat_library() except + 
         std_set[std_string] get_matlist() except +
         std_set[int] get_nuclist() except +

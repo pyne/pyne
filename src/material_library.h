@@ -29,9 +29,6 @@ class MaterialLibrary {
   matname_set matlist;
   nuc_set nuclist;
 
-  std::vector<std::string> name_order;
-  std::unordered_map<int, std::string> order_name;
-
 
  private:
   /**
@@ -154,6 +151,12 @@ class MaterialLibrary {
   */
   void add_material(pyne::Material mat, const std::string& mat_name);
   /**
+   * \brief replace a material to the library
+   * \param num position of the material to replace
+   * \param mat material to add
+  */
+  void replace(int num, pyne::Material mat);
+  /**
    * \brief remove a material of the Library
    * \param mat material to remove
   */
@@ -169,6 +172,11 @@ class MaterialLibrary {
   */
   pyne::Material get_material(const std::string& mat_name);
   /**
+   * \brief Get a material of the Library by name
+   * \param num number of the material to return
+  */
+  pyne::Material get_material(int num);
+  /**
    * \brief Get the material Library
    * \return std::map<std::string, pyne::MaterialLibrary>
   */
@@ -183,6 +191,8 @@ class MaterialLibrary {
    * \return std::set<int>
   */
   pyne::nuc_set get_nuclist() { return nuclist; }
+
+  std::vector<std::string> name_order;
 
 };  // end MaterialLibrary class header
 }  // end of pyne namespace

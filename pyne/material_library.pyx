@@ -152,12 +152,17 @@ cdef class _MaterialLibrary:
                             "{0}".format(type(mat)))
         self._inst.del_material(c_matname)
 
-    def get_material(self, matname):
+    def get_material(self, key):
         # Get the correct cpp_material
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
-        c_matname = matname
-        c_mat = self._inst.get_material(c_matname);
+        
+        if isinstance(key, basestring):
+            c_matname = key
+            c_mat = self._inst.get_material(c_matname)
+        elif isinstance(key, int):
+            cm_mat = self._inst.get_material(<int>key)
+        
         # build a PyNE Material object form the cpp_material
         py_mat = material.Material(free_mat = False)
         (< material._Material > py_mat).mat_pointer = new cpp_material.Material(c_mat.comp, c_mat.mass, c_mat.density, c_mat.atoms_per_molecule, c_mat.metadata)        
@@ -233,18 +238,24 @@ cdef class _MaterialLibrary:
         self._inst.write_json(filename)
 
     def __setitem__(self, key, value):
-        if isinstance(key, int):
-            key = str(key)
-
-        value.metadata["name"] = key.encode('utf-8')
-        value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
-        self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
+        cdef cpp_pair[std_string, cpp_material.Material] item
+        if not isinstance(key, int):
+            value.metadata["name"] = key.encode('utf-8')
+            value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+            self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
+        else:
+            if 'name' not in value.metadata:
+                value.metadata["name"] = self._inst.name_order[key]
+            else:
+                value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+                self._inst.replace(key, (<material._Material> value_proxy).mat_pointer[0]) 
 
     def __getitem__(self, key):
         if isinstance(key, basestring):
             key = key.encode('UTF-8')
         elif isinstance(key, int):
             key = str(key).encode('UTF-8')
+
         py_mat = self.get_material(key)
         return py_mat
     
