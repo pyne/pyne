@@ -49,7 +49,7 @@ else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
   # handle the QUIETLY and REQUIRED arguments and set MOAB_FOUND to TRUE
   # if all listed variables are TRUE
   find_package_handle_standard_args(MOAB  DEFAULT_MSG
-                                    MOAB_LIBRARY MOAB_INCLUDE_DIR)
+      MOAB_LIBRARY MOAB_INCLUDE_DIRS)
   if (MOAB_FOUND)
     message(STATUS "MOAB header files: ${MOAB_INCLUDE_DIR}")
     message(STATUS "MOAB library: ${MOAB_LIBRARY}")
