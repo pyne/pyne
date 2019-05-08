@@ -1586,7 +1586,7 @@ def test_matlib_hdf5():
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     water.metadata["name"] = "Aqua sera."
-    lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
+    lib = {"nucvec": nucvec,"aqua": water, "leu": Material(leu)}
     wmatlib = MaterialLibrary(lib)
     wmatlib.write_hdf5(filename)
     rmatlib = MaterialLibrary()
