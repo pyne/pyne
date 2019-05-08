@@ -258,7 +258,7 @@ def str_almost_same(s1, s2, rel_tol=1e-9):
 def line_almost_same(l1, l2, rel_tol=1e-9):
     """
     This function is used to compare two lines (read from files). If they are
-    the same, or almost the same (with only silight different on float
+    the same, or almost the same (with only slight difference on float
     numbers), return True. Ohterwise, return False.
 
     Parameters:
@@ -268,7 +268,7 @@ def line_almost_same(l1, l2, rel_tol=1e-9):
     l2 : str
         Line 2
     rel_tol : float
-        Reletive tolerance for float comparison
+        Relative tolerance for float comparison
 
     Returns:
     --------
@@ -310,14 +310,14 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
     f2 : str
         Filename of file 2 or lines
     rel_tol : float
-        Reletive tolerance for float numbers
+        Relative tolerance for float numbers
 
     Returns:
     True : bool
         If two file are exactly the same, or almost the same with only decimal
         differences.
     False : bool
-        If the difference the two files are more than dicimal differences.
+        If the strings of the two files are different and/or their numbers differences are greater than the tolerance
     """
     if os.path.isfile(f1) and os.path.isfile(f2):
         if filecmp.cmp(f1, f2):
