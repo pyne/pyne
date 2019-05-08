@@ -85,8 +85,10 @@ void pyne::MaterialLibrary::load_json(Json::Value json) {
 
 Json::Value pyne::MaterialLibrary::dump_json() {
   Json::Value json = Json::Value(Json::objectValue);
-  for( auto mat : material_library)
-    json[mat.first] = (mat.second).dump_json();
+
+  for (auto name : name_order) {
+    json[name] = material_library[name].dump_json();
+  }
   return json;
 }
 
@@ -127,7 +129,6 @@ void pyne::MaterialLibrary::write_json(const std::string& filename) {
 }
 
 void pyne::MaterialLibrary::add_material(pyne::Material mat) {
-  
   // if exists, get the material name from metadata make one instead
   std::string mat_name;
   std::pair<pyne::matname_set::iterator, bool> mat_insert;
