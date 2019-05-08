@@ -777,6 +777,7 @@ def discretize_geom(mesh, **kwargs):
        if kwargs:
            raise ValueError("No valid key word arguments for unstructed mesh.")
        cells = cells_at_ve_centers(mesh)
+       # Use str for python2/3 compatibility
        results = np.zeros(len(mesh), dtype=[(str('idx'), np.int64),
                                             (str('cell'), np.int64),
                                             (str('vol_frac'), np.float64),
@@ -855,6 +856,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
         cell changing fastest.
     """
     mesh._structured_check()
+    # add the str here to prevent the 'xyz' be transfered to ascii
     divs = [mesh.structured_get_divisions(x) for x in str('xyz')]
     num_ves = (len(divs[0])-1)*(len(divs[1])-1)*(len(divs[2])-1)
     #  Stores a running tally of sums of x and sums of x^2 for each ve
@@ -925,6 +927,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
 
     #  Create structured array
     total_rays = num_rays*3 # three directions
+    # Use str for python2/3 compatibility
     results = np.zeros(len_count, dtype=[(str('idx'), np.int64),
                                          (str('cell'), np.int64),
                                          (str('vol_frac'), np.float64),

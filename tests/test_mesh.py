@@ -9,6 +9,7 @@ try:
     from itertools import izip as zip
 except:
     pass
+# izip_longest in python3 was renamed to zip_longest in python3
 try:
     from itertools import izip_longest as zip_longest
 except:
