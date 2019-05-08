@@ -1,7 +1,7 @@
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
 from libcpp.string cimport string as std_string
-from libcpp.map cimport map as cpp_map
+from libcpp.unordered_map cimport unordered_map as cpp_umap
 from libcpp.set cimport set as cpp_set
 from cython import pointer
 
@@ -20,5 +20,5 @@ cdef class _MaterialLibrary:
     cdef cpp_set[std_string] get_matlist(self)
     cdef cpp_set[int] get_nuclist(self)
 
-cdef cpp_map[std_string, matp] dict_to_map_str_matp(dict)
-cdef dict map_to_dict_str_matp(cpp_map[std_string, cpp_material.Material *])
+cdef cpp_umap[std_string, cpp_material.Material] dict_to_map_str_matp(dict)
+cdef dict map_to_dict_str_matp(cpp_umap[std_string, cpp_material.Material])

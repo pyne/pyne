@@ -7,7 +7,6 @@
 
 // Empty Constructor
 pyne::MaterialLibrary::MaterialLibrary(){
-  last_mat_number = 0;
 };
 
 // Default constructor
@@ -21,7 +20,6 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
     throw std::runtime_error("The datapath, " + datapath + ", in " + file +
                              " is empty.");
   }
-  last_mat_number = 0;
   // load materials
   from_hdf5(file, datapath);
 };
@@ -53,40 +51,15 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   int file_num_materials = get_length_of_table(filename, datapath);
   int library_length = material_library.size();
   for (int i = 0; i < file_num_materials; i++) {
-    pyne::Material* mat = new pyne::Material();  // from file
+    pyne::Material mat = pyne::Material();  // from file
     // read new mat
     if( nucpath == ""){
-      mat->from_hdf5(filename, datapath, i, protocol);
+      mat.from_hdf5(filename, datapath, i, protocol);
     }  
     else {
-       mat->from_hdf5(filename, datapath, nucpath, i, protocol);
+      mat.from_hdf5(filename, datapath, nucpath, i, protocol);
     }
-    // if exists, get the material name from metadata make one instead
-    std::string mat_name;
-    std::pair<pyne::matname_set::iterator, bool> mat_insert;
-    if (mat->metadata.isMember("name")) {
-      mat_name = mat->metadata["name"].asString();
-      mat_insert = matlist.insert(mat->metadata["name"].asString());
-    } else {
-      // form a mat name as 'mX'
-      int mat_number = library_length + i;
-      mat_name = "m" + std::to_string(mat_number);
-      mat->metadata["name"] = mat_name;
-      mat_insert = matlist.insert(mat->metadata["name"].asString());
-
-      // if 'mX' name is already in the Library rename the material
-      while (!mat_insert.second) {
-        mat_number += file_num_materials;
-        mat_name = "m" + std::to_string(library_length + i);
-        mat->metadata["name"] = mat_name;
-        mat_insert = matlist.insert(mat->metadata["name"].asString());
-      }
-    }
-    if (mat_insert.second) {
-      append_to_nuclist(*mat);
-      material_library[mat->metadata["name"].asString()] = mat;
-      material_library[mat->metadata["name"].asString()]->metadata["mat_number"] = last_mat_number++;
-    }
+    (*this).add_material(mat);
   }
 }
 
@@ -103,21 +76,17 @@ void pyne::MaterialLibrary::load_json(Json::Value json) {
   Json::Value::Members keys = json.getMemberNames();
   Json::Value::Members::const_iterator ikey = keys.begin();
   Json::Value::Members::const_iterator ikey_end = keys.end();
-  mat_map mat_lib_tmp; // required to maintain order in mat number
   for (; ikey != ikey_end; ++ikey) {
     pyne::Material mat = pyne::Material();
     mat.load_json(json[*ikey]);
-    mat_lib_tmp[mat.metadata["name"].asString()] = new Material(mat);
-  }
-  for (auto mat_element : mat_lib_tmp) {
-    (*this).add_material(*mat_element.second);
+    (*this).add_material(Material(mat));
   }
 }
 
 Json::Value pyne::MaterialLibrary::dump_json() {
   Json::Value json = Json::Value(Json::objectValue);
   for( auto mat : material_library)
-    json[mat.first] = (mat.second)->dump_json();
+    json[mat.first] = (mat.second).dump_json();
   return json;
 }
 
@@ -158,14 +127,34 @@ void pyne::MaterialLibrary::write_json(const std::string& filename) {
 }
 
 void pyne::MaterialLibrary::add_material(pyne::Material mat) {
-  std::string mat_name = mat.metadata["name"].asString();
-  pyne::Material* mat_p = new pyne::Material(mat);
-  auto inst = material_library.insert(std::make_pair(mat_name, mat_p));
+  
+  // if exists, get the material name from metadata make one instead
+  std::string mat_name;
+  std::pair<pyne::matname_set::iterator, bool> mat_insert;
+  if (mat.metadata.isMember("name")) {
+    mat_name = mat.metadata["name"].asString();
+    mat_insert = matlist.insert(mat.metadata["name"].asString());
+  } else {
+    // form a mat name as 'mX'
+    int mat_number = name_order.size();
+    mat_name = "m" + std::to_string(mat_number);
+    mat.metadata["name"] = mat_name;
+    mat_insert = matlist.insert(mat.metadata["name"].asString());
 
-  if (inst.second) {
-    append_to_nuclist(*mat_p);
-    matlist.insert(mat_p->metadata["name"].asString());
-    material_library[mat_p->metadata["name"].asString()]->metadata["mat_number"] = last_mat_number++;
+    // if 'mX' name is already in the Library rename the material
+    while (!mat_insert.second) {
+      mat_number += name_order.size();
+      mat_name = "m" + std::to_string(mat_number);
+      mat.metadata["name"] = mat_name;
+      mat_insert = matlist.insert(mat.metadata["name"].asString());
+    }
+  }
+  if (mat_insert.second) {
+    append_to_nuclist(mat);
+    material_library[mat_name] = mat;
+    material_library[mat_name].metadata["mat_number"] = int(name_order.size());
+    
+    name_order.push_back(mat_name);
   }
 }
 
@@ -196,7 +185,7 @@ pyne::Material pyne::MaterialLibrary::get_material(
     const std::string& mat_name) {
   auto it = material_library.find(mat_name);
   if (it != material_library.end()) {
-    return *(it->second);
+    return it->second;
   } else {
     return pyne::Material();
   }
@@ -266,7 +255,7 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
 
   // Write the Materials in the file
   for (auto element : material_library_tmp) {
-    (element.second)->write_hdf5(filename, datapath, nucpath);
+    element.second.write_hdf5(filename, datapath, nucpath);
   }
 }
 

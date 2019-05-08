@@ -6,7 +6,7 @@ from libcpp.utility cimport pair as cpp_pair
 from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string as std_string
 from libc.stdlib cimport malloc, free
-from libcpp.map cimport map as cpp_map
+from libcpp.unordered_map cimport unordered_map as cpp_umap
 from libcpp.vector cimport vector as cpp_vector
 from libcpp cimport bool as cpp_bool
 # from cython.operator cimport reference as ref
@@ -283,30 +283,30 @@ class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
         
 # <string, Material *>
 
-cdef cpp_map[std_string, matp] dict_to_map_str_matp(dict pydict):
+cdef cpp_umap[std_string, cpp_material.Material] dict_to_map_str_matp(dict pydict):
     cdef material._Material pymat
     cdef cpp_material.Material * cpp_matp
-    cdef cpp_map[std_string, matp] cppmap = cpp_map[std_string, matp]()
-    cdef cpp_pair[std_string, matp] item
+    cdef cpp_umap[std_string, cpp_material.Material ] cppmap = cpp_umap[std_string, cpp_material.Material]()
+    cdef cpp_pair[std_string, cpp_material.Material] item
 
     for key, value in pydict.items():
         pymat = value
         cpp_matp = pymat.mat_pointer
         #cppmap[std_string(key)] = cpp_matp
-        item = cpp_pair[std_string, matp](std_string(< char * > key), cpp_matp)
+        item = cpp_pair[std_string, cpp_material.Material](std_string(< char * > key), deref(cpp_matp))
         cppmap.insert(item)
 
     return cppmap
 
 
-cdef dict map_to_dict_str_matp(cpp_map[std_string, matp] cppmap):
+cdef dict map_to_dict_str_matp(cpp_umap[std_string, cpp_material.Material] cppmap):
     pydict = {}
     cdef material._Material pymat
-    cdef cpp_map[std_string, matp].iterator mapiter = cppmap.begin()
+    cdef cpp_umap[std_string, cpp_material.Material].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
         pymat = material.Material()
-        pymat.mat_pointer[0] = deref(deref(mapiter).second)
+        pymat.mat_pointer[0] = deref(mapiter).second
         pydict[< char * > deref(mapiter).first.c_str()] = pymat
         inc(mapiter)
 

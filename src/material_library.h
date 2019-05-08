@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <string>
 #include <vector>
@@ -18,7 +18,7 @@
 
 namespace pyne {
 
-typedef std::map<std::string, pyne::Material*> mat_map;
+typedef std::unordered_map<std::string, pyne::Material> mat_map;
 typedef std::set<std::string> matname_set;
 typedef std::set<int> nuc_set;
 
@@ -28,7 +28,10 @@ class MaterialLibrary {
   mat_map material_library;  // material library
   matname_set matlist;
   nuc_set nuclist;
-  int last_mat_number;
+
+  std::vector<std::string> name_order;
+  std::unordered_map<int, std::string> order_name;
+
 
  private:
   /**
