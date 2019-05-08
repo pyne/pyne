@@ -180,6 +180,12 @@ void pyne::MaterialLibrary::del_material(pyne::Material mat) {
 void pyne::MaterialLibrary::del_material(const std::string& mat_name) {
   material_library.erase(mat_name);
   matlist.erase(mat_name);
+  for ( auto name = name_order.begin(); name != name_order.end(); name++) {
+    if (*name == mat_name) {
+      name_order.erase(name);
+      return;
+    }
+  }
 }
 
 pyne::Material pyne::MaterialLibrary::get_material(
