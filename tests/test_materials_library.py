@@ -80,7 +80,6 @@ def test_against_nuc_data():
         metadata={"name": "Plutonium Bromide"}).expand_elements()
 
     obs_gasoline = obs_matslib["Gasoline"]
-   
     # remove empty elements
     assert_equal( { (x,val) for x,val in set(obs_gasoline.comp.items()) if val > 0 }, 
             set(gasoline.comp.items()))
