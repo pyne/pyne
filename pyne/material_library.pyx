@@ -244,7 +244,10 @@ cdef class _MaterialLibrary:
             self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
         else:
             if 'name' not in value.metadata:
-                value.metadata["name"] = self._inst.name_order[key]
+                if (self._inst.name_order.size() > key): 
+                    value.metadata["name"] = self._inst.name_order[key]
+                else:
+                    value.metadata["name"] = "_" + str(key)
             else:
                 value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
                 self._inst.replace(key, (<material._Material> value_proxy).mat_pointer[0]) 
