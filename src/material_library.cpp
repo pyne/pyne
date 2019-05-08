@@ -254,8 +254,8 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   H5Tclose(db);
 
   // Write the Materials in the file
-  for (auto element : material_library_tmp) {
-    element.second.write_hdf5(filename, datapath, nucpath);
+  for (auto name : name_order) {
+    material_library[name].write_hdf5(filename, datapath, nucpath);
   }
 }
 
