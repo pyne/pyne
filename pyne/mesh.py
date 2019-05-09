@@ -832,13 +832,16 @@ class Mesh(object):
                 if '/materials' in h5f:
                     mats_in_mesh_file = True
             if mats_in_mesh_file:
+                print("I should be there")
                 mats = MaterialLibrary(mesh)
 
         if mats is None:
             pass
         elif len(mats) == 0 and not mats_in_mesh_file:
+            print("here")
             mats = MaterialLibrary()
         elif not isinstance(mats, MaterialLibrary):
+            print ("or here")
             mats = MaterialLibrary(mats)
 
         self.mats = mats
