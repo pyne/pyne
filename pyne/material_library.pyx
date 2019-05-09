@@ -84,6 +84,7 @@ cdef class _MaterialLibrary:
                     print("shoudl be here now")
                     mat = lib[key]
                     self.__setitem__(key, material.ensure_material(mat))
+                    print(key," ", self.get_material(key))
             elif isinstance(lib, unicode):
                 c_filename = lib.encode('utf-8')
                 c_datapath = datapath.encode('utf-8')
