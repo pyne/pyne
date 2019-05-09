@@ -156,6 +156,7 @@ cdef class _MaterialLibrary:
         # Get the correct cpp_material
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
+        print("in get material", type(key), " " , key)
         if isinstance(key, int):
             print("in INT!")
             c_mat = self._inst.get_material_by_indice(key)
