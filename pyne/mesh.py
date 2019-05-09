@@ -864,6 +864,7 @@ class Mesh(object):
         # check for and populate materials
         if mats is not None:
             for i in range(len(ves)):
+                print(i, " ", mats[i])
                 if i not in mats:
                     mats[i] = Material()
         self._len = len(ves)
