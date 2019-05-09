@@ -241,16 +241,21 @@ cdef class _MaterialLibrary:
         if not isinstance(key, int):
             value.metadata["name"] = key.encode('utf-8')
             value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
-            self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
+            self._inst.add_material( deref((<material._Material>
+                value_proxy).mat_pointer))
         else:
             print ("key", key)
             if 'name' not in value.metadata:
                 if (self._inst.name_order.size() > key): 
                     value.metadata["name"] = self._inst.name_order[key]
+                    value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+                    self._inst.replace(key, deref((<material._Material>
+                        value_proxy).mat_pointer)) 
                 else:
                     value.metadata["name"] = "_" + str(key)
-            value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
-            self._inst.replace(key, (<material._Material> value_proxy).mat_pointer[0]) 
+                    value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+                    self._inst.add_material( deref((<material._Material>
+                        value_proxy).mat_pointer))
 
     def __getitem__(self, key):
         if isinstance(key, basestring):
