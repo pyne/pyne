@@ -157,6 +157,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
     
     name_order.push_back(mat_name);
   }
+  std::cout << "add " << material_library[mat_name].mcnp() <<std::endl;
 }
 
 void pyne::MaterialLibrary::add_material(pyne::Material mat, char* mat_name) {
@@ -199,7 +200,9 @@ pyne::Material pyne::MaterialLibrary::get_material(
 }
 
 pyne::Material pyne::MaterialLibrary::get_material(int num) {
+  std::cout << "in cpp " << i << endl; 
   if (num < name_order.size()) {
+    std::cout << "get cpp " << material_library[name_order[num]].mcnp() << std::endl;
     return material_library[name_order[num]];
   } else {
     return pyne::Material();
