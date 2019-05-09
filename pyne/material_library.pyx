@@ -256,6 +256,7 @@ cdef class _MaterialLibrary:
                     value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
                     self._inst.add_material( deref((<material._Material>
                         value_proxy).mat_pointer))
+        print(value)
 
     def __getitem__(self, key):
         if isinstance(key, basestring):
