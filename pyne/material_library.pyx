@@ -81,9 +81,7 @@ cdef class _MaterialLibrary:
                 self._inst = new cpp_material_library.MaterialLibrary()
                 list_ = []
                 for key in sorted(lib.keys()):
-                    print("shoudl be here now")
                     mat = lib[key]
-                    print("before ", mat)
                     self.__setitem__(key, material.ensure_material(mat))
                     print(key," ", self.get_material(key))
             elif isinstance(lib, unicode):
@@ -240,6 +238,7 @@ cdef class _MaterialLibrary:
         self._inst.write_json(filename)
 
     def __setitem__(self, key, value):
+        print("inset ", value)
         cdef cpp_pair[std_string, cpp_material.Material] item
         if not isinstance(key, int):
             value.metadata["name"] = key.encode('utf-8')
@@ -257,6 +256,7 @@ cdef class _MaterialLibrary:
                 else:
                     value.metadata["name"] = "_" + str(key)
                     value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+                    print("value proxy ", value_proxy)
                     self._inst.add_material( deref((<material._Material>
                         value_proxy).mat_pointer))
         print(value)
