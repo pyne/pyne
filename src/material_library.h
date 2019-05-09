@@ -175,7 +175,7 @@ class MaterialLibrary {
    * \brief Get a material of the Library by name
    * \param num number of the material to return
   */
-  pyne::Material get_material(int num);
+  pyne::Material get_material_by_indice(int num);
   /**
    * \brief Get the material Library
    * \return std::map<std::string, pyne::MaterialLibrary>

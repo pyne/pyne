@@ -51,7 +51,7 @@ cdef extern from "material_library.h" namespace "pyne":
         void replace(int, cpp_material.Material) except +
 
         cpp_material.Material get_material(std_string) except +
-        cpp_material.Material get_material(int) except +
+        cpp_material.Material get_material_by_indice( int ) except +
         
         unordered_map[std_string, cpp_material.Material] get_mat_library() except + 
         std_set[std_string] get_matlist() except +
