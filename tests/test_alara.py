@@ -462,7 +462,8 @@ def test_mesh_to_geom():
 
     with open(matlib) as f:
         expected = f.readlines()
-
+    print("Expected ", expected)
+    print("Written ", written)
     assert_equal(written, expected)
 
     if os.path.isfile(matlib):
