@@ -249,8 +249,7 @@ cdef class _MaterialLibrary:
                     value.metadata["name"] = self._inst.name_order[key]
                 else:
                     value.metadata["name"] = "_" + str(key)
-            else:
-                value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+            value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
             self._inst.replace(key, (<material._Material> value_proxy).mat_pointer[0]) 
 
     def __getitem__(self, key):
