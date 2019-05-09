@@ -2281,7 +2281,7 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
     mat_cards = ""
     idx = mesh.iter_structured_idx('xyz')
     for i in idx:
-        mesh.mats[i].metadata['mat_number'] = int(i + 1)
-        mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
+        mesh.mats[int(i)].metadata['mat_number'] = int(i + 1)
+        mat_cards += mesh.mats[int(i)].mcnp(frac_type=frac_type)
 
     return mat_cards
