@@ -83,6 +83,7 @@ cdef class _MaterialLibrary:
                 for key in sorted(lib.keys()):
                     print("shoudl be here now")
                     mat = lib[key]
+                    print("before ", mat)
                     self.__setitem__(key, material.ensure_material(mat))
                     print(key," ", self.get_material(key))
             elif isinstance(lib, unicode):
