@@ -200,7 +200,7 @@ pyne::Material pyne::MaterialLibrary::get_material(
 }
 
 pyne::Material pyne::MaterialLibrary::get_material(int num) {
-  std::cout << "in cpp " << i << endl; 
+  std::cout << "in cpp " << num << endl; 
   if (num < name_order.size()) {
     std::cout << "get cpp " << material_library[name_order[num]].mcnp() << std::endl;
     return material_library[name_order[num]];
