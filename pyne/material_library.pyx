@@ -158,6 +158,7 @@ cdef class _MaterialLibrary:
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
         if isinstance(key, int):
+            print("I am here again")
             cm_mat = self._inst.get_material(<int>key)
         else:
             c_matname = key
