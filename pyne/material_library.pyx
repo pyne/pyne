@@ -83,7 +83,7 @@ cdef class _MaterialLibrary:
                 for key in sorted(lib.keys()):
                     mat = lib[key]
                     self.__setitem__(key, material.ensure_material(mat))
-                    print(key," ", self.get_material(key))
+                    print(key," ", "value proxy ", self.get_material(key))
             elif isinstance(lib, unicode):
                 c_filename = lib.encode('utf-8')
                 c_datapath = datapath.encode('utf-8')
@@ -259,7 +259,6 @@ cdef class _MaterialLibrary:
                     print("value proxy ", value_proxy)
                     self._inst.add_material( deref((<material._Material>
                         value_proxy).mat_pointer))
-        print(value)
 
     def __getitem__(self, key):
         if isinstance(key, basestring):
