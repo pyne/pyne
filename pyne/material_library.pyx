@@ -262,8 +262,6 @@ cdef class _MaterialLibrary:
     def __getitem__(self, key):
         if isinstance(key, basestring):
             key = key.encode('UTF-8')
-        elif isinstance(key, int):
-            key = str(key).encode('UTF-8')
 
         py_mat = self.get_material(key)
         return py_mat
