@@ -120,43 +120,43 @@ def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"
     return [f1, f2, f3]
 
 
-#def test_irradiation_setup_structured():
-#    p = multiprocessing.Pool()
-#    r = p.apply_async(irradiation_setup_structured)
-#    p.close()
-#    p.join()
-#    results = r.get()
-#
-#    # unpack return values
-#    f1 = results[0]
-#    f2 = results[1]
-#    f3 = results[2]
-#
-#    # test that files match
-#    assert(f1 is True)
-#    assert(f2 is True)
-#    assert(f3 is True)
-#
-#
-#def test_photon_sampling_setup_structured():
-#
-#    phtn_src = os.path.join(thisdir, "files_test_r2s", "phtn_src")
-#    coords = [[0, 1, 2], [0, 1, 2], [0, 1]]
-#    m = Mesh(structured=True, structured_coords=coords)
-#    tags = {(10010000, "1 h"): "tag1", ("TOTAL", "shutdown"): "tag2"}
-#    photon_sampling_setup(m, phtn_src, tags)
-#
-#    exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
-#    exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
-#
-#    m.tag1 = NativeMeshTag(2, float)
-#    m.tag2 = NativeMeshTag(2, float)
-#
-#    for i, mat, ve in m:
-#        assert_array_equal(m.tag1[i], exp_tag1[i])
-#        assert_array_equal(m.tag2[i], exp_tag2[i])
-#
-#
+def test_irradiation_setup_structured():
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_structured)
+    p.close()
+    p.join()
+    results = r.get()
+
+    # unpack return values
+    f1 = results[0]
+    f2 = results[1]
+    f3 = results[2]
+
+    # test that files match
+    assert(f1 is True)
+    assert(f2 is True)
+    assert(f3 is True)
+
+
+def test_photon_sampling_setup_structured():
+
+    phtn_src = os.path.join(thisdir, "files_test_r2s", "phtn_src")
+    coords = [[0, 1, 2], [0, 1, 2], [0, 1]]
+    m = Mesh(structured=True, structured_coords=coords)
+    tags = {(10010000, "1 h"): "tag1", ("TOTAL", "shutdown"): "tag2"}
+    photon_sampling_setup(m, phtn_src, tags)
+
+    exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
+    exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
+
+    m.tag1 = NativeMeshTag(2, float)
+    m.tag2 = NativeMeshTag(2, float)
+
+    for i, mat, ve in m:
+        assert_array_equal(m.tag1[i], exp_tag1[i])
+        assert_array_equal(m.tag2[i], exp_tag2[i])
+
+
 def irradiation_setup_unstructured(flux_tag="n_flux"):
     meshtal_filename = "meshtal_2x2x1"
     meshtal_file = os.path.join(thisdir, "files_test_r2s", meshtal_filename)
@@ -272,219 +272,215 @@ def irradiation_setup_unstructured(flux_tag="n_flux"):
     return [f1, f2, f3]
 
 
-#def test_irradiation_setup_unstructured():
-#
-#    # make new file with non default tag
-#    p = multiprocessing.Pool()
-#    r = p.apply_async(irradiation_setup_unstructured)
-#    p.close()
-#    p.join()
-#    results = r.get()
-#
-#    # unpack return values
-#    f1 = results[0]
-#    f2 = results[1]
-#    f3 = results[2]
-# 
-#    # test that files match
-#    assert(f1 is True)
-#    assert(f2 is True)
-#    assert(f3 is True)
-#
-#
-#def test_photon_sampling_setup_unstructured():
-#
-#    phtn_src = os.path.join(thisdir, "files_test_r2s", "phtn_src")
-#    coords = [[0, 1, 2], [0, 1, 2], [0, 1]]
-#    m = Mesh(structured=True, structured_coords=coords)
-#    m.structured = False
-#    tags = {(10010000, "1 h"): "tag1", ("TOTAL", "shutdown"): "tag2"}
-#    photon_sampling_setup(m, phtn_src, tags)
-#
-#    exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
-#    exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
-#
-#    m.tag1 = NativeMeshTag(2, float)
-#    m.tag2 = NativeMeshTag(2, float)
-#
-#    for i, mat, ve in m:
-#        assert_array_equal(m.tag1[i], exp_tag1[i])
-#        assert_array_equal(m.tag2[i], exp_tag2[i])
-#
-#
-#def test_total_photon_source_intensity():
-#
-#    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
-#    m.source_density = NativeMeshTag(2, float)
-#    m.source_density[:] = [[1., 2.], [3., 4.], [5., 6.], [7., 8.]]
-#
-#    intensity = total_photon_source_intensity(m, "source_density")
-#    assert_equal(intensity, 58)
-#
-#
-#def test_total_photon_source_intensity_subvoxel():
-#    # In the calculation of the total photon source intensities under subvoxel
-#    # mode, the volume fractions of each subvoxel should be multiplied
-#
-#    # Set up 4 voxels with the volume of: 1, 2, 1, 2
-#    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
-#    # 4 voxels, each voxel contains two subvoxels -> 8 subvoxels
-#    # The volume fraction of each subvoxel is 0.5
-#    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
-#                                    ('cell', np.int64),
-#                                    ('vol_frac', np.float64),
-#                                    ('rel_error', np.float64)])
-#    cell_fracs[:] = [(0, 11, 0.5, 0.0), (0, 12, 0.5, 0.0),
-#                     (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
-#                     (2, 13, 0.5, 0.0), (2, 11, 0.5, 0.0),
-#                     (3, 12, 0.5, 0.0), (3, 13, 0.5, 0.0)]
-#    m.tag_cell_fracs(cell_fracs)
-#    # Set up the source density with energy group number of 2
-#    m.source_density = NativeMeshTag(4, float)
-#    m.source_density[:] = [[0.0, 0.0, 1.0, 1.0],
-#                           [2.0, 2.0, 3.0, 3.0],
-#                           [4.0, 4.0, 5.0, 5.0],
-#                           [6.0, 6.0, 7.0, 7.0]]
-#    intensity = total_photon_source_intensity(m, "source_density", True)
-#    # expected intensity: each line represents a mesh voxel
-#    # for each subvoxel: voxel_vol * cell_fracs * photon_intensity
-#    expected_intensity = 1 * 0.5 * (0.0 + 0.0) + 1 * 0.5 * (1.0 + 1.0)
-#    expected_intensity += 2 * 0.5 * (2.0 + 2.0) + 2 * 0.5 * (3.0 + 3.0)
-#    expected_intensity += 1 * 0.5 * (4.0 + 4.0) + 1 * 0.5 * (5.0 + 5.0)
-#    expected_intensity += 2 * 0.5 * (6.0 + 6.0) + 2 * 0.5 * (7.0 + 7.0)
-#    assert_equal(intensity, expected_intensity)
+def test_irradiation_setup_unstructured():
+
+    # make new file with non default tag
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_unstructured)
+    p.close()
+    p.join()
+    results = r.get()
+
+    # unpack return values
+    f1 = results[0]
+    f2 = results[1]
+    f3 = results[2]
+ 
+    # test that files match
+    assert(f1 is True)
+    assert(f2 is True)
+    assert(f3 is True)
+
+
+def test_photon_sampling_setup_unstructured():
+
+    phtn_src = os.path.join(thisdir, "files_test_r2s", "phtn_src")
+    coords = [[0, 1, 2], [0, 1, 2], [0, 1]]
+    m = Mesh(structured=True, structured_coords=coords)
+    m.structured = False
+    tags = {(10010000, "1 h"): "tag1", ("TOTAL", "shutdown"): "tag2"}
+    photon_sampling_setup(m, phtn_src, tags)
+
+    exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
+    exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
+
+    m.tag1 = NativeMeshTag(2, float)
+    m.tag2 = NativeMeshTag(2, float)
+
+    for i, mat, ve in m:
+        assert_array_equal(m.tag1[i], exp_tag1[i])
+        assert_array_equal(m.tag2[i], exp_tag2[i])
+
+
+def test_total_photon_source_intensity():
+
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
+    m.source_density = NativeMeshTag(2, float)
+    m.source_density[:] = [[1., 2.], [3., 4.], [5., 6.], [7., 8.]]
+
+    intensity = total_photon_source_intensity(m, "source_density")
+    assert_equal(intensity, 58)
+
+
+def test_total_photon_source_intensity_subvoxel():
+    # In the calculation of the total photon source intensities under subvoxel
+    # mode, the volume fractions of each subvoxel should be multiplied
+
+    # Set up 4 voxels with the volume of: 1, 2, 1, 2
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
+    # 4 voxels, each voxel contains two subvoxels -> 8 subvoxels
+    # The volume fraction of each subvoxel is 0.5
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.5, 0.0), (0, 12, 0.5, 0.0),
+                     (1, 11, 0.5, 0.0), (1, 12, 0.5, 0.0),
+                     (2, 13, 0.5, 0.0), (2, 11, 0.5, 0.0),
+                     (3, 12, 0.5, 0.0), (3, 13, 0.5, 0.0)]
+    m.tag_cell_fracs(cell_fracs)
+    # Set up the source density with energy group number of 2
+    m.source_density = NativeMeshTag(4, float)
+    m.source_density[:] = [[0.0, 0.0, 1.0, 1.0],
+                           [2.0, 2.0, 3.0, 3.0],
+                           [4.0, 4.0, 5.0, 5.0],
+                           [6.0, 6.0, 7.0, 7.0]]
+    intensity = total_photon_source_intensity(m, "source_density", True)
+    # expected intensity: each line represents a mesh voxel
+    # for each subvoxel: voxel_vol * cell_fracs * photon_intensity
+    expected_intensity = 1 * 0.5 * (0.0 + 0.0) + 1 * 0.5 * (1.0 + 1.0)
+    expected_intensity += 2 * 0.5 * (2.0 + 2.0) + 2 * 0.5 * (3.0 + 3.0)
+    expected_intensity += 1 * 0.5 * (4.0 + 4.0) + 1 * 0.5 * (5.0 + 5.0)
+    expected_intensity += 2 * 0.5 * (6.0 + 6.0) + 2 * 0.5 * (7.0 + 7.0)
+    assert_equal(intensity, expected_intensity)
 
 
 def test_irradiation_setup_unstructured_nondef_tag():
-    #p = multiprocessing.Pool()
-    ##r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
-    #p.close()
-    #p.join()
-    #results = r.get()
-    results = irradiation_setup_unstructured("TALLY_TAG")
+    p = multiprocessing.Pool()
+    r = p.apply_async(irradiation_setup_unstructured, ("TALLY_TAG",))
+    p.close()
+    p.join()
+    results = r.get()
 
     # unpack return values
     f1 = results[0]
     f2 = results[1]
     f3 = results[2]
 
-    assert(f1)
-    assert(f2)
-    assert(f3)
     
-#def _r2s_test_step1(r2s_run_dir):
-#    os.chdir(thisdir)
-#    # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
-#    os.chdir("..")
-#    folderpath = os.getcwd()
-#    dst = os.path.join(r2s_run_dir, "r2s.py")
-#    copyfile(os.path.join(folderpath, "scripts", "r2s.py"), dst)
-#
-#    # run r2s step1
-#    os.chdir(r2s_run_dir)
-#    os.system('python r2s.py step1')
-#
-#    # output files of r2s step1
-#    alara_inp = os.path.join(r2s_run_dir, "alara_inp")
-#    alara_matlib = os.path.join(r2s_run_dir, "alara_matlib")
-#    alara_fluxin = os.path.join(r2s_run_dir, "alara_fluxin")
-#    blank_mesh = os.path.join(r2s_run_dir, "blank_mesh.h5m")
-#    step1_file = os.path.join(r2s_run_dir, "r2s_step1.h5m")
-#
-#    exp_alara_inp = os.path.join(r2s_run_dir, "exp_alara_inp")
-#    exp_alara_matlib = os.path.join(r2s_run_dir, "exp_alara_matlib")
-#    exp_alara_fluxin = os.path.join(r2s_run_dir, "exp_alara_fluxin")
-#
-#    # compare the output file of step1
-#    f1 = filecmp.cmp(alara_inp, exp_alara_inp)
-#    f2 = file_block_almost_same(alara_matlib, exp_alara_matlib)
-#    f3 = filecmp.cmp(alara_fluxin, exp_alara_fluxin)
-#
-#    # remove test output files
-#    os.remove(alara_inp)
-#    os.remove(alara_fluxin)
-#    os.remove(alara_matlib)
-#    os.remove(blank_mesh)
-#    os.remove(step1_file)
-#    os.remove(dst)
-#
-#    assert_equal(f1, True)
-#    assert_equal(f2, True)
-#    assert_equal(f3, True)
-#
-#
-#def _r2s_test_step2(r2s_run_dir):
-#    os.chdir(thisdir)
-#    # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
-#    os.chdir("..")
-#    folderpath = os.getcwd()
-#    dst = os.path.join(r2s_run_dir, "r2s.py")
-#    copyfile(os.path.join(folderpath, "scripts", "r2s.py"), dst)
-#
-#    # output files of r2s step1
-#    alara_inp = os.path.join(r2s_run_dir, "alara_inp")
-#    copyfile(os.path.join(r2s_run_dir, "exp_alara_inp"), alara_inp)
-#    blank_mesh = os.path.join(r2s_run_dir, "blank_mesh.h5m")
-#    copyfile(os.path.join(r2s_run_dir, "exp_blank_mesh.h5m"), blank_mesh)
-#
-#    # run r2s step2
-#    os.chdir(r2s_run_dir)
-#    os.system('python r2s.py step2')
-#
-#    # output files of r2s step2
-#    e_bounds = os.path.join(r2s_run_dir, "e_bounds")
-#    p_src = os.path.join(r2s_run_dir, "phtn_src.h5")
-#    t_p_src = os.path.join(r2s_run_dir, "total_photon_source_intensities.txt")
-#    src_c1 = os.path.join(r2s_run_dir, "source_1.h5m")
-#
-#    exp_e_bounds = os.path.join(r2s_run_dir, "exp_e_bounds")
-#    exp_t_p_src = os.path.join(
-#        r2s_run_dir, "exp_total_photon_source_intensities.txt")
-#
-#    # compare the results
-#    f4 = filecmp.cmp(e_bounds, exp_e_bounds)
-#    f5 = file_almost_same(t_p_src, exp_t_p_src)
-#
-#    # remove test generated files
-#    os.remove(blank_mesh)
-#    os.remove(alara_inp)
-#    os.remove(e_bounds)
-#    os.remove(p_src)
-#    os.remove(t_p_src)
-#    os.remove(src_c1)
-#    os.remove(dst)
-#
-#    assert_equal(f4, True)
-#    assert_equal(f5, True)
-#
-#
-#def test_r2s_script():
-#    # skip test without dagmc
-#    try:
-#        from pyne import dagmc
-#    except ImportError:
-#        raise SkipTest
-#
-#    r2s_run_dir = os.path.join(
-#        thisdir, "files_test_r2s", "r2s_examples", "r2s_run")
-#    _r2s_test_step1(r2s_run_dir)
-#    _r2s_test_step2(r2s_run_dir)
-#    
-#
-#def test_r2s_script_subvoxel():
-#    # skip test without dagmc
-#    try:
-#        from pyne import dagmc
-#    except ImportError:
-#        raise SkipTest
-#
-#    # test sub-voxel r2s
-#    r2s_run_dir = os.path.join(
-#        thisdir, "files_test_r2s", "r2s_examples", "subvoxel_r2s_run")
-#    _r2s_test_step1(r2s_run_dir)
-#    _r2s_test_step2(r2s_run_dir)
-#
-#
+def _r2s_test_step1(r2s_run_dir):
+    os.chdir(thisdir)
+    # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
+    os.chdir("..")
+    folderpath = os.getcwd()
+    dst = os.path.join(r2s_run_dir, "r2s.py")
+    copyfile(os.path.join(folderpath, "scripts", "r2s.py"), dst)
+
+    # run r2s step1
+    os.chdir(r2s_run_dir)
+    os.system('python r2s.py step1')
+
+    # output files of r2s step1
+    alara_inp = os.path.join(r2s_run_dir, "alara_inp")
+    alara_matlib = os.path.join(r2s_run_dir, "alara_matlib")
+    alara_fluxin = os.path.join(r2s_run_dir, "alara_fluxin")
+    blank_mesh = os.path.join(r2s_run_dir, "blank_mesh.h5m")
+    step1_file = os.path.join(r2s_run_dir, "r2s_step1.h5m")
+
+    exp_alara_inp = os.path.join(r2s_run_dir, "exp_alara_inp")
+    exp_alara_matlib = os.path.join(r2s_run_dir, "exp_alara_matlib")
+    exp_alara_fluxin = os.path.join(r2s_run_dir, "exp_alara_fluxin")
+
+    # compare the output file of step1
+    f1 = filecmp.cmp(alara_inp, exp_alara_inp)
+    f2 = file_block_almost_same(alara_matlib, exp_alara_matlib)
+    f3 = filecmp.cmp(alara_fluxin, exp_alara_fluxin)
+
+    # remove test output files
+    os.remove(alara_inp)
+    os.remove(alara_fluxin)
+    os.remove(alara_matlib)
+    os.remove(blank_mesh)
+    os.remove(step1_file)
+    os.remove(dst)
+
+    assert_equal(f1, True)
+    assert_equal(f2, True)
+    assert_equal(f3, True)
+
+
+def _r2s_test_step2(r2s_run_dir):
+    os.chdir(thisdir)
+    # copy ../scripts/r2s.py to r2s_run_dir/r2s.py
+    os.chdir("..")
+    folderpath = os.getcwd()
+    dst = os.path.join(r2s_run_dir, "r2s.py")
+    copyfile(os.path.join(folderpath, "scripts", "r2s.py"), dst)
+
+    # output files of r2s step1
+    alara_inp = os.path.join(r2s_run_dir, "alara_inp")
+    copyfile(os.path.join(r2s_run_dir, "exp_alara_inp"), alara_inp)
+    blank_mesh = os.path.join(r2s_run_dir, "blank_mesh.h5m")
+    copyfile(os.path.join(r2s_run_dir, "exp_blank_mesh.h5m"), blank_mesh)
+
+    # run r2s step2
+    os.chdir(r2s_run_dir)
+    os.system('python r2s.py step2')
+
+    # output files of r2s step2
+    e_bounds = os.path.join(r2s_run_dir, "e_bounds")
+    p_src = os.path.join(r2s_run_dir, "phtn_src.h5")
+    t_p_src = os.path.join(r2s_run_dir, "total_photon_source_intensities.txt")
+    src_c1 = os.path.join(r2s_run_dir, "source_1.h5m")
+
+    exp_e_bounds = os.path.join(r2s_run_dir, "exp_e_bounds")
+    exp_t_p_src = os.path.join(
+        r2s_run_dir, "exp_total_photon_source_intensities.txt")
+
+    # compare the results
+    f4 = filecmp.cmp(e_bounds, exp_e_bounds)
+    f5 = file_almost_same(t_p_src, exp_t_p_src)
+
+    # remove test generated files
+    os.remove(blank_mesh)
+    os.remove(alara_inp)
+    os.remove(e_bounds)
+    os.remove(p_src)
+    os.remove(t_p_src)
+    os.remove(src_c1)
+    os.remove(dst)
+
+    assert_equal(f4, True)
+    assert_equal(f5, True)
+
+
+def test_r2s_script():
+    # skip test without dagmc
+    try:
+        from pyne import dagmc
+    except ImportError:
+        raise SkipTest
+
+    r2s_run_dir = os.path.join(
+        thisdir, "files_test_r2s", "r2s_examples", "r2s_run")
+    _r2s_test_step1(r2s_run_dir)
+    _r2s_test_step2(r2s_run_dir)
+    
+
+def test_r2s_script_subvoxel():
+    # skip test without dagmc
+    try:
+        from pyne import dagmc
+    except ImportError:
+        raise SkipTest
+
+    # test sub-voxel r2s
+    r2s_run_dir = os.path.join(
+        thisdir, "files_test_r2s", "r2s_examples", "subvoxel_r2s_run")
+    _r2s_test_step1(r2s_run_dir)
+    _r2s_test_step2(r2s_run_dir)
+
+
 #def test_r2s_script_unstructured():
 #    # skip test without dagmc
 #    try:
