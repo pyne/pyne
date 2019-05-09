@@ -69,8 +69,6 @@ def test_get_material_lib_no_names():
                                      801990000: 6.916609590819954e-03}}
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
-    print("unique ",  mat_lib)
-    print("exp_unique ",  mat_lib_expected)
     assert(unique_names == expected_unique_names)
     assert(mat_lib == mat_lib_expected)
 
@@ -90,7 +88,6 @@ def test_nucid_to_xs_with_names():
     mat_xs_names_expected = {'mat:M1': {'cu63': 0.058, 'cu65': 0.026},
                              'mat:M2': {'h1': 0.067, 'o16': 0.033}}
     mat_xs_names = partisn._nucid_to_xs(mat_lib, nuc_names=nuc_names)
-    print(mat_xs_names)
     assert(mat_xs_names == mat_xs_names_expected)
 
 
