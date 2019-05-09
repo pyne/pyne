@@ -81,6 +81,7 @@ cdef class _MaterialLibrary:
                 self._inst = new cpp_material_library.MaterialLibrary()
                 list_ = []
                 for key in sorted(lib.keys()):
+                    print("shoudl be here now")
                     mat = lib[key]
                     self.__setitem__(key, material.ensure_material(mat))
             elif isinstance(lib, unicode):
