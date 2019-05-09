@@ -137,7 +137,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
     mat_insert = matlist.insert(mat.metadata["name"].asString());
   } else {
     // form a mat name as 'mX'
-    int mat_number = name_order.size();
+    int mat_number = name_order.size() +1;
     mat_name = "m" + std::to_string(mat_number);
     mat.metadata["name"] = mat_name;
     mat_insert = matlist.insert(mat.metadata["name"].asString());
