@@ -1,10 +1,14 @@
 **Added:**
 
-* File, line, and string almost the same compare functions
+* Add functions to do file, file block, line, and string almost the same
+  compare functions in pyne/utils.py
 
 **Changed:**
 
-* Changes to enable pyne/alara.py support python2/3
+* Convert some code to enable python2/3 compatiblility
+* Convert test function (including test_alara.py, test_mesh.py, test_dagmc.py,
+  test_mcnp.py, test_partisn.py, test_r2s.py, test_source_sampling.py,
+  test_variancereduction.py) to enable python2/3 compatibility.
 
 **Deprecated:** None
 
