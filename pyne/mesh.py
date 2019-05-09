@@ -131,7 +131,7 @@ class MaterialPropertyTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            return getattr(mats[key], name)
+            return getattr(mats[int(key)], name)
         elif isinstance(key, slice):
             return np.array([getattr(mats[i], name)
                              for i in range(*key.indices(size))])
