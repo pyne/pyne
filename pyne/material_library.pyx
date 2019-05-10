@@ -274,7 +274,10 @@ cdef class _MaterialLibrary:
         return py_mat
     
     def __len__(self):
-        return self.mat_library.size()
+        if hasattr(self, 'mat_library'):
+            return self.mat_library.size()
+        else:
+            return 0
 
     def __delitem__(self, key):
         if isinstance(key, basestring):
