@@ -157,7 +157,7 @@ cdef class _MaterialLibrary:
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
         if isinstance(key, int):
-            c_mat = self._inst.get_material_by_indice(key)
+            c_mat = deref(self._inst.get_element_by_indice(key))
         else:
             c_matname = key
             c_mat = self._inst.get_material(c_matname)
@@ -258,10 +258,19 @@ cdef class _MaterialLibrary:
                         value_proxy).mat_pointer))
 
     def __getitem__(self, key):
+        cdef cpp_material.Material* c_mat
+        cdef std_string c_matname
         if isinstance(key, basestring):
             key = key.encode('UTF-8')
+        if isinstance(key, int):
+            c_mat = self._inst.get_element_by_indice(key)
+        else:
+            c_matname = key
+            c_mat = self._inst.get_element(c_matname)
 
-        py_mat = self.get_material(key)
+        # build a PyNE Material object form the cpp_material
+        py_mat = material.Material(free_mat = False)
+        (< material._Material > py_mat).mat_pointer = c_mat
         return py_mat
     
     def __len__(self):
@@ -299,31 +308,30 @@ class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
         
 # <string, Material *>
 
-cdef cpp_umap[std_string, cpp_material.Material] dict_to_map_str_matp(dict pydict):
-    cdef material._Material pymat
+cdef cpp_umap[std_string, cpp_material.Material*] dict_to_map_str_matp(dict pydict):
     cdef cpp_material.Material * cpp_matp
-    cdef cpp_umap[std_string, cpp_material.Material ] cppmap = cpp_umap[std_string, cpp_material.Material]()
-    cdef cpp_pair[std_string, cpp_material.Material] item
+    cdef cpp_umap[std_string, matp ] cppmap = cpp_umap[std_string, matp ]()
+    cdef cpp_pair[std_string, cpp_material.Material* ] item
 
     for key, value in pydict.items():
-        pymat = value
-        cpp_matp = pymat.mat_pointer
+        py_mat = material.Material(free_mat = False)
+        py_mat = value
+        cpp_matp = (< material._Material > py_mat).mat_pointer
         #cppmap[std_string(key)] = cpp_matp
-        item = cpp_pair[std_string, cpp_material.Material](std_string(< char * > key), deref(cpp_matp))
+        item = cpp_pair[std_string, matp](std_string(< char * > key), cpp_matp)
         cppmap.insert(item)
 
     return cppmap
 
 
-cdef dict map_to_dict_str_matp(cpp_umap[std_string, cpp_material.Material] cppmap):
+cdef dict map_to_dict_str_matp(cpp_umap[std_string, cpp_material.Material*] cppmap):
     pydict = {}
-    cdef material._Material pymat
-    cdef cpp_umap[std_string, cpp_material.Material].iterator mapiter = cppmap.begin()
+    cdef cpp_umap[std_string, cpp_material.Material*].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
-        pymat = material.Material()
-        pymat.mat_pointer[0] = deref(mapiter).second
-        pydict[< char * > deref(mapiter).first.c_str()] = pymat
+        py_mat = material.Material(free_mat = False)
+        (< material._Material > py_mat).mat_pointer = deref(mapiter).second
+        pydict[< char * > deref(mapiter).first.c_str()] = py_mat
         inc(mapiter)
 
     return pydict

@@ -18,7 +18,7 @@
 
 namespace pyne {
 
-typedef std::unordered_map<std::string, pyne::Material> mat_map;
+typedef std::unordered_map<std::string, pyne::Material*> mat_map;
 typedef std::set<std::string> matname_set;
 typedef std::set<int> nuc_set;
 
@@ -173,9 +173,14 @@ class MaterialLibrary {
   pyne::Material get_material(const std::string& mat_name);
   /**
    * \brief Get a material of the Library by name
+   * \param mat_name name of the material to return
+  */
+  pyne::Material* get_element(const std::string& mat_name);
+  /**
+   * \brief Get a material of the Library by name
    * \param num number of the material to return
   */
-  pyne::Material get_material_by_indice(int num);
+  pyne::Material* get_element_by_indice(int num);
   /**
    * \brief Get the material Library
    * \return std::map<std::string, pyne::MaterialLibrary>

@@ -87,7 +87,7 @@ Json::Value pyne::MaterialLibrary::dump_json() {
   Json::Value json = Json::Value(Json::objectValue);
 
   for (auto name : name_order) {
-    json[name] = material_library[name].dump_json();
+    json[name] = material_library[name]->dump_json();
   }
   return json;
 }
@@ -152,8 +152,8 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   }
   if (mat_insert.second) {
     append_to_nuclist(mat);
-    material_library[mat_name] = mat;
-    material_library[mat_name].metadata["mat_number"] = int(name_order.size() +1);
+    material_library[mat_name] = new Material(mat);
+    material_library[mat_name]->metadata["mat_number"] = int(name_order.size() +1);
     
     name_order.push_back(mat_name);
   }
@@ -192,17 +192,26 @@ pyne::Material pyne::MaterialLibrary::get_material(
     const std::string& mat_name) {
   auto it = material_library.find(mat_name);
   if (it != material_library.end()) {
-    return it->second;
+    return *(it->second);
   } else {
     return pyne::Material();
   }
 }
 
-pyne::Material pyne::MaterialLibrary::get_material_by_indice(int num) {
+pyne::Material* pyne::MaterialLibrary::get_element(const std::string& mat_name) {
+  auto it = material_library.find(mat_name);
+  if (it != material_library.end()) {
+    return it->second;
+  } else {
+    return new pyne::Material();
+  }
+}
+
+pyne::Material* pyne::MaterialLibrary::get_element_by_indice(int num) {
   if (num < name_order.size()) {
     return material_library[name_order[num]];
   } else {
-    return pyne::Material();
+    return new pyne::Material();
   }
 }
 
@@ -214,7 +223,7 @@ void pyne::MaterialLibrary::replace(int num, pyne::Material mat) {
     material_library.erase( name_order[num]);
     name_order[num] = mat.metadata["name"].asString();
   }
-  material_library[name_order[num]] = name_order[num];
+  *material_library[name_order[num]] = name_order[num];
 }
 
 
@@ -282,7 +291,7 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
 
   // Write the Materials in the file
   for (auto name : name_order) {
-    material_library[name].write_hdf5(filename, datapath, nucpath);
+    material_library[name]->write_hdf5(filename, datapath, nucpath);
   }
 }
 
