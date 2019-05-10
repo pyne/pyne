@@ -1336,7 +1336,7 @@ class Mesh(object):
         """Writes the mesh to an hdf5 file."""
         self.mesh.write_file(filename)
         if write_mats and self.mats is not None:
-            print("I am in write filename is", filename, flush=True)
+            print("I am in write filename is", filename)
             self.mats.write_hdf5(filename)
 
     def cell_fracs_to_mats(self, cell_fracs, cell_mats):
