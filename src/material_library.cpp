@@ -153,7 +153,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   if (mat_insert.second) {
     append_to_nuclist(mat);
     material_library[mat_name] = mat;
-    material_library[mat_name].metadata["mat_number"] = int(name_order.size());
+    material_library[mat_name].metadata["mat_number"] = int(name_order.size() +1);
     
     name_order.push_back(mat_name);
   }
