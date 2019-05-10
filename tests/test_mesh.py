@@ -560,7 +560,7 @@ def test_matlib():
     }
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(mesh_iterate(m.mesh)):
-        assert_is(m.mats[i], mats[i])
+        assert_equal(m.mats[i], mats[i])
         assert_equal(m.mesh.tag_get_data(
             m.mesh.tag_get_handle('idx'), ve, flat=True)[0], i)
 
@@ -884,7 +884,7 @@ def test_iter():
     idx_tag = m.mesh.tag_get_handle('idx')
     for i, mat, ve in m:
         assert_equal(j, i)
-        assert_is(mats[i], mat)
+        assert_equal(mats[i], mat)
         assert_equal(j, m.mesh.tag_get_data(idx_tag, ve, flat=True)[0])
         j += 1
 
