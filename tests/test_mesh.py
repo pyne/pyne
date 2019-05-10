@@ -555,7 +555,7 @@ def test_matlib():
     mats = {
         0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1, metadata={'mat_number':1}),
         1: Material({'H1': 0.1, 'O16': 1.0}, density=2.2, metadata={'mat_number':2}),
-        2: Material({'He4': 42.0}, density=3.3, metadata={'mat_numner'=3}),
+        2: Material({'He4': 42.0}, density=3.3, metadata={'mat_number':3}),
         3: Material({'Tm171': 171.0}, density=4.4, metadata={'mat_number':4}),
     }
     m = gen_mesh(mats=mats)
