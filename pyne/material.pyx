@@ -1700,45 +1700,45 @@ class Material(_Material, collections.MutableMapping):
         with open(filename, 'a') as f:
             f.write(self.alara())
 
-    def __eq__(self, other):
-        """Compare self and other material.
-
-        Parameters
-        ----------
-        other : Material
-            The other material to be comparied.
-
-        Returns
-        -------
-        True : bool
-            If self and other have the same value
-        False : bool
-            If self and other are different
-        """
-        # check whether they have the same id
-        if id(self) == id(other):
-            return True
-        # check the type
-        if type(other) != type(self):
-            return False
-        # check the value
-        # comp
-        if self.comp != other.comp:
-            return False
-        # density
-        if self.density != other.density:
-            return False
-        # mass
-        if self.mass != other.mass:
-            return False
-        # atoms_per_molecule
-        if self.atoms_per_molecule != other.atoms_per_molecule:
-            return False
-        # matedata
-        if self.metadata != other.metadata:
-            return False
-        # no difference found
-        return True
+#    def __eq__(self, other):
+#        """Compare self and other material.
+#
+#        Parameters
+#        ----------
+#        other : Material
+#            The other material to be comparied.
+#
+#        Returns
+#        -------
+#        True : bool
+#            If self and other have the same value
+#        False : bool
+#            If self and other are different
+#        """
+#        # check whether they have the same id
+#        if id(self) == id(other):
+#            return True
+#        # check the type
+#        if type(other) != type(self):
+#            return False
+#        # check the value
+#        # comp
+#        if self.comp != other.comp:
+#            return False
+#        # density
+#        if self.density != other.density:
+#            return False
+#        # mass
+#        if self.mass != other.mass:
+#            return False
+#        # atoms_per_molecule
+#        if self.atoms_per_molecule != other.atoms_per_molecule:
+#            return False
+#        # matedata
+#        if self.metadata != other.metadata:
+#            return False
+#        # no difference found
+#        return True
          
 
 
