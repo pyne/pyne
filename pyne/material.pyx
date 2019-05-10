@@ -1737,13 +1737,6 @@ class Material(_Material, collections.MutableMapping):
         # matedata
         if self.metadata != other.metadata:
             return False
-        # free_mat
-        if hasattr(self, 'free_mat') == hasattr(other, 'free_mat'):
-            try:
-                if self.free_mat != self.free_mat:
-                    return False
-            except:
-                pass
         # no difference found
         return True
          
