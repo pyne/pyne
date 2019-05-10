@@ -129,7 +129,6 @@ cdef class _MaterialLibrary:
         cdef char * c_nucpath
         nucpath_bytes = nucpath.encode('UTF-8')
         c_nucpath = nucpath_bytes
-        print("in hdf5_matlib write")
         self._inst.write_hdf5(c_filename, c_datapath, c_nucpath)
 
     def add_material(self, mat):
@@ -257,6 +256,10 @@ cdef class _MaterialLibrary:
                     value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
                     self._inst.add_material( deref((<material._Material>
                         value_proxy).mat_pointer))
+            else:
+                value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+                self._inst.add_material( deref((<material._Material> value_proxy).mat_pointer))
+
 
     def __getitem__(self, key):
         cdef cpp_material.Material* c_mat
