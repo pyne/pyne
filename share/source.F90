@@ -38,7 +38,7 @@ function find_cell() result(icl_tmp)
 
     ! icl now is -1
     if(icl_tmp .le. 0) then
-      write(*,*) 'history ', nps, 'at position ', xxx, yyy, zzz, ' no in any cell'
+      write(*,*) 'history ', nps, 'at position ', xxx, yyy, zzz, ' not in any cell'
       write(*,*) 'Skipping and resampling the source particle'
     endif
 
