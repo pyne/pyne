@@ -44,6 +44,11 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
               exit
            endif
         enddo
+      ! icl now is -1
+      if(icl_tmp .le. 0) then
+        write(*,*) 'history ', nps, 'at position ', xxx, yyy, zzz, ' not in any cell'
+        write(*,*) 'Skipping and resampling the source particle'
+      endif
     else
         ! HEX mesh. VOXEL/SUBVOXEL
         do i = 1, cell_list_size
@@ -63,8 +68,6 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
               exit
            endif
         enddo
-    endif
-
 end function find_cell
 
 subroutine source
@@ -106,7 +109,7 @@ subroutine source
    if (icl_tmp .le. 0) then
       goto 300
    endif
-
+   
    ! check whether the material of sampled cell is void
    if (mat(icl_tmp).eq.0) then
        goto 300
