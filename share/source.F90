@@ -21,6 +21,27 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
 !     cell_list: array of integers. Contains cell numbers that the source
 !                particle possiblely located.
 !     cell_list_size: integer. Size of the cell_list.
+!
+! There are 3 types of not found icl_tmp (icl_tmp == -1):
+! - Type 1: Sorce particle is located in a cell that exist in neutron transport
+!             but removed in photon transport. Therefore, the cell number does
+!             not exist in the ncl list.
+!           This is not an error, happens with samll frequency.
+!           Skip it and resample next particle without warning message.
+! - Type 2: Source particle is not located in the given cell_list for HEX
+!             mesh cases (both voxel and sub-voxel). Because cell_list from
+!             discretize_geom() missed some cells with very small volume
+!             fractions.
+!           This is caused by random error, happens with samll frequency.
+!           Skip it andd resample next particle with warning message.
+! - Type 3: Source partilce with a specific coordinates can't be find in any
+!             cell from ncl(1) to ncl(mxa).
+!           This is an error. When this error happens, it means that there is
+!             something wrong in this file (source.F90) or DAGMC geometry
+!             representing/checking. It happens with low frenquency for some
+!             complex geometry. The results is suspicious under this condition.
+!           Skip it and resample next particle with error message.
+
 
     use mcnp_global
     use mcnp_debug
@@ -34,22 +55,9 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
     integer :: cid ! cell index
 
     icl_tmp = -1
-    if (cell_list_size .eq. 0) then
-        ! TET mesh
-        do i = 1, mxa
-           call chkcel(i, 0, j)
-           if (j .eq. 0) then
-              ! valid cell found
-              icl_tmp = i
-              exit
-           endif
-        enddo
-      ! icl now is -1
-      if(icl_tmp .le. 0) then
-        write(*,*) 'history ', nps, 'at position ', xxx, yyy, zzz, ' not in any cell'
-        write(*,*) 'Skipping and resampling the source particle'
-      endif
-    else
+    ! If the cell_list is given (for HEX mesh),
+    ! use it to find cell first
+    if (cell_list_size > 0) then
         ! HEX mesh. VOXEL/SUBVOXEL
         do i = 1, cell_list_size
            if (cell_list(i) .le. 0) then
@@ -58,7 +66,7 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
            endif
            cid = namchg(1, cell_list(i))
            if (cid .eq. 0) then
-               ! cell index not found
+               ! Type 1: cell index not found, skip and resampling
                exit
            endif
            call chkcel(cid, 0, j)
@@ -68,6 +76,32 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
               exit
            endif
         enddo
+    endif
+
+    ! If the icl_tmp is not find yet (for HEX mesh), type 2 or type 3 happends,
+    ! or the cell_list is not given (for TET mesh),
+    ! find it in the entire list of cells
+    if (icl_tmp == -1) .or. (cell_list_size .eq. 0) then
+        do i = 1, mxa
+           call chkcel(i, 0, j)
+           if (j .eq. 0) then
+              ! valid cell found
+              icl_tmp = i
+              if (cell_list_size > 0) then
+                 ! this is a type 2 problem, skip and print warning message
+                 write(*,*) 'WARNING: history ', nps, 'at position ', xxx, yyy, zzz, ' in cell ', ncl(i), ' is not well detected'
+                 write(*,*) 'Consider increase num_rays of r2s step1'
+              endif
+              exit
+           endif
+        enddo
+      ! icl now is -1, it is a type 3 error.
+      ! Skip and print error message
+      if(icl_tmp .le. 0) then
+        write(*,*) 'ERROR: history ', nps, 'at position ', xxx, yyy, zzz, ' not in any cell'
+        write(*,*) 'Skipping and resampling the source particle'
+      endif
+    endif
 end function find_cell
 
 subroutine source
