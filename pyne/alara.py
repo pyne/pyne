@@ -107,7 +107,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         f.write(output)
 
 
-def photon_source_to_hdf5(filename, chunkshape=(10000,)):
+def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     """Converts a plaintext photon source file to an HDF5 version for
     quick later use.
 
@@ -128,7 +128,11 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     Parameters
     ----------
     filename : str
-        The path to the file
+        The path to the file for read
+    nucs : str
+        Nuclides need to write into h5 file. For example:
+            - 'all': default value. Write the information of all nuclides to h5.
+            - 'total': used for r2s. Only write TOTAL value to h5.
     chunkshape : tuple of int
         A 1D tuple of the HDF5 chunkshape.
 
@@ -146,13 +150,15 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     ])
 
     filters = tb.Filters(complevel=1, complib='zlib')
+    # set the default output h5_filename
     h5f = tb.open_file(filename + '.h5', 'w', filters=filters)
     tab = h5f.create_table('/', 'data', dt, chunkshape=chunkshape)
 
     chunksize = chunkshape[0]
     rows = np.empty(chunksize, dtype=dt)
     idx = 0
-    old = u""
+    old = ""
+    row_count = 0
     for i, line in enumerate(f, 1):
         ls = line.strip().split('\t')
 
@@ -161,17 +167,27 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
         if ls[0] != u'TOTAL' and old == u'TOTAL':
             idx += 1
 
-        j = (i-1) % chunksize
-        rows[j] = (idx, ls[0].strip(), ls[1].strip(),
-                   np.array(ls[2:], dtype=np.float64))
+        if nucs.lower() == 'all':
+            row_count += 1
+            j = (row_count-1) % chunksize
+            rows[j] = (idx, ls[0].strip(), ls[1].strip(),
+                       np.array(ls[2:], dtype=np.float64))
+        elif nucs.lower() == 'total':
+            if ls[0] == 'TOTAL':
+                row_count += 1
+                j = (row_count-1) % chunksize
+                rows[j] = (idx, ls[0].strip(), ls[1].strip(),
+                           np.array(ls[2:], dtype=np.float64))
+
         # Save the nuclide in order to keep track of idx
         old = ls[0]
 
-        if i % chunksize == 0:
+        if (row_count > 0) and (row_count % chunksize == 0):
             tab.append(rows)
             rows = np.empty(chunksize, dtype=dt)
+            row_count = 0
 
-    if i % chunksize != 0:
+    if row_count % chunksize != 0:
         tab.append(rows[:j+1])
 
     h5f.close()
