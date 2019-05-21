@@ -214,6 +214,7 @@ namespace pyne {
     // For unstructured R2S, p_src_num_cells = 1.
     int p_src_num_cells;
     int cell_list_size;
+    bool has_cell_fracs;
     BiasMode bias_mode; ///< Bias mode: ANALOG, UNIFORM, USER
     MeshMode mesh_mode; ///< Mesh mode: VOXEL, SUBVOXEL, TET
     int mode; ///< Sampler mode, currently support 0, 1, 2, 3, 4, 5

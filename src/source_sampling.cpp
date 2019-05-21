@@ -287,21 +287,20 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
                                   cell_number_tag);
       rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
                                   cell_fracs_tag);
+      // has_cell_fracs is assinged in get_max_num_cells
       max_num_cells = get_max_num_cells(cell_fracs_tag);
       if (mesh_mode == SUBVOXEL) {
          p_src_num_cells = max_num_cells;
          num_e_groups /= p_src_num_cells;
 	 // cell_fracs must exist in SUBVOXEL mode
-         rval = mesh->tag_get_bytes(cell_fracs_tag, *(&tag_size));
-         if (rval != moab::MB_SUCCESS) {
+         if (has_cell_fracs == false) {
              throw std::runtime_error("No cell_fracs tag found in sub-voxel R2S. Wrong source file used.");
          }
          cell_fracs.resize(num_ves*p_src_num_cells);
          rval = mesh->tag_get_data(cell_fracs_tag, ves, &cell_fracs[0]);
       }
       // check and set cell_number
-      rval = mesh->tag_get_bytes(cell_number_tag, *(&tag_size));
-      if (rval == moab::MB_SUCCESS) {
+      if (has_cell_fracs) {
           cell_number.resize(num_ves*max_num_cells);
           rval = mesh->tag_get_data(cell_number_tag, ves, &cell_number[0]);
       }
@@ -533,8 +532,10 @@ int pyne::Sampler::get_max_num_cells(moab::Tag tag) {
   if (rval != moab::MB_SUCCESS) {
       std::cout<<"Warning: Old version source file used. No cell_number and cell_fracs tag found!"<<std::endl;
       std::cout<<"Default cell_number [-1] and cell_fracs [1.0] will be used."<<std::endl;
+      has_cell_fracs = false;
       return 1;
   } else {
+    has_cell_fracs = true;
     return tag_size/sizeof(double);
   }
 }
@@ -544,7 +545,7 @@ int pyne::Sampler::get_cell_list_size() {
    // 0: for unstructured mesh
    // 1: for sub-voxel R2S
    // max_num_cells: for voxel R2S
-   if (ve_type == moab::MBTET) {
+   if (ve_type == moab::MBTET or has_cell_fracs == false) {
       return 0;
    } else {
       if (mesh_mode == VOXEL) {
