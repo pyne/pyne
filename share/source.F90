@@ -81,7 +81,7 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
     ! If the icl_tmp is not find yet (for HEX mesh), type 2 or type 3 happends,
     ! or the cell_list is not given (for TET mesh),
     ! find it in the entire list of cells
-    if (icl_tmp == -1) .or. (cell_list_size .eq. 0) then
+    if ((icl_tmp == -1) .or. (cell_list_size .eq. 0)) then
         do i = 1, mxa
            call chkcel(i, 0, j)
            if (j .eq. 0) then
