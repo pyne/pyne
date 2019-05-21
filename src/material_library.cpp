@@ -287,7 +287,7 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
            nuclide_data);
   H5Fflush(db, H5F_SCOPE_GLOBAL);
   // Close out the Dataset
-  H5Tclose(db);
+  H5Fclose(db);
 
   // Write the Materials in the file
   for (auto name : name_order) {
