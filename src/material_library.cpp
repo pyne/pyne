@@ -24,17 +24,6 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
   from_hdf5(file, datapath);
 };
 
-// Destructor
-pyne::MaterialLibrary::~MaterialLibrary(){
-
- // for (auto element : material_library) {
- //   delete element.second;
- //   material_library.erase(element.first);
- // }
-
-
-};
-
 void pyne::MaterialLibrary::from_hdf5(char* fname, char* dpath, char* npath, int protocol) {
   std::string filename(fname);
   std::string datapath(dpath);

@@ -66,7 +66,7 @@ class MaterialLibrary {
   MaterialLibrary(const std::string& filename,
                   const std::string& datapath = "/materials");
 
-  ~MaterialLibrary();  //< default destructor
+  ~MaterialLibrary() {};  //< default destructor
 
   void renumber_mat();
   /**
