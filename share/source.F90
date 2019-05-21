@@ -26,19 +26,19 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
 ! - Type 1: Sorce particle is located in a cell that exist in neutron transport
 !             but removed in photon transport. Therefore, the cell number does
 !             not exist in the ncl list.
-!           This is not an error, happens with samll frequency.
+!           This is not an error, happens with small frequency.
 !           Skip it and resample next particle without warning message.
 ! - Type 2: Source particle is not located in the given cell_list for HEX
 !             mesh cases (both voxel and sub-voxel). Because cell_list from
 !             discretize_geom() missed some cells with very small volume
 !             fractions.
-!           This is caused by random error, happens with samll frequency.
+!           This is caused by random error, happens with small frequency.
 !           Skip it andd resample next particle with warning message.
-! - Type 3: Source partilce with a specific coordinates can't be find in any
+! - Type 3: Source partilce with a specific coordinates can't be found in any
 !             cell from ncl(1) to ncl(mxa).
 !           This is an error. When this error happens, it means that there is
-!             something wrong in this file (source.F90) or DAGMC geometry
-!             representing/checking. It happens with low frenquency for some
+!             something wrong in either the source.F90 file or the DAGMC
+!             geometry representation. It happens with low frenquency for some
 !             complex geometry. The results is suspicious under this condition.
 !           Skip it and resample next particle with error message.
 
@@ -78,7 +78,7 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
         enddo
     endif
 
-    ! If the icl_tmp is not find yet (for HEX mesh), type 2 or type 3 happends,
+    ! If the icl_tmp is not found yet (for HEX mesh), type 2 or type 3 happens,
     ! or the cell_list is not given (for TET mesh),
     ! find it in the entire list of cells
     if ((icl_tmp == -1) .or. (cell_list_size .eq. 0)) then

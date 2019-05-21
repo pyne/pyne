@@ -129,7 +129,7 @@ pyne::Sampler::Sampler(std::string filename,
 pyne::SourceParticle pyne::Sampler::particle_birth(std::vector<double> rands) {
   // select mesh volume and energy group
   // For Unstructured mesh, p_src_num_cells and max_num_cells are set to 1
-  // For Cartisian mesh, max_num_cells is obtained by read cell_fracs tag
+  // For Cartisian mesh, max_num_cells is obtained via cell_fracs tag
   int pdf_idx =at->sample_pdf(rands[0], rands[1]);
   int ve_idx = pdf_idx/p_src_num_cells/num_e_groups;
   int c_idx = (pdf_idx/num_e_groups)%p_src_num_cells;
