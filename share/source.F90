@@ -88,9 +88,7 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
               ! valid cell found
               icl_tmp = i
               if (cell_list_size > 0) then
-                 ! this is a type 2 problem, skip and print warning message
-                 write(*,*) 'WARNING: history ', nps, 'at position ', xxx, yyy, zzz, ' in cell ', ncl(i), ' is not well detected'
-                 write(*,*) 'Consider increase num_rays of r2s step1'
+                 ! this is a type 2 problem, skip
                  ! reset the icl_tmp to -1 because of the type 2 not found
                  icl_tmp = -1
               endif
