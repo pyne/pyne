@@ -189,6 +189,7 @@ namespace pyne {
 
     /// Return cell_list_size
     int get_cell_list_size();
+
     ~Sampler() {
       delete mesh;
       delete at;
@@ -244,6 +245,8 @@ namespace pyne {
     int num_groups(moab::Tag tag);
     std::vector<double> read_bias_pdf(moab::Range ves, std::vector<double> volumes, 
                                       std::vector<double> pdf);
+    // Get max_num_cells
+    int get_max_num_cells(moab::Tag tag);
   };
 } //end namespace pyne
 
