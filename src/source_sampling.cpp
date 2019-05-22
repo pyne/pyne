@@ -4,6 +4,8 @@
 
 // Global sampler instance
 static pyne::Sampler* sampler = NULL;
+// Global variable for mode range
+const int SUBVOXEL_START = 3;
 
 // Fortran API
 void pyne::sampling_setup_(int* mode, int* cell_list_size) {
@@ -189,9 +191,8 @@ void pyne::Sampler::setup() {
 
   // Assign MeshMode: VOXEL, SUBVOXEL, TET
   // Accept mode: 0, 1, 2, 3, 4, 5
-  int voxel_start = 3;
   if (ve_type == moab::MBHEX){
-     if (mode < voxel_start){
+     if (mode < SUBVOXEL_START){
         mesh_mode = VOXEL;
      } else {
         mesh_mode = SUBVOXEL;
