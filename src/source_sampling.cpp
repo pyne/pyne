@@ -188,8 +188,10 @@ void pyne::Sampler::setup() {
   else throw std::invalid_argument("Mesh file must contain only tets or hexes.");
 
   // Assign MeshMode: VOXEL, SUBVOXEL, TET
+  // Accept mode: 0, 1, 2, 3, 4, 5
+  int voxel_start = 3;
   if (ve_type == moab::MBHEX){
-     if (mode < 3){
+     if (mode < voxel_start){
         mesh_mode = VOXEL;
      } else {
         mesh_mode = SUBVOXEL;
