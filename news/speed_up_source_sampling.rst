@@ -3,7 +3,7 @@
 **Changed:**
 
 * Pass cell_list back to Fortran, to speed up source sampling.
-* Update the test functions acoording to the cell_list change.
+* Update the test functions according to the cell_list change.
 
 **Deprecated:** None
 
