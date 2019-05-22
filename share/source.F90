@@ -13,7 +13,7 @@
 ! in the PyNE user manual.
 
 function find_cell(cell_list, cell_list_size) result(icl_tmp)
-! This function to determines the current MCNP cell index location.
+! This function determines the current MCNP cell index location.
 ! Return a positive integer if a valid cell is found, otherwise it returns -1.
 ! This only works if there are no repeated geometries or universes present in
 ! the model.
