@@ -287,7 +287,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
                                   cell_number_tag);
       rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
                                   cell_fracs_tag);
-      // has_cell_fracs is assinged in get_max_num_cells
+      // has_cell_fracs is assigned in get_max_num_cells
       max_num_cells = get_max_num_cells(cell_fracs_tag);
       if (mesh_mode == SUBVOXEL) {
          p_src_num_cells = max_num_cells;
