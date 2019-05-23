@@ -247,7 +247,9 @@ namespace pyne {
     std::vector<double> read_bias_pdf(moab::Range ves, std::vector<double> volumes, 
                                       std::vector<double> pdf);
     // Get max_num_cells
-    int get_max_num_cells(moab::Tag tag);
+    int get_max_num_cells(moab::Tag cell_fracs_tag);
+    // get has_cell_fracs
+    bool check_cell_fracs(moab::Tag cell_fracs_tag);
   };
 } //end namespace pyne
 

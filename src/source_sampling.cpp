@@ -4,6 +4,8 @@
 
 // Global sampler instance
 static pyne::Sampler* sampler = NULL;
+// Global variable for mode range
+const int SUBVOXEL_START = 3;
 
 // Fortran API
 void pyne::sampling_setup_(int* mode, int* cell_list_size) {
@@ -188,8 +190,9 @@ void pyne::Sampler::setup() {
   else throw std::invalid_argument("Mesh file must contain only tets or hexes.");
 
   // Assign MeshMode: VOXEL, SUBVOXEL, TET
+  // Accept mode: 0, 1, 2, 3, 4, 5
   if (ve_type == moab::MBHEX){
-     if (mode < 3){
+     if (mode < SUBVOXEL_START){
         mesh_mode = VOXEL;
      } else {
         mesh_mode = SUBVOXEL;
@@ -287,7 +290,7 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
                                   cell_number_tag);
       rval = mesh->tag_get_handle(cell_fracs_tag_name.c_str(),
                                   cell_fracs_tag);
-      // has_cell_fracs is assinged in get_max_num_cells
+      has_cell_fracs = check_cell_fracs(cell_fracs_tag);
       max_num_cells = get_max_num_cells(cell_fracs_tag);
       if (mesh_mode == SUBVOXEL) {
          p_src_num_cells = max_num_cells;
@@ -525,18 +528,28 @@ int pyne::Sampler::num_groups(moab::Tag tag) {
   return tag_size/sizeof(double);
 }
 
-int pyne::Sampler::get_max_num_cells(moab::Tag tag) {
+bool pyne::Sampler::check_cell_fracs(moab::Tag cell_fracs_tag) {
   moab::ErrorCode rval;
   int tag_size;
-  rval = mesh->tag_get_bytes(tag, *(&tag_size));
+  rval = mesh->tag_get_bytes(cell_fracs_tag, *(&tag_size));
   if (rval != moab::MB_SUCCESS) {
       std::cout<<"Warning: Old version source file used. No cell_number and cell_fracs tag found!"<<std::endl;
       std::cout<<"Default cell_number [-1] and cell_fracs [1.0] will be used."<<std::endl;
       has_cell_fracs = false;
-      return 1;
   } else {
     has_cell_fracs = true;
-    return tag_size/sizeof(double);
+  }
+  return has_cell_fracs;
+}
+
+int pyne::Sampler::get_max_num_cells(moab::Tag cell_fracs_tag) {
+  moab::ErrorCode rval;
+  int tag_size;
+  if (has_cell_fracs) {
+      rval = mesh->tag_get_bytes(cell_fracs_tag, *(&tag_size));
+      return tag_size/sizeof(double);
+  } else {
+      return 1;
   }
 }
 
