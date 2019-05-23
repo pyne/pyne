@@ -462,10 +462,26 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
     exp_e_bounds = os.path.join(r2s_run_dir, "exp_e_bounds")
     exp_t_p_src = os.path.join(
         r2s_run_dir, "exp_total_photon_source_intensities.txt")
+    exp_src_c1 = os.path.join(r2s_run_dir, "exp_source_1.h5m")
 
     # compare the results
     f4 = filecmp.cmp(e_bounds, exp_e_bounds)
     f5 = filecmp.cmp(t_p_src, exp_t_p_src)
+    f6 = True
+    # skip test if h5diff not exist
+    if 'unstructured' in r2s_run_dir:
+        ele_type = 'Tet4'
+    else:
+        ele_type = 'Hex8'
+    is_h5diff = os.system('which h5diff')
+    if is_h5diff == 0:
+        # compare two h5 files
+        command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
+            ' /tstt/elements/', ele_type, '/tags/source_density',
+            ' /tstt/elements/', ele_type, '/tags/source_density'])
+        diff_flag = os.system(command)
+        # return value 0 if no difference, 1 if differences found, 2 if error
+        f6 = True if diff_flag == 0 else False
 
     # remove test generated files
     os.remove(blank_mesh)
@@ -478,6 +494,7 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
 
     assert_equal(f4, True)
     assert_equal(f5, True)
+    assert_equal(f6, True)
 
 
 def test_r2s_script_step_by_step():
