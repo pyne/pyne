@@ -127,7 +127,7 @@ push-test:
 	cd $(BUILDDIR) && \
 	test -d $(DOCREPONAME) || git clone $(DOCREPOURL) $(DOCREPONAME) && \
 	cd $(DOCREPONAME) && \
-	git checkout -b ci_testing origin/ci_testing && \
+	git checkout -b website_preview origin/website_preview && \
 	rm -rf * && \
 	cp -r ../html/* . && \
 	git add . && \
