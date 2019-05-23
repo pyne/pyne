@@ -2314,6 +2314,8 @@ cdef class _MaterialLibrary(object):
             matsmetadata = f.get_node(datapath + '_metadata').read()
         for i in range(len(matstable)):
             row = matstable[i]
+            if len(nucs) == 0:
+                row = (row[0], row[1], row[2], [])
             comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
             mat = Material(comp, mass=row[0], density=row[1],
                                     atoms_per_molecule=row[2])
