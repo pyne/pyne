@@ -101,7 +101,7 @@ commands:
     parameters:
       push_option:
           type: string
-          default: "push-test"
+          default: "test"
     steps:
       - pull_container:
           build: "python2_dagmc_pymoab" 
