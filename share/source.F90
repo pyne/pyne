@@ -52,7 +52,7 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
     integer :: icl_tmp ! temporary cell variable
     integer, intent(in) :: cell_list_size
     integer, dimension(cell_list_size), intent(in) :: cell_list
-    integer :: cid ! cell index
+    integer :: cidx ! cell index
 
     icl_tmp = -1
     ! If the cell_list is given (for HEX mesh),
@@ -64,15 +64,15 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
                ! not a valid cell number (-1)
                exit
            endif
-           cid = namchg(1, cell_list(i))
-           if (cid .eq. 0) then
+           cidx = namchg(1, cell_list(i))
+           if (cidx .eq. 0) then
                ! Type 1: cell index not found, skip and resampling
                exit
            endif
-           call chkcel(cid, 0, j)
+           call chkcel(cidx, 0, j)
            if (j .eq. 0) then
               ! valid cell found
-              icl_tmp = cid
+              icl_tmp = cidx
               exit
            endif
         enddo
