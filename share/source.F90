@@ -1,15 +1,15 @@
 ! This is Fortran90 code that can be compiled directly into MCNP5 in order
 ! to use the mesh-based sampling capabilities provided by the Sampler class
-! within source_sampling.cpp. The subroutine "source" calls the MCNP5 interface 
+! within source_sampling.cpp. The subroutine "source" calls the MCNP5 interface
 ! C++ functions within source_sampling.cpp. The function "find_cell"
 ! determines what geomety cell a sampled x, y, z are in, which allows for
-! void rejection within the source subroutine. Void rejection ensures that 
+! void rejection within the source subroutine. Void rejection ensures that
 ! particles are never born in void (which is non-physical) which may arise in
 ! the case of source density meshes that are non-conformal to the geometry
 ! (e.g. most Cartesean meshes). This version of find_cell does not work for
-! repeated geometries or universes. 
+! repeated geometries or universes.
 !
-! Full instructions on compiling and using MCNP5 with this subroutine are found
+! Full instructions on compiling and using MCNP6 with this subroutine are found
 ! in the PyNE user manual.
 
 function find_cell(cell_list, cell_list_size) result(icl_tmp)
@@ -42,128 +42,146 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
 !             complex geometry. The results is suspicious under this condition.
 !           Skip it and resample next particle with error message.
 
+  use fixcom, only: mxa
+  use mcnp_global, only: ncl
+  use mcnp_params, only: dknd
+  use pblcom, only: xxx, yyy, zzz, erg
+  use varcom, only: nps
+  use mcnp_debug
 
-    use mcnp_global
-    use mcnp_debug
-    ! xxx,yyy,zzz are global variables
-    ! mxa is global
-    integer :: i ! iterator variable
-    integer :: j ! temporary cell test
-    integer :: icl_tmp ! temporary cell variable
-    integer, intent(in) :: cell_list_size
-    integer, dimension(cell_list_size), intent(in) :: cell_list
-    integer :: cidx ! cell index
+  implicit none
 
-    icl_tmp = -1
-    ! If the cell_list is given (for HEX mesh),
-    ! use it to find cell first
-    if (cell_list_size > 0) then
-        ! HEX mesh. VOXEL/SUBVOXEL
-        do i = 1, cell_list_size
-           if (cell_list(i) .le. 0) then
-               ! not a valid cell number (-1)
-               exit
-           endif
-           cidx = namchg(1, cell_list(i))
-           if (cidx .eq. 0) then
-               ! Type 1: cell index not found, skip and resampling
-               exit
-           endif
-           call chkcel(cidx, 0, j)
-           if (j .eq. 0) then
-              ! valid cell found
-              icl_tmp = cidx
-              exit
-           endif
-        enddo
-    endif
+  interface
+    function namchg(mm, ji)
+      use mcnp_global, only: dknd
+      implicit real(dknd) (a-h,o-z)
+    end function namchg
+  end interface
 
-    ! If the icl_tmp is not found yet (for HEX mesh), type 2 or type 3 happens,
-    ! or the cell_list is not given (for TET mesh),
-    ! find it in the entire list of cells
-    if ((icl_tmp == -1) .or. (cell_list_size .eq. 0)) then
-        do i = 1, mxa
-           call chkcel(i, 0, j)
-           if (j .eq. 0) then
-              ! valid cell found
-              icl_tmp = i
-              if (cell_list_size > 0) then
-                 ! this is a type 2 problem, skip
-                 ! reset the icl_tmp to -1 because of the type 2 not found
-                 icl_tmp = -1
-              endif
-              exit
-           endif
-        enddo
-      ! icl now is -1, it is a type 3 error.
-      ! Skip and print error message
-      if(icl_tmp .le. 0) then
-        write(*,*) 'ERROR: history ', nps, 'at position ', xxx, yyy, zzz, ' not in any cell'
-        write(*,*) 'Skipping and resampling the source particle'
+  integer :: i ! iterator variable
+  integer :: j ! temporary cell test
+  integer :: icl_tmp ! temporary cell variable
+  integer, intent(in) :: cell_list_size
+  integer, dimension(cell_list_size), intent(in) :: cell_list
+  integer :: cidx ! cell index
+
+  icl_tmp = -1
+  ! If the cell_list is given (for HEX mesh),
+  ! use it to find cell first
+  if (cell_list_size > 0) then
+    ! HEX mesh. VOXEL/SUBVOXEL
+    do i = 1, cell_list_size
+      if (cell_list(i) .le. 0) then
+        ! not a valid cell number (-1)
+        exit
       endif
+      cidx = namchg(1, cell_list(i))
+      if (cidx .eq. 0) then
+        ! Type 1: cell index not found, skip and resampling
+        exit
+      endif
+      call chkcel(cidx, 0, j)
+      if (j .eq. 0) then
+        ! valid cell found
+        icl_tmp = cidx
+        exit
+      endif
+    enddo
+  endif
+
+  ! If the icl_tmp is not found yet (for HEX mesh), type 2 or type 3 happens,
+  ! or the cell_list is not given (for TET mesh),
+  ! find it in the entire list of cells
+  if ((icl_tmp == -1) .or. (cell_list_size .eq. 0)) then
+    do i = 1, mxa
+      call chkcel(i, 0, j)
+      if (j .eq. 0) then
+        ! valid cell found
+        icl_tmp = i
+        if (cell_list_size > 0) then
+          ! this is a type 2 problem, skip
+          ! reset the icl_tmp to -1 because of the type 2 not found
+          icl_tmp = -1
+        endif
+        exit
+      endif
+    enddo
+    ! icl now is -1, it is a type 3 error.
+    ! Skip and print error message
+    if(icl_tmp .le. 0) then
+      write(*,*) 'ERROR: history ', nps, 'at position ', &
+      &          xxx, yyy, zzz, ' not in any cell'
+      write(*,*) 'Skipping and resampling the source particle'
     endif
+  endif
 end function find_cell
 
 subroutine source
-    ! This subroutine is called directly by MCNP to select particle birth
-    ! parameters
-    use mcnp_global
-    use mcnp_debug
-    implicit real(dknd) (a-h,o-z)
-    logical, save :: first_run = .true.
-    real(dknd), dimension(6) :: rands
-    integer :: icl_tmp ! temporary cell index variable
-    integer :: find_cell
-    integer :: tries
-    integer, save :: cell_list_size = 0
-    integer, dimension(:), allocatable, save :: cell_list
-  
-    if (first_run .eqv. .true.) then
-        ! set up, and return cell_list_size to create a cell_list
-        call sampling_setup(idum(1), cell_list_size)
-        allocate(cell_list(cell_list_size))
-        first_run = .false.
-    endif
+  ! This subroutine is called directly by MCNP to select particle birth
+  ! parameters
 
-100 continue 
-   tries = 0
-   rands(1) = rang() ! sample alias table
-   rands(2) = rang() ! sample alias table
-   rands(6) = rang() ! sample energy
+  use mcnp_global, only: mat
+  use mcnp_params, only: dknd
+  use mcnp_random, only: rang
+  use pblcom, only: xxx, yyy, zzz, erg, tme, wgt, icl, ipt, jsu
+  use mcnp_debug
+
+  implicit none
+
+  logical, save :: first_run = .true.
+  real(dknd), dimension(6) :: rands
+  integer :: icl_tmp ! temporary cell index variable
+  integer :: find_cell
+  integer :: tries
+  integer, save :: cell_list_size = 0
+  integer, dimension(:), allocatable, save :: cell_list
+
+  if (first_run .eqv. .true.) then
+    ! set up, and return cell_list_size to create a cell_list
+    call sampling_setup(idum(1), cell_list_size)
+    allocate(cell_list(cell_list_size))
+    first_run = .false.
+  endif
+
+100 continue
+  tries = 0
+  rands(1) = rang() ! sample alias table
+  rands(2) = rang() ! sample alias table
+  rands(6) = rang() ! sample energy
 200 continue
-   rands(3) = rang() ! sample x
-   rands(4) = rang() ! sample y
-   rands(5) = rang() ! sample z
- 
-   call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_list)
-   ! Loop over cell_list to find icl_tmp
-   icl_tmp = find_cell(cell_list, cell_list_size)
+  rands(3) = rang() ! sample x
+  rands(4) = rang() ! sample y
+  rands(5) = rang() ! sample z
 
-   ! check whether this is a valid cell
-   if (icl_tmp .le. 0) then
-      goto 300
-   endif
-   
-   ! check whether the material of sampled cell is void
-   if (mat(icl_tmp).eq.0) then
-       goto 300
-   else
-       goto 400
-   endif
+  call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_list)
+  ! Loop over cell_list to find icl_tmp
+  icl_tmp = find_cell(cell_list, cell_list_size)
+
+  ! check whether this is a valid cell
+  if (icl_tmp .le. 0) then
+    goto 300
+  endif
+
+  ! check whether the material of sampled cell is void
+  if (mat(icl_tmp).eq.0) then
+    goto 300
+  else
+    goto 400
+  endif
 
 300 continue
-   tries = tries + 1
-   if(tries < idum(2)) then
-       goto 200
-   else
-       goto 100
-   endif
+  tries = tries + 1
+  if(tries < idum(2)) then
+    goto 200
+  else
+    goto 100
+  endif
 
 400 continue
-   icl = icl_tmp
-   tme = 0.0
-   ipt = idum(3)
-   jsu = 0
- 
-   return
+  icl = icl_tmp
+  tme = 0.0
+  ipt = idum(3)
+  jsu = 0
+
+  return
 end subroutine source
