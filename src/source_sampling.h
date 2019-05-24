@@ -52,7 +52,12 @@ namespace pyne {
   /// \param mode The sampling mode: 
   /// Voxel(DEFAULT) R2S: 0 = analog, 1 = uniform, 2 = user-specified
   /// SubVoxel(SUBVOXEL) R2S: 3 = analog, 4 = uniform, 5 = user-specified
-  void sampling_setup_(int* mode);
+  /// cell_list_size if the variable used for create the cell_list
+  /// cell_list_size could be
+  ///      0: for unstructured mesh
+  ///      1: for sub-voxel mode,
+  ///      max_num_cells: for voxel mode
+  void sampling_setup_(int* mode, int* cell_list_size);
   /// MCNP interface to sample particle birth parameters after sampling setup
   /// \param rands Six pseudo-random numbers supplied from the Fortran side.
   /// \param x The sampled x position returned by this function
@@ -67,7 +72,7 @@ namespace pyne {
                             double* z,
                             double* e,
                             double* w,
-                            int* c);
+                            int* cell_list);
   /// Helper function for MCNP interface that reads energy boudaries from a file
   /// \param e_bounds_file A file containing the energy group boundaries.
   std::vector<double> read_e_bounds(std::string e_bounds_file);
@@ -112,7 +117,7 @@ namespace pyne {
                    double z,
                    double e,
                    double w,
-                   int c);
+                   std::vector<int> cell_list);
     ~SourceParticle();
 
     double get_x() {return x;};
@@ -120,18 +125,20 @@ namespace pyne {
     double get_z() {return z;};
     double get_e() {return e;};
     double get_w() {return w;};
-    int get_c() {return c;};
+    std::vector<int> get_cell_list() {return cell_list;};
     private:
     double x; // x coordinate
     double y; // y coordinate
     double z; // z coordinate
     double e; // energy
     double w; // weight
-    int c; // cell number
+    /// cell list. For sub-voxel mode, the size of cell_list is 1.
+    std::vector<int> cell_list;
   };
   
   /// Problem modes
   enum BiasMode {USER, ANALOG, UNIFORM};
+  enum MeshMode {VOXEL, SUBVOXEL, TET};
   
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
@@ -180,6 +187,9 @@ namespace pyne {
     ///         z, position, e, energy and w, weight of a particle.
     pyne::SourceParticle particle_birth(std::vector<double> rands);
 
+    /// Return cell_list_size
+    int get_cell_list_size();
+
     ~Sampler() {
       delete mesh;
       delete at;
@@ -198,7 +208,16 @@ namespace pyne {
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
     int max_num_cells; /// Max number of cells in voxels
+    // Equivalent cell number in photon source.
+    // For voxel R2S, p_src_num_cells = 1
+    // For sub-voxel R2S, p_src_num_cells = max_num_cells
+    // For unstructured R2S, p_src_num_cells = 1.
+    int p_src_num_cells;
+    int cell_list_size;
+    bool has_cell_fracs;
     BiasMode bias_mode; ///< Bias mode: ANALOG, UNIFORM, USER
+    MeshMode mesh_mode; ///< Mesh mode: VOXEL, SUBVOXEL, TET
+    int mode; ///< Sampler mode, currently support 0, 1, 2, 3, 4, 5
     // mesh
     moab::Interface* mesh; ///< MOAB mesh
     int num_ves; ///< Number of mesh volume elements on \a mesh.
@@ -208,6 +227,7 @@ namespace pyne {
     std::vector<edge_points> all_edge_points; ///< Four connected points on a VE.
     std::vector<double> biased_weights; ///< Birth weights for biased sampling.
     std::vector<int> cell_number; ///< Tag cell_number
+    std::vector<int> cell_list; ///< Cell list passed to Fortran
     std::vector<double> cell_fracs; ///< Tag cell_fracs
     AliasTable* at; ///< Alias table used for sampling.
   
@@ -226,6 +246,10 @@ namespace pyne {
     int num_groups(moab::Tag tag);
     std::vector<double> read_bias_pdf(moab::Range ves, std::vector<double> volumes, 
                                       std::vector<double> pdf);
+    // Get max_num_cells
+    int get_max_num_cells(moab::Tag cell_fracs_tag);
+    // get has_cell_fracs
+    bool check_cell_fracs(moab::Tag cell_fracs_tag);
   };
 } //end namespace pyne
 
