@@ -502,7 +502,7 @@ cdef class Sampler:
                 (<cpp_source_sampling.Sampler *> self._inst)\
                 .particle_birth(rands_proxy)
         return SourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), \
-                c_src.get_e(), c_src.get_w(), c_src.get_c())
+                c_src.get_e(), c_src.get_w(), c_src.get_cell_list())
 
 
 cdef class SourceParticle:
@@ -520,8 +520,8 @@ cdef class SourceParticle:
         The energy of the source particle
     w : double
         The weight of the source particle
-    c : int
-        The cell number of the source particle
+    cell_list : vector[int]
+        The cell list for available cells of the source particle
     
     Notes
     -----
@@ -530,12 +530,12 @@ cdef class SourceParticle:
     The class is found in the "pyne" namespace"""
 
     # constuctors
-    def __cinit__(self, double x, double y, double z, double e, double w, int c):
-        self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, c)
+    def __cinit__(self, double x, double y, double z, double e, double w, cpp_vector[int] cell_list):
+        self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, cell_list)
     
     @property
-    def c(self):
-        return self.c_src.get_c()
+    def cell_list(self):
+        return self.c_src.get_cell_list()
 
     @property
     def x(self):

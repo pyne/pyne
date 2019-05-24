@@ -378,7 +378,7 @@ def test_single_hex_single_subvoxel_analog():
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0., 1.) for x in range(6)]))
         assert_equal(s.w, 1.0)  # analog: all weights must be one
-        assert_equal(s.c, 11)  # analog: the cell number
+        assert_equal(s.cell_list[0], 11)  # analog: the cell number
         tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
               int(s.e*num_divs)] += score
 
@@ -422,11 +422,11 @@ def test_single_hex_multiple_subvoxel_analog():
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
         assert_equal(s.w, 1.0)  # analog: all weights must be one
-        if s.c == 11:
+        if s.cell_list[0] == 11:
             tally[0] += score
-        elif s.c == 12:
+        elif s.cell_list[0] == 12:
             tally[1] += score
-        elif s.c == 13:
+        elif s.cell_list[0] == 13:
             tally[2] += score
 
     # Test that each source particle in each cell has right frequency
@@ -468,7 +468,7 @@ def test_multiple_hex_multiple_subvoxel_analog():
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         assert_equal(s.w, 1.0)
-        assert_equal(s.c, 4*int(s.x*num_divs) + 2*int(s.y*num_divs)
+        assert_equal(s.cell_list[0], 4*int(s.x*num_divs) + 2*int(s.y*num_divs)
                      + int(s.z*num_divs) + 1)
         tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
               int(s.e*num_divs)] += score
@@ -513,7 +513,7 @@ def test_single_hex_subvoxel_uniform():
     for i in range(num_samples):
         s = sampler.particle_birth(np.array([uniform(0., 1.) for x in range(6)]))
         assert_equal(s.w, 1.0)  # analog: all weights must be one
-        assert_equal(s.c, 11)  # analog: the cell number
+        assert_equal(s.cell_list[0], 11)  # analog: the cell number
         tally[int(s.x*num_divs), int(s.y*num_divs), int(s.z*num_divs),
               int(s.e*num_divs)] += score
 
@@ -555,14 +555,14 @@ def test_single_hex_multiple_subvoxel_uniform():
     num_divs = 2
     tally = [0.0] * 3
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0., 1.) for x in range(6)]))
-        if s.c == 11:
+        s = sampler.particle_birth(np.array([uniform(0.0, 1.0) for x in range(6)]))
+        if s.cell_list[0] == 11:
             tally[0] += score
-        if s.c == 12:
+        if s.cell_list[0] == 12:
             tally[1] += score
             # analog: all weights must be one
             assert(abs(s.w - 0.369)/0.369 < 0.05)
-        if s.c == 13:
+        if s.cell_list[0] == 13:
             tally[2] += score
             assert(abs(s.w - 1.475)/1.475 < 0.05)
 
@@ -608,16 +608,16 @@ def test_multiple_hex_multiple_subvoxel_uniform():
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
         # check the cell_number
-        assert_equal(s.c, 4*int(s.x*num_divs) + 2*int(s.y*num_divs)
+        assert_equal(s.cell_list[0], 4*int(s.x*num_divs) + 2*int(s.y*num_divs)
                      + int(s.z*num_divs))
         # check the weight of each subvoxel
-        if s.c not in empty_cells:
+        if s.cell_list[0] not in empty_cells:
             # weight for cell 1, 3, 5, 7 should be: 0.4, 0.8, 1.2, 1.6
-            exp_w = (s.c + 1) / 2 * 0.4
+            exp_w = (s.cell_list[0] + 1) / 2 * 0.4
             out_w = s.w
             assert(abs(out_w - exp_w)/exp_w < 0.05)  # hand calculate
         # count the tally
-        tally[s.c] += score
+        tally[s.cell_list[0]] += score
 
     # check the real sample rate
     for i, item in enumerate(tally):
@@ -798,14 +798,14 @@ def test_subvoxel_multiple_hex_bias_1():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        vid = s.c//10 - 1
-        cid = s.c % 10 - 1
+        vid = s.cell_list[0]//10 - 1
+        cid = s.cell_list[0] % 10 - 1
         eid = 0 if s.e < 0.5 else 1
         # check the cell_number
         if s.x < 0.5:
-            assert(s.c in [11, 12])
+            assert(s.cell_list[0] in [11, 12])
         if s.x > 0.5:
-            assert(s.c in [21, 22])
+            assert(s.cell_list[0] in [21, 22])
         # check the weight of each subvoxel
         if vid == 0:
             assert(abs(s.w - 0.746) / 0.746 < 0.05)
@@ -876,14 +876,14 @@ def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
     exp_wgt[:] = [[[1.0, 1.0], [1.25, 0.83]], [[1.25, 1.25], [0.83, 0.83]]]
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        vid = s.c//10 - 1
-        cid = s.c % 10 - 1
+        vid = s.cell_list[0]//10 - 1
+        cid = s.cell_list[0] % 10 - 1
         eid = 0 if s.e < 0.5 else 1
         # check the cell_number
         if s.x < 0.5:
-            assert(s.c in [11, 12])
+            assert(s.cell_list[0] in [11, 12])
         if s.x > 0.5:
-            assert(s.c in [21, 22])
+            assert(s.cell_list[0] in [21, 22])
         # check the weight of each subvoxel
         assert(abs(s.w - exp_wgt[vid, cid, eid]) /
                exp_wgt[vid, cid, eid] < 0.05)
@@ -947,14 +947,14 @@ def test_subvoxel_multiple_hex_bias_e_groups():
     tally = np.zeros(shape=(num_divs, num_divs, num_divs))
     for i in range(num_samples):
         s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
-        vid = s.c//10 - 1
-        cid = s.c % 10 - 1
+        vid = s.cell_list[0] // 10 - 1
+        cid = s.cell_list[0] % 10 - 1
         eid = 0 if s.e < 0.5 else 1
         # check the cell_number
         if s.x < 0.5:
-            assert(s.c in [11, 12])
+            assert(s.cell_list[0] in [11, 12])
         if s.x > 0.5:
-            assert(s.c in [21, 22])
+            assert(s.cell_list[0] in [21, 22])
         # check the weight of each subvoxel
         if vid == 0 and eid == 0:
             assert(abs(s.w - 1.5)/1.5 < 0.05)
@@ -1040,6 +1040,7 @@ def test_template_examples():
         for num_e_groups in (1, 2):
             # num_bias_groups could be:
             # 1, num_e_groups, and max_num_cells*num_e_groups
+
             # test case: 1 voxel, 1 subvoxel
             cell_fracs_list = [(0, 1, 1.0, 0.0)]
             src_tag = [[1.0]*num_e_groups]
@@ -1050,16 +1051,29 @@ def test_template_examples():
                         mode, cell_fracs_list, src_tag, bias_tag)
             else:
                 _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+
             # test case: 1 voxel, 2 subvoxels
-            cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0)]
-            src_tag = [[1.0, 1.0]*num_e_groups]
-            if mode == DEFAULT_USER or mode == SUBVOXEL_USER:
+            # create src and cell_fracs tag data
+            if mode in (0, 1, 2):
+                src_tag = [[1.0]*num_e_groups]
+                cell_fracs_list = [(0, 1, 1.0, 0.0)]
+            elif mode in (3, 4, 5):
+                src_tag = [[1.0, 1.0]*num_e_groups]
+                cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0)]
+
+            if mode == DEFAULT_USER:
+                for num_bias_groups in (1, num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups]
+                    _source_sampling_test_template(
+                        mode, cell_fracs_list, src_tag, bias_tag)
+            elif mode == SUBVOXEL_USER:
                 for num_bias_groups in (1, num_e_groups, 2*num_e_groups):
                     bias_tag = [[1.0]*num_bias_groups]
                     _source_sampling_test_template(
                         mode, cell_fracs_list, src_tag, bias_tag)
             else:
                 _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+
             # test case: 2 voxel, 2 subvoxels
             cell_fracs_list = [(0, 1, 1.0, 0.0), (1, 2, 1.0, 0.0)]
             src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
@@ -1070,11 +1084,24 @@ def test_template_examples():
                         mode, cell_fracs_list, src_tag, bias_tag)
             else:
                 _source_sampling_test_template(mode, cell_fracs_list, src_tag)
+
             # test case: 2 voxel, 4 subvoxels
-            cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0),
-                               (1, 3, 0.5, 0.0), (1, 4, 0.5, 0.0)]
-            src_tag = [[1.0, 1.0]*num_e_groups, [1.0, 1.0]*num_e_groups]
-            if mode == DEFAULT_USER or mode == SUBVOXEL_USER:
+            # create src and cell_fracs tag data
+            if mode in (0, 1, 2):
+                src_tag = [[1.0]*num_e_groups, [1.0]*num_e_groups]
+                cell_fracs_list = [(0, 1, 1.0, 0.0),
+                                   (1, 2, 1.0, 0.0)]
+            elif mode in (3, 4, 5):
+                src_tag = [[1.0, 1.0]*num_e_groups, [1.0, 1.0]*num_e_groups]
+                cell_fracs_list = [(0, 1, 0.5, 0.0), (0, 2, 0.5, 0.0),
+                                   (1, 3, 0.5, 0.0), (1, 4, 0.5, 0.0)]
+
+            if mode == DEFAULT_USER:
+                for num_bias_groups in (1, num_e_groups):
+                    bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
+                    _source_sampling_test_template(
+                        mode, cell_fracs_list, src_tag, bias_tag)
+            elif mode == SUBVOXEL_USER:
                 for num_bias_groups in (1, num_e_groups, 2*num_e_groups):
                     bias_tag = [[1.0]*num_bias_groups, [1.0]*num_bias_groups]
                     _source_sampling_test_template(
@@ -1311,7 +1338,10 @@ def _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag):
     exp_c = set(list(current_cell_fracs['cell']))
 
     # calculate eid
-    num_e_groups = len(src_tag[0])//max_num_cells
+    if mode in (0, 1, 2):
+        num_e_groups = len(src_tag[0])
+    elif mode in (3, 4, 5):
+        num_e_groups = len(src_tag[0])//max_num_cells
     e_bounds = np.array([i*1.0/num_e_groups for i in range(num_e_groups+1)])
     eid = -1
     for i in range(num_e_groups):
@@ -1425,7 +1455,10 @@ def _get_x_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     """
     num_ve, num_sve, max_num_cells = \
         _get_num_ve_sve_and_max_num_cells(cell_fracs)
-    num_e_groups = len(src_tag[0])//max_num_cells
+    if mode in (0, 1, 2):
+        num_e_groups = len(src_tag[0])
+    elif mode in (3, 4, 5):
+        num_e_groups = len(src_tag[0])//max_num_cells
     x_bounds = [v*1.0/(num_ve) for v in range(num_ve+1)]
     x_dis_exp = np.array([0.0]*num_ve)
     if mode in (0, 3):
@@ -1518,7 +1551,10 @@ def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
                          .format(str(mode)))
     num_ve, num_sve, max_num_cells = \
         _get_num_ve_sve_and_max_num_cells(cell_fracs)
-    num_e_groups = len(src_tag[0])//max_num_cells
+    if mode in (0, 1, 2):
+        num_e_groups = len(src_tag[0])
+    elif mode in (3, 4, 5):
+        num_e_groups = len(src_tag[0])//max_num_cells
     e_bounds = [e*1.0/(num_e_groups) for e in range(num_e_groups+1)]
     e_dis_exp = np.array([0.0]*num_e_groups)
     if mode in (0, 1, 3, 4) or (mode in (2, 5) and len(bias_tag[0]) == 1):
@@ -1539,7 +1575,6 @@ def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
                     e_dis_exp[eid] += current_ve[svid]['vol_frac'] *\
                         bias_tag[vid][eid]
     else:
-        # Energy is biased according to the bias_tag
         for vid in range(num_ve):
             current_ve = cell_fracs[cell_fracs['idx'] == vid]
             for svid in range(len(current_ve)):
@@ -1646,13 +1681,19 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     num_ve, num_sve, max_num_cells = _get_num_ve_sve_and_max_num_cells(
         cell_fracs)
     # set up e_bounds
-    num_e_groups = len(src_tag[0])//max_num_cells
+    if mode in (0, 1, 2):
+        num_e_groups = len(src_tag[0])
+    elif mode in (3, 4, 5):
+        num_e_groups = len(src_tag[0])//max_num_cells
     e_bounds = [i*1.0/num_e_groups for i in range(num_e_groups+1)]
     e_bounds = np.array(e_bounds)
     # set up mesh
     m = _create_mesh_via_num_ve(num_ve)
     # set up src tag
-    m.src = NativeMeshTag(max_num_cells*num_e_groups, float)
+    if mode in (0, 1, 2):
+        m.src = NativeMeshTag(num_e_groups, float)
+    elif mode in (3, 4, 5):
+        m.src = NativeMeshTag(max_num_cells*num_e_groups, float)
     m.src[:] = src_tag
     # set up cell_number and cell_fracs tag
     m.tag_cell_fracs(cell_fracs)
@@ -1673,6 +1714,8 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
 
     # construct Sampler
     sampler = Sampler(filename, tag_names, e_bounds, mode)
+    # remove the temporary file
+    os.remove(filename)
 
     # sampling and tally, tally should be defined by the mesh cell_fracs
     num_samples = 5000
@@ -1680,14 +1723,18 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
 
     seed(1953)
     for i in range(num_samples):
-        s = sampler.particle_birth(np.array([uniform(0, 1) for x in range(6)]))
+        rands = np.array([uniform(0, 1) for x in range(6)])
+        s = sampler.particle_birth(rands)
         # check w, and c for each particle
         # calculate the expected weight and cell_number
         exp_w, exp_c = _cal_exp_w_c(s, mode, cell_fracs, src_tag, bias_tag)
         assert_equal(s.w, exp_w)
         # when mode in (0, 1, 2), the set exp_c is (-1), otherwise it contains
         # several available cell number
-        assert(s.c in exp_c)
+        if mode in (0, 1, 2):
+            assert(set(s.cell_list) == exp_c)
+        elif mode in (3, 4, 5):
+            assert(set(s.cell_list).issubset(exp_c))
         # store all the particles for the convinent of distribution check
         particles.append(s)
 
@@ -1710,5 +1757,3 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
             assert(abs(e_dis[i] - e_dis_exp[i]) / e_dis_exp[i] < 0.05)
         else:
             assert_equal(e_dis[i], 0.0)
-    # remove the temporary file
-    os.remove(filename)
