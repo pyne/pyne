@@ -9,7 +9,7 @@
 ! (e.g. most Cartesean meshes). This version of find_cell does not work for
 ! repeated geometries or universes.
 !
-! Full instructions on compiling and using MCNP6 with this subroutine are found
+! Full instructions on compiling and using MCNP5 with this subroutine are found
 ! in the PyNE user manual.
 
 function find_cell(cell_list, cell_list_size) result(icl_tmp)

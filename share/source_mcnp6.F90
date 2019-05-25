@@ -1,6 +1,6 @@
-! This is Fortran90 code that can be compiled directly into MCNP5 in order
+! This is Fortran90 code that can be compiled directly into MCNP6 in order
 ! to use the mesh-based sampling capabilities provided by the Sampler class
-! within source_sampling.cpp. The subroutine "source" calls the MCNP5 interface
+! within source_sampling.cpp. The subroutine "source" calls the MCNP6 interface
 ! C++ functions within source_sampling.cpp. The function "find_cell"
 ! determines what geomety cell a sampled x, y, z are in, which allows for
 ! void rejection within the source subroutine. Void rejection ensures that
