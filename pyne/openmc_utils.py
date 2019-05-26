@@ -16,6 +16,19 @@ else:
 
 from pyne import nucname
 from pyne.utils import QAWarning
+from pyne.mesh import HAVE_PYMOAB
+try:
+    from pymoab import core as mb_core, hcoord, scd, types
+    from pymoab.rng import subtract
+    from pymoab.tag import Tag
+    from pymoab.types import _eh_py_type, _TAG_TYPE_STRS
+    HAVE_PYMOAB = True
+except ImportError:
+    HAVE_PYMOAB = False
+    warn("The PyMOAB optional dependency could not be imported. "
+         "Some aspects of the openmc module may be incomplete.", QAWarning)
+
+
 from pyne.mesh import Mesh
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
@@ -199,7 +212,8 @@ def mesh_from_statepoint(filename, tally_num, particle_type='n'):
     tally_name = ''.join(["tally ", str(tally_num)])
     with tb.open_file(filename) as h5f:
         try:
-            tally_results = h5f.root.tallies._f_get_child(tally_name)._f_get_child('results')[:]
+            tally_results = get_tally_results_from_openmc_sp(filename,
+                    tally_num)
             meshes = h5f.root.tallies._f_get_child('meshes')
             if meshes._v_nchildren != 1:
                 raise ValueError("Only one mesh is support for each Tally now")
@@ -210,46 +224,12 @@ def mesh_from_statepoint(filename, tally_num, particle_type='n'):
                     mesh.lower_left[:],
                     mesh.upper_right[:],
                     mesh.dimension[:])
-            num_ves = len(mesh.dimension[0]) * len(mesh.dimension[1]) * len(mesh.dimension[2])
-            num_e_groups = len(tally_results) // num_ves
         except:
             raise ValueError("Tally {0} not found in {1}".format(str(tally_num), filename))
 
     # parameters to create mesh
     mesh = Mesh(mesh=None, structured=True, structured_coords=structred_coords)
-    ves = list(mesh.structured_iterate_hex('xyz'))
-
-    # set flux and error tag
-    # set results tag
-    flux_tag = mesh.mesh.tag_get_handle("{0}_result".format(particle_type),
-        num_e_groups, types.MB_TYPE_DOUBLE, types.MB_TYPE_DENSE,
-        create_if_missing=True)
-    flux_data = tally_results[:, :, 0]
-    flux_data = np.reshape(flux_data, newshape=(num_ves, num_e_groups))
-    flux_data = flux_data.transpose()
-    mesh.mesh.tag_set_data(flux_tag, ves, flux_data)
-    # set result_rel_error tag
-    error_tag = mesh.mesh.tag_get_handle(
-        "{0}_result_rel_err".format(particle_type),
-        num_e_groups, types.MB_TYPE_DOUBLE, types.MB_TYPE_DENSE,
-        create_if_missing=True)
-    error_data = tally_results[:, :, 1]
-    error_data = np.reshape(error_data, newshape=(num_ves, num_e_groups))
-    error_data = error_data.transpose()
-    mesh.mesh.tag_set_data(error_tag, ves, error_data)
-    # set result_total tag
-    total_flux_tag = mesh.mesh.tag_get_handle(
-        "{0}_result_total".format(particle_type), 1, types.MB_TYPE_DOUBLE,
-        types.MB_TYPE_DENSE, create_if_missing=True)
-    total_flux_data = np.sum(flux_data, axis=1)
-    mesh.mesh.tag_set_data(total_flux_tag, ves, total_flux_data)
-    # set result_total_rel_error tag
-    total_error_tag = mesh.mesh.tag_get_handle(
-        "{0}_result_total_rel_error".format(particle_type), 1,
-        types.MB_TYPE_DOUBLE, types.MB_TYPE_DENSE,
-        create_if_missing=True)
-    total_error_data = np.sum(error_data, axis=1)
-    mesh.mesh.tag_set_data(total_error_tag, ves, total_error_data)
+    mesh = mesh.tag_flux_error_from_openmc_tally_results(tally_results)
     return mesh
 
 def calc_structured_coords(lower_left, upper_right, dimension):

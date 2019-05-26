@@ -1443,6 +1443,60 @@ class Mesh(object):
                                             'largest cell volume fraction',
                  size=1, dtype=float)
 
+    def tag_flux_error_from_openmc_tally_results(self, tally_results,
+            particle_type='n'):
+        """
+        This function uses the output tally_results from
+        openmc.get_tally_results_from_openmc_sp to set the flux and error tags.
+
+        Parameters
+        ----------
+        tally_results : numpy array
+            This numpy array contains the flux and error data read from an
+            openmc state point file. The shape of this numpy array is
+            (num_ves*num_e_groups, 1, 2). In the first dimension, the energy
+            changes the fastest.
+            The flux data is tally_results[:, :, 0], and the error data is
+            tally_results[:, :, 1].
+        """
+        num_ves = len(self)
+        num_e_groups = len(tally_results) // num_ves
+        if particle_type.lower() == 'n':
+            par_name = "neutron"
+        elif particle_type.lower() == 'p':
+            par_name = "photon"
+        else:
+            raise ValueError("Particle type {0} not supported!".format(
+                particle_type))
+    
+        # set flux and error tag
+        # set results tag
+        flux_data = tally_results[:, :, 0]
+        flux_data = np.reshape(flux_data, newshape=(num_ves, num_e_groups))
+        self.tag(name="{0}_result".format(particle_type), value=flux_data,
+                 doc='{0} flux'.format(
+                     par_name),
+                 tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
+        # set result_rel_error tag
+        error_data = tally_results[:, :, 1]
+        error_data = np.reshape(error_data, newshape=(num_ves, num_e_groups))
+        self.tag(name="{0}_result_rel_error".format(particle_type),
+                 value=error_data,
+                 doc='{0} flux relative error'.format(par_name),
+                 tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
+        # set result_total tag
+        total_flux_data = np.sum(flux_data, axis=1)
+        self.tag(name="{0}_result_total".format(particle_type),
+                 value=total_flux_data,
+                 doc='total {0} flux'.format(par_name),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+        # set result_total_rel_error tag
+        total_error_data = np.sum(error_data, axis=1)
+        self.tag(name="{0}_result_total_rel_error".format(particle_type),
+                 value=total_flux_data,
+                 doc='total {0} flux relative error'.format(par_name),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+
 
 class StatMesh(Mesh):
     """This class extends the basic Mesh class by modifying the standard

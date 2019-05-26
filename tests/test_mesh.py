@@ -1037,3 +1037,32 @@ def test_no_mats():
     assert_true(mesh.mats is None)
     i, mat, ve = next(iter(mesh))
     assert_true(mat is None)
+
+def test_tag_flux_error_from_openmc_tally_results():
+    # create a simple mesh
+    mesh = Mesh(structured_coords=[[0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0],
+        [0.0, 1.0]], structured=True)
+    tally_results = np.array(
+           [[[1.0, 0.1]], [[2.0, 0.2]], 
+            [[3.0, 0.3]], [[4.0, 0.4]],
+            [[5.0, 0.5]], [[6.0, 0.6]],
+            [[7.0, 0.7]], [[8.0, 0.8]],
+            [[9.0, 0.9]], [[10.0, 1.0]],
+            [[11.0, 1.1]], [[12.0, 1.2]]], dtype=float)
+    #mesh = openmc.mesh_add_flux_error_tag_from_openmc_tally_results(mesh,
+    #        tally_results)
+    mesh.tag_flux_error_from_openmc_tally_results(tally_results)
+    # check tag data
+    # n_flux tag
+    exp_n_flux = np.array([[1.0, 2.0],
+                          [3.0, 4.0],
+                          [5.0, 6.0],
+                          [7.0, 8.0],
+                          [9.0, 10.0],
+                          [11.0, 12.0]])
+    assert_equal(len(mesh.n_result[:]), len(exp_n_flux))
+    for i in range(len(exp_n_flux)):
+        assert_array_almost_equal(mesh.n_result[i], exp_n_flux[i])
+
+
+
