@@ -6,6 +6,7 @@ import io
 import sys
 from warnings import warn
 from collections import namedtuple
+import numpy as np
 import tables as tb
 
 if sys.version_info[0] == 2:
@@ -184,14 +185,64 @@ def mesh_from_statepoint(filename, tally_num):
             meshes = h5f.root.tallies._f_get_child('meshes')
             if meshes._v_nchildren != 1:
                 raise ValueError("Only one mesh is support for each Tally now")
-            mesh_str = meshes.__str__()
+            mesh_str = meshes._v_groups.__str__()
             mesh_name = _get_mesh_name(mesh_str)
+            mesh = meshes._f_get_child(mesh_name)
+            structured_coords = get_structured_coords(
+                    mesh.lower_left[:],
+                    mesh.upper_right[:],
+                    mesh.dimension[:])
+            num_ves = len(mesh.dimension[0]) * len(mesh.dimension[1]) * len(mesh.dimension[2])
+            num_e_groups = len(tally_results) // num_ves
         except:
             raise ValueError("Tally {0} not found in {1}".format(str(tally_num), filename))
     # parameters to create mesh
-    structured = True
+    mesh = Mesh(mesh=None, structured=True, structured_coords=structred_coords)
+    flux_tag = mesh.mesh.tag_get_handle("n_flux", num_e_groups,
+            types.MB_TYPE_DOUBLE, types.MB_TYPE_DENSE, create_if_missing=True)
+
+
 
     return False
+
+def calc_structured_coords(lower_left, upper_right, dimension):
+    """
+    This function calculate the structured mesh coordinations from OpenMC mesh
+    parameters.
+    x_bounds, y_bounds, z_bounds = [], [], []
+
+    Parameters:
+    -----------
+    lower_left : numpy array of float
+        The lower left coordinate of the mesh. A numpy array of lenght 3.
+        Format: [x_min, y_min, z_min].
+    upper_right : numpy array of float
+        The upper right coordinate of the mesh. A numpy array of lenght 3.
+        Format: [x_max, y_max, z_max].
+    dimension : numpy array of int
+        Number of mesh intervals in each dimension. A numpy array of length 3.
+        Format: [x_ints, y_ints, z_ints].
+
+    Returns:
+    --------
+    structured_coords : numpy array
+        A nested numpy array definning the boundaries of the mesh element in
+        each dimension. Format: [[x_bounds1, x_bounds2. ...],
+                                 [y_bounds1, y_bounds2, ...],
+                                 [z_bounds1, z_bounds2, ...]]
+    """
+    # check the length of parameters
+    if len(lower_left) != 3 or len(upper_right) != 3 or len(dimension) != 3:
+        raise ValueError("Only 3D OpenMC mesh is supported!")
+    # calc x_bounds
+    structured_coords = []
+    for dim in range(3):
+        bounds = []
+        step = (upper_right[dim] - lower_left[dim]) / dimension[dim]
+        for i in range(dimension[dim] + 1):
+            bounds.append(lower_left[dim] + i * step)
+        structured_coords.append(bounds)
+    return np.array(structured_coords)
 
 
 def _get_mesh_name(mesh_str):
