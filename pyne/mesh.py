@@ -1472,14 +1472,16 @@ class Mesh(object):
         # set flux and error tag
         # set results tag
         flux_data = tally_results[:, :, 0]
-        flux_data = np.reshape(flux_data, newshape=(num_ves, num_e_groups))
+        flux_data = np.reshape(flux_data, newshape=(num_e_groups, num_ves))
+        flux_data = flux_data.transpose()
         self.tag(name="{0}_flux".format(particle_type), value=flux_data,
                  doc='{0} flux'.format(
                      par_name),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
         # set result_rel_error tag
         error_data = tally_results[:, :, 1]
-        error_data = np.reshape(error_data, newshape=(num_ves, num_e_groups))
+        error_data = np.reshape(error_data, newshape=(num_e_groups, num_ves))
+        error_data = error_data.transpose()
         self.tag(name="{0}_flux_err".format(particle_type),
                  value=error_data,
                  doc='{0} flux relative error'.format(par_name),
