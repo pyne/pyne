@@ -1038,7 +1038,6 @@ def test_no_mats():
     i, mat, ve = next(iter(mesh))
     assert_true(mat is None)
 
-
 def test_meshtally_from_openmc_statepoint():
     if not HAVE_PYMOAB:
         raise SkipTest
