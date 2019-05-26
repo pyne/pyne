@@ -1060,9 +1060,9 @@ def test_tag_flux_error_from_openmc_tally_results():
                           [7.0, 8.0],
                           [9.0, 10.0],
                           [11.0, 12.0]])
-    assert_equal(len(mesh.n_result[:]), len(exp_n_flux))
+    assert_equal(len(mesh.n_flux[:]), len(exp_n_flux))
     for i in range(len(exp_n_flux)):
-        assert_array_almost_equal(mesh.n_result[i], exp_n_flux[i])
+        assert_array_almost_equal(mesh.n_flux[i], exp_n_flux[i])
 
 
 

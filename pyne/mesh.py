@@ -1473,26 +1473,26 @@ class Mesh(object):
         # set results tag
         flux_data = tally_results[:, :, 0]
         flux_data = np.reshape(flux_data, newshape=(num_ves, num_e_groups))
-        self.tag(name="{0}_result".format(particle_type), value=flux_data,
+        self.tag(name="{0}_flux".format(particle_type), value=flux_data,
                  doc='{0} flux'.format(
                      par_name),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
         # set result_rel_error tag
         error_data = tally_results[:, :, 1]
         error_data = np.reshape(error_data, newshape=(num_ves, num_e_groups))
-        self.tag(name="{0}_result_rel_error".format(particle_type),
+        self.tag(name="{0}_flux_err".format(particle_type),
                  value=error_data,
                  doc='{0} flux relative error'.format(par_name),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
         # set result_total tag
         total_flux_data = np.sum(flux_data, axis=1)
-        self.tag(name="{0}_result_total".format(particle_type),
+        self.tag(name="{0}_flux_total".format(particle_type),
                  value=total_flux_data,
                  doc='total {0} flux'.format(par_name),
                  tagtype=NativeMeshTag, size=1, dtype=float)
         # set result_total_rel_error tag
         total_error_data = np.sum(error_data, axis=1)
-        self.tag(name="{0}_result_total_rel_error".format(particle_type),
+        self.tag(name="{0}_flux_err_total".format(particle_type),
                  value=total_flux_data,
                  doc='total {0} flux relative error'.format(par_name),
                  tagtype=NativeMeshTag, size=1, dtype=float)
