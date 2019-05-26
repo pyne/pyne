@@ -15,6 +15,7 @@ warnings.simplefilter("ignore", QAWarning)
 
 from pyne import nucname
 from pyne import openmc
+from pyne.mesh import HAVE_PYMOAB, Mesh
 
 sample_xs = StringIO("""<?xml version="1.0" ?>
 <cross_sections>
@@ -43,7 +44,6 @@ sample_xs_with_mcnp_id = StringIO("""<?xml version="1.0" ?>
 """)
 
 cwd = os.getcwd()
-
 def test_ace_table_init():
     atab = openmc.AceTable(zaid='92235', path='U235.ace',
                            cross_sections_path='/tmp/cross_sections.xml')
@@ -119,21 +119,21 @@ def test_get_tally_results_from_openmc_sp():
     # 6 volume elemenes
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
     # dimension of the tally_results: (12, 1, 2)
-    exp_tally_results = np.array(
-           [[[ 0.977887, 0.956263 ]],
-            [[ 0.115698, 0.0133861]], 
-            [[ 0.181645, 0.0329949]],
-            [[ 0.938374, 0.880546 ]],
-            [[ 0.219677, 0.0482578]],
-            [[ 0.18134 , 0.0328842]],
-            [[ 4.20556 , 17.6867  ]],
-            [[ 0       , 0        ]],
-            [[ 0       , 0        ]],
-            [[ 3.40724 , 11.6093  ]],
-            [[ 0       , 0        ]],
-            [[ 0       , 0        ]]], dtype=float)
     tally_results = openmc.get_tally_results_from_openmc_sp(filename,
             tally_num=1)
+    exp_tally_results = np.array(
+           [[[0.977887, 0.956263 ]],
+            [[0.115698, 0.0133861]], 
+            [[0.181645, 0.0329949]],
+            [[0.938374, 0.880546 ]],
+            [[0.219677, 0.0482578]],
+            [[0.18134 , 0.0328842]],
+            [[4.20556 , 17.6867  ]],
+            [[0       , 0        ]],
+            [[0       , 0        ]],
+            [[3.40724 , 11.6093  ]],
+            [[0       , 0        ]],
+            [[0       , 0        ]]], dtype=float)
     # compare
     assert_array_equal(tally_results.shape, exp_tally_results.shape)
     for i in range(tally_results.shape[0]):
@@ -158,6 +158,8 @@ def test_calc_structured_coords():
                 exp_structured_coords[i])
 
 def test_mesh_from_statepoint():
+    if not HAVE_PYMOAB:
+        raise SkipTest
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.1.h5")
     tally_num = 1
 #    import pdb; pdb.set_trace()
