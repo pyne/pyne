@@ -1088,4 +1088,3 @@ def test_meshtally_from_openmc_statepoint():
             assert(is_close(mesh.n_flux_err[i][j],
                 exp_n_flux_err[i][j], rel_tol=1e-5))
 
-

@@ -261,7 +261,6 @@ def calc_structured_coords(lower_left, upper_right, dimension):
     # check the length of parameters
     if len(lower_left) != 3 or len(upper_right) != 3 or len(dimension) != 3:
         raise ValueError("Only 3D OpenMC mesh is supported!")
-    # calc x_bounds
     structured_coords = []
     for dim in range(3):
         bounds = []
