@@ -189,7 +189,7 @@ def get_tally_results_from_openmc_sp(filename, tally_num):
                 str(tally_num), filename))
     return tally_results
 
-def mesh_from_statepoint(filename, tally_num, particle_type='n'):
+def mesh_from_openmc_statepoint(filename, tally_num, particle_type='n'):
     """
     This function creates a Mesh instance from OpenMC statepoint file.
 
@@ -220,7 +220,7 @@ def mesh_from_statepoint(filename, tally_num, particle_type='n'):
             mesh_str = meshes._v_groups.__str__()
             mesh_name = _get_mesh_name(mesh_str)
             mesh = meshes._f_get_child(mesh_name)
-            structured_coords = get_structured_coords(
+            structured_coords = calc_structured_coords(
                     mesh.lower_left[:],
                     mesh.upper_right[:],
                     mesh.dimension[:])
@@ -228,8 +228,8 @@ def mesh_from_statepoint(filename, tally_num, particle_type='n'):
             raise ValueError("Tally {0} not found in {1}".format(str(tally_num), filename))
 
     # parameters to create mesh
-    mesh = Mesh(mesh=None, structured=True, structured_coords=structred_coords)
-    mesh = mesh.tag_flux_error_from_openmc_tally_results(tally_results)
+    mesh = Mesh(mesh=None, structured=True, structured_coords=structured_coords)
+    mesh.tag_flux_error_from_openmc_tally_results(tally_results)
     return mesh
 
 def calc_structured_coords(lower_left, upper_right, dimension):
@@ -268,7 +268,7 @@ def calc_structured_coords(lower_left, upper_right, dimension):
         for i in range(dimension[dim] + 1):
             bounds.append(lower_left[dim] + i * step)
         structured_coords.append(bounds)
-    return np.array(structured_coords)
+    return structured_coords
 
 
 def _get_mesh_name(mesh_str):
