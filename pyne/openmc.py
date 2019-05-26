@@ -6,6 +6,7 @@ import io
 import sys
 from warnings import warn
 from collections import namedtuple
+import tables as tb
 
 if sys.version_info[0] == 2:
     from HTMLParser import HTMLParser
@@ -14,6 +15,7 @@ else:
 
 from pyne import nucname
 from pyne.utils import QAWarning
+from pyne.mesh import Mesh
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -156,3 +158,58 @@ class CrossSections(HTMLParser):
         ace_tables = "\n  ".join([a.xml() for a in self.ace_tables])
         s = template.format(filetype=self.filetype, ace_tables=ace_tables)
         return s
+
+def mesh_from_statepoint(filename, tally_num):
+    """
+    This function creates a Mesh instance from OpenMC statepoint file.
+
+    Parameters:
+    -----------
+    filename : str
+        Filename of the OpenMC statepoint file. It ends with ".h5",
+        eg: "statepoint.10.h5".
+    tally_num : int
+        Tally number of specific mesh tally.
+
+    Returns:
+    --------
+    mesh : Mesh
+        PyNE Mesh instance.
+    """
+    # check tally_num exist
+    tally_name = ''.join(["tally ", str(tally_num)])
+    with tb.open_file(filename) as h5f:
+        try:
+            tally_results = h5f.root.tallies._f_get_child(tally_name)._f_get_child('results')[:]
+            meshes = h5f.root.tallies._f_get_child('meshes')
+            if meshes._v_nchildren != 1:
+                raise ValueError("Only one mesh is support for each Tally now")
+            mesh_str = meshes.__str__()
+            mesh_name = _get_mesh_name(mesh_str)
+        except:
+            raise ValueError("Tally {0} not found in {1}".format(str(tally_num), filename))
+    # parameters to create mesh
+    structured = True
+
+    return False
+
+
+def _get_mesh_name(mesh_str):
+    """
+    This function is used to get mesh name from a string contain it.
+    A mesh string contains the content such as:
+    "{'mesh 14': /tallies/meshes/mesh 14 (Group)"
+
+    Parameters:
+    -----------
+    mesh_str : str
+        A mesh string contains mesh name.
+    
+    Returns:
+    --------
+    mesh_name : str
+        The mesh name, Eg: "mesh 14"
+    """
+    ls = mesh_str.strip().split(':')
+    mesh_name = ls[0].split("'")[1]
+    return mesh_name

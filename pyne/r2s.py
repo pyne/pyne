@@ -46,6 +46,11 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
     elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
             and mesh_reference.endswith(".h5m"):
         m = Mesh(structured=False, mesh=mesh_reference)
+    # mesh_reference is a openmc statepoint file
+    elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
+            and mesh_reference.endswith(".h5"):
+        mesh_reference = mesh_from_statepoint(mesh_reference, tally_num)
+        m = mesh_reference.tally[tally_num]
     #  mesh_reference is Meshtal or meshtal file
     elif tally_num is not None:
         #  mesh_reference is meshtal file
