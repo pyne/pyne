@@ -160,7 +160,23 @@ class CrossSections(HTMLParser):
         s = template.format(filetype=self.filetype, ace_tables=ace_tables)
         return s
 
-def mesh_from_statepoint(filename, tally_num):
+def get_tally_results_from_openmc_sp(filename, tally_num):
+    """
+    This function reads a OpenMC state point file to get the results data for
+    specific tally number.
+    """
+    # check tally_num exist
+    tally_name = ''.join(["tally ", str(tally_num)])
+    with tb.open_file(filename) as h5f:
+        try:
+            tally_results = h5f.root.tallies._f_get_child(
+                    tally_name)._f_get_child('results')[:]
+        except:
+            raise ValueError("Tally {0} not found in file: {1}".format(
+                str(tally_num), filename))
+    return tally_results
+
+def mesh_from_statepoint(filename, tally_num, particle_type='n'):
     """
     This function creates a Mesh instance from OpenMC statepoint file.
 
@@ -171,6 +187,8 @@ def mesh_from_statepoint(filename, tally_num):
         eg: "statepoint.10.h5".
     tally_num : int
         Tally number of specific mesh tally.
+    particle_type : str
+        Type of the tallied particle.
 
     Returns:
     --------
@@ -196,14 +214,43 @@ def mesh_from_statepoint(filename, tally_num):
             num_e_groups = len(tally_results) // num_ves
         except:
             raise ValueError("Tally {0} not found in {1}".format(str(tally_num), filename))
+
     # parameters to create mesh
     mesh = Mesh(mesh=None, structured=True, structured_coords=structred_coords)
-    flux_tag = mesh.mesh.tag_get_handle("n_flux", num_e_groups,
-            types.MB_TYPE_DOUBLE, types.MB_TYPE_DENSE, create_if_missing=True)
+    ves = list(mesh.structured_iterate_hex('xyz'))
 
-
-
-    return False
+    # set flux and error tag
+    # set results tag
+    flux_tag = mesh.mesh.tag_get_handle("{0}_result".format(particle_type),
+        num_e_groups, types.MB_TYPE_DOUBLE, types.MB_TYPE_DENSE,
+        create_if_missing=True)
+    flux_data = tally_results[:, :, 0]
+    flux_data = np.reshape(flux_data, newshape=(num_ves, num_e_groups))
+    flux_data = flux_data.transpose()
+    mesh.mesh.tag_set_data(flux_tag, ves, flux_data)
+    # set result_rel_error tag
+    error_tag = mesh.mesh.tag_get_handle(
+        "{0}_result_rel_err".format(particle_type),
+        num_e_groups, types.MB_TYPE_DOUBLE, types.MB_TYPE_DENSE,
+        create_if_missing=True)
+    error_data = tally_results[:, :, 1]
+    error_data = np.reshape(error_data, newshape=(num_ves, num_e_groups))
+    error_data = error_data.transpose()
+    mesh.mesh.tag_set_data(error_tag, ves, error_data)
+    # set result_total tag
+    total_flux_tag = mesh.mesh.tag_get_handle(
+        "{0}_result_total".format(particle_type), 1, types.MB_TYPE_DOUBLE,
+        types.MB_TYPE_DENSE, create_if_missing=True)
+    total_flux_data = np.sum(flux_data, axis=1)
+    mesh.mesh.tag_set_data(total_flux_tag, ves, total_flux_data)
+    # set result_total_rel_error tag
+    total_error_tag = mesh.mesh.tag_get_handle(
+        "{0}_result_total_rel_error".format(particle_type), 1,
+        types.MB_TYPE_DOUBLE, types.MB_TYPE_DENSE,
+        create_if_missing=True)
+    total_error_data = np.sum(error_data, axis=1)
+    mesh.mesh.tag_set_data(total_error_tag, ves, total_error_data)
+    return mesh
 
 def calc_structured_coords(lower_left, upper_right, dimension):
     """

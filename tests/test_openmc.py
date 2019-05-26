@@ -6,6 +6,7 @@ import warnings
 import os
 import nose
 import numpy as np
+from math import isclose
 from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
@@ -112,6 +113,35 @@ def test_get_mesh_name():
                   'type' (Array), 'upper_right' (Array), 'width' (Array)]}"""
     exp_mesh_name = "mesh 14"
     assert_equal(openmc._get_mesh_name(mesh_str), exp_mesh_name)
+
+def test_get_tally_results_from_openmc_sp():
+    # energy bin: [0.0, 1.0, 20.0], 2bins
+    # 6 volume elemenes
+    filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
+    # dimension of the tally_results: (12, 1, 2)
+    exp_tally_results = np.array(
+           [[[ 0.977887, 0.956263 ]],
+            [[ 0.115698, 0.0133861]], 
+            [[ 0.181645, 0.0329949]],
+            [[ 0.938374, 0.880546 ]],
+            [[ 0.219677, 0.0482578]],
+            [[ 0.18134 , 0.0328842]],
+            [[ 4.20556 , 17.6867  ]],
+            [[ 0       , 0        ]],
+            [[ 0       , 0        ]],
+            [[ 3.40724 , 11.6093  ]],
+            [[ 0       , 0        ]],
+            [[ 0       , 0        ]]], dtype=float)
+    tally_results = openmc.get_tally_results_from_openmc_sp(filename,
+            tally_num=1)
+    # compare
+    assert_array_equal(tally_results.shape, exp_tally_results.shape)
+    for i in range(tally_results.shape[0]):
+        for j in range(tally_results.shape[1]):
+            for k in  range(tally_results.shape[2]):
+                # data in h5 file is 6 digits
+                assert_true(isclose(tally_results[i][j][k],
+                    exp_tally_results[i][j][k], rel_tol=1e-5))
 
 def test_calc_structured_coords():
     lower_left = np.array([0.0, 0.0, 0.0])
