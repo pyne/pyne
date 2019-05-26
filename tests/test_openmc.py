@@ -3,6 +3,7 @@ from __future__ import unicode_literals, division
 from io import StringIO
 import warnings
 
+import os
 import nose
 from nose.tools import assert_equal, assert_true
 
@@ -38,6 +39,7 @@ sample_xs_with_mcnp_id = StringIO("""<?xml version="1.0" ?>
 </cross_sections>
 """)
 
+cwd = os.getcwd()
 
 def test_ace_table_init():
     atab = openmc.AceTable(zaid='92235', path='U235.ace',
@@ -102,6 +104,17 @@ def test_cross_sections_roundtrip():
     obs = xs.xml()
     assert_equal(exp, obs)
 
+def test_get_mesh_name():
+    mesh_str = """{'mesh 14': /tallies/meshes/mesh 14 (Group) ''\n
+                  children := ['dimension' (Array), 'lower_left' (Array), 
+                  'type' (Array), 'upper_right' (Array), 'width' (Array)]}"""
+    exp_mesh_name = "mesh 14"
+    assert_equal(openmc._get_mesh_name(mesh_str), exp_mesh_name)
+
+def test_mesh_from_statepoint():
+    filename = os.path.join(cwd, "files_test_openmc", "statepoint.1.h5")
+    tally_num = 1
+    #assert_true(openmc.mesh_from_statepoint(filename, tally_num))
 
 if __name__ == "__main__":
     nose.runmodule()
