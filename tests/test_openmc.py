@@ -5,7 +5,9 @@ import warnings
 
 import os
 import nose
+import numpy as np
 from nose.tools import assert_equal, assert_true
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
@@ -111,10 +113,25 @@ def test_get_mesh_name():
     exp_mesh_name = "mesh 14"
     assert_equal(openmc._get_mesh_name(mesh_str), exp_mesh_name)
 
+def test_calc_structured_coords():
+    lower_left = np.array([0.0, 0.0, 0.0])
+    upper_right = np.array([1.0, 2.0, 3.0])
+    dimension = np.array([2, 4, 5])
+    exp_structured_coords = np.array([[0.0, 0.5, 1.0],
+                                      [0.0, 0.5, 1.0, 1.5, 2.0],
+                                      [0.0, 0.6, 1.2, 1.8, 2.4, 3.0]])
+    structured_coords = openmc.calc_structured_coords(lower_left,
+            upper_right, dimension)
+    assert_equal(len(structured_coords), len(exp_structured_coords))
+    for i in range(len(exp_structured_coords)):
+        assert_array_almost_equal(structured_coords[i],
+                exp_structured_coords[i])
+
 def test_mesh_from_statepoint():
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.1.h5")
     tally_num = 1
-    #assert_true(openmc.mesh_from_statepoint(filename, tally_num))
+#    import pdb; pdb.set_trace()
+#    assert_true(openmc.mesh_from_statepoint(filename, tally_num))
 
 if __name__ == "__main__":
     nose.runmodule()
