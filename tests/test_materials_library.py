@@ -26,7 +26,7 @@ def assert_mat_almost_equal(first, second, places=7):
     assert_almost_equal(first.mass, second.mass, places=places)
     assert_almost_equal(first.density, second.density, places=places)
     assert_almost_equal(first.atoms_per_molecule, second.atoms_per_molecule, places=places)
-    assert_equal(first.metadata, second.metadata)
+    assert_equal(first.metadata["name"], second.metadata["name"])
     nucs = set(second.comp)
     assert_equal(set(first.comp), nucs)
     for nuc in nucs:
@@ -155,3 +155,24 @@ def test_matlib_hdf5():
     for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
+
+def test_matlib_query():
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.metadata["name"] = "Aqua sera."
+    mat_nucvec = Material(nucvec)
+    mat_nucvec.metadata["name"] = "nucvec"
+    lib = { "nucvec": nucvec,"aqua": water}
+    matlib = MaterialLibrary(lib)
+    
+    matlib_aqua = matlib[0]
+    assert_mat_almost_equal(water, matlib_aqua)
+
+    matlib_nucvec = matlib[1]
+    assert_mat_almost_equal(mat_nucvec, matlib_nucvec)
+
+    mat_leu = Material(leu)
+    mat_leu.metadata["name"] = "leu"
+    matlib[1] = mat_leu
+    matlib_leu = matlib[1]
+    assert_mat_almost_equal(mat_leu, matlib_leu)
