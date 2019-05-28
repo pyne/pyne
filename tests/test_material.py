@@ -1273,7 +1273,7 @@ def test_gdml():
                       '  <fraction ref="U238" n="0.96" />\n'
                       '</element>\n'
                       '<material name="leu" formula="leu" >\n'
-                      '  <D value=19.1" />\n'
+                      '  <D value="19.1" />\n'
                       '  <fraction n="1" ref="mat2_Uranium" />\n'
                       '</material>\n')
     assert_equal(gdml_input, gdml_input_exp)
