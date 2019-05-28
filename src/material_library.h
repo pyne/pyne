@@ -68,7 +68,6 @@ class MaterialLibrary {
 
   ~MaterialLibrary() {};  //< default destructor
 
-  void renumber_mat();
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the HDF5 file.
@@ -84,8 +83,7 @@ class MaterialLibrary {
     /// \param datapath Path to the materials in the file.
     /// \param protocol Flag for layout of material on disk.
   */
-  void from_hdf5(char* filename, char* datapath = "/materials",
-                 char* nucpath = "", int protocol = 1);
+  void from_hdf5(char* filename, char* datapath, char* nucpath, int protocol = 1);
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the json file.
@@ -112,8 +110,7 @@ class MaterialLibrary {
    *             appended to the end of the dataset.
    *  \param chunksize The chunksize for all material data on disk.
   */
-  void write_hdf5(char* filename, char* datapath = "/materials",
-                  char* nucpath = "/nucid");
+  void write_hdf5(char* filename, char* datapath, char* nucpath);
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
@@ -143,6 +140,8 @@ class MaterialLibrary {
   /**
    * \brief Add a material to the library
    * \param mat material to add
+   * \param mat_name name of the material to add(will overwrite material name 
+            if it already has one)
   */
   void add_material(pyne::Material mat, char* mat_name);
   /**
@@ -175,12 +174,12 @@ class MaterialLibrary {
    * \brief Get a material of the Library by name
    * \param mat_name name of the material to return
   */
-  pyne::Material* get_element(const std::string& mat_name);
+  pyne::Material* get_material_ptr(const std::string& mat_name);
   /**
    * \brief Get a material of the Library by name
    * \param num number of the material to return
   */
-  pyne::Material* get_element_by_indice(int num);
+  pyne::Material* get_material_ptr(int num);
   /**
    * \brief Get the material Library
    * \return std::map<std::string, pyne::MaterialLibrary>

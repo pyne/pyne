@@ -157,7 +157,7 @@ cdef class _MaterialLibrary:
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
         if isinstance(key, int):
-            c_mat = deref(self._inst.get_element_by_indice(key))
+            c_mat = deref(self._inst.get_material_ptr(<int> key) )
         else:
             c_matname = key
             c_mat = self._inst.get_material(c_matname)
@@ -267,10 +267,10 @@ cdef class _MaterialLibrary:
         if isinstance(key, basestring):
             key = key.encode('UTF-8')
         if isinstance(key, int):
-            c_mat = self._inst.get_element_by_indice(key)
+            c_mat = self._inst.get_material_ptr(<int>key)
         else:
             c_matname = key
-            c_mat = self._inst.get_element(c_matname)
+            c_mat = self._inst.get_material_ptr(<std_string>c_matname)
 
         # build a PyNE Material object form the cpp_material
         py_mat = material.Material(free_mat = False)
