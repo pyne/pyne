@@ -2179,3 +2179,4 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
     return tab
 
 ensure_material = lambda m: m if isinstance(m, Material) else Material(m)
+

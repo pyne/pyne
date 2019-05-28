@@ -119,7 +119,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   std::pair<pyne::matname_set::iterator, bool> mat_insert;
   if (mat.metadata.isMember("mat_number")) {
     warning(
-        "Pre-existing material number in materiali metadata... Material number "
+        "Pre-existing material number in material metadata... Material number "
         "are overwriten when added in a MaterialLibrary.");
   }
 

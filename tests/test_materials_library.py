@@ -1,6 +1,7 @@
 import os
 
-from nose.tools import assert_true, assert_false, assert_in, assert_equal
+from nose.tools import assert_true, assert_false, assert_almost_equal, assert_equal
+from pyne import nuc_data
 from pyne.dbgen.materials_library import *
 from pyne.material import Material
 from pyne.material_library import MaterialLibrary
@@ -9,6 +10,27 @@ import pyne.nucname as nucname
 import tables as tb
 import numpy as np
 
+nucvec = {10010000:  1.0,
+          80160000:  1.0,
+          691690000: 1.0,
+          922350000: 1.0,
+          922380000: 1.0,
+          942390000: 1.0,
+          942410000: 1.0,
+          952420000: 1.0,
+          962440000: 1.0,
+          }
+leu = {922380000: 0.96, 922350000: 0.04}
+
+def assert_mat_almost_equal(first, second, places=7):
+    assert_almost_equal(first.mass, second.mass, places=places)
+    assert_almost_equal(first.density, second.density, places=places)
+    assert_almost_equal(first.atoms_per_molecule, second.atoms_per_molecule, places=places)
+    assert_equal(first.metadata, second.metadata)
+    nucs = set(second.comp)
+    assert_equal(set(first.comp), nucs)
+    for nuc in nucs:
+        assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
 
 def assert_close(obs, exp, margin=1e-6):
     # default margin is because we only have 1e-6 of precision
@@ -92,3 +114,44 @@ def test_against_nuc_data():
             set(pubr3.comp.items()))
     assert_equal(obs_pubr3.density, pubr3.density)
     assert_equal(obs_pubr3.metadata["name"], pubr3.metadata["name"])
+
+def test_matlib_json():
+    filename = "matlib.json"
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.metadata["name"] = "Aqua sera."
+    lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
+    wmatlib = MaterialLibrary(lib)
+    wmatlib.write_json(filename)
+    
+    rmatlib = MaterialLibrary()
+    rmatlib.from_json(filename)
+    assert_equal(set(wmatlib), set(rmatlib))
+    for key in rmatlib:
+        assert_mat_almost_equal(wmatlib[key], rmatlib[key])
+    os.remove(filename)
+
+def test_matlib_hdf5_nuc_data():
+    matlib = MaterialLibrary()
+    matlib.from_hdf5(nuc_data, datapath="/material_library/materials")
+
+def test_matlib_hdf5():
+    filename = "matlib.h5"
+    if filename in os.listdir('.'):
+        os.remove(filename)
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.metadata["name"] = "Aqua sera."
+    lib = { "leu": Material(leu),"nucvec": nucvec,"aqua": water}
+    wmatlib = MaterialLibrary(lib)
+    wmatlib.write_hdf5(filename)
+    rmatlib = MaterialLibrary()
+    rmatlib.from_hdf5(filename)
+    os.remove(filename)
+    # Round trip!
+    rmatlib.write_hdf5(filename)
+    wmatlib = MaterialLibrary(filename)
+    assert_equal(set(wmatlib), set(rmatlib))
+    for key in rmatlib:
+        assert_mat_almost_equal(wmatlib[key], rmatlib[key])
+    os.remove(filename)

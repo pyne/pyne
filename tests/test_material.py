@@ -14,6 +14,7 @@ warnings.simplefilter("ignore", QAWarning)
 from pyne import nuc_data
 from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
     MapStrMaterial, MultiMaterial
+from pyne.material import assert_mat_almost_equal as assert_mat_almost_equal
 from pyne.material_library import MaterialLibrary
 from pyne import jsoncpp
 from pyne import data
@@ -51,7 +52,6 @@ def assert_mat_almost_equal(first, second, places=7):
     assert_equal(set(first.comp), nucs)
     for nuc in nucs:
         assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
-
 
 def make_mat_txt():
     """Helper for mat.txt"""
@@ -1550,54 +1550,6 @@ def test_rw_json():
     rmat = Material()
     rmat.from_json(filename)
     assert_equal(wmat, rmat)
-    os.remove(filename)
-
-
-
-#
-#  Material Library
-#
-
-
-def test_matlib_json():
-    filename = "matlib.json"
-    water = Material()
-    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
-    water.metadata["name"] = "Aqua sera."
-    lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
-    wmatlib = MaterialLibrary(lib)
-    wmatlib.write_json(filename)
-    
-    rmatlib = MaterialLibrary()
-    rmatlib.from_json(filename)
-    assert_equal(set(wmatlib), set(rmatlib))
-    for key in rmatlib:
-        assert_mat_almost_equal(wmatlib[key], rmatlib[key])
-    os.remove(filename)
-
-def test_matlib_hdf5_nuc_data():
-    matlib = MaterialLibrary()
-    matlib.from_hdf5(nuc_data, datapath="/material_library/materials")
-
-def test_matlib_hdf5():
-    filename = "matlib.h5"
-    if filename in os.listdir('.'):
-        os.remove(filename)
-    water = Material()
-    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
-    water.metadata["name"] = "Aqua sera."
-    lib = { "leu": Material(leu),"nucvec": nucvec,"aqua": water}
-    wmatlib = MaterialLibrary(lib)
-    wmatlib.write_hdf5(filename)
-    rmatlib = MaterialLibrary()
-    rmatlib.from_hdf5(filename)
-    os.remove(filename)
-    # Round trip!
-    rmatlib.write_hdf5(filename)
-    wmatlib = MaterialLibrary(filename)
-    assert_equal(set(wmatlib), set(rmatlib))
-    for key in rmatlib:
-        assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
 
