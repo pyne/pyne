@@ -245,7 +245,7 @@ cdef class _MaterialLibrary:
                 value_proxy).mat_pointer))
         else:
             if (self._inst.name_order.size() > key): 
-                value.metadata["mat_number"] = key
+                value.metadata["mat_number"] = key+1
                 if 'name' not in value.metadata:
                     value.metadata["name"] = "m" + str(key+1)
                 value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
