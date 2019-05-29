@@ -1571,7 +1571,6 @@ class StatMesh(Mesh):
 
         return mesh_1
 
-
 class MeshTally(StatMesh):
     """This class stores all information from all single mesh tally that
     exists within some meshtal or state point file. Header information is
@@ -1863,7 +1862,6 @@ class MeshTally(StatMesh):
                  value=total_flux_data,
                  doc='total {0} flux relative error'.format(particle),
                  tagtype=NativeMeshTag, size=1, dtype=float)
-
 
 
 
