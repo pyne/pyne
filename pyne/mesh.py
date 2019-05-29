@@ -1458,8 +1458,13 @@ class Mesh(object):
             changes the fastest.
             The flux data is tally_results[:, :, 0], and the error data is
             tally_results[:, :, 1].
+            The unit of flux data is units are particle-cm per source particle.
+            Different from the neutron flux tallied in MCNP, this tally results
+            does not divide the mesh element volume.
         """
         num_ves = len(self)
+        # currently, the openmc mesh are uniform
+        ve_vol = self.structured_hex_volume(0, 0, 0)
         num_e_groups = len(tally_results) // num_ves
         if particle_type.lower() == 'n':
             par_name = "neutron"
@@ -1471,7 +1476,7 @@ class Mesh(object):
     
         # set flux and error tag
         # set results tag
-        flux_data = tally_results[:, :, 0]
+        flux_data = np.divide(tally_results[:, :, 0], ve_vol)
         flux_data = np.reshape(flux_data, newshape=(num_e_groups, num_ves))
         flux_data = flux_data.transpose()
         self.tag(name="{0}_flux".format(particle_type), value=flux_data,
@@ -1479,7 +1484,7 @@ class Mesh(object):
                      par_name),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
         # set result_rel_error tag
-        error_data = tally_results[:, :, 1]
+        error_data = np.divide(tally_results[:, :, 1], ve_vol)
         error_data = np.reshape(error_data, newshape=(num_e_groups, num_ves))
         error_data = error_data.transpose()
         self.tag(name="{0}_flux_err".format(particle_type),
