@@ -244,18 +244,13 @@ cdef class _MaterialLibrary:
             self._inst.add_material( deref((<material._Material>
                 value_proxy).mat_pointer))
         else:
-            print ("key", key)
-            if 'name' not in value.metadata:
-                if (self._inst.name_order.size() > key): 
-                    value.metadata["name"] = self._inst.name_order[key]
-                    value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
-                    self._inst.replace(key, deref((<material._Material>
-                        value_proxy).mat_pointer)) 
-                else:
+            if (self._inst.name_order.size() > key): 
+                value.metadata["mat_number"] = key
+                if 'name' not in value.metadata:
                     value.metadata["name"] = "_" + str(key)
-                    value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
-                    self._inst.add_material( deref((<material._Material>
-                        value_proxy).mat_pointer))
+                value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+                self._inst.replace(key, deref((<material._Material>
+                    value_proxy).mat_pointer)) 
             else:
                 value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
                 self._inst.add_material( deref((<material._Material> value_proxy).mat_pointer))
