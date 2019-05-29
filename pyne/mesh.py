@@ -704,8 +704,8 @@ class Mesh(object):
             stored in self.dims.
 
         """
-	# if Mesh is made and no parameters passed, raise MeshError
-	if mesh is None and not structured and structured_coords is None and \
+        # if Mesh is made and no parameters passed, raise MeshError
+        if mesh is None and not structured and structured_coords is None and \
             structured_set is None and structured_ordering=='xyz' and mats==():
             raise MeshError("Trivial mesh instantiation "
                             "For structured mesh instantiation, need to "
@@ -714,7 +714,7 @@ class Mesh(object):
                                 "B. Mesh file\n"
                                 "C. Mesh coordinates\n"
                                 "D. Structured entity set AND PyMOAB instance")
-	    return 
+            return 
         if mesh is None:
             self.mesh = mb_core.Core()
         elif isinstance(mesh, basestring):
