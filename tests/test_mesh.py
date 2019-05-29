@@ -1042,6 +1042,7 @@ def test_tag_flux_error_from_openmc_tally_results():
     # create a simple mesh
     mesh = Mesh(structured_coords=[[0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0],
         [0.0, 1.0]], structured=True)
+    ve_vol = 1.0
     tally_results = np.array(
            [[[1.0, 0.1]], [[2.0, 0.2]], 
             [[3.0, 0.3]], [[4.0, 0.4]],
@@ -1054,15 +1055,27 @@ def test_tag_flux_error_from_openmc_tally_results():
     mesh.tag_flux_error_from_openmc_tally_results(tally_results)
     # check tag data
     # n_flux tag
-    exp_n_flux = np.array([[1.0, 2.0],
-                          [3.0, 4.0],
-                          [5.0, 6.0],
-                          [7.0, 8.0],
-                          [9.0, 10.0],
-                          [11.0, 12.0]])
+    exp_n_flux = np.divide(np.array([[1.0, 7.0],
+                                     [2.0, 8.0],
+                                     [3.0, 9.0],
+                                     [4.0, 10.0],
+                                     [5.0, 11.0],
+                                     [6.0, 12.0]]), ve_vol)
     assert_equal(len(mesh.n_flux[:]), len(exp_n_flux))
     for i in range(len(exp_n_flux)):
         assert_array_almost_equal(mesh.n_flux[i], exp_n_flux[i])
+    # n_err tag data
+    exp_n_flux_err = np.divide(np.array([[0.1, 0.7],
+                                         [0.2, 0.8],
+                                         [0.3, 0.9],
+                                         [0.4, 1.0],
+                                         [0.5, 1.1],
+                                         [0.6, 1.2]]), ve_vol)
+    assert_equal(len(mesh.n_flux_err[:]), len(exp_n_flux_err))
+    for i in range(len(exp_n_flux_err)):
+        assert_array_almost_equal(mesh.n_flux_err[i], exp_n_flux_err[i])
+
+
 
 
 
