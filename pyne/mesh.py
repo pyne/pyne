@@ -714,7 +714,6 @@ class Mesh(object):
                                 "B. Mesh file\n"
                                 "C. Mesh coordinates\n"
                                 "D. Structured entity set AND PyMOAB instance")
-            return 
         if mesh is None:
             self.mesh = mb_core.Core()
         elif isinstance(mesh, basestring):
