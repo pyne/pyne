@@ -10,7 +10,7 @@ import itertools
 # For python3, do nothing with zip.
 try:
     from itertools import izip as zip
-except:
+except ImportError:
     pass
 
 # izip_longest in python3 was renamed to zip_longest in python3

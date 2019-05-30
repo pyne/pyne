@@ -11,7 +11,7 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 # For python3, do nothing with zip.
 try:
     from itertools import izip as zip
-except:
+except ImportError:
     pass
 from warnings import warn
 from pyne.utils import QAWarning
