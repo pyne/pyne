@@ -157,6 +157,14 @@ def test_calc_structured_coords():
         assert_array_almost_equal(structured_coords[i],
                 exp_structured_coords[i])
 
+def test_get_ebins_from_openmc_sp():
+    # energy bin: [0.0, 1.0, 20.0], 2bins
+    # 6 volume elemenes
+    filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
+    # OpenMC energy unit is eV
+    exp_ebins = np.array([0.0, 1.0, 20.0]) * 1e6
+    ebins = openmc.get_ebins_from_openmc_sp(filename, tally_num=1)
+    assert_array_equal(ebins, exp_ebins)
 
 if __name__ == "__main__":
     nose.runmodule()
