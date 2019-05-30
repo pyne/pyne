@@ -5,7 +5,10 @@ import numpy as np
 from pyne.particle import mcnp
 from .mcnp import Wwinp
 from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
-# default zip in python3 behaves as itertools.izip as python2
+
+# The buildin zip in python3 behaves as itertools.izip as python2.
+# For python2, we need to import izip as zip.
+# For python3, do nothing with zip.
 try:
     from itertools import izip as zip
 except:

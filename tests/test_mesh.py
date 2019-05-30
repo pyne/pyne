@@ -4,11 +4,15 @@ import time
 import shutil
 import warnings
 import itertools
-# default zip in python3 behaves as itertools.izip as python2
+
+# The buildin zip in python3 behaves as itertools.izip as python2.
+# For python2, we need to import izip as zip.
+# For python3, do nothing with zip.
 try:
     from itertools import izip as zip
 except:
     pass
+
 # izip_longest in python3 was renamed to zip_longest in python3
 try:
     from itertools import izip_longest as zip_longest
