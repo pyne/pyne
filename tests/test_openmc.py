@@ -214,7 +214,7 @@ def test_mesh_from_openmc_statepoint():
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
     tally_num = 1
     
-    mesh = openmc.mesh_from_openmc_statepoint(filename, tally_num)
+    mesh = openmc.meshtally_from_openmc_statepoint(filename, tally_num)
     # check mesh attributes
     assert_equal(len(mesh), 6)
     assert(mesh.structured)
