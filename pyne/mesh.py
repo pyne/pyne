@@ -1083,12 +1083,12 @@ class Mesh(object):
                                   self.structured_set,
                                   types.MBMAXTYPE,
                                   dim=3)
-        self_tags = self.mesh.tag_get_tags_on_entity(self_it.__next__())
+        self_tags = self.mesh.tag_get_tags_on_entity(next(self_it))
         other_it = MeshSetIterator(other.mesh,
                                    other.structured_set,
                                    types.MBMAXTYPE,
                                    dim=3)
-        other_tags = other.mesh.tag_get_tags_on_entity(other_it.__next__())
+        other_tags = other.mesh.tag_get_tags_on_entity(next(other_it))
         self_tags = set(x.get_name() for x in self_tags)
         other_tags = set(x.get_name() for x in other_tags)
         intersect = self_tags & other_tags
@@ -1528,7 +1528,7 @@ def _structured_step_iter(it, n):
     Return the nth item in the iterator.
     """
     it.step(n)
-    r = it.__next__()
+    r = next(it)
     it.reset()
     return r
 
@@ -1629,15 +1629,18 @@ class MeshSetIterator(object):
         self.entities = ents
 
     def __iter__(self):
-        for i in range(0, self.size):
-            yield self.entities[i]
+        return self
 
     def __next__(self):
         if self.pos >= self.size:
             raise StopIteration
         else:
-            return self.entities[self.pos]
-            self.pos += 1
+            self.pos, value = self.pos + 1, self.entities[self.pos]
+            return value
+
+    # for Python2 compatability
+    def next(self):
+        return self.__next__()
 
     def step(self, num_steps):
         self.pos += int(num_steps)  # protecting from Python 3 auto-promotion
