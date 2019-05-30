@@ -157,7 +157,7 @@ def test_calc_structured_coords():
         assert_array_almost_equal(structured_coords[i],
                 exp_structured_coords[i])
 
-def test_mesh_from_openmc_statepoint():
+def test_meshtally_from_openmc_statepoint():
     if not HAVE_PYMOAB:
         raise SkipTest
     # mesh read from openmc state point file
@@ -170,7 +170,7 @@ def test_mesh_from_openmc_statepoint():
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
     tally_num = 1
     
-    mesh = openmc.mesh_from_openmc_statepoint(filename, tally_num)
+    mesh = openmc.meshtally_from_openmc_statepoint(filename, tally_num)
     # check mesh attributes
     assert_equal(len(mesh), 6)
     assert(mesh.structured)

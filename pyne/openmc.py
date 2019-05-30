@@ -189,7 +189,7 @@ def get_tally_results_from_openmc_sp(filename, tally_num):
                 str(tally_num), filename))
     return tally_results
 
-def mesh_from_openmc_statepoint(filename, tally_num, particle_type='n'):
+def meshtally_from_openmc_statepoint(filename, tally_num, particle_type='n'):
     """
     This function creates a Mesh instance from OpenMC statepoint file.
 
