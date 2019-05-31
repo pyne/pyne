@@ -727,7 +727,7 @@ class Mesh(object):
                 # check for the structured box tag on the instance
                 try:
                     box_tag = self.mesh.tag_get_handle(_BOX_DIMS_TAG_NAME)
-                except Exception as e:
+                except RuntimeError as e:
                     print("BOX_DIMS not found on MOAB mesh instance")
                     raise e
 
