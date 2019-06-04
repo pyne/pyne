@@ -114,7 +114,7 @@ PyNE has known issues on the following platforms
 Conda Install Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 After installing anaconda or miniconda from 
-`the Continuum downloads page <http://continuum.io/downloads>`_,
+`the downloads page <https://www.anaconda.com/distribution/#download-section>`_,
 in a new terminal run the following conda install command::
 
     conda install -c conda-forge pyne
@@ -128,7 +128,7 @@ Conda Build Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 On mac and linux PyNE can be installed via the package manager conda. 
 After installing anaconda or miniconda from 
-`the Continuum downloads page <http://continuum.io/downloads>`_ 
+`the downloads page <https://www.anaconda.com/distribution/#download-section>`_ 
 add conda's binary directory to your bash profile by adding::
 
     export PATH=/path/to/anaconda/bin:$PATH
@@ -202,8 +202,8 @@ Once those lines have been added, run the following command before running
     source ~/.bashrc
 
 
-.. _zip: https://github.com/pyne/pyne/zipball/0.4
-.. _tar: https://github.com/pyne/pyne/tarball/0.4
+.. _zip: https://github.com/pyne/pyne/zipball/0.5.1
+.. _tar: https://github.com/pyne/pyne/tarball/0.5.1
 
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^
