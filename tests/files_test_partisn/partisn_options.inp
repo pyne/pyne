@@ -1,0 +1,56 @@
+     1     0     0
+partisn_test_geom
+/
+/
+/ 
+/ ------------ Block 1 (Control and Dimensions) ------------
+/ 
+igeom=slab  ngroup=66  niso=9  mt=2  nzone=3
+im=3  it=9  
+isn=6
+maxlcm=6000000
+maxscm=3000000
+t
+/ 
+/ ------------ Block 2 (Geometry) ------------
+/ 
+xmesh= -5.000 0.000 10.000 15.000 
+xints= 3R 3
+zones= 1 2 3 ;
+hello=from block2
+t
+/ 
+/ ------------ Block 3 (Nuclear Data) ------------
+/ 
+/ Note: NAMES is not all inclusive. Only NAMES that are present in
+/ meshed area are listed.
+names= He3 He4 Hg196 Hg198 Hg199 Hg200 Hg201 Hg202 Hg204 
+i2lp1=0
+ifido=1
+ihm=227
+ihs=11
+iht=10
+ititl=1
+kwikrd=1
+lib=xsf21-71
+lng=175
+maxord=5
+savbxs=1
+t
+/ 
+/ ------------ Block 4 (Cross-Section Mixing) ------------
+/ 
+matls= HELIUMNA He3 4.4415e-11, He4 2.4976e-05;
+       MERCURY1 Hg196 6.2441e-05, Hg198 4.1083e-03, Hg199 6.9166e-03, 
+       Hg200 9.4235e-03, Hg201 5.3499e-03, Hg202 1.2060e-02, 
+       Hg204 2.7475e-03;
+assign= 1 HELIUMNA 1.0000e+00;
+        2 HELIUMNA 5.0000e-01, MERCURY1 5.0000e-01;
+        3 MERCURY1 1.0000e+00;
+hello=from block4
+t
+/ 
+/ ------------ Block 5 (Solver Inputs) ------------
+/ 
+<this is a dummy source>
+t
