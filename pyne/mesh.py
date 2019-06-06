@@ -707,7 +707,7 @@ class Mesh(object):
         # if Mesh is made and no parameters passed, raise MeshError
         if mesh is None and not structured and structured_coords is None and \
             structured_set is None and structured_ordering=='xyz' and mats==():
-            raise MeshError("Trivial mesh instantiation "
+            raise MeshError("Trivial mesh instantiation detected. "
                             "For structured mesh instantiation, need to "
                                 "supply exactly one of the following:\n"
                                 "A. PyMOAB instance\n"
