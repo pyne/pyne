@@ -24,7 +24,6 @@ from textwrap import wrap
 from warnings import warn
 from pyne.utils import QAWarning
 import itertools
-from collections import OrderedDict
 
 import numpy as np
 import tables
@@ -141,7 +140,7 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     block05 = {}
 
     # Read optional inputs:
-    cards = kwargs.get('cards', OrderedDict())
+    cards = kwargs.get('cards', {})
     dg = kwargs.get('dg', None)
     mat_assigns = kwargs.get('mat_assigns', None)
     num_rays = kwargs.get('num_rays', 10)
@@ -530,7 +529,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
 
     block1_cards = []
     if 'block1' in cards:
-        for card, value in cards['block1'].items():
+        for card, value in sorted(cards['block1'].items()):
             partisn += "{}={}\n".format(card, value)
             block1_cards.append(card)
 
@@ -609,7 +608,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
             partisn += "\n"
 
     if 'block2' in cards:
-        for card, value in cards['block2'].items():
+        for card, value in sorted(cards['block2'].items()):
             partisn += "{}={}\n".format(card, value)
 
     partisn += "t"
@@ -637,7 +636,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
 
     block3_cards = []
     if 'block3' in cards:
-        for card, value in cards['block3'].items():
+        for card, value in sorted(cards['block3'].items()):
             partisn += "{}={}\n".format(card, value)
             block3_cards.append(card)
 

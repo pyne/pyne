@@ -656,7 +656,7 @@ def write_partisn_input_options():
     # verify we get a warning from including num_rays and dg
     out1 = len(w) == 1
     out2 = filecmp.cmp(input_file, file_expected)
-    #os.remove(input_file)
+    os.remove(input_file)
     return out1 and out2
 
 
