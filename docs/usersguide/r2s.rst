@@ -174,7 +174,7 @@ Examples input files can be seen in both 'r2s_examples/r2s_run' and 'subvoxel_r2
 By setting the parameter 'sub_voxel' (in 'config.ini') to be 'False', the user can perform voxel R2S described in [4]_.
 By setting the parameter 'sub_voxel' to be 'True', the user can perform sub-voxel R2S without any other change.
 Prepare alara nuclide library, copy preinstalled data library from
-`ALARA/data <https://github.com/svalinn/ALARA/tree/master/data.>`_.
+`ALARA/data <https://github.com/svalinn/ALARA/tree/master/data>`_.
 Example nuclide library can be seen in 'r2s_examples/data'
 Perform R2S step1. ALARA input file and neutron flux file will be generated in this step.
 
