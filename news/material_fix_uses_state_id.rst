@@ -1,4 +1,6 @@
-**Added:** None
+**Added:**
+
+* Adds tests to tests/test:materials.py:test_decay_heat(self) to check more isotopes
 
 **Changed:**
 
