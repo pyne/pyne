@@ -1,6 +1,6 @@
-! This is Fortran90 code that can be compiled directly into MCNP5 in order
+! This is Fortran90 code that can be compiled directly into MCNP6 in order
 ! to use the mesh-based sampling capabilities provided by the Sampler class
-! within source_sampling.cpp. The subroutine "source" calls the MCNP5 interface
+! within source_sampling.cpp. The subroutine "source" calls the MCNP6 interface
 ! C++ functions within source_sampling.cpp. The function "find_cell"
 ! determines what geomety cell a sampled x, y, z are in, which allows for
 ! void rejection within the source subroutine. Void rejection ensures that
@@ -9,7 +9,7 @@
 ! (e.g. most Cartesean meshes). This version of find_cell does not work for
 ! repeated geometries or universes.
 !
-! Full instructions on compiling and using MCNP5 with this subroutine are found
+! Full instructions on compiling and using MCNP6 with this subroutine are found
 ! in the PyNE user manual.
 
 function find_cell(cell_list, cell_list_size) result(icl_tmp)
@@ -44,19 +44,13 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
 
   use fixcom, only: mxa
   use mcnp_global, only: ncl
+  use mcnp_interfaces_mod, only: namchg
   use mcnp_params, only: dknd
-  use pblcom, only: xxx, yyy, zzz, erg
+  use pblcom, only: pbl
   use varcom, only: nps
   use mcnp_debug
 
   implicit none
-
-  interface
-    function namchg(mm, ji)
-      use mcnp_global, only: dknd
-      implicit real(dknd) (a-h,o-z)
-    end function namchg
-  end interface
 
   integer :: i ! iterator variable
   integer :: j ! temporary cell test
@@ -110,7 +104,7 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
     ! Skip and print error message
     if(icl_tmp .le. 0) then
       write(*,*) 'ERROR: history ', nps, 'at position ', &
-      &          xxx, yyy, zzz, ' not in any cell'
+      &          pbl%r%x, pbl%r%y, pbl%r%z, ' not in any cell'
       write(*,*) 'Skipping and resampling the source particle'
     endif
   endif
@@ -123,7 +117,7 @@ subroutine source
   use mcnp_global, only: mat
   use mcnp_params, only: dknd
   use mcnp_random, only: rang
-  use pblcom, only: xxx, yyy, zzz, erg, tme, wgt, icl, ipt, jsu
+  use pblcom, only: pbl
   use mcnp_debug
 
   implicit none
@@ -153,7 +147,8 @@ subroutine source
   rands(4) = rang() ! sample y
   rands(5) = rang() ! sample z
 
-  call particle_birth(rands, xxx, yyy, zzz, erg, wgt, cell_list)
+  call particle_birth(rands, pbl%r%x, pbl%r%y, pbl%r%z, pbl%r%erg, pbl%r%wgt, &
+  &                   cell_list)
   ! Loop over cell_list to find icl_tmp
   icl_tmp = find_cell(cell_list, cell_list_size)
 
@@ -178,10 +173,10 @@ subroutine source
   endif
 
 400 continue
-  icl = icl_tmp
-  tme = 0.0
-  ipt = idum(3)
-  jsu = 0
+  pbl%i%icl = icl_tmp
+  pbl%r%tme = 0.0
+  pbl%i%ipt = idum(3)
+  pbl%i%jsu = 0
 
   return
 end subroutine source

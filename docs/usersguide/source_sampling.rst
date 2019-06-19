@@ -202,18 +202,19 @@ source sampling within MCNP5. This file is found in pyne/share/source.F90.
 The simplest way to compile MCNP5 with the source subroutine is as follows:
 
   #. Obtain a copy of the MCNP5 source code.
-  #. Navigate to the folder MCNP5/Source/src.
-  #. Soft-link the following files into this folder:
+  #. Navigate to the folder MCNP5/Source/src: ``cd MCNP5/Source/src``
+  #. Symlink the following files into this folder:
 
-     a. pyne/src/source_sampling.cpp
-     b. pyne/src/source_sampling.h
-     c. pyne/src/measure.cpp
-     d. pyne/src/measure.h
+     a. ``ln -s /path/to/pyne/src/source_sampling.cpp .``
+     b. ``ln -s /path/to/pyne/src/source_sampling.h .``
+     c. ``ln -s /path/to/pyne/src/measure.cpp .``
+     d. ``ln -s /path/to/pyne/src/measure.h .``
 
   #. Remove the pre-existing empty source.F90 file.
-  #. Soft-link pyne/share/source.F90.
-  #. Open the file MCNP/Source/src/FILE.list.
-  #. Edit line 78 to include the additional source files. It should look like "CXX_SRC := measure.cpp source_sampling.cpp".
+  #. Symlink source.F90: ``ln -s /path/to/pyne/share/source.F90 .``
+  #. Open the file MCNP/Source/src/FILE.list and edit line 78 to include the
+     additional source files. It should look like
+     ``CXX_SRC := measure.cpp source_sampling.cpp``.
   #. Compile MCNP5 using the standard build method.
 
 Once MCNP5 is compiled, MCNP5 can be run normally. The file "source.h5m" and
@@ -239,3 +240,17 @@ of 100 with source particles specified as photons:
 
   idum 1 100 2
 
+************************
+Source Sampling in MCNP6
+************************
+
+Another version of the source.F90 file was produced for use with MCNP6. The
+instructions for how to use it are identical to those for the MCNP5 version
+except for one difference: the file that should be symlinked is called
+``pyne/share/source_mcnp6.F90`` instead. It should still be called
+``source.F90`` inside the MCNP source directory. For example:
+
+.. code-block:: bash
+
+  cd MCNP6/Source/src
+  ln -s /path/to/pyne/share/source_mcnp6.F90 source.F90
