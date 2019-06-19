@@ -234,6 +234,8 @@ class TestMaterialMethods(TestCase):
     def test_decay_heat_metastable(self):
         mat = Material({471080001: 0.5, 551340001: 0.5}, 2)
         obs = mat.decay_heat()
+        # decay heat values from external calculation using half-life: BNL
+        # q-values: ORNL, atomic mass: AMDC
         exp = {471080001: 7.33578506845e-8, 551340001: 6.241109861949e-3}
         assert_equal(set(obs), set(exp))
         for key in exp:
