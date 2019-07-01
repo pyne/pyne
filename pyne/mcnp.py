@@ -2250,7 +2250,7 @@ def _mesh_to_cell_cards(mesh, divs):
             for k in range(1, len(divs[2])):
                 # Cell number, mat number, density
                 cell_cards += "{0} {1} {2} ".format(count, count,
-                                                    mesh.density[idx.next()])
+                                                    mesh.density[next(idx)])
                 # x, y, and z surfaces
                 cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
                               i, i + 1, j + x_max, j + x_max + 1,
@@ -2281,7 +2281,7 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
     mat_cards = ""
     idx = mesh.iter_structured_idx('xyz')
     for i in idx:
-        mesh.mats[i].metadata['mat_number'] = i + 1
+        mesh.mats[i].metadata['mat_number'] = int(i + 1)
         mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
 
     return mat_cards

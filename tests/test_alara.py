@@ -19,7 +19,7 @@ from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
     irradiation_blocks, record_to_geom, phtn_src_energy_bounds
 from pyne.material import Material
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, str_to_unicode, file_almost_same
 warnings.simplefilter("ignore", QAWarning)
 
 
@@ -364,9 +364,10 @@ def test_record_to_geom():
     m = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
              structured=True, mats=None)
 
+#    import pdb; pdb.set_trace()
     record_to_geom(m, cell_fracs, cell_mats, geom, matlib)
 
-    assert(filecmp.cmp(geom, expected_geom))
+    assert(file_almost_same(geom, expected_geom))
     if os.path.isfile(geom):
         os.remove(geom)
 
@@ -494,11 +495,11 @@ def test_num_den_to_mesh_shutdown():
     act_comp_1 = m.mats[1].to_atom_frac()
 
     assert_equal(len(exp_comp_0), len(act_comp_0))
-    for key, value in exp_comp_0.iteritems():
+    for key, value in exp_comp_0.items():
         assert_almost_equal(value/act_comp_0[key], 1.0, 15)
 
     assert_equal(len(exp_comp_1), len(act_comp_1))
-    for key, value in exp_comp_1.iteritems():
+    for key, value in exp_comp_1.items():
         assert_almost_equal(value/act_comp_1[key], 1.0, 15)
 
     # compare densities
@@ -520,8 +521,9 @@ def test_num_den_to_mesh_stdout():
 
     p = subprocess.Popen(["cat", filename], stdout=subprocess.PIPE)
     lines, err = p.communicate()
+    lines = str_to_unicode(lines)
 
-    num_density_to_mesh(lines.split('\n'), 'shutdown', m)
+    num_density_to_mesh(lines.split(u'\n'), u'shutdown', m)
 
     # expected composition results:
     exp_comp_0 = {10010000: 5.3390e+19,
@@ -540,11 +542,11 @@ def test_num_den_to_mesh_stdout():
     act_comp_1 = m.mats[1].to_atom_frac()
 
     assert_equal(len(exp_comp_0), len(act_comp_0))
-    for key, value in exp_comp_0.iteritems():
+    for key, value in exp_comp_0.items():
         assert_almost_equal(value/act_comp_0[key], 1.0, 15)
 
     assert_equal(len(exp_comp_1), len(act_comp_1))
-    for key, value in exp_comp_1.iteritems():
+    for key, value in exp_comp_1.items():
         assert_almost_equal(value/act_comp_1[key], 1.0, 15)
 
     # compare densities
@@ -582,11 +584,11 @@ def test_num_den_to_mesh_1_y():
     act_comp_1 = m.mats[1].to_atom_frac()
 
     assert_equal(len(exp_comp_0), len(act_comp_0))
-    for key, value in exp_comp_0.iteritems():
+    for key, value in exp_comp_0.items():
         assert_almost_equal(value/act_comp_0[key], 1.0, 15)
 
     assert_equal(len(exp_comp_1), len(act_comp_1))
-    for key, value in exp_comp_1.iteritems():
+    for key, value in exp_comp_1.items():
         assert_almost_equal(value/act_comp_1[key], 1.0, 15)
 
     # compare densities

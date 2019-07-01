@@ -30,7 +30,7 @@ t
 / 
 / Note: NAMES is not all inclusive. Only NAMES that are present in
 / meshed area are listed.
-names= He4 Hg202 Hg200 Hg201 Hg196 Hg204 He3 Hg198 Hg199 
+names= He3 He4 Hg196 Hg198 Hg199 Hg200 Hg201 Hg202 Hg204 
 / Please provide input for the following variables:
 /ifido=
 /ihm=
@@ -44,10 +44,10 @@ t
 / 
 / ------------ Block 4 (Cross-Section Mixing) ------------
 / 
-matls= HELIUMNA He4 2.4976e-05, He3 4.4415e-11;
-       MERCURY1 Hg202 1.2060e-02, Hg200 9.4235e-03, Hg201 5.3499e-03, 
-       Hg196 6.2441e-05, Hg204 2.7475e-03, Hg198 4.1083e-03, 
-       Hg199 6.9166e-03;
+matls= HELIUMNA He3 4.4415e-11, He4 2.4976e-05;
+       MERCURY1 Hg196 6.2441e-05, Hg198 4.1083e-03, Hg199 6.9166e-03, 
+       Hg200 9.4235e-03, Hg201 5.3499e-03, Hg202 1.2060e-02, 
+       Hg204 2.7475e-03;
 assign= 1 HELIUMNA 1.0000e+00;
         2 HELIUMNA 5.0000e-01, MERCURY1 5.0000e-01;
         3 MERCURY1 1.0000e+00;

@@ -214,7 +214,7 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
         # create a cell_fracs
         cell_fracs = np.ones(shape=(len(m), 1), dtype=float)
     max_num_cells = len(cell_fracs[0])
-    num_e_groups = len(sd_tag[list(m.iter_ve())[0]]) / max_num_cells
+    num_e_groups = len(sd_tag[list(m.iter_ve())[0]]) // max_num_cells
     for idx, _, ve in m:
         ve_data = sd_tag[ve]
         for svid in range(max_num_cells):
