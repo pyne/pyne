@@ -1395,6 +1395,8 @@ class Mesh(object):
             cell changing fastest.
 
         """
+        # sort cell_fracs
+        cell_fracs.sort(order=['idx', 'vol_frac'])
 
         num_vol_elements = len(self)
         # Find the maximum cell number in a voxel
