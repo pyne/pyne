@@ -29,7 +29,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.material import Material
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, is_close
 from pyne.mesh import HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
@@ -1086,7 +1086,7 @@ def test_meshtally_from_openmc_statepoint():
     assert_equal(len(mesh.n_flux_err[:]), len(exp_n_flux_err))
     for i in range(len(exp_n_flux_err)):
         for j in range(exp_n_flux_err.shape[1]):
-            assert(isclose(mesh.n_flux_err[i][j],
+            assert(is_close(mesh.n_flux_err[i][j],
                 exp_n_flux_err[i][j], rel_tol=1e-5))
 
 
