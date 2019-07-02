@@ -179,6 +179,8 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
                 rows[j] = (idx, ls[0].strip(), ls[1].strip(),
                            np.array(ls[2:], dtype=np.float64))
         else:
+            h5f.close()
+            f.close()
             raise ValueError(u"Nucs option {0} not support!".format(nucs))
 
         # Save the nuclide in order to keep track of idx
