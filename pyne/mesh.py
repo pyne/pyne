@@ -1697,6 +1697,9 @@ def _cell_fracs_sort_vol_frac_reverse(cell_fracs, num_vol_elements):
     for i in range(num_vol_elements):
         fracs = cell_fracs[cell_fracs['idx'] == i]
         fracs = fracs[::-1]
+        # treat the cells with the same vol_frac, set cell_number ascending
+        for c_f in set(fracs['vol_frac']):
+            fracs[fracs['vol_frac'] == c_f] = fracs[fracs['vol_frac'] == c_f][::-1]
         cell_fracs[cell_fracs['idx'] == i] = fracs[:]
     return cell_fracs
 

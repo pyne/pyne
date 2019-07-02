@@ -934,12 +934,12 @@ def test_cell_fracs_to_mats():
         assert_equal(mat.density, 1.0)
 
 def test_cell_fracs_sort_vol_frac_reverse():
-    cell_fracs = np.zeros(7, dtype=[('idx', np.int64),
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
 
-    exp_cell_fracs = np.zeros(7, dtype=[('idx', np.int64),
+    exp_cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
@@ -948,14 +948,16 @@ def test_cell_fracs_sort_vol_frac_reverse():
                      (1, 11, 0.2, 0.0),
                      (1, 12, 0.3, 0.0),
                      (1, 13, 0.5, 0.0),
-                     (2, 11, 1.0, 0.0),
-                     (3, 12, 1.0, 0.0)]
+                     (2, 11, 0.5, 0.0),
+                     (2, 12, 0.5, 0.0),
+                     (3, 11, 0.5, 0.0)]
     exp_cell_fracs[:] = [(0, 11, 0.55, 0.0),
                      (0, 12, 0.45, 0.0),
                      (1, 13, 0.5, 0.0),
                      (1, 12, 0.3, 0.0),
                      (1, 11, 0.2, 0.0),
-                     (2, 11, 1.0, 0.0),
+                     (2, 11, 0.5, 0.0),
+                     (2, 12, 0.5, 0.0),
                      (3, 12, 1.0, 0.0)]
     cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs, 4)
     for i in range(4):

@@ -407,8 +407,8 @@ def test_single_hex_multiple_subvoxel_analog():
                                     ('cell', np.int64),
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
-    cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.4, 0.0)]
-    m.tag_cell_fracs(cell_fracs)
+    cell_fracs[:] = [(0, 11, 0.4, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.3, 0.0)]
+    m.tag_cell_fracs(cell_fracs) # cell_fracs will be sorted
     filename = "sampling_mesh.h5m"
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
@@ -431,8 +431,8 @@ def test_single_hex_multiple_subvoxel_analog():
 
     # Test that each source particle in each cell has right frequency
     assert_equal(tally[0], 0.0)
-    assert(abs(tally[1] - 0.158)/0.158 < 0.05)
-    assert(abs(tally[2] - 0.842)/0.842 < 0.05)
+    assert(abs(tally[1] - 0.2)/0.2 < 0.05)
+    assert(abs(tally[2] - 0.8)/0.8 < 0.05)
 
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
@@ -542,7 +542,7 @@ def test_single_hex_multiple_subvoxel_uniform():
                                     ('cell', np.int64),
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
-    cell_fracs[:] = [(0, 11, 0.3, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.4, 0.0)]
+    cell_fracs[:] = [(0, 11, 0.4, 0.0), (0, 12, 0.3, 0.0), (0, 13, 0.3, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
     m.write_hdf5(filename)
@@ -561,15 +561,15 @@ def test_single_hex_multiple_subvoxel_uniform():
         if s.cell_list[0] == 12:
             tally[1] += score
             # analog: all weights must be one
-            assert(abs(s.w - 0.369)/0.369 < 0.05)
+            assert(abs(s.w - 0.4)/0.4 < 0.05)
         if s.cell_list[0] == 13:
             tally[2] += score
-            assert(abs(s.w - 1.475)/1.475 < 0.05)
+            assert(abs(s.w - 1.6)/1.6 < 0.05)
 
     # Test that each source particle in each cell has right frequency
     assert_equal(tally[0], 0.0)
-    assert(abs(tally[1] - 0.428) < 0.05)
-    assert(abs(tally[2] - 0.572) < 0.05)
+    assert(abs(tally[1] - 0.5) < 0.05)
+    assert(abs(tally[2] - 0.5) < 0.05)
 
 
 @with_setup(None, try_rm_file('sampling_mesh.h5m'))
