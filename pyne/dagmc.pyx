@@ -943,7 +943,7 @@ def ray_discretize(mesh, num_rays=10, grid=False):
            results[row_count] = (i, vol, vol_frac, rel_error)
            row_count += 1
 
-    results.sort(order=['idx', 'vol_frac'])
+    results.sort()
 
     return results
 

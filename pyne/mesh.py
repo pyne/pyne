@@ -1395,10 +1395,10 @@ class Mesh(object):
             cell changing fastest.
 
         """
-        # sort cell_fracs
-        cell_fracs.sort(order=['idx', 'vol_frac'])
-
         num_vol_elements = len(self)
+        # sort cell_fracs
+        cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs, num_vol_elements)
+        #cell_fracs.sort(order=['idx', 'vol_frac'])
         # Find the maximum cell number in a voxel
         max_num_cells = -1
         for i in range(num_vol_elements):
@@ -1660,3 +1660,43 @@ class MeshSetIterator(object):
             self.pos = self.size - 1
             at_end = True
         return at_end
+
+def _cell_fracs_sort_vol_frac_reverse(cell_fracs, num_vol_elements):
+    """
+    Sort cell_fracs according to the order of increasing idx and decreasing
+    with vol_frac.
+
+    Parameters
+    ----------
+    cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A sorted, one dimensional
+            array, each entry containing the following fields:
+
+                :idx: int
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+
+            The array must be sorted with respect to both idx and cell, with
+            cell changing fastest.
+    num_vol_elements: int
+        number of volume elements.
+
+    Returns
+    -------
+    cell_fracs : structured array
+        Sorted cell_fracs.
+    """
+    # sort ascending along idx and vol_frac
+    cell_fracs.sort(order=['idx', 'vol_frac'])
+
+    for i in range(num_vol_elements):
+        fracs = cell_fracs[cell_fracs['idx'] == i]
+        fracs = fracs[::-1]
+        cell_fracs[cell_fracs['idx'] == i] = fracs[:]
+    return cell_fracs
+
