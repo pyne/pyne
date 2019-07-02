@@ -12,7 +12,7 @@ import tables as tb
 
 from pyne.mcnp import Meshtal
 from pyne.material import Material
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, file_block_almost_same
 from pyne.alara import response_to_hdf5, response_hdf5_to_mesh
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
@@ -198,7 +198,7 @@ def _activation_responses_test_step1(activation_responses_run_dir):
 
     # compare the output file of step1
     f1 = filecmp.cmp(alara_inp, exp_alara_inp)
-    f2 = filecmp.cmp(alara_matlib, exp_alara_matlib)
+    f2 = file_block_almost_same(alara_matlib, exp_alara_matlib)
     f3 = filecmp.cmp(alara_fluxin, exp_alara_fluxin)
 
     # remove test output files
