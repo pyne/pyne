@@ -10,7 +10,7 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 import os
 import collections
 from warnings import warn
-from pyne.utils import QAWarning, to_sec, is_number
+from pyne.utils import QAWarning, to_sec, is_float
 import numpy as np
 import tables as tb
 from io import open
@@ -1214,7 +1214,7 @@ def _is_data(line):
     if len(ls) < 2:
         return False
     for i in range(1, len(ls)):
-        if not is_number(ls[i]):
+        if not is_float(ls[i]):
             return False
     return True
     
