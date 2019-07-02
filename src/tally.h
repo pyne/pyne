@@ -17,11 +17,13 @@
 #ifndef PYNE_IS_AMALGAMATED
   #include "h5wrap.h"
   #include "utils.h"
+  #include "material.h"
 #endif
 
 
 namespace pyne
 {
+
   class Tally
   {
   public:
@@ -49,6 +51,8 @@ namespace pyne
 
     ~Tally (); /// default destructor
 
+    // is the proposed name a valid tally name
+    bool is_valid(std::string s); 
 
     // Create hdf5 datatable for tallies
     hid_t create_dataspace(hid_t file, std::string datapath);
@@ -86,7 +90,7 @@ namespace pyne
     void write_hdf5(std::string filename, std::string datapath);
 
     // mcnp tally
-    std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5" );
+    std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5", pyne::Material *material = NULL);
     
     // fluka tally 
     std::string fluka(std::string unit_number = "-21");
