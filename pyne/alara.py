@@ -10,7 +10,7 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 import os
 import collections
 from warnings import warn
-from pyne.utils import QAWarning, to_sec, is_float
+from pyne.utils import QAWarning, to_sec, is_float, str_to_unicode
 import numpy as np
 import tables as tb
 from io import open
@@ -356,14 +356,15 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                  size=tag_size, dtype=float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
-    # creat a list of decay times (strings) in the source file
-    phtn_src_dc = []
-    with tb.open_file(filename) as h5f:
-        for row in h5f.root.data:
-            if row[2].decode() not in phtn_src_dc:
-                phtn_src_dc.append(row[2].decode())
-            else:
-                break
+#    # creat a list of decay times (strings) in the source file
+#    phtn_src_dc = []
+#    with tb.open_file(filename) as h5f:
+#        for row in h5f.root.data:
+#            if row[2].decode() not in phtn_src_dc:
+#                phtn_src_dc.append(row[2].decode())
+#            else:
+#                break
+    phtn_src_dc = _read_phtn_src_dc(filename)
 
     # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
@@ -446,14 +447,15 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
                  size=1, dtype=float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
-    # creat a list of decay times (strings) in the source file
-    phtn_src_dc = []
-    with tb.open_file(filename) as h5f:
-        for row in h5f.root.data:
-            if row[2] not in phtn_src_dc:
-                phtn_src_dc.append(row[2])
-            else:
-                break
+#    # creat a list of decay times (strings) in the source file
+#    phtn_src_dc = []
+#    with tb.open_file(filename) as h5f:
+#        for row in h5f.root.data:
+#            if row[2].decode() not in phtn_src_dc:
+#                phtn_src_dc.append(row[2].decode())
+#            else:
+#                break
+    phtn_src_dc = _read_phtn_src_dc(filename)
 
     # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
@@ -1081,6 +1083,7 @@ def _convert_unit_to_s(dc):
     -------
     a float number
     """
+    dc = str_to_unicode(dc)
     # get num and unit
     if dc == u'shutdown':
         num, unit = u'0.0', u's'
@@ -1114,7 +1117,7 @@ def _find_phsrc_dc(idc, phtn_src_dc):
         # Loop over decay times in phtn_src_dc list and compare to idc_s.
         for dc in phtn_src_dc:
             # Skip "shutdown" string in list.
-            if dc == u'shutdown':
+            if str_to_unicode(dc) == u'shutdown':
                 continue
             # Convert to [s].
             dc_s = _convert_unit_to_s(dc)
@@ -1310,3 +1313,29 @@ def is_response_string(line, response):
         return True
     else:
         return False
+
+def _read_phtn_src_dc(filename):
+    """
+    This function reads decay times in photon source file.
+
+    Parameters
+    ----------
+    filename : string
+        Filename of the photon source file.
+
+    Returns
+    -------
+    phtn_src_dc : list
+        List of the decay times, in unicode.
+    """
+    # creat a list of decay times (strings) in the source file
+    phtn_src_dc = []
+    with tb.open_file(filename) as h5f:
+        for row in h5f.root.data:
+            if row[2].decode() not in phtn_src_dc:
+                phtn_src_dc.append(row[2].decode())
+            else:
+                break
+    return phtn_src_dc
+
+

@@ -79,6 +79,7 @@ def to_sec(input_time, units):
         Time value in [sec].
 
     """
+    units = str_to_unicode(units)
     conv = time_conv_dict.get(units.lower(), None)
     if conv:
         sec_time = input_time * conv
