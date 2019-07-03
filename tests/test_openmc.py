@@ -6,11 +6,10 @@ import warnings
 import os
 import nose
 import numpy as np
-from math import isclose
 from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, is_close
 warnings.simplefilter("ignore", QAWarning)
 
 from pyne import nucname
@@ -140,7 +139,7 @@ def test_get_tally_results_from_openmc_sp():
         for j in range(tally_results.shape[1]):
             for k in  range(tally_results.shape[2]):
                 # data in h5 file is 6 digits
-                assert_true(isclose(tally_results[i][j][k],
+                assert_true(is_close(tally_results[i][j][k],
                     exp_tally_results[i][j][k], rel_tol=1e-5))
 
 def test_calc_structured_coords():
