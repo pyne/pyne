@@ -63,3 +63,6 @@ tests/epdl97_eedl_Pb
 
 # Rever
 rever/
+
+# test file exceptions
+!tests/files_test_r2s/r2s_examples/*/*.h5
