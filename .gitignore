@@ -65,4 +65,5 @@ tests/epdl97_eedl_Pb
 rever/
 
 # test file exceptions
+!tests/files_test*/*.h5
 !tests/files_test_r2s/r2s_examples/*/*.h5
