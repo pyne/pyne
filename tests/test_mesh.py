@@ -959,7 +959,7 @@ def test_cell_fracs_sort_vol_frac_reverse():
                      (2, 11, 0.5, 0.0),
                      (2, 12, 0.5, 0.0),
                      (3, 12, 1.0, 0.0)]
-    cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs, 4)
+    cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs)
     for i in range(4):
         assert_array_equal(cell_fracs[i], exp_cell_fracs[i])
 
