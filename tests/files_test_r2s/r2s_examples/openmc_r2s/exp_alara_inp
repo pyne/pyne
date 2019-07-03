@@ -1,169 +1,25 @@
 geometry rectangular
 
 volume
-     1.250000E+02    zone_0
-     1.250000E+02    zone_1
-     1.250000E+02    zone_2
-     1.250000E+02    zone_3
-     1.250000E+02    zone_4
-     1.250000E+02    zone_5
-     1.250000E+02    zone_6
-     1.250000E+02    zone_7
-     1.250000E+02    zone_8
-     1.250000E+02    zone_9
-     1.250000E+02    zone_10
-     1.250000E+02    zone_11
-     1.250000E+02    zone_12
-     1.250000E+02    zone_13
-     1.250000E+02    zone_14
-     1.250000E+02    zone_15
-     1.250000E+02    zone_16
-     1.250000E+02    zone_17
-     1.250000E+02    zone_18
-     1.250000E+02    zone_19
-     1.250000E+02    zone_20
-     1.250000E+02    zone_21
-     1.250000E+02    zone_22
-     1.250000E+02    zone_23
-     1.250000E+02    zone_24
-     1.250000E+02    zone_25
-     1.250000E+02    zone_26
-     1.250000E+02    zone_27
-     1.250000E+02    zone_28
-     1.250000E+02    zone_29
-     1.250000E+02    zone_30
-     1.250000E+02    zone_31
-     1.250000E+02    zone_32
-     1.250000E+02    zone_33
-     1.250000E+02    zone_34
-     1.250000E+02    zone_35
-     1.250000E+02    zone_36
-     1.250000E+02    zone_37
-     1.250000E+02    zone_38
-     1.250000E+02    zone_39
-     1.250000E+02    zone_40
-     1.250000E+02    zone_41
-     1.250000E+02    zone_42
-     1.250000E+02    zone_43
-     1.250000E+02    zone_44
-     1.250000E+02    zone_45
-     1.250000E+02    zone_46
-     1.250000E+02    zone_47
-     1.250000E+02    zone_48
-     1.250000E+02    zone_49
-     1.250000E+02    zone_50
-     1.250000E+02    zone_51
-     1.250000E+02    zone_52
-     1.250000E+02    zone_53
-     1.250000E+02    zone_54
-     1.250000E+02    zone_55
-     1.250000E+02    zone_56
-     1.250000E+02    zone_57
-     1.250000E+02    zone_58
-     1.250000E+02    zone_59
-     1.250000E+02    zone_60
-     1.250000E+02    zone_61
-     1.250000E+02    zone_62
-     1.250000E+02    zone_63
-     1.250000E+02    zone_64
-     1.250000E+02    zone_65
-     1.250000E+02    zone_66
-     1.250000E+02    zone_67
-     1.250000E+02    zone_68
-     1.250000E+02    zone_69
-     1.250000E+02    zone_70
-     1.250000E+02    zone_71
-     1.250000E+02    zone_72
-     1.250000E+02    zone_73
-     1.250000E+02    zone_74
-     1.250000E+02    zone_75
-     1.250000E+02    zone_76
-     1.250000E+02    zone_77
-     1.250000E+02    zone_78
-     1.250000E+02    zone_79
+     1.250000E+03    zone_0
+     1.250000E+03    zone_1
+     1.250000E+03    zone_2
+     1.250000E+03    zone_3
+     1.250000E+03    zone_4
+     1.250000E+03    zone_5
+     1.250000E+03    zone_6
+     1.250000E+03    zone_7
 end
 
 mat_loading
     zone_0    mix_0
     zone_1    mix_0
-    zone_2    mix_0
-    zone_3    mix_0
-    zone_4    mix_0
-    zone_5    mix_0
-    zone_6    mix_0
-    zone_7    mix_0
-    zone_8    mix_0
-    zone_9    mix_0
-    zone_10    mix_0
-    zone_11    mix_0
-    zone_12    mix_0
-    zone_13    mix_0
-    zone_14    mix_0
-    zone_15    mix_0
-    zone_16    mix_0
-    zone_17    mix_0
-    zone_18    mix_0
-    zone_19    mix_0
-    zone_20    mix_1
-    zone_21    mix_0
-    zone_22    mix_1
-    zone_23    mix_0
-    zone_24    mix_1
-    zone_25    mix_1
-    zone_26    mix_0
-    zone_27    mix_1
-    zone_28    mix_0
-    zone_29    mix_1
-    zone_30    mix_1
-    zone_31    mix_1
-    zone_32    mix_1
-    zone_33    mix_1
-    zone_34    mix_1
-    zone_35    mix_1
-    zone_36    mix_1
-    zone_37    mix_1
-    zone_38    mix_1
-    zone_39    mix_1
-    zone_40    mix_0
-    zone_41    mix_0
-    zone_42    mix_1
-    zone_43    mix_0
-    zone_44    mix_0
-    zone_45    mix_0
-    zone_46    mix_0
-    zone_47    mix_1
-    zone_48    mix_0
-    zone_49    mix_0
-    zone_50    mix_0
-    zone_51    mix_0
-    zone_52    mix_1
-    zone_53    mix_0
-    zone_54    mix_0
-    zone_55    mix_0
-    zone_56    mix_0
-    zone_57    mix_1
-    zone_58    mix_0
-    zone_59    mix_0
-    zone_60    mix_0
-    zone_61    mix_0
-    zone_62    mix_1
-    zone_63    mix_0
-    zone_64    mix_0
-    zone_65    mix_0
-    zone_66    mix_0
-    zone_67    mix_1
-    zone_68    mix_0
-    zone_69    mix_0
-    zone_70    mix_0
-    zone_71    mix_0
-    zone_72    mix_1
-    zone_73    mix_0
-    zone_74    mix_0
-    zone_75    mix_0
-    zone_76    mix_0
-    zone_77    mix_1
-    zone_78    mix_0
-    zone_79    mix_0
+    zone_2    mix_1
+    zone_3    mix_1
+    zone_4    mix_2
+    zone_5    mix_2
+    zone_6    mix_2
+    zone_7    mix_2
 end
 
 mixture mix_0
@@ -171,13 +27,17 @@ mixture mix_0
 end
 
 mixture mix_1
-    material mat:Air/rho:0.001205 1 1.0
+    material mat:Air/rho:0.001205 1 0.8
+    material mat:Lead/rho:11.35 1 0.2
+end
+
+mixture mix_2
+    material mat:Air/rho:0.001205 1 0.2
+    material mat:Lead/rho:11.35 1 0.8
 end
 
 cooling
     1E3 s
-    12 h
-    3.0 d
 end
 
 material_lib alara_matlib
