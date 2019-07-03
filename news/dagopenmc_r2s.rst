@@ -8,6 +8,7 @@
 **Changed:**
 
 * Change the class MeshTally from pyne.mcnp to pyne.mesh
+* Add h5 files for test in the exceptions of .gitignore
 
 **Deprecated:** None
 
