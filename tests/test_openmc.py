@@ -6,7 +6,6 @@ import warnings
 import os
 import nose
 import numpy as np
-from math import isclose
 from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
