@@ -1060,12 +1060,12 @@ def test_meshtally_from_openmc_statepoint():
     assert(mesh.structured)
     # structured_coords
     assert_array_almost_equal(mesh.structured_coords[0],
-            [(-40.0 + x * 80 / 3) for x in range(0, 4)])
+            [(-40.0 + x * 80.0 / 3) for x in range(0, 4)])
     assert_array_almost_equal(mesh.structured_coords[1],
             [(-12.5 + x * 25.0 / 2) for x in range (0, 3)])
     assert_array_almost_equal(mesh.structured_coords[2],
-            [(-2.5 + x * 5 / 1) for x in range(0, 2)])
-    ve_vol = (80.0/3) * (25.0/2) * (5/1)
+            [(-2.5 + x * 5.0 / 1) for x in range(0, 2)])
+    ve_vol = (80.0/3) * (25.0/2) * (5.0/1)
     # flux
     exp_n_flux = np.divide(np.array([[0.977887, 4.20556],
                            [0.115698, 0.0],
