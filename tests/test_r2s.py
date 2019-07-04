@@ -7,11 +7,13 @@ from numpy.testing import assert_array_equal
 import multiprocessing
 import filecmp
 import sys
+import tables as tb
 from shutil import copyfile
 
 from pyne.mcnp import Meshtal
 from pyne.material import Material
-from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
+from pyne.r2s import irradiation_setup, photon_sampling_setup, \
+        total_photon_source_intensity, photon_source_add_filetype
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
@@ -155,6 +157,7 @@ def test_photon_sampling_setup_structured():
     for i, mat, ve in m:
         assert_array_equal(m.tag1[i], exp_tag1[i])
         assert_array_equal(m.tag2[i], exp_tag2[i])
+    os.remove(phtn_src + '.h5')
 
 
 def irradiation_setup_unstructured(flux_tag="n_flux"):
@@ -310,6 +313,7 @@ def test_photon_sampling_setup_unstructured():
     for i, mat, ve in m:
         assert_array_equal(m.tag1[i], exp_tag1[i])
         assert_array_equal(m.tag2[i], exp_tag2[i])
+    os.remove(phtn_src + '.h5')
 
 
 def test_total_photon_source_intensity():
@@ -366,6 +370,17 @@ def test_irradiation_setup_unstructured_nondef_tag():
     f1 = results[0]
     f2 = results[1]
     f3 = results[2]
+
+
+def test_photon_soruce_add_filetype():
+    filename = os.path.join("files_test_r2s", "source.h5m")
+    filename_add_type = os.path.join("files_test_r2s", "source_filetype.h5m")
+    copyfile(filename, filename_add_type)
+    photon_source_add_filetype(filename_add_type)
+    with tb.open_file(filename_add_type) as h5f:
+        retval = h5f.root._f_getattr('filetype')
+        assert_equal(retval, 'pyne_r2s_source')
+    os.remove(filename_add_type)
 
 
 def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
