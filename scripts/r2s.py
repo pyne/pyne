@@ -10,7 +10,7 @@ from os.path import isfile
 from pyne.mesh import Mesh, NativeMeshTag
 from pyne.dagmc import cell_materials, load, discretize_geom
 from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
-    total_photon_source_intensity
+    total_photon_source_intensity, photon_source_add_filetype
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
     phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
@@ -24,6 +24,8 @@ config = \
 structured: True
 # Specify whether this problem uses sub-voxel r2s
 sub_voxel: False
+# transport code, MCNP or OpenMC
+transport_code: MCNP
 
 [step1]
 # Path to MCNP MESHTAL file containing neutron fluxes or a DAG-MCNP5
@@ -162,6 +164,10 @@ def step2():
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
     sub_voxel = config.getboolean('general', 'sub_voxel')
+    try:
+        transport_code = config.get('general', 'transport_code')
+    except:
+        transport_code = 'MCNP'
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
@@ -183,7 +189,10 @@ def step2():
         tags = {('TOTAL', dc): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
-        mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
+        p_src_filename = '{0}_{1}.h5m'.format(output, i+1)
+        mesh.write_hdf5(p_src_filename)
+        if transport_code.lower() == 'openmc':
+            photon_source_add_filetype(p_src_filename)
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
         intensities += "{0}: {1}\n".format(dc, intensity)

@@ -2,6 +2,7 @@ from os.path import isfile
 from warnings import warn
 from pyne.utils import QAWarning
 import numpy as np
+import tables as tb
 
 from pyne.mesh import Mesh, MeshTally
 from pyne.mcnp import Meshtal
@@ -233,3 +234,19 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
             sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
             intensity += vol * np.sum(sv_data)
     return intensity
+
+
+def photon_source_add_filetype(filename):
+    """
+    This function is used to add 'filetype' attribute for PyNE R2S photon
+    source file 'source_x.h5m'. For OpenMC source sampling.
+
+    Parameters
+    ----------
+    filename : string
+        Filename of the 'source_x.h5m'.
+    """
+    with tb.open_file(filename, 'r+') as h5f:
+        h5f.root._f_setattr('filetype', 'pyne_r2s_source')
+    return
+
