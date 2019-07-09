@@ -74,7 +74,11 @@ commands:
     steps:
       - checkout
       - run: python setup.py install --user --clean << parameters.flags >> 
+<<<<<<< HEAD
       - run: cd ../ && nuc_data_make ;
+=======
+      - run: cd ../ && nuc_data_make -m atomic_mass;
+>>>>>>> 5edc338... fix simple_xs zf, test -m atomic_mass
       - save_container:
           build: << parameters.build >>
 

@@ -34,15 +34,18 @@ def grab_kaeri_simple_xs(build_dir=""):
     if not os.path.exists(zip_path):
         print("  grabbing {0} and placing it in {1}".format(zip_url, zip_path))
         urllib.urlretrieve(zip_url, zip_path)
+        zf = ZipFile(zip_path)
         try:
-            zf = ZipFile(zip_path)
             for name in zf.namelist():
                 if not os.path.exists(os.path.join(build_dir, name)):
                     print("    extracting {0} from {1}".format(name, zip_path))
                     zf.extract(name, build_dir)
         finally:
             zf.close()
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5edc338... fix simple_xs zf, test -m atomic_mass
     # Add kaeri to build_dir
     build_dir = os.path.join(build_dir, 'KAERI')
     try:
