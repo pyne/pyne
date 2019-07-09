@@ -75,10 +75,14 @@ commands:
       - checkout
       - run: python setup.py install --user --clean << parameters.flags >> 
 <<<<<<< HEAD
+<<<<<<< HEAD
       - run: cd ../ && nuc_data_make ;
 =======
       - run: cd ../ && nuc_data_make -m atomic_mass;
 >>>>>>> 5edc338... fix simple_xs zf, test -m atomic_mass
+=======
+      - run: cd ../ && nuc_data_make -m atomic_mass;
+>>>>>>> 2383e50... test remove the skip for atomic_mass creation
       - save_container:
           build: << parameters.build >>
 
