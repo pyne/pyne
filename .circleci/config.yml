@@ -76,6 +76,8 @@ commands:
       - run: python setup.py install --user --clean << parameters.flags >> 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
       - run: cd ../ && nuc_data_make ;
 =======
       - run: cd ../ && nuc_data_make -m atomic_mass;
@@ -83,6 +85,12 @@ commands:
 =======
       - run: cd ../ && nuc_data_make -m atomic_mass;
 >>>>>>> 2383e50... test remove the skip for atomic_mass creation
+=======
+      - run: cd ../ && nuc_data_make -m atomic_mass, materials;
+>>>>>>> c0f86f1... test building materials library
+=======
+      - run: cd ../ && nuc_data_make -m atomic_mass,materials;
+>>>>>>> 821bed9... fix typo for testing materials build
       - save_container:
           build: << parameters.build >>
 
