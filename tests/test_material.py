@@ -241,7 +241,7 @@ class TestMaterialMethods(TestCase):
             assert_almost_equal(obs1[key], exp1[key])
         # testing for non-default source
         obs2 = mat.dose_per_g("ingest", 1)
-        exp2 = {922350000: 27.1139475504, 922380000: 77.5921552819}
+        exp2 = {922350000: 27.11394777435, 922380000: 77.592155747}
         assert_equal(set(obs2), set(exp2))
         for key in exp2:
             assert_almost_equal(obs2[key], exp2[key])
