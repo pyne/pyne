@@ -122,10 +122,7 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
     kdb = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
-<<<<<<< HEAD
-=======
     kdb.remove_node('/atomic_mass')
->>>>>>> 55fc32c... test deleting atomic_mass node
     Atable = kdb.create_table("/", "atomic_mass", atomic_mass_desc,
                              "Atomic Mass Data [amu]", expectedrows=len(A))
     Atable.append(A)

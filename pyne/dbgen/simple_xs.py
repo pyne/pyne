@@ -42,10 +42,7 @@ def grab_kaeri_simple_xs(build_dir=""):
                     zf.extract(name, build_dir)
         finally:
             zf.close()
-<<<<<<< HEAD
 
-=======
->>>>>>> 5edc338... fix simple_xs zf, test -m atomic_mass
     # Add kaeri to build_dir
     build_dir = os.path.join(build_dir, 'KAERI')
     try:
