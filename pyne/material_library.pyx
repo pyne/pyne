@@ -52,6 +52,8 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647
 
+_INTEGRAL_TYPES = (int, np.integer, np.bool_)
+ 
 
 #
 #  Material Library
@@ -131,12 +133,16 @@ cdef class _MaterialLibrary:
         c_nucpath = nucpath_bytes
         self._inst.write_hdf5(c_filename, c_datapath, c_nucpath)
 
-    def add_material(self, mat):
+    def add_material(self, key, mat):
         cdef std_string c_matname
+        if isinstance(key, basestring):
+            key = key.encode('UTF-8')
+        elif isinstance(key, _INTEGRAL_TYPES):
+            key = str(key).encode('UTF-8')
         if isinstance(mat, material.Material):
             value_proxy = material.Material(
                 mat, free_mat=not isinstance(mat, material._Material))
-            self._inst.add_material( (<material._Material> value_proxy).mat_pointer[0])
+            self._inst.add_material( key, (<material._Material> value_proxy).mat_pointer[0])
         else:
             raise TypeError("the material must be a material or a stri but is a "
                             "{0}".format(type(mat)))
@@ -174,8 +180,8 @@ cdef class _MaterialLibrary:
             raise TypeError("the material library must be a MaterialLibrary but is a "
                             "{0}".format(type(mat_library)))
 
-    cdef cpp_set[std_string] get_matlist(self):
-        return self._inst.get_matlist()
+    cdef cpp_set[std_string] get_keylist(self):
+        return self._inst.get_keylist()
 
     cdef cpp_set[int] get_nuclist(self):
         return self._inst.get_nuclist()
@@ -238,22 +244,11 @@ cdef class _MaterialLibrary:
 
     def __setitem__(self, key, value):
         cdef cpp_pair[std_string, cpp_material.Material] item
-        if not isinstance(key, int):
-            value.metadata["name"] = key.encode('utf-8')
-            value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
-            self._inst.add_material( deref((<material._Material>
-                value_proxy).mat_pointer))
-        else:
-            if (self._inst.name_order.size() > key): 
-                value.metadata["mat_number"] = key+1
-                if 'name' not in value.metadata:
-                    value.metadata["name"] = "m" + str(key+1)
-                value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
-                self._inst.replace(key, deref((<material._Material>
-                    value_proxy).mat_pointer)) 
-            else:
-                value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
-                self._inst.add_material( deref((<material._Material> value_proxy).mat_pointer))
+        if isinstance(key, _INTEGRAL_TYPES):
+            key = str(key).encode('UTF-8')
+        
+        value_proxy = material.Material(value, free_mat=not isinstance(value, material._Material))
+        self._inst.add_material(key, deref((<material._Material> value_proxy).mat_pointer))
 
 
     def __getitem__(self, key):
@@ -261,11 +256,11 @@ cdef class _MaterialLibrary:
         cdef std_string c_matname
         if isinstance(key, basestring):
             key = key.encode('UTF-8')
-        if isinstance(key, int):
-            c_mat = self._inst.get_material_ptr(<int>key)
-        else:
-            c_matname = key
-            c_mat = self._inst.get_material_ptr(<std_string>c_matname)
+        elif isinstance(key, _INTEGRAL_TYPES):
+            key = str(key).encode('UTF-8')
+        
+        c_matname = key
+        c_mat = self._inst.get_material_ptr(<std_string>c_matname)
 
         # build a PyNE Material object form the cpp_material
         py_mat = material.Material(free_mat = False)
@@ -281,7 +276,7 @@ cdef class _MaterialLibrary:
     def __delitem__(self, key):
         if isinstance(key, basestring):
             key = key.encode('UTF-8')
-        elif isinstance(key, int):
+        elif isinstance(key, _INTEGRAL_TYPES):
             key = str(key).encode('UTF-8')
         self.del_material(key)
 

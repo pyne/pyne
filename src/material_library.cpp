@@ -52,7 +52,7 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
 }
 
 void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
-  pyne::matname_set mats_to_add = mat_lib.get_matlist();
+  pyne::matname_set mats_to_add = mat_lib.get_keylist();
   for (auto it = mats_to_add.begin(); it != mats_to_add.end(); it++) {
     pyne::Material mat = Material(mat_lib.get_material(*it));
     (*this).add_material(mat);
@@ -134,37 +134,50 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
     }
   }
 
-  pyne::matname_set::iterator mat_it;
+  pyne::matname_set::iterator key_it;
   if (mat.metadata.isMember("name")) {
     mat_name = mat.metadata["name"].asString();
-    mat_it = matlist.find(mat_name);
+    key_it = keylist.find(mat_name);
   } else {
     // form a mat name as 'mX'
     int mat_number = name_order.size() + 1;
     mat_name = "m" + std::to_string(mat_number);
     mat.metadata["name"] = mat_name;
-    mat_it = matlist.find(mat_name);
+    key_it = keylist.find(mat_name);
   }
-  if (mat_it != matlist.end()) {
-    append_to_nuclist(mat);
-    mat_number_set.insert(mat_number);
-    matlist.insert(mat_name);
-    material_library[mat_name] = new Material(mat);
-    name_order.push_back(mat_name);
+  
+  add_material(mat_name, mat);  
+}
+
+void pyne::MaterialLibrary::add_material(char* key, pyne::Material mat) {
+  std::string key_name(key);
+  add_material(key_name, mat);
+}
+
+void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material mat) {
+  std::string mat_name;
+  int mat_number = -1;
+  std::set<int>::iterator mat_numb_it;
+  if (mat.metadata.isMember("mat_number")) {
+    mat_number = mat.metadata["mat_number"].asInt();
+    mat_numb_it = mat_number_set.find(mat_number);
+    if (mat_numb_it == mat_number_set.end()) {
+      warning("The Material Number Conflict.");
+    }
   } else {
-      warning("The Material Name Conflict, the material has not been added to the database.");
+    while (mat_numb_it == mat_number_set.end()) {
+      // mat number are conflicting, this adds an arbitrarily large number.
+      mat.metadata["mat_number"] = int(name_order.size() + 100);
+      mat_number = mat.metadata["mat_number"].asInt();
+      mat_numb_it = mat_number_set.find(mat_number);
+    }
   }
-}
-
-void pyne::MaterialLibrary::add_material(pyne::Material mat, char* mat_name) {
-  std::string material_name(mat_name);
-  add_material(mat, material_name);
-}
-
-void pyne::MaterialLibrary::add_material(pyne::Material mat,
-                                         const std::string& mat_name) {
-  mat.metadata["name"] = mat_name;
-  add_material(mat);
+    
+  append_to_nuclist(mat);
+  mat_number_set.insert(mat_number);
+  keylist.insert(key);
+  material_library[key] = new Material(mat);
+  name_order.push_back(mat_name);
 }
 
 void pyne::MaterialLibrary::del_material(pyne::Material mat) {
@@ -176,7 +189,7 @@ void pyne::MaterialLibrary::del_material(pyne::Material mat) {
 
 void pyne::MaterialLibrary::del_material(const std::string& mat_name) {
   material_library.erase(mat_name);
-  matlist.erase(mat_name);
+  keylist.erase(mat_name);
   for (auto name = name_order.begin(); name != name_order.end(); name++) {
     if (*name == mat_name) {
       name_order.erase(name);

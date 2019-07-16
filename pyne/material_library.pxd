@@ -17,7 +17,7 @@ ctypedef cpp_material.Material * matp
 
 cdef class _MaterialLibrary:
     cdef cpp_material_library.MaterialLibrary * _inst
-    cdef cpp_set[std_string] get_matlist(self)
+    cdef cpp_set[std_string] get_keylist(self)
     cdef cpp_set[int] get_nuclist(self)
 
 cdef cpp_umap[std_string, cpp_material.Material*] dict_to_map_str_matp(dict)

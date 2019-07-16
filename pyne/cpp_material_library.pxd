@@ -55,5 +55,5 @@ cdef extern from "material_library.h" namespace "pyne":
         cpp_material.Material* get_material_ptr( std_string ) except +
         
         unordered_map[std_string, cpp_material.Material*] get_mat_library() except + 
-        std_set[std_string] get_matlist() except +
+        std_set[std_string] get_keylist() except +
         std_set[int] get_nuclist() except +

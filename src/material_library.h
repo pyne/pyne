@@ -26,7 +26,7 @@ class MaterialLibrary {
  protected:
   // The actual library
   mat_map material_library;  // material library
-  matname_set matlist;
+  matname_set keylist;
   nuc_set nuclist;
 
 
@@ -143,12 +143,12 @@ class MaterialLibrary {
    * \param mat_name name of the material to add(will overwrite material name 
             if it already has one)
   */
-  void add_material(pyne::Material mat, char* mat_name);
+  void add_material(char* mat_name, pyne::Material mat);
   /**
    * \brief Add a material to the library
    * \param mat material to add
   */
-  void add_material(pyne::Material mat, const std::string& mat_name);
+  void add_material(const std::string& mat_name, pyne::Material mat);
   /**
    * \brief replace a material to the library
    * \param num position of the material to replace
@@ -189,7 +189,7 @@ class MaterialLibrary {
    * \brief Get the list of materials in the Library
    * \return std::set<std::string>
   */
-  pyne::matname_set get_matlist() { return matlist; }
+  pyne::matname_set get_keylist() { return keylist; }
   /**
    * \brief Get the list of nuclides in the Library
    * \return std::set<int>
