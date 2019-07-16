@@ -119,7 +119,13 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   int mat_number = -1;
   std::set<int>::iterator mat_numb_it;
   if (mat.metadata.isMember("mat_number")) {
-    mat_number = mat.metadata["mat_number"].asInt();
+    if (Json::intValue <= mat.metadata["mat_number"].type() &&
+        mat.metadata["mat_number"].type() <= Json::realValue ){
+      mat_number = mat.metadata["mat_number"].asInt();
+    } else {
+      mat_number = std::stoi(mat.metadata["mat_number"].asString());
+      mat.metadata["mat_number"] = mat_number;
+    }
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
       warning("The Material Number Conflict.");
@@ -127,7 +133,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   } else {
     while (mat_numb_it == mat_number_set.end()) {
       // mat number are conflicting, this adds an arbitrarily large number.
-      mat.metadata["mat_number"] = int(name_order.size() + 100);
+      mat.metadata["mat_number"] = int(name_order.size() + 1);
       mat_number = mat.metadata["mat_number"].asInt();
       mat_numb_it = mat_number_set.find(mat_number);
     }
@@ -138,8 +144,6 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
     mat_name = mat.metadata["name"].asString();
     key_it = keylist.find(mat_name);
   } else {
-    // form a mat name as 'mX'
-    int mat_number = name_order.size() + 1;
     mat_name = "m" + std::to_string(mat_number);
     mat.metadata["name"] = mat_name;
     key_it = keylist.find(mat_name);
@@ -158,15 +162,24 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
   int mat_number = -1;
   std::set<int>::iterator mat_numb_it;
   if (mat.metadata.isMember("mat_number")) {
-    mat_number = mat.metadata["mat_number"].asInt();
+    if (Json::intValue <= mat.metadata["mat_number"].type() &&
+        mat.metadata["mat_number"].type() <= Json::realValue ){
+      mat_number = mat.metadata["mat_number"].asInt();
+    } else {
+      mat_number = std::stoi(mat.metadata["mat_number"].asString());
+      mat.metadata["mat_number"] = mat_number;
+    }
+    mat_numb_it = mat_number_set.find(mat_number);
+    if (mat_numb_it != mat_number_set.end()) {
+      warning("The Material Number Conflict.");
+    }
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
       warning("The Material Number Conflict.");
     }
   } else {
     while (mat_numb_it == mat_number_set.end()) {
-      // mat number are conflicting, this adds an arbitrarily large number.
-      mat.metadata["mat_number"] = int(name_order.size() + 100);
+      mat.metadata["mat_number"] = int(name_order.size() + 1);
       mat_number = mat.metadata["mat_number"].asInt();
       mat_numb_it = mat_number_set.find(mat_number);
     }
