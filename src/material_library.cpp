@@ -116,39 +116,43 @@ void pyne::MaterialLibrary::write_json(const std::string& filename) {
 void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   // if exists, get the material name from metadata make one instead
   std::string mat_name;
-  std::pair<pyne::matname_set::iterator, bool> mat_insert;
+  int mat_number = -1;
+  std::set<int>::iterator mat_numb_it;
   if (mat.metadata.isMember("mat_number")) {
-    warning(
-        "Pre-existing material number in material metadata... Material number "
-        "are overwriten when added in a MaterialLibrary.");
+    mat_number = mat.metadata["mat_number"].asInt();
+    mat_numb_it = mat_number_set.find(mat_number);
+    if (mat_numb_it == mat_number_set.end()) {
+      warning("The Material Number Conflict, the material has not been added to the database.");
+      return;
+    }
+  } else {
+    while (mat_numb_it == mat_number_set.end()) {
+      // mat number are conflicting, this adds an arbitrarily large number.
+      mat.metadata["mat_number"] = int(name_order.size() + 100);
+      mat_number = mat.metadata["mat_number"].asInt();
+      mat_numb_it = mat_number_set.find(mat_number);
+    }
   }
 
+  pyne::matname_set::iterator mat_it;
   if (mat.metadata.isMember("name")) {
     mat_name = mat.metadata["name"].asString();
-    mat_insert = matlist.insert(mat.metadata["name"].asString());
+    mat_it = matlist.find(mat_name);
   } else {
     // form a mat name as 'mX'
     int mat_number = name_order.size() + 1;
     mat_name = "m" + std::to_string(mat_number);
     mat.metadata["name"] = mat_name;
-    mat_insert = matlist.insert(mat.metadata["name"].asString());
-
-    // if 'mX' name is already in the Library rename the material
-    while (!mat_insert.second) {
-      // mat number are conflicting, this adds an arbitrarily large number.
-      mat_number += name_order.size();
-      mat_name = "m" + std::to_string(mat_number);
-      mat.metadata["name"] = mat_name;
-      mat_insert = matlist.insert(mat.metadata["name"].asString());
-    }
+    mat_it = matlist.find(mat_name);
   }
-  if (mat_insert.second) {
+  if (mat_it != matlist.end()) {
     append_to_nuclist(mat);
+    mat_number_set.insert(mat_number);
+    matlist.insert(mat_name);
     material_library[mat_name] = new Material(mat);
-    material_library[mat_name]->metadata["mat_number"] =
-        int(name_order.size() + 1);
-
     name_order.push_back(mat_name);
+  } else {
+      warning("The Material Name Conflict, the material has not been added to the database.");
   }
 }
 

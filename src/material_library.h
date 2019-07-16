@@ -196,6 +196,7 @@ class MaterialLibrary {
   */
   pyne::nuc_set get_nuclist() { return nuclist; }
 
+  std::set<int> mat_number_set;
   std::vector<std::string> name_order;
 
 };  // end MaterialLibrary class header
