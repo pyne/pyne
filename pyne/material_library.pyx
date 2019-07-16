@@ -292,7 +292,7 @@ class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     Material objects.
 
     """
-   def __repr__(self):
+    def __repr__(self):
         libs = ["{0!r}={1!r}".format(k, m) for k, m in self.items()]
         libs = "{" + ", ".join(libs) + "}"
         return "pyne.material.MaterialLibrary({0})".format(libs)
