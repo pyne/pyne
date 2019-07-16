@@ -83,7 +83,7 @@ class MaterialLibrary {
     /// \param datapath Path to the materials in the file.
     /// \param protocol Flag for layout of material on disk.
   */
-  void from_hdf5(char* filename, char* datapath, char* nucpath, int protocol = 1);
+  void from_hdf5(char* filename, char* datapath = "/materials" , char* nucpath = "", int protocol = 1);
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the json file.
