@@ -55,7 +55,7 @@ void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
   pyne::matname_set mats_to_add = mat_lib.get_keylist();
   for (auto it = mats_to_add.begin(); it != mats_to_add.end(); it++) {
     pyne::Material mat = Material(mat_lib.get_material(*it));
-    (*this).add_material(mat);
+    (*this).add_material(*it, mat);
   }
 }
 
@@ -66,7 +66,7 @@ void pyne::MaterialLibrary::load_json(Json::Value json) {
   for (; ikey != ikey_end; ++ikey) {
     pyne::Material mat = pyne::Material();
     mat.load_json(json[*ikey]);
-    (*this).add_material(Material(mat));
+    (*this).add_material(*ikey, Material(mat));
   }
 }
 
@@ -121,9 +121,8 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   if (mat.metadata.isMember("mat_number")) {
     mat_number = mat.metadata["mat_number"].asInt();
     mat_numb_it = mat_number_set.find(mat_number);
-    if (mat_numb_it == mat_number_set.end()) {
-      warning("The Material Number Conflict, the material has not been added to the database.");
-      return;
+    if (mat_numb_it != mat_number_set.end()) {
+      warning("The Material Number Conflict.");
     }
   } else {
     while (mat_numb_it == mat_number_set.end()) {
@@ -161,7 +160,7 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
   if (mat.metadata.isMember("mat_number")) {
     mat_number = mat.metadata["mat_number"].asInt();
     mat_numb_it = mat_number_set.find(mat_number);
-    if (mat_numb_it == mat_number_set.end()) {
+    if (mat_numb_it != mat_number_set.end()) {
       warning("The Material Number Conflict.");
     }
   } else {
@@ -172,12 +171,16 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
       mat_numb_it = mat_number_set.find(mat_number);
     }
   }
-    
+  
+  if ( !mat.metadata.isMember("name")) {
+    mat.metadata["name"] = key;
+  } 
+
   append_to_nuclist(mat);
   mat_number_set.insert(mat_number);
   keylist.insert(key);
   material_library[key] = new Material(mat);
-  name_order.push_back(mat_name);
+  name_order.push_back(key);
 }
 
 void pyne::MaterialLibrary::del_material(pyne::Material mat) {
@@ -187,11 +190,11 @@ void pyne::MaterialLibrary::del_material(pyne::Material mat) {
   }
 }
 
-void pyne::MaterialLibrary::del_material(const std::string& mat_name) {
-  material_library.erase(mat_name);
-  keylist.erase(mat_name);
+void pyne::MaterialLibrary::del_material(const std::string& key) {
+  material_library.erase(key);
+  keylist.erase(key);
   for (auto name = name_order.begin(); name != name_order.end(); name++) {
-    if (*name == mat_name) {
+    if (*name == key) {
       name_order.erase(name);
       return;
     }
