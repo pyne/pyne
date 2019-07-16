@@ -110,7 +110,7 @@ class MaterialLibrary {
    *             appended to the end of the dataset.
    *  \param chunksize The chunksize for all material data on disk.
   */
-  void write_hdf5(char* filename, char* datapath, char* nucpath);
+  void write_hdf5(char* filename, char* datapath = "/materials", char* nucpath = "/nucid");
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
