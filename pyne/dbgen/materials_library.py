@@ -130,8 +130,8 @@ def parse_materials(mats, lines):
 def make_materials_compendium(nuc_data, matslib):
     """Adds materials compendium to nuc_data.h5."""
     kdb = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
-    kdb.remove_node('/material_library/materials')
-    kdb.remove_node('/material_library/nucid')
+    #kdb.remove_node('/material_library/materials')
+    #kdb.remove_node('/material_library/nucid')
     kdb.close()
     matslib.write_hdf5(nuc_data, datapath="/material_library/materials",
                        nucpath="/material_library/nucid")
@@ -163,8 +163,8 @@ def make_materials_library(args):
     if os.path.exists(nuc_data):
         with tb.open_file(nuc_data, 'r') as f:
             if '/material_library' in f:
-                #print("skipping materials library data table creation; already exists.")
-                pass
+                print("skipping materials library data table creation; already exists.")
+                return
 
     print("Making materials library...")
     matslib = make_matslib(os.path.join(os.path.split(__file__)[0],

@@ -122,7 +122,7 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
     kdb = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
-    kdb.remove_node('/atomic_mass')
+    #kdb.remove_node('/atomic_mass')
     Atable = kdb.create_table("/", "atomic_mass", atomic_mass_desc,
                              "Atomic Mass Data [amu]", expectedrows=len(A))
     Atable.append(A)
@@ -142,8 +142,8 @@ def make_atomic_mass(args):
     if os.path.exists(nuc_data):
         with tb.open_file(nuc_data, 'r') as f:
             if hasattr(f.root, 'atomic_mass'):
-                #print("skipping atomic mass data table creation; already exists.")
-                pass
+                print("skipping atomic mass data table creation; already exists.")
+                return
 
     # Then grab mass data
     print("Copying AME 2016 atomic mass data.")

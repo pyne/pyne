@@ -74,7 +74,7 @@ commands:
     steps:
       - checkout
       - run: python setup.py install --user --clean << parameters.flags >> 
-      - run: cd ../ && nuc_data_make -m atomic_mass,materials;
+      - run: cd ../ && nuc_data_make;
       - save_container:
           build: << parameters.build >>
 
