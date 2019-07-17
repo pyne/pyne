@@ -77,7 +77,6 @@ cdef class _MaterialLibrary:
 
         """
         if lib != None:
-            print(type(lib))
             if sys.version_info[0] >= 3 and isinstance(lib, bytes):
                 lib = lib.decode()
             if isinstance(lib, collections.Mapping):

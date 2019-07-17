@@ -141,7 +141,15 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
 
   pyne::matname_set::iterator key_it;
   if (mat.metadata.isMember("name")) {
-    mat_name = mat.metadata["name"].asString();
+    
+    if (Json::intValue <= mat.metadata["name"].type() &&
+        mat.metadata["name"].type() <= Json::realValue ){
+      mat_name = std::to_string(mat.metadata["name"].asInt());
+      mat.metadata["name"] = mat_name; 
+    } else {
+      mat_name = mat.metadata["name"].asString();
+    }
+    
     key_it = keylist.find(mat_name);
   } else {
     mat_name = "m" + std::to_string(mat_number);
@@ -171,7 +179,6 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
     }
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
-      warning("The Material Number Conflict.");
     }
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
