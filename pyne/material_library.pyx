@@ -85,11 +85,11 @@ cdef class _MaterialLibrary:
                 for key in sorted(lib.keys()):
                     mat = lib[key]
                     self.__setitem__(key, material.ensure_material(mat))
-            elif isinstance(lib, unicode):
-                c_filename = lib.encode('UTF-8')
-                c_datapath = datapath.encode('UTF-8')
-                self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
             elif isinstance(lib, basestring):
+                c_filename = lib
+                c_datapath = datapath
+                self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
+            elif isinstance(lib, unicode):
                 c_filename = lib.encode('UTF-8')
                 c_datapath = datapath.encode('UTF-8')
                 self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
