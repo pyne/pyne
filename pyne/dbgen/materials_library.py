@@ -17,7 +17,6 @@ from pyne.utils import QAWarning
 import tables as tb
 
 from pyne import nucname
-from pyne.dbgen.api import BASIC_FILTERS
 from pyne.data import natural_abund, natural_abund_map
 from pyne.material import Material, MaterialLibrary
 
@@ -129,10 +128,6 @@ def parse_materials(mats, lines):
 # Writes to file
 def make_materials_compendium(nuc_data, matslib):
     """Adds materials compendium to nuc_data.h5."""
-    kdb = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
-    #kdb.remove_node('/material_library/materials')
-    #kdb.remove_node('/material_library/nucid')
-    kdb.close()
     matslib.write_hdf5(nuc_data, datapath="/material_library/materials",
                        nucpath="/material_library/nucid")
 

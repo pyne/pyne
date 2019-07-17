@@ -42,10 +42,6 @@ def test_get_material_lib_with_names():
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
     assert(unique_names == expected_unique_names)
-    print('mat_lib_expected: ')
-    print(mat_lib_expected)
-    print('mat_lib_observed: ')
-    print(mat_lib)
     assert(mat_lib == mat_lib_expected)
 
 
@@ -73,10 +69,6 @@ def test_get_material_lib_no_names():
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
     assert(unique_names == expected_unique_names)
-    print('mat_lib_expected: ')
-    print(mat_lib_expected)
-    print('mat_lib_observed: ')
-    print(mat_lib)
     assert(mat_lib == mat_lib_expected)
 
 
