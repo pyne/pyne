@@ -36,12 +36,16 @@ def test_get_material_lib_with_names():
 
     mat_lib, unique_names = partisn._get_material_lib(
         hdf5, data_hdf5path, nuc_hdf5path, nuc_names=names)
-    mat_lib_expected = {u'MERCURY1': {800000000: 4.066613534078662e-2},
+    mat_lib_expected = {u'MERCURY1': {800000000: 4.066613528361793e-02},
                         u'HELIUMNA': {20040000: 2.4975599277878773e-05,
-                                      20030000: 4.4414858514189387e-11}}
+                                      20030000: 4.441485847634287e-11}}
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
     assert(unique_names == expected_unique_names)
+    print('mat_lib_expected: ')
+    print(mat_lib_expected)
+    print('mat_lib_observed: ')
+    print(mat_lib)
     assert(mat_lib == mat_lib_expected)
 
 
@@ -57,18 +61,22 @@ def test_get_material_lib_no_names():
 
     mat_lib, unique_names = partisn._get_material_lib(
         hdf5, data_hdf5path, nuc_hdf5path)
-    mat_lib_expected = {'MERCURY1': {802020000: 1.2060451913893048e-02,
-                                     802000000: 9.423512145483618e-03,
-                                     802010000: 5.3498985962366465e-03,
-                                     801960000: 6.24414427454006e-05,
-                                     802040000: 2.7475463582858147e-03,
-                                     801980000: 4.108325935058038e-03,
-                                     801990000: 6.916609590819954e-03},
+    mat_lib_expected = {'MERCURY1': {802020000: 1.2060451902845978e-02,
+                                     802000000: 9.42351212927261e-03,
+                                     802010000: 5.349898590939199e-03,
+                                     801960000: 6.244144246372785e-05,
+                                     802040000: 2.747546357531488e-03,
+                                     801980000: 4.108325923083786e-03,
+                                     801990000: 6.9166095787921746e-03},
                         'HELIUMNA': {20040000: 2.4975599277878773e-05,
-                                     20030000: 4.4414858514189387e-11}}
+                                     20030000: 4.441485847634287e-11}}
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
     assert(unique_names == expected_unique_names)
+    print('mat_lib_expected: ')
+    print(mat_lib_expected)
+    print('mat_lib_observed: ')
+    print(mat_lib)
     assert(mat_lib == mat_lib_expected)
 
 
