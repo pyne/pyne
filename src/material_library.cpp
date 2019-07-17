@@ -128,7 +128,10 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
     }
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
-      warning("The Material Number Conflict.");
+      std::string msg = "The Material Number Conflict. Material Number ";
+      msg += mat_number;
+      msg += " is already in the library.";
+      warning(msg);
     }
   } else {
     while (mat_numb_it == mat_number_set.end()) {
@@ -182,7 +185,10 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
     }
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
-      warning("The Material Number Conflict.");
+      std::string msg = "The Material Number Conflict. Material Number ";
+      msg += mat_number;
+      msg += " is already in the library.";
+      warning(msg);
     }
   } else {
     while (mat_numb_it == mat_number_set.end()) {
