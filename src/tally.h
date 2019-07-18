@@ -87,12 +87,16 @@ namespace pyne
 
     // mcnp tally
     std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5" );
-    
+   
+    // Form the tally line as function of its properties
+    std::stringstream form_mcnp_tally(string tally_index, int type, 
+                                      string particle_token, string entity_id);
+
     // fluka tally 
     std::string fluka(std::string unit_number = "-21");
 
     /// fundamental tally variables
-    std::string entity_type; ///< the type of entity (volume,surface)
+    std::string entity_type; ///< the type of entity (volume,surface) or (xyz, cylinder)
     std::string entity_name; ///< the name of the entity (optional)
     std::string particle_name; ///< particle name string
     std::string tally_type; ///< type of tally flux or current
@@ -100,6 +104,21 @@ namespace pyne
     int entity_id; ///< id number of the entity being tallied upon    
     double entity_size; ///< the physical size of the entity 
     double normalization; ///< the tally normalization 
+    
+    /// fundemental mesh tally variables
+    /// Mesh tally definition variable
+    std::string entity_geometry;
+    double[3] origin;
+    double[3] vec;
+    vector<double> i_meshs;
+    vector<double> j_meshs;
+    vector<double> k_meshs;
+    vector<double> i_bins;
+    vector<double> j_bins;
+    vector<double> k_bins;
+    vector<double> energy; ///< Energy Mesh
+    vector<int> energy_bins; ///< Bin per energy
+ 
   };
 
   /// Converts a Tally to a string stream representation.
@@ -119,6 +138,25 @@ namespace pyne
     double entity_size;
     double normalization;
   } tally_struct;
+  
+//  typedef struct mesh_tally_struct {
+//    int entity_type;
+//    int tally_type;
+//    const char * particle_name;
+//    const char * entity_name;
+//    const char * tally_name;
+//    double normalization;
+//    
+//    const char * geometry;
+//    double[2] x_bound;
+//    double[2] y_bound;
+//    double[2] z_bound;
+//    double x_bins;
+//    double y_bins;
+//    double z_bins;
+//    vector<double> energy;
+//    vector<int> energy_bins;
+//  } mesh_tally_struct;
   
 // End pyne namespace
 }

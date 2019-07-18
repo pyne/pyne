@@ -2,21 +2,26 @@
 // Central Tally Class
 // -- Andrew Davis
 
+#include <iomanip>
 #include <string>
 #include <vector>
-#include <iomanip>
 
 #ifndef PYNE_IS_AMALGAMATED
-  #include "tally.h"
-  #include "particle.h"
+#include "particle.h"
+#include "tally.h"
 #endif
 
-enum entity_type_enum {VOLUME, SURFACE, MESH}; // Enumeration for entity types
-enum tally_type_enum  {FLUX, CURRENT};   // Enumeration for tally types
+enum entity_type_enum {
+  VOLUME,
+  SURFACE,
+  MESH_XYZ,
+  MESH_CYL
+};                                       // Enumeration for entity types
+enum tally_type_enum { FLUX, CURRENT };  // Enumeration for tally types
 
 const std::string tally_type_enum2string[] = {"Flux", "Current"};
-const std::string entity_type_enum2string[] = {"Volume", "Surface"};
-
+const std::string entity_type_enum2string[] = {"Volume", "Surface", "Mesh"};
+const std::string geometry_type_enum2string[] = {"XYZ", "Cylinder"};
 
 /***************************/
 /*** Protected Functions ***/
@@ -40,14 +45,13 @@ pyne::Tally::Tally() {
   tally_name = "";
   entity_size = -1.0;
   normalization = 1.0;
+
 }
 
 // Default constructor
-pyne::Tally::Tally(std::string type, std::string part_name,
-       int ent, std::string ent_type,
-       std::string ent_name, std::string tal_name,
-       double size, double norm ) {
-
+pyne::Tally::Tally(std::string type, std::string part_name, int ent,
+                   std::string ent_type, std::string ent_name,
+                   std::string tal_name, double size, double norm) {
   // Empty Tally Constructor
   tally_type = type;
   particle_name = pyne::particle::name(part_name);
@@ -57,35 +61,68 @@ pyne::Tally::Tally(std::string type, std::string part_name,
   tally_name = tal_name;
   entity_size = size;
   normalization = norm;
+  
+}
+
+pyne::Tally::Tally(std::string type,
+                   std::string part_name, 
+                   std::string ent_type,
+                   std::string ent_name, 
+                   std::string tal_name, 
+                   double[3] orgn;
+                   vector<double> i,
+                   vector<double> j,
+                   vector<double> k,
+                   vector<double> i_ints,
+                   vector<double> j_ints,
+                   vector<double> k_ints,
+                   vector<double> e,
+                   vector<int> e_ints,
+                   double norm) {
+  // Empty Tally Constructor
+  tally_type = type;
+  particle_name = pyne::particle::name(part_name);
+  entity_type = ent_type;
+  entity_name = ent_name;
+  tally_name = tal_name;
+  entity_size = -1;
+
+  origin = orgn;
+  i_meshs = i;
+  j_meshs = j;
+  k_meshs = k;
+  i_bins = i_ints;
+  j_bins = j_ints;
+  k_bins = k_ints;
+  energy = e;       ///< Energy Mesh
+  energy_bins = e_ints;  ///< Bin per energy
+
+  normalization = norm;
 }
 
 // Destructor
-pyne::Tally::~Tally() {
-}
-
+pyne::Tally::~Tally() {}
 
 /*--- Method definitions ---*/
 //
-void pyne::Tally::from_hdf5(char * filename, char *datapath, int row) {
+void pyne::Tally::from_hdf5(char* filename, char* datapath, int row) {
   std::string fname(filename);
   std::string dpath(datapath);
-  from_hdf5(fname,dpath,row);
+  from_hdf5(fname, dpath, row);
 }
 
 //
 void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
-          int row) {
+                            int row) {
   // line of data to acces
   int data_row = row;
 
   // check for file existence
-  if (!pyne::file_exists(filename))
-    throw pyne::FileNotFound(filename);
+  if (!pyne::file_exists(filename)) throw pyne::FileNotFound(filename);
 
   // check to make sure is a HDF5 file
   bool is_h5 = H5Fis_hdf5(filename.c_str());
-  if (!is_h5)
-    throw h5wrap::FileNotHDF5(filename);
+  if (!is_h5) throw h5wrap::FileNotHDF5(filename);
 
   // Open file and dataset.
   hid_t file = H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -93,8 +130,8 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
 
   // Get dataspace and allocate memory for read buffer.
   hid_t space = H5Dget_space(dset);
-  int rank  = H5Sget_simple_extent_ndims(space);
-  hsize_t dims[1]; // for length of dataset
+  int rank = H5Sget_simple_extent_ndims(space);
+  hsize_t dims[1];  // for length of dataset
 
   // get the length of the dataset
   int ndims = H5Sget_simple_extent_dims(space, dims, NULL);
@@ -105,46 +142,46 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
   hsize_t chunk_dimsr[1];
   int rank_chunk;
 
-  if(H5D_CHUNKED == H5Pget_layout(prop))
+  if (H5D_CHUNKED == H5Pget_layout(prop))
     rank_chunk = H5Pget_chunk(prop, rank, chunk_dimsr);
 
-// allocate memory for data from file
-tally_struct* read_data = new tally_struct[dims[0]];
+  // allocate memory for data from file
+  tally_struct* read_data = new tally_struct[dims[0]];
 
-// if row number is larger than data set only give last element
-if (row >= dims[0]) data_row = dims[0] - 1;
+  // if row number is larger than data set only give last element
+  if (row >= dims[0]) data_row = dims[0] - 1;
 
-// Create variable-length string datatype.
-hid_t strtype = H5Tcopy(H5T_C_S1);
-int status = H5Tset_size(strtype, H5T_VARIABLE);
+  // Create variable-length string datatype.
+  hid_t strtype = H5Tcopy(H5T_C_S1);
+  int status = H5Tset_size(strtype, H5T_VARIABLE);
 
-// Create the compound datatype for memory.
-hid_t memtype = create_memtype();
+  // Create the compound datatype for memory.
+  hid_t memtype = create_memtype();
 
-// Create the compound datatype for the file
-hid_t filetype = create_filetype();
+  // Create the compound datatype for the file
+  hid_t filetype = create_filetype();
 
-// Read the data.
-status = H5Dread(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
+  // Read the data.
+  status = H5Dread(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
 
-// unpack the data and set values
-entity_id = read_data[data_row].entity_id;
-entity_type = entity_type_enum2string[read_data[data_row].entity_type];
-tally_type = tally_type_enum2string[read_data[data_row].tally_type];
-particle_name = std::string(read_data[data_row].particle_name);
-tally_name = std::string(read_data[data_row].tally_name);
-entity_name = std::string(read_data[data_row].entity_name);
-entity_size = read_data[data_row].entity_size;
-normalization = read_data[data_row].normalization;
+  // unpack the data and set values
+  entity_id = read_data[data_row].entity_id;
+  entity_type = entity_type_enum2string[read_data[data_row].entity_type];
+  tally_type = tally_type_enum2string[read_data[data_row].tally_type];
+  particle_name = std::string(read_data[data_row].particle_name);
+  tally_name = std::string(read_data[data_row].tally_name);
+  entity_name = std::string(read_data[data_row].entity_name);
+  entity_size = read_data[data_row].entity_size;
+  normalization = read_data[data_row].normalization;
 
-// close the data sets
-status = H5Dclose(dset);
-status = H5Sclose(space);
-status = H5Tclose(filetype);
-status = H5Fclose(file);
+  // close the data sets
+  status = H5Dclose(dset);
+  status = H5Sclose(space);
+  status = H5Tclose(filetype);
+  status = H5Fclose(file);
 
-// tidy up
-delete[] read_data;
+  // tidy up
+  delete[] read_data;
 }
 
 // Dummy Wrapper around C Style Functions
@@ -254,6 +291,9 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     tally_data[0].entity_type = VOLUME;
   else if (entity_type.find("Surface") != std::string::npos)
     tally_data[0].entity_type = SURFACE;
+  else {
+    std::cout << "Can't write mesh tally in hdf5 file yet!" << std::endl;
+  }
 
   // tally kind
   if (tally_type.find("Flux") != std::string::npos)
@@ -419,33 +459,77 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   // neednt check entity type
   if (entity_type.find("Surface") != std::string::npos) {
     if (tally_type.find("Current") != std::string::npos) {
-      output << "F" << tally_index << "1:" << particle_token << " " << entity_id
-             << std::endl;
-      if (entity_size > 0.0)
-        output << "SD" << tally_index << "1 " << entity_size << std::endl;
-      // normalisation
-      if (normalization > 1.0)
-        output << "FM" << tally_index << "1 " << normalization << std::endl;
+      oss << form_mcnp_tally(tally_index, 1, particle_token, entity_id);
     } else if (tally_type.find("Flux") != std::string::npos) {
-      output << "F" << tally_index << "2:" << particle_token << " " << entity_id
-             << std::endl;
-      if (entity_size > 0.0)
-        output << "SD" << tally_index << "2 " << entity_size << std::endl;
-      // normalisation
-      if (normalization > 1.0)
-        output << "FM" << tally_index << "2 " << normalization << std::endl;
+      oss << form_mcnp_tally(tally_index, 2, particle_token, entity_id);
     }
+
   } else if (entity_type.find("Volume") != std::string::npos) {
     if (tally_type.find("Flux") != std::string::npos) {
-      output << "F" << tally_index << "4:" << particle_token << " " << entity_id
-             << std::endl;
-      if (entity_size > 0.0)
-        output << "SD" << tally_index << "4 " << entity_size << std::endl;
-      // normalisation
-      if (normalization > 1.0)
-        output << "FM" << tally_index << "4 " << normalization << std::endl;
+      oss << form_mcnp_tally(tally_index, 4, particle_token, entity_id);
     } else if (tally_type.find("Current") != std::string::npos) {
       // makes no sense in mcnp
+    }
+  } else if (entity_type.find("Mesh") != std::string::npos) {
+    oss << "FMESH4:" << particle_token << "  ";
+    oss << " GEOM=";
+    std::stringstream sup_var = "";
+
+    if (entity_geometry.find("XYZ") != std::string::npos) {
+      oss << "XYZ";
+    } else if (entity_geometry.find("CYL") != std::string::npos) {
+      oss << "CYL";
+      if (axl.size() > 0) {
+        sup_var << "AXL=";
+        for (int i = 0; i <= axl.size(); i++) {
+              sup_var << std::to_string(axl[i] << " ";
+        }
+      }
+    }
+    if (vec.size() > 0) {
+      sup_var << "VEC=";
+      for (int i = 0; i <= vec.size(); i++) {
+            sup_var << std::to_string(vec[i] << " ";
+      }
+    }
+    oss << "ORIGIN= " << origin[0] << " " << origin[1] << " " << origin[2]
+        << "\n";
+    std::string[3] = dir_name = {"I", "J", "K"};
+    std::vector<double>[3] meshes = {i_meshs, j_meshs, z_meshs};
+    std::vector<double>[3] bins = {i_bins, j_bins, z_bins};
+
+    for (int j = 0; j < 3; j++) {
+      oss << "          ";
+      oss << dir_name << "MESH=";
+      for (int i = 0; i < i_meshs.size(); i++) {
+        oss << " " << std::to_string(meshes[j][i]);
+      }
+      if (bins[j].size() > 0) {
+        oss << dir_name << "INTS=";
+        for (int i = 0; i < i_bins.size(); i++) {
+          oss << " " << std::to_string(bins[j][i]);
+        }
+      }
+      oss << "\n";
+    }
+    if (sup_var != "") {
+      oss << "          ";
+      oss << sup_var << "\n";
+    }
+    if (energy.size() > 0) {
+      oss << "          EMESH=";
+      for (int i = 0; i < energy.size(); i++) {
+        oss << " " << std::string(energy[i]);
+      }
+      if (energy_bins.size() > 0) {
+        oss << "          EINTS=";
+        for (int i = 0; i < energy_bins.size(); i++) {
+          oss << " " << std::string(energy_bins[i]);
+        }
+      }
+    }
+    if (out.size() > 0) {
+      oss << "          OUT=" << out;
     }
   } else {
     std::cout << "tally/entity combination makes no sense for MCNP"
@@ -455,6 +539,30 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   // print sd card if area/volume specified
   return output.str();
 }
+
+
+
+
+// Form the tally line as function of its properties
+std::stringstream pyne::Tally::form_mcnp_tally(string tally_index, 
+                                               int type, 
+                                               string particle_token, 
+                                               string entity_id) {
+  std::stringstream tally_stream;  // tally stream
+  
+  tally_stream << "F" << tally_index << std::to_string(type) 
+               << ":" << particle_token << " " << entity_id << std::endl;
+  
+  if (entity_size > 0.0)
+    tally_stream << "SD" << tally_index << type << " " << entity_size << std::endl;
+  
+  if (normalization > 1.0)
+    tally_stream << "FM" << tally_index << type << " " << normalization << std::endl;
+
+  return tally_stream;
+}
+
+
 
 // Produces valid fluka tally
 std::string pyne::Tally::fluka(std::string unit_number) {
