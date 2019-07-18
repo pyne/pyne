@@ -45,6 +45,12 @@ class Tally {
         std::string tally_name = "", double entity_size = 0.0,
         double normalization = 1.0);
 
+  Tally(std::string type, std::string part_name, std::string ent_type,
+        std::string ent_name, std::string tal_name, double* orgn,
+        std::vector<double> i, std::vector<double> j, std::vector<double> k,
+        std::vector<double> i_ints, std::vector<double> j_ints,
+        std::vector<double> k_ints, std::vector<double> e,
+        std::vector<int> e_ints, double norm);
   ~Tally();  /// default destructor
 
   // Create hdf5 datatable for tallies
@@ -83,11 +89,7 @@ class Tally {
   void write_hdf5(std::string filename, std::string datapath);
 
   // mcnp tally
-  std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5");
-
-  // Form the tally line as function of its properties
-  std::stringstream form_mcnp_tally(string tally_index, int type,
-                                    string particle_token, string entity_id);
+  std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5", std::string out="");
 
   // fluka tally
   std::string fluka(std::string unit_number = "-21");
@@ -106,16 +108,17 @@ class Tally {
   /// fundemental mesh tally variables
   /// Mesh tally definition variable
   std::string entity_geometry;
-  double[3] origin;
-  double[3] vec;
-  vector<double> i_meshs;
-  vector<double> j_meshs;
-  vector<double> k_meshs;
-  vector<double> i_bins;
-  vector<double> j_bins;
-  vector<double> k_bins;
-  vector<double> energy;    ///< Energy Mesh
-  vector<int> energy_bins;  ///< Bin per energy
+  double origin[3];
+  double vec[3];
+  double axl[3];
+  std::vector<double> i_meshs;
+  std::vector<double> j_meshs;
+  std::vector<double> k_meshs;
+  std::vector<double> i_bins;
+  std::vector<double> j_bins;
+  std::vector<double> k_bins;
+  std::vector<double> energy;    ///< Energy Mesh
+  std::vector<int> energy_bins;  ///< Bin per energy
 };
 
 /// Converts a Tally to a string stream representation.
