@@ -7,8 +7,8 @@
 #include <vector>
 
 #ifndef PYNE_IS_AMALGAMATED
-#include "particle.h"
-#include "tally.h"
+  #include "particle.h"
+  #include "tally.h"
 #endif
 
 enum entity_type_enum {
@@ -541,8 +541,6 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
 }
 
 
-
-
 // Form the tally line as function of its properties
 std::stringstream pyne::Tally::form_mcnp_tally(string tally_index, 
                                                int type, 
@@ -561,7 +559,6 @@ std::stringstream pyne::Tally::form_mcnp_tally(string tally_index,
 
   return tally_stream;
 }
-
 
 
 // Produces valid fluka tally
