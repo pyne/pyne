@@ -2,6 +2,7 @@ from os.path import isfile
 from warnings import warn
 from pyne.utils import QAWarning
 import numpy as np
+import tables as tb
 
 from pyne.mesh import Mesh
 from pyne.mcnp import Meshtal
@@ -244,6 +245,5 @@ def e_bins_to_photon_source_h5m(filename, e_bins):
         Energy boundaries, unit: MeV.
     """
     with tb.open_file(filename, 'r+') as h5f:
-        #h5f.root._f_setattr('energy_boundaries', 'pyne_r2s_source')
-        h5f.root.Array('/', 'energ_boundaries', obj=e_bins)
+        h5f.create_array('/', 'energy_boundaries', obj=e_bins)
     return
