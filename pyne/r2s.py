@@ -231,3 +231,19 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
             sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
             intensity += vol * np.sum(sv_data)
     return intensity
+
+def e_bins_to_photon_source_h5m(filename, e_bins):
+    """
+    This function is used to add 'energy_boundaries' attribute for PyNE R2S
+    photon source file 'source_x.h5m'.
+    Parameters
+    ----------
+    filename : string
+        Filename of the 'source_x.h5m'.
+    e_bins : numpy array
+        Energy boundaries, unit: MeV.
+    """
+    with tb.open_file(filename, 'r+') as h5f:
+        #h5f.root._f_setattr('energy_boundaries', 'pyne_r2s_source')
+        h5f.root.Array('/', 'energ_boundaries', obj=e_bins)
+    return
