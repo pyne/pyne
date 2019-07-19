@@ -45,12 +45,23 @@ class Tally {
         std::string tally_name = "", double entity_size = 0.0,
         double normalization = 1.0);
 
-  Tally(std::string type, std::string part_name, std::string ent_type,
-        std::string ent_name, std::string tal_name, double* orgn,
+  /// Constructor from passed in vars
+  /// \param particle_name the name of the particle type
+  /// \param entity the entity id of the tally (eg. surface index,
+  ///          volume number)
+  /// \param entity_geom (xyz, cylinder)
+  /// \param entity_name string identifying the entity
+  /// \param tally_name string identifying the tally
+  /// \param origin double[3] origin of the meshtally
+  /// \param i,j,k vector<double> coordinate of the coarse meshes
+  /// \param ints i,j,k vector<double> coordinate of the coarse meshes
+  /// \param normalization the number required to normalize your tally
+  Tally(std::string particule_name, std::string entity_geom,
+        std::string entity_name, std::string tally_name, double orgn[3],
         std::vector<double> i, std::vector<double> j, std::vector<double> k,
-        std::vector<double> i_ints, std::vector<double> j_ints,
-        std::vector<double> k_ints, std::vector<double> e,
-        std::vector<int> e_ints, double norm);
+        std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
+        std::vector<double> e, std::vector<int> e_ints, 
+        double norm, double vec[3], double axl[3]);
   ~Tally();  /// default destructor
 
   // Create hdf5 datatable for tallies
@@ -114,9 +125,9 @@ class Tally {
   std::vector<double> i_meshs;
   std::vector<double> j_meshs;
   std::vector<double> k_meshs;
-  std::vector<double> i_bins;
-  std::vector<double> j_bins;
-  std::vector<double> k_bins;
+  std::vector<int> i_bins;
+  std::vector<int> j_bins;
+  std::vector<int> k_bins;
   std::vector<double> energy;    ///< Energy Mesh
   std::vector<int> energy_bins;  ///< Bin per energy
 };
@@ -137,25 +148,6 @@ typedef struct tally_struct {
   double entity_size;
   double normalization;
 } tally_struct;
-
-//  typedef struct mesh_tally_struct {
-//    int entity_type;
-//    int tally_type;
-//    const char * particle_name;
-//    const char * entity_name;
-//    const char * tally_name;
-//    double normalization;
-//
-//    const char * geometry;
-//    double[2] x_bound;
-//    double[2] y_bound;
-//    double[2] z_bound;
-//    double x_bins;
-//    double y_bins;
-//    double z_bins;
-//    vector<double> energy;
-//    vector<int> energy_bins;
-//  } mesh_tally_struct;
 
 // End pyne namespace
 }

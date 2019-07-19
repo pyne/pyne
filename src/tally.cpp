@@ -64,26 +64,17 @@ pyne::Tally::Tally(std::string type, std::string part_name, int ent,
 
 }
 
-pyne::Tally::Tally(std::string type,
-                   std::string part_name,
-                   std::string ent_type,
-                   std::string ent_name,
-                   std::string tal_name,
-                   double orgn[3],
-                   std::vector<double> i,
-                   std::vector<double> j,
-                   std::vector<double> k,
-                   std::vector<double> i_ints,
-                   std::vector<double> j_ints,
-                   std::vector<double> k_ints,
-                   std::vector<double> e,
-                   std::vector<int> e_ints,
-                   double norm) {
+pyne::Tally::Tally(std::string part_name, std::string ent_geom,
+                   std::string ent_name, std::string tal_name, double orgn[3],
+                   std::vector<double> i, std::vector<double> j, std::vector<double> k,
+                   std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
+                   std::vector<double> e, std::vector<int> e_ints, 
+                   double norm, double vec[3], double axl[3]) {
   // Empty Tally Constructor
-  tally_type = type;
-  particle_name = pyne::particle::name(part_name);
-  entity_type = ent_type;
+  tally_type = "Mesh";
   entity_name = ent_name;
+  particle_name = pyne::particle::name(part_name);
+  entity_geometry = ent_geom;
   tally_name = tal_name;
   entity_size = -1;
   
@@ -515,7 +506,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
         << "\n";
     std::string dir_name[3] = {"I", "J", "K"};
     std::vector<double> meshes[3] = {i_meshs, j_meshs, k_meshs};
-    std::vector<double> bins[3] = {i_bins, j_bins, k_bins};
+    std::vector<int> bins[3] = {i_bins, j_bins, k_bins};
 
     for (int j = 0; j < 3; j++) {
       output << "          ";
