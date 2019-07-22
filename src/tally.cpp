@@ -65,11 +65,11 @@ pyne::Tally::Tally(std::string type, std::string part_name, int ent,
 }
 
 pyne::Tally::Tally(std::string part_name, std::string ent_geom,
-                   std::string ent_name, std::string tal_name, double orgn[3],
+                   std::string ent_name, double orgn[3],
                    std::vector<double> i, std::vector<double> j, std::vector<double> k,
                    std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
                    std::vector<double> e, std::vector<int> e_ints, 
-                   double norm, double vec[3], double axl[3]) {
+                   std::string tal_name, double norm, double vec[3], double axl[3]) {
   // Empty Tally Constructor
   tally_type = "Mesh";
   entity_name = ent_name;

@@ -12,6 +12,9 @@ from pyne cimport stlcontainers
 from libc.stdlib cimport free
 from libcpp.map cimport map as cpp_map
 from libcpp.string cimport string as std_string
+from libcpp.vector cimport vector
+import numpy as np
+cimport numpy as np
 
 import collections
 from pyne import stlcontainers
@@ -20,6 +23,44 @@ from warnings import warn
 from pyne.utils import QAWarning
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+cdef vector[int] to_vector_int(value):
+    cdef vector[int] value_proxy
+    cdef int ivalue
+    cdef int value_size
+    cdef int * value_data
+    # value is a ('vector', 'int32', 0)
+    value_size = len(value)
+    if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_INT32:
+        value_data = <int *> np.PyArray_DATA(<np.ndarray> value)
+        value_proxy = vector[int](<size_t> value_size)
+        for ivalue in range(value_size):
+            value_proxy[ivalue] = value_data[ivalue]
+    else:
+        value_proxy = vector[int](<size_t> value_size)
+        for ivalue in range(value_size):
+            value_proxy[ivalue] = <int> value[ivalue]
+    return value_proxy
+
+
+cdef vector[double] to_vector_double(value):
+    cdef vector[double] value_proxy
+    cdef int ivalue
+    cdef int value_size
+    cdef double * value_data
+    # value is a ('vector', 'float64', 0)
+    value_size = len(value)
+    if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
+        value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
+        value_proxy = vector[double](<size_t> value_size)
+        for ivalue in range(value_size):
+            value_proxy[ivalue] = value_data[ivalue]
+    else:
+        value_proxy = vector[double](<size_t> value_size)
+        for ivalue in range(value_size):
+            value_proxy[ivalue] = <double> value[ivalue]
+    return value_proxy
+
 
 cdef class Tally:
     """
@@ -90,23 +131,6 @@ cdef class Tally:
 
         empty constructor   Constructor from passed in vars
 
-        Parameters
-        ----------
-        entity_name : std::string
-
-        entity_type : std::string
-
-        entity_size : double
-
-        entity : int
-
-        normalization : double
-
-        particle_name : std::string
-
-        type : std::string
-
-        tally_name : std::string
 
         Returns
         -------
@@ -171,9 +195,100 @@ cdef class Tally:
         tal_name_bytes = tal_name.encode()
         self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
 
+    
+    def _tally_tally_2(self, part_name, ent_geom, ent_name, origin, i, j, k,
+            i_ints, j_ints, k_ints, e, e_ints, tal_name='', norm=1.0, vec={}, axl={}):
+        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        ################################################################
+
+        Parameters
+        ----------
+        entity_name : std::string
+        entity_geometry : std::string
+        entity_type : std::string
+        entity_size : double
+        normalization : double
+        particle_name : std::string
+        type : std::string
+        tally_name : std::string
+        i: vector
+
+        Returns
+        -------
+        None
+
+        """
+        cdef char * part_name_proxy
+        cdef char * ent_geom_proxy
+        cdef char * ent_name_proxy
+        cdef char * tal_name_proxy
+        cdef vector[double] i_proxy
+        cdef vector[int] i_ints_proxy
+        cdef vector[double] j_proxy
+        cdef vector[int] j_ints_proxy
+        cdef vector[double] k_proxy
+        cdef vector[int] k_ints_proxy
+        cdef vector[double] e_proxy
+        cdef vector[int] e_ints_proxy
+        
+        part_name_bytes = part_name.encode()
+        ent_geom_bytes = ent_geom.encode()
+        ent_name_bytes = ent_name.encode()
+        tal_name_bytes = tal_name.encode()
+        i_proxy = to_vector_double(i)
+        j_proxy = to_vector_double(k)
+        k_proxy = to_vector_double(k)
+        e_proxy = to_vector_double(e)
+        i_ints_proxy = to_vector_int(i_ints)
+        j_ints_proxy = to_vector_int(k_ints)
+        k_ints_proxy = to_vector_int(k_ints)
+        e_ints_proxy = to_vector_int(e_ints)
+        
+        
+        self._inst = new cpp_tally.Tally(std_string(<char *> part_name_bytes), 
+                std_string(<char *> ent_geom_bytes), std_string(<char *> ent_name_bytes), 
+                <cpp_tally.vec3> origin,
+                <vector[double]> i_proxy, <vector[double]> j_proxy, <vector[double]> k_proxy,
+                <vector[int]> i_ints_proxy, <vector[int]> j_ints_proxy, <vector[int]> k_ints_proxy, 
+                <vector[double]> e_proxy, <vector[int]> e_ints_proxy, 
+                std_string(<char *> tal_name_bytes), <double> norm, <cpp_tally.vec3> vec, <cpp_tally.vec3> axl)
+
 
     _tally_tally_0_argtypes = frozenset()
-    _tally_tally_1_argtypes = frozenset(((0, str), (1, str), (2, int), (3, str), (4, str), (5, str), (6, float), (7, float), ("type", str), ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str), ("tal_name", str), ("size", float), ("norm", float)))
+    _tally_tally_1_argtypes = frozenset(((0, str), (1, str), (2, int), 
+        (3, str), (4, str), (5, str), (6, float), (7, float), ("type", str), 
+        ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str), 
+        ("tal_name", str), ("size", float), ("norm", float)))
+    _tally_tally_2_argtypes = frozenset(((0, str), (1, str), (2, int),
+        (3,list), (3, np.ndarray), 
+        (12, str), (13, float), (14, float),
+        (15, np.ndarray), (16, np.ndarray),
+        (15, list), (16, list),
+        (4, np.ndarray), (5, np.ndarray),
+        (6, np.ndarray), (7, np.ndarray),
+        (8, np.ndarray), (9, np.ndarray),
+        (10, np.ndarray), (11, np.ndarray),
+        (4, list), (5, list),
+        (6, list), (7, list),
+        (8, list), (9, list),
+        (10, list), (11, list),
+        ("part_name", str), ("ent_geom", str), ("ent_name", str), 
+        ("tal_name", str), ("size", float), ("norm", float),
+        ("origin",list), ("origin", np.ndarray), 
+        ("i", np.ndarray), ("i_ints", np.ndarray), 
+        ("j", np.ndarray), ("ji_ints", np.ndarray), 
+        ("k", np.ndarray), ("k_ints", np.ndarray),
+        ("e", np.ndarray), ("e_ints", np.ndarray),
+        ("i", list), ("i_ints", list), 
+        ("j", list), ("ji_ints", list), 
+        ("k", list), ("k_ints", list),
+        ("e", list), ("e_ints", list),
+        ("vec", np.ndarray), ("axl", np.ndarray),
+        ("vec", list), ("axl", list)))
 
     def __init__(self, *args, **kwargs):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
@@ -226,6 +341,9 @@ cdef class Tally:
             return
         if types <= self._tally_tally_1_argtypes:
             self._tally_tally_1(*args, **kwargs)
+            return
+        if types <= self._tally_tally_2_argtypes:
+            self._tally_tally_2(*args, **kwargs)
             return
         # duck-typed dispatch based on whatever works!
         try:
@@ -764,8 +882,6 @@ cdef class Tally:
 
 
     pass
-
-
 
 
 

@@ -57,11 +57,12 @@ class Tally {
   /// \param ints i,j,k vector<double> coordinate of the coarse meshes
   /// \param normalization the number required to normalize your tally
   Tally(std::string particule_name, std::string entity_geom,
-        std::string entity_name, std::string tally_name, double orgn[3],
+        std::string entity_name, double orgn[3],
         std::vector<double> i, std::vector<double> j, std::vector<double> k,
         std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
         std::vector<double> e, std::vector<int> e_ints, 
-        double norm = 1.0, double vec[3] = nullptr, double axl[3] = nullptr);
+        std::string tally_name = "", double norm = 1.0, double vec[3] = nullptr, 
+        double axl[3] = nullptr);
   ~Tally();  /// default destructor
 
   // Create hdf5 datatable for tallies

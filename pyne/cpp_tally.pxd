@@ -29,12 +29,16 @@ cdef extern from "tally.h" namespace "pyne":
         Tally(cstr, cstr, int, cstr, cstr, cstr, double) except +
         Tally(cstr, cstr, int, cstr, cstr, cstr, double, double) except +
 
-        Tally(cstr, cstr, cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
-                vdbl, vdbl, vdbl,  vint, vint, vint,  vdbl, vint) except + 
-        Tally(cstr, cstr, cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
-                vdbl, vdbl, vdbl,  vint, vint, vint,  vdbl, vint, double) except + 
-        Tally(cstr, cstr, cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
-                vdbl, vdbl, vdbl,  vint, vint, vint,  vdbl, vint, double, vec3) except + 
+        Tally(cstr, cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint) except + 
+        Tally(cstr, cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint, cstr) except + 
+        Tally(cstr, cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint, cstr, double) except + 
+        Tally(cstr, cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint, cstr, double, vec3) except + 
+        Tally(cstr, cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint, cstr, double, vec3, vec3) except + 
 
         # attributes
         int entity_id
