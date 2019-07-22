@@ -61,7 +61,7 @@ class Tally {
         std::vector<double> i, std::vector<double> j, std::vector<double> k,
         std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
         std::vector<double> e, std::vector<int> e_ints, 
-        double norm, double vec[3], double axl[3]);
+        double norm = 1.0, double vec[3] = nullptr, double axl[3] = nullptr);
   ~Tally();  /// default destructor
 
   // Create hdf5 datatable for tallies

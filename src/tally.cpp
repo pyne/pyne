@@ -489,14 +489,14 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
       output << "XYZ";
     } else if (entity_geometry.find("CYL") != std::string::npos) {
       output << "CYL";
-      if (axl != NULL) {
+      if (axl != nullptr) {
         sup_var << "AXL=";
         for (int i = 0; i <= 3; i++) {
               sup_var << axl[i] << " ";
         }
       }
     }
-    if (vec != NULL) {
+    if (vec != nullptr) {
       sup_var << "VEC=";
       for (int i = 0; i <= 3; i++) {
             sup_var << vec[i] << " ";
