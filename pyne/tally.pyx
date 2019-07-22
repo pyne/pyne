@@ -603,7 +603,7 @@ cdef class Tally:
             pass
         raise RuntimeError('method from_hdf5() could not be dispatched')
 
-    def mcnp(self, tally_index=1, mcnp_version='mcnp5'):
+    def mcnp(self, tally_index=1, mcnp_version='mcnp5', out=''):
         """mcnp(self, tally_index=1, mcnp_version='mcnp5')
 
 
@@ -621,7 +621,9 @@ cdef class Tally:
         cdef char * mcnp_version_proxy
         cdef std_string rtnval
         mcnp_version_bytes = mcnp_version.encode()
-        rtnval = (<cpp_tally.Tally *> self._inst).mcnp(<int> tally_index, std_string(<char *> mcnp_version_bytes))
+        out_bytes = out.encode()
+        rtnval = (<cpp_tally.Tally *> self._inst).mcnp(<int> tally_index,
+                std_string(<char *> mcnp_version_bytes), std_string(<char *> out_bytes))
         return bytes(<char *> rtnval.c_str()).decode()
 
 
