@@ -1221,8 +1221,8 @@ pyne::comp_map pyne::Material::decay_heat() {
   double masspermole = mass * pyne::N_A;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
     dh[i->first] = masspermole * (i->second) * \
-                   decay_const(i->first) * q_val(i->first) / \
-                   atomic_mass(i->first) / pyne::MeV_per_MJ;
+                   decay_const(metastable_id(i->first,nucname::snum(i->first))) * \
+                   q_val(i->first) / atomic_mass(i->first) / pyne::MeV_per_MJ;
   }
   return dh;
 }
