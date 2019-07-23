@@ -466,7 +466,7 @@ std::string pyne::Tally::form_mcnp_tally(int tally_index,
   if (entity_size > 0.0)
     tally_stream << "SD" << tally_index << type << " " << entity_size << std::endl;
   
-  if (normalization > 1.0)
+  if (normalization != 1.0)
     tally_stream << "FM" << tally_index << type << " " << normalization << std::endl;
 
   return tally_stream.str();
