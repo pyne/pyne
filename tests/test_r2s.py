@@ -407,7 +407,7 @@ def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
     exp_alara_fluxin = os.path.join(r2s_run_dir, "exp_alara_fluxin")
 
     # compare the output file of step1
-    f1 = filecmp.cmp(alara_inp, exp_alara_inp)
+    f1 = file_block_almost_same(alara_inp, exp_alara_inp)
     f2 = file_block_almost_same(alara_matlib, exp_alara_matlib)
     f3 = filecmp.cmp(alara_fluxin, exp_alara_fluxin)
 
