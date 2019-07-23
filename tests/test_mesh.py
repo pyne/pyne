@@ -36,7 +36,8 @@ if not HAVE_PYMOAB:
 from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
 from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
-from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
+from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, \
+        mesh_iterate, _cell_fracs_sort_vol_frac_reverse
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -932,6 +933,36 @@ def test_cell_fracs_to_mats():
         assert_equal(mat.comp, exp_comps[i])
         assert_equal(mat.density, 1.0)
 
+def test_cell_fracs_sort_vol_frac_reverse():
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+
+    exp_cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.55, 0.0),
+                     (0, 12, 0.45, 0.0),
+                     (1, 11, 0.2, 0.0),
+                     (1, 12, 0.3, 0.0),
+                     (1, 13, 0.5, 0.0),
+                     (2, 11, 0.5, 0.0),
+                     (2, 12, 0.5, 0.0),
+                     (3, 11, 0.5, 0.0)]
+    exp_cell_fracs[:] = [(0, 11, 0.55, 0.0),
+                     (0, 12, 0.45, 0.0),
+                     (1, 13, 0.5, 0.0),
+                     (1, 12, 0.3, 0.0),
+                     (1, 11, 0.2, 0.0),
+                     (2, 11, 0.5, 0.0),
+                     (2, 12, 0.5, 0.0),
+                     (3, 12, 1.0, 0.0)]
+    cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs)
+    for i in range(4):
+        assert_array_equal(cell_fracs[i], exp_cell_fracs[i])
+
 
 def test_tag_cell_fracs():
     m = gen_mesh()
@@ -940,17 +971,25 @@ def test_tag_cell_fracs():
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
 
-    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0),
-                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 1.0, 0.0),
+    cell_fracs[:] = [(0, 11, 0.55, 0.0),
+                     (0, 12, 0.45, 0.0),
+                     (1, 11, 0.2, 0.0),
+                     (1, 12, 0.3, 0.0),
+                     (1, 13, 0.5, 0.0),
+                     (2, 11, 1.0, 0.0),
                      (3, 12, 1.0, 0.0)]
 
     m.tag_cell_fracs(cell_fracs)
 
     #  Expected tags:
-    exp_cell_number = [[11, 12, -1], [11, 12, 13], [11, -1, -1],
+    exp_cell_number = [[11, 12, -1],
+                       [13, 12, 11],
+                       [11, -1, -1],
                        [12, -1, -1]]
-    exp_cell_fracs = [[0.55, 0.45, 0.0], [0.2, 0.3, 0.5],
-                      [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+    exp_cell_fracs = [[0.55, 0.45, 0.0],
+                      [0.5, 0.3, 0.2],
+                      [1.0, 0.0, 0.0],
+                      [1.0, 0.0, 0.0]]
     exp_cell_largest_frac_number = [11, 13, 11, 12]
     exp_cell_largest_frac = [0.55, 0.5, 1.0, 1.0]
 
