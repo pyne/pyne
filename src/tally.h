@@ -21,6 +21,7 @@
 
 
 namespace pyne {
+double def_empty_vec3[3] = {0, 0, 0};
 class Tally {
  public:
   std::map<std::string, std::string> rx2fluka;
@@ -50,19 +51,17 @@ class Tally {
   /// \param entity the entity id of the tally (eg. surface index,
   ///          volume number)
   /// \param entity_geom (xyz, cylinder)
-  /// \param entity_name string identifying the entity
   /// \param tally_name string identifying the tally
   /// \param origin double[3] origin of the meshtally
   /// \param i,j,k vector<double> coordinate of the coarse meshes
   /// \param ints i,j,k vector<double> coordinate of the coarse meshes
   /// \param normalization the number required to normalize your tally
-  Tally(std::string particule_name, std::string entity_geom,
-        std::string entity_name, double orgn[3],
+  Tally(std::string particule_name, std::string entity_geom, double orgn[3],
         std::vector<double> i, std::vector<double> j, std::vector<double> k,
         std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
         std::vector<double> e, std::vector<int> e_ints, 
-        std::string tally_name = "", double norm = 1.0, double vec[3] = nullptr, 
-        double axl[3] = nullptr);
+        std::string tally_name = "", double norm = 1.0, double vec[3] = def_empty_vec3, 
+        double axl[3] = def_empty_vec3);
   ~Tally();  /// default destructor
 
   // Create hdf5 datatable for tallies

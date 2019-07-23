@@ -64,31 +64,32 @@ pyne::Tally::Tally(std::string type, std::string part_name, int ent,
 
 }
 
-pyne::Tally::Tally(std::string part_name, std::string ent_geom,
-                   std::string ent_name, double orgn[3],
-                   std::vector<double> i, std::vector<double> j, std::vector<double> k,
+pyne::Tally::Tally(std::string part_name, std::string ent_geom, double orgn[3],
+                   std::vector<double> mesh_i, std::vector<double> mesh_j, std::vector<double> mesh_k,
                    std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
                    std::vector<double> e, std::vector<int> e_ints, 
-                   std::string tal_name, double norm, double vec[3], double axl[3]) {
+                   std::string tal_name, double norm, double vec_[3], double axl_[3]) {
   // Empty Tally Constructor
-  tally_type = "Mesh";
-  entity_name = ent_name;
+  entity_type = "Mesh";
+  entity_name = "";
   particle_name = pyne::particle::name(part_name);
   entity_geometry = ent_geom;
   tally_name = tal_name;
   entity_size = -1;
   
-  for (int i=0; i<3; i++) 
+  for (int i=0; i<3; i++)  {
     origin[i] = orgn[i];
-  i_meshs = i;
-  j_meshs = j;
-  k_meshs = k;
+    vec[i] = vec_[i];
+    axl[i] = axl_[i];
+  }
+  i_meshs = mesh_i;
+  j_meshs = mesh_j;
+  k_meshs = mesh_k;
   i_bins = i_ints;
   j_bins = j_ints;
   k_bins = k_ints;
   energy = e;       ///< Energy Mesh
   energy_bins = e_ints;  ///< Bin per energy
-
   normalization = norm;
 }
 
@@ -468,6 +469,8 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
   output << "FM" << tally_index << "2 " << normalization << std::endl;
 
     }
+  
+  
   } else if (entity_type.find("Volume") != std::string::npos) {
     if (tally_type.find("Flux") != std::string::npos) {
       output << "F"<< tally_index <<"4:" << particle_token << " "
@@ -480,29 +483,31 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
     } else if (tally_type.find("Current") != std::string::npos) {
       // makes no sense in mcnp
     }
+  
+  
   } else if (entity_type.find("Mesh") != std::string::npos) {
     output << "FMESH4:" << particle_token << "  ";
-    output << " GEOM=";
+    output << "GEOM=";
     std::stringstream sup_var;
 
     if (entity_geometry.find("XYZ") != std::string::npos) {
-      output << "XYZ";
-    } else if (entity_geometry.find("CYL") != std::string::npos) {
-      output << "CYL";
-      if (axl != nullptr) {
+      output << "XYZ ";
+    } else if (entity_geometry.find("Cylinder") != std::string::npos) {
+      output << "CYL ";
+      if (axl[0] != 0 || axl[1] != 0 || axl[2] != 0) {
         sup_var << "AXL=";
-        for (int i = 0; i <= 3; i++) {
+        for (int i = 0; i < 3; i++) {
               sup_var << axl[i] << " ";
         }
       }
-    }
-    if (vec != nullptr) {
-      sup_var << "VEC=";
-      for (int i = 0; i <= 3; i++) {
-            sup_var << vec[i] << " ";
+      if (vec[0] != 0 || vec[1] != 0 || vec[2] != 0) {
+        sup_var << "VEC=";
+        for (int i = 0; i < 3; i++) {
+              sup_var << vec[i] << " ";
+        }
       }
     }
-    output << "ORIGIN= " << origin[0] << " " << origin[1] << " " << origin[2]
+    output << " ORIGIN= " << origin[0] << " " << origin[1] << " " << origin[2]
         << "\n";
     std::string dir_name[3] = {"I", "J", "K"};
     std::vector<double> meshes[3] = {i_meshs, j_meshs, k_meshs};
@@ -510,13 +515,13 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
 
     for (int j = 0; j < 3; j++) {
       output << "          ";
-      output << dir_name << "MESH=";
-      for (int i = 0; i < i_meshs.size(); i++) {
+      output << dir_name[j] << "MESH=";
+      for (int i = 0; i < meshes[j].size(); i++) {
         output << " " << meshes[j][i];
       }
       if (bins[j].size() > 0) {
-        output << dir_name << "INTS=";
-        for (int i = 0; i < i_bins.size(); i++) {
+        output << " " << dir_name[j] << "INTS=";
+        for (int i = 0; i < bins[j].size(); i++) {
           output << " " << bins[j][i];
         }
       }
@@ -532,7 +537,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
         output << " " << energy[i];
       }
       if (energy_bins.size() > 0) {
-        output << "          EINTS=";
+        output << " EINTS=";
         for (int i = 0; i < energy_bins.size(); i++) {
           output << " " << energy_bins[i];
         }
