@@ -32,8 +32,8 @@ mixture mix_1
 end
 
 mixture mix_2
-    material mat:Air/rho:0.001205 1 0.2
     material mat:Lead/rho:11.35 1 0.8
+    material mat:Air/rho:0.001205 1 0.2
 end
 
 cooling
