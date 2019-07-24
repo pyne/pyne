@@ -565,77 +565,79 @@ std::string pyne::Tally::form_mcnp_tally(int tally_index,
 
 // Produces valid fluka tally
 std::string pyne::Tally::fluka(std::string unit_number) {
-  std::stringstream output;  // output stream
+  std::stringstream output; // output stream
 
   // check entity type
   if (entity_type.find("Volume") != std::string::npos) {
     // ok
-  } else if (entity_type.find("Surface") != std::string::npos) {
-    std::cout << "Surface tally not valid in FLUKA" << std::endl;
+  }  else if (entity_type.find("Surface") != std::string::npos) {
+      std::cout << "Surface tally not valid in FLUKA" << std::endl;
   } else {
-    std::cout << "Unknown entity type" << std::endl;
+      std::cout << "Unknown entity type" << std::endl;
   }
 
   output << "* " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(1);
   // check tally type
   if (tally_type.find("Flux") != std::string::npos) {
-    output << std::setw(10) << std::left << "USRTRACK";
-    output << std::setw(10) << std::right << "     1.0";
-    output << std::setw(10) << std::right
-           << pyne::particle::fluka(particle_name);
-    output << std::setw(10) << std::right << unit_number;
-    output << std::setw(10) << std::right << entity_name;
-    if (entity_size > 0.0) {
-      output << std::scientific;
-      output << std::setprecision(4);
-      output << std::setw(10) << std::right << entity_size;
-    } else
-      output << std::setw(10) << std::right << 1.0;
+      output << std::setw(10) << std::left  << "USRTRACK";
+      output << std::setw(10) << std::right << "     1.0";
+      output << std::setw(10) << std::right 
+	     << pyne::particle::fluka(particle_name);
+      output << std::setw(10) << std::right << unit_number;
+      output << std::setw(10) << std::right << entity_name;
+      if(entity_size > 0.0) {
+	output << std::scientific;
+	output << std::setprecision(4);
+      	output << std::setw(10) << std::right << entity_size;
+      }
+      else
+	output << std::setw(10) << std::right << 1.0;
 
-    output << std::setw(10) << std::right << "   1000.";  // number of ebins
-    tally_name.resize(8);
-    output << std::setw(8) << std::left
-           << tally_name;  // may need to make sure less than 10 chars
-    output << std::endl;
-    output << std::setw(10) << std::left << "USRTRACK";
-    output << std::setw(10) << std::right << "   10.E1";
-    output << std::setw(10) << std::right << "   1.E-3";
-    output << std::setw(10) << std::right << "        ";
-    output << std::setw(10) << std::right << "        ";
-    output << std::setw(10) << std::right << "        ";
-    output << std::setw(10) << std::right << "        ";
-    output << std::setw(8) << std::left << "       &";
-    // end of usrtrack
+      output << std::setw(10) << std::right << "   1000."; // number of ebins
+      tally_name.resize(8);
+      output << std::setw(8) << std::left 
+	     << tally_name; // may need to make sure less than 10 chars
+      output << std::endl;
+      output << std::setw(10) << std::left  << "USRTRACK";
+      output << std::setw(10) << std::right << "   10.E1";
+      output << std::setw(10) << std::right << "   1.E-3";
+      output << std::setw(10) << std::right << "        ";
+      output << std::setw(10) << std::right << "        ";
+      output << std::setw(10) << std::right << "        ";
+      output << std::setw(10) << std::right << "        ";
+      output << std::setw(8) << std::left << "       &";      
+      // end of usrtrack
   } else if (tally_type.find("Current") != std::string::npos) {
-    output << std::setw(10) << std::left << "USRBDX  ";
-    output << std::setw(10) << std::right << "   110.0";
-    output << std::setw(10) << std::right
-           << pyne::particle::fluka(particle_name);
-    output << std::setw(10) << std::right << unit_number;
-    output << std::setw(10) << std::right << entity_name;  // upstream
-    output << std::setw(10) << std::right << entity_name;  // downstream
-    if (entity_size > 0.0)
-      output << std::setw(10) << std::right << entity_size;  // area
-    else
-      output << std::setw(10) << std::right << 1.0;
+      output << std::setw(10) << std::left  << "USRBDX  ";    
+      output << std::setw(10) << std::right << "   110.0";
+      output << std::setw(10) << std::right 
+	     << pyne::particle::fluka(particle_name);
+      output << std::setw(10) << std::right << unit_number;
+      output << std::setw(10) << std::right << entity_name; // upstream
+      output << std::setw(10) << std::right << entity_name; // downstream
+      if ( entity_size > 0.0 )
+	output << std::setw(10) << std::right << entity_size; // area
+      else
+	output << std::setw(10) << std::right << 1.0;
 
-    tally_name.resize(8);
-    output << std::setw(8) << std::right
-           << tally_name;  // may need to make sure less than 10 chars
-    output << std::endl;
-    output << std::setw(10) << std::left << "USRBDX  ";
-    output << std::setw(10) << std::right << "  10.0E1";
-    output << std::setw(10) << std::right << "     0.0";
-    output << std::setw(10) << std::right << "  1000.0";  // number of bins
-    output << std::setw(10) << std::right << "12.56637";  // 4pi
-    output << std::setw(10) << std::right << "     0.0";
-    output << std::setw(10) << std::right
-           << "   240.0";  // number of angular bins
-    output << std::setw(8) << std::left << "       &";
-    // end of usrbdx
+      tally_name.resize(8);
+      output << std::setw(8) << std::right 
+	     << tally_name; // may need to make sure less than 10 chars
+      output << std::endl;
+      output << std::setw(10) << std::left  << "USRBDX  ";    
+      output << std::setw(10) << std::right << "  10.0E1";
+      output << std::setw(10) << std::right << "     0.0";
+      output << std::setw(10) << std::right << "  1000.0"; // number of bins
+      output << std::setw(10) << std::right << "12.56637"; // 4pi
+      output << std::setw(10) << std::right << "     0.0";
+      output << std::setw(10) << std::right 
+	     << "   240.0"; // number of angular bins
+      output << std::setw(8) << std::left << "       &";      
+      // end of usrbdx
   } else {
     std::cout << "Unknown tally type" << std::endl;
   }
   return output.str();
 }
+
