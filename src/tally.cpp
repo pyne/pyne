@@ -431,7 +431,7 @@ std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
 
 // Sets string to valid mcnp formatted tally
 // Takes mcnp version as arg, like 5 or 6
-std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
+std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::string out) {
   std::stringstream output; // output stream
   std::string particle_token;
   // particle token
