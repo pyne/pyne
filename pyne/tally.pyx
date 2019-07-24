@@ -4,7 +4,7 @@
 # Do not modify!!!                             #
 #                                              #
 #                                              #
-# With some edits form BaM241                  #
+# With some edits from BaM241                  #
 #                    Come on, guys. I mean it! #
 ################################################
 """
