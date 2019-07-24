@@ -208,7 +208,7 @@ hid_t pyne::Tally::create_filetype() {
   return filetype;
 }
 
-// create memory type
+// create memory type 
 hid_t pyne::Tally::create_memtype() {
   // iostatus
   herr_t status;
@@ -238,7 +238,7 @@ hid_t pyne::Tally::create_memtype() {
 		     HOFFSET(tally_struct, normalization), H5T_NATIVE_DOUBLE);
   return memtype;
 }
-  
+
 hid_t pyne::Tally::create_dataspace(hid_t file, std::string datapath) {
     // enable chunking 
     hid_t prop = H5Pcreate(H5P_DATASET_CREATE);
