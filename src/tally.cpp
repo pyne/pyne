@@ -539,6 +539,30 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
 }
 
 
+// Form the tally line as function of its properties
+std::string pyne::Tally::form_mcnp_tally(int tally_index, 
+                                               int type, 
+                                               std::string particle_token, 
+                                               int entity_id, double entity_size, 
+                                               double normalization) {
+  std::stringstream tally_stream;  // tally stream
+  tally_stream << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+  if (normalization > 1.0)
+    tally_stream << std::scientific;
+  
+  tally_stream << "F" << tally_index << type 
+               << ":" << particle_token << " " << entity_id << std::endl;
+  
+  if (entity_size > 0.0)
+    tally_stream << "SD" << tally_index << type << " " << entity_size << std::endl;
+  
+  if (normalization > 1.0)
+    tally_stream << "FM" << tally_index << type << " " << normalization << std::endl;
+
+  return tally_stream.str();
+}
+
+
 // Produces valid fluka tally
 std::string pyne::Tally::fluka(std::string unit_number) {
   std::stringstream output;  // output stream
