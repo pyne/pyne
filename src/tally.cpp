@@ -544,7 +544,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
       }
     }
     if (out.size() > 0) {
-      output << "          OUT=" << out;
+      output << "\n          OUT=" << out;
     }
   } else {
     std::cout << "tally/entity combination makes no sense for MCNP"

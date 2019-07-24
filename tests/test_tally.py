@@ -449,7 +449,7 @@ def test_mcnp_mesh_tally_xyz():
     e = [0, 10, 100]
     e_ints = [1, 1, 2]
     tal_name = "Mesh Tally XYZ Proton"
-
+    out = "IJ"
 
     tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
             e, e_ints, tal_name)
@@ -458,8 +458,9 @@ def test_mcnp_mesh_tally_xyz():
         "          IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
         "          JMESH= 2.000000 12.000000 JINTS= 1\n"+\
         "          KMESH= 45.000000 KINTS= 1\n"+\
-        "          EMESH= 0.000000 10.000000 100.000000 EINTS= 1 1 2";
-    assert_equal(mcnp_tally, tally.mcnp(1,"mcnp6"))
+        "          EMESH= 0.000000 10.000000 100.000000 EINTS= 1 1 2\n"+\
+        "          OUT=IJ"
+    assert_equal(mcnp_tally, tally.mcnp(1,"mcnp6", out))
 
 def test_mcnp_mesh_tally_cyl():
     particle = "Neutron"
