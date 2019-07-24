@@ -11,12 +11,7 @@
   #include "tally.h"
 #endif
 
-enum entity_type_enum {
-  VOLUME,
-  SURFACE,
-  MESH_XYZ,
-  MESH_CYL
-};                                       // Enumeration for entity types
+enum entity_type_enum { VOLUME, SURFACE, MESH_XYZ, MESH_CYL }; // Enumeration for entity types
 enum tally_type_enum { FLUX, CURRENT };  // Enumeration for tally types
 
 const std::string tally_type_enum2string[] = {"Flux", "Current"};
@@ -49,9 +44,10 @@ pyne::Tally::Tally() {
 }
 
 // Default constructor
-pyne::Tally::Tally(std::string type, std::string part_name, int ent,
-                   std::string ent_type, std::string ent_name,
-                   std::string tal_name, double size, double norm) {
+pyne::Tally::Tally(std::string type, std::string part_name, 
+		   int ent, std::string ent_type, 
+		   std::string ent_name, std::string tal_name,
+		   double size, double norm ) {
   // Empty Tally Constructor
   tally_type = type;
   particle_name = pyne::particle::name(part_name);
@@ -61,7 +57,6 @@ pyne::Tally::Tally(std::string type, std::string part_name, int ent,
   tally_name = tal_name;
   entity_size = size;
   normalization = norm;
-
 }
 
 pyne::Tally::Tally(std::string part_name, std::string ent_geom, double orgn[3],
@@ -105,17 +100,19 @@ void pyne::Tally::from_hdf5(char* filename, char* datapath, int row) {
 }
 
 //
-void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
-                            int row) {
+void pyne::Tally::from_hdf5(std::string filename, std::string datapath, 
+			    int row) { 
   // line of data to acces
   int data_row = row;
 
   // check for file existence
-  if (!pyne::file_exists(filename)) throw pyne::FileNotFound(filename);
+  if (!pyne::file_exists(filename))
+    throw pyne::FileNotFound(filename);
 
   // check to make sure is a HDF5 file
   bool is_h5 = H5Fis_hdf5(filename.c_str());
-  if (!is_h5) throw h5wrap::FileNotHDF5(filename);
+  if (!is_h5)
+    throw h5wrap::FileNotHDF5(filename);
 
   // Open file and dataset.
   hid_t file = H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -123,37 +120,39 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
 
   // Get dataspace and allocate memory for read buffer.
   hid_t space = H5Dget_space(dset);
-  int rank = H5Sget_simple_extent_ndims(space);
-  hsize_t dims[1];  // for length of dataset
+  int rank  = H5Sget_simple_extent_ndims(space);
+  hsize_t dims[1]; // for length of dataset 
 
   // get the length of the dataset
   int ndims = H5Sget_simple_extent_dims(space, dims, NULL);
-
+  
   // determine if chunked
   hid_t prop = H5Dget_create_plist(dset);
-
+  
   hsize_t chunk_dimsr[1];
   int rank_chunk;
 
-  if (H5D_CHUNKED == H5Pget_layout(prop))
+  if(H5D_CHUNKED == H5Pget_layout(prop))
     rank_chunk = H5Pget_chunk(prop, rank, chunk_dimsr);
-
+  
   // allocate memory for data from file
   tally_struct* read_data = new tally_struct[dims[0]];
 
   // if row number is larger than data set only give last element
-  if (row >= dims[0]) data_row = dims[0] - 1;
-
+  if ( row >= dims[0] )
+    data_row = dims[0]-1;
+    
+  
   // Create variable-length string datatype.
   hid_t strtype = H5Tcopy(H5T_C_S1);
-  int status = H5Tset_size(strtype, H5T_VARIABLE);
-
+  int status  = H5Tset_size(strtype, H5T_VARIABLE);
+  
   // Create the compound datatype for memory.
   hid_t memtype = create_memtype();
-
+  
   // Create the compound datatype for the file
   hid_t filetype = create_filetype();
-
+  
   // Read the data.
   status = H5Dread(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
 
@@ -175,6 +174,7 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
 
   // tidy up
   delete[] read_data;
+ 
 }
 
 // Dummy Wrapper around C Style Functions
