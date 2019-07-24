@@ -175,10 +175,10 @@ def step2():
         cell_mats = None
     h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
-        photon_source_to_hdf5('phtn_src')
+        photon_source_to_hdf5(filename='phtn_src', nucs='total')
     intensities = "Total photon source intensities (p/s)\n"
     for i, dc in enumerate(decay_times):
-        print('Writing source for decay time: {0}'.format(dc))
+        print('Writing source for decay time: {0} to mesh'.format(dc))
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
         tags = {('TOTAL', dc): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,

@@ -4,7 +4,7 @@ import nose
 import subprocess
 
 from nose.tools import assert_almost_equal
-from nose.tools import assert_equal, assert_true, with_setup
+from nose.tools import assert_equal, assert_true, with_setup, assert_raises
 from nose.plugins.skip import SkipTest
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -199,6 +199,9 @@ def test_photon_source_to_hdf5():
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
+
+    # wrong nuc option raise test
+    assert_raises(ValueError, photon_source_to_hdf5, filename, 'test')
 
 
 def test_photon_source_hdf5_to_mesh():

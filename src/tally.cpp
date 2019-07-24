@@ -426,32 +426,17 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   // neednt check entity type
   if (entity_type.find("Surface") != std::string::npos) {
     if (tally_type.find("Current") != std::string::npos) {
-      output << "F"<< tally_index <<"1:" << particle_token 
-	     << " " << entity_id << std::endl;
-      if (entity_size > 0.0)
-	output << "SD"<<tally_index <<"1 " << entity_size << std::endl;
-      // normalisation
-      if (normalization > 1.0)
-	output << "FM" << tally_index << "1 " << normalization << std::endl;
+      output << form_mcnp_tally(tally_index, 1, particle_token, 
+                                entity_id, entity_size, normalization);
     } else if (tally_type.find("Flux") != std::string::npos) {
-      output << "F"<< tally_index <<"2:" << particle_token 
-	     << " " << entity_id << std::endl;
-      if (entity_size > 0.0)
-	output << "SD"<<tally_index <<"2 " << entity_size << std::endl;
-      // normalisation
-      if(normalization > 1.0)
-	output << "FM" << tally_index << "2 " << normalization << std::endl;
-
+      output << form_mcnp_tally(tally_index, 2, particle_token, 
+                                entity_id, entity_size, normalization);
     }
+
   } else if (entity_type.find("Volume") != std::string::npos) {
     if (tally_type.find("Flux") != std::string::npos) {
-      output << "F"<< tally_index <<"4:" << particle_token << " " 
-	     << entity_id << std::endl;
-      if (entity_size > 0.0)
-	output << "SD"<<tally_index <<"4 " << entity_size << std::endl;
-            // normalisation
-      if(normalization > 1.0)
-	output << "FM" << tally_index << "4 " << normalization << std::endl;
+      output << form_mcnp_tally(tally_index, 4, particle_token, 
+                                entity_id, entity_size, normalization);
     } else if (tally_type.find("Current") != std::string::npos) {
       // makes no sense in mcnp
     }
@@ -463,6 +448,30 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
   // print sd card if area/volume specified
   return output.str();
 } 
+
+// Form the tally line as function of its properties
+std::string pyne::Tally::form_mcnp_tally(int tally_index, 
+                                               int type, 
+                                               std::string particle_token, 
+                                               int entity_id, double entity_size, 
+                                               double normalization) {
+  std::stringstream tally_stream;  // tally stream
+  tally_stream << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+  if (normalization > 1.0)
+    tally_stream << std::scientific;
+  
+  tally_stream << "F" << tally_index << type 
+               << ":" << particle_token << " " << entity_id << std::endl;
+  
+  if (entity_size > 0.0)
+    tally_stream << "SD" << tally_index << type << " " << entity_size << std::endl;
+  
+  if (normalization > 1.0)
+    tally_stream << "FM" << tally_index << type << " " << normalization << std::endl;
+
+  return tally_stream.str();
+}
+
 
 // Produces valid fluka tally
 std::string pyne::Tally::fluka(std::string unit_number) {
