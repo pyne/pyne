@@ -11,7 +11,7 @@
   #include "tally.h"
 #endif
 
-enum entity_type_enum { VOLUME, SURFACE, MESH_XYZ, MESH_CYL }; // Enumeration for entity types
+enum entity_type_enum { VOLUME, SURFACE, MESH }; // Enumeration for entity types
 enum tally_type_enum { FLUX, CURRENT };  // Enumeration for tally types
 
 const std::string tally_type_enum2string[] = {"Flux", "Current"};
