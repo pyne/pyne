@@ -20,7 +20,7 @@
 #endif
 
 
-namespace pyne 
+namespace pyne
 {
   double def_empty_vec3[3] = {0, 0, 0};
   class Tally 
@@ -31,8 +31,8 @@ namespace pyne
     std::map<std::string, std::string> rx2mcnp6;
 
     /// Tally Constructors
-    Tally();  /// empty constructor
-  
+    Tally (); /// empty constructor
+
     /// Constructor from passed in vars
     /// \param type the type of tally (flux or current)
     /// \param particle_name the name of the particle type
@@ -77,14 +77,14 @@ namespace pyne
 
     /// Dummy read method wrapper around c style strings
     /// \param filename the filename of the file to read from
-    /// \param datapath _name the name of the region where tallies
+    /// \param datapath _name the name of the region where tallies 
     ///          are stored
     /// \param row  the array index of data to access
     void from_hdf5(char* filename, char* datapath, int row = -1);
 
     /// Main read tally method
     /// \param filename the filename of the file to read from
-    /// \param datapath _name the name of the region where tallies
+    /// \param datapath _name the name of the region where tallies 
     ///          are stored
     /// \param row  the array index of data to access
     void from_hdf5(std::string filename, std::string datapath, int row = -1);
@@ -97,7 +97,7 @@ namespace pyne
 
     /// Main write tally method
     /// \param filename the filename of the file to write to
-    /// \param datapath _name the name of the region where tallies
+    /// \param datapath _name the name of the region where tallies 
     ///          are to be stored
     void write_hdf5(std::string filename, std::string datapath);
 
