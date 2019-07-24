@@ -40,7 +40,6 @@ pyne::Tally::Tally() {
   tally_name = "";
   entity_size = -1.0;
   normalization = 1.0;
-
 }
 
 // Default constructor
@@ -192,20 +191,20 @@ hid_t pyne::Tally::create_filetype() {
   hid_t strtype = H5Tcopy(H5T_C_S1);
   status = H5Tset_size(strtype, H5T_VARIABLE);
 
-  hid_t filetype =
-      H5Tcreate(H5T_COMPOUND, 8 + 8 + 8 + (3 * sizeof(hvl_t)) + 8 + 8);
+  hid_t filetype = H5Tcreate(H5T_COMPOUND, 8 + 8 + 8 + 
+			     (3*sizeof(hvl_t)) + 8 + 8);
   status = H5Tinsert(filetype, "entity_id", 0, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "entity_type", 8, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "tally_type", 8 + 8, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "particle_name", 8 + 8 + 8, strtype);
-  status =
-      H5Tinsert(filetype, "entity_name", 8 + 8 + 8 + sizeof(hvl_t), strtype);
-  status = H5Tinsert(filetype, "tally_name", 8 + 8 + 8 + (2 * sizeof(hvl_t)),
-                     strtype);
-  status = H5Tinsert(filetype, "entity_size", 8 + 8 + 8 + (3 * sizeof(hvl_t)),
-                     H5T_IEEE_F64BE);
-  status = H5Tinsert(filetype, "normalization",
-                     8 + 8 + 8 + (3 * sizeof(hvl_t)) + 8, H5T_IEEE_F64BE);
+  status = H5Tinsert(filetype, "entity_name", 8 + 8 + 8 + 
+		     sizeof(hvl_t), strtype);
+  status = H5Tinsert(filetype, "tally_name", 8 + 8 + 8 + 
+		     (2*sizeof(hvl_t)) , strtype);
+  status = H5Tinsert(filetype, "entity_size", 8 + 8 + 8 + 
+		     (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
+  status = H5Tinsert(filetype, "normalization", 8 + 8 + 8 + 
+		     (3*sizeof(hvl_t)) + 8, H5T_IEEE_F64BE);
   return filetype;
 }
 
@@ -220,62 +219,64 @@ hid_t pyne::Tally::create_memtype() {
 
   // Create the compound datatype for memory.
   hid_t memtype = H5Tcreate(H5T_COMPOUND, sizeof(tally_struct));
-  status = H5Tinsert(memtype, "entity_id", HOFFSET(tally_struct, entity_id),
-                     H5T_NATIVE_INT);
-  status = H5Tinsert(memtype, "entity_type", HOFFSET(tally_struct, entity_type),
-                     H5T_NATIVE_INT);
-  status = H5Tinsert(memtype, "tally_type", HOFFSET(tally_struct, tally_type),
-                     H5T_NATIVE_INT);
+  status = H5Tinsert(memtype, "entity_id",
+		     HOFFSET(tally_struct, entity_id), H5T_NATIVE_INT);
+  status = H5Tinsert(memtype, "entity_type",
+		     HOFFSET(tally_struct, entity_type), H5T_NATIVE_INT);
+  status = H5Tinsert(memtype, "tally_type",
+		     HOFFSET(tally_struct, tally_type), H5T_NATIVE_INT);
   status = H5Tinsert(memtype, "particle_name",
-                     HOFFSET(tally_struct, particle_name), strtype);
-  status = H5Tinsert(memtype, "entity_name", HOFFSET(tally_struct, entity_name),
-                     strtype);
-  status = H5Tinsert(memtype, "tally_name", HOFFSET(tally_struct, tally_name),
-                     strtype);
-  status = H5Tinsert(memtype, "entity_size", HOFFSET(tally_struct, entity_size),
-                     H5T_NATIVE_DOUBLE);
+		     HOFFSET(tally_struct, particle_name),
+		     strtype);
+  status = H5Tinsert(memtype, "entity_name",HOFFSET(tally_struct, entity_name),
+		     strtype);
+  status = H5Tinsert(memtype, "tally_name",HOFFSET(tally_struct, tally_name),
+		     strtype);
+  status = H5Tinsert(memtype, "entity_size",
+		     HOFFSET(tally_struct, entity_size), H5T_NATIVE_DOUBLE);
   status = H5Tinsert(memtype, "normalization",
-                     HOFFSET(tally_struct, normalization), H5T_NATIVE_DOUBLE);
+		     HOFFSET(tally_struct, normalization), H5T_NATIVE_DOUBLE);
   return memtype;
 }
-
+  
 hid_t pyne::Tally::create_dataspace(hid_t file, std::string datapath) {
-  // enable chunking
-  hid_t prop = H5Pcreate(H5P_DATASET_CREATE);
-  // set chunk size
-  hsize_t chunk_dimensions[1] = {1};
-  herr_t status = H5Pset_chunk(prop, 1, chunk_dimensions);
+    // enable chunking 
+    hid_t prop = H5Pcreate(H5P_DATASET_CREATE);
+    // set chunk size
+    hsize_t chunk_dimensions[1]={1};
+    herr_t status = H5Pset_chunk(prop, 1, chunk_dimensions);
+    
+    // allow varaible length strings
+    hid_t strtype = H5Tcopy(H5T_C_S1);
+    status = H5Tset_size(strtype, H5T_VARIABLE);
 
-  // allow varaible length strings
-  hid_t strtype = H5Tcopy(H5T_C_S1);
-  status = H5Tset_size(strtype, H5T_VARIABLE);
+    // Create the compound datatype for memory.
+    hid_t memtype = create_memtype();
+    
+    // Create the compound datatype for the file
+    hid_t filetype = create_filetype();
+    
+    // max dims unlimted
+    hsize_t max_dims[1] = {H5S_UNLIMITED};
+    // only ever let 1 tally object be added
+    hsize_t dims[1] = {1};  
+    // Create dataspace.  Setting maximum size to NULL sets the maximum
+    hid_t space = H5Screate_simple(1, dims, max_dims);
 
-  // Create the compound datatype for memory.
-  hid_t memtype = create_memtype();
-
-  // Create the compound datatype for the file
-  hid_t filetype = create_filetype();
-
-  // max dims unlimted
-  hsize_t max_dims[1] = {H5S_UNLIMITED};
-  // only ever let 1 tally object be added
-  hsize_t dims[1] = {1};
-  // Create dataspace.  Setting maximum size to NULL sets the maximum
-  hid_t space = H5Screate_simple(1, dims, max_dims);
-
-  // Create the dataset and write the compound data to it.
-  return H5Dcreate2(file, datapath.c_str(), filetype, space, H5P_DEFAULT, prop,
-                    H5P_DEFAULT);
+    // Create the dataset and write the compound data to it.
+    return H5Dcreate2(file, datapath.c_str(), filetype, space, H5P_DEFAULT, prop,
+			     H5P_DEFAULT);
 }
 
 // Appends Tally object to dataset if file & datapath already exists
 // if file exists & data path doesnt creates new datapath,
 // otherwise creates new file
 void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
+
   // turn of annoying hdf5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
-  tally_struct tally_data[1];  // storage for the tally to add
+  tally_struct tally_data[1]; // storage for the tally to add
 
   // setup the data to write
   tally_data[0].entity_id = entity_id;
@@ -284,9 +285,6 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     tally_data[0].entity_type = VOLUME;
   else if (entity_type.find("Surface") != std::string::npos)
     tally_data[0].entity_type = SURFACE;
-  else {
-    std::cout << "Can't write mesh tally in hdf5 file yet!" << std::endl;
-  }
 
   // tally kind
   if (tally_type.find("Flux") != std::string::npos)
@@ -302,6 +300,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   tally_data[0].entity_size = entity_size;
   tally_data[0].normalization = normalization;
 
+  
   // check for file existence
   bool is_exist = pyne::file_exists(filename);
   // create new file
@@ -309,17 +308,18 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   // check to make sure is a HDF5 file
   bool is_h5 = H5Fis_hdf5(filename.c_str());
 
-  if (is_exist && !is_h5) throw h5wrap::FileNotHDF5(filename);
+  if (is_exist && !is_h5)
+    throw h5wrap::FileNotHDF5(filename);
 
-  if (!is_exist) {  // is a new file
-    hid_t file =
-        H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  if (!is_exist ) { // is a new file        
+    hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, 
+			   H5P_DEFAULT);
     // create a dataspace
     hid_t dset = create_dataspace(file, datapath);
 
     hid_t memtype = create_memtype();
-
-    herr_t status;  // iostatus
+  
+    herr_t status; // iostatus
 
     status = H5Dwrite(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tally_data);
 
@@ -328,96 +328,95 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     //    status = H5Sclose(space);
     //    status = H5Tclose(filetype);
     status = H5Fclose(file);
-
-  } else if (is_exist && is_h5) {  // already exists and is an hdf file
+  
+  }  else if ( is_exist && is_h5 ) {// already exists and is an hdf file
     // then we append the data to the end
-    herr_t data_status;  // iostatus
-
+    herr_t data_status; // iostatus
+ 
     // Open file and dataset.
     hid_t file = H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
 
     // see if path exists
-    data_status = H5Gget_objinfo(file, datapath.c_str(), 0, NULL);
+    data_status = H5Gget_objinfo (file, datapath.c_str(), 0, NULL);
 
     hid_t dset;
     // if fails neet to create dataset
     // still need to check that the datapath exists
-    if (data_status != 0)  // doesnt exist
-    {
-      dset = create_dataspace(file, datapath.c_str());
-      hid_t memtype = create_memtype();
-      herr_t status;  // iostatus
+    if (data_status != 0) // doesnt exist
+      {
+	dset = create_dataspace(file,datapath.c_str());
+	hid_t memtype = create_memtype();
+	herr_t status; // iostatus
 
-      status =
-          H5Dwrite(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tally_data);
+	status = H5Dwrite(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, tally_data);
 
-      // close the data sets
-      status = H5Dclose(dset);
-      status = H5Fclose(file);
-    } else {
-      dset = H5Dopen2(file, datapath.c_str(), H5P_DEFAULT);
+	// close the data sets
+	status = H5Dclose(dset);
+	status = H5Fclose(file);
+      } else {
+      
+        dset = H5Dopen2(file, datapath.c_str(), H5P_DEFAULT);
+      
+	// Get dataspace and allocate memory for read buffer.
+	hid_t space = H5Dget_space(dset);
+	int rank  = H5Sget_simple_extent_ndims(space);
+	hsize_t dims[1]; // for length of dataset 
+	
+	// get the length of the dataset
+	int ndims = H5Sget_simple_extent_dims(space, dims, NULL);
+	
+	// determine if chunked
+	hid_t prop = H5Dget_create_plist(dset);
 
-      // Get dataspace and allocate memory for read buffer.
-      hid_t space = H5Dget_space(dset);
-      int rank = H5Sget_simple_extent_ndims(space);
-      hsize_t dims[1];  // for length of dataset
-
-      // get the length of the dataset
-      int ndims = H5Sget_simple_extent_dims(space, dims, NULL);
-
-      // determine if chunked
-      hid_t prop = H5Dget_create_plist(dset);
-
-      hsize_t chunk_dimsr[1];
-      int rank_chunk;
-      if (H5D_CHUNKED == H5Pget_layout(prop))
-        rank_chunk = H5Pget_chunk(prop, rank, chunk_dimsr);
-
-      // allocate memory for data from file
-      tally_struct* read_data = new tally_struct[dims[0]];
-
-      // Create variable-length string datatype.
-      hid_t strtype = H5Tcopy(H5T_C_S1);
-      int status = H5Tset_size(strtype, H5T_VARIABLE);
-
-      // Create the compound datatype for memory.
-      hid_t memtype = create_memtype();
-
-      // Create the compound datatype for the file
-      hid_t filetype = create_filetype();
-
-      // Read the data.
-      status = H5Dread(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
-
-      // resize dims
-      dims[0] += 1;
-
-      // Extend the dataset
-      status = H5Dextend(dset, dims);
-      hid_t filespace = H5Dget_space(dset);
-      // calculate the existing offset
-      hsize_t offset[1] = {dims[0] - 1};
-
-      // select hyerslab
-      hsize_t new_length[1] = {1};
-      status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL,
-                                   new_length, NULL);
-
-      // create dataspace for new data
-      space = H5Screate_simple(1, new_length, NULL);
-
-      // Write the dataset to memory
-      status =
-          H5Dwrite(dset, memtype, space, filespace, H5P_DEFAULT, tally_data);
-
-      // tidy up
-      status = H5Dvlen_reclaim(memtype, space, H5P_DEFAULT, read_data);
-      delete[] read_data;
-      status = H5Dclose(dset);
-      status = H5Sclose(space);
-      status = H5Tclose(memtype);
-      status = H5Tclose(strtype);
-      status = H5Fclose(file);
+	hsize_t chunk_dimsr[1];
+	int rank_chunk;
+	if (H5D_CHUNKED == H5Pget_layout(prop))
+	  rank_chunk = H5Pget_chunk(prop, rank, chunk_dimsr);
+	
+	// allocate memory for data from file
+	tally_struct* read_data = new tally_struct[dims[0]];
+	
+	// Create variable-length string datatype.
+	hid_t strtype = H5Tcopy(H5T_C_S1);
+	int status  = H5Tset_size(strtype, H5T_VARIABLE);
+	
+	// Create the compound datatype for memory.
+	hid_t memtype = create_memtype();
+	
+	// Create the compound datatype for the file
+	hid_t filetype = create_filetype();
+	
+	// Read the data.
+	status = H5Dread(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
+      
+	// resize dims
+	dims[0] += 1;
+	
+	// Extend the dataset
+	status = H5Dextend(dset,dims);
+	hid_t filespace = H5Dget_space(dset);
+	// calculate the existing offset
+	hsize_t offset[1] = {dims[0] - 1};  
+	
+	// select hyerslab
+	hsize_t new_length[1] = {1};
+	status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,offset , NULL,
+				     new_length, NULL);
+	
+	// create dataspace for new data
+	space = H5Screate_simple(1,new_length, NULL);
+	
+	// Write the dataset to memory
+	status = H5Dwrite(dset, memtype, space, filespace, H5P_DEFAULT, tally_data);
+	
+	// tidy up
+	status = H5Dvlen_reclaim(memtype, space, H5P_DEFAULT, read_data);
+	delete[] read_data;
+	status = H5Dclose(dset);
+	status = H5Sclose(space);
+	status = H5Tclose(memtype);
+	status = H5Tclose(strtype);
+	status = H5Fclose(file);
     }
   }
 }
