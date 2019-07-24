@@ -64,6 +64,7 @@ namespace pyne
           std::vector<int> k_ints, std::vector<double> e, std::vector<int> e_ints,
           std::string tally_name = "", double norm = 1.0,
           double vec[3] = def_empty_vec3, double axl[3] = def_empty_vec3);
+
     ~Tally();  /// default destructor
  
     // Create hdf5 datatable for tallies
@@ -91,7 +92,7 @@ namespace pyne
 
     /// Dummy write method wrapper around c style strings
     /// \param filename the filename of the file to write to
-    /// \param datapath _name the name of the region where tallies
+    /// \param datapath _name the name of the region where tallies 
     ///          are to be stored
     void write_hdf5(char* filename, char* datapath);
 
