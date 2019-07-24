@@ -422,7 +422,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 }
 
 std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
-  // print the Tally to ostream
+  //print the Tally to ostream
   os << "\t---------\n";
   os << "\t Tallying " << tal.particle_name << " " << tal.tally_type << "\n";
   os << "\t in/on " << tal.entity_type << " " << tal.entity_id << "\n";
@@ -431,8 +431,8 @@ std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
 
 // Sets string to valid mcnp formatted tally
 // Takes mcnp version as arg, like 5 or 6
-std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::string out) {
-  std::stringstream output;  // output stream
+std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version) {
+  std::stringstream output; // output stream
   std::string particle_token;
   // particle token
   if (mcnp_version.find("mcnp5") != std::string::npos)
@@ -446,39 +446,23 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
   output << "C " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(6);
 
-  if (normalization > 1.0) output << std::scientific;
+  if (normalization > 1.0)
+    output << std::scientific;
 
   // neednt check entity type
   if (entity_type.find("Surface") != std::string::npos) {
     if (tally_type.find("Current") != std::string::npos) {
-      output << "F"<< tally_index <<"1:" << particle_token
-       << " " << entity_id << std::endl;
-      if (entity_size > 0.0)
-  output << "SD"<<tally_index <<"1 " << entity_size << std::endl;
-      // normalisation
-      if (normalization > 1.0)
-  output << "FM" << tally_index << "1 " << normalization << std::endl;
+      output << form_mcnp_tally(tally_index, 1, particle_token, 
+                                entity_id, entity_size, normalization);
     } else if (tally_type.find("Flux") != std::string::npos) {
-      output << "F"<< tally_index <<"2:" << particle_token
-       << " " << entity_id << std::endl;
-      if (entity_size > 0.0)
-  output << "SD"<<tally_index <<"2 " << entity_size << std::endl;
-      // normalisation
-      if(normalization > 1.0)
-  output << "FM" << tally_index << "2 " << normalization << std::endl;
-
+      output << form_mcnp_tally(tally_index, 2, particle_token, 
+                                entity_id, entity_size, normalization);
     }
-  
-  
+
   } else if (entity_type.find("Volume") != std::string::npos) {
     if (tally_type.find("Flux") != std::string::npos) {
-      output << "F"<< tally_index <<"4:" << particle_token << " "
-       << entity_id << std::endl;
-      if (entity_size > 0.0)
-  output << "SD"<<tally_index <<"4 " << entity_size << std::endl;
-            // normalisation
-      if(normalization > 1.0)
-  output << "FM" << tally_index << "4 " << normalization << std::endl;
+      output << form_mcnp_tally(tally_index, 4, particle_token, 
+                                entity_id, entity_size, normalization);
     } else if (tally_type.find("Current") != std::string::npos) {
       // makes no sense in mcnp
     }
