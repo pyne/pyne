@@ -15,8 +15,8 @@
 #include <string>
 
 #ifndef PYNE_IS_AMALGAMATED
-#include "h5wrap.h"
-#include "utils.h"
+  #include "h5wrap.h"
+  #include "utils.h"
 #endif
 
 namespace pyne 
@@ -104,19 +104,23 @@ namespace pyne
     std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5",
                      std::string out = "");
   
-    // fluka tally
+    // Form the mcnp tally line as function of its properties
+    std::string form_mcnp_tally(int tally_index, int type,
+                                    std::string particle_token, int entity_id,
+                                    double entity_size, double normalization);
+    
+    // fluka tally 
     std::string fluka(std::string unit_number = "-21");
   
     /// fundamental tally variables
-    std::string
-        entity_type;  ///< the type of entity (volume,surface) or (xyz, cylinder)
-    std::string entity_name;    ///< the name of the entity (optional)
-    std::string particle_name;  ///< particle name string
-    std::string tally_type;     ///< type of tally flux or current
-    std::string tally_name;     ///< name of the tally
-    int entity_id;              ///< id number of the entity being tallied upon
-    double entity_size;         ///< the physical size of the entity
-    double normalization;       ///< the tally normalization
+    std::string entity_type; ///< the type of entity (volume,surface)
+    std::string entity_name; ///< the name of the entity (optional)
+    std::string particle_name; ///< particle name string
+    std::string tally_type; ///< type of tally flux or current
+    std::string tally_name; ///< name of the tally 
+    int entity_id; ///< id number of the entity being tallied upon    
+    double entity_size; ///< the physical size of the entity 
+    double normalization; ///< the tally normalization 
   
     /// fundemental mesh tally variables
     /// Mesh tally definition variable
@@ -133,10 +137,10 @@ namespace pyne
     std::vector<double> energy;    ///< Energy Mesh
     std::vector<int> energy_bins;  ///< Bin per energy
   };
-  
+
   /// Converts a Tally to a string stream representation.
   std::ostream& operator<<(std::ostream& os, Tally tally);
-  
+
   /// A stuct for reprensenting fundemental data in a tally
   /// Maybe Useful for HDF5 representations.
   /// following scoptaz's lead here
