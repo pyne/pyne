@@ -269,7 +269,7 @@ hid_t pyne::Tally::create_dataspace(hid_t file, std::string datapath) {
 }
 
 // Appends Tally object to dataset if file & datapath already exists
-// if file exists & data path doesnt creates new datapath,
+// if file exists & data path doesnt creates new datapath, 
 // otherwise creates new file
 void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 
