@@ -280,7 +280,7 @@ cdef class Tally:
         ("tal_name", str), ("size", float), ("norm", float),
         ("origin",list), 
         ("i", list), ("i_ints", list), 
-        ("j", list), ("ji_ints", list), 
+        ("j", list), ("j_ints", list), 
         ("k", list), ("k_ints", list),
         ("e", list), ("e_ints", list),
         ("vec", list), ("axl", list)))
