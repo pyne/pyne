@@ -180,7 +180,7 @@ cdef class Tally:
             i_ints=[], j_ints=[], k_ints=[], e=[], e_ints=[], vec=[], axl=[], tal_name='', norm=1.0):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         ################################################################
@@ -277,7 +277,7 @@ cdef class Tally:
         ("tal_name", str), ("size", float), ("norm", float),
         ("origin",list), 
         ("i", list), ("i_ints", list), 
-        ("j", list), ("ji_ints", list), 
+        ("j", list), ("j_ints", list), 
         ("k", list), ("k_ints", list),
         ("e", list), ("e_ints", list),
         ("vec", list), ("axl", list)))
