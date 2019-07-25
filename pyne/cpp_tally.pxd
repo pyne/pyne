@@ -32,13 +32,13 @@ cdef extern from "tally.h" namespace "pyne":
         Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
                 vdbl, vint) except + 
         Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
-                vdbl, vint, cstr) except + 
+                vdbl, vint, vdbl) except + 
         Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
-                vdbl, vint, cstr, double) except + 
+                vdbl, vint, vdbl, vdbl) except + 
         Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
-                vdbl, vint, cstr, double, vec3) except + 
+                vdbl, vint, vdbl, vdbl, cstr) except + 
         Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
-                vdbl, vint, cstr, double, vec3, vec3) except + 
+                vdbl, vint, vdbl, vdbl, cstr, double) except + 
 
         # attributes
         int entity_id

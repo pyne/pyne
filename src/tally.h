@@ -62,8 +62,8 @@ namespace pyne
           std::vector<double> i, std::vector<double> j, std::vector<double> k,
           std::vector<int> i_ints, std::vector<int> j_ints,
           std::vector<int> k_ints, std::vector<double> e, std::vector<int> e_ints,
-          std::string tally_name = "", double norm = 1.0,
-          double vec[3] = def_empty_vec3, double axl[3] = def_empty_vec3);
+          std::vector<double> vec, std::vector<double> axl,
+          std::string tally_name = "", double norm = 1.0);
 
     ~Tally();  /// default destructor
  
@@ -106,6 +106,9 @@ namespace pyne
     std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5",
                      std::string out = "");
 
+    template<typename T> bool is_zero(T vect);
+    template<typename T> std::string to_string(std::vector<T> vect);
+
     // Form the mcnp tally line as function of its properties
     std::string form_mcnp_tally(int tally_index, int type,
                                     std::string particle_token, int entity_id,
@@ -128,8 +131,8 @@ namespace pyne
     /// Mesh tally definition variable
     std::string entity_geometry;
     double origin[3];
-    double vec[3];
-    double axl[3];
+    std::vector<double> vec;
+    std::vector<double> axl;
     std::vector<double> i_meshs;
     std::vector<double> j_meshs;
     std::vector<double> k_meshs;

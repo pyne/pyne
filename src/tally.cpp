@@ -61,8 +61,9 @@ pyne::Tally::Tally(std::string type, std::string part_name,
 pyne::Tally::Tally(std::string part_name, std::string ent_geom, double orgn[3],
                    std::vector<double> mesh_i, std::vector<double> mesh_j, std::vector<double> mesh_k,
                    std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
-                   std::vector<double> e, std::vector<int> e_ints, 
-                   std::string tal_name, double norm, double vec_[3], double axl_[3]) {
+                   std::vector<double> e, std::vector<int> e_ints,
+                   std::vector<double> vec_, std::vector<double> axl_, 
+                   std::string tal_name, double norm) {
   // Empty Tally Constructor
   entity_type = "Mesh";
   entity_name = "";
@@ -73,9 +74,9 @@ pyne::Tally::Tally(std::string part_name, std::string ent_geom, double orgn[3],
   
   for (int i=0; i<3; i++)  {
     origin[i] = orgn[i];
-    vec[i] = vec_[i];
-    axl[i] = axl_[i];
   }
+  vec = vec_;
+  axl = axl_;
   i_meshs = mesh_i;
   j_meshs = mesh_j;
   k_meshs = mesh_k;
@@ -429,10 +430,12 @@ std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
   return os;
 }
 
+
 // Sets string to valid mcnp formatted tally
 // Takes mcnp version as arg, like 5 or 6
-std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::string out) {
-  std::stringstream output; // output stream
+std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
+                              std::string out) {
+  std::stringstream output;  // output stream
   std::string particle_token;
   // particle token
   if (mcnp_version.find("mcnp5") != std::string::npos)
@@ -446,96 +449,102 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version, std::st
   output << "C " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(6);
 
-  if (normalization > 1.0)
+  if (normalization > 1.0) 
     output << std::scientific;
+  int tally_id = 0;
 
   // neednt check entity type
   if (entity_type.find("Surface") != std::string::npos) {
     if (tally_type.find("Current") != std::string::npos) {
-      output << form_mcnp_tally(tally_index, 1, particle_token, 
-                                entity_id, entity_size, normalization);
+      tally_id = 1;
     } else if (tally_type.find("Flux") != std::string::npos) {
-      output << form_mcnp_tally(tally_index, 2, particle_token, 
-                                entity_id, entity_size, normalization);
+      tally_id = 2;
     }
+    output << form_mcnp_tally(tally_index, tally_id, particle_token, entity_id,
+                              entity_size, normalization);
 
   } else if (entity_type.find("Volume") != std::string::npos) {
     if (tally_type.find("Flux") != std::string::npos) {
-      output << form_mcnp_tally(tally_index, 4, particle_token, 
-                                entity_id, entity_size, normalization);
+      tally_id = 4;
     } else if (tally_type.find("Current") != std::string::npos) {
       // makes no sense in mcnp
+      return "";
     }
-  
-  
+    output << form_mcnp_tally(tally_index, tally_id, particle_token, entity_id,
+                              entity_size, normalization);
   } else if (entity_type.find("Mesh") != std::string::npos) {
-    output << "FMESH4:" << particle_token << "  ";
+    output << "FMESH" << tally_index << "4:" << particle_token << "  ";
     output << "GEOM=";
+    std::string indent_block = "           ";
     std::stringstream sup_var;
 
     if (entity_geometry.find("XYZ") != std::string::npos) {
       output << "XYZ ";
     } else if (entity_geometry.find("Cylinder") != std::string::npos) {
       output << "CYL ";
-      if (axl[0] != 0 || axl[1] != 0 || axl[2] != 0) {
-        sup_var << "AXL=";
-        for (int i = 0; i < 3; i++) {
-              sup_var << axl[i] << " ";
-        }
+      if (!is_zero(axl)) {
+        sup_var << indent_block << "AXL=" << to_string(axl);
       }
-      if (vec[0] != 0 || vec[1] != 0 || vec[2] != 0) {
-        sup_var << "VEC=";
-        for (int i = 0; i < 3; i++) {
-              sup_var << vec[i] << " ";
-        }
+      if (!is_zero(vec)) {
+        sup_var << "\n" << indent_block;
+        sup_var << "VEC=" << to_string(vec);
       }
     }
+
     output << " ORIGIN= " << origin[0] << " " << origin[1] << " " << origin[2]
-        << "\n";
+           << "\n";
     std::string dir_name[3] = {"I", "J", "K"};
     std::vector<double> meshes[3] = {i_meshs, j_meshs, k_meshs};
     std::vector<int> bins[3] = {i_bins, j_bins, k_bins};
 
     for (int j = 0; j < 3; j++) {
-      output << "          ";
-      output << dir_name[j] << "MESH=";
-      for (int i = 0; i < meshes[j].size(); i++) {
-        output << " " << meshes[j][i];
-      }
+      output << indent_block;
+      output << dir_name[j] << "MESH=" << to_string(meshes[j]);
       if (bins[j].size() > 0) {
-        output << " " << dir_name[j] << "INTS=";
-        for (int i = 0; i < bins[j].size(); i++) {
-          output << " " << bins[j][i];
-        }
+        output << " " << dir_name[j] << "INTS=" << to_string(bins[j]);
       }
       output << "\n";
     }
     if (sup_var.str().size() > 0) {
-      output << "          ";
       output << sup_var.str() << "\n";
     }
     if (energy.size() > 0) {
-      output << "          EMESH=";
-      for (int i = 0; i < energy.size(); i++) {
-        output << " " << energy[i];
-      }
-      if (energy_bins.size() > 0) {
-        output << " EINTS=";
-        for (int i = 0; i < energy_bins.size(); i++) {
-          output << " " << energy_bins[i];
-        }
-      }
+      output << indent_block << "EMESH=";
+      output << to_string(energy);
+    }
+    output << "\n";
+    if (energy_bins.size() > 0) {
+      output << indent_block << "EINTS=";
+      output << to_string(energy_bins);
     }
     if (out.size() > 0) {
-      output << "\n          OUT=" << out;
+      output << "\n" << indent_block << "OUT=" << out;
     }
   } else {
     std::cout << "tally/entity combination makes no sense for MCNP"
               << std::endl;
   }
-
   // print sd card if area/volume specified
   return output.str();
+}
+template <typename T>
+bool pyne::Tally::is_zero(T vect) {
+  int size = sizeof(vect) / sizeof(vect[0]);
+  bool result = true;
+  for (int i = 0; i < size; i++) result &= (vect[i] == 0);
+  return result;
+}
+
+template<typename T>
+std::string pyne::Tally::to_string(std::vector<T> vect){
+  std::stringstream out;
+  out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+  if (normalization > 1.0) 
+    out << std::scientific;
+  
+  for( auto elmt : vect)
+    out << " " << elmt;
+  return out.str();
 }
 
 

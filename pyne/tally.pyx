@@ -254,14 +254,13 @@ cdef class Tally:
         axl = np.asarray(axl, dtype=np.float64)
         
         self._inst = new cpp_tally.Tally(std_string(<char *> part_name_bytes), 
-                std_string(<char *> ent_geom_bytes), <cpp_tally.vec3>
-                np.PyArray_DATA(origin),
+                std_string(<char *> ent_geom_bytes), 
+                <cpp_tally.vec3> np.PyArray_DATA(origin),
                 <vector[double]> i_proxy, <vector[double]> j_proxy, <vector[double]> k_proxy,
                 <vector[int]> i_ints_proxy, <vector[int]> j_ints_proxy, <vector[int]> k_ints_proxy, 
                 <vector[double]> e_proxy, <vector[int]> e_ints_proxy, 
-                std_string(<char *> tal_name_bytes), <double> norm,
-                <cpp_tally.vec3> np.PyArray_DATA(vec), 
-                <cpp_tally.vec3> np.PyArray_DATA(axl))
+                <vector[double]> vec, <vector[double]> axl,
+                std_string(<char *> tal_name_bytes), <double> norm)
 
 
     _tally_tally_0_argtypes = frozenset()
@@ -275,8 +274,8 @@ cdef class Tally:
         (5, list), (6, list),
         (7, list), (8, list),
         (9, list), (10, list),
-        (11, str), (12, float), (13, float),
-        (15, list), (15, list),
+        (11, list), (12, list),
+        (13, str), (14, float),
         ("part_name", str), ("ent_geom", str), ("ent_name", str), 
         ("tal_name", str), ("size", float), ("norm", float),
         ("origin",list), 
