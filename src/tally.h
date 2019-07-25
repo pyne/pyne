@@ -22,7 +22,8 @@
 
 namespace pyne
 {
-  double def_empty_vec3[3] = {0, 0, 0};
+  const std::vector<double> _empty_vec_dbl;
+  const std::vector<int> _empty_vec_int;
   class Tally 
   {
   public:
@@ -58,11 +59,11 @@ namespace pyne
     /// \param i,j,k vector<double> coordinate of the coarse meshes
     /// \param ints i,j,k vector<double> coordinate of the coarse meshes
     /// \param normalization the number required to normalize your tally
-    Tally(std::string particule_name, std::string entity_geom, double orgn[3],
-          std::vector<double> i, std::vector<double> j, std::vector<double> k,
-          std::vector<int> i_ints, std::vector<int> j_ints,
-          std::vector<int> k_ints, std::vector<double> e, std::vector<int> e_ints,
-          std::vector<double> vec, std::vector<double> axl,
+    Tally(std::string particule_name, std::string entity_geom, std::vector<double> orgn,
+          std::vector<double> i_mesh, std::vector<double> j_mesh, std::vector<double> k_mesh,
+          std::vector<int> i_ints = _empty_vec_int, std::vector<int> j_ints =_empty_vec_int,
+          std::vector<int> k_ints = _empty_vec_int, std::vector<double> e_bounds = _empty_vec_dbl, std::vector<int> e_ints =_empty_vec_int,
+          std::vector<double> vec =_empty_vec_dbl, std::vector<double> axl = _empty_vec_dbl,
           std::string tally_name = "", double norm = 1.0);
 
     ~Tally();  /// default destructor
@@ -130,7 +131,7 @@ namespace pyne
     /// fundemental mesh tally variables
     /// Mesh tally definition variable
     std::string entity_geometry;
-    double origin[3];
+    std::vector<double> origin;
     std::vector<double> vec;
     std::vector<double> axl;
     std::vector<double> i_meshs;
@@ -139,8 +140,8 @@ namespace pyne
     std::vector<int> i_bins;
     std::vector<int> j_bins;
     std::vector<int> k_bins;
-    std::vector<double> energy;    ///< Energy Mesh
-    std::vector<int> energy_bins;  ///< Bin per energy
+    std::vector<double> e_bounds;    ///< Energy Mesh
+    std::vector<int> e_bins;  ///< Bin per energy
   };
 
   /// Converts a Tally to a string stream representation.

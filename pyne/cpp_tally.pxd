@@ -29,15 +29,21 @@ cdef extern from "tally.h" namespace "pyne":
         Tally(cstr, cstr, int, cstr, cstr, cstr, double) except +
         Tally(cstr, cstr, int, cstr, cstr, cstr, double, double) except +
 
-        Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
                 vdbl, vint) except + 
-        Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
                 vdbl, vint, vdbl) except + 
-        Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
                 vdbl, vint, vdbl, vdbl) except + 
-        Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
                 vdbl, vint, vdbl, vdbl, cstr) except + 
-        Tally(cstr, cstr, vec3, vdbl, vdbl, vdbl,  vint, vint, vint,
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
                 vdbl, vint, vdbl, vdbl, cstr, double) except + 
 
         # attributes

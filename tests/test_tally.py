@@ -438,7 +438,7 @@ def test_mcnp6_tally_vol_proton_volume_set():
 
 def test_mcnp_mesh_tally_xyz():
     particle = "Neutron"
-    geometry = "XYZ"
+    geometry = "Cartesian"
     origin = [1,2,3]
     i = [5, 10, 20, 25]
     j = [2, 12]
@@ -452,7 +452,7 @@ def test_mcnp_mesh_tally_xyz():
     out = "IJ"
 
     tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
-            e, e_ints, tal_name)
+            e, e_ints, tal_name=tal_name)
     mcnp_tally = "C Mesh Tally XYZ Proton\n"+\
         "FMESH14:n  GEOM=XYZ  ORIGIN= 1.000000 2.000000 3.000000\n"+\
         "           IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
@@ -481,7 +481,7 @@ def test_mcnp_mesh_tally_cyl():
 
 
     tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
-            e, e_ints, tal_name, axl = axl, vec = vec)
+            e, e_ints, tal_name = tal_name, axl = axl, vec = vec)
     mcnp_tally = "C Mesh Tally XYZ Proton\n"+\
         "FMESH14:n  GEOM=CYL  ORIGIN= 1.000000 2.000000 3.000000\n"+\
         "           IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\

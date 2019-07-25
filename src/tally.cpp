@@ -16,7 +16,7 @@ enum tally_type_enum { FLUX, CURRENT };  // Enumeration for tally types
 
 const std::string tally_type_enum2string[] = {"Flux", "Current"};
 const std::string entity_type_enum2string[] = {"Volume", "Surface", "Mesh"};
-const std::string geometry_type_enum2string[] = {"XYZ", "Cylinder"};
+const std::string geometry_type_enum2string[] = {"Cartesian", "Cylinder"};
 
 /***************************/
 /*** Protected Functions ***/
@@ -58,10 +58,11 @@ pyne::Tally::Tally(std::string type, std::string part_name,
   normalization = norm;
 }
 
-pyne::Tally::Tally(std::string part_name, std::string ent_geom, double orgn[3],
+pyne::Tally::Tally(std::string part_name, std::string ent_geom, 
+                   std::vector<double> orgn,
                    std::vector<double> mesh_i, std::vector<double> mesh_j, std::vector<double> mesh_k,
                    std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
-                   std::vector<double> e, std::vector<int> e_ints,
+                   std::vector<double> e_bounds_, std::vector<int> e_ints_,
                    std::vector<double> vec_, std::vector<double> axl_, 
                    std::string tal_name, double norm) {
   // Empty Tally Constructor
@@ -72,9 +73,7 @@ pyne::Tally::Tally(std::string part_name, std::string ent_geom, double orgn[3],
   tally_name = tal_name;
   entity_size = -1;
   
-  for (int i=0; i<3; i++)  {
-    origin[i] = orgn[i];
-  }
+  origin = orgn;
   vec = vec_;
   axl = axl_;
   i_meshs = mesh_i;
@@ -83,8 +82,8 @@ pyne::Tally::Tally(std::string part_name, std::string ent_geom, double orgn[3],
   i_bins = i_ints;
   j_bins = j_ints;
   k_bins = k_ints;
-  energy = e;       ///< Energy Mesh
-  energy_bins = e_ints;  ///< Bin per energy
+  e_bounds = e_bounds_;       ///< Energy Mesh
+  e_bins = e_ints_;  ///< Bin per energy
   normalization = norm;
 }
 
@@ -478,7 +477,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
     std::string indent_block = "           ";
     std::stringstream sup_var;
 
-    if (entity_geometry.find("XYZ") != std::string::npos) {
+    if (entity_geometry.find("Cartesian") != std::string::npos) {
       output << "XYZ ";
     } else if (entity_geometry.find("Cylinder") != std::string::npos) {
       output << "CYL ";
@@ -491,8 +490,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
       }
     }
 
-    output << " ORIGIN= " << origin[0] << " " << origin[1] << " " << origin[2]
-           << "\n";
+    output << " ORIGIN=" << to_string(origin) << "\n";
     std::string dir_name[3] = {"I", "J", "K"};
     std::vector<double> meshes[3] = {i_meshs, j_meshs, k_meshs};
     std::vector<int> bins[3] = {i_bins, j_bins, k_bins};
@@ -508,14 +506,14 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
     if (sup_var.str().size() > 0) {
       output << sup_var.str() << "\n";
     }
-    if (energy.size() > 0) {
+    if (e_bounds.size() > 0) {
       output << indent_block << "EMESH=";
-      output << to_string(energy);
+      output << to_string(e_bounds);
     }
     output << "\n";
-    if (energy_bins.size() > 0) {
+    if (e_bins.size() > 0) {
       output << indent_block << "EINTS=";
-      output << to_string(energy_bins);
+      output << to_string(e_bins);
     }
     if (out.size() > 0) {
       output << "\n" << indent_block << "OUT=" << out;

@@ -32,15 +32,15 @@ cdef vector[int] to_vector_int(value):
     cdef int * value_data
     # value is a ('vector', 'int32', 0)
     value_size = len(value)
-    if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_INT32:
-        value_data = <int *> np.PyArray_DATA(<np.ndarray> value)
-        value_proxy = vector[int](<size_t> value_size)
+    if isinstance(value, np.ndarray) and (< np.ndarray > value).descr.type_num == np.NPY_INT64:
+        value_data = <int * > np.PyArray_DATA( < np.ndarray > value)
+        value_proxy = vector[int](< size_t > value_size)
         for ivalue in range(value_size):
             value_proxy[ivalue] = value_data[ivalue]
     else:
-        value_proxy = vector[int](<size_t> value_size)
+        value_proxy = vector[int](< size_t > value_size)
         for ivalue in range(value_size):
-            value_proxy[ivalue] = <int> value[ivalue]
+            value_proxy[ivalue] = <int > value[ivalue]
     return value_proxy
 
 
@@ -51,15 +51,15 @@ cdef vector[double] to_vector_double(value):
     cdef double * value_data
     # value is a ('vector', 'float64', 0)
     value_size = len(value)
-    if isinstance(value, np.ndarray) and (<np.ndarray> value).descr.type_num == np.NPY_FLOAT64:
-        value_data = <double *> np.PyArray_DATA(<np.ndarray> value)
-        value_proxy = vector[double](<size_t> value_size)
+    if isinstance(value, np.ndarray) and (< np.ndarray > value).descr.type_num == np.NPY_FLOAT64:
+        value_data = <double * > np.PyArray_DATA( < np.ndarray > value)
+        value_proxy = vector[double](< size_t > value_size)
         for ivalue in range(value_size):
             value_proxy[ivalue] = value_data[ivalue]
     else:
-        value_proxy = vector[double](<size_t> value_size)
+        value_proxy = vector[double](< size_t > value_size)
         for ivalue in range(value_size):
-            value_proxy[ivalue] = <double> value[ivalue]
+            value_proxy[ivalue] = <double > value[ivalue]
     return value_proxy
 
 
@@ -147,36 +147,15 @@ cdef class Tally:
         this we ill put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
-
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        ################################################################
-
-        empty constructor   Constructor from passed in vars
-
         Parameters
         ----------
         entity_name : std::string
-
         entity_type : std::string
-
         entity_size : double
-
         entity : int
-
         normalization : double
-
         particle_name : std::string
-
         type : std::string
-
         tally_name : std::string
 
         Returns
@@ -197,9 +176,8 @@ cdef class Tally:
         self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
 
     
-    def _tally_tally_2(self, part_name, ent_geom, origin, i, j, k,
-            i_ints, j_ints, k_ints, e, e_ints, tal_name='', norm=1.0,
-            vec=[0,0,0], axl=[0,0,0]):
+    def _tally_tally_2(self, part_name, ent_geom, origin, i_mesh, j_mesh, k_mesh,
+            i_ints=[], j_ints=[], k_ints=[], e=[], e_ints=[], vec=[], axl=[], tal_name='', norm=1.0):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
         this we ill put the relevant docstring for each version below.
@@ -209,7 +187,23 @@ cdef class Tally:
 
         Parameters
         ----------
-        entity_name : std::string
+        part_name : string
+        ent_geom : string
+        origin : (3d) list 
+        i_mesh : list
+        j_mesh : list
+        k_mesh : list
+        i_ints : list (default: empty) 
+        j_ints : list (default: empty)
+        k_ints : list (default: empty)
+        e : list (default: empty)
+        e_ints : list (default: empty)
+        vec : (3d) list (default: empty)
+        axl : (3d) list (default: empty)
+        tal_name string (default: "")
+        norm : float (default: 1.0)
+
+        part_name : std::string
         entity_geometry : std::string
         entity_type : std::string
         entity_size : double
@@ -228,38 +222,41 @@ cdef class Tally:
         cdef char * ent_geom_proxy
         cdef char * ent_name_proxy
         cdef char * tal_name_proxy
-        cdef vector[double] i_proxy
+        cdef vector[double] i_mesh_proxy
         cdef vector[int] i_ints_proxy
-        cdef vector[double] j_proxy
+        cdef vector[double] j_mesh_proxy
         cdef vector[int] j_ints_proxy
-        cdef vector[double] k_proxy
+        cdef vector[double] k_mesh_proxy
         cdef vector[int] k_ints_proxy
         cdef vector[double] e_proxy
         cdef vector[int] e_ints_proxy
+        cdef vector[double] vec_proxy
+        cdef vector[double] axl_proxy
         
         part_name_bytes = part_name.encode()
         ent_geom_bytes = ent_geom.encode()
         tal_name_bytes = tal_name.encode()
-        i_proxy = to_vector_double(i)
-        j_proxy = to_vector_double(j)
-        k_proxy = to_vector_double(k)
+        i_mesh_proxy = to_vector_double(i_mesh)
+        j_mesh_proxy = to_vector_double(j_mesh)
+        k_mesh_proxy = to_vector_double(k_mesh)
         e_proxy = to_vector_double(e)
         i_ints_proxy = to_vector_int(i_ints)
         j_ints_proxy = to_vector_int(j_ints)
         k_ints_proxy = to_vector_int(k_ints)
         e_ints_proxy = to_vector_int(e_ints)
        
-        origin = np.asarray(origin, dtype=np.float64)
-        vec = np.asarray(vec, dtype=np.float64)
-        axl = np.asarray(axl, dtype=np.float64)
+        origin_proxy = to_vector_double(origin)
+        vec_proxy = to_vector_double(vec)
+        axl_proxy = to_vector_double(axl)
         
         self._inst = new cpp_tally.Tally(std_string(<char *> part_name_bytes), 
                 std_string(<char *> ent_geom_bytes), 
-                <cpp_tally.vec3> np.PyArray_DATA(origin),
-                <vector[double]> i_proxy, <vector[double]> j_proxy, <vector[double]> k_proxy,
+                <vector[double]> origin,
+                <vector[double]> i_mesh_proxy, <vector[double]> j_mesh_proxy,
+                <vector[double]> k_mesh_proxy,
                 <vector[int]> i_ints_proxy, <vector[int]> j_ints_proxy, <vector[int]> k_ints_proxy, 
                 <vector[double]> e_proxy, <vector[int]> e_ints_proxy, 
-                <vector[double]> vec, <vector[double]> axl,
+                <vector[double]> vec_proxy, <vector[double]> axl_proxy,
                 std_string(<char *> tal_name_bytes), <double> norm)
 
 
