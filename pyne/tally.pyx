@@ -202,7 +202,7 @@ cdef class Tally:
             vec=[0,0,0], axl=[0,0,0]):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         ################################################################
