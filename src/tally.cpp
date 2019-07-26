@@ -482,24 +482,24 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
     } else if (entity_geometry.find("Cylinder") != std::string::npos) {
       output << "CYL ";
       if (!is_zero(axl)) {
-        sup_var << indent_block << "AXL=" << to_string(axl);
+        sup_var << indent_block << "AXL=" << mcnp_to_string(axl);
       }
       if (!is_zero(vec)) {
         sup_var << "\n" << indent_block;
-        sup_var << "VEC=" << to_string(vec);
+        sup_var << "VEC=" << mcnp_to_string(vec);
       }
     }
 
-    output << " ORIGIN=" << to_string(origin) << "\n";
+    output << " ORIGIN=" << mcnp_to_string(origin) << "\n";
     std::string dir_name[3] = {"I", "J", "K"};
     std::vector<double> meshes[3] = {i_meshs, j_meshs, k_meshs};
     std::vector<int> bins[3] = {i_bins, j_bins, k_bins};
 
     for (int j = 0; j < 3; j++) {
       output << indent_block;
-      output << dir_name[j] << "MESH=" << to_string(meshes[j]);
+      output << dir_name[j] << "MESH=" << mcnp_to_string(meshes[j]);
       if (bins[j].size() > 0) {
-        output << " " << dir_name[j] << "INTS=" << to_string(bins[j]);
+        output << " " << dir_name[j] << "INTS=" << mcnp_to_string(bins[j]);
       }
       output << "\n";
     }
@@ -508,12 +508,12 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
     }
     if (e_bounds.size() > 0) {
       output << indent_block << "EMESH=";
-      output << to_string(e_bounds);
+      output << mcnp_to_string(e_bounds);
     }
     output << "\n";
     if (e_bins.size() > 0) {
       output << indent_block << "EINTS=";
-      output << to_string(e_bins);
+      output << mcnp_to_string(e_bins);
     }
     if (out.size() > 0) {
       output << "\n" << indent_block << "OUT=" << out;
