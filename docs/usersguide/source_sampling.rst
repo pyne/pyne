@@ -232,9 +232,8 @@ particle, if a source position is selected in void (MCNP material 0) or in a
 cell that disagrees with the cell number, the source position is resampled
 within the selected mesh volume element until either a correct position is
 found, or this user-specified limit is researched. If the second argument is
-set to be a negtive integer (-1 is recommended), then the void rejection will
-be disabled. The third argument should specify the particle type: 1 for
-neutrons, 2 for photons.
+set to be 0, then the void rejection will be disabled. The third argument
+should specify the particle type: 1 for neutrons, 2 for photons.
 
 For example, this "idum" card specifies uniform sampling with a resample limit
 of 100 with source particles specified as photons:

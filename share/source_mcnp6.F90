@@ -159,7 +159,7 @@ subroutine source
 
   ! check whether the material of sampled cell is void
   ! idum > 0, enable void rejection
-  ! idum < 0, disable void rejection
+  ! idum = 0, disable void rejection
   if ((mat(icl_tmp).eq.0) .and. (idum(2) > 0)) then
     goto 300
   else
