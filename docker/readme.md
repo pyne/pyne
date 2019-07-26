@@ -12,12 +12,14 @@ to build docker containers with a custom set of
   dependencies required by the CI. The configuration of the Docker containers
   can be specified using the `--build-args <flag>` argument. The different flags are:
     
-    - `build_moab=YES` add MOAB in the docker container
-    - `build_pymoab=YES` install MOAB with pymoab
-    - `build_dagmc=YES` add DAGMC 
-    - `build_pyne=NO` do not build PyNE, only add the PyNE dependencies to the container
+    - `build_moab=YES` add MOAB in the docker container (default: `NO`)
+    - `build_pymoab=YES` install MOAB with pymoab (default: `NO`)
+    - `build_dagmc=YES` add DAGMC (default: `NO`)
+    - `build_pyne=NO` do not build PyNE, only add the PyNE dependencies to the container (default: `YES`)
     - `py_version=X.Y` specify the python version to install (options are 2.7 or
-      3.6)
+      3.6) (default: `2.7`)
+
+
 Note, if using multiple build arguments `--build-args` has to be repeted, i.e. :
 to request DAGMC dependencies only with Python 2.7, the docker build arguments will be: 
 `--build-args build_dagmc=YES --build-args build_pyne=NO --build-args py_version=2.7` 
@@ -30,13 +32,14 @@ to request DAGMC dependencies only with Python 2.7, the docker build arguments w
     - `--moab` install MOAB in the container
     - `--dagmc` install DAGMC in the container
     - `--pymoab` install pyMOAB in the container (along with MOAB)
-    - `--all/-a/-all` install all the optional dependencies (MOAB/pyMOAB/DAGMC)
+    - `--all/-a/-all` install all the optional dependencies (MOAB/pyMOAB/DAGMC) 
     - `--deps` don't install PyNE, only install the dependencies (both required and selected optional dependencies)
     - `--push` push the docker container to DockerHub after building it
       (requires right to push on the PyNE DockerHub account)
     - `--name=` manually set the docker container name (NOT recommended to be used
       with the push option)
-
+The default value will be the one defined in the `Dockerfile` (Python 2.7, no
+optionnal dependencies, PyNE built).
 
 The Python script will check for consistency among the required dependencies to ensure
 working build. For example, pyMOAB requires MOAB to be install (MOAB will be installed if
