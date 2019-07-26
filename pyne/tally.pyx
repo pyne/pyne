@@ -203,16 +203,6 @@ cdef class Tally:
         tal_name string (default: "")
         norm : float (default: 1.0)
 
-        part_name : std::string
-        entity_geometry : std::string
-        entity_type : std::string
-        entity_size : double
-        normalization : double
-        particle_name : std::string
-        type : std::string
-        tally_name : std::string
-        i: vector
-
         Returns
         -------
         None
