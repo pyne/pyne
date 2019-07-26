@@ -534,7 +534,7 @@ bool pyne::Tally::is_zero(T vect) {
 }
 
 template<typename T>
-std::string pyne::Tally::to_string(std::vector<T> vect){
+std::string pyne::Tally::mcnp_list_to_string(std::vector<T> vect){
   std::stringstream out;
   out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
   if (normalization > 1.0) 
