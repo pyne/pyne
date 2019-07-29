@@ -540,8 +540,8 @@ std::string pyne::Tally::mcnp_list_to_string(std::vector<T> vect){
   if (normalization > 1.0) 
     out << std::scientific;
   
-  for( auto elmt : vect)
-    out << " " << elmt;
+  for( int i= 0; i < vect[i].size(), i++) 
+    out << " " << vect[i];
   return out.str();
 }
 
