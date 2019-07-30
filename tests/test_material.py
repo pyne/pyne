@@ -222,10 +222,21 @@ class TestMaterialMethods(TestCase):
         assert_equal(set(obs.values()), set(exp.values()))
 
 
-    def test_decay_heat(self):
+    def test_decay_heat_stable(self):
         mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
         obs = mat.decay_heat()
         exp = {922350000: 4.48963565256e-14, 922380000: 1.2123912039e-13}
+        assert_equal(set(obs), set(exp))
+        for key in exp:
+            assert_almost_equal(obs[key], exp[key])
+    
+
+    def test_decay_heat_metastable(self):
+        mat = Material({471080001: 0.5, 551340001: 0.5}, 2)
+        obs = mat.decay_heat()
+        # decay heat values from external calculation using half-life: BNL
+        # q-values: ORNL, atomic mass: AMDC
+        exp = {471080001: 7.33578506845e-8, 551340001: 6.241109861949e-3}
         assert_equal(set(obs), set(exp))
         for key in exp:
             assert_almost_equal(obs[key], exp[key])

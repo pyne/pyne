@@ -13,6 +13,7 @@ from warnings import warn
 from pyne.utils import QAWarning, to_sec
 import numpy as np
 import tables as tb
+from io import open
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -90,7 +91,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         stop = -1
         direction = -1
 
-    output = ""
+    output = u""
     if not sub_voxel:
         for i, mat, ve in flux_mesh:
             # print flux data to file
@@ -106,7 +107,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         f.write(output)
 
 
-def photon_source_to_hdf5(filename, chunkshape=(10000,)):
+def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     """Converts a plaintext photon source file to an HDF5 version for
     quick later use.
 
@@ -127,7 +128,11 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     Parameters
     ----------
     filename : str
-        The path to the file
+        The path to the file for read
+    nucs : str
+        Nuclides need to write into h5 file. For example:
+            - 'all': default value. Write the information of all nuclides to h5.
+            - 'total': used for r2s. Only write TOTAL value to h5.
     chunkshape : tuple of int
         A 1D tuple of the HDF5 chunkshape.
 
@@ -145,6 +150,7 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     ])
 
     filters = tb.Filters(complevel=1, complib='zlib')
+    # set the default output h5_filename
     h5f = tb.open_file(filename + '.h5', 'w', filters=filters)
     tab = h5f.create_table('/', 'data', dt, chunkshape=chunkshape)
 
@@ -152,25 +158,40 @@ def photon_source_to_hdf5(filename, chunkshape=(10000,)):
     rows = np.empty(chunksize, dtype=dt)
     idx = 0
     old = ""
+    row_count = 0
     for i, line in enumerate(f, 1):
         ls = line.strip().split('\t')
 
         # Keep track of the idx by delimiting by the last TOTAL line in a
         # volume element.
-        if ls[0] != 'TOTAL' and old == 'TOTAL':
+        if ls[0] != u'TOTAL' and old == u'TOTAL':
             idx += 1
 
-        j = (i-1) % chunksize
-        rows[j] = (idx, ls[0].strip(), ls[1].strip(),
-                   np.array(ls[2:], dtype=np.float64))
+        if nucs.lower() == 'all':
+            row_count += 1
+            j = (row_count-1) % chunksize
+            rows[j] = (idx, ls[0].strip(), ls[1].strip(),
+                       np.array(ls[2:], dtype=np.float64))
+        elif nucs.lower() == 'total':
+            if ls[0] == 'TOTAL':
+                row_count += 1
+                j = (row_count-1) % chunksize
+                rows[j] = (idx, ls[0].strip(), ls[1].strip(),
+                           np.array(ls[2:], dtype=np.float64))
+        else:
+            h5f.close()
+            f.close()
+            raise ValueError(u"Nucs option {0} not support!".format(nucs))
+
         # Save the nuclide in order to keep track of idx
         old = ls[0]
 
-        if i % chunksize == 0:
+        if (row_count > 0) and (row_count % chunksize == 0):
             tab.append(rows)
             rows = np.empty(chunksize, dtype=dt)
+            row_count = 0
 
-    if i % chunksize != 0:
+    if row_count % chunksize != 0:
         tab.append(rows[:j+1])
 
     h5f.close()
@@ -234,8 +255,10 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     phtn_src_dc = []
     with tb.open_file(filename) as h5f:
         for row in h5f.root.data:
-            phtn_src_dc.append(row[2])
-    phtn_src_dc = list(set(phtn_src_dc))
+            if row[2].decode() not in phtn_src_dc:
+                phtn_src_dc.append(row[2].decode())
+            else:
+                break
 
     # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
@@ -243,10 +266,10 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
             # Convert nuclide to the form found in the ALARA phtn_src
             # file, which is similar to the Serpent form. Note this form is
             # different from the ALARA input nuclide form found in nucname.
-            if cond[0] != "TOTAL":
+            if cond[0] != u"TOTAL":
                 nuc = serpent(cond[0]).lower()
             else:
-                nuc = "TOTAL"
+                nuc = u"TOTAL"
 
             # time match, convert string mathch to float mathch
             dc = _find_phsrc_dc(cond[1], phtn_src_dc)
@@ -317,18 +340,18 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
     # unstructured meshes are not adversely affected.
-    geometry = 'geometry rectangular\n\n'
+    geometry = u'geometry rectangular\n\n'
 
     # Create three strings in order to create all ALARA input blocks in a
     # single mesh iteration.
-    volume = 'volume\n'  # volume input block
-    mat_loading = 'mat_loading\n'  # material loading input block
-    mixture = ''  # mixture blocks
+    volume = u'volume\n'  # volume input block
+    mat_loading = u'mat_loading\n'  # material loading input block
+    mixture = u''  # mixture blocks
 
     unique_mixtures = []
     if not sub_voxel:
         for i, mat, ve in mesh:
-            volume += '    {0: 1.6E}    zone_{1}\n'.format(
+            volume += u'    {0: 1.6E}    zone_{1}\n'.format(
                 mesh.elem_volume(ve), i)
 
             ve_mixture = {}
@@ -336,7 +359,7 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
                 cell_mat = cell_mats[row['cell']]
                 name = cell_mat.metadata['name']
                 if _is_void(name):
-                    name = 'mat_void'
+                    name = u'mat_void'
                 if name not in ve_mixture.keys():
                     ve_mixture[name] = np.round(row['vol_frac'], sig_figs)
                 else:
@@ -344,40 +367,40 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
 
             if ve_mixture not in unique_mixtures:
                 unique_mixtures.append(ve_mixture)
-                mixture += 'mixture mix_{0}\n'.format(
+                mixture += u'mixture mix_{0}\n'.format(
                     unique_mixtures.index(ve_mixture))
                 for key, value in ve_mixture.items():
-                    mixture += '    material {0} 1 {1}\n'.format(key, value)
+                    mixture += u'    material {0} 1 {1}\n'.format(key, value)
 
-                mixture += 'end\n\n'
+                mixture += u'end\n\n'
 
-            mat_loading += '    zone_{0}    mix_{1}\n'.format(i,
+            mat_loading += u'    zone_{0}    mix_{1}\n'.format(i,
                                                               unique_mixtures.index(ve_mixture))
     else:
         ves = list(mesh.iter_ve())
         sve_count = 0
         for row in cell_fracs:
             if len(cell_mats[row['cell']].comp) != 0:
-                volume += '    {0: 1.6E}    zone_{1}\n'.format(
+                volume += u'    {0: 1.6E}    zone_{1}\n'.format(
                     mesh.elem_volume(ves[row['idx']]) * row['vol_frac'], sve_count)
                 cell_mat = cell_mats[row['cell']]
                 name = cell_mat.metadata['name']
                 if name not in unique_mixtures:
                     unique_mixtures.append(name)
-                    mixture += 'mixture {0}\n'.format(name)
-                    mixture += '    material {0} 1 1\n'.format(name)
-                    mixture += 'end\n\n'
-                mat_loading += '    zone_{0}    {1}\n'.format(
+                    mixture += u'mixture {0}\n'.format(name)
+                    mixture += u'    material {0} 1 1\n'.format(name)
+                    mixture += u'end\n\n'
+                mat_loading += u'    zone_{0}    {1}\n'.format(
                     sve_count, name)
                 sve_count += 1
 
-    volume += 'end\n\n'
-    mat_loading += 'end\n\n'
+    volume += u'end\n\n'
+    mat_loading += u'end\n\n'
 
     with open(geom_file, 'w') as f:
         f.write(geometry + volume + mat_loading + mixture)
 
-    matlib = ''  # ALARA material library string
+    matlib = u''  # ALARA material library string
 
     printed_mats = []
     print_void = False
@@ -388,15 +411,15 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
             continue
         if name not in printed_mats:
             printed_mats.append(name)
-            matlib += '{0}    {1: 1.6E}    {2}\n'.format(name, mat.density,
+            matlib += u'{0}    {1: 1.6E}    {2}\n'.format(name, mat.density,
                                                          len(mat.comp))
-            for nuc, comp in mat.comp.iteritems():
-                matlib += '{0}    {1: 1.6E}    {2}\n'.format(alara(nuc),
+            for nuc, comp in mat.comp.items():
+                matlib += u'{0}    {1: 1.6E}    {2}\n'.format(alara(nuc),
                                                              comp*100.0, znum(nuc))
-            matlib += '\n'
+            matlib += u'\n'
 
     if print_void:
-        matlib += '# void material\nmat_void 0.0 1\nhe 1 2\n'
+        matlib += u'# void material\nmat_void 0.0 1\nhe 1 2\n'
 
     with open(matlib_file, 'w') as f:
         f.write(matlib)
@@ -428,30 +451,30 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
     # unstructured meshes are not adversely affected.
-    geometry = "geometry rectangular\n\n"
+    geometry = u"geometry rectangular\n\n"
 
     # Create three strings in order to create all ALARA input blocks in a
     # single mesh iteration.
-    volume = "volume\n"  # volume input block
-    mat_loading = "mat_loading\n"  # material loading input block
-    mixture = ""  # mixture blocks
-    matlib = ""  # ALARA material library string
+    volume = u"volume\n"  # volume input block
+    mat_loading = u"mat_loading\n"  # material loading input block
+    mixture = u""  # mixture blocks
+    matlib = u""  # ALARA material library string
 
     for i, mat, ve in mesh:
-        volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
-        mat_loading += "    zone_{0}    mix_{0}\n".format(i)
-        matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(i, mesh.density[i],
+        volume += u"    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
+        mat_loading += u"    zone_{0}    mix_{0}\n".format(i)
+        matlib += u"mat_{0}    {1: 1.6E}    {2}\n".format(i, mesh.density[i],
                                                          len(mesh.comp[i]))
-        mixture += ("mixture mix_{0}\n"
-                    "    material mat_{0} 1 1\nend\n\n".format(i))
+        mixture += (u"mixture mix_{0}\n"
+                    u"    material mat_{0} 1 1\nend\n\n".format(i))
 
-        for nuc, comp in mesh.comp[i].iteritems():
-            matlib += "{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0,
+        for nuc, comp in mesh.comp[i].items():
+            matlib += u"{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0,
                                                          znum(nuc))
-        matlib += "\n"
+        matlib += u"\n"
 
-    volume += "end\n\n"
-    mat_loading += "end\n\n"
+    volume += u"end\n\n"
+    mat_loading += u"end\n\n"
 
     with open(geom_file, 'w') as f:
         f.write(geometry + volume + mat_loading + mixture)
@@ -466,6 +489,7 @@ def num_density_to_mesh(lines, time, m):
     creates material objects which are then added to a supplied PyNE Mesh object.
     The volumes within ALARA are assummed to appear in the same order as the
     idx on the Mesh object.
+    All the strings in this function is text (unicode).
 
     Parameters
     ----------
@@ -486,15 +510,15 @@ def num_density_to_mesh(lines, time, m):
     elif not isinstance(lines, collections.Sequence):
         raise TypeError("Lines argument not a file or sequence.")
     # Advance file to number density portion.
-    header = 'Number Density [atoms/cm3]'
-    line = ""
+    header = u'Number Density [atoms/cm3]'
+    line = u""
     while line.rstrip() != header:
         line = lines.pop(0)
 
     # Get decay time index from next line (the column the decay time answers
     # appear in.
-    line_strs = lines.pop(0).replace('\t', '  ')
-    time_index = [s.strip() for s in line_strs.split('  ')
+    line_strs = lines.pop(0).replace(u'\t', u'  ')
+    time_index = [s.strip() for s in line_strs.split(u'  ')
                   if s.strip()].index(time)
 
     # Create a dict of mats for the mesh.
@@ -503,7 +527,7 @@ def num_density_to_mesh(lines, time, m):
     # Read through file until enough material objects are create to fill mesh.
     while count != len(m):
         # Pop lines to the start of the next material.
-        while (lines.pop(0) + " ")[0] != '=':
+        while (lines.pop(0) + u" ")[0] != u'=':
             pass
 
         # Create a new material object and add to mats dict.
@@ -511,7 +535,7 @@ def num_density_to_mesh(lines, time, m):
         nucvec = {}
         density = 0.0
         # Read lines until '=' delimiter at the end of a material.
-        while line[0] != '=':
+        while line[0] != u'=':
             nuc = line.split()[0]
             n = float(line.split()[time_index])
             if n != 0.0:
@@ -575,46 +599,46 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
         Irradition-related ALARA input blocks.
     """
 
-    s = ""
+    s = u""
 
     # Material, element, and data_library blocks
-    s += "material_lib {0}\n".format(material_lib)
-    s += "element_lib {0}\n".format(element_lib)
-    s += "data_library {0}\n\n".format(data_library)
+    s += u"material_lib {0}\n".format(material_lib)
+    s += u"element_lib {0}\n".format(element_lib)
+    s += u"data_library {0}\n\n".format(data_library)
 
     # Cooling times
-    s += "cooling\n"
+    s += u"cooling\n"
     if isinstance(cooling, collections.Iterable) and not isinstance(cooling, basestring):
         for c in cooling:
-            s += "    {0}\n".format(c)
+            s += u"    {0}\n".format(c)
     else:
-        s += "    {0}\n".format(cooling)
+        s += u"    {0}\n".format(cooling)
 
-    s += "end\n\n"
+    s += u"end\n\n"
 
     # Flux block
-    s += "flux flux_1 {0} 1.0 0 default\n".format(flux_file)
+    s += u"flux flux_1 {0} 1.0 0 default\n".format(flux_file)
 
     # Flux schedule
-    s += ("schedule simple_schedule\n"
-          "    {0} flux_1 pulse_once 0 s\nend\n\n".format(irr_time))
+    s += (u"schedule simple_schedule\n"
+          u"    {0} flux_1 pulse_once 0 s\nend\n\n".format(irr_time))
 
-    s += "pulsehistory pulse_once\n    1 0.0 s\nend\n\n"
+    s += u"pulsehistory pulse_once\n    1 0.0 s\nend\n\n"
 
     # Output block
-    s += "output zone\n    units Ci cm3\n"
+    s += u"output zone\n    units Ci cm3\n"
     if isinstance(output, collections.Iterable) and not isinstance(output, basestring):
         for out in output:
-            s += "    {0}\n".format(out)
+            s += u"    {0}\n".format(out)
     else:
-        s += "    {0}\n".format(output)
+        s += u"    {0}\n".format(output)
 
-    s += "end\n\n"
+    s += u"end\n\n"
 
     # Other parameters
-    s += "truncation {0}\n".format(truncation)
-    s += "impurity {0} {1}\n".format(impurity[0], impurity[1])
-    s += "dump_file {0}\n".format(dump_file)
+    s += u"truncation {0}\n".format(truncation)
+    s += u"impurity {0} {1}\n".format(impurity[0], impurity[1])
+    s += u"dump_file {0}\n".format(dump_file)
 
     return s
 
@@ -633,17 +657,17 @@ def phtn_src_energy_bounds(input_file):
     e_bounds : list of floats
     The lower and upper energy bounds for the photon_source discretization. Unit: eV.
     """
-    phtn_src_lines = ""
+    phtn_src_lines = u""
     with open(input_file, 'r') as f:
         line = f.readline()
-        while not (' photon_source ' in line and line.strip()[0] != "#"):
+        while not (u' photon_source ' in line and line.strip()[0] != u"#"):
             line = f.readline()
         num_groups = float(line.split()[3])
         upper_bounds = [float(x) for x in line.split()[4:]]
         while len(upper_bounds) < num_groups:
             line = f.readline()
-            upper_bounds += [float(x) for x in line.split("#")
-                             [0].split('end')[0].split()]
+            upper_bounds += [float(x) for x in line.split(u"#")
+                             [0].split(u'end')[0].split()]
     e_bounds = [0.] + upper_bounds
     return e_bounds
 
@@ -813,14 +837,14 @@ def _output_flux(ve, tag_flux, output, start, stop, direction):
     count = 0
     flux_data = np.atleast_1d(tag_flux[ve])
     for i in range(start, stop, direction):
-        output += "{:.6E} ".format(flux_data[i])
+        output += u"{:.6E} ".format(flux_data[i])
         # fluxin formatting: create a new line
         # after every 6th entry
         count += 1
         if count % 6 == 0:
-            output += "\n"
+            output += u"\n"
 
-    output += "\n\n"
+    output += u"\n\n"
     return output
 
 
@@ -845,12 +869,12 @@ def _get_subvoxel_array(mesh, cell_mats):
 
     """
     cell_number_tag = mesh.cell_number
-    subvoxel_array = np.zeros(0, dtype=[(b'svid', np.int64),
-                                        (b'idx', np.int64),
-                                        (b'scid', np.int64)])
-    temp_subvoxel = np.zeros(1, dtype=[(b'svid', np.int64),
-                                       (b'idx', np.int64),
-                                       (b'scid', np.int64)])
+    subvoxel_array = np.zeros(0, dtype=[('svid', np.int64),
+                                        ('idx', np.int64),
+                                        ('scid', np.int64)])
+    temp_subvoxel = np.zeros(1, dtype=[('svid', np.int64),
+                                       ('idx', np.int64),
+                                       ('scid', np.int64)])
     # calculate the total number of non-void sub-voxel
     non_void_sv_num = 0
     for i, _, ve in mesh:
@@ -875,7 +899,10 @@ def _convert_unit_to_s(dc):
     a float number
     """
     # get num and unit
-    num, unit = dc.split()
+    if dc == u'shutdown':
+        num, unit = u'0.0', u's'
+    else:
+        num, unit = dc.split()
     return to_sec(float(num), unit)
 
 
@@ -904,7 +931,7 @@ def _find_phsrc_dc(idc, phtn_src_dc):
         # Loop over decay times in phtn_src_dc list and compare to idc_s.
         for dc in phtn_src_dc:
             # Skip "shutdown" string in list.
-            if dc == 'shutdown':
+            if dc == u'shutdown':
                 continue
             # Convert to [s].
             dc_s = _convert_unit_to_s(dc)

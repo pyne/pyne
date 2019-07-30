@@ -46,6 +46,6 @@ do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.
 
 
-.. _zip: https://github.com/pyne/pyne/zipball/0.4
-.. _tar: https://github.com/pyne/pyne/tarball/0.4
+.. _zip: https://github.com/pyne/pyne/zipball/0.5.1
+.. _tar: https://github.com/pyne/pyne/tarball/0.5.1
 .. _GitHub: http://github.com/pyne/pyne

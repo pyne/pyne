@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+from future.utils import implements_iterator
 from pyne.material import Material, MaterialLibrary, MultiMaterial
 import sys
 import copy
@@ -704,6 +705,17 @@ class Mesh(object):
             stored in self.dims.
 
         """
+        # if Mesh is made and no parameters passed, raise MeshError
+        if (mesh is None) and (not structured) and (structured_coords is None) \
+            and (structured_set is None) and (structured_ordering == 'xyz') \
+            and (mats == ()):
+            raise MeshError("Trivial mesh instantiation detected. "
+                            "For structured mesh instantiation, "
+                                "supply exactly one of the following:\n"
+                                "A. PyMOAB instance\n"
+                                "B. Mesh file\n"
+                                "C. Mesh coordinates\n"
+                                "D. Structured entity set AND PyMOAB instance")
         if mesh is None:
             self.mesh = mb_core.Core()
         elif isinstance(mesh, basestring):
@@ -726,7 +738,7 @@ class Mesh(object):
                 # check for the structured box tag on the instance
                 try:
                     box_tag = self.mesh.tag_get_handle(_BOX_DIMS_TAG_NAME)
-                except types.MB_TAG_NOT_FOUND as e:
+                except RuntimeError as e:
                     print("BOX_DIMS not found on MOAB mesh instance")
                     raise e
 
@@ -1044,6 +1056,12 @@ class Mesh(object):
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "/")
 
+    def __itruediv__(self, other):
+        """Divides the common tags of other to the mesh object.
+        """
+        tags = self.common_ve_tags(other)
+        return self._do_op(other, tags, "/")
+
     def _do_op(self, other, tags, op, in_place=True):
         """Private function to do mesh +, -, *, /.
         """
@@ -1076,12 +1094,12 @@ class Mesh(object):
                                   self.structured_set,
                                   types.MBMAXTYPE,
                                   dim=3)
-        self_tags = self.mesh.tag_get_tags_on_entity(self_it.next())
+        self_tags = self.mesh.tag_get_tags_on_entity(next(self_it))
         other_it = MeshSetIterator(other.mesh,
                                    other.structured_set,
                                    types.MBMAXTYPE,
                                    dim=3)
-        other_tags = other.mesh.tag_get_tags_on_entity(other_it.next())
+        other_tags = other.mesh.tag_get_tags_on_entity(next(other_it))
         self_tags = set(x.get_name() for x in self_tags)
         other_tags = set(x.get_name() for x in other_tags)
         intersect = self_tags & other_tags
@@ -1300,6 +1318,7 @@ class Mesh(object):
         """
         self._structured_check()
 
+        ## sometimes the dim is the ascii of the 'x', 'y', 'z'
         if len(dim) == 1 and dim in "xyz":
             idx = "xyz".find(dim)
             return [self.mesh.get_coords(v)[idx] for v in self.structured_iterate_vertex(dim)]
@@ -1376,8 +1395,9 @@ class Mesh(object):
             cell changing fastest.
 
         """
-
         num_vol_elements = len(self)
+        # sort cell_fracs
+        cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs)
         # Find the maximum cell number in a voxel
         max_num_cells = -1
         for i in range(num_vol_elements):
@@ -1518,7 +1538,7 @@ def _structured_step_iter(it, n):
     Return the nth item in the iterator.
     """
     it.step(n)
-    r = it.next()
+    r = next(it)
     it.reset()
     return r
 
@@ -1619,15 +1639,18 @@ class MeshSetIterator(object):
         self.entities = ents
 
     def __iter__(self):
-        for i in range(0, self.size):
-            yield self.entities[i]
+        return self
 
-    def next(self):
+    def __next__(self):
         if self.pos >= self.size:
             raise StopIteration
         else:
-            return self.entities[self.pos]
-            self.pos += 1
+            self.pos, value = self.pos + 1, self.entities[self.pos]
+            return value
+
+    # for Python2 compatability
+    def next(self):
+        return self.__next__()
 
     def step(self, num_steps):
         self.pos += int(num_steps)  # protecting from Python 3 auto-promotion
@@ -1636,3 +1659,40 @@ class MeshSetIterator(object):
             self.pos = self.size - 1
             at_end = True
         return at_end
+
+def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
+    """
+    Sort cell_fracs according to the order of increasing idx and decreasing
+    with vol_frac.
+
+    Parameters
+    ----------
+    cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A sorted, one dimensional
+            array, each entry containing the following fields:
+
+                :idx: int
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+
+            The array must be sorted with respect to both idx and cell, with
+            cell changing fastest.
+
+    Returns
+    -------
+    cell_fracs : structured array
+        Sorted cell_fracs.
+    """
+    # sort ascending along idx and vol_frac
+    # ndarray.sort can't sort using desending sequence.
+    # Multiply the vol_frac to -1.0 to sort the vol_frac in reverse order.
+    cell_fracs['vol_frac'] *= -1.0
+    cell_fracs.sort(order=['idx', 'vol_frac'])
+    cell_fracs['vol_frac'] *= -1.0
+    return cell_fracs
+

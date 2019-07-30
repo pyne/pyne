@@ -87,6 +87,11 @@ namespace pyne
 
     // mcnp tally
     std::string mcnp(int tally_index = 1, std::string mcnp_version = "mcnp5" );
+  
+    // Form the mcnp tally line as function of its properties
+    std::string form_mcnp_tally(int tally_index, int type,
+                                    std::string particle_token, int entity_id,
+                                    double entity_size, double normalization);
     
     // fluka tally 
     std::string fluka(std::string unit_number = "-21");

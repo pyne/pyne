@@ -629,22 +629,21 @@ def write_partisn_input_options():
                    5: 'mat:Graveyard', 6: u'mat:Vacuum'}
 
     cards = {"block1": {"isn": 6,
-                        "maxscm": 3000000,
                         "maxlcm": 6000000,
+                        "maxscm": 3000000,
                         },
              "block2": {"hello": "from block2"},
-             "block3": {"lib": "xsf21-71",
+             "block3": {"i2lp1": 0,
+                        "ifido": 1,
+                        "ihm": 227,
+                        "ihs": 11,
+                        "iht": 10,
+                        "ititl": 1,
+                        "kwikrd": 1,
+                        "lib": "xsf21-71",
                         "lng": 175,
                         "maxord": 5,
-                        "ihm": 227,
-                        "iht": 10,
-                        "ihs": 11,
-                        "ifido": 1,
-                        "ititl": 1,
-                        "i2lp1": 0,
-                        "savbxs": 1,
-                        "kwikrd": 1
-                        },
+                        "savbxs": 1},
              "block4": {"hello": "from block4"},
              "block5": {"source": "<this is a dummy source>"}
              }
