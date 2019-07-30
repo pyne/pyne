@@ -1624,7 +1624,6 @@ class MeshTally(StatMesh):
                 self.tally_number)
         structured_coords = openmc.get_structured_coords_from_openmc_sp(
                 filename)
-   
         # parameters to create mesh
         self.x_bounds = structured_coords[0]
         self.y_bounds = structured_coords[1]
