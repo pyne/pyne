@@ -1620,24 +1620,10 @@ class MeshTally(StatMesh):
         """
         # check tally_num exist
         tally_name = openmc.create_tally_name(self.tally_number)
-        with tb.open_file(filename) as h5f:
-            try:
-                tally_results = openmc.get_tally_results_from_openmc_sp(filename,
-                        self.tally_number)
-                meshes = h5f.root.tallies._f_get_child('meshes')
-                if meshes._v_nchildren != 1:
-                    raise ValueError(
-                            "Only one mesh is support for each Tally now")
-                mesh_str = meshes._v_groups.__str__()
-                mesh_name = openmc.get_openmc_mesh_name(mesh_str)
-                mesh = meshes._f_get_child(mesh_name)
-                structured_coords = openmc.calc_structured_coords(
-                        mesh.lower_left[:],
-                        mesh.upper_right[:],
-                        mesh.dimension[:])
-            except:
-                raise ValueError("Tally {0} not found in {1}".format(
-                    str(self.tally_number), filename))
+        tally_results = openmc.get_tally_results_from_openmc_sp(filename,
+                self.tally_number)
+        structured_coords = openmc.get_structured_coords_from_openmc_sp(
+                filename)
     
         # parameters to create mesh
         self.x_bounds = structured_coords[0]
