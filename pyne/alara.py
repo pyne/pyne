@@ -356,14 +356,6 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                  size=tag_size, dtype=float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
-#    # creat a list of decay times (strings) in the source file
-#    phtn_src_dc = []
-#    with tb.open_file(filename) as h5f:
-#        for row in h5f.root.data:
-#            if row[2].decode() not in phtn_src_dc:
-#                phtn_src_dc.append(row[2].decode())
-#            else:
-#                break
     phtn_src_dc = _read_phtn_src_dc(filename)
 
     # iterate through each requested nuclide/dectay time
@@ -405,7 +397,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
 
 
 def response_hdf5_to_mesh(mesh, filename, tags, response):
-    """This function reads in an hdf5 file produced by photon_source_to_hdf5
+    """This function reads in an hdf5 file produced by response_to_hdf5
     and tags the requested data to the mesh of a PyNE Mesh object. Any
     combinations of nuclides and decay times are allowed. The photon source
     file is assumed to be in mesh.__iter__() order
@@ -447,14 +439,6 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
                  size=1, dtype=float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
-#    # creat a list of decay times (strings) in the source file
-#    phtn_src_dc = []
-#    with tb.open_file(filename) as h5f:
-#        for row in h5f.root.data:
-#            if row[2].decode() not in phtn_src_dc:
-#                phtn_src_dc.append(row[2].decode())
-#            else:
-#                break
     phtn_src_dc = _read_phtn_src_dc(filename)
 
     # iterate through each requested nuclide/dectay time
