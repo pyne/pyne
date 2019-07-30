@@ -1443,67 +1443,6 @@ class Mesh(object):
                                             'largest cell volume fraction',
                  size=1, dtype=float)
 
-    def tag_flux_error_from_openmc_tally_results(self, tally_results,
-            particle_type='n'):
-        """
-        This function uses the output tally_results from
-        openmc.get_tally_results_from_openmc_sp to set the flux and error tags.
-
-        Parameters
-        ----------
-        tally_results : numpy array
-            This numpy array contains the flux and error data read from an
-            openmc state point file. The shape of this numpy array is
-            (num_ves*num_e_groups, 1, 2). In the first dimension, the energy
-            changes the fastest.
-            The flux data is tally_results[:, :, 0], and the error data is
-            tally_results[:, :, 1].
-            The unit of flux data is units are particle-cm per source particle.
-            Different from the neutron flux tallied in MCNP, this tally results
-            does not divide the mesh element volume.
-        """
-        num_ves = len(self)
-        # currently, the openmc mesh are uniform
-        ve_vol = self.structured_hex_volume(0, 0, 0)
-        num_e_groups = len(tally_results) // num_ves
-        if particle_type.lower() == 'n':
-            par_name = "neutron"
-        elif particle_type.lower() == 'p':
-            par_name = "photon"
-        else:
-            raise ValueError("Particle type {0} not supported!".format(
-                particle_type))
-    
-        # set flux and error tag
-        # set results tag
-        flux_data = np.divide(tally_results[:, :, 0], ve_vol)
-        flux_data = np.reshape(flux_data, newshape=(num_e_groups, num_ves))
-        flux_data = flux_data.transpose()
-        self.tag(name="{0}_flux".format(particle_type), value=flux_data,
-                 doc='{0} flux'.format(
-                     par_name),
-                 tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
-        # set result_rel_error tag
-        error_data = np.divide(tally_results[:, :, 1], ve_vol)
-        error_data = np.reshape(error_data, newshape=(num_e_groups, num_ves))
-        error_data = error_data.transpose()
-        self.tag(name="{0}_flux_err".format(particle_type),
-                 value=error_data,
-                 doc='{0} flux relative error'.format(par_name),
-                 tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
-        # set result_total tag
-        total_flux_data = np.sum(flux_data, axis=1)
-        self.tag(name="{0}_flux_total".format(particle_type),
-                 value=total_flux_data,
-                 doc='total {0} flux'.format(par_name),
-                 tagtype=NativeMeshTag, size=1, dtype=float)
-        # set result_total_rel_error tag
-        total_error_data = np.sum(error_data, axis=1)
-        self.tag(name="{0}_flux_err_total".format(particle_type),
-                 value=total_flux_data,
-                 doc='total {0} flux relative error'.format(par_name),
-                 tagtype=NativeMeshTag, size=1, dtype=float)
-
 
 class StatMesh(Mesh):
     """This class extends the basic Mesh class by modifying the standard
@@ -1570,6 +1509,7 @@ class StatMesh(Mesh):
                 mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1, new_val)
 
         return mesh_1
+
 
 class MeshTally(StatMesh):
     """This class stores all information from all single mesh tally that
@@ -1684,7 +1624,7 @@ class MeshTally(StatMesh):
                 self.tally_number)
         structured_coords = openmc.get_structured_coords_from_openmc_sp(
                 filename)
-    
+   
         # parameters to create mesh
         self.x_bounds = structured_coords[0]
         self.y_bounds = structured_coords[1]
