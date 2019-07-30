@@ -94,7 +94,7 @@ def pivot_mat_keys():
     """
     nuc_keys = {}
     for key in MATS.keys():
-        if (sys.version_info > (3, 0)):
+        if (sys.version_info[0] >= 3):
             key = str(key, encoding='UTF-8')
         else:
             key = str(key).encode('UTF-8')
