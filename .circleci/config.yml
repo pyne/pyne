@@ -314,7 +314,8 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - develop
+
 
       # only done on tags
       - build_push_website_deploy:
