@@ -11,7 +11,8 @@ from pyne.utils import QAWarning
 import numpy as np
 import tables as tb
 from pyne.openmc import calc_structured_coords, \
-        get_tally_results_from_openmc_sp, get_openmc_mesh_name
+        get_tally_results_from_openmc_sp, get_openmc_mesh_name, \
+        create_tally_name
 
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
@@ -1621,7 +1622,7 @@ class MeshTally(StatMesh):
             PyNE Mesh instance.
         """
         # check tally_num exist
-        tally_name = ''.join(["tally ", str(self.tally_number)])
+        tally_name = create_tally_name(self.tally_number)
         with tb.open_file(filename) as h5f:
             try:
                 tally_results = get_tally_results_from_openmc_sp(filename,

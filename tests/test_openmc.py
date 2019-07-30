@@ -165,6 +165,12 @@ def test_get_ebins_from_openmc_sp():
     ebins = openmc.get_ebins_from_openmc_sp(filename, tally_num=1)
     assert_array_equal(ebins, exp_ebins)
 
+def test_create_tally_name():
+    tally_number = 1
+    exp_tally_name = "tally 1"
+    tally_name = openmc.create_tally_name(tally_number)
+    assert_equal(tally_name, exp_tally_name)
+
 if __name__ == "__main__":
     nose.runmodule()
 
