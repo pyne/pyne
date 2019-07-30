@@ -10,10 +10,7 @@ from pyne.utils import QAWarning
 
 import numpy as np
 import tables as tb
-from pyne.openmc import calc_structured_coords, \
-        get_tally_results_from_openmc_sp, get_openmc_mesh_name, \
-        create_tally_name
-
+from pyne import openmc
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -1622,19 +1619,19 @@ class MeshTally(StatMesh):
             PyNE Mesh instance.
         """
         # check tally_num exist
-        tally_name = create_tally_name(self.tally_number)
+        tally_name = openmc.create_tally_name(self.tally_number)
         with tb.open_file(filename) as h5f:
             try:
-                tally_results = get_tally_results_from_openmc_sp(filename,
+                tally_results = openmc.get_tally_results_from_openmc_sp(filename,
                         self.tally_number)
                 meshes = h5f.root.tallies._f_get_child('meshes')
                 if meshes._v_nchildren != 1:
                     raise ValueError(
                             "Only one mesh is support for each Tally now")
                 mesh_str = meshes._v_groups.__str__()
-                mesh_name = get_openmc_mesh_name(mesh_str)
+                mesh_name = openmc.get_openmc_mesh_name(mesh_str)
                 mesh = meshes._f_get_child(mesh_name)
-                structured_coords = calc_structured_coords(
+                structured_coords = openmc.calc_structured_coords(
                         mesh.lower_left[:],
                         mesh.upper_right[:],
                         mesh.dimension[:])
