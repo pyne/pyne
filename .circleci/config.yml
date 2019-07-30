@@ -120,7 +120,7 @@ commands:
       - run:
           command: |
               git config --global user.email "ci@pyne.io"
-              git config --global user.name "pyne-overseer"
+              git config --global user.name "report errors on github.com/PyNE/PyNE"
       - run:
           name: Build PyNE website
           command: |
