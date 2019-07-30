@@ -116,7 +116,7 @@ commands:
           build: "python2_dagmc_pymoab"
       - add_ssh_keys:
           fingerprints:
-            - $PYNE_KEY_FINGERPRINT 
+            - $PYNE_KEY_FINGERPRINT
       - run:
           command: |
               git config --global user.email "ci@pyne.io"
