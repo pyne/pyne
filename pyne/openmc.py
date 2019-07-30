@@ -16,21 +16,6 @@ else:
 
 from pyne import nucname
 from pyne.utils import QAWarning
-from pyne.mesh import HAVE_PYMOAB
-try:
-    from pymoab import core as mb_core, hcoord, scd, types
-    from pymoab.rng import subtract
-    from pymoab.tag import Tag
-    from pymoab.types import _eh_py_type, _TAG_TYPE_STRS
-    HAVE_PYMOAB = True
-except ImportError:
-    HAVE_PYMOAB = False
-    warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the openmc module may be incomplete.", QAWarning)
-
-
-from pyne.mesh import Mesh
-
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 if sys.version_info[0] > 2:
@@ -189,48 +174,48 @@ def get_tally_results_from_openmc_sp(filename, tally_num):
                 str(tally_num), filename))
     return tally_results
 
-def meshtally_from_openmc_statepoint(filename, tally_num, particle_type='n'):
-    """
-    This function creates a Mesh instance from OpenMC statepoint file.
-
-    Parameters:
-    -----------
-    filename : str
-        Filename of the OpenMC statepoint file. It ends with ".h5",
-        eg: "statepoint.10.h5".
-    tally_num : int
-        Tally number of specific mesh tally.
-    particle_type : str
-        Type of the tallied particle.
-
-    Returns:
-    --------
-    mesh : Mesh
-        PyNE Mesh instance.
-    """
-    # check tally_num exist
-    tally_name = ''.join(["tally ", str(tally_num)])
-    with tb.open_file(filename) as h5f:
-        try:
-            tally_results = get_tally_results_from_openmc_sp(filename,
-                    tally_num)
-            meshes = h5f.root.tallies._f_get_child('meshes')
-            if meshes._v_nchildren != 1:
-                raise ValueError("Only one mesh is support for each Tally now")
-            mesh_str = meshes._v_groups.__str__()
-            mesh_name = _get_mesh_name(mesh_str)
-            mesh = meshes._f_get_child(mesh_name)
-            structured_coords = calc_structured_coords(
-                    mesh.lower_left[:],
-                    mesh.upper_right[:],
-                    mesh.dimension[:])
-        except:
-            raise ValueError("Tally {0} not found in {1}".format(str(tally_num), filename))
-
-    # parameters to create mesh
-    mesh = Mesh(mesh=None, structured=True, structured_coords=structured_coords)
-    mesh.tag_flux_error_from_openmc_tally_results(tally_results)
-    return mesh
+#def meshtally_from_openmc_statepoint(filename, tally_num, particle='neutron'):
+#    """
+#    This function creates a Mesh instance from OpenMC statepoint file.
+#
+#    Parameters:
+#    -----------
+#    filename : str
+#        Filename of the OpenMC statepoint file. It ends with ".h5",
+#        eg: "statepoint.10.h5".
+#    tally_num : int
+#        Tally number of specific mesh tally.
+#    particle : str
+#        Type of the tallied particle, 'neutron' or 'photon'
+#
+#    Returns:
+#    --------
+#    mesh : MeshTally
+#        PyNE MeshTally instance.
+#    """
+#    # check tally_num exist
+#    tally_name = ''.join(["tally ", str(tally_num)])
+#    with tb.open_file(filename) as h5f:
+#        try:
+#            tally_results = get_tally_results_from_openmc_sp(filename,
+#                    tally_num)
+#            meshes = h5f.root.tallies._f_get_child('meshes')
+#            if meshes._v_nchildren != 1:
+#                raise ValueError("Only one mesh is support for each Tally now")
+#            mesh_str = meshes._v_groups.__str__()
+#            mesh_name = _get_mesh_name(mesh_str)
+#            mesh = meshes._f_get_child(mesh_name)
+#            structured_coords = calc_structured_coords(
+#                    mesh.lower_left[:],
+#                    mesh.upper_right[:],
+#                    mesh.dimension[:])
+#        except:
+#            raise ValueError("Tally {0} not found in {1}".format(str(tally_num), filename))
+#
+#    # parameters to create mesh
+#    mesh = Mesh(mesh=None, structured=True, structured_coords=structured_coords)
+#    mesh.tag_flux_error_from_openmc_tally_results(tally_results)
+#    return mesh
 
 def calc_structured_coords(lower_left, upper_right, dimension):
     """
@@ -271,7 +256,7 @@ def calc_structured_coords(lower_left, upper_right, dimension):
     return structured_coords
 
 
-def _get_mesh_name(mesh_str):
+def get_openmc_mesh_name(mesh_str):
     """
     This function is used to get mesh name from a string contain it.
     A mesh string contains the content such as:

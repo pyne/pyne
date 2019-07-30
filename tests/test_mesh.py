@@ -1038,44 +1038,55 @@ def test_no_mats():
     i, mat, ve = next(iter(mesh))
     assert_true(mat is None)
 
-def test_tag_flux_error_from_openmc_tally_results():
-    # create a simple mesh
-    mesh = Mesh(structured_coords=[[0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0],
-        [0.0, 1.0]], structured=True)
-    ve_vol = 1.0
-    tally_results = np.array(
-           [[[1.0, 0.1]], [[2.0, 0.2]], 
-            [[3.0, 0.3]], [[4.0, 0.4]],
-            [[5.0, 0.5]], [[6.0, 0.6]],
-            [[7.0, 0.7]], [[8.0, 0.8]],
-            [[9.0, 0.9]], [[10.0, 1.0]],
-            [[11.0, 1.1]], [[12.0, 1.2]]], dtype=float)
-    #mesh = openmc.mesh_add_flux_error_tag_from_openmc_tally_results(mesh,
-    #        tally_results)
-    mesh.tag_flux_error_from_openmc_tally_results(tally_results)
-    # check tag data
-    # n_flux tag
-    exp_n_flux = np.divide(np.array([[1.0, 7.0],
-                                     [2.0, 8.0],
-                                     [3.0, 9.0],
-                                     [4.0, 10.0],
-                                     [5.0, 11.0],
-                                     [6.0, 12.0]]), ve_vol)
+
+def test_meshtally_from_openmc_statepoint():
+    if not HAVE_PYMOAB:
+        raise SkipTest
+    # mesh read from openmc state point file
+    # Parameters of the tally and mesh
+    # mesh = openmc.Mesh(mesh_id=14, name="n_flux")
+    # mesh.dimension= [3, 2, 1]
+    # mesh.lower_left = (-40.0, -12.5, -2.5)
+    # mesh.upper_right = (40.0, 12.5, 2.5)
+    # energy_bins = np.array([0.0, 1.0, 20.0]) * 1e6
+    filename = os.path.join(os.getcwd(), "files_test_openmc",
+            "statepoint.ebin2.ves6.h5")
+    tally_num = 1
+    
+    tag_names = ("n_flux", "n_flux_err", "n_flux_total", "n_flux_total_err")
+    mesh = MeshTally(filename, tally_num, tag_names=tag_names, mc_code='openmc')
+    # check mesh attributes
+    assert_equal(len(mesh), 6)
+    assert(mesh.structured)
+    # structured_coords
+    assert_array_almost_equal(mesh.structured_coords[0],
+            [(-40.0 + x * 80 / 3) for x in range(0, 4)])
+    assert_array_almost_equal(mesh.structured_coords[1],
+            [(-12.5 + x * 25.0 / 2) for x in range (0, 3)])
+    assert_array_almost_equal(mesh.structured_coords[2],
+            [(-2.5 + x * 5 / 1) for x in range(0, 2)])
+    ve_vol = (80.0/3) * (25.0/2) * (5/1)
+    # flux
+    exp_n_flux = np.divide(np.array([[0.977887, 4.20556],
+                           [0.115698, 0.0],
+                           [0.181645, 0.0],
+                           [0.938374, 3.40724],
+                           [0.219677, 0.0],
+                           [0.18134,  0.0]]), ve_vol)
     assert_equal(len(mesh.n_flux[:]), len(exp_n_flux))
     for i in range(len(exp_n_flux)):
-        assert_array_almost_equal(mesh.n_flux[i], exp_n_flux[i])
-    # n_err tag data
-    exp_n_flux_err = np.divide(np.array([[0.1, 0.7],
-                                         [0.2, 0.8],
-                                         [0.3, 0.9],
-                                         [0.4, 1.0],
-                                         [0.5, 1.1],
-                                         [0.6, 1.2]]), ve_vol)
+        assert_array_almost_equal(mesh.n_flux[i], exp_n_flux[i], decimal=5)
+    # error
+    exp_n_flux_err = np.divide(np.array([[0.956263, 17.6867],
+                               [0.0133861, 0.0],
+                               [0.0329949, 0.0],
+                               [0.880546, 11.6093],
+                               [0.0482578, 0.0],
+                               [0.0328842, 0.0]]), ve_vol)
     assert_equal(len(mesh.n_flux_err[:]), len(exp_n_flux_err))
     for i in range(len(exp_n_flux_err)):
-        assert_array_almost_equal(mesh.n_flux_err[i], exp_n_flux_err[i])
-
-
-
+        for j in range(exp_n_flux_err.shape[1]):
+            assert(isclose(mesh.n_flux_err[i][j],
+                exp_n_flux_err[i][j], rel_tol=1e-5))
 
 

@@ -3,11 +3,10 @@ from warnings import warn
 from pyne.utils import QAWarning
 import numpy as np
 
-from pyne.mesh import Mesh
+from pyne.mesh import Mesh, MeshTally
 from pyne.mcnp import Meshtal
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh
-from pyne.openmc import meshtally_from_openmc_statepoint
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -50,7 +49,11 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
     # mesh_reference is a openmc statepoint file
     elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
             and mesh_reference.endswith(".h5"):
-        m = meshtally_from_openmc_statepoint(mesh_reference, tally_num)
+            mesh_reference = Meshtal(mesh_reference,
+                                     {tally_num: (flux_tag, flux_tag + "_err",
+                                                  flux_tag + "_total",
+                                                  flux_tag + "_err_total")},
+                                     meshes_have_mats=output_material)
     #  mesh_reference is Meshtal or meshtal file
     elif tally_num is not None:
         #  mesh_reference is meshtal file
