@@ -74,7 +74,6 @@ cdef class _MaterialLibrary:
             The path in the heirarchy to the data table in an HDF5 file.
         nucpath : str, optional
             The path in the heirarchy to the nuclide array in an HDF5 file.
-
         """
         if lib != None:
             if sys.version_info[0] >= 3 and isinstance(lib, bytes):
