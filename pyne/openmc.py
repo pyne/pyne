@@ -280,3 +280,21 @@ def get_openmc_mesh_name(mesh_str):
     ls = mesh_str.strip().split(':')
     mesh_name = ls[0].split("'")[1]
     return mesh_name
+
+
+def create_tally_name(tally_number):
+    """
+    This function is used to create OpenMC tally name from tally number.
+
+    Parameters:
+    -----------
+    tally_number : int
+        Tally number.
+
+    Returns:
+    --------
+    tally_name : str
+        Tally name. Eg: "tally 1"
+    """
+    tally_name = ''.join(["tally ", str(tally_number)])
+    return tally_name
