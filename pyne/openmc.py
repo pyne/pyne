@@ -222,6 +222,43 @@ def get_tally_results_from_openmc_sp(filename, tally_num):
                 str(tally_num), filename))
     return tally_results
 
+
+def get_structured_coords_from_openmc_sp(filename):
+    """
+    This function read the OpenMC state point file and get the structured
+    coordinates of the mesh.
+
+    Parameters:
+    -----------
+    filename : str
+        OpenMC state point filename.
+
+    Returns:
+    --------
+    structured_coords : numpy array
+        A nested numpy array definning the boundaries of the mesh element in
+        each dimension. Format: [[x_bounds1, x_bounds2. ...],
+                                 [y_bounds1, y_bounds2, ...],
+                                 [z_bounds1, z_bounds2, ...]]
+    """
+    with tb.open_file(filename) as h5f:
+        try:
+            meshes = h5f.root.tallies._f_get_child('meshes')
+            if meshes._v_nchildren != 1:
+                raise ValueError(
+                        "Only one mesh is support for each Tally now")
+            mesh_str = meshes._v_groups.__str__()
+            mesh_name = get_openmc_mesh_name(mesh_str)
+            mesh = meshes._f_get_child(mesh_name)
+            structured_coords = calc_structured_coords(
+                    mesh.lower_left[:],
+                    mesh.upper_right[:],
+                    mesh.dimension[:])
+        except:
+            raise ValueError("Read mesh failed in file: {0}".format(filename))
+    return structured_coords
+
+
 def calc_structured_coords(lower_left, upper_right, dimension):
     """
     This function calculate the structured mesh coordinations from OpenMC mesh
