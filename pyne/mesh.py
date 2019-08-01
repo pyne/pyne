@@ -1674,8 +1674,7 @@ class MeshTally(StatMesh):
             rel_err_tot_tag[:] = rel_err_tot
 
 
-    def tag_flux_error_from_openmc_tally_results(self, tally_results,
-            particle='neutron'):
+    def tag_flux_error_from_openmc_tally_results(self, tally_results):
         """
         This function uses the output tally_results from
         openmc.get_tally_results_from_openmc_sp to set the flux and error tags.
@@ -1692,8 +1691,6 @@ class MeshTally(StatMesh):
             The unit of flux data is units are particle-cm per source particle.
             Different from the neutron flux tallied in MCNP, this tally results
             does not divide the mesh element volume.
-        particle : str
-            Particle type, 'neutron' or 'photon'.
         """
         num_ves = len(self)
         # currently, the openmc mesh are uniform
@@ -1706,7 +1703,7 @@ class MeshTally(StatMesh):
         flux_data = np.reshape(flux_data, newshape=(num_e_groups, num_ves))
         flux_data = flux_data.transpose()
         self.tag(name=self.tag_names[0], value=flux_data,
-                 doc='{0} flux'.format(particle),
+                 doc='{0} flux'.format(self.particle),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
         # set result_rel_error tag
         error_data = np.divide(tally_results[:, :, 1], ve_vol)
@@ -1714,19 +1711,19 @@ class MeshTally(StatMesh):
         error_data = error_data.transpose()
         self.tag(name=self.tag_names[1],
                  value=error_data,
-                 doc='{0} flux relative error'.format(particle),
+                 doc='{0} flux relative error'.format(self.particle),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
         # set result_total tag
         total_flux_data = np.sum(flux_data, axis=1)
         self.tag(name=self.tag_names[2],
                  value=total_flux_data,
-                 doc='total {0} flux'.format(particle),
+                 doc='total {0} flux'.format(self.particle),
                  tagtype=NativeMeshTag, size=1, dtype=float)
         # set result_total_rel_error tag
         total_error_data = np.sum(error_data, axis=1)
         self.tag(name=self.tag_names[3],
                  value=total_flux_data,
-                 doc='total {0} flux relative error'.format(particle),
+                 doc='total {0} flux relative error'.format(self.particle),
                  tagtype=NativeMeshTag, size=1, dtype=float)
 
 

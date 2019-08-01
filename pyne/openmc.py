@@ -398,8 +398,7 @@ def create_meshtally(filename, tally_number, particle=None,
     mats = () if mesh_has_mats is True else None
     super(MeshTally, m).__init__(structured_coords=structured_coords,
             structured=True, mats=mats)
-    m.tag_flux_error_from_openmc_tally_results(tally_results,
-            particle=m.particle)
+    m.tag_flux_error_from_openmc_tally_results(tally_results)
     return m
 
 
