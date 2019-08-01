@@ -1551,56 +1551,82 @@ class MeshTally(StatMesh):
 
     """
 
-    def __init__(self, f, tally_number, tag_names=None, mesh_has_mats=False,
-            mc_code='MCNP', particle='neutron'):
-        """Create MeshTally object from a filestream open to the second
-        line of a mesh tally header (the neutron/photon line). MeshTally objects
-        should be instantiated through the Meshtal or StatePoint class.
+#    def __init__(self, f, tally_number, tag_names=None, mesh_has_mats=False,
+#            mc_code='MCNP', particle='neutron'):
+#        """Create MeshTally object from a filestream open to the second
+#        line of a mesh tally header (the neutron/photon line). MeshTally objects
+#        should be instantiated through the Meshtal or StatePoint class.
+#
+#        Parameters
+#        ----------
+#        f : str or filestream
+#            Filestream of the meshtal file or the filename of the state point file.
+#        tally_number : int
+#            The MCNP fmesh4 tally number (e.g. 4, 14, 24).
+#        particle : str
+#            The particle type, 'neutron' or 'photon'.
+#        tag_names : iterable, optional
+#            Four strs that specify the tag names for the results, relative
+#            errors, total results and relative errors of the total results.
+#            This should come from the Meshtal.tags attribute dict.
+#        mesh_has_mats : bool
+#             If false, Meshtally objects will be created without PyNE material
+#             objects.
+#        mc_code : str
+#            Monte Carlo code name, could be MCNP or OpenMC.
+#        """
+#
+#        if not HAVE_PYMOAB:
+#            raise RuntimeError("PyMOAB is not available, "
+#                               "unable to create Meshtally Mesh.")
+#
+#        self.tally_number = tally_number
+#        self.particle = particle
+#        if tag_names is None:
+#            self.tag_names = ("{0}_result".format(self.particle),
+#                              "{0}_result_rel_error".format(self.particle),
+#                              "{0}_result_total".format(self.particle),
+#                              "{0}_result_total_rel_error".format(self.particle))
+#        else:
+#            self.tag_names = tag_names
+#
+#        # read meshtal and create mesh for MCNP
+#        if mc_code.lower() == 'mcnp':
+#            self._read_meshtally_head(f)
+#            self._read_column_order(f)
+#            self._create_mesh(f, mesh_has_mats)
+#
+#        # read state point file and create mesh for OpenMC
+#        if mc_code.lower() == 'openmc':
+#            self.from_openmc_statepoint(f, mesh_has_mats)
 
-        Parameters
-        ----------
-        f : str or filestream
-            Filestream of the meshtal file or the filename of the state point file.
-        tally_number : int
-            The MCNP fmesh4 tally number (e.g. 4, 14, 24).
-        particle : str
-            The particle type, 'neutron' or 'photon'.
-        tag_names : iterable, optional
-            Four strs that specify the tag names for the results, relative
-            errors, total results and relative errors of the total results.
-            This should come from the Meshtal.tags attribute dict.
-        mesh_has_mats : bool
-             If false, Meshtally objects will be created without PyNE material
-             objects.
-        mc_code : str
-            Monte Carlo code name, could be MCNP or OpenMC.
+    def __init__(self):
+        """
+        Create an empty MeshTally object and set default values.
         """
 
         if not HAVE_PYMOAB:
             raise RuntimeError("PyMOAB is not available, "
                                "unable to create Meshtally Mesh.")
 
-        self.tally_number = tally_number
-        self.particle = particle
-        if tag_names is None:
-            self.tag_names = ("{0}_result".format(self.particle),
-                              "{0}_result_rel_error".format(self.particle),
-                              "{0}_result_total".format(self.particle),
-                              "{0}_result_total_rel_error".format(self.particle))
-        else:
-            self.tag_names = tag_names
+        self.tally_number = None
+        self.particle = 'neutron'
+        self.tag_names = None
 
-        # read meshtal and create mesh for MCNP
-        if mc_code.lower() == 'mcnp':
-            self._read_meshtally_head(f)
-            self._read_column_order(f)
-            self._create_mesh(f, mesh_has_mats)
+#        # read meshtal and create mesh for MCNP
+#        if mc_code.lower() == 'mcnp':
+#            self._read_meshtally_head(f)
+#            self._read_column_order(f)
+#            self._create_mesh(f, mesh_has_mats)
+#
+#        # read state point file and create mesh for OpenMC
+#        if mc_code.lower() == 'openmc':
+#            self.from_openmc_statepoint(f, mesh_has_mats)
 
-        # read state point file and create mesh for OpenMC
-        if mc_code.lower() == 'openmc':
-            self.from_openmc_statepoint(f, mesh_has_mats)
 
-    def from_openmc_statepoint(self, filename, mesh_has_mats=False):
+
+    def from_openmc_statepoint(self, filename, tally_number, particle=None,
+            tag_names=None, mesh_has_mats=False):
         """
         This function creates a Mesh instance from OpenMC statepoint file.
     
@@ -1609,15 +1635,31 @@ class MeshTally(StatMesh):
         filename : str
             Filename of the OpenMC statepoint file. It ends with ".h5",
             eg: "statepoint.10.h5".
+        tally_number : int
+            Tally number.
+        particle : str
+            The particle type, 'neutron' or 'photon'.
+        tag_names : iterable, optional
+            Four strs that specify the tag names for the results, relative
+            errors, total results and relative errors of the total results.
+            This should come from the Meshtal.tags attribute dict.
         mesh_has_mats: bool
             If false, Meshtally objects will be created without PyNE material
             objects.
-    
-        Returns:
-        --------
-        mesh : Mesh
-            PyNE Mesh instance.
         """
+        # assign tally_number
+        self.tally_number = tally_number
+        # assign particle
+        if particle != None:
+           self.particle = particle
+        # assign tag_names
+        if tag_names is None:
+            self.tag_names = ("{0}_result".format(self.particle),
+                              "{0}_result_rel_error".format(self.particle),
+                              "{0}_result_total".format(self.particle),
+                              "{0}_result_total_rel_error".format(self.particle))
+        else:
+            self.tag_names = tag_names
         # check tally_num exist
         tally_name = openmc.create_tally_name(self.tally_number)
         tally_results = openmc.get_tally_results_from_openmc_sp(filename,

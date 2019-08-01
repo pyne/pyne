@@ -1053,7 +1053,9 @@ def test_meshtally_from_openmc_statepoint():
     tally_num = 1
     
     tag_names = ("n_flux", "n_flux_err", "n_flux_total", "n_flux_total_err")
-    mesh = MeshTally(filename, tally_num, tag_names=tag_names, mc_code='openmc')
+    mesh = MeshTally() #filename, tally_num, tag_names=tag_names, mc_code='openmc')
+    mesh.from_openmc_statepoint(filename, tally_num, particle='neutron',
+            tag_names=tag_names)
     # check mesh attributes
     assert_equal(len(mesh), 6)
     assert(mesh.structured)
