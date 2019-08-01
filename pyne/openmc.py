@@ -14,6 +14,7 @@ if sys.version_info[0] == 2:
 else:
     from html.parser import HTMLParser
 
+from pyne.utils import QAWarning
 from pyne.mesh import MeshTally, HAVE_PYMOAB
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
