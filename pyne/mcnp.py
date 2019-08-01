@@ -1998,7 +1998,6 @@ class Meshtal(object):
             if line.split()[0:3] == ['Mesh', 'Tally', 'Number']:
                 tally_num = int(line.split()[3])
                 if self.tags is not None and tally_num in self.tags.keys():
-                    #self.tally[tally_num] = MeshTally()
                     self.tally[tally_num] = self.create_meshtally(f, tally_num,
                             self.tags[tally_num], mesh_has_mats=self._meshes_have_mats)
                 else:
@@ -2031,7 +2030,7 @@ class Meshtal(object):
         # assign tally_number
         m.tally_number = tally_number
         # assign particle and dose_response
-        m.particle, m.dose_response = read_meshtally_head(f)
+        m.particle, m.dose_response = self.read_meshtally_head(f)
         # assign tag_names
         if tag_names is None:
             m.tag_names = ("{0}_result".format(m.particle),
@@ -2042,137 +2041,137 @@ class Meshtal(object):
             m.tag_names = tag_names
 
         m.x_bounds, m.y_bounds, m.z_bounds, m.e_bounds = \
-                read_xyze_bounds(f)
+                self.read_xyze_bounds(f)
         m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1)\
             * (len(m.z_bounds)-1)
-        column_idx = read_column_order(f)
+        m.num_e_groups = len(m.e_bounds)-1
+        column_idx = self.read_column_order(f)
         # create mesh
         mats = () if mesh_has_mats is True else None
         super(MeshTally, m).__init__(structured_coords=[m.x_bounds,
                                                            m.y_bounds, m.z_bounds],
                                         structured=True, mats=mats)
 
-        m.num_e_groups = len(m.e_bounds)-1
         # read result, rel_error, res_tot and rel_err_tot
-        result, rel_error, res_tot, rel_err_tot = read_tally_results_rel_error(f,
+        result, rel_error, res_tot, rel_err_tot = self.read_tally_results_rel_error(f,
                 m.num_e_groups, m.num_ves, column_idx)
         m.tag_flux_error_from_mcnp_tally_results(result, rel_error,
                 res_tot, rel_err_tot)
         return m
 
 
-def read_meshtally_head(f):
-    """
-    Get the particle type and dose response bool of the current meshtally.
-
-    Parameters
-    ----------
-    f : str or filestream
-        Filestream of the meshtal file.
-
-    Returns
-    -------
-    particle : str
-        The particle type, 'neutron' or 'photon'.
-    dose_response : bool
-        True : if this meshtally is modified by a dose function.
-        False : if this meshtally is not modified by a dose function.
-    """
-    line = f.readline()
-    if ('neutron' in line):
-        particle = 'neutron'
-    elif ('photon' in line):
-        particle = 'photon'
-    # determine if meshtally flux-to-dose conversion factors are being used.
-    line = f.readline()
-    dr_str = 'This mesh tally is modified by a dose response function.'
-    if line.strip() == dr_str:
-        dose_response = True
-    else:
-        dose_response = False
-
-    return particle, dose_response
-
-def read_xyze_bounds(f):
-    """
-    Read the spatial and energy bounds.
-    """
-    # advance the file to the line where x, y, z, bounds start
-    line = f.readline()
-    while line.strip() != 'Tally bin boundaries:':
-        line = f.readline()
-
-    x_bounds = [float(x) for x in f.readline().split()[2:]]
-    y_bounds = [float(x) for x in f.readline().split()[2:]]
-    z_bounds = [float(x) for x in f.readline().split()[2:]]
-    # "Energy bin boundaries" contain one more word than "X boundaries"
-    e_bounds = [float(x) for x in f.readline().split()[3:]]
-    return x_bounds, y_bounds, z_bounds, e_bounds
-
-def read_column_order(f):
-    """Create dictionary with table headings as keys and their column
-    location as values. Dictionary is the private attribute _column_idx.
-    """
-    # skip blank line between enery bin boundaries and table headings
-    f.readline()
-
-    line = f.readline()
-    column_names = line.replace('Rel ', 'Rel_').replace(
-        'Rslt * ', 'Rslt_*_').strip().split()
-    column_idx = dict(zip(column_names, range(0, len(column_names))))
-    return column_idx
-
-def read_tally_results_rel_error(f, num_e_groups, num_ves, column_idx):
-    """
-    Read meshtally results and reletive error data.
-
-    Parameters
-    ----------
-    f : str or filestream
-        Filestream of the meshtal file.
-    num_e_groups: int
-        Number of energy groups.
-    num_ves: int
-        Number of volume elements.
-    column_idx : dict
-        Dictionary of the column index.
+    def read_meshtally_head(self, f):
+        """
+        Get the particle type and dose response bool of the current meshtally.
     
-    Returns
-    -------
-    results : numpy array
-        Tally results data.
-    rel_error : numpy array
-        Tally relative error data.
-    """
-    # get result and relative error data from file
-    result = np.empty(shape=(num_e_groups, num_ves))
-    rel_error = np.empty(shape=(num_e_groups, num_ves))
-    for i in range(0, num_e_groups):
-        result_row = []
-        rel_error_row = []
-        for j in range(0, num_ves):
-            line = f.readline().split()
-            result_row.append(float(line[column_idx["Result"]]))
-            rel_error_row.append(
-                float(line[column_idx["Rel_Error"]]))
+        Parameters
+        ----------
+        f : str or filestream
+            Filestream of the meshtal file.
+    
+        Returns
+        -------
+        particle : str
+            The particle type, 'neutron' or 'photon'.
+        dose_response : bool
+            True : if this meshtally is modified by a dose function.
+            False : if this meshtally is not modified by a dose function.
+        """
+        line = f.readline()
+        if ('neutron' in line):
+            particle = 'neutron'
+        elif ('photon' in line):
+            particle = 'photon'
+        # determine if meshtally flux-to-dose conversion factors are being used.
+        line = f.readline()
+        dr_str = 'This mesh tally is modified by a dose response function.'
+        if line.strip() == dr_str:
+            dose_response = True
+        else:
+            dose_response = False
+    
+        return particle, dose_response
 
-        result[i] = result_row
-        rel_error[i] = rel_error_row
+    def read_xyze_bounds(self, f):
+        """
+        Read the spatial and energy bounds.
+        """
+        # advance the file to the line where x, y, z, bounds start
+        line = f.readline()
+        while line.strip() != 'Tally bin boundaries:':
+            line = f.readline()
+    
+        x_bounds = [float(x) for x in f.readline().split()[2:]]
+        y_bounds = [float(x) for x in f.readline().split()[2:]]
+        z_bounds = [float(x) for x in f.readline().split()[2:]]
+        # "Energy bin boundaries" contain one more word than "X boundaries"
+        e_bounds = [float(x) for x in f.readline().split()[3:]]
+        return x_bounds, y_bounds, z_bounds, e_bounds
 
-    res_tot = []
-    rel_err_tot = []
-    # If "total" data exists (i.e. if there is more than
-    # 1 energy group) get it and tag it onto the mesh.
-    if num_e_groups > 1:
-        for i in range(0, num_ves):
-            line = f.readline().split()
-            res_tot.append(float(line[column_idx["Result"]]))
-            rel_err_tot.append(
-                float(line[column_idx["Rel_Error"]]))
-    else:
-        res_tot = result.flatten()
-        rel_err_tot = rel_error.flatten()
-    return result, rel_error, res_tot, rel_err_tot
+    def read_column_order(self, f):
+        """Create dictionary with table headings as keys and their column
+        location as values. Dictionary is the private attribute _column_idx.
+        """
+        # skip blank line between enery bin boundaries and table headings
+        f.readline()
+    
+        line = f.readline()
+        column_names = line.replace('Rel ', 'Rel_').replace(
+            'Rslt * ', 'Rslt_*_').strip().split()
+        column_idx = dict(zip(column_names, range(0, len(column_names))))
+        return column_idx
+
+    def read_tally_results_rel_error(self, f, num_e_groups, num_ves, column_idx):
+        """
+        Read meshtally results and reletive error data.
+    
+        Parameters
+        ----------
+        f : str or filestream
+            Filestream of the meshtal file.
+        num_e_groups: int
+            Number of energy groups.
+        num_ves: int
+            Number of volume elements.
+        column_idx : dict
+            Dictionary of the column index.
+        
+        Returns
+        -------
+        results : numpy array
+            Tally results data.
+        rel_error : numpy array
+            Tally relative error data.
+        """
+        # get result and relative error data from file
+        result = np.empty(shape=(num_e_groups, num_ves))
+        rel_error = np.empty(shape=(num_e_groups, num_ves))
+        for i in range(0, num_e_groups):
+            result_row = []
+            rel_error_row = []
+            for j in range(0, num_ves):
+                line = f.readline().split()
+                result_row.append(float(line[column_idx["Result"]]))
+                rel_error_row.append(
+                    float(line[column_idx["Rel_Error"]]))
+    
+            result[i] = result_row
+            rel_error[i] = rel_error_row
+    
+        res_tot = []
+        rel_err_tot = []
+        # If "total" data exists (i.e. if there is more than
+        # 1 energy group) get it and tag it onto the mesh.
+        if num_e_groups > 1:
+            for i in range(0, num_ves):
+                line = f.readline().split()
+                res_tot.append(float(line[column_idx["Result"]]))
+                rel_err_tot.append(
+                    float(line[column_idx["Rel_Error"]]))
+        else:
+            res_tot = result.flatten()
+            rel_err_tot = rel_error.flatten()
+        return result, rel_error, res_tot, rel_err_tot
 
 
 def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
