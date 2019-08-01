@@ -1598,9 +1598,9 @@ class MeshTally(StatMesh):
 
         # read state point file and create mesh for OpenMC
         if mc_code.lower() == 'openmc':
-            self._from_openmc_statepoint(f, mesh_has_mats)
+            self.from_openmc_statepoint(f, mesh_has_mats)
 
-    def _from_openmc_statepoint(self, filename, mesh_has_mats=False):
+    def from_openmc_statepoint(self, filename, mesh_has_mats=False):
         """
         This function creates a Mesh instance from OpenMC statepoint file.
     
