@@ -1535,8 +1535,14 @@ class MeshTally(StatMesh):
         The locations of mesh vertices in the y direction.
     z_bounds : list of floats
         The locations of mesh vertices in the z direction.
+    dims : list
+        Dimensions of the mesh.
+    num_ves : int
+        Number of volume elements.
     e_bounds : list of floats
         The minimum and maximum bounds for energy bins
+    num_e_groups: int
+        Number of energy groups.
     mesh :
         An PyMOAB core instance tagged with all results and
         relative errors
@@ -1551,55 +1557,6 @@ class MeshTally(StatMesh):
 
     """
 
-#    def __init__(self, f, tally_number, tag_names=None, mesh_has_mats=False,
-#            mc_code='MCNP', particle='neutron'):
-#        """Create MeshTally object from a filestream open to the second
-#        line of a mesh tally header (the neutron/photon line). MeshTally objects
-#        should be instantiated through the Meshtal or StatePoint class.
-#
-#        Parameters
-#        ----------
-#        f : str or filestream
-#            Filestream of the meshtal file or the filename of the state point file.
-#        tally_number : int
-#            The MCNP fmesh4 tally number (e.g. 4, 14, 24).
-#        particle : str
-#            The particle type, 'neutron' or 'photon'.
-#        tag_names : iterable, optional
-#            Four strs that specify the tag names for the results, relative
-#            errors, total results and relative errors of the total results.
-#            This should come from the Meshtal.tags attribute dict.
-#        mesh_has_mats : bool
-#             If false, Meshtally objects will be created without PyNE material
-#             objects.
-#        mc_code : str
-#            Monte Carlo code name, could be MCNP or OpenMC.
-#        """
-#
-#        if not HAVE_PYMOAB:
-#            raise RuntimeError("PyMOAB is not available, "
-#                               "unable to create Meshtally Mesh.")
-#
-#        self.tally_number = tally_number
-#        self.particle = particle
-#        if tag_names is None:
-#            self.tag_names = ("{0}_result".format(self.particle),
-#                              "{0}_result_rel_error".format(self.particle),
-#                              "{0}_result_total".format(self.particle),
-#                              "{0}_result_total_rel_error".format(self.particle))
-#        else:
-#            self.tag_names = tag_names
-#
-#        # read meshtal and create mesh for MCNP
-#        if mc_code.lower() == 'mcnp':
-#            self._read_meshtally_head(f)
-#            self._read_column_order(f)
-#            self._create_mesh(f, mesh_has_mats)
-#
-#        # read state point file and create mesh for OpenMC
-#        if mc_code.lower() == 'openmc':
-#            self.from_openmc_statepoint(f, mesh_has_mats)
-
     def __init__(self):
         """
         Create an empty MeshTally object and set default values.
@@ -1612,17 +1569,6 @@ class MeshTally(StatMesh):
         self.tally_number = None
         self.particle = 'neutron'
         self.tag_names = None
-
-#        # read meshtal and create mesh for MCNP
-#        if mc_code.lower() == 'mcnp':
-#            self._read_meshtally_head(f)
-#            self._read_column_order(f)
-#            self._create_mesh(f, mesh_has_mats)
-#
-#        # read state point file and create mesh for OpenMC
-#        if mc_code.lower() == 'openmc':
-#            self.from_openmc_statepoint(f, mesh_has_mats)
-
 
 
     def from_openmc_statepoint(self, filename, tally_number, particle=None,
@@ -1642,7 +1588,6 @@ class MeshTally(StatMesh):
         tag_names : iterable, optional
             Four strs that specify the tag names for the results, relative
             errors, total results and relative errors of the total results.
-            This should come from the Meshtal.tags attribute dict.
         mesh_has_mats: bool
             If false, Meshtally objects will be created without PyNE material
             objects.
@@ -1670,6 +1615,11 @@ class MeshTally(StatMesh):
         self.x_bounds = structured_coords[0]
         self.y_bounds = structured_coords[1]
         self.z_bounds = structured_coords[2]
+        self.dims = [0, 0, 0] + [len(self.x_bounds) - 1,
+                                 len(self.y_bounds) - 1,
+                                 len(self.z_bounds) - 1]
+        num_ves = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
+            * (len(self.z_bounds)-1)
         mats = () if mesh_has_mats is True else None
         super(MeshTally, self).__init__(structured_coords=structured_coords,
                 structured=True, mats=mats)
@@ -1677,115 +1627,53 @@ class MeshTally(StatMesh):
                 particle=self.particle)
 
 
-    def _read_meshtally_head(self, f):
-        """Get the particle type, spacial and energy bounds, and whether or
-        not flux-to-dose conversion factors are being used.
+    def tag_flux_error_from_mcnp_tally_results(self, result, rel_error,
+            res_tot, rel_err_tot):
         """
-        line = f.readline()
-        if ('neutron' in line):
-            self.particle = 'neutron'
-        elif ('photon' in line):
-            self.particle = 'photon'
+        This function uses the output tally result from mcnp result and
+        rel_error to set the flux and error tags.
 
-        # determine if meshtally flux-to-dose conversion factors are being used.
-        line = f.readline()
-        dr_str = 'This mesh tally is modified by a dose response function.'
-        if line.strip() == dr_str:
-            self.dose_response = True
-        else:
-            self.dose_response = False
-
-        # advance the file to the line where x, y, z, bounds start
-        while line.strip() != 'Tally bin boundaries:':
-            line = f.readline()
-
-        self.x_bounds = [float(x) for x in f.readline().split()[2:]]
-        self.y_bounds = [float(x) for x in f.readline().split()[2:]]
-        self.z_bounds = [float(x) for x in f.readline().split()[2:]]
-        # "Energy bin boundaries" contain one more word than "X boundaries"
-        self.e_bounds = [float(x) for x in f.readline().split()[3:]]
-
-        self.dims = [0, 0, 0] + [len(self.x_bounds) - 1,
-                                 len(self.y_bounds) - 1,
-                                 len(self.z_bounds) - 1]
-
-        # skip blank line between enery bin boundaries and table headings
-        f.readline()
-
-    def _read_column_order(self, f):
-        """Create dictionary with table headings as keys and their column
-        location as values. Dictionary is the private attribute _column_idx.
+        Parameters
+        ----------
+        result : numpy array
+            This numpy array contains the flux data read from MCNP meshtally
+            file. The shape of this numpy array is
+            (num_e_groups*num_vess).
+        rel_error: numpy array
+            This numpy array contains the relative error data read from MCNP
+            meshtally.
+        res_tot : list
+            The total results.
+        rel_err_tot : list
+            Relative error of total results.
         """
-        line = f.readline()
-        column_names = line.replace('Rel ', 'Rel_').replace(
-            'Rslt * ', 'Rslt_*_').strip().split()
-        self._column_idx = dict(zip(column_names, range(0, len(column_names))))
-
-    def _create_mesh(self, f, mesh_has_mats):
-        """Instantiate a Mesh object and tag the PyMOAB core instance
-           with results and relative errors.
-        """
-
-        mats = () if mesh_has_mats is True else None
-        super(MeshTally, self).__init__(structured_coords=[self.x_bounds,
-                                                           self.y_bounds, self.z_bounds],
-                                        structured=True, mats=mats)
-
-        num_vol_elements = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
-            * (len(self.z_bounds)-1)
-        num_e_groups = len(self.e_bounds)-1
-
-        # get result and relative error data from file
-        result = np.empty(shape=(num_e_groups, num_vol_elements))
-        rel_error = np.empty(shape=(num_e_groups, num_vol_elements))
-        for i in range(0, num_e_groups):
-            result_row = []
-            rel_error_row = []
-            for j in range(0, num_vol_elements):
-                line = f.readline().split()
-                result_row.append(float(line[self._column_idx["Result"]]))
-                rel_error_row.append(
-                    float(line[self._column_idx["Rel_Error"]]))
-
-            result[i] = result_row
-            rel_error[i] = rel_error_row
-
         # Tag results and error vector to mesh
         self.tag(self.tag_names[0], tagtype='nat_mesh',
-                 size=num_e_groups, dtype=float)
+                 size=self.num_e_groups, dtype=float)
         res_tag = self.get_tag(self.tag_names[0])
         self.tag(self.tag_names[1], tagtype='nat_mesh',
-                 size=num_e_groups, dtype=float)
+                 size=self.num_e_groups, dtype=float)
         rel_err_tag = self.get_tag(self.tag_names[1])
 
-        if num_e_groups == 1:
+        if self.num_e_groups == 1:
             res_tag[:] = result[0]
             rel_err_tag[:] = rel_error[0]
         else:
             res_tag[:] = result.transpose()
             rel_err_tag[:] = rel_error.transpose()
 
-        # If "total" data exists (i.e. if there is more than
-        # 1 energy group) get it and tag it onto the mesh.
-        if num_e_groups > 1:
-            result = []
-            rel_error = []
-            for i in range(0, num_vol_elements):
-                line = f.readline().split()
-                result.append(float(line[self._column_idx["Result"]]))
-                rel_error.append(
-                    float(line[self._column_idx["Rel_Error"]]))
-
+        if self.num_e_groups > 1:
             self.tag(self.tag_names[2], size=1,
                      dtype=float, tagtype='nat_mesh')
             res_tot_tag = self.get_tag(self.tag_names[2])
-
+    
             self.tag(self.tag_names[3], size=1,
                      dtype=float, tagtype='nat_mesh')
             rel_err_tot_tag = self.get_tag(self.tag_names[3])
+    
+            res_tot_tag[:] = res_tot
+            rel_err_tot_tag[:] = rel_err_tot
 
-            res_tot_tag[:] = result
-            rel_err_tot_tag[:] = rel_error
 
     def tag_flux_error_from_openmc_tally_results(self, tally_results,
             particle='neutron'):
