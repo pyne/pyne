@@ -38,6 +38,7 @@ from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, \
         mesh_iterate, _cell_fracs_sort_vol_frac_reverse
+from pyne import openmc
 
 warnings.simplefilter("ignore", QAWarning)
 

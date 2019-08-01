@@ -14,6 +14,13 @@ if sys.version_info[0] == 2:
 else:
     from html.parser import HTMLParser
 
+from pyne.mesh import MeshTally, HAVE_PYMOAB
+if HAVE_PYMOAB:
+    from pyne.mesh import NativeMeshTag
+else:
+    warn("The PyMOAB optional dependency could not be imported. "
+         "Some aspects of the mcnp module may be incomplete.",
+         QAWarning)
 from pyne import nucname
 from pyne.utils import QAWarning
 warn(__name__ + " is not yet QA compliant.", QAWarning)
@@ -335,3 +342,64 @@ def create_tally_name(tally_number):
     """
     tally_name = ''.join(["tally ", str(tally_number)])
     return tally_name
+
+def create_meshtally(filename, tally_number, particle=None,
+        tag_names=None, mesh_has_mats=False):
+    """
+    This function creates a MeshTally instance from OpenMC statepoint file.
+
+    Parameters:
+    -----------
+    filename : str
+        Filename of the OpenMC statepoint file. It ends with ".h5",
+        eg: "statepoint.10.h5".
+    tally_number : int
+        Tally number.
+    particle : str
+        The particle type, 'neutron' or 'photon'.
+    tag_names : iterable, optional
+        Four strs that specify the tag names for the results, relative
+        errors, total results and relative errors of the total results.
+    mesh_has_mats: bool
+        If false, Meshtally objects will be created without PyNE material
+        objects.
+    """
+    m = MeshTally()
+    # assign tally_number
+    m.tally_number = tally_number
+    # assign particle
+    if particle != None:
+       m.particle = particle
+    # assign tag_names
+    if tag_names is None:
+        m.tag_names = ("{0}_result".format(m.particle),
+                          "{0}_result_rel_error".format(m.particle),
+                          "{0}_result_total".format(m.particle),
+                          "{0}_result_total_rel_error".format(m.particle))
+    else:
+        m.tag_names = tag_names
+    # check tally_num exist
+    tally_name = create_tally_name(m.tally_number)
+    tally_results = get_tally_results_from_openmc_sp(filename,
+            m.tally_number)
+    structured_coords = get_structured_coords_from_openmc_sp(
+            filename)
+
+    # parameters to create mesh
+    m.x_bounds = structured_coords[0]
+    m.y_bounds = structured_coords[1]
+    m.z_bounds = structured_coords[2]
+    m.dims = [0, 0, 0] + [len(m.x_bounds) - 1,
+                             len(m.y_bounds) - 1,
+                             len(m.z_bounds) - 1]
+    m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1)\
+        * (len(m.z_bounds)-1)
+    m.num_e_groups = len(tally_results) // m.num_ves
+    mats = () if mesh_has_mats is True else None
+    super(MeshTally, m).__init__(structured_coords=structured_coords,
+            structured=True, mats=mats)
+    m.tag_flux_error_from_openmc_tally_results(tally_results,
+            particle=m.particle)
+    return m
+
+

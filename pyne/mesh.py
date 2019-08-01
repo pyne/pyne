@@ -10,7 +10,6 @@ from pyne.utils import QAWarning
 
 import numpy as np
 import tables as tb
-from pyne import openmc
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -1706,8 +1705,6 @@ class MeshTally(StatMesh):
         flux_data = np.divide(tally_results[:, :, 0], ve_vol)
         flux_data = np.reshape(flux_data, newshape=(num_e_groups, num_ves))
         flux_data = flux_data.transpose()
-        #self.tag(self.tag_names[0], tagtype='nat_mesh',
-        #         size=num_e_groups, dtype=float)
         self.tag(name=self.tag_names[0], value=flux_data,
                  doc='{0} flux'.format(particle),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
