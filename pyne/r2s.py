@@ -6,6 +6,7 @@ import tables as tb
 
 from pyne.mesh import Mesh, MeshTally
 from pyne.mcnp import Meshtal
+from pyne import openmc
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh
 
@@ -53,8 +54,7 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
     # mesh_reference is a openmc statepoint file
     elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
             and mesh_reference.endswith(".h5"):
-            m = MeshTally()
-            m.from_openmc_statepoint(mesh_reference, tally_number=tally_num,
+            m = openmc.create_meshtally(mesh_reference, tally_number=tally_num,
                                      tag_names=(flux_tag, flux_tag + "_err",
                                                   flux_tag + "_total",
                                                   flux_tag + "_err_total"))
