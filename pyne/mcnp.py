@@ -2001,16 +2001,9 @@ class Meshtal(object):
                     #self.tally[tally_num] = MeshTally()
                     self.tally[tally_num] = self.create_meshtally(f, tally_num,
                             self.tags[tally_num], mesh_has_mats=self._meshes_have_mats)
-                    # f, tally_num,
-                    #                                  self.tags[tally_num],
-                    #                                  mesh_has_mats=self._meshes_have_mats)
                 else:
-                    #self.tally[tally_num] = MeshTally()
                     self.tally[tally_num] = self.create_meshtally(f, tally_num,
                             mesh_has_mats=self._meshes_have_mats)
-                    #= MeshTally(f, tally_num,
-                    #                                  mesh_has_mats=self._meshes_have_mats)
-
             line = f.readline()
 
     def create_meshtally(self, f, tally_number, tag_names=None,
@@ -2053,7 +2046,6 @@ class Meshtal(object):
         m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1)\
             * (len(m.z_bounds)-1)
         column_idx = read_column_order(f)
-        #self._create_mesh(f, mesh_has_mats)
         # create mesh
         mats = () if mesh_has_mats is True else None
         super(MeshTally, m).__init__(structured_coords=[m.x_bounds,
