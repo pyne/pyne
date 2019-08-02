@@ -247,6 +247,7 @@ def photon_source_add_filetype(filename):
         Filename of the 'source_x.h5m'.
     """
     with tb.open_file(filename, 'r+') as h5f:
-        h5f.root._f_setattr('filetype', 'pyne_r2s_source')
+        h5f.root._f_setattr('filetype',
+                'pyne_r2s_source'.encode(encoding='ascii'))
     return
 

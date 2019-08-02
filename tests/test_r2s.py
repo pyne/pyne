@@ -379,7 +379,7 @@ def test_photon_soruce_add_filetype():
     photon_source_add_filetype(filename_add_type)
     with tb.open_file(filename_add_type) as h5f:
         retval = h5f.root._f_getattr('filetype')
-        assert_equal(retval, 'pyne_r2s_source')
+        assert_equal(retval, b'pyne_r2s_source')
     os.remove(filename_add_type)
 
 
