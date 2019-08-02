@@ -308,7 +308,6 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
           rval = mesh->tag_get_data(cell_number_tag, ves, &cell_number[0]);
       }
   }
-  std::cout<<" comment. max_num_cells="<<max_num_cells<<std::endl;
   std::vector<double> pdf(num_ves*num_e_groups*p_src_num_cells);
   rval = mesh->tag_get_data(src_tag, ves, &pdf[0]);
   if (rval != moab::MB_SUCCESS)
