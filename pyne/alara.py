@@ -263,12 +263,12 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
             response_start = True
             continue
         # get decay times
-        if 'isotope\t shutdown' in line:
+        if 'isotope shutdown'.lower.split() in line.lower.split():
             if len(decay_times) == 0:
                 decay_times = read_decay_times(line)
             continue
         # get zone idx
-        if 'Zone #' in line: 
+        if 'Zone #'.lower.split() in line.lower.split():
             idx = _get_zone_idx(line)
             if idx == 0:
                 ## new blocks, disable first response string
