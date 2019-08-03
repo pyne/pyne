@@ -288,7 +288,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         for k, dc in enumerate(decay_times):
             j = (count-1) % chunksize
             nuc = ls[0].strip()
-            if nuc in ('total', 'Total'):
+            if nuc.lower() == 'total':
                 nuc = nuc.upper()
             rows[j] = (idx, nuc, dc, float(ls[k+1]))
             if count % chunksize == 0:
