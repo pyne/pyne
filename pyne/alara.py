@@ -255,7 +255,8 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     response_start = False
     for i, line in enumerate(f, 1):
         # terminate condition
-        if 'Totals for all zones' in line and response_start:
+        if 'Totals for all zones'.lower.split() in line.lower.split() \
+                and response_start:
             break
         # get response string
         if zone_start and is_response_string(line, response):
