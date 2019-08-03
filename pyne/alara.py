@@ -1199,12 +1199,11 @@ def _is_data(line):
     """
     # check the list from the second value, if they are float, then return True
     ls = line.strip().split()
-    if len(ls) < 2:
+    try:
+        np.array(ls[1:]).astype(float)
+        return True
+    except:
         return False
-    for i in range(1, len(ls)):
-        if not is_float(ls[i]):
-            return False
-    return True
     
 
 def read_decay_times(line):
